@@ -19,23 +19,22 @@ package org.openmole.ide.plugin.sampling.lhs
 
 import org.openmole.ide.core.implementation.builder._
 import org.openmole.ide.core.implementation.registry._
-import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 import org.openmole.core.model.sampling.{ Factor, Sampling }
-import org.openmole.ide.core.model.sampling.IBuiltCompositionSampling
-import org.openmole.ide.core.implementation.sampling.SamplingProxyUI
+import org.openmole.ide.core.implementation.sampling.{ IBuiltCompositionSampling, SamplingProxyUI }
 import org.openmole.plugin.sampling.lhs._
+import org.openmole.ide.core.implementation.factory.SamplingFactoryUI
 
 class Activator extends OSGiActivator with SamplingActivator {
 
-  override def samplingFactories = List(new ISamplingFactoryUI {
+  override def samplingFactories = List(new SamplingFactoryUI {
     def buildDataUI = new LHSSamplingDataUI
 
     def fromCoreObject(sampling: Sampling, bSC: IBuiltCompositionSampling) = {
       sampling match {
         case cs: LHS ⇒
-          val proxy = new SamplingProxyUI(new LHSSamplingDataUI(cs.samples.toString))
+          val proxy = SamplingProxyUI(new LHSSamplingDataUI(cs.samples.toString))
           (proxy, Builder.buildConnectedSamplings(proxy, Seq(), bSC))
-        case _ ⇒ (new SamplingProxyUI(buildDataUI), bSC)
+        case _ ⇒ (SamplingProxyUI(buildDataUI), bSC)
       }
     }
   })

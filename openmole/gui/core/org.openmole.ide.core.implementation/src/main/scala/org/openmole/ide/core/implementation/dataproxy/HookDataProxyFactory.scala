@@ -16,9 +16,8 @@
  */
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.model.dataproxy.IHookDataProxyFactory
-import org.openmole.ide.core.model.factory.IHookFactoryUI
+import org.openmole.ide.core.implementation.factory.HookFactoryUI
 
-class HookDataProxyFactory(val factory: IHookFactoryUI) extends IHookDataProxyFactory {
-  def buildDataProxyUI = new HookDataProxyUI(factory.buildDataUI)
+class HookDataProxyFactory(val factory: HookFactoryUI) extends DataProxyFactory {
+  def buildDataProxyUI = HookDataProxyUI(factory.buildDataUI)
 }

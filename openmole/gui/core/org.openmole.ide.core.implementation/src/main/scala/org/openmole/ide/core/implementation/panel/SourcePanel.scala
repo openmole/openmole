@@ -16,98 +16,101 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, ISourceDataProxyUI }
-import org.openmole.ide.core.model.workflow.IMoleScene
-import swing._
-import event.{ SelectionChanged, FocusGained }
-import javax.swing.ImageIcon
-import javax.imageio.ImageIO
-import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxies }
-import org.openmole.ide.core.implementation.dialog.StatusBar
-import java.awt.BorderLayout
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, SourceDataProxyUI }
+import org.openmole.ide.core.implementation.data.{ ImageView, SourceDataUI }
+import scala.swing.Label
+import ConceptMenu._
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
+import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.misc.tools.image.Images
+import scala.swing.event.SelectionChanged
 
-class SourcePanel(proxy: ISourceDataProxyUI,
-                  scene: IMoleScene,
-                  val index: Int) extends BasePanel(Some(proxy), scene) {
-  sourcePanel ⇒
+trait SourcePanel extends Base
+    with Header
+    with ProxyShortcut
+    with IOProxy
+    with ConceptCombo
+    with Icon
+    with IO {
 
-  var panelUI = proxy.dataUI.buildPanelUI
-  def created = Proxies.instance.contains(proxy)
+  override type DATAPROXY = SourceDataProxyUI with IOFacade
+  type SOURCEDATAUI = SourceDataUI with ImageView
+  override type DATAUI = SOURCEDATAUI with IODATAUI
 
-  refreshPanel
+  var panelSettings = proxy.dataUI.buildPanelUI
+  val icon: Label = icon(Images.SOURCE)
+  val sourceCombo = ConceptMenu.buildSourceMenu(p ⇒ updateConceptPanel(p.dataUI), proxy.dataUI)
 
-  iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/source.png")))
+  var ioSettings = ioPanel
+  build
 
-  def create = {
-    Proxies.instance += proxy
-    scene.dataUI.invalidateCache
-    ConceptMenu.sourceMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
+  listenTo(panelSettings.help.components.toSeq: _*)
+
+  def build = {
+    basePanel.contents += new PluginPanel("wrap 2", "-5[left]-10[]", "-2[top][10]") {
+      contents += header(scene, index)
+      contents += new PluginPanel("wrap 2", "[]10[]", "") {
+        contents += new Composer {
+          addIcon(icon)
+          addName
+          addTypeMenu(sourceCombo)
+          addCreateLink
+        }
+        contents += proxyShorcut(proxy.dataUI, index)
+      }
+    }
+    createSettings
   }
 
-  def delete = {
+  override def created = proxyCreated
+
+  def createSettings: Unit = {
+    panelSettings = proxy.dataUI.buildPanelUI
+
+    val tPane = panelSettings.tabbedPane(("I/O", ioSettings))
+    Tools.updateIndex(basePanel, tPane)
+
+    if (basePanel.contents.size == 3) basePanel.contents.remove(1, 2)
+    basePanel.contents += tPane
+    basePanel.contents += panelSettings.help
+
+    listenTo(tPane.selection)
+    listenTo(panelSettings.help.components.toSeq: _*)
+
+    tPane.reactions += {
+      case SelectionChanged(_) ⇒ updatePanel
+    }
+  }
+
+  override def updatePanel = {
+    savePanel
+    ioSettings = ioPanel
+    createSettings
+  }
+
+  def updateConceptPanel(d: SOURCEDATAUI) = {
+    savePanel
+    d.inputs = ioSettings.prototypesIn
+    d.outputs = ioSettings.prototypesOut
+    proxy.dataUI = d
+    createSettings
+  }
+
+  def savePanel = {
+    val ioSave = ioSettings.save
+    panelSettings.saveContent(nameTextField.text) match {
+      case x: DATAUI ⇒ proxy.dataUI = save(x, ioSave._1, ioSave._2, ioSave._3)
+      case _         ⇒ StatusBar().warn("The current panel cannot be saved")
+    }
+    ConceptMenu.refreshItem(proxy)
+  }
+
+  def deleteProxy = {
     scene.closePropertyPanel(index)
     Proxies.instance -= proxy
-    ConceptMenu.removeItem(proxy)
-    true
+    -=(proxy)
+    //true
+
   }
 
-  def save = {
-    val protoPanelSave = protoPanel.save
-    proxy.dataUI = panelUI.save(nameTextField.text, protoPanelSave._1, protoPanelSave._2, protoPanelSave._3)
-  }
-
-  def buildProtoPanel = {
-    val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
-    new IOPrototypePanel(scene,
-      this,
-      proxy.dataUI.inputs,
-      proxy.dataUI.outputs,
-      implicitIP,
-      implicitOP,
-      proxy.dataUI.inputParameters.toMap)
-  }
-
-  def updatePanel = {
-    tabbedLock = true
-    save
-    panelUI = proxy.dataUI.buildPanelUI
-    refreshPanel
-    protoPanel = buildProtoPanel
-    tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
-    tabbedPane.revalidate
-    tabbedLock = false
-  }
-
-  def updateProtoPanel = {
-    save
-    protoPanel = buildProtoPanel
-    tabbedPane.pages(1).content = protoPanel
-  }
-
-  var protoPanel = buildProtoPanel
-  tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
-
-  tabbedPane.revalidate
-
-  mainPanel.contents += new NewConceptPanel(this) { addPrototype }
-  peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(new PluginPanel("wrap") {
-    contents += tabbedPane
-    contents += panelUI.help
-  }.peer, BorderLayout.CENTER)
-
-  listenTo(panelUI.help.components.toSeq: _*)
-  listenTo(tabbedPane.selection)
-  reactions += {
-    case FocusGained(source: Component, _, _)     ⇒ panelUI.help.switchTo(source)
-    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-    case SelectionChanged(tabbedPane)             ⇒ if (!tabbedLock) updateProtoPanel
-    case UpdatedProxyEvent(p: IDataProxyUI, _) ⇒
-      scene.removeAll(index + 1)
-      updatePanel
-      tabbedPane.selection.index = 0
-    case _ ⇒
-  }
 }

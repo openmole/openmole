@@ -18,9 +18,9 @@
 package org.openmole.ide.plugin.hook.display
 
 import org.openmole.plugin.hook.display.ToStringHook
-import org.openmole.ide.core.model.factory.IHookFactoryUI
+import org.openmole.ide.core.implementation.factory.HookFactoryUI
 
-class ToStringHookFactoryUI extends IHookFactoryUI {
+class ToStringHookFactoryUI extends HookFactoryUI {
 
   def buildDataUI = new ToStringHookDataUI
 

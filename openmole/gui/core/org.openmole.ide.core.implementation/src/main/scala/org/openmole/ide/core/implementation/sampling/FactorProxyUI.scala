@@ -16,7 +16,6 @@
  */
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.core.model.data.IFactorDataUI
-import org.openmole.ide.core.model.sampling.IFactorProxyUI
+import org.openmole.ide.core.implementation.data.IFactorDataUI
 
 class FactorProxyUI(var dataUI: IFactorDataUI) extends IFactorProxyUI

@@ -39,7 +39,7 @@ object SaveXML {
     }
 
   def show: Option[File] = {
-    val fc = DialogFactory.fileChooser("Save OpenMOLE project",
+    val fc = DialogFactory.fileChooser("SaveSettings OpenMOLE project",
       "*.om",
       "om",
       Settings.currentPath)

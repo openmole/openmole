@@ -18,10 +18,9 @@
 package org.openmole.ide.plugin.domain.file
 
 import java.io.File
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.domain.file.ListFilesDomain
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import util.Try
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 object ListFilesDomainDataUI {
   def apply(d: SubDataUI) = d match {

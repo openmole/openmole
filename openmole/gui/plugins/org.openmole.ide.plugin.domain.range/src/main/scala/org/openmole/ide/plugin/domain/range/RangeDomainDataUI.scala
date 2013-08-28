@@ -19,8 +19,6 @@ package org.openmole.ide.plugin.domain.range
 
 import java.math.BigDecimal
 import java.math.BigInteger
-import org.openmole.core.model.domain.Domain
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.plugin.domain.range._
 import org.openmole.plugin.domain.bounded._
 import org.openmole.misc.tools.io.FromString

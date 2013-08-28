@@ -19,9 +19,9 @@ package org.openmole.ide.core.implementation.action
 
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import org.openmole.ide.core.model.workflow.{ IBuildMoleScene, ICapsuleUI, IMoleScene }
+import org.openmole.ide.core.implementation.workflow.{ CapsuleUI, BuildMoleScene }
 
-class DefineMoleStartAction(moleScene: IBuildMoleScene, capsule: ICapsuleUI) extends ActionListener {
+class DefineMoleStartAction(moleScene: BuildMoleScene, capsule: CapsuleUI) extends ActionListener {
   override def actionPerformed(ae: ActionEvent) = {
     moleScene.startingCapsule_=(capsule)
     moleScene.dataUI.invalidateCache

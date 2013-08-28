@@ -22,7 +22,6 @@ import java.awt.Color
 import java.awt.Rectangle
 import java.awt.RenderingHints
 import org.netbeans.api.visual.widget._
-import org.openmole.ide.core.model.workflow.{ IConnectorViewUI, IConnectorUI, IMoleScene }
 import org.openmole.ide.misc.widget.LinkLabel
 
 object PrototypeOnConnectorWidget {
@@ -34,7 +33,7 @@ object PrototypeOnConnectorWidget {
 import PrototypeOnConnectorWidget._
 
 class PrototypeOnConnectorWidget(scene: Scene,
-                                 var connectorUI: IConnectorViewUI,
+                                 var connectorUI: ConnectorViewUI,
                                  val link: LinkLabel,
                                  val colorPattern: (Color, Color) = PrototypeOnConnectorWidget.lightOnDark,
                                  dim: Int = 0) extends ComponentWidget(scene, link.peer) {

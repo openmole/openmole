@@ -17,35 +17,34 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.ide.core.model.factory._
 import org.openmole.misc.tools.obj.ClassUtils.ClassDecorator
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
-import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.factory._
 
 object KeyRegistry {
-  val prototypes = new HashMap[PrototypeKey, IPrototypeFactoryUI] with SynchronizedMap[PrototypeKey, IPrototypeFactoryUI]
+  val prototypes = new HashMap[PrototypeKey, PrototypeFactoryUI] with SynchronizedMap[PrototypeKey, PrototypeFactoryUI]
 
-  val tasks = new HashMap[DefaultKey, ITaskFactoryUI] with SynchronizedMap[DefaultKey, ITaskFactoryUI]
+  val tasks = new HashMap[DefaultKey, TaskFactoryUI] with SynchronizedMap[DefaultKey, TaskFactoryUI]
 
-  val samplings = new HashMap[DefaultKey, ISamplingFactoryUI] with SynchronizedMap[DefaultKey, ISamplingFactoryUI]
+  val samplings = new HashMap[DefaultKey, SamplingFactoryUI] with SynchronizedMap[DefaultKey, SamplingFactoryUI]
 
-  val environments = new HashMap[DefaultKey, IEnvironmentFactoryUI] with SynchronizedMap[DefaultKey, IEnvironmentFactoryUI]
+  val environments = new HashMap[DefaultKey, EnvironmentFactoryUI] with SynchronizedMap[DefaultKey, EnvironmentFactoryUI]
 
   val domains = new HashMap[DefaultKey, IDomainFactoryUI] with SynchronizedMap[DefaultKey, IDomainFactoryUI]
 
-  val hooks = new HashMap[DefaultKey, IHookFactoryUI] with SynchronizedMap[DefaultKey, IHookFactoryUI]
+  val hooks = new HashMap[DefaultKey, HookFactoryUI] with SynchronizedMap[DefaultKey, HookFactoryUI]
 
-  val sources = new HashMap[DefaultKey, ISourceFactoryUI] with SynchronizedMap[DefaultKey, ISourceFactoryUI]
+  val sources = new HashMap[DefaultKey, SourceFactoryUI] with SynchronizedMap[DefaultKey, SourceFactoryUI]
 
-  val builders = new HashMap[NameKey, IBuilderFactoryUI] with SynchronizedMap[NameKey, IBuilderFactoryUI]
+  val builders = new HashMap[NameKey, BuilderFactoryUI] with SynchronizedMap[NameKey, BuilderFactoryUI]
 
-  val authentifications = new HashMap[DefaultKey, IAuthentificationFactoryUI] with SynchronizedMap[DefaultKey, IAuthentificationFactoryUI]
+  val authentifications = new HashMap[DefaultKey, AuthentificationFactoryUI] with SynchronizedMap[DefaultKey, AuthentificationFactoryUI]
 
-  val groupingStrategies = new HashMap[DefaultKey, IGroupingFactoryUI] with SynchronizedMap[DefaultKey, IGroupingFactoryUI]
+  val groupingStrategies = new HashMap[DefaultKey, GroupingFactoryUI] with SynchronizedMap[DefaultKey, GroupingFactoryUI]
 
   def task(c: Class[_]) = {
     val key = Key(c)

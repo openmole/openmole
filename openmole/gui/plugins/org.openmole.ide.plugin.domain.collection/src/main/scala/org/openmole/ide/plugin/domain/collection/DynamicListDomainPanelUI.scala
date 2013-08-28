@@ -17,17 +17,14 @@
 
 package org.openmole.ide.plugin.domain.collection
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
 import swing.ScrollPane.BarPolicy._
 import swing._
 import java.awt.Color
 import java.util.{ Locale, ResourceBundle }
+import org.openmole.ide.core.implementation.panelsettings.IDomainPanelUI
 
-class DynamicListDomainPanelUI(pud: DynamicListDomainDataUI[_]) extends PluginPanel("wrap") with IDomainPanelUI {
-
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class DynamicListDomainPanelUI(pud: DynamicListDomainDataUI[_])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends IDomainPanelUI {
 
   val typeCombo = new MyComboBox(pud.availableTypes)
   val textArea = new TextArea(pud.values.mkString("\n"), 10, 20) {
@@ -36,16 +33,19 @@ class DynamicListDomainPanelUI(pud: DynamicListDomainDataUI[_]) extends PluginPa
 
   typeCombo.selection.item = pud.domainType.toString.split('.').last
 
-  contents += typeCombo
-  contents += new ScrollPane(textArea) {
-    horizontalScrollBarPolicy = Never
-    verticalScrollBarPolicy = AsNeeded
-  }
+  val components = List(("", new PluginPanel("wrap") {
+    contents += typeCombo
+    contents += new ScrollPane(textArea) {
+      horizontalScrollBarPolicy = Never
+      verticalScrollBarPolicy = AsNeeded
+    }
+  }))
 
   def saveContent = DynamicListDomainDataUI(textArea.text.split('\n').toList,
     typeCombo.selection.item)
 
-  override val help = new Helper(List(new URL(i18n.getString("valueListPermalinkText"), i18n.getString("valueListPermalink")))) {
-    add(textArea, new Help(i18n.getString("valueList"), i18n.getString("valueListEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("valueListPermalinkText"), i18n.getString("valueListPermalink"))))
+
+  add(textArea, new Help(i18n.getString("valueList"), i18n.getString("valueListEx")))
+
 }

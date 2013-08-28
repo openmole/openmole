@@ -16,10 +16,17 @@
  */
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.model.data.IHookDataUI
-import org.openmole.ide.misc.tools.util.ID
-import org.openmole.ide.core.model.dataproxy.IHookDataProxyUI
+import org.openmole.ide.core.implementation.data.{ ImageView, HookDataUI }
+import org.openmole.ide.core.implementation.panel.IOFacade
 
-class HookDataProxyUI(
-  var dataUI: IHookDataUI,
-  override val generated: Boolean = false) extends IHookDataProxyUI with ID
+object HookDataProxyUI {
+  def apply(d: HookDataUI,
+            g: Boolean = false) = new HookDataProxyUI with IOFacade {
+    var dataUI: DATAUI = d
+    val generated = g
+  }
+}
+
+trait HookDataProxyUI extends DataProxyUI {
+  type DATAUI = HookDataUI with ImageView
+}

@@ -139,7 +139,7 @@ object GliteAuthentication extends Logger {
     voName: String,
     proxyFile: File,
     lifeTime: Int,
-    fqan: Option[String]) =
+    fqan: Option[String])(implicit authenticationProvider: AuthenticationProvider) =
     a match {
       case a: P12Certificate ⇒
         VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
@@ -150,7 +150,7 @@ object GliteAuthentication extends Logger {
           val voName = _voName
           val proxyFile = _proxyFile
           val lifeTime = _lifeTime
-          val password = a.password
+          val password = a.password(authenticationProvider)
           override val fqan = _fqan
         }
       case a: PEMCertificate ⇒
@@ -163,7 +163,7 @@ object GliteAuthentication extends Logger {
           val voName = _voName
           val proxyFile = _proxyFile
           val lifeTime = _lifeTime
-          val password = a.password
+          val password = a.password(authenticationProvider)
           override val fqan = _fqan
         }
       case a: ProxyFile ⇒

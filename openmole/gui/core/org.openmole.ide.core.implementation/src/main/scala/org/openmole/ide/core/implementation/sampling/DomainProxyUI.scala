@@ -16,11 +16,16 @@
  */
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
-import org.openmole.ide.core.model.sampling.{ IFactorProxyUI, IDomainProxyUI }
-import org.openmole.ide.core.implementation.data.FactorDataUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.misc.tools.util.ID
+import org.openmole.ide.core.implementation.data.DomainDataUI
 
-class DomainProxyUI(var dataUI: IDomainDataUI,
-                    var ordering: Int = 0) extends IDomainProxyUI
+object DomainProxyUI {
+  def apply(d: DomainDataUI,
+            o: Int = 0) = new DomainProxyUI {
+    var ordering = o
+    var dataUI = d
+  }
+}
+
+trait DomainProxyUI extends SamplingOrDomainProxyUI {
+  type DATAUI = DomainDataUI
+}

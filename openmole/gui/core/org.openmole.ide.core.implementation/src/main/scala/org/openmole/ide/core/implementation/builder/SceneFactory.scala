@@ -17,23 +17,8 @@
 
 package org.openmole.ide.core.implementation.builder
 
-import java.awt.Point
-import org.openmole.ide.core.implementation.data._
-import org.openmole.ide.core.model.commons._
-import org.openmole.ide.core.model.commons.TransitionType
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IInputSlotWidget
-import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.implementation.workflow.{ DataChannelUI, TransitionUI, CapsuleUI }
-import org.openmole.core.model.task.ITask
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.model.data.Prototype
-import org.openmole.ide.core.model.data.IExplorationTaskDataUI
-import org.openmole.ide.core.implementation.data.CapsuleDataUI
-import scala.Some
-import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.commons.TransitionType
 
 object SceneFactory {
 

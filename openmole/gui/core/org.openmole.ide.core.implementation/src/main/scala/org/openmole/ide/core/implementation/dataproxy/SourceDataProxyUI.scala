@@ -16,9 +16,17 @@
  */
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.model.dataproxy.ISourceDataProxyUI
-import org.openmole.ide.core.model.data.ISourceDataUI
-import org.openmole.ide.misc.tools.util.ID
+import org.openmole.ide.core.implementation.data.SourceDataUI
+import org.openmole.ide.core.implementation.panel.IOFacade
 
-class SourceDataProxyUI(var dataUI: ISourceDataUI,
-                        override val generated: Boolean = false) extends ISourceDataProxyUI with ID
+object SourceDataProxyUI {
+  def apply(d: SourceDataUI,
+            g: Boolean = false) = new SourceDataProxyUI with IOFacade {
+    var dataUI = d
+    val generated = g
+  }
+}
+
+trait SourceDataProxyUI extends DataProxyUI {
+  type DATAUI = SourceDataUI
+}

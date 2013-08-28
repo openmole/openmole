@@ -6,12 +6,12 @@
 package org.openmole.ide.plugin.environment.glite
 
 import org.openmole.plugin.environment.glite._
-import org.openmole.ide.core.model.data.IEnvironmentDataUI
 import org.openmole.plugin.environment.glite.MyProxy
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
+import org.openmole.ide.core.implementation.data.EnvironmentDataUI
 
 class GliteEnvironmentDataUI(val name: String = "",
                              val vo: String = "",
@@ -30,7 +30,7 @@ class GliteEnvironmentDataUI(val name: String = "",
                              val jobType: Option[String] = None,
                              val smpGranularity: Option[Int] = None,
                              val architecture: Boolean = false,
-                             val threads: Option[Int] = None) extends IEnvironmentDataUI {
+                             val threads: Option[Int] = None) extends EnvironmentDataUI {
 
   def coreObject = util.Try {
 
@@ -65,7 +65,7 @@ class GliteEnvironmentDataUI(val name: String = "",
 
   def coreClass = classOf[GliteEnvironment]
 
-  def imagePath = "img/glite.png"
+  override def imagePath = "img/glite.png"
 
   override def fatImagePath = "img/glite_fat.png"
 

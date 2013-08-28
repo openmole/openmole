@@ -19,12 +19,12 @@ package org.openmole.ide.plugin.environment.glite
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget._
 import swing._
 import event.ButtonClicked
 import org.openmole.plugin.environment.glite.GliteAuthentication
 import scala.Some
+import org.openmole.ide.core.implementation.panelsettings.EnvironmentPanelUI
 
 object GliteEnvironmentPanelUI {
   lazy val vomses = {
@@ -37,9 +37,8 @@ object GliteEnvironmentPanelUI {
 }
 
 import Converters._
-class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IEnvironmentPanelUI {
 
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends EnvironmentPanelUI {
 
   val vo = new VOPanel(pud.vo, pud.voms, pud.bdii)
   val runtimeMemoryTextField = new TextField(pud.openMOLEMemory, 4)
@@ -127,13 +126,13 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
     }
   }
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(vo.voComboBox, new Help(i18n.getString("vo"), i18n.getString("voEx")))
-    add(vo.vomsTextField, new Help(i18n.getString("voms"), i18n.getString("vomsEx")))
-    add(vo.bdiiTextField, new Help(i18n.getString("bdii"), i18n.getString("bdiiEx")))
-    add(proxyCheckBox, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
-    add(runtimeMemoryTextField, new Help(i18n.getString("myProxy")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+
+  add(vo.voComboBox, new Help(i18n.getString("vo"), i18n.getString("voEx")))
+  add(vo.vomsTextField, new Help(i18n.getString("voms"), i18n.getString("vomsEx")))
+  add(vo.bdiiTextField, new Help(i18n.getString("bdii"), i18n.getString("bdiiEx")))
+  add(proxyCheckBox, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
+  add(runtimeMemoryTextField, new Help(i18n.getString("myProxy")))
 
   def saveContent(name: String) =
     new GliteEnvironmentDataUI(name,

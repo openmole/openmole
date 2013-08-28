@@ -18,10 +18,7 @@
 package org.openmole.ide.core.implementation.sampling
 
 import java.awt.Point
-import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
-import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
-import org.openmole.ide.core.model.sampling.ISamplingComponent
 
-class SamplingComponent(samplingScene: ISamplingCompositionPanelUI,
+class SamplingComponent(samplingScene: SamplingCompositionPanelUI,
                         val component: ISamplingCompositionWidget,
                         val location: Point) extends SceneComponent(samplingScene, component, location) with ISamplingComponent

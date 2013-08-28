@@ -19,12 +19,9 @@ package org.openmole.ide.plugin.task.systemexec
 import java.io.File
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.data.EmptyDataUIs
+import org.openmole.ide.core.implementation.data.{ TaskDataUI, EmptyDataUIs }
 import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyPrototypeDataUI
-import org.openmole.ide.core.implementation.dataproxy.Proxies
-import org.openmole.ide.core.model.data.ITaskDataUI
-import org.openmole.ide.core.model.panel.ITaskPanelUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
 import org.openmole.ide.misc.widget.URL
@@ -40,9 +37,9 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.FileChooser._
 import scala.swing._
+import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 
-class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") with ITaskPanelUI {
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("") with TaskPanelUI {
   val workdirTextField = new TextField(ndu.workdir, 30)
 
   val variablesMultiCombo = new MultiCombo("Variables",
@@ -59,13 +56,13 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") w
     minus = CLOSE_IF_EMPTY)
 
   if (ndu.resources.isEmpty) resourcesMultiTextField.removeAllRows
-  val outputMapMultiTextFieldCombo = new MultiTextFieldCombo[IPrototypeDataProxyUI]("Output mapping",
+  val outputMapMultiTextFieldCombo = new MultiTextFieldCombo[PrototypeDataProxyUI]("Output mapping",
     comboContent,
     ndu.outputMap.map { out ⇒ new TextFieldComboPanel(comboContent, new TextFieldComboData(out._1, Some(out._2))) },
     minus = CLOSE_IF_EMPTY)
 
   if (ndu.outputMap.isEmpty) outputMapMultiTextFieldCombo.removeAllRows
-  val inputMapMultiComboTextField = new MultiComboTextField[IPrototypeDataProxyUI]("Input mapping",
+  val inputMapMultiComboTextField = new MultiComboTextField[PrototypeDataProxyUI]("Input mapping",
     comboContent,
     ndu.inputMap.map { i ⇒ new ComboTextFieldPanel(comboContent, new ComboTextFieldData(Some(i._1), i._2)) },
     minus = CLOSE_IF_EMPTY,
@@ -74,51 +71,52 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") w
 
   val launchingCommandTextArea = new BashEditor {
     editor.text = ndu.lauchingCommands
-    minimumSize = new Dimension(450, 200)
+    preferredSize = new Dimension(100, 200)
   }
 
-  val components = List(("Working directory", new PluginPanel("wrap") { contents += workdirTextField }),
+  val components = List(("Working directory", new PluginPanel("") {
+    contents += workdirTextField
+    preferredSize = new Dimension(100, 50)
+  }),
     ("Variables", variablesMultiCombo.panel),
     ("Commands", launchingCommandTextArea),
     ("Resources", resourcesMultiTextField.panel),
     ("Input mapping", inputMapMultiComboTextField.panel),
     ("Output mapping", outputMapMultiTextFieldCombo.panel))
 
-  override def saveContent(name: String): ITaskDataUI =
+  override def saveContent(name: String): TaskDataUI =
     new SystemExecTaskDataUI(name,
       workdirTextField.text,
       launchingCommandTextArea.editor.text,
       resourcesMultiTextField.content.map { _.content },
       inputMapMultiComboTextField.content.filterNot { x ⇒
-        println("XXX : " + x.comboValue + " " + x.comboValue.isDefined)
         x.comboValue match {
           case Some(x: EmptyPrototypeDataUI) ⇒ true
           case _                             ⇒ false
         }
-      }.map { d ⇒ d.comboValue.get -> d.textFieldValue },
-      outputMapMultiTextFieldCombo.content.map { data ⇒ data.textFieldValue -> data.comboValue.get },
-      variablesMultiCombo.content.map { _.comboValue.get })
+      }.map { d ⇒ d.comboValue.get -> d.textFieldValue }.filter { case (p, _) ⇒ Proxies.check(p) },
+      outputMapMultiTextFieldCombo.content.map { data ⇒ data.textFieldValue -> data.comboValue.get }.filter { case (_, p) ⇒ Proxies.check(p) },
+      Proxies.check(variablesMultiCombo.content.map { _.comboValue.get }))
 
-  def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.classPrototypes(classOf[File])
+  def comboContent: List[PrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.classPrototypes(classOf[File])
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(workdirTextField,
-      new Help(i18n.getString("workdir"),
-        i18n.getString("workdirEx")))
-    add(variablesMultiCombo,
-      new Help(i18n.getString("variables"),
-        i18n.getString("variablesEx")))
-    add(resourcesMultiTextField,
-      new Help(i18n.getString("resources"),
-        i18n.getString("resourcesEx")))
-    add(inputMapMultiComboTextField,
-      new Help(i18n.getString("inputMap"),
-        i18n.getString("inputMapEx")))
-    add(outputMapMultiTextFieldCombo,
-      new Help(i18n.getString("outputMap"),
-        i18n.getString("outputMapEx")))
-    add(launchingCommandTextArea,
-      new Help(i18n.getString("command"),
-        i18n.getString("commandEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+  add(workdirTextField,
+    new Help(i18n.getString("workdir"),
+      i18n.getString("workdirEx")))
+  add(variablesMultiCombo,
+    new Help(i18n.getString("variables"),
+      i18n.getString("variablesEx")))
+  add(resourcesMultiTextField,
+    new Help(i18n.getString("resources"),
+      i18n.getString("resourcesEx")))
+  add(inputMapMultiComboTextField,
+    new Help(i18n.getString("inputMap"),
+      i18n.getString("inputMapEx")))
+  add(outputMapMultiTextFieldCombo,
+    new Help(i18n.getString("outputMap"),
+      i18n.getString("outputMapEx")))
+  add(launchingCommandTextArea.editor,
+    new Help(i18n.getString("command"),
+      i18n.getString("commandEx")))
 }

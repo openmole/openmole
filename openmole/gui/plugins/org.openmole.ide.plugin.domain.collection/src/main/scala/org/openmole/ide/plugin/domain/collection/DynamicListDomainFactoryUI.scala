@@ -17,6 +17,6 @@
 
 package org.openmole.ide.plugin.domain.collection
 
-import org.openmole.ide.core.model.factory.IDomainFactoryUI
+import org.openmole.ide.core.implementation.factory.IDomainFactoryUI
 
 trait DynamicListFactoryUI extends IDomainFactoryUI

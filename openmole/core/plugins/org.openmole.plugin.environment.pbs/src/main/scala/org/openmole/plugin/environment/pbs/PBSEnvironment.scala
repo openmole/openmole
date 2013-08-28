@@ -68,7 +68,7 @@ class PBSEnvironment(
   type SS = PersistentStorageService
   type JS = PBSJobService
 
-  @transient lazy val authentication = SSHAuthentication(user, host, port, authentications)()
+  @transient lazy val authentication = SSHAuthentication(user, host, port, authentications)(authentications)
   @transient lazy val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val storage =

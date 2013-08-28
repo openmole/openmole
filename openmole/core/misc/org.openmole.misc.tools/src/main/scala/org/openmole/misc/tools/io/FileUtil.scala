@@ -47,6 +47,7 @@ import java.util.zip.GZIPOutputStream
 import scala.io.Source
 import org.openmole.misc.tools.service._
 import scala.util.{ Try, Failure, Success }
+import java.util.UUID
 
 object FileUtil {
 
@@ -344,11 +345,16 @@ object FileUtil {
     }
 
     def extractDirArchiveWithRelativePath(dest: File) = {
-      new TarInputStream(bufferedInputStream).extractDirArchiveWithRelativePathAndClose(dest)
+      val is = new TarInputStream(bufferedInputStream)
+      try is.extractDirArchiveWithRelativePath(dest)
+      finally is.close
     }
 
-    def extractUncompressDirArchiveWithRelativePath(dest: File) =
-      new TarInputStream(gzipedBufferedInputStream).extractDirArchiveWithRelativePathAndClose(dest)
+    def extractUncompressDirArchiveWithRelativePath(dest: File) = {
+      val is = new TarInputStream(gzipedBufferedInputStream)
+      try is.extractDirArchiveWithRelativePath(dest)
+      finally is.close
+    }
 
     def withLock[T](f: OutputStream ⇒ T) = vmFileLock.withLock(file.getCanonicalPath) {
       val fos = new FileOutputStream(file, true)
@@ -436,6 +442,14 @@ object FileUtil {
       finally upFile.delete
       file
     }
+
+    def newDir(prefix: String): File = {
+      val tempFile = newFile(prefix, "")
+      if (!tempFile.mkdirs) throw new IOException("Cannot create directory " + tempFile)
+      tempFile
+    }
+
+    def newFile(prefix: String, suffix: String): File = new File(file, prefix + UUID.randomUUID + suffix)
 
   }
 

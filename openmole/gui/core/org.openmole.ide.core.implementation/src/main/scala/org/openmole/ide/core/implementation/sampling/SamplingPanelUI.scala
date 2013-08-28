@@ -16,25 +16,21 @@
  */
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.core.model.sampling.{ IDomainWidget, ISamplingWidget }
-import org.openmole.ide.core.implementation.panel.{ SamplingPanel }
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.core.model.panel.IPanelUI
 import org.openmole.ide.core.implementation.registry.KeyRegistry
-import swing.{ Label, Component, MyComboBox }
-import org.openmole.ide.core.model.data.ISamplingDataUI
+import scala.swing.{ Publisher, Label, Component, MyComboBox }
 import swing.event.{ FocusGained, SelectionChanged }
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import javax.swing.ImageIcon
 import javax.imageio.ImageIO
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.implementation.data.SamplingDataUI
+import org.openmole.ide.core.implementation.panel.{ AnonSaveSettings, Settings }
 
-class SamplingPanelUI(samplingWidget: ISamplingWidget,
-                      samplingPanel: SamplingPanel) extends PluginPanel("") with IPanelUI {
+class SamplingPanelUI(samplingWidget: ISamplingWidget) extends Settings with AnonSaveSettings {
 
+  type DATAUI = SamplingDataUI
   val incomings = samplingWidget.incomings
-  val components = List()
 
   val samplings =
     KeyRegistry.samplings.values.map {
@@ -60,7 +56,7 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
   samplings.filter {
     _.toString == samplingWidget.proxy.dataUI.toString
   }.headOption match {
-    case Some(d: ISamplingDataUI) ⇒
+    case Some(d: SamplingDataUI) ⇒
       samplingComboBox.selection.item = d
     case _ ⇒
   }
@@ -72,21 +68,22 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
     contents += buildPanel(samplingWidget.proxy.dataUI)
   }
 
-  contents += mainSamplingPanel
+  val components = List(("Settings", mainSamplingPanel))
+
   samplingComboBox.selection.reactions += {
     case SelectionChanged(`samplingComboBox`) ⇒
       if (mainSamplingPanel.contents.size == 2) mainSamplingPanel.contents.remove(1)
       mainSamplingPanel.contents += buildPanel(samplingComboBox.selection.item)
       listenToSampling
-      repaint
+    // repaint
   }
 
-  def buildPanel(s: ISamplingDataUI) = new PluginPanel("wrap 2") {
+  def buildPanel(s: SamplingDataUI) = new PluginPanel("wrap 2") {
     contents += new Label {
       icon = new ImageIcon(ImageIO.read(s.getClass.getClassLoader.getResource(s.fatImagePath)))
     }
     sPanel = s.buildPanelUI
-    contents += sPanel.peer
+    contents += sPanel.panel.peer
   }
 
   def listenToSampling = {
@@ -95,7 +92,7 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
       case FocusGained(source: Component, _, _)     ⇒ sPanel.help.switchTo(source)
       case ComponentFocusedEvent(source: Component) ⇒ sPanel.help.switchTo(source)
     }
-    samplingPanel.updateHelp
+    // samplingPanel.updateHelp
   }
 
   def saveContent = sPanel.saveContent

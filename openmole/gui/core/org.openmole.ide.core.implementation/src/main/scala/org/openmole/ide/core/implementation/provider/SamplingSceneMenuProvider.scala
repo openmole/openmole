@@ -19,16 +19,15 @@ package org.openmole.ide.core.implementation.provider
 
 import java.awt.Point
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.swing.Action
 import scala.swing.Menu
 import scala.swing.MenuItem
-import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.sampling._
 import scala.Some
 import org.openmole.ide.core.implementation.data.FactorDataUI
+import org.openmole.ide.core.implementation.workflow.{ ISceneContainer, MoleScene }
 
 class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends GenericMenuProvider {
 
@@ -39,7 +38,7 @@ class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends 
       def apply = {
         closeExtraPanel
         val domainFactories = KeyRegistry.domains.values
-        panelScene.addDomain(new DomainProxyUI(domainFactories.map {
+        panelScene.addDomain(DomainProxyUI(domainFactories.map {
           _.buildDataUI
         }.filter(_.name == "Range").headOption.getOrElse(domainFactories.head.buildDataUI)),
           point, true)
@@ -50,7 +49,7 @@ class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends 
       def apply = {
         closeExtraPanel
         val samplingFactories = KeyRegistry.samplings.values
-        panelScene.addSampling(new SamplingProxyUI(samplingFactories.map {
+        panelScene.addSampling(SamplingProxyUI(samplingFactories.map {
           _.buildDataUI
         }.filter(_.name == "Complete").headOption.getOrElse(samplingFactories.head.buildDataUI)),
           point, true)

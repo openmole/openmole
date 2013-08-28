@@ -17,16 +17,18 @@
 package org.openmole.ide.core.implementation.builder
 
 import org.openmole.ide.misc.widget.PluginPanel
-import swing.{ Action, Button, TextField, Label }
-import org.openmole.ide.core.model.panel.IBuilderPanelUI
-import java.awt.{ Dimension, Color }
+import swing.{ TextField, Label }
+import java.awt.Dimension
+import org.openmole.core.implementation.puzzle.Puzzle
 
-abstract class BuilderPanel extends PluginPanel("wrap 2 ") with IBuilderPanelUI {
+abstract class BuilderPanel extends PluginPanel("wrap 2 ") {
   val nameTextField = new TextField(10)
 
   contents += new Label("Name")
   contents += nameTextField
 
   preferredSize = new Dimension(300, 80)
+
+  def build(uiMap: PuzzleUIMap): (Puzzle, PuzzleUIMap)
 
 }

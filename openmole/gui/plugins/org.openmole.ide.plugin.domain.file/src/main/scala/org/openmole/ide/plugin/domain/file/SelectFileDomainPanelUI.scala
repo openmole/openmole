@@ -18,24 +18,28 @@
 package org.openmole.ide.plugin.domain.file
 
 import swing.{ TextField, Label }
-import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
 import java.util.{ Locale, ResourceBundle }
+import org.openmole.ide.core.implementation.panelsettings.IDomainPanelUI
 
-class SelectFileDomainPanelUI(val dataUI: SelectFileDomainDataUI) extends PluginPanel("wrap") with IDomainPanelUI with FileDomainPanelUI {
-
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class SelectFileDomainPanelUI(val dataUI: SelectFileDomainDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends IDomainPanelUI with FileDomainPanelUI {
 
   val dirTField = directoryTextField(dataUI.directoryPath)
   val pathTextField = new TextField(8) { text = dataUI.path }
-  contents += FileDomainPanelUI.panel(List((dirTField, "Directory"), (pathTextField, "Reg Exp")))
+
+  val sfpanel = new PluginPanel("wrap") {
+    contents += FileDomainPanelUI.panel(List((dirTField, "Directory"), (pathTextField, "Reg Exp")))
+  }
+
+  val components = List(("", sfpanel))
 
   override def toString = dataUI.name
 
   def saveContent = new SelectFileDomainDataUI(dirTField.text, pathTextField.text)
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(dirTField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
-    add(pathTextField, new Help(i18n.getString("singleFilePath"), i18n.getString("singleFilePathEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+
+  add(dirTField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
+  add(pathTextField, new Help(i18n.getString("singleFilePath"), i18n.getString("singleFilePathEx")))
+
 }

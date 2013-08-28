@@ -17,22 +17,21 @@
 
 package org.openmole.ide.plugin.source.file
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.data.SourceDataUI
 import org.openmole.plugin.source.file.CSVSource
 import java.io.File
 import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyPrototypeDataUI
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 class CSVSourceDataUI(val name: String = "",
                       val csvFilePath: String = "",
-                      val prototypeMapping: List[(String, IPrototypeDataProxyUI)] = List.empty) extends SourceDataUI {
+                      val prototypeMapping: List[(String, PrototypeDataProxyUI)] = List.empty) extends SourceDataUI {
 
   def coreClass = classOf[CSVSource]
 
   def buildPanelUI = new CSVSourcePanelUI(this)
 
-  override def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI) =
+  override def cloneWithoutPrototype(proxy: PrototypeDataProxyUI) =
     new CSVSourceDataUI(name, csvFilePath, prototypeMapping.filterNot(_._2 == proxy))
 
   def coreObject = util.Try {

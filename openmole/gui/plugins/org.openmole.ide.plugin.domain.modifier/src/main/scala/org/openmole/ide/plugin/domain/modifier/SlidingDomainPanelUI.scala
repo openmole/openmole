@@ -18,38 +18,44 @@
 package org.openmole.ide.plugin.domain.modifier
 
 import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
-import org.openmole.ide.core.model.panel.IDomainPanelUI
 import swing.{ Label, TextField }
 import java.util.{ Locale, ResourceBundle }
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.misc.tools.util.Types._
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.panelsettings.IDomainPanelUI
+import org.openmole.ide.core.implementation.sampling.SamplingCompositionPanelUI
 
-class SlidingDomainPanelUI(val dataUI: SlidingDomainDataUI[_]) extends PluginPanel("wrap 2") with IDomainPanelUI {
+class SlidingDomainPanelUI(val dataUI: SlidingDomainDataUI[_])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends IDomainPanelUI {
 
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   val sizeField = new TextField(dataUI.size, 5)
   val stepTextField = new TextField(dataUI.step, 5)
 
-  contents += (new Label("Size"), "gap para")
-  contents += sizeField
-  contents += (new Label("Step"), "gap para")
-  contents += stepTextField
+  val components = List(("", new PluginPanel("wrap 2") {
+    contents += (new Label("Size"), "gap para")
+    contents += sizeField
+    contents += (new Label("Step"), "gap para")
+    contents += stepTextField
+  }))
 
   override def toString = dataUI.name
 
   def saveContent = {
-
     val classString =
-      ScenesManager.currentSamplingCompositionPanelUI.firstNoneModifierDomain(dataUI) match {
-        case Some(d: IDomainDataUI) ⇒ d.domainType.toString.split('.').last
-        case _                      ⇒ DOUBLE
+      ScenesManager.currentSamplingCompositionPanelUI.headOption match {
+        case Some(scp: SamplingCompositionPanelUI) ⇒ scp.firstNoneModifierDomain(dataUI) match {
+          case Some(d: DomainDataUI) ⇒ d.domainType.toString.split('.').last
+          case _                     ⇒ DOUBLE
+        }
+        case _ ⇒
+          DOUBLE
       }
     SlidingDomainDataUI(sizeField.text, stepTextField.text, classString, dataUI.previousDomain)
   }
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(sizeField, new Help(i18n.getString("size"), i18n.getString("sizeEx")))
-    add(stepTextField, new Help(i18n.getString("step"), i18n.getString("stepEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+
+  add(sizeField, new Help(i18n.getString("size"), i18n.getString("sizeEx")))
+  add(stepTextField, new Help(i18n.getString("step"), i18n.getString("stepEx")))
+
 }

@@ -20,10 +20,9 @@ package org.openmole.ide.core.implementation.action
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
-import org.openmole.ide.core.implementation.workflow.CapsuleUI
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.implementation.workflow.{ MoleScene, CapsuleUI }
 
-class EncapsuleTaskAction(moleScene: IMoleScene,
+class EncapsuleTaskAction(moleScene: MoleScene,
                           capsule: CapsuleUI,
                           dpu: TaskDataProxyUI) extends ActionListener {
   override def actionPerformed(ae: ActionEvent) = {

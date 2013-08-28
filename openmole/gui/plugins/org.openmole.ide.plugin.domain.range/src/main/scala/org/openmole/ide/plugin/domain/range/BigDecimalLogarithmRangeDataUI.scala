@@ -18,11 +18,7 @@
 package org.openmole.ide.plugin.domain.range
 
 import java.math.BigDecimal
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.domain.range._
-import org.openmole.core.model.domain.Domain
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.misc.tools.io.FromString._
 import org.openmole.misc.exception.UserBadDataError

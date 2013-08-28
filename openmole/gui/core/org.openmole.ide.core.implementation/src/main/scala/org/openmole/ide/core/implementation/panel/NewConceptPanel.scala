@@ -17,13 +17,19 @@
 package org.openmole.ide.core.implementation.panel
 
 import org.openmole.ide.misc.widget.{ MainLinkLabel, PluginPanel }
-import swing.{ Label, Action }
+import swing.Action
 
-class NewConceptPanel(fromPanel: BasePanel) extends PluginPanel("wrap") {
+class NewConceptPanel extends PluginPanel("wrap") {
 
-  def addPrototype = add("> prototype", new Action("") { def apply = ConceptMenu.createAndDisplayPrototype(fromPanel) })
+  def addPrototype = add("> prototype", new Action("") { def apply = ConceptMenu.createAndDisplayPrototype })
 
-  def addSamplingComposition = add("> sampling", new Action("") { def apply = ConceptMenu.createAndDisplaySamplingComposition(fromPanel) })
+  def addHook = add("> hook", new Action("") { def apply = ConceptMenu.createAndDisplayHook })
+
+  def addSource = add("> source", new Action("") { def apply = ConceptMenu.createAndDisplaySource })
+
+  def addEnvironment = add("> environment", new Action("") { def apply = ConceptMenu.createAndDisplayEnvironment })
+
+  def addSamplingComposition = add("> sampling", new Action("") { def apply = ConceptMenu.createAndDisplaySamplingComposition })
 
   def add(s: String, action: Action) = contents += new MainLinkLabel(s, action)
 }

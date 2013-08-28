@@ -17,10 +17,10 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.workflow._
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.misc.tools.util.ID
 
 class DataChannelUI(
-  val source: ICapsuleUI,
-  val target: IInputSlotWidget,
-  var filteredPrototypes: List[IPrototypeDataProxyUI] = List.empty) extends IDataChannelUI
+  val source: CapsuleUI,
+  val target: InputSlotWidget,
+  var filteredPrototypes: List[PrototypeDataProxyUI] = List.empty) extends ConnectorUI with ID

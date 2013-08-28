@@ -21,7 +21,6 @@ import java.awt.BorderLayout
 import javax.swing.{ JSplitPane, JScrollPane }
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.misc.widget.ToolBarButton
 import scala.collection.mutable.HashSet

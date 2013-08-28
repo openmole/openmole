@@ -17,26 +17,40 @@
 
 package org.openmole.ide.plugin.hook.file
 
-import org.openmole.ide.core.model.panel.IHookPanelUI
-import org.openmole.ide.misc.widget.CSVChooseFileTextField
+import org.openmole.ide.misc.widget.{ PluginPanel, CSVChooseFileTextField }
 import org.openmole.ide.plugin.misc.tools.MultiPrototypePanel
-import swing.{ TabbedPane, Label }
+import swing.Label
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import java.awt.Dimension
+import org.openmole.ide.core.implementation.panelsettings.HookPanelUI
 
-class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI) extends MultiPrototypePanel("",
-  dataUI.toBeHooked.toList,
-  Proxies.instance.prototypes.toList) with IHookPanelUI {
+class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI) extends PluginPanel("") with HookPanelUI {
 
   val filePathTextField = new CSVChooseFileTextField(dataUI.fileName)
-  contents.insert(0, filePathTextField)
-  contents.insert(0, new Label("CSV file path"))
-  contents.insert(0, new Label { text = "<html><b>Append prototypes to file</b></html>" })
-  minimumSize = new Dimension(300, 150)
+
+  val multi = new MultiPrototypePanel("",
+    dataUI.toBeHooked.toList,
+    Proxies.instance.prototypes.toList)
+
+  contents += {
+    if (Proxies.instance.prototypes.isEmpty)
+      new Label("No prototype to be displayed")
+    else {
+      multi.contents.insert(0, filePathTextField)
+      multi.contents.insert(0, new Label("CSV file path"))
+      multi.contents.insert(0, new Label {
+        text = "<html><b>Append prototypes to file</b></html>"
+      })
+      multi.minimumSize = new Dimension(300, 150)
+      multi
+    }
+  }
 
   val components = List(("Prototypes", this))
 
   def saveContent(name: String) = new AppendToCSVFileHookDataUI(name,
-    multiPrototypeCombo.content.map { _.comboValue.get }.toList,
+    Proxies.check(multi.multiPrototypeCombo.content.map {
+      _.comboValue.get
+    }.toList),
     filePathTextField.text)
 }

@@ -6,16 +6,16 @@
 package org.openmole.ide.plugin.environment.local
 
 import org.openmole.core.implementation.execution.local.LocalEnvironment
-import org.openmole.ide.core.model.data.IEnvironmentDataUI
+import org.openmole.ide.core.implementation.data.EnvironmentDataUI
 
 class LocalEnvironmentDataUI(val name: String = "",
-                             val nbThread: Int = 1) extends IEnvironmentDataUI {
+                             val nbThread: Int = 1) extends EnvironmentDataUI {
 
   def coreObject = util.Try { LocalEnvironment(nbThread) }
 
   def coreClass = classOf[LocalEnvironment]
 
-  def imagePath = "img/local.png"
+  override def imagePath = "img/local.png"
 
   override def fatImagePath = "img/local_fat.png"
 

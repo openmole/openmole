@@ -18,35 +18,31 @@
 
 package org.openmole.ide.plugin.domain.collection
 
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.tools.util.Types._
-import java.math.BigInteger
-import java.math.BigDecimal
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.collection.VariableDomain
 import org.openmole.core.model.data.Prototype
-import org.openmole.ide.core.model.sampling.IFinite
-import org.openmole.ide.misc.tools.util.Types
-import java.io.File
 import org.openmole.misc.tools.obj.ClassUtils
 import util.Try
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.sampling.FiniteUI
 
 object VariableDomainDataUI {
-  def apply[T](prototypeArray: Option[IPrototypeDataProxyUI], classString: String) = {
+  def apply[T](prototypeArray: Option[PrototypeDataProxyUI], classString: String) = {
     new VariableDomainDataUI(prototypeArray)(ClassUtils.manifest(classString))
   }
 }
 
-class VariableDomainDataUI[S](val prototypeArray: Option[IPrototypeDataProxyUI] = None)(implicit val domainType: Manifest[S])
-    extends IDomainDataUI with IFinite {
+class VariableDomainDataUI[S](val prototypeArray: Option[PrototypeDataProxyUI] = None)(implicit val domainType: Manifest[S])
+    extends DomainDataUI with FiniteUI {
   vdomainDataUI ⇒
 
   val name = "Prototype Array"
 
   def coreObject = Try(prototypeArray match {
-    case Some(p: IPrototypeDataProxyUI) ⇒ VariableDomain(p.dataUI.coreObject.asInstanceOf[Prototype[Array[S]]])
-    case _                              ⇒ throw new UserBadDataError("An array of Prototypes is required for a Prototype Array Domain")
+    case Some(p: PrototypeDataProxyUI) ⇒ VariableDomain(p.dataUI.coreObject.asInstanceOf[Prototype[Array[S]]])
+    case _                             ⇒ throw new UserBadDataError("An array of Prototypes is required for a Prototype Array Domain")
   })
 
   def buildPanelUI = new VariableDomainPanelUI(this)

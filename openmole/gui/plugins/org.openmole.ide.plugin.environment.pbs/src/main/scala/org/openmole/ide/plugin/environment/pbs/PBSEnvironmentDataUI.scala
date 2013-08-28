@@ -7,7 +7,7 @@ package org.openmole.ide.plugin.environment.pbs
 
 import org.openmole.plugin.environment.pbs.PBSEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.ide.core.model.data.IEnvironmentDataUI
+import org.openmole.ide.core.implementation.data.EnvironmentDataUI
 import org.openmole.misc.workspace.Workspace
 
 class PBSEnvironmentDataUI(val name: String = "",
@@ -22,7 +22,7 @@ class PBSEnvironmentDataUI(val name: String = "",
                            val threads: Option[Int] = None,
                            val nodes: Option[Int] = None,
                            val coreByNode: Option[Int] = None)
-    extends IEnvironmentDataUI {
+    extends EnvironmentDataUI {
   ui ⇒
 
   def coreObject = util.Try {
@@ -41,9 +41,9 @@ class PBSEnvironmentDataUI(val name: String = "",
 
   def coreClass = classOf[PBSEnvironment]
 
-  def imagePath = "img/pbs.png"
+  override def imagePath = "img/pbs.png"
 
-  override def fatImagePath = "img/pbs_fat.png"
+  def fatImagePath = "img/pbs_fat.png"
 
   def buildPanelUI = new PBSEnvironmentPanelUI(this)
 }

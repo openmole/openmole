@@ -17,11 +17,10 @@
 
 package org.openmole.ide.plugin.domain.distribution
 
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.misc.tools.util.Types
+import org.openmole.ide.core.implementation.data.DomainDataUI
 
 object UniformDistributionDataUI {
 
@@ -32,7 +31,7 @@ object UniformDistributionDataUI {
   }
 }
 
-abstract class UniformDistributionDataUI[S] extends IDomainDataUI {
+abstract class UniformDistributionDataUI[S] extends DomainDataUI {
 
   def max: Option[Int]
 

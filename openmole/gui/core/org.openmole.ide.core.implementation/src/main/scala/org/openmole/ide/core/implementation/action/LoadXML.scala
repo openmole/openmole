@@ -19,21 +19,16 @@ package org.openmole.ide.core.implementation.action
 
 import java.io.File
 import scala.swing.Label
-import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.core.implementation.execution.{ ScenesManager, Settings }
 import org.openmole.ide.core.implementation.serializer.{ MoleData, GUISerializer }
 import org.openmole.ide.core.implementation.dialog.{ StatusBar, DialogFactory }
 import org.openmole.ide.core.implementation.dialog.StatusBar._
 import scala.swing.FileChooser.Result._
-import util.{ Success, Failure }
 import org.openmole.ide.core.implementation.dataproxy.Proxies
-import org.openmole.ide.core.implementation.workflow._
-import org.openmole.misc.exception.ExceptionUtils
 import org.openmole.ide.core.implementation.panel.ConceptMenu
+import ConceptMenu._
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.misc.tools.util.Types
-import org.openmole.ide.core.implementation.builder.SceneFactory
-import java.awt.Point
 import util.Success
 import util.Failure
 import scala.Some
@@ -73,43 +68,43 @@ object LoadXML {
     for {
       p ← proxies.tasks
       if (!p.generated)
-    } ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(p)
+    } +=(p)
 
   def addSamplings(proxies: Proxies) =
     for {
       p ← proxies.samplings
       if (!p.generated)
-    } ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(p)
+    } +=(p)
 
   def addEnvironments(proxies: Proxies) =
     for {
       p ← proxies.environments
       if (!p.generated)
-    } ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(p)
+    } +=(p)
 
   def addSampling(proxies: Proxies) =
     for {
       p ← proxies.sources
       if (!p.generated)
-    } ConceptMenu.sourceMenu.popup.contents += ConceptMenu.addItem(p)
+    } +=(p)
 
   def addSources(proxies: Proxies) =
     for {
       p ← proxies.sources
       if (!p.generated)
-    } ConceptMenu.sourceMenu.popup.contents += ConceptMenu.addItem(p)
+    } +=(p)
 
   def addHooks(proxies: Proxies) =
     for {
       p ← proxies.hooks
       if (!p.generated)
-    } ConceptMenu.hookMenu.popup.contents += ConceptMenu.addItem(p)
+    } +=(p)
 
   def addPrototypes(proxies: Proxies) =
     for {
       p ← proxies.prototypes
     } {
-      if (!p.generated) ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
+      if (!p.generated) +=(p)
       if (!(GenericPrototypeDataUI.baseType ::: GenericPrototypeDataUI.extraType contains Types.standardize(p.dataUI.typeClassString))) {
         GenericPrototypeDataUI.extraType = GenericPrototypeDataUI.extraType :+ Types.standardize(p.dataUI.typeClassString)
       }

@@ -16,19 +16,16 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.misc.widget.{ Help, PluginPanel }
-import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import swing.MyComboBox
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import java.util.{ Locale, ResourceBundle }
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.panelsettings.ISamplingPanelUI
 
-class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI) extends PluginPanel("") with ISamplingPanelUI {
+class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends ISamplingPanelUI {
 
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-
-  val availablePrototypes: List[IPrototypeDataProxyUI] = {
+  val availablePrototypes: List[PrototypeDataProxyUI] = {
     dataUI match {
       case i: ZipWithIndexSamplingDataUI ⇒ Proxies.instance.classPrototypes(classOf[Int])
       case n: ZipWithNameSamplingDataUI  ⇒ Proxies.instance.classPrototypes(classOf[String])
@@ -38,13 +35,14 @@ class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI) ex
 
   val protoCombo = new MyComboBox(availablePrototypes)
   dataUI.prototype match {
-    case Some(p: IPrototypeDataProxyUI) ⇒ protoCombo.selection.item = p
-    case _                              ⇒
+    case Some(p: PrototypeDataProxyUI) ⇒ protoCombo.selection.item = p
+    case _                             ⇒
   }
+  val components = List(("", new PluginPanel("") {
+    contents += protoCombo
+  }))
 
-  contents += protoCombo
-
-  help.add(protoCombo, new Help(i18n.getString("zipPrototype")))
+  add(protoCombo, new Help(i18n.getString("zipPrototype")))
 
   def saveContent = dataUI match {
     case i: ZipWithIndexSamplingDataUI ⇒ new ZipWithIndexSamplingDataUI(proto)
@@ -53,7 +51,7 @@ class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI) ex
   }
 
   def proto = protoCombo.selection.item match {
-    case p: IPrototypeDataProxyUI ⇒ Some(p)
-    case _                        ⇒ None
+    case p: PrototypeDataProxyUI ⇒ Some(p)
+    case _                       ⇒ None
   }
 }

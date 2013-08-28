@@ -1,39 +1,31 @@
 /*
- * Copyright (C) 2013 Mathieu Leclaire
+ * Copyright (C) 2013 Mathieu Mathieu Leclaire <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.openmole.ide.core.implementation.builder
 
-import org.openmole.ide.core.implementation.dataproxy._
-import org.openmole.core.model.sampling.Sampling
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.registry._
-import org.openmole.ide.core.model.workflow.{ IBuildMoleScene, IMoleUI, IMoleScene, ICapsuleUI }
 import org.openmole.core.implementation.puzzle.Puzzle
 import java.awt.Point
 import org.openmole.core.model.transition._
-import org.openmole.ide.core.model.sampling.IBuiltCompositionSampling
-import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
-import org.openmole.ide.core.implementation.sampling.{ DomainProxyUI, SamplingProxyUI, SamplingCompositionDataUI }
+import org.openmole.ide.core.implementation.sampling.{ IBuiltCompositionSampling, DomainProxyUI, SamplingProxyUI, SamplingCompositionDataUI }
 import org.openmole.core.model.domain.Domain
 import org.openmole.core.model.data.Prototype
-import org.openmole.ide.core.model.builder.IPuzzleUIMap
-import org.openmole.ide.core.implementation.data.{ CapsuleDataUI, CheckData }
-import org.openmole.ide.core.model.commons._
+import org.openmole.ide.core.implementation.data.{ HookDataUI, CapsuleDataUI, CheckData }
 import org.openmole.core.model.transition.{ IEndExplorationTransition, IExplorationTransition, IAggregationTransition }
-import org.openmole.ide.core.model.factory.IBuilderFactoryUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
@@ -46,18 +38,46 @@ import org.openmole.ide.core.implementation.registry.DefaultKey
 import org.openmole.ide.core.implementation.workflow.{ TransitionUI, CapsuleUI }
 import org.openmole.core.implementation.transition.Condition
 import org.openmole.ide.core.implementation.registry.DefaultKey
+import org.openmole.ide.core.implementation.registry.DefaultKey
+import scala.Some
+import org.openmole.ide.core.implementation.factory.BuilderFactoryUI
+import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.misc.tools.obj.ClassUtils._
+import org.openmole.core.model.sampling.Sampling
+import org.openmole.ide.core.implementation.registry.DefaultKey
+import scala.Some
 
 object Builder {
 
-  def prototypeUI = new PrototypeDataProxyUI(GenericPrototypeDataUI[java.lang.Double], generated = false)
+  def prototypeUI = PrototypeDataProxyUI(new GenericPrototypeDataUI("", 0, manifest(classOf[java.lang.Double])), false)
 
-  def samplingCompositionUI(g: Boolean) = new SamplingCompositionDataProxyUI(generated = g)
+  def samplingCompositionUI(b: Boolean) = SamplingCompositionDataProxyUI(g = b)
 
-  /* def puzzles(listsPuzzleCompliant: List[List[ICapsuleUI]],
+  def hookUI(g: Boolean) = {
+    val hookValues = KeyRegistry.hooks.values
+    HookDataProxyUI(hookValues.find { _.toString == "Display" }.getOrElse(hookValues.head).buildDataUI, g)
+  }
+
+  def sourceUI(g: Boolean) = {
+    val sourceValues = KeyRegistry.sources.values
+    SourceDataProxyUI(sourceValues.find { _.toString == "CSV" }.getOrElse(sourceValues.head).buildDataUI, g)
+  }
+
+  def taskUI(g: Boolean) = {
+    val taskValues = KeyRegistry.tasks.values
+    TaskDataProxyUI(taskValues.find { _.toString == "Groovy" }.getOrElse(taskValues.head).buildDataUI, g)
+  }
+
+  def environmentUI(g: Boolean) = {
+    val envValues = KeyRegistry.environments.values
+    EnvironmentDataProxyUI(envValues.find { _.toString == "Multi threading" }.getOrElse(envValues.head).buildDataUI, g)
+  }
+
+  /* def puzzles(listsPuzzleCompliant: List[List[CapsuleUI]],
               manager: IMoleUI,
-              uiMap: IPuzzleUIMap = new PuzzleUIMap): (List[Puzzle], IPuzzleUIMap) = {
+              uiMap: PuzzleUIMap = new PuzzleUIMap): (List[Puzzle], PuzzleUIMap) = {
 
-    def puzzles0(toBeComputed: List[List[ICapsuleUI]], puzzleList: List[Puzzle], uiMap0: IPuzzleUIMap): (List[Puzzle], IPuzzleUIMap) = {
+    def puzzles0(toBeComputed: List[List[CapsuleUI]], puzzleList: List[Puzzle], uiMap0: PuzzleUIMap): (List[Puzzle], PuzzleUIMap) = {
       if (toBeComputed.isEmpty) (puzzleList, uiMap0)
       else {
         val firsts = manager.firstCapsules(toBeComputed.head)
@@ -72,10 +92,10 @@ object Builder {
     puzzles0(listsPuzzleCompliant, List(), uiMap)
   }
 
-  def puzzle(capsulesUI: List[ICapsuleUI],
-             first: ICapsuleUI,
-             lasts: Iterable[ICapsuleUI],
-             uiMap: IPuzzleUIMap = PuzzleUIMap()) = {
+  def puzzle(capsulesUI: List[CapsuleUI],
+             first: CapsuleUI,
+             lasts: Iterable[CapsuleUI],
+             uiMap: PuzzleUIMap = PuzzleUIMap()) = {
     val capsuleMap = capsulesUI.map {
       c ⇒ c -> c.dataUI.coreObject(c.scene.dataUI).get
     }.toMap
@@ -104,10 +124,10 @@ object Builder {
   }
 
   def fromPuzzle(p: Puzzle,
-                 scene: IBuildMoleScene,
+                 scene: BuildMoleScene,
                  firstPoint: Point,
                  lastPoint: Point,
-                 uiMap: IPuzzleUIMap) = {
+                 uiMap: PuzzleUIMap) = {
     val capsuleMap = p.slots.zipWithIndex.map {
       s ⇒
         val proxy = toTaskUI(s._1.capsule.task, uiMap)
@@ -149,13 +169,13 @@ object Builder {
     scene.refresh
   }    */
 
-  def toTaskUI(t: ITask, uiMap: IPuzzleUIMap) =
+  def toTaskUI(t: ITask, uiMap: PuzzleUIMap) =
     KeyRegistry.task(t.getClass).buildDataProxyUI(t, uiMap)
 
-  def toSamplingCompositionUI(s: Sampling): ISamplingCompositionDataProxyUI = {
+  def toSamplingCompositionUI(s: Sampling): SamplingCompositionDataProxyUI = {
     val (sProxy, bcs) = toSamplingUI(s, new BuiltCompositionSampling)
 
-    new SamplingCompositionDataProxyUI(new SamplingCompositionDataUI(sProxy.dataUI.name,
+    SamplingCompositionDataProxyUI(new SamplingCompositionDataUI(sProxy.dataUI.name,
       bcs.builtDomains.toList.zipWithIndex.map {
         d ⇒ (d._1, new Point(10, d._2 * 20))
       },
@@ -177,7 +197,7 @@ object Builder {
   def toDomainUI(d: Domain[_],
                  bsc: IBuiltCompositionSampling) = {
     //val (proxy, newBSC) = KeyRegistry.domains(new DefaultKey(d.getClass)).fromCoreObject(d)
-    val proxy = new DomainProxyUI(KeyRegistry.domains(new DefaultKey(d.getClass)).buildDataUI)
+    val proxy = DomainProxyUI(KeyRegistry.domains(new DefaultKey(d.getClass)).buildDataUI)
     (proxy, bsc.copyWithDomains(proxy))
   }
 
@@ -211,9 +231,9 @@ object Builder {
     buildSamplingUI0(connectedSamplings, bcs)
   }
 
-  /* def apply(scene: IBuildMoleScene,
-            b: IBuilderFactoryUI,
-            sel: List[ICapsuleUI] = List()) = {
+  /* def apply(scene: BuildMoleScene,
+            b: BuilderFactoryUI,
+            sel: List[CapsuleUI] = List()) = {
     try {
       StatusBar().clear
       val selection = {

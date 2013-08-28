@@ -19,8 +19,6 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.Color
 import java.awt.Dimension
-import org.openmole.ide.core.model.panel.{ IBasePanel, IComponentCategory }
-import org.openmole.ide.core.model.dataproxy._
 import scala.collection.mutable.HashMap
 import scala.swing.Action
 import scala.swing.Menu
@@ -28,27 +26,27 @@ import scala.swing.MenuBar
 import scala.swing.MenuItem
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.core.implementation.builder.Builder
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.dialog.DialogFactory
-import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
-import org.openmole.ide.core.model.workflow.ISceneContainer
-import org.openmole.ide.core.implementation.builder.Builder
+import org.openmole.ide.core.implementation.workflow.{ ISceneContainer, BuildMoleSceneContainer }
 import scala.collection.JavaConversions._
+import org.openmole.ide.core.implementation.factory.FactoryUI
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.ide.core.implementation.data._
+import scala.swing.event.ButtonClicked
+import scala.Some
 
 object ConceptMenu {
 
-  def createAndDisplaySamplingComposition(fromPanel: BasePanel) = displayExtra(Builder.samplingCompositionUI(false), fromPanel)
-
-  def createAndDisplayPrototype(fromPanel: BasePanel) = displayExtra(Builder.prototypeUI, fromPanel)
-
+  def createAndDisplaySamplingComposition = display(Builder.samplingCompositionUI(false))
   def createAndDisplayPrototype = display(Builder.prototypeUI)
+  def createAndDisplayHook = display(Builder.hookUI(false))
+  def createAndDisplaySource = display(Builder.sourceUI(false))
+  def createAndDisplayEnvironment = display(Builder.environmentUI(false))
 
-  val menuItemMapping = new HashMap[IDataProxyUI, MenuItem]()
+  val menuItemMapping = new HashMap[DataProxyUI, MenuItem]()
   val mapping = new HashMap[List[String], Menu]
-
-  def menu(s: String): Menu = createRootMenu(s)
-
-  private def createRootMenu(s: String): Menu = mapping.getOrElseUpdate(List(s), new Menu(s))
 
   def menu(seq: List[String]): Menu = {
     def menu0(seq: List[String], m: Menu): Menu = {
@@ -56,84 +54,131 @@ object ConceptMenu {
       else menu0(seq.tail, mapping.getOrElseUpdate(seq, {
         val child = new Menu(seq.head)
         m.contents += child
-        child
+        m
       }))
     }
-
-    menu0(seq.tail, createRootMenu(seq.head))
+    menu0(seq.tail, mapping.getOrElseUpdate(List(seq.head), new Menu(seq.head)))
   }
 
-  val taskMenu = {
-    KeyRegistry.tasks.values.map {
+  def menuItem[T](proxy: T, fact: FactoryUI, f: T ⇒ Unit, popup: PopupToolBarPresenter): MenuItem = {
+    if (fact.category.isEmpty) menuItem(proxy, fact.toString, f)
+    else {
+      val m = menu(fact.category)
+      val item = menuItem(proxy, fact.toString, f)
+      popup.listenTo(item)
+      m.contents += item
+      m
+    }
+  }
+
+  def menuItem[T](proxy: T, s: String, f: T ⇒ Unit): MenuItem =
+    new MenuItem(new Action(s) {
+      override def apply = f(proxy)
+    }) {
+      listenTo(this)
+      reactions += {
+        case x: ButtonClicked ⇒
+          publish(new ConceptChanged(this))
+      }
+    }
+
+  def menuItem(f: ⇒ Unit): MenuItem = new MenuItem(new Action("New") {
+    override def apply = f
+  })
+
+  val taskMenu = new PopupToolBarPresenter("Task", new Color(107, 138, 166), List(menuItem(display(Builder.taskUI(false)))))
+  val environmentMenu = new PopupToolBarPresenter("Environment", new Color(68, 120, 33), List(menuItem(display(Builder.environmentUI(false)))))
+  val prototypeMenu = new PopupToolBarPresenter("Prototype", new Color(212, 170, 0), List(menuItem(display(Builder.prototypeUI))))
+  val samplingMenu = new PopupToolBarPresenter("Sampling", new Color(255, 85, 85), List(menuItem(display(Builder.samplingCompositionUI(false)))))
+  val sourceMenu = new PopupToolBarPresenter("Source", new Color(99, 86, 136), List(menuItem(display(Builder.sourceUI(false)))))
+  val hookMenu = new PopupToolBarPresenter("Hook", new Color(168, 120, 33), List(menuItem(display(Builder.hookUI(false)))))
+
+  def factoryName(d: DataUI, factories: List[DataProxyFactory]): String = {
+    List(factories.find { f ⇒ f.buildDataProxyUI.dataUI.getClass.isAssignableFrom(d.getClass) }).flatten.map {
+      _.factory.toString
+    }.headOption.getOrElse("")
+  }
+
+  def buildTaskMenu(f: TaskDataProxyUI ⇒ Unit, initDataUI: TaskDataUI) = {
+    mapping.clear
+    val factories = KeyRegistry.tasks.values.map {
       f ⇒ new TaskDataProxyFactory(f)
-    }.toList.sortBy(_.factory.toString).foreach {
-      d ⇒
-        menu(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
-          override def apply = display(d.buildDataProxyUI)
-        })
-    }
-    new PopupToolBarPresenter("Task", menu("Task"), new Color(107, 138, 166))
+    }.toList.sortBy(_.factory.toString)
+    // Enforce to build PopupToolBarPresenter, cause Memu.contents still return an empty buffer (Bug SI-2362),
+    // so that it can be listened in the contructor as it is done the simple MenuItem
+    val popup = new PopupToolBarPresenter(factoryName(initDataUI, factories), new Color(107, 138, 166))
+    val items = factories.map { d ⇒ menuItem(d.buildDataProxyUI, d.factory, f, popup) }
+    items.foreach { popup+= }
+    popup
   }
 
-  val environmentMenu = {
-    KeyRegistry.environments.values.map {
+  def buildEnvironmentMenu(f: EnvironmentDataProxyUI ⇒ Unit, initDataUI: EnvironmentDataUI) = {
+    mapping.clear
+    val factories = KeyRegistry.environments.values.map {
       f ⇒ new EnvironmentDataProxyFactory(f)
-    }.toList.sortBy(_.factory.toString).foreach {
-      d ⇒
-        menu(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
-          override def apply = display(d.buildDataProxyUI)
-        })
+    }.toList.sortBy(_.factory.toString)
+
+    val popup = new PopupToolBarPresenter(factoryName(initDataUI, factories), new Color(68, 120, 33))
+    val items = factories.map { d ⇒ menuItem(d.buildDataProxyUI, d.factory, f, popup) }
+    items.foreach { popup+= }
+    popup
+  }
+
+  def buildPrototypeMenu(f: PrototypeDataProxyUI ⇒ Unit, initDataUI: PrototypeDataUI[_]) = {
+    mapping.clear
+
+    val pmenu = (GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra).sortBy(_.toString).map {
+      d ⇒ menuItem(PrototypeDataProxyUI(d), d.toString, f)
     }
-    new PopupToolBarPresenter("Environment", menu("Environment"), new Color(68, 120, 33))
+    new PopupToolBarPresenter(initDataUI.typeClassString.split('.').last, new Color(212, 170, 0), pmenu)
   }
 
-  val prototypeMenu = {
-    val m = new MenuItem(new Action("New") {
-      override def apply = createAndDisplayPrototype
-    })
-    new PopupToolBarPresenter("Prototype", m, new Color(212, 170, 0))
-  }
-
-  val samplingMenu = {
-    val m = new MenuItem(new Action("New") {
-      override def apply = display(Builder.samplingCompositionUI(false))
-    })
-    new PopupToolBarPresenter("Sampling", m, new Color(255, 85, 85))
-  }
-
-  val hookMenu = {
-    KeyRegistry.hooks.values.map {
+  def buildHookMenu(f: HookDataProxyUI ⇒ Unit, initDataUI: HookDataUI) = {
+    mapping.clear
+    val factories = KeyRegistry.hooks.values.map {
       f ⇒ new HookDataProxyFactory(f)
-    }.toList.sortBy(_.factory.toString).foreach {
-      d ⇒
-        menu(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
-          override def apply = display(d.buildDataProxyUI)
-        })
-    }
-    new PopupToolBarPresenter("Hook", menu("Hook"), new Color(168, 120, 33))
+    }.toList.sortBy(_.factory.toString)
+
+    val popup = new PopupToolBarPresenter(factoryName(initDataUI, factories), new Color(168, 120, 33))
+    val items = factories.map { d ⇒ menuItem(d.buildDataProxyUI, d.factory, f, popup) }
+    items.foreach { popup+= }
+    popup
   }
 
-  val sourceMenu = {
-    KeyRegistry.sources.values.map {
+  def buildSourceMenu(f: SourceDataProxyUI ⇒ Unit, initDataUI: SourceDataUI) = {
+    mapping.clear
+    val factories = KeyRegistry.sources.values.map {
       f ⇒ new SourceDataProxyFactory(f)
-    }.toList.sortBy(_.factory.toString).foreach {
-      d ⇒
-        menu(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
-          override def apply = display(d.buildDataProxyUI)
-        })
-    }
-    new PopupToolBarPresenter("Source", menu("Source"), new Color(60, 60, 60))
+    }.toList.sortBy(_.factory.toString)
+
+    val popup = new PopupToolBarPresenter(factoryName(initDataUI, factories), new Color(99, 86, 136))
+    val items = factories.map { d ⇒ menuItem(d.buildDataProxyUI, d.factory, f, popup) }
+    items.foreach { popup+= }
+    popup
   }
 
-  def removeItem(proxy: IDataProxyUI) = {
+  def -=(proxy: DataProxyUI) = {
     proxy match {
-      case x: IEnvironmentDataProxyUI         ⇒ environmentMenu.remove(menuItemMapping(proxy))
-      case x: IPrototypeDataProxyUI           ⇒ prototypeMenu.remove(menuItemMapping(proxy))
-      case x: ITaskDataProxyUI                ⇒ taskMenu.remove(menuItemMapping(proxy))
-      case x: ISamplingCompositionDataProxyUI ⇒ samplingMenu.remove(menuItemMapping(proxy))
-      case x: IHookDataProxyUI                ⇒ hookMenu.remove(menuItemMapping(proxy))
-      case x: ISourceDataProxyUI              ⇒ sourceMenu.remove(menuItemMapping(proxy))
+      case x: EnvironmentDataProxyUI         ⇒ environmentMenu.remove(menuItemMapping(proxy))
+      case x: PrototypeDataProxyUI           ⇒ prototypeMenu.remove(menuItemMapping(proxy))
+      case x: TaskDataProxyUI                ⇒ taskMenu.remove(menuItemMapping(proxy))
+      case x: SamplingCompositionDataProxyUI ⇒ samplingMenu.remove(menuItemMapping(proxy))
+      case x: HookDataProxyUI                ⇒ hookMenu.remove(menuItemMapping(proxy))
+      case x: SourceDataProxyUI              ⇒ sourceMenu.remove(menuItemMapping(proxy))
     }
+  }
+
+  def +=(name: String, proxy: DataProxyUI) = addInMenu(proxy, addItem(name, proxy))
+
+  def +=(proxy: DataProxyUI) = addInMenu(proxy, addItem(proxy))
+
+  private def addInMenu(proxy: DataProxyUI, menuItem: MenuItem) = proxy match {
+    case x: EnvironmentDataProxyUI         ⇒ environmentMenu.popup.contents += menuItem
+    case x: PrototypeDataProxyUI           ⇒ prototypeMenu.popup.contents += menuItem
+    case x: TaskDataProxyUI                ⇒ taskMenu.popup.contents += menuItem
+    case x: SamplingCompositionDataProxyUI ⇒ samplingMenu.popup.contents += menuItem
+    case x: HookDataProxyUI                ⇒ hookMenu.popup.contents += menuItem
+    case x: SourceDataProxyUI              ⇒ sourceMenu.popup.contents += menuItem
   }
 
   def menuBar = new MenuBar {
@@ -141,32 +186,31 @@ object ConceptMenu {
     minimumSize = new Dimension(size.width, 50)
   }
 
-  def display(proxy: IDataProxyUI) = {
+  def display(proxy: DataProxyUI) = {
     if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy)
     else ScenesManager.tabPane.selection.page.content match {
-      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy, 0)
+      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy)
       case _                  ⇒ createTab(proxy)
     }
   }
 
-  def displayExtra(proxy: IDataProxyUI,
-                   fromPanel: IBasePanel) = {
+  /*def displayExtra(proxy: DataProxyUI) = {
     if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy)
     else ScenesManager.tabPane.selection.page.content match {
-      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy, fromPanel, fromPanel.index + 1)
+      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy)
       case _                  ⇒ createTab(proxy)
     }
-  }
+  }   */
 
-  def createTab(proxy: IDataProxyUI) = DialogFactory.newTabName match {
-    case Some(y: BuildMoleSceneContainer) ⇒ y.scene.displayPropertyPanel(proxy, 0)
+  def createTab(proxy: DataProxyUI) = DialogFactory.newTabName match {
+    case Some(y: BuildMoleSceneContainer) ⇒ y.scene.displayPropertyPanel(proxy)
     case _                                ⇒
   }
 
-  def addItem(proxy: IDataProxyUI): MenuItem = addItem(proxyName(proxy), proxy)
+  def addItem(proxy: DataProxyUI): MenuItem = addItem(proxyName(proxy), proxy)
 
   def addItem(name: String,
-              proxy: IDataProxyUI): MenuItem = {
+              proxy: DataProxyUI): MenuItem = {
     menuItemMapping += proxy -> new MenuItem(new Action(proxyName(proxy)) {
       override def apply = {
         ConceptMenu.display(proxy)
@@ -175,7 +219,7 @@ object ConceptMenu {
     menuItemMapping(proxy)
   }
 
-  def refreshItem(proxy: IDataProxyUI) = {
+  def refreshItem(proxy: DataProxyUI) = {
     if (menuItemMapping.contains(proxy))
       menuItemMapping(proxy).action.title = proxyName(proxy)
   }
@@ -187,9 +231,9 @@ object ConceptMenu {
     menuItemMapping.clear
   }
 
-  def proxyName(proxy: IDataProxyUI) =
+  def proxyName(proxy: DataProxyUI) =
     proxy.dataUI.name + (proxy match {
-      case x: IPrototypeDataProxyUI ⇒
+      case x: PrototypeDataProxyUI ⇒
         if (x.dataUI.dim > 0) " [" + x.dataUI.dim.toString + "]" else ""
       case _ ⇒ ""
     })

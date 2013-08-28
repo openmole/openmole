@@ -2,7 +2,7 @@
  * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -11,101 +11,108 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, IHookDataProxyUI }
-import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxies }
-import swing.{ TabbedPane, Component, Label }
-import swing.event.{ SelectionChanged, FocusGained }
-import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
-import javax.swing.ImageIcon
-import javax.imageio.ImageIO
-import java.awt.BorderLayout
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, HookDataProxyUI }
+import org.openmole.ide.core.implementation.data.{ ImageView, HookDataUI }
+import scala.swing.Label
+import ConceptMenu._
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.misc.tools.image.Images
+import scala.swing.event.SelectionChanged
 
-class HookPanel(proxy: IHookDataProxyUI,
-                scene: IMoleScene,
-                val index: Int) extends BasePanel(Some(proxy), scene) {
-  hookPanel ⇒
+trait HookPanel extends Base
+    with Header
+    with ProxyShortcut
+    with IOProxy
+    with ConceptCombo
+    with Icon
+    with IO {
 
-  var panelUI = proxy.dataUI.buildPanelUI
-  def created = Proxies.instance.contains(proxy)
+  override type DATAPROXY = HookDataProxyUI with IOFacade
+  type HOOKDATAUI = HookDataUI with ImageView
+  override type DATAUI = HOOKDATAUI with IODATAUI
 
-  refreshPanel
+  var panelSettings = proxy.dataUI.buildPanelUI
+  val icon: Label = icon(Images.HOOK)
+  val hookCombo = ConceptMenu.buildHookMenu(p ⇒ updateConceptPanel(p.dataUI), proxy.dataUI)
 
-  iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/hook.png")))
+  var ioSettings = ioPanel
+  build
 
-  def create = {
-    Proxies.instance += proxy
-    ConceptMenu.hookMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
+  listenTo(panelSettings.help.components.toSeq: _*)
+
+  def build = {
+    basePanel.contents += new PluginPanel("wrap 2", "-5[left]-10[]", "-2[top][10]") {
+      contents += header(scene, index)
+      contents += new PluginPanel("wrap 2", "[]10[]", "") {
+        contents += new Composer {
+          addIcon(icon)
+          addName
+          addTypeMenu(hookCombo)
+          addCreateLink
+        }
+        contents += proxyShorcut(proxy.dataUI, index)
+      }
+    }
+    createSettings
   }
 
-  def delete = {
+  override def created = proxyCreated
+
+  def createSettings: Unit = {
+
+    panelSettings = proxy.dataUI.buildPanelUI
+    val tPane = panelSettings.tabbedPane(("I/O", ioSettings))
+    Tools.updateIndex(basePanel, tPane)
+
+    if (basePanel.contents.size == 3) basePanel.contents.remove(1, 2)
+
+    basePanel.contents += tPane
+    basePanel.contents += panelSettings.help
+
+    listenTo(panelSettings.help.components.toSeq: _*)
+    tPane.listenTo(tPane.selection)
+
+    tPane.reactions += {
+      case SelectionChanged(_) ⇒ updatePanel
+    }
+    basePanel.revalidate
+  }
+
+  override def updatePanel = {
+    savePanel
+    ioSettings = ioPanel
+    createSettings
+  }
+
+  def updateConceptPanel(d: HOOKDATAUI) = {
+    savePanel
+    d.inputs = ioSettings.prototypesIn
+    d.outputs = ioSettings.prototypesOut
+    proxy.dataUI = d
+    createSettings
+  }
+
+  def savePanel = {
+    val ioSave = ioSettings.save
+    panelSettings.saveContent(nameTextField.text) match {
+      case x: DATAUI ⇒ proxy.dataUI = save(x, ioSave._1, ioSave._2, ioSave._3)
+      case _         ⇒ StatusBar().warn("The current panel cannot be saved")
+    }
+    ConceptMenu.refreshItem(proxy)
+  }
+
+  def deleteProxy = {
     scene.closePropertyPanel(index)
     Proxies.instance -= proxy
-    ConceptMenu.removeItem(proxy)
-    true
+    -=(proxy)
+    //true
+
   }
 
-  def updatePanel = {
-    tabbedLock = true
-    save
-    panelUI = proxy.dataUI.buildPanelUI
-    refreshPanel
-    protoPanel = buildProtoPanel
-    tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
-    tabbedPane.revalidate
-    tabbedLock = false
-  }
-
-  def buildProtoPanel = {
-    val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
-    new IOPrototypePanel(scene,
-      this,
-      proxy.dataUI.inputs,
-      proxy.dataUI.outputs,
-      implicitIP,
-      implicitOP,
-      proxy.dataUI.inputParameters.toMap)
-  }
-
-  def updateProtoPanel = {
-    save
-    protoPanel = buildProtoPanel
-    tabbedPane.pages(1).content = protoPanel
-  }
-
-  var protoPanel = buildProtoPanel
-  tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
-
-  tabbedPane.revalidate
-
-  mainPanel.contents += new NewConceptPanel(this) { addPrototype }
-  peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(new PluginPanel("wrap") {
-    contents += tabbedPane
-    contents += panelUI.help
-  }.peer, BorderLayout.CENTER)
-
-  listenTo(panelUI.help.components.toSeq: _*)
-  listenTo(tabbedPane.selection)
-  reactions += {
-    case FocusGained(source: Component, _, _)     ⇒ panelUI.help.switchTo(source)
-    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-    case SelectionChanged(tabbedPane)             ⇒ if (!tabbedLock) updateProtoPanel
-    case UpdatedProxyEvent(p: IDataProxyUI, _) ⇒
-      scene.removeAll(index + 1)
-      updatePanel
-      tabbedPane.selection.index = 0
-    case _ ⇒
-  }
-
-  def save = {
-    val protoPanelSave = protoPanel.save
-    proxy.dataUI = panelUI.save(nameTextField.text, protoPanelSave._1, protoPanelSave._2, protoPanelSave._3)
-  }
 }

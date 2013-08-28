@@ -25,10 +25,7 @@ import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.panel.BasePanel
-import org.openmole.ide.core.implementation.workflow.{ BuildMoleScene, ExecutionMoleSceneContainer }
-import org.openmole.ide.core.model.dataproxy.IDataProxyUI
-import org.openmole.ide.core.model.workflow.ISceneContainer
+import org.openmole.ide.core.implementation.workflow.{ ISceneContainer, BuildMoleScene, ExecutionMoleSceneContainer }
 import scala.swing.FileChooser.SelectionMode._
 import swing._
 import java.io.File
@@ -36,10 +33,12 @@ import org.openmole.ide.misc.widget.{ ChooseFileTextField, PluginPanel }
 import scala.Some
 import util.{ Failure, Success }
 import org.openmole.core.serializer.SerializerService
+import org.openmole.ide.core.implementation.panel.Proxy
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import scala.swing.FileChooser.Result._
 import org.openmole.ide.misc.tools.image.Images
 import org.openide.NotifyDescriptor
+import org.openmole.ide.core.implementation.dataproxy.DataProxyUI
 
 object DialogFactory {
 
@@ -81,12 +80,12 @@ object DialogFactory {
     else false
   }
 
-  def deleteProxyConfirmation(proxy: IDataProxyUI) = confirmationDialog("Execution warning", "<html>" + proxy.dataUI.name + " is currently used in a scene or by an other component.<br>" +
+  def deleteProxyConfirmation(proxy: DataProxyUI) = confirmationDialog("Execution warning", "<html>" + proxy.dataUI.name + " is currently used in a scene or by an other component.<br>" +
     "It will be deleted everywhere it appears. <br>" +
     "Delete anyway ?</html>")
 
-  def closePropertyPanelConfirmation(panel: BasePanel): Boolean = confirmationDialog("Warning",
-    "<html> The property panel " + panel.nameTextField.text + " has not been created yet.<br>" +
+  def closePropertyPanelConfirmation: Boolean = confirmationDialog("Warning",
+    "<html> The property current settings panel has not been created yet.<br>" +
       "All the data will be lost. <br>" +
       "Close anyway ?</html>")
 

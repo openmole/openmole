@@ -19,20 +19,15 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.BasicStroke
 import java.awt.Color
-import org.netbeans.api.visual.action.WidgetAction
-import org.netbeans.api.visual.action.WidgetAction._
 import org.netbeans.api.visual.anchor.AnchorShape
-import org.netbeans.api.visual.anchor.AnchorShapeFactory
 import org.netbeans.api.visual.layout.LayoutFactory
 import org.netbeans.api.visual.widget.ConnectionWidget
-import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog
-import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget._
 import scala.swing.Action
 import org.openmole.ide.misc.tools.image.Images._
 
-class DataChannelConnectionWidget(scene: IMoleScene, val dataChannelUI: IDataChannelUI) extends ConnectionWidget(scene.graphScene) { dataChannelWidget ⇒
+class DataChannelConnectionWidget(scene: MoleScene, val dataChannelUI: DataChannelUI) extends ConnectionWidget(scene.graphScene) { dataChannelWidget ⇒
 
   setLineColor(new Color(188, 188, 188))
   setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 20.0f, List(10.0f).toArray, 0.0f))

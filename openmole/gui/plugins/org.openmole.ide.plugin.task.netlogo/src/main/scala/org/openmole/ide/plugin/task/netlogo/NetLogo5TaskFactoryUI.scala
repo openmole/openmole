@@ -17,18 +17,17 @@
 
 package org.openmole.ide.plugin.task.netlogo
 
-import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.core.model.task.ITask
-import org.openmole.ide.core.model.builder.IPuzzleUIMap
 import org.openmole.plugin.task.netlogo5.NetLogo5Task
-import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.core.implementation.builder.{ PuzzleUIMap, SceneFactory }
+import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 
-class NetLogo5TaskFactoryUI extends ITaskFactoryUI {
+class NetLogo5TaskFactoryUI extends TaskFactoryUI {
   override def toString = "NetLogo5"
 
   def buildDataUI = new NetLogo5TaskDataUI
 
-  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
+  def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[NetLogo5Task](task)
     val embededWS = t.workspace.location match {
       case Right(r) ⇒ true
@@ -43,5 +42,5 @@ class NetLogo5TaskFactoryUI extends ITaskFactoryUI {
       t.resources.map { _._2 }.toList))
   }
 
-  override def category = List("Task", "ABM")
+  override def category = List("ABM")
 }

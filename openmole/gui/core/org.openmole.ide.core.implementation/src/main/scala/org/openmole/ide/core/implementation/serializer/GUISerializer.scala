@@ -30,7 +30,6 @@ import java.io.FileWriter
 import org.openmole.ide.misc.tools.util.ID
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.dataproxy._
 import java.io.ObjectInputStream
 import java.nio.file.Files
@@ -44,17 +43,18 @@ import org.openmole.misc.exception.{ UserBadDataError, ExceptionUtils, InternalP
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import com.thoughtworks.xstream.converters.{ ErrorWriter, UnmarshallingContext, MarshallingContext }
 import collection.mutable
-import org.openmole.ide.core.model.workflow.{ IMoleUI, IMoleScene }
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI, ICapsuleDataUI }
 import com.thoughtworks.xstream.converters.collections.SingletonCollectionConverter
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
-import org.openmole.ide.core.model.commons._
 import scala.util.Failure
 import scala.Some
-import org.openmole.ide.core.model.commons.MasterCapsuleType
 import scala.util.Success
-import org.openmole.ide.core.model.sampling.{ IFactorProxyUI, IDomainProxyUI }
 import org.openmole.misc.tools.service.Logger
+import org.openmole.ide.core.implementation.commons._
+import scala.util.Failure
+import scala.Some
+import org.openmole.ide.core.implementation.commons.MasterCapsuleType
+import scala.util.Success
+import org.openmole.ide.core.implementation.sampling.DomainProxyUI
 
 object GUISerializer extends Logger
 
@@ -123,13 +123,13 @@ class GUISerializer { serializer ⇒
 
   }
 
-  val taskConverter = new GUIConverter[ITaskDataProxyUI]
-  val prototypeConverter = new GUIConverter[IPrototypeDataProxyUI]
-  val samplingConverter = new GUIConverter[ISamplingCompositionDataProxyUI]
-  val domainConverter = new GUIConverter[IDomainProxyUI]
-  val environmentConverter = new GUIConverter[IEnvironmentDataProxyUI]
-  val hookConverter = new GUIConverter[IHookDataProxyUI]
-  val sourceConverter = new GUIConverter[ISourceDataProxyUI]
+  val taskConverter = new GUIConverter[TaskDataProxyUI]
+  val prototypeConverter = new GUIConverter[PrototypeDataProxyUI]
+  val samplingConverter = new GUIConverter[SamplingCompositionDataProxyUI]
+  val domainConverter = new GUIConverter[DomainProxyUI]
+  val environmentConverter = new GUIConverter[EnvironmentDataProxyUI]
+  val hookConverter = new GUIConverter[HookDataProxyUI]
+  val sourceConverter = new GUIConverter[SourceDataProxyUI]
   val capsuleConverter = new GUIConverter[CapsuleData]
   val transitionConverter = new GUIConverter[TransitionData]
   val dataChannelConverter = new GUIConverter[DataChannelData]
@@ -238,13 +238,13 @@ class GUISerializer { serializer ⇒
 
   def folder(clazz: Class[_]) =
     clazz match {
-      case c if c < classOf[IPrototypeDataProxyUI] ⇒ "prototype"
-      case c if c < classOf[IEnvironmentDataProxyUI] ⇒ "environment"
-      case c if c < classOf[ISamplingCompositionDataProxyUI] ⇒ "sampling"
-      case c if c < classOf[IDomainProxyUI] ⇒ "domain"
-      case c if c < classOf[IHookDataProxyUI] ⇒ "hook"
-      case c if c < classOf[ISourceDataProxyUI] ⇒ "source"
-      case c if c < classOf[ITaskDataProxyUI] ⇒ "task"
+      case c if c < classOf[PrototypeDataProxyUI] ⇒ "prototype"
+      case c if c < classOf[EnvironmentDataProxyUI] ⇒ "environment"
+      case c if c < classOf[SamplingCompositionDataProxyUI] ⇒ "sampling"
+      case c if c < classOf[DomainProxyUI] ⇒ "domain"
+      case c if c < classOf[HookDataProxyUI] ⇒ "hook"
+      case c if c < classOf[SourceDataProxyUI] ⇒ "source"
+      case c if c < classOf[TaskDataProxyUI] ⇒ "task"
       case c if c < classOf[CapsuleData] ⇒ "capsule"
       case c if c < classOf[TransitionData] ⇒ "transition"
       case c if c < classOf[SlotData] ⇒ "slot"
@@ -268,12 +268,12 @@ class GUISerializer { serializer ⇒
   }
 
   def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData]) = {
-    serializeConcept(classOf[IPrototypeDataProxyUI], proxies.prototypes.map { s ⇒ s -> s.id })
-    serializeConcept(classOf[IEnvironmentDataProxyUI], proxies.environments.map { s ⇒ s -> s.id })
-    serializeConcept(classOf[ISamplingCompositionDataProxyUI], proxies.samplings.map { s ⇒ s -> s.id })
-    serializeConcept(classOf[IHookDataProxyUI], proxies.hooks.map { s ⇒ s -> s.id })
-    serializeConcept(classOf[ISourceDataProxyUI], proxies.sources.map { s ⇒ s -> s.id })
-    serializeConcept(classOf[ITaskDataProxyUI], proxies.tasks.map { s ⇒ s -> s.id })
+    serializeConcept(classOf[PrototypeDataProxyUI], proxies.prototypes.map { s ⇒ s -> s.id })
+    serializeConcept(classOf[EnvironmentDataProxyUI], proxies.environments.map { s ⇒ s -> s.id })
+    serializeConcept(classOf[SamplingCompositionDataProxyUI], proxies.samplings.map { s ⇒ s -> s.id })
+    serializeConcept(classOf[HookDataProxyUI], proxies.hooks.map { s ⇒ s -> s.id })
+    serializeConcept(classOf[SourceDataProxyUI], proxies.sources.map { s ⇒ s -> s.id })
+    serializeConcept(classOf[TaskDataProxyUI], proxies.tasks.map { s ⇒ s -> s.id })
 
     serializeConcept(classOf[CapsuleData], moleScenes.flatMap(_.capsules).map { s ⇒ s -> s.id })
     serializeConcept(classOf[TransitionData], moleScenes.flatMap(_.transitions).map { s ⇒ s -> s.id })
@@ -306,17 +306,18 @@ class GUISerializer { serializer ⇒
 
   def deserialize(fromFile: String) = {
     val os = new TarInputStream(new FileInputStream(fromFile))
-    os.extractDirArchiveWithRelativePathAndClose(workDir)
+    try os.extractDirArchiveWithRelativePath(workDir)
+    finally os.close
 
     val proxies: Proxies = new Proxies
 
     Try {
-      deserializeConcept[IPrototypeDataProxyUI](classOf[IPrototypeDataProxyUI]).foreach(proxies.+=)
-      deserializeConcept[ISamplingCompositionDataProxyUI](classOf[ISamplingCompositionDataProxyUI]).foreach(proxies.+=)
-      deserializeConcept[IEnvironmentDataProxyUI](classOf[IEnvironmentDataProxyUI]).foreach(proxies.+=)
-      deserializeConcept[IHookDataProxyUI](classOf[IHookDataProxyUI]).foreach(proxies.+=)
-      deserializeConcept[ISourceDataProxyUI](classOf[ISourceDataProxyUI]).foreach(proxies.+=)
-      deserializeConcept[ITaskDataProxyUI](classOf[ITaskDataProxyUI]).foreach(proxies.+=)
+      deserializeConcept[PrototypeDataProxyUI](classOf[PrototypeDataProxyUI]).foreach(proxies.+=)
+      deserializeConcept[SamplingCompositionDataProxyUI](classOf[SamplingCompositionDataProxyUI]).foreach(proxies.+=)
+      deserializeConcept[EnvironmentDataProxyUI](classOf[EnvironmentDataProxyUI]).foreach(proxies.+=)
+      deserializeConcept[HookDataProxyUI](classOf[HookDataProxyUI]).foreach(proxies.+=)
+      deserializeConcept[SourceDataProxyUI](classOf[SourceDataProxyUI]).foreach(proxies.+=)
+      deserializeConcept[TaskDataProxyUI](classOf[TaskDataProxyUI]).foreach(proxies.+=)
 
       deserializeConcept[CapsuleData](classOf[CapsuleData])
       deserializeConcept[SlotData](classOf[SlotData])

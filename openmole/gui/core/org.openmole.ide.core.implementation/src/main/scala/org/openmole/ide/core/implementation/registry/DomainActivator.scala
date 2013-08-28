@@ -18,9 +18,9 @@
 package org.openmole.ide.core.implementation.registry
 
 import org.openmole.core.model.domain.Domain
-import org.openmole.ide.core.model.factory.IDomainFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
+import org.openmole.ide.core.implementation.factory.IDomainFactoryUI
 
 trait DomainActivator extends BundleActivator {
 

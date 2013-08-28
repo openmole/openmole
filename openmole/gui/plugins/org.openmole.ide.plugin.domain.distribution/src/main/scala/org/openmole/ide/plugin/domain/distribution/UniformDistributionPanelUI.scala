@@ -19,19 +19,13 @@ package org.openmole.ide.plugin.domain.distribution
 
 import scala.swing._
 import event.SelectionChanged
-import swing.Swing._
-import swing.ListView._
-import scala.swing.Table.ElementMode._
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
-import scala.swing.BorderPanel.Position._
 import java.util.{ Locale, ResourceBundle }
 import org.openmole.ide.misc.tools.util.Types._
+import org.openmole.ide.core.implementation.panelsettings.IDomainPanelUI
 
-class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_]) extends PluginPanel("wrap 2") with IDomainPanelUI {
+class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends Publisher with IDomainPanelUI {
 
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   val typeCombo = new MyComboBox(List(INT, LONG))
   val maxField = new TextField(pud.max.getOrElse("").toString, 6)
 
@@ -39,8 +33,14 @@ class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_]) extends Plug
   typeCombo.selection.item = initialType
 
   val maxPanel = new PluginPanel("wrap 2")
-  contents += typeCombo
-  contents += maxPanel
+
+  val mainPanel = new PluginPanel("wrap 2") {
+    contents += typeCombo
+    contents += maxPanel
+  }
+
+  val components = List(("", mainPanel))
+
   setContents(initialType)
 
   listenTo(`typeCombo`)
@@ -57,15 +57,16 @@ class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_]) extends Plug
       case LONG ⇒ maxPanel.contents += new Label("<html><i>No more information is required for this Domain</i></html>")
       case _    ⇒
     }
-    revalidate
-    repaint
+    mainPanel.revalidate
+    mainPanel.repaint
   }
 
   def saveContent = UniformDistributionDataUI({
     if (maxField.text.isEmpty) scala.None else Some(maxField.text.toInt)
   }, typeCombo.selection.item)
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(maxField, new Help(i18n.getString("max"), i18n.getString("maxEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+
+  add(maxField, new Help(i18n.getString("max"), i18n.getString("maxEx")))
+
 }

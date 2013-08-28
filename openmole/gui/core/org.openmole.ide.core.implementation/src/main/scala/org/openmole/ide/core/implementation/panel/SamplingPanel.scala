@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,49 +14,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.core.implementation.panel
 
-import scala.swing._
-import event.FocusGained
-import java.awt.BorderLayout
-import org.openmole.ide.core.model.sampling.{ ISamplingProxyUI, ISamplingWidget }
-import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.misc.widget._
-import multirow.ComponentFocusedEvent
+import org.openmole.ide.core.implementation.data.{ SamplingDataUI }
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.sampling.SamplingPanelUI
 
-class SamplingPanel(samplingWidget: ISamplingWidget,
-                    scene: IMoleScene,
-                    val index: Int) extends BasePanel(None, scene) {
-  val panelUI = new SamplingPanelUI(samplingWidget, this)
-  def created = true
+trait SamplingPanel extends Base
+    with SWidget
+    with Header {
 
-  listenTo(panelUI.help.components.toSeq: _*)
-  reactions += {
-    case FocusGained(source: Component, _, _)     ⇒ panelUI.help.switchTo(source)
-    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+  type DATAUI = SamplingDataUI
+
+  val samplingPanelUI = new SamplingPanelUI(widget)
+  build
+
+  def build = {
+    basePanel.contents += new PluginPanel("wrap", "-5[left]-10[]", "-2[top][10]") {
+      contents += header(scene, index)
+    }
+    createSettings
   }
 
-  peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(new PluginPanel("") {
-    contents += panelUI.peer
-  }.peer, BorderLayout.CENTER)
-  peer.add(panelUI.sPanel.help.peer, BorderLayout.SOUTH)
+  def components = samplingPanelUI.bestDisplay
 
-  def create = {}
-
-  def delete = true
-
-  def save = {
-    samplingWidget.proxy.dataUI = panelUI.saveContent
-    samplingWidget.update
+  def createSettings = {
+    savePanel
+    widget.update
+    basePanel.contents += samplingPanelUI.bestDisplay
   }
 
-  def updateHelp = {
-    if (peer.getComponentCount == 3) peer.remove(2)
-    peer.add(panelUI.sPanel.help.peer, BorderLayout.SOUTH)
-    revalidate
-    repaint
+  def savePanel = widget.proxy.dataUI = samplingPanelUI.saveContent
+
+  def deleteProxy = {}
+
+  override def toDoOnClose = {
+    widget.update
   }
 }

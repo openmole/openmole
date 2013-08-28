@@ -17,19 +17,16 @@
 
 package org.openmole.ide.plugin.domain.range
 
-import java.math.BigInteger
-import java.math.BigDecimal
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.model.domain.{ Bounds, Domain }
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.misc.tools.util.Types
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.sampling.FiniteUI
 
 object GenericRangeDomainDataUI {
 
-  def apply[S](min: String = "0", max: String = "", step: Option[String] = None, log: Boolean, classString: String): IDomainDataUI =
+  def apply[S](min: String = "0", max: String = "", step: Option[String] = None, log: Boolean, classString: String): DomainDataUI =
     if (log) {
       Types.standardize(classString) match {
         case DOUBLE      ⇒ new DoubleLogarithmRangeDataUI(min, max, step)
@@ -40,9 +37,9 @@ object GenericRangeDomainDataUI {
     else RangeDomainDataUI(min, max, step, classString)
 }
 
-abstract class GenericRangeDomainDataUI extends IDomainDataUI with IFinite {
+abstract class GenericRangeDomainDataUI extends DomainDataUI with FiniteUI {
 
-  override def isAcceptable(domain: IDomainDataUI) = {
+  override def isAcceptable(domain: DomainDataUI) = {
     StatusBar().warn("Only modifier Domain (Map, Take, Group, ...) can take another Domain as input")
     super.isAcceptable(domain)
   }

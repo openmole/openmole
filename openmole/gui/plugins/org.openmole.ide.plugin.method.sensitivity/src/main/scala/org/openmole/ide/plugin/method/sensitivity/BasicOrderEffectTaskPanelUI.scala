@@ -17,20 +17,19 @@
 
 package org.openmole.ide.plugin.method.sensitivity
 
-import org.openmole.ide.core.implementation.dataproxy.Proxies
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import scala.swing.Label
+import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 
-abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[IPrototypeDataProxyUI],
-                                           outputSequence: Iterable[IPrototypeDataProxyUI]) extends PluginPanel("wrap 2") with ITaskPanelUI {
+abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[PrototypeDataProxyUI],
+                                           outputSequence: Iterable[PrototypeDataProxyUI]) extends PluginPanel("wrap 2") with TaskPanelUI {
 
   val doublePrototypes = Proxies.instance.classPrototypes(classOf[Double])
 
-  val inputPrototypeCombo: Option[MultiCombo[IPrototypeDataProxyUI]] =
+  val inputPrototypeCombo: Option[MultiCombo[PrototypeDataProxyUI]] =
     if (!doublePrototypes.isEmpty) {
       Some(new MultiCombo("Model inputs",
         doublePrototypes,
@@ -41,7 +40,7 @@ abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[IPrototypeDat
     }
     else None
 
-  val outputPrototypeCombo: Option[MultiCombo[IPrototypeDataProxyUI]] =
+  val outputPrototypeCombo: Option[MultiCombo[PrototypeDataProxyUI]] =
     if (!doublePrototypes.isEmpty) {
       Some(new MultiCombo("Model outputs",
         doublePrototypes,

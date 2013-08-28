@@ -17,16 +17,21 @@
 
 package org.openmole.ide.plugin.groupingstrategy
 
-import org.openmole.ide.core.model.panel.IGroupingPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 import scala.swing.TextField
+import org.openmole.ide.core.implementation.panelsettings.GroupingPanelUI
 
-class NumberOfMoleJobsGroupingPanelUI(dataUI: NumberOfMoleJobsGroupingDataUI) extends PluginPanel("wrap 2") with IGroupingPanelUI {
+class NumberOfMoleJobsGroupingPanelUI(dataUI: NumberOfMoleJobsGroupingDataUI) extends GroupingPanelUI {
 
   val numberTextField = new TextField(dataUI.number.toString, 5)
-  contents += new Label("jobs / group : ")
-  contents += numberTextField
+
+  val npanel = new PluginPanel("wrap 2") {
+    contents += new Label("jobs / group : ")
+    contents += numberTextField
+  }
+
+  val components = List(("", npanel))
 
   def saveContent = new NumberOfMoleJobsGroupingDataUI(numberTextField.text.toInt)
 }

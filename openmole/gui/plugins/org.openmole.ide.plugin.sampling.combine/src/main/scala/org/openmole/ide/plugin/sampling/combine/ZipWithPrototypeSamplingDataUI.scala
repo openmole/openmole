@@ -16,8 +16,8 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 trait ZipWithPrototypeSamplingDataUI {
-  def prototype: Option[IPrototypeDataProxyUI]
+  def prototype: Option[PrototypeDataProxyUI]
 }

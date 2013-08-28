@@ -18,11 +18,11 @@
 package org.openmole.ide.core.implementation.action
 
 import org.openmole.ide.core.implementation.data.CheckData
-import org.openmole.ide.core.model.commons.{ StrainerCapsuleType, MasterCapsuleType, SimpleCapsuleType, CapsuleType }
-import org.openmole.ide.core.model.workflow.ICapsuleUI
 
 import scala.swing.Action
 import org.openmole.core.implementation.mole.StrainerCapsule
+import org.openmole.ide.core.implementation.workflow.CapsuleUI
+import org.openmole.ide.core.implementation.commons.{ StrainerCapsuleType, SimpleCapsuleType, MasterCapsuleType, CapsuleType }
 
 object ChangeCapsuleAction {
 
@@ -36,7 +36,7 @@ object ChangeCapsuleAction {
 }
 
 class ChangeCapsuleAction(
-    capsule: ICapsuleUI,
+    capsule: CapsuleUI,
     newType: CapsuleType) extends Action(ChangeCapsuleAction.toString(newType)) {
 
   override def apply = {

@@ -16,12 +16,9 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI, ISamplingDataUI }
 import org.openmole.core.model.sampling.{ DiscreteFactor, Factor, Sampling }
 import org.openmole.plugin.sampling.combine.ZipWithNameSampling
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.misc.exception.UserBadDataError
 import java.io.File
 import org.openmole.core.model.domain.{ Discrete, Domain }
@@ -29,35 +26,37 @@ import org.openmole.core.model.data.Prototype
 import org.openmole.ide.misc.tools.util.Types
 import org.openmole.ide.misc.widget.{ URL, Helper }
 import java.util.{ ResourceBundle, Locale }
-import org.openmole.ide.core.implementation.sampling.SamplingUtils
+import org.openmole.ide.core.implementation.sampling.{ FiniteUI, SamplingUtils }
 import org.openmole.misc.tools.obj.ClassUtils
+import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
-class ZipWithNameSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = None) extends ISamplingDataUI with ZipWithPrototypeSamplingDataUI {
+class ZipWithNameSamplingDataUI(val prototype: Option[PrototypeDataProxyUI] = None) extends SamplingDataUI with ZipWithPrototypeSamplingDataUI {
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
     ZipWithNameSampling(SamplingUtils.toFactors(factorOrSampling).asInstanceOf[List[Factor[File, Domain[File] with Discrete[File]]]]
       .headOption.getOrElse(throw new UserBadDataError("A factor is required to build a Zip with name Sampling")),
-      prototype.getOrElse(throw new UserBadDataError("A string prototypeMap is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[String]])
+      prototype.getOrElse(throw new UserBadDataError("A string prototypeMap is required to build a Zip with name Sampling")).dataUI.coreObject.get.asInstanceOf[Prototype[String]])
   }
 
   def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
     new ZipWithNameSampling(factors.map {
       f ⇒ DiscreteFactor(f.asInstanceOf[Factor[File, Domain[File] with Discrete[File]]])
     }.headOption.getOrElse(throw new UserBadDataError("A factor is required to build a Zip with name Sampling")),
-      prototype.getOrElse(throw new UserBadDataError("A string prototypeMap is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[String]])
+      prototype.getOrElse(throw new UserBadDataError("A string prototypeMap is required to build a Zip with name Sampling")).dataUI.coreObject.get.asInstanceOf[Prototype[String]])
 
   def buildPanelUI = new ZipWithPrototypeSamplingPanelUI(this) {
-    override def help = new Helper(List(new URL(i18n.getString("zipWithNamePermalinkText"), i18n.getString("zipWithNamePermalink"))))
+    override lazy val help = new Helper(List(new URL(i18n.getString("zipWithNamePermalinkText"), i18n.getString("zipWithNamePermalink"))))
   }
 
-  def imagePath = "img/zipWithNameSampling.png"
+  override def imagePath = "img/zipWithNameSampling.png"
 
   def fatImagePath = "img/zipWithNameSampling_fat.png"
 
-  def isAcceptable(sampling: ISamplingDataUI) = false
+  def isAcceptable(sampling: SamplingDataUI) = false
 
-  override def isAcceptable(domain: IDomainDataUI) = domain match {
-    case f: IFinite ⇒
+  override def isAcceptable(domain: DomainDataUI) = domain match {
+    case f: FiniteUI ⇒
       if (ClassUtils.assignable(domain.domainType.runtimeClass, classOf[File])) true
       else {
         StatusBar().warn("A File domain is required here.")

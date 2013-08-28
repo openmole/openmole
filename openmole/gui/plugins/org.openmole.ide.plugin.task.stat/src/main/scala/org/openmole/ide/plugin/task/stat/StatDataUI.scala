@@ -16,9 +16,9 @@
  */
 package org.openmole.ide.plugin.task.stat
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.data.TaskDataUI
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 abstract class StatDataUI extends TaskDataUI {
-  def sequence: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)]
+  def sequence: List[(PrototypeDataProxyUI, PrototypeDataProxyUI)]
 }

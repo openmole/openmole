@@ -18,12 +18,11 @@
 package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Point
-import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.implementation.commons.Constants
+import Constants._
 import org.openmole.ide.misc.tools.image.Images._
 
-class OutputSlotWidget(scene: IMoleScene) extends SlotWidget(scene.graphScene) {
+class OutputSlotWidget(scene: MoleScene) extends SlotWidget(scene.graphScene) {
   setPreferredLocation(new Point(TASK_CONTAINER_WIDTH, 24 + TASK_TITLE_HEIGHT))
 
   scene match {

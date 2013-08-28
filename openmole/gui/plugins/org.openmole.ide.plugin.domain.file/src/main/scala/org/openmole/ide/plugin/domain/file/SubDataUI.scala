@@ -18,19 +18,19 @@
 
 package org.openmole.ide.plugin.domain.file
 
-import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.misc.tools.util.Types.FILE
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.sampling.IFinite
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.sampling.FiniteUI
 
-trait SubDataUI extends IDomainDataUI with IFinite {
+trait SubDataUI extends DomainDataUI with FiniteUI {
   def name = "File"
 
   override def availableTypes = List(FILE)
 
   def directoryPath: String
 
-  override def isAcceptable(domain: IDomainDataUI) = {
+  override def isAcceptable(domain: DomainDataUI) = {
     StatusBar().warn("A file domain can not modify another Domain")
     super.isAcceptable(domain)
   }

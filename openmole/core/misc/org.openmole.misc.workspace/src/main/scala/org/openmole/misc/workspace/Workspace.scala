@@ -128,8 +128,6 @@ object Workspace {
 
   def preferenceAsDuration(location: ConfigurationLocation) = instance.preferenceAsDuration(location)
 
-  def decrypt(s: String) = instance.decrypt(s)
-
   def encrypt(s: String) = instance.encrypt(s)
 
   def setAuthentication[T](i: Int, obj: T)(implicit m: Manifest[T]) = instance.setAuthentication[T](i, obj)
@@ -146,11 +144,24 @@ object Workspace {
     def decrypt(encryptedMessage: String) = encryptedMessage
     def encrypt(message: String) = message
   }
+
+  def textEncryptor(password: String) =
+    if (!password.trim.isEmpty) {
+      val textEncryptor = new BasicTextEncryptor
+      textEncryptor.setPassword(password)
+      textEncryptor
+    }
+    else NoneTextEncryptor
+
+  def decrypt(s: String, password: String = instance.password) =
+    if (s.isEmpty) s
+    else Workspace.textEncryptor(password).decrypt(s)
+
 }
 
 class Workspace(val location: File) {
 
-  import Workspace.{ NoneTextEncryptor, persitentLocation, pluginLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
+  import Workspace.{ textEncryptor, decrypt, NoneTextEncryptor, persitentLocation, pluginLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
 
   location.mkdirs
 
@@ -166,19 +177,6 @@ class Workspace(val location: File) {
   def newSeed = rng.nextLong
 
   val rng = Random.newRNG(sessionUUID)
-
-  private def textEncryptor(password: Option[String]) = {
-    password match {
-      case Some(password) ⇒
-        if (!password.trim.isEmpty) {
-          val textEncryptor = new BasicTextEncryptor
-          textEncryptor.setPassword(password)
-          textEncryptor
-        }
-        else NoneTextEncryptor
-      case None ⇒ throw new UserBadDataError("Password is not set.")
-    }
-  }
 
   @transient private var _password: Option[String] = None
 
@@ -196,13 +194,9 @@ class Workspace(val location: File) {
 
   def clean = tmpDir.recursiveDelete
 
-  def newDir(prefix: String): File = {
-    val tempFile = newFile(prefix, "")
-    if (!tempFile.mkdirs) throw new IOException("Cannot create directory " + tempFile)
-    tempFile
-  }
+  def newDir(prefix: String): File = tmpDir.newDir(prefix)
 
-  def newFile(prefix: String, suffix: String): File = new File(tmpDir, prefix + UUID.randomUUID + suffix)
+  def newFile(prefix: String, suffix: String): File = tmpDir.newFile(prefix, suffix)
 
   def defaultValue(location: ConfigurationLocation): String = {
     configurations.get(location) match {
@@ -224,7 +218,7 @@ class Workspace(val location: File) {
     val confVal = rawPreference(location)
 
     if (!location.cyphered) confVal
-    else decrypt(confVal)
+    else decrypt(confVal, password)
   }
 
   def setToDefaultValue(location: ConfigurationLocation) = synchronized {
@@ -282,28 +276,20 @@ class Workspace(val location: File) {
     if (!isPreferenceSet(passwordTest)) setToDefaultValue(passwordTest)
   }
 
-  def decrypt(s: String) =
-    if (s.isEmpty) s
-    else {
-      _password match {
-        case None    ⇒ EventDispatcher.trigger(this, Workspace.PasswordRequired)
-        case Some(p) ⇒
-      }
-      textEncryptor(_password).decrypt(s)
-    }
-
-  def encrypt(s: String) = {
+  private def password = {
     _password match {
       case None    ⇒ EventDispatcher.trigger(this, Workspace.PasswordRequired)
       case Some(p) ⇒
     }
-    textEncryptor(_password).encrypt(s)
+    _password.getOrElse(throw new UserBadDataError("Password is not set."))
   }
+
+  def encrypt(s: String) = textEncryptor(password).encrypt(s)
 
   def passwordIsCorrect(password: String) = {
     try {
       if (isPreferenceSet(passwordTest)) {
-        val te = textEncryptor(Some(password))
+        val te = textEncryptor(password)
         te.decrypt(rawPreference(passwordTest))
         true
       }
@@ -324,7 +310,7 @@ class Workspace(val location: File) {
     rawPreference(location) != null
   }
 
-  def authenticationProvider = AuthenticationProvider(authentications)
+  def authenticationProvider = AuthenticationProvider(authentications, password)
 
   def cleanAuthentications[T](implicit m: Manifest[T]) = authenticationDir.recursiveDelete
 
@@ -357,26 +343,4 @@ class Workspace(val location: File) {
     def wsync[T] = Workspace.this.synchronized[T] _
     @transient lazy val xstream = new XStream
   }
-
-  /*private class PersistentList[T](dir: File) extends Seq[T] {
-    dir.mkdirs
-    import PersistentList._
-
-    def file(i: Int) = new File(dir, i.toString)
-
-    def -=(i: Int) = wsync { file(i).delete }
-
-    def get(i: Int): Option[T] = wsync {
-      if (file(i).exists) Some(apply(i)) else None
-    }
-
-    def apply(i: Int): T = wsync { serializer.fromXML(file(i).content).asInstanceOf[T] }
-
-    def update(i: Int, obj: T) = wsync { file(i).content = serializer.toXML(obj) }
-
-    override def iterator = wsync {
-      dir.listFiles { f: File ⇒ f.getName.matches(pattern) }.map { _.getName.toInt }.sorted.map { i ⇒ apply(i) }.iterator
-    }
-  }  */
-
 }

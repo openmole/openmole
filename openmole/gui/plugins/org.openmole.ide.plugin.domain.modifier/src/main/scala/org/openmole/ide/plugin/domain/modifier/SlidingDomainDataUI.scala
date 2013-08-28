@@ -19,14 +19,14 @@ package org.openmole.ide.plugin.domain.modifier
 
 import org.openmole.plugin.domain.modifier.SlidingDomain
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.model.data.IDomainDataUI
-import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.misc.tools.util.Types._
 import java.math.BigInteger
 import java.io.File
 import org.openmole.ide.misc.tools.util.Types
 import org.openmole.core.model.domain.{ Domain, Discrete }
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.sampling.FiniteUI
 
 object SlidingDomainDataUI {
   def empty = apply("1", "1", DOUBLE, List.empty)
@@ -34,7 +34,7 @@ object SlidingDomainDataUI {
   def apply(size: String,
             step: String,
             classString: String,
-            previousDomain: List[IDomainDataUI]): SlidingDomainDataUI[_] = {
+            previousDomain: List[DomainDataUI]): SlidingDomainDataUI[_] = {
     Types.standardize(classString) match {
       case INT         ⇒ new SlidingDomainDataUI[Int](size, step, previousDomain)
       case DOUBLE      ⇒ new SlidingDomainDataUI[Double](size, step, previousDomain)
@@ -50,8 +50,8 @@ object SlidingDomainDataUI {
 
 case class SlidingDomainDataUI[S](val size: String = "",
                                   val step: String = "",
-                                  val previousDomain: List[IDomainDataUI] = List.empty)(implicit val domainType: Manifest[S])
-    extends ModifierDomainDataUI with IFinite {
+                                  val previousDomain: List[DomainDataUI] = List.empty)(implicit val domainType: Manifest[S])
+    extends ModifierDomainDataUI with FiniteUI {
 
   override def name = "Sliding Slice"
 
@@ -67,8 +67,8 @@ case class SlidingDomainDataUI[S](val size: String = "",
 
   def coreClass = classOf[SlidingDomain[_]]
 
-  def clone(pD: List[IDomainDataUI]) = pD.headOption match {
-    case Some(d: IDomainDataUI) ⇒ SlidingDomainDataUI(size, step, Types.pretify(d.domainType.toString), pD)
-    case _                      ⇒ SlidingDomainDataUI(size, step, DOUBLE, List())
+  def clone(pD: List[DomainDataUI]) = pD.headOption match {
+    case Some(d: DomainDataUI) ⇒ SlidingDomainDataUI(size, step, Types.pretify(d.domainType.toString), pD)
+    case _                     ⇒ SlidingDomainDataUI(size, step, DOUBLE, List())
   }
 }

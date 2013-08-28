@@ -62,7 +62,7 @@ object TarArchiver {
     }
     finally tis.close
 
-    def extractDirArchiveWithRelativePathAndClose(baseDir: File) = try {
+    def extractDirArchiveWithRelativePath(baseDir: File) = {
       if (!baseDir.isDirectory) throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
 
       val links = Iterator.continually(tis.getNextEntry).takeWhile(_ != null).flatMap {
@@ -89,7 +89,6 @@ object TarArchiver {
       }
 
     }
-    finally tis.close
   }
 
   private def createDirArchiveWithRelativePathWithAdditionnalCommand(tos: TarOutputStream, baseDir: File, additionnalCommand: TarEntry ⇒ Unit) = {

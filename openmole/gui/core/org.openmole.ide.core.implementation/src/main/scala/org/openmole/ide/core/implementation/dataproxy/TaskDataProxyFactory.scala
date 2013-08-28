@@ -17,10 +17,9 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyFactory
-import org.openmole.ide.core.model.factory.ITaskFactoryUI
+import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 
-class TaskDataProxyFactory(val factory: ITaskFactoryUI) extends ITaskDataProxyFactory {
+class TaskDataProxyFactory(val factory: TaskFactoryUI) extends DataProxyFactory {
 
-  def buildDataProxyUI = new TaskDataProxyUI(factory.buildDataUI)
+  def buildDataProxyUI = TaskDataProxyUI(factory.buildDataUI)
 }

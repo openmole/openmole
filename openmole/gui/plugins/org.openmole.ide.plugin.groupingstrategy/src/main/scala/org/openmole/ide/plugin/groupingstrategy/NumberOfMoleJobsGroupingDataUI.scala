@@ -16,10 +16,10 @@
  */
 package org.openmole.ide.plugin.groupingstrategy
 
-import org.openmole.ide.core.model.data.IGroupingDataUI
 import org.openmole.plugin.grouping.batch.{ ByGrouping, InShuffledGrouping }
+import org.openmole.ide.core.implementation.data.GroupingDataUI
 
-class NumberOfMoleJobsGroupingDataUI(val number: Int = 0) extends IGroupingDataUI {
+class NumberOfMoleJobsGroupingDataUI(val number: Int = 0) extends GroupingDataUI {
   def coreObject = util.Try { ByGrouping(number) }
 
   def coreClass = classOf[ByGrouping]

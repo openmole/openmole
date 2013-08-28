@@ -16,13 +16,13 @@
  */
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
+import org.openmole.ide.core.implementation.factory.HookFactoryUI
 
 trait HookActivator extends BundleActivator {
 
-  def hookFactories: Iterable[IHookFactoryUI]
+  def hookFactories: Iterable[HookFactoryUI]
 
   abstract override def start(context: BundleContext) = {
     super.start(context)

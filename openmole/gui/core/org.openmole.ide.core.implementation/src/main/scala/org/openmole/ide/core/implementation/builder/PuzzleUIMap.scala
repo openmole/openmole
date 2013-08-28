@@ -17,44 +17,42 @@
 package org.openmole.ide.core.implementation.builder
 
 import org.openmole.core.model.task.ITask
-import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ISamplingCompositionDataProxyUI, ITaskDataProxyUI }
 import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.sampling.Sampling
-import org.openmole.ide.core.model.builder.IPuzzleUIMap
-import org.openmole.ide.core.implementation.dataproxy.{ SamplingCompositionDataProxyUI, PrototypeDataProxyUI, TaskDataProxyUI }
-import org.openmole.ide.core.model.data.{ ISamplingCompositionDataUI, ITaskDataUI, IPrototypeDataUI }
+import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.core.model.mole.IMole
-import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.registry.PrototypeKey
+import org.openmole.ide.core.implementation.data.TaskDataUI
+import org.openmole.ide.core.implementation.workflow.MoleScene
+import org.openmole.ide.core.implementation.sampling.SamplingCompositionDataUI
 
 case class PuzzleUIMap(
-    taskMap: Map[ITask, ITaskDataProxyUI] = Map(),
-    prototypeMap: Map[PrototypeKey, IPrototypeDataProxyUI] = Map(),
-    samplingMap: Map[Sampling, ISamplingCompositionDataProxyUI] = Map(),
-    moleMap: Map[IMole, IMoleScene] = Map()) extends IPuzzleUIMap {
+    taskMap: Map[ITask, TaskDataProxyUI] = Map(),
+    prototypeMap: Map[PrototypeKey, PrototypeDataProxyUI] = Map(),
+    samplingMap: Map[Sampling, SamplingCompositionDataProxyUI] = Map(),
+    moleMap: Map[IMole, MoleScene] = Map()) {
 
-  def proxyUI(t: ITask): Option[ITaskDataProxyUI] = taskMap.get(t)
+  def proxyUI(t: ITask): Option[TaskDataProxyUI] = taskMap.get(t)
 
-  def samplingUI(s: Sampling): Option[ISamplingCompositionDataProxyUI] = samplingMap.get(s)
+  def samplingUI(s: Sampling): Option[SamplingCompositionDataProxyUI] = samplingMap.get(s)
 
-  def moleScene(m: IMole): Option[IMoleScene] = moleMap.get(m)
+  def moleScene(m: IMole): Option[MoleScene] = moleMap.get(m)
 
-  def prototypeUI(p: Prototype[_]): Option[IPrototypeDataProxyUI] = prototypeMap.get(PrototypeKey(p))
+  def prototypeUI(p: Prototype[_]): Option[PrototypeDataProxyUI] = prototypeMap.get(PrototypeKey(p))
 
-  def task(t: ITask, f: Unit ⇒ ITaskDataUI) =
-    taskMap.getOrElse(t, new TaskDataProxyUI(f()))
+  def task(t: ITask, f: Unit ⇒ TaskDataUI) =
+    taskMap.getOrElse(t, TaskDataProxyUI(f()))
 
   def prototype[T](p: Prototype[T])(implicit t: Manifest[T]) =
     prototypeMap.get(PrototypeKey(p))
 
-  //def prototype(name: String) = prototypeMap.map { case (k, v) ⇒ k.name -> v }.getOrElse(name, new PrototypeDataProxyUI(GenericPrototypeDataUI(name)))
+  //def prototype(name: String) = prototypeMap.map { case (k, v) ⇒ k.name -> v }.getOrElse(name, PrototypeDataProxyUI(GenericPrototypeDataUI(name)))
 
-  def sampling(s: Sampling, f: Unit ⇒ ISamplingCompositionDataUI) =
-    samplingMap.getOrElse(s, new SamplingCompositionDataProxyUI(f()))
+  def sampling(s: Sampling, f: Unit ⇒ SamplingCompositionDataUI) =
+    samplingMap.getOrElse(s, SamplingCompositionDataProxyUI(f()))
 
-  def mole(m: IMole): IMoleScene = moleMap.getOrElse(m, ScenesManager.addBuildSceneContainer("A_NAME").scene)
+  def mole(m: IMole): MoleScene = moleMap.getOrElse(m, ScenesManager.addBuildSceneContainer("A_NAME").scene)
 
-  def +=(s: Sampling, ui: ISamplingCompositionDataProxyUI) = copy(samplingMap = samplingMap + (s -> ui))
+  def +=(s: Sampling, ui: SamplingCompositionDataProxyUI) = copy(samplingMap = samplingMap + (s -> ui))
 }

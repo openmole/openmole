@@ -17,13 +17,13 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
+import org.openmole.ide.core.implementation.factory.EnvironmentFactoryUI
 
 trait EnvironmentActivator extends BundleActivator {
 
-  def environmentFactories: Iterable[IEnvironmentFactoryUI]
+  def environmentFactories: Iterable[EnvironmentFactoryUI]
 
   abstract override def start(context: BundleContext) = {
     super.start(context)

@@ -17,27 +17,29 @@
 package org.openmole.ide.plugin.domain.modifier
 
 import org.openmole.core.model.domain.{ Finite, Discrete, Domain }
-import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.sampling.IModifier
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.misc.tools.util.Types._
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.sampling.{ SamplingCompositionPanelUI, Modifier }
 
 object ModifierDomainDataUI {
 
-  def computeClassString(pud: IDomainDataUI) =
-    ScenesManager.currentSamplingCompositionPanelUI.firstNoneModifierDomain(pud) match {
-      case Some(d: IDomainDataUI) ⇒ d.domainType.toString.split('.').last
-      case _                      ⇒ DOUBLE
+  def computeClassString(pud: DomainDataUI) = ScenesManager.currentSamplingCompositionPanelUI.headOption match {
+    case Some(scp: SamplingCompositionPanelUI) ⇒ scp.firstNoneModifierDomain(pud) match {
+      case Some(d: DomainDataUI) ⇒ d.domainType.toString.split('.').last
+      case _                     ⇒ DOUBLE
     }
+    case _ ⇒ DOUBLE
+  }
 }
 
-trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
+trait ModifierDomainDataUI extends DomainDataUI with Modifier {
   type DOMAINTYPE = Domain[Any] with Discrete[Any]
   type FINITDOMAINTYPE = Domain[Any] with Finite[Any]
 
-  override def isAcceptable(domain: IDomainDataUI): Boolean =
-    domain.coreObject match {
+  override def isAcceptable(domain: DomainDataUI): Boolean =
+    domain.coreObject.get match {
       case d: DOMAINTYPE ⇒ true
       case _ ⇒
         StatusBar().warn("A Discrete Domain is required as input of a Modifier Domain (Map, Take, Group, ...)")
@@ -46,7 +48,7 @@ trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
 
   def validPreviousDomains: (Boolean, List[DOMAINTYPE]) = {
     val dL = previousDomain.flatMap {
-      _.coreObject match {
+      _.coreObject.get match {
         case id: DOMAINTYPE ⇒ List(id)
         case _              ⇒ Nil
       }
@@ -56,7 +58,7 @@ trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
 
   def validFinitePreviousDomains: (Boolean, List[FINITDOMAINTYPE]) = {
     val dL = previousDomain.flatMap {
-      _.coreObject match {
+      _.coreObject.get match {
         case id: FINITDOMAINTYPE ⇒ List(id)
         case _                   ⇒ Nil
       }

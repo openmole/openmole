@@ -18,20 +18,13 @@
 package org.openmole.ide.plugin.sampling.combine
 
 import scala.swing._
-import org.openmole.ide.misc.widget.URL
-import java.util.Locale
-import java.util.ResourceBundle
-import org.openmole.ide.core.model.panel._
-import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
-import swing.TabbedPane.Page
-import org.openmole.ide.core.model.data.ISamplingDataUI
+import org.openmole.ide.core.implementation.data.SamplingDataUI
+import org.openmole.ide.core.implementation.panelsettings.ISamplingPanelUI
 
-class GenericCombineSamplingPanelUI(cud: ISamplingDataUI) extends PluginPanel("wrap") with ISamplingPanelUI {
+class GenericCombineSamplingPanelUI(cud: SamplingDataUI) extends PluginPanel("wrap") with ISamplingPanelUI {
 
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-
-  contents += new Label("<html><i>No more information is required for this Sampling</i></html>")
+  val components = List(("Settings", new Label("<html><i>No more information is required for this Sampling</i></html>")))
 
   def saveContent = cud
 }

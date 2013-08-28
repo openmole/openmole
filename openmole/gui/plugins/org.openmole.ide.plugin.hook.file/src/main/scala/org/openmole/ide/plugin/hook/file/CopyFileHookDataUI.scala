@@ -19,12 +19,12 @@ package org.openmole.ide.plugin.hook.file
 
 import java.io.File
 import org.openmole.core.model.data.Prototype
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.hook.file._
 import org.openmole.ide.core.implementation.data.HookDataUI
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 class CopyFileHookDataUI(val name: String = "",
-                         val prototypes: List[(IPrototypeDataProxyUI, String)] = List.empty) extends HookDataUI {
+                         val prototypes: List[(PrototypeDataProxyUI, String)] = List.empty) extends HookDataUI {
 
   def coreClass = classOf[CopyFileHook]
 
@@ -35,7 +35,7 @@ class CopyFileHookDataUI(val name: String = "",
     cfh.toHook
   }
 
-  override def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI) =
+  override def cloneWithoutPrototype(proxy: PrototypeDataProxyUI) =
     new CopyFileHookDataUI(name, prototypes.filterNot(_._1 == proxy))
 
   def buildPanelUI = new CopyFileHookPanelUI(this)

@@ -17,10 +17,21 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.model.data.IPrototypeDataUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.misc.tools.util.ID
+import org.openmole.ide.core.implementation.data.{ ImageView, PrototypeDataUI }
 
-class PrototypeDataProxyUI(
-  var dataUI: IPrototypeDataUI[_],
-  override val generated: Boolean = false) extends IPrototypeDataProxyUI with ID
+object PrototypeDataProxyUI {
+  def apply(p: PrototypeDataUI[_],
+            g: Boolean = false) = new PrototypeDataProxyUI {
+    var dataUI: DATAUI = p
+    val generated = g
+  }
+}
+
+trait PrototypeDataProxyUI extends DataProxyUI {
+  type DATAUI = PrototypeDataUI[_] with ImageView
+
+  override def toString = {
+    if (dataUI.dim > 0) dataUI.name + " [" + dataUI.dim + "]"
+    else dataUI.name
+  }
+}

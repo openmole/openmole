@@ -17,13 +17,13 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
+import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 
 trait TaskActivator extends BundleActivator {
 
-  def taskFactories: Iterable[ITaskFactoryUI]
+  def taskFactories: Iterable[TaskFactoryUI]
 
   abstract override def start(context: BundleContext) = {
     super.start(context)

@@ -24,15 +24,13 @@ import java.awt.Point
 import java.awt.Rectangle
 import java.awt.RenderingHints
 import org.netbeans.api.visual.widget.ComponentWidget
-import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.workflow.{ ICapsuleUI, IMoleScene }
+import org.openmole.ide.core.implementation.commons.Constants
+import Constants._
 import org.openmole.ide.misc.widget.LinkLabel
 import scala.swing.Action
-import scala.swing.Label
 
 object PrototypeWidget {
-  def green(scene: IMoleScene) = scene match {
+  def green(scene: MoleScene) = scene match {
     case y: BuildMoleScene ⇒ new Color(180, 200, 7, 220)
     case _                 ⇒ new Color(44, 137, 160, 64)
   }
@@ -41,18 +39,18 @@ object PrototypeWidget {
 
   val red = new Color(212, 0, 0)
 
-  def buildNoTaskSource(scene: IMoleScene, capsule: ICapsuleUI, color: Color = grey) =
+  def buildNoTaskSource(scene: MoleScene, capsule: CapsuleUI, color: Color = grey) =
     new IPrototypeWidget(scene, capsule, new LinkLabel("0", new Action("") { def apply = scene.displayCapsuleProperty(capsule, 0) }), new Point(19, TASK_CONTAINER_HEIGHT / 2), grey)
 
-  def buildNoTaskHook(scene: IMoleScene, capsule: ICapsuleUI, color: Color = grey) =
+  def buildNoTaskHook(scene: MoleScene, capsule: CapsuleUI, color: Color = grey) =
     new OPrototypeWidget(scene, capsule, new LinkLabel("0", new Action("") { def apply = scene.displayCapsuleProperty(capsule, 1) }), new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2), grey)
 
-  def buildTaskSource(scene: IMoleScene, capsule: ICapsuleUI) = buildNoTaskSource(scene, capsule, green(scene))
+  def buildTaskSource(scene: MoleScene, capsule: CapsuleUI) = buildNoTaskSource(scene, capsule, green(scene))
 
-  def buildTaskHook(scene: IMoleScene, capsule: ICapsuleUI) = buildNoTaskHook(scene, capsule, green(scene))
+  def buildTaskHook(scene: MoleScene, capsule: CapsuleUI) = buildNoTaskHook(scene, capsule, green(scene))
 
-  class IPrototypeWidget(scene: IMoleScene,
-                         capsule: ICapsuleUI,
+  class IPrototypeWidget(scene: MoleScene,
+                         capsule: CapsuleUI,
                          link: LinkLabel,
                          location: Point = new Point(0, 0),
                          initColor: Color) extends PrototypeWidget(scene, capsule, link, location, initColor) {
@@ -60,8 +58,8 @@ object PrototypeWidget {
     override def paintChildren = link.text = capsule.inputs.size.toString
   }
 
-  class OPrototypeWidget(scene: IMoleScene,
-                         capsule: ICapsuleUI,
+  class OPrototypeWidget(scene: MoleScene,
+                         capsule: CapsuleUI,
                          link: LinkLabel,
                          location: Point = new Point(0, 0),
                          initColor: Color) extends PrototypeWidget(scene, capsule, link, location, initColor) {
@@ -72,8 +70,8 @@ object PrototypeWidget {
 
 import PrototypeWidget._
 
-abstract class PrototypeWidget(scene: IMoleScene,
-                               capsule: ICapsuleUI,
+abstract class PrototypeWidget(scene: MoleScene,
+                               capsule: CapsuleUI,
                                link: LinkLabel,
                                location: Point = new Point(0, 0),
                                initColor: Color) extends ComponentWidget(scene.graphScene, link.peer) {

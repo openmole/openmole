@@ -24,12 +24,12 @@ object DIRACAuthentication {
   def update(a: DIRACAuthentication) = Workspace.setAuthentication(0, a)
   def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[DIRACAuthentication]).headOption
 
-  def initialise(a: DIRACAuthentication) =
+  def initialise(a: DIRACAuthentication)(implicit authenticationProvider: AuthenticationProvider) =
     a match {
       case a: P12Certificate ⇒
         new P12HTTPSAuthentication {
           val certificate = a.certificate
-          val password = a.password
+          val password = a.password(authenticationProvider)
         }
     }
 

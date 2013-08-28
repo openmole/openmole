@@ -16,14 +16,14 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.model.data.{ IDomainDataUI, ISamplingDataUI }
 import org.openmole.core.model.sampling.{ Factor, Sampling }
 import org.openmole.plugin.sampling.combine.CombineSampling
 import org.openmole.ide.misc.widget.{ URL, Helper }
-import org.openmole.ide.core.model.sampling.{ IOrdering, IFinite }
-import org.openmole.ide.core.implementation.sampling.SamplingUtils
+import org.openmole.ide.core.implementation.sampling.{ Ordering, FiniteUI, SamplingUtils }
+import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
+import java.util.{ Locale, ResourceBundle }
 
-class CombineSamplingDataUI extends ISamplingDataUI with IOrdering {
+class CombineSamplingDataUI extends SamplingDataUI with Ordering {
   val name = "Combine"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
@@ -31,20 +31,21 @@ class CombineSamplingDataUI extends ISamplingDataUI with IOrdering {
   }
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
-    override val help = new Helper(List(new URL(i18n.getString("combinePermalinkText"),
+    val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+    override lazy val help = new Helper(List(new URL(i18n.getString("combinePermalinkText"),
       i18n.getString("combinePermalink"))))
   }
 
-  def imagePath = "img/combineSampling.png"
+  override def imagePath = "img/combineSampling.png"
 
   def fatImagePath = "img/combineSampling_fat.png"
 
-  override def isAcceptable(domain: IDomainDataUI) = domain match {
-    case f: IFinite ⇒ true
-    case _          ⇒ false
+  override def isAcceptable(domain: DomainDataUI) = domain match {
+    case f: FiniteUI ⇒ true
+    case _           ⇒ false
   }
 
-  def isAcceptable(sampling: ISamplingDataUI) = true
+  def isAcceptable(sampling: SamplingDataUI) = true
 
   def preview = name
 

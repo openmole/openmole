@@ -17,9 +17,9 @@
 
 package org.openmole.ide.plugin.environment.pbs
 
-import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
+import org.openmole.ide.core.implementation.factory.EnvironmentFactoryUI
 
-class PBSEnvironmentFactoryUI extends IEnvironmentFactoryUI {
+class PBSEnvironmentFactoryUI extends EnvironmentFactoryUI {
   override def toString = "PBS"
 
   def buildDataUI = new PBSEnvironmentDataUI

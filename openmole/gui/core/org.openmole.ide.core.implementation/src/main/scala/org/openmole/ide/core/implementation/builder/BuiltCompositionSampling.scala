@@ -16,19 +16,19 @@
  */
 package org.openmole.ide.core.implementation.builder
 
-import org.openmole.ide.core.model.sampling._
+import org.openmole.ide.core.implementation.sampling._
 
 case class BuiltCompositionSampling(
-    builtSamplings: Seq[ISamplingProxyUI] = Seq(),
-    builtDomains: Seq[IDomainProxyUI] = Seq(),
+    builtSamplings: Seq[SamplingProxyUI] = Seq(),
+    builtDomains: Seq[DomainProxyUI] = Seq(),
     builtFactors: Seq[IFactorProxyUI] = Seq(),
-    builtConnections: Seq[(ISamplingOrDomainProxyUI, ISamplingOrDomainProxyUI)] = Seq()) extends IBuiltCompositionSampling {
+    builtConnections: Seq[(SamplingOrDomainProxyUI, SamplingOrDomainProxyUI)] = Seq()) extends IBuiltCompositionSampling {
 
-  def copyWithSamplings(sp: ISamplingProxyUI) = copy(builtSamplings = builtSamplings :+ sp)
+  def copyWithSamplings(sp: SamplingProxyUI) = copy(builtSamplings = builtSamplings :+ sp)
 
-  def copyWithDomains(dp: IDomainProxyUI) = copy(builtDomains = builtDomains :+ dp)
+  def copyWithDomains(dp: DomainProxyUI) = copy(builtDomains = builtDomains :+ dp)
 
   def copyWithFactors(fp: IFactorProxyUI) = copy(builtFactors = builtFactors :+ fp)
 
-  def copyWithConnections(c: (ISamplingOrDomainProxyUI, ISamplingOrDomainProxyUI)) = copy(builtConnections = builtConnections :+ c)
+  def copyWithConnections(c: (SamplingOrDomainProxyUI, SamplingOrDomainProxyUI)) = copy(builtConnections = builtConnections :+ c)
 }

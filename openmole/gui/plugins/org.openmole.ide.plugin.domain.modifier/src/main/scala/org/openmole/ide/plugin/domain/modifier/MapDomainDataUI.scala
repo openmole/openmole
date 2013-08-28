@@ -17,23 +17,21 @@
 
 package org.openmole.ide.plugin.domain.modifier
 
-import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.MapDomain
-import org.openmole.ide.core.model.sampling.IFinite
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.sampling.FiniteUI
 
 case class MapDomainDataUI(val prototypeName: String = "",
                            val code: String = "",
-                           var previousDomain: List[IDomainDataUI] = List.empty)
-    extends ModifierDomainDataUI with IFinite {
+                           var previousDomain: List[DomainDataUI] = List.empty)
+    extends ModifierDomainDataUI with FiniteUI {
 
   def domainType = previousDomain.headOption match {
-    case Some(d: IDomainDataUI) ⇒ d.domainType
-    case _                      ⇒ manifest[Double]
+    case Some(d: DomainDataUI) ⇒ d.domainType
+    case _                     ⇒ manifest[Double]
   }
 
   val name = "Map"
@@ -46,14 +44,14 @@ case class MapDomainDataUI(val prototypeName: String = "",
     else throw new UserBadDataError("An input Domain is required for a Map modifier Domain")
   }
 
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new MapDomainPanelUI(this)
+  def buildPanelUI(p: PrototypeDataProxyUI) = new MapDomainPanelUI(this)
 
-  def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], generated = false))
+  def buildPanelUI = buildPanelUI(PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
 
   def coreClass = classOf[MapDomain[_, _]]
 
-  def clone(pD: List[IDomainDataUI]) = pD.headOption match {
-    case Some(d: IDomainDataUI) ⇒ MapDomainDataUI(prototypeName, code, pD)
-    case _                      ⇒ MapDomainDataUI(prototypeName, code, List())
+  def clone(pD: List[DomainDataUI]) = pD.headOption match {
+    case Some(d: DomainDataUI) ⇒ MapDomainDataUI(prototypeName, code, pD)
+    case _                     ⇒ MapDomainDataUI(prototypeName, code, List())
   }
 }

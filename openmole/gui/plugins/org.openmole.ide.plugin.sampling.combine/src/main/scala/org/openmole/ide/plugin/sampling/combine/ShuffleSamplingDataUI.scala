@@ -16,16 +16,16 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI, ISamplingDataUI }
 import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
 import org.openmole.plugin.sampling.combine.ShuffleSampling
-import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.widget.{ URL, Helper }
 import org.openmole.core.model.domain.{ Discrete, Domain }
-import org.openmole.ide.core.implementation.sampling.SamplingUtils
+import org.openmole.ide.core.implementation.sampling.{ FiniteUI, SamplingUtils }
+import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
+import java.util.{ Locale, ResourceBundle }
 
-class ShuffleSamplingDataUI extends ISamplingDataUI {
+class ShuffleSamplingDataUI extends SamplingDataUI {
   def name = "Shuffle"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
@@ -33,22 +33,23 @@ class ShuffleSamplingDataUI extends ISamplingDataUI {
   }
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
-    override val help = new Helper(List(new URL(i18n.getString("shufflePermalinkText"),
+    val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+    override lazy val help = new Helper(List(new URL(i18n.getString("shufflePermalinkText"),
       i18n.getString("shufflePermalink"))))
   }
 
-  def imagePath = "img/shuffleSampling.png"
+  override def imagePath = "img/shuffleSampling.png"
 
   def fatImagePath = "img/shuffleSampling_fat.png"
 
-  override def isAcceptable(domain: IDomainDataUI) = domain match {
-    case f: IFinite ⇒ true
+  override def isAcceptable(domain: DomainDataUI) = domain match {
+    case f: FiniteUI ⇒ true
     case _ ⇒
       StatusBar().warn("A Finite Domain is required for a Shuffle Sampling")
       false
   }
 
-  def isAcceptable(sampling: ISamplingDataUI) = true
+  def isAcceptable(sampling: SamplingDataUI) = true
 
   override def inputNumberConstrainst = Some(1)
 

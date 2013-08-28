@@ -7,12 +7,12 @@ package org.openmole.ide.plugin.environment.desktopgrid
 
 import org.openmole.plugin.environment.desktopgrid.DesktopGridEnvironment
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.model.data.IEnvironmentDataUI
+import org.openmole.ide.core.implementation.data.EnvironmentDataUI
 
 class DesktopGridEnvironmentDataUI(val name: String = "",
                                    val login: String = "",
                                    val pass: String = "",
-                                   val port: Int = 0) extends IEnvironmentDataUI {
+                                   val port: Int = 0) extends EnvironmentDataUI {
 
   override def coreObject = util.Try {
     if (login != "" && pass != "") DesktopGridEnvironment(port, login, pass)

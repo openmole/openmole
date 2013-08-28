@@ -16,15 +16,13 @@
  */
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.ConnectionWidget
 import swing.Panel
 import java.awt.{ Color, Point }
-import org.openmole.ide.core.model.sampling.ISceneComponent
 import scala.collection.mutable.HashSet
 
-class SceneComponent(samplingScene: ISamplingCompositionPanelUI,
+class SceneComponent(samplingScene: SamplingCompositionPanelUI,
                      val panel: Panel,
                      location: Point) extends ComponentWidget(samplingScene.scene, panel.peer) with ISceneComponent {
   var connections = HashSet.empty[ConnectionWidget]

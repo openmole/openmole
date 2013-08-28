@@ -16,16 +16,14 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI, ISamplingDataUI }
-import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
+import org.openmole.core.model.sampling.{ Factor, Sampling }
 import org.openmole.plugin.sampling.combine.ZipSampling
 import org.openmole.ide.misc.widget.{ URL, Helper }
-import org.openmole.ide.core.model.sampling.IFinite
-import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.core.model.domain.{ Discrete, Domain }
-import org.openmole.ide.core.implementation.sampling.SamplingUtils
+import org.openmole.ide.core.implementation.sampling.{ SamplingUtils }
+import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
+import java.util.{ Locale, ResourceBundle }
 
-class ZipSamplingDataUI extends ISamplingDataUI {
+class ZipSamplingDataUI extends SamplingDataUI {
   def name = "Zip"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
@@ -33,17 +31,18 @@ class ZipSamplingDataUI extends ISamplingDataUI {
   }
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
-    override val help = new Helper(List(new URL(i18n.getString("zipPermalinkText"),
+    val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+    override lazy val help = new Helper(List(new URL(i18n.getString("zipPermalinkText"),
       i18n.getString("zipPermalink"))))
   }
 
-  def imagePath = "img/zipSampling.png"
+  override def imagePath = "img/zipSampling.png"
 
   def fatImagePath = "img/zipSampling_fat.png"
 
-  def isAcceptable(sampling: ISamplingDataUI) = true
+  def isAcceptable(sampling: SamplingDataUI) = true
 
-  override def isAcceptable(domain: IDomainDataUI) = true
+  override def isAcceptable(domain: DomainDataUI) = true
 
   def preview = name
 

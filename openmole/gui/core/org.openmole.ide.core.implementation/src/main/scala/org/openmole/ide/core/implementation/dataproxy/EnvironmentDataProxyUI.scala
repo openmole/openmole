@@ -17,10 +17,17 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.model.data.IEnvironmentDataUI
-import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-import org.openmole.ide.misc.tools.util.ID
+import org.openmole.ide.core.implementation.data.{ ImageView, EnvironmentDataUI }
 
-class EnvironmentDataProxyUI(
-  var dataUI: IEnvironmentDataUI,
-  val generated: Boolean = false) extends IEnvironmentDataProxyUI with ID
+object EnvironmentDataProxyUI {
+  def apply(d: EnvironmentDataUI,
+            g: Boolean = false) = new EnvironmentDataProxyUI {
+    var dataUI: DATAUI = d
+    val generated = g
+  }
+}
+
+trait EnvironmentDataProxyUI extends DataProxyUI {
+  type DATAUI = EnvironmentDataUI with ImageView
+}
+

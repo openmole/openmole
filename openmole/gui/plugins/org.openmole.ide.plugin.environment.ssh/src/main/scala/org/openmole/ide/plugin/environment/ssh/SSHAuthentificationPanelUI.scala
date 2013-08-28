@@ -22,7 +22,6 @@ import java.awt.Dimension
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow._
@@ -37,6 +36,7 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing.event.SelectionChanged
 import org.openmole.plugin.environment.ssh.{ SSHAuthentication, PrivateKey, LoginPassword }
+import org.openmole.ide.core.implementation.panelsettings.AuthenticationPanelUI
 
 object SSHAuthentificationPanelUI {
   sealed trait ConnectionMethod
@@ -162,9 +162,8 @@ object SSHAuthentificationPanelUI {
 }
 
 import SSHAuthentificationPanelUI._
-class SSHAuthentificationPanelUI extends PluginPanel("") with IAuthentificationPanelUI {
+class SSHAuthentificationPanelUI extends PluginPanel("") with AuthenticationPanelUI {
 
-  override val components = List()
   val panelList =
     Workspace.authenticationProvider(classOf[SSHAuthentication]).map { hm ⇒
       hm match {
@@ -183,6 +182,8 @@ class SSHAuthentificationPanelUI extends PluginPanel("") with IAuthentificationP
               x.privateKey.getPath)))
       }
     }.toList
+
+  lazy val components = List(("", this))
 
   val multiPanel = new MultiPanel("SSH Authentifications",
     new SSHAuthentificationFactory,

@@ -67,4 +67,9 @@ object Images {
 
   val APPLICATION_ICON = imageIcon("img/openmole.png")
   val MOLE_SETTINGS = imageIcon("img/moleSettings.png")
+
+  val HOOK = imageIcon("img/hook.png")
+  val SOURCE = imageIcon("img/source.png")
+  val SAMPLING_COMPOSITION = imageIcon("img/samplingComposition.png")
+  val SAMPLING_COMPOSITION_FAT = imageIcon("img/samplingComposition_fat.png")
 }

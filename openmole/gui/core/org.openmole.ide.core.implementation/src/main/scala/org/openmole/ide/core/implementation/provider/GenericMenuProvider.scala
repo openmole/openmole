@@ -22,10 +22,10 @@ import javax.swing.JMenu
 import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
 import scala.collection.mutable.HashSet
-import org.openmole.ide.core.model.provider.IGenericMenuProvider
 import scala.collection.mutable.ListBuffer
+import org.netbeans.api.visual.action.PopupMenuProvider
 
-class GenericMenuProvider extends IGenericMenuProvider {
+class GenericMenuProvider extends PopupMenuProvider {
 
   var items = ListBuffer.empty[JMenuItem]
   var menus = HashSet.empty[JMenu]

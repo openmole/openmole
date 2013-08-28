@@ -19,11 +19,9 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Dimension
 import org.netbeans.api.visual.widget.ComponentWidget
-import org.openmole.ide.core.model.workflow._
-import org.openmole.ide.core.model.commons.Constants._
 import scala.swing.Panel
 
-class SceneComponentWidget(scene: IMoleScene,
+class SceneComponentWidget(scene: MoleScene,
                            panel: Panel,
                            w: Int,
                            h: Int) extends ComponentWidget(scene.graphScene, panel.peer) {

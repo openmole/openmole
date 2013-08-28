@@ -17,8 +17,8 @@
 
 package org.openmole.ide.plugin.domain.distribution
 
-import org.openmole.ide.core.model.factory.IDomainFactoryUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.factory.IDomainFactoryUI
 
 trait UniformDistributionFactoryUI extends IDomainFactoryUI

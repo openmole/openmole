@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,82 +14,90 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.core.implementation.panel
 
-import java.awt.Dimension
-import java.awt.BorderLayout
-import javax.swing._
-import javax.swing.ScrollPaneConstants._
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, SamplingCompositionDataProxyUI }
+import org.openmole.ide.core.implementation.sampling.SamplingCompositionDataUI
+import org.openmole.ide.core.implementation.data.ImageView
+import scala.swing.{ Publisher, Label }
+import org.openmole.ide.misc.tools.image.Images
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import javax.imageio.ImageIO
-import javax.swing.ImageIcon
-import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxies }
 import org.openmole.ide.core.implementation.dialog.DialogFactory
-import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, ISamplingCompositionDataProxyUI }
-import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.misc.widget.{ MainLinkLabel, PluginPanel }
-import org.netbeans.api.visual.widget.Scene
-import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
-import scala.swing.Component
-import scala.swing.Action
-import scala.swing.event.FocusGained
 
-class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
-                               scene: IMoleScene,
-                               val index: Int) extends BasePanel(Some(proxy), scene) { sCPanel ⇒
-  iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
-  val panelUI = proxy.dataUI.buildPanelUI
-  def created = Proxies.instance.contains(proxy)
+trait SamplingCompositionPanel extends Base
+    with Publisher
+    with Header
+    with ProxyShortcut
+    with Proxy
+    with Icon {
 
-  tabbedPane.preferredSize = new Dimension(0, 0)
+  override type DATAPROXY = SamplingCompositionDataProxyUI
+  type DATAUI = SamplingCompositionDataUI with ImageView
 
-  mainPanel.contents += new NewConceptPanel(this) { addPrototype }
+  var panelSettings = proxy.dataUI.buildPanelUI
+  val icon: Label = icon(Images.SAMPLING_COMPOSITION_FAT)
 
-  peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(new PluginPanel("wrap") {
-    contents += tabbedPane
-    contents += panelUI.help
+  build
 
-    panelUI match {
-      case s: Scene ⇒ peer.add(new JScrollPane(s.createView) {
-        setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER)
-        setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER)
-      })
-      case _ ⇒
+  listenTo(panelSettings.help.components.toSeq: _*)
+
+  def build = {
+    basePanel.contents += new PluginPanel("wrap", "-5[left]-10[]", "-2[top][10]") {
+      contents += header(scene, index)
+      contents += new PluginPanel("wrap") {
+        contents += new Composer {
+          addIcon(icon)
+          addName
+          addCreateLink
+        }
+        contents += proxyShorcut(proxy.dataUI, index)
+      }
     }
-  }.peer, BorderLayout.CENTER)
-
-  listenTo(nameTextField)
-  listenTo(panelUI.help.components.toSeq: _*)
-  reactions += {
-    case FocusGained(source: Component, _, _)     ⇒ panelUI.help.switchTo(source)
-    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-    case UpdatedProxyEvent(p: IDataProxyUI, _) ⇒
-      scene.removeAll(index + 1)
+    createSettings
   }
 
-  def create = {
-    Proxies.instance += proxy
-    ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
+  override def created = proxyCreated
+
+  def createSettings = {
+    if (basePanel.contents.size == 3) basePanel.contents.remove(1, 2)
+
+    panelSettings = proxy.dataUI.buildPanelUI
+    basePanel.contents += panelSettings.bestDisplay
+    basePanel.contents += panelSettings.help
   }
 
-  def delete = {
+  override def updatePanel = {
+    savePanel
+    createSettings
+  }
+
+  def updateConceptPanel(d: SamplingCompositionDataUI with ImageView) = {
+    savePanel
+    proxy.dataUI = d
+    createSettings
+  }
+
+  def savePanel = {
+    proxy.dataUI = panelSettings.saveContent(nameTextField.text)
+    ConceptMenu.refreshItem(proxy)
+  }
+
+  def deleteProxy = {
     val toBeRemovedSamplings = ScenesManager.explorationCapsules.filter { case (c, d) ⇒ d.sampling == Some(proxy) }
     toBeRemovedSamplings match {
       case Nil ⇒
         scene.closePropertyPanel(index)
         Proxies.instance -= proxy
-        ConceptMenu.removeItem(proxy)
-        true
+        ConceptMenu.-=(proxy)
+      // true
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           toBeRemovedSamplings.foreach { case (c, d) ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.dataUI.removeCapsuleUI(c)) }
-          delete
+          deleteProxy
         }
-        else false
+      // else false
     }
   }
 
-  def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)
 }

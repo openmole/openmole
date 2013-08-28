@@ -9,12 +9,12 @@ import java.awt.Color
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.TaskDataUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.method.sensitivity.FirstOrderEffectTask
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 class FirstOrderEffectTaskDataUI(val name: String = "",
-                                 val modelInputs: Traversable[IPrototypeDataProxyUI] = List.empty,
-                                 val modelOutputs: Traversable[IPrototypeDataProxyUI] = List.empty) extends TaskDataUI {
+                                 val modelInputs: Traversable[PrototypeDataProxyUI] = List.empty,
+                                 val modelOutputs: Traversable[PrototypeDataProxyUI] = List.empty) extends TaskDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
     val builder =

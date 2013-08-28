@@ -17,21 +17,20 @@
 
 package org.openmole.ide.plugin.task.stat
 
-import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.core.model.task.ITask
-import org.openmole.ide.core.model.builder.IPuzzleUIMap
 import org.openmole.plugin.task.stat.AverageTask
-import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.core.implementation.builder.{ PuzzleUIMap, SceneFactory }
+import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 
-class AverageTaskFactoryUI extends ITaskFactoryUI {
+class AverageTaskFactoryUI extends TaskFactoryUI {
   override def toString = "Average"
 
   def buildDataUI = new AverageTaskDataUI
 
-  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
+  def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[AverageTask](task)
     uiMap.task(t, x ⇒ new AverageTaskDataUI(t.name, t.sequences.toList.map { p ⇒ (uiMap.prototypeUI(p._1).get, uiMap.prototypeUI(p._2).get) }))
   }
 
-  override def category = List("Task", "Stat")
+  override def category = List("Stat")
 }

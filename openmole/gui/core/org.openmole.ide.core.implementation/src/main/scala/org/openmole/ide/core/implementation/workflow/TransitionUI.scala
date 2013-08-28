@@ -17,13 +17,27 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import org.openmole.ide.core.model.commons.TransitionType
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.workflow._
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.commons._
+import org.openmole.core.model.transition._
+import org.openmole.core.implementation.transition._
+import org.openmole.core.model.mole.ICapsule
+import org.openmole.ide.misc.tools.util.ID
 
 class TransitionUI(
-  val source: ICapsuleUI,
-  val target: IInputSlotWidget,
-  var transitionType: TransitionType,
-  var condition: Option[String] = None,
-  var filteredPrototypes: List[IPrototypeDataProxyUI] = List.empty) extends ITransitionUI
+    val source: CapsuleUI,
+    val target: InputSlotWidget,
+    var transitionType: TransitionType,
+    var condition: Option[String] = None,
+    var filteredPrototypes: List[PrototypeDataProxyUI] = List.empty) extends ConnectorUI with ID {
+
+  def coreObject(source: ICapsule,
+                 target: Slot,
+                 condition: ICondition,
+                 filtered: List[String]) = transitionType match {
+    case SimpleTransitionType      ⇒ new Transition(source, target, condition, Block(filtered: _*))
+    case AggregationTransitionType ⇒ new AggregationTransition(source, target, condition, Block(filtered: _*))
+    case ExplorationTransitionType ⇒ new ExplorationTransition(source, target, condition, Block(filtered: _*))
+    case EndTransitionType         ⇒ new EndExplorationTransition(source, target, condition, Block(filtered: _*))
+  }
+}

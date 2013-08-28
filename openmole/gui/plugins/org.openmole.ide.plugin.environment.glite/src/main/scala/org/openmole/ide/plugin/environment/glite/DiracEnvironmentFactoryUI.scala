@@ -17,9 +17,9 @@
 
 package org.openmole.ide.plugin.environment.glite
 
-import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
+import org.openmole.ide.core.implementation.factory.EnvironmentFactoryUI
 
-class DiracEnvironmentFactoryUI extends IEnvironmentFactoryUI {
+class DiracEnvironmentFactoryUI extends EnvironmentFactoryUI {
   override def toString = "Dirac"
 
   def buildDataUI = new DiracEnvironmentDataUI

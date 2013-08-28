@@ -7,7 +7,6 @@ package org.openmole.ide.core.implementation.dialog
 
 import scala.swing._
 import org.openmole.ide.misc.widget.MigPanel
-import org.openmole.ide.core.implementation.panel.ConceptMenu
 import java.awt.BorderLayout
 import org.openmole.ide.core.implementation.execution._
 import java.awt.Event
@@ -32,6 +31,7 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
+import org.openmole.ide.core.implementation.panel.ConceptMenu
 
 class GUIPanel extends MainFrame {
   mainframe ⇒
@@ -173,7 +173,7 @@ class GUIPanel extends MainFrame {
               requiredFiles.filter(x ⇒ allDepending.toList.contains(x._1)).foreach {
                 case (fi, p) ⇒
                   Proxies.instance -= p
-                  ConceptMenu.removeItem(p)
+                  ConceptMenu.-=(p)
                   unloadAndDelete(fi)
                 case _ ⇒
               }

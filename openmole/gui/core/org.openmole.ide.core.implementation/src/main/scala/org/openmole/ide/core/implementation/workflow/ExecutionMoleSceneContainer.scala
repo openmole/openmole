@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import java.awt.{ BorderLayout, Color }
+import java.awt.BorderLayout
 import javax.swing.JScrollPane
 import javax.swing.ScrollPaneConstants._
 import org.openide.DialogDescriptor
@@ -25,13 +25,11 @@ import org.openide.DialogDisplayer
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.ide.core.implementation.execution.ExecutionManager
 import org.openmole.ide.core.implementation.execution.MoleFinishedEvent
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget._
 import scala.swing._
-import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
+import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
@@ -64,8 +62,8 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
       eManager.capsuleMapping.keys.foreach {
         c ⇒
           c.dataUI.task match {
-            case Some(t: ITaskDataProxyUI) ⇒
-            case _                         ⇒
+            case Some(t: TaskDataProxyUI) ⇒
+            case _                        ⇒
           }
       }
 
@@ -77,7 +75,6 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         contents += new TitleLabel("Execution control")
         contents += new PluginPanel("wrap 2", "[]-20[]5[]") {
           contents += startStopButton
-          // contents += exportButton
           contents += new PluginPanel("wrap 4") {
             contents += new Label("Downloads:")
             contents += dlLabel

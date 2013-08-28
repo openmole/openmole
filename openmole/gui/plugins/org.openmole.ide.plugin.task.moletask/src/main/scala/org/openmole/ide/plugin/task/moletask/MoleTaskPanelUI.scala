@@ -24,22 +24,21 @@ import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.{ EmptyDataUIs }
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.tools.util._
 import scala.swing.event.SelectionChanged
 import scala.swing.Label
 import scala.swing.MyComboBox
 import org.openmole.ide.misc.widget.URL
 import scala.collection.JavaConversions._
-import org.openmole.ide.core.model.workflow.IMoleUI
-import org.openmole.ide.core.implementation.workflow.MoleUI
+import org.openmole.ide.core.implementation.workflow.{ IMoleUI, MoleUI }
+import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 
-class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "left,grow,fill", "") with ITaskPanelUI {
-
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class MoleTaskPanelUI(pud: MoleTaskDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("fillx,wrap 2", "left,grow,fill", "") with TaskPanelUI {
 
   val moleComboBox = new MyComboBox(MoleTaskDataUI.emptyMoleSceneManager ::
-    ScenesManager.moleScenes.map { _.dataUI }.filter {
+    ScenesManager.moleScenes.map {
+      _.dataUI
+    }.filter {
       _ != ScenesManager.currentSceneContainer.get.scene.dataUI
     }.filter {
       _.capsules.size > 0
@@ -71,8 +70,14 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
   }
 
   def currentCapsules = {
-    val li = ScenesManager.moleScenes.map { _.dataUI }.filter(_ == moleComboBox.selection.item)
-    if (li.size > 0) li.head.capsules.values.filter { _.dataUI.task.isDefined }.map { _.dataUI.task.get }.toList
+    val li = ScenesManager.moleScenes.map {
+      _.dataUI
+    }.filter(_ == moleComboBox.selection.item)
+    if (li.size > 0) li.head.capsules.values.filter {
+      _.dataUI.task.isDefined
+    }.map {
+      _.dataUI.task.get
+    }.toList
     else List(EmptyDataUIs.emptyTaskProxy)
   }
 
@@ -81,12 +86,13 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
       if (moleComboBox.selection.item.id == -1) None else Some(moleComboBox.selection.item.id),
       if (capsuleComboBox.selection.item == EmptyDataUIs.emptyTaskProxy) None else Some(capsuleComboBox.selection.item))
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(moleComboBox,
-      new Help(i18n.getString("mole"),
-        i18n.getString("moleEx")))
-    add(capsuleComboBox,
-      new Help(i18n.getString("finalCapsule"),
-        i18n.getString("finalCapsuleEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+
+  add(moleComboBox,
+    new Help(i18n.getString("mole"),
+      i18n.getString("moleEx")))
+  add(capsuleComboBox,
+    new Help(i18n.getString("finalCapsule"),
+      i18n.getString("finalCapsuleEx")))
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 201 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,36 +16,52 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.model.workflow.{ ICapsuleUI, IMoleScene }
-import java.awt.BorderLayout
+import scala.swing.{ TabbedPane, Publisher, Label }
+import scala.swing.event.SelectionChanged
 import org.openmole.ide.misc.widget.PluginPanel
-import swing.{ TabbedPane, Label }
 
-class CapsulePanel(scene: IMoleScene,
-                   capsule: ICapsuleUI,
-                   val index: Int,
-                   tabIndex: Int) extends BasePanel(None, scene) {
+trait CapsulePanel extends Base
+    with Capsule
+    with Header
+    with ProxyShortcut {
 
-  val panelUI = capsule.dataUI.buildPanelUI(index)
-  def created = true
+  def components = panelSettings.components
 
-  peer.add(mainPanel.peer, BorderLayout.NORTH)
+  var panelSettings = capsule.dataUI.buildPanelUI
 
-  refreshPanel
-  val capsulePanel = new PluginPanel("wrap") {
-    contents += new Label { text = "<html><b><font \"size=\"4\" >Capsule settings</font></b></html>" }
-    contents += tabbedPane
-    contents += panelUI.help
+  build
+
+  def build = {
+    basePanel.contents += header(scene, index)
+    basePanel.contents += new Label("")
+    basePanel.contents += proxyShorcut(capsule.dataUI, index)
+    createSettings(initTabIndex)
   }
-  peer.add(capsulePanel.peer, BorderLayout.CENTER)
-  tabbedPane.selection.index = tabIndex
 
-  def create {}
+  def createSettings(id: Int): Unit = {
+    panelSettings = capsule.dataUI.buildPanelUI
 
-  def delete = true
+    val tPane = panelSettings.tabbedPane
+    if (id == -1) Tools.updateIndex(basePanel, tPane)
+    else tPane.selection.index = id
 
-  def save = {
-    capsule.dataUI = panelUI.save
+    if (basePanel.contents.size == 3) basePanel.contents.remove(1)
+
+    basePanel.contents.insert(1, tPane)
+
+    tPane.listenTo(tPane.selection)
+    tPane.reactions += {
+      case SelectionChanged(_) ⇒ updatePanel
+    }
+  }
+
+  override def updatePanel = {
+    savePanel
+    createSettings(-1)
+  }
+
+  def savePanel = {
+    capsule.dataUI = panelSettings.saveContent("")
     scene.refresh
   }
 

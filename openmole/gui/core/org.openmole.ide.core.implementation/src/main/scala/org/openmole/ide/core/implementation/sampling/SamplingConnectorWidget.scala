@@ -16,25 +16,18 @@
  */
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.core.model.sampling._
-import swing.{ Action, Label }
-import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget
+import swing.Action
+import org.openmole.ide.core.implementation.workflow.{ ConnectorViewUI, PrototypeOnConnectorWidget }
 import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget._
 import org.openmole.ide.misc.widget.LinkLabel
-import org.openmole.ide.core.model.sampling.IOrdering
-import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI }
-import org.openmole.ide.core.implementation.dataproxy.Proxies._
 import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog.{ OrderingDialog, FactorPrototypeDialog }
-import org.openmole.ide.core.model.workflow.IConnectorViewUI
-import org.netbeans.api.visual.widget.ConnectionWidget
 import org.netbeans.api.visual.anchor.Anchor
 import org.netbeans.api.visual.anchor.AnchorShape
-import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.layout.LayoutFactory
 import org.netbeans.api.visual.widget._
 import java.awt._
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.Some
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 class SamplingConnectorWidget(sourceWidget: Widget,
                               targetWidget: Widget,
@@ -80,13 +73,13 @@ class SamplingConnectorWidget(sourceWidget: Widget,
     updateOrderingWidget
   }
 
-  def preview = new IConnectorViewUI {
+  def preview = new ConnectorViewUI {
     val preview =
       factorProxyUI match {
         case Some(factor: IFactorProxyUI) ⇒
           factor.dataUI.prototype match {
-            case Some(p: IPrototypeDataProxyUI) ⇒ p.toString
-            case _                              ⇒ "?"
+            case Some(p: PrototypeDataProxyUI) ⇒ p.toString
+            case _                             ⇒ "?"
           }
         case _ ⇒ "?"
       }
@@ -97,7 +90,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
       case sc: SamplingComponent ⇒ sc.component.proxy match {
         case s: SamplingProxyUI ⇒
           s.dataUI match {
-            case o: IOrdering ⇒
+            case o: Ordering ⇒
               orderingWidget.setVisible(true)
             case _ ⇒ orderingWidget.setVisible(false)
           }

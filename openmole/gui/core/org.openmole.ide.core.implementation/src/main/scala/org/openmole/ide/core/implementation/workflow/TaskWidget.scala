@@ -17,15 +17,14 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import javax.imageio.ImageIO
-import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.workflow._
+import org.openmole.ide.core.implementation.commons.Constants
+import Constants._
 import java.awt._
 import scala.swing.{ Action, Panel }
-import swing.event.MouseClicked
-import org.openmole.ide.misc.widget.{ MigPanel, ImageLinkLabel, PluginPanel }
+import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.tools.image.Images
+import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 
 object TaskWidget {
   lazy val VALID = (new Color(215, 238, 244), new Color(73, 90, 105))
@@ -38,16 +37,16 @@ object TaskWidget {
 
 import TaskWidget._
 
-class TaskWidget(scene: IMoleScene,
-                 val capsule: ICapsuleUI) extends Panel {
+class TaskWidget(scene: MoleScene,
+                 val capsule: CapsuleUI) extends Panel {
   preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_CONTAINER_HEIGHT)
   background = new Color(0, 0, 0, 0)
 
   val settings = new ImageLinkLabel(Images.SETTINGS, new Action("") {
     def apply = {
       capsule.dataUI.task match {
-        case Some(x: ITaskDataProxyUI) ⇒ scene.displayPropertyPanel(x, 0)
-        case _                         ⇒
+        case Some(x: TaskDataProxyUI) ⇒ scene.saveAndcloseAllAndDisplayPropertyPanel(x)
+        case _                        ⇒
       }
     }
   })
@@ -68,7 +67,7 @@ class TaskWidget(scene: IMoleScene,
     g.fillRect(0, 0, preferredSize.width, TASK_TITLE_HEIGHT)
 
     capsule.dataUI.task match {
-      case Some(x: ITaskDataProxyUI) ⇒
+      case Some(x: TaskDataProxyUI) ⇒
         g.drawImage(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.fatImagePath)), 10, 30, 80, 80, peer)
       case None ⇒
     }
@@ -81,7 +80,7 @@ class TaskWidget(scene: IMoleScene,
   def backColor = {
     if (scene.dataUI.capsulesInMole.toList.contains(capsule)) {
       capsule.dataUI.task match {
-        case Some(x: ITaskDataProxyUI) ⇒
+        case Some(x: TaskDataProxyUI) ⇒
           scene match {
             case y: BuildMoleScene ⇒
               if (capsule.valid) VALID._1 else INVALID._1
@@ -99,7 +98,7 @@ class TaskWidget(scene: IMoleScene,
       if (capsule.selected) new Color(222, 135, 135)
       else {
         capsule.dataUI.task match {
-          case Some(x: ITaskDataProxyUI) ⇒
+          case Some(x: TaskDataProxyUI) ⇒
             scene match {
               case y: BuildMoleScene ⇒ if (capsule.valid) VALID._2 else INVALID._2
               case _                 ⇒ EXECUTION._2

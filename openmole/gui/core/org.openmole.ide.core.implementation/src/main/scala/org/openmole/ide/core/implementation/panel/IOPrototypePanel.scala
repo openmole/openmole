@@ -17,33 +17,34 @@
 package org.openmole.ide.core.implementation.panel
 
 import org.openmole.ide.misc.widget._
-import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import java.awt.{ Color, BorderLayout }
 import org.openmole.ide.misc.widget.multirow._
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import swing.{ Color, Separator, Label, MyComboBox }
 import scala.collection.immutable.HashMap
-import org.openmole.ide.core.implementation.data.CheckData
-import org.openmole.ide.core.model.workflow.{ IMoleScene, ISceneContainer }
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.misc.widget.multirow.RowWidget.SMALL
 import org.openmole.ide.misc.widget.multirow.MultiWidget.CLOSE_IF_EMPTY
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor.{ ComboLinkLabelGroovyTextFieldEditorData, ComboLinkLabelGroovyTextFieldEditorPanel }
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabelData, ComboLinkLabelPanel }
+import org.openmole.ide.core.implementation.workflow.ISceneContainer
+import org.openmole.core.model.data.Prototype
 
-class IOPrototypePanel(scene: IMoleScene,
-                       onPanel: BasePanel,
-                       prototypesIn: Seq[IPrototypeDataProxyUI] = List.empty,
-                       prototypesOut: Seq[IPrototypeDataProxyUI] = List.empty,
-                       implicitPrototypeIn: Seq[IPrototypeDataProxyUI] = List.empty,
-                       implicitPrototypeOut: Seq[IPrototypeDataProxyUI] = List.empty,
-                       inputParameters: Map[IPrototypeDataProxyUI, String] = Map.empty) extends PluginPanel("wrap") {
+class IOPrototypePanel(val prototypesIn: Seq[PrototypeDataProxyUI] = List.empty,
+                       val prototypesOut: Seq[PrototypeDataProxyUI] = List.empty,
+                       implicitPrototypeIn: Seq[PrototypeDataProxyUI] = List.empty,
+                       implicitPrototypeOut: Seq[PrototypeDataProxyUI] = List.empty,
+                       inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends PluginPanel("wrap") {
 
   val protoInEditor = {
     val incomboContent = Proxies.instance.prototypes.map {
       p ⇒
-        (p, p.dataUI.coreObject.get, contentAction(p))
+        {
+          // lazy val coreOb = p.dataUI.coreObject
+          // lazy val test = implicitly[coreOb.type <:< scala.util.Try[Prototype[_]]]
+          (p, p.dataUI.coreObject.get, contentAction(p))
+        }
     }.toList
     new MultiComboLinkLabelGroovyTextFieldEditor("", incomboContent,
       prototypesIn.map {
@@ -63,7 +64,7 @@ class IOPrototypePanel(scene: IMoleScene,
     }, EYE, CLOSE_IF_EMPTY, insets = SMALL)
   }
 
-  var implicitEditorsMapping = new HashMap[IPrototypeDataProxyUI, PrototypeGroovyTextFieldEditor]()
+  var implicitEditorsMapping = new HashMap[PrototypeDataProxyUI, PrototypeGroovyTextFieldEditor]()
 
   lazy val protoIn = new PluginPanel("wrap") {
     contents += new Label("Inputs") {
@@ -90,7 +91,7 @@ class IOPrototypePanel(scene: IMoleScene,
         }
         protoPanel
       }
-      else new Label("Please create first Prototypes.")
+      else new Label("None")
     }
   }
 
@@ -116,11 +117,9 @@ class IOPrototypePanel(scene: IMoleScene,
         }
         protoPanel
       }
-      else new Label("Please create first Prototypes.")
+      else new Label("None")
     }
   }
-
-  CheckData.checkMole(scene)
 
   contents += new PluginPanel("") {
     peer.setLayout(new BorderLayout)
@@ -129,10 +128,10 @@ class IOPrototypePanel(scene: IMoleScene,
     peer.add(protoOut.peer, BorderLayout.EAST)
   }
 
-  def contentAction(proto: IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.toString, proto) {
+  def contentAction(proto: PrototypeDataProxyUI) = new ContentAction(proto.dataUI.toString, proto) {
     override def apply =
       ScenesManager.currentSceneContainer match {
-        case Some(x: ISceneContainer) ⇒ x.scene.displayPropertyPanel(proto, onPanel, 1)
+        case Some(x: ISceneContainer) ⇒ x.scene.displayPropertyPanel(proto)
         case None                     ⇒
       }
   }
@@ -145,7 +144,7 @@ class IOPrototypePanel(scene: IMoleScene,
       protoOutEditor.content)
 
     (pInEditorContent.map { _.content.get }.filterNot { p ⇒ implicitPrototypeIn.contains(p) },
-      new HashMap[IPrototypeDataProxyUI, String]() ++
+      new HashMap[PrototypeDataProxyUI, String]() ++
       pInEditorContent.map {
         x ⇒ x.content.get -> x.editorValue
       } ++ iEditorsMapping.map {

@@ -17,23 +17,19 @@
 
 package org.openmole.ide.plugin.environment.glite
 
-import java.awt.Color
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.glite._
-import scala.swing.ButtonGroup
+import scala.swing._
 import scala.swing.FileChooser.SelectionMode._
-import scala.swing.Label
-import scala.swing.PasswordField
-import scala.swing.RadioButton
-import scala.swing.event.ButtonClicked
 import org.openmole.misc.workspace.Workspace
 import scala.swing.event.Key._
 import java.io.File
 import swing.event.ButtonClicked
+import scala.Some
+import org.openmole.ide.core.implementation.panelsettings.AuthenticationPanelUI
+import scala.swing.event.ButtonClicked
 import scala.Some
 
 object GliteAuthentificationPanelUI {
@@ -41,7 +37,9 @@ object GliteAuthentificationPanelUI {
   val GREEN = new Color(136, 170, 0)
 }
 
-class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") with IAuthentificationPanelUI {
+class GliteAuthentificationPanelUI extends AuthenticationPanelUI {
+
+  val authPanel = new PluginPanel("", "[left][right]", "")
   var passString = ""
   var initButton: Option[RadioButton] = None
   val pemButton = new RadioButton("pem")
@@ -106,8 +104,10 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
   pemPanel.contents += pemPassField.get
   p12Panel.contents += p12PassField.get
 
+  lazy val components = List(("", authPanel))
+
   def addButtons =
-    contents += new PluginPanel("wrap", "", "[]15[]15[]") {
+    authPanel.contents += new PluginPanel("wrap", "", "[]15[]15[]") {
       contents += pemButton
       contents += p12Button
       contents += proxyButton
@@ -115,25 +115,25 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
 
   def addPem = {
     clean
-    contents += pem._2
+    authPanel.contents += pem._2
     refresh
   }
   def addP12 = {
     clean
-    contents += p12._2
+    authPanel.contents += p12._2
     refresh
   }
   def addProxy = {
     clean
-    contents += proxy._2
+    authPanel.contents += proxy._2
     refresh
   }
 
-  def clean = if (contents.size == 2) contents.remove(1)
+  def clean = if (authPanel.contents.size == 2) authPanel.contents.remove(1)
 
   def refresh = {
-    repaint
-    revalidate
+    authPanel.repaint
+    authPanel.revalidate
   }
 
   def saveContent =

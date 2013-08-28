@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,44 +14,96 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.core.implementation.panel
 
-import java.awt.BorderLayout
-import javax.swing.ImageIcon
-import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxies }
-import org.openmole.ide.core.implementation.dialog.DialogFactory
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, Proxies, PrototypeDataProxyUI }
+import org.openmole.ide.core.implementation.panel.ConceptMenu._
+import org.openmole.ide.core.implementation.data.{ PrototypeDataUI, ImageView }
+import scala.swing.Label
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
-import scala.collection.JavaConversions._
-import scala.swing.Component
-import scala.swing.event.FocusGained
-import javax.imageio.ImageIO
-import BasePanel.IconChanged
+import org.openmole.ide.core.implementation.workflow.CapsuleUI
+import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.core.implementation.dialog.DialogFactory
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 
-object PrototypePanel {
-  def deletePrototype(proxy: IPrototypeDataProxyUI,
-                      scene: IMoleScene,
-                      index: Int): Boolean = {
+trait PrototypePanel extends Base
+    with Header
+    with ProxyShortcut
+    with Proxy
+    with ConceptCombo
+    with Icon {
+
+  override type DATAPROXY = PrototypeDataProxyUI
+  type DATAUI = GenericPrototypeDataUI[_] with ImageView
+
+  var panelSettings = proxy.dataUI.buildPanelUI
+  val icon: Label = fatIcon(proxy.dataUI)
+  val protoCombo = ConceptMenu.buildPrototypeMenu(p ⇒ updateConceptPanel(p.dataUI), proxy.dataUI)
+
+  private def updateConceptPanel(d: PrototypeDataUI[_] with ImageView) = {
+    savePanel
+    proxy.dataUI = d
+    createSettings
+    scene.updatePanels
+  }
+
+  build
+
+  listenTo(panelSettings.help.components.toSeq: _*)
+
+  def build = {
+    basePanel.contents += new PluginPanel("wrap", "-5[left]-10[]", "-2[top][10]") {
+      contents += header(scene, index)
+      contents += new PluginPanel("wrap") {
+        contents += new Composer {
+          addIcon(icon)
+          addName
+          addTypeMenu(protoCombo)
+          addCreateLink
+        }
+      }
+    }
+    createSettings
+  }
+
+  def createSettings = {
+    if (basePanel.contents.size > 1) {
+      basePanel.contents.remove(1)
+      basePanel.contents.remove(1)
+    }
+    icon.icon = fatIcon(proxy.dataUI).icon
+    panelSettings = proxy.dataUI.buildPanelUI
+    basePanel.contents += panelSettings.bestDisplay
+    basePanel.contents += panelSettings.help
+  }
+
+  override def created = proxyCreated
+
+  override def updatePanel = {
+    savePanel
+  }
+
+  def savePanel = {
+    proxy.dataUI = panelSettings.saveContent(nameTextField.text)
+    ConceptMenu.refreshItem(proxy)
+  }
+
+  def deleteProxy = {
+
     def erase = {
       scene.closePropertyPanel(index)
       Proxies.instance -= proxy
       // Proxys.prototypes.filter { p ⇒ p.dataUI.name == proxy.dataUI.name && p.generated }.foreach { p ⇒ Proxys -= p }
-      ConceptMenu.removeItem(proxy)
-      true
+      -=(proxy)
+      // true
     }
 
     //remove in Tasks
-    val capsulesWithProtos: List[ICapsuleUI] = ScenesManager.moleScenes.flatMap {
+    val capsulesWithProtos: List[CapsuleUI] = ScenesManager.moleScenes.flatMap {
       _.dataUI.capsules.values.flatMap { c ⇒
         c.dataUI.task match {
-          case Some(x: ITaskDataProxyUI) ⇒ if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
-          case _                         ⇒ None
+          case Some(x: TaskDataProxyUI) ⇒ if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
+          case _                        ⇒ None
         }
       }
     }.toList
@@ -64,10 +116,12 @@ object PrototypePanel {
         h.dataUI.removePrototypeOccurencies(proxy)
         h.dataUI = h.dataUI.cloneWithoutPrototype(proxy)
       }
+
       Proxies.instance.sources.foreach { s ⇒
         s.dataUI.removePrototypeOccurencies(proxy)
         s.dataUI = s.dataUI.cloneWithoutPrototype(proxy)
       }
+
       erase
       capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
       List(ScenesManager.currentScene).flatten.foreach {
@@ -75,48 +129,15 @@ object PrototypePanel {
           dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy }
         }
       }
+
       ScenesManager.invalidateMoles
-      true
+      // true
+
     }
-    else false
+    //else false
+
     //  }
-  }
-}
 
-import PrototypePanel._
-class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
-                        scene: IMoleScene,
-                        val index: Int) extends BasePanel(Some(proxy), scene) {
-  iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
-  val panelUI = proxy.dataUI.buildPanelUI
-  def created = Proxies.instance.contains(proxy)
-
-  peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(new PluginPanel("wrap") {
-    contents += panelUI.peer
-    contents += panelUI.help
-  }.peer, BorderLayout.CENTER)
-
-  listenTo(panelUI)
-  listenTo(panelUI.help.components.toSeq: _*)
-  reactions += {
-    case FocusGained(source: Component, _, _)     ⇒ panelUI.help.switchTo(source)
-    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-    case IconChanged(_, iconPath) ⇒
-      iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(iconPath)))
-  }
-
-  def create = {
-    Proxies.instance += proxy
-    ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(nameTextField.text,
-      proxy)
-  }
-
-  def delete = deletePrototype(proxy, scene, index)
-
-  def save = {
-    proxy.dataUI = panelUI.saveContent(nameTextField.text)
-    publish(new UpdatedProxyEvent(proxy, this))
   }
 
 }

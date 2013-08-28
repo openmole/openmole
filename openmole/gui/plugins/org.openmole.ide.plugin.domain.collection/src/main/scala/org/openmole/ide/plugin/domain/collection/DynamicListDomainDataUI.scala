@@ -18,13 +18,13 @@
 package org.openmole.ide.plugin.domain.collection
 
 import org.openmole.ide.misc.tools.util.Types._
-import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.collection.DynamicListDomain
-import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.misc.tools.util.Types
 import org.openmole.misc.tools.io.FromString
 import util.Try
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.sampling.FiniteUI
 
 object DynamicListDomainDataUI {
 
@@ -43,7 +43,7 @@ object DynamicListDomainDataUI {
 
 case class DynamicListDomainDataUI[S](values: List[String])(implicit val domainType: Manifest[S],
                                                             fs: FromString[S])
-    extends IDomainDataUI with IFinite {
+    extends DomainDataUI with FiniteUI {
   val name = "Value list"
 
   def preview = " in " + values.headOption.getOrElse("") + " ..."

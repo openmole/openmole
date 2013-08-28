@@ -17,18 +17,17 @@
 
 package org.openmole.ide.plugin.task.stat
 
-import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.core.model.task.ITask
-import org.openmole.ide.core.model.builder.IPuzzleUIMap
-import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.core.implementation.builder.{ PuzzleUIMap, SceneFactory }
 import org.openmole.plugin.task.stat.SumTask
+import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 
-class SumTaskFactoryUI extends ITaskFactoryUI {
+class SumTaskFactoryUI extends TaskFactoryUI {
   override def toString = "Sum"
 
   def buildDataUI = new SumTaskDataUI
 
-  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
+  def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[SumTask](task)
     uiMap.task(
       t,
@@ -36,5 +35,5 @@ class SumTaskFactoryUI extends ITaskFactoryUI {
     )
   }
 
-  override def category = List("Task", "Stat")
+  override def category = List("Stat")
 }

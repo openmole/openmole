@@ -19,23 +19,19 @@ package org.openmole.ide.plugin.domain.modifier
 
 import java.math.BigDecimal
 import java.math.BigInteger
-import org.openmole.core.model.domain.{ Discrete, Domain }
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.TakeDomain
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.sampling.IFinite
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.sampling.FiniteUI
 
 case class TakeDomainDataUI(size: String = "1",
-                            previousDomain: List[IDomainDataUI] = List.empty)
-    extends ModifierDomainDataUI with IFinite {
+                            previousDomain: List[DomainDataUI] = List.empty)
+    extends ModifierDomainDataUI with FiniteUI {
 
   def domainType = previousDomain.headOption match {
-    case Some(dt: IDomainDataUI) ⇒ dt.domainType
-    case _                       ⇒ manifest[Double]
+    case Some(dt: DomainDataUI) ⇒ dt.domainType
+    case _                      ⇒ manifest[Double]
   }
 
   val name = "Take"
@@ -54,9 +50,9 @@ case class TakeDomainDataUI(size: String = "1",
 
   override def toString = "Take"
 
-  def clone(pD: List[IDomainDataUI]) =
+  def clone(pD: List[DomainDataUI]) =
     pD.headOption match {
-      case Some(d: IDomainDataUI) ⇒ new TakeDomainDataUI(size, pD)
-      case _                      ⇒ new TakeDomainDataUI(size, List())
+      case Some(d: DomainDataUI) ⇒ new TakeDomainDataUI(size, pD)
+      case _                     ⇒ new TakeDomainDataUI(size, List())
     }
 }

@@ -16,18 +16,37 @@
  */
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import scala.collection.immutable.HashMap
-import org.openmole.ide.core.model.data.IHookDataUI
-import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.mole.IHook
 import org.openmole.ide.misc.tools.util.ID
-import scala.util.Success
+import scala.util.{ Try, Success }
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.panelsettings.HookPanelUI
 
-abstract class HookDataUI extends IHookDataUI with CoreObjectInitialisation with ID {
-  def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
+abstract class HookDataUI extends DataUI with InputPrototype with OutputPrototype with ImplicitPrototype with ImageView with CoreObjectInitialisation {
+  def implicitPrototypes: (List[PrototypeDataProxyUI], List[PrototypeDataProxyUI]) =
     coreObject match {
       case Success(x: IHook) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map { _.prototype }.toList, inputs, y ⇒ x.outputs.map { _.prototype }.toList, outputs)
       case _                 ⇒ (List(), List())
     }
+
+  def fatImagePath = ""
+
+  override def toString: String = name
+
+  def coreClass: Class[_ <: IHook]
+
+  def coreObject: Try[IHook]
+
+  def executionCoreObject = coreObject
+
+  def buildPanelUI: HookPanelUI
+
+  def filterPrototypeOccurencies(pproxy: PrototypeDataProxyUI) = (filterInputs(pproxy) ++ filterOutputs(pproxy)).distinct
+
+  def cloneWithoutPrototype(proxy: PrototypeDataProxyUI): HookDataUI = this
+
+  def removePrototypeOccurencies(pproxy: PrototypeDataProxyUI) = {
+    removeInput(pproxy)
+    removeOutput(pproxy)
+  }
 }

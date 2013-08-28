@@ -17,11 +17,17 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.model.data.ISamplingCompositionDataUI
-import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.ide.core.implementation.sampling.SamplingCompositionDataUI
-import org.openmole.ide.misc.tools.util.ID
+import org.openmole.ide.core.implementation.data.ImageView
 
-class SamplingCompositionDataProxyUI(
-  var dataUI: ISamplingCompositionDataUI = new SamplingCompositionDataUI,
-  override val generated: Boolean = false) extends ISamplingCompositionDataProxyUI with ID
+object SamplingCompositionDataProxyUI {
+  def apply(d: SamplingCompositionDataUI = new SamplingCompositionDataUI,
+            g: Boolean = false) = new SamplingCompositionDataProxyUI {
+    var dataUI: DATAUI = d
+    val generated = g
+  }
+}
+
+trait SamplingCompositionDataProxyUI extends DataProxyUI {
+  type DATAUI = SamplingCompositionDataUI with ImageView
+}

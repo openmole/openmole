@@ -20,10 +20,12 @@ package org.openmole.ide.plugin.domain.range
 import scala.math.Numeric._
 import org.openmole.ide.misc.widget.{ URL, Help, Helper, PluginPanel }
 import scala.swing.event._
-import swing.{ MyComboBox, TextField, CheckBox, Label }
+import scala.swing._
 import org.openmole.ide.misc.tools.util.Types
+import scala.swing.event.ButtonClicked
+import scala.Some
 
-class RangeDomainPanelUI(pud: RangeDomainDataUI[_]) extends GenericRangeDomainPanelUI {
+class RangeDomainPanelUI(pud: RangeDomainDataUI[_]) extends GenericRangeDomainPanelUI with Publisher {
 
   minField.text = pud.min
   maxField.text = pud.max
@@ -43,8 +45,10 @@ class RangeDomainPanelUI(pud: RangeDomainDataUI[_]) extends GenericRangeDomainPa
     case ButtonClicked(`stepCheckBox`) ⇒ stepField.visible = stepCheckBox.selected
   }
 
-  contents += (stepCheckBox, "gap para")
-  contents += stepField
+  logPanel.contents += (stepCheckBox, "gap para")
+  logPanel.contents += stepField
+
+  val components = List(("", logPanel))
 
   help.add(stepField, new Help(i18n.getString("step"), i18n.getString("stepEx")))
 
