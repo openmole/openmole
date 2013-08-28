@@ -32,7 +32,7 @@ trait Base extends Created with SavePanel {
 
   def updatePanel: Unit = {}
 
-  def createSettings: Unit
+  //def createSettings: Unit
 
   def created: Boolean
 

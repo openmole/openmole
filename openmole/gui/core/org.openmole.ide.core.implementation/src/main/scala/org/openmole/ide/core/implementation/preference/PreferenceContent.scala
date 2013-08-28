@@ -24,12 +24,12 @@ import scala.swing.TabbedPane
 import scala.swing.event.Key._
 
 class PreferenceContent extends PluginPanel("wrap", "[right]", "") {
-  preferredSize = new Dimension(450, 300)
+  minimumSize = new Dimension(450, 400)
   StatusBar().clear
   val authentification = new AuthenticationPanel
   contents += new TabbedPane {
-    pages.append(new TabbedPane.Page("Authentification", authentification))
-    pages.append(new TabbedPane.Page("Header", new EnvironmentSettingPanel))
+    pages.append(new TabbedPane.Page("Authentication", authentification))
+    pages.append(new TabbedPane.Page("Settings", new EnvironmentSettingPanel))
   }
   def save = authentification.save
 }

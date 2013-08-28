@@ -17,9 +17,8 @@
 
 package org.openmole.ide.core.implementation.panelsettings
 
-import org.openmole.ide.core.implementation.panel.{ AnonSaveSettings, Settings }
+import org.openmole.ide.core.implementation.panel.Settings
 
 trait AuthenticationPanelUI extends Settings {
   def saveContent
-  val components = List()
 }

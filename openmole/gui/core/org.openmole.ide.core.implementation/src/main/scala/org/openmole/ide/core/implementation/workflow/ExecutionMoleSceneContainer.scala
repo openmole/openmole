@@ -75,7 +75,6 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         contents += new TitleLabel("Execution control")
         contents += new PluginPanel("wrap 2", "[]-20[]5[]") {
           contents += startStopButton
-          // contents += exportButton
           contents += new PluginPanel("wrap 4") {
             contents += new Label("Downloads:")
             contents += dlLabel

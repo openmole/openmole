@@ -71,10 +71,13 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI)(implicit val i18n: Resour
 
   val launchingCommandTextArea = new BashEditor {
     editor.text = ndu.lauchingCommands
-    minimumSize = new Dimension(450, 200)
+    preferredSize = new Dimension(100, 200)
   }
 
-  val components = List(("Working directory", new PluginPanel("wrap") { contents += workdirTextField }),
+  val components = List(("Working directory", new PluginPanel("") {
+    contents += workdirTextField
+    preferredSize = new Dimension(100, 50)
+  }),
     ("Variables", variablesMultiCombo.panel),
     ("Commands", launchingCommandTextArea),
     ("Resources", resourcesMultiTextField.panel),

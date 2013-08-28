@@ -64,7 +64,7 @@ trait SourcePanel extends Base
 
   override def created = proxyCreated
 
-  def createSettings = {
+  def createSettings: Unit = {
     panelSettings = proxy.dataUI.buildPanelUI
 
     val tPane = panelSettings.tabbedPane(("I/O", ioSettings))

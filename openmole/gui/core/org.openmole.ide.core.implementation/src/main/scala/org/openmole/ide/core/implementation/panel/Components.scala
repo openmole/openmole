@@ -16,9 +16,8 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import scala.swing.{ Publisher, TabbedPane, Component }
+import scala.swing.{ Publisher, TabbedPane, Component, Alignment }
 import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.event.SelectionChanged
 
 trait Components extends Publisher with Help {
 
@@ -35,6 +34,7 @@ trait Components extends Publisher with Help {
     compts.foreach {
       c ⇒ pages += new TabbedPane.Page(c._1, c._2)
     }
+    if (pages.size > 5) this.tabPlacement = Alignment.Left
   }
 
   def panel = new PluginPanel("wrap") {
