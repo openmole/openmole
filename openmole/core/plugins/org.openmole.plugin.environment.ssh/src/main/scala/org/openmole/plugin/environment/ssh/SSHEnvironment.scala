@@ -57,7 +57,7 @@ class SSHEnvironment(
   type SS = SSHStorageService
   type JS = SSHJobService
 
-  @transient lazy val authentication = SSHAuthentication(user, host, port, authentications)()
+  @transient lazy val authentication = SSHAuthentication(user, host, port, authentications)(authentications)
   @transient lazy val id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val storage = new PersistentStorageService with SSHStorageService with LimitedAccess with ThisHost {

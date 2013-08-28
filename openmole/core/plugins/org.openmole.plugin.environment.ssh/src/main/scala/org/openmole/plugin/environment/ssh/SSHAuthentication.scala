@@ -40,7 +40,7 @@ trait SSHAuthentication {
   def login: String
   def regexp = ".*" + login + "@" + target + ".*"
 
-  def apply(): fr.iscpif.gridscale.ssh.SSHAuthentication
+  def apply(implicit authenticationProvider: AuthenticationProvider): fr.iscpif.gridscale.ssh.SSHAuthentication
 
   override def toString = "Target = " + target
 }

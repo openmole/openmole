@@ -213,7 +213,7 @@ class GliteEnvironment(
         voName,
         file,
         proxyTime.toSeconds,
-        fqan).cache(proxyRenewalDelay)
+        fqan)(authentications).cache(proxyRenewalDelay)
     case None ⇒ throw new UserBadDataError("No authentication has been initialized for glite.")
   }
 

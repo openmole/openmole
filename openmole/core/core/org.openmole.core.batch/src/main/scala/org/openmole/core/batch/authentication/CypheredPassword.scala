@@ -17,12 +17,12 @@
 
 package org.openmole.core.batch.authentication
 
-import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.workspace.{ AuthenticationProvider, Workspace }
 
 trait CypheredPassword {
   def cypheredPassword: String
 
-  def password =
+  def password(implicit authenticationProvider: AuthenticationProvider) =
     if (cypheredPassword == null || cypheredPassword == "") ""
-    else Workspace.decrypt(cypheredPassword)
+    else authenticationProvider.decrypt(cypheredPassword)
 }

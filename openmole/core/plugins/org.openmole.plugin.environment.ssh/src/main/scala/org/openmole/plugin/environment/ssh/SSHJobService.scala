@@ -27,6 +27,9 @@ import org.openmole.plugin.environment.gridscale._
 import fr.iscpif.gridscale.ssh.{ SSHJobService ⇒ GSSSHJobService, SSHConnectionCache, SSHJobDescription }
 import java.util.concurrent.atomic.AtomicInteger
 import collection.mutable
+import org.openmole.misc.tools.service.Logger
+
+object SSHJobService extends Logger
 
 trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 
@@ -76,6 +79,8 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
       val jobDescription = _jobDescription
       val resultPath = result
     }
+
+    SSHJobService.logger.fine(s"Queuing /bin/bash $remoteScript in directory ${sharedFS.root}")
 
     EventDispatcher.listen(sshBatchJob: BatchJob, BatchJobStatusListner, classOf[BatchJob.StateChanged])
 
