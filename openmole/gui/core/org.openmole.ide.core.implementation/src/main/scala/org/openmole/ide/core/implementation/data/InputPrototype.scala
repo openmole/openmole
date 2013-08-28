@@ -20,8 +20,8 @@ import scala.collection.immutable.HashMap
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 trait InputPrototype {
-  var inputParameters: Map[PrototypeDataProxyUI, String] = HashMap.empty[PrototypeDataProxyUI, String]
-  var inputs: Seq[PrototypeDataProxyUI] = List.empty[PrototypeDataProxyUI]
-  def filterInputs(pproxy: PrototypeDataProxyUI) = inputs.filter(_ == pproxy)
-  def removeInput(pproxy: PrototypeDataProxyUI) = inputs = inputs.filterNot { _ == pproxy }
+  def inputParameters: Map[PrototypeDataProxyUI, String]
+  def inputs: Seq[PrototypeDataProxyUI]
+  def filterInputs(pproxy: PrototypeDataProxyUI): Seq[PrototypeDataProxyUI] = inputs.filterNot(_ == pproxy).toSeq
+  def filterInputParameters(pproxy: PrototypeDataProxyUI): Map[PrototypeDataProxyUI, String] = inputParameters.filterNot(_._1 == pproxy)
 }

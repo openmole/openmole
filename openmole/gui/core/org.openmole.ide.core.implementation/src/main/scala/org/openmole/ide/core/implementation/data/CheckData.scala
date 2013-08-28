@@ -62,13 +62,14 @@ object CheckData extends Logger {
                     errors.flatMap {
                       _ match {
                         case x: DuplicatedName ⇒
-                          val duplicated = x.data.map { _.prototype.name }.toList.distinct
+                          /*     val duplicated = x.data.map { _.prototype.name }.toList.distinct
                           List(capsuleMap(x.capsule).dataUI.task).flatten.map { proxy ⇒
                             proxy.dataUI.inputs = proxy.dataUI.inputs.filterNot { p ⇒
                               duplicated.contains(p.dataUI.name)
                             }.toSeq
                             proxy
-                          }
+                          } */
+                          displayCapsuleErrors(capsuleMap(x.capsule), x.toString)
                           None
                         case x: DataflowProblem ⇒
                           displayCapsuleErrors(capsuleMap(x.capsule), x.toString)

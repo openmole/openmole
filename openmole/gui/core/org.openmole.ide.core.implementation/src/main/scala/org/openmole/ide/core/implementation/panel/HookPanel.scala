@@ -92,9 +92,7 @@ trait HookPanel extends Base
 
   def updateConceptPanel(d: HOOKDATAUI) = {
     savePanel
-    d.inputs = ioSettings.prototypesIn
-    d.outputs = ioSettings.prototypesOut
-    proxy.dataUI = d
+    proxy.dataUI = d.doClone(ioSettings.prototypesIn, ioSettings.prototypesOut, ioSettings.inputParameters)
     createSettings
   }
 
@@ -111,8 +109,6 @@ trait HookPanel extends Base
     scene.closePropertyPanel(index)
     Proxies.instance -= proxy
     -=(proxy)
-    //true
-
   }
 
 }

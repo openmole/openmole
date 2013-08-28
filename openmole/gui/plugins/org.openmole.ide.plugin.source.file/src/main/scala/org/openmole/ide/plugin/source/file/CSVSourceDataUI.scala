@@ -21,18 +21,18 @@ import org.openmole.ide.core.implementation.data.SourceDataUI
 import org.openmole.plugin.source.file.CSVSource
 import java.io.File
 import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyPrototypeDataUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 
 class CSVSourceDataUI(val name: String = "",
                       val csvFilePath: String = "",
-                      val prototypeMapping: List[(String, PrototypeDataProxyUI)] = List.empty) extends SourceDataUI {
+                      val prototypeMapping: List[(String, PrototypeDataProxyUI)] = List.empty,
+                      val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                      val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                      val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends SourceDataUI {
 
   def coreClass = classOf[CSVSource]
 
   def buildPanelUI = new CSVSourcePanelUI(this)
-
-  override def cloneWithoutPrototype(proxy: PrototypeDataProxyUI) =
-    new CSVSourceDataUI(name, csvFilePath, prototypeMapping.filterNot(_._2 == proxy))
 
   def coreObject = util.Try {
     val source = CSVSource(new File(csvFilePath))
@@ -42,4 +42,8 @@ class CSVSourceDataUI(val name: String = "",
     initialise(source)
     source
   }
+
+  def doClone(ins: Seq[PrototypeDataProxyUI],
+              outs: Seq[PrototypeDataProxyUI],
+              params: Map[PrototypeDataProxyUI, String]) = new CSVSourceDataUI(name, csvFilePath, Proxies.instance.filterListTupleOut(prototypeMapping), ins, outs, params)
 }
