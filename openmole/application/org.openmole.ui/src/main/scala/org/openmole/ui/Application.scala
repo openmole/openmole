@@ -38,12 +38,13 @@ class Application extends IApplication with Logger {
 
   lazy val consoleSplash =
     """
-  ___                   __  __       _     _____
- / _ \ _ __   ___ _ __ |  \/  | ___ | |   | ____|
-| | | | '_ \ / _ \ '_ \| |\/| |/ _ \| |   |  _|
-| |_| | |_) |  __/ | | | |  | | (_) | |___| |___
- \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____|
+  ___                   __  __  ___  _     _____    ___   ___
+ / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____|  / _ \ / _ \
+| | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   | | | | (_) |
+| |_| | |_) |  __/ | | | |  | | |_| | |___| |___  | |_| |\__, |
+ \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____|  \___(_) /_/
       |_|
+
 """
 
   override def start(context: IApplicationContext) = {
@@ -92,7 +93,11 @@ class Application extends IApplication with Logger {
 
     val config = parse(args.toList)
 
-    val userPlugins = config.userPlugins.map(p ⇒ new File(p))
+    val (userPlugins, notExisting) = config.userPlugins.map(p ⇒ new File(p)).partition(_.exists)
+
+    notExisting.foreach {
+      f => logger.warning(s"Plugin file $f doesn't exists.")
+    }
 
     val plugins: List[String] =
       config.pluginsDirs ++
