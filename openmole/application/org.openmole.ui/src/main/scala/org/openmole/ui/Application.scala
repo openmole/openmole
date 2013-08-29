@@ -96,7 +96,7 @@ class Application extends IApplication with Logger {
     val (userPlugins, notExisting) = config.userPlugins.map(p ⇒ new File(p)).partition(_.exists)
 
     notExisting.foreach {
-      f => println(s"Plugin file $f doesn't exists.")
+      f => logger.warning(s"Plugin file $f doesn't exists.")
     }
 
     val plugins: List[String] =
