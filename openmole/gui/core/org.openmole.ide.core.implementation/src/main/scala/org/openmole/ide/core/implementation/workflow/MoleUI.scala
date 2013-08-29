@@ -71,7 +71,6 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
       _connectors.single remove (c.id)
       -=(c.source, c)
     }
-    else println("not contains")
   }
 
   def update(id: String, c: ConnectorUI) = _connectors.single(id) = c
