@@ -71,6 +71,7 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
       _connectors.single remove (c.id)
       -=(c.source, c)
     }
+    else println("not contains")
   }
 
   def update(id: String, c: ConnectorUI) = _connectors.single(id) = c
@@ -153,7 +154,7 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
       case Some(caps: CapsuleUI) ⇒ if (id == caps.id) startingCapsule = None
     }
 
-    removeIncomingTransitions(capsule)
+    removeInAndOutcomingTransitions(capsule)
 
     -=(capsule)
     assignDefaultStartingCapsule
@@ -176,9 +177,9 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
     _._2
   }
 
-  private def removeIncomingTransitions(capsule: CapsuleUI) =
-    connectors.filter {
-      _._2.target.capsule == capsule
+  private def removeInAndOutcomingTransitions(capsule: CapsuleUI) =
+    connectors.filter { c ⇒
+      c._2.target.capsule == capsule || c._2.source == capsule
     }.foreach {
       t ⇒
         removeConnector(t._1)
