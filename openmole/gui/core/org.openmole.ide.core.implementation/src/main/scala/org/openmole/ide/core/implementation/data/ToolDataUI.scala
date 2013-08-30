@@ -22,6 +22,7 @@ import org.openmole.core.model.mole.{ Hooks, Sources, IMole }
 import org.openmole.core.model.transition.{ IAggregationTransition, ITransition }
 import org.openmole.ide.core.implementation.builder.Builder
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
+import org.openmole.core.implementation.mole.Mole
 
 object ToolDataUI {
   def implicitPrototypes(coreInputs: Unit ⇒ List[Prototype[_]],
@@ -51,10 +52,11 @@ object ToolDataUI {
   }
 
   def buildUpLevelPrototypes(mole: IMole) = {
-    mole.capsules.foreach { c ⇒
-      c.outputs(mole, Sources.empty, Hooks.empty).foreach { d ⇒
-        Proxies.instance.prototypeOrElseCreate(d.prototype, mole.level(c))
-      }
+    Mole.levels(mole).foreach {
+      case (c, level) ⇒
+        c.outputs(mole, Sources.empty, Hooks.empty).foreach { d ⇒
+          Proxies.instance.prototypeOrElseCreate(d.prototype, level)
+        }
     }
   }
 }
