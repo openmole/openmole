@@ -39,11 +39,10 @@ object ToolDataUI {
     (protoFilter(coreInputs(), prototypesIn), protoFilter(coreOutputs(), prototypesOut))
   }
 
-  def computePrototypeFromAggregation(mole: IMole) = {
+  def computePrototypeFromAggregation(mole: IMole, sources: Sources, hooks: Hooks) = {
     mole.transitions.foreach {
       _ match {
-        //FIXME SOURCES AND HOOKS
-        case t: ITransition with IAggregationTransition ⇒ t.data(mole, Sources.empty, Hooks.empty).foreach { d ⇒
+        case t: ITransition with IAggregationTransition ⇒ t.data(mole, sources, hooks).foreach { d ⇒
           Proxies.instance.prototypeOrElseCreate(d.prototype)
         }
         case _ ⇒
@@ -51,10 +50,10 @@ object ToolDataUI {
     }
   }
 
-  def buildUpLevelPrototypes(mole: IMole) = {
+  def buildUpLevelPrototypes(mole: IMole, sources: Sources, hooks: Hooks) = {
     Mole.levels(mole).foreach {
       case (c, level) ⇒
-        c.outputs(mole, Sources.empty, Hooks.empty).foreach { d ⇒
+        c.outputs(mole, sources, hooks).foreach { d ⇒
           Proxies.instance.prototypeOrElseCreate(d.prototype, level)
         }
     }

@@ -39,7 +39,6 @@ object CheckData extends Logger {
           case Some(x: CapsuleUI) ⇒
             MoleFactory.buildMole(y.dataUI) match {
               case Success((mole, cMap, errs)) ⇒
-                ToolDataUI.buildUpLevelPrototypes(mole)
                 val error_capsules = y.dataUI.capsules.values.partition {
                   _.dataUI.task.isDefined
                 }
@@ -52,12 +51,16 @@ object CheckData extends Logger {
                   case (k, v) ⇒ v -> k
                 }
 
-                ToolDataUI.computePrototypeFromAggregation(mole)
+                val sources = capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.sources.map { _.dataUI.coreObject.get } }
+                val hooks = capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.hooks.map { _.dataUI.coreObject.get } }
+
+                ToolDataUI.buildUpLevelPrototypes(mole, sources, hooks)
+                ToolDataUI.computePrototypeFromAggregation(mole, sources, hooks)
                 // Formal validation
                 val errors = Validation(mole,
                   Context.empty,
-                  capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.sources.map { _.dataUI.coreObject.get } },
-                  capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.hooks.map { _.dataUI.coreObject.get } })
+                  sources,
+                  hooks)
                 errors.isEmpty match {
                   case false ⇒
                     errors.flatMap {
