@@ -1,5 +1,7 @@
+package org.openmole.ide.plugin.task.stat
+
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.task.stat
+class MSETaskPanelUI(dataUI: MSETaskDataUI) extends BasicStatPanelUI("mse", dataUI) {
 
-import org.openmole.ide.core.implementation.registry.OSGiActivator
-import org.openmole.ide.core.implementation.registry.TaskActivator
-
-class Activator extends OSGiActivator with TaskActivator {
-
-  override def taskFactories = List(new MedianTaskFactoryUI,
-    new AverageTaskFactoryUI,
-    new SumTaskFactoryUI,
-    new MSETaskFactoryUI)
+  def saveContent(name: String) = new MSETaskDataUI(name,
+    multiPrototypeCombo.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) })
 }
