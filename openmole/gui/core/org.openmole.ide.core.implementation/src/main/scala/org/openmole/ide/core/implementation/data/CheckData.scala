@@ -26,7 +26,7 @@ import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.data.Context
 import util.{ Failure, Success }
 import org.openmole.core.implementation.validation.DataflowProblem.DuplicatedName
-import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, TaskDataProxyUI }
 
 object CheckData extends Logger {
 
@@ -39,6 +39,7 @@ object CheckData extends Logger {
           case Some(x: CapsuleUI) ⇒
             MoleFactory.buildMole(y.dataUI) match {
               case Success((mole, cMap, errs)) ⇒
+                ToolDataUI.buildUpLevelPrototypes(mole)
                 val error_capsules = y.dataUI.capsules.values.partition {
                   _.dataUI.task.isDefined
                 }

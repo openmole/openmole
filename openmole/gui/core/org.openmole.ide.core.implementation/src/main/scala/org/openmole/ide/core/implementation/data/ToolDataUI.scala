@@ -16,10 +16,11 @@
  */
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.core.model.data.{ Prototype, DataSet }
+import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.registry.{ KeyGenerator, PrototypeKey }
-import org.openmole.core.model.mole.{ ICapsule, Hooks, Sources, IMole }
+import org.openmole.core.model.mole.{ Hooks, Sources, IMole }
 import org.openmole.core.model.transition.{ IAggregationTransition, ITransition }
+import org.openmole.ide.core.implementation.builder.Builder
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 
 object ToolDataUI {
@@ -41,12 +42,18 @@ object ToolDataUI {
     mole.transitions.foreach {
       _ match {
         //FIXME SOURCES AND HOOKS
-        case t: ITransition with IAggregationTransition ⇒ t.data(mole, Sources.empty, Hooks.empty).foreach {
-          d ⇒
-            val (protoType, dim) = KeyGenerator.stripArrays(d.prototype.`type`)
-            Proxies.instance.prototypeOrElseCreate(PrototypeKey(d.prototype.name, protoType.runtimeClass, dim))
+        case t: ITransition with IAggregationTransition ⇒ t.data(mole, Sources.empty, Hooks.empty).foreach { d ⇒
+          Proxies.instance.prototypeOrElseCreate(d.prototype)
         }
         case _ ⇒
+      }
+    }
+  }
+
+  def buildUpLevelPrototypes(mole: IMole) = {
+    mole.capsules.foreach { c ⇒
+      c.outputs(mole, Sources.empty, Hooks.empty).foreach { d ⇒
+        Proxies.instance.prototypeOrElseCreate(d.prototype, mole.level(c))
       }
     }
   }

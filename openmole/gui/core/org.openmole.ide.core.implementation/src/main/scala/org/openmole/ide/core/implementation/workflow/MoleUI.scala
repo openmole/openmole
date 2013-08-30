@@ -89,13 +89,8 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
     if (l.contains(c)) l -= c
   }
 
-  def refreshCache = {
-    invalidateCache
-    cacheMole
-    cleanUnusedPrototypes
-  }
-
   def invalidateCache = {
+    cleanUnusedPrototypes
     _cacheMole.single() = None
   }
 
@@ -126,8 +121,8 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
         val impl = s.dataUI.implicitPrototypes
         s.dataUI.inputs.toList ::: s.dataUI.outputs.toList ::: impl._1 ::: impl._2
       }).distinct
-    Proxies.instance.prototypes.diff(pUI).foreach {
-      p ⇒ if (p.generated) Proxies.instance -= p
+    Proxies.instance.prototypes.diff(pUI).filter { _.generated }.foreach {
+      Proxies.instance -=
     }
   }
 

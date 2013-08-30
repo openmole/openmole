@@ -16,13 +16,15 @@ class AverageTaskDataUI(val name: String = "",
                         val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
                         val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends StatDataUI {
 
+  type S = Double
+
   def coreObject(plugins: PluginSet) = util.Try {
     val gtBuilder = AverageTask(name)(plugins)
 
     sequence foreach {
       s ⇒
-        gtBuilder addSequence (s._1.dataUI.coreObject.get.asInstanceOf[Prototype[Array[Double]]],
-          s._2.dataUI.coreObject.get.asInstanceOf[Prototype[Double]])
+        gtBuilder addSequence (s._1.dataUI.coreObject.get.asInstanceOf[Prototype[Array[S]]],
+          s._2.dataUI.coreObject.get.asInstanceOf[Prototype[S]])
     }
 
     initialise(gtBuilder)

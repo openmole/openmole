@@ -41,7 +41,7 @@ class VariableDomainDataUI[S](val prototypeArray: Option[PrototypeDataProxyUI] =
   val name = "Prototype Array"
 
   def coreObject = Try(prototypeArray match {
-    case Some(p: PrototypeDataProxyUI) ⇒ VariableDomain(p.dataUI.coreObject.asInstanceOf[Prototype[Array[S]]])
+    case Some(p: PrototypeDataProxyUI) ⇒ VariableDomain(p.dataUI.coreObject.get.asInstanceOf[Prototype[Array[S]]])
     case _                             ⇒ throw new UserBadDataError("An array of Prototypes is required for a Prototype Array Domain")
   })
 

@@ -24,11 +24,14 @@ import org.openmole.ide.core.implementation.builder.Builder
 import org.openmole.ide.core.implementation.registry.PrototypeKey
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.ide.core.implementation.panel.ConceptMenu
+import org.openmole.core.model.data.Prototype
 
 object Proxies {
   var instance = new Proxies
 
-  def check[T <: DataProxyUI](proxyList: List[T]) = proxyList.filter { instance.contains }
+  def check[T <: DataProxyUI](proxyList: List[T]) = proxyList.filter {
+    instance.contains
+  }
 
   def check[T <: DataProxyUI](proxy: T) = instance.contains(proxy)
 }
@@ -37,8 +40,9 @@ class Proxies {
 
   private val _proxies = TMap[ID.Type, DataProxyUI]()
 
-  def dataUIs = atomic { implicit ctx ⇒
-    _proxies.values
+  def dataUIs = atomic {
+    implicit ctx ⇒
+      _proxies.values
   }
 
   def tasks = _tasks.values.toList
@@ -71,14 +75,21 @@ class Proxies {
   def source(id: ID.Type) = _sources.get(id)
 
   def prototype(p: PrototypeKey) =
-    _prototypes.map { case (_, v) ⇒ PrototypeKey(v) -> v }.get(p)
+    _prototypes.map {
+      case (_, v) ⇒ PrototypeKey(v) -> v
+    }.get(p)
 
-  def prototypeOrElseCreate(k: PrototypeKey) = atomic { implicit ctx ⇒
-    prototype(k).getOrElse {
-      val p = PrototypeKey.build(k)
-      this += p
-      p
-    }
+  def prototypeOrElseCreate[C](name: String, d: Int, c: Class[C]): PrototypeDataProxyUI = prototypeOrElseCreate(name, d, manifest(c))
+  def prototypeOrElseCreate(name: String, d: Int, m: Manifest[_]): PrototypeDataProxyUI = prototypeOrElseCreate(PrototypeKey(name, m.runtimeClass, d))
+  def prototypeOrElseCreate(proto: Prototype[_], dim: Int): PrototypeDataProxyUI = prototypeOrElseCreate(PrototypeKey(proto, dim))
+  def prototypeOrElseCreate(proto: Prototype[_]): PrototypeDataProxyUI = prototypeOrElseCreate(PrototypeKey(proto))
+  def prototypeOrElseCreate(k: PrototypeKey): PrototypeDataProxyUI = atomic {
+    implicit ctx ⇒
+      prototype(k).getOrElse {
+        val p = PrototypeKey.build(k)
+        this += p
+        p
+      }
   }
 
   def +=(p: DataProxyUI) = {
@@ -91,12 +102,33 @@ class Proxies {
     EventDispatcher.trigger(this, new ProxyDeletedEvent)
   }
 
-  def filterListTupleOut[T, P <: DataProxyUI](m: List[(T, P)]) = m.filter { p ⇒ contains(p._2) }
-  def filterListTupleIn[P <: DataProxyUI, T](m: List[(P, T)]) = m.filter { p ⇒ contains(p._1) }
-  def filterListTupleInOut[P <: DataProxyUI](m: List[(P, P)]) = m.filter { p ⇒ contains(p._1) && contains(p._2) }
-  def filterMapIn[P <: DataProxyUI, T](m: Map[P, T]) = m.filter { p ⇒ contains(p._1) }
-  def filterMapOut[T, P <: DataProxyUI](m: Map[T, P]) = m.filter { p ⇒ contains(p._2) }
-  def filter[P <: DataProxyUI](m: List[P]) = m.filter { p ⇒ contains(p) }
+  def cleanGenerated = prototypes.foreach { p ⇒
+    if (p.generated) -=(p)
+  }
+
+  def filterListTupleOut[T, P <: DataProxyUI](m: List[(T, P)]) = m.filter {
+    p ⇒ contains(p._2)
+  }
+
+  def filterListTupleIn[P <: DataProxyUI, T](m: List[(P, T)]) = m.filter {
+    p ⇒ contains(p._1)
+  }
+
+  def filterListTupleInOut[P <: DataProxyUI](m: List[(P, P)]) = m.filter {
+    p ⇒ contains(p._1) && contains(p._2)
+  }
+
+  def filterMapIn[P <: DataProxyUI, T](m: Map[P, T]) = m.filter {
+    p ⇒ contains(p._1)
+  }
+
+  def filterMapOut[T, P <: DataProxyUI](m: Map[T, P]) = m.filter {
+    p ⇒ contains(p._2)
+  }
+
+  def filter[P <: DataProxyUI](m: List[P]) = m.filter {
+    p ⇒ contains(p)
+  }
 
   def contains(p: DataProxyUI) = _proxies.single.contains(p.id)
 
@@ -113,10 +145,11 @@ class Proxies {
     if (contains(p)) p
     else Builder.samplingCompositionUI(true)
 
-  def clearAll: Unit = atomic { implicit actx ⇒
-    ConceptMenu.clearAllItems
-    _proxies.clear
-    EventDispatcher.trigger(this, new ProxyDeletedEvent)
+  def clearAll: Unit = atomic {
+    implicit actx ⇒
+      ConceptMenu.clearAllItems
+      _proxies.clear
+      EventDispatcher.trigger(this, new ProxyDeletedEvent)
   }
 }
 

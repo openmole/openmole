@@ -44,13 +44,17 @@ object PrototypeKey {
   def inCacheMap(k: PrototypeKey) = atomic { implicit actx ⇒ cacheMap.contains(k) }    */
 
   def apply(proxy: PrototypeDataProxyUI): PrototypeKey =
-    PrototypeKey(proxy.dataUI.name, KeyGenerator.stripArrays(proxy.dataUI.`type`)._1.runtimeClass, proxy.dataUI.dim)
+    new PrototypeKey(proxy.dataUI.name, KeyGenerator.stripArrays(proxy.dataUI.`type`)._1.runtimeClass, proxy.dataUI.dim)
 
   def apply(proto: Prototype[_]): PrototypeKey = {
     val (manifest, dim) = KeyGenerator.stripArrays(proto.`type`)
-    PrototypeKey(proto.name, manifest.runtimeClass, dim)
+    new PrototypeKey(proto.name, manifest.runtimeClass, dim)
   }
 
+  def apply(proto: Prototype[_], dim: Int): PrototypeKey = {
+    val (manifest, _) = KeyGenerator.stripArrays(proto.`type`)
+    new PrototypeKey(proto.name, manifest.runtimeClass, dim)
+  }
   /*def prototype(key: PrototypeKey): PrototypeDataProxyUI = {
     buildUnknownPrototype(key)
     cacheMap(key)
@@ -70,9 +74,8 @@ object PrototypeKey {
   }
 
   def build(name: String, dim: Int, m: Manifest[_]): PrototypeDataProxyUI = {
-    val proxy = PrototypeDataProxyUI(GenericPrototypeDataUI(name, dim)(m), true)
-    //if (!Proxies.contains(proxy)) Proxies.instance += proxy
-
+    val proxy = PrototypeDataProxyUI(GenericPrototypeDataUI(name, dim)(KeyGenerator.stripArrays(m)._1), true)
+    //  val proxy = PrototypeDataProxyUI(GenericPrototypeDataUI(name, dim)(m), true)
     proxy
   }
 

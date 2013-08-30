@@ -43,8 +43,11 @@ object Types {
   def standardize(c: String) = {
     c match {
       case "Int"                  ⇒ "int"
+      case "java.lang.Integer"    ⇒ "ims"
       case "Double"               ⇒ "double"
+      case "java.lang.Double"     ⇒ println("AAAAAAAAAAaaaah"); "double"
       case "Long"                 ⇒ "long"
+      case "java.lang.Long"       ⇒ "long"
       case "java.math.BigDecimal" ⇒ "BigDecimal"
       case "java.math.BigInteger" ⇒ "BigInteger"
       case "java.io.File"         ⇒ "File"

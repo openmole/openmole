@@ -88,7 +88,7 @@ object ConceptMenu {
 
   val taskMenu = new PopupToolBarPresenter("Task", new Color(107, 138, 166), List(menuItem(display(Builder.taskUI(false)))))
   val environmentMenu = new PopupToolBarPresenter("Environment", new Color(68, 120, 33), List(menuItem(display(Builder.environmentUI(false)))))
-  val prototypeMenu = new PopupToolBarPresenter("Prototype", new Color(212, 170, 0), List(menuItem(display(Builder.prototypeUI))))
+  val prototypeMenu = new PopupToolBarPresenter("Prototype", new Color(192, 154, 0), List(menuItem(display(Builder.prototypeUI))))
   val samplingMenu = new PopupToolBarPresenter("Sampling", new Color(255, 85, 85), List(menuItem(display(Builder.samplingCompositionUI(false)))))
   val sourceMenu = new PopupToolBarPresenter("Source", new Color(99, 86, 136), List(menuItem(display(Builder.sourceUI(false)))))
   val hookMenu = new PopupToolBarPresenter("Hook", new Color(168, 120, 33), List(menuItem(display(Builder.hookUI(false)))))
@@ -130,7 +130,7 @@ object ConceptMenu {
     val pmenu = (GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra).sortBy(_.toString).map {
       d ⇒ menuItem(PrototypeDataProxyUI(d), d.toString, f)
     }
-    new PopupToolBarPresenter(initDataUI.typeClassString.split('.').last, new Color(212, 170, 0), pmenu)
+    new PopupToolBarPresenter(initDataUI.typeClassString.split('.').last, new Color(192, 154, 0), pmenu)
   }
 
   def buildHookMenu(f: HookDataProxyUI ⇒ Unit, initDataUI: HookDataUI) = {

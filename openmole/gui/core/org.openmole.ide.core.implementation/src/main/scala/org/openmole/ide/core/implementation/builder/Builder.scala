@@ -32,7 +32,7 @@ import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import scala.swing.ScrollPane
 import org.openmole.misc.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI._
 import scala.Some
 import org.openmole.ide.core.implementation.registry.DefaultKey
 import org.openmole.ide.core.implementation.workflow.{ TransitionUI, CapsuleUI }
@@ -49,7 +49,7 @@ import scala.Some
 
 object Builder {
 
-  def prototypeUI = PrototypeDataProxyUI(new GenericPrototypeDataUI("", 0, manifest(classOf[java.lang.Double])), false)
+  def prototypeUI = PrototypeDataProxyUI(stringToDataUI("double"), false)
 
   def samplingCompositionUI(b: Boolean) = SamplingCompositionDataProxyUI(g = b)
 

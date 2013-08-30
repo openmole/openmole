@@ -299,7 +299,7 @@ class CapsuleUI private (
         mole,
         Map(caps -> dataUI.sources.map { _.dataUI.coreObject.get }),
         Map(caps -> dataUI.hooks.map { _.dataUI.coreObject.get })).toList.map {
-          ds ⇒ Proxies.instance.prototypeOrElseCreate(PrototypeKey(ds.prototype))
+          ds ⇒ Proxies.instance.prototypeOrElseCreate(ds.prototype)
         }
     }
     else List()
@@ -312,7 +312,7 @@ class CapsuleUI private (
         mole,
         Map(caps -> dataUI.sources.map { _.dataUI.coreObject.get }),
         Map(caps -> dataUI.hooks.map { _.dataUI.coreObject.get })).toList.map {
-          ds ⇒ Proxies.instance.prototypeOrElseCreate(PrototypeKey(ds.prototype))
+          ds ⇒ Proxies.instance.prototypeOrElseCreate(ds.prototype)
         }
     }
     else List()
