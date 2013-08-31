@@ -74,12 +74,10 @@ class DIRACGliteEnvironment(
   @transient lazy val authentication = DIRACAuthentication.initialise(getAuthentication)(authentications)
 
   @transient lazy val proxyCreator = {
-    val file = Workspace.newFile("proxy", ".x509")
-    FileDeleter.deleteWhenGarbageCollected(file)
     GliteAuthentication.initialise(getAuthentication)(
       vomsURL,
       voName,
-      file,
+      FileDeleter.deleteWhenGarbageCollected(Workspace.newFile("proxy", ".x509")),
       GliteEnvironment.proxyTime.toSeconds,
       fqan)(authentications).cache(GliteEnvironment.proxyRenewalDelay)
   }
