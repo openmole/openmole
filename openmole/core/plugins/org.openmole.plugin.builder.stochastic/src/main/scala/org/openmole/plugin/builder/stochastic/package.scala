@@ -32,6 +32,10 @@ import org.openmole.plugin.task.stat._
 
 package object stochastic {
 
+  object Statistics {
+    def apply() = new Statistics
+  }
+
   class Statistics {
     var medians: List[(Prototype[Double], Prototype[Double])] = Nil
     var medianAbsoluteDeviations: List[(Prototype[Double], Prototype[Double])] = Nil
