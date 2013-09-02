@@ -75,7 +75,7 @@ package object stochastic {
     statistics.sums.foreach { case (out, stat) ⇒ sumTask addSequence (out.toArray, stat) }
     val sumCapsule = new Capsule(sumTask)
 
-    val mseTask = MeanSquaredErrorTask(name + "MeanSquareError")
+    val mseTask = MeanSquareErrorTask(name + "MeanSquareError")
     statistics.mses.foreach { case (out, stat) ⇒ mseTask addSequence (out.toArray, stat) }
     val mseCapsule = new Capsule(mseTask)
 

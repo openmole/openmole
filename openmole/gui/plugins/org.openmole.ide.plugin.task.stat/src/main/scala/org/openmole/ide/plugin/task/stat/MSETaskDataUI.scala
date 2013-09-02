@@ -18,7 +18,7 @@ package org.openmole.ide.plugin.task.stat
 
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 import org.openmole.core.model.task.PluginSet
-import org.openmole.plugin.task.stat.MeanSquaredErrorTask
+import org.openmole.plugin.task.stat.MeanSquareErrorTask
 import org.openmole.core.model.data.Prototype
 
 class MSETaskDataUI(val name: String = "",
@@ -28,7 +28,7 @@ class MSETaskDataUI(val name: String = "",
                     val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends StatDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
-    val gtBuilder = MeanSquaredErrorTask(name)(plugins)
+    val gtBuilder = MeanSquareErrorTask(name)(plugins)
     sequence foreach {
       s ⇒
         gtBuilder addSequence (s._1.dataUI.coreObject.get.asInstanceOf[Prototype[Array[Double]]],
@@ -38,7 +38,7 @@ class MSETaskDataUI(val name: String = "",
     gtBuilder.toTask
   }
 
-  def coreClass = classOf[MeanSquaredErrorTask]
+  def coreClass = classOf[MeanSquareErrorTask]
 
   override def imagePath = "img/mse.png"
 
