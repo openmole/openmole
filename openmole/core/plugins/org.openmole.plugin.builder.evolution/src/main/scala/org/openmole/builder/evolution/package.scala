@@ -106,8 +106,9 @@ package object evolution {
     scalingIndividualsTask addOutput individual.toArray
     scalingIndividualsTask addOutput archive
 
-    val renameIndividualsTask = RenameTask(name + "RenameIndividuals", individual.toArray -> newIndividual.toArray)
-    val mergeIndividualsTask = FlattenTask(name + "MergeIndividuals", List(individual.toArray, newIndividual.toArray), individual.toArray)
+    val renameIndividualsTask = RenameTask(name + "RenameIndividuals")
+    renameIndividualsTask.rename(individual.toArray, newIndividual.toArray)
+    val mergeIndividualsTask = FlattenTask(name + "MergeIndividuals", individual.toArray, individual.toArray, newIndividual.toArray)
 
     val terminatedCondition = Condition(terminated.name + " == true")
 

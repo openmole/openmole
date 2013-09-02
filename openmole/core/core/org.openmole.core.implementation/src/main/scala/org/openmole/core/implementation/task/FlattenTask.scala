@@ -24,7 +24,7 @@ import reflect.ClassTag
 
 object FlattenTask {
 
-  def apply[S, T <: Array[S]](name: String, prototypes: Iterable[Prototype[_ <: T]], result: Prototype[Array[S]])(implicit plugins: PluginSet = PluginSet.empty) =
+  def apply[S, T <: Array[S]](name: String, result: Prototype[Array[S]], prototypes: Prototype[_ <: T]*)(implicit plugins: PluginSet = PluginSet.empty) =
     new TaskBuilder { builder ⇒
 
       for (p ← prototypes) addInput(p)

@@ -20,19 +20,23 @@ package org.openmole.core.implementation.task
 import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
+import scala.collection.mutable.ListBuffer
 
 object RenameTask {
 
-  def apply(name: String, renamings: (Prototype[T], Prototype[T]) forSome { type T }*)(implicit plugins: PluginSet = PluginSet.empty) =
+  def apply(name: String)(implicit plugins: PluginSet = PluginSet.empty) =
     new TaskBuilder { builder ⇒
 
-      for ((from, to) ← renamings) {
+      val toRename = ListBuffer[(Prototype[T], Prototype[T]) forSome { type T }]()
+
+      def rename[T](from: Prototype[T], to: Prototype[T]) = {
         addInput(from)
         addOutput(to)
+        toRename += ((from, to))
       }
 
       def toTask =
-        new RenameTask(name, renamings: _*) with builder.Built
+        new RenameTask(name, toRename.toList: _*) with builder.Built
 
     }
 
@@ -40,6 +44,6 @@ object RenameTask {
 sealed abstract class RenameTask(val name: String, val renamings: (Prototype[T], Prototype[T]) forSome { type T }*) extends Task {
 
   override def process(context: Context) =
-    renamings.map { case (from, to) ⇒ Variable(to, context.valueOrException(from)) }
+    renamings.map { case (from, to) ⇒ Variable(to, context(from)) }
 
 }
