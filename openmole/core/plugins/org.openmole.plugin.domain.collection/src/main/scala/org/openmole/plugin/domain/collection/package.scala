@@ -22,6 +22,7 @@ import org.openmole.core.model.sampling._
 import org.openmole.core.implementation.data._
 
 package object collection {
+
   implicit def scalaIterableDomainDecorator[T](iterable: Iterable[T]) = new {
     def toDomain = new IterableDomain[T](iterable)
   }
@@ -30,4 +31,9 @@ package object collection {
     def toDomain = new VariableDomain[T](variable)
     def toFactor = Factor(variable.fromArray, new VariableDomain[T](variable))
   }
+
+  implicit def booleanPrototypeDecorator(p: Prototype[Boolean]) = new {
+    def toFactor = Factor(p, List(true, false) toDomain)
+  }
+
 }
