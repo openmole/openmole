@@ -92,7 +92,7 @@ package object stochastic {
     val exploration = ExplorationTask(name + "Replication", replications)
     val explorationCapsule = new StrainerCapsule(exploration)
     val aggregationCapsule = Slot(new StrainerCapsule(EmptyTask(name + "Aggregation")))
-    explorationCapsule -< model >- aggregationCapsule + explorationCapsule oo explorationCapsule
+    explorationCapsule -< model >- aggregationCapsule + explorationCapsule oo aggregationCapsule
   }
 
 }
