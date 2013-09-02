@@ -30,6 +30,6 @@ object MeanSquaredErrorTask {
 
 sealed abstract class MeanSquaredErrorTask(val name: String) extends DoubleSequenceStatTask {
 
-  override def stat(seq: Array[Double]) = Stat.meanSquaredError(seq)
+  override def stat(seq: Array[Double]) = Stat.meanSquareError(seq)
 
 }
