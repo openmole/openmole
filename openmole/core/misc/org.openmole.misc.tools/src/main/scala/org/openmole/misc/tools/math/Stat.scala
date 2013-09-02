@@ -35,7 +35,7 @@ object Stat {
 
   def average(serie: Iterable[Double]) = serie.sum / serie.size
 
-  def meanSquareError(serie: Iterable[Double]) = {
+  def meanSquaredError(serie: Iterable[Double]) = {
     val avg = average(serie)
     average(serie.map { v ⇒ math.pow(v - avg, 2) })
   }

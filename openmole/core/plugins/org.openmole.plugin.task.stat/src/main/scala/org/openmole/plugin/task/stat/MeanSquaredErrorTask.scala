@@ -20,15 +20,15 @@ package org.openmole.plugin.task.stat
 import org.openmole.core.model.task.PluginSet
 import org.openmole.misc.tools.math._
 
-object MeanSquareErrorTask {
+object MeanSquaredErrorTask {
 
   def apply(name: String)(implicit plugins: PluginSet) = new DoubleSequenceStatTaskBuilder { builder ⇒
-    def toTask = new MeanSquareErrorTask(name) with builder.Built
+    def toTask = new MeanSquaredErrorTask(name) with builder.Built
   }
 
 }
 
-sealed abstract class MeanSquareErrorTask(val name: String) extends DoubleSequenceStatTask {
+sealed abstract class MeanSquaredErrorTask(val name: String) extends DoubleSequenceStatTask {
 
   override def stat(seq: Array[Double]) = Stat.meanSquareError(seq)
 

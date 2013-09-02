@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.task.stat
 import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.builder.{ SceneFactory, PuzzleUIMap }
-import org.openmole.plugin.task.stat.MeanSquareErrorTask
+import org.openmole.plugin.task.stat.MeanSquaredErrorTask
 
 class MSETaskFactoryUI extends TaskFactoryUI {
   override def toString = "Mean Squared Err"
@@ -27,7 +27,7 @@ class MSETaskFactoryUI extends TaskFactoryUI {
   def buildDataUI = new MSETaskDataUI()
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
-    val t = SceneFactory.as[MeanSquareErrorTask](task)
+    val t = SceneFactory.as[MeanSquaredErrorTask](task)
     uiMap.task(t, x ⇒ new MSETaskDataUI(t.name, t.sequences.toList.map { p ⇒ (uiMap.prototypeUI(p._1).get, uiMap.prototypeUI(p._2).get) }))
   }
 
