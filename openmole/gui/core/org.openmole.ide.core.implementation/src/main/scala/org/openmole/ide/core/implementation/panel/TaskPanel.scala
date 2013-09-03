@@ -91,7 +91,7 @@ trait TaskPanel extends Base
       case SelectionChanged(_) ⇒ updatePanel
     }
 
-    basePanel.revalidate
+    // basePanel.revalidate
   }
 
   def updateConceptPanel(d: TASKDATAUI) = {

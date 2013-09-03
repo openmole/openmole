@@ -40,7 +40,7 @@ class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene { buildMoleScene ⇒
 
   override def refresh {
     dataUI.invalidateCache
-    CheckData.checkMole(this)
+    //CheckData.checkMole(this)
     dataUI.capsules.foreach { case (_, c) ⇒ c.update }
     super.refresh
   }
