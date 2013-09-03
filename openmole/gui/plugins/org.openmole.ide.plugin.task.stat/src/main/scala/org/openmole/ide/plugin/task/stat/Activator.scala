@@ -25,5 +25,6 @@ class Activator extends OSGiActivator with TaskActivator {
   override def taskFactories = List(new MedianTaskFactoryUI,
     new AverageTaskFactoryUI,
     new SumTaskFactoryUI,
-    new MSETaskFactoryUI)
+    new MSETaskFactoryUI,
+    new ConfidenceIntervalTaskFactoryUI)
 }
