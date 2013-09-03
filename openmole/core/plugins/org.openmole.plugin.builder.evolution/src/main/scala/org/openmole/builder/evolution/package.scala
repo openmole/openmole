@@ -311,7 +311,8 @@ package object evolution {
 
     val firstCapsule = StrainerCapsule(EmptyTask(name + "First"))
 
-    val renameOriginalArchiveTask = RenameTask(name + "RenameOriginalArchive", archive -> originalArchive)
+    val renameOriginalArchiveTask = RenameTask(name + "RenameOriginalArchive")
+    renameOriginalArchiveTask.rename(archive, originalArchive)
     renameOriginalArchiveTask addOutput archive
 
     val renameOriginalArchiveCapsule = Capsule(renameOriginalArchiveTask)
@@ -322,9 +323,10 @@ package object evolution {
     mergeArchiveTask addParameter (archive -> islandElitism.initialArchive)
     val mergeArchiveSlot = Slot(MasterCapsule(mergeArchiveTask, archive))
 
-    val renameIndividualsTask = RenameTask(name + "RenameIndividuals", individual.toArray -> newIndividual.toArray)
+    val renameIndividualsTask = RenameTask(name + "RenameIndividuals")
+    renameIndividualsTask.rename(individual.toArray, newIndividual.toArray)
 
-    val mergeIndividualsTask = FlattenTask(name + "MergeIndividuals", List(individual.toArray, newIndividual.toArray), individual.toArray)
+    val mergeIndividualsTask = FlattenTask(name + "MergeIndividuals", individual.toArray, individual.toArray, newIndividual.toArray)
     mergeIndividualsTask addInput archive
     mergeIndividualsTask addOutput archive
 

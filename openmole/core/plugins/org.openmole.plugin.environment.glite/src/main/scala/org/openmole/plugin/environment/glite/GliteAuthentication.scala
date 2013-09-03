@@ -137,7 +137,7 @@ object GliteAuthentication extends Logger {
   def initialise(a: GliteAuthentication)(
     serverURL: String,
     voName: String,
-    proxyFile: => File,
+    proxyFile: ⇒ File,
     lifeTime: Int,
     fqan: Option[String])(implicit authenticationProvider: AuthenticationProvider) =
     a match {
