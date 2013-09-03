@@ -15,14 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.task
+package org.openmole.plugin.task.tools
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.task._
 import reflect.ClassTag
+import org.openmole.core.implementation.task.Task
 
-object FlattenTask {
+object MergeTask {
 
   def apply[S, T <: Array[S]](name: String, result: Prototype[Array[S]], prototypes: Prototype[_ <: T]*)(implicit plugins: PluginSet = PluginSet.empty) =
     new TaskBuilder { builder ⇒
@@ -31,12 +33,12 @@ object FlattenTask {
       addOutput(result)
 
       def toTask =
-        new FlattenTask[S, T](name, prototypes, result) with builder.Built
+        new MergeTask[S, T](name, prototypes, result) with builder.Built
     }
 
 }
 
-sealed abstract class FlattenTask[S, T <: Array[S]](val name: String, prototypes: Iterable[Prototype[_ <: T]], result: Prototype[Array[S]]) extends Task {
+sealed abstract class MergeTask[S, T <: Array[S]](val name: String, prototypes: Iterable[Prototype[_ <: T]], result: Prototype[Array[S]]) extends Task {
 
   override def process(context: Context) = {
     val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))
