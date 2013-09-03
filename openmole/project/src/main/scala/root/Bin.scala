@@ -76,5 +76,5 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
 
   lazy val openmoleDaemon = AssemblyProject("daemon", "plugins", settings = resAssemblyProject ++ daemonProjects, depNameMap =
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" }, """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })) settings
-    (resourceSets <+= baseDirectory map { _ / "resources" -> "." }, equinoxDependencies)
+    (resourceSets <+= baseDirectory map { _ / "resources" -> "." }, equinoxDependencies, includeGridscale)
 }
