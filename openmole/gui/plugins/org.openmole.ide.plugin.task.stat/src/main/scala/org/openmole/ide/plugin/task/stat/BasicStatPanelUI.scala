@@ -64,11 +64,13 @@ abstract class BasicStatPanelUI(statType: String,
 
   def filterPrototypes(p: (PrototypeDataProxyUI, PrototypeDataProxyUI)) = Proxies.check(p._1) && Proxies.check(p._2)
 
-  val components = {
+  val panelSettings = new PluginPanel("wrap") {
+    contents += multiPrototypeCombo.panel
+  }
+
+  lazy val components = {
     if (isValid)
-      List(("Settings", new PluginPanel("") {
-        add(multiPrototypeCombo.panel, "gap bottom 40")
-      }))
+      List(("Settings", panelSettings))
     else
       List(("Settings", new PluginPanel("") {
         add(new Label("At least 2 Prototypes (a Double and an array of Double have to be created first.)"), "gap bottom 40")

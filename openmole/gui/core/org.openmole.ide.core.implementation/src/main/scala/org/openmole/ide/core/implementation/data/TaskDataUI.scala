@@ -26,7 +26,15 @@ import org.openmole.ide.core.implementation.commons.AggregationTransitionType
 import org.openmole.ide.core.implementation.panel.{ TaskPanel, SaveSettings, Settings }
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-abstract class TaskDataUI extends DataUI with InputPrototype with OutputPrototype with ImplicitPrototype with ImageView with CoreObjectInitialisation {
+abstract class TaskDataUI extends DataUI
+    with InputPrototype
+    with OutputPrototype
+    with ImplicitPrototype
+    with ImageView
+    with CoreObjectInitialisation
+    with Clonable {
+
+  type DATAUI = TaskDataUI
 
   override def toString: String = name
 
@@ -61,12 +69,7 @@ abstract class TaskDataUI extends DataUI with InputPrototype with OutputPrototyp
         Proxies.instance.prototypeOrElseCreate(PrototypeKey(p.dataUI.name, p.dataUI.`type`.runtimeClass, p.dataUI.dim + 1))
     }
 
+  def doClone(p: PrototypeDataProxyUI): DATAUI = doClone(filterInputs(p), filterOutputs(p), filterInputParameters(p))
+
   def filterPrototypeOccurencies(pproxy: PrototypeDataProxyUI) = (filterInputs(pproxy) ++ filterOutputs(pproxy)).distinct
-
-  def cloneWithoutPrototype(proxy: PrototypeDataProxyUI): TaskDataUI = this
-
-  def removePrototypeOccurencies(pproxy: PrototypeDataProxyUI) = {
-    removeInput(pproxy)
-    removeOutput(pproxy)
-  }
 }

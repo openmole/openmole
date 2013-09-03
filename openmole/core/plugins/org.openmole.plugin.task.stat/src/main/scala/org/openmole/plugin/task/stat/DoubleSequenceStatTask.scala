@@ -28,7 +28,7 @@ abstract class DoubleSequenceStatTask extends Task {
   override def process(context: Context) =
     Context(
       sequences.map {
-        case (sequence, statProto) ⇒ Variable(statProto, stat(context.valueOrException(sequence)))
+        case (sequence, statProto) ⇒ Variable(statProto, stat(context(sequence)))
       })
 
   def stat(seq: Array[Double]): Double

@@ -21,6 +21,7 @@ import org.openmole.core.model.domain._
 import org.openmole.misc.tools.io.FromString
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.tools._
+import org.openmole.misc.tools.script.GroovyProxyPool
 
 object Range {
 
@@ -35,6 +36,10 @@ sealed class Range[T](val min: String, val max: String, val step: String = "1")(
 
   import integral._
   import fs._
+
+  @transient lazy val minValue = GroovyProxyPool(min)
+  @transient lazy val maxValue = GroovyProxyPool(max)
+  @transient lazy val stepValue = GroovyProxyPool(step)
 
   override def computeValues(context: Context): Iterable[T] = {
     val mi = min(context)
@@ -51,9 +56,9 @@ sealed class Range[T](val min: String, val max: String, val step: String = "1")(
     mi + ((max(context) - mi) / fromInt(2))
   }
 
-  def step(context: Context): T = fromString(VariableExpansion(context, step))
-  override def max(context: Context): T = fromString(VariableExpansion(context, max))
-  override def min(context: Context): T = fromString(VariableExpansion(context, min))
+  def step(context: Context): T = fromString(stepValue(context).toString)
+  override def max(context: Context): T = fromString(maxValue(context).toString)
+  override def min(context: Context): T = fromString(minValue(context).toString)
 
 }
 

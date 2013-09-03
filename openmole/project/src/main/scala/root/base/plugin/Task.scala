@@ -36,4 +36,6 @@ object Task extends PluginDefaults {
     provided(Misc.workspace), Apache.exec % "provided")
 
   lazy val stat = OsgiProject("stat") dependsOn (provided(Core.implementation))
+
+  lazy val tools = OsgiProject("tools") dependsOn (provided(Core.implementation))
 }

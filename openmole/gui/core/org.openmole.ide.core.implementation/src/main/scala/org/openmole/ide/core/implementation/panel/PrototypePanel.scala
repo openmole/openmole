@@ -90,54 +90,41 @@ trait PrototypePanel extends Base
 
   def deleteProxy = {
 
-    def erase = {
-      scene.closePropertyPanel(index)
-      Proxies.instance -= proxy
-      // Proxys.prototypes.filter { p ⇒ p.dataUI.name == proxy.dataUI.name && p.generated }.foreach { p ⇒ Proxys -= p }
-      -=(proxy)
-      // true
-    }
-
     //remove in Tasks
-    val capsulesWithProtos: List[CapsuleUI] = ScenesManager.moleScenes.flatMap {
+    /* val capsulesWithProtos: List[CapsuleUI] = ScenesManager.moleScenes.flatMap {
       _.dataUI.capsules.values.flatMap { c ⇒
         c.dataUI.task match {
           case Some(x: TaskDataProxyUI) ⇒ if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
           case _                        ⇒ None
         }
       }
-    }.toList
+    }.toList */
 
-    //  capsulesWithProtos match {
-    // case Nil ⇒ erase
-    // case _ ⇒
+    scene.closePropertyPanel(index)
+    Proxies.instance -= proxy
+    -=(proxy)
+
     if (DialogFactory.deleteProxyConfirmation(proxy)) {
       Proxies.instance.hooks.foreach { h ⇒
-        h.dataUI.removePrototypeOccurencies(proxy)
-        h.dataUI = h.dataUI.cloneWithoutPrototype(proxy)
+        h.dataUI = h.dataUI.doClone(proxy)
       }
 
       Proxies.instance.sources.foreach { s ⇒
-        s.dataUI.removePrototypeOccurencies(proxy)
-        s.dataUI = s.dataUI.cloneWithoutPrototype(proxy)
+        s.dataUI = s.dataUI.doClone(proxy)
       }
 
-      erase
-      capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
+      Proxies.instance.tasks.foreach { s ⇒
+        s.dataUI = s.dataUI.doClone(proxy)
+      }
+
       List(ScenesManager.currentScene).flatten.foreach {
         _.dataUI.connectors.values.toList.foreach {
           dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy }
         }
       }
-
       ScenesManager.invalidateMoles
-      // true
 
     }
-    //else false
-
-    //  }
-
   }
 
 }

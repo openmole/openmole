@@ -23,18 +23,32 @@ import org.openmole.ide.core.implementation.data.HookDataUI
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 
 class ToStringHookDataUI(val name: String = "",
-                         val toBeHooked: List[PrototypeDataProxyUI] = List.empty) extends HookDataUI {
+                         val toBeHooked: List[PrototypeDataProxyUI] = List.empty,
+                         val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                         val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                         val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends HookDataUI {
 
   def coreClass = classOf[ToStringHook]
 
   def buildPanelUI = new ToStringHookPanelUI(this)
 
-  override def cloneWithoutPrototype(proxy: PrototypeDataProxyUI) =
-    new ToStringHookDataUI(name, toBeHooked.filterNot { _ == proxy })
+  /*override def cloneWithoutPrototype(proxy: PrototypeDataProxyUI) =
+    new ToStringHookDataUI(name, toBeHooked.filterNot {
+      _ == proxy
+    })      */
 
   def coreObject = util.Try {
-    val h = ToStringHook(toBeHooked.map { _.dataUI.coreObject.get }.toSeq: _*)
+    val h = ToStringHook(toBeHooked.map {
+      _.dataUI.coreObject.get
+    }.toSeq: _*)
     initialise(h)
     h.toHook
+  }
+
+  def doClone(ins: Seq[PrototypeDataProxyUI],
+              outs: Seq[PrototypeDataProxyUI],
+              params: Map[PrototypeDataProxyUI, String]) = {
+    println("in doClone " + Proxies.instance.filter(toBeHooked))
+    new ToStringHookDataUI(name, Proxies.instance.filter(toBeHooked), ins, outs, params)
   }
 }

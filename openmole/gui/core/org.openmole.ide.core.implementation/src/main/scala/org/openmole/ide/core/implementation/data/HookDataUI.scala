@@ -22,7 +22,15 @@ import scala.util.{ Try, Success }
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.panelsettings.HookPanelUI
 
-abstract class HookDataUI extends DataUI with InputPrototype with OutputPrototype with ImplicitPrototype with ImageView with CoreObjectInitialisation {
+abstract class HookDataUI extends DataUI
+    with InputPrototype
+    with OutputPrototype
+    with ImplicitPrototype
+    with ImageView
+    with CoreObjectInitialisation
+    with Clonable {
+
+  type DATAUI = HookDataUI
   def implicitPrototypes: (List[PrototypeDataProxyUI], List[PrototypeDataProxyUI]) =
     coreObject match {
       case Success(x: IHook) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map { _.prototype }.toList, inputs, y ⇒ x.outputs.map { _.prototype }.toList, outputs)
@@ -41,12 +49,5 @@ abstract class HookDataUI extends DataUI with InputPrototype with OutputPrototyp
 
   def buildPanelUI: HookPanelUI
 
-  def filterPrototypeOccurencies(pproxy: PrototypeDataProxyUI) = (filterInputs(pproxy) ++ filterOutputs(pproxy)).distinct
-
-  def cloneWithoutPrototype(proxy: PrototypeDataProxyUI): HookDataUI = this
-
-  def removePrototypeOccurencies(pproxy: PrototypeDataProxyUI) = {
-    removeInput(pproxy)
-    removeOutput(pproxy)
-  }
+  def doClone(p: PrototypeDataProxyUI): DATAUI = doClone(filterInputs(p), filterOutputs(p), filterInputParameters(p))
 }

@@ -70,7 +70,7 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI)(implicit val i18n: Resour
   if (ndu.inputMap.isEmpty) inputMapMultiComboTextField.removeAllRows
 
   val launchingCommandTextArea = new BashEditor {
-    editor.text = ndu.lauchingCommands
+    editor.text = ndu.launchingCommands
     preferredSize = new Dimension(100, 200)
   }
 

@@ -137,7 +137,7 @@ object GliteAuthentication extends Logger {
   def initialise(a: GliteAuthentication)(
     serverURL: String,
     voName: String,
-    proxyFile: File,
+    proxyFile: ⇒ File,
     lifeTime: Int,
     fqan: Option[String])(implicit authenticationProvider: AuthenticationProvider) =
     a match {
@@ -148,7 +148,7 @@ object GliteAuthentication extends Logger {
           val certificate = a.certificate
           val serverURL = _serverURL
           val voName = _voName
-          val proxyFile = _proxyFile
+          def proxyFile = _proxyFile
           val lifeTime = _lifeTime
           val password = a.password(authenticationProvider)
           override val fqan = _fqan
@@ -161,7 +161,7 @@ object GliteAuthentication extends Logger {
           val key = a.key
           val serverURL = _serverURL
           val voName = _voName
-          val proxyFile = _proxyFile
+          def proxyFile = _proxyFile
           val lifeTime = _lifeTime
           val password = a.password(authenticationProvider)
           override val fqan = _fqan

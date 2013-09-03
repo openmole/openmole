@@ -26,7 +26,7 @@ import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.data.Context
 import util.{ Failure, Success }
 import org.openmole.core.implementation.validation.DataflowProblem.DuplicatedName
-import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, TaskDataProxyUI }
 
 object CheckData extends Logger {
 
@@ -51,24 +51,29 @@ object CheckData extends Logger {
                   case (k, v) ⇒ v -> k
                 }
 
-                ToolDataUI.computePrototypeFromAggregation(mole)
+                val sources = capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.sources.map { _.dataUI.coreObject.get } }
+                val hooks = capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.hooks.map { _.dataUI.coreObject.get } }
+
+                ToolDataUI.buildUpLevelPrototypes(mole, sources, hooks)
+                ToolDataUI.computePrototypeFromAggregation(mole, sources, hooks)
                 // Formal validation
                 val errors = Validation(mole,
                   Context.empty,
-                  capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.sources.map { _.dataUI.coreObject.get } },
-                  capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.hooks.map { _.dataUI.coreObject.get } })
+                  sources,
+                  hooks)
                 errors.isEmpty match {
                   case false ⇒
                     errors.flatMap {
                       _ match {
                         case x: DuplicatedName ⇒
-                          val duplicated = x.data.map { _.prototype.name }.toList.distinct
+                          /*     val duplicated = x.data.map { _.prototype.name }.toList.distinct
                           List(capsuleMap(x.capsule).dataUI.task).flatten.map { proxy ⇒
                             proxy.dataUI.inputs = proxy.dataUI.inputs.filterNot { p ⇒
                               duplicated.contains(p.dataUI.name)
                             }.toSeq
                             proxy
-                          }
+                          } */
+                          displayCapsuleErrors(capsuleMap(x.capsule), x.toString)
                           None
                         case x: DataflowProblem ⇒
                           displayCapsuleErrors(capsuleMap(x.capsule), x.toString)

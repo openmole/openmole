@@ -35,7 +35,7 @@ class IOPrototypePanel(val prototypesIn: Seq[PrototypeDataProxyUI] = List.empty,
                        val prototypesOut: Seq[PrototypeDataProxyUI] = List.empty,
                        implicitPrototypeIn: Seq[PrototypeDataProxyUI] = List.empty,
                        implicitPrototypeOut: Seq[PrototypeDataProxyUI] = List.empty,
-                       inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends PluginPanel("wrap") {
+                       val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends PluginPanel("wrap") {
 
   val protoInEditor = {
     val incomboContent = Proxies.instance.prototypes.map {

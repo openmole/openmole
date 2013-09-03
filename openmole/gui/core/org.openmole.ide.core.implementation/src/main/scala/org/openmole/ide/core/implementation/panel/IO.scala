@@ -37,11 +37,6 @@ trait IO extends IOProxy {
   def save(dUI: DATAUI,
            prototypesIn: Seq[PrototypeDataProxyUI],
            inputParameters: Map[PrototypeDataProxyUI, String],
-           prototypesOut: Seq[PrototypeDataProxyUI]): DATAUI = {
-    dUI.inputs = prototypesIn
-    dUI.outputs = prototypesOut
-    dUI.inputParameters = inputParameters
-    dUI
-  }
-
+           prototypesOut: Seq[PrototypeDataProxyUI]) =
+    dUI.doClone(prototypesIn, prototypesOut, inputParameters)
 }

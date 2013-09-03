@@ -15,31 +15,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.task
+package org.openmole.plugin.task.tools
 
 import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
+import scala.collection.mutable.ListBuffer
+import org.openmole.core.implementation.task._
 
-object RenameTask {
+object AssignTask {
 
-  def apply(name: String, renamings: (Prototype[T], Prototype[T]) forSome { type T }*)(implicit plugins: PluginSet = PluginSet.empty) =
+  def apply(name: String)(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
-      for ((from, to) ← renamings) {
+      val toAssign = ListBuffer[(Prototype[T], Prototype[T]) forSome { type T }]()
+
+      def assign[T](from: Prototype[T], to: Prototype[T]) = {
         addInput(from)
         addOutput(to)
+        toAssign += ((from, to))
       }
 
       def toTask =
-        new RenameTask(name, renamings: _*) with builder.Built
+        new AssignTask(name, toAssign.toList: _*) with builder.Built
 
     }
 
 }
-sealed abstract class RenameTask(val name: String, val renamings: (Prototype[T], Prototype[T]) forSome { type T }*) extends Task {
+sealed abstract class AssignTask(val name: String, val renamings: (Prototype[T], Prototype[T]) forSome { type T }*) extends Task {
 
   override def process(context: Context) =
-    renamings.map { case (from, to) ⇒ Variable(to, context.valueOrException(from)) }
+    renamings.map { case (from, to) ⇒ Variable(to, context(from)) }
 
 }

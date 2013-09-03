@@ -8,7 +8,7 @@ object Builder extends PluginDefaults {
 
   lazy val base = OsgiProject("base") dependsOn (Core.implementation)
 
-  lazy val evolution = OsgiProject("evolution") dependsOn (Misc.exception, Core.implementation, Method.evolution)
+  lazy val evolution = OsgiProject("evolution") dependsOn (Misc.exception, Core.implementation, Method.evolution, Task.tools)
 
   lazy val sensitivity = OsgiProject("sensitivity") dependsOn (Core.implementation, plugin.Task.stat, Method.sensitivity)
 

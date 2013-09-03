@@ -94,6 +94,7 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
             "org.openmole.core.model.task._",
             "org.openmole.core.batch.authentication._",
             "org.openmole.misc.workspace._",
+            "Workspace.authenticationProvider",
             "org.openmole.misc.tools.io.FromString._",
             "java.io.File",
             "commands._",

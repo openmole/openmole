@@ -19,7 +19,12 @@ package org.openmole.core.serializer
 
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.io.xml.StaxDriver
-import java.io._
+import java.io.File
+import java.io.FileFilter
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.core.serializer.structure.PluginClassAndFiles
@@ -38,7 +43,6 @@ import com.ice.tar.TarInputStream
 import org.openmole.misc.tools.service.LockUtils._
 import java.util.concurrent.locks.{ ReentrantReadWriteLock, ReadWriteLock }
 import collection.mutable.ListBuffer
-import java.util.zip.GZIPInputStream
 
 object SerializerService extends Logger {
 
@@ -101,17 +105,25 @@ object SerializerService extends Logger {
 
   def deserialize[T](is: InputStream): T = lock.read(xstream.fromXML(is).asInstanceOf[T])
 
-  def deserializeAndExtractFiles[T](is: InputStream, extractDir: File): T = {
-    new TarInputStream(is).extractDirArchiveWithRelativePath(extractDir)
+  def deserializeAndExtractFiles[T](file: File, extractDir: File = Workspace.newDir("extraction")): T = {
+    val tis = new TarInputStream(file.bufferedInputStream)
+    try deserializeAndExtractFiles(tis, extractDir)
+    finally tis.close
+  }
 
-    val fileInfoFile = new File(extractDir, filesInfo)
+  def deserializeAndExtractFiles[T](tis: TarInputStream, extractDir: File): T = lock.read {
+
+    val archiveExtractDir = extractDir.newDir("archive")
+    tis.extractDirArchiveWithRelativePath(archiveExtractDir)
+
+    val fileInfoFile = new File(archiveExtractDir, filesInfo)
     val fi = deserialize[FilesInfo](fileInfoFile)
     fileInfoFile.delete
 
     val fileReplacement =
       new TreeMap[File, File] ++ fi.map {
         case (name, (file, isDirectory, exists)) ⇒
-          val f = new File(extractDir, name)
+          val f = new File(archiveExtractDir, name)
           val dest = extractDir.newFile("extracted", ".bin")
           if (exists) f.move(dest)
 
@@ -126,31 +138,23 @@ object SerializerService extends Logger {
             else dest)
       }
 
-    val contentFile = new File(extractDir, content)
+    val contentFile = new File(archiveExtractDir, content)
     val obj = deserializeReplaceFiles[T](contentFile, fileReplacement)
     contentFile.delete
-    extractDir.delete
+    archiveExtractDir.delete
 
     obj
   }
 
-  def deserializeAndExtractFiles[T](file: File, extractDir: File = Workspace.newDir("extraction")): T = lock.read {
-    val is = file.bufferedInputStream
-    try deserializeAndExtractFiles[T](is, extractDir)
-    finally is.close
-  }
-
-  def serializeAndArchiveFiles(obj: Any, file: File): Unit = {
-    val os = file.bufferedOutputStream
+  def serializeAndArchiveFiles(obj: Any, f: File): Unit = {
+    val os = new TarOutputStream(f.bufferedOutputStream)
     try serializeAndArchiveFiles(obj, os)
     finally os.close
   }
 
-  def serializeAndArchiveFiles(obj: Any, os: OutputStream): Unit = lock.read {
+  def serializeAndArchiveFiles(obj: Any, tos: TarOutputStream): Unit = lock.read {
     val objSerial = Workspace.newFile
     val serializationResult = serializeGetPluginsAndFiles(obj, objSerial)
-
-    val tos = new TarOutputStream(os)
 
     tos.addFile(objSerial, content)
     objSerial.delete

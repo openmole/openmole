@@ -89,13 +89,8 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
     if (l.contains(c)) l -= c
   }
 
-  def refreshCache = {
-    invalidateCache
-    cacheMole
-    cleanUnusedPrototypes
-  }
-
   def invalidateCache = {
+    cleanUnusedPrototypes
     _cacheMole.single() = None
   }
 
@@ -126,8 +121,8 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
         val impl = s.dataUI.implicitPrototypes
         s.dataUI.inputs.toList ::: s.dataUI.outputs.toList ::: impl._1 ::: impl._2
       }).distinct
-    Proxies.instance.prototypes.diff(pUI).foreach {
-      p ⇒ if (p.generated) Proxies.instance -= p
+    Proxies.instance.prototypes.diff(pUI).filter { _.generated }.foreach {
+      Proxies.instance -=
     }
   }
 
@@ -153,7 +148,7 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
       case Some(caps: CapsuleUI) ⇒ if (id == caps.id) startingCapsule = None
     }
 
-    removeIncomingTransitions(capsule)
+    removeInAndOutcomingTransitions(capsule)
 
     -=(capsule)
     assignDefaultStartingCapsule
@@ -176,9 +171,9 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
     _._2
   }
 
-  private def removeIncomingTransitions(capsule: CapsuleUI) =
-    connectors.filter {
-      _._2.target.capsule == capsule
+  private def removeInAndOutcomingTransitions(capsule: CapsuleUI) =
+    connectors.filter { c ⇒
+      c._2.target.capsule == capsule || c._2.source == capsule
     }.foreach {
       t ⇒
         removeConnector(t._1)

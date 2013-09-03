@@ -19,8 +19,9 @@ package org.openmole.plugin.domain.bounded
 
 import org.openmole.core.model.domain._
 import org.openmole.core.model.data._
-import org.openmole.core.implementation.tools.VariableExpansion._
-import org.openmole.misc.tools.io.FromString
+import org.openmole.core.implementation.tools._
+import org.openmole.misc.tools.io._
+import org.openmole.misc.tools.script._
 
 object Bounded {
 
@@ -30,6 +31,9 @@ object Bounded {
 }
 
 sealed class Bounded[T](val min: String, val max: String)(implicit fromString: FromString[T]) extends Domain[T] with Bounds[T] {
-  def min(context: Context) = fromString.fromString(min.expand(context))
-  def max(context: Context) = fromString.fromString(max.expand(context))
+  @transient lazy val minValue = GroovyProxyPool(min)
+  @transient lazy val maxValue = GroovyProxyPool(max)
+
+  def min(context: Context) = fromString.fromString(minValue(context).toString)
+  def max(context: Context) = fromString.fromString(maxValue(context).toString)
 }

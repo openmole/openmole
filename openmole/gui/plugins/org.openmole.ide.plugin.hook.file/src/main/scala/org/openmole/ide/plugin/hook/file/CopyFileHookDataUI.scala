@@ -21,22 +21,28 @@ import java.io.File
 import org.openmole.core.model.data.Prototype
 import org.openmole.plugin.hook.file._
 import org.openmole.ide.core.implementation.data.HookDataUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 
 class CopyFileHookDataUI(val name: String = "",
-                         val prototypes: List[(PrototypeDataProxyUI, String)] = List.empty) extends HookDataUI {
+                         val prototypes: List[(PrototypeDataProxyUI, String)] = List.empty,
+                         val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                         val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                         val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends HookDataUI {
 
   def coreClass = classOf[CopyFileHook]
 
   def coreObject = util.Try {
     val cfh = CopyFileHook()
-    prototypes.foreach { case (p, s) ⇒ cfh.copy(p.dataUI.coreObject.get.asInstanceOf[Prototype[File]], s) }
+    prototypes.foreach {
+      case (p, s) ⇒ cfh.copy(p.dataUI.coreObject.get.asInstanceOf[Prototype[File]], s)
+    }
     initialise(cfh)
     cfh.toHook
   }
 
-  override def cloneWithoutPrototype(proxy: PrototypeDataProxyUI) =
-    new CopyFileHookDataUI(name, prototypes.filterNot(_._1 == proxy))
-
   def buildPanelUI = new CopyFileHookPanelUI(this)
+
+  def doClone(ins: Seq[PrototypeDataProxyUI],
+              outs: Seq[PrototypeDataProxyUI],
+              params: Map[PrototypeDataProxyUI, String]) = new CopyFileHookDataUI(name, Proxies.instance.filterListTupleIn(prototypes), ins, outs, params)
 }

@@ -22,11 +22,13 @@ import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data._
 import scala.Some
-import org.openmole.ide.core.implementation.dataproxy.SamplingCompositionDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, SamplingCompositionDataProxyUI }
 
-class ExplorationTaskDataUI(
-    val name: String = "",
-    override var sampling: Option[SamplingCompositionDataProxyUI] = None) extends IExplorationTaskDataUI {
+class ExplorationTaskDataUI(val name: String = "",
+                            override var sampling: Option[SamplingCompositionDataProxyUI] = None,
+                            val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                            val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                            val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends IExplorationTaskDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
     val taskBuilder = sampling match {
@@ -45,4 +47,9 @@ class ExplorationTaskDataUI(
   override def imagePath = "img/explorationTask.png"
 
   def buildPanelUI = new ExplorationTaskPanelUI(this)
+
+  def doClone(ins: Seq[PrototypeDataProxyUI],
+              outs: Seq[PrototypeDataProxyUI],
+              params: Map[PrototypeDataProxyUI, String]) = new ExplorationTaskDataUI(name, sampling, ins, outs, params)
+
 }

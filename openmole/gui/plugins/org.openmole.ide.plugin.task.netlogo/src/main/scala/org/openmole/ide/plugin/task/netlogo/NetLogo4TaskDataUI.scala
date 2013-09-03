@@ -12,20 +12,18 @@ import org.openmole.plugin.task.netlogo4.NetLogo4Task
 import scala.collection.JavaConversions._
 import scala.io.Source
 import java.io.File
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 
-case class NetLogo4TaskDataUI(
-    name: String = "",
-    workspaceEmbedded: Boolean = false,
-    nlogoPath: String = "",
-    lauchingCommands: String = "",
-    prototypeMappingInput: List[(PrototypeDataProxyUI, String)] = List(),
-    prototypeMappingOutput: List[(String, PrototypeDataProxyUI)] = List(),
-    resources: List[String] = List()) extends TaskDataUI {
-
-  override def cloneWithoutPrototype(proxy: PrototypeDataProxyUI) =
-    this.copy(prototypeMappingInput = prototypeMappingInput.filterNot(_._1 == proxy),
-      prototypeMappingOutput = prototypeMappingOutput.filterNot(_._2 == proxy))
+case class NetLogo4TaskDataUI(name: String = "",
+                              workspaceEmbedded: Boolean = false,
+                              nlogoPath: String = "",
+                              lauchingCommands: String = "",
+                              prototypeMappingInput: List[(PrototypeDataProxyUI, String)] = List(),
+                              prototypeMappingOutput: List[(String, PrototypeDataProxyUI)] = List(),
+                              resources: List[String] = List(),
+                              val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                              val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                              val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
     val builder = NetLogo4Task(
@@ -34,9 +32,15 @@ case class NetLogo4TaskDataUI(
       Source.fromString(lauchingCommands).getLines.toIterable,
       workspaceEmbedded)(plugins)
     initialise(builder)
-    resources.foreach { r ⇒ builder addResource (new File(r)) }
-    prototypeMappingInput.foreach { case (p, n) ⇒ builder addNetLogoInput (p.dataUI.coreObject.get, n) }
-    prototypeMappingOutput.foreach { case (n, p) ⇒ builder addNetLogoOutput (n, p.dataUI.coreObject.get) }
+    resources.foreach {
+      r ⇒ builder addResource (new File(r))
+    }
+    prototypeMappingInput.foreach {
+      case (p, n) ⇒ builder addNetLogoInput (p.dataUI.coreObject.get, n)
+    }
+    prototypeMappingOutput.foreach {
+      case (n, p) ⇒ builder addNetLogoOutput (n, p.dataUI.coreObject.get)
+    }
     builder.toTask
   }
 
@@ -48,4 +52,16 @@ case class NetLogo4TaskDataUI(
 
   def buildPanelUI = new NetLogo4TaskPanelUI(this)
 
+  def doClone(ins: Seq[PrototypeDataProxyUI],
+              outs: Seq[PrototypeDataProxyUI],
+              params: Map[PrototypeDataProxyUI, String]) = new NetLogo4TaskDataUI(name,
+    workspaceEmbedded,
+    nlogoPath,
+    lauchingCommands,
+    Proxies.instance.filterListTupleIn(prototypeMappingInput),
+    Proxies.instance.filterListTupleOut(prototypeMappingOutput),
+    resources,
+    ins,
+    outs,
+    params)
 }

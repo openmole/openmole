@@ -132,7 +132,7 @@ object Workspace {
 
   def setAuthentication[T](i: Int, obj: T)(implicit m: Manifest[T]) = instance.setAuthentication[T](i, obj)
 
-  def authenticationProvider = instance.authenticationProvider
+  implicit def authenticationProvider = instance.authenticationProvider
 
   def cleanAuthentications[T](implicit m: Manifest[T]) = instance.cleanAuthentications[T]
 

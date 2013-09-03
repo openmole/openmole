@@ -25,7 +25,7 @@ import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.ide.core.implementation.data._
 
 trait IOProxy extends Proxy {
-  type IODATAUI <: DataUI with ImageView with InputPrototype with OutputPrototype with ImplicitPrototype
+  type IODATAUI <: DataUI with ImageView with InputPrototype with OutputPrototype with ImplicitPrototype with Clonable
   type DATAPROXY <: DataProxyUI with IOFacade
 }
 

@@ -32,6 +32,10 @@ import org.openmole.plugin.task.stat._
 
 package object stochastic {
 
+  object Statistics {
+    def apply() = new Statistics
+  }
+
   class Statistics {
     var medians: List[(Prototype[Double], Prototype[Double])] = Nil
     var medianAbsoluteDeviations: List[(Prototype[Double], Prototype[Double])] = Nil
@@ -88,7 +92,7 @@ package object stochastic {
     val exploration = ExplorationTask(name + "Replication", replications)
     val explorationCapsule = new StrainerCapsule(exploration)
     val aggregationCapsule = Slot(new StrainerCapsule(EmptyTask(name + "Aggregation")))
-    explorationCapsule -< model >- aggregationCapsule + explorationCapsule oo explorationCapsule
+    explorationCapsule -< model >- aggregationCapsule + explorationCapsule oo aggregationCapsule
   }
 
 }

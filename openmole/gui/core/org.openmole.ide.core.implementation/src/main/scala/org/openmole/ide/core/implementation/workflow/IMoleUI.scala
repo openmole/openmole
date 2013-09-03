@@ -44,8 +44,6 @@ trait IMoleUI extends DataUI with ID {
 
   def invalidateCache: Unit
 
-  def refreshCache: Unit
-
   def startingCapsule_=(n: Option[CapsuleUI])
 
   def capsules: Map[String, CapsuleUI]

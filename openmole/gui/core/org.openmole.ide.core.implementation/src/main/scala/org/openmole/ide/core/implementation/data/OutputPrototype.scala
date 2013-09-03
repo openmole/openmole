@@ -19,7 +19,6 @@ package org.openmole.ide.core.implementation.data
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 trait OutputPrototype {
-  var outputs: Seq[PrototypeDataProxyUI] = List.empty[PrototypeDataProxyUI]
-  def filterOutputs(pproxy: PrototypeDataProxyUI) = outputs.filter(_ == pproxy)
-  def removeOutput(pproxy: PrototypeDataProxyUI) = outputs = outputs.filterNot { _ == pproxy }
+  def outputs: Seq[PrototypeDataProxyUI]
+  def filterOutputs(pproxy: PrototypeDataProxyUI): Seq[PrototypeDataProxyUI] = outputs.filter(_ == pproxy).toSeq
 }
