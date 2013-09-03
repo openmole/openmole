@@ -26,7 +26,7 @@ import org.openmole.core.implementation.task.Task
 
 object MergeTask {
 
-  def apply[S, T <: Array[S]](name: String, result: Prototype[Array[S]], prototypes: Prototype[_ <: T]*)(implicit plugins: PluginSet = PluginSet.empty) =
+  def apply[S, T <: Array[S]](name: String, result: Prototype[Array[S]], prototypes: Prototype[_ <: T]*)(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
       for (p ← prototypes) addInput(p)
