@@ -46,7 +46,8 @@ class FileUtilSpec extends FlatSpec with ShouldMatchers {
       file.withLock(_.append(t1))
       file.withLock(_.append(t2))
       file.content should equal(t1 + t2)
-    } finally file.delete
+    }
+    finally file.delete
   }
 
 }

@@ -77,7 +77,8 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
         OsgiKeys.dynamicImportPackage := dynamicImports,
         OsgiKeys.importPackage := imports,
         OsgiKeys.embeddedJars := embeddedJars,
-        OsgiKeys.bundleActivator <<= OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) }
+        OsgiKeys.bundleActivator <<= OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) },
+        libraryDependencies ++= Seq("junit" % "junit" % "4.11" % "test", "org.scalatest" %% "scalatest" % "1.9.1" % "test")
       ) ++ sets)
   }
 
