@@ -44,7 +44,10 @@ trait DomainPanel extends Base
     basePanel.contents += domainPanelUI.bestDisplay
   }
 
-  def savePanel = widget.proxy.dataUI = domainPanelUI.saveContent
+  def savePanel = {
+    widget.proxy.dataUI = domainPanelUI.saveContent
+    widget.update
+  }
 
   def deleteProxy = {}
 
