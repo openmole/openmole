@@ -19,7 +19,6 @@ package org.openmole.core.implementation.mole
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
-import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
 import org.openmole.misc.exception.UserBadDataError
 import scala.collection.mutable.HashMap
@@ -27,7 +26,7 @@ import scala.collection.mutable.ListBuffer
 
 object Mole {
 
-  def nextCaspules(mole: IMole)(from: ICapsule, lvl: Int) =
+  def nextCapsules(mole: IMole)(from: ICapsule, lvl: Int) =
     nextTransitions(mole)(from, lvl).map { case (t, lvl) ⇒ t.end.capsule -> lvl }
 
   def nextTransitions(mole: IMole)(from: ICapsule, lvl: Int) =
@@ -45,7 +44,7 @@ object Mole {
 
     while (!toProceed.isEmpty) {
       val (capsule, level) = toProceed.remove(0)
-      nextCaspules(mole)(capsule, level).foreach {
+      nextCapsules(mole)(capsule, level).foreach {
         case (c, l) ⇒
           val continue = !cache.contains(c)
           val lvl = cache.getOrElseUpdate(c, l)

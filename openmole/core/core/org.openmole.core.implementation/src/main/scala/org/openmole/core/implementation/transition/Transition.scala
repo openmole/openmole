@@ -53,7 +53,6 @@ class Transition(
 
     registry.register(this, ticket, context)
     if (nextTaskReady(ticket, subMole)) {
-
       val dataChannelVariables = mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) }
 
       def removeVariables(t: ITransition) = registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable
