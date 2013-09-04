@@ -126,6 +126,7 @@ trait TaskPanel extends Base
           toBeRemovedCapsules.foreach {
             c ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.dataUI.removeCapsuleUI(c))
           }
+          deleteProxy
           ScenesManager.invalidateSceneCaches
           ScenesManager.refreshScenes
         }

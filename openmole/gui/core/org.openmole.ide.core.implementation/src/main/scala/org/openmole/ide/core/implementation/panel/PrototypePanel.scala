@@ -89,17 +89,6 @@ trait PrototypePanel extends Base
   }
 
   def deleteProxy = {
-
-    //remove in Tasks
-    /* val capsulesWithProtos: List[CapsuleUI] = ScenesManager.moleScenes.flatMap {
-      _.dataUI.capsules.values.flatMap { c ⇒
-        c.dataUI.task match {
-          case Some(x: TaskDataProxyUI) ⇒ if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
-          case _                        ⇒ None
-        }
-      }
-    }.toList */
-
     scene.closePropertyPanel(index)
     Proxies.instance -= proxy
     -=(proxy)

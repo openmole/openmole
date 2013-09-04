@@ -76,7 +76,7 @@ object CheckData extends Logger {
                           displayCapsuleErrors(capsuleMap(x.capsule), x.toString)
                           None
                         case x: DataflowProblem ⇒
-                          displayCapsuleErrors(capsuleMap(x.capsule), x.toString)
+                          displayCapsuleErrors(capsuleMap(x.capsule), x)
                           Some(capsuleMap(x.capsule) -> x)
                         case x ⇒
                           logger.info("Error " + x + " not taken into account in the GUI yet.")
@@ -108,7 +108,10 @@ object CheckData extends Logger {
   }
 
   def displayCapsuleErrors(capsule: CapsuleUI,
-                           errorMsg: String) = {
+                           e: Problem): Unit = displayCapsuleErrors(capsule, e.getClass.getSimpleName + " : " + e.toString)
+
+  def displayCapsuleErrors(capsule: CapsuleUI,
+                           errorMsg: String): Unit = {
     capsule.dataUI.task match {
       case Some(x: TaskDataProxyUI) ⇒ StatusBar().warn(errorMsg, Some(x))
       case None                     ⇒ StatusBar().warn(errorMsg)
