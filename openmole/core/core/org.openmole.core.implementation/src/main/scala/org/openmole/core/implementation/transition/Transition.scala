@@ -46,7 +46,7 @@ class Transition(
     mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
   }
 
-  protected def submitNextJobsIfReady(context: Buffer[Variable[_]], ticket: ITicket, subMole: ISubMoleExecution) = {
+  protected def submitNextJobsIfReady(context: Iterable[Variable[_]], ticket: ITicket, subMole: ISubMoleExecution) = {
     val moleExecution = subMole.moleExecution
     val registry = subMole.transitionRegistry
     val mole = subMole.moleExecution.mole
@@ -54,29 +54,16 @@ class Transition(
     registry.register(this, ticket, context)
     if (nextTaskReady(ticket, subMole)) {
 
-      val inputDC = mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) }
+      val dataChannelVariables = mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) }
 
       def removeVariables(t: ITransition) = registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable
 
-      val aggregatedVariables: Iterable[Variable[_]] =
+      val transitionsVariables: Iterable[Variable[_]] =
         mole.inputTransitions(end).toList.flatMap {
-          _ match {
-            case t: IAggregationTransition ⇒
-              val variables = removeVariables(t)
-              Some(AggregationTransition.aggregateOutputs(moleExecution, t, variables).values)
-            case _ ⇒ None
-          }
-        }.flatten
+          t ⇒ removeVariables(t)
+        }
 
-      val otherVariables: Iterable[Variable[_]] =
-        mole.inputTransitions(end).toList.flatMap {
-          case t: IAggregationTransition ⇒ None
-          case t ⇒
-            val variables = removeVariables(t)
-            Some(variables)
-        }.flatten
-
-      val combinaison: Iterable[Variable[_]] = inputDC ++ aggregatedVariables ++ otherVariables
+      val combinaison: Iterable[Variable[_]] = dataChannelVariables ++ transitionsVariables
 
       val newTicket =
         if (mole.slots(end.capsule).size <= 1) ticket
