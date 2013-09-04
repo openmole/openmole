@@ -44,7 +44,10 @@ trait SamplingPanel extends Base
     basePanel.contents += samplingPanelUI.bestDisplay
   }
 
-  def savePanel = widget.proxy.dataUI = samplingPanelUI.saveContent
+  def savePanel = {
+    widget.proxy.dataUI = samplingPanelUI.saveContent
+    widget.update
+  }
 
   def deleteProxy = {}
 

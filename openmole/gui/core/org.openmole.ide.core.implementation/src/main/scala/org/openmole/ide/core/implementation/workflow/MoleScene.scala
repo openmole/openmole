@@ -250,15 +250,13 @@ abstract class MoleScene extends GraphScene.StringGraph
           }
           case _ ⇒ throw new UserBadDataError("No displaying available for " + dataproxy)
         }
-        //  currentPanels(i).set(p)
-        // locate(i)
         p.nameTextField.requestFocus
         setPanel(p, i)
-        //  refresh
         p
     }
 
   def setPanel(p: Base, i: Int) = {
+    if (i == 2) saveAndClose(i)
     currentPanel(i).set(p)
     locate(i)
     refresh
