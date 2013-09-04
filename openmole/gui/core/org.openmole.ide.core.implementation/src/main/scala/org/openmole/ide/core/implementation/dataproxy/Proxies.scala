@@ -87,18 +87,26 @@ class Proxies {
     implicit ctx ⇒
       prototype(k).getOrElse {
         val p = PrototypeKey.build(k)
-        this += p
+        add(p)
         p
       }
   }
 
   def +=(p: DataProxyUI) = {
-    _proxies.single += p.id -> p
+    add(p)
     EventDispatcher.trigger(this, new ProxyCreatedEvent)
   }
 
-  def -=(p: DataProxyUI) = {
+  def add(p: DataProxyUI) = {
+    _proxies.single += p.id -> p
+  }
+
+  def remove(p: DataProxyUI) = {
     _proxies.single -= p.id
+  }
+
+  def -=(p: DataProxyUI) = {
+    remove(p)
     EventDispatcher.trigger(this, new ProxyDeletedEvent)
   }
 

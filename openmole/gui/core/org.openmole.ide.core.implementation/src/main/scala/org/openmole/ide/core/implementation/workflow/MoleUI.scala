@@ -122,7 +122,7 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
         s.dataUI.inputs.toList ::: s.dataUI.outputs.toList ::: impl._1 ::: impl._2
       }).distinct
     Proxies.instance.prototypes.diff(pUI).filter { _.generated }.foreach {
-      Proxies.instance -=
+      Proxies.instance.remove
     }
   }
 
