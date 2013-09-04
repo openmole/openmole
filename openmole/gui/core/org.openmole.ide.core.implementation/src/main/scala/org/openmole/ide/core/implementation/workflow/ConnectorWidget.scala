@@ -35,6 +35,7 @@ import scala.swing.Label
 import scala.swing.event.MousePressed
 import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.core.implementation.commons.{ EndTransitionType, AggregationTransitionType, ExplorationTransitionType, SimpleTransitionType }
+import org.netbeans.modules.visual.anchor.TriangleAnchorShape
 
 class ConnectorWidget(val scene: MoleScene,
                       var connector: ConnectorUI,
@@ -83,7 +84,7 @@ class ConnectorWidget(val scene: MoleScene,
       case x: TransitionUI ⇒
         conditionWidget.setVisible(!label.text.isEmpty)
         setLineColor(new Color(130, 130, 130))
-        setStroke(new BasicStroke(3f))
+        setStroke(transitionStroke)
         setConstraint(prototypeFilterWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER,
           if (label.text.isEmpty) 0.5f else 0.33f)
         label.revalidate
@@ -99,16 +100,29 @@ class ConnectorWidget(val scene: MoleScene,
     scene.refresh
   }
 
+  def transitionStroke = new BasicStroke(connector match {
+    case x: TransitionUI ⇒
+      x.transitionType match {
+        case ExplorationTransitionType ⇒ 5f
+        case AggregationTransitionType ⇒ 5f
+        case _                         ⇒ 2f
+      }
+  })
+
   def drawTransitionType = {
     setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
     setSourceAnchorShape(AnchorShape.NONE)
+    setStroke(transitionStroke)
     connector match {
       case x: TransitionUI ⇒
         x.transitionType match {
-          case ExplorationTransitionType ⇒ setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(EXPLORATION_TRANSITION_IMAGE, false))
-          case AggregationTransitionType ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITION_IMAGE, false))
-          case EndTransitionType         ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(END_TRANSITION_IMAGE, false))
-          case SimpleTransitionType      ⇒
+          case ExplorationTransitionType ⇒
+            setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(EXPLORATION_TRANSITION_IMAGE, false))
+            setTargetAnchorShape(new TriangleAnchorShape(22, true, false, false, 11.0))
+          case AggregationTransitionType ⇒
+            setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITION_IMAGE, false))
+          case EndTransitionType    ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(END_TRANSITION_IMAGE, false))
+          case SimpleTransitionType ⇒
         }
       case _ ⇒
     }

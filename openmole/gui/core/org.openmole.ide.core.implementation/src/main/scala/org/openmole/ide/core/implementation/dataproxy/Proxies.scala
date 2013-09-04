@@ -132,6 +132,11 @@ class Proxies {
 
   def contains(p: DataProxyUI) = _proxies.single.contains(p.id)
 
+  def prototypesWithMinDim(dim: Int): List[PrototypeDataProxyUI] = prototypesWithMinDim(dim, prototypes.toList)
+
+  def prototypesWithMinDim(dim: Int,
+                           protoList: List[PrototypeDataProxyUI]): List[PrototypeDataProxyUI] = protoList.toList.filter { _.dataUI.dim >= dim }
+
   def classPrototypes(prototypeClass: Class[_]): List[PrototypeDataProxyUI] = {
     classPrototypes(prototypeClass, prototypes.toList)
   }

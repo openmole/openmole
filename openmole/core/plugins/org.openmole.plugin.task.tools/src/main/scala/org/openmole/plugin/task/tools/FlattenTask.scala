@@ -22,6 +22,7 @@ import org.openmole.core.model.task._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.data._
 import scala.collection.mutable.ListBuffer
+import scala.reflect.ClassTag
 
 object FlattenTask {
 
@@ -46,6 +47,6 @@ object FlattenTask {
 sealed abstract class FlattenTask(val name: String, val toFlatten: List[(Prototype[Array[Array[S]]], Prototype[Array[S]]) forSome { type S }]) extends Task {
 
   override def process(context: Context) =
-    toFlatten.map { case (f, r) ⇒ Variable(r, context(f).flatten) }
+    toFlatten.map { case (f, r) ⇒ Variable(r.asInstanceOf[Prototype[Any]], context(f).flatten.toArray[Any](ClassTag(r.fromArray.`type`.runtimeClass))) }
 
 }

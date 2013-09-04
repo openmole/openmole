@@ -90,14 +90,13 @@ trait SamplingCompositionPanel extends Base
         scene.closePropertyPanel(index)
         Proxies.instance -= proxy
         ConceptMenu.-=(proxy)
-      // true
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           toBeRemovedSamplings.foreach { case (c, d) ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.dataUI.removeCapsuleUI(c)) }
           deleteProxy
         }
-      // else false
     }
+    scene.closePropertyPanels
   }
 
 }

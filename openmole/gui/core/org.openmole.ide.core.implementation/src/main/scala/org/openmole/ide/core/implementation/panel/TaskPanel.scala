@@ -91,7 +91,7 @@ trait TaskPanel extends Base
       case SelectionChanged(_) ⇒ updatePanel
     }
 
-    basePanel.revalidate
+    // basePanel.revalidate
   }
 
   def updateConceptPanel(d: TASKDATAUI) = {
@@ -126,6 +126,7 @@ trait TaskPanel extends Base
           toBeRemovedCapsules.foreach {
             c ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.dataUI.removeCapsuleUI(c))
           }
+          deleteProxy
           ScenesManager.invalidateSceneCaches
           ScenesManager.refreshScenes
         }

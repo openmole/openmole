@@ -46,27 +46,35 @@ class Transition(
     mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
   }
 
-  protected def submitNextJobsIfReady(context: Buffer[Variable[_]], ticket: ITicket, subMole: ISubMoleExecution) = {
+  protected def submitNextJobsIfReady(context: Iterable[Variable[_]], ticket: ITicket, subMole: ISubMoleExecution) = {
     val moleExecution = subMole.moleExecution
     val registry = subMole.transitionRegistry
     val mole = subMole.moleExecution.mole
 
     registry.register(this, ticket, context)
     if (nextTaskReady(ticket, subMole)) {
+      val dataChannelVariables = mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) }
 
-      val inputDC = mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) }
-      val inputTransitions = mole.inputTransitions(end).toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
+      def removeVariables(t: ITransition) = registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable
 
-      val combinaison = inputDC ++ inputTransitions
+      val transitionsVariables: Iterable[Variable[_]] =
+        mole.inputTransitions(end).toList.flatMap {
+          t ⇒ removeVariables(t)
+        }
+
+      val combinaison: Iterable[Variable[_]] = dataChannelVariables ++ transitionsVariables
 
       val newTicket =
         if (mole.slots(end.capsule).size <= 1) ticket
         else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
       val toArrayManifests =
-        Map.empty[String, Manifest[_]] ++ computeManifests(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.manifest)
+        Map.empty[String, Manifest[_]] ++
+          computeManifests(mole, moleExecution.sources, moleExecution.hooks)(end).
+          filter(_.toArray).map(ct ⇒ ct.name -> ct.manifest)
 
       val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinaison)
+
       subMole.submit(end.capsule, newContext, newTicket)
     }
   }
