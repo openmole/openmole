@@ -95,17 +95,14 @@ trait EnvironmentPanel extends Base
         scene.closePropertyPanel(index)
         Proxies.instance -= proxy
         -=(proxy)
-      //  true
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
+          scene.closePropertyPanel(index)
           capsulesWithEnv.foreach {
             _.environment_=(None)
           }
-          //delete
         }
-      // else false
     }
-
   }
 
 }
