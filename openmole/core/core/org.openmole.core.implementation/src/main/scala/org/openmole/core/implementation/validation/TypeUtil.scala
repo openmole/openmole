@@ -68,7 +68,7 @@ object TypeUtil {
         (direct.getOrElse(name, empty), toArray.getOrElse(name, empty), fromArray.getOrElse(name, empty)) match {
           case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ new ComputedType(name, d, false, optional(name))
           case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ new ComputedType(name, t, true, optional(name))
-          case (d, t, ListBuffer())                        ⇒ new ComputedType(name, s(d ++ t), true, optional(name))
+          case (d, t, ListBuffer())                        ⇒ new ComputedType(name, s(d ++ t.map(_.arrayManifest)), true, optional(name))
           case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒
             if (f.isArray) new ComputedType(name, f.fromArray.toManifest, false, optional(name))
             else new ComputedType(name, f, false, optional(name))
