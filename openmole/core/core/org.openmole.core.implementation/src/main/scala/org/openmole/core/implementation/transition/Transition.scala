@@ -55,18 +55,40 @@ class Transition(
     if (nextTaskReady(ticket, subMole)) {
 
       val inputDC = mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) }
-      val inputTransitions = mole.inputTransitions(end).toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
 
-      val combinaison = inputDC ++ inputTransitions
+      def removeVariables(t: ITransition) = registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable
+
+      val aggregatedVariables: Iterable[Variable[_]] =
+        mole.inputTransitions(end).toList.flatMap {
+          _ match {
+            case t: IAggregationTransition ⇒
+              val variables = removeVariables(t)
+              Some(AggregationTransition.aggregateOutputs(moleExecution, t, variables).values)
+            case _ ⇒ None
+          }
+        }.flatten
+
+      val otherVariables: Iterable[Variable[_]] =
+        mole.inputTransitions(end).toList.flatMap {
+          case t: IAggregationTransition ⇒ None
+          case t ⇒
+            val variables = removeVariables(t)
+            Some(variables)
+        }.flatten
+
+      val combinaison: Iterable[Variable[_]] = inputDC ++ aggregatedVariables ++ otherVariables
 
       val newTicket =
         if (mole.slots(end.capsule).size <= 1) ticket
         else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
       val toArrayManifests =
-        Map.empty[String, Manifest[_]] ++ computeManifests(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.manifest)
+        Map.empty[String, Manifest[_]] ++
+          computeManifests(mole, moleExecution.sources, moleExecution.hooks)(end).
+          filter(_.toArray).map(ct ⇒ ct.name -> ct.manifest)
 
       val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinaison)
+
       subMole.submit(end.capsule, newContext, newTicket)
     }
   }

@@ -47,7 +47,7 @@ object TypeUtil {
   def receivedTypes(mole: IMole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[Prototype[_]] =
     computeManifests(mole, sources, hooks)(slot).map { _.toPrototype }
 
-  class ComputedType(val name: String, val manifest: Manifest[_], val toArray: Boolean, val isOptional: Boolean) {
+  case class ComputedType(val name: String, val manifest: Manifest[_], val toArray: Boolean, val isOptional: Boolean) {
     def toPrototype =
       if (toArray) Prototype(name)(manifest.arrayManifest)
       else Prototype(name)(manifest)
@@ -66,9 +66,9 @@ object TypeUtil {
 
       name ⇒
         (direct.getOrElse(name, empty), toArray.getOrElse(name, empty), fromArray.getOrElse(name, empty)) match {
-          case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ new ComputedType(name, d, false, optional(name))
-          case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ new ComputedType(name, t, true, optional(name))
-          case (d, t, ListBuffer())                        ⇒ new ComputedType(name, s(d ++ t.map(_.arrayManifest)), true, optional(name))
+          case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ ComputedType(name, d, false, optional(name))
+          case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ ComputedType(name, t.arrayManifest, false, optional(name))
+          case (d, t, ListBuffer())                        ⇒ ComputedType(name, s(d ++ t.map(_.arrayManifest)), true, optional(name))
           case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒
             if (f.isArray) new ComputedType(name, f.fromArray.toManifest, false, optional(name))
             else new ComputedType(name, f, false, optional(name))

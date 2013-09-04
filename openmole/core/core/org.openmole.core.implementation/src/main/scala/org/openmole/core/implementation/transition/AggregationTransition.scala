@@ -31,6 +31,13 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 import org.openmole.misc.tools.service.LockUtil._
 
+object AggregationTransition {
+  def aggregateOutputs(moleExecution: IMoleExecution, transition: IAggregationTransition, results: Iterable[Variable[_]]) = {
+    val toArrayManifests = Map.empty[String, Manifest[_]] ++ transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }
+    ContextAggregator.aggregate(transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, results)
+  }
+}
+
 class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = True, filter: Filter[String] = Filter.empty, trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
 
   override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = {
@@ -44,8 +51,7 @@ class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = 
           results ++= filtered(context).values
 
           if (trigger != ICondition.False) {
-            val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.outputs(mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }
-            val context = ContextAggregator.aggregate(start.outputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, results.toIterable)
+            val context = AggregationTransition.aggregateOutputs(moleExecution, this, results)
             if (trigger.evaluate(context)) {
               aggregate(subMole, ticket)
               if (allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel
