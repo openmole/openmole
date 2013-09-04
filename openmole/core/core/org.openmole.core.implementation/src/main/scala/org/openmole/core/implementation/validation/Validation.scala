@@ -154,7 +154,7 @@ object Validation {
     while (!toProcess.isEmpty) {
       val (capsule, level, path) = toProcess.dequeue
 
-      Mole.nextCaspules(mole)(capsule, level).foreach {
+      Mole.nextCapsules(mole)(capsule, level).foreach {
         case (nCap, nLvl) ⇒
           if (!seen.contains(nCap)) toProcess.enqueue((nCap, nLvl, capsule :: path))
           seen(nCap) = ((capsule :: path) -> nLvl) :: seen.getOrElse(nCap, List.empty)
