@@ -30,7 +30,7 @@ import org.netbeans.api.visual.action.ConnectorState
 import org.netbeans.api.visual.widget.Scene
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.dialog.DialogFactory
+import org.openmole.ide.core.implementation.dialog.{ StatusBar, DialogFactory }
 import org.openmole.ide.core.implementation.data.{ IExplorationTaskDataUI, CheckData }
 import org.openmole.ide.core.implementation.commons.{ ExplorationTransitionType, SimpleTransitionType }
 import org.openmole.ide.misc.widget.MigPanel
@@ -138,16 +138,26 @@ abstract class MoleScene extends GraphScene.StringGraph
     CheckData.checkMole(this)
   }
 
+  def contains(transition: ConnectorUI) = dataUI.connectors.values.exists {
+    con ⇒ transition.source.id == con.source.id && transition.target.capsule.id == con.target.capsule.id
+  }
+
   def add(trans: TransitionUI) = {
-    dataUI.registerConnector(trans)
-    createConnectEdge(trans.source.id, trans.target.capsule.id, trans.id, trans.target.index)
-    refresh
+    if (contains(trans)) StatusBar().warn("The transition from " + trans.source.id + " to " + trans.target.capsule.id + " already exists")
+    else {
+      dataUI.registerConnector(trans)
+      createConnectEdge(trans.source.id, trans.target.capsule.id, trans.id, trans.target.index)
+      refresh
+    }
   }
 
   def add(dc: DataChannelUI) = {
-    dataUI.registerConnector(dc)
-    createConnectEdge(dc.source.id, dc.target.capsule.id, dc.id)
-    refresh
+    if (contains(dc)) StatusBar().warn("The Data Channel from " + dc.source.id + " to " + dc.target.capsule.id + " already exists")
+    else {
+      dataUI.registerConnector(dc)
+      createConnectEdge(dc.source.id, dc.target.capsule.id, dc.id)
+      refresh
+    }
   }
 
   def startingCapsule_=(caps: CapsuleUI) = {

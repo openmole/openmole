@@ -20,7 +20,7 @@ import org.openmole.ide.misc.widget.PluginPanel
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ConfidenceIntervalTaskPanelUI(dataUI: ConfidenceIntervalTaskDataUI) extends BasicStatPanelUI("to interval", dataUI) {
+class ConfidenceIntervalTaskPanelUI(dataUI: ConfidenceIntervalTaskDataUI) extends BasicStatPanelUI("interval", dataUI) {
 
   val levelTextField = new TextField(dataUI.level.toString, 10)
   panelSettings.contents.insert(0, new PluginPanel("wrap") {
