@@ -35,6 +35,7 @@ import org.openmole.misc.exception._
 import org.openmole.misc.replication._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.Duration._
+import scala.util.Try
 
 object Workspace {
 
@@ -335,7 +336,9 @@ class Workspace(val location: File) {
     import PersistentList._
     val dir = new File(persistentDir, clazz)
     def deserialize(f: File) = PersistentList.xstream.fromXML(f.content)
-    dir.listFiles { f: File ⇒ f.getName.matches(pattern) }.sortBy { f ⇒ f.getName.toInt }.map { deserialize }.toSeq
+    dir.listFiles { f: File ⇒ f.getName.matches(pattern) }.sortBy { f ⇒ f.getName.toInt }.flatMap {
+      f ⇒ Try(deserialize(f)).toOption
+    }.toSeq
   }
 
   object PersistentList {
