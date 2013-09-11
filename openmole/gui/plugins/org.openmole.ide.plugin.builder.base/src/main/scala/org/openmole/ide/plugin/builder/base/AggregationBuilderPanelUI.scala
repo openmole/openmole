@@ -21,12 +21,12 @@ import org.openmole.plugin.builder.base._
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import swing.{ Label, MyComboBox }
 import java.awt.Dimension
-import org.openmole.ide.core.implementation.workflow.IMoleUI
+import org.openmole.ide.core.implementation.workflow.MoleUI
 import org.openmole.ide.core.implementation.builder.PuzzleUIMap
 
 class AggregationBuilderPanelUI(puzzles: List[Puzzle],
                                 puzzleSelection: Option[Puzzle],
-                                manager: IMoleUI) extends GenericBuilderPanelUI("Explore on", puzzles, puzzleSelection) {
+                                manager: MoleUI) extends GenericBuilderPanelUI("Explore on", puzzles, puzzleSelection) {
 
   val aggregationPuzzleComboBox = new MyComboBox(puzzles)
   contents += new Label("Aggregates on")

@@ -22,21 +22,36 @@ import org.openmole.core.model.mole.{ ICapsule, IMole }
 import concurrent.stm._
 import util.{ Failure, Success }
 import org.openmole.ide.misc.tools.util.ID
-import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, Proxies }
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, TaskDataProxyUI, Proxies }
 import org.openmole.ide.core.implementation.panelsettings.MolePanelUI
+import java.io.File
+import org.openmole.core.model.task.PluginSet
+import org.openmole.ide.core.implementation.data.DataUI
+import org.openmole.core.model.data.{ Prototype, Variable, Context }
 
-class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
+class MoleUI(var name: String) extends DataUI with ID { moleUI ⇒
 
   private val _startingCapsule: Ref[Option[CapsuleUI]] = Ref(Option.empty[CapsuleUI])
   private val _capsules = TMap[String, CapsuleUI]()
   private val _connectors = TMap[String, ConnectorUI]()
   private val _capsuleConnections = TMap[String, TSet[ConnectorUI]]()
   private val _plugins: Ref[List[String]] = Ref(List.empty[String])
+  private val _prototypesInContext: Ref[List[(PrototypeDataProxyUI, String)]] = Ref(List.empty[(PrototypeDataProxyUI, String)])
 
   def plugins = _plugins.single()
   def plugins_=(v: Traversable[String]) = _plugins.single() = v.toList
+  def pluginSet: PluginSet = PluginSet(plugins.map { p ⇒ new File(p) }.toSet)
+
+  def prototypesInContext = _prototypesInContext.single()
+  def prototypesInContext_=(v: List[(PrototypeDataProxyUI, String)]) = _prototypesInContext.single() = v
 
   @transient lazy val _cacheMole: Ref[Option[(IMole, Map[CapsuleUI, ICapsule])]] = Ref(None)
+
+  def context = Context(prototypesInContext.map {
+    case (proxy, value) ⇒ Variable(proxy.dataUI.coreObject.get.asInstanceOf[Prototype[Any]], value)
+  })
+
+  def coreClass = classOf[IMole]
 
   def buildPanelUI = new MolePanelUI {
     // type DATAUI = moleUI.type
@@ -135,7 +150,7 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
 
   def startingCapsule = _startingCapsule.single()
 
-  override def registerCapsuleUI(cv: CapsuleUI) = {
+  def registerCapsuleUI(cv: CapsuleUI) = {
     +=(cv)
     if (capsules.size == 1) startingCapsule = Some(cv)
     invalidateCache
@@ -192,10 +207,10 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
     invalidateCache
   }
 
-  def registerConnector(connector: ConnectorUI) = registerConnector(connector.id, connector)
+  def registerConnector(connector: ConnectorUI): Unit = registerConnector(connector.id, connector)
 
   def registerConnector(edgeID: String,
-                        connector: ConnectorUI) = atomic { implicit ctx ⇒
+                        connector: ConnectorUI): Unit = atomic { implicit ctx ⇒
     +=(connector)
     invalidateCache
   }
@@ -229,5 +244,37 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
       }
     }
     connectedCapsulesFrom0(List(from), List())
+  }
+
+  def puzzlesCompliant: List[List[CapsuleUI]] = groups.map { puzzleCompliant }
+
+  def puzzleCompliant(l: List[CapsuleUI]): List[CapsuleUI] = {
+    if (isPuzzleCompliant(l)) l
+    else List()
+  }
+
+  def isPuzzleCompliant: Boolean = isPuzzleCompliant(capsules.values.toList)
+
+  def isPuzzleCompliant(l: List[CapsuleUI]): Boolean = {
+    if (isFirstCompliant(l) && isLastCompliant(l)) true
+    else false
+  }
+
+  def groups(l: List[CapsuleUI]): List[List[CapsuleUI]] = firstCapsules(l).map(connectedCapsulesFrom)
+
+  def groups: List[List[CapsuleUI]] = groups(capsules.values.toList)
+
+  def isFirstCompliant(firsts: List[CapsuleUI]) = if (firsts.isEmpty || firsts.size > 1) false else true
+
+  def isLastCompliant(lasts: List[CapsuleUI]) = if (lasts.isEmpty || lasts.size > 1) false else true
+
+  def firstCompliant(f: List[CapsuleUI]) = {
+    val firsts = firstCapsules(f)
+    if (isFirstCompliant(firsts)) List() else firsts
+  }
+
+  def lastCompliant(l: List[CapsuleUI]) = {
+    val lasts = lastCapsules(l)
+    if (isLastCompliant(lasts)) List() else lasts
   }
 }

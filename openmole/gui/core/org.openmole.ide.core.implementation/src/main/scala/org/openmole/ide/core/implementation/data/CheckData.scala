@@ -58,7 +58,7 @@ object CheckData extends Logger {
                 ToolDataUI.computePrototypeFromAggregation(mole, sources, hooks)
                 // Formal validation
                 val errors = Validation(mole,
-                  Context.empty,
+                  scene.dataUI.context,
                   sources,
                   hooks)
                 errors.isEmpty match {

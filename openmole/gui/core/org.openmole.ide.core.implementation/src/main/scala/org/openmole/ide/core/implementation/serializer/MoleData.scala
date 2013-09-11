@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.serializer
 
-import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import org.openmole.ide.core.implementation.workflow._
 import java.awt.Point
 import org.openmole.ide.misc.tools.util.ID
@@ -30,6 +30,7 @@ object MoleData {
     }
     val scene = new BuildMoleScene(ui)
     ui.plugins = moleData.plugins
+    ui.prototypesInContext = moleData.prototypesInContext
 
     val capsuleUIMap =
       moleData.capsules.map {
@@ -121,7 +122,8 @@ object MoleData {
       slots.unzip._2.toList,
       transitions.toList,
       dataChannels.toList,
-      scene.dataUI.plugins.toList)
+      scene.dataUI.plugins.toList,
+      scene.dataUI.prototypesInContext)
 
   }
 
@@ -135,4 +137,5 @@ class MoleData(
   val slots: List[SlotData],
   val transitions: List[TransitionData],
   val dataChannels: List[DataChannelData],
-  val plugins: List[String])
+  val plugins: List[String],
+  val prototypesInContext: List[(PrototypeDataProxyUI, String)])

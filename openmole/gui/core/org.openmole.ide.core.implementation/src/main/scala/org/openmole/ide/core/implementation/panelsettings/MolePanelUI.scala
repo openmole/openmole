@@ -18,21 +18,27 @@
 package org.openmole.ide.core.implementation.panelsettings
 
 import java.awt.Dimension
-import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.RadioButton
+import scala.swing.{ Label, RadioButton, TabbedPane }
 import org.openmole.misc.workspace.Workspace
-import org.openmole.ide.core.implementation.workflow.IMoleUI
-import org.openmole.ide.core.implementation.panel.{ AnonSaveSettings, Settings }
+import org.openmole.ide.core.implementation.workflow.MoleUI
+import org.openmole.ide.core.implementation.panel.{ MultiProxies, AnonSaveSettings, Settings }
+import scala.swing.TabbedPane.Page
+import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.registry.PrototypeKey
 
 trait MolePanelUI extends Settings with AnonSaveSettings {
 
-  def dataUI: IMoleUI
+  def dataUI: MoleUI
 
-  type DATAUI = IMoleUI
+  type DATAUI = MoleUI
 
-  override val panel = new PluginPanel("wrap") {
+  val tabbed = new TabbedPane {
     minimumSize = new Dimension(300, 400)
     preferredSize = new Dimension(300, 400)
+  }
+
+  val pluginPanel = new PluginPanel("wrap") {
     Workspace.pluginDirLocation.list.foreach {
       f ⇒
         contents += new RadioButton(f) {
@@ -41,10 +47,20 @@ trait MolePanelUI extends Settings with AnonSaveSettings {
     }
   }
 
-  val components = List()
+  val contextPanel = MultiProxies.comboLinkGroovyEditor(Proxies.instance.prototypes,
+    dataUI.prototypesInContext.map { _._1 }.toSeq,
+    dataUI.prototypesInContext.map { p ⇒ p._1 -> p._2 }.toMap)
+
+  tabbed.pages += new Page("Plugins", pluginPanel)
+  tabbed.pages += new Page("Context", {
+    if (Proxies.instance.prototypes.isEmpty) new Label("Define Prototype first")
+    else contextPanel.panel
+  })
+
+  lazy val components = List(("", tabbed))
 
   def saveContent: DATAUI = {
-    dataUI.plugins = panel.contents.flatMap {
+    dataUI.plugins = pluginPanel.contents.flatMap {
       c ⇒
         c match {
           case x: RadioButton ⇒ List(x)
@@ -55,6 +71,7 @@ trait MolePanelUI extends Settings with AnonSaveSettings {
     }.map {
       _.text
     }
+    dataUI.prototypesInContext = contextPanel.content.map { data ⇒ PrototypeKey.build(data.prototype) -> data.editorValue }
     dataUI
   }
 }

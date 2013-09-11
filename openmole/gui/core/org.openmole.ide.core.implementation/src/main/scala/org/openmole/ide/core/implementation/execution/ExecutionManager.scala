@@ -23,7 +23,7 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.job.State
 import org.openmole.core.model.data._
 import org.openmole.core.model.execution.ExecutionState
-import org.openmole.ide.core.implementation.workflow.{ IMoleUI, CapsuleUI, ExecutionMoleSceneContainer }
+import org.openmole.ide.core.implementation.workflow.{ MoleUI, CapsuleUI, ExecutionMoleSceneContainer }
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
 import org.openmole.misc.exception.ExceptionUtils
@@ -37,7 +37,7 @@ object ExecutionManager {
   }
 }
 
-class ExecutionManager(manager: IMoleUI,
+class ExecutionManager(manager: MoleUI,
                        executionContainer: ExecutionMoleSceneContainer,
                        val mole: IMole,
                        val capsuleMapping: Map[CapsuleUI, ICapsule]) extends PluginPanel("", "[grow,fill]", "")
@@ -101,7 +101,7 @@ class ExecutionManager(manager: IMoleUI,
 
     buildMoleExecution match {
       case Success((mE, envNames)) ⇒
-        val mExecution = mE.toExecution(Context.empty, ExecutionContext.local.copy(out = printStream))
+        val mExecution = mE.toExecution(manager.context, ExecutionContext.local.copy(out = printStream))
         moleExecution = Some(mExecution)
         EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
         EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])

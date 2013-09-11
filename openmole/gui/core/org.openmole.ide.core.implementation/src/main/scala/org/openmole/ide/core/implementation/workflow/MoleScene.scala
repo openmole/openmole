@@ -48,7 +48,7 @@ abstract class MoleScene extends GraphScene.StringGraph
     with RectangularSelectProvider {
   moleScene ⇒
 
-  val dataUI: IMoleUI
+  val dataUI: MoleUI
   var obUI: Option[Widget] = None
   val capsuleLayer = new LayerWidget(this)
   val connectLayer = new LayerWidget(this)

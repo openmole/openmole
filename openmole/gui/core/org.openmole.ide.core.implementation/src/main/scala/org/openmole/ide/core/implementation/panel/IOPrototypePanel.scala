@@ -19,17 +19,11 @@ package org.openmole.ide.core.implementation.panel
 import org.openmole.ide.misc.widget._
 import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import java.awt.{ Color, BorderLayout }
-import org.openmole.ide.misc.widget.multirow._
 import swing.{ Color, Separator, Label, MyComboBox }
 import scala.collection.immutable.HashMap
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.misc.tools.image.Images._
-import org.openmole.ide.misc.widget.multirow.RowWidget.SMALL
-import org.openmole.ide.misc.widget.multirow.MultiWidget.CLOSE_IF_EMPTY
-import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor.{ ComboLinkLabelGroovyTextFieldEditorData, ComboLinkLabelGroovyTextFieldEditorPanel }
-import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabelData, ComboLinkLabelPanel }
 import org.openmole.ide.core.implementation.workflow.ISceneContainer
-import org.openmole.core.model.data.Prototype
 
 class IOPrototypePanel(val prototypesIn: Seq[PrototypeDataProxyUI] = List.empty,
                        val prototypesOut: Seq[PrototypeDataProxyUI] = List.empty,
@@ -37,32 +31,11 @@ class IOPrototypePanel(val prototypesIn: Seq[PrototypeDataProxyUI] = List.empty,
                        implicitPrototypeOut: Seq[PrototypeDataProxyUI] = List.empty,
                        val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends PluginPanel("wrap") {
 
-  val protoInEditor = {
-    val incomboContent = Proxies.instance.prototypes.map {
-      p ⇒
-        {
-          // lazy val coreOb = p.dataUI.coreObject
-          // lazy val test = implicitly[coreOb.type <:< scala.util.Try[Prototype[_]]]
-          (p, p.dataUI.coreObject.get, contentAction(p))
-        }
-    }.toList
-    new MultiComboLinkLabelGroovyTextFieldEditor("", incomboContent,
-      prototypesIn.map {
-        proto ⇒
-          new ComboLinkLabelGroovyTextFieldEditorPanel(incomboContent, EYE,
-            new ComboLinkLabelGroovyTextFieldEditorData(proto.dataUI.coreObject.get, Some(proto), inputParameters.getOrElse(proto, "")))
-      }, EYE, CLOSE_IF_EMPTY, insets = SMALL)
-  }
+  val protoInEditor = MultiProxies.comboLinkGroovyEditor(Proxies.instance.prototypes,
+    prototypesIn,
+    inputParameters)
 
-  val protoOutEditor = {
-    val outcomboContent = Proxies.instance.prototypes.map {
-      p ⇒ (p, contentAction(p))
-    }.toList
-    new MultiComboLinkLabel("", outcomboContent, prototypesOut.map {
-      proto ⇒
-        new ComboLinkLabelPanel(outcomboContent, EYE, new ComboLinkLabelData(Some(proto)))
-    }, EYE, CLOSE_IF_EMPTY, insets = SMALL)
-  }
+  val protoOutEditor = MultiProxies.comboLink(Proxies.instance.prototypes, prototypesOut)
 
   var implicitEditorsMapping = new HashMap[PrototypeDataProxyUI, PrototypeGroovyTextFieldEditor]()
 

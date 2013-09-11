@@ -18,7 +18,7 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.core.implementation.mole.{ StrainerCapsule, MasterCapsule, Capsule }
-import org.openmole.ide.core.implementation.workflow.{ IMoleUI, CapsulePanelUI }
+import org.openmole.ide.core.implementation.workflow.{ MoleUI, CapsulePanelUI }
 import java.io.File
 import org.openmole.core.model.task.{ PluginSet, ITask }
 import org.openmole.core.implementation.task.EmptyTask
@@ -59,7 +59,7 @@ class CapsuleDataUI(
     lazy val dataUI = capsuleDataUI
   }
 
-  def coreObject(moleDataUI: IMoleUI) = task match {
+  def coreObject(moleDataUI: MoleUI) = task match {
     case Some(t: TaskDataProxyUI) ⇒
       t.dataUI.coreObject(PluginSet(moleDataUI.plugins.map { p ⇒ new File(p) })) match {
         case Success(x: ITask) ⇒ capsuleType match {

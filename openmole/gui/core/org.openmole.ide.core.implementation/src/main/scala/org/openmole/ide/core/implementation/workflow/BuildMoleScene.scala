@@ -32,7 +32,7 @@ object BuildMoleScene {
   def apply(name: String) = new BuildMoleScene(new MoleUI(name))
 }
 
-class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene { buildMoleScene ⇒
+class BuildMoleScene(val dataUI: MoleUI) extends MoleScene { buildMoleScene ⇒
 
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
 

@@ -40,9 +40,9 @@ trait CapsulePanelUI extends Publisher with Settings {
   def sources = Proxies.instance.sources.toList
   def hooks = Proxies.instance.hooks.toList
 
-  val sourcePanel = MultiProxies(sources, dataUI.sources)
+  val sourcePanel = MultiProxies.comboLink(sources, dataUI.sources)
 
-  val hookPanel = MultiProxies(hooks, dataUI.hooks)
+  val hookPanel = MultiProxies.comboLink(hooks, dataUI.hooks)
 
   val environmentProxys = Proxies.instance.environments :+ EmptyDataUIs.localEnvironmentProxy
   val environmentCombo = new MyComboBox(environmentProxys)

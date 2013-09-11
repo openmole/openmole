@@ -30,7 +30,7 @@ import scala.swing.Label
 import scala.swing.MyComboBox
 import org.openmole.ide.misc.widget.URL
 import scala.collection.JavaConversions._
-import org.openmole.ide.core.implementation.workflow.{ IMoleUI, MoleUI }
+import org.openmole.ide.core.implementation.workflow.MoleUI
 import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 
 class MoleTaskPanelUI(pud: MoleTaskDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("fillx,wrap 2", "left,grow,fill", "") with TaskPanelUI {
@@ -46,8 +46,8 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI)(implicit val i18n: ResourceBundle = R
 
   moleComboBox.selection.item = pud.mole match {
     case Some(x: ID.Type) ⇒ MoleTaskDataUI.manager(x) match {
-      case Some(m: IMoleUI) ⇒ m.asInstanceOf[MoleUI]
-      case _                ⇒ MoleTaskDataUI.emptyMoleSceneManager
+      case Some(m: MoleUI) ⇒ m.asInstanceOf[MoleUI]
+      case _               ⇒ MoleTaskDataUI.emptyMoleSceneManager
     }
     case _ ⇒ MoleTaskDataUI.emptyMoleSceneManager
   }

@@ -21,9 +21,9 @@ import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.builder._
 import org.openmole.core.implementation.puzzle.Puzzle
 import org.openmole.plugin.builder.base._
-import org.openmole.ide.core.implementation.workflow.IMoleUI
+import org.openmole.ide.core.implementation.workflow.MoleUI
 
-class ExplorationBuilderPanelUI(puzzles: List[Puzzle], puzzleSelection: Option[Puzzle], manager: IMoleUI) extends GenericBuilderPanelUI("Explore on", puzzles, puzzleSelection) {
+class ExplorationBuilderPanelUI(puzzles: List[Puzzle], puzzleSelection: Option[Puzzle], manager: MoleUI) extends GenericBuilderPanelUI("Explore on", puzzles, puzzleSelection) {
 
   def build(uiMap: PuzzleUIMap) = {
     val samplingUI = Proxies.instance.getOrGenerateSamplingComposition(samplingComboBox.selection.item)

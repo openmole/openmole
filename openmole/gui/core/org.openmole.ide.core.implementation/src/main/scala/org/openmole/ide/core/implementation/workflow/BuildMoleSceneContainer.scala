@@ -67,7 +67,7 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
   }
   def displayMoleSettingsDialogAction = new Action("") {
     override def apply = {
-      MoleSettingsDialog.display(scene.dataUI)
+      MoleSettingsDialog.display(scene)
     }
   }
 }

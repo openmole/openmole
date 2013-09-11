@@ -16,20 +16,20 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.implementation.dataproxy.DataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies, DataProxyUI }
 import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.misc.widget.multirow.RowWidget.SMALL
 import org.openmole.ide.misc.widget.multirow.MultiWidget.CLOSE_IF_EMPTY
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.workflow.ISceneContainer
-import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
+import org.openmole.ide.misc.widget.multirow.{ MultiComboLinkLabelGroovyTextFieldEditor, MultiComboLinkLabel }
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabelData, ComboLinkLabelPanel }
+import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor.{ ComboLinkLabelGroovyTextFieldEditorData, ComboLinkLabelGroovyTextFieldEditorPanel }
 
 object MultiProxies {
 
-  def apply[T <: DataProxyUI](fullList: Seq[T], data: Seq[T]) = {
-
+  def comboLink[T <: DataProxyUI](fullList: Seq[T], data: Seq[T]) = {
     val contentActions = fullList.map {
       p ⇒ (p, contentAction(p))
     }.toList
@@ -37,6 +37,19 @@ object MultiProxies {
     new MultiComboLinkLabel("", contentActions, data.map {
       p ⇒ new ComboLinkLabelPanel(contentActions, EYE, new ComboLinkLabelData(Some(p)))
     }, EYE, CLOSE_IF_EMPTY, insets = SMALL)
+  }
+
+  def comboLinkGroovyEditor[T <: PrototypeDataProxyUI](fullList: Seq[T], data: Seq[T], inputParameters: Map[T, String]) = {
+    val contentActions = fullList.map {
+      p ⇒ (p, p.dataUI.coreObject.get, contentAction(p))
+    }.toList
+
+    new MultiComboLinkLabelGroovyTextFieldEditor("", contentActions,
+      data.map {
+        d ⇒
+          new ComboLinkLabelGroovyTextFieldEditorPanel(contentActions, EYE,
+            new ComboLinkLabelGroovyTextFieldEditorData(d.dataUI.coreObject.get, Some(d), inputParameters.getOrElse(d, "")))
+      }, EYE, CLOSE_IF_EMPTY, insets = SMALL)
   }
 
   def contentAction[T <: DataProxyUI](proto: T) = new ContentAction(proto.dataUI.toString, proto) {

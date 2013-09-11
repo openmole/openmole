@@ -14,17 +14,17 @@ import org.openmole.misc.exception.UserBadDataError
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Success, Failure }
-import org.openmole.ide.core.implementation.workflow.{ IMoleUI, MoleUI }
+import org.openmole.ide.core.implementation.workflow.MoleUI
 import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, TaskDataProxyUI }
 
 object MoleTaskDataUI {
-  def manager(i: ID.Type): Option[IMoleUI] = ScenesManager.moleScenes.map {
+  def manager(i: ID.Type): Option[MoleUI] = ScenesManager.moleScenes.map {
     _.dataUI
   }.filter {
     _.id == i
   }.headOption
 
-  def capsule(t: TaskDataProxyUI, manager: IMoleUI): Option[CapsuleDataUI] =
+  def capsule(t: TaskDataProxyUI, manager: MoleUI): Option[CapsuleDataUI] =
     manager.capsules.values.map {
       _.dataUI
     }.filter {
@@ -48,7 +48,7 @@ class MoleTaskDataUI(val name: String = "",
   def coreObject(plugins: PluginSet) = util.Try {
     mole match {
       case Some(x: ID.Type) ⇒ manager(x) match {
-        case Some(y: IMoleUI) ⇒
+        case Some(y: MoleUI) ⇒
           finalCapsule match {
             case Some(z: TaskDataProxyUI) ⇒
               MoleTaskDataUI.capsule(z, y) match {

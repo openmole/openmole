@@ -74,7 +74,7 @@ object Builder {
   }
 
   /* def puzzles(listsPuzzleCompliant: List[List[CapsuleUI]],
-              manager: IMoleUI,
+              manager: MoleUI,
               uiMap: PuzzleUIMap = new PuzzleUIMap): (List[Puzzle], PuzzleUIMap) = {
 
     def puzzles0(toBeComputed: List[List[CapsuleUI]], puzzleList: List[Puzzle], uiMap0: PuzzleUIMap): (List[Puzzle], PuzzleUIMap) = {

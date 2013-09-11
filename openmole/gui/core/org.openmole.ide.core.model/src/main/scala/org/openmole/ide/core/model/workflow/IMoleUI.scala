@@ -26,7 +26,7 @@ import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.task.PluginSet
 import java.io.File
 
-trait IMoleUI extends IDataUI with ID {
+trait MoleUI extends IDataUI with ID {
 
   override def toString: String = name
 
