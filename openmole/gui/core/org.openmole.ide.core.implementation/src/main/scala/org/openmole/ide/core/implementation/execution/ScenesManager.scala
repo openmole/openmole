@@ -90,10 +90,9 @@ object ScenesManager {
     currentScene.getOrElse(addBuildSceneContainer("Mole").scene).displayPropertyPanel(proxy)
   }
 
-  def currentPanels = currentScene match {
-    case Some(s: MoleScene) ⇒ s.currentPanels
-    case _                  ⇒ List()
-  }
+  def currentPanels = List(currentScene).flatten.map { _.currentPanels }
+
+  def closePropertyPanels = List(currentScene).flatten.map { _.closePropertyPanels }
 
   def currentSamplingCompositionPanelUI = currentPanels.map {
     _ match {
