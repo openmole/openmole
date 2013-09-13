@@ -105,7 +105,7 @@ object SerializerService extends Logger {
 
   def deserialize[T](is: InputStream): T = lock.read(xstream.fromXML(is).asInstanceOf[T])
 
-  def deserializeAndExtractFiles[T](file: File, extractDir: File = Workspace.newDir("extraction")): T = {
+  def deserializeAndExtractFiles[T](file: File, extractDir: File = Workspace.tmpDir): T = {
     val tis = new TarInputStream(file.bufferedInputStream)
     try deserializeAndExtractFiles(tis, extractDir)
     finally tis.close
