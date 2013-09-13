@@ -32,7 +32,7 @@ object MoleSettingsDialog {
       def dataUI = scene.dataUI
     }
 
-    val dd = new DialogDescriptor(new ScrollPane(settingsPanel.panel) {
+    val dd = new DialogDescriptor(new ScrollPane(settingsPanel.tabbed) {
       verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
     }.peer, "Preferences")
     dd.setOptions(List(NotifyDescriptor.OK_OPTION).toArray)
