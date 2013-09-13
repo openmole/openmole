@@ -1,7 +1,8 @@
 customXML:
   - |
+    <native type="izpack" name="ShellLink_x64.dll"></native>
+  - |
     <native type="izpack" name="ShellLink.dll"></native>
-
 info:
     appName: OpenMOLE
     summaryLogFilePath: "/tmp/out"
@@ -9,7 +10,7 @@ info:
     createUninstaller: yes
     javaVersion: 1.7
     runPrivileged:
-        enabled: no
+        enabled: yes
     pack200: yes
 
 packs:
