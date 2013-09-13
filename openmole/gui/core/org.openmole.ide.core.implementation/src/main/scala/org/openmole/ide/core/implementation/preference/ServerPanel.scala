@@ -14,28 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.core.implementation.preference
 
-import java.awt.Dimension
-import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.TabbedPane
-import scala.swing.event.Key._
 
-class PreferenceContent extends PluginPanel("wrap", "[right]", "") {
-  minimumSize = new Dimension(450, 400)
-  StatusBar().clear
-  val authentification = new AuthenticationPanel
-  val servers = new ServerPanel
+class ServerPanel extends PluginPanel("wrap", "[grow,fill]", "") {
 
-  contents += new TabbedPane {
-    pages.append(new TabbedPane.Page("Authentication", authentification))
-    pages.append(new TabbedPane.Page("Servers", servers))
-    pages.append(new TabbedPane.Page("Other", new EnvironmentSettingPanel))
-  }
-  def save = {
-    authentification.save
-    servers.save
-  }
+  def save = println("save server")
+
 }
