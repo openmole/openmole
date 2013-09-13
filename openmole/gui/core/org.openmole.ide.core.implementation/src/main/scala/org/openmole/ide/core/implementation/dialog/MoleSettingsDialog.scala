@@ -20,9 +20,12 @@ package org.openmole.ide.core.implementation.dialog
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import scala.swing.FileChooser.SelectionMode._
 import scala.swing.ScrollPane
+<<<<<<< HEAD
 import org.openmole.ide.core.implementation.workflow.{ MoleScene, MoleUI }
+=======
+import org.openmole.ide.core.implementation.workflow.MoleScene
+>>>>>>> 0.9-dev
 import org.openmole.ide.core.implementation.panelsettings.MolePanelUI
 import org.openmole.ide.core.implementation.data.CheckData
 
@@ -37,7 +40,6 @@ object MoleSettingsDialog {
     }.peer, "Preferences")
     dd.setOptions(List(NotifyDescriptor.OK_OPTION).toArray)
     val notification = DialogDisplayer.getDefault.notify(dd)
-
     if (notification == -1 || notification == 0) {
       settingsPanel.saveContent
       CheckData.checkMole(scene)
