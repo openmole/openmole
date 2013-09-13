@@ -20,15 +20,15 @@ package org.openmole.ide.core.implementation.dialog
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import scala.swing.FileChooser.SelectionMode._
 import scala.swing.ScrollPane
-import org.openmole.ide.core.implementation.workflow.IMoleUI
+import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.ide.core.implementation.panelsettings.MolePanelUI
+import org.openmole.ide.core.implementation.data.CheckData
 
 object MoleSettingsDialog {
-  def display(manager: IMoleUI) = {
+  def display(scene: MoleScene) = {
     val settingsPanel = new MolePanelUI {
-      def dataUI = manager
+      def dataUI = scene.dataUI
     }
 
     val dd = new DialogDescriptor(new ScrollPane(settingsPanel.panel) {
@@ -37,7 +37,10 @@ object MoleSettingsDialog {
 
     dd.setOptions(List(NotifyDescriptor.OK_OPTION).toArray)
     val notification = DialogDisplayer.getDefault.notify(dd)
-    if (notification == -1 || notification == 0) settingsPanel.saveContent
+    if (notification == -1 || notification == 0) {
+      settingsPanel.saveContent
+      CheckData.checkMole(scene)
+    }
   }
 
 }
