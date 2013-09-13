@@ -21,11 +21,7 @@ import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import scala.swing.ScrollPane
-<<<<<<< HEAD
-import org.openmole.ide.core.implementation.workflow.{ MoleScene, MoleUI }
-=======
 import org.openmole.ide.core.implementation.workflow.MoleScene
->>>>>>> 0.9-dev
 import org.openmole.ide.core.implementation.panelsettings.MolePanelUI
 import org.openmole.ide.core.implementation.data.CheckData
 
