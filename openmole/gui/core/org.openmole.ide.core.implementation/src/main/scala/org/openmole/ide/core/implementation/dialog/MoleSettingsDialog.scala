@@ -31,12 +31,13 @@ object MoleSettingsDialog {
       def dataUI = manager
     }
 
-    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(settingsPanel.panel) {
+    val dd = new DialogDescriptor(new ScrollPane(settingsPanel.panel) {
       verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
-    }.peer,
-      "Mole plugins")).equals(NotifyDescriptor.OK_OPTION)) {
-      settingsPanel.saveContent
-    }
+    }.peer, "Preferences")
+
+    dd.setOptions(List(NotifyDescriptor.OK_OPTION).toArray)
+    val notification = DialogDisplayer.getDefault.notify(dd)
+    if (notification == -1 || notification == 0) settingsPanel.saveContent
   }
 
 }
