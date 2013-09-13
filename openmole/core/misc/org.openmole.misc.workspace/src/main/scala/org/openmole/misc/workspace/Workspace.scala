@@ -91,6 +91,8 @@ object Workspace {
 
   def location = instance.location
 
+  def tmpDir = instance.tmpDir
+
   def newDir(prefix: String): File = instance.newDir(prefix)
 
   def newFile(prefix: String, suffix: String): File = instance.newFile(prefix, suffix)

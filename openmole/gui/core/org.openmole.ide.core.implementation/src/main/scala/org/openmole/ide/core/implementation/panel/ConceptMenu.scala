@@ -83,7 +83,10 @@ object ConceptMenu {
     }
 
   def menuItem(f: ⇒ Unit): MenuItem = new MenuItem(new Action("New") {
-    override def apply = f
+    override def apply = {
+      ScenesManager.closePropertyPanels
+      f
+    }
   })
 
   val taskMenu = new PopupToolBarPresenter("Task", new Color(107, 138, 166), List(menuItem(display(Builder.taskUI(false)))))
@@ -193,14 +196,6 @@ object ConceptMenu {
       case _                  ⇒ createTab(proxy)
     }
   }
-
-  /*def displayExtra(proxy: DataProxyUI) = {
-    if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy)
-    else ScenesManager.tabPane.selection.page.content match {
-      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy)
-      case _                  ⇒ createTab(proxy)
-    }
-  }   */
 
   def createTab(proxy: DataProxyUI) = DialogFactory.newTabName match {
     case Some(y: BuildMoleSceneContainer) ⇒ y.scene.displayPropertyPanel(proxy)
