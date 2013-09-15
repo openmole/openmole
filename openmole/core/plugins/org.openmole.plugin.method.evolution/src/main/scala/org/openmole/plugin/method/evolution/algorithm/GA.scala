@@ -117,7 +117,7 @@ object GA {
     def x: Int
   }
 
-  def profile(x: Int, nX: Int, aggregation: GAAggregation) = {
+  def genomeProfile(x: Int, nX: Int, aggregation: GAAggregation) = {
     val (_x, _nX, _aggregation) = (x, nX, aggregation)
     new GAAlgorithmBuilder with GAProfile {
       val aggregation = _aggregation
@@ -149,7 +149,7 @@ object GA {
     def y: Int
   }
 
-  def map(x: Int, nX: Int, y: Int, nY: Int, aggregation: GAAggregation, neighbors: Int = 8, dominance: Dominance = strict, ranking: GARankingBuilder = pareto, diversityMetric: DiversityMetricBuilder = crowding) = {
+  def genomeMap(x: Int, nX: Int, y: Int, nY: Int, aggregation: GAAggregation, neighbors: Int = 8, dominance: Dominance = strict, ranking: GARankingBuilder = pareto, diversityMetric: DiversityMetricBuilder = crowding) = {
     val (_x, _nX, _y, _nY, _aggregation, _neighbors, _dominance, _ranking, _diversityMetric) = (x, nX, y, nY, aggregation, neighbors, dominance, ranking, diversityMetric)
     new GAAlgorithmBuilder with GAMap {
       val aggregation = _aggregation
