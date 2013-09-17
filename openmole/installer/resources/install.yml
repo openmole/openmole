@@ -10,7 +10,7 @@ info:
     createUninstaller: yes
     javaVersion: 1.7
     runPrivileged:
-        enabled: yes
+        enabled: no
     pack200: yes
 
 packs:
