@@ -48,8 +48,8 @@ trait MolePanelUI extends Settings with AnonSaveSettings {
   }
 
   val contextPanel = MultiProxies.comboLinkGroovyEditor(Proxies.instance.prototypes,
-    dataUI.prototypesInContext.map { _._1 }.toSeq,
-    dataUI.prototypesInContext.map { p ⇒ p._1 -> p._2 }.toMap)
+    dataUI.implicits.map { _._1 }.toSeq,
+    dataUI.implicits.map { p ⇒ p._1 -> p._2 }.toMap)
 
   tabbed.pages += new Page("Plugins", pluginPanel)
   tabbed.pages += new Page("Context", {
@@ -71,7 +71,7 @@ trait MolePanelUI extends Settings with AnonSaveSettings {
     }.map {
       _.text
     }
-    dataUI.prototypesInContext = contextPanel.content.map { data ⇒ PrototypeKey.build(data.prototype) -> data.editorValue }
+    dataUI.implicits = contextPanel.content.map { data ⇒ PrototypeKey.build(data.prototype) -> data.editorValue }
     dataUI
   }
 }

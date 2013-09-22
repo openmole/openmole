@@ -179,6 +179,20 @@ class GUISerializer { serializer ⇒
     override def canConvert(t: Class[_]) = classOf[Some[_]].isAssignableFrom(t)
   }
 
+  val updateConverter = new ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider) {
+    override def unmarshal(reader: HierarchicalStreamReader, context: UnmarshallingContext) =
+      super.unmarshal(reader, context).asInstanceOf[Update[AnyRef]].update
+
+    override def marshal(
+      o: Object,
+      writer: HierarchicalStreamWriter,
+      mc: MarshallingContext) =
+      super.marshal(o.asInstanceOf[Update[AnyRef]].update, writer, mc)
+
+    override def canConvert(t: Class[_]) = classOf[Update[_]].isAssignableFrom(t)
+
+  }
+
   xstream.registerConverter(taskConverter)
   xstream.registerConverter(prototypeConverter)
   xstream.registerConverter(samplingConverter)
@@ -197,9 +211,11 @@ class GUISerializer { serializer ⇒
   xstream.addImmutableType(classOf[SlotData])
   xstream.addImmutableType(classOf[CapsuleData])
   xstream.addImmutableType(classOf[MoleData])
+  xstream.addImmutableType(classOf[MoleData2])
 
   xstream.alias("DataChannelData", classOf[DataChannelData])
   xstream.alias("MoleData", classOf[MoleData])
+  xstream.alias("MoleData2", classOf[MoleData2])
   xstream.alias("CapsuleData", classOf[CapsuleData])
   xstream.alias("SlotData", classOf[SlotData])
   xstream.alias("TransitionData", classOf[TransitionData])
@@ -219,6 +235,8 @@ class GUISerializer { serializer ⇒
   xstream.alias("None", None.getClass)
   xstream.registerConverter(optionConverter)
   xstream.addImmutableType(None.getClass)
+
+  xstream.registerConverter(updateConverter)
 
   implicit val mapper = xstream.getMapper
 
@@ -249,7 +267,7 @@ class GUISerializer { serializer ⇒
       case c if c < classOf[TransitionData] ⇒ "transition"
       case c if c < classOf[SlotData] ⇒ "slot"
       case c if c < classOf[DataChannelData] ⇒ "datachannel"
-      case c if c < classOf[MoleData] ⇒ "mole"
+      case c if c < classOf[MoleData] || c < classOf[MoleData2] ⇒ "mole"
       case c ⇒ c.getSimpleName
     }
 
@@ -267,7 +285,7 @@ class GUISerializer { serializer ⇒
     }
   }
 
-  def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData]) = {
+  def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData2]) = {
     serializeConcept(classOf[PrototypeDataProxyUI], proxies.prototypes.map { s ⇒ s -> s.id })
     serializeConcept(classOf[EnvironmentDataProxyUI], proxies.environments.map { s ⇒ s -> s.id })
     serializeConcept(classOf[SamplingCompositionDataProxyUI], proxies.samplings.map { s ⇒ s -> s.id })
@@ -280,7 +298,7 @@ class GUISerializer { serializer ⇒
     serializeConcept(classOf[DataChannelData], moleScenes.flatMap(_.dataChannels).map { s ⇒ s -> s.id })
     serializeConcept(classOf[SlotData], moleScenes.flatMap(_.slots).map { s ⇒ s -> s.id })
 
-    serializeConcept(classOf[MoleData], moleScenes.map { ms ⇒ ms -> ms.id })
+    serializeConcept(classOf[MoleData2], moleScenes.map { ms ⇒ ms -> ms.id })
 
     val os = new TarOutputStream(new FileOutputStream(file))
     try os.createDirArchiveWithRelativePath(workDir)
@@ -324,7 +342,7 @@ class GUISerializer { serializer ⇒
       deserializeConcept[TransitionData](classOf[TransitionData])
       deserializeConcept[DataChannelData](classOf[DataChannelData])
 
-      val moleScenes = deserializeConcept[MoleData](classOf[MoleData])
+      val moleScenes = deserializeConcept[MoleData2](classOf[MoleData2])
       (proxies, moleScenes)
     }
 

@@ -36,18 +36,18 @@ class MoleUI(var name: String) extends DataUI with ID { moleUI ⇒
   private val _connectors = TMap[String, ConnectorUI]()
   private val _capsuleConnections = TMap[String, TSet[ConnectorUI]]()
   private val _plugins: Ref[List[String]] = Ref(List.empty[String])
-  private val _prototypesInContext: Ref[List[(PrototypeDataProxyUI, String)]] = Ref(List.empty[(PrototypeDataProxyUI, String)])
+  private val _implicits: Ref[List[(PrototypeDataProxyUI, String)]] = Ref(List.empty[(PrototypeDataProxyUI, String)])
 
   def plugins = _plugins.single()
   def plugins_=(v: Traversable[String]) = _plugins.single() = v.toList
   def pluginSet: PluginSet = PluginSet(plugins.map { p ⇒ new File(p) }.toSet)
 
-  def prototypesInContext = _prototypesInContext.single()
-  def prototypesInContext_=(v: List[(PrototypeDataProxyUI, String)]) = _prototypesInContext.single() = v
+  def implicits = _implicits.single()
+  def implicits_=(v: List[(PrototypeDataProxyUI, String)]) = _implicits.single() = v
 
   @transient lazy val _cacheMole: Ref[Option[(IMole, Map[CapsuleUI, ICapsule])]] = Ref(None)
 
-  def context = Context(prototypesInContext.map {
+  def context = Context(implicits.map {
     case (proxy, value) ⇒ Variable(proxy.dataUI.coreObject.get.asInstanceOf[Prototype[Any]], value)
   })
 
