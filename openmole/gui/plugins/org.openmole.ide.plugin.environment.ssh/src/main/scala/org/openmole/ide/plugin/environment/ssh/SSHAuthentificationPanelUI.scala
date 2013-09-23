@@ -193,16 +193,16 @@ class SSHAuthentificationPanelUI extends PluginPanel("") with AuthenticationPane
   contents += multiPanel.panel
 
   def saveContent = {
-    Workspace.cleanAuthentications[SSHAuthentication]
+    Workspace.authentications.clean[SSHAuthentication]
 
     multiPanel.content.zipWithIndex.foreach {
       case (data, i) ⇒
         data.connectionData.connectionMethod match {
-          case Login ⇒ Workspace.setAuthentication[SSHAuthentication](i,
+          case Login ⇒ Workspace.authentications.save[SSHAuthentication](i,
             new LoginPassword(data.connectionData.login,
               Workspace.encrypt(new String(data.connectionData.password)),
               data.connectionData.target))
-          case SSHKey ⇒ Workspace.setAuthentication[SSHAuthentication](i,
+          case SSHKey ⇒ Workspace.authentications.save[SSHAuthentication](i,
             new PrivateKey(new File(data.connectionData.pritvateKey),
               data.connectionData.login,
               Workspace.encrypt(new String(data.connectionData.password)),

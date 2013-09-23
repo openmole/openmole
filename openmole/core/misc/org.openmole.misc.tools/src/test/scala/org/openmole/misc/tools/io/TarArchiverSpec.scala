@@ -61,7 +61,7 @@ class TarArchiverSpec extends FlatSpec with ShouldMatchers {
     val tmpDir = Files.createTempDirectory("testArch").toFile
     val file1 = new File(tmpDir, "file1")
     val file2 = new File(tmpDir, "file2")
-    val file3 = new File(tmpDir, "dir/file1")
+    val file3 = new File(tmpDir, "category/file1")
     file3.getParentFile.mkdirs
 
     file1.createNewFile
@@ -88,7 +88,7 @@ class TarArchiverSpec extends FlatSpec with ShouldMatchers {
 
     val file1Arch = new File(extractDir, "file1")
     val file2Arch = new File(extractDir, "file2")
-    val file3Arch = new File(extractDir, "dir/file1")
+    val file3Arch = new File(extractDir, "category/file1")
 
     file1Arch.canExecute should equal(true)
     file1Arch.canRead should equal(true)

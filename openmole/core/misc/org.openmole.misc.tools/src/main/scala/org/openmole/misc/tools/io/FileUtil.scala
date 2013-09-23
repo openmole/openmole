@@ -62,7 +62,9 @@ object FileUtil {
   val DefaultBufferSize = 8 * 1024
   implicit def inputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
   implicit def file2FileDecorator(file: File) = new FileDecorator(file)
-
+  implicit def predicateToFileFilter(predicate: File ⇒ Boolean) = new FileFilter {
+    def accept(p1: File) = predicate(p1)
+  }
   implicit def file2PathConverter(file: File) = file.toPath
 
   def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
@@ -92,7 +94,7 @@ object FileUtil {
         catch {
           case (e: TimeoutException) ⇒
             futureRead.cancel(true)
-            throw new IOException("Timout on reading " + maxRead + " bytes, read was longer than " + timeout + "ms.", e)
+            throw new IOException(s"Timeout on reading $maxRead bytes, read was longer than $timeout ms.", e)
         }
       }.takeWhile(_ != -1).foreach {
         count ⇒
@@ -102,7 +104,7 @@ object FileUtil {
           catch {
             case (e: TimeoutException) ⇒
               futureWrite.cancel(true)
-              throw new IOException("Timeout on writting " + count + " bytes, write was longer than " + timeout + " ms.", e);
+              throw new IOException(s"Timeout on writing $count bytes, write was longer than $timeout ms.", e)
           }
       }
     }
@@ -152,9 +154,9 @@ object FileUtil {
       lastModification
     }
 
-    def listRecursive(filter: FileFilter) = {
+    def listRecursive(filter: File ⇒ Boolean) = {
       val ret = new ListBuffer[File]
-      applyRecursive((f: File) ⇒ if (filter.accept(f)) ret += f)
+      applyRecursive((f: File) ⇒ if (filter(f)) ret += f)
       ret
     }
 
@@ -451,10 +453,6 @@ object FileUtil {
 
     def newFile(prefix: String, suffix: String): File = new File(file, prefix + UUID.randomUUID + suffix)
 
-  }
-
-  implicit def toFileFilterConverter(f: File ⇒ Boolean) = new FileFilter {
-    override def accept(file: File) = f(file)
   }
 
 }

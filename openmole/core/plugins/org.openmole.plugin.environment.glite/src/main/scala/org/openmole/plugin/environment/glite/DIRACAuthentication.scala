@@ -21,7 +21,7 @@ import fr.iscpif.gridscale.dirac.P12HTTPSAuthentication
 import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
 
 object DIRACAuthentication {
-  def update(a: DIRACAuthentication) = Workspace.setAuthentication(0, a)
+  def update(a: DIRACAuthentication) = Workspace.authentications.save(0, a)
   def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[DIRACAuthentication]).headOption
 
   def initialise(a: DIRACAuthentication)(implicit authenticationProvider: AuthenticationProvider) =

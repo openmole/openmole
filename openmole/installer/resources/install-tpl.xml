@@ -11,7 +11,7 @@
     <packs>
         <pack name="OpenMOLE Core" required="yes">
 	    <description>"OpenMOLE Core</description>
-            <fileset dir="../openmole/" targetdir="$INSTALL_PATH" />
+            <fileset category="../openmole/" targetdir="$INSTALL_PATH" />
             <file src="register.bat" targetdir="$INSTALL_PATH" override="true" />
 	</pack>
         <pack name="OpenMOLE Runtime" required="yes">

@@ -67,7 +67,7 @@ class Application extends IApplication with Logger {
     def usage =
       """openmole [options]
 
-[-p list of arg] plugins list of jar or dir containing jars to be loaded
+[-p list of arg] plugins list of jar or category containing jars to be loaded
 [-s path] a path of script to execute
 [-pw password] openmole password
 [-c] console mode

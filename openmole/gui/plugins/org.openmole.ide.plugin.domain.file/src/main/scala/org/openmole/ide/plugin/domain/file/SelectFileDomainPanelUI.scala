@@ -39,7 +39,7 @@ class SelectFileDomainPanelUI(val dataUI: SelectFileDomainDataUI)(implicit val i
 
   override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 
-  add(dirTField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
+  add(dirTField, new Help(i18n.getString("category"), i18n.getString("dirEx")))
   add(pathTextField, new Help(i18n.getString("singleFilePath"), i18n.getString("singleFilePathEx")))
 
 }

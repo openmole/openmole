@@ -93,7 +93,7 @@ public class Tar {
 					logger.log(Level.FINEST, "Extracting " + destPath.getAbsolutePath());
 				}
 
-				// If the file is a directory, make all the dir's below it
+				// If the file is a directory, make all the category's below it
 				if (tarEntry.isDirectory()){
 					destPath.mkdirs();                           
 				} else {

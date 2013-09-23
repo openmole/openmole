@@ -58,7 +58,7 @@ class SimExplorer extends IApplication with Logger {
           opt("c", "path", "Path for the communication") {
             (v: String, c: Config) ⇒ c.copy(path = Some(v))
           },
-          opt("p", "plugin", "Path for plugin dir to preload") {
+          opt("p", "plugin", "Path for plugin category to preload") {
             (v: String, c: Config) ⇒ c.copy(pluginPath = Some(v))
           },
           opt("t", "nbThread", "Number of thread for the execution") {
