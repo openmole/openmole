@@ -107,6 +107,8 @@ class ConnectorWidget(val scene: MoleScene,
         case AggregationTransitionType ⇒ 5f
         case _                         ⇒ 2f
       }
+    case x: DataChannelUI ⇒ 3f
+    case _                ⇒ 2f
   })
 
   def drawTransitionType = {
