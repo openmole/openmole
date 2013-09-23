@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import java.awt.BorderLayout
+import java.awt.{ Checkbox, BorderLayout }
 import javax.swing.JScrollPane
 import javax.swing.ScrollPaneConstants._
 import org.openide.DialogDescriptor
@@ -30,6 +30,7 @@ import scala.swing._
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
+import scala.swing.event.ButtonClicked
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
@@ -90,6 +91,18 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
               }, "Mole execution"))
           })
         }
+
+        val serverCheckBox = new CheckBox("Delegates to : ")
+        val serverCombo = new ComboBox(List("Server1", "Server2"))
+        serverCombo.enabled = false
+
+        contents += serverCheckBox
+        contents += serverCombo
+
+        listenTo(`serverCheckBox`)
+        reactions += {
+          case ButtonClicked(`serverCheckBox`) ⇒ serverCombo.enabled = serverCheckBox.selected
+        }
         contents += eManager.envBarPanel
       }.peer, BorderLayout.NORTH)
 
@@ -107,7 +120,9 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             startLook
         }
         startStopButton.background = new Color(170, 0, 0)
-        startStopButton.action = new Action("Stop") { def apply = stop }
+        startStopButton.action = new Action("Stop") {
+          def apply = stop
+        }
         //exportButton.enabled = false
         x.start
       case _ ⇒
