@@ -148,16 +148,9 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         val pRams = params("id")
 
-        def returnStatusPage(exec: IMoleExecution) = {
-          val pageData = getMoleStats(exec) + ("Encapsulated" -> isEncapsulated(pRams)) + ("id" -> pRams) + ("status" -> getStatus(exec))
+        val pageData = getMoleStats(pRams) + ("Encapsulated" -> isEncapsulated(pRams)) + ("id" -> pRams) + ("status" -> getStatus(pRams))
 
-          ssp("/executionData", pageData.toSeq: _*)
-        }
-
-        getMole(pRams) match {
-          case Some(exec) ⇒ returnStatusPage(exec)
-          case _          ⇒ ssp("createMole", "body" -> "")
-        }
+        ssp("/executionData", pageData.toSeq: _*)
       }
     }
   }
@@ -167,10 +160,8 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     val pRams = params("id")
 
-    val mole = getMole(pRams)
-
-    val stats = mole map getMoleStats getOrElse Stats.empty //TODO this shouldn't be necessary
-    val r = mole map getStatus getOrElse "doesn't exist"
+    val stats = getMoleStats(pRams)
+    val r = getStatus(pRams)
 
     render(("status", r) ~
       ("stats", stats.toSeq))
@@ -229,7 +220,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     val exec = getMole(params("id"))
 
     render(("id", exec map (_.id) getOrElse "none") ~
-      ("execResult", exec map { e ⇒ e.start; getStatus(e) } getOrElse "id didn't exist"))
+      ("execResult", exec map { e ⇒ e.start; getStatus(params("id")) } getOrElse "id didn't exist"))
   }
 
   get("/json/remove/:id") {

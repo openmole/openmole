@@ -55,9 +55,8 @@ trait MoleHandling { self: SlickSupport ⇒
 
   (getUnfinishedMoleKeys map getMole).flatten foreach (_.start)
 
-  def getStatus(exec: IMoleExecution): String =
+  def getStatus(moleId: String): String =
     db withSession {
-      val moleId = mole2CacheId.get(exec).get
       (for (m ← MoleData if m.id === moleId) yield m.state).list().headOption.getOrElse("Doesn't Exist")
     }
 
@@ -197,9 +196,8 @@ trait MoleHandling { self: SlickSupport ⇒
     blob.getBytes(1, blob.length.toInt)
   }
 
-  def getMoleStats(mole: IMoleExecution) = {
-    val moleId = mole2CacheId.get(mole).get
-    (moleStats get moleId getOrElse Stats.empty) + ("totalJobs" -> mole.moleJobs.size)
+  def getMoleStats(key: String) = {
+    moleStats get key getOrElse Stats.empty
   }
   def startMole(key: String) { getMole(key) foreach (_.start) }
 
@@ -211,6 +209,13 @@ trait MoleHandling { self: SlickSupport ⇒
     }
 
     ret
+  }
+
+  def decacheMole(mole: IMoleExecution) = {
+    val mKey = mole2CacheId get mole
+    mKey foreach (id ⇒ println(s"decaching mole id: $id"))
+    mKey foreach (cachedMoles get _ foreach (_.cancel))
+    mKey foreach (cachedMoles remove _)
   }
 
   def setStatus(mole: IMoleExecution, status: String) = {
