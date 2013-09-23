@@ -192,7 +192,7 @@ class GUISerializer { serializer ⇒
     override def canConvert(t: Class[_]) = classOf[Update[_]].isAssignableFrom(t)
 
     def updated(u: AnyRef): AnyRef =
-      if(classOf[Update[_]].isAssignableFrom(u.getClass))
+      if (classOf[Update[_]].isAssignableFrom(u.getClass))
         updated(u.asInstanceOf[Update[AnyRef]].update)
       else u
   }
