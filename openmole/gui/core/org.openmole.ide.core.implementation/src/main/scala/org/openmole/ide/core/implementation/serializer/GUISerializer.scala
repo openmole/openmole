@@ -181,16 +181,20 @@ class GUISerializer { serializer ⇒
 
   val updateConverter = new ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider) {
     override def unmarshal(reader: HierarchicalStreamReader, context: UnmarshallingContext) =
-      super.unmarshal(reader, context).asInstanceOf[Update[AnyRef]].update
+      updated(super.unmarshal(reader, context))
 
     override def marshal(
       o: Object,
       writer: HierarchicalStreamWriter,
       mc: MarshallingContext) =
-      super.marshal(o.asInstanceOf[Update[AnyRef]].update, writer, mc)
+      super.marshal(updated(o), writer, mc)
 
     override def canConvert(t: Class[_]) = classOf[Update[_]].isAssignableFrom(t)
 
+    def updated(u: AnyRef): AnyRef =
+      if(classOf[Update[_]].isAssignableFrom(u.getClass))
+        updated(u.asInstanceOf[Update[AnyRef]].update)
+      else u
   }
 
   xstream.registerConverter(taskConverter)
