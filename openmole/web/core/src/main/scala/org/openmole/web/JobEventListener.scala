@@ -32,6 +32,7 @@ class MoleStatusListener(mH: MoleHandling) extends EventListener[IMoleExecution]
       case x: Starting ⇒ mH.setStatus(execution, MoleHandling.Status.running)
       case x: Finished ⇒ {
         mH.setStatus(execution, MoleHandling.Status.finished)
+        mH.decacheMole(execution)
         mH.storeResultBlob(execution)
       }
     }
