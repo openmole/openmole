@@ -29,6 +29,8 @@ import Persistent._
 
 case class Persistent(baseDir: File) {
 
+  baseDir.mkdirs
+
   private def subDirectory(dir: Option[String]) =
     dir.map(new File(baseDir, _)).getOrElse(baseDir)
 
@@ -54,39 +56,6 @@ case class Persistent(baseDir: File) {
       f ⇒ xstream.fromXML(f.content)
     }
   }
-
-  /*def file[T](i: Int)(implicit m: Manifest[T]) = new File(category, i.toString)
-
-  def category[T](implicit m: Manifest[T]): File = dirForName(m.runtimeClass.getCanonicalName)
-
-  def dirForName(clazz: String): File = {
-    val category = new File(baseDir, clazz)
-    category.mkdirs
-    category
-  }
-
-  def set[T](i: Int, obj: T)(implicit m: Manifest[T]) = synchronized {
-    file(i).content = xstream.toXML(obj)
-  }
-
-  def clean[T](implicit m: Manifest[T]) = synchronized { category.recursiveDelete }
-
-  def all[T](implicit m: Manifest[T]) =
-    allForName(m.runtimeClass.getCanonicalName)
-
-  def allForName(clazz: String) = synchronized {
-    def deserialize(f: File) = xstream.fromXML(f.content)
-    category.listFiles { f: File ⇒ f.getName.matches(pattern) }.sortBy { f ⇒ f.getName.toInt }.flatMap {
-      f ⇒ Try(deserialize(f)).toOption
-    }.toSeq
-  }
-
-  def all = synchronized {
-    baseDir.listFiles.map {
-      f ⇒
-        f.getName -> allForName(f.getName)
-    }.toMap
-  }        */
 
 }
 

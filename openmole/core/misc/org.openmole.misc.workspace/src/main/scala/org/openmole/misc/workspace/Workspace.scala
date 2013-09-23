@@ -43,11 +43,10 @@ object Workspace {
 
   val sessionUUID = UUID.randomUUID
 
-  //val openMoleDir = ".openmole"
-
   val preferences = "preferences"
   val globalGroup = "Global"
   val tmpLocation = ".tmp"
+  val persistentLocation = "persistent"
   val authenticationsLocation = "authentications"
   val pluginLocation = "plugins"
   val uniqueID = new ConfigurationLocation(globalGroup, "UniqueID")
@@ -164,7 +163,7 @@ object Workspace {
 
 class Workspace(val location: File) {
 
-  import Workspace.{ textEncryptor, decrypt, NoneTextEncryptor, authenticationsLocation, pluginLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
+  import Workspace.{ textEncryptor, decrypt, NoneTextEncryptor, persistentLocation, authenticationsLocation, pluginLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
 
   location.mkdirs
 
@@ -174,8 +173,8 @@ class Workspace(val location: File) {
   val pluginDir = new File(location, pluginLocation)
   pluginDir.mkdirs
 
-  val authenticationDir = new File(location, authenticationsLocation)
-  authenticationDir.mkdirs
+  val persistentDir = new File(location, persistentLocation)
+  persistentDir.mkdirs
 
   def newSeed = rng.nextLong
 
@@ -263,7 +262,7 @@ class Workspace(val location: File) {
   def newDir: File = newDir(fixedDir)
 
   def reset = synchronized {
-    authenticationDir.recursiveDelete
+    persistentDir.recursiveDelete
     val uniqueId = preference(uniqueID)
     configurationFile.content = ""
     configuration.clear
@@ -313,7 +312,7 @@ class Workspace(val location: File) {
     rawPreference(location) != null
   }
 
-  def persistent(name: String) = Persistent(file(name))
+  def persistent(name: String) = Persistent(new File(persistentDir, name))
 
   def authenticationProvider =
     AuthenticationProvider(
@@ -322,33 +321,5 @@ class Workspace(val location: File) {
     )
 
   lazy val authentications = new Persistent(new File(Workspace.authenticationsLocation)) with Authentication
-
-  /*def cleanAuthentications[T](implicit m: Manifest[T]) = authenticationDir.recursiveDelete
-
-  private def authentications =
-    persistentDir.listFiles.map {
-      f ⇒
-        f.getName -> loadList(f.getName)
-    }.toMap
-
-  private def authenticationDir[T](implicit m: Manifest[T]) = {
-    val category = new File(persistentDir, m.runtimeClass.getCanonicalName)
-    category.mkdirs
-    category
-  }
-
-  def setAuthentication[T](i: Int, obj: T)(implicit m: Manifest[T]) = synchronized {
-    def file(i: Int) = new File(authenticationDir, i.toString)
-    file(i).content = PersistentList.xstream.toXML(obj)
-  }
-
-  private def loadList(clazz: String) = synchronized {
-    import PersistentList._
-    val category = new File(persistentDir, clazz)
-    def deserialize(f: File) = PersistentList.xstream.fromXML(f.content)
-    category.listFiles { f: File ⇒ f.getName.matches(pattern) }.sortBy { f ⇒ f.getName.toInt }.flatMap {
-      f ⇒ Try(deserialize(f)).toOption
-    }.toSeq
-  }  */
 
 }
