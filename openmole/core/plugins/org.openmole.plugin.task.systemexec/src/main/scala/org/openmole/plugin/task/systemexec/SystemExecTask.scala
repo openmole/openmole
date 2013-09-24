@@ -40,7 +40,7 @@ object SystemExecTask extends Logger {
 
   /**
    * System exec task execute an external process.
-   * To communicate with the dataflow the result should be either a file / dir or the return
+   * To communicate with the dataflow the result should be either a file / category or the return
    * value of the process.
    *
    * @param name the name of the task

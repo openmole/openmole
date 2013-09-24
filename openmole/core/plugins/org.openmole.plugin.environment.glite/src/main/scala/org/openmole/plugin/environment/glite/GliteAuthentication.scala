@@ -131,7 +131,7 @@ object GliteAuthentication extends Logger {
     }
   }
 
-  def update(a: GliteAuthentication) = Workspace.setAuthentication(0, a)
+  def update(a: GliteAuthentication) = Workspace.authentications.save(0, a)
   def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[GliteAuthentication]).headOption
 
   def initialise(a: GliteAuthentication)(

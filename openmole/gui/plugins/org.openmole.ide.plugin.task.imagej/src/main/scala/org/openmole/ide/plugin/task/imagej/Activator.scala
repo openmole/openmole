@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 2013 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.core.implementation.preference
 
-import org.openmole.ide.misc.widget.PluginPanel
+package org.openmole.ide.plugin.task.imagej
 
-class ServerPanel extends PluginPanel("wrap", "[grow,fill]", "") {
+import org.openmole.ide.core.implementation.registry.OSGiActivator
+import org.openmole.ide.core.implementation.registry.TaskActivator
 
-  def save = println("save server")
+class Activator extends OSGiActivator with TaskActivator {
 
+  override def taskFactories = List(new ImageJTaskFactoryUI)
 }

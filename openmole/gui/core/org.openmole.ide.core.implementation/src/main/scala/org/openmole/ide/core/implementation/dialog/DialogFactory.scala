@@ -71,6 +71,15 @@ object DialogFactory {
     else None
   }
 
+  def serverURL(url: String): String = {
+    val textField = new TextField(url, 20)
+    val d = new DialogDescriptor(textField.peer, "Server address")
+    d.setOptions(List(NotifyDescriptor.OK_OPTION).toArray)
+    val notification = DialogDisplayer.getDefault.notify(d)
+    if (notification == -1 || notification == 0) textField.text
+    else ""
+  }
+
   def confirmationDialog(header: String,
                          text: String) = {
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label(text) {
@@ -94,7 +103,9 @@ object DialogFactory {
       "Reset anyway ?</html> ")
 
   def displaySplashScreen = {
-    val d = new DialogDescriptor(new Label("") { icon = Images.SPLASH_SCREEN }.peer, "About OpenMOLE")
+    val d = new DialogDescriptor(new Label("") {
+      icon = Images.SPLASH_SCREEN
+    }.peer, "About OpenMOLE")
     d.setOptions(List(NotifyDescriptor.OK_OPTION).toArray)
     DialogDisplayer.getDefault.notify(d)
   }
@@ -112,7 +123,9 @@ object DialogFactory {
     }).peer, "Export Mole"))
 
     val text = if (new File(fc.text).getParentFile.isDirectory) {
-      Some(fc.text.split('.')(0) + { if (withArchiveCheckBox.selected) ".tar" else ".xml" })
+      Some(fc.text.split('.')(0) + {
+        if (withArchiveCheckBox.selected) ".tar" else ".xml"
+      })
     }
     else None
 

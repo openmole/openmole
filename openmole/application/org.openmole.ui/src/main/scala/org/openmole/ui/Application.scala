@@ -38,13 +38,12 @@ class Application extends IApplication with Logger {
 
   lazy val consoleSplash =
     """
-  ___                   __  __  ___  _     _____    ___   ___
- / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____|  / _ \ / _ \
-| | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   | | | | (_) |
-| |_| | |_) |  __/ | | | |  | | |_| | |___| |___  | |_| |\__, |
- \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____|  \___(_) /_/
+  ___                   __  __  ___  _     _____    ___   _  ___
+ / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____|  / _ \ / |/ _ \
+| | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   | | | || | | | |
+| |_| | |_) |  __/ | | | |  | | |_| | |___| |___  | |_| || | |_| |
+ \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____|  \___(_)_|\___/
       |_|
-
 """
 
   override def start(context: IApplicationContext) = {
@@ -68,7 +67,7 @@ class Application extends IApplication with Logger {
     def usage =
       """openmole [options]
 
-[-p list of arg] plugins list of jar or dir containing jars to be loaded
+[-p list of arg] plugins list of jar or category containing jars to be loaded
 [-s path] a path of script to execute
 [-pw password] openmole password
 [-c] console mode

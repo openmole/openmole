@@ -24,13 +24,13 @@ import org.openmole.ide.misc.tools.util.ID
 
 object MoleData {
 
-  def toScene(moleData: MoleData, proxies: Proxies) = {
+  def toScene(moleData: MoleData2, proxies: Proxies) = {
     val ui = new MoleUI(moleData.name) {
       override val id = moleData.id
     }
     val scene = new BuildMoleScene(ui)
     ui.plugins = moleData.plugins
-    ui.prototypesInContext = moleData.prototypesInContext
+    ui.implicits = moleData.implicits
 
     val capsuleUIMap =
       moleData.capsules.map {
@@ -114,7 +114,7 @@ object MoleData {
         case (_, _) ⇒ None
       }
 
-    new MoleData(
+    MoleData2(
       scene.dataUI.id,
       scene.dataUI.name,
       scene.dataUI.startingCapsule.map(capsules),
@@ -123,19 +123,44 @@ object MoleData {
       transitions.toList,
       dataChannels.toList,
       scene.dataUI.plugins.toList,
-      scene.dataUI.prototypesInContext)
+      scene.dataUI.implicits
+    )
 
   }
 
 }
 
+@deprecated
 class MoleData(
-  val id: ID.Type,
-  val name: String,
-  val startingCapsule: Option[CapsuleData],
-  val capsules: List[CapsuleData],
-  val slots: List[SlotData],
-  val transitions: List[TransitionData],
-  val dataChannels: List[DataChannelData],
-  val plugins: List[String],
-  val prototypesInContext: List[(PrototypeDataProxyUI, String)])
+    val id: ID.Type,
+    val name: String,
+    val startingCapsule: Option[CapsuleData],
+    val capsules: List[CapsuleData],
+    val slots: List[SlotData],
+    val transitions: List[TransitionData],
+    val dataChannels: List[DataChannelData],
+    val plugins: List[String]) extends Update[MoleData2] {
+
+  def update = MoleData2(
+    id,
+    name,
+    startingCapsule,
+    capsules,
+    slots,
+    transitions,
+    dataChannels,
+    plugins,
+    List.empty
+  )
+}
+
+case class MoleData2(
+  id: ID.Type,
+  name: String,
+  startingCapsule: Option[CapsuleData],
+  capsules: List[CapsuleData],
+  slots: List[SlotData],
+  transitions: List[TransitionData],
+  dataChannels: List[DataChannelData],
+  plugins: List[String],
+  implicits: List[(PrototypeDataProxyUI, String)])

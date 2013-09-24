@@ -92,7 +92,7 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI)(implicit val i18n: Resour
     new Help(i18n.getString("nbSlot"),
       i18n.getString("nbSlotEx")))
   add(dirTextField,
-    new Help(i18n.getString("dir"),
+    new Help(i18n.getString("category"),
       i18n.getString("dirEx")))
   add(openMOLEMemoryTextField,
     new Help(i18n.getString("runtimeMemory"),

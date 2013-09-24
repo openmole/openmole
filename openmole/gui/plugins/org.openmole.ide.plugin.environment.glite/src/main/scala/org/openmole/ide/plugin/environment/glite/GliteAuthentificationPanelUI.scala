@@ -140,16 +140,16 @@ class GliteAuthentificationPanelUI extends AuthenticationPanelUI {
     try {
       pemPassField match {
         case Some(x: PasswordField) ⇒
-          if (pemButton.selected) Workspace.setAuthentication[GliteAuthentication](0,
+          if (pemButton.selected) Workspace.authentications.save[GliteAuthentication](0,
             new PEMCertificate(Workspace.encrypt(new String(x.password)),
               new File(pem1TextField.text),
               new File(pem2TextField.text)))
           else if (p12Button.selected)
-            Workspace.setAuthentication[GliteAuthentication](0,
+            Workspace.authentications.save[GliteAuthentication](0,
               new P12Certificate(Workspace.encrypt(new String(p12PassField.get.password)),
                 new File(p12TextField.text)))
           else if (proxyButton.selected) {
-            Workspace.setAuthentication[GliteAuthentication](0,
+            Workspace.authentications.save[GliteAuthentication](0,
               new ProxyFile(new File(proxyTextField.text)))
           }
       }

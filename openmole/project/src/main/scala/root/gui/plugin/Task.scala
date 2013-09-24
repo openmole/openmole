@@ -11,6 +11,8 @@ object Task extends PluginDefaults {
 
   lazy val groovy = OsgiProject("groovy") dependsOn (Core.implementation, base.Misc.workspace, base.plugin.Task.groovy)
 
+  lazy val imagej = OsgiProject("imagej") dependsOn (Core.implementation, base.Misc.workspace, base.plugin.Task.groovy)
+
   lazy val moletask = OsgiProject("moletask") dependsOn (Core.implementation, base.Core.model)
 
   lazy val netlogo = OsgiProject("netlogo") dependsOn (Core.implementation, base.Core.model, Osgi.netlogo4,

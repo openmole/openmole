@@ -106,7 +106,7 @@ object BundleClassPathBuilder {
 
     class DirEntry(url: URL, parent: DirEntry) extends BundleEntry(url, parent) {
 
-      //println("Create dir entry " + url + " " + parent)
+      //println("Create category entry " + url + " " + parent)
       /**
        * @return true
        */
