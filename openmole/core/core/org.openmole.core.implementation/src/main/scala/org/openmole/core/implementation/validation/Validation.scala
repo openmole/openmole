@@ -237,6 +237,11 @@ object Validation {
     }).flatten
   }
 
+  def dataChannelErrors(mole: IMole) =
+    mole.dataChannels.filter {
+      dc ⇒ mole.level(dc.end) < mole.level(dc.start)
+    }.map(DataChannelNegativeLevelProblem(_))
+
   def apply(mole: IMole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty) =
     allMoles(mole).flatMap {
       case (m, mt) ⇒
@@ -256,7 +261,8 @@ object Validation {
         }) ++
           topologyErrors(m) ++
           duplicatedTransitions(m) ++
-          duplicatedName(m, sources, hooks)
+          duplicatedName(m, sources, hooks) ++
+          dataChannelErrors(m)
     }
 
 }

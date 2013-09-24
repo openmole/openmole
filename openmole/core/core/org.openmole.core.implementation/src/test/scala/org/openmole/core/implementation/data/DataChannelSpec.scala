@@ -104,41 +104,4 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 
-  "A data channel" should "be able to gather the values of the multiple execution of an explored task" in {
-    var executed = false
-    val data = List("A", "B", "C")
-    val i = Prototype[String]("i")
-    val j = Prototype[String]("j")
-
-    val sampling = new ExplicitSampling(i, data)
-
-    val exc = Capsule(ExplorationTask("Exploration", sampling))
-
-    val t = new TestTask {
-      val name = "Test"
-      override val outputs = DataSet(j)
-      override def process(context: Context) = context + (j -> "J")
-    }
-
-    val noOP = EmptyTask("NoOP")
-
-    val tr = new TestTask {
-      val name = "Test read"
-      override val inputs = DataSet(j.toArray)
-      override def process(context: Context) = {
-        context(j.toArray).size should equal(data.size)
-        executed = true
-        context
-      }
-    }
-
-    val tc = Capsule(t)
-    val noOPC = Capsule(noOP)
-    val trc = Slot(tr)
-
-    val ex = (exc -< tc -- noOPC >- trc) + (tc oo trc)
-
-    ex.start.waitUntilEnded
-    executed should equal(true)
-  }
 }

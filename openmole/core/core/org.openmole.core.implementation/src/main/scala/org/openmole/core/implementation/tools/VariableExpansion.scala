@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.tools
 
-import java.io.InputStreamReader
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.io.InputStream
@@ -25,14 +24,11 @@ import org.openmole.misc.tools.script.GroovyProxy
 import org.openmole.core.model.data.Context
 import org.openmole.core.model.data.Variable
 import scala.math.BigDecimal
-import scala.util.control.Breaks._
 import util.Try
+import org.openmole.misc.tools.io.{ StringBuilderOutputStream, StringInputStream }
+import org.openmole.misc.exception._
 
 object VariableExpansion {
-
-  private val patternBegin = '{'
-  private val patternEnd = '}'
-  private val eval = "$" + patternBegin
 
   def expandBigDecimal(context: Context, s: String): BigDecimal =
     BigDecimal(apply(context, s))
@@ -50,79 +46,18 @@ object VariableExpansion {
     expandDataInternal(context, tmpVariable, s)
 
   private def expandDataInternal(context: Context, tmpVariable: Iterable[Variable[_]], s: String): String = {
-    var ret = s
-    val allVariables = context ++ tmpVariable
-    var cur = 0
-
-    breakable {
-      do {
-        val beginIndex = ret.indexOf(eval)
-        if (beginIndex == -1) break
-        var cur = beginIndex + 2
-        var curLevel = 0
-
-        breakable {
-          while (cur < ret.length) {
-            val curChar = ret.charAt(cur)
-
-            if (curChar == patternEnd) {
-              if (curLevel == 0) break
-              curLevel -= 1
-            }
-            else if (curChar == patternBegin) {
-              curLevel += 1
-            }
-            cur += 1
-          }
-        }
-
-        if (cur < ret.length) {
-          val toInsert = expandOneData(allVariables, getVarName(ret.substring(beginIndex + 1, cur + 1)))
-          ret = ret.substring(0, beginIndex) + toInsert + ret.substring(cur + 1)
-        }
-        else break
-      } while (true)
-    }
-
-    ret
-  }
-
-  def expandData(replace: Map[String, String], tmpVariable: Iterable[Variable[_]], s: String): String = {
-    expandDataInternal(replace, tmpVariable, s)
-  }
-
-  def expandDataInternal(replace: Map[String, String], tmpVariable: Iterable[Variable[_]], s: String): String = {
-    var ret = s
-    var beginIndex = -1
-    var endIndex = -1
-
-    breakable {
-      do {
-        beginIndex = ret.indexOf(patternBegin)
-        endIndex = ret.indexOf(patternEnd)
-
-        if (beginIndex == -1 || endIndex == -1) break
-
-        val toReplace = ret.substring(beginIndex, endIndex + 1)
-
-        val varName = getVarName(toReplace);
-
-        ret = replace.get(varName) match {
-          case Some(toInsert) ⇒ ret.substring(0, beginIndex) + toInsert + ret.substring(endIndex + 1)
-          case None           ⇒ ret.substring(0, beginIndex) + ret.substring(endIndex + 1)
-        }
-      } while (true)
-    }
-
-    ret
+    val os = new StringBuilder()
+    expandBufferData(context ++ tmpVariable, new StringInputStream(s), new StringBuilderOutputStream(os))
+    os.toString
   }
 
   private def getVarName(str: String): String = {
     str.substring(1, str.length - 1)
   }
 
-  protected def expandOneData(allVariables: Context, variableExpression: String): String = {
-    allVariables.variable(variableExpression).map((_: Variable[Any]).value) orElse
+  protected def expandOneData(allVariables: Context, variableExpression: String): String =
+    if (variableExpression.isEmpty) variableExpression
+    else allVariables.variable(variableExpression).map((_: Variable[Any]).value) orElse
       Try(variableExpression.toDouble).toOption orElse
       Try(variableExpression.toLong).toOption orElse
       Try(variableExpression.toLowerCase.toBoolean).toOption match {
@@ -131,42 +66,51 @@ object VariableExpansion {
           val shell = new GroovyProxy(variableExpression, Iterable.empty) with GroovyContextAdapter
           shell.execute(allVariables).toString
       }
-  }
 
   def expandBufferData(context: Context, is: InputStream, os: OutputStream) = {
-    val isreader = new InputStreamReader(is, "UTF-8")
+    //val isreader = new InputStreamReader(is, "UTF-8")
     val oswriter = new OutputStreamWriter(os)
 
-    var openbrace = 0
-    var closebrace = 0
-    var expandTime = false
-    var esbuilder = new StringBuffer("${")
-
-    def appendChar(c: Int) = esbuilder.append(c)
-
     try {
-      Iterator.continually(isreader.read).takeWhile(_ != -1).foreach {
-        n ⇒
-          n match {
-            case '{' ⇒
-              openbrace += 1
-              expandTime = true
-              if (openbrace > 1) appendChar(n)
-              else esbuilder = new StringBuffer("${")
-            case '}' ⇒
-              closebrace += 1
-              appendChar(n)
-              if (openbrace == closebrace) {
-                oswriter.write(apply(context, esbuilder.toString))
-                expandTime = false
-                openbrace = 0
-                closebrace = 0
-              }
-            case _ ⇒
-              if (expandTime) appendChar(n)
-              else if (n != '$') oswriter.write(n)
+      val it = Iterator.continually(is.read).takeWhile(_ != -1)
+
+      def nextToExpand(it: Iterator[Int]) = {
+        var opened = 1
+        val res = new StringBuffer
+        while (it.hasNext && opened > 0) {
+          val c = it.next
+          c match {
+            case '{' ⇒ res.append(c.toChar); opened += 1
+            case '}' ⇒ opened -= 1; if (opened > 0) res.append(c.toChar)
+            case _   ⇒ res.append(c.toChar)
           }
+        }
+        if (opened != 0) throw new UserBadDataError("Malformed ${expr} expression, unmatched opened {")
+        res.toString
       }
+
+      var dollar = false
+
+      while (it.hasNext) {
+        val c = it.next
+        c match {
+          case '{' ⇒
+            if (dollar) {
+              val toExpand = nextToExpand(it)
+              oswriter.write(expandOneData(context, toExpand))
+            }
+            else oswriter.write(c)
+            dollar = false
+          case '$' ⇒
+            if (dollar) oswriter.write('$')
+            dollar = true
+          case _ ⇒
+            if (dollar) oswriter.write('$')
+            oswriter.write(c)
+            dollar = false
+        }
+      }
+      if (dollar) oswriter.write('$')
     }
     finally oswriter.close
   }
