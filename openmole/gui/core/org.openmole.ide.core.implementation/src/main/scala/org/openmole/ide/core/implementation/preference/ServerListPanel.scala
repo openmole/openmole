@@ -22,7 +22,18 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import scala.swing.Action
+import org.openmole.misc.workspace.Workspace
 
+object ServerListPanel {
+  def list = Workspace.persistent("servers").all().map {
+    _ match {
+      case s: String ⇒ Option(s)
+      case _         ⇒ None
+    }
+  }.flatten
+}
+
+import ServerListPanel._
 class ServerListPanel extends PluginPanel("wrap", "[grow,fill]", "") {
 
   class ServerPanel(var data: ServerData)
@@ -30,7 +41,9 @@ class ServerListPanel extends PluginPanel("wrap", "[grow,fill]", "") {
 
     val linkLabel = new LinkLabel(
       expandName,
-      new Action("") { def apply = displayPopup },
+      new Action("") {
+        def apply = displayPopup
+      },
       4,
       "73a5d2",
       false)
@@ -62,13 +75,16 @@ class ServerListPanel extends PluginPanel("wrap", "[grow,fill]", "") {
 
   lazy val multiPanel = new MultiPanel("Server list",
     new ServerFactory,
-    //FIXME with persistent
-    List("s1", "s2").map { s ⇒ new ServerPanel(new ServerData(s)) },
+    list.map { s ⇒ new ServerPanel(new ServerData(s)) },
     CLOSE_IF_EMPTY,
     ADD)
 
   contents += multiPanel.panel
 
-  def save = println("save server to Persistent List")
-
+  def save = {
+    multiPanel.content.zipWithIndex.foreach {
+      case (data, i) ⇒
+        Workspace.persistent("servers").save(data.serverUrl, i.toString)
+    }
+  }
 }

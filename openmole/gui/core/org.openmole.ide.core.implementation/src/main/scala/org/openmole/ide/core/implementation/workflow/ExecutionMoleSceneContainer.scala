@@ -31,6 +31,7 @@ import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import scala.swing.event.ButtonClicked
+import org.openmole.ide.core.implementation.preference.ServerListPanel
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
@@ -93,7 +94,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         }
 
         val serverCheckBox = new CheckBox("Delegates to : ")
-        val serverCombo = new ComboBox(List("Server1", "Server2"))
+        val serverCombo = new ComboBox(ServerListPanel.list)
         serverCombo.enabled = false
 
         contents += serverCheckBox
