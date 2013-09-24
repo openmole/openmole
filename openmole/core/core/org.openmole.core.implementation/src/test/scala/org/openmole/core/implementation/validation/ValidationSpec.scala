@@ -336,4 +336,28 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     }
   }
 
+  "Merge between aggregation and simple transition" should "be supported" in {
+    val j = Prototype[Int]("j")
+
+    val t1 = EmptyTask("t1")
+    t1 addOutput j
+
+    val t1Caps = Capsule(t1)
+
+    val exploration = ExplorationTask("explo", new EmptySampling)
+    exploration addInput j.toArray
+    exploration addOutput j.toArray
+    exploration addParameter (j.toArray -> Array.empty[Int])
+
+    val explorationCaps = Capsule(exploration)
+
+    val agg = EmptyTask("agg")
+    agg addInput j.toArray.toArray
+
+    val aggSlot = Slot(agg)
+
+    val mole = (explorationCaps -< t1Caps >- aggSlot) + (explorationCaps -- aggSlot)
+    Validation(mole).isEmpty should equal(true)
+  }
+
 }
