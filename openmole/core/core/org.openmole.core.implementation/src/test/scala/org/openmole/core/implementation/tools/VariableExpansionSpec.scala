@@ -17,8 +17,6 @@
 
 package org.openmole.core.implementation.tools
 
-import org.openmole.implementation.tools.TemplateData
-import org.openmole.misc.hashservice.HashService
 import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
 import org.openmole.core.model.data._
@@ -33,10 +31,23 @@ import org.junit.runner.RunWith
 @RunWith(classOf[JUnitRunner])
 class VariableExpansionSpec extends FlatSpec with ShouldMatchers {
 
-  "A expandData" should "expand all the ${} sequence from an inputStream and return a parsed OuputStream" in {
+  "A expandData" should "expand all the ${} top level sequence from an inputStream and return a parsed OuputStream" in {
+    val template = """My first line
+${2*3}
+${"I am ${6*5} year old"}"""
 
-    val of = File.createTempFile("expand", ".test")
-    VariableExpansion.expandBufferData(Context.empty, new FileInputStream(TemplateData.templateFile), new FileOutputStream(of))
-    HashService.computeHash(of).equals(HashService.computeHash(TemplateData.targetFile)) should equal(true)
+    val expected = """My first line
+6
+I am 30 year old"""
+
+    val res = VariableExpansion(Context.empty, template)
+    res should equal(expected)
   }
+
+  "A expandData" should "preserve additionnal $ in the string" in {
+    val test = "$$$etere{etsaesrn}etasriu$$$$eatsrn$"
+    val res = VariableExpansion(Context.empty, test)
+    test should equal(res)
+  }
+
 }

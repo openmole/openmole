@@ -31,9 +31,9 @@ import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class MoleExecutionHookSpec extends FlatSpec with ShouldMatchers {
+class ProfilerSpec extends FlatSpec with ShouldMatchers {
 
-  "A execution misc" should "intersept finished jobs in mole execution" in {
+  "A profiler" should "intersept finished jobs in mole execution" in {
     var executed = false
 
     val p = Prototype[String]("p")
@@ -47,9 +47,9 @@ class MoleExecutionHookSpec extends FlatSpec with ShouldMatchers {
     val t1c = new Capsule(t1)
 
     val profiler = new Profiler {
-      override def process(moleJob: IMoleJob) = {
+      override def process(moleJob: IMoleJob, executionContext: ExecutionContext) = {
         moleJob.context.contains(p) should equal(true)
-        moleJob.context.value(p).get should equal("test")
+        moleJob.context(p) should equal("test")
         executed = true
       }
     }

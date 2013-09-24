@@ -22,6 +22,7 @@ import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools._
+import org.openmole.core.implementation.sampling._
 import DataflowProblem._
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
@@ -32,6 +33,7 @@ import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
 import org.junit.runner.RunWith
+import org.openmole.core.implementation.validation.TopologyProblem.DataChannelNegativeLevelProblem
 
 @RunWith(classOf[JUnitRunner])
 class ValidationSpec extends FlatSpec with ShouldMatchers {
@@ -53,7 +55,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
     errors.headOption match {
       case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
-      case _ ⇒ sys.error("Error should have been detected")
+      case _                        ⇒ sys.error("Error should have been detected")
     }
   }
 
@@ -149,7 +151,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     errors.headOption match {
       case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
-      case _ ⇒ sys.error("Error should have been detected")
+      case _                        ⇒ sys.error("Error should have been detected")
     }
   }
 
@@ -170,7 +172,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     errors.headOption match {
       case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
-      case _ ⇒ sys.error("Error should have been detected")
+      case _                        ⇒ sys.error("Error should have been detected")
     }
 
   }
@@ -214,7 +216,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val errors = Validation.duplicatedName(new Mole(c1), Sources.empty, Hooks.empty)
     errors.headOption match {
       case Some(DuplicatedName(_, _, _, Output)) ⇒
-      case _ ⇒ sys.error("Error should have been detected")
+      case _                                     ⇒ sys.error("Error should have been detected")
     }
   }
 
@@ -233,10 +235,10 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val errors = Validation.hookErrors(new Mole(c1), Iterable.empty, Sources.empty, Map(c1 -> List(h)))
+    val errors = Validation.hookErrors(new Mole(c1), Iterable.empty, Sources.empty, Hooks(Map(c1 -> List(h))))
     errors.headOption match {
       case Some(MissingHookInput(_, _, _)) ⇒
-      case _ ⇒ sys.error("Error should have been detected")
+      case _                               ⇒ sys.error("Error should have been detected")
     }
   }
 
@@ -257,10 +259,10 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val errors = Validation.hookErrors(new Mole(c1), Iterable.empty, Sources.empty, Map(c1 -> List(h)))
+    val errors = Validation.hookErrors(new Mole(c1), Iterable.empty, Sources.empty, Hooks(Map(c1 -> List(h))))
     errors.headOption match {
       case Some(WrongHookType(_, _, _, _)) ⇒
-      case _ ⇒ sys.error("Error should have been detected")
+      case _                               ⇒ sys.error("Error should have been detected")
     }
   }
 
@@ -282,7 +284,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = new Mole(c1)
 
-    val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Map(c1 -> List(s)), Hooks.empty)
+    val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources(Map(c1 -> List(s))), Hooks.empty)
     errors.isEmpty should equal(true)
   }
 
@@ -303,10 +305,34 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = new Mole(c1)
 
-    val errors = Validation.sourceTypeErrors(mole, List.empty, Map(c1 -> List(s)), Hooks.empty)
+    val errors = Validation.sourceTypeErrors(mole, List.empty, Sources(Map(c1 -> List(s))), Hooks.empty)
     errors.headOption match {
       case Some(MissingSourceInput(_, _, _)) ⇒
-      case _ ⇒ sys.error("Error should have been detected")
+      case _                                 ⇒ sys.error("Error should have been detected")
+    }
+  }
+
+  "Validation" should "detect a data channel error when a data channel is going from a level to a lower level" in {
+    val i = Prototype[String]("i")
+
+    val exc = new Capsule(ExplorationTask("Exploration", new EmptySampling))
+
+    val testT = EmptyTask("Test")
+    testT addOutput i
+
+    val noOP = EmptyTask("NoOP")
+    val aggT = EmptyTask("Aggregation")
+
+    val testC = new Capsule(testT)
+    val noOPC = new Capsule(noOP)
+    val aggC = Slot(aggT)
+
+    val mole = (exc -< testC -- noOPC >- aggC) + (testC oo aggC)
+
+    val errors = Validation.dataChannelErrors(mole)
+    errors.headOption match {
+      case Some(DataChannelNegativeLevelProblem(_)) ⇒
+      case _                                        ⇒ sys.error("Error should have been detected")
     }
   }
 
