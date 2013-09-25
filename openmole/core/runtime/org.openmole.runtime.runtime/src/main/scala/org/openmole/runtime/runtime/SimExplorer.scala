@@ -68,7 +68,10 @@ class SimExplorer extends IApplication with Logger {
 
       val debug = args.contains("-d")
       val filteredArgs = args.filterNot((_: String) == "-d")
-      if (debug) LoggerService.level("ALL")
+      if (debug) {
+
+        LoggerService.level("ALL")
+      }
 
       parser.parse(filteredArgs, Config()) foreach { config ⇒
 
