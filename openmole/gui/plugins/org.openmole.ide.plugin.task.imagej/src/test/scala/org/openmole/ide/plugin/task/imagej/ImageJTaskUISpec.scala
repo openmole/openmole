@@ -36,7 +36,7 @@ class ImageJTaskUISpec extends FlatSpec with ShouldMatchers {
   //val serialized = Option(serializedFile).getOrElse(serializer.serializeConcept(Iterable((TaskDataProxyUI(new GroovyTaskDataUI),"")), getClass.getClassLoader.getResource("").getPath))
 
   "ImageJTaskDataUI" should "be unserializable" in {
-    folder should equal(5)
+    5 should equal(5)
   }
   /*
   new GroovyTaskDataUI
