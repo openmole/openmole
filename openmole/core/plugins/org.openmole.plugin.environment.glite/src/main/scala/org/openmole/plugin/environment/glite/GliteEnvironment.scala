@@ -134,7 +134,8 @@ object GliteEnvironment extends Logger {
     smpGranularity: Option[Int] = None,
     myProxy: Option[MyProxy] = None,
     architecture: Option[String] = None,
-    threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
+    threads: Option[Int] = None,
+    debug: Boolean = false)(implicit authentications: AuthenticationProvider) =
     new GliteEnvironment(voName,
       bdii.getOrElse(Workspace.preference(GliteEnvironment.DefaultBDII)),
       vomsURL.getOrElse(GliteAuthentication.getVMOSOrError(voName)),
@@ -148,7 +149,8 @@ object GliteEnvironment extends Logger {
       smpGranularity,
       myProxy,
       architecture,
-      threads)(authentications)
+      threads,
+      debug)(authentications)
 
   def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
 
@@ -185,7 +187,8 @@ class GliteEnvironment(
     val smpGranularity: Option[Int],
     val myProxy: Option[MyProxy],
     val architecture: Option[String],
-    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId { env ⇒
+    override val threads: Option[Int],
+    val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId { env ⇒
 
   import GliteEnvironment._
 

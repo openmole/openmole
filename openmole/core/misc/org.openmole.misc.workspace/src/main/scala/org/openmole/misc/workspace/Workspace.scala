@@ -312,7 +312,7 @@ class Workspace(val location: File) {
     rawPreference(location) != null
   }
 
-  def persistent(name: String) = Persistent(new File(persistentDir, name))
+  def persistent(name: String) = Persistent(persistentDir.child(name))
 
   def authenticationProvider =
     AuthenticationProvider(
@@ -320,6 +320,6 @@ class Workspace(val location: File) {
       password
     )
 
-  lazy val authentications = new Persistent(new File(Workspace.authenticationsLocation)) with Authentication
+  lazy val authentications = new Persistent(persistentDir.child(Workspace.authenticationsLocation)) with Authentication
 
 }
