@@ -140,15 +140,15 @@ class GliteAuthentificationPanelUI extends AuthenticationPanelUI {
     try {
       pemPassField match {
         case Some(x: PasswordField) ⇒
-            if (pemButton.selected)
-              GliteAuthentication() = PEMCertificate(Workspace.encrypt(new String(x.password)),
-                new File(pem1TextField.text),
-                new File(pem2TextField.text))
-            else if (p12Button.selected)
-              GliteAuthentication() =
-                P12Certificate(Workspace.encrypt(new String(p12PassField.get.password)), new File(p12TextField.text))
-            else if (proxyButton.selected)
-              GliteAuthentication() = ProxyFile(new File(proxyTextField.text))
+          if (pemButton.selected)
+            GliteAuthentication() = PEMCertificate(Workspace.encrypt(new String(x.password)),
+              new File(pem1TextField.text),
+              new File(pem2TextField.text))
+          else if (p12Button.selected)
+            GliteAuthentication() =
+              P12Certificate(Workspace.encrypt(new String(p12PassField.get.password)), new File(p12TextField.text))
+          else if (proxyButton.selected)
+            GliteAuthentication() = ProxyFile(new File(proxyTextField.text))
       }
       (pem :: p12 :: proxy :: Nil).filterNot(_._1.selected).foreach(_._3)
     }

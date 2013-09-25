@@ -39,7 +39,8 @@ object DIRACGliteEnvironment {
     setup: Option[String] = None,
     fqan: Option[String] = None,
     cpuTime: Option[String] = None,
-    openMOLEMemory: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
+    openMOLEMemory: Option[Int] = None,
+    debug: Boolean = false)(implicit authentications: AuthenticationProvider) =
     new DIRACGliteEnvironment(
       voName,
       service,
@@ -49,7 +50,8 @@ object DIRACGliteEnvironment {
       setup.getOrElse("Dirac-Production"),
       fqan,
       cpuTime,
-      openMOLEMemory
+      openMOLEMemory,
+      debug
     )(authentications)
 
 }
@@ -63,7 +65,8 @@ class DIRACGliteEnvironment(
     val setup: String,
     val fqan: Option[String],
     val cpuTime: Option[String],
-    override val openMOLEMemory: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId { env ⇒
+    override val openMOLEMemory: Option[Int],
+    val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId { env ⇒
 
   type JS = DIRACGliteJobService
 
