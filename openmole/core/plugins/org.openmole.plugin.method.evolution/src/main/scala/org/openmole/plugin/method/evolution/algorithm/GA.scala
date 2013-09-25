@@ -149,20 +149,20 @@ object GA {
     def y: Int
   }
 
-  def genomeMap(x: Int, nX: Int, y: Int, nY: Int, aggregation: GAAggregation, neighbors: Int = 8, dominance: Dominance = strict, ranking: GARankingBuilder = pareto, diversityMetric: DiversityMetricBuilder = crowding) = {
-    val (_x, _nX, _y, _nY, _aggregation, _neighbors, _dominance, _ranking, _diversityMetric) = (x, nX, y, nY, aggregation, neighbors, dominance, ranking, diversityMetric)
+  def genomeMap(x: Int, nX: Int, y: Int, nY: Int, aggregation: GAAggregation, neighbours: Int = 8, dominance: Dominance = strict, ranking: GARankingBuilder = pareto, diversityMetric: DiversityMetricBuilder = crowding) = {
+    val (_x, _nX, _y, _nY, _aggregation, _neighbours, _dominance, _ranking, _diversityMetric) = (x, nX, y, nY, aggregation, neighbours, dominance, ranking, diversityMetric)
     new GAAlgorithmBuilder with GAMap {
       val aggregation = _aggregation
       val x = _x
       val y = _y
 
       def apply =
-        new MapArchive with GAAlgorithm with MapModifier with MapElitism with MapGenomePlotter {
+        new GAAlgorithm with MapModifier with MapElitism with MapGenomePlotter with NoArchive {
           val aManifest = manifest[A]
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
           val diversityMetric = _diversityMetric(_dominance)
           val ranking = _ranking(_dominance)
-          val neighbors = _neighbors
+          val neighbours = _neighbours
           val x = _x
           val y = _y
           val nX = _nX
@@ -232,7 +232,7 @@ trait GA extends GASigmaFactory
   with GA.GA
   with Archive
   with Termination
-  with Breeding
+  with GeneticBreeding
   with MG
   with Elitism
   with Modifier
@@ -268,5 +268,5 @@ sealed class GAImpl(
   def modify(individuals: Seq[Individual[G, P, F]], archive: A) = thisAlgorithm.modify(individuals, archive)
   def crossover(g1: G, g2: G)(implicit rng: Random) = thisCrossover.crossover(g1, g2)
   def mutate(genome: G)(implicit rng: Random) = thisMutation.mutate(genome)
-  def elitism(individuals: Seq[Individual[G, P, F]], a: A) = thisAlgorithm.elitism(individuals, a)
+  def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], a: A) = thisAlgorithm.elitism(individuals, newIndividuals, a)
 }
