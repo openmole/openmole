@@ -55,8 +55,21 @@ import scala.Some
 import org.openmole.ide.core.implementation.commons.MasterCapsuleType
 import scala.util.Success
 import org.openmole.ide.core.implementation.sampling.DomainProxyUI
+import java.net.URL
 
-object GUISerializer extends Logger
+object GUISerializer extends Logger {
+  var instance = new GUISerializer
+
+  implicit def urlToFile(url: URL): File = new File(url.toURI)
+
+  def serializable(url: URL): Boolean = try {
+    instance.read(url)
+    true
+  }
+  catch {
+    case x: Throwable ⇒ false
+  }
+}
 
 class GUISerializer { serializer ⇒
 
