@@ -21,6 +21,8 @@ java -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area=${CONFIGDIR} $F
 
 RETURNCODE=$?
 
+cat ${CONFIGDIR}/*.log
+
 rm -rf ${CONFIGDIR}
 
 exit $RETURNCODE

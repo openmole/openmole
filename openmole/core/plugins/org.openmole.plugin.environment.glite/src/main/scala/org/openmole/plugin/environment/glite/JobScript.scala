@@ -87,7 +87,7 @@ trait JobScript {
       script += "export PATH=$PWD/jre/bin:$PATH"
       script += "/bin/sh run.sh " + environment.openMOLEMemoryValue + "m " + UUID.randomUUID + " -c " +
         path + " -s $CUR/storage.xml.gz -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath +
-        " -t " + environment.threadsValue + (if (environment.debug) " -d" else "")
+        " -t " + environment.threadsValue + (if (environment.debug) " -d 2>&1" else "")
       script.mkString(" && ")
     }
 
