@@ -30,7 +30,6 @@ trait ISamplingCompositionWidget extends Panel {
 
   def displayOnMoleScene(proxy: SamplingOrDomainProxyUI): Unit = ScenesManager.currentSceneContainer match {
     case Some(s: ISceneContainer) ⇒
-      // s.scene.displayPropertyPanel(proxy, update)
       s.scene.displaySamplingPropertyPanel(this)
     case _ ⇒
   }
