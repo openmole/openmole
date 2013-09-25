@@ -17,7 +17,7 @@
 package org.openmole.ide.core.implementation.sampling
 
 import swing.Action
-import org.openmole.ide.core.implementation.workflow.{ ConnectorViewUI, PrototypeOnConnectorWidget }
+import org.openmole.ide.core.implementation.workflow.{ PrototypeOnFactorConnectorWidget, ConnectorViewUI, PrototypeOnConnectorWidget }
 import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget._
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog.{ OrderingDialog, FactorPrototypeDialog }
@@ -36,7 +36,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
 
   val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
   val targetW = targetWidget.asInstanceOf[SceneComponent]
-  var componentWidget: Option[PrototypeOnConnectorWidget] = None
+  var componentWidget: Option[PrototypeOnFactorConnectorWidget] = None
   val orderingDialog = new OrderingDialog(sourceW.component.proxy, this)
   val orderingWidget = new OrderingOnConnectorWidget(scene,
     sourceW.component.proxy,
@@ -67,8 +67,11 @@ class SamplingConnectorWidget(sourceWidget: Widget,
 
   def update = {
     componentWidget match {
-      case Some(x: PrototypeOnConnectorWidget) ⇒ x.connectorUI = preview
-      case _                                   ⇒
+      case Some(x: PrototypeOnFactorConnectorWidget) ⇒
+        x.connectorUI = preview
+        x.repaint
+        x.revalidate
+      case _ ⇒
     }
     updateOrderingWidget
   }
@@ -107,14 +110,16 @@ class SamplingConnectorWidget(sourceWidget: Widget,
     factorProxyUI match {
       case Some(factor: IFactorProxyUI) ⇒
         val dialog = new FactorPrototypeDialog(samplingConnectorWidget)
-        componentWidget = Some(new PrototypeOnConnectorWidget(scene,
+        componentWidget = Some(new PrototypeOnFactorConnectorWidget(scene,
           preview,
           new LinkLabel(factor.dataUI.prototype.toString,
             new Action("") {
               def apply = {
                 dialog.display
+                repaint
+                revalidate
               }
-            }, 2, bold = true), darkOnLight, 20))
+            }, 4, bold = true), lightOnRed, lightOnGreen, 80))
         addChild(componentWidget.get)
         setConstraint(componentWidget.get, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
         componentWidget.get.setOpaque(true)

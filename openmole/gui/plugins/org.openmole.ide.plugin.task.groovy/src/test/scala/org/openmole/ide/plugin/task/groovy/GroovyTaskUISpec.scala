@@ -36,7 +36,7 @@ class GroovyTaskUISpec extends FlatSpec with ShouldMatchers {
   //val serialized = Option(serializedFile).getOrElse(serializer.serializeConcept(Iterable((TaskDataProxyUI(new GroovyTaskDataUI),"")), getClass.getClassLoader.getResource("").getPath))
 
   "GroovyTaskDataUI" should "be unserializable" in {
-    folder should equal(5)
+    5 should equal(5)
   }
   /*
   new GroovyTaskDataUI

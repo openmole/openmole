@@ -9,9 +9,9 @@ object Task extends PluginDefaults {
 
   lazy val exploration = OsgiProject("exploration") dependsOn (Core.implementation, base.Core.model, base.Misc.exception)
 
-  lazy val groovy = OsgiProject("groovy") dependsOn (Core.implementation, base.Misc.workspace, base.plugin.Task.groovy)
+  lazy val groovy = OsgiProject("groovy") dependsOn (Core.implementation, base.Misc.workspace, base.plugin.Task.groovy, base.Misc.replication % "test")
 
-  lazy val imagej = OsgiProject("imagej") dependsOn (Core.implementation, base.Misc.workspace, base.plugin.Task.groovy)
+  lazy val imagej = OsgiProject("imagej") dependsOn (Core.implementation, base.Misc.workspace, base.plugin.Task.groovy, base.Misc.replication % "test")
 
   lazy val moletask = OsgiProject("moletask") dependsOn (Core.implementation, base.Core.model)
 
