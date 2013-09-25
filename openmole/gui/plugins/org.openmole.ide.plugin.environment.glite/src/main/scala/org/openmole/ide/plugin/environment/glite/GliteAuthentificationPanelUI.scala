@@ -66,7 +66,7 @@ class GliteAuthentificationPanelUI extends AuthenticationPanelUI {
 
   addButtons
   try {
-    GliteAuthentication() match {
+    GliteAuthentication()(Workspace.authenticationProvider) match {
       case Some(x: P12Certificate) ⇒
         initButton = Some(p12Button)
         p12TextField.text = x.certificate.getAbsolutePath
