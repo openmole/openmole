@@ -19,24 +19,11 @@ package org.openmole.ide.plugin.task.groovy
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import org.junit.runner.RunWith
 import org.openmole.ide.core.implementation.serializer.GUISerializer
-import java.io.File
 
 class GroovyTaskUISpec extends FlatSpec with ShouldMatchers {
 
-  val serializedFile = getClass.getClassLoader.getResource("serialized.xml")
-  val serializer = new GUISerializer
-
-  def test(f: ⇒ Unit): Boolean = try {
-    f
-    true
-  }
-  catch {
-    case x: Throwable ⇒ false
-  }
-
   "GroovyTaskDataUI" should "be unserializable" in {
-    test(serializer.read(new File(serializedFile.toURI))) should equal(true)
+    GUISerializer.serializable(getClass.getClassLoader.getResource("serialized.xml")) should equal(true)
   }
 }
