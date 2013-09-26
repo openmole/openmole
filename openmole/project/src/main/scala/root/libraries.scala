@@ -168,7 +168,7 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies ++= Seq("org.netbeans.api" % "org-netbeans-api-visual" % "RELEASE73",
       "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 
-  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.64-SNAPSHOT", bundleType := Set("plugin"))
+  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.64", bundleType := Set("plugin"))
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0", bundleType := Set("plugin"))
 
