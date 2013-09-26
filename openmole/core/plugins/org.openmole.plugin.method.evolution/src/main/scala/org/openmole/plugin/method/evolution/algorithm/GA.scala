@@ -149,26 +149,22 @@ object GA {
     def y: Int
   }
 
-  def genomeMap(x: Int, nX: Int, y: Int, nY: Int, aggregation: GAAggregation, neighbours: Int = 8, dominance: Dominance = strict, ranking: GARankingBuilder = pareto, diversityMetric: DiversityMetricBuilder = crowding) = {
-    val (_x, _nX, _y, _nY, _aggregation, _neighbours, _dominance, _ranking, _diversityMetric) = (x, nX, y, nY, aggregation, neighbours, dominance, ranking, diversityMetric)
+  def genomeMap(x: Int, nX: Int, y: Int, nY: Int, aggregation: GAAggregation, neighbours: Int = 8) = {
+    val (_x, _nX, _y, _nY, _aggregation, _neighbours) = (x, nX, y, nY, aggregation, neighbours)
     new GAAlgorithmBuilder with GAMap {
       val aggregation = _aggregation
       val x = _x
       val y = _y
 
       def apply =
-        new GAAlgorithm with MapModifier with MapElitism with MapGenomePlotter with NoArchive {
+        new GAAlgorithm with MapModifier with MapElitism with MapGenomePlotter with NoArchive with HierarchicalRanking {
           val aManifest = manifest[A]
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
-          val diversityMetric = _diversityMetric(_dominance)
-          val ranking = _ranking(_dominance)
           val neighbours = _neighbours
           val x = _x
           val y = _y
           val nX = _nX
           val nY = _nY
-          def diversity(individuals: Seq[Seq[Double]], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = diversityMetric.diversity(individuals, ranks)
-          def rank(individuals: Seq[Seq[Double]]) = ranking.rank(individuals)
         }
     }
   }
