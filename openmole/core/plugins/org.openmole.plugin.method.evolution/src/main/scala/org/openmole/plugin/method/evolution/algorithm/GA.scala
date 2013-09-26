@@ -157,7 +157,7 @@ object GA {
       val y = _y
 
       def apply =
-        new GAAlgorithm with MapModifier with MapElitism with MapGenomePlotter with NoArchive with HierarchicalRanking {
+        new GAAlgorithm with MapModifier with MapElitism with MapGenomePlotter with NoArchive with HierarchicalRanking with NoDiversity {
           val aManifest = manifest[A]
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
           val neighbours = _neighbours
