@@ -1,0 +1,7 @@
+<dataUI class="org.openmole.ide.plugin.task.exploration.ExplorationTaskDataUI">
+    <name>test</name>
+    <sampling class="None"/>
+    <inputs class="List"/>
+    <outputs class="List"/>
+    <inputParameters class="HashMap"/>
+</dataUI>

@@ -14,7 +14,7 @@ object Environment extends PluginDefaults {
     base.Misc.exception, base.Core.batch)
 
   lazy val local = OsgiProject("local") dependsOn (Core.implementation, base.Misc.exception,
-    base.Core.model)
+    base.Core.model, base.Misc.replication % "test")
 
   lazy val pbs = OsgiProject("pbs") dependsOn (Core.implementation, base.plugin.Environment.pbs,
     base.Misc.exception, base.Core.batch)

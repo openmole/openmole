@@ -1,0 +1,8 @@
+<dataUI class="org.openmole.ide.plugin.task.stat.ConfidenceIntervalTaskDataUI">
+    <name>test</name>
+    <sequence class="List"/>
+    <level>0.95</level>
+    <inputs class="List"/>
+    <outputs class="List"/>
+    <inputParameters class="HashMap"/>
+  </dataUI>

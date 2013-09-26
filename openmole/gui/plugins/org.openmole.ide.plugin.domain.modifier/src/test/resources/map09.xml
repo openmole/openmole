@@ -1,0 +1,6 @@
+<dataUI class="org.openmole.ide.plugin.domain.modifier.MapDomainDataUI">
+    <prototypeName></prototypeName>
+    <code></code>
+    <previousDomain class="List"/>
+    <name>Map</name>
+  </dataUI>

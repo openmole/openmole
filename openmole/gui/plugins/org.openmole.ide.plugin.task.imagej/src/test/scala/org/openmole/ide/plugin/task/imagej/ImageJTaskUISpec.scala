@@ -24,6 +24,6 @@ import org.scalatest.matchers.ShouldMatchers
 class ImageJTaskUISpec extends FlatSpec with ShouldMatchers {
 
   "ImageJTaskDataUI" should "be unserializable" in {
-    GUISerializer.serializable(getClass.getClassLoader.getResource("serialized.xml")) should equal(true)
+    GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)
   }
 }

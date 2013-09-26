@@ -1,0 +1,8 @@
+<dataUI class="org.openmole.ide.plugin.hook.file.AppendToCSVFileHookDataUI">
+    <name>test</name>
+    <toBeHooked class="List"/>
+    <fileName></fileName>
+    <inputs class="List"/>
+    <outputs class="List"/>
+    <inputParameters class="HashMap"/>
+  </dataUI>

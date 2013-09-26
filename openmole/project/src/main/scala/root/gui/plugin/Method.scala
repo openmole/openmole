@@ -8,5 +8,5 @@ object Method extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.ide.plugin.method")
 
   lazy val sensitivity = OsgiProject("sensitivity") dependsOn (base.plugin.Method.sensitivity, Domain.range,
-    Core.implementation)
+    Core.implementation, base.Misc.replication % "test")
 }

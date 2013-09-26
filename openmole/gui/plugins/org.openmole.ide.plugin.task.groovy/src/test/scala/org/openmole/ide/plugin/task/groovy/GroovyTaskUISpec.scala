@@ -24,6 +24,6 @@ import org.openmole.ide.core.implementation.serializer.GUISerializer
 class GroovyTaskUISpec extends FlatSpec with ShouldMatchers {
 
   "GroovyTaskDataUI" should "be unserializable" in {
-    GUISerializer.serializable(getClass.getClassLoader.getResource("serialized.xml")) should equal(true)
+    GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)
   }
 }
