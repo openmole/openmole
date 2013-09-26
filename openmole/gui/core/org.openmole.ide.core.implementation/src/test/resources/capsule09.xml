@@ -1,0 +1,14 @@
+<CapsuleData>
+  <capsule>
+    <task class="None"/>
+    <environment class="None"/>
+    <grouping class="None"/>
+    <sourcesOptions class="List"/>
+    <hooksOptions class="List"/>
+    <capsuleType class="SimpleCapsuleType"/>
+    <name></name>
+  </capsule>
+  <x>304</x>
+  <y>147</y>
+  <id>8a55fa93-2526-49a7-b5da-615ce833d1c4</id>
+</CapsuleData>
