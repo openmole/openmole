@@ -44,7 +44,6 @@ object Images {
   val MASTER_CAPSULE = imageIcon("img/masterCapsule.png")
 
   val BUILD_EXECUTION = imageIcon("img/build.png")
-  val CLEAN_BUILD_EXECUTION = imageIcon("img/cleanAndBuild.png")
 
   val EYE = imageIcon("img/eye.png")
   val ARROW = imageIcon("img/arrow.png")
