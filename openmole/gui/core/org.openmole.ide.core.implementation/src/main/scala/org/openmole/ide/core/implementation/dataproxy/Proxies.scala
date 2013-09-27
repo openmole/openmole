@@ -29,8 +29,9 @@ import org.openmole.core.model.data.Prototype
 object Proxies {
   var instance = new Proxies
 
-  def check[T <: DataProxyUI](proxyList: List[T]) = proxyList.filter {
-    instance.contains
+  def check[T <: DataProxyUI](proxyList: List[T]) = proxyList.filter { p ⇒
+    println("p " + p + " :: " + instance.contains(p))
+    instance.contains(p)
   }
 
   def check[T <: DataProxyUI](proxy: T) = instance.contains(proxy)
