@@ -55,13 +55,12 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap"
   }
 
   def saveContent(name: String) = new CopyFileHookDataUI(name,
-    multiComboTextField.content.filter {
+    multiComboTextField.content.filterNot {
       _.comboValue match {
         case Some(v: PrototypeDataProxyUI) ⇒ Proxies.check(List(v)).isEmpty
         case _                             ⇒ false
       }
     }.map { m ⇒
-      println("M : " + m.comboValue.get)
       (KeyRegistry.protoProxyKeyMap(PrototypeKey(m.comboValue.get)), m.textFieldValue)
     })
 
