@@ -1,0 +1,16 @@
+<dataUI class="org.openmole.ide.plugin.environment.pbs.PBSEnvironmentDataUI">
+    <name>test</name>
+    <login></login>
+    <host></host>
+    <port>22</port>
+    <queue class="None"/>
+    <openMOLEMemory class="Some">
+      <x class="int">512</x>
+    </openMOLEMemory>
+    <wallTime class="None"/>
+    <memory class="None"/>
+    <path class="None"/>
+    <threads class="None"/>
+    <nodes class="None"/>
+    <coreByNode class="None"/>
+  </dataUI>

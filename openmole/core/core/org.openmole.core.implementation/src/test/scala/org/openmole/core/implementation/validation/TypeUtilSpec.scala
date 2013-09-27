@@ -81,26 +81,4 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
     m.manifest.runtimeClass should equal(classOf[Int])
   }
 
-  "Type system" should "detect an toArray case when a data channel is going from a level to a lower level" in {
-    val i = Prototype[String]("i")
-
-    val exc = new Capsule(ExplorationTask("Exploration", new EmptySampling))
-
-    val testT = EmptyTask("Test")
-    testT addOutput i
-
-    val noOP = EmptyTask("NoOP")
-    val aggT = EmptyTask("Aggregation")
-
-    val testC = new Capsule(testT)
-    val noOPC = new Capsule(noOP)
-    val aggC = Slot(aggT)
-
-    val mole = (exc -< testC -- noOPC >- aggC) + (testC oo aggC)
-
-    val m = TypeUtil.computeManifests(mole, Sources.empty, Hooks.empty)(aggC).head
-    m.toArray should equal(true)
-    m.manifest.runtimeClass should equal(classOf[String])
-  }
-
 }

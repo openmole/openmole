@@ -29,16 +29,20 @@ object ElitismTask {
   def apply(evolution: Elitism with Termination with Modifier with Archive)(
     name: String,
     individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
+    newIndividuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
     archive: Prototype[evolution.A])(implicit plugins: PluginSet) = {
-    val (_individuals, _archive) = (individuals, archive)
+    val (_individuals, _newIndividuals, _archive) = (individuals, newIndividuals, archive)
 
     new TaskBuilder { builder ⇒
       addInput(archive)
       addInput(individuals)
+      addInput(newIndividuals)
       addOutput(individuals)
 
       def toTask = new ElitismTask(name, evolution) with builder.Built {
         val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
+        val newIndividuals = _newIndividuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
+
         val archive = _archive.asInstanceOf[Prototype[evolution.A]]
       }
     }
@@ -49,14 +53,15 @@ sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier wi
     val name: String, val evolution: E) extends Task {
 
   def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
+  def newIndividuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
   def archive: Prototype[evolution.A]
 
   override def process(context: Context) = {
     val a = context(archive)
-    val newIndividuals = evolution.elitism(context(individuals), a)
+    val elitIndividuals = evolution.elitism(context(individuals), context(newIndividuals), a)
 
     Context(
-      Variable(individuals, newIndividuals.toArray))
+      Variable(individuals, elitIndividuals.toArray))
   }
 
 }

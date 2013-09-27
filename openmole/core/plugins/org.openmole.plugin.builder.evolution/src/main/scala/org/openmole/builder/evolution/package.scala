@@ -80,6 +80,7 @@ package object evolution {
       ElitismTask(evolution)(
         name + "ElitismTask",
         individual.toArray,
+        newIndividual.toArray,
         archive)
 
     val terminationTask = TerminationTask(evolution)(
@@ -109,7 +110,6 @@ package object evolution {
 
     val renameIndividualsTask = AssignTask(name + "RenameIndividuals")
     renameIndividualsTask.assign(individual.toArray, newIndividual.toArray)
-    val mergeIndividualsTask = MergeTask(name + "MergeIndividuals", individual.toArray, individual.toArray, newIndividual.toArray)
 
     val terminatedCondition = Condition(terminated.name + " == true")
 
@@ -171,7 +171,6 @@ package object evolution {
 
     val scalingGenomeCaps = Capsule(scalingGenomeTask)
     val toIndividualSlot = Slot(InputStrainerCapsule(toIndividualTask))
-    val mergeIndividualsSlot = Slot(Capsule(mergeIndividualsTask))
     val mergeArchiveSlot = Slot(Capsule(mergeArchiveTask))
     val elitismSlot = Slot(elitismTask)
 
@@ -182,7 +181,7 @@ package object evolution {
     val scalingIndividualsSlot = Slot(Capsule(scalingIndividualsTask))
     val endSlot = Slot(StrainerCapsule(EmptyTask(name + "End")))
 
-    val exploration = firstCapsule -- breedingCaps -< scalingGenomeCaps -- (model, filter = Block(genome)) -- toIndividualSlot >- (mergeArchiveSlot, renameIndividualsTask -- mergeIndividualsSlot)
+    val exploration = firstCapsule -- breedingCaps -< scalingGenomeCaps -- (model, filter = Block(genome)) -- toIndividualSlot >- (mergeArchiveSlot, renameIndividualsTask)
     val skel = exploration -- elitismSlot -- terminationSlot -- scalingIndividualsSlot -- (endSlot, terminatedCondition, filter = Keep(individual.toArray))
 
     val loop = terminationSlot -- (breedingCapsItSlot, !terminatedCondition)
@@ -190,7 +189,7 @@ package object evolution {
     val dataChannels =
       (scalingGenomeCaps -- (toIndividualSlot, filter = Keep(genome))) +
         (breedingCaps -- (mergeArchiveSlot, filter = Keep(archive))) +
-        (breedingCaps -- (mergeIndividualsSlot, filter = Keep(individual.toArray))) +
+        (breedingCaps -- (elitismSlot, filter = Keep(individual.toArray))) +
         (breedingCaps oo (model.first, filter = Block(archive, individual.toArray, genome.toArray))) +
         (breedingCaps -- (endSlot, filter = Block(archive, individual.toArray, state, generation, terminated, genome.toArray))) +
         (breedingCaps -- (terminationSlot, filter = Block(archive, individual.toArray))) +
@@ -221,10 +220,8 @@ package object evolution {
     mergeArchiveTask addParameter (archive -> evolution.initialArchive)
     val mergeArchiveCaps = MasterCapsule(mergeArchiveTask, archive)
 
-    mergeIndividualsTask addParameter (individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
-    val mergeIndividualsCaps = MasterCapsule(mergeIndividualsTask, individual.toArray)
-
-    val elitismCaps = Capsule(elitismTask)
+    elitismTask addParameter (individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
+    val elitismCaps = MasterCapsule(elitismTask, individual.toArray)
 
     terminationTask addParameter Parameter.delayed(state, evolution.initialState)
     terminationTask addParameter generation -> 0
@@ -247,7 +244,7 @@ package object evolution {
         (model, filter = Block(genome)) --
         (toIndividualSlot, filter = Keep(objectives.map(_._1).map(_.name).toSeq: _*)) --
         toIndividualArrayCaps --
-        (mergeArchiveCaps, renameIndividualsTask -- mergeIndividualsCaps) --
+        (mergeArchiveCaps, renameIndividualsTask) --
         elitismCaps --
         terminationSlot --
         scalingIndividualsSlot >| (endCapsule, terminatedCondition, Block(archive))
@@ -262,7 +259,7 @@ package object evolution {
         (firstCapsule oo (model.first, filter = Block(archive, individual.toArray))) +
         (firstCapsule -- (endCapsule, filter = Block(archive, individual.toArray))) +
         (firstCapsule oo (mergeArchiveCaps, filter = Keep(archive))) +
-        (firstCapsule oo (mergeIndividualsCaps, filter = Keep(individual.toArray))) +
+        (firstCapsule oo (elitismCaps, filter = Keep(individual.toArray))) +
         (mergeArchiveCaps -- (terminationSlot, filter = Keep(archive)))
 
     val gaPuzzle = skel + loop + dataChannels
@@ -294,7 +291,7 @@ package object evolution {
       def diff(a1: A, a2: A) = evolution.diff(a1, a2)
       def toArchive(individuals: Seq[Individual[G, P, F]]) = evolution.toArchive(individuals)
       def modify(individuals: Seq[Individual[G, P, F]], archive: A) = evolution.modify(individuals, archive)
-      def elitism(individuals: Seq[Individual[G, P, F]], archive: A) = evolution.elitism(individuals, archive)
+      def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], archive: A) = evolution.elitism(individuals, newIndividuals, archive)
 
       def initialState = termination.initialState
       def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE) = termination.terminated(population, terminationState)
@@ -327,19 +324,14 @@ package object evolution {
     val renameIndividualsTask = AssignTask(name + "RenameIndividuals")
     renameIndividualsTask.assign(individual.toArray, newIndividual.toArray)
 
-    val mergeIndividualsTask = MergeTask(name + "MergeIndividuals", individual.toArray, individual.toArray, newIndividual.toArray)
-    mergeIndividualsTask addInput archive
-    mergeIndividualsTask addOutput archive
-
     val elitismTask = ElitismTask(islandElitism)(
       name + "ElitismTask",
       individual.toArray,
+      newIndividual.toArray,
       archive)
 
-    val moleElitismTask = MoleTask(name + "MoleElitism", mergeIndividualsTask -- elitismTask)
-    moleElitismTask addParameter (individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
-
-    val moleElitismCaps = MasterCapsule(moleElitismTask, individual.toArray)
+    elitismTask addParameter (individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
+    val elitismCaps = MasterCapsule(elitismTask, individual.toArray)
 
     val terminationTask = TerminationTask(islandElitism)(
       name + "TerminationTask",
@@ -401,7 +393,7 @@ package object evolution {
         (preIslandCapsule, size = number.toString) --
         islandSlot --
         (renameIndividualsTask, archiveDiffSlot -- mergeArchiveSlot) --
-        moleElitismCaps --
+        elitismCaps --
         terminationSlot --
         scalingIndividualsSlot >| (endCapsule, terminated.name + " == true")
 

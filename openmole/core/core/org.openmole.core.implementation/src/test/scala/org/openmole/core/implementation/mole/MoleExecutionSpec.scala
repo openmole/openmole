@@ -45,7 +45,7 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
     def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
       groups.find { case (_, g) ⇒ g.size < 2 } match {
         case Some((mg, _)) ⇒ mg
-        case None ⇒ MoleJobGroup()
+        case None          ⇒ MoleJobGroup()
       }
     }
 

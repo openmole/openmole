@@ -1,0 +1,14 @@
+<dataUI class="org.openmole.ide.plugin.domain.range.RangeDomainDataUI">
+    <min>0</min>
+    <max>1</max>
+    <step class="Some">
+      <x class="string">1</x>
+    </step>
+    <domainType class="scala.reflect.ManifestFactory$$anon$12">
+      <toString>Double</toString>
+      <hashCode>450839479</hashCode>
+    </domainType>
+    <org_-openmole_-ide_-plugin_-domain_-range_-RangeDomainDataUI_-_-fs class="org.openmole.misc.tools.io.FromString$$anon$3"/>
+    <org_-openmole_-ide_-plugin_-domain_-range_-RangeDomainDataUI_-_-integral class="scala.math.Numeric$DoubleAsIfIntegral$"/>
+    <name>Range</name>
+  </dataUI>

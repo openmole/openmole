@@ -1,0 +1,9 @@
+<dataUI class="org.openmole.ide.plugin.domain.modifier.SlidingDomainDataUI">
+    <size>1</size>
+    <step>1</step>
+    <previousDomain class="List"/>
+    <domainType class="scala.reflect.ManifestFactory$$anon$12">
+      <toString>Double</toString>
+      <hashCode>450839479</hashCode>
+    </domainType>
+  </dataUI>

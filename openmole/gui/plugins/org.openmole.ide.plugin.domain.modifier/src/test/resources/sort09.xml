@@ -1,0 +1,5 @@
+<dataUI class="org.openmole.ide.plugin.domain.modifier.SortDomainDataUI">
+    <previousDomain class="List"/>
+    <ord class="scala.math.Ordering$Double$"/>
+    <name>Sort</name>
+  </dataUI>

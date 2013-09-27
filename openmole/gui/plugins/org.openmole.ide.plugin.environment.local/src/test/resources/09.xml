@@ -1,0 +1,4 @@
+<dataUI class="org.openmole.ide.plugin.environment.local.LocalEnvironmentDataUI">
+    <name>test</name>
+    <nbThread>1</nbThread>
+  </dataUI>

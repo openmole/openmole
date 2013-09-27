@@ -1,0 +1,4 @@
+<dataUI class="org.openmole.ide.plugin.sampling.csv.CSVSamplingDataUI">
+            <csvFilePath></csvFilePath>
+            <prototypeMapping class="List"/>
+          </dataUI>
