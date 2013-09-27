@@ -176,5 +176,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val arm = OsgiProject("com.jsuereth.scala-arm") settings (libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.3", exportPackage := Seq("resource.*"))
 
+  lazy val scalajHttp = OsgiProject("org.scalaj.scalaj-http") settings (libraryDependencies += "org.scalaj" %% "scalaj-http" % "0.3.10")
+
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core", "runtime")) //TODO make library defaults
 }
