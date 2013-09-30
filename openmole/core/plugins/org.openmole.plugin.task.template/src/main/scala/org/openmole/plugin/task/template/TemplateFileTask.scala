@@ -37,7 +37,7 @@ object TemplateFileTask {
 
 sealed abstract class TemplateFileTask(
     val name: String,
-    template: File,
+    val template: File,
     val output: Prototype[File]) extends AbstractTemplateFileTask {
 
   override def file(context: Context) = template
