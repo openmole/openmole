@@ -3,7 +3,6 @@ package org.openmole.web.misc.tools
 import scalaj.http._
 import java.net.URL
 
-
 /**
  * Created with IntelliJ IDEA.
  * User: luft
@@ -12,8 +11,8 @@ import java.net.URL
  */
 case class OMClient[T](address: URL, responseFormat: ResponseFormat[T] = WebResponse) {
   def createMole(moleData: Array[Byte], context: Option[Array[Byte]], pack: Boolean = false, encapsulate: Boolean = false) = {
-    val packVal = if(pack) "on" else ""
-    val encapsulateVal = if(encapsulate) "on" else ""
+    val packVal = if (pack) "on" else ""
+    val encapsulateVal = if (encapsulate) "on" else ""
     val url = address.toString + responseFormat.responseUrlSection + "/createMole"
     println(url)
     responseFormat.convertResponse(
@@ -44,17 +43,17 @@ case class OMClient[T](address: URL, responseFormat: ResponseFormat[T] = WebResp
 
 trait ResponseFormat[T] {
   def response: String
-  def responseUrlSection = if(response.isEmpty) "" else s"/$response"
-  def convertResponse: scalaj.http.Http.Request => T
+  def responseUrlSection = if (response.isEmpty) "" else s"/$response"
+  def convertResponse: scalaj.http.Http.Request ⇒ T
 }
 
 case object WebResponse extends ResponseFormat[String] {
   def response = ""
-  def convertResponse = (a: scalaj.http.Http.Request) => a.asString
+  def convertResponse = (a: scalaj.http.Http.Request) ⇒ a.asString
 }
 
 case object XMLResponse extends ResponseFormat[scala.xml.Elem] {
   def response = "xml"
-  def convertResponse = (a: Http.Request) => a.asXml
+  def convertResponse = (a: Http.Request) ⇒ a.asXml
 }
 
