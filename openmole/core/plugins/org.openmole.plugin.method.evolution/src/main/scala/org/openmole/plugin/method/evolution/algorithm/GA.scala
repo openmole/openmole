@@ -149,8 +149,8 @@ object GA {
     def y: Int
   }
 
-  def genomeMap(x: Int, nX: Int, y: Int, nY: Int, aggregation: GAAggregation, neighbours: Int = 8) = {
-    val (_x, _nX, _y, _nY, _aggregation, _neighbours) = (x, nX, y, nY, aggregation, neighbours)
+  def genomeMap(x: Int, nX: Int, y: Int, nY: Int, aggregation: GAAggregation) = {
+    val (_x, _nX, _y, _nY, _aggregation) = (x, nX, y, nY, aggregation)
     new GAAlgorithmBuilder with GAMap {
       val aggregation = _aggregation
       val x = _x
@@ -160,7 +160,6 @@ object GA {
         new GAAlgorithm with MapModifier with MapElitism with MapGenomePlotter with NoArchive with HierarchicalRanking with NoDiversity {
           val aManifest = manifest[A]
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
-          val neighbours = _neighbours
           val x = _x
           val y = _y
           val nX = _nX
