@@ -26,7 +26,7 @@ object Web extends Defaults {
     (h2, jetty, slick, logback, scalatra, bonecp, scalaLang, base.Core.implementation, base.Core.serializer, xstream, jacksonJson, iceTar, arm)
 
   lazy val misc = OsgiProject("org.openmole.web.misc.tools", "misc/tools",
-    exports = Seq("org.openmole.web.misc.tools")) dependsOn
+    exports = Seq("org.openmole.web.misc.tools.*")) dependsOn
     (scalajHttp)
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core"))
