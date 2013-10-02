@@ -27,6 +27,9 @@ import org.openmole.ide.core.implementation.provider.{ MoleSceneMenuProvider, Co
 import scala.collection.mutable.HashMap
 import scala.Some
 import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, ProxyFreezer }
+import org.netbeans.api.visual.export.SceneExporter
+import java.io.File
+import org.netbeans.api.visual.export.SceneExporter.{ ZoomType, ImageType }
 
 object BuildMoleScene {
   def apply(name: String) = new BuildMoleScene(new MoleUI(name))
@@ -118,4 +121,6 @@ class BuildMoleScene(val dataUI: MoleUI) extends MoleScene { buildMoleScene ⇒
     graphScene.removeNodeWithEdges(dataUI.removeCapsuleUI(c))
     CheckData.checkMole(buildMoleScene)
   }
+
+  def createImage(file: File) = SceneExporter.createImage(this, file, ImageType.PNG, ZoomType.FIT_IN_WINDOW, true, false, 7, 800, 400)
 }
