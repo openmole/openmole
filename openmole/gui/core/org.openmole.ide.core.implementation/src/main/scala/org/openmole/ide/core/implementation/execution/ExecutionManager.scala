@@ -21,15 +21,17 @@ import scala.collection.mutable.HashMap
 import scala.swing._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.job.State
-import org.openmole.core.model.data._
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.ide.core.implementation.workflow.{ MoleUI, CapsuleUI, ExecutionMoleSceneContainer }
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
 import org.openmole.misc.exception.ExceptionUtils
 import scala.concurrent.stm._
+import java.net.URL
 
 import org.openmole.core.model.execution.ExecutionState._
+import org.openmole.web.misc.tools.OMClient
+import org.openmole.ide.core.implementation.serializer.ExecutionSerializer
 
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {
@@ -41,7 +43,6 @@ class ExecutionManager(manager: MoleUI,
                        executionContainer: ExecutionMoleSceneContainer,
                        val mole: IMole,
                        val capsuleMapping: Map[CapsuleUI, ICapsule]) extends PluginPanel("", "[grow,fill]", "")
-    with IExecutionManager
     with Publisher {
   executionManager ⇒
   val logTextArea = new TextArea
@@ -53,7 +54,7 @@ class ExecutionManager(manager: MoleUI,
 
   val moleExecutionExceptionTextArea = new StatusBar
 
-  override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea), true)
+  val printStream = new PrintStream(new TextAreaOutputStream(logTextArea), true)
   var moleExecution: Option[IMoleExecution] = None
   var status = HashMap(State.READY -> new AtomicInteger,
     State.RUNNING -> new AtomicInteger,
@@ -75,8 +76,9 @@ class ExecutionManager(manager: MoleUI,
 
   lazy val timerAction = new ActionListener {
     def actionPerformed(ae: ActionEvent) = {
-      environments.foreach { e ⇒
-        e._2.plotter.update(new States(e._2.statuses(READY).intValue, e._2.statuses(SUBMITTED).intValue, e._2.statuses(RUNNING).intValue))
+      environments.foreach {
+        e ⇒
+          e._2.plotter.update(new States(e._2.statuses(READY).intValue, e._2.statuses(SUBMITTED).intValue, e._2.statuses(RUNNING).intValue))
       }
     }
   }
@@ -88,63 +90,80 @@ class ExecutionManager(manager: MoleUI,
     opaque = true
     background = new Color(77, 77, 77)
   }
-  tabbedPane.pages += new TabbedPane.Page("Progress", new ScrollPane(logTextArea) { verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded })
-  tabbedPane.pages += new TabbedPane.Page("Errors", new ScrollPane(executionJobExceptionTextArea) { verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded })
-  tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea) { verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded })
+  tabbedPane.pages += new TabbedPane.Page("Progress", new ScrollPane(logTextArea) {
+    verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+  })
+  tabbedPane.pages += new TabbedPane.Page("Errors", new ScrollPane(executionJobExceptionTextArea) {
+    verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+  })
+  tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea) {
+    verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+  })
 
   contents += tabbedPane
 
-  def start = synchronized {
+  def start(server: Option[URL] = None) = synchronized {
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter
 
-    buildMoleExecution match {
-      case Success((mE, envNames)) ⇒
-        val mExecution = mE.toExecution(manager.context, ExecutionContext.local.copy(out = printStream))
-        moleExecution = Some(mExecution)
-        EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
-        EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
-        EventDispatcher.listen(mExecution: IMoleExecution, new JobCreatedListener(this), classOf[IMoleExecution.JobCreated])
-        EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
-        EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.JobFailed])
-        EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.HookExceptionRaised])
-        EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.SourceExceptionRaised])
-        EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ProfilerExceptionRaised])
-        envNames.foreach {
-          case (e, _) ⇒
-            e match {
-              case e: BatchEnvironment ⇒
-                EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
-                EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.EndUpload])
-                EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.BeginDownload])
-                EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.EndDownload])
-              case _ ⇒
+    server match {
+      case Some(url: URL) ⇒
+        val client = new OMClient(url)
+        client.createMole(ExecutionSerializer(manager, true), None)
+      case _ ⇒
+        buildMoleExecution match {
+          case Success((mE, envNames)) ⇒
+            val mExecution = mE.toExecution(manager.context, ExecutionContext.local.copy(out = printStream))
+            moleExecution = Some(mExecution)
+            EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
+            EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
+            EventDispatcher.listen(mExecution: IMoleExecution, new JobCreatedListener(this), classOf[IMoleExecution.JobCreated])
+            EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
+            EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.JobFailed])
+            EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.HookExceptionRaised])
+            EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.SourceExceptionRaised])
+            EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ProfilerExceptionRaised])
+            envNames.foreach {
+              case (e, _) ⇒
+                e match {
+                  case e: BatchEnvironment ⇒
+                    EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
+                    EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.EndUpload])
+                    EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.BeginDownload])
+                    EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.EndDownload])
+                  case _ ⇒
+                }
             }
-        }
-        envNames.foreach {
-          case (env, name) ⇒
-            EventDispatcher.listen(env: Environment, new EnvironmentExceptionListener(this), classOf[Environment.ExceptionRaised])
-            buildEmptyEnvPlotter(env, name)
-        }
+            envNames.foreach {
+              case (env, name) ⇒
+                EventDispatcher.listen(env: Environment, new EnvironmentExceptionListener(this), classOf[Environment.ExceptionRaised])
+                buildEmptyEnvPlotter(env, name)
+            }
 
-        if (envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
-        if (environments.size > 0) {
-          envBarPanel.peer.add(new PluginPanel("wrap", "[center]", "") {
-            contents += new TabbedPane {
-              environments.foreach { e ⇒ pages += new TabbedPane.Page(e._2.name, new PluginPanel("") { contents += e._2.plotter.panel }) }
+            if (envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
+            if (environments.size > 0) {
+              envBarPanel.peer.add(new PluginPanel("wrap", "[center]", "") {
+                contents += new TabbedPane {
+                  environments.foreach {
+                    e ⇒
+                      pages += new TabbedPane.Page(e._2.name, new PluginPanel("") {
+                        contents += e._2.plotter.panel
+                      })
+                  }
+                }
+              }.peer)
             }
-          }.peer)
+            initPieChart
+            repaint
+            revalidate
+            timer.start
+            mExecution.start
+          case Failure(e) ⇒
+            executionJobExceptionTextArea.block(e.getMessage, None, ExceptionUtils.prettify(e))
+            tabbedPane.selection.index = 1
+            None
         }
-        initPieChart
-        repaint
-        revalidate
-        timer.start
-        mExecution.start
-      case Failure(e) ⇒
-        executionJobExceptionTextArea.block(e.getMessage, None, ExceptionUtils.prettify(e))
-        tabbedPane.selection.index = 1
-        None
     }
   }
 
@@ -196,12 +215,14 @@ class ExecutionManager(manager: MoleUI,
     environments.values.foreach(env ⇒ env.statuses.keys.foreach(k ⇒ env.statuses(k) = new AtomicInteger))
   }
 
-  def displayFileTransfer = atomic { implicit ctx ⇒
-    executionContainer.updateFileTransferLabels(downloads()._1 + " / " + downloads()._2,
-      uploads()._1 + " / " + uploads()._2)
+  def displayFileTransfer = atomic {
+    implicit ctx ⇒
+      executionContainer.updateFileTransferLabels(downloads()._1 + " / " + downloads()._2,
+        uploads()._1 + " / " + uploads()._2)
   }
 
   case class PlotState(val name: String,
                        val statuses: HashMap[ExecutionState.ExecutionState, AtomicInteger],
                        val plotter: XYPlotter = new XYPlotter(5000, 120))
+
 }

@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import java.awt.{ Checkbox, BorderLayout }
+import java.awt.BorderLayout
 import javax.swing.JScrollPane
 import javax.swing.ScrollPaneConstants._
 import org.openide.DialogDescriptor
@@ -32,6 +32,7 @@ import util.{ Failure, Success }
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import scala.swing.event.ButtonClicked
 import org.openmole.ide.core.implementation.preference.ServerListPanel
+import java.net.URL
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
@@ -52,12 +53,11 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
     background = new Color(125, 160, 0)
   }
 
-  /* val exportButton = new Button(export) {
-    background = new Color(55, 170, 200)
-  }*/
-
   val dlLabel = new Label("0/0")
   val ulLabel = new Label("0/0")
+  val serverCheckBox = new CheckBox("Delegates to : ")
+  val serverCombo = new ComboBox(ServerListPanel.list)
+  serverCombo.enabled = false
 
   executionManager match {
     case Some(eManager: ExecutionManager) ⇒
@@ -93,10 +93,6 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           })
         }
 
-        val serverCheckBox = new CheckBox("Delegates to : ")
-        val serverCombo = new ComboBox(ServerListPanel.list)
-        serverCombo.enabled = false
-
         contents += serverCheckBox
         contents += serverCombo
 
@@ -124,8 +120,10 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         startStopButton.action = new Action("Stop") {
           def apply = stop
         }
-        //exportButton.enabled = false
-        x.start
+        x.start({
+          if (serverCheckBox.selected) Some(new URL(serverCombo.selection.item))
+          else None
+        })
       case _ ⇒
     }
   }
@@ -133,7 +131,6 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   def startLook = {
     startStopButton.background = new Color(125, 160, 0)
     startStopButton.action = start
-    // exportButton.enabled = true
   }
 
   def stop = executionManager match {
