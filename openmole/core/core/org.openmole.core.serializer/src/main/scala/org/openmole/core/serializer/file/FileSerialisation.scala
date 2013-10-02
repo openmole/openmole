@@ -24,7 +24,7 @@ import com.ice.tar.TarOutputStream
 import java.io.{ File, FileOutputStream }
 import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 
 trait FileSerialisation {
 
@@ -56,14 +56,14 @@ trait FileSerialisation {
     }
 
     val filesInfoSerial = Workspace.newFile
-    SerializerService.serialize(fileInfo, filesInfoSerial)
+    SerialiserService.serialise(fileInfo, filesInfoSerial)
     tos.addFile(filesInfoSerial, filesInfo)
     filesInfoSerial.delete
   }
 
   def deserialiseFileReplacements(archiveExtractDir: File, extractDir: File) = {
     val fileInfoFile = new File(archiveExtractDir, filesInfo)
-    val fi = SerializerService.deserialize[FilesInfo](fileInfoFile)
+    val fi = SerialiserService.deserialise[FilesInfo](fileInfoFile)
     fileInfoFile.delete
 
     new TreeMap[File, File] ++ fi.map {

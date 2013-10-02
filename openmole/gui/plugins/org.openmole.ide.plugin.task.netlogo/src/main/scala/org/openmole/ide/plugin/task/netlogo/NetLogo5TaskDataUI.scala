@@ -20,9 +20,9 @@ case class NetLogo5TaskDataUI(name: String = "",
                               prototypeMappingInput: List[(PrototypeDataProxyUI, String)] = List(),
                               prototypeMappingOutput: List[(String, PrototypeDataProxyUI)] = List(),
                               resources: List[String] = List(),
-                              val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                              val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                              val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
+                              inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                              outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                              inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
     val builder = NetLogo5Task(

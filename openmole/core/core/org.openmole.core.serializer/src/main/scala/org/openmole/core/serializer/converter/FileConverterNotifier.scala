@@ -20,7 +20,7 @@ package org.openmole.core.serializer.converter
 import com.thoughtworks.xstream.converters.extended.FileConverter
 import java.io.File
 
-class FileConverterNotifier(serializer: SerializerWithFileAndPluginListing) extends FileConverter {
+class FileConverterNotifier(serializer: SerialiserWithFileAndPluginListing) extends FileConverter {
 
   override def toString(obj: Object): String = {
     val file = obj.asInstanceOf[File]

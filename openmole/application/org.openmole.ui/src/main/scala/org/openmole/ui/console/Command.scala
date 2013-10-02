@@ -28,7 +28,7 @@ import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.{ ExecutionContext, IMole, IMoleExecution }
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.IExplorationTransition
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.HashMap
 
@@ -90,8 +90,8 @@ class Command {
     Workspace.encrypt(password)
   }
 
-  def load[T](f: File) = SerializerService.deserialize[T](f)
-  def save(o: Any, f: File) = SerializerService.serialize(o, f)
+  def load[T](f: File) = SerialiserService.deserialise[T](f)
+  def save(o: Any, f: File) = SerialiserService.serialise(o, f)
 
 }
 

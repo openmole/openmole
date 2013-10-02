@@ -47,7 +47,7 @@ import javax.xml.bind.annotation.XmlTransient
 import org.openmole.core.model.execution.Environment
 import collection.mutable
 import java.io.File
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.model.mole
 
 object MoleExecution extends Logger {

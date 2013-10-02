@@ -21,7 +21,7 @@ import com.thoughtworks.xstream.XStreamException
 import com.thoughtworks.xstream.converters.extended.FileConverter
 import java.io.File
 
-class FileConverterInjecter(deserializer: DeserializerWithFileInjectionFromFile) extends FileConverter {
+class FileConverterInjecter(deserializer: DeserialiserWithFileInjectionFromFile) extends FileConverter {
 
   override def fromString(str: String): Object = {
     val file = super.fromString(str).asInstanceOf[File]

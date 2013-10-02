@@ -32,7 +32,7 @@ import java.io.File
 import org.openmole.ide.misc.widget.{ ChooseFileTextField, PluginPanel }
 import scala.Some
 import util.{ Failure, Success }
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.ide.core.implementation.panel.Proxy
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import scala.swing.FileChooser.Result._
@@ -132,8 +132,8 @@ object DialogFactory {
     text match {
       case Some(t: String) ⇒ MoleFactory.buildMoleExecution(s.dataUI) match {
         case Success(mE) ⇒
-          if (withArchiveCheckBox.selected) SerializerService.serializeAndArchiveFiles(mE._1, new File(t))
-          else SerializerService.serialize(mE._1, new File(t))
+          if (withArchiveCheckBox.selected) SerialiserService.serialiseAndArchiveFiles(mE._1, new File(t))
+          else SerialiserService.serialise(mE._1, new File(t))
         case Failure(t) ⇒ StatusBar().warn("The mole can not be serialized due to " + t.getMessage)
       }
       case _ ⇒

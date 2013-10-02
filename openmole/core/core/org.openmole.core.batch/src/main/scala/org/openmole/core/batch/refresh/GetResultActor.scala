@@ -27,7 +27,7 @@ import org.openmole.core.batch.message._
 import org.openmole.core.batch.storage._
 import org.openmole.core.model.execution._
 import org.openmole.core.model.job._
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.hashservice.HashService
@@ -92,7 +92,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
     val resultFile = Workspace.newFile
     try {
       signalDownload(storage.downloadGZ(outputFilePath, resultFile), outputFilePath, storage)
-      SerializerService.deserialize(resultFile)
+      SerialiserService.deserialise(resultFile)
     }
     finally resultFile.delete
   }
@@ -134,7 +134,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
     try {
       signalDownload(storage.downloadGZ(resultPath.path, contextResutsFileCache), resultPath.path, storage)
       if (HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted during the transfer.")
-      SerializerService.deserializeAndExtractFiles(contextResutsFileCache)
+      SerialiserService.deserialiseAndExtractFiles(contextResutsFileCache)
     }
     finally contextResutsFileCache.delete
   }

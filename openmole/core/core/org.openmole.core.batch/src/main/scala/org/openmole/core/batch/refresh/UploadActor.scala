@@ -114,7 +114,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
         /* ---- upload the execution message ----*/
         val executionMessageFile = Workspace.newFile("job", ".xml")
         try {
-          SerializerService.serialize(executionMessage, executionMessageFile)
+          SerialiserService.serialise(executionMessage, executionMessageFile)
           signalUpload(
             storage.uploadGZ(executionMessageFile, inputPath), inputPath, storage)
         }
@@ -137,7 +137,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
           val moleJobFile = Workspace.newFile("job", ".tar")
           try {
             val serializationResult =
-              SerializerService.serializeGetPluginsAndFiles(
+              SerialiserService.serialiseGetPluginsAndFiles(
                 RunnableTask(moleJob),
                 moleJobFile)
 

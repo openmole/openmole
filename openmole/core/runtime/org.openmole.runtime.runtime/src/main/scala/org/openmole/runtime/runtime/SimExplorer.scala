@@ -23,7 +23,7 @@ import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.tools.io.FileUtil._
 import java.io.File
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
 import org.openmole.core.batch.storage._
@@ -81,7 +81,7 @@ class SimExplorer extends IApplication with Logger {
         val storage =
           try {
             new File(config.storage.get).copyUncompressFile(storageFile)
-            SerializerService.deserializeAndExtractFiles[SimpleStorage](storageFile)
+            SerialiserService.deserialiseAndExtractFiles[SimpleStorage](storageFile)
           }
           finally storageFile.delete
 
