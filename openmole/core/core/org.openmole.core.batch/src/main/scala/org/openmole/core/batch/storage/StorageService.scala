@@ -39,7 +39,7 @@ trait StorageService extends BatchService with Storage {
   @transient lazy val serializedRemoteStorage = {
     val file = Workspace.newFile("remoteStorage", ".xml")
     FileDeleter.deleteWhenGarbageCollected(file)
-    SerializerService.serializeAndArchiveFiles(remoteStorage, file)
+    SerialiserService.serialiseAndArchiveFiles(remoteStorage, file)
     file
   }
 

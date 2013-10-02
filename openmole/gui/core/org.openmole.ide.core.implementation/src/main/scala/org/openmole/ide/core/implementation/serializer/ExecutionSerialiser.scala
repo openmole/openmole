@@ -20,19 +20,19 @@ import org.openmole.ide.core.implementation.workflow.MoleUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import java.io.{ ByteArrayOutputStream, File }
 import scala.util.{ Failure, Success }
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-object ExecutionSerializer {
+object ExecutionSerialiser {
 
   def apply(moleUI: MoleUI, path: String, withArchive: Boolean = false) = {
-    if (withArchive) SerializerService.serializeAndArchiveFiles(execution(moleUI), new File(path))
-    else SerializerService.serialize(execution(moleUI), new File(path))
+    if (withArchive) SerialiserService.serialiseAndArchiveFiles(execution(moleUI), new File(path))
+    else SerialiserService.serialise(execution(moleUI), new File(path))
   }
 
   def apply(moleUI: MoleUI, withArchive: Boolean) = {
     val array = new ByteArrayOutputStream
-    SerializerService.serialize(execution(moleUI), array)
+    SerialiserService.serialise(execution(moleUI), array)
     array.toByteArray
   }
 

@@ -31,7 +31,7 @@ import java.net.URL
 
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.web.misc.tools.OMClient
-import org.openmole.ide.core.implementation.serializer.ExecutionSerializer
+import org.openmole.ide.core.implementation.serializer.ExecutionSerialiser
 
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {
@@ -110,7 +110,7 @@ class ExecutionManager(manager: MoleUI,
     server match {
       case Some(url: URL) ⇒
         val client = new OMClient(url)
-        client.createMole(ExecutionSerializer(manager, true), None)
+        client.createMole(ExecutionSerialiser(manager, true), None)
       case _ ⇒
         buildMoleExecution match {
           case Success((mE, envNames)) ⇒

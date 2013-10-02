@@ -4,7 +4,7 @@ import scala.reflect.ClassTag
 import scala.io.{ Codec, Source }
 import org.scalatra.servlet.FileItem
 import java.io._
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
 import org.openmole.core.model.mole.IPartialMoleExecution
 import org.openmole.core.model.mole.{ IPartialMoleExecution, IMoleExecution, ExecutionContext }
@@ -64,7 +64,7 @@ trait MoleHandling { self: SlickSupport ⇒
     is match {
       case Some(stream) ⇒
         try {
-          val ret = is.map(SerializerService.deserialize[A](_))
+          val ret = is.map(SerialiserService.deserialise[A](_))
           if (!ret.forall(evidence$1.runtimeClass.isInstance(_)))
             None -> s"The uploaded xml is not a subtype of the type you wished to deserialize to: ${evidence$1.runtimeClass} vs ${ret.get.getClass}"
           else
@@ -147,9 +147,9 @@ trait MoleHandling { self: SlickSupport ⇒
       case (Some(pEx), _) ⇒ {
         val ctxt = reifyCSV(pEx, csvData)
 
-        val clob = new SerialClob(SerializerService.serialize(pEx).toCharArray)
+        val clob = new SerialClob(SerialiserService.serialise(pEx).toCharArray)
 
-        val ctxtClob = new SerialClob(SerializerService.serialize(ctxt).toCharArray)
+        val ctxtClob = new SerialClob(SerialiserService.serialise(ctxt).toCharArray)
 
         val outputBlob = new SerialBlob(Array[Byte]())
         //val id = UUID.randomUUID().toString
@@ -182,7 +182,7 @@ trait MoleHandling { self: SlickSupport ⇒
 
       val row = MoleData filter (_.id === key)
       val r = (row map (r ⇒ (r.clobbedMole, r.clobbedContext, r.encapsulated))).list.headOption map {
-        case (pMClob, ctxtClob, e) ⇒ (SerializerService.deserialize[IPartialMoleExecution](pMClob.getAsciiStream), SerializerService.deserialize[Context](ctxtClob.getAsciiStream), e)
+        case (pMClob, ctxtClob, e) ⇒ (SerialiserService.deserialise[IPartialMoleExecution](pMClob.getAsciiStream), SerialiserService.deserialise[Context](ctxtClob.getAsciiStream), e)
       }
 
       r map Function.tupled(createMoleExecution _) map Function.tupled(cacheMoleExecution(_, _, key))

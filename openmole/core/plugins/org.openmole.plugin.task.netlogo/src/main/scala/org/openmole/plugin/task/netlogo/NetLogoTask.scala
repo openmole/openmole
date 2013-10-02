@@ -29,7 +29,7 @@ import org.openmole.misc.tools.service.OS
 
 object NetLogoTask {
 
-  class Workspace(val location: Either[(File, String), File]) {
+  case class Workspace(location: Either[(File, String), File]) {
     def this(workspace: File, script: String) = this(Left(workspace, script))
     def this(script: File) = this(Right(script))
   }

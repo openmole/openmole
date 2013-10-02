@@ -29,7 +29,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import java.io.File
 
-class FilePathHashNotifier(serializer: SerializerWithPathHashInjection, reflectionConverter: ReflectionConverter) extends Converter {
+class FilePathHashNotifier(serializer: SerialiserWithPathHashInjection, reflectionConverter: ReflectionConverter) extends Converter {
 
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
     val file = o.asInstanceOf[File]

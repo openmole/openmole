@@ -62,7 +62,7 @@ class Runtime {
 
     val executionMessage = retry(Workspace.withTmpFile { executionMesageFileCache ⇒
       storage.downloadGZ(inputMessagePath, executionMesageFileCache)
-      SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
+      SerialiserService.deserialise[ExecutionMessage](executionMesageFileCache)
     })
 
     val oldOut = System.out
@@ -134,7 +134,7 @@ class Runtime {
       if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
 
       val tis = new TarInputStream(new FileInputStream(jobsFileCache))
-      val runableTasks = tis.applyAndClose(e ⇒ { SerializerService.deserializeReplaceFiles[RunnableTask](tis, usedFiles) })
+      val runableTasks = tis.applyAndClose(e ⇒ { SerialiserService.deserialiseReplaceFiles[RunnableTask](tis, usedFiles) })
       jobsFileCache.delete
 
       val saver = new ContextSaver(runableTasks.size)
@@ -151,7 +151,7 @@ class Runtime {
       val contextResults = new ContextResults(saver.results)
       val contextResultFile = Workspace.newFile
 
-      SerializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
+      SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
       val uploadedcontextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("uplodedTar", ".tgz"))
       val result = new FileMessage(uploadedcontextResults, HashService.computeHash(contextResultFile).toString)
 
@@ -198,7 +198,7 @@ class Runtime {
 
     logger.fine("Upload the result message")
     val outputLocal = Workspace.newFile("output", ".res")
-    SerializerService.serialize(runtimeResult, outputLocal)
+    SerialiserService.serialise(runtimeResult, outputLocal)
     try retry(storage.uploadGZ(outputLocal, outputMessagePath))
     finally outputLocal.delete
 

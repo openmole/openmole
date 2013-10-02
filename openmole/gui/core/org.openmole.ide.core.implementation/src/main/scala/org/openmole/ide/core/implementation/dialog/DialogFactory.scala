@@ -32,14 +32,14 @@ import java.io.{ FileOutputStream, File }
 import org.openmole.ide.misc.widget.{ ChooseFileTextField, PluginPanel }
 import scala.Some
 import util.{ Failure, Success }
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.ide.core.implementation.panel.Proxy
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import scala.swing.FileChooser.Result._
 import org.openmole.ide.misc.tools.image.Images
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.dataproxy.DataProxyUI
-import org.openmole.ide.core.implementation.serializer.ExecutionSerializer
+import org.openmole.ide.core.implementation.serializer.ExecutionSerialiser
 
 object DialogFactory {
 
@@ -131,7 +131,7 @@ object DialogFactory {
     else None
 
     text match {
-      case Some(t: String) ⇒ ExecutionSerializer(s.dataUI, t, withArchiveCheckBox.selected)
+      case Some(t: String) ⇒ ExecutionSerialiser(s.dataUI, t, withArchiveCheckBox.selected)
       case _               ⇒
     }
   }

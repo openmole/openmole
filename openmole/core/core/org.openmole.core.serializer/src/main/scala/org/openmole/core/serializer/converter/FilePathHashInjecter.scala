@@ -28,7 +28,7 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 
-class FilePathHashInjecter(deserializer: DeserializerWithFileInjectionFromPathHash, reflectionConverter: ReflectionConverter) extends Converter {
+class FilePathHashInjecter(deserializer: DeserialiserWithFileInjectionFromPathHash, reflectionConverter: ReflectionConverter) extends Converter {
 
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
     throw new UnsupportedOperationException("Bug: Should never be called.")
