@@ -132,7 +132,7 @@ object DialogFactory {
 
     text match {
       case Some(t: String) ⇒ ExecutionSerializer(s.dataUI, t, withArchiveCheckBox.selected)
-      case _
+      case _               ⇒
     }
   }
 }
