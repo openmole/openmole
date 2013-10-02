@@ -18,9 +18,7 @@
 package org.openmole.core.serializer
 
 import com.thoughtworks.xstream.XStream
-import com.thoughtworks.xstream.io.xml.StaxDriver
 import java.io.File
-import java.io.FileFilter
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -29,28 +27,24 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import java.util.UUID
-import java.util.concurrent.Semaphore
 import org.openmole.core.serializer.converter._
 import org.openmole.core.serializer.structure.FileInfo
-import com.ice.tar.TarEntry
 import com.ice.tar.TarOutputStream
 import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
-import collection.JavaConversions._
 import scala.collection.immutable.TreeMap
 import com.ice.tar.TarInputStream
 import org.openmole.misc.tools.service.LockUtils._
 import java.util.concurrent.locks.{ ReentrantReadWriteLock, ReadWriteLock }
 import collection.mutable.ListBuffer
+import org.openmole.core.serializer.file.FileSerialisation
 
-object SerializerService extends Logger {
+object SerializerService extends Logger with FileSerialisation {
 
   private val lock = new ReentrantReadWriteLock
   private val xStreamOperations = ListBuffer.empty[(XStream ⇒ _)]
 
   private val xstream = new XStream
-  private val filesInfo = "filesInfo.xml"
   private val content = "content.xml"
 
   private trait Initialized extends Factory {
@@ -83,8 +77,6 @@ object SerializerService extends Logger {
     def make = new DeserializerWithFileInjectionFromPathHash
   }
 
-  private type FilesInfo = TreeMap[String, (File, Boolean, Boolean)]
-
   private def xStreams =
     xstream ::
       serializerWithPathHashInjectionFactory.instantiated.flatMap(_.xStreams) :::
@@ -112,37 +104,13 @@ object SerializerService extends Logger {
   }
 
   def deserializeAndExtractFiles[T](tis: TarInputStream, extractDir: File): T = lock.read {
-
     val archiveExtractDir = extractDir.newDir("archive")
     tis.extractDirArchiveWithRelativePath(archiveExtractDir)
-
-    val fileInfoFile = new File(archiveExtractDir, filesInfo)
-    val fi = deserialize[FilesInfo](fileInfoFile)
-    fileInfoFile.delete
-
-    val fileReplacement =
-      new TreeMap[File, File] ++ fi.map {
-        case (name, (file, isDirectory, exists)) ⇒
-          val f = new File(archiveExtractDir, name)
-          val dest = extractDir.newFile("extracted", ".bin")
-          if (exists) f.move(dest)
-
-          file ->
-            (if (isDirectory) {
-              val extractedDir = extractDir.newDir("extractionDir")
-              dest.extractDirArchiveWithRelativePath(extractedDir)
-              dest.delete
-
-              extractedDir
-            }
-            else dest)
-      }
-
+    val fileReplacement = deserialiseFileReplacements(archiveExtractDir, extractDir)
     val contentFile = new File(archiveExtractDir, content)
     val obj = deserializeReplaceFiles[T](contentFile, fileReplacement)
     contentFile.delete
     archiveExtractDir.delete
-
     obj
   }
 
@@ -155,37 +123,9 @@ object SerializerService extends Logger {
   def serializeAndArchiveFiles(obj: Any, tos: TarOutputStream): Unit = lock.read {
     val objSerial = Workspace.newFile
     val serializationResult = serializeGetPluginsAndFiles(obj, objSerial)
-
     tos.addFile(objSerial, content)
     objSerial.delete
-
-    val fileInfo = new FilesInfo ++ serializationResult.files.map {
-      file ⇒
-        val name = UUID.randomUUID
-
-        val toArchive =
-          if (file.isDirectory) {
-            val toArchive = Workspace.newFile
-            val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
-
-            try outputStream.createDirArchiveWithRelativePath(file)
-            finally outputStream.close
-
-            toArchive
-          }
-          else file
-
-        if (toArchive.exists)
-          tos.addFile(toArchive, name.toString)
-
-        (name.toString, (file, file.isDirectory, file.exists))
-    }
-
-    val filesInfoSerial = Workspace.newFile
-    serialize(fileInfo, filesInfoSerial)
-    tos.addFile(filesInfoSerial, filesInfo)
-    filesInfoSerial.delete
-
+    serialiseFiles(serializationResult.files, tos)
   }
 
   def serializeFilePathAsHashGetFiles(obj: Any, file: File): Map[File, FileInfo] = lock.read {
