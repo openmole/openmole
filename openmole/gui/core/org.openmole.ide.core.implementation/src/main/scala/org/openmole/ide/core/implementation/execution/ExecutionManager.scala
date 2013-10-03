@@ -102,7 +102,8 @@ class ExecutionManager(manager: MoleUI,
 
   contents += tabbedPane
 
-  def start(server: Option[URL] = None) = synchronized {
+  def start(server: Option[URL] = None,
+            executionContext: ExecutionContext = ExecutionContext.local) = synchronized {
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter
@@ -114,7 +115,7 @@ class ExecutionManager(manager: MoleUI,
       case _ ⇒
         buildMoleExecution match {
           case Success((mE, envNames)) ⇒
-            val mExecution = mE.toExecution(manager.context, ExecutionContext.local.copy(out = printStream))
+            val mExecution = mE.toExecution(manager.context, executionContext.copy(out = printStream))
             moleExecution = Some(mExecution)
             EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
             EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
