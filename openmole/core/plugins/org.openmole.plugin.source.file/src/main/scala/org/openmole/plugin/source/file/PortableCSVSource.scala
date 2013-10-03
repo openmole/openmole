@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 03/10/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,22 +11,27 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer.converter
+package org.openmole.plugin.source.file
 
 import java.io.File
+import org.openmole.plugin.source.file.CSVSource.CSVSourceBuilder
 
-class DeserialiserWithFileInjectionFromFile extends Deserializer {
+object PortableCSVSource {
 
-  var files: PartialFunction[File, File] = null
-  registerConverter(new FileConverterInjecter(this))
+  def apply(_file: File) =
+    new CSVSourceBuilder { builder ⇒
+      def toSource = new PortableCSVSource with Built {
+        val file = _file
+      }
+    }
 
-  def clean = {
-    files = null
-  }
+}
 
-  def getMatchingFile(file: File): File = files(file)
+abstract class PortableCSVSource extends CSVSource {
+  val file: File
+  def path = file.getPath
 }

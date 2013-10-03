@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer.converter
+package org.openmole.core.serializer.plugin
 
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.extended.JavaClassConverter

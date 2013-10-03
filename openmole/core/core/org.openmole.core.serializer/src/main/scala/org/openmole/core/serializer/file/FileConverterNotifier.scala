@@ -15,18 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer.converter
+package org.openmole.core.serializer.file
 
+import com.thoughtworks.xstream.converters.extended.FileConverter
 import java.io.File
 
-class DeserialiserWithFileInjectionFromFile extends Deserializer {
+class FileConverterNotifier(serializer: FileListing) extends FileConverter {
 
-  var files: PartialFunction[File, File] = null
-  registerConverter(new FileConverterInjecter(this))
-
-  def clean = {
-    files = null
+  override def toString(obj: Object): String = {
+    val file = obj.asInstanceOf[File]
+    serializer.fileUsed(file)
+    super.toString(obj)
   }
 
-  def getMatchingFile(file: File): File = files(file)
 }
+
