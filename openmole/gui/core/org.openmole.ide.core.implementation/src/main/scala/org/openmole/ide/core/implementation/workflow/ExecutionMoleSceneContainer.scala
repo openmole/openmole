@@ -65,7 +65,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   val sandBoxCheckBox = new CheckBox("Sandbox")
   val sandBoxTextField: ChooseFileTextField = new ChooseFileTextField(SandBox.apply, Workspace.persistent("gui").save(sandBoxTextField.text, "sandbox")
   )
-  sandBoxCheckBox.selected = false
+  sandBoxTextField.enabled = false
 
   executionManager match {
     case Some(eManager: ExecutionManager) ⇒
@@ -118,9 +118,8 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         reactions += {
           case ButtonClicked(`serverCheckBox`) ⇒
             serverCombo.enabled = serverCheckBox.selected
-            sandBoxCheckBox.enabled = !serverCombo.enabled
-            sandBoxTextField.enabled = false
-            sandBoxCheckBox.selected = false
+            sandBoxTextField.enabled = !serverCombo.enabled
+            sandBoxCheckBox.enabled = sandBoxCheckBox.enabled
           case ButtonClicked(`sandBoxCheckBox`) ⇒
             sandBoxTextField.enabled = sandBoxCheckBox.selected
         }
