@@ -304,11 +304,11 @@ class GUISerializer { serializer ⇒
   }
 
   def serializeMetadata = {
-    val imagePath = workDir + "/metadata/img"
-    (new File(imagePath)).mkdirs
+    val imagePath = workDir.child("metadata").child("img")
+    imagePath.mkdirs
     ScenesManager.moleScenes.foreach { s ⇒
       s.closePropertyPanels
-      s.createImage(new File(imagePath + "/" + s.dataUI.name + ".png"))
+      s.createImage(imagePath.child( s.dataUI.name + ".png"))
     }
   }
 
