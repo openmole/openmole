@@ -22,7 +22,7 @@ import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.dialog.GUIPanel
 import org.openmole.ide.core.implementation.execution.{ ScenesManager, Settings }
-import org.openmole.ide.core.implementation.serializer.{ MoleData, GUISerializer }
+import org.openmole.ide.core.implementation.serializer.{ MetaData, MoleData, GUISerializer }
 import scala.swing.FileChooser.Result._
 import scala.swing.Label
 import org.openmole.ide.core.implementation.dataproxy.Proxies
@@ -33,7 +33,8 @@ object SaveXML {
     path match {
       case Some(p) ⇒
         frame.title = "OpenMOLE - " + p.getCanonicalPath
-        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager.moleScenes.map(MoleData.fromScene))
+        ScenesManager.moleScenes.foreach { _.closePropertyPanels }
+        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager.moleScenes.map(MoleData.fromScene), ScenesManager.moleScenes.map(new MetaData(_)))
         Settings.currentProject = path
       case None ⇒
     }

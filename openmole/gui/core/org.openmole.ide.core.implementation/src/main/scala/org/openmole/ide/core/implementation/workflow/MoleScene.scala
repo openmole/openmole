@@ -41,6 +41,9 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.panel._
 import org.openmole.ide.core.implementation.sampling._
 import scala.Some
+import java.io.File
+import org.netbeans.api.visual.export.SceneExporter
+import org.netbeans.api.visual.export.SceneExporter.{ ZoomType, ImageType }
 
 abstract class MoleScene extends GraphScene.StringGraph
     with SelectProvider
@@ -165,6 +168,7 @@ abstract class MoleScene extends GraphScene.StringGraph
     refresh
   }
 
+  def buildImage(file: File) = SceneExporter.createImage(this, file, ImageType.PNG, ZoomType.FIT_IN_WINDOW, true, false, 7, 800, 400)
   override def paintChildren = {
     getGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     getGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)

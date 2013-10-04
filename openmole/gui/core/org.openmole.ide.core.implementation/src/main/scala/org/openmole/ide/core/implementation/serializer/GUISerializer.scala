@@ -303,16 +303,13 @@ class GUISerializer { serializer ⇒
     }
   }
 
-  def serializeMetadata = {
+  def serializeMetadata(metaDatas: Iterable[MetaData]) = {
     val imagePath = workDir + "/metadata/img"
     (new File(imagePath)).mkdirs
-    ScenesManager.moleScenes.foreach { s ⇒
-      s.closePropertyPanels
-      s.createImage(new File(imagePath + "/" + s.dataUI.name + ".png"))
-    }
+    metaDatas.map { md ⇒ md.buildImage(new File(imagePath + "/" + md.scene.dataUI.name + ".png")) }
   }
 
-  def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData2]) = {
+  def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData2], metaDatas: Iterable[MetaData] = Iterable.empty) = {
     serializeConcept(classOf[PrototypeDataProxyUI], proxies.prototypes.map { s ⇒ s -> s.id })
     serializeConcept(classOf[EnvironmentDataProxyUI], proxies.environments.map { s ⇒ s -> s.id })
     serializeConcept(classOf[SamplingCompositionDataProxyUI], proxies.samplings.map { s ⇒ s -> s.id })
@@ -327,7 +324,7 @@ class GUISerializer { serializer ⇒
 
     serializeConcept(classOf[MoleData2], moleScenes.map { ms ⇒ ms -> ms.id })
 
-    serializeMetadata
+    serializeMetadata(metaDatas)
 
     val os = new TarOutputStream(new FileOutputStream(file))
     try os.createDirArchiveWithRelativePath(workDir)
