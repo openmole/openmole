@@ -26,16 +26,14 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.core.serializer.converter._
-import org.openmole.core.serializer.structure.FileInfo
 import com.ice.tar.TarOutputStream
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
-import scala.collection.immutable.TreeMap
 import com.ice.tar.TarInputStream
 import org.openmole.misc.tools.service.LockUtils._
 import java.util.concurrent.locks.{ ReentrantReadWriteLock, ReadWriteLock }
 import collection.mutable.ListBuffer
-import org.openmole.core.serializer.file.{ FileListing, FileSerialisation }
+import org.openmole.core.serializer.file.{ FileInjection, FileListing, FileSerialisation }
 import org.openmole.core.serializer.plugin.PluginListing
 
 object SerialiserService extends Logger with FileSerialisation {
@@ -55,11 +53,6 @@ object SerialiserService extends Logger with FileSerialisation {
     }
   }
 
-  private val serialiserWithPathHashInjectionFactory = new Factory with Initialized {
-    type T = SerialiserWithPathHashInjection
-    def make = new SerialiserWithPathHashInjection
-  }
-
   private val serialiserWithFileListingFactory = new Factory with Initialized {
     type T = Serialiser with FileListing
     def make = new Serialiser with FileListing
@@ -70,23 +63,16 @@ object SerialiserService extends Logger with FileSerialisation {
     def make = new Serialiser with PluginListing
   }
 
-  private val deserialiserWithFileInjectionFromFileFactory = new Factory with Initialized {
-    type T = DeserialiserWithFileInjectionFromFile
-    def make = new DeserialiserWithFileInjectionFromFile
-  }
-
-  private val deserialiserWithFileInjectionFromPathHashFactory = new Factory with Initialized {
-    type T = DeserialiserWithFileInjectionFromPathHash
-    def make = new DeserialiserWithFileInjectionFromPathHash
+  private val deserialiserWithFileInjectionFactory = new Factory with Initialized {
+    type T = Serialiser with FileInjection
+    def make = new Serialiser with FileInjection
   }
 
   private def xStreams =
     xstream ::
-      serialiserWithPathHashInjectionFactory.instantiated.map(_.xStream) :::
       serialiserWithFileListingFactory.instantiated.map(_.xStream) :::
       pluginListingFactory.instantiated.map(_.xStream) :::
-      deserialiserWithFileInjectionFromFileFactory.instantiated.map(_.xStream) :::
-      deserialiserWithFileInjectionFromPathHashFactory.instantiated.map(_.xStream)
+      deserialiserWithFileInjectionFactory.instantiated.map(_.xStream)
 
   def register(op: XStream ⇒ Unit) = lock.write {
     xStreamOperations += op
@@ -132,15 +118,6 @@ object SerialiserService extends Logger with FileSerialisation {
     serialiseFiles(serializationResult.files, tos)
   }
 
-  def serialiseFilePathAsHashGetFiles(obj: Any, file: File): Map[File, FileInfo] = lock.read {
-    val os = file.bufferedOutputStream
-    try serialiseFilePathAsHashGetFiles(obj, os)
-    finally os.close
-  }
-
-  def serialiseFilePathAsHashGetFiles(obj: Any, os: OutputStream): Map[File, FileInfo] =
-    lock.read(serialiserWithPathHashInjectionFactory.exec(_.toXML(obj.asInstanceOf[AnyRef], os)))
-
   def serialiseGetPluginsAndFiles(obj: Any, file: File): PluginClassAndFiles = lock.read {
     val os = file.bufferedOutputStream
     try serialiseGetPluginsAndFiles(obj, os)
@@ -160,7 +137,7 @@ object SerialiserService extends Logger with FileSerialisation {
   }
 
   def deserialiseReplaceFiles[T](is: InputStream, files: PartialFunction[File, File]): T =
-    lock.read(deserialiserWithFileInjectionFromFileFactory.exec {
+    lock.read(deserialiserWithFileInjectionFactory.exec {
       serializer ⇒
         serializer.files = files
         serializer.fromXML[T](is)
@@ -175,18 +152,5 @@ object SerialiserService extends Logger with FileSerialisation {
     try serialise(obj, os)
     finally os.close
   }
-
-  def deserialiseReplacePathHash[T](file: File, files: PartialFunction[FileInfo, File]): T = lock.read {
-    val is = file.bufferedInputStream
-    try deserialiseReplacePathHash[T](is, files)
-    finally is.close
-  }
-
-  def deserialiseReplacePathHash[T](is: InputStream, files: PartialFunction[FileInfo, File]) =
-    lock.read(deserialiserWithFileInjectionFromPathHashFactory.exec {
-      deserialiser ⇒
-        deserialiser.files = files
-        deserialiser.fromXML[T](is)
-    })
 
 }
