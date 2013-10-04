@@ -35,7 +35,7 @@ class ChooseFileTextField(initialText: String,
 
   def this(iT: String, cT: String) = this(iT, cT, None, FilesOnly, None)
 
-  def this(iT: String) = this(iT, "Select a directory", None, DirectoriesOnly, None)
+  def this(iT: String, f: ⇒ Unit = {}) = this(iT, "Select a directory", None, DirectoriesOnly, None, f)
 
   text = initialText
   val fc = new FileChooser {
@@ -51,8 +51,9 @@ class ChooseFileTextField(initialText: String,
         publish(new DialogClosedEvent(this))
       }
     case KeyReleased(_, _, _, _) ⇒ toDoFunction
+    case DialogClosedEvent(_)    ⇒ toDoFunction
   }
 
   columns = 15
-  listenTo(this.mouse.clicks, keys)
+  listenTo(this, this.mouse.clicks, keys)
 }
