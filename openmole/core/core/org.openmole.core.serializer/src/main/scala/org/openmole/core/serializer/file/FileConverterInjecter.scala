@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer.converter
+package org.openmole.core.serializer.file
 
 import com.thoughtworks.xstream.XStreamException
 import com.thoughtworks.xstream.converters.extended.FileConverter
 import java.io.File
 
-class FileConverterInjecter(deserializer: DeserialiserWithFileInjectionFromFile) extends FileConverter {
+class FileConverterInjecter(deserializer: FileInjection) extends FileConverter {
 
   override def fromString(str: String): Object = {
     val file = super.fromString(str).asInstanceOf[File]

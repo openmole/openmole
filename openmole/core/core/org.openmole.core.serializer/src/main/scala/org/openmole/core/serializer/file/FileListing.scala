@@ -23,7 +23,7 @@ import java.io.OutputStream
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import org.openmole.core.serializer.converter.Serialiser
 
-trait FileListing { this: Serialiser ⇒
+trait FileListing <: Serialiser {
   private var files: TreeSet[File] = null
 
   xStream.registerConverter(new FileConverterNotifier(this))
