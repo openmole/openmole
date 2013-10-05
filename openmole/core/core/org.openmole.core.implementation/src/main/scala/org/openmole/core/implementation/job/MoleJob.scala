@@ -17,14 +17,11 @@
 
 package org.openmole.core.implementation.job
 
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.job.MoleJobId
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
 import org.openmole.core.model.job.State._
-import org.openmole.core.model.job.State
-import org.openmole.core.model.task.ITask
+import org.openmole.core.model.task._
 import org.openmole.misc.tools.service.Logger
-import scala.collection.mutable.ListBuffer
 import java.util.UUID
 
 object MoleJob extends Logger {
@@ -33,13 +30,20 @@ object MoleJob extends Logger {
     task: ITask,
     context: Context,
     id: UUID,
-    stateChangedCallBack: MoleJob.StateChangedCallBack) =
-    new MoleJob(task, context, id.getMostSignificantBits, id.getLeastSignificantBits, stateChangedCallBack)
+    stateChangedCallBack: MoleJob.StateChangedCallBack) = {
+    val (prototypes, values) = compressContext(context)
+    new MoleJob(task, prototypes.toArray, values.toArray, id.getMostSignificantBits, id.getLeastSignificantBits, stateChangedCallBack)
+  }
+  def compressContext(context: Context) =
+    context.toSeq.map {
+      case (_, v: Variable[Any]) ⇒ (v.prototype, v.value)
+    }.unzip
 }
 
 class MoleJob(
     val task: ITask,
-    private var _context: Context,
+    private var prototypes: Array[Prototype[Any]],
+    private var values: Array[Any],
     mostSignificantBits: Long, leastSignificantBits: Long,
     val stateChangedCallBack: MoleJob.StateChangedCallBack) extends IMoleJob {
 
@@ -49,7 +53,14 @@ class MoleJob(
   state = READY
 
   override def state: State = _state
-  override def context: Context = _context
+  override def context: Context =
+    Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) })
+
+  private def context_=(ctx: Context) = {
+    val (_prototypes, _values) = MoleJob.compressContext(ctx)
+    prototypes = _prototypes.toArray
+    values = _values.toArray
+  }
 
   def id = new UUID(mostSignificantBits, leastSignificantBits)
 
@@ -77,7 +88,7 @@ class MoleJob(
     if (!state.isFinal) {
       try {
         state = RUNNING
-        _context = task.perform(context)
+        context = task.perform(context)
         state = COMPLETED
       }
       catch {
@@ -88,8 +99,8 @@ class MoleJob(
       }
     }
 
-  override def finish(context: Context) = {
-    _context = context
+  override def finish(_context: Context) = {
+    context = _context
     state = COMPLETED
   }
 
