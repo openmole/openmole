@@ -195,7 +195,7 @@ class SubMoleExecution(
           background {
             masterCapsuleSemaphore {
               val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
-              val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + sourced + context + savedContext, moleExecution.nextJobId, stateChanged)
+              val moleJob: IMoleJob = MoleJob(capsule.task, implicits + sourced + context + savedContext, moleExecution.nextJobId, stateChanged)
               EventDispatcher.trigger(moleExecution, new IMoleExecution.JobCreated(moleJob, capsule))
               addJob(moleJob, capsule, ticket)
               moleJob.perform
@@ -209,7 +209,7 @@ class SubMoleExecution(
             if (newState.isFinal) finalState(job, newState)
           }
 
-          val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + sourced + context, moleExecution.nextJobId, stateChanged)
+          val moleJob: IMoleJob = MoleJob(capsule.task, implicits + sourced + context, moleExecution.nextJobId, stateChanged)
           addJob(moleJob, capsule, ticket)
           EventDispatcher.trigger(moleExecution, new IMoleExecution.JobCreated(moleJob, capsule))
           moleExecution.group(moleJob, capsule, this)

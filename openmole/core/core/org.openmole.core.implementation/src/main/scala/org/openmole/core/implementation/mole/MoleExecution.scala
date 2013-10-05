@@ -212,7 +212,7 @@ class MoleExecution(
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.next)
 
-  def nextJobId = new MoleJobId(id, jobId.next)
+  def nextJobId = UUID.randomUUID
 
   def newSeed = rng.nextLong
 

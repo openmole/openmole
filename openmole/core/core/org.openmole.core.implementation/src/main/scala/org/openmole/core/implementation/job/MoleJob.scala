@@ -25,17 +25,22 @@ import org.openmole.core.model.job.State
 import org.openmole.core.model.task.ITask
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.ListBuffer
+import java.util.UUID
 
 object MoleJob extends Logger {
   type StateChangedCallBack = (IMoleJob, State, State) ⇒ Unit
+  def apply(
+    task: ITask,
+    context: Context,
+    id: UUID,
+    stateChangedCallBack: MoleJob.StateChangedCallBack) =
+    new MoleJob(task, context, id.getMostSignificantBits, id.getLeastSignificantBits, stateChangedCallBack)
 }
-
-import MoleJob._
 
 class MoleJob(
     val task: ITask,
     private var _context: Context,
-    val id: MoleJobId,
+    mostSignificantBits: Long, leastSignificantBits: Long,
     val stateChangedCallBack: MoleJob.StateChangedCallBack) extends IMoleJob {
 
   var exception: Option[Throwable] = None
@@ -45,6 +50,8 @@ class MoleJob(
 
   override def state: State = _state
   override def context: Context = _context
+
+  def id = new UUID(mostSignificantBits, leastSignificantBits)
 
   def state_=(state: State) = {
     val changed = synchronized {

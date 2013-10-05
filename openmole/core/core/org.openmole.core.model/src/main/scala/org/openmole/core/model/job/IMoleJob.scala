@@ -21,13 +21,7 @@ import org.openmole.core.model.task.ITask
 import org.openmole.core.model.data.Context
 
 object IMoleJob {
-  implicit val moleJobOrdering = new Ordering[IMoleJob] {
-
-    override def compare(left: IMoleJob, right: IMoleJob) = {
-      MoleJobId.moleJobIdOrdering.compare(left.id, right.id)
-    }
-  }
-
+  implicit val moleJobOrdering = Ordering.by((_: IMoleJob).id)
 }
 
 trait IMoleJob {
