@@ -17,8 +17,6 @@
 
 package org.openmole.core.implementation.job
 
-import org.openmole.core.implementation.tools.TimeStamp
-import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.data.Context
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
@@ -30,15 +28,6 @@ import scala.collection.mutable.ListBuffer
 
 object MoleJob extends Logger {
   type StateChangedCallBack = (IMoleJob, State, State) ⇒ Unit
-
-  def cpuTime(job: IMoleJob) =
-    job.timeStamps.find(j ⇒ j.state.isFinal) match {
-      case Some(last) ⇒
-        val running = job.timeStamps.find(_.state == RUNNING).get
-        last.time - running.time
-      case None ⇒ 0L
-    }
-
 }
 
 import MoleJob._
@@ -49,10 +38,6 @@ class MoleJob(
     val id: MoleJobId,
     val stateChangedCallBack: MoleJob.StateChangedCallBack) extends IMoleJob {
 
-  import IMoleJob._
-  import MoleJob._
-
-  val timeStamps: ListBuffer[ITimeStamp[State.State]] = new ListBuffer
   var exception: Option[Throwable] = None
 
   @volatile private var _state: State = null
@@ -64,12 +49,10 @@ class MoleJob(
   def state_=(state: State) = {
     val changed = synchronized {
       if (_state == null) {
-        timeStamps += new TimeStamp(state)
         _state = state
         None
       }
       else if (!_state.isFinal) {
-        timeStamps += new TimeStamp(state)
         val oldState = _state
         _state = state
         Some(oldState)
@@ -98,9 +81,8 @@ class MoleJob(
       }
     }
 
-  override def finish(context: Context, timeStamps: Seq[ITimeStamp[State.State]]) = {
+  override def finish(context: Context) = {
     _context = context
-    this.timeStamps ++= timeStamps
     state = COMPLETED
   }
 

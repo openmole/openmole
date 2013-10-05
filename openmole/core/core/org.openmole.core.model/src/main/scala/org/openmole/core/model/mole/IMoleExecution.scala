@@ -44,8 +44,6 @@ object IMoleExecution {
   case class ExceptionRaised(moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
   case class SourceExceptionRaised(source: ISource, capsule: ICapsule, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
   case class HookExceptionRaised(hook: IHook, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
-  case class ProfilerExceptionRaised(profiler: Profiler, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
-
 }
 
 trait IMoleExecution {
@@ -61,7 +59,6 @@ trait IMoleExecution {
   def mole: IMole
   def hooks: Hooks
   def sources: Sources
-  def profiler: Profiler
   def implicits: Context
 
   def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[Variable[_]]]

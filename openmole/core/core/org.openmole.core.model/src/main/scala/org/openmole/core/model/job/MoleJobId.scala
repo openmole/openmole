@@ -17,7 +17,6 @@
 
 package org.openmole.core.model.job
 
-import org.openmole.misc.tools.obj.Id
 import org.openmole.misc.tools.obj.OrderedTuple2Id
 
 object MoleJobId {

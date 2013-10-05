@@ -11,6 +11,6 @@ abstract class PluginDefaults(subBuilds: Defaults*) extends BaseDefaults(subBuil
 
 }
 
-object Plugin extends PluginDefaults(plugin.Task, Tools, Domain, Builder, Method, Environment, Sampling, Grouping, Hook, Profiler, Source) {
+object Plugin extends PluginDefaults(plugin.Task, Tools, Domain, Builder, Method, Environment, Sampling, Grouping, Hook, Source) {
 }
 

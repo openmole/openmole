@@ -100,21 +100,11 @@ class SubMoleExecution(
   private def -=(submoleExecution: SubMoleExecution) =
     _childs.single -= submoleExecution
 
-  private def secureProfilerExecution(profiler: Profiler, moleJob: IMoleJob) =
-    try profiler.process(moleJob, moleExecution.executionContext)
-    catch {
-      case e: Throwable ⇒
-        EventDispatcher.trigger(moleExecution, new IMoleExecution.ProfilerExceptionRaised(profiler, moleJob, e, WARNING))
-        logger.log(WARNING, "Error in execution of profiler " + profiler, e)
-    }
-
   override def jobs =
     atomic { implicit txn ⇒ _jobs().keys.toList ::: TSet.asSet(_childs).flatMap(_.jobs.toList).toList }
 
   private def jobFailedOrCanceled(job: IMoleJob) = {
     val (capsule, ticket) = _jobs.single().get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
-
-    secureProfilerExecution(moleExecution.profiler, job)
 
     val finished =
       atomic { implicit txn ⇒
@@ -142,7 +132,6 @@ class SubMoleExecution(
         }
 
       val context = job.context ++ moleExecution.hooks(capsule).flatMap(executeHook).unzip._2
-      secureProfilerExecution(moleExecution.profiler, job)
       mole.outputDataChannels(capsule).foreach { _.provides(context, ticket, moleExecution) }
 
       transitionLock {

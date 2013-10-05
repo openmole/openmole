@@ -58,7 +58,6 @@ object MoleExecution extends Logger {
     hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
     environments: Map[ICapsule, Environment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
-    profiler: Profiler = Profiler.empty,
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
     executionContext: ExecutionContext = ExecutionContext.local) =
@@ -68,7 +67,6 @@ object MoleExecution extends Logger {
       hooks,
       environments,
       grouping,
-      profiler,
       seed).toExecution(implicits, executionContext)
 
 }
@@ -79,7 +77,6 @@ class MoleExecution(
     val hooks: Hooks = Hooks.empty,
     val environments: Map[ICapsule, Environment] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,
-    val profiler: Profiler = Profiler.empty,
     seed: Long = Workspace.newSeed,
     override val id: String = UUID.randomUUID().toString)(implicit val implicits: Context = Context.empty, implicit val executionContext: ExecutionContext = ExecutionContext.local) extends IMoleExecution {
 
@@ -176,7 +173,6 @@ class MoleExecution(
     if (!_canceled.getUpdate(_ ⇒ true)) {
       rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, new IMoleExecution.Finished)
-      profiler.finished
       _finished.single() = true
     }
     this
@@ -206,7 +202,6 @@ class MoleExecution(
       if (allWaiting) submitAll
       if (numberOfJobs == 0) {
         EventDispatcher.trigger(this, new IMoleExecution.Finished)
-        profiler.finished
         _finished.single() = true
       }
     }

@@ -17,17 +17,10 @@
 
 package org.openmole.core.model.job
 
-import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.task.ITask
 import org.openmole.core.model.data.Context
 
 object IMoleJob {
-
-  /*case class TransitionPerformed(val capsule: ICapsule) extends Event[IMoleJob]
-  case class JobFailedOrCanceled(val capsule: ICapsule) extends Event[IMoleJob]
-  case class StateChanged(val newState: State.State, val oldState: State.State) extends Event[IMoleJob]
-  case class ExceptionRaised(val exception: Throwable, level: Level) extends Event[IMoleJob]*/
-
   implicit val moleJobOrdering = new Ordering[IMoleJob] {
 
     override def compare(left: IMoleJob, right: IMoleJob) = {
@@ -43,8 +36,7 @@ trait IMoleJob {
   def finished: Boolean
   def context: Context
   def exception: Option[Throwable]
-  def timeStamps: Seq[ITimeStamp[State.State]]
-  def finish(context: Context, timeStamps: Seq[ITimeStamp[State.State]])
+  def finish(context: Context)
   def perform
   def id: MoleJobId
   def cancel

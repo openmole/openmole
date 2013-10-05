@@ -75,9 +75,9 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
 
             moleJob.synchronized {
               if (!moleJob.finished) {
-                executionResult._1 match {
+                executionResult match {
                   case Success(context) ⇒
-                    moleJob.finish(context, executionResult._2)
+                    moleJob.finish(context)
                   case Failure(e) ⇒
                     sender ! MoleJobError(moleJob, batchJob, e)
                 }

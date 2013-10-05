@@ -39,8 +39,6 @@ class ExecutionExceptionListener(exeManager: ExecutionManager) extends EventList
         exeManager.executionJobExceptionTextArea.warn(h.level + ": Exception in hook " + h.hook, None, ExceptionUtils.prettify(h.exception))
       case s: SourceExceptionRaised ⇒
         exeManager.executionJobExceptionTextArea.warn(s.level + ": Exception in source " + s.source, None, ExceptionUtils.prettify(s.exception))
-      case s: ProfilerExceptionRaised ⇒
-        exeManager.executionJobExceptionTextArea.warn(s.level + ": Exception in profiler " + s.profiler, None, ExceptionUtils.prettify(s.exception))
     }
     exeManager.tabbedPane.selection.index = 1
   }
