@@ -22,7 +22,7 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import collection.JavaConversions._
 import org.openmole.core.batch.jobservice._
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.model.execution.ExecutionState._
 
@@ -51,7 +51,7 @@ trait DesktopGridJobService extends JobService with UnlimitedAccess { js ⇒
     val desktopJobMessage = new DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, environment.openMOLEMemoryValue, inputFile)
 
     val os = jobSubmissionFile(jobId).gzipedBufferedOutputStream
-    try SerializerService.serialize(desktopJobMessage, os)
+    try SerialiserService.serialise(desktopJobMessage, os)
     finally os.close
 
     new BatchJob with BatchJobId {

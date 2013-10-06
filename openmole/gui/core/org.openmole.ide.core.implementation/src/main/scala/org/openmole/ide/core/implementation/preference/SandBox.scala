@@ -1,5 +1,9 @@
+package org.openmole.ide.core.implementation.preference
+
+import org.openmole.misc.workspace.Workspace
+
 /*
- * Copyright (C) 2012 romain
+ * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,17 +19,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.mole
-
-import org.openmole.core.model.job._
-
-object Profiler {
-  val empty = new Profiler {
-    def process(job: IMoleJob, executionContext: ExecutionContext) = {}
+object SandBox {
+  def apply = try {
+    Workspace.persistent("gui").load("sandbox") match {
+      case s: String ⇒ s
+      case _         ⇒ ""
+    }
   }
-}
-
-trait Profiler {
-  def process(job: IMoleJob, executionContext: ExecutionContext)
-  def finished = {}
+  catch {
+    case _: Throwable ⇒ ""
+  }
 }

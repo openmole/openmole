@@ -259,20 +259,21 @@ trait MoleHandling { self: SlickSupport ⇒
       outFile.createNewFile()
       println(outFile)
 
-      try {
-        Tar.createDirectoryTar(path, outFile)
+    val moleId = mole2CacheId.get(exec).get
 
-        for (tis ← managed(Source.fromFile(outFile)(Codec.ISO8859))) {
-          val r = for (m ← MoleData if m.id === moleId) yield m.result
+    try {
+      Tar.createDirectoryTar(path, outFile)
 
-          val arr = tis.iter.toArray.map(_.toByte)
-          val blob = new SerialBlob(arr)
-          r.update(blob)
-        }
+      for (tis ← managed(Source.fromFile(outFile)(Codec.ISO8859))) {
+        val r = for (m ← MoleData if m.id === moleId) yield m.result
+
+        val arr = tis.iter.toArray.map(_.toByte)
+        val blob = new SerialBlob(arr)
+        r.update(blob)
       }
-      catch {
-        case e: Exception ⇒ e.printStackTrace(System.out)
-      }
+    }
+    catch {
+      case e: Exception ⇒ e.printStackTrace(System.out)
     }
   }
 }

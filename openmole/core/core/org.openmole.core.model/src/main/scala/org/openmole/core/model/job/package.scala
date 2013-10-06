@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 05/10/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,22 +11,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.serializer.converter
+package org.openmole.core.model
 
-import java.io.File
+import java.util.UUID
 
-class DeserializerWithFileInjectionFromFile extends Deserializer with Factory.XStreamPool {
-
-  var files: PartialFunction[File, File] = null
-  registerConverter(new FileConverterInjecter(this))
-
-  def clean = {
-    files = null
-  }
-
-  def getMatchingFile(file: File): File = files(file)
+package object job {
+  type MoleJobId = UUID
 }

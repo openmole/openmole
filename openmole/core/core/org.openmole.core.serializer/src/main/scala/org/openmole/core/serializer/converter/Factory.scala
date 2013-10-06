@@ -21,23 +21,15 @@ import collection.mutable
 import com.thoughtworks.xstream.XStream
 import collection.mutable.ListBuffer
 
-object Factory {
-
-  trait XStreamPool {
-    def clean
-    def xStreams: Iterable[XStream]
-  }
-
-}
-
-import Factory._
-
 trait Factory {
 
   private val pool = new mutable.Stack[T]
   private val _instantiated = ListBuffer.empty[T]
 
-  type T <: XStreamPool
+  type T <: {
+    def xStream: XStream
+    def clean
+  }
 
   def make: T
 

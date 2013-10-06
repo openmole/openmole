@@ -15,31 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.profiler.csv
+package org.openmole.core.serializer.file
 
-import au.com.bytecode.opencsv.CSVWriter
-import java.io.BufferedWriter
+import com.thoughtworks.xstream.converters.extended.FileConverter
 import java.io.File
-import java.io.FileWriter
-import org.openmole.core.model.job._
-import org.openmole.core.model.mole._
-import org.openmole.misc.tools.io.FileUtil._
-import ToCSV._
 
-object CSVFileProfiler {
-  def apply(file: File) = new CSVFileProfiler(file)
-}
+class FileConverterNotifier(serializer: FileListing) extends FileConverter {
 
-class CSVFileProfiler(file: File) extends Profiler {
-
-  override def process(moleJob: IMoleJob, executionContext: ExecutionContext) = synchronized {
-    val f = executionContext.relativise(file.getPath)
-
-    f.getParentFile.mkdirs
-    val writer = new CSVWriter(new BufferedWriter(new FileWriter(f)))
-
-    try writer.writeNext(toColumns(moleJob))
-    finally writer.close
+  override def toString(obj: Object): String = {
+    val file = obj.asInstanceOf[File]
+    serializer.fileUsed(file)
+    super.toString(obj)
   }
 
 }
+

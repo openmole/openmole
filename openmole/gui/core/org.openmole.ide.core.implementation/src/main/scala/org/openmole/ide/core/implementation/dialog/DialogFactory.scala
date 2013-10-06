@@ -28,17 +28,18 @@ import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.workflow.{ ISceneContainer, BuildMoleScene, ExecutionMoleSceneContainer }
 import scala.swing.FileChooser.SelectionMode._
 import swing._
-import java.io.File
+import java.io.{ FileOutputStream, File }
 import org.openmole.ide.misc.widget.{ ChooseFileTextField, PluginPanel }
 import scala.Some
 import util.{ Failure, Success }
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.ide.core.implementation.panel.Proxy
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import scala.swing.FileChooser.Result._
 import org.openmole.ide.misc.tools.image.Images
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.dataproxy.DataProxyUI
+import org.openmole.ide.core.implementation.serializer.ExecutionSerialiser
 
 object DialogFactory {
 
@@ -130,14 +131,8 @@ object DialogFactory {
     else None
 
     text match {
-      case Some(t: String) ⇒ MoleFactory.buildMoleExecution(s.dataUI) match {
-        case Success(mE) ⇒
-          if (withArchiveCheckBox.selected) SerializerService.serializeAndArchiveFiles(mE._1, new File(t))
-          else SerializerService.serialize(mE._1, new File(t))
-        case Failure(t) ⇒ StatusBar().warn("The mole can not be serialized due to " + t.getMessage)
-      }
-      case _ ⇒
+      case Some(t: String) ⇒ ExecutionSerialiser(s.dataUI, t, withArchiveCheckBox.selected)
+      case _               ⇒
     }
   }
-
 }

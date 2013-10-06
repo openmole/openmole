@@ -54,7 +54,7 @@ abstract class SaveHook extends Hook {
     save.map {
       case (p, f) ⇒
         val to = executionContext.relativise(VariableExpansion(context, f))
-        SerializerService.serializeAndArchiveFiles(context(p), to)
+        SerialiserService.serialiseAndArchiveFiles(context(p), to)
 
     }
     context

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Mathieu Mathieu Leclaire <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 02/10/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,10 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.groupingstrategy
+package org.openmole.core.serializer.file
 
-import org.openmole.ide.core.implementation.factory.GroupingFactoryUI
+import scala.collection.immutable.TreeSet
+import java.io.File
+import java.io.OutputStream
+import org.openmole.misc.tools.io.FileUtil.fileOrdering
+import org.openmole.core.serializer.converter.Serialiser
 
-class NumberOfMoleJobsGroupingFactoryUI extends GroupingFactoryUI {
-  def buildDataUI = new NumberOfMoleJobsGroupingDataUI
+trait FileListing <: Serialiser {
+  private var files: TreeSet[File] = null
+
+  xStream.registerConverter(new FileConverterNotifier(this))
+
+  def fileUsed(file: File) =
+    files += file
+
+  def toXMLListFiles(obj: Any, outputStream: OutputStream) = synchronized {
+    files = new TreeSet
+    xStream.toXML(obj, outputStream)
+    val retFiles = files
+    files = null
+    retFiles
+  }
+
 }

@@ -27,7 +27,7 @@ import org.openmole.core.batch.message._
 import org.openmole.core.batch.storage._
 import org.openmole.core.model.execution._
 import org.openmole.core.model.job._
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.hashservice.HashService
@@ -35,6 +35,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
 import util.{ Failure, Success }
+import org.openmole.misc.eventdispatcher.EventDispatcher
 
 object GetResultActor extends Logger
 
@@ -65,8 +66,10 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
 
     runtimeResult.result match {
       case Failure(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown during the execution of the job execution on the execution node")
-      case Success(result) ⇒
+      case Success((result, log)) ⇒
         val contextResults = getContextResults(result, storage)
+
+        EventDispatcher.trigger(storage.environment: Environment, new Environment.JobCompleted(batchJob, log))
 
         //Try to download the results for all the jobs of the group
         for (moleJob ← job.moleJobs) {
@@ -75,9 +78,9 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
 
             moleJob.synchronized {
               if (!moleJob.finished) {
-                executionResult._1 match {
+                executionResult match {
                   case Success(context) ⇒
-                    moleJob.finish(context, executionResult._2)
+                    moleJob.finish(context)
                   case Failure(e) ⇒
                     sender ! MoleJobError(moleJob, batchJob, e)
                 }
@@ -92,7 +95,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
     val resultFile = Workspace.newFile
     try {
       signalDownload(storage.downloadGZ(outputFilePath, resultFile), outputFilePath, storage)
-      SerializerService.deserialize(resultFile)
+      SerialiserService.deserialise(resultFile)
     }
     finally resultFile.delete
   }
@@ -134,7 +137,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
     try {
       signalDownload(storage.downloadGZ(resultPath.path, contextResutsFileCache), resultPath.path, storage)
       if (HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted during the transfer.")
-      SerializerService.deserializeAndExtractFiles(contextResutsFileCache)
+      SerialiserService.deserialiseAndExtractFiles(contextResutsFileCache)
     }
     finally contextResutsFileCache.delete
   }

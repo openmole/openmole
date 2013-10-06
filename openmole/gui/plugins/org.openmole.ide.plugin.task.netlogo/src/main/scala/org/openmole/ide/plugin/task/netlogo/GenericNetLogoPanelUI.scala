@@ -39,7 +39,6 @@ import scala.concurrent.stm.Ref
 import scala.concurrent.stm
 import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 import scala.Some
-import org.openmole.ide.misc.widget.DialogClosedEvent
 
 abstract class GenericNetLogoPanelUI(
     nlogoPath: String,
@@ -70,11 +69,6 @@ abstract class GenericNetLogoPanelUI(
     selectionMode = SelectionMode.FilesAndDirectories,
     minus = CLOSE_IF_EMPTY)
   if (resources.isEmpty) resourcesMultiTextField.removeAllRows
-
-  listenTo(nlogoTextField)
-  reactions += {
-    case DialogClosedEvent(nlogoTextField) ⇒ updateGlobals
-  }
 
   private def updateGlobals = {
     _globalsReporters.single() = None

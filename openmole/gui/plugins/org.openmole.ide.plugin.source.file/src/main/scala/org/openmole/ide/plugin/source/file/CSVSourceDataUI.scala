@@ -35,7 +35,7 @@ class CSVSourceDataUI(val name: String = "",
   def buildPanelUI = new CSVSourcePanelUI(this)
 
   def coreObject = util.Try {
-    val source = CSVSource(new File(csvFilePath))
+    val source = CSVSource(csvFilePath)
     prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach {
       m ⇒ source addColumn (m._1, m._2.dataUI.coreObject.get)
     }

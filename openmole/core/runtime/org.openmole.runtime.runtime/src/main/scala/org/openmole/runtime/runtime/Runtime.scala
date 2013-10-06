@@ -42,6 +42,7 @@ import org.openmole.misc.workspace._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import util.{ Success, Failure }
+import org.openmole.core.model.execution.Environment.RuntimeLog
 
 object Runtime extends Logger {
   val NbRetry = 3
@@ -62,7 +63,7 @@ class Runtime {
 
     val executionMessage = retry(Workspace.withTmpFile { executionMesageFileCache ⇒
       storage.downloadGZ(inputMessagePath, executionMesageFileCache)
-      SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
+      SerialiserService.deserialise[ExecutionMessage](executionMesageFileCache)
     })
 
     val oldOut = System.out
@@ -78,6 +79,8 @@ class Runtime {
       System.setOut(outSt)
       System.setErr(errSt)
     }
+
+    val beginTime = System.currentTimeMillis
 
     val result = try {
       logger.fine("Downloading plugins")
@@ -134,11 +137,13 @@ class Runtime {
       if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
 
       val tis = new TarInputStream(new FileInputStream(jobsFileCache))
-      val runableTasks = tis.applyAndClose(e ⇒ { SerializerService.deserializeReplaceFiles[RunnableTask](tis, usedFiles) })
+      val runableTasks = tis.applyAndClose(e ⇒ { SerialiserService.deserialiseReplaceFiles[RunnableTask](tis, usedFiles) })
       jobsFileCache.delete
 
       val saver = new ContextSaver(runableTasks.size)
       val allMoleJobs = runableTasks.map { _.toMoleJob(saver.save) }
+
+      val beginExecutionTime = System.currentTimeMillis
 
       /* --- Submit all jobs to the local environment --*/
       logger.fine("Run the jobs")
@@ -146,19 +151,24 @@ class Runtime {
 
       saver.waitAllFinished
 
+      val endExecutionTime = System.currentTimeMillis
+
       logger.fine("Results " + saver.results)
 
       val contextResults = new ContextResults(saver.results)
       val contextResultFile = Workspace.newFile
 
-      SerializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
+      SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
       val uploadedcontextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("uplodedTar", ".tgz"))
       val result = new FileMessage(uploadedcontextResults, HashService.computeHash(contextResultFile).toString)
 
       logger.fine("Upload the results")
       retry(storage.uploadGZ(contextResultFile, uploadedcontextResults))
       contextResultFile.delete
-      Success(result)
+
+      val endTime = System.currentTimeMillis
+
+      Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime, LocalHostName.localHostName))
     }
     catch {
       case t: Throwable ⇒
@@ -198,7 +208,7 @@ class Runtime {
 
     logger.fine("Upload the result message")
     val outputLocal = Workspace.newFile("output", ".res")
-    SerializerService.serialize(runtimeResult, outputLocal)
+    SerialiserService.serialise(runtimeResult, outputLocal)
     try retry(storage.uploadGZ(outputLocal, outputMessagePath))
     finally outputLocal.delete
 

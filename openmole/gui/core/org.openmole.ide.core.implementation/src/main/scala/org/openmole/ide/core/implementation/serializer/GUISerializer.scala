@@ -56,6 +56,7 @@ import org.openmole.ide.core.implementation.commons.MasterCapsuleType
 import scala.util.Success
 import org.openmole.ide.core.implementation.sampling.DomainProxyUI
 import java.net.URL
+import javax.imageio.ImageIO
 
 object GUISerializer extends Logger {
   var instance = new GUISerializer
@@ -302,7 +303,13 @@ class GUISerializer { serializer ⇒
     }
   }
 
-  def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData2]) = {
+  def serializeMetadata(metaDatas: Iterable[MetaData]) = {
+    val imagePath = workDir + "/metadata/img"
+    (new File(imagePath)).mkdirs
+    metaDatas.map { md ⇒ md.buildImage(new File(imagePath + "/" + md.scene.dataUI.name + ".png")) }
+  }
+
+  def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData2], metaDatas: Iterable[MetaData] = Iterable.empty) = {
     serializeConcept(classOf[PrototypeDataProxyUI], proxies.prototypes.map { s ⇒ s -> s.id })
     serializeConcept(classOf[EnvironmentDataProxyUI], proxies.environments.map { s ⇒ s -> s.id })
     serializeConcept(classOf[SamplingCompositionDataProxyUI], proxies.samplings.map { s ⇒ s -> s.id })
@@ -316,6 +323,8 @@ class GUISerializer { serializer ⇒
     serializeConcept(classOf[SlotData], moleScenes.flatMap(_.slots).map { s ⇒ s -> s.id })
 
     serializeConcept(classOf[MoleData2], moleScenes.map { ms ⇒ ms -> ms.id })
+
+    serializeMetadata(metaDatas)
 
     val os = new TarOutputStream(new FileOutputStream(file))
     try os.createDirArchiveWithRelativePath(workDir)

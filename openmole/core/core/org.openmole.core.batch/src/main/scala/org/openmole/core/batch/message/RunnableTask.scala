@@ -32,5 +32,5 @@ object RunnableTask {
 }
 
 class RunnableTask(val task: ITask, val context: Context, val id: MoleJobId) {
-  def toMoleJob(stateChangedCallBack: StateChangedCallBack) = new MoleJob(task, context, id, stateChangedCallBack)
+  def toMoleJob(stateChangedCallBack: StateChangedCallBack) = MoleJob(task, context, id, stateChangedCallBack)
 }

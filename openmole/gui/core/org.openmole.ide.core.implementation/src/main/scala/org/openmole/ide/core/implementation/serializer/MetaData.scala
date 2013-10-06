@@ -2,7 +2,7 @@
  * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -11,24 +11,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.core.implementation.serializer
 
-package org.openmole.ide.core.implementation.execution
+import org.openmole.ide.core.implementation.workflow.MoleScene
+import java.io.File
 
-import org.openmole.core.model.mole._
-import java.io.PrintStream
-import org.openmole.ide.core.implementation.workflow.CapsuleUI
-
-trait IExecutionManager {
-  def mole: IMole
-
-  def moleExecution: Option[IMoleExecution]
-
-  def capsuleMapping: Map[CapsuleUI, ICapsule]
-
-  def printStream: PrintStream
-
-  def start
+class MetaData(val scene: MoleScene) {
+  def buildImage(file: File) = scene.buildImage(file)
 }

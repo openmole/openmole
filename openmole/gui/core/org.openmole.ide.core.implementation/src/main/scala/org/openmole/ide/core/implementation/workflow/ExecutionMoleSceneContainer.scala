@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import java.awt.{ Checkbox, BorderLayout }
+import java.awt.BorderLayout
 import javax.swing.JScrollPane
 import javax.swing.ScrollPaneConstants._
 import org.openide.DialogDescriptor
@@ -31,7 +31,11 @@ import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import scala.swing.event.ButtonClicked
-import org.openmole.ide.core.implementation.preference.ServerListPanel
+import org.openmole.ide.core.implementation.preference.{ SandBox, ServerListPanel }
+import java.net.URL
+import org.openmole.misc.workspace.Workspace
+import java.io.File
+import org.openmole.core.model.mole.ExecutionContext
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
@@ -52,12 +56,16 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
     background = new Color(125, 160, 0)
   }
 
-  /* val exportButton = new Button(export) {
-    background = new Color(55, 170, 200)
-  }*/
-
   val dlLabel = new Label("0/0")
   val ulLabel = new Label("0/0")
+  val serverCheckBox = new CheckBox("Delegates to : ")
+  val serverCombo = new ComboBox(ServerListPanel.list)
+  serverCombo.enabled = false
+
+  val sandBoxCheckBox = new CheckBox("Sandbox")
+  val sandBoxTextField: ChooseFileTextField = new ChooseFileTextField(SandBox.apply, Workspace.persistent("gui").save(sandBoxTextField.text, "sandbox")
+  )
+  sandBoxTextField.enabled = false
 
   executionManager match {
     case Some(eManager: ExecutionManager) ⇒
@@ -93,16 +101,27 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           })
         }
 
-        val serverCheckBox = new CheckBox("Delegates to : ")
-        val serverCombo = new ComboBox(ServerListPanel.list)
-        serverCombo.enabled = false
+        contents += new PluginPanel("wrap 2") {
+          contents += serverCheckBox
+          contents += serverCombo
+        }
 
-        contents += serverCheckBox
-        contents += serverCombo
+        contents += new PluginPanel("wrap 3") {
+          contents += sandBoxCheckBox
+          contents += sandBoxTextField
+          contents += new Label("<html><i>The sandbox folder is a root folder from which all paths are appended; allowing portability of the workflows." +
+            "<br/>Ex: sandbox folder = /tmp/ and a Copy File hook is set to /home/mole/; files will be copied in /tmp/home/mole." +
+            "<br/>It is the default mode when the computation is delegated to a server.</i></html>")
+        }
 
-        listenTo(`serverCheckBox`)
+        listenTo(`serverCheckBox`, `sandBoxCheckBox`)
         reactions += {
-          case ButtonClicked(`serverCheckBox`) ⇒ serverCombo.enabled = serverCheckBox.selected
+          case ButtonClicked(`serverCheckBox`) ⇒
+            serverCombo.enabled = serverCheckBox.selected
+            sandBoxTextField.enabled = !serverCombo.enabled
+            sandBoxCheckBox.enabled = sandBoxCheckBox.enabled
+          case ButtonClicked(`sandBoxCheckBox`) ⇒
+            sandBoxTextField.enabled = sandBoxCheckBox.selected
         }
         contents += eManager.envBarPanel
       }.peer, BorderLayout.NORTH)
@@ -124,8 +143,13 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         startStopButton.action = new Action("Stop") {
           def apply = stop
         }
-        //exportButton.enabled = false
-        x.start
+        x.start({
+          if (serverCheckBox.selected) Some(new URL(serverCombo.selection.item))
+          else None
+        }, {
+          if (sandBoxCheckBox.selected) ExecutionContext.local.copy(directory = Some(new File(sandBoxTextField.text)))
+          else ExecutionContext.local
+        })
       case _ ⇒
     }
   }
@@ -133,7 +157,6 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   def startLook = {
     startStopButton.background = new Color(125, 160, 0)
     startStopButton.action = start
-    // exportButton.enabled = true
   }
 
   def stop = executionManager match {

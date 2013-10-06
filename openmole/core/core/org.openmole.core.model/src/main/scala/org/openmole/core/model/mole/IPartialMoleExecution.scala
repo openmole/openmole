@@ -23,7 +23,6 @@ trait IPartialMoleExecution {
   def mole: IMole
   def hooks: Hooks
   def sources: Sources
-  def profiler: Profiler
 
   def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local): IMoleExecution
 }
