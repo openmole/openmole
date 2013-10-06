@@ -35,6 +35,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
 import util.{ Failure, Success }
+import org.openmole.misc.eventdispatcher.EventDispatcher
 
 object GetResultActor extends Logger
 
@@ -65,8 +66,10 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
 
     runtimeResult.result match {
       case Failure(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown during the execution of the job execution on the execution node")
-      case Success(result) ⇒
+      case Success((result, log)) ⇒
         val contextResults = getContextResults(result, storage)
+
+        EventDispatcher.trigger(storage.environment: Environment, new Environment.JobCompleted(batchJob, log))
 
         //Try to download the results for all the jobs of the group
         for (moleJob ← job.moleJobs) {
