@@ -79,6 +79,11 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     val csv = fileParams.get("csv")
 
+    val molePack = params get "pack" match {
+      case Some("on") ⇒ true
+      case _          ⇒ false
+    }
+
     val cnS = csv.map(_.getInputStream)
 
     val encapsulate = params get "encapsulate" match {
@@ -93,7 +98,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         contentType = "text/html"
 
-        createMole(inS, cnS, encapsulate) match {
+        createMole(inS, cnS, encapsulate, pack = molePack) match {
           case Left(error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
           case _           ⇒ redirect(url("execs"))
         }
@@ -101,18 +106,32 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     }
   }
 
-  /*//todo: update this for async
   post("/xml/createMole") {
-    val moleExec = processXMLFile[IMoleExecution](fileParams.get("file"), fileParams.get("file").map(_.getInputStream))
-
-    moleExec match {
-      case (Some(exec), _) ⇒ {
-        cachedMoles.add(exec.id, exec)
-        redirect("/xml/execs")
-      }
-      case (_, error) ⇒ <error>{ error }</error>
+    contentType = "application/xml"
+    println("starting the create operation")
+    val encapsulate = params get "encapsulate" match {
+      case Some("on") ⇒ true
+      case _          ⇒ false
     }
-  }*/
+
+    val molePack = params get "pack" match {
+      case Some("on") ⇒ true
+      case _          ⇒ false
+    }
+
+    println("encapsulate and pack parsed")
+
+    val res = createMole(fileParams get "file" map (_.getInputStream), fileParams get "csv" map (_.getInputStream), encapsulate, molePack)
+
+    println("mole created")
+
+    println(res)
+
+    res match {
+      case Left(error) ⇒ <error>{ error }</error>
+      case Right(exec) ⇒ <moleID>{ exec.id }</moleID>
+    }
+  }
 
   post("/json/createMole") {
     contentType = formats("json")
@@ -122,12 +141,16 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
       case _          ⇒ false
     }
 
-    val res = createMole(fileParams get "file" map (_.getInputStream), fileParams get "csv" map (_.getInputStream), encapsulate)
+    val molePack = params get "pack" match {
+      case Some("on") ⇒ true
+      case _          ⇒ false
+    }
+
+    val res = createMole(fileParams get "file" map (_.getInputStream), fileParams get "csv" map (_.getInputStream), encapsulate, pack = molePack)
 
     res match {
       case Left(error) ⇒ Xml.toJson(<error>{ error }</error>)
       case Right(exec) ⇒ Xml.toJson(<moleID>{ exec.id }</moleID>)
-
     }
   }
 
@@ -191,15 +214,15 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     getMoleResult(params("id"))
   }
 
-  /*get("/xml/execs") {
-    contentType = "text/xml"
+  get("/xml/execs") {
+    contentType = "application/xml"
 
     <mole-execs>
-      { for (key ← cachedMoles.getKeys) yield <execID>{ key }</execID> }
+      { for (key ← getMoleKeys) yield <moleID>{ key }</moleID> }
     </mole-execs>
   }
 
-  get("/xml/start/:id") {
+  /*get("/xml/start/:id") {
     contentType = "text/html"
 
     new AsyncResult() {
@@ -241,6 +264,8 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
       }
     }
   }
+
+  options("/createMole") {}
 
   notFound {
     // remove content type in case it was set through an action
