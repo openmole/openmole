@@ -29,14 +29,12 @@ object PartialMoleExecution {
     hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
     environments: Map[ICapsule, Environment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
-    profiler: Profiler = Profiler.empty,
     seed: Long = Workspace.newSeed): PartialMoleExecution = new PartialMoleExecution(
     mole,
     sources groupBy { case (c, _) ⇒ c } map { case (c, ss) ⇒ c -> ss.map(_._2) } withDefault { _ ⇒ List.empty },
     hooks groupBy { case (c, _) ⇒ c } map { case (c, hs) ⇒ c -> hs.map(_._2) } withDefault { _ ⇒ List.empty },
     environments,
     grouping,
-    profiler,
     seed)
 }
 
@@ -46,7 +44,6 @@ class PartialMoleExecution(
     val hooks: Hooks = Hooks.empty,
     val environments: Map[ICapsule, Environment] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,
-    val profiler: Profiler = Profiler.empty,
     val seed: Long = Workspace.newSeed) extends IPartialMoleExecution {
 
   def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) =
@@ -55,7 +52,6 @@ class PartialMoleExecution(
       hooks,
       environments,
       grouping,
-      profiler,
       seed)(implicits, moleExecutionContext)
 
 }

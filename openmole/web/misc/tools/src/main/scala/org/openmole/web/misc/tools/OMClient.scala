@@ -9,14 +9,15 @@ import java.net.URL
  * Date: 9/27/13
  * Time: 11:44 AM
  */
-case class OMClient[T](address: URL, responseFormat: ResponseFormat[T] = WebResponse) {
+case class OMClient[T](address: String, responseFormat: ResponseFormat[T] = WebResponse) {
   def createMole(moleData: Array[Byte], context: Option[Array[Byte]], pack: Boolean = false, encapsulate: Boolean = false) = {
     val packVal = if (pack) "on" else ""
     val encapsulateVal = if (encapsulate) "on" else ""
     val url = address.toString + responseFormat.responseUrlSection + "/createMole"
+    val multiparts = MultiPart("file", "", "", moleData) :: (context map (MultiPart("csv", "", "", _))).toList
     println(url)
     responseFormat.convertResponse(
-      Http.multipart(address.toString, MultiPart("file", "...", "multipart/form-data", moleData)).params("pack" -> packVal, "encapsulate" -> encapsulateVal).option(HttpOptions.connTimeout(1000)).option(HttpOptions.readTimeout(5000))
+      Http.multipart(url, multiparts: _*).params("pack" -> packVal, "encapsulate" -> encapsulateVal).option(HttpOptions.connTimeout(1000)).option(HttpOptions.readTimeout(5000))
     )
   }
 

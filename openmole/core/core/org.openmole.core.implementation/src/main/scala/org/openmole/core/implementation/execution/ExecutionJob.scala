@@ -18,10 +18,8 @@
 package org.openmole.core.implementation.execution
 
 import org.openmole.core.model.execution._
-import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.implementation.tools.TimeStamp
 import org.openmole.core.model.execution.ExecutionState._
 
 trait ExecutionJob extends IExecutionJob {

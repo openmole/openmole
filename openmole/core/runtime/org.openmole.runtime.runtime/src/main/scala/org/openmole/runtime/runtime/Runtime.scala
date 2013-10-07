@@ -42,6 +42,7 @@ import org.openmole.misc.workspace._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import util.{ Success, Failure }
+import org.openmole.core.model.execution.Environment.RuntimeLog
 
 object Runtime extends Logger {
   val NbRetry = 3
@@ -78,6 +79,8 @@ class Runtime {
       System.setOut(outSt)
       System.setErr(errSt)
     }
+
+    val beginTime = System.currentTimeMillis
 
     val result = try {
       logger.fine("Downloading plugins")
@@ -140,11 +143,15 @@ class Runtime {
       val saver = new ContextSaver(runableTasks.size)
       val allMoleJobs = runableTasks.map { _.toMoleJob(saver.save) }
 
+      val beginExecutionTime = System.currentTimeMillis
+
       /* --- Submit all jobs to the local environment --*/
       logger.fine("Run the jobs")
       for (toProcess ← allMoleJobs) LocalEnvironment.default.submit(toProcess)
 
       saver.waitAllFinished
+
+      val endExecutionTime = System.currentTimeMillis
 
       logger.fine("Results " + saver.results)
 
@@ -158,7 +165,10 @@ class Runtime {
       logger.fine("Upload the results")
       retry(storage.uploadGZ(contextResultFile, uploadedcontextResults))
       contextResultFile.delete
-      Success(result)
+
+      val endTime = System.currentTimeMillis
+
+      Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime, LocalHostName.localHostName))
     }
     catch {
       case t: Throwable ⇒

@@ -30,15 +30,15 @@ class ContextSaver(val nbJobs: Int) {
   val allFinished = new Semaphore(0)
 
   var nbFinished = 0
-  var _results = new TreeMap[MoleJobId, (Try[Context], Seq[ITimeStamp[State]])]
+  var _results = new TreeMap[MoleJobId, Try[Context]]
   def results = _results
 
   def save(job: IMoleJob, oldState: State, newState: State) = synchronized {
     newState match {
       case COMPLETED | FAILED ⇒
         job.exception match {
-          case None    ⇒ _results += job.id -> (Success(job.context), job.timeStamps)
-          case Some(t) ⇒ _results += job.id -> (Failure(t), job.timeStamps)
+          case None    ⇒ _results += job.id -> Success(job.context)
+          case Some(t) ⇒ _results += job.id -> Failure(t)
         }
       case _ ⇒
     }

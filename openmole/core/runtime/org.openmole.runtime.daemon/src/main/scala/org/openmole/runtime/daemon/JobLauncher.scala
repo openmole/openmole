@@ -182,8 +182,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     }
 
     val uplodadedResult = runtimeResult.result match {
-      case Success(result) ⇒ Success(uploadFileMessage(result))
-      case Failure(e)      ⇒ Failure(e)
+      case Success((result, log)) ⇒ Success((uploadFileMessage(result), log))
+      case Failure(e)             ⇒ Failure(e)
     }
 
     val uploadedStdOut = runtimeResult.stdOut match {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 05/10/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,18 +11,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.job
+package org.openmole.core.model
 
-import org.openmole.misc.tools.obj.Id
-import org.openmole.misc.tools.obj.OrderedTuple2Id
+import java.util.UUID
 
-object MoleJobId {
-  implicit val moleJobIdOrdering = OrderedTuple2Id.orderedTuple2IdOrdering[String, Long, MoleJobId]
+package object job {
+  type MoleJobId = UUID
 }
-
-class MoleJobId(val executionId: String, val jobId: Long) extends OrderedTuple2Id(executionId, jobId)
-
