@@ -4,7 +4,7 @@ import scala.reflect.ClassTag
 import scala.io.{ Codec, Source }
 import org.scalatra.servlet.FileItem
 import java.io._
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
 import org.openmole.core.implementation.mole.PartialMoleExecution
 import org.openmole.core.model.mole.{ IPartialMoleExecution, IMoleExecution, ExecutionContext }
@@ -34,7 +34,8 @@ import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
 import java.util.UUID
 import java.sql.SQLException
 
-trait MoleHandling { self: SlickSupport ⇒
+trait MoleHandling {
+  self: SlickSupport ⇒
 
   def system: ActorSystem
 
@@ -63,7 +64,7 @@ trait MoleHandling { self: SlickSupport ⇒
   private def processXMLFile[A: ClassTag](is: Option[InputStream]): Either[A, String] = is match {
     case Some(stream) ⇒
       try {
-        val ret = SerializerService.deserialize[A](stream)
+        val ret = SerialiserService.deserialise[A](stream)
         Left(ret)
       }
       catch {
@@ -77,7 +78,7 @@ trait MoleHandling { self: SlickSupport ⇒
     case Some(stream) ⇒
       try {
         val p = Workspace.newDir
-        val ret = SerializerService.deserializeAndExtractFiles[IPartialMoleExecution](new TarInputStream(stream), p)
+        val ret = SerialiserService.deserialiseAndExtractFiles[IPartialMoleExecution](new TarInputStream(stream), p)
         Left(ret) -> Some(p)
       }
       catch {
@@ -101,16 +102,17 @@ trait MoleHandling { self: SlickSupport ⇒
       case error                 ⇒ throw new Exception(s"Malformed partial mole: $error")
     })
 
-    val c = mIS.map { mI ⇒
-      mI.data.prototype.`type`.erasure match {
-        case t if t.equals(classOf[Int])    ⇒ createVariable[Int](mI)
-        case t if t.equals(classOf[Double]) ⇒ createVariable[Double](mI)
-        case t if t.equals(classOf[Float])  ⇒ createVariable[Float](mI)
-        case t if t.equals(classOf[BigInt]) ⇒ createVariable[BigInt](mI)
-        case t if t.equals(classOf[String]) ⇒ createVariable[String](mI)
-        case t if t.equals(classOf[File])   ⇒ createVariable[File](mI)
-        case _                              ⇒ throw new Exception(s"The missing parameter type: ${mI.data.prototype.`type`} is not known to the reification system.")
-      }
+    val c = mIS.map {
+      mI ⇒
+        mI.data.prototype.`type`.erasure match {
+          case t if t.equals(classOf[Int])    ⇒ createVariable[Int](mI)
+          case t if t.equals(classOf[Double]) ⇒ createVariable[Double](mI)
+          case t if t.equals(classOf[Float])  ⇒ createVariable[Float](mI)
+          case t if t.equals(classOf[BigInt]) ⇒ createVariable[BigInt](mI)
+          case t if t.equals(classOf[String]) ⇒ createVariable[String](mI)
+          case t if t.equals(classOf[File])   ⇒ createVariable[File](mI)
+          case _                              ⇒ throw new Exception(s"The missing parameter type: ${mI.data.prototype.`type`} is not known to the reification system.")
+        }
     }
 
     if (!mIS.isEmpty && c.isEmpty) throw new Exception("No parameters given")
@@ -156,9 +158,9 @@ trait MoleHandling { self: SlickSupport ⇒
       case Left(pEx) ⇒ {
         val ctxt = reifyCSV(pEx, csvData)
 
-        val clob = new SerialClob(SerializerService.serialize(pEx).toCharArray)
+        val clob = new SerialClob(SerialiserService.serialise(pEx).toCharArray)
 
-        val ctxtClob = new SerialClob(SerializerService.serialize(ctxt).toCharArray)
+        val ctxtClob = new SerialClob(SerialiserService.serialise(ctxt).toCharArray)
 
         val outputBlob = new SerialBlob(Array[Byte]())
         //val id = UUID.randomUUID().toString
@@ -192,12 +194,12 @@ trait MoleHandling { self: SlickSupport ⇒
       val row = MoleData filter (_.id === key)
       val molePack = (row map (_.molePackage)).list.headOption.getOrElse(false)
       val workDir = if (molePack) Some(Workspace.newDir) else None
-      val moleDeserializer: InputStream ⇒ IPartialMoleExecution = workDir map (dir ⇒
-        (in: InputStream) ⇒ SerializerService.deserializeAndExtractFiles[IPartialMoleExecution](new TarInputStream(in), dir)
-      ) getOrElse (SerializerService.deserialize[IPartialMoleExecution](_))
+      val moleDeserialiser: InputStream ⇒ IPartialMoleExecution = workDir map (dir ⇒
+        (in: InputStream) ⇒ SerialiserService.deserialiseAndExtractFiles[IPartialMoleExecution](new TarInputStream(in), dir)
+      ) getOrElse (SerialiserService.deserialise[IPartialMoleExecution](_))
 
       val r = (row map (r ⇒ (r.clobbedMole, r.clobbedContext, r.encapsulated))).list.headOption map {
-        case (pMClob, ctxtClob, e) ⇒ (moleDeserializer(pMClob.getAsciiStream), SerializerService.deserialize[Context](ctxtClob.getAsciiStream), e)
+        case (pMClob, ctxtClob, e) ⇒ (moleDeserialiser(pMClob.getAsciiStream), SerialiserService.deserialise[Context](ctxtClob.getAsciiStream), e)
       }
 
       r map Function.tupled(createMoleExecution(_, _, _, workDir)) map Function.tupled(cacheMoleExecution(_, _, key))
@@ -214,7 +216,10 @@ trait MoleHandling { self: SlickSupport ⇒
   def getMoleStats(key: String) = {
     moleStats get key getOrElse Stats.empty
   }
-  def startMole(key: String) { getMole(key) foreach (_.start) }
+
+  def startMole(key: String) {
+    getMole(key) foreach (_.start)
+  }
 
   def deleteMole(key: String) = {
     val ret = cachedMoles get key map (_.cancel)
@@ -259,29 +264,30 @@ trait MoleHandling { self: SlickSupport ⇒
       outFile.createNewFile()
       println(outFile)
 
-    val moleId = mole2CacheId.get(exec).get
+      try {
+        Tar.createDirectoryTar(path, outFile)
 
-    try {
-      Tar.createDirectoryTar(path, outFile)
+        for (tis ← managed(Source.fromFile(outFile)(Codec.ISO8859))) {
+          val r = for (m ← MoleData if m.id === moleId) yield m.result
 
-      for (tis ← managed(Source.fromFile(outFile)(Codec.ISO8859))) {
-        val r = for (m ← MoleData if m.id === moleId) yield m.result
-
-        val arr = tis.iter.toArray.map(_.toByte)
-        val blob = new SerialBlob(arr)
-        r.update(blob)
+          val arr = tis.iter.toArray.map(_.toByte)
+          val blob = new SerialBlob(arr)
+          r.update(blob)
+        }
       }
-    }
-    catch {
-      case e: Exception ⇒ e.printStackTrace(System.out)
+      catch {
+        case e: Exception ⇒ e.printStackTrace(System.out)
+      }
     }
   }
 }
 
 object MoleHandling {
+
   object Status {
     val running = "Running"
     val finished = "Finished"
     val stopped = "Stopped"
   }
+
 }
