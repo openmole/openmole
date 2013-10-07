@@ -144,7 +144,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           def apply = stop
         }
         x.start({
-          if (serverCheckBox.selected) Some(new URL(serverCombo.selection.item))
+          if (serverCheckBox.selected) Some(serverCombo.selection.item)
           else None
         }, {
           if (sandBoxCheckBox.selected) ExecutionContext.local.copy(directory = Some(new File(sandBoxTextField.text)))
