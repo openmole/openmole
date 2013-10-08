@@ -102,14 +102,14 @@ class ExecutionManager(manager: MoleUI,
 
   contents += tabbedPane
 
-  def start(server: Option[URL] = None,
+  def start(server: Option[String] = None,
             executionContext: ExecutionContext = ExecutionContext.local) = synchronized {
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter
 
     server match {
-      case Some(url: URL) ⇒
+      case Some(url: String) ⇒
         val client = new OMClient(url)
         client.createMole(ExecutionSerialiser(manager, true), None)
       case _ ⇒
