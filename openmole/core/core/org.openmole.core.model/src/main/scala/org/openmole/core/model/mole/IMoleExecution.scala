@@ -64,6 +64,7 @@ trait IMoleExecution {
   def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[Variable[_]]]
 
   def moleJobs: Iterable[IMoleJob]
+
   def id: String
   def nextTicket(parent: ITicket): ITicket
 }

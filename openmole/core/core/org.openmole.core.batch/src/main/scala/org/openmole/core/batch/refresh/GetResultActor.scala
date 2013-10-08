@@ -69,7 +69,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
       case Success((result, log)) ⇒
         val contextResults = getContextResults(result, storage)
 
-        EventDispatcher.trigger(storage.environment: Environment, new Environment.JobCompleted(batchJob, log))
+        EventDispatcher.trigger(storage.environment: Environment, Environment.JobCompleted(batchJob, log))
 
         //Try to download the results for all the jobs of the group
         for (moleJob ← job.moleJobs) {
