@@ -28,23 +28,45 @@ object Range {
   def apply[T](
     min: String,
     max: String,
-    step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) = new Range[T](min, max, step)
+    step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) = {
+    val _step = step
+    new Range[T](min, max) {
+      lazy val stepProxy = GroovyProxyPool(_step)
+      def step(minValue: T, maxValue: T, context: Context): T =
+        fs.fromString(stepProxy(context).toString)
+    }
+  }
+
+  def steps[T](
+    min: String,
+    max: String,
+    nbSteps: String)(implicit integral: Integral[T], fs: FromString[T]) = {
+    new Range[T](min, max) {
+      lazy val nbStepProxy = GroovyProxyPool(nbSteps)
+      def step(minValue: T, maxValue: T, context: Context): T = {
+        import integral._
+        (maxValue - minValue) / fs.fromString(nbStepProxy(context).toString)
+      }
+
+    }
+  }
 
 }
 
-sealed class Range[T](val min: String, val max: String, val step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) extends Domain[T] with Finite[T] with Center[T] with Bounds[T] {
+abstract sealed class Range[T](val min: String, val max: String)(implicit integral: Integral[T], fs: FromString[T]) extends Domain[T] with Finite[T] with Center[T] with Bounds[T] {
 
   import integral._
   import fs._
 
+  def step(maxValue: T, minValue: T, context: Context): T
+
   @transient lazy val minValue = GroovyProxyPool(min)
   @transient lazy val maxValue = GroovyProxyPool(max)
-  @transient lazy val stepValue = GroovyProxyPool(step)
 
   override def computeValues(context: Context): Iterable[T] = {
     val mi = min(context)
     val ma = max(context)
-    val s = step(context)
+    val s = step(mi, ma, context)
 
     val size = (ma - mi).abs / s
 
@@ -52,11 +74,10 @@ sealed class Range[T](val min: String, val max: String, val step: String = "1")(
   }
 
   override def center(context: Context): T = {
-    val mi = min(context);
+    val mi = min(context)
     mi + ((max(context) - mi) / fromInt(2))
   }
 
-  def step(context: Context): T = fromString(stepValue(context).toString)
   override def max(context: Context): T = fromString(maxValue(context).toString)
   override def min(context: Context): T = fromString(minValue(context).toString)
 
