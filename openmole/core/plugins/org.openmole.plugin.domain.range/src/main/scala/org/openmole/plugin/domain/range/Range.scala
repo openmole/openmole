@@ -32,8 +32,14 @@ object Range {
     val _step = step
     new Range[T](min, max) {
       lazy val stepProxy = GroovyProxyPool(_step)
-      def step(minValue: T, maxValue: T, context: Context): T =
-        fs.fromString(stepProxy(context).toString)
+
+      def stepAndSize(minValue: T, maxValue: T, context: Context): T = {
+        import  integral._
+        val step = fs.fromString(stepProxy(context).toString)
+        val size = (maxValue - minValue).abs / step
+        (step, size)
+      }
+
     }
   }
 
@@ -43,11 +49,12 @@ object Range {
     nbSteps: String)(implicit integral: Integral[T], fs: FromString[T]) = {
     new Range[T](min, max) {
       lazy val nbStepProxy = GroovyProxyPool(nbSteps)
-      def step(minValue: T, maxValue: T, context: Context): T = {
+      def stepAndSize(minValue: T, maxValue: T, context: Context): T = {
         import integral._
-        (maxValue - minValue) / fs.fromString(nbStepProxy(context).toString)
+        val size =  fs.fromString(nbStepProxy(context).toString)
+        val step = (maxValue - minValue) / size
+        (step, size)
       }
-
     }
   }
 
@@ -58,7 +65,7 @@ abstract sealed class Range[T](val min: String, val max: String)(implicit integr
   import integral._
   import fs._
 
-  def step(maxValue: T, minValue: T, context: Context): T
+  def stepAndSize(maxValue: T, minValue: T, context: Context): (T, T)
 
   @transient lazy val minValue = GroovyProxyPool(min)
   @transient lazy val maxValue = GroovyProxyPool(max)
@@ -66,11 +73,8 @@ abstract sealed class Range[T](val min: String, val max: String)(implicit integr
   override def computeValues(context: Context): Iterable[T] = {
     val mi = min(context)
     val ma = max(context)
-    val s = step(mi, ma, context)
-
-    val size = (ma - mi).abs / s
-
-    (for (i ← 0 to size.toInt) yield { mi + fromInt(i) * s })
+    val (step, size) = stepAndSize(mi, ma, context)
+    for (i ← 0 to size.toInt) yield { mi + fromInt(i) * step }
   }
 
   override def center(context: Context): T = {
