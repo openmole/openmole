@@ -28,6 +28,7 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.{ LocalHostName, Logger }
 import scala.collection.JavaConversions._
 import ref.WeakReference
+import org.openmole.core.implementation.mole.StrainerCapsule
 
 object LocalExecuter extends Logger
 
@@ -42,7 +43,7 @@ class LocalExecuter(environment: WeakReference[LocalEnvironment]) extends Runnab
     while (!stop) {
       environment.get match {
         case Some(environment) ⇒
-          def jobGoneIdle {
+          def jobGoneIdle() {
             environment.addExecuters(1)
             stop = true
           }
@@ -52,11 +53,15 @@ class LocalExecuter(environment: WeakReference[LocalEnvironment]) extends Runnab
           val executionJob = environment.takeNextjob
           try {
             executionJob.state = ExecutionState.RUNNING
-            val running = System.currentTimeMillis
 
             for (moleJob ← executionJob.moleJobs) {
               if (moleJob.state != State.CANCELED) {
-                if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) jobGoneIdle
+                moleJob.task match {
+                  case _: IMoleTask ⇒ jobGoneIdle()
+                  case t: StrainerCapsule.StrainerTaskDecorator ⇒
+                    if (classOf[IMoleTask].isAssignableFrom(t.task.getClass)) jobGoneIdle()
+                  case _ ⇒
+                }
                 moleJob.perform
                 moleJob.exception match {
                   case Some(e) ⇒ EventDispatcher.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
