@@ -37,7 +37,7 @@ object Range {
         import integral._
         val step = fs.fromString(stepProxy(context).toString)
         val size = (maxValue - minValue).abs / step
-        (step, size)
+        (step, size.toInt)
       }
 
     }
@@ -52,8 +52,8 @@ object Range {
       def stepAndSize(minValue: T, maxValue: T, context: Context) = {
         import integral._
         val size = fs.fromString(nbStepProxy(context).toString)
-        val step = (maxValue - minValue) / size - 1
-        (step, size)
+        val step = (maxValue - minValue) / size
+        (step, size.toInt - 1)
       }
     }
   }
@@ -65,7 +65,7 @@ abstract sealed class Range[T](val min: String, val max: String)(implicit integr
   import integral._
   import fs._
 
-  def stepAndSize(maxValue: T, minValue: T, context: Context): (T, T)
+  def stepAndSize(maxValue: T, minValue: T, context: Context): (T, Int)
 
   @transient lazy val minValue = GroovyProxyPool(min)
   @transient lazy val maxValue = GroovyProxyPool(max)
@@ -74,7 +74,7 @@ abstract sealed class Range[T](val min: String, val max: String)(implicit integr
     val mi = min(context)
     val ma = max(context)
     val (step, size) = stepAndSize(mi, ma, context)
-    for (i ← 0 to size.toInt) yield { mi + fromInt(i) * step }
+    for (i ← 0 to size) yield { mi + fromInt(i) * step }
   }
 
   override def center(context: Context): T = {
