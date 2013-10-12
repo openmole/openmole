@@ -29,6 +29,8 @@ import org.openmole.core.model.sampling._
 import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
 import org.openmole.plugin.task.stat._
+import org.openmole.core.implementation.validation.Validation
+import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
 
 package object stochastic {
 
@@ -56,33 +58,37 @@ package object stochastic {
     replicationFactor: DiscreteFactor[_, _],
     statistics: Statistics)(implicit plugins: PluginSet): Puzzle = {
     val exploration = ExplorationTask(name + "Replication", replicationFactor)
-    val explorationCapsule = new StrainerCapsule(exploration)
-    val aggregationCapsule = new StrainerCapsule(EmptyTask(name + "Aggregation"))
 
-    val medianTask = MedianTask(name + "Median")
-    statistics.medians.foreach { case (out, stat) ⇒ medianTask addSequence (out.toArray, stat) }
-    val medianCapsule = new Capsule(medianTask)
+    def create(seq: List[(Prototype[Double], Prototype[Double])], builder: DoubleSequenceStatTaskBuilder) =
+      if (!seq.isEmpty) {
+        seq.foreach { case (out, stat) ⇒ builder addSequence (out.toArray, stat) }
+        Some(Capsule(builder))
+      }
+      else None
 
-    val medianAbsoluteDeviationTask = MedianAbsoluteDeviationTask(name + "MedianAbsoluteDeviation")
-    statistics.medianAbsoluteDeviations.foreach { case (out, stat) ⇒ medianAbsoluteDeviationTask addSequence (out.toArray, stat) }
-    val medianAbsoluteDeviationCapsule = new Capsule(medianAbsoluteDeviationTask)
+    val capsules =
+      List(
+        create(statistics.medians, MedianTask(name + "Median")),
+        create(statistics.medianAbsoluteDeviations, MedianAbsoluteDeviationTask(name + "MedianAbsoluteDeviation")),
+        create(statistics.averages, AverageTask(name + "Average")),
+        create(statistics.sums, SumTask(name + "Sum")),
+        create(statistics.mses, MeanSquareErrorTask(name + "MeanSquareError"))
+      ).flatten.map(_.toPuzzle)
 
-    val averageTask = AverageTask(name + "Average")
-    statistics.averages.foreach { case (out, stat) ⇒ averageTask addSequence (out.toArray, stat) }
-    val averageCapsule = new Capsule(averageTask)
+    Validation(exploration -< model) foreach {
+      case MissingInput(_, d) ⇒
+        exploration.addInput(d)
+        exploration.addOutput(d)
+      case _ ⇒
+    }
 
-    val sumTask = SumTask(name + "Sum")
-    statistics.sums.foreach { case (out, stat) ⇒ sumTask addSequence (out.toArray, stat) }
-    val sumCapsule = new Capsule(sumTask)
+    val explorationCapsule = StrainerCapsule(exploration)
+    val aggregationCapsule = StrainerCapsule(EmptyTask(name + "Aggregation"))
+    val endCapsule = Slot(StrainerCapsule(EmptyTask(name + "End")))
 
-    val mseTask = MeanSquareErrorTask(name + "MeanSquareError")
-    statistics.mses.foreach { case (out, stat) ⇒ mseTask addSequence (out.toArray, stat) }
-    val mseCapsule = new Capsule(mseTask)
+    explorationCapsule -< model >- aggregationCapsule -- capsules -- endCapsule
 
-    val endCapsule = Slot(new StrainerCapsule(EmptyTask(name + "End")))
-
-    (explorationCapsule -< model >- aggregationCapsule -- (medianCapsule, medianAbsoluteDeviationCapsule, averageCapsule, sumCapsule, mseCapsule) -- endCapsule) +
-      (explorationCapsule oo (endCapsule, filter = Block(replicationFactor.prototype)))
+    //+(explorationCapsule oo (endCapsule, filter = Block(replicationFactor.prototype)))
   }
 
   def replicate(
@@ -90,8 +96,16 @@ package object stochastic {
     model: Puzzle,
     replications: Sampling)(implicit plugins: PluginSet) = {
     val exploration = ExplorationTask(name + "Replication", replications)
-    val explorationCapsule = new StrainerCapsule(exploration)
-    val aggregationCapsule = Slot(new StrainerCapsule(EmptyTask(name + "Aggregation")))
+
+    Validation(exploration -< model) foreach {
+      case MissingInput(_, d) ⇒
+        exploration.addInput(d)
+        exploration.addOutput(d)
+      case _ ⇒
+    }
+
+    val explorationCapsule = StrainerCapsule(exploration)
+    val aggregationCapsule = Slot(StrainerCapsule(EmptyTask(name + "Aggregation")))
     explorationCapsule -< model >- aggregationCapsule + explorationCapsule oo aggregationCapsule
   }
 
