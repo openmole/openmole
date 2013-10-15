@@ -51,12 +51,15 @@ object CSVSource {
     }
   }
 
-  def apply(_path: String) =
+  def apply(path: String, separator: Char = ',') = {
+    val (_path, _separator) = (path, separator)
     new CSVSourceBuilder { builder ⇒
       def toSource = new CSVSource with Built {
         val path = _path
+        val separator = _separator
       }
     }
+  }
 
 }
 
@@ -64,13 +67,15 @@ abstract class CSVSource extends Source {
 
   def path: String
   def columns: List[(String, Prototype[_])]
+  def separator: Char
 
   def p = columns.map { case (_, p) ⇒ p }
 
   import org.openmole.core.model.data._
 
   override def process(context: Context, executionContext: ExecutionContext): Context = {
-    val reader = new CSVReader(new FileReader(VariableExpansion(context, path)))
+    val reader = new CSVReader(new FileReader(VariableExpansion(context, path)), separator)
+
     val headers = reader.readNext.toArray
 
     val columnsIndexes = columns.map {

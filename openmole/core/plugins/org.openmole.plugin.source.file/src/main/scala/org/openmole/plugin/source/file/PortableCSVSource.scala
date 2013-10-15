@@ -22,12 +22,15 @@ import org.openmole.plugin.source.file.CSVSource.CSVSourceBuilder
 
 object PortableCSVSource {
 
-  def apply(_file: File) =
+  def apply(file: File, separator: Char = ',') = {
+    val (_file, _separator) = (file, separator)
     new CSVSourceBuilder { builder ⇒
       def toSource = new PortableCSVSource with Built {
         val file = _file
+        val separator = _separator
       }
     }
+  }
 
 }
 
