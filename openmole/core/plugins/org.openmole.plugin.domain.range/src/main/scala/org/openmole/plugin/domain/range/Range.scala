@@ -51,9 +51,9 @@ object Range {
       lazy val nbStepProxy = GroovyProxyPool(nbSteps)
       def stepAndSize(minValue: T, maxValue: T, context: Context) = {
         import integral._
-        val size = fs.fromString(nbStepProxy(context).toString)
+        val size = fs.fromString(nbStepProxy(context).toString) - integral.one
         val step = (maxValue - minValue) / size
-        (step, size.toInt - 1)
+        (step, size.toInt)
       }
     }
   }
