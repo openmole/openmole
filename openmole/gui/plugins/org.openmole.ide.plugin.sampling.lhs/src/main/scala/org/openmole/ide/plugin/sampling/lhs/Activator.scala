@@ -32,7 +32,7 @@ class Activator extends OSGiActivator with SamplingActivator {
     def fromCoreObject(sampling: Sampling, bSC: IBuiltCompositionSampling) = {
       sampling match {
         case cs: LHS ⇒
-          val proxy = SamplingProxyUI(new LHSSamplingDataUI(cs.samples.toString))
+          val proxy = SamplingProxyUI(new LHSSamplingDataUI2)
           (proxy, Builder.buildConnectedSamplings(proxy, Seq(), bSC))
         case _ ⇒ (SamplingProxyUI(buildDataUI), bSC)
       }

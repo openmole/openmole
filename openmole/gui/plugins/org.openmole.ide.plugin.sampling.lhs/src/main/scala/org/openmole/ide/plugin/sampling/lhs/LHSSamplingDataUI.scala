@@ -5,19 +5,17 @@
 
 package org.openmole.ide.plugin.sampling.lhs
 
-import org.openmole.core.model.sampling.Factor
-import org.openmole.ide.plugin.domain.range.RangeDomainDataUI
-import org.openmole.plugin.sampling.lhs._
+import org.openmole.ide.core.implementation.serializer.Update
+import org.openmole.ide.core.implementation.data.{ DomainDataUI, SamplingDataUI }
+import org.openmole.core.model.sampling.{ Sampling, Factor }
+import org.openmole.plugin.sampling.lhs.LHS
+import org.openmole.ide.core.implementation.sampling.SamplingUtils
 import org.openmole.core.model.data.Prototype
 import org.openmole.plugin.domain.bounded.Bounded
-import scala.collection.JavaConversions._
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.model.sampling.Sampling
-import org.openmole.ide.core.implementation.sampling._
+import org.openmole.ide.plugin.domain.range.RangeDomainDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 
-class LHSSamplingDataUI(val samples: String = "1") extends SamplingDataUI {
+class LHSSamplingDataUI2 extends SamplingDataUI {
 
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
@@ -25,10 +23,6 @@ class LHSSamplingDataUI(val samples: String = "1") extends SamplingDataUI {
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
     LHS(
-      try samples
-      catch {
-        case e: NumberFormatException ⇒ throw new UserBadDataError("An integer is exepected as number of samples")
-      },
       SamplingUtils.toFactors(factorOrSampling).map {
         f ⇒
           Factor(f.prototype.asInstanceOf[Prototype[Double]],
@@ -61,5 +55,23 @@ class LHSSamplingDataUI(val samples: String = "1") extends SamplingDataUI {
 
   def isAcceptable(sampling: SamplingDataUI) = false
 
-  def preview = "LHS (" + samples + ")"
+  def preview = "LHS"
+}
+
+class LHSSamplingDataUI(val samples: String = "1") extends SamplingDataUI with Update[LHSSamplingDataUI2] {
+  def update = new LHSSamplingDataUI2()
+
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = ???
+
+  def buildPanelUI = ???
+
+  def fatImagePath = ???
+
+  def isAcceptable(sampling: SamplingDataUI) = ???
+
+  def preview = ???
+
+  def coreClass = ???
+
+  def name = ???
 }
