@@ -47,8 +47,8 @@ package object osgi {
         else noProtocol
       }
 
-      val base = if (ref) new File(openMOLELocation) else new File("")
-      new File(base, location)
+      if (ref) new File(new File(openMOLELocation), location)
+      else new File(location)
     }
 
   }

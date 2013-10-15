@@ -18,7 +18,7 @@
 package org.openmole.core.serializer.plugin
 
 import scala.collection.immutable.TreeSet
-import java.io.{ OutputStream, File }
+import java.io.{IOException, OutputStream, File}
 import org.openmole.core.serializer.converter.Serialiser
 
 trait PluginListing { this: Serialiser ⇒
@@ -28,7 +28,11 @@ trait PluginListing { this: Serialiser ⇒
   xStream.registerConverter(new PluginClassConverter(this))
 
   def pluginUsed(f: File): Unit =
-    plugins += f
+    try {
+      plugins += f
+    } catch {
+      case e: IOException => throw new IOException(f.toString, e)
+    }
 
   def listPlugins(obj: Any) = synchronized {
     plugins = new TreeSet
