@@ -35,6 +35,7 @@ import org.openmole.misc.tools.service.{ Logger, OS }
 import org.openmole.plugin.task.external._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
+import org.openmole.misc.tools.io.FileUtil._
 
 object SystemExecTask extends Logger {
 
@@ -106,39 +107,46 @@ sealed abstract class SystemExecTask(
   override protected def process(context: Context) = {
     val tmpDir = Workspace.newDir("systemExecTask")
 
-    val workDir = if (directory.isEmpty) tmpDir else new File(tmpDir, directory)
-    val links = prepareInputFiles(context, tmpDir, directory)
-
-    val osCommandLine: String = command.find { case (_, os) ⇒ os.compatible }.map { case (cmd, _) ⇒ cmd }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
-
-    val commandLine =
-      CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context + Variable(ExternalTask.PWD, workDir.getAbsolutePath), osCommandLine))
-
     try {
-      val runtime = Runtime.getRuntime
+      val workDir = if (directory.isEmpty) tmpDir else new File(tmpDir, directory)
+      val links = prepareInputFiles(context, tmpDir, directory)
 
-      //FIXES java.io.IOException: error=26
-      val process = runtime.synchronized {
-        runtime.exec(
-          commandLine.toString,
-          variables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
-          workDir)
+      val osCommandLine: String = command.find { case (_, os) ⇒ os.compatible }.map { case (cmd, _) ⇒ cmd }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
+
+      val commandLine =
+        CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context + Variable(ExternalTask.PWD, workDir.getAbsolutePath), osCommandLine))
+
+      try {
+        val runtime = Runtime.getRuntime
+
+        //FIXES java.io.IOException: error=26
+        val process = runtime.synchronized {
+          runtime.exec(
+            commandLine.toString,
+            variables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
+            workDir)
+        }
+
+        execute(process, context) match {
+          case (retCode, variables) ⇒
+            if (errorOnReturnCode && retCode != 0) throw new InternalProcessingError("Error executing: " + commandLine + " return code was not 0 but " + retCode)
+
+            val retContext = fetchOutputFiles(context, workDir, links) ++ variables
+
+            returnValue match {
+              case None              ⇒ retContext
+              case Some(returnValue) ⇒ retContext + (returnValue, retCode)
+            }
+        }
       }
-
-      execute(process, context) match {
-        case (retCode, variables) ⇒
-          if (errorOnReturnCode && retCode != 0) throw new InternalProcessingError("Error executing: " + commandLine + " return code was not 0 but " + retCode)
-
-          val retContext = fetchOutputFiles(context, workDir, links) ++ variables
-
-          returnValue match {
-            case None              ⇒ retContext
-            case Some(returnValue) ⇒ retContext + (returnValue, retCode)
-          }
+      catch {
+        case e: IOException ⇒ throw new InternalProcessingError(e, "Error executing: " + commandLine)
       }
     }
     catch {
-      case e: IOException ⇒ throw new InternalProcessingError(e, "Error executing: " + commandLine)
+      case e: Throwable ⇒
+        tmpDir.recursiveDelete
+        throw e
     }
   }
 
