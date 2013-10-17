@@ -14,42 +14,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.plugin.sampling.combine
+package org.openmole.ide.plugin.sampling.modifier
 
 import org.openmole.core.model.sampling.{ Factor, Sampling }
-import org.openmole.plugin.sampling.combine.CombineSampling
-import org.openmole.ide.misc.widget.{ URL, Helper }
-import org.openmole.ide.core.implementation.sampling.{ Ordering, FiniteUI, SamplingUtils }
+import org.openmole.plugin.sampling.modifier.TakeSampling
+import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.implementation.sampling.{ FiniteUI, SamplingUtils }
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
-import java.util.{ Locale, ResourceBundle }
 
-import org.openmole.ide.core.implementation.panel.NoParameterSamplingPanelUI
+class TakeSamplingDataUI2(val size: String = "1") extends SamplingDataUI {
 
-class CombineSamplingDataUI extends SamplingDataUI with Ordering {
-  val name = "Combine"
+  val name = "Take"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
-    CombineSampling(SamplingUtils.toOrderedSamplings(factorOrSampling): _*)
+    new TakeSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling).head, size.toInt)
   }
 
-  def buildPanelUI = new NoParameterSamplingPanelUI(this) {
-    val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-    override lazy val help = new Helper(List(new URL(i18n.getString("combinePermalinkText"),
-      i18n.getString("combinePermalink"))))
-  }
+  def buildPanelUI = new TakeSamplingPanelUI(this)
 
-  override def imagePath = "img/combineSampling.png"
+  override def imagePath = "img/takeSampling.png"
 
-  def fatImagePath = "img/combineSampling_fat.png"
+  def fatImagePath = "img/takeSampling_fat.png"
 
   override def isAcceptable(domain: DomainDataUI) = domain match {
     case f: FiniteUI ⇒ true
-    case _           ⇒ false
+    case _ ⇒
+      StatusBar().warn("A Finite Domain is required for a Take Sampling")
+      false
   }
 
   def isAcceptable(sampling: SamplingDataUI) = true
 
-  def preview = name
+  override def inputNumberConstrainst = Some(1)
 
-  def coreClass = classOf[CombineSampling]
+  def preview = "Take (" + size + ")"
+
+  def coreClass = classOf[TakeSampling]
 }

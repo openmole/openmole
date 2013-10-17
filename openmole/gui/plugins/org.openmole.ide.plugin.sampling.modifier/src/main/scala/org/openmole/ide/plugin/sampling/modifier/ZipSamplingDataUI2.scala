@@ -14,42 +14,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.plugin.sampling.combine
+package org.openmole.ide.plugin.sampling.modifier
 
 import org.openmole.core.model.sampling.{ Factor, Sampling }
-import org.openmole.plugin.sampling.combine.CombineSampling
+import org.openmole.plugin.sampling.modifier.ZipSampling
 import org.openmole.ide.misc.widget.{ URL, Helper }
-import org.openmole.ide.core.implementation.sampling.{ Ordering, FiniteUI, SamplingUtils }
+import org.openmole.ide.core.implementation.sampling.{ SamplingUtils }
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
+import org.openmole.ide.core.implementation.panel.NoParameterSamplingPanelUI
 import java.util.{ Locale, ResourceBundle }
 
-import org.openmole.ide.core.implementation.panel.NoParameterSamplingPanelUI
-
-class CombineSamplingDataUI extends SamplingDataUI with Ordering {
-  val name = "Combine"
+class ZipSamplingDataUI2 extends SamplingDataUI {
+  def name = "Zip"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
-    CombineSampling(SamplingUtils.toOrderedSamplings(factorOrSampling): _*)
+    ZipSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling): _*)
   }
 
   def buildPanelUI = new NoParameterSamplingPanelUI(this) {
-    val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-    override lazy val help = new Helper(List(new URL(i18n.getString("combinePermalinkText"),
-      i18n.getString("combinePermalink"))))
+    val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+    override lazy val help = new Helper(List(new URL(i18n.getString("zipPermalinkText"),
+      i18n.getString("zipPermalink"))))
   }
 
-  override def imagePath = "img/combineSampling.png"
+  override def imagePath = "img/zipSampling.png"
 
-  def fatImagePath = "img/combineSampling_fat.png"
-
-  override def isAcceptable(domain: DomainDataUI) = domain match {
-    case f: FiniteUI ⇒ true
-    case _           ⇒ false
-  }
+  def fatImagePath = "img/zipSampling_fat.png"
 
   def isAcceptable(sampling: SamplingDataUI) = true
 
+  override def isAcceptable(domain: DomainDataUI) = true
+
   def preview = name
 
-  def coreClass = classOf[CombineSampling]
+  def coreClass = classOf[ZipSampling]
 }

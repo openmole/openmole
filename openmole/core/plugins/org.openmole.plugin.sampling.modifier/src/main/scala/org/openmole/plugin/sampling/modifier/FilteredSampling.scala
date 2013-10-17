@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2010 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,26 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling
+package org.openmole.plugin.sampling.modifier
 
-import java.io.File
-import java.util.Random
 import org.openmole.core.model.data._
-import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
-import org.openmole.misc.workspace._
-import org.openmole.core.implementation.sampling._
 
-package object combine {
+object FilteredSampling {
 
-  implicit def combineSamplingDecorator(s: Sampling) = new {
-    def +(s2: Sampling) = new CombineSampling(s, s2)
-    def x(s2: Sampling) = new CompleteSampling(s, s2)
-  }
+  def apply(sampling: Sampling, filters: Filter*) =
+    new FilteredSampling(sampling, filters: _*)
 
-  implicit def combineFactorDecorator[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) = new {
-    def x(s: Sampling) = new CompleteSampling(f, s)
-    def +(s2: Sampling) = new CombineSampling(f, s2)
-  }
+}
+
+sealed class FilteredSampling(sampling: Sampling, filters: Filter*) extends Sampling {
+
+  override def inputs = sampling.inputs
+  override def prototypes = sampling.prototypes
+
+  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
+    sampling.build(context).filter(sample ⇒ !filters.exists(!_(Context(sample))))
 
 }
