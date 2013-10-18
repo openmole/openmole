@@ -222,6 +222,22 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     </mole-execs>
   }
 
+  get("/xml/execs/:id") {
+    contentType = "application/xml"
+
+    val pRams = params("id")
+
+    val stats = getMoleStats(pRams)
+    val r = getStatus(pRams)
+
+    <status current={ r }>
+      {
+        for (stat ← stats.keys) <stat id={ stat }>{ stats(stat) }</stat>
+      }
+    </status>
+
+  }
+
   /*get("/xml/start/:id") {
     contentType = "text/html"
 
@@ -246,6 +262,14 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
       ("execResult", exec map { e ⇒ e.start; getStatus(params("id")) } getOrElse "id didn't exist"))
   }
 
+  get("/xml/start/:id") {
+    contentType = "application/xml"
+
+    val exec = getMole(params("id"))
+
+    <moleID status={ exec map { e ⇒ e.start; getStatus(params("id")) } getOrElse ("id doesn't exist") }>{ params("id") }</moleID>
+  }
+
   get("/json/remove/:id") {
     contentType = formats("json")
 
@@ -261,6 +285,18 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         deleteMole(params("id"))
 
         redirect("/execs")
+      }
+    }
+  }
+
+  get("/xml/remove/:id") {
+    contentType = "application/xml"
+
+    new AsyncResult() {
+      val is = Future {
+        val exec = deleteMole(params("id"))
+
+        <moleID status={ if (exec.isDefined) "deleted" else "id doesn't exist" }>{ params("id") }</moleID>
       }
     }
   }

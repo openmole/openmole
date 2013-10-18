@@ -34,8 +34,7 @@ import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
 import java.util.UUID
 import java.sql.SQLException
 
-trait MoleHandling {
-  self: SlickSupport ⇒
+trait MoleHandling { self: SlickSupport ⇒
 
   def system: ActorSystem
 
@@ -216,10 +215,7 @@ trait MoleHandling {
   def getMoleStats(key: String) = {
     moleStats get key getOrElse Stats.empty
   }
-
-  def startMole(key: String) {
-    getMole(key) foreach (_.start)
-  }
+  def startMole(key: String) { getMole(key) foreach (_.start) }
 
   def deleteMole(key: String) = {
     val ret = cachedMoles get key map (_.cancel)
@@ -283,11 +279,9 @@ trait MoleHandling {
 }
 
 object MoleHandling {
-
   object Status {
     val running = "Running"
     val finished = "Finished"
     val stopped = "Stopped"
   }
-
 }
