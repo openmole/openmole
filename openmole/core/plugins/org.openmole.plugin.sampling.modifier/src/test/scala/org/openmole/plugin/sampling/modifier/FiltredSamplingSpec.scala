@@ -18,11 +18,10 @@
 package org.openmole.plugin.sampling.modifier
 
 import org.openmole.core.model.data._
-import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
-import org.openmole.plugin.sampling.filter.Filter
+import org.scalatest._
+import org.scalatest.matchers._
 
-@RunWith(classOf[JUnitRunner])
 class FiltredSamplingSpec extends FlatSpec with ShouldMatchers {
 
   "Filtred sampling" should "remove all value which doesn't match the filters" in {

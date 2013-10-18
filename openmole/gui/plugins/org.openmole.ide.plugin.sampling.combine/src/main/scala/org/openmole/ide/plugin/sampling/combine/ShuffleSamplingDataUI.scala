@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 17/10/13 Romain Reuillon
+ * Copyright (C) 18/10/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,14 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.sampling
+package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.implementation.data.SamplingDataUI
 import org.openmole.ide.core.implementation.serializer.Update
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.core.model.sampling.{ Sampling, Factor }
 import org.openmole.ide.plugin.sampling.modifier._
 
-package object combine {
-
+@deprecated
+class ShuffleSamplingDataUI extends Update[ShuffleSamplingDataUI2] {
+  def update = new ShuffleSamplingDataUI2
 }

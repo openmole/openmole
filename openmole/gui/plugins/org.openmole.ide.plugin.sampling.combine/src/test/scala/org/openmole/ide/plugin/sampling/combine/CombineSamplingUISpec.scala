@@ -23,31 +23,31 @@ import org.scalatest.matchers.ShouldMatchers
 
 class CombineSamplingUISpec extends FlatSpec with ShouldMatchers {
 
-  "ZipSamplingDataUI" should "be unserializable" in {
-    GUISerializer.serializable(getClass.getClassLoader.getResource("zip09.xml")) should equal(true)
+  "ZipSamplingDataUI" should "be unserialisable" in {
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("zip09.xml"))
   }
 
-  "ZipWithNameSamplingDataUI" should "be unserializable" in {
-    GUISerializer.serializable(getClass.getClassLoader.getResource("zipwithname09.xml")) should equal(true)
+  "ZipWithNameSamplingDataUI" should "be unserialisable" in {
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("zipwithname09.xml"))
   }
 
-  "ZipWithIndexSamplingDataUI" should "be unserializable" in {
-    GUISerializer.serializable(getClass.getClassLoader.getResource("zipwithindex09.xml")) should equal(true)
+  "ZipWithIndexSamplingDataUI" should "be unserialisable" in {
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("zipwithindex09.xml"))
   }
 
-  "TakeSamplingDataUI" should "be unserializable" in {
-    GUISerializer.serializable(getClass.getClassLoader.getResource("take09.xml")) should equal(true)
+  "TakeSamplingDataUI" should "be unserialisable" in {
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("take09.xml"))
   }
 
-  "ShuffleSamplingDataUI" should "be unserializable" in {
-    GUISerializer.serializable(getClass.getClassLoader.getResource("shuffle09.xml")) should equal(true)
+  "ShuffleSamplingDataUI" should "be unserialisable" in {
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("shuffle09.xml"))
   }
 
-  "CombineSamplingDataUI" should "be unserializable" in {
-    GUISerializer.serializable(getClass.getClassLoader.getResource("combine09.xml")) should equal(true)
+  "CombineSamplingDataUI" should "be unserialisable" in {
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("combine09.xml"))
   }
 
-  "CompleteSamplingDataUI" should "be unserializable" in {
-    GUISerializer.serializable(getClass.getClassLoader.getResource("complete09.xml")) should equal(true)
+  "CompleteSamplingDataUI" should "be unserialisable" in {
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("complete09.xml"))
   }
 }
