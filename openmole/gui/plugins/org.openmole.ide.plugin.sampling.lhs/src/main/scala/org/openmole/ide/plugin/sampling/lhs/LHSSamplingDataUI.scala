@@ -58,20 +58,6 @@ class LHSSamplingDataUI2 extends SamplingDataUI {
   def preview = "LHS"
 }
 
-class LHSSamplingDataUI(val samples: String = "1") extends SamplingDataUI with Update[LHSSamplingDataUI2] {
-  def update = new LHSSamplingDataUI2()
-
-  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = ???
-
-  def buildPanelUI = ???
-
-  def fatImagePath = ???
-
-  def isAcceptable(sampling: SamplingDataUI) = ???
-
-  def preview = ???
-
-  def coreClass = ???
-
-  def name = ???
+class LHSSamplingDataUI(val samples: String = "1") extends Update[LHSSamplingDataUI2] {
+  def update = new LHSSamplingDataUI2
 }
