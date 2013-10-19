@@ -108,7 +108,7 @@ object BatchEnvironment extends Logger {
   Workspace += (MaxUpdateInterval, "PT10M")
   Workspace += (IncrementUpdateInterval, "PT1M")
 
-  private def runtimeDirLocation =  Workspace.openMOLELocation.getOrElse(throw new InternalProcessingError("openmole.location not set")).child("runtime")
+  private def runtimeDirLocation = Workspace.openMOLELocation.getOrElse(throw new InternalProcessingError("openmole.location not set")).child("runtime")
 
   def runtimeLocation = runtimeDirLocation.child("runtime.tar.gz")
   def JVMLinuxI386Location = runtimeDirLocation.child("jvm-386.tar.gz")
