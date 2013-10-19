@@ -36,6 +36,7 @@ import org.openmole.misc.replication._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.Duration._
 import scala.util.Try
+import org.openmole.misc.osgi
 
 object Workspace {
 
@@ -159,6 +160,7 @@ object Workspace {
     if (s.isEmpty) s
     else Workspace.textEncryptor(password).decrypt(s)
 
+  def openMOLELocation = osgi.openMOLELocation
 }
 
 class Workspace(val location: File) {
