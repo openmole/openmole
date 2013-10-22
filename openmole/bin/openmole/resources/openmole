@@ -1,7 +1,8 @@
 #!/bin/bash
 
 CURDIR=$PWD
-LOCATION=`dirname $0`
+REALPATH=`readlink -f $0`
+LOCATION=`dirname $REALPATH`
 
 (nohup sh $LOCATION/dbserver/bin/openmole-dbserver >/dev/null &) 2>/dev/null
 
@@ -26,7 +27,7 @@ done
 CONFIGDIR=$LOCATION/$RANDOM
 
 
-java -Dosgi.locking=none -Dopenmole.location=${LOCATION} -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} $SPLASHSCREEN -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseG1GC \
+java -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} $SPLASHSCREEN -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseG1GC \
      -jar $LOCATION/plugins/org.eclipse.equinox.launcher.jar \
      -cp $LOCATION/openmole-plugins -gp $LOCATION/openmole-plugins-gui "$@"
 

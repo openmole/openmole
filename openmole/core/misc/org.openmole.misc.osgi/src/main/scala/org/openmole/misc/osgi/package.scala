@@ -27,7 +27,7 @@ package object osgi {
   val OpenMOLELocationProperty = "openmole.location"
 
   def openMOLELocation =
-    Option(System.getProperty(OpenMOLELocationProperty, null))
+    Option(System.getProperty(OpenMOLELocationProperty, null)).map(new File(_))
 
   implicit class BundleDecorator(b: Bundle) {
 
@@ -50,7 +50,7 @@ package object osgi {
 
       if (ref)
         openMOLELocation match {
-          case Some(oMLoc) ⇒ new File(new File(oMLoc), location)
+          case Some(oMLoc) ⇒ new File(oMLoc, location)
           case None        ⇒ new File(location)
         }
       else new File(location)

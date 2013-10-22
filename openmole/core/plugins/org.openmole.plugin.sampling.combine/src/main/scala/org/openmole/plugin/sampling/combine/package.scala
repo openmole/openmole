@@ -30,23 +30,11 @@ package object combine {
   implicit def combineSamplingDecorator(s: Sampling) = new {
     def +(s2: Sampling) = new CombineSampling(s, s2)
     def x(s2: Sampling) = new CompleteSampling(s, s2)
-    def zip(s2: Sampling) = new ZipSampling(s, s2)
-    def zipWithIndex(index: Prototype[Int]) = new ZipWithIndexSampling(s, index)
-    def take(n: Int) = new TakeSampling(s, n)
-    def shuffle = new ShuffleSampling(s)
-  }
-
-  implicit def zipWithNameFactorDecorator(factor: Factor[File, Domain[File] with Discrete[File]]) = new {
-    def zipWithName(name: Prototype[String]) = new ZipWithNameSampling(factor, name)
   }
 
   implicit def combineFactorDecorator[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) = new {
     def x(s: Sampling) = new CompleteSampling(f, s)
     def +(s2: Sampling) = new CombineSampling(f, s2)
-    def zip(s2: Sampling) = new ZipSampling(f, s2)
-    def zipWithIndex(index: Prototype[Int]) = new ZipWithIndexSampling(f, index)
-    def take(n: Int) = new TakeSampling(f, n)
-    def shuffle = new ShuffleSampling(f)
   }
 
 }

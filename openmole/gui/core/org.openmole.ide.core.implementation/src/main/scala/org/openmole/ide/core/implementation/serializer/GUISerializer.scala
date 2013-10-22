@@ -63,8 +63,10 @@ object GUISerializer extends Logger {
 
   implicit def urlToFile(url: URL): File = new File(url.toURI)
 
+  def unserialise(url: URL) = instance.read(url)
+
   def serializable(url: URL): Boolean = try {
-    instance.read(url)
+    unserialise(url)
     true
   }
   catch {

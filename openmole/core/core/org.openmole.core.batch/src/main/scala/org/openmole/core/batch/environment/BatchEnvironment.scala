@@ -87,9 +87,6 @@ object BatchEnvironment extends Logger {
   }
 
   val MemorySizeForRuntime = new ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime")
-  val RuntimeLocation = new ConfigurationLocation("BatchEnvironment", "RuntimeLocation")
-  val JVMLinuxI386Location = new ConfigurationLocation("BatchEnvironment", "JVMLinuxI386Location")
-  val JVMLinuxX64Location = new ConfigurationLocation("BatchEnvironment", "JVMLinuxX64Location")
 
   val CheckInterval = new ConfigurationLocation("BatchEnvironment", "CheckInterval")
 
@@ -111,9 +108,11 @@ object BatchEnvironment extends Logger {
   Workspace += (MaxUpdateInterval, "PT10M")
   Workspace += (IncrementUpdateInterval, "PT1M")
 
-  Workspace += (RuntimeLocation, () ⇒ new File(new File(Workspace.location, "runtime"), "runtime.tar.gz").getAbsolutePath)
-  Workspace += (JVMLinuxI386Location, () ⇒ new File(new File(Workspace.location, "runtime"), "jvm-386.tar.gz").getAbsolutePath)
-  Workspace += (JVMLinuxX64Location, () ⇒ new File(new File(Workspace.location, "runtime"), "jvm-x64.tar.gz").getAbsolutePath)
+  private def runtimeDirLocation = Workspace.openMOLELocation.getOrElse(throw new InternalProcessingError("openmole.location not set")).child("runtime")
+
+  @transient lazy val runtimeLocation = runtimeDirLocation.child("runtime.tar.gz")
+  @transient lazy val JVMLinuxI386Location = runtimeDirLocation.child("jvm-386.tar.gz")
+  @transient lazy val JVMLinuxX64Location = runtimeDirLocation.child("jvm-x64.tar.gz")
 
   Workspace += (MemorySizeForRuntime, "512")
   Workspace += (CheckInterval, "PT1M")
@@ -206,9 +205,9 @@ trait BatchEnvironment extends Environment { env ⇒
 
   def executionJob(job: IJob) = new BatchExecutionJob(this, job)
 
-  @transient lazy val runtime = new File(Workspace.preference(BatchEnvironment.RuntimeLocation))
-  @transient lazy val jvmLinuxI386 = new File(Workspace.preference(BatchEnvironment.JVMLinuxI386Location))
-  @transient lazy val jvmLinuxX64 = new File(Workspace.preference(BatchEnvironment.JVMLinuxX64Location))
+  def runtime = BatchEnvironment.runtimeLocation
+  def jvmLinuxI386 = BatchEnvironment.JVMLinuxI386Location
+  def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
 
   @transient lazy val jobServices = {
     val jobServices = allJobServices

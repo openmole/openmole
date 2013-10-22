@@ -23,6 +23,8 @@ import org.openmole.ide.core.implementation.sampling.{ Ordering, FiniteUI, Sampl
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 import java.util.{ Locale, ResourceBundle }
 
+import org.openmole.ide.core.implementation.panel.NoParameterSamplingPanelUI
+
 class CombineSamplingDataUI extends SamplingDataUI with Ordering {
   val name = "Combine"
 
@@ -30,7 +32,7 @@ class CombineSamplingDataUI extends SamplingDataUI with Ordering {
     CombineSampling(SamplingUtils.toOrderedSamplings(factorOrSampling): _*)
   }
 
-  def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
+  def buildPanelUI = new NoParameterSamplingPanelUI(this) {
     val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
     override lazy val help = new Helper(List(new URL(i18n.getString("combinePermalinkText"),
       i18n.getString("combinePermalink"))))
