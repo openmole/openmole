@@ -223,8 +223,7 @@ object Assembly {
 
   def expandToDependencies(pr: ProjectReference): Project.Initialize[Seq[ProjectReference]] = {
     val r = (thisProject in pr) { _.dependencies.map(_.project) }
-    val r2 = Project.bind(r) { ret ⇒ Project.Initialize.join(ret map expandToDependencies) }
-    val r3 = Project.bind(r2) { ret ⇒ r(first ⇒ pr +: ret.flatten) }
+    val r3 = Project.bind(Project.bind(r) { ret ⇒ Project.Initialize.join(ret map expandToDependencies) }) { ret ⇒ r(first ⇒ pr +: ret.flatten) }
     r3
   }
 
