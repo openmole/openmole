@@ -1,13 +1,14 @@
 package org.openmole.buildsystem
 
-import aQute.lib.osgi.Builder
+import aQute.bnd.osgi.Builder
+import aQute.bnd.osgi.Constants._
 import java.util.Properties
 import sbt._
 import com.typesafe.sbt.osgi.OsgiManifestHeaders
 import java.io.{ FileInputStream, FileOutputStream }
 import resource._
 
-object Osgi {
+/*object Osgi {
 
   def seqToStrOpt[A](seq: Seq[A])(f: A ⇒ String): Option[String] =
     if (seq.isEmpty) None else Some(seq map f mkString ",")
@@ -70,4 +71,4 @@ object Osgi {
     seqToStrOpt(embeddedJars)(_.getName) map (".," + _)
 
   private def id(s: String) = s
-}
+}*/ 
