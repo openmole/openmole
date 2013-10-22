@@ -216,7 +216,7 @@ object Assembly {
     val ret2 = Project.bind(ret) { r ⇒
       val x = r.map(expandToDependencies)
       val y = Project.Initialize.join(x)
-      y { st ⇒ val ret = st.flatten.toSet.toSeq; println(ret.intersect(r)); ret } //make sure all references are unique
+      y { _.flatten.toSet.toSeq } //make sure all references are unique
     }
     ret2
   }
@@ -224,7 +224,7 @@ object Assembly {
   def expandToDependencies(pr: ProjectReference): Project.Initialize[Seq[ProjectReference]] = {
     val r = (thisProject in pr) { _.dependencies.map(_.project) }
     val r2 = Project.bind(r) { ret ⇒ Project.Initialize.join(ret map expandToDependencies) }
-    val r3 = Project.bind(r2) { ret ⇒ r(first ⇒ pr +: (first ++ ret.flatten)) }
+    val r3 = Project.bind(r2) { ret ⇒ r(first ⇒ pr +: ret.flatten) }
     r3
   }
 
@@ -249,7 +249,7 @@ object Assembly {
 
   def sendBundles(bundles: Project.Initialize[Seq[ProjectReference]], to: String): Project.Initialize[Task[Set[(File, String)]]] = Project.bind(bundles) { projs ⇒
     require(projs.nonEmpty)
-    val seqOTasks: Project.Initialize[Seq[Task[Set[(File, String)]]]] = Project.Initialize.join(projs.map(p ⇒ (bundle in p, thisProject in p) map { (f, bs) ⇒
+    val seqOTasks: Project.Initialize[Seq[Task[Set[(File, String)]]]] = Project.Initialize.join(projs.map(p ⇒ (bundle in p) map { f ⇒
       Set(f -> to)
     }))
     seqOTasks { seq ⇒ seq.reduceLeft[Task[Set[(File, String)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }
