@@ -1,6 +1,6 @@
 package root
 
-import sbt._
+/*import sbt._
 import Keys._
 import org.clapper.sbt.izpack.IzPack
 import org.clapper.sbt.izpack.IzPackSection
@@ -25,4 +25,4 @@ object Installer extends Defaults {
       ) ++ (Set(tarGz getOrElse "assembly", "jvm-386", "jvm-x64") map (n ⇒ target / (n + ".tar.gz") -> "runtime"))
     }
   )
-}
+} */
