@@ -22,7 +22,7 @@ import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.data.{ DomainDataUI, CheckData }
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.{ ContentComboBox, PluginPanel }
 import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
@@ -71,21 +71,15 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
 
   class FactorPrototypeDialog(connectorWidget: SamplingConnectorWidget) extends PluginPanel("wrap") {
     preferredSize = new Dimension(150, 100)
-    val protoCombo = new MyComboBox(availablePrototypes)
-    contents += new Label("Prototype to be applied on the domain")
-    contents += protoCombo
 
-    def content = protoCombo.selection.item
-
-    connectorWidget.factorProxyUI match {
-      case Some(f: IFactorProxyUI) ⇒
-        f.dataUI.prototype match {
-          case Some(p: PrototypeDataProxyUI) ⇒
-            protoCombo.selection.item = p
-          case _ ⇒
-        }
-      case _ ⇒
+    def sel = connectorWidget.factorProxyUI match {
+      case Some(f: IFactorProxyUI) ⇒ println("proto! " + f.dataUI.prototype); f.dataUI.prototype
+      case _                       ⇒ None
     }
+
+    val protoCombo = ContentComboBox(availablePrototypes, sel)
+    contents += new Label("Prototype to be applied on the domain")
+    contents += protoCombo.widget
 
     def availablePrototypes =
       connectorWidget.factorProxyUI match {
@@ -97,13 +91,13 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
 
     def display: Unit = {
       StatusBar().clear
-      protoCombo.peer.setModel(MyComboBox.newConstantModel(availablePrototypes))
+      protoCombo.setModel(availablePrototypes, sel)
       if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(this) {
         verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
       }.peer,
         "Prototype")).equals(NotifyDescriptor.OK_OPTION)) {
         connectorWidget.factorProxyUI match {
-          case Some(f: IFactorProxyUI) ⇒ f.dataUI.prototype = Some(protoCombo.selection.item)
+          case Some(f: IFactorProxyUI) ⇒ f.dataUI.prototype = protoCombo.widget.selection.item.content
           case _                       ⇒
         }
         connectorWidget.update

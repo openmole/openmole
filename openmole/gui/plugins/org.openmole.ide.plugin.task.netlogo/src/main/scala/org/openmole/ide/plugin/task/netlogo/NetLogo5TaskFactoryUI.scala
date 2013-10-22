@@ -21,11 +21,12 @@ import org.openmole.core.model.task.ITask
 import org.openmole.plugin.task.netlogo5.NetLogo5Task
 import org.openmole.ide.core.implementation.builder.{ PuzzleUIMap, SceneFactory }
 import org.openmole.ide.core.implementation.factory.TaskFactoryUI
+import org.openmole.ide.misc.tools.util.Converters._
 
 class NetLogo5TaskFactoryUI extends TaskFactoryUI {
   override def toString = "NetLogo5"
 
-  def buildDataUI = new NetLogo5TaskDataUI
+  def buildDataUI = new NetLogo5TaskDataUI2
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[NetLogo5Task](task)
@@ -33,7 +34,7 @@ class NetLogo5TaskFactoryUI extends TaskFactoryUI {
       case Right(r) ⇒ true
       case Left(l)  ⇒ false
     }
-    uiMap.task(t, x ⇒ new NetLogo4TaskDataUI(t.name,
+    uiMap.task(t, x ⇒ new NetLogo5TaskDataUI2(t.name,
       embededWS,
       t.scriptPath,
       t.launchingCommands.mkString("\n"),

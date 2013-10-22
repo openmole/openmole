@@ -18,13 +18,13 @@ object Task extends PluginDefaults {
   lazy val moletask = OsgiProject("moletask") dependsOn (Core.implementation, base.Core.model, base.Misc.replication % "test")
 
   lazy val netlogo = OsgiProject("netlogo") dependsOn (Core.implementation, base.Core.model, Osgi.netlogo4,
-    base.plugin.Task.netLogo4, base.plugin.Task.netLogo5, Osgi.netlogo5, base.Misc.replication % "test")
+    base.plugin.Task.netLogo4, base.plugin.Task.netLogo5, Osgi.netlogo5, Miscellaneous.tools, base.Misc.replication % "test")
 
   lazy val stat = OsgiProject("stat") dependsOn (Core.implementation, base.plugin.Task.stat, base.Core.model, base.Misc.replication % "test")
 
   lazy val tools = OsgiProject("tools") dependsOn (Core.implementation, base.plugin.Task.tools, base.Core.model, base.Misc.replication % "test")
 
   lazy val systemexec = OsgiProject("systemexec") dependsOn (Core.implementation, base.plugin.Task.systemexec,
-    base.Core.model, base.Misc.replication % "test")
+    base.Core.model, Miscellaneous.tools, base.Misc.replication % "test")
 
 }

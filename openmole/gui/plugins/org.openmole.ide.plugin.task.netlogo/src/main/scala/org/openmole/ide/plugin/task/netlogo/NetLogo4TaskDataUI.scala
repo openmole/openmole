@@ -13,7 +13,9 @@ import scala.collection.JavaConversions._
 import scala.io.Source
 import java.io.File
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
+import org.openmole.ide.core.implementation.serializer.Update
 
+@deprecated
 case class NetLogo4TaskDataUI(name: String = "",
                               workspaceEmbedded: Boolean = false,
                               nlogoPath: String = "",
@@ -23,8 +25,29 @@ case class NetLogo4TaskDataUI(name: String = "",
                               resources: List[String] = List(),
                               val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
                               val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                              val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
+                              val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[NetLogo4TaskDataUI2] {
+  def update = new NetLogo4TaskDataUI2(name,
+    workspaceEmbedded,
+    nlogoPath,
+    lauchingCommands,
+    prototypeMappingInput.zipWithIndex.map { case (t, i) ⇒ (t._1, t._2, i) },
+    prototypeMappingOutput.zipWithIndex.map { case (t, i) ⇒ (t._1, t._2, i) },
+    resources,
+    inputs,
+    outputs,
+    inputParameters)
+}
 
+case class NetLogo4TaskDataUI2(name: String = "",
+                               workspaceEmbedded: Boolean = false,
+                               nlogoPath: String = "",
+                               lauchingCommands: String = "",
+                               prototypeMappingInput: List[(PrototypeDataProxyUI, String, Int)] = List(),
+                               prototypeMappingOutput: List[(String, PrototypeDataProxyUI, Int)] = List(),
+                               resources: List[String] = List(),
+                               val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                               val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                               val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
   def coreObject(plugins: PluginSet) = util.Try {
     val builder = NetLogo4Task(
       name,
@@ -36,10 +59,10 @@ case class NetLogo4TaskDataUI(name: String = "",
       r ⇒ builder addResource (new File(r))
     }
     prototypeMappingInput.foreach {
-      case (p, n) ⇒ builder addNetLogoInput (p.dataUI.coreObject.get, n)
+      case (p, n, _) ⇒ builder addNetLogoInput (p.dataUI.coreObject.get, n)
     }
     prototypeMappingOutput.foreach {
-      case (n, p) ⇒ builder addNetLogoOutput (n, p.dataUI.coreObject.get)
+      case (n, p, _) ⇒ builder addNetLogoOutput (n, p.dataUI.coreObject.get)
     }
     builder.toTask
   }
@@ -54,7 +77,7 @@ case class NetLogo4TaskDataUI(name: String = "",
 
   def doClone(ins: Seq[PrototypeDataProxyUI],
               outs: Seq[PrototypeDataProxyUI],
-              params: Map[PrototypeDataProxyUI, String]) = new NetLogo4TaskDataUI(name,
+              params: Map[PrototypeDataProxyUI, String]) = new NetLogo4TaskDataUI2(name,
     workspaceEmbedded,
     nlogoPath,
     lauchingCommands,

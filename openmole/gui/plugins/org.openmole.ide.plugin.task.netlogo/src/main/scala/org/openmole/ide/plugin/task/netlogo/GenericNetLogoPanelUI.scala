@@ -44,8 +44,8 @@ abstract class GenericNetLogoPanelUI(
     nlogoPath: String,
     workspaceEmbedded: Boolean,
     lauchingCommands: String,
-    prototypeMappingInput: List[(PrototypeDataProxyUI, String)],
-    prototypeMappingOutput: List[(String, PrototypeDataProxyUI)],
+    prototypeMappingInput: List[(PrototypeDataProxyUI, String, Int)],
+    prototypeMappingOutput: List[(String, PrototypeDataProxyUI, Int)],
     resources: List[String])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("") with TaskPanelUI {
 
   val nlogoTextField = new ChooseFileTextField(nlogoPath,
@@ -60,15 +60,14 @@ abstract class GenericNetLogoPanelUI(
 
   val launchingCommandTextArea = new TextArea(lauchingCommands)
 
-  var multiStringProto: Option[MultiTwoCombos[String, PrototypeDataProxyUI]] = None
-  var multiProtoString: Option[MultiTwoCombos[PrototypeDataProxyUI, String]] = None
+  var multiStringProto = new MultiTwoCombos[String, PrototypeDataProxyUI]("", List(), List(), "with", Seq())
+  var multiProtoString = new MultiTwoCombos[PrototypeDataProxyUI, String]("", List(), List(), "with", Seq())
   val resourcesMultiTextField = new MultiChooseFileTextField("",
     resources.map {
       r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r))
     },
     selectionMode = SelectionMode.FilesAndDirectories,
     minus = CLOSE_IF_EMPTY)
-  if (resources.isEmpty) resourcesMultiTextField.removeAllRows
 
   private def updateGlobals = {
     _globalsReporters.single() = None
@@ -120,14 +119,12 @@ abstract class GenericNetLogoPanelUI(
       contents += resourcesMultiTextField.panel
     }))
 
-  def emptyMapping = (new PluginPanel(""), new PluginPanel(""))
-
-  def buildMultis: (Component, Component) =
+  def buildMultis: (Component, Component) = {
     try {
       globalsReporters match {
         case Some((globals, reporters)) ⇒
           if (!(globals ++ reporters).isEmpty && !comboContent.isEmpty) {
-            multiStringProto = Some(new MultiTwoCombos[String, PrototypeDataProxyUI](
+            multiStringProto = new MultiTwoCombos[String, PrototypeDataProxyUI](
               "",
               globals ++ reporters,
               comboContent,
@@ -135,9 +132,9 @@ abstract class GenericNetLogoPanelUI(
               prototypeMappingOutput.map {
                 m ⇒ new TwoCombosPanel(globals, comboContent, "with", new TwoCombosData(Some(m._1), Some(m._2)))
               },
-              minus = CLOSE_IF_EMPTY, insets = SMALL))
+              minus = CLOSE_IF_EMPTY, insets = SMALL)
 
-            multiProtoString = Some(new MultiTwoCombos[PrototypeDataProxyUI, String](
+            multiProtoString = new MultiTwoCombos[PrototypeDataProxyUI, String](
               "",
               comboContent,
               globals,
@@ -145,18 +142,17 @@ abstract class GenericNetLogoPanelUI(
               prototypeMappingInput.map {
                 m ⇒ new TwoCombosPanel(comboContent, globals, "with", new TwoCombosData(Some(m._1), Some(m._2)))
               },
-              minus = CLOSE_IF_EMPTY, insets = SMALL))
+              minus = CLOSE_IF_EMPTY, insets = SMALL)
           }
         case None ⇒
       }
-      if (multiStringProto.isDefined) (multiProtoString.get.panel, multiStringProto.get.panel)
-      else emptyMapping
     }
     catch {
       case e: Throwable ⇒
         StatusBar().block(e.getMessage, stack = e.getStackTraceString)
-        emptyMapping
     }
+    (multiProtoString.panel, multiStringProto.panel)
+  }
 
   def comboContent: List[PrototypeDataProxyUI] = Proxies.instance.prototypes.toList
 

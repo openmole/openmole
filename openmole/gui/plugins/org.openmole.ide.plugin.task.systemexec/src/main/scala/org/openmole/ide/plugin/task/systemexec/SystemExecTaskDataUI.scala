@@ -12,7 +12,10 @@ import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.plugin.task.systemexec.SystemExecTask
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
+import org.openmole.ide.core.implementation.serializer.Update
+import org.openmole.ide.misc.tools.util.Converters._
 
+@deprecated
 class SystemExecTaskDataUI(val name: String = "",
                            val workdir: String = "",
                            val launchingCommands: String = "",
@@ -22,7 +25,31 @@ class SystemExecTaskDataUI(val name: String = "",
                            val variables: List[PrototypeDataProxyUI] = List.empty,
                            val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
                            val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                           val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
+                           val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[SystemExecTaskDataUI2] {
+  def update = new SystemExecTaskDataUI2(name,
+    workdir,
+    launchingCommands,
+    resources,
+    inputMap,
+    outputMap,
+    variables,
+    inputs,
+    outputs,
+    inputParameters)
+}
+
+class SystemExecTaskDataUI2(val name: String = "",
+                            val workdir: String = "",
+                            val launchingCommands: String = "",
+                            val resources: List[String] = List.empty,
+                            val inputMap: List[(PrototypeDataProxyUI, String, Int)] = List.empty,
+                            val outputMap: List[(String, PrototypeDataProxyUI, Int)] = List.empty,
+                            val variables: List[PrototypeDataProxyUI] = List.empty,
+                            val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                            val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                            val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty,
+                            val stdOut: Option[PrototypeDataProxyUI] = None,
+                            val stdErr: Option[PrototypeDataProxyUI] = None) extends TaskDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
     val syet = SystemExecTask(name, directory = workdir)(plugins)
@@ -48,7 +75,7 @@ class SystemExecTaskDataUI(val name: String = "",
 
   def doClone(ins: Seq[PrototypeDataProxyUI],
               outs: Seq[PrototypeDataProxyUI],
-              params: Map[PrototypeDataProxyUI, String]) = new SystemExecTaskDataUI(name,
+              params: Map[PrototypeDataProxyUI, String]) = new SystemExecTaskDataUI2(name,
     workdir,
     launchingCommands,
     resources,
@@ -57,6 +84,8 @@ class SystemExecTaskDataUI(val name: String = "",
     Proxies.instance.filter(variables),
     ins,
     outs,
-    params)
+    params,
+    stdOut,
+    stdErr)
 
 }

@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.source.file
 
-import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 import swing.Label
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.ide.misc.widget.Helper
@@ -27,21 +27,22 @@ import java.util.{ Locale, ResourceBundle }
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import java.io.{ FileReader, File }
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos.{ TwoCombosData, TwoCombosPanel }
-import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import java.awt.Dimension
 import org.openmole.ide.core.implementation.panelsettings.SourcePanelUI
+import org.openmole.ide.misc.tools.util.Converters
+import org.openmole.ide.misc.tools.util.Converters._
 
-class CSVSourcePanelUI(dataUI: CSVSourceDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("wrap") with SourcePanelUI {
+class CSVSourcePanelUI(dataUI: CSVSourceDataUI2)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("wrap") with SourcePanelUI {
 
   val csvTextField = new CSVChooseFileTextField(dataUI.csvFilePath)
-  var comboMulti: Option[MultiTwoCombos[String, PrototypeDataProxyUI]] = None
+  var comboMulti = new MultiTwoCombos[String, PrototypeDataProxyUI]("", List(), List(), "with", Seq())
 
   val mainPanel = new PluginPanel("wrap") {
     contents += new PluginPanel("wrap 2") {
       contents += new Label("CSV file")
       contents += (csvTextField, "span,growx")
     }
-    contents += (comboMulti.getOrElse(new Label("<html><i>Nothing to be mapped yet</html></i>")), "span 2")
+    contents += comboMulti
     //preferredSize = new Dimension(250, 100)
   }
   readFile(dataUI.csvFilePath)
@@ -57,38 +58,33 @@ class CSVSourcePanelUI(dataUI: CSVSourceDataUI)(implicit val i18n: ResourceBundl
     if (new File(s).isFile) {
       val reader = new CSVReader(new FileReader(s))
       val headers = reader.readNext
-      comboMulti =
-        Some(new MultiTwoCombos(
-          "Map columns to prototypes",
-          headers.toList,
-          comboContent,
-          "with",
-          dataUI.prototypeMapping.map {
-            pm ⇒
-              new TwoCombosPanel(
-                headers.toList,
-                comboContent,
-                "with",
-                new TwoCombosData(Some(pm._1), Some(pm._2)))
-          }))
-      help.add(comboMulti.get, new Help(i18n.getString("mapping")))
+      comboMulti = new MultiTwoCombos(
+        "Map columns to prototypes",
+        headers.toList,
+        comboContent,
+        "with",
+        dataUI.prototypeMapping.map {
+          pm ⇒
+            new TwoCombosPanel(
+              headers.toList,
+              comboContent,
+              "with",
+              new TwoCombosData(Some(pm._1), Some(pm._2)))
+        })
+      help.add(comboMulti, new Help(i18n.getString("mapping")))
       mainPanel.contents.remove(1)
-      mainPanel.contents += comboMulti.get.panel
+      mainPanel.contents += comboMulti.panel
       reader.close
     }
   }
 
-  def saveContent(name: String) = {
-    if (comboMulti.isDefined)
-      new CSVSourceDataUI(name,
-        csvTextField.text,
-        comboMulti.get.content.map {
-          c ⇒ (c.comboValue1.get, c.comboValue2.get)
-        })
-    else new CSVSourceDataUI(name, csvTextField.text, List[(String, PrototypeDataProxyUI)]())
-  }
+  def saveContent(name: String) = new CSVSourceDataUI2(name,
+    csvTextField.text,
+    Converters.flattenTuple2Options(comboMulti.content.map {
+      c ⇒ (c.comboValue1, c.comboValue2)
+    }))
 
-  def comboContent: List[PrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.prototypes.toList
+  def comboContent: List[PrototypeDataProxyUI] = Proxies.instance.prototypes.toList
 
   override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 

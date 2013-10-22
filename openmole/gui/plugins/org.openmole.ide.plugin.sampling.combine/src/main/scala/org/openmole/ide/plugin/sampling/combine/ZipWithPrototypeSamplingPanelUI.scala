@@ -16,7 +16,7 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.misc.widget.{ Help, PluginPanel }
+import org.openmole.ide.misc.widget.{ ContentComboBox, Help, PluginPanel }
 import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import swing.MyComboBox
 import java.util.{ Locale, ResourceBundle }
@@ -33,16 +33,13 @@ class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI)(im
     }
   }
 
-  val protoCombo = new MyComboBox(availablePrototypes)
-  dataUI.prototype match {
-    case Some(p: PrototypeDataProxyUI) ⇒ protoCombo.selection.item = p
-    case _                             ⇒
-  }
+  val protoCombo = ContentComboBox(availablePrototypes, dataUI.prototype)
+
   val components = List(("", new PluginPanel("") {
-    contents += protoCombo
+    contents += protoCombo.widget
   }))
 
-  add(protoCombo, new Help(i18n.getString("zipPrototype")))
+  add(protoCombo.widget, new Help(i18n.getString("zipPrototype")))
 
   def saveContent = dataUI match {
     case i: ZipWithIndexSamplingDataUI ⇒ new ZipWithIndexSamplingDataUI(proto)
@@ -50,8 +47,5 @@ class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI)(im
     case _                             ⇒ throw new UserBadDataError("The data for the 'Zip with' Sampling is not correct ")
   }
 
-  def proto = protoCombo.selection.item match {
-    case p: PrototypeDataProxyUI ⇒ Some(p)
-    case _                       ⇒ None
-  }
+  def proto = protoCombo.widget.selection.item.content
 }
