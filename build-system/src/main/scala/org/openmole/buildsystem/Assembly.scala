@@ -224,8 +224,7 @@ object Assembly {
   //recursively explores the dependency tree of pr and adds all dependencies to the list of projects to be copied
   def expandToDependencies(pr: ProjectReference): Def.Initialize[Seq[ProjectReference]] = {
     val r = (thisProject in pr) { _.dependencies.map(_.project) }
-    val r2 = Def.bind(r) { ret ⇒ Def.Initialize.join(ret map expandToDependencies) }
-    val r3 = Def.bind(r2) { ret ⇒ r(first ⇒ pr +: ret.flatten) }
+    val r3 = Def.bind(Def.bind(r) { ret ⇒ Def.Initialize.join(ret map expandToDependencies) }) { ret ⇒ r(first ⇒ pr +: ret.flatten) }
     r3
   }
 
