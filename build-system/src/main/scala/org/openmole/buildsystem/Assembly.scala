@@ -208,10 +208,24 @@ object Assembly {
   def projFilter[T](s: Seq[ProjectReference], key: SettingKey[T], filter: T ⇒ Boolean): Project.Initialize[Seq[ProjectReference]] = {
     // (key in p) ? returns Initialize[Option[T]]
     // Project.Initialize.join takes a Seq[Initialize[_]] and gives back an Initialize[Seq[_]]
-    Project.Initialize.join(s map { p ⇒ (key in p).?(i ⇒ i -> p) })(_ filter {
+    val ret = Project.Initialize.join(s map { p ⇒ (key in p).?(i ⇒ i -> p) })(_ filter {
       case (None, _)    ⇒ false
       case (Some(v), _) ⇒ filter(v)
     })(_ map { _._2 })
+
+    val ret2 = Project.bind(ret) { r ⇒
+      val x = r.map(expandToDependencies)
+      val y = Project.Initialize.join(x)
+      y { st ⇒ val ret = st.flatten.toSet.toSeq; println(ret.intersect(r)); ret } //make sure all references are unique
+    }
+    ret2
+  }
+
+  def expandToDependencies(pr: ProjectReference): Project.Initialize[Seq[ProjectReference]] = {
+    val r = (thisProject in pr) { _.dependencies.map(_.project) }
+    val r2 = Project.bind(r) { ret ⇒ Project.Initialize.join(ret map expandToDependencies) }
+    val r3 = Project.bind(r2) { ret ⇒ r(first ⇒ pr +: (first ++ ret.flatten)) }
+    r3
   }
 
   implicit def ProjRefs2RichProjectSeq(s: Seq[ProjectReference]) = new RichProjectSeq(Project.value(s))
@@ -235,7 +249,9 @@ object Assembly {
 
   def sendBundles(bundles: Project.Initialize[Seq[ProjectReference]], to: String): Project.Initialize[Task[Set[(File, String)]]] = Project.bind(bundles) { projs ⇒
     require(projs.nonEmpty)
-    val seqOTasks: Project.Initialize[Seq[Task[Set[(File, String)]]]] = Project.Initialize.join(projs.map(p ⇒ (bundle in p) map { f ⇒ Set(f -> to) }))
+    val seqOTasks: Project.Initialize[Seq[Task[Set[(File, String)]]]] = Project.Initialize.join(projs.map(p ⇒ (bundle in p, thisProject in p) map { (f, bs) ⇒
+      Set(f -> to)
+    }))
     seqOTasks { seq ⇒ seq.reduceLeft[Task[Set[(File, String)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }
   }
 }
