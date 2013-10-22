@@ -7,7 +7,7 @@ import OMKeys._
 import java.util.zip.GZIPOutputStream
 import org.kamranzafar.jtar.{ TarEntry, TarOutputStream }
 import resource._
-import java.io.{ BufferedOutputStream, BufferedInputStream, FileOutputStream }
+import java.io.{ BufferedOutputStream, FileOutputStream }
 import scala.io.Source
 import sbt.Path._
 import com.typesafe.sbt.osgi.OsgiKeys._
