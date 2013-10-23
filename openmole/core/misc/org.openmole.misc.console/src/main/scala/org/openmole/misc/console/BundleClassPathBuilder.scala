@@ -238,6 +238,7 @@ object BundleClassPathBuilder {
   //   */
   //  def fromBundle(bundle: Bundle): List[AbstractFile] = {
   //    require(bundle != null, "Bundle should not be null")
+
   //
   //    // add the bundle itself
   //    val files = ListBuffer(create(bundle))
