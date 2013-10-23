@@ -39,12 +39,12 @@ trait ExternalTask extends Task {
   def outputFiles: Iterable[(String, Prototype[File])]
   def resources: Iterable[(File, String, Boolean, OS)]
 
-  protected class ToPut(val file: File, val name: String, val link: Boolean)
-  protected class ToGet(val name: String, val file: File)
+  protected case class ToPut(file: File, name: String, link: Boolean)
+  protected case class ToGet(name: String, file: File)
 
   protected def listInputFiles(context: Context): Iterable[ToPut] =
     inputFiles.map {
-      case (prototype, name, link) ⇒ new ToPut(context(prototype), VariableExpansion(context, name), link)
+      case (prototype, name, link) ⇒ ToPut(context(prototype), VariableExpansion(context, name), link)
     }
 
   protected def listResources(context: Context, tmpDir: File): Iterable[ToPut] = {
@@ -62,7 +62,7 @@ trait ExternalTask extends Task {
       }
 
     selectedOS.map {
-      case (file, name, link, _) ⇒ new ToPut(file, name, link)
+      case (file, name, link, _) ⇒ ToPut(file, name, link)
     }
   }
 
@@ -74,7 +74,7 @@ trait ExternalTask extends Task {
           val file = new File(localDir, fileName)
 
           val fileVariable = Variable(prototype, file)
-          new ToGet(fileName, file) -> fileVariable
+          ToGet(fileName, file) -> fileVariable
       }
     context ++ files.map { _._2 } -> files.map { _._1 }
   }

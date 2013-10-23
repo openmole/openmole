@@ -4,7 +4,9 @@ rmdir /s /q "configuration\org.eclipse.osgi"
 
 start dbserver\bin\openmole-dbserver.bat
 
-set ran=%random%
+mkdir "%UserProfile%\.openmole\.tmp\"
+
+set ran="%UserProfile%\.openmole\.tmp\%random%"
 
 set PWD=%~dp0
 
