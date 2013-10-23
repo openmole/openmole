@@ -216,7 +216,7 @@ object Assembly {
     lazy val ret2 = Project.bind(ret) { r ⇒
       val x = r.map(expandToDependencies)
       val y = Project.Initialize.join(x)
-      y { st ⇒ val ret = st.flatten.toSet.toSeq; println(ret.intersect(r)); ret } //make sure all references are unique
+      y { _.flatten.toSet.toSeq } //make sure all references are unique
     }
     if (intransitive) ret else ret2
   }

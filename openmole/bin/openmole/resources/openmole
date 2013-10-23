@@ -23,8 +23,8 @@ do
   if [[ $ARG == "-c" || $ARG == "-ws" ]]; then SPLASHSCREEN=""; fi
 done
 
-
-CONFIGDIR=$LOCATION/$RANDOM
+mkdir -p $HOME/.openmole/.tmp/
+CONFIGDIR=$HOME/.openmole/.tmp/$RANDOM
 
 
 java -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} $SPLASHSCREEN -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseG1GC \
