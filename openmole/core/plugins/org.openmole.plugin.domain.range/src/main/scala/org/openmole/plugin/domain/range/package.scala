@@ -45,6 +45,7 @@ package object range {
   implicit class RangeDomainDecorator[T](r: Range[T]) {
     def step(s: String) = StepRange[T](r, s)
     def size(s: String) = SizeRange[T](r, s)
+    def logSteps(s: String)(implicit l: Log[T]) = LogRange[T](r, s)
   }
 
 }

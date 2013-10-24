@@ -34,7 +34,7 @@ class DoubleLogarithmRangeDataUI(val min: String = "0.0",
   def coreObject = util.Try {
     if (min.isEmpty || max.isEmpty || !step.isDefined)
       throw new UserBadDataError("Min, Max ant Step values are required for defining a Logarithm Range Domain")
-    else new LogRange[Double](min, max, step.get)
+    else new Range[Double](min, max) logSteps step.get
   }
 
   def coreClass = classOf[DoubleLogarithmRangeDataUI]

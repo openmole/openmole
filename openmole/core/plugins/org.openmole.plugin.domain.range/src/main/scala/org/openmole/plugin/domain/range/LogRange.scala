@@ -25,12 +25,14 @@ import org.openmole.misc.tools.script.GroovyProxy
 
 object LogRange {
 
-  def apply[T](min: String, max: String, nbStep: String)(implicit integral: Integral[T], fs: FromString[T], lg: Log[T]) =
-    new LogRange[T](min, max, nbStep)
+  def apply[T](range: Range[T], steps: String)(implicit lg: Log[T]) =
+    new LogRange[T](range, steps)
 
 }
 
-sealed class LogRange[T](val min: String, val max: String, val nbStep: String)(implicit integral: Integral[T], fs: FromString[T], lg: Log[T]) extends Domain[T] with Finite[T] with Bounds[T] {
+sealed class LogRange[T](val range: Range[T], val steps: String)(implicit lg: Log[T]) extends Domain[T] with Finite[T] with Bounds[T] {
+
+  import range._
 
   override def computeValues(context: Context): Iterable[T] = {
     val mi: T = lg.log(min(context))
@@ -50,9 +52,9 @@ sealed class LogRange[T](val min: String, val max: String, val nbStep: String)(i
     }
   }
 
-  @transient lazy val minProxy = GroovyProxy(min)
-  @transient lazy val maxProxy = GroovyProxy(max)
-  @transient lazy val nbStepProxy = GroovyProxy(nbStep)
+  @transient lazy val minProxy = GroovyProxy(range.min)
+  @transient lazy val maxProxy = GroovyProxy(range.max)
+  @transient lazy val nbStepProxy = GroovyProxy(steps)
 
   def nbStep(context: Context): T = fs.fromString(nbStepProxy(context).toString)
   def min(context: Context): T = fs.fromString(minProxy(context).toString)
