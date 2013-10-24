@@ -15,7 +15,6 @@ object Sampling extends PluginDefaults {
 
   lazy val csv = OsgiProject("csv") dependsOn (opencsv, Core.implementation, base.plugin.Sampling.csv, base.Misc.exception, base.Misc.replication % "test")
 
-  lazy val lhs = OsgiProject("lhs") dependsOn (base.plugin.Sampling.lhs, Core.implementation, base.plugin.Domain.bounded,
-    Domain.range, base.Misc.replication % "test")
+  lazy val lhs = OsgiProject("lhs") dependsOn (base.plugin.Sampling.lhs, Core.implementation, base.plugin.Domain.range, Domain.range, base.Misc.replication % "test")
 
 }

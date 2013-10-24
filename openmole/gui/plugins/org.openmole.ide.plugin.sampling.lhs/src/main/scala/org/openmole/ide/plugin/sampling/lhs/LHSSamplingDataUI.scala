@@ -11,9 +11,9 @@ import org.openmole.core.model.sampling.{ Sampling, Factor }
 import org.openmole.plugin.sampling.lhs.LHS
 import org.openmole.ide.core.implementation.sampling.SamplingUtils
 import org.openmole.core.model.data.Prototype
-import org.openmole.plugin.domain.bounded.Bounded
 import org.openmole.ide.plugin.domain.range.RangeDomainDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.plugin.domain.range.Range
 
 class LHSSamplingDataUI2 extends SamplingDataUI {
 
@@ -26,7 +26,7 @@ class LHSSamplingDataUI2 extends SamplingDataUI {
       SamplingUtils.toFactors(factorOrSampling).map {
         f ⇒
           Factor(f.prototype.asInstanceOf[Prototype[Double]],
-            f.domain.asInstanceOf[Bounded[Double]])
+            f.domain.asInstanceOf[Range[Double]])
       }.toSeq: _*)
   }
 
