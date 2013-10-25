@@ -34,7 +34,7 @@ case class BigDecimalLogarithmRangeDataUI(min: String = "0.0",
   def coreObject = util.Try {
     if (min.isEmpty || max.isEmpty || !step.isDefined)
       throw new UserBadDataError("Min, Max ant Step values are required for defining a Logarithm Range Domain")
-    else LogRange[BigDecimal](min, max, stepString)
+    else Range[BigDecimal](min, max) logSteps stepString
   }
 
   def coreClass = classOf[BigDecimalLogarithmRangeDataUI]

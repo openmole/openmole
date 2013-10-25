@@ -7,8 +7,6 @@ import root.libraries.Apache
 object Domain extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.domain")
 
-  lazy val bounded = OsgiProject("bounded") dependsOn (Core.implementation)
-
   lazy val collection = OsgiProject("collection") dependsOn (Misc.exception, Core.implementation)
 
   lazy val distribution = OsgiProject("distribution") dependsOn (Misc.exception, Core.implementation, Misc.workspace,

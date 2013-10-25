@@ -16,5 +16,5 @@ object Domain extends PluginDefaults {
 
   lazy val modifier = OsgiProject("modifier") dependsOn (Core.implementation, base.plugin.Domain.modifier, base.Misc.replication % "test")
 
-  lazy val range = OsgiProject("range") dependsOn (Core.implementation, base.plugin.Domain.range, base.plugin.Domain.bounded, base.Misc.replication % "test")
+  lazy val range = OsgiProject("range") dependsOn (Core.implementation, base.plugin.Domain.range, base.Misc.replication % "test")
 }
