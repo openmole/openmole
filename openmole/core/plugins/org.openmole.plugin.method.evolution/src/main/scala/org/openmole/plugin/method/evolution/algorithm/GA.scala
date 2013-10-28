@@ -21,6 +21,7 @@ import fr.iscpif.mgo._
 import fr.iscpif.mgo.tools.Lazy
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.script._
+import org.openmole.misc.tools.service.Duration._
 import scala.util.Random
 
 object GA {
@@ -43,8 +44,8 @@ object GA {
     }
   }
 
-  def timed(duration: Long) = {
-    val _duration = duration
+  def timed(duration: String) = {
+    val _duration = duration.toMilliSeconds
     new TimedTermination with GATermination {
       val duration = _duration
       val stateManifest = manifest[STATE]
