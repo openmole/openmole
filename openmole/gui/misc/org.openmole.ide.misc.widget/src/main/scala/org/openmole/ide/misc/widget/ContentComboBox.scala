@@ -43,7 +43,7 @@ class ContentComboBox[T](rawContent: List[T], selectedItem: Option[T] = None) {
 
   def setSelection[T](sel: Option[T]) = {
     widget.selection.item = contents.find(_.content == sel).headOption match {
-      case Some(x: Content[T]) ⇒ println("set :: " + x); x
+      case Some(x: Content[T]) ⇒ x
       case _                   ⇒ none
     }
   }
