@@ -60,6 +60,15 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
     val artifactId = artifactPrefix map (_ + "." + artifactSuffix) getOrElse artifactSuffix
     val base = dir / (if (pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
+    val testDependencies = (scalaVersion in thisProject, scalaVersion in Global) {
+      (tSV, sv) ⇒
+        (if (tSV == sv)
+          Seq("org.scalatest" %% "scalatest" % "1.9.1" % "test")
+        else
+          Seq()
+        ) ++ Seq("junit" % "junit" % "4.11" % "test")
+    }
+
     val sets = settings
 
     val additional = buddyPolicy.map(v ⇒ Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++
@@ -78,7 +87,7 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
         OsgiKeys.importPackage := imports,
         OsgiKeys.embeddedJars := embeddedJars,
         OsgiKeys.bundleActivator <<= OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) },
-        libraryDependencies ++= Seq("junit" % "junit" % "4.11" % "test", "org.scalatest" %% "scalatest" % "1.9.0" % "test")
+        libraryDependencies <++= testDependencies
       ) ++ sets)
   }
 

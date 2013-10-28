@@ -189,13 +189,13 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val uploadedStdOut = runtimeResult.stdOut match {
       case Some(stdOut) ⇒
         logger.info("Uploading stdout"); Some(uploadFileMessage(stdOut))
-      case None         ⇒ None
+      case None ⇒ None
     }
 
     val uploadedStdErr = runtimeResult.stdErr match {
       case Some(stdErr) ⇒
         logger.info("Uploading stderr"); Some(uploadFileMessage(stdErr))
-      case None         ⇒ None
+      case None ⇒ None
     }
 
     logger.info("Context results uploaded")

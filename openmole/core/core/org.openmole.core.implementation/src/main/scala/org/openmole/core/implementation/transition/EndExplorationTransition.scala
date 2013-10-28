@@ -37,9 +37,9 @@ class EndExplorationTransition(start: ICapsule, end: Slot, trigger: ICondition, 
 
     Try(!subMole.canceled && trigger.evaluate(context)) match {
       case Success(true) ⇒ perform()
-      case Failure(t)    ⇒
+      case Failure(t) ⇒
         subMole.cancel; throw t
-      case _             ⇒
+      case _ ⇒
     }
   }
 

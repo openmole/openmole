@@ -205,7 +205,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
 object Assembly {
   //checks to see if settingkey key exists for project p in Seq s. If it does, applies the filter function to key's value, and if that returns true, the project stays in the seq.
-  def projFilter[T](s: Seq[ProjectReference], key: SettingKey[T], filter: T ⇒ Boolean): Def.Initialize[Seq[ProjectReference]] = {
+  def projFilter[T](s: Seq[ProjectReference], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Def.Initialize[Seq[ProjectReference]] = {
     // (key in p) ? returns Initialize[Option[T]]
     // Project.Initialize.join takes a Seq[Initialize[_]] and gives back an Initialize[Seq[_]]
     val ret = Def.Initialize.join(s map { p ⇒ (key in p).?(i ⇒ i -> p) })(_ filter {
@@ -213,12 +213,13 @@ object Assembly {
       case (Some(v), _) ⇒ filter(v)
     })(_ map { _._2 })
 
-    val ret2 = Def.bind(ret) { r ⇒
+    lazy val ret2 = Def.bind(ret) { r ⇒
       val x = r.map(expandToDependencies)
       val y = Def.Initialize.join(x)
       y { _.flatten.toSet.toSeq } //make sure all references are unique
     }
-    ret2
+
+    if (intransitive) ret else ret2
   }
 
   //recursively explores the dependency tree of pr and adds all dependencies to the list of projects to be copied
@@ -233,7 +234,7 @@ object Assembly {
   implicit def InitProjRefs2RichProjectSeq(s: Def.Initialize[Seq[ProjectReference]]) = new RichProjectSeq(s)
 
   class RichProjectSeq(s: Def.Initialize[Seq[ProjectReference]]) {
-    def keyFilter[T](key: SettingKey[T], filter: (T) ⇒ Boolean) = projFilter(s, key, filter)
+    def keyFilter[T](key: SettingKey[T], filter: (T) ⇒ Boolean, intransitive: Boolean = false) = projFilter(s, key, filter, intransitive)
     def sendTo(to: String) = sendBundles(s, to) //TODO: This function is specific to OSGI bundled projects. Make it less specific?
   }
 
@@ -243,8 +244,8 @@ object Assembly {
     (keyFilter.tail foldLeft projFilter(s, head._1, head._2)) { case (s, (key, filter)) ⇒ projFilter(s, key, filter) }
   }*/
 
-  def projFilter[T](s: Def.Initialize[Seq[ProjectReference]], key: SettingKey[T], filter: T ⇒ Boolean): Project.Initialize[Seq[ProjectReference]] = {
-    Def.bind(s)(j ⇒ projFilter(j, key, filter))
+  def projFilter[T](s: Def.Initialize[Seq[ProjectReference]], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Project.Initialize[Seq[ProjectReference]] = {
+    Def.bind(s)(j ⇒ projFilter(j, key, filter, intransitive))
   }
 
   //TODO: New API makes this much simpler
@@ -253,6 +254,7 @@ object Assembly {
   def sendBundles(bundles: Def.Initialize[Seq[ProjectReference]], to: String): Def.Initialize[Task[Set[(File, String)]]] = Def.bind(bundles) { projs ⇒
     require(projs.nonEmpty)
     val seqOTasks: Def.Initialize[Seq[Task[Set[(File, String)]]]] = Def.Initialize.join(projs.map(p ⇒ bundle in p map { f ⇒
+      println(f -> to)
       Set(f -> to)
     }))
     seqOTasks { seq ⇒ seq.reduceLeft[Task[Set[(File, String)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }
