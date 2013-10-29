@@ -112,6 +112,7 @@ class CapsuleUI private (
   addChild(taskComponentWidget)
   addChild(titleWidget)
   addChild(oslot)
+  updateCapsuleTypeWidget
 
   def nbInputSlots: Int = inputSlots.size
 

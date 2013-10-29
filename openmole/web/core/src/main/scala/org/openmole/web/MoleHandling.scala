@@ -76,8 +76,7 @@ trait MoleHandling { self: SlickSupport ⇒
   private def processPack(is: Option[InputStream]): (Either[IPartialMoleExecution, String], Option[File]) = is match {
     case Some(stream) ⇒
       try {
-        val p = Workspace.newDir
-        println(p)
+        val p = Workspace.newDir // Todo: make sure that the encapsulate flag is implicit for packs
         val ret = managed(new TarInputStream(stream)) acquireAndGet { SerialiserService.deserialiseAndExtractFiles[IPartialMoleExecution](_, p) }
         Left(ret) -> Some(p)
       }

@@ -30,7 +30,6 @@ object ToolDataUI {
                          prototypesIn: Seq[PrototypeDataProxyUI],
                          coreOutputs: Unit ⇒ List[Prototype[_]],
                          prototypesOut: Seq[PrototypeDataProxyUI]) = {
-
     def protoFilter(lP: Seq[Prototype[_]], protos: Seq[PrototypeDataProxyUI]) = {
       lP.map { i ⇒ PrototypeKey(i) }.toList.diff(protos.map {
         p ⇒ PrototypeKey(p)

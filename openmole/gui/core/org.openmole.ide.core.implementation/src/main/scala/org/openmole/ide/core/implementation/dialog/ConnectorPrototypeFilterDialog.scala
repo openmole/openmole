@@ -73,7 +73,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     preferredSize = new Dimension(150, 100)
 
     def sel = connectorWidget.factorProxyUI match {
-      case Some(f: IFactorProxyUI) ⇒ println("proto! " + f.dataUI.prototype); f.dataUI.prototype
+      case Some(f: IFactorProxyUI) ⇒ f.dataUI.prototype
       case _                       ⇒ None
     }
 
