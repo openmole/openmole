@@ -84,7 +84,7 @@ case class ScalaClient(_address: String) extends AbstractOMClient {
 
   def createMole(moleData: Array[Byte], context: Option[Array[Byte]], pack: Boolean, encapsulate: Boolean): Either[String, UUID] = {
     val xml = subClient.createMole(moleData, context, pack, encapsulate)
-    if(xml.label == "moleID") Right(UUID.fromString(xml.text)) else Left(xml.text)
+    if (xml.label == "moleID") Right(UUID.fromString(xml.text)) else Left(xml.text)
   }
 
   def getLoadedMoles = {

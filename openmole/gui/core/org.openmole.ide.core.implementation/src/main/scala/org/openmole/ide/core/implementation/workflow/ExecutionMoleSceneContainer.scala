@@ -58,14 +58,28 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
   val dlLabel = new Label("0/0")
   val ulLabel = new Label("0/0")
-  val serverCheckBox = new CheckBox("Delegates to : ")
+  val serverCheckBox = new CheckBox("Server delegation")
   val serverCombo = new ComboBox(ServerListPanel.list)
-  serverCombo.enabled = false
+  val serverLabel = new Label("")
+  val uuidLabel = new ExternalLinkLabel
+  val serverPanel = new PluginPanel("wrap") {
+    contents += serverCombo
+    contents += serverLabel
+    contents += uuidLabel
+  }
+  serverCheckBox.selected = false
+  serverPanel.visible = false
 
   val sandBoxCheckBox = new CheckBox("Sandbox")
-  val sandBoxTextField: ChooseFileTextField = new ChooseFileTextField(SandBox.apply, Workspace.persistent("gui").save(sandBoxTextField.text, "sandbox")
-  )
-  sandBoxTextField.enabled = false
+  val sandBoxTextField: ChooseFileTextField = new ChooseFileTextField(SandBox.apply, Workspace.persistent("gui").save(sandBoxTextField.text, "sandbox"))
+  val sandBoxPanel = new PluginPanel("wrap 2 ") {
+    contents += sandBoxTextField
+    contents += new Label("<html><i>The sandbox folder is a root folder from which all paths are appended; allowing portability of the workflows." +
+      "<br/>Ex: sandbox folder = /tmp/ and a Copy File hook is set to /home/mole/; files will be copied in /tmp/home/mole." +
+      "<br/>It is the default mode when the computation is delegated to a server.</i></html>")
+  }
+
+  sandBoxPanel.visible = false
 
   executionManager match {
     case Some(eManager: ExecutionManager) ⇒
@@ -103,25 +117,22 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
         contents += new PluginPanel("wrap 2") {
           contents += serverCheckBox
-          contents += serverCombo
+          contents += serverPanel
         }
 
         contents += new PluginPanel("wrap 3") {
           contents += sandBoxCheckBox
-          contents += sandBoxTextField
-          contents += new Label("<html><i>The sandbox folder is a root folder from which all paths are appended; allowing portability of the workflows." +
-            "<br/>Ex: sandbox folder = /tmp/ and a Copy File hook is set to /home/mole/; files will be copied in /tmp/home/mole." +
-            "<br/>It is the default mode when the computation is delegated to a server.</i></html>")
+          contents += sandBoxPanel
         }
 
         listenTo(`serverCheckBox`, `sandBoxCheckBox`)
         reactions += {
           case ButtonClicked(`serverCheckBox`) ⇒
-            serverCombo.enabled = serverCheckBox.selected
-            sandBoxTextField.enabled = !serverCombo.enabled
+            serverPanel.visible = serverCheckBox.selected
+            sandBoxPanel.visible = !serverCombo.enabled
             sandBoxCheckBox.enabled = sandBoxCheckBox.enabled
           case ButtonClicked(`sandBoxCheckBox`) ⇒
-            sandBoxTextField.enabled = sandBoxCheckBox.selected
+            sandBoxPanel.visible = sandBoxCheckBox.selected
         }
         contents += eManager.envBarPanel
       }.peer, BorderLayout.NORTH)
