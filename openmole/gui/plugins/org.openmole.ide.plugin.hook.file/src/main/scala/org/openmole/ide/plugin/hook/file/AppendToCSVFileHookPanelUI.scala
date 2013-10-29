@@ -23,8 +23,11 @@ import swing.Label
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import java.awt.Dimension
 import org.openmole.ide.core.implementation.panelsettings.HookPanelUI
+import org.openmole.ide.misc.widget.Helper
+import org.openmole.ide.misc.widget.URL
+import java.util.{ Locale, ResourceBundle }
 
-class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI) extends PluginPanel("") with HookPanelUI {
+class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("") with HookPanelUI {
 
   val filePathTextField = new CSVChooseFileTextField(dataUI.fileName)
 
@@ -49,4 +52,6 @@ class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI) extends Plug
       _.comboValue
     }.flatten),
     filePathTextField.text)
+
+  override lazy val help = new Helper(List(new URL(i18n.getString("appendHookPermalinkText"), i18n.getString("appendHookPermalink"))))
 }
