@@ -77,7 +77,10 @@ object DialogFactory {
     val d = new DialogDescriptor(textField.peer, "Server address")
     d.setOptions(List(NotifyDescriptor.OK_OPTION).toArray)
     val notification = DialogDisplayer.getDefault.notify(d)
-    if (notification == -1 || notification == 0) textField.text
+    if (notification == -1 || notification == 0) {
+      if (!textField.text.startsWith("http://")) "http://" + textField.text
+      else textField.text
+    }
     else ""
   }
 
