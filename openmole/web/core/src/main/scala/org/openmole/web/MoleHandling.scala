@@ -77,7 +77,8 @@ trait MoleHandling { self: SlickSupport ⇒
     case Some(stream) ⇒
       try {
         val p = Workspace.newDir
-        val ret = SerialiserService.deserialiseAndExtractFiles[IPartialMoleExecution](new TarInputStream(stream), p)
+        println(p)
+        val ret = managed(new TarInputStream(stream)) acquireAndGet { SerialiserService.deserialiseAndExtractFiles[IPartialMoleExecution](_, p) }
         Left(ret) -> Some(p)
       }
       catch {
