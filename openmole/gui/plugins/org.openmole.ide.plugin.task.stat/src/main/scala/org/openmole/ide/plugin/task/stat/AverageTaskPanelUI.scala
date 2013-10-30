@@ -17,8 +17,10 @@
 
 package org.openmole.ide.plugin.task.stat
 
+import org.openmole.ide.misc.tools.util.Converters
+
 class AverageTaskPanelUI(dataUI: AverageTaskDataUI) extends BasicStatPanelUI("average", dataUI) {
 
   def saveContent(name: String) = new AverageTaskDataUI(name,
-    multiPrototypeCombo.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) })
+    Converters.flattenTuple2Options(multiPrototypeCombo.content.map { c ⇒ (c.comboValue1, c.comboValue2) }))
 }

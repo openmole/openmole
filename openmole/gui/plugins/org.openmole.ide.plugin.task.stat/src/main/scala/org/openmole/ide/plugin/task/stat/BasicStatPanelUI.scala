@@ -22,7 +22,6 @@ import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.widget.Help
-import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
@@ -60,7 +59,7 @@ abstract class BasicStatPanelUI(statType: String,
             new TwoCombosData(Some(s._1), Some(s._2)))
       },
       CLOSE_IF_EMPTY,
-      ADD, SMALL)
+      ADD, MEDIUM)
 
   def filterPrototypes(p: (PrototypeDataProxyUI, PrototypeDataProxyUI)) = Proxies.check(p._1) && Proxies.check(p._2)
 
