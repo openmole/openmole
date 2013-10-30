@@ -42,27 +42,36 @@ object LoadXML {
       Settings.currentPath)
     var text = ""
     if (fc.showDialog(new Label, "OK") == Approve) text = fc.selectedFile.getPath
-    val file = new File(text)
-    if (file.isFile) {
-      Settings.currentPath = Some(file.getParentFile)
-      Settings.currentProject = Some(file)
-      (new GUISerializer).deserialize(text) match {
-        case Failure(t) ⇒ displayErrors(List(t))
-        case Success((proxies, scene)) ⇒
-          StatusBar().clear
-          ScenesManager.closeAll
-          Proxies.instance = proxies
-          addPrototypes(proxies)
-          addTasks(proxies)
-          addSamplings(proxies)
-          addEnvironments(proxies)
-          addHooks(proxies)
-          addSources(proxies)
-          scene.foreach(mdu ⇒ ScenesManager.addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
-      }
-    }
-    text
+
+    tryFile(text, List("", ".om", ".tar"))
   }
+
+  def tryFile(text: String, exts: List[String]): String =
+    if (!exts.isEmpty) {
+      val fileName = text + exts.head
+      val f = new File(fileName)
+      if (f.isFile) {
+        Settings.currentPath = Some(f.getParentFile)
+        Settings.currentProject = Some(f)
+        (new GUISerializer).deserialize(fileName) match {
+          case Failure(t) ⇒ displayErrors(List(t))
+          case Success((proxies, scene)) ⇒
+            StatusBar().clear
+            ScenesManager.closeAll
+            Proxies.instance = proxies
+            addPrototypes(proxies)
+            addTasks(proxies)
+            addSamplings(proxies)
+            addEnvironments(proxies)
+            addHooks(proxies)
+            addSources(proxies)
+            scene.foreach(mdu ⇒ ScenesManager.addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
+        }
+        fileName
+      }
+      else tryFile(text, exts.tail)
+    }
+    else ""
 
   def addTasks(proxies: Proxies) =
     for {
