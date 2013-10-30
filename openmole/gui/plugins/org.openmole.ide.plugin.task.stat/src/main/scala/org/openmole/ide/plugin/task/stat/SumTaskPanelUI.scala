@@ -17,8 +17,10 @@
 
 package org.openmole.ide.plugin.task.stat
 
+import org.openmole.ide.misc.tools.util.Converters
+
 class SumTaskPanelUI(dataUI: SumTaskDataUI) extends BasicStatPanelUI("sum", dataUI) {
 
   def saveContent(name: String) = new SumTaskDataUI(name,
-    multiPrototypeCombo.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) })
+    Converters.flattenTuple2Options(multiPrototypeCombo.content.map { c ⇒ (c.comboValue1, c.comboValue2) }))
 }

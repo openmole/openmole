@@ -1,5 +1,7 @@
 package org.openmole.ide.plugin.task.stat
 
+import org.openmole.ide.misc.tools.util.Converters
+
 /*
  * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
  *
@@ -20,5 +22,5 @@ package org.openmole.ide.plugin.task.stat
 class MSETaskPanelUI(dataUI: MSETaskDataUI) extends BasicStatPanelUI("mse", dataUI) {
 
   def saveContent(name: String) = new MSETaskDataUI(name,
-    multiPrototypeCombo.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) })
+    Converters.flattenTuple2Options(multiPrototypeCombo.content.map { c ⇒ (c.comboValue1, c.comboValue2) }))
 }

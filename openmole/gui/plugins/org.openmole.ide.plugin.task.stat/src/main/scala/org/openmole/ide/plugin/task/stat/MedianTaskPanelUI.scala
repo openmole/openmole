@@ -17,10 +17,10 @@
 
 package org.openmole.ide.plugin.task.stat
 
-import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.misc.tools.util.Converters
 
 class MedianTaskPanelUI(dataUI: MedianTaskDataUI) extends BasicStatPanelUI("median", dataUI) {
 
   def saveContent(name: String) = new MedianTaskDataUI(name,
-    multiPrototypeCombo.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) })
+    Converters.flattenTuple2Options(multiPrototypeCombo.content.map { c ⇒ (c.comboValue1, c.comboValue2) }))
 }

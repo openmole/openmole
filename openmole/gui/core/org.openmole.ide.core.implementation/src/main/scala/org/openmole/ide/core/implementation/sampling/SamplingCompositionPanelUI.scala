@@ -37,7 +37,7 @@ import scala.collection.JavaConversions._
 import org.openmole.misc.tools.obj.ClassUtils._
 import scala.Some
 import org.openmole.ide.core.implementation.data.FactorDataUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ DataProxyUI, PrototypeDataProxyUI }
 import org.openmole.ide.core.implementation.panel.{ SaveSettings, Settings }
 import org.openmole.ide.misc.widget.URL
 import java.util.{ Locale, ResourceBundle }
@@ -186,9 +186,12 @@ trait SamplingCompositionPanelUI extends Scene with Settings with SaveSettings {
               c ⇒ connectLayer.removeChild(c)
             }
             s match {
-              case (d: IDomainWidget) ⇒ domains -= d.proxy
+              case (d: IDomainWidget) ⇒
+                domains -= d.proxy
+                unSetFinal(d.proxy)
               case (s: ISamplingWidget) ⇒
                 samplings -= s.proxy
+                unSetFinal(s.proxy)
               case _ ⇒
             }
           case _ ⇒
@@ -209,6 +212,8 @@ trait SamplingCompositionPanelUI extends Scene with Settings with SaveSettings {
     revalidate
     repaint
   }
+
+  def unSetFinal(proxy: DataProxyUI) = if (finalSampling == Some(proxy)) { println("oui !!"); finalSampling = None }
 
   def scene = this
 
