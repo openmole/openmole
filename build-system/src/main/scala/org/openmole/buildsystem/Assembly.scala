@@ -60,22 +60,21 @@ trait Assembly { self: BuildSystemDefaults ⇒
         def isChildOf(f: File, oF: File): Boolean = f.getCanonicalPath.contains(oF.getCanonicalPath)
         def getDiff(f: File, oF: File): String = f.getCanonicalPath.takeRight(f.getCanonicalPath.length - oF.getCanonicalPath.length)
 
-        val resourceMap = (rS flatMap { case (in, out) ⇒ expand(in, in, out) }).toMap
+        val resourceMap = (rS flatMap { case (in, out) ⇒ expand(in, in, out) }).groupBy(_._1).collect { case (k, v) ⇒ k -> (v map (_._2)) }
 
         val copyFunction = FileFunction.cached(target / ("resAssembleCache" + name), FilesInfo.lastModified, FilesInfo.exists) {
-          _ map {
-            rT ⇒
-              /*val out = rS.filter(i ⇒ isChildOf(rT, i._1)).reduce { (a, b) ⇒ if (a._1.getAbsolutePath.length > b._1.getAbsolutePath.length) a else b }
-              val dest = cT / out._2 / (if (out._1.isDirectory) getDiff(rT, out._1) else getDiff(rT, out._1.getParentFile))
-              println(getDiff(rT, out._1.getParentFile))
-              println(rT.getCanonicalPath)
-              println(out._1.getParentFile.getCanonicalPath)*/
-              val dest = resourceMap(rT)
+          f ⇒
+            f flatMap {
+              rT ⇒
+                val dests = resourceMap(rT)
 
-              s.log.info("Copying file " + rT.getPath + " to: " + dest.getCanonicalPath)
-              IO.copyFile(rT, dest)
-              dest
-          }
+                for (dest ← dests) {
+                  s.log.info("Copying file " + rT.getPath + " to: " + dest.getCanonicalPath)
+                  IO.copyFile(rT, dest)
+                  dest
+                }
+                dests
+            }
         }
 
         copyFunction(resourceMap.keySet)
