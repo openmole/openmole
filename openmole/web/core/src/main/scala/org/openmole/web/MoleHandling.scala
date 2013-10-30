@@ -151,13 +151,17 @@ trait MoleHandling { self: SlickSupport ⇒
       case _                                 ⇒ throw new Exception("Invalidly formatted csv file")
     }).toMap) getOrElse Map()
 
-    val (moleExec, genPath) = if (pack) processPack(moleInput) else (processXMLFile[IPartialMoleExecution](moleInput), None)
+    val moleBinary = moleInput map {str => {val arr = Source.fromInputStream(str)(Codec.ISO8859).toArray; str.close(); arr}}
+
+    val moleStream = moleBinary map (b => new ByteArrayInputStream(b map (_.toByte)))
+
+    val (moleExec, genPath) = if (pack) processPack(moleStream) else (processXMLFile[IPartialMoleExecution](moleStream), None)
 
     moleExec match {
       case Left(pEx) ⇒ {
         val ctxt = reifyCSV(pEx, csvData)
 
-        val clob = new SerialClob(SerialiserService.serialise(pEx).toCharArray)
+        val clob = new SerialClob(moleBinary.get)
 
         val ctxtClob = new SerialClob(SerialiserService.serialise(ctxt).toCharArray)
 
