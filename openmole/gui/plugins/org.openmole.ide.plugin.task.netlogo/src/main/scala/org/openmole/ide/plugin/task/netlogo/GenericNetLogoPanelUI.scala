@@ -18,7 +18,7 @@ package org.openmole.ide.plugin.task.netlogo
 
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.widget.ChooseFileTextField
-import org.openmole.ide.misc.widget.multirow.RowWidget.SMALL
+import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
@@ -132,7 +132,7 @@ abstract class GenericNetLogoPanelUI(
               prototypeMappingOutput.map {
                 m ⇒ new TwoCombosPanel(globals, comboContent, "with", new TwoCombosData(Some(m._1), Some(m._2)))
               },
-              minus = CLOSE_IF_EMPTY, insets = SMALL)
+              minus = CLOSE_IF_EMPTY, insets = MEDIUM)
 
             multiProtoString = new MultiTwoCombos[PrototypeDataProxyUI, String](
               "",
@@ -142,7 +142,7 @@ abstract class GenericNetLogoPanelUI(
               prototypeMappingInput.map {
                 m ⇒ new TwoCombosPanel(comboContent, globals, "with", new TwoCombosData(Some(m._1), Some(m._2)))
               },
-              minus = CLOSE_IF_EMPTY, insets = SMALL)
+              minus = CLOSE_IF_EMPTY, insets = MEDIUM)
           }
         case None ⇒
       }

@@ -2,7 +2,7 @@
 
 CURDIR=$PWD
 REALPATH=`readlink -f $0`
-LOCATION=`dirname $REALPATH`
+LOCATION=`dirname "$REALPATH"`
 
 (nohup sh $LOCATION/dbserver/bin/openmole-dbserver >/dev/null &) 2>/dev/null
 
@@ -16,7 +16,7 @@ case "$JVMVERSION" in
   *64-Bit*) FLAG="-XX:+UseCompressedOops";;
 esac
 
-SPLASHSCREEN="-splash:$LOCATION/splashscreen.png"
+SPLASHSCREEN="${LOCATION}/splashscreen.png"
 
 for ARG in $@
 do
@@ -26,10 +26,9 @@ done
 mkdir -p $HOME/.openmole/.tmp/
 CONFIGDIR=$HOME/.openmole/.tmp/$RANDOM
 
-
-java -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} $SPLASHSCREEN -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseG1GC \
-     -jar $LOCATION/plugins/org.eclipse.equinox.launcher.jar \
-     -cp $LOCATION/openmole-plugins -gp $LOCATION/openmole-plugins-gui "$@"
+java -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -splash:"${SPLASHSCREEN}" -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseG1GC \
+     -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" \
+     -cp "$LOCATION/openmole-plugins" -gp "$LOCATION/openmole-plugins-gui" "$@"
 
 rm -rf ${CONFIGDIR} 
 

@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.{ Helper, MigPanel }
 import org.openmole.ide.core.implementation.data._
 import java.awt.{ Point, Color }
 import org.netbeans.api.visual.action.ActionFactory
@@ -39,6 +39,8 @@ import scala.Some
 import org.openmole.ide.core.implementation.data.FactorDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.panel.{ SaveSettings, Settings }
+import org.openmole.ide.misc.widget.URL
+import java.util.{ Locale, ResourceBundle }
 
 object SamplingCompositionPanelUI {
   val DEFAULT_COLOR = new Color(250, 250, 250)
@@ -518,5 +520,9 @@ trait SamplingCompositionPanelUI extends Scene with Settings with SaveSettings {
       connectLayer.addChild(connection)
     }
   }
+
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+  override lazy val help = new Helper(List(new URL(i18n.getString("samplingCPermalinkText"), i18n.getString("samplingCPermalink"))))
+
 }
 

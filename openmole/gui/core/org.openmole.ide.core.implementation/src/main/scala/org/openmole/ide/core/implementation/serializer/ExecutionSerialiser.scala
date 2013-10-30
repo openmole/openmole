@@ -18,10 +18,12 @@ package org.openmole.ide.core.implementation.serializer
 
 import org.openmole.ide.core.implementation.workflow.MoleUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
-import java.io.{ ByteArrayOutputStream, File }
+import java.io.{ FileOutputStream, ByteArrayOutputStream, File }
 import scala.util.{ Failure, Success }
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import com.ice.tar.TarOutputStream
+import org.openmole.core.batch.message.FileMessage
 
 object ExecutionSerialiser {
 
@@ -32,7 +34,12 @@ object ExecutionSerialiser {
 
   def apply(moleUI: MoleUI, withArchive: Boolean) = {
     val array = new ByteArrayOutputStream
-    SerialiserService.serialise(execution(moleUI), array)
+    if (withArchive) {
+      val tos = new TarOutputStream(array)
+      try SerialiserService.serialiseAndArchiveFiles(execution(moleUI), tos)
+      finally tos.close
+    }
+    else SerialiserService.serialise(execution(moleUI), array)
     array.toByteArray
   }
 

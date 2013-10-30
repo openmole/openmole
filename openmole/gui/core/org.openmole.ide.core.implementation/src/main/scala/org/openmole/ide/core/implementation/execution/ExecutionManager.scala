@@ -37,6 +37,7 @@ import scala.concurrent.{ ExecutionContext ⇒ exc }
 import sun.security.pkcs11.Secmod.ModuleType
 
 //FIXME with Romain actor system include
+
 import exc.Implicits.global
 
 object ExecutionManager {
@@ -119,13 +120,18 @@ class ExecutionManager(manager: MoleUI,
         executionContainer.serverLabel.text = "Uploading mole execution, please wait..."
         executionContainer.revalidate
         val client = ScalaClient(url)
-        val future = Future(client.createMole(ExecutionSerialiser(manager, true), None, encapsulate = true))
-        future.foreach { uuid ⇒
-          client.startMole(uuid.right.get.toString)
-          executionContainer.serverLabel.text = "The Mole has been started "
-          val uidurl = url + "/execs/" + uuid.right.get.toString
-          executionContainer.uuidLabel.hlink(uidurl)
-          executionContainer.revalidate
+        val future = Future(client.createMole(ExecutionSerialiser(manager, true), None, encapsulate = true, pack = true))
+        future.foreach {
+          uuid ⇒
+            uuid match {
+              case Right(x) ⇒
+                client.startMole(x.toString)
+                executionContainer.serverLabel.text = "The Mole has been started "
+                val uidurl = url + "/execs/" + x.toString
+                executionContainer.uuidLabel.hlink(uidurl)
+                executionContainer.revalidate
+              case Left(s: String) ⇒ StatusBar().block(s)
+            }
         }
       case _ ⇒
         buildMoleExecution match {

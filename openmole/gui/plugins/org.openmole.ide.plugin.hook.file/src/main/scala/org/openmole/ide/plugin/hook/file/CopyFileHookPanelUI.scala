@@ -29,8 +29,11 @@ import org.openmole.ide.core.implementation.panelsettings.HookPanelUI
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.tools.util.Converters
 import org.openmole.ide.misc.tools.util.Converters._
+import org.openmole.ide.misc.widget.Helper
+import org.openmole.ide.misc.widget.URL
+import java.util.{ Locale, ResourceBundle }
 
-class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI2) extends PluginPanel("wrap") with HookPanelUI {
+class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI2)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("wrap") with HookPanelUI {
 
   val multiComboTextField = new MultiComboTextField("",
     comboContent,
@@ -62,4 +65,6 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI2) extends PluginPanel("wrap
       }.map { m ⇒ (m.comboValue, m.textFieldValue) }).map { m ⇒
         (KeyRegistry.protoProxyKeyMap(PrototypeKey(m._1)), m._2)
       })
+
+  override lazy val help = new Helper(List(new URL(i18n.getString("copyFileHookPermalinkText"), i18n.getString("copyFileHookPermalink"))))
 }

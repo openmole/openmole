@@ -27,7 +27,6 @@ import java.util.{ Locale, ResourceBundle }
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import java.io.{ FileReader, File }
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos.{ TwoCombosData, TwoCombosPanel }
-import java.awt.Dimension
 import org.openmole.ide.core.implementation.panelsettings.SourcePanelUI
 import org.openmole.ide.misc.tools.util.Converters
 import org.openmole.ide.misc.tools.util.Converters._
