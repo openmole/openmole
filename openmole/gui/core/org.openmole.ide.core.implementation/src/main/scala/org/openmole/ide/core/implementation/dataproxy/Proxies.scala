@@ -112,11 +112,11 @@ class Proxies {
     if (p.generated) -=(p)
   }
 
-  def filterListTupleOut[T, P <: DataProxyUI](m: List[(T, P)]) = m.filter {
+  def filterListTupleOut[T, P <: DataProxyUI, Q](m: List[(T, P, Q)]) = m.filter {
     p ⇒ contains(p._2)
   }
 
-  def filterListTupleIn[P <: DataProxyUI, T](m: List[(P, T)]) = m.filter {
+  def filterListTupleIn[P <: DataProxyUI, T, Q](m: List[(P, T, Q)]) = m.filter {
     p ⇒ contains(p._1)
   }
 

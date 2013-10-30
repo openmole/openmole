@@ -16,29 +16,28 @@
  */
 package org.openmole.ide.plugin.task.netlogo
 
-import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.osgi.netlogo5.NetLogo5
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.misc.tools.util.Converters
+import org.openmole.ide.misc.tools.util.Converters._
 
-class NetLogo5TaskPanelUI(ndu: NetLogo5TaskDataUI) extends GenericNetLogoPanelUI(ndu.nlogoPath,
+class NetLogo5TaskPanelUI(ndu: NetLogo5TaskDataUI2) extends GenericNetLogoPanelUI(ndu.nlogoPath,
   ndu.workspaceEmbedded,
   ndu.lauchingCommands,
   ndu.prototypeMappingInput,
   ndu.prototypeMappingOutput,
   ndu.resources) {
-  override def saveContent(name: String): TaskDataUI = new NetLogo5TaskDataUI(name,
-    workspaceCheckBox.selected,
-    nlogoTextField.text,
-    launchingCommandTextArea.text,
-    if (multiProtoString.isDefined)
-      multiProtoString.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }.filterNot(_._1.dataUI.isInstanceOf[EmptyPrototypeDataUI]).filter { case (p, s) ⇒ Proxies.check(p) }
-    else List(),
-    if (multiStringProto.isDefined)
-      multiStringProto.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }.filterNot(_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).filter { case (s, p) ⇒ Proxies.check(p) }
-    else List(),
-    resourcesMultiTextField.content.map { _.content })
-
+  override def saveContent(name: String): TaskDataUI = {
+    val o = new NetLogo5TaskDataUI2(name,
+      workspaceCheckBox.selected,
+      nlogoTextField.text,
+      launchingCommandTextArea.text,
+      Converters.flattenTuple2Options(multiProtoString.content.map { c ⇒ (c.comboValue1, c.comboValue2) }).filter { case (p, s) ⇒ Proxies.check(p) },
+      Converters.flattenTuple2Options(multiStringProto.content.map { c ⇒ (c.comboValue1, c.comboValue2) }).filter { case (s, p) ⇒ Proxies.check(p) },
+      resourcesMultiTextField.content.map { _.content })
+    o
+  }
   def buildNetLogo = new NetLogo5
 
 }

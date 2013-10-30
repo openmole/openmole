@@ -17,73 +17,28 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.domain._
 import org.openmole.misc.tools.io.FromString
-import org.openmole.core.model.data._
-import org.openmole.core.implementation.tools._
-import org.openmole.misc.tools.script.GroovyProxyPool
 
 object Range {
 
   def apply[T](
     min: String,
+    max: String)(implicit integral: Integral[T], fs: FromString[T]) = new Range[T](min, max)
+
+  def apply[T](
+    min: String,
     max: String,
-    step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) = {
-    val _step = step
-    new Range[T](min, max) {
-      lazy val stepProxy = GroovyProxyPool(_step)
-
-      def stepAndSize(minValue: T, maxValue: T, context: Context) = {
-        import integral._
-        val step = fs.fromString(stepProxy(context).toString)
-        val size = (maxValue - minValue).abs / step
-        (step, size.toInt)
-      }
-
-    }
-  }
+    step: String)(implicit integral: Integral[T], fs: FromString[T]): StepRange[T] =
+    StepRange[T](Range[T](min, max), step)
 
   def steps[T](
     min: String,
     max: String,
-    nbSteps: String)(implicit integral: Integral[T], fs: FromString[T]) = {
-    new Range[T](min, max) {
-      lazy val nbStepProxy = GroovyProxyPool(nbSteps)
-      def stepAndSize(minValue: T, maxValue: T, context: Context) = {
-        import integral._
-        val size = fs.fromString(nbStepProxy(context).toString) - integral.one
-        val step = (maxValue - minValue) / size
-        (step, size.toInt)
-      }
-    }
-  }
+    steps: String)(implicit integral: Integral[T], fs: FromString[T]): SizeRange[T] =
+    SizeRange[T](Range[T](min, max), steps)
 
 }
 
-abstract sealed class Range[T](val min: String, val max: String)(implicit integral: Integral[T], fs: FromString[T]) extends Domain[T] with Finite[T] with Center[T] with Bounds[T] {
-
-  import integral._
-  import fs._
-
-  def stepAndSize(maxValue: T, minValue: T, context: Context): (T, Int)
-
-  @transient lazy val minValue = GroovyProxyPool(min)
-  @transient lazy val maxValue = GroovyProxyPool(max)
-
-  override def computeValues(context: Context): Iterable[T] = {
-    val mi = min(context)
-    val ma = max(context)
-    val (step, size) = stepAndSize(mi, ma, context)
-    for (i ← 0 to size) yield { mi + fromInt(i) * step }
-  }
-
-  override def center(context: Context): T = {
-    val mi = min(context)
-    mi + ((max(context) - mi) / fromInt(2))
-  }
-
-  override def max(context: Context): T = fromString(maxValue(context).toString)
-  override def min(context: Context): T = fromString(minValue(context).toString)
-
+class Range[T](val min: String, val max: String)(implicit val integral: Integral[T], val fs: FromString[T]) extends Bounded[T] {
+  lazy val range = this
 }
-

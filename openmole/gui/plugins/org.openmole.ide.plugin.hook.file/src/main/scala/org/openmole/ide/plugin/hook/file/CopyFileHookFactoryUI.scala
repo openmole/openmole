@@ -22,7 +22,7 @@ import org.openmole.ide.core.implementation.factory.HookFactoryUI
 
 class CopyFileHookFactoryUI extends HookFactoryUI {
 
-  def buildDataUI = new CopyFileHookDataUI
+  def buildDataUI = new CopyFileHookDataUI2
 
   def coreClass = classOf[CopyFileHook]
 

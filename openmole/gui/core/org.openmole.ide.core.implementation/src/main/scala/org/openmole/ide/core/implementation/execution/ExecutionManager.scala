@@ -32,6 +32,13 @@ import java.net.URL
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.web.misc.tools.ScalaClient
 import org.openmole.ide.core.implementation.serializer.ExecutionSerialiser
+import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext ⇒ exc }
+import sun.security.pkcs11.Secmod.ModuleType
+
+//FIXME with Romain actor system include
+
+import exc.Implicits.global
 
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {
@@ -110,8 +117,22 @@ class ExecutionManager(manager: MoleUI,
 
     server match {
       case Some(url: String) ⇒
+        executionContainer.serverLabel.text = "Uploading mole execution, please wait..."
+        executionContainer.revalidate
         val client = ScalaClient(url)
-        client.createMole(ExecutionSerialiser(manager, true), None)
+        val future = Future(client.createMole(ExecutionSerialiser(manager, true), None, encapsulate = true, pack = true))
+        future.foreach {
+          uuid ⇒
+            uuid match {
+              case Right(x) ⇒
+                client.startMole(x.toString)
+                executionContainer.serverLabel.text = "The Mole has been started "
+                val uidurl = url + "/execs/" + x.toString
+                executionContainer.uuidLabel.hlink(uidurl)
+                executionContainer.revalidate
+              case Left(s: String) ⇒ StatusBar().block(s)
+            }
+        }
       case _ ⇒
         buildMoleExecution match {
           case Success((mE, envNames)) ⇒

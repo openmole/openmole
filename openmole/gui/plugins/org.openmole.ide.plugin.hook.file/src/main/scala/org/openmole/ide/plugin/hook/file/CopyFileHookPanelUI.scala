@@ -23,12 +23,17 @@ import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
 import org.openmole.ide.core.implementation.registry._
 import java.io.File
-import swing.{ TabbedPane, Label }
+import swing.Label
 import java.awt.Dimension
 import org.openmole.ide.core.implementation.panelsettings.HookPanelUI
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import org.openmole.ide.misc.tools.util.Converters
+import org.openmole.ide.misc.tools.util.Converters._
+import org.openmole.ide.misc.widget.Helper
+import org.openmole.ide.misc.widget.URL
+import java.util.{ Locale, ResourceBundle }
 
-class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap") with HookPanelUI {
+class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI2)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("wrap") with HookPanelUI {
 
   val multiComboTextField = new MultiComboTextField("",
     comboContent,
@@ -41,12 +46,8 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap"
 
   minimumSize = new Dimension(300, 150)
 
-  if (Proxies.instance.prototypes.isEmpty || comboContent.isEmpty)
-    contents += new Label("No prototype to be displayed")
-  else {
-    contents += new Label("<html><b>Files to be dumped</b></html>")
-    contents += multiComboTextField.panel
-  }
+  contents += new Label("<html><b>Files to be dumped</b></html>")
+  contents += multiComboTextField.panel
 
   val components = List(("Prototypes", this))
 
@@ -54,14 +55,16 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap"
     _.dataUI.dim == 0
   }
 
-  def saveContent(name: String) = new CopyFileHookDataUI(name,
-    multiComboTextField.content.filterNot {
-      _.comboValue match {
-        case Some(v: PrototypeDataProxyUI) ⇒ Proxies.check(List(v)).isEmpty
-        case _                             ⇒ false
-      }
-    }.map { m ⇒
-      (KeyRegistry.protoProxyKeyMap(PrototypeKey(m.comboValue.get)), m.textFieldValue)
-    })
+  def saveContent(name: String) = new CopyFileHookDataUI2(name,
+    Converters.flattenTupleOptionAny(
+      multiComboTextField.content.filterNot {
+        _.comboValue match {
+          case Some(v: PrototypeDataProxyUI) ⇒ Proxies.check(List(v)).isEmpty
+          case _                             ⇒ false
+        }
+      }.map { m ⇒ (m.comboValue, m.textFieldValue) }).map { m ⇒
+        (KeyRegistry.protoProxyKeyMap(PrototypeKey(m._1)), m._2)
+      })
 
+  override lazy val help = new Helper(List(new URL(i18n.getString("copyFileHookPermalinkText"), i18n.getString("copyFileHookPermalink"))))
 }

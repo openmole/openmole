@@ -29,17 +29,12 @@ object MultiTextFieldCombo {
                                val data: TextFieldComboData[B]) extends PluginPanel("wrap 2") with IPanel[TextFieldComboData[B]] {
 
     val textField = new TextField(data.textFieldValue, 15)
-    val comboBox = new MyComboBox(comboContent.sortBy { _.toString }) {
-      data.comboValue match {
-        case Some(x: B) ⇒ selection.item = x
-        case _          ⇒
-      }
-    }
+    val comboBox = ContentComboBox(comboContent.sortBy { _.toString }, data.comboValue)
 
     contents += textField
-    contents += comboBox
+    contents += comboBox.widget
 
-    def content = new TextFieldComboData(textField.text, Some(comboBox.selection.item))
+    def content = new TextFieldComboData(textField.text, comboBox.widget.selection.item.content)
   }
 
   class TextFieldComboData[B](val textFieldValue: String = "",

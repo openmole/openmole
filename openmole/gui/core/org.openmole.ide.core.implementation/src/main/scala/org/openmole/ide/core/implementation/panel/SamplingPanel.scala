@@ -42,6 +42,7 @@ trait SamplingPanel extends Base
     savePanel
     widget.update
     basePanel.contents += samplingPanelUI.bestDisplay
+    basePanel.contents += samplingPanelUI.help
   }
 
   def savePanel = {

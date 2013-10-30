@@ -3,6 +3,8 @@ package root
 import sbt._
 import Keys._
 
+import org.clapper.sbt.izpack.IzPack
+import IzPack.IzPack._
 import org.openmole.buildsystem.OMKeys._
 import org.openmole.buildsystem._, Assembly._
 import Libraries._

@@ -25,6 +25,8 @@ import org.openmole.ide.misc.widget._
 import multirow.ComponentFocusedEvent
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.panel.{ AnonSaveSettings, Settings }
+import org.openmole.ide.misc.widget.{ URL, Helper, PluginPanel }
+import java.util.{ Locale, ResourceBundle }
 
 class DomainPanelUI(domainWidget: IDomainWidget) extends Settings with AnonSaveSettings {
 
@@ -93,7 +95,6 @@ class DomainPanelUI(domainWidget: IDomainWidget) extends Settings with AnonSaveS
       case FocusGained(source: Component, _, _)     ⇒ dPanel.help.switchTo(source)
       case ComponentFocusedEvent(source: Component) ⇒ dPanel.help.switchTo(source)
     }
-    // domainPanel.updateHelp
   }
 
   def saveContent = dPanel.saveContent match {
@@ -104,4 +105,6 @@ class DomainPanelUI(domainWidget: IDomainWidget) extends Settings with AnonSaveS
     case x: Any ⇒ x
   }
 
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+  override lazy val help = new Helper(List(new URL(i18n.getString("domainPermalinkText"), i18n.getString("domainPermalink"))))
 }

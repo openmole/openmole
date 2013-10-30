@@ -25,7 +25,7 @@ import scala.swing.ScrollPane
 class BashEditor extends ScrollPane {
   val editor = new EditorPane
   viewportView = editor
-  editor.contentType = "text/bash"
+  editor.contentType = "text/plain"
   editor.editorKit = new DefaultSyntaxKit(new BashLexer)
 
   override def enabled_=(b: Boolean): Unit = {

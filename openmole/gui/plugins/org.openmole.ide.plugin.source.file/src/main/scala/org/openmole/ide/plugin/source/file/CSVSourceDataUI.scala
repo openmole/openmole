@@ -19,17 +19,35 @@ package org.openmole.ide.plugin.source.file
 
 import org.openmole.ide.core.implementation.data.SourceDataUI
 import org.openmole.plugin.source.file.CSVSource
-import java.io.File
 import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
+import org.openmole.ide.core.implementation.serializer.Update
 
+@deprecated
 class CSVSourceDataUI(val name: String = "",
                       val csvFilePath: String = "",
                       val prototypeMapping: List[(String, PrototypeDataProxyUI)] = List.empty,
                       val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
                       val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                      val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends SourceDataUI {
+                      val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends SourceDataUI with Update[CSVSourceDataUI2] {
+  def coreClass = ???
+  def coreObject = ???
+  def buildPanelUI = ???
+  def doClone(inputs: Seq[PrototypeDataProxyUI], outputs: Seq[PrototypeDataProxyUI], parameters: Map[PrototypeDataProxyUI, String]) = ???
+  def update = new CSVSourceDataUI2(name,
+    csvFilePath,
+    prototypeMapping.zipWithIndex.map { case (t, i) ⇒ (t._1, t._2, i) },
+    inputs,
+    outputs,
+    inputParameters)
+}
 
+class CSVSourceDataUI2(val name: String = "",
+                       val csvFilePath: String = "",
+                       val prototypeMapping: List[(String, PrototypeDataProxyUI, Int)] = List.empty,
+                       val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                       val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                       val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends SourceDataUI {
   def coreClass = classOf[CSVSource]
 
   def buildPanelUI = new CSVSourcePanelUI(this)
@@ -45,5 +63,5 @@ class CSVSourceDataUI(val name: String = "",
 
   def doClone(ins: Seq[PrototypeDataProxyUI],
               outs: Seq[PrototypeDataProxyUI],
-              params: Map[PrototypeDataProxyUI, String]) = new CSVSourceDataUI(name, csvFilePath, Proxies.instance.filterListTupleOut(prototypeMapping), ins, outs, params)
+              params: Map[PrototypeDataProxyUI, String]) = new CSVSourceDataUI2(name, csvFilePath, Proxies.instance.filterListTupleOut(prototypeMapping), ins, outs, params)
 }

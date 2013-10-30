@@ -34,7 +34,7 @@ trait Components extends Publisher with Help {
     compts.foreach {
       c ⇒ pages += new TabbedPane.Page(c._1, c._2)
     }
-    if (pages.size > 5) this.tabPlacement = Alignment.Left
+    if (pages.size > 6) this.tabPlacement = Alignment.Left
   }
 
   def panel = new PluginPanel("wrap") {

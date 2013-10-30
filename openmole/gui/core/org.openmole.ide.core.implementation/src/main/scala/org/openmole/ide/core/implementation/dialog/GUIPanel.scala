@@ -54,6 +54,11 @@ class GUIPanel extends MainFrame {
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, Event.CTRL_MASK))
       })
 
+      contents += new MenuItem(new Action("Import") {
+        override def apply = LoadXML.show
+        accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_I, Event.CTRL_MASK))
+      })
+
       contents += new MenuItem(new Action("Save") {
         override def apply = {
           ScenesManager.saveCurrentPropertyWidget

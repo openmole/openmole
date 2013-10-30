@@ -17,12 +17,13 @@
 package org.openmole.ide.plugin.domain.collection
 
 import java.util.{ Locale, ResourceBundle }
-import org.openmole.ide.misc.widget.{ Help, Helper, PluginPanel, URL }
+import org.openmole.ide.misc.widget._
 import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.misc.tools.util.Types
 import swing.MyComboBox
 import org.openmole.ide.core.implementation.panelsettings.IDomainPanelUI
+import scala.Some
 
 class VariableDomainPanelUI(dataUI: VariableDomainDataUI[_])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends IDomainPanelUI {
 
@@ -31,25 +32,23 @@ class VariableDomainPanelUI(dataUI: VariableDomainDataUI[_])(implicit val i18n: 
       _.dataUI.dim == 1
     }
 
-  val protoCombo = new MyComboBox(availablePrototypes)
-  dataUI.prototypeArray match {
-    case Some(p: PrototypeDataProxyUI) ⇒ protoCombo.selection.item = p
-    case _                             ⇒
-  }
+  val protoCombo = ContentComboBox(availablePrototypes, dataUI.prototypeArray)
+
   val components = List(("", new PluginPanel("wrap") {
-    contents += protoCombo
+    contents += protoCombo.widget
   }))
 
   def saveContent = {
-    val params = protoCombo.selection.item match {
+    val params = protoCombo.widget.selection.item match {
       case p: PrototypeDataProxyUI ⇒ (Some(p), p.dataUI.typeClassString)
       case _                       ⇒ (None, DOUBLE)
     }
-    VariableDomainDataUI(params._1, Types.pretify(params._2))
+    val sel = protoCombo.widget.selection.item.content
+    VariableDomainDataUI(protoCombo.widget.selection.item.content, Types.pretify({ if (sel.isDefined) sel.get.dataUI.typeClassString else DOUBLE }))
   }
 
   override lazy val help = new Helper(List(new URL(i18n.getString("variableDomainPermalink"), i18n.getString("variableDomainPermalinkText"))))
 
-  add(protoCombo, new Help(i18n.getString("prototypeArrayList")))
+  add(protoCombo.widget, new Help(i18n.getString("prototypeArrayList")))
 
 }
