@@ -151,7 +151,7 @@ trait MoleHandling { self: SlickSupport ⇒
       case _                                 ⇒ throw new Exception("Invalidly formatted csv file")
     }).toMap) getOrElse Map()
 
-    val moleBinary = moleInput map (Source.fromInputStream(_)(Codec.ISO8859).toArray)
+    val moleBinary = moleInput map {str => {val arr = Source.fromInputStream(str)(Codec.ISO8859).toArray; str.close(); arr}}
 
     val moleStream = moleBinary map (b => new ByteArrayInputStream(b map (_.toByte)))
 
