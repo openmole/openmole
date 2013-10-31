@@ -18,13 +18,13 @@ name := "openmole-buildsystem-plugin"
 
 organization := "org.openmole"
 
-version := "0.9.16"
+version := "0.10.0.0-SNAPSHOT"
 
 resolvers += Classpaths.sbtPluginSnapshots
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.5.0")
+addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.6.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.0.1")
+addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.2.0")
 
 libraryDependencies ++= Seq("com.jsuereth" %% "scala-arm" % "1.3",
                             "org.kamranzafar" % "jtar" % "2.2")

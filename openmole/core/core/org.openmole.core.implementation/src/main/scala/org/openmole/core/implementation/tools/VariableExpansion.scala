@@ -80,9 +80,11 @@ object VariableExpansion {
         while (it.hasNext && opened > 0) {
           val c = it.next
           c match {
-            case '{' ⇒ res.append(c.toChar); opened += 1
-            case '}' ⇒ opened -= 1; if (opened > 0) res.append(c.toChar)
-            case _   ⇒ res.append(c.toChar)
+            case '{' ⇒
+              res.append(c.toChar); opened += 1
+            case '}' ⇒
+              opened -= 1; if (opened > 0) res.append(c.toChar)
+            case _ ⇒ res.append(c.toChar)
           }
         }
         if (opened != 0) throw new UserBadDataError("Malformed ${expr} expression, unmatched opened {")

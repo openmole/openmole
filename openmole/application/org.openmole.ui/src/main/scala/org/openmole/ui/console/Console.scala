@@ -60,7 +60,8 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
   def run {
     val correctPassword =
       password match {
-        case None    ⇒ initPassword; true
+        case None ⇒
+          initPassword; true
         case Some(p) ⇒ setPassword(p)
       }
 

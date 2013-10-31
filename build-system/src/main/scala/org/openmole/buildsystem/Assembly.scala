@@ -1,15 +1,15 @@
 package org.openmole.buildsystem
 
 import sbt._
+import sbt.Def
 import Keys._
 import scala.util.matching.Regex
 import OMKeys._
 import java.util.zip.GZIPOutputStream
 import org.kamranzafar.jtar.{ TarEntry, TarOutputStream }
 import resource._
-import java.io.{ BufferedOutputStream, BufferedInputStream, FileOutputStream }
+import java.io.{ BufferedOutputStream, FileOutputStream }
 import scala.io.Source
-import sbt.Path._
 import com.typesafe.sbt.osgi.OsgiKeys._
 import scala.Some
 
@@ -60,22 +60,21 @@ trait Assembly { self: BuildSystemDefaults ⇒
         def isChildOf(f: File, oF: File): Boolean = f.getCanonicalPath.contains(oF.getCanonicalPath)
         def getDiff(f: File, oF: File): String = f.getCanonicalPath.takeRight(f.getCanonicalPath.length - oF.getCanonicalPath.length)
 
-        val resourceMap = (rS flatMap { case (in, out) ⇒ expand(in, in, out) }).toMap
+        val resourceMap = (rS flatMap { case (in, out) ⇒ expand(in, in, out) }).groupBy(_._1).collect { case (k, v) ⇒ k -> (v map (_._2)) }
 
         val copyFunction = FileFunction.cached(target / ("resAssembleCache" + name), FilesInfo.lastModified, FilesInfo.exists) {
-          _ map {
-            rT ⇒
-              /*val out = rS.filter(i ⇒ isChildOf(rT, i._1)).reduce { (a, b) ⇒ if (a._1.getAbsolutePath.length > b._1.getAbsolutePath.length) a else b }
-              val dest = cT / out._2 / (if (out._1.isDirectory) getDiff(rT, out._1) else getDiff(rT, out._1.getParentFile))
-              println(getDiff(rT, out._1.getParentFile))
-              println(rT.getCanonicalPath)
-              println(out._1.getParentFile.getCanonicalPath)*/
-              val dest = resourceMap(rT)
+          f ⇒
+            f flatMap {
+              rT ⇒
+                val dests = resourceMap(rT)
 
-              s.log.info("Copying file " + rT.getPath + " to: " + dest.getCanonicalPath)
-              IO.copyFile(rT, dest)
-              dest
-          }
+                for (dest ← dests) {
+                  s.log.info("Copying file " + rT.getPath + " to: " + dest.getCanonicalPath)
+                  IO.copyFile(rT, dest)
+                  dest
+                }
+                dests
+            }
         }
 
         copyFunction(resourceMap.keySet)
@@ -205,34 +204,35 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
 object Assembly {
   //checks to see if settingkey key exists for project p in Seq s. If it does, applies the filter function to key's value, and if that returns true, the project stays in the seq.
-  def projFilter[T](s: Seq[ProjectReference], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Project.Initialize[Seq[ProjectReference]] = {
+  def projFilter[T](s: Seq[ProjectReference], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Def.Initialize[Seq[ProjectReference]] = {
     // (key in p) ? returns Initialize[Option[T]]
     // Project.Initialize.join takes a Seq[Initialize[_]] and gives back an Initialize[Seq[_]]
-    val ret = Project.Initialize.join(s map { p ⇒ (key in p).?(i ⇒ i -> p) })(_ filter {
+    val ret = Def.Initialize.join(s map { p ⇒ (key in p).?(i ⇒ i -> p) })(_ filter {
       case (None, _)    ⇒ false
       case (Some(v), _) ⇒ filter(v)
     })(_ map { _._2 })
 
-    lazy val ret2 = Project.bind(ret) { r ⇒
+    lazy val ret2 = Def.bind(ret) { r ⇒
       val x = r.map(expandToDependencies)
-      val y = Project.Initialize.join(x)
+      val y = Def.Initialize.join(x)
       y { _.flatten.toSet.toSeq } //make sure all references are unique
     }
+
     if (intransitive) ret else ret2
   }
 
-  def expandToDependencies(pr: ProjectReference): Project.Initialize[Seq[ProjectReference]] = {
+  //recursively explores the dependency tree of pr and adds all dependencies to the list of projects to be copied
+  def expandToDependencies(pr: ProjectReference): Def.Initialize[Seq[ProjectReference]] = {
     val r = (thisProject in pr) { _.dependencies.map(_.project) }
-    val r2 = Project.bind(r) { ret ⇒ Project.Initialize.join(ret map expandToDependencies) }
-    val r3 = Project.bind(r2) { ret ⇒ r(first ⇒ pr +: (first ++ ret.flatten)) }
+    val r3 = Def.bind(Def.bind(r) { ret ⇒ Def.Initialize.join(ret map expandToDependencies) }) { ret ⇒ r(first ⇒ pr +: ret.flatten) }
     r3
   }
 
-  implicit def ProjRefs2RichProjectSeq(s: Seq[ProjectReference]) = new RichProjectSeq(Project.value(s))
+  implicit def ProjRefs2RichProjectSeq(s: Seq[ProjectReference]) = new RichProjectSeq(Def.value(s))
 
-  implicit def InitProjRefs2RichProjectSeq(s: Project.Initialize[Seq[ProjectReference]]) = new RichProjectSeq(s)
+  implicit def InitProjRefs2RichProjectSeq(s: Def.Initialize[Seq[ProjectReference]]) = new RichProjectSeq(s)
 
-  class RichProjectSeq(s: Project.Initialize[Seq[ProjectReference]]) {
+  class RichProjectSeq(s: Def.Initialize[Seq[ProjectReference]]) {
     def keyFilter[T](key: SettingKey[T], filter: (T) ⇒ Boolean, intransitive: Boolean = false) = projFilter(s, key, filter, intransitive)
     def sendTo(to: String) = sendBundles(s, to) //TODO: This function is specific to OSGI bundled projects. Make it less specific?
   }
@@ -243,13 +243,16 @@ object Assembly {
     (keyFilter.tail foldLeft projFilter(s, head._1, head._2)) { case (s, (key, filter)) ⇒ projFilter(s, key, filter) }
   }*/
 
-  def projFilter[T](s: Project.Initialize[Seq[ProjectReference]], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Project.Initialize[Seq[ProjectReference]] = {
-    Project.bind(s)(j ⇒ projFilter(j, key, filter, intransitive))
+  def projFilter[T](s: Def.Initialize[Seq[ProjectReference]], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Project.Initialize[Seq[ProjectReference]] = {
+    Def.bind(s)(j ⇒ projFilter(j, key, filter, intransitive))
   }
 
-  def sendBundles(bundles: Project.Initialize[Seq[ProjectReference]], to: String): Project.Initialize[Task[Set[(File, String)]]] = Project.bind(bundles) { projs ⇒
+  //TODO: New API makes this much simpler
+  //val bundles: Seq[FIle] = bundle.all( ScopeFilter( inDependencies(ref) ) ).value
+
+  def sendBundles(bundles: Def.Initialize[Seq[ProjectReference]], to: String): Def.Initialize[Task[Set[(File, String)]]] = Def.bind(bundles) { projs ⇒
     require(projs.nonEmpty)
-    val seqOTasks: Project.Initialize[Seq[Task[Set[(File, String)]]]] = Project.Initialize.join(projs.map(p ⇒ (bundle in p, thisProject in p) map { (f, bs) ⇒
+    val seqOTasks: Def.Initialize[Seq[Task[Set[(File, String)]]]] = Def.Initialize.join(projs.map(p ⇒ bundle in p map { f ⇒
       Set(f -> to)
     }))
     seqOTasks { seq ⇒ seq.reduceLeft[Task[Set[(File, String)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }

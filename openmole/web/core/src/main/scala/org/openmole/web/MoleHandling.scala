@@ -70,7 +70,7 @@ trait MoleHandling { self: SlickSupport ⇒
         case e: CannotResolveClassException ⇒ Right("The uploaded xml was not a valid serialized object.")
         case c: ClassCastException          ⇒ Right("Blargh")
       }
-    case None ⇒ Right("No data was uploaded.")
+    case None ⇒ Right("No data was uploaded..")
   }
 
   private def processPack(is: Option[InputStream]): (Either[IPartialMoleExecution, String], Option[File]) = is match {
