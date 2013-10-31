@@ -25,6 +25,7 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
       OsgiKeys.embeddedJars, target
     ) map Osgi.bundleTask,
     OsgiKeys.bundleSymbolicName <<= (name, osgiSingleton) { case (name, singleton) ⇒ name + ";singleton:=" + singleton },
+    autoAPIMappings := true,
     bundleProj := true,
     OsgiKeys.bundleVersion <<= version,
     OsgiKeys.exportPackage <<= name { n ⇒ Seq(n + ".*") },

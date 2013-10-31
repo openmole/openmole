@@ -35,7 +35,7 @@ import scala.io.Source
 import org.openmole.core.model.mole.IMoleExecution.JobStatusChanged
 import org.openmole.misc.eventdispatcher.{ Event, EventListener }
 
-@MultipartConfig(maxFileSize = 3 * 1024 * 1024 /*max file size of 3 MiB*/ ) //research scala multipart config
+@MultipartConfig(maxFileSize = 3145728 /*max file size of 3 MiB*/ ) //research scala multipart config
 class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupport with ScalateSupport
     with FileUploadSupport with FlashMapSupport with FutureSupport with JacksonJsonSupport with MoleHandling {
 
