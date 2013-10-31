@@ -8,11 +8,7 @@ import com.typesafe.sbt.osgi.OsgiManifestHeaders
 import java.io.{ FileInputStream, FileOutputStream }
 import resource._
 
-/*object Osgi {
-
-  def seqToStrOpt[A](seq: Seq[A])(f: A ⇒ String): Option[String] =
-    if (seq.isEmpty) None else Some(seq map f mkString ",")
-
+private object Osgi {
   def bundleTask(
     headers: OsgiManifestHeaders,
     additionalHeaders: Map[String, String],
@@ -34,10 +30,10 @@ import resource._
         builder.setClasspath(fullClasspath map (_.data) toArray)
         builder.setProperties(props)
         includeResourceProperty(resourceDirectories, embeddedJars) foreach (dirs ⇒
-          builder.setProperty(aQute.lib.osgi.Constants.INCLUDE_RESOURCE, dirs)
+          builder.setProperty(INCLUDE_RESOURCE, dirs)
         )
         bundleClasspathProperty(embeddedJars) foreach (jars ⇒
-          builder.setProperty(aQute.lib.osgi.Constants.BUNDLE_CLASSPATH, jars)
+          builder.setProperty(BUNDLE_CLASSPATH, jars)
         )
         val jar = builder.build
         jar.write(artifactPath)
@@ -49,7 +45,6 @@ import resource._
 
   def headersToProperties(headers: OsgiManifestHeaders, additionalHeaders: Map[String, String]): Properties = {
     import headers._
-    import aQute.lib.osgi.Constants._
     val properties = new Properties
     properties.put(BUNDLE_SYMBOLICNAME, bundleSymbolicName)
     properties.put(BUNDLE_VERSION, bundleVersion)
@@ -64,11 +59,26 @@ import resource._
     properties
   }
 
-  private def includeResourceProperty(resourceDirectories: Seq[File], embeddedJars: Seq[File]) =
+  def seqToStrOpt[A](seq: Seq[A])(f: A ⇒ String): Option[String] =
+    if (seq.isEmpty) None else Some(seq map f mkString ",")
+
+  def includeResourceProperty(resourceDirectories: Seq[File], embeddedJars: Seq[File]) =
     seqToStrOpt(resourceDirectories ++ embeddedJars)(_.getAbsolutePath)
 
-  private def bundleClasspathProperty(embeddedJars: Seq[File]) =
+  def bundleClasspathProperty(embeddedJars: Seq[File]) =
     seqToStrOpt(embeddedJars)(_.getName) map (".," + _)
 
-  private def id(s: String) = s
-}*/ 
+  def defaultBundleSymbolicName(organization: String, name: String): String = {
+    val organizationParts = parts(organization)
+    val nameParts = parts(name)
+    val partsWithoutOverlap = (organizationParts.lastOption, nameParts.headOption) match {
+      case (Some(last), Some(head)) if (last == head) ⇒ organizationParts ++ nameParts.tail
+      case _ ⇒ organizationParts ++ nameParts
+    }
+    partsWithoutOverlap mkString "."
+  }
+
+  def id(s: String) = s
+
+  def parts(s: String) = s split "[.-]" filterNot (_.isEmpty)
+}

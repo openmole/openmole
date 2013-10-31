@@ -70,7 +70,7 @@ trait MoleHandling { self: SlickSupport ⇒
         case e: CannotResolveClassException ⇒ Right("The uploaded xml was not a valid serialized object.")
         case c: ClassCastException          ⇒ Right("Blargh")
       }
-    case None ⇒ Right("No data was uploaded.")
+    case None ⇒ Right("No data was uploaded..")
   }
 
   private def processPack(is: Option[InputStream]): (Either[IPartialMoleExecution, String], Option[File]) = is match {
@@ -151,9 +151,9 @@ trait MoleHandling { self: SlickSupport ⇒
       case _                                 ⇒ throw new Exception("Invalidly formatted csv file")
     }).toMap) getOrElse Map()
 
-    val moleBinary = moleInput map {str => {val arr = Source.fromInputStream(str)(Codec.ISO8859).toArray; str.close(); arr}}
+    val moleBinary = moleInput map { str ⇒ { val arr = Source.fromInputStream(str)(Codec.ISO8859).toArray; str.close(); arr } }
 
-    val moleStream = moleBinary map (b => new ByteArrayInputStream(b map (_.toByte)))
+    val moleStream = moleBinary map (b ⇒ new ByteArrayInputStream(b map (_.toByte)))
 
     val (moleExec, genPath) = if (pack) processPack(moleStream) else (processXMLFile[IPartialMoleExecution](moleStream), None)
 

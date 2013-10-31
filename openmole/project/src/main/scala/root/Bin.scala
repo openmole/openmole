@@ -38,9 +38,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
 
   lazy val guiPluginProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"), true) sendTo "openmole-plugins-gui"
 
-  println(uiProjects ++ dbserverProjects)
-
-  lazy val openmole = AssemblyProject("openmole", "plugins", settings = resAssemblyProject ++ uiProjects ++ pluginProjects ++ guiPluginProjects, depNameMap =
+  lazy val openmole = AssemblyProject("openmole", "plugins", settings = resAssemblyProject ++ uiProjects ++ pluginProjects ++ guiPluginProjects ++ dbserverProjects ++ zipProject, depNameMap =
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" }, """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })
   ) settings (
     equinoxDependencies, libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion intransitive (),
@@ -49,17 +47,12 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     },
     resourceSets <+= (baseDirectory) map { _ / "db-resources" -> "dbserver/bin" },
     resourceSets <+= (copyDependencies in openmolePlugins) map { _ -> "openmole-plugins" },
+    tarGZName := Some("openmole"),
     dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") }
   ) //todo, add dependency mapping or something
 
   lazy val openmolePlugins = AssemblyProject("openmole-plugins") settings (openmolePluginDependencies, //TODO: This project is only necessary thanks to the lack of dependency mapping in AssemblyProject
     dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library")
-  )
-
-  lazy val a = bundle in base.Core.model map { x ⇒ x }
-
-  lazy val assembleTest = AssemblyProject("assembleTest", settings = resAssemblyProject) settings (
-    resourceSets <++= (bundle in base.Core.model) map { x ⇒ Set((x, "b"), (x, "a")) }
   )
 
   lazy val dbserverProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "dbserver") sendTo "dbserver/lib"
