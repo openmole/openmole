@@ -146,7 +146,7 @@ trait MoleHandling { self: SlickSupport ⇒
     val r = csvInput map Source.fromInputStream
 
     val regex = """(.*),(.*)""".r
-    val csvData = r.map(_.getLines().map(_ match {
+    lazy val csvData = r.map(_.getLines().map(_ match {
       case regex(name: String, data: String) ⇒ name -> data
       case _                                 ⇒ throw new Exception("Invalidly formatted csv file")
     }).toMap) getOrElse Map()

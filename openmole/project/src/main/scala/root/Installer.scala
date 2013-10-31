@@ -1,28 +1,18 @@
 package root
 
-/*import sbt._
+import sbt._
 import Keys._
-import org.clapper.sbt.izpack.IzPack
-import org.clapper.sbt.izpack.IzPackSection
-import IzPack.IzPack._
-import org.openmole.buildsystem.OMKeys._
-import Bin.{ openmole, openmoleRuntime }
+import root._
+import sbtunidoc.Plugin._
+import UnidocKeys._
+import sbt.inc.Analysis
 
-object Installer extends Defaults {
+object Installer extends Defaults(Application, Base, Gui, Web) {
   val dir = file("installer")
 
-  lazy val installer = AssemblyProject("installer", "installer", baseDir = file("."), settings = IzPack.izPackSettings ++ resAssemblyProject) settings (
-    assemble := false,
-    packageBin := file("."),
-    createInstaller in IzPack.IzPack.Config <<= (createInstaller in IzPack.IzPack.Config) dependsOn resourceAssemble,
-    variables in Config <++= version { v ⇒ Seq(("version", v), "home" -> "$USER_HOME") },
-    installSourceDir in Config <<= assemblyPath,
-    configFile in Config <<= assemblyPath { _ / "resources/install.yml" },
-    resourceSets <<= (assemblyPath in openmole, target in openmoleRuntime, tarGZName in openmoleRuntime, baseDirectory) map { (assembly, target, tarGz, bD) ⇒
-      Set(
-        assembly -> "openmole",
-        bD / "resources" -> "resources"
-      ) ++ (Set(tarGz getOrElse "assembly", "jvm-386", "jvm-x64") map (n ⇒ target / (n + ".tar.gz") -> "runtime"))
-    }
-  )
-} */
+  lazy val docProj = Project("documentation", dir / "documentation") aggregate (subProjects: _*) settings (
+    unidocSettings: _*
+  ) settings (compile := Analysis.Empty, scalacOptions in (ScalaUnidoc, unidoc) += "-Ymacro-no-expand",
+      unidocProjectFilter in (ScalaUnidoc, unidoc) := inAnyProject -- inProjects(Libraries.subProjects: _*) -- inProjects(ThirdParties.subProjects: _*)
+    )
+}
