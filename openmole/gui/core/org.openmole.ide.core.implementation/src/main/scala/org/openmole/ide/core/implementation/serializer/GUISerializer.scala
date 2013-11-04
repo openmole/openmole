@@ -57,6 +57,8 @@ import scala.util.Success
 import org.openmole.ide.core.implementation.sampling.DomainProxyUI
 import java.net.URL
 import javax.imageio.ImageIO
+import scalaz._
+import Scalaz._
 
 object GUISerializer extends Logger {
   var instance = new GUISerializer
@@ -74,7 +76,7 @@ object GUISerializer extends Logger {
   }
 }
 
-class GUISerializer { serializer ⇒
+class GUISerializer extends Logger { serializer ⇒
 
   sealed trait SerializationState
   case class Serializing(id: ID.Type) extends SerializationState
@@ -342,8 +344,12 @@ class GUISerializer { serializer ⇒
     }
   }
 
-  def deserializeConcept[T](clazz: Class[_]) =
-    new File(workDir, folder(clazz)).listFiles.toList.map(f ⇒ Try(read(f)).toOption).flatten.map(_.asInstanceOf[T])
+  def deserializeConcept[T](clazz: Class[_]): Writer[List[Throwable], List[T]] = {
+    val res = new File(workDir, folder(clazz)).listFiles.toList.map(
+      f ⇒ Try(read(f).asInstanceOf[T])
+    )
+    res.collect { case Success(s) ⇒ s }.set(res.collect { case Failure(f) ⇒ f })
+  }
 
   def deserializeConcept(clazz: Class[_], id: String) = {
     val f = workDir.child(folder(clazz)).child(id + ".xml")
@@ -355,24 +361,27 @@ class GUISerializer { serializer ⇒
     try os.extractDirArchiveWithRelativePath(workDir)
     finally os.close
 
+    val concepts =
+      for {
+        protos ← deserializeConcept[PrototypeDataProxyUI](classOf[PrototypeDataProxyUI])
+        samplings ← deserializeConcept[SamplingCompositionDataProxyUI](classOf[SamplingCompositionDataProxyUI])
+        envs ← deserializeConcept[EnvironmentDataProxyUI](classOf[EnvironmentDataProxyUI])
+        hooks ← deserializeConcept[HookDataProxyUI](classOf[HookDataProxyUI])
+        sources ← deserializeConcept[SourceDataProxyUI](classOf[SourceDataProxyUI])
+        tasks ← deserializeConcept[TaskDataProxyUI](classOf[TaskDataProxyUI])
+      } yield protos ++ samplings ++ envs ++ hooks ++ sources ++ tasks
+
     val proxies: Proxies = new Proxies
+    concepts.value.foreach(proxies += _)
 
-    Try {
-      deserializeConcept[PrototypeDataProxyUI](classOf[PrototypeDataProxyUI]).foreach(proxies.+=)
-      deserializeConcept[SamplingCompositionDataProxyUI](classOf[SamplingCompositionDataProxyUI]).foreach(proxies.+=)
-      deserializeConcept[EnvironmentDataProxyUI](classOf[EnvironmentDataProxyUI]).foreach(proxies.+=)
-      deserializeConcept[HookDataProxyUI](classOf[HookDataProxyUI]).foreach(proxies.+=)
-      deserializeConcept[SourceDataProxyUI](classOf[SourceDataProxyUI]).foreach(proxies.+=)
-      deserializeConcept[TaskDataProxyUI](classOf[TaskDataProxyUI]).foreach(proxies.+=)
-
-      deserializeConcept[CapsuleData](classOf[CapsuleData])
+    /*deserializeConcept[CapsuleData](classOf[CapsuleData])
       deserializeConcept[SlotData](classOf[SlotData])
       deserializeConcept[TransitionData](classOf[TransitionData])
-      deserializeConcept[DataChannelData](classOf[DataChannelData])
+      deserializeConcept[DataChannelData](classOf[DataChannelData])*/
 
-      val moleScenes = deserializeConcept[MoleData2](classOf[MoleData2])
-      (proxies, moleScenes)
-    }
+    for {
+      moleScenes ← deserializeConcept[MoleData2](classOf[MoleData2])
+    } yield (proxies, moleScenes)
 
   }
 
