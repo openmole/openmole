@@ -371,17 +371,19 @@ class GUISerializer extends Logger { serializer ⇒
         tasks ← deserializeConcept[TaskDataProxyUI](classOf[TaskDataProxyUI])
       } yield protos ++ samplings ++ envs ++ hooks ++ sources ++ tasks
 
-    val proxies: Proxies = new Proxies
-    concepts.value.foreach(proxies += _)
-
     /*deserializeConcept[CapsuleData](classOf[CapsuleData])
       deserializeConcept[SlotData](classOf[SlotData])
       deserializeConcept[TransitionData](classOf[TransitionData])
       deserializeConcept[DataChannelData](classOf[DataChannelData])*/
 
     for {
+      concept ← concepts
       moleScenes ← deserializeConcept[MoleData2](classOf[MoleData2])
-    } yield (proxies, moleScenes)
+    } yield {
+      val proxies: Proxies = new Proxies
+      concept.foreach(proxies += _)
+      (proxies, moleScenes)
+    }
 
   }
 
