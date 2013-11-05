@@ -104,49 +104,40 @@ sealed abstract class SystemExecTask(
     val error: Option[Prototype[String]],
     val variables: Iterable[(Prototype[_], String)]) extends ExternalTask {
 
-  override protected def process(context: Context) = {
-    val tmpDir = Workspace.newDir("systemExecTask")
+  override protected def process(context: Context) = withWorkDir { tmpDir ⇒
+    val workDir = if (directory.isEmpty) tmpDir else new File(tmpDir, directory)
+    val links = prepareInputFiles(context, tmpDir, directory)
+
+    val osCommandLine: String = command.find { case (_, os) ⇒ os.compatible }.map { case (cmd, _) ⇒ cmd }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
+
+    val commandLine =
+      CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context + Variable(ExternalTask.PWD, workDir.getAbsolutePath), osCommandLine))
 
     try {
-      val workDir = if (directory.isEmpty) tmpDir else new File(tmpDir, directory)
-      val links = prepareInputFiles(context, tmpDir, directory)
+      val runtime = Runtime.getRuntime
 
-      val osCommandLine: String = command.find { case (_, os) ⇒ os.compatible }.map { case (cmd, _) ⇒ cmd }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
-
-      val commandLine =
-        CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context + Variable(ExternalTask.PWD, workDir.getAbsolutePath), osCommandLine))
-
-      try {
-        val runtime = Runtime.getRuntime
-
-        //FIXES java.io.IOException: error=26
-        val process = runtime.synchronized {
-          runtime.exec(
-            commandLine.toString,
-            variables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
-            workDir)
-        }
-
-        execute(process, context) match {
-          case (retCode, variables) ⇒
-            if (errorOnReturnCode && retCode != 0) throw new InternalProcessingError("Error executing: " + commandLine + " return code was not 0 but " + retCode)
-
-            val retContext = fetchOutputFiles(context, workDir, links) ++ variables
-
-            returnValue match {
-              case None              ⇒ retContext
-              case Some(returnValue) ⇒ retContext + (returnValue, retCode)
-            }
-        }
+      //FIXES java.io.IOException: error=26
+      val process = runtime.synchronized {
+        runtime.exec(
+          commandLine.toString,
+          variables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
+          workDir)
       }
-      catch {
-        case e: IOException ⇒ throw new InternalProcessingError(e, "Error executing: " + commandLine)
+
+      execute(process, context) match {
+        case (retCode, variables) ⇒
+          if (errorOnReturnCode && retCode != 0) throw new InternalProcessingError("Error executing: " + commandLine + " return code was not 0 but " + retCode)
+
+          val retContext = fetchOutputFiles(context, workDir, links) ++ variables
+
+          returnValue match {
+            case None              ⇒ retContext
+            case Some(returnValue) ⇒ retContext + (returnValue, retCode)
+          }
       }
     }
     catch {
-      case e: Throwable ⇒
-        tmpDir.recursiveDelete
-        throw e
+      case e: IOException ⇒ throw new InternalProcessingError(e, "Error executing: " + commandLine)
     }
   }
 
