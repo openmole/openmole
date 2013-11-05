@@ -2,7 +2,7 @@ rmdir /s /q "configuration\org.eclipse.core.runtime"
 rmdir /s /q "configuration\org.eclipse.equinox.app"
 rmdir /s /q "configuration\org.eclipse.osgi"
 
-start dbserver\bin\openmole-dbserver.bat
+start /MIN dbserver\bin\openmole-dbserver.bat
 
 mkdir "%UserProfile%\.openmole\.tmp"
 
