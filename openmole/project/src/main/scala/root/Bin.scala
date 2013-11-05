@@ -55,7 +55,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
   ) //todo, add dependency mapping or something
 
   lazy val openmolePlugins = AssemblyProject("openmole-plugins") settings (openmolePluginDependencies, //TODO: This project is only necessary thanks to the lack of dependency mapping in AssemblyProject
-    dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library")
+    dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") }
   )
 
   lazy val dbserverProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "dbserver") sendTo "dbserver/lib"

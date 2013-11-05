@@ -57,9 +57,7 @@ class NetLogoTask(
       case Right(s)     ⇒ s.getName
     }
 
-  override def process(context: Context): Context = {
-
-    val tmpDir = org.openmole.misc.workspace.Workspace.newDir("netLogoTask")
+  override def process(context: Context): Context = withWorkDir { tmpDir ⇒
     val links = prepareInputFiles(context, tmpDir)
 
     val script = new File(tmpDir, scriptPath)
