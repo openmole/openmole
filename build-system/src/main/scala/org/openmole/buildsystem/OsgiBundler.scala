@@ -16,14 +16,16 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
   protected val bundleMap = Map("Bundle-ActivationPolicy" -> "lazy")
 
   protected lazy val osgiCachedSettings = Project.defaultSettings ++ SbtOsgi.osgiSettings ++ Seq(
-    OsgiKeys.bundle <<= (
+    /*OsgiKeys.bundle <<= (
       OsgiKeys.manifestHeaders,
+      includeResource,
       OsgiKeys.additionalHeaders,
       fullClasspath in Compile,
       artifactPath in (Compile, packageBin),
       resourceDirectories in Compile,
       OsgiKeys.embeddedJars, target
     ) map Osgi.bundleTask,
+    includeResource := Nil,*/
     OsgiKeys.bundleSymbolicName <<= (name, osgiSingleton) { case (name, singleton) ⇒ name + ";singleton:=" + singleton },
     autoAPIMappings := true,
     bundleProj := true,

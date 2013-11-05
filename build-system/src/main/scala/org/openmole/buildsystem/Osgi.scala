@@ -1,6 +1,6 @@
 package org.openmole.buildsystem
 
-import aQute.bnd.osgi.Builder
+/*import aQute.bnd.osgi.Builder
 import aQute.bnd.osgi.Constants._
 import java.util.Properties
 import sbt._
@@ -11,6 +11,7 @@ import resource._
 private object Osgi {
   def bundleTask(
     headers: OsgiManifestHeaders,
+    resources: Seq[String],
     additionalHeaders: Map[String, String],
     fullClasspath: Seq[Attributed[File]],
     artifactPath: File,
@@ -29,13 +30,14 @@ private object Osgi {
         val builder = new Builder
         builder.setClasspath(fullClasspath map (_.data) toArray)
         builder.setProperties(props)
-        includeResourceProperty(resourceDirectories, embeddedJars) foreach (dirs ⇒
-          builder.setProperty(INCLUDE_RESOURCE, dirs)
+        includeResourceProperty(resourceDirectories, embeddedJars, resources) foreach (dirs ⇒
+          builder.setProperty(INCLUDERESOURCE, dirs)
         )
         bundleClasspathProperty(embeddedJars) foreach (jars ⇒
           builder.setProperty(BUNDLE_CLASSPATH, jars)
         )
         val jar = builder.build
+        println(jar.getResources)
         jar.write(artifactPath)
         Set(artifactPath)
     }
@@ -62,8 +64,9 @@ private object Osgi {
   def seqToStrOpt[A](seq: Seq[A])(f: A ⇒ String): Option[String] =
     if (seq.isEmpty) None else Some(seq map f mkString ",")
 
-  def includeResourceProperty(resourceDirectories: Seq[File], embeddedJars: Seq[File]) =
-    seqToStrOpt(resourceDirectories ++ embeddedJars)(_.getAbsolutePath)
+  def includeResourceProperty(resourceDirectories: Seq[File], embeddedJars: Seq[File], oResources: Seq[String]): Option[String] = {
+    seqToStrOpt(resourceDirectories ++ embeddedJars)(_.getAbsolutePath) zip seqToStrOpt(oResources)(a ⇒ a) map { case (a, b) ⇒ a + (if (!b.isEmpty) "," else "") + b } headOption
+  }
 
   def bundleClasspathProperty(embeddedJars: Seq[File]) =
     seqToStrOpt(embeddedJars)(_.getName) map (".," + _)
@@ -81,4 +84,4 @@ private object Osgi {
   def id(s: String) = s
 
   def parts(s: String) = s split "[.-]" filterNot (_.isEmpty)
-}
+}*/ 

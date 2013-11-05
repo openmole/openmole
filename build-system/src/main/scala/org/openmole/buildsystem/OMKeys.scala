@@ -28,6 +28,8 @@ object OMKeys {
 
   val installRemote = TaskKey[Unit]("install-remote", "Builds bundles and adds them to the openmole nexus server")
 
+  //val includeResource = SettingKey[Seq[String]]("includeResource")
+
   val assemblyPath = SettingKey[File]("The path to the project's assembly folder")
 
   val gc = TaskKey[Unit]("gc", "Force SBT to take out the trash")

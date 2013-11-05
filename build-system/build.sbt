@@ -18,11 +18,14 @@ name := "openmole-buildsystem-plugin"
 
 organization := "org.openmole"
 
-version := "0.10.0.0"
+version := "0.10.1"
 
 resolvers += Classpaths.sbtPluginSnapshots
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.6.0")
+resolvers ++= Seq(DefaultMavenRepository,"openmole-public" at "http://maven.openmole.org/public")
+
+
+addSbtPlugin("fr.iscpif" % "sbt-osgi" % "0.5.1") //TODO: Get these changes mainlined
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.2.0")
 
