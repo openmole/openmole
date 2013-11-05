@@ -25,9 +25,9 @@ trait Assembly { self: BuildSystemDefaults ⇒
   lazy val zipProject: Seq[Project.Setting[_]] = Seq(
     zipFiles <+= copyDependencies map { f ⇒ f },
     zip <<= (zipFiles, streams, target, tarGZName) map zipImpl,
-    tarGZName := None,
+    tarGZName := None
 
-    assemble <<= assemble dependsOn zip
+  //assemble <<= assemble dependsOn zip
   )
 
   lazy val urlDownloadProject: Seq[Project.Setting[_]] = Seq(
