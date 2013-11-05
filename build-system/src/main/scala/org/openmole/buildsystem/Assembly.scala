@@ -186,7 +186,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
     val cacheOutput = managed(new BufferedOutputStream(new FileOutputStream(cache)))
 
     if (alreadyCached) {
-      Seq.empty
+      urls map (_._2)
     }
     else {
       for { os ← cacheOutput; hash ← hashes } { os.write(hash) }
