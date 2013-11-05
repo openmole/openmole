@@ -20,6 +20,7 @@ package org.openmole.misc
 import collection.JavaConversions._
 import java.io._
 import org.osgi.framework._
+import java.net.URLDecoder
 
 package object osgi {
 
@@ -48,12 +49,14 @@ package object osgi {
         else noProtocol
       }
 
+      val decodedLocation = URLDecoder.decode(location, "UTF-8")
+
       if (ref)
         openMOLELocation match {
-          case Some(oMLoc) ⇒ new File(oMLoc, location)
-          case None        ⇒ new File(location)
+          case Some(oMLoc) ⇒ new File(oMLoc, decodedLocation)
+          case None ⇒ new File(decodedLocation)
         }
-      else new File(location)
+      else new File(decodedLocation)
     }
 
   }

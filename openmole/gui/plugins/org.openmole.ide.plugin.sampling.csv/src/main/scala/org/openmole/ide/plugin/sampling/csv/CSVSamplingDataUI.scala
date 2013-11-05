@@ -8,21 +8,22 @@ package org.openmole.ide.plugin.sampling.csv
 import java.io.File
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.sampling.csv.CSVSampling
-import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.core.model.sampling.{ Factor, Sampling }
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.serializer.Update
 
-class CSVSamplingDataUI(val csvFilePath: String = "",
-                        val prototypeMapping: List[(String, PrototypeDataProxyUI)] = List.empty) extends SamplingDataUI {
+class CSVSamplingDataUI2(val csvFilePath: String = "",
+                         val separator: Char = ',',
+                         val prototypeMapping: List[(String, PrototypeDataProxyUI)] = List.empty) extends SamplingDataUI {
   def name = "CSV"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
     try {
       val fi = new File(csvFilePath)
-      val sampling = CSVSampling(fi)
-      prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach {
+      val sampling = CSVSampling(fi, separator)
+      prototypeMapping.foreach {
         m ⇒ sampling addColumn (m._1, m._2.dataUI.coreObject.get)
       }
       sampling
@@ -55,4 +56,8 @@ class CSVSamplingDataUI(val csvFilePath: String = "",
     if (n.isEmpty) "CSV file"
     else n
   }
+}
+
+class CSVSamplingDataUI extends Update[CSVSamplingDataUI2] {
+  def update = new CSVSamplingDataUI2
 }

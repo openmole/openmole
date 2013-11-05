@@ -113,10 +113,10 @@ class ExecutionManager(manager: MoleUI,
             executionContext: ExecutionContext = ExecutionContext.local) = synchronized {
     tabbedPane.selection.index = 0
     cancel
-    initBarPlotter
 
     server match {
       case Some(url: String) ⇒
+        executionContainer.startStopButton.enabled = false
         executionContainer.serverLabel.text = "Uploading mole execution, please wait..."
         executionContainer.revalidate
         val client = ScalaClient(url)
@@ -129,11 +129,14 @@ class ExecutionManager(manager: MoleUI,
                 executionContainer.serverLabel.text = "The Mole has been started "
                 val uidurl = url + "/execs/" + x.toString
                 executionContainer.uuidLabel.hlink(uidurl)
+                executionContainer.startLook
+                executionContainer.startStopButton.enabled = true
                 executionContainer.revalidate
               case Left(s: String) ⇒ StatusBar().block(s)
             }
         }
       case _ ⇒
+        initBarPlotter
         buildMoleExecution match {
           case Success((mE, envNames)) ⇒
             val mExecution = mE.toExecution(manager.context, executionContext.copy(out = printStream))
