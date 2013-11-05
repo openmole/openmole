@@ -92,7 +92,7 @@ object Libraries extends Defaults(Apache) {
         "com.typesafe.akka" %% "akka-transactor" % "2.1.4",
         "com.typesafe" % "config" % "1.0.0",
         "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2")
-    })
+    }, bundleType += "dbserver")
 
   lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.reflect.*", "scala.tools.*"),
     privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
