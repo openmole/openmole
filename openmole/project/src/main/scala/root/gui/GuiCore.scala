@@ -15,5 +15,5 @@ object Core extends GuiDefaults {
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }) dependsOn
     (provided(robustIt), provided(base.Core.model), provided(base.Core.batch), base.Misc.exception, provided(base.Misc.eventDispatcher), provided(Web.misc),
       provided(base.Misc.workspace), provided(base.Misc.tools), provided(xstream), provided(Apache.config), provided(Apache.log4j), provided(groovy), provided(jodaTime), provided(netbeans),
-      Misc.widget, Misc.tools, provided(Misc.visualization), provided(gral), base.Misc.replication % "test")
+      Misc.widget, Misc.tools, provided(Misc.visualization), provided(gral), provided(scalaz), base.Misc.replication % "test")
 }

@@ -177,5 +177,8 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scalajHttp = OsgiProject("org.scalaj.scalaj-http") settings (libraryDependencies += "org.scalaj" %% "scalaj-http" % "0.3.10", exportPackage := Seq("scalaj.http.*"))
 
+  lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
+    (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.4")
+
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
 }

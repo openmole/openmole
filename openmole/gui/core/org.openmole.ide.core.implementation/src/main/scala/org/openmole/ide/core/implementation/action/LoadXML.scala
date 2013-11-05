@@ -53,20 +53,20 @@ object LoadXML {
       if (f.isFile) {
         Settings.currentPath = Some(f.getParentFile)
         Settings.currentProject = Some(f)
-        (new GUISerializer).deserialize(fileName) match {
-          case Failure(t) ⇒ displayErrors(List(t))
-          case Success((proxies, scene)) ⇒
-            StatusBar().clear
-            ScenesManager.closeAll
-            Proxies.instance = proxies
-            addPrototypes(proxies)
-            addTasks(proxies)
-            addSamplings(proxies)
-            addEnvironments(proxies)
-            addHooks(proxies)
-            addSources(proxies)
-            scene.foreach(mdu ⇒ ScenesManager.addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
-        }
+        val deserialised = (new GUISerializer).deserialize(fileName)
+        displayErrors(deserialised.written)
+        val (proxies, scene) = deserialised.value
+        StatusBar().clear
+        ScenesManager.closeAll
+        Proxies.instance = proxies
+        addPrototypes(proxies)
+        addTasks(proxies)
+        addSamplings(proxies)
+        addEnvironments(proxies)
+        addHooks(proxies)
+        addSources(proxies)
+        scene.foreach(mdu ⇒ ScenesManager.addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
+
         fileName
       }
       else tryFile(text, exts.tail)
