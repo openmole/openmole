@@ -2,6 +2,7 @@ package org.openmole.ide.plugin.task.stat
 
 import scala.swing.{ Label, TextField }
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.tools.util.Converters._
 
 /*
  * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
@@ -29,6 +30,6 @@ class ConfidenceIntervalTaskPanelUI(dataUI: ConfidenceIntervalTaskDataUI) extend
   })
 
   def saveContent(name: String) = new ConfidenceIntervalTaskDataUI(name,
-    multiPrototypeCombo.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) },
+    multiPrototypeCombo.content.map { c ⇒ (c.comboValue1, c.comboValue2) },
     levelTextField.text.toDouble)
 }
