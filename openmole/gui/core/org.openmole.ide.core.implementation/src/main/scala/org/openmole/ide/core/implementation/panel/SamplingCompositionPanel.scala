@@ -84,7 +84,7 @@ trait SamplingCompositionPanel extends Base
   }
 
   def deleteProxy = {
-    val toBeRemovedSamplings = ScenesManager.explorationCapsules.filter { case (c, d) ⇒ d.sampling == Some(proxy) }
+    val toBeRemovedSamplings = ScenesManager().explorationCapsules.filter { case (c, d) ⇒ d.sampling == Some(proxy) }
     toBeRemovedSamplings match {
       case Nil ⇒
         scene.closePropertyPanel(index)

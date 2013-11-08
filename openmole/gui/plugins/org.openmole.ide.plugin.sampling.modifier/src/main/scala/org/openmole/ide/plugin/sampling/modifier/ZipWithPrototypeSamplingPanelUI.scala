@@ -27,9 +27,9 @@ class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI)(im
 
   val availablePrototypes: List[PrototypeDataProxyUI] = {
     dataUI match {
-      case i: ZipWithIndexSamplingDataUI2 ⇒ Proxies.instance.classPrototypes(classOf[Int])
-      case n: ZipWithNameSamplingDataUI2  ⇒ Proxies.instance.classPrototypes(classOf[String])
-      case _                              ⇒ List()
+      case i: ZipWithIndexSamplingDataUI010 ⇒ Proxies.instance.classPrototypes(classOf[Int])
+      case n: ZipWithNameSamplingDataUI010  ⇒ Proxies.instance.classPrototypes(classOf[String])
+      case _                                ⇒ List()
     }
   }
 
@@ -42,9 +42,9 @@ class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI)(im
   add(protoCombo.widget, new Help(i18n.getString("zipPrototype")))
 
   def saveContent = dataUI match {
-    case i: ZipWithIndexSamplingDataUI2 ⇒ new ZipWithIndexSamplingDataUI2(proto)
-    case n: ZipWithNameSamplingDataUI2  ⇒ new ZipWithNameSamplingDataUI2(proto)
-    case _                              ⇒ throw new UserBadDataError("The data for the 'Zip with' Sampling is not correct ")
+    case i: ZipWithIndexSamplingDataUI010 ⇒ new ZipWithIndexSamplingDataUI010(proto)
+    case n: ZipWithNameSamplingDataUI010  ⇒ new ZipWithNameSamplingDataUI010(proto)
+    case _                                ⇒ throw new UserBadDataError("The data for the 'Zip with' Sampling is not correct ")
   }
 
   def proto = protoCombo.widget.selection.item.content

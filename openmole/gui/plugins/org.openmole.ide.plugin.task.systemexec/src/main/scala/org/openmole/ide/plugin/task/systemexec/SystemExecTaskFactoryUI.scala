@@ -26,11 +26,11 @@ import org.openmole.ide.misc.tools.util.Converters._
 class SystemExecTaskFactoryUI extends TaskFactoryUI {
   override def toString = "System exec"
 
-  def buildDataUI = new SystemExecTaskDataUI2
+  def buildDataUI = new SystemExecTaskDataUI010
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[SystemExecTask](task)
-    uiMap.task(t, x ⇒ new SystemExecTaskDataUI2(t.name,
+    uiMap.task(t, x ⇒ new SystemExecTaskDataUI010(t.name,
       t.directory,
       t.command.head._1,
       t.resources.toList.map { _._2 },

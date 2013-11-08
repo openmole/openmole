@@ -65,7 +65,7 @@ trait CapsulePanelUI extends Publisher with Settings {
       contents += new LinkLabel("", new Action("") {
         def apply =
           if (environmentCombo.selection.index != environmentProxys.size - 1) {
-            ScenesManager.displayExtraPropertyPanel(environmentCombo.selection.item)
+            ScenesManager().displayExtraPropertyPanel(environmentCombo.selection.item)
           }
       }) { icon = org.openmole.ide.misc.tools.image.Images.EYE }
     }

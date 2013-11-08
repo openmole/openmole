@@ -84,7 +84,7 @@ object ConceptMenu {
 
   def menuItem(f: ⇒ Unit): MenuItem = new MenuItem(new Action("New") {
     override def apply = {
-      ScenesManager.closePropertyPanels
+      ScenesManager().closePropertyPanels
       f
     }
   })
@@ -190,8 +190,8 @@ object ConceptMenu {
   }
 
   def display(proxy: DataProxyUI) = {
-    if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy)
-    else ScenesManager.tabPane.selection.page.content match {
+    if (ScenesManager().tabPane.peer.getTabCount == 0) createTab(proxy)
+    else ScenesManager().tabPane.selection.page.content match {
       case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy)
       case _                  ⇒ createTab(proxy)
     }

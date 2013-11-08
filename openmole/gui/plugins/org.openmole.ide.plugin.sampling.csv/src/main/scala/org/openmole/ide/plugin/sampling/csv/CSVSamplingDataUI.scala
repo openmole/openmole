@@ -14,9 +14,9 @@ import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI 
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.serializer.Update
 
-class CSVSamplingDataUI2(val csvFilePath: String = "",
-                         val separator: Char = ',',
-                         val prototypeMapping: List[(String, PrototypeDataProxyUI)] = List.empty) extends SamplingDataUI {
+class CSVSamplingDataUI010(val csvFilePath: String = "",
+                           val separator: Char = ',',
+                           val prototypeMapping: List[(String, PrototypeDataProxyUI)] = List.empty) extends SamplingDataUI {
   def name = "CSV"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
@@ -58,6 +58,6 @@ class CSVSamplingDataUI2(val csvFilePath: String = "",
   }
 }
 
-class CSVSamplingDataUI extends Update[CSVSamplingDataUI2] {
-  def update = new CSVSamplingDataUI2
+class CSVSamplingDataUI extends Update[CSVSamplingDataUI010] {
+  def update = new CSVSamplingDataUI010
 }

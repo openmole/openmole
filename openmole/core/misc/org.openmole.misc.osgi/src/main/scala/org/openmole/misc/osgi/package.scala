@@ -54,7 +54,7 @@ package object osgi {
       if (ref)
         openMOLELocation match {
           case Some(oMLoc) ⇒ new File(oMLoc, decodedLocation)
-          case None ⇒ new File(decodedLocation)
+          case None        ⇒ new File(decodedLocation)
         }
       else new File(decodedLocation)
     }

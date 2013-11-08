@@ -7,9 +7,8 @@ package org.openmole.ide.core.implementation.dialog
 
 import scala.swing._
 import org.openmole.ide.misc.widget.MigPanel
-import java.awt.BorderLayout
+import java.awt.{ Toolkit, BorderLayout, Event }
 import org.openmole.ide.core.implementation.execution._
-import java.awt.Event
 import java.awt.event.KeyEvent
 import javax.swing.KeyStroke
 import org.openide.DialogDescriptor
@@ -61,7 +60,7 @@ class GUIPanel extends MainFrame {
 
       contents += new MenuItem(new Action("Save") {
         override def apply = {
-          ScenesManager.saveCurrentPropertyWidget
+          ScenesManager().saveCurrentPropertyWidget
           SaveXML.save(mainframe)
         }
 
@@ -73,7 +72,7 @@ class GUIPanel extends MainFrame {
       })
 
       contents += new MenuItem(new Action("Export") {
-        override def apply = ScenesManager.currentScene match {
+        override def apply = ScenesManager().currentScene match {
           case Some(s: BuildMoleScene) ⇒ DialogFactory.exportPartialMoleExecution(s)
           case _                       ⇒ StatusBar().inform("No mole available for export")
         }
@@ -81,7 +80,7 @@ class GUIPanel extends MainFrame {
 
       contents += new MenuItem(new Action("Reset all") {
         override def apply = {
-          ScenesManager.closeAll
+          ScenesManager().closeAll
           Proxies.instance.clearAll
           mainframe.title = "OpenMOLE"
           Settings.currentProject = None
@@ -126,10 +125,12 @@ class GUIPanel extends MainFrame {
     contents += ConceptMenu.sourceMenu
   }).peer, BorderLayout.NORTH)
 
-  val splitPane = ScenesManager.tabPane
+  val splitPane = new SplitPane(Orientation.Horizontal, ScenesManager().tabPane, ScenesManager().statusBar)
+  splitPane.resizeWeight = 1
+  //splitPane.peer.setResizeWeight(1 - (50.0 / Toolkit.getDefaultToolkit.getScreenSize.height))
 
   peer.add(splitPane.peer, BorderLayout.CENTER)
-  StatusBar().inform("OpenMOLE - 0.8 - Elastic Earth")
+  StatusBar().inform("OpenMOLE - 0.10 - Gogo Gadget")
 
   PasswordListner.apply
 

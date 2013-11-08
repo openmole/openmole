@@ -29,6 +29,7 @@ import org.openmole.ide.misc.widget.multirow.MultiTwoCombos.{ TwoCombosData, Two
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import org.openmole.ide.misc.tools.util.Converters._
 
 class FlattenTaskPanelUI(pud: FlattenTaskDataUI[_])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends TaskPanelUI {
 
@@ -49,10 +50,10 @@ class FlattenTaskPanelUI(pud: FlattenTaskDataUI[_])(implicit val i18n: ResourceB
             new TwoCombosData(Some(s._1), Some(s._2)))
       },
       CLOSE_IF_EMPTY,
-      ADD, SMALL)
+      ADD, MEDIUM)
 
   lazy val components = List(("Settings", multiPrototypeCombo.panel))
 
-  def saveContent(name: String): TaskDataUI = new FlattenTaskDataUI(name, multiPrototypeCombo.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) })
+  def saveContent(name: String): TaskDataUI = new FlattenTaskDataUI(name, multiPrototypeCombo.content.map { c ⇒ (c.comboValue1, c.comboValue2) })
 
 }

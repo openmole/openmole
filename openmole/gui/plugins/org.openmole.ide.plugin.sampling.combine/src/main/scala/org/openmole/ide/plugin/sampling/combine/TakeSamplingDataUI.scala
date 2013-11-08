@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.serializer.Update
 import org.openmole.ide.plugin.sampling.modifier._
 
 @deprecated
-class TakeSamplingDataUI(val size: String = "1") extends Update[TakeSamplingDataUI2] {
+class TakeSamplingDataUI(val size: String = "1") extends Update[TakeSamplingDataUI010] {
   val name = "Take"
-  def update = new TakeSamplingDataUI2(size)
+  def update = new TakeSamplingDataUI010(size)
 }

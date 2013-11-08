@@ -31,7 +31,7 @@ import org.openmole.misc.tools.obj.ClassUtils
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
-class ZipWithNameSamplingDataUI2(val prototype: Option[PrototypeDataProxyUI] = None) extends SamplingDataUI with ZipWithPrototypeSamplingDataUI {
+class ZipWithNameSamplingDataUI010(val prototype: Option[PrototypeDataProxyUI] = None) extends SamplingDataUI with ZipWithPrototypeSamplingDataUI {
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
     ZipWithNameSampling(SamplingUtils.toFactors(factorOrSampling).asInstanceOf[List[Factor[File, Domain[File] with Discrete[File]]]]

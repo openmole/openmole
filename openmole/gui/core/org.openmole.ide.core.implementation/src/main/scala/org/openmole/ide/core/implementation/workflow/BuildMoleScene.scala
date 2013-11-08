@@ -65,7 +65,7 @@ class BuildMoleScene(val dataUI: MoleUI) extends MoleScene { buildMoleScene ⇒
 
     var capsuleMapping = new HashMap[CapsuleUI, CapsuleUI]
     var islots = new HashMap[InputSlotWidget, InputSlotWidget]
-    val ms = ExecutionMoleScene(dataUI.name + "_" + ScenesManager.countExec.incrementAndGet)
+    val ms = ExecutionMoleScene(dataUI.name + "_" + ScenesManager().countExec.incrementAndGet)
     dataUI.capsules.foreach(n ⇒ {
       val (caps, islotMapping) = deepcopy(n._2, ms)
       if (dataUI.startingCapsule == Some(n._2)) ms.dataUI.startingCapsule = Some(caps)
@@ -114,7 +114,7 @@ class BuildMoleScene(val dataUI: MoleUI) extends MoleScene { buildMoleScene ⇒
     connectionWidget
   }
 
-  def removeSelectedWidgets = ScenesManager.selection.foreach { c ⇒
+  def removeSelectedWidgets = ScenesManager().selection.foreach { c ⇒
     graphScene.removeNodeWithEdges(dataUI.removeCapsuleUI(c))
     CheckData.checkMole(buildMoleScene)
   }

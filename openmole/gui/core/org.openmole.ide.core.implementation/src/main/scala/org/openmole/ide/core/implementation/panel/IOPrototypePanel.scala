@@ -103,7 +103,7 @@ class IOPrototypePanel(val prototypesIn: Seq[PrototypeDataProxyUI] = List.empty,
 
   def contentAction(proto: PrototypeDataProxyUI) = new ContentAction(proto.dataUI.toString, proto) {
     override def apply =
-      ScenesManager.currentSceneContainer match {
+      ScenesManager().currentSceneContainer match {
         case Some(x: ISceneContainer) ⇒ x.scene.displayPropertyPanel(proto)
         case None                     ⇒
       }

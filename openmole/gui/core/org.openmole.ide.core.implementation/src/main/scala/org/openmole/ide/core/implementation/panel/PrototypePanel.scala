@@ -106,12 +106,12 @@ trait PrototypePanel extends Base
         s.dataUI = s.dataUI.doClone(proxy)
       }
 
-      List(ScenesManager.currentScene).flatten.foreach {
+      List(ScenesManager().currentScene).flatten.foreach {
         _.dataUI.connectors.values.toList.foreach {
           dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy }
         }
       }
-      ScenesManager.invalidateMoles
+      ScenesManager().invalidateMoles
 
     }
   }

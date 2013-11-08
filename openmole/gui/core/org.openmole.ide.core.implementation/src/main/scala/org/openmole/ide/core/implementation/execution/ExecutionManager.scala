@@ -49,12 +49,10 @@ object ExecutionManager {
 class ExecutionManager(manager: MoleUI,
                        executionContainer: ExecutionMoleSceneContainer,
                        val mole: IMole,
-                       val capsuleMapping: Map[CapsuleUI, ICapsule]) extends PluginPanel("", "[grow,fill]", "")
+                       val capsuleMapping: Map[CapsuleUI, ICapsule]) extends PluginPanel("", "[grow,fill]", "[fill]")
     with Publisher {
   executionManager ⇒
   val logTextArea = new TextArea
-  logTextArea.columns = 20
-  //logTextArea.rows = 20
   logTextArea.editable = false
 
   val executionJobExceptionTextArea = new StatusBar
@@ -118,7 +116,7 @@ class ExecutionManager(manager: MoleUI,
       case Some(url: String) ⇒
         executionContainer.startStopButton.enabled = false
         executionContainer.serverLabel.text = "Uploading mole execution, please wait..."
-        executionContainer.revalidate
+        executionContainer.peer.revalidate
         val client = ScalaClient(url)
         val future = Future(client.createMole(ExecutionSerialiser(manager, true), None, encapsulate = true, pack = true))
         future.foreach {
@@ -131,7 +129,7 @@ class ExecutionManager(manager: MoleUI,
                 executionContainer.uuidLabel.hlink(uidurl)
                 executionContainer.startLook
                 executionContainer.startStopButton.enabled = true
-                executionContainer.revalidate
+                executionContainer.peer.revalidate
               case Left(s: String) ⇒ StatusBar().block(s)
             }
         }

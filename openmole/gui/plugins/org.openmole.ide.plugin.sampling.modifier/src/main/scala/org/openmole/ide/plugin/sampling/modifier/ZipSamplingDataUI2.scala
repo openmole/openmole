@@ -24,7 +24,7 @@ import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI 
 import org.openmole.ide.core.implementation.panel.NoParameterSamplingPanelUI
 import java.util.{ Locale, ResourceBundle }
 
-class ZipSamplingDataUI2 extends SamplingDataUI {
+class ZipSamplingDataUI010 extends SamplingDataUI {
   def name = "Zip"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {

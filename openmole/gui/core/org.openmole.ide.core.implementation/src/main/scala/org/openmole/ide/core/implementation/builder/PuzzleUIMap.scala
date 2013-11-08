@@ -52,7 +52,7 @@ case class PuzzleUIMap(
   def sampling(s: Sampling, f: Unit ⇒ SamplingCompositionDataUI) =
     samplingMap.getOrElse(s, SamplingCompositionDataProxyUI(f()))
 
-  def mole(m: IMole): MoleScene = moleMap.getOrElse(m, ScenesManager.addBuildSceneContainer("A_NAME").scene)
+  def mole(m: IMole): MoleScene = moleMap.getOrElse(m, ScenesManager().addBuildSceneContainer("A_NAME").scene)
 
   def +=(s: Sampling, ui: SamplingCompositionDataProxyUI) = copy(samplingMap = samplingMap + (s -> ui))
 }

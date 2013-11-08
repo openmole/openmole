@@ -66,9 +66,9 @@ object DialogFactory {
   }
 
   def newTabName: Option[ISceneContainer] = {
-    val textField = new TextField("Mole_" + (ScenesManager.buildMoleSceneContainers.size + 1), 20)
+    val textField = new TextField("Mole_" + (ScenesManager().buildMoleSceneContainers.size + 1), 20)
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(textField.peer, "Mole name")).equals(NotifyDescriptor.OK_OPTION))
-      Some(ScenesManager.addBuildSceneContainer(textField.text))
+      Some(ScenesManager().addBuildSceneContainer(textField.text))
     else None
   }
 

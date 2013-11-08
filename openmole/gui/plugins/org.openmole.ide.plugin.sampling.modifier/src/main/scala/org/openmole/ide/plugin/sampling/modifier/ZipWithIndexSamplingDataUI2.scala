@@ -27,7 +27,7 @@ import org.openmole.ide.core.implementation.sampling.{ FiniteUI, SamplingUtils }
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
-class ZipWithIndexSamplingDataUI2(val prototype: Option[PrototypeDataProxyUI] = None)
+class ZipWithIndexSamplingDataUI010(val prototype: Option[PrototypeDataProxyUI] = None)
     extends SamplingDataUI with ZipWithPrototypeSamplingDataUI {
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
