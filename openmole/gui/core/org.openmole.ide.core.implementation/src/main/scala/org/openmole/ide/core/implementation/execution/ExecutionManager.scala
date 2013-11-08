@@ -49,12 +49,11 @@ object ExecutionManager {
 class ExecutionManager(manager: MoleUI,
                        executionContainer: ExecutionMoleSceneContainer,
                        val mole: IMole,
-                       val capsuleMapping: Map[CapsuleUI, ICapsule]) extends PluginPanel("", "[grow,fill]", "")
+                       val capsuleMapping: Map[CapsuleUI, ICapsule]) extends PluginPanel("", "[grow,fill]", "[fill]")
     with Publisher {
   executionManager ⇒
   val logTextArea = new TextArea
-  logTextArea.columns = 20
-  //logTextArea.rows = 20
+  logTextArea.columns = 30
   logTextArea.editable = false
 
   val executionJobExceptionTextArea = new StatusBar
