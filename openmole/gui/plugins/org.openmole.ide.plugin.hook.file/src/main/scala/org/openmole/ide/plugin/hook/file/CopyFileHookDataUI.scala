@@ -30,19 +30,19 @@ class CopyFileHookDataUI(val name: String = "",
                          val prototypes: List[(PrototypeDataProxyUI, String)] = List.empty,
                          val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
                          val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                         val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends HookDataUI with Update[CopyFileHookDataUI2] {
+                         val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends HookDataUI with Update[CopyFileHookDataUI010] {
   def coreClass = ???
   def buildPanelUI = ???
   def coreObject = ???
   def doClone(inputs: Seq[PrototypeDataProxyUI], outputs: Seq[PrototypeDataProxyUI], parameters: Map[PrototypeDataProxyUI, String]) = ???
-  def update = new CopyFileHookDataUI2(name, prototypes, inputs, outputs, inputParameters)
+  def update = new CopyFileHookDataUI010(name, prototypes, inputs, outputs, inputParameters)
 }
 
-class CopyFileHookDataUI2(val name: String = "",
-                          val prototypes: List[(PrototypeDataProxyUI, String, Int)] = List.empty,
-                          val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                          val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                          val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends HookDataUI {
+class CopyFileHookDataUI010(val name: String = "",
+                            val prototypes: List[(PrototypeDataProxyUI, String, Int)] = List.empty,
+                            val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                            val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                            val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends HookDataUI {
 
   def coreClass = classOf[CopyFileHook]
 
@@ -59,5 +59,5 @@ class CopyFileHookDataUI2(val name: String = "",
 
   def doClone(ins: Seq[PrototypeDataProxyUI],
               outs: Seq[PrototypeDataProxyUI],
-              params: Map[PrototypeDataProxyUI, String]) = new CopyFileHookDataUI2(name, Proxies.instance.filterListTupleIn(prototypes), ins, outs, params)
+              params: Map[PrototypeDataProxyUI, String]) = new CopyFileHookDataUI010(name, Proxies.instance.filterListTupleIn(prototypes), ins, outs, params)
 }

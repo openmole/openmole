@@ -27,7 +27,7 @@ import org.openmole.ide.core.implementation.factory.SamplingFactoryUI
 class Activator extends OSGiActivator with SamplingActivator {
   override def samplingFactories = List(
     new SamplingFactoryUI {
-      def buildDataUI = new ShuffleSamplingDataUI2
+      def buildDataUI = new ShuffleSamplingDataUI010
 
       def fromCoreObject(sampling: Sampling,
                          bSC: IBuiltCompositionSampling) = {
@@ -38,19 +38,19 @@ class Activator extends OSGiActivator with SamplingActivator {
         }
       }
     }, new SamplingFactoryUI {
-      def buildDataUI = new TakeSamplingDataUI2
+      def buildDataUI = new TakeSamplingDataUI010
 
       def fromCoreObject(sampling: Sampling,
                          bSC: IBuiltCompositionSampling) = {
         sampling match {
           case cs: TakeSampling ⇒
-            val proxy = SamplingProxyUI(new TakeSamplingDataUI2(cs.n.toString))
+            val proxy = SamplingProxyUI(new TakeSamplingDataUI010(cs.n.toString))
             (proxy, Builder.buildConnectedSamplings(proxy, Seq(cs.sampling), bSC))
           case _ ⇒ (SamplingProxyUI(buildDataUI), bSC)
         }
       }
     }, new SamplingFactoryUI {
-      def buildDataUI = new ZipSamplingDataUI2
+      def buildDataUI = new ZipSamplingDataUI010
 
       def fromCoreObject(sampling: Sampling,
                          bSC: IBuiltCompositionSampling) = {
@@ -61,23 +61,23 @@ class Activator extends OSGiActivator with SamplingActivator {
         }
       }
     }, new SamplingFactoryUI {
-      def buildDataUI = new ZipWithIndexSamplingDataUI2
+      def buildDataUI = new ZipWithIndexSamplingDataUI010
 
       def fromCoreObject(sampling: Sampling,
                          bSC: IBuiltCompositionSampling) =
         sampling match {
           case cs: ZipWithIndexSampling ⇒
-            val proxy = SamplingProxyUI(new ZipWithIndexSamplingDataUI2(KeyRegistry.protoProxyKeyMap.get(PrototypeKey(cs.index))))
+            val proxy = SamplingProxyUI(new ZipWithIndexSamplingDataUI010(KeyRegistry.protoProxyKeyMap.get(PrototypeKey(cs.index))))
             (proxy, Builder.buildConnectedSamplings(proxy, Seq(cs.sampling), bSC))
           case _ ⇒ (SamplingProxyUI(buildDataUI), bSC)
         }
     }, new SamplingFactoryUI {
-      def buildDataUI = new ZipWithNameSamplingDataUI2
+      def buildDataUI = new ZipWithNameSamplingDataUI010
 
       def fromCoreObject(sampling: Sampling,
                          bSC: IBuiltCompositionSampling) = sampling match {
         case cs: ZipWithNameSampling ⇒
-          val proxy = SamplingProxyUI(new ZipWithNameSamplingDataUI2(KeyRegistry.protoProxyKeyMap.get(PrototypeKey(cs.name))))
+          val proxy = SamplingProxyUI(new ZipWithNameSamplingDataUI010(KeyRegistry.protoProxyKeyMap.get(PrototypeKey(cs.name))))
           (proxy, Builder.buildConnectedSamplings(proxy, Seq(cs.factor), bSC))
         case _ ⇒ (SamplingProxyUI(buildDataUI), bSC)
       }

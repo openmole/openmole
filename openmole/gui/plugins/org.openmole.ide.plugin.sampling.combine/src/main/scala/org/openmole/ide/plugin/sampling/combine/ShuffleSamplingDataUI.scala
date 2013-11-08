@@ -21,6 +21,6 @@ import org.openmole.ide.core.implementation.serializer.Update
 import org.openmole.ide.plugin.sampling.modifier._
 
 @deprecated
-class ShuffleSamplingDataUI extends Update[ShuffleSamplingDataUI2] {
-  def update = new ShuffleSamplingDataUI2
+class ShuffleSamplingDataUI extends Update[ShuffleSamplingDataUI010] {
+  def update = new ShuffleSamplingDataUI010
 }

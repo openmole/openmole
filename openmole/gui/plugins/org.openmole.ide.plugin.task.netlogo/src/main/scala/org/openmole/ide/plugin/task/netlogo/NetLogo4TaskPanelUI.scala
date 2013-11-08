@@ -22,13 +22,13 @@ import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.misc.tools.util.Converters
 import org.openmole.ide.misc.tools.util.Converters._
 
-class NetLogo4TaskPanelUI(ndu: NetLogo4TaskDataUI2) extends GenericNetLogoPanelUI(ndu.nlogoPath,
+class NetLogo4TaskPanelUI(ndu: NetLogo4TaskDataUI010) extends GenericNetLogoPanelUI(ndu.nlogoPath,
   ndu.workspaceEmbedded,
   ndu.lauchingCommands,
   ndu.prototypeMappingInput,
   ndu.prototypeMappingOutput,
   ndu.resources) {
-  override def saveContent(name: String): TaskDataUI = new NetLogo4TaskDataUI2(name,
+  override def saveContent(name: String): TaskDataUI = new NetLogo4TaskDataUI010(name,
     workspaceCheckBox.selected,
     nlogoTextField.text,
     launchingCommandTextArea.text,

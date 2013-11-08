@@ -21,6 +21,6 @@ import org.openmole.ide.core.implementation.serializer.Update
 import org.openmole.ide.plugin.sampling.modifier._
 
 @deprecated
-class ZipSamplingDataUI extends Update[ZipSamplingDataUI2] {
-  def update = new ZipSamplingDataUI2
+class ZipSamplingDataUI extends Update[ZipSamplingDataUI010] {
+  def update = new ZipSamplingDataUI010
 }

@@ -27,7 +27,7 @@ class NetLogo4TaskFactoryUI extends TaskFactoryUI {
 
   override def toString = "NetLogo4"
 
-  def buildDataUI = new NetLogo4TaskDataUI2
+  def buildDataUI = new NetLogo4TaskDataUI010
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[NetLogo4Task](task)
@@ -35,7 +35,7 @@ class NetLogo4TaskFactoryUI extends TaskFactoryUI {
       case Right(r) ⇒ true
       case Left(l)  ⇒ false
     }
-    uiMap.task(t, x ⇒ new NetLogo4TaskDataUI2(t.name,
+    uiMap.task(t, x ⇒ new NetLogo4TaskDataUI010(t.name,
       embededWS,
       t.scriptPath,
       t.launchingCommands.mkString("\n"),

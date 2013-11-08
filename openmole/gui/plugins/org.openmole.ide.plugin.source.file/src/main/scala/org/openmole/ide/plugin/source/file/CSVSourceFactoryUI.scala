@@ -22,7 +22,7 @@ import org.openmole.ide.core.implementation.factory.SourceFactoryUI
 
 class CSVSourceFactoryUI extends SourceFactoryUI {
 
-  def buildDataUI = new CSVSourceDataUI2
+  def buildDataUI = new CSVSourceDataUI010
 
   def coreClass = classOf[CSVSource]
 

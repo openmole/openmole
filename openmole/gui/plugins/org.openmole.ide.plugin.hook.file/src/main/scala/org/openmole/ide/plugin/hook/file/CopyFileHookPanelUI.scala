@@ -33,7 +33,7 @@ import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.URL
 import java.util.{ Locale, ResourceBundle }
 
-class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI2)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("wrap") with HookPanelUI {
+class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("wrap") with HookPanelUI {
 
   val multiComboTextField = new MultiComboTextField("",
     comboContent,
@@ -55,7 +55,7 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI2)(implicit val i18n: Resour
     _.dataUI.dim == 0
   }
 
-  def saveContent(name: String) = new CopyFileHookDataUI2(name,
+  def saveContent(name: String) = new CopyFileHookDataUI010(name,
     Converters.flattenTupleOptionAny(
       multiComboTextField.content.filterNot {
         _.comboValue match {

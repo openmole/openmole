@@ -26,7 +26,7 @@ import org.openmole.ide.core.implementation.sampling.{ FiniteUI, SamplingUtils }
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 import java.util.{ Locale, ResourceBundle }
 
-class ShuffleSamplingDataUI2 extends SamplingDataUI {
+class ShuffleSamplingDataUI010 extends SamplingDataUI {
   def name = "Shuffle"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
