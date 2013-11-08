@@ -17,37 +17,24 @@
 
 package org.openmole.ide.core.implementation.serializer
 
-import util.{ Failure, Success, Try }
+import util.Try
 import com.ice.tar.TarInputStream
 import com.ice.tar.TarOutputStream
 import com.thoughtworks.xstream.XStream
-import java.io.EOFException
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.FileReader
-import java.io.FileWriter
 import org.openmole.ide.misc.tools.util.ID
-import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy._
-import java.io.ObjectInputStream
-import java.nio.file.Files
-import org.openmole.ide.core.implementation.workflow.BuildMoleScene
-import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.io.TarArchiver._
 import com.thoughtworks.xstream.io.{ HierarchicalStreamReader, HierarchicalStreamWriter }
-import org.openmole.misc.exception.{ UserBadDataError, ExceptionUtils, InternalProcessingError }
+import org.openmole.misc.exception.{ UserBadDataError, InternalProcessingError }
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import com.thoughtworks.xstream.converters.{ ErrorWriter, UnmarshallingContext, MarshallingContext }
 import collection.mutable
-import com.thoughtworks.xstream.converters.collections.SingletonCollectionConverter
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
-import scala.util.Failure
-import scala.Some
-import scala.util.Success
 import org.openmole.misc.tools.service.Logger
 import org.openmole.ide.core.implementation.commons._
 import scala.util.Failure
@@ -56,9 +43,9 @@ import org.openmole.ide.core.implementation.commons.MasterCapsuleType
 import scala.util.Success
 import org.openmole.ide.core.implementation.sampling.DomainProxyUI
 import java.net.URL
-import javax.imageio.ImageIO
 import scalaz._
 import Scalaz._
+import org.openmole.core.serializer.file._
 
 object GUISerializer extends Logger {
   var instance = new GUISerializer
@@ -76,9 +63,12 @@ object GUISerializer extends Logger {
   }
 }
 
-class GUISerializer extends Logger { serializer ⇒
+class GUISerializer extends FileListing with FileInjection { serializer ⇒
 
-  sealed trait SerializationState
+  sealed trait SerializationState {
+    def id: ID.Type
+  }
+
   case class Serializing(id: ID.Type) extends SerializationState
   case class Serialized(id: ID.Type) extends SerializationState
 
@@ -307,13 +297,19 @@ class GUISerializer extends Logger { serializer ⇒
     }
   }
 
-  def serializeMetadata(metaDatas: Iterable[MetaData]) = {
-    val imagePath = workDir + "/metadata/img"
-    (new File(imagePath)).mkdirs
-    metaDatas.map { md ⇒ md.buildImage(new File(imagePath + "/" + md.scene.dataUI.name + ".png")) }
-  }
+  def serializeMetadata(metaData: Option[MetaData]) =
+    for {
+      md ← metaData
+    } {
+      val imagePath = workDir.child("/metadata/img")
+      imagePath.mkdirs
+      md.scenes.foreach {
+        s ⇒
+          s.buildImage(imagePath.child(s.dataUI.id + ".png"))
+      }
+    }
 
-  def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData2], metaDatas: Iterable[MetaData] = Iterable.empty) = {
+  def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData2], metaData: Option[MetaData] = None) = {
     serializeConcept(classOf[PrototypeDataProxyUI], proxies.prototypes.map { s ⇒ s -> s.id })
     serializeConcept(classOf[EnvironmentDataProxyUI], proxies.environments.map { s ⇒ s -> s.id })
     serializeConcept(classOf[SamplingCompositionDataProxyUI], proxies.samplings.map { s ⇒ s -> s.id })
@@ -328,7 +324,7 @@ class GUISerializer extends Logger { serializer ⇒
 
     serializeConcept(classOf[MoleData2], moleScenes.map { ms ⇒ ms -> ms.id })
 
-    serializeMetadata(metaDatas)
+    serializeMetadata(metaData)
 
     val os = new TarOutputStream(new FileOutputStream(file))
     try os.createDirArchiveWithRelativePath(workDir)
