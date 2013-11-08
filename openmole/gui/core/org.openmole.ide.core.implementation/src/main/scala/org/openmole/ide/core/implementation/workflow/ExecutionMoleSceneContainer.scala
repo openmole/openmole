@@ -39,8 +39,8 @@ import org.openmole.core.model.mole.ExecutionContext
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
-                                  val bmsc: BuildMoleSceneContainer) extends Panel with ISceneContainer {
-  peer.setLayout(new BorderLayout)
+                                  val bmsc: BuildMoleSceneContainer) extends PluginPanel("") with ISceneContainer {
+  // peer.setLayout(new BorderLayout)
 
   val executionManager =
     MoleFactory.buildMole(bmsc.scene.dataUI) match {
@@ -91,11 +91,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           }
       }
 
-      val executionPanel = new ExecutionPanel
-      executionPanel.peer.setLayout(new BorderLayout)
-      executionPanel.peer.setLayout(new BorderLayout)
-
-      peer.add(new PluginPanel("wrap") {
+      contents += new SplitPane(Orientation.Vertical, new PluginPanel("wrap") {
         contents += new TitleLabel("Execution control")
         contents += new PluginPanel("wrap 2", "[]-20[]5[]") {
           contents += startStopButton
@@ -135,10 +131,11 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             sandBoxPanel.visible = sandBoxCheckBox.selected
         }
         contents += eManager.envBarPanel
-      }.peer, BorderLayout.NORTH)
-
-      peer.add(eManager.peer)
-
+      }, eManager) {
+        oneTouchExpandable = true
+        continuousLayout = true
+        resizeWeight = 0.67
+      }
     case None ⇒
   }
 
@@ -197,10 +194,6 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   def finished = moleExecution match {
     case Some(me: MoleExecution) ⇒ me.finished
     case _                       ⇒ false
-  }
-
-  class ExecutionPanel extends Panel {
-    background = new Color(77, 77, 77)
   }
 
 }
