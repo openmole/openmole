@@ -29,11 +29,7 @@ class CSVSourceDataUI(val name: String = "",
                       val prototypeMapping: List[(String, PrototypeDataProxyUI)] = List.empty,
                       val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
                       val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                      val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends SourceDataUI with Update[CSVSourceDataUI010] {
-  def coreClass = ???
-  def coreObject = ???
-  def buildPanelUI = ???
-  def doClone(inputs: Seq[PrototypeDataProxyUI], outputs: Seq[PrototypeDataProxyUI], parameters: Map[PrototypeDataProxyUI, String]) = ???
+                      val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[CSVSourceDataUI010] {
   def update = new CSVSourceDataUI010(name,
     csvFilePath,
     prototypeMapping.zipWithIndex.map { case (t, i) ⇒ (t._1, t._2, i) },

@@ -16,6 +16,8 @@
  */
 package org.openmole.ide.misc.tools.util
 
+import java.io.File
+
 object Converters {
   implicit def tupleToIndexedTuple[S, T](tu: List[Tuple2[S, T]]) = {
     val tt = tu.zipWithIndex.map {
@@ -51,5 +53,8 @@ object Converters {
     }.flatten
   }
 
+  implicit def stringToFile(s: String) = new File(s)
+
+  implicit def fileToString(f: File) = f.getAbsolutePath
 }
 

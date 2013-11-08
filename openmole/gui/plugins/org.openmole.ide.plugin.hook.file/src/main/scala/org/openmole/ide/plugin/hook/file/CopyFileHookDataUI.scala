@@ -30,16 +30,12 @@ class CopyFileHookDataUI(val name: String = "",
                          val prototypes: List[(PrototypeDataProxyUI, String)] = List.empty,
                          val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
                          val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                         val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends HookDataUI with Update[CopyFileHookDataUI010] {
-  def coreClass = ???
-  def buildPanelUI = ???
-  def coreObject = ???
-  def doClone(inputs: Seq[PrototypeDataProxyUI], outputs: Seq[PrototypeDataProxyUI], parameters: Map[PrototypeDataProxyUI, String]) = ???
-  def update = new CopyFileHookDataUI010(name, prototypes, inputs, outputs, inputParameters)
+                         val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[CopyFileHookDataUI010] {
+  def update = new CopyFileHookDataUI010(name, prototypes.map { case (p, s) ⇒ (p, new File(s)) }, inputs, outputs, inputParameters)
 }
 
 class CopyFileHookDataUI010(val name: String = "",
-                            val prototypes: List[(PrototypeDataProxyUI, String, Int)] = List.empty,
+                            val prototypes: List[(PrototypeDataProxyUI, File, Int)] = List.empty,
                             val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
                             val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
                             val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends HookDataUI {
