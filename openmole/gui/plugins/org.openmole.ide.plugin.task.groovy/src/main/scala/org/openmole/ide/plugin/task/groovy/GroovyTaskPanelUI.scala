@@ -31,8 +31,9 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.implementation.panel.Settings
 import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
+import java.io.File
 
-class GroovyTaskPanelUI(pud: GroovyTaskDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends TaskPanelUI {
+class GroovyTaskPanelUI(pud: GroovyTaskDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends TaskPanelUI {
 
   val codeTextArea = new GroovyEditor {
     editor.text = pud.code
@@ -41,7 +42,7 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI)(implicit val i18n: ResourceBundle
 
   val libMultiTextField = new MultiChooseFileTextField("Libraries",
     pud.libs.map {
-      l ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(l))
+      l ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(l.getAbsolutePath))
     },
     "Select a file",
     Some("Lib files"),
@@ -62,9 +63,9 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI)(implicit val i18n: ResourceBundle
     new Help(i18n.getString("libraryPath"),
       i18n.getString("libraryPathEx")))
 
-  def saveContent(name: String): TaskDataUI = new GroovyTaskDataUI(name,
+  def saveContent(name: String): TaskDataUI = new GroovyTaskDataUI010(name,
     codeTextArea.editor.text,
     libMultiTextField.content.map {
       _.content
-    }.filterNot(_.isEmpty))
+    }.filterNot(_.isEmpty).map { new File(_) })
 }

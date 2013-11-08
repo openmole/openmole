@@ -82,7 +82,7 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI010)(implicit val i18n: ResourceB
                 headers.toList,
                 comboContent,
                 "with",
-                new TwoCombosData(Some(pm._1), Some(pm._2)))
+                new TwoCombosData(Some(pm._1.getAbsolutePath), Some(pm._2)))
           }, CLOSE_IF_EMPTY))
       help.add(comboMulti.get, new Help(i18n.getString("mapping")))
       csvpanel.contents.remove(4)
@@ -97,10 +97,10 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI010)(implicit val i18n: ResourceB
     if (comboMulti.isDefined)
       new CSVSamplingDataUI010(csv,
         sep,
-        comboMulti.get.content.map {
+        flattenTupleOptionAny(comboMulti.get.content.map {
           c ⇒ (c.comboValue1, c.comboValue2)
-        })
-    else new CSVSamplingDataUI010(csv, sep, List[(String, PrototypeDataProxyUI)]())
+        }).map { case (s, o) ⇒ (new File(s), o) })
+    else new CSVSamplingDataUI010(csv, sep, List[(File, PrototypeDataProxyUI)]())
   }
 
   def comboContent: List[PrototypeDataProxyUI] = Proxies.instance.prototypes.toList

@@ -13,10 +13,11 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.serializer.Update
+import org.openmole.ide.misc.tools.util.Converters._
 
 class CSVSamplingDataUI010(val csvFilePath: String = "",
                            val separator: Char = ',',
-                           val prototypeMapping: List[(String, PrototypeDataProxyUI)] = List.empty) extends SamplingDataUI {
+                           val prototypeMapping: List[(File, PrototypeDataProxyUI)] = List.empty) extends SamplingDataUI {
   def name = "CSV"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
@@ -58,6 +59,7 @@ class CSVSamplingDataUI010(val csvFilePath: String = "",
   }
 }
 
-class CSVSamplingDataUI extends Update[CSVSamplingDataUI010] {
-  def update = new CSVSamplingDataUI010
+class CSVSamplingDataUI(csvFilePath: String = "",
+                        prototypeMapping: List[(String, PrototypeDataProxyUI)]) extends Update[CSVSamplingDataUI010] {
+  def update = new CSVSamplingDataUI010(csvFilePath, ',', prototypeMapping.map { case (s, p) ⇒ (new File(s), p) })
 }
