@@ -30,7 +30,8 @@ trait FileSerialisation {
 
   type FilesInfo = TreeMap[String, (File, Boolean, Boolean)]
 
-  val filesInfo = "filesInfo.xml"
+  def filesInfo = "filesInfo.xml"
+  def fileDir = "files"
 
   def serialiseFiles(files: Iterable[File], tos: TarOutputStream) = {
     val fileInfo = new FilesInfo ++ files.map {
@@ -50,25 +51,25 @@ trait FileSerialisation {
           else file
 
         if (toArchive.exists)
-          tos.addFile(toArchive, name.toString)
+          tos.addFile(toArchive, fileDir + "/" + name.toString)
 
         (name.toString, (file, file.isDirectory, file.exists))
     }
 
     val filesInfoSerial = Workspace.newFile
     SerialiserService.serialise(fileInfo, filesInfoSerial)
-    tos.addFile(filesInfoSerial, filesInfo)
+    tos.addFile(filesInfoSerial, fileDir + "/" + filesInfo)
     filesInfoSerial.delete
   }
 
   def deserialiseFileReplacements(archiveExtractDir: File, extractDir: File) = {
-    val fileInfoFile = new File(archiveExtractDir, filesInfo)
+    val fileInfoFile = new File(archiveExtractDir, fileDir + "/" + filesInfo)
     val fi = SerialiserService.deserialise[FilesInfo](fileInfoFile)
     fileInfoFile.delete
 
     new TreeMap[File, File] ++ fi.map {
       case (name, (file, isDirectory, exists)) ⇒
-        val f = new File(archiveExtractDir, name)
+        val f = new File(archiveExtractDir, fileDir + "/" + name)
         val dest = extractDir.newFile("extracted", ".bin")
         if (exists) f.move(dest)
 
