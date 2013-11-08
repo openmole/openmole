@@ -109,7 +109,7 @@ object MoleFactory {
     s ⇒ s -> s.dataUI.coreObject.get
   }.toMap
 
-  def moleMapping: Map[MoleScene, IMole] = ScenesManager.moleScenes.map {
+  def moleMapping: Map[MoleScene, IMole] = ScenesManager().moleScenes.map {
     m ⇒ m.graphScene -> buildMole(m.dataUI).get._1
   }.toMap
 

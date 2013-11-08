@@ -78,8 +78,8 @@ trait Proxy {
     Proxies.instance += proxy
     +=(nameTextField.text, proxy)
     toDelete
-    ScenesManager.invalidateSceneCaches
-    ScenesManager.refreshScenes
+    ScenesManager().invalidateSceneCaches
+    ScenesManager().refreshScenes
   }
 
   def deleteProxy: Unit

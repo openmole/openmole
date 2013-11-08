@@ -34,6 +34,7 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
 
   val executionMoleSceneContainers = new HashSet[String]
   val statusBar = new StatusBar
+  statusBar.inform("Loaded: " + scene.dataUI.name)
 
   peer.setLayout(new BorderLayout)
 
@@ -54,15 +55,16 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
   view.setFocusable(true)
 
   val spane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(view), statusBar.peer)
-  spane.setResizeWeight(1 - (50.0 / Toolkit.getDefaultToolkit.getScreenSize.height))
+  spane.setResizeWeight(1)
+  // / spane.setResizeWeight(1 - (50.0 / Toolkit.getDefaultToolkit.getScreenSize.height))
   peer.add(spane, BorderLayout.CENTER)
   CheckData.checkMole(scene, false)
 
   def buildExecutionAction = new Action("") {
     override def apply = {
-      ScenesManager.saveCurrentPropertyWidget
+      ScenesManager().saveCurrentPropertyWidget
       CheckData.checkNoEmptyCapsule(scene)
-      ScenesManager.addExecutionSceneContainer(buildContainer)
+      ScenesManager().addExecutionSceneContainer(buildContainer)
     }
   }
   def displayMoleSettingsDialogAction = new Action("") {

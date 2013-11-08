@@ -57,7 +57,7 @@ object LoadXML {
         displayErrors(deserialised.written)
         val (proxies, scene) = deserialised.value
         StatusBar().clear
-        ScenesManager.closeAll
+        ScenesManager().closeAll
         Proxies.instance = proxies
         addPrototypes(proxies)
         addTasks(proxies)
@@ -65,7 +65,7 @@ object LoadXML {
         addEnvironments(proxies)
         addHooks(proxies)
         addSources(proxies)
-        scene.foreach(mdu ⇒ ScenesManager.addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
+        scene.foreach(mdu ⇒ ScenesManager().addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
 
         fileName
       }

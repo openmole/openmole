@@ -36,10 +36,10 @@ import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 class MoleTaskPanelUI(pud: MoleTaskDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("fillx,wrap 2", "left,grow,fill", "") with TaskPanelUI {
 
   val moleComboBox = new MyComboBox(MoleTaskDataUI.emptyMoleSceneManager ::
-    ScenesManager.moleScenes.map {
+    ScenesManager().moleScenes.map {
       _.dataUI
     }.filter {
-      _ != ScenesManager.currentSceneContainer.get.scene.dataUI
+      _ != ScenesManager().currentSceneContainer.get.scene.dataUI
     }.filter {
       _.capsules.size > 0
     }.toList)
@@ -70,7 +70,7 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI)(implicit val i18n: ResourceBundle = R
   }
 
   def currentCapsules = {
-    val li = ScenesManager.moleScenes.map {
+    val li = ScenesManager().moleScenes.map {
       _.dataUI
     }.filter(_ == moleComboBox.selection.item)
     if (li.size > 0) li.head.capsules.values.filter {
