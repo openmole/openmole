@@ -49,7 +49,7 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget) extends Settings with Ano
       s ⇒ testConstraints(s.inputNumberConstrainst)
     }
 
-  StatusBar().clear
+  StatusBar.clear
 
   val samplingComboBox = new MyComboBox(samplings) {
     peer.setMaximumRowCount(15)

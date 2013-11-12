@@ -35,7 +35,7 @@ object StatusBar {
   }
 
   def displayErrors(f: ⇒ Traversable[Throwable]) = {
-    StatusBar().clear
+    StatusBar.clear
     f.foreach {
       t ⇒
         StatusBar().block(
@@ -44,6 +44,10 @@ object StatusBar {
     }
   }
 
+  def clear = {
+    apply().clear
+    ScenesManager.instance.statusBar.clear
+  }
 }
 
 class StatusBar extends MigPanel("wrap 3") {

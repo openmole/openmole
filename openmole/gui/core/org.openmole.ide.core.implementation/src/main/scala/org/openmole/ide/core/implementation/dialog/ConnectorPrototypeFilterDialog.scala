@@ -58,7 +58,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     contents += orderTextField
 
     def display: Unit = {
-      StatusBar().clear
+      StatusBar.clear
       if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(this) {
         verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
       }.peer,
@@ -90,7 +90,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
       }
 
     def display: Unit = {
-      StatusBar().clear
+      StatusBar.clear
       protoCombo.setModel(availablePrototypes, sel)
       if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(this) {
         verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
