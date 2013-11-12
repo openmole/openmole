@@ -37,7 +37,7 @@ import org.openmole.ide.misc.tools.util.Converters
 import org.openmole.ide.misc.tools.util.Converters._
 import scala.Some
 
-class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI2)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends TaskPanelUI {
+class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends TaskPanelUI {
 
   val workdirTextField = new TextField(ndu.workdir)
 
@@ -92,10 +92,10 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI2)(implicit val i18n: Resou
     }))
 
   override def saveContent(name: String): TaskDataUI =
-    new SystemExecTaskDataUI2(name,
+    new SystemExecTaskDataUI010(name,
       workdirTextField.text,
       launchingCommandTextArea.editor.text,
-      resourcesMultiTextField.content.map { _.content },
+      resourcesMultiTextField.content.map { r ⇒ new File(r.content) },
       Converters.flattenTupleOptionAny(inputMapMultiComboTextField.content.map { d ⇒ d.comboValue -> d.textFieldValue }).filter { case (p, _) ⇒ Proxies.check(p) },
       Converters.flattenTupleAnyOption(outputMapMultiTextFieldCombo.content.map { d ⇒ d.textFieldValue -> d.comboValue }).filter { case (_, p) ⇒ Proxies.check(p) },
       Proxies.check(variablesMultiCombo.content.map { _.comboValue }.flatten),

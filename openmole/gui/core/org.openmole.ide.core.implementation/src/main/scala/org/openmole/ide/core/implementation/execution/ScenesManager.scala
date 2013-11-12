@@ -39,9 +39,16 @@ import org.openmole.ide.core.implementation.sampling.SamplingCompositionPanelUI
 import org.openmole.ide.core.implementation.panel.SamplingCompositionPanel
 
 object ScenesManager {
+  val instance = new ScenesManager
+
+  def apply() = instance
+}
+
+class ScenesManager {
 
   val tabPane = new TabbedPane
 
+  val statusBar = new StatusBar
   var countBuild = new AtomicInteger
   var countExec = new AtomicInteger
   val _selection: Ref[Option[List[CapsuleUI]]] = Ref(None)

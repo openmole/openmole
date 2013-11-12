@@ -21,14 +21,15 @@ import org.openmole.core.model.task.ITask
 import org.openmole.plugin.task.groovy.GroovyTask
 import org.openmole.ide.core.implementation.builder.{ PuzzleUIMap, SceneFactory }
 import org.openmole.ide.core.implementation.factory.TaskFactoryUI
+import java.io.File
 
 class GroovyTaskFactoryUI extends TaskFactoryUI {
   override def toString = "Groovy"
 
-  def buildDataUI = new GroovyTaskDataUI
+  def buildDataUI = new GroovyTaskDataUI010
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[GroovyTask](task)
-    uiMap.task(task, x ⇒ new GroovyTaskDataUI(t.name, t.code, t.libraries.toList.map { _.getCanonicalPath }))
+    uiMap.task(task, x ⇒ new GroovyTaskDataUI010(t.name, t.code, t.libraries.toList.map { l ⇒ new File(l.getCanonicalPath) }))
   }
 }

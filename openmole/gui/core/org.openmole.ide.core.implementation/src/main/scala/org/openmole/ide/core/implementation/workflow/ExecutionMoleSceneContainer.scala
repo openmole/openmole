@@ -32,15 +32,14 @@ import util.{ Failure, Success }
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import scala.swing.event.ButtonClicked
 import org.openmole.ide.core.implementation.preference.{ SandBox, ServerListPanel }
-import java.net.URL
 import org.openmole.misc.workspace.Workspace
 import java.io.File
 import org.openmole.core.model.mole.ExecutionContext
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
-                                  val bmsc: BuildMoleSceneContainer) extends PluginPanel("") with ISceneContainer {
-  // peer.setLayout(new BorderLayout)
+                                  val bmsc: BuildMoleSceneContainer) extends Panel with ISceneContainer {
+  peer.setLayout(new BorderLayout)
 
   val executionManager =
     MoleFactory.buildMole(bmsc.scene.dataUI) match {
@@ -91,7 +90,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           }
       }
 
-      contents += new SplitPane(Orientation.Vertical, new PluginPanel("wrap") {
+      peer.add(new SplitPane(Orientation.Vertical, new PluginPanel("wrap") {
         contents += new TitleLabel("Execution control")
         contents += new PluginPanel("wrap 2", "[]-20[]5[]") {
           contents += startStopButton
@@ -131,11 +130,11 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             sandBoxPanel.visible = sandBoxCheckBox.selected
         }
         contents += eManager.envBarPanel
-      }, eManager) {
+      }, PluginPanel("wrap", "[fill,grow]", "[fill,grow]", Seq(eManager))) {
         oneTouchExpandable = true
         continuousLayout = true
-        resizeWeight = 0.67
-      }
+        // resizeWeight = 0.95
+      }.peer, BorderLayout.CENTER)
     case None ⇒
   }
 
@@ -178,7 +177,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   def updateFileTransferLabels(dl: String, ul: String) = {
     dlLabel.text = dl
     ulLabel.text = ul
-    revalidate
+    repaint
   }
 
   def moleExecution = executionManager match {

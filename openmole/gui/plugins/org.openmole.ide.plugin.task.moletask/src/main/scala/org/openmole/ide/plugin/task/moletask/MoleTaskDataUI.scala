@@ -18,7 +18,7 @@ import org.openmole.ide.core.implementation.workflow.MoleUI
 import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, TaskDataProxyUI }
 
 object MoleTaskDataUI {
-  def manager(i: ID.Type): Option[MoleUI] = ScenesManager.moleScenes.map {
+  def manager(i: ID.Type): Option[MoleUI] = ScenesManager().moleScenes.map {
     _.dataUI
   }.filter {
     _.id == i

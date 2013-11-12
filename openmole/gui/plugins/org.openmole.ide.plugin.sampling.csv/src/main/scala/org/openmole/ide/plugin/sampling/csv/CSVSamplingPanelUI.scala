@@ -38,7 +38,7 @@ import org.openmole.ide.misc.widget.DialogClosedEvent
 import scala.Some
 import org.openmole.ide.misc.tools.image.Images
 
-class CSVSamplingPanelUI(pud: CSVSamplingDataUI2)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends ISamplingPanelUI with Publisher {
+class CSVSamplingPanelUI(pud: CSVSamplingDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends ISamplingPanelUI with Publisher {
 
   val csvTextField = new CSVChooseFileTextField(pud.csvFilePath)
   val separatorTextField = new TextField(pud.separator.toString, 3)
@@ -82,7 +82,7 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI2)(implicit val i18n: ResourceBun
                 headers.toList,
                 comboContent,
                 "with",
-                new TwoCombosData(Some(pm._1), Some(pm._2)))
+                new TwoCombosData(Some(pm._1.getAbsolutePath), Some(pm._2)))
           }, CLOSE_IF_EMPTY))
       help.add(comboMulti.get, new Help(i18n.getString("mapping")))
       csvpanel.contents.remove(4)
@@ -95,12 +95,12 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI2)(implicit val i18n: ResourceBun
     val csv = csvTextField.text
     val sep = separatorTextField.text.head
     if (comboMulti.isDefined)
-      new CSVSamplingDataUI2(csv,
+      new CSVSamplingDataUI010(csv,
         sep,
-        comboMulti.get.content.map {
+        flattenTupleOptionAny(comboMulti.get.content.map {
           c ⇒ (c.comboValue1, c.comboValue2)
-        })
-    else new CSVSamplingDataUI2(csv, sep, List[(String, PrototypeDataProxyUI)]())
+        }).map { case (s, o) ⇒ (new File(s), o) })
+    else new CSVSamplingDataUI010(csv, sep, List[(File, PrototypeDataProxyUI)]())
   }
 
   def comboContent: List[PrototypeDataProxyUI] = Proxies.instance.prototypes.toList

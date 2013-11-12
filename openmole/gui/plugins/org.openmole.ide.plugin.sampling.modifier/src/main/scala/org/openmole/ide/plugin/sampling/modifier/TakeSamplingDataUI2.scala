@@ -22,7 +22,7 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.sampling.{ FiniteUI, SamplingUtils }
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 
-class TakeSamplingDataUI2(val size: String = "1") extends SamplingDataUI {
+class TakeSamplingDataUI010(val size: String = "1") extends SamplingDataUI {
 
   val name = "Take"
 

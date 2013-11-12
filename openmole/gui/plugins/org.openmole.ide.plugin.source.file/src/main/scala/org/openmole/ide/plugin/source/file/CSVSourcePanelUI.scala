@@ -31,7 +31,7 @@ import org.openmole.ide.core.implementation.panelsettings.SourcePanelUI
 import org.openmole.ide.misc.tools.util.Converters
 import org.openmole.ide.misc.tools.util.Converters._
 
-class CSVSourcePanelUI(dataUI: CSVSourceDataUI2)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("wrap") with SourcePanelUI {
+class CSVSourcePanelUI(dataUI: CSVSourceDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("wrap") with SourcePanelUI {
 
   val csvTextField = new CSVChooseFileTextField(dataUI.csvFilePath)
   var comboMulti = new MultiTwoCombos[String, PrototypeDataProxyUI]("", List(), List(), "with", Seq())
@@ -77,7 +77,7 @@ class CSVSourcePanelUI(dataUI: CSVSourceDataUI2)(implicit val i18n: ResourceBund
     }
   }
 
-  def saveContent(name: String) = new CSVSourceDataUI2(name,
+  def saveContent(name: String) = new CSVSourceDataUI010(name,
     csvTextField.text,
     Converters.flattenTuple2Options(comboMulti.content.map {
       c ⇒ (c.comboValue1, c.comboValue2)

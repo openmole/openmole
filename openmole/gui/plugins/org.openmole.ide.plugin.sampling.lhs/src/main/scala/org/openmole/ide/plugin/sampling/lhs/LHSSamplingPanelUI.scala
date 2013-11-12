@@ -27,7 +27,7 @@ import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.core.implementation.panelsettings.ISamplingPanelUI
 
-class LHSSamplingPanelUI(cud: LHSSamplingDataUI2)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends ISamplingPanelUI {
+class LHSSamplingPanelUI(cud: LHSSamplingDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends ISamplingPanelUI {
 
   val components = List.empty
 
@@ -35,7 +35,7 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI2)(implicit val i18n: ResourceBun
     _.buildDataUI
   }.toList
 
-  override def saveContent = new LHSSamplingDataUI2
+  override def saveContent = new LHSSamplingDataUI010
 
   override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 

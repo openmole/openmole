@@ -54,7 +54,7 @@ object MultiProxies {
 
   def contentAction[T <: DataProxyUI](proto: T) = new ContentAction(proto.dataUI.toString, proto) {
     override def apply =
-      ScenesManager.currentSceneContainer match {
+      ScenesManager().currentSceneContainer match {
         case Some(x: ISceneContainer) ⇒ x.scene.displayPropertyPanel(proto)
         case None                     ⇒
       }

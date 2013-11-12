@@ -22,6 +22,6 @@ import org.openmole.ide.core.implementation.serializer.Update
 import org.openmole.ide.plugin.sampling.modifier._
 
 @deprecated
-class ZipWithNameSamplingDataUI(val prototype: Option[PrototypeDataProxyUI] = None) extends Update[ZipWithNameSamplingDataUI2] {
-  def update = new ZipWithNameSamplingDataUI2(prototype)
+class ZipWithNameSamplingDataUI(val prototype: Option[PrototypeDataProxyUI] = None) extends Update[ZipWithNameSamplingDataUI010] {
+  def update = new ZipWithNameSamplingDataUI010(prototype)
 }

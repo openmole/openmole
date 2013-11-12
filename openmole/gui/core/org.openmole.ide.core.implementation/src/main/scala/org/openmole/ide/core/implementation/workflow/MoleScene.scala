@@ -183,7 +183,7 @@ abstract class MoleScene extends GraphScene.StringGraph
   }.flatten
 
   def displayCapsuleProperty(capsuleUI: CapsuleUI, tabIndex: Int) =
-    ScenesManager.currentSceneContainer match {
+    ScenesManager().currentSceneContainer match {
       case (Some(exe: ExecutionMoleSceneContainer)) ⇒
       case _ ⇒
         setPanel(new CapsulePanel {
@@ -205,7 +205,7 @@ abstract class MoleScene extends GraphScene.StringGraph
   }
 
   def displaySamplingPropertyPanel(samplingWidget: ISamplingCompositionWidget): Base = {
-    ScenesManager.currentSceneContainer match {
+    ScenesManager().currentSceneContainer match {
       case (Some(exe: ExecutionMoleSceneContainer)) ⇒ throw new UserBadDataError("No displaying in execution mode")
       case _ ⇒
         val i = firstFree
@@ -227,7 +227,7 @@ abstract class MoleScene extends GraphScene.StringGraph
   }
 
   def displayPropertyPanel(dataproxy: DataProxyUI): Base =
-    ScenesManager.currentSceneContainer match {
+    ScenesManager().currentSceneContainer match {
       case (Some(exe: ExecutionMoleSceneContainer)) ⇒ throw new UserBadDataError("No displaying in execution mode")
       case _ ⇒
         val i = firstFree
@@ -369,8 +369,8 @@ abstract class MoleScene extends GraphScene.StringGraph
   def select(w: Widget, point: Point, change: Boolean) {
     w match {
       case widget: CapsuleUI ⇒
-        ScenesManager.changeSelection(widget)
-      case _ ⇒ ScenesManager.clearSelection
+        ScenesManager().changeSelection(widget)
+      case _ ⇒ ScenesManager().clearSelection
     }
   }
 
@@ -393,14 +393,14 @@ abstract class MoleScene extends GraphScene.StringGraph
       rectangle.height *= -1
     }
 
-    ScenesManager.clearSelection
+    ScenesManager().clearSelection
     getNodes.foreach {
       b ⇒
         findWidget(b) match {
           case w: CapsuleUI ⇒
             val r = new Rectangle(w.getBounds)
             r.setLocation(w.getLocation)
-            if (r.intersects(rectangle)) ScenesManager.addToSelection(w)
+            if (r.intersects(rectangle)) ScenesManager().addToSelection(w)
           case _ ⇒
         }
     }
@@ -412,7 +412,7 @@ abstract class MoleScene extends GraphScene.StringGraph
     var original: Option[Point] = None
 
     def movementStarted(widget: Widget) = {
-      ScenesManager.selection.foreach {
+      ScenesManager().selection.foreach {
         o ⇒
           originals += o -> o.widget.getPreferredLocation
       }
@@ -426,15 +426,15 @@ abstract class MoleScene extends GraphScene.StringGraph
     def getOriginalLocation(widget: Widget) = {
       widget match {
         case x: CapsuleUI ⇒
-          if (!ScenesManager.selection.contains(x)) {
-            ScenesManager.clearSelection
-            ScenesManager.changeSelection(x)
+          if (!ScenesManager().selection.contains(x)) {
+            ScenesManager().clearSelection
+            ScenesManager().changeSelection(x)
             x.repaint
           }
           original = Some(widget.getPreferredLocation)
           original.get
         case _ ⇒
-          ScenesManager.clearSelection
+          ScenesManager().clearSelection
           new Point
       }
     }

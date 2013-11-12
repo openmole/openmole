@@ -52,13 +52,20 @@ object Validation {
     (paramsToMap(po), paramsToMap(pno))
   }
 
+  abstract class errorDetect(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) {
+    def checkPrototypeMatch(p: Prototype[_]): Problem
+
+    val implicitMap = prototypesToMap(implicits)
+
+  }
+
   def taskTypeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[_] = {
 
     val implicitMap = prototypesToMap(implicits)
 
     (for {
-      c ← capsules
-      sourcesOutputs = TreeMap(sources(c).flatMap(_.outputs).map(o ⇒ o.prototype.name -> o).toSeq: _*)
+      (c: ICapsule) ← capsules
+      sourcesOutputs = TreeMap(sources(c).flatMap((os: ISource) ⇒ os.outputs.toSet).map((o: Data[_]) ⇒ o.prototype.name -> o).toSeq: _*)
       s ← mole.slots(c)
       receivedInputs = TreeMap(computeManifests(mole, sources, hooks)(s).map { p ⇒ p.name -> p }.toSeq: _*)
       (parametersOverride, parametersNonOverride) = separateParameters(c.task.parameters)
@@ -104,9 +111,9 @@ object Validation {
   def sourceTypeErrors(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[_] = {
     val implicitMap = prototypesToMap(implicits)
 
-    (for {
+    val x = (for {
       c ← mole.capsules
-      so ← sources.getOrElse(c, List.empty)
+      (so: ISource) ← sources.getOrElse(c, List.empty)
       (parametersOverride, parametersNonOverride) = separateParameters(so.parameters)
       sl ← mole.slots(c)
       receivedInputs = TreeMap(computeManifests(mole, sources, hooks)(sl).map { p ⇒ p.name -> p }.toSeq: _*)
@@ -135,7 +142,8 @@ object Validation {
         case (None, None, None, None) ⇒
           if (!(i.mode is Optional)) Some(MissingSourceInput(sl, so, i)) else None
       }
-    }).flatten
+    })
+    x.flatten
   }
 
   def typeErrorsTopMole(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) =
@@ -242,7 +250,7 @@ object Validation {
       dc ⇒ mole.level(dc.end) < mole.level(dc.start)
     }.map(DataChannelNegativeLevelProblem(_))
 
-  def apply(mole: IMole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty) =
+  def apply(mole: IMole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty) = {
     allMoles(mole).flatMap {
       case (m, mt) ⇒
         def moleTaskImplicits(moleTask: IMoleTask) = {
@@ -264,5 +272,6 @@ object Validation {
           duplicatedName(m, sources, hooks) ++
           dataChannelErrors(m)
     }
+  }
 
 }

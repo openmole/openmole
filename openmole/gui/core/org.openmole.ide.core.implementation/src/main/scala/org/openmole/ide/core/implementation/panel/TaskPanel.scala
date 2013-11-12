@@ -110,7 +110,7 @@ trait TaskPanel extends Base
   }
 
   def deleteProxy = {
-    val toBeRemovedCapsules: List[CapsuleUI] = ScenesManager.moleScenes.map {
+    val toBeRemovedCapsules: List[CapsuleUI] = ScenesManager().moleScenes.map {
       _.dataUI.capsules.values.filter {
         c ⇒
           c.dataUI.task == Some(proxy)
@@ -127,8 +127,8 @@ trait TaskPanel extends Base
             c ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.dataUI.removeCapsuleUI(c))
           }
           deleteProxy
-          ScenesManager.invalidateSceneCaches
-          ScenesManager.refreshScenes
+          ScenesManager().invalidateSceneCaches
+          ScenesManager().refreshScenes
         }
     }
   }

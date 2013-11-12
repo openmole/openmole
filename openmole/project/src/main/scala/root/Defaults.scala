@@ -23,9 +23,11 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
 
   override def settings = super.settings ++
     Seq(version in Global := "0.10.0-SNAPSHOT",
-      scalaVersion := "2.10.2",
+      scalaVersion in Global := "2.10.3",
+      scalacOptions ++= Seq("-deprecation"),
       publishArtifact in (packageDoc in install) := false,
       publishArtifact in (packageSrc in install) := false,
-      concurrentRestrictions := Seq(Tags.limitAll(5))
+
+      concurrentRestrictions := Seq(Tags.limitAll(5), Tags.limit(Tags.Disk, 2))
     )
 }

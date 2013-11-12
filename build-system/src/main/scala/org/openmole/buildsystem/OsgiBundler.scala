@@ -40,6 +40,8 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
     projectID <<= (projectID, bundleType) { (id, bT) ⇒
       id extra ("project-name" -> projectName, "bundle-type" -> bT.mkString)
     },
+    testListeners in (Test, test) := Seq(TestLogger(streams.value.log, { _ ⇒ streams.value.log }, logBuffered.value)), //TODO: Quick hack to workaround the file hungriness of SBT 0.13.0 fix when https://github.com/sbt/sbt/issues/937 is fixed
+    test in (Test, test) <<= test in (Test, test) tag (Tags.Disk),
     publishTo <<= isSnapshot(if (_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases"))
   ) ++ scalariformDefaults
 

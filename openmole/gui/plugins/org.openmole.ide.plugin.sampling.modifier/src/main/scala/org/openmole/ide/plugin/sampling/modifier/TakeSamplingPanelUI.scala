@@ -21,7 +21,7 @@ import java.util.{ Locale, ResourceBundle }
 import swing.{ Label, TextField }
 import org.openmole.ide.core.implementation.panelsettings.ISamplingPanelUI
 
-class TakeSamplingPanelUI(cud: TakeSamplingDataUI2)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends ISamplingPanelUI {
+class TakeSamplingPanelUI(cud: TakeSamplingDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends ISamplingPanelUI {
 
   val sizeTextField = new TextField(cud.size, 8)
 
@@ -30,7 +30,7 @@ class TakeSamplingPanelUI(cud: TakeSamplingDataUI2)(implicit val i18n: ResourceB
     contents += sizeTextField
   }))
 
-  override def saveContent = new TakeSamplingDataUI2(sizeTextField.text)
+  override def saveContent = new TakeSamplingDataUI010(sizeTextField.text)
 
   override lazy val help = new Helper(List(new URL(i18n.getString("takePermalinkText"), i18n.getString("takePermalink"))))
   add(sizeTextField, new Help(i18n.getString("takeSize"), i18n.getString("takeSizeEx")))

@@ -15,7 +15,7 @@ import org.openmole.ide.plugin.domain.range.RangeDomainDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.plugin.domain.range.Range
 
-class LHSSamplingDataUI2 extends SamplingDataUI {
+class LHSSamplingDataUI010 extends SamplingDataUI {
 
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
@@ -58,6 +58,6 @@ class LHSSamplingDataUI2 extends SamplingDataUI {
   def preview = "LHS"
 }
 
-class LHSSamplingDataUI(val samples: String = "1") extends Update[LHSSamplingDataUI2] {
-  def update = new LHSSamplingDataUI2
+class LHSSamplingDataUI(val samples: String = "1") extends Update[LHSSamplingDataUI010] {
+  def update = new LHSSamplingDataUI010
 }
