@@ -19,6 +19,6 @@ package org.openmole.ide.core.implementation.serializer
 import org.openmole.ide.core.implementation.workflow.MoleScene
 import java.io.File
 
-class MetaData(val scene: MoleScene) {
-  def buildImage(file: File) = scene.buildImage(file)
+case class MetaData(scenes: Iterable[MoleScene]) {
+  def buildImages(file: File) = scenes.map(_.buildImage(file))
 }

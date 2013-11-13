@@ -34,9 +34,9 @@ object SaveXML {
       case Some(p) ⇒
         frame.title = "OpenMOLE - " + p.getCanonicalPath
         ScenesManager().moleScenes.foreach { _.closePropertyPanels }
-        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager().moleScenes.map(MoleData.fromScene), ScenesManager().moleScenes.map(new MetaData(_)))
+        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager().moleScenes.map(MoleData.fromScene), Some(MetaData(ScenesManager().moleScenes)))
         Settings.currentProject = path
-        ScenesManager().statusBar.inform(p.getName + " succefully saved " + " in " + p.getParent)
+        ScenesManager().statusBar.inform(p.getName + " succesfully saved " + " in " + p.getParent)
       case None ⇒
     }
 

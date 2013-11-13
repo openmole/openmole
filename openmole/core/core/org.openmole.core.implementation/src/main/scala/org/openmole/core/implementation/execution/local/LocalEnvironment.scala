@@ -33,7 +33,7 @@ object LocalEnvironment extends Environment {
   var initializationNumberOfThread: Option[Int] = None
   def numberOfThread = initializationNumberOfThread.getOrElse(Workspace.preferenceAsInt(DefaultNumberOfThreads))
 
-  @transient lazy val default = new LocalEnvironment(numberOfThread)
+  var default = new LocalEnvironment(numberOfThread)
 
   override def submit(job: IJob) = default.submit(job)
 
