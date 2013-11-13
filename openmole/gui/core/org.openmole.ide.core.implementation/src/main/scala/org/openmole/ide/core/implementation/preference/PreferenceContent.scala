@@ -25,7 +25,7 @@ import scala.swing.event.Key._
 
 class PreferenceContent extends PluginPanel("wrap", "[right]", "") {
   preferredSize = new Dimension(650, 300)
-  StatusBar().clear
+  StatusBar.clear
   val authentification = new AuthenticationPanel
   val servers = new ServerListPanel
 

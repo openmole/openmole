@@ -252,7 +252,7 @@ trait SamplingCompositionPanelUI extends Scene with Settings with SaveSettings {
   def testConnection(sourceWidget: ISamplingCompositionWidget,
                      targetWidget: ISamplingCompositionWidget,
                      arityTest: Boolean = true): Boolean = {
-    StatusBar().clear
+    StatusBar.clear
     targetWidget match {
       case domainT: IDomainWidget ⇒
         sourceWidget match {

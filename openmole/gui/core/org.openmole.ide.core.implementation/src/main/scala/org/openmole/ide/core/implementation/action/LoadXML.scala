@@ -56,7 +56,7 @@ object LoadXML {
         val deserialised = (new GUISerializer).deserialize(fileName)
         displayErrors(deserialised.written)
         val (proxies, scene) = deserialised.value
-        StatusBar().clear
+        StatusBar.clear
         ScenesManager().closeAll
         Proxies.instance = proxies
         addPrototypes(proxies)

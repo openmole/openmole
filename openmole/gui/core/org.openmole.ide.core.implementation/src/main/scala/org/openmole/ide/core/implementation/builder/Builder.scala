@@ -235,7 +235,7 @@ object Builder {
             b: BuilderFactoryUI,
             sel: List[CapsuleUI] = List()) = {
     try {
-      StatusBar().clear
+      StatusBar.clear
       val selection = {
         if (sel.isEmpty) {
           if (scene.dataUI.puzzlesCompliant.isEmpty) throw new UserBadDataError("Builder error: no Sequence of Task has been found.")

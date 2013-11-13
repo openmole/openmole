@@ -39,6 +39,9 @@ import scala.concurrent.stm.Ref
 import scala.concurrent.stm
 import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 import scala.Some
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Success
 
 abstract class GenericNetLogoPanelUI(
     nlogoPath: String,
@@ -69,27 +72,36 @@ abstract class GenericNetLogoPanelUI(
     selectionMode = SelectionMode.FilesAndDirectories,
     minus = CLOSE_IF_EMPTY)
 
+  private lazy val _globalsReporters = Ref(Option.empty[(Seq[String], Seq[String])])
+
+  private val inputMappingPanel = new PluginPanel("")
+  private val outputMappingPanel = new PluginPanel("")
+
   private def updateGlobals = {
     _globalsReporters.single() = None
     updateIOPanel
     publish(UpdatedProxyEvent.task(this))
   }
 
-  private val _globalsReporters = Ref(Option.empty[(Seq[String], Seq[String])])
-
-  private val inputMappingPanel = new PluginPanel("")
-  private val outputMappingPanel = new PluginPanel("")
-  updateIOPanel
-
-  private def updateIOPanel = {
+  private def updateIOPanel = future {
+    StatusBar().inform("Reading the netlogo file ...")
+    inputMappingPanel.contents += new Label("<html><i>Loading...</i></html>")
+    outputMappingPanel.contents += new Label("<html><i>Loading...</i></html>")
     val (i, o) = buildMultis
-    if (inputMappingPanel.contents.size > 0) inputMappingPanel.contents.remove(0)
-    if (outputMappingPanel.contents.size > 0) outputMappingPanel.contents.remove(0)
+    if (inputMappingPanel.contents.size > 0) inputMappingPanel.contents.remove(0, 1)
+    if (outputMappingPanel.contents.size > 0) outputMappingPanel.contents.remove(0, 1)
     inputMappingPanel.contents += i
     outputMappingPanel.contents += o
+    inputMappingPanel.revalidate
+    outputMappingPanel.revalidate
+    inputMappingPanel.repaint
+    outputMappingPanel.repaint
     revalidate
     repaint
+    StatusBar.clear
   }
+
+  updateIOPanel
 
   private def globalsReporters = stm.atomic {
     implicit ctx ⇒

@@ -37,6 +37,7 @@ import scala.Some
 import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, DataProxyUI }
 import org.openmole.ide.core.implementation.sampling.SamplingCompositionPanelUI
 import org.openmole.ide.core.implementation.panel.SamplingCompositionPanel
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object ScenesManager {
   val instance = new ScenesManager
@@ -263,7 +264,7 @@ class ScenesManager {
   }
 
   def addExecutionSceneContainer(bmsc: BuildMoleSceneContainer) =
-    CheckData.fullCheck(bmsc.scene) match {
+    CheckData.fullCheck(bmsc.scene) onComplete {
       case Success(_) ⇒
         if (StatusBar().isValid) {
           val clone = bmsc.scene.copyScene

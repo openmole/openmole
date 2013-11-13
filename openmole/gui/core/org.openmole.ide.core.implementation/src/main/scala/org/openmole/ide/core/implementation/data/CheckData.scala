@@ -24,15 +24,18 @@ import org.openmole.ide.core.implementation.workflow.{ CapsuleUI, MoleScene, Bui
 import org.openmole.misc.tools.service.Logger
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.data.Context
-import util.{ Failure, Success }
+import scala.util.{ Failure, Success }
 import org.openmole.core.implementation.validation.DataflowProblem.DuplicatedName
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, TaskDataProxyUI }
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
+import org.openmole.core.implementation.mole.Mole
 
 object CheckData extends Logger {
 
   def checkMole(scene: MoleScene,
-                clear: Boolean = true) = {
-    if (clear) StatusBar().clear
+                clear: Boolean = true) = future {
+    if (clear) StatusBar.clear
     scene match {
       case y: BuildMoleScene ⇒
         y.dataUI.startingCapsule match {
@@ -97,7 +100,7 @@ object CheckData extends Logger {
                     cui.setAsInvalid(e.getMessage)
                     displayCapsuleErrors(cui, e.getMessage)
                 }
-                Success(mole, cMap, errs)
+                (mole, cMap, errs)
               case Failure(l) ⇒ Failure(l)
             }
           case _ ⇒
@@ -127,9 +130,9 @@ object CheckData extends Logger {
         }
     }
 
-  def fullCheck(scene: MoleScene) = {
-    checkMole(scene) match {
-      case Success((mole, _, errors)) ⇒
+  def fullCheck(scene: MoleScene) = future {
+    checkMole(scene) onComplete {
+      case Success((mole: Mole, _, errors: Iterable[(CapsuleUI, Throwable)])) ⇒
         if (errors.isEmpty) {
           val checkTopo = checkTopology(mole)
           if (checkTopo.isEmpty) Success("")
@@ -137,6 +140,7 @@ object CheckData extends Logger {
         }
         else Left(errors.mkString("\n"))
       case Failure(l) ⇒ Failure(l)
+      case _          ⇒
     }
   }
 
