@@ -28,7 +28,7 @@ object MoleData {
     val ui = new MoleUI(moleData.name) {
       override val id = moleData.id
     }
-    val scene = new BuildMoleScene(ui)
+    val scene = new BuildMoleScene(ui, false)
     ui.plugins = moleData.plugins
     ui.implicits = moleData.implicits
 
@@ -73,6 +73,7 @@ object MoleData {
             d.filtered)
         scene.add(dataChannel)
     }
+    scene.refreshing = true
     scene
   }
 

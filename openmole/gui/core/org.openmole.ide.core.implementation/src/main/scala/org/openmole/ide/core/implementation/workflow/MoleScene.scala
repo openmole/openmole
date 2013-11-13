@@ -45,7 +45,7 @@ import java.io.File
 import org.netbeans.api.visual.export.SceneExporter
 import org.netbeans.api.visual.export.SceneExporter.{ ZoomType, ImageType }
 
-abstract class MoleScene extends GraphScene.StringGraph
+abstract class MoleScene(var refreshing: Boolean = true) extends GraphScene.StringGraph
     with SelectProvider
     with RectangularSelectDecorator
     with RectangularSelectProvider {
@@ -139,7 +139,7 @@ abstract class MoleScene extends GraphScene.StringGraph
     initCapsuleAdd(caps)
     dataUI.registerCapsuleUI(caps)
     graphScene.addNode(caps.id).setPreferredLocation(locationPoint)
-    CheckData.checkMole(this)
+    //  CheckData.checkMole(this)
   }
 
   def contains(transition: ConnectorUI) = dataUI.connectors.values.exists {

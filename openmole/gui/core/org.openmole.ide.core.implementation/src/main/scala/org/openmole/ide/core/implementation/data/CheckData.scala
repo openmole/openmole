@@ -33,82 +33,85 @@ import org.openmole.core.implementation.mole.Mole
 
 object CheckData extends Logger {
 
+  //FIXME: find another way (other than testing scene.refreshing) to block that function when a project is loading
   def checkMole(scene: MoleScene,
-                clear: Boolean = true) = {
-    if (clear) StatusBar.clear
-    scene match {
-      case y: BuildMoleScene ⇒
-        y.dataUI.startingCapsule match {
-          case Some(x: CapsuleUI) ⇒
-            MoleFactory.buildMole(y.dataUI) match {
-              case Success((mole, cMap, errs)) ⇒
-                val error_capsules = y.dataUI.capsules.values.partition {
-                  _.dataUI.task.isDefined
-                }
-                error_capsules._1.foreach(_.setAsValid)
-                error_capsules._2.foreach {
-                  _.setAsInvalid("A capsule has to be encapsulated to be run")
-                }
-
-                val capsuleMap: Map[ICapsule, CapsuleUI] = cMap.map {
-                  case (k, v) ⇒ v -> k
-                }
-
-                val sources = capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.sources.map { _.dataUI.coreObject.get } }
-                val hooks = capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.hooks.map { _.dataUI.coreObject.get } }
-
-                ToolDataUI.buildUpLevelPrototypes(mole, sources, hooks)
-                ToolDataUI.computePrototypeFromAggregation(mole, sources, hooks)
-                // Formal validation
-                val errors = Validation(mole,
-                  scene.dataUI.context,
-                  sources,
-                  hooks)
-                errors.isEmpty match {
-                  case false ⇒
-                    errors.flatMap {
-                      _ match {
-                        case x: DuplicatedName ⇒
-                          /*     val duplicated = x.data.map { _.prototype.name }.toList.distinct
-                          List(capsuleMap(x.capsule).dataUI.task).flatten.map { proxy ⇒
-                            proxy.dataUI.inputs = proxy.dataUI.inputs.filterNot { p ⇒
-                              duplicated.contains(p.dataUI.name)
-                            }.toSeq
-                            proxy
-                          } */
-                          displayCapsuleErrors(capsuleMap(x.capsule), x.toString)
-                          None
-                        case x: DataflowProblem ⇒
-                          displayCapsuleErrors(capsuleMap(x.capsule), x)
-                          Some(capsuleMap(x.capsule) -> x)
-                        case x ⇒
-                          logger.info("Error " + x + " not taken into account in the GUI yet.")
-                          None
-                      }
-                    }.groupBy(_._1).map {
-                      case (k, v) ⇒ (k, v.map(_._2))
-                    }.foreach {
-                      case (capsuleUI, e) ⇒
-                        capsuleUI.updateErrors(e.toList)
-                    }
-                  case true ⇒ y.dataUI.capsules.values.foreach {
-                    _.updateErrors(List.empty)
+                clear: Boolean = true) =
+    if (scene.refreshing) {
+      if (clear) StatusBar.clear
+      scene match {
+        case y: BuildMoleScene ⇒
+          y.dataUI.startingCapsule match {
+            case Some(x: CapsuleUI) ⇒
+              MoleFactory.buildMole(y.dataUI) match {
+                case Success((mole, cMap, errs)) ⇒
+                  val error_capsules = y.dataUI.capsules.values.partition {
+                    _.dataUI.task.isDefined
                   }
-                }
-                errs.foreach {
-                  case (cui, e) ⇒
-                    cui.setAsInvalid(e.getMessage)
-                    displayCapsuleErrors(cui, e.getMessage)
-                }
-                Success(mole, cMap, errs)
-              case Failure(l) ⇒ Failure(l)
-            }
-          case _ ⇒
-            Failure(new Throwable("No starting capsule is defined, the Mole can not be built"))
-        }
-      case _ ⇒ Failure(new Throwable(""))
+                  error_capsules._1.foreach(_.setAsValid)
+                  error_capsules._2.foreach {
+                    _.setAsInvalid("A capsule has to be encapsulated to be run")
+                  }
+
+                  val capsuleMap: Map[ICapsule, CapsuleUI] = cMap.map {
+                    case (k, v) ⇒ v -> k
+                  }
+
+                  val sources = capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.sources.map { _.dataUI.coreObject.get } }
+                  val hooks = capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.hooks.map { _.dataUI.coreObject.get } }
+
+                  ToolDataUI.buildUpLevelPrototypes(mole, sources, hooks)
+                  ToolDataUI.computePrototypeFromAggregation(mole, sources, hooks)
+                  // Formal validation
+                  val errors = Validation(mole,
+                    scene.dataUI.context,
+                    sources,
+                    hooks)
+                  errors.isEmpty match {
+                    case false ⇒
+                      errors.flatMap {
+                        _ match {
+                          case x: DuplicatedName ⇒
+                            /*     val duplicated = x.data.map { _.prototype.name }.toList.distinct
+                            List(capsuleMap(x.capsule).dataUI.task).flatten.map { proxy ⇒
+                              proxy.dataUI.inputs = proxy.dataUI.inputs.filterNot { p ⇒
+                                duplicated.contains(p.dataUI.name)
+                              }.toSeq
+                              proxy
+                            } */
+                            displayCapsuleErrors(capsuleMap(x.capsule), x.toString)
+                            None
+                          case x: DataflowProblem ⇒
+                            displayCapsuleErrors(capsuleMap(x.capsule), x)
+                            Some(capsuleMap(x.capsule) -> x)
+                          case x ⇒
+                            logger.info("Error " + x + " not taken into account in the GUI yet.")
+                            None
+                        }
+                      }.groupBy(_._1).map {
+                        case (k, v) ⇒ (k, v.map(_._2))
+                      }.foreach {
+                        case (capsuleUI, e) ⇒
+                          capsuleUI.updateErrors(e.toList)
+                      }
+                    case true ⇒ y.dataUI.capsules.values.foreach {
+                      _.updateErrors(List.empty)
+                    }
+                  }
+                  errs.foreach {
+                    case (cui, e) ⇒
+                      cui.setAsInvalid(e.getMessage)
+                      displayCapsuleErrors(cui, e.getMessage)
+                  }
+                  Success(mole, cMap, errs)
+                case Failure(l) ⇒ Failure(l)
+              }
+            case _ ⇒
+              Failure(new Throwable("No starting capsule is defined, the Mole can not be built"))
+          }
+        case _ ⇒ Failure(new Throwable(""))
+      }
     }
-  }
+    else Failure(new Throwable(""))
 
   def displayCapsuleErrors(capsule: CapsuleUI,
                            e: Problem): Unit = displayCapsuleErrors(capsule, e.getClass.getSimpleName + " : " + e.toString)
