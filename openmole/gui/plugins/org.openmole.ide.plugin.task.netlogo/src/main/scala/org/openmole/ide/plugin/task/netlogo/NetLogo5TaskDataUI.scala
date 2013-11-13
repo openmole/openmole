@@ -15,16 +15,16 @@ import org.openmole.ide.core.implementation.serializer.Update
 import org.openmole.ide.misc.tools.util.Converters._
 
 @deprecated
-case class NetLogo5TaskDataUI(name: String = "",
-                              workspaceEmbedded: Boolean = false,
-                              nlogoPath: String = "",
-                              lauchingCommands: String = "",
-                              prototypeMappingInput: List[(PrototypeDataProxyUI, String)] = List(),
-                              prototypeMappingOutput: List[(String, PrototypeDataProxyUI)] = List(),
-                              resources: List[String] = List(),
-                              inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                              outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                              inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[NetLogo5TaskDataUI010] {
+class NetLogo5TaskDataUI(name: String = "",
+                         workspaceEmbedded: Boolean = false,
+                         nlogoPath: String = "",
+                         lauchingCommands: String = "",
+                         prototypeMappingInput: List[(PrototypeDataProxyUI, String)] = List(),
+                         prototypeMappingOutput: List[(String, PrototypeDataProxyUI)] = List(),
+                         resources: List[String] = List(),
+                         inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                         outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                         inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[NetLogo5TaskDataUI010] {
   def update = new NetLogo5TaskDataUI010(name,
     workspaceEmbedded,
     nlogoPath,
@@ -37,16 +37,16 @@ case class NetLogo5TaskDataUI(name: String = "",
     inputParameters)
 }
 
-case class NetLogo5TaskDataUI010(name: String = "",
-                                 workspaceEmbedded: Boolean = false,
-                                 nlogoPath: String = "",
-                                 lauchingCommands: String = "",
-                                 prototypeMappingInput: List[(PrototypeDataProxyUI, String, Int)] = List(),
-                                 prototypeMappingOutput: List[(String, PrototypeDataProxyUI, Int)] = List(),
-                                 resources: List[String] = List(),
-                                 inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                                 outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                                 inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
+class NetLogo5TaskDataUI010(val name: String = "",
+                            val workspaceEmbedded: Boolean = false,
+                            val nlogoPath: String = "",
+                            val lauchingCommands: String = "",
+                            val prototypeMappingInput: List[(PrototypeDataProxyUI, String, Int)] = List(),
+                            val prototypeMappingOutput: List[(String, PrototypeDataProxyUI, Int)] = List(),
+                            val resources: List[String] = List(),
+                            val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                            val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                            val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
   def coreObject(plugins: PluginSet) = util.Try {
     val builder = NetLogo5Task(
       name,

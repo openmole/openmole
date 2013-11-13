@@ -31,7 +31,7 @@ trait SourcePanel extends Base
     with IOProxy
     with ConceptCombo
     with Icon
-    with IO {
+    with IO { sPanel ⇒
 
   override type DATAPROXY = SourceDataProxyUI with IOFacade
   type SOURCEDATAUI = SourceDataUI with ImageView
@@ -56,7 +56,7 @@ trait SourcePanel extends Base
           addTypeMenu(sourceCombo)
           addCreateLink
         }
-        contents += proxyShorcut(proxy.dataUI, index)
+        contents += proxyShorcut(sPanel, proxy.dataUI, index)
       }
     }
     createSettings
@@ -78,12 +78,13 @@ trait SourcePanel extends Base
     listenTo(panelSettings.help.components.toSeq: _*)
 
     tPane.reactions += {
-      case SelectionChanged(_) ⇒ updatePanel
+      case SelectionChanged(_) ⇒
+        savePanel
+        updatePanel
     }
   }
 
   override def updatePanel = {
-    savePanel
     ioSettings = ioPanel
     createSettings
   }

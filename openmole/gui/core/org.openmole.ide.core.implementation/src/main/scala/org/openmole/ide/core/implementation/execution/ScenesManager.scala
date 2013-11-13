@@ -264,7 +264,7 @@ class ScenesManager {
   }
 
   def addExecutionSceneContainer(bmsc: BuildMoleSceneContainer) =
-    CheckData.fullCheck(bmsc.scene) onComplete {
+    CheckData.fullCheck(bmsc.scene) match {
       case Success(_) ⇒
         if (StatusBar().isValid) {
           val clone = bmsc.scene.copyScene

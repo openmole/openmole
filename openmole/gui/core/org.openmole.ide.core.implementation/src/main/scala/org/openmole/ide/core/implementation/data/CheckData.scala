@@ -34,7 +34,7 @@ import org.openmole.core.implementation.mole.Mole
 object CheckData extends Logger {
 
   def checkMole(scene: MoleScene,
-                clear: Boolean = true) = future {
+                clear: Boolean = true) = {
     if (clear) StatusBar.clear
     scene match {
       case y: BuildMoleScene ⇒
@@ -100,7 +100,7 @@ object CheckData extends Logger {
                     cui.setAsInvalid(e.getMessage)
                     displayCapsuleErrors(cui, e.getMessage)
                 }
-                (mole, cMap, errs)
+                Success(mole, cMap, errs)
               case Failure(l) ⇒ Failure(l)
             }
           case _ ⇒
@@ -130,18 +130,16 @@ object CheckData extends Logger {
         }
     }
 
-  def fullCheck(scene: MoleScene) = future {
-    checkMole(scene) onComplete {
-      case Success((mole: Mole, _, errors: Iterable[(CapsuleUI, Throwable)])) ⇒
-        if (errors.isEmpty) {
-          val checkTopo = checkTopology(mole)
-          if (checkTopo.isEmpty) Success("")
-          else Left(checkTopo)
-        }
-        else Left(errors.mkString("\n"))
-      case Failure(l) ⇒ Failure(l)
-      case _          ⇒
-    }
+  def fullCheck(scene: MoleScene) = checkMole(scene) match {
+    case Success((mole, _, errors)) ⇒
+      if (errors.isEmpty) {
+        val checkTopo = checkTopology(mole)
+        if (checkTopo.isEmpty) Success("")
+        else Left(checkTopo)
+      }
+      else Left(errors.mkString("\n"))
+    case Failure(l) ⇒ Failure(l)
+    case _          ⇒
   }
 
   def checkTopology(mole: IMole) =

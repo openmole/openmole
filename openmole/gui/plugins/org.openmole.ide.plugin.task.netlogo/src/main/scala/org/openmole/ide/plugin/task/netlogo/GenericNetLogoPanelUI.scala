@@ -72,16 +72,18 @@ abstract class GenericNetLogoPanelUI(
     selectionMode = SelectionMode.FilesAndDirectories,
     minus = CLOSE_IF_EMPTY)
 
-  private lazy val _globalsReporters = Ref(Option.empty[(Seq[String], Seq[String])])
-
-  private val inputMappingPanel = new PluginPanel("")
-  private val outputMappingPanel = new PluginPanel("")
-
   private def updateGlobals = {
     _globalsReporters.single() = None
     updateIOPanel
     publish(UpdatedProxyEvent.task(this))
   }
+
+  private val _globalsReporters = Ref(Option.empty[(Seq[String], Seq[String])])
+
+  private val inputMappingPanel = new PluginPanel("")
+  private val outputMappingPanel = new PluginPanel("")
+
+  updateIOPanel
 
   private def updateIOPanel = future {
     StatusBar().inform("Reading the netlogo file ...")
@@ -100,8 +102,6 @@ abstract class GenericNetLogoPanelUI(
     repaint
     StatusBar.clear
   }
-
-  updateIOPanel
 
   private def globalsReporters = stm.atomic {
     implicit ctx ⇒

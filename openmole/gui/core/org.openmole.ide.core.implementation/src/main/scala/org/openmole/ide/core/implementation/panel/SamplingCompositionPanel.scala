@@ -30,7 +30,7 @@ trait SamplingCompositionPanel extends Base
     with Header
     with ProxyShortcut
     with Proxy
-    with Icon {
+    with Icon { sPanel ⇒
 
   override type DATAPROXY = SamplingCompositionDataProxyUI
   type DATAUI = SamplingCompositionDataUI with ImageView
@@ -51,7 +51,7 @@ trait SamplingCompositionPanel extends Base
           addName
           addCreateLink
         }
-        contents += proxyShorcut(proxy.dataUI, index)
+        contents += proxyShorcut(sPanel, proxy.dataUI, index)
       }
     }
     createSettings
@@ -67,10 +67,7 @@ trait SamplingCompositionPanel extends Base
     basePanel.contents += panelSettings.help
   }
 
-  override def updatePanel = {
-    savePanel
-    createSettings
-  }
+  override def updatePanel = createSettings
 
   def updateConceptPanel(d: SamplingCompositionDataUI with ImageView) = {
     savePanel

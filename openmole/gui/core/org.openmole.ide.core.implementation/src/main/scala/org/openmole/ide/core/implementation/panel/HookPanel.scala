@@ -31,7 +31,7 @@ trait HookPanel extends Base
     with IOProxy
     with ConceptCombo
     with Icon
-    with IO {
+    with IO { hPanel ⇒
 
   override type DATAPROXY = HookDataProxyUI with IOFacade
   type HOOKDATAUI = HookDataUI with ImageView
@@ -56,7 +56,7 @@ trait HookPanel extends Base
           addTypeMenu(hookCombo)
           addCreateLink
         }
-        contents += proxyShorcut(proxy.dataUI, index)
+        contents += proxyShorcut(hPanel, proxy.dataUI, index)
       }
     }
     createSettings
@@ -79,9 +79,10 @@ trait HookPanel extends Base
     tPane.listenTo(tPane.selection)
 
     tPane.reactions += {
-      case SelectionChanged(_) ⇒ updatePanel
+      case SelectionChanged(_) ⇒
+        savePanel
+        updatePanel
     }
-    //basePanel.revalidate
   }
 
   override def updatePanel = {
@@ -91,7 +92,6 @@ trait HookPanel extends Base
   }
 
   def updateConceptPanel(d: HOOKDATAUI) = {
-    savePanel
     proxy.dataUI = d.doClone(ioSettings.prototypesIn, ioSettings.prototypesOut, ioSettings.inputParameters)
     createSettings
   }

@@ -32,7 +32,7 @@ trait TaskPanel extends Base
     with IOProxy
     with ConceptCombo
     with Icon
-    with IO {
+    with IO { tPanel ⇒
 
   override type DATAPROXY = TaskDataProxyUI with IOFacade
   type TASKDATAUI = TaskDataUI with ImageView
@@ -58,7 +58,7 @@ trait TaskPanel extends Base
           addTypeMenu(taskCombo)
           addCreateLink
         }
-        contents += proxyShorcut(proxy.dataUI)
+        contents += proxyShorcut(tPanel, proxy.dataUI)
       }
     }
     createSettings
@@ -67,7 +67,6 @@ trait TaskPanel extends Base
   override def created = proxyCreated
 
   override def updatePanel = {
-    savePanel
     ioSettings = ioPanel
     createSettings
   }
@@ -88,10 +87,10 @@ trait TaskPanel extends Base
     tPane.listenTo(tPane.selection)
 
     tPane.reactions += {
-      case SelectionChanged(_) ⇒ updatePanel
+      case SelectionChanged(_) ⇒
+        savePanel
+        updatePanel
     }
-
-    // basePanel.revalidate
   }
 
   def updateConceptPanel(d: TASKDATAUI) = {
