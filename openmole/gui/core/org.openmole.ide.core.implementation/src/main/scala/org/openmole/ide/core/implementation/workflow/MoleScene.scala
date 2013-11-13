@@ -72,10 +72,11 @@ abstract class MoleScene extends GraphScene.StringGraph
     firstFree0(0)
   }
 
-  def updatePanels = _currentPanels.flatMap {
+  def updatePanels(i: Int) = _currentPanels.flatMap {
     _.base
-  }.reverse.foreach {
-    _.updatePanel
+  }.reverse.foreach { p ⇒
+    if (p.index == i) p.savePanel
+    p.updatePanel
   }
 
   class OBase {

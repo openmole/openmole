@@ -44,7 +44,7 @@ trait PrototypePanel extends Base
     savePanel
     proxy.dataUI = d
     createSettings
-    scene.updatePanels
+    scene.updatePanels(index)
   }
 
   build
