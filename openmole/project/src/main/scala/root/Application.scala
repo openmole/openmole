@@ -138,7 +138,7 @@ object Application extends Defaults {
           sbtPluginTemplate("task.moletask"),
           sbtPluginTemplate("task.stat"),
           sbtPluginTemplate("task.tools"),
-          sbtPluginTemplate("task.imagej"),
+          //sbtPluginTemplate("task.imagej"),
           sbtPluginTemplate("domain.range"),
           sbtPluginTemplate("domain.collection"),
           sbtPluginTemplate("domain.modifier"),
