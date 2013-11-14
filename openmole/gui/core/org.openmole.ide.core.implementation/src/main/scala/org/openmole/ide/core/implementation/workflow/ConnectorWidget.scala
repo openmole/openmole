@@ -59,7 +59,7 @@ class ConnectorWidget(val scene: MoleScene,
   addChild(prototypeFilterWidget)
 
   drawTransitionType
-  setLabelVisible
+  _setLabelVisible
   toBeEdited = true
 
   def setConnnector(c: ConnectorUI) {
@@ -78,7 +78,7 @@ class ConnectorWidget(val scene: MoleScene,
         new Action("") { def apply = editPrototypeFilter }, 10))
   }
 
-  def setLabelVisible = {
+  def _setLabelVisible = {
     removeConstraint(prototypeFilterWidget)
     connector match {
       case x: TransitionUI ⇒
@@ -97,6 +97,10 @@ class ConnectorWidget(val scene: MoleScene,
       case _ ⇒
     }
     prototypeFilterWidget.setOpaque(true)
+  }
+
+  def setLabelVisible = {
+    _setLabelVisible
     scene.refresh
   }
 

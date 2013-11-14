@@ -36,7 +36,7 @@ object MoleData {
       moleData.capsules.map {
         case cd @ CapsuleData(c, x, y) ⇒
           val capsuleUI = CapsuleUI.withMenu(scene, c)
-          scene.add(capsuleUI, new Point(x, y))
+          scene._add(capsuleUI, new Point(x, y))
           cd -> capsuleUI
       }.toMap
 
@@ -47,7 +47,7 @@ object MoleData {
         case (capsule, slots) ⇒
           slots.sortBy(_.index).map {
             data ⇒
-              val slot = capsuleUIMap(capsule).addInputSlot
+              val slot = capsuleUIMap(capsule)._addInputSlot
               data.id -> slot
           }
       }.flatten.toMap
@@ -61,7 +61,7 @@ object MoleData {
             t.transitionType,
             t.condition,
             t.filtered.map(i ⇒ proxies.prototype(i.id).get))
-        scene.add(transition)
+        scene._add(transition)
     }
 
     moleData.dataChannels.foreach {
@@ -71,7 +71,7 @@ object MoleData {
             capsuleUIMap(d.from),
             slots(d.to.id),
             d.filtered)
-        scene.add(dataChannel)
+        scene._add(dataChannel)
     }
     scene
   }

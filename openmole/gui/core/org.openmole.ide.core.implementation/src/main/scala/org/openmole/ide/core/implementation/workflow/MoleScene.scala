@@ -134,33 +134,45 @@ abstract class MoleScene extends GraphScene.StringGraph
 
   def initCapsuleAdd(w: CapsuleUI)
 
-  def add(caps: CapsuleUI, locationPoint: Point) = {
+  def _add(caps: CapsuleUI, locationPoint: Point) = {
     assert(caps.scene == this)
     initCapsuleAdd(caps)
     dataUI.registerCapsuleUI(caps)
     graphScene.addNode(caps.id).setPreferredLocation(locationPoint)
-    //  CheckData.checkMole(this)
+  }
+
+  def add(caps: CapsuleUI, locationPoint: Point) = {
+    _add(caps, locationPoint)
+    refresh
   }
 
   def contains(transition: ConnectorUI) = dataUI.connectors.values.exists {
     con ⇒ transition.source.id == con.source.id && transition.target.capsule.id == con.target.capsule.id
   }
 
-  def add(trans: TransitionUI) = {
+  def _add(trans: TransitionUI) = {
     if (contains(trans)) StatusBar().warn("The transition from " + trans.source.id + " to " + trans.target.capsule.id + " already exists")
     else {
       dataUI.registerConnector(trans)
       createConnectEdge(trans.source.id, trans.target.capsule.id, trans.id, trans.target.index)
-      refresh
     }
   }
 
-  def add(dc: DataChannelUI) = {
+  def add(trans: TransitionUI) = {
+    _add(trans)
+    refresh
+  }
+
+  def add(trans: DataChannelUI) = {
+    _add(trans)
+    refresh
+  }
+
+  def _add(dc: DataChannelUI) = {
     if (contains(dc)) StatusBar().warn("The Data Channel from " + dc.source.id + " to " + dc.target.capsule.id + " already exists")
     else {
       dataUI.registerConnector(dc)
       createConnectEdge(dc.source.id, dc.target.capsule.id, dc.id)
-      refresh
     }
   }
 

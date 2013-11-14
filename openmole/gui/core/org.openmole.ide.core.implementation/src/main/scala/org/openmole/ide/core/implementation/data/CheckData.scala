@@ -23,13 +23,11 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.workflow.{ CapsuleUI, MoleScene, BuildMoleScene }
 import org.openmole.misc.tools.service.Logger
 import org.openmole.ide.core.implementation.builder.MoleFactory
-import org.openmole.core.model.data.Context
 import scala.util.{ Failure, Success }
 import org.openmole.core.implementation.validation.DataflowProblem.DuplicatedName
-import org.openmole.ide.core.implementation.dataproxy.{ Proxies, TaskDataProxyUI }
+import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.core.implementation.mole.Mole
 
 object CheckData extends Logger {
 

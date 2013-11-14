@@ -56,10 +56,10 @@ object CapsuleUI {
     val caps = new CapsuleUI(scene, dataUI)
     dataUI.task match {
       case Some(t: TaskDataProxyUI) ⇒
-        caps.encapsule(t)
+        caps._encapsule(t)
         caps.setAsValid
       case _ ⇒
-        caps.decapsule
+        caps._decapsule
         caps.setAsInvalid("Empty Capsule")
     }
     caps
@@ -112,7 +112,7 @@ class CapsuleUI private (
   addChild(taskComponentWidget)
   addChild(titleWidget)
   addChild(oslot)
-  updateCapsuleTypeWidget
+  _updateCapsuleTypeWidget
 
   def nbInputSlots: Int = inputSlots.size
 
@@ -150,18 +150,13 @@ class CapsuleUI private (
 
   def starting = scene.dataUI.startingCapsule.map(_ == this).getOrElse(false)
 
-  def defineAsStartingCapsule = {
-    scene.dataUI.startingCapsule = Some(this)
-    scene.refresh
-  }
-
   def update = {
     inputSlots.foreach(_.refresh)
     updateEnvironmentWidget
     updateSamplingWidget
   }
 
-  def decapsule = {
+  def _decapsule = {
     dataUI = dataUI.copy(task = None)
     removeWidget(inputPrototypeWidget)
     removeWidget(outputPrototypeWidget)
@@ -172,17 +167,24 @@ class CapsuleUI private (
     addChild(inputPrototypeWidget.get)
     outputPrototypeWidget = Some(PrototypeWidget.buildNoTaskHook(scene, this))
     addChild(outputPrototypeWidget.get)
+  }
+
+  def decapsule = {
+    _decapsule
     scene.refresh
   }
 
-  def encapsule(dpu: TaskDataProxyUI) = {
-    decapsule
+  def _encapsule(dpu: TaskDataProxyUI) = {
+    _decapsule
     dataUI = dataUI.copy(task = Some(dpu))
     inputPrototypeWidget = Some(PrototypeWidget.buildTaskSource(scene, this))
     outputPrototypeWidget = Some(PrototypeWidget.buildTaskHook(scene, this))
-    CheckData.checkMole(scene)
     addChild(inputPrototypeWidget.get)
     addChild(outputPrototypeWidget.get)
+  }
+
+  def encapsule(dpu: TaskDataProxyUI) = {
+    _encapsule(dpu)
     scene.refresh
   }
 
@@ -202,7 +204,7 @@ class CapsuleUI private (
     updateCapsuleTypeWidget
   }
 
-  private def updateCapsuleTypeWidget = {
+  private def _updateCapsuleTypeWidget = {
     removeWidget(capsuleTypeWidget)
 
     dataUI.capsuleType match {
@@ -218,6 +220,10 @@ class CapsuleUI private (
           }))
         addChild(capsuleTypeWidget.get)
     }
+  }
+
+  private def updateCapsuleTypeWidget = {
+    _updateCapsuleTypeWidget
     scene.refresh
   }
 
@@ -278,10 +284,15 @@ class CapsuleUI private (
     if (problems.size > 0) setAsInvalid("I / O errors")
   }
 
-  def addInputSlot: InputSlotWidget = {
+  def _addInputSlot: InputSlotWidget = {
     val im = new InputSlotWidget(scene, this, nbInputSlots)
     inputSlots += im
     addChild(im)
+    im
+  }
+
+  def addInputSlot: InputSlotWidget = {
+    val im = _addInputSlot
     scene.refresh
     im
   }
