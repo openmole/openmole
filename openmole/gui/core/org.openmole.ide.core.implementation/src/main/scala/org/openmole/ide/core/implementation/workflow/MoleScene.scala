@@ -45,7 +45,7 @@ import java.io.File
 import org.netbeans.api.visual.export.SceneExporter
 import org.netbeans.api.visual.export.SceneExporter.{ ZoomType, ImageType }
 
-abstract class MoleScene(var refreshing: Boolean = true) extends GraphScene.StringGraph
+abstract class MoleScene extends GraphScene.StringGraph
     with SelectProvider
     with RectangularSelectDecorator
     with RectangularSelectProvider {

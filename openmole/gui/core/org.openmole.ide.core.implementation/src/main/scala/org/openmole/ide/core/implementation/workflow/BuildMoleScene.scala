@@ -32,13 +32,13 @@ object BuildMoleScene {
   def apply(name: String) = new BuildMoleScene(new MoleUI(name))
 }
 
-class BuildMoleScene(val dataUI: MoleUI, refreshing: Boolean = true) extends MoleScene(refreshing) { buildMoleScene ⇒
+class BuildMoleScene(val dataUI: MoleUI, r: Boolean = true) extends MoleScene { buildMoleScene ⇒
 
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
 
   val isBuildScene = true
 
-  override def refresh = if (refreshing) {
+  override def refresh = {
     dataUI.invalidateCache
     CheckData.checkMole(this)
     dataUI.capsules.foreach { case (_, c) ⇒ c.update }
