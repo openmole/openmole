@@ -282,9 +282,9 @@ package object evolution {
       type A = model.evolution.A
       type MF = model.evolution.MF
       type F = model.evolution.F
-      type STATE = termination.STATE
+      type STATE = model.evolution.STATE
 
-      val stateManifest = termination.stateManifest
+      val stateManifest = model.evolution.stateManifest
 
       def initialArchive = evolution.initialArchive
       def combine(a1: A, a2: A) = evolution.combine(a1, a2)
@@ -293,8 +293,8 @@ package object evolution {
       def modify(individuals: Seq[Individual[G, P, F]], archive: A) = evolution.modify(individuals, archive)
       def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], archive: A) = evolution.elitism(individuals, newIndividuals, archive)
 
-      def initialState = termination.initialState
-      def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE) = termination.terminated(population, terminationState)
+      def initialState = evolution.initialState
+      def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE) = evolution.terminated(population, terminationState)
     }
 
     val archive = model.archive.asInstanceOf[Prototype[A]]

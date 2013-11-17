@@ -26,29 +26,39 @@ import scala.util.Random
 
 object GA {
 
-  trait GA extends G with ContextPhenotype with MG with MF with RankDiversityMF with GASigma {
-    type MF <: Rank with Diversity
+  trait GA extends G with ContextPhenotype with MG with MF with GASigma {
     val gManifest = manifest[G]
     val individualManifest = manifest[Individual[G, P, F]]
-    val populationManifest = manifest[Population[G, P, F, MF]]
     val fManifest = manifest[F]
   }
 
-  trait GATermination extends Termination with TerminationManifest with GA
+  trait GATermination {
 
-  def counter(steps: Int) = {
-    val _steps = steps
-    new CounterTermination with GATermination {
-      val steps = _steps
-      val stateManifest = manifest[STATE]
+    trait GATerminationAlgorithm[_MF] extends Termination with TerminationManifest with GA {
+      type MF = _MF
+    }
+
+    def apply(ga: GA): GATerminationAlgorithm[ga.MF]
+
+  }
+
+  def counter(steps: Int) = new GATermination {
+    def apply(ga: GA): GATerminationAlgorithm[ga.MF] = {
+      val _steps = steps
+      new GATerminationAlgorithm[ga.MF] with CounterTermination {
+        val steps = _steps
+        val stateManifest = manifest[STATE]
+      }
     }
   }
 
-  def timed(duration: String) = {
-    val _duration = duration.toMilliSeconds
-    new TimedTermination with GATermination {
-      val duration = _duration
-      val stateManifest = manifest[STATE]
+  def timed(duration: String) = new GATermination {
+    def apply(ga: GA): GATerminationAlgorithm[ga.MF] = {
+      val _duration = duration.toMilliSeconds
+      new GATerminationAlgorithm[ga.MF] with TimedTermination {
+        val duration = _duration
+        val stateManifest = manifest[STATE]
+      }
     }
   }
 
@@ -94,7 +104,7 @@ object GA {
 
   trait GAModifier extends Modifier with GA
 
-  trait GAAlgorithm extends Archive with ArchiveManifest with GA with GAModifier with Elitism
+  trait GAAlgorithm extends Archive with ArchiveManifest with GA with GAModifier with Elitism with PopulationManifest with Selection
 
   trait GAAlgorithmBuilder extends A {
     def apply: GAAlgorithm
@@ -103,8 +113,9 @@ object GA {
   def optimization(mu: Int, dominance: Dominance = strict, ranking: GARankingBuilder = pareto, diversityMetric: DiversityMetricBuilder = crowding) = new GAAlgorithmBuilder {
     val (_mu, _dominance, _ranking, _diversityMetric) = (mu, dominance, ranking, diversityMetric)
     def apply =
-      new NoArchive with RankDiversityModifier with GAAlgorithm with NonDominatedElitism {
+      new NoArchive with RankDiversityModifier with GAAlgorithm with NonDominatedElitism with BinaryTournamentSelection {
         val aManifest = manifest[A]
+        val populationManifest = manifest[Population[G, P, F, MF]]
         val diversityMetric = _diversityMetric(dominance)
         val ranking = _ranking(dominance)
         val mu = _mu
@@ -125,8 +136,9 @@ object GA {
       val x = _x
 
       def apply =
-        new GAAlgorithm with ProfileModifier with ProfileElitism with NoArchive with NoDiversity with ProfileGenomePlotter with HierarchicalRanking {
+        new GAAlgorithm with ProfileModifier with ProfileElitism with NoArchive with NoDiversity with ProfileGenomePlotter with HierarchicalRanking with BinaryTournamentSelection {
           val aManifest = manifest[A]
+          val populationManifest = manifest[Population[G, P, F, MF]]
           val x = _x
           val nX = _nX
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
@@ -158,8 +170,10 @@ object GA {
       val y = _y
 
       def apply =
-        new GAAlgorithm with MapModifier with MapElitism with MapGenomePlotter with NoArchive with HierarchicalRanking with NoDiversity {
+        new GAAlgorithm with MapElitism with MapGenomePlotter with NoArchive with NoRanking with NoModifier with MapSelection {
           val aManifest = manifest[A]
+          val populationManifest = manifest[Population[G, P, F, MF]]
+
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
           val x = _x
           val y = _y
@@ -222,7 +236,6 @@ object GA {
 }
 
 trait GA extends GASigmaFactory
-  with BinaryTournamentSelection
   with EvolutionManifest
   with TerminationManifest
   with GA.GA
@@ -234,6 +247,7 @@ trait GA extends GASigmaFactory
   with Modifier
   with CloneRemoval
   with ContextPhenotype
+  with PopulationManifest
 
 sealed class GAImpl(
   val algorithm: GA.GAAlgorithmBuilder,
@@ -247,16 +261,18 @@ sealed class GAImpl(
   lazy val thisAlgorithm = algorithm.apply
   lazy val thisCrossover = crossover(genomeFactory)
   lazy val thisMutation = mutation(genomeFactory)
+  lazy val thisTermination = termination(thisAlgorithm)
 
-  type STATE = termination.STATE
+  type STATE = thisTermination.STATE
   type A = thisAlgorithm.A
+  type MF = thisAlgorithm.MF
 
   implicit val aManifest = thisAlgorithm.aManifest
+  implicit val stateManifest = thisTermination.stateManifest
+  implicit val populationManifest = thisAlgorithm.populationManifest
 
-  implicit val stateManifest = termination.stateManifest
-
-  def initialState: STATE = termination.initialState
-  def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+  def initialState: STATE = thisTermination.initialState
+  def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = thisTermination.terminated(population, terminationState)
   def toArchive(individuals: Seq[Individual[G, P, F]]) = thisAlgorithm.toArchive(individuals)
   def combine(a1: A, a2: A) = thisAlgorithm.combine(a1, a2)
   def diff(a1: A, a2: A) = thisAlgorithm.diff(a1, a2)
@@ -265,4 +281,6 @@ sealed class GAImpl(
   def crossover(g1: G, g2: G)(implicit rng: Random) = thisCrossover.crossover(g1, g2)
   def mutate(genome: G)(implicit rng: Random) = thisMutation.mutate(genome)
   def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], a: A) = thisAlgorithm.elitism(individuals, newIndividuals, a)
+  def selection(population: Population[G, P, F, MF])(implicit aprng: Random): Iterator[Individual[G, P, F]] = thisAlgorithm.selection(population)
+
 }
