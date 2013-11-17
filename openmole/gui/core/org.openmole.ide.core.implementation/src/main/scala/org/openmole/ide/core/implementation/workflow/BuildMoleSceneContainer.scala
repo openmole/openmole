@@ -56,7 +56,6 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
 
   val spane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(view), statusBar.peer)
   spane.setResizeWeight(1)
-  // / spane.setResizeWeight(1 - (50.0 / Toolkit.getDefaultToolkit.getScreenSize.height))
   peer.add(spane, BorderLayout.CENTER)
   CheckData.checkMole(scene, false)
 

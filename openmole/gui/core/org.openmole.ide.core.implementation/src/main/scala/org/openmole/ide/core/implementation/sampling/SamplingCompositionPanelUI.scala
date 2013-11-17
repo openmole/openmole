@@ -70,8 +70,6 @@ trait SamplingCompositionPanelUI extends Scene with Settings with SaveSettings {
   addChild(boxLayer)
   addChild(connectLayer)
 
-  //setPreferredBounds(new Rectangle(0, 0, 350, 200))
-
   val connectProvider = new SamplingConnectionProvider
   val connectAction = ActionFactory.createExtendedConnectAction(null, connectLayer,
     new SamplingConnectionProvider,
@@ -213,7 +211,7 @@ trait SamplingCompositionPanelUI extends Scene with Settings with SaveSettings {
     repaint
   }
 
-  def unSetFinal(proxy: DataProxyUI) = if (finalSampling == Some(proxy)) { println("oui !!"); finalSampling = None }
+  def unSetFinal(proxy: DataProxyUI) = if (finalSampling == Some(proxy)) finalSampling = None
 
   def scene = this
 

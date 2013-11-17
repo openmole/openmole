@@ -5,7 +5,6 @@ import org.openmole.ide.core.implementation.dataproxy.{ ProxyDeletedEvent, Proxy
 import org.openmole.misc.eventdispatcher._
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.event.{ UIElementResized, MouseClicked }
-import scala.swing.TabbedPane
 
 /*
  * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
@@ -24,15 +23,13 @@ import scala.swing.TabbedPane
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait Base extends Created with SavePanel {
+trait Base extends Created with SavePanel { bb ⇒
 
   val scene: MoleScene
 
   val index: Int
 
   def updatePanel: Unit = {}
-
-  //def createSettings: Unit
 
   def created: Boolean
 
@@ -49,13 +46,13 @@ trait Base extends Created with SavePanel {
 
   val createListener = new EventListener[Proxies] {
     def triggered(obj: Proxies, ev: Event[Proxies]) {
-      scene.updatePanels
+      scene.updatePanels(index)
     }
   }
 
   val deleteListener = new EventListener[Proxies] {
     def triggered(obj: Proxies, ev: Event[Proxies]) {
-      scene.updatePanels
+      scene.updatePanels(index)
     }
   }
 

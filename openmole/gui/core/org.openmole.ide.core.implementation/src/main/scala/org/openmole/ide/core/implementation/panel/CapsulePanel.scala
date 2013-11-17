@@ -23,7 +23,7 @@ import org.openmole.ide.misc.widget.PluginPanel
 trait CapsulePanel extends Base
     with Capsule
     with Header
-    with ProxyShortcut {
+    with ProxyShortcut { cPanel ⇒
 
   def components = panelSettings.components
 
@@ -34,7 +34,7 @@ trait CapsulePanel extends Base
   def build = {
     basePanel.contents += header(scene, index)
     basePanel.contents += new Label("")
-    basePanel.contents += proxyShorcut(capsule.dataUI, index)
+    basePanel.contents += proxyShorcut(cPanel, capsule.dataUI, index)
     createSettings(initTabIndex)
   }
 
@@ -51,12 +51,13 @@ trait CapsulePanel extends Base
 
     tPane.listenTo(tPane.selection)
     tPane.reactions += {
-      case SelectionChanged(_) ⇒ updatePanel
+      case SelectionChanged(_) ⇒
+        savePanel
+        updatePanel
     }
   }
 
   override def updatePanel = {
-    savePanel
     createSettings(-1)
   }
 

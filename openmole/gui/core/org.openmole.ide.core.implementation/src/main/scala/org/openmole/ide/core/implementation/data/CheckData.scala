@@ -23,18 +23,16 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.workflow.{ CapsuleUI, MoleScene, BuildMoleScene }
 import org.openmole.misc.tools.service.Logger
 import org.openmole.ide.core.implementation.builder.MoleFactory
-import org.openmole.core.model.data.Context
 import scala.util.{ Failure, Success }
 import org.openmole.core.implementation.validation.DataflowProblem.DuplicatedName
-import org.openmole.ide.core.implementation.dataproxy.{ Proxies, TaskDataProxyUI }
+import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.core.implementation.mole.Mole
 
 object CheckData extends Logger {
 
   def checkMole(scene: MoleScene,
-                clear: Boolean = true) = future {
+                clear: Boolean = true) = {
     if (clear) StatusBar.clear
     scene match {
       case y: BuildMoleScene ⇒
@@ -54,8 +52,18 @@ object CheckData extends Logger {
                   case (k, v) ⇒ v -> k
                 }
 
-                val sources = capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.sources.map { _.dataUI.coreObject.get } }
-                val hooks = capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.hooks.map { _.dataUI.coreObject.get } }
+                val sources = capsuleMap.map {
+                  c ⇒
+                    c._1 -> c._2.dataUI.sources.map {
+                      _.dataUI.coreObject.get
+                    }
+                }
+                val hooks = capsuleMap.map {
+                  c ⇒
+                    c._1 -> c._2.dataUI.hooks.map {
+                      _.dataUI.coreObject.get
+                    }
+                }
 
                 ToolDataUI.buildUpLevelPrototypes(mole, sources, hooks)
                 ToolDataUI.computePrototypeFromAggregation(mole, sources, hooks)
@@ -70,12 +78,12 @@ object CheckData extends Logger {
                       _ match {
                         case x: DuplicatedName ⇒
                           /*     val duplicated = x.data.map { _.prototype.name }.toList.distinct
-                          List(capsuleMap(x.capsule).dataUI.task).flatten.map { proxy ⇒
-                            proxy.dataUI.inputs = proxy.dataUI.inputs.filterNot { p ⇒
-                              duplicated.contains(p.dataUI.name)
-                            }.toSeq
-                            proxy
-                          } */
+                              List(capsuleMap(x.capsule).dataUI.task).flatten.map { proxy ⇒
+                                proxy.dataUI.inputs = proxy.dataUI.inputs.filterNot { p ⇒
+                                  duplicated.contains(p.dataUI.name)
+                                }.toSeq
+                                proxy
+                              } */
                           displayCapsuleErrors(capsuleMap(x.capsule), x.toString)
                           None
                         case x: DataflowProblem ⇒
@@ -100,7 +108,7 @@ object CheckData extends Logger {
                     cui.setAsInvalid(e.getMessage)
                     displayCapsuleErrors(cui, e.getMessage)
                 }
-                (mole, cMap, errs)
+                Success(mole, cMap, errs)
               case Failure(l) ⇒ Failure(l)
             }
           case _ ⇒
@@ -130,18 +138,16 @@ object CheckData extends Logger {
         }
     }
 
-  def fullCheck(scene: MoleScene) = future {
-    checkMole(scene) onComplete {
-      case Success((mole: Mole, _, errors: Iterable[(CapsuleUI, Throwable)])) ⇒
-        if (errors.isEmpty) {
-          val checkTopo = checkTopology(mole)
-          if (checkTopo.isEmpty) Success("")
-          else Left(checkTopo)
-        }
-        else Left(errors.mkString("\n"))
-      case Failure(l) ⇒ Failure(l)
-      case _          ⇒
-    }
+  def fullCheck(scene: MoleScene) = checkMole(scene) match {
+    case Success((mole, _, errors)) ⇒
+      if (errors.isEmpty) {
+        val checkTopo = checkTopology(mole)
+        if (checkTopo.isEmpty) Success("")
+        else Left(checkTopo)
+      }
+      else Left(errors.mkString("\n"))
+    case Failure(l) ⇒ Failure(l)
+    case _          ⇒
   }
 
   def checkTopology(mole: IMole) =

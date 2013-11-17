@@ -21,31 +21,33 @@ import org.openmole.ide.core.implementation.sampling.SamplingCompositionDataUI
 
 trait ProxyShortcut {
 
-  def proxyShorcut(dataUI: DataUI): NewConceptPanel = proxyShorcut(dataUI match {
-    case x: TaskDataUI with IExplorationTaskDataUI ⇒ x
-    case x: TaskDataUI                             ⇒ x
-    case x: SourceDataUI                           ⇒ x
-    case x: HookDataUI                             ⇒ x
-    case x: CapsuleDataUI                          ⇒ x
-    case x: SamplingCompositionDataUI              ⇒ x
-  })
+  def proxyShorcut(base: Base, dataUI: DataUI): NewConceptPanel = {
+    proxyShorcut(base: Base, dataUI match {
+      case x: TaskDataUI with IExplorationTaskDataUI ⇒ x
+      case x: TaskDataUI                             ⇒ x
+      case x: SourceDataUI                           ⇒ x
+      case x: HookDataUI                             ⇒ x
+      case x: CapsuleDataUI                          ⇒ x
+      case x: SamplingCompositionDataUI              ⇒ x
+    })
+  }
 
-  def proxyShorcut(dataUI: TaskDataUI) = new NewConceptPanel {
+  def proxyShorcut(base: Base, dataUI: TaskDataUI) = new NewConceptPanel(base.savePanel) {
     addPrototype
     addSamplingComposition
   }
 
-  def protoProxyShortcut = new NewConceptPanel {
+  def protoProxyShortcut(base: Base) = new NewConceptPanel(base.savePanel) {
     addPrototype
   }
 
-  def proxyShorcut(dataUI: SourceDataUI, index: Int) = protoProxyShortcut
+  def proxyShorcut(base: Base, dataUI: SourceDataUI, index: Int) = protoProxyShortcut(base)
 
-  def proxyShorcut(dataUI: HookDataUI, index: Int) = protoProxyShortcut
+  def proxyShorcut(base: Base, dataUI: HookDataUI, index: Int) = protoProxyShortcut(base)
 
-  def proxyShorcut(dataUI: SamplingCompositionDataUI, index: Int) = protoProxyShortcut
+  def proxyShorcut(base: Base, dataUI: SamplingCompositionDataUI, index: Int) = protoProxyShortcut(base)
 
-  def proxyShorcut(dataUI: CapsuleDataUI, index: Int) = new NewConceptPanel {
+  def proxyShorcut(base: Base, dataUI: CapsuleDataUI, index: Int) = new NewConceptPanel(base.savePanel) {
     addEnvironment
     addSource
     addHook
