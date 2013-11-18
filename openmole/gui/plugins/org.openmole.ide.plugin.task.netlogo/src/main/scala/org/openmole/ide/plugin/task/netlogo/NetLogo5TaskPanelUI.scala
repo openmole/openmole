@@ -29,8 +29,6 @@ class NetLogo5TaskPanelUI(ndu: NetLogo5TaskDataUI010) extends GenericNetLogoPane
   ndu.prototypeMappingOutput,
   ndu.resources) {
   override def saveContent(name: String): TaskDataUI = {
-    val i = Converters.flattenTuple2Options(multiProtoString.content.map { c ⇒ (c.comboValue1, c.comboValue2) }).filter { case (p, s) ⇒ Proxies.check(p) }
-    val o = Converters.flattenTuple2Options(multiStringProto.content.map { c ⇒ (c.comboValue1, c.comboValue2) }).filter { case (s, p) ⇒ Proxies.check(p) }
     new NetLogo5TaskDataUI010(name,
       workspaceCheckBox.selected,
       nlogoTextField.text,

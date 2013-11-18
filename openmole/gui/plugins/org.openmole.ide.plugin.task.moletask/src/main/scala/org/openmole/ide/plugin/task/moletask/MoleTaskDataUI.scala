@@ -16,6 +16,7 @@ import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Success, Failure }
 import org.openmole.ide.core.implementation.workflow.MoleUI
 import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, TaskDataProxyUI }
+import org.openmole.ide.core.implementation.serializer.Update
 
 object MoleTaskDataUI {
   def manager(i: ID.Type): Option[MoleUI] = ScenesManager().moleScenes.map {
@@ -38,12 +39,13 @@ object MoleTaskDataUI {
 
 import MoleTaskDataUI._
 
-class MoleTaskDataUI(val name: String = "",
-                     val mole: Option[ID.Type] = None,
-                     val finalCapsule: Option[TaskDataProxyUI] = None,
-                     val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                     val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                     val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
+class MoleTaskDataUI010(val name: String = "",
+                        val mole: Option[ID.Type] = None,
+                        val finalCapsule: Option[TaskDataProxyUI] = None,
+                        val implicits: Iterable[PrototypeDataProxyUI] = Iterable(),
+                        val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                        val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                        val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
     mole match {
@@ -82,5 +84,14 @@ class MoleTaskDataUI(val name: String = "",
 
   def doClone(ins: Seq[PrototypeDataProxyUI],
               outs: Seq[PrototypeDataProxyUI],
-              params: Map[PrototypeDataProxyUI, String]) = new MoleTaskDataUI(name, mole, finalCapsule, ins, outs, params)
+              params: Map[PrototypeDataProxyUI, String]) = new MoleTaskDataUI010(name, mole, finalCapsule, implicits, ins, outs, params)
+}
+
+class MoleTaskDataUI(name: String = "",
+                     mole: Option[ID.Type] = None,
+                     finalCapsule: Option[TaskDataProxyUI] = None,
+                     inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                     outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                     inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[MoleTaskDataUI010] {
+  def update = new MoleTaskDataUI010(name, mole, finalCapsule, Iterable(), inputs, outputs, inputParameters)
 }

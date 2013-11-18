@@ -74,7 +74,6 @@ abstract class GenericNetLogoPanelUI(
 
   private def updateGlobals = {
     _globalsReporters.single() = None
-    updateIOPanel
     publish(UpdatedProxyEvent.task(this))
   }
 

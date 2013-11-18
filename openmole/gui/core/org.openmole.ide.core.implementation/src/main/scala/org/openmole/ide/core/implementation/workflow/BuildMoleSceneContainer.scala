@@ -57,7 +57,6 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
   val spane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(view), statusBar.peer)
   spane.setResizeWeight(1)
   peer.add(spane, BorderLayout.CENTER)
-  CheckData.checkMole(scene, false)
 
   def buildExecutionAction = new Action("") {
     override def apply = {

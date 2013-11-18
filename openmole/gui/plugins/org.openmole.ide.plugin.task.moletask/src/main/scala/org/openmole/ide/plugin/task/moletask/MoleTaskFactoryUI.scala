@@ -25,10 +25,10 @@ import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 class MoleTaskFactoryUI extends TaskFactoryUI {
   override def toString = "Mole Task"
 
-  def buildDataUI = new MoleTaskDataUI
+  def buildDataUI = new MoleTaskDataUI010
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[MoleTask](task)
-    uiMap.task(task, x ⇒ (new MoleTaskDataUI(t.name, Some(uiMap.mole(t.mole).dataUI.id))))
+    uiMap.task(task, x ⇒ (new MoleTaskDataUI010(t.name, Some(uiMap.mole(t.mole).dataUI.id))))
   }
 }
