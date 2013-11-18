@@ -66,7 +66,6 @@ object LoadXML {
         addHooks(proxies)
         addSources(proxies)
         scene.foreach(mdu ⇒ ScenesManager().addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
-
         fileName
       }
       else tryFile(text, exts.tail)

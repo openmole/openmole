@@ -73,6 +73,7 @@ object MoleData {
             d.filtered)
         scene._add(dataChannel)
     }
+    scene.refresh
     scene
   }
 
