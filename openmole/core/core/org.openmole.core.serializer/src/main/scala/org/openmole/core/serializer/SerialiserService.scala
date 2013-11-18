@@ -36,7 +36,7 @@ import collection.mutable.ListBuffer
 import org.openmole.core.serializer.file.{ FileInjection, FileListing, FileSerialisation }
 import org.openmole.core.serializer.plugin.PluginListing
 
-object SerialiserService extends Logger with FileSerialisation {
+object SerialiserService extends Logger {
 
   private val lock = new ReentrantReadWriteLock
   private val xStreamOperations = ListBuffer.empty[(XStream ⇒ _)]
@@ -51,6 +51,11 @@ object SerialiserService extends Logger with FileSerialisation {
       } op(t.xStream)
       t
     }
+  }
+
+  private val fileSerialisation = new Factory with Initialized {
+    type T = Serialiser with FileSerialisation
+    def make = new Serialiser with FileSerialisation
   }
 
   private val serialiserWithFileListingFactory = new Factory with Initialized {
@@ -96,7 +101,7 @@ object SerialiserService extends Logger with FileSerialisation {
   def deserialiseAndExtractFiles[T](tis: TarInputStream, extractDir: File): T = lock.read {
     val archiveExtractDir = extractDir.newDir("archive")
     tis.extractDirArchiveWithRelativePath(archiveExtractDir)
-    val fileReplacement = deserialiseFileReplacements(archiveExtractDir, extractDir)
+    val fileReplacement = fileSerialisation.exec(_.deserialiseFileReplacements(archiveExtractDir, extractDir))
     val contentFile = new File(archiveExtractDir, content)
     val obj = deserialiseReplaceFiles[T](contentFile, fileReplacement)
     contentFile.delete
@@ -115,7 +120,7 @@ object SerialiserService extends Logger with FileSerialisation {
     val serializationResult = serialiseGetPluginsAndFiles(obj, objSerial)
     tos.addFile(objSerial, content)
     objSerial.delete
-    serialiseFiles(serializationResult.files, tos)
+    fileSerialisation.exec(_.serialiseFiles(serializationResult.files, tos))
   }
 
   def serialiseGetPluginsAndFiles(obj: Any, file: File): PluginClassAndFiles = lock.read {
@@ -126,8 +131,10 @@ object SerialiserService extends Logger with FileSerialisation {
 
   def serialiseGetPluginsAndFiles(obj: Any, os: OutputStream): PluginClassAndFiles = lock.read {
     val plugins = pluginListingFactory.exec(_.listPlugins(obj))
-    val files = serialiserWithFileListingFactory.exec { _.toXMLListFiles(obj, os) }
-    PluginClassAndFiles(files, plugins)
+    serialiserWithFileListingFactory.exec { s ⇒
+      s.toXML(obj, os)
+      PluginClassAndFiles(s.listedFiles, plugins)
+    }
   }
 
   def deserialiseReplaceFiles[T](file: File, files: PartialFunction[File, File]): T = lock.read {
@@ -139,7 +146,7 @@ object SerialiserService extends Logger with FileSerialisation {
   def deserialiseReplaceFiles[T](is: InputStream, files: PartialFunction[File, File]): T =
     lock.read(deserialiserWithFileInjectionFactory.exec {
       serializer ⇒
-        serializer.files = files
+        serializer.injectedFiles = files
         serializer.fromXML[T](is)
     })
 

@@ -25,27 +25,29 @@ import scala.collection.immutable.HashMap
 
 class HashMapConverter(implicit _mapper: Mapper) extends AbstractCollectionConverter(_mapper) {
 
-  def canConvert(clazz: Class[_]) = classOf[HashMap[_, _]] == clazz || HashMap.empty.getClass == clazz
+  def canConvert(clazz: Class[_]) = classOf[HashMap[_, _]] == clazz || classOf[HashMap.HashMap1[_, _]] == clazz || HashMap.empty.getClass == clazz
 
   def marshal(value: Any, writer: HierarchicalStreamWriter, context: MarshallingContext) = {
     val list = value.asInstanceOf[HashMap[_, _]]
     for ((k, v) ← list) {
-      writer.startNode("entry")
       writeItem(k, context, writer)
       writeItem(v, context, writer)
-      writer.endNode()
     }
   }
 
   def unmarshal(reader: HierarchicalStreamReader, context: UnmarshallingContext) = {
     val list = new scala.collection.mutable.ListBuffer[(Any, Any)]()
+    //reader.moveDown()
     while (reader.hasMoreChildren()) {
       reader.moveDown()
       val k = readItem(reader, context, list)
+      reader.moveUp()
+      reader.moveDown()
       val v = readItem(reader, context, list)
       list += k -> v
       reader.moveUp()
     }
+    //reader.moveUp()
     HashMap() ++ list
   }
 }

@@ -289,6 +289,14 @@ object FileUtil {
       Files.isSymbolicLink(fs.getPath(file.getAbsolutePath))
     }
 
+    def isEmpty =
+      if (!file.exists) true
+      else
+        file.isFile match {
+          case true  ⇒ file.length == 0
+          case false ⇒ file.list.isEmpty
+        }
+
     def recursiveDelete: Boolean = {
       if (file.exists && file.isDirectory && !file.isSymbolicLink) {
         for (f ← file.listFiles) f.recursiveDelete
@@ -326,6 +334,18 @@ object FileUtil {
 
     def gzipedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
     def gzipedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream)
+
+    def withOutputStream[T](f: OutputStream ⇒ T) = {
+      val os = bufferedOutputStream
+      try f(os)
+      finally os.close
+    }
+
+    def withInputStream[T](f: InputStream ⇒ T) = {
+      val is = bufferedInputStream
+      try f(is)
+      finally is.close
+    }
 
     def withWriter[T](f: Writer ⇒ T): T = {
       val w = new OutputStreamWriter(bufferedOutputStream)

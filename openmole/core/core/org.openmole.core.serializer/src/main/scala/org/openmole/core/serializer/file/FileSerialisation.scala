@@ -17,24 +17,29 @@
 
 package org.openmole.core.serializer.file
 
-import scala.collection.immutable.TreeMap
+import scala.collection.immutable.HashMap
 import java.util.UUID
 import org.openmole.misc.workspace.Workspace
 import com.ice.tar.TarOutputStream
 import java.io.{ File, FileOutputStream }
 import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.serializer.SerialiserService
+import org.openmole.core.serializer.converter.Serialiser
 
-trait FileSerialisation {
+object FileSerialisation {
+  case class FileInfo(file: File, directory: Boolean, exists: Boolean)
+  type FilesInfo = HashMap[String, FileInfo]
+}
 
-  type FilesInfo = TreeMap[String, (File, Boolean, Boolean)]
+import FileSerialisation._
+
+trait FileSerialisation extends Serialiser {
 
   def filesInfo = "filesInfo.xml"
   def fileDir = "files"
 
   def serialiseFiles(files: Iterable[File], tos: TarOutputStream) = {
-    val fileInfo = new FilesInfo ++ files.map {
+    val fileInfo = HashMap() ++ files.map {
       file ⇒
         val name = UUID.randomUUID
 
@@ -53,22 +58,22 @@ trait FileSerialisation {
         if (toArchive.exists)
           tos.addFile(toArchive, fileDir + "/" + name.toString)
 
-        (name.toString, (file, file.isDirectory, file.exists))
+        (name.toString, FileInfo(file, file.isDirectory, file.exists))
     }
 
-    val filesInfoSerial = Workspace.newFile
-    SerialiserService.serialise(fileInfo, filesInfoSerial)
-    tos.addFile(filesInfoSerial, fileDir + "/" + filesInfo)
-    filesInfoSerial.delete
+    Workspace.withTmpFile { tmpFile ⇒
+      tmpFile.withOutputStream(xStream.toXML(fileInfo, _))
+      tos.addFile(tmpFile, fileDir + "/" + filesInfo)
+    }
   }
 
   def deserialiseFileReplacements(archiveExtractDir: File, extractDir: File) = {
     val fileInfoFile = new File(archiveExtractDir, fileDir + "/" + filesInfo)
-    val fi = SerialiserService.deserialise[FilesInfo](fileInfoFile)
+    val fi = fileInfoFile.withInputStream(xStream.fromXML).asInstanceOf[FilesInfo]
     fileInfoFile.delete
 
-    new TreeMap[File, File] ++ fi.map {
-      case (name, (file, isDirectory, exists)) ⇒
+    HashMap() ++ fi.map {
+      case (name, FileInfo(file, isDirectory, exists)) ⇒
         val f = new File(archiveExtractDir, fileDir + "/" + name)
         val dest = extractDir.newFile("extracted", ".bin")
         if (exists) f.move(dest)

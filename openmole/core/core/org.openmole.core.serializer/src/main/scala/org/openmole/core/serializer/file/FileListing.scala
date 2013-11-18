@@ -24,19 +24,20 @@ import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import org.openmole.core.serializer.converter.Serialiser
 
 trait FileListing <: Serialiser {
-  private var files: TreeSet[File] = null
+  var listedFiles: TreeSet[File] = new TreeSet
 
   xStream.registerConverter(new FileConverterNotifier(this))
 
   def fileUsed(file: File) =
-    files += file
+    listedFiles += file
 
-  def toXMLListFiles(obj: Any, outputStream: OutputStream) = synchronized {
-    files = new TreeSet
+  def toXML(obj: Any, outputStream: OutputStream) = synchronized {
     xStream.toXML(obj, outputStream)
-    val retFiles = files
-    files = null
-    retFiles
+  }
+
+  override def clean = {
+    super.clean
+    listedFiles = new TreeSet
   }
 
 }
