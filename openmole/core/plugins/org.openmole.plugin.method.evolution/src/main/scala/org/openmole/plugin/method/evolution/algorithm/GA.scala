@@ -32,35 +32,20 @@ object GA {
     val fManifest = manifest[F]
   }
 
-  trait GATermination {
+  trait GATermination extends Termination with GA with TerminationManifest
 
-    trait GATerminationAlgorithm[_MF] extends Termination with TerminationManifest with GA {
-      type MF = _MF
-    }
-
-    def apply(ga: GA): GATerminationAlgorithm[ga.MF]
-
+  def counter(_steps: Int) = new GATermination with CounterTermination {
+    type MF = Any
+    val steps = _steps
+    val stateManifest = manifest[STATE]
   }
 
-  def counter(steps: Int) = new GATermination {
-    def apply(ga: GA): GATerminationAlgorithm[ga.MF] = {
-      val _steps = steps
-      new GATerminationAlgorithm[ga.MF] with CounterTermination {
-        val steps = _steps
-        val stateManifest = manifest[STATE]
-      }
+  def timed(_duration: String) =
+    new GATermination with TimedTermination {
+      type MF = Any
+      val duration = _duration.toMilliSeconds
+      val stateManifest = manifest[STATE]
     }
-  }
-
-  def timed(duration: String) = new GATermination {
-    def apply(ga: GA): GATerminationAlgorithm[ga.MF] = {
-      val _duration = duration.toMilliSeconds
-      new GATerminationAlgorithm[ga.MF] with TimedTermination {
-        val duration = _duration
-        val stateManifest = manifest[STATE]
-      }
-    }
-  }
 
   trait GARanking extends Ranking with GA
 
@@ -104,16 +89,35 @@ object GA {
 
   trait GAModifier extends Modifier with GA
 
-  trait GAAlgorithm extends Archive with ArchiveManifest with GA with GAModifier with Elitism with PopulationManifest with Selection
+  trait GAAlgorithm extends Archive
+    with ArchiveManifest
+    with GA
+    with GAModifier
+    with Elitism
+    with PopulationManifest
+    with Selection
+    with Termination
+    with TerminationManifest
 
   trait GAAlgorithmBuilder extends A {
     def apply: GAAlgorithm
   }
 
-  def optimization(mu: Int, dominance: Dominance = strict, ranking: GARankingBuilder = pareto, diversityMetric: DiversityMetricBuilder = crowding) = new GAAlgorithmBuilder {
+  trait Optimisation extends NoArchive
+    with RankDiversityModifier
+    with GAAlgorithm
+    with NonDominatedElitism
+    with BinaryTournamentSelection
+
+  def optimisation(
+    mu: Int,
+    termination: GATermination { type MF >: Optimisation#MF },
+    dominance: Dominance = strict,
+    ranking: GARankingBuilder = pareto,
+    diversityMetric: DiversityMetricBuilder = crowding) = new GAAlgorithmBuilder {
     val (_mu, _dominance, _ranking, _diversityMetric) = (mu, dominance, ranking, diversityMetric)
     def apply =
-      new NoArchive with RankDiversityModifier with GAAlgorithm with NonDominatedElitism with BinaryTournamentSelection {
+      new Optimisation {
         val aManifest = manifest[A]
         val populationManifest = manifest[Population[G, P, F, MF]]
         val diversityMetric = _diversityMetric(dominance)
@@ -121,6 +125,10 @@ object GA {
         val mu = _mu
         def diversity(individuals: Seq[Seq[Double]], ranks: Seq[Lazy[Int]]) = diversityMetric.diversity(individuals, ranks)
         def rank(individuals: Seq[Seq[Double]]) = ranking.rank(individuals)
+        type STATE = termination.STATE
+        implicit val stateManifest = termination.stateManifest
+        def initialState: STATE = termination.initialState
+        def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
       }
   }
 
@@ -129,19 +137,36 @@ object GA {
     def x: Int
   }
 
-  def genomeProfile(x: Int, nX: Int, aggregation: GAAggregation) = {
+  trait GenomeProfile extends GAAlgorithm
+    with ProfileModifier
+    with ProfileElitism
+    with NoArchive
+    with NoDiversity
+    with ProfileGenomePlotter
+    with HierarchicalRanking
+    with BinaryTournamentSelection
+
+  def genomeProfile(
+    x: Int,
+    nX: Int,
+    aggregation: GAAggregation,
+    termination: GATermination { type MF >: GenomeProfile#MF }) = {
     val (_x, _nX, _aggregation) = (x, nX, aggregation)
     new GAAlgorithmBuilder with GAProfile {
       val aggregation = _aggregation
       val x = _x
 
       def apply =
-        new GAAlgorithm with ProfileModifier with ProfileElitism with NoArchive with NoDiversity with ProfileGenomePlotter with HierarchicalRanking with BinaryTournamentSelection {
+        new GenomeProfile {
           val aManifest = manifest[A]
           val populationManifest = manifest[Population[G, P, F, MF]]
           val x = _x
           val nX = _nX
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
+          type STATE = termination.STATE
+          implicit val stateManifest = termination.stateManifest
+          def initialState: STATE = termination.initialState
+          def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
         }
     }
   }
@@ -162,7 +187,21 @@ object GA {
     def y: Int
   }
 
-  def genomeMap(x: Int, nX: Int, y: Int, nY: Int, aggregation: GAAggregation) = {
+  trait GenomeMap extends GAAlgorithm
+    with MapElitism
+    with MapGenomePlotter
+    with NoArchive
+    with NoRanking
+    with NoModifier
+    with MapSelection
+
+  def genomeMap(
+    x: Int,
+    nX: Int,
+    y: Int,
+    nY: Int,
+    aggregation: GAAggregation,
+    termination: GATermination { type MF >: GenomeMap#MF }) = {
     val (_x, _nX, _y, _nY, _aggregation) = (x, nX, y, nY, aggregation)
     new GAAlgorithmBuilder with GAMap {
       val aggregation = _aggregation
@@ -170,7 +209,7 @@ object GA {
       val y = _y
 
       def apply =
-        new GAAlgorithm with MapElitism with MapGenomePlotter with NoArchive with NoRanking with NoModifier with MapSelection {
+        new GenomeMap {
           val aManifest = manifest[A]
           val populationManifest = manifest[Population[G, P, F, MF]]
 
@@ -179,6 +218,12 @@ object GA {
           val y = _y
           val nX = _nX
           val nY = _nY
+
+          type STATE = termination.STATE
+          implicit val stateManifest = termination.stateManifest
+          def initialState: STATE = termination.initialState
+          def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+
         }
     }
   }
@@ -227,11 +272,10 @@ object GA {
   def apply(
     algorithm: GAAlgorithmBuilder,
     lambda: Int,
-    termination: GATermination,
     mutation: GAMutationBuilder = coEvolvingSigma,
     crossover: GACrossoverBuilder = sbx(),
     cloneProbability: Double = 0.0) =
-    new org.openmole.plugin.method.evolution.algorithm.GAImpl(algorithm, lambda, termination, mutation, crossover, cloneProbability)(_)
+    new org.openmole.plugin.method.evolution.algorithm.GAImpl(algorithm, lambda, mutation, crossover, cloneProbability)(_)
 
 }
 
@@ -252,7 +296,6 @@ trait GA extends GASigmaFactory
 sealed class GAImpl(
   val algorithm: GA.GAAlgorithmBuilder,
   val lambda: Int,
-  val termination: GA.GATermination,
   val mutation: GA.GAMutationBuilder,
   val crossover: GA.GACrossoverBuilder,
   override val cloneProbability: Double)(val genomeSize: Int)
@@ -261,18 +304,17 @@ sealed class GAImpl(
   lazy val thisAlgorithm = algorithm.apply
   lazy val thisCrossover = crossover(genomeFactory)
   lazy val thisMutation = mutation(genomeFactory)
-  lazy val thisTermination = termination(thisAlgorithm)
 
-  type STATE = thisTermination.STATE
+  type STATE = thisAlgorithm.STATE
   type A = thisAlgorithm.A
   type MF = thisAlgorithm.MF
 
   implicit val aManifest = thisAlgorithm.aManifest
-  implicit val stateManifest = thisTermination.stateManifest
   implicit val populationManifest = thisAlgorithm.populationManifest
 
-  def initialState: STATE = thisTermination.initialState
-  def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = thisTermination.terminated(population, terminationState)
+  implicit val stateManifest = thisAlgorithm.stateManifest
+  def initialState: STATE = thisAlgorithm.initialState
+  def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = thisAlgorithm.terminated(population, terminationState)
   def toArchive(individuals: Seq[Individual[G, P, F]]) = thisAlgorithm.toArchive(individuals)
   def combine(a1: A, a2: A) = thisAlgorithm.combine(a1, a2)
   def diff(a1: A, a2: A) = thisAlgorithm.diff(a1, a2)

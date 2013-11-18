@@ -270,21 +270,22 @@ package object evolution {
   def islandGA(model: Puzzle with Island)(
     name: String,
     number: Int,
-    termination: GA.GATermination,
+    termination: GA.GATermination { type MF >: model.evolution.MF },
     sampling: Int = model.evolution.lambda)(implicit plugins: PluginSet) = {
 
     import model.evolution
     import evolution._
 
     val islandElitism = new Elitism with Termination with Modifier with Archive with TerminationManifest {
-      type G = model.evolution.G
-      type P = model.evolution.P
-      type A = model.evolution.A
-      type MF = model.evolution.MF
-      type F = model.evolution.F
-      type STATE = model.evolution.STATE
+      type G = evolution.G
+      type P = evolution.P
+      type A = evolution.A
+      type MF = evolution.MF
+      type F = evolution.F
 
-      val stateManifest = model.evolution.stateManifest
+      type STATE = termination.STATE
+
+      val stateManifest = termination.stateManifest
 
       def initialArchive = evolution.initialArchive
       def combine(a1: A, a2: A) = evolution.combine(a1, a2)
@@ -293,8 +294,8 @@ package object evolution {
       def modify(individuals: Seq[Individual[G, P, F]], archive: A) = evolution.modify(individuals, archive)
       def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], archive: A) = evolution.elitism(individuals, newIndividuals, archive)
 
-      def initialState = evolution.initialState
-      def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE) = evolution.terminated(population, terminationState)
+      def initialState = termination.initialState
+      def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE) = termination.terminated(population, terminationState)
     }
 
     val archive = model.archive.asInstanceOf[Prototype[A]]
