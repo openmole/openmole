@@ -406,7 +406,7 @@ class GUISerializer { self ⇒
       deserializeConcept[TransitionData](classOf[TransitionData])
       deserializeConcept[DataChannelData](classOf[DataChannelData])*/
 
-    for {
+    val result = for {
       concept ← concepts
       moleScenes ← deserializeConcept[MoleData2](classOf[MoleData2])
     } yield {
@@ -415,6 +415,8 @@ class GUISerializer { self ⇒
       (proxies, moleScenes)
     }
 
+    clear
+    result
   }
 
   def clear = {
