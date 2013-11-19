@@ -53,7 +53,7 @@ object LoadXML {
       if (f.isFile) {
         Settings.currentPath = Some(f.getParentFile)
         Settings.currentProject = Some(f)
-        val deserialised = (new GUISerializer).deserialize(fileName)
+        val deserialised = (new GUISerializer).deserialize(f)
         displayErrors(deserialised.written)
         val (proxies, scene) = deserialised.value
         StatusBar.clear

@@ -47,6 +47,7 @@ import scalaz._
 import Scalaz._
 import org.openmole.core.serializer.file._
 import org.openmole.core.serializer.converter.Serialiser
+import java.util.zip.{ ZipException, GZIPInputStream, GZIPOutputStream }
 
 object GUISerializer extends Logger {
   var instance = new GUISerializer
@@ -357,7 +358,7 @@ class GUISerializer(injectFiles: Boolean = false) { self ⇒
 
     serializeMetadata(metaData)
 
-    val os = new TarOutputStream(new FileOutputStream(file))
+    val os = new TarOutputStream(new GZIPOutputStream(new FileOutputStream(file)))
     try {
       os.createDirArchiveWithRelativePath(workDir)
       fileSerialisation.serialiseFiles(serialiser.listedFiles, os)
@@ -386,10 +387,15 @@ class GUISerializer(injectFiles: Boolean = false) { self ⇒
     read(f)
   }
 
-  def deserialize(fromFile: String) = {
-    val os = new TarInputStream(new FileInputStream(fromFile))
-    try os.extractDirArchiveWithRelativePath(workDir)
-    finally os.close
+  def deserialize(fromFile: File) = fromFile.withInputStream { is ⇒
+    val gis =
+      Try(new GZIPInputStream(is)) match {
+        case Success(gis)             ⇒ gis
+        case Failure(t: ZipException) ⇒ is
+        case Failure(t)               ⇒ throw t
+      }
+
+    new TarInputStream(gis).extractDirArchiveWithRelativePath(workDir)
 
     deserialiser.injectedFiles_=(fileSerialisation.deserialiseFileReplacements(workDir, baseDir))
 
