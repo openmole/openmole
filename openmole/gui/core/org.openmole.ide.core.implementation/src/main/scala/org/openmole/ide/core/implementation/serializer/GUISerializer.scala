@@ -77,12 +77,9 @@ class GUISerializer(injectFiles: Boolean = false) { self ⇒
   val serializationStates: mutable.HashMap[AnyRef, SerializationState] = mutable.HashMap.empty
   val deserializationStates: mutable.HashMap[ID.Type, AnyRef] = mutable.HashMap.empty
 
-  val deserialiser: Serialiser { def injectedFiles_=(files: PartialFunction[File, File]): Unit } =
-    injectFiles match {
-      case true ⇒ new Serialiser with FileInjection
-      case false ⇒ new Serialiser {
-        def injectedFiles_=(files: PartialFunction[File, File]) = {}
-      }
+  val deserialiser =
+    new Serialiser with FileInjection {
+      override def getMatchingFile(file: File): File = injectedFiles.applyOrElse(file, _ => file)
     }
 
   val serialiser: Serialiser { def listedFiles: Iterable[File] } =
