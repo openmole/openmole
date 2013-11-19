@@ -40,6 +40,8 @@ import org.openmole.ide.misc.tools.image.Images
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.dataproxy.DataProxyUI
 import org.openmole.ide.core.implementation.serializer.ExecutionSerialiser
+import org.openmole.ide.core.implementation.preference.Preferences
+import scala.swing.event.ButtonClicked
 
 object DialogFactory {
 
@@ -116,6 +118,22 @@ object DialogFactory {
 
   def displayStack(stack: String) =
     DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(new TextArea(stack)).peer, "Error stack"))
+
+  def closeApplication = {
+    val embeddCheckBox = new CheckBox("Embedd resources") {
+      selected = Preferences().embeddResources
+      listenTo(this)
+      reactions += {
+        case ButtonClicked(x) ⇒ Preferences.setEmbeddRessources(x.selected)
+      }
+    }
+
+    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new PluginPanel("wrap") {
+      contents += new Label("<html>You are exiting the OpenMOLE application.<br>SaveSettings the project ?</html>")
+      contents += embeddCheckBox
+    }.peer, "Exit OpenMOLE")).equals(NotifyDescriptor.OK_OPTION)) true
+    else false
+  }
 
   def exportPartialMoleExecution(s: BuildMoleScene) = {
     val fc = new ChooseFileTextField("", "XML file", "XML,tar", "xml,tar")

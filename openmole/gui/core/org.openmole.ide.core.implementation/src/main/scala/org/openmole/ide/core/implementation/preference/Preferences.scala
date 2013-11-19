@@ -28,7 +28,7 @@ object Preferences {
     try {
       Workspace.persistent("gui").load("preferences") match {
         case p: Preferences ⇒ p
-        case _ ⇒  empty
+        case _              ⇒ empty
       }
     }
     catch {

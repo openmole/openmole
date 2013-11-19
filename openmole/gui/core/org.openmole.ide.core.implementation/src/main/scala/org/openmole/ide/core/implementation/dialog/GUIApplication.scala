@@ -64,7 +64,7 @@ class GUIApplication {
   }
 
   def closeOperation: Unit = {
-    if (DialogFactory.confirmationDialog(" Exit OpenMOLE", "<html>You are exiting the OpenMOLE application.<br>SaveSettings the project ?</html>"))
+    if (DialogFactory.closeApplication)
       SaveXML.save(frame)
     Preferences.dumpFile
   }
