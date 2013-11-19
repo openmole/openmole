@@ -379,17 +379,27 @@ class GUISerializer { self ⇒
     read(f)
   }
 
-  def deserialize(fromFile: File) = fromFile.withInputStream { is ⇒
-    val gis =
+  def deserialize(fromFile: File) = {
+
+    val zipped = fromFile.withInputStream { is ⇒
       Try(new GZIPInputStream(is)) match {
-        case Success(gis)             ⇒ gis
-        case Failure(t: ZipException) ⇒ is
+        case Success(gis)             ⇒ true
+        case Failure(t: ZipException) ⇒ false
         case Failure(t)               ⇒ throw t
       }
+    }
 
-    new TarInputStream(gis).extractDirArchiveWithRelativePath(workDir)
+    fromFile.withInputStream { is ⇒
+      val tis =
+        if (zipped) new TarInputStream(new GZIPInputStream(is))
+        else new TarInputStream(new FileInputStream(fromFile))
 
-    deserialiser.injectedFiles_=(fileSerialisation.deserialiseFileReplacements(workDir, baseDir))
+      tis.extractDirArchiveWithRelativePath(workDir)
+    }
+
+    if (workDir.child(fileSerialisation.fileDir).exists)
+      deserialiser.injectedFiles_=(fileSerialisation.deserialiseFileReplacements(workDir, baseDir))
+    else deserialiser.injectedFiles_=(Map.empty)
 
     val concepts =
       for {
