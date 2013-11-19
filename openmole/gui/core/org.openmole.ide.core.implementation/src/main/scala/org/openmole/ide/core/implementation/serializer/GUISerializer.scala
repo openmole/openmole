@@ -65,7 +65,7 @@ object GUISerializer extends Logger {
   }
 }
 
-class GUISerializer(injectFiles: Boolean = false) { self ⇒
+class GUISerializer { self ⇒
 
   sealed trait SerializationState {
     def id: ID.Type
@@ -79,16 +79,10 @@ class GUISerializer(injectFiles: Boolean = false) { self ⇒
 
   val deserialiser =
     new Serialiser with FileInjection {
-      override def getMatchingFile(file: File): File = injectedFiles.applyOrElse(file, _ => file)
+      override def getMatchingFile(file: File): File = injectedFiles.applyOrElse(file, (f: File) ⇒ f)
     }
 
-  val serialiser: Serialiser { def listedFiles: Iterable[File] } =
-    injectFiles match {
-      case true ⇒ new Serialiser with FileListing
-      case false ⇒ new Serialiser {
-        def listedFiles = List.empty
-      }
-    }
+  val serialiser = new Serialiser with FileListing
 
   val fileSerialisation = new Serialiser with FileSerialisation
 
@@ -338,7 +332,7 @@ class GUISerializer(injectFiles: Boolean = false) { self ⇒
       }
     }
 
-  def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData2], metaData: Option[MetaData] = None) = {
+  def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData2], metaData: Option[MetaData] = None, saveFiles: Boolean = false) = {
     serializeConcept(classOf[PrototypeDataProxyUI], proxies.prototypes.map { s ⇒ s -> s.id })
     serializeConcept(classOf[EnvironmentDataProxyUI], proxies.environments.map { s ⇒ s -> s.id })
     serializeConcept(classOf[SamplingCompositionDataProxyUI], proxies.samplings.map { s ⇒ s -> s.id })
@@ -358,7 +352,8 @@ class GUISerializer(injectFiles: Boolean = false) { self ⇒
     val os = new TarOutputStream(new GZIPOutputStream(new FileOutputStream(file)))
     try {
       os.createDirArchiveWithRelativePath(workDir)
-      fileSerialisation.serialiseFiles(serialiser.listedFiles, os)
+      if (saveFiles) fileSerialisation.serialiseFiles(serialiser.listedFiles, os)
+      else fileSerialisation.serialiseFiles(List.empty, os)
     }
     finally os.close
     clear
