@@ -25,15 +25,7 @@ import scala.swing.Action
 import org.openmole.misc.workspace.Workspace
 
 object ServerListPanel {
-  def list = try {
-    Workspace.persistent("gui").load("servers") match {
-      case l: List[String] ⇒ l
-      case _               ⇒ List()
-    }
-  }
-  catch {
-    case _: Throwable ⇒ List()
-  }
+  def list = Preferences().servers
 }
 
 import ServerListPanel._
@@ -84,5 +76,5 @@ class ServerListPanel extends PluginPanel("wrap", "[grow,fill]", "") {
 
   contents += multiPanel.panel
 
-  def save = Workspace.persistent("gui").save(multiPanel.content.map { _.serverUrl }, "servers")
+  def save = Preferences.setServers(multiPanel.content.map { _.serverUrl })
 }

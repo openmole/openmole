@@ -278,6 +278,7 @@ class ScenesManager {
           addTab(page, clone.dataUI.name, new Action("") {
             def apply = {
               container.stop
+              container.save
               tabPane.pages.remove(page.index)
             }
           })

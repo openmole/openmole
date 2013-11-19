@@ -31,7 +31,7 @@ import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import scala.swing.event.ButtonClicked
-import org.openmole.ide.core.implementation.preference.{ SandBox, ServerListPanel }
+import org.openmole.ide.core.implementation.preference.{ Preferences, ServerListPanel }
 import org.openmole.misc.workspace.Workspace
 import java.io.File
 import org.openmole.core.model.mole.ExecutionContext
@@ -70,7 +70,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   serverPanel.visible = false
 
   val sandBoxCheckBox = new CheckBox("Sandbox")
-  val sandBoxTextField: ChooseFileTextField = new ChooseFileTextField(SandBox.apply, Workspace.persistent("gui").save(sandBoxTextField.text, "sandbox"))
+  val sandBoxTextField: ChooseFileTextField = new ChooseFileTextField(Preferences().sandbox)
   val sandBoxPanel = new PluginPanel("wrap 2 ") {
     contents += sandBoxTextField
     contents += new Label("<html><i>The sandbox folder is a root folder from which all paths are appended; allowing portability of the workflows." +
@@ -160,6 +160,8 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
       case _ ⇒
     }
   }
+
+  def save = Preferences.setSandBox(sandBoxTextField.text)
 
   def startLook = {
     startStopButton.background = new Color(125, 160, 0)
