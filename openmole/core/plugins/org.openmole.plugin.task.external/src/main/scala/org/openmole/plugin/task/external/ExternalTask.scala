@@ -127,7 +127,7 @@ trait ExternalTask extends Task {
   }
 
   def withWorkDir[T](f: File ⇒ T): T = {
-    val tmpDir = org.openmole.misc.workspace.Workspace.newDir("netLogoTask")
+    val tmpDir = org.openmole.misc.workspace.Workspace.newDir("externalTask")
     val res =
       try f(tmpDir)
       catch {
