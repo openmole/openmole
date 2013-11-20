@@ -21,8 +21,7 @@ import org.openmole.core.model.execution._
 import org.openmole.core.model.job._
 import org.openmole.misc.workspace._
 import org.openmole.misc.eventdispatcher._
-import org.openmole.misc.tools.service.ThreadUtil._
-import ref.WeakReference
+import scala.ref.WeakReference
 
 object LocalEnvironment extends Environment {
 
@@ -43,29 +42,9 @@ object LocalEnvironment extends Environment {
 
 class LocalEnvironment(val nbThreads: Int) extends Environment {
 
-  import LocalEnvironment._
+  @transient lazy val pool = new ExecuterPool(nbThreads, WeakReference(this))
 
-  private val jobs = new JobPriorityQueue
-
-  private var executers = List.empty[(LocalExecuter, Thread)]
-
-  addExecuters(nbThreads)
-
-  override def finalize = executers.foreach {
-    case (exe, thread) ⇒ exe.stop = true; thread.interrupt
-  }
-
-  private[local] def addExecuters(nbExecuters: Int) = synchronized {
-    for (i ← 0 until nbExecuters) {
-      val executer = new LocalExecuter(WeakReference(this))
-      val thread = daemonThreadFactory.newThread(executer)
-      thread.start
-      executers ::= executer -> thread
-    }
-    executers = executers.filterNot(_._1.stop)
-  }
-
-  def nbJobInQueue = jobs.size
+  def nbJobInQueue = pool.inQueue
 
   override def submit(job: IJob) = submit(new LocalExecutionJob(this, job.moleJobs))
 
@@ -74,9 +53,7 @@ class LocalEnvironment(val nbThreads: Int) extends Environment {
   private def submit(ejob: LocalExecutionJob) = {
     EventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))
     ejob.state = ExecutionState.SUBMITTED
-    jobs.enqueue(ejob)
+    pool.enqueue(ejob)
   }
-
-  private[local] def takeNextjob: LocalExecutionJob = jobs.dequeue
 
 }

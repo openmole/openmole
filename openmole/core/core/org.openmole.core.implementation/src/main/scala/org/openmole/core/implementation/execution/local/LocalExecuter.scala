@@ -44,11 +44,12 @@ class LocalExecuter(environment: WeakReference[LocalEnvironment]) extends Runnab
       environment.get match {
         case Some(environment) ⇒
           def jobGoneIdle() {
-            environment.addExecuters(1)
+            environment.pool.removeExecuter(this)
+            environment.pool.addExecuter()
             stop = true
           }
 
-          val executionJob = environment.takeNextjob
+          val executionJob = environment.pool.takeNextjob
 
           val beginTime = System.currentTimeMillis
 

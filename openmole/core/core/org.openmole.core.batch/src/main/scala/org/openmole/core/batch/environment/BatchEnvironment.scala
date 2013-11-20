@@ -153,7 +153,7 @@ import BatchEnvironment._
 
 trait BatchEnvironment extends Environment { env ⇒
 
-  val jobRegistry = new ExecutionJobRegistry
+  @transient lazy val jobRegistry = new ExecutionJobRegistry
 
   val id: String
 
