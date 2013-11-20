@@ -58,12 +58,14 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   val dlLabel = new Label("0/0")
   val ulLabel = new Label("0/0")
   val serverCheckBox = new CheckBox("Server delegation")
+  val serverTagTextField = new TextField(bmsc.scene.dataUI.name, 10)
   val serverCombo = new ComboBox(ServerListPanel.list)
   val serverLabel = new Label("")
   val uuidLabel = new ExternalLinkLabel
   val serverPanel = new PluginPanel("wrap") {
     contents += serverCombo
     contents += serverLabel
+    contents += serverTagTextField
     contents += uuidLabel
   }
   serverCheckBox.selected = false

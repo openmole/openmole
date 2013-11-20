@@ -26,6 +26,7 @@ import org.openmole.ide.core.implementation.serializer.{ MetaData, MoleData, GUI
 import scala.swing.FileChooser.Result._
 import scala.swing.Label
 import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.preference.Preferences
 
 object SaveXML {
 
@@ -34,7 +35,7 @@ object SaveXML {
       case Some(p) ⇒
         frame.title = "OpenMOLE - " + p.getCanonicalPath
         ScenesManager().moleScenes.foreach { _.closePropertyPanels }
-        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager().moleScenes.map(MoleData.fromScene), Some(MetaData(ScenesManager().moleScenes)))
+        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager().moleScenes.map(MoleData.fromScene), Some(MetaData(ScenesManager().moleScenes)), Preferences().embeddResources)
         Settings.currentProject = path
         ScenesManager().statusBar.inform(p.getName + " succesfully saved " + " in " + p.getParent)
       case None ⇒
