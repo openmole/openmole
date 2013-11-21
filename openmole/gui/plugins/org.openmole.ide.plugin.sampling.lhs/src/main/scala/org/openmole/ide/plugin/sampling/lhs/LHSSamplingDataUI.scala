@@ -5,24 +5,23 @@
 
 package org.openmole.ide.plugin.sampling.lhs
 
-import org.openmole.ide.core.implementation.serializer.Update
-import org.openmole.ide.core.implementation.data.{ DomainDataUI, SamplingDataUI }
-import org.openmole.core.model.sampling.{ Sampling, Factor }
-import org.openmole.plugin.sampling.lhs.LHS
-import org.openmole.ide.core.implementation.sampling.SamplingUtils
-import org.openmole.core.model.data.Prototype
+import org.openmole.core.model.sampling.Factor
 import org.openmole.ide.plugin.domain.range.RangeDomainDataUI
-import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.plugin.sampling.lhs._
+import org.openmole.core.model.data.Prototype
 import org.openmole.plugin.domain.range.Range
+import org.openmole.core.model.sampling.Sampling
+import org.openmole.ide.core.implementation.sampling._
+import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 
-class LHSSamplingDataUI010 extends SamplingDataUI {
-
-  implicit def string2Int(s: String): Int = augmentString(s).toInt
+class LHSSamplingDataUI(val samples: String = "1") extends SamplingDataUI {
 
   def name = "LHS"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
     LHS(
+      samples,
       SamplingUtils.toFactors(factorOrSampling).map {
         f ⇒
           Factor(f.prototype.asInstanceOf[Prototype[Double]],
@@ -55,9 +54,5 @@ class LHSSamplingDataUI010 extends SamplingDataUI {
 
   def isAcceptable(sampling: SamplingDataUI) = false
 
-  def preview = "LHS"
-}
-
-class LHSSamplingDataUI(val samples: String = "1") extends Update[LHSSamplingDataUI010] {
-  def update = new LHSSamplingDataUI010
+  def preview = "LHS (" + samples + ")"
 }

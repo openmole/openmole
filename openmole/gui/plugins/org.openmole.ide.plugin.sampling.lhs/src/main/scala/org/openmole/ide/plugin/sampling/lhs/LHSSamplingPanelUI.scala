@@ -27,16 +27,22 @@ import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.core.implementation.panelsettings.ISamplingPanelUI
 
-class LHSSamplingPanelUI(cud: LHSSamplingDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends ISamplingPanelUI {
+class LHSSamplingPanelUI(cud: LHSSamplingDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends ISamplingPanelUI {
 
-  val components = List.empty
+  val sampleTextField = new TextField(cud.samples, 8)
+
+  val components = List(("", new PluginPanel("wrap 2", "", "") {
+    contents += new Label("Samples")
+    contents += sampleTextField
+  }))
 
   def domains = KeyRegistry.domains.values.map {
     _.buildDataUI
   }.toList
 
-  override def saveContent = new LHSSamplingDataUI010
+  override def saveContent = new LHSSamplingDataUI(sampleTextField.text)
 
   override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 
+  add(sampleTextField, new Help(i18n.getString("sample"), i18n.getString("sampleEx")))
 }
