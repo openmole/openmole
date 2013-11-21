@@ -42,14 +42,16 @@ import scala.Some
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
+import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
 
 abstract class GenericNetLogoPanelUI(
-    nlogoPath: String,
-    workspaceEmbedded: Boolean,
+    workspace: Workspace,
     lauchingCommands: String,
     prototypeMappingInput: List[(PrototypeDataProxyUI, String, Int)],
     prototypeMappingOutput: List[(String, PrototypeDataProxyUI, Int)],
     resources: List[String])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("") with TaskPanelUI {
+
+  val (nlogoPath, workspaceEmbedded) = Util.fromWorkspace(workspace)
 
   val nlogoTextField = new ChooseFileTextField(nlogoPath,
     "Select a nlogo file",

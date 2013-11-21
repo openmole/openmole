@@ -31,13 +31,9 @@ class NetLogo4TaskFactoryUI extends TaskFactoryUI {
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[NetLogo4Task](task)
-    val embededWS = t.workspace.location match {
-      case Right(r) ⇒ true
-      case Left(l)  ⇒ false
-    }
+
     uiMap.task(t, x ⇒ new NetLogo4TaskDataUI010(t.name,
-      embededWS,
-      t.scriptPath,
+      t.workspace,
       t.launchingCommands.mkString("\n"),
       t.netLogoInputs.toList.map { p ⇒ (uiMap.prototypeUI(p._1).get, p._2) },
       t.netLogoOutputs.toList.map { p ⇒ (p._1, uiMap.prototypeUI(p._2).get) },
