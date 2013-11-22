@@ -203,6 +203,35 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     errors.isEmpty should equal(true)
   }
 
+  "Validation" should "not detect a missing input when provided by the implicits" in {
+    val p = Prototype[String]("t")
+
+    val t1 =
+      new TestTask {
+        val name = "t1"
+        override def outputs = DataSet(p)
+        override def process(context: Context) = Context(Variable(p, "test"))
+      }
+
+    val c1 = new Capsule(t1)
+
+    val t2 = EmptyTask("t2")
+    val c2 = new Capsule(t2)
+
+    val t3 = EmptyTask("t2")
+    t3 addInput p
+    val c3 = new Capsule(t2)
+
+    val mt = MoleTask("mt", c2, implicits = Seq("p"))
+
+    val mtC = new Capsule(mt)
+
+    val mole = c1 -- mtC
+
+    val errors = Validation(mole)
+    errors.isEmpty should equal(true)
+  }
+
   "Validation" should "detect a duplicated name error" in {
     val pInt = Prototype[Int]("t")
     val pString = Prototype[String]("t")

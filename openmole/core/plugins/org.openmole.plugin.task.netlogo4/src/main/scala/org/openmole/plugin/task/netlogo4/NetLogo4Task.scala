@@ -88,14 +88,14 @@ object NetLogo4Task {
     }
   }
 
-  def apply(
-    name: String,
-    script: File,
-    launchingCommands: Iterable[String],
-    embedWorkspace: Boolean)(implicit plugins: PluginSet): NetLogoTaskBuilder =
-    if (embedWorkspace) apply(name, script.getParentFile, script.getName, launchingCommands)
-    else apply(name, script, launchingCommands)
-
+  def apply(name: String,
+            workspace: Workspace,
+            launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
+    workspace.location match {
+      case Left((w: File, s: String)) ⇒ apply(name, w, s, launchingCommands)
+      case Right(s: File)             ⇒ apply(name, s, launchingCommands)
+    }
+  }
 }
 
 sealed class NetLogo4Task(

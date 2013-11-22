@@ -19,35 +19,36 @@ package org.openmole.plugin.sampling.lhs
 
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.sampling._
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
-import org.openmole.misc.workspace._
 import org.openmole.core.implementation.task.Task._
+import org.openmole.misc.tools.script.GroovyProxyPool
+import org.openmole.core.implementation.tools._
 
 object LHS {
 
-  def apply(factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
-    new LHS(factors: _*)
+  def apply(samples: String, factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
+    new LHS(samples, factors: _*)
 
 }
 
-sealed class LHS(val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
+sealed class LHS(val samples: String, val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
+
+  @transient lazy val samplesValue = GroovyProxyPool(samples)
 
   override def inputs = DataSet(factors.flatMap(_.inputs))
   override def prototypes = factors.map { _.prototype }
 
   override def build(context: Context): Iterator[Iterable[Variable[Double]]] = {
     val rng = newRNG(context(openMOLESeed))
+    val samples = samplesValue(context).asInstanceOf[Int]
+    factors.map {
+      f ⇒
+        (0 until samples).shuffled(rng).map {
+          i ⇒ Variable(f.prototype, ((i + rng.nextDouble) / samples).scale(f.domain.min(context), f.domain.max(context)))
+        }
+    }.transpose.toIterator
 
-    Iterator.continually {
-      (0 until factors.size).map {
-        i ⇒ (i + rng.nextDouble) / factors.size
-      }.shuffled(rng).zip(factors).map {
-        case (v, f) ⇒ Variable(f.prototype, v.scale(f.domain.min(context), f.domain.max(context)))
-      }
-    }.toIterator
   }
 }

@@ -13,6 +13,7 @@ import java.io.File
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 import org.openmole.ide.core.implementation.serializer.Update
 import org.openmole.ide.misc.tools.util.Converters._
+import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
 
 @deprecated
 class NetLogo5TaskDataUI(name: String = "",
@@ -26,8 +27,7 @@ class NetLogo5TaskDataUI(name: String = "",
                          outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
                          inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[NetLogo5TaskDataUI010] {
   def update = new NetLogo5TaskDataUI010(name,
-    workspaceEmbedded,
-    nlogoPath,
+    Util.toWorkspace(nlogoPath, workspaceEmbedded),
     lauchingCommands,
     prototypeMappingInput,
     prototypeMappingOutput,
@@ -38,8 +38,7 @@ class NetLogo5TaskDataUI(name: String = "",
 }
 
 class NetLogo5TaskDataUI010(val name: String = "",
-                            val workspaceEmbedded: Boolean = false,
-                            val nlogoPath: String = "",
+                            val workspace: Workspace = new Workspace(new File("")),
                             val lauchingCommands: String = "",
                             val prototypeMappingInput: List[(PrototypeDataProxyUI, String, Int)] = List(),
                             val prototypeMappingOutput: List[(String, PrototypeDataProxyUI, Int)] = List(),
@@ -50,9 +49,8 @@ class NetLogo5TaskDataUI010(val name: String = "",
   def coreObject(plugins: PluginSet) = util.Try {
     val builder = NetLogo5Task(
       name,
-      new File(nlogoPath),
-      Source.fromString(lauchingCommands).getLines.toIterable,
-      workspaceEmbedded)(plugins)
+      workspace,
+      Source.fromString(lauchingCommands).getLines.toIterable)(plugins)
     initialise(builder)
     resources.foreach {
       r ⇒ builder addResource (new File(r))
@@ -77,8 +75,7 @@ class NetLogo5TaskDataUI010(val name: String = "",
   def doClone(ins: Seq[PrototypeDataProxyUI],
               outs: Seq[PrototypeDataProxyUI],
               params: Map[PrototypeDataProxyUI, String]) = new NetLogo5TaskDataUI010(name,
-    workspaceEmbedded,
-    nlogoPath,
+    workspace,
     lauchingCommands,
     Proxies.instance.filterListTupleIn(prototypeMappingInput),
     Proxies.instance.filterListTupleOut(prototypeMappingOutput),
