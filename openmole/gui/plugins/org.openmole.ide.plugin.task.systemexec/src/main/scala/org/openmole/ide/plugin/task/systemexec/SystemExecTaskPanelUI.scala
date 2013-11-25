@@ -37,7 +37,7 @@ import org.openmole.ide.misc.tools.util.Converters
 import org.openmole.ide.misc.tools.util.Converters._
 import scala.Some
 
-class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends TaskPanelUI {
+class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("helpSETask", new Locale("en", "EN"))) extends TaskPanelUI {
 
   val workdirTextField = new TextField(ndu.workdir)
 
