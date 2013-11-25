@@ -55,11 +55,13 @@ class Application extends IApplication with Logger {
       workspaceDir: Option[String] = None,
       scriptFile: Option[String] = None,
       password: Option[String] = None,
+      hostName: Option[String] = None,
       console: Boolean = false,
       help: Boolean = false,
       ignored: List[String] = Nil,
       server: Boolean = false,
-      serverPort: Option[Int] = None)
+      serverPort: Option[Int] = None,
+      serverSSLPort: Option[Int] = None)
 
     def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
@@ -75,17 +77,19 @@ class Application extends IApplication with Logger {
 
     @tailrec def parse(args: List[String], c: Config = Config()): Config =
       args match {
-        case "-cp" :: tail ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
-        case "-gp" :: tail ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
-        case "-p" :: tail  ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
-        case "-s" :: tail  ⇒ parse(tail.tail, c.copy(scriptFile = Some(tail.head)))
-        case "-pw" :: tail ⇒ parse(tail.tail, c.copy(password = Some(tail.head)))
-        case "-c" :: tail  ⇒ parse(tail, c.copy(console = true))
-        case "-h" :: tail  ⇒ parse(tail, c.copy(help = true))
-        case "-ws" :: tail ⇒ parse(tail, c.copy(server = true))
-        case "-sp" :: tail ⇒ parse(tail.tail, c.copy(serverPort = Some(tail.head.toInt)))
-        case s :: tail     ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-        case Nil           ⇒ c
+        case "-cp" :: tail  ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
+        case "-gp" :: tail  ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
+        case "-p" :: tail   ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
+        case "-s" :: tail   ⇒ parse(tail.tail, c.copy(scriptFile = Some(tail.head)))
+        case "-pw" :: tail  ⇒ parse(tail.tail, c.copy(password = Some(tail.head)))
+        case "-hn" :: tail  ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
+        case "-c" :: tail   ⇒ parse(tail, c.copy(console = true))
+        case "-h" :: tail   ⇒ parse(tail, c.copy(help = true))
+        case "-ws" :: tail  ⇒ parse(tail, c.copy(server = true))
+        case "-sp" :: tail  ⇒ parse(tail.tail, c.copy(serverPort = Some(tail.head.toInt))) // Server port
+        case "-ssp" :: tail ⇒ parse(tail.tail, c.copy(serverSSLPort = Some(tail.head.toInt)))
+        case s :: tail      ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+        case Nil            ⇒ c
       }
 
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]]
@@ -137,7 +141,7 @@ class Application extends IApplication with Logger {
       catch {
         case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
       }
-      val server = new Openmolewebserver(config.serverPort getOrElse 8080)
+      val server = new Openmolewebserver(config.serverPort, config.serverSSLPort, config.hostName, config.password)
       server.start()
     }
     else {

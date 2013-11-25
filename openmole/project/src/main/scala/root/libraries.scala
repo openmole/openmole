@@ -18,7 +18,9 @@ object Libraries extends Defaults(Apache) {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.57"
+  val gridscaleVersion = "1.58"
+
+  val bouncyCastleVersion = "1.49"
 
   lazy val includeGridscale = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion
 
@@ -31,6 +33,8 @@ object Libraries extends Defaults(Apache) {
   lazy val includeGridscaleDirac = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.dirac" % gridscaleVersion
 
   lazy val includeGridscaleHTTP = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.http" % gridscaleVersion
+
+  lazy val includeBouncyCastle = libraryDependencies += "org.bouncycastle" % "bcprov-jdk15on" % bouncyCastleVersion
 
   lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }
 

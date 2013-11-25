@@ -17,7 +17,7 @@ object Misc extends BaseDefaults {
   val exception = OsgiProject("org.openmole.misc.exception")
 
   val osgi = OsgiProject("org.openmole.misc.osgi", buddyPolicy = Some("global"), imports = Seq("*"),
-    bundleActivator = Some("org.openmole.misc.osgi.Activator")) dependsOn (provided(exception), provided(scalaLang), provided(scalaCompiler)) settings
+    bundleActivator = Some("org.openmole.misc.osgi.Activator")) dependsOn (provided(exception), provided(scalaLang)) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" })
 
   val tools = OsgiProject("org.openmole.misc.tools", buddyPolicy = Some("global")) settings

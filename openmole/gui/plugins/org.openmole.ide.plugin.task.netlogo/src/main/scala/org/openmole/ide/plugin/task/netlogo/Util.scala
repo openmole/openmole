@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,21 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.plugin.task.netlogo
 
-package org.openmole.ide.misc.widget
+import java.io.File
+import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
 
-import jsyntaxpane.lexers.BashLexer
-import jsyntaxpane.DefaultSyntaxKit
-import scala.swing.{ TextArea, EditorPane, ScrollPane }
+object Util {
+  implicit def stringToFile(s: String) = new File(s)
 
-class BashEditor extends ScrollPane {
-  val editor = new TextArea
-  editor.columns = 30
-  editor.lineWrap = true
-  viewportView = editor
+  def toWorkspace(script: String, embedWS: Boolean) =
+    if (embedWS) new Workspace(script.getParentFile, script)
+    else new Workspace(script)
 
-  override def enabled_=(b: Boolean): Unit = {
-    super.enabled = b
-    editor.enabled = b
+  def fromWorkspace(w: Workspace): (String, Boolean) = w.location match {
+    case Left((w: File, s: String)) ⇒ (w.getAbsolutePath, true)
+    case Right(s: File)             ⇒ (s.getAbsolutePath, false)
+
   }
 }
