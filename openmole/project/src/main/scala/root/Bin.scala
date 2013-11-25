@@ -23,7 +23,8 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     "org.eclipse.core" % "org.eclipse.equinox.launcher" % "1.3.0.v20120522-1813" intransitive (),
     "org.eclipse.core" % "org.eclipse.equinox.registry" % "3.5.200.v20120522-1841" intransitive (),
     "org.eclipse.core" % "org.eclipse.equinox.preferences" % "3.5.1.v20121031-182809" intransitive (),
-    "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944" intransitive ()
+    "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944" intransitive (),
+    "org.bouncycastle" % "bcprov-jdk15on" % bouncyCastleVersion intransitive ()
   )
 
   private lazy val openmolePluginDependencies = libraryDependencies ++= Seq(
@@ -51,11 +52,11 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     resourceSets <+= (baseDirectory) map { _ / "db-resources" -> "dbserver/bin" },
     resourceSets <+= (copyDependencies in openmolePlugins) map { _ -> "openmole-plugins" },
     tarGZName := Some("openmole"),
-    dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") }
+    dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle" || m.organization == "org.bouncycastle" }
   ) //todo, add dependency mapping or something
 
   lazy val openmolePlugins = AssemblyProject("openmole-plugins") settings (openmolePluginDependencies, //TODO: This project is only necessary thanks to the lack of dependency mapping in AssemblyProject
-    dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") }
+    dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.bouncycastle" || m.organization == "fr.iscpif.gridscale.bundle") }
   )
 
   lazy val dbserverProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "dbserver") sendTo "dbserver/lib"
@@ -72,7 +73,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
       libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion intransitive (),
       tarGZName := Some("runtime"),
       resourceSets <+= baseDirectory map { _ / "resources" -> "." },
-      dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") })
+      dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") })
 
   lazy val daemonProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ (a contains "core") || (a contains "daemon")) sendTo "plugins"
 

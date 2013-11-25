@@ -29,7 +29,7 @@ object Core extends BaseDefaults {
       provided(serializer), pluginManager, scalaLang, Apache.math, groovy, Misc.hashService % "test", Misc.replication % "test") //TODO: THINGS REALLY DEPEND ON THESE LIBS. Deal with it
 
   lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (implementation,
-    provided(workspace), provided(Misc.tools), provided(eventDispatcher), replication, db4o, provided(updater), provided(Misc.exception),
+    provided(workspace), provided(Misc.tools), provided(eventDispatcher), replication, db4o, updater, Misc.exception,
     serializer, jasypt, provided(fileService), provided(hashService), pluginManager, iceTar % "provided",
     guava, Apache.config) settings (includeGridscale)
 
