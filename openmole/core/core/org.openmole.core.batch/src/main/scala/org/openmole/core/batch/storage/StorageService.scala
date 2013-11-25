@@ -27,6 +27,11 @@ import org.openmole.misc.workspace._
 import com.db4o.ObjectContainer
 import fr.iscpif.gridscale.FileType
 import java.io._
+import org.openmole.misc.tools.service.Logger
+
+object StorageService extends Logger
+
+import StorageService.Log._
 
 trait StorageService extends BatchService with Storage {
 
@@ -58,14 +63,17 @@ trait StorageService extends BatchService with Storage {
   }
 
   protected def mkBaseDir(implicit token: AccessToken): String = synchronized {
-    val rootFile = new File(root)
-    val baseDir = new File(rootFile, baseDirName)
+    val baseDir = root + "/" + baseDirName
 
-    Iterator.iterate(baseDir)(_.getParentFile).takeWhile(_ != null).toList.reverse.filterNot(_.getName.isEmpty).foldLeft("/") {
+    baseDir.split("/").toList.filterNot(_.isEmpty).foldLeft("/") {
       (path, file) ⇒
-        val childPath = child(path, file.getName)
-        if (!exists(childPath)) makeDir(childPath)
+        val childPath = child(path, file)
+        try makeDir(childPath)
+        catch {
+          case e: Throwable ⇒ logger.log(FINE, "Error creating base directory " + baseDir + e)
+        }
         childPath
+
     }
 
   }

@@ -19,13 +19,24 @@ package org.openmole.misc.tools.service
 
 import java.util.logging.{ Logger ⇒ JLogger, Level }
 
-trait Logger {
-  @transient lazy val logger = JLogger.getLogger(getClass.getName)
+trait Logger { l ⇒
 
-  def SEVERE = Level.SEVERE
-  def WARNING = Level.WARNING
-  def INFO = Level.INFO
-  def FINE = Level.FINE
-  def FINER = Level.FINER
-  def FINEST = Level.FINEST
+  object Log {
+    @transient lazy val logger = JLogger.getLogger(l.getClass.getName)
+
+    def SEVERE = Level.SEVERE
+    def WARNING = Level.WARNING
+    def INFO = Level.INFO
+    def FINE = Level.FINE
+    def FINER = Level.FINER
+    def FINEST = Level.FINEST
+  }
+
+  @deprecated("Use log namespace instead") def logger = Log.logger
+  @deprecated("Use log namespace instead") def SEVERE = Log.SEVERE
+  @deprecated("Use log namespace instead") def WARNING = Log.WARNING
+  @deprecated("Use log namespace instead") def INFO = Log.INFO
+  @deprecated("Use log namespace instead") def FINE = Log.FINE
+  @deprecated("Use log namespace instead") def FINER = Log.FINER
+  @deprecated("Use log namespace instead") def FINEST = Log.FINEST
 }
