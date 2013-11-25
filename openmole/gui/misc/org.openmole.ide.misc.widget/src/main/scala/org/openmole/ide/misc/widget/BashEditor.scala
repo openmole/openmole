@@ -19,14 +19,13 @@ package org.openmole.ide.misc.widget
 
 import jsyntaxpane.lexers.BashLexer
 import jsyntaxpane.DefaultSyntaxKit
-import scala.swing.EditorPane
-import scala.swing.ScrollPane
+import scala.swing.{ TextArea, EditorPane, ScrollPane }
 
 class BashEditor extends ScrollPane {
-  val editor = new EditorPane
+  val editor = new TextArea
+  editor.columns = 30
+  editor.lineWrap = true
   viewportView = editor
-  editor.contentType = "text/plain"
-  editor.editorKit = new DefaultSyntaxKit(new BashLexer)
 
   override def enabled_=(b: Boolean): Unit = {
     super.enabled = b
