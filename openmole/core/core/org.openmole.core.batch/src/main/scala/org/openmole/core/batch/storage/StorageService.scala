@@ -56,26 +56,27 @@ trait StorageService extends BatchService with Storage {
     baseSpaceVar match {
       case Some(s) ⇒ s
       case None ⇒
-        val basePath = mkBaseDir
+        val rootPath = mkRootDir
+        val basePath = child(rootPath, baseDirName)
+        if (!exists(basePath)) makeDir(basePath)
+        initialise(basePath)
         baseSpaceVar = Some(basePath)
         basePath
     }
   }
 
-  protected def mkBaseDir(implicit token: AccessToken): String = synchronized {
-    val baseDir = root + "/" + baseDirName
+  protected def initialise(basePath: String)(implicit token: AccessToken) = {}
 
-    baseDir.split("/").toList.filterNot(_.isEmpty).foldLeft("/") {
+  protected def mkRootDir(implicit token: AccessToken): String = synchronized {
+    root.split("/").toList.filterNot(_.isEmpty).foldLeft("/") {
       (path, file) ⇒
         val childPath = child(path, file)
         try makeDir(childPath)
         catch {
-          case e: Throwable ⇒ logger.log(FINE, "Error creating base directory " + baseDir + e)
+          case e: Throwable ⇒ logger.log(FINEST, "Error creating base directory " + baseDir + e)
         }
         childPath
-
     }
-
   }
 
   override def toString: String = id
