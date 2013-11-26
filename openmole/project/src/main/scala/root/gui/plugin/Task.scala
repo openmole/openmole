@@ -25,6 +25,6 @@ object Task extends PluginDefaults {
   lazy val tools = OsgiProject("tools") dependsOn (Core.implementation, base.plugin.Task.tools, base.Core.model, base.Misc.replication % "test")
 
   lazy val systemexec = OsgiProject("systemexec") dependsOn (Core.implementation, base.plugin.Task.systemexec,
-    base.Core.model, Miscellaneous.tools, base.Misc.replication % "test")
+    base.Core.model, Miscellaneous.tools)
 
 }
