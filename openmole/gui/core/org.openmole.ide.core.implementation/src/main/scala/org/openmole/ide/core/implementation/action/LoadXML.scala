@@ -32,6 +32,7 @@ import org.openmole.ide.misc.tools.util.Types
 import util.Success
 import util.Failure
 import scala.Some
+import org.openmole.ide.core.implementation.preference.Preferences
 
 object LoadXML {
 
@@ -43,10 +44,12 @@ object LoadXML {
     var text = ""
     if (fc.showDialog(new Label, "OK") == Approve) text = fc.selectedFile.getPath
 
-    tryFile(text, List("", ".om", ".tar"))
+    tryFile(text)
   }
 
-  def tryFile(text: String, exts: List[String]): String =
+  def tryFile(text: String) = _tryFile(text, List("", ".om", ".tar"))
+
+  private def _tryFile(text: String, exts: List[String]): String =
     if (!exts.isEmpty) {
       val fileName = text + exts.head
       val f = new File(fileName)
@@ -66,9 +69,10 @@ object LoadXML {
         addHooks(proxies)
         addSources(proxies)
         scene.foreach(mdu ⇒ ScenesManager().addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
+        Preferences.addRecentFiles(f.getAbsolutePath)
         fileName
       }
-      else tryFile(text, exts.tail)
+      else _tryFile(text, exts.tail)
     }
     else ""
 
