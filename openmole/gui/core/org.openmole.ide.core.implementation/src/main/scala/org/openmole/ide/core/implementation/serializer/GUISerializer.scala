@@ -97,7 +97,25 @@ class GUISerializer { self ⇒
 
   register { xstream ⇒
 
-    class GUIConverter[T <: AnyRef { def id: ID.Type }](implicit clazz: Manifest[T]) extends ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider) {
+    class UpdateConverter extends ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider) {
+      override def unmarshal(reader: HierarchicalStreamReader, context: UnmarshallingContext) =
+        updated(super.unmarshal(reader, context))
+
+      override def marshal(
+        o: Object,
+        writer: HierarchicalStreamWriter,
+        mc: MarshallingContext) =
+        super.marshal(updated(o), writer, mc)
+
+      override def canConvert(t: Class[_]) = classOf[Update[_]].isAssignableFrom(t)
+
+      def updated(u: AnyRef): AnyRef =
+        if (classOf[Update[_]].isAssignableFrom(u.getClass))
+          updated(u.asInstanceOf[Update[AnyRef]].update)
+        else u
+    }
+
+    class GUIConverter[T <: AnyRef { def id: ID.Type }](implicit clazz: Manifest[T]) extends UpdateConverter {
 
       override def marshal(
         o: Object,
@@ -206,23 +224,7 @@ class GUISerializer { self ⇒
       override def canConvert(t: Class[_]) = classOf[Some[_]].isAssignableFrom(t)
     }
 
-    val updateConverter = new ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider) {
-      override def unmarshal(reader: HierarchicalStreamReader, context: UnmarshallingContext) =
-        updated(super.unmarshal(reader, context))
-
-      override def marshal(
-        o: Object,
-        writer: HierarchicalStreamWriter,
-        mc: MarshallingContext) =
-        super.marshal(updated(o), writer, mc)
-
-      override def canConvert(t: Class[_]) = classOf[Update[_]].isAssignableFrom(t)
-
-      def updated(u: AnyRef): AnyRef =
-        if (classOf[Update[_]].isAssignableFrom(u.getClass))
-          updated(u.asInstanceOf[Update[AnyRef]].update)
-        else u
-    }
+    xstream.registerConverter(new UpdateConverter)
 
     xstream.registerConverter(taskConverter)
     xstream.registerConverter(prototypeConverter)
@@ -266,8 +268,6 @@ class GUISerializer { self ⇒
     xstream.alias("None", None.getClass)
     xstream.registerConverter(optionConverter)
     xstream.addImmutableType(None.getClass)
-
-    xstream.registerConverter(updateConverter)
 
     implicit val mapper = xstream.getMapper
 
