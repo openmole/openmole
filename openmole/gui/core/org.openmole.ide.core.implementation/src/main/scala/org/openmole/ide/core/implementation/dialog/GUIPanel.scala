@@ -45,13 +45,17 @@ class GUIPanel extends MainFrame {
       })
 
       contents += new Menu("Recent files") {
-        Preferences().recentFiles.foreach { rf ⇒
-          contents += new MenuItem(new Action(new File(rf).getName) {
-            override def apply = {
-              Proxies.instance.clearAll
-              mainframe.title = "OpenMOLE - " + LoadXML.tryFile(rf)
+        Preferences().recentFiles.foreach {
+          rf ⇒
+            val f = new File(rf)
+            if (f.isFile) {
+              contents += new MenuItem(new Action(f.getName) {
+                override def apply = {
+                  Proxies.instance.clearAll
+                  mainframe.title = "OpenMOLE - " + LoadXML.tryFile(rf)
+                }
+              })
             }
-          })
         }
       }
 
@@ -60,6 +64,7 @@ class GUIPanel extends MainFrame {
           Proxies.instance.clearAll
           mainframe.title = "OpenMOLE - " + LoadXML.show
         }
+
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, Event.CTRL_MASK))
       })
 
