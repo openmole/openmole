@@ -49,7 +49,7 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI010)(implicit val i18n: Res
     }, minus = CLOSE_IF_EMPTY)
 
   val resourcesMultiTextField = new MultiChooseFileTextField("Resources",
-    ndu.resources.map { r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r)) },
+    ndu.resources.map { r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r._1.getAbsolutePath)) },
     selectionMode = SelectionMode.FilesAndDirectories,
     minus = CLOSE_IF_EMPTY)
 
@@ -95,7 +95,10 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI010)(implicit val i18n: Res
     new SystemExecTaskDataUI010(name,
       workdirTextField.text,
       launchingCommandTextArea.editor.text,
-      resourcesMultiTextField.content.map { r ⇒ new File(r.content) },
+      resourcesMultiTextField.content.map { r ⇒
+        val f = new File(r.content)
+        (f, f.getName)
+      },
       Converters.flattenTupleOptionAny(inputMapMultiComboTextField.content.map { d ⇒ d.comboValue -> d.textFieldValue }).filter { case (p, _) ⇒ Proxies.check(p) },
       Converters.flattenTupleAnyOption(outputMapMultiTextFieldCombo.content.map { d ⇒ d.textFieldValue -> d.comboValue }).filter { case (_, p) ⇒ Proxies.check(p) },
       Proxies.check(variablesMultiCombo.content.map { _.comboValue }.flatten),
