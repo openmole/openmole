@@ -143,9 +143,9 @@ object CheckData extends Logger {
       if (errors.isEmpty) {
         val checkTopo = checkTopology(mole)
         if (checkTopo.isEmpty) Success("")
-        else Left(checkTopo)
+        else Failure(new Throwable(checkTopo))
       }
-      else Left(errors.mkString("\n"))
+      else Failure(errors.head._2)
     case Failure(l) ⇒ Failure(l)
     case _          ⇒
   }
