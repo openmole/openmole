@@ -18,15 +18,21 @@ package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.implementation.data.{ ImageView, HookDataUI }
 import org.openmole.ide.core.implementation.panel.IOFacade
+import org.openmole.ide.misc.tools.util.ID
+import org.openmole.ide.core.implementation.serializer.Update
 
 object HookDataProxyUI {
-  def apply(d: HookDataUI,
-            g: Boolean = false) = new HookDataProxyUI with IOFacade {
-    var dataUI: DATAUI = d
-    val generated = g
+  def apply(d: HookDataUI with ImageView,
+            g: Boolean = false) = new HookDataProxyUI(d, g)
+
+  @deprecated("Used for deserialiation purposes")
+  private def annonymous = new HookDataProxyUI(???, ???) with Update[HookDataProxyUI] {
+    def update = new HookDataProxyUI(dataUI, generated, id)
   }
 }
 
-trait HookDataProxyUI extends DataProxyUI {
+class HookDataProxyUI(var dataUI: HookDataUI with ImageView,
+                      val generated: Boolean,
+                      override val id: ID.Type = ID.newId) extends DataProxyUI with IOFacade {
   type DATAUI = HookDataUI with ImageView
 }
