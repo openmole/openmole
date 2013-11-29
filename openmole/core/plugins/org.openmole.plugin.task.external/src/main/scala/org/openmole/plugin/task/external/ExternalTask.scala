@@ -48,7 +48,8 @@ trait ExternalTask extends Task {
     }
 
   protected def listResources(context: Context, tmpDir: File): Iterable[ToPut] = {
-    val expanded = resources map { case v @ (_, name, _, _) ⇒ v.copy(_2 = VariableExpansion(context, name)) }
+    val expanded =
+      resources map { case v @ (_, name, _, _) ⇒ v.copy(_2 = VariableExpansion(context, name)) }
 
     val byLocation =
       expanded groupBy {

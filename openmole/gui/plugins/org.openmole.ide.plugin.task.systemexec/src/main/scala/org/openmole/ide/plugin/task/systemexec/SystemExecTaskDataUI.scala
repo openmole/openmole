@@ -55,7 +55,7 @@ class SystemExecTaskDataUI010(val name: String = "",
     val syet = SystemExecTask(name, directory = workdir)(plugins)
     syet command launchingCommands.filterNot(_ == '\n')
     initialise(syet)
-    resources.foreach { r ⇒ syet addResource (r._1, Some(r._2)) }
+    resources.foreach { case (file, name) ⇒ syet addResource (file, name = Some(name)) }
     variables.foreach {
       p ⇒ syet addVariable (p.dataUI.coreObject.get)
     }
