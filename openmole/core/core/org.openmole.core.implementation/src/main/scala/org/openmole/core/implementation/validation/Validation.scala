@@ -200,11 +200,12 @@ object Validation {
   }
 
   private def moleTaskInputMaps(moleTask: IMoleTask) =
-    moleTask.mole.root.inputs(moleTask.mole, Sources.empty, Hooks.empty).toList.map(i ⇒ i.prototype.name -> i.prototype).toMap[String, Prototype[_]]
+    (moleTask.mole.root.inputs(moleTask.mole, Sources.empty, Hooks.empty).toList ++
+      moleTask.inputs).map(i ⇒ i.prototype.name -> i.prototype).toMap[String, Prototype[_]]
 
   def moleTaskImplicitsErrors(moleTask: IMoleTask, capsule: ICapsule) = {
     val inputs = moleTaskInputMaps(moleTask)
-    moleTask.implicits.filterNot(i ⇒ inputs.contains(i)).map(i ⇒ MissingMoleTaskImplicit(capsule, i))
+    moleTask.implicits.filterNot(inputs.contains).map(i ⇒ MissingMoleTaskImplicit(capsule, i))
   }
 
   def hookErrors(m: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[Problem] = {
