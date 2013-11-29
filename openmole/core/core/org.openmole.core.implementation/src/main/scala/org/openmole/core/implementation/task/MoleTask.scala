@@ -17,10 +17,8 @@
 
 package org.openmole.core.implementation.task
 
-import org.openmole.misc.tools.service.Random
 import org.openmole.misc.eventdispatcher._
 import org.openmole.misc.exception._
-import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.mole._
@@ -28,19 +26,23 @@ import org.openmole.core.model.mole._
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
+import scala.collection.mutable.ListBuffer
 
 object MoleTask {
 
-  def apply(name: String, puzzle: Puzzle, implicits: Iterable[String] = Iterable.empty)(implicit plugins: PluginSet): TaskBuilder =
-    apply(name, puzzle toMole, puzzle.lasts.head, implicits)
+  def apply(name: String, puzzle: Puzzle)(implicit plugins: PluginSet): MoleTaskBuilder =
+    apply(name, puzzle toMole, puzzle.lasts.head)
 
-  def apply(name: String, mole: IMole, last: ICapsule, implicits: Iterable[String])(implicit plugins: PluginSet) = {
-    new TaskBuilder { builder ⇒
+  def apply(name: String, mole: IMole, last: ICapsule)(implicit plugins: PluginSet) =
+    new MoleTaskBuilder { builder ⇒
       mole.root.inputs(mole, Sources.empty, Hooks.empty).foreach(addInput)
       last.outputs(mole, Sources.empty, Hooks.empty).foreach(addOutput)
-
       def toTask = new MoleTask(name, mole, last, implicits) with builder.Built
     }
+
+  trait MoleTaskBuilder extends TaskBuilder { builder ⇒
+    val implicits = ListBuffer[String]()
+    def addImplicit(p: String) = implicits += p
   }
 
 }

@@ -162,7 +162,7 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
 
     val mole = t1 toMole
 
-    val mt = MoleTask("MoleTask", mole, mole.root, Iterable.empty)
+    val mt = MoleTask("MoleTask", mole, mole.root)
 
     val t1c = new MasterCapsule(mt.toTask)
 
