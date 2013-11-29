@@ -19,15 +19,21 @@ package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.implementation.sampling.SamplingCompositionDataUI
 import org.openmole.ide.core.implementation.data.ImageView
+import org.openmole.ide.core.implementation.serializer.Update
+import org.openmole.ide.misc.tools.util.ID
 
 object SamplingCompositionDataProxyUI {
-  def apply(d: SamplingCompositionDataUI = new SamplingCompositionDataUI,
-            g: Boolean = false) = new SamplingCompositionDataProxyUI {
-    var dataUI: DATAUI = d
-    val generated = g
+  def apply(d: SamplingCompositionDataUI with ImageView = new SamplingCompositionDataUI,
+            g: Boolean = false) = new SamplingCompositionDataProxyUI(d, g)
+
+  @deprecated("Used for deserialiation purposes")
+  private def annonymous = new SamplingCompositionDataProxyUI(???, ???) with Update[SamplingCompositionDataProxyUI] {
+    def update = new SamplingCompositionDataProxyUI(dataUI, generated, id)
   }
 }
 
-trait SamplingCompositionDataProxyUI extends DataProxyUI {
+class SamplingCompositionDataProxyUI(var dataUI: SamplingCompositionDataUI with ImageView,
+                                     val generated: Boolean,
+                                     override val id: ID.Type = ID.newId) extends DataProxyUI {
   type DATAUI = SamplingCompositionDataUI with ImageView
 }

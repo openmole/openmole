@@ -24,22 +24,16 @@ import org.openmole.ide.misc.tools.util.ID
 
 object TaskDataProxyUI {
   def apply(d: TaskDataUI with ImageView,
-            g: Boolean = false) = {
-    new IOTaskDataProxyUI(d, g)
-  }
+            g: Boolean = false) = new TaskDataProxyUI(d, g)
 
   @deprecated("Used for deserialiation purposes")
-  private def annonymous = new TaskDataProxyUI with IOFacade with Update[IOTaskDataProxyUI] {
-    var dataUI: DATAUI = ???
-    val generated: Boolean = ???
-
-    def update = new IOTaskDataProxyUI(dataUI, generated, id)
+  private def annonymous = new TaskDataProxyUI(???, ???) with Update[TaskDataProxyUI] {
+    def update = new TaskDataProxyUI(dataUI, generated, id)
   }
-
 }
 
-class IOTaskDataProxyUI(var dataUI: TaskDataUI with ImageView, val generated: Boolean, override val id: ID.Type = ID.newId) extends TaskDataProxyUI with IOFacade
-
-trait TaskDataProxyUI extends DataProxyUI {
+class TaskDataProxyUI(var dataUI: TaskDataUI with ImageView,
+                      val generated: Boolean,
+                      override val id: ID.Type = ID.newId) extends DataProxyUI with IOFacade {
   type DATAUI = TaskDataUI with ImageView
 }

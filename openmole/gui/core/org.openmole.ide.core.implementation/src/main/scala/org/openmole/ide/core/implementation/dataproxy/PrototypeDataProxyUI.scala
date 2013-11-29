@@ -18,16 +18,22 @@
 package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.implementation.data.{ ImageView, PrototypeDataUI }
+import org.openmole.ide.core.implementation.serializer.Update
+import org.openmole.ide.misc.tools.util.ID
 
 object PrototypeDataProxyUI {
-  def apply(p: PrototypeDataUI[_],
-            g: Boolean = false) = new PrototypeDataProxyUI {
-    var dataUI: DATAUI = p
-    val generated = g
+  def apply(d: PrototypeDataUI[_] with ImageView,
+            g: Boolean = false) = new PrototypeDataProxyUI(d, g)
+
+  @deprecated("Used for deserialiation purposes")
+  private def annonymous = new PrototypeDataProxyUI(???, ???) with Update[PrototypeDataProxyUI] {
+    def update = new PrototypeDataProxyUI(dataUI, generated, id)
   }
 }
 
-trait PrototypeDataProxyUI extends DataProxyUI {
+class PrototypeDataProxyUI(var dataUI: PrototypeDataUI[_] with ImageView,
+                           val generated: Boolean,
+                           override val id: ID.Type = ID.newId) extends DataProxyUI {
   type DATAUI = PrototypeDataUI[_] with ImageView
 
   override def toString = {
@@ -35,3 +41,4 @@ trait PrototypeDataProxyUI extends DataProxyUI {
     else dataUI.name
   }
 }
+
