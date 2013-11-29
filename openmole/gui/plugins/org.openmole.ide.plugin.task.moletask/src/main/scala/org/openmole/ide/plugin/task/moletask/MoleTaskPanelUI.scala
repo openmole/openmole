@@ -31,6 +31,7 @@ import scala.swing.event.SelectionChanged
 import org.openmole.ide.misc.widget.multirow.MultiCombo.{ ComboData, ComboPanel }
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.workflow.MoleUI
+import org.openmole.ide.core.implementation.data.ToolDataUI
 
 class MoleTaskPanelUI(pud: MoleTaskDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("fillx,wrap 2", "left,grow,fill", "") with TaskPanelUI {
 
@@ -39,10 +40,13 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI010)(implicit val i18n: ResourceBundle 
 
   val capsuleComboBox = ContentComboBox(currentCapsules, pud.finalCapsule)
 
+  val implicitContent = Proxies.instance.prototypes intersect (pud.inputs ++ pud.implicitPrototypes._1)
+
+
   val multiImplicits = new MultiCombo("Implicits",
-    Proxies.instance.prototypes.toList,
+    implicitContent,
     pud.implicits.map { i ⇒
-      new ComboPanel(Proxies.instance.prototypes.toList,
+      new ComboPanel(implicitContent,
         new ComboData(Some(i)))
     }.toSeq,
     minus = CLOSE_IF_EMPTY,
