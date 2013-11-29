@@ -59,7 +59,7 @@ object Validation {
 
   }
 
-  def taskTypeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[_] = {
+  def taskTypeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) = {
 
     val implicitMap = prototypesToMap(implicits)
 
@@ -108,7 +108,7 @@ object Validation {
     }).flatten
   }
 
-  def sourceTypeErrors(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[_] = {
+  def sourceTypeErrors(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) = {
     val implicitMap = prototypesToMap(implicits)
 
     val x = (for {
@@ -184,9 +184,7 @@ object Validation {
       slot ← mole.slots(end)
       (_, transitions) ← mole.inputTransitions(slot).toList.map { t ⇒ t.start -> t }.groupBy { case (c, _) ⇒ c }
       if (transitions.size > 1)
-    } yield {
-      new DuplicatedTransition(transitions.unzip._2)
-    }
+    } yield DuplicatedTransition(transitions.unzip._2)
 
   def duplicatedName(mole: IMole, sources: Sources, hooks: Hooks) = {
     def duplicated(data: DataSet) =
@@ -262,7 +260,7 @@ object Validation {
         (mt match {
           case Some((t, c)) ⇒
             moleTaskImplicitsErrors(t, c) ++
-              typeErrorsMoleTask(m, moleTaskImplicits(t))
+              typeErrorsMoleTask(m, moleTaskImplicits(t)).map { e ⇒ MoleTaskDataFlowProblem(c, e) }
           case None ⇒
             sourceTypeErrors(m, implicits.prototypes, sources, hooks) ++
               hookErrors(m, implicits.prototypes, sources, hooks) ++
