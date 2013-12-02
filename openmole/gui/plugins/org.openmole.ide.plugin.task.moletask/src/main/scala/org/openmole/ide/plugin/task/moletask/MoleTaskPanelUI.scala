@@ -42,7 +42,6 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI010)(implicit val i18n: ResourceBundle 
 
   val implicitContent = Proxies.instance.prototypes intersect (pud.inputs ++ pud.implicitPrototypes._1)
 
-
   val multiImplicits = new MultiCombo("Implicits",
     implicitContent,
     pud.implicits.map { i ⇒
