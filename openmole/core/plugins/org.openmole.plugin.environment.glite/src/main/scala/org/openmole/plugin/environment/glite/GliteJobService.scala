@@ -120,6 +120,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       override val myProxyServer = environment.myProxy.map(_.url)
       override val architecture = environment.architecture
       override val fuzzy = true
+      override val requirements =
+        environment.requirements.map(super.requirements + " && (" + _ + ")").getOrElse(super.requirements)
     }
-
 }
