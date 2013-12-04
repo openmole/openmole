@@ -1,11 +1,11 @@
 
-start /MIN dbserver\bin\openmole-dbserver.bat
+set PWD=%~dp0
+
+start /MIN %PWD%\dbserver\bin\openmole-dbserver.bat
 
 mkdir "%UserProfile%\.openmole\.tmp"
 
 set ran="%UserProfile%\.openmole\.tmp\%random%"
-
-set PWD=%~dp0
 
 java -d64 -version >nul 2>&1
 if errorlevel 1 goto is32bit
