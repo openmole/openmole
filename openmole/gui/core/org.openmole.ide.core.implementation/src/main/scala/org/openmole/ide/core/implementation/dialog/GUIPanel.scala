@@ -18,7 +18,7 @@ import org.openide.NotifyDescriptor._
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
 import java.io.File
-import org.openmole.ide.core.implementation.preference.PreferenceContent
+import org.openmole.ide.core.implementation.preference.{ Preferences, PreferenceContent }
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.action.LoadXML
 import org.openmole.ide.core.implementation.action.SaveXML
@@ -44,6 +44,21 @@ class GUIPanel extends MainFrame {
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, Event.CTRL_MASK))
       })
 
+      contents += new Menu("Recent files") {
+        Preferences().recentFiles.foreach {
+          rf ⇒
+            val f = new File(rf)
+            if (f.isFile) {
+              contents += new MenuItem(new Action(f.getName) {
+                override def apply = {
+                  Proxies.instance.clearAll
+                  mainframe.title = "OpenMOLE - " + LoadXML.tryFile(rf)
+                }
+              })
+            }
+        }
+      }
+
       contents += new MenuItem(new Action("Load") {
         override def apply = {
           Proxies.instance.clearAll
@@ -55,6 +70,7 @@ class GUIPanel extends MainFrame {
 
       contents += new MenuItem(new Action("Import") {
         override def apply = LoadXML.show
+
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_I, Event.CTRL_MASK))
       })
 

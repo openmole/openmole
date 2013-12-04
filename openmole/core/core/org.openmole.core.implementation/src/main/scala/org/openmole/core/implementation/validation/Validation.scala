@@ -59,7 +59,7 @@ object Validation {
 
   }
 
-  def taskTypeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[_] = {
+  def taskTypeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) = {
 
     val implicitMap = prototypesToMap(implicits)
 
@@ -108,7 +108,7 @@ object Validation {
     }).flatten
   }
 
-  def sourceTypeErrors(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[_] = {
+  def sourceTypeErrors(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) = {
     val implicitMap = prototypesToMap(implicits)
 
     val x = (for {
@@ -184,9 +184,7 @@ object Validation {
       slot ← mole.slots(end)
       (_, transitions) ← mole.inputTransitions(slot).toList.map { t ⇒ t.start -> t }.groupBy { case (c, _) ⇒ c }
       if (transitions.size > 1)
-    } yield {
-      new DuplicatedTransition(transitions.unzip._2)
-    }
+    } yield DuplicatedTransition(transitions.unzip._2)
 
   def duplicatedName(mole: IMole, sources: Sources, hooks: Hooks) = {
     def duplicated(data: DataSet) =
@@ -200,11 +198,12 @@ object Validation {
   }
 
   private def moleTaskInputMaps(moleTask: IMoleTask) =
-    moleTask.mole.root.inputs(moleTask.mole, Sources.empty, Hooks.empty).toList.map(i ⇒ i.prototype.name -> i.prototype).toMap[String, Prototype[_]]
+    (moleTask.mole.root.inputs(moleTask.mole, Sources.empty, Hooks.empty).toList ++
+      moleTask.inputs).map(i ⇒ i.prototype.name -> i.prototype).toMap[String, Prototype[_]]
 
   def moleTaskImplicitsErrors(moleTask: IMoleTask, capsule: ICapsule) = {
     val inputs = moleTaskInputMaps(moleTask)
-    moleTask.implicits.filterNot(i ⇒ inputs.contains(i)).map(i ⇒ MissingMoleTaskImplicit(capsule, i))
+    moleTask.implicits.filterNot(inputs.contains).map(i ⇒ MissingMoleTaskImplicit(capsule, i))
   }
 
   def hookErrors(m: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[Problem] = {
@@ -261,7 +260,7 @@ object Validation {
         (mt match {
           case Some((t, c)) ⇒
             moleTaskImplicitsErrors(t, c) ++
-              typeErrorsMoleTask(m, moleTaskImplicits(t))
+              typeErrorsMoleTask(m, moleTaskImplicits(t)).map { e ⇒ MoleTaskDataFlowProblem(c, e) }
           case None ⇒
             sourceTypeErrors(m, implicits.prototypes, sources, hooks) ++
               hookErrors(m, implicits.prototypes, sources, hooks) ++

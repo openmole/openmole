@@ -27,6 +27,11 @@ import org.openmole.misc.workspace._
 import com.db4o.ObjectContainer
 import fr.iscpif.gridscale.FileType
 import java.io._
+import org.openmole.misc.tools.service.Logger
+
+object StorageService extends Logger
+
+import StorageService.Log._
 
 trait StorageService extends BatchService with Storage {
 
@@ -51,23 +56,27 @@ trait StorageService extends BatchService with Storage {
     baseSpaceVar match {
       case Some(s) ⇒ s
       case None ⇒
-        val basePath = mkBaseDir
+        val rootPath = mkRootDir
+        val basePath = child(rootPath, baseDirName)
+        if (!exists(basePath)) makeDir(basePath)
+        initialise(basePath)
         baseSpaceVar = Some(basePath)
         basePath
     }
   }
 
-  protected def mkBaseDir(implicit token: AccessToken): String = synchronized {
-    val rootFile = new File(root)
-    val baseDir = new File(rootFile, baseDirName)
+  protected def initialise(basePath: String)(implicit token: AccessToken) = {}
 
-    Iterator.iterate(baseDir)(_.getParentFile).takeWhile(_ != null).toList.reverse.filterNot(_.getName.isEmpty).foldLeft("/") {
+  protected def mkRootDir(implicit token: AccessToken): String = synchronized {
+    root.split("/").toList.filterNot(_.isEmpty).foldLeft("/") {
       (path, file) ⇒
-        val childPath = child(path, file.getName)
-        if (!exists(childPath)) makeDir(childPath)
+        val childPath = child(path, file)
+        try makeDir(childPath)
+        catch {
+          case e: Throwable ⇒ logger.log(FINEST, "Error creating base directory " + root + e)
+        }
         childPath
     }
-
   }
 
   override def toString: String = id

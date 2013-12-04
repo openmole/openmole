@@ -57,9 +57,11 @@ class MoleTaskDataUI010(val name: String = "",
                 case Some(w: CapsuleDataUI) ⇒
                   MoleFactory.buildMole(y) match {
                     case Success((m, capsMap, errs)) ⇒
-                      val builder = MoleTask(name, m, capsMap.find {
-                        case (k, _) ⇒ k.dataUI == w
-                      }.get._2, List.empty)(plugins)
+                      val builder =
+                        MoleTask(name, m, capsMap.find {
+                          case (k, _) ⇒ k.dataUI == w
+                        }.get._2)(plugins)
+                      implicits foreach (p ⇒ builder.addImplicit(p.dataUI.coreObject.get.name))
                       initialise(builder)
                       builder.toTask
                     case Failure(l) ⇒ throw new UserBadDataError(l)

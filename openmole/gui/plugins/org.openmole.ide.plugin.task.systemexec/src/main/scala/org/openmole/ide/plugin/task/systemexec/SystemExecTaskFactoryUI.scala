@@ -34,7 +34,7 @@ class SystemExecTaskFactoryUI extends TaskFactoryUI {
     uiMap.task(t, x ⇒ new SystemExecTaskDataUI010(t.name,
       t.directory,
       t.command.head._1,
-      t.resources.toList.map { r ⇒ new File(r._2) },
+      t.resources.map { case (f, n, _, _) ⇒ (f, n) }.toList,
       t.inputFiles.toList.map { p ⇒ (uiMap.prototypeUI(p._1).get, p._2) },
       t.outputFiles.toList.map { p ⇒ (p._1, uiMap.prototypeUI(p._2).get) },
       t.variables.toList.map { p ⇒ uiMap.prototypeUI(p._1).get }))

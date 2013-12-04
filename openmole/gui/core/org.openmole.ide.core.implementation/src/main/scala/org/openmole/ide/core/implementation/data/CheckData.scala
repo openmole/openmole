@@ -84,11 +84,12 @@ object CheckData extends Logger {
                                 }.toSeq
                                 proxy
                               } */
-                          displayCapsuleErrors(capsuleMap(x.capsule), x.toString)
+                          displayCapsuleErrors(capsuleMap.get(x.capsule), x.toString)
                           None
                         case x: DataflowProblem ⇒
-                          displayCapsuleErrors(capsuleMap(x.capsule), x)
-                          Some(capsuleMap(x.capsule) -> x)
+                          val caps = capsuleMap.get(x.capsule)
+                          displayCapsuleErrors(caps, x)
+                          Some(caps, x)
                         case x ⇒
                           logger.info("Error " + x + " not taken into account in the GUI yet.")
                           None
@@ -96,8 +97,9 @@ object CheckData extends Logger {
                     }.groupBy(_._1).map {
                       case (k, v) ⇒ (k, v.map(_._2))
                     }.foreach {
-                      case (capsuleUI, e) ⇒
+                      case (Some(capsuleUI: CapsuleUI), e) ⇒
                         capsuleUI.updateErrors(e.toList)
+                      case _ ⇒
                     }
                   case true ⇒ y.dataUI.capsules.values.foreach {
                     _.updateErrors(List.empty)
@@ -106,7 +108,6 @@ object CheckData extends Logger {
                 errs.foreach {
                   case (cui, e) ⇒
                     cui.setAsInvalid(e.getMessage)
-                    displayCapsuleErrors(cui, e.getMessage)
                 }
                 Success(mole, cMap, errs)
               case Failure(l) ⇒ Failure(l)
@@ -118,14 +119,19 @@ object CheckData extends Logger {
     }
   }
 
-  def displayCapsuleErrors(capsule: CapsuleUI,
+  def displayCapsuleErrors(capsule: Option[CapsuleUI],
                            e: Problem): Unit = displayCapsuleErrors(capsule, e.getClass.getSimpleName + " : " + e.toString)
 
-  def displayCapsuleErrors(capsule: CapsuleUI,
+  def displayCapsuleErrors(capsule: Option[CapsuleUI],
                            errorMsg: String): Unit = {
-    capsule.dataUI.task match {
-      case Some(x: TaskDataProxyUI) ⇒ StatusBar().warn(errorMsg, Some(x))
-      case None                     ⇒ StatusBar().warn(errorMsg)
+    capsule.map {
+      StatusBar().warn(errorMsg)
+      c ⇒
+        c.dataUI.task match {
+          case Some(x: TaskDataProxyUI) ⇒ StatusBar().warn(errorMsg, Some(x))
+          case _                        ⇒
+          //case None                     ⇒ StatusBar().warn(errorMsg)
+        }
     }
   }
 
@@ -143,9 +149,9 @@ object CheckData extends Logger {
       if (errors.isEmpty) {
         val checkTopo = checkTopology(mole)
         if (checkTopo.isEmpty) Success("")
-        else Left(checkTopo)
+        else Failure(new Throwable(checkTopo))
       }
-      else Left(errors.mkString("\n"))
+      else Failure(errors.head._2)
     case Failure(l) ⇒ Failure(l)
     case _          ⇒
   }

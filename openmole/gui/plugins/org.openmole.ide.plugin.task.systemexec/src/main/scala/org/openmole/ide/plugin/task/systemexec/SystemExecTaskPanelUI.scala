@@ -36,8 +36,9 @@ import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 import org.openmole.ide.misc.tools.util.Converters
 import org.openmole.ide.misc.tools.util.Converters._
 import scala.Some
+import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextFieldTextField.{ ChooseFileTextFieldTextFieldPanel, ChooseFileTextFieldTextFieldData }
 
-class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends TaskPanelUI {
+class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("helpSETask", new Locale("en", "EN"))) extends TaskPanelUI {
 
   val workdirTextField = new TextField(ndu.workdir)
 
@@ -48,8 +49,9 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI010)(implicit val i18n: Res
         new ComboData(Some(p)))
     }, minus = CLOSE_IF_EMPTY)
 
-  val resourcesMultiTextField = new MultiChooseFileTextField("Resources",
-    ndu.resources.map { r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r)) },
+  val resourcesMultiTextField = new MultiChooseFileTextFieldTextField("Resources",
+    ndu.resources.map { r ⇒ new ChooseFileTextFieldTextFieldPanel(new ChooseFileTextFieldTextFieldData(r._1.getAbsolutePath, r._2), inBetweenString = "aliased by") },
+    "aliased by",
     selectionMode = SelectionMode.FilesAndDirectories,
     minus = CLOSE_IF_EMPTY)
 
@@ -95,7 +97,7 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI010)(implicit val i18n: Res
     new SystemExecTaskDataUI010(name,
       workdirTextField.text,
       launchingCommandTextArea.editor.text,
-      resourcesMultiTextField.content.map { r ⇒ new File(r.content) },
+      resourcesMultiTextField.content.map { r ⇒ (new File(r.chooseFileContent), r.textFieldContent) },
       Converters.flattenTupleOptionAny(inputMapMultiComboTextField.content.map { d ⇒ d.comboValue -> d.textFieldValue }).filter { case (p, _) ⇒ Proxies.check(p) },
       Converters.flattenTupleAnyOption(outputMapMultiTextFieldCombo.content.map { d ⇒ d.textFieldValue -> d.comboValue }).filter { case (_, p) ⇒ Proxies.check(p) },
       Proxies.check(variablesMultiCombo.content.map { _.comboValue }.flatten),

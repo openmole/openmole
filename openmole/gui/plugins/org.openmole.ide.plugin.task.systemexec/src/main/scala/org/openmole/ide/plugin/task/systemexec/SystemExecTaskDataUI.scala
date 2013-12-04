@@ -29,7 +29,7 @@ class SystemExecTaskDataUI(val name: String = "",
   def update = new SystemExecTaskDataUI010(name,
     workdir,
     launchingCommands,
-    resources.map { new File(_) },
+    resources.map { r ⇒ (new File(r), r.getName) },
     inputMap,
     outputMap,
     variables,
@@ -41,7 +41,7 @@ class SystemExecTaskDataUI(val name: String = "",
 class SystemExecTaskDataUI010(val name: String = "",
                               val workdir: String = "",
                               val launchingCommands: String = "",
-                              val resources: List[File] = List.empty,
+                              val resources: List[(File, String)] = List.empty,
                               val inputMap: List[(PrototypeDataProxyUI, String, Int)] = List.empty,
                               val outputMap: List[(String, PrototypeDataProxyUI, Int)] = List.empty,
                               val variables: List[PrototypeDataProxyUI] = List.empty,
@@ -55,7 +55,7 @@ class SystemExecTaskDataUI010(val name: String = "",
     val syet = SystemExecTask(name, directory = workdir)(plugins)
     syet command launchingCommands.filterNot(_ == '\n')
     initialise(syet)
-    resources.foreach(syet addResource new File(_))
+    resources.foreach { case (file, name) ⇒ syet addResource (file, name = Some(name)) }
     variables.foreach {
       p ⇒ syet addVariable (p.dataUI.coreObject.get)
     }

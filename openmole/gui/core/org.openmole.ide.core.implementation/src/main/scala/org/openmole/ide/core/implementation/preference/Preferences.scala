@@ -22,7 +22,7 @@ import java.io.{ FileNotFoundException, File }
 object Preferences {
   def apply() = instance
 
-  def empty = new Preferences(List(), "", false)
+  def empty = new Preferences
 
   private var instance = {
     try {
@@ -38,6 +38,8 @@ object Preferences {
 
   private def update(pref: Preferences) = instance = pref
 
+  def addRecentFiles(rf: String) = update(instance.copy(recentFiles = (rf +: instance.recentFiles).distinct.take(7)))
+
   def setServers(s: List[String]) = update(instance.copy(servers = s))
 
   def setSandBox(s: String) = update(instance.copy(sandbox = s))
@@ -47,6 +49,7 @@ object Preferences {
   def dumpFile = Workspace.persistent("gui").save(instance, "preferences")
 }
 
-case class Preferences(servers: List[String],
-                       sandbox: String,
-                       embeddResources: Boolean)
+case class Preferences(servers: List[String] = List(),
+                       sandbox: String = "",
+                       embeddResources: Boolean = false,
+                       recentFiles: List[String] = List())

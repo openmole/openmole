@@ -216,13 +216,15 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val c1 = new Capsule(t1)
 
     val t2 = EmptyTask("t2")
+    t2 addInput p
     val c2 = new Capsule(t2)
 
-    val t3 = EmptyTask("t2")
+    val t3 = EmptyTask("t3")
     t3 addInput p
-    val c3 = new Capsule(t2)
+    val c3 = new Capsule(t3)
 
-    val mt = MoleTask("mt", c2, implicits = Seq("p"))
+    val mt = MoleTask("mt", c2 -- c3)
+    mt addImplicit p
 
     val mtC = new Capsule(mt)
 

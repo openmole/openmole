@@ -25,16 +25,14 @@ import com.db4o.ObjectContainer
 
 trait VolatileStorageService extends StorageService { this: Storage ⇒
 
-  override protected def mkBaseDir(implicit token: AccessToken): String = {
+  override protected def initialise(basePath: String)(implicit token: AccessToken) = {
     ReplicaCatalog.withClient { implicit c ⇒
       ReplicaCatalog.replicas(this).foreach {
         r ⇒ ReplicaCatalog.remove(r)
       }
     }
-    val dir = super.mkBaseDir(token)
-    rmDir(dir)
-    makeDir(dir)
-    dir
+    rmDir(basePath)
+    makeDir(basePath)
   }
 
   def persistentDir(implicit token: AccessToken, objectContainer: ObjectContainer) = baseDir(token)

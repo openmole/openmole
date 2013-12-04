@@ -18,15 +18,21 @@ package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.implementation.data.SourceDataUI
 import org.openmole.ide.core.implementation.panel.IOFacade
+import org.openmole.ide.misc.tools.util.ID
+import org.openmole.ide.core.implementation.serializer.Update
 
 object SourceDataProxyUI {
   def apply(d: SourceDataUI,
-            g: Boolean = false) = new SourceDataProxyUI with IOFacade {
-    var dataUI = d
-    val generated = g
+            g: Boolean = false) = new SourceDataProxyUI(d, g)
+
+  @deprecated("Used for deserialiation purposes")
+  private def annonymous = new SourceDataProxyUI(???, ???) with Update[SourceDataProxyUI] {
+    def update = new SourceDataProxyUI(dataUI, generated, id)
   }
 }
 
-trait SourceDataProxyUI extends DataProxyUI {
+class SourceDataProxyUI(var dataUI: SourceDataUI,
+                        val generated: Boolean,
+                        override val id: ID.Type = ID.newId) extends DataProxyUI with IOFacade {
   type DATAUI = SourceDataUI
 }
