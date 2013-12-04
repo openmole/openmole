@@ -37,7 +37,7 @@ import org.openmole.misc.eventdispatcher.{ Event, EventListener }
 
 @MultipartConfig(maxFileSize = 3145728 /*max file size of 3 MiB*/ ) //research scala multipart config
 class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupport with ScalateSupport
-    with FileUploadSupport with FlashMapSupport with FutureSupport with JacksonJsonSupport with MoleHandling {
+    with FileUploadSupport with FlashMapSupport with FutureSupport with JacksonJsonSupport with MoleHandling with Authentication {
 
   protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal
 
@@ -96,61 +96,100 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     new AsyncResult {
       val is = Future {
 
-        contentType = "text/html"
+        if (cookies get "api-key" orElse (request.headers get "apiKey") map (checkKey(_, request.getRemoteHost)) getOrElse false) {
+          contentType = "text/html"
 
-        createMole(inS, cnS, encapsulate, pack = molePack) match {
-          case Left(error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
-          case _           ⇒ redirect(url("execs"))
+          createMole(inS, cnS, encapsulate, pack = molePack) match {
+            case Left(error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
+            case _           ⇒ redirect(url("execs"))
+          }
+
         }
+        else halt(status = 401, headers = Map("WWW-Authenticate" -> "API-Key"))
       }
+    }
+  }
+
+  post("/getApiKey") {
+    new AsyncResult() {
+      val is = Future {
+        request.headers get "pass" map (issueKey(_, request.getRemoteHost)) foreach (cookies("api-key") = _)
+        logger.info(s"created api key: ${cookies("api-key")}")
+        redirect("index.html")
+      }
+    }
+  }
+
+  post("/json/getApiKey") {
+    contentType = formats("json")
+
+    new AsyncResult {
+      val is = Future { request.headers get "pass" map (issueKey(_, request.getRemoteHost)) map (render("api-key", _)) getOrElse render("error", "no password or incorrect password") }
+    }
+  }
+
+  post("/xml/getApiKey") {
+    contentType = "application/xml"
+
+    new AsyncResult() {
+      val is = Future(request.headers get "pass" map (issueKey(_, request.getRemoteHost)) map (k ⇒ <api-key>${ k }</api-key>) getOrElse <error>"no password or incorrect password"</error>)
     }
   }
 
   post("/xml/createMole") {
     contentType = "application/xml"
-    println("starting the create operation")
-    val encapsulate = params get "encapsulate" match {
-      case Some("on") ⇒ true
-      case _          ⇒ false
-    }
 
-    val molePack = params get "pack" match {
-      case Some("on") ⇒ true
-      case _          ⇒ false
-    }
+    if (!(params get "api-key" map (checkKey(_, request.getRemoteHost)) getOrElse false))
+      <error>"This service requires a password"</error>
+    else {
+      println("starting the create operation")
+      val encapsulate = params get "encapsulate" match {
+        case Some("on") ⇒ true
+        case _          ⇒ false
+      }
 
-    println("encapsulate and pack parsed")
+      val molePack = params get "pack" match {
+        case Some("on") ⇒ true
+        case _          ⇒ false
+      }
 
-    val res = createMole(fileParams get "file" map (_.getInputStream), fileParams get "csv" map (_.getInputStream), encapsulate, molePack)
+      println("encapsulate and pack parsed")
 
-    println("mole created")
+      val res = createMole(fileParams get "file" map (_.getInputStream), fileParams get "csv" map (_.getInputStream), encapsulate, molePack)
 
-    println(res)
+      println("mole created")
 
-    res match {
-      case Left(error) ⇒ <error>{ error }</error>
-      case Right(exec) ⇒ <moleID>{ exec.id }</moleID>
+      println(res)
+
+      res match {
+        case Left(error) ⇒ <error>{ error }</error>
+        case Right(exec) ⇒ <moleID>{ exec.id }</moleID>
+      }
     }
   }
 
   post("/json/createMole") {
     contentType = formats("json")
 
-    val encapsulate = params get "encapsulate" match {
-      case Some("on") ⇒ true
-      case _          ⇒ false
-    }
+    if (!(params get "api-key" map (checkKey(_, request.getRemoteHost)) getOrElse false))
+      <error>"This service requires a password"</error>
+    else {
+      val encapsulate = params get "encapsulate" match {
+        case Some("on") ⇒ true
+        case _          ⇒ false
+      }
 
-    val molePack = params get "pack" match {
-      case Some("on") ⇒ true
-      case _          ⇒ false
-    }
+      val molePack = params get "pack" match {
+        case Some("on") ⇒ true
+        case _          ⇒ false
+      }
 
-    val res = createMole(fileParams get "file" map (_.getInputStream), fileParams get "csv" map (_.getInputStream), encapsulate, pack = molePack)
+      val res = createMole(fileParams get "file" map (_.getInputStream), fileParams get "csv" map (_.getInputStream), encapsulate, pack = molePack)
 
-    res match {
-      case Left(error) ⇒ Xml.toJson(<error>{ error }</error>)
-      case Right(exec) ⇒ Xml.toJson(<moleID>{ exec.id }</moleID>)
+      res match {
+        case Left(error) ⇒ Xml.toJson(<error>{ error }</error>)
+        case Right(exec) ⇒ Xml.toJson(<moleID>{ exec.id }</moleID>)
+      }
     }
   }
 
@@ -273,18 +312,28 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
   get("/json/remove/:id") {
     contentType = formats("json")
 
-    val exec = deleteMole(params("id"))
+    if (!(params get "api-key" map (checkKey(_, request.getRemoteHost)) getOrElse false))
+      render(("error", "This service requires a password"))
+    else {
 
-    render(("id", exec map (_.id) getOrElse "none") ~
-      ("status", "deleted"))
+      val exec = deleteMole(params("id"))
+
+      render(("id", exec map (_.id) getOrElse "none") ~
+        ("status", "deleted"))
+    }
   }
 
   get("/remove/:id") {
     new AsyncResult() {
       val is = Future {
-        deleteMole(params("id"))
 
-        redirect("/execs")
+        if (!(cookies get "api-key" map (checkKey(_, request.getRemoteHost)) getOrElse false))
+          redirect("/execs")
+        else {
+          deleteMole(params("id"))
+
+          redirect("/execs")
+        }
       }
     }
   }
@@ -294,9 +343,14 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     new AsyncResult() {
       val is = Future {
-        val exec = deleteMole(params("id"))
+        if (!(params get "api-key" map (checkKey(_, request.getRemoteHost)) getOrElse false))
+          <error>"This service requires a password"</error>
+        else {
 
-        <moleID status={ if (exec.isDefined) "deleted" else "id doesn't exist" }>{ params("id") }</moleID>
+          val exec = deleteMole(params("id"))
+
+          <moleID status={ if (exec.isDefined) "deleted" else "id doesn't exist" }>{ params("id") }</moleID>
+        }
       }
     }
   }

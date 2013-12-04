@@ -77,19 +77,19 @@ class Application extends IApplication with Logger {
 
     @tailrec def parse(args: List[String], c: Config = Config()): Config =
       args match {
-        case "-cp" :: tail ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
-        case "-gp" :: tail ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
-        case "-p" :: tail  ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
-        case "-s" :: tail  ⇒ parse(tail.tail, c.copy(scriptFile = Some(tail.head)))
-        case "-pw" :: tail ⇒ parse(tail.tail, c.copy(password = Some(tail.head)))
-        case "-hn" :: tail ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
-        case "-c" :: tail  ⇒ parse(tail, c.copy(console = true))
-        case "-h" :: tail  ⇒ parse(tail, c.copy(help = true))
-        case "-ws" :: tail ⇒ parse(tail, c.copy(server = true))
-        case "-sp" :: tail ⇒ parse(tail.tail, c.copy(serverPort = Some(tail.head.toInt))) // Server port
-        case "-ssp" :: tail => parse(tail.tail, c.copy(serverSSLPort = Some(tail.head.toInt)))
-        case s :: tail     ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-        case Nil           ⇒ c
+        case "-cp" :: tail  ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
+        case "-gp" :: tail  ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
+        case "-p" :: tail   ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
+        case "-s" :: tail   ⇒ parse(tail.tail, c.copy(scriptFile = Some(tail.head)))
+        case "-pw" :: tail  ⇒ parse(tail.tail, c.copy(password = Some(tail.head)))
+        case "-hn" :: tail  ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
+        case "-c" :: tail   ⇒ parse(tail, c.copy(console = true))
+        case "-h" :: tail   ⇒ parse(tail, c.copy(help = true))
+        case "-ws" :: tail  ⇒ parse(tail, c.copy(server = true))
+        case "-sp" :: tail  ⇒ parse(tail.tail, c.copy(serverPort = Some(tail.head.toInt))) // Server port
+        case "-ssp" :: tail ⇒ parse(tail.tail, c.copy(serverSSLPort = Some(tail.head.toInt)))
+        case s :: tail      ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+        case Nil            ⇒ c
       }
 
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]]

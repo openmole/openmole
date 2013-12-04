@@ -117,7 +117,7 @@ class ExecutionManager(manager: MoleUI,
         executionContainer.startStopButton.enabled = false
         executionContainer.serverLabel.text = "Uploading mole execution, please wait..."
         executionContainer.peer.revalidate
-        val client = ScalaClient(url)
+        val client: ScalaClient = ??? //ScalaClient(url)
         val future = Future(client.createMole(ExecutionSerialiser(manager, true), None, encapsulate = true, pack = true))
         future.foreach {
           uuid ⇒

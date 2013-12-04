@@ -36,4 +36,7 @@ object Apache extends Defaults {
   lazy val ant = OsgiProject("org.apache.ant") settings
     (libraryDependencies += "org.apache.ant" % "ant" % "1.8.0")
 
+  lazy val codec = OsgiProject("org.apache.commons.codec") settings
+    (libraryDependencies += "commons-codec" % "commons-codec" % "1.5")
+
 }
