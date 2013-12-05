@@ -13,7 +13,7 @@ import java.util.UUID
 
 trait AbstractOMClient {
   case class HTTPControls(address: String, path: String, pass: String) extends AbstractOMClient {
-    lazy val apiKey = (Http.post(address + "/xml/getApiKey").header("pass", pass).option(HttpOptions.connTimeout(10000)).option(HttpOptions.readTimeout(10000)).asXml \ "api-key").text
+    lazy val apiKey = (Http.post(address + "/xml/getApiKey").header("pass", pass).option(HttpOptions.connTimeout(10000)).option(HttpOptions.readTimeout(10000)).asXml \ "apiKey").text
 
     def createMole(moleData: Array[Byte], context: Option[Array[Byte]], pack: Boolean = false, encapsulate: Boolean = false) = {
       val packVal = if (pack) "on" else ""
