@@ -28,13 +28,9 @@ import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.workflow.{ ISceneContainer, BuildMoleScene, ExecutionMoleSceneContainer }
 import scala.swing.FileChooser.SelectionMode._
 import swing._
-import java.io.{ FileOutputStream, File }
+import java.io.File
 import org.openmole.ide.misc.widget.{ ChooseFileTextField, PluginPanel }
 import scala.Some
-import util.{ Failure, Success }
-import org.openmole.core.serializer.SerialiserService
-import org.openmole.ide.core.implementation.panel.Proxy
-import org.openmole.ide.core.implementation.builder.MoleFactory
 import scala.swing.FileChooser.Result._
 import org.openmole.ide.misc.tools.image.Images
 import org.openide.NotifyDescriptor
@@ -42,6 +38,7 @@ import org.openmole.ide.core.implementation.dataproxy.DataProxyUI
 import org.openmole.ide.core.implementation.serializer.ExecutionSerialiser
 import org.openmole.ide.core.implementation.preference.Preferences
 import scala.swing.event.ButtonClicked
+import org.openmole.misc.workspace.Workspace
 
 object DialogFactory {
 
@@ -74,16 +71,23 @@ object DialogFactory {
     else None
   }
 
-  def serverURL(url: String): String = {
-    val textField = new TextField(url, 20)
-    val d = new DialogDescriptor(textField.peer, "Server address")
+  def serverURL(url: String, pass: String): (String, String) = {
+    val serverTextField = new TextField(url, 20)
+    val passTextField = new PasswordField(Workspace.decrypt(pass), 20)
+    val d = new DialogDescriptor(new PluginPanel("wrap 2") {
+      contents += new Label("Url")
+      contents += serverTextField
+      contents += new Label("password")
+      contents += passTextField
+    }.peer, "Server address")
     d.setOptions(List(NotifyDescriptor.OK_OPTION).toArray)
     val notification = DialogDisplayer.getDefault.notify(d)
+    val encryptedPass = Workspace.encrypt(new String(passTextField.password))
     if (notification == -1 || notification == 0) {
-      if (!textField.text.startsWith("http://")) "http://" + textField.text
-      else textField.text
+      if (!serverTextField.text.startsWith("http://")) ("http://" + serverTextField.text, encryptedPass)
+      else (serverTextField.text, encryptedPass)
     }
-    else ""
+    else ("", "")
   }
 
   def confirmationDialog(header: String,
@@ -154,6 +158,15 @@ object DialogFactory {
     text match {
       case Some(t: String) ⇒ ExecutionSerialiser(s.dataUI, t, withArchiveCheckBox.selected)
       case _               ⇒
+      /*
+      case Some(t: String) ⇒ MoleFactory.buildMoleExecution(s.dataUI) match {
+        case Success(mE) ⇒
+          if (withArchiveCheckBox.selected) SerializerService.serializeAndArchiveFiles(mE._1, new File(t))
+          else SerializerService.serialize(mE._1, new File(t))
+        case Failure(t) ⇒ StatusBar().warn("The mole can not be serialized due to " + t.getMessage)
+      }
+      case _ ⇒
+    }  */
     }
   }
 }

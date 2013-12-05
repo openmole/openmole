@@ -17,7 +17,7 @@
 package org.openmole.ide.core.implementation.preference
 
 import org.openmole.misc.workspace.Workspace
-import java.io.{ FileNotFoundException, File }
+import java.io.FileNotFoundException
 
 object Preferences {
   def apply() = instance
@@ -40,7 +40,7 @@ object Preferences {
 
   def addRecentFiles(rf: String) = update(instance.copy(recentFiles = (rf +: instance.recentFiles).distinct.take(7)))
 
-  def setServers(s: List[String]) = update(instance.copy(servers = s))
+  def setServers(s: List[(String, String)]) = update(instance.copy(servers = s))
 
   def setSandBox(s: String) = update(instance.copy(sandbox = s))
 
@@ -49,7 +49,7 @@ object Preferences {
   def dumpFile = Workspace.persistent("gui").save(instance, "preferences")
 }
 
-case class Preferences(servers: List[String] = List(),
+case class Preferences(servers: List[(String, String)] = List(),
                        sandbox: String = "",
                        embeddResources: Boolean = false,
                        recentFiles: List[String] = List())

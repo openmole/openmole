@@ -1,8 +1,12 @@
 #!/bin/bash
 
 CURDIR=$PWD
-REALPATH=`readlink -f $0`
-LOCATION=`dirname "$REALPATH"`
+
+#REALPATH=`readlink -f $0`
+#LOCATION=`dirname "$REALPATH"`
+
+LOCATION=$( cd $(dirname $0) ; pwd -P )
+cd $CURDIR
 
 (nohup sh $LOCATION/dbserver/bin/openmole-dbserver >/dev/null &) 2>/dev/null
 

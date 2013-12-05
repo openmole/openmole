@@ -25,7 +25,11 @@ import scala.swing.Action
 import org.openmole.misc.workspace.Workspace
 
 object ServerListPanel {
+  def serverlist = Preferences().servers.map { _._1 }
+
   def list = Preferences().servers
+
+  def map: Map[String, String] = Preferences().servers.toMap
 }
 
 import ServerListPanel._
@@ -46,7 +50,7 @@ class ServerListPanel extends PluginPanel("wrap", "[grow,fill]", "") {
     contents += linkLabel
 
     def displayPopup: Unit = {
-      data = new ServerData(DialogFactory.serverURL(data.serverUrl))
+      data = new ServerData(DialogFactory.serverURL(data.serverUrl, data.serverPass))
       linkLabel.link(expandName)
 
       revalidate
@@ -62,7 +66,9 @@ class ServerListPanel extends PluginPanel("wrap", "[grow,fill]", "") {
 
   }
 
-  class ServerData(val serverUrl: String = "") extends IData
+  class ServerData(val serverUrl: String = "", val serverPass: String = "") extends IData {
+    def this(tuple: (String, String)) = this(tuple._1, tuple._2)
+  }
 
   class ServerFactory extends IFactory[ServerData] {
     def apply = new ServerPanel(new ServerData)
@@ -70,11 +76,11 @@ class ServerListPanel extends PluginPanel("wrap", "[grow,fill]", "") {
 
   lazy val multiPanel = new MultiPanel("Server list",
     new ServerFactory,
-    list.map { s ⇒ new ServerPanel(new ServerData(s)) },
+    list.map { case (s, p) ⇒ new ServerPanel(new ServerData(s, p)) },
     CLOSE_IF_EMPTY,
     ADD)
 
   contents += multiPanel.panel
 
-  def save = Preferences.setServers(multiPanel.content.map { _.serverUrl })
+  def save = Preferences.setServers(multiPanel.content.map { row ⇒ (row.serverUrl, row.serverPass) })
 }
