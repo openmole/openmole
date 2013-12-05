@@ -19,7 +19,9 @@ import org.openmole.misc.workspace.Workspace
 class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Option[String], pass: Option[String]) {
 
   val p = port getOrElse 8080
-  val sslP = port getOrElse 8443
+  val sslP = sslPort getOrElse 8443
+
+  println(s"binding http to: $p")
 
   val server = new Server(p)
 
@@ -71,6 +73,8 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
   contextFactory.setKeyManagerPassword(pw)
   contextFactory.setTrustStore(ks)
   contextFactory.setTrustStorePassword(pw)
+
+  println(s"binding ssl to: $sslP")
 
   server.addConnector(new org.eclipse.jetty.server.ssl.SslSelectChannelConnector(contextFactory) {
     setPort(sslP)
