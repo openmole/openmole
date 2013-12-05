@@ -34,6 +34,7 @@ import org.openmole.web.misc.tools.ScalaClient
 import org.openmole.ide.core.implementation.serializer.ExecutionSerialiser
 import scala.concurrent.Future
 import scala.concurrent.{ ExecutionContext ⇒ exc }
+import org.openmole.misc.workspace.Workspace
 
 //FIXME with Romain actor system include
 
@@ -116,15 +117,16 @@ class ExecutionManager(manager: MoleUI,
         executionContainer.startStopButton.enabled = false
         executionContainer.serverLabel.text = "Uploading mole execution, please wait..."
         executionContainer.peer.revalidate
-        val client = ScalaClient(url._1, url._2)
+        val client = ScalaClient(url._1, Workspace.decrypt(url._2))
         val future = Future(client.createMole(ExecutionSerialiser(manager, true), None, encapsulate = true, pack = true))
         future.foreach {
           uuid ⇒
             uuid match {
               case Right(x) ⇒
                 client.startMole(x.toString)
+                println("started mole ")
                 executionContainer.serverLabel.text = "The Mole has been started "
-                val uidurl = url + "/execs/" + x.toString
+                val uidurl = url._1 + "/execs/" + x.toString
                 executionContainer.uuidLabel.hlink(uidurl)
                 executionContainer.startLook
                 executionContainer.startStopButton.enabled = true
