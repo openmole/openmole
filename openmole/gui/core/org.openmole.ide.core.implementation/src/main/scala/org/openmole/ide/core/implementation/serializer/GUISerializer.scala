@@ -280,6 +280,7 @@ class GUISerializer { self ⇒
     xstream.alias("HashMap", classOf[collection.immutable.HashMap.HashMap1[_, _]])
     xstream.alias("HashMap", collection.immutable.HashMap.empty.getClass.asInstanceOf[Class[_]])
     xstream.registerConverter(new HashMapConverter())
+    xstream.registerConverter(new Tuple2Converter())
 
     xstream.alias("FileInfo", classOf[FileSerialisation.FileInfo])
   }
