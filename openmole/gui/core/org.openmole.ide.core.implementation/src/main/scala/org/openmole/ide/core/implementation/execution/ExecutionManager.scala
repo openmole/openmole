@@ -34,7 +34,6 @@ import org.openmole.web.misc.tools.ScalaClient
 import org.openmole.ide.core.implementation.serializer.ExecutionSerialiser
 import scala.concurrent.Future
 import scala.concurrent.{ ExecutionContext ⇒ exc }
-import sun.security.pkcs11.Secmod.ModuleType
 
 //FIXME with Romain actor system include
 
