@@ -59,7 +59,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   val ulLabel = new Label("0/0")
   val serverCheckBox = new CheckBox("Server delegation")
   val serverTagTextField = new TextField(bmsc.scene.dataUI.name, 10)
-  val serverCombo = new ComboBox(ServerListPanel.list)
+  val serverCombo = new ComboBox(ServerListPanel.serverlist)
   val serverLabel = new Label("")
   val uuidLabel = new ExternalLinkLabel
   val serverPanel = new PluginPanel("wrap") {
@@ -153,7 +153,8 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           def apply = stop
         }
         x.start({
-          if (serverCheckBox.selected) Some(serverCombo.selection.item)
+          val serverUrl = serverCombo.selection.item
+          if (serverCheckBox.selected) Some((serverUrl, ServerListPanel.map(serverUrl)))
           else None
         }, {
           if (sandBoxCheckBox.selected) ExecutionContext.local.copy(directory = Some(new File(sandBoxTextField.text)))

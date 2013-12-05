@@ -107,17 +107,17 @@ class ExecutionManager(manager: MoleUI,
 
   contents += tabbedPane
 
-  def start(server: Option[String] = None,
+  def start(server: Option[(String, String)] = None,
             executionContext: ExecutionContext = ExecutionContext.local) = synchronized {
     tabbedPane.selection.index = 0
     cancel
 
     server match {
-      case Some(url: String) ⇒
+      case Some(url: (String, String)) ⇒
         executionContainer.startStopButton.enabled = false
         executionContainer.serverLabel.text = "Uploading mole execution, please wait..."
         executionContainer.peer.revalidate
-        val client: ScalaClient = ??? //ScalaClient(url)
+        val client = ScalaClient(url._1, url._2)
         val future = Future(client.createMole(ExecutionSerialiser(manager, true), None, encapsulate = true, pack = true))
         future.foreach {
           uuid ⇒
