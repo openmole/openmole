@@ -65,6 +65,8 @@ class Proxies {
   private def _hooks = castProxies[HookDataProxyUI]
   private def _sources = castProxies[SourceDataProxyUI]
 
+  def ++(p: Proxies) = p.all.foreach { += }
+
   def task(id: ID.Type) = _tasks.get(id)
   def prototype(id: ID.Type) = _prototypes.get(id)
   def sampling(id: ID.Type) = _samplings.get(id)
@@ -135,6 +137,8 @@ class Proxies {
   def filter[P <: DataProxyUI](m: List[P]) = m.filter {
     p ⇒ contains(p)
   }
+
+  def all = tasks ++ prototypes ++ samplings ++ environments ++ hooks ++ sources
 
   def contains(p: DataProxyUI) = _proxies.single.contains(p.id)
 

@@ -124,7 +124,6 @@ class ExecutionManager(manager: MoleUI,
             uuid match {
               case Right(x) ⇒
                 client.startMole(x.toString)
-                println("started mole ")
                 executionContainer.serverLabel.text = "The Mole has been started "
                 val uidurl = url._1 + "/execs/" + x.toString
                 executionContainer.uuidLabel.hlink(uidurl)

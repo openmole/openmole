@@ -52,7 +52,8 @@ class GUIPanel extends MainFrame {
               contents += new MenuItem(new Action(f.getName) {
                 override def apply = {
                   Proxies.instance.clearAll
-                  mainframe.title = "OpenMOLE - " + LoadXML.tryFile(rf)
+                  ScenesManager().closeAll
+                  mainframe.title = "OpenMOLE - " + LoadXML.load(f)
                 }
               })
             }
@@ -61,15 +62,16 @@ class GUIPanel extends MainFrame {
 
       contents += new MenuItem(new Action("Load") {
         override def apply = {
+          ScenesManager().closeAll
           Proxies.instance.clearAll
-          mainframe.title = "OpenMOLE - " + LoadXML.show
+          mainframe.title = "OpenMOLE - " + LoadXML.load
         }
 
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, Event.CTRL_MASK))
       })
 
       contents += new MenuItem(new Action("Import") {
-        override def apply = LoadXML.show
+        override def apply = LoadXML.load
 
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_I, Event.CTRL_MASK))
       })
@@ -143,7 +145,6 @@ class GUIPanel extends MainFrame {
 
   val splitPane = new SplitPane(Orientation.Horizontal, ScenesManager().tabPane, ScenesManager().statusBar)
   splitPane.resizeWeight = 1
-  //splitPane.peer.setResizeWeight(1 - (50.0 / Toolkit.getDefaultToolkit.getScreenSize.height))
 
   peer.add(splitPane.peer, BorderLayout.CENTER)
   StatusBar().inform("OpenMOLE - 0.10 - Gogo Gadget")

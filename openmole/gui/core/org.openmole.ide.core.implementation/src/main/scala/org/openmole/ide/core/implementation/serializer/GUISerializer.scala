@@ -86,6 +86,8 @@ class GUISerializer { self ⇒
 
   val fileSerialisation = new Serialiser with FileSerialisation
 
+  def init(proxies: Proxies) = proxies.all foreach { e ⇒ deserializationStates.put(e.id, e) }
+
   private def register(f: XStream ⇒ Unit) = {
     f(deserialiser.xStream)
     f(serialiser.xStream)
