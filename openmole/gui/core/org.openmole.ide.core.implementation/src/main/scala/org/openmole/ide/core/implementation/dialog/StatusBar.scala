@@ -29,9 +29,8 @@ import org.openmole.ide.core.implementation.dataproxy.DataProxyUI
 
 object StatusBar {
   def apply() = ScenesManager().currentSceneContainer match {
-    case Some(b: BuildMoleSceneContainer)     ⇒ b.statusBar
-    case Some(e: ExecutionMoleSceneContainer) ⇒ e.bmsc.statusBar
-    case _                                    ⇒ ScenesManager.instance.statusBar
+    case Some(b: BuildMoleSceneContainer) ⇒ b.statusBar
+    case _                                ⇒ ScenesManager.instance.statusBar
   }
 
   def displayErrors(f: ⇒ Traversable[Throwable]) = {

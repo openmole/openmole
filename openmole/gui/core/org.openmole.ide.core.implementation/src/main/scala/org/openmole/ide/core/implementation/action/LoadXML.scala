@@ -43,38 +43,51 @@ object LoadXML {
       Settings.currentPath)
     var text = ""
     if (fc.showDialog(new Label, "OK") == Approve) text = fc.selectedFile.getPath
+    text
+  }
 
-    tryFile(text)
+  def load: String = {
+    val fileName = show
+    if (!fileName.isEmpty) {
+      tryFile(fileName).map {
+        f ⇒ load(f)
+      }.headOption.getOrElse("")
+    }
+    else ""
   }
 
   def tryFile(text: String) = _tryFile(text, List("", ".om", ".tar"))
 
-  private def _tryFile(text: String, exts: List[String]): String =
+  private def _tryFile(text: String, exts: List[String]): Option[File] = {
     if (!exts.isEmpty) {
       val fileName = text + exts.head
       val f = new File(fileName)
-      if (f.isFile) {
-        Settings.currentPath = Some(f.getParentFile)
-        Settings.currentProject = Some(f)
-        val deserialised = (new GUISerializer).deserialize(f)
-        displayErrors(deserialised.written)
-        val (proxies, scene) = deserialised.value
-        StatusBar.clear
-        ScenesManager().closeAll
-        Proxies.instance = proxies
-        addPrototypes(proxies)
-        addTasks(proxies)
-        addSamplings(proxies)
-        addEnvironments(proxies)
-        addHooks(proxies)
-        addSources(proxies)
-        scene.foreach(mdu ⇒ ScenesManager().addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
-        Preferences.addRecentFiles(f.getAbsolutePath)
-        fileName
-      }
+      if (f.isFile) Some(f)
       else _tryFile(text, exts.tail)
     }
-    else ""
+    else None
+  }
+
+  def load(f: File): String = {
+    Settings.currentPath = Some(f.getParentFile)
+    Settings.currentProject = Some(f)
+    val seriliazer = new GUISerializer
+    seriliazer.init(Proxies.instance)
+    val deserialised = seriliazer.deserialize(f)
+    displayErrors(deserialised.written)
+    val (proxies, scene) = deserialised.value
+    StatusBar.clear
+    Proxies.instance ++ proxies
+    addPrototypes(proxies)
+    addTasks(proxies)
+    addSamplings(proxies)
+    addEnvironments(proxies)
+    addHooks(proxies)
+    addSources(proxies)
+    scene.foreach(mdu ⇒ ScenesManager().addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
+    Preferences.addRecentFiles(f.getAbsolutePath)
+    f.getAbsolutePath
+  }
 
   def addTasks(proxies: Proxies) =
     for {

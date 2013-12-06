@@ -18,6 +18,7 @@ package org.openmole.ide.core.implementation.preference
 
 import org.openmole.misc.workspace.Workspace
 import java.io.FileNotFoundException
+import org.openmole.ide.core.implementation.serializer.XStreamFactory
 
 object Preferences {
   def apply() = instance
@@ -26,7 +27,7 @@ object Preferences {
 
   private var instance = {
     try {
-      Workspace.persistent("gui").load("preferences") match {
+      Workspace.persistent("gui").load("preferences", xstream = XStreamFactory.build) match {
         case p: Preferences ⇒ p
         case _              ⇒ empty
       }
@@ -46,7 +47,7 @@ object Preferences {
 
   def setEmbeddRessources(b: Boolean) = update(instance.copy(embeddResources = b))
 
-  def dumpFile = Workspace.persistent("gui").save(instance, "preferences")
+  def dumpFile = Workspace.persistent("gui").save(instance, "preferences", xstream = XStreamFactory.build)
 }
 
 case class Preferences(servers: List[(String, String)] = List(),
