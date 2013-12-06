@@ -25,8 +25,6 @@ object Persistent {
   @transient lazy val xstream = new XStream
 }
 
-import Persistent._
-
 case class Persistent(baseDir: File) {
 
   baseDir.mkdirs
@@ -34,14 +32,14 @@ case class Persistent(baseDir: File) {
   private def subDirectory(dir: Option[String]) =
     dir.map(new File(baseDir, _)).getOrElse(baseDir)
 
-  def save(obj: Any, name: String, category: Option[String] = None) = synchronized {
+  def save(obj: Any, name: String, category: Option[String] = None, xstream: XStream = Persistent.xstream) = synchronized {
     val subDir = subDirectory(category)
     subDir.mkdirs()
     val file = new File(subDir, name)
     file.content = xstream.toXML(obj)
   }
 
-  def load(name: String, category: Option[String] = None) = synchronized {
+  def load(name: String, category: Option[String] = None, xstream: XStream = Persistent.xstream) = synchronized {
     val subDir = subDirectory(category)
     val file = new File(subDir, name)
     xstream.fromXML(file.content)
@@ -51,7 +49,7 @@ case class Persistent(baseDir: File) {
     subDirectory(category).recursiveDelete
   }
 
-  def all(category: Option[String] = None) = synchronized {
+  def all(category: Option[String] = None, xstream: XStream = Persistent.xstream) = synchronized {
     subDirectory(category).listRecursive(_.isFile).map {
       f ⇒ xstream.fromXML(f.content)
     }
