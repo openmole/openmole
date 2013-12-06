@@ -66,7 +66,10 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     contentType = "text/html"
     new AsyncResult() {
       val is = Future {
-        ssp("/createMole", "body" -> "Please upload a serialized mole execution below!")
+        if (cookies get "apiKey" isDefined)
+          ssp("/createMole", "body" -> "Please upload a serialized mole execution below!")
+        else
+          ssp("/authenticate.ssp", "goTo" -> "/createMole")
       }
     }
   }
@@ -113,9 +116,9 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
   post("/getApiKey") {
     new AsyncResult() {
       val is = Future {
+        logger.info("received apiKey request")
         request.headers get "pass" map (issueKey(_, request.getRemoteHost)) foreach (cookies("apiKey") = _)
-        logger.info(s"created api key: ${cookies("apiKey")}")
-        redirect("index.html")
+        cookies get "apiKey" foreach (k => logger.info(s"created api key: $k"))
       }
     }
   }
@@ -328,7 +331,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
       val is = Future {
 
         if (!(cookies get "apiKey" map (checkKey(_, request.getRemoteHost)) getOrElse false))
-          redirect("/execs")
+          ssp("/authenticate.ssp", "goTo" -> s"/remove/${params("id")}")
         else {
           deleteMole(params("id"))
 
