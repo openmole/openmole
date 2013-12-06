@@ -114,11 +114,18 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
   }
 
   post("/getApiKey") {
+    contentType = "text/plain"
     new AsyncResult() {
       val is = Future {
         logger.info("received apiKey request")
-        request.headers get "pass" map (issueKey(_, request.getRemoteHost)) foreach (cookies("apiKey") = _)
-        cookies get "apiKey" foreach (k => logger.info(s"created api key: $k"))
+        try {
+          request.headers get "pass" map (issueKey(_, request.getRemoteHost)) foreach (cookies("apiKey") = _)
+          cookies get "apiKey" foreach (k ⇒ logger.info(s"created api key: $k"))
+          ""
+        }
+        catch {
+          case e: InvalidPasswordException ⇒ "Invalid password entered"
+        }
       }
     }
   }

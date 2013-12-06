@@ -13,10 +13,15 @@ import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.HashMap
 import akka.actor.ActorSystem
 import org.apache.commons.codec.binary.Base64
+import org.slf4j.LoggerFactory
 
 trait Authentication {
 
+  //private val logger = LoggerFactory.getLogger(getClass)
+
   def system: ActorSystem
+
+  class InvalidPasswordException(cause: String) extends Exception(cause)
 
   case class Key(hash: String, start: Long, end: Long) {
     def isValid = {
@@ -42,7 +47,11 @@ trait Authentication {
 
       hash
     }
-    else ???
+    else {
+      //logger.info("Submitted password was incorrect")
+      println("Submitted password was incorrect")
+      throw new InvalidPasswordException("Submitted password was incorrect")
+    }
   }
 
   def checkKey(key: String, hostname: String): Boolean = {
