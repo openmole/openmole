@@ -78,13 +78,13 @@ class GUISerializer { self ⇒
   val deserializationStates: mutable.HashMap[ID.Type, AnyRef] = mutable.HashMap.empty
 
   val deserialiser =
-    new Serialiser with FileInjection {
+    new Serialiser(XStreamFactory.build) with FileInjection {
       override def getMatchingFile(file: File): File = injectedFiles.applyOrElse(file, (f: File) ⇒ f)
     }
 
-  val serialiser = new Serialiser with FileListing
+  val serialiser = new Serialiser(XStreamFactory.build) with FileListing
 
-  val fileSerialisation = new Serialiser with FileSerialisation
+  val fileSerialisation = new Serialiser(XStreamFactory.build) with FileSerialisation
 
   def init(proxies: Proxies) = proxies.all foreach { e ⇒ deserializationStates.put(e.id, e) }
 
@@ -266,23 +266,8 @@ class GUISerializer { self ⇒
     xstream.alias("AggregationTransitionType", AggregationTransitionType.getClass)
     xstream.alias("EndTransitionType", EndTransitionType.getClass)
 
-    xstream.alias("Some", classOf[scala.Some[_]])
-    xstream.alias("None", None.getClass)
     xstream.registerConverter(optionConverter)
     xstream.addImmutableType(None.getClass)
-
-    implicit val mapper = xstream.getMapper
-
-    xstream.alias("List", classOf[::[_]])
-    xstream.alias("List", Nil.getClass)
-    xstream.registerConverter(new ListConverter())
-    xstream.addImmutableType(Nil.getClass)
-
-    xstream.alias("HashMap", classOf[collection.immutable.HashMap[_, _]])
-    xstream.alias("HashMap", classOf[collection.immutable.HashMap.HashMap1[_, _]])
-    xstream.alias("HashMap", collection.immutable.HashMap.empty.getClass.asInstanceOf[Class[_]])
-    xstream.registerConverter(new HashMapConverter())
-    xstream.registerConverter(new Tuple2Converter())
 
     xstream.alias("FileInfo", classOf[FileSerialisation.FileInfo])
   }
