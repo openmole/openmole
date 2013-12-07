@@ -39,6 +39,7 @@ object Random { random ⇒
     override def nextInt(n: Int) = synchronized { generator.nextInt(n) }
     override def nextLong = synchronized { generator.nextLong }
     override def setSeed(seed: Long) = synchronized { generator.setSeed(seed) }
+    def toScala = new util.Random(this)
   }
 
   @transient lazy val longInterval = {
