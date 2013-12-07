@@ -33,9 +33,10 @@ import org.openmole.core.implementation.validation.DataflowProblem.MissingSource
 import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
 import java.util.UUID
 import java.sql.SQLException
+import org.scalatra.ScalatraBase
+import javax.servlet.http.HttpServletRequest
 
-trait MoleHandling { self: SlickSupport ⇒
-
+trait MoleHandling { self: ScalatraBase with SlickSupport ⇒
   def system: ActorSystem
 
   protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
