@@ -66,10 +66,11 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     contentType = "text/html"
     new AsyncResult() {
       val is = Future {
-        if (cookies get "apiKey" isDefined)
+        requireAuth(cookies get "apiKey") {
           ssp("/createMole", "body" -> "Please upload a serialized mole execution below!")
-        else
+        } {
           ssp("/authenticate.ssp", "goTo" -> "/createMole")
+        }
       }
     }
   }
@@ -98,17 +99,16 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     new AsyncResult {
       val is = Future {
-
-        if (cookies get "apiKey" orElse (request.headers get "apiKey") map (checkKey(_, request.getRemoteHost)) getOrElse false) {
+        requireAuth(cookies get "apiKey" orElse (request.headers get "apiKey")) {
           contentType = "text/html"
 
           createMole(inS, cnS, encapsulate, pack = molePack) match {
             case Left(error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
             case _           ⇒ redirect(url("execs"))
           }
-
+        } {
+          halt(status = 401, headers = Map("WWW-Authenticate" -> "apiKey"))
         }
-        else halt(status = 401, headers = Map("WWW-Authenticate" -> "apiKey"))
       }
     }
   }
@@ -149,9 +149,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
   post("/xml/createMole") {
     contentType = "application/xml"
 
-    if (!(request.headers get "apiKey" map (checkKey(_, request.getRemoteHost)) getOrElse false))
-      <error>"This service requires a password"</error>
-    else {
+    requireAuth(request.headers get "apiKey") {
       println("starting the create operation")
       val encapsulate = params get "encapsulate" match {
         case Some("on") ⇒ true
@@ -175,15 +173,15 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         case Left(error) ⇒ <error>{ error }</error>
         case Right(exec) ⇒ <moleID>{ exec.id }</moleID>
       }
+    } {
+      <error>"This service requires a password"</error>
     }
   }
 
   post("/json/createMole") {
     contentType = formats("json")
 
-    if (!(request.headers get "apiKey" map (checkKey(_, request.getRemoteHost)) getOrElse false))
-      <error>"This service requires a password"</error>
-    else {
+    requireAuth(request.headers get "apiKey") {
       val encapsulate = params get "encapsulate" match {
         case Some("on") ⇒ true
         case _          ⇒ false
@@ -200,6 +198,8 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         case Left(error) ⇒ Xml.toJson(<error>{ error }</error>)
         case Right(exec) ⇒ Xml.toJson(<moleID>{ exec.id }</moleID>)
       }
+    } {
+      Xml.toJson(<error>"This service requires a password"</error>)
     }
   }
 
@@ -322,27 +322,24 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
   get("/json/remove/:id") {
     contentType = formats("json")
 
-    if (!(request.headers get "apiKey" map (checkKey(_, request.getRemoteHost)) getOrElse false))
-      render(("error", "This service requires a password"))
-    else {
-
+    requireAuth(request.headers get "apiKey") {
       val exec = deleteMole(params("id"))
 
       render(("id", exec map (_.id) getOrElse "none") ~
         ("status", "deleted"))
+    } {
+      render(("error", "This service requires a password"))
     }
   }
 
   get("/remove/:id") {
     new AsyncResult() {
       val is = Future {
-
-        if (!(cookies get "apiKey" map (checkKey(_, request.getRemoteHost)) getOrElse false))
-          ssp("/authenticate.ssp", "goTo" -> s"/remove/${params("id")}")
-        else {
+        requireAuth(cookies get "apiKey") {
           deleteMole(params("id"))
-
           redirect("/execs")
+        } {
+          ssp("/authenticate.ssp", "goTo" -> s"/remove/${params("id")}")
         }
       }
     }
@@ -353,13 +350,12 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     new AsyncResult() {
       val is = Future {
-        if (!(request.headers get "apiKey" map (checkKey(_, request.getRemoteHost)) getOrElse false))
-          <error>"This service requires a password"</error>
-        else {
-
+        requireAuth(request.headers get "apiKey") {
           val exec = deleteMole(params("id"))
 
           <moleID status={ if (exec.isDefined) "deleted" else "id doesn't exist" }>{ params("id") }</moleID>
+        } {
+          <error>"This service requires a password"</error>
         }
       }
     }

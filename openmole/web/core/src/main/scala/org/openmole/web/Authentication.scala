@@ -14,8 +14,10 @@ import scala.collection.mutable.HashMap
 import akka.actor.ActorSystem
 import org.apache.commons.codec.binary.Base64
 import org.slf4j.LoggerFactory
+import org.scalatra.ScalatraBase
+import javax.servlet.http.HttpServletRequest
 
-trait Authentication {
+trait Authentication { self ⇒ MoleHandling
 
   //private val logger = LoggerFactory.getLogger(getClass)
 
@@ -32,18 +34,18 @@ trait Authentication {
 
   private val keyStorage = new DataHandler[String, Key](system)
 
-  def issueKey(pwH: String, hostname: String): String = {
+  def issueKey(pwH: String)(implicit r: HttpServletRequest): String = {
     if (Workspace.passwordIsCorrect(pwH)) { //TODO this is probably terribly unsafe
       val signingKey = new SecretKeySpec(pwH.getBytes, "HmacSHA256")
       val mac = Mac.getInstance("HmacSHA256")
       mac.init(signingKey)
-      val rawHmac = mac.doFinal((hostname + Workspace.uniqueID) getBytes ())
+      val rawHmac = mac.doFinal((r.getRemoteHost + Workspace.sessionUUID) getBytes ())
 
       val hash = new String(Base64.encodeBase64(rawHmac))
       val start = java.util.Calendar.getInstance().getTimeInMillis
       val end = start + (24 * 60 * 60 * 1000)
 
-      keyStorage.add(hostname, Key(hash, start, end))
+      keyStorage.add(r.getRemoteHost, Key(hash, start, end))
 
       hash
     }
@@ -54,12 +56,14 @@ trait Authentication {
     }
   }
 
+  def requireAuth[T](key: ⇒ Option[String])(success: ⇒ T)(fail: ⇒ T = { throw new InvalidPasswordException("Api-key is not valid") })(implicit r: HttpServletRequest): T = {
+    if (key map (checkKey(_, r.getRemoteHost)) getOrElse false) success else fail
+  }
+
   def checkKey(key: String, hostname: String): Boolean = {
     keyStorage get hostname match {
       case Some(k) ⇒ k.isValid && k.hash == key
       case _       ⇒ false
     }
-
-    true
   }
 }
