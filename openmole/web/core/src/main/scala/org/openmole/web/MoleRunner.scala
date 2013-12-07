@@ -119,7 +119,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
       val is = Future {
         logger.info("received apiKey request")
         try {
-          request.headers get "pass" map (issueKey(_, request.getRemoteHost)) foreach (cookies("apiKey") = _)
+          request.headers get "pass" map issueKey foreach (cookies("apiKey") = _)
           cookies get "apiKey" foreach (k ⇒ logger.info(s"created api key: $k"))
           ""
         }
@@ -134,7 +134,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     contentType = formats("json")
 
     new AsyncResult {
-      val is = Future { request.headers get "pass" map (issueKey(_, request.getRemoteHost)) map (render("apiKey", _)) getOrElse render("error", "no password or incorrect password") }
+      val is = Future { request.headers get "pass" map issueKey map (render("apiKey", _)) getOrElse render("error", "no password or incorrect password") }
     }
   }
 
@@ -142,7 +142,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     contentType = "application/xml"
 
     new AsyncResult() {
-      val is = Future(request.headers get "pass" map (issueKey(_, request.getRemoteHost)) map (k ⇒ <apiKey>${ k }</apiKey>) getOrElse <error>"no password or incorrect password"</error>)
+      val is = Future(request.headers get "pass" map issueKey map (k ⇒ <apiKey>${ k }</apiKey>) getOrElse <error>"no password or incorrect password"</error>)
     }
   }
 
