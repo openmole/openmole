@@ -38,7 +38,7 @@ object GliteEnvironmentPanelUI {
 
 import Converters._
 
-class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends EnvironmentPanelUI {
+class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends EnvironmentPanelUI {
 
   val vo = new VOPanel(pud.vo, pud.voms, pud.bdii)
   val runtimeMemoryTextField = new TextField(pud.openMOLEMemory, 4)
@@ -64,6 +64,11 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI)(implicit val i18n: Re
   }
 
   val proxyCheckBox = new CheckBox("MyProxy")
+
+  var freeRequirementTextArea = new BashEditor {
+    editor.text = pud.freeRequirements
+    minimumSize = new Dimension(420, 200)
+  }
 
   listenTo(`proxyCheckBox`)
 
@@ -107,15 +112,19 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI)(implicit val i18n: Re
         contents += (new Label("Threads"), "gap para")
         contents += threadsTextField
       }
-    }), ("MyProxy", new PluginPanel("") {
-    contents += (proxyCheckBox, "wrap")
-    contents += (proxyTimeLabel, "gap para")
-    contents += (proxyTimeTextField, "wrap")
-    contents += (proxyHostLabel, "gap para")
-    contents += (proxyHostTextField, "wrap")
-    contents += (proxyPortLabel, "gap para")
-    contents += proxyPortTextField
-  }))
+    }), ("Other", new PluginPanel("wrap", "fill", "fill") {
+    contents += new Label("Free requirements")
+    contents += freeRequirementTextArea
+  }),
+    ("MyProxy", new PluginPanel("") {
+      contents += (proxyCheckBox, "wrap")
+      contents += (proxyTimeLabel, "gap para")
+      contents += (proxyTimeTextField, "wrap")
+      contents += (proxyHostLabel, "gap para")
+      contents += (proxyHostTextField, "wrap")
+      contents += (proxyPortLabel, "gap para")
+      contents += proxyPortTextField
+    }))
 
   proxyCheckBox.selected = pud.proxy
   showProxy(pud.proxy)
@@ -135,7 +144,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI)(implicit val i18n: Re
   add(runtimeMemoryTextField, new Help(i18n.getString("myProxy")))
 
   def saveContent(name: String) =
-    new GliteEnvironmentDataUI(name,
+    new GliteEnvironmentDataUI010(name,
       vo.voComboBox.selection.item,
       vo.vomsTextField.text,
       vo.bdiiTextField.text,
@@ -152,5 +161,6 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI)(implicit val i18n: Re
       jobTypeTextField.text,
       smpGranularityTextField.text,
       architectureCheckBox.selected,
-      threadsTextField.text)
+      threadsTextField.text,
+      freeRequirementTextArea.editor.text)
 }

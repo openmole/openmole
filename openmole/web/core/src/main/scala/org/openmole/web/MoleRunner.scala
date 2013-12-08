@@ -118,7 +118,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
       val is = Future {
         logger.info("received apiKey request")
         request.headers get "pass" map (issueKey(_, request.getRemoteHost)) foreach (cookies("apiKey") = _)
-        cookies get "apiKey" foreach (k => logger.info(s"created api key: $k"))
+        cookies get "apiKey" foreach (k ⇒ logger.info(s"created api key: $k"))
       }
     }
   }
