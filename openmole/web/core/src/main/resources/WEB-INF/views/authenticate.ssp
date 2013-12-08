@@ -15,6 +15,9 @@ var getKey = function() {$.ajax({
         pass: $("#passBox").val()   //passes
     },
     success: function (data) {
+            if(data != "")
+              displayError(data);
+
             window.location.replace(goTo);
             console.log("issued ajax call");
     }
