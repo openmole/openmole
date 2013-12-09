@@ -12,6 +12,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.implementation.data.EnvironmentDataUI
+import org.openmole.ide.core.implementation.serializer.Update
 
 class GliteEnvironmentDataUI(val name: String = "",
                              val vo: String = "",
@@ -30,7 +31,47 @@ class GliteEnvironmentDataUI(val name: String = "",
                              val jobType: Option[String] = None,
                              val smpGranularity: Option[Int] = None,
                              val architecture: Boolean = false,
-                             val threads: Option[Int] = None) extends EnvironmentDataUI {
+                             val threads: Option[Int] = None) extends Update[GliteEnvironmentDataUI010] {
+  def update = new GliteEnvironmentDataUI010(name,
+    vo,
+    voms,
+    bdii,
+    proxy,
+    proxyTime,
+    proxyHost,
+    proxyPort,
+    fqan,
+    openMOLEMemory,
+    memory,
+    cpuTime,
+    wallTime,
+    cpuNumber,
+    jobType,
+    smpGranularity,
+    architecture,
+    threads,
+    "")
+}
+
+class GliteEnvironmentDataUI010(val name: String = "",
+                                val vo: String = "",
+                                val voms: String = "",
+                                val bdii: String = Workspace.preference(GliteEnvironment.DefaultBDII),
+                                val proxy: Boolean = false,
+                                val proxyTime: Option[String] = None,
+                                val proxyHost: Option[String] = None,
+                                val proxyPort: Option[Int] = None,
+                                val fqan: Option[String] = None,
+                                val openMOLEMemory: Option[Int] = Some(Workspace.preference(BatchEnvironment.MemorySizeForRuntime).toInt),
+                                val memory: Option[Int] = None,
+                                val cpuTime: Option[String] = None,
+                                val wallTime: Option[String] = None,
+                                val cpuNumber: Option[Int] = None,
+                                val jobType: Option[String] = None,
+                                val smpGranularity: Option[Int] = None,
+                                val architecture: Boolean = false,
+                                val threads: Option[Int] = None,
+                                val freeRequirements: String = "") extends EnvironmentDataUI {
 
   def coreObject = util.Try {
 
@@ -56,7 +97,8 @@ class GliteEnvironmentDataUI(val name: String = "",
         smpGranularity = smpGranularity,
         myProxy = myProxy,
         architecture = if (architecture) Some("x86_64") else None,
-        threads = threads)(Workspace.authenticationProvider)
+        threads = threads,
+        requirements = if (freeRequirements.isEmpty) None else Some(freeRequirements))(Workspace.authenticationProvider)
     }
     catch {
       case e: Throwable ⇒ throw new UserBadDataError(e, "An error occurred when initializing the glite environment " + name + ". Please check your certificate settings in the Preferences menu.")
