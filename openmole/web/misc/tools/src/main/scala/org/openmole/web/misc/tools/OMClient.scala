@@ -104,7 +104,7 @@ case class HTTPControls(address: String, path: String, pass: String) extends OMC
         val certs = h.getServerCertificates
         ks.getCertificate(hostName) == certs(0)
       }
-      case _ ⇒ false
+      case _ ⇒ true
     })
   }
 
