@@ -18,6 +18,8 @@ import java.security.KeyStore
  * Time: 11:44 AM
  */
 
+//TODO: There's so much to fix in this class. Consult romain and mathieu about it.
+
 trait OMClientInterface {
   def address: String
   def path: String
@@ -27,44 +29,54 @@ trait OMClientInterface {
   def getMoleStats(id: String): Any
   def startMole(id: String): Any
   def deleteMole(id: String): Any
+  def trustCert(): Unit
+  def isCertTrusted: Boolean
+  def getCert: Certificate
+  val fullAddress = if (address.endsWith("/")) address + path else address + "/" + path
 }
 
-trait AbstractOMClient extends OMClientInterface {
-  case class HTTPControls(address: String, path: String, pass: String) extends OMClientInterface {
-    lazy val apiKey = (Http.post(address + "/xml/getApiKey").header("pass", pass).option(HttpOptions.connTimeout(10000)).option(HttpOptions.readTimeout(10000)).asXml \ "apiKey").text
+case class HTTPControls(address: String, path: String, pass: String) extends OMClientInterface {
+  lazy val apiKey = (Http.post(address + "/xml/getApiKey").header("pass", pass).option(HttpOptions.connTimeout(10000)).option(HttpOptions.readTimeout(10000)).asXml \ "apiKey").text
 
-    def createMole(moleData: Array[Byte], context: Option[Array[Byte]], pack: Boolean = false, encapsulate: Boolean = false) = {
-      val packVal = if (pack) "on" else ""
-      val encapsulateVal = if (encapsulate) "on" else ""
-      val url = s"$fullAddress/createMole"
-      val multiparts = MultiPart("file", "", "", moleData) :: (context map (MultiPart("csv", "", "", _))).toList
-      finishRequest(Http.multipart(url, multiparts: _*).header("apiKey", apiKey).params("pack" -> packVal, "encapsulate" -> encapsulateVal))
-    }
-
-    def getLoadedMoles = {
-      val url = s"$fullAddress/execs"
-      finishRequest(Http(url))
-    }
-
-    def getMoleStats(id: String) = {
-      val url = s"$fullAddress/execs/$id"
-      finishRequest(Http(url))
-    }
-
-    def startMole(id: String) = {
-      val url = s"$fullAddress/start/$id"
-      finishRequest(Http(url))
-    }
-
-    def deleteMole(id: String) = {
-      val url = s"$fullAddress/remove/$id"
-      finishRequest(Http(url).header("apiKey", apiKey))
-    }
-
-    private def finishRequest(h: Http.Request) = h.option(HttpOptions.sslSocketFactory(sslFactory)).option { case hS: HttpsURLConnection ⇒ hS.setHostnameVerifier(hostnameVerifier) case _ ⇒ () }.option { HttpOptions.connTimeout(10000) }.option { HttpOptions.readTimeout(10000) }
+  def createMole(moleData: Array[Byte], context: Option[Array[Byte]], pack: Boolean = false, encapsulate: Boolean = false) = {
+    val packVal = if (pack) "on" else ""
+    val encapsulateVal = if (encapsulate) "on" else ""
+    val url = s"$fullAddress/createMole"
+    val multiparts = MultiPart("file", "", "", moleData) :: (context map (MultiPart("csv", "", "", _))).toList
+    finishRequest(Http.multipart(url, multiparts: _*).header("apiKey", apiKey).params("pack" -> packVal, "encapsulate" -> encapsulateVal))
   }
-  val ks = KeyStoreTools.getOMInsecureKeyStore
-  def genSSLFactory(ks: KeyStore) = {
+
+  def getLoadedMoles = {
+    val url = s"$fullAddress/execs"
+    finishRequest(Http(url))
+  }
+
+  def getMoleStats(id: String) = {
+    val url = s"$fullAddress/execs/$id"
+    finishRequest(Http(url))
+  }
+
+  def startMole(id: String) = {
+    val url = s"$fullAddress/start/$id"
+    finishRequest(Http(url))
+  }
+
+  def deleteMole(id: String) = {
+    val url = s"$fullAddress/remove/$id"
+    finishRequest(Http(url).header("apiKey", apiKey))
+  }
+
+  private def finishRequest(h: Http.Request) = h.option(HttpOptions.sslSocketFactory(sslFactory)).option { case hS: HttpsURLConnection ⇒ hS.setHostnameVerifier(hostnameVerifier) case _ ⇒ () }.option { HttpOptions.connTimeout(10000) }.option { HttpOptions.readTimeout(10000) }
+
+  private val ks = KeyStoreTools.getOMInsecureKeyStore
+
+  private val hostnameVerifier: HostnameVerifier = new HostnameVerifier {
+    def verify(p1: String, p2: SSLSession): Boolean = true
+  }
+
+  private var sslFactory = genSSLFactory(ks)
+
+  private def genSSLFactory(ks: KeyStore) = {
     val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
     tmf.init(ks)
     val ctx = SSLContext.getInstance("TLS")
@@ -72,13 +84,7 @@ trait AbstractOMClient extends OMClientInterface {
     ctx.getSocketFactory()
   }
 
-  val hostnameVerifier: HostnameVerifier = new HostnameVerifier {
-    def verify(p1: String, p2: SSLSession): Boolean = true
-  }
-
-  private[tools] var sslFactory = genSSLFactory(ks)
-
-  def trustCerts() = {
+  def trustCert() = {
     val certs = Http(address).option(HttpOptions.allowUnsafeSSL).process(_ match {
       case h: HttpsURLConnection ⇒ h.getServerCertificates
       case _                     ⇒ throw new Exception("Can't trust a certificate that doesn't exist.")
@@ -87,11 +93,10 @@ trait AbstractOMClient extends OMClientInterface {
     certs foreach { println }
     ks.setCertificateEntry(hostName, certs(0))
     ks.store(new FileOutputStream(Workspace.file("OMUnsafeKeystore")), "".toCharArray)
-    certs(0)
-    //sslFactory = genSSLFactory(ks)
+    sslFactory = genSSLFactory(ks)
   }
 
-  def areCertsTrusted = {
+  def isCertTrusted = {
     val url = new URL(address)
     val hostName = url.getHost
     Http(address).option(HttpOptions.allowUnsafeSSL).process(_ match {
@@ -103,8 +108,21 @@ trait AbstractOMClient extends OMClientInterface {
     })
   }
 
-  val httpControls = new HTTPControls(address, path, pass)
-  val fullAddress = if (address.endsWith("/")) address + path else address + "/" + path
+  def getCert = Http(address).option(HttpOptions.allowUnsafeSSL).process(_ match {
+    case h: HttpsURLConnection ⇒ {
+      val certs = h.getServerCertificates
+      certs(0)
+    }
+    case _ ⇒ throw new Exception("Can't retrieve a certificate that doesn't exist.")
+  })
+}
+
+trait AbstractOMClient extends OMClientInterface {
+  def trustCert() = httpControls.trustCert()
+  def isCertTrusted = httpControls.isCertTrusted
+  def getCert = httpControls.getCert
+
+  val httpControls: HTTPControls = new HTTPControls(address, path, pass)
 }
 
 case class WebClient(address: String, pass: String) extends AbstractOMClient {
@@ -170,11 +188,6 @@ case class ScalaClient(address: String, pass: String) extends AbstractOMClient {
     xml \ "@status" text
   }
 
-  override def trustCerts() = {
-    val cert = super.trustCerts()
-    subClient.ks.setCertificateEntry(new URL(address).getHost, cert)
-    subClient.sslFactory = genSSLFactory(ks)
-    cert
-  }
+  override val httpControls: HTTPControls = subClient.httpControls
 }
 
