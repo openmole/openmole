@@ -8,7 +8,6 @@ import javax.net.ssl._
 import java.security.cert.{ CertificateException, X509Certificate, Certificate }
 import org.openmole.misc.workspace.Workspace
 import java.io.FileOutputStream
-import org.openmole.web.misc.tools.XMLClient
 import java.security.KeyStore
 
 /**
@@ -83,10 +82,12 @@ class HTTPControls(val address: String, val path: String, pass: String) extends 
     ctx.getSocketFactory()
   }
 
+  @throws[CertificateException]
   def trustCert() = {
-    cert foreach { println }
-    cert foreach (ks.setCertificateEntry(hostname, _))
-    ks.store(new FileOutputStream(Workspace.file("OMUnsafeKeystore")), "".toCharArray)
+    val serverCert = cert getOrElse (throw new CertificateException("Cannot trust a non-existent certificate"))
+
+    ks.setCertificateEntry(hostname, serverCert)
+    ks.store(new FileOutputStream(Workspace.file("OMUnsafeKeystore")), "".toCharArray) //make some kind of managed keystore so this kind of code is unnecessary
     sslFactory = genSSLFactory(ks)
   }
 
