@@ -134,11 +134,12 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     contentType = formats("json")
 
     new AsyncResult {
-      val is = Future{
+      val is = Future {
         try {
           request.headers get "pass" map issueKey map (render("apiKey", _)) getOrElse render("error", "no password sent with request")
-        } catch {
-          case e: InvalidPasswordException => render(("error", e.getMessage) ~ ("stackTrace", e.getStackTrace))
+        }
+        catch {
+          case e: InvalidPasswordException ⇒ render(("error", e.getMessage) ~ ("stackTrace", e.getStackTrace.map(e ⇒ s"\tat$e").reduceLeft((prev, next) ⇒ s"$prev\n$next")))
         }
       }
 
@@ -149,11 +150,12 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     contentType = "application/xml"
 
     new AsyncResult() {
-      val is = Future{
+      val is = Future {
         try {
           request.headers get "pass" map issueKey map (k ⇒ <apiKey>{ k }</apiKey>) getOrElse <error>"no password sent with request"</error>
-        } catch {
-          case e: InvalidPasswordException => <error>{e.getMessage}<stackTrace>{e.getStackTrace}</stackTrace></error>
+        }
+        catch {
+          case e: InvalidPasswordException ⇒ <error><message>{ e.getMessage }</message><stackTrace>{ e.getStackTrace.map(e ⇒ s"\tat $e").reduceLeft((prev, next) ⇒ s"$prev\n$next") }</stackTrace></error>
         }
       }
     }

@@ -46,7 +46,7 @@ class HTTPControls(val address: String, val path: String, pass: String) extends 
     val res = finishRequest(Http.post(address + "/xml/getApiKey").header("pass", pass)).asXml
     res.label match {
       case "apiKey" ⇒ res.text
-      case "error"  ⇒ throw new Exception(s"Invalid password given: ${res.text}")
+      case "error"  ⇒ throw new Exception(s"Invalid password given: ${(res \ "message").text}")
     }
   }
 
