@@ -12,7 +12,6 @@ import java.io.{ BufferedOutputStream, FileOutputStream }
 import scala.io.Source
 import com.typesafe.sbt.osgi.OsgiKeys._
 import scala.Some
-import java.nio.file.Files
 
 /**
  * Created with IntelliJ IDEA.
@@ -70,14 +69,8 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
                 for (dest ← dests) {
                   s.log.info("Copying file " + rT.getPath + " to: " + dest.getCanonicalPath)
-                  try {
-                    Files.createLink(rT.toPath, dest.toPath)
-                    //IO.copyFile(rT, dest)
-                    dest
-                  }
-                  catch {
-                    case _ ⇒ dest
-                  }
+                  IO.copyFile(rT, dest)
+                  dest
                 }
                 dests
             }
