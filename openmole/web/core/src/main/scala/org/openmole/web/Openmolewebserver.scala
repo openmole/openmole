@@ -8,13 +8,16 @@ import java.security.{ Security, SecureRandom, KeyPairGenerator, KeyStore }
 import java.io.{ FileOutputStream, FileInputStream, File }
 import resource._
 import org.bouncycastle.x509.X509V3CertificateGenerator
-import org.bouncycastle.asn1.x509.X509Name
+import org.bouncycastle.asn1.x509._
 import java.math.BigInteger
 import java.util.Date
 import org.bouncycastle.jce.X509Principal
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Provider.Service
 import org.openmole.misc.workspace.Workspace
+import org.bouncycastle.asn1.{ ASN1EncodableVector, DEROctetString, ASN1ObjectIdentifier, DERObjectIdentifier }
+import java.util
+import sun.security.x509.SubjectAlternativeNameExtension
 
 class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Option[String], pass: Option[String]) {
 
@@ -27,9 +30,10 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
 
   val contextFactory = new org.eclipse.jetty.http.ssl.SslContextFactory()
 
+  //replace with keystore utils' getOMSecureKeyStore
   val ks = KeyStore.getInstance(KeyStore.getDefaultType)
 
-  val bcp = new BouncyCastleProvider
+  val bcp = new BouncyCastleProvider()
 
   val pw = pass getOrElse "openmole"
   val host = hostName getOrElse "localhost"
@@ -55,12 +59,22 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
     val kp = kpg.generateKeyPair()
 
     certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()))
-    certGen.setIssuerDN(new X509Principal("CN=cn, O=o, L=L, ST=il, C= c"))
-    certGen.setSubjectDN(new X509Principal("CN=cn, O=o, L=L, ST=il, C= c"))
+    certGen.setIssuerDN(new X509Principal(s"CN=$host, O=o, L=L, ST=il, C= c"))
+    certGen.setSubjectDN(new X509Principal(s"CN=$host, O=o, L=L, ST=il, C= c"))
+    X509Extensions.SubjectAlternativeName
+    val subjectAltName = new GeneralNames(
+      new GeneralName(GeneralName.rfc822Name, "127.0.0.1"))
+
+    val oids = new java.util.Vector[ASN1ObjectIdentifier]
+    val vals = new util.Vector[X509Extension]
+    oids.add(X509Extensions.SubjectAlternativeName)
+    vals.add(new X509Extension(false, new DEROctetString(subjectAltName)))
+    val extensions = new X509Extensions(oids, vals)
     certGen.setNotBefore(new Date(System.currentTimeMillis() - 1000l * 60 * 60 * 24))
     certGen.setNotAfter(new Date(System.currentTimeMillis() + 1000l * 60 * 60 * 24 * 365 * 1000))
     certGen.setPublicKey(kp.getPublic)
     certGen.setSignatureAlgorithm("SHA256WITHRSA")
+    certGen.addExtension("2.5.29.17", false, "hell".toCharArray.map(_.toByte)) //Subject alt name oid?
     val cert = certGen.generate(kp.getPrivate)
 
     ks.setKeyEntry(host, kp.getPrivate, pw.toCharArray, Array[java.security.cert.Certificate](cert))

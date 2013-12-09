@@ -31,8 +31,8 @@ object Misc extends BaseDefaults {
 
   val workspace = OsgiProject("org.openmole.misc.workspace") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (provided(osgi), provided(exception), provided(eventDispatcher), tools, provided(replication), jasypt, xstream, Apache.config,
-      Apache.math % "provided")
+    (osgi, exception, eventDispatcher, tools, replication, jasypt, xstream, Apache.config,
+      Apache.math)
 
   val hashService = OsgiProject("org.openmole.misc.hashservice") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
