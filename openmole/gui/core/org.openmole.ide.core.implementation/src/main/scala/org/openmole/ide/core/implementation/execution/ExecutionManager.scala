@@ -16,7 +16,7 @@ import org.openmole.core.model.execution.Environment
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget._
 import org.openmole.core.model.mole._
-import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.implementation.dialog.{ DialogFactory, StatusBar }
 import scala.collection.mutable.HashMap
 import scala.swing._
 import org.openmole.misc.eventdispatcher.EventDispatcher
@@ -28,6 +28,7 @@ import util.{ Failure, Success }
 import org.openmole.misc.exception.ExceptionUtils
 import scala.concurrent.stm._
 import java.net.URL
+import org.openmole.web.misc.tools._
 
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.web.misc.tools.ScalaClient
@@ -117,22 +118,38 @@ class ExecutionManager(manager: MoleUI,
         executionContainer.startStopButton.enabled = false
         executionContainer.serverLabel.text = "Uploading mole execution, please wait..."
         executionContainer.peer.revalidate
-        val client = ScalaClient(url._1, Workspace.decrypt(url._2))
-        val future = Future(client.createMole(ExecutionSerialiser(manager, true), None, encapsulate = true, pack = true))
-        future.foreach {
-          uuid ⇒
-            uuid match {
-              case Right(x) ⇒
-                client.startMole(x.toString)
+        val client = new ScalaClient(url._1, Workspace.decrypt(url._2))
+        //  val control = new HTTPControls(client.address, client.path, pass)
+        if (client.httpControls.isCertTrusted match {
+          case Some(false) ⇒
+            val trusted = DialogFactory.confirmationDialog("Security Warning", "This connection is unstrusted. Do you trust it ?")
+            if (trusted) client.httpControls.trustCert
+            trusted
+          case _ ⇒ true
+        }) {
+          println("true " + client.fullAddress)
+          client.createMole(ExecutionSerialiser(manager, true), None, encapsulate = true, pack = true) match {
+            case Left(s: String) ⇒
+              println("left " + s)
+              StatusBar().block(s)
+            case Right(y) ⇒
+              println("right " + y)
+              val future = Future(y)
+              println("future done " + future)
+              future.foreach { uuid ⇒
+                println("in future " + uuid)
+                client.startMole(uuid.toString)
                 executionContainer.serverLabel.text = "The Mole has been started "
-                val uidurl = url._1 + "/execs/" + x.toString
+                val uidurl = url._1 + "/execs/" + uuid.toString
                 executionContainer.uuidLabel.hlink(uidurl)
                 executionContainer.startLook
                 executionContainer.startStopButton.enabled = true
                 executionContainer.peer.revalidate
-              case Left(s: String) ⇒ StatusBar().block(s)
-            }
+              }
+          }
+          println("done ...")
         }
+        else println("false")
       case _ ⇒
         initBarPlotter
         buildMoleExecution match {
