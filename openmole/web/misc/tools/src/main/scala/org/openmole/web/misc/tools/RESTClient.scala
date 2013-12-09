@@ -109,7 +109,7 @@ abstract class AbstractRESTClient(pass: String) extends RESTClientInterface {
   def isCertTrusted = httpControls.isCertTrusted
   def cert = httpControls.cert
 
-  val httpControls: HTTPControls = new HTTPControls(address, path, pass)
+  lazy val httpControls: HTTPControls = new HTTPControls(address, path, pass)
 }
 
 class WebClient(val address: String, pass: String) extends AbstractRESTClient(pass) {
@@ -175,5 +175,5 @@ class ScalaClient(val address: String, pass: String) extends AbstractRESTClient(
     xml \ "@status" text
   }
 
-  override val httpControls: HTTPControls = subClient.httpControls
+  override lazy val httpControls: HTTPControls = subClient.httpControls
 }
