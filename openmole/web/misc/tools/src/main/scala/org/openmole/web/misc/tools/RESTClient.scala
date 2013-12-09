@@ -42,7 +42,7 @@ class HTTPControls(val address: String, val path: String, pass: String) extends 
 
   private var sslFactory = genSSLFactory(ks)
 
-  val apiKey = (finishRequest(Http.post(address + "/xml/getApiKey").header("pass", pass)).asXml \ "apiKey").text
+  lazy val apiKey = (finishRequest(Http.post(address + "/xml/getApiKey").header("pass", pass)).asXml \ "apiKey").text
 
   def createMole(moleData: Array[Byte], context: Option[Array[Byte]], pack: Boolean = false, encapsulate: Boolean = false) = {
     val packVal = if (pack) "on" else ""
