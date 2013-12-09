@@ -16,15 +16,15 @@ import org.openmole.core.model.execution.Environment
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget._
 import org.openmole.core.model.mole._
-import org.openmole.ide.core.implementation.dialog.{DialogFactory, StatusBar}
+import org.openmole.ide.core.implementation.dialog.{ DialogFactory, StatusBar }
 import scala.collection.mutable.HashMap
 import scala.swing._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.job.State
 import org.openmole.core.model.execution.ExecutionState
-import org.openmole.ide.core.implementation.workflow.{MoleUI, CapsuleUI, ExecutionMoleSceneContainer}
+import org.openmole.ide.core.implementation.workflow.{ MoleUI, CapsuleUI, ExecutionMoleSceneContainer }
 import org.openmole.ide.core.implementation.builder.MoleFactory
-import util.{Failure, Success}
+import util.{ Failure, Success }
 import org.openmole.misc.exception.ExceptionUtils
 import scala.concurrent.stm._
 import java.net.URL
@@ -34,7 +34,7 @@ import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.web.misc.tools.ScalaClient
 import org.openmole.ide.core.implementation.serializer.ExecutionSerialiser
 import scala.concurrent.Future
-import scala.concurrent.{ExecutionContext ⇒ exc}
+import scala.concurrent.{ ExecutionContext ⇒ exc }
 import org.openmole.misc.workspace.Workspace
 
 //FIXME with Romain actor system include
@@ -51,7 +51,7 @@ class ExecutionManager(manager: MoleUI,
                        executionContainer: ExecutionMoleSceneContainer,
                        val mole: IMole,
                        val capsuleMapping: Map[CapsuleUI, ICapsule]) extends PluginPanel("", "[grow,fill]", "[fill]")
-with Publisher {
+    with Publisher {
   executionManager ⇒
   val logTextArea = new TextArea
   logTextArea.editable = false
@@ -128,16 +128,11 @@ with Publisher {
         }) {
           println("true " + client.fullAddress)
           client.createMole(ExecutionSerialiser(manager, true), None, encapsulate = true, pack = true) match {
-            case Left(s: String) ⇒
-              println("left " + s)
-              StatusBar().block(s)
+            case Left(s: String) ⇒ StatusBar().block(s)
             case Right(y) ⇒
-              println("right " + y)
               val future = Future(y)
-              println("future done " + future)
               future.foreach {
                 uuid ⇒
-                  println("in future " + uuid)
                   client.startMole(uuid.toString)
 
                   executionContainer.serverLabel.text = "The Mole has been started "
@@ -148,9 +143,7 @@ with Publisher {
                   executionContainer.peer.revalidate
               }
           }
-          println("done ...")
         }
-        else println("false")
       case _ ⇒
         initBarPlotter
         buildMoleExecution match {
@@ -225,7 +218,7 @@ with Publisher {
     timer.stop
     moleExecution match {
       case Some(mE: IMoleExecution) ⇒ mE.cancel
-      case _ ⇒
+      case _                        ⇒
     }
   }
 
