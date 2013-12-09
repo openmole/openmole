@@ -20,7 +20,7 @@ import java.security.KeyStore
 
 //TODO: There's so much to fix in this class. Consult romain and mathieu about it.
 
-abstract class RESTClientInterface(pass: String) {
+trait RESTClientInterface {
   def address: String
   def path: String
   def createMole(moleData: Array[Byte], context: Option[Array[Byte]] = None, pack: Boolean = false, encapsulate: Boolean = false): Any
@@ -34,7 +34,7 @@ abstract class RESTClientInterface(pass: String) {
   val fullAddress = if (address.endsWith("/")) address + path else address + "/" + path
 }
 
-class HTTPControls(val address: String, val path: String, pass: String) extends RESTClientInterface(pass) {
+class HTTPControls(val address: String, val path: String, pass: String) extends RESTClientInterface {
   private val ks = KeyStoreTools.getOMInsecureKeyStore
 
   private val hostnameVerifier: HostnameVerifier = new HostnameVerifier {
@@ -103,7 +103,7 @@ class HTTPControls(val address: String, val path: String, pass: String) extends 
   })
 }
 
-abstract class AbstractRESTClient(pass: String) extends RESTClientInterface(pass) {
+abstract class AbstractRESTClient(pass: String) extends RESTClientInterface {
   def trustCert() = httpControls.trustCert()
   def isCertTrusted = httpControls.isCertTrusted
   def cert = httpControls.cert
@@ -176,4 +176,3 @@ class ScalaClient(val address: String, pass: String) extends AbstractRESTClient(
 
   override val httpControls: HTTPControls = subClient.httpControls
 }
-
