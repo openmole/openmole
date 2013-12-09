@@ -67,9 +67,10 @@ trait MoleHandling { self: ScalatraBase with SlickSupport ⇒
         val ret = SerialiserService.deserialise[A](stream)
         Left(ret)
       }
-      catch {
+      catch {    //TODO: Make error messages more verbose
         case e: CannotResolveClassException ⇒ Right("The uploaded xml was not a valid serialized object.")
         case c: ClassCastException          ⇒ Right("Blargh")
+        case e: Exception                   ⇒ Right("Could not parse the given mole")
       }
     case None ⇒ Right("No data was uploaded..")
   }
@@ -84,6 +85,7 @@ trait MoleHandling { self: ScalatraBase with SlickSupport ⇒
       catch {
         case e: CannotResolveClassException ⇒ Right("The uploaded pack was not a valid tar file") -> None
         case c: ClassCastException          ⇒ Right("Blargh") -> None
+        case e: Exception                   ⇒ Right("Could not parse the given mole") -> None
       }
     case None ⇒ Right("No data was uploaded") -> None
   }

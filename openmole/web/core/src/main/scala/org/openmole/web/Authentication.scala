@@ -39,11 +39,11 @@ trait Authentication { self ⇒ MoleHandling
       val signingKey = new SecretKeySpec(pwH.getBytes, "HmacSHA256")
       val mac = Mac.getInstance("HmacSHA256")
       mac.init(signingKey)
-      val rawHmac = mac.doFinal((r.getRemoteHost + Workspace.sessionUUID) getBytes ())
-
-      val hash = new String(Base64.encodeBase64(rawHmac))
       val start = java.util.Calendar.getInstance().getTimeInMillis
       val end = start + (24 * 60 * 60 * 1000)
+      val rawHmac = mac.doFinal((r.getRemoteHost + Workspace.sessionUUID + start + end) getBytes ())
+
+      val hash = new String(Base64.encodeBase64(rawHmac))
 
       keyStorage.add(r.getRemoteHost, Key(hash, start, end))
 
@@ -62,8 +62,15 @@ trait Authentication { self ⇒ MoleHandling
 
   def checkKey(key: String, hostname: String): Boolean = {
     keyStorage get hostname match {
-      case Some(k) ⇒ k.isValid && k.hash == key
-      case _       ⇒ false
+      case Some(k) ⇒ {
+        println(s"key is valid: ${k.isValid}")
+        println(s"key matches key given: ${k.hash == key}")
+        println(s"stored key: ${k.hash}")
+        println(s"given key: $key")
+
+        k.isValid && k.hash == key
+      }
+      case _ ⇒ false
     }
   }
 }
