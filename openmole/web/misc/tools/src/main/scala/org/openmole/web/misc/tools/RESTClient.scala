@@ -42,7 +42,13 @@ class HTTPControls(val address: String, val path: String, pass: String) extends 
 
   private var sslFactory = genSSLFactory(ks)
 
-  lazy val apiKey = (finishRequest(Http.post(address + "/xml/getApiKey").header("pass", pass)).asXml \ "apiKey").text
+  lazy val apiKey = {
+    val res = finishRequest(Http.post(address + "/xml/getApiKey").header("pass", pass)).asXml
+    res.label match {
+      case "apiKey" ⇒ res.text
+      case "error"  ⇒ throw new Exception(s"Invalid password given: ${(res \ "message").text}")
+    }
+  }
 
   def createMole(moleData: Array[Byte], context: Option[Array[Byte]], pack: Boolean = false, encapsulate: Boolean = false) = {
     val packVal = if (pack) "on" else ""

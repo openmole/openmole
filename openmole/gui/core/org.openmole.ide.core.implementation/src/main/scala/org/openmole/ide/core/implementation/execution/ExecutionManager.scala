@@ -16,15 +16,15 @@ import org.openmole.core.model.execution.Environment
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget._
 import org.openmole.core.model.mole._
-import org.openmole.ide.core.implementation.dialog.{ DialogFactory, StatusBar }
+import org.openmole.ide.core.implementation.dialog.{DialogFactory, StatusBar}
 import scala.collection.mutable.HashMap
 import scala.swing._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.job.State
 import org.openmole.core.model.execution.ExecutionState
-import org.openmole.ide.core.implementation.workflow.{ MoleUI, CapsuleUI, ExecutionMoleSceneContainer }
+import org.openmole.ide.core.implementation.workflow.{MoleUI, CapsuleUI, ExecutionMoleSceneContainer}
 import org.openmole.ide.core.implementation.builder.MoleFactory
-import util.{ Failure, Success }
+import util.{Failure, Success}
 import org.openmole.misc.exception.ExceptionUtils
 import scala.concurrent.stm._
 import java.net.URL
@@ -34,7 +34,7 @@ import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.web.misc.tools.ScalaClient
 import org.openmole.ide.core.implementation.serializer.ExecutionSerialiser
 import scala.concurrent.Future
-import scala.concurrent.{ ExecutionContext ⇒ exc }
+import scala.concurrent.{ExecutionContext ⇒ exc}
 import org.openmole.misc.workspace.Workspace
 
 //FIXME with Romain actor system include
@@ -51,7 +51,7 @@ class ExecutionManager(manager: MoleUI,
                        executionContainer: ExecutionMoleSceneContainer,
                        val mole: IMole,
                        val capsuleMapping: Map[CapsuleUI, ICapsule]) extends PluginPanel("", "[grow,fill]", "[fill]")
-    with Publisher {
+with Publisher {
   executionManager ⇒
   val logTextArea = new TextArea
   logTextArea.editable = false
@@ -119,7 +119,6 @@ class ExecutionManager(manager: MoleUI,
         executionContainer.serverLabel.text = "Uploading mole execution, please wait..."
         executionContainer.peer.revalidate
         val client = new ScalaClient(url._1, Workspace.decrypt(url._2))
-        //  val control = new HTTPControls(client.address, client.path, pass)
         if (client.httpControls.isCertTrusted match {
           case Some(false) ⇒
             val trusted = DialogFactory.confirmationDialog("Security Warning", "This connection is unstrusted. Do you trust it ?")
@@ -136,15 +135,17 @@ class ExecutionManager(manager: MoleUI,
               println("right " + y)
               val future = Future(y)
               println("future done " + future)
-              future.foreach { uuid ⇒
-                println("in future " + uuid)
-                client.startMole(uuid.toString)
-                executionContainer.serverLabel.text = "The Mole has been started "
-                val uidurl = url._1 + "/execs/" + uuid.toString
-                executionContainer.uuidLabel.hlink(uidurl)
-                executionContainer.startLook
-                executionContainer.startStopButton.enabled = true
-                executionContainer.peer.revalidate
+              future.foreach {
+                uuid ⇒
+                  println("in future " + uuid)
+                  client.startMole(uuid.toString)
+
+                  executionContainer.serverLabel.text = "The Mole has been started "
+                  val uidurl = url._1 + "/execs/" + uuid.toString
+                  executionContainer.uuidLabel.hlink(uidurl)
+                  executionContainer.startLook
+                  executionContainer.startStopButton.enabled = true
+                  executionContainer.peer.revalidate
               }
           }
           println("done ...")
@@ -224,7 +225,7 @@ class ExecutionManager(manager: MoleUI,
     timer.stop
     moleExecution match {
       case Some(mE: IMoleExecution) ⇒ mE.cancel
-      case _                        ⇒
+      case _ ⇒
     }
   }
 

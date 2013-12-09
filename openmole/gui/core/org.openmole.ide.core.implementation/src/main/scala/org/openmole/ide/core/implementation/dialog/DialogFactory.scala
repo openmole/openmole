@@ -84,8 +84,8 @@ object DialogFactory {
     val notification = DialogDisplayer.getDefault.notify(d)
     val encryptedPass = Workspace.encrypt(new String(passTextField.password))
     if (notification == -1 || notification == 0) {
-      if (!serverTextField.text.startsWith("http://")) ("http://" + serverTextField.text, encryptedPass)
-      else (serverTextField.text, encryptedPass)
+      /* if (!serverTextField.text.startsWith("http://")) ("http://" + serverTextField.text, encryptedPass)
+      else*/ (serverTextField.text, encryptedPass)
     }
     else ("", "")
   }
