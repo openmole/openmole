@@ -30,7 +30,7 @@ trait RESTClientInterface {
   def trustCert(): Unit
   def isCertTrusted: Option[Boolean]
   def cert: Option[Certificate]
-  lazy val fullAddress = if (address.endsWith("/")) address + path else address + "/" + path
+  val fullAddress = if (address.endsWith("/")) address + path else address + "/" + path
 }
 
 class HTTPControls(val address: String, val path: String, pass: String) extends RESTClientInterface {
@@ -104,17 +104,15 @@ class HTTPControls(val address: String, val path: String, pass: String) extends 
   })
 }
 
-abstract class AbstractRESTClient(pass: String) extends RESTClientInterface {
+abstract class AbstractRESTClient(val path: String, pass: String) extends RESTClientInterface {
   def trustCert() = httpControls.trustCert()
   def isCertTrusted = httpControls.isCertTrusted
   def cert = httpControls.cert
 
-  lazy val httpControls: HTTPControls = new HTTPControls(address, path, pass)
+  val httpControls: HTTPControls = new HTTPControls(address, path, pass)
 }
 
-class WebClient(val address: String, pass: String) extends AbstractRESTClient(pass) {
-  val path = ""
-
+class WebClient(val address: String, pass: String) extends AbstractRESTClient(WebClient.path, pass) {
   def createMole(moleData: Array[Byte], context: Option[Array[Byte]], pack: Boolean, encapsulate: Boolean): String = {
     httpControls.createMole(moleData, context, pack, encapsulate).asString
   }
@@ -128,8 +126,12 @@ class WebClient(val address: String, pass: String) extends AbstractRESTClient(pa
   def deleteMole(id: String) = httpControls.deleteMole(id).asString
 }
 
-class XMLClient(val address: String, pass: String) extends AbstractRESTClient(pass) {
-  val path = "xml"
+object WebClient {
+  val path = ""
+}
+
+class XMLClient(val address: String, pass: String) extends AbstractRESTClient(XMLClient.path, pass) {
+  //val path = "xml"
 
   def createMole(moleData: Array[Byte], context: Option[Array[Byte]], pack: Boolean, encapsulate: Boolean) = httpControls.createMole(moleData, context, pack, encapsulate).asXml
 
@@ -142,9 +144,13 @@ class XMLClient(val address: String, pass: String) extends AbstractRESTClient(pa
   def deleteMole(id: String) = httpControls.deleteMole(id).asXml
 }
 
-class ScalaClient(val address: String, pass: String) extends AbstractRESTClient(pass) {
+object XMLClient {
+  val path = "xml"
+}
+
+class ScalaClient(val address: String, pass: String) extends AbstractRESTClient(XMLClient.path, pass) {
   val subClient = new XMLClient(address, pass)
-  val path = subClient.path
+  //val path = subClient.path
 
   def createMole(moleData: Array[Byte], context: Option[Array[Byte]], pack: Boolean, encapsulate: Boolean): Either[String, UUID] = {
     val xml = subClient.createMole(moleData, context, pack, encapsulate)
@@ -175,5 +181,5 @@ class ScalaClient(val address: String, pass: String) extends AbstractRESTClient(
     xml \ "@status" text
   }
 
-  override lazy val httpControls: HTTPControls = subClient.httpControls
+  override val httpControls: HTTPControls = subClient.httpControls
 }
