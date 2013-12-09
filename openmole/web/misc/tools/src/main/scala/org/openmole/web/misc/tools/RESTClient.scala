@@ -30,7 +30,7 @@ trait RESTClientInterface {
   def trustCert(): Unit
   def isCertTrusted: Option[Boolean]
   def cert: Option[Certificate]
-  val fullAddress = if (address.endsWith("/")) address + path else address + "/" + path
+  lazy val fullAddress = if (address.endsWith("/")) address + path else address + "/" + path
 }
 
 class HTTPControls(val address: String, val path: String, pass: String) extends RESTClientInterface {
