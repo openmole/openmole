@@ -105,7 +105,7 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
   context.setInitParameter(ScalatraBase.HostNameKey, host)
   context.setInitParameter("org.scalatra.Port", sslP.toString)
   context.setInitParameter(ScalatraBase.ForceHttpsKey, allowInsecureConnections.toString)
-  context.setInitParameter("org.scalatra.environment", "production")
+  //context.setInitParameter("org.scalatra.environment", "production")
 
   server.setHandler(context)
 
