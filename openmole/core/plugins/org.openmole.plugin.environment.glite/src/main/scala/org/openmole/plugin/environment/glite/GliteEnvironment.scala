@@ -82,10 +82,10 @@ object GliteEnvironment extends Logger {
   val JobServiceAvailabilityFactor = ConfigurationLocation("GliteEnvironment", "JobServiceAvailabilityFactor")
   val JobServiceSuccessRateFactor = ConfigurationLocation("GliteEnvironment", "JobServiceSuccessRateFactor")
 
-  val RunningHistoryDuration = new ConfigurationLocation("GliteEnvironment", "RunningHistoryDuration")
-  val EagerSubmissionThreshold = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionThreshold")
+  val RunningHistoryDuration = ConfigurationLocation("GliteEnvironment", "RunningHistoryDuration")
+  val EagerSubmissionThreshold = ConfigurationLocation("GliteEnvironment", "EagerSubmissionThreshold")
 
-  val DefaultBDII = new ConfigurationLocation("GliteEnvironment", "DefaultBDII")
+  val DefaultBDII = ConfigurationLocation("GliteEnvironment", "DefaultBDII")
 
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
