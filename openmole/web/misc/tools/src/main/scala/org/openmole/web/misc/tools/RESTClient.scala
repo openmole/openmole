@@ -78,7 +78,7 @@ class HTTPControls(val address: String, val path: String, pass: String) extends 
     finishRequest(Http(url).header("apiKey", apiKey))
   }
 
-  private def finishRequest(h: Http.Request) = h.option(HttpOptions.sslSocketFactory(sslFactory)).option { case hS: HttpsURLConnection ⇒ hS.setHostnameVerifier(hostnameVerifier) case _ ⇒ () }.option { HttpOptions.connTimeout(10000) }.option { HttpOptions.readTimeout(10000) }
+  private def finishRequest(h: Http.Request) = h.option(HttpOptions.sslSocketFactory(sslFactory)).option{ case hS: HttpsURLConnection ⇒ hS.setHostnameVerifier(hostnameVerifier) case _ ⇒ () }.option { HttpOptions.connTimeout(30000) }.option { HttpOptions.readTimeout(30000) }
 
   private def genSSLFactory(ks: KeyStore) = {
     val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
