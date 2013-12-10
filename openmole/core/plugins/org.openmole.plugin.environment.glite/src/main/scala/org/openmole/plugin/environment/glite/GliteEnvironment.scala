@@ -69,8 +69,18 @@ object GliteEnvironment extends Logger {
   val MinValueForSelectionExploration = new ConfigurationLocation("GliteEnvironment", "MinValueForSelectionExploration")
   val ShallowWMSRetryCount = new ConfigurationLocation("GliteEnvironment", "ShallowWMSRetryCount")
 
-  val JobServiceFitnessPower = new ConfigurationLocation("GliteEnvironment", "JobServiceFitnessPower")
-  val StorageFitnessPower = new ConfigurationLocation("GliteEnvironment", "StorageFitnessPower")
+  val JobServiceFitnessPower = ConfigurationLocation("GliteEnvironment", "JobServiceFitnessPower")
+  val StorageFitnessPower = ConfigurationLocation("GliteEnvironment", "StorageFitnessPower")
+
+  val StorageSizeFactor = ConfigurationLocation("GliteEnvironment", "StorageSizeFactor")
+  val StorageTimeFactor = ConfigurationLocation("GliteEnvironment", "StorageTimeFactor")
+  val StorageAvailabilityFactor = ConfigurationLocation("GliteEnvironment", "StorageAvailabilityFactor")
+  val StorageSuccessRateFactor = ConfigurationLocation("GliteEnvironment", "StorageSuccessRateFactor")
+
+  val JobServiceJobFactor = ConfigurationLocation("GliteEnvironment", "JobServiceSizeFactor")
+  val JobServiceTimeFactor = ConfigurationLocation("GliteEnvironment", "JobServiceTimeFactor")
+  val JobServiceAvailabilityFactor = ConfigurationLocation("GliteEnvironment", "JobServiceAvailabilityFactor")
+  val JobServiceSuccessRateFactor = ConfigurationLocation("GliteEnvironment", "JobServiceSuccessRateFactor")
 
   val RunningHistoryDuration = new ConfigurationLocation("GliteEnvironment", "RunningHistoryDuration")
   val EagerSubmissionThreshold = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionThreshold")
@@ -114,6 +124,16 @@ object GliteEnvironment extends Logger {
 
   Workspace += (JobServiceFitnessPower, "2")
   Workspace += (StorageFitnessPower, "2")
+
+  Workspace += (StorageSizeFactor, "5")
+  Workspace += (StorageTimeFactor, "1")
+  Workspace += (StorageAvailabilityFactor, "10")
+  Workspace += (StorageSuccessRateFactor, "10")
+
+  Workspace += (JobServiceJobFactor, "1")
+  Workspace += (JobServiceTimeFactor, "10")
+  Workspace += (JobServiceAvailabilityFactor, "10")
+  Workspace += (JobServiceSuccessRateFactor, "1")
 
   Workspace += (RunningHistoryDuration, "PT3H")
   Workspace += (EagerSubmissionThreshold, "0.5")
@@ -269,7 +289,15 @@ class GliteEnvironment(
                   if (cur.submitted > 0 && cur.totalSubmitted > 0) ((cur.runnig.toDouble / cur.submitted) * (cur.totalDone / cur.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
                   else 0.0
 
-                val fitness = math.pow((jobFactor + timeFactor + 10 * cur.availability + 10 * cur.successRate), Workspace.preferenceAsDouble(JobServiceFitnessPower))
+                import Workspace.preferenceAsDouble
+                import GliteEnvironment._
+
+                val fitness = math.pow(
+                  preferenceAsDouble(JobServiceJobFactor) * jobFactor +
+                    preferenceAsDouble(JobServiceTimeFactor) * timeFactor +
+                    preferenceAsDouble(JobServiceAvailabilityFactor) * cur.availability +
+                    preferenceAsDouble(JobServiceSuccessRateFactor) * cur.successRate,
+                  preferenceAsDouble(JobServiceFitnessPower))
                 Some((cur, token, fitness))
             }
         }

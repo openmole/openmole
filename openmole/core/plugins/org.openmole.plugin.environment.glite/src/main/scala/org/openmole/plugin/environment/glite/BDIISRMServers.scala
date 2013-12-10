@@ -64,14 +64,22 @@ trait BDIISRMServers extends BatchEnvironment {
               case Some(token) ⇒
                 val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(h.toString, Set.empty).contains(cur.id) }.map { case (f, _) ⇒ f.size }.sum
                 val sizeFactor =
-                  if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 0.0
+                  if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
 
                 val time = cur.time
                 val timeFactor =
                   if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
                   else 1 - time.normalize(minTime, maxTime)
 
-                val fitness = math.pow((5 * sizeFactor + timeFactor + 10 * cur.availability + 10 * cur.successRate), Workspace.preferenceAsDouble(GliteEnvironment.StorageFitnessPower))
+                import GliteEnvironment._
+                import Workspace.preferenceAsDouble
+
+                val fitness = math.pow(
+                  preferenceAsDouble(StorageSizeFactor) * sizeFactor +
+                    preferenceAsDouble(StorageTimeFactor) * timeFactor +
+                    preferenceAsDouble(StorageAvailabilityFactor) * cur.availability +
+                    preferenceAsDouble(StorageSuccessRateFactor) * cur.successRate,
+                  preferenceAsDouble(StorageFitnessPower))
                 Some((cur, token, fitness))
             }
         }
