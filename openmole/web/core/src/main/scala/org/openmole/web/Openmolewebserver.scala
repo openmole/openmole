@@ -19,7 +19,7 @@ import org.bouncycastle.asn1.{ ASN1EncodableVector, DEROctetString, ASN1ObjectId
 import java.util
 import sun.security.x509.SubjectAlternativeNameExtension
 
-class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Option[String], pass: Option[String]) {
+class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Option[String], pass: Option[String], allowInsecureConnections: Boolean) {
 
   val p = port getOrElse 8080
   val sslP = sslPort getOrElse 8443
@@ -104,7 +104,8 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
   context.setClassLoader(classOf[Openmolewebserver].getClassLoader)
   context.setInitParameter(ScalatraBase.HostNameKey, host)
   context.setInitParameter("org.scalatra.Port", sslP.toString)
-  context.setInitParameter(ScalatraBase.ForceHttpsKey, "true")
+  context.setInitParameter(ScalatraBase.ForceHttpsKey, allowInsecureConnections.toString)
+  context.setInitParameter("org.scalatra.environment", "production")
 
   server.setHandler(context)
 
