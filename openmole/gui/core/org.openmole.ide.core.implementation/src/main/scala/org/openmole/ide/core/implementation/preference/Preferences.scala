@@ -52,5 +52,5 @@ object Preferences {
 
 case class Preferences(servers: List[(String, String)] = List(),
                        sandbox: String = "",
-                       embeddResources: Boolean = false,
+                       embeddResources: Boolean = true,
                        recentFiles: List[String] = List())
