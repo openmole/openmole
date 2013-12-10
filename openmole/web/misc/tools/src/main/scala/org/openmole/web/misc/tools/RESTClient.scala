@@ -43,7 +43,7 @@ class HTTPControls(val address: String, val path: String, pass: String) extends 
   private var sslFactory = genSSLFactory(ks)
 
   lazy val apiKey = {
-    val res = finishRequest(Http.post(address + "/xml/getApiKey").header("pass", pass)).asXml
+    val res = addDefaultOptions(Http.post(address + "/xml/getApiKey").header("pass", pass)).asXml
     res.label match {
       case "apiKey" ⇒ res.text
       case "error"  ⇒ throw new Exception(s"Invalid password given: ${(res \ "message").text}")
@@ -55,30 +55,30 @@ class HTTPControls(val address: String, val path: String, pass: String) extends 
     val encapsulateVal = if (encapsulate) "on" else ""
     val url = s"$fullAddress/createMole"
     val multiparts = MultiPart("file", "", "", moleData) :: (context map (MultiPart("csv", "", "", _))).toList
-    finishRequest(Http.multipart(url, multiparts: _*).header("apiKey", apiKey).params("pack" -> packVal, "encapsulate" -> encapsulateVal))
+    addDefaultOptions(Http.multipart(url, multiparts: _*).header("apiKey", apiKey).params("pack" -> packVal, "encapsulate" -> encapsulateVal))
   }
 
   def getLoadedMoles = {
     val url = s"$fullAddress/execs"
-    finishRequest(Http(url))
+    addDefaultOptions(Http(url))
   }
 
   def getMoleStats(id: String) = {
     val url = s"$fullAddress/execs/$id"
-    finishRequest(Http(url))
+    addDefaultOptions(Http(url))
   }
 
   def startMole(id: String) = {
     val url = s"$fullAddress/start/$id"
-    finishRequest(Http(url))
+    addDefaultOptions(Http(url))
   }
 
   def deleteMole(id: String) = {
     val url = s"$fullAddress/remove/$id"
-    finishRequest(Http(url).header("apiKey", apiKey))
+    addDefaultOptions(Http(url).header("apiKey", apiKey))
   }
 
-  private def finishRequest(h: Http.Request) = h.option(HttpOptions.sslSocketFactory(sslFactory)).option{ case hS: HttpsURLConnection ⇒ hS.setHostnameVerifier(hostnameVerifier) case _ ⇒ () }.option { HttpOptions.connTimeout(30000) }.option { HttpOptions.readTimeout(30000) }
+  private def addDefaultOptions(h: Http.Request) = h.option(HttpOptions.sslSocketFactory(sslFactory)).option { case hS: HttpsURLConnection ⇒ hS.setHostnameVerifier(hostnameVerifier) case _ ⇒ () }.option { HttpOptions.connTimeout(30000) }.option { HttpOptions.readTimeout(30000) }
 
   private def genSSLFactory(ks: KeyStore) = {
     val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
@@ -101,7 +101,7 @@ class HTTPControls(val address: String, val path: String, pass: String) extends 
 
   lazy val hostname = new URL(address).getHost
 
-  def cert = Http(address).option(HttpOptions.allowUnsafeSSL).process(_ match {
+  def cert = addDefaultOptions(Http(address)).option(HttpOptions.allowUnsafeSSL).process(_ match {
     case h: HttpsURLConnection ⇒ {
       val certs = h.getServerCertificates
       Some(certs(0))
