@@ -18,9 +18,11 @@
 package org.openmole.core.batch.message
 
 object FileMessage {
-  implicit def replicatedFile2FileMessage(r: ReplicatedFile) = new FileMessage(r)
+  implicit def replicatedFile2FileMessage(r: ReplicatedFile) = FileMessage(r)
+
+  def apply(replicatedFile: ReplicatedFile): FileMessage = apply(replicatedFile.path, replicatedFile.hash)
 }
 
-class FileMessage(val path: String, val hash: String) {
-  def this(replicatedFile: ReplicatedFile) = this(replicatedFile.path, replicatedFile.hash)
-}
+case class FileMessage(
+  path: String,
+  hash: String)

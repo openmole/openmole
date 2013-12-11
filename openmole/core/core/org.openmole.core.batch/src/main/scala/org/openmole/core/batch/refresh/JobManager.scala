@@ -20,20 +20,13 @@ package org.openmole.core.batch.refresh
 import akka.actor.Actor
 import akka.actor.ActorSystem
 import akka.actor.Props
-import akka.dispatch.Dispatchers
-import akka.dispatch.PriorityGenerator
-import akka.dispatch.UnboundedPriorityMailbox
-import akka.routing.DefaultResizer
-import akka.routing.RoundRobinRouter
 import akka.routing.SmallestMailboxRouter
 import org.openmole.core.model.execution._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 
 import org.openmole.misc.workspace.Workspace
-import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import org.openmole.core.batch.environment._
-import org.openmole.core.batch.storage._
 import org.openmole.core.batch.environment.BatchEnvironment.JobManagmentThreads
 
 import scala.concurrent.duration._
@@ -106,16 +99,16 @@ akka {
 
     case Error(job, exception) ⇒
       val level = exception match {
-        case e: UserBadDataError            ⇒ SEVERE
-        case e: JobRemoteExecutionException ⇒ WARNING
-        case _                              ⇒ FINE
+        case e: UserBadDataError            ⇒ Log.SEVERE
+        case e: JobRemoteExecutionException ⇒ Log.WARNING
+        case _                              ⇒ Log.FINE
       }
       EventDispatcher.trigger(job.environment: Environment, new Environment.ExceptionRaised(job, exception, level))
-      JobManager.logger.log(level, "Error in job refresh", exception)
+      Log.logger.log(level, "Error in job refresh", exception)
 
     case MoleJobError(mj, j, e) ⇒
       EventDispatcher.trigger(j.environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
-      JobManager.logger.log(WARNING, "Error during job execution, it will be resubmitted.", e)
+      Log.logger.log(Log.WARNING, "Error during job execution, it will be resubmitted.", e)
 
   }
 }
