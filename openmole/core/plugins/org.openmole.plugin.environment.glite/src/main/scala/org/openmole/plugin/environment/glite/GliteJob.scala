@@ -47,7 +47,7 @@ trait GliteJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
 
         lastShacked = System.currentTimeMillis
 
-        if (Workspace.rng.nextDouble < probability) throw new ShouldBeKilledException("Killed in shaking process")
+        if (Workspace.rng.nextDouble < probability) throw new ResubmitException("Killed in shaking process")
       }
     }
     state

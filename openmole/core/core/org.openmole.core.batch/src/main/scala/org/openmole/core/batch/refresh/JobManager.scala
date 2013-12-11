@@ -79,7 +79,7 @@ akka {
     case msg: CleanSerializedJob ⇒ cleaner ! msg
 
     case Manage(job) ⇒
-      self ! Upload(job)
+      self ! Upload(job, None)
 
     case Delay(msg, delay) ⇒
       context.system.scheduler.scheduleOnce(delay milliseconds) {
@@ -96,10 +96,12 @@ akka {
 
     case Kill(job) ⇒
       job.state = ExecutionState.KILLED
-      job.batchJob.foreach(bj ⇒ self ! KillBatchJob(bj))
-      job.batchJob = None
-      job.serializedJob.foreach(j ⇒ self ! CleanSerializedJob(j))
-      job.serializedJob = None
+      killAndClean(job)
+
+    case Resubmit(job, storage) ⇒
+      killAndClean(job)
+      job.state = ExecutionState.READY
+      uploader ! Upload(job, Some(storage))
 
     case Error(job, exception) ⇒
       val level = exception match {
@@ -114,5 +116,12 @@ akka {
       EventDispatcher.trigger(j.environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
       Log.logger.log(Log.WARNING, "Error during job execution, it will be resubmitted.", e)
 
+  }
+
+  def killAndClean(job: BatchExecutionJob) {
+    job.batchJob.foreach(bj ⇒ self ! KillBatchJob(bj))
+    job.batchJob = None
+    job.serializedJob.foreach(j ⇒ self ! CleanSerializedJob(j))
+    job.serializedJob = None
   }
 }
