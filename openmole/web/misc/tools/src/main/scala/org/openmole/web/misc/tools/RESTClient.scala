@@ -42,7 +42,6 @@ class HTTPControls(val address: String, val path: String, pass: String) extends 
 
   private var sslFactory = genSSLFactory(ks)
 
-<<<<<<< HEAD
   lazy val apiKey = {
     val res = addDefaultOptions(Http.post(address + "/xml/getApiKey").header("pass", pass)).asXml
     res.label match {
@@ -50,9 +49,6 @@ class HTTPControls(val address: String, val path: String, pass: String) extends 
       case "error"  ⇒ throw new Exception(s"Invalid password given: ${(res \ "message").text}")
     }
   }
-=======
-  lazy val apiKey = (finishRequest(Http.post(address + "/xml/getApiKey").header("pass", pass)).asXml \ "apiKey").text
->>>>>>> 9b50d67... Fixes the bug where the client crashes on initialization.
 
   def createMole(moleData: Array[Byte], context: Option[Array[Byte]], pack: Boolean = false, encapsulate: Boolean = false) = {
     val packVal = if (pack) "on" else ""
