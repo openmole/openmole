@@ -56,75 +56,76 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
 
   override def update: Boolean = {
     try {
-      logger.log(FINE, "oversubmission started")
+      Log.logger.log(Log.FINE, "Eager submission started")
 
       val env = environment.get match {
         case None      ⇒ return false
         case Some(env) ⇒ env
       }
 
-      val registry = env.jobRegistry
-      registry.synchronized {
-        val jobs = registry.allExecutionJobs
-        val stillRunning = jobs.count(_.state == RUNNING)
-        val stillReady = jobs.count(_.state == READY)
+      val jobs = env.executionJobs
 
-        runningHistory.enqueueFinite(TimeInt(stillRunning), Workspace.preferenceAsDuration(GliteEnvironment.RunningHistoryDuration).toMilliSeconds)
+      val executionJobs = jobs.groupBy(_.job)
 
-        logger.fine("still running " + stillRunning)
+      val stillRunning = jobs.count(_.state == RUNNING)
+      val stillReady = jobs.count(_.state == READY)
 
-        val maxRunning = runningHistory.map(_.value).max * Workspace.preferenceAsDouble(GliteEnvironment.EagerSubmissionThreshold)
+      runningHistory.enqueueFinite(TimeInt(stillRunning), Workspace.preferenceAsDuration(GliteEnvironment.RunningHistoryDuration).toMilliSeconds)
 
-        var nbRessub = if (jobs.size > Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)) {
-          val minOversub = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)
-          if (maxRunning < minOversub) minOversub - jobs.size else maxRunning - (stillRunning + stillReady)
-        }
-        else Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob) - jobs.size
+      logger.fine("still running " + stillRunning)
 
-        val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionNumberOfJobUnderMin)
+      val maxRunning = runningHistory.map(_.value).max * Workspace.preferenceAsDouble(GliteEnvironment.EagerSubmissionThreshold)
 
-        if (nbRessub > 0) {
-          // Resubmit nbRessub jobs in a fair manner
-          val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
-          var keys = new TreeSet[Int]
+      var nbRessub = if (jobs.size > Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)) {
+        val minOversub = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)
+        if (maxRunning < minOversub) minOversub - jobs.size else maxRunning - (stillRunning + stillReady)
+      }
+      else Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob) - jobs.size
 
-          for (job ← registry.allJobs) {
-            val nb = registry.executionJobs(job).size
-            if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-              order.addBinding(nb, job)
-              keys += nb
-            }
-          }
+      val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionNumberOfJobUnderMin)
 
-          if (!keys.isEmpty) {
-            while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-              val key = keys.head
-              val jobs = order(keys.head)
-              val job =
-                jobs.find(j ⇒ registry.executionJobs(j).isEmpty) match {
-                  case Some(j) ⇒ j
-                  case None ⇒
-                    jobs.find(j ⇒ !registry.executionJobs(j).exists(_.state != SUBMITTED)) match {
-                      case Some(j) ⇒ j
-                      case None    ⇒ jobs.head
-                    }
-                }
+      if (nbRessub > 0) {
+        // Resubmit nbRessub jobs in a fair manner
+        val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
+        var keys = new TreeSet[Int]
 
-              env.submit(job)
-
-              order.removeBinding(key, job)
-              if (jobs.isEmpty) keys -= key
-
-              order.addBinding(key + 1, job)
-              keys += (key + 1)
-              nbRessub -= 1
-            }
+        for (job ← executionJobs.keys) {
+          val nb = executionJobs(job).size
+          if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+            order.addBinding(nb, job)
+            keys += nb
           }
         }
+
+        if (!keys.isEmpty) {
+          while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+            val key = keys.head
+            val jobs = order(keys.head)
+            val job =
+              jobs.find(j ⇒ executionJobs(j).isEmpty) match {
+                case Some(j) ⇒ j
+                case None ⇒
+                  jobs.find(j ⇒ !executionJobs(j).exists(_.state != SUBMITTED)) match {
+                    case Some(j) ⇒ j
+                    case None    ⇒ jobs.head
+                  }
+              }
+
+            env.submit(job)
+
+            order.removeBinding(key, job)
+            if (jobs.isEmpty) keys -= key
+
+            order.addBinding(key + 1, job)
+            keys += (key + 1)
+            nbRessub -= 1
+          }
+        }
+
       }
     }
     catch {
-      case e: Throwable ⇒ logger.log(SEVERE, "Exception in oversubmission agen", e)
+      case e: Throwable ⇒ Log.logger.log(Log.SEVERE, "Exception in oversubmission agen", e)
     }
     true
   }
