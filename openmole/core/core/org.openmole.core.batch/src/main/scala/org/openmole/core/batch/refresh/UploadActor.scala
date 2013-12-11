@@ -25,32 +25,22 @@ import com.ice.tar.TarOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
-import java.util.concurrent.Callable
 import org.openmole.core.batch.message._
 import org.openmole.core.batch.replication._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.environment.BatchEnvironment.{ signalDownload, signalUpload }
-import org.openmole.core.model.execution._
 import org.openmole.core.model.job._
-import org.openmole.misc.tools.io.FileUtil
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
 
-import scala.io.Source._
 import org.openmole.core.serializer._
-import org.openmole.misc.eventdispatcher._
 import org.openmole.misc.fileservice.FileService
 import org.openmole.misc.hashservice.HashService
-import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
-import scala.collection.JavaConversions._
 import scala.collection.immutable.TreeSet
-import scala.collection.mutable.HashSet
-import org.openmole.misc.hashservice.HashService._
-import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.misc.exception.UserBadDataError
 
 //import actors.futures._
@@ -179,12 +169,12 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     environment: BatchEnvironment,
     storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer) = {
 
-    val environmentPluginPath = environment.plugins.map { p ⇒ toReplicatedFile(job, p, storage) }.map { f ⇒ new FileMessage(f) }
-    val runtimeFileMessage = new FileMessage(toReplicatedFile(job, environment.runtime, storage))
-    val jvmLinuxI386FileMessage = new FileMessage(toReplicatedFile(job, environment.jvmLinuxI386, storage))
-    val jvmLinuxX64FileMessage = new FileMessage(toReplicatedFile(job, environment.jvmLinuxX64, storage))
+    val environmentPluginPath = environment.plugins.map { p ⇒ toReplicatedFile(job, p, storage) }.map { FileMessage(_) }
+    val runtimeFileMessage = FileMessage(toReplicatedFile(job, environment.runtime, storage))
+    val jvmLinuxI386FileMessage = FileMessage(toReplicatedFile(job, environment.jvmLinuxI386, storage))
+    val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(job, environment.jvmLinuxX64, storage))
 
-    val storageReplication = new FileMessage(toReplicatedFile(job, storage.serializedRemoteStorage, storage))
+    val storageReplication = FileMessage(toReplicatedFile(job, storage.serializedRemoteStorage, storage))
 
     new Runtime(
       storageReplication,
@@ -213,7 +203,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     new ExecutionMessage(
       pluginReplicas,
       files,
-      new FileMessage(jobForRuntimePath, jobHash),
+      FileMessage(jobForRuntimePath, jobHash),
       path)
   }
 

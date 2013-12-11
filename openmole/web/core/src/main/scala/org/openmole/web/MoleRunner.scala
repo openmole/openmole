@@ -69,7 +69,8 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         requireAuth(cookies get "apiKey") {
           ssp("/createMole", "body" -> "Please upload a serialized mole execution below!")
         } {
-          ssp("/authenticate.ssp", "goTo" -> "/createMole")
+
+          ssp("/authenticate", "goTo" -> "/createMole")
         }
       }
     }
@@ -350,13 +351,15 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
   }
 
   get("/remove/:id") {
+    contentType = "text/html"
     new AsyncResult() {
       val is = Future {
         requireAuth(cookies get "apiKey") {
           deleteMole(params("id"))
           redirect("/execs")
+          "" //TODO not good practice but necessary to get ssp("/authenticate"...) working
         } {
-          ssp("/authenticate.ssp", "goTo" -> s"/remove/${params("id")}")
+          ssp("/authenticate", "goTo" -> s"/remove/${params("id")}")
         }
       }
     }

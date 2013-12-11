@@ -18,15 +18,19 @@ import org.openmole.misc.workspace.Workspace
 import org.bouncycastle.asn1.{ ASN1EncodableVector, DEROctetString, ASN1ObjectIdentifier, DERObjectIdentifier }
 import java.util
 import sun.security.x509.SubjectAlternativeNameExtension
+import org.eclipse.jetty.server.nio.SelectChannelConnector
+import org.eclipse.jetty.security.{ ConstraintMapping, ConstraintSecurityHandler }
 
-class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Option[String], pass: Option[String]) {
+class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Option[String], pass: Option[String], allowInsecureConnections: Boolean) {
 
   val p = port getOrElse 8080
-  val sslP = sslPort getOrElse 8443
+  val sslP = sslPort getOrElse (if (port.isDefined) 8443 else 8080)
 
-  println(s"binding http to: $p")
-
-  val server = new Server(p)
+  val server = if (allowInsecureConnections) {
+    println(s"Binding http to port $p")
+    new Server(p)
+  }
+  else new Server()
 
   val contextFactory = new org.eclipse.jetty.http.ssl.SslContextFactory()
 
@@ -36,7 +40,7 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
   val bcp = new BouncyCastleProvider()
 
   val pw = pass getOrElse "openmole"
-  val host = hostName getOrElse "localhost"
+  //val host = hostName getOrElse "localhost"
 
   val ksLoc = Workspace.file("OMServerKeystore")
 
@@ -59,8 +63,8 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
     val kp = kpg.generateKeyPair()
 
     certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()))
-    certGen.setIssuerDN(new X509Principal(s"CN=$host, O=o, L=L, ST=il, C= c"))
-    certGen.setSubjectDN(new X509Principal(s"CN=$host, O=o, L=L, ST=il, C= c"))
+    certGen.setIssuerDN(new X509Principal(s"CN=${hostName getOrElse "cn"}, O=o, L=L, ST=il, C= c"))
+    certGen.setSubjectDN(new X509Principal(s"CN=${hostName getOrElse "cn"}, O=o, L=L, ST=il, C= c"))
     X509Extensions.SubjectAlternativeName
     val subjectAltName = new GeneralNames(
       new GeneralName(GeneralName.rfc822Name, "127.0.0.1"))
@@ -77,7 +81,7 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
     certGen.addExtension("2.5.29.17", false, "hell".toCharArray.map(_.toByte)) //Subject alt name oid?
     val cert = certGen.generate(kp.getPrivate)
 
-    ks.setKeyEntry(host, kp.getPrivate, pw.toCharArray, Array[java.security.cert.Certificate](cert))
+    ks.setKeyEntry(hostName getOrElse "", kp.getPrivate, pw.toCharArray, Array[java.security.cert.Certificate](cert))
 
     fos foreach (ks.store(_, pw.toCharArray))
   }
@@ -88,12 +92,18 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
   contextFactory.setTrustStore(ks)
   contextFactory.setTrustStorePassword(pw)
 
-  println(s"binding ssl to: $sslP")
+  println(s"binding https to port $sslP")
 
   server.addConnector(new org.eclipse.jetty.server.ssl.SslSelectChannelConnector(contextFactory) {
     setPort(sslP)
     setMaxIdleTime(30000)
   })
+
+  /*if (!allowInsecureConnections)
+    server.getConnectors.foreach {
+      case s: SelectChannelConnector ⇒ server.removeConnector(s)
+      case _                         ⇒ ()
+    }*/
 
   val context = new WebAppContext()
 
@@ -102,9 +112,18 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
   context.setContextPath("/")
   context.setBaseResource(res)
   context.setClassLoader(classOf[Openmolewebserver].getClassLoader)
-  context.setInitParameter(ScalatraBase.HostNameKey, host)
+  hostName foreach (context.setInitParameter(ScalatraBase.HostNameKey, _))
   context.setInitParameter("org.scalatra.Port", sslP.toString)
-  context.setInitParameter(ScalatraBase.ForceHttpsKey, "true")
+  context.setInitParameter(ScalatraBase.ForceHttpsKey, allowInsecureConnections.toString)
+
+  val constraintHandler = new ConstraintSecurityHandler
+  val constraintMapping = new ConstraintMapping
+  constraintMapping.setPathSpec("/*")
+  constraintMapping.setConstraint({ val r = new org.eclipse.jetty.util.security.Constraint(); r.setDataConstraint(1); r })
+  constraintHandler.addConstraintMapping(constraintMapping)
+
+  if (!allowInsecureConnections) context.setSecurityHandler(constraintHandler)
+  //context.setInitParameter("org.scalatra.environment", "production")
 
   server.setHandler(context)
 
