@@ -53,15 +53,12 @@ class UploadActor(jobManager: ActorRef) extends Actor {
           }
         }
         catch {
-          case e: Throwable ⇒ signalError(job, e, msg)
+          case e: Throwable ⇒
+            jobManager ! Error(job, e)
+            jobManager ! msg
         }
       }
       System.runFinalization()
-  }
-
-  private def signalError(job: BatchExecutionJob, e: Throwable, msg: Upload) = {
-    jobManager ! Error(job, e)
-    jobManager ! msg
   }
 
   private def initCommunication(environment: BatchEnvironment, job: IJob, selectedStorage: Option[StorageService]): Option[SerializedJob] = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
