@@ -24,4 +24,4 @@ case class SerializedJob(
   path: String,
   inputFile: String,
   runtime: Runtime,
-  cleaned: Boolean = false)
+  var cleaned: Boolean = false)
