@@ -52,7 +52,7 @@ trait MolePanelUI extends Settings with AnonSaveSettings {
     dataUI.implicits.map { p ⇒ p._1 -> p._2 }.toMap)
 
   tabbed.pages += new Page("Plugins", pluginPanel)
-  tabbed.pages += new Page("Context", {
+  tabbed.pages += new Page("Implicits", {
     if (Proxies.instance.prototypes.isEmpty) new Label("Define Prototype first")
     else contextPanel.panel
   })
