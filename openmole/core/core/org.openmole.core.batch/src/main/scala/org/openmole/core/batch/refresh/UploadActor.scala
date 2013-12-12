@@ -63,12 +63,12 @@ class UploadActor(jobManager: ActorRef) extends Actor {
 
   private def initCommunication(environment: BatchEnvironment, job: IJob, selectedStorage: Option[StorageService]): Option[SerializedJob] = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
 
-    val (serializationFile, serialisationPluginFiles) = serializeJob(jobFile, job)
+    val (serializationFiles, serialisationPluginFiles) = serializeJob(jobFile, job)
 
     val storageAndToken = selectedStorage match {
       case None ⇒
         val selected = environment.selectAStorage(
-          (serializationFile +
+          (serializationFiles +
             environment.runtime +
             environment.jvmLinuxI386 +
             environment.jvmLinuxX64 ++
@@ -93,7 +93,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
           val executionMessage = createExecutionMessage(
             job,
             jobFile,
-            serializationFile,
+            serializationFiles,
             serialisationPluginFiles,
             storage,
             communicationPath)
