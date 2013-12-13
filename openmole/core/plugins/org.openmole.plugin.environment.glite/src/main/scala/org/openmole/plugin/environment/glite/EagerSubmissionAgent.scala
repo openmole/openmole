@@ -34,7 +34,7 @@ import scala.ref.WeakReference
 import scala.math._
 import scala.collection.mutable
 
-object OverSubmissionAgent extends Logger {
+object EagerSubmissionAgent extends Logger {
 
   case class TimeInt(value: Int, time: Long = System.currentTimeMillis)
 
@@ -46,9 +46,9 @@ object OverSubmissionAgent extends Logger {
   }
 }
 
-import OverSubmissionAgent._
+import EagerSubmissionAgent._
 
-class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
+class EagerSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
 
   @transient lazy val runningHistory = new mutable.Queue[TimeInt]
 

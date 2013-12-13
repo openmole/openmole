@@ -30,7 +30,6 @@ object BatchJobWatcher extends Logger {
   case object Watch
 
   class ExecutionJobRegistry {
-
     val jobs = new HashMap[IJob, Set[BatchExecutionJob]] with MultiMap[IJob, BatchExecutionJob]
 
     def allJobs = jobs.keySet
@@ -45,8 +44,7 @@ object BatchJobWatcher extends Logger {
 
     def removeJob(job: IJob) = jobs -= job
 
-    def allExecutionJobs = jobs.values.map(_.toSeq).flatten
-
+    def allExecutionJobs = jobs.values.flatMap(_.toSeq)
   }
 
 }
