@@ -100,6 +100,15 @@ object NetLogo5Task {
       case Right(s: File)             ⇒ apply(name, s, launchingCommands)
     }
   }
+
+  def apply(
+    name: String,
+    script: File,
+    launchingCommands: Iterable[String],
+    embedWorkspace: Boolean)(implicit plugins: PluginSet): NetLogoTaskBuilder =
+    if (embedWorkspace) apply(name, script.getParentFile, script.getName, launchingCommands)
+    else apply(name, script, launchingCommands)
+
 }
 
 sealed class NetLogo5Task(
