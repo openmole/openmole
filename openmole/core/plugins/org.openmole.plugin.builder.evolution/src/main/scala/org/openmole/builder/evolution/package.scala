@@ -115,7 +115,7 @@ package object evolution {
 
     val (_evolution, _inputs, _objectives) = (evolution, inputs, objectives)
 
-    def puzzle(puzzle: Puzzle, output: ICapsule) =
+    def puzzle(puzzle: Puzzle, _output: ICapsule) =
       new Puzzle(puzzle) with Island {
         val evolution = _evolution
 
@@ -126,7 +126,7 @@ package object evolution {
         def inputs = _inputs
         def objectives = _objectives
 
-        def outputCapsule = output
+        def output = _output
         def state = components.state
         def generation = components.generation
       }
