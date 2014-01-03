@@ -23,8 +23,9 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
   //To add zipping to project, add zipProject to its settings
   lazy val zipProject: Seq[Project.Setting[_]] = Seq(
-    zipFiles <+= copyDependencies map { f ⇒ f },
-    zip <<= (zipFiles, streams, target, tarGZName) map zipImpl,
+    zipFiles <+= copyDependencies.toTask,
+    innerZipFolder := None,
+    zip <<= (zipFiles, streams, target, tarGZName, innerZipFolder) map zipImpl,
     tarGZName := None
 
   //assemble <<= assemble dependsOn zip
@@ -49,17 +50,21 @@ trait Assembly { self: BuildSystemDefaults ⇒
     assemble <<= assemble dependsOn resourceAssemble
   )
 
-  lazy val resTask = resourceAssemble <<= (resourceSets, target, assemblyPath, streams, name) map { //TODO: Find a natural way to do this
-    (rS, target, cT, s, name) ⇒
+  lazy val resTask = resourceAssemble <<= (resourceSets, setExecutable, target, assemblyPath, streams, name) map { //TODO: Find a natural way to do this
+    (rS, sE, target, cT, s, name) ⇒
       {
         def expand(f: File, p: File, o: String): Array[(File, File)] = if (f.isDirectory) f.listFiles() flatMap (expand(_, p, o)) else {
           val dest = cT / o / (if (f != p) getDiff(f, p) else f.name)
           Array(f -> dest)
         }
 
+        def rExpand(f: File): Set[File] = if(f.isDirectory) (f.listFiles() flatMap rExpand).toSet else Set(f)
+
         def getDiff(f: File, oF: File): String = f.getCanonicalPath.takeRight(f.getCanonicalPath.length - oF.getCanonicalPath.length)
 
         val resourceMap = (rS flatMap { case (in, out) ⇒ expand(in, in, out) }).groupBy(_._1).collect { case (k, v) ⇒ k -> (v map (_._2)) }
+
+        val expandedExecSet = sE flatMap rExpand
 
         val copyFunction = FileFunction.cached(target / ("resAssembleCache" + name), FilesInfo.lastModified, FilesInfo.exists) {
           f ⇒
@@ -70,6 +75,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
                 for (dest ← dests) {
                   s.log.info("Copying file " + rT.getPath + " to: " + dest.getCanonicalPath)
                   IO.copyFile(rT, dest)
+                  if(expandedExecSet.contains(rT)) dest.setExecutable(true)
                   dest
                 }
                 dests
@@ -125,7 +131,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
     ) ++ s ++ scalariformDefaults)
   }
 
-  def zipImpl(targetFolders: Seq[File], s: TaskStreams, t: File, name: Option[String]): File = {
+  def zipImpl(targetFolders: Seq[File], s: TaskStreams, t: File, name: Option[String], folder: Option[String]): File = {
     val out = t / ((name getOrElse "assembly") + ".tar.gz")
 
     val tgzOS = managed(new TarOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(out)))))
@@ -150,7 +156,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
           file ← fileSet
           is ← managed(Source.fromFile(file)(scala.io.Codec.ISO8859))
         } {
-          val relativeFile = (file relativeTo lCP).get.getPath
+          val relativeFile = (if (folder isDefined) folder.get + "/" else "") + (file relativeTo lCP).get.getPath
           s.log.info("\t - " + relativeFile)
           os.putNextEntry(new TarEntry(file, relativeFile))
 
