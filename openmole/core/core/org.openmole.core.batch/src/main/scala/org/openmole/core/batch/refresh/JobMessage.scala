@@ -23,16 +23,18 @@ import org.openmole.core.model.job._
 import org.openmole.core.batch.storage._
 
 sealed trait JobMessage
-case class Upload(job: BatchExecutionJob) extends JobMessage
+case class Upload(job: BatchExecutionJob, storageService: Option[StorageService]) extends JobMessage
 case class Uploaded(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage
 case class Submit(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage
 case class Submitted(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJob) extends JobMessage
 case class Refresh(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJob, delay: Long) extends JobMessage
+case class Resubmit(job: BatchExecutionJob, storage: StorageService) extends JobMessage
 case class Delay(msg: JobMessage, delay: Long) extends JobMessage
 case class Error(job: BatchExecutionJob, exception: Throwable) extends JobMessage
 case class Kill(job: BatchExecutionJob) extends JobMessage
 case class KillBatchJob(batchJob: BatchJob) extends JobMessage
 case class GetResult(job: BatchExecutionJob, serializedJob: SerializedJob, outputFilePath: String) extends JobMessage
+case class Manage(job: BatchExecutionJob) extends JobMessage
 case class MoleJobError(moleJob: IMoleJob, job: BatchExecutionJob, exception: Throwable) extends JobMessage
 case class CleanSerializedJob(job: SerializedJob) extends JobMessage
 case class DeleteFile(storage: StorageService, path: String, directory: Boolean) extends JobMessage

@@ -17,4 +17,4 @@
 
 package org.openmole.core.batch.environment
 
-class ShouldBeKilledException(message: String) extends Exception(message)
+class ResubmitException(message: String) extends Exception(message)

@@ -220,8 +220,8 @@ class GliteEnvironment(
   type JS = GliteJobService
 
   @transient lazy val registerAgents: Unit = {
-    Updater.registerForUpdate(new OverSubmissionAgent(WeakReference(this)))
-    Updater.registerForUpdate(new ProxyChecker(WeakReference(this)))
+    Updater.delay(new EagerSubmissionAgent(WeakReference(this)))
+    Updater.delay(new ProxyChecker(WeakReference(this)))
   }
 
   override def submit(job: IJob) = {

@@ -38,7 +38,7 @@ trait GliteJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
     if (state == SUBMITTED) {
       val maxNbReady = Workspace.preferenceAsInt(GliteEnvironment.JobShakingMaxReady)
 
-      def nbReady = jobService.environment.jobRegistry.allExecutionJobs.count(_.state == READY)
+      def nbReady = jobService.environment.executionJobs.count(_.state == READY)
 
       if (nbReady < maxNbReady) {
         val jobShakingAverageTime = Workspace.preferenceAsDuration(GliteEnvironment.JobShakingHalfLife).toMilliSeconds
@@ -47,7 +47,7 @@ trait GliteJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
 
         lastShacked = System.currentTimeMillis
 
-        if (Workspace.rng.nextDouble < probability) throw new ShouldBeKilledException("Killed in shaking process")
+        if (Workspace.rng.nextDouble < probability) throw new ResubmitException("Killed in shaking process")
       }
     }
     state

@@ -57,31 +57,30 @@ trait BDIISRMServers extends BatchEnvironment {
       val minTime = storages.map(_.time).min
 
       def fitness =
-        storages.flatMap {
-          cur ⇒
-            cur.tryGetToken match {
-              case None ⇒ None
-              case Some(token) ⇒
-                val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(h.toString, Set.empty).contains(cur.id) }.map { case (f, _) ⇒ f.size }.sum
-                val sizeFactor =
-                  if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
+        for {
+          cur ← storages
+          token ← cur.tryGetToken
+        } yield {
+          val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(h.toString, Set.empty).contains(cur.id) }.map { case (f, _) ⇒ f.size }.sum
+          val sizeFactor =
+            if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
 
-                val time = cur.time
-                val timeFactor =
-                  if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
-                  else 1 - time.normalize(minTime, maxTime)
+          val time = cur.time
+          val timeFactor =
+            if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
+            else 1 - time.normalize(minTime, maxTime)
 
-                import GliteEnvironment._
-                import Workspace.preferenceAsDouble
+          import GliteEnvironment._
+          import Workspace.preferenceAsDouble
 
-                val fitness = math.pow(
-                  preferenceAsDouble(StorageSizeFactor) * sizeFactor +
-                    preferenceAsDouble(StorageTimeFactor) * timeFactor +
-                    preferenceAsDouble(StorageAvailabilityFactor) * cur.availability +
-                    preferenceAsDouble(StorageSuccessRateFactor) * cur.successRate,
-                  preferenceAsDouble(StorageFitnessPower))
-                Some((cur, token, fitness))
-            }
+          val fitness = math.pow(
+            preferenceAsDouble(StorageSizeFactor) * sizeFactor +
+              preferenceAsDouble(StorageTimeFactor) * timeFactor +
+              preferenceAsDouble(StorageAvailabilityFactor) * cur.availability +
+              preferenceAsDouble(StorageSuccessRateFactor) * cur.successRate,
+            preferenceAsDouble(StorageFitnessPower))
+
+          (cur, token, fitness)
         }
 
       @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): (StorageService, AccessToken) = {
