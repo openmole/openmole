@@ -61,10 +61,11 @@ class Runtime {
 
     logger.fine("Downloading input message")
 
-    val executionMessage = retry(Workspace.withTmpFile { executionMesageFileCache ⇒
-      storage.downloadGZ(inputMessagePath, executionMesageFileCache)
-      SerialiserService.deserialise[ExecutionMessage](executionMesageFileCache)
-    })
+    val executionMessage =
+      Workspace.withTmpFile { executionMesageFileCache ⇒
+        storage.downloadGZ(inputMessagePath, executionMesageFileCache)
+        SerialiserService.deserialise[ExecutionMessage](executionMesageFileCache)
+      }
 
     val oldOut = System.out
     val oldErr = System.err
