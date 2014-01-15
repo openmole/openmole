@@ -27,14 +27,14 @@ object ABCSampling {
 
   def apply(abc: ABC)(
     state: Prototype[abc.STATE],
-    prototypes: Seq[Prototype[Double]],
+    thetas: Seq[Prototype[Double]],
     size: Int) = {
-    val (_abc, _state, _prototypes, _size) = (abc, state, prototypes, size)
+    val (_abc, _state, _thetas, _size) = (abc, state, thetas, size)
     new ABCSampling {
       val abc = _abc
       def state = _state.asInstanceOf[Prototype[abc.STATE]]
       def size = _size
-      def prototypes = _prototypes
+      def thetas = _thetas
     }
   }
 
@@ -46,7 +46,8 @@ abstract class ABCSampling extends Sampling {
   def state: Prototype[abc.STATE]
   def size: Int
 
-  def prototypes: Seq[Prototype[Double]]
+  def thetas: Seq[Prototype[Double]]
+  def prototypes = thetas
   override def inputs = DataSet(Data(state))
 
   override def build(context: Context) = {
