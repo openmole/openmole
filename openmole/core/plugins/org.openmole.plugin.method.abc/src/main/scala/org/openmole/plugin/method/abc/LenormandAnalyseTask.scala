@@ -27,11 +27,11 @@ object LenormandAnalyseTask {
 
   def apply(
     name: String,
-    abc: Lenormand,
+    lenormand: Lenormand,
     state: Prototype[Lenormand#STATE],
     thetas: Seq[Prototype[Double]],
     summaryStats: Seq[Prototype[Double]])(implicit plugins: PluginSet) = {
-    val (_abc, _state, _thetas, _summaryStats) = (abc, state, thetas, summaryStats)
+    val (_lenormand, _state, _thetas, _summaryStats) = (lenormand, state, thetas, summaryStats)
 
     new TaskBuilder() { builder ⇒
       addInput(state)
@@ -40,7 +40,7 @@ object LenormandAnalyseTask {
       addOutput(state)
 
       def toTask = new LenormandAnalyseTask(name) with Built {
-        val abc: Lenormand = _abc
+        val lenormand: Lenormand = _lenormand
         val state: Prototype[Lenormand#STATE] = _state
         val thetas: Seq[Prototype[Array[Double]]] = _thetas.map(_.toArray)
         val summaryStats: Seq[Prototype[Array[Double]]] = _summaryStats.map(_.toArray)
@@ -52,7 +52,7 @@ object LenormandAnalyseTask {
 
 abstract class LenormandAnalyseTask(val name: String) extends Task {
 
-  val abc: Lenormand
+  val lenormand: Lenormand
   def state: Prototype[Lenormand#STATE]
   def thetas: Seq[Prototype[Array[Double]]]
   def summaryStats: Seq[Prototype[Array[Double]]]
@@ -61,7 +61,7 @@ abstract class LenormandAnalyseTask(val name: String) extends Task {
     val thetasValue: Seq[Seq[Double]] = thetas.map { context(_).toSeq }.transpose
     val summaryStatsValue: Seq[Seq[Double]] = summaryStats.map { context(_).toSeq }.transpose
     val stateValue: Lenormand#STATE = context(state)
-    val nextState = abc.analyse(summaryStatsValue.size, stateValue, thetasValue, summaryStatsValue)
+    val nextState = lenormand.analyse(stateValue, thetasValue, summaryStatsValue)
     Context(Variable(state, nextState))
   }
 }

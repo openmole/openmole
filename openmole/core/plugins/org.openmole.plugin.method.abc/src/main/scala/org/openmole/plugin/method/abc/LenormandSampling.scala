@@ -23,28 +23,25 @@ import org.openmole.core.model.data._
 import org.openmole.core.implementation.task._
 import org.openmole.misc.tools.service.Random._
 
-object ABCSampling {
+object LenormandSampling {
 
-  def apply(abc: ABC)(
-    state: Prototype[abc.STATE],
-    thetas: Seq[Prototype[Double]],
-    size: Int) = {
-    val (_abc, _state, _thetas, _size) = (abc, state, thetas, size)
-    new ABCSampling {
-      val abc = _abc
-      def state = _state.asInstanceOf[Prototype[abc.STATE]]
-      def size = _size
+  def apply(lenormand: Lenormand,
+            state: Prototype[Lenormand#STATE],
+            thetas: Seq[Prototype[Double]]) = {
+    val (_lenormand, _state, _thetas) = (lenormand, state, thetas)
+    new LenormandSampling {
+      val lenormand = _lenormand
+      def state = _state
       def thetas = _thetas
     }
   }
 
 }
 
-abstract class ABCSampling extends Sampling {
+abstract class LenormandSampling extends Sampling {
 
-  val abc: ABC
-  def state: Prototype[abc.STATE]
-  def size: Int
+  val lenormand: Lenormand
+  def state: Prototype[Lenormand#STATE]
 
   def thetas: Seq[Prototype[Double]]
   def prototypes = thetas
@@ -52,7 +49,7 @@ abstract class ABCSampling extends Sampling {
 
   override def build(context: Context) = {
     val rng = newRNG(context(Task.openMOLESeed))
-    abc.sample(context(state), size)(rng).map {
+    lenormand.sample(context(state))(rng).map {
       sampled ⇒
         (prototypes zip sampled).map {
           case (v, s) ⇒ Variable(v, s)

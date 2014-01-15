@@ -168,7 +168,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.68", bundleType := Set("plugin"))
 
-  lazy val scalabc = OsgiProject("fr.irstea.scalabc", privatePackages = Seq("!scala.*", "*")) settings (libraryDependencies += "fr.irstea" %% "scalabc" % "0.3", bundleType := Set("plugin"))
+  lazy val scalabc = OsgiProject("fr.irstea.scalabc", privatePackages = Seq("!scala.*", "*")) settings (libraryDependencies += "fr.irstea" %% "scalabc" % "0.4-SNAPSHOT", bundleType := Set("plugin"))
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0", bundleType := Set("plugin"))
 
