@@ -173,6 +173,8 @@ object Libraries extends Defaults(Apache) {
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.68", bundleType := Set("plugin"))
 
+  lazy val scalabc = OsgiProject("fr.irstea.scalabc") settings (libraryDependencies += "fr.irstea" %% "scalabc" % "0.1", bundleType := Set("plugin"))
+
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0", bundleType := Set("plugin"))
 
   lazy val jline = OsgiProject("net.sourceforge.jline") settings (libraryDependencies += "jline" % "jline" % "0.9.94", exportPackage := Seq("jline.*"))
