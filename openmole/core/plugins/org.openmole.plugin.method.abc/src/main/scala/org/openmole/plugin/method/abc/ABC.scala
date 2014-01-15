@@ -23,26 +23,35 @@ import sampling._
 import distance._
 import prior._
 import scala.util.Random
+import org.openmole.core.model.data.Prototype
 
 object ABC {
+
+  trait ABC {
+    def targetPrototypes: Seq[Prototype[Double]]
+    def priorPrototypes: Seq[Prototype[Double]]
+  }
 
   def jabotMover = new JabotMover {}
 
   def lenormand(
-    targets: Seq[Double],
-    priors: Seq[(Double, Double)],
+    targets: Seq[(Prototype[Double], Double)],
+    priors: Seq[((Prototype[Double], (Double, Double)))],
     simulations: Int,
     alpha: Double = 1.0,
     mover: ParticleMover = jabotMover) = {
-    val (_priors, _simulations, _alpha) = (priors, simulations, alpha)
+    val (_priors, _simulations, _alpha, _targets) = (priors, simulations, alpha, targets)
 
-    new Lenormand with DefaultDistance {
-      override def alpha = _alpha
+    new Lenormand with DefaultDistance with ABC.ABC {
+      val targetPrototypes = _targets.unzip._1
+      val priorPrototypes = _priors.unzip._1
+
+      override val alpha = _alpha
       def move(simulations: Seq[WeightedSimulation])(implicit rng: Random) = mover.move(simulations)
 
-      def summaryStatsTarget = targets
-      def simulations = _simulations
-      val priors = _priors.map { case (min, max) ⇒ Uniform(min, max) }
+      val summaryStatsTarget = targets.unzip._2
+      val simulations = _simulations
+      val priors = _priors.unzip._2.map { case (min, max) ⇒ Uniform(min, max) }
     }
   }
 

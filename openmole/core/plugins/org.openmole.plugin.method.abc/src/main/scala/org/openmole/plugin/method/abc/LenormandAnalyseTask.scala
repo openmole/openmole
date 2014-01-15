@@ -27,23 +27,19 @@ object LenormandAnalyseTask {
 
   def apply(
     name: String,
-    lenormand: Lenormand,
-    state: Prototype[Lenormand#STATE],
-    thetas: Seq[Prototype[Double]],
-    summaryStats: Seq[Prototype[Double]])(implicit plugins: PluginSet) = {
-    val (_lenormand, _state, _thetas, _summaryStats) = (lenormand, state, thetas, summaryStats)
+    lenormand: Lenormand with ABC.ABC,
+    state: Prototype[Lenormand#STATE])(implicit plugins: PluginSet) = {
+    val (_lenormand, _state) = (lenormand, state)
 
     new TaskBuilder() { builder ⇒
       addInput(state)
-      thetas.foreach(t ⇒ addInput(t.toArray))
-      summaryStats.foreach(s ⇒ addInput(s.toArray))
+      lenormand.priorPrototypes.foreach(t ⇒ addInput(t.toArray))
+      lenormand.targetPrototypes.foreach(s ⇒ addInput(s.toArray))
       addOutput(state)
 
       def toTask = new LenormandAnalyseTask(name) with Built {
-        val lenormand: Lenormand = _lenormand
+        val lenormand = _lenormand
         val state: Prototype[Lenormand#STATE] = _state
-        val thetas: Seq[Prototype[Array[Double]]] = _thetas.map(_.toArray)
-        val summaryStats: Seq[Prototype[Array[Double]]] = _summaryStats.map(_.toArray)
       }
     }
   }
@@ -52,14 +48,12 @@ object LenormandAnalyseTask {
 
 abstract class LenormandAnalyseTask(val name: String) extends Task {
 
-  val lenormand: Lenormand
+  val lenormand: Lenormand with ABC.ABC
   def state: Prototype[Lenormand#STATE]
-  def thetas: Seq[Prototype[Array[Double]]]
-  def summaryStats: Seq[Prototype[Array[Double]]]
 
   override def process(context: Context) = {
-    val thetasValue: Seq[Seq[Double]] = thetas.map { context(_).toSeq }.transpose
-    val summaryStatsValue: Seq[Seq[Double]] = summaryStats.map { context(_).toSeq }.transpose
+    val thetasValue: Seq[Seq[Double]] = lenormand.priorPrototypes.map { p ⇒ context(p.toArray).toSeq }.transpose
+    val summaryStatsValue: Seq[Seq[Double]] = lenormand.targetPrototypes.map { p ⇒ context(p.toArray).toSeq }.transpose
     val stateValue: Lenormand#STATE = context(state)
     val nextState = lenormand.analyse(stateValue, thetasValue, summaryStatsValue)
     Context(Variable(state, nextState))

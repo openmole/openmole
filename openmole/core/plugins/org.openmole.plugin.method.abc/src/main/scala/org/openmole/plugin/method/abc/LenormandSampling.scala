@@ -25,14 +25,12 @@ import org.openmole.misc.tools.service.Random._
 
 object LenormandSampling {
 
-  def apply(lenormand: Lenormand,
-            state: Prototype[Lenormand#STATE],
-            thetas: Seq[Prototype[Double]]) = {
-    val (_lenormand, _state, _thetas) = (lenormand, state, thetas)
+  def apply(lenormand: Lenormand with ABC.ABC,
+            state: Prototype[Lenormand#STATE]) = {
+    val (_lenormand, _state) = (lenormand, state)
     new LenormandSampling {
       val lenormand = _lenormand
       def state = _state
-      def thetas = _thetas
     }
   }
 
@@ -40,18 +38,17 @@ object LenormandSampling {
 
 abstract class LenormandSampling extends Sampling {
 
-  val lenormand: Lenormand
+  val lenormand: Lenormand with ABC.ABC
   def state: Prototype[Lenormand#STATE]
 
-  def thetas: Seq[Prototype[Double]]
-  def prototypes = thetas
+  def prototypes = lenormand.priorPrototypes
   override def inputs = DataSet(Data(state))
 
   override def build(context: Context) = {
     val rng = newRNG(context(Task.openMOLESeed))
     lenormand.sample(context(state))(rng).map {
       sampled ⇒
-        (prototypes zip sampled).map {
+        (lenormand.priorPrototypes zip sampled).map {
           case (v, s) ⇒ Variable(v, s)
         }
     }.toIterator
