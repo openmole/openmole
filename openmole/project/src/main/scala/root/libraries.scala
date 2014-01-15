@@ -38,11 +38,6 @@ object Libraries extends Defaults(Apache) {
 
   lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }
 
-  /*lazy val all = Project(id = "openmole-libraries",
-    base = file("libraries")) aggregate (jetty, scalatra, logback, h2, bonecp, slick, slf4j, xstream, groovy,
-      objenesis, scalaLang, Apache.all, jodaTime, gnuCrypto, db4o, jasypt, robustIt, netlogo4, netlogo5, opencsv,
-      netlogo4_noscala, netlogo5_noscala, guava, jsyntaxpane, gral, miglayout, netbeans, mgo, jline, jacksonJson, scalaCompiler)*/
-
   lazy val jetty = OsgiProject("org.eclipse.jetty", exports = Seq("org.eclipse.jetty.*", "javax.*")) settings
     (libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106",
       "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016"))
@@ -173,7 +168,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.68", bundleType := Set("plugin"))
 
-  lazy val scalabc = OsgiProject("fr.irstea.scalabc") settings (libraryDependencies += "fr.irstea" %% "scalabc" % "0.1", bundleType := Set("plugin"))
+  lazy val scalabc = OsgiProject("fr.irstea.scalabc", privatePackages = Seq("!scala.*", "*")) settings (libraryDependencies += "fr.irstea" %% "scalabc" % "0.2", bundleType := Set("plugin"))
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0", bundleType := Set("plugin"))
 
