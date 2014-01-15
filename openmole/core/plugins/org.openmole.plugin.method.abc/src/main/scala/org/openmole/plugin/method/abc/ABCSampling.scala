@@ -23,6 +23,23 @@ import org.openmole.core.model.data._
 import org.openmole.core.implementation.task._
 import org.openmole.misc.tools.service.Random._
 
+object ABCSampling {
+
+  def apply(abc: ABC)(
+    state: Prototype[abc.STATE],
+    prototypes: Seq[Prototype[Double]],
+    size: Int) = {
+    val (_abc, _state, _prototypes, _size) = (abc, state, prototypes, size)
+    new ABCSampling {
+      val abc = _abc
+      def state = _state.asInstanceOf[Prototype[abc.STATE]]
+      def size = _size
+      def prototypes = _prototypes
+    }
+  }
+
+}
+
 abstract class ABCSampling extends Sampling {
 
   val abc: ABC
