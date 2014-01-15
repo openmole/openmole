@@ -28,18 +28,21 @@ object LenormandAnalyseTask {
   def apply(
     name: String,
     lenormand: Lenormand with ABC.ABC,
-    state: Prototype[Lenormand#STATE])(implicit plugins: PluginSet) = {
-    val (_lenormand, _state) = (lenormand, state)
+    state: Prototype[Lenormand#STATE],
+    terminated: Prototype[Boolean])(implicit plugins: PluginSet) = {
+    val (_lenormand, _state, _terminated) = (lenormand, state, terminated)
 
     new TaskBuilder() { builder ⇒
       addInput(state)
       lenormand.priorPrototypes.foreach(t ⇒ addInput(t.toArray))
       lenormand.targetPrototypes.foreach(s ⇒ addInput(s.toArray))
       addOutput(state)
+      addOutput(terminated)
 
       def toTask = new LenormandAnalyseTask(name) with Built {
         val lenormand = _lenormand
-        val state: Prototype[Lenormand#STATE] = _state
+        val state = _state
+        val terminated = _terminated
       }
     }
   }
@@ -50,12 +53,13 @@ abstract class LenormandAnalyseTask(val name: String) extends Task {
 
   val lenormand: Lenormand with ABC.ABC
   def state: Prototype[Lenormand#STATE]
+  def terminated: Prototype[Boolean]
 
   override def process(context: Context) = {
     val thetasValue: Seq[Seq[Double]] = lenormand.priorPrototypes.map { p ⇒ context(p.toArray).toSeq }.transpose
     val summaryStatsValue: Seq[Seq[Double]] = lenormand.targetPrototypes.map { p ⇒ context(p.toArray).toSeq }.transpose
     val stateValue: Lenormand#STATE = context(state)
     val nextState = lenormand.analyse(stateValue, thetasValue, summaryStatsValue)
-    Context(Variable(state, nextState))
+    Context(Variable(state, nextState), Variable(terminated, lenormand.finished(nextState)))
   }
 }
