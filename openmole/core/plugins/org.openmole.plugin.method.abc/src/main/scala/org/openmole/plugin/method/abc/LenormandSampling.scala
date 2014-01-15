@@ -18,7 +18,7 @@
 package org.openmole.plugin.method.abc
 
 import org.openmole.core.model.sampling._
-import fr.irstea.scalabc._
+import fr.irstea.scalabc.algorithm._
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.task._
 import org.openmole.misc.tools.service.Random._

@@ -20,7 +20,7 @@ package org.openmole.plugin.method.abc
 import org.openmole.core.implementation.task._
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.data._
-import fr.irstea.scalabc.Lenormand
+import fr.irstea.scalabc.algorithm.Lenormand
 import org.openmole.core.model.task._
 
 object LenormandAnalyseTask {
