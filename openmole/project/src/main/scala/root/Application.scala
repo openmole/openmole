@@ -108,6 +108,7 @@ object Application extends Defaults {
           sbtPluginTemplate("hook.file"),
           sbtPluginTemplate("hook.display"),
           sbtPluginTemplate("source.file"),
+          sbtPluginTemplate("method.abc"),
           sbtPluginTemplate("method.evolution"),
           sbtPluginTemplate("method.sensitivity"),
           sbtPluginTemplate("builder.base"),

@@ -32,7 +32,14 @@ import java.util.logging.Level
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.jobservice._
-import org.openmole.core.batch.environment.BatchJobWatcher.Watch
+import org.openmole.core.batch.refresh._
+import org.openmole.core.batch.environment.BatchEnvironment.EndDownload
+import org.openmole.core.batch.refresh.Upload
+import org.openmole.core.batch.environment.BatchEnvironment.BeginDownload
+import scala.Some
+import org.openmole.core.batch.environment.BatchEnvironment.BeginUpload
+import org.openmole.core.batch.environment.BatchEnvironment.EndUpload
+import BatchJobWatcher.Watch
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication._
@@ -54,7 +61,6 @@ import scala.concurrent.stm._
 import collection.mutable.SynchronizedMap
 import collection.mutable.WeakHashMap
 import org.openmole.misc.tools.service.ThreadUtil._
-import scala.concurrent.duration.{ Duration ⇒ SDuration, MILLISECONDS }
 import ref.WeakReference
 import annotation.tailrec
 
@@ -129,7 +135,7 @@ object BatchEnvironment extends Logger {
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 
-  @transient lazy val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
+  lazy val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
     """
 akka {
   daemonic="on"
@@ -139,7 +145,7 @@ akka {
       type = Dispatcher
 
       fork-join-executor {
-        parallelism-min = 5
+        parallelism-min = 1
         parallelism-max = 10
       }
     }
@@ -147,7 +153,7 @@ akka {
 }
     """).withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
 
-  @transient lazy val jobManager = system.actorOf(Props(new JobManager))
+  lazy val jobManager = system.actorOf(Props(new JobManager))
 
 }
 
@@ -155,20 +161,7 @@ import BatchEnvironment._
 
 trait BatchEnvironment extends Environment { env ⇒
 
-  @transient lazy val jobRegistry = new ExecutionJobRegistry
-
   val id: String
-
-  import BatchEnvironment.system.dispatcher
-
-  @transient lazy val watcher = system.actorOf(Props(new BatchJobWatcher(this)))
-  @transient lazy val registerWatcher: Unit = {
-    system.scheduler.schedule(
-      SDuration(Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval).toMilliSeconds, MILLISECONDS),
-      SDuration(Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval).toMilliSeconds, MILLISECONDS),
-      watcher,
-      Watch)
-  }
 
   type SS <: StorageService
   type JS <: JobService
@@ -182,15 +175,20 @@ trait BatchEnvironment extends Environment { env ⇒
     case Some(m) ⇒ m
   }
 
+  @transient lazy val batchJobWatcher = {
+    val watcher = new BatchJobWatcher(WeakReference(this))
+    Updater.registerForUpdate(watcher)
+    watcher
+  }
+
   def threads: Option[Int] = None
   def threadsValue = threads.getOrElse(1)
 
   override def submit(job: IJob) = {
-    registerWatcher
     val bej = executionJob(job)
     EventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
-    jobRegistry.register(bej)
-    jobManager ! Upload(bej)
+    batchJobWatcher.register(bej)
+    jobManager ! Manage(bej)
   }
 
   def clean = ReplicaCatalog.withClient { implicit c ⇒
@@ -239,5 +237,7 @@ trait BatchEnvironment extends Environment { env ⇒
   def minUpdateInterval = Workspace.preferenceAsDuration(MinUpdateInterval).toMilliSeconds
   def maxUpdateInterval = Workspace.preferenceAsDuration(MaxUpdateInterval).toMilliSeconds
   def incrementUpdateInterval = Workspace.preferenceAsDuration(IncrementUpdateInterval).toMilliSeconds
+
+  def executionJobs: Iterable[BatchExecutionJob] = batchJobWatcher.executionJobs
 
 }

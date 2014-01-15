@@ -19,9 +19,9 @@ package org.openmole.core.batch.environment
 
 import org.openmole.core.batch.storage._
 
-class SerializedJob(
-  val storage: StorageService,
-  val path: String,
-  val inputFile: String,
-  val runtime: Runtime,
+case class SerializedJob(
+  storage: StorageService,
+  path: String,
+  inputFile: String,
+  runtime: Runtime,
   var cleaned: Boolean = false)
