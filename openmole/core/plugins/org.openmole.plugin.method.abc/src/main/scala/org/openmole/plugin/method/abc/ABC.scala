@@ -39,7 +39,7 @@ object ABC {
     targets: Seq[(Prototype[Double], Double)],
     simulations: Int,
     minimumProportionOfAccepted: Double = 0.05,
-    alpha: Double = 1.0,
+    alpha: Double = 0.5,
     mover: ParticleMover = jabotMover) = {
     val (_priors, _simulations, _alpha, _targets, _minimumProportionOfAccepted) = (priors, simulations, alpha, targets, minimumProportionOfAccepted)
 

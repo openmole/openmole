@@ -34,6 +34,8 @@ package object abc {
     name: String,
     algorithm: Lenormand with ABC.ABC,
     model: Puzzle)(implicit plugins: PluginSet) = {
+    val acceptedPrototype = Prototype[Double](name + "Accepted")
+    val iterationPrototype = Prototype[Int](name + "Iteration")
     val statePrototype = Prototype[Lenormand#STATE](name + "State")
     val terminatedPrototype = Prototype[Boolean](name + "Terminated")
     val preModel = StrainerCapsule(EmptyTask(name + "PreModel"))
@@ -47,22 +49,34 @@ package object abc {
 
     val exploration = StrainerCapsule(explorationTask)
 
-    val analyse = Slot(StrainerCapsule(LenormandAnalyseTask(name + "Analyse", algorithm, statePrototype, terminatedPrototype)))
+    val analyseTask =
+      LenormandAnalyseTask(
+        name + "Analyse",
+        algorithm,
+        statePrototype,
+        terminatedPrototype,
+        iterationPrototype,
+        acceptedPrototype
+      )
 
-    val continue = Condition(terminatedPrototype.name + " == true")
+    val analyse = Slot(StrainerCapsule(analyseTask))
+
+    val terminated = Condition(terminatedPrototype.name + " == true")
 
     val modelVariables = algorithm.priorPrototypes.map(_.name) ++ algorithm.targetPrototypes.map(_.name)
 
     val puzzle =
-      (exploration -< (preModel, filter = Block(statePrototype.name)) -- model -- postModel >- analyse -- (last, !continue)) +
+      (exploration -< (preModel, filter = Block(statePrototype.name)) -- model -- postModel >- analyse -- (last, terminated)) +
         (exploration -- (analyse, filter = Block(modelVariables: _*))) +
         (preModel -- postModel) +
         (exploration oo (model.first, filter = Block(modelVariables: _*))) +
-        (analyse -- (exploration, continue, filter = Block(modelVariables: _*)))
+        (analyse -- (exploration, !terminated, filter = Block(modelVariables: _*)))
 
     new Puzzle(puzzle) {
       val output = analyse
       val state = statePrototype
+      val accepted = acceptedPrototype
+      val iteration = iterationPrototype
     }
   }
 
