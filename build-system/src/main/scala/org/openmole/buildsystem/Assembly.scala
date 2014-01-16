@@ -45,6 +45,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
   lazy val resAssemblyProject: Seq[Project.Setting[_]] = Seq(
     resourceSets := Set.empty,
+    setExecutable := Set.empty,
     resTask,
     zipFiles <++= resourceAssemble map { (f: Set[File]) ⇒ f.toSeq },
     assemble <<= assemble dependsOn resourceAssemble
@@ -58,7 +59,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
           Array(f -> dest)
         }
 
-        def rExpand(f: File): Set[File] = if(f.isDirectory) (f.listFiles() flatMap rExpand).toSet else Set(f)
+        def rExpand(f: File): Set[File] = if (f.isDirectory) (f.listFiles() flatMap rExpand).toSet else Set(f)
 
         def getDiff(f: File, oF: File): String = f.getCanonicalPath.takeRight(f.getCanonicalPath.length - oF.getCanonicalPath.length)
 
@@ -75,7 +76,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
                 for (dest ← dests) {
                   s.log.info("Copying file " + rT.getPath + " to: " + dest.getCanonicalPath)
                   IO.copyFile(rT, dest)
-                  if(expandedExecSet.contains(rT)) dest.setExecutable(true)
+                  if (expandedExecSet.contains(rT)) dest.setExecutable(true)
                   dest
                 }
                 dests
