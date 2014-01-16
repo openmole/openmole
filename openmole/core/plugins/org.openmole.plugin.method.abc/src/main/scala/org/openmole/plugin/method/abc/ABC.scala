@@ -38,13 +38,15 @@ object ABC {
     targets: Seq[(Prototype[Double], Double)],
     priors: Seq[((Prototype[Double], (Double, Double)))],
     simulations: Int,
+    minimumProportionOfAccepted: Double = 0.05,
     alpha: Double = 1.0,
     mover: ParticleMover = jabotMover) = {
-    val (_priors, _simulations, _alpha, _targets) = (priors, simulations, alpha, targets)
+    val (_priors, _simulations, _alpha, _targets, _minimumProportionOfAccepted) = (priors, simulations, alpha, targets, minimumProportionOfAccepted)
 
     new Lenormand with DefaultDistance with ABC.ABC {
       val targetPrototypes = _targets.unzip._1
       val priorPrototypes = _priors.unzip._1
+      override val minimumProportionOfAccepted = _minimumProportionOfAccepted
 
       override val alpha = _alpha
       def move(simulations: Seq[WeightedSimulation])(implicit rng: Random) = mover.move(simulations)
