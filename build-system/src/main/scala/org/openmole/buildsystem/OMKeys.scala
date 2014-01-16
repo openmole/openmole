@@ -44,6 +44,10 @@ object OMKeys {
 
   val zipFiles = TaskKey[Seq[File]]("zip-files", "Collects the list of files to be zipped")
 
+  val innerZipFolder = SettingKey[Option[String]]("innerZipFolder", "All files in zipFiles will be put under this folder")
+
+  val setExecutable = SettingKey[Set[File]]("setExecutable")
+
   val downloadUrls = TaskKey[Seq[File]]("download-urls")
 
   val urls = SettingKey[Seq[(URL, File)]]("urls", "A project setting that describes a urls to download")
