@@ -20,11 +20,13 @@ package org.openmole.plugin.builder
 import org.openmole.plugin.method.abc._
 import fr.irstea.scalabc.algorithm.Lenormand
 import org.openmole.core.model.data._
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.mole._
-import org.openmole.core.model.task.PluginSet
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
 
 package object abc {
 
@@ -34,17 +36,34 @@ package object abc {
     model: Puzzle)(implicit plugins: PluginSet) = {
     val statePrototype = Prototype[Lenormand#STATE](name + "State")
     val terminatedPrototype = Prototype[Boolean](name + "Terminated")
+    val preModel = StrainerCapsule(EmptyTask(name + "PreModel"))
+    val postModel = Slot(StrainerCapsule(EmptyTask(name + "PostModel")))
+    val last = StrainerCapsule(EmptyTask(name + "Last"))
 
     val sampling = LenormandSampling(algorithm, statePrototype)
-    val first = StrainerCapsule(EmptyTask(name + "First"))
-    val last = StrainerCapsule(EmptyTask(name + "Last"))
-    val exploration = Capsule(ExplorationTask(name + "Exploration", sampling))
-    val analyse = Capsule(LenormandAnalyseTask(name + "Analyse", algorithm, statePrototype, terminatedPrototype))
+    val explorationTask = ExplorationTask(name + "Exploration", sampling)
+    explorationTask addParameter Parameter(statePrototype, algorithm.initialState)
+    explorationTask addOutput statePrototype
 
-    (first -- exploration -< model >- analyse -- last) +
-      (analyse -- exploration) +
-      (first oo model.first) +
-      (first -- (last, terminatedPrototype.name + " == true"))
+    val exploration = StrainerCapsule(explorationTask)
+
+    val analyse = Slot(StrainerCapsule(LenormandAnalyseTask(name + "Analyse", algorithm, statePrototype, terminatedPrototype)))
+
+    val continue = Condition(terminatedPrototype.name + " == true")
+
+    val modelVariables = algorithm.priorPrototypes.map(_.name) ++ algorithm.targetPrototypes.map(_.name)
+
+    val puzzle =
+      (exploration -< (preModel, filter = Block(statePrototype.name)) -- model -- postModel >- analyse -- (last, !continue)) +
+        (exploration -- (analyse, filter = Block(modelVariables: _*))) +
+        (preModel -- postModel) +
+        (exploration oo (model.first, filter = Block(modelVariables: _*))) +
+        (analyse -- (exploration, continue, filter = Block(modelVariables: _*)))
+
+    new Puzzle(puzzle) {
+      val output = analyse
+      val state = statePrototype
+    }
   }
 
 }

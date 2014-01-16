@@ -35,8 +35,8 @@ object ABC {
   def jabotMover = new JabotMover {}
 
   def lenormand(
-    targets: Seq[(Prototype[Double], Double)],
     priors: Seq[((Prototype[Double], (Double, Double)))],
+    targets: Seq[(Prototype[Double], Double)],
     simulations: Int,
     minimumProportionOfAccepted: Double = 0.05,
     alpha: Double = 1.0,
