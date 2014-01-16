@@ -45,6 +45,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
   lazy val resAssemblyProject: Seq[Project.Setting[_]] = Seq(
     resourceSets := Set.empty,
+    setExecutable := Set.empty,
     resTask,
     zipFiles <++= resourceAssemble map { (f: Set[File]) ⇒ f.toSeq },
     assemble <<= assemble dependsOn resourceAssemble
