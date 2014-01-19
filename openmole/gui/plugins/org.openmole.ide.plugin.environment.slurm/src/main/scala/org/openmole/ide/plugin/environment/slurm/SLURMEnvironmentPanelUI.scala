@@ -118,7 +118,6 @@ class SLURMEnvironmentPanelUI(pud: SLURMEnvironmentDataUI)(implicit val i18n: Re
   add(pathTextField, new Help(i18n.getString("category"), i18n.getString("dirEx")))
   add(queueTextField, new Help(i18n.getString("queue"), i18n.getString("queueEx")))
   add(openMOLEMemoryTextField, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
-  // TODO: create i18n file for SLURM
   add(gresTextField, new Help(i18n.getString("gres"), i18n.getString("gresEx")))
   add(constraintsTextField, new Help(i18n.getString("constraints"), i18n.getString("constraintsEx")))
 
