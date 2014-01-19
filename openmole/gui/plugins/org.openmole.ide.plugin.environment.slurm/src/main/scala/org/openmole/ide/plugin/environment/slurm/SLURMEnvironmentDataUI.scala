@@ -10,26 +10,32 @@ import org.openmole.plugin.environment.slurm.SLURMEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.ide.core.implementation.data.EnvironmentDataUI
 import org.openmole.misc.workspace.Workspace
+import fr.iscpif.gridscale.slurm.Gres
 
 class SLURMEnvironmentDataUI(val name: String = "",
-                           val login: String = "",
-                           val host: String = "",
-                           val port: Int = 22,
-                           val queue: Option[String] = None,
-                           val openMOLEMemory: Option[Int] = Some(BatchEnvironment.defaultRuntimeMemory),
-                           val wallTime: Option[String] = None,
-                           val memory: Option[Int] = None,
-                           val path: Option[String] = None,
-			   val gres: List[Gres] = List(),
-			   val constraints: List[String] = List()
-			   // not supported yet in GridScale
-//                           val threads: Option[Int] = None,
-//                           val nodes: Option[Int] = None,
-//                           val coreByNode: Option[Int] = None)
+                             val login: String = "",
+                             val host: String = "",
+                             val port: Int = 22,
+                             val queue: Option[String] = None,
+                             val openMOLEMemory: Option[Int] = Some(BatchEnvironment.defaultRuntimeMemory),
+                             val wallTime: Option[String] = None,
+                             val memory: Option[Int] = None,
+                             val path: Option[String] = None,
+                             val gres: String = "",
+                             val constraints: String = "")
+    // not supported yet in GridScale
+    //                           val threads: Option[Int] = None,
+    //                           val nodes: Option[Int] = None,
+    //                           val coreByNode: Option[Int] = None)
     extends EnvironmentDataUI {
   ui ⇒
 
   def coreObject = util.Try {
+
+    val gresList = gres.split('&') map (g ⇒
+      g.split(':') match { case Array(s: String, i: String) ⇒ new Gres(s, i toInt) }) toList
+    val constraintsList = constraints.split('&') toList
+
     SLURMEnvironment(login,
       host,
       port,
@@ -38,14 +44,16 @@ class SLURMEnvironmentDataUI(val name: String = "",
       wallTime,
       memory,
       path,
-      gres,
-      constraints)(Workspace.authenticationProvider)
+      gresList,
+      constraintsList)(Workspace.authenticationProvider)
   }
 
   def coreClass = classOf[SLURMEnvironment]
 
+  // TODO: create image
   override def imagePath = "img/slurm.png"
 
+  // TODO: create image
   def fatImagePath = "img/slurm_fat.png"
 
   def buildPanelUI = new SLURMEnvironmentPanelUI(this)

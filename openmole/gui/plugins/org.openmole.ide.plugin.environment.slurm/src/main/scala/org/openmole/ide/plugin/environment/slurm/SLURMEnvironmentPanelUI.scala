@@ -65,13 +65,13 @@ class SLURMEnvironmentPanelUI(pud: SLURMEnvironmentDataUI)(implicit val i18n: Re
   val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory, 4)
   val wallTimeTextField = new TextField(pud.wallTime.getOrElse(""), 4)
   val memoryTextField = new TextField(pud.memory, 4)
-  val gresTextField = new TextField(pud.gres.getOrElse(""), 15)
-  val constraintsTextField = new TextField(pud.constraints.getOrElse(""), 15)
+  val gresTextField = new TextField(pud.gres, 30)
+  val constraintsTextField = new TextField(pud.constraints, 30)
 
- // not supported (yet) in GridScale
-//  val threadsTextField = new TextField(pud.threads, 4)
-//  val nodesTextField = new TextField(pud.nodes, 4)
-//  val coreByNodeTextField = new TextField(pud.coreByNode, 4)
+  // not supported (yet) in GridScale
+  //  val threadsTextField = new TextField(pud.threads, 4)
+  //  val nodesTextField = new TextField(pud.nodes, 4)
+  //  val coreByNodeTextField = new TextField(pud.coreByNode, 4)
 
   val components = List(("Settings",
     new PluginPanel("wrap 2") {
@@ -118,6 +118,9 @@ class SLURMEnvironmentPanelUI(pud: SLURMEnvironmentDataUI)(implicit val i18n: Re
   add(pathTextField, new Help(i18n.getString("category"), i18n.getString("dirEx")))
   add(queueTextField, new Help(i18n.getString("queue"), i18n.getString("queueEx")))
   add(openMOLEMemoryTextField, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
+  // TODO: create i18n file for SLURM
+  add(gresTextField, new Help(i18n.getString("gres"), i18n.getString("gresEx")))
+  add(constraintsTextField, new Help(i18n.getString("constraints"), i18n.getString("constraintsEx")))
 
   override def saveContent(name: String) =
     new SLURMEnvironmentDataUI(name,

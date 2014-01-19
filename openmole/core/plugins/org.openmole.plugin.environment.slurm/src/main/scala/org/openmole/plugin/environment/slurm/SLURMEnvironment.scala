@@ -28,6 +28,7 @@ import org.openmole.core.batch.storage.StorageService
 import org.openmole.misc.workspace._
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._
+import fr.iscpif.gridscale.slurm.Gres
 
 object SLURMEnvironment {
   val MaxConnections = new ConfigurationLocation("SLURMEnvironment", "MaxConnections")
@@ -60,11 +61,11 @@ class SLURMEnvironment(
     val wallTime: Option[String],
     val memory: Option[Int],
     val path: Option[String],
-    override val threads: Option[Int],
+    //override val threads: Option[Int],
     val gres: List[Gres],
     val constraints: List[String],
-    val nodes: Option[Int],
-    val coreByNode: Option[Int],
+    //val nodes: Option[Int],
+    //val coreByNode: Option[Int],
     val workDirectory: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
 
   type SS = PersistentStorageService
