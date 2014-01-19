@@ -22,6 +22,9 @@ object Environment extends PluginDefaults {
   lazy val pbs = OsgiProject("pbs") dependsOn (Misc.exception, Misc.workspace, provided(Core.batch), gridscale, ssh) settings
     (Libraries.includeGridscalePBS)
 
+  lazy val slurm = OsgiProject("slurm") dependsOn (Misc.exception, Misc.workspace, provided(Core.batch), gridscale, ssh) settings
+    (Libraries.includeGridscaleSLURM)
+
   lazy val ssh = OsgiProject("ssh") dependsOn (Misc.exception, Misc.workspace, Misc.eventDispatcher, provided(Core.batch), gridscale) settings
     (Libraries.includeGridscaleSSH)
 

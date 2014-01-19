@@ -80,6 +80,7 @@ object Application extends Defaults {
           sbtPluginTemplate("environment.desktopgrid"),
           sbtPluginTemplate("environment.ssh"),
           sbtPluginTemplate("environment.pbs"),
+          sbtPluginTemplate("environment.slurm"),
           sbtPluginTemplate("grouping.onvariable"),
           sbtPluginTemplate("grouping.batch"),
           sbtPluginTemplate("task.netlogo"),
@@ -122,6 +123,7 @@ object Application extends Defaults {
           "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.ssh" % gridscaleVersion intransitive (), //TODO deal with these
           "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.http" % gridscaleVersion intransitive (),
           "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.pbs" % gridscaleVersion intransitive (),
+          "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.slurm" % gridscaleVersion intransitive (),
           "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.dirac" % gridscaleVersion intransitive (),
           "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.glite" % gridscaleVersion intransitive (),
           "fr.iscpif.gridscale.bundle" % "org.bouncycastle" % gridscaleVersion intransitive ()
@@ -152,6 +154,7 @@ object Application extends Defaults {
           sbtPluginTemplate("environment.local"),
           sbtPluginTemplate("environment.glite"),
           sbtPluginTemplate("environment.pbs"),
+          sbtPluginTemplate("environment.slurm"),
           sbtPluginTemplate("environment.desktopgrid"),
           sbtPluginTemplate("environment.ssh"),
           sbtPluginTemplate("method.sensitivity"),

@@ -28,6 +28,8 @@ object Libraries extends Defaults(Apache) {
 
   lazy val includeGridscalePBS = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.pbs" % gridscaleVersion
 
+  lazy val includeGridscaleSLURM = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.slurm" % gridscaleVersion
+
   lazy val includeGridscaleGlite = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.glite" % gridscaleVersion
 
   lazy val includeGridscaleDirac = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.dirac" % gridscaleVersion
