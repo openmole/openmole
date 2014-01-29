@@ -24,26 +24,46 @@ import fr.iscpif.mgo._
 
 object GenomeScaling {
 
-  def scaled(scales: List[(Prototype[Double], (GroovyFunction, GroovyFunction))], genome: List[Double], context: Context): List[Variable[Double]] =
+  def scaled(scales: List[(Input, (GroovyFunction, GroovyFunction))], genome: List[Double], context: Context): List[Variable[_]] =
     if (scales.isEmpty || genome.isEmpty) List.empty
     else {
-      val (p, (vMin, vMax)) = scales.head
-      val dMin = vMin(context).toString.toDouble
-      val dMax = vMax(context).toString.toDouble
-      val scaledV = Variable(p, genome.head.scale(dMin, dMax))
-      scaledV :: scaled(scales.tail, genome.tail, context + scaledV)
+      val sc = scaled(scales.head, context, genome)
+      val (variable, tail) =
+        sc match {
+          case ScaledScalar(s, v)   ⇒ Variable(s.prototype, v) -> genome.tail
+          case ScaledSequence(s, v) ⇒ Variable(s.prototype, v) -> genome.drop(s.size)
+        }
+
+      variable :: scaled(scales.tail, tail.toList, context + variable)
     }
 
-  def groovyProxies(scales: Traversable[(Prototype[Double], (String, String))]) =
-    scales.map { case (p, (min, max)) ⇒ p -> (GroovyProxyPool(min), GroovyProxyPool(max)) }
+  def scaled(input: (Input, (GroovyFunction, GroovyFunction)), context: Context, genomePart: Seq[Double]) = {
+    val (i, (vMin, vMax)) = input
+    val dMin = vMin(context).toString.toDouble
+    val dMax = vMax(context).toString.toDouble
 
-  type Scale = (Prototype[Double], (String, String))
+    i match {
+      case s @ Scalar(p, _, _)         ⇒ ScaledScalar(s, genomePart.head.scale(dMin, dMax))
+      case s @ Sequence(p, _, _, size) ⇒ ScaledSequence(s, genomePart.take(size).toArray.map(_.scale(dMin, dMax)))
+    }
+  }
+
+  sealed trait Scaled
+  case class ScaledSequence(input: Sequence, s: Array[Double]) extends Scaled
+  case class ScaledScalar(input: Scalar, v: Double) extends Scaled
+
+  def groovyProxies(inputs: Inputs) =
+    inputs.inputs.map {
+      case s @ Scalar(_, min, max)      ⇒ s -> (GroovyProxyPool(min), GroovyProxyPool(max))
+      case s @ Sequence(_, min, max, _) ⇒ s -> (GroovyProxyPool(min), GroovyProxyPool(max))
+    }
 
 }
 
 trait GenomeScaling {
 
-  def scales: Seq[GenomeScaling.Scale]
+  def scales: Inputs
+
   def scaled(genome: Seq[Double], context: Context) = GenomeScaling.scaled(groovyScales.toList, genome.toList, context)
 
   @transient lazy val groovyScales = GenomeScaling.groovyProxies(scales)

@@ -35,9 +35,9 @@ object ScalingGAGenomeTask {
   def apply[T <: GAGenome](
     name: String,
     genome: Prototype[T],
-    scales: (Prototype[Double], (String, String))*)(implicit plugins: PluginSet) =
+    scales: Inputs)(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
-      scales foreach { case (p, _) ⇒ this.addOutput(p) }
+      scales.inputs foreach { i ⇒ this.addOutput(i.prototype) }
       addInput(genome)
       addOutput(genome)
 
@@ -49,7 +49,7 @@ object ScalingGAGenomeTask {
 sealed abstract class ScalingGAGenomeTask[T <: GAGenome](
     val name: String,
     val genome: Prototype[T],
-    val scales: Seq[(Prototype[Double], (String, String))]) extends Task with GenomeScaling {
+    val scales: Inputs) extends Task with GenomeScaling {
 
   override def process(context: Context) = context ++ scaled(context(genome).values, context)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 22/11/12 Romain Reuillon
+ * Copyright (C) 27/01/14 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,13 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method
+package org.openmole.plugin.method.evolution
 
 import org.openmole.core.model.data.Prototype
+import util.Try
 
-package object evolution {
-  val GA = algorithm.GA
+sealed trait Input {
+  def min: String
+  def max: String
+  def prototype: Prototype[_]
+  def size: Int
+}
 
-  implicit def seqToInputsConversion(s: Seq[(Prototype[Double], (String, String))]) =
-    Inputs(s.map { case (p, (min, max)) ⇒ Scalar(p, min, max) })
+case class Scalar(prototype: Prototype[Double], min: String, max: String) extends Input {
+  def size = 1
+}
+
+case class Sequence(prototype: Prototype[Array[Double]], min: String, max: String, size: Int) extends Input
+
+case class Inputs(inputs: Seq[Input]) {
+  def size: Int =
+    Try(inputs.map(_.size).sum).getOrElse(0)
 }

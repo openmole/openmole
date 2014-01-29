@@ -34,7 +34,7 @@ object SaveProfileHook {
   def apply(
     individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
     profile: GA.GAProfile,
-    scales: Seq[GenomeScaling.Scale],
+    scales: Inputs,
     path: String) =
     new HookBuilder {
       addInput(individual.toArray)
@@ -46,7 +46,7 @@ object SaveProfileHook {
 abstract class SaveProfileHook(
     val individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
     val profile: GA.GAProfile,
-    val scales: Seq[GenomeScaling.Scale],
+    val scales: Inputs,
     val path: String) extends Hook with GenomeScaling {
 
   def process(context: Context, executionContext: ExecutionContext) = {

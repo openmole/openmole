@@ -31,7 +31,7 @@ object ScalingGAIndividualsTask {
   def apply[G <: GAGenome, P, F <: MGFitness, MF](
     name: String,
     individuals: Prototype[Array[Individual[G, P, F]]],
-    scales: (GenomeScaling.Scale)*)(implicit plugins: PluginSet) =
+    scales: Inputs)(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
       private var objectives = new ListBuffer[Prototype[Double]]
@@ -43,7 +43,7 @@ object ScalingGAIndividualsTask {
       }
 
       addInput(individuals)
-      scales foreach { case (p, _) ⇒ this addOutput p.toArray }
+      scales.inputs foreach { i ⇒ this.addOutput(i.prototype.toArray) }
 
       def toTask = new ScalingGAIndividualsTask(name, individuals, scales) with Built {
         val objectives = builder.objectives.toList
@@ -55,18 +55,21 @@ object ScalingGAIndividualsTask {
 sealed abstract class ScalingGAIndividualsTask[G <: GAGenome, P, F <: MGFitness, MF](
     val name: String,
     val individuals: Prototype[Array[Individual[G, P, F]]],
-    val scales: Seq[GenomeScaling.Scale]) extends Task with GenomeScaling {
+    val scales: Inputs) extends Task with GenomeScaling {
 
   def objectives: List[Prototype[Double]]
 
   override def process(context: Context) = {
     val individualsValue = context(individuals)
-    val genomeValues =
-      individualsValue.toArray.map {
-        i ⇒ scaled(i.genome.values, context).map(_.value).toArray
-      }.transpose
+    val scaledValues = individualsValue.map(i ⇒ scaled(i.genome.values, context).toIndexedSeq)
 
-    (genomeValues zip scales.map(_._1)).map { case (g, p) ⇒ Variable(p.toArray, g) }.toList ++
+    scales.inputs.zipWithIndex.map {
+      case (input, i) ⇒
+        input match {
+          case Scalar(prototype, _, _)      ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Double]).toArray[Double])
+          case Sequence(prototype, _, _, _) ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Array[Double]]).toArray[Array[Double]])
+        }
+    }.toList ++
       objectives.zipWithIndex.map {
         case (p, i) ⇒
           Variable(
