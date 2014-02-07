@@ -55,6 +55,10 @@ object Libraries extends Defaults(Apache) {
     exportPackage += "com.fasterxml.*"
   )
 
+  //jacksonJson
+
+  //lazy val x = Project("org.openmole.mathieu", file("/"))
+
   lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl")) settings
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9")
 
