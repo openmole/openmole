@@ -18,7 +18,7 @@ name := "openmole-buildsystem-plugin"
 
 organization := "org.openmole"
 
-version := "0.10.10"
+version := "0.10.11"
 
 resolvers += Classpaths.sbtPluginSnapshots
 

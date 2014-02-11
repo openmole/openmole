@@ -46,7 +46,7 @@ object OMKeys {
 
   val innerZipFolder = SettingKey[Option[String]]("innerZipFolder", "All files in zipFiles will be put under this folder")
 
-  val setExecutable = SettingKey[Set[File]]("setExecutable")
+  val setExecutable = SettingKey[Set[String]]("setExecutable", "Sets the path relative to the assemble folder executable")
 
   val downloadUrls = TaskKey[Seq[File]]("download-urls")
 

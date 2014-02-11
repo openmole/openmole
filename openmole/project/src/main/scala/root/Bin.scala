@@ -50,6 +50,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     },
     resourceSets <+= (baseDirectory) map { _ / "db-resources" -> "dbserver/bin" },
     resourceSets <+= (copyDependencies in openmolePlugins) map { _ -> "openmole-plugins" },
+    setExecutable += "openmole",
     tarGZName := Some("openmole"),
     innerZipFolder := Some("openmole"),
     dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle" || m.organization == "org.bouncycastle" }
@@ -72,6 +73,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
       urls <++= target { t ⇒ Seq(java368URL -> t / "jvm-386.tar.gz", javax64URL -> t / "jvm-x64.tar.gz") },
       libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion intransitive (),
       tarGZName := Some("runtime"),
+      setExecutable += "run.sh",
       resourceSets <+= baseDirectory map { _ / "resources" -> "." },
       dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") })
 

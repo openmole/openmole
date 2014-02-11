@@ -65,22 +65,27 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
         val resourceMap = (rS flatMap { case (in, out) ⇒ expand(in, in, out) }).groupBy(_._1).collect { case (k, v) ⇒ k -> (v map (_._2)) }
 
-        val expandedExecSet = sE flatMap rExpand
+        val expandedExecSet = sE map (cT / _) flatMap rExpand
+
+        s.log.info(s"List of files to be marked executable: $expandedExecSet")
 
         val copyFunction = FileFunction.cached(target / ("resAssembleCache" + name), FilesInfo.lastModified, FilesInfo.exists) {
           f ⇒
-            f flatMap {
+            val res = f flatMap {
               rT ⇒
                 val dests = resourceMap(rT)
 
                 for (dest ← dests) {
-                  s.log.info("Copying file " + rT.getPath + " to: " + dest.getCanonicalPath)
+                  s.log.info(s"Copying file ${rT.getPath} to ${dest.getCanonicalPath} ${if (expandedExecSet.contains(dest)) "(e)" else ""}")
                   IO.copyFile(rT, dest)
-                  if (expandedExecSet.contains(rT)) dest.setExecutable(true)
                   dest
                 }
+
                 dests
             }
+
+            expandedExecSet foreach (ex ⇒ if (!ex.exists()) s.log.error(s"$ex does not exist. Maybe you typed the wrong relative path?") else ex.setExecutable(true))
+            res
         }
 
         copyFunction(resourceMap.keySet)
