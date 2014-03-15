@@ -71,6 +71,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
   override protected def _submit(serializedJob: SerializedJob) = quality {
     delegated {
       import serializedJob._
+      import GliteJobService.Log._
 
       val script = Workspace.newFile("script", ".sh")
       try {
@@ -80,15 +81,15 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
 
         val scriptContent = generateScript(serializedJob, outputFilePath, Some(_runningPath), Some(_finishedPath))
 
-        GliteJobService.logger.fine(scriptContent)
-
         Resource.fromFile(script).write(scriptContent)
 
         val jobDescription = buildJobDescription(script)
 
-        //logger.fine(jobDescription.toJDL)
+        logger.fine(s"""Submitting job: "$jobDescription.toJDL" with script "$scriptContent" """)
 
         val jid = jobService.submit(jobDescription)(authentication)
+
+        logger.fine(s"""Job successfully submitted with job service ${jobService.url} and id ${jid}""")
 
         new GliteJob {
           val jobService = js
