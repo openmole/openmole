@@ -32,25 +32,30 @@ import org.openmole.misc.tools.script.{ GroovyFunction, GroovyProxyPool, GroovyP
 
 object ScalingGAGenomeTask {
 
-  def apply[T <: GAGenome](
+  def apply(evolution: GA)(
     name: String,
-    genome: Prototype[T],
-    scales: Inputs)(implicit plugins: PluginSet) =
+    genome: Prototype[evolution.G],
+    scales: Inputs)(implicit plugins: PluginSet) = {
+
+    val (_name, _genome, _scales) = (name, genome, scales)
     new TaskBuilder { builder ⇒
       scales.inputs foreach { i ⇒ this.addOutput(i.prototype) }
       addInput(genome)
       addOutput(genome)
 
-      def toTask = new ScalingGAGenomeTask[T](name, genome, scales) with Built
+      def toTask = new ScalingGAGenomeTask(evolution) with Built {
+        val name = _name
+        val genome = _genome.asInstanceOf[Prototype[evolution.G]]
+        val scales = _scales
+      }
     }
+  }
 
 }
 
-sealed abstract class ScalingGAGenomeTask[T <: GAGenome](
-    val name: String,
-    val genome: Prototype[T],
-    val scales: Inputs) extends Task with GenomeScaling {
+sealed abstract class ScalingGAGenomeTask(val evolution: GA) extends Task with GenomeScaling {
+  val genome: Prototype[evolution.G]
+  val scales: Inputs
 
-  override def process(context: Context) = context ++ scaled(context(genome).values, context)
-
+  override def process(context: Context) = context ++ scaled(evolution.values.get(context(genome)), context)
 }

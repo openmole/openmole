@@ -28,10 +28,13 @@ import scala.collection.mutable.ListBuffer
 
 object ScalingGAIndividualsTask {
 
-  def apply[G <: GAGenome, P, F <: MGFitness, MF](
+  def apply[P, F <: MGFitness, MF](evolution: GA)(
     name: String,
-    individuals: Prototype[Array[Individual[G, P, F]]],
-    scales: Inputs)(implicit plugins: PluginSet) =
+    individuals: Prototype[Array[Individual[evolution.G, P, F]]],
+    scales: Inputs)(implicit plugins: PluginSet) = {
+
+    val (_name, _individuals, _scales) = (name, individuals, scales)
+
     new TaskBuilder { builder ⇒
 
       private var objectives = new ListBuffer[Prototype[Double]]
@@ -45,23 +48,26 @@ object ScalingGAIndividualsTask {
       addInput(individuals)
       scales.inputs foreach { i ⇒ this.addOutput(i.prototype.toArray) }
 
-      def toTask = new ScalingGAIndividualsTask(name, individuals, scales) with Built {
+      def toTask = new ScalingGAIndividualsTask[P, F, MF](evolution) with Built {
+        val name = _name
+        val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, P, F]]]]
+        val scales = _scales
         val objectives = builder.objectives.toList
       }
     }
+  }
 
 }
 
-sealed abstract class ScalingGAIndividualsTask[G <: GAGenome, P, F <: MGFitness, MF](
-    val name: String,
-    val individuals: Prototype[Array[Individual[G, P, F]]],
-    val scales: Inputs) extends Task with GenomeScaling {
+sealed abstract class ScalingGAIndividualsTask[P, F <: MGFitness, MF](val evolution: GA) extends Task with GenomeScaling {
 
-  def objectives: List[Prototype[Double]]
+  val individuals: Prototype[Array[Individual[evolution.G, P, F]]]
+  val scales: Inputs
+  val objectives: List[Prototype[Double]]
 
   override def process(context: Context) = {
     val individualsValue = context(individuals)
-    val scaledValues = individualsValue.map(i ⇒ scaled(i.genome.values, context).toIndexedSeq)
+    val scaledValues = individualsValue.map(i ⇒ scaled(evolution.values.get(i.genome), context).toIndexedSeq)
 
     scales.inputs.zipWithIndex.map {
       case (input, i) ⇒

@@ -19,7 +19,7 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.task.Task._
+import org.openmole.core.implementation.task._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.misc.tools.service.Random._
@@ -56,7 +56,7 @@ sealed abstract class SelectIndividualsTask(
   def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
 
   override def process(context: Context) = {
-    implicit val rng = newRNG(context(openMOLESeed))
+    implicit val rng = Task.buildRNG(context)
     val is = context(individuals)
     val newIs = (0 until size).map { i ⇒ is(rng.nextInt(is.size)) }.toArray
     Variable(individuals, newIs)

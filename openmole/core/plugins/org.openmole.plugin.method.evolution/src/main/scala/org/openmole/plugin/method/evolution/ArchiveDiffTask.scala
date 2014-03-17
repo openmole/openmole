@@ -56,8 +56,8 @@ abstract sealed class ArchiveDiffTask(val evolution: Archive)(
 
   override def process(context: Context) = {
     val diff = evolution.diff(
-      context.valueOrException(originalArchive),
-      context.valueOrException(newArchive))
+      context(originalArchive),
+      context(newArchive))
     Context(Variable(newArchive, diff))
   }
 }

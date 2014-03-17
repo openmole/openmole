@@ -70,7 +70,7 @@ package object evolution {
     breedTask.addParameter(individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
     breedTask.addParameter(archive -> evolution.initialArchive)
 
-    val scalingGenomeTask = ScalingGAGenomeTask(name + "ScalingGenome", genome, inputs)
+    val scalingGenomeTask = ScalingGAGenomeTask(evolution)(name + "ScalingGenome", genome, inputs)
 
     val toIndividualTask = ToIndividualTask(evolution)(name + "ToIndividual", genome, individual, objectives)
 
@@ -91,7 +91,7 @@ package object evolution {
       state,
       terminated)
 
-    val scalingIndividualsTask = ScalingGAIndividualsTask(name + "ScalingIndividuals", individual.toArray, inputs)
+    val scalingIndividualsTask = ScalingGAIndividualsTask(evolution)(name + "ScalingIndividuals", individual.toArray, inputs)
 
     objectives.foreach {
       case (o, _) ⇒ scalingIndividualsTask addObjective o
@@ -364,7 +364,7 @@ package object evolution {
 
     val islandSlot = Slot(MoleTask(name + "MoleTask", model))
 
-    val scalingIndividualsTask = ScalingGAIndividualsTask(name + "ScalingIndividuals", individual.toArray, model.inputs)
+    val scalingIndividualsTask = ScalingGAIndividualsTask(evolution)(name + "ScalingIndividuals", individual.toArray, model.inputs)
 
     model.objectives.foreach {
       case (o, _) ⇒ scalingIndividualsTask addObjective o
