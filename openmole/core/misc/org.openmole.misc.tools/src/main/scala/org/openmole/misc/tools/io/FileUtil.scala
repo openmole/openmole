@@ -48,6 +48,7 @@ import scala.io.Source
 import org.openmole.misc.tools.service._
 import scala.util.{ Try, Failure, Success }
 import java.util.UUID
+import java.util.zip.ZipFile
 
 object FileUtil {
 
@@ -472,6 +473,14 @@ object FileUtil {
     }
 
     def newFile(prefix: String, suffix: String): File = new File(file, prefix + UUID.randomUUID + suffix)
+
+    def isJar = Try {
+      val zip = new ZipFile(file)
+      val hasManifestEntry =
+        try zip.getEntry("META-INF/MANIFEST.MF") != null
+        finally zip.close
+      hasManifestEntry
+    }.getOrElse(false)
 
   }
 

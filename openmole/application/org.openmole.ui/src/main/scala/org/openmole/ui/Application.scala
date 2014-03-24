@@ -33,6 +33,7 @@ import org.openmole.ui.console.Console
 import annotation.tailrec
 import org.openmole.web._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.logging.LoggerService
 
 class Application extends IApplication with Logger {
 
@@ -62,7 +63,8 @@ class Application extends IApplication with Logger {
       server: Boolean = false,
       allowInsecureConnections: Boolean = false,
       serverPort: Option[Int] = None,
-      serverSSLPort: Option[Int] = None)
+      serverSSLPort: Option[Int] = None,
+      loggerLevel: Option[String] = None)
 
     def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
@@ -90,6 +92,7 @@ class Application extends IApplication with Logger {
         case "-sp" :: tail                          ⇒ parse(tail.tail, c.copy(serverPort = Some(tail.head.toInt))) // Server port
         case "-ssp" :: tail                         ⇒ parse(tail.tail, c.copy(serverSSLPort = Some(tail.head.toInt)))
         case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
+        case "--logger-level" :: tail               ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
         case s :: tail                              ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                    ⇒ c
       }
@@ -97,6 +100,8 @@ class Application extends IApplication with Logger {
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]]
 
     val config = parse(args.toList)
+
+    config.loggerLevel.foreach(LoggerService.level)
 
     val (userPlugins, notExisting) = config.userPlugins.map(p ⇒ new File(p)).partition(_.exists)
 

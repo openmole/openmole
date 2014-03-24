@@ -81,25 +81,44 @@ class Runtime {
       System.setErr(errSt)
     }
 
+    def getReplicatedFile(replicatedFile: ReplicatedFile) = {
+      val cache = Workspace.newFile
+
+      logger.fine("Downloading file " + replicatedFile.path)
+      storage.downloadGZ(replicatedFile.path, cache)
+      val cacheHash = HashService.computeHash(cache).toString
+
+      if (cacheHash != replicatedFile.hash)
+        throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.src.toString + " replicated at " + replicatedFile.path)
+
+      if (replicatedFile.directory) {
+        val local = Workspace.newDir("dirReplica")
+        cache.extractDirArchiveWithRelativePath(local)
+        local.mode = replicatedFile.mode
+        cache.delete
+        local
+      }
+      else {
+        cache.mode = replicatedFile.mode
+        cache
+      }
+    }
+
     val beginTime = System.currentTimeMillis
 
     val result = try {
       logger.fine("Downloading plugins")
 
-      val pluginDir = Workspace.newDir
+      //val pluginDir = Workspace.newDir
 
-      for (plugin ← executionMessage.plugins) {
-        val inPluginDirLocalFile = File.createTempFile("plugin", ".jar", pluginDir)
-        logger.fine("Downloading plugin" + plugin.path)
-        storage.downloadGZ(plugin.path, inPluginDirLocalFile)
+      val plugins =
+        for {
+          plugin ← executionMessage.plugins
+        } yield plugin -> getReplicatedFile(plugin)
 
-        if (HashService.computeHash(inPluginDirLocalFile).toString != plugin.hash)
-          throw new InternalProcessingError("Hash of a plugin does't match.")
+      PluginManager.load(plugins.unzip._2)
 
-        usedFiles.put(plugin.src, inPluginDirLocalFile)
-      }
-
-      PluginManager.loadDir(pluginDir)
+      for { (p, f) ← plugins } usedFiles.put(p.src, f)
 
       /* --- Download the files for the local file cache ---*/
       logger.fine("Downloading files")
@@ -108,25 +127,7 @@ class Runtime {
 
         //To avoid getting twice the same plugin with different path
         if (!usedFiles.containsKey(repliURI.src)) {
-          val cache = Workspace.newFile
-
-          logger.fine("Downloading file " + repliURI.path)
-          storage.downloadGZ(repliURI.path, cache)
-          val cacheHash = HashService.computeHash(cache).toString
-
-          if (cacheHash != repliURI.hash)
-            throw new InternalProcessingError("Hash is incorrect for file " + repliURI.src.toString + " replicated at " + repliURI.path)
-
-          val local = if (repliURI.directory) {
-            val local = Workspace.newDir("dirReplica")
-            cache.extractDirArchiveWithRelativePath(local)
-            local
-          }
-          else {
-            cache.mode = repliURI.mode
-            cache
-          }
-
+          val local = getReplicatedFile(repliURI)
           usedFiles.put(repliURI.src, local)
         }
       }

@@ -22,6 +22,7 @@ import java.io.FileFilter
 import java.io.FileInputStream
 import org.openmole.misc.pluginmanager.internal.Activator
 import org.openmole.misc.tools.service.Logger
+import org.openmole.misc.tools.io.FileUtil._
 import org.osgi.framework.Bundle
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
@@ -33,8 +34,6 @@ import org.openmole.misc.exception._
 import org.openmole.misc.osgi._
 
 object PluginManager extends Logger {
-
-  private val defaultPattern = ".*\\.jar"
 
   private var files = Map.empty[File, (Long, Long)]
   private var resolvedDirectDependencies = HashMap.empty[Long, HashSet[Long]]
@@ -77,15 +76,20 @@ object PluginManager extends Logger {
     }
   }
 
-  def plugins(path: File) =
-    path.listFiles(new FileFilter {
-      override def accept(file: File): Boolean =
-        file.isFile && file.exists && file.getName.matches(defaultPattern)
+  def plugins(path: File): Iterable[File] = {
+    def isDirectoryPlugin(file: File) = file.isDirectory && file.child("META-INF").child("MANIFEST.MF").exists
 
-    })
+    if (isDirectoryPlugin(path) || path.isJar) List(path)
+    else
+      path.listFiles(new FileFilter {
+        override def accept(file: File): Boolean =
+          (file.isFile && file.exists && file.isJar) ||
+            isDirectoryPlugin(file)
+      })
+  }
 
   def load(files: Iterable[File]) = synchronized {
-    val bundles = files.flatMap { f ⇒ if (f.isDirectory) plugins(f) else List(f) }.map { installBundle }.toList
+    val bundles = files.flatMap { plugins }.map { installBundle }.toList
     bundles.foreach { _.start }
   }
 
@@ -94,10 +98,7 @@ object PluginManager extends Logger {
     bundles.foreach { _.start }
   }
 
-  def load(path: File): Unit = synchronized {
-    if (path.isDirectory) loadDir(path)
-    else installBundle(path).start
-  }
+  def load(path: File): Unit = load(List(path))
 
   def loadDir(path: File): Unit =
     if (path.exists && path.isDirectory) load(plugins(path))
@@ -122,18 +123,20 @@ object PluginManager extends Logger {
   }
 
   private def installBundle(f: File) = try {
+    logger.fine(s"Install bundle $f")
+
     if (!f.exists) throw new UserBadDataError("Bundle file " + f + " doesn't exists.")
     val file = f.getCanonicalFile
 
     files.get(file) match {
       case None ⇒
         val ret = Activator.contextOrException.installBundle(file.toURI.toString)
-        files += file -> ((ret.getBundleId, file.lastModified))
+        files += file -> ((ret.getBundleId, file.lastModification))
         ret
       case Some(bundleId) ⇒
         val bundle = Activator.contextOrException.getBundle(bundleId._1)
         //FileService.invalidate(bundle, file)
-        if (file.lastModified != bundleId._2) {
+        if (file.lastModification != bundleId._2) {
           val is = new FileInputStream(f)
           try bundle.update(is)
           finally is.close
@@ -158,7 +161,7 @@ object PluginManager extends Logger {
 
     resolvedPluginDependenciesCache = new HashMap[Long, Iterable[Long]]
     providedDependencies = dependencies(bundles.filter(b ⇒ b.isProvided).map { _.getBundleId }).toSet
-    files = bundles.map(b ⇒ b.file.getCanonicalFile -> ((b.getBundleId, b.file.lastModified))).toMap
+    files = bundles.map(b ⇒ b.file.getCanonicalFile -> ((b.getBundleId, b.file.lastModification))).toMap
   }
 
   private def allDependingBundles(b: Bundle): Iterable[Bundle] =
@@ -173,5 +176,4 @@ object PluginManager extends Logger {
     else Iterable.empty
   }
 
-  def load(path: String): Unit = load(new File(path))
 }
