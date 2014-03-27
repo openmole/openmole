@@ -232,23 +232,13 @@ object FileUtil {
           else curFrom.copyFile(curTo))
 
       goThrough((curFrom, curTo) ⇒ curTo.setSamePermissionsAs(curFrom))
+      toF
     }
 
     def setSamePermissionsAs(other: File) = {
       file.setExecutable(other.canExecute)
       file.setReadable(other.canRead)
       file.setWritable(other.canWrite)
-    }
-
-    def copyFile(toF: File) = {
-      val from = new FileInputStream(file).getChannel
-
-      try {
-        val to = new FileOutputStream(toF).getChannel
-        try FileUtil.copy(from, to) finally to.close
-      }
-      finally from.close
-      toF
     }
 
     def copyCompress(toF: File): File = {
@@ -271,6 +261,18 @@ object FileUtil {
       toF
     }
 
+
+    def copyFile(toF: File) = {
+      val from = new FileInputStream(file).getChannel
+
+      try {
+        val to = new FileOutputStream(toF).getChannel
+        try FileUtil.copy(from, to) finally to.close
+      }
+      finally from.close
+      toF
+    }
+    
     def copy(to: OutputStream): Unit = {
       val fromIS = new FileInputStream(file)
       try fromIS.copy(to) finally fromIS.close
