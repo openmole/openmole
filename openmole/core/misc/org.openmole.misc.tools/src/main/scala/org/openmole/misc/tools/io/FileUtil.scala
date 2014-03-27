@@ -240,7 +240,7 @@ object FileUtil {
       file.setWritable(other.canWrite)
     }
 
-    def copyFile(toF: File): Unit = {
+    def copyFile(toF: File) = {
       val from = new FileInputStream(file).getChannel
 
       try {
@@ -248,23 +248,27 @@ object FileUtil {
         try FileUtil.copy(from, to) finally to.close
       }
       finally from.close
+      toF
     }
 
-    def copyCompress(toF: File): Unit = {
+    def copyCompress(toF: File): File = {
       if (toF.isDirectory) toF.archiveCompressDirWithRelativePathNoVariableContent(file)
       else copyCompressFile(toF)
+      toF
     }
 
-    def copyCompressFile(toF: File): Unit = {
+    def copyCompressFile(toF: File): File = {
       val to = new GZIPOutputStream(new FileOutputStream(toF))
       try file.copy(to) finally to.close
+      toF
     }
 
-    def copyUncompressFile(toF: File): Unit = {
+    def copyUncompressFile(toF: File): File = {
       val from = new GZIPInputStream(new FileInputStream(file))
 
       try from.copy(toF)
       finally from.close
+      toF
     }
 
     def copy(to: OutputStream): Unit = {
@@ -283,6 +287,7 @@ object FileUtil {
         copy(to)
         recursiveDelete
       }
+      to
     }
 
     def isSymbolicLink = {
