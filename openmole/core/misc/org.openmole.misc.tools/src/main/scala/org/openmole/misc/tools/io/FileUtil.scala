@@ -261,7 +261,6 @@ object FileUtil {
       toF
     }
 
-
     def copyFile(toF: File) = {
       val from = new FileInputStream(file).getChannel
 
@@ -272,7 +271,7 @@ object FileUtil {
       finally from.close
       toF
     }
-    
+
     def copy(to: OutputStream): Unit = {
       val fromIS = new FileInputStream(file)
       try fromIS.copy(to) finally fromIS.close
