@@ -84,14 +84,13 @@ class Runtime {
     def getReplicatedFile(replicatedFile: ReplicatedFile) = {
       val cache = Workspace.newFile
 
-      logger.fine("Downloading file " + replicatedFile.path)
       storage.downloadGZ(replicatedFile.path, cache)
       val cacheHash = HashService.computeHash(cache).toString
 
       if (cacheHash != replicatedFile.hash)
         throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.src.toString + " replicated at " + replicatedFile.path)
 
-      if (replicatedFile.directory) {
+      val dl = if (replicatedFile.directory) {
         val local = Workspace.newDir("dirReplica")
         cache.extractDirArchiveWithRelativePath(local)
         local.mode = replicatedFile.mode
@@ -102,6 +101,9 @@ class Runtime {
         cache.mode = replicatedFile.mode
         cache
       }
+
+      logger.fine("Downloaded file " + replicatedFile + " to " + dl)
+      dl
     }
 
     val beginTime = System.currentTimeMillis
@@ -116,7 +118,9 @@ class Runtime {
           plugin ← executionMessage.plugins
         } yield plugin -> getReplicatedFile(plugin)
 
-      PluginManager.load(plugins.unzip._2)
+      logger.fine("Plugins " + plugins.unzip._2)
+
+      PluginManager.tryLoad(plugins.unzip._2)
 
       for { (p, f) ← plugins } usedFiles.put(p.src, f)
 

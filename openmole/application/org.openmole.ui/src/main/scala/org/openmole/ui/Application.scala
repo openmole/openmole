@@ -102,11 +102,10 @@ class Application extends IApplication with Logger {
 
     config.loggerLevel.foreach(LoggerService.level)
 
-    val (userPlugins, notExisting) = config.userPlugins.map(p ⇒ new File(p)).partition(_.exists)
+    val userPlugins =
+      config.userPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) }
 
-    notExisting.foreach {
-      f ⇒ logger.warning(s"Plugin file $f doesn't exists.")
-    }
+    logger.fine(s"Loading user plugins " + userPlugins)
 
     val plugins: List[String] =
       config.pluginsDirs ++

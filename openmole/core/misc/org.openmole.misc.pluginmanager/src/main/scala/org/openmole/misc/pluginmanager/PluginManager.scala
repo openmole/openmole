@@ -32,6 +32,7 @@ import org.osgi.framework.BundleListener
 import scala.collection.JavaConversions._
 import org.openmole.misc.exception._
 import org.openmole.misc.osgi._
+import util.Try
 
 object PluginManager extends Logger {
 
@@ -90,6 +91,26 @@ object PluginManager extends Logger {
           (file.isFile && file.exists && file.isJar) ||
             isDirectoryPlugin(file)
       })
+  }
+
+  def tryLoad(files: Iterable[File]) = synchronized {
+    val bundles =
+      files.flatMap { plugins }.flatMap {
+        b ⇒
+          try {
+            Some(installBundle(b))
+          }
+          catch {
+            case e: Throwable ⇒
+              logger.log(WARNING, s"Error installing bundle $b", e)
+              None
+          }
+      }.toList
+    bundles.foreach {
+      b ⇒
+        logger.fine(s"Stating bundle ${b.getLocation}")
+        b.start
+    }
   }
 
   def load(files: Iterable[File]) = synchronized {
