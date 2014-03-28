@@ -31,6 +31,7 @@ import org.openmole.core.model.transition.IExplorationTransition
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.HashMap
+import org.openmole.misc.pluginmanager.PluginManager
 
 class Command {
 
@@ -93,6 +94,9 @@ class Command {
 
   def load[T](f: File) = SerialiserService.deserialise[T](f)
   def save(o: Any, f: File) = SerialiserService.serialise(o, f)
+
+  def bundles = PluginManager.bundles
+  def dependencies(file: File) = PluginManager.dependencies(file)
 
 }
 

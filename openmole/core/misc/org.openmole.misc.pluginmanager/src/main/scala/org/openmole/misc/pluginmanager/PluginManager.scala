@@ -49,6 +49,10 @@ object PluginManager extends Logger {
     }
   })
 
+  def bundles = files.keys
+  def dependencies(file: File): Option[Iterable[File]] =
+    files.get(file).map { case (id, _) ⇒ allPluginDependencies(id).map { l ⇒ Activator.contextOrException.getBundle(l).file } }
+
   def isClassProvidedByAPlugin(c: Class[_]) = {
     val b = Activator.packageAdmin.getBundle(c)
     if (b != null) !providedDependencies.contains(b.getBundleId)
@@ -90,7 +94,11 @@ object PluginManager extends Logger {
 
   def load(files: Iterable[File]) = synchronized {
     val bundles = files.flatMap { plugins }.map { installBundle }.toList
-    bundles.foreach { _.start }
+    bundles.foreach {
+      b ⇒
+        logger.fine(s"Stating bundle ${b.getLocation}")
+        b.start
+    }
   }
 
   def loadIfNotAlreadyLoaded(plugins: Iterable[File]) = synchronized {

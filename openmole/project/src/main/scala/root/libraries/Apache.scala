@@ -25,7 +25,7 @@ object Apache extends Defaults {
     (libraryDependencies += "org.apache.commons" % "commons-exec" % "1.1", bundleType += "runtime")
 
   lazy val log4j = OsgiProject("org.apache.log4j") settings
-    (libraryDependencies += "log4j" % "log4j" % "1.2.17", bundleType += "runtime")
+    (libraryDependencies += "log4j" % "log4j" % "1.2.17", bundleType += "runtime", version := "1.2.17")
 
   lazy val logging = OsgiProject("org.apache.commons.logging") settings
     (libraryDependencies += "commons-logging" % "commons-logging" % "1.1.1", bundleType += "runtime", version := "1.1.1")
