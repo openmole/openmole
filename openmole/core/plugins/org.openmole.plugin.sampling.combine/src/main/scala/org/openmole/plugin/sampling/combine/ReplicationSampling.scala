@@ -24,17 +24,20 @@ import org.openmole.plugin.domain.modifier._
 
 object ReplicationSampling {
 
-  def apply[T](sampling: Sampling, seeder: Factor[T, Domain[T] with Discrete[T]], replications: Int) =
-    new ReplicationSampling(sampling, seeder, replications)
+  def apply[T](sampling: Sampling, seeder: Factor[T, Domain[T] with Discrete[T]], replications: Int): ReplicationSampling[T] =
+    apply(sampling, Factor(seeder.prototype, seeder.domain.take(replications)))
+
+  def apply[T](sampling: Sampling, seeder: Factor[T, Domain[T] with Discrete[T] with Finite[T]]): ReplicationSampling[T] =
+    new ReplicationSampling(sampling, seeder)
 
 }
 
-sealed class ReplicationSampling[T](sampling: Sampling, seeder: Factor[T, Domain[T] with Discrete[T]], replications: Int) extends Sampling {
+sealed class ReplicationSampling[T](sampling: Sampling, seeder: Factor[T, Domain[T] with Discrete[T] with Finite[T]]) extends Sampling {
 
   override def inputs = sampling.inputs ++ seeder.inputs
   override def prototypes = seeder.prototype :: sampling.prototypes.toList
 
   override def build(context: Context): Iterator[Iterable[Variable[_]]] =
-    CompleteSampling(sampling, Factor(seeder.prototype, seeder.domain.take(replications))).build(context)
+    CompleteSampling(sampling, seeder).build(context)
 
 }

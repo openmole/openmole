@@ -45,6 +45,7 @@ package object combine {
     def take(n: Int) = TakeSampling(s, n)
     def shuffle = ShuffleSampling(s)
     def replicate[T](seeder: Factor[T, Domain[T] with Discrete[T]], replications: Int) = ReplicationSampling(s, seeder, replications)
+    def replicate[T2](seeder: Factor[T2, Domain[T2] with Discrete[T2] with Finite[T2]]) = ReplicationSampling(s, seeder)
   }
 
   implicit def zipWithNameFactorDecorator(factor: Factor[File, Domain[File] with Discrete[File]]) = new {
@@ -58,6 +59,7 @@ package object combine {
     def take(n: Int) = TakeSampling(f, n)
     def shuffle = ShuffleSampling(f)
     def replicate[T2](seeder: Factor[T2, Domain[T2] with Discrete[T2]], replications: Int) = ReplicationSampling(f, seeder, replications)
+    def replicate[T2](seeder: Factor[T2, Domain[T2] with Discrete[T2] with Finite[T2]]) = ReplicationSampling(f, seeder)
   }
 
 }
