@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Romain Reuillon
+ * Copyright (C) 2012 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,26 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling.modifier
+package org.openmole.plugin.sampling.combine
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
-object ZipWithIndexSampling {
+object TakeSampling {
 
-  def apply(sampling: Sampling, index: Prototype[Int]) =
-    new ZipWithIndexSampling(sampling, index)
+  def apply(sampling: Sampling, n: Int) =
+    new TakeSampling(sampling, n)
 
 }
 
-sealed class ZipWithIndexSampling(val sampling: Sampling, val index: Prototype[Int]) extends Sampling {
+sealed class TakeSampling(val sampling: Sampling, val n: Int) extends Sampling {
 
   override def inputs = sampling.inputs
-  override def prototypes = index :: sampling.prototypes.toList
+  override def prototypes = sampling.prototypes
 
   override def build(context: Context): Iterator[Iterable[Variable[_]]] =
-    sampling.build(context).zipWithIndex.map {
-      case (line, i) ⇒ line ++ List(Variable(index, i))
-    }
+    sampling.build(context).take(n)
 
 }

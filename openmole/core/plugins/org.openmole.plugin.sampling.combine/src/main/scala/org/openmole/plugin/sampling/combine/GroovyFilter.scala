@@ -15,24 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling.modifier
+package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.model.data._
-import org.openmole.core.model.sampling._
+import org.openmole.misc.tools.script.GroovyProxy
+import org.openmole.core.implementation.tools.GroovyContextAdapter
+import org.openmole.core.model.data.Context
 
-object FilteredSampling {
+class GroovyFilter(code: String) extends Filter {
+  @transient lazy val groovyProxy = new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
 
-  def apply(sampling: Sampling, filters: Filter*) =
-    new FilteredSampling(sampling, filters: _*)
-
-}
-
-sealed class FilteredSampling(sampling: Sampling, filters: Filter*) extends Sampling {
-
-  override def inputs = sampling.inputs
-  override def prototypes = sampling.prototypes
-
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
-    sampling.build(context).filter(sample ⇒ !filters.exists(!_(Context(sample))))
-
+  def apply(factorsValues: Context) = groovyProxy.execute(factorsValues).asInstanceOf[Boolean]
 }

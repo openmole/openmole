@@ -15,10 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling.modifier
+package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.model.data.Context
+import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
 
-trait Filter {
-  def apply(factorsValues: Context): Boolean
+object FilteredSampling {
+
+  def apply(sampling: Sampling, filters: Filter*) =
+    new FilteredSampling(sampling, filters: _*)
+
+}
+
+sealed class FilteredSampling(sampling: Sampling, filters: Filter*) extends Sampling {
+
+  override def inputs = sampling.inputs
+  override def prototypes = sampling.prototypes
+
+  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
+    sampling.build(context).filter(sample ⇒ !filters.exists(!_(Context(sample))))
+
 }

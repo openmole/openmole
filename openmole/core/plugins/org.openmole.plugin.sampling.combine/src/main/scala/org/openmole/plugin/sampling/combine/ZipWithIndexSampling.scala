@@ -15,27 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling.modifier
+package org.openmole.plugin.sampling.combine
 
 import org.openmole.core.model.data._
-import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
-import org.openmole.plugin.sampling.combine._
-import org.openmole.plugin.domain.modifier._
 
-object ReplicationSampling {
+object ZipWithIndexSampling {
 
-  def apply[T](sampling: Sampling, seeder: Factor[T, Domain[T] with Discrete[T]], replications: Int) =
-    new ReplicationSampling(sampling, seeder, replications)
+  def apply(sampling: Sampling, index: Prototype[Int]) =
+    new ZipWithIndexSampling(sampling, index)
 
 }
 
-sealed class ReplicationSampling[T](sampling: Sampling, seeder: Factor[T, Domain[T] with Discrete[T]], replications: Int) extends Sampling {
+sealed class ZipWithIndexSampling(val sampling: Sampling, val index: Prototype[Int]) extends Sampling {
 
-  override def inputs = sampling.inputs ++ seeder.inputs
-  override def prototypes = seeder.prototype :: sampling.prototypes.toList
+  override def inputs = sampling.inputs
+  override def prototypes = index :: sampling.prototypes.toList
 
   override def build(context: Context): Iterator[Iterable[Variable[_]]] =
-    CompleteSampling(sampling, Factor(seeder.prototype, seeder.domain.take(replications))).build(context)
+    sampling.build(context).zipWithIndex.map {
+      case (line, i) ⇒ line ++ List(Variable(index, i))
+    }
 
 }

@@ -17,7 +17,6 @@
 package org.openmole.ide.plugin.sampling.modifier
 
 import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
-import org.openmole.plugin.sampling.modifier.ShuffleSampling
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.panel.NoParameterSamplingPanelUI
 import org.openmole.ide.misc.widget.{ URL, Helper }
@@ -25,6 +24,7 @@ import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.ide.core.implementation.sampling.{ FiniteUI, SamplingUtils }
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 import java.util.{ Locale, ResourceBundle }
+import org.openmole.plugin.sampling.combine.ShuffleSampling
 
 class ShuffleSamplingDataUI010 extends SamplingDataUI {
   def name = "Shuffle"

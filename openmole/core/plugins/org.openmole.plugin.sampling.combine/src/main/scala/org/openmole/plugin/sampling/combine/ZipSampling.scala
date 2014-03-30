@@ -15,12 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling.modifier
+package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
-import org.openmole.core.model.sampling._
-import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
 import scala.collection.mutable.ListBuffer
 

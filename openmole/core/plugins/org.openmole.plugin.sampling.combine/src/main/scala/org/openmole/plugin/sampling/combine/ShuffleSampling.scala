@@ -15,9 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling.modifier
+package org.openmole.plugin.sampling.combine
 
-import java.util.Random
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 import org.openmole.misc.tools.service.Random._
