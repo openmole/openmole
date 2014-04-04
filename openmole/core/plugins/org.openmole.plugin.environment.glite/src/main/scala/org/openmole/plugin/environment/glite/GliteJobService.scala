@@ -98,6 +98,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
           val runningPath = _runningPath
           val id = jid
           val resultPath = outputFilePath
+          val description = jobDescription
         }
       }
       finally script.delete
