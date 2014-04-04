@@ -28,6 +28,7 @@ import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }
 import org.openmole.core.batch.control.LimitedAccess
 import StatusFiles._
 import scalax.io.Resource
+import java.io.File
 
 trait DIRACGliteJobService extends GridScaleJobService with JobScript with LimitedAccess { js ⇒
 
@@ -50,7 +51,7 @@ trait DIRACGliteJobService extends GridScaleJobService with JobScript with Limit
       val jobDescription = new DIRACJobDescription {
         override def stdOut = if(environment.debug) Some("out") else None
         override def stdErr = if(environment.debug) Some("err") else None
-        def outputSandbox = if(environment.debug) Seq("out, err") else Seq.empty
+        def outputSandbox = if(environment.debug) Seq("out" -> new File("out"), "err" -> new File("err")) else Seq.empty
         def inputSandbox = Seq(script)
         def arguments = script.getName
         def executable = "/bin/bash"
