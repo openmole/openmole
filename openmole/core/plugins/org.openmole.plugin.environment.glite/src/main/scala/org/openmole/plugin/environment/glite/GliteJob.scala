@@ -24,12 +24,14 @@ import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.misc.workspace._
 import org.openmole.core.batch.storage.StorageService
 import org.openmole.misc.tools.service.Logger
+import fr.iscpif.gridscale.glite.WMSJobDescription
 
 object GliteJob extends Logger
 
 trait GliteJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
   var lastShacked = System.currentTimeMillis
   val jobService: GliteJobService
+  val description: WMSJobDescription
 
   override def updateState(implicit token: AccessToken) = {
     state = testStatusFile(super.updateState)
@@ -64,7 +66,9 @@ trait GliteJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
       state match {
         case SUBMITTED ⇒ jobService.incrementSubmitted
         case RUNNING   ⇒ jobService.incrementRunning
-        case DONE      ⇒ jobService.incrementDone
+        case DONE      ⇒
+          jobService.incrementDone
+          if(jobService.environment.debug) jobService.jobService.downloadOutputSandbox(description, id)
         case _         ⇒
       }
     }
