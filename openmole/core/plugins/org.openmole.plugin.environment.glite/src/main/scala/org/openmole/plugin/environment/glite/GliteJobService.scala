@@ -110,9 +110,9 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       val executable = "/bin/bash"
       val arguments = script.getName
       val inputSandbox = List(script)
-      override def stdOutput = if(environment.debug) "out" else ""
-      override def stdError = if(environment.debug) "err" else ""
-      def outputSandbox = if(environment.debug) Seq("out" -> Workspace.newFile("job",".out"), "err" -> Workspace.newFile("job",".out")) else Seq.empty
+      override def stdOutput = if (environment.debug) "out" else ""
+      override def stdError = if (environment.debug) "err" else ""
+      def outputSandbox = if (environment.debug) Seq("out" -> Workspace.newFile("job", ".out"), "err" -> Workspace.newFile("job", ".out")) else Seq.empty
 
       override val memory = Some(environment.requieredMemory)
       override val cpuTime = environment.cpuTime.map(_.toMinutes)

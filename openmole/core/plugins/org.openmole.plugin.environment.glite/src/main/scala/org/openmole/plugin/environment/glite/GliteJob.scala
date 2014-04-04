@@ -66,11 +66,17 @@ trait GliteJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
       state match {
         case SUBMITTED ⇒ jobService.incrementSubmitted
         case RUNNING   ⇒ jobService.incrementRunning
-        case DONE      ⇒
-          jobService.incrementDone
-          if(jobService.environment.debug) jobService.jobService.downloadOutputSandbox(description, id)(jobService.authentication)
+        case DONE      ⇒ jobService.incrementDone
         case _         ⇒
       }
+
+      if (jobService.environment.debug)
+        state match {
+          case DONE   ⇒ jobService.jobService.downloadOutputSandbox(description, id)(jobService.authentication)
+          case FAILED ⇒ jobService.jobService.downloadOutputSandbox(description, id)(jobService.authentication)
+          case _      ⇒
+        }
+
     }
     super.state = state
   }
