@@ -68,7 +68,7 @@ trait GliteJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
         case RUNNING   ⇒ jobService.incrementRunning
         case DONE      ⇒
           jobService.incrementDone
-          if(jobService.environment.debug) jobService.jobService.downloadOutputSandbox(description, id)
+          if(jobService.environment.debug) jobService.jobService.downloadOutputSandbox(description, id)(jobService.authentication)
         case _         ⇒
       }
     }
