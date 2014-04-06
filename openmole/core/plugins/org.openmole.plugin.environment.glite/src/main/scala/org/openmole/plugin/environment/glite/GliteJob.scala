@@ -34,7 +34,7 @@ trait GliteJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
   val description: WMSJobDescription
 
   override def updateState(implicit token: AccessToken) = {
-    state = if(!jobService.environment.debug) testStatusFile(super.updateState) else super.updateState
+    state = if (!jobService.environment.debug) testStatusFile(super.updateState) else super.updateState
 
     //if (!state.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
     if (state == SUBMITTED) {

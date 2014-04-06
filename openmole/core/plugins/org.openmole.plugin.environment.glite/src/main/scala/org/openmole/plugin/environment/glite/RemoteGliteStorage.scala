@@ -23,7 +23,7 @@ import org.openmole.misc.exception._
 import fr.iscpif.gridscale.glite.{ SRMStorage, ProxyFileAuthentication, VOMSAuthentication }
 import java.io.File
 
-class RemoteGliteStorage(val host: String, val port: Int, permissive: Boolean, certificateDir: File) extends SimpleStorage { s ⇒
+class RemoteGliteStorage(val host: String, val port: Int, permissive: Boolean) extends SimpleStorage { s ⇒
 
   def root = ""
   val timeout = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds
@@ -39,11 +39,11 @@ class RemoteGliteStorage(val host: String, val port: Int, permissive: Boolean, c
 
   def authentication: SRMStorage#A = new ProxyFileAuthentication {
     def proxy = {
-      //val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
+      val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
 
-      //      val certificateDir =
-      //        if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists) new File(X509_CERT_DIR)
-      //        else throw new InternalProcessingError("X509_CERT_DIR environment variable not found or directory doesn't exists.")
+      val certificateDir =
+        if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists) new File(X509_CERT_DIR)
+        else throw new InternalProcessingError("X509_CERT_DIR environment variable not found or directory doesn't exists.")
 
       VOMSAuthentication.setCARepository(certificateDir)
 
