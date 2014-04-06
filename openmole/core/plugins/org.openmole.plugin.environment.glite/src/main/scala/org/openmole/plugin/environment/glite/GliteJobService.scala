@@ -91,15 +91,15 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
 
         logger.fine(s"""Job successfully submitted with job service ${jobService.url} and with id ${jid.id}""")
 
-        new GliteJob {
+        val job = new GliteJob {
           val jobService = js
           val storage = serializedJob.storage
           val finishedPath = _finishedPath
           val runningPath = _runningPath
           val id = jid
           val resultPath = outputFilePath
-          val description = jobDescription
         }
+        if (!environment.debug) job else GliteJob.debug(job, jobDescription)
       }
       finally script.delete
     }
