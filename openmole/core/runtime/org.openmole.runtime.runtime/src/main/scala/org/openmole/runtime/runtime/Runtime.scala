@@ -63,7 +63,7 @@ class Runtime {
 
     val executionMessage =
       Workspace.withTmpFile { executionMesageFileCache ⇒
-        storage.downloadGZ(inputMessagePath, executionMesageFileCache)
+        retry(storage.downloadGZ(inputMessagePath, executionMesageFileCache))
         SerialiserService.deserialise[ExecutionMessage](executionMesageFileCache)
       }
 
@@ -84,7 +84,7 @@ class Runtime {
     def getReplicatedFile(replicatedFile: ReplicatedFile) = {
       val cache = Workspace.newFile
 
-      storage.downloadGZ(replicatedFile.path, cache)
+      retry(storage.downloadGZ(replicatedFile.path, cache))
       val cacheHash = HashService.computeHash(cache).toString
 
       if (cacheHash != replicatedFile.hash)
@@ -138,7 +138,7 @@ class Runtime {
 
       val jobsFileCache = Workspace.newFile
       logger.fine("Downloading execution message")
-      storage.downloadGZ(executionMessage.jobs.path, jobsFileCache)
+      retry(storage.downloadGZ(executionMessage.jobs.path, jobsFileCache))
 
       if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
 
@@ -193,7 +193,7 @@ class Runtime {
     val outputMessage =
       if (out.length != 0) {
         val output = storage.child(executionMessage.communicationDirPath, Storage.uniqName("output", ".txt"))
-        storage.uploadGZ(out, output)
+        retry(storage.uploadGZ(out, output))
         Some(new FileMessage(output, HashService.computeHash(out).toString))
       }
       else None
@@ -203,7 +203,7 @@ class Runtime {
     val errorMessage =
       if (err.length != 0) {
         val errout = storage.child(executionMessage.communicationDirPath, Storage.uniqName("outputError", ".txt"))
-        storage.uploadGZ(err, errout)
+        retry(storage.uploadGZ(err, errout))
         Some(new FileMessage(errout, HashService.computeHash(err).toString))
       }
       else None
