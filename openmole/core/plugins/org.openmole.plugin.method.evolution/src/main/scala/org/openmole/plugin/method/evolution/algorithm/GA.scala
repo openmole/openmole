@@ -84,6 +84,10 @@ object GA {
     }
   }
 
+  def hierarchical = new GARankingBuilder {
+    def apply(dominance: Dominance) = new HierarchicalRanking with GARanking {}
+  }
+
   trait GADiversityMetric extends DiversityMetric with GAType
 
   trait DiversityMetricBuilder {
