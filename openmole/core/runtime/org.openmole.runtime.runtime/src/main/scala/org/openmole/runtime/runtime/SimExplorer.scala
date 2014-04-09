@@ -78,7 +78,7 @@ class SimExplorer extends IApplication with Logger {
         val storage =
           try {
             new File(config.storage.get).copyUncompressFile(storageFile)
-            SerialiserService.deserialiseAndExtractFiles[SimpleStorage](storageFile)
+            SerialiserService.deserialiseAndExtractFiles[RemoteStorage](storageFile)
           }
           finally storageFile.delete
 

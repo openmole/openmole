@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2012 reuillon
+ * Copyright (C) 2014 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,14 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.desktopgrid
+package org.openmole.core.batch.storage
 
-import org.openmole.core.batch.storage.{ RemoteStorage, SimpleStorage }
-import fr.iscpif.gridscale.LocalStorage
+import java.io.File
 
-class LocalSimpleStorage extends SimpleStorage with RemoteStorage {
-  val storage = new LocalStorage {}
-  val root = ""
-  val authentication: Unit = Unit
+trait RemoteStorage {
+  def upload(src: File, dest: String): Unit
+  def uploadGZ(src: File, dest: String): Unit
+  def download(src: String, dest: File): Unit
+  def downloadGZ(src: String, dest: File): Unit
+  def child(parent: String, child: String): String
 }
-

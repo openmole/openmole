@@ -44,7 +44,7 @@ trait BDIISRMServers extends BatchEnvironment {
   override def allStorages = {
     val stors = bdiiServer.querySRM(voName, Workspace.preferenceAsDuration(GliteEnvironment.FetchResourcesTimeOut).toSeconds.toInt)
     stors.map {
-      s ⇒ GliteStorageService(s, this, proxyCreator, threadsBySE, permissive, GliteAuthentication.CACertificatesDir)
+      s ⇒ GliteStorageService(s, this, proxyCreator, threadsBySE, permissive)
     }
   }
 

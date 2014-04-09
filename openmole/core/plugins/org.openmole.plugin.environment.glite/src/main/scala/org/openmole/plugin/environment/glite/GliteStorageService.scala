@@ -36,10 +36,10 @@ object GliteStorageService {
       override def permissive = _permissive
     }
 
-  def apply(s: SRMStorage, _environment: BatchEnvironment, _authentication: GlobusAuthentication.ProxyCreator, threads: Int, permissive: Boolean, caCertDir: File) = new GliteStorageService {
+  def apply(s: SRMStorage, _environment: BatchEnvironment { def voName: String }, _authentication: GlobusAuthentication.ProxyCreator, threads: Int, permissive: Boolean) = new GliteStorageService {
     val storage = emptyRoot(s, permissive)
     val url = new URI("srm", null, s.host, s.port, null, null, null)
-    val remoteStorage = new RemoteGliteStorage(s.host, s.port, permissive)
+    val remoteStorage = new RemoteGliteStorage(s.host, s.port, _environment.voName)
     val environment = _environment
     val root = s.basePath
     def nbTokens = threads

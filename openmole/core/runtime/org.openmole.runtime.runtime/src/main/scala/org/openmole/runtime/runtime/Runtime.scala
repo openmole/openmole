@@ -54,7 +54,7 @@ class Runtime {
 
   import Runtime._
 
-  def apply(storage: SimpleStorage, communicationDirPath: String, inputMessagePath: String, outputMessagePath: String, debug: Boolean) = {
+  def apply(storage: RemoteStorage, communicationDirPath: String, inputMessagePath: String, outputMessagePath: String, debug: Boolean) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[File, File]

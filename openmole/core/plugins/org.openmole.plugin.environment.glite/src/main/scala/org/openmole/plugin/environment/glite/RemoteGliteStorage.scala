@@ -17,43 +17,57 @@
 
 package org.openmole.plugin.environment.glite
 
-import org.openmole.core.batch.storage.SimpleStorage
+import org.openmole.core.batch.storage.{ RemoteStorage, SimpleStorage }
 import org.openmole.misc.workspace._
 import org.openmole.misc.exception._
-import fr.iscpif.gridscale.glite.{ SRMStorage, ProxyFileAuthentication, VOMSAuthentication }
+import org.openmole.misc.tools.io.FileUtil._
+import fr.iscpif.gridscale.{ Storage ⇒ GSStorage }
 import java.io.File
+import java.net.URI
+import scala.sys.process._
 
-class RemoteGliteStorage(val host: String, val port: Int, permissive: Boolean) extends SimpleStorage { s ⇒
+class RemoteGliteStorage(val host: String, val port: Int, voName: String) extends RemoteStorage { s ⇒
 
-  def root = ""
   val timeout = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds
 
-  @transient lazy val storage =
-    new SRMStorage {
-      val host: String = s.host
-      val port: Int = s.port
-      val basePath: String = ""
-      override def permissive = s.permissive
-      override val timeout = s.timeout
-    }
+  @transient lazy val url = new URI("srm", null, host, port, null, null, null)
 
-  def authentication: SRMStorage#A = new ProxyFileAuthentication {
-    def proxy = {
-      val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
-      lazy val defaultDir = new File("/etc/grid-security/certificates")
+  def lcgCp = s"lcg-cp --vo ${voName} --checksum $timeOutCmd "
+  def lcgDel = s"lcg-del --vo ${voName} $timeOutCmd "
 
-      val certificateDir =
-        if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists) new File(X509_CERT_DIR)
-        else if (defaultDir.exists) defaultDir
-        else throw new InternalProcessingError("X509_CERT_DIR environment variable not found or directory doesn't exists.")
+  def timeOutCmd = s"--connect-timeout $timeout --sendreceive-timeout $timeout --srm-timeout $timeout"
 
-      VOMSAuthentication.setCARepository(certificateDir)
+  def lcgCpCmd(from: String, to: URI) = s"$lcgCp file:$from ${to.toString}"
+  def lcgCpCmd(from: URI, to: String) = s"$lcgCp ${from.toString} file:$to"
 
-      val path =
-        if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) System.getenv.get("X509_USER_PROXY")
-        else throw new InternalProcessingError("The X509_USER_PROXY environment variable is not defined or point to an inexisting file.")
+  protected def run(cmd: String) = {
+    val output = new StringBuilder
+    val error = new StringBuilder
 
-      new File(path)
-    }
+    val logger =
+      ProcessLogger(
+        (o: String) ⇒ output.append(o),
+        (e: String) ⇒ error.append(e)
+      )
+
+    val exit = Process(cmd) ! logger
+    if (exit != 0) throw new RuntimeException(s"Command $cmd had a non 0 return value. Output: ${output.toString}. Error: ${error.toString}")
+    output.toString
   }
+
+  override def child(parent: String, child: String): String = GSStorage.child(parent, child)
+
+  override def downloadGZ(src: String, dest: File): Unit = Workspace.withTmpFile { tmpFile ⇒
+    download(src, tmpFile)
+    tmpFile.copyUncompressFile(dest)
+  }
+
+  override def download(src: String, dest: File): Unit = run(lcgCpCmd(url.resolve(src), dest.getAbsolutePath))
+
+  override def uploadGZ(src: File, dest: String): Unit = Workspace.withTmpFile { tmpFile ⇒
+    src.copyCompress(tmpFile)
+    uploadGZ(tmpFile, dest)
+  }
+
+  override def upload(src: File, dest: String): Unit = run(lcgCpCmd(src.getAbsolutePath, url.resolve(dest)))
 }
