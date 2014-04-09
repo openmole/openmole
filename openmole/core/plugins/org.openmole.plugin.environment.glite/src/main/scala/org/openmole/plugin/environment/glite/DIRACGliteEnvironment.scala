@@ -66,7 +66,7 @@ class DIRACGliteEnvironment(
     val fqan: Option[String],
     val cpuTime: Option[String],
     override val openMOLEMemory: Option[Int],
-    val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId { env ⇒
+    val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId with LCGCp { env ⇒
 
   type JS = DIRACGliteJobService
 

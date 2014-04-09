@@ -25,8 +25,7 @@ import scala.collection.mutable.ListBuffer
 
 trait JobScript {
 
-  def environment: BatchEnvironment {
-    def voName: String
+  def environment: BatchEnvironment with LCGCp {
     def debug: Boolean
   }
 
@@ -78,7 +77,7 @@ trait JobScript {
         script += lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
       }
 
-      script += lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz")
+      script += environment.lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz")
 
       "mkdir envplugins && " + script.mkString(" && ")
     }
@@ -101,20 +100,11 @@ trait JobScript {
 
   protected def touch(dest: URI) = {
     val name = UUID.randomUUID.toString
-    s"touch $name && ${lcgCpCmd(name, dest)}; rm -f $name"
+    s"touch $name && ${environment.lcgCpCmd(name, dest)}; rm -f $name"
   }
 
   protected def lcgCpGunZipCmd(from: URI, to: String) =
-    s"( ${lcgCpCmd(from, to + ".gz")} && gunzip $to.gz )"
-
-  @transient lazy val lcgCp =
-    s"lcg-cp --vo ${environment.voName} --checksum --connect-timeout $getTimeOut --sendreceive-timeout $getTimeOut --srm-timeout $getTimeOut "
-
-  protected def lcgCpCmd(from: String, to: URI) = s"$lcgCp file:$from ${to.toString}"
-
-  protected def lcgCpCmd(from: URI, to: String) = s"$lcgCp ${from.toString} file:$to"
-
-  private def getTimeOut = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds.toString
+    s"( ${environment.lcgCpCmd(from, to + ".gz")} && gunzip $to.gz )"
 
   private def background(s: String) = "( " + s + " & )"
 }

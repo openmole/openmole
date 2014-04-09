@@ -38,6 +38,7 @@ import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
 import fr.iscpif.gridscale.glite.{ GlobusAuthentication, WMSJobService, BDII }
 import fr.iscpif.gridscale.RenewDecorator
+import java.net.URI
 
 object GliteEnvironment extends Logger {
 
@@ -211,7 +212,7 @@ class GliteEnvironment(
     val architecture: Option[String],
     override val threads: Option[Int],
     val requirements: Option[String],
-    val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId { env ⇒
+    val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId with LCGCp { env ⇒
 
   import GliteEnvironment._
 
