@@ -96,7 +96,7 @@ trait JobScript {
     val finish =
       finishedPath.map { p ⇒ touch(storage.url.resolve(p)) + "; " }.getOrElse("") + "cd .. &&  rm -rf $CUR"
 
-    catProxy + " ; " + init + " && " + install + " && " + dl + " && " + run + "; RETURNCODE=$?;" + finish + "; exit $RETURNCODE;"
+    (if (environment.debug) catProxy + " ; " else "") + init + " && " + install + " && " + dl + " && " + run + "; RETURNCODE=$?;" + finish + "; exit $RETURNCODE;"
   }
 
   protected def touch(dest: URI) = {
