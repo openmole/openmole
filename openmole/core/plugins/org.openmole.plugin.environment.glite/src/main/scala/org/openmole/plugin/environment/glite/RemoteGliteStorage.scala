@@ -26,19 +26,11 @@ import java.io.File
 import java.net.URI
 import scala.sys.process._
 
-class RemoteGliteStorage(val host: String, val port: Int, voName: String) extends RemoteStorage { s ⇒
+class RemoteGliteStorage(val host: String, val port: Int, val voName: String) extends RemoteStorage with LCGCp { s ⇒
 
   val timeout = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds
 
   @transient lazy val url = new URI("srm", null, host, port, null, null, null)
-
-  def lcgCp = s"lcg-cp --vo ${voName} --checksum $timeOutCmd "
-  def lcgDel = s"lcg-del --vo ${voName} $timeOutCmd "
-
-  def timeOutCmd = s"--connect-timeout $timeout --sendreceive-timeout $timeout --srm-timeout $timeout"
-
-  def lcgCpCmd(from: String, to: URI) = s"$lcgCp file:$from ${to.toString}"
-  def lcgCpCmd(from: URI, to: String) = s"$lcgCp ${from.toString} file:$to"
 
   protected def run(cmd: String) = {
     val output = new StringBuilder
