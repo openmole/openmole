@@ -39,7 +39,7 @@ trait JobScript {
 
     assert(runtime.runtime.path != null)
 
-    val catProxy = "env ; echo $X509_USER_PROXY ; cat $X509_USER_PROXY"
+    val catProxy = s"echo ${serializedJob.storage.url} ; " + "env ; echo $X509_USER_PROXY ; cat $X509_USER_PROXY"
 
     val init = {
       val script = ListBuffer[String]()
