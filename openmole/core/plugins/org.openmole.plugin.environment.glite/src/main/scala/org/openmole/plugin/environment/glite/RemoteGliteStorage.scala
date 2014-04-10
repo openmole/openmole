@@ -57,7 +57,7 @@ class RemoteGliteStorage(val host: String, val port: Int, val voName: String) ex
   override def download(src: String, dest: File): Unit = run(lcgCpCmd(url.resolve(src), dest.getAbsolutePath))
 
   override def uploadGZ(src: File, dest: String): Unit = Workspace.withTmpFile { tmpFile ⇒
-    src.copyCompress(tmpFile)
+    src.copyCompressFile(tmpFile)
     upload(tmpFile, dest)
   }
 
