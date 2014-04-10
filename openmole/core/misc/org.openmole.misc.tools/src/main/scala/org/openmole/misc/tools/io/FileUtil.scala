@@ -248,13 +248,13 @@ object FileUtil {
     }
 
     def copyCompressFile(toF: File): File = {
-      val to = new GZIPOutputStream(new FileOutputStream(toF))
+      val to = new GZIPOutputStream(toF.bufferedOutputStream)
       try file.copy(to) finally to.close
       toF
     }
 
     def copyUncompressFile(toF: File): File = {
-      val from = new GZIPInputStream(new FileInputStream(file))
+      val from = new GZIPInputStream(file.bufferedInputStream)
 
       try from.copy(toF)
       finally from.close
