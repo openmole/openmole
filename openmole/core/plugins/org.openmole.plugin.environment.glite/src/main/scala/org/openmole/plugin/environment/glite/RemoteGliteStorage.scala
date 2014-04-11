@@ -38,8 +38,8 @@ class RemoteGliteStorage(val host: String, val port: Int, val voName: String) ex
 
     val logger =
       ProcessLogger(
-        (o: String) ⇒ output.append(o + "\n"),
-        (e: String) ⇒ error.append(e + "\n")
+        (o: String) ⇒ output.append("\n" + o),
+        (e: String) ⇒ error.append("\n" + e)
       )
 
     val exit = Process(cmd) ! logger
