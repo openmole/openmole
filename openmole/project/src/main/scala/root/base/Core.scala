@@ -16,7 +16,7 @@ object Core extends BaseDefaults {
   override val dir = file("core/core")
 
   lazy val model = OsgiProject("model", openmoleScope = Some("provided")) dependsOn
-    (eventDispatcher, provided(exception), Misc.tools, provided(updater), provided(Misc.workspace))
+    (eventDispatcher, provided(exception), Misc.tools, provided(updater), provided(Misc.workspace), scalaz)
 
   lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
