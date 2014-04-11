@@ -38,12 +38,12 @@ class RemoteGliteStorage(val host: String, val port: Int, val voName: String) ex
 
     val logger =
       ProcessLogger(
-        (o: String) ⇒ output.append(o),
-        (e: String) ⇒ error.append(e)
+        (o: String) ⇒ output.append(o + "\n"),
+        (e: String) ⇒ error.append(e + "\n")
       )
 
     val exit = Process(cmd) ! logger
-    if (exit != 0) throw new RuntimeException(s"Command $cmd had a non 0 return value. Output: ${output.toString}. Error: ${error.toString}")
+    if (exit != 0) throw new RuntimeException(s"Command $cmd had a non 0 return value.\n Output: ${output.toString}. Error: ${error.toString}")
     output.toString
   }
 
