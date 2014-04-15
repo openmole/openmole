@@ -28,16 +28,15 @@ import org.openmole.core.batch.environment.BatchEnvironment
 
 object GliteStorageService {
 
-  def emptyRoot(s: SRMStorage, _permissive: Boolean) =
+  def emptyRoot(s: SRMStorage) =
     new SRMStorage {
       val host: String = s.host
       val port: Int = s.port
       val basePath: String = ""
-      override def permissive = _permissive
     }
 
-  def apply(s: SRMStorage, _environment: BatchEnvironment { def voName: String }, _authentication: GlobusAuthentication.ProxyCreator, threads: Int, permissive: Boolean) = new GliteStorageService {
-    val storage = emptyRoot(s, permissive)
+  def apply(s: SRMStorage, _environment: BatchEnvironment { def voName: String }, _authentication: GlobusAuthentication.ProxyCreator, threads: Int) = new GliteStorageService {
+    val storage = emptyRoot(s)
     val url = new URI("srm", null, s.host, s.port, null, null, null)
     val remoteStorage = new RemoteGliteStorage(s.host, s.port, _environment.voName)
     val environment = _environment
