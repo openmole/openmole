@@ -50,7 +50,9 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     },
     resourceSets <+= (baseDirectory) map { _ / "db-resources" -> "dbserver/bin" },
     resourceSets <+= (copyDependencies in openmolePlugins) map { _ -> "openmole-plugins" },
+    setExecutable += "openmole",
     tarGZName := Some("openmole"),
+    innerZipFolder := Some("openmole"),
     dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle" || m.organization == "org.bouncycastle" }
   ) //todo, add dependency mapping or something
 
@@ -62,8 +64,8 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
 
   lazy val runtimeProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo "plugins"
 
-  lazy val java368URL = new URL("http://maven.iscpif.fr/public/com/oracle/java-jre-linux-i386/7-u10/java-jre-linux-i386-7-u10.tgz")
-  lazy val javax64URL = new URL("http://maven.iscpif.fr/public/com/oracle/java-jre-linux-x64/7-u10/java-jre-linux-x64-7-u10.tgz")
+  lazy val java368URL = new URL("http://maven.iscpif.fr/public/com/oracle/java-jre-linux-386/8-b132/java-jre-linux-386-8-b132.tgz")
+  lazy val javax64URL = new URL("http://maven.iscpif.fr/public/com/oracle/java-jre-linux-x64/8-b132/java-jre-linux-x64-8-b132.tgz")
 
   lazy val openmoleRuntime = AssemblyProject("runtime", "plugins", depNameMap = Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
     """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }), settings = resAssemblyProject ++ zipProject ++ urlDownloadProject ++ runtimeProjects) settings
@@ -71,6 +73,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
       urls <++= target { t ⇒ Seq(java368URL -> t / "jvm-386.tar.gz", javax64URL -> t / "jvm-x64.tar.gz") },
       libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion intransitive (),
       tarGZName := Some("runtime"),
+      setExecutable += "run.sh",
       resourceSets <+= baseDirectory map { _ / "resources" -> "." },
       dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") })
 

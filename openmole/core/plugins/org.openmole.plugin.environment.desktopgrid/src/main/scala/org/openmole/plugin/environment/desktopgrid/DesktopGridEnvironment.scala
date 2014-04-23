@@ -59,7 +59,7 @@ class DesktopGridEnvironment(
 
   @transient lazy val batchStorage = new VolatileStorageService with UnlimitedAccess {
     def environment = env
-    val remoteStorage = new DumyStorage
+    val remoteStorage: RemoteStorage = new DumyStorage
     def url = env.url
     def root = path.getAbsolutePath
     val storage = new GSLocalStorage {}

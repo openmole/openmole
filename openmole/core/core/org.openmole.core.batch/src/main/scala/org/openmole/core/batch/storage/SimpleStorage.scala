@@ -45,10 +45,10 @@ trait SimpleStorage extends Storage {
   override def openInputStream(path: String): InputStream = super.openInputStream(path)
   override def openOutputStream(path: String): OutputStream = super.openOutputStream(path)
 
-  override def upload(src: File, dest: String) = super.upload(src, dest)
-  override def uploadGZ(src: File, dest: String) = super.uploadGZ(src, dest)
-  override def download(src: String, dest: File) = super.download(src, dest)
-  override def downloadGZ(src: String, dest: File) = super.downloadGZ(src, dest)
+  override def upload(src: File, dest: String): Unit = super.upload(src, dest)
+  override def uploadGZ(src: File, dest: String): Unit = super.uploadGZ(src, dest)
+  override def download(src: String, dest: File): Unit = super.download(src, dest)
+  override def downloadGZ(src: String, dest: File): Unit = super.downloadGZ(src, dest)
 
   def create(dest: String) = {
     val os = openOutputStream(dest)

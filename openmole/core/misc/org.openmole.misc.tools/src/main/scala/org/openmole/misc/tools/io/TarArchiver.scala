@@ -76,8 +76,7 @@ object TarArchiver {
             }
             else {
               dest.getParentFile.mkdirs
-              val fos = new FileOutputStream(dest)
-              try tis.copy(fos) finally fos.close
+              dest.withOutputStream(tis.copy)
               None
             }
           dest.mode = e.getMode

@@ -23,7 +23,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.misc.workspace._
 import org.openmole.misc.tools.service.Random._
-import org.openmole.core.implementation.task.Task._
+import org.openmole.core.implementation.task._
 import algorithm._
 import fr.iscpif.mgo._
 import org.openmole.core.model.sampling.Sampling
@@ -53,7 +53,7 @@ sealed abstract class BreedSampling(val evolution: Breeding with GManifest with 
   override def inputs = DataSet(individuals, archive)
 
   override def build(context: Context) = {
-    val rng = newRNG(context(openMOLESeed))
+    val rng = Task.buildRNG(context)
     val is = context(individuals)
     val a = context(archive)
     evolution.breed(is.toSeq, a, size)(rng).map(g ⇒ List(Variable(genome, g))).toIterator

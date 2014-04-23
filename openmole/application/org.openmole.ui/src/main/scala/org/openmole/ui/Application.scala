@@ -33,16 +33,16 @@ import org.openmole.ui.console.Console
 import annotation.tailrec
 import org.openmole.web._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.logging.LoggerService
 
 class Application extends IApplication with Logger {
 
   lazy val consoleSplash =
-    """
-  ___                   __  __  ___  _     _____    ___   _  ___
- / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____|  / _ \ / |/ _ \
-| | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   | | | || | | | |
-| |_| | |_) |  __/ | | | |  | | |_| | |___| |___  | |_| || | |_| |
- \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____|  \___(_)_|\___/
+    """  ___                   __  __  ___  _     _____   _   ___
+ / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____| / | / _ \
+| | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   | || | | |
+| |_| | |_) |  __/ | | | |  | | |_| | |___| |___  | || |_| |
+ \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____| |_(_)___/
       |_|
 """
 
@@ -62,7 +62,8 @@ class Application extends IApplication with Logger {
       server: Boolean = false,
       allowInsecureConnections: Boolean = false,
       serverPort: Option[Int] = None,
-      serverSSLPort: Option[Int] = None)
+      serverSSLPort: Option[Int] = None,
+      loggerLevel: Option[String] = None)
 
     def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
@@ -90,6 +91,7 @@ class Application extends IApplication with Logger {
         case "-sp" :: tail                          ⇒ parse(tail.tail, c.copy(serverPort = Some(tail.head.toInt))) // Server port
         case "-ssp" :: tail                         ⇒ parse(tail.tail, c.copy(serverSSLPort = Some(tail.head.toInt)))
         case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
+        case "--logger-level" :: tail               ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
         case s :: tail                              ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                    ⇒ c
       }
@@ -98,11 +100,16 @@ class Application extends IApplication with Logger {
 
     val config = parse(args.toList)
 
-    val (userPlugins, notExisting) = config.userPlugins.map(p ⇒ new File(p)).partition(_.exists)
+    config.loggerLevel.foreach(LoggerService.level)
 
-    notExisting.foreach {
-      f ⇒ logger.warning(s"Plugin file $f doesn't exists.")
-    }
+    val (existingUserPlugins, notExistingUserPlugins) = config.userPlugins.span(new File(_).exists)
+
+    if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
+
+    val userPlugins =
+      existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) }
+
+    logger.fine(s"Loading user plugins " + userPlugins)
 
     val plugins: List[String] =
       config.pluginsDirs ++

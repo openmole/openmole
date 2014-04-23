@@ -37,8 +37,12 @@ class ContextSaver(val nbJobs: Int) {
     newState match {
       case COMPLETED | FAILED ⇒
         job.exception match {
-          case None    ⇒ _results += job.id -> Success(job.context)
-          case Some(t) ⇒ _results += job.id -> Failure(t)
+          case None ⇒
+            Runtime.logger.fine(s"Job success ${job.id} ${job.context}")
+            _results += job.id -> Success(job.context)
+          case Some(t) ⇒
+            Runtime.logger.log(Runtime.FINE, s"Job failure ${job.id}", t)
+            _results += job.id -> Failure(t)
         }
       case _ ⇒
     }

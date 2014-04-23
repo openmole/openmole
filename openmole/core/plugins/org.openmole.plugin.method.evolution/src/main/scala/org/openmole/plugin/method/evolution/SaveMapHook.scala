@@ -33,7 +33,7 @@ object SaveMapHook {
   def apply(
     individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
     map: GA.GAMap,
-    scales: Seq[GenomeScaling.Scale],
+    scales: Inputs,
     path: String) =
     new HookBuilder {
       addInput(individual.toArray)
@@ -46,7 +46,7 @@ object SaveMapHook {
 abstract class SaveMapHook(
     val individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
     val map: GA.GAMap,
-    val scales: Seq[GenomeScaling.Scale],
+    val scales: Inputs,
     val path: String) extends Hook with GenomeScaling {
 
   def process(context: Context, executionContext: ExecutionContext) = {

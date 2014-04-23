@@ -13,4 +13,6 @@ object Builder extends PluginDefaults {
   lazy val sensitivity = OsgiProject("sensitivity") dependsOn (Core.implementation, plugin.Task.stat, Method.sensitivity)
 
   lazy val stochastic = OsgiProject("stochastic") dependsOn (Core.implementation, plugin.Task.stat, Domain.distribution)
+
+  lazy val abc = OsgiProject("abc") dependsOn (Misc.exception, Core.implementation, Method.abc, Task.tools)
 }

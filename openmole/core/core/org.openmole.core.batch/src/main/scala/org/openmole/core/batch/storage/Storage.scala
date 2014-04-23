@@ -45,7 +45,7 @@ trait Storage {
 
   def root: String
 
-  def child(parent: String, child: String) = storage.child(parent, child)
+  def child(parent: String, child: String): String = storage.child(parent, child)
 
   protected def exists(path: String): Boolean = storage.exists(path)(authentication)
   protected def listNames(path: String): Seq[String] = storage.listNames(path)(authentication)

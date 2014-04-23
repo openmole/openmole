@@ -34,7 +34,8 @@ package object osgi {
 
     def isSystem = b.getLocation.toLowerCase.contains("system bundle") || b.getLocation.startsWith("netigso:")
 
-    def isProvided = b.getHeaders.toMap.exists { case (k, v) ⇒ k.toString.toLowerCase.contains("openmole-scope") && v.toString.toLowerCase.contains("provided") }
+    def isProvided =
+      b.getHeaders.toMap.exists { case (k, v) ⇒ k.toString.toLowerCase.contains("openmole-scope") && v.toString.toLowerCase.contains("provided") }
 
     def file = {
       val (ref, url) = if (b.getLocation.startsWith("reference:"))

@@ -17,44 +17,80 @@
 
 package org.openmole.core.batch.environment
 
-import akka.actor.Actor
-import org.openmole.core.batch.refresh.Kill
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.tools.service.Logger
-import scala.collection.mutable.ListBuffer
+import collection.mutable._
+import org.openmole.core.batch.refresh.{ Kill, Manage }
+import org.openmole.misc.updater.IUpdatableWithVariableDelay
+import scala.ref.WeakReference
+import org.openmole.misc.workspace.Workspace
 
 object BatchJobWatcher extends Logger {
   case object Watch
+
+  class ExecutionJobRegistry {
+    val jobs = new HashMap[IJob, Set[BatchExecutionJob]] with MultiMap[IJob, BatchExecutionJob]
+
+    def allJobs = jobs.keySet
+
+    def executionJobs(job: IJob) = jobs.getOrElse(job, Set.empty)
+
+    def remove(ejob: BatchExecutionJob) = jobs.removeBinding(ejob.job, ejob)
+
+    def isEmpty: Boolean = jobs.isEmpty
+
+    def register(ejob: BatchExecutionJob) = jobs.addBinding(ejob.job, ejob)
+
+    def removeJob(job: IJob) = jobs -= job
+
+    def allExecutionJobs = jobs.values.flatMap(_.toSeq)
+  }
+
 }
 
-class BatchJobWatcher(environment: BatchEnvironment) extends Actor {
+class BatchJobWatcher(environment: WeakReference[BatchEnvironment]) extends IUpdatableWithVariableDelay {
+
+  val registry = new BatchJobWatcher.ExecutionJobRegistry
 
   import BatchJobWatcher._
 
-  def receive = {
-    case Watch ⇒
-      val registry = environment.jobRegistry
-      val jobGroupsToRemove = new ListBuffer[IJob]
+  def register(job: BatchExecutionJob) = synchronized { registry.register(job) }
 
-      logger.fine("Watch jobs " + registry.allJobs.size)
-      registry.synchronized {
-        for (job ← registry.allJobs) {
-          if (job.finished) {
-            for (ej ← registry.executionJobs(job)) if (ej.state != KILLED) BatchEnvironment.jobManager ! Kill(ej)
-            jobGroupsToRemove += job
-          }
-          else {
-            val executionJobsToRemove = new ListBuffer[BatchExecutionJob]
+  override def update: Boolean = synchronized {
+    val env = environment.get match {
+      case None ⇒
+        for (ej ← registry.allExecutionJobs) if (ej.state != KILLED) BatchEnvironment.jobManager ! Kill(ej)
+        return false
+      case Some(env) ⇒ env
+    }
 
-            for (ej ← registry.executionJobs(job) if (ej.state.isFinal)) executionJobsToRemove += ej
-            for (ej ← executionJobsToRemove) registry.remove(ej)
+    val jobGroupsToRemove = new ListBuffer[IJob]
 
-            if (registry.executionJobs(job).isEmpty) environment.submit(job)
-          }
-        }
-
-        for (j ← jobGroupsToRemove) registry.removeJob(j)
+    Log.logger.fine("Watch jobs " + registry.allJobs.size)
+    for (job ← registry.allJobs) {
+      if (job.finished) {
+        for (ej ← registry.executionJobs(job)) if (ej.state != KILLED) BatchEnvironment.jobManager ! Kill(ej)
+        jobGroupsToRemove += job
       }
+      else {
+        val executionJobsToRemove = new ListBuffer[BatchExecutionJob]
+
+        for {
+          ej ← registry.executionJobs(job)
+          if ej.state.isFinal
+        } executionJobsToRemove += ej
+
+        for (ej ← executionJobsToRemove) registry.remove(ej)
+        if (registry.executionJobs(job).isEmpty) env.submit(job)
+      }
+    }
+
+    for (j ← jobGroupsToRemove) registry.removeJob(j)
+    true
   }
+
+  def executionJobs = synchronized { registry.allExecutionJobs }
+
+  def delay = Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval).toMilliSeconds
 }

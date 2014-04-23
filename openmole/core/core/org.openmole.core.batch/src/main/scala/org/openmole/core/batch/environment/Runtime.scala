@@ -19,9 +19,9 @@ package org.openmole.core.batch.environment
 
 import org.openmole.core.batch.message.FileMessage
 
-class Runtime(
-  val storage: FileMessage,
-  val runtime: FileMessage,
-  val environmentPlugins: Iterable[FileMessage],
-  val jvmLinuxI386: FileMessage,
-  val jvmLinuxX64: FileMessage)
+case class Runtime(
+  storage: FileMessage,
+  runtime: FileMessage,
+  environmentPlugins: Iterable[FileMessage],
+  jvmLinuxI386: FileMessage,
+  jvmLinuxX64: FileMessage)

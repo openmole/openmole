@@ -17,9 +17,7 @@
 
 package org.openmole.core.batch.refresh
 
-import akka.actor.Actor
-import akka.actor.ActorSystem
-import akka.actor.Props
+import akka.actor.{ ActorRef, Actor, ActorSystem, Props }
 import akka.routing.SmallestMailboxRouter
 import org.openmole.core.model.execution._
 import org.openmole.misc.eventdispatcher.EventDispatcher
@@ -32,6 +30,7 @@ import org.openmole.core.batch.environment.BatchEnvironment.JobManagmentThreads
 import scala.concurrent.duration._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.Logger
+import scala.concurrent.duration.{ Duration ⇒ SDuration, MILLISECONDS }
 
 object JobManager extends Logger
 
@@ -79,6 +78,9 @@ akka {
     case msg: DeleteFile         ⇒ deleter ! msg
     case msg: CleanSerializedJob ⇒ cleaner ! msg
 
+    case Manage(job) ⇒
+      self ! Upload(job, None)
+
     case Delay(msg, delay) ⇒
       context.system.scheduler.scheduleOnce(delay milliseconds) {
         self ! msg
@@ -94,8 +96,12 @@ akka {
 
     case Kill(job) ⇒
       job.state = ExecutionState.KILLED
-      job.batchJob.foreach(bj ⇒ self ! KillBatchJob(bj))
-      job.serializedJob.foreach(j ⇒ self ! CleanSerializedJob(j))
+      killAndClean(job)
+
+    case Resubmit(job, storage) ⇒
+      killAndClean(job)
+      job.state = ExecutionState.READY
+      uploader ! Upload(job, Some(storage))
 
     case Error(job, exception) ⇒
       val level = exception match {
@@ -110,5 +116,12 @@ akka {
       EventDispatcher.trigger(j.environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
       Log.logger.log(Log.WARNING, "Error during job execution, it will be resubmitted.", e)
 
+  }
+
+  def killAndClean(job: BatchExecutionJob) {
+    job.batchJob.foreach(bj ⇒ self ! KillBatchJob(bj))
+    job.batchJob = None
+    job.serializedJob.foreach(j ⇒ self ! CleanSerializedJob(j))
+    job.serializedJob = None
   }
 }

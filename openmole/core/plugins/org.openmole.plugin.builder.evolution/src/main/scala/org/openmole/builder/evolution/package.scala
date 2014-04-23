@@ -33,13 +33,13 @@ import org.openmole.plugin.method.evolution._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.tools._
+import org.openmole.plugin.method.evolution.Inputs
 import org.openmole.plugin.method.evolution.algorithm.{ EvolutionManifest, TerminationManifest, GA ⇒ OMGA }
 import org.openmole.misc.exception._
 import org.openmole.plugin.task.tools._
 
 package object evolution {
 
-  type Inputs = Seq[(Prototype[Double], (String, String))]
   type Objectives = Seq[(Prototype[Double], String)]
 
   private def components(
@@ -70,7 +70,7 @@ package object evolution {
     breedTask.addParameter(individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
     breedTask.addParameter(archive -> evolution.initialArchive)
 
-    val scalingGenomeTask = ScalingGAGenomeTask(name + "ScalingGenome", genome, inputs.toSeq: _*)
+    val scalingGenomeTask = ScalingGAGenomeTask(evolution)(name + "ScalingGenome", genome, inputs)
 
     val toIndividualTask = ToIndividualTask(evolution)(name + "ToIndividual", genome, individual, objectives)
 
@@ -91,7 +91,7 @@ package object evolution {
       state,
       terminated)
 
-    val scalingIndividualsTask = ScalingGAIndividualsTask(name + "ScalingIndividuals", individual.toArray, inputs.toSeq: _*)
+    val scalingIndividualsTask = ScalingGAIndividualsTask(evolution)(name + "ScalingIndividuals", individual.toArray, inputs)
 
     objectives.foreach {
       case (o, _) ⇒ scalingIndividualsTask addObjective o
@@ -115,7 +115,7 @@ package object evolution {
 
     val (_evolution, _inputs, _objectives) = (evolution, inputs, objectives)
 
-    def puzzle(puzzle: Puzzle, output: ICapsule) =
+    def puzzle(puzzle: Puzzle, _output: ICapsule) =
       new Puzzle(puzzle) with Island {
         val evolution = _evolution
 
@@ -126,7 +126,7 @@ package object evolution {
         def inputs = _inputs
         def objectives = _objectives
 
-        def outputCapsule = output
+        def output = _output
         def state = components.state
         def generation = components.generation
       }
@@ -364,7 +364,7 @@ package object evolution {
 
     val islandSlot = Slot(MoleTask(name + "MoleTask", model))
 
-    val scalingIndividualsTask = ScalingGAIndividualsTask(name + "ScalingIndividuals", individual.toArray, model.inputs.toSeq: _*)
+    val scalingIndividualsTask = ScalingGAIndividualsTask(evolution)(name + "ScalingIndividuals", individual.toArray, model.inputs)
 
     model.objectives.foreach {
       case (o, _) ⇒ scalingIndividualsTask addObjective o
@@ -417,7 +417,7 @@ package object evolution {
     val (_state, _generation, _genome, _individual, _archive) = (state, generation, model.genome, model.individual, archive)
 
     new Puzzle(puzzle) {
-      def outputCapsule = scalingIndividualsSlot.capsule
+      def output = scalingIndividualsSlot.capsule
       def state = _state
       def generation = _generation
       def genome = _genome
