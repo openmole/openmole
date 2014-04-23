@@ -1,39 +1,27 @@
-package org.openmole.web
+package org.openmole.web.mole
 
 import _root_.akka.actor.ActorSystem
 import org.scalatra._
 import scalate.ScalateSupport
 import servlet.{ FileItem, FileUploadSupport }
-import java.io.{ PrintStream, File, InputStream }
+import java.io.{ PrintStream, InputStream }
 import javax.servlet.annotation.MultipartConfig
-
-import org.openmole.core.serializer._
-import org.openmole.core.model.mole.{ IPartialMoleExecution, IMoleExecution, ExecutionContext }
-import org.openmole.core.model.data.{ Context, Prototype, Variable }
-import com.thoughtworks.xstream.mapper.CannotResolveClassException
+import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.data.Variable
 import concurrent.Future
 
 import slick.driver.H2Driver.simple._
-import slick.jdbc.meta.MTable
 
 import org.openmole.misc.tools.io.FromString
 
-import org.openmole.misc.eventdispatcher.EventDispatcher
-
-import Database.threadLocalSession
-
-import javax.sql.rowset.serial.SerialClob
-import reflect.ClassTag
 import json.JacksonJsonSupport
 import org.json4s._
 import org.json4s.JsonDSL._
-import scala.None
 import org.json4s.{ Formats, DefaultFormats }
-import org.openmole.core.implementation.validation.Validation
-import org.openmole.core.implementation.validation.DataflowProblem.{ MissingSourceInput, MissingInput, WrongType }
-import scala.io.Source
-import org.openmole.core.model.mole.IMoleExecution.JobStatusChanged
-import org.openmole.misc.eventdispatcher.{ Event, EventListener }
+import org.openmole.core.implementation.validation.DataflowProblem.{ MissingSourceInput, MissingInput }
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.web.Authentication
+import org.openmole.web.db.SlickSupport
 
 @MultipartConfig(maxFileSize = 3145728 /*max file size of 3 MiB*/ ) //research scala multipart config
 class MoleRunner(val system: ActorSystem, protected val dbPassword: String /*TODO: is this safe??*/ ) extends ScalatraServlet with SlickSupport with ScalateSupport

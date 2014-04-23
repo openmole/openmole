@@ -1,21 +1,17 @@
-package org.openmole.web
+package org.openmole.web.mole
 
 import scala.reflect.ClassTag
 import scala.io.{ Codec, Source }
-import org.scalatra.servlet.FileItem
 import java.io._
 import org.openmole.core.serializer.SerialiserService
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
-import org.openmole.core.implementation.mole.PartialMoleExecution
 import org.openmole.core.model.mole.{ IPartialMoleExecution, IMoleExecution, ExecutionContext }
 import org.openmole.misc.tools.io.FromString
-import org.openmole.core.implementation.validation.DataflowProblem.{ MissingSourceInput, MissingInput }
+import org.openmole.core.implementation.validation.DataflowProblem.MissingSourceInput
 import org.openmole.core.model.data.{ Context, Prototype, Variable }
 import org.openmole.core.implementation.validation.Validation
 import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
 import org.openmole.misc.eventdispatcher.{ EventListener, EventDispatcher }
-import org.slf4j.LoggerFactory
-import com.jolbox.bonecp.{ BoneCPDataSource, BoneCPConfig }
 import akka.actor.ActorSystem
 
 import resource._
@@ -25,26 +21,22 @@ import slick.jdbc.meta.MTable
 
 import Database.threadLocalSession
 import org.openmole.misc.workspace.Workspace
-import java.nio.file.Paths
-import com.ice.tar.{ TarInputStream, Tar, TarOutputStream }
-import org.openmole.misc.tools.io.TarArchiver.TarOutputStream2TarOutputStreamComplement
+import com.ice.tar.{ TarInputStream, Tar }
 import scala.Some
 import org.openmole.core.implementation.validation.DataflowProblem.MissingSourceInput
 import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
-import java.util.UUID
-import java.sql.SQLException
 import org.scalatra.ScalatraBase
-import javax.servlet.http.HttpServletRequest
+import org.openmole.web.db.tables.{ MoleData, MoleStats }
+import org.openmole.web.cache.DataHandler
+import org.openmole.web.db.{SlickDB, SlickSupport}
 
-trait MoleHandling { self: ScalatraBase with SlickSupport ⇒
+trait MoleHandling { self: ScalatraBase ⇒
   def system: ActorSystem
+  val database: SlickDB
+  val db = database.db
 
   protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
 
-  private val cachedMoles = new DataHandler[String, IMoleExecution](system)
-  private val capsules = new DataHandler[String, File](system)
-  private val moleStats = new DataHandler[String, Stats.Stats](system)
-  private val mole2CacheId = new DataHandler[IMoleExecution, String](system)
 
   private val listener: EventListener[IMoleExecution] = new JobEventListener(moleStats, mole2CacheId)
   private val mStatusListener = new MoleStatusListener(this)
@@ -52,6 +44,11 @@ trait MoleHandling { self: ScalatraBase with SlickSupport ⇒
   db withSession {
     if (MTable.getTables("MoleData").list().isEmpty)
       MoleData.ddl.create // check that table exists somehow
+  }
+
+  db withSession {
+    if (MTable.getTables("MoleStats").list().isEmpty)
+      MoleStats.ddl.create
   }
 
   (getUnfinishedMoleKeys map getMole).flatten foreach (_.start)
@@ -220,7 +217,7 @@ trait MoleHandling { self: ScalatraBase with SlickSupport ⇒
   }
 
   def getMoleStats(key: String) = {
-    moleStats get key getOrElse Stats.empty
+    moleStats get key getOrElse MoleStats.empty
   }
   def startMole(key: String) { getMole(key) foreach (_.start) }
 

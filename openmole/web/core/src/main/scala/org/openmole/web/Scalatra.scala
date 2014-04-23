@@ -6,6 +6,7 @@ import javax.servlet.ServletContext
 import com.typesafe.config.ConfigFactory
 import slick.driver.H2Driver.simple._
 import java.sql.{ Blob, Clob }
+import org.openmole.web.mole.MoleRunner
 
 /**
  * This is the Scalatra bootstrap file. You can use it to mount servlets or
@@ -20,7 +21,6 @@ class Scalatra extends LifeCycle {
   override def init(context: ServletContext) {
     // Mount one or more servlets
     context.mount(new MoleRunner(system, context.getAttribute("dbPass").asInstanceOf[String]), "/*")
-    context.mount(new SlickRoutes(), "/c/*")
   }
 
   override def destroy(context: ServletContext) {
@@ -28,15 +28,3 @@ class Scalatra extends LifeCycle {
   }
 }
 
-object MoleData extends Table[(String, String, String, Clob, Clob, Boolean, Boolean, Blob)]("MoleData") {
-  def id = column[String]("ID", O.PrimaryKey) //TODO: RENAME TO EXECID
-  def moleName = column[String]("MOLENAME")
-  def state = column[String]("STATE")
-  def clobbedMole = column[Clob]("MOLEEXEC")
-  def clobbedContext = column[Clob]("CONTEXT")
-  def encapsulated = column[Boolean]("encapsulated")
-  def molePackage = column[Boolean]("MOLEPACKAGE")
-  def result = column[Blob]("MOLERESULT")
-
-  def * = id ~ moleName ~ state ~ clobbedMole ~ clobbedContext ~ encapsulated ~ molePackage ~ result
-}

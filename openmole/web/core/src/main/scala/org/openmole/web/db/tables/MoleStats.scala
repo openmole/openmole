@@ -1,4 +1,5 @@
-package org.openmole.web
+package org.openmole.web.db.tables
+
 import slick.driver.H2Driver.simple._
 
 /**
@@ -7,7 +8,7 @@ import slick.driver.H2Driver.simple._
  * Date: 6/14/13
  * Time: 1:39 PM
  */
-object Stats extends Table[(String, Int, Int, Int, Int, Int)]("MoleStats") {
+object MoleStats extends Table[(String, Int, Int, Int, Int, Int)]("MoleStats") {
   type Stats = Map[String, Int]
   lazy val empty = Map("Ready" -> 0,
     "Running" -> 0,

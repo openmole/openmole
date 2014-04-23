@@ -1,11 +1,10 @@
-package org.openmole.web
+package org.openmole.web.mole
 
 import org.openmole.misc.eventdispatcher.{ Event, EventListener }
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.IMoleExecution.{ Finished, Starting, JobCreated, JobStatusChanged }
-import org.openmole.misc.tools.io.TarArchiver.TarOutputStream2TarOutputStreamComplement
-import com.ice.tar.TarOutputStream
-import java.io.ByteArrayOutputStream
+import org.openmole.web.db.tables.MoleStats
+import org.openmole.web.cache.DataHandler
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,15 +12,15 @@ import java.io.ByteArrayOutputStream
  * Date: 6/14/13
  * Time: 1:34 PM
  */
-class JobEventListener(d: DataHandler[String, Stats.Stats], cacheMap: DataHandler[IMoleExecution, String]) extends EventListener[IMoleExecution] {
+class JobEventListener(d: DataHandler[String, MoleStats.Stats], cacheMap: DataHandler[IMoleExecution, String]) extends EventListener[IMoleExecution] {
 
-  def updateMap(m: Stats.Stats, key: String, value: Int ⇒ Int) = m + (key -> value(m get key getOrElse 0))
+  def updateMap(m: MoleStats.Stats, key: String, value: Int ⇒ Int) = m + (key -> value(m get key getOrElse 0))
 
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
     val moleId = cacheMap.get(execution).get
     event match {
-      case x: JobCreated       ⇒ d.add(moleId, updateMap(d get moleId getOrElse Stats.empty, "Ready", _ + 1))
-      case x: JobStatusChanged ⇒ d.add(moleId, updateMap(updateMap(d get moleId getOrElse Stats.empty, x.newState.name, _ + 1), x.oldState.name, _ - 1))
+      case x: JobCreated       ⇒ d.add(moleId, updateMap(d get moleId getOrElse MoleStats.empty, "Ready", _ + 1))
+      case x: JobStatusChanged ⇒ d.add(moleId, updateMap(updateMap(d get moleId getOrElse MoleStats.empty, x.newState.name, _ + 1), x.oldState.name, _ - 1))
     }
   }
 }
@@ -37,14 +36,4 @@ class MoleStatusListener(mH: MoleHandling) extends EventListener[IMoleExecution]
       }
     }
   }
-}
-
-import java.io.OutputStream
-
-class webStream extends OutputStream {
-  def write(p1: Int) {
-    storage += p1.toChar
-  }
-
-  var storage = ""
 }

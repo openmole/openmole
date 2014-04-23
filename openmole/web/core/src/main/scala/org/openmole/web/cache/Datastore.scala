@@ -1,4 +1,4 @@
-package org.openmole.web
+package org.openmole.web.cache
 
 import akka.actor.{ Props, ActorSystem, Actor }
 import akka.pattern.ask

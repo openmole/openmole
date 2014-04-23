@@ -20,7 +20,9 @@ import sun.security.x509.SubjectAlternativeNameExtension
 import org.eclipse.jetty.server.nio.SelectChannelConnector
 import org.eclipse.jetty.security.{ ConstraintMapping, ConstraintSecurityHandler }
 import java.security.MessageDigest
-import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Base64
+import org.openmole.web.db.SlickDB
+;
 
 class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Option[String], pass: Option[String], allowInsecureConnections: Boolean) {
 
@@ -120,7 +122,8 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
   val md = MessageDigest.getInstance("SHA-256")
   md.update(pw.getBytes("UTF-8"))
   val outStr = new String(Base64.encodeBase64(md.digest))
-  context.setAttribute("dbPass", outStr)
+
+  val db = new SlickDB(pw)
 
   val constraintHandler = new ConstraintSecurityHandler
   val constraintMapping = new ConstraintMapping
@@ -141,5 +144,6 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
   def end() {
     server.stop
     server.join
+    db.closeDbConnection()
   }
 }

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import slick.driver.H2Driver.simple._
 import com.jolbox.bonecp._
 import org.openmole.misc.workspace.Workspace
+import org.openmole.web.db.SlickSupport
 
 //import scala.slick.session.Database
 import Database.threadLocalSession
@@ -63,47 +64,7 @@ object Coffees extends Table[(String, Int, Double, Int, Int)]("COFFEES") {
   def supplier = foreignKey("SUP_FK", supID, Suppliers)(_.id)
 }
 
-trait SlickSupport extends ScalatraServlet {
 
-  protected val dbPassword: String;
-
-  val logger = LoggerFactory.getLogger(getClass)
-
-  try {
-    Class.forName("org.h2.Driver")
-  }
-  catch {
-    case e: ClassNotFoundException ⇒ println("Suffered irrecoverable error: " + e)
-  }
-
-  var connectionPool = {
-    val boneCfg = new BoneCPConfig()
-    val dbFile: java.io.File = Workspace.file("WebserverDB")
-    boneCfg.setJdbcUrl(s"jdbc:h2:${dbFile.getCanonicalPath};TRACE_LEVEL_FILE=4;MVCC=TRUE;CIPHER=AES")
-    boneCfg.setUser("root")
-    boneCfg.setPassword(s"$dbPassword openmole")
-    boneCfg.setMinConnectionsPerPartition(5)
-    boneCfg.setMaxConnectionsPerPartition(10)
-    boneCfg.setPartitionCount(1)
-    boneCfg.setDefaultAutoCommit(true)
-
-    new BoneCPDataSource(boneCfg)
-  }
-
-  def closeDbConnection() {
-    logger.info("Closing boneCP connection pool")
-    connectionPool.close
-  }
-
-  val db = Database.forDataSource(connectionPool)
-
-  //val db = Database.forURL("jdbc:h2:~/test", "root", "")
-
-  override def destroy() {
-    super.destroy()
-    closeDbConnection()
-  }
-}
 
 class SlickRoutes extends ScalatraServlet with SlickSupport {
 
