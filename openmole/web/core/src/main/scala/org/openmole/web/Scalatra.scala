@@ -18,9 +18,8 @@ class Scalatra extends LifeCycle {
   //val myActor = system.actorOf(Props[MyActor])
 
   override def init(context: ServletContext) {
-
     // Mount one or more servlets
-    context.mount(new MoleRunner(system), "/*")
+    context.mount(new MoleRunner(system, context.getAttribute("dbPass").asInstanceOf[String]), "/*")
     context.mount(new SlickRoutes(), "/c/*")
   }
 

@@ -234,11 +234,13 @@ trait MoleHandling { self: ScalatraBase with SlickSupport ⇒
     ret
   }
 
+  //Called automatically when execution is complete.
   def decacheMole(mole: IMoleExecution) = {
     val mKey = mole2CacheId get mole
     mKey foreach (id ⇒ println(s"decaching mole id: $id"))
     mKey foreach (cachedMoles get _ foreach (_.cancel))
-    mKey foreach (cachedMoles remove _)
+    mKey foreach (k ⇒ List(cachedMoles, /*moleStats,*/ capsules) map (_ remove k)) //TODO: Commit the mole stats to the db so they can be retrieved after decaching.
+    mole2CacheId remove mole
   }
 
   //todo fix to remove decached moles
