@@ -7,7 +7,6 @@ import org.openmole.core.serializer.SerialiserService
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
 import org.openmole.core.model.mole.{ IPartialMoleExecution, IMoleExecution, ExecutionContext }
 import org.openmole.misc.tools.io.FromString
-import org.openmole.core.implementation.validation.DataflowProblem.MissingSourceInput
 import org.openmole.core.model.data.{ Context, Prototype, Variable }
 import org.openmole.core.implementation.validation.Validation
 import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
