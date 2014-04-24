@@ -1,5 +1,7 @@
 package org.openmole.web.cache
 
+import org.openmole.web.cache.Status.Stopped
+
 /**
  * Created by mhammons on 4/23/14.
  */
@@ -7,15 +9,6 @@ case class Stats(ready: Int, running: Int, completed: Int, failed: Int, cancelle
   val self = this
 
   object lens {
-    trait JobStatusLens {
-      protected def binding: (Int) => Stats
-      protected def stat: Int
-      def ++ = binding(stat + 1)
-      def -- = binding(stat - 1)
-    }
-
-    case class JSLens(stat: Int, binding: (Int) => Stats) extends JobStatusLens
-
     val ready = JSLens(self.ready, Stats(_, self.running, self.completed, self.failed, self.cancelled, self.status))
     val running = JSLens(self.running, Stats(self.ready, _, self.completed, self.failed, self.cancelled, self.status))
     val completed = JSLens(self.completed, Stats(self.ready, self.running, _, self.failed, self.cancelled, self.status))
@@ -27,8 +20,19 @@ case class Stats(ready: Int, running: Int, completed: Int, failed: Int, cancelle
     }
   }
 
+  def getJobStatsAsSeq = List(ready, running, completed, failed, cancelled)
 }
 
+trait JobStatusLens {
+  protected def binding: (Int) ⇒ Stats
+  protected def stat: Int
+  def ++ = binding(stat + 1)
+  def -- = binding(stat - 1)
+}
+
+case class JSLens(stat: Int, binding: (Int) ⇒ Stats) extends JobStatusLens
+
+object EmptyStats extends Stats(0, 0, 0, 0, 0, Stopped)
 
 trait Status
 

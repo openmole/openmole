@@ -7,6 +7,7 @@ import com.typesafe.config.ConfigFactory
 import slick.driver.H2Driver.simple._
 import java.sql.{ Blob, Clob }
 import org.openmole.web.mole.MoleRunner
+import org.openmole.web.db.SlickDB
 
 /**
  * This is the Scalatra bootstrap file. You can use it to mount servlets or
@@ -20,7 +21,8 @@ class Scalatra extends LifeCycle {
 
   override def init(context: ServletContext) {
     // Mount one or more servlets
-    context.mount(new MoleRunner(system, context.getAttribute("dbPass").asInstanceOf[String]), "/*")
+    val db = context.getAttribute("database").asInstanceOf[SlickDB]
+    context.mount(new MoleRunner(system, db), "/*")
   }
 
   override def destroy(context: ServletContext) {

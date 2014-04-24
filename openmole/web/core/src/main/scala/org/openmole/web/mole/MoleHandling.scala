@@ -27,31 +27,21 @@ import org.openmole.core.implementation.validation.DataflowProblem.MissingSource
 import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
 import org.scalatra.ScalatraBase
 import org.openmole.web.db.tables.{ MoleData, MoleStats }
-import org.openmole.web.cache.DataHandler
-import org.openmole.web.db.{SlickDB, SlickSupport}
+import org.openmole.web.cache.{ Stats, Status, Cache, DataHandler }
+import org.openmole.web.db.{ SlickDB }
 
 trait MoleHandling { self: ScalatraBase ⇒
   def system: ActorSystem
   val database: SlickDB
   val db = database.db
+  val cache = new Cache(system, database)
 
   protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
 
-
-  private val listener: EventListener[IMoleExecution] = new JobEventListener(moleStats, mole2CacheId)
+  private val listener: EventListener[IMoleExecution] = new JobEventListener(this)
   private val mStatusListener = new MoleStatusListener(this)
 
-  db withSession {
-    if (MTable.getTables("MoleData").list().isEmpty)
-      MoleData.ddl.create // check that table exists somehow
-  }
-
-  db withSession {
-    if (MTable.getTables("MoleStats").list().isEmpty)
-      MoleStats.ddl.create
-  }
-
-  (getUnfinishedMoleKeys map getMole).flatten foreach (_.start)
+  (cache.getUnfinishedMoleKeys map getMole).flatten foreach (_.start)
 
   def getStatus(moleId: String): String =
     db withSession {
@@ -131,17 +121,6 @@ trait MoleHandling { self: ScalatraBase ⇒
     (mole, path)
   }
 
-  private def cacheMoleExecution(moleExecution: IMoleExecution, path: Option[File], cacheId: String) = {
-    path foreach (capsules.add(cacheId, _))
-    cachedMoles.add(cacheId, moleExecution)
-    mole2CacheId add (moleExecution, cacheId)
-    moleExecution
-  }
-
-  private def regenDir(file: File) = {
-    if (!file.exists()) file.mkdir()
-  }
-
   def createMole(moleInput: ⇒ Option[InputStream], csvInput: ⇒ Option[InputStream], encapsulate: Boolean = false, pack: Boolean = false, name: String = ""): Either[String, IMoleExecution] = {
     val r = csvInput map Source.fromInputStream
 
@@ -170,26 +149,18 @@ trait MoleHandling { self: ScalatraBase ⇒
 
         val (me, path) = createMoleExecution(pEx, ctxt, encapsulate, genPath)
         db withSession {
-          MoleData.insert((me.id, name, MoleHandling.Status.stopped, clob, ctxtClob, encapsulate, pack, outputBlob))
+          MoleData.insert((me.id, name, Status.Stopped.toString, clob, ctxtClob, encapsulate, pack, outputBlob))
         }
-        cacheMoleExecution(me, path, me.id)
+        cache.cacheMoleExecution(me, path, me.id)
         Right(me)
       }
       case Right(error) ⇒ Left(error)
     }
   }
 
-  def getMoleKeys = db withSession {
-    (for {
-      m ← MoleData
-    } yield m.id.asColumnOf[String]).list
-  }
+  def getMoleKeys = cache.getMoleKeys
 
-  private def getUnfinishedMoleKeys = db withSession {
-    (for (m ← MoleData if m.state === "Running") yield m.id.asColumnOf[String]).list
-  }
-
-  def getMole(key: String): Option[IMoleExecution] = {
+  def getMole(key: String): Option[IMoleExecution] = { //TODO: move a large part of this to cache
     lazy val mole: Option[IMoleExecution] = db withSession {
       /*val f = new File((for (m ← MoleData if m.id === key) yield m.path).list.head)
       f.createNewFile()*/
@@ -205,50 +176,45 @@ trait MoleHandling { self: ScalatraBase ⇒
         case (pMClob, ctxtClob, e) ⇒ (moleDeserialiser(pMClob.getAsciiStream), SerialiserService.deserialise[Context](ctxtClob.getAsciiStream), e)
       }
 
-      r map Function.tupled(createMoleExecution(_, _, _, workDir)) map Function.tupled(cacheMoleExecution(_, _, key))
+      r map Function.tupled(createMoleExecution(_, _, _, workDir)) map Function.tupled(cache.cacheMoleExecution(_, _, key))
     }
 
-    cachedMoles get key orElse mole
+    cache.getMole(key) orElse mole
   }
 
-  def getMoleResult(key: String) = db withSession {
-    val blob = (for (m ← MoleData if m.id === key) yield m.result).list.head
-    blob.getBytes(1, blob.length.toInt)
-  }
+  def getMoleResult(key: String) = cache.getMoleResult(key)
 
-  def getMoleStats(key: String) = {
-    moleStats get key getOrElse MoleStats.empty
-  }
+  def getMoleStats(mole: IMoleExecution) = cache.getMoleStats(cache.getCacheId(mole))
+
+  def getMoleStats(key: String) = cache.getMoleStats(key)
+
   def startMole(key: String) { getMole(key) foreach (_.start) }
 
   def deleteMole(key: String) = {
-    val ret = cachedMoles get key map (_.cancel)
-    cachedMoles remove key
-    db withSession {
-      MoleData.filter(_.id === key).delete
-    }
+    val ret = getMole(key) map (_.cancel)
+
+    ret foreach cache.deleteMole
 
     ret
   }
 
-  //Called automatically when execution is complete.
-  def decacheMole(mole: IMoleExecution) = {
-    val mKey = mole2CacheId get mole
-    mKey foreach (id ⇒ println(s"decaching mole id: $id"))
-    mKey foreach (cachedMoles get _ foreach (_.cancel))
-    mKey foreach (k ⇒ List(cachedMoles, /*moleStats,*/ capsules) map (_ remove k)) //TODO: Commit the mole stats to the db so they can be retrieved after decaching.
-    mole2CacheId remove mole
+  def getWebStats(key: String) = {
+    val statNames = List("Ready", "Running", "Completed", "Failed", "Cancelled")
+
+    val stats = getMoleStats(key)
+
+    statNames zip stats.getJobStatsAsSeq
   }
 
-  //todo fix to remove decached moles
-  def setStatus(mole: IMoleExecution, status: String) = {
-    db withSession {
-      val moleId = mole2CacheId.get(mole).get
-      val x = for { m ← MoleData if m.id === moleId } yield m.state
-      x update status
-      println(s"updated mole: ${moleId} to ${status}")
-    }
+  def updateStats(mole: IMoleExecution, stats: Stats) {
+    cache.updateStats(mole, stats)
   }
+
+  //Called automatically when execution is complete.
+  def decacheMole(mole: IMoleExecution) = cache.decacheMole(mole)
+
+  //todo fix to remove decached moles
+  def setStatus(mole: IMoleExecution, status: Status) = cache.setStatus(mole, status)
 
   def isEncapsulated(key: String): Boolean = db withSession {
     println(key)
@@ -256,10 +222,9 @@ trait MoleHandling { self: ScalatraBase ⇒
   }
 
   //TODO - FRAGILE
-  def storeResultBlob(exec: IMoleExecution) = db withSession {
-    val moleId = mole2CacheId.get(exec).get
+  def storeResultBlob(exec: IMoleExecution) = {
     println("starting the store op")
-    val mPath = capsules get moleId
+    val mPath = cache.getCapsule(exec)
     for (path ← mPath) {
       println(path)
       val outFile = new File(Workspace.newFile.toString + ".tar")
@@ -270,11 +235,8 @@ trait MoleHandling { self: ScalatraBase ⇒
         Tar.createDirectoryTar(path, outFile)
 
         for (tis ← managed(Source.fromFile(outFile)(Codec.ISO8859))) {
-          val r = for (m ← MoleData if m.id === moleId) yield m.result
-
           val arr = tis.iter.toArray.map(_.toByte)
-          val blob = new SerialBlob(arr)
-          r.update(blob)
+          cache.storeResultBlob(exec, new SerialBlob(arr))
         }
       }
       catch {
@@ -285,9 +247,4 @@ trait MoleHandling { self: ScalatraBase ⇒
 }
 
 object MoleHandling {
-  object Status {
-    val running = "Running"
-    val finished = "Finished"
-    val stopped = "Stopped"
-  }
 }

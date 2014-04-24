@@ -21,10 +21,10 @@ import org.json4s.{ Formats, DefaultFormats }
 import org.openmole.core.implementation.validation.DataflowProblem.{ MissingSourceInput, MissingInput }
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.web.Authentication
-import org.openmole.web.db.SlickSupport
+import org.openmole.web.db.SlickDB
 
 @MultipartConfig(maxFileSize = 3145728 /*max file size of 3 MiB*/ ) //research scala multipart config
-class MoleRunner(val system: ActorSystem, protected val dbPassword: String /*TODO: is this safe??*/ ) extends ScalatraServlet with SlickSupport with ScalateSupport
+class MoleRunner(val system: ActorSystem, val database: SlickDB /*TODO: is this safe??*/ ) extends ScalatraServlet with ScalateSupport
     with FileUploadSupport with FlashMapSupport with FutureSupport with JacksonJsonSupport with MoleHandling with Authentication {
 
   protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal
@@ -33,6 +33,8 @@ class MoleRunner(val system: ActorSystem, protected val dbPassword: String /*TOD
   val moleStats = new DataHandler[String, Stats.Stats](system)
 
   val listener: EventListener[IMoleExecution] = new JobEventListener(moleStats)*/
+
+  private val logger = org.openmole.web.Log.log
 
   get("/index.html") {
     contentType = "text/html"
@@ -226,7 +228,7 @@ class MoleRunner(val system: ActorSystem, protected val dbPassword: String /*TOD
 
         val pRams = params("id")
 
-        val pageData = getMoleStats(pRams) + ("Encapsulated" -> isEncapsulated(pRams)) + ("id" -> pRams) + ("status" -> getStatus(pRams))
+        val pageData = getWebStats(pRams).toMap + ("Encapsulated" -> isEncapsulated(pRams)) + ("id" -> pRams) + ("status" -> getStatus(pRams))
 
         ssp("/executionData", pageData.toSeq: _*)
       }
@@ -238,11 +240,10 @@ class MoleRunner(val system: ActorSystem, protected val dbPassword: String /*TOD
 
     val pRams = params("id")
 
-    val stats = getMoleStats(pRams)
     val r = getStatus(pRams)
 
     render(("status", r) ~
-      ("stats", stats.toSeq))
+      ("stats", getWebStats(pRams)))
   }
 
   get("/json/execs") {
@@ -282,7 +283,7 @@ class MoleRunner(val system: ActorSystem, protected val dbPassword: String /*TOD
 
     val pRams = params("id")
 
-    val stats = getMoleStats(pRams)
+    val stats = getWebStats(pRams).toMap
     val r = getStatus(pRams)
 
     <status current={ r }>

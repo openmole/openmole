@@ -1,10 +1,9 @@
 package org.openmole.web.db
 
 import org.slf4j.LoggerFactory
-import com.jolbox.bonecp.{BoneCPDataSource, BoneCPConfig}
+import com.jolbox.bonecp.{ BoneCPDataSource, BoneCPConfig }
 import org.openmole.misc.workspace.Workspace
 import slick.driver.H2Driver.simple._
-
 
 /**
  * Created by mhammons on 4/24/14.
@@ -17,7 +16,7 @@ class SlickDB(private val pw: String) {
     case e: ClassNotFoundException ⇒ println("Suffered irrecoverable error: " + e)
   }
 
-  private val logger = LoggerFactory.getLogger(getClass)
+  private val logger = org.openmole.web.Log.log
 
   private val connectionPool = {
     val boneCfg = new BoneCPConfig()

@@ -21,8 +21,7 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector
 import org.eclipse.jetty.security.{ ConstraintMapping, ConstraintSecurityHandler }
 import java.security.MessageDigest
 import org.apache.commons.codec.binary.Base64
-import org.openmole.web.db.SlickDB
-;
+import org.openmole.web.db.SlickDB;
 
 class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Option[String], pass: Option[String], allowInsecureConnections: Boolean) {
 
@@ -119,9 +118,8 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
   context.setInitParameter(ScalatraBase.ForceHttpsKey, allowInsecureConnections.toString)
 
   //TODO: Discuss the protection of in-memory data for a java program.
-  val md = MessageDigest.getInstance("SHA-256")
-  md.update(pw.getBytes("UTF-8"))
-  val outStr = new String(Base64.encodeBase64(md.digest))
+
+  context.setAttribute("database", db)
 
   val db = new SlickDB(pw)
 
