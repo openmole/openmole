@@ -4,7 +4,7 @@ import org.openmole.misc.eventdispatcher.{ Event, EventListener }
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.IMoleExecution.{ Finished, Starting, JobCreated, JobStatusChanged }
 import org.openmole.web.db.tables.MoleStats
-import org.openmole.web.cache.{ Status, DataHandler }
+import org.openmole.web.cache.{ Stats, Status, DataHandler }
 import org.openmole.core.model.job
 
 /**
@@ -18,8 +18,9 @@ class JobEventListener(mH: MoleHandling) extends EventListener[IMoleExecution] {
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
     val stats = mH.getMoleStats(execution)
 
-    implicit def state2Lens(s: job.State.State) = {
+    def state2Lens(s: job.State.State, stats: Stats) = {
       import job.State._
+      println(s)
       s match {
         case READY     ⇒ stats.lens.ready
         case RUNNING   ⇒ stats.lens.running
@@ -32,7 +33,7 @@ class JobEventListener(mH: MoleHandling) extends EventListener[IMoleExecution] {
 
     event match {
       case x: JobCreated       ⇒ mH.updateStats(execution, stats.lens.ready++)
-      case x: JobStatusChanged ⇒ { mH.updateStats(execution, x.newState++); mH.updateStats(execution, x.oldState--) }
+      case x: JobStatusChanged ⇒ mH.updateStats(execution, state2Lens(x.oldState, state2Lens(x.newState, stats)++)--)
     }
   }
 }

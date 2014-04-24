@@ -52,10 +52,4 @@ object Status {
   }
 }
 
-object ex {
-  lazy val empty = Map("Ready" -> 0,
-    "Running" -> 0,
-    "Completed" -> 0,
-    "Failed" -> 0,
-    "Cancelled" -> 0)
-}
+

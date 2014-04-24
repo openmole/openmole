@@ -118,10 +118,9 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
   context.setInitParameter(ScalatraBase.ForceHttpsKey, allowInsecureConnections.toString)
 
   //TODO: Discuss the protection of in-memory data for a java program.
+  val db = new SlickDB(pw)
 
   context.setAttribute("database", db)
-
-  val db = new SlickDB(pw)
 
   val constraintHandler = new ConstraintSecurityHandler
   val constraintMapping = new ConstraintMapping

@@ -1,22 +1,14 @@
 package org.openmole.web.cache
 
-import org.openmole.core.model.mole.{ IPartialMoleExecution, IMoleExecution }
-import java.io.{ InputStream, File }
+import org.openmole.core.model.mole.IMoleExecution
+import java.io.File
 import akka.actor.ActorSystem
 import org.openmole.web.db.SlickDB
-import scala.slick.jdbc.meta.MTable
 import org.openmole.web.db.tables.{ MoleStats, MoleData }
 import slick.driver.H2Driver.simple._
 import Database.threadLocalSession
 import slick.jdbc.meta.MTable
-import org.openmole.misc.workspace.Workspace
-import org.openmole.core.serializer.SerialiserService
-import com.ice.tar.{ Tar, TarInputStream }
-import org.openmole.core.model.data.Context
-import org.openmole.web.cache.Status.Stopped
-import resource._
-import org.openmole.web.cache.Stats
-import scala.io.{ Codec, Source }
+
 import javax.sql.rowset.serial.SerialBlob
 
 /**
@@ -56,9 +48,14 @@ class Cache(system: ActorSystem, database: SlickDB) {
   def getMoleStats(key: String): Stats = {
     lazy val stats = getStatus(key) flatMap (s ⇒ dataB withSession {
       val status = Status.statuses.find(_.toString == s).getOrElse(throw new Exception("Unknown status on DB"))
-      (for (s ← MoleStats if s.id === key) yield (s.ready, s.running, s.completed, s.failed, s.cancelled)).list().map(Function.tupled(Stats(_, _, _, _, _, status))).headOption
+      (for (s ← MoleStats if s.id === key) yield s.*).list().map {
+        case (_, a, b, c, d, e) ⇒
+          println(c)
+          Stats(a, b, c, d, e, status)
+      }.headOption
     })
 
+    println(stats)
     moleStats get key orElse stats getOrElse EmptyStats
   }
 
@@ -81,17 +78,27 @@ class Cache(system: ActorSystem, database: SlickDB) {
     val mKey = mole2CacheId get mole
     mKey foreach (id ⇒ println(s"decaching mole id: $id"))
     mKey foreach (cachedMoles get _ foreach (_.cancel))
-    mKey foreach (k ⇒ List(cachedMoles, /*moleStats,*/ capsules) map (_ remove k)) //TODO: Commit the mole stats to the db so they can be retrieved after decaching.
+    mKey flatMap (moleStats get _) foreach {
+      stats ⇒
+        println(stats)
+        dataB withSession {
+          MoleStats.filter(_.id === mKey.get)
+            .map(x ⇒ x.*)
+            .update((mKey.get, stats.ready, stats.running, stats.completed, stats.failed, stats.cancelled))
+        }
+    }
+    mKey foreach (k ⇒ List(cachedMoles, moleStats, capsules) map (_ remove k))
     mole2CacheId remove mole
   }
 
-  def deleteMole(mole: IMoleExecution) = {
-    val key = getCacheId(mole)
+  def deleteMole(key: String) = {
+    getMole(key) map decacheMole
+
     dataB withSession {
       MoleData.filter(_.id === key).delete
+      MoleStats.filter(_.id === key).delete
     }
 
-    decacheMole(mole)
   }
 
   def setStatus(mole: IMoleExecution, status: Status) {
@@ -114,6 +121,7 @@ class Cache(system: ActorSystem, database: SlickDB) {
     val r = for (m ← MoleData if m.id === moleId) yield m.result
     r.update(blob)
     logger.info(s"Blob stored for mole: $moleId")
+    println("test")
   }
 
   def getCapsule(exec: IMoleExecution) = mole2CacheId get exec flatMap (capsules get _)

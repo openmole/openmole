@@ -17,7 +17,6 @@ import akka.actor.ActorSystem
 import resource._
 
 import slick.driver.H2Driver.simple._
-import slick.jdbc.meta.MTable
 
 import Database.threadLocalSession
 import org.openmole.misc.workspace.Workspace
@@ -150,6 +149,7 @@ trait MoleHandling { self: ScalatraBase ⇒
         val (me, path) = createMoleExecution(pEx, ctxt, encapsulate, genPath)
         db withSession {
           MoleData.insert((me.id, name, Status.Stopped.toString, clob, ctxtClob, encapsulate, pack, outputBlob))
+          MoleStats.insert((me.id, 0, 0, 0, 0, 0))
         }
         cache.cacheMoleExecution(me, path, me.id)
         Right(me)
@@ -176,6 +176,8 @@ trait MoleHandling { self: ScalatraBase ⇒
         case (pMClob, ctxtClob, e) ⇒ (moleDeserialiser(pMClob.getAsciiStream), SerialiserService.deserialise[Context](ctxtClob.getAsciiStream), e)
       }
 
+      println(r)
+
       r map Function.tupled(createMoleExecution(_, _, _, workDir)) map Function.tupled(cache.cacheMoleExecution(_, _, key))
     }
 
@@ -193,7 +195,7 @@ trait MoleHandling { self: ScalatraBase ⇒
   def deleteMole(key: String) = {
     val ret = getMole(key) map (_.cancel)
 
-    ret foreach cache.deleteMole
+    cache.deleteMole(key)
 
     ret
   }
@@ -203,6 +205,7 @@ trait MoleHandling { self: ScalatraBase ⇒
 
     val stats = getMoleStats(key)
 
+    println(statNames zip stats.getJobStatsAsSeq)
     statNames zip stats.getJobStatsAsSeq
   }
 
