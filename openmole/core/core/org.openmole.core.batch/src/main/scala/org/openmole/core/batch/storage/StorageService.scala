@@ -35,7 +35,7 @@ import StorageService.Log._
 
 trait StorageService extends BatchService with Storage {
 
-  def remoteStorage: Storage
+  def remoteStorage: RemoteStorage
   def clean(implicit token: AccessToken, objectContainer: ObjectContainer)
 
   def url: URI

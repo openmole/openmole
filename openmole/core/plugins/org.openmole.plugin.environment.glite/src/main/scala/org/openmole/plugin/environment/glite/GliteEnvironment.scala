@@ -38,6 +38,7 @@ import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
 import fr.iscpif.gridscale.glite.{ GlobusAuthentication, WMSJobService, BDII }
 import fr.iscpif.gridscale.RenewDecorator
+import java.net.URI
 
 object GliteEnvironment extends Logger {
 
@@ -92,10 +93,10 @@ object GliteEnvironment extends Logger {
 
   Workspace += (FetchResourcesTimeOut, "PT2M")
   Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
-  Workspace += (CACertificatesCacheTime, "P50D")
+  Workspace += (CACertificatesCacheTime, "P10D")
   Workspace += (VOInformationSite, "http://operations-portal.egi.eu/xml/voIDCard/public/all/true")
   Workspace += (VOCardDownloadTimeOut, "PT2M")
-  Workspace += (VOCardCacheTime, "P50D")
+  Workspace += (VOCardCacheTime, "P10D")
 
   Workspace += (LocalThreadsBySE, "10")
   Workspace += (LocalThreadsByWMS, "10")
@@ -211,7 +212,7 @@ class GliteEnvironment(
     val architecture: Option[String],
     override val threads: Option[Int],
     val requirements: Option[String],
-    val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId { env ⇒
+    val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId with LCGCp { env ⇒
 
   import GliteEnvironment._
 

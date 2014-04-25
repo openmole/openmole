@@ -17,7 +17,7 @@
 package org.openmole.ide.plugin.sampling.modifier
 
 import org.openmole.core.model.sampling.{ DiscreteFactor, Factor, Sampling }
-import org.openmole.plugin.sampling.modifier.ZipWithNameSampling
+import org.openmole.plugin.sampling.combine.ZipWithNameSampling
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.misc.exception.UserBadDataError
 import java.io.File

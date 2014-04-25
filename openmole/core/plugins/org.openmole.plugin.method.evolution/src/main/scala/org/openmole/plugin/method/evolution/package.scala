@@ -17,6 +17,13 @@
 
 package org.openmole.plugin.method
 
+import org.openmole.core.model.data.Prototype
+
 package object evolution {
   val GA = algorithm.GA
+
+  implicit def seqOfTuplesToInputsConversion(s: Seq[(Prototype[Double], (String, String))]) =
+    Inputs(s.map { case (p, (min, max)) ⇒ Scalar(p, min, max) })
+
+  implicit def seqToInputsConversion(s: Seq[Input]) = Inputs(s)
 }

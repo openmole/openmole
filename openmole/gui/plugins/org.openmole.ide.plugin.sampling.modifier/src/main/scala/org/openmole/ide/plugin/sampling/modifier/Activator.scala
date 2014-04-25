@@ -20,9 +20,9 @@ package org.openmole.ide.plugin.sampling.modifier
 import org.openmole.ide.core.implementation.registry._
 import org.openmole.ide.core.implementation.builder._
 import org.openmole.core.model.sampling.Sampling
-import org.openmole.plugin.sampling.modifier._
 import org.openmole.ide.core.implementation.sampling.{ IBuiltCompositionSampling, SamplingProxyUI }
 import org.openmole.ide.core.implementation.factory.SamplingFactoryUI
+import org.openmole.plugin.sampling.combine._
 
 class Activator extends OSGiActivator with SamplingActivator {
   override def samplingFactories = List(

@@ -18,7 +18,7 @@ object Libraries extends Defaults(Apache) {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.59"
+  val gridscaleVersion = "1.62-SNAPSHOT"
 
   val bouncyCastleVersion = "1.49"
 
@@ -37,11 +37,6 @@ object Libraries extends Defaults(Apache) {
   lazy val includeBouncyCastle = libraryDependencies += "org.bouncycastle" % "bcprov-jdk15on" % bouncyCastleVersion
 
   lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }
-
-  /*lazy val all = Project(id = "openmole-libraries",
-    base = file("libraries")) aggregate (jetty, scalatra, logback, h2, bonecp, slick, slf4j, xstream, groovy,
-      objenesis, scalaLang, Apache.all, jodaTime, gnuCrypto, db4o, jasypt, robustIt, netlogo4, netlogo5, opencsv,
-      netlogo4_noscala, netlogo5_noscala, guava, jsyntaxpane, gral, miglayout, netbeans, mgo, jline, jacksonJson, scalaCompiler)*/
 
   lazy val jetty = OsgiProject("org.eclipse.jetty", exports = Seq("org.eclipse.jetty.*", "javax.*")) settings
     (libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106",
@@ -75,11 +70,11 @@ object Libraries extends Defaults(Apache) {
   lazy val slf4j = OsgiProject("org.slf4j") settings (libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2")
 
   lazy val xstream = OsgiProject("com.thoughtworks.xstream", buddyPolicy = Some("global"), privatePackages = Seq("!scala.*", "*")) settings
-    (libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.4",
+    (libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.6",
       "net.sf.kxml" % "kxml2" % "2.3.0"), bundleType += "dbserver")
 
   lazy val groovy = OsgiProject("org.codehaus.groovy", buddyPolicy = Some("global"), exports = Seq("groovy.*", "org.codehaus.*"),
-    privatePackages = Seq("!scala.*,*")) settings (libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.1.9",
+    privatePackages = Seq("!scala.*,*")) settings (libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.2.1",
       "org.fusesource.jansi" % "jansi" % "1.2.1"))
 
   lazy val objenesis = OsgiProject("org.objenesis") settings (libraryDependencies += "org.objenesis" % "objenesis" % "1.2")
@@ -155,7 +150,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val guava = OsgiProject("com.google.guava",
     exports = Seq("com.google.common.*"), privatePackages = Seq("!scala.*", "*")) settings (libraryDependencies ++=
-      Seq("com.google.guava" % "guava" % "14.0.1", "com.google.code.findbugs" % "jsr305" % "1.3.9")
+      Seq("com.google.guava" % "guava" % "16.0.1", "com.google.code.findbugs" % "jsr305" % "1.3.9")
     )
 
   lazy val jsyntaxpane = OsgiProject("jsyntaxpane", privatePackages = Seq("!scala.*", "*")) settings
@@ -171,7 +166,9 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies ++= Seq("org.netbeans.api" % "org-netbeans-api-visual" % "RELEASE73",
       "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 
-  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.68", bundleType := Set("plugin"))
+  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.70", bundleType := Set("plugin"))
+
+  lazy val scalabc = OsgiProject("fr.irstea.scalabc", privatePackages = Seq("!scala.*", "*")) settings (libraryDependencies += "fr.irstea" %% "scalabc" % "0.4-SNAPSHOT", bundleType := Set("plugin"))
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0", bundleType := Set("plugin"))
 
@@ -182,7 +179,7 @@ object Libraries extends Defaults(Apache) {
   lazy val scalajHttp = OsgiProject("org.scalaj.scalaj-http") settings (libraryDependencies += "org.scalaj" %% "scalaj-http" % "0.3.10", exportPackage := Seq("scalaj.http.*"))
 
   lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
-    (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.4")
+    (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.4", version := "7.0.4")
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
 }

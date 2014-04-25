@@ -68,10 +68,7 @@ class SimExplorer extends IApplication with Logger {
 
       val debug = args.contains("-d")
       val filteredArgs = args.filterNot((_: String) == "-d")
-      if (debug) {
-
-        LoggerService.level("ALL")
-      }
+      if (debug) LoggerService.level("ALL")
 
       parser.parse(filteredArgs, Config()) foreach { config ⇒
 
@@ -81,7 +78,7 @@ class SimExplorer extends IApplication with Logger {
         val storage =
           try {
             new File(config.storage.get).copyUncompressFile(storageFile)
-            SerialiserService.deserialiseAndExtractFiles[SimpleStorage](storageFile)
+            SerialiserService.deserialiseAndExtractFiles[RemoteStorage](storageFile)
           }
           finally storageFile.delete
 

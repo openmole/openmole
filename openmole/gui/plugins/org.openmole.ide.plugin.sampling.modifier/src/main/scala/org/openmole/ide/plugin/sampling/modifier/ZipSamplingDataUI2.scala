@@ -17,7 +17,7 @@
 package org.openmole.ide.plugin.sampling.modifier
 
 import org.openmole.core.model.sampling.{ Factor, Sampling }
-import org.openmole.plugin.sampling.modifier.ZipSampling
+import org.openmole.plugin.sampling.combine.ZipSampling
 import org.openmole.ide.misc.widget.{ URL, Helper }
 import org.openmole.ide.core.implementation.sampling.{ SamplingUtils }
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }

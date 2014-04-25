@@ -21,7 +21,6 @@ import org.openmole.ide.core.implementation.data.SamplingDataUI
 import org.openmole.ide.core.implementation.serializer.Update
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.core.model.sampling.{ Sampling, Factor }
-import org.openmole.ide.plugin.sampling.modifier._
 
 package object combine {
 

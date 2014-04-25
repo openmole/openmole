@@ -23,16 +23,42 @@ import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.script._
 import org.openmole.misc.tools.service.Duration._
 import scala.util.Random
+import scalaz._
 
 object GA {
 
-  trait GA extends G with ContextPhenotype with MG with MF with GASigma {
+  trait GAType <: G with P with F with MF with ContextPhenotype with MG with genome.GAGenomeWithSigmaType
+
+  trait GA extends GAGenomeWithSigma with GAType {
     val gManifest = manifest[G]
     val individualManifest = manifest[Individual[G, P, F]]
     val fManifest = manifest[F]
   }
 
-  trait GATermination extends Termination with GA with TerminationManifest
+  trait SelfGA <: GAType {
+    val self: fr.iscpif.mgo.GA with Sigma
+
+    def values: Lens[self.G, Seq[Double]] = self.values
+    def genome: Lens[self.G, Seq[Double]] = self.genome
+
+    /** Size of the value part of the genome */
+    def genomeSize: Int = self.genomeSize
+
+    def sigma: Lens[self.G, Seq[Double]] = self.sigma
+
+    def randomGenome(implicit rng: Random): self.G = self.randomGenome
+  }
+
+  /*trait SelfPopulation <: G with P with F with MF {
+    type self <: fr.iscpif.mgo.G with fr.iscpif.mgo.F with fr.iscpif.mgo.MF with fr.iscpif.mgo.P
+
+    type G = GA#G
+    type P = GA#P
+    type F = GA#F
+    type MF = GA#MF
+  }*/
+
+  trait GATermination extends Termination with TerminationManifest with GAType
 
   def counter(_steps: Int) = new GATermination with CounterTermination {
     type MF = Any
@@ -40,14 +66,13 @@ object GA {
     val stateManifest = manifest[STATE]
   }
 
-  def timed(_duration: String) =
-    new GATermination with TimedTermination {
-      type MF = Any
-      val duration = _duration.toMilliSeconds
-      val stateManifest = manifest[STATE]
-    }
+  def timed(_duration: String) = new GATermination with TimedTermination {
+    type MF = Any
+    val duration = _duration.toMilliSeconds
+    val stateManifest = manifest[STATE]
+  }
 
-  trait GARanking extends Ranking with GA
+  trait GARanking extends Ranking with GAType
 
   trait GARankingBuilder {
     def apply(dominance: Dominance): GARanking
@@ -59,7 +84,11 @@ object GA {
     }
   }
 
-  trait GADiversityMetric extends DiversityMetric with GA
+  def hierarchical = new GARankingBuilder {
+    def apply(dominance: Dominance) = new HierarchicalRanking with GARanking {}
+  }
+
+  trait GADiversityMetric extends DiversityMetric with GAType
 
   trait DiversityMetricBuilder {
     def apply(dominance: Dominance): GADiversityMetric
@@ -87,7 +116,7 @@ object GA {
   def strict = new StrictDominance {}
   def nonStrict = new NonStrictDominance {}
 
-  trait GAModifier extends Modifier with GA
+  trait GAModifier extends Modifier with GAType
 
   trait GAAlgorithm extends Archive
     with ArchiveManifest
@@ -100,7 +129,7 @@ object GA {
     with TerminationManifest
 
   trait GAAlgorithmBuilder extends A {
-    def apply: GAAlgorithm
+    def apply(genomeSize: Int): GAAlgorithm
   }
 
   trait Optimisation extends NoArchive
@@ -108,6 +137,7 @@ object GA {
     with GAAlgorithm
     with NonDominatedElitism
     with BinaryTournamentSelection
+    with TournamentOnRankAndDiversity
 
   def optimisation(
     mu: Int,
@@ -116,8 +146,9 @@ object GA {
     ranking: GARankingBuilder = pareto,
     diversityMetric: DiversityMetricBuilder = crowding) = new GAAlgorithmBuilder {
     val (_mu, _dominance, _ranking, _diversityMetric) = (mu, dominance, ranking, diversityMetric)
-    def apply =
+    def apply(_genomeSize: Int) =
       new Optimisation {
+        val genomeSize = _genomeSize
         val aManifest = manifest[A]
         val populationManifest = manifest[Population[G, P, F, MF]]
         val diversityMetric = _diversityMetric(dominance)
@@ -132,7 +163,7 @@ object GA {
       }
   }
 
-  trait GAProfile extends GA {
+  trait GAProfile extends GAType {
     def aggregation: GAAggregation
     def x: Int
   }
@@ -145,6 +176,7 @@ object GA {
     with ProfileGenomePlotter
     with HierarchicalRanking
     with BinaryTournamentSelection
+    with TournamentOnRank
 
   def genomeProfile(
     x: Int,
@@ -156,8 +188,9 @@ object GA {
       val aggregation = _aggregation
       val x = _x
 
-      def apply =
+      def apply(_genomeSize: Int) =
         new GenomeProfile {
+          val genomeSize = _genomeSize
           val aManifest = manifest[A]
           val populationManifest = manifest[Population[G, P, F, MF]]
           val x = _x
@@ -171,7 +204,7 @@ object GA {
     }
   }
 
-  trait GAProfilePlotter extends ProfilePlotter with GA with MG
+  trait GAProfilePlotter extends ProfilePlotter with GAType with MG
 
   def profilePlotter(x: String) = new GAProfilePlotter {
     @transient lazy val interpreter = new GroovyProxyPool(x)
@@ -181,7 +214,7 @@ object GA {
 
   }
 
-  trait GAMap extends GA {
+  trait GAMap extends GAType {
     def aggregation: GAAggregation
     def x: Int
     def y: Int
@@ -208,8 +241,9 @@ object GA {
       val x = _x
       val y = _y
 
-      def apply =
+      def apply(_genomeSize: Int) =
         new GenomeMap {
+          val genomeSize = _genomeSize
           val aManifest = manifest[A]
           val populationManifest = manifest[Population[G, P, F, MF]]
 
@@ -229,7 +263,7 @@ object GA {
   }
 
   trait GAAggregation extends Aggregation with MG
-  trait GAMapPlotter extends MapPlotter with GA with MG
+  trait GAMapPlotter extends MapPlotter with GAType with MG
 
   def max = new MaxAggregation with GAAggregation {}
 
@@ -242,31 +276,32 @@ object GA {
         yInterpreter.execute(individual.phenotype.toBinding).asInstanceOf[Double].toInt)
   }
 
-  trait GACrossover extends CrossOver with GA
+  trait GACrossover extends CrossOver with GAType
 
   trait GACrossoverBuilder {
-    def apply(genomeSize: Factory[GA#G]): GACrossover
+    def apply(evolution: GA): GACrossover
   }
 
   def sbx(distributionIndex: Double = 2.0) = new GACrossoverBuilder {
     val _distributionIndex = distributionIndex
-    def apply(_genomeFactory: Factory[GA#G]) =
-      new SBXBoundedCrossover with GACrossover {
+    def apply(evolution: GA) =
+      new SBXBoundedCrossover with GACrossover with SelfGA {
+        val self = evolution
         override val distributionIndex = _distributionIndex
-        val genomeFactory = _genomeFactory
       }
   }
 
-  trait GAMutation extends Mutation with GA
+  trait GAMutation extends Mutation with GAType
 
-  trait GAMutationBuilder extends GA {
-    def apply(genomeFactory: Factory[GA#G]): GAMutation
+  trait GAMutationBuilder {
+    def apply(evolution: GA): GAMutation
   }
 
   def coEvolvingSigma = new GAMutationBuilder {
-    def apply(_genomeFactory: Factory[GA#G]) = new CoEvolvingSigmaValuesMutation with GAMutation {
-      val genomeFactory = _genomeFactory
-    }
+    def apply(evolution: GA) =
+      new CoEvolvingSigmaValuesMutation with GAMutation with SelfGA {
+        val self = evolution
+      }
   }
 
   def apply(
@@ -279,7 +314,7 @@ object GA {
 
 }
 
-trait GA extends GASigmaFactory
+trait GA extends GAGenomeWithSigma
   with EvolutionManifest
   with TerminationManifest
   with GA.GA
@@ -301,9 +336,9 @@ sealed class GAImpl(
   override val cloneProbability: Double)(val genomeSize: Int)
     extends GA { sga ⇒
 
-  lazy val thisAlgorithm = algorithm.apply
-  lazy val thisCrossover = crossover(genomeFactory)
-  lazy val thisMutation = mutation(genomeFactory)
+  lazy val thisAlgorithm = algorithm.apply(genomeSize)
+  lazy val thisCrossover = crossover(thisAlgorithm)
+  lazy val thisMutation = mutation(thisAlgorithm)
 
   type STATE = thisAlgorithm.STATE
   type A = thisAlgorithm.A

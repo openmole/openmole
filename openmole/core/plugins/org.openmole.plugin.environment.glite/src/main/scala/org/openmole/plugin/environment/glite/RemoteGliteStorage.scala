@@ -17,41 +17,49 @@
 
 package org.openmole.plugin.environment.glite
 
-import org.openmole.core.batch.storage.SimpleStorage
+import org.openmole.core.batch.storage.{ RemoteStorage, SimpleStorage }
 import org.openmole.misc.workspace._
 import org.openmole.misc.exception._
-import fr.iscpif.gridscale.glite.{ SRMStorage, ProxyFileAuthentication, VOMSAuthentication }
+import org.openmole.misc.tools.io.FileUtil._
+import fr.iscpif.gridscale.{ Storage ⇒ GSStorage }
 import java.io.File
+import java.net.URI
+import scala.sys.process._
 
-class RemoteGliteStorage(val host: String, val port: Int, permissive: Boolean, certificateDir: File) extends SimpleStorage { s ⇒
+class RemoteGliteStorage(val host: String, val port: Int, val voName: String) extends RemoteStorage with LCGCp { s ⇒
 
-  def root = ""
   val timeout = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds
 
-  @transient lazy val storage =
-    new SRMStorage {
-      val host: String = s.host
-      val port: Int = s.port
-      val basePath: String = ""
-      override def permissive = s.permissive
-      override val timeout = s.timeout
-    }
+  @transient lazy val url = new URI("srm", null, host, port, null, null, null)
 
-  def authentication: SRMStorage#A = new ProxyFileAuthentication {
-    def proxy = {
-      //val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
+  protected def run(cmd: String) = {
+    val output = new StringBuilder
+    val error = new StringBuilder
 
-      //      val certificateDir =
-      //        if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists) new File(X509_CERT_DIR)
-      //        else throw new InternalProcessingError("X509_CERT_DIR environment variable not found or directory doesn't exists.")
+    val logger =
+      ProcessLogger(
+        (o: String) ⇒ output.append("\n" + o),
+        (e: String) ⇒ error.append("\n" + e)
+      )
 
-      VOMSAuthentication.setCARepository(certificateDir)
-
-      val path =
-        if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) System.getenv.get("X509_USER_PROXY")
-        else throw new InternalProcessingError("The X509_USER_PROXY environment variable is not defined or point to an inexisting file.")
-
-      new File(path)
-    }
+    val exit = Process(cmd) ! logger
+    if (exit != 0) throw new RuntimeException(s"Command $cmd had a non 0 return value.\n Output: ${output.toString}. Error: ${error.toString}")
+    output.toString
   }
+
+  override def child(parent: String, child: String): String = GSStorage.child(parent, child)
+
+  override def downloadGZ(src: String, dest: File): Unit = Workspace.withTmpFile { tmpFile ⇒
+    download(src, tmpFile)
+    tmpFile.copyUncompressFile(dest)
+  }
+
+  override def download(src: String, dest: File): Unit = run(lcgCpCmd(url.resolve(src), dest.getAbsolutePath))
+
+  override def uploadGZ(src: File, dest: String): Unit = Workspace.withTmpFile { tmpFile ⇒
+    src.copyCompressFile(tmpFile)
+    upload(tmpFile, dest)
+  }
+
+  override def upload(src: File, dest: String): Unit = run(lcgCpCmd(src.getAbsolutePath, url.resolve(dest)))
 }
