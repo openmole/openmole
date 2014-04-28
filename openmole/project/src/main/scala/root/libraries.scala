@@ -166,7 +166,7 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies ++= Seq("org.netbeans.api" % "org-netbeans-api-visual" % "RELEASE73",
       "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 
-  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.70", bundleType := Set("plugin"))
+  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.71", bundleType := Set("plugin"))
 
   lazy val scalabc = OsgiProject("fr.irstea.scalabc", privatePackages = Seq("!scala.*", "*")) settings (libraryDependencies += "fr.irstea" %% "scalabc" % "0.4-SNAPSHOT", bundleType := Set("plugin"))
 
