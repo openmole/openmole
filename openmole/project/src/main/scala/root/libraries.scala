@@ -85,11 +85,11 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies <++= (scalaVersion) { sV ⇒
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,
-        "org.scala-lang" % "scala-actors" % sV,
+        //"org.scala-lang" % "scala-actors" % sV,
         "org.scala-lang" % "jline" % sV,
-        "com.typesafe.akka" %% "akka-actor" % "2.1.4",
-        "com.typesafe.akka" %% "akka-transactor" % "2.1.4",
-        "com.typesafe" % "config" % "1.0.0",
+        "com.typesafe.akka" %% "akka-actor" % "2.2.3",
+        "com.typesafe.akka" %% "akka-transactor" % "2.2.3",
+        "com.typesafe" % "config" % "1.2.0",
         "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2")
     }, bundleType += "dbserver")
 
@@ -179,7 +179,7 @@ object Libraries extends Defaults(Apache) {
   lazy val scalajHttp = OsgiProject("org.scalaj.scalaj-http") settings (libraryDependencies += "org.scalaj" %% "scalaj-http" % "0.3.10", exportPackage := Seq("scalaj.http.*"))
 
   lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
-    (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.4", version := "7.0.4")
+    (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6", version := "7.0.6")
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
 }
