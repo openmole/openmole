@@ -27,6 +27,8 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
       scalacOptions ++= Seq("-deprecation"),
       publishArtifact in (packageDoc in install) := false,
       publishArtifact in (packageSrc in install) := false,
+      scalatestVersion in Global := "2.1.5",
+      junitVersion in Global := "4.11",
 
       concurrentRestrictions := Seq(Tags.limitAll(5), Tags.limit(Tags.Disk, 2))
     )
