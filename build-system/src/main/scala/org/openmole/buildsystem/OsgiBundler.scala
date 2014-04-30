@@ -65,7 +65,7 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
     val testDependencies = (scalaVersion in thisProject, scalaVersion in Global) {
       (tSV, sv) ⇒
         (if (tSV == sv)
-          Seq("org.scalatest" %% "scalatest" % "1.9.1" % "test")
+          Seq("org.scalatest" %% "scalatest" % "2.1.5" % "test")
         else
           Seq()
         ) ++ Seq("junit" % "junit" % "4.11" % "test")
