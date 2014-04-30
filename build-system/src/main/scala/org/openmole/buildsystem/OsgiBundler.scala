@@ -62,13 +62,13 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
     val artifactId = artifactPrefix map (_ + "." + artifactSuffix) getOrElse artifactSuffix
     val base = dir / (if (pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
-    val testDependencies = (scalaVersion in thisProject, scalaVersion in Global) {
-      (tSV, sv) ⇒
+    val testDependencies = (scalaVersion in thisProject, scalaVersion in Global, scalatestVersion, junitVersion) {
+      (tSV, sv, stv, juv) ⇒
         (if (tSV == sv)
-          Seq("org.scalatest" %% "scalatest" % "2.1.5" % "test")
+          Seq("org.scalatest" %% "scalatest" % stv % "test")
         else
           Seq()
-        ) ++ Seq("junit" % "junit" % "4.11" % "test")
+        ) ++ Seq("junit" % "junit" % juv % "test")
     }
 
     val sets = settings
