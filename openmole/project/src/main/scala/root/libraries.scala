@@ -51,7 +51,7 @@ object Libraries extends Defaults(Apache) {
       "org.scalatra" %% "scalatra-json" % "2.2.1")) dependsOn (slf4j)
 
   lazy val jacksonJson = OsgiProject("org.json4s") settings (
-    libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.4",
+    libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.9",
     exportPackage += "com.fasterxml.*"
   )
 
@@ -85,12 +85,11 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies <++= (scalaVersion) { sV ⇒
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,
-        //"org.scala-lang" % "scala-actors" % sV,
         "org.scala-lang" % "jline" % sV,
         "com.typesafe.akka" %% "akka-actor" % "2.2.3",
         "com.typesafe.akka" %% "akka-transactor" % "2.2.3",
         "com.typesafe" % "config" % "1.2.0",
-        "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2")
+        "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.3")
     }, bundleType += "dbserver")
 
   lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.reflect.*", "scala.tools.*"),
@@ -174,9 +173,9 @@ object Libraries extends Defaults(Apache) {
 
   lazy val jline = OsgiProject("net.sourceforge.jline") settings (libraryDependencies += "jline" % "jline" % "0.9.94", exportPackage := Seq("jline.*"))
 
-  lazy val arm = OsgiProject("com.jsuereth.scala-arm") settings (libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.3", exportPackage := Seq("resource.*"))
+  lazy val arm = OsgiProject("com.jsuereth.scala-arm") settings (libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.4", exportPackage := Seq("resource.*"))
 
-  lazy val scalajHttp = OsgiProject("org.scalaj.scalaj-http") settings (libraryDependencies += "org.scalaj" %% "scalaj-http" % "0.3.10", exportPackage := Seq("scalaj.http.*"))
+  lazy val scalajHttp = OsgiProject("org.scalaj.scalaj-http") settings (libraryDependencies += "org.scalaj" %% "scalaj-http" % "0.3.15", exportPackage := Seq("scalaj.http.*"))
 
   lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
     (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6", version := "7.0.6")
