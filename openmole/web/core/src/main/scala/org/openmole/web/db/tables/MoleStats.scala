@@ -8,7 +8,7 @@ import slick.driver.H2Driver.simple._
  * Date: 6/14/13
  * Time: 1:39 PM
  */
-object MoleStats extends Table[(String, Int, Int, Int, Int, Int)]("MoleStats") {
+class MoleStats(tag: Tag) extends Table[(String, Int, Int, Int, Int, Int)](tag, "MoleStats") {
   type Stats = Map[String, Int]
   lazy val empty = Map("Ready" -> 0,
     "Running" -> 0,
@@ -23,5 +23,9 @@ object MoleStats extends Table[(String, Int, Int, Int, Int, Int)]("MoleStats") {
   def failed = column[Int]("FAILED")
   def cancelled = column[Int]("CANCELLED")
 
-  def * = id ~ ready ~ completed ~ running ~ failed ~ cancelled
+  def * = (id, ready, completed, running, failed, cancelled)
+}
+
+object MoleStats {
+  lazy val instance = TableQuery[MoleStats]
 }

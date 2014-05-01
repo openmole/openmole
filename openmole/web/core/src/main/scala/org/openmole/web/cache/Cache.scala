@@ -6,7 +6,6 @@ import akka.actor.ActorSystem
 import org.openmole.web.db.SlickDB
 import org.openmole.web.db.tables.{ MoleStats, MoleData }
 import slick.driver.H2Driver.simple._
-import Database.threadLocalSession
 import slick.jdbc.meta.MTable
 
 import javax.sql.rowset.serial.SerialBlob
@@ -24,14 +23,14 @@ class Cache(system: ActorSystem, database: SlickDB) {
 
   val dataB = database.db
 
-  dataB withSession {
+  dataB withSession { implicit session ⇒
     if (MTable.getTables("MoleData").list().isEmpty)
-      MoleData.ddl.create // check that table exists somehow
+      MoleData.instance.ddl.create // check that table exists somehow
   }
 
-  dataB withSession {
+  dataB withSession { implicit session ⇒
     if (MTable.getTables("MoleStats").list().isEmpty)
-      MoleStats.ddl.create
+      MoleStats.instance.ddl.create
   }
 
   def cacheMoleExecution(moleExecution: IMoleExecution, path: Option[File], cacheId: String) = {
@@ -46,43 +45,40 @@ class Cache(system: ActorSystem, database: SlickDB) {
   def getCacheId(mole: IMoleExecution) = mole2CacheId get mole getOrElse (throw new Exception("Cache ID requested for uncached mole."))
 
   def getMoleStats(key: String): Stats = {
-    lazy val stats = getStatus(key) flatMap (s ⇒ dataB withSession {
+    lazy val stats = getStatus(key) flatMap (s ⇒ dataB withSession { implicit session ⇒
       val status = Status.statuses.find(_.toString == s).getOrElse(throw new Exception("Unknown status on DB"))
-      (for (s ← MoleStats if s.id === key) yield s.*).list().map {
+      (for (s ← MoleStats.instance if s.id === key) yield s.*).list().map {
         case (_, a, b, c, d, e) ⇒
-          println(c)
           Stats(a, b, c, d, e, status)
       }.headOption
     })
 
-    println(stats)
     moleStats get key orElse stats getOrElse EmptyStats
   }
 
-  def getUnfinishedMoleKeys = dataB withSession {
-    (for (m ← MoleData if m.state === "Running") yield m.id.asColumnOf[String]).list
+  def getUnfinishedMoleKeys = dataB withSession { implicit session ⇒
+    (for (m ← MoleData.instance if m.state === "Running") yield m.id.asColumnOf[String]).list
   }
 
-  def getMoleKeys = dataB withSession {
+  def getMoleKeys = dataB withSession { implicit session ⇒
     (for {
-      m ← MoleData
+      m ← MoleData.instance
     } yield m.id.asColumnOf[String]).list
   }
 
   def getStatus(moleId: String): Option[String] =
-    dataB withSession {
-      (for (m ← MoleData if m.id === moleId) yield m.state).list().headOption
+    dataB withSession { implicit session ⇒
+      (for (m ← MoleData.instance if m.id === moleId) yield m.state).list().headOption
     }
 
   def decacheMole(mole: IMoleExecution) = {
     val mKey = mole2CacheId get mole
-    mKey foreach (id ⇒ println(s"decaching mole id: $id"))
+    mKey foreach (id ⇒ logger.info(s"decaching mole id: $id"))
     mKey foreach (cachedMoles get _ foreach (_.cancel))
     mKey flatMap (moleStats get _) foreach {
       stats ⇒
-        println(stats)
-        dataB withSession {
-          MoleStats.filter(_.id === mKey.get)
+        dataB withSession { implicit session ⇒
+          MoleStats.instance.filter(_.id === mKey.get)
             .map(x ⇒ x.*)
             .update((mKey.get, stats.ready, stats.running, stats.completed, stats.failed, stats.cancelled))
         }
@@ -94,34 +90,33 @@ class Cache(system: ActorSystem, database: SlickDB) {
   def deleteMole(key: String) = {
     getMole(key) map decacheMole
 
-    dataB withSession {
-      MoleData.filter(_.id === key).delete
-      MoleStats.filter(_.id === key).delete
+    dataB withSession { implicit session ⇒
+      MoleData.instance.filter(_.id === key).delete
+      MoleStats.instance.filter(_.id === key).delete
     }
 
   }
 
   def setStatus(mole: IMoleExecution, status: Status) {
     val moleId = getCacheId(mole)
-    dataB withSession {
-      val x = for { m ← MoleData if m.id === moleId } yield m.state
+    dataB withSession { implicit session ⇒
+      val x = for { m ← MoleData.instance if m.id === moleId } yield m.state
       x update status.toString
 
     }
     logger.info(s"updated mole: ${moleId} to ${status}")
   }
 
-  def getMoleResult(key: String) = dataB withSession {
-    val blob = (for (m ← MoleData if m.id === key) yield m.result).list.head
+  def getMoleResult(key: String) = dataB withSession { implicit session ⇒
+    val blob = (for (m ← MoleData.instance if m.id === key) yield m.result).list.head
     blob.getBytes(1, blob.length.toInt)
   }
 
-  def storeResultBlob(exec: IMoleExecution, blob: SerialBlob) = dataB withSession {
+  def storeResultBlob(exec: IMoleExecution, blob: SerialBlob) = dataB withSession { implicit session ⇒
     val moleId = getCacheId(exec)
-    val r = for (m ← MoleData if m.id === moleId) yield m.result
+    val r = for (m ← MoleData.instance if m.id === moleId) yield m.result
     r.update(blob)
     logger.info(s"Blob stored for mole: $moleId")
-    println("test")
   }
 
   def getCapsule(exec: IMoleExecution) = mole2CacheId get exec flatMap (capsules get _)

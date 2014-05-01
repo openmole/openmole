@@ -17,7 +17,6 @@ import resource._
 
 import slick.driver.H2Driver.simple._
 
-import Database.threadLocalSession
 import org.openmole.misc.workspace.Workspace
 import com.ice.tar.{ TarInputStream, Tar }
 import scala.Some
@@ -42,8 +41,8 @@ trait MoleHandling { self: ScalatraBase ⇒
   (cache.getUnfinishedMoleKeys map getMole).flatten foreach (_.start)
 
   def getStatus(moleId: String): String =
-    db withSession {
-      (for (m ← MoleData if m.id === moleId) yield m.state).list().headOption.getOrElse("Doesn't Exist")
+    db withSession { implicit session ⇒
+      (for (m ← MoleData.instance if m.id === moleId) yield m.state).list().headOption.getOrElse("Doesn't Exist")
     }
 
   private def processXMLFile[A: ClassTag](is: Option[InputStream]): Either[A, String] = is match {
@@ -146,9 +145,9 @@ trait MoleHandling { self: ScalatraBase ⇒
         //val id = UUID.randomUUID().toString
 
         val (me, path) = createMoleExecution(pEx, ctxt, encapsulate, genPath)
-        db withSession {
-          MoleData.insert((me.id, name, Status.Stopped.toString, clob, ctxtClob, encapsulate, pack, outputBlob))
-          MoleStats.insert((me.id, 0, 0, 0, 0, 0))
+        db withSession { implicit session ⇒
+          MoleData.instance.insert((me.id, name, Status.Stopped.toString, clob, ctxtClob, encapsulate, pack, outputBlob))
+          MoleStats.instance.insert((me.id, 0, 0, 0, 0, 0))
         }
         cache.cacheMoleExecution(me, path, me.id)
         Right(me)
@@ -160,11 +159,9 @@ trait MoleHandling { self: ScalatraBase ⇒
   def getMoleKeys = cache.getMoleKeys
 
   def getMole(key: String): Option[IMoleExecution] = { //TODO: move a large part of this to cache
-    lazy val mole: Option[IMoleExecution] = db withSession {
-      /*val f = new File((for (m ← MoleData if m.id === key) yield m.path).list.head)
-      f.createNewFile()*/
+    lazy val mole: Option[IMoleExecution] = db withSession { implicit session ⇒
 
-      val row = MoleData filter (_.id === key)
+      val row = MoleData.instance filter (_.id === key)
       val molePack = (row map (_.molePackage)).list.headOption.getOrElse(false)
       val workDir = if (molePack) Some(Workspace.newDir) else None
       val moleDeserialiser: InputStream ⇒ IPartialMoleExecution = workDir map (dir ⇒
@@ -174,8 +171,6 @@ trait MoleHandling { self: ScalatraBase ⇒
       val r = (row map (r ⇒ (r.clobbedMole, r.clobbedContext, r.encapsulated))).list.headOption map {
         case (pMClob, ctxtClob, e) ⇒ (moleDeserialiser(pMClob.getAsciiStream), SerialiserService.deserialise[Context](ctxtClob.getAsciiStream), e)
       }
-
-      println(r)
 
       r map Function.tupled(createMoleExecution(_, _, _, workDir)) map Function.tupled(cache.cacheMoleExecution(_, _, key))
     }
@@ -193,9 +188,7 @@ trait MoleHandling { self: ScalatraBase ⇒
 
   def deleteMole(key: String) = {
     val ret = getMole(key) map (_.cancel)
-
     cache.deleteMole(key)
-
     ret
   }
 
@@ -204,7 +197,6 @@ trait MoleHandling { self: ScalatraBase ⇒
 
     val stats = getMoleStats(key)
 
-    println(statNames zip stats.getJobStatsAsSeq)
     statNames zip stats.getJobStatsAsSeq
   }
 
@@ -218,20 +210,16 @@ trait MoleHandling { self: ScalatraBase ⇒
   //todo fix to remove decached moles
   def setStatus(mole: IMoleExecution, status: Status) = cache.setStatus(mole, status)
 
-  def isEncapsulated(key: String): Boolean = db withSession {
-    println(key)
-    (for { m ← MoleData if m.id === key } yield m.encapsulated).list.forall(b ⇒ b)
+  def isEncapsulated(key: String): Boolean = db withSession { implicit session ⇒
+    (for { m ← MoleData.instance if m.id === key } yield m.encapsulated).list.forall(b ⇒ b)
   }
 
   //TODO - FRAGILE
   def storeResultBlob(exec: IMoleExecution) = {
-    println("starting the store op")
     val mPath = cache.getCapsule(exec)
     for (path ← mPath) {
-      println(path)
       val outFile = new File(Workspace.newFile.toString + ".tar")
       outFile.createNewFile()
-      println(outFile)
 
       try {
         Tar.createDirectoryTar(path, outFile)
@@ -248,5 +236,3 @@ trait MoleHandling { self: ScalatraBase ⇒
   }
 }
 
-object MoleHandling {
-}

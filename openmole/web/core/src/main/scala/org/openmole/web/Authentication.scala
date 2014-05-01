@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest
 import org.openmole.web.cache.DataHandler
 import org.openmole.web.mole.MoleHandling
 
-trait Authentication { self ⇒ MoleHandling
+trait Authentication { self ⇒
 
   //private val logger = LoggerFactory.getLogger(getClass)
 
