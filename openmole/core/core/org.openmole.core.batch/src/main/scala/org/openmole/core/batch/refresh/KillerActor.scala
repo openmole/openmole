@@ -24,8 +24,7 @@ import org.openmole.core.batch.environment.BatchEnvironment
 
 object KillerActor extends Logger
 
-import org.openmole.core.model.execution.ExecutionState._
-import KillerActor._
+import KillerActor.Log._
 
 class KillerActor(jobManager: ActorRef) extends Actor {
   def receive = {

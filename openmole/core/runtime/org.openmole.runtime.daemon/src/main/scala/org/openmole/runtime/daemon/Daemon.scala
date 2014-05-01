@@ -21,7 +21,11 @@ import org.eclipse.equinox.app._
 import org.openmole.misc.tools.service.Logger
 import scopt.immutable._
 
-class Daemon extends IApplication with Logger {
+object Daemon extends Logger
+
+import Daemon.Log._
+
+class Daemon extends IApplication {
   override def start(context: IApplicationContext) = {
     try {
       val args = context.getArguments.get(IApplicationContext.APPLICATION_ARGS).asInstanceOf[Array[String]]

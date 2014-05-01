@@ -30,7 +30,11 @@ import org.openmole.core.batch.storage._
 import org.openmole.core.implementation.execution.local.LocalEnvironment
 import scala.util.{ Success, Failure }
 
-class SimExplorer extends IApplication with Logger {
+object SimExplorer extends Logger
+
+import SimExplorer.Log._
+
+class SimExplorer extends IApplication {
 
   override def start(context: IApplicationContext) = {
     try {

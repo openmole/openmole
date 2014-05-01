@@ -53,6 +53,7 @@ object Runtime extends Logger {
 class Runtime {
 
   import Runtime._
+  import Log._
 
   def apply(storage: RemoteStorage, communicationDirPath: String, inputMessagePath: String, outputMessagePath: String, debug: Boolean) = {
 

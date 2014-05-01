@@ -22,6 +22,8 @@ import org.openmole.misc.tools.service.Logger
 
 object Prettifier extends Logger {
 
+  import Log._
+
   implicit def objectPrettifer(o: Any) = new {
     def prettify(snipArray: Int = Int.MaxValue) = Prettifier.prettify(o, snipArray)
   }

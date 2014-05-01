@@ -65,6 +65,8 @@ object GUISerializer extends Logger {
   }
 }
 
+import GUISerializer.Log._
+
 class GUISerializer { self ⇒
 
   sealed trait SerializationState {
@@ -217,7 +219,7 @@ class GUISerializer { self ⇒
         Try(super.unmarshal(cReader, context)) match {
           case Success(o) ⇒ o
           case Failure(t) ⇒
-            GUISerializer.logger.log(GUISerializer.WARNING, "Error in deserialisation", t)
+            logger.log(WARNING, "Error in deserialisation", t)
             for (i ← 0 until cReader.depth) reader.moveUp
             None
         }

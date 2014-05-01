@@ -39,6 +39,8 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 
 object GetResultActor extends Logger
 
+import GetResultActor.Log._
+
 class GetResultActor(jobManager: ActorRef) extends Actor {
 
   def receive = {
@@ -124,8 +126,8 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
         }
         catch {
           case (e: IOException) ⇒
-            GetResultActor.logger.log(WARNING, description + " transfer has failed.")
-            GetResultActor.logger.log(FINE, "Stack of the error during tranfert", e)
+            logger.log(WARNING, description + " transfer has failed.")
+            logger.log(FINE, "Stack of the error during tranfert", e)
         }
       case None ⇒
     }

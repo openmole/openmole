@@ -31,6 +31,8 @@ import org.openmole.misc.tools.service.Logger
 
 object SSHJobService extends Logger
 
+import SSHJobService.Log._
+
 trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 
   val environment: BatchEnvironment with SSHAccess
@@ -80,7 +82,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
       val resultPath = result
     }
 
-    SSHJobService.logger.fine(s"Queuing /bin/bash $remoteScript in directory ${sharedFS.root}")
+    logger.fine(s"Queuing /bin/bash $remoteScript in directory ${sharedFS.root}")
 
     EventDispatcher.listen(sshBatchJob: BatchJob, BatchJobStatusListner, classOf[BatchJob.StateChanged])
 

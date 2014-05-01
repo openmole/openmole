@@ -35,6 +35,11 @@ import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
 import java.util.concurrent.{ Semaphore, locks, Executors }
 import org.openmole.misc.tools.service.LockUtil._
+import org.openmole.misc.tools.service.Logger
+
+object SubMoleExecution extends Logger
+
+import SubMoleExecution.Log._
 
 class SubMoleExecution(
     val parent: Option[SubMoleExecution],

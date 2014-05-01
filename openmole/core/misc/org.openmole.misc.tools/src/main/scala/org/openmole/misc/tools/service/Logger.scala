@@ -32,11 +32,4 @@ trait Logger { l ⇒
     def FINEST = Level.FINEST
   }
 
-  @deprecated("Use log namespace instead") def logger = Log.logger
-  @deprecated("Use log namespace instead") def SEVERE = Log.SEVERE
-  @deprecated("Use log namespace instead") def WARNING = Log.WARNING
-  @deprecated("Use log namespace instead") def INFO = Log.INFO
-  @deprecated("Use log namespace instead") def FINE = Log.FINE
-  @deprecated("Use log namespace instead") def FINER = Log.FINER
-  @deprecated("Use log namespace instead") def FINEST = Log.FINEST
 }

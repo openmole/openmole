@@ -29,6 +29,8 @@ import scala.util.{ Failure, Try }
 
 object GliteJob extends Logger {
 
+  import Log._
+
   trait GliteDebugJob extends GliteJob {
     val description: WMSJobDescription
 

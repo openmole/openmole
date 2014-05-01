@@ -47,6 +47,7 @@ object EagerSubmissionAgent extends Logger {
 }
 
 import EagerSubmissionAgent._
+import Log._
 
 class EagerSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
 
@@ -56,7 +57,7 @@ class EagerSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends
 
   override def update: Boolean = {
     try {
-      Log.logger.log(Log.FINE, "Eager submission started")
+      logger.log(FINE, "Eager submission started")
 
       val env = environment.get match {
         case None      ⇒ return false
