@@ -37,6 +37,7 @@ import org.openmole.plugin.method.evolution.Inputs
 import org.openmole.plugin.method.evolution.algorithm.{ EvolutionManifest, TerminationManifest, GA ⇒ OMGA }
 import org.openmole.misc.exception._
 import org.openmole.plugin.task.tools._
+import scala.util.Random
 
 package object evolution {
 
@@ -292,7 +293,7 @@ package object evolution {
       def diff(a1: A, a2: A) = evolution.diff(a1, a2)
       def toArchive(individuals: Seq[Individual[G, P, F]]) = evolution.toArchive(individuals)
       def modify(individuals: Seq[Individual[G, P, F]], archive: A) = evolution.modify(individuals, archive)
-      def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], archive: A) = evolution.elitism(individuals, newIndividuals, archive)
+      def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], archive: A)(implicit rng: Random) = evolution.elitism(individuals, newIndividuals, archive)
 
       def initialState = termination.initialState
       def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE) = termination.terminated(population, terminationState)

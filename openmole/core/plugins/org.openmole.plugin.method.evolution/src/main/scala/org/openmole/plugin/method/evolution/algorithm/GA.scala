@@ -127,6 +127,8 @@ object GA {
     with Selection
     with Termination
     with TerminationManifest
+    with Mutation
+    with CrossOver
 
   trait GAAlgorithmBuilder extends A {
     def apply(genomeSize: Int): GAAlgorithm
@@ -138,6 +140,8 @@ object GA {
     with NonDominatedElitism
     with BinaryTournamentSelection
     with TournamentOnRankAndDiversity
+    with CoEvolvingSigmaValuesMutation
+    with SBXBoundedCrossover
 
   def optimisation(
     mu: Int,
@@ -177,6 +181,8 @@ object GA {
     with HierarchicalRanking
     with BinaryTournamentSelection
     with TournamentOnRank
+    with CoEvolvingSigmaValuesMutation
+    with SBXBoundedCrossover
 
   def genomeProfile(
     x: Int,
@@ -227,6 +233,8 @@ object GA {
     with NoRanking
     with NoModifier
     with MapSelection
+    with CoEvolvingSigmaValuesMutation
+    with SBXBoundedCrossover
 
   def genomeMap(
     x: Int,
@@ -276,41 +284,11 @@ object GA {
         yInterpreter.execute(individual.phenotype.toBinding).asInstanceOf[Double].toInt)
   }
 
-  trait GACrossover extends CrossOver with GAType
-
-  trait GACrossoverBuilder {
-    def apply(evolution: GA): GACrossover
-  }
-
-  def sbx(distributionIndex: Double = 2.0) = new GACrossoverBuilder {
-    val _distributionIndex = distributionIndex
-    def apply(evolution: GA) =
-      new SBXBoundedCrossover with GACrossover with SelfGA {
-        val self = evolution
-        override val distributionIndex = _distributionIndex
-      }
-  }
-
-  trait GAMutation extends Mutation with GAType
-
-  trait GAMutationBuilder {
-    def apply(evolution: GA): GAMutation
-  }
-
-  def coEvolvingSigma = new GAMutationBuilder {
-    def apply(evolution: GA) =
-      new CoEvolvingSigmaValuesMutation with GAMutation with SelfGA {
-        val self = evolution
-      }
-  }
-
   def apply(
     algorithm: GAAlgorithmBuilder,
     lambda: Int,
-    mutation: GAMutationBuilder = coEvolvingSigma,
-    crossover: GACrossoverBuilder = sbx(),
     cloneProbability: Double = 0.0) =
-    new org.openmole.plugin.method.evolution.algorithm.GAImpl(algorithm, lambda, mutation, crossover, cloneProbability)(_)
+    new org.openmole.plugin.method.evolution.algorithm.GAImpl(algorithm, lambda, cloneProbability)(_)
 
 }
 
@@ -331,14 +309,10 @@ trait GA extends GAGenomeWithSigma
 sealed class GAImpl(
   val algorithm: GA.GAAlgorithmBuilder,
   val lambda: Int,
-  val mutation: GA.GAMutationBuilder,
-  val crossover: GA.GACrossoverBuilder,
   override val cloneProbability: Double)(val genomeSize: Int)
     extends GA { sga ⇒
 
   lazy val thisAlgorithm = algorithm.apply(genomeSize)
-  lazy val thisCrossover = crossover(thisAlgorithm)
-  lazy val thisMutation = mutation(thisAlgorithm)
 
   type STATE = thisAlgorithm.STATE
   type A = thisAlgorithm.A
@@ -355,9 +329,9 @@ sealed class GAImpl(
   def diff(a1: A, a2: A) = thisAlgorithm.diff(a1, a2)
   def initialArchive = thisAlgorithm.initialArchive
   def modify(individuals: Seq[Individual[G, P, F]], archive: A) = thisAlgorithm.modify(individuals, archive)
-  def crossover(g1: G, g2: G)(implicit rng: Random) = thisCrossover.crossover(g1, g2)
-  def mutate(genome: G)(implicit rng: Random) = thisMutation.mutate(genome)
-  def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], a: A) = thisAlgorithm.elitism(individuals, newIndividuals, a)
-  def selection(population: Population[G, P, F, MF])(implicit aprng: Random): Iterator[Individual[G, P, F]] = thisAlgorithm.selection(population)
+  def crossover(g1: G, g2: G, population: Seq[Individual[G, P, F]], archive: A)(implicit rng: Random) = thisAlgorithm.crossover(g1, g2, population, archive)
+  def mutate(genome: G, population: Seq[Individual[G, P, F]], archive: A)(implicit rng: Random) = thisAlgorithm.mutate(genome, population, archive)
+  def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], a: A)(implicit rng: Random) = thisAlgorithm.elitism(individuals, newIndividuals, a)
+  def selection(population: Population[G, P, F, MF])(implicit rng: Random): Iterator[Individual[G, P, F]] = thisAlgorithm.selection(population)
 
 }
