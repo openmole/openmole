@@ -27,7 +27,7 @@ import scalaz._
 
 object GA {
 
-  trait GAType <: G with P with F with MF with ContextPhenotype with MG with genome.GAGenomeWithSigmaType
+  trait GAType <: G with P with F with MF with ContextPhenotype with MG //with genome.GAGenomeWithSigmaType
 
   trait GA extends GAGenomeWithSigma with GAType {
     val gManifest = manifest[G]
@@ -145,7 +145,7 @@ object GA {
 
   def optimisation(
     mu: Int,
-    termination: GATermination { type MF >: Optimisation#MF },
+    termination: GATermination { type G >: Optimisation#G; type P >: Optimisation#P; type F >: Optimisation#F; type MF >: Optimisation#MF },
     dominance: Dominance = strict,
     ranking: GARankingBuilder = pareto,
     diversityMetric: DiversityMetricBuilder = crowding) = new GAAlgorithmBuilder {
@@ -188,7 +188,7 @@ object GA {
     x: Int,
     nX: Int,
     aggregation: GAAggregation,
-    termination: GATermination { type MF >: GenomeProfile#MF }) = {
+    termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F; type MF >: GenomeProfile#MF }) = {
     val (_x, _nX, _aggregation) = (x, nX, aggregation)
     new GAAlgorithmBuilder with GAProfile {
       val aggregation = _aggregation
@@ -242,7 +242,7 @@ object GA {
     y: Int,
     nY: Int,
     aggregation: GAAggregation,
-    termination: GATermination { type MF >: GenomeMap#MF }) = {
+    termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F; type MF >: GenomeMap#MF }) = {
     val (_x, _nX, _y, _nY, _aggregation) = (x, nX, y, nY, aggregation)
     new GAAlgorithmBuilder with GAMap {
       val aggregation = _aggregation

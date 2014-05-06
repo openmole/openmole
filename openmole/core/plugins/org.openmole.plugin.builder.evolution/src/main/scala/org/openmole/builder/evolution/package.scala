@@ -271,7 +271,7 @@ package object evolution {
   def islandGA(model: Puzzle with Island)(
     name: String,
     number: Int,
-    termination: GA.GATermination { type MF >: model.evolution.MF },
+    termination: GA.GATermination { type G >: model.evolution.G; type P >: model.evolution.P; type F >: model.evolution.F; type MF >: model.evolution.MF },
     sampling: Int = model.evolution.lambda)(implicit plugins: PluginSet) = {
 
     import model.evolution
