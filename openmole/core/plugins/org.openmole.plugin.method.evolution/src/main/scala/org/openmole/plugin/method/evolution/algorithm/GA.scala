@@ -18,6 +18,7 @@
 package org.openmole.plugin.method.evolution.algorithm
 
 import fr.iscpif.mgo._
+import fr.iscpif.mgo.{ GA ⇒ MGOGA }
 import fr.iscpif.mgo.tools.Lazy
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.script._
@@ -27,52 +28,29 @@ import scalaz._
 
 object GA {
 
-  trait GAType <: G with P with F with MF with ContextPhenotype with MG //with genome.GAGenomeWithSigmaType
+  trait GAType <: G with P with F with MF with MG with MGOGA with Sigma with DoubleSequencePhenotype with MGFitness
 
-  trait GA extends GAGenomeWithSigma with GAType {
-    val gManifest = manifest[G]
-    val individualManifest = manifest[Individual[G, P, F]]
-    val fManifest = manifest[F]
-  }
-
-  trait SelfGA <: GAType {
-    val self: fr.iscpif.mgo.GA with Sigma
-
-    def values: Lens[self.G, Seq[Double]] = self.values
-    def genome: Lens[self.G, Seq[Double]] = self.genome
-
-    /** Size of the value part of the genome */
-    def genomeSize: Int = self.genomeSize
-
-    def sigma: Lens[self.G, Seq[Double]] = self.sigma
-
-    def randomGenome(implicit rng: Random): self.G = self.randomGenome
-  }
-
-  /*trait SelfPopulation <: G with P with F with MF {
-    type self <: fr.iscpif.mgo.G with fr.iscpif.mgo.F with fr.iscpif.mgo.MF with fr.iscpif.mgo.P
-
-    type G = GA#G
-    type P = GA#P
-    type F = GA#F
-    type MF = GA#MF
-  }*/
-
-  trait GATermination extends Termination with TerminationManifest with GAType
+  trait GATermination extends Termination with TerminationManifest
 
   def counter(_steps: Int) = new GATermination with CounterTermination {
+    type G = Any
+    type F = Any
+    type P = Any
     type MF = Any
+    val stateManifest: Manifest[STATE] = manifest[STATE]
     val steps = _steps
-    val stateManifest = manifest[STATE]
   }
 
   def timed(_duration: String) = new GATermination with TimedTermination {
+    type G = Any
+    type F = Any
+    type P = Any
     type MF = Any
+    val stateManifest: Manifest[STATE] = manifest[STATE]
     val duration = _duration.toMilliSeconds
-    val stateManifest = manifest[STATE]
   }
 
-  trait GARanking extends Ranking with GAType
+  trait GARanking extends Ranking
 
   trait GARankingBuilder {
     def apply(dominance: Dominance): GARanking
@@ -88,7 +66,7 @@ object GA {
     def apply(dominance: Dominance) = new HierarchicalRanking with GARanking {}
   }
 
-  trait GADiversityMetric extends DiversityMetric with GAType
+  trait GADiversityMetric extends DiversityMetric
 
   trait DiversityMetricBuilder {
     def apply(dominance: Dominance): GADiversityMetric
@@ -119,14 +97,12 @@ object GA {
   trait GAModifier extends Modifier with GAType
 
   trait GAAlgorithm extends Archive
-    with ArchiveManifest
-    with GA
+    with EvolutionManifest
+    with GAType
     with GAModifier
     with Elitism
-    with PopulationManifest
     with Selection
     with Termination
-    with TerminationManifest
     with Mutation
     with CrossOver
 
@@ -142,6 +118,8 @@ object GA {
     with TournamentOnRankAndDiversity
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
+    with GAType
+    with GAGenomeWithSigma
 
   def optimisation(
     mu: Int,
@@ -152,117 +130,114 @@ object GA {
     val (_mu, _dominance, _ranking, _diversityMetric) = (mu, dominance, ranking, diversityMetric)
     def apply(_genomeSize: Int) =
       new Optimisation {
+        val stateManifest: Manifest[STATE] = termination.stateManifest
+        val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
+        val individualManifest: Manifest[Individual[G, P, F]] = implicitly
+        val aManifest: Manifest[A] = implicitly
+        val fManifest: Manifest[F] = implicitly
+        val gManifest: Manifest[G] = implicitly
+
         val genomeSize = _genomeSize
-        val aManifest = manifest[A]
-        val populationManifest = manifest[Population[G, P, F, MF]]
         val diversityMetric = _diversityMetric(dominance)
         val ranking = _ranking(dominance)
         val mu = _mu
         def diversity(individuals: Seq[Seq[Double]], ranks: Seq[Lazy[Int]]) = diversityMetric.diversity(individuals, ranks)
         def rank(individuals: Seq[Seq[Double]]) = ranking.rank(individuals)
         type STATE = termination.STATE
-        implicit val stateManifest = termination.stateManifest
         def initialState: STATE = termination.initialState
         def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
       }
   }
 
-  trait GAProfile extends GAType {
-    def aggregation: GAAggregation
+  trait GenomeProfile extends GAAlgorithm
+      with ProfileModifier
+      with ProfileElitism
+      with NoArchive
+      with NoDiversity
+      with ProfileGenomePlotter
+      with HierarchicalRanking
+      with BinaryTournamentSelection
+      with TournamentOnRank
+      with CoEvolvingSigmaValuesMutation
+      with SBXBoundedCrossover
+      with GAType
+      with GAGenomeWithSigma
+      with MGFitness
+      with MaxAggregation {
     def x: Int
   }
-
-  trait GenomeProfile extends GAAlgorithm
-    with ProfileModifier
-    with ProfileElitism
-    with NoArchive
-    with NoDiversity
-    with ProfileGenomePlotter
-    with HierarchicalRanking
-    with BinaryTournamentSelection
-    with TournamentOnRank
-    with CoEvolvingSigmaValuesMutation
-    with SBXBoundedCrossover
 
   def genomeProfile(
     x: Int,
     nX: Int,
-    aggregation: GAAggregation,
     termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F; type MF >: GenomeProfile#MF }) = {
-    val (_x, _nX, _aggregation) = (x, nX, aggregation)
-    new GAAlgorithmBuilder with GAProfile {
-      val aggregation = _aggregation
+    val (_x, _nX) = (x, nX)
+    new GAAlgorithmBuilder {
       val x = _x
 
       def apply(_genomeSize: Int) =
         new GenomeProfile {
+          val stateManifest: Manifest[STATE] = termination.stateManifest
+          val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
+          val individualManifest: Manifest[Individual[G, P, F]] = implicitly
+          val aManifest: Manifest[A] = implicitly
+          val fManifest: Manifest[F] = implicitly
+          val gManifest: Manifest[G] = implicitly
+
           val genomeSize = _genomeSize
-          val aManifest = manifest[A]
-          val populationManifest = manifest[Population[G, P, F, MF]]
           val x = _x
           val nX = _nX
-          def aggregate(fitness: F) = _aggregation.aggregate(fitness)
           type STATE = termination.STATE
-          implicit val stateManifest = termination.stateManifest
           def initialState: STATE = termination.initialState
           def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
         }
     }
   }
 
-  trait GAProfilePlotter extends ProfilePlotter with GAType with MG
-
-  def profilePlotter(x: String) = new GAProfilePlotter {
-    @transient lazy val interpreter = new GroovyProxyPool(x)
-
-    def plot(individual: Individual[this.type#G, this.type#P, this.type#F]) =
-      interpreter.execute(individual.phenotype.toBinding).asInstanceOf[Double].toInt
-
-  }
-
-  trait GAMap extends GAType {
-    def aggregation: GAAggregation
+  trait GenomeMap extends GAAlgorithm
+      with MapElitism
+      with MapGenomePlotter
+      with NoArchive
+      with NoRanking
+      with NoModifier
+      with MapSelection
+      with CoEvolvingSigmaValuesMutation
+      with SBXBoundedCrossover
+      with GAType
+      with GAGenomeWithSigma
+      with MaxAggregation {
     def x: Int
     def y: Int
   }
-
-  trait GenomeMap extends GAAlgorithm
-    with MapElitism
-    with MapGenomePlotter
-    with NoArchive
-    with NoRanking
-    with NoModifier
-    with MapSelection
-    with CoEvolvingSigmaValuesMutation
-    with SBXBoundedCrossover
 
   def genomeMap(
     x: Int,
     nX: Int,
     y: Int,
     nY: Int,
-    aggregation: GAAggregation,
     termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F; type MF >: GenomeMap#MF }) = {
-    val (_x, _nX, _y, _nY, _aggregation) = (x, nX, y, nY, aggregation)
-    new GAAlgorithmBuilder with GAMap {
-      val aggregation = _aggregation
+    val (_x, _nX, _y, _nY) = (x, nX, y, nY)
+    new GAAlgorithmBuilder {
       val x = _x
       val y = _y
 
       def apply(_genomeSize: Int) =
         new GenomeMap {
-          val genomeSize = _genomeSize
-          val aManifest = manifest[A]
-          val populationManifest = manifest[Population[G, P, F, MF]]
+          val stateManifest: Manifest[STATE] = termination.stateManifest
+          val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
+          val individualManifest: Manifest[Individual[G, P, F]] = implicitly
+          val aManifest: Manifest[A] = implicitly
+          val fManifest: Manifest[F] = implicitly
+          val gManifest: Manifest[G] = implicitly
 
-          def aggregate(fitness: F) = _aggregation.aggregate(fitness)
+          val genomeSize = _genomeSize
           val x = _x
           val y = _y
           val nX = _nX
           val nY = _nY
 
           type STATE = termination.STATE
-          implicit val stateManifest = termination.stateManifest
+
           def initialState: STATE = termination.initialState
           def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
 
@@ -270,58 +245,64 @@ object GA {
     }
   }
 
-  trait GAAggregation extends Aggregation with MG
-  trait GAMapPlotter extends MapPlotter with GAType with MG
-
-  def max = new MaxAggregation with GAAggregation {}
-
-  def mapGenomePlotter(x: String, y: String) = new GAMapPlotter {
-    @transient lazy val xInterpreter = new GroovyProxyPool(x)
-    @transient lazy val yInterpreter = new GroovyProxyPool(y)
-
-    def plot(individual: Individual[this.type#G, this.type#P, this.type#F]) =
-      (xInterpreter.execute(individual.phenotype.toBinding).asInstanceOf[Double].toInt,
-        yInterpreter.execute(individual.phenotype.toBinding).asInstanceOf[Double].toInt)
-  }
-
-  def apply(
-    algorithm: GAAlgorithmBuilder,
+  def apply[AG <: GAAlgorithmBuilder](
+    algorithm: AG,
     lambda: Int,
-    cloneProbability: Double = 0.0) =
-    new org.openmole.plugin.method.evolution.algorithm.GAImpl(algorithm, lambda, cloneProbability)(_)
+    cloneProbability: Double = 0.0) = {
+    val (_lambda, _cloneProbability) = (lambda, cloneProbability)
+
+    s: Int ⇒
+      new org.openmole.plugin.method.evolution.algorithm.GAImpl[AG](algorithm)(s) {
+        val lambda = _lambda
+        override val cloneProbability = _cloneProbability
+      }
+  }
 
 }
 
-trait GA extends GAGenomeWithSigma
-  with EvolutionManifest
-  with TerminationManifest
-  with GA.GA
-  with Archive
-  with Termination
-  with GeneticBreeding
-  with MG
-  with Elitism
-  with Modifier
-  with CloneRemoval
-  with ContextPhenotype
-  with PopulationManifest
+trait GA[ALGO <: GA.GAAlgorithmBuilder] extends GA.GAType
+    with Archive
+    with Termination
+    with GeneticBreeding
+    with Elitism
+    with Modifier
+    with CloneRemoval
+    with EvolutionManifest {
+  def algorithm: ALGO
+}
 
-sealed class GAImpl(
-  val algorithm: GA.GAAlgorithmBuilder,
-  val lambda: Int,
-  override val cloneProbability: Double)(val genomeSize: Int)
-    extends GA { sga ⇒
+sealed abstract class GAImpl[ALGO <: GA.GAAlgorithmBuilder](val algorithm: ALGO)(val genomeSize: Int) extends GA[ALGO] { sga ⇒
+  val lambda: Int
 
   lazy val thisAlgorithm = algorithm.apply(genomeSize)
 
   type STATE = thisAlgorithm.STATE
-  type A = thisAlgorithm.A
+  type G = thisAlgorithm.G
+  //type P = thisAlgorithm.P
+  //type F = thisAlgorithm.F
   type MF = thisAlgorithm.MF
+  type A = thisAlgorithm.A
 
-  implicit val aManifest = thisAlgorithm.aManifest
-  implicit val populationManifest = thisAlgorithm.populationManifest
+  /*val stateManifest: Manifest[STATE] = implicitly
+  val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
+  val individualManifest: Manifest[Individual[G, P, F]] = implicitly
+  val aManifest: Manifest[A] = implicitly
+  val fManifest: Manifest[F] = implicitly
+  val gManifest: Manifest[G] = implicitly*/
 
-  implicit val stateManifest = thisAlgorithm.stateManifest
+  implicit val stateManifest: Manifest[STATE] = thisAlgorithm.stateManifest
+  implicit val populationManifest: Manifest[Population[G, P, F, MF]] = thisAlgorithm.populationManifest
+  implicit val individualManifest: Manifest[Individual[G, P, F]] = thisAlgorithm.individualManifest
+  implicit val aManifest: Manifest[A] = thisAlgorithm.aManifest
+  implicit val fManifest: Manifest[F] = thisAlgorithm.fManifest
+  implicit val gManifest: Manifest[G] = thisAlgorithm.gManifest
+
+  val genome = thisAlgorithm.genome
+  val values = thisAlgorithm.values
+  val sigma = thisAlgorithm.sigma
+
+  def randomGenome(implicit rng: Random) = thisAlgorithm.randomGenome
+
   def initialState: STATE = thisAlgorithm.initialState
   def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = thisAlgorithm.terminated(population, terminationState)
   def toArchive(individuals: Seq[Individual[G, P, F]]) = thisAlgorithm.toArchive(individuals)

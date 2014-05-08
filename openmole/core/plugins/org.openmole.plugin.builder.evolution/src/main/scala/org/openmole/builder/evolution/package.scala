@@ -45,12 +45,12 @@ package object evolution {
 
   private def components(
     name: String,
-    evolution: OMGA,
+    evolution: OMGA[_],
     inputs: Inputs,
     objectives: Objectives)(implicit plugins: PluginSet) = new { components ⇒
     import evolution._
 
-    val genome = Prototype[evolution.G](name + "Genome")
+    val genome = Prototype[evolution.G](name + "Genome")(gManifest)
     val individual = Prototype[Individual[evolution.G, evolution.P, evolution.F]](name + "Individual")
     val newIndividual = Prototype[Individual[evolution.G, evolution.P, evolution.F]](name + "NewIndividual")
     //val population = Prototype[Population[evolution.G, evolution.F, evolution.MF]](name + "Population")
@@ -114,15 +114,16 @@ package object evolution {
 
     val terminatedCondition = Condition(terminated.name + " == true")
 
-    val (_evolution, _inputs, _objectives) = (evolution, inputs, objectives)
+    val _evolution = evolution
+    val (_inputs, _objectives) = (inputs, objectives)
 
     def puzzle(puzzle: Puzzle, _output: ICapsule) =
       new Puzzle(puzzle) with Island {
         val evolution = _evolution
 
         val archive = components.archive.asInstanceOf[Prototype[evolution.A]]
-        val genome = components.genome
-        val individual = components.individual
+        val genome = components.genome.asInstanceOf[Prototype[evolution.G]]
+        val individual = components.individual.asInstanceOf[Prototype[Individual[evolution.G, evolution.P, evolution.F]]]
 
         def inputs = _inputs
         def objectives = _objectives
@@ -135,7 +136,7 @@ package object evolution {
   }
 
   trait Island {
-    val evolution: OMGA //EvolutionManifest with Modifier with Selection with Lambda with Elitism
+    val evolution: OMGA[_]
 
     def archive: Prototype[evolution.A]
     def genome: Prototype[evolution.G]
@@ -144,7 +145,7 @@ package object evolution {
     def objectives: Objectives
   }
 
-  def generationalGA(evolutionBuilder: Int ⇒ OMGA)(
+  def generationalGA(evolutionBuilder: Int ⇒ OMGA[_])(
     name: String,
     model: Puzzle,
     inputs: Inputs,
@@ -201,7 +202,7 @@ package object evolution {
     cs.puzzle(gaPuzzle, scalingIndividualsSlot.capsule)
   }
 
-  def steadyGA(evolutionBuilder: Int ⇒ OMGA)(
+  def steadyGA(evolutionBuilder: Int ⇒ OMGA[_])(
     name: String,
     model: Puzzle,
     inputs: Inputs,
@@ -286,7 +287,7 @@ package object evolution {
 
       type STATE = termination.STATE
 
-      val stateManifest = termination.stateManifest
+      implicit val stateManifest = termination.stateManifest
 
       def initialArchive = evolution.initialArchive
       def combine(a1: A, a2: A) = evolution.combine(a1, a2)

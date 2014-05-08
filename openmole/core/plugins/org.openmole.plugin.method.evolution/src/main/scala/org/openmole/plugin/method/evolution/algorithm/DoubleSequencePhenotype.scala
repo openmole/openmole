@@ -20,6 +20,6 @@ package org.openmole.plugin.method.evolution.algorithm
 import fr.iscpif.mgo._
 import org.openmole.core.model.data._
 
-trait ContextPhenotype extends P {
-  type P = Context
+trait DoubleSequencePhenotype extends P {
+  type P = Seq[Double]
 }

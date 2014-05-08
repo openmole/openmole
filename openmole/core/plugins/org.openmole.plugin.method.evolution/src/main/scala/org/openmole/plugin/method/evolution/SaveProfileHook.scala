@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.method.evolution
 
-import algorithm.GA.{ GAAggregation, GAProfile }
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.implementation.data._
@@ -31,23 +30,30 @@ import org.openmole.core.implementation.mole._
 
 object SaveProfileHook {
 
-  def apply(
-    individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
-    profile: GA.GAProfile,
+  def apply(profile: GA.GenomeProfile)(
+    individual: Prototype[Individual[profile.G, profile.P, profile.F]],
     scales: Inputs,
     path: String) =
     new HookBuilder {
       addInput(individual.toArray)
-      def toHook = new SaveProfileHook(individual, profile, scales, path) with Built
+      val (_individual, _profile, _scales, _path) = (individual, profile, scales, path)
+
+      def toHook = new SaveProfileHook with Built {
+        val profile = _profile
+        val individual = _individual.asInstanceOf[Prototype[Individual[profile.G, profile.P, profile.F]]]
+        val scales = _scales
+        val path = _path
+      }
     }
 
 }
 
-abstract class SaveProfileHook(
-    val individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
-    val profile: GA.GAProfile,
-    val scales: Inputs,
-    val path: String) extends Hook with GenomeScaling {
+abstract class SaveProfileHook extends Hook with GenomeScaling {
+
+  val profile: GA.GenomeProfile
+  val individual: Prototype[Individual[profile.G, profile.P, profile.F]]
+  val scales: Inputs
+  val path: String
 
   def process(context: Context, executionContext: ExecutionContext) = {
     val file = executionContext.relativise(VariableExpansion(context, path))
@@ -56,8 +62,8 @@ abstract class SaveProfileHook(
       for {
         i ← context(individual.toArray)
       } {
-        val scaledGenome = scaled(i.genome.values, context)
-        w.write("" + scaledGenome(profile.x).value + "," + profile.aggregation.aggregate(i.fitness) + "\n")
+        val scaledGenome = scaled(profile.values.get(i.genome), context)
+        w.write("" + scaledGenome(profile.x).value + "," + profile.aggregate(i.fitness) + "\n")
       }
     }
     context

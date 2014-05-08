@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.method.evolution
 
-import algorithm.ContextPhenotype
+import org.openmole.plugin.method.evolution.algorithm.DoubleSequencePhenotype
 import fr.iscpif.mgo._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
@@ -36,7 +36,7 @@ object ToIndividualTask {
       (p, vDouble) :: expand(objectives.tail, context + Variable(p, vDouble))
     }
 
-  def apply(evolution: G with ContextPhenotype with F with MG)(
+  def apply(evolution: G with P with F with MGFitness with DoubleSequencePhenotype)(
     name: String,
     genome: Prototype[evolution.G],
     individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]],
@@ -74,7 +74,7 @@ object ToIndividualTask {
 
 }
 
-sealed abstract class ToIndividualTask(val evolution: G with ContextPhenotype with F with MG)(
+sealed abstract class ToIndividualTask(val evolution: G with P with F with MGFitness with DoubleSequencePhenotype)(
     val name: String) extends Task { task ⇒
 
   def genome: Prototype[evolution.G]
@@ -92,8 +92,8 @@ sealed abstract class ToIndividualTask(val evolution: G with ContextPhenotype wi
     val i: Individual[evolution.G, evolution.P, evolution.F] =
       Individual(
         context(task.genome),
-        context + scaled.map { case (p, v) ⇒ Variable(p, v) },
-        MGFitness(scaled.map { _._2 }))
+        scaled.unzip._2,
+        scaled.unzip._2)
 
     Context(Variable(individual, i))
   }

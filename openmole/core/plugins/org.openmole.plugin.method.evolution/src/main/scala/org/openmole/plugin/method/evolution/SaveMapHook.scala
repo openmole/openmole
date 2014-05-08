@@ -30,24 +30,31 @@ import org.openmole.core.implementation.mole._
 
 object SaveMapHook {
 
-  def apply(
-    individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
-    map: GA.GAMap,
+  def apply(map: GA.GenomeMap)(
+    individual: Prototype[Individual[map.G, map.P, map.F]],
     scales: Inputs,
     path: String) =
     new HookBuilder {
       addInput(individual.toArray)
-      def toHook = new SaveMapHook(individual, map, scales, path) with Built
+      val (_map, _individual, _scales, _path) = (map, individual, scales, path)
+
+      def toHook = new SaveMapHook with Built {
+        val map = _map
+        val individual = _individual.asInstanceOf[Prototype[Individual[map.G, map.P, map.F]]]
+        val scales = _scales
+        val path = _path
+      }
     }
 
 }
 
 //FIXME scala type system is not yet able to match the correct prototype (use a cast)
-abstract class SaveMapHook(
-    val individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
-    val map: GA.GAMap,
-    val scales: Inputs,
-    val path: String) extends Hook with GenomeScaling {
+abstract class SaveMapHook extends Hook with GenomeScaling {
+
+  val map: GA.GenomeMap
+  val individual: Prototype[Individual[map.G, map.P, map.F]]
+  val scales: Inputs
+  val path: String
 
   def process(context: Context, executionContext: ExecutionContext) = {
     val file = executionContext.relativise(VariableExpansion(context, path))
@@ -56,8 +63,8 @@ abstract class SaveMapHook(
       for {
         i ← context(individual.toArray)
       } {
-        val scaledGenome = scaled(i.genome.values, context)
-        w.write("" + scaledGenome(map.x).value + "," + scaledGenome(map.y).value + "," + map.aggregation.aggregate(i.fitness) + "\n")
+        val scaledGenome = scaled(map.values.get(i.genome), context)
+        w.write("" + scaledGenome(map.x).value + "," + scaledGenome(map.y).value + "," + map.aggregate(i.fitness) + "\n")
       }
     }
     context
