@@ -283,13 +283,6 @@ sealed abstract class GAImpl[ALGO <: GA.GAAlgorithmBuilder](val algorithm: ALGO)
   type MF = thisAlgorithm.MF
   type A = thisAlgorithm.A
 
-  /*val stateManifest: Manifest[STATE] = implicitly
-  val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
-  val individualManifest: Manifest[Individual[G, P, F]] = implicitly
-  val aManifest: Manifest[A] = implicitly
-  val fManifest: Manifest[F] = implicitly
-  val gManifest: Manifest[G] = implicitly*/
-
   implicit val stateManifest: Manifest[STATE] = thisAlgorithm.stateManifest
   implicit val populationManifest: Manifest[Population[G, P, F, MF]] = thisAlgorithm.populationManifest
   implicit val individualManifest: Manifest[Individual[G, P, F]] = thisAlgorithm.individualManifest
