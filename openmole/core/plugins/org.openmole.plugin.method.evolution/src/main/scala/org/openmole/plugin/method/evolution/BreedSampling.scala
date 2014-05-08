@@ -56,6 +56,7 @@ sealed abstract class BreedSampling(val evolution: Breeding with GManifest with 
     val rng = Task.buildRNG(context)
     val is = context(individuals)
     val a = context(archive)
-    evolution.breed(is.toSeq, a, size)(rng).map(g ⇒ List(Variable(genome, g))).toIterator
+    val breeded = evolution.breed(is.toSeq, a, size)(rng)
+    breeded.map(g ⇒ List(Variable(genome, g))).toIterator
   }
 }

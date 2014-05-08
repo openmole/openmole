@@ -25,8 +25,12 @@ import org.openmole.misc.tools.script._
 import org.openmole.misc.tools.service.Duration._
 import scala.util.Random
 import scalaz._
+import org.openmole.plugin.method.evolution.Inputs
+import org.openmole.core.model.data.Prototype
 
 object GA {
+
+  type Objectives = Seq[(Prototype[Double], String)]
 
   trait GAType <: G with P with F with MF with MG with MGOGA with Sigma with DoubleSequencePhenotype with MGFitness
 
@@ -105,9 +109,10 @@ object GA {
     with Termination
     with Mutation
     with CrossOver
+    with GeneticBreeding
 
   trait GAAlgorithmBuilder extends A {
-    def apply(genomeSize: Int): GAAlgorithm
+    def apply(genomeSize: Int, lambda: Int): GAAlgorithm
   }
 
   trait Optimisation extends NoArchive
@@ -126,9 +131,10 @@ object GA {
     termination: GATermination { type G >: Optimisation#G; type P >: Optimisation#P; type F >: Optimisation#F; type MF >: Optimisation#MF },
     dominance: Dominance = strict,
     ranking: GARankingBuilder = pareto,
-    diversityMetric: DiversityMetricBuilder = crowding) = new GAAlgorithmBuilder {
-    val (_mu, _dominance, _ranking, _diversityMetric) = (mu, dominance, ranking, diversityMetric)
-    def apply(_genomeSize: Int) =
+    diversityMetric: DiversityMetricBuilder = crowding,
+    cloneProbability: Double = 0.0) = new GAAlgorithmBuilder {
+    val (_mu, _dominance, _ranking, _diversityMetric, _cloneProbability) = (mu, dominance, ranking, diversityMetric, cloneProbability)
+    def apply(_genomeSize: Int, _lambda: Int) =
       new Optimisation {
         val stateManifest: Manifest[STATE] = termination.stateManifest
         val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
@@ -138,6 +144,10 @@ object GA {
         val gManifest: Manifest[G] = implicitly
 
         val genomeSize = _genomeSize
+        val lambda = _lambda
+
+        override val cloneProbability: Double = _cloneProbability
+
         val diversityMetric = _diversityMetric(dominance)
         val ranking = _ranking(dominance)
         val mu = _mu
@@ -170,12 +180,13 @@ object GA {
   def genomeProfile(
     x: Int,
     nX: Int,
-    termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F; type MF >: GenomeProfile#MF }) = {
-    val (_x, _nX) = (x, nX)
+    termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F; type MF >: GenomeProfile#MF },
+    cloneProbability: Double = 0.0) = {
+    val (_x, _nX, _cloneProbability) = (x, nX, cloneProbability)
     new GAAlgorithmBuilder {
       val x = _x
 
-      def apply(_genomeSize: Int) =
+      def apply(_genomeSize: Int, _lambda: Int) =
         new GenomeProfile {
           val stateManifest: Manifest[STATE] = termination.stateManifest
           val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
@@ -185,6 +196,9 @@ object GA {
           val gManifest: Manifest[G] = implicitly
 
           val genomeSize = _genomeSize
+          val lambda = _lambda
+          override val cloneProbability: Double = _cloneProbability
+
           val x = _x
           val nX = _nX
           type STATE = termination.STATE
@@ -215,13 +229,14 @@ object GA {
     nX: Int,
     y: Int,
     nY: Int,
-    termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F; type MF >: GenomeMap#MF }) = {
-    val (_x, _nX, _y, _nY) = (x, nX, y, nY)
+    termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F; type MF >: GenomeMap#MF },
+    cloneProbability: Double = 0.0) = {
+    val (_x, _nX, _y, _nY, _cloneProbability) = (x, nX, y, nY, cloneProbability)
     new GAAlgorithmBuilder {
       val x = _x
       val y = _y
 
-      def apply(_genomeSize: Int) =
+      def apply(_genomeSize: Int, _lambda: Int) =
         new GenomeMap {
           val stateManifest: Manifest[STATE] = termination.stateManifest
           val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
@@ -231,6 +246,9 @@ object GA {
           val gManifest: Manifest[G] = implicitly
 
           val genomeSize = _genomeSize
+          val lambda = _lambda
+          override val cloneProbability: Double = _cloneProbability
+
           val x = _x
           val y = _y
           val nX = _nX
@@ -248,14 +266,14 @@ object GA {
   def apply[AG <: GAAlgorithmBuilder](
     algorithm: AG,
     lambda: Int,
-    cloneProbability: Double = 0.0) = {
-    val (_lambda, _cloneProbability) = (lambda, cloneProbability)
+    inputs: Inputs,
+    objectives: Objectives) = {
+    val (_inputs, _objectives) = (inputs, objectives)
 
-    s: Int ⇒
-      new org.openmole.plugin.method.evolution.algorithm.GAImpl[AG](algorithm)(s) {
-        val lambda = _lambda
-        override val cloneProbability = _cloneProbability
-      }
+    new org.openmole.plugin.method.evolution.algorithm.GAImpl[AG](algorithm, inputs.size, lambda) {
+      val inputs = _inputs
+      val objectives = _objectives
+    }
   }
 
 }
@@ -263,18 +281,18 @@ object GA {
 trait GA[ALGO <: GA.GAAlgorithmBuilder] extends GA.GAType
     with Archive
     with Termination
-    with GeneticBreeding
+    with Breeding
     with Elitism
     with Modifier
     with CloneRemoval
     with EvolutionManifest {
   def algorithm: ALGO
+  def inputs: Inputs
+  def objectives: GA.Objectives
 }
 
-sealed abstract class GAImpl[ALGO <: GA.GAAlgorithmBuilder](val algorithm: ALGO)(val genomeSize: Int) extends GA[ALGO] { sga ⇒
-  val lambda: Int
-
-  lazy val thisAlgorithm = algorithm.apply(genomeSize)
+sealed abstract class GAImpl[ALGO <: GA.GAAlgorithmBuilder](val algorithm: ALGO, val genomeSize: Int, val lambda: Int) extends GA[ALGO] { sga ⇒
+  lazy val thisAlgorithm = algorithm.apply(genomeSize, lambda)
 
   type STATE = thisAlgorithm.STATE
   type G = thisAlgorithm.G
@@ -307,5 +325,5 @@ sealed abstract class GAImpl[ALGO <: GA.GAAlgorithmBuilder](val algorithm: ALGO)
   def mutate(genome: G, population: Seq[Individual[G, P, F]], archive: A)(implicit rng: Random) = thisAlgorithm.mutate(genome, population, archive)
   def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], a: A)(implicit rng: Random) = thisAlgorithm.elitism(individuals, newIndividuals, a)
   def selection(population: Population[G, P, F, MF])(implicit rng: Random): Iterator[Individual[G, P, F]] = thisAlgorithm.selection(population)
-
+  def breed(individuals: Seq[Individual[G, P, F]], a: A, size: Int)(implicit aprng: Random): Seq[G] = thisAlgorithm.breed(individuals, a, size)
 }

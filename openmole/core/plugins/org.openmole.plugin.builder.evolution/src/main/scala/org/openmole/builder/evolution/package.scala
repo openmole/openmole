@@ -41,13 +41,9 @@ import scala.util.Random
 
 package object evolution {
 
-  type Objectives = Seq[(Prototype[Double], String)]
-
   private def components(
     name: String,
-    evolution: OMGA[_],
-    inputs: Inputs,
-    objectives: Objectives)(implicit plugins: PluginSet) = new { components ⇒
+    evolution: OMGA[_])(implicit plugins: PluginSet) = new { components ⇒
     import evolution._
 
     val genome = Prototype[evolution.G](name + "Genome")(gManifest)
@@ -71,9 +67,9 @@ package object evolution {
     breedTask.addParameter(individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
     breedTask.addParameter(archive -> evolution.initialArchive)
 
-    val scalingGenomeTask = ScalingGAGenomeTask(evolution)(name + "ScalingGenome", genome, inputs)
+    val scalingGenomeTask = ScalingGAGenomeTask(evolution)(name + "ScalingGenome", genome)
 
-    val toIndividualTask = ToIndividualTask(evolution)(name + "ToIndividual", genome, individual, objectives)
+    val toIndividualTask = ToIndividualTask(evolution)(name + "ToIndividual", genome, individual)
 
     val mergeArchiveTask = UpdateArchiveTask(evolution)(name + "MergeArchive", individual.toArray, archive)
 
@@ -125,9 +121,6 @@ package object evolution {
         val genome = components.genome.asInstanceOf[Prototype[evolution.G]]
         val individual = components.individual.asInstanceOf[Prototype[Individual[evolution.G, evolution.P, evolution.F]]]
 
-        def inputs = _inputs
-        def objectives = _objectives
-
         def output = _output
         def state = components.state
         def generation = components.generation
@@ -141,18 +134,13 @@ package object evolution {
     def archive: Prototype[evolution.A]
     def genome: Prototype[evolution.G]
     def individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]]
-    def inputs: Inputs
-    def objectives: Objectives
   }
 
-  def generationalGA(evolutionBuilder: Int ⇒ OMGA[_])(
+  def generationalGA(evolution: OMGA[_])(
     name: String,
-    model: Puzzle,
-    inputs: Inputs,
-    objectives: Objectives)(implicit plugins: PluginSet) = {
+    model: Puzzle)(implicit plugins: PluginSet) = {
 
-    val evolution = evolutionBuilder(inputs.size)
-    val cs = components(name, evolution, inputs, objectives)
+    val cs = components(name, evolution)
     import cs._
 
     val firstCapsule = StrainerCapsule(firstTask)
@@ -202,14 +190,11 @@ package object evolution {
     cs.puzzle(gaPuzzle, scalingIndividualsSlot.capsule)
   }
 
-  def steadyGA(evolutionBuilder: Int ⇒ OMGA[_])(
+  def steadyGA(evolution: OMGA[_])(
     name: String,
-    model: Puzzle,
-    inputs: Inputs,
-    objectives: Objectives)(implicit plugins: PluginSet) = {
+    model: Puzzle)(implicit plugins: PluginSet) = {
 
-    val evolution = evolutionBuilder(inputs.size)
-    val cs = components(name, evolution, inputs, objectives)
+    val cs = components(name, evolution)
     import cs._
 
     val firstCapsule = StrainerCapsule(firstTask)
@@ -244,7 +229,7 @@ package object evolution {
         breedTask -<
         scalingCaps --
         (model, filter = Block(genome)) --
-        (toIndividualSlot, filter = Keep(objectives.map(_._1).map(_.name).toSeq: _*)) --
+        (toIndividualSlot, filter = Keep(evolution.objectives.map(_._1).map(_.name).toSeq: _*)) --
         toIndividualArrayCaps --
         (mergeArchiveCaps, renameIndividualsTask) --
         elitismCaps --
@@ -366,9 +351,9 @@ package object evolution {
 
     val islandSlot = Slot(MoleTask(name + "MoleTask", model))
 
-    val scalingIndividualsTask = ScalingGAIndividualsTask(evolution)(name + "ScalingIndividuals", individual.toArray, model.inputs)
+    val scalingIndividualsTask = ScalingGAIndividualsTask(evolution)(name + "ScalingIndividuals", individual.toArray, evolution.inputs)
 
-    model.objectives.foreach {
+    evolution.objectives.foreach {
       case (o, _) ⇒ scalingIndividualsTask addObjective o
     }
 

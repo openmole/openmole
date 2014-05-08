@@ -21,27 +21,27 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.implementation.data._
 import org.openmole.misc.tools.io.FileUtil._
-import fr.iscpif.mgo._
 import java.io.File
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.script.GroovyProxyPool
 import org.openmole.core.implementation.mole._
+import algorithm.{ GA ⇒ OMGA }
+import fr.iscpif.mgo._
 
 object SaveProfileHook {
 
-  def apply(profile: GA.GenomeProfile)(
+  def apply(profile: OMGA[_ <: GA.GenomeProfile])(
     individual: Prototype[Individual[profile.G, profile.P, profile.F]],
-    scales: Inputs,
     path: String) =
     new HookBuilder {
       addInput(individual.toArray)
-      val (_individual, _profile, _scales, _path) = (individual, profile, scales, path)
+      val _profile = profile
+      val (_individual, _path) = (individual, path)
 
       def toHook = new SaveProfileHook with Built {
         val profile = _profile
         val individual = _individual.asInstanceOf[Prototype[Individual[profile.G, profile.P, profile.F]]]
-        val scales = _scales
         val path = _path
       }
     }
@@ -50,10 +50,10 @@ object SaveProfileHook {
 
 abstract class SaveProfileHook extends Hook with GenomeScaling {
 
-  val profile: GA.GenomeProfile
+  val profile: OMGA[_ <: GA.GenomeProfile]
   val individual: Prototype[Individual[profile.G, profile.P, profile.F]]
-  val scales: Inputs
   val path: String
+  def scales = profile.inputs
 
   def process(context: Context, executionContext: ExecutionContext) = {
     val file = executionContext.relativise(VariableExpansion(context, path))
@@ -63,7 +63,7 @@ abstract class SaveProfileHook extends Hook with GenomeScaling {
         i ← context(individual.toArray)
       } {
         val scaledGenome = scaled(profile.values.get(i.genome), context)
-        w.write("" + scaledGenome(profile.x).value + "," + profile.aggregate(i.fitness) + "\n")
+        w.write("" + scaledGenome(profile.algorithm.x).value + "," + profile.algorithm.aggregate(i.fitness) + "\n")
       }
     }
     context
