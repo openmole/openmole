@@ -31,29 +31,24 @@ import algorithm.{ GA ⇒ OMGA }
 
 object SaveMapHook {
 
-  def apply(map: OMGA[_ <: GA.GenomeMap])(
-    individual: Prototype[Individual[map.G, map.P, map.F]],
-    path: String) =
+  def apply(puzzle: GAPuzzle[_ <: GA.GenomeMap], path: String) =
     new HookBuilder {
-      addInput(individual.toArray)
-      val _map = map
-      val (_individual, _path) = (individual, path)
+      addInput(puzzle.individual.toArray)
+      val _puzzle = puzzle
+      val _path = path
 
       def toHook = new SaveMapHook with Built {
-        val map = _map
-        val individual = _individual.asInstanceOf[Prototype[Individual[map.G, map.P, map.F]]]
+        val puzzle = _puzzle
         val path = _path
       }
     }
 
 }
 
-//FIXME scala type system is not yet able to match the correct prototype (use a cast)
 abstract class SaveMapHook extends Hook with GenomeScaling {
 
-  val map: OMGA[_ <: GA.GenomeMap]
-  val individual: Prototype[Individual[map.G, map.P, map.F]]
-  def scales: Inputs = map.inputs
+  val puzzle: GAPuzzle[_ <: GA.GenomeMap]
+  def scales: Inputs = puzzle.evolution.inputs
   val path: String
 
   def process(context: Context, executionContext: ExecutionContext) = {
@@ -61,10 +56,10 @@ abstract class SaveMapHook extends Hook with GenomeScaling {
     file.createParentDir
     file.withWriter { w ⇒
       for {
-        i ← context(individual.toArray)
+        i ← context(puzzle.individual.toArray)
       } {
-        val scaledGenome = scaled(map.values.get(i.genome), context)
-        w.write("" + scaledGenome(map.algorithm.x).value + "," + scaledGenome(map.algorithm.y).value + "," + map.algorithm.aggregate(i.fitness) + "\n")
+        val scaledGenome = scaled(puzzle.evolution.values.get(i.genome), context)
+        w.write("" + scaledGenome(puzzle.evolution.algorithm.x).value + "," + scaledGenome(puzzle.evolution.algorithm.y).value + "," + puzzle.evolution.algorithm.aggregate(i.fitness) + "\n")
       }
     }
     context

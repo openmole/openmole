@@ -31,17 +31,14 @@ import fr.iscpif.mgo._
 
 object SaveProfileHook {
 
-  def apply(profile: OMGA[_ <: GA.GenomeProfile])(
-    individual: Prototype[Individual[profile.G, profile.P, profile.F]],
-    path: String) =
+  def apply(puzzle: GAPuzzle[_ <: GA.GenomeProfile], path: String) =
     new HookBuilder {
-      addInput(individual.toArray)
-      val _profile = profile
-      val (_individual, _path) = (individual, path)
+      addInput(puzzle.individual.toArray)
+      val _puzzle = puzzle
+      val _path = path
 
       def toHook = new SaveProfileHook with Built {
-        val profile = _profile
-        val individual = _individual.asInstanceOf[Prototype[Individual[profile.G, profile.P, profile.F]]]
+        val puzzle = _puzzle
         val path = _path
       }
     }
@@ -50,20 +47,19 @@ object SaveProfileHook {
 
 abstract class SaveProfileHook extends Hook with GenomeScaling {
 
-  val profile: OMGA[_ <: GA.GenomeProfile]
-  val individual: Prototype[Individual[profile.G, profile.P, profile.F]]
+  val puzzle: GAPuzzle[_ <: GA.GenomeProfile]
   val path: String
-  def scales = profile.inputs
+  def scales = puzzle.evolution.inputs
 
   def process(context: Context, executionContext: ExecutionContext) = {
     val file = executionContext.relativise(VariableExpansion(context, path))
     file.createParentDir
     file.withWriter { w ⇒
       for {
-        i ← context(individual.toArray)
+        i ← context(puzzle.individual.toArray)
       } {
-        val scaledGenome = scaled(profile.values.get(i.genome), context)
-        w.write("" + scaledGenome(profile.algorithm.x).value + "," + profile.algorithm.aggregate(i.fitness) + "\n")
+        val scaledGenome = scaled(puzzle.evolution.values.get(i.genome), context)
+        w.write("" + scaledGenome(puzzle.evolution.algorithm.x).value + "," + puzzle.evolution.algorithm.aggregate(i.fitness) + "\n")
       }
     }
     context

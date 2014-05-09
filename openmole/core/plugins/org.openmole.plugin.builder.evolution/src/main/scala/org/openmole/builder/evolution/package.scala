@@ -41,9 +41,9 @@ import scala.util.Random
 
 package object evolution {
 
-  private def components(
+  private def components[AG <: GA.GAAlgorithm](
     name: String,
-    evolution: OMGA[_])(implicit plugins: PluginSet) = new { components ⇒
+    evolution: OMGA[AG])(implicit plugins: PluginSet) = new { components ⇒
     import evolution._
 
     val genome = Prototype[evolution.G](name + "Genome")(gManifest)
@@ -114,7 +114,7 @@ package object evolution {
     val (_inputs, _objectives) = (inputs, objectives)
 
     def puzzle(puzzle: Puzzle, _output: ICapsule) =
-      new Puzzle(puzzle) with Island {
+      new Puzzle(puzzle) with GAPuzzle[AG] {
         val evolution = _evolution
 
         val archive = components.archive.asInstanceOf[Prototype[evolution.A]]
@@ -128,19 +128,11 @@ package object evolution {
 
   }
 
-  trait Island {
-    val evolution: OMGA[_]
-
-    def archive: Prototype[evolution.A]
-    def genome: Prototype[evolution.G]
-    def individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]]
-  }
-
-  def generationalGA(evolution: OMGA[_])(
+  def generationalGA[AG <: GA.GAAlgorithm](evolution: OMGA[AG])(
     name: String,
     model: Puzzle)(implicit plugins: PluginSet) = {
 
-    val cs = components(name, evolution)
+    val cs = components[AG](name, evolution)
     import cs._
 
     val firstCapsule = StrainerCapsule(firstTask)
@@ -190,11 +182,11 @@ package object evolution {
     cs.puzzle(gaPuzzle, scalingIndividualsSlot.capsule)
   }
 
-  def steadyGA(evolution: OMGA[_])(
+  def steadyGA[AG <: GA.GAAlgorithm](evolution: OMGA[AG])(
     name: String,
     model: Puzzle)(implicit plugins: PluginSet) = {
 
-    val cs = components(name, evolution)
+    val cs = components[AG](name, evolution)
     import cs._
 
     val firstCapsule = StrainerCapsule(firstTask)
@@ -254,7 +246,7 @@ package object evolution {
     cs.puzzle(gaPuzzle, scalingIndividualsSlot.capsule)
   }
 
-  def islandGA(model: Puzzle with Island)(
+  def islandGA[AG <: GA.GAAlgorithm](model: Puzzle with GAPuzzle[AG])(
     name: String,
     number: Int,
     termination: GA.GATermination { type G >: model.evolution.G; type P >: model.evolution.P; type F >: model.evolution.F; type MF >: model.evolution.MF },
@@ -401,16 +393,17 @@ package object evolution {
 
     val puzzle = skel + loop + dataChannels + archivePath
 
-    val (_state, _generation, _genome, _individual, _archive) = (state, generation, model.genome, model.individual, archive)
+    val (_state, _generation) = (state, generation)
 
-    new Puzzle(puzzle) {
+    new Puzzle(puzzle) with GAPuzzle[AG] {
+      val evolution = model.evolution
       def output = scalingIndividualsSlot.capsule
       def state = _state
       def generation = _generation
-      def genome = _genome
+      def genome = model.genome.asInstanceOf[Prototype[evolution.G]]
       def island = islandSlot.capsule
-      def archive = _archive
-      def individual = _individual
+      def archive = model.archive.asInstanceOf[Prototype[evolution.A]]
+      def individual = model.individual.asInstanceOf[Prototype[Individual[evolution.G, evolution.P, evolution.F]]]
     }
   }
 
