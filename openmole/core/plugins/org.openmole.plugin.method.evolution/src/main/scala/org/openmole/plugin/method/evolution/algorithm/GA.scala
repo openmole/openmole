@@ -111,8 +111,8 @@ object GA {
     with CrossOver
     with GeneticBreeding
 
-  trait GAAlgorithmBuilder extends A {
-    def apply(genomeSize: Int, lambda: Int): GAAlgorithm
+  trait GAAlgorithmBuilder[ALG <: GAAlgorithm] extends A {
+    def apply(genomeSize: Int, lambda: Int): ALG
   }
 
   trait Optimisation extends NoArchive
@@ -132,7 +132,7 @@ object GA {
     dominance: Dominance = strict,
     ranking: GARankingBuilder = pareto,
     diversityMetric: DiversityMetricBuilder = crowding,
-    cloneProbability: Double = 0.0) = new GAAlgorithmBuilder {
+    cloneProbability: Double = 0.0) = new GAAlgorithmBuilder[Optimisation] {
     val (_mu, _dominance, _ranking, _diversityMetric, _cloneProbability) = (mu, dominance, ranking, diversityMetric, cloneProbability)
     def apply(_genomeSize: Int, _lambda: Int) =
       new Optimisation {
@@ -183,7 +183,7 @@ object GA {
     termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F; type MF >: GenomeProfile#MF },
     cloneProbability: Double = 0.0) = {
     val (_x, _nX, _cloneProbability) = (x, nX, cloneProbability)
-    new GAAlgorithmBuilder {
+    new GAAlgorithmBuilder[GenomeProfile] {
       val x = _x
 
       def apply(_genomeSize: Int, _lambda: Int) =
@@ -232,7 +232,7 @@ object GA {
     termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F; type MF >: GenomeMap#MF },
     cloneProbability: Double = 0.0) = {
     val (_x, _nX, _y, _nY, _cloneProbability) = (x, nX, y, nY, cloneProbability)
-    new GAAlgorithmBuilder {
+    new GAAlgorithmBuilder[GenomeMap] {
       val x = _x
       val y = _y
 
@@ -263,8 +263,8 @@ object GA {
     }
   }
 
-  def apply[AG <: GAAlgorithmBuilder](
-    algorithm: AG,
+  def apply[AG <: GAAlgorithm](
+    algorithm: GAAlgorithmBuilder[AG],
     lambda: Int,
     inputs: Inputs,
     objectives: Objectives) = {
@@ -278,7 +278,7 @@ object GA {
 
 }
 
-trait GA[ALGO <: GA.GAAlgorithmBuilder] extends GA.GAType
+trait GA[ALGO <: GA.GAAlgorithm] extends GA.GAType
     with Archive
     with Termination
     with Breeding
@@ -291,39 +291,39 @@ trait GA[ALGO <: GA.GAAlgorithmBuilder] extends GA.GAType
   def objectives: GA.Objectives
 }
 
-sealed abstract class GAImpl[ALGO <: GA.GAAlgorithmBuilder](val algorithm: ALGO, val genomeSize: Int, val lambda: Int) extends GA[ALGO] { sga ⇒
-  lazy val thisAlgorithm = algorithm.apply(genomeSize, lambda)
+sealed abstract class GAImpl[ALGO <: GA.GAAlgorithm](val algorithmBuilder: GA.GAAlgorithmBuilder[ALGO], val genomeSize: Int, val lambda: Int) extends GA[ALGO] { sga ⇒
+  lazy val algorithm: ALGO = algorithmBuilder(genomeSize, lambda)
 
-  type STATE = thisAlgorithm.STATE
-  type G = thisAlgorithm.G
+  type STATE = algorithm.STATE
+  type G = algorithm.G
   //type P = thisAlgorithm.P
   //type F = thisAlgorithm.F
-  type MF = thisAlgorithm.MF
-  type A = thisAlgorithm.A
+  type MF = algorithm.MF
+  type A = algorithm.A
 
-  implicit val stateManifest: Manifest[STATE] = thisAlgorithm.stateManifest
-  implicit val populationManifest: Manifest[Population[G, P, F, MF]] = thisAlgorithm.populationManifest
-  implicit val individualManifest: Manifest[Individual[G, P, F]] = thisAlgorithm.individualManifest
-  implicit val aManifest: Manifest[A] = thisAlgorithm.aManifest
-  implicit val fManifest: Manifest[F] = thisAlgorithm.fManifest
-  implicit val gManifest: Manifest[G] = thisAlgorithm.gManifest
+  implicit val stateManifest: Manifest[STATE] = algorithm.stateManifest
+  implicit val populationManifest: Manifest[Population[G, P, F, MF]] = algorithm.populationManifest
+  implicit val individualManifest: Manifest[Individual[G, P, F]] = algorithm.individualManifest
+  implicit val aManifest: Manifest[A] = algorithm.aManifest
+  implicit val fManifest: Manifest[F] = algorithm.fManifest
+  implicit val gManifest: Manifest[G] = algorithm.gManifest
 
-  val genome = thisAlgorithm.genome
-  val values = thisAlgorithm.values
-  val sigma = thisAlgorithm.sigma
+  val genome = algorithm.genome
+  val values = algorithm.values
+  val sigma = algorithm.sigma
 
-  def randomGenome(implicit rng: Random) = thisAlgorithm.randomGenome
+  def randomGenome(implicit rng: Random) = algorithm.randomGenome
 
-  def initialState: STATE = thisAlgorithm.initialState
-  def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = thisAlgorithm.terminated(population, terminationState)
-  def toArchive(individuals: Seq[Individual[G, P, F]]) = thisAlgorithm.toArchive(individuals)
-  def combine(a1: A, a2: A) = thisAlgorithm.combine(a1, a2)
-  def diff(a1: A, a2: A) = thisAlgorithm.diff(a1, a2)
-  def initialArchive = thisAlgorithm.initialArchive
-  def modify(individuals: Seq[Individual[G, P, F]], archive: A) = thisAlgorithm.modify(individuals, archive)
-  def crossover(g1: G, g2: G, population: Seq[Individual[G, P, F]], archive: A)(implicit rng: Random) = thisAlgorithm.crossover(g1, g2, population, archive)
-  def mutate(genome: G, population: Seq[Individual[G, P, F]], archive: A)(implicit rng: Random) = thisAlgorithm.mutate(genome, population, archive)
-  def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], a: A)(implicit rng: Random) = thisAlgorithm.elitism(individuals, newIndividuals, a)
-  def selection(population: Population[G, P, F, MF])(implicit rng: Random): Iterator[Individual[G, P, F]] = thisAlgorithm.selection(population)
-  def breed(individuals: Seq[Individual[G, P, F]], a: A, size: Int)(implicit aprng: Random): Seq[G] = thisAlgorithm.breed(individuals, a, size)
+  def initialState: STATE = algorithm.initialState
+  def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = algorithm.terminated(population, terminationState)
+  def toArchive(individuals: Seq[Individual[G, P, F]]) = algorithm.toArchive(individuals)
+  def combine(a1: A, a2: A) = algorithm.combine(a1, a2)
+  def diff(a1: A, a2: A) = algorithm.diff(a1, a2)
+  def initialArchive = algorithm.initialArchive
+  def modify(individuals: Seq[Individual[G, P, F]], archive: A) = algorithm.modify(individuals, archive)
+  def crossover(g1: G, g2: G, population: Seq[Individual[G, P, F]], archive: A)(implicit rng: Random) = algorithm.crossover(g1, g2, population, archive)
+  def mutate(genome: G, population: Seq[Individual[G, P, F]], archive: A)(implicit rng: Random) = algorithm.mutate(genome, population, archive)
+  def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], a: A)(implicit rng: Random) = algorithm.elitism(individuals, newIndividuals, a)
+  def selection(population: Population[G, P, F, MF])(implicit rng: Random): Iterator[Individual[G, P, F]] = algorithm.selection(population)
+  def breed(individuals: Seq[Individual[G, P, F]], a: A, size: Int)(implicit aprng: Random): Seq[G] = algorithm.breed(individuals, a, size)
 }
