@@ -32,8 +32,12 @@ class SLURMEnvironmentDataUI(val name: String = "",
 
   def coreObject = util.Try {
 
-    val gresList = gres.split('&') map (g ⇒
-      g.split(':') match { case Array(s: String, i: String) ⇒ new Gres(s, i toInt) }) toList
+    val gresList = gres.split('&') map (
+      g ⇒ g.split(':') match {
+        case Array(s: String, i: String) ⇒ Some(new Gres(s, i toInt))
+        case _                           ⇒ None
+      }) toList
+
     val constraintsList = constraints.split('&') toList
 
     SLURMEnvironment(login,
@@ -44,7 +48,7 @@ class SLURMEnvironmentDataUI(val name: String = "",
       wallTime,
       memory,
       path,
-      gresList,
+      gresList.flatten,
       constraintsList)(Workspace.authenticationProvider)
   }
 
