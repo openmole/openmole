@@ -37,7 +37,7 @@ object ToIndividualTask {
       (p, vDouble) :: expand(objectives.tail, context + Variable(p, vDouble))
     }
 
-  def apply(evolution: OMGA[_])(
+  def apply(evolution: GA.GAAlgorithm)(
     name: String,
     genome: Prototype[evolution.G],
     individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]])(implicit plugins: PluginSet) = {
@@ -62,7 +62,7 @@ object ToIndividualTask {
 
 }
 
-sealed abstract class ToIndividualTask(val evolution: OMGA[_])(
+sealed abstract class ToIndividualTask(val evolution: GA.GAAlgorithm)(
     val name: String) extends Task { task ⇒
 
   def genome: Prototype[evolution.G]

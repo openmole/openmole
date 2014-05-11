@@ -31,7 +31,7 @@ import algorithm.{ GA ⇒ OMGA }
 
 object SaveMapHook {
 
-  def apply(puzzle: GAPuzzle[_ <: GA.GenomeMap], path: String) =
+  def apply(puzzle: GAPuzzle[GA.GenomeMap], path: String) =
     new HookBuilder {
       addInput(puzzle.individual.toArray)
       val _puzzle = puzzle
@@ -59,7 +59,7 @@ abstract class SaveMapHook extends Hook with GenomeScaling {
         i ← context(puzzle.individual.toArray)
       } {
         val scaledGenome = scaled(puzzle.evolution.values.get(i.genome), context)
-        w.write("" + scaledGenome(puzzle.evolution.algorithm.x).value + "," + scaledGenome(puzzle.evolution.algorithm.y).value + "," + puzzle.evolution.algorithm.aggregate(i.fitness) + "\n")
+        w.write("" + scaledGenome(puzzle.evolution.x).value + "," + scaledGenome(puzzle.evolution.y).value + "," + puzzle.evolution.aggregate(i.fitness) + "\n")
       }
     }
     context

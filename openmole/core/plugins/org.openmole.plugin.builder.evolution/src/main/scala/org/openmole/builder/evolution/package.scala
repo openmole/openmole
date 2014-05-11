@@ -41,9 +41,9 @@ import scala.util.Random
 
 package object evolution {
 
-  private def components[AG <: GA.GAAlgorithm](
+  private def components[ALG <: GA.GAAlgorithm](
     name: String,
-    evolution: OMGA[AG])(implicit plugins: PluginSet) = new { components ⇒
+    evolution: ALG)(implicit plugins: PluginSet) = new { components ⇒
     import evolution._
 
     val genome = Prototype[evolution.G](name + "Genome")(gManifest)
@@ -114,7 +114,7 @@ package object evolution {
     val (_inputs, _objectives) = (inputs, objectives)
 
     def puzzle(puzzle: Puzzle, _output: ICapsule) =
-      new Puzzle(puzzle) with GAPuzzle[AG] {
+      new Puzzle(puzzle) with GAPuzzle[ALG] {
         val evolution = _evolution
 
         val archive = components.archive.asInstanceOf[Prototype[evolution.A]]
@@ -128,11 +128,11 @@ package object evolution {
 
   }
 
-  def generationalGA[AG <: GA.GAAlgorithm](evolution: OMGA[AG])(
+  def generationalGA[ALG <: GA.GAAlgorithm](evolution: ALG)(
     name: String,
     model: Puzzle)(implicit plugins: PluginSet) = {
 
-    val cs = components[AG](name, evolution)
+    val cs = components[ALG](name, evolution)
     import cs._
 
     val firstCapsule = StrainerCapsule(firstTask)
@@ -182,11 +182,11 @@ package object evolution {
     cs.puzzle(gaPuzzle, scalingIndividualsSlot.capsule)
   }
 
-  def steadyGA[AG <: GA.GAAlgorithm](evolution: OMGA[AG])(
+  def steadyGA[ALG <: GA.GAAlgorithm](evolution: ALG)(
     name: String,
     model: Puzzle)(implicit plugins: PluginSet) = {
 
-    val cs = components[AG](name, evolution)
+    val cs = components[ALG](name, evolution)
     import cs._
 
     val firstCapsule = StrainerCapsule(firstTask)

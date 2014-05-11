@@ -19,7 +19,6 @@ package org.openmole.plugin.method
 
 import org.openmole.core.model.data.Prototype
 import fr.iscpif.mgo.Individual
-import evolution.algorithm.{ GA ⇒ OMGA }
 
 package object evolution {
   val GA = algorithm.GA
@@ -29,8 +28,8 @@ package object evolution {
 
   implicit def seqToInputsConversion(s: Seq[Input]) = Inputs(s)
 
-  trait GAPuzzle[ALG <: GA.GAAlgorithm] {
-    val evolution: OMGA[ALG]
+  trait GAPuzzle[+ALG <: GA.GAAlgorithm] {
+    val evolution: ALG
 
     def archive: Prototype[evolution.A]
     def genome: Prototype[evolution.G]

@@ -31,7 +31,7 @@ import fr.iscpif.mgo._
 
 object SaveProfileHook {
 
-  def apply(puzzle: GAPuzzle[_ <: GA.GenomeProfile], path: String) =
+  def apply(puzzle: GAPuzzle[GA.GenomeProfile], path: String) =
     new HookBuilder {
       addInput(puzzle.individual.toArray)
       val _puzzle = puzzle
@@ -47,7 +47,7 @@ object SaveProfileHook {
 
 abstract class SaveProfileHook extends Hook with GenomeScaling {
 
-  val puzzle: GAPuzzle[_ <: GA.GenomeProfile]
+  val puzzle: GAPuzzle[GA.GenomeProfile]
   val path: String
   def scales = puzzle.evolution.inputs
 
@@ -59,7 +59,7 @@ abstract class SaveProfileHook extends Hook with GenomeScaling {
         i ← context(puzzle.individual.toArray)
       } {
         val scaledGenome = scaled(puzzle.evolution.values.get(i.genome), context)
-        w.write("" + scaledGenome(puzzle.evolution.algorithm.x).value + "," + puzzle.evolution.algorithm.aggregate(i.fitness) + "\n")
+        w.write("" + scaledGenome(puzzle.evolution.x).value + "," + puzzle.evolution.aggregate(i.fitness) + "\n")
       }
     }
     context
