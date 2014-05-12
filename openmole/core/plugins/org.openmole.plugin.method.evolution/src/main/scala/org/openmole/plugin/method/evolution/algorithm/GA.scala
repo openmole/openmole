@@ -235,7 +235,6 @@ object GA {
     y: Int,
     nY: Int,
     lambda: Int,
-
     termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F; type MF >: GenomeMap#MF },
     inputs: Inputs,
     objectives: Objectives,
