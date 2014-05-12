@@ -31,6 +31,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.ssh" % gridscaleVersion intransitive (), //TODO deal with these
     "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.http" % gridscaleVersion intransitive (),
     "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.pbs" % gridscaleVersion intransitive (),
+    "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.slurm" % gridscaleVersion intransitive (),
     "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.dirac" % gridscaleVersion intransitive (),
     "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.glite" % gridscaleVersion intransitive ()
   )

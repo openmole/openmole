@@ -19,6 +19,9 @@ object Environment extends PluginDefaults {
   lazy val pbs = OsgiProject("pbs") dependsOn (Core.implementation, base.plugin.Environment.pbs,
     base.Misc.exception, base.Core.batch)
 
+  lazy val slurm = OsgiProject("slurm") dependsOn (Core.implementation, base.plugin.Environment.slurm,
+    base.Misc.exception, base.Core.batch)
+
   lazy val ssh = OsgiProject("ssh") dependsOn (Core.implementation, base.plugin.Environment.ssh,
     base.Core.batch)
 }
