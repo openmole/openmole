@@ -154,7 +154,7 @@ object GA {
       val diversityMetric = _diversityMetric(dominance)
       val ranking = _ranking(dominance)
       val mu = _mu
-      def diversity(individuals: Seq[Seq[Double]], ranks: Seq[Lazy[Int]]) = diversityMetric.diversity(individuals, ranks)
+      def diversity(individuals: Seq[Seq[Double]]) = diversityMetric.diversity(individuals)
       def rank(individuals: Seq[Seq[Double]]) = ranking.rank(individuals)
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
