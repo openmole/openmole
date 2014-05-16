@@ -21,13 +21,19 @@ import org.openmole.core.model.data._
 import org.openmole.core.implementation.data._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.ExternalTask
+import java.io.File
+
+object CodeTask {
+  lazy val workDir = Prototype[File]("workDir")
+}
 
 trait CodeTask extends ExternalTask {
 
   override def process(context: Context) = {
     val pwd = Workspace.newDir
     val links = prepareInputFiles(context, pwd.getCanonicalFile)
-    fetchOutputFiles(processCode(context), pwd.getCanonicalFile, links)
+    val newContext = context + Variable(CodeTask.workDir, pwd)
+    fetchOutputFiles(processCode(newContext), pwd.getCanonicalFile, links)
   }
 
   def processCode(context: Context): Context
