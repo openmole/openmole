@@ -44,13 +44,11 @@ import org.openmole.misc.exception.UserBadDataError
 class UploadActor(jobManager: ActorRef) extends Actor {
 
   def receive = {
-    case msg @ Upload(job, storage) ⇒
+    case msg @ Upload(job) ⇒
       if (!job.state.isFinal) {
         try {
-          initCommunication(job.environment, job.job, storage) match {
-            case Some(sj) ⇒ jobManager ! Uploaded(job, sj)
-            case None     ⇒ jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
-          }
+          val sj = initCommunication(job.environment, job.job)
+          jobManager ! Uploaded(job, sj)
         }
         catch {
           case e: Throwable ⇒
@@ -61,52 +59,43 @@ class UploadActor(jobManager: ActorRef) extends Actor {
       System.runFinalization()
   }
 
-  private def initCommunication(environment: BatchEnvironment, job: IJob, selectedStorage: Option[StorageService]): Option[SerializedJob] = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
+  private def initCommunication(environment: BatchEnvironment, job: IJob): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
 
     val (serializationFiles, serialisationPluginFiles) = serializeJob(jobFile, job)
 
-    val storageAndToken = selectedStorage match {
-      case None ⇒
-        val selected = environment.selectAStorage(
-          (serializationFiles +
-            environment.runtime +
-            environment.jvmLinuxI386 +
-            environment.jvmLinuxX64 ++
-            environment.plugins ++
-            serialisationPluginFiles).map(f ⇒ f -> FileService.hash(job.moleExecution, f)))
-        Some(selected)
-      case Some(storage) ⇒ storage.tryGetToken.map(storage -> _)
-    }
+    val (storage, token) = environment.selectAStorage(
+      (serializationFiles +
+        environment.runtime +
+        environment.jvmLinuxI386 +
+        environment.jvmLinuxX64 ++
+        environment.plugins ++
+        serialisationPluginFiles).map(f ⇒ f -> FileService.hash(job.moleExecution, f)))
 
-    storageAndToken.map {
-      case (storage, token) ⇒
+    implicit val t = token
+    try ReplicaCatalog.withClient { implicit client ⇒
+      val communicationPath = storage.child(storage.tmpDir, UUID.randomUUID.toString)
+      storage.makeDir(communicationPath)
 
-        implicit val t = token
-        try ReplicaCatalog.withClient { implicit client ⇒
-          val communicationPath = storage.child(storage.tmpDir, UUID.randomUUID.toString)
-          storage.makeDir(communicationPath)
+      val inputPath = storage.child(communicationPath, Storage.uniqName("job", ".in"))
 
-          val inputPath = storage.child(communicationPath, Storage.uniqName("job", ".in"))
+      val runtime = replicateTheRuntime(job, environment, storage)
 
-          val runtime = replicateTheRuntime(job, environment, storage)
+      val executionMessage = createExecutionMessage(
+        job,
+        jobFile,
+        serializationFiles,
+        serialisationPluginFiles,
+        storage,
+        communicationPath)
 
-          val executionMessage = createExecutionMessage(
-            job,
-            jobFile,
-            serializationFiles,
-            serialisationPluginFiles,
-            storage,
-            communicationPath)
+      /* ---- upload the execution message ----*/
+      Workspace.withTmpFile("job", ".xml") { executionMessageFile ⇒
+        SerialiserService.serialise(executionMessage, executionMessageFile)
+        signalUpload(storage.uploadGZ(executionMessageFile, inputPath), inputPath, storage)
+      }
 
-          /* ---- upload the execution message ----*/
-          Workspace.withTmpFile("job", ".xml") { executionMessageFile ⇒
-            SerialiserService.serialise(executionMessage, executionMessageFile)
-            signalUpload(storage.uploadGZ(executionMessageFile, inputPath), inputPath, storage)
-          }
-
-          SerializedJob(storage, communicationPath, inputPath, runtime)
-        } finally storage.releaseToken(token)
-    }
+      SerializedJob(storage, communicationPath, inputPath, runtime)
+    } finally storage.releaseToken(token)
   }
 
   def serializeJob(file: File, job: IJob) = {

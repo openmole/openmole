@@ -79,7 +79,7 @@ akka {
     case msg: CleanSerializedJob ⇒ cleaner ! msg
 
     case Manage(job) ⇒
-      self ! Upload(job, None)
+      self ! Upload(job)
 
     case Delay(msg, delay) ⇒
       context.system.scheduler.scheduleOnce(delay milliseconds) {
@@ -101,7 +101,7 @@ akka {
     case Resubmit(job, storage) ⇒
       killAndClean(job)
       job.state = ExecutionState.READY
-      uploader ! Upload(job, Some(storage))
+      uploader ! Upload(job)
 
     case Error(job, exception) ⇒
       val level = exception match {

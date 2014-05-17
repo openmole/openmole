@@ -23,7 +23,7 @@ import org.openmole.core.model.job._
 import org.openmole.core.batch.storage._
 
 sealed trait JobMessage
-case class Upload(job: BatchExecutionJob, storageService: Option[StorageService]) extends JobMessage
+case class Upload(job: BatchExecutionJob) extends JobMessage
 case class Uploaded(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage
 case class Submit(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage
 case class Submitted(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJob) extends JobMessage
