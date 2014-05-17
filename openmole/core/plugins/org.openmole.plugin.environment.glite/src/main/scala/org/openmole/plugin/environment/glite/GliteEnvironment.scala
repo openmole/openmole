@@ -136,7 +136,7 @@ object GliteEnvironment extends Logger {
   Workspace += (JobServiceAvailabilityFactor, "10")
   Workspace += (JobServiceSuccessRateFactor, "1")
 
-  Workspace += (RunningHistoryDuration, "PT3H")
+  Workspace += (RunningHistoryDuration, "PT12H")
   Workspace += (EagerSubmissionThreshold, "0.5")
 
   Workspace += (DefaultBDII, "ldap://cclcgtopbdii02.in2p3.fr:2170")
