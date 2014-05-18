@@ -28,6 +28,12 @@ object LogRange {
   def apply[T](range: Range[T], steps: String)(implicit lg: Log[T]) =
     new LogRange[T](range, steps)
 
+  def apply[T](
+    min: String,
+    max: String,
+    steps: String)(implicit integral: Integral[T], log: Log[T], fs: FromString[T]): LogRange[T] =
+    LogRange[T](Range[T](min, max), steps)
+
 }
 
 sealed class LogRange[T](val range: Range[T], val steps: String)(implicit lg: Log[T]) extends Domain[T] with Finite[T] with Bounds[T] {
