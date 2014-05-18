@@ -24,18 +24,21 @@ import org.openmole.core.model.domain._
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
-object UniformIntDistribution {
-  def apply(max: Option[Int] = None) = new UniformIntDistribution(max)
+object UniformDistribution {
+  def apply[T](seed: Option[Long] = None, max: Option[T] = None)(implicit distribution: Distribution[T]) = new UniformDistribution(seed, max)
 }
 
-sealed class UniformIntDistribution(max: Option[Int] = None) extends Domain[Int] with Discrete[Int] {
+sealed class UniformDistribution[T](seed: Option[Long], max: Option[T])(implicit distribution: Distribution[T]) extends Domain[T] with Discrete[T] {
 
-  override def iterator(context: Context): Iterator[Int] = {
-    val rng = newRNG(context(openMOLESeed))
+  override def iterator(context: Context): Iterator[T] = {
+    val rng: Random = seed match {
+      case Some(s) ⇒ newRNG(s)
+      case None    ⇒ newRNG(context(openMOLESeed))
+    }
     Iterator.continually {
       max match {
-        case Some(i) ⇒ rng.nextInt(i)
-        case None    ⇒ rng.nextInt
+        case Some(i) ⇒ distribution.next(rng, i)
+        case None    ⇒ distribution.next(rng)
       }
     }
   }

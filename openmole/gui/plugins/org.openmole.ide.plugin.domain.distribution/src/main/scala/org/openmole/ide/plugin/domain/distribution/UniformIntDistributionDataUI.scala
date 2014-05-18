@@ -32,7 +32,7 @@ class UniformIntDistributionDataUI(val max: Option[Int] = None) extends UniformD
 
   def buildPanelUI = new UniformDistributionPanelUI(this)
 
-  def coreClass = classOf[UniformIntDistribution]
+  def coreClass = classOf[UniformDistribution[Int]]
 
-  def coreObject = Try(UniformIntDistribution(max))
+  def coreObject = Try(UniformDistribution[Int](max = max))
 }
