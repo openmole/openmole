@@ -29,6 +29,7 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
       publishArtifact in (packageSrc in install) := false,
       scalatestVersion in Global := "2.1.5",
       junitVersion in Global := "4.11",
-      concurrentRestrictions := Seq(Tags.limitAll(5), Tags.limit(Tags.Disk, 2))
+      concurrentRestrictions := Seq(Tags.limitAll(5), Tags.limit(Tags.Disk, 2)),
+      resolvers += Resolver.sonatypeRepo("snashots") // for scalatra 2.3 
     )
 }
