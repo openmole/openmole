@@ -29,12 +29,11 @@ import org.openmole.plugin.method.evolution.algorithm.GA.GAType
 
 object ScalingGAIndividualsTask {
 
-  def apply(evolution: GAType)(
+  def apply(evolution: GA.GAAlgorithm)(
     name: String,
-    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
-    scales: Inputs)(implicit plugins: PluginSet) = {
+    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]])(implicit plugins: PluginSet) = {
 
-    val (_evolution, _name, _individuals, _scales) = (evolution, name, individuals, scales)
+    val (_evolution, _name, _individuals) = (evolution, name, individuals)
 
     new TaskBuilder { builder ⇒
 
@@ -47,13 +46,12 @@ object ScalingGAIndividualsTask {
       }
 
       addInput(individuals)
-      scales.inputs foreach { i ⇒ this.addOutput(i.prototype.toArray) }
+      evolution.inputs.inputs foreach { i ⇒ this.addOutput(i.prototype.toArray) }
 
       def toTask = new ScalingGAIndividualsTask with Built {
         val evolution = _evolution
         val name = _name
         val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
-        val scales = _scales
         val objectives = builder.objectives.toList
       }
     }
@@ -63,10 +61,10 @@ object ScalingGAIndividualsTask {
 
 sealed abstract class ScalingGAIndividualsTask extends Task with GenomeScaling {
 
-  val evolution: GAType
+  val evolution: GA.GAAlgorithm
   val individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
-  val scales: Inputs
   val objectives: List[Prototype[Double]]
+  def scales = evolution.inputs
 
   override def process(context: Context) = {
     val individualsValue = context(individuals)
