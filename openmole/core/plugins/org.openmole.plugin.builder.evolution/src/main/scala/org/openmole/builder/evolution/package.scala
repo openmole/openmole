@@ -90,10 +90,6 @@ package object evolution {
 
     val scalingIndividualsTask = ScalingGAIndividualsTask(evolution)(name + "ScalingIndividuals", individual.toArray)
 
-    objectives.foreach {
-      case (o, _) ⇒ scalingIndividualsTask addObjective o
-    }
-
     scalingIndividualsTask addInput state
     scalingIndividualsTask addInput generation
     scalingIndividualsTask addInput terminated
@@ -344,10 +340,6 @@ package object evolution {
     val islandSlot = Slot(MoleTask(name + "MoleTask", model))
 
     val scalingIndividualsTask = ScalingGAIndividualsTask(evolution)(name + "ScalingIndividuals", individual.toArray)
-
-    evolution.objectives.foreach {
-      case (o, _) ⇒ scalingIndividualsTask addObjective o
-    }
 
     scalingIndividualsTask addInput archive
     scalingIndividualsTask addInput terminated
