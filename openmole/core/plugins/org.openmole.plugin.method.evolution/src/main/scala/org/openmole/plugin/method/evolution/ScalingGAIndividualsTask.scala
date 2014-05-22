@@ -44,7 +44,6 @@ object ScalingGAIndividualsTask {
         val evolution = _evolution
         val name = _name
         val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
-        val objectives = evolution.objectives.unzip._1
       }
     }
   }
@@ -55,7 +54,7 @@ sealed abstract class ScalingGAIndividualsTask extends Task with GenomeScaling {
 
   val evolution: GA.GAAlgorithm
   val individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
-  val objectives: Seq[Prototype[Double]]
+  def objectives = evolution.objectives.unzip._1
   def scales = evolution.inputs
 
   override def process(context: Context) = {
