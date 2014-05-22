@@ -17,7 +17,9 @@
 
 package org.openmole.ide.misc.widget
 
+import scala.swing.FileChooser.SelectionMode._
+
 class CSVChooseFileTextField(initialText: String) extends ChooseFileTextField(initialText,
   "Select a CSV file",
-  "CSV files",
-  "csv")
+  FilesOnly,
+  Some("CSV files" -> Seq("csv")))

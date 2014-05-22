@@ -67,7 +67,7 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1")
 
   lazy val slick = OsgiProject("com.typesafe.slick", exports = Seq("scala.slick.*")) settings
-    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.0.1")
+    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.0.2")
 
   lazy val slf4j = OsgiProject("org.slf4j") settings (libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2")
 
@@ -88,10 +88,10 @@ object Libraries extends Defaults(Apache) {
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,
         "org.scala-lang" % "jline" % sV,
-        "com.typesafe.akka" %% "akka-actor" % "2.2.3",
-        "com.typesafe.akka" %% "akka-transactor" % "2.2.3",
-        "com.typesafe" % "config" % "1.2.0",
-        "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.3")
+        "com.typesafe.akka" %% "akka-actor" % "2.3.2",
+        "com.typesafe.akka" %% "akka-transactor" % "2.3.2",
+        "com.typesafe" % "config" % "1.2.1",
+        "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3")
     }, bundleType += "dbserver")
 
   lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.reflect.*", "scala.tools.*"),
@@ -118,7 +118,7 @@ object Libraries extends Defaults(Apache) {
       Seq("ccl.northwestern.edu" % "netlogo" % "4.1.3",
         "org.picocontainer" % "picocontainer" % "2.8",
         "org.objectweb" % "asm" % "3.1",
-        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.10.0", bundleType := Set("all"),
+        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", bundleType := Set("all"),
         ivyScala ~= { (is: Option[IvyScala]) ⇒ //should disable the binary compat warnings this causes
           for (i ← is) yield i.copy(checkExplicit = false)
         })
@@ -128,7 +128,7 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies ++=
       Seq("ccl.northwestern.edu" % "netlogo" % "5.0.4",
         "org.picocontainer" % "picocontainer" % "2.13.6",
-        "org.objectweb" % "asm-all" % "3.3.1"), version := "5.0.3", scalaVersion := "2.10.0", bundleType := Set("all"),
+        "org.objectweb" % "asm-all" % "3.3.1"), version := "5.0.3", bundleType := Set("all"),
         ivyScala ~= { (is: Option[IvyScala]) ⇒ //See netlogo4_noscala
           for (i ← is) yield i.copy(checkExplicit = false)
         })
@@ -181,6 +181,8 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
     (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6", version := "7.0.6")
+
+  lazy val scopt = OsgiProject("com.github.scopt", exports = Seq("scopt.*")) settings (libraryDependencies += "com.github.scopt" %% "scopt" % "3.2.0")
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
 }

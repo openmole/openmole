@@ -55,8 +55,8 @@ abstract class GenericNetLogoPanelUI(
 
   val nlogoTextField = new ChooseFileTextField(nlogoPath,
     "Select a nlogo file",
-    "Netlogo files",
-    "nlogo",
+    SelectionMode.FilesOnly,
+    Some("Netlogo files" -> Seq("nlogo")),
     updateGlobals)
 
   val workspaceCheckBox = new CheckBox("Embed Workspace") {

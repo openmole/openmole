@@ -20,6 +20,7 @@ package org.openmole.ide.plugin.domain.file
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.PluginPanel
 import swing._
+import scala.swing.FileChooser.SelectionMode
 
 object FileDomainPanelUI {
   def panel(cList: List[(Component, String)]) = {
@@ -34,5 +35,5 @@ object FileDomainPanelUI {
 }
 
 trait FileDomainPanelUI {
-  def directoryTextField(dir: String) = new ChooseFileTextField(dir)
+  def directoryTextField(dir: String) = new ChooseFileTextField(dir, "Choose directory", SelectionMode.DirectoriesOnly)
 }

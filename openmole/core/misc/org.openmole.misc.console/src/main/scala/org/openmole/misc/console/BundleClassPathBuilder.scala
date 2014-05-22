@@ -26,7 +26,6 @@ import collection.mutable.ListBuffer
 import org.osgi.framework._
 
 import collection.JavaConversions._
-import org.openmole.misc.console.Activator
 
 /**
  * Helper methods to transform OSGi bundles into {@link AbstractFile} implementations

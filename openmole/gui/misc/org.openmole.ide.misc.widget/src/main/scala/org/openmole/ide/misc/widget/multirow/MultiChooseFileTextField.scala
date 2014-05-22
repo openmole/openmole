@@ -27,12 +27,11 @@ object MultiChooseFileTextField {
 
   class ChooseFileTextFieldPanel(data: ChooseFileTextFieldData,
                                  chooserTitle: String = "",
-                                 chooserDescription: Option[String] = None,
                                  selectionMode: SelectionMode.Value = SelectionMode.FilesOnly,
-                                 extensions: Option[String] = None)
+                                 chooserDescription: Option[(String, Seq[String])] = None)
       extends PluginPanel("wrap 2") with IPanel[ChooseFileTextFieldData] {
 
-    val chooseFileTextField = new ChooseFileTextField(data.content, chooserTitle, chooserDescription, selectionMode, extensions)
+    val chooseFileTextField = new ChooseFileTextField(data.content, chooserTitle, selectionMode, chooserDescription)
 
     contents += chooseFileTextField
 
@@ -42,15 +41,13 @@ object MultiChooseFileTextField {
   class ChooseFileTextFieldData(val content: String = "") extends IData
 
   class ChooseFileTextFieldFactory(chooserTitle: String = "",
-                                   chooserDescription: Option[String] = None,
                                    selectionMode: SelectionMode.Value = SelectionMode.FilesOnly,
-                                   extensions: Option[String] = None) extends IFactory[ChooseFileTextFieldData] {
+                                   chooserDescription: Option[(String, Seq[String])] = None) extends IFactory[ChooseFileTextFieldData] {
 
     def apply = new ChooseFileTextFieldPanel(new ChooseFileTextFieldData,
       chooserTitle,
-      chooserDescription,
       selectionMode,
-      extensions)
+      chooserDescription)
   }
 }
 
@@ -58,15 +55,13 @@ import MultiChooseFileTextField._
 class MultiChooseFileTextField(title: String,
                                initPanels: List[ChooseFileTextFieldPanel],
                                chooserTitle: String = "",
-                               chooserDescription: Option[String] = None,
                                selectionMode: SelectionMode.Value = SelectionMode.FilesOnly,
-                               extensions: Option[String] = None,
+                               chooserDescription: Option[(String, Seq[String])] = None,
                                minus: Minus = NO_EMPTY,
                                plus: Plus = ADD) extends MultiPanel(title,
   new ChooseFileTextFieldFactory(chooserTitle,
-    chooserDescription,
     selectionMode,
-    extensions),
+    chooserDescription),
   initPanels,
   minus,
   plus)

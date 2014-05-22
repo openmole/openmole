@@ -39,6 +39,7 @@ import org.openmole.ide.core.implementation.serializer.ExecutionSerialiser
 import org.openmole.ide.core.implementation.preference.Preferences
 import scala.swing.event.ButtonClicked
 import org.openmole.misc.workspace.Workspace
+import scala.swing.FileChooser.SelectionMode
 
 object DialogFactory {
 
@@ -140,7 +141,7 @@ object DialogFactory {
   }
 
   def exportPartialMoleExecution(s: BuildMoleScene) = {
-    val fc = new ChooseFileTextField("", "XML file", "XML,tar", "xml,tar")
+    val fc = new ChooseFileTextField("", "XML file", SelectionMode.FilesOnly, Some("XML,tar", Seq("xml", "tar")))
     val withArchiveCheckBox = new CheckBox("export with archives")
     DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(new PluginPanel("wrap") {
       contents += new Label("XML file")
