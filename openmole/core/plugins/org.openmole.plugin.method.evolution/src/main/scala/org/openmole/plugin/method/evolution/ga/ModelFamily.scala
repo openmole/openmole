@@ -21,6 +21,7 @@ import fr.iscpif.mgo._
 import fr.iscpif.mgo.modelfamily._
 import org.openmole.plugin.method.evolution._
 import org.openmole.core.model.data._
+import org.openmole.core.implementation.data._
 
 object ModelFamily {
 
@@ -30,11 +31,11 @@ object ModelFamily {
     models: Int,
     nicheSize: Int,
     termination: GATermination { type G >: ModelFamily#G; type P >: ModelFamily#P; type F >: ModelFamily#F; type MF >: ModelFamily#MF },
-    id: Prototype[Int],
+    modelId: Prototype[Int],
     inputs: Inputs,
     objectives: Objectives,
     cloneProbability: Double = 0.0) = {
-    val (_mu, _cloneProbability, _lambda, _inputs, _objectives, _nicheSize, _models) = (mu, cloneProbability, lambda, inputs, objectives, nicheSize, models)
+    val (_mu, _cloneProbability, _lambda, _inputs, _objectives, _nicheSize, _models, _modelId) = (mu, cloneProbability, lambda, inputs, objectives, nicheSize, models, modelId)
     new ModelFamily {
       val inputs = _inputs
       val objectives = _objectives
@@ -56,6 +57,14 @@ object ModelFamily {
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
       def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+
+      override def inputsPrototypes = super.inputsPrototypes ++ Seq(_modelId)
+
+      override def toVariables(genome: G, context: Context): Seq[Variable[_]] =
+        super.toVariables(genome, context) ++ Seq(Variable(_modelId, modelId.get(genome)))
+
+      override def toVariables(individuals: Seq[Individual[G, P, F]], context: Context): Seq[Variable[_]] =
+        super.toVariables(individuals, context) ++ Seq(Variable(_modelId.toArray, individuals.map(i ⇒ modelId.get(i.genome)).toArray))
     }
   }
 }
