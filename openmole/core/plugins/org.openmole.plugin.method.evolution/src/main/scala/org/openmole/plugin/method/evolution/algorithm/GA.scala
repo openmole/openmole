@@ -33,7 +33,7 @@ object GA {
 
   type Objectives = Seq[(Prototype[Double], String)]
 
-  trait GAType <: G with P with F with MF with MG with MGOGA with Sigma with DoubleSequencePhenotype with MGFitness
+  //trait GAType <: G with P with F with MF with MG with MGOGA with Sigma with DoubleSequencePhenotype with MGFitness
 
   trait GATermination extends Termination with TerminationManifest
 
@@ -99,12 +99,10 @@ object GA {
   def strict = new StrictDominance {}
   def nonStrict = new NonStrictDominance {}
 
-  trait GAModifier extends Modifier with GAType
-
   trait GAAlgorithm extends Archive
       with EvolutionManifest
-      with GAType
-      with GAModifier
+      with G with P with F with MF with MG with MGOGA with Sigma with DoubleSequencePhenotype with MGFitness
+      with Modifier
       with Elitism
       with Selection
       with Termination
@@ -145,7 +143,6 @@ object GA {
     with TournamentOnRankAndDiversity
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
-    with GAType
     with GAGenomeWithSigma
 
   def optimisation(
@@ -196,7 +193,6 @@ object GA {
       with TournamentOnRank
       with CoEvolvingSigmaValuesMutation
       with SBXBoundedCrossover
-      with GAType
       with GAGenomeWithSigma
       with MGFitness
       with MaxAggregation {
@@ -245,7 +241,6 @@ object GA {
       with MapSelection
       with CoEvolvingSigmaValuesMutation
       with SBXBoundedCrossover
-      with GAType
       with GAGenomeWithSigma
       with MaxAggregation {
     def x: Int

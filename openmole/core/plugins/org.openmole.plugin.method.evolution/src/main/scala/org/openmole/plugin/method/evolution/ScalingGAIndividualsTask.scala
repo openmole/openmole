@@ -24,9 +24,6 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.domain._
 import org.openmole.core.model.task._
-import scala.collection.mutable.ListBuffer
-import org.openmole.plugin.method.evolution.algorithm.GA.GAType
-import org.openmole.plugin.method.evolution.algorithm.GenomeScaling
 
 object ScalingGAIndividualsTask {
 
