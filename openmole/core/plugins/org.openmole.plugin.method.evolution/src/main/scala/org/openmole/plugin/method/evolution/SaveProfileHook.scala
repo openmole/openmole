@@ -26,12 +26,13 @@ import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.script.GroovyProxyPool
 import org.openmole.core.implementation.mole._
-import org.openmole.plugin.method.evolution.algorithm.{ GA ⇒ OMGA, GenomeScaling }
+import org.openmole.plugin.method.evolution.ga._
 import fr.iscpif.mgo._
+import org.openmole.plugin.method.evolution.ga._
 
 object SaveProfileHook {
 
-  def apply(puzzle: GAPuzzle[GA.GenomeProfile], path: String) =
+  def apply(puzzle: GAPuzzle[GenomeProfile], path: String) =
     new HookBuilder {
       addInput(puzzle.individual.toArray)
       val _puzzle = puzzle
@@ -45,11 +46,10 @@ object SaveProfileHook {
 
 }
 
-abstract class SaveProfileHook extends Hook with GenomeScaling {
+abstract class SaveProfileHook extends Hook {
 
-  val puzzle: GAPuzzle[GA.GenomeProfile]
+  val puzzle: GAPuzzle[GenomeProfile]
   val path: String
-  def scales = puzzle.evolution.inputs
 
   def process(context: Context, executionContext: ExecutionContext) = {
     val file = executionContext.relativise(VariableExpansion(context, path))
@@ -58,7 +58,7 @@ abstract class SaveProfileHook extends Hook with GenomeScaling {
       for {
         i ← context(puzzle.individual.toArray)
       } {
-        val scaledGenome = scaled(puzzle.evolution.values.get(i.genome), context)
+        val scaledGenome = puzzle.evolution.toVariables(i.genome, context)
         w.write("" + scaledGenome(puzzle.evolution.x).value + "," + puzzle.evolution.aggregate(i.fitness) + "\n")
       }
     }

@@ -27,11 +27,11 @@ import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.implementation.mole._
-import org.openmole.plugin.method.evolution.algorithm.{ GA ⇒ OMGA, GenomeScaling }
+import org.openmole.plugin.method.evolution.ga._
 
 object SaveMapHook {
 
-  def apply(puzzle: GAPuzzle[GA.GenomeMap], path: String) =
+  def apply(puzzle: GAPuzzle[GenomeMap], path: String) =
     new HookBuilder {
       addInput(puzzle.individual.toArray)
       val _puzzle = puzzle
@@ -47,7 +47,7 @@ object SaveMapHook {
 
 abstract class SaveMapHook extends Hook with GenomeScaling {
 
-  val puzzle: GAPuzzle[_ <: GA.GenomeMap]
+  val puzzle: GAPuzzle[_ <: GenomeMap]
   def scales: Inputs = puzzle.evolution.inputs
   val path: String
 

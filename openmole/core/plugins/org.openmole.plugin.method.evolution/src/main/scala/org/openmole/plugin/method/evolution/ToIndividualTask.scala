@@ -25,7 +25,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.tools.VariableExpansion
-import algorithm.{ GA ⇒ OMGA }
+import ga._
 
 object ToIndividualTask {
 
@@ -37,7 +37,7 @@ object ToIndividualTask {
       (p, vDouble) :: expand(objectives.tail, context + Variable(p, vDouble))
     }
 
-  def apply(evolution: GA.GAAlgorithm)(
+  def apply(evolution: GAAlgorithm)(
     name: String,
     genome: Prototype[evolution.G],
     individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]])(implicit plugins: PluginSet) = {
@@ -60,7 +60,7 @@ object ToIndividualTask {
 
 }
 
-sealed abstract class ToIndividualTask(val evolution: GA.GAAlgorithm)(
+sealed abstract class ToIndividualTask(val evolution: GAAlgorithm)(
     val name: String) extends Task { task ⇒
 
   def genome: Prototype[evolution.G]

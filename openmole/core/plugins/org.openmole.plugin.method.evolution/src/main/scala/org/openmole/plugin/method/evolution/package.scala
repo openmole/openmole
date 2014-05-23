@@ -19,16 +19,16 @@ package org.openmole.plugin.method
 
 import org.openmole.core.model.data.Prototype
 import fr.iscpif.mgo.Individual
+import evolution.ga._
 
 package object evolution {
-  val GA = algorithm.GA
 
   implicit def seqOfTuplesToInputsConversion(s: Seq[(Prototype[Double], (String, String))]) =
     Inputs(s.map { case (p, (min, max)) ⇒ Scalar(p, min, max) })
 
   implicit def seqToInputsConversion(s: Seq[Input]) = Inputs(s)
 
-  trait GAPuzzle[+ALG <: GA.GAAlgorithm] {
+  trait GAPuzzle[+ALG <: GAAlgorithm] {
     val evolution: ALG
 
     def archive: Prototype[evolution.A]
@@ -36,4 +36,6 @@ package object evolution {
     def individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]]
     def generation: Prototype[Int]
   }
+
+  type Objectives = Seq[(Prototype[Double], String)]
 }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.algorithm
+package org.openmole.plugin.method.evolution.ga
 
 import org.openmole.core.model.data._
 import org.openmole.misc.tools.script._

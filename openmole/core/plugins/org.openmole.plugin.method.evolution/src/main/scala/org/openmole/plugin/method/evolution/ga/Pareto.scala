@@ -15,22 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution
+package org.openmole.plugin.method.evolution.ga
 
-import ga._
-import org.openmole.core.model.data._
-import org.openmole.core.implementation.data._
-import org.openmole.plugin.hook.file.AppendToCSVFileHook
+import fr.iscpif.mgo._
 
-object SavePopulationHook {
-
-  def apply(puzzle: GAPuzzle[GAAlgorithm], path: String) = {
-    import puzzle._
-    val builder = new AppendToCSVFileHook.Builder(path)
-    builder.add(puzzle.generation)
-    evolution.inputs.inputs.foreach(i ⇒ builder.add(i.prototype.toArray))
-    evolution.objectives.foreach { case (o, _) ⇒ builder.add(o.toArray) }
-    builder
+object Pareto extends GARankingBuilder {
+  def apply(dominance: Dominance) = new ParetoRanking {
+    def isDominated(p1: Seq[Double], p2: Seq[Double]) = dominance.isDominated(p1, p2)
   }
-
 }

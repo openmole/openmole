@@ -29,11 +29,11 @@ import org.openmole.core.model.domain._
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.misc.tools.script.{ GroovyFunction, GroovyProxyPool, GroovyProxy }
-import org.openmole.plugin.method.evolution.algorithm.GenomeScaling
+import org.openmole.plugin.method.evolution.ga._
 
 object ScalingGAGenomeTask {
 
-  def apply(evolution: GA.GAAlgorithm)(
+  def apply(evolution: GAAlgorithm)(
     name: String,
     genome: Prototype[evolution.G])(implicit plugins: PluginSet) = {
 
@@ -52,7 +52,7 @@ object ScalingGAGenomeTask {
 
 }
 
-sealed abstract class ScalingGAGenomeTask(val evolution: GA.GAAlgorithm) extends Task {
+sealed abstract class ScalingGAGenomeTask(val evolution: GAAlgorithm) extends Task {
   val genome: Prototype[evolution.G]
 
   override def process(context: Context) = {

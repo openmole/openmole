@@ -24,10 +24,11 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.domain._
 import org.openmole.core.model.task._
+import ga._
 
 object ScalingGAIndividualsTask {
 
-  def apply(evolution: GA.GAAlgorithm)(
+  def apply(evolution: GAAlgorithm)(
     name: String,
     individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]])(implicit plugins: PluginSet) = {
 
@@ -51,7 +52,7 @@ object ScalingGAIndividualsTask {
 
 sealed abstract class ScalingGAIndividualsTask extends Task {
 
-  val evolution: GA.GAAlgorithm
+  val evolution: GAAlgorithm
   val individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
 
   override def process(context: Context) =

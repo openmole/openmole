@@ -34,14 +34,15 @@ import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.tools._
 import org.openmole.plugin.method.evolution.Inputs
-import org.openmole.plugin.method.evolution.algorithm.{ EvolutionManifest, TerminationManifest, GA ⇒ OMGA }
+import org.openmole.plugin.method.evolution.algorithm._
 import org.openmole.misc.exception._
 import org.openmole.plugin.task.tools._
 import scala.util.Random
+import ga._
 
 package object evolution {
 
-  private def components[ALG <: GA.GAAlgorithm](
+  private def components[ALG <: GAAlgorithm](
     name: String,
     evolution: ALG)(implicit plugins: PluginSet) = new { components ⇒
     import evolution._
@@ -124,7 +125,7 @@ package object evolution {
 
   }
 
-  def generationalGA[ALG <: GA.GAAlgorithm](evolution: ALG)(
+  def generationalGA[ALG <: GAAlgorithm](evolution: ALG)(
     name: String,
     model: Puzzle)(implicit plugins: PluginSet) = {
 
@@ -178,7 +179,7 @@ package object evolution {
     cs.puzzle(gaPuzzle, scalingIndividualsSlot.capsule)
   }
 
-  def steadyGA[ALG <: GA.GAAlgorithm](evolution: ALG)(
+  def steadyGA[ALG <: GAAlgorithm](evolution: ALG)(
     name: String,
     model: Puzzle)(implicit plugins: PluginSet) = {
 
@@ -242,10 +243,10 @@ package object evolution {
     cs.puzzle(gaPuzzle, scalingIndividualsSlot.capsule)
   }
 
-  def islandGA[AG <: GA.GAAlgorithm](model: Puzzle with GAPuzzle[AG])(
+  def islandGA[AG <: GAAlgorithm](model: Puzzle with GAPuzzle[AG])(
     name: String,
     number: Int,
-    termination: GA.GATermination { type G >: model.evolution.G; type P >: model.evolution.P; type F >: model.evolution.F; type MF >: model.evolution.MF },
+    termination: GATermination { type G >: model.evolution.G; type P >: model.evolution.P; type F >: model.evolution.F; type MF >: model.evolution.MF },
     sampling: Int = model.evolution.lambda)(implicit plugins: PluginSet) = {
 
     import model.evolution

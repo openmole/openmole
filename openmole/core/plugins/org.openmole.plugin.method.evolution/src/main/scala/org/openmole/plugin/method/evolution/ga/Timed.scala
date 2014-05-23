@@ -15,22 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution
+package org.openmole.plugin.method.evolution.ga
 
-import ga._
-import org.openmole.core.model.data._
-import org.openmole.core.implementation.data._
-import org.openmole.plugin.hook.file.AppendToCSVFileHook
+import fr.iscpif.mgo.termination.TimedTermination
+import org.openmole.misc.tools.service.Duration._
 
-object SavePopulationHook {
+object Timed {
 
-  def apply(puzzle: GAPuzzle[GAAlgorithm], path: String) = {
-    import puzzle._
-    val builder = new AppendToCSVFileHook.Builder(path)
-    builder.add(puzzle.generation)
-    evolution.inputs.inputs.foreach(i ⇒ builder.add(i.prototype.toArray))
-    evolution.objectives.foreach { case (o, _) ⇒ builder.add(o.toArray) }
-    builder
+  def apply(_duration: String) = new GATermination with TimedTermination {
+    type G = Any
+    type F = Any
+    type P = Any
+    type MF = Any
+    val stateManifest: Manifest[STATE] = manifest[STATE]
+    val duration = _duration.toMilliSeconds
   }
 
 }
