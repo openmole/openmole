@@ -27,7 +27,7 @@ import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.implementation.mole._
-import algorithm.{ GA ⇒ OMGA }
+import org.openmole.plugin.method.evolution.algorithm.{ GA ⇒ OMGA, GenomeScaling }
 
 object SaveMapHook {
 

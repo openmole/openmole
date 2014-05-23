@@ -26,6 +26,7 @@ import org.openmole.core.model.domain._
 import org.openmole.core.model.task._
 import scala.collection.mutable.ListBuffer
 import org.openmole.plugin.method.evolution.algorithm.GA.GAType
+import org.openmole.plugin.method.evolution.algorithm.GenomeScaling
 
 object ScalingGAIndividualsTask {
 
@@ -38,7 +39,8 @@ object ScalingGAIndividualsTask {
     new TaskBuilder { builder ⇒
 
       addInput(individuals)
-      evolution.inputs.inputs foreach { i ⇒ this.addOutput(i.prototype.toArray) }
+      evolution.inputsPrototypes foreach { i ⇒ addOutput(i.toArray) }
+      evolution.outputPrototypes foreach { o ⇒ addOutput(o.toArray) }
 
       def toTask = new ScalingGAIndividualsTask with Built {
         val evolution = _evolution
@@ -50,30 +52,12 @@ object ScalingGAIndividualsTask {
 
 }
 
-sealed abstract class ScalingGAIndividualsTask extends Task with GenomeScaling {
+sealed abstract class ScalingGAIndividualsTask extends Task {
 
   val evolution: GA.GAAlgorithm
   val individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
-  def objectives = evolution.objectives.unzip._1
-  def scales = evolution.inputs
 
-  override def process(context: Context) = {
-    val individualsValue = context(individuals)
-    val scaledValues = individualsValue.map(i ⇒ scaled(evolution.values.get(i.genome), context).toIndexedSeq)
-
-    scales.inputs.zipWithIndex.map {
-      case (input, i) ⇒
-        input match {
-          case Scalar(prototype, _, _)      ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Double]).toArray[Double])
-          case Sequence(prototype, _, _, _) ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Array[Double]]).toArray[Array[Double]])
-        }
-    }.toList ++
-      objectives.zipWithIndex.map {
-        case (p, i) ⇒
-          Variable(
-            p.toArray,
-            individualsValue.map { iv ⇒ evolution.fitness.get(iv.fitness)(i) }.toArray)
-      }
-  }
+  override def process(context: Context) =
+    evolution.toVariables(context(individuals), context)
 
 }

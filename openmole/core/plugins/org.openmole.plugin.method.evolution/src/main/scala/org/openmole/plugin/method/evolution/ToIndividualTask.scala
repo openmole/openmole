@@ -44,9 +44,7 @@ object ToIndividualTask {
 
     new TaskBuilder { builder ⇒
 
-      evolution.objectives.foreach {
-        case (p, _) ⇒ addInput(p)
-      }
+      evolution.outputPrototypes.foreach(p ⇒ addInput(p))
 
       addInput(genome)
       addOutput(individual)

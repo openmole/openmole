@@ -25,8 +25,9 @@ import org.openmole.misc.tools.script._
 import org.openmole.misc.tools.service.Duration._
 import scala.util.Random
 import scalaz._
-import org.openmole.plugin.method.evolution.Inputs
-import org.openmole.core.model.data.Prototype
+import org.openmole.plugin.method.evolution.{ Sequence, Scalar, Inputs }
+import org.openmole.core.model.data._
+import org.openmole.core.implementation.data._
 
 object GA {
 
@@ -109,9 +110,31 @@ object GA {
       with Termination
       with Mutation
       with CrossOver
-      with GeneticBreeding {
+      with GeneticBreeding
+      with GenomeScaling {
     def inputs: Inputs
+    def scales = inputs
     def objectives: GA.Objectives
+    def inputsPrototypes = inputs.inputs.map(_.prototype)
+    def outputPrototypes = objectives.map(_._1)
+    def toVariables(genome: G, context: Context): Seq[Variable[_]] = scaled(values.get(genome), context)
+    def toVariables(individuals: Seq[Individual[G, P, F]], context: Context): Seq[Variable[_]] = {
+      val scaledValues = individuals.map(i ⇒ scaled(values.get(i.genome), context).toIndexedSeq)
+
+      scales.inputs.zipWithIndex.map {
+        case (input, i) ⇒
+          input match {
+            case Scalar(prototype, _, _)      ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Double]).toArray[Double])
+            case Sequence(prototype, _, _, _) ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Array[Double]]).toArray[Array[Double]])
+          }
+      }.toList ++
+        objectives.map(_._1).zipWithIndex.map {
+          case (p, i) ⇒
+            Variable(
+              p.toArray,
+              individuals.map { iv ⇒ fitness.get(iv.fitness)(i) }.toArray)
+        }
+    }
   }
 
   trait Optimisation extends NoArchive

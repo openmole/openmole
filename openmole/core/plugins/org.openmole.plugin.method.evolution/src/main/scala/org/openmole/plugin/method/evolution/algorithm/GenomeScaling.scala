@@ -15,12 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution
+package org.openmole.plugin.method.evolution.algorithm
 
 import org.openmole.core.model.data._
 import org.openmole.misc.tools.script._
 import org.openmole.core.implementation.tools._
 import fr.iscpif.mgo._
+import org.openmole.plugin.method.evolution.{ Sequence, Scalar, Input, Inputs }
 
 object GenomeScaling {
 
