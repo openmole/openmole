@@ -18,7 +18,7 @@ object Libraries extends Defaults(Apache) {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.64"
+  val gridscaleVersion = "1.65"
 
   val bouncyCastleVersion = "1.49"
 
@@ -88,8 +88,8 @@ object Libraries extends Defaults(Apache) {
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,
         "org.scala-lang" % "jline" % sV,
-        "com.typesafe.akka" %% "akka-actor" % "2.3.2",
-        "com.typesafe.akka" %% "akka-transactor" % "2.3.2",
+        "com.typesafe.akka" %% "akka-actor" % "2.3.3",
+        "com.typesafe.akka" %% "akka-transactor" % "2.3.3",
         "com.typesafe" % "config" % "1.2.1",
         "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3")
     }, bundleType += "dbserver")
