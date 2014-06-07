@@ -18,25 +18,25 @@ object Libraries extends Defaults(Apache) {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.68"
+  val gridscaleVersion = "1.69-SNAPSHOT"
 
   val bouncyCastleVersion = "1.49"
 
-  lazy val includeGridscale = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion
+  lazy val gridscale = "fr.iscpif.gridscale.bundle" %% "gridscale" % gridscaleVersion
 
-  lazy val includeGridscaleSSH = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.ssh" % gridscaleVersion
+  lazy val gridscaleSSH = "fr.iscpif.gridscale.bundle" %% "ssh" % gridscaleVersion
 
-  lazy val includeGridscalePBS = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.pbs" % gridscaleVersion
+  lazy val gridscalePBS = "fr.iscpif.gridscale.bundle" %% "pbs" % gridscaleVersion
 
-  lazy val includeGridscaleSLURM = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.slurm" % gridscaleVersion
+  lazy val gridscaleSLURM = "fr.iscpif.gridscale.bundle" %% "slurm" % gridscaleVersion
 
-  lazy val includeGridscaleGlite = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.glite" % gridscaleVersion
+  lazy val gridscaleGlite = "fr.iscpif.gridscale.bundle" %% "glite" % gridscaleVersion
 
-  lazy val includeGridscaleDirac = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.dirac" % gridscaleVersion
+  lazy val gridscaleDirac = "fr.iscpif.gridscale.bundle" %% "dirac" % gridscaleVersion
 
-  lazy val includeGridscaleHTTP = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.http" % gridscaleVersion
+  lazy val gridscaleHTTP = "fr.iscpif.gridscale.bundle" %% "http" % gridscaleVersion
 
-  lazy val includeBouncyCastle = libraryDependencies += "org.bouncycastle" % "bcprov-jdk15on" % bouncyCastleVersion
+  lazy val bouncyCastle = "org.bouncycastle" % "bcprov-jdk15on" % bouncyCastleVersion
 
   lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }
 

@@ -30,6 +30,6 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
       scalatestVersion in Global := "2.1.5",
       junitVersion in Global := "4.11",
       concurrentRestrictions := Seq(Tags.limitAll(5), Tags.limit(Tags.Disk, 2)),
-      resolvers += Resolver.sonatypeRepo("snashots") // for scalatra 2.3 
+      resolvers += Resolver.sonatypeRepo("snapshots") // for scalatra 2.3 
     )
 }
