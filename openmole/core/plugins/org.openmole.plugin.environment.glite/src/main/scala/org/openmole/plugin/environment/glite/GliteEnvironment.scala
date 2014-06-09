@@ -230,7 +230,7 @@ class GliteEnvironment(
     super.submit(job)
   }
 
-  def proxyCreator = authentication
+  val proxyCreator = authentication
 
   @transient lazy val authentication = authentications(classOf[GliteAuthentication]).headOption match {
     case Some(a) ⇒
