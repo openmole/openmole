@@ -36,7 +36,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val gridscaleHTTP = "fr.iscpif.gridscale.bundle" %% "http" % gridscaleVersion
 
-  lazy val bouncyCastle = "org.bouncycastle" % "bcprov-jdk15on" % bouncyCastleVersion
+  lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
 
   lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }
 
