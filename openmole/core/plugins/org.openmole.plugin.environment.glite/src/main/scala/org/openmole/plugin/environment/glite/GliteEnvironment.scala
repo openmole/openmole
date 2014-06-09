@@ -230,7 +230,7 @@ class GliteEnvironment(
     super.submit(job)
   }
 
-  val proxyCreator = authentication
+  def proxyCreator = authentication
 
   @transient lazy val authentication = authentications(classOf[GliteAuthentication]).headOption match {
     case Some(a) ⇒
@@ -246,9 +246,10 @@ class GliteEnvironment(
   def delegate =
     jobServices.foreach { _.delegated = false }
 
-  override def allJobServices = {
-    val jss = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut).toSeconds.toInt)
-    jss.map {
+  @transient lazy val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut).toSeconds.toInt)
+
+  override def allJobServices =
+    bdiiWMS.map {
       js ⇒
         new GliteJobService {
           val jobService = new WMSJobService {
@@ -259,7 +260,6 @@ class GliteEnvironment(
           val nbTokens = threadsByWMS
         }
     }
-  }
 
   override def selectAJobService =
     if (jobServices.size == 1) super.selectAJobService

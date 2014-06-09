@@ -40,12 +40,12 @@ trait BDIISRMServers extends BatchEnvironment {
 
   @transient lazy val threadsBySE = Workspace.preferenceAsInt(GliteEnvironment.LocalThreadsBySE)
 
-  override def allStorages = {
-    val stors = bdiiServer.querySRM(voName, Workspace.preferenceAsDuration(GliteEnvironment.FetchResourcesTimeOut).toSeconds.toInt)
-    stors.map {
+  lazy val bdiiStorarges = bdiiServer.querySRM(voName, Workspace.preferenceAsDuration(GliteEnvironment.FetchResourcesTimeOut).toSeconds.toInt)
+
+  override def allStorages =
+    bdiiStorarges.map {
       s ⇒ GliteStorageService(s, this, proxyCreator, threadsBySE)
     }
-  }
 
   override def selectAStorage(usedFileHashes: Iterable[(File, Hash)]) =
     if (storages.size == 1) super.selectAStorage(usedFileHashes)
