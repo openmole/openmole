@@ -45,7 +45,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
   lazy val openmole = AssemblyProject("openmole", "plugins", settings = resAssemblyProject ++ uiProjects ++ pluginProjects ++ guiPluginProjects ++ dbserverProjects ++ zipProject, depNameMap =
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" }, """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })
   ) settings (
-    equinoxDependencies, libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion intransitive (),
+    equinoxDependencies, libraryDependencies += Libraries.gridscale intransitive (),
     resourceSets <++= (baseDirectory, zip in openmoleRuntime, downloadUrls in openmoleRuntime) map { (bd, zipFile, downloadUrls) ⇒
       Set(bd / "resources" -> "", zipFile -> "runtime") ++ downloadUrls.map(_ -> "runtime")
     },
@@ -72,7 +72,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }), settings = resAssemblyProject ++ zipProject ++ urlDownloadProject ++ runtimeProjects) settings
     (equinoxDependencies, resourceDirectory <<= baseDirectory / "resources",
       urls <++= target { t ⇒ Seq(java368URL -> t / "jvm-386.tar.gz", javax64URL -> t / "jvm-x64.tar.gz") },
-      libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion intransitive (),
+      libraryDependencies += Libraries.gridscale intransitive (),
       tarGZName := Some("runtime"),
       setExecutable += "run.sh",
       resourceSets <+= baseDirectory map { _ / "resources" -> "." },
