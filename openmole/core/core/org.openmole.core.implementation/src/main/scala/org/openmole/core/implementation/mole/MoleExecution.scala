@@ -109,11 +109,11 @@ class MoleExecution(
 
   def exceptions = _exceptions.single()
 
-  def duration =
+  def duration: Option[Long] =
     (_startTime.single(), _endTime.single()) match {
       case (None, _)          ⇒ None
-      case (Some(t), None)    ⇒ System.currentTimeMillis - t
-      case (Some(s), Some(e)) ⇒ e - s
+      case (Some(t), None)    ⇒ Some(System.currentTimeMillis - t)
+      case (Some(s), Some(e)) ⇒ Some(e - s)
     }
 
   def group(moleJob: IMoleJob, capsule: ICapsule, submole: ISubMoleExecution) =
