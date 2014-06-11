@@ -33,6 +33,7 @@ import org.openmole.core.serializer.SerialiserService
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.HashMap
 import org.openmole.misc.pluginmanager.PluginManager
+import org.openmole.core.implementation.mole.MoleExecution
 
 class Command {
 
