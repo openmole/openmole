@@ -21,16 +21,15 @@ import scala.tools.nsc.interpreter._
 import scala.tools.nsc._
 import org.openmole.misc.osgi._
 import scala.tools.nsc.reporters._
-import scala.tools.nsc.util._
+//import scala.tools.nsc.util._
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ScalaREPL extends ILoop {
 
   System.setProperty("jline.shutdownhook", "true")
   //System.setProperty("scala.repl.debug", "true")
   override val prompt = "OpenMOLE>"
-
-  settings = new Settings
-  settings.Yreplsync.value = true
 
   intp = new IMain {
 
@@ -52,5 +51,11 @@ class ScalaREPL extends ILoop {
   }
 
   in = new JLineReader(new JLineCompletion(this))
+
+  super.getClass.getMethods.find(_.getName.contains("globalFuture_$eq")).get.invoke(this, Future { true }.asInstanceOf[AnyRef])
+
+  settings = new Settings
+  settings.Yreplsync.value = true
+  settings
 
 }

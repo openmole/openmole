@@ -17,6 +17,8 @@
 
 package org.openmole.plugin.task.netlogo
 
+import org.openmole.plugin.tool.netlogo.NetLogo
+
 trait NetLogoFactory {
   def apply(): NetLogo
 }

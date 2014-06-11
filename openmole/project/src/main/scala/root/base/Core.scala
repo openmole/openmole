@@ -33,6 +33,6 @@ object Core extends BaseDefaults {
     serializer, jasypt, provided(fileService), provided(hashService), pluginManager, iceTar % "provided",
     guava, Apache.config) settings (libraryDependencies += gridscale)
 
-  lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global")) dependsOn (implementation, scalaLang, scalaCompiler, Misc.macros)
+  lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global")) dependsOn (implementation, scalaLang /*, scalaCompiler*/ , Misc.macros)
 
 }

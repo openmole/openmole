@@ -11,6 +11,4 @@ object Method extends PluginDefaults {
 
   lazy val sensitivity = OsgiProject("sensitivity") dependsOn (Misc.exception, Core.implementation)
 
-  lazy val abc = OsgiProject("abc") dependsOn (Misc.exception, Core.implementation, scalabc, Misc.workspace)
-
 }

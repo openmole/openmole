@@ -17,6 +17,7 @@
 
 package org.openmole.ui.console
 
+import jline.console.ConsoleReader
 import java.util.concurrent.Executors
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
@@ -48,7 +49,7 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
 
   @tailrec private def initPassword: Unit = {
     val message = (if (Workspace.passwordChosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
-    val password = new jline.ConsoleReader().readLine(message, '*')
+    val password = new ConsoleReader().readLine(message, '*')
     if (!setPassword(password)) initPassword
   }
 
@@ -75,7 +76,7 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
           loop.bind(serializer, new Serializer)
           loop.bind("commands", new Command)
           loop.bind("implicits", new Implicits()(plugins))
-          loop.addImports(
+          loop.interpret(Seq(
             "org.openmole.core.convenience._",
             "org.openmole.core.implementation.data._",
             "org.openmole.core.implementation.execution._",
@@ -99,7 +100,7 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
             "org.openmole.misc.tools.io.FromString._",
             "java.io.File",
             "commands._",
-            "implicits._")
+            "implicits._").map("import " + _).mkString("; "))
 
         }
 

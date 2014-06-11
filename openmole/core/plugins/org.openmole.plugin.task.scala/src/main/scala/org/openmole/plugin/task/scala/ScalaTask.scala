@@ -72,8 +72,10 @@ sealed abstract class ScalaTask(
   def interpreter = {
     val interpreter = new ScalaREPL
     interpreter.beSilentDuring {
-      interpreter.addImports(imports.toSeq: _*)
+      //interpreter.intp.addImports(imports.toSeq: _*)
       libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
+      val importString = imports.map("import " + _).mkString("; ")
+      interpreter.interpret(importString)
       val res = interpreter.interpret(script)
       if (res != tools.nsc.interpreter.Results.Success) throw new UserBadDataError("Error in script: " + script)
     }
@@ -87,7 +89,7 @@ sealed abstract class ScalaTask(
       val scalaTaskResult = interpreter.beSilentDuring {
         try {
           context.values.foreach {
-            v ⇒ interpreter.bindValue(v.prototype.name, v.value)
+            v ⇒ interpreter.bind(v.prototype.name, v.value)
           }
           val code = resVariable + " = run(" + inputs.map { i ⇒ i.prototype.name }.mkString(",") + ")"
           interpreter.interpret(code)
@@ -96,7 +98,7 @@ sealed abstract class ScalaTask(
         finally {
           interpreter.interpret(resVariable + " = null")
           context.values.foreach {
-            v ⇒ interpreter.bindValue(v.prototype.name, null)
+            v ⇒ interpreter.bind(v.prototype.name, null)
           }
         }
       }

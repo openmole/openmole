@@ -179,7 +179,7 @@ object BundleClassPathBuilder {
         }
       }
 
-      override def lookupPathUnchecked(path: String, directory: Boolean) = lookupPath(path, directory)
+      //override def lookupPathUnchecked(path: String, directory: Boolean) = lookupPath(path, directory)
       def lookupNameUnchecked(name: String, directory: Boolean) = lookupName(path, directory)
 
       def absolute = unsupported("absolute() is unsupported")
@@ -198,7 +198,7 @@ object BundleClassPathBuilder {
       override def sizeOption: Option[Int] = Some(bundle.getEntry(fullName).openConnection().getContentLength())
       def lookupName(name: String, directory: Boolean): AbstractFile = null
 
-      override def lookupPathUnchecked(path: String, directory: Boolean) = lookupPath(path, directory)
+      //override def lookupPathUnchecked(path: String, directory: Boolean) = lookupPath(path, directory)
       def lookupNameUnchecked(name: String, directory: Boolean) = lookupName(path, directory)
 
       def iterator = Iterator.empty

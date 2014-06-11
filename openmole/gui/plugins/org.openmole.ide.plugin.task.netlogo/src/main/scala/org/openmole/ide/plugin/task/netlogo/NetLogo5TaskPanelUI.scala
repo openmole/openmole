@@ -16,11 +16,11 @@
  */
 package org.openmole.ide.plugin.task.netlogo
 
-import org.openmole.ide.osgi.netlogo5.NetLogo5
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.misc.tools.util.Converters
 import org.openmole.ide.misc.tools.util.Converters._
+import org.openmole.plugin.tool.netlogo5.NetLogo5
 
 class NetLogo5TaskPanelUI(ndu: NetLogo5TaskDataUI010) extends GenericNetLogoPanelUI(ndu.workspace,
   ndu.lauchingCommands,

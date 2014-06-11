@@ -31,7 +31,7 @@ import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing._
-import org.openmole.ide.osgi.netlogo.NetLogo
+import org.openmole.plugin.tool.netlogo.NetLogo
 import scala.swing.FileChooser._
 import java.io.File
 import org.openmole.ide.misc.widget.multirow.MultiWidget._

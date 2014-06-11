@@ -17,6 +17,7 @@
 
 package org.openmole.ui.console
 
+import jline.console.ConsoleReader
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.batch.authentication._
@@ -88,7 +89,7 @@ class Command {
   def verify(mole: IMole): Unit = Validation(mole).foreach(println)
 
   def encrypted = {
-    val password = new jline.ConsoleReader().readLine("encrypt:", '*')
+    val password = new ConsoleReader().readLine("encrypt:", '*')
     Workspace.encrypt(password)
   }
 

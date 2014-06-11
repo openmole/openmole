@@ -18,4 +18,4 @@ package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.misc.eventdispatcher.Event
 
-case class ProxyCreatedEvent extends Event[Proxies]
+case class ProxyCreatedEvent() extends Event[Proxies]

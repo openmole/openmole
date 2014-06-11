@@ -67,7 +67,7 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1")
 
   lazy val slick = OsgiProject("com.typesafe.slick", exports = Seq("scala.slick.*")) settings
-    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.0.2")
+    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.1.0-M2")
 
   lazy val slf4j = OsgiProject("org.slf4j") settings (libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2")
 
@@ -81,21 +81,23 @@ object Libraries extends Defaults(Apache) {
 
   lazy val objenesis = OsgiProject("org.objenesis") settings (libraryDependencies += "org.objenesis" % "objenesis" % "1.2")
 
-  lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*"),
+  lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
     privatePackages = Seq("*"), buddyPolicy = Some("global")
   ) settings
     (libraryDependencies <++= (scalaVersion) { sV ⇒
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,
-        "org.scala-lang" % "jline" % sV,
+        "jline" % "jline" % "2.11",
         "com.typesafe.akka" %% "akka-actor" % "2.3.3",
         "com.typesafe.akka" %% "akka-transactor" % "2.3.3",
         "com.typesafe" % "config" % "1.2.1",
-        "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3")
+        "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3",
+        "org.scala-lang" % "scala-compiler" % sV
+      )
     }, bundleType += "dbserver")
 
-  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.reflect.*", "scala.tools.*"),
-    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
+  //  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.tools.*", "scala.reflect.macros.*"),
+  //    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
 
   lazy val jodaTime = OsgiProject("org.joda.time") settings (libraryDependencies += "joda-time" % "joda-time" % "1.6")
 
@@ -118,7 +120,7 @@ object Libraries extends Defaults(Apache) {
       Seq("ccl.northwestern.edu" % "netlogo" % "4.1.3",
         "org.picocontainer" % "picocontainer" % "2.8",
         "org.objectweb" % "asm" % "3.1",
-        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", bundleType := Set("all"),
+        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.8.0", crossPaths := false,
         ivyScala ~= { (is: Option[IvyScala]) ⇒ //should disable the binary compat warnings this causes
           for (i ← is) yield i.copy(checkExplicit = false)
         })
@@ -128,7 +130,7 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies ++=
       Seq("ccl.northwestern.edu" % "netlogo" % "5.0.4",
         "org.picocontainer" % "picocontainer" % "2.13.6",
-        "org.objectweb" % "asm-all" % "3.3.1"), version := "5.0.3", bundleType := Set("all"),
+        "org.objectweb" % "asm-all" % "3.3.1"), version := "5.0.3", autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.9.2", crossPaths := false,
         ivyScala ~= { (is: Option[IvyScala]) ⇒ //See netlogo4_noscala
           for (i ← is) yield i.copy(checkExplicit = false)
         })
@@ -168,8 +170,6 @@ object Libraries extends Defaults(Apache) {
       "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.72-SNAPSHOT", bundleType := Set("plugin"))
-
-  lazy val scalabc = OsgiProject("fr.irstea.scalabc", privatePackages = Seq("!scala.*", "*")) settings (libraryDependencies += "fr.irstea" %% "scalabc" % "0.4-SNAPSHOT", bundleType := Set("plugin"))
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0", bundleType := Set("plugin"))
 
