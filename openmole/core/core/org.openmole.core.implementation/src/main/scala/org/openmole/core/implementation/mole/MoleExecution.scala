@@ -111,9 +111,9 @@ class MoleExecution(
 
   def duration =
     (_startTime.single(), _endTime.single()) match {
-      case (None, _) => None
-      case (Some(t), None) => System.currentTimeMillis - t
-      case (Some(s), Some(e)) => e - s
+      case (None, _)          ⇒ None
+      case (Some(t), None)    ⇒ System.currentTimeMillis - t
+      case (Some(s), Some(e)) ⇒ e - s
     }
 
   def group(moleJob: IMoleJob, capsule: ICapsule, submole: ISubMoleExecution) =
