@@ -108,7 +108,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
   protected def buildJobDescription(script: File) =
     new WMSJobDescription {
       val executable = "/bin/bash"
-      val arguments = (if(environment.debug) " -x " else "") + script.getName
+      val arguments = (if (environment.debug) " -x " else "") + script.getName
       val inputSandbox = List(script)
       override def stdOutput = if (environment.debug) "out" else ""
       override def stdError = if (environment.debug) "err" else ""

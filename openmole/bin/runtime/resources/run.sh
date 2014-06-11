@@ -17,7 +17,7 @@ esac
 
 cp -r configuration ${CONFIGDIR}
 
-java -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area=${CONFIGDIR} $FLAG -XX:MaxPermSize=128m -XX:MaxMetaspaceSize=128m -XX:MaxMetaspaceSize=128m -XX:+UseG1GC -XX:ParallelGCThreads=1 -jar plugins/org.eclipse.equinox.launcher.jar -consoleLog $@ 
+java -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area=${CONFIGDIR} $FLAG -XX:MaxPermSize=128m -XX:MaxMetaspaceSize=128m -XX:MetaspaceSize=32m -XX:+UseG1GC -XX:ParallelGCThreads=1 -jar plugins/org.eclipse.equinox.launcher.jar -consoleLog $@ 
 
 RETURNCODE=$?
 
