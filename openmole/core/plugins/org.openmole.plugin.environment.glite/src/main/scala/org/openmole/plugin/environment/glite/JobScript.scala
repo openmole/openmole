@@ -38,7 +38,7 @@ trait JobScript {
 
     assert(runtime.runtime.path != null)
 
-    val catProxy = s"echo ${serializedJob.storage.url} ; " + "env ; echo $X509_USER_PROXY ; cat $X509_USER_PROXY"
+    val debugInfo = s"echo ${serializedJob.storage.url} ; cat /proc/meminfo ; " + "env ; echo $X509_USER_PROXY ; cat $X509_USER_PROXY"
 
     val init = {
       val script = ListBuffer[String]()
@@ -95,7 +95,7 @@ trait JobScript {
     val finish =
       finishedPath.map { p ⇒ touch(storage.url.resolve(p)) + "; " }.getOrElse("") + "cd .. &&  rm -rf $CUR"
 
-    (if (environment.debug) catProxy + " ; " else "") + init + " && " + install + " && " + dl + " && " + run + "; RETURNCODE=$?;" + finish + "; exit $RETURNCODE;"
+    (if (environment.debug) debugInfo + " ; " else "") + init + " && " + install + " && " + dl + " && " + run + "; RETURNCODE=$?;" + finish + "; exit $RETURNCODE;"
   }
 
   protected def touch(dest: URI) = {
