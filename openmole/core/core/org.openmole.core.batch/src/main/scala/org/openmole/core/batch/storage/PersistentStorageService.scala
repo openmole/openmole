@@ -24,7 +24,7 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.replication._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
-import fr.iscpif.gridscale.DirectoryType
+import fr.iscpif.gridscale._
 import collection.JavaConversions._
 
 object PersistentStorageService extends Logger {
@@ -100,7 +100,8 @@ trait PersistentStorageService extends StorageService {
 
     for ((name, fileType) ← super.list(tmpNoTime)) {
       val childPath = child(tmpNoTime, name)
-      if (fileType == DirectoryType) {
+
+      def rmDir =
         try {
           val timeOfDir = (if (name.endsWith("/")) name.substring(0, name.length - 1) else name).toLong
           if (timeOfDir < removalDate) backgroundRmDir(childPath)
@@ -108,8 +109,17 @@ trait PersistentStorageService extends StorageService {
         catch {
           case (ex: NumberFormatException) ⇒ backgroundRmDir(childPath)
         }
+
+      fileType match {
+        case DirectoryType ⇒ rmDir
+        case FileType      ⇒ backgroundRmFile(childPath)
+        case LinkType      ⇒ backgroundRmFile(childPath)
+        case UnknownType ⇒
+          try rmDir
+          catch {
+            case e: Throwable ⇒ backgroundRmFile(childPath)
+          }
       }
-      else backgroundRmFile(childPath)
     }
 
     val tmpTimePath = super.child(tmpNoTime, time.toString)

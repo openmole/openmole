@@ -94,7 +94,7 @@ trait JobScript {
       script.mkString(" && ")
     }
 
-    val postDebugInfo = if(environment.debug) "cat *.log ; " else ""
+    val postDebugInfo = if (environment.debug) "cat *.log ; " else ""
 
     val finish =
       finishedPath.map { p ⇒ touch(storage.url.resolve(p)) + "; " }.getOrElse("") + "cd .. &&  rm -rf $CUR"
