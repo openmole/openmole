@@ -32,7 +32,9 @@ import org.openmole.plugin.method.evolution.ga._
 
 object SaveProfileHook {
 
-  def apply(puzzle: GAPuzzle[GenomeProfile], dir: String)(name: String = "profile${" + puzzle.generation.name + "}.csv") =
+  def apply(puzzle: GAPuzzle[GenomeProfile], dir: String): HookBuilder = apply(puzzle, dir, "profile${" + puzzle.generation.name + "}.csv")
+
+  def apply(puzzle: GAPuzzle[GenomeProfile], dir: String, name: String): HookBuilder =
     new HookBuilder {
       addInput(puzzle.individual.toArray)
       val _puzzle = puzzle
