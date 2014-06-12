@@ -48,7 +48,7 @@ object Libraries extends Defaults(Apache) {
     buddyPolicy = Some("global"),
     exports = Seq("org.scalatra.*, org.fusesource.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.json4s", "*")) settings
-    (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % "2.3.0-SNAPSHOT",
+    (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % "2.3.0.RC3",
       "org.scalatra" %% "scalatra-scalate" % "2.3.0-SNAPSHOT",
       "org.scalatra" %% "scalatra-json" % "2.3.0-SNAPSHOT")) dependsOn (slf4j)
 
