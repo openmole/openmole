@@ -31,11 +31,11 @@ import org.openmole.plugin.method.evolution.ga._
 
 object SaveMapHook {
 
-  def apply(puzzle: GAPuzzle[GenomeMap], path: String) =
+  def apply(puzzle: GAPuzzle[GenomeMap], dir: String)(name: String = "map${" + puzzle.generation.name + "}.csv") =
     new HookBuilder {
       addInput(puzzle.individual.toArray)
       val _puzzle = puzzle
-      val _path = path
+      val _path = path + "/" + name
 
       def toHook = new SaveMapHook with Built {
         val puzzle = _puzzle
