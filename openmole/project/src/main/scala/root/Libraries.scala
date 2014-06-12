@@ -44,13 +44,15 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106",
       "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016"))
 
+  lazy val scalatraVersion = "2.3.0.RC3"
+
   lazy val scalatra = OsgiProject("org.scalatra",
     buddyPolicy = Some("global"),
     exports = Seq("org.scalatra.*, org.fusesource.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.json4s", "*")) settings
-    (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % "2.3.0.RC3",
-      "org.scalatra" %% "scalatra-scalate" % "2.3.0-SNAPSHOT",
-      "org.scalatra" %% "scalatra-json" % "2.3.0-SNAPSHOT")) dependsOn (slf4j)
+    (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % scalatraVersion,
+      "org.scalatra" %% "scalatra-scalate" % scalatraVersion,
+      "org.scalatra" %% "scalatra-json" % scalatraVersion)) dependsOn (slf4j)
 
   lazy val jacksonJson = OsgiProject("org.json4s") settings (
     libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.9",
