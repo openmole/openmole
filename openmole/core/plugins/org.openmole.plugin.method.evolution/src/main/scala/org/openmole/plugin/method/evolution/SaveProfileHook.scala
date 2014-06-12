@@ -36,7 +36,7 @@ object SaveProfileHook {
     new HookBuilder {
       addInput(puzzle.individual.toArray)
       val _puzzle = puzzle
-      val _path = path + "/" + name
+      val _path = dir + "/" + name
 
       def toHook = new SaveProfileHook with Built {
         val puzzle = _puzzle
