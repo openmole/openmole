@@ -24,9 +24,9 @@ import org.openmole.plugin.hook.file.AppendToCSVFileHook
 
 object SavePopulationHook {
 
-  def apply(puzzle: GAPuzzle[GAAlgorithm], dir: String): AppendToCSVFileHook = apply(puzzle, dir, "/population${" + puzzle.generation.name + "}.csv")
+  def apply(puzzle: GAPuzzle[GAAlgorithm], dir: String): AppendToCSVFileHook.Builder = apply(puzzle, dir, "/population${" + puzzle.generation.name + "}.csv")
 
-  def apply(puzzle: GAPuzzle[GAAlgorithm], dir: String, name: String): AppendToCSVFileHook = {
+  def apply(puzzle: GAPuzzle[GAAlgorithm], dir: String, name: String): AppendToCSVFileHook.Builder = {
     import puzzle._
     val builder = new AppendToCSVFileHook.Builder(dir + "/" + name)
     builder.add(puzzle.generation)
