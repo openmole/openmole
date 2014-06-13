@@ -26,6 +26,7 @@ import org.openmole.misc.exception._
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.storage._
 import org.openmole.misc.tools.io.FileUtil._
+import concurrent.duration._
 
 object SharedStorage {
   val UpdateInstallJobInterval = new ConfigurationLocation("SharedStorage", "UpdateInstallJobInterval")
@@ -38,11 +39,11 @@ trait SharedStorage extends SSHService { js ⇒
   def sharedFS: SSHStorageService
 
   def installJobService = new fr.iscpif.gridscale.ssh.SSHJobService {
-    def authentication = js.authentication
+    def credential = js.credential
     def host = js.host
     def user = js.user
     override def port = js.port
-    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toMilliSeconds.toInt
+    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toSeconds -> SECONDS
   }
 
   @transient private var installed: Option[String] = None
@@ -82,8 +83,8 @@ trait SharedStorage extends SSHService { js ⇒
           val workDirectory = workdir
         }
 
-        val j = installJobService.submit(jobDescription)(authentication)
-        val s = fr.iscpif.gridscale.untilFinished { Thread.sleep(Workspace.preferenceAsDuration(UpdateInstallJobInterval).toMilliSeconds); installJobService.state(j)(authentication) }
+        val j = installJobService.submit(jobDescription)
+        val s = fr.iscpif.gridscale.untilFinished { Thread.sleep(Workspace.preferenceAsDuration(UpdateInstallJobInterval).toMilliSeconds); installJobService.state(j) }
 
         if (s != fr.iscpif.gridscale.Done) throw new InternalProcessingError("Installation of runtime has failed.")
 

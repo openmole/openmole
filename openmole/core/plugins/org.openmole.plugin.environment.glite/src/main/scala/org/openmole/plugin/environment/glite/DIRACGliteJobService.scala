@@ -58,7 +58,7 @@ trait DIRACGliteJobService extends GridScaleJobService with JobScript with Limit
         override val cpuTime = environment.cpuTime.map(_.toMinutes)
       }
 
-      val jid = jobService.submit(jobDescription)(authentication)
+      val jid = jobService.submit(jobDescription)
 
       new DIRACGliteJob {
         val jobService = js

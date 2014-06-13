@@ -43,6 +43,7 @@ import fr.iscpif.gridscale.http._
 import fr.iscpif.gridscale._
 import java.io.File
 import scala.util.{ Success, Failure, Try }
+import concurrent.duration._
 
 object GliteAuthentication extends Logger {
 
@@ -104,7 +105,7 @@ object GliteAuthentication extends Logger {
       voCards ⇒
         HTTPStorage.withConnection(
           new URI(Workspace.preference(GliteEnvironment.VOInformationSite)),
-          Workspace.preferenceAsDuration(GliteEnvironment.VOCardDownloadTimeOut).toSeconds) { http ⇒
+          Workspace.preferenceAsDuration(GliteEnvironment.VOCardDownloadTimeOut).toSeconds -> SECONDS) { http ⇒
             val is: InputStream = http.getInputStream
             try is.copy(voCards)
             finally is.close

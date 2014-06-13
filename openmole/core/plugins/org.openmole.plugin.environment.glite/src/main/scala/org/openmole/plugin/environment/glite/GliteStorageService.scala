@@ -33,6 +33,7 @@ object GliteStorageService {
       val host: String = s.host
       val port: Int = s.port
       val basePath: String = ""
+      val credential = s.credential
     }
 
   def apply(s: SRMStorage, _environment: BatchEnvironment { def voName: String }, _authentication: GlobusAuthentication.ProxyCreator, threads: Int) = new GliteStorageService {

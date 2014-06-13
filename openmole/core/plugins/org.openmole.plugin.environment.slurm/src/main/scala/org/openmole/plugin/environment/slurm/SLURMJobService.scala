@@ -29,6 +29,7 @@ import org.openmole.core.batch.storage.SimpleStorage
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.misc.tools.service.Duration._
 import org.openmole.misc.workspace.Workspace
+import concurrent.duration._
 
 trait SLURMJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
 
@@ -37,8 +38,9 @@ trait SLURMJobService extends GridScaleJobService with SSHHost with SharedStorag
   val jobService = new GSSLURMJobService with SSHConnectionCache {
     def host = js.host
     def user = js.user
+    def credential = js.credential
     override def port = js.port
-    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toMilliSeconds.toInt
+    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toSeconds -> SECONDS
   }
 
   protected def _submit(serializedJob: SerializedJob) = {
@@ -58,7 +60,7 @@ trait SLURMJobService extends GridScaleJobService with SSHHost with SharedStorag
       //      override val coreByNode = environment.coreByNode orElse environment.threads
     }
 
-    val jid = js.jobService.submit(jobDescription)(authentication)
+    val jid = js.jobService.submit(jobDescription)
 
     new BatchJob with BatchJobId {
       val jobService = js

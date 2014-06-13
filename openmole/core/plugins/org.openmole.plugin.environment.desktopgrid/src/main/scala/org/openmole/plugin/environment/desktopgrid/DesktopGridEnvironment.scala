@@ -63,7 +63,6 @@ class DesktopGridEnvironment(
     def url = env.url
     def root = path.getAbsolutePath
     val storage = new GSLocalStorage {}
-    val authentication: Unit = Unit
   }
 
   @transient override lazy val allStorages = List(batchStorage)

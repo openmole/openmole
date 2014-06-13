@@ -29,7 +29,7 @@ trait SSHStorageService extends StorageService with SSHService { ss ⇒
   lazy val storage =
     new fr.iscpif.gridscale.ssh.SSHStorage with environment.ThisHost with SSHConnectionCache
 
-  def home = storage.home(authentication)
+  lazy val home = storage.home
 
   lazy val remoteStorage: RemoteStorage = new LocalStorage(root)
 

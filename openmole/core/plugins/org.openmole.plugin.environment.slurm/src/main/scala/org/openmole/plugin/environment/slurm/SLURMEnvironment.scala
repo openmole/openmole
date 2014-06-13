@@ -71,7 +71,7 @@ class SLURMEnvironment(
   type SS = PersistentStorageService
   type JS = SLURMJobService
 
-  @transient lazy val authentication = SSHAuthentication(user, host, port, authentications)(authentications)
+  @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
   @transient lazy val id = new URI("slurm", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val storage =

@@ -39,8 +39,8 @@ object GliteJob extends Logger {
 
         try {
           state match {
-            case DONE   ⇒ jobService.jobService.downloadOutputSandbox(description, id)(jobService.authentication)
-            case FAILED ⇒ jobService.jobService.downloadOutputSandbox(description, id)(jobService.authentication)
+            case DONE   ⇒ jobService.jobService.downloadOutputSandbox(description, id)
+            case FAILED ⇒ jobService.jobService.downloadOutputSandbox(description, id)
             case _      ⇒
           }
         }

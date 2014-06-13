@@ -39,6 +39,7 @@ import org.openmole.misc.tools.service.Random._
 import fr.iscpif.gridscale.glite.{ GlobusAuthentication, WMSJobService, BDII }
 import fr.iscpif.gridscale.RenewDecorator
 import java.net.URI
+import concurrent.duration._
 
 object GliteEnvironment extends Logger {
 
@@ -102,7 +103,6 @@ object GliteEnvironment extends Logger {
   Workspace += (LocalThreadsByWMS, "10")
 
   Workspace += (ProxyRenewalRatio, "0.2")
-
   Workspace += (MinProxyRenewal, "PT5M")
 
   Workspace += (OverSubmissionNbSampling, "10")
@@ -177,12 +177,10 @@ object GliteEnvironment extends Logger {
 
   def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
 
-  def proxyRenewalDelay = {
-    val remainingTime = proxyTime.toSeconds
+  def proxyRenewalDelay =
     math.max(
-      (remainingTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
+      (proxyTime.toSeconds * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
       Workspace.preferenceAsDuration(GliteEnvironment.MinProxyRenewal).toSeconds)
-  }
 
   def normalizedFitness[T, S](fitness: ⇒ Iterable[(T, S, Double)]): Iterable[(T, S, Double)] = {
     def orMinForExploration(v: Double) = {
@@ -222,7 +220,6 @@ class GliteEnvironment(
 
   @transient lazy val registerAgents: Unit = {
     Updater.delay(new EagerSubmissionAgent(WeakReference(this)))
-    Updater.delay(new ProxyChecker(WeakReference(this)))
   }
 
   override def submit(job: IJob) = {
@@ -239,14 +236,11 @@ class GliteEnvironment(
         voName,
         FileDeleter.deleteWhenGarbageCollected(Workspace.newFile("proxy", ".x509")),
         proxyTime.toSeconds,
-        fqan)(authentications).cache(proxyRenewalDelay)
+        fqan)(authentications).cache(proxyRenewalDelay -> SECONDS)
     case None ⇒ throw new UserBadDataError("No authentication has been initialized for glite.")
   }
 
-  def delegate =
-    jobServices.foreach { _.delegated = false }
-
-  @transient lazy val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut).toSeconds.toInt)
+  @transient lazy val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut).toSeconds.toInt)(authentication)
 
   override def allJobServices =
     bdiiWMS.map {
@@ -254,7 +248,8 @@ class GliteEnvironment(
         new GliteJobService {
           val jobService = new WMSJobService {
             val url = js.url
-            override def delegationRenewal = Int.MaxValue
+            val credential = js.credential
+            override def delegationRenewal = proxyRenewalDelay -> SECONDS
           }
           val environment = env
           val nbTokens = threadsByWMS

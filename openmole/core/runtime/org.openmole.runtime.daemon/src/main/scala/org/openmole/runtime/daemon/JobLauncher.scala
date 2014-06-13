@@ -63,18 +63,14 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val _host = splitHost(0)
 
     val storage = new SimpleStorage {
-      val storage = new SSHStorage {
+      val storage = new SSHStorage with SSHUserPasswordAuthentication {
         val host = _host
         override val port = _port
         val user = _user
+        val password = _password
       }
 
       val root = ""
-
-      val authentication = new SSHUserPasswordAuthentication {
-        val user = _user
-        val password = _password
-      }
     }
 
     val storageFileGz = Workspace.withTmpFile {

@@ -23,6 +23,7 @@ import fr.iscpif.gridscale.glite.BDII
 import org.openmole.misc.filedeleter.FileDeleter
 import org.openmole.misc.exception.UserBadDataError
 import fr.iscpif.gridscale.dirac.DIRACJobService
+import concurrent.duration._
 
 object DIRACGliteEnvironment {
 
@@ -82,18 +83,18 @@ class DIRACGliteEnvironment(
       voName,
       FileDeleter.deleteWhenGarbageCollected(Workspace.newFile("proxy", ".x509")),
       GliteEnvironment.proxyTime.toSeconds,
-      fqan)(authentications).cache(GliteEnvironment.proxyRenewalDelay)
+      fqan)(authentications).cache(GliteEnvironment.proxyRenewalDelay -> SECONDS)
   }
 
   def allJobServices = List(jobService)
 
   @transient lazy val jobService = new DIRACGliteJobService {
     def nbTokens = Workspace.preferenceAsInt(DIRACGliteEnvironment.LocalThreads)
-    val authentication = env.authentication
     val environment = env
     val jobService = new DIRACJobService {
       def group = env.group
       def service = env.service
+      def credential = env.authentication
     }
   }
 
