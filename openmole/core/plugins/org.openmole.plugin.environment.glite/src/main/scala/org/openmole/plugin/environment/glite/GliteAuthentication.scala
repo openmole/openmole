@@ -51,7 +51,7 @@ object GliteAuthentication extends Logger {
 
   val updatedFile = ".updated"
 
-  /*def CACertificatesDir: File =
+  def CACertificatesDir: File =
     Workspace.file("CACertificates").updateIfTooOld(Workspace.preferenceAsDuration(CACertificatesCacheTime).toMilliSeconds) {
       caDir ⇒
         caDir.mkdir
@@ -98,7 +98,7 @@ object GliteAuthentication extends Logger {
         case e: Throwable ⇒ throw new IOException(tarUrl, e)
       }
     }
-  }*/
+  }
 
   def voCards =
     Workspace.file("voCards.xml").updateIfTooOld(Workspace.preferenceAsDuration(VOCardCacheTime).toMilliSeconds) {
@@ -144,7 +144,7 @@ object GliteAuthentication extends Logger {
     fqan: Option[String])(implicit authenticationProvider: AuthenticationProvider) =
     a match {
       case a: P12Certificate ⇒
-        //VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
+        VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
         val (_serverURL, _voName, _lifeTime, _fqan) = (serverURL, voName, lifeTime, fqan)
         new P12VOMSAuthentication {
           val certificate = a.certificate
@@ -155,7 +155,7 @@ object GliteAuthentication extends Logger {
           override val fqan = _fqan
         }
       case a: PEMCertificate ⇒
-        //VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
+        VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
         val (_serverURL, _voName, _lifeTime, _fqan) = (serverURL, voName, lifeTime, fqan)
         new PEMVOMSAuthentication {
           val certificate = a.certificate
