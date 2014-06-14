@@ -140,31 +140,28 @@ object GliteAuthentication extends Logger {
   def initialise(a: GliteAuthentication)(
     serverURL: String,
     voName: String,
-    proxyFile: ⇒ File,
     lifeTime: Int,
     fqan: Option[String])(implicit authenticationProvider: AuthenticationProvider) =
     a match {
       case a: P12Certificate ⇒
         //VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
-        val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan) = (serverURL, voName, proxyFile, lifeTime, fqan)
+        val (_serverURL, _voName, _lifeTime, _fqan) = (serverURL, voName, lifeTime, fqan)
         new P12VOMSAuthentication {
           val certificate = a.certificate
           val serverURL = _serverURL
           val voName = _voName
-          def proxyFile = _proxyFile
           val lifeTime = _lifeTime
           val password = a.password(authenticationProvider)
           override val fqan = _fqan
         }
       case a: PEMCertificate ⇒
         //VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
-        val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan) = (serverURL, voName, proxyFile, lifeTime, fqan)
+        val (_serverURL, _voName, _lifeTime, _fqan) = (serverURL, voName, lifeTime, fqan)
         new PEMVOMSAuthentication {
           val certificate = a.certificate
           val key = a.key
           val serverURL = _serverURL
           val voName = _voName
-          def proxyFile = _proxyFile
           val lifeTime = _lifeTime
           val password = a.password(authenticationProvider)
           override val fqan = _fqan

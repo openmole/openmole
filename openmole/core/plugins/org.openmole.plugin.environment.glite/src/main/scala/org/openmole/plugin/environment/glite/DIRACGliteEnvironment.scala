@@ -81,7 +81,6 @@ class DIRACGliteEnvironment(
     GliteAuthentication.initialise(getAuthentication)(
       vomsURL,
       voName,
-      FileDeleter.deleteWhenGarbageCollected(Workspace.newFile("proxy", ".x509")),
       GliteEnvironment.proxyTime.toSeconds,
       fqan)(authentications).cache(GliteEnvironment.proxyRenewalDelay -> SECONDS)
   }

@@ -218,8 +218,9 @@ class GliteEnvironment(
 
   type JS = GliteJobService
 
-  @transient lazy val registerAgents: Unit = {
+  @transient lazy val registerAgents = {
     Updater.delay(new EagerSubmissionAgent(WeakReference(this)))
+    None
   }
 
   override def submit(job: IJob) = {
@@ -234,7 +235,6 @@ class GliteEnvironment(
       GliteAuthentication.initialise(a)(
         vomsURL,
         voName,
-        FileDeleter.deleteWhenGarbageCollected(Workspace.newFile("proxy", ".x509")),
         proxyTime.toSeconds,
         fqan)(authentications).cache(proxyRenewalDelay -> SECONDS)
     case None ⇒ throw new UserBadDataError("No authentication has been initialized for glite.")
