@@ -18,6 +18,7 @@
 package org.openmole.core.batch.refresh
 
 import akka.actor.{ Actor, ActorRef }
+import org.openmole.core.implementation.tools.objectToSomeObjectConverter
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.batch.environment.BatchEnvironment
@@ -30,7 +31,9 @@ class KillerActor(jobManager: ActorRef) extends Actor {
   def receive = {
     case msg @ KillBatchJob(bj) ⇒
       try bj.jobService.tryWithToken {
-        case Some(t) ⇒ bj.kill(t)
+        case Some(t) ⇒
+          logger.fine(s"Killing $bj")
+          bj.kill(t)
         case None ⇒
           jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
       } catch {
