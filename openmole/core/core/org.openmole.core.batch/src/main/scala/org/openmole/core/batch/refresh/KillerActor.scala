@@ -31,9 +31,7 @@ class KillerActor(jobManager: ActorRef) extends Actor {
   def receive = {
     case msg @ KillBatchJob(bj) ⇒
       try bj.jobService.tryWithToken {
-        case Some(t) ⇒
-          logger.fine(s"Killing $bj")
-          bj.kill(t)
+        case Some(t) ⇒ bj.kill(t)
         case None ⇒
           jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
       } catch {
