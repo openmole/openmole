@@ -120,7 +120,7 @@ class Application extends IApplication {
         existingUserPlugins ++
         (if (!config.console && !config.server) config.guiPluginsDirs else List.empty)
 
-    PluginManager.load(plugins.map(new File(_))
+    PluginManager.load(plugins.map(new File(_)))
 
     try config.password foreach Workspace.setPassword
     catch {
