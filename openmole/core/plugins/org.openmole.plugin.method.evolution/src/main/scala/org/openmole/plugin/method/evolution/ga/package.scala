@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2014 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,38 +9,30 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.builder
+package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.sampling._
+import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
+import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
-import org.openmole.core.model.sampling._
-import org.openmole.core.model.domain._
 import org.openmole.core.model.transition._
-import org.openmole.plugin.method.evolution._
-import org.openmole.core.implementation.puzzle._
-import org.openmole.core.implementation.transition._
-import org.openmole.core.implementation.tools._
-import org.openmole.plugin.method.evolution.Inputs
 import org.openmole.plugin.method.evolution.algorithm._
-import org.openmole.misc.exception._
 import org.openmole.plugin.task.tools._
-import scala.util.Random
-import ga._
 
-package object evolution {
+import scala.util.Random
+
+package object ga {
 
   private def components[ALG <: GAAlgorithm](
     name: String,
@@ -363,7 +355,7 @@ package object evolution {
 
     val skel =
       firstCapsule -<
-        (preIslandCapsule, size = number.toString) --
+        (preIslandCapsule, size = Some(number.toString)) --
         islandSlot --
         (renameIndividualsTask, archiveDiffSlot -- mergeArchiveSlot) --
         elitismCaps --

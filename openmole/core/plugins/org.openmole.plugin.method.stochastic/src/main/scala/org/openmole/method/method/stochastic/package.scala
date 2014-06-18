@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.builder
+package org.openmole.plugin.method
 
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.puzzle._

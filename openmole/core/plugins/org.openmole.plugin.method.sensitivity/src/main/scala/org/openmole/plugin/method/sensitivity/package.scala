@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2014 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,22 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.builder
+package org.openmole.plugin.method
 
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
-import org.openmole.core.implementation.data._
-import org.openmole.core.model.data._
+import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.domain._
-import org.openmole.core.model.mole._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
 import org.openmole.plugin.method.sensitivity._
 
 package object sensitivity {
-
   def indice(name: String, input: Prototype[Double], output: Prototype[Double]) = SensitivityTask.indice(name, input, output)
 
   def bootStrappedSensitivity(
