@@ -56,10 +56,6 @@ package object ga {
     firstTask addOutput (Data(archive, Optional))
     firstTask addOutput (Data(individual.toArray, Optional))
 
-    val breedTask = ExplorationTask(name + "Breed", BreedSampling(evolution)(individual.toArray, archive, genome, evolution.lambda))
-    breedTask.addParameter(individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
-    breedTask.addParameter(archive -> evolution.initialArchive)
-
     val scalingGenomeTask = ScalingGAGenomeTask(evolution)(name + "ScalingGenome", genome)
 
     val toIndividualTask = ToIndividualTask(evolution)(name + "ToIndividual", genome, individual)
@@ -119,12 +115,17 @@ package object ga {
 
   def generationalGA[ALG <: GAAlgorithm](evolution: ALG)(
     name: String,
-    model: Puzzle)(implicit plugins: PluginSet) = {
+    model: Puzzle,
+    lambda: Int)(implicit plugins: PluginSet) = {
 
     val cs = components[ALG](name, evolution)
     import cs._
 
     val firstCapsule = StrainerCapsule(firstTask)
+
+    val breedTask = ExplorationTask(name + "Breed", BreedSampling(evolution)(individual.toArray, archive, genome, lambda))
+    breedTask.addParameter(individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
+    breedTask.addParameter(archive -> evolution.initialArchive)
 
     breedTask addInput generation
     breedTask addInput state
@@ -177,6 +178,10 @@ package object ga {
 
     val cs = components[ALG](name, evolution)
     import cs._
+
+    val breedTask = ExplorationTask(name + "Breed", BreedSampling(evolution)(individual.toArray, archive, genome, 1))
+    breedTask.addParameter(individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
+    breedTask.addParameter(archive -> evolution.initialArchive)
 
     val firstCapsule = StrainerCapsule(firstTask)
     val scalingCaps = Capsule(scalingGenomeTask)
@@ -239,7 +244,7 @@ package object ga {
     name: String,
     number: Int,
     termination: GATermination { type G >: model.evolution.G; type P >: model.evolution.P; type F >: model.evolution.F; type MF >: model.evolution.MF },
-    sampling: Int = model.evolution.lambda)(implicit plugins: PluginSet) = {
+    sampling: Int)(implicit plugins: PluginSet) = {
 
     import model.evolution
     import evolution._

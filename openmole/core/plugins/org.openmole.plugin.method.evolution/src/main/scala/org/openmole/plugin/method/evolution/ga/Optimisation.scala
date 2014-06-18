@@ -24,7 +24,6 @@ object Optimisation {
 
   def apply(
     mu: Int,
-    lambda: Int,
     termination: GATermination { type G >: Optimisation#G; type P >: Optimisation#P; type F >: Optimisation#F; type MF >: Optimisation#MF },
     inputs: Inputs,
     objectives: Objectives,
@@ -32,7 +31,7 @@ object Optimisation {
     ranking: GARankingBuilder = Pareto,
     diversityMetric: DiversityMetricBuilder = Crowding,
     cloneProbability: Double = 0.0) = {
-    val (_mu, _ranking, _diversityMetric, _cloneProbability, _lambda, _inputs, _objectives) = (mu, ranking, diversityMetric, cloneProbability, lambda, inputs, objectives)
+    val (_mu, _ranking, _diversityMetric, _cloneProbability, _inputs, _objectives) = (mu, ranking, diversityMetric, cloneProbability, inputs, objectives)
     new Optimisation {
       val inputs = _inputs
       val objectives = _objectives
@@ -44,7 +43,6 @@ object Optimisation {
       val gManifest: Manifest[G] = implicitly
 
       val genomeSize = inputs.size
-      val lambda = _lambda
 
       override val cloneProbability: Double = _cloneProbability
 
