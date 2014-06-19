@@ -22,7 +22,7 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
   def org = "org.openmole"
 
   override def settings = super.settings ++
-    Seq(version in Global := "0.11.0-SNAPSHOT",
+    Seq(version in Global := "1.0-SNAPSHOT",
       scalaVersion in Global := "2.11.1",
       scalacOptions ++= Seq("-deprecation"),
       publishArtifact in (packageDoc in install) := false,
