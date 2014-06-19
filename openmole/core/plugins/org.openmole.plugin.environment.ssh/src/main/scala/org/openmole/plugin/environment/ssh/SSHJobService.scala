@@ -23,6 +23,7 @@ import org.openmole.core.model.execution.ExecutionState
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.EventListener
+import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.gridscale._
 import fr.iscpif.gridscale.ssh.{ SSHJobService ⇒ GSSSHJobService, SSHConnectionCache, SSHJobDescription }
 import java.util.concurrent.atomic.AtomicInteger
@@ -38,7 +39,9 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
   val environment: BatchEnvironment with SSHAccess
   def nbSlots: Int
 
-  val jobService = new GSSSHJobService with environment.ThisHost with SSHConnectionCache
+  val jobService = new GSSSHJobService with environment.ThisHost with SSHConnectionCache {
+    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout)
+  }
 
   val queue = new mutable.SynchronizedQueue[SSHBatchJob]
   @transient lazy val nbRunning = new AtomicInteger

@@ -30,6 +30,8 @@ import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._
 import fr.iscpif.gridscale.slurm.Gres
 
+import scala.concurrent.duration.Duration
+
 object SLURMEnvironment {
   val MaxConnections = new ConfigurationLocation("SLURMEnvironment", "MaxConnections")
 
@@ -41,7 +43,7 @@ object SLURMEnvironment {
     port: Int = 22,
     queue: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
-    wallTime: Option[String] = None,
+    wallTime: Option[Duration] = None,
     memory: Option[Int] = None,
     path: Option[String] = None,
     gres: List[Gres] = List(),
@@ -58,7 +60,7 @@ class SLURMEnvironment(
     override val port: Int,
     val queue: Option[String],
     override val openMOLEMemory: Option[Int],
-    val wallTime: Option[String],
+    val wallTime: Option[Duration],
     val memory: Option[Int],
     val path: Option[String],
     //override val threads: Option[Int],

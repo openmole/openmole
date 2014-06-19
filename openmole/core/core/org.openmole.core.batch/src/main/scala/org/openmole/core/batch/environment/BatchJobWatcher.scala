@@ -92,5 +92,5 @@ class BatchJobWatcher(environment: WeakReference[BatchEnvironment]) extends IUpd
 
   def executionJobs = synchronized { registry.allExecutionJobs }
 
-  def delay = Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval).toMilliSeconds
+  def delay = Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval)
 }

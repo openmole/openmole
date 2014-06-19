@@ -39,7 +39,7 @@ object DIRACGliteEnvironment {
     vomsURL: Option[String] = None,
     setup: Option[String] = None,
     fqan: Option[String] = None,
-    cpuTime: Option[String] = None,
+    cpuTime: Option[Duration] = None,
     openMOLEMemory: Option[Int] = None,
     debug: Boolean = false)(implicit authentications: AuthenticationProvider) =
     new DIRACGliteEnvironment(
@@ -65,7 +65,7 @@ class DIRACGliteEnvironment(
     val vomsURL: String,
     val setup: String,
     val fqan: Option[String],
-    val cpuTime: Option[String],
+    val cpuTime: Option[Duration],
     override val openMOLEMemory: Option[Int],
     val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId with LCGCp { env ⇒
 
@@ -81,8 +81,8 @@ class DIRACGliteEnvironment(
     GliteAuthentication.initialise(getAuthentication)(
       vomsURL,
       voName,
-      GliteEnvironment.proxyTime.toSeconds,
-      fqan)(authentications).cache(GliteEnvironment.proxyRenewalDelay -> SECONDS)
+      GliteEnvironment.proxyTime,
+      fqan)(authentications).cache(GliteEnvironment.proxyRenewalDelay)
   }
 
   def allJobServices = List(jobService)

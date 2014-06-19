@@ -41,7 +41,7 @@ object FileService {
   private[fileservice] val hashCache = new AssociativeCache[String, Hash]
   private[fileservice] val archiveCache = new AssociativeCache[String, IFileCache]
 
-  Updater.delay(new FileServiceGC, Workspace.preferenceAsDuration(FileService.GCInterval).toMilliSeconds)
+  Updater.delay(new FileServiceGC, Workspace.preferenceAsDuration(FileService.GCInterval))
 
   def hash(file: File): Hash =
     hash(file, if (file.isDirectory) archiveForDir(file).file(false) else file)

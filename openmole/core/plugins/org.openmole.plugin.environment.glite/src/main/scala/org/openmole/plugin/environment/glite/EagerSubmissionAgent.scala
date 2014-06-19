@@ -53,7 +53,7 @@ class EagerSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends
 
   @transient lazy val runningHistory = new mutable.Queue[TimeInt]
 
-  override def delay = Workspace.preferenceAsDuration(GliteEnvironment.OverSubmissionInterval).toMilliSeconds
+  override def delay = Workspace.preferenceAsDuration(GliteEnvironment.OverSubmissionInterval)
 
   override def update: Boolean = {
     try {
@@ -71,7 +71,7 @@ class EagerSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends
       val stillRunning = jobs.count(_.state == RUNNING)
       val stillReady = jobs.count(_.state == READY)
 
-      runningHistory.enqueueFinite(TimeInt(stillRunning), Workspace.preferenceAsDuration(GliteEnvironment.RunningHistoryDuration).toMilliSeconds)
+      runningHistory.enqueueFinite(TimeInt(stillRunning), Workspace.preferenceAsDuration(GliteEnvironment.RunningHistoryDuration).toMillis)
 
       logger.fine("still running " + stillRunning)
 

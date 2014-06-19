@@ -41,7 +41,7 @@ trait BDIISRMServers extends BatchEnvironment {
   @transient lazy val threadsBySE = Workspace.preferenceAsInt(GliteEnvironment.LocalThreadsBySE)
 
   lazy val bdiiStorarges =
-    bdiiServer.querySRMs(voName, Workspace.preferenceAsDuration(GliteEnvironment.FetchResourcesTimeOut).toSeconds.toInt)(proxyCreator)
+    bdiiServer.querySRMs(voName, Workspace.preferenceAsDuration(GliteEnvironment.FetchResourcesTimeOut))(proxyCreator)
 
   override def allStorages =
     bdiiStorarges.map {

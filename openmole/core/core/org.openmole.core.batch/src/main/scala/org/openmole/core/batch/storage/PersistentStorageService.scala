@@ -24,8 +24,9 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.replication._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
-import fr.iscpif.gridscale._
+import fr.iscpif.gridscale.storage._
 import collection.JavaConversions._
+import scala.concurrent.duration.Duration
 
 object PersistentStorageService extends Logger {
 
@@ -76,7 +77,7 @@ trait PersistentStorageService extends StorageService {
   override def tmpDir(implicit token: AccessToken) = synchronized {
     tmpSpaceVar match {
       case Some(space) ⇒
-        if (time + Workspace.preferenceAsDuration(TmpDirRegenerate).toMilliSeconds < System.currentTimeMillis) {
+        if (time + Workspace.preferenceAsDuration(TmpDirRegenerate).toMillis < System.currentTimeMillis) {
           val tmpDir = createTmpDir
           tmpSpaceVar = Some(tmpDir)
           tmpDir
@@ -96,7 +97,7 @@ trait PersistentStorageService extends StorageService {
     val tmpNoTime = child(baseDir, tmp)
     if (!super.exists(tmpNoTime)) super.makeDir(tmpNoTime)
 
-    val removalDate = System.currentTimeMillis - Workspace.preferenceAsDuration(TmpDirRemoval).toMilliSeconds
+    val removalDate = System.currentTimeMillis - Workspace.preferenceAsDuration(TmpDirRemoval).toMillis
 
     for ((name, fileType) ← super.list(tmpNoTime)) {
       val childPath = child(tmpNoTime, name)

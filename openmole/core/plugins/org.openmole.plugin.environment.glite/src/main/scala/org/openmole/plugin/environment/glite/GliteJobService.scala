@@ -18,25 +18,13 @@
 package org.openmole.plugin.environment.glite
 
 import java.io.File
-import java.io.OutputStream
-import java.io.PrintStream
-import java.net.URI
-import java.util.UUID
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.storage.{ StorageService, Storage }
 import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.batch.environment.Runtime
-import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
-import org.openmole.core.batch.control.AccessToken
-import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import fr.iscpif.gridscale.glite.{ WMSJobService, WMSJobDescription }
-import scala.collection.JavaConversions._
-import scala.io.Source
-import org.openmole.misc.tools.service.Duration._
+import org.openmole.misc.tools.service._
 import StatusFiles._
 import scalax.io.Resource
 
@@ -103,8 +91,8 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       def outputSandbox = if (environment.debug) Seq("out" -> Workspace.newFile("job", ".out"), "err" -> Workspace.newFile("job", ".err")) else Seq.empty
 
       override val memory = Some(environment.requieredMemory)
-      override val cpuTime = environment.cpuTime.map(_.toMinutes)
-      override val wallTime = environment.wallTime.map(_.toMinutes)
+      override val cpuTime = environment.cpuTime
+      override val wallTime = environment.wallTime
       override val cpuNumber = environment.cpuNumber orElse environment.threads
       override val jobType = environment.jobType
       override val smpGranularity = environment.smpGranularity orElse environment.threads

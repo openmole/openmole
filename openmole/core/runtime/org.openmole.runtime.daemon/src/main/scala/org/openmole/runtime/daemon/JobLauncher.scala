@@ -145,14 +145,14 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             next
           case None ⇒
             logger.info("Job list is empty on the remote host.")
-            Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMilliSeconds)
+            Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMillis)
             background { fetchAJob(id, storage) }
         }
       }
       catch {
         case e: Exception ⇒
           logger.log(WARNING, "Error while looking for jobs.", e)
-          Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMilliSeconds)
+          Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMillis)
           background { fetchAJob(id, storage) }
       }
       processJob(next)

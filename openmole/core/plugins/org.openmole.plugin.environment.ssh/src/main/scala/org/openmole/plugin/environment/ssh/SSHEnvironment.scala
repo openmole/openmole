@@ -22,6 +22,7 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage.PersistentStorageService
 import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
+import concurrent.duration._
 
 object SSHEnvironment {
   val MaxConnections = new ConfigurationLocation("SSHEnvironment", "MaxConnections")
@@ -77,8 +78,8 @@ class SSHEnvironment(
   def allStorages = List(storage)
   def allJobServices = List(jobService)
 
-  override def minUpdateInterval = Workspace.preferenceAsDuration(UpdateInterval).toMilliSeconds
-  override def maxUpdateInterval = Workspace.preferenceAsDuration(UpdateInterval).toMilliSeconds
-  override def incrementUpdateInterval = 0
+  override def minUpdateInterval = Workspace.preferenceAsDuration(UpdateInterval)
+  override def maxUpdateInterval = Workspace.preferenceAsDuration(UpdateInterval)
+  override def incrementUpdateInterval = 0 second
 
 }

@@ -10,9 +10,9 @@ import org.openmole.plugin.environment.glite.MyProxy
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
-import scala.collection.JavaConversions._
 import org.openmole.ide.core.implementation.data.EnvironmentDataUI
 import org.openmole.ide.core.implementation.serializer.Update
+import org.openmole.misc.tools.service._
 
 class GliteEnvironmentDataUI(val name: String = "",
                              val vo: String = "",
@@ -90,8 +90,8 @@ class GliteEnvironmentDataUI010(val name: String = "",
         fqan = fqan,
         openMOLEMemory = openMOLEMemory,
         memory = memory,
-        cpuTime = cpuTime,
-        wallTime = wallTime,
+        cpuTime = cpuTime.map(_.toDuration),
+        wallTime = wallTime.map(_.toDuration),
         cpuNumber = cpuNumber,
         jobType = jobType,
         smpGranularity = smpGranularity,

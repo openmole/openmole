@@ -33,7 +33,7 @@ class DeleteActor(jobManager: ActorRef) extends Actor {
         case Some(t) ⇒
           if (directory) storage.rmDir(path)(t) else storage.rmFile(path)(t)
         case None ⇒
-          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
+          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval))
       }
       catch {
         case t: Throwable ⇒

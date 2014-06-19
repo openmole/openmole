@@ -18,17 +18,18 @@
 package org.openmole.plugin.method.evolution.ga
 
 import fr.iscpif.mgo.termination.TimedTermination
-import org.openmole.misc.tools.service.Duration._
+
+import scala.concurrent.duration.Duration
 
 object Timed {
 
-  def apply(_duration: String) = new GATermination with TimedTermination {
+  def apply(_duration: Duration) = new GATermination with TimedTermination {
     type G = Any
     type F = Any
     type P = Any
     type MF = Any
     val stateManifest: Manifest[STATE] = manifest[STATE]
-    val duration = _duration.toMilliSeconds
+    val duration = _duration.toMillis
   }
 
 }

@@ -24,7 +24,6 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.exception._
-import org.openmole.misc.tools.service.Duration._
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.control._
 import org.openmole.misc.tools.service._
@@ -36,6 +35,7 @@ import annotation.tailrec
 import ref.WeakReference
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
+import org.openmole.misc.tools.service._
 import fr.iscpif.gridscale.glite.{ GlobusAuthentication, WMSJobService, BDII }
 import fr.iscpif.gridscale.RenewDecorator
 import java.net.URI
@@ -148,8 +148,8 @@ object GliteEnvironment extends Logger {
     fqan: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
     memory: Option[Int] = None,
-    cpuTime: Option[String] = None,
-    wallTime: Option[String] = None,
+    cpuTime: Option[Duration] = None,
+    wallTime: Option[Duration] = None,
     cpuNumber: Option[Int] = None,
     jobType: Option[String] = None,
     smpGranularity: Option[Int] = None,
@@ -178,9 +178,7 @@ object GliteEnvironment extends Logger {
   def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
 
   def proxyRenewalDelay =
-    math.max(
-      (proxyTime.toSeconds * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
-      Workspace.preferenceAsDuration(GliteEnvironment.MinProxyRenewal).toSeconds)
+    (proxyTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)) max Workspace.preferenceAsDuration(GliteEnvironment.MinProxyRenewal)
 
   def normalizedFitness[T, S](fitness: ⇒ Iterable[(T, S, Double)]): Iterable[(T, S, Double)] = {
     def orMinForExploration(v: Double) = {
@@ -201,8 +199,8 @@ class GliteEnvironment(
     val fqan: Option[String],
     override val openMOLEMemory: Option[Int],
     val memory: Option[Int],
-    val cpuTime: Option[String],
-    val wallTime: Option[String],
+    val cpuTime: Option[Duration],
+    val wallTime: Option[Duration],
     val cpuNumber: Option[Int],
     val jobType: Option[String],
     val smpGranularity: Option[Int],
@@ -235,12 +233,12 @@ class GliteEnvironment(
       GliteAuthentication.initialise(a)(
         vomsURL,
         voName,
-        proxyTime.toSeconds,
-        fqan)(authentications).cache(proxyRenewalDelay -> SECONDS)
+        proxyTime,
+        fqan)(authentications).cache(proxyRenewalDelay)
     case None ⇒ throw new UserBadDataError("No authentication has been initialized for glite.")
   }
 
-  @transient lazy val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut).toSeconds.toInt)(authentication)
+  @transient lazy val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut))(authentication)
 
   override def allJobServices =
     bdiiWMS.map {
@@ -249,7 +247,7 @@ class GliteEnvironment(
           val jobService = new WMSJobService {
             val url = js.url
             val credential = js.credential
-            override def delegationRenewal = proxyRenewalDelay -> SECONDS
+            override def delegationRenewal = proxyRenewalDelay
           }
           val environment = env
           val nbTokens = threadsByWMS

@@ -19,9 +19,8 @@ package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.storage.{ RemoteStorage, SimpleStorage }
 import org.openmole.misc.workspace._
-import org.openmole.misc.exception._
 import org.openmole.misc.tools.io.FileUtil._
-import fr.iscpif.gridscale.{ Storage ⇒ GSStorage }
+import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage }
 import java.io.File
 import java.net.URI
 import scala.sys.process._

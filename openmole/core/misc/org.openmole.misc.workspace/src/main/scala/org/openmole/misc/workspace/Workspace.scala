@@ -34,9 +34,10 @@ import org.openmole.misc.eventdispatcher.{ EventDispatcher, Event }
 import org.openmole.misc.exception._
 import org.openmole.misc.replication._
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.tools.service.Duration._
-import scala.util.Try
 import org.openmole.misc.osgi
+
+import scala.concurrent.duration.FiniteDuration
+import org.openmole.misc.tools.service._
 
 object Workspace {
 
@@ -316,7 +317,7 @@ class Workspace(val location: File) {
 
   def passwordChosen = isPreferenceSet(passwordTest)
 
-  def preferenceAsDuration(location: ConfigurationLocation) = new DurationStringDecorator(preference(location))
+  def preferenceAsDuration(location: ConfigurationLocation): FiniteDuration = preference(location)
 
   def isPreferenceSet(location: ConfigurationLocation): Boolean = synchronized {
     rawPreference(location) != null

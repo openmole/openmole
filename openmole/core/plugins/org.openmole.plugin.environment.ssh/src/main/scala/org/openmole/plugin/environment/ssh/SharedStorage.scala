@@ -43,7 +43,7 @@ trait SharedStorage extends SSHService { js ⇒
     def host = js.host
     def user = js.user
     override def port = js.port
-    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toSeconds -> SECONDS
+    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout)
   }
 
   @transient private var installed: Option[String] = None
@@ -84,9 +84,9 @@ trait SharedStorage extends SSHService { js ⇒
         }
 
         val j = installJobService.submit(jobDescription)
-        val s = fr.iscpif.gridscale.untilFinished { Thread.sleep(Workspace.preferenceAsDuration(UpdateInstallJobInterval).toMilliSeconds); installJobService.state(j) }
+        val s = fr.iscpif.gridscale.untilFinished { Thread.sleep(Workspace.preferenceAsDuration(UpdateInstallJobInterval).toMillis); installJobService.state(j) }
 
-        if (s != fr.iscpif.gridscale.Done) throw new InternalProcessingError("Installation of runtime has failed.")
+        if (s != fr.iscpif.gridscale.jobservice.Done) throw new InternalProcessingError("Installation of runtime has failed.")
 
         val path = sharedFS.child(workdir, runtime.runtime.hash)
         installed = Some(path)

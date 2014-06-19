@@ -98,6 +98,8 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
             "org.openmole.misc.workspace._",
             "Workspace.authenticationProvider",
             "org.openmole.misc.tools.io.FromString._",
+            "scala.concurrent.duration._",
+            "org.openmole.misc.tools.services._",
             "java.io.File",
             "commands._",
             "implicits._").map("import " + _).mkString("; "))

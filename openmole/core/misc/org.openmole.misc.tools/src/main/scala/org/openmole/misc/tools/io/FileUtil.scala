@@ -44,6 +44,7 @@ import TarArchiver._
 import java.util.logging.Logger
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+import scala.concurrent.duration.Duration
 import scala.io.Source
 import org.openmole.misc.tools.service._
 import scala.util.{ Try, Failure, Success }
@@ -77,13 +78,13 @@ object FileUtil {
       Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach { to.write(buffer, 0, _) }
     }
 
-    def copy(to: File, maxRead: Int, timeout: Long): Unit = {
+    def copy(to: File, maxRead: Int, timeout: Duration): Unit = {
       val os = to.bufferedOutputStream
       try copy(os, maxRead, timeout)
       finally os.close
     }
 
-    def copy(to: OutputStream, maxRead: Int, timeout: Long) = {
+    def copy(to: OutputStream, maxRead: Int, timeout: Duration) = {
       val buffer = new Array[Byte](maxRead)
       val executor = ThreadUtil.defaultExecutor
       val reader = new ReaderRunnable(buffer, is, maxRead)
@@ -91,7 +92,7 @@ object FileUtil {
       Iterator.continually {
         val futureRead = executor.submit(reader)
 
-        try futureRead.get(timeout, TimeUnit.MILLISECONDS)
+        try futureRead.get(timeout.length, timeout.unit)
         catch {
           case (e: TimeoutException) ⇒
             futureRead.cancel(true)
@@ -101,7 +102,7 @@ object FileUtil {
         count ⇒
           val futureWrite = executor.submit(new WritterRunnable(buffer, to, count))
 
-          try futureWrite.get(timeout, TimeUnit.MILLISECONDS)
+          try futureWrite.get(timeout.length, timeout.unit)
           catch {
             case (e: TimeoutException) ⇒
               futureWrite.cancel(true)
@@ -277,7 +278,7 @@ object FileUtil {
       try fromIS.copy(to) finally fromIS.close
     }
 
-    def copy(to: OutputStream, maxRead: Int, timeout: Long) = {
+    def copy(to: OutputStream, maxRead: Int, timeout: Duration) = {
       val is = bufferedInputStream
       try is.copy(to, maxRead, timeout)
       finally is.close
@@ -444,7 +445,7 @@ object FileUtil {
       }
 
     def updateIfTooOld(
-      tooOld: Long,
+      tooOld: Duration,
       timeStamp: File ⇒ File = f ⇒ new File(file.getPath + "-timestamp"),
       updating: File ⇒ File = f ⇒ new File(file.getPath + "-updating"))(update: File ⇒ Unit) = {
       val upFile = updating(file)
@@ -457,7 +458,7 @@ object FileUtil {
             if (!file.exists || !ts.exists) false
             else
               Try(ts.content.toLong) match {
-                case Success(v) ⇒ v + tooOld > System.currentTimeMillis
+                case Success(v) ⇒ v + tooOld.toMillis > System.currentTimeMillis
                 case Failure(_) ⇒ ts.delete; false
               }
 

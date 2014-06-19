@@ -52,7 +52,7 @@ object GliteAuthentication extends Logger {
   val updatedFile = ".updated"
 
   def CACertificatesDir: File =
-    Workspace.file("CACertificates").updateIfTooOld(Workspace.preferenceAsDuration(CACertificatesCacheTime).toMilliSeconds) {
+    Workspace.file("CACertificates").updateIfTooOld(Workspace.preferenceAsDuration(CACertificatesCacheTime)) {
       caDir ⇒
         caDir.mkdir
         downloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
@@ -101,7 +101,7 @@ object GliteAuthentication extends Logger {
   }
 
   def voCards =
-    Workspace.file("voCards.xml").updateIfTooOld(Workspace.preferenceAsDuration(VOCardCacheTime).toMilliSeconds) {
+    Workspace.file("voCards.xml").updateIfTooOld(Workspace.preferenceAsDuration(VOCardCacheTime)) {
       voCards ⇒
         HTTPStorage.withConnection(
           new URI(Workspace.preference(GliteEnvironment.VOInformationSite)),
@@ -140,7 +140,7 @@ object GliteAuthentication extends Logger {
   def initialise(a: GliteAuthentication)(
     serverURL: String,
     voName: String,
-    lifeTime: Int,
+    lifeTime: FiniteDuration,
     fqan: Option[String])(implicit authenticationProvider: AuthenticationProvider) =
     a match {
       case a: P12Certificate ⇒
