@@ -31,6 +31,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object CheckData extends Logger {
 
+  import Log._
+
   def checkMole(scene: MoleScene,
                 clear: Boolean = true) = {
     if (clear) StatusBar.clear

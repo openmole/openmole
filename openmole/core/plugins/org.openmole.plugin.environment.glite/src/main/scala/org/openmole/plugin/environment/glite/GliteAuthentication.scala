@@ -46,6 +46,8 @@ import scala.util.{ Success, Failure, Try }
 
 object GliteAuthentication extends Logger {
 
+  import Log._
+
   val updatedFile = ".updated"
 
   def CACertificatesDir: File =

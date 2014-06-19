@@ -24,7 +24,7 @@ import scala.ref.WeakReference
 
 object ProxyChecker extends Logger
 
-import ProxyChecker._
+import ProxyChecker.Log._
 
 class ProxyChecker(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
 

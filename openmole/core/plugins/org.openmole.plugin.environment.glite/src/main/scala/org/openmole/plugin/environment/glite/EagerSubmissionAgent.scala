@@ -47,6 +47,7 @@ object EagerSubmissionAgent extends Logger {
 }
 
 import EagerSubmissionAgent._
+import Log._
 
 class EagerSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
 
@@ -56,7 +57,7 @@ class EagerSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends
 
   override def update: Boolean = {
     try {
-      Log.logger.log(Log.FINE, "Eager submission started")
+      logger.log(FINE, "Eager submission started")
 
       val env = environment.get match {
         case None      ⇒ return false
@@ -76,13 +77,19 @@ class EagerSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends
 
       val maxRunning = runningHistory.map(_.value).max * Workspace.preferenceAsDouble(GliteEnvironment.EagerSubmissionThreshold)
 
-      var nbRessub = if (jobs.size > Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)) {
-        val minOversub = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)
-        if (maxRunning < minOversub) minOversub - jobs.size else maxRunning - (stillRunning + stillReady)
-      }
-      else Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob) - jobs.size
+      logger.fine(s"maxRunning $maxRunning, stillRunning $stillRunning, stillReady $stillReady")
+
+      val minOversub = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)
+
+      var nbRessub =
+        if (jobs.size > minOversub) {
+          if (maxRunning < minOversub) minOversub - jobs.size else maxRunning - (stillRunning + stillReady)
+        }
+        else Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob) - jobs.size
 
       val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionNumberOfJobUnderMin)
+
+      logger.fine("resubmit " + nbRessub)
 
       if (nbRessub > 0) {
         // Resubmit nbRessub jobs in a fair manner

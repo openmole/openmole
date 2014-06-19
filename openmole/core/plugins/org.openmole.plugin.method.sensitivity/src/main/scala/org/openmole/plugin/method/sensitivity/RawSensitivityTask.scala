@@ -41,7 +41,7 @@ trait RawSensitivityTask extends SensitivityTask {
 
     Context.empty ++
       (for (i ← modelInputs; o ← modelOutputs) yield {
-        val (a, b, c) = extractValues(context.valueOrException(o.toArray), matrixNames, i)
+        val (a, b, c) = extractValues(context(o.toArray), matrixNames, i)
         Variable(
           indice(name, i, o),
           computeSensitivity(a, b, c))

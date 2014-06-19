@@ -17,47 +17,49 @@
 
 package org.openmole.plugin.method.evolution
 
-import algorithm.GA.{ GAAggregation, GAProfile }
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.implementation.data._
 import org.openmole.misc.tools.io.FileUtil._
-import fr.iscpif.mgo._
 import java.io.File
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.script.GroovyProxyPool
 import org.openmole.core.implementation.mole._
+import org.openmole.plugin.method.evolution.ga._
+import fr.iscpif.mgo._
+import org.openmole.plugin.method.evolution.ga._
 
 object SaveProfileHook {
 
-  def apply(
-    individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
-    profile: GA.GAProfile,
-    scales: Inputs,
-    path: String) =
+  def apply(puzzle: GAPuzzle[GenomeProfile], path: String) =
     new HookBuilder {
-      addInput(individual.toArray)
-      def toHook = new SaveProfileHook(individual, profile, scales, path) with Built
+      addInput(puzzle.individual.toArray)
+      val _puzzle = puzzle
+      val _path = path
+
+      def toHook = new SaveProfileHook with Built {
+        val puzzle = _puzzle
+        val path = _path
+      }
     }
 
 }
 
-abstract class SaveProfileHook(
-    val individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
-    val profile: GA.GAProfile,
-    val scales: Inputs,
-    val path: String) extends Hook with GenomeScaling {
+abstract class SaveProfileHook extends Hook {
+
+  val puzzle: GAPuzzle[GenomeProfile]
+  val path: String
 
   def process(context: Context, executionContext: ExecutionContext) = {
     val file = executionContext.relativise(VariableExpansion(context, path))
     file.createParentDir
     file.withWriter { w ⇒
       for {
-        i ← context(individual.toArray)
+        i ← context(puzzle.individual.toArray)
       } {
-        val scaledGenome = scaled(i.genome.values, context)
-        w.write("" + scaledGenome(profile.x).value + "," + profile.aggregation.aggregate(i.fitness) + "\n")
+        val scaledGenome = puzzle.evolution.toVariables(i.genome, context)
+        w.write("" + scaledGenome(puzzle.evolution.x).value + "," + puzzle.evolution.aggregate(i.fitness) + "\n")
       }
     }
     context

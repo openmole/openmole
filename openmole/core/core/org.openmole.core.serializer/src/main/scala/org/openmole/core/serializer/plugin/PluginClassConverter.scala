@@ -21,8 +21,9 @@ import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.extended.JavaClassConverter
 import org.openmole.misc.pluginmanager.PluginManager
 import java.io.File
+import com.thoughtworks.xstream.core.ClassLoaderReference
 
-class PluginClassConverter[A <: { def pluginUsed(f: File) }](serializer: A) extends JavaClassConverter(classOf[XStream].getClassLoader) {
+class PluginClassConverter[A <: { def pluginUsed(f: File) }](serializer: A) extends JavaClassConverter(new ClassLoaderReference(classOf[XStream].getClassLoader)) {
 
   override def toString(obj: Object) = {
     val c = obj.asInstanceOf[Class[_]]

@@ -21,7 +21,7 @@ object Web extends Defaults {
   override val org = "org.openmole.web"
 
   lazy val core = OsgiProject("org.openmole.web.core", "core",
-    exports = Seq("org.openmole.web"),
+    exports = Seq("org.openmole.web.*"),
     buddyPolicy = Some("global"),
     imports = Seq("org.h2.*", "*;resolution:=optional")) dependsOn
     (h2, jetty, slick, logback, scalatra, bonecp, scalaLang, base.Core.implementation, base.Core.serializer, xstream, jacksonJson, iceTar, arm, codec, misc) settings

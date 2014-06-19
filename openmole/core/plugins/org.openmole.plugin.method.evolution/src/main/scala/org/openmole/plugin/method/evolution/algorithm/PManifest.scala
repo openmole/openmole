@@ -20,5 +20,5 @@ package org.openmole.plugin.method.evolution.algorithm
 import fr.iscpif.mgo._
 
 trait PManifest extends P {
-  implicit val pManifest: Manifest[P]
+  implicit val pManifest: Manifest[P] = manifest[P]
 }

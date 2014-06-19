@@ -26,7 +26,7 @@ import org.openmole.misc.tools.io.FileUtil._
 
 object FileCache extends Logger
 
-import FileCache._
+import FileCache.Log._
 
 abstract class FileCache {
 

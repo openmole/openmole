@@ -23,7 +23,12 @@ import org.openmole.core.model.job._
 import org.openmole.core.model.tools._
 import org.openmole.core.model.job.State._
 import scala.collection.immutable.TreeMap
+import org.openmole.misc.tools.service.Logger
 import util.{ Failure, Success, Try }
+
+object ContextSaver extends Logger
+
+import ContextSaver.Log._
 
 class ContextSaver(val nbJobs: Int) {
 
@@ -38,10 +43,10 @@ class ContextSaver(val nbJobs: Int) {
       case COMPLETED | FAILED ⇒
         job.exception match {
           case None ⇒
-            Runtime.logger.fine(s"Job success ${job.id} ${job.context}")
+            logger.fine(s"Job success ${job.id} ${job.context}")
             _results += job.id -> Success(job.context)
           case Some(t) ⇒
-            Runtime.logger.log(Runtime.FINE, s"Job failure ${job.id}", t)
+            logger.log(FINE, s"Job failure ${job.id}", t)
             _results += job.id -> Failure(t)
         }
       case _ ⇒

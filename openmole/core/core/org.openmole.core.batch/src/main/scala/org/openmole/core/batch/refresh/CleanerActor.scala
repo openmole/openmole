@@ -24,7 +24,7 @@ import org.openmole.core.batch.environment.BatchEnvironment
 
 object CleanerActor extends Logger
 
-import CleanerActor._
+import CleanerActor.Log._
 
 class CleanerActor(jobManager: ActorRef) extends Actor {
   def receive = {

@@ -32,7 +32,7 @@ import org.openmole.misc.tools.service.LockUtil._
 
 object Transition extends Logger
 
-import Transition._
+import Transition.Log._
 
 class Transition(
     val start: ICapsule,

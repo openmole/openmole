@@ -35,6 +35,7 @@ import org.openmole.ide.core.implementation.preference.{ Preferences, ServerList
 import org.openmole.misc.workspace.Workspace
 import java.io.File
 import org.openmole.core.model.mole.ExecutionContext
+import scala.swing.FileChooser.SelectionMode
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
@@ -72,7 +73,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   serverPanel.visible = false
 
   val sandBoxCheckBox = new CheckBox("Sandbox")
-  val sandBoxTextField: ChooseFileTextField = new ChooseFileTextField(Preferences().sandbox)
+  val sandBoxTextField: ChooseFileTextField = new ChooseFileTextField(Preferences().sandbox, "Select a directory", SelectionMode.DirectoriesOnly)
   val sandBoxPanel = new PluginPanel("wrap 2 ") {
     contents += sandBoxTextField
     contents += new Label("<html><i>The sandbox folder is a root folder from which all paths are appended; allowing portability of the workflows." +

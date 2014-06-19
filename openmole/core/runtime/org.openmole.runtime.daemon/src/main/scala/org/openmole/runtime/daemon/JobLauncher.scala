@@ -46,6 +46,7 @@ object JobLauncher extends Logger {
 
 class JobLauncher(cacheSize: Long, debug: Boolean) {
   import JobLauncher._
+  import Log._
 
   val localCache = new FileCache {
     val limit = cacheSize

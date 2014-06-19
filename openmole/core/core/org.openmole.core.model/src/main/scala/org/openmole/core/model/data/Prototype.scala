@@ -28,9 +28,12 @@ object Prototype {
       left.name compare right.name
   }
 
-  def apply[T](n: String)(implicit t: Manifest[T]) = new Prototype[T] {
-    val name = n
-    val `type` = t
+  def apply[T](n: String)(implicit t: Manifest[T]) = {
+    assert(t != null)
+    new Prototype[T] {
+      val name = n
+      val `type` = t
+    }
   }
 
 }

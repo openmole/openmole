@@ -22,6 +22,8 @@ import java.util.UUID
 
 object LocalHostName extends Logger {
 
+  import Log._
+
   @transient
   lazy val localHostName =
     try {

@@ -35,7 +35,11 @@ import org.openmole.web._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 
-class Application extends IApplication with Logger {
+object Application extends Logger
+
+import Application.Log._
+
+class Application extends IApplication {
 
   lazy val consoleSplash =
     """  ___                   __  __  ___  _     _____   _   ___

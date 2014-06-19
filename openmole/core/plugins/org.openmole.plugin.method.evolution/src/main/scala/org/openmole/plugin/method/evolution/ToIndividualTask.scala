@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.method.evolution
 
-import algorithm.ContextPhenotype
+import org.openmole.plugin.method.evolution.algorithm.DoubleSequencePhenotype
 import fr.iscpif.mgo._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
@@ -25,6 +25,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.tools.VariableExpansion
+import ga._
 
 object ToIndividualTask {
 
@@ -36,27 +37,14 @@ object ToIndividualTask {
       (p, vDouble) :: expand(objectives.tail, context + Variable(p, vDouble))
     }
 
-  def apply(evolution: G with ContextPhenotype with F with MG)(
+  def apply(evolution: GAAlgorithm)(
     name: String,
     genome: Prototype[evolution.G],
-    individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]],
-    objectives: Seq[(Prototype[Double], String)])(implicit plugins: PluginSet) = {
-
-    val (_objectives) = (objectives)
+    individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]])(implicit plugins: PluginSet) = {
 
     new TaskBuilder { builder ⇒
 
-      //      private var objectives = new ListBuffer[(Prototype[Double], String)]
-      //
-      //      def addObjective(p: Prototype[Double], v: String) = {
-      //        this addInput p
-      //        objectives += (p -> v)
-      //        this
-      //      }
-
-      objectives.foreach {
-        case (p, _) ⇒ addInput(p)
-      }
+      evolution.outputPrototypes.foreach(p ⇒ addInput(p))
 
       addInput(genome)
       addOutput(individual)
@@ -66,34 +54,30 @@ object ToIndividualTask {
       def toTask = new ToIndividualTask(evolution)(name) with Built {
         val genome = _genome.asInstanceOf[Prototype[evolution.G]]
         val individual = _individual.asInstanceOf[Prototype[Individual[evolution.G, evolution.P, evolution.F]]]
-
-        val objectives = _objectives
       }
     }
   }
 
 }
 
-sealed abstract class ToIndividualTask(val evolution: G with ContextPhenotype with F with MG)(
+sealed abstract class ToIndividualTask(val evolution: GAAlgorithm)(
     val name: String) extends Task { task ⇒
 
   def genome: Prototype[evolution.G]
   def individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]]
 
-  def objectives: Seq[(Prototype[Double], String)]
-
   override def process(context: Context) = {
 
     val scaled: List[(Prototype[Double], Double)] =
-      ToIndividualTask.expand(objectives.toList, context).map {
+      ToIndividualTask.expand(evolution.objectives.toList, context).map {
         case (o, v) ⇒ o -> math.abs(context(o) - v)
       }
 
     val i: Individual[evolution.G, evolution.P, evolution.F] =
       Individual(
         context(task.genome),
-        context + scaled.map { case (p, v) ⇒ Variable(p, v) },
-        MGFitness(scaled.map { _._2 }))
+        scaled.unzip._2,
+        scaled.unzip._2)
 
     Context(Variable(individual, i))
   }

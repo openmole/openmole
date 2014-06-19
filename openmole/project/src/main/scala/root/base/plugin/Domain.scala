@@ -18,5 +18,4 @@ object Domain extends PluginDefaults {
 
   lazy val range = OsgiProject("range") dependsOn (Core.implementation, Misc.exception)
 
-  lazy val relative = OsgiProject("relative") dependsOn (Misc.exception, Core.implementation)
 }

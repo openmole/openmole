@@ -21,3 +21,4 @@ release/*
 .settings
 *.bak
 .directory
+.DS_Store

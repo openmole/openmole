@@ -26,14 +26,27 @@ import org.openmole.misc.tools.io.Prettifier._
 import scala.annotation.tailrec
 import org.openmole.core.implementation.mole._
 import org.openmole.core.model.mole.ExecutionContext
+import scala.collection.mutable.ListBuffer
 
 object AppendToCSVFileHook {
 
-  def apply(fileName: String, prototypes: Prototype[_]*) =
-    new HookBuilder {
-      prototypes.foreach(addInput(_))
-      def toHook = new AppendToCSVFileHook(fileName, prototypes: _*) with Built
+  class Builder(fileName: String) extends HookBuilder {
+    private val prototypes = ListBuffer[Prototype[_]]()
+
+    def add(p: Prototype[_]) = {
+      p.foreach(addInput(_))
+      prototypes += p
+      this
     }
+
+    def toHook = new AppendToCSVFileHook(fileName, prototypes.toSeq: _*) with Built
+  }
+
+  def apply(fileName: String, prototypes: Prototype[_]*) = {
+    val builder = new Builder(fileName)
+    prototypes.foreach(builder.add)
+    builder
+  }
 
 }
 

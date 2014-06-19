@@ -34,7 +34,7 @@ import scala.concurrent.duration.{ Duration ⇒ SDuration, MILLISECONDS }
 
 object JobManager extends Logger
 
-import JobManager._
+import JobManager.Log._
 
 class JobManager extends Actor {
 
@@ -79,7 +79,7 @@ akka {
     case msg: CleanSerializedJob ⇒ cleaner ! msg
 
     case Manage(job) ⇒
-      self ! Upload(job, None)
+      self ! Upload(job)
 
     case Delay(msg, delay) ⇒
       context.system.scheduler.scheduleOnce(delay milliseconds) {
@@ -101,20 +101,20 @@ akka {
     case Resubmit(job, storage) ⇒
       killAndClean(job)
       job.state = ExecutionState.READY
-      uploader ! Upload(job, Some(storage))
+      uploader ! Upload(job)
 
     case Error(job, exception) ⇒
       val level = exception match {
-        case e: UserBadDataError            ⇒ Log.SEVERE
-        case e: JobRemoteExecutionException ⇒ Log.WARNING
-        case _                              ⇒ Log.FINE
+        case e: UserBadDataError            ⇒ SEVERE
+        case e: JobRemoteExecutionException ⇒ WARNING
+        case _                              ⇒ FINE
       }
       EventDispatcher.trigger(job.environment: Environment, new Environment.ExceptionRaised(job, exception, level))
-      Log.logger.log(level, "Error in job refresh", exception)
+      logger.log(level, "Error in job refresh", exception)
 
     case MoleJobError(mj, j, e) ⇒
       EventDispatcher.trigger(j.environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
-      Log.logger.log(Log.WARNING, "Error during job execution, it will be resubmitted.", e)
+      logger.log(WARNING, "Error during job execution, it will be resubmitted.", e)
 
   }
 

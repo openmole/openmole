@@ -39,6 +39,8 @@ import java.util.concurrent.TimeUnit
 
 object ReplicaCatalog extends Logger {
 
+  import Log._
+
   val NoAccessCleanTime = new ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime")
   val InCatalogCacheTime = new ConfigurationLocation("ReplicaCatalog", "InCatalogCacheTime")
   val ReplicaCacheTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime")

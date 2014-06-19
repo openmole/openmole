@@ -24,7 +24,7 @@ import org.openmole.misc.workspace._
 
 object DeleteActor extends Logger
 
-import DeleteActor._
+import DeleteActor.Log._
 
 class DeleteActor(jobManager: ActorRef) extends Actor {
   def receive = {

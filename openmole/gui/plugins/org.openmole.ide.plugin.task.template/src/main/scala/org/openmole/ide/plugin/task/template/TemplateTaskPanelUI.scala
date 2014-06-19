@@ -25,6 +25,7 @@ import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 import scala.swing.{ Label, ComboBox }
 import java.io.File
 import org.openmole.ide.core.implementation.dataproxy.Proxies
+import scala.swing.FileChooser.SelectionMode
 
 class TemplateTaskPanelUI(pud: TemplateTaskDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends TaskPanelUI {
 
@@ -32,8 +33,8 @@ class TemplateTaskPanelUI(pud: TemplateTaskDataUI)(implicit val i18n: ResourceBu
 
   val templateTextField = new ChooseFileTextField(pud.template,
     "Select a template file",
-    "",
-    "*")
+    SelectionMode.FilesOnly,
+    Some("All files" -> Seq("*")))
 
   val protoCombo = new ComboBox(protoFiles)
 

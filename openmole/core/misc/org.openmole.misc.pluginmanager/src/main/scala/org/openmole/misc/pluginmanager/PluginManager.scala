@@ -36,6 +36,8 @@ import util.Try
 
 object PluginManager extends Logger {
 
+  import Log._
+
   private var files = Map.empty[File, (Long, Long)]
   private var resolvedDirectDependencies = HashMap.empty[Long, HashSet[Long]]
   private var resolvedPluginDependenciesCache = HashMap.empty[Long, Iterable[Long]]
