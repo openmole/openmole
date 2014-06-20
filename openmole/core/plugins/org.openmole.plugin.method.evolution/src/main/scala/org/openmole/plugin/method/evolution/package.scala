@@ -23,10 +23,13 @@ import evolution.ga._
 
 package object evolution {
 
-  implicit def seqOfTuplesToInputsConversion(s: Seq[(Prototype[Double], (String, String))]) =
-    Inputs(s.map { case (p, (min, max)) ⇒ Scalar(p, min, max) })
+  implicit def seqOfTuplesToInputsConversion[T](s: Seq[(Prototype[Double], (T, T))]) =
+    Inputs[T](s.map { case (p, (min, max)) ⇒ Scalar[T](p, min, max) })
 
-  implicit def seqToInputsConversion(s: Seq[Input]) = Inputs(s)
+  implicit def seqOfTuplesStringToInputsDoubleConversion(s: Seq[(Prototype[Double], (String, String))]) =
+    Inputs[Double](s.map { case (p, (min, max)) ⇒ Scalar[Double](p, min.toDouble, max.toDouble) })
+
+  implicit def seqToInputsConversion[T](s: Seq[Input[T]]) = Inputs[T](s)
 
   trait GAPuzzle[+ALG <: GAAlgorithm] {
     val evolution: ALG

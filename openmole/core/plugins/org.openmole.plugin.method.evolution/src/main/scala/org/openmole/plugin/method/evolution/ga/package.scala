@@ -96,7 +96,8 @@ package object ga {
     val terminatedCondition = Condition(terminated.name + " == true")
 
     val _evolution = evolution
-    val (_inputs, _objectives) = (inputs, objectives)
+    val _inputs = inputs
+    val _objectives = objectives
 
     def puzzle(puzzle: Puzzle, _output: ICapsule) =
       new Puzzle(puzzle) with GAPuzzle[ALG] {

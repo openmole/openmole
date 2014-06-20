@@ -25,7 +25,7 @@ object Optimisation {
   def apply(
     mu: Int,
     termination: GATermination { type G >: Optimisation#G; type P >: Optimisation#P; type F >: Optimisation#F; type MF >: Optimisation#MF },
-    inputs: Inputs,
+    inputs: Inputs[String],
     objectives: Objectives,
     dominance: Dominance = Strict,
     ranking: GARankingBuilder = Pareto,
@@ -67,4 +67,5 @@ trait Optimisation extends NoArchive
   with CoEvolvingSigmaValuesMutation
   with SBXBoundedCrossover
   with GAGenomeWithSigma
+  with GenomeScalingFromGroovy
 

@@ -20,20 +20,19 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.model.data.Prototype
 import util.Try
 
-sealed trait Input {
-  def min: String
-  def max: String
+sealed trait Input[T] {
+  def min: T
+  def max: T
   def prototype: Prototype[_]
   def size: Int
 }
 
-case class Scalar(prototype: Prototype[Double], min: String, max: String) extends Input {
+case class Scalar[T](prototype: Prototype[Double], min: T, max: T) extends Input[T] {
   def size = 1
 }
 
-case class Sequence(prototype: Prototype[Array[Double]], min: String, max: String, size: Int) extends Input
+case class Sequence[T](prototype: Prototype[Array[Double]], min: T, max: T, size: Int) extends Input[T]
 
-case class Inputs(inputs: Seq[Input]) {
-  def size: Int =
-    Try(inputs.map(_.size).sum).getOrElse(0)
+case class Inputs[T](inputs: Seq[Input[T]]) {
+  def size: Int = Try(inputs.map(_.size).sum).getOrElse(0)
 }

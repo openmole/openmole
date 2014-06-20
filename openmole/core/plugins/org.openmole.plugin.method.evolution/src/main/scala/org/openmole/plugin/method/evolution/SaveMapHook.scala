@@ -47,10 +47,9 @@ object SaveMapHook {
 
 }
 
-abstract class SaveMapHook extends Hook with GenomeScaling {
+abstract class SaveMapHook extends Hook {
 
   val puzzle: GAPuzzle[_ <: GenomeMap]
-  def scales: Inputs = puzzle.evolution.inputs
   val path: String
 
   def process(context: Context, executionContext: ExecutionContext) = {
@@ -60,7 +59,7 @@ abstract class SaveMapHook extends Hook with GenomeScaling {
       for {
         i ← context(puzzle.individual.toArray)
       } {
-        val scaledGenome = scaled(puzzle.evolution.values.get(i.genome), context)
+        val scaledGenome = puzzle.evolution.toVariables(i.genome, context)
         w.write("" + scaledGenome(puzzle.evolution.x).value + "," + scaledGenome(puzzle.evolution.y).value + "," + puzzle.evolution.aggregate(i.fitness) + "\n")
       }
     }
