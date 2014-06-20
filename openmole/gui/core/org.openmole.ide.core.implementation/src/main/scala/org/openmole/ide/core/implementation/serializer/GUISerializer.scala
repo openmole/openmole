@@ -96,8 +96,7 @@ class GUISerializer { self ⇒
     f(fileSerialisation.xStream)
   }
 
-  val baseDir = Workspace.newDir("gui")
-  val workDir = baseDir.newDir("archive")
+  val workDir = Workspace.newDir("archive")
 
   register { xstream ⇒
 
@@ -129,7 +128,7 @@ class GUISerializer { self ⇒
         serializationStates.get(dataUI) match {
           case None ⇒
             serializationStates += dataUI -> Serializing(dataUI.id)
-            serializeConcept(clazz.runtimeClass, List(dataUI -> dataUI.id))
+            serializeConcept(clazz.runtimeClass, List(dataUI -> dataUI.id), workDir)
             marshal(dataUI, writer, mc)
           case Some(Serializing(id)) ⇒
             serializationStates(dataUI) = Serialized(id)
@@ -147,7 +146,7 @@ class GUISerializer { self ⇒
           val dui = existing(id)
           dui match {
             case Some(y) ⇒ y
-            case _       ⇒ self.deserializeConcept(uc.getRequiredType, id)
+            case _       ⇒ self.deserializeConcept(uc.getRequiredType, id, workDir)
           }
         }
         else {
@@ -296,7 +295,7 @@ class GUISerializer { self ⇒
       case c ⇒ c.getSimpleName
     }
 
-  def serializeConcept(clazz: Class[_], set: Iterable[(_, ID.Type)]) = {
+  def serializeConcept(clazz: Class[_], set: Iterable[(_, ID.Type)], workDir: File) = {
     val conceptDir = new File(workDir, folder(clazz))
     conceptDir.mkdirs
     set.foreach {
@@ -310,7 +309,7 @@ class GUISerializer { self ⇒
     }
   }
 
-  def serializeMetadata(metaData: Option[MetaData]) =
+  def serializeMetadata(metaData: Option[MetaData], workDir: File) =
     for {
       md ← metaData
     } {
@@ -323,21 +322,21 @@ class GUISerializer { self ⇒
     }
 
   def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData2], metaData: Option[MetaData] = None, saveFiles: Boolean = false) = {
-    serializeConcept(classOf[PrototypeDataProxyUI], proxies.prototypes.map { s ⇒ s -> s.id })
-    serializeConcept(classOf[EnvironmentDataProxyUI], proxies.environments.map { s ⇒ s -> s.id })
-    serializeConcept(classOf[SamplingCompositionDataProxyUI], proxies.samplings.map { s ⇒ s -> s.id })
-    serializeConcept(classOf[HookDataProxyUI], proxies.hooks.map { s ⇒ s -> s.id })
-    serializeConcept(classOf[SourceDataProxyUI], proxies.sources.map { s ⇒ s -> s.id })
-    serializeConcept(classOf[TaskDataProxyUI], proxies.tasks.map { s ⇒ s -> s.id })
+    serializeConcept(classOf[PrototypeDataProxyUI], proxies.prototypes.map { s ⇒ s -> s.id }, workDir)
+    serializeConcept(classOf[EnvironmentDataProxyUI], proxies.environments.map { s ⇒ s -> s.id }, workDir)
+    serializeConcept(classOf[SamplingCompositionDataProxyUI], proxies.samplings.map { s ⇒ s -> s.id }, workDir)
+    serializeConcept(classOf[HookDataProxyUI], proxies.hooks.map { s ⇒ s -> s.id }, workDir)
+    serializeConcept(classOf[SourceDataProxyUI], proxies.sources.map { s ⇒ s -> s.id }, workDir)
+    serializeConcept(classOf[TaskDataProxyUI], proxies.tasks.map { s ⇒ s -> s.id }, workDir)
 
-    serializeConcept(classOf[CapsuleData], moleScenes.flatMap(_.capsules).map { s ⇒ s -> s.id })
-    serializeConcept(classOf[TransitionData], moleScenes.flatMap(_.transitions).map { s ⇒ s -> s.id })
-    serializeConcept(classOf[DataChannelData], moleScenes.flatMap(_.dataChannels).map { s ⇒ s -> s.id })
-    serializeConcept(classOf[SlotData], moleScenes.flatMap(_.slots).map { s ⇒ s -> s.id })
+    serializeConcept(classOf[CapsuleData], moleScenes.flatMap(_.capsules).map { s ⇒ s -> s.id }, workDir)
+    serializeConcept(classOf[TransitionData], moleScenes.flatMap(_.transitions).map { s ⇒ s -> s.id }, workDir)
+    serializeConcept(classOf[DataChannelData], moleScenes.flatMap(_.dataChannels).map { s ⇒ s -> s.id }, workDir)
+    serializeConcept(classOf[SlotData], moleScenes.flatMap(_.slots).map { s ⇒ s -> s.id }, workDir)
 
-    serializeConcept(classOf[MoleData2], moleScenes.map { ms ⇒ ms -> ms.id })
+    serializeConcept(classOf[MoleData2], moleScenes.map { ms ⇒ ms -> ms.id }, workDir)
 
-    serializeMetadata(metaData)
+    serializeMetadata(metaData, workDir)
 
     val os = new TarOutputStream(new GZIPOutputStream(new FileOutputStream(file)))
     try {
@@ -357,19 +356,19 @@ class GUISerializer { self ⇒
     }
   }
 
-  def deserializeConcept[T](clazz: Class[_]): Writer[List[Throwable], List[T]] = {
+  def deserializeConcept[T](clazz: Class[_], workDir: File): Writer[List[Throwable], List[T]] = {
     val res = new File(workDir, folder(clazz)).listFiles.toList.map(
       f ⇒ Try(read(f).asInstanceOf[T])
     )
     res.collect { case Success(s) ⇒ s }.set(res.collect { case Failure(f) ⇒ f })
   }
 
-  def deserializeConcept(clazz: Class[_], id: String) = {
+  def deserializeConcept(clazz: Class[_], id: String, workDir: File) = {
     val f = workDir.child(folder(clazz)).child(id + ".xml")
     read(f)
   }
 
-  def deserialize(fromFile: File) = {
+  def deserialize(fromFile: File, exportDir: Option[File] = None) = {
 
     val zipped = fromFile.withInputStream { is ⇒
       Try(new GZIPInputStream(is)) match {
@@ -387,18 +386,20 @@ class GUISerializer { self ⇒
       tis.extractDirArchiveWithRelativePath(workDir)
     }
 
-    if (workDir.child(fileSerialisation.fileDir).exists)
-      deserialiser.injectedFiles_=(fileSerialisation.deserialiseFileReplacements(workDir, baseDir))
-    else deserialiser.injectedFiles_=(Map.empty)
+    exportDir match {
+      case Some(dir) ⇒
+        deserialiser.injectedFiles_=(fileSerialisation.deserialiseFileReplacements(workDir, dir))
+      case None ⇒ deserialiser.injectedFiles_=(Map.empty)
+    }
 
     val concepts =
       for {
-        protos ← deserializeConcept[PrototypeDataProxyUI](classOf[PrototypeDataProxyUI])
-        samplings ← deserializeConcept[SamplingCompositionDataProxyUI](classOf[SamplingCompositionDataProxyUI])
-        envs ← deserializeConcept[EnvironmentDataProxyUI](classOf[EnvironmentDataProxyUI])
-        hooks ← deserializeConcept[HookDataProxyUI](classOf[HookDataProxyUI])
-        sources ← deserializeConcept[SourceDataProxyUI](classOf[SourceDataProxyUI])
-        tasks ← deserializeConcept[TaskDataProxyUI](classOf[TaskDataProxyUI])
+        protos ← deserializeConcept[PrototypeDataProxyUI](classOf[PrototypeDataProxyUI], workDir)
+        samplings ← deserializeConcept[SamplingCompositionDataProxyUI](classOf[SamplingCompositionDataProxyUI], workDir)
+        envs ← deserializeConcept[EnvironmentDataProxyUI](classOf[EnvironmentDataProxyUI], workDir)
+        hooks ← deserializeConcept[HookDataProxyUI](classOf[HookDataProxyUI], workDir)
+        sources ← deserializeConcept[SourceDataProxyUI](classOf[SourceDataProxyUI], workDir)
+        tasks ← deserializeConcept[TaskDataProxyUI](classOf[TaskDataProxyUI], workDir)
       } yield protos ++ samplings ++ envs ++ hooks ++ sources ++ tasks
 
     /*deserializeConcept[CapsuleData](classOf[CapsuleData])
@@ -408,7 +409,7 @@ class GUISerializer { self ⇒
 
     val result = for {
       concept ← concepts
-      moleScenes ← deserializeConcept[MoleData2](classOf[MoleData2])
+      moleScenes ← deserializeConcept[MoleData2](classOf[MoleData2], workDir)
     } yield {
       val proxies: Proxies = new Proxies
       concept.foreach(proxies += _)
@@ -423,7 +424,5 @@ class GUISerializer { self ⇒
     serializationStates.clear
     deserializationStates.clear
     workDir.recursiveDelete
-    workDir.mkdirs
-    if (baseDir.isEmpty) baseDir.delete
   }
 }
