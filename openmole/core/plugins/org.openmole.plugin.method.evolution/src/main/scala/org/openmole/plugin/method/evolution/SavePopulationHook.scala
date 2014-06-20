@@ -30,7 +30,7 @@ object SavePopulationHook {
     import puzzle._
     val builder = new AppendToCSVFileHook.Builder(dir + "/" + name)
     builder.add(puzzle.generation)
-    evolution.inputs.inputs.foreach(i ⇒ builder.add(i.prototype.toArray))
+    evolution.inputsPrototypes.foreach(p ⇒ builder.add(p.toArray))
     evolution.objectives.foreach { case (o, _) ⇒ builder.add(o.toArray) }
     builder
   }

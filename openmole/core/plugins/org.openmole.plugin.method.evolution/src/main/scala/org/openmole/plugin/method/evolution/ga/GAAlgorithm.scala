@@ -35,8 +35,7 @@ trait GAAlgorithm extends Archive
     with CrossOver
     with GeneticBreeding
     with GenomeScaling {
-  def inputs: Inputs
-  def scales = inputs
+  def inputs: Inputs[_]
   def objectives: Objectives
   def inputsPrototypes = inputs.inputs.map(_.prototype)
   def outputPrototypes = objectives.map(_._1)
@@ -44,7 +43,7 @@ trait GAAlgorithm extends Archive
   def toVariables(individuals: Seq[Individual[G, P, F]], context: Context): Seq[Variable[_]] = {
     val scaledValues = individuals.map(i ⇒ scaled(values.get(i.genome), context).toIndexedSeq)
 
-    scales.inputs.zipWithIndex.map {
+    inputs.inputs.zipWithIndex.map {
       case (input, i) ⇒
         input match {
           case Scalar(prototype, _, _)      ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Double]).toArray[Double])

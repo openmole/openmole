@@ -26,7 +26,7 @@ object GenomeProfile {
     x: Int,
     nX: Int,
     termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F; type MF >: GenomeProfile#MF },
-    inputs: Inputs,
+    inputs: Inputs[Double],
     objectives: Objectives,
     cloneProbability: Double = 0.0) = {
     val (_x, _nX, _cloneProbability, _inputs, _objectives) = (x, nX, cloneProbability, inputs, objectives)
@@ -68,6 +68,7 @@ trait GenomeProfile extends GAAlgorithm
     with SBXBoundedCrossover
     with GAGenomeWithSigma
     with MGFitness
-    with MaxAggregation {
+    with MaxAggregation
+    with GenomeScalingFromDouble {
   def x: Int
 }

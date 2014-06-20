@@ -32,7 +32,7 @@ object ModelFamily {
     nicheSize: Int,
     termination: GATermination { type G >: ModelFamily#G; type P >: ModelFamily#P; type F >: ModelFamily#F; type MF >: ModelFamily#MF },
     modelId: Prototype[Int],
-    inputs: Inputs,
+    inputs: Inputs[String],
     objectives: Objectives,
     cloneProbability: Double = 0.0) = {
     val (_mu, _cloneProbability, _lambda, _inputs, _objectives, _nicheSize, _models, _modelId) = (mu, cloneProbability, lambda, inputs, objectives, nicheSize, models, modelId)
@@ -81,3 +81,4 @@ trait ModelFamily extends NoArchive
   with GeneticBreeding
   with HierarchicalRanking
   with ModelFamilyGenome
+  with GenomeScalingFromGroovy

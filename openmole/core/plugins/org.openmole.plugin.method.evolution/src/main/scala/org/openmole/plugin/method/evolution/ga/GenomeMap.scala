@@ -28,7 +28,7 @@ object GenomeMap {
     y: Int,
     nY: Int,
     termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F; type MF >: GenomeMap#MF },
-    inputs: Inputs,
+    inputs: Inputs[Double],
     objectives: Objectives,
     cloneProbability: Double = 0.0) = {
     val (_x, _nX, _y, _nY, _cloneProbability, _inputs, _objectives) = (x, nX, y, nY, cloneProbability, inputs, objectives)
@@ -72,7 +72,8 @@ trait GenomeMap extends GAAlgorithm
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
     with GAGenomeWithSigma
-    with MaxAggregation {
+    with MaxAggregation
+    with GenomeScalingFromDouble {
   def x: Int
   def y: Int
 }
