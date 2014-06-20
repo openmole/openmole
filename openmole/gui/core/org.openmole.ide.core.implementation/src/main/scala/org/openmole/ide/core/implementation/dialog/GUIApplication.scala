@@ -64,8 +64,6 @@ class GUIApplication {
   }
 
   def closeOperation: Unit = {
-    if (DialogFactory.closeApplication)
-      SaveXML.save(frame)
     Preferences.dumpFile
   }
 }

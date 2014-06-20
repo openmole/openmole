@@ -27,7 +27,15 @@ class NetlogoTaskUISpec extends FlatSpec with ShouldMatchers {
     GUISerializer.serializable(getClass.getClassLoader.getResource("nl4_09.xml")) should equal(true)
   }
 
+  "NetlogoTask4DataUI" should "be unserializable" in {
+    GUISerializer.serializable(getClass.getClassLoader.getResource("nl4_09.xml")) should equal(true)
+  }
+  
   "NetlogoTask5DataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("nl5_09.xml")) should equal(true)
   }
+
+  "NetlogoTask5DataUI" should "be unserializable" in {
+    GUISerializer.serializable(getClass.getClassLoader.getResource("nl5_09.xml")) should equal(true)
+}
 }

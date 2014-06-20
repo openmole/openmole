@@ -23,7 +23,11 @@ import org.scalatest.matchers.ShouldMatchers
 
 class ExplorationTaskUISpec extends FlatSpec with ShouldMatchers {
 
-  "ExplorationTaskDataUI" should "be unserializable" in {
+  "ExplorationTaskDataUI 0.9" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)
+  }
+
+  "ExplorationTaskDataUI 0.10" should "be unserializable" in {
+    GUISerializer.serializable(getClass.getClassLoader.getResource("010.xml")) should equal(true)
   }
 }
