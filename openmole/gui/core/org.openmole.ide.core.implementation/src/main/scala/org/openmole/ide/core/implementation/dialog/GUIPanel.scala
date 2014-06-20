@@ -70,10 +70,13 @@ class GUIPanel extends MainFrame {
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, Event.CTRL_MASK))
       })
 
+      contents += new MenuItem(new Action("Insert") {
+        override def apply = LoadXML.load
+        accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_I, Event.CTRL_MASK))
+      })
+
       contents += new MenuItem(new Action("Import") {
         override def apply = LoadXML.load
-
-        accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_I, Event.CTRL_MASK))
       })
 
       contents += new MenuItem(new Action("Save") {
@@ -89,10 +92,19 @@ class GUIPanel extends MainFrame {
         override def apply = SaveXML.save(mainframe, SaveXML.show)
       })
 
-      contents += new MenuItem(new Action("Export") {
+      contents += new MenuItem(new Action("Export as XML") {
         override def apply = ScenesManager().currentScene match {
           case Some(s: BuildMoleScene) ⇒ DialogFactory.exportPartialMoleExecution(s)
           case _                       ⇒ StatusBar().inform("No mole available for export")
+        }
+      })
+
+      contents += new MenuItem(new Action("Export project") {
+        override def apply = ScenesManager().currentScene match {
+          case Some(s: BuildMoleScene) ⇒
+            ScenesManager().saveCurrentPropertyWidget
+            SaveXML.export(mainframe)
+          case _ ⇒
         }
       })
 
@@ -103,6 +115,10 @@ class GUIPanel extends MainFrame {
           mainframe.title = "OpenMOLE"
           Settings.currentProject = None
         }
+      })
+
+      contents += new MenuItem(new Action("Quit") {
+        override def apply = closeOperation
       })
     }
 

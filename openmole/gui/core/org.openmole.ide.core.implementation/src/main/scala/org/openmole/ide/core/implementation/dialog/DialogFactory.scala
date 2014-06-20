@@ -124,22 +124,6 @@ object DialogFactory {
   def displayStack(stack: String) =
     DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(new TextArea(stack)).peer, "Error stack"))
 
-  def closeApplication = {
-    val embeddCheckBox = new CheckBox("Embedd resources") {
-      selected = Preferences().embeddResources
-      listenTo(this)
-      reactions += {
-        case ButtonClicked(x) ⇒ Preferences.setEmbeddRessources(x.selected)
-      }
-    }
-
-    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new PluginPanel("wrap") {
-      contents += new Label("<html>You are exiting the OpenMOLE application.<br>SaveSettings the project ?</html>")
-      contents += embeddCheckBox
-    }.peer, "Exit OpenMOLE")).equals(NotifyDescriptor.OK_OPTION)) true
-    else false
-  }
-
   def exportPartialMoleExecution(s: BuildMoleScene) = {
     val fc = new ChooseFileTextField("", "XML file", SelectionMode.FilesOnly, Some("XML,tar", Seq("xml", "tar")))
     val withArchiveCheckBox = new CheckBox("export with archives")

@@ -45,12 +45,9 @@ object Preferences {
 
   def setSandBox(s: String) = update(instance.copy(sandbox = s))
 
-  def setEmbeddRessources(b: Boolean) = update(instance.copy(embeddResources = b))
-
   def dumpFile = Workspace.persistent("gui").save(instance, "preferences", xstream = XStreamFactory.build)
 }
 
 case class Preferences(servers: List[(String, String)] = List(),
                        sandbox: String = "",
-                       embeddResources: Boolean = false,
                        recentFiles: List[String] = List())

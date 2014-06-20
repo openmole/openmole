@@ -126,7 +126,7 @@ class ExecutionManager(manager: MoleUI,
             trusted
           case _ ⇒ true
         }) {
-          println("true " + client.fullAddress)
+          println("loaded : " + client.getLoadedMoles)
           client.createMole(ExecutionSerialiser(manager, true), None, encapsulate = true, pack = true) match {
             case Left(s: String) ⇒ StatusBar().block(s)
             case Right(y) ⇒

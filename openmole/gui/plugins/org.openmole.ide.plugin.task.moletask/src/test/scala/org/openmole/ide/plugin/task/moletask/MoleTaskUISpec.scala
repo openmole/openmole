@@ -23,7 +23,11 @@ import org.scalatest.matchers.ShouldMatchers
 
 class MoleTaskUISpec extends FlatSpec with ShouldMatchers {
 
-  "MoleTaskDataUI" should "be unserializable" in {
+  "MoleTaskDataUI 0.9" should "be unserializable" in {
+    GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)
+  }
+
+  "MoleTaskDataUI 0.10" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)
   }
 }
