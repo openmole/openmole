@@ -420,7 +420,7 @@ class GUISerializer { self ⇒
     result
   }
 
-  def clear = {
+  private def clear = {
     serializationStates.clear
     deserializationStates.clear
     workDir.recursiveDelete
