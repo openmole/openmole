@@ -17,34 +17,16 @@
 
 package org.openmole.core.batch.environment
 
-import akka.actor.Actor
 import akka.actor.ActorSystem
-import akka.actor.Props
-import akka.dispatch.Dispatchers
-import akka.routing.RoundRobinRouter
 import com.typesafe.config.ConfigFactory
 import java.io.File
-import java.util.concurrent.TimeoutException
 import org.openmole.misc.exception.InternalProcessingError
-import java.net.URI
 import java.util.concurrent.atomic.AtomicLong
-import java.util.logging.Level
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.refresh._
-import org.openmole.core.batch.environment.BatchEnvironment.EndDownload
-import org.openmole.core.batch.refresh.Upload
-import org.openmole.core.batch.environment.BatchEnvironment.BeginDownload
-import scala.Some
-import org.openmole.core.batch.environment.BatchEnvironment.BeginUpload
-import org.openmole.core.batch.environment.BatchEnvironment.EndUpload
-import BatchJobWatcher.Watch
-import org.openmole.core.batch.authentication._
-import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication._
-import org.openmole.core.implementation.execution._
-import org.openmole.misc.workspace._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.model.job._
 import org.openmole.misc.tools.service._
@@ -53,16 +35,9 @@ import org.openmole.misc.workspace._
 import org.openmole.misc.pluginmanager._
 import org.openmole.misc.eventdispatcher._
 import org.openmole.core.model.execution._
-import org.openmole.misc.tools.collection._
-import akka.actor.Actor
 import akka.actor.Props
-import akka.routing.SmallestMailboxRouter
-import scala.concurrent.stm._
-import collection.mutable.SynchronizedMap
-import collection.mutable.WeakHashMap
 import org.openmole.misc.tools.service.ThreadUtil._
 import ref.WeakReference
-import annotation.tailrec
 
 object BatchEnvironment extends Logger {
 
@@ -218,7 +193,7 @@ trait BatchEnvironment extends Environment { env ⇒
   @transient lazy val storages = {
     val storages = allStorages
     if (storages.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
-    Updater.delay(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDuration(StoragesGCUpdateInterval).toMilliSeconds)
+    Updater.delay(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDuration(StoragesGCUpdateInterval))
     storages
   }
 
@@ -234,9 +209,9 @@ trait BatchEnvironment extends Environment { env ⇒
 
   @transient lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
-  def minUpdateInterval = Workspace.preferenceAsDuration(MinUpdateInterval).toMilliSeconds
-  def maxUpdateInterval = Workspace.preferenceAsDuration(MaxUpdateInterval).toMilliSeconds
-  def incrementUpdateInterval = Workspace.preferenceAsDuration(IncrementUpdateInterval).toMilliSeconds
+  def minUpdateInterval = Workspace.preferenceAsDuration(MinUpdateInterval)
+  def maxUpdateInterval = Workspace.preferenceAsDuration(MaxUpdateInterval)
+  def incrementUpdateInterval = Workspace.preferenceAsDuration(IncrementUpdateInterval)
 
   def executionJobs: Iterable[BatchExecutionJob] = batchJobWatcher.executionJobs
 

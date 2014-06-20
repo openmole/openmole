@@ -18,25 +18,25 @@ object Libraries extends Defaults(Apache) {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.68"
+  val gridscaleVersion = "1.71-SNAPSHOT"
 
   val bouncyCastleVersion = "1.49"
 
-  lazy val includeGridscale = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion
+  lazy val gridscale = "fr.iscpif.gridscale.bundle" %% "gridscale" % gridscaleVersion
 
-  lazy val includeGridscaleSSH = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.ssh" % gridscaleVersion
+  lazy val gridscaleSSH = "fr.iscpif.gridscale.bundle" %% "ssh" % gridscaleVersion
 
-  lazy val includeGridscalePBS = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.pbs" % gridscaleVersion
+  lazy val gridscalePBS = "fr.iscpif.gridscale.bundle" %% "pbs" % gridscaleVersion
 
-  lazy val includeGridscaleSLURM = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.slurm" % gridscaleVersion
+  lazy val gridscaleSLURM = "fr.iscpif.gridscale.bundle" %% "slurm" % gridscaleVersion
 
-  lazy val includeGridscaleGlite = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.glite" % gridscaleVersion
+  lazy val gridscaleGlite = "fr.iscpif.gridscale.bundle" %% "glite" % gridscaleVersion
 
-  lazy val includeGridscaleDirac = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.dirac" % gridscaleVersion
+  lazy val gridscaleDirac = "fr.iscpif.gridscale.bundle" %% "dirac" % gridscaleVersion
 
-  lazy val includeGridscaleHTTP = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.http" % gridscaleVersion
+  lazy val gridscaleHTTP = "fr.iscpif.gridscale.bundle" %% "http" % gridscaleVersion
 
-  lazy val includeBouncyCastle = libraryDependencies += "org.bouncycastle" % "bcprov-jdk15on" % bouncyCastleVersion
+  lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
 
   lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }
 
@@ -44,13 +44,15 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106",
       "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016"))
 
+  lazy val scalatraVersion = "2.3.0.RC3"
+
   lazy val scalatra = OsgiProject("org.scalatra",
     buddyPolicy = Some("global"),
     exports = Seq("org.scalatra.*, org.fusesource.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.json4s", "*")) settings
-    (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % "2.3.0-SNAPSHOT",
-      "org.scalatra" %% "scalatra-scalate" % "2.3.0-SNAPSHOT",
-      "org.scalatra" %% "scalatra-json" % "2.3.0-SNAPSHOT")) dependsOn (slf4j)
+    (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % scalatraVersion,
+      "org.scalatra" %% "scalatra-scalate" % scalatraVersion,
+      "org.scalatra" %% "scalatra-json" % scalatraVersion)) dependsOn (slf4j)
 
   lazy val jacksonJson = OsgiProject("org.json4s") settings (
     libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.9",
@@ -67,7 +69,7 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1")
 
   lazy val slick = OsgiProject("com.typesafe.slick", exports = Seq("scala.slick.*")) settings
-    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.0.2")
+    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.1.0-M2")
 
   lazy val slf4j = OsgiProject("org.slf4j") settings (libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2")
 
@@ -76,26 +78,28 @@ object Libraries extends Defaults(Apache) {
       "net.sf.kxml" % "kxml2" % "2.3.0"), bundleType += "dbserver")
 
   lazy val groovy = OsgiProject("org.codehaus.groovy", buddyPolicy = Some("global"), exports = Seq("groovy.*", "org.codehaus.*"),
-    privatePackages = Seq("!scala.*,*")) settings (libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.2.1",
+    privatePackages = Seq("!scala.*,*")) settings (libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.3.3",
       "org.fusesource.jansi" % "jansi" % "1.2.1"))
 
   lazy val objenesis = OsgiProject("org.objenesis") settings (libraryDependencies += "org.objenesis" % "objenesis" % "1.2")
 
-  lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*"),
+  lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
     privatePackages = Seq("*"), buddyPolicy = Some("global")
   ) settings
     (libraryDependencies <++= (scalaVersion) { sV ⇒
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,
-        "org.scala-lang" % "jline" % sV,
+        "jline" % "jline" % "2.11",
         "com.typesafe.akka" %% "akka-actor" % "2.3.3",
         "com.typesafe.akka" %% "akka-transactor" % "2.3.3",
         "com.typesafe" % "config" % "1.2.1",
-        "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3")
+        "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3",
+        "org.scala-lang" % "scala-compiler" % sV
+      )
     }, bundleType += "dbserver")
 
-  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.reflect.*", "scala.tools.*"),
-    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
+  //  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.tools.*", "scala.reflect.macros.*"),
+  //    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
 
   lazy val jodaTime = OsgiProject("org.joda.time") settings (libraryDependencies += "joda-time" % "joda-time" % "1.6")
 
@@ -118,7 +122,7 @@ object Libraries extends Defaults(Apache) {
       Seq("ccl.northwestern.edu" % "netlogo" % "4.1.3",
         "org.picocontainer" % "picocontainer" % "2.8",
         "org.objectweb" % "asm" % "3.1",
-        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", bundleType := Set("all"),
+        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.8.0", crossPaths := false,
         ivyScala ~= { (is: Option[IvyScala]) ⇒ //should disable the binary compat warnings this causes
           for (i ← is) yield i.copy(checkExplicit = false)
         })
@@ -128,7 +132,7 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies ++=
       Seq("ccl.northwestern.edu" % "netlogo" % "5.0.4",
         "org.picocontainer" % "picocontainer" % "2.13.6",
-        "org.objectweb" % "asm-all" % "3.3.1"), version := "5.0.3", bundleType := Set("all"),
+        "org.objectweb" % "asm-all" % "3.3.1"), version := "5.0.3", autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.9.2", crossPaths := false,
         ivyScala ~= { (is: Option[IvyScala]) ⇒ //See netlogo4_noscala
           for (i ← is) yield i.copy(checkExplicit = false)
         })
@@ -167,9 +171,7 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies ++= Seq("org.netbeans.api" % "org-netbeans-api-visual" % "RELEASE73",
       "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 
-  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.72-SNAPSHOT", bundleType := Set("plugin"))
-
-  lazy val scalabc = OsgiProject("fr.irstea.scalabc", privatePackages = Seq("!scala.*", "*")) settings (libraryDependencies += "fr.irstea" %% "scalabc" % "0.4-SNAPSHOT", bundleType := Set("plugin"))
+  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.72", bundleType := Set("plugin"))
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0", bundleType := Set("plugin"))
 

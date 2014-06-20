@@ -117,12 +117,10 @@ class Application extends IApplication {
 
     val plugins: List[String] =
       config.pluginsDirs ++
-        config.userPlugins ++
+        existingUserPlugins ++
         (if (!config.console && !config.server) config.guiPluginsDirs else List.empty)
 
-    PluginManager.load(
-      plugins.map(p ⇒ new File(p))
-    )
+    PluginManager.load(plugins.map(new File(_)))
 
     try config.password foreach Workspace.setPassword
     catch {

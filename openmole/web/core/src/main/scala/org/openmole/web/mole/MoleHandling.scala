@@ -42,7 +42,7 @@ trait MoleHandling { self: ScalatraBase ⇒
 
   def getStatus(moleId: String): String =
     db withSession { implicit session ⇒
-      (for (m ← MoleData.instance if m.id === moleId) yield m.state).list().headOption.getOrElse("Doesn't Exist")
+      (for (m ← MoleData.instance if m.id === moleId) yield m.state).list.headOption.getOrElse("Doesn't Exist")
     }
 
   private def processXMLFile[A: ClassTag](is: Option[InputStream]): Either[A, String] = is match {

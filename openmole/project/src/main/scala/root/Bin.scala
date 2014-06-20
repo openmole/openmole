@@ -24,16 +24,16 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     "org.eclipse.core" % "org.eclipse.equinox.registry" % "3.5.200.v20120522-1841" intransitive (),
     "org.eclipse.core" % "org.eclipse.equinox.preferences" % "3.5.1.v20121031-182809" intransitive (),
     "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944" intransitive (),
-    "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
+    Libraries.bouncyCastle
   )
 
   private lazy val openmolePluginDependencies = libraryDependencies ++= Seq(
-    "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.ssh" % gridscaleVersion intransitive (), //TODO deal with these
-    "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.http" % gridscaleVersion intransitive (),
-    "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.pbs" % gridscaleVersion intransitive (),
-    "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.slurm" % gridscaleVersion intransitive (),
-    "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.dirac" % gridscaleVersion intransitive (),
-    "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.glite" % gridscaleVersion intransitive ()
+    Libraries.gridscaleSSH intransitive (),
+    Libraries.gridscaleHTTP intransitive (),
+    Libraries.gridscalePBS intransitive (),
+    Libraries.gridscaleSLURM intransitive (),
+    Libraries.gridscaleDirac intransitive (),
+    Libraries.gridscaleGlite intransitive ()
   )
 
   lazy val uiProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo "plugins"
@@ -45,7 +45,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
   lazy val openmole = AssemblyProject("openmole", "plugins", settings = resAssemblyProject ++ uiProjects ++ pluginProjects ++ guiPluginProjects ++ dbserverProjects ++ zipProject, depNameMap =
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" }, """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })
   ) settings (
-    equinoxDependencies, libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion intransitive (),
+    equinoxDependencies, libraryDependencies += Libraries.gridscale intransitive (),
     resourceSets <++= (baseDirectory, zip in openmoleRuntime, downloadUrls in openmoleRuntime) map { (bd, zipFile, downloadUrls) ⇒
       Set(bd / "resources" -> "", zipFile -> "runtime") ++ downloadUrls.map(_ -> "runtime")
     },
@@ -65,14 +65,14 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
 
   lazy val runtimeProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo "plugins"
 
-  lazy val java368URL = new URL("http://maven.iscpif.fr/public/com/oracle/java-jre-linux-386/8-u5/java-jre-linux-386-8-u5.tgz")
-  lazy val javax64URL = new URL("http://maven.iscpif.fr/public/com/oracle/java-jre-linux-x64/8-u5/java-jre-linux-x64-8-u5.tgz")
+  lazy val java368URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-386/20-b17/java-jre-linux-386-20-b17.tgz")
+  lazy val javax64URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-x64/20-b17/java-jre-linux-x64-20-b17.tgz")
 
   lazy val openmoleRuntime = AssemblyProject("runtime", "plugins", depNameMap = Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
     """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }), settings = resAssemblyProject ++ zipProject ++ urlDownloadProject ++ runtimeProjects) settings
     (equinoxDependencies, resourceDirectory <<= baseDirectory / "resources",
       urls <++= target { t ⇒ Seq(java368URL -> t / "jvm-386.tar.gz", javax64URL -> t / "jvm-x64.tar.gz") },
-      libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion intransitive (),
+      libraryDependencies += Libraries.gridscale intransitive (),
       tarGZName := Some("runtime"),
       setExecutable += "run.sh",
       resourceSets <+= baseDirectory map { _ / "resources" -> "." },
@@ -82,7 +82,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
 
   lazy val openmoleDaemon = AssemblyProject("daemon", "plugins", settings = resAssemblyProject ++ daemonProjects, depNameMap =
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" }, """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })) settings
-    (resourceSets <+= baseDirectory map { _ / "resources" -> "." }, equinoxDependencies, includeGridscale, includeGridscaleSSH, dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") })
+    (resourceSets <+= baseDirectory map { _ / "resources" -> "." }, equinoxDependencies, libraryDependencies += gridscale, libraryDependencies += gridscaleSSH, dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") })
 
   lazy val docProj = Project("documentation", dir / "documentation") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects ++ Application.subProjects): _*) settings (
     unidocSettings: _*

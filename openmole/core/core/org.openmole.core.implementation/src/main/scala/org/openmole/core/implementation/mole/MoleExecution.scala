@@ -87,6 +87,9 @@ class MoleExecution(
   private val _canceled = Ref(false)
   private val _finished = Ref(false)
 
+  private val _startTime = Ref(None: Option[Long])
+  private val _endTime = Ref(None: Option[Long])
+
   private val ticketNumber = Ref(0L)
   private val jobId = Ref(0L)
 
@@ -105,6 +108,13 @@ class MoleExecution(
   def numberOfJobs = rootSubMoleExecution.numberOfJobs
 
   def exceptions = _exceptions.single()
+
+  def duration: Option[Long] =
+    (_startTime.single(), _endTime.single()) match {
+      case (None, _)          ⇒ None
+      case (Some(t), None)    ⇒ Some(System.currentTimeMillis - t)
+      case (Some(s), Some(e)) ⇒ Some(e - s)
+    }
 
   def group(moleJob: IMoleJob, capsule: ICapsule, submole: ISubMoleExecution) =
     atomic { implicit txn ⇒
@@ -163,8 +173,8 @@ class MoleExecution(
     if (!_started.getUpdate(_ ⇒ true)) {
       val validationErrors = Validation(mole, implicits, sources, hooks)
       if (!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of your mole has failed, several errors have been found: " + validationErrors.mkString("\n"))
+      _startTime.single() = Some(System.currentTimeMillis)
       start(Context.empty)
-      _started.single() = true
     }
     this
   }
@@ -174,6 +184,7 @@ class MoleExecution(
       rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, new IMoleExecution.Finished)
       _finished.single() = true
+      _endTime.single() = Some(System.currentTimeMillis)
     }
     this
   }
@@ -203,6 +214,7 @@ class MoleExecution(
       if (numberOfJobs == 0) {
         EventDispatcher.trigger(this, new IMoleExecution.Finished)
         _finished.single() = true
+        _endTime.single() = Some(System.currentTimeMillis)
       }
     }
 

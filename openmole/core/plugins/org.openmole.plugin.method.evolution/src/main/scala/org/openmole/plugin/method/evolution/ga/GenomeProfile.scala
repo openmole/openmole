@@ -25,12 +25,11 @@ object GenomeProfile {
   def apply(
     x: Int,
     nX: Int,
-    lambda: Int,
     termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F; type MF >: GenomeProfile#MF },
     inputs: Inputs,
     objectives: Objectives,
     cloneProbability: Double = 0.0) = {
-    val (_x, _nX, _cloneProbability, _inputs, _objectives, _lambda) = (x, nX, cloneProbability, inputs, objectives, lambda)
+    val (_x, _nX, _cloneProbability, _inputs, _objectives) = (x, nX, cloneProbability, inputs, objectives)
     new GenomeProfile {
       val inputs = _inputs
       val objectives = _objectives
@@ -43,7 +42,6 @@ object GenomeProfile {
       val gManifest: Manifest[G] = implicitly
 
       val genomeSize = inputs.size
-      val lambda = _lambda
       override val cloneProbability: Double = _cloneProbability
 
       val x = _x

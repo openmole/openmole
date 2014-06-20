@@ -11,7 +11,7 @@ import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.ide.core.implementation.data.EnvironmentDataUI
 import org.openmole.misc.workspace.Workspace
 import fr.iscpif.gridscale.slurm.Gres
-
+import org.openmole.misc.tools.service._
 class SLURMEnvironmentDataUI(val name: String = "",
                              val login: String = "",
                              val host: String = "",
@@ -45,7 +45,7 @@ class SLURMEnvironmentDataUI(val name: String = "",
       port,
       queue,
       openMOLEMemory,
-      wallTime,
+      wallTime.map(_.toDuration),
       memory,
       path,
       gresList.flatten,

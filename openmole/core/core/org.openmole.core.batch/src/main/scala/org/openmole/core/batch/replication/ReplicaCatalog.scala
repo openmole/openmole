@@ -72,7 +72,7 @@ object ReplicaCatalog extends Logger {
     configuration.common.objectClass(classOf[Replica]).objectField("_path").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_environment").indexed(true)
-    configuration.timeoutClientSocket(Workspace.preferenceAsDuration(SocketTimeout).toMilliSeconds.toInt)
+    configuration.timeoutClientSocket(Workspace.preferenceAsDuration(SocketTimeout).toMillis.toInt)
 
     Db4oClientServer.openClient(configuration, "localhost", info.port, info.user, info.password)
   }
@@ -99,7 +99,7 @@ object ReplicaCatalog extends Logger {
    }
    }*/
 
-  def inCatalog(environment: String)(implicit objectContainer: ObjectContainer) = inCatalogCache(inCatalogQuery(environment), Workspace.preferenceAsDuration(InCatalogCacheTime).toMilliSeconds)
+  def inCatalog(environment: String)(implicit objectContainer: ObjectContainer) = inCatalogCache(inCatalogQuery(environment), Workspace.preferenceAsDuration(InCatalogCacheTime).toMillis)
 
   private def inCatalogQuery(environment: String)(implicit objectContainer: ObjectContainer): Map[String, Set[String]] =
     objectContainer.queryByExample[Replica](new Replica(_environment = environment)).map {
@@ -173,7 +173,7 @@ object ReplicaCatalog extends Logger {
     src: File,
     srcPath: File,
     storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer) =
-    if (replica.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMilliSeconds < System.currentTimeMillis) {
+    if (replica.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMillis < System.currentTimeMillis) {
       if (storage.exists(replica.path)) {
         removeNoLock(replica)
         val toInsert = new Replica(_source = replica.source, _storage = replica.storage, _path = replica.path, _hash = replica.hash, _environment = replica.environment, _lastCheckExists = System.currentTimeMillis)

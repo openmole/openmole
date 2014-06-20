@@ -82,7 +82,7 @@ akka {
       self ! Upload(job)
 
     case Delay(msg, delay) ⇒
-      context.system.scheduler.scheduleOnce(delay milliseconds) {
+      context.system.scheduler.scheduleOnce(delay) {
         self ! msg
       }
 

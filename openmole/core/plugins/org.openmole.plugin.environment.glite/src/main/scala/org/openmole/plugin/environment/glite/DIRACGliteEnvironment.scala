@@ -23,6 +23,7 @@ import fr.iscpif.gridscale.glite.BDII
 import org.openmole.misc.filedeleter.FileDeleter
 import org.openmole.misc.exception.UserBadDataError
 import fr.iscpif.gridscale.dirac.DIRACJobService
+import concurrent.duration._
 
 object DIRACGliteEnvironment {
 
@@ -38,7 +39,7 @@ object DIRACGliteEnvironment {
     vomsURL: Option[String] = None,
     setup: Option[String] = None,
     fqan: Option[String] = None,
-    cpuTime: Option[String] = None,
+    cpuTime: Option[Duration] = None,
     openMOLEMemory: Option[Int] = None,
     debug: Boolean = false)(implicit authentications: AuthenticationProvider) =
     new DIRACGliteEnvironment(
@@ -64,7 +65,7 @@ class DIRACGliteEnvironment(
     val vomsURL: String,
     val setup: String,
     val fqan: Option[String],
-    val cpuTime: Option[String],
+    val cpuTime: Option[Duration],
     override val openMOLEMemory: Option[Int],
     val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId with LCGCp { env ⇒
 
@@ -80,8 +81,7 @@ class DIRACGliteEnvironment(
     GliteAuthentication.initialise(getAuthentication)(
       vomsURL,
       voName,
-      FileDeleter.deleteWhenGarbageCollected(Workspace.newFile("proxy", ".x509")),
-      GliteEnvironment.proxyTime.toSeconds,
+      GliteEnvironment.proxyTime,
       fqan)(authentications).cache(GliteEnvironment.proxyRenewalDelay)
   }
 
@@ -89,11 +89,11 @@ class DIRACGliteEnvironment(
 
   @transient lazy val jobService = new DIRACGliteJobService {
     def nbTokens = Workspace.preferenceAsInt(DIRACGliteEnvironment.LocalThreads)
-    val authentication = env.authentication
     val environment = env
     val jobService = new DIRACJobService {
       def group = env.group
       def service = env.service
+      def credential = env.authentication
     }
   }
 

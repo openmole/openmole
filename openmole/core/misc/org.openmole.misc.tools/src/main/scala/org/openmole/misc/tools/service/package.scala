@@ -17,9 +17,17 @@
 
 package org.openmole.misc.tools
 
+import org.joda.time.format.ISOPeriodFormat
+import concurrent.duration._
+
 package object service {
 
   def localHostName = LocalHostName.localHostName
   def newRNG(seed: Long) = Random.newRNG(seed)
 
+  implicit def stringToDuration(s: String): FiniteDuration = ISOPeriodFormat.standard.parsePeriod(s).toStandardSeconds.getSeconds seconds
+
+  implicit class StringDurationDecorator(s: String) {
+    def toDuration = stringToDuration(s)
+  }
 }

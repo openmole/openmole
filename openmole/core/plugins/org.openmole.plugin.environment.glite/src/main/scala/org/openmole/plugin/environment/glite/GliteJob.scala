@@ -22,7 +22,6 @@ import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.misc.workspace._
-import org.openmole.core.batch.storage.StorageService
 import org.openmole.misc.tools.service.Logger
 import fr.iscpif.gridscale.glite.WMSJobDescription
 import scala.util.{ Failure, Try }
@@ -39,8 +38,8 @@ object GliteJob extends Logger {
 
         try {
           state match {
-            case DONE   ⇒ jobService.jobService.downloadOutputSandbox(description, id)(jobService.authentication)
-            case FAILED ⇒ jobService.jobService.downloadOutputSandbox(description, id)(jobService.authentication)
+            case DONE   ⇒ jobService.jobService.downloadOutputSandbox(description, id)
+            case FAILED ⇒ jobService.jobService.downloadOutputSandbox(description, id)
             case _      ⇒
           }
         }
@@ -79,8 +78,8 @@ trait GliteJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
       def nbReady = jobService.environment.executionJobs.count(_.state == READY)
 
       if (nbReady < maxNbReady) {
-        val jobShakingAverageTime = Workspace.preferenceAsDuration(GliteEnvironment.JobShakingHalfLife).toMilliSeconds
-        val nbInterval = ((System.currentTimeMillis - lastShacked.toDouble) / jobShakingAverageTime)
+        val jobShakingAverageTime = Workspace.preferenceAsDuration(GliteEnvironment.JobShakingHalfLife)
+        val nbInterval = ((System.currentTimeMillis - lastShacked.toDouble) / jobShakingAverageTime.toMillis)
         val probability = 1 - math.pow(0.5, nbInterval)
 
         lastShacked = System.currentTimeMillis

@@ -35,7 +35,7 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
             if (job.state == DONE) jobManager ! GetResult(job, sj, bj.resultPath)
             else if (!job.state.isFinal) {
               val newDelay =
-                if (oldState == job.state) math.min(delay + job.environment.incrementUpdateInterval, job.environment.maxUpdateInterval)
+                if (oldState == job.state) (delay + job.environment.incrementUpdateInterval) min job.environment.maxUpdateInterval
                 else job.environment.minUpdateInterval
               jobManager ! Delay(Refresh(job, sj, bj, newDelay), newDelay)
             }

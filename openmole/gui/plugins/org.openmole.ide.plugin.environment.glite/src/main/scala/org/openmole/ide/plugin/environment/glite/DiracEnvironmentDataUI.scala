@@ -9,6 +9,7 @@ import org.openmole.plugin.environment.glite.{ GliteEnvironment, DIRACGliteEnvir
 import org.openmole.misc.workspace.Workspace
 import util.Try
 import org.openmole.ide.core.implementation.data.EnvironmentDataUI
+import org.openmole.misc.tools.service._
 
 class DiracEnvironmentDataUI(val name: String = "",
                              val voName: String = "",
@@ -29,7 +30,7 @@ class DiracEnvironmentDataUI(val name: String = "",
     Some(vomsURL),
     Some(setup),
     fqan,
-    cpuTime,
+    cpuTime.map(_.toDuration),
     openMOLEMemory)(Workspace.authenticationProvider))
 
   def coreClass = classOf[DIRACGliteEnvironment]

@@ -14,7 +14,7 @@ object Domain extends PluginDefaults {
 
   lazy val file = OsgiProject("file") dependsOn (Misc.exception, Core.implementation)
 
-  lazy val modifier = OsgiProject("modifier") dependsOn (Misc.exception, Core.implementation, Tools.groovy)
+  lazy val modifier = OsgiProject("modifier") dependsOn (Misc.exception, Core.implementation, Tool.groovy)
 
   lazy val range = OsgiProject("range") dependsOn (Core.implementation, Misc.exception)
 

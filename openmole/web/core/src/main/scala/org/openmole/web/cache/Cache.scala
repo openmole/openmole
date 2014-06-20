@@ -24,12 +24,12 @@ class Cache(system: ActorSystem, database: SlickDB) {
   val dataB = database.db
 
   dataB withSession { implicit session ⇒
-    if (MTable.getTables("MoleData").list().isEmpty)
+    if (MTable.getTables("MoleData").list.isEmpty)
       MoleData.instance.ddl.create // check that table exists somehow
   }
 
   dataB withSession { implicit session ⇒
-    if (MTable.getTables("MoleStats").list().isEmpty)
+    if (MTable.getTables("MoleStats").list.isEmpty)
       MoleStats.instance.ddl.create
   }
 
@@ -47,7 +47,7 @@ class Cache(system: ActorSystem, database: SlickDB) {
   def getMoleStats(key: String): Stats = {
     lazy val stats = getStatus(key) flatMap (s ⇒ dataB withSession { implicit session ⇒
       val status = Status.statuses.find(_.toString == s).getOrElse(throw new Exception("Unknown status on DB"))
-      (for (s ← MoleStats.instance if s.id === key) yield s.*).list().map {
+      (for (s ← MoleStats.instance if s.id === key) yield s.*).list.map {
         case (_, a, b, c, d, e) ⇒
           Stats(a, b, c, d, e, status)
       }.headOption
@@ -68,7 +68,7 @@ class Cache(system: ActorSystem, database: SlickDB) {
 
   def getStatus(moleId: String): Option[String] =
     dataB withSession { implicit session ⇒
-      (for (m ← MoleData.instance if m.id === moleId) yield m.state).list().headOption
+      (for (m ← MoleData.instance if m.id === moleId) yield m.state).list.headOption
     }
 
   def decacheMole(mole: IMoleExecution) = {

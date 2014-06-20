@@ -22,14 +22,14 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
   def org = "org.openmole"
 
   override def settings = super.settings ++
-    Seq(version in Global := "0.11.0-SNAPSHOT",
-      scalaVersion in Global := "2.10.4",
+    Seq(version in Global := "1.0-SNAPSHOT",
+      scalaVersion in Global := "2.11.1",
       scalacOptions ++= Seq("-deprecation"),
       publishArtifact in (packageDoc in install) := false,
       publishArtifact in (packageSrc in install) := false,
       scalatestVersion in Global := "2.1.5",
       junitVersion in Global := "4.11",
       concurrentRestrictions := Seq(Tags.limitAll(5), Tags.limit(Tags.Disk, 2)),
-      resolvers += Resolver.sonatypeRepo("snashots") // for scalatra 2.3 
+      resolvers += Resolver.sonatypeRepo("snapshots") // for scalatra 2.3 
     )
 }

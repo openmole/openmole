@@ -24,7 +24,7 @@ import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import org.openmole.plugin.task.code._
 import org.openmole.core.implementation.task._
 import org.openmole.core.model.data._
-import org.openmole.plugin.tools.groovy.ContextToGroovyCode
+import org.openmole.plugin.tool.groovy.ContextToGroovyCode
 
 object GroovyTask {
 

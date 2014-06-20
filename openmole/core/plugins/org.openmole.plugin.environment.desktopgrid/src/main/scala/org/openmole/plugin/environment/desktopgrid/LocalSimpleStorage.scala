@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.desktopgrid
 
 import org.openmole.core.batch.storage.{ RemoteStorage, SimpleStorage }
-import fr.iscpif.gridscale.LocalStorage
+import fr.iscpif.gridscale.storage.LocalStorage
 
 class LocalSimpleStorage extends SimpleStorage with RemoteStorage {
   val storage = new LocalStorage {}
