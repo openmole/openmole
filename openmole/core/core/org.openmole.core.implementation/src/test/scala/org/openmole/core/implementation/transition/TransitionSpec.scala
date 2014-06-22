@@ -119,11 +119,10 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
       val name = "Test read"
       override def inputs = DataSet(pArray)
       override def process(context: Context) = {
-        //println(context.value(pArtoStringray).map(_.intL))
-        context.value(pArray).get.map(_.intValue).contains(1) should equal(true)
-        context.value(pArray).get.map(_.intValue).contains(2) should equal(true)
+        context(pArray).map(_.intValue).contains(1) should equal(true)
+        context(pArray).map(_.intValue).contains(2) should equal(true)
 
-        context.value(pArray).get.getClass should equal(classOf[Array[java.lang.Number]])
+        context(pArray).getClass should equal(classOf[Array[java.lang.Number]])
         context
       }
     }
@@ -161,26 +160,24 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
       val name = "Test read conjonctive"
       override def inputs = DataSet(p1, p2.toArray)
       override def process(context: Context) = {
-        context.value(p1).get should equal("Test1")
-        context.value(p2.toArray).get.head should equal("Test2")
-        context.value(p2.toArray).get.size should equal(100)
+        context(p1) should equal("Test1")
+        context(p2.toArray).head should equal("Test2")
+        context(p2.toArray).size should equal(100)
         executed += 1
         context
       }
     }
 
-    val initc = new Capsule(init)
-    val t1c = new Capsule(t1)
+    val initc = Capsule(init)
+    val t1c = Capsule(t1)
 
     val t3c = Slot(t3)
 
-    val env = new LocalEnvironment(20)
-
     val mole = initc -- t1c -- t3c + (0 until 100).map {
-      i ⇒ initc -- (Capsule(t2) on env) -- t3c
+      i ⇒ initc -- t2 -- t3c
     }.reduce(_ + _)
 
-    mole.start.waitUntilEnded
+    mole.toExecution(defaultEnvironment = LocalEnvironment(20)).start.waitUntilEnded
     executed should equal(1)
   }
 

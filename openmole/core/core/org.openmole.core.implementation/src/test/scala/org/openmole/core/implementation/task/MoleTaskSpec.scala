@@ -39,12 +39,12 @@ class MoleTaskSpec extends FlatSpec with ShouldMatchers {
     val moleTask =
       MoleTask(
         "MoleTask",
-        new Mole(emptyC), emptyC)(PluginSet.empty)
+        Mole(emptyC), emptyC)(PluginSet.empty)
 
     moleTask addImplicit i
     moleTask addParameter (i -> "test")
 
-    new MoleExecution(new Mole(moleTask)).start.waitUntilEnded
+    MoleExecution(Mole(moleTask)).start.waitUntilEnded
   }
 
 }

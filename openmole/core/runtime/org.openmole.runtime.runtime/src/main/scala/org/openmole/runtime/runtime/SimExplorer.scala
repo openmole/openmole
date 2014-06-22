@@ -86,7 +86,7 @@ class SimExplorer extends IApplication {
           }
           finally storageFile.delete
 
-        LocalEnvironment.initializationNumberOfThread = config.nbThread
+        LocalEnvironment.default = LocalEnvironment(config.nbThread.getOrElse(1))
 
         new Runtime().apply(
           storage,

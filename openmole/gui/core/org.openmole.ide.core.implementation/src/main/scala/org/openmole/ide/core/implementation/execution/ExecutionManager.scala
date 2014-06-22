@@ -148,7 +148,7 @@ class ExecutionManager(manager: MoleUI,
         initBarPlotter
         buildMoleExecution match {
           case Success((mE, envNames)) ⇒
-            val mExecution = mE.toExecution(manager.context, executionContext.copy(out = printStream))
+            val mExecution = mE.toExecution(manager.context)(executionContext = executionContext.copy(out = printStream))
             moleExecution = Some(mExecution)
             EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
             EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])

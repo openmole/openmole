@@ -47,8 +47,8 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val t2 = EmptyTask("t2")
     t2 addInput p
 
-    val c1 = new Capsule(t1)
-    val c2 = new Capsule(t2)
+    val c1 = Capsule(t1)
+    val c2 = Capsule(t2)
 
     val mole = c1 -- c2
 
@@ -67,8 +67,8 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     t2 addInput p
     t2 addParameter (p -> "Test")
 
-    val c1 = new Capsule(t1)
-    val c2 = new Capsule(t2)
+    val c1 = Capsule(t1)
+    val c2 = Capsule(t2)
 
     val mole = c1 -- c2
 
@@ -85,8 +85,8 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val t2 = EmptyTask("t2")
     t2 addInput pString
 
-    val c1 = new Capsule(t1)
-    val c2 = new Capsule(t2)
+    val c1 = Capsule(t1)
+    val c2 = Capsule(t2)
 
     val mole = c1 -- c2
 
@@ -106,7 +106,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val t2 = EmptyTask("t2")
 
     val c1 = Slot(t1)
-    val c2 = new Capsule(t2)
+    val c2 = Capsule(t2)
 
     val mole = c1 -< c2 -- c1
 
@@ -118,7 +118,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val t1 = EmptyTask("t1")
     val t2 = EmptyTask("t2")
 
-    val c1 = new Capsule(t1)
+    val c1 = Capsule(t1)
     val c2 = Slot(t2)
 
     val mole = (c1 -- c2) + (c1 -- c2)
@@ -141,8 +141,8 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val t3 = EmptyTask("t2")
     t3 addInput p
 
-    val c1 = new Capsule(t1)
-    val c2 = new Capsule(t2)
+    val c1 = Capsule(t1)
+    val c2 = Capsule(t2)
     val c3 = Slot(t3)
 
     val mole = (c1 -- c2 -- c3) + (c1 oo (c3, Block(p)))
@@ -168,7 +168,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mt = MoleTask("mt", c1 -- c2)
 
-    val errors = Validation(new Mole(mt))
+    val errors = Validation(Mole(mt))
 
     errors.headOption match {
       case Some(MoleTaskDataFlowProblem(_, MissingInput(_, d))) ⇒ assert(d.prototype == p)
@@ -187,15 +187,15 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
         override def process(context: Context) = Context(Variable(p, "test"))
       }
 
-    val c1 = new Capsule(t1)
+    val c1 = Capsule(t1)
 
     val t2 = EmptyTask("t2")
     t2 addInput p
-    val c2 = new Capsule(t2)
+    val c2 = Capsule(t2)
 
     val mt = MoleTask("mt", c2)
 
-    val mtC = new Capsule(mt)
+    val mtC = Capsule(mt)
 
     val mole = c1 -- mtC
 
@@ -213,20 +213,20 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
         override def process(context: Context) = Context(Variable(p, "test"))
       }
 
-    val c1 = new Capsule(t1)
+    val c1 = Capsule(t1)
 
     val t2 = EmptyTask("t2")
     t2 addInput p
-    val c2 = new Capsule(t2)
+    val c2 = Capsule(t2)
 
     val t3 = EmptyTask("t3")
     t3 addInput p
-    val c3 = new Capsule(t3)
+    val c3 = Capsule(t3)
 
     val mt = MoleTask("mt", c2 -- c3)
     mt addImplicit p
 
-    val mtC = new Capsule(mt)
+    val mtC = Capsule(mt)
 
     val mole = c1 -- mtC
 
@@ -242,9 +242,9 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     t1 addOutput pInt
     t1 addOutput pString
 
-    val c1 = new Capsule(t1)
+    val c1 = Capsule(t1)
 
-    val errors = Validation.duplicatedName(new Mole(c1), Sources.empty, Hooks.empty)
+    val errors = Validation.duplicatedName(Mole(c1), Sources.empty, Hooks.empty)
     errors.headOption match {
       case Some(DuplicatedName(_, _, _, Output)) ⇒
       case _                                     ⇒ sys.error("Error should have been detected")
@@ -256,7 +256,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val t1 = EmptyTask("t1")
 
-    val c1 = new Capsule(t1)
+    val c1 = Capsule(t1)
 
     val h = new HookBuilder {
       addInput(i)
@@ -266,7 +266,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val errors = Validation.hookErrors(new Mole(c1), Iterable.empty, Sources.empty, Hooks(Map(c1 -> List(h))))
+    val errors = Validation.hookErrors(Mole(c1), Iterable.empty, Sources.empty, Hooks(Map(c1 -> List(h))))
     errors.headOption match {
       case Some(MissingHookInput(_, _, _)) ⇒
       case _                               ⇒ sys.error("Error should have been detected")
@@ -280,7 +280,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val t1 = EmptyTask("t1")
     t1 addOutput iString
 
-    val c1 = new Capsule(t1)
+    val c1 = Capsule(t1)
 
     val h = new HookBuilder {
       addInput(iInt)
@@ -290,7 +290,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val errors = Validation.hookErrors(new Mole(c1), Iterable.empty, Sources.empty, Hooks(Map(c1 -> List(h))))
+    val errors = Validation.hookErrors(Mole(c1), Iterable.empty, Sources.empty, Hooks(Map(c1 -> List(h))))
     errors.headOption match {
       case Some(WrongHookType(_, _, _, _)) ⇒
       case _                               ⇒ sys.error("Error should have been detected")
@@ -313,7 +313,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       }
     }.toSource
 
-    val mole = new Mole(c1)
+    val mole = Mole(c1)
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources(Map(c1 -> List(s))), Hooks.empty)
     errors.isEmpty should equal(true)
@@ -334,7 +334,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       }
     }.toSource
 
-    val mole = new Mole(c1)
+    val mole = Mole(c1)
 
     val errors = Validation.sourceTypeErrors(mole, List.empty, Sources(Map(c1 -> List(s))), Hooks.empty)
     errors.headOption match {
@@ -346,7 +346,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
   "Validation" should "detect a data channel error when a data channel is going from a level to a lower level" in {
     val i = Prototype[String]("i")
 
-    val exc = new Capsule(ExplorationTask("Exploration", new EmptySampling))
+    val exc = Capsule(ExplorationTask("Exploration", new EmptySampling))
 
     val testT = EmptyTask("Test")
     testT addOutput i
@@ -354,8 +354,8 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val noOP = EmptyTask("NoOP")
     val aggT = EmptyTask("Aggregation")
 
-    val testC = new Capsule(testT)
-    val noOPC = new Capsule(noOP)
+    val testC = Capsule(testT)
+    val noOPC = Capsule(noOP)
     val aggC = Slot(aggT)
 
     val mole = (exc -< testC -- noOPC >- aggC) + (testC oo aggC)
