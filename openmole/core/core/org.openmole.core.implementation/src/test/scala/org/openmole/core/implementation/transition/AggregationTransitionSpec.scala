@@ -27,13 +27,13 @@ import org.openmole.core.model.sampling._
 import org.openmole.core.model.task._
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
-class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
+class AggregationTransitionSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
 

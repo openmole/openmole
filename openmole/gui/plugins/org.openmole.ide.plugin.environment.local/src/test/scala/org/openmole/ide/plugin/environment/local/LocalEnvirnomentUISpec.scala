@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.environment.local
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class LocalEnvironmentUISpec extends FlatSpec with ShouldMatchers {
+class LocalEnvironmentUISpec extends FlatSpec with Matchers {
 
   "LocalEnvironmentDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)

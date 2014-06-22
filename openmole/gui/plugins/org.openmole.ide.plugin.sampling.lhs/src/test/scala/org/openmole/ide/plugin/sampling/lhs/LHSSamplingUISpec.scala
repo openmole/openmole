@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.sampling.lhs
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class LHSSamplingUISpec extends FlatSpec with ShouldMatchers {
+class LHSSamplingUISpec extends FlatSpec with Matchers {
 
   "LHSSamplingDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)

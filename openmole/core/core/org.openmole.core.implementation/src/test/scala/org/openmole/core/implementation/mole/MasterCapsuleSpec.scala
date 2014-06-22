@@ -25,7 +25,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
@@ -34,7 +34,7 @@ import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
 
 @RunWith(classOf[JUnitRunner])
-class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
+class MasterCapsuleSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
 

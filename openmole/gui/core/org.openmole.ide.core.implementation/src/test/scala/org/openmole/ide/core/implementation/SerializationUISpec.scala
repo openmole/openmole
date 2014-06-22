@@ -18,10 +18,10 @@
 package org.openmole.ide.plugin.task.groovy
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 
-class SerializationUISpec extends FlatSpec with ShouldMatchers {
+class SerializationUISpec extends FlatSpec with Matchers {
 
   "CapsuleData" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("capsule09.xml")) should equal(true)

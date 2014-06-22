@@ -22,12 +22,12 @@ import org.openmole.core.model.domain._
 import org.openmole.core.implementation.data._
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class MapDomainSpec extends FlatSpec with ShouldMatchers {
+class MapDomainSpec extends FlatSpec with Matchers {
 
   "MapDomain" should "change the values of a domain using groovy code" in {
     val r1 = (1 to 3)

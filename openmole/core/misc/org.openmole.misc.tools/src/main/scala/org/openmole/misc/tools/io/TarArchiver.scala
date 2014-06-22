@@ -17,6 +17,8 @@
 
 package org.openmole.misc.tools.io
 
+import java.security.{ PrivilegedAction, AccessController }
+
 import com.ice.tar.TarEntry
 import com.ice.tar.TarInputStream
 import com.ice.tar.TarOutputStream

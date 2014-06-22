@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.task.stat
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class StatTaskUISpec extends FlatSpec with ShouldMatchers {
+class StatTaskUISpec extends FlatSpec with Matchers {
 
   "AverageTaskDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("average09.xml")) should equal(true)

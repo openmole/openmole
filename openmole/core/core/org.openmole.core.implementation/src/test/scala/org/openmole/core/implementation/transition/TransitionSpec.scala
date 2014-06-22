@@ -25,12 +25,12 @@ import org.openmole.core.model.transition._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class TransitionSpec extends FlatSpec with ShouldMatchers {
+class TransitionSpec extends FlatSpec with Matchers {
 
   "A transition" should "enable variable values to be transmitted from a task to another" in {
     val p = Prototype[String]("p")
@@ -45,7 +45,7 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
       val name = "Test read"
       override def inputs = DataSet(p)
       override def process(context: Context) = {
-        context.value(p).get should equal("Test")
+        context(p) should equal("Test")
         context
       }
     }
@@ -78,8 +78,8 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
       val name = "Test read"
       override def inputs = DataSet(p1, p2)
       override def process(context: Context) = {
-        context.value(p1).get should equal("Test1")
-        context.value(p2).get should equal("Test2")
+        context(p1) should equal("Test1")
+        context(p2) should equal("Test2")
         context
       }
     }
@@ -205,12 +205,12 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
       val name = "Test read"
       override def inputs = DataSet(pArray)
       override def process(context: Context) = {
-        val res = IndexedSeq(context.value(pArray).get(0).deep, context.value(pArray).get(1).deep)
+        val res = IndexedSeq(context(pArray)(0).deep, context(pArray)(1).deep)
 
         res.contains(Array(new java.lang.Integer(1)).deep) should equal(true)
         res.contains(Array(new java.lang.Long(2L)).deep) should equal(true)
 
-        context.value(pArray).get.getClass should equal(classOf[Array[Array[java.lang.Number]]])
+        context(pArray).getClass should equal(classOf[Array[Array[java.lang.Number]]])
         context
       }
     }

@@ -25,12 +25,12 @@ import org.openmole.core.model.job._
 import org.openmole.core.model.mole._
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class HookSpec extends FlatSpec with ShouldMatchers {
+class HookSpec extends FlatSpec with Matchers {
 
   "A capsule execution misc" should "intercept the execution of a capsule" in {
     var executed = false

@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.environment.desktopgrid
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class DesktopEnvironmentUISpec extends FlatSpec with ShouldMatchers {
+class DesktopEnvironmentUISpec extends FlatSpec with Matchers {
 
   "DesktopEnvironmentDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)

@@ -23,12 +23,12 @@ import org.openmole.core.implementation.transition._
 import org.openmole.core.model.data._
 import org.openmole.core.model.transition._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class StrainerCapsuleSpec extends FlatSpec with ShouldMatchers {
+class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
   "The strainer capsule" should "let the data pass through" in {
     val p = Prototype[String]("p")
@@ -45,7 +45,7 @@ class StrainerCapsuleSpec extends FlatSpec with ShouldMatchers {
       val name = "Test read"
       override def inputs = DataSet(p)
       override def process(context: Context) = {
-        context.value(p).get should equal("Test")
+        context(p) should equal("Test")
         context
       }
     }
@@ -78,7 +78,7 @@ class StrainerCapsuleSpec extends FlatSpec with ShouldMatchers {
       val name = "Test read"
       override def inputs = DataSet(p)
       override def process(context: Context) = {
-        context.value(p).get should equal("Test")
+        context(p) should equal("Test")
         context
       }
     }

@@ -22,14 +22,14 @@ import org.scalatest.junit.JUnitRunner
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools._
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class VariableExpansionSpec extends FlatSpec with ShouldMatchers {
+class VariableExpansionSpec extends FlatSpec with Matchers {
 
   "A expandData" should "expand all the ${} top level sequence from an inputStream and return a parsed OuputStream" in {
     val template = """My first line

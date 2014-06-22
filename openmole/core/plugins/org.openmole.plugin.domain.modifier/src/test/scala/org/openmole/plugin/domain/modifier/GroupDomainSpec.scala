@@ -22,12 +22,12 @@ import org.openmole.core.model.domain._
 import org.openmole.core.implementation.data._
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class GroupDomainSpec extends FlatSpec with ShouldMatchers {
+class GroupDomainSpec extends FlatSpec with Matchers {
 
   "GroupDomain" should "change the values of a domain to an iterable of array" in {
     val r1 = (1 to 10)

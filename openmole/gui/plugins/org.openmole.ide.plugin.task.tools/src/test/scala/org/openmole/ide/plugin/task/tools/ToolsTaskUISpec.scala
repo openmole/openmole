@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.task.tools
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class ToolTaskUISpec extends FlatSpec with ShouldMatchers {
+class ToolTaskUISpec extends FlatSpec with Matchers {
 
   "AssignTaskDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("assign09.xml")) should equal(true)

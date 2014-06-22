@@ -25,13 +25,13 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.task._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
-class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
+class ExplorationTransitionSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
 
@@ -51,7 +51,7 @@ class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
       override def inputs = DataSet(i)
       override def process(context: Context) = synchronized {
         context.contains(i) should equal(true)
-        res += context.value(i).get
+        res += context(i)
         context
       }
     }

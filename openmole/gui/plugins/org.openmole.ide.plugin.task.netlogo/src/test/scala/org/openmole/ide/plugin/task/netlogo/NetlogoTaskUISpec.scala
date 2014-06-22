@@ -19,23 +19,23 @@ package org.openmole.ide.plugin.task.netlogo
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class NetlogoTaskUISpec extends FlatSpec with ShouldMatchers {
+class NetlogoTaskUISpec extends FlatSpec with Matchers {
+
+  "NetlogoTask4DataUI" should "be unserializable" in {
+    GUISerializer.serializable(getClass.getClassLoader.getResource("nl4_09.xml")) should equal(true)
+  }
 
   "NetlogoTask4DataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("nl4_09.xml")) should equal(true)
   }
 
-  "NetlogoTask4DataUI" should "be unserializable" in {
-    GUISerializer.serializable(getClass.getClassLoader.getResource("nl4_09.xml")) should equal(true)
-  }
-  
   "NetlogoTask5DataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("nl5_09.xml")) should equal(true)
   }
 
   "NetlogoTask5DataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("nl5_09.xml")) should equal(true)
-}
+  }
 }

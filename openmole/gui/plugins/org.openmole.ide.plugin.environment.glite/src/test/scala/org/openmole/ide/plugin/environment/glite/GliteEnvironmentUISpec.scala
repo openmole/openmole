@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.environment.glite
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class GliteEnvironmentUISpec extends FlatSpec with ShouldMatchers {
+class GliteEnvironmentUISpec extends FlatSpec with Matchers {
 
   "GliteEnvironmentDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)

@@ -31,12 +31,12 @@ import org.openmole.core.model.transition._
 
 import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.junit.runner.RunWith
 import org.openmole.core.implementation.validation.TopologyProblem.DataChannelNegativeLevelProblem
 
 @RunWith(classOf[JUnitRunner])
-class ValidationSpec extends FlatSpec with ShouldMatchers {
+class ValidationSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
 
