@@ -1,5 +1,7 @@
 package org.openmole.web.mole
 
+import org.openmole.core.implementation.execution.local.LocalEnvironment
+
 import scala.reflect.ClassTag
 import scala.io.{ Codec, Source }
 import java.io._
@@ -106,10 +108,10 @@ trait MoleHandling { self: ScalatraBase ⇒
     Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
   }
 
-  private def createMoleExecution(pMole: IPartialMoleExecution, ctxt: Context, encapsulated: Boolean, mPath: Option[File] = None) = {
+  private def createMoleExecution(pMole: IPartialMoleExecution, context: Context, encapsulated: Boolean, mPath: Option[File] = None) = {
     val path: Option[File] = mPath orElse (if (encapsulated) Some(Workspace.newDir("")) else None)
-    val context = ExecutionContext(new PrintStream(new File(path.getOrElse(".") + "/out")), path)
-    val mole = pMole.toExecution(ctxt, context)
+    val executionContext = ExecutionContext(new PrintStream(new File(path.getOrElse(".") + "/out")), path)
+    val mole = pMole.toExecution(context)(executionContext = executionContext)
 
     EventDispatcher.listen(mole, listener, classOf[IMoleExecution.JobStatusChanged])
     EventDispatcher.listen(mole, listener, classOf[IMoleExecution.JobCreated])

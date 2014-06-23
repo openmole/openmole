@@ -18,11 +18,12 @@
 package org.openmole.core.model.mole
 
 import org.openmole.core.model.data._
+import org.openmole.core.model.execution._
 
 trait IPartialMoleExecution {
   def mole: IMole
   def hooks: Hooks
   def sources: Sources
 
-  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local): IMoleExecution
+  def toExecution(implicits: Context = Context.empty)(implicit executionContext: ExecutionContext): IMoleExecution
 }

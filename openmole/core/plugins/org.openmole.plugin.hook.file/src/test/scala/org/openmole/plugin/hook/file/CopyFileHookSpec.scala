@@ -27,14 +27,14 @@ import org.openmole.core.model.data.Context
 import org.openmole.misc.hashservice.HashService._
 import org.openmole.misc.tools.io.FileUtil._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import java.io.FileWriter
 import org.junit.runner.RunWith
 import scala.io.Source
 
 @RunWith(classOf[JUnitRunner])
-class CopyFileHookSpec extends FlatSpec with ShouldMatchers {
+class CopyFileHookSpec extends FlatSpec with Matchers {
 
   "A copy file misc" should "copy a file after the execution of a capsule" in {
     val f = File.createTempFile("test", ".tmp")
@@ -60,7 +60,7 @@ class CopyFileHookSpec extends FlatSpec with ShouldMatchers {
 
     val hook = CopyFileHook(p, fDest.getAbsolutePath)
 
-    val ex = MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
+    val ex = MoleExecution(Mole(t1c), hooks = List(t1c -> hook))
 
     ex.start.waitUntilEnded
 

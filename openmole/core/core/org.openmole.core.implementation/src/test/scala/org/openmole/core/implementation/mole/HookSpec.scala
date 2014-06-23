@@ -25,12 +25,12 @@ import org.openmole.core.model.job._
 import org.openmole.core.model.mole._
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class HookSpec extends FlatSpec with ShouldMatchers {
+class HookSpec extends FlatSpec with Matchers {
 
   "A capsule execution misc" should "intercept the execution of a capsule" in {
     var executed = false
@@ -43,7 +43,7 @@ class HookSpec extends FlatSpec with ShouldMatchers {
       override def process(context: Context) = context + (p -> "test")
     }
 
-    val t1c = new Capsule(t1)
+    val t1c = Capsule(t1)
 
     val hook = new HookBuilder {
       def toHook = new IHook with Built {
@@ -56,7 +56,7 @@ class HookSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val ex = MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
+    val ex = MoleExecution(Mole(t1c), hooks = List(t1c -> hook))
 
     ex.start.waitUntilEnded
 
@@ -88,7 +88,7 @@ class HookSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val ex = MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
+    val ex = MoleExecution(Mole(t1c), hooks = List(t1c -> hook))
 
     ex.start.waitUntilEnded
 

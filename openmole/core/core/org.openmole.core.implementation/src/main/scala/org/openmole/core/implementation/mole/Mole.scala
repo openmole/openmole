@@ -55,12 +55,17 @@ object Mole {
     cache
   }
 
+  def apply(
+    root: ICapsule,
+    transitions: Iterable[ITransition] = Iterable.empty,
+    dataChannels: Iterable[IDataChannel] = Iterable.empty) = new Mole(root, transitions, dataChannels)
+
 }
 
 class Mole(
     val root: ICapsule,
-    val transitions: Iterable[ITransition] = Iterable.empty,
-    val dataChannels: Iterable[IDataChannel] = Iterable.empty) extends IMole {
+    val transitions: Iterable[ITransition],
+    val dataChannels: Iterable[IDataChannel]) extends IMole {
 
   lazy val levels = Mole.levels(this)
   def level(c: ICapsule) = levels(c)

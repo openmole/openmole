@@ -23,21 +23,16 @@ import org.openmole.misc.workspace._
 import org.openmole.misc.eventdispatcher._
 import scala.ref.WeakReference
 
-object LocalEnvironment extends Environment {
+object LocalEnvironment {
 
   val DefaultNumberOfThreads = new ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber")
 
-  Workspace += (DefaultNumberOfThreads, Integer.toString(1))
+  Workspace += (DefaultNumberOfThreads, "1")
+  def numberOfThread = Workspace.preferenceAsInt(DefaultNumberOfThreads)
 
-  var initializationNumberOfThread: Option[Int] = None
-  def numberOfThread = initializationNumberOfThread.getOrElse(Workspace.preferenceAsInt(DefaultNumberOfThreads))
+  def apply(nbThreads: Int = numberOfThread) = new LocalEnvironment(nbThreads)
 
-  var default = new LocalEnvironment(numberOfThread)
-
-  override def submit(job: IJob) = default.submit(job)
-
-  def apply(nbThreads: Int) = new LocalEnvironment(nbThreads)
-
+  var default = LocalEnvironment()
 }
 
 class LocalEnvironment(val nbThreads: Int) extends Environment {
@@ -46,9 +41,11 @@ class LocalEnvironment(val nbThreads: Int) extends Environment {
 
   def nbJobInQueue = pool.inQueue
 
-  override def submit(job: IJob) = submit(new LocalExecutionJob(this, job.moleJobs))
+  override def submit(job: IJob) =
+    submit(new LocalExecutionJob(this, job.moleJobs))
 
-  def submit(moleJob: IMoleJob): Unit = submit(new LocalExecutionJob(this, List(moleJob)))
+  def submit(moleJob: IMoleJob): Unit =
+    submit(new LocalExecutionJob(this, List(moleJob)))
 
   private def submit(ejob: LocalExecutionJob) = {
     EventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))

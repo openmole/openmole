@@ -24,13 +24,13 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import org.openmole.misc.tools.io.FileUtil._
 
 @RunWith(classOf[JUnitRunner])
-class CSVSamplingSpec extends FlatSpec with ShouldMatchers {
+class CSVSamplingSpec extends FlatSpec with Matchers {
 
   "CSVSampling" should "detect the correct mapping between csv header defined column" in {
     val p1 = Prototype[String]("col1")

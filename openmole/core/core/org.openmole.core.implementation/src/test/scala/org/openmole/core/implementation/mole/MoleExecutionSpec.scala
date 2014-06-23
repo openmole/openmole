@@ -30,13 +30,13 @@ import org.openmole.core.model.sampling._
 import org.openmole.core.model.task._
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
-class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
+class MoleExecutionSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
 
@@ -63,7 +63,7 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
     emptyT.addInput(i)
     emptyT.addOutput(i)
 
-    val emptyC = new Capsule(emptyT)
+    val emptyC = Capsule(emptyT)
 
     val testT = new TestTask {
       val name = "Test"
@@ -75,11 +75,11 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val testC = new Capsule(testT)
+    val testC = Capsule(testT)
 
     val ex = exc -< emptyC >- testC
 
-    new MoleExecution(
+    MoleExecution(
       mole = ex,
       grouping = Map(emptyC -> new JobGroupingBy2Test)).start.waitUntilEnded
   }
@@ -89,8 +89,7 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
     val emptyT = EmptyTask("Empty")
     emptyT.addInput(i)
 
-    val emptyC = new Capsule(emptyT)
-    new MoleExecution(
-      mole = new Mole(emptyC))(implicits = Context(Variable(i, "test"))).start.waitUntilEnded
+    val emptyC = Capsule(emptyT)
+    MoleExecution(mole = Mole(emptyC), implicits = Context(Variable(i, "test"))).start.waitUntilEnded
   }
 }

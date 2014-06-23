@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.environment.pbs
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class PBSEnvironmentUISpec extends FlatSpec with ShouldMatchers {
+class PBSEnvironmentUISpec extends FlatSpec with Matchers {
 
   "PBSEnvironmentDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)

@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.domain.modifier
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class ModifierDomainUISpec extends FlatSpec with ShouldMatchers {
+class ModifierDomainUISpec extends FlatSpec with Matchers {
 
   "GroupDomainDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("group09.xml")) should equal(true)

@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.task.exploration
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class ExplorationTaskUISpec extends FlatSpec with ShouldMatchers {
+class ExplorationTaskUISpec extends FlatSpec with Matchers {
 
   "ExplorationTaskDataUI 0.9" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)

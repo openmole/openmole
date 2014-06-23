@@ -18,10 +18,10 @@
 package org.openmole.ide.plugin.task.groovy
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 
-class TemplateTaskUISpec extends FlatSpec with ShouldMatchers {
+class TemplateTaskUISpec extends FlatSpec with Matchers {
 
   "TemplateTaskDataUI" should "be unserializable" in {
     true should equal(true)

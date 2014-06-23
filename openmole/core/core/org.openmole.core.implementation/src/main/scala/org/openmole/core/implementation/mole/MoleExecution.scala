@@ -60,25 +60,27 @@ object MoleExecution extends Logger {
     grouping: Map[ICapsule, Grouping] = Map.empty,
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
-    executionContext: ExecutionContext = ExecutionContext.local) =
+    defaultEnvironment: Environment = LocalEnvironment.default)(implicit executionContext: ExecutionContext) =
     PartialMoleExecution(
       mole,
       sources,
       hooks,
       environments,
       grouping,
-      seed).toExecution(implicits, executionContext)
+      seed,
+      defaultEnvironment).toExecution(implicits)(executionContext)
 
 }
 
 class MoleExecution(
     val mole: IMole,
-    val sources: Sources = Sources.empty,
-    val hooks: Hooks = Hooks.empty,
-    val environments: Map[ICapsule, Environment] = Map.empty,
-    val grouping: Map[ICapsule, Grouping] = Map.empty,
-    seed: Long = Workspace.newSeed,
-    override val id: String = UUID.randomUUID().toString)(implicit val implicits: Context = Context.empty, implicit val executionContext: ExecutionContext = ExecutionContext.local) extends IMoleExecution {
+    val sources: Sources,
+    val hooks: Hooks,
+    val environments: Map[ICapsule, Environment],
+    val grouping: Map[ICapsule, Grouping],
+    val seed: Long,
+    val defaultEnvironment: Environment,
+    override val id: String = UUID.randomUUID().toString)(val implicits: Context, val executionContext: ExecutionContext) extends IMoleExecution {
 
   import IMoleExecution._
   import MoleExecution._
@@ -140,7 +142,7 @@ class MoleExecution(
 
   private def submit(job: IJob, capsule: ICapsule) =
     if (!job.finished) {
-      val env = environments.getOrElse(capsule, LocalEnvironment)
+      val env = environments.getOrElse(capsule, defaultEnvironment)
       env.submit(job)
       EventDispatcher.trigger(this, new IMoleExecution.JobSubmitted(job, capsule, env))
     }

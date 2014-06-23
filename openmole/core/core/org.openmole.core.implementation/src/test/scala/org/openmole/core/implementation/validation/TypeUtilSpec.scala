@@ -28,11 +28,11 @@ import org.openmole.core.model.transition._
 import org.openmole.core.model.mole._
 import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class TypeUtilSpec extends FlatSpec with ShouldMatchers {
+class TypeUtilSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
 

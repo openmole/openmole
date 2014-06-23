@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.domain.file
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class FileDomainUISpec extends FlatSpec with ShouldMatchers {
+class FileDomainUISpec extends FlatSpec with Matchers {
 
   "FileDomainDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)

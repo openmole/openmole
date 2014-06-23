@@ -23,13 +23,13 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class GroovyTaskSpec extends FlatSpec with ShouldMatchers {
+class GroovyTaskSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
 

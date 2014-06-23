@@ -18,12 +18,12 @@
 package org.openmole.misc.tools.obj
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class ClassUtilsSpec extends FlatSpec with ShouldMatchers {
+class ClassUtilsSpec extends FlatSpec with Matchers {
 
   "Is assignable from" should "work with native types" in {
     ClassUtils.assignable(java.lang.Double.TYPE, classOf[java.lang.Double]) should equal(true)

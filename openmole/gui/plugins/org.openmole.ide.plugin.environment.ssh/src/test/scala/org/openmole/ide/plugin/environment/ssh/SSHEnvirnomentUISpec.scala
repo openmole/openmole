@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.environment.ssh
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class SSHEnvironmentUISpec extends FlatSpec with ShouldMatchers {
+class SSHEnvironmentUISpec extends FlatSpec with Matchers {
 
   "SSHEnvironmentDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)
