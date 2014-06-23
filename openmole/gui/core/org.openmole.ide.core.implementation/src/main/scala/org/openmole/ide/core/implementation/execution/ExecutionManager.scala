@@ -224,7 +224,8 @@ class ExecutionManager(manager: MoleUI,
 
   def initBarPlotter = synchronized {
     environments.clear
-    buildEmptyEnvPlotter(LocalEnvironment.asInstanceOf[Environment], "Local")
+    // buildEmptyEnvPlotter(LocalEnvironment.asInstanceOf[Environment], "Local")
+    buildEmptyEnvPlotter(new LocalEnvironment(1), "Local")
   }
 
   def buildEmptyEnvPlotter(env: Environment, name: String) = {
