@@ -74,7 +74,7 @@ object Libraries extends Defaults(Apache) {
   lazy val slf4j = OsgiProject("org.slf4j") settings (libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2")
 
   lazy val xstream = OsgiProject("com.thoughtworks.xstream", buddyPolicy = Some("global"), privatePackages = Seq("!scala.*", "*")) settings
-    (libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.6",
+    (libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.7",
       "net.sf.kxml" % "kxml2" % "2.3.0"), bundleType += "dbserver")
 
   lazy val groovy = OsgiProject("org.codehaus.groovy", buddyPolicy = Some("global"), exports = Seq("groovy.*", "org.codehaus.*"),

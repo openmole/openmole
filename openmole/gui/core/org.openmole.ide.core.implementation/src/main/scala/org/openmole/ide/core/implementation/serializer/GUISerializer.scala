@@ -54,15 +54,11 @@ object GUISerializer extends Logger {
 
   implicit def urlToFile(url: URL): File = new File(url.toURI)
 
-  def unserialise(url: URL) = instance.read(url)
+  def unserialise(url: URL) =
+    try instance.read(url)
+    finally instance.clear
 
-  def serializable(url: URL): Boolean = try {
-    unserialise(url)
-    true
-  }
-  catch {
-    case x: Throwable ⇒ false
-  }
+  def serializable(url: URL): Boolean = Try(unserialise(url)).isSuccess
 }
 
 import GUISerializer.Log._
@@ -349,17 +345,18 @@ class GUISerializer { self ⇒
   }
   finally clear
 
-  def read(f: File) = try {
+  def read(f: File) = {
     try f.withInputStream(deserialiser.xStream.fromXML)
     catch {
       case e: Throwable ⇒
         throw new InternalProcessingError(e, "An error occurred when loading " + f.getAbsolutePath + "\n")
     }
   }
-  finally clear
 
   def deserializeConcept[T](clazz: Class[_], workDir: File): Writer[List[Throwable], List[T]] = {
-    val res = new File(workDir, folder(clazz)).listFiles.toList.map(
+    val dir = new File(workDir, folder(clazz))
+
+    val res = dir.listFiles.toList.map(
       f ⇒ Try(read(f).asInstanceOf[T])
     )
     res.collect { case Success(s) ⇒ s }.set(res.collect { case Failure(f) ⇒ f })
@@ -418,11 +415,11 @@ class GUISerializer { self ⇒
       (proxies, moleScenes)
     }
 
-    result
+    result.map(i ⇒ i)
   }
   finally clear
 
-  private def clear = {
+  private[GUISerializer] def clear = {
     serializationStates.clear
     deserializationStates.clear
     workDir.recursiveDelete

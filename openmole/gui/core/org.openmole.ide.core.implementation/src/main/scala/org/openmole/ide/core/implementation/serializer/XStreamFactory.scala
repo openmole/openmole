@@ -35,6 +35,11 @@ object XStreamFactory {
     xstream.alias("HashMap", collection.immutable.HashMap.empty.getClass.asInstanceOf[Class[_]])
     xstream.registerConverter(new HashMapConverter())
     xstream.registerConverter(new Tuple2Converter())
+
+    xstream.alias("Right", classOf[Right[_, _]])
+    xstream.alias("Left", classOf[Left[_, _]])
+
+    xstream.registerConverter(new EitherConverter())
     xstream
   }
 }
