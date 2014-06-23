@@ -7,7 +7,6 @@ package org.openmole.ide.plugin.task.netlogo
 
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.TaskDataUI
-import org.openmole.ide.plugin.task.netlogo.Util.Workspace
 import org.openmole.plugin.task.netlogo5.NetLogo5Task
 import scala.io.Source
 import java.io.File
@@ -15,7 +14,7 @@ import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataPr
 import org.openmole.ide.core.implementation.serializer.Update
 import org.openmole.ide.misc.tools.util.Converters._
 
-@deprecated
+@deprecated("NetLogo5TaskDataUI010 is now used", "0.10")
 class NetLogo5TaskDataUI(name: String = "",
                          workspaceEmbedded: Boolean = false,
                          nlogoPath: String = "",
@@ -27,7 +26,7 @@ class NetLogo5TaskDataUI(name: String = "",
                          outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
                          inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[NetLogo5TaskDataUI010] {
   def update = new NetLogo5TaskDataUI010(name,
-    Util.toWorkspace(nlogoPath, workspaceEmbedded),
+    Workspace.toWorkspace(nlogoPath, workspaceEmbedded),
     lauchingCommands,
     prototypeMappingInput,
     prototypeMappingOutput,
@@ -38,7 +37,7 @@ class NetLogo5TaskDataUI(name: String = "",
 }
 
 class NetLogo5TaskDataUI010(val name: String = "",
-                            val workspace: Workspace = new Workspace(new File("")),
+                            val workspace: Workspace = EmptyWorkspace,
                             val lauchingCommands: String = "",
                             val prototypeMappingInput: List[(PrototypeDataProxyUI, String, Int)] = List(),
                             val prototypeMappingOutput: List[(String, PrototypeDataProxyUI, Int)] = List(),
@@ -49,7 +48,7 @@ class NetLogo5TaskDataUI010(val name: String = "",
   def coreObject(plugins: PluginSet) = util.Try {
     val builder = NetLogo5Task(
       name,
-      workspace.coreObject,
+      Workspace.toCoreObject(workspace),
       Source.fromString(lauchingCommands).getLines.toIterable)(plugins)
     initialise(builder)
     resources.foreach {

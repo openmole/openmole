@@ -30,7 +30,6 @@ import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.plugin.task.netlogo.Util.Workspace
 import scala.swing._
 import org.openmole.plugin.tool.netlogo.NetLogo
 import scala.swing.FileChooser._
@@ -51,9 +50,9 @@ abstract class GenericNetLogoPanelUI(
     prototypeMappingOutput: List[(String, PrototypeDataProxyUI, Int)],
     resources: List[String])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("") with TaskPanelUI {
 
-  val (nlogoPath, workspaceEmbedded) = Util.fromWorkspace(workspace)
+  val (nlogoPath, workspaceEmbedded) = Workspace.fromWorkspace(workspace)
 
-  val nlogoTextField = new ChooseFileTextField(nlogoPath,
+  val nlogoTextField = new ChooseFileTextField(nlogoPath.getPath,
     "Select a nlogo file",
     SelectionMode.FilesOnly,
     Some("Netlogo files" -> Seq("nlogo")),

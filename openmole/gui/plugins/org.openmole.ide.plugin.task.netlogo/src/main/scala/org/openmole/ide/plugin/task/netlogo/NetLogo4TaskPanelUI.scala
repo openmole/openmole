@@ -28,7 +28,7 @@ class NetLogo4TaskPanelUI(ndu: NetLogo4TaskDataUI010) extends GenericNetLogoPane
   ndu.prototypeMappingOutput,
   ndu.resources) {
   override def saveContent(name: String): TaskDataUI = new NetLogo4TaskDataUI010(name,
-    Util.toWorkspace(nlogoTextField.text, workspaceCheckBox.selected),
+    Workspace.toWorkspace(nlogoTextField.text, workspaceCheckBox.selected),
     launchingCommandTextArea.text,
     Converters.flattenTuple2Options(multiProtoString.content.map { c ⇒ (c.comboValue1, c.comboValue2) }).filter { case (p, s) ⇒ Proxies.check(p) },
     Converters.flattenTuple2Options(multiStringProto.content.map { c ⇒ (c.comboValue1, c.comboValue2) }).filter { case (s, p) ⇒ Proxies.check(p) },
