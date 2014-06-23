@@ -24,7 +24,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.core.implementation.execution.{ Settings, ScenesManager }
 import org.openmole.ide.core.implementation.workflow.{ ISceneContainer, BuildMoleScene, ExecutionMoleSceneContainer }
 import scala.swing.FileChooser.SelectionMode._
 import swing._
@@ -52,6 +52,14 @@ object DialogFactory {
       fileSelectionMode = FilesOnly
       title = titleText
     }
+
+  def directoryChooser(titleText: String,
+                       dir: Option[File] = None) = {
+    new FileChooser(dir.getOrElse(new File(System.getProperty("user.home")))) {
+      fileSelectionMode = DirectoriesOnly
+      title = titleText
+    }
+  }
 
   def closeExecutionTab(exeContainer: ExecutionMoleSceneContainer): Boolean = {
     if (exeContainer.finished) true
@@ -86,9 +94,32 @@ object DialogFactory {
     val encryptedPass = Workspace.encrypt(new String(passTextField.password))
     if (notification == -1 || notification == 0) {
       /* if (!serverTextField.text.startsWith("http://")) ("http://" + serverTextField.text, encryptedPass)
-      else*/ (serverTextField.text, encryptedPass)
+        else*/ (serverTextField.text, encryptedPass)
     }
     else ("", "")
+  }
+
+  def importProjectDialog: Option[(File, File)] = {
+    val defaultP = Settings.currentPath match {
+      case Some(f: File) ⇒ f.getAbsolutePath
+      case _             ⇒ ""
+    }
+    val fileChooser = new ChooseFileTextField(defaultP, "Select a directory", SelectionMode.FilesOnly, Some("om files", Seq("om")))
+    val directoryChooser = new ChooseFileTextField(defaultP, "Folder for embedded files extraction", SelectionMode.DirectoriesOnly)
+
+    val d = new DialogDescriptor(new PluginPanel("wrap") {
+      contents += new PluginPanel("wrap 2") {
+        contents += new Label("Project file")
+        contents += fileChooser
+        contents += new Label("Merge resources in ")
+        contents += directoryChooser
+      }
+    }.peer, "Import project")
+
+    d.setOptions(List(NotifyDescriptor.OK_OPTION).toArray)
+    val notification = DialogDisplayer.getDefault.notify(d)
+    if (notification == -1 || notification == 0) Some((new File(fileChooser.text), new File(directoryChooser.text)))
+    else None
   }
 
   def confirmationDialog(header: String,
@@ -144,14 +175,15 @@ object DialogFactory {
       case Some(t: String) ⇒ ExecutionSerialiser(s.dataUI, t, withArchiveCheckBox.selected)
       case _               ⇒
       /*
-      case Some(t: String) ⇒ MoleFactory.buildMoleExecution(s.dataUI) match {
-        case Success(mE) ⇒
-          if (withArchiveCheckBox.selected) SerializerService.serializeAndArchiveFiles(mE._1, new File(t))
-          else SerializerService.serialize(mE._1, new File(t))
-        case Failure(t) ⇒ StatusBar().warn("The mole can not be serialized due to " + t.getMessage)
-      }
-      case _ ⇒
-    }  */
+        case Some(t: String) ⇒ MoleFactory.buildMoleExecution(s.dataUI) match {
+          case Success(mE) ⇒
+            if (withArchiveCheckBox.selected) SerializerService.serializeAndArchiveFiles(mE._1, new File(t))
+            else SerializerService.serialize(mE._1, new File(t))
+          case Failure(t) ⇒ StatusBar().warn("The mole can not be serialized due to " + t.getMessage)
+        }
+        case _ ⇒
+      }  */
     }
   }
+
 }
