@@ -30,8 +30,8 @@ object GenomeMap {
     termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F; type MF >: GenomeMap#MF },
     inputs: Inputs[Double],
     objectives: Objectives,
-    cloneProbability: Double = 0.0) = {
-    val (_x, _nX, _y, _nY, _cloneProbability, _inputs, _objectives) = (x, nX, y, nY, cloneProbability, inputs, objectives)
+    reevaluate: Double = 0.0) = {
+    val (_x, _nX, _y, _nY, _reevaluate, _inputs, _objectives) = (x, nX, y, nY, reevaluate, inputs, objectives)
     new GenomeMap {
       val inputs = _inputs
       val objectives = _objectives
@@ -44,7 +44,7 @@ object GenomeMap {
       val gManifest: Manifest[G] = implicitly
 
       val genomeSize = inputs.size
-      override val cloneProbability: Double = _cloneProbability
+      override val cloneProbability: Double = _reevaluate
 
       val x = _x
       val y = _y

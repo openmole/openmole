@@ -17,25 +17,14 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.plugin.method.evolution.algorithm.DoubleSequencePhenotype
 import fr.iscpif.mgo._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
-import scala.collection.mutable.ListBuffer
-import org.openmole.core.implementation.tools.VariableExpansion
 import ga._
 
 object ToIndividualTask {
-
-  def expand(objectives: List[(Prototype[Double], String)], context: Context): List[(Prototype[Double], Double)] =
-    if (objectives.isEmpty) List.empty
-    else {
-      val (p, v) = objectives.head
-      val vDouble = VariableExpansion(context, v).toDouble
-      (p, vDouble) :: expand(objectives.tail, context + Variable(p, vDouble))
-    }
 
   def apply(evolution: GAAlgorithm)(
     name: String,
@@ -43,7 +32,6 @@ object ToIndividualTask {
     individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]])(implicit plugins: PluginSet) = {
 
     new TaskBuilder { builder ⇒
-
       evolution.outputPrototypes.foreach(p ⇒ addInput(p))
 
       addInput(genome)
@@ -67,11 +55,7 @@ sealed abstract class ToIndividualTask(val evolution: GAAlgorithm)(
   def individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]]
 
   override def process(context: Context) = {
-
-    val scaled: List[(Prototype[Double], Double)] =
-      ToIndividualTask.expand(evolution.objectives.toList, context).map {
-        case (o, v) ⇒ o -> math.abs(context(o) - v)
-      }
+    val scaled: Seq[(Prototype[Double], Double)] = evolution.objectives.map(o ⇒ o -> context(o))
 
     val i: Individual[evolution.G, evolution.P, evolution.F] =
       Individual(

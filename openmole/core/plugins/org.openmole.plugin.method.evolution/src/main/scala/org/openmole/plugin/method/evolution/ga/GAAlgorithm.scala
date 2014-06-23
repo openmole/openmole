@@ -38,7 +38,7 @@ trait GAAlgorithm extends Archive
   def inputs: Inputs[_]
   def objectives: Objectives
   def inputsPrototypes = inputs.inputs.map(_.prototype)
-  def outputPrototypes = objectives.map(_._1)
+  def outputPrototypes = objectives
   def toVariables(genome: G, context: Context): Seq[Variable[_]] = scaled(values.get(genome), context)
   def toVariables(individuals: Seq[Individual[G, P, F]], context: Context): Seq[Variable[_]] = {
     val scaledValues = individuals.map(i ⇒ scaled(values.get(i.genome), context).toIndexedSeq)
@@ -50,7 +50,7 @@ trait GAAlgorithm extends Archive
           case Sequence(prototype, _, _, _) ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Array[Double]]).toArray[Array[Double]])
         }
     }.toList ++
-      objectives.map(_._1).zipWithIndex.map {
+      objectives.zipWithIndex.map {
         case (p, i) ⇒
           Variable(
             p.toArray,

@@ -30,8 +30,8 @@ object Optimisation {
     dominance: Dominance = Strict,
     ranking: GARankingBuilder = Pareto,
     diversityMetric: DiversityMetricBuilder = Crowding,
-    cloneProbability: Double = 0.0) = {
-    val (_mu, _ranking, _diversityMetric, _cloneProbability, _inputs, _objectives) = (mu, ranking, diversityMetric, cloneProbability, inputs, objectives)
+    reevaluate: Double = 0.0) = {
+    val (_mu, _ranking, _diversityMetric, _reevaluate, _inputs, _objectives) = (mu, ranking, diversityMetric, reevaluate, inputs, objectives)
     new Optimisation {
       val inputs = _inputs
       val objectives = _objectives
@@ -44,7 +44,7 @@ object Optimisation {
 
       val genomeSize = inputs.size
 
-      override val cloneProbability: Double = _cloneProbability
+      override val cloneProbability: Double = _reevaluate
 
       val diversityMetric = _diversityMetric(dominance)
       val ranking = _ranking(dominance)

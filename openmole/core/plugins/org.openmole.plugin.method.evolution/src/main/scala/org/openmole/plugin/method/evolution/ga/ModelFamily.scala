@@ -34,8 +34,8 @@ object ModelFamily {
     modelId: Prototype[Int],
     inputs: Inputs[String],
     objectives: Objectives,
-    cloneProbability: Double = 0.0) = {
-    val (_mu, _cloneProbability, _lambda, _inputs, _objectives, _nicheSize, _models, _modelId) = (mu, cloneProbability, lambda, inputs, objectives, nicheSize, models, modelId)
+    reevaluate: Double = 0.0) = {
+    val (_mu, _reevaluate, _lambda, _inputs, _objectives, _nicheSize, _models, _modelId) = (mu, reevaluate, lambda, inputs, objectives, nicheSize, models, modelId)
     new ModelFamily {
       val inputs = _inputs
       val objectives = _objectives
@@ -51,7 +51,7 @@ object ModelFamily {
       val nicheSize = _nicheSize
       val models = _models
 
-      override val cloneProbability: Double = _cloneProbability
+      override val cloneProbability: Double = _reevaluate
 
       val mu = _mu
       type STATE = termination.STATE
