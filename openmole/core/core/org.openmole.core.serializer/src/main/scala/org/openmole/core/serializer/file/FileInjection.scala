@@ -21,7 +21,7 @@ import org.openmole.core.serializer.converter.Serialiser
 import java.io.{ InputStream, File }
 
 trait FileInjection <: Serialiser {
-  var injectedFiles: PartialFunction[File, File] = null
+  var injectedFiles: PartialFunction[File, File] = Map.empty
 
   xStream.registerConverter(new FileConverterInjecter(this))
 

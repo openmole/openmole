@@ -36,9 +36,6 @@ class NetLogo4TaskDataUI(name: String = "",
     inputParameters)
 }
 
-//Faire un object Workspace avec les meme champs que dans le corps
-//deprecated la 010 engardant que les champs
-//creer la 0.1
 class NetLogo4TaskDataUI010(val name: String = "",
                             val workspace: Workspace = new Workspace(new File("")),
                             val lauchingCommands: String = "",

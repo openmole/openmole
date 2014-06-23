@@ -321,7 +321,7 @@ class GUISerializer { self ⇒
       }
     }
 
-  def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData2], metaData: Option[MetaData] = None, saveFiles: Boolean = false) = {
+  def serialize(file: File, proxies: Proxies, moleScenes: Iterable[MoleData2], metaData: Option[MetaData] = None, saveFiles: Boolean = false) = try {
     serializeConcept(classOf[PrototypeDataProxyUI], proxies.prototypes.map { s ⇒ s -> s.id }, workDir)
     serializeConcept(classOf[EnvironmentDataProxyUI], proxies.environments.map { s ⇒ s -> s.id }, workDir)
     serializeConcept(classOf[SamplingCompositionDataProxyUI], proxies.samplings.map { s ⇒ s -> s.id }, workDir)
@@ -345,16 +345,18 @@ class GUISerializer { self ⇒
       else fileSerialisation.serialiseFiles(List.empty, os)
     }
     finally os.close
-    clear
-  }
 
-  def read(f: File) = {
+  }
+  finally clear
+
+  def read(f: File) = try {
     try f.withInputStream(deserialiser.xStream.fromXML)
     catch {
       case e: Throwable ⇒
         throw new InternalProcessingError(e, "An error occurred when loading " + f.getAbsolutePath + "\n")
     }
   }
+  finally clear
 
   def deserializeConcept[T](clazz: Class[_], workDir: File): Writer[List[Throwable], List[T]] = {
     val res = new File(workDir, folder(clazz)).listFiles.toList.map(
@@ -368,7 +370,7 @@ class GUISerializer { self ⇒
     read(f)
   }
 
-  def deserialize(fromFile: File, exportDir: Option[File] = None) = {
+  def deserialize(fromFile: File, exportDir: Option[File] = None) = try {
 
     val zipped = fromFile.withInputStream { is ⇒
       Try(new GZIPInputStream(is)) match {
@@ -388,8 +390,8 @@ class GUISerializer { self ⇒
 
     exportDir match {
       case Some(dir) ⇒
-        deserialiser.injectedFiles_=(fileSerialisation.deserialiseFileReplacements(workDir, dir))
-      case None ⇒ deserialiser.injectedFiles_=(Map.empty)
+        deserialiser.injectedFiles = fileSerialisation.deserialiseFileReplacements(workDir, dir)
+      case None ⇒ deserialiser.injectedFiles = Map.empty
     }
 
     val concepts =
@@ -416,13 +418,14 @@ class GUISerializer { self ⇒
       (proxies, moleScenes)
     }
 
-    clear
     result
   }
+  finally clear
 
   private def clear = {
     serializationStates.clear
     deserializationStates.clear
     workDir.recursiveDelete
+    deserialiser.injectedFiles = Map.empty
   }
 }
