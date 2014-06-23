@@ -17,10 +17,17 @@
 package org.openmole.ide.plugin.task.netlogo
 
 import java.io.File
-import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
 
 object Util {
   implicit def stringToFile(s: String) = new File(s)
+  implicit def fromWtoW(w: org.openmole.plugin.task.netlogo.NetLogoTask.Workspace): Workspace =
+    new Workspace(w.location)
+
+  case class Workspace(location: Either[(File, String), File]) {
+    def this(workspace: File, script: String) = this(Left(workspace, script))
+    def this(script: File) = this(Right(script))
+    def coreObject = new org.openmole.plugin.task.netlogo.NetLogoTask.Workspace(location)
+  }
 
   def toWorkspace(script: String, embedWS: Boolean) =
     if (embedWS) new Workspace(script.getParentFile, script)

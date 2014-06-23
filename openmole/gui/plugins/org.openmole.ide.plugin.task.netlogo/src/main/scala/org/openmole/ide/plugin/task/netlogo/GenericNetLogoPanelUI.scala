@@ -30,6 +30,7 @@ import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.plugin.task.netlogo.Util.Workspace
 import scala.swing._
 import org.openmole.plugin.tool.netlogo.NetLogo
 import scala.swing.FileChooser._
@@ -42,7 +43,6 @@ import scala.Some
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
-import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
 
 abstract class GenericNetLogoPanelUI(
     workspace: Workspace,

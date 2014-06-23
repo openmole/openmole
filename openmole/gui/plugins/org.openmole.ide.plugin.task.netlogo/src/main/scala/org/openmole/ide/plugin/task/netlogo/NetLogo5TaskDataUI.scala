@@ -7,13 +7,13 @@ package org.openmole.ide.plugin.task.netlogo
 
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.TaskDataUI
+import org.openmole.ide.plugin.task.netlogo.Util.Workspace
 import org.openmole.plugin.task.netlogo5.NetLogo5Task
 import scala.io.Source
 import java.io.File
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 import org.openmole.ide.core.implementation.serializer.Update
 import org.openmole.ide.misc.tools.util.Converters._
-import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
 
 @deprecated
 class NetLogo5TaskDataUI(name: String = "",
@@ -49,7 +49,7 @@ class NetLogo5TaskDataUI010(val name: String = "",
   def coreObject(plugins: PluginSet) = util.Try {
     val builder = NetLogo5Task(
       name,
-      workspace,
+      workspace.coreObject,
       Source.fromString(lauchingCommands).getLines.toIterable)(plugins)
     initialise(builder)
     resources.foreach {

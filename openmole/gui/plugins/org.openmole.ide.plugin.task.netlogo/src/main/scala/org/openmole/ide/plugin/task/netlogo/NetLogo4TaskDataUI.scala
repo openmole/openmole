@@ -7,12 +7,12 @@ package org.openmole.ide.plugin.task.netlogo
 
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.TaskDataUI
+import org.openmole.ide.plugin.task.netlogo.Util.Workspace
 import org.openmole.plugin.task.netlogo4.NetLogo4Task
 import scala.io.Source
 import java.io.File
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 import org.openmole.ide.core.implementation.serializer.Update
-import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
 
 @deprecated
 class NetLogo4TaskDataUI(name: String = "",
@@ -36,6 +36,9 @@ class NetLogo4TaskDataUI(name: String = "",
     inputParameters)
 }
 
+//Faire un object Workspace avec les meme champs que dans le corps
+//deprecated la 010 engardant que les champs
+//creer la 0.1
 class NetLogo4TaskDataUI010(val name: String = "",
                             val workspace: Workspace = new Workspace(new File("")),
                             val lauchingCommands: String = "",
@@ -48,7 +51,7 @@ class NetLogo4TaskDataUI010(val name: String = "",
   def coreObject(plugins: PluginSet) = util.Try {
     val builder = NetLogo4Task(
       name,
-      workspace,
+      workspace.coreObject,
       Source.fromString(lauchingCommands).getLines.toIterable)(plugins)
     initialise(builder)
     resources.foreach {
