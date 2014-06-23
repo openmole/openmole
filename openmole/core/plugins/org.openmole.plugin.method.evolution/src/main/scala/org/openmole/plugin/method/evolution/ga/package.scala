@@ -34,6 +34,23 @@ import scala.util.Random
 
 package object ga {
 
+  implicit def seqOfTuplesToInputsConversion[T](s: Seq[(Prototype[Double], (T, T))]) =
+    Inputs[T](s.map { case (p, (min, max)) ⇒ Scalar[T](p, min, max) })
+
+  implicit def seqOfTuplesStringToInputsDoubleConversion(s: Seq[(Prototype[Double], (Double, Double))]) =
+    Inputs[String](s.map { case (p, (min, max)) ⇒ Scalar[String](p, min.toString, max.toString) })
+
+  implicit def seqToInputsConversion[T](s: Seq[Input[T]]) = Inputs[T](s)
+
+  trait GAPuzzle[+ALG <: GAAlgorithm] {
+    val evolution: ALG
+
+    def archive: Prototype[evolution.A]
+    def genome: Prototype[evolution.G]
+    def individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]]
+    def generation: Prototype[Int]
+  }
+
   private def components[ALG <: GAAlgorithm](
     name: String,
     evolution: ALG)(implicit plugins: PluginSet) = new { components ⇒
@@ -175,12 +192,13 @@ package object ga {
 
   def steadyGA[ALG <: GAAlgorithm](evolution: ALG)(
     name: String,
-    model: Puzzle)(implicit plugins: PluginSet) = {
+    model: Puzzle,
+    lambda: Int = 1)(implicit plugins: PluginSet) = {
 
     val cs = components[ALG](name, evolution)
     import cs._
 
-    val breedTask = ExplorationTask(name + "Breed", BreedSampling(evolution)(individual.toArray, archive, genome, 1))
+    val breedTask = ExplorationTask(name + "Breed", BreedSampling(evolution)(individual.toArray, archive, genome, lambda))
     breedTask.addParameter(individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
     breedTask.addParameter(archive -> evolution.initialArchive)
 
@@ -216,7 +234,7 @@ package object ga {
         breedTask -<
         scalingCaps --
         (model, filter = Block(genome)) --
-        (toIndividualSlot, filter = Keep(evolution.objectives.map(_._1).map(_.name).toSeq: _*)) --
+        (toIndividualSlot, filter = Keep(evolution.objectives.map(_.name).toSeq: _*)) --
         toIndividualArrayCaps --
         (mergeArchiveCaps, renameIndividualsTask) --
         elitismCaps --
