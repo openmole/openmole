@@ -35,8 +35,8 @@ import java.awt.Color
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import de.erichseifert.gral.util.Orientation
-import de.erichseifert.gral.plots.legends.Legend
-import de.erichseifert.gral.util.Location
+import de.erichseifert.gral.Legend
+import de.erichseifert.gral.Location
 import java.awt.Dimension
 
 class XYPlotter(buffer_size: Int,
