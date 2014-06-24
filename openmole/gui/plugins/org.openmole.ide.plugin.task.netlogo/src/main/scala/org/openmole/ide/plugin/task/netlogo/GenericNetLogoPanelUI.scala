@@ -85,7 +85,7 @@ abstract class GenericNetLogoPanelUI(
 
   updateIOPanel
 
-  private def updateIOPanel = future {
+  private def updateIOPanel = Future {
     StatusBar().inform("Reading the netlogo file ...")
     inputMappingPanel.contents += new Label("<html><i>Loading...</i></html>")
     outputMappingPanel.contents += new Label("<html><i>Loading...</i></html>")
@@ -135,7 +135,7 @@ abstract class GenericNetLogoPanelUI(
     try {
       globalsReporters match {
         case Some((globals, reporters)) ⇒
-          if (!(globals ++ reporters).isEmpty && !comboContent.isEmpty) {
+          if (!(globals ++ reporters).isEmpty) {
             multiStringProto = new MultiTwoCombos[String, PrototypeDataProxyUI](
               "",
               globals ++ reporters,
