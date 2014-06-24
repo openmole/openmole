@@ -111,7 +111,7 @@ object DialogFactory {
       contents += new PluginPanel("wrap 2") {
         contents += new Label("Project file")
         contents += fileChooser
-        contents += new Label("Merge resources in ")
+        contents += new Label("Extract resources in ")
         contents += directoryChooser
       }
     }.peer, "Import project")
