@@ -174,7 +174,7 @@ class GUIPanel extends MainFrame {
   splitPane.resizeWeight = 1
 
   peer.add(splitPane.peer, BorderLayout.CENTER)
-  StatusBar().inform("OpenMOLE - 0.10 - Gogo Gadget")
+  StatusBar().inform("OpenMOLE - 1.0 - Heroic Hippo")
 
   PasswordListner.apply
 
