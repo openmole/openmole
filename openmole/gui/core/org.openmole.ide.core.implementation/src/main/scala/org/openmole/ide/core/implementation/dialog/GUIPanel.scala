@@ -65,34 +65,9 @@ class GUIPanel extends MainFrame {
           val name = DialogFactory.multiLoadDialog
           mainframe.title = "OpenMOLE - " + name
         }
-        /*  ScenesManager().closeAll
-          Proxies.instance.clearAll
-          mainframe.title = "OpenMOLE - " + LoadXML.load
-        }*/
 
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, Event.CTRL_MASK))
       })
-
-      /*  contents += new MenuItem(new Action("Insert") {
-        override def apply = DialogFactory.multiLoadDialog
-        // override def apply = LoadXML.load
-
-        accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_I, Event.CTRL_MASK))
-      })
-
-      contents += new MenuItem(new Action("Import") {
-        override def apply = {
-          DialogFactory.importProjectDialog match {
-            case Some((f: File, d: File)) ⇒
-              d.mkdirs
-              ScenesManager().closeAll
-              Proxies.instance.clearAll
-              LoadXML.load(f, Some(d))
-            case _ ⇒
-          }
-        }
-      }
-      )*/
 
       contents += new MenuItem(new Action("Save") {
         override def apply = {
