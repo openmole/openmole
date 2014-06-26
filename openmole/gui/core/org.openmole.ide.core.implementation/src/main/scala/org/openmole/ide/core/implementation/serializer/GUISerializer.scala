@@ -387,7 +387,7 @@ class GUISerializer { self ⇒
 
     exportDir match {
       case Some(dir) ⇒
-        deserialiser.injectedFiles = fileSerialisation.deserialiseFileReplacements(workDir, dir)
+        deserialiser.injectedFiles = fileSerialisation.deserialiseFileReplacements(workDir, dir, false)
       case None ⇒ deserialiser.injectedFiles = Map.empty
     }
 
