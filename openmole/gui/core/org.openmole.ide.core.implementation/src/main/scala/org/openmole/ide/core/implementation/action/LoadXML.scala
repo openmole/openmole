@@ -45,14 +45,10 @@ object LoadXML {
 
   def importProject = DialogFactory.importProjectDialog
 
-  def load: String = {
-    val fileName = show(DialogFactory.fileChooser("OpenMOLE project loading",
-      "*.om",
-      "om",
-      Settings.currentPath))
+  def load(fileName: String, extraDir: Option[File] = None): String = {
     if (!fileName.isEmpty) {
       tryFile(fileName).map {
-        f ⇒ load(f, None)
+        f ⇒ _load(f, extraDir)
       }.headOption.getOrElse("")
     }
     else ""
@@ -70,7 +66,7 @@ object LoadXML {
     else None
   }
 
-  def load(f: File, extraDir: Option[File] = None): String = {
+  private def _load(f: File, extraDir: Option[File] = None): String = {
     Settings.currentPath = Some(f.getParentFile)
     Settings.currentProject = Some(f)
     val seriliazer = new GUISerializer

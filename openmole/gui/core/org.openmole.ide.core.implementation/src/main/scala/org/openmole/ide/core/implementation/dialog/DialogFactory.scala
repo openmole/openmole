@@ -24,6 +24,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
+import org.openmole.ide.core.implementation.action.LoadXML
 import org.openmole.ide.core.implementation.execution.{ Settings, ScenesManager }
 import org.openmole.ide.core.implementation.workflow.{ ISceneContainer, BuildMoleScene, ExecutionMoleSceneContainer }
 import scala.swing.FileChooser.SelectionMode._
@@ -34,7 +35,7 @@ import scala.Some
 import scala.swing.FileChooser.Result._
 import org.openmole.ide.misc.tools.image.Images
 import org.openide.NotifyDescriptor
-import org.openmole.ide.core.implementation.dataproxy.DataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, DataProxyUI }
 import org.openmole.ide.core.implementation.serializer.ExecutionSerialiser
 import org.openmole.ide.core.implementation.preference.Preferences
 import scala.swing.event.ButtonClicked
@@ -97,6 +98,75 @@ object DialogFactory {
         else*/ (serverTextField.text, encryptedPass)
     }
     else ("", "")
+  }
+
+  def multiLoadDialog: String = {
+    val defaultP = Settings.currentPath match {
+      case Some(f: File) ⇒ f.getAbsolutePath
+      case _             ⇒ ""
+    }
+
+    val loadButton = new RadioButton("Load")
+    val importButton = new RadioButton("Import")
+    val insertButton = new RadioButton("Insert")
+    val groupButton = new ButtonGroup {
+      buttons += loadButton
+      buttons += importButton
+      buttons += insertButton
+    }
+    val fileChooser = new ChooseFileTextField(defaultP, "Select a file", SelectionMode.FilesOnly, Some("om files", Seq("om")))
+    val fileChooser2 = new ChooseFileTextField(defaultP, "Select a file", SelectionMode.FilesOnly, Some("om files", Seq("om")))
+    val fileChooser3 = new ChooseFileTextField(defaultP, "Select a file", SelectionMode.FilesOnly, Some("om files", Seq("om")))
+    val directoryChooser = new ChooseFileTextField(defaultP, "Folder for embedded files extraction", SelectionMode.DirectoriesOnly)
+
+    val importPanel = new PluginPanel("wrap 3") {
+      contents += fileChooser2
+      contents += new Label("Extract resources in ")
+      contents += directoryChooser
+    }
+
+    val d = new DialogDescriptor(new PluginPanel("wrap") {
+      contents += new PluginPanel("wrap 2") {
+        contents += loadButton
+        contents += new Label("<html><i>   a project previously saved</i></html>")
+      }
+      contents += fileChooser
+
+      contents += new PluginPanel("wrap 2") {
+        contents += importButton
+        contents += new Label("<html><i>   a project previously exported</i></html>")
+      }
+      contents += importPanel
+
+      contents += new PluginPanel("wrap 2") {
+        contents += insertButton
+        contents += new Label("<html><i>   a project in an existing one</i></html>")
+      }
+      contents += fileChooser3
+    }.peer, "Load a project")
+    loadButton.selected = true
+    d.setOptions(List(NotifyDescriptor.OK_OPTION).toArray)
+    val notification = DialogDisplayer.getDefault.notify(d)
+
+    if (notification == -1 || notification == 0) {
+      if (loadButton.selected) {
+        ScenesManager().closeAll
+        Proxies.instance.clearAll
+        LoadXML.load(fileChooser.text)
+      }
+      else if (importButton.selected) {
+        val dir = new File(directoryChooser.text)
+        dir.mkdirs
+        ScenesManager().closeAll
+        Proxies.instance.clearAll
+        LoadXML.load(fileChooser2.text, Some(dir))
+      }
+      else if (insertButton.selected) {
+        LoadXML.load(fileChooser3.text)
+      }
+      else ""
+    }
+    else ""
   }
 
   def importProjectDialog: Option[(File, File)] = {

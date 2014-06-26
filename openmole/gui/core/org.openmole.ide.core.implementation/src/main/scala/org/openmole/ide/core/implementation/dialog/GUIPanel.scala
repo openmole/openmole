@@ -53,7 +53,7 @@ class GUIPanel extends MainFrame {
                 override def apply = {
                   Proxies.instance.clearAll
                   ScenesManager().closeAll
-                  mainframe.title = "OpenMOLE - " + LoadXML.load(f)
+                  mainframe.title = "OpenMOLE - " + LoadXML.load(f.getAbsolutePath)
                 }
               })
             }
@@ -62,16 +62,20 @@ class GUIPanel extends MainFrame {
 
       contents += new MenuItem(new Action("Load") {
         override def apply = {
-          ScenesManager().closeAll
+          val name = DialogFactory.multiLoadDialog
+          mainframe.title = "OpenMOLE - " + name
+        }
+        /*  ScenesManager().closeAll
           Proxies.instance.clearAll
           mainframe.title = "OpenMOLE - " + LoadXML.load
-        }
+        }*/
 
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, Event.CTRL_MASK))
       })
 
-      contents += new MenuItem(new Action("Insert") {
-        override def apply = LoadXML.load
+      /*  contents += new MenuItem(new Action("Insert") {
+        override def apply = DialogFactory.multiLoadDialog
+        // override def apply = LoadXML.load
 
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_I, Event.CTRL_MASK))
       })
@@ -88,7 +92,7 @@ class GUIPanel extends MainFrame {
           }
         }
       }
-      )
+      )*/
 
       contents += new MenuItem(new Action("Save") {
         override def apply = {
