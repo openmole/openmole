@@ -82,7 +82,12 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
 
   lazy val openmoleDaemon = AssemblyProject("daemon", "plugins", settings = resAssemblyProject ++ daemonProjects, depNameMap =
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" }, """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })) settings
-    (resourceSets <+= baseDirectory map { _ / "resources" -> "." }, equinoxDependencies, libraryDependencies += gridscale, libraryDependencies += gridscaleSSH, dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") })
+    (resourceSets <+= baseDirectory map { _ / "resources" -> "." },
+      equinoxDependencies,
+      libraryDependencies += gridscale,
+      libraryDependencies += gridscaleSSH,
+      setExecutable += "openmole-daemon",
+      dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") })
 
   lazy val docProj = Project("documentation", dir / "documentation") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects ++ Application.subProjects): _*) settings (
     unidocSettings: _*
