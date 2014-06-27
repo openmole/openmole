@@ -61,7 +61,8 @@ trait BDIISRMServers extends BatchEnvironment {
           cur ← storages
           token ← cur.tryGetToken
         } yield {
-          val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(h.toString, Set.empty).contains(cur.id) }.map { case (f, _) ⇒ f.size }.sum
+          val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(cur.id, Set.empty).contains(h.toString) }.map { case (f, _) ⇒ f.size }.sum
+
           val sizeFactor =
             if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
 

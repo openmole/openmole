@@ -52,7 +52,7 @@ object ReplicaCatalog extends Logger {
   Workspace += (SocketTimeout, "PT10M")
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
-  lazy val inCatalogCache = new TimeCache[Map[String, Set[String]]]
+  lazy val inCatalogCache = new TimeCache[Map[String, Map[String, Set[String]]]]
 
   type ReplicaCacheKey = (String, String, String, String)
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
@@ -83,28 +83,22 @@ object ReplicaCatalog extends Logger {
     finally client.close
   }
 
-  /*private var _dbInfo: Option[(DBServerInfo, Long)] = None
+  def inCatalog(environment: String)(implicit objectContainer: ObjectContainer) = inCatalogCache(inCatalogQuery, Workspace.preferenceAsDuration(InCatalogCacheTime).toMillis)(environment)
 
-   def dbInfo = synchronized {
-   val dbInfoFile = DBServerInfo.dbInfoFile(DBServerInfo.base)
-
-   if (!dbInfoFile.exists) throw new InternalProcessingError("Database server not launched, file " + dbInfoFile + " doesn't exists.")
-
-   _dbInfo match {
-   case Some((server, modif)) if (modif >= dbInfoFile.lastModification) ⇒ server
-   case _ ⇒
-   val dbInfo = DBServerInfo.load(dbInfoFile) -> dbInfoFile.lastModification
-   _dbInfo = Some(dbInfo)
-   dbInfo._1
-   }
-   }*/
-
-  def inCatalog(environment: String)(implicit objectContainer: ObjectContainer) = inCatalogCache(inCatalogQuery(environment), Workspace.preferenceAsDuration(InCatalogCacheTime).toMillis)
-
-  private def inCatalogQuery(environment: String)(implicit objectContainer: ObjectContainer): Map[String, Set[String]] =
-    objectContainer.queryByExample[Replica](new Replica(_environment = environment)).map {
-      replica ⇒ replica.hash -> replica.storage
-    }.groupBy(_._1).map { case (k, v) ⇒ k -> v.unzip._2.toSet }
+  private def inCatalogQuery(implicit objectContainer: ObjectContainer): Map[String, Map[String, Set[String]]] =
+    objectContainer.query[Replica](classOf[Replica]).map {
+      replica ⇒ (replica.environment, replica.storage, replica.hash)
+    }.groupBy(_._1).map {
+      case (environment, values) ⇒
+        environment ->
+          values.map {
+            case (_, storage, hash) ⇒ (storage, hash)
+          }.groupBy {
+            case (storage, _) ⇒ storage
+          }.map {
+            case (storage, values) ⇒ (storage, values.map { case (_, hash) ⇒ hash }.toSet)
+          }
+    }.withDefaultValue(Map.empty)
 
   private def key(hash: String, storage: String, environment: String): String = hash + "_" + storage + "_" + environment
   private def key(r: Replica): String = key(r.hash, r.storage, r.environment)
