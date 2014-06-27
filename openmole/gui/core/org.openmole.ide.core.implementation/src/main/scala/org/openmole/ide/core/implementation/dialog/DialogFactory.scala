@@ -169,29 +169,6 @@ object DialogFactory {
     else ""
   }
 
-  def importProjectDialog: Option[(File, File)] = {
-    val defaultP = Settings.currentPath match {
-      case Some(f: File) ⇒ f.getAbsolutePath
-      case _             ⇒ ""
-    }
-    val fileChooser = new ChooseFileTextField(defaultP, "Select a directory", SelectionMode.FilesOnly, Some("om files", Seq("om")))
-    val directoryChooser = new ChooseFileTextField(defaultP, "Folder for embedded files extraction", SelectionMode.DirectoriesOnly)
-
-    val d = new DialogDescriptor(new PluginPanel("wrap") {
-      contents += new PluginPanel("wrap 2") {
-        contents += new Label("Project file")
-        contents += fileChooser
-        contents += new Label("Extract resources in ")
-        contents += directoryChooser
-      }
-    }.peer, "Import project")
-
-    d.setOptions(List(NotifyDescriptor.OK_OPTION).toArray)
-    val notification = DialogDisplayer.getDefault.notify(d)
-    if (notification == -1 || notification == 0) Some((new File(fileChooser.text), new File(directoryChooser.text)))
-    else None
-  }
-
   def confirmationDialog(header: String,
                          text: String) = {
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label(text) {
