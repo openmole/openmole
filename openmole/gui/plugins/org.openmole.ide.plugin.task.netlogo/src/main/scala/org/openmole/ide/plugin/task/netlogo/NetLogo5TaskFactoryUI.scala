@@ -26,16 +26,16 @@ import org.openmole.ide.misc.tools.util.Converters._
 class NetLogo5TaskFactoryUI extends TaskFactoryUI {
   override def toString = "NetLogo5"
 
-  def buildDataUI = new NetLogo5TaskDataUI010
+  def buildDataUI = new NetLogo5TaskDataUI1
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[NetLogo5Task](task)
-    uiMap.task(t, x ⇒ new NetLogo5TaskDataUI010(t.name,
+    uiMap.task(t, x ⇒ new NetLogo5TaskDataUI1(t.name,
       t.workspace,
       t.launchingCommands.mkString("\n"),
       t.netLogoInputs.toList.map { p ⇒ (uiMap.prototypeUI(p._1).get, p._2) },
       t.netLogoOutputs.toList.map { p ⇒ (p._1, uiMap.prototypeUI(p._2).get) },
-      t.resources.map { _._2 }.toList))
+      t.resources.map { _._1 }.toList))
   }
 
   override def category = List("ABM")

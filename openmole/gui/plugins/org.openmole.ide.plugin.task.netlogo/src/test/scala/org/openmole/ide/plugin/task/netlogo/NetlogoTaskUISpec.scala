@@ -24,12 +24,12 @@ import org.scalatest._
 class NetlogoTaskUISpec extends FlatSpec with Matchers {
 
   "NetlogoTask4DataUI" should "be unserializable" in {
-    GUISerializer.serializable(getClass.getClassLoader.getResource("nl4_09.xml")) should equal(true)
-    GUISerializer.serializable(getClass.getClassLoader.getResource("nl4_010.xml")) should equal(true)
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("nl4_09.xml"))
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("nl4_010.xml"))
   }
 
   "NetlogoTask5DataUI" should "be unserializable" in {
-    GUISerializer.serializable(getClass.getClassLoader.getResource("nl5_09.xml")) should equal(true)
-    GUISerializer.serializable(getClass.getClassLoader.getResource("nl5_010.xml")) should equal(true)
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("nl5_09.xml"))
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("nl5_010.xml"))
   }
 }

@@ -39,8 +39,10 @@ class EitherConverter(implicit _mapper: Mapper) extends AbstractCollectionConver
     val item = readItem(reader, context, null)
     reader.moveUp()
     c match {
-      case "Right" ⇒ Right(item)
-      case "Left"  ⇒ Left(item)
+      case "Right"            ⇒ Right(item)
+      case "Left"             ⇒ Left(item)
+      case "scala.util.Right" ⇒ Right(item)
+      case "scala.util.Left"  ⇒ Left(item)
     }
   }
 }
