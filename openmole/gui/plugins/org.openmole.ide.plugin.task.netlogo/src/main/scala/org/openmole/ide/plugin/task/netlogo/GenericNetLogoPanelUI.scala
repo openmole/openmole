@@ -48,7 +48,7 @@ abstract class GenericNetLogoPanelUI(
     lauchingCommands: String,
     prototypeMappingInput: List[(PrototypeDataProxyUI, String, Int)],
     prototypeMappingOutput: List[(String, PrototypeDataProxyUI, Int)],
-    resources: List[String])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("") with TaskPanelUI {
+    resources: List[File])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("") with TaskPanelUI {
 
   val (nlogoPath, workspaceEmbedded) = Workspace.fromWorkspace(workspace)
 
@@ -68,7 +68,7 @@ abstract class GenericNetLogoPanelUI(
   var multiProtoString = new MultiTwoCombos[PrototypeDataProxyUI, String]("", List(), List(), "with", Seq())
   val resourcesMultiTextField = new MultiChooseFileTextField("",
     resources.map {
-      r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r))
+      r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r.getAbsolutePath))
     },
     selectionMode = SelectionMode.FilesAndDirectories,
     minus = CLOSE_IF_EMPTY)

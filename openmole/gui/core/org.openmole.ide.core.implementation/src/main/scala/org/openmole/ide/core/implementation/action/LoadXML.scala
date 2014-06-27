@@ -43,8 +43,6 @@ object LoadXML {
     text
   }
 
-  def importProject = DialogFactory.importProjectDialog
-
   def load(fileName: String, extraDir: Option[File] = None): String = {
     if (!fileName.isEmpty) {
       tryFile(fileName).map {

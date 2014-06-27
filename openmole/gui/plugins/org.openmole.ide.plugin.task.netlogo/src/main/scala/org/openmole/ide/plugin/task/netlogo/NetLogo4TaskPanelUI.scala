@@ -16,23 +16,25 @@
  */
 package org.openmole.ide.plugin.task.netlogo
 
+import java.io.File
+
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.misc.tools.util.Converters
 import org.openmole.ide.misc.tools.util.Converters._
 import org.openmole.plugin.tool.netlogo4.NetLogo4
 
-class NetLogo4TaskPanelUI(ndu: NetLogo4TaskDataUI010) extends GenericNetLogoPanelUI(ndu.workspace,
+class NetLogo4TaskPanelUI(ndu: NetLogo4TaskDataUI1) extends GenericNetLogoPanelUI(ndu.workspace,
   ndu.lauchingCommands,
   ndu.prototypeMappingInput,
   ndu.prototypeMappingOutput,
   ndu.resources) {
-  override def saveContent(name: String): TaskDataUI = new NetLogo4TaskDataUI010(name,
+  override def saveContent(name: String): TaskDataUI = new NetLogo4TaskDataUI1(name,
     Workspace.toWorkspace(nlogoTextField.text, workspaceCheckBox.selected),
     launchingCommandTextArea.text,
     Converters.flattenTuple2Options(multiProtoString.content.map { c ⇒ (c.comboValue1, c.comboValue2) }).filter { case (p, s) ⇒ Proxies.check(p) },
     Converters.flattenTuple2Options(multiStringProto.content.map { c ⇒ (c.comboValue1, c.comboValue2) }).filter { case (s, p) ⇒ Proxies.check(p) },
-    resourcesMultiTextField.content.map { _.content })
+    resourcesMultiTextField.content.map { data ⇒ new File(data.content) })
 
   def buildNetLogo = new NetLogo4
 }

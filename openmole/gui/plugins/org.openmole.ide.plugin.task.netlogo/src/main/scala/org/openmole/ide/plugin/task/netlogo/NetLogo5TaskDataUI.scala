@@ -15,18 +15,18 @@ import org.openmole.ide.core.implementation.serializer.Update
 import org.openmole.ide.misc.tools.util.Converters._
 
 @deprecated("NetLogo5TaskDataUI010 is now used", "0.10")
-class NetLogo5TaskDataUI(name: String = "",
-                         workspaceEmbedded: Boolean = false,
-                         nlogoPath: String = "",
-                         lauchingCommands: String = "",
-                         prototypeMappingInput: List[(PrototypeDataProxyUI, String)] = List(),
-                         prototypeMappingOutput: List[(String, PrototypeDataProxyUI)] = List(),
-                         resources: List[String] = List(),
-                         inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                         outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                         inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[NetLogo5TaskDataUI010] {
+class NetLogo5TaskDataUI(val name: String = "",
+                         val workspaceEmbedded: Boolean = false,
+                         val nlogoPath: String = "",
+                         val lauchingCommands: String = "",
+                         val prototypeMappingInput: List[(PrototypeDataProxyUI, String)] = List(),
+                         val prototypeMappingOutput: List[(String, PrototypeDataProxyUI)] = List(),
+                         val resources: List[String] = List(),
+                         val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                         val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                         val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[NetLogo5TaskDataUI010] {
   def update = new NetLogo5TaskDataUI010(name,
-    Workspace.toWorkspace(nlogoPath, workspaceEmbedded),
+    FilledWorkspace(Right(nlogoPath)),
     lauchingCommands,
     prototypeMappingInput,
     prototypeMappingOutput,
@@ -36,15 +36,37 @@ class NetLogo5TaskDataUI(name: String = "",
     inputParameters)
 }
 
+@deprecated("NetLogo5TaskDataUI1 is now used", "1.0")
 class NetLogo5TaskDataUI010(val name: String = "",
-                            val workspace: Workspace = EmptyWorkspace,
+                            val workspace: FilledWorkspace = FilledWorkspace(Right("")),
                             val lauchingCommands: String = "",
                             val prototypeMappingInput: List[(PrototypeDataProxyUI, String, Int)] = List(),
                             val prototypeMappingOutput: List[(String, PrototypeDataProxyUI, Int)] = List(),
                             val resources: List[String] = List(),
                             val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
                             val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                            val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
+                            val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[NetLogo5TaskDataUI1] {
+  def update = {
+    new NetLogo5TaskDataUI1(name,
+      workspace,
+      lauchingCommands,
+      prototypeMappingInput,
+      prototypeMappingOutput,
+      resources.map { new File(_) },
+      inputs,
+      outputs,
+      inputParameters)
+  }
+}
+class NetLogo5TaskDataUI1(val name: String = "",
+                          val workspace: Workspace = EmptyWorkspace,
+                          val lauchingCommands: String = "",
+                          val prototypeMappingInput: List[(PrototypeDataProxyUI, String, Int)] = List(),
+                          val prototypeMappingOutput: List[(String, PrototypeDataProxyUI, Int)] = List(),
+                          val resources: List[File] = List(),
+                          val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                          val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                          val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
   def coreObject(plugins: PluginSet) = util.Try {
     val builder = NetLogo5Task(
       name,
@@ -52,7 +74,7 @@ class NetLogo5TaskDataUI010(val name: String = "",
       Source.fromString(lauchingCommands).getLines.toIterable)(plugins)
     initialise(builder)
     resources.foreach {
-      r ⇒ builder addResource (new File(r))
+      r ⇒ builder addResource r
     }
     prototypeMappingInput.foreach {
       case (p, n, _) ⇒ builder addNetLogoInput (p.dataUI.coreObject.get, n)
@@ -73,7 +95,7 @@ class NetLogo5TaskDataUI010(val name: String = "",
 
   def doClone(ins: Seq[PrototypeDataProxyUI],
               outs: Seq[PrototypeDataProxyUI],
-              params: Map[PrototypeDataProxyUI, String]) = new NetLogo5TaskDataUI010(name,
+              params: Map[PrototypeDataProxyUI, String]) = new NetLogo5TaskDataUI1(name,
     workspace,
     lauchingCommands,
     Proxies.instance.filterListTupleIn(prototypeMappingInput),
