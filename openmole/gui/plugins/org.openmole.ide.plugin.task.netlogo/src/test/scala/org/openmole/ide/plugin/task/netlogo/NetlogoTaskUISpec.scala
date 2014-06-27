@@ -26,10 +26,12 @@ class NetlogoTaskUISpec extends FlatSpec with Matchers {
   "NetlogoTask4DataUI" should "be unserializable" in {
     GUISerializer.unserialise(getClass.getClassLoader.getResource("nl4_09.xml"))
     GUISerializer.unserialise(getClass.getClassLoader.getResource("nl4_010.xml"))
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("nl4_1.xml"))
   }
 
   "NetlogoTask5DataUI" should "be unserializable" in {
     GUISerializer.unserialise(getClass.getClassLoader.getResource("nl5_09.xml"))
     GUISerializer.unserialise(getClass.getClassLoader.getResource("nl5_010.xml"))
+    GUISerializer.unserialise(getClass.getClassLoader.getResource("nl5_1.xml"))
   }
 }
