@@ -10,6 +10,6 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "0.6.0")
 
 addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.5.1")
 
-addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.0.0-SNAPSHOT")
+addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.1")
 
 addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.3.0")
