@@ -111,7 +111,7 @@ object Libraries extends Defaults(Apache) {
   lazy val jasypt = OsgiProject("org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings (libraryDependencies += "org.jasypt" % "jasypt" % "1.8")
 
   lazy val db4o = OsgiProject("com.db4o", buddyPolicy = Some("global")) settings
-    (libraryDependencies += "com.db4o" % "db4o-full-java5" % "8.1-SNAPSHOT", bundleType += "dbserver")
+    (libraryDependencies += "com.db4o" % "db4o-full-java5" % "8.0.249", bundleType += "dbserver")
 
   lazy val robustIt = OsgiProject("uk.com.robustit.cloning", exports = Seq("com.rits.*")) settings
     (libraryDependencies += "uk.com.robust-it" % "cloning" % "1.7.4")
