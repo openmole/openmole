@@ -179,38 +179,24 @@ trait Assembly { self: BuildSystemDefaults ⇒
   }
 
   def urlDownloader(urls: Seq[(URL, File)], s: TaskStreams, targetDir: File) = {
-    val cache = targetDir / "url-cache"
+    def cache(url: URL) = targetDir / s"url-cache-${Hash.toHex(Hash(url.toString))}"
 
     targetDir.mkdir() //makes sure target exists
 
-    val cacheInput = managed(Source.fromFile(cache)(io.Codec.ISO8859))
-
-    val hashes = (urls map { case (url, _) ⇒ url.toString } flatten).toIterator
-
-    val alreadyCached = if (cache.exists) {
-      ((cacheInput map { _.iter zip hashes forall { case (n, cached) ⇒ n == cached } }).opt getOrElse false) && (urls forall (_._2.exists))
-    }
-    else {
-      cache.createNewFile()
-      false
-    }
-
-    val cacheOutput = managed(new BufferedOutputStream(new FileOutputStream(cache)))
-
-    if (alreadyCached) {
-      urls map (_._2)
-    }
-    else {
-      for { os ← cacheOutput; hash ← hashes } { os.write(hash) }
-      urls.map {
-        case (url, file) ⇒
-          s.log.info("Downloading " + url + " to " + file)
-          val os = managed(new BufferedOutputStream(new FileOutputStream(file)))
-          os.foreach(BasicIO.transferFully(url.openStream, _))
-          file
+    for {
+      (url, file) ← urls
+    } yield {
+      val cacheFile = cache(url)
+      if (!cacheFile.exists) {
+        s.log.info("Downloading " + url + " to " + file)
+        val os = managed(new BufferedOutputStream(new FileOutputStream(file)))
+        os.foreach(BasicIO.transferFully(url.openStream, _))
+        cacheFile.createNewFile()
       }
+      file
     }
   }
+
 }
 
 object Assembly {

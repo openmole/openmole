@@ -35,6 +35,4 @@ libraryDependencies ++= Seq("com.jsuereth" %% "scala-arm" % "1.3",
 
 publishTo <<= isSnapshot(if(_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases"))
 
-credentials += Credentials(Path.userHome / ".sbt" / "openmole.credentials")
-
 releaseSettings
