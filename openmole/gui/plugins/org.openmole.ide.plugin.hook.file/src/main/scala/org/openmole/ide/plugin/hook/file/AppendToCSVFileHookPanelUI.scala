@@ -35,15 +35,14 @@ class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI)(implicit val
     dataUI.toBeHooked.toList,
     Proxies.instance.prototypes.toList)
 
-  contents += {
-    multi.contents.insert(0, filePathTextField)
-    multi.contents.insert(0, new Label("CSV file path"))
-    multi.contents.insert(0, new Label {
-      text = "<html><b>Append prototypes to file</b></html>"
-    })
-    multi.minimumSize = new Dimension(300, 150)
-    multi
-  }
+  multi.contents.insert(0, filePathTextField)
+  multi.contents.insert(0, new Label("CSV file path"))
+  multi.contents.insert(0, new Label {
+    text = "<html><b>Append prototypes to file</b></html>"
+  })
+  // multi.minimumSize = new Dimension(300, 150)
+
+  contents += multi
 
   val components = List(("Prototypes", this))
 
