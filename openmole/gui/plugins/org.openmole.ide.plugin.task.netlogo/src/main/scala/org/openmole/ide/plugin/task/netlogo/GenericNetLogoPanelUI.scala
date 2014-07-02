@@ -41,7 +41,7 @@ import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 import scala.Some
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Success
+import scala.util.{ Failure, Try, Success }
 
 abstract class GenericNetLogoPanelUI(
     workspace: Workspace,
@@ -85,7 +85,7 @@ abstract class GenericNetLogoPanelUI(
 
   updateIOPanel
 
-  private def updateIOPanel = Future {
+  private def updateIOPanel = {
     StatusBar().inform("Reading the netlogo file ...")
     inputMappingPanel.contents += new Label("<html><i>Loading...</i></html>")
     outputMappingPanel.contents += new Label("<html><i>Loading...</i></html>")
@@ -100,7 +100,6 @@ abstract class GenericNetLogoPanelUI(
     outputMappingPanel.repaint
     revalidate
     repaint
-    StatusBar.clear
   }
 
   private def globalsReporters = stm.atomic {
@@ -155,6 +154,7 @@ abstract class GenericNetLogoPanelUI(
                 m ⇒ new TwoCombosPanel(comboContent, globals, "with", new TwoCombosData(Some(m._1), Some(m._2)))
               },
               minus = CLOSE_IF_EMPTY, insets = MEDIUM)
+            StatusBar().clear
           }
         case None ⇒
       }

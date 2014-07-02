@@ -17,12 +17,13 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.misc.tools.util._
 import org.openmole.misc.tools.obj.ClassUtils._
 import concurrent.stm._
 import org.openmole.ide.core.implementation.builder.Builder
 import org.openmole.ide.core.implementation.registry.PrototypeKey
-import org.openmole.misc.eventdispatcher.EventDispatcher
+//import org.openmole.misc.eventdispatcher.{ Event, EventListener, EventDispatcher }
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.core.model.data.Prototype
 
@@ -94,7 +95,7 @@ class Proxies {
 
   def +=(p: DataProxyUI) = {
     add(p)
-    EventDispatcher.trigger(this, new ProxyCreatedEvent)
+    updateScene
   }
 
   def add(p: DataProxyUI) = {
@@ -107,7 +108,8 @@ class Proxies {
 
   def -=(p: DataProxyUI) = {
     remove(p)
-    EventDispatcher.trigger(this, new ProxyDeletedEvent)
+    // EventDispatcher.trigger(this, new ProxyDeletedEvent)
+    updateScene
   }
 
   def cleanGenerated = prototypes.foreach { p ⇒
@@ -164,7 +166,9 @@ class Proxies {
     implicit actx ⇒
       ConceptMenu.clearAllItems
       _proxies.clear
-      EventDispatcher.trigger(this, new ProxyDeletedEvent)
+      updateScene
   }
+
+  def updateScene = ScenesManager.instance.currentScene.map { _.updatePanels(0) }
 }
 

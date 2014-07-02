@@ -22,11 +22,11 @@ import org.nlogo.headless.HeadlessWorkspace;
 import org.nlogo.nvm.Procedure;
 import org.openmole.plugin.tool.netlogo.NetLogo;
 
+import java.lang.RuntimeException;
 import java.util.LinkedList;
 import java.util.Map;
 
 /**
- *
  * @author Romain Reuillon
  */
 public class NetLogo5 implements NetLogo {
@@ -65,10 +65,10 @@ public class NetLogo5 implements NetLogo {
     }
 
     public String[] reporters() {
-       LinkedList<String> reporters = new LinkedList<String>();
-       for(Map.Entry<String, Procedure> e: workspace.getProcedures().entrySet()) {
-         if(e.getValue().tyype == Procedure.Type.REPORTER) reporters.add(e.getKey());
-       }
-       return reporters.toArray(new String[0]);
+        LinkedList<String> reporters = new LinkedList<String>();
+        for (Map.Entry<String, Procedure> e : workspace.getProcedures().entrySet()) {
+            if (e.getValue().tyype == Procedure.Type.REPORTER) reporters.add(e.getKey());
+        }
+        return reporters.toArray(new String[0]);
     }
 }
