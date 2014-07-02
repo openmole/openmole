@@ -16,7 +16,7 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, Proxies, PrototypeDataProxyUI }
+import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.panel.ConceptMenu._
 import org.openmole.ide.core.implementation.data.{ PrototypeDataUI, ImageView }
 import scala.swing.Label
@@ -115,5 +115,4 @@ trait PrototypePanel extends Base
 
     }
   }
-
 }

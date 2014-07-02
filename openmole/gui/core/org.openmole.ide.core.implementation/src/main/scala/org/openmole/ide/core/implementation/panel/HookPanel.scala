@@ -18,6 +18,7 @@ package org.openmole.ide.core.implementation.panel
 
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, HookDataProxyUI }
 import org.openmole.ide.core.implementation.data.{ ImageView, HookDataUI }
+import org.openmole.misc.eventdispatcher.EventDispatcher
 import scala.swing.Label
 import ConceptMenu._
 import org.openmole.ide.misc.widget.PluginPanel
@@ -110,5 +111,4 @@ trait HookPanel extends Base
     Proxies.instance -= proxy
     -=(proxy)
   }
-
 }

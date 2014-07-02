@@ -104,5 +104,4 @@ trait EnvironmentPanel extends Base
         }
     }
   }
-
 }
