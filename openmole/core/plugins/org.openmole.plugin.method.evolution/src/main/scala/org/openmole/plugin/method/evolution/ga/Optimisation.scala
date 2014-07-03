@@ -27,7 +27,7 @@ object Optimisation {
     termination: GATermination { type G >: Optimisation#G; type P >: Optimisation#P; type F >: Optimisation#F; type MF >: Optimisation#MF },
     inputs: Inputs[String],
     objectives: Objectives,
-    dominance: Dominance = Strict,
+    dominance: Dominance = NonStrict,
     ranking: GARankingBuilder = Pareto,
     diversityMetric: DiversityMetricBuilder = Crowding,
     reevaluate: Double = 0.0) = {
