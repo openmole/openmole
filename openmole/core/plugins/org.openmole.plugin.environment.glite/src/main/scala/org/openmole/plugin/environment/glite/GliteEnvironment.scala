@@ -94,7 +94,7 @@ object GliteEnvironment extends Logger {
 
   Workspace += (FetchResourcesTimeOut, "PT2M")
   Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
-  Workspace += (CACertificatesCacheTime, "P5D")
+  Workspace += (CACertificatesCacheTime, "P7D")
   Workspace += (VOInformationSite, "http://operations-portal.egi.eu/xml/voIDCard/public/all/true")
   Workspace += (VOCardDownloadTimeOut, "PT2M")
   Workspace += (VOCardCacheTime, "P10D")
