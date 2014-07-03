@@ -34,6 +34,7 @@ trait GAAlgorithm extends Archive
     with Mutation
     with CrossOver
     with GeneticBreeding
+    with CloneRemoval
     with GenomeScaling {
   def inputs: Inputs[_]
   def objectives: Objectives
