@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.pbs
+package org.openmole.plugin.environment.sge
 
 import fr.iscpif.gridscale.ssh.SSHStorage
 import fr.iscpif.gridscale.ssh.SSHHost
@@ -30,8 +30,8 @@ import org.openmole.plugin.environment.ssh._
 
 import scala.concurrent.duration.Duration
 
-object PBSEnvironment {
-  val MaxConnections = new ConfigurationLocation("PBSEnvironment", "MaxConnections")
+object SGEEnvironment {
+  val MaxConnections = new ConfigurationLocation("SGEEnvironment", "MaxConnections")
 
   Workspace += (MaxConnections, "10")
 
@@ -44,16 +44,13 @@ object PBSEnvironment {
     wallTime: Option[Duration] = None,
     memory: Option[Int] = None,
     path: Option[String] = None,
-    threads: Option[Int] = None,
-    nodes: Option[Int] = None,
-    coreByNode: Option[Int] = None,
     workDirectory: Option[String] = None)(implicit authentications: AuthenticationProvider) =
-    new PBSEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, path, threads, nodes, coreByNode, workDirectory)
+    new SGEEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, path, workDirectory)
 }
 
-import PBSEnvironment._
+import SGEEnvironment._
 
-class PBSEnvironment(
+class SGEEnvironment(
     val user: String,
     val host: String,
     override val port: Int,
@@ -62,20 +59,17 @@ class PBSEnvironment(
     val wallTime: Option[Duration],
     val memory: Option[Int],
     val path: Option[String],
-    override val threads: Option[Int],
-    val nodes: Option[Int],
-    val coreByNode: Option[Int],
     val workDirectory: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
-  type JS = PBSJobService
+  type JS = SGEJobService
 
   @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
-  @transient lazy val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
+  @transient lazy val id = new URI("sge", env.user, env.host, env.port, null, null, null).toString
 
   def maxConnections = Workspace.preferenceAsInt(MaxConnections)
 
-  @transient lazy val jobService = new PBSJobService with ThisHost with LimitedAccess {
-    def nbTokens = maxConnections
+  @transient lazy val jobService = new SGEJobService with ThisHost with LimitedAccess {
+    def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def queue = env.queue
     val environment = env
     def sharedFS = storage

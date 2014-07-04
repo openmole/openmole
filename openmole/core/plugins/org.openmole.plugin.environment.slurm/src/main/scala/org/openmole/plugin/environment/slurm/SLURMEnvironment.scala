@@ -68,33 +68,23 @@ class SLURMEnvironment(
     val constraints: List[String],
     //val nodes: Option[Int],
     //val coreByNode: Option[Int],
-    val workDirectory: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
+    val workDirectory: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
-  type SS = PersistentStorageService
   type JS = SLURMJobService
 
   @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
   @transient lazy val id = new URI("slurm", env.user, env.host, env.port, null, null, null).toString
 
-  @transient lazy val storage =
-    new PersistentStorageService with SSHStorageService with ThisHost with LimitedAccess {
-      def nbTokens = Workspace.preferenceAsInt(MaxConnections)
-      val environment = env
-      lazy val root = env.path match {
-        case Some(p) ⇒ p
-        case None    ⇒ child(home, ".openmole")
-      }
-    }
+  def maxConnections = Workspace.preferenceAsInt(MaxConnections)
 
   @transient lazy val jobService = new SLURMJobService with ThisHost with LimitedAccess {
-    def nbTokens = Workspace.preferenceAsInt(MaxConnections)
+    def nbTokens = maxConnections
     def queue = env.queue
     val environment = env
     def sharedFS = storage
     val id = url.toString
   }
 
-  def allStorages = List(storage)
   def allJobServices = List(jobService)
 
 }
