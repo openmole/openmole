@@ -64,8 +64,7 @@ object Misc extends BaseDefaults {
     bundleActivator = Some("org.openmole.misc.logging.internal.Activator")) dependsOn (provided(tools), provided(workspace),
       Apache.log4j % "provided", Apache.logging % "provided", logback % "provided", slf4j % "provided")
 
-  val sftpserver = OsgiProject("org.openmole.misc.sftpserver") dependsOn
-    (provided(tools), Apache.sshd)
+  val sftpserver = OsgiProject("org.openmole.misc.sftpserver") dependsOn (tools, Apache.sshd)
 
   val console = OsgiProject("org.openmole.misc.console", bundleActivator = Some("org.openmole.misc.console.Activator"), buddyPolicy = Some("global")) dependsOn
     (scalaLang, osgi /*, scalaCompiler*/ ) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"))
