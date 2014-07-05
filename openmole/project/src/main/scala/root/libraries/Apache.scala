@@ -31,7 +31,7 @@ object Apache extends Defaults {
     (libraryDependencies += "commons-logging" % "commons-logging" % "1.1.1", bundleType += "runtime", version := "1.1.1")
 
   lazy val sshd = OsgiProject("org.apache.sshd", exports = Seq("org.apache.sshd.*", "org.apache.mina.*")) settings
-    (libraryDependencies += "org.apache.sshd" % "sshd-core" % "0.8.0")
+    (libraryDependencies += "org.apache.sshd" % "sshd-core" % "0.11.0")
 
   lazy val ant = OsgiProject("org.apache.ant") settings
     (libraryDependencies += "org.apache.ant" % "ant" % "1.8.0")
