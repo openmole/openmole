@@ -25,7 +25,7 @@ object Core extends BaseDefaults {
 
   lazy val implementation = OsgiProject("implementation", openmoleScope = Some("provided")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (model, workspace, provided(robustIt), provided(exception), provided(eventDispatcher),
+    (model, workspace, provided(exception), provided(eventDispatcher),
       provided(serializer), pluginManager, scalaLang, Apache.math, groovy, Misc.hashService % "test", Misc.replication % "test") //TODO: THINGS REALLY DEPEND ON THESE LIBS. Deal with it
 
   lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (implementation,
