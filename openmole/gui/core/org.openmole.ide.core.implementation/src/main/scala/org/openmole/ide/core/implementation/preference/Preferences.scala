@@ -16,6 +16,7 @@
  */
 package org.openmole.ide.core.implementation.preference
 
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.misc.workspace.Workspace
 import java.io.FileNotFoundException
 import org.openmole.ide.core.implementation.serializer.XStreamFactory
@@ -33,7 +34,10 @@ object Preferences {
       }
     }
     catch {
-      case fnde: FileNotFoundException ⇒ empty
+      case e: FileNotFoundException ⇒ empty
+      case _: Any ⇒
+        StatusBar().warn("The preferences have not been loaded")
+        empty
     }
   }
 
