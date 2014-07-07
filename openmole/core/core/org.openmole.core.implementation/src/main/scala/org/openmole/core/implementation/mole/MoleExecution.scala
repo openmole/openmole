@@ -60,25 +60,27 @@ object MoleExecution extends Logger {
     grouping: Map[ICapsule, Grouping] = Map.empty,
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
-    executionContext: ExecutionContext = ExecutionContext.local) =
+    defaultEnvironment: Environment = LocalEnvironment.default)(implicit executionContext: ExecutionContext) =
     PartialMoleExecution(
       mole,
       sources,
       hooks,
       environments,
       grouping,
-      seed).toExecution(implicits, executionContext)
+      seed,
+      defaultEnvironment).toExecution(implicits)(executionContext)
 
 }
 
 class MoleExecution(
     val mole: IMole,
-    val sources: Sources = Sources.empty,
-    val hooks: Hooks = Hooks.empty,
-    val environments: Map[ICapsule, Environment] = Map.empty,
-    val grouping: Map[ICapsule, Grouping] = Map.empty,
-    seed: Long = Workspace.newSeed,
-    override val id: String = UUID.randomUUID().toString)(implicit val implicits: Context = Context.empty, implicit val executionContext: ExecutionContext = ExecutionContext.local) extends IMoleExecution {
+    val sources: Sources,
+    val hooks: Hooks,
+    val environments: Map[ICapsule, Environment],
+    val grouping: Map[ICapsule, Grouping],
+    val seed: Long,
+    val defaultEnvironment: Environment,
+    override val id: String = UUID.randomUUID().toString)(val implicits: Context, val executionContext: ExecutionContext) extends IMoleExecution {
 
   import IMoleExecution._
   import MoleExecution._
@@ -86,6 +88,9 @@ class MoleExecution(
   private val _started = Ref(false)
   private val _canceled = Ref(false)
   private val _finished = Ref(false)
+
+  private val _startTime = Ref(None: Option[Long])
+  private val _endTime = Ref(None: Option[Long])
 
   private val ticketNumber = Ref(0L)
   private val jobId = Ref(0L)
@@ -105,6 +110,13 @@ class MoleExecution(
   def numberOfJobs = rootSubMoleExecution.numberOfJobs
 
   def exceptions = _exceptions.single()
+
+  def duration: Option[Long] =
+    (_startTime.single(), _endTime.single()) match {
+      case (None, _)          ⇒ None
+      case (Some(t), None)    ⇒ Some(System.currentTimeMillis - t)
+      case (Some(s), Some(e)) ⇒ Some(e - s)
+    }
 
   def group(moleJob: IMoleJob, capsule: ICapsule, submole: ISubMoleExecution) =
     atomic { implicit txn ⇒
@@ -130,7 +142,7 @@ class MoleExecution(
 
   private def submit(job: IJob, capsule: ICapsule) =
     if (!job.finished) {
-      val env = environments.getOrElse(capsule, LocalEnvironment)
+      val env = environments.getOrElse(capsule, defaultEnvironment)
       env.submit(job)
       EventDispatcher.trigger(this, new IMoleExecution.JobSubmitted(job, capsule, env))
     }
@@ -163,8 +175,8 @@ class MoleExecution(
     if (!_started.getUpdate(_ ⇒ true)) {
       val validationErrors = Validation(mole, implicits, sources, hooks)
       if (!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of your mole has failed, several errors have been found: " + validationErrors.mkString("\n"))
+      _startTime.single() = Some(System.currentTimeMillis)
       start(Context.empty)
-      _started.single() = true
     }
     this
   }
@@ -174,6 +186,7 @@ class MoleExecution(
       rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, new IMoleExecution.Finished)
       _finished.single() = true
+      _endTime.single() = Some(System.currentTimeMillis)
     }
     this
   }
@@ -203,6 +216,7 @@ class MoleExecution(
       if (numberOfJobs == 0) {
         EventDispatcher.trigger(this, new IMoleExecution.Finished)
         _finished.single() = true
+        _endTime.single() = Some(System.currentTimeMillis)
       }
     }
 

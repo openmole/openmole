@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.mole
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
@@ -28,7 +28,7 @@ import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
 
 @RunWith(classOf[JUnitRunner])
-class InputStrainerCapsuleSpec extends FlatSpec with ShouldMatchers {
+class InputStrainerCapsuleSpec extends FlatSpec with Matchers {
   "The input strainer capsule" should "let the data in but not out" in {
     val p = Prototype[String]("p")
 

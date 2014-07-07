@@ -39,6 +39,8 @@ import java.util.concurrent.TimeUnit
 
 object ReplicaCatalog extends Logger {
 
+  import Log._
+
   val NoAccessCleanTime = new ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime")
   val InCatalogCacheTime = new ConfigurationLocation("ReplicaCatalog", "InCatalogCacheTime")
   val ReplicaCacheTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime")
@@ -50,7 +52,7 @@ object ReplicaCatalog extends Logger {
   Workspace += (SocketTimeout, "PT10M")
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
-  lazy val inCatalogCache = new TimeCache[Map[String, Set[String]]]
+  lazy val inCatalogCache = new TimeCache[Map[String, Map[String, Set[String]]]]
 
   type ReplicaCacheKey = (String, String, String, String)
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
@@ -70,7 +72,7 @@ object ReplicaCatalog extends Logger {
     configuration.common.objectClass(classOf[Replica]).objectField("_path").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_environment").indexed(true)
-    configuration.timeoutClientSocket(Workspace.preferenceAsDuration(SocketTimeout).toMilliSeconds.toInt)
+    configuration.timeoutClientSocket(Workspace.preferenceAsDuration(SocketTimeout).toMillis.toInt)
 
     Db4oClientServer.openClient(configuration, "localhost", info.port, info.user, info.password)
   }
@@ -81,28 +83,22 @@ object ReplicaCatalog extends Logger {
     finally client.close
   }
 
-  /*private var _dbInfo: Option[(DBServerInfo, Long)] = None
+  def inCatalog(environment: String)(implicit objectContainer: ObjectContainer) = inCatalogCache(inCatalogQuery, Workspace.preferenceAsDuration(InCatalogCacheTime).toMillis)(environment)
 
-   def dbInfo = synchronized {
-   val dbInfoFile = DBServerInfo.dbInfoFile(DBServerInfo.base)
-
-   if (!dbInfoFile.exists) throw new InternalProcessingError("Database server not launched, file " + dbInfoFile + " doesn't exists.")
-
-   _dbInfo match {
-   case Some((server, modif)) if (modif >= dbInfoFile.lastModification) ⇒ server
-   case _ ⇒
-   val dbInfo = DBServerInfo.load(dbInfoFile) -> dbInfoFile.lastModification
-   _dbInfo = Some(dbInfo)
-   dbInfo._1
-   }
-   }*/
-
-  def inCatalog(environment: String)(implicit objectContainer: ObjectContainer) = inCatalogCache(inCatalogQuery(environment), Workspace.preferenceAsDuration(InCatalogCacheTime).toMilliSeconds)
-
-  private def inCatalogQuery(environment: String)(implicit objectContainer: ObjectContainer): Map[String, Set[String]] =
-    objectContainer.queryByExample[Replica](new Replica(_environment = environment)).map {
-      replica ⇒ replica.hash -> replica.storage
-    }.groupBy(_._1).map { case (k, v) ⇒ k -> v.unzip._2.toSet }
+  private def inCatalogQuery(implicit objectContainer: ObjectContainer): Map[String, Map[String, Set[String]]] =
+    objectContainer.query[Replica](classOf[Replica]).map {
+      replica ⇒ (replica.environment, replica.storage, replica.hash)
+    }.groupBy(_._1).map {
+      case (environment, values) ⇒
+        environment ->
+          values.map {
+            case (_, storage, hash) ⇒ (storage, hash)
+          }.groupBy {
+            case (storage, _) ⇒ storage
+          }.map {
+            case (storage, values) ⇒ (storage, values.map { case (_, hash) ⇒ hash }.toSet)
+          }
+    }.withDefaultValue(Map.empty)
 
   private def key(hash: String, storage: String, environment: String): String = hash + "_" + storage + "_" + environment
   private def key(r: Replica): String = key(r.hash, r.storage, r.environment)
@@ -171,7 +167,7 @@ object ReplicaCatalog extends Logger {
     src: File,
     srcPath: File,
     storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer) =
-    if (replica.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMilliSeconds < System.currentTimeMillis) {
+    if (replica.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMillis < System.currentTimeMillis) {
       if (storage.exists(replica.path)) {
         removeNoLock(replica)
         val toInsert = new Replica(_source = replica.source, _storage = replica.storage, _path = replica.path, _hash = replica.hash, _environment = replica.environment, _lastCheckExists = System.currentTimeMillis)

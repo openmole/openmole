@@ -18,12 +18,16 @@
 package org.openmole.ide.plugin.task.groovy
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 
-class GroovyTaskUISpec extends FlatSpec with ShouldMatchers {
+class GroovyTaskUISpec extends FlatSpec with Matchers {
 
-  "GroovyTaskDataUI" should "be unserializable" in {
+  "GroovyTaskDataUI 0.9" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)
+  }
+
+  "GroovyTaskDataUI 0.10" should "be unserializable" in {
+    GUISerializer.serializable(getClass.getClassLoader.getResource("010.xml")) should equal(true)
   }
 }

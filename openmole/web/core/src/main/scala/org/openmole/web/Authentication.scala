@@ -16,8 +16,10 @@ import org.apache.commons.codec.binary.Base64
 import org.slf4j.LoggerFactory
 import org.scalatra.ScalatraBase
 import javax.servlet.http.HttpServletRequest
+import org.openmole.web.cache.DataHandler
+import org.openmole.web.mole.MoleHandling
 
-trait Authentication { self ⇒ MoleHandling
+trait Authentication { self ⇒
 
   //private val logger = LoggerFactory.getLogger(getClass)
 

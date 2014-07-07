@@ -17,6 +17,8 @@
 
 package org.openmole.misc.tools.io
 
+import java.security.{ PrivilegedAction, AccessController }
+
 import com.ice.tar.TarEntry
 import com.ice.tar.TarInputStream
 import com.ice.tar.TarOutputStream
@@ -76,8 +78,7 @@ object TarArchiver {
             }
             else {
               dest.getParentFile.mkdirs
-              val fos = new FileOutputStream(dest)
-              try tis.copy(fos) finally fos.close
+              dest.withOutputStream(tis.copy)
               None
             }
           dest.mode = e.getMode

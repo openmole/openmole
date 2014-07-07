@@ -20,14 +20,14 @@ package org.openmole.core.implementation.task
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.data._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import org.openmole.core.implementation.mole._
 import org.openmole.core.model.task.PluginSet
 
 @RunWith(classOf[JUnitRunner])
-class MoleTaskSpec extends FlatSpec with ShouldMatchers {
+class MoleTaskSpec extends FlatSpec with Matchers {
 
   "Implicits" should "work with mole task" in {
     val i = Prototype[String]("i")
@@ -39,12 +39,12 @@ class MoleTaskSpec extends FlatSpec with ShouldMatchers {
     val moleTask =
       MoleTask(
         "MoleTask",
-        new Mole(emptyC), emptyC)(PluginSet.empty)
+        Mole(emptyC), emptyC)(PluginSet.empty)
 
     moleTask addImplicit i
     moleTask addParameter (i -> "test")
 
-    new MoleExecution(new Mole(moleTask)).start.waitUntilEnded
+    MoleExecution(Mole(moleTask)).start.waitUntilEnded
   }
 
 }

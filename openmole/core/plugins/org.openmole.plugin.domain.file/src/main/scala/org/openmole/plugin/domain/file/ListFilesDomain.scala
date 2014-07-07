@@ -35,6 +35,8 @@ object ListFilesDomain extends Logger {
 
 }
 
+import ListFilesDomain.Log._
+
 sealed class ListFilesDomain(
     base: File,
     subdirectory: String = "",
@@ -45,7 +47,7 @@ sealed class ListFilesDomain(
     val dir = new File(base, VariableExpansion(context, subdirectory))
 
     if (!dir.exists) {
-      ListFilesDomain.logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
+      logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
       Iterable.empty
     }
     else if (recursive) dir.listRecursive(filter)

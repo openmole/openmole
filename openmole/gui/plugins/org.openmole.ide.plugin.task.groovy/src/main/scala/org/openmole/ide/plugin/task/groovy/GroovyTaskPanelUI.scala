@@ -45,9 +45,8 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI010)(implicit val i18n: ResourceBun
       l ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(l.getAbsolutePath))
     },
     "Select a file",
-    Some("Lib files"),
     FilesOnly,
-    Some("jar"),
+    Some("Lib files", Seq("jar")),
     CLOSE_IF_EMPTY)
 
   val components = List(("Code", codeTextArea), ("Library", libMultiTextField.panel))

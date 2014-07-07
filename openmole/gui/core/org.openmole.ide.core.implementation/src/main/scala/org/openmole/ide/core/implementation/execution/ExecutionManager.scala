@@ -126,7 +126,6 @@ class ExecutionManager(manager: MoleUI,
             trusted
           case _ ⇒ true
         }) {
-          println("loaded : " + client.getLoadedMoles)
           client.createMole(ExecutionSerialiser(manager, true), None, encapsulate = true, pack = true) match {
             case Left(s: String) ⇒ StatusBar().block(s)
             case Right(y) ⇒
@@ -148,7 +147,7 @@ class ExecutionManager(manager: MoleUI,
         initBarPlotter
         buildMoleExecution match {
           case Success((mE, envNames)) ⇒
-            val mExecution = mE.toExecution(manager.context, executionContext.copy(out = printStream))
+            val mExecution = mE.toExecution(manager.context)(executionContext = executionContext.copy(out = printStream))
             moleExecution = Some(mExecution)
             EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
             EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
@@ -224,7 +223,8 @@ class ExecutionManager(manager: MoleUI,
 
   def initBarPlotter = synchronized {
     environments.clear
-    buildEmptyEnvPlotter(LocalEnvironment.asInstanceOf[Environment], "Local")
+    // buildEmptyEnvPlotter(LocalEnvironment.asInstanceOf[Environment], "Local")
+    buildEmptyEnvPlotter(new LocalEnvironment(1), "Local")
   }
 
   def buildEmptyEnvPlotter(env: Environment, name: String) = {

@@ -22,12 +22,14 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.core.batch.storage.Storage
 import org.openmole.misc.tools.io.FileUtil._
 import fr.iscpif.gridscale.dirac.{ DIRACJobService, DIRACJobDescription }
-import org.openmole.misc.tools.service.Duration._
+import org.openmole.misc.tools.service._
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }
 import org.openmole.core.batch.control.LimitedAccess
 import StatusFiles._
 import scalax.io.Resource
+import java.io.File
+import org.openmole.misc.tools._
 
 trait DIRACGliteJobService extends GridScaleJobService with JobScript with LimitedAccess { js ⇒
 
@@ -48,13 +50,16 @@ trait DIRACGliteJobService extends GridScaleJobService with JobScript with Limit
       Resource.fromFile(script).write(generateScript(serializedJob, outputFilePath, Some(_runningPath), Some(_finishedPath)))
 
       val jobDescription = new DIRACJobDescription {
+        override def stdOut = if (environment.debug) Some("out") else None
+        override def stdErr = if (environment.debug) Some("err") else None
+        def outputSandbox = if (environment.debug) Seq("out" -> new File("out"), "err" -> new File("err")) else Seq.empty
         def inputSandbox = Seq(script)
         def arguments = script.getName
         def executable = "/bin/bash"
-        override val cpuTime = environment.cpuTime.map(_.toMinutes)
+        override val cpuTime = environment.cpuTime
       }
 
-      val jid = jobService.submit(jobDescription)(authentication)
+      val jid = jobService.submit(jobDescription)
 
       new DIRACGliteJob {
         val jobService = js

@@ -33,6 +33,7 @@ import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.file.FileSystems
 import java.nio.file.Files
+import java.security.Permission
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -44,10 +45,12 @@ import TarArchiver._
 import java.util.logging.Logger
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+import scala.concurrent.duration.Duration
 import scala.io.Source
 import org.openmole.misc.tools.service._
 import scala.util.{ Try, Failure, Success }
 import java.util.UUID
+import java.util.zip.ZipFile
 
 object FileUtil {
 
@@ -76,13 +79,13 @@ object FileUtil {
       Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach { to.write(buffer, 0, _) }
     }
 
-    def copy(to: File, maxRead: Int, timeout: Long): Unit = {
+    def copy(to: File, maxRead: Int, timeout: Duration): Unit = {
       val os = to.bufferedOutputStream
       try copy(os, maxRead, timeout)
       finally os.close
     }
 
-    def copy(to: OutputStream, maxRead: Int, timeout: Long) = {
+    def copy(to: OutputStream, maxRead: Int, timeout: Duration) = {
       val buffer = new Array[Byte](maxRead)
       val executor = ThreadUtil.defaultExecutor
       val reader = new ReaderRunnable(buffer, is, maxRead)
@@ -90,7 +93,7 @@ object FileUtil {
       Iterator.continually {
         val futureRead = executor.submit(reader)
 
-        try futureRead.get(timeout, TimeUnit.MILLISECONDS)
+        try futureRead.get(timeout.length, timeout.unit)
         catch {
           case (e: TimeoutException) ⇒
             futureRead.cancel(true)
@@ -100,7 +103,7 @@ object FileUtil {
         count ⇒
           val futureWrite = executor.submit(new WritterRunnable(buffer, to, count))
 
-          try futureWrite.get(timeout, TimeUnit.MILLISECONDS)
+          try futureWrite.get(timeout.length, timeout.unit)
           catch {
             case (e: TimeoutException) ⇒
               futureWrite.cancel(true)
@@ -231,6 +234,7 @@ object FileUtil {
           else curFrom.copyFile(curTo))
 
       goThrough((curFrom, curTo) ⇒ curTo.setSamePermissionsAs(curFrom))
+      toF
     }
 
     def setSamePermissionsAs(other: File) = {
@@ -239,7 +243,27 @@ object FileUtil {
       file.setWritable(other.canWrite)
     }
 
-    def copyFile(toF: File): Unit = {
+    def copyCompress(toF: File): File = {
+      if (toF.isDirectory) toF.archiveCompressDirWithRelativePathNoVariableContent(file)
+      else copyCompressFile(toF)
+      toF
+    }
+
+    def copyCompressFile(toF: File): File = {
+      val to = new GZIPOutputStream(toF.bufferedOutputStream)
+      try file.copy(to) finally to.close
+      toF
+    }
+
+    def copyUncompressFile(toF: File): File = {
+      val from = new GZIPInputStream(file.bufferedInputStream)
+
+      try from.copy(toF)
+      finally from.close
+      toF
+    }
+
+    def copyFile(toF: File) = {
       val from = new FileInputStream(file).getChannel
 
       try {
@@ -247,23 +271,7 @@ object FileUtil {
         try FileUtil.copy(from, to) finally to.close
       }
       finally from.close
-    }
-
-    def copyCompress(toF: File): Unit = {
-      if (toF.isDirectory) toF.archiveCompressDirWithRelativePathNoVariableContent(file)
-      else copyCompressFile(toF)
-    }
-
-    def copyCompressFile(toF: File): Unit = {
-      val to = new GZIPOutputStream(new FileOutputStream(toF))
-      try file.copy(to) finally to.close
-    }
-
-    def copyUncompressFile(toF: File): Unit = {
-      val from = new GZIPInputStream(new FileInputStream(file))
-
-      try from.copy(toF)
-      finally from.close
+      toF
     }
 
     def copy(to: OutputStream): Unit = {
@@ -271,7 +279,7 @@ object FileUtil {
       try fromIS.copy(to) finally fromIS.close
     }
 
-    def copy(to: OutputStream, maxRead: Int, timeout: Long) = {
+    def copy(to: OutputStream, maxRead: Int, timeout: Duration) = {
       val is = bufferedInputStream
       try is.copy(to, maxRead, timeout)
       finally is.close
@@ -282,6 +290,7 @@ object FileUtil {
         copy(to)
         recursiveDelete
       }
+      to
     }
 
     def isSymbolicLink = {
@@ -437,7 +446,7 @@ object FileUtil {
       }
 
     def updateIfTooOld(
-      tooOld: Long,
+      tooOld: Duration,
       timeStamp: File ⇒ File = f ⇒ new File(file.getPath + "-timestamp"),
       updating: File ⇒ File = f ⇒ new File(file.getPath + "-updating"))(update: File ⇒ Unit) = {
       val upFile = updating(file)
@@ -450,7 +459,7 @@ object FileUtil {
             if (!file.exists || !ts.exists) false
             else
               Try(ts.content.toLong) match {
-                case Success(v) ⇒ v + tooOld > System.currentTimeMillis
+                case Success(v) ⇒ v + tooOld.toMillis > System.currentTimeMillis
                 case Failure(_) ⇒ ts.delete; false
               }
 
@@ -472,6 +481,14 @@ object FileUtil {
     }
 
     def newFile(prefix: String, suffix: String): File = new File(file, prefix + UUID.randomUUID + suffix)
+
+    def isJar = Try {
+      val zip = new ZipFile(file)
+      val hasManifestEntry =
+        try zip.getEntry("META-INF/MANIFEST.MF") != null
+        finally zip.close
+      hasManifestEntry
+    }.getOrElse(false)
 
   }
 

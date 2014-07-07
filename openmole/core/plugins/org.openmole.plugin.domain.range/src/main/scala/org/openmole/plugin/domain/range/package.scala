@@ -30,13 +30,13 @@ package object range {
     def exp(t: T): T
   }
 
-  implicit val doubleLog =
+  implicit lazy val doubleLog =
     new Log[Double] {
       def log(t: Double) = math.log(t)
       def exp(t: Double) = math.exp(t)
     }
 
-  implicit val bigDecimalLog =
+  implicit lazy val bigDecimalLog =
     new Log[BigDecimal] {
       def log(t: BigDecimal) = BigDecimalOperations.ln(t, scale)
       def exp(t: BigDecimal) = BigDecimalOperations.exp(t, scale).setScale(scale, RoundingMode.HALF_UP).round(mc)

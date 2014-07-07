@@ -34,15 +34,25 @@ object SaveXML {
     path match {
       case Some(p) ⇒
         frame.title = "OpenMOLE - " + p.getCanonicalPath
-        ScenesManager().moleScenes.foreach { _.closePropertyPanels }
-        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager().moleScenes.map(MoleData.fromScene), Some(MetaData(ScenesManager().moleScenes)), Preferences().embeddResources)
+        ScenesManager().moleScenes.foreach {
+          _.closePropertyPanels
+        }
+        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager().moleScenes.map(MoleData.fromScene), Some(MetaData(ScenesManager().moleScenes)))
         Settings.currentProject = path
         ScenesManager().statusBar.inform(p.getName + " succesfully saved " + " in " + p.getParent)
       case None ⇒
     }
 
+  def export(frame: GUIPanel): Unit =
+    SaveXML.show match {
+      case Some(p) ⇒
+        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager().moleScenes.map(MoleData.fromScene), Some(MetaData(ScenesManager().moleScenes)), true)
+        ScenesManager().statusBar.inform(p.getName + " succesfully exported " + " in " + p.getParent)
+      case None ⇒
+    }
+
   def show: Option[File] = {
-    val fc = DialogFactory.fileChooser("SaveSettings OpenMOLE project",
+    val fc = DialogFactory.fileChooser("Save OpenMOLE project",
       "*.om",
       "om",
       Settings.currentPath)

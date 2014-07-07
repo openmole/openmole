@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.domain.collection
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class CollectionDomainUISpec extends FlatSpec with ShouldMatchers {
+class CollectionDomainUISpec extends FlatSpec with Matchers {
 
   "DynamicListDomainDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("dlist09.xml")) should equal(true)

@@ -27,37 +27,40 @@ import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.implementation.mole._
+import org.openmole.plugin.method.evolution.ga._
 
 object SaveMapHook {
 
-  def apply(
-    individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
-    map: GA.GAMap,
-    scales: Seq[GenomeScaling.Scale],
-    path: String) =
+  def apply(puzzle: GAPuzzle[GenomeMap], dir: String): HookBuilder = apply(puzzle, dir, "map${" + puzzle.generation.name + "}.csv")
+
+  def apply(puzzle: GAPuzzle[GenomeMap], dir: String, name: String): HookBuilder =
     new HookBuilder {
-      addInput(individual.toArray)
-      def toHook = new SaveMapHook(individual, map, scales, path) with Built
+      addInput(puzzle.individual.toArray)
+      val _puzzle = puzzle
+      val _path = dir + "/" + name
+
+      def toHook = new SaveMapHook with Built {
+        val puzzle = _puzzle
+        val path = _path
+      }
     }
 
 }
 
-//FIXME scala type system is not yet able to match the correct prototype (use a cast)
-abstract class SaveMapHook(
-    val individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
-    val map: GA.GAMap,
-    val scales: Seq[GenomeScaling.Scale],
-    val path: String) extends Hook with GenomeScaling {
+abstract class SaveMapHook extends Hook {
+
+  val puzzle: GAPuzzle[_ <: GenomeMap]
+  val path: String
 
   def process(context: Context, executionContext: ExecutionContext) = {
     val file = executionContext.relativise(VariableExpansion(context, path))
     file.createParentDir
     file.withWriter { w ⇒
       for {
-        i ← context(individual.toArray)
+        i ← context(puzzle.individual.toArray)
       } {
-        val scaledGenome = scaled(i.genome.values, context)
-        w.write("" + scaledGenome(map.x).value + "," + scaledGenome(map.y).value + "," + map.aggregation.aggregate(i.fitness) + "\n")
+        val scaledGenome = puzzle.evolution.toVariables(i.genome, context)
+        w.write("" + scaledGenome(puzzle.evolution.x).value + "," + scaledGenome(puzzle.evolution.y).value + "," + puzzle.evolution.aggregate(i.fitness) + "\n")
       }
     }
     context

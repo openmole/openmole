@@ -1,7 +1,7 @@
 package org.openmole.ide.core.implementation.panel
 
 import org.openmole.ide.core.implementation.workflow.MoleScene
-import org.openmole.ide.core.implementation.dataproxy.{ ProxyDeletedEvent, ProxyCreatedEvent, Proxies }
+import org.openmole.ide.core.implementation.dataproxy.{ DataProxyUI, Proxies }
 import org.openmole.misc.eventdispatcher._
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.event.{ UIElementResized, MouseClicked }
@@ -43,19 +43,4 @@ trait Base extends Created with SavePanel { bb ⇒
         scene.graphScene.repaint
     }
   }
-
-  val createListener = new EventListener[Proxies] {
-    def triggered(obj: Proxies, ev: Event[Proxies]) {
-      scene.updatePanels(index)
-    }
-  }
-
-  val deleteListener = new EventListener[Proxies] {
-    def triggered(obj: Proxies, ev: Event[Proxies]) {
-      scene.updatePanels(index)
-    }
-  }
-
-  EventDispatcher.listen(Proxies.instance, createListener, classOf[ProxyCreatedEvent])
-  EventDispatcher.listen(Proxies.instance, deleteListener, classOf[ProxyDeletedEvent])
 }

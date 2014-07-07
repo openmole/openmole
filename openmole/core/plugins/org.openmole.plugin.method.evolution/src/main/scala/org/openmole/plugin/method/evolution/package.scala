@@ -17,6 +17,11 @@
 
 package org.openmole.plugin.method
 
+import org.openmole.core.model.data.Prototype
+import fr.iscpif.mgo.Individual
+import evolution.ga._
+
 package object evolution {
-  val GA = algorithm.GA
+
+  type Objectives = Seq[Prototype[Double]]
 }

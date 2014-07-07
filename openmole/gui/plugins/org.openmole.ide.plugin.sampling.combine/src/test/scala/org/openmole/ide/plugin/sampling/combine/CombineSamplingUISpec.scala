@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class CombineSamplingUISpec extends FlatSpec with ShouldMatchers {
+class CombineSamplingUISpec extends FlatSpec with Matchers {
 
   "ZipSamplingDataUI" should "be unserialisable" in {
     GUISerializer.unserialise(getClass.getClassLoader.getResource("zip09.xml"))

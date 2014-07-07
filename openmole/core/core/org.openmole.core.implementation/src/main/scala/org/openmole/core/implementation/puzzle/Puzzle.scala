@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.puzzle
 
+import org.openmole.core.implementation.execution.local.LocalEnvironment
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.transition._
@@ -85,8 +86,9 @@ case class Puzzle(
     hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
     environment: Map[ICapsule, Environment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
-    seed: Long = Workspace.newSeed) =
-    PartialMoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.environments ++ environments, this.grouping ++ grouping, seed)
+    seed: Long = Workspace.newSeed,
+    defaultEnvironment: Environment = LocalEnvironment.default) =
+    PartialMoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.environments ++ environments, this.grouping ++ grouping, seed, defaultEnvironment)
 
   def toExecution: MoleExecution =
     MoleExecution(toMole, sources, hooks, environments, grouping)
@@ -97,8 +99,10 @@ case class Puzzle(
     selection: Map[ICapsule, Environment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     implicits: Context = Context.empty,
-    seed: Long = Workspace.newSeed): MoleExecution =
-    MoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.environments ++ environments, this.grouping ++ grouping, implicits, seed)
+    seed: Long = Workspace.newSeed,
+    executionContext: ExecutionContext = ExecutionContext.local,
+    defaultEnvironment: Environment = LocalEnvironment.default): MoleExecution =
+    MoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.environments ++ environments, this.grouping ++ grouping, implicits, seed, defaultEnvironment)(executionContext)
 
   def +(p: Puzzle) = Puzzle.merge(this, p)
 

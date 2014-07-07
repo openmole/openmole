@@ -18,7 +18,7 @@
 package org.openmole.runtime.runtime
 
 import org.eclipse.equinox.app._
-import scopt.immutable._
+import scopt._
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.tools.io.FileUtil._
@@ -30,7 +30,11 @@ import org.openmole.core.batch.storage._
 import org.openmole.core.implementation.execution.local.LocalEnvironment
 import scala.util.{ Success, Failure }
 
-class SimExplorer extends IApplication with Logger {
+object SimExplorer extends Logger
+
+import SimExplorer.Log._
+
+class SimExplorer extends IApplication {
 
   override def start(context: IApplicationContext) = {
     try {
@@ -44,34 +48,31 @@ class SimExplorer extends IApplication with Logger {
         pluginPath: Option[String] = None,
         nbThread: Option[Int] = None)
 
-      val parser = new OptionParser[Config]("openmole", "0.x") {
-        def options = Seq(
-          opt("s", "storage", "Storage") {
-            (v: String, c: Config) ⇒ c.copy(storage = Some(v))
-          },
-          opt("i", "input", "Path of the input message") {
-            (v: String, c: Config) ⇒ c.copy(inputMessage = Some(v))
-          },
-          opt("o", "output", "Path of the output message") {
-            (v: String, c: Config) ⇒ c.copy(outputMessage = Some(v))
-          },
-          opt("c", "path", "Path for the communication") {
-            (v: String, c: Config) ⇒ c.copy(path = Some(v))
-          },
-          opt("p", "plugin", "Path for plugin category to preload") {
-            (v: String, c: Config) ⇒ c.copy(pluginPath = Some(v))
-          },
-          opt("t", "nbThread", "Number of thread for the execution") {
-            (v: String, c: Config) ⇒ c.copy(nbThread = Some(v.toInt))
-          })
+      val parser = new OptionParser[Config]("OpenMOLE") {
+        head("OpenMOLE runtime", "0.x")
+        opt[String]('s', "storage") text ("Storage") action {
+          (v, c) ⇒ c.copy(storage = Some(v))
+        }
+        opt[String]('i', "input") text ("Path of the input message") action {
+          (v, c) ⇒ c.copy(inputMessage = Some(v))
+        }
+        opt[String]('o', "output") text ("Path of the output message") action {
+          (v, c) ⇒ c.copy(outputMessage = Some(v))
+        }
+        opt[String]('c', "path") text ("Path for the communication") action {
+          (v, c) ⇒ c.copy(path = Some(v))
+        }
+        opt[String]('p', "plugin") text ("Path for plugin category to preload") action {
+          (v, c) ⇒ c.copy(pluginPath = Some(v))
+        }
+        opt[Int]('t', "nbThread") text ("Number of thread for the execution") action {
+          (v, c) ⇒ c.copy(nbThread = Some(v))
+        }
       }
 
       val debug = args.contains("-d")
       val filteredArgs = args.filterNot((_: String) == "-d")
-      if (debug) {
-
-        LoggerService.level("ALL")
-      }
+      if (debug) LoggerService.level("ALL")
 
       parser.parse(filteredArgs, Config()) foreach { config ⇒
 
@@ -81,11 +82,11 @@ class SimExplorer extends IApplication with Logger {
         val storage =
           try {
             new File(config.storage.get).copyUncompressFile(storageFile)
-            SerialiserService.deserialiseAndExtractFiles[SimpleStorage](storageFile)
+            SerialiserService.deserialiseAndExtractFiles[RemoteStorage](storageFile)
           }
           finally storageFile.delete
 
-        LocalEnvironment.initializationNumberOfThread = config.nbThread
+        LocalEnvironment.default = LocalEnvironment(config.nbThread.getOrElse(1))
 
         new Runtime().apply(
           storage,

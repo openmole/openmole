@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.mole
 
+import org.openmole.core.implementation.execution.local.LocalEnvironment
 import org.openmole.core.model.mole._
 import org.openmole.misc.workspace._
 import org.openmole.core.model.data._
@@ -29,29 +30,33 @@ object PartialMoleExecution {
     hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
     environments: Map[ICapsule, Environment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
-    seed: Long = Workspace.newSeed): PartialMoleExecution = new PartialMoleExecution(
+    seed: Long = Workspace.newSeed,
+    defaultEnvironment: Environment = LocalEnvironment.default): PartialMoleExecution = new PartialMoleExecution(
     mole,
     sources groupBy { case (c, _) ⇒ c } map { case (c, ss) ⇒ c -> ss.map(_._2) } withDefault { _ ⇒ List.empty },
     hooks groupBy { case (c, _) ⇒ c } map { case (c, hs) ⇒ c -> hs.map(_._2) } withDefault { _ ⇒ List.empty },
     environments,
     grouping,
-    seed)
+    seed,
+    defaultEnvironment)
 }
 
 class PartialMoleExecution(
     val mole: IMole,
-    val sources: Sources = Sources.empty,
-    val hooks: Hooks = Hooks.empty,
-    val environments: Map[ICapsule, Environment] = Map.empty,
-    val grouping: Map[ICapsule, Grouping] = Map.empty,
-    val seed: Long = Workspace.newSeed) extends IPartialMoleExecution {
+    val sources: Sources,
+    val hooks: Hooks,
+    val environments: Map[ICapsule, Environment],
+    val grouping: Map[ICapsule, Grouping],
+    val seed: Long,
+    val defaultEnvironment: Environment) extends IPartialMoleExecution {
 
-  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) =
+  def toExecution(implicits: Context = Context.empty)(implicit executionContext: ExecutionContext = ExecutionContext.local) =
     new MoleExecution(mole,
       sources,
       hooks,
       environments,
       grouping,
-      seed)(implicits, moleExecutionContext)
+      seed,
+      defaultEnvironment)(implicits, executionContext)
 
 }

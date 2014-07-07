@@ -44,6 +44,10 @@ object OMKeys {
 
   val zipFiles = TaskKey[Seq[File]]("zip-files", "Collects the list of files to be zipped")
 
+  val innerZipFolder = SettingKey[Option[String]]("innerZipFolder", "All files in zipFiles will be put under this folder")
+
+  val setExecutable = SettingKey[Set[String]]("setExecutable", "Sets the path relative to the assemble folder executable")
+
   val downloadUrls = TaskKey[Seq[File]]("download-urls")
 
   val urls = SettingKey[Seq[(URL, File)]]("urls", "A project setting that describes a urls to download")
@@ -61,4 +65,9 @@ object OMKeys {
   val dependencyFilter = SettingKey[DependencyFilter]("Tells copyDependencies to ignore certain dependencies.")
 
   val dependencyNameMap = SettingKey[Map[Regex, String ⇒ String]]("dependencymap", "A map that is run against dependencies to be copied.")
+
+  val scalatestVersion = SettingKey[String]("Version of scalatest.")
+
+  val junitVersion = SettingKey[String]("Version of junit.")
+
 }

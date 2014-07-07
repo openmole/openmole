@@ -20,14 +20,14 @@ package org.openmole.misc.tools.io
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import java.io.FileWriter
 import org.junit.runner.RunWith
 import scala.io.Source
 
 @RunWith(classOf[JUnitRunner])
-class FileUtilSpec extends FlatSpec with ShouldMatchers {
+class FileUtilSpec extends FlatSpec with Matchers {
 
   "A string" should "be append to the stream" in {
     val t = "TestString"

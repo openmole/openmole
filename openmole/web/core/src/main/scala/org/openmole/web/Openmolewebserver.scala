@@ -16,10 +16,12 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Provider.Service
 import org.openmole.misc.workspace.Workspace
 import org.bouncycastle.asn1.{ ASN1EncodableVector, DEROctetString, ASN1ObjectIdentifier, DERObjectIdentifier }
-import java.util
 import sun.security.x509.SubjectAlternativeNameExtension
 import org.eclipse.jetty.server.nio.SelectChannelConnector
 import org.eclipse.jetty.security.{ ConstraintMapping, ConstraintSecurityHandler }
+import java.security.MessageDigest
+import org.apache.commons.codec.binary.Base64
+import org.openmole.web.db.SlickDB;
 
 class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Option[String], pass: Option[String], allowInsecureConnections: Boolean) {
 
@@ -65,12 +67,11 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
     certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()))
     certGen.setIssuerDN(new X509Principal(s"CN=${hostName getOrElse "cn"}, O=o, L=L, ST=il, C= c"))
     certGen.setSubjectDN(new X509Principal(s"CN=${hostName getOrElse "cn"}, O=o, L=L, ST=il, C= c"))
-    X509Extensions.SubjectAlternativeName
     val subjectAltName = new GeneralNames(
       new GeneralName(GeneralName.rfc822Name, "127.0.0.1"))
 
     val oids = new java.util.Vector[ASN1ObjectIdentifier]
-    val vals = new util.Vector[X509Extension]
+    val vals = new java.util.Vector[X509Extension]
     oids.add(X509Extensions.SubjectAlternativeName)
     vals.add(new X509Extension(false, new DEROctetString(subjectAltName)))
     val extensions = new X509Extensions(oids, vals)
@@ -116,6 +117,11 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
   context.setInitParameter("org.scalatra.Port", sslP.toString)
   context.setInitParameter(ScalatraBase.ForceHttpsKey, allowInsecureConnections.toString)
 
+  //TODO: Discuss the protection of in-memory data for a java program.
+  val db = new SlickDB(pw)
+
+  context.setAttribute("database", db)
+
   val constraintHandler = new ConstraintSecurityHandler
   val constraintMapping = new ConstraintMapping
   constraintMapping.setPathSpec("/*")
@@ -135,5 +141,6 @@ class Openmolewebserver(port: Option[Int], sslPort: Option[Int], hostName: Optio
   def end() {
     server.stop
     server.join
+    db.closeDbConnection()
   }
 }

@@ -46,6 +46,7 @@ object JobLauncher extends Logger {
 
 class JobLauncher(cacheSize: Long, debug: Boolean) {
   import JobLauncher._
+  import Log._
 
   val localCache = new FileCache {
     val limit = cacheSize
@@ -62,18 +63,14 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val _host = splitHost(0)
 
     val storage = new SimpleStorage {
-      val storage = new SSHStorage {
+      val storage = new SSHStorage with SSHUserPasswordAuthentication {
         val host = _host
         override val port = _port
         val user = _user
+        val password = _password
       }
 
       val root = ""
-
-      val authentication = new SSHUserPasswordAuthentication {
-        val user = _user
-        val password = _password
-      }
     }
 
     val storageFileGz = Workspace.withTmpFile {
@@ -148,14 +145,14 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             next
           case None ⇒
             logger.info("Job list is empty on the remote host.")
-            Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMilliSeconds)
+            Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMillis)
             background { fetchAJob(id, storage) }
         }
       }
       catch {
         case e: Exception ⇒
           logger.log(WARNING, "Error while looking for jobs.", e)
-          Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMilliSeconds)
+          Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMillis)
           background { fetchAJob(id, storage) }
       }
       processJob(next)

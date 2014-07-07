@@ -17,7 +17,7 @@
 package org.openmole.ide.plugin.sampling.modifier
 
 import org.openmole.core.model.sampling.{ Factor, Sampling }
-import org.openmole.plugin.sampling.modifier.TakeSampling
+import org.openmole.plugin.sampling.combine.TakeSampling
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.sampling.{ FiniteUI, SamplingUtils }
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }

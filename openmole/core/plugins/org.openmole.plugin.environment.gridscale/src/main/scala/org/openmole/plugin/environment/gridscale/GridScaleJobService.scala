@@ -19,18 +19,16 @@ package org.openmole.plugin.environment.gridscale
 
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.batch.jobservice.JobService
-import org.openmole.core.batch.environment.BatchEnvironment
-import fr.iscpif.gridscale.{ JobService ⇒ GSJobService, JobState, Submitted, Running, Done, Failed }
+import fr.iscpif.gridscale.jobservice.{ JobService ⇒ GSJobService, JobState, Submitted, Running, Done, Failed }
 
 trait GridScaleJobService extends JobService {
 
   val jobService: GSJobService
   type J = jobService.J
-  def authentication: jobService.A
 
-  protected def _state(j: J) = translateStatus(jobService.state(j)(authentication))
-  protected def _cancel(j: J) = jobService.cancel(j)(authentication)
-  protected def _purge(j: J) = jobService.purge(j)(authentication)
+  protected def _state(j: J) = translateStatus(jobService.state(j))
+  protected def _cancel(j: J) = jobService.cancel(j)
+  protected def _purge(j: J) = jobService.purge(j)
 
   private def translateStatus(state: JobState) =
     state match {

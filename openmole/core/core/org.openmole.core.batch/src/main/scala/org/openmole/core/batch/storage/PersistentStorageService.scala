@@ -24,8 +24,9 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.replication._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
-import fr.iscpif.gridscale.DirectoryType
+import fr.iscpif.gridscale.storage._
 import collection.JavaConversions._
+import scala.concurrent.duration.Duration
 
 object PersistentStorageService extends Logger {
 
@@ -76,7 +77,7 @@ trait PersistentStorageService extends StorageService {
   override def tmpDir(implicit token: AccessToken) = synchronized {
     tmpSpaceVar match {
       case Some(space) ⇒
-        if (time + Workspace.preferenceAsDuration(TmpDirRegenerate).toMilliSeconds < System.currentTimeMillis) {
+        if (time + Workspace.preferenceAsDuration(TmpDirRegenerate).toMillis < System.currentTimeMillis) {
           val tmpDir = createTmpDir
           tmpSpaceVar = Some(tmpDir)
           tmpDir
@@ -96,11 +97,12 @@ trait PersistentStorageService extends StorageService {
     val tmpNoTime = child(baseDir, tmp)
     if (!super.exists(tmpNoTime)) super.makeDir(tmpNoTime)
 
-    val removalDate = System.currentTimeMillis - Workspace.preferenceAsDuration(TmpDirRemoval).toMilliSeconds
+    val removalDate = System.currentTimeMillis - Workspace.preferenceAsDuration(TmpDirRemoval).toMillis
 
     for ((name, fileType) ← super.list(tmpNoTime)) {
       val childPath = child(tmpNoTime, name)
-      if (fileType == DirectoryType) {
+
+      def rmDir =
         try {
           val timeOfDir = (if (name.endsWith("/")) name.substring(0, name.length - 1) else name).toLong
           if (timeOfDir < removalDate) backgroundRmDir(childPath)
@@ -108,8 +110,17 @@ trait PersistentStorageService extends StorageService {
         catch {
           case (ex: NumberFormatException) ⇒ backgroundRmDir(childPath)
         }
+
+      fileType match {
+        case DirectoryType ⇒ rmDir
+        case FileType      ⇒ backgroundRmFile(childPath)
+        case LinkType      ⇒ backgroundRmFile(childPath)
+        case UnknownType ⇒
+          try rmDir
+          catch {
+            case e: Throwable ⇒ backgroundRmFile(childPath)
+          }
       }
-      else backgroundRmFile(childPath)
     }
 
     val tmpTimePath = super.child(tmpNoTime, time.toString)

@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.task.systemexec
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class SystemExecTaskUISpec extends FlatSpec with ShouldMatchers {
+class SystemExecTaskUISpec extends FlatSpec with Matchers {
 
   "SystemExecTaskDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("09.xml")) should equal(true)

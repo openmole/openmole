@@ -16,6 +16,7 @@
  */
 package org.openmole.ide.core.implementation.panel
 
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.sampling.DomainPanelUI
 import org.openmole.ide.core.implementation.data.DomainDataUI
 import org.openmole.ide.misc.widget.PluginPanel
@@ -55,5 +56,4 @@ trait DomainPanel extends Base
   override def toDoOnClose = {
     widget.update
   }
-
 }

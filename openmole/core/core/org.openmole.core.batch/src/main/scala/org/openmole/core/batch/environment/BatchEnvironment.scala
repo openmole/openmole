@@ -17,27 +17,16 @@
 
 package org.openmole.core.batch.environment
 
-import akka.actor.Actor
 import akka.actor.ActorSystem
-import akka.actor.Props
-import akka.dispatch.Dispatchers
-import akka.routing.RoundRobinRouter
 import com.typesafe.config.ConfigFactory
 import java.io.File
-import java.util.concurrent.TimeoutException
 import org.openmole.misc.exception.InternalProcessingError
-import java.net.URI
 import java.util.concurrent.atomic.AtomicLong
-import java.util.logging.Level
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.jobservice._
-import org.openmole.core.batch.environment.BatchJobWatcher.Watch
-import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication._
-import org.openmole.core.implementation.execution._
-import org.openmole.misc.workspace._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.model.job._
 import org.openmole.misc.tools.service._
@@ -46,17 +35,9 @@ import org.openmole.misc.workspace._
 import org.openmole.misc.pluginmanager._
 import org.openmole.misc.eventdispatcher._
 import org.openmole.core.model.execution._
-import org.openmole.misc.tools.collection._
-import akka.actor.Actor
 import akka.actor.Props
-import akka.routing.SmallestMailboxRouter
-import scala.concurrent.stm._
-import collection.mutable.SynchronizedMap
-import collection.mutable.WeakHashMap
 import org.openmole.misc.tools.service.ThreadUtil._
-import scala.concurrent.duration.{ Duration ⇒ SDuration, MILLISECONDS }
 import ref.WeakReference
-import annotation.tailrec
 
 object BatchEnvironment extends Logger {
 
@@ -129,7 +110,7 @@ object BatchEnvironment extends Logger {
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 
-  @transient lazy val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
+  lazy val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
     """
 akka {
   daemonic="on"
@@ -139,7 +120,7 @@ akka {
       type = Dispatcher
 
       fork-join-executor {
-        parallelism-min = 5
+        parallelism-min = 1
         parallelism-max = 10
       }
     }
@@ -147,7 +128,7 @@ akka {
 }
     """).withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
 
-  @transient lazy val jobManager = system.actorOf(Props(new JobManager))
+  lazy val jobManager = system.actorOf(Props(new JobManager))
 
 }
 
@@ -155,20 +136,7 @@ import BatchEnvironment._
 
 trait BatchEnvironment extends Environment { env ⇒
 
-  @transient lazy val jobRegistry = new ExecutionJobRegistry
-
   val id: String
-
-  import BatchEnvironment.system.dispatcher
-
-  @transient lazy val watcher = system.actorOf(Props(new BatchJobWatcher(this)))
-  @transient lazy val registerWatcher: Unit = {
-    system.scheduler.schedule(
-      SDuration(Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval).toMilliSeconds, MILLISECONDS),
-      SDuration(Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval).toMilliSeconds, MILLISECONDS),
-      watcher,
-      Watch)
-  }
 
   type SS <: StorageService
   type JS <: JobService
@@ -182,15 +150,20 @@ trait BatchEnvironment extends Environment { env ⇒
     case Some(m) ⇒ m
   }
 
+  @transient lazy val batchJobWatcher = {
+    val watcher = new BatchJobWatcher(WeakReference(this))
+    Updater.registerForUpdate(watcher)
+    watcher
+  }
+
   def threads: Option[Int] = None
   def threadsValue = threads.getOrElse(1)
 
   override def submit(job: IJob) = {
-    registerWatcher
     val bej = executionJob(job)
     EventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
-    jobRegistry.register(bej)
-    jobManager ! Upload(bej)
+    batchJobWatcher.register(bej)
+    jobManager ! Manage(bej)
   }
 
   def clean = ReplicaCatalog.withClient { implicit c ⇒
@@ -220,7 +193,7 @@ trait BatchEnvironment extends Environment { env ⇒
   @transient lazy val storages = {
     val storages = allStorages
     if (storages.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
-    Updater.delay(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDuration(StoragesGCUpdateInterval).toMilliSeconds)
+    Updater.delay(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDuration(StoragesGCUpdateInterval))
     storages
   }
 
@@ -236,8 +209,10 @@ trait BatchEnvironment extends Environment { env ⇒
 
   @transient lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
-  def minUpdateInterval = Workspace.preferenceAsDuration(MinUpdateInterval).toMilliSeconds
-  def maxUpdateInterval = Workspace.preferenceAsDuration(MaxUpdateInterval).toMilliSeconds
-  def incrementUpdateInterval = Workspace.preferenceAsDuration(IncrementUpdateInterval).toMilliSeconds
+  def minUpdateInterval = Workspace.preferenceAsDuration(MinUpdateInterval)
+  def maxUpdateInterval = Workspace.preferenceAsDuration(MaxUpdateInterval)
+  def incrementUpdateInterval = Workspace.preferenceAsDuration(IncrementUpdateInterval)
+
+  def executionJobs: Iterable[BatchExecutionJob] = batchJobWatcher.executionJobs
 
 }

@@ -24,10 +24,10 @@ import org.openmole.misc.pluginmanager.PluginManager
 object ClassLoader {
 
   def loadExtraPlugins = {
-    Workspace.pluginDirLocation.list.map {
-      f ⇒ new File(Workspace.pluginDirLocation + "/" + f)
-    } foreach {
-      PluginManager.load
-    }
+    PluginManager.load(
+      Workspace.pluginDirLocation.list.map {
+        f ⇒ new File(Workspace.pluginDirLocation + "/" + f)
+      }
+    )
   }
 }

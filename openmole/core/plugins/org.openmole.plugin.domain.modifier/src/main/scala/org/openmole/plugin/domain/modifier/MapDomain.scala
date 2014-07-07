@@ -19,7 +19,7 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
-import org.openmole.plugin.tools.groovy.ContextToGroovyCode
+import org.openmole.plugin.tool.groovy.ContextToGroovyCode
 import org.openmole.core.implementation.tools._
 
 object MapDomain {

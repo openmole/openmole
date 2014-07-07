@@ -31,6 +31,7 @@ import scala.tools.nsc.symtab.SymbolLoaders
 import scala.tools.nsc.backend.JavaPlatform
 import scala.tools.util.PathResolver
 import org.openmole.misc.osgi.{ ClassPathBuilder }
+import scala.tools.nsc._
 
 class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory: AbstractFile) extends Global(settings, reporter) with ReplGlobal { g ⇒
 
@@ -43,10 +44,7 @@ class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory
     new MergedClassPath(result.toList ::: original :: vdcp :: Nil, original.context)
   }
 
-  lazy val internalClassPath = {
-    require(!forMSIL, "MSIL not supported")
-    cp
-  }
+  lazy val internalClassPath = cp
 
   override def classPath = internalClassPath
 

@@ -16,7 +16,7 @@ object Core extends BaseDefaults {
   override val dir = file("core/core")
 
   lazy val model = OsgiProject("model", openmoleScope = Some("provided")) dependsOn
-    (eventDispatcher, provided(exception), Misc.tools, provided(updater), provided(Misc.workspace))
+    (eventDispatcher, provided(exception), Misc.tools, provided(updater), provided(Misc.workspace), scalaz)
 
   lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
@@ -31,8 +31,8 @@ object Core extends BaseDefaults {
   lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (implementation,
     provided(workspace), provided(Misc.tools), provided(eventDispatcher), replication, db4o, updater, Misc.exception,
     serializer, jasypt, provided(fileService), provided(hashService), pluginManager, iceTar % "provided",
-    guava, Apache.config) settings (includeGridscale)
+    guava, Apache.config) settings (libraryDependencies += gridscale)
 
-  lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global")) dependsOn (implementation, scalaLang, scalaCompiler, Misc.macros)
+  lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global")) dependsOn (implementation, scalaLang /*, scalaCompiler*/ , Misc.macros)
 
 }

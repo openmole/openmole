@@ -19,10 +19,10 @@ package org.openmole.core.batch.message
 
 import java.io.File
 
-class ReplicatedFile(
-  val src: File,
-  val directory: Boolean,
-  val hash: String,
-  val path: String,
-  val mode: Int)
+case class ReplicatedFile(
+  src: File,
+  directory: Boolean,
+  hash: String,
+  path: String,
+  mode: Int)
 

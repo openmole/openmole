@@ -33,24 +33,20 @@ import util.Success
 import util.Failure
 import scala.Some
 import org.openmole.ide.core.implementation.preference.Preferences
+import scala.swing.FileChooser
 
 object LoadXML {
 
-  def show = {
-    val fc = DialogFactory.fileChooser(" OpenMOLE project loading",
-      "*.om",
-      "om",
-      Settings.currentPath)
+  def show(chooser: FileChooser) = {
     var text = ""
-    if (fc.showDialog(new Label, "OK") == Approve) text = fc.selectedFile.getPath
+    if (chooser.showDialog(new Label, "OK") == Approve) text = chooser.selectedFile.getPath
     text
   }
 
-  def load: String = {
-    val fileName = show
+  def load(fileName: String, extraDir: Option[File] = None): String = {
     if (!fileName.isEmpty) {
       tryFile(fileName).map {
-        f ⇒ load(f)
+        f ⇒ _load(f, extraDir)
       }.headOption.getOrElse("")
     }
     else ""
@@ -68,12 +64,12 @@ object LoadXML {
     else None
   }
 
-  def load(f: File): String = {
+  private def _load(f: File, extraDir: Option[File] = None): String = {
     Settings.currentPath = Some(f.getParentFile)
     Settings.currentProject = Some(f)
     val seriliazer = new GUISerializer
     seriliazer.init(Proxies.instance)
-    val deserialised = seriliazer.deserialize(f)
+    val deserialised = seriliazer.deserialize(f, extraDir)
     displayErrors(deserialised.written)
     val (proxies, scene) = deserialised.value
     StatusBar.clear

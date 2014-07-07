@@ -34,7 +34,7 @@ object LocalExecuter extends Logger
 
 class LocalExecuter(environment: WeakReference[LocalEnvironment]) extends Runnable {
 
-  import LocalExecuter._
+  import LocalExecuter.Log._
 
   var stop: Boolean = false
 

@@ -67,26 +67,42 @@ trait FileSerialisation extends Serialiser {
     }
   }
 
-  def deserialiseFileReplacements(archiveExtractDir: File, extractDir: File) = {
+  def deserialiseFileReplacements(archiveExtractDir: File, extractDir: File, shortNames: Boolean = true) = {
     val fileInfoFile = new File(archiveExtractDir, fileDir + "/" + filesInfo)
     val fi = fileInfoFile.withInputStream(xStream.fromXML).asInstanceOf[FilesInfo]
     fileInfoFile.delete
 
     HashMap() ++ fi.map {
       case (name, FileInfo(file, isDirectory, exists)) ⇒
-        val f = new File(archiveExtractDir, fileDir + "/" + name)
-        val dest = extractDir.newFile("extracted", ".bin")
-        if (exists) f.move(dest)
+        val fromArchive = new File(archiveExtractDir, fileDir + "/" + name)
 
-        file ->
-          (if (isDirectory) {
-            val extractedDir = extractDir.newDir("extractionDir")
-            dest.extractDirArchiveWithRelativePath(extractedDir)
-            dest.delete
-
-            extractedDir
+        def fileContent =
+          if (isDirectory) {
+            val dest = if (shortNames) extractDir.newDir("extracted")
+            else {
+              val f = new File(extractDir, file.getAbsolutePath)
+              f.mkdirs()
+              f
+            }
+            if (exists) fromArchive.extractDirArchiveWithRelativePath(dest)
+            else dest.delete
+            dest
           }
-          else dest)
+          else {
+            val dest =
+              if (shortNames) extractDir.newFile("extracted", ".bin")
+              else {
+                val f = new File(extractDir, file.getAbsolutePath)
+                f.getParentFile.mkdirs()
+                f
+              }
+            if (exists) fromArchive.move(dest)
+            else dest.delete
+
+            dest
+          }
+
+        file -> fileContent
     }
 
   }

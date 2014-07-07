@@ -26,7 +26,7 @@ import org.openmole.core.implementation.task._
 import java.io.File
 import collection.JavaConversions._
 import org.openmole.misc.tools.service.OS
-import org.nlogo.prim._word
+import org.openmole.plugin.tool.netlogo5.NetLogo5
 
 object NetLogo5Task {
 
@@ -100,6 +100,15 @@ object NetLogo5Task {
       case Right(s: File)             ⇒ apply(name, s, launchingCommands)
     }
   }
+
+  def apply(
+    name: String,
+    script: File,
+    launchingCommands: Iterable[String],
+    embedWorkspace: Boolean)(implicit plugins: PluginSet): NetLogoTaskBuilder =
+    if (embedWorkspace) apply(name, script.getParentFile, script.getName, launchingCommands)
+    else apply(name, script, launchingCommands)
+
 }
 
 sealed class NetLogo5Task(

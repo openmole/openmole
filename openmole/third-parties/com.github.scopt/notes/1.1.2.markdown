@@ -1,1 +1,0 @@
-- Cross built against Scala 2.9.1, 2.9.0-1, and 2.8.1.

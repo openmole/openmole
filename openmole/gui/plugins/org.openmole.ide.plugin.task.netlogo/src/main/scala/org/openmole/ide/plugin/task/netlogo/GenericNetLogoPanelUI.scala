@@ -31,7 +31,7 @@ import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing._
-import org.openmole.ide.osgi.netlogo.NetLogo
+import org.openmole.plugin.tool.netlogo.NetLogo
 import scala.swing.FileChooser._
 import java.io.File
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
@@ -41,22 +41,21 @@ import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 import scala.Some
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Success
-import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
+import scala.util.{ Failure, Try, Success }
 
 abstract class GenericNetLogoPanelUI(
     workspace: Workspace,
     lauchingCommands: String,
     prototypeMappingInput: List[(PrototypeDataProxyUI, String, Int)],
     prototypeMappingOutput: List[(String, PrototypeDataProxyUI, Int)],
-    resources: List[String])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("") with TaskPanelUI {
+    resources: List[File])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("") with TaskPanelUI {
 
-  val (nlogoPath, workspaceEmbedded) = Util.fromWorkspace(workspace)
+  val (nlogoPath, workspaceEmbedded) = Workspace.fromWorkspace(workspace)
 
-  val nlogoTextField = new ChooseFileTextField(nlogoPath,
+  val nlogoTextField = new ChooseFileTextField(nlogoPath.getPath,
     "Select a nlogo file",
-    "Netlogo files",
-    "nlogo",
+    SelectionMode.FilesOnly,
+    Some("Netlogo files" -> Seq("nlogo")),
     updateGlobals)
 
   val workspaceCheckBox = new CheckBox("Embed Workspace") {
@@ -69,7 +68,7 @@ abstract class GenericNetLogoPanelUI(
   var multiProtoString = new MultiTwoCombos[PrototypeDataProxyUI, String]("", List(), List(), "with", Seq())
   val resourcesMultiTextField = new MultiChooseFileTextField("",
     resources.map {
-      r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r))
+      r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r.getAbsolutePath))
     },
     selectionMode = SelectionMode.FilesAndDirectories,
     minus = CLOSE_IF_EMPTY)
@@ -86,7 +85,7 @@ abstract class GenericNetLogoPanelUI(
 
   updateIOPanel
 
-  private def updateIOPanel = future {
+  private def updateIOPanel = {
     StatusBar().inform("Reading the netlogo file ...")
     inputMappingPanel.contents += new Label("<html><i>Loading...</i></html>")
     outputMappingPanel.contents += new Label("<html><i>Loading...</i></html>")
@@ -101,7 +100,6 @@ abstract class GenericNetLogoPanelUI(
     outputMappingPanel.repaint
     revalidate
     repaint
-    StatusBar.clear
   }
 
   private def globalsReporters = stm.atomic {
@@ -136,7 +134,7 @@ abstract class GenericNetLogoPanelUI(
     try {
       globalsReporters match {
         case Some((globals, reporters)) ⇒
-          if (!(globals ++ reporters).isEmpty && !comboContent.isEmpty) {
+          if (!(globals ++ reporters).isEmpty) {
             multiStringProto = new MultiTwoCombos[String, PrototypeDataProxyUI](
               "",
               globals ++ reporters,
@@ -156,6 +154,7 @@ abstract class GenericNetLogoPanelUI(
                 m ⇒ new TwoCombosPanel(comboContent, globals, "with", new TwoCombosData(Some(m._1), Some(m._2)))
               },
               minus = CLOSE_IF_EMPTY, insets = MEDIUM)
+            StatusBar().clear
           }
         case None ⇒
       }

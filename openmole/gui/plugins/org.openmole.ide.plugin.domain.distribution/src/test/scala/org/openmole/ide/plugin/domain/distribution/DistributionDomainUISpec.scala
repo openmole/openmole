@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.domain.distribution
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class RangeDomainUISpec extends FlatSpec with ShouldMatchers {
+class RangeDomainUISpec extends FlatSpec with Matchers {
 
   "UniformDistributionIntDomainDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("int09.xml")) should equal(true)

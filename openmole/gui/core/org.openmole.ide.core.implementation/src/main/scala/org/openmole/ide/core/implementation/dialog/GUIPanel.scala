@@ -53,7 +53,7 @@ class GUIPanel extends MainFrame {
                 override def apply = {
                   Proxies.instance.clearAll
                   ScenesManager().closeAll
-                  mainframe.title = "OpenMOLE - " + LoadXML.load(f)
+                  mainframe.title = "OpenMOLE - " + LoadXML.load(f.getAbsolutePath)
                 }
               })
             }
@@ -62,18 +62,11 @@ class GUIPanel extends MainFrame {
 
       contents += new MenuItem(new Action("Load") {
         override def apply = {
-          ScenesManager().closeAll
-          Proxies.instance.clearAll
-          mainframe.title = "OpenMOLE - " + LoadXML.load
+          val name = DialogFactory.multiLoadDialog
+          mainframe.title = "OpenMOLE - " + name
         }
 
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, Event.CTRL_MASK))
-      })
-
-      contents += new MenuItem(new Action("Import") {
-        override def apply = LoadXML.load
-
-        accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_I, Event.CTRL_MASK))
       })
 
       contents += new MenuItem(new Action("Save") {
@@ -89,10 +82,19 @@ class GUIPanel extends MainFrame {
         override def apply = SaveXML.save(mainframe, SaveXML.show)
       })
 
-      contents += new MenuItem(new Action("Export") {
+      contents += new MenuItem(new Action("Export as XML") {
         override def apply = ScenesManager().currentScene match {
           case Some(s: BuildMoleScene) ⇒ DialogFactory.exportPartialMoleExecution(s)
           case _                       ⇒ StatusBar().inform("No mole available for export")
+        }
+      })
+
+      contents += new MenuItem(new Action("Export project") {
+        override def apply = ScenesManager().currentScene match {
+          case Some(s: BuildMoleScene) ⇒
+            ScenesManager().saveCurrentPropertyWidget
+            SaveXML.export(mainframe)
+          case _ ⇒
         }
       })
 
@@ -103,6 +105,10 @@ class GUIPanel extends MainFrame {
           mainframe.title = "OpenMOLE"
           Settings.currentProject = None
         }
+      })
+
+      contents += new MenuItem(new Action("Quit") {
+        override def apply = closeOperation
       })
     }
 
@@ -147,7 +153,7 @@ class GUIPanel extends MainFrame {
   splitPane.resizeWeight = 1
 
   peer.add(splitPane.peer, BorderLayout.CENTER)
-  StatusBar().inform("OpenMOLE - 0.10 - Gogo Gadget")
+  StatusBar().inform("OpenMOLE - 1.0 - Heroic Hippo")
 
   PasswordListner.apply
 

@@ -23,14 +23,13 @@ import akka.actor.ActorRef
 import com.db4o.ObjectContainer
 import com.ice.tar.TarOutputStream
 import java.io.File
-import java.io.FileOutputStream
 import java.util.UUID
 import org.openmole.core.batch.message._
 import org.openmole.core.batch.replication._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
-import org.openmole.core.batch.environment.BatchEnvironment.{ signalDownload, signalUpload }
+import org.openmole.core.batch.environment.BatchEnvironment.{ signalUpload }
 import org.openmole.core.model.job._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
@@ -38,89 +37,72 @@ import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.core.serializer._
 import org.openmole.misc.fileservice.FileService
 import org.openmole.misc.hashservice.HashService
-import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import scala.collection.immutable.TreeSet
 import org.openmole.misc.exception.UserBadDataError
 
-//import actors.futures._
-
-object UploadActor extends Logger
-
-import UploadActor._
-
 class UploadActor(jobManager: ActorRef) extends Actor {
 
   def receive = {
-    case Upload(job) ⇒
+    case msg @ Upload(job) ⇒
       if (!job.state.isFinal) {
         try {
           val sj = initCommunication(job.environment, job.job)
           jobManager ! Uploaded(job, sj)
         }
         catch {
-          case e: Throwable ⇒ signalError(job, e)
+          case e: Throwable ⇒
+            jobManager ! Error(job, e)
+            jobManager ! msg
         }
       }
-      System.runFinalization
+      System.runFinalization()
   }
 
-  private def signalError(job: BatchExecutionJob, e: Throwable) = {
-    jobManager ! Error(job, e)
-    jobManager ! Upload(job)
-  }
+  private def initCommunication(environment: BatchEnvironment, job: IJob): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
 
-  private def initCommunication(environment: BatchEnvironment, job: IJob): SerializedJob = {
-    val jobFile = Workspace.newFile("job", ".tar")
+    val (serializationFiles, serialisationPluginFiles) = serializeJob(jobFile, job)
 
-    try {
-      val (serializationFile, serialisationPluginFiles) = serializeJob(jobFile, job)
+    val (storage, token) = environment.selectAStorage(
+      (serializationFiles +
+        environment.runtime +
+        environment.jvmLinuxI386 +
+        environment.jvmLinuxX64 ++
+        environment.plugins ++
+        serialisationPluginFiles).map(f ⇒ f -> FileService.hash(job.moleExecution, f)))
 
-      val (storage, token) = environment.selectAStorage(
-        (serializationFile +
-          environment.runtime +
-          environment.jvmLinuxI386 +
-          environment.jvmLinuxX64 ++
-          environment.plugins ++
-          serialisationPluginFiles).map(f ⇒ f -> FileService.hash(job.moleExecution, f)))
+    implicit val t = token
+    try ReplicaCatalog.withClient { implicit client ⇒
+      val communicationPath = storage.child(storage.tmpDir, UUID.randomUUID.toString)
+      storage.makeDir(communicationPath)
 
-      implicit val t = token
-      try ReplicaCatalog.withClient { implicit client ⇒
-        val communicationPath = storage.child(storage.tmpDir, UUID.randomUUID.toString)
-        storage.makeDir(communicationPath)
+      val inputPath = storage.child(communicationPath, Storage.uniqName("job", ".in"))
 
-        val inputPath = storage.child(communicationPath, Storage.uniqName("job", ".in"))
+      val runtime = replicateTheRuntime(job, environment, storage)
 
-        val runtime = replicateTheRuntime(job, environment, storage)
+      val executionMessage = createExecutionMessage(
+        job,
+        jobFile,
+        serializationFiles,
+        serialisationPluginFiles,
+        storage,
+        communicationPath)
 
-        val executionMessage = createExecutionMessage(
-          job,
-          jobFile,
-          serializationFile,
-          serialisationPluginFiles,
-          storage,
-          communicationPath)
+      /* ---- upload the execution message ----*/
+      Workspace.withTmpFile("job", ".xml") { executionMessageFile ⇒
+        SerialiserService.serialise(executionMessage, executionMessageFile)
+        signalUpload(storage.uploadGZ(executionMessageFile, inputPath), inputPath, storage)
+      }
 
-        /* ---- upload the execution message ----*/
-        val executionMessageFile = Workspace.newFile("job", ".xml")
-        try {
-          SerialiserService.serialise(executionMessage, executionMessageFile)
-          signalUpload(
-            storage.uploadGZ(executionMessageFile, inputPath), inputPath, storage)
-        }
-        finally executionMessageFile.delete
-
-        new SerializedJob(storage, communicationPath, inputPath, runtime)
-      } finally storage.releaseToken(token)
-    }
-    finally jobFile.delete
+      SerializedJob(storage, communicationPath, inputPath, runtime)
+    } finally storage.releaseToken(token)
   }
 
   def serializeJob(file: File, job: IJob) = {
     var files = new TreeSet[File]
     var plugins = new TreeSet[File]
 
-    val tos = new TarOutputStream(new FileOutputStream(file))
+    val tos = new TarOutputStream(file.bufferedOutputStream)
     try {
       for (moleJob ← job.moleJobs) moleJob.synchronized {
         if (!moleJob.finished) {
@@ -161,7 +143,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
 
     val hash = FileService.hash(job.moleExecution, toReplicate).toString
     val replica = ReplicaCatalog.uploadAndGet(toReplicate, toReplicatePath, hash, storage)
-    new ReplicatedFile(file, isDir, hash, replica.path, file.mode)
+    ReplicatedFile(file, isDir, hash, replica.path, file.mode)
   }
 
   def replicateTheRuntime(
@@ -176,7 +158,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
 
     val storageReplication = FileMessage(toReplicatedFile(job, storage.serializedRemoteStorage, storage))
 
-    new Runtime(
+    Runtime(
       storageReplication,
       runtimeFileMessage,
       environmentPluginPath,
@@ -200,7 +182,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     val pluginReplicas = serializationPlugin.map { toReplicatedFile(job, _, storage) }
     val files = serializationFile.map { toReplicatedFile(job, _, storage) }
 
-    new ExecutionMessage(
+    ExecutionMessage(
       pluginReplicas,
       files,
       FileMessage(jobForRuntimePath, jobHash),

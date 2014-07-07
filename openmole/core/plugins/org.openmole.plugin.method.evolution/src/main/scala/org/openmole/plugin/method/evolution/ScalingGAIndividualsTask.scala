@@ -24,55 +24,38 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.domain._
 import org.openmole.core.model.task._
-import scala.collection.mutable.ListBuffer
+import ga._
 
 object ScalingGAIndividualsTask {
 
-  def apply[G <: GAGenome, P, F <: MGFitness, MF](
+  def apply(evolution: GAAlgorithm)(
     name: String,
-    individuals: Prototype[Array[Individual[G, P, F]]],
-    scales: (GenomeScaling.Scale)*)(implicit plugins: PluginSet) =
+    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]])(implicit plugins: PluginSet) = {
+
+    val (_evolution, _name, _individuals) = (evolution, name, individuals)
+
     new TaskBuilder { builder ⇒
 
-      private var objectives = new ListBuffer[Prototype[Double]]
-
-      def addObjective(p: Prototype[Double]) = {
-        objectives += p
-        this addOutput p.toArray
-        this
-      }
-
       addInput(individuals)
-      scales foreach { case (p, _) ⇒ this addOutput p.toArray }
+      evolution.inputsPrototypes foreach { i ⇒ addOutput(i.toArray) }
+      evolution.outputPrototypes foreach { o ⇒ addOutput(o.toArray) }
 
-      def toTask = new ScalingGAIndividualsTask(name, individuals, scales) with Built {
-        val objectives = builder.objectives.toList
+      def toTask = new ScalingGAIndividualsTask with Built {
+        val evolution = _evolution
+        val name = _name
+        val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
       }
     }
+  }
 
 }
 
-sealed abstract class ScalingGAIndividualsTask[G <: GAGenome, P, F <: MGFitness, MF](
-    val name: String,
-    val individuals: Prototype[Array[Individual[G, P, F]]],
-    val scales: Seq[GenomeScaling.Scale]) extends Task with GenomeScaling {
+sealed abstract class ScalingGAIndividualsTask extends Task {
 
-  def objectives: List[Prototype[Double]]
+  val evolution: GAAlgorithm
+  val individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
 
-  override def process(context: Context) = {
-    val individualsValue = context(individuals)
-    val genomeValues =
-      individualsValue.toArray.map {
-        i ⇒ scaled(i.genome.values, context).map(_.value).toArray
-      }.transpose
-
-    (genomeValues zip scales.map(_._1)).map { case (g, p) ⇒ Variable(p.toArray, g) }.toList ++
-      objectives.zipWithIndex.map {
-        case (p, i) ⇒
-          Variable(
-            p.toArray,
-            individualsValue.map { _.fitness.values(i) }.toArray)
-      }
-  }
+  override def process(context: Context) =
+    evolution.toVariables(context(individuals), context)
 
 }

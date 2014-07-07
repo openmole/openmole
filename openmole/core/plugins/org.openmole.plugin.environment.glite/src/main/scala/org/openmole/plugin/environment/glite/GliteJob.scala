@@ -22,32 +22,69 @@ import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.misc.workspace._
-import org.openmole.core.batch.storage.StorageService
 import org.openmole.misc.tools.service.Logger
+import fr.iscpif.gridscale.glite.WMSJobDescription
+import scala.util.{ Failure, Try }
 
-object GliteJob extends Logger
+object GliteJob extends Logger {
+
+  import Log._
+
+  trait GliteDebugJob extends GliteJob {
+    val description: WMSJobDescription
+
+    override def state_=(state: ExecutionState) = {
+      if (_state != state) {
+
+        try {
+          state match {
+            case DONE   ⇒ jobService.jobService.downloadOutputSandbox(description, id)
+            case FAILED ⇒ jobService.jobService.downloadOutputSandbox(description, id)
+            case _      ⇒
+          }
+        }
+        catch {
+          case e: Throwable ⇒ logger.log(WARNING, "Error retrieving output sandbox for debug job", e)
+        }
+      }
+      super.state_=(state)
+    }
+  }
+
+  def debug(gliteJob: GliteJob, _description: WMSJobDescription) =
+    new GliteDebugJob {
+      val storage = gliteJob.storage
+      val finishedPath = gliteJob.finishedPath
+      val jobService = gliteJob.jobService
+      val description = _description
+      val runningPath: String = gliteJob.runningPath
+      val id = gliteJob.id
+      val resultPath: String = gliteJob.resultPath
+    }
+
+}
 
 trait GliteJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
   var lastShacked = System.currentTimeMillis
   val jobService: GliteJobService
 
   override def updateState(implicit token: AccessToken) = {
-    state = testStatusFile(super.updateState)
+    state = if (!jobService.environment.debug) testStatusFile(super.updateState) else super.updateState
 
     //if (!state.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
     if (state == SUBMITTED) {
       val maxNbReady = Workspace.preferenceAsInt(GliteEnvironment.JobShakingMaxReady)
 
-      def nbReady = jobService.environment.jobRegistry.allExecutionJobs.count(_.state == READY)
+      def nbReady = jobService.environment.executionJobs.count(_.state == READY)
 
       if (nbReady < maxNbReady) {
-        val jobShakingAverageTime = Workspace.preferenceAsDuration(GliteEnvironment.JobShakingHalfLife).toMilliSeconds
-        val nbInterval = ((System.currentTimeMillis - lastShacked.toDouble) / jobShakingAverageTime)
+        val jobShakingAverageTime = Workspace.preferenceAsDuration(GliteEnvironment.JobShakingHalfLife)
+        val nbInterval = ((System.currentTimeMillis - lastShacked.toDouble) / jobShakingAverageTime.toMillis)
         val probability = 1 - math.pow(0.5, nbInterval)
 
         lastShacked = System.currentTimeMillis
 
-        if (Workspace.rng.nextDouble < probability) throw new ShouldBeKilledException("Killed in shaking process")
+        if (Workspace.rng.nextDouble < probability) throw new ResubmitException("Killed in shaking process")
       }
     }
     state

@@ -37,16 +37,16 @@ trait BDIISRMServers extends BatchEnvironment {
   def bdiiServer: BDII
   def voName: String
   def proxyCreator: GlobusAuthentication.ProxyCreator
-  def permissive = true
 
   @transient lazy val threadsBySE = Workspace.preferenceAsInt(GliteEnvironment.LocalThreadsBySE)
 
-  override def allStorages = {
-    val stors = bdiiServer.querySRM(voName, Workspace.preferenceAsDuration(GliteEnvironment.FetchResourcesTimeOut).toSeconds.toInt)
-    stors.map {
-      s ⇒ GliteStorageService(s, this, proxyCreator, threadsBySE, permissive, GliteAuthentication.CACertificatesDir)
+  lazy val bdiiStorarges =
+    bdiiServer.querySRMs(voName, Workspace.preferenceAsDuration(GliteEnvironment.FetchResourcesTimeOut))(proxyCreator)
+
+  override def allStorages =
+    bdiiStorarges.map {
+      s ⇒ GliteStorageService(s, this, proxyCreator, threadsBySE)
     }
-  }
 
   override def selectAStorage(usedFileHashes: Iterable[(File, Hash)]) =
     if (storages.size == 1) super.selectAStorage(usedFileHashes)
@@ -57,31 +57,31 @@ trait BDIISRMServers extends BatchEnvironment {
       val minTime = storages.map(_.time).min
 
       def fitness =
-        storages.flatMap {
-          cur ⇒
-            cur.tryGetToken match {
-              case None ⇒ None
-              case Some(token) ⇒
-                val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(h.toString, Set.empty).contains(cur.id) }.map { case (f, _) ⇒ f.size }.sum
-                val sizeFactor =
-                  if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
+        for {
+          cur ← storages
+          token ← cur.tryGetToken
+        } yield {
+          val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(cur.id, Set.empty).contains(h.toString) }.map { case (f, _) ⇒ f.size }.sum
 
-                val time = cur.time
-                val timeFactor =
-                  if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
-                  else 1 - time.normalize(minTime, maxTime)
+          val sizeFactor =
+            if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
 
-                import GliteEnvironment._
-                import Workspace.preferenceAsDouble
+          val time = cur.time
+          val timeFactor =
+            if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
+            else 1 - time.normalize(minTime, maxTime)
 
-                val fitness = math.pow(
-                  preferenceAsDouble(StorageSizeFactor) * sizeFactor +
-                    preferenceAsDouble(StorageTimeFactor) * timeFactor +
-                    preferenceAsDouble(StorageAvailabilityFactor) * cur.availability +
-                    preferenceAsDouble(StorageSuccessRateFactor) * cur.successRate,
-                  preferenceAsDouble(StorageFitnessPower))
-                Some((cur, token, fitness))
-            }
+          import GliteEnvironment._
+          import Workspace.preferenceAsDouble
+
+          val fitness = math.pow(
+            preferenceAsDouble(StorageSizeFactor) * sizeFactor +
+              preferenceAsDouble(StorageTimeFactor) * timeFactor +
+              preferenceAsDouble(StorageAvailabilityFactor) * cur.availability +
+              preferenceAsDouble(StorageSuccessRateFactor) * cur.successRate,
+            preferenceAsDouble(StorageFitnessPower))
+
+          (cur, token, fitness)
         }
 
       @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): (StorageService, AccessToken) = {

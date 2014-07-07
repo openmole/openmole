@@ -22,11 +22,7 @@ import org.openmole.misc.tools.service.Logger
 import akka.actor.ActorRef
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.batch.environment.BatchEnvironment._
-import org.openmole.core.batch.environment.BatchEnvironment
-
-object RefreshActor extends Logger
-
-import RefreshActor._
+import org.openmole.core.batch.environment.{ ResubmitException, BatchEnvironment }
 
 class RefreshActor(jobManager: ActorRef) extends Actor {
   def receive = {
@@ -39,13 +35,15 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
             if (job.state == DONE) jobManager ! GetResult(job, sj, bj.resultPath)
             else if (!job.state.isFinal) {
               val newDelay =
-                if (oldState == job.state) math.min(delay + job.environment.incrementUpdateInterval, job.environment.maxUpdateInterval)
+                if (oldState == job.state) (delay + job.environment.incrementUpdateInterval) min job.environment.maxUpdateInterval
                 else job.environment.minUpdateInterval
               jobManager ! Delay(Refresh(job, sj, bj, newDelay), newDelay)
             }
             else jobManager ! Kill(job)
           case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay), delay)
         } catch {
+          case _: ResubmitException ⇒
+            jobManager ! Resubmit(job, sj.storage)
           case e: Throwable ⇒
             jobManager ! Error(job, e)
             jobManager ! Kill(job)

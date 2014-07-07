@@ -17,9 +17,7 @@
 
 package org.openmole.core.batch.refresh
 
-import akka.actor.Actor
-import akka.actor.ActorSystem
-import akka.actor.Props
+import akka.actor.{ ActorRef, Actor, ActorSystem, Props }
 import akka.routing.SmallestMailboxRouter
 import org.openmole.core.model.execution._
 import org.openmole.misc.eventdispatcher.EventDispatcher
@@ -32,10 +30,11 @@ import org.openmole.core.batch.environment.BatchEnvironment.JobManagmentThreads
 import scala.concurrent.duration._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.Logger
+import scala.concurrent.duration.{ Duration ⇒ SDuration, MILLISECONDS }
 
 object JobManager extends Logger
 
-import JobManager._
+import JobManager.Log._
 
 class JobManager extends Actor {
 
@@ -79,8 +78,11 @@ akka {
     case msg: DeleteFile         ⇒ deleter ! msg
     case msg: CleanSerializedJob ⇒ cleaner ! msg
 
+    case Manage(job) ⇒
+      self ! Upload(job)
+
     case Delay(msg, delay) ⇒
-      context.system.scheduler.scheduleOnce(delay milliseconds) {
+      context.system.scheduler.scheduleOnce(delay) {
         self ! msg
       }
 
@@ -94,21 +96,32 @@ akka {
 
     case Kill(job) ⇒
       job.state = ExecutionState.KILLED
-      job.batchJob.foreach(bj ⇒ self ! KillBatchJob(bj))
-      job.serializedJob.foreach(j ⇒ self ! CleanSerializedJob(j))
+      killAndClean(job)
+
+    case Resubmit(job, storage) ⇒
+      killAndClean(job)
+      job.state = ExecutionState.READY
+      uploader ! Upload(job)
 
     case Error(job, exception) ⇒
       val level = exception match {
-        case e: UserBadDataError            ⇒ Log.SEVERE
-        case e: JobRemoteExecutionException ⇒ Log.WARNING
-        case _                              ⇒ Log.FINE
+        case e: UserBadDataError            ⇒ SEVERE
+        case e: JobRemoteExecutionException ⇒ WARNING
+        case _                              ⇒ FINE
       }
       EventDispatcher.trigger(job.environment: Environment, new Environment.ExceptionRaised(job, exception, level))
-      Log.logger.log(level, "Error in job refresh", exception)
+      logger.log(level, "Error in job refresh", exception)
 
     case MoleJobError(mj, j, e) ⇒
       EventDispatcher.trigger(j.environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
-      Log.logger.log(Log.WARNING, "Error during job execution, it will be resubmitted.", e)
+      logger.log(WARNING, "Error during job execution, it will be resubmitted.", e)
 
+  }
+
+  def killAndClean(job: BatchExecutionJob) {
+    job.batchJob.foreach(bj ⇒ self ! KillBatchJob(bj))
+    job.batchJob = None
+    job.serializedJob.foreach(j ⇒ self ! CleanSerializedJob(j))
+    job.serializedJob = None
   }
 }

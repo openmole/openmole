@@ -17,6 +17,7 @@
 
 package org.openmole.ui.console
 
+import jline.console.ConsoleReader
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.batch.authentication._
@@ -31,6 +32,8 @@ import org.openmole.core.model.transition.IExplorationTransition
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.HashMap
+import org.openmole.misc.pluginmanager.PluginManager
+import org.openmole.core.implementation.mole.MoleExecution
 
 class Command {
 
@@ -41,13 +44,14 @@ class Command {
 
   def print(environment: BatchEnvironment, v: Int = 0): Unit = {
     val accounting = new Array[AtomicInteger](ExecutionState.values.size)
-    val executionJobRegistry = environment.jobRegistry
 
     for (state ← ExecutionState.values) {
       accounting(state.id) = new AtomicInteger
     }
 
-    for (executionJob ← executionJobRegistry.allExecutionJobs) {
+    val executionJobs = environment.executionJobs
+
+    for (executionJob ← executionJobs) {
       accounting(executionJob.state.id).incrementAndGet
     }
 
@@ -58,7 +62,7 @@ class Command {
     if (v > 0) {
       val states =
         for {
-          ej ← executionJobRegistry.allExecutionJobs
+          ej ← executionJobs
           bj ← ej.batchJob
         } yield { bj.jobService.id -> bj.state }
 
@@ -86,12 +90,15 @@ class Command {
   def verify(mole: IMole): Unit = Validation(mole).foreach(println)
 
   def encrypted = {
-    val password = new jline.ConsoleReader().readLine("encrypt:", '*')
+    val password = new ConsoleReader().readLine("encrypt:", '*')
     Workspace.encrypt(password)
   }
 
   def load[T](f: File) = SerialiserService.deserialise[T](f)
   def save(o: Any, f: File) = SerialiserService.serialise(o, f)
+
+  def bundles = PluginManager.bundles
+  def dependencies(file: File) = PluginManager.dependencies(file)
 
 }
 

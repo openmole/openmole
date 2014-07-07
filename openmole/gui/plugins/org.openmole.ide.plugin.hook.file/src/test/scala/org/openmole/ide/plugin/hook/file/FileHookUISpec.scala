@@ -19,9 +19,9 @@ package org.openmole.ide.plugin.hook.file
 
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-class FileHookUISpec extends FlatSpec with ShouldMatchers {
+class FileHookUISpec extends FlatSpec with Matchers {
 
   "CopyFileHookDataUI" should "be unserializable" in {
     GUISerializer.serializable(getClass.getClassLoader.getResource("copy09.xml")) should equal(true)

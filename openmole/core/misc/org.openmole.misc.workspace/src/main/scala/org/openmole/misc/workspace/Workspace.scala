@@ -34,9 +34,10 @@ import org.openmole.misc.eventdispatcher.{ EventDispatcher, Event }
 import org.openmole.misc.exception._
 import org.openmole.misc.replication._
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.tools.service.Duration._
-import scala.util.Try
 import org.openmole.misc.osgi
+
+import scala.concurrent.duration.FiniteDuration
+import org.openmole.misc.tools.service._
 
 object Workspace {
 
@@ -114,6 +115,8 @@ object Workspace {
   def preferenceAsDouble(location: ConfigurationLocation): Double = instance.preferenceAsDouble(location)
 
   def withTmpFile[T](f: File ⇒ T): T = instance.withTmpFile(f)
+
+  def withTmpFile[T](prefix: String, postfix: String)(f: File ⇒ T): T = instance.withTmpFile(prefix, postfix)(f)
 
   def newFile: File = instance.newFile
 
@@ -253,6 +256,12 @@ class Workspace(val location: File) {
 
   def preferenceAsDouble(location: ConfigurationLocation): Double = preference(location).toDouble
 
+  def withTmpFile[T](prefix: String, postfix: String)(f: File ⇒ T): T = {
+    val file = newFile(prefix, postfix)
+    try f(file)
+    finally file.delete
+  }
+
   def withTmpFile[T](f: File ⇒ T): T = {
     val file = newFile
     try f(file)
@@ -308,7 +317,7 @@ class Workspace(val location: File) {
 
   def passwordChosen = isPreferenceSet(passwordTest)
 
-  def preferenceAsDuration(location: ConfigurationLocation) = new DurationStringDecorator(preference(location))
+  def preferenceAsDuration(location: ConfigurationLocation): FiniteDuration = preference(location)
 
   def isPreferenceSet(location: ConfigurationLocation): Boolean = synchronized {
     rawPreference(location) != null

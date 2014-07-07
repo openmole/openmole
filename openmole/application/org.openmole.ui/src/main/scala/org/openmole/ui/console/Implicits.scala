@@ -27,5 +27,8 @@ class Implicits(
   implicit def stringToFile(path: String) = new File(path)
   implicit lazy val executionContext = ExecutionContext.local
   implicit lazy val implicits = Context.empty
+  implicit def doubleToString(d: Double) = d.toString
+  implicit def intToString(i: Int) = i.toString
+  implicit def longToString(l: Long) = l.toString
 }
 
