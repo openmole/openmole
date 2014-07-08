@@ -28,12 +28,10 @@ import org.openmole.core.batch.storage._
 import org.openmole.misc.tools.io.FileUtil._
 import concurrent.duration._
 
-object SharedStorage {
-  val UpdateInstallJobInterval = new ConfigurationLocation("SharedStorage", "UpdateInstallJobInterval")
-  Workspace += (UpdateInstallJobInterval, "PT5S")
-}
+object SharedStorage extends Logger
 
 import SharedStorage._
+import Log._
 
 trait SharedStorage extends SSHService { js ⇒
   def sharedFS: SSHStorageService
@@ -59,7 +57,7 @@ trait SharedStorage extends SSHService { js ⇒
           try {
             val tmpDirName = UUID.randomUUID.toString
 
-            script.content =
+            val content =
               "if [ -d " + runtime.runtime.hash + " ]; then exit 0; fi; " +
                 "mkdir " + tmpDirName + "; cd " + tmpDirName + "; if [ `uname -m` = x86_64 ]; then cp " + runtime.jvmLinuxX64.path + " jvm.tar.gz.gz;" +
                 "else cp " + runtime.jvmLinuxI386.path + " jvm.tar.gz.gz; fi;" +
@@ -67,7 +65,11 @@ trait SharedStorage extends SSHService { js ⇒
                 "cp " + runtime.runtime.path + " runtime.tar.gz.gz; gunzip runtime.tar.gz.gz; gunzip runtime.tar.gz; tar -xf runtime.tar; rm runtime.tar; mkdir envplugins; PLUGIN=0;" +
                 runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar.gz; gunzip envplugins/plugin$PLUGIN.jar.gz; PLUGIN=`expr $PLUGIN + 1`;" }.foldLeft("") { case (c, s) ⇒ c + s } +
                 "cd ..; if [ -d " + runtime.runtime.hash + " ]; then rm -rf " + tmpDirName + "; exit 0; fi; " +
-                " mv " + tmpDirName + " " + runtime.runtime.hash + "; ls | grep -v " + runtime.runtime.hash + " | xargs rm -rf"
+                " mv " + tmpDirName + " " + runtime.runtime.hash + s"; rm -rf $tmpDirName"
+
+            logger.fine(s"Install script: $content")
+
+            script.content = content
 
             val scriptName = Storage.uniqName("install", ".sh")
             val remoteScript = sharedFS.child(workdir, scriptName)
@@ -83,10 +85,9 @@ trait SharedStorage extends SSHService { js ⇒
           val workDirectory = workdir
         }
 
-        val j = installJobService.submit(jobDescription)
-        val s = fr.iscpif.gridscale.untilFinished { Thread.sleep(Workspace.preferenceAsDuration(UpdateInstallJobInterval).toMillis); installJobService.state(j) }
-
-        if (s != fr.iscpif.gridscale.jobservice.Done) throw new InternalProcessingError("Installation of runtime has failed.")
+        logger.fine("Begin install")
+        installJobService.execute(jobDescription)
+        logger.fine("End install")
 
         val path = sharedFS.child(workdir, runtime.runtime.hash)
         installed = Some(path)
@@ -104,11 +105,16 @@ trait SharedStorage extends SSHService { js ⇒
     val remoteScript = try {
       val workspace = serializedJob.storage.child(serializedJob.path, UUID.randomUUID.toString)
       val osgiWorkDir = serializedJob.storage.child(serializedJob.path, UUID.randomUUID.toString)
-      script.content =
+
+      val content =
         "export PATH=" + runtime + "/jre/bin/" + ":$PATH; cd " + runtime + "; export OPENMOLE_HOME=" + workspace + " ; mkdir $OPENMOLE_HOME ; " +
           "sh run.sh " + environment.openMOLEMemoryValue + "m " + osgiWorkDir + " -s " + serializedJob.runtime.storage.path +
           " -c " + serializedJob.path + " -p envplugins/ -i " + serializedJob.inputFile + " -o " + result + " -t " + environment.threadsValue +
           "; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ;"
+
+      logger.fine("Script: " + content)
+
+      script.content = content
 
       val remoteScript = sharedFS.child(serializedJob.path, Storage.uniqName("run", ".sh"))
       sharedFS.withToken { sharedFS.upload(script, remoteScript)(_) }

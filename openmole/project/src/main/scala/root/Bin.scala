@@ -43,7 +43,12 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
   lazy val guiPluginProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"), true) sendTo "openmole-plugins-gui"
 
   lazy val openmole = AssemblyProject("openmole", "plugins", settings = resAssemblyProject ++ uiProjects ++ pluginProjects ++ guiPluginProjects ++ dbserverProjects ++ zipProject, depNameMap =
-    Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" }, """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })
+    Map(
+      """org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
+      """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") },
+      """bcpkix-jdk15on.*\.jar""".r -> { r ⇒ "bcpkix-jdk15on.jar" },
+      """bcprov-jdk15on.*\.jar""".r -> { r ⇒ "bcprov-jdk15on.jar" }
+    )
   ) settings (
     equinoxDependencies, libraryDependencies += Libraries.gridscale intransitive (),
     resourceSets <++= (baseDirectory, zip in openmoleRuntime, downloadUrls in openmoleRuntime) map { (bd, zipFile, downloadUrls) ⇒
