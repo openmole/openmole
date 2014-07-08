@@ -30,7 +30,7 @@ import org.openmole.ide.core.implementation.preference.Preferences
 
 object SaveXML {
 
-  def save(frame: GUIPanel, path: Option[File] = Settings.currentProject orElse SaveXML.show): Unit =
+  def save(frame: GUIPanel, path: Option[File] = Settings.currentProject orElse SaveXML.show(".om")): Unit =
     path match {
       case Some(p) ⇒
         frame.title = "OpenMOLE - " + p.getCanonicalPath
@@ -44,24 +44,24 @@ object SaveXML {
     }
 
   def export(frame: GUIPanel): Unit =
-    SaveXML.show match {
+    SaveXML.show(".omx") match {
       case Some(p) ⇒
         (new GUISerializer).serialize(p, Proxies.instance, ScenesManager().moleScenes.map(MoleData.fromScene), Some(MetaData(ScenesManager().moleScenes)), true)
         ScenesManager().statusBar.inform(p.getName + " succesfully exported " + " in " + p.getParent)
       case None ⇒
     }
 
-  def show: Option[File] = {
+  def show(ext: String = ".om"): Option[File] = {
     val fc = DialogFactory.fileChooser("Save OpenMOLE project",
-      "*.om",
-      "om",
+      "*" + ext,
+      ext,
       Settings.currentPath)
     if (fc.showDialog(new Label, "OK") == Approve) {
       val f = new File(fc.selectedFile.getPath)
       if (f.getParentFile.isDirectory) {
         Settings.currentPath = Some(f.getParentFile)
         val saveAs =
-          if (!f.getName.contains(".")) new File(fc.selectedFile.getPath + ".om")
+          if (!f.getName.contains(".")) new File(fc.selectedFile.getPath + ext)
           else f
         Some(saveAs)
       }

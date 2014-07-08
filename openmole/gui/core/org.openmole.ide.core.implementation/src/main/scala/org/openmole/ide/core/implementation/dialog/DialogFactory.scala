@@ -24,9 +24,10 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import org.openmole.ide.core.implementation.action.LoadXML
+import org.openmole.ide.core.implementation.action.{ SaveXML, LoadXML }
 import org.openmole.ide.core.implementation.execution.{ Settings, ScenesManager }
 import org.openmole.ide.core.implementation.workflow.{ ISceneContainer, BuildMoleScene, ExecutionMoleSceneContainer }
+import org.openmole.misc.tools.io.FileUtil
 import scala.swing.FileChooser.SelectionMode._
 import swing._
 import java.io.File
@@ -41,6 +42,7 @@ import org.openmole.ide.core.implementation.preference.Preferences
 import scala.swing.event.ButtonClicked
 import org.openmole.misc.workspace.Workspace
 import scala.swing.FileChooser.SelectionMode
+import org.openmole.misc.tools.io.FileUtil._
 
 object DialogFactory {
 
@@ -100,7 +102,7 @@ object DialogFactory {
     else ("", "")
   }
 
-  def multiLoadDialog: String = {
+  def multiLoadDialog(mainframe: GUIPanel): String = {
     val defaultP = Settings.currentPath match {
       case Some(f: File) ⇒ f.getAbsolutePath
       case _             ⇒ ""
@@ -115,7 +117,7 @@ object DialogFactory {
       buttons += insertButton
     }
     val fileChooser = new ChooseFileTextField(defaultP, "Select a file", SelectionMode.FilesOnly, Some("om files", Seq("om")))
-    val fileChooser2 = new ChooseFileTextField(defaultP, "Select a file", SelectionMode.FilesOnly, Some("om files", Seq("om")))
+    val fileChooser2 = new ChooseFileTextField(defaultP, "Select a file", SelectionMode.FilesOnly, Some("omx files", Seq("omx")))
     val fileChooser3 = new ChooseFileTextField(defaultP, "Select a file", SelectionMode.FilesOnly, Some("om files", Seq("om")))
     val directoryChooser = new ChooseFileTextField(defaultP, "Folder for embedded files extraction", SelectionMode.DirectoriesOnly)
 
@@ -134,7 +136,7 @@ object DialogFactory {
 
       contents += new PluginPanel("wrap 2") {
         contents += importButton
-        contents += new Label("<html><i>   a project previously exported</i></html>")
+        contents += new Label("<html><i>   a project previously exported as an omx file</i></html>")
       }
       contents += importPanel
 
@@ -159,7 +161,16 @@ object DialogFactory {
         dir.mkdirs
         ScenesManager().closeAll
         Proxies.instance.clearAll
-        LoadXML.load(fileChooser2.text, Some(dir))
+        LoadXML._tryFile(fileChooser2.text, List("", ".omx")) match {
+          case Some(omxFile: File) ⇒
+            val omFile = new File(dir, omxFile.getName.replace("omx", "om"))
+            LoadXML.load(omxFile.getAbsolutePath, Some(dir))
+            SaveXML.save(mainframe, Some(omFile))
+            omFile.getAbsolutePath
+          case _ ⇒
+            StatusBar().warn(fileChooser2.text + " not found.")
+            ""
+        }
       }
       else if (insertButton.selected) {
         LoadXML.load(fileChooser3.text)
