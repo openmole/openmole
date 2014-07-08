@@ -90,6 +90,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
     EventDispatcher.listen(sshBatchJob: BatchJob, BatchJobStatusListner, classOf[BatchJob.StateChanged])
 
     synchronized {
+      logger.fine(s"${nbRunning.get()} on $nbSlots taken")
       if (nbRunning.get() < nbSlots) {
         nbRunning.incrementAndGet
         sshBatchJob.submit
