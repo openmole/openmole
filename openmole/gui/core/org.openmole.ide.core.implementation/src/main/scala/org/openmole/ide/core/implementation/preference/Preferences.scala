@@ -43,7 +43,7 @@ object Preferences {
 
   private def update(pref: Preferences) = instance = pref
 
-  def addRecentFiles(rf: String) = update(instance.copy(recentFiles = (rf +: instance.recentFiles).distinct.take(7)))
+  def addRecentFiles(rf: String) = update(instance.copy(recentFiles = (rf +: instance.recentFiles).distinct.filterNot(_.endsWith(".omx")).take(7)))
 
   def setServers(s: List[(String, String)]) = update(instance.copy(servers = s))
 

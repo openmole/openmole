@@ -54,7 +54,7 @@ object LoadXML {
 
   def tryFile(text: String) = _tryFile(text, List("", ".om", ".tar"))
 
-  private def _tryFile(text: String, exts: List[String]): Option[File] = {
+  def _tryFile(text: String, exts: List[String]): Option[File] = {
     if (!exts.isEmpty) {
       val fileName = text + exts.head
       val f = new File(fileName)
