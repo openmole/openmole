@@ -18,9 +18,9 @@ object Libraries extends Defaults(Apache) {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.71"
+  val gridscaleVersion = "1.72"
 
-  val bouncyCastleVersion = "1.49"
+  val bouncyCastleVersion = "1.50"
 
   lazy val gridscale = "fr.iscpif.gridscale.bundle" %% "gridscale" % gridscaleVersion
 
