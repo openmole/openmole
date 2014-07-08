@@ -104,7 +104,7 @@ trait JobScript {
 
   protected def touch(dest: URI) = {
     val name = UUID.randomUUID.toString
-    s"touch $name && ${environment.lcgCpCmd(name, dest)}; rm -f $name"
+    s"echo $name >$name && ${environment.lcgCpCmd(name, dest)}; rm -f $name"
   }
 
   protected def lcgCpGunZipCmd(from: URI, to: String) =

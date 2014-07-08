@@ -32,7 +32,7 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
     def nbTokens = maxConnections
     lazy val root = path match {
       case Some(p) ⇒ p
-      case None    ⇒ child(home, ".openmole")
+      case None    ⇒ child(home, ".openmole/.tmp/ssh/")
     }
     val environment = env
   }
