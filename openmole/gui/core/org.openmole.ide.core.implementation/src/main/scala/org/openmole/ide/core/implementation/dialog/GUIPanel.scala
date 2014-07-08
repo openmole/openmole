@@ -62,7 +62,7 @@ class GUIPanel extends MainFrame {
 
       contents += new MenuItem(new Action("Load") {
         override def apply = {
-          val name = DialogFactory.multiLoadDialog
+          val name = DialogFactory.multiLoadDialog(mainframe)
           mainframe.title = "OpenMOLE - " + name
         }
 
@@ -79,7 +79,7 @@ class GUIPanel extends MainFrame {
       })
 
       contents += new MenuItem(new Action("Save as") {
-        override def apply = SaveXML.save(mainframe, SaveXML.show)
+        override def apply = SaveXML.save(mainframe, SaveXML.show(".om"))
       })
 
       contents += new MenuItem(new Action("Export as XML") {
