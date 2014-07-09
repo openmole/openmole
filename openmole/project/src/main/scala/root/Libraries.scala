@@ -138,8 +138,10 @@ object Libraries extends Defaults(Apache) {
   lazy val db4o = OsgiProject("com.db4o", buddyPolicy = Some("global")) settings
     (libraryDependencies += "com.db4o" % "db4o-full-java5" % "8.0.249", bundleType += "dbserver", version := "8.0.249")
 
-  lazy val robustIt = OsgiProject("uk.com.robustit.cloning", exports = Seq("com.rits.*")) settings
-    (libraryDependencies += "uk.com.robust-it" % "cloning" % "1.7.4", version := "1.7.4")
+  lazy val robustIt = OsgiProject("uk.com.robustit.cloning", exports = Seq("com.rits.*"), privatePackages = Seq("org.objenesis.*")) settings (
+    libraryDependencies += "uk.com.robust-it" % "cloning" % "1.7.4",
+    libraryDependencies += "org.objenesis" % "objenesis" % "1.2",
+    version := "1.7.4")
 
   lazy val netlogo4_noscala = OsgiProject("ccl.northwestern.edu.netlogo4.noscala", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("!scala.*", "*")) settings
