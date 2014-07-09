@@ -22,8 +22,6 @@ import org.apache.log4j.BasicConfigurator
 import java.util.logging._
 
 import org.openmole.misc.workspace._
-import org.openmole.misc.tools.io.FileUtil._
-import collection.JavaConversions._
 
 object LoggerService {
 

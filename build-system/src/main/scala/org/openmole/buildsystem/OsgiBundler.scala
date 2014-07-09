@@ -53,7 +53,7 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
                   settings: Seq[Project.Setting[_]] = Nil,
                   bundleActivator: Option[String] = None,
                   dynamicImports: Seq[String] = Seq(),
-                  imports: Seq[String] = Seq("*"),
+                  imports: Seq[String] = Seq("*;optional:=true"),
                   embeddedJars: Seq[File] = Seq(), //TODO make this actually useful, using an EitherT or something
                   openmoleScope: Option[String] = None)(implicit artifactPrefix: Option[String] = None) = {
 
