@@ -22,7 +22,7 @@ object Misc extends BaseDefaults {
 
   val tools = OsgiProject("org.openmole.misc.tools", buddyPolicy = Some("global")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }) dependsOn
-    (provided(exception), xstream % "provided", groovy, objenesis % "provided", Apache.exec,
+    (provided(exception), xstream % "provided", groovy, Apache.exec,
       Apache.pool % "provided", Apache.math % "provided", osgi % "provided", jodaTime % "provided", iceTar, provided(scalaLang))
 
   val eventDispatcher = OsgiProject("org.openmole.misc.eventdispatcher") dependsOn (provided(tools))
@@ -36,7 +36,7 @@ object Misc extends BaseDefaults {
 
   val hashService = OsgiProject("org.openmole.misc.hashservice") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (provided(exception), gnuCrypto % "provided", provided(tools), Apache.pool % "provided")
+    (exception, gnuCrypto, tools, Apache.pool)
 
   val fileDeleter = OsgiProject("org.openmole.misc.filedeleter") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
@@ -60,9 +60,11 @@ object Misc extends BaseDefaults {
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
     (provided(tools), provided(hashService), fileCache, provided(updater), provided(workspace), iceTar % "provided")
 
-  val logging = OsgiProject("org.openmole.misc.logging",
+  val logging = OsgiProject(
+    "org.openmole.misc.logging",
     bundleActivator = Some("org.openmole.misc.logging.internal.Activator")) dependsOn (provided(tools), provided(workspace),
-      Apache.log4j % "provided", Apache.logging % "provided", logback % "provided", slf4j % "provided")
+      Apache.log4j % "provided", Apache.logging % "provided", logback % "provided", slf4j % "provided"
+    )
 
   val sftpserver = OsgiProject("org.openmole.misc.sftpserver") dependsOn (tools, Apache.sshd)
 

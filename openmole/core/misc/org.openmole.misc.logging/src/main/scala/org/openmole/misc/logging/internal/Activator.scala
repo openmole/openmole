@@ -21,7 +21,6 @@ import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.tools.service.OSGiActivator
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
-//import org.slf4j.bridge._
 
 object Activator extends OSGiActivator {
   var context: Option[BundleContext] = None
