@@ -20,22 +20,20 @@ package org.openmole.plugin.method.evolution.ga
 import fr.iscpif.mgo._
 import org.openmole.plugin.method.evolution._
 
-object GenomeMap {
+object BehaviourSearch {
 
   def apply(
-    x: Int,
-    nX: Int,
-    y: Int,
-    nY: Int,
-    termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F; type MF >: GenomeMap#MF },
-    inputs: Inputs[Double],
+    termination: GATermination { type G >: BehaviourSearch#G; type P >: BehaviourSearch#P; type F >: BehaviourSearch#F; type MF >: BehaviourSearch#MF },
+    inputs: Inputs[String],
     objectives: Objectives,
+    gridSize: Seq[Double],
     reevaluate: Double = 0.0) = {
-    val (_x, _nX, _y, _nY, _reevaluate, _inputs, _objectives) = (x, nX, y, nY, reevaluate, inputs, objectives)
-    new GenomeMap {
+    val _inputs = inputs
+    val _gridSize = gridSize
+    val (_reevaluate, _objectives) = (reevaluate, objectives)
+    new BehaviourSearch {
       val inputs = _inputs
       val objectives = _objectives
-
       val stateManifest: Manifest[STATE] = termination.stateManifest
       val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
       val individualManifest: Manifest[Individual[G, P, F]] = implicitly
@@ -44,37 +42,30 @@ object GenomeMap {
       val gManifest: Manifest[G] = implicitly
 
       val genomeSize = inputs.size
+
+      val gridSize = _gridSize
+
       override val cloneProbability: Double = _reevaluate
 
-      val x = _x
-      val y = _y
-      val nX = _nX
-      val nY = _nY
-
       type STATE = termination.STATE
-
       def initialState: STATE = termination.initialState
       def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
-
     }
-
   }
 
 }
 
-trait GenomeMap extends GAAlgorithm
-    with BestAggregatedNicheElitism
-    with MapNiche
-    with MapGenomePlotter
-    with NoArchive
-    with NoRanking
-    with NoModifier
-    with MapSelection
-    with CoEvolvingSigmaValuesMutation
-    with SBXBoundedCrossover
-    with GAGenomeWithSigma
-    with MaxAggregation
-    with GenomeScalingFromDouble {
-  def x: Int
-  def y: Int
-}
+trait BehaviourSearch extends GAAlgorithm
+  with HitMapArchive
+  with GeneticBreeding
+  with SortedTournamentSelection
+  with SBXBoundedCrossover
+  with TournamentOnRank
+  with RankModifier
+  with HierarchicalRanking
+  with HitCountModifiedFitness
+  with CoEvolvingSigmaValuesMutation
+  with GAGenomeWithSigma
+  with GenomeScalingFromGroovy
+  with RandomNicheElitism
+  with PhenotypeGridNiche

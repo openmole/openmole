@@ -57,7 +57,8 @@ object GenomeProfile {
 
 trait GenomeProfile extends GAAlgorithm
     with ProfileModifier
-    with ProfileElitism
+    with BestAggregatedNicheElitism
+    with ProfileNiche
     with NoArchive
     with NoDiversity
     with ProfileGenomePlotter

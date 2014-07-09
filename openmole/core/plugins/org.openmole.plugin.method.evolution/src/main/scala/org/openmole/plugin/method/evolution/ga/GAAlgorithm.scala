@@ -26,7 +26,7 @@ import org.openmole.plugin.method.evolution._
 
 trait GAAlgorithm extends Archive
     with EvolutionManifest
-    with G with P with F with MF with MG with GA with Sigma with DoubleSequencePhenotype with MGFitness
+    with G with P with F with MF with MG with GA with Sigma with DoubleSeqPhenotype with MGFitness
     with Modifier
     with Elitism
     with Selection
