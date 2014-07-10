@@ -32,7 +32,8 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     Libraries.gridscalePBS intransitive (),
     Libraries.gridscaleSLURM intransitive (),
     Libraries.gridscaleDirac intransitive (),
-    Libraries.gridscaleGlite intransitive ()
+    Libraries.gridscaleGlite intransitive (),
+    Libraries.gridscaleSGE intransitive ()
   ) ++ Libraries.gridscaleSSH
 
   lazy val uiProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo "plugins"
