@@ -15,50 +15,51 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.sge
+package org.openmole.plugin.environment.oar
 
-import fr.iscpif.gridscale.ssh.SSHStorage
-import fr.iscpif.gridscale.ssh.SSHHost
 import java.net.URI
+
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment._
-import org.openmole.core.batch.storage.PersistentStorageService
-import org.openmole.core.batch.storage.StorageService
 import org.openmole.misc.workspace._
-import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._
 
 import scala.concurrent.duration.Duration
 
-object SGEEnvironment {
+object OAREnvironment {
+
   def apply(
     user: String,
     host: String,
     port: Int = 22,
     queue: Option[String] = None,
-    openMOLEMemory: Option[Int] = None,
+    core: Option[Int] = None,
+    cpu: Option[Int] = None,
     wallTime: Option[Duration] = None,
-    memory: Option[Int] = None,
-    workDirectory: Option[String] = None)(implicit authentications: AuthenticationProvider) =
-    new SGEEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, workDirectory)
+    openMOLEMemory: Option[Int] = None,
+    workDirectory: Option[String] = None,
+    threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
+    new OAREnvironment(user, host, port, queue, core, cpu, wallTime, openMOLEMemory, workDirectory, threads)
 }
 
-class SGEEnvironment(
+class OAREnvironment(
     val user: String,
     val host: String,
     override val port: Int,
     val queue: Option[String],
-    override val openMOLEMemory: Option[Int],
+    val core: Option[Int],
+    val cpu: Option[Int],
     val wallTime: Option[Duration],
-    val memory: Option[Int],
-    val workDirectory: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    override val openMOLEMemory: Option[Int],
+    val workDirectory: Option[String],
+    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage { env ⇒
 
-  type JS = SGEJobService
+  type JS = OARJobService
 
   @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
-  @transient lazy val id = new URI("sge", env.user, env.host, env.port, null, null, null).toString
+  @transient lazy val id = new URI("oar", env.user, env.host, env.port, null, null, null).toString
 
-  @transient lazy val jobService = new SGEJobService with ThisHost with LimitedAccess {
+  @transient lazy val jobService = new OARJobService with ThisHost with LimitedAccess {
     def nbTokens = maxConnections
     def queue = env.queue
     val environment = env

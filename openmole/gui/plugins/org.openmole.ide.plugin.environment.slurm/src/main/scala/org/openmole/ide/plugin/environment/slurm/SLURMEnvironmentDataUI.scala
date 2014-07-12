@@ -47,9 +47,9 @@ class SLURMEnvironmentDataUI(val name: String = "",
       openMOLEMemory,
       wallTime.map(_.toDuration),
       memory,
-      path,
       gresList.flatten,
-      constraintsList)(Workspace.authenticationProvider)
+      constraintsList,
+      path)(Workspace.authenticationProvider)
   }
 
   def coreClass = classOf[SLURMEnvironment]

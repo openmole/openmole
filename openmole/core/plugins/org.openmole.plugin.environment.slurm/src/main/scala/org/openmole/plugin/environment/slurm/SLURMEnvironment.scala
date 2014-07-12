@@ -33,9 +33,6 @@ import fr.iscpif.gridscale.slurm.Gres
 import scala.concurrent.duration.Duration
 
 object SLURMEnvironment {
-  val MaxConnections = new ConfigurationLocation("SLURMEnvironment", "MaxConnections")
-
-  Workspace += (MaxConnections, "10")
 
   def apply(
     user: String,
@@ -45,11 +42,11 @@ object SLURMEnvironment {
     openMOLEMemory: Option[Int] = None,
     wallTime: Option[Duration] = None,
     memory: Option[Int] = None,
-    path: Option[String] = None,
     gres: List[Gres] = List(),
     constraints: List[String] = List(),
-    workDirectory: Option[String] = None)(implicit authentications: AuthenticationProvider) =
-    new SLURMEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, path, gres, constraints, workDirectory)
+    workDirectory: Option[String] = None,
+    threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
+    new SLURMEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, gres, constraints, workDirectory, threads)
 }
 
 import SLURMEnvironment._
@@ -62,20 +59,17 @@ class SLURMEnvironment(
     override val openMOLEMemory: Option[Int],
     val wallTime: Option[Duration],
     val memory: Option[Int],
-    val path: Option[String],
-    //override val threads: Option[Int],
     val gres: List[Gres],
     val constraints: List[String],
     //val nodes: Option[Int],
     //val coreByNode: Option[Int],
-    val workDirectory: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    val workDirectory: Option[String],
+    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
   type JS = SLURMJobService
 
   @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
   @transient lazy val id = new URI("slurm", env.user, env.host, env.port, null, null, null).toString
-
-  def maxConnections = Workspace.preferenceAsInt(MaxConnections)
 
   @transient lazy val jobService = new SLURMJobService with ThisHost with LimitedAccess {
     def nbTokens = maxConnections

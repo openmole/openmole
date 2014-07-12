@@ -38,10 +38,10 @@ object SSHEnvironment {
     host: String,
     nbSlots: Int,
     port: Int = 22,
-    path: Option[String] = None,
+    workDirectory: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
     threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
-    new SSHEnvironment(user, host, nbSlots, port, path, openMOLEMemory, threads)
+    new SSHEnvironment(user, host, nbSlots, port, workDirectory, openMOLEMemory, threads)
 }
 
 import SSHEnvironment._
@@ -51,7 +51,7 @@ class SSHEnvironment(
     val host: String,
     val nbSlots: Int,
     override val port: Int,
-    val path: Option[String],
+    val workDirectory: Option[String],
     override val openMOLEMemory: Option[Int],
     override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage { env ⇒
 
@@ -59,8 +59,6 @@ class SSHEnvironment(
 
   @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
   @transient lazy val id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
-
-  def maxConnections = Workspace.preferenceAsInt(MaxConnections)
 
   @transient lazy val jobService = new SSHJobService with LimitedAccess with ThisHost {
     def nbTokens = maxConnections

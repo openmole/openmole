@@ -34,10 +34,10 @@ class PBSEnvironmentDataUI(val name: String = "",
       openMOLEMemory,
       wallTime.map(_.toDuration),
       memory,
-      path,
-      threads,
       nodes,
-      coreByNode)(Workspace.authenticationProvider)
+      coreByNode,
+      path,
+      threads)(Workspace.authenticationProvider)
   }
 
   def coreClass = classOf[PBSEnvironment]

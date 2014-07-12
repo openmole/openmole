@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.pbs
+package org.openmole.plugin.environment.oar
 
 import fr.iscpif.gridscale.ssh.{ SSHConnectionCache, SSHAuthentication, SSHJobService, SSHHost }
-import fr.iscpif.gridscale.pbs.{ PBSJobService ⇒ GSPBSJobService, PBSJobDescription }
+import fr.iscpif.gridscale.oar.{ OARJobService ⇒ GSOARJobService, OARJobDescription }
 import java.net.URI
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
@@ -29,11 +29,11 @@ import org.openmole.plugin.environment.gridscale._
 import org.openmole.misc.workspace.Workspace
 import concurrent.duration._
 
-trait PBSJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
+trait OARJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
 
-  def environment: PBSEnvironment
+  def environment: OAREnvironment
 
-  val jobService = new GSPBSJobService with SSHConnectionCache {
+  val jobService = new GSOARJobService with SSHConnectionCache {
     def host = js.host
     def user = js.user
     def credential = js.credential
@@ -43,15 +43,14 @@ trait PBSJobService extends GridScaleJobService with SSHHost with SharedStorage 
 
   protected def _submit(serializedJob: SerializedJob) = {
     val (remoteScript, result) = buildScript(serializedJob)
-    val jobDescription = new PBSJobDescription {
+    val jobDescription = new OARJobDescription {
       val executable = "/bin/bash"
       val arguments = remoteScript
       override val queue = environment.queue
-      val workDirectory = serializedJob.path
+      val workDirectory = environment.workDirectory.getOrElse(serializedJob.path)
+      override val cpu = environment.cpu
+      override val core = environment.core
       override val wallTime = environment.wallTime
-      override val memory = Some(environment.requieredMemory)
-      override val nodes = environment.nodes
-      override val coreByNode = environment.coreByNode orElse environment.threads
     }
 
     val jid = js.jobService.submit(jobDescription)

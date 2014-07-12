@@ -20,17 +20,17 @@ package org.openmole.plugin.environment.ssh
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.storage.PersistentStorageService
+import org.openmole.misc.workspace.Workspace
 
 trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
 
   type SS = PersistentStorageService with SSHStorageService
 
-  def maxConnections: Int
-  def path: Option[String]
+  def workDirectory: Option[String]
 
   @transient lazy val storage = new PersistentStorageService with SSHStorageService with LimitedAccess with ThisHost {
     def nbTokens = maxConnections
-    lazy val root = path match {
+    lazy val root = workDirectory match {
       case Some(p) ⇒ p
       case None    ⇒ child(home, ".openmole/.tmp/ssh/")
     }

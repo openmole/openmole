@@ -28,12 +28,14 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
   )
 
   private lazy val openmolePluginDependencies = libraryDependencies ++= Seq(
-    Libraries.gridscaleHTTP intransitive (),
-    Libraries.gridscalePBS intransitive (),
-    Libraries.gridscaleSLURM intransitive (),
-    Libraries.gridscaleDirac intransitive (),
-    Libraries.gridscaleGlite intransitive (),
-    Libraries.gridscaleSGE intransitive ()
+    Libraries.gridscaleHTTP,
+    Libraries.gridscalePBS,
+    Libraries.gridscaleSLURM,
+    Libraries.gridscaleDirac,
+    Libraries.gridscaleGlite,
+    Libraries.gridscaleSGE,
+    Libraries.gridscalePBS,
+    Libraries.gridscaleOAR
   ) ++ Libraries.gridscaleSSH
 
   lazy val uiProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo "plugins"

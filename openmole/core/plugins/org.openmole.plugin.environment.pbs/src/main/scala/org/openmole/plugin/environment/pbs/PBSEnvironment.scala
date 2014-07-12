@@ -31,9 +31,6 @@ import org.openmole.plugin.environment.ssh._
 import scala.concurrent.duration.Duration
 
 object PBSEnvironment {
-  val MaxConnections = new ConfigurationLocation("PBSEnvironment", "MaxConnections")
-
-  Workspace += (MaxConnections, "10")
 
   def apply(
     user: String,
@@ -43,12 +40,11 @@ object PBSEnvironment {
     openMOLEMemory: Option[Int] = None,
     wallTime: Option[Duration] = None,
     memory: Option[Int] = None,
-    path: Option[String] = None,
-    threads: Option[Int] = None,
     nodes: Option[Int] = None,
     coreByNode: Option[Int] = None,
-    workDirectory: Option[String] = None)(implicit authentications: AuthenticationProvider) =
-    new PBSEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, path, threads, nodes, coreByNode, workDirectory)
+    workDirectory: Option[String] = None,
+    threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
+    new PBSEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, nodes, coreByNode, workDirectory, threads)
 }
 
 import PBSEnvironment._
@@ -61,18 +57,15 @@ class PBSEnvironment(
     override val openMOLEMemory: Option[Int],
     val wallTime: Option[Duration],
     val memory: Option[Int],
-    val path: Option[String],
-    override val threads: Option[Int],
     val nodes: Option[Int],
     val coreByNode: Option[Int],
-    val workDirectory: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    val workDirectory: Option[String],
+    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
   type JS = PBSJobService
 
   @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
   @transient lazy val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
-
-  def maxConnections = Workspace.preferenceAsInt(MaxConnections)
 
   @transient lazy val jobService = new PBSJobService with ThisHost with LimitedAccess {
     def nbTokens = maxConnections
