@@ -47,7 +47,7 @@ trait SGEJobService extends GridScaleJobService with SSHHost with SharedStorage 
       val executable = "/bin/bash"
       val arguments = remoteScript
       override val queue = environment.queue
-      val workDirectory = environment.workDirectory.getOrElse(serializedJob.path)
+      val workDirectory = serializedJob.path
       override val wallTime = environment.wallTime
       override val memory = Some(environment.requieredMemory)
     }

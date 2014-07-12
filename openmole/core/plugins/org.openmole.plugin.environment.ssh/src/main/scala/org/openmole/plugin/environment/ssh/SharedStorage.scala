@@ -27,6 +27,7 @@ import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.storage._
 import org.openmole.misc.tools.io.FileUtil._
 import concurrent.duration._
+import scala.util.Try
 
 object SharedStorage extends Logger
 
@@ -49,29 +50,32 @@ trait SharedStorage extends SSHService { js ⇒
   def preparedRuntime(runtime: Runtime) = synchronized {
     installed match {
       case None ⇒ sharedFS.withToken { implicit token ⇒
+        val runtimePrefix = "runtime"
+        val runtimeInstall = runtimePrefix + runtime.runtime.hash
+
         val (workdir, scriptName) = {
           val workdir = sharedFS.child(sharedFS.root, Workspace.preference(Workspace.uniqueID) + "_install")
           if (!sharedFS.exists(workdir)) sharedFS.makeDir(workdir)
 
           val script = Workspace.newFile("install", ".sh")
           try {
-            val tmpDirName = UUID.randomUUID.toString
+            val tmpDirName = runtimePrefix + UUID.randomUUID.toString
+            val scriptName = Storage.uniqName("install", ".sh")
 
             val content =
-              "if [ -d " + runtime.runtime.hash + " ]; then exit 0; fi; " +
-                "mkdir " + tmpDirName + "; cd " + tmpDirName + "; if [ `uname -m` = x86_64 ]; then cp " + runtime.jvmLinuxX64.path + " jvm.tar.gz.gz;" +
-                "else cp " + runtime.jvmLinuxI386.path + " jvm.tar.gz.gz; fi;" +
+              s"if [ -d $runtimeInstall ]; then exit 0; fi; " +
+                s"mkdir $tmpDirName; cd $tmpDirName; if [ `uname -m` = x86_64 ]; then cp ${runtime.jvmLinuxX64.path} jvm.tar.gz.gz; " +
+                s"else cp ${runtime.jvmLinuxI386.path} jvm.tar.gz.gz; fi;" +
                 "gunzip jvm.tar.gz.gz; gunzip jvm.tar.gz; tar -xf jvm.tar; rm jvm.tar;" +
-                "cp " + runtime.runtime.path + " runtime.tar.gz.gz; gunzip runtime.tar.gz.gz; gunzip runtime.tar.gz; tar -xf runtime.tar; rm runtime.tar; mkdir envplugins; PLUGIN=0;" +
+                s"cp ${runtime.runtime.path} runtime.tar.gz.gz; gunzip runtime.tar.gz.gz; gunzip runtime.tar.gz; tar -xf runtime.tar; rm runtime.tar; mkdir envplugins; PLUGIN=0;" +
                 runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar.gz; gunzip envplugins/plugin$PLUGIN.jar.gz; PLUGIN=`expr $PLUGIN + 1`;" }.foldLeft("") { case (c, s) ⇒ c + s } +
-                "cd ..; if [ -d " + runtime.runtime.hash + " ]; then rm -rf " + tmpDirName + "; exit 0; fi; " +
-                " mv " + tmpDirName + " " + runtime.runtime.hash + s"; rm -rf $tmpDirName"
+                s"cd ..; if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi; " +
+                s"mv $tmpDirName $runtimeInstall ; rm -rf $tmpDirName ; rm $scriptName ; ls $runtimePrefix* | grep -v '^$runtimeInstall' | xargs rm -rf "
 
             logger.fine(s"Install script: $content")
 
             script.content = content
 
-            val scriptName = Storage.uniqName("install", ".sh")
             val remoteScript = sharedFS.child(workdir, scriptName)
             sharedFS.upload(script, remoteScript)
             (workdir, scriptName)
@@ -89,7 +93,7 @@ trait SharedStorage extends SSHService { js ⇒
         installJobService.execute(jobDescription)
         logger.fine("End install")
 
-        val path = sharedFS.child(workdir, runtime.runtime.hash)
+        val path = sharedFS.child(workdir, runtimeInstall)
         installed = Some(path)
         path
       }
