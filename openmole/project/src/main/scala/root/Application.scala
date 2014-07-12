@@ -34,9 +34,9 @@ object Application extends Defaults {
     (base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
       base.Misc.pluginManager, jodaTime, scalaLang, jasypt, Apache.config, base.Core.implementation, robustIt,
       scopt, base.Core.batch, gui.Core.implementation, base.Misc.sftpserver, base.Misc.logging, jline, Apache.logging,
-      Apache.ant, Web.core, base.Misc.console, base.Core.convenience) /*
+      Apache.ant, Web.core, base.Misc.console, base.Core.convenience)
 
-
+  /*
   lazy val rpm = AssemblyProject("package", "packages") settings (packagerSettings: _*) settings (
     maintainer in Debian := "Romain Reuillon <romain@reuillon.org>",
     maintainer in Rpm <<= maintainer in Debian,
