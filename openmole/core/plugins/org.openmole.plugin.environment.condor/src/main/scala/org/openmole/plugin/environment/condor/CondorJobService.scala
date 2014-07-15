@@ -50,7 +50,8 @@ trait CondorJobService extends GridScaleJobService with SSHHost with SharedStora
       // TODO not available in GridScale plugin yet
       //override val queue = environment.queue
       val workDirectory = serializedJob.path
-      override val wallTime = environment.wallTime
+      // TODO not available in GridScale plugin yet
+      //override val wallTime = environment.wallTime
       override val memory = Some(environment.requiredMemory)
     }
 

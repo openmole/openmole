@@ -62,7 +62,6 @@ class CondorEnvironmentPanelUI(pud: CondorEnvironmentDataUI)(implicit val i18n: 
   val portTextField = new TextField(pud.port.toString, 4)
   val pathTextField = new TextField(pud.path.getOrElse(""), 15)
   val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory, 4)
-  val wallTimeTextField = new TextField(pud.wallTime.getOrElse(""), 4)
   val memoryTextField = new TextField(pud.memory, 4)
 
   val components = List(("Settings",
@@ -87,9 +86,6 @@ class CondorEnvironmentPanelUI(pud: CondorEnvironmentDataUI)(implicit val i18n: 
 
         contents += (new Label("Memory"), "gap para")
         contents += memoryTextField
-
-        contents += (new Label("Wall time"), "gap para")
-        contents += wallTimeTextField
       }
     }))
 
@@ -106,7 +102,6 @@ class CondorEnvironmentPanelUI(pud: CondorEnvironmentDataUI)(implicit val i18n: 
       hostTextField.text,
       portTextField.text,
       openMOLEMemoryTextField.text,
-      wallTimeTextField.text,
       memoryTextField.text,
       pathTextField.text)
 }

@@ -39,10 +39,11 @@ object CondorEnvironment {
     // TODO not available in the GridScale plugin yet
     //  queue: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
-    wallTime: Option[Duration] = None,
+    // TODO not available in the GridScale plugin yet
+    //wallTime: Option[Duration] = None,
     memory: Option[Int] = None,
     workDirectory: Option[String] = None)(implicit authentications: AuthenticationProvider) =
-    new CondorEnvironment(user, host, port, openMOLEMemory, wallTime, memory, workDirectory)
+    new CondorEnvironment(user, host, port, openMOLEMemory, memory, workDirectory)
 }
 
 class CondorEnvironment(
@@ -52,7 +53,8 @@ class CondorEnvironment(
     // TODO not available in the GridScale plugin yet
     //val queue: Option[String],
     override val openMOLEMemory: Option[Int],
-    val wallTime: Option[Duration],
+    // TODO not available in the GridScale plugin yet
+    //val wallTime: Option[Duration],
     val memory: Option[Int],
     val workDirectory: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 

@@ -31,7 +31,8 @@ class CondorEnvironmentDataUI(val name: String = "",
                               // TODO not available in GridScale plugin yet
                               //val queue: Option[String] = None,
                               val openMOLEMemory: Option[Int] = Some(BatchEnvironment.defaultRuntimeMemory),
-                              val wallTime: Option[String] = None,
+                              // TODO not available in GridScale plugin yet
+                              //val wallTime: Option[String] = None,
                               val memory: Option[Int] = None,
                               val path: Option[String] = None) extends EnvironmentDataUI { ui ⇒
 
@@ -42,7 +43,8 @@ class CondorEnvironmentDataUI(val name: String = "",
       // TODO not available in GridScale plugin yet
       //queue,
       openMOLEMemory,
-      wallTime.map(_.toDuration),
+      // TODO not available in GridScale plugin yet
+      //wallTime.map(_.toDuration),
       memory,
       path)(Workspace.authenticationProvider)
   }
