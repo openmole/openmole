@@ -25,15 +25,15 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service._
 
 class CondorEnvironmentDataUI(val name: String = "",
-                           val login: String = "",
-                           val host: String = "",
-                           val port: Int = 22,
-                           // TODO not available in GridScale plugin yet
-                           //val queue: Option[String] = None,
-                           val openMOLEMemory: Option[Int] = Some(BatchEnvironment.defaultRuntimeMemory),
-                           val wallTime: Option[String] = None,
-                           val memory: Option[Int] = None,
-                           val path: Option[String] = None) extends EnvironmentDataUI { ui ⇒
+                              val login: String = "",
+                              val host: String = "",
+                              val port: Int = 22,
+                              // TODO not available in GridScale plugin yet
+                              //val queue: Option[String] = None,
+                              val openMOLEMemory: Option[Int] = Some(BatchEnvironment.defaultRuntimeMemory),
+                              val wallTime: Option[String] = None,
+                              val memory: Option[Int] = None,
+                              val path: Option[String] = None) extends EnvironmentDataUI { ui ⇒
 
   def coreObject = util.Try {
     CondorEnvironment(login,

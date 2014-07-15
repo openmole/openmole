@@ -25,7 +25,7 @@ trait MemoryRequirement extends BatchEnvironment {
   def margin = Workspace.preferenceAsInt(BatchEnvironment.MemoryMargin)
   def memory: Option[Int]
 
-  def requieredMemory = memory match {
+  def requiredMemory = memory match {
     case Some(m) ⇒ math.max(openMOLEMemoryValue + margin, m)
     case None    ⇒ openMOLEMemoryValue + margin
   }

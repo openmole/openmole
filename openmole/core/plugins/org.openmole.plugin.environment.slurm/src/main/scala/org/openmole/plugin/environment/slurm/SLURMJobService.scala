@@ -50,7 +50,7 @@ trait SLURMJobService extends GridScaleJobService with SSHHost with SharedStorag
       override val queue = environment.queue
       val workDirectory = serializedJob.path
       override val wallTime = environment.wallTime
-      override val memory = Some(environment.requieredMemory)
+      override val memory = Some(environment.requiredMemory)
       override val gres = environment.gres
       override val constraints = environment.constraints
       // nodes and coreByNode not supported (yet) by the SLURM plugin in GridScale
