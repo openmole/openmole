@@ -129,6 +129,7 @@ object ReplicaCatalog extends Logger {
                 val existing = getReplica(srcPath, hash)
                 existing.firstOption match {
                   case Some(r) ⇒
+                    logger.fine("Allready in database deleting")
                     storage.backgroundRmFile(newFile)
                     r
                   case None ⇒
