@@ -30,7 +30,7 @@ object Core extends BaseDefaults {
 
   lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (implementation,
     workspace, Misc.tools, eventDispatcher, replication, h2, slick, updater, Misc.exception,
-    serializer, jasypt, fileService, hashService, pluginManager, iceTar % "provided",
+    serializer, jasypt, fileService, hashService, pluginManager, iceTar,
     guava, Apache.config) settings (libraryDependencies += gridscale)
 
   lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global")) dependsOn (implementation, scalaLang /*, scalaCompiler*/ , Misc.macros)
