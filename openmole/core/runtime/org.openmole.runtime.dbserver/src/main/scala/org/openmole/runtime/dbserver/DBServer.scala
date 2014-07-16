@@ -31,14 +31,14 @@ object DBServer extends App {
 
   val base = DBServerInfo.base
 
-  val lockFile = DBServerInfo.dbLockFile(base)
+  val lockFile = DBServerInfo.dbLockFile
   lockFile.createNewFile
 
   val str = new FileOutputStream(lockFile)
   val lock = str.getChannel.tryLock
 
   if (lock != null) {
-    val objRepo = DBServerInfo.dbFile(base)
+    val objRepo = DBServerInfo.dbFile
 
     val server = Server.createTcpServer("-tcp", "-tcpDaemon").start()
 
@@ -60,7 +60,7 @@ object DBServer extends App {
       Try(replicas.ddl.create)
     }
 
-    val dbInfoFile = DBServerInfo.dbInfoFile(base)
+    val dbInfoFile = DBServerInfo.dbInfoFile
     dbInfoFile.deleteOnExit
 
     val out = new FileOutputStream(dbInfoFile)

@@ -50,7 +50,7 @@ object ReplicaCatalog extends Logger {
   //lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
   lazy val inCatalogCache = new TimeCache[Map[String, Set[String]]]
   lazy val database = {
-    val dbInfoFile = DBServerInfo.dbInfoFile(DBServerInfo.base)
+    val dbInfoFile = DBServerInfo.dbInfoFile
     val info = DBServerInfo.load(dbInfoFile)
     Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.dbName}", user = info.user, password = info.password)
   }

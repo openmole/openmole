@@ -32,9 +32,9 @@ object DBServerInfo {
     dir
   }
 
-  val dbName = "h2.bin"
-  val dbInfoName = "h2.info"
-  val dbLock = "h2.lock"
+  val dbName = "replica"
+  val dbInfoName = "replica.info"
+  val dbLock = "replica.lock"
 
   lazy val xstream = new XStream
 
@@ -44,9 +44,9 @@ object DBServerInfo {
     finally src.close
   }
 
-  def dbLockFile(base: File) = new File(base, dbLock)
-  def dbFile(base: File) = new File(base, dbName)
-  def dbInfoFile(base: File) = new File(base, dbInfoName)
+  def dbLockFile = new File(base, dbLock)
+  def dbFile = new File(base, dbName)
+  def dbInfoFile = new File(base, dbInfoName)
 
 }
 
