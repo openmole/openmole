@@ -34,6 +34,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     Libraries.gridscaleDirac,
     Libraries.gridscaleGlite,
     Libraries.gridscaleSGE,
+    Libraries.gridscaleCondor,
     Libraries.gridscalePBS,
     Libraries.gridscaleOAR
   ) ++ Libraries.gridscaleSSH

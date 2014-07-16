@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2012 reuillon
+ * Copyright (C) 2012 mathieu
+ * Copyright (C) 2014 Jonathan Passerat-Palmbach
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.environment
+package org.openmole.ide.plugin.environment.condor
 
-import org.openmole.misc.workspace.Workspace
+import org.openmole.ide.core.implementation.registry.OSGiActivator
+import org.openmole.ide.core.implementation.registry.EnvironmentActivator
 
-trait MemoryRequirement extends BatchEnvironment {
+class Activator extends OSGiActivator with EnvironmentActivator {
 
-  // Margin for the thread stack allocations
-  def margin = Workspace.preferenceAsInt(BatchEnvironment.MemoryMargin)
-  def memory: Option[Int]
-
-  def requiredMemory = memory match {
-    case Some(m) ⇒ math.max(openMOLEMemoryValue + margin, m)
-    case None    ⇒ openMOLEMemoryValue + margin
-  }
+  override def environmentFactories = List(new CondorEnvironmentFactoryUI)
 }
