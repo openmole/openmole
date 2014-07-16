@@ -17,47 +17,19 @@
 
 package org.openmole.runtime.dbserver
 
-import com.db4o.ObjectContainer
-import com.db4o.cs.Db4oClientServer
-import com.db4o.defragment.Defragment
-import com.db4o.defragment.DefragmentConfig
-import com.db4o.ta.TransparentPersistenceSupport
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.UUID
-import org.openmole.misc.replication.DBServerInfo
-import org.openmole.misc.replication.Replica
+import org.h2.tools.Server
+import org.openmole.misc.replication._
+import scala.slick.driver.H2Driver.simple._
+import scala.util.Try
 
 object DBServer extends App {
 
-  val user = UUID.randomUUID.toString
-  val password = UUID.randomUUID.toString
-
   val base = DBServerInfo.base
-
-  private def dB4oConfiguration = {
-    val configuration = Db4oClientServer.newServerConfiguration
-    configuration.common.add(new TransparentPersistenceSupport)
-    configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
-    configuration.common.bTreeNodeSize(256)
-    configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_storage").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_path").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_environment").indexed(true)
-    configuration.file.lockDatabaseFile(false)
-    configuration
-  }
-
-  def defrag(db: File) = {
-    val defragmentConfig = new DefragmentConfig(db.getAbsolutePath)
-    defragmentConfig.forceBackupDelete(true)
-    Defragment.defrag(defragmentConfig)
-  }
-
-  def open(dbFile: File) = Db4oClientServer.openServer(dB4oConfiguration, dbFile.getAbsolutePath, -1)
 
   val lockFile = DBServerInfo.dbLockFile(base)
   lockFile.createNewFile
@@ -67,30 +39,35 @@ object DBServer extends App {
 
   if (lock != null) {
     val objRepo = DBServerInfo.dbFile(base)
-    if (objRepo.exists) defrag(objRepo)
 
-    val server = open(objRepo)
+    val server = Server.createTcpServer("-tcp", "-tcpDaemon").start()
 
     Runtime.getRuntime.addShutdownHook(
       new Thread {
         override def run = {
           lock.release
           str.close
-          server.close
+          server.stop
         }
       })
 
-    server.grantAccess(user, password)
-    val serverInfo = new DBServerInfo(server.ext.port, user, password)
+    val user = "sa"
+    val password = ""
+    val info = new DBServerInfo(server.getPort, user, password)
+
+    val db = Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.dbName}", user = info.user, password = info.password)
+    db.withSession { implicit s ⇒
+      Try(replicas.ddl.create)
+    }
+
     val dbInfoFile = DBServerInfo.dbInfoFile(base)
     dbInfoFile.deleteOnExit
 
     val out = new FileOutputStream(dbInfoFile)
-    try new XStream().toXML(serverInfo, out) finally out.close
-    server.openClient.close
+    try new XStream().toXML(info, out) finally out.close
 
     Thread.sleep(Long.MaxValue)
   }
-  else println("Server is allready running")
+  else println("Server is already running")
 
 }

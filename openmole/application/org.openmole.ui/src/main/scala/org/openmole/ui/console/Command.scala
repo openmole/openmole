@@ -42,7 +42,7 @@ class Command {
     println("Number of threads: " + environment.nbThreads)
   }
 
-  def print(environment: BatchEnvironment, v: Int = 0): Unit = {
+  def print(environment: BatchEnvironment): Unit = {
     val accounting = new Array[AtomicInteger](ExecutionState.values.size)
 
     for (state ← ExecutionState.values) {
@@ -57,20 +57,6 @@ class Command {
 
     for (state ← ExecutionState.values) {
       println(state.toString + ": " + accounting(state.id))
-    }
-
-    if (v > 0) {
-      val states =
-        for {
-          ej ← executionJobs
-          bj ← ej.batchJob
-        } yield { bj.jobService.id -> bj.state }
-
-      states.groupBy(_._1).foreach {
-        case (js, s) ⇒
-          val stateString = s.groupBy(_._2).map { case (k, v) ⇒ k -> v.size }.mkString(", ")
-          println(js + ": " + stateString)
-      }
     }
   }
 

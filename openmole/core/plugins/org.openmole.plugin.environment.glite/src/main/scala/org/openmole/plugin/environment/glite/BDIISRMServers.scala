@@ -52,7 +52,7 @@ trait BDIISRMServers extends BatchEnvironment {
     if (storages.size == 1) super.selectAStorage(usedFileHashes)
     else {
       val totalFileSize = usedFileHashes.map { case (f, _) ⇒ f.size }.sum
-      val onStorage = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(id)(_))
+      val onStorage = ReplicaCatalog.withSession(ReplicaCatalog.inCatalog(_))
       val maxTime = storages.map(_.time).max
       val minTime = storages.map(_.time).min
 

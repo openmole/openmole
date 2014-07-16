@@ -16,21 +16,21 @@ object Core extends BaseDefaults {
   override val dir = file("core/core")
 
   lazy val model = OsgiProject("model", openmoleScope = Some("provided")) dependsOn
-    (eventDispatcher, provided(exception), Misc.tools, provided(updater), provided(Misc.workspace), scalaz)
+    (eventDispatcher, exception, Misc.tools, updater, Misc.workspace, scalaz)
 
   lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (provided(model), provided(workspace), xstream, provided(pluginManager), provided(hashService), provided(fileService),
-      provided(Misc.tools), provided(iceTar))
+    (model, workspace, xstream, pluginManager, hashService, fileService,
+      Misc.tools, iceTar)
 
   lazy val implementation = OsgiProject("implementation", openmoleScope = Some("provided")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (model, workspace, provided(exception), provided(eventDispatcher),
+    (model, workspace, exception, eventDispatcher,
       provided(serializer), pluginManager, scalaLang, Apache.math, groovy, Misc.hashService % "test", Misc.replication % "test") //TODO: THINGS REALLY DEPEND ON THESE LIBS. Deal with it
 
   lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (implementation,
-    provided(workspace), provided(Misc.tools), provided(eventDispatcher), replication, db4o, updater, Misc.exception,
-    serializer, jasypt, provided(fileService), provided(hashService), pluginManager, iceTar % "provided",
+    workspace, Misc.tools, eventDispatcher, replication, h2, slick, updater, Misc.exception,
+    serializer, jasypt, fileService, hashService, pluginManager, iceTar % "provided",
     guava, Apache.config) settings (libraryDependencies += gridscale)
 
   lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global")) dependsOn (implementation, scalaLang /*, scalaCompiler*/ , Misc.macros)

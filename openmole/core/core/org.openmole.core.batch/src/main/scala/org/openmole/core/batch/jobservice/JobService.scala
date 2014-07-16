@@ -43,6 +43,4 @@ trait JobService extends BatchService { js ⇒
   protected def _cancel(j: J)
   protected def _purge(j: J)
 
-  override def toString: String = id
-
 }

@@ -24,10 +24,10 @@ import org.openmole.core.batch.refresh._
 import org.openmole.core.serializer._
 import org.openmole.misc.filedeleter._
 import org.openmole.misc.workspace._
-import com.db4o.ObjectContainer
 import fr.iscpif.gridscale.storage.FileType
 import java.io._
 import org.openmole.misc.tools.service.Logger
+import scala.slick.driver.H2Driver.simple._
 
 object StorageService extends Logger
 
@@ -36,10 +36,10 @@ import StorageService.Log._
 trait StorageService extends BatchService with Storage {
 
   def remoteStorage: RemoteStorage
-  def clean(implicit token: AccessToken, objectContainer: ObjectContainer)
+  def clean(implicit token: AccessToken, session: Session)
 
   def url: URI
-  lazy val id = url.toString
+  val id: String
 
   @transient lazy val serializedRemoteStorage = {
     val file = Workspace.newFile("remoteStorage", ".xml")
@@ -50,7 +50,7 @@ trait StorageService extends BatchService with Storage {
 
   @transient protected var baseSpaceVar: Option[String] = None
 
-  def persistentDir(implicit token: AccessToken, objectContainer: ObjectContainer): String
+  def persistentDir(implicit token: AccessToken, session: Session): String
   def tmpDir(implicit token: AccessToken): String
   def baseDir(implicit token: AccessToken): String = synchronized {
     baseSpaceVar match {

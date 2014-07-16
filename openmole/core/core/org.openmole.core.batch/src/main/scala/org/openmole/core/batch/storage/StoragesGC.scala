@@ -17,32 +17,37 @@
 
 package org.openmole.core.batch.storage
 
+import java.io.File
+
 import org.openmole.core.batch.replication._
-import org.openmole.core.batch.environment._
-import org.openmole.core.batch.storage._
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater._
 import org.openmole.misc.workspace._
 import scala.ref.WeakReference
+import scala.slick.driver.H2Driver.simple._
+import org.openmole.misc.replication._
+
+object StoragesGC extends Logger
+
+import StoragesGC.Log._
 
 class StoragesGC(storagesRef: WeakReference[Iterable[StorageService]]) extends IUpdatable {
 
   override def update: Boolean =
     storagesRef.get match {
       case Some(storages) ⇒
-        ReplicaCatalog.withClient { implicit c ⇒
+        ReplicaCatalog.withSession { implicit session ⇒
           for {
             storage ← storages
-            replica ← ReplicaCatalog.replicas(storage)
+            replica ← replicas.filter { _.storage === storage.id }
           } {
             try
-              if (!replica.sourceFile.exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preferenceAsDuration(ReplicaCatalog.NoAccessCleanTime).toMillis) {
-                ReplicaCatalog.remove(replica)
-                ReplicaCatalog.rmFileIfNotUsed(storage, replica.path)
+              if (!new File(replica.source).exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preferenceAsDuration(ReplicaCatalog.NoAccessCleanTime).toMillis) {
+                ReplicaCatalog.remove(replica.id)
+                storage.backgroundRmFile(replica.path)
               }
             catch {
-              case t: Throwable ⇒
-                ReplicaCatalog.remove(replica)
-                ReplicaCatalog.rmFileIfNotUsed(storage, replica.path)
+              case t: Throwable ⇒ logger.log(FINE, "Error while garbage collecting the replicas", t)
             }
           }
         }

@@ -296,7 +296,7 @@ class GliteEnvironment(
             }
         }
 
-      @tailrec def selected(value: Double, jobServices: List[(JobService, AccessToken, Double)]): (JobService, AccessToken) =
+      @tailrec def selected(value: Double, jobServices: List[(GliteJobService, AccessToken, Double)]): (GliteJobService, AccessToken) =
         jobServices match {
           case (js, token, fitness) :: Nil ⇒ (js, token)
           case (js, token, fitness) :: tail ⇒

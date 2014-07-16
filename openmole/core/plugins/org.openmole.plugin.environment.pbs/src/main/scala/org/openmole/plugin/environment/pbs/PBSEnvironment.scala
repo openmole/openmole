@@ -65,14 +65,13 @@ class PBSEnvironment(
   type JS = PBSJobService
 
   @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
-  @transient lazy val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
+  def id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val jobService = new PBSJobService with ThisHost with LimitedAccess {
     def nbTokens = maxConnections
     def queue = env.queue
     val environment = env
     def sharedFS = storage
-    val id = url.toString
   }
 
   def allJobServices = List(jobService)

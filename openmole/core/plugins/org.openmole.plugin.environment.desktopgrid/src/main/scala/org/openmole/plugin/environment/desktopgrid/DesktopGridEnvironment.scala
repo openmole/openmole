@@ -55,7 +55,6 @@ class DesktopGridEnvironment(
   new SFTPServer(path, login, password, port)
 
   val url = new URI("desktop", login, "localhost", port, null, null, null)
-  val id = url.toString
 
   @transient lazy val batchStorage = new VolatileStorageService with UnlimitedAccess {
     def environment = env
@@ -63,6 +62,7 @@ class DesktopGridEnvironment(
     def url = env.url
     def root = path.getAbsolutePath
     val storage = new GSLocalStorage {}
+    val id = url.toString
   }
 
   @transient override lazy val allStorages = List(batchStorage)
@@ -70,7 +70,6 @@ class DesktopGridEnvironment(
   @transient override lazy val allJobServices = List(
     new DesktopGridJobService {
       def environment = env
-      val id = env.id
     })
 
 }

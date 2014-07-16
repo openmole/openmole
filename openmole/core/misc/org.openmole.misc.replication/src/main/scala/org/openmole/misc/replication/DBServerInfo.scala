@@ -20,6 +20,7 @@ package org.openmole.misc.replication
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import scala.io.Source
+import scala.slick.driver.H2Driver.simple._
 
 object DBServerInfo {
   val base = {
@@ -31,9 +32,9 @@ object DBServerInfo {
     dir
   }
 
-  val dbName = "db.bin"
-  val dbInfoName = "db.info"
-  val dbLock = "db.lock"
+  val dbName = "h2.bin"
+  val dbInfoName = "h2.info"
+  val dbLock = "h2.lock"
 
   lazy val xstream = new XStream
 
@@ -46,6 +47,7 @@ object DBServerInfo {
   def dbLockFile(base: File) = new File(base, dbLock)
   def dbFile(base: File) = new File(base, dbName)
   def dbInfoFile(base: File) = new File(base, dbInfoName)
+
 }
 
-class DBServerInfo(val port: Int, val user: String, val password: String)
+case class DBServerInfo(port: Int, user: String, password: String)

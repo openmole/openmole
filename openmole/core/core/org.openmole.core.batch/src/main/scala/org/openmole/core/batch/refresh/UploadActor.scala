@@ -20,7 +20,6 @@ package org.openmole.core.batch.refresh
 import akka.actor.Actor
 
 import akka.actor.ActorRef
-import com.db4o.ObjectContainer
 import com.ice.tar.TarOutputStream
 import java.io.File
 import java.util.UUID
@@ -40,6 +39,7 @@ import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.workspace.Workspace
 import scala.collection.immutable.TreeSet
 import org.openmole.misc.exception.UserBadDataError
+import scala.slick.driver.H2Driver.simple._
 
 class UploadActor(jobManager: ActorRef) extends Actor {
 
@@ -72,7 +72,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
         serialisationPluginFiles).map(f ⇒ f -> FileService.hash(job.moleExecution, f)))
 
     implicit val t = token
-    try ReplicaCatalog.withClient { implicit client ⇒
+    try ReplicaCatalog.withSession { implicit session ⇒
       val communicationPath = storage.child(storage.tmpDir, UUID.randomUUID.toString)
       storage.makeDir(communicationPath)
 
@@ -126,7 +126,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     (files, plugins)
   }
 
-  def toReplicatedFile(job: IJob, file: File, storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer): ReplicatedFile = {
+  def toReplicatedFile(job: IJob, file: File, storage: StorageService)(implicit token: AccessToken, session: Session): ReplicatedFile = {
     if (!file.exists) throw new UserBadDataError(s"File/category $file is requiered but doesn't exist.")
 
     val isDir = file.isDirectory
@@ -149,7 +149,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
   def replicateTheRuntime(
     job: IJob,
     environment: BatchEnvironment,
-    storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer) = {
+    storage: StorageService)(implicit token: AccessToken, session: Session) = {
 
     val environmentPluginPath = environment.plugins.map { p ⇒ toReplicatedFile(job, p, storage) }.map { FileMessage(_) }
     val runtimeFileMessage = FileMessage(toReplicatedFile(job, environment.runtime, storage))
@@ -172,7 +172,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     serializationFile: Iterable[File],
     serializationPlugin: Iterable[File],
     storage: StorageService,
-    path: String)(implicit token: AccessToken, objectContainer: ObjectContainer): ExecutionMessage = {
+    path: String)(implicit token: AccessToken, session: Session): ExecutionMessage = {
     val jobForRuntimePath = storage.child(path, Storage.uniqName("job", ".tgz"))
 
     signalUpload(

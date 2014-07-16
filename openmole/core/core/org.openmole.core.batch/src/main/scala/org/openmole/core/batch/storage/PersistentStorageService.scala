@@ -17,7 +17,6 @@
 
 package org.openmole.core.batch.storage
 
-import com.db4o.ObjectContainer
 import java.io.File
 import java.net.URI
 import org.openmole.core.batch.control._
@@ -25,8 +24,9 @@ import org.openmole.core.batch.replication._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
 import fr.iscpif.gridscale.storage._
-import collection.JavaConversions._
 import scala.concurrent.duration.Duration
+
+import scala.slick.driver.H2Driver.simple._
 
 object PersistentStorageService extends Logger {
 
@@ -49,9 +49,8 @@ trait PersistentStorageService extends StorageService {
   @transient protected var persistentSpaceVar: Option[String] = None
   @transient private var time = System.currentTimeMillis
 
-  override def clean(implicit token: AccessToken, objectContainer: ObjectContainer) = synchronized {
-    for (r ← ReplicaCatalog.replicas(this)) ReplicaCatalog.remove(r)
-
+  override def clean(implicit token: AccessToken, session: Session) = synchronized {
+    ReplicaCatalog.onStorage(this).delete
     super.rmDir(baseDir)
     baseSpaceVar = None
     tmpSpaceVar = None
@@ -59,14 +58,16 @@ trait PersistentStorageService extends StorageService {
     time = System.currentTimeMillis
   }
 
-  override def persistentDir(implicit token: AccessToken, objectContainer: ObjectContainer): String = synchronized {
+  override def persistentDir(implicit token: AccessToken, session: Session): String = synchronized {
     persistentSpaceVar match {
       case None ⇒
         val persistentPath = child(baseDir, persistent)
         if (!super.exists(persistentPath)) super.makeDir(persistentPath)
 
-        for (file ← super.listNames(persistentPath))
-          ReplicaCatalog.rmFileIfNotUsed(this, super.child(persistentPath, file))
+        for (file ← super.listNames(persistentPath)) {
+          val path = super.child(persistentPath, file)
+          if (!ReplicaCatalog.forPath(path).exists.run) backgroundRmFile(path)
+        }
 
         persistentSpaceVar = Some(persistentPath)
         persistentPath

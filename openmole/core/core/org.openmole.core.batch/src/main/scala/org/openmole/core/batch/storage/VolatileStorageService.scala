@@ -18,24 +18,20 @@
 package org.openmole.core.batch.storage
 
 import org.openmole.core.batch.control._
-import org.openmole.misc.workspace._
 import org.openmole.core.batch.replication.ReplicaCatalog
-import collection.JavaConversions._
-import com.db4o.ObjectContainer
+import scala.slick.driver.H2Driver.simple._
 
 trait VolatileStorageService extends StorageService { this: Storage ⇒
 
   override protected def initialise(basePath: String)(implicit token: AccessToken) = {
-    ReplicaCatalog.withClient { implicit c ⇒
-      ReplicaCatalog.replicas(this).foreach {
-        r ⇒ ReplicaCatalog.remove(r)
-      }
+    ReplicaCatalog.withSession { implicit c ⇒
+      ReplicaCatalog.onStorage(this).delete
     }
     rmDir(basePath)
     makeDir(basePath)
   }
 
-  def persistentDir(implicit token: AccessToken, objectContainer: ObjectContainer) = baseDir(token)
+  def persistentDir(implicit token: AccessToken, session: Session) = baseDir(token)
   def tmpDir(implicit token: AccessToken) = baseDir(token)
-  def clean(implicit token: AccessToken, objectContainer: ObjectContainer) = {}
+  def clean(implicit token: AccessToken, session: Session) = {}
 }

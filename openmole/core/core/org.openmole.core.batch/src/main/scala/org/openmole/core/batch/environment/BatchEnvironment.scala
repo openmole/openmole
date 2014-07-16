@@ -136,7 +136,7 @@ import BatchEnvironment._
 
 trait BatchEnvironment extends Environment { env ⇒
 
-  val id: String
+  //val id: String
 
   type SS <: StorageService
   type JS <: JobService
@@ -166,7 +166,7 @@ trait BatchEnvironment extends Environment { env ⇒
     jobManager ! Manage(bej)
   }
 
-  def clean = ReplicaCatalog.withClient { implicit c ⇒
+  def clean = ReplicaCatalog.withSession { implicit c ⇒
     val cleaningThreadPool = fixedThreadPool(Workspace.preferenceAsInt(EnvironmentCleaningThreads))
     allStorages.foreach {
       s ⇒

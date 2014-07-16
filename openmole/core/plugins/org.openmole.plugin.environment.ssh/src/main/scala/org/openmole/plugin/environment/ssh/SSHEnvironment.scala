@@ -58,14 +58,13 @@ class SSHEnvironment(
   type JS = SSHJobService
 
   @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
-  @transient lazy val id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
+  def id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val jobService = new SSHJobService with LimitedAccess with ThisHost {
     def nbTokens = maxConnections
     def nbSlots = env.nbSlots
     def sharedFS = storage
     val environment = env
-    val id = url.toString
   }
 
   def allJobServices = List(jobService)
