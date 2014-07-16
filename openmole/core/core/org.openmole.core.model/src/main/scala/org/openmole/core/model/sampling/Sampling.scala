@@ -22,7 +22,7 @@ import org.openmole.core.model.data._
 trait Sampling {
 
   /**
-   * Prototypes of the variables requiered by this sampling.
+   * Prototypes of the variables required by this sampling.
    *
    * @return the data
    */

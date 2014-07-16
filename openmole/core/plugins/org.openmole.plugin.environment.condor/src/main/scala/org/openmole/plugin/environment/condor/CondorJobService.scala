@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.slurm
+package org.openmole.plugin.environment.condor
 
 import fr.iscpif.gridscale.ssh.{ SSHConnectionCache, SSHAuthentication, SSHJobService, SSHHost }
-import fr.iscpif.gridscale.slurm.{ SLURMJobService ⇒ GSSLURMJobService, SLURMJobDescription }
+import fr.iscpif.gridscale.condor.{ CondorJobService ⇒ GSCondorJobService, CondorJobDescription }
 import java.net.URI
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
@@ -30,11 +30,11 @@ import org.openmole.plugin.environment.gridscale._
 import org.openmole.misc.workspace.Workspace
 import concurrent.duration._
 
-trait SLURMJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
+trait CondorJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
 
-  def environment: SLURMEnvironment
+  def environment: CondorEnvironment
 
-  val jobService = new GSSLURMJobService with SSHConnectionCache {
+  val jobService = new GSCondorJobService with SSHConnectionCache {
     def host = js.host
     def user = js.user
     def credential = js.credential
@@ -44,19 +44,15 @@ trait SLURMJobService extends GridScaleJobService with SSHHost with SharedStorag
 
   protected def _submit(serializedJob: SerializedJob) = {
     val (remoteScript, result) = buildScript(serializedJob)
-    val jobDescription = new SLURMJobDescription {
+    val jobDescription = new CondorJobDescription {
       val executable = "/bin/bash"
       val arguments = remoteScript
-      override val queue = environment.queue
+      // TODO not available in GridScale plugin yet
+      //override val queue = environment.queue
       val workDirectory = serializedJob.path
-      override val wallTime = environment.wallTime
+      // TODO not available in GridScale plugin yet
+      //override val wallTime = environment.wallTime
       override val memory = Some(environment.requiredMemory)
-      override val gres = environment.gres
-      override val constraints = environment.constraints
-      // nodes and coreByNode not supported (yet) by the SLURM plugin in GridScale
-
-      //      override val nodes = environment.nodes orElse environment.threads
-      //      override val coreByNode = environment.coreByNode orElse environment.threads
     }
 
     val jid = js.jobService.submit(jobDescription)
