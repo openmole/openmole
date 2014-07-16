@@ -90,7 +90,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       override def stdError = if (environment.debug) "err" else ""
       def outputSandbox = if (environment.debug) Seq("out" -> Workspace.newFile("job", ".out"), "err" -> Workspace.newFile("job", ".err")) else Seq.empty
 
-      override val memory = Some(environment.requieredMemory)
+      override val memory = Some(environment.requiredMemory)
       override val cpuTime = environment.cpuTime
       override val wallTime = environment.wallTime
       override val cpuNumber = environment.cpuNumber orElse environment.threads
