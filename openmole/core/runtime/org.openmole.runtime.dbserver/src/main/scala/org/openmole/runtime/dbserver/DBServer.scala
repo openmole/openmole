@@ -17,6 +17,8 @@
 
 package org.openmole.runtime.dbserver
 
+import java.util.logging.Logger
+
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import java.io.FileInputStream
@@ -38,6 +40,7 @@ object DBServer extends App {
   val lock = str.getChannel.tryLock
 
   if (lock != null) {
+
     val objRepo = DBServerInfo.dbFile
 
     val server = Server.createTcpServer("-tcp", "-tcpDaemon").start()
@@ -51,18 +54,25 @@ object DBServer extends App {
         }
       })
 
-    val user = "sa"
-    val password = ""
-    val info = new DBServerInfo(server.getPort, user, password)
+    val info = if (!DBServerInfo.dbInfoFile.exists || !DBServer.base.exists) {
+      Logger.getLogger(this.getClass.getName).info("Create BDD")
+      DBServer.base.delete
+      val user = "sa"
+      val password = UUID.randomUUID.toString.filter(_.isLetterOrDigit)
 
-    val db = Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.dbName}", user = info.user, password = info.password)
-    db.withSession { implicit s ⇒
-      Try(replicas.ddl.create)
+      val db = Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:file:${DBServerInfo.base}/${DBServerInfo.dbName}", user = user, password = "")
+      db.withSession { implicit s ⇒
+        replicas.ddl.create
+        s.withStatement() {
+          _.execute(s"SET PASSWORD '$password';")
+        }
+      }
+
+      new DBServerInfo(server.getPort, user, password)
     }
+    else DBServerInfo.load(DBServerInfo.dbInfoFile).copy(port = server.getPort)
 
     val dbInfoFile = DBServerInfo.dbInfoFile
-    dbInfoFile.deleteOnExit
-
     val out = new FileOutputStream(dbInfoFile)
     try new XStream().toXML(info, out) finally out.close
 
