@@ -247,6 +247,7 @@ class GliteEnvironment(
           val jobService = new WMSJobService {
             val url = js.url
             val credential = js.credential
+            override def connections = threadsByWMS
             override def delegationRenewal = proxyRenewalDelay
           }
           val environment = env
