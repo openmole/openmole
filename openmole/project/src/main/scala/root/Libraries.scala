@@ -204,6 +204,16 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "fr.iscpif" %% "mgo" % "1.74-SNAPSHOT",
     bundleType := Set("plugin"),
     version := "1.74"
+  ) dependsOn (monocle)
+
+  val monocleVersion = "0.4.0"
+
+  lazy val monocle = OsgiProject("monocle") settings (
+    libraryDependencies += "com.github.julien-truffaut" %% "monocle-core" % monocleVersion,
+    libraryDependencies += "com.github.julien-truffaut" %% "monocle-generic" % monocleVersion,
+    libraryDependencies += "com.github.julien-truffaut" %% "monocle-macro" % monocleVersion,
+    bundleType := Set("plugin"),
+    version := monocleVersion
   )
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (
