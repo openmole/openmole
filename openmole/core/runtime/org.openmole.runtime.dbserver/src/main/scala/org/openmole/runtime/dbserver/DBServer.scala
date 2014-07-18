@@ -54,7 +54,7 @@ object DBServer extends App {
         }
       })
 
-    val fullDataBaseFile = new File(DBServer.base.getPath + ".h2.db")
+    val fullDataBaseFile = new File(DBServer.base.getPath, DBServerInfo.dbName + ".h2.db")
 
     val info = if (!DBServerInfo.dbInfoFile.exists || !fullDataBaseFile.exists) {
       Logger.getLogger(this.getClass.getName).info("Create BDD")
