@@ -10,7 +10,7 @@ cd $CURDIR
 
 (nohup sh $LOCATION/dbserver/bin/openmole-dbserver >/dev/null &) 2>/dev/null
 
-MEM="1G"
+MEM=${OPENMOLE_MEMORY:-"1G"}
 
 FLAG=""
 
