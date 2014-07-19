@@ -1,5 +1,6 @@
 package root
 
+import root.libraries.Apache
 import sbt._
 import Keys._
 
@@ -11,7 +12,7 @@ import sbt.inc.Analysis
 import sbtunidoc.Plugin._
 import UnidocKeys._
 
-object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application) {
+object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   val dir = file("bin")
 
   private val equinoxDependencies = libraryDependencies ++= Seq(
@@ -24,8 +25,18 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     "org.eclipse.core" % "org.eclipse.equinox.registry" % "3.5.200.v20120522-1841" intransitive (),
     "org.eclipse.core" % "org.eclipse.equinox.preferences" % "3.5.1.v20121031-182809" intransitive (),
     "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944" intransitive (),
-    Libraries.bouncyCastle
+    Libraries.bouncyCastle intransitive ()
   )
+
+  lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true, buddyPolicy = Some("global")) settings (
+    equinoxDependencies,
+    bundleType := Set("core"),
+    organization := "org.openmole.ui"
+  ) dependsOn
+    (base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
+      base.Misc.pluginManager, jodaTime, scalaLang, jasypt, Apache.config, base.Core.implementation, robustIt,
+      scopt, base.Core.batch, gui.Core.implementation, base.Misc.sftpserver, base.Misc.logging, jline, Apache.logging,
+      Apache.ant, Web.core, base.Misc.console, base.Core.convenience)
 
   private lazy val openmolePluginDependencies = libraryDependencies ++= Seq(
     Libraries.gridscaleHTTP,
@@ -39,7 +50,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     Libraries.gridscaleOAR
   ) ++ Libraries.gridscaleSSH
 
-  lazy val uiProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo "plugins"
+  lazy val uiProjects = resourceSets <++= (subProjects ++ Seq(openmoleui.project)).keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo "plugins"
 
   lazy val pluginProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo "openmole-plugins"
 
@@ -61,7 +72,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
     tarGZName := Some("openmole"),
     innerZipFolder := Some("openmole"),
     dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle" || m.organization == "org.bouncycastle" }
-  ) //todo, add dependency mapping or something
+  ) dependsOn (openmoleui) //todo, add dependency mapping or something
 
   lazy val openmolePlugins = AssemblyProject("openmole-plugins") settings (openmolePluginDependencies, //TODO: This project is only necessary thanks to the lack of dependency mapping in AssemblyProject
     dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "fr.iscpif.gridscale.bundle") }
@@ -98,7 +109,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
       setExecutable += "openmole-daemon",
       dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle" || m.organization == "org.bouncycastle") })
 
-  lazy val docProj = Project("documentation", dir / "documentation") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects ++ Application.subProjects): _*) settings (
+  lazy val docProj = Project("documentation", dir / "documentation") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (
     unidocSettings: _*
   ) settings (compile := Analysis.Empty, scalacOptions in (ScalaUnidoc, unidoc) += "-Ymacro-no-expand",
       unidocProjectFilter in (ScalaUnidoc, unidoc) := inAnyProject -- inProjects(Libraries.subProjects: _*) -- inProjects(ThirdParties.subProjects: _*)
