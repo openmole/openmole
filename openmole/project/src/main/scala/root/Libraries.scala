@@ -203,7 +203,7 @@ object Libraries extends Defaults(Apache) {
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (
     libraryDependencies += "fr.iscpif" %% "mgo" % "1.75-SNAPSHOT",
     bundleType := Set("plugin"),
-    version := "1.74"
+    version := "1.75"
   ) dependsOn (monocle)
 
   val monocleVersion = "0.4.0"
