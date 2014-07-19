@@ -179,6 +179,8 @@ object PluginManager extends Logger {
     case t: Throwable ⇒ throw new InternalProcessingError(t, "Installing bundle " + f)
   }
 
+  def startAll = Activator.contextOrException.getBundles.foreach(_.start)
+
   private def updateDependencies = synchronized {
     val bundles = Activator.contextOrException.getBundles.filter(!_.isSystem)
 

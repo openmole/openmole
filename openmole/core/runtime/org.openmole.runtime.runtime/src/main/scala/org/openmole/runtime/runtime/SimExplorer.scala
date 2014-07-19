@@ -77,6 +77,7 @@ class SimExplorer extends IApplication {
       parser.parse(filteredArgs, Config()) foreach { config ⇒
 
         PluginManager.loadDir(new File(config.pluginPath.get))
+        PluginManager.startAll
 
         val storageFile = Workspace.newFile("storage", ".xml")
         val storage =
