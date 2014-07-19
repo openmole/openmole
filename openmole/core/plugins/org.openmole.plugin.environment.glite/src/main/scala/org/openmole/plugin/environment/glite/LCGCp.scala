@@ -26,8 +26,8 @@ trait LCGCp {
   def voName: String
 
   @transient lazy val lcgCp =
-    s"lcg-cp --vo ${voName} --checksum --nobdii --defaultsetype srmv2 --connect-timeout $getTimeOut --sendreceive-timeout $getTimeOut --srm-timeout $getTimeOut "
-
+    s"lcg-cp --vo ${voName} --nobdii --defaultsetype srmv2 --connect-timeout $getTimeOut --sendreceive-timeout $getTimeOut --srm-timeout $getTimeOut "
+  
   def lcgCpCmd(from: String, to: URI) = s"$lcgCp file:$from ${SRMStorage.fullEndpoint(to.getHost, to.getPort, to.getPath)}"
   def lcgCpCmd(from: URI, to: String) = s"$lcgCp ${SRMStorage.fullEndpoint(from.getHost, from.getPort, from.getPath)} file:$to"
 
