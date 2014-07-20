@@ -87,17 +87,17 @@ object ReplicaCatalog extends Logger {
         case None ⇒
           def getReplicasForSrcWithOtherHash(src: File, hash: String) =
             replicas.filter { r ⇒
-              r.source === src.getCanonicalPath && r.hash =!= hash && r.storage === storage.id && r.hash === hash
+              r.source === src.getCanonicalPath && r.hash =!= hash && r.storage === storage.id
             }
 
           //If replica is already present on the storage with another hash
           val samePath = getReplicasForSrcWithOtherHash(srcPath, hash)
-          samePath.foreach(replica ⇒ storage.backgroundRmFile(replica.path))
+          samePath.foreach {
+            replica ⇒
+              logger.fine(s"Remove obsolete $replica")
+              storage.backgroundRmFile(replica.path)
+          }
           samePath.delete
-
-          def checkExists(replica: Replica): Boolean =
-            if (replica.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMillis < System.currentTimeMillis) storage.exists(replica.path)
-            else true
 
           //Remove deleted replicas
           for {
@@ -107,7 +107,10 @@ object ReplicaCatalog extends Logger {
             if (storage.exists(replica.path)) replicas.filter {
               _.id === replica.id
             }.map(_.lastCheckExists).update(System.currentTimeMillis)
-            else remove(replica.id)
+            else {
+              logger.fine(s"Remove inexisting $replica")
+              remove(replica.id)
+            }
           }
 
           def getReplica(src: File, hash: String) =
@@ -129,7 +132,7 @@ object ReplicaCatalog extends Logger {
                 val existing = getReplica(srcPath, hash)
                 existing.firstOption match {
                   case Some(r) ⇒
-                    logger.fine("Allready in database deleting")
+                    logger.fine("Already in database deleting")
                     storage.backgroundRmFile(newFile)
                     r
                   case None ⇒
@@ -154,7 +157,11 @@ object ReplicaCatalog extends Logger {
 
   def forPath(path: String)(implicit session: Session) = replicas.filter { _.path === path }
   def onStorage(storage: StorageService)(implicit session: Session) = replicas.filter { _.storage === storage.id }
-  def remove(id: Long)(implicit session: Session) = replicas.filter { _.id === id }.delete
+
+  def remove(id: Long)(implicit session: Session) = {
+    logger.fine(s"Remove replica with id $id")
+    replicas.filter { _.id === id }.delete
+  }
 
   /*def replicas(storage: StorageService)(implicit objectContainer: ObjectContainer): Iterable[Replica] =
     objectContainer.queryByExample(new Replica(_storage = storage.id, _environment = storage.environment.id)).toList
