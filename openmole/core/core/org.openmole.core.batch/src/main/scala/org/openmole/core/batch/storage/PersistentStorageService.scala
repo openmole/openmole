@@ -64,10 +64,18 @@ trait PersistentStorageService extends StorageService {
         val persistentPath = child(baseDir, persistent)
         if (!super.exists(persistentPath)) super.makeDir(persistentPath)
 
-        for (file ← super.listNames(persistentPath)) {
-          val path = super.child(persistentPath, file)
-          if (!ReplicaCatalog.forPath(path).exists.run) backgroundRmFile(path)
-        }
+        def graceIsOver(name: String) =
+          ReplicaCatalog.timeOfPersistent(name).map {
+            _ + Workspace.preferenceAsDuration(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
+          }.getOrElse(true)
+
+          for {
+            name ← super.listNames(persistentPath)
+            if graceIsOver(name)
+          } {
+            val path = super.child(persistentPath, name)
+            if (!ReplicaCatalog.forPath(path).exists.run) backgroundRmFile(path)
+          }
 
         persistentSpaceVar = Some(persistentPath)
         persistentPath

@@ -30,7 +30,7 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import java.util.concurrent.TimeUnit
 import scala.slick.driver.H2Driver.simple._
-import scala.slick.jdbc.JdbcBackend
+import scala.util.Try
 
 object ReplicaCatalog extends Logger {
 
@@ -39,15 +39,19 @@ object ReplicaCatalog extends Logger {
   val NoAccessCleanTime = new ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime")
   val InCatalogCacheTime = new ConfigurationLocation("ReplicaCatalog", "InCatalogCacheTime")
   val ReplicaCacheTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime")
+  val ReplicaGraceTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime")
 
   //val SocketTimeout = new ConfigurationLocation("ReplicaCatalog", "SocketTimeout")
 
   Workspace += (NoAccessCleanTime, "P30D")
   Workspace += (InCatalogCacheTime, "PT2M")
   Workspace += (ReplicaCacheTime, "PT30M")
+  Workspace += (ReplicaGraceTime, "P1D")
+
   //Workspace += (SocketTimeout, "PT10M")
 
-  //lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
+  lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
+
   lazy val inCatalogCache = new TimeCache[Map[String, Set[String]]]
   lazy val database = {
     val dbInfoFile = DBServerInfo.dbInfoFile
@@ -123,7 +127,7 @@ object ReplicaCatalog extends Logger {
           getReplica.firstOption match {
             case Some(replica) ⇒ replica
             case None ⇒
-              val name = Storage.uniqName(hash, ".rep")
+              val name = Storage.uniqName(System.currentTimeMillis.toString, ".rep")
               val newFile = storage.child(storage.persistentDir, name)
               logger.fine(s"Upload $src to $newFile on ${storage.id}")
               signalUpload(storage.uploadGZ(src, newFile), newFile, storage)
@@ -160,6 +164,12 @@ object ReplicaCatalog extends Logger {
   def remove(id: Long)(implicit session: Session) = {
     logger.fine(s"Remove replica with id $id")
     replicas.filter { _.id === id }.delete
+  }
+
+  def timeOfPersistent(name: String) ={
+    val matcher = replicationPattern.matcher(name)
+    if(!matcher.matches) None
+    else Try(matcher.group(1).toLong).toOption
   }
 
   /*def replicas(storage: StorageService)(implicit objectContainer: ObjectContainer): Iterable[Replica] =
