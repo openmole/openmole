@@ -85,13 +85,13 @@ object ReplicaCatalog extends Logger {
       Option(replicaCache.getIfPresent(cacheKey)) match {
         case Some(r) ⇒ r
         case None ⇒
-          def getReplicasForSrcWithOtherHash(src: File, hash: String) =
+          def getReplicasForSrcWithOtherHash =
             replicas.filter { r ⇒
-              r.source === src.getCanonicalPath && r.hash =!= hash && r.storage === storage.id
+              r.source === srcPath.getCanonicalPath && r.hash =!= hash && r.storage === storage.id
             }
 
           //If replica is already present on the storage with another hash
-          val samePath = getReplicasForSrcWithOtherHash(srcPath, hash)
+          val samePath = getReplicasForSrcWithOtherHash
           samePath.foreach {
             replica ⇒
               logger.fine(s"Remove obsolete $replica")
@@ -101,7 +101,7 @@ object ReplicaCatalog extends Logger {
 
           //Remove deleted replicas
           for {
-            replica ← getReplica(srcPath, hash)
+            replica ← getReplica
             if (replica.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMillis < System.currentTimeMillis)
           } {
             if (storage.exists(replica.path)) replicas.filter {
