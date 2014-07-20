@@ -113,14 +113,14 @@ object ReplicaCatalog extends Logger {
             }
           }
 
-          def getReplica(src: File, hash: String) =
+          def getReplica =
             replicas.filter { r ⇒ r.source === src.getCanonicalPath && r.storage === storage.id && r.hash === hash }
 
           /* def getReplicaForHash(hash: String)(implicit session: Session) =
         replicas.filter { r => r.storage === storage.id && r.hash === hash && r.environment === environment.id }*/
 
           // RQ: Could be improved by reusing files with same hash already on the storage, may be not very generic though
-          getReplica(srcPath, hash).firstOption match {
+          getReplica.firstOption match {
             case Some(replica) ⇒ replica
             case None ⇒
               val name = Storage.uniqName(hash, ".rep")
@@ -129,8 +129,7 @@ object ReplicaCatalog extends Logger {
               signalUpload(storage.uploadGZ(src, newFile), newFile, storage)
 
               val replica = session.withTransaction {
-                val existing = getReplica(srcPath, hash)
-                existing.firstOption match {
+                getReplica.firstOption match {
                   case Some(r) ⇒
                     logger.fine("Already in database deleting")
                     storage.backgroundRmFile(newFile)
