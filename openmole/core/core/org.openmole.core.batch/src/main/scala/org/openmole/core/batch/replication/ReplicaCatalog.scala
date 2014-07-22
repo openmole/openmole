@@ -166,9 +166,9 @@ object ReplicaCatalog extends Logger {
     replicas.filter { _.id === id }.delete
   }
 
-  def timeOfPersistent(name: String) ={
+  def timeOfPersistent(name: String) = {
     val matcher = replicationPattern.matcher(name)
-    if(!matcher.matches) None
+    if (!matcher.matches) None
     else Try(matcher.group(1).toLong).toOption
   }
 

@@ -1,12 +1,12 @@
 package org.openmole.buildsystem
 
+import org.apache.commons.compress.archivers.tar.{ TarArchiveEntry, TarArchiveOutputStream }
 import sbt._
 import sbt.Def
 import Keys._
 import scala.util.matching.Regex
 import OMKeys._
 import java.util.zip.GZIPOutputStream
-import org.kamranzafar.jtar.{ TarEntry, TarOutputStream }
 import resource._
 import java.io.{ BufferedOutputStream, FileOutputStream }
 import scala.io.Source
@@ -140,7 +140,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
   def zipImpl(targetFolders: Seq[File], s: TaskStreams, t: File, name: Option[String], folder: Option[String]): File = {
     val out = t / ((name getOrElse "assembly") + ".tar.gz")
 
-    val tgzOS = managed(new TarOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(out)))))
+    val tgzOS = managed(new TarArchiveOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(out)))))
 
     def findFiles(f: File): Set[File] = if (f.isDirectory) (f.listFiles map findFiles flatten).toSet else Set(f)
 
@@ -164,13 +164,16 @@ trait Assembly { self: BuildSystemDefaults ⇒
         } {
           val relativeFile = (if (folder isDefined) folder.get + "/" else "") + (file relativeTo lCP).get.getPath
           s.log.info("\t - " + relativeFile)
-          os.putNextEntry(new TarEntry(file, relativeFile))
 
-          for (c ← is.iter) {
-            os.write(c.toByte)
-          }
+          val entry = new TarArchiveEntry(file, relativeFile)
+          entry.setSize(file.length)
+          if (file.canExecute) entry.setMode(TarArchiveEntry.DEFAULT_FILE_MODE | 111)
 
-          os.flush()
+          os.putArchiveEntry(entry)
+
+          for (c ← is.iter) { os.write(c.toByte) }
+
+          os.closeArchiveEntry()
         }
         Set(out)
     }

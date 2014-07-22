@@ -18,7 +18,7 @@ name := "openmole-buildsystem-plugin"
 
 organization := "org.openmole"
 
-version := "1.1"
+version := "1.2"
 
 resolvers += Classpaths.sbtPluginSnapshots
 
@@ -29,8 +29,9 @@ addSbtPlugin("fr.iscpif" % "sbt-osgi" % "0.5.4-SNAPSHOT") //TODO: Get these chan
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.2.0")
 
-libraryDependencies ++= Seq("com.jsuereth" %% "scala-arm" % "1.3",
-                            "org.kamranzafar" % "jtar" % "2.2")
+libraryDependencies ++= Seq(
+  "com.jsuereth" %% "scala-arm" % "1.3",
+  "org.apache.commons" % "commons-compress" % "1.8.1")
 
 
 publishTo <<= isSnapshot(if(_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases"))
