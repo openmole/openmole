@@ -70,15 +70,18 @@ object ModelFamily {
 }
 
 trait ModelFamily extends NoArchive
-  with RankModifier
-  with GAAlgorithm
-  with ModelFamilyElitism
-  with ModelFamilyMutation
-  with SBXBoundedCrossover
-  with MaxAggregation
-  with BinaryTournamentSelection
-  with TournamentOnRank
-  with GeneticBreeding
-  with HierarchicalRanking
-  with ModelFamilyGenome
-  with GenomeScalingFromGroovy
+    with RankModifier
+    with GAAlgorithm
+    with ModelFamilyElitism
+    with ModelFamilyMutation
+    with SBXBoundedCrossover
+    with MaxAggregation
+    with BinaryTournamentSelection
+    with TournamentOnRank
+    with GeneticBreeding
+    with HierarchicalRanking
+    with ModelFamilyGenome {
+  type INPUT = String
+  def inputConverter = implicitly
+
+}

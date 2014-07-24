@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.hook.file
 
-import java.io.File
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._

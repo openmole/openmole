@@ -59,13 +59,16 @@ object Optimisation {
 }
 
 trait Optimisation extends NoArchive
-  with RankDiversityModifier
-  with GAAlgorithm
-  with NonDominatedElitism
-  with BinaryTournamentSelection
-  with TournamentOnRankAndDiversity
-  with CoEvolvingSigmaValuesMutation
-  with SBXBoundedCrossover
-  with GAGenomeWithSigma
-  with GenomeScalingFromGroovy
+    with RankDiversityModifier
+    with GAAlgorithm
+    with NonDominatedElitism
+    with BinaryTournamentSelection
+    with TournamentOnRankAndDiversity
+    with CoEvolvingSigmaValuesMutation
+    with SBXBoundedCrossover
+    with GAGenomeWithSigma {
+  type INPUT = String
+  def inputConverter = implicitly
+
+}
 

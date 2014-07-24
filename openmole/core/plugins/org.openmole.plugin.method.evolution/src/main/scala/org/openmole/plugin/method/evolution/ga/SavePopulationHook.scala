@@ -15,10 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution
+package org.openmole.plugin.method.evolution.ga
 
-import ga._
-import org.openmole.core.model.data._
 import org.openmole.core.implementation.data._
 import org.openmole.plugin.hook.file.AppendToCSVFileHook
 

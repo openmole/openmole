@@ -56,16 +56,18 @@ object BehaviourSearch {
 }
 
 trait BehaviourSearch extends GAAlgorithm
-  with HitMapArchive
-  with GeneticBreeding
-  with SortedTournamentSelection
-  with SBXBoundedCrossover
-  with TournamentOnRank
-  with RankModifier
-  with HierarchicalRanking
-  with HitCountModifiedFitness
-  with CoEvolvingSigmaValuesMutation
-  with GAGenomeWithSigma
-  with GenomeScalingFromGroovy
-  with RandomNicheElitism
-  with PhenotypeGridNiche
+    with HitMapArchive
+    with GeneticBreeding
+    with SortedTournamentSelection
+    with SBXBoundedCrossover
+    with TournamentOnRank
+    with RankModifier
+    with HierarchicalRanking
+    with HitCountModifiedFitness
+    with CoEvolvingSigmaValuesMutation
+    with GAGenomeWithSigma
+    with RandomNicheElitism
+    with PhenotypeGridNiche {
+  type INPUT = String
+  def inputConverter = implicitly
+}

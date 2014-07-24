@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 08/01/13 Romain Reuillon
+ * Copyright (C) 23/11/12 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,32 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution
+package org.openmole.plugin.method.evolution.ga
 
-import org.openmole.core.model.data._
-import org.openmole.core.model.mole._
 import org.openmole.core.implementation.data._
-import org.openmole.misc.tools.io.FileUtil._
-import java.io.File
-import org.openmole.core.implementation.tools._
-import org.openmole.misc.tools.service.Scaling._
-import org.openmole.misc.tools.script.GroovyProxyPool
 import org.openmole.core.implementation.mole._
-import org.openmole.plugin.method.evolution.ga._
-import fr.iscpif.mgo._
-import org.openmole.plugin.method.evolution.ga._
+import org.openmole.core.implementation.tools._
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole.ExecutionContext
+import org.openmole.misc.tools.io.FileUtil._
 
-object SaveProfileHook {
+object SaveMapHook {
 
-  def apply(puzzle: GAPuzzle[GenomeProfile], dir: String): HookBuilder = apply(puzzle, dir, "profile${" + puzzle.generation.name + "}.csv")
+  def apply(puzzle: GAPuzzle[GenomeMap], dir: String): HookBuilder = apply(puzzle, dir, "map${" + puzzle.generation.name + "}.csv")
 
-  def apply(puzzle: GAPuzzle[GenomeProfile], dir: String, name: String): HookBuilder =
+  def apply(puzzle: GAPuzzle[GenomeMap], dir: String, name: String): HookBuilder =
     new HookBuilder {
       addInput(puzzle.individual.toArray)
       val _puzzle = puzzle
       val _path = dir + "/" + name
 
-      def toHook = new SaveProfileHook with Built {
+      def toHook = new SaveMapHook with Built {
         val puzzle = _puzzle
         val path = _path
       }
@@ -48,9 +42,9 @@ object SaveProfileHook {
 
 }
 
-abstract class SaveProfileHook extends Hook {
+abstract class SaveMapHook extends Hook {
 
-  val puzzle: GAPuzzle[GenomeProfile]
+  val puzzle: GAPuzzle[_ <: GenomeMap]
   val path: String
 
   def process(context: Context, executionContext: ExecutionContext) = {
@@ -61,10 +55,9 @@ abstract class SaveProfileHook extends Hook {
         i ← context(puzzle.individual.toArray)
       } {
         val scaledGenome = puzzle.evolution.toVariables(i.genome, context)
-        w.write("" + scaledGenome(puzzle.evolution.x).value + "," + puzzle.evolution.aggregate(i.fitness) + "\n")
+        w.write("" + scaledGenome(puzzle.evolution.x).value + "," + scaledGenome(puzzle.evolution.y).value + "," + puzzle.evolution.aggregate(i.fitness) + "\n")
       }
     }
     context
   }
-
 }

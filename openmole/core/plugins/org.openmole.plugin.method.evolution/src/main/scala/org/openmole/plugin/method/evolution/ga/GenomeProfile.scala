@@ -69,7 +69,9 @@ trait GenomeProfile extends GAAlgorithm
     with SBXBoundedCrossover
     with GAGenomeWithSigma
     with MGFitness
-    with MaxAggregation
-    with GenomeScalingFromDouble {
+    with MaxAggregation {
+  type INPUT = Double
+  def inputConverter = implicitly
+
   def x: Int
 }
