@@ -18,6 +18,7 @@ esac
 cp -r configuration ${CONFIGDIR}
 
 ulimit -v unlimited
+ulimit -s unlimited
 
 java -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area=${CONFIGDIR} $FLAG -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=128m -XX:+UseG1GC -XX:ParallelGCThreads=1 -jar plugins/org.eclipse.equinox.launcher.jar -consoleLog $@ 
 
