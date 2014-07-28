@@ -11,4 +11,7 @@ object Hook extends PluginDefaults {
 
   lazy val file = OsgiProject("file") dependsOn (Misc.exception, Core.implementation, Misc.workspace, Core.serializer, Misc.hashService % "test",
     Misc.replication % "test", gnuCrypto % "test")
+
+  lazy val modifier = OsgiProject("modifier") dependsOn (Core.implementation)
+
 }
