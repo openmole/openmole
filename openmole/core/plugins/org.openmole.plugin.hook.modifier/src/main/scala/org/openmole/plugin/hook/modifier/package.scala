@@ -21,7 +21,6 @@ import org.openmole.core.implementation.mole.HookBuilder
 import org.openmole.core.implementation.transition.Condition
 import org.openmole.core.model.mole.IHook
 import org.openmole.core.model.transition.ICondition
-import org.openmole.plugin.hook.filter.ConditionHook
 
 package object modifier {
 

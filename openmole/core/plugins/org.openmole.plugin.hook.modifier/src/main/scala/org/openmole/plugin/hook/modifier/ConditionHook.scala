@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.hook.filter
+package org.openmole.plugin.hook.modifier
 
 import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.data._
