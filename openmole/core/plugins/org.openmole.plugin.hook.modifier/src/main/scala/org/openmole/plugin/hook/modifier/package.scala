@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.hook
 
+import org.openmole.core.implementation.mole.HookBuilder
 import org.openmole.core.implementation.transition.Condition
 import org.openmole.core.model.mole.IHook
 import org.openmole.core.model.transition.ICondition
@@ -27,5 +28,10 @@ package object modifier {
   implicit class HookModifierDecorator(h: IHook) {
     def condition(condition: ICondition) = ConditionHook(h, condition)
     def condition(condition: String) = ConditionHook(h, Condition(condition))
+  }
+
+  implicit class HookBuilderModifierDecorator(h: HookBuilder) {
+    def condition(condition: ICondition) = h.toHook.condition(condition)
+    def condition(condition: String) = h.toHook.condition(condition)
   }
 }
