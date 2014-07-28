@@ -17,8 +17,9 @@ esac
 
 cp -r configuration ${CONFIGDIR}
 
-ulimit -v unlimited
-ulimit -s unlimited
+ulimit -S -v unlimited
+ulimit -S -s unlimited
+ulimit -S -s unlimited
 
 export MALOC_ARNEA_MAX=1
 
