@@ -22,6 +22,9 @@ object Environment extends PluginDefaults {
   lazy val sge = OsgiProject("sge") dependsOn (Core.implementation, base.plugin.Environment.sge,
     base.Misc.exception, base.Core.batch)
 
+  lazy val oar = OsgiProject("oar") dependsOn (Core.implementation, base.plugin.Environment.oar,
+    base.Misc.exception, base.Core.batch)
+
   lazy val condor = OsgiProject("condor") dependsOn (Core.implementation, base.plugin.Environment.condor,
     base.Misc.exception, base.Core.batch)
 
