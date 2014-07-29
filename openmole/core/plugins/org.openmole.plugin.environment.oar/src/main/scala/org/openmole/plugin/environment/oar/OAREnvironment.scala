@@ -57,7 +57,6 @@ class OAREnvironment(
   type JS = OARJobService
 
   @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
-  def id = new URI("oar", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val jobService = new OARJobService with ThisHost with LimitedAccess {
     def nbTokens = maxConnections
