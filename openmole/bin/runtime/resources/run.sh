@@ -23,7 +23,7 @@ ulimit -S -s unlimited
 
 export MALOC_ARNEA_MAX=1
 
-java -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area=${CONFIGDIR} $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=128m -XX:+UseG1GC -XX:ParallelGCThreads=1 -jar plugins/org.eclipse.equinox.launcher.jar -consoleLog $@ 
+java -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area=${CONFIGDIR} $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=128m -XX:+UseG1GC -XX:ParallelGCThreads=1 -jar plugins/org.eclipse.equinox.launcher.jar -consoleLog $@ 
 
 RETURNCODE=$?
 
