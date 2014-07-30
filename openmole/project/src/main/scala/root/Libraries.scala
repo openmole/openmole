@@ -123,6 +123,9 @@ object Libraries extends Defaults(Apache) {
   //  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.tools.*", "scala.reflect.macros.*"),
   //    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
 
+  lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
+    (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6", version := "7.0.6")
+
   lazy val jodaTime = OsgiProject("org.joda.time") settings (
     libraryDependencies += "joda-time" % "joda-time" % "1.6",
     version := "1.6"
@@ -201,10 +204,10 @@ object Libraries extends Defaults(Apache) {
       "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (
-    libraryDependencies += "fr.iscpif" %% "mgo" % "1.76",
+    libraryDependencies += "fr.iscpif" %% "mgo" % "1.77-SNAPSHOT",
     bundleType := Set("plugin"),
     version := "1.76"
-  ) dependsOn (monocle)
+  )
 
   val monocleVersion = "0.4.0"
 
@@ -237,9 +240,6 @@ object Libraries extends Defaults(Apache) {
     version := "0.3.15",
     exportPackage := Seq("scalaj.http.*")
   )
-
-  lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
-    (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6", version := "7.0.6")
 
   lazy val scopt = OsgiProject("com.github.scopt", exports = Seq("scopt.*")) settings (
     libraryDependencies += "com.github.scopt" %% "scopt" % "3.2.0",

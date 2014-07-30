@@ -16,12 +16,11 @@ object Core extends BaseDefaults {
   override val dir = file("core/core")
 
   lazy val model = OsgiProject("model", openmoleScope = Some("provided")) dependsOn
-    (eventDispatcher, exception, Misc.tools, updater, Misc.workspace, scalaz)
+    (eventDispatcher, exception, Misc.tools, updater, Misc.workspace)
 
   lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (model, workspace, xstream, pluginManager, hashService, fileService,
-      Misc.tools, iceTar)
+    (model, workspace, xstream, pluginManager, hashService, fileService, Misc.tools, iceTar)
 
   lazy val implementation = OsgiProject("implementation", openmoleScope = Some("provided")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
