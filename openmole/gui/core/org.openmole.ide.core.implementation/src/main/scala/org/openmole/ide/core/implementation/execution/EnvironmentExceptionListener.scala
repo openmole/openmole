@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.execution
 
-import org.openmole.core.model.execution.Environment.ExceptionRaised
+import org.openmole.core.model.execution.Environment.{ MoleJobExceptionRaised, ExceptionRaised }
 import java.awt.Color
 import java.io.BufferedOutputStream
 import java.io.PrintStream
@@ -33,6 +33,8 @@ class EnvironmentExceptionListener(exeManager: ExecutionManager) extends EventLi
     event match {
       case x: ExceptionRaised ⇒
         exeManager.moleExecutionExceptionTextArea.warn(x.level + ": Exception in taskMap " + x.job, None, ExceptionUtils.prettify(x.exception))
+      case x: MoleJobExceptionRaised ⇒
+        exeManager.moleExecutionExceptionTextArea.warn(x.level + ": Unexpected failed task.  " + x.job, None, ExceptionUtils.prettify(x.exception))
     }
   }
 }
