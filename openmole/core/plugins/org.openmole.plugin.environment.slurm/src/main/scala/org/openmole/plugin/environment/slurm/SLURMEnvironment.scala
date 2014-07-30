@@ -69,7 +69,6 @@ class SLURMEnvironment(
   type JS = SLURMJobService
 
   @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
-  def id = new URI("slurm", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val jobService = new SLURMJobService with ThisHost with LimitedAccess {
     def nbTokens = maxConnections

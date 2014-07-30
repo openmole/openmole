@@ -56,7 +56,6 @@ class SGEEnvironment(
   type JS = SGEJobService
 
   @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
-  @transient lazy val id = new URI("sge", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val jobService = new SGEJobService with ThisHost with LimitedAccess {
     def nbTokens = maxConnections

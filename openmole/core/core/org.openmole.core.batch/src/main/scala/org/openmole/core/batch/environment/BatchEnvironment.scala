@@ -97,7 +97,7 @@ object BatchEnvironment extends Logger {
   @transient lazy val JVMLinuxI386Location = runtimeDirLocation.child("jvm-386.tar.gz")
   @transient lazy val JVMLinuxX64Location = runtimeDirLocation.child("jvm-x64.tar.gz")
 
-  Workspace += (MemorySizeForRuntime, "512")
+  Workspace += (MemorySizeForRuntime, "1024")
   Workspace += (CheckInterval, "PT1M")
   Workspace += (CheckFileExistsInterval, "PT1H")
   Workspace += (JobManagmentThreads, "200")
@@ -106,7 +106,7 @@ object BatchEnvironment extends Logger {
   Workspace += (StoragesGCUpdateInterval, "PT1H")
   Workspace += (NoTokenForSerivceRetryInterval, "PT2M")
 
-  Workspace += (MemoryMargin, "512")
+  Workspace += (MemoryMargin, "1024")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 

@@ -17,6 +17,8 @@
 
 package org.openmole.plugin.environment.ssh
 
+import java.net.URI
+
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.storage.PersistentStorageService
@@ -27,7 +29,6 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
   type SS = PersistentStorageService with SSHStorageService
 
   def workDirectory: Option[String]
-  def id: String
 
   @transient lazy val storage = new PersistentStorageService with SSHStorageService with LimitedAccess with ThisHost {
     def nbTokens = maxConnections
@@ -36,7 +37,7 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
       case None    ⇒ child(home, ".openmole/.tmp/ssh/")
     }
     val environment = env
-    val id = env.id
+    val id = new URI("ssh", env.user, env.host, env.port, workDirectory.orNull, null, null).toString
   }
 
   def allStorages = List(storage)
