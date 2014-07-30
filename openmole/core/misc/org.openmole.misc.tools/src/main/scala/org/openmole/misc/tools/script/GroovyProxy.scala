@@ -47,7 +47,8 @@ class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) extends G
     val groovyShell = new GroovyShell(config)
     try groovyShell.parse("package script\n" + code)
     catch {
-      case t: Throwable ⇒ throw new UserBadDataError("Script compilation error !\n The script was :\n" + code + "\n Error message was:" + t.getMessage);
+      case t: Throwable ⇒
+        throw new UserBadDataError("Script compilation error !\n The script was :\n" + code + "\n Error message was:" + t.getMessage);
     }
   }
 
@@ -62,12 +63,16 @@ class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) extends G
     executeUnsynchronized(binding)
   }
 
-  def executeUnsynchronized(binding: Binding = new Binding) = {
+  def executeUnsynchronized(binding: Binding = new Binding) = try {
     compiledScript.setBinding(binding)
     val ret = compiledScript.run
     InvokerHelper.removeClass(compiledScript.getClass)
     compiledScript.setBinding(null)
     ret
+  }
+  catch {
+    case t: Throwable ⇒
+      throw new UserBadDataError("Script execution error !\n The script was :\n" + code + "\n Error message was:" + t.getMessage);
   }
 
 }
