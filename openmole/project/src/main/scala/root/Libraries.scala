@@ -204,9 +204,9 @@ object Libraries extends Defaults(Apache) {
       "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (
-    libraryDependencies += "fr.iscpif" %% "mgo" % "1.77-SNAPSHOT",
+    libraryDependencies += "fr.iscpif" %% "mgo" % "1.77",
     bundleType := Set("plugin"),
-    version := "1.76"
+    version := "1.77"
   )
 
   val monocleVersion = "0.4.0"
