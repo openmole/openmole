@@ -217,7 +217,7 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "com.github.julien-truffaut" %% "monocle-macro" % monocleVersion,
     bundleType := Set("plugin"),
     version := monocleVersion
-  ) dependsOn(scalaz)
+  ) dependsOn (scalaz)
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (
     libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0",
