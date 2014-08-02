@@ -20,13 +20,9 @@ package org.openmole.misc.hashservice
 import gnu.crypto.hash.Sha160
 import java.io.File
 import java.io.FileInputStream
-import java.io.IOException
 import java.io.InputStream
-import java.util.concurrent.TimeoutException
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import org.openmole.misc.tools.io.FileUtil
-import org.openmole.misc.tools.io.ReaderRunnable
+import org.openmole.misc.tools.service.Hash
 
 object HashService {
 
@@ -36,48 +32,20 @@ object HashService {
 
   implicit def inputStreamHashServiceDecorator(is: InputStream) = new Object {
     def hash = computeHash(is)
-    def hash(maxRead: Int, timeout: Long) = computeHash(is, maxRead, timeout)
   }
 
-  def computeHash(file: File): SHA1Hash = {
+  def computeHash(file: File): Hash = {
     val is = new FileInputStream(file)
     try computeHash(is)
     finally is.close
   }
 
-  def computeHash(is: InputStream): SHA1Hash = {
-
+  def computeHash(is: InputStream): Hash = {
     val buffer = new Array[Byte](FileUtil.DefaultBufferSize)
     val md = new Sha160
     Stream.continually(is.read(buffer)).takeWhile(_ != -1).foreach {
       count ⇒ md.update(buffer, 0, count)
     }
-
-    new SHA1Hash(md.digest)
-  }
-
-  def computeHash(is: InputStream, maxRead: Int, timeout: Long): SHA1Hash = {
-    val buffer = new Array[Byte](maxRead)
-    val md = new Sha160
-
-    val executor = Executors.newSingleThreadExecutor
-    val reader = new ReaderRunnable(buffer, is, maxRead)
-
-    Iterator.continually({
-      val f = executor.submit(reader)
-
-      try {
-        f.get(timeout, TimeUnit.MILLISECONDS)
-      }
-      catch {
-        case (e: TimeoutException) ⇒
-          f.cancel(true)
-          throw new IOException("Timout on reading, read was longer than " + timeout, e)
-      }
-    }).takeWhile(_ != -1).foreach {
-      count ⇒ md.update(buffer, 0, count)
-    }
-
-    new SHA1Hash(md.digest)
+    Hash(md.digest)
   }
 }
