@@ -259,7 +259,7 @@ package object ga {
     cs.puzzle(gaPuzzle, scalingIndividualsSlot.capsule)
   }
 
-  def steadyIslandGA[ALG <: GAAlgorithm](evolution: ALG, model: Puzzle)(
+  def islandSteadyGA[ALG <: GAAlgorithm](evolution: ALG, model: Puzzle)(
     name: String,
     number: Int,
     termination: GATermination { type G >: evolution.G; type P >: evolution.P; type F >: evolution.F; type MF >: evolution.MF },
