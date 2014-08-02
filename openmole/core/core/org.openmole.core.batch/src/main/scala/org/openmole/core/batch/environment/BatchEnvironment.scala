@@ -193,7 +193,7 @@ trait BatchEnvironment extends Environment { env ⇒
   @transient lazy val storages = {
     val storages = allStorages
     if (storages.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
-    Updater.delay(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDuration(StoragesGCUpdateInterval))
+    Updater.registerForUpdate(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDuration(StoragesGCUpdateInterval))
     storages
   }
 
