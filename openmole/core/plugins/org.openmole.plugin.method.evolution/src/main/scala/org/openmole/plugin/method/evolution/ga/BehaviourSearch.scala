@@ -25,7 +25,7 @@ object BehaviourSearch {
   def apply(
     termination: GATermination { type G >: BehaviourSearch#G; type P >: BehaviourSearch#P; type F >: BehaviourSearch#F; type MF >: BehaviourSearch#MF },
     inputs: Inputs[String],
-    objectives: Objectives,
+    observables: Objectives,
     gridSize: Seq[Double],
     reevaluate: Double = 0.0) = {
     val _inputs = inputs
