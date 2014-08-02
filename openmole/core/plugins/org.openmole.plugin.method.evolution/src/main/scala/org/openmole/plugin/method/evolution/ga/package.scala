@@ -259,6 +259,25 @@ package object ga {
     cs.puzzle(gaPuzzle, scalingIndividualsSlot.capsule)
   }
 
+  def steadyIslandGA[ALG <: GAAlgorithm](evolution: ALG, model: Puzzle)(
+    name: String,
+    number: Int,
+    termination: GATermination { type G >: evolution.G; type P >: evolution.P; type F >: evolution.F; type MF >: evolution.MF },
+    sampling: Int)(implicit plugins: PluginSet) = {
+    val puzzle: Puzzle with GAPuzzle[ALG] =
+      steadyGA[ALG](evolution)(
+        s"${name}Island",
+        model
+      )
+
+    islandGA[ALG](puzzle)(
+      name,
+      number,
+      termination.asInstanceOf[GATermination { type G = puzzle.evolution.G; type P = puzzle.evolution.P; type F = puzzle.evolution.F; type MF = puzzle.evolution.MF }],
+      sampling)
+
+  }
+
   def islandGA[AG <: GAAlgorithm](model: Puzzle with GAPuzzle[AG])(
     name: String,
     number: Int,
