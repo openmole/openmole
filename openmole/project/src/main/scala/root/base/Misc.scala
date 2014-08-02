@@ -36,7 +36,7 @@ object Misc extends BaseDefaults {
 
   val hashService = OsgiProject("org.openmole.misc.hashservice") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (exception, gnuCrypto, tools, Apache.pool)
+    (exception, tools, Apache.pool)
 
   val fileDeleter = OsgiProject("org.openmole.misc.filedeleter") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn

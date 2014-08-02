@@ -17,7 +17,8 @@
 
 package org.openmole.misc.hashservice
 
-import gnu.crypto.hash.Sha160
+import java.security.MessageDigest
+
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -26,11 +27,11 @@ import org.openmole.misc.tools.service.Hash
 
 object HashService {
 
-  implicit def fileHashServiceDecorator(file: File) = new {
+  implicit class FileHashServiceDecorator(file: File) {
     def hash = computeHash(file)
   }
 
-  implicit def inputStreamHashServiceDecorator(is: InputStream) = new Object {
+  implicit class InputStreamHashServiceDecorator(is: InputStream) {
     def hash = computeHash(is)
   }
 
@@ -42,8 +43,8 @@ object HashService {
 
   def computeHash(is: InputStream): Hash = {
     val buffer = new Array[Byte](FileUtil.DefaultBufferSize)
-    val md = new Sha160
-    Stream.continually(is.read(buffer)).takeWhile(_ != -1).foreach {
+    val md = MessageDigest.getInstance("SHA1")
+    Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach {
       count ⇒ md.update(buffer, 0, count)
     }
     Hash(md.digest)

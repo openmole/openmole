@@ -34,7 +34,7 @@ object Task extends PluginDefaults {
   lazy val groovy = OsgiProject("groovy") dependsOn (provided(Misc.exception), provided(Core.model), Tool.groovy, code, Misc.replication % "test")
 
   lazy val template = OsgiProject("template") dependsOn (provided(Misc.exception), provided(Core.implementation), provided(Misc.workspace),
-    Misc.hashService % "test", Misc.replication % "test", gnuCrypto % "test")
+    Misc.hashService % "test", Misc.replication % "test")
 
   lazy val systemexec = OsgiProject("systemexec") dependsOn (provided(Misc.exception), provided(Core.implementation), external,
     provided(Misc.workspace), Apache.exec % "provided")
