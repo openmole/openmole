@@ -81,7 +81,7 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1", version := "0.8.0-rc1")
 
   lazy val slick = OsgiProject("com.typesafe.slick", exports = Seq("scala.slick.*")) settings
-    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.1.0-RC3", version := "2.1.0-RC3")
+    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.1.0", version := "2.1.0")
 
   lazy val slf4j = OsgiProject("org.slf4j") settings (
     libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2",
