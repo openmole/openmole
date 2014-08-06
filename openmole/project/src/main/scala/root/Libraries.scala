@@ -6,6 +6,7 @@ import com.typesafe.sbt.osgi.OsgiKeys
 import OsgiKeys._
 import root.libraries._
 import org.openmole.buildsystem.OMKeys._
+import fr.iscpif.jsmanager.JSManagerPlugin._
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,7 +19,7 @@ object Libraries extends Defaults(Apache) {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.76-SNAPSHOT"
+  val gridscaleVersion = "1.76"
 
   val bouncyCastleVersion = "1.50"
 
@@ -55,7 +56,7 @@ object Libraries extends Defaults(Apache) {
       libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106", "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016")
     )
 
-  lazy val scalatraVersion = "2.3.0.RC3"
+  lazy val scalatraVersion = "2.3.0"
 
   lazy val scalatra = OsgiProject("org.scalatra",
     buddyPolicy = Some("global"),
@@ -81,7 +82,7 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1", version := "0.8.0-rc1")
 
   lazy val slick = OsgiProject("com.typesafe.slick", exports = Seq("scala.slick.*")) settings
-    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.1.0-RC2", version := "2.1.0-RC2")
+    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.1.0-RC3", version := "2.1.0-RC3")
 
   lazy val slf4j = OsgiProject("org.slf4j") settings (
     libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2",
@@ -187,18 +188,23 @@ object Libraries extends Defaults(Apache) {
       version := "16.0.1"
     )
 
-  lazy val jsyntaxpane = OsgiProject("jsyntaxpane", privatePackages = Seq("!scala.*", "*")) settings
-    (libraryDependencies += "jsyntaxpane" % "jsyntaxpane" % "0.9.6", version := "0.9.6")
+  lazy val scalaTags = OsgiProject("com.scalatags", exports = Seq("scalatags.*")) settings (
+    libraryDependencies += "com.scalatags" %%% "scalatags" % "0.3.8", version := "0.3.9")
 
-  lazy val gral = OsgiProject("de.erichseifert.gral", privatePackages = Seq("!scala.*", "*")) settings
-    (libraryDependencies += "de.erichseifert.gral" % "gral-core" % "0.9-SNAPSHOT", version := "0.9")
+  lazy val scalaRx = OsgiProject("com.scalarx", exports = Seq("rx.*")) settings (
+    libraryDependencies += "com.scalarx" %%% "scalarx" % "0.2.5", version := "0.2.6")
 
-  lazy val miglayout = OsgiProject("net.miginfocom.swing.miglayout", exports = Seq("net.miginfocom.*")) settings
-    (libraryDependencies += "com.miglayout" % "miglayout" % "3.7.4", version := "3.7.4")
+  /* lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*")) settings (
+    libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.2.0", version := "0.2.0")*/
 
-  lazy val netbeans = OsgiProject("org.netbeans.api", exports = Seq("org.netbeans.*", "org.openide.*")) settings
-    (libraryDependencies ++= Seq("org.netbeans.api" % "org-netbeans-api-visual" % "RELEASE73",
-      "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
+  lazy val scalajsDom = OsgiProject("org.scala-lang.modules.scalajs", exports = Seq("org.scalajs.dom.*")) settings (
+    libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6", version := "0.6")
+
+  lazy val scalajsJQuery = OsgiProject("org.scala-lang.modules.scalajs", exports = Seq("org.scalajs.jquery.*")) settings (
+    libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6", version := "0.6")
+
+  lazy val autowire = OsgiProject("autowire", exports = Seq("autowire.*")) settings (
+    libraryDependencies += "com.lihaoyi" %% "autowire" % "0.1.3", version := "0.1.2")
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (
     libraryDependencies += "fr.iscpif" %% "mgo" % "1.76",
