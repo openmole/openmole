@@ -11,6 +11,7 @@ import com.typesafe.sbt.osgi.OsgiKeys._
 import sbt.inc.Analysis
 import sbtunidoc.Plugin._
 import UnidocKeys._
+import fr.iscpif.jsmanager.JSManagerPlugin._
 
 object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   val dir = file("bin")
@@ -28,14 +29,14 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     Libraries.bouncyCastle intransitive ()
   )
 
-  lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true, buddyPolicy = Some("global")) settings (
+  lazy val openmoleui = OsgiProject("org.openmole.gui", singleton = true, buddyPolicy = Some("global")) settings (
     equinoxDependencies,
     bundleType := Set("core"),
-    organization := "org.openmole.ui"
-  ) dependsOn
-    (base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
+    organization := "org.openmole.gui"
+  ) settings (jsManagerSettings: _*) dependsOn (
+      base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
       base.Misc.pluginManager, jodaTime, scalaLang, jasypt, Apache.config, base.Core.implementation, robustIt,
-      scopt, base.Core.batch, gui.Core.implementation, base.Misc.sftpserver, base.Misc.logging, jline, Apache.logging,
+      scopt, base.Core.batch, gui.Server.server, gui.Client.client, base.Misc.sftpserver, base.Misc.logging, jline, Apache.logging,
       Apache.ant, Web.core, base.Misc.console, base.Core.convenience)
 
   private lazy val openmolePluginDependencies = libraryDependencies ++= Seq(
@@ -54,9 +55,9 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
 
   lazy val pluginProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo "openmole-plugins"
 
-  lazy val guiPluginProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"), true) sendTo "openmole-plugins-gui"
+  // lazy val guiPluginProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"), true) sendTo "openmole-plugins-gui"
 
-  lazy val openmole = AssemblyProject("openmole", "plugins", settings = resAssemblyProject ++ uiProjects ++ pluginProjects ++ guiPluginProjects ++ dbserverProjects ++ zipProject, depNameMap =
+  lazy val openmole = AssemblyProject("openmole", "plugins", settings = resAssemblyProject ++ uiProjects ++ pluginProjects ++ /*guiPluginProjects ++ */ dbserverProjects ++ zipProject, depNameMap =
     Map(
       """org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
       """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }
