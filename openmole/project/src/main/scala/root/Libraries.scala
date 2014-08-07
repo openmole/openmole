@@ -188,10 +188,10 @@ object Libraries extends Defaults(Apache) {
     )
 
   lazy val scalaTags = OsgiProject("com.scalatags", exports = Seq("scalatags.*")) settings (
-    libraryDependencies += "com.scalatags" %%% "scalatags" % "0.3.8", version := "0.3.9")
+    libraryDependencies += "com.scalatags" %%% "scalatags" % "0.3.9", version := "0.3.9")
 
   lazy val scalaRx = OsgiProject("com.scalarx", exports = Seq("rx.*")) settings (
-    libraryDependencies += "com.scalarx" %%% "scalarx" % "0.2.5", version := "0.2.6")
+    libraryDependencies += "com.scalarx" %%% "scalarx" % "0.2.6", version := "0.2.6")
 
   /* lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*")) settings (
     libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.2.0", version := "0.2.0")*/
@@ -203,7 +203,7 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6", version := "0.6")
 
   lazy val autowire = OsgiProject("autowire", exports = Seq("autowire.*")) settings (
-    libraryDependencies += "com.lihaoyi" %% "autowire" % "0.1.3", version := "0.1.2")
+    libraryDependencies += "com.lihaoyi" %% "autowire" % "0.1.3", version := "0.1.3")
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo", imports = Seq("*")) settings (
     libraryDependencies += "fr.iscpif" %% "mgo" % "1.78-SNAPSHOT",
