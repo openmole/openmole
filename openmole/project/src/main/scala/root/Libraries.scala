@@ -199,8 +199,8 @@ object Libraries extends Defaults(Apache) {
   lazy val scalajsDom = OsgiProject("org.scala-lang.modules.scalajs", exports = Seq("org.scalajs.dom.*")) settings (
     libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6", version := "0.6")
 
-  lazy val scalajsJQuery = OsgiProject("org.scala-lang.modules.scalajs", exports = Seq("org.scalajs.jquery.*")) settings (
-    libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6", version := "0.6")
+  /*lazy val scalajsJQuery = OsgiProject("org.scala-lang.modules.scalajs", exports = Seq("org.scalajs.jquery.*")) settings (
+    libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6", version := "0.6")*/
 
   lazy val autowire = OsgiProject("autowire", exports = Seq("autowire.*")) settings (
     libraryDependencies += "com.lihaoyi" %% "autowire" % "0.1.3", version := "0.1.3")
