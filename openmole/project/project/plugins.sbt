@@ -6,4 +6,4 @@ Resolver.sonatypeRepo("releases"),
     url("http://dl.bintray.com/content/scala-js/scala-js-releases"))(
       Resolver.ivyStylePatterns))
 
-addSbtPlugin("fr.iscpif" %% "jsmanager" % "0.2.0")
+//addSbtPlugin("fr.iscpif" %% "jsmanager" % "0.2.0")

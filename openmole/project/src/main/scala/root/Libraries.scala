@@ -189,22 +189,19 @@ object Libraries extends Defaults(Apache) {
     )
 
   lazy val scalaTags = OsgiProject("com.scalatags", exports = Seq("scalatags.*")) settings (
-    libraryDependencies += "com.scalatags" %%% "scalatags" % "0.3.9", version := "0.3.9")
+    libraryDependencies += "com.scalatags" %%% "scalatags" % "0.4.0", version := "0.4.0")
 
   lazy val scalaRx = OsgiProject("com.scalarx", exports = Seq("rx.*")) settings (
     libraryDependencies += "com.scalarx" %%% "scalarx" % "0.2.6", version := "0.2.6")
 
-  /* lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*")) settings (
-    libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.2.0", version := "0.2.0")*/
+  lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*")) settings (
+    libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.1.7", version := "0.1.7")
 
   lazy val scalajsDom = OsgiProject("org.scala-lang.modules.scalajs", exports = Seq("org.scalajs.dom.*")) settings (
     libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6", version := "0.6")
 
-  /*lazy val scalajsJQuery = OsgiProject("org.scala-lang.modules.scalajs", exports = Seq("org.scalajs.jquery.*")) settings (
-    libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6", version := "0.6")*/
-
   lazy val autowire = OsgiProject("autowire", exports = Seq("autowire.*")) settings (
-    libraryDependencies += "com.lihaoyi" %% "autowire" % "0.1.3", version := "0.1.3")
+    libraryDependencies += "com.lihaoyi" %% "autowire" % "0.1.2", version := "0.1.2")
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (
     libraryDependencies += "fr.iscpif" %% "mgo" % "1.76",
@@ -212,7 +209,7 @@ object Libraries extends Defaults(Apache) {
     version := "1.76"
   ) dependsOn (monocle)
 
-  val monocleVersion = "0.4.0"
+  val monocleVersion = "0.5.0"
 
   lazy val monocle = OsgiProject("monocle") settings (
     libraryDependencies += "com.github.julien-truffaut" %% "monocle-core" % monocleVersion,

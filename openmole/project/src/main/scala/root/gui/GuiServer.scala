@@ -13,7 +13,7 @@ object Server extends GuiDefaults {
 
   lazy val server = OsgiProject("org.openmole.gui.server") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }) dependsOn
-    (scalatra, logback, jetty, scalajsDom, autowire, slick,
+    (scalatra, logback, jetty, scalajsDom, upickle, autowire, slick,
       Shared.shared, Ext.dataui,
       base.Misc.workspace)
 
