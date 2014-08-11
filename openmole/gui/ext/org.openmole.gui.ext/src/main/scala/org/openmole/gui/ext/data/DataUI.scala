@@ -1,5 +1,7 @@
+package org.openmole.gui.ext.data
+
 /*
- * Copyright (C) 2011 Mathieu Mathieu Leclaire <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 08/08/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,13 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.data
-
-//import org.openmole.ide.core.implementation.panel.Settings
-
-/*trait DataUI {
+trait DataUI {
   def name: String
   override def toString: String = name
   def coreClass: Class[_]
-  def buildPanelUI: Settings
-}*/ 
+  //def buildPanelUI: Settings
+
+}
