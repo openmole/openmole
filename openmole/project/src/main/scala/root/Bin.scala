@@ -33,11 +33,12 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     equinoxDependencies,
     bundleType := Set("core"),
     organization := "org.openmole.gui"
-  ) settings (jsManagerSettings: _*) dependsOn (
-      base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
-      base.Misc.pluginManager, jodaTime, scalaLang, jasypt, Apache.config, base.Core.implementation, robustIt,
-      scopt, base.Core.batch, gui.Server.server, gui.Client.client, base.Misc.sftpserver, base.Misc.logging, jline, Apache.logging,
-      Apache.ant, Web.core, base.Misc.console, base.Core.convenience)
+  ) settings (jsManagerSettings: _*) settings (
+      libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.logging, scopt, robustIt)
+    ) dependsOn (
+        base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
+        base.Misc.pluginManager, base.Core.implementation, base.Core.batch, gui.Server.server, gui.Client.client, base.Misc.sftpserver, base.Misc.logging,
+        Web.core, base.Misc.console, base.Core.convenience)
 
   private lazy val openmolePluginDependencies = libraryDependencies ++= Seq(
     Libraries.gridscaleHTTP,
