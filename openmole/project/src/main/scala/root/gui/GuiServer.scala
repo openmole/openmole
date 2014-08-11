@@ -7,6 +7,8 @@ import root.{ GuiDefaults, base, Web }
 import root.Libraries._
 import root.libraries.Apache
 import sbt.Keys._
+import com.typesafe.sbt.osgi.OsgiKeys._
+import fr.iscpif.jsmanager.JSManagerPlugin._
 
 object Server extends GuiDefaults {
   override val dir = super.dir / "server"
@@ -15,5 +17,5 @@ object Server extends GuiDefaults {
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }) dependsOn
     (scalatra, logback, jetty, scalajsDom, upickle, autowire, slick,
       Shared.shared, Ext.dataui,
-      base.Misc.workspace)
+      base.Misc.workspace) settings (bundle <<= bundle dependsOn (toJs in Client.client))
 }

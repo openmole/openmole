@@ -19,7 +19,7 @@ object Libraries extends Defaults(Apache) {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.79-SNAPSHOT"
+  val gridscaleVersion = "1.76"
 
   val bouncyCastleVersion = "1.50"
 
@@ -50,21 +50,22 @@ object Libraries extends Defaults(Apache) {
 
   lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }
 
-  lazy val jetty = "org.openmole" %% "org.eclipse.jetty" % "8.1.8.v20121106" /*OsgiProject(
+  lazy val jetty = OsgiProject(
     "org.eclipse.jetty",
     exports = Seq("org.eclipse.jetty.*", "javax.*")) settings (
-      libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106", "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016")
-    )*/
+      libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106", "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016"),
+      version := "8.1.8.v20121106"
+    )
 
   lazy val scalatraVersion = "2.3.0"
 
-  lazy val scalatra = "org.openmole" %% "org.scalatra" % scalatraVersion /*OsgiProject("org.scalatra",
+  lazy val scalatra = OsgiProject("org.scalatra",
     buddyPolicy = Some("global"),
     exports = Seq("org.scalatra.*, org.fusesource.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.json4s", "*")) settings
     (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % scalatraVersion,
       "org.scalatra" %% "scalatra-scalate" % scalatraVersion,
-      "org.scalatra" %% "scalatra-json" % scalatraVersion), version := scalatraVersion) dependsOn (slf4j)*/
+      "org.scalatra" %% "scalatra-json" % scalatraVersion), version := scalatraVersion) dependsOn (slf4j)
 
   lazy val jacksonJson = OsgiProject("org.json4s") settings (
     libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.9",
@@ -76,13 +77,13 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9")
 
   lazy val h2 = OsgiProject("org.h2", buddyPolicy = Some("global"), privatePackages = Seq("META-INF.*")) settings
-    (libraryDependencies += "com.h2database" % "h2" % "1.4.181", version := "1.4.181")
+    (libraryDependencies += "com.h2database" % "h2" % "1.3.170", version := "1.3.170")
 
   lazy val bonecp = OsgiProject("com.jolbox.bonecp", buddyPolicy = Some("global")) settings
     (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1", version := "0.8.0-rc1")
 
   lazy val slick = OsgiProject("com.typesafe.slick", exports = Seq("scala.slick.*")) settings
-    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.1.0", version := "2.1.0"))
+    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.1.0-RC3", version := "2.1.0-RC3")
 
   lazy val slf4j = OsgiProject("org.slf4j") settings (
     libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2",
@@ -124,12 +125,15 @@ object Libraries extends Defaults(Apache) {
   //  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.tools.*", "scala.reflect.macros.*"),
   //    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
 
-  lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
-    (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6", version := "7.0.6")
-
   lazy val jodaTime = OsgiProject("org.joda.time") settings (
     libraryDependencies += "joda-time" % "joda-time" % "1.6",
     version := "1.6"
+  )
+
+  lazy val gnuCrypto = OsgiProject("org.gnu.crypto") settings (
+    libraryDependencies += "org.gnu.crypto" % "gnu-crypto" % "2.0.1",
+    exportPackage += "gnu.crypto.*",
+    version := "2.0.1"
   )
 
   lazy val jasypt = OsgiProject("org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings (
@@ -141,8 +145,6 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "uk.com.robust-it" % "cloning" % "1.7.4",
     libraryDependencies += "org.objenesis" % "objenesis" % "1.2",
     version := "1.7.4")
-
-  lazy val netLogo5Version = "5.1.0"
 
   lazy val netlogo4_noscala = OsgiProject("ccl.northwestern.edu.netlogo4.noscala", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("!scala.*", "*")) settings
@@ -158,9 +160,9 @@ object Libraries extends Defaults(Apache) {
   lazy val netlogo5_noscala = OsgiProject("ccl.northwestern.edu.netlogo5.noscala", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("!scala.*", "*")) settings
     (libraryDependencies ++=
-      Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
-        "org.objectweb" % "asm-all" % "3.3.1",
-        "org.picocontainer" % "picocontainer" % "2.13.6"), version := netLogo5Version, autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.9.2", crossPaths := false,
+      Seq("ccl.northwestern.edu" % "netlogo" % "5.0.5",
+        "org.picocontainer" % "picocontainer" % "2.13.6",
+        "org.objectweb" % "asm-all" % "3.3.1"), version := "5.0.5", autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.9.2", crossPaths := false,
         ivyScala ~= { (is: Option[IvyScala]) ⇒ //See netlogo4_noscala
           for (i ← is) yield i.copy(checkExplicit = false)
         })
@@ -176,10 +178,10 @@ object Libraries extends Defaults(Apache) {
   lazy val netlogo5 = OsgiProject("ccl.northwestern.edu.netlogo5", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("*")) settings
     (libraryDependencies ++=
-      Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
-        "org.objectweb" % "asm-all" % "3.3.1",
+      Seq("ccl.northwestern.edu" % "netlogo" % "5.0.5",
         "org.scala-lang" % "scala-library" % "2.9.2",
-        "org.picocontainer" % "picocontainer" % "2.13.6"), version := netLogo5Version, scalaVersion := "2.9.2", bundleType := Set("plugin"))
+        "org.objectweb" % "asm-all" % "3.3.1",
+        "org.picocontainer" % "picocontainer" % "2.13.6"), version := "5.0.5", scalaVersion := "2.9.2", bundleType := Set("plugin"))
 
   lazy val guava = OsgiProject("com.google.guava",
     exports = Seq("com.google.common.*"), privatePackages = Seq("!scala.*", "*")) settings (libraryDependencies ++=
@@ -202,17 +204,11 @@ object Libraries extends Defaults(Apache) {
   lazy val autowire = OsgiProject("autowire", exports = Seq("autowire.*")) settings (
     libraryDependencies += "com.lihaoyi" %% "autowire" % "0.1.2", version := "0.1.2")
 
-  lazy val mgo = OsgiProject("fr.iscpif.mgo", imports = Seq("*")) settings (
-    libraryDependencies += "fr.iscpif" %% "mgo" % "1.78-SNAPSHOT",
+  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (
+    libraryDependencies += "fr.iscpif" %% "mgo" % "1.76",
     bundleType := Set("plugin"),
-    version := "1.78-SNAPSHOT"
-  )
-
-  lazy val scalabc = OsgiProject("fr.iscpif.scalabc", privatePackages = Seq("!scala.*", "!junit.*", "*")) settings (
-    libraryDependencies += "fr.iscpif" %% "abc" % "0.4-SNAPSHOT",
-    bundleType := Set("plugin"),
-    version := "0.4-SNAPSHOT"
-  )
+    version := "1.76"
+  ) dependsOn (monocle)
 
   val monocleVersion = "0.5.0"
 
@@ -222,7 +218,7 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "com.github.julien-truffaut" %% "monocle-macro" % monocleVersion,
     bundleType := Set("plugin"),
     version := monocleVersion
-  ) dependsOn (scalaz)
+  )
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (
     libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0",
@@ -245,6 +241,9 @@ object Libraries extends Defaults(Apache) {
     version := "0.3.15",
     exportPackage := Seq("scalaj.http.*")
   )
+
+  lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
+    (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6", version := "7.0.6")
 
   lazy val scopt = OsgiProject("com.github.scopt", exports = Seq("scopt.*")) settings (
     libraryDependencies += "com.github.scopt" %% "scopt" % "3.2.0",
