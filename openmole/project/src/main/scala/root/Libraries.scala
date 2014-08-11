@@ -50,97 +50,43 @@ object Libraries extends Defaults(Apache) {
 
   lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }
 
-  lazy val jetty = "org.openmole" %% "org.eclipse.jetty" % "8.1.8.v20121106" /*OsgiProject(
-    "org.eclipse.jetty",
-    exports = Seq("org.eclipse.jetty.*", "javax.*")) settings (
-      libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106", "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016")
-    )*/
+  lazy val jetty = "org.openmole" %% "org.eclipse.jetty" % "8.1.8.v20121106"
 
   lazy val scalatraVersion = "2.3.0"
 
-  lazy val scalatra = "org.openmole" %% "org.scalatra" % scalatraVersion /*OsgiProject("org.scalatra",
-    buddyPolicy = Some("global"),
-    exports = Seq("org.scalatra.*, org.fusesource.*"),
-    privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.json4s", "*")) settings
-    (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % scalatraVersion,
-      "org.scalatra" %% "scalatra-scalate" % scalatraVersion,
-      "org.scalatra" %% "scalatra-json" % scalatraVersion), version := scalatraVersion) dependsOn (slf4j)*/
+  lazy val scalatra = "org.openmole" %% "org.scalatra" % scalatraVersion
 
-  lazy val jacksonJson = OsgiProject("org.json4s") settings (
-    libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.9",
-    exportPackage += "com.fasterxml.*",
-    version := "3.2.9"
-  )
+  lazy val jacksonJson = "org.openmole" %% "org.json4s" % "3.2.9"
 
-  lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl")) settings
-    (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9")
+  lazy val logback = "org.openmole" %% "ch.qos.logback" % "1.0.9"
 
-  lazy val h2 = OsgiProject("org.h2", buddyPolicy = Some("global"), privatePackages = Seq("META-INF.*")) settings
-    (libraryDependencies += "com.h2database" % "h2" % "1.4.181", version := "1.4.181")
+  lazy val h2 = "org.openmole" %% "org.h2" % h2Version
 
-  lazy val bonecp = OsgiProject("com.jolbox.bonecp", buddyPolicy = Some("global")) settings
-    (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1", version := "0.8.0-rc1")
+  lazy val bonecp = "org.openmole" %% "com.jolbox.bonecp" % "0.8.0-rc1"
 
-  lazy val slick = OsgiProject("com.typesafe.slick", exports = Seq("scala.slick.*")) settings
-    (libraryDependencies += "com.typesafe.slick" %% "slick" % "2.1.0", version := "2.1.0"))
+  lazy val slick = "org.openmole" %% "com.typesafe.slick" % slickVersion
 
-  lazy val slf4j = OsgiProject("org.slf4j") settings (
-    libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2",
-    version := "1.7.2"
-  )
+  lazy val slf4j = "org.openmole" %% "org.slf4j" % "1.7.2"
 
-  lazy val xstream = OsgiProject(
-    "com.thoughtworks.xstream",
-    buddyPolicy = Some("global"),
-    privatePackages = Seq("!scala.*", "*")) settings (
-      libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.7", "net.sf.kxml" % "kxml2" % "2.3.0"),
-      version := "1.4.7",
-      bundleType += "dbserver")
+  lazy val xstream = "org.openmole" %% "com.thoughtworks.xstream" % "1.4.7"
 
-  lazy val groovy = OsgiProject(
-    "org.codehaus.groovy",
-    buddyPolicy = Some("global"),
-    exports = Seq("groovy.*", "org.codehaus.*"),
-    privatePackages = Seq("!scala.*,*")) settings (
-      libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.3.3", "org.fusesource.jansi" % "jansi" % "1.2.1"),
-      version := "2.3.3"
-    )
+  lazy val groovy = "org.openmole" %% "org.codehaus.groovy" % "2.3.3"
 
-  lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
-    privatePackages = Seq("*"), buddyPolicy = Some("global")
-  ) settings
-    (libraryDependencies <++= (scalaVersion) { sV ⇒
-      Seq("org.scala-lang" % "scala-library" % sV,
-        "org.scala-lang" % "scala-reflect" % sV,
-        "jline" % "jline" % "2.11",
-        "com.typesafe.akka" %% "akka-actor" % "2.3.3",
-        "com.typesafe.akka" %% "akka-transactor" % "2.3.3",
-        "com.typesafe" % "config" % "1.2.1",
-        "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3",
-        "org.scala-lang" % "scala-compiler" % sV
-      )
-    }, bundleType += "dbserver", version := "2.11.1")
+  lazy val scalaLang = "org.openmole" %% "org.scala-lang.scala-library" % "2.11.1"
 
   //  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.tools.*", "scala.reflect.macros.*"),
   //    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
 
   lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
-    (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6", version := "7.0.6")
+    (libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion, version := scalazVersion)
 
-  lazy val jodaTime = OsgiProject("org.joda.time") settings (
-    libraryDependencies += "joda-time" % "joda-time" % "1.6",
-    version := "1.6"
-  )
+  lazy val jodaTime = "org.openmole" %% "org.joda.time" % "1.6"
 
-  lazy val jasypt = OsgiProject("org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings (
-    libraryDependencies += "org.jasypt" % "jasypt" % "1.8",
-    version := "1.8"
-  )
+  lazy val gnuCrypto = "org.openmole" %% "org.gnu.crypto" % "2.0.1"
 
-  lazy val robustIt = OsgiProject("uk.com.robustit.cloning", exports = Seq("com.rits.*"), privatePackages = Seq("org.objenesis.*")) settings (
-    libraryDependencies += "uk.com.robust-it" % "cloning" % "1.7.4",
-    libraryDependencies += "org.objenesis" % "objenesis" % "1.2",
-    version := "1.7.4")
+  lazy val jasypt = "org.openmole" %% "org.jasypt.encryption" % "1.8"
+
+  lazy val robustIt = "org.openmole" %% "uk.com.robustit.cloning" % "1.7.4"
 
   lazy val netLogo5Version = "5.1.0"
 
