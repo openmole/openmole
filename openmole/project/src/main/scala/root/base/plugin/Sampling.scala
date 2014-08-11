@@ -9,7 +9,9 @@ object Sampling extends PluginDefaults {
 
   lazy val combine = OsgiProject("combine") dependsOn (provided(Misc.exception), provided(Domain.modifier), provided(Core.implementation), provided(Tool.groovy))
 
-  lazy val csv = OsgiProject("csv") dependsOn (provided(Misc.exception), provided(Core.implementation), opencsv % "provided")
+  lazy val csv = OsgiProject("csv") dependsOn (provided(Misc.exception), provided(Core.implementation)) settings(
+    libraryDependencies += opencsv % "provided"
+    )
 
   lazy val hypothesis = OsgiProject("hypothesis") dependsOn (provided(Misc.exception), provided(Core.implementation))
 
