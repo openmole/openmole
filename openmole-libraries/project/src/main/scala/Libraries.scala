@@ -50,21 +50,22 @@ object Libraries extends Defaults(Apache) {
 
   lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }
 
-  lazy val jetty = "org.openmole" %% "org.eclipse.jetty" % "8.1.8.v20121106" /*OsgiProject(
+  lazy val jetty = OsgiProject(
     "org.eclipse.jetty",
     exports = Seq("org.eclipse.jetty.*", "javax.*")) settings (
-      libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106", "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016")
-    )*/
+      libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106", "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016"),
+      version := "8.1.8.v20121106"
+    )
 
   lazy val scalatraVersion = "2.3.0"
 
-  lazy val scalatra = "org.openmole" %% "org.scalatra" % scalatraVersion /*OsgiProject("org.scalatra",
+  lazy val scalatra = OsgiProject("org.scalatra",
     buddyPolicy = Some("global"),
     exports = Seq("org.scalatra.*, org.fusesource.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.json4s", "*")) settings
     (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % scalatraVersion,
       "org.scalatra" %% "scalatra-scalate" % scalatraVersion,
-      "org.scalatra" %% "scalatra-json" % scalatraVersion), version := scalatraVersion) dependsOn (slf4j)*/
+      "org.scalatra" %% "scalatra-json" % scalatraVersion), version := scalatraVersion) dependsOn (slf4j)
 
   lazy val jacksonJson = OsgiProject("org.json4s") settings (
     libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.9",
