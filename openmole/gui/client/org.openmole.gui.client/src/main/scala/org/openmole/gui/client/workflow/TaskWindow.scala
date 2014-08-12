@@ -22,7 +22,7 @@ import rx.core.Obs
 
 class TaskWindow(val proxy: TaskDataProxy) {
 
-  /*Obs(proxy.dataUI) {
+  Obs(proxy.dataUI) {
     println("the dataUI changed")
-  }*/
+  }
 }

@@ -22,11 +22,11 @@ import rx._
  */
 object TaskDataProxyUI {
 
-  def apply(d: TaskDataUI /*with ImageView*/ ,
+  def apply(d: Var[TaskDataUI] /*with ImageView*/ ,
             g: Boolean = false) = new TaskDataProxy(d, g)
 }
 
-class TaskDataProxy(var dataUI: TaskDataUI /*with ImageView*/ ,
+class TaskDataProxy(val dataUI: Var[TaskDataUI] /*with ImageView*/ ,
                     val generated: Boolean,
                     override val id: ID.Type = ID.newId) extends DataProxy /*with IOFacade*/ {
   type DATAUI = TaskDataUI /*with ImageView*/

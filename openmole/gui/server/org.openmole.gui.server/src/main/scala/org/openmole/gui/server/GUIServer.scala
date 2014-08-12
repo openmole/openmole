@@ -20,6 +20,7 @@ import java.util.UUID
 
 import org.scalatra._
 import scala.concurrent.ExecutionContext.Implicits.global
+import upickle._
 import autowire._
 import org.openmole.gui.shared._
 import scala.concurrent.duration._
@@ -39,7 +40,7 @@ class GUIServer extends ServertestStack {
   }
 
   post(s"/$basePath/*") {
-    Await.result(autowire.Macros.route[Web](Server)(
+    Await.result(autowire.Macros.route[Api](Server)(
       autowire.Request(Seq(basePath) ++ multiParams("splat").head.split("/"),
         upickle.read[Map[String, String]](request.body))
     ), Duration.Inf)
