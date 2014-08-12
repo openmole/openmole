@@ -198,7 +198,7 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "com.scalarx" %%% "scalarx" % "0.2.6", version := "0.2.6")
 
   lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*")) settings (
-    libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.1.7", version := "0.1.7")
+    libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.2.1", version := "0.2.1")
 
   lazy val scalajsDom = OsgiProject("org.scala-lang.modules.scalajs", exports = Seq("org.scalajs.dom.*")) settings (
     libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6", version := "0.6")
