@@ -2,6 +2,7 @@ package root.gui.plugin
 
 import root.base
 import sbt._
+import Keys._
 import root.gui._
 import root.Libraries._
 
@@ -13,7 +14,7 @@ object Sampling extends PluginDefaults {
 
   lazy val modifier = OsgiProject("modifier") dependsOn (Ext.dataui, base.plugin.Sampling.combine, base.Core.model, base.Misc.replication % "test")
 
-  lazy val csv = OsgiProject("csv") dependsOn (opencsv, Ext.dataui, base.plugin.Sampling.csv, base.Misc.exception, base.Misc.replication % "test")
+  lazy val csv = OsgiProject("csv") dependsOn (Ext.dataui, base.plugin.Sampling.csv, base.Misc.exception, base.Misc.replication % "test") settings (libraryDependencies += opencsv)
 
   lazy val lhs = OsgiProject("lhs") dependsOn (base.plugin.Sampling.lhs, Ext.dataui, base.plugin.Domain.range, Domain.range, base.Misc.replication % "test")
 

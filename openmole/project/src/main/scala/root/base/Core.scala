@@ -17,29 +17,23 @@ object Core extends BaseDefaults {
 
   lazy val model = OsgiProject("model", openmoleScope = Some("provided")) dependsOn
     (eventDispatcher, exception, Misc.tools, updater, Misc.workspace) settings (
-    libraryDependencies ++= Seq(scalaz)
+      libraryDependencies ++= Seq(scalaz)
     )
 
-  lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided")) settings
-    (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (model, workspace, pluginManager, hashService, fileService, Misc.tools) settings (
-    libraryDependencies ++= Seq(xstream, iceTar)
-    )
+  lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided")) dependsOn
+    (model, workspace, pluginManager, hashService, fileService, Misc.tools, iceTar) settings (includeOsgiProv, libraryDependencies += xstream)
 
-  lazy val implementation = OsgiProject("implementation", openmoleScope = Some("provided")) settings
-    (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
+  lazy val implementation = OsgiProject("implementation", openmoleScope = Some("provided")) dependsOn
     (model, workspace, exception, eventDispatcher,
       provided(serializer), pluginManager, Misc.hashService % "test", Misc.replication % "test") settings
-    (libraryDependencies ++= Seq(scalaLang, Apache.math, groovy))//TODO: THINGS REALLY DEPEND ON THESE LIBS. Deal with it
+      (includeOsgiProv, libraryDependencies ++= Seq(scalaLang, Apache.math, groovy)) //TODO: THINGS REALLY DEPEND ON THESE LIBS. Deal with it
 
   lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (implementation,
     workspace, Misc.tools, eventDispatcher, replication, updater, Misc.exception,
-    serializer, fileService, hashService, pluginManager) settings
-    (libraryDependencies ++= Seq(gridscale,h2, slick, jasypt, iceTar, guava, Apache.config))
+    serializer, fileService, hashService, pluginManager, iceTar) settings
+    (includeOsgiProv, libraryDependencies ++= Seq(gridscale, h2, slick, jasypt, guava, Apache.config))
 
-  lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global"))
-  settings (libraryDependencies ++= Seq(scalaLang))
-  dependsOn (implementation /*, scalaCompiler*/ , Misc.macros)
-
+  lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global")) settings
+    (libraryDependencies += scalaLang, includeOsgiProv) dependsOn (implementation /*, scalaCompiler*/ , Misc.macros)
 
 }
