@@ -24,7 +24,7 @@ trait DataProxy extends ID {
 
   type DATAUI <: DataUI
 
-  var dataUI: DATAUI
+  val dataUI: Var[DATAUI]
 
   def generated: Boolean
 

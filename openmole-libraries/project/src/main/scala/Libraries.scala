@@ -202,7 +202,7 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6", version := "0.6")
 
   lazy val autowire = OsgiProject("autowire", exports = Seq("autowire.*")) settings (
-    libraryDependencies += "com.lihaoyi" %% "autowire" % "0.1.2", version := "0.1.2")
+    libraryDependencies += "com.lihaoyi" %% "autowire" % "0.1.4", version := "0.1.4")
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (
     libraryDependencies += "fr.iscpif" %% "mgo" % "1.76",

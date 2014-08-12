@@ -16,18 +16,22 @@
  */
 package org.openmole.gui.client.workflow
 
+import rx.core.Var
+
 import scala.scalajs.js
 import js.Dynamic.{ literal ⇒ lit }
+import rx._
 
-object FlowChart {
+class FlowChart {
 
   def apply[T](settings: WorkflowSettings,
                tasks: Seq[TaskWindow],
                connections: Seq[(TaskWindow, TaskWindow)]) = {
 
     val jsplumb = js.Dynamic.global.jsPlumb
+    val tasks: Var[Seq[TaskWindow]] = Var(Seq())
 
-    jsplumb.ready { () ⇒
+    val plumbInstance = jsplumb.ready { () ⇒
 
       val plumbInstance = jsplumb.getInstance(
         settings.defaults
@@ -40,22 +44,9 @@ object FlowChart {
         })
       }
 
-      def addEndpoints(toId: String, sourceAnchors: Seq[String], targetAnchors: Seq[String]) = {
-        sourceAnchors.foreach { sanch ⇒
-          val sourceUUID = toId + sanch
-          plumbInstance.addEndpoint("flowchart" + toId, settings.sourcePoint, lit(anchor = sanch, uuid = sourceUUID))
-        }
-
-        targetAnchors.foreach { tanch ⇒
-          val targetUUID = toId + tanch
-          plumbInstance.addEndpoint("flowchart" + toId, settings.targetPoint, lit(anchor = tanch, uuid = targetUUID))
-
-        }
-      }
-
       plumbInstance.doWhileSuspended(() ⇒ {
-        tasks.foreach { task ⇒
-          addEndpoints(task.proxy.id, js.Array("RightMiddle"), js.Array("LeftMiddle"))
+        tasks().foreach { task ⇒
+          //addEndpoints(task.proxy.id, js.Array("RightMiddle"), js.Array("LeftMiddle"))
         }
 
         plumbInstance.bind("connection", (conInfo: js.Dynamic, _: js.Dynamic) ⇒ {
@@ -76,6 +67,24 @@ object FlowChart {
 
       jsplumb.fire("workfow loaded", plumbInstance)
     }
+    /*
+    def +(tw: TaskWindow) = tasks() = {
+      addEndpoints(tw.proxy.id, js.Array("RightMiddle"), js.Array("LeftMiddle"))
+      tasks() :+ tw
+    }
+
+    def addEndpoints(toId: String, sourceAnchors: Seq[String], targetAnchors: Seq[String]) = {
+      sourceAnchors.foreach { sanch ⇒
+        val sourceUUID = toId + sanch
+        plumbInstance.addEndpoint("flowchart" + toId, settings.sourcePoint, lit(anchor = sanch, uuid = sourceUUID))
+      }
+
+      targetAnchors.foreach { tanch ⇒
+        val targetUUID = toId + tanch
+        plumbInstance.addEndpoint("flowchart" + toId, settings.targetPoint, lit(anchor = tanch, uuid = targetUUID))
+
+      }
+    }*/
 
   }
 }
