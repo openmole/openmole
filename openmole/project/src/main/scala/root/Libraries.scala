@@ -101,7 +101,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scalaRx = "org.openmole" %% "com-scalarx" % "0.2.6"
 
-  lazy val upickle = "org.openmole" %% "upickle" % "0.1.7"
+  lazy val upickle = "org.openmole" %% "upickle" % "0.2.1"
 
   lazy val scalajsDom = "org.openmole" %% "org-scala-lang-modules-scalajs" % "0.6"
 
