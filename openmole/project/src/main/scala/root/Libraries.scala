@@ -52,90 +52,72 @@ object Libraries extends Defaults(Apache) {
 
   lazy val includeOsgiProv = libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % osgiVersion.value % "provided"
 
-  lazy val jetty = "org.openmole" %% "org.eclipse.jetty" % "8.1.8.v20121106"
+  lazy val jetty = "org.openmole" %% "org-eclipse-jetty" % "8.1.8.v20121106"
 
   lazy val scalatraVersion = "2.3.0"
 
-  lazy val scalatra = "org.openmole" %% "org.scalatra" % scalatraVersion
+  lazy val scalatra = "org.openmole" %% "org-scalatra" % scalatraVersion
 
-  lazy val jacksonJson = "org.openmole" %% "org.json4s" % "3.2.9"
+  lazy val jacksonJson = "org.openmole" %% "org-json4s" % "3.2.9"
 
-  lazy val logback = "org.openmole" %% "ch.qos.logback" % "1.0.9"
+  lazy val logback = "org.openmole" %% "ch-qos-logback" % "1.0.9"
 
-  lazy val h2 = "org.openmole" %% "org.h2" % h2Version
+  lazy val h2 = "org.openmole" %% "org-h2" % h2Version
 
-  lazy val bonecp = "org.openmole" %% "com.jolbox.bonecp" % "0.8.0-rc1"
+  lazy val bonecp = "org.openmole" %% "com-jolbox-bonecp" % "0.8.0-rc1"
 
-  lazy val slick = "org.openmole" %% "com.typesafe.slick" % slickVersion
+  lazy val slick = "org.openmole" %% "com-typesafe-slick" % slickVersion
 
-  lazy val slf4j = "org.openmole" %% "org.slf4j" % "1.7.2"
+  lazy val slf4j = "org.openmole" %% "org-slf4j" % "1.7.2"
 
-  lazy val xstream = "org.openmole" %% "com.thoughtworks.xstream" % "1.4.7"
+  lazy val xstream = "org.openmole" %% "com-thoughtworks-xstream" % "1.4.7"
 
-  lazy val groovy = "org.openmole" %% "org.codehaus.groovy" % "2.3.3"
+  lazy val groovy = "org.openmole" %% "org-codehaus-groovy" % "2.3.3"
 
-  lazy val scalaLang = "org.openmole" %% "org.scala-lang.scala-library" % "2.11.1"
+  lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.1"
 
   //  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.tools.*", "scala.reflect.macros.*"),
   //    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
 
-  lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
-    (libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion, version := scalazVersion)
+  lazy val jodaTime = "org.openmole" %% "org-joda-time" % "1.6"
 
-  lazy val jodaTime = "org.openmole" %% "org.joda.time" % "1.6"
+  lazy val jasypt = "org.openmole" %% "org-jasypt-encryption" % "1.8"
 
-  lazy val gnuCrypto = "org.openmole" %% "org.gnu.crypto" % "2.0.1"
+  lazy val robustIt = "org.openmole" %% "uk-com-robustit-cloning" % "1.7.4"
 
-  lazy val jasypt = "org.openmole" %% "org.jasypt.encryption" % "1.8"
+  lazy val netlogo4_noscala = "org.openmole" % "ccl-northwestern-edu-netlogo4-noscala" % "4.1.3"
 
-  lazy val robustIt = "org.openmole" %% "uk.com.robustit.cloning" % "1.7.4"
+  lazy val netlogo4 = "org.openmole" %% "ccl-northwestern-edu-netlogo4" % "4.1.3"
 
+  lazy val netlogo5 = "org.openmole" %% "ccl-northwestern-edu-netlogo5" % netLogo5Version
 
-  val monocleVersion = "0.5.0"
+  lazy val guava = "org.openmole" %% "com-google-guava" % "16.0.1"
 
-  lazy val monocle = OsgiProject("monocle") settings (
-    libraryDependencies += "com.github.julien-truffaut" %% "monocle-core" % monocleVersion,
-    libraryDependencies += "com.github.julien-truffaut" %% "monocle-generic" % monocleVersion,
-    libraryDependencies += "com.github.julien-truffaut" %% "monocle-macro" % monocleVersion,
-    bundleType := Set("plugin"),
-    version := monocleVersion
-  ) dependsOn (scalaz)
+  lazy val scalaTags = "org.openmole" %% "com-scalatags" % "0.4.0"
 
-  lazy val netlogo4_noscala = "org.openmole" %% "ccl.northwestern.edu.netlogo4.noscala" % "4.1.3"
-
-  lazy val netlogo5_noscala = "org.openmole" %% "ccl.northwestern.edu.netlogo5.noscala" % netLogo5Version
-
-  lazy val netlogo4 = "org.openmole" %% "ccl.northwestern.edu.netlogo4" % "4.1.3"
-
-  lazy val netlogo5 = "org.openmole" %% "ccl.northwestern.edu.netlogo5" % netLogo5Version
-
-  lazy val guava = "org.openmole" %% "com.google.guava" % "16.0.1"
-
-  lazy val scalaTags = "org.openmole" %% "com.scalatags" % "0.4.0"
-
-  lazy val scalaRx = "org.openmole" %% "com.scalarx" % "0.2.6"
+  lazy val scalaRx = "org.openmole" %% "com-scalarx" % "0.2.6"
 
   lazy val upickle = "org.openmole" %% "upickle" % "0.1.7"
 
-  lazy val scalajsDom = "org.openmole" %% "org.scalajs.dom" % "0.6"
+  lazy val scalajsDom = "org.openmole" %% "org-scala-lang-modules-scalajs" % "0.6"
 
   lazy val autowire = "org.openmole" %% "autowire" % "0.1.2"
 
-  lazy val mgo = "org.openmole" %% "fr.iscpif.mgo" % mgoVersion
+  lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % mgoVersion
 
   lazy val monocle = "org.openmole" %% "monocle" % "0.5.0"
 
-  lazy val opencsv = "org.openmole" %% "au.com.bytecode.opencsv" % "2.0"
+  lazy val opencsv = "org.openmole" %% "au-com-bytecode-opencsv" % "2.0"
 
-  lazy val jline = "org.openmole" %% "net.sourceforge.jline" % "0.9.94"
+  lazy val jline = "org.openmole" %% "net-sourceforge-jline" % "0.9.94"
 
-  lazy val arm = "org.openmole" %% "com.jsuereth.scala-arme" % "1.4"
+  lazy val arm = "org.openmole" %% "com-jsuereth-scala-arm" % "1.4"
 
-  lazy val scalajHttp = "org.openmole" %% "org.scalaj.scalaj-http" % "0.3.15"
+  lazy val scalajHttp = "org.openmole" %% "org-scalaj-scalaj-http" % "0.3.15"
 
-  lazy val scalaz = "org.openmole" %% "org.scalaz" % "7.0.6"
+  lazy val scalaz = "org.openmole" %% "org-scalaz" % scalazVersion
 
-  lazy val scopt = "org.openmole" %% "org.scalaz" % "3.2.0"
+  lazy val scopt = "org.openmole" %% "com-github-scopt" % "3.2.0"
 
   lazy val scalabc = "org.openmole" %% "scalabc" % scalabcVersion
 

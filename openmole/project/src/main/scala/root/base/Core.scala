@@ -19,11 +19,11 @@ object Core extends BaseDefaults {
     (eventDispatcher, exception, Misc.tools, updater, Misc.workspace)
 
   lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided")) settings
-    (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
+    (includeOsgiProv) dependsOn
     (model, workspace, xstream, pluginManager, fileService, Misc.tools, iceTar)
 
   lazy val implementation = OsgiProject("implementation", openmoleScope = Some("provided"), imports = Seq("*")) settings
-    (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
+    (includeOsgiProv) dependsOn
     (model, workspace, exception, eventDispatcher,
       provided(serializer), pluginManager, scalaLang, Apache.math, groovy, Misc.replication % "test") //TODO: THINGS REALLY DEPEND ON THESE LIBS. Deal with it
 
@@ -32,5 +32,7 @@ object Core extends BaseDefaults {
     serializer, jasypt, fileService, pluginManager, iceTar,
     guava, Apache.config) settings (libraryDependencies += gridscale)
 
+  lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global")) settings
+    (libraryDependencies += scalaLang, includeOsgiProv) dependsOn (implementation /*, scalaCompiler*/ , Misc.macros)
 
 }

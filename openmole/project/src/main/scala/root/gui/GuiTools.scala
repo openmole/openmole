@@ -1,7 +1,8 @@
 package root.gui
 
 import sbt._
-import root.{GuiDefaults, base}
+import Keys._
+import root.{ GuiDefaults, base }
 import root.Libraries._
 import root.ThirdParties._
 
@@ -10,6 +11,6 @@ object Tools extends GuiDefaults {
 
   lazy val tools = OsgiProject("org.openmole.gui.tools") dependsOn
     (provided(base.Misc.workspace)) settings (
-    libraryDependencies ++= Seq(autowire, scalaTags, scalaRx, scalajsDom)
+      libraryDependencies ++= Seq(autowire, scalaTags, scalaRx, scalajsDom)
     )
 }

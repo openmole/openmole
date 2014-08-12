@@ -137,12 +137,6 @@ object Libraries extends Defaults(Apache) {
     version := "1.6"
     )
 
-  lazy val gnuCrypto = OsgiProject("org.gnu.crypto") settings(
-    libraryDependencies += "org.gnu.crypto" % "gnu-crypto" % "2.0.1",
-    exportPackage += "gnu.crypto.*",
-    version := "2.0.1"
-    )
-
   lazy val jasypt = OsgiProject("org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings(
     libraryDependencies += "org.jasypt" % "jasypt" % "1.8",
     version := "1.8"

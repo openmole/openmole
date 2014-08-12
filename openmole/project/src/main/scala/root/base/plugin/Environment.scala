@@ -16,10 +16,8 @@ object Environment extends PluginDefaults {
     Core.batch, Core.serializer, Misc.sftpserver) settings (bundleType += "daemon")
 
   lazy val glite = OsgiProject("glite") dependsOn (Core.model, Misc.exception, Misc.updater, Core.batch,
-    Misc.workspace, provided(Libraries.scalaLang), Misc.fileService, gridscale) settings (
-      libraryDependencies += Libraries.gridscaleGlite,
-      libraryDependencies += Libraries.gridscaleDirac,
-      libraryDependencies += Libraries.gridscaleHTTP)
+    Misc.workspace, Misc.fileService, gridscale) settings (
+      libraryDependencies ++= Seq(Libraries.gridscaleGlite, Libraries.gridscaleDirac, Libraries.gridscaleHTTP, Libraries.scalaLang % "provided"))
 
   lazy val gridscale = OsgiProject("gridscale") dependsOn (Core.model, Misc.workspace, Misc.tools, Core.implementation,
     provided(Core.batch), Misc.exception)

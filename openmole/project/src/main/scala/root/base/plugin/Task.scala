@@ -29,17 +29,17 @@ object Task extends PluginDefaults {
 
   lazy val code = OsgiProject("code") dependsOn (provided(Misc.exception), provided(Core.implementation), external, provided(Misc.workspace))
 
-  lazy val scala = OsgiProject("scala") dependsOn (provided(Misc.exception), provided(Core.model), provided(code), Misc.console) settings(
+  lazy val scala = OsgiProject("scala") dependsOn (provided(Misc.exception), provided(Core.model), provided(code), Misc.console) settings (
     libraryDependencies ++= Seq(scalaLang % "provided")
-    )
+  )
 
   lazy val groovy = OsgiProject("groovy") dependsOn (provided(Misc.exception), provided(Core.model), Tool.groovy, code, Misc.replication % "test")
 
   lazy val template = OsgiProject("template") dependsOn (provided(Misc.exception), provided(Core.implementation), provided(Misc.workspace), Misc.replication % "test")
 
   lazy val systemexec = OsgiProject("systemexec") dependsOn (provided(Misc.exception), provided(Core.implementation), external,
-    provided(Misc.workspace)) settings(
-    libraryDependencies ++= Seq(Apache.exec % "provided")
+    provided(Misc.workspace)) settings (
+      libraryDependencies ++= Seq(Apache.exec % "provided")
     )
 
   lazy val statistics = OsgiProject("statistics") dependsOn (provided(Core.implementation))
