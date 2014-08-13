@@ -1373,59 +1373,7 @@ ScalaJS.i.s_Proxy$class__toString__s_Proxy__T = (function($$this) {
 ScalaJS.i.s_Proxy$class__$init$__s_Proxy__V = (function($$this) {
   /*<skip>*/
 });
-ScalaJS.i.s_concurrent_ExecutionContext$class__prepare__s_concurrent_ExecutionContext__s_concurrent_ExecutionContext = (function($$this) {
-  return $$this
-});
 ScalaJS.i.s_concurrent_ExecutionContext$class__$init$__s_concurrent_ExecutionContext__V = (function($$this) {
-  /*<skip>*/
-});
-ScalaJS.i.s_concurrent_Future$class__foreach__s_concurrent_Future__F1__s_concurrent_ExecutionContext__V = (function($$this, f, executor) {
-  $$this.onComplete__F1__s_concurrent_ExecutionContext__V(new ScalaJS.c.sjsr_AnonFunction1().init___sjs_js_Function1((function($$this, f) {
-    return (function(x$1$2) {
-      var x$1 = ScalaJS.as.s_util_Try(x$1$2);
-      ScalaJS.i.s_concurrent_Future$class__$anonfun$4__s_concurrent_Future__s_util_Try__F1__V($$this, x$1, f)
-    })
-  })($$this, f)), executor)
-});
-ScalaJS.i.s_concurrent_Future$class__map__s_concurrent_Future__F1__s_concurrent_ExecutionContext__s_concurrent_Future = (function($$this, f, executor) {
-  var p = ScalaJS.m.s_concurrent_Promise().apply__s_concurrent_Promise();
-  $$this.onComplete__F1__s_concurrent_ExecutionContext__V(new ScalaJS.c.sjsr_AnonFunction1().init___sjs_js_Function1((function($$this, p, f) {
-    return (function(v$2) {
-      var v = ScalaJS.as.s_util_Try(v$2);
-      return ScalaJS.i.s_concurrent_Future$class__$anonfun$8__s_concurrent_Future__s_util_Try__s_concurrent_Promise__F1__s_concurrent_Promise($$this, v, p, f)
-    })
-  })($$this, p, f)), executor);
-  return p.future__s_concurrent_Future()
-});
-ScalaJS.i.s_concurrent_Future$class__$anonfun$4__s_concurrent_Future__s_util_Try__F1__V = (function($$this, x$1, f$1) {
-  x$1.foreach__F1__V(f$1)
-});
-ScalaJS.i.s_concurrent_Future$class__$anonfun$8__s_concurrent_Future__s_util_Try__s_concurrent_Promise__F1__s_concurrent_Promise = (function($$this, v, p$3, f$3) {
-  return p$3.complete__s_util_Try__s_concurrent_Promise(v.map__F1__s_util_Try(f$3))
-});
-ScalaJS.i.s_concurrent_Future$class__$init$__s_concurrent_Future__V = (function($$this) {
-  /*<skip>*/
-});
-ScalaJS.i.s_concurrent_Promise$class__complete__s_concurrent_Promise__s_util_Try__s_concurrent_Promise = (function($$this, result) {
-  if ($$this.tryComplete__s_util_Try__Z(result)) {
-    return $$this
-  } else {
-    throw new ScalaJS.c.jl_IllegalStateException().init___T("Promise already completed.")
-  }
-});
-ScalaJS.i.s_concurrent_Promise$class__success__s_concurrent_Promise__O__s_concurrent_Promise = (function($$this, value) {
-  return $$this.complete__s_util_Try__s_concurrent_Promise(new ScalaJS.c.s_util_Success().init___O(value))
-});
-ScalaJS.i.s_concurrent_Promise$class__failure__s_concurrent_Promise__jl_Throwable__s_concurrent_Promise = (function($$this, cause) {
-  return $$this.complete__s_util_Try__s_concurrent_Promise(new ScalaJS.c.s_util_Failure().init___jl_Throwable(cause))
-});
-ScalaJS.i.s_concurrent_Promise$class__$init$__s_concurrent_Promise__V = (function($$this) {
-  /*<skip>*/
-});
-ScalaJS.i.s_concurrent_impl_Promise$class__future__s_concurrent_impl_Promise__s_concurrent_impl_Promise = (function($$this) {
-  return $$this
-});
-ScalaJS.i.s_concurrent_impl_Promise$class__$init$__s_concurrent_impl_Promise__V = (function($$this) {
   /*<skip>*/
 });
 ScalaJS.i.s_io_AnsiColor$class__$init$__s_io_AnsiColor__V = (function($$this) {
@@ -3771,75 +3719,6 @@ ScalaJS.m.Lorg_openmole_gui_client_Client = (function() {
 ScalaJS.e["Client"] = ScalaJS.m.Lorg_openmole_gui_client_Client;
 /** @constructor (dummy parent) */
 ScalaJS.h.Lorg_openmole_gui_tools_js_JsRxTags$ = function() {};
-/** @constructor */
-ScalaJS.c.Lorg_scalajs_dom_extensions_Ajax$ = (function() {
-  ScalaJS.c.O.call(this)
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_Ajax$.prototype = new ScalaJS.h.O();
-ScalaJS.c.Lorg_scalajs_dom_extensions_Ajax$.prototype.constructor = ScalaJS.c.Lorg_scalajs_dom_extensions_Ajax$;
-/** @constructor */
-ScalaJS.h.Lorg_scalajs_dom_extensions_Ajax$ = (function() {
-  /*<skip>*/
-});
-ScalaJS.h.Lorg_scalajs_dom_extensions_Ajax$.prototype = ScalaJS.c.Lorg_scalajs_dom_extensions_Ajax$.prototype;
-ScalaJS.c.Lorg_scalajs_dom_extensions_Ajax$.prototype.post__T__T__I__sc_Seq__Z__s_concurrent_Future = (function(url, data, timeout, headers, withCredentials) {
-  return this.apply__T__T__T__I__sc_Seq__Z__s_concurrent_Future("POST", url, data, timeout, headers, withCredentials)
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_Ajax$.prototype.post$default$3__I = (function() {
-  return 0
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_Ajax$.prototype.post$default$4__sc_Seq = (function() {
-  return ScalaJS.m.sci_Nil()
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_Ajax$.prototype.post$default$5__Z = (function() {
-  return false
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_Ajax$.prototype.apply__T__T__T__I__sc_Seq__Z__s_concurrent_Future = (function(method, url, data, timeout, headers, withCredentials) {
-  var req = new ScalaJS.g["XMLHttpRequest"]();
-  var promise = ScalaJS.m.s_concurrent_Promise().apply__s_concurrent_Promise();
-  req["onreadystatechange"] = (function(req$1, promise$1) {
-    return (function(e$2) {
-      var e = e$2;
-      return ((ScalaJS.uI(req$1["readyState"]) === 4) ? (((200 <= ScalaJS.uI(req$1["status"])) && (ScalaJS.uI(req$1["status"]) < 300)) ? promise$1.success__O__s_concurrent_Promise(req$1) : promise$1.failure__jl_Throwable__s_concurrent_Promise(new ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException().init___Lorg_scalajs_dom_XMLHttpRequest(req$1))) : (void 0))
-    })
-  })(req, promise);
-  req["open"](method, url);
-  req["withCredentials"] = withCredentials;
-  headers.foreach__F1__V(new ScalaJS.c.sjsr_AnonFunction1().init___sjs_js_Function1((function(req$1) {
-    return (function(x$2) {
-      var x = ScalaJS.as.T2(x$2);
-      req$1["setRequestHeader"](ScalaJS.as.T(x.$$und1__O()), ScalaJS.as.T(x.$$und2__O()))
-    })
-  })(req)));
-  req["send"](data);
-  return promise.future__s_concurrent_Future()
-});
-ScalaJS.is.Lorg_scalajs_dom_extensions_Ajax$ = (function(obj) {
-  return (!(!((obj && obj.$classData) && obj.$classData.ancestors.Lorg_scalajs_dom_extensions_Ajax$)))
-});
-ScalaJS.as.Lorg_scalajs_dom_extensions_Ajax$ = (function(obj) {
-  return ((ScalaJS.is.Lorg_scalajs_dom_extensions_Ajax$(obj) || (obj === null)) ? obj : ScalaJS.throwClassCastException(obj, "org.scalajs.dom.extensions.Ajax$"))
-});
-ScalaJS.isArrayOf.Lorg_scalajs_dom_extensions_Ajax$ = (function(obj, depth) {
-  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.Lorg_scalajs_dom_extensions_Ajax$)))
-});
-ScalaJS.asArrayOf.Lorg_scalajs_dom_extensions_Ajax$ = (function(obj, depth) {
-  return ((ScalaJS.isArrayOf.Lorg_scalajs_dom_extensions_Ajax$(obj, depth) || (obj === null)) ? obj : ScalaJS.throwArrayCastException(obj, "Lorg.scalajs.dom.extensions.Ajax$;", depth))
-});
-ScalaJS.d.Lorg_scalajs_dom_extensions_Ajax$ = new ScalaJS.ClassTypeData({
-  Lorg_scalajs_dom_extensions_Ajax$: 0
-}, false, "org.scalajs.dom.extensions.Ajax$", ScalaJS.d.O, {
-  Lorg_scalajs_dom_extensions_Ajax$: 1,
-  O: 1
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_Ajax$.prototype.$classData = ScalaJS.d.Lorg_scalajs_dom_extensions_Ajax$;
-ScalaJS.n.Lorg_scalajs_dom_extensions_Ajax = (void 0);
-ScalaJS.m.Lorg_scalajs_dom_extensions_Ajax = (function() {
-  if ((!ScalaJS.n.Lorg_scalajs_dom_extensions_Ajax)) {
-    ScalaJS.n.Lorg_scalajs_dom_extensions_Ajax = new ScalaJS.c.Lorg_scalajs_dom_extensions_Ajax$().init___()
-  };
-  return ScalaJS.n.Lorg_scalajs_dom_extensions_Ajax
-});
 /** @constructor */
 ScalaJS.c.Lrx_core_Dynamic = (function() {
   ScalaJS.c.O.call(this);
@@ -10216,258 +10095,6 @@ ScalaJS.m.s_compat_Platform = (function() {
   return ScalaJS.n.s_compat_Platform
 });
 /** @constructor */
-ScalaJS.c.s_concurrent_Promise$ = (function() {
-  ScalaJS.c.O.call(this)
-});
-ScalaJS.c.s_concurrent_Promise$.prototype = new ScalaJS.h.O();
-ScalaJS.c.s_concurrent_Promise$.prototype.constructor = ScalaJS.c.s_concurrent_Promise$;
-/** @constructor */
-ScalaJS.h.s_concurrent_Promise$ = (function() {
-  /*<skip>*/
-});
-ScalaJS.h.s_concurrent_Promise$.prototype = ScalaJS.c.s_concurrent_Promise$.prototype;
-ScalaJS.c.s_concurrent_Promise$.prototype.apply__s_concurrent_Promise = (function() {
-  return new ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise().init___()
-});
-ScalaJS.is.s_concurrent_Promise$ = (function(obj) {
-  return (!(!((obj && obj.$classData) && obj.$classData.ancestors.s_concurrent_Promise$)))
-});
-ScalaJS.as.s_concurrent_Promise$ = (function(obj) {
-  return ((ScalaJS.is.s_concurrent_Promise$(obj) || (obj === null)) ? obj : ScalaJS.throwClassCastException(obj, "scala.concurrent.Promise$"))
-});
-ScalaJS.isArrayOf.s_concurrent_Promise$ = (function(obj, depth) {
-  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.s_concurrent_Promise$)))
-});
-ScalaJS.asArrayOf.s_concurrent_Promise$ = (function(obj, depth) {
-  return ((ScalaJS.isArrayOf.s_concurrent_Promise$(obj, depth) || (obj === null)) ? obj : ScalaJS.throwArrayCastException(obj, "Lscala.concurrent.Promise$;", depth))
-});
-ScalaJS.d.s_concurrent_Promise$ = new ScalaJS.ClassTypeData({
-  s_concurrent_Promise$: 0
-}, false, "scala.concurrent.Promise$", ScalaJS.d.O, {
-  s_concurrent_Promise$: 1,
-  O: 1
-});
-ScalaJS.c.s_concurrent_Promise$.prototype.$classData = ScalaJS.d.s_concurrent_Promise$;
-ScalaJS.n.s_concurrent_Promise = (void 0);
-ScalaJS.m.s_concurrent_Promise = (function() {
-  if ((!ScalaJS.n.s_concurrent_Promise)) {
-    ScalaJS.n.s_concurrent_Promise = new ScalaJS.c.s_concurrent_Promise$().init___()
-  };
-  return ScalaJS.n.s_concurrent_Promise
-});
-/** @constructor */
-ScalaJS.c.s_concurrent_impl_AbstractPromise = (function() {
-  ScalaJS.c.O.call(this);
-  this.state$1 = null
-});
-ScalaJS.c.s_concurrent_impl_AbstractPromise.prototype = new ScalaJS.h.O();
-ScalaJS.c.s_concurrent_impl_AbstractPromise.prototype.constructor = ScalaJS.c.s_concurrent_impl_AbstractPromise;
-/** @constructor */
-ScalaJS.h.s_concurrent_impl_AbstractPromise = (function() {
-  /*<skip>*/
-});
-ScalaJS.h.s_concurrent_impl_AbstractPromise.prototype = ScalaJS.c.s_concurrent_impl_AbstractPromise.prototype;
-ScalaJS.c.s_concurrent_impl_AbstractPromise.prototype.state__p1__O = (function() {
-  return this.state$1
-});
-ScalaJS.c.s_concurrent_impl_AbstractPromise.prototype.state$und$eq__p1__O__V = (function(x$1) {
-  this.state$1 = x$1
-});
-ScalaJS.c.s_concurrent_impl_AbstractPromise.prototype.updateState__O__O__Z = (function(oldState, newState) {
-  return ((this.state__p1__O() === oldState) ? (this.state$und$eq__p1__O__V(newState), true) : false)
-});
-ScalaJS.c.s_concurrent_impl_AbstractPromise.prototype.getState__O = (function() {
-  return this.state__p1__O()
-});
-ScalaJS.is.s_concurrent_impl_AbstractPromise = (function(obj) {
-  return (!(!((obj && obj.$classData) && obj.$classData.ancestors.s_concurrent_impl_AbstractPromise)))
-});
-ScalaJS.as.s_concurrent_impl_AbstractPromise = (function(obj) {
-  return ((ScalaJS.is.s_concurrent_impl_AbstractPromise(obj) || (obj === null)) ? obj : ScalaJS.throwClassCastException(obj, "scala.concurrent.impl.AbstractPromise"))
-});
-ScalaJS.isArrayOf.s_concurrent_impl_AbstractPromise = (function(obj, depth) {
-  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.s_concurrent_impl_AbstractPromise)))
-});
-ScalaJS.asArrayOf.s_concurrent_impl_AbstractPromise = (function(obj, depth) {
-  return ((ScalaJS.isArrayOf.s_concurrent_impl_AbstractPromise(obj, depth) || (obj === null)) ? obj : ScalaJS.throwArrayCastException(obj, "Lscala.concurrent.impl.AbstractPromise;", depth))
-});
-ScalaJS.d.s_concurrent_impl_AbstractPromise = new ScalaJS.ClassTypeData({
-  s_concurrent_impl_AbstractPromise: 0
-}, false, "scala.concurrent.impl.AbstractPromise", ScalaJS.d.O, {
-  s_concurrent_impl_AbstractPromise: 1,
-  O: 1
-});
-ScalaJS.c.s_concurrent_impl_AbstractPromise.prototype.$classData = ScalaJS.d.s_concurrent_impl_AbstractPromise;
-/** @constructor */
-ScalaJS.c.s_concurrent_impl_CallbackRunnable = (function() {
-  ScalaJS.c.O.call(this);
-  this.executor$1 = null;
-  this.onComplete$1 = null;
-  this.value$1 = null
-});
-ScalaJS.c.s_concurrent_impl_CallbackRunnable.prototype = new ScalaJS.h.O();
-ScalaJS.c.s_concurrent_impl_CallbackRunnable.prototype.constructor = ScalaJS.c.s_concurrent_impl_CallbackRunnable;
-/** @constructor */
-ScalaJS.h.s_concurrent_impl_CallbackRunnable = (function() {
-  /*<skip>*/
-});
-ScalaJS.h.s_concurrent_impl_CallbackRunnable.prototype = ScalaJS.c.s_concurrent_impl_CallbackRunnable.prototype;
-ScalaJS.c.s_concurrent_impl_CallbackRunnable.prototype.executor__s_concurrent_ExecutionContext = (function() {
-  return this.executor$1
-});
-ScalaJS.c.s_concurrent_impl_CallbackRunnable.prototype.onComplete__F1 = (function() {
-  return this.onComplete$1
-});
-ScalaJS.c.s_concurrent_impl_CallbackRunnable.prototype.value__s_util_Try = (function() {
-  return this.value$1
-});
-ScalaJS.c.s_concurrent_impl_CallbackRunnable.prototype.value$und$eq__s_util_Try__V = (function(x$1) {
-  this.value$1 = x$1
-});
-ScalaJS.c.s_concurrent_impl_CallbackRunnable.prototype.run__V = (function() {
-  ScalaJS.m.s_Predef().require__Z__V((this.value__s_util_Try() !== null));
-  try {
-    this.onComplete__F1().apply__O__O(this.value__s_util_Try())
-  } catch (ex) {
-    ex = ScalaJS.wrapJavaScriptException(ex);
-    if (ScalaJS.is.jl_Throwable(ex)) {
-      var ex6 = ex;
-      var x4 = ex6;
-      matchEnd8: {
-        var o11 = ScalaJS.m.s_util_control_NonFatal().unapply__jl_Throwable__s_Option(x4);
-        if ((!o11.isEmpty__Z())) {
-          var e = ScalaJS.as.jl_Throwable(o11.get__O());
-          this.executor__s_concurrent_ExecutionContext().reportFailure__jl_Throwable__V(e);
-          (void 0);
-          break matchEnd8
-        };
-        throw ScalaJS.unwrapJavaScriptException(ex6)
-      }
-    } else {
-      throw ScalaJS.unwrapJavaScriptException(ex)
-    }
-  }
-});
-ScalaJS.c.s_concurrent_impl_CallbackRunnable.prototype.executeWithValue__s_util_Try__V = (function(v) {
-  ScalaJS.m.s_Predef().require__Z__V((this.value__s_util_Try() === null));
-  this.value$und$eq__s_util_Try__V(v);
-  try {
-    this.executor__s_concurrent_ExecutionContext().execute__jl_Runnable__V(this)
-  } catch (ex) {
-    ex = ScalaJS.wrapJavaScriptException(ex);
-    if (ScalaJS.is.jl_Throwable(ex)) {
-      var ex6 = ex;
-      var x4 = ex6;
-      matchEnd8: {
-        var o11 = ScalaJS.m.s_util_control_NonFatal().unapply__jl_Throwable__s_Option(x4);
-        if ((!o11.isEmpty__Z())) {
-          var t = ScalaJS.as.jl_Throwable(o11.get__O());
-          this.executor__s_concurrent_ExecutionContext().reportFailure__jl_Throwable__V(t);
-          (void 0);
-          break matchEnd8
-        };
-        throw ScalaJS.unwrapJavaScriptException(ex6)
-      }
-    } else {
-      throw ScalaJS.unwrapJavaScriptException(ex)
-    }
-  }
-});
-ScalaJS.c.s_concurrent_impl_CallbackRunnable.prototype.init___s_concurrent_ExecutionContext__F1 = (function(executor, onComplete) {
-  this.executor$1 = executor;
-  this.onComplete$1 = onComplete;
-  ScalaJS.c.O.prototype.init___.call(this);
-  this.value$1 = null;
-  return this
-});
-ScalaJS.is.s_concurrent_impl_CallbackRunnable = (function(obj) {
-  return (!(!((obj && obj.$classData) && obj.$classData.ancestors.s_concurrent_impl_CallbackRunnable)))
-});
-ScalaJS.as.s_concurrent_impl_CallbackRunnable = (function(obj) {
-  return ((ScalaJS.is.s_concurrent_impl_CallbackRunnable(obj) || (obj === null)) ? obj : ScalaJS.throwClassCastException(obj, "scala.concurrent.impl.CallbackRunnable"))
-});
-ScalaJS.isArrayOf.s_concurrent_impl_CallbackRunnable = (function(obj, depth) {
-  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.s_concurrent_impl_CallbackRunnable)))
-});
-ScalaJS.asArrayOf.s_concurrent_impl_CallbackRunnable = (function(obj, depth) {
-  return ((ScalaJS.isArrayOf.s_concurrent_impl_CallbackRunnable(obj, depth) || (obj === null)) ? obj : ScalaJS.throwArrayCastException(obj, "Lscala.concurrent.impl.CallbackRunnable;", depth))
-});
-ScalaJS.d.s_concurrent_impl_CallbackRunnable = new ScalaJS.ClassTypeData({
-  s_concurrent_impl_CallbackRunnable: 0
-}, false, "scala.concurrent.impl.CallbackRunnable", ScalaJS.d.O, {
-  s_concurrent_impl_CallbackRunnable: 1,
-  s_concurrent_OnCompleteRunnable: 1,
-  jl_Runnable: 1,
-  O: 1
-});
-ScalaJS.c.s_concurrent_impl_CallbackRunnable.prototype.$classData = ScalaJS.d.s_concurrent_impl_CallbackRunnable;
-/** @constructor */
-ScalaJS.c.s_concurrent_impl_Promise$ = (function() {
-  ScalaJS.c.O.call(this)
-});
-ScalaJS.c.s_concurrent_impl_Promise$.prototype = new ScalaJS.h.O();
-ScalaJS.c.s_concurrent_impl_Promise$.prototype.constructor = ScalaJS.c.s_concurrent_impl_Promise$;
-/** @constructor */
-ScalaJS.h.s_concurrent_impl_Promise$ = (function() {
-  /*<skip>*/
-});
-ScalaJS.h.s_concurrent_impl_Promise$.prototype = ScalaJS.c.s_concurrent_impl_Promise$.prototype;
-ScalaJS.c.s_concurrent_impl_Promise$.prototype.scala$concurrent$impl$Promise$$resolveTry__s_util_Try__s_util_Try = (function(source) {
-  var x1 = source;
-  if (ScalaJS.is.s_util_Failure(x1)) {
-    var x2 = ScalaJS.as.s_util_Failure(x1);
-    var t = x2.exception__jl_Throwable();
-    return this.resolver__p1__jl_Throwable__s_util_Try(t)
-  };
-  return source
-});
-ScalaJS.c.s_concurrent_impl_Promise$.prototype.resolver__p1__jl_Throwable__s_util_Try = (function(throwable) {
-  var x1 = throwable;
-  if (ScalaJS.is.sr_NonLocalReturnControl(x1)) {
-    var x2 = ScalaJS.as.sr_NonLocalReturnControl(x1);
-    return new ScalaJS.c.s_util_Success().init___O(x2.value__O())
-  };
-  if (ScalaJS.is.s_util_control_ControlThrowable(x1)) {
-    var x3 = ScalaJS.as.s_util_control_ControlThrowable(x1);
-    return new ScalaJS.c.s_util_Failure().init___jl_Throwable(new ScalaJS.c.ju_concurrent_ExecutionException().init___T__jl_Throwable("Boxed ControlThrowable", ScalaJS.as.jl_Throwable(x3)))
-  };
-  if (ScalaJS.is.jl_InterruptedException(x1)) {
-    var x4 = ScalaJS.as.jl_InterruptedException(x1);
-    return new ScalaJS.c.s_util_Failure().init___jl_Throwable(new ScalaJS.c.ju_concurrent_ExecutionException().init___T__jl_Throwable("Boxed InterruptedException", x4))
-  };
-  if (ScalaJS.is.jl_Error(x1)) {
-    var x5 = ScalaJS.as.jl_Error(x1);
-    return new ScalaJS.c.s_util_Failure().init___jl_Throwable(new ScalaJS.c.ju_concurrent_ExecutionException().init___T__jl_Throwable("Boxed Error", x5))
-  };
-  return new ScalaJS.c.s_util_Failure().init___jl_Throwable(x1)
-});
-ScalaJS.is.s_concurrent_impl_Promise$ = (function(obj) {
-  return (!(!((obj && obj.$classData) && obj.$classData.ancestors.s_concurrent_impl_Promise$)))
-});
-ScalaJS.as.s_concurrent_impl_Promise$ = (function(obj) {
-  return ((ScalaJS.is.s_concurrent_impl_Promise$(obj) || (obj === null)) ? obj : ScalaJS.throwClassCastException(obj, "scala.concurrent.impl.Promise$"))
-});
-ScalaJS.isArrayOf.s_concurrent_impl_Promise$ = (function(obj, depth) {
-  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.s_concurrent_impl_Promise$)))
-});
-ScalaJS.asArrayOf.s_concurrent_impl_Promise$ = (function(obj, depth) {
-  return ((ScalaJS.isArrayOf.s_concurrent_impl_Promise$(obj, depth) || (obj === null)) ? obj : ScalaJS.throwArrayCastException(obj, "Lscala.concurrent.impl.Promise$;", depth))
-});
-ScalaJS.d.s_concurrent_impl_Promise$ = new ScalaJS.ClassTypeData({
-  s_concurrent_impl_Promise$: 0
-}, false, "scala.concurrent.impl.Promise$", ScalaJS.d.O, {
-  s_concurrent_impl_Promise$: 1,
-  O: 1
-});
-ScalaJS.c.s_concurrent_impl_Promise$.prototype.$classData = ScalaJS.d.s_concurrent_impl_Promise$;
-ScalaJS.n.s_concurrent_impl_Promise = (void 0);
-ScalaJS.m.s_concurrent_impl_Promise = (function() {
-  if ((!ScalaJS.n.s_concurrent_impl_Promise)) {
-    ScalaJS.n.s_concurrent_impl_Promise = new ScalaJS.c.s_concurrent_impl_Promise$().init___()
-  };
-  return ScalaJS.n.s_concurrent_impl_Promise
-});
-/** @constructor */
 ScalaJS.c.s_math_Equiv$ = (function() {
   ScalaJS.c.O.call(this)
 });
@@ -16304,33 +15931,6 @@ ScalaJS.h.sjs_concurrent_QueueExecutionContext$ = (function() {
   /*<skip>*/
 });
 ScalaJS.h.sjs_concurrent_QueueExecutionContext$.prototype = ScalaJS.c.sjs_concurrent_QueueExecutionContext$.prototype;
-ScalaJS.c.sjs_concurrent_QueueExecutionContext$.prototype.prepare__s_concurrent_ExecutionContext = (function() {
-  return ScalaJS.i.s_concurrent_ExecutionContext$class__prepare__s_concurrent_ExecutionContext__s_concurrent_ExecutionContext(this)
-});
-ScalaJS.c.sjs_concurrent_QueueExecutionContext$.prototype.execute__jl_Runnable__V = (function(runnable) {
-  var lambda = (function(this$2, runnable) {
-    return (function() {
-      return (this$2.$$anonfun$1__p1__jl_Runnable__V(runnable), (void 0))
-    })
-  })(this, runnable);
-  ScalaJS.g["setTimeout"](lambda, 0)
-});
-ScalaJS.c.sjs_concurrent_QueueExecutionContext$.prototype.reportFailure__jl_Throwable__V = (function(t) {
-  ScalaJS.m.s_Console().err__Ljava_io_PrintStream().println__T__V(("Failure in async execution: " + t))
-});
-ScalaJS.c.sjs_concurrent_QueueExecutionContext$.prototype.$$anonfun$1__p1__jl_Runnable__V = (function(runnable$1) {
-  try {
-    runnable$1.run__V()
-  } catch (ex) {
-    ex = ScalaJS.wrapJavaScriptException(ex);
-    if (ScalaJS.is.jl_Throwable(ex)) {
-      var t = ex;
-      this.reportFailure__jl_Throwable__V(t)
-    } else {
-      throw ScalaJS.unwrapJavaScriptException(ex)
-    }
-  }
-});
 ScalaJS.c.sjs_concurrent_QueueExecutionContext$.prototype.init___ = (function() {
   ScalaJS.c.O.prototype.init___.call(this);
   ScalaJS.n.sjs_concurrent_QueueExecutionContext = this;
@@ -16375,25 +15975,6 @@ ScalaJS.h.sjs_concurrent_RunNowExecutionContext$ = (function() {
   /*<skip>*/
 });
 ScalaJS.h.sjs_concurrent_RunNowExecutionContext$.prototype = ScalaJS.c.sjs_concurrent_RunNowExecutionContext$.prototype;
-ScalaJS.c.sjs_concurrent_RunNowExecutionContext$.prototype.prepare__s_concurrent_ExecutionContext = (function() {
-  return ScalaJS.i.s_concurrent_ExecutionContext$class__prepare__s_concurrent_ExecutionContext__s_concurrent_ExecutionContext(this)
-});
-ScalaJS.c.sjs_concurrent_RunNowExecutionContext$.prototype.execute__jl_Runnable__V = (function(runnable) {
-  try {
-    runnable.run__V()
-  } catch (ex) {
-    ex = ScalaJS.wrapJavaScriptException(ex);
-    if (ScalaJS.is.jl_Throwable(ex)) {
-      var t = ex;
-      this.reportFailure__jl_Throwable__V(t)
-    } else {
-      throw ScalaJS.unwrapJavaScriptException(ex)
-    }
-  }
-});
-ScalaJS.c.sjs_concurrent_RunNowExecutionContext$.prototype.reportFailure__jl_Throwable__V = (function(t) {
-  ScalaJS.m.s_Console().err__Ljava_io_PrintStream().println__T__V(("Failure in async execution: " + t))
-});
 ScalaJS.c.sjs_concurrent_RunNowExecutionContext$.prototype.init___ = (function() {
   ScalaJS.c.O.prototype.init___.call(this);
   ScalaJS.n.sjs_concurrent_RunNowExecutionContext = this;
@@ -18017,14 +17598,6 @@ ScalaJS.h.Lorg_openmole_gui_client_Post$ = (function() {
   /*<skip>*/
 });
 ScalaJS.h.Lorg_openmole_gui_client_Post$.prototype = ScalaJS.c.Lorg_openmole_gui_client_Post$.prototype;
-ScalaJS.c.Lorg_openmole_gui_client_Post$.prototype.callRequest__Lautowire_package$Request__s_concurrent_Future = (function(req) {
-  var url = req.path__sc_Seq().mkString__T__T("/");
-  ScalaJS.m.s_Predef().println__O__V((" URL\u00a0" + url));
-  return ScalaJS.m.Lorg_scalajs_dom_extensions_Ajax().post__T__T__I__sc_Seq__Z__s_concurrent_Future(("http://localhost:8080/" + url), ScalaJS.m.Lupickle_package().write__O__Lupickle_Writer__T(req.args__sci_Map(), ScalaJS.m.Lupickle_package().MapW__Lupickle_Writer__Lupickle_Writer__Lupickle_Writer(ScalaJS.m.Lupickle_package().StringRW__Lupickle_Writer(), ScalaJS.m.Lupickle_package().StringRW__Lupickle_Writer())), ScalaJS.m.Lorg_scalajs_dom_extensions_Ajax().post$default$3__I(), ScalaJS.m.Lorg_scalajs_dom_extensions_Ajax().post$default$4__sc_Seq(), ScalaJS.m.Lorg_scalajs_dom_extensions_Ajax().post$default$5__Z()).map__F1__s_concurrent_ExecutionContext__s_concurrent_Future(new ScalaJS.c.sjsr_AnonFunction1().init___sjs_js_Function1((function(x$2$2) {
-    var x$2 = x$2$2;
-    return ScalaJS.as.T(x$2["responseText"])
-  })), ScalaJS.m.sjs_concurrent_JSExecutionContext$Implicits().runNow__s_concurrent_ExecutionContext())
-});
 ScalaJS.is.Lorg_openmole_gui_client_Post$ = (function(obj) {
   return (!(!((obj && obj.$classData) && obj.$classData.ancestors.Lorg_openmole_gui_client_Post$)))
 });
@@ -19277,9 +18850,6 @@ ScalaJS.h.jl_Exception = (function() {
   /*<skip>*/
 });
 ScalaJS.h.jl_Exception.prototype = ScalaJS.c.jl_Exception.prototype;
-ScalaJS.c.jl_Exception.prototype.init___ = (function() {
-  return (ScalaJS.c.jl_Exception.prototype.init___T__jl_Throwable.call(this, null, null), this)
-});
 ScalaJS.is.jl_Exception = (function(obj) {
   return (!(!((obj && obj.$classData) && obj.$classData.ancestors.jl_Exception)))
 });
@@ -19616,14 +19186,8 @@ ScalaJS.h.s_Console$.prototype = ScalaJS.c.s_Console$.prototype;
 ScalaJS.c.s_Console$.prototype.outVar__p2__s_util_DynamicVariable = (function() {
   return this.outVar$2
 });
-ScalaJS.c.s_Console$.prototype.errVar__p2__s_util_DynamicVariable = (function() {
-  return this.errVar$2
-});
 ScalaJS.c.s_Console$.prototype.out__Ljava_io_PrintStream = (function() {
   return ScalaJS.as.Ljava_io_PrintStream(this.outVar__p2__s_util_DynamicVariable().value__O())
-});
-ScalaJS.c.s_Console$.prototype.err__Ljava_io_PrintStream = (function() {
-  return ScalaJS.as.Ljava_io_PrintStream(this.errVar__p2__s_util_DynamicVariable().value__O())
 });
 ScalaJS.c.s_Console$.prototype.println__O__V = (function(x) {
   this.out__Ljava_io_PrintStream().println__O__V(x)
@@ -19771,11 +19335,6 @@ ScalaJS.c.s_Predef$.prototype.assert__Z__V = (function(assertion) {
 ScalaJS.c.s_Predef$.prototype.assert__Z__F0__V = (function(assertion, message) {
   if ((!assertion)) {
     throw new ScalaJS.c.jl_AssertionError().init___O(("assertion failed: " + message.apply__O()))
-  }
-});
-ScalaJS.c.s_Predef$.prototype.require__Z__V = (function(requirement) {
-  if ((!requirement)) {
-    throw new ScalaJS.c.jl_IllegalArgumentException().init___T("requirement failed")
   }
 });
 ScalaJS.c.s_Predef$.prototype.require__Z__F0__V = (function(requirement, message) {
@@ -20030,171 +19589,6 @@ ScalaJS.d.s_Some = new ScalaJS.ClassTypeData({
   O: 1
 });
 ScalaJS.c.s_Some.prototype.$classData = ScalaJS.d.s_Some;
-/** @constructor */
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise = (function() {
-  ScalaJS.c.s_concurrent_impl_AbstractPromise.call(this)
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype = new ScalaJS.h.s_concurrent_impl_AbstractPromise();
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.constructor = ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise;
-/** @constructor */
-ScalaJS.h.s_concurrent_impl_Promise$DefaultPromise = (function() {
-  /*<skip>*/
-});
-ScalaJS.h.s_concurrent_impl_Promise$DefaultPromise.prototype = ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype;
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.future__s_concurrent_impl_Promise = (function() {
-  return ScalaJS.i.s_concurrent_impl_Promise$class__future__s_concurrent_impl_Promise__s_concurrent_impl_Promise(this)
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.foreach__F1__s_concurrent_ExecutionContext__V = (function(f, executor) {
-  ScalaJS.i.s_concurrent_Future$class__foreach__s_concurrent_Future__F1__s_concurrent_ExecutionContext__V(this, f, executor)
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.map__F1__s_concurrent_ExecutionContext__s_concurrent_Future = (function(f, executor) {
-  return ScalaJS.i.s_concurrent_Future$class__map__s_concurrent_Future__F1__s_concurrent_ExecutionContext__s_concurrent_Future(this, f, executor)
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.complete__s_util_Try__s_concurrent_Promise = (function(result) {
-  return ScalaJS.i.s_concurrent_Promise$class__complete__s_concurrent_Promise__s_util_Try__s_concurrent_Promise(this, result)
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.success__O__s_concurrent_Promise = (function(value) {
-  return ScalaJS.i.s_concurrent_Promise$class__success__s_concurrent_Promise__O__s_concurrent_Promise(this, value)
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.failure__jl_Throwable__s_concurrent_Promise = (function(cause) {
-  return ScalaJS.i.s_concurrent_Promise$class__failure__s_concurrent_Promise__jl_Throwable__s_concurrent_Promise(this, cause)
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.compressedRoot__p2__s_concurrent_impl_Promise$DefaultPromise = (function() {
-  var _$this = this;
-  tailCallLoop: while (true) {
-    var x1 = _$this.getState__O();
-    if (ScalaJS.is.s_concurrent_impl_Promise$DefaultPromise(x1)) {
-      var x2 = ScalaJS.as.s_concurrent_impl_Promise$DefaultPromise(x1);
-      var target = x2.root__p2__s_concurrent_impl_Promise$DefaultPromise();
-      if ((x2 === target)) {
-        return target
-      } else if (_$this.updateState__O__O__Z(x2, target)) {
-        return target
-      } else {
-        continue tailCallLoop
-      }
-    };
-    return _$this
-  }
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.root__p2__s_concurrent_impl_Promise$DefaultPromise = (function() {
-  var _$this = this;
-  tailCallLoop: while (true) {
-    var x1 = _$this.getState__O();
-    if (ScalaJS.is.s_concurrent_impl_Promise$DefaultPromise(x1)) {
-      var x2 = ScalaJS.as.s_concurrent_impl_Promise$DefaultPromise(x1);
-      _$this = x2;
-      continue tailCallLoop
-    };
-    return _$this
-  }
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.tryComplete__s_util_Try__Z = (function(value) {
-  var resolved = ScalaJS.m.s_concurrent_impl_Promise().scala$concurrent$impl$Promise$$resolveTry__s_util_Try__s_util_Try(value);
-  var x1 = this.tryCompleteAndGetListeners__p2__s_util_Try__sci_List(resolved);
-  if ((null === x1)) {
-    return false
-  };
-  if (x1.isEmpty__Z()) {
-    return true
-  };
-  return (x1.foreach__F1__V(new ScalaJS.c.sjsr_AnonFunction1().init___sjs_js_Function1((function(this$2, resolved) {
-    return (function(r$2) {
-      var r = ScalaJS.as.s_concurrent_impl_CallbackRunnable(r$2);
-      this$2.$$anonfun$1__p2__s_concurrent_impl_CallbackRunnable__s_util_Try__V(r, resolved)
-    })
-  })(this, resolved))), true)
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.tryCompleteAndGetListeners__p2__s_util_Try__sci_List = (function(v) {
-  var _$this = this;
-  tailCallLoop: while (true) {
-    var x1 = _$this.getState__O();
-    if (ScalaJS.is.sci_List(x1)) {
-      var x2 = ScalaJS.as.sci_List(x1);
-      var cur = x2;
-      if (_$this.updateState__O__O__Z(cur, v)) {
-        return cur
-      } else {
-        continue tailCallLoop
-      }
-    };
-    if (ScalaJS.is.s_concurrent_impl_Promise$DefaultPromise(x1)) {
-      _$this = _$this.compressedRoot__p2__s_concurrent_impl_Promise$DefaultPromise();
-      continue tailCallLoop
-    };
-    return null
-  }
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.onComplete__F1__s_concurrent_ExecutionContext__V = (function(func, executor) {
-  var preparedEC = executor.prepare__s_concurrent_ExecutionContext();
-  var runnable = new ScalaJS.c.s_concurrent_impl_CallbackRunnable().init___s_concurrent_ExecutionContext__F1(preparedEC, func);
-  this.dispatchOrAddCallback__p2__s_concurrent_impl_CallbackRunnable__V(runnable)
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.dispatchOrAddCallback__p2__s_concurrent_impl_CallbackRunnable__V = (function(runnable) {
-  var _$this = this;
-  tailCallLoop: while (true) {
-    var x1 = _$this.getState__O();
-    matchEnd6: {
-      if (ScalaJS.is.s_util_Try(x1)) {
-        var x2 = ScalaJS.as.s_util_Try(x1);
-        runnable.executeWithValue__s_util_Try__V(x2);
-        (void 0);
-        break matchEnd6
-      };
-      if (ScalaJS.is.s_concurrent_impl_Promise$DefaultPromise(x1)) {
-        _$this = _$this.compressedRoot__p2__s_concurrent_impl_Promise$DefaultPromise();
-        continue tailCallLoop;
-        break matchEnd6
-      };
-      if (ScalaJS.is.sci_List(x1)) {
-        var x4 = ScalaJS.as.sci_List(x1);
-        var jsx$1 = _$this;
-        var x$1 = runnable;
-        if (jsx$1.updateState__O__O__Z(x4, x4.$$colon$colon__O__sci_List(x$1))) {
-          break matchEnd6
-        } else {
-          continue tailCallLoop;
-          break matchEnd6
-        }
-      };
-      throw new ScalaJS.c.s_MatchError().init___O(x1)
-    };
-    return (void 0)
-  }
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.future__s_concurrent_Future = (function() {
-  return this.future__s_concurrent_impl_Promise()
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.$$anonfun$1__p2__s_concurrent_impl_CallbackRunnable__s_util_Try__V = (function(r, resolved$1) {
-  r.executeWithValue__s_util_Try__V(resolved$1)
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.init___ = (function() {
-  return (ScalaJS.c.s_concurrent_impl_AbstractPromise.prototype.init___.call(this), ScalaJS.i.s_concurrent_Promise$class__$init$__s_concurrent_Promise__V(this), ScalaJS.i.s_concurrent_Future$class__$init$__s_concurrent_Future__V(this), ScalaJS.i.s_concurrent_impl_Promise$class__$init$__s_concurrent_impl_Promise__V(this), this.updateState__O__O__Z(null, ScalaJS.m.sci_Nil()), this)
-});
-ScalaJS.is.s_concurrent_impl_Promise$DefaultPromise = (function(obj) {
-  return (!(!((obj && obj.$classData) && obj.$classData.ancestors.s_concurrent_impl_Promise$DefaultPromise)))
-});
-ScalaJS.as.s_concurrent_impl_Promise$DefaultPromise = (function(obj) {
-  return ((ScalaJS.is.s_concurrent_impl_Promise$DefaultPromise(obj) || (obj === null)) ? obj : ScalaJS.throwClassCastException(obj, "scala.concurrent.impl.Promise$DefaultPromise"))
-});
-ScalaJS.isArrayOf.s_concurrent_impl_Promise$DefaultPromise = (function(obj, depth) {
-  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.s_concurrent_impl_Promise$DefaultPromise)))
-});
-ScalaJS.asArrayOf.s_concurrent_impl_Promise$DefaultPromise = (function(obj, depth) {
-  return ((ScalaJS.isArrayOf.s_concurrent_impl_Promise$DefaultPromise(obj, depth) || (obj === null)) ? obj : ScalaJS.throwArrayCastException(obj, "Lscala.concurrent.impl.Promise$DefaultPromise;", depth))
-});
-ScalaJS.d.s_concurrent_impl_Promise$DefaultPromise = new ScalaJS.ClassTypeData({
-  s_concurrent_impl_Promise$DefaultPromise: 0
-}, false, "scala.concurrent.impl.Promise$DefaultPromise", ScalaJS.d.s_concurrent_impl_AbstractPromise, {
-  s_concurrent_impl_Promise$DefaultPromise: 1,
-  s_concurrent_impl_Promise: 1,
-  s_concurrent_Future: 1,
-  s_concurrent_Awaitable: 1,
-  s_concurrent_Promise: 1,
-  s_concurrent_impl_AbstractPromise: 1,
-  O: 1
-});
-ScalaJS.c.s_concurrent_impl_Promise$DefaultPromise.prototype.$classData = ScalaJS.d.s_concurrent_impl_Promise$DefaultPromise;
 ScalaJS.is.s_math_ScalaNumber = (function(obj) {
   return (!(!((obj && obj.$classData) && obj.$classData.ancestors.s_math_ScalaNumber)))
 });
@@ -20738,12 +20132,6 @@ ScalaJS.c.s_util_Failure.prototype.exception__jl_Throwable = (function() {
 ScalaJS.c.s_util_Failure.prototype.get__O = (function() {
   throw ScalaJS.unwrapJavaScriptException(this.exception__jl_Throwable())
 });
-ScalaJS.c.s_util_Failure.prototype.foreach__F1__V = (function(f) {
-  /*<skip>*/
-});
-ScalaJS.c.s_util_Failure.prototype.map__F1__s_util_Try = (function(f) {
-  return this
-});
 ScalaJS.c.s_util_Failure.prototype.productPrefix__T = (function() {
   return "Failure"
 });
@@ -20841,16 +20229,6 @@ ScalaJS.c.s_util_Success.prototype.value__O = (function() {
 ScalaJS.c.s_util_Success.prototype.get__O = (function() {
   return this.value__O()
 });
-ScalaJS.c.s_util_Success.prototype.foreach__F1__V = (function(f) {
-  f.apply__O__O(this.value__O())
-});
-ScalaJS.c.s_util_Success.prototype.map__F1__s_util_Try = (function(f) {
-  return ScalaJS.m.s_util_Try().apply__F0__s_util_Try(new ScalaJS.c.sjsr_AnonFunction0().init___sjs_js_Function0((function(this$2, f) {
-    return (function() {
-      return this$2.$$anonfun$3__p2__F1__O(f)
-    })
-  })(this, f)))
-});
 ScalaJS.c.s_util_Success.prototype.productPrefix__T = (function() {
   return "Success"
 });
@@ -20899,9 +20277,6 @@ ScalaJS.c.s_util_Success.prototype.equals__O__Z = (function(x$1) {
       return false
     }
   }
-});
-ScalaJS.c.s_util_Success.prototype.$$anonfun$3__p2__F1__O = (function(f$1) {
-  return f$1.apply__O__O(this.value__O())
 });
 ScalaJS.c.s_util_Success.prototype.init___O = (function(value) {
   this.value$2 = value;
@@ -23192,28 +22567,6 @@ ScalaJS.d.sr_AbstractFunction1$mcVI$sp = new ScalaJS.ClassTypeData({
   O: 1
 });
 ScalaJS.c.sr_AbstractFunction1$mcVI$sp.prototype.$classData = ScalaJS.d.sr_AbstractFunction1$mcVI$sp;
-ScalaJS.is.sr_NonLocalReturnControl = (function(obj) {
-  return (!(!((obj && obj.$classData) && obj.$classData.ancestors.sr_NonLocalReturnControl)))
-});
-ScalaJS.as.sr_NonLocalReturnControl = (function(obj) {
-  return ((ScalaJS.is.sr_NonLocalReturnControl(obj) || (obj === null)) ? obj : ScalaJS.throwClassCastException(obj, "scala.runtime.NonLocalReturnControl"))
-});
-ScalaJS.isArrayOf.sr_NonLocalReturnControl = (function(obj, depth) {
-  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.sr_NonLocalReturnControl)))
-});
-ScalaJS.asArrayOf.sr_NonLocalReturnControl = (function(obj, depth) {
-  return ((ScalaJS.isArrayOf.sr_NonLocalReturnControl(obj, depth) || (obj === null)) ? obj : ScalaJS.throwArrayCastException(obj, "Lscala.runtime.NonLocalReturnControl;", depth))
-});
-ScalaJS.d.sr_NonLocalReturnControl = new ScalaJS.ClassTypeData({
-  sr_NonLocalReturnControl: 0
-}, false, "scala.runtime.NonLocalReturnControl", ScalaJS.d.jl_Throwable, {
-  sr_NonLocalReturnControl: 1,
-  s_util_control_ControlThrowable: 1,
-  s_util_control_NoStackTrace: 1,
-  jl_Throwable: 1,
-  Ljava_io_Serializable: 1,
-  O: 1
-});
 ScalaJS.is.sr_Nothing$ = (function(obj) {
   return (!(!((obj && obj.$classData) && obj.$classData.ancestors.sr_Nothing$)))
 });
@@ -23330,10 +22683,6 @@ ScalaJS.c.Ljava_io_PrintStream.prototype.print__O__V = (function(o) {
 ScalaJS.c.Ljava_io_PrintStream.prototype.println__V = (function() {
   this.write__I__V(10)
 });
-ScalaJS.c.Ljava_io_PrintStream.prototype.println__T__V = (function(x) {
-  this.print__T__V(x);
-  this.println__V()
-});
 ScalaJS.c.Ljava_io_PrintStream.prototype.println__O__V = (function(x) {
   this.print__O__V(x);
   this.println__V()
@@ -23392,7 +22741,7 @@ ScalaJS.c.Lorg_openmole_gui_client_Client$$anonfun$2.prototype.apply__Z = (funct
   return this.apply$mcZ$sp__Z()
 });
 ScalaJS.c.Lorg_openmole_gui_client_Client$$anonfun$2.prototype.apply$mcZ$sp__Z = (function() {
-  return (ScalaJS.m.Lorg_openmole_gui_client_Post().callRequest__Lautowire_package$Request__s_concurrent_Future(new ScalaJS.c.Lautowire_package$Request().init___sc_Seq__sci_Map(ScalaJS.as.sc_Seq(ScalaJS.m.sc_Seq().apply__sc_Seq__sc_GenTraversable(ScalaJS.m.s_Predef().wrapRefArray__AO__scm_WrappedArray(ScalaJS.asArrayOf.O(ScalaJS.makeNativeArrayWrapper(ScalaJS.d.T.getArrayOf(), ["org", "openmole", "gui", "shared", "Api", "hello"]), 1)))), ScalaJS.as.sci_Map(ScalaJS.m.s_Predef().Map__sci_Map$().apply__sc_Seq__sc_GenMap(ScalaJS.m.s_Predef().wrapRefArray__AO__scm_WrappedArray(ScalaJS.asArrayOf.O(ScalaJS.makeNativeArrayWrapper(ScalaJS.d.T2.getArrayOf(), [ScalaJS.m.s_Predef$ArrowAssoc().$$minus$greater$extension__O__O__T2(ScalaJS.m.s_Predef().ArrowAssoc__O__O("a"), ScalaJS.m.Lupickle_package().write__O__Lupickle_Writer__T(5, ScalaJS.m.Lupickle_package().IntRW__Lupickle_Writer()))]), 1)))))).map__F1__s_concurrent_ExecutionContext__s_concurrent_Future(new ScalaJS.c.sjsr_AnonFunction1().init___sjs_js_Function1((function(x$3$2) {
+  return (ScalaJS.m.Lorg_openmole_gui_client_Post().apply__Lautowire_package$ClientProxy().callRequest__Lautowire_package$Request__s_concurrent_Future(new ScalaJS.c.Lautowire_package$Request().init___sc_Seq__sci_Map(ScalaJS.as.sc_Seq(ScalaJS.m.sc_Seq().apply__sc_Seq__sc_GenTraversable(ScalaJS.m.s_Predef().wrapRefArray__AO__scm_WrappedArray(ScalaJS.asArrayOf.O(ScalaJS.makeNativeArrayWrapper(ScalaJS.d.T.getArrayOf(), ["org", "openmole", "gui", "shared", "Api", "hello"]), 1)))), ScalaJS.as.sci_Map(ScalaJS.m.s_Predef().Map__sci_Map$().apply__sc_Seq__sc_GenMap(ScalaJS.m.s_Predef().wrapRefArray__AO__scm_WrappedArray(ScalaJS.asArrayOf.O(ScalaJS.makeNativeArrayWrapper(ScalaJS.d.T2.getArrayOf(), [ScalaJS.m.s_Predef$ArrowAssoc().$$minus$greater$extension__O__O__T2(ScalaJS.m.s_Predef().ArrowAssoc__O__O("a"), ScalaJS.m.Lupickle_package().write__O__Lupickle_Writer__T(5, ScalaJS.m.Lupickle_package().IntRW__Lupickle_Writer()))]), 1)))))).map__F1__s_concurrent_ExecutionContext__s_concurrent_Future(new ScalaJS.c.sjsr_AnonFunction1().init___sjs_js_Function1((function(x$3$2) {
     var x$3 = ScalaJS.as.T(x$3$2);
     return ScalaJS.uI(ScalaJS.m.Lupickle_package().read__T__Lupickle_Reader__O(x$3, ScalaJS.as.Lupickle_Reader(ScalaJS.m.Lupickle_package().IntRW__Lupickle_Writer())))
   })), ScalaJS.m.sjs_concurrent_JSExecutionContext$Implicits().runNow__s_concurrent_ExecutionContext()).foreach__F1__s_concurrent_ExecutionContext__V(new ScalaJS.c.Lorg_openmole_gui_client_Client$$anonfun$2$$anonfun$apply$mcZ$sp$1().init___Lorg_openmole_gui_client_Client$$anonfun$2(this), ScalaJS.m.sjs_concurrent_JSExecutionContext$Implicits().runNow__s_concurrent_ExecutionContext()), false)
@@ -23477,101 +22826,6 @@ ScalaJS.d.Lorg_openmole_gui_client_Client$$anonfun$2$$anonfun$apply$mcZ$sp$1 = n
   O: 1
 });
 ScalaJS.c.Lorg_openmole_gui_client_Client$$anonfun$2$$anonfun$apply$mcZ$sp$1.prototype.$classData = ScalaJS.d.Lorg_openmole_gui_client_Client$$anonfun$2$$anonfun$apply$mcZ$sp$1;
-/** @constructor */
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException = (function() {
-  ScalaJS.c.jl_Exception.call(this);
-  this.xhr$3 = null
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype = new ScalaJS.h.jl_Exception();
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype.constructor = ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException;
-/** @constructor */
-ScalaJS.h.Lorg_scalajs_dom_extensions_AjaxException = (function() {
-  /*<skip>*/
-});
-ScalaJS.h.Lorg_scalajs_dom_extensions_AjaxException.prototype = ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype;
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype.xhr__Lorg_scalajs_dom_XMLHttpRequest = (function() {
-  return this.xhr$3
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype.productPrefix__T = (function() {
-  return "AjaxException"
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype.productArity__I = (function() {
-  return 1
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype.productElement__I__O = (function(x$1) {
-  var x1 = x$1;
-  switch (x1) {
-    case 0:
-      {
-        return this.xhr__Lorg_scalajs_dom_XMLHttpRequest();
-        break
-      };
-    default:
-      throw new ScalaJS.c.jl_IndexOutOfBoundsException().init___T(ScalaJS.objectToString(x$1));
-  }
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype.productIterator__sc_Iterator = (function() {
-  return ScalaJS.m.sr_ScalaRunTime().typedProductIterator__s_Product__sc_Iterator(this)
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype.canEqual__O__Z = (function(x$1) {
-  return ScalaJS.is.Lorg_scalajs_dom_extensions_AjaxException(x$1)
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype.hashCode__I = (function() {
-  return ScalaJS.m.sr_ScalaRunTime().$$undhashCode__s_Product__I(this)
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype.equals__O__Z = (function(x$1) {
-  if ((this === x$1)) {
-    return true
-  } else {
-    var x1 = x$1;
-    matchEnd4: {
-      var jsx$1;
-      if (ScalaJS.is.Lorg_scalajs_dom_extensions_AjaxException(x1)) {
-        var jsx$1 = true;
-        break matchEnd4
-      };
-      var jsx$1 = false;
-      break matchEnd4
-    };
-    if (jsx$1) {
-      var AjaxException$1 = ScalaJS.as.Lorg_scalajs_dom_extensions_AjaxException(x$1);
-      return ((this.xhr__Lorg_scalajs_dom_XMLHttpRequest() === AjaxException$1.xhr__Lorg_scalajs_dom_XMLHttpRequest()) && AjaxException$1.canEqual__O__Z(this))
-    } else {
-      return false
-    }
-  }
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype.init___Lorg_scalajs_dom_XMLHttpRequest = (function(xhr) {
-  this.xhr$3 = xhr;
-  ScalaJS.c.jl_Exception.prototype.init___.call(this);
-  ScalaJS.i.s_Product$class__$init$__s_Product__V(this);
-  return this
-});
-ScalaJS.is.Lorg_scalajs_dom_extensions_AjaxException = (function(obj) {
-  return (!(!((obj && obj.$classData) && obj.$classData.ancestors.Lorg_scalajs_dom_extensions_AjaxException)))
-});
-ScalaJS.as.Lorg_scalajs_dom_extensions_AjaxException = (function(obj) {
-  return ((ScalaJS.is.Lorg_scalajs_dom_extensions_AjaxException(obj) || (obj === null)) ? obj : ScalaJS.throwClassCastException(obj, "org.scalajs.dom.extensions.AjaxException"))
-});
-ScalaJS.isArrayOf.Lorg_scalajs_dom_extensions_AjaxException = (function(obj, depth) {
-  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.Lorg_scalajs_dom_extensions_AjaxException)))
-});
-ScalaJS.asArrayOf.Lorg_scalajs_dom_extensions_AjaxException = (function(obj, depth) {
-  return ((ScalaJS.isArrayOf.Lorg_scalajs_dom_extensions_AjaxException(obj, depth) || (obj === null)) ? obj : ScalaJS.throwArrayCastException(obj, "Lorg.scalajs.dom.extensions.AjaxException;", depth))
-});
-ScalaJS.d.Lorg_scalajs_dom_extensions_AjaxException = new ScalaJS.ClassTypeData({
-  Lorg_scalajs_dom_extensions_AjaxException: 0
-}, false, "org.scalajs.dom.extensions.AjaxException", ScalaJS.d.jl_Exception, {
-  Lorg_scalajs_dom_extensions_AjaxException: 1,
-  s_Serializable: 1,
-  s_Product: 1,
-  s_Equals: 1,
-  jl_Exception: 1,
-  jl_Throwable: 1,
-  Ljava_io_Serializable: 1,
-  O: 1
-});
-ScalaJS.c.Lorg_scalajs_dom_extensions_AjaxException.prototype.$classData = ScalaJS.d.Lorg_scalajs_dom_extensions_AjaxException;
 /** @constructor */
 ScalaJS.c.Lscalatags_generic_StyleMisc$BorderStyle = (function() {
   ScalaJS.c.Lscalatags_generic_StyleMisc$OutlineStyle.call(this);
@@ -23775,39 +23029,6 @@ ScalaJS.d.jl_VirtualMachineError = new ScalaJS.ClassTypeData({
   Ljava_io_Serializable: 1,
   O: 1
 });
-/** @constructor */
-ScalaJS.c.ju_concurrent_ExecutionException = (function() {
-  ScalaJS.c.jl_Exception.call(this)
-});
-ScalaJS.c.ju_concurrent_ExecutionException.prototype = new ScalaJS.h.jl_Exception();
-ScalaJS.c.ju_concurrent_ExecutionException.prototype.constructor = ScalaJS.c.ju_concurrent_ExecutionException;
-/** @constructor */
-ScalaJS.h.ju_concurrent_ExecutionException = (function() {
-  /*<skip>*/
-});
-ScalaJS.h.ju_concurrent_ExecutionException.prototype = ScalaJS.c.ju_concurrent_ExecutionException.prototype;
-ScalaJS.is.ju_concurrent_ExecutionException = (function(obj) {
-  return (!(!((obj && obj.$classData) && obj.$classData.ancestors.ju_concurrent_ExecutionException)))
-});
-ScalaJS.as.ju_concurrent_ExecutionException = (function(obj) {
-  return ((ScalaJS.is.ju_concurrent_ExecutionException(obj) || (obj === null)) ? obj : ScalaJS.throwClassCastException(obj, "java.util.concurrent.ExecutionException"))
-});
-ScalaJS.isArrayOf.ju_concurrent_ExecutionException = (function(obj, depth) {
-  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.ju_concurrent_ExecutionException)))
-});
-ScalaJS.asArrayOf.ju_concurrent_ExecutionException = (function(obj, depth) {
-  return ((ScalaJS.isArrayOf.ju_concurrent_ExecutionException(obj, depth) || (obj === null)) ? obj : ScalaJS.throwArrayCastException(obj, "Ljava.util.concurrent.ExecutionException;", depth))
-});
-ScalaJS.d.ju_concurrent_ExecutionException = new ScalaJS.ClassTypeData({
-  ju_concurrent_ExecutionException: 0
-}, false, "java.util.concurrent.ExecutionException", ScalaJS.d.jl_Exception, {
-  ju_concurrent_ExecutionException: 1,
-  jl_Exception: 1,
-  jl_Throwable: 1,
-  Ljava_io_Serializable: 1,
-  O: 1
-});
-ScalaJS.c.ju_concurrent_ExecutionException.prototype.$classData = ScalaJS.d.ju_concurrent_ExecutionException;
 /** @constructor */
 ScalaJS.c.s_ref_WeakReferenceWithWrapper = (function() {
   ScalaJS.c.jl_ref_WeakReference.call(this);

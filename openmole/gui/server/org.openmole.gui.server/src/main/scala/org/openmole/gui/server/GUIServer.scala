@@ -40,7 +40,7 @@ class GUIServer extends ServertestStack {
   }
 
   post(s"/$basePath/*") {
-    Await.result(autowire.Macros.route[Api](Server)(
+    Await.result(autowire.Macros.route[Web](Server)(
       autowire.Request(Seq(basePath) ++ multiParams("splat").head.split("/"),
         upickle.read[Map[String, String]](request.body))
     ), Duration.Inf)
