@@ -16,6 +16,12 @@
  */
 package org.openmole.gui.shared
 
+import scala.annotation.ClassfileAnnotation
+import scala.scalajs.js.annotation.JSExport
+
+class Web extends ClassfileAnnotation
+
+@Web
 trait Api {
   def hello(a: Int): Int
 }
