@@ -54,9 +54,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val jetty = "org.openmole" %% "org-eclipse-jetty" % "8.1.8.v20121106"
 
-  lazy val scalatraVersion = "2.3.0"
-
-  lazy val scalatra = "org.openmole" %% "org-scalatra" % scalatraVersion
+  lazy val scalatra = "org.openmole" %% "org-scalatra" % "2.3.0"
 
   lazy val jacksonJson = "org.openmole" %% "org-json4s" % "3.2.9"
 
