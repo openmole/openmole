@@ -30,7 +30,8 @@ object BehaviourSearch {
     reevaluate: Double = 0.0) = {
     val _inputs = inputs
     val _gridSize = gridSize
-    val (_reevaluate, _objectives) = (reevaluate, objectives)
+    val _objectives = observables
+    val _reevaluate = reevaluate
     new BehaviourSearch {
       val inputs = _inputs
       val objectives = _objectives
