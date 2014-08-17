@@ -66,7 +66,9 @@ trait Optimisation extends NoArchive
     with TournamentOnRankAndDiversity
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
-    with GAGenomeWithSigma {
+    with GeneticBreeding
+    with GAGenomeWithSigma
+    with ClampedGenome {
   type INPUT = String
   def inputConverter = implicitly
 

@@ -61,7 +61,7 @@ package object ga {
     val newIndividual = Prototype[Individual[evolution.G, evolution.P, evolution.F]](name + "NewIndividual")
     //val population = Prototype[Population[evolution.G, evolution.F, evolution.MF]](name + "Population")
     val archive = Prototype[evolution.A](name + "Archive")
-    val newArchive = Prototype[evolution.A](name + "NewArchive")
+    //val newArchive = Prototype[evolution.A](name + "NewArchive")
     val state = Prototype[evolution.STATE](name + "State")
     val fitness = Prototype[evolution.F](name + "Fitness")
     val generation = Prototype[Int](name + "Generation")
@@ -76,8 +76,6 @@ package object ga {
     val scalingGenomeTask = ScalingGAGenomeTask(evolution)(name + "ScalingGenome", genome)
 
     val toIndividualTask = ToIndividualTask(evolution)(name + "ToIndividual", genome, individual)
-
-    val mergeArchiveTask = UpdateArchiveTask(evolution)(name + "MergeArchive", individual.toArray, archive)
 
     val elitismTask =
       ElitismTask(evolution)(
@@ -161,31 +159,27 @@ package object ga {
 
     val scalingGenomeCaps = Capsule(scalingGenomeTask)
     val toIndividualSlot = Slot(InputStrainerCapsule(toIndividualTask))
-    val mergeArchiveSlot = Slot(Capsule(mergeArchiveTask))
     val elitismSlot = Slot(elitismTask)
 
     terminationTask addOutput archive
     terminationTask addOutput individual.toArray
 
-    val terminationSlot = Slot(Capsule(terminationTask))
+    val terminationSlot = Slot(StrainerCapsule(terminationTask))
     val scalingIndividualsSlot = Slot(Capsule(scalingIndividualsTask))
     val endSlot = Slot(StrainerCapsule(EmptyTask(name + "End")))
 
-    val exploration = firstCapsule -- breedingCaps -< scalingGenomeCaps -- (model, filter = Block(genome)) -- toIndividualSlot >- (mergeArchiveSlot, renameIndividualsTask)
-    val skel = exploration -- elitismSlot -- terminationSlot -- scalingIndividualsSlot -- (endSlot, terminatedCondition, filter = Keep(individual.toArray))
+    val exploration = firstCapsule -- breedingCaps -< scalingGenomeCaps -- (model, filter = Block(genome)) -- toIndividualSlot >- renameIndividualsTask -- elitismSlot -- terminationSlot -- scalingIndividualsSlot -- (endSlot, terminatedCondition, filter = Keep(individual.toArray))
 
     val loop = terminationSlot -- (breedingCapsItSlot, !terminatedCondition)
 
     val dataChannels =
       (scalingGenomeCaps -- (toIndividualSlot, filter = Keep(genome))) +
-        (breedingCaps -- (mergeArchiveSlot, filter = Keep(archive))) +
-        (breedingCaps -- (elitismSlot, filter = Keep(individual.toArray))) +
+        (breedingCaps -- (elitismSlot, filter = Keep(individual.toArray, archive))) +
         (breedingCaps oo (model.first, filter = Block(archive, individual.toArray, genome.toArray))) +
         (breedingCaps -- (endSlot, filter = Block(archive, individual.toArray, state, generation, terminated, genome.toArray))) +
-        (breedingCaps -- (terminationSlot, filter = Block(archive, individual.toArray))) +
-        (mergeArchiveSlot -- (terminationSlot, filter = Keep(archive)))
+        (breedingCaps -- (terminationSlot, filter = Block(archive, individual.toArray, genome.toArray)))
 
-    val gaPuzzle = skel + loop + dataChannels
+    val gaPuzzle = exploration + loop + dataChannels
 
     cs.puzzle(gaPuzzle, scalingIndividualsSlot.capsule)
   }
@@ -209,11 +203,12 @@ package object ga {
 
     val toIndividualArrayCaps = StrainerCapsule(ToArrayTask(name + "IndividualToArray", individual))
 
-    mergeArchiveTask addParameter (archive -> evolution.initialArchive)
-    val mergeArchiveCaps = MasterCapsule(mergeArchiveTask, archive)
+    //mergeArchiveTask addParameter (archive -> evolution.initialArchive)
+    //val mergeArchiveCaps = MasterCapsule(mergeArchiveTask, archive)
 
     elitismTask addParameter (individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
-    val elitismCaps = MasterCapsule(elitismTask, individual.toArray)
+    elitismTask addParameter (archive -> evolution.initialArchive)
+    val elitismCaps = MasterCapsule(elitismTask, individual.toArray, archive)
 
     terminationTask addParameter Parameter.delayed(state, evolution.initialState)
     terminationTask addParameter generation -> 0
@@ -236,7 +231,7 @@ package object ga {
         (model, filter = Block(genome)) --
         (toIndividualSlot, filter = Keep(evolution.objectives.map(_.name).toSeq: _*)) --
         toIndividualArrayCaps --
-        (mergeArchiveCaps, renameIndividualsTask) --
+        renameIndividualsTask --
         elitismCaps --
         terminationSlot --
         scalingIndividualsSlot >| (endCapsule, terminatedCondition, Block(archive))
@@ -250,9 +245,7 @@ package object ga {
       (scalingCaps -- (toIndividualSlot, filter = Keep(genome))) +
         (firstCapsule oo (model.first, filter = Block(archive, individual.toArray))) +
         (firstCapsule -- (endCapsule, filter = Block(archive, individual.toArray))) +
-        (firstCapsule oo (mergeArchiveCaps, filter = Keep(archive))) +
-        (firstCapsule oo (elitismCaps, filter = Keep(individual.toArray))) +
-        (mergeArchiveCaps -- (terminationSlot, filter = Keep(archive)))
+        (firstCapsule oo (elitismCaps, filter = Keep(individual.toArray, archive)))
 
     val gaPuzzle = skel + loop + dataChannels
 
@@ -299,9 +292,7 @@ package object ga {
       implicit val stateManifest = termination.stateManifest
 
       def initialArchive = evolution.initialArchive
-      def combine(a1: A, a2: A) = evolution.combine(a1, a2)
-      def diff(a1: A, a2: A) = evolution.diff(a1, a2)
-      def toArchive(individuals: Seq[Individual[G, P, F]]) = evolution.toArchive(individuals)
+      def archive(a: A, offspring: Seq[Individual[G, P, F]]) = evolution.archive(a, offspring)
       def modify(individuals: Seq[Individual[G, P, F]], archive: A) = evolution.modify(individuals, archive)
       def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], archive: A)(implicit rng: Random) = evolution.elitism(individuals, newIndividuals, archive)
 
@@ -321,18 +312,6 @@ package object ga {
 
     val firstCapsule = StrainerCapsule(EmptyTask(name + "First"))
 
-    val renameOriginalArchiveTask = AssignTask(name + "RenameOriginalArchive")
-    renameOriginalArchiveTask.assign(archive, originalArchive)
-    renameOriginalArchiveTask addOutput archive
-
-    val renameOriginalArchiveCapsule = Capsule(renameOriginalArchiveTask)
-
-    val archiveDiffSlot = Slot(Capsule(ArchiveDiffTask(evolution)(name + "ArchiveDiff", originalArchive, archive)))
-
-    val mergeArchiveTask = UpdateArchiveTask(evolution)(name + "MergeArchive", individual.toArray, archive)
-    mergeArchiveTask addParameter (archive -> islandElitism.initialArchive)
-    val mergeArchiveSlot = Slot(MasterCapsule(mergeArchiveTask, archive))
-
     val renameIndividualsTask = AssignTask(name + "RenameIndividuals")
     renameIndividualsTask.assign(individual.toArray, newIndividual.toArray)
 
@@ -343,7 +322,8 @@ package object ga {
       archive)
 
     elitismTask addParameter (individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
-    val elitismCaps = MasterCapsule(elitismTask, individual.toArray)
+    elitismTask addParameter (archive -> islandElitism.initialArchive)
+    val elitismCaps = MasterCapsule(elitismTask, individual.toArray, archive)
 
     val terminationTask = TerminationTask(islandElitism)(
       name + "TerminationTask",
@@ -400,13 +380,9 @@ package object ga {
       firstCapsule -<
         (preIslandCapsule, size = Some(number.toString)) --
         islandSlot --
-        (renameIndividualsTask, archiveDiffSlot -- mergeArchiveSlot) --
         elitismCaps --
         terminationSlot --
         scalingIndividualsSlot >| (endCapsule, terminated.name + " == true")
-
-    val archivePath =
-      (preIslandCapsule -- renameOriginalArchiveCapsule -- (archiveDiffSlot, filter = Keep(originalArchive, archive)))
 
     val loop =
       scalingIndividualsSlot --
@@ -415,11 +391,9 @@ package object ga {
 
     val dataChannels =
       (firstCapsule oo islandSlot) +
-        (firstCapsule -- endCapsule) +
-        (islandSlot -- (mergeArchiveSlot, filter = Keep(individual.toArray))) +
-        (mergeArchiveSlot -- (terminationSlot, filter = Keep(archive)))
+        (firstCapsule -- endCapsule)
 
-    val puzzle = skel + loop + dataChannels + archivePath
+    val puzzle = skel + loop + dataChannels
 
     val (_state, _generation) = (state, generation)
 

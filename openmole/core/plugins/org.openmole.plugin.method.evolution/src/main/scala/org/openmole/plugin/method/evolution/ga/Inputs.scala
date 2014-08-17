@@ -40,7 +40,11 @@ object InputConverter {
           @transient lazy val proxy = groovyProxy(v)
           override def toDouble(context: Context) = {
             val (p1, p2) = proxy
-            (p1(context).toString.toDouble, p2(context).toString.toDouble)
+            val v1 = p1(context).toString.toDouble
+            val v2 = p2(context).toString.toDouble
+            assert(!v1.isNaN)
+            assert(!v2.isNaN)
+            (v1, v2)
           }
         }
     }
@@ -51,7 +55,8 @@ object InputConverter {
       val (input, toDouble) = scales.head
       val (variable, tail) =
         scaled(input, toDouble, context, genome) match {
-          case ScaledScalar(p, v)   ⇒ Variable(p, v) -> genome.tail
+          case ScaledScalar(p, v) ⇒
+            assert(!v.isNaN); Variable(p, v) -> genome.tail
           case ScaledSequence(p, v) ⇒ Variable(p, v) -> genome.drop(input.size)
         }
 
@@ -62,7 +67,11 @@ object InputConverter {
     val (min, max) = toDouble.toDouble(context)
 
     input match {
-      case s @ Scalar(p, _, _)         ⇒ ScaledScalar(s.prototype, genomePart.head.scale(min, max))
+      case s @ Scalar(p, _, _) ⇒
+        val g = genomePart.head
+        assert(!g.isNaN)
+        val sc = g.scale(min, max)
+        ScaledScalar(s.prototype, sc)
       case s @ Sequence(p, _, _, size) ⇒ ScaledSequence(s.prototype, genomePart.take(size).toArray.map(_.scale(min, max)))
     }
   }

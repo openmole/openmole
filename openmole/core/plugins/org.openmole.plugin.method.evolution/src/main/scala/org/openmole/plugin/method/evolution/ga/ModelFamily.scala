@@ -80,7 +80,8 @@ trait ModelFamily extends NoArchive
     with TournamentOnRank
     with GeneticBreeding
     with HierarchicalRanking
-    with ModelFamilyGenome {
+    with ModelFamilyGenome
+    with ClampedGenome {
   type INPUT = String
   def inputConverter = implicitly
 

@@ -29,11 +29,8 @@ trait GAAlgorithm extends Archive
     with G with P with F with MF with MG with GA with DoubleSeqPhenotype with MGFitness
     with Modifier
     with Elitism
-    with Selection
     with Termination
-    with Mutation
-    with CrossOver
-    with GeneticBreeding
+    with Breeding
     with CloneRemoval
     with InputsConverter {
   def objectives: Objectives
@@ -54,7 +51,7 @@ trait GAAlgorithm extends Archive
         case (p, i) ⇒
           Variable(
             p.toArray,
-            individuals.map { iv ⇒ fitness.get(iv.fitness)(i) }.toArray)
+            individuals.map { iv ⇒ fitness(iv)(i) }.toArray)
       }
   }
 }

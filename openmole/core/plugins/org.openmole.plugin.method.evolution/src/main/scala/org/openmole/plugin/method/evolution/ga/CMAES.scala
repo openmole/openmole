@@ -20,20 +20,16 @@ package org.openmole.plugin.method.evolution.ga
 import fr.iscpif.mgo._
 import org.openmole.plugin.method.evolution._
 
-object GenomeProfile {
+object CMAES {
 
   def apply(
-    x: Int,
-    nX: Int,
-    termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F; type MF >: GenomeProfile#MF },
-    inputs: Inputs[Double],
-    objectives: Objectives,
-    reevaluate: Double = 0.0) = {
-    val (_x, _nX, _reevaluate, _inputs, _objectives) = (x, nX, reevaluate, inputs, objectives)
-    new GenomeProfile {
+    termination: GATermination { type G >: CMAES#G; type P >: CMAES#P; type F >: CMAES#F; type MF >: CMAES#MF },
+    inputs: Inputs[String],
+    objectives: Objectives) = {
+    val (_inputs, _objectives) = (inputs, objectives)
+    new CMAES {
       val inputs = _inputs
       val objectives = _objectives
-
       val stateManifest: Manifest[STATE] = termination.stateManifest
       val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
       val individualManifest: Manifest[Individual[G, P, F]] = implicitly
@@ -42,38 +38,23 @@ object GenomeProfile {
       val gManifest: Manifest[G] = implicitly
 
       val genomeSize = inputs.size
-      override val cloneProbability: Double = _reevaluate
 
-      val x = _x
-      val nX = _nX
+      //val mu = _mu
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
       def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
     }
-
   }
-
 }
 
-trait GenomeProfile extends GAAlgorithm
-    with ProfileModifier
-    with BestAggregatedNicheElitism
-    with ProfileNiche
-    with NoArchive
-    with NoDiversity
-    with ProfileGenomePlotter
-    with HierarchicalRanking
-    with BinaryTournamentSelection
-    with TournamentOnRank
-    with CoEvolvingSigmaValuesMutation
-    with SBXBoundedCrossover
-    with GAGenomeWithSigma
-    with GeneticBreeding
-    with MGFitness
+trait CMAES extends GAAlgorithm
+    with KeepOffspringElitism
+    with GAGenomeWithRandomValue
+    with NoModifier
     with MaxAggregation
+    with CMAESBreeding
+    with CMAESArchive
     with ClampedGenome {
-  type INPUT = Double
+  type INPUT = String
   def inputConverter = implicitly
-
-  def x: Int
 }

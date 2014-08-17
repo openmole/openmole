@@ -73,7 +73,9 @@ trait GenomeMap extends GAAlgorithm
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
     with GAGenomeWithSigma
-    with MaxAggregation {
+    with MaxAggregation
+    with GeneticBreeding
+    with ClampedGenome {
   type INPUT = Double
   def inputConverter = implicitly
 

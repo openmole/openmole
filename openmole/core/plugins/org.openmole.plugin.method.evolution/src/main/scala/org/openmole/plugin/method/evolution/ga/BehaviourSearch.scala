@@ -68,7 +68,8 @@ trait BehaviourSearch extends GAAlgorithm
     with CoEvolvingSigmaValuesMutation
     with GAGenomeWithSigma
     with RandomNicheElitism
-    with PhenotypeGridNiche {
+    with PhenotypeGridNiche
+    with ClampedGenome {
   type INPUT = String
   def inputConverter = implicitly
 }

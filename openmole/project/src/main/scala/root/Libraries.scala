@@ -197,10 +197,10 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies ++= Seq("org.netbeans.api" % "org-netbeans-api-visual" % "RELEASE73",
       "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 
-  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (
-    libraryDependencies += "fr.iscpif" %% "mgo" % "1.77",
+  lazy val mgo = OsgiProject("fr.iscpif.mgo", imports = Seq("*")) settings (
+    libraryDependencies += "fr.iscpif" %% "mgo" % "1.78-SNAPSHOT",
     bundleType := Set("plugin"),
-    version := "1.77"
+    version := "1.78-SNAPSHOT"
   )
 
   val monocleVersion = "0.4.0"
