@@ -59,7 +59,7 @@ object BehaviourSearch {
 trait BehaviourSearch extends GAAlgorithm
     with HitMapArchive
     with GeneticBreeding
-    with SortedTournamentSelection
+    with BinaryTournamentSelection
     with SBXBoundedCrossover
     with TournamentOnRank
     with RankModifier
