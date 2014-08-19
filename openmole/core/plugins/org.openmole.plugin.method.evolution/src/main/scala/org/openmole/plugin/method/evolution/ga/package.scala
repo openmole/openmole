@@ -292,7 +292,7 @@ package object ga {
       implicit val stateManifest = termination.stateManifest
 
       def initialArchive = evolution.initialArchive
-      def archive(a: A, offspring: Seq[Individual[G, P, F]]) = evolution.archive(a, offspring)
+      def archive(a: A, oldIndividuals: Seq[Individual[G, P, F]], offspring: Seq[Individual[G, P, F]]) = evolution.archive(a, oldIndividuals, offspring)
       def modify(individuals: Seq[Individual[G, P, F]], archive: A) = evolution.modify(individuals, archive)
       def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], archive: A)(implicit rng: Random) = evolution.elitism(individuals, newIndividuals, archive)
 
