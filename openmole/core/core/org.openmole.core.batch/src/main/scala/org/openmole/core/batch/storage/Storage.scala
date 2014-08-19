@@ -24,15 +24,16 @@ import java.io.OutputStream
 import java.util.UUID
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.workspace._
+import org.openmole.misc.tools.service.ThreadUtil._
 
 object Storage {
-  val Timeout = new ConfigurationLocation("Storage", "Timeout")
   val BufferSize = new ConfigurationLocation("Storage", "BufferSize")
   val CopyTimeout = new ConfigurationLocation("Storage", "CopyTimeout")
+  val CloseTimeout = new ConfigurationLocation("Storage", "CloseTimeout")
 
-  Workspace += (Timeout, "PT2M")
   Workspace += (BufferSize, "8192")
   Workspace += (CopyTimeout, "PT1M")
+  Workspace += (CloseTimeout, "PT2M")
 
   def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
 }
@@ -58,27 +59,28 @@ trait Storage {
   protected def upload(src: File, dest: String) = {
     val os = openOutputStream(dest)
     try src.copy(os, bufferSize, copyTimeout)
-    finally os.close
+    finally timeout(os.close)(closeTimeout)
   }
 
   protected def uploadGZ(src: File, dest: String) = {
     val os = openOutputStream(dest).toGZ
     try src.copy(os, bufferSize, copyTimeout)
-    finally os.close
+    finally timeout(os.close)(closeTimeout)
   }
 
   protected def download(src: String, dest: File) = {
     val is = openInputStream(src)
     try is.copy(dest, bufferSize, copyTimeout)
-    finally is.close
+    finally timeout(is.close)(closeTimeout)
   }
 
   protected def downloadGZ(src: String, dest: File) = {
     val is = openInputStream(src).toGZ
     try is.copy(dest, bufferSize, copyTimeout)
-    finally is.close
+    finally timeout(is.close)(closeTimeout)
   }
 
   private def bufferSize = Workspace.preferenceAsInt(Storage.BufferSize)
   private def copyTimeout = Workspace.preferenceAsDuration(Storage.CopyTimeout)
+  private def closeTimeout = Workspace.preferenceAsDuration(Storage.CloseTimeout)
 }
