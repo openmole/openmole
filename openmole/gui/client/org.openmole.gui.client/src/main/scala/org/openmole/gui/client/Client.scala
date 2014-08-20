@@ -28,7 +28,7 @@ object Client {
     val submitButton = button("Click meee")(
       cursor := "pointer",
       onclick := { () ⇒
-        Post[Api](_.hello(5)).foreach { i ⇒
+        Post(_.hello(5)).foreach { i ⇒
           helloValue() = helloValue() + i
         }
         false
@@ -42,7 +42,7 @@ object Client {
   }
 }
 
-object Post extends autowire.Client[Web] {
+object Post extends autowire.Client[Api] {
 
   override def callRequest(req: Request): Future[String] = {
     val url = req.path.mkString("/")

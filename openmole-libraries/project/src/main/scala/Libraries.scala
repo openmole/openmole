@@ -64,15 +64,17 @@ object Libraries extends Defaults(Apache) {
     exports = Seq("org.scalatra.*, org.fusesource.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.json4s", "*")) settings
     (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % scalatraVersion,
-      "org.scalatra" %% "scalatra-scalate" % scalatraVersion,
       "org.scalatra" %% "scalatra-json" % scalatraVersion), version := scalatraVersion) dependsOn (slf4j)
+
+  lazy val scalate = OsgiProject("scalate", exports = Seq("org.scalatra.*")) settings
+    (libraryDependencies += "org.scalatra" %% "scalatra-scalate" % scalatraVersion)
 
   lazy val jacksonJson = OsgiProject("org.json4s") settings(
     libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.9",
     exportPackage += "com.fasterxml.*",
     version := "3.2.9"
     )
-
+  
   lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl")) settings
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9")
 
@@ -204,7 +206,7 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6", version := "0.6")
 
   lazy val autowire = OsgiProject("autowire", exports = Seq("autowire.*")) settings (
-    libraryDependencies += "com.lihaoyi" %% "autowire" % "0.1.2", version := "0.1.2")
+    libraryDependencies += "com.lihaoyi" %% "autowire" % "0.1.4", version := "0.1.4")
 
   lazy val mgoVersion = "1.78-SNAPSHOT"
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (

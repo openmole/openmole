@@ -23,7 +23,7 @@ import js.Dynamic.{ literal ⇒ lit }
 import rx._
 
 class FlowChart {
-
+  /*
   def apply[T](settings: WorkflowSettings,
                tasks: Seq[TaskWindow],
                connections: Seq[(TaskWindow, TaskWindow)]) = {
@@ -86,5 +86,5 @@ class FlowChart {
       }
     }*/
 
-  }
+  }*/
 }
