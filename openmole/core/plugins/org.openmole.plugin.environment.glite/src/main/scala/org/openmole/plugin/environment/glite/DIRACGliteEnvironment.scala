@@ -18,12 +18,14 @@
 package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
 import fr.iscpif.gridscale.glite.BDII
 import org.openmole.misc.filedeleter.FileDeleter
 import org.openmole.misc.exception.UserBadDataError
 import fr.iscpif.gridscale.dirac.DIRACJobService
 import concurrent.duration._
+import scala.ref.WeakReference
 
 object DIRACGliteEnvironment {
 
@@ -70,6 +72,11 @@ class DIRACGliteEnvironment(
     val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId with LCGCp { env ⇒
 
   type JS = DIRACGliteJobService
+
+  @transient lazy val registerAgents = {
+    Updater.delay(new EagerSubmissionAgent(WeakReference(this)))
+    None
+  }
 
   def bdiiServer: BDII = new BDII(bdii)
 

@@ -31,9 +31,9 @@ object Storage {
   val CopyTimeout = new ConfigurationLocation("Storage", "CopyTimeout")
   val CloseTimeout = new ConfigurationLocation("Storage", "CloseTimeout")
 
-  Workspace += (BufferSize, "8192")
+  Workspace += (BufferSize, "65535")
   Workspace += (CopyTimeout, "PT1M")
-  Workspace += (CloseTimeout, "PT2M")
+  Workspace += (CloseTimeout, "PT1M")
 
   def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
 }

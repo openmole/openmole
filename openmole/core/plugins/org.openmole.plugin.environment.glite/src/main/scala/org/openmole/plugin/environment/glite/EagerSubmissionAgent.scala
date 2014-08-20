@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.glite
 
-import org.openmole.core.batch.environment.BatchExecutionJob
+import org.openmole.core.batch.environment.{BatchEnvironment, BatchExecutionJob}
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
@@ -49,7 +49,7 @@ object EagerSubmissionAgent extends Logger {
 import EagerSubmissionAgent._
 import Log._
 
-class EagerSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
+class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment]) extends IUpdatableWithVariableDelay {
 
   @transient lazy val runningHistory = new mutable.Queue[TimeInt]
 
