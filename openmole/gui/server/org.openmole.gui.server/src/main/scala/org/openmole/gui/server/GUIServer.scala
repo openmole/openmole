@@ -28,9 +28,16 @@ import org.openmole.gui.shared._
 import scala.concurrent.duration._
 import scala.concurrent.Await
 
-object Server extends Api {
+object ApiImpl extends Api {
   def hello(a: Int) = a * 3
+
   def caseClass: MyCaseClass = new MyCaseClass("Hello !")
+}
+
+object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Writer] {
+  def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
+
+  def write[Result: upickle.Writer](r: Result) = upickle.write(r)
 }
 
 class GUIServer extends ScalatraServlet {
@@ -50,8 +57,8 @@ class GUIServer extends ScalatraServlet {
   }
 
   post(s"/$basePath/*") {
-    Await.result(autowire.Macros.route[Api](Server)(
-      autowire.Request(Seq(basePath) ++ multiParams("splat").head.split("/"),
+    Await.result(AutowireServer.route[Api](ApiImpl)(
+      autowire.Core.Request(Seq(basePath) ++ multiParams("splat").head.split("/"),
         upickle.read[Map[String, String]](request.body))
     ), Duration.Inf)
   }

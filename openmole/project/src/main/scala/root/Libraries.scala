@@ -58,7 +58,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scalatra = "org.openmole" %% "org-scalatra" % scalatraVersion
 
-  lazy val scalate = "org.openmole" %% "org-scalatra" % scalatraVersion
+  lazy val scalate = "org.openmole" %% "scalate" % scalatraVersion
 
   lazy val jacksonJson = "org.openmole" %% "org-json4s" % "3.2.9"
 
@@ -95,15 +95,28 @@ object Libraries extends Defaults(Apache) {
 
   lazy val guava = "org.openmole" %% "com-google-guava" % "16.0.1"
 
-  lazy val scalaTags = "org.openmole" %% "com-scalatags" % "0.4.0"
+  lazy val scalaTagsVersion = "0.4.0"
+  lazy val scalaRxVersion = "0.2.6"
+  lazy val scalaUpickleVersion = "0.2.2"
+  lazy val scalaAutowireVersion = "0.2.2"
 
-  lazy val scalaRx = "org.openmole" %% "com-scalarx" % "0.2.6"
+  lazy val scalaTagsJS = "org.openmole" %% "com-scalatags-js" % scalaTagsVersion
 
-  lazy val upickle = "org.openmole" %% "upickle" % "0.2.1"
+  lazy val scalaRxJS = "org.openmole" %% "com-scalarx-js" % scalaRxVersion
+
+  lazy val upickleJS = "org.openmole" %% "upickle-js" % scalaUpickleVersion
+
+  lazy val autowireJS = "org.openmole" %% "autowire-js" % scalaAutowireVersion
+
+  lazy val scalaTagsJVM = "org.openmole" %% "com-scalatags-jvm" % scalaTagsVersion
+
+  lazy val scalaRxJVM = "org.openmole" %% "com-scalarx-jvm" % scalaRxVersion
+
+  lazy val upickleJVM = "org.openmole" %% "upickle-jvm" % scalaUpickleVersion
+
+  lazy val autowireJVM = "org.openmole" %% "autowire-jvm" % scalaAutowireVersion
 
   lazy val scalajsDom = "org.openmole" %% "org-scala-lang-modules-scalajs" % "0.6"
-
-  lazy val autowire = "org.openmole" %% "autowire" % "0.1.4"
 
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % mgoVersion
 
