@@ -12,7 +12,7 @@ object Client extends GuiDefaults {
 
   lazy val client = OsgiProject("org.openmole.gui.client") dependsOn
     (Tools.tools, Shared.shared, Ext.dataui) settings (jsManagerSettings: _*) settings (
-      libraryDependencies ++= Seq(autowire, scalaTags, scalaRx, scalajsDom),
+      libraryDependencies ++= Seq(upickleJS, autowireJS, scalaTagsJS, scalaRxJS, scalajsDom),
       jsCall := "Plot().run();",
       outputPath := Server.dir + "/src/main/webapp/"
     )

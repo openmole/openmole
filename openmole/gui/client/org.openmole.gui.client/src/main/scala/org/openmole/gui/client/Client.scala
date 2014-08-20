@@ -28,7 +28,7 @@ object Client {
     val submitButton = button("Click meee")(
       cursor := "pointer",
       onclick := { () ⇒
-        Post(_.hello(5)).foreach { i ⇒
+        Post[Api].hello(5).call().foreach { i ⇒
           helloValue() = helloValue() + i
         }
         false
@@ -42,9 +42,9 @@ object Client {
   }
 }
 
-object Post extends autowire.Client[Api] {
+object Post extends autowire.Client[String, upickle.Reader, upickle.Writer] {
 
-  override def callRequest(req: Request): Future[String] = {
+  override def doCall(req: Request): Future[String] = {
     val url = req.path.mkString("/")
     println(" URL " + url)
     dom.extensions.Ajax.post(
@@ -54,4 +54,8 @@ object Post extends autowire.Client[Api] {
         _.responseText
       }
   }
+
+  def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
+
+  def write[Result: upickle.Writer](r: Result) = upickle.write(r)
 }

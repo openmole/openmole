@@ -14,7 +14,7 @@ object Server extends GuiDefaults {
   override val dir = super.dir / "server"
 
   lazy val server = OsgiProject("org.openmole.gui.server") settings
-    (includeOsgi, libraryDependencies ++= Seq(scalatra, logback, jetty, scalajsDom, upickle, autowire, slick)) dependsOn
+    (includeOsgi, libraryDependencies ++= Seq(scalatra, logback, jetty, scalajsDom, upickleJVM, autowireJVM, slick)) dependsOn
     (Shared.shared, Ext.dataui, base.Misc.workspace) settings (bundle <<= bundle dependsOn (toJs in Client.client))
 
   /*   (robustIt, base.Core.model, base.Core.batch, base.Misc.exception, base.Misc.eventDispatcher, Web.misc,

@@ -11,6 +11,6 @@ object Tools extends GuiDefaults {
 
   lazy val tools = OsgiProject("org.openmole.gui.tools") dependsOn
     (provided(base.Misc.workspace)) settings (
-      libraryDependencies ++= Seq(autowire, scalaTags, scalaRx, scalajsDom)
+      libraryDependencies ++= Seq(scalaTagsJS, scalaRxJS, scalajsDom)
     )
 }
