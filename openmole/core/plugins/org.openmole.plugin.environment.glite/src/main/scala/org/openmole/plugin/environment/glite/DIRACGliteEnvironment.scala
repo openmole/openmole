@@ -83,7 +83,7 @@ class DIRACGliteEnvironment(
     registerAgents
     super.submit(job)
   }
-  
+
   def bdiiServer: BDII = new BDII(bdii)
 
   def getAuthentication = authentications(classOf[DIRACAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))

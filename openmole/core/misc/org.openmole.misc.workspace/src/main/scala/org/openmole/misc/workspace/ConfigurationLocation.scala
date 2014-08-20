@@ -29,4 +29,5 @@ class ConfigurationLocation(val group: String, val name: String, val cyphered: B
 
   override def equals(obj: Any) = (group, name).equals(obj)
   override def hashCode = (group, name).hashCode
+  override def toString = s"$group.$name"
 }

@@ -53,11 +53,11 @@ object GliteEnvironment extends Logger {
   val VOCardDownloadTimeOut = new ConfigurationLocation("GliteEnvironment", "VOCardDownloadTimeOut")
   val VOCardCacheTime = new ConfigurationLocation("GliteEnvironment", "VOCardCacheTime")
 
-  val OverSubmissionInterval = new ConfigurationLocation("GliteEnvironment", "OverSubmissionInterval")
-  val OverSubmissionMinNumberOfJob = new ConfigurationLocation("GliteEnvironment", "OverSubmissionMinNumberOfJob")
-  val OverSubmissionNumberOfJobUnderMin = new ConfigurationLocation("GliteEnvironment", "OverSubmissionNumberOfJobUnderMin")
-  val OverSubmissionNbSampling = new ConfigurationLocation("GliteEnvironment", "OverSubmissionNbSampling")
-  val OverSubmissionSamplingWindowFactor = new ConfigurationLocation("GliteEnvironment", "OverSubmissionSamplingWindowFactor")
+  val EagerSubmissionInterval = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionInterval")
+  val EagerSubmissionMinNumberOfJob = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionMinNumberOfJob")
+  val EagerSubmissionNumberOfJobUnderMin = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionNumberOfJobUnderMin")
+  val EagerSubmissionNbSampling = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionNbSampling")
+  val EagerSubmissionSamplingWindowFactor = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionSamplingWindowFactor")
 
   val LocalThreadsBySE = new ConfigurationLocation("GliteEnvironment", "LocalThreadsBySE")
   val LocalThreadsByWMS = new ConfigurationLocation("GliteEnvironment", "LocalThreadsByWMS")
@@ -105,13 +105,13 @@ object GliteEnvironment extends Logger {
   Workspace += (ProxyRenewalRatio, "0.2")
   Workspace += (MinProxyRenewal, "PT5M")
 
-  Workspace += (OverSubmissionNbSampling, "10")
-  Workspace += (OverSubmissionSamplingWindowFactor, "5")
+  Workspace += (EagerSubmissionNbSampling, "10")
+  Workspace += (EagerSubmissionSamplingWindowFactor, "5")
 
-  Workspace += (OverSubmissionInterval, "PT5M")
+  Workspace += (EagerSubmissionInterval, "PT5M")
 
-  Workspace += (OverSubmissionMinNumberOfJob, "100")
-  Workspace += (OverSubmissionNumberOfJobUnderMin, "10")
+  Workspace += (EagerSubmissionMinNumberOfJob, "100")
+  Workspace += (EagerSubmissionNumberOfJobUnderMin, "10")
 
   Workspace += (JobShakingHalfLife, "PT30M")
   Workspace += (JobShakingMaxReady, "100")

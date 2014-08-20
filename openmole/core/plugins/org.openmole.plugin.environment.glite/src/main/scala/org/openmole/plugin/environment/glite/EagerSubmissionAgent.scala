@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.glite
 
-import org.openmole.core.batch.environment.{BatchEnvironment, BatchExecutionJob}
+import org.openmole.core.batch.environment.{ BatchEnvironment, BatchExecutionJob }
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
@@ -53,7 +53,7 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment]) extends
 
   @transient lazy val runningHistory = new mutable.Queue[TimeInt]
 
-  override def delay = Workspace.preferenceAsDuration(GliteEnvironment.OverSubmissionInterval)
+  override def delay = Workspace.preferenceAsDuration(GliteEnvironment.EagerSubmissionInterval)
 
   override def update: Boolean = {
     try {
@@ -79,15 +79,15 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment]) extends
 
       logger.fine(s"maxRunning $maxRunning, stillRunning $stillRunning, stillReady $stillReady")
 
-      val minOversub = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)
+      val minOversub = Workspace.preferenceAsInt(GliteEnvironment.EagerSubmissionMinNumberOfJob)
 
       var nbRessub =
         if (jobs.size > minOversub) {
           if (maxRunning < minOversub) minOversub - jobs.size else maxRunning - (stillRunning + stillReady)
         }
-        else Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob) - jobs.size
+        else Workspace.preferenceAsInt(GliteEnvironment.EagerSubmissionMinNumberOfJob) - jobs.size
 
-      val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionNumberOfJobUnderMin)
+      val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(GliteEnvironment.EagerSubmissionNumberOfJobUnderMin)
 
       logger.fine("resubmit " + nbRessub)
 

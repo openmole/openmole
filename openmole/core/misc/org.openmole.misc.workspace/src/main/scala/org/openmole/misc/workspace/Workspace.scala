@@ -100,6 +100,12 @@ object Workspace {
 
   def defaultValue(location: ConfigurationLocation): String = instance.defaultValue(location)
 
+  def overridePreference(preference: String, value: String) = instance.overridePreference(preference, value)
+
+  def overridePreference(preference: ConfigurationLocation, value: String) = instance.overridePreference(preference, value)
+
+  def unsetOverridePreference(preference: String) = instance.unsetOverridePreference(preference)
+
   def rawPreference(location: ConfigurationLocation): String = instance.rawPreference(location)
 
   def preference(location: ConfigurationLocation): String = instance.preference(location)
@@ -199,6 +205,8 @@ class Workspace(val location: File) {
     configuration
   }
 
+  lazy val overriden = collection.mutable.HashMap[String, String]()
+
   def clean = tmpDir.recursiveDelete
 
   def newDir(prefix: String): File = tmpDir.newDir(prefix)
@@ -215,9 +223,19 @@ class Workspace(val location: File) {
     }
   }
 
+  def overridePreference(preference: ConfigurationLocation, value: String): Unit =
+    overridePreference(preference.toString, value)
+
+  def overridePreference(preference: String, value: String): Unit = synchronized {
+    overriden(preference) = value
+  }
+
+  def unsetOverridePreference(preference: String) = synchronized {
+    overriden.remove(preference)
+  }
+
   def rawPreference(location: ConfigurationLocation): String = synchronized {
-    val conf = configuration.subset(location.group)
-    conf.getString(location.name)
+    overriden.getOrElse(location.toString, configuration.subset(location.group).getString(location.name))
   }
 
   def preference(location: ConfigurationLocation): String = synchronized {
