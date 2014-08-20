@@ -18,6 +18,7 @@
 package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.model.job.IJob
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
 import fr.iscpif.gridscale.glite.BDII
@@ -78,6 +79,11 @@ class DIRACGliteEnvironment(
     None
   }
 
+  override def submit(job: IJob) = {
+    registerAgents
+    super.submit(job)
+  }
+  
   def bdiiServer: BDII = new BDII(bdii)
 
   def getAuthentication = authentications(classOf[DIRACAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
