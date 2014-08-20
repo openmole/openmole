@@ -54,7 +54,11 @@ object Libraries extends Defaults(Apache) {
 
   lazy val jetty = "org.openmole" %% "org-eclipse-jetty" % "8.1.8.v20121106"
 
-  lazy val scalatra = "org.openmole" %% "org-scalatra" % "2.3.0"
+  lazy val scalatraVersion = "2.3.0"
+
+  lazy val scalatra = "org.openmole" %% "org-scalatra" % scalatraVersion
+
+  lazy val scalate = "org.openmole" %% "org-scalatra" % scalatraVersion
 
   lazy val jacksonJson = "org.openmole" %% "org-json4s" % "3.2.9"
 
@@ -103,7 +107,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scalajsDom = "org.openmole" %% "org-scala-lang-modules-scalajs" % "0.6"
 
-  lazy val autowire = "org.openmole" %% "autowire" % "0.1.2"
+  lazy val autowire = "org.openmole" %% "autowire" % "0.1.4"
 
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "1.76"
 

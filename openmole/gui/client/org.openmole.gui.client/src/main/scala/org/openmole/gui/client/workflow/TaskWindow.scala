@@ -1,6 +1,6 @@
 package org.openmole.gui.client.workflow
 
-import org.openmole.gui.ext.dataproxy.TaskDataProxy
+import org.openmole.gui.ext.data.TaskDataUI
 import rx.core.Obs
 
 /*
@@ -19,10 +19,11 @@ import rx.core.Obs
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import rx._
 
-class TaskWindow(val proxy: TaskDataProxy) {
+class TaskWindow(val dataUI: Var[TaskDataUI] = Var(TaskDataUI.empty)) {
 
-  Obs(proxy.dataUI) {
+  Obs(dataUI) {
     println("the dataUI changed")
   }
 }

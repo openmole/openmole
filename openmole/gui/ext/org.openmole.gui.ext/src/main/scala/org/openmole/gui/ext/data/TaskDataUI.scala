@@ -17,5 +17,12 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+object TaskDataUI {
+  def empty = new TaskDataUI {
+    override def name: String = ""
+    override def coreClass: Class[_] = classOf[Any]
+  }
+}
+
 trait TaskDataUI <: DataUI {
 }

@@ -25,7 +25,7 @@ object Web extends Defaults {
     buddyPolicy = Some("global"),
     imports = Seq("org.h2.*", "*;resolution:=optional")) dependsOn
     (base.Core.implementation, base.Core.serializer, iceTar, misc) settings
-    (libraryDependencies ++= Seq(bouncyCastle, h2, jetty, slick, logback, scalatra, bonecp, scalaLang, xstream, jacksonJson, arm, codec))
+    (libraryDependencies ++= Seq(bouncyCastle, h2, jetty, slick, logback, scalatra, scalate, bonecp, scalaLang, xstream, jacksonJson, arm, codec))
 
   lazy val misc = OsgiProject("org.openmole.web.misc.tools", "misc/tools") dependsOn
     (base.Misc.workspace) settings (libraryDependencies ++= Seq(scalajHttp, arm))
