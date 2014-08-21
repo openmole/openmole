@@ -17,24 +17,21 @@
 
 package org.openmole.plugin.method.evolution.ga
 
-import fr.iscpif.mgo._
 import org.openmole.plugin.method.evolution._
+import fr.iscpif.mgo._
 
-object Optimisation {
+object MonoObjective {
 
   def apply(
     mu: Int,
-    termination: GATermination { type G >: Optimisation#G; type P >: Optimisation#P; type F >: Optimisation#F; type MF >: Optimisation#MF },
+    termination: GATermination { type G >: MonoObjective#G; type P >: MonoObjective#P; type F >: MonoObjective#F; type MF >: MonoObjective#MF },
     inputs: Inputs[String],
-    objectives: Objectives,
-    dominance: Dominance = NonStrict,
-    ranking: GARankingBuilder = Pareto,
-    diversityMetric: DiversityMetricBuilder = Crowding,
+    objective: Objective,
     reevaluate: Double = 0.0) = {
-    val (_mu, _ranking, _diversityMetric, _reevaluate, _inputs, _objectives) = (mu, ranking, diversityMetric, reevaluate, inputs, objectives)
-    new Optimisation {
+    val (_mu, _reevaluate, _inputs) = (mu, reevaluate, inputs)
+    new MonoObjective {
       val inputs = _inputs
-      val objectives = _objectives
+      val objectives = Seq(objective)
       val stateManifest: Manifest[STATE] = termination.stateManifest
       val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
       val individualManifest: Manifest[Individual[G, P, F]] = implicitly
@@ -46,11 +43,7 @@ object Optimisation {
 
       override val cloneProbability: Double = _reevaluate
 
-      val diversityMetric = _diversityMetric(dominance)
-      val ranking = _ranking(dominance)
       val mu = _mu
-      def diversity(individuals: Seq[Seq[Double]]) = diversityMetric.diversity(individuals)
-      def rank(individuals: Seq[Seq[Double]]) = ranking.rank(individuals)
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
       def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
@@ -58,19 +51,20 @@ object Optimisation {
   }
 }
 
-trait Optimisation extends NoArchive
-    with RankDiversityModifier
-    with GAAlgorithm
-    with NonDominatedElitism
+trait MonoObjective extends GAAlgorithm
+    with GAGenome
     with BinaryTournamentSelection
-    with TournamentOnRankAndDiversity
-    with CoEvolvingSigmaValuesMutation
-    with SBXBoundedCrossover
+    with TournamentOnAggregatedFitness
+    with BestAggregatedElitism
+    with BLXCrossover
+    with BGAMutation
+    with NoArchive
+    with CloneRemoval
     with GeneticBreeding
-    with GAGenomeWithSigma
-    with ClampedGenome {
+    with MGFitness
+    with ClampedGenome
+    with MaxAggregation
+    with NoModifier {
   type INPUT = String
   def inputConverter = implicitly
-
 }
-

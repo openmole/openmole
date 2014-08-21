@@ -22,6 +22,6 @@ import fr.iscpif.mgo.Individual
 import evolution.ga._
 
 package object evolution {
-
-  type Objectives = Seq[Prototype[Double]]
+  type Objective = Prototype[Double]
+  type Objectives = Seq[Objective]
 }
