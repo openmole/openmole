@@ -380,6 +380,7 @@ package object ga {
       firstCapsule -<
         (preIslandCapsule, size = Some(number.toString)) --
         islandSlot --
+        renameIndividualsTask --
         elitismCaps --
         terminationSlot --
         scalingIndividualsSlot >| (endCapsule, terminated.name + " == true")
