@@ -93,7 +93,6 @@ class MoleExecution(
   private val _endTime = Ref(None: Option[Long])
 
   private val ticketNumber = Ref(0L)
-  private val jobId = Ref(0L)
 
   private val waitingJobs: TMap[ICapsule, TMap[IMoleJobGroup, Ref[List[IMoleJob]]]] =
     TMap(grouping.map { case (c, g) ⇒ c -> TMap.empty[IMoleJobGroup, Ref[List[IMoleJob]]] }.toSeq: _*)

@@ -19,12 +19,11 @@ package org.openmole.core.implementation.tools
 
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.tools.IRegistryWithTicket
-import scala.collection.mutable.{ WeakHashMap, HashMap, SynchronizedMap }
+import scala.collection.mutable.{ WeakHashMap, HashMap }
 
 class RegistryWithTicket[K, V] extends IRegistryWithTicket[K, V] {
 
-  class Registry extends HashMap[K, V] with SynchronizedMap[K, V]
-
+  class Registry extends HashMap[K, V]
   val registries = new WeakHashMap[ITicket, Registry]
 
   def registry(ticket: ITicket): Registry = synchronized {
@@ -44,7 +43,7 @@ class RegistryWithTicket[K, V] extends IRegistryWithTicket[K, V] {
   }
 
   override def remove(key: K, ticket: ITicket): Option[V] = synchronized {
-    var ret = registry(ticket).remove(key)
+    val ret = registry(ticket).remove(key)
     if (registries(ticket).isEmpty) registries -= ticket
     ret
   }
