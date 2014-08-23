@@ -30,10 +30,6 @@ import scala.ref.WeakReference
 
 object DIRACGliteEnvironment {
 
-  val LocalThreads = new ConfigurationLocation("DIRACEnvironment", "LocalThreads")
-
-  Workspace += (LocalThreads, "20")
-
   def apply(
     voName: String,
     service: String,
@@ -101,7 +97,6 @@ class DIRACGliteEnvironment(
   def allJobServices = List(jobService)
 
   @transient lazy val jobService = new DIRACGliteJobService {
-    def nbTokens = Workspace.preferenceAsInt(DIRACGliteEnvironment.LocalThreads)
     val environment = env
     val jobService = new DIRACJobService {
       def group = env.group
