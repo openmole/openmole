@@ -25,7 +25,7 @@ import fr.iscpif.gridscale.dirac.{ DIRACJobService, DIRACJobDescription }
 import org.openmole.misc.tools.service._
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }
-import org.openmole.core.batch.control.{UnlimitedAccess, LimitedAccess}
+import org.openmole.core.batch.control.{ UnlimitedAccess, LimitedAccess }
 import StatusFiles._
 import scalax.io.Resource
 import java.io.File

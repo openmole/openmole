@@ -30,6 +30,10 @@ import scala.ref.WeakReference
 
 object DIRACGliteEnvironment {
 
+  val LocalThreads = new ConfigurationLocation("DiracGliteEnvironment", "LocalThreadsBySE")
+
+  Workspace += (LocalThreads, "20")
+
   def apply(
     voName: String,
     service: String,
@@ -102,6 +106,7 @@ class DIRACGliteEnvironment(
       def group = env.group
       def service = env.service
       def credential = env.authentication
+      override def maxConnections = Workspace.preferenceAsInt(DIRACGliteEnvironment.LocalThreads)
     }
   }
 
