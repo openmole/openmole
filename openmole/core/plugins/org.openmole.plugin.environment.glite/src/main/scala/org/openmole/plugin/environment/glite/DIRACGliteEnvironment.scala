@@ -30,7 +30,7 @@ import scala.ref.WeakReference
 
 object DIRACGliteEnvironment {
 
-  val LocalThreads = new ConfigurationLocation("DiracGliteEnvironment", "LocalThreadsBySE")
+  val LocalThreads = new ConfigurationLocation("DiracGliteEnvironment", "LocalThreads")
 
   Workspace += (LocalThreads, "100")
 
