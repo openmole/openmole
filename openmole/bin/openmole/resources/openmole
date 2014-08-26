@@ -41,13 +41,13 @@ SPLASHSCREEN="${LOCATION}/splashscreen.png"
 
 ARGS=""
 
-for ARG in $@
-do
-  case "$ARG" in
-    -c|-wc) SPLASHSCREEN=""; ARGS="$ARGS $ARG";;
-    -mem) MEM=$ARG ;;
-    *) ARGS="$ARGS $ARG" ;;
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -c|-wc) SPLASHSCREEN=""; ARGS="$ARGS $1";;
+    -mem) shift; MEM=$1 ;;
+    *) ARGS="$ARGS $1" ;;
   esac
+  shift
 done
 
 mkdir -p $HOME/.openmole/.tmp/
