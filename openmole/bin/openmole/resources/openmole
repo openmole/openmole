@@ -39,9 +39,15 @@ esac
 
 SPLASHSCREEN="${LOCATION}/splashscreen.png"
 
+ARGS=""
+
 for ARG in $@
 do
-  if [[ $ARG == "-c" || $ARG == "-ws" ]]; then SPLASHSCREEN=""; fi
+  case "$ARG" in
+    -c|-wc) SPLASHSCREEN=""; ARGS="$ARGS $ARG";;
+    -mem) MEM=$ARG ;;
+    *) ARGS="$ARGS $ARG" ;;
+  esac
 done
 
 mkdir -p $HOME/.openmole/.tmp/
@@ -49,7 +55,7 @@ CONFIGDIR=$HOME/.openmole/.tmp/`date +%s`_$RANDOM
 
 java -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -splash:"${SPLASHSCREEN}" -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseG1GC \
      -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog \
-     -cp "$LOCATION/openmole-plugins" -gp "$LOCATION/openmole-plugins-gui" "$@"
+     -cp "$LOCATION/openmole-plugins" -gp "$LOCATION/openmole-plugins-gui" "$ARGS"
 
 rm -rf ${CONFIGDIR} 
 
