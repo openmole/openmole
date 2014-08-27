@@ -100,7 +100,7 @@ class Application extends IApplication {
         case Nil                                    ⇒ c
       }
 
-    val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]]
+    val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]].map(_.trim)
 
     val config = parse(args.toList)
 
