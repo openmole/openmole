@@ -25,10 +25,14 @@ import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.batch.environment.{ ResubmitException, BatchEnvironment }
 import org.openmole.misc.workspace.Workspace
 
+object RefreshActor extends Logger
+
+import RefreshActor.Log._
+
 class RefreshActor(jobManager: ActorRef) extends Actor {
 
   def receive = {
-    case Refresh(job, sj, bj, delay, consecutiveUpdateErrors) ⇒
+    case Refresh(job, sj, bj, delay, updateErrorsInARow) ⇒
       if (!job.state.isFinal) {
         try bj.jobService.tryWithToken {
           case Some(t) ⇒
@@ -42,16 +46,19 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
               jobManager ! Delay(Refresh(job, sj, bj, newDelay, 0), newDelay)
             }
             else jobManager ! Kill(job)
-          case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay, consecutiveUpdateErrors), delay)
+          case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow), delay)
         } catch {
           case _: ResubmitException ⇒
             jobManager ! Resubmit(job, sj.storage)
           case e: Throwable ⇒
-            if (consecutiveUpdateErrors >= Workspace.preferenceAsInt(MaxConsecutiveUpdateErrors)) {
+            if (updateErrorsInARow >= Workspace.preferenceAsInt(MaxUpdateErrorsInARow)) {
               jobManager ! Error(job, e)
               jobManager ! Kill(job)
             }
-            else jobManager ! Delay(Refresh(job, sj, bj, delay, consecutiveUpdateErrors + 1), delay)
+            else {
+              logger.log(FINE, s"${updateErrorsInARow + 1} error in a row during job refresh", e)
+              jobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow + 1), delay)
+            }
         }
       }
       System.runFinalization
