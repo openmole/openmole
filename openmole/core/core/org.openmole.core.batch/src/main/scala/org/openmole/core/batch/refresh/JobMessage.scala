@@ -29,7 +29,7 @@ case class Upload(job: BatchExecutionJob) extends JobMessage
 case class Uploaded(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage
 case class Submit(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage
 case class Submitted(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJob) extends JobMessage
-case class Refresh(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJob, delay: FiniteDuration) extends JobMessage
+case class Refresh(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJob, delay: FiniteDuration, consecutiveUpdateErrors: Int = 0) extends JobMessage
 case class Resubmit(job: BatchExecutionJob, storage: StorageService) extends JobMessage
 case class Delay(msg: JobMessage, delay: FiniteDuration) extends JobMessage
 case class Error(job: BatchExecutionJob, exception: Throwable) extends JobMessage

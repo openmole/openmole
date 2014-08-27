@@ -23,10 +23,12 @@ import akka.actor.ActorRef
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.batch.environment.{ ResubmitException, BatchEnvironment }
+import org.openmole.misc.workspace.Workspace
 
 class RefreshActor(jobManager: ActorRef) extends Actor {
+
   def receive = {
-    case Refresh(job, sj, bj, delay) ⇒
+    case Refresh(job, sj, bj, delay, consecutiveUpdateErrors) ⇒
       if (!job.state.isFinal) {
         try bj.jobService.tryWithToken {
           case Some(t) ⇒
@@ -37,16 +39,19 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
               val newDelay =
                 if (oldState == job.state) (delay + job.environment.incrementUpdateInterval) min job.environment.maxUpdateInterval
                 else job.environment.minUpdateInterval
-              jobManager ! Delay(Refresh(job, sj, bj, newDelay), newDelay)
+              jobManager ! Delay(Refresh(job, sj, bj, newDelay, 0), newDelay)
             }
             else jobManager ! Kill(job)
-          case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay), delay)
+          case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay, consecutiveUpdateErrors), delay)
         } catch {
           case _: ResubmitException ⇒
             jobManager ! Resubmit(job, sj.storage)
           case e: Throwable ⇒
-            jobManager ! Error(job, e)
-            jobManager ! Kill(job)
+            if (consecutiveUpdateErrors >= Workspace.preferenceAsInt(MaxConsecutiveUpdateErrors)) {
+              jobManager ! Error(job, e)
+              jobManager ! Kill(job)
+            }
+            else jobManager ! Delay(Refresh(job, sj, bj, delay, consecutiveUpdateErrors + 1), delay)
         }
       }
       System.runFinalization

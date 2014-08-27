@@ -76,6 +76,7 @@ object BatchEnvironment extends Logger {
   val MinUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MinUpdateInterval")
   val MaxUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval")
   val IncrementUpdateInterval = new ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval")
+  val MaxConsecutiveUpdateErrors = ConfigurationLocation("BatchEnvironment", "MaxConsecutiveUpdateErrors")
 
   val JobManagmentThreads = new ConfigurationLocation("BatchEnvironment", "JobManagmentThreads")
 
@@ -90,6 +91,7 @@ object BatchEnvironment extends Logger {
   Workspace += (MinUpdateInterval, "PT1M")
   Workspace += (MaxUpdateInterval, "PT10M")
   Workspace += (IncrementUpdateInterval, "PT1M")
+  Workspace += (MaxConsecutiveUpdateErrors, "3")
 
   private def runtimeDirLocation = Workspace.openMOLELocation.getOrElse(throw new InternalProcessingError("openmole.location not set")).child("runtime")
 
