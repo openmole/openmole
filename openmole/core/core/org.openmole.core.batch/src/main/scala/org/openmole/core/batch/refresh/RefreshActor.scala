@@ -56,7 +56,7 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
               jobManager ! Kill(job)
             }
             else {
-              logger.log(FINE, s"${updateErrorsInARow + 1} error in a row during job refresh", e)
+              logger.log(FINE, s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
               jobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow + 1), delay)
             }
         }
