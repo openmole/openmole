@@ -13,4 +13,6 @@ object Method extends PluginDefaults {
 
   lazy val stochastic = OsgiProject("stochastic") dependsOn (Core.implementation, plugin.Task.stat, Domain.distribution)
 
+  lazy val abc = OsgiProject("abc") dependsOn (Misc.exception, Core.implementation, scalabc, Misc.workspace, Hook.file, plugin.Task.tools)
+
 }
