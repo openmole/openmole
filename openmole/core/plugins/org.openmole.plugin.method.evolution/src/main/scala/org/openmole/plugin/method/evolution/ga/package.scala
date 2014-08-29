@@ -27,6 +27,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
+import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.method.evolution.algorithm._
 import org.openmole.plugin.task.tools._
 
@@ -141,7 +142,7 @@ package object ga {
 
     val breedTask = ExplorationTask(name + "Breed", BreedSampling(evolution)(individual.toArray, archive, genome, lambda))
     breedTask.addParameter(individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
-    breedTask.addParameter(archive -> evolution.initialArchive)
+    breedTask.addParameter(archive -> evolution.initialArchive(Workspace.rng))
 
     breedTask addInput generation
     breedTask addInput state
@@ -194,7 +195,7 @@ package object ga {
 
     val breedTask = ExplorationTask(name + "Breed", BreedSampling(evolution)(individual.toArray, archive, genome, lambda))
     breedTask.addParameter(individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
-    breedTask.addParameter(archive -> evolution.initialArchive)
+    breedTask.addParameter(archive -> evolution.initialArchive(Workspace.rng))
 
     val firstCapsule = StrainerCapsule(firstTask)
     val scalingCaps = Capsule(scalingGenomeTask)
@@ -207,7 +208,7 @@ package object ga {
     //val mergeArchiveCaps = MasterCapsule(mergeArchiveTask, archive)
 
     elitismTask addParameter (individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
-    elitismTask addParameter (archive -> evolution.initialArchive)
+    elitismTask addParameter (archive -> evolution.initialArchive(Workspace.rng))
     val elitismCaps = MasterCapsule(elitismTask, individual.toArray, archive)
 
     terminationTask addParameter Parameter.delayed(state, evolution.initialState)
@@ -291,8 +292,8 @@ package object ga {
 
       implicit val stateManifest = termination.stateManifest
 
-      def initialArchive = evolution.initialArchive
-      def archive(a: A, oldIndividuals: Seq[Individual[G, P, F]], offspring: Seq[Individual[G, P, F]]) = evolution.archive(a, oldIndividuals, offspring)
+      def initialArchive(implicit rng: Random) = evolution.initialArchive
+      def archive(a: A, oldIndividuals: Seq[Individual[G, P, F]], offspring: Seq[Individual[G, P, F]])(implicit rng: Random) = evolution.archive(a, oldIndividuals, offspring)
       def modify(individuals: Seq[Individual[G, P, F]], archive: A) = evolution.modify(individuals, archive)
       def elitism(individuals: Seq[Individual[G, P, F]], newIndividuals: Seq[Individual[G, P, F]], archive: A)(implicit rng: Random) = evolution.elitism(individuals, newIndividuals, archive)
 
@@ -322,7 +323,7 @@ package object ga {
       archive)
 
     elitismTask addParameter (individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
-    elitismTask addParameter (archive -> islandElitism.initialArchive)
+    elitismTask addParameter (archive -> islandElitism.initialArchive(Workspace.rng))
     val elitismCaps = MasterCapsule(elitismTask, individual.toArray, archive)
 
     val terminationTask = TerminationTask(islandElitism)(
@@ -349,7 +350,7 @@ package object ga {
     preIslandTask addOutput archive
 
     preIslandTask addParameter (individual.toArray -> Array.empty[Individual[evolution.G, evolution.P, evolution.F]])
-    preIslandTask addParameter (archive -> evolution.initialArchive)
+    preIslandTask addParameter (archive -> evolution.initialArchive(Workspace.rng))
 
     val preIslandCapsule = Capsule(preIslandTask)
 

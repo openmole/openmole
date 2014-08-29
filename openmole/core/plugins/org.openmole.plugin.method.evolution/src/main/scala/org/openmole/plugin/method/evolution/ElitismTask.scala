@@ -60,7 +60,7 @@ sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier wi
   override def process(context: Context) = {
     val a = context(archive)
     val rng = Task.buildRNG(context)
-    val newArchive = evolution.archive(a, context(individuals), context(newIndividuals))
+    val newArchive = evolution.archive(a, context(individuals), context(newIndividuals))(rng)
     val elitIndividuals = evolution.elitism(context(individuals), context(newIndividuals), newArchive)(rng)
 
     Context(Variable(individuals, elitIndividuals.toArray), Variable(archive, newArchive))
