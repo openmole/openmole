@@ -203,7 +203,7 @@ object Libraries extends Defaults(Apache) {
     version := "1.78-SNAPSHOT"
   )
 
-  lazy val scalabc = OsgiProject("fr.iscpif.scalabc", imports = Seq("*")) settings (
+  lazy val scalabc = OsgiProject("fr.iscpif.scalabc", imports = Seq("*"), privatePackages = Seq("!scala.*", "*")) settings (
     libraryDependencies += "fr.iscpif" %% "abc" % "0.4-SNAPSHOT",
     bundleType := Set("plugin"),
     version := "0.4-SNAPSHOT"
