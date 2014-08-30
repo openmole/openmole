@@ -25,7 +25,7 @@ object GenomeProfile {
   def apply(
     x: Int,
     nX: Int,
-    termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F; type MF >: GenomeProfile#MF },
+    termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F },
     inputs: Inputs[Double],
     objectives: Objectives,
     reevaluate: Double = 0.0) = {
@@ -35,7 +35,7 @@ object GenomeProfile {
       val objectives = _objectives
 
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
+      val populationManifest: Manifest[Population[G, P, F]] = implicitly
       val individualManifest: Manifest[Individual[G, P, F]] = implicitly
       val aManifest: Manifest[A] = implicitly
       val fManifest: Manifest[F] = implicitly
@@ -48,7 +48,7 @@ object GenomeProfile {
       val nX = _nX
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
-      def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+      def terminated(population: Population[G, P, F], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
     }
 
   }
@@ -56,13 +56,12 @@ object GenomeProfile {
 }
 
 trait GenomeProfile extends GAAlgorithm
-    with ProfileModifier
+    with ProfileRanking
     with BestAggregatedNicheElitism
     with ProfileNiche
     with NoArchive
     with NoDiversity
     with ProfileGenomePlotter
-    with HierarchicalRanking
     with BinaryTournamentSelection
     with TournamentOnRank
     with CoEvolvingSigmaValuesMutation

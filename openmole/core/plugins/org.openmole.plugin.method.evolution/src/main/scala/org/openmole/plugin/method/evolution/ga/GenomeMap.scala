@@ -27,7 +27,7 @@ object GenomeMap {
     nX: Int,
     y: Int,
     nY: Int,
-    termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F; type MF >: GenomeMap#MF },
+    termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F },
     inputs: Inputs[Double],
     objectives: Objectives,
     reevaluate: Double = 0.0) = {
@@ -37,7 +37,7 @@ object GenomeMap {
       val objectives = _objectives
 
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
+      val populationManifest: Manifest[Population[G, P, F]] = implicitly
       val individualManifest: Manifest[Individual[G, P, F]] = implicitly
       val aManifest: Manifest[A] = implicitly
       val fManifest: Manifest[F] = implicitly
@@ -54,7 +54,7 @@ object GenomeMap {
       type STATE = termination.STATE
 
       def initialState: STATE = termination.initialState
-      def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+      def terminated(population: Population[G, P, F], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
 
     }
 
@@ -68,7 +68,6 @@ trait GenomeMap extends GAAlgorithm
     with MapGenomePlotter
     with NoArchive
     with NoRanking
-    with NoModifier
     with MapSelection
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover

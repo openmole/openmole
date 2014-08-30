@@ -26,8 +26,7 @@ import org.openmole.plugin.method.evolution._
 
 trait GAAlgorithm extends Archive
     with EvolutionManifest
-    with G with P with F with MF with MG with GA with DoubleSeqPhenotype with MGFitness
-    with Modifier
+    with G with P with F with GA with DoubleSeqPhenotype with MGFitness
     with Elitism
     with Termination
     with Breeding
@@ -37,8 +36,8 @@ trait GAAlgorithm extends Archive
   def inputsPrototypes = inputs.inputs.map(_.prototype)
   def outputPrototypes = objectives
   def toVariables(genome: G, context: Context): Seq[Variable[_]] = scaled(values.get(genome), context)
-  def toVariables(individuals: Seq[Individual[G, P, F]], context: Context): Seq[Variable[_]] = {
-    val scaledValues = individuals.map(i ⇒ scaled(values.get(i.genome), context).toIndexedSeq)
+  def toVariables(population: Population[G, P, F], context: Context): Seq[Variable[_]] = {
+    val scaledValues = population.map(i ⇒ scaled(values.get(i.genome), context).toIndexedSeq)
 
     inputs.inputs.zipWithIndex.map {
       case (input, i) ⇒
@@ -51,7 +50,7 @@ trait GAAlgorithm extends Archive
         case (p, i) ⇒
           Variable(
             p.toArray,
-            individuals.map { iv ⇒ fitness(iv)(i) }.toArray)
+            population.map { iv ⇒ fitness(iv.toIndividual)(i) }.toArray)
       }
   }
 }

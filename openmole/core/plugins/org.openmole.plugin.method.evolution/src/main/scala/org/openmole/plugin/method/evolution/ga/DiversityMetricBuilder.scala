@@ -20,5 +20,5 @@ package org.openmole.plugin.method.evolution.ga
 import fr.iscpif.mgo._
 
 trait DiversityMetricBuilder {
-  def apply(dominance: Dominance): DiversityMetric
+  def apply(dominance: Dominance): Diversity
 }

@@ -23,7 +23,7 @@ import org.openmole.plugin.method.evolution._
 object CMAES {
 
   def apply(
-    termination: GATermination { type G >: CMAES#G; type P >: CMAES#P; type F >: CMAES#F; type MF >: CMAES#MF },
+    termination: GATermination { type G >: CMAES#G; type P >: CMAES#P; type F >: CMAES#F },
     inputs: Inputs[String],
     objectives: Objectives) = {
     val (_inputs, _objectives) = (inputs, objectives)
@@ -31,7 +31,7 @@ object CMAES {
       val inputs = _inputs
       val objectives = _objectives
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
+      val populationManifest: Manifest[Population[G, P, F]] = implicitly
       val individualManifest: Manifest[Individual[G, P, F]] = implicitly
       val aManifest: Manifest[A] = implicitly
       val fManifest: Manifest[F] = implicitly
@@ -42,7 +42,7 @@ object CMAES {
       //val mu = _mu
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
-      def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+      def terminated(population: Population[G, P, F], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
     }
   }
 }
@@ -50,7 +50,6 @@ object CMAES {
 trait CMAES extends GAAlgorithm
     with KeepOffspringElitism
     with GAGenomeWithRandomValue
-    with NoModifier
     with MaxAggregation
     with CMAESBreeding
     with CMAESArchive

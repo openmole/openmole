@@ -30,7 +30,7 @@ object ModelFamily {
     lambda: Int,
     models: Int,
     nicheSize: Int,
-    termination: GATermination { type G >: ModelFamily#G; type P >: ModelFamily#P; type F >: ModelFamily#F; type MF >: ModelFamily#MF },
+    termination: GATermination { type G >: ModelFamily#G; type P >: ModelFamily#P; type F >: ModelFamily#F },
     modelId: Prototype[Int],
     inputs: Inputs[String],
     objectives: Objectives,
@@ -40,7 +40,7 @@ object ModelFamily {
       val inputs = _inputs
       val objectives = _objectives
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
+      val populationManifest: Manifest[Population[G, P, F]] = implicitly
       val individualManifest: Manifest[Individual[G, P, F]] = implicitly
       val aManifest: Manifest[A] = implicitly
       val fManifest: Manifest[F] = implicitly
@@ -56,21 +56,20 @@ object ModelFamily {
       val mu = _mu
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
-      def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+      def terminated(population: Population[G, P, F], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
 
       override def inputsPrototypes = super.inputsPrototypes ++ Seq(_modelId)
 
       override def toVariables(genome: G, context: Context): Seq[Variable[_]] =
         super.toVariables(genome, context) ++ Seq(Variable(_modelId, modelId.get(genome)))
 
-      override def toVariables(individuals: Seq[Individual[G, P, F]], context: Context): Seq[Variable[_]] =
-        super.toVariables(individuals, context) ++ Seq(Variable(_modelId.toArray, individuals.map(i ⇒ modelId.get(i.genome)).toArray))
+      override def toVariables(population: Population[G, P, F], context: Context): Seq[Variable[_]] =
+        super.toVariables(population, context) ++ Seq(Variable(_modelId.toArray, population.map(i ⇒ modelId.get(i.genome)).toArray))
     }
   }
 }
 
 trait ModelFamily extends NoArchive
-    with RankModifier
     with GAAlgorithm
     with ModelFamilyElitism
     with ModelFamilyMutation

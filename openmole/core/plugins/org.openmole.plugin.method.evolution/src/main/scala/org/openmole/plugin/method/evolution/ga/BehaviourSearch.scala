@@ -23,7 +23,7 @@ import org.openmole.plugin.method.evolution._
 object BehaviourSearch {
 
   def apply(
-    termination: GATermination { type G >: BehaviourSearch#G; type P >: BehaviourSearch#P; type F >: BehaviourSearch#F; type MF >: BehaviourSearch#MF },
+    termination: GATermination { type G >: BehaviourSearch#G; type P >: BehaviourSearch#P; type F >: BehaviourSearch#F },
     inputs: Inputs[String],
     observables: Objectives,
     gridSize: Seq[Double],
@@ -36,7 +36,7 @@ object BehaviourSearch {
       val inputs = _inputs
       val objectives = _objectives
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
+      val populationManifest: Manifest[Population[G, P, F]] = implicitly
       val individualManifest: Manifest[Individual[G, P, F]] = implicitly
       val aManifest: Manifest[A] = implicitly
       val fManifest: Manifest[F] = implicitly
@@ -50,7 +50,7 @@ object BehaviourSearch {
 
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
-      def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+      def terminated(population: Population[G, P, F], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
     }
   }
 
@@ -61,10 +61,8 @@ trait BehaviourSearch extends GAAlgorithm
     with GeneticBreeding
     with BinaryTournamentSelection
     with SBXBoundedCrossover
-    with TournamentOnRank
-    with RankModifier
     with HierarchicalRanking
-    with HitCountModifiedFitness
+    with TournamentOnHitCount
     with CoEvolvingSigmaValuesMutation
     with GAGenomeWithSigma
     with RandomNicheElitism

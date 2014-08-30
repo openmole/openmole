@@ -26,21 +26,21 @@ import org.openmole.misc.tools.service.Random._
 
 import fr.iscpif.mgo._
 
-object SelectIndividualsTask {
+object SamplePopulationTask {
 
-  def apply(evolution: Modifier with G with MF with F)(
+  def apply(evolution: G with P with F)(
     name: String,
-    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
+    population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
     size: Int)(implicit plugins: PluginSet) = {
-    val (_individuals) = (individuals)
+    val (_population) = (population)
 
     new TaskBuilder { builder ⇒
-      addInput(individuals)
-      addOutput(individuals)
+      addInput(population)
+      addOutput(population)
 
       def toTask =
-        new SelectIndividualsTask(name, evolution, size) with Built {
-          val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
+        new SamplePopulationTask(name, evolution, size) with Built {
+          val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
         }
     }
 
@@ -48,18 +48,18 @@ object SelectIndividualsTask {
 
 }
 
-sealed abstract class SelectIndividualsTask(
+sealed abstract class SamplePopulationTask(
     val name: String,
-    val evolution: Modifier with G with MF with F,
+    val evolution: G with P with F,
     val size: Int) extends Task {
 
-  def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
+  def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
 
   override def process(context: Context) = {
     implicit val rng = Task.buildRNG(context)
-    val is = context(individuals)
-    val newIs = (0 until size).map { i ⇒ is(rng.nextInt(is.size)) }.toArray
-    Variable(individuals, newIs)
+    val p = context(population)
+    val newP = Population((0 until size).map { i ⇒ p(rng.nextInt(p.size)) })
+    Variable(population, newP)
   }
 
 }

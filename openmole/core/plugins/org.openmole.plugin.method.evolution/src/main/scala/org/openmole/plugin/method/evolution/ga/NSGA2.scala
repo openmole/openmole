@@ -24,19 +24,16 @@ object NSGA2 {
 
   def apply(
     mu: Int,
-    termination: GATermination { type G >: NSGA2#G; type P >: NSGA2#P; type F >: NSGA2#F; type MF >: NSGA2#MF },
+    termination: GATermination { type G >: NSGA2#G; type P >: NSGA2#P; type F >: NSGA2#F },
     inputs: Inputs[String],
     objectives: Objectives,
-    dominance: Dominance = NonStrict,
-    ranking: GARankingBuilder = Pareto,
-    diversityMetric: DiversityMetricBuilder = Crowding,
     reevaluate: Double = 0.0) = {
-    val (_mu, _ranking, _diversityMetric, _reevaluate, _inputs, _objectives) = (mu, ranking, diversityMetric, reevaluate, inputs, objectives)
+    val (_mu, _reevaluate, _inputs, _objectives) = (mu, reevaluate, inputs, objectives)
     new NSGA2 {
       val inputs = _inputs
       val objectives = _objectives
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
+      val populationManifest: Manifest[Population[G, P, F]] = implicitly
       val individualManifest: Manifest[Individual[G, P, F]] = implicitly
       val aManifest: Manifest[A] = implicitly
       val fManifest: Manifest[F] = implicitly
@@ -46,28 +43,28 @@ object NSGA2 {
 
       override val cloneProbability: Double = _reevaluate
 
-      val diversityMetric = _diversityMetric(dominance)
-      val ranking = _ranking(dominance)
       val mu = _mu
-      def diversity(individuals: Seq[Seq[Double]]) = diversityMetric.diversity(individuals)
-      def rank(individuals: Seq[Seq[Double]]) = ranking.rank(individuals)
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
-      def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+      def terminated(population: Population[G, P, F], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
     }
   }
 }
 
-trait NSGA2 extends NoArchive
-    with RankDiversityModifier
-    with GAAlgorithm
-    with GeneticBreeding
-    with NonDominatedElitism
+trait NSGA2 extends GAAlgorithm
+    with GAGenomeWithSigma
     with BinaryTournamentSelection
     with TournamentOnRankAndDiversity
+    with NonDominatedElitism
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
-    with GAGenomeWithSigma
+    with FitnessCrowdingDiversity
+    with ParetoRanking
+    with NonStrictDominance
+    with NoArchive
+    with CloneRemoval
+    with GeneticBreeding
+    with MGFitness
     with ClampedGenome {
   type INPUT = String
   def inputConverter = implicitly

@@ -26,36 +26,36 @@ import org.openmole.core.model.domain._
 import org.openmole.core.model.task._
 import ga._
 
-object ScalingGAIndividualsTask {
+object ScalingGAPopulationTask {
 
   def apply(evolution: GAAlgorithm)(
     name: String,
-    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]])(implicit plugins: PluginSet) = {
+    population: Prototype[Population[evolution.G, evolution.P, evolution.F]])(implicit plugins: PluginSet) = {
 
-    val (_evolution, _name, _individuals) = (evolution, name, individuals)
+    val (_evolution, _name, _population) = (evolution, name, population)
 
     new TaskBuilder { builder ⇒
 
-      addInput(individuals)
+      addInput(population)
       evolution.inputsPrototypes foreach { i ⇒ addOutput(i.toArray) }
       evolution.outputPrototypes foreach { o ⇒ addOutput(o.toArray) }
 
-      def toTask = new ScalingGAIndividualsTask with Built {
+      def toTask = new ScalingGAPopulationTask with Built {
         val evolution = _evolution
         val name = _name
-        val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
+        val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
       }
     }
   }
 
 }
 
-sealed abstract class ScalingGAIndividualsTask extends Task {
+sealed abstract class ScalingGAPopulationTask extends Task {
 
   val evolution: GAAlgorithm
-  val individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
+  val population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
 
   override def process(context: Context) =
-    evolution.toVariables(context(individuals), context)
+    evolution.toVariables(context(population), context)
 
 }

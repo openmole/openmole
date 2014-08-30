@@ -24,7 +24,7 @@ object MonoObjective {
 
   def apply(
     mu: Int,
-    termination: GATermination { type G >: MonoObjective#G; type P >: MonoObjective#P; type F >: MonoObjective#F; type MF >: MonoObjective#MF },
+    termination: GATermination { type G >: MonoObjective#G; type P >: MonoObjective#P; type F >: MonoObjective#F },
     inputs: Inputs[String],
     objective: Objective,
     reevaluate: Double = 0.0) = {
@@ -33,7 +33,7 @@ object MonoObjective {
       val inputs = _inputs
       val objectives = Seq(objective)
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F, MF]] = implicitly
+      val populationManifest: Manifest[Population[G, P, F]] = implicitly
       val individualManifest: Manifest[Individual[G, P, F]] = implicitly
       val aManifest: Manifest[A] = implicitly
       val fManifest: Manifest[F] = implicitly
@@ -46,25 +46,24 @@ object MonoObjective {
       val mu = _mu
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
-      def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+      def terminated(population: Population[G, P, F], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
     }
   }
 }
 
 trait MonoObjective extends GAAlgorithm
-    with GAGenome
+    with GAGenomeWithSigma
     with BinaryTournamentSelection
     with TournamentOnAggregatedFitness
     with BestAggregatedElitism
-    with BLXCrossover
-    with BGAMutation
+    with SBXBoundedCrossover
+    with CoEvolvingSigmaValuesMutation
     with NoArchive
     with CloneRemoval
     with GeneticBreeding
     with MGFitness
     with ClampedGenome
-    with MaxAggregation
-    with NoModifier {
+    with MaxAggregation {
   type INPUT = String
   def inputConverter = implicitly
 }
