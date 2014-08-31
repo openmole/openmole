@@ -31,8 +31,10 @@ import scala.ref.WeakReference
 object DIRACGliteEnvironment {
 
   val LocalThreads = new ConfigurationLocation("DiracGliteEnvironment", "LocalThreads")
+  val EagerSubmissionThreshold = ConfigurationLocation("DiracGliteEnvironment", "EagerSubmissionThreshold")
 
   Workspace += (LocalThreads, "100")
+  Workspace += (EagerSubmissionThreshold, "0.2")
 
   def apply(
     voName: String,
@@ -75,7 +77,7 @@ class DIRACGliteEnvironment(
   type JS = DIRACGliteJobService
 
   @transient lazy val registerAgents = {
-    Updater.delay(new EagerSubmissionAgent(WeakReference(this)))
+    Updater.delay(new EagerSubmissionAgent(WeakReference(this), DIRACGliteEnvironment.EagerSubmissionThreshold))
     None
   }
 

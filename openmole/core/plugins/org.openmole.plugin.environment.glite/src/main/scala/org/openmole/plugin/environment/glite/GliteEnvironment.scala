@@ -217,7 +217,7 @@ class GliteEnvironment(
   type JS = GliteJobService
 
   @transient lazy val registerAgents = {
-    Updater.delay(new EagerSubmissionAgent(WeakReference(this)))
+    Updater.delay(new EagerSubmissionAgent(WeakReference(this), GliteEnvironment.EagerSubmissionThreshold))
     None
   }
 

@@ -24,7 +24,7 @@ import org.openmole.core.model.job.IJob
 import org.openmole.misc.tools.cache.AssociativeCache
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
-import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.workspace.{ConfigurationLocation, Workspace}
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.HashSet
@@ -49,7 +49,7 @@ object EagerSubmissionAgent extends Logger {
 import EagerSubmissionAgent._
 import Log._
 
-class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment]) extends IUpdatableWithVariableDelay {
+class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment], thresholdPreference: ConfigurationLocation) extends IUpdatableWithVariableDelay {
 
   @transient lazy val runningHistory = new mutable.Queue[TimeInt]
 
@@ -75,7 +75,7 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment]) extends
 
       logger.fine("still running " + stillRunning)
 
-      val maxRunning = runningHistory.map(_.value).max * Workspace.preferenceAsDouble(GliteEnvironment.EagerSubmissionThreshold)
+      val maxRunning = runningHistory.map(_.value).max * Workspace.preferenceAsDouble(thresholdPreference)
 
       logger.fine(s"maxRunning $maxRunning, stillRunning $stillRunning, stillReady $stillReady")
 
