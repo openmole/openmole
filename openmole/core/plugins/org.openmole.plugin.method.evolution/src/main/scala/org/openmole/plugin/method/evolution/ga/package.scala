@@ -211,7 +211,7 @@ package object ga {
 
     elitismTask addParameter (population -> Population.empty[evolution.G, evolution.P, evolution.F])
     elitismTask addParameter (archive -> evolution.initialArchive(Workspace.rng))
-    val elitismCaps = MasterCapsule(elitismTask, population, archive)
+    val elitismSlot = Slot(MasterCapsule(elitismTask, population, archive))
 
     terminationTask addParameter Parameter.delayed(state, evolution.initialState)
     terminationTask addParameter generation -> 0
@@ -234,7 +234,7 @@ package object ga {
         (model, filter = Block(genome)) --
         (toIndividualSlot, filter = Keep(evolution.objectives.map(_.name).toSeq: _*)) --
         toIndividualArrayCaps --
-        elitismCaps --
+        elitismSlot --
         terminationSlot --
         scalingIndividualsSlot >| (endCapsule, terminatedCondition, Block(archive))
 
@@ -247,7 +247,7 @@ package object ga {
       (scalingCaps -- (toIndividualSlot, filter = Keep(genome))) +
         (firstCapsule oo (model.first, filter = Block(archive, population))) +
         (firstCapsule -- (endCapsule, filter = Block(archive, population))) +
-        (firstCapsule oo (elitismCaps, filter = Keep(population, archive)))
+        (firstCapsule oo (elitismSlot, filter = Keep(population, archive)))
 
     val gaPuzzle = skel + loop + dataChannels
 
@@ -304,7 +304,7 @@ package object ga {
     val originalArchive = Prototype[A](name + "OriginalArchive")
 
     val individual = model.individual.asInstanceOf[Prototype[Individual[G, P, F]]]
-    val population = Prototype[Population[G, P, F]](name + "Population")
+    val population = model.population //Prototype[Population[G, P, F]](name + "Population")
 
     val state = Prototype[islandElitism.STATE](name + "State")(islandElitism.stateManifest)
     val generation = Prototype[Int](name + "Generation")
@@ -354,7 +354,8 @@ package object ga {
 
     val preIslandCapsule = Capsule(preIslandTask)
 
-    val islandSlot = Slot(MoleTask(name + "MoleTask", model))
+    val islandTask = MoleTask(name + "MoleTask", model)
+    val islandSlot = Slot(islandTask)
 
     val scalingIndividualsTask = ScalingGAPopulationTask(evolution)(name + "ScalingIndividuals", population)
 

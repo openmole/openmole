@@ -24,7 +24,7 @@ import org.openmole.core.model.job.IJob
 import org.openmole.misc.tools.cache.AssociativeCache
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
-import org.openmole.misc.workspace.{ConfigurationLocation, Workspace}
+import org.openmole.misc.workspace.{ ConfigurationLocation, Workspace }
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.HashSet
