@@ -56,8 +56,8 @@ trait MonoObjective extends GAAlgorithm
     with BinaryTournamentSelection
     with TournamentOnAggregatedFitness
     with BestAggregatedElitism
-    with SBXBoundedCrossover
-    with CoEvolvingSigmaValuesMutation
+    with SBXCrossover
+    with AdaptiveCauchyMutation
     with NoArchive
     with CloneRemoval
     with GeneticBreeding

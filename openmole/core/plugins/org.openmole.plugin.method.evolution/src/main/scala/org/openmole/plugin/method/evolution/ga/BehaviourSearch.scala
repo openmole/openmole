@@ -60,10 +60,10 @@ trait BehaviourSearch extends GAAlgorithm
     with HitMapArchive
     with GeneticBreeding
     with BinaryTournamentSelection
-    with SBXBoundedCrossover
+    with SBXCrossover
     with HierarchicalRanking
     with TournamentOnHitCount
-    with CoEvolvingSigmaValuesMutation
+    with AdaptiveCauchyMutation
     with GAGenomeWithSigma
     with RandomNicheElitism
     with PhenotypeGridNiche

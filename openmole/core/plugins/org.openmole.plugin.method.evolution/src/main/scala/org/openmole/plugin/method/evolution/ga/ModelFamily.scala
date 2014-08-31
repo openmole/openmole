@@ -73,7 +73,7 @@ trait ModelFamily extends NoArchive
     with GAAlgorithm
     with ModelFamilyElitism
     with ModelFamilyMutation
-    with SBXBoundedCrossover
+    with SBXCrossover
     with MaxAggregation
     with BinaryTournamentSelection
     with TournamentOnRank
