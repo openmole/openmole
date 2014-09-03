@@ -52,12 +52,10 @@ object MonoObjective {
 }
 
 trait MonoObjective extends GAAlgorithm
-    with GAGenomeWithSigma
+    with dynamic.DynamicApplicationGA
     with BinaryTournamentSelection
     with TournamentOnAggregatedFitness
     with BestAggregatedElitism
-    with SBXCrossover
-    with AdaptiveCauchyMutation
     with NoArchive
     with CloneRemoval
     with GeneticBreeding
@@ -67,3 +65,4 @@ trait MonoObjective extends GAAlgorithm
   type INPUT = String
   def inputConverter = implicitly
 }
+

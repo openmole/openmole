@@ -52,12 +52,10 @@ object NSGA2 {
 }
 
 trait NSGA2 extends GAAlgorithm
-    with GAGenomeWithSigma
+    with dynamic.DynamicApplicationGA
     with BinaryTournamentSelection
     with TournamentOnRankAndDiversity
     with NonDominatedElitism
-    with AdaptiveCauchyMutation
-    with SBXCrossover
     with FitnessCrowdingDiversity
     with ParetoRanking
     with NonStrictDominance

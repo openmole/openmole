@@ -64,9 +64,9 @@ trait GenomeProfile extends GAAlgorithm
     with ProfileGenomePlotter
     with BinaryTournamentSelection
     with TournamentOnRank
-    with AdaptiveCauchyMutation
+    with GAGenome
     with SBXCrossover
-    with GAGenomeWithSigma
+    with BGAMutation
     with GeneticBreeding
     with MGFitness
     with MaxAggregation

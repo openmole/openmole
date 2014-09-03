@@ -69,9 +69,9 @@ trait GenomeMap extends GAAlgorithm
     with NoArchive
     with NoRanking
     with MapSelection
-    with AdaptiveCauchyMutation
     with SBXCrossover
-    with GAGenomeWithSigma
+    with BGAMutation
+    with GAGenome
     with MaxAggregation
     with GeneticBreeding
     with ClampedGenome {
