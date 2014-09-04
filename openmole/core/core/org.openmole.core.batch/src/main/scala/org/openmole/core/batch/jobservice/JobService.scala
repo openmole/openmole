@@ -39,7 +39,10 @@ trait JobService extends BatchService with Logger { js ⇒
 
   def state(j: J)(implicit token: AccessToken) = token.synchronized { _state(j) }
 
-  def cancel(j: J)(implicit token: AccessToken) = token.synchronized { _cancel(j) }
+  def cancel(j: J)(implicit token: AccessToken) = {
+    token.synchronized { _cancel(j) }
+    Log.logger.info(s"Cancelled job: ${j}")
+  }
 
   def purge(j: J)(implicit token: AccessToken) = token.synchronized { _purge(j) }
 
