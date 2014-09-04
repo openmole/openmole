@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2014 Jonathan Passerat-Palmbach
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -21,14 +22,18 @@ import org.openmole.core.batch.control._
 import org.openmole.misc.workspace._
 import org.openmole.core.batch.environment._
 import org.openmole.core.model.execution.ExecutionState._
+import org.openmole.misc.tools.service.Logger
 
-trait JobService extends BatchService { js ⇒
+trait JobService extends BatchService with Logger { js ⇒
 
   type J
 
   def submit(serializedJob: SerializedJob)(implicit token: AccessToken): BatchJob = token.synchronized {
     val job = _submit(serializedJob)
     job.state = SUBMITTED
+
+    Log.logger.info(s"Successful submission: ${job}")
+
     job
   }
 
