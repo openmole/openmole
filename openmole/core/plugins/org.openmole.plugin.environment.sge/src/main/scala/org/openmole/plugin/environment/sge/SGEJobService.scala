@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2014 Jonathan Passerat-Palmbach
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,16 +24,11 @@ import java.net.URI
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
-import org.openmole.misc.tools.service.Logger
 import org.openmole.plugin.environment.ssh.{ SharedStorage, SSHService }
 import org.openmole.core.batch.storage.SimpleStorage
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.misc.workspace.Workspace
 import concurrent.duration._
-
-object SGEJobService extends Logger
-
-import SGEJobService.Log._
 
 trait SGEJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
 
@@ -57,11 +53,8 @@ trait SGEJobService extends GridScaleJobService with SSHHost with SharedStorage 
       override val memory = Some(environment.requiredMemory)
     }
 
-    logger.fine(s"Submit job ${jobDescription.toSGE}")
-
     val jid = js.jobService.submit(jobDescription)
-
-    logger.fine(s"Submitted job with id $jid")
+    Log.logger.fine(s"SGE job [${jid.sgeId}], description: \n ${jobDescription.toSGE}")
 
     new BatchJob with BatchJobId {
       val jobService = js

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Romain Reuillon
+ * Copyright (C) 2014 Jonathan Passerat-Palmbach
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,11 +29,6 @@ import org.openmole.plugin.environment.gridscale._
 import fr.iscpif.gridscale.ssh.{ SSHJobService ⇒ GSSSHJobService, SSHConnectionCache, SSHJobDescription }
 import java.util.concurrent.atomic.AtomicInteger
 import collection.mutable
-import org.openmole.misc.tools.service.Logger
-
-object SSHJobService extends Logger
-
-import SSHJobService.Log._
 
 trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 
@@ -85,12 +81,12 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
       val resultPath = result
     }
 
-    logger.fine(s"Queuing /bin/bash $remoteScript in directory ${sharedFS.root}")
+    Log.logger.fine(s"SSHJobService: Queuing /bin/bash $remoteScript in directory ${sharedFS.root}")
 
     EventDispatcher.listen(sshBatchJob: BatchJob, BatchJobStatusListner, classOf[BatchJob.StateChanged])
 
     synchronized {
-      logger.fine(s"${nbRunning.get()} on $nbSlots taken")
+      Log.logger.fine(s"SSHJobService: ${nbRunning.get()} on $nbSlots taken")
       if (nbRunning.get() < nbSlots) {
         nbRunning.incrementAndGet
         sshBatchJob.submit

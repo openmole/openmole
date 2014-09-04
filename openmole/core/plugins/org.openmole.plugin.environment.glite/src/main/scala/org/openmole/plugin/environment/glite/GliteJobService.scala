@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2014 Jonathan Passerat-Palmbach
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -24,11 +25,8 @@ import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import fr.iscpif.gridscale.glite.{ WMSJobService, WMSJobDescription }
-import org.openmole.misc.tools.service._
 import StatusFiles._
 import scalax.io.Resource
-
-object GliteJobService extends Logger
 
 trait GliteJobService extends GridScaleJobService with JobServiceQualityControl with LimitedAccess with AvailabitityQuality with JobScript { js ⇒
 
@@ -48,7 +46,6 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
 
   override protected def _submit(serializedJob: SerializedJob) = quality {
     import serializedJob._
-    import GliteJobService.Log._
 
     val script = Workspace.newFile("script", ".sh")
     try {
@@ -62,11 +59,8 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
 
       val jobDescription = buildJobDescription(script)
 
-      logger.fine(s"""Submitting job: ${jobDescription.toJDL} with script $scriptContent" """)
-
       val jid = jobService.submit(jobDescription)
-
-      logger.fine(s"""Job successfully submitted with job service ${jobService.url} and with id ${jid.id}""")
+      Log.logger.fine(s"""GLite job [${jid.id}], description: \n${jobDescription.toJDL}\n with script ${scriptContent}""")
 
       val job = new GliteJob {
         val jobService = js

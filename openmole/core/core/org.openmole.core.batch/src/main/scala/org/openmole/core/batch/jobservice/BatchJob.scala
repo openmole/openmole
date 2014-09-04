@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2014 Jonathan Passerat-Palmbach
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -66,4 +67,7 @@ trait BatchJob { bj ⇒
 
   def state: ExecutionState = _state
 
+  override def toString: String = {
+    s"Job ${bj} from job service ${jobService} is ${state}"
+  }
 }
