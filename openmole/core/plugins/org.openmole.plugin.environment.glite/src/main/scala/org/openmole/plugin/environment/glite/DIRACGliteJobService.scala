@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 10/06/13 Romain Reuillon
+ * Copyright (C) 2014 Jonathan Passerat-Palmbach
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -22,7 +23,6 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.core.batch.storage.Storage
 import org.openmole.misc.tools.io.FileUtil._
 import fr.iscpif.gridscale.dirac.{ DIRACJobService, DIRACJobDescription }
-import org.openmole.misc.tools.service._
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }
 import org.openmole.core.batch.control.{ UnlimitedAccess, LimitedAccess }
@@ -60,6 +60,7 @@ trait DIRACGliteJobService extends GridScaleJobService with JobScript with Unlim
       }
 
       val jid = jobService.submit(jobDescription)
+      Log.logger.fine(s"""DIRACGLite job [${jid}], description: \n${jobDescription}""")
 
       new DIRACGliteJob {
         val jobService = js

@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2012 Romain Reuillon
- *
+ * Copyright (C) 2014 Jonathan Passerat-Palmbach
+
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -55,6 +56,7 @@ trait PBSJobService extends GridScaleJobService with SSHHost with SharedStorage 
     }
 
     val jid = js.jobService.submit(jobDescription)
+    Log.logger.fine(s"PBS job [${jid.pbsId}], description: \n ${jobDescription}")
 
     new BatchJob with BatchJobId {
       val jobService = js

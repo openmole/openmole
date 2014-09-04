@@ -59,11 +59,12 @@ trait SLURMJobService extends GridScaleJobService with SSHHost with SharedStorag
       //      override val coreByNode = environment.coreByNode orElse environment.threads
     }
 
-    val jid = js.jobService.submit(jobDescription)
+    val job = js.jobService.submit(jobDescription)
+    Log.logger.fine(s"SLURM job [${job.slurmId}], description: \n ${jobDescription}")
 
     new BatchJob with BatchJobId {
       val jobService = js
-      val id = jid
+      val id = job
       val resultPath = result
     }
   }
