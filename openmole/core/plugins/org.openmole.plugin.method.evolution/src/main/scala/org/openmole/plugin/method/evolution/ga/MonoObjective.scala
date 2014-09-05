@@ -55,7 +55,7 @@ trait MonoObjective extends GAAlgorithm
     with dynamic.DynamicApplicationGA
     with BinaryTournamentSelection
     with TournamentOnAggregatedFitness
-    with BestAggregatedElitism
+    with DiversityAggregatedElitism
     with NoArchive
     with CloneRemoval
     with GeneticBreeding
