@@ -32,7 +32,7 @@ trait JobService extends BatchService with Logger { js ⇒
     val job = _submit(serializedJob)
     job.state = SUBMITTED
 
-    Log.logger.info(s"Successful submission: ${job}")
+    Log.logger.fine(s"Successful submission: ${job}")
 
     job
   }
@@ -41,7 +41,7 @@ trait JobService extends BatchService with Logger { js ⇒
 
   def cancel(j: J)(implicit token: AccessToken) = {
     token.synchronized { _cancel(j) }
-    Log.logger.info(s"Cancelled job: ${j}")
+    Log.logger.fine(s"Cancelled job: ${j}")
   }
 
   def purge(j: J)(implicit token: AccessToken) = token.synchronized { _purge(j) }
