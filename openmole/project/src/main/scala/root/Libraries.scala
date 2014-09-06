@@ -75,7 +75,7 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9")
 
   lazy val h2 = OsgiProject("org.h2", buddyPolicy = Some("global"), privatePackages = Seq("META-INF.*")) settings
-    (libraryDependencies += "com.h2database" % "h2" % "1.3.170", version := "1.3.170")
+    (libraryDependencies += "com.h2database" % "h2" % "1.4.181", version := "1.4.181")
 
   lazy val bonecp = OsgiProject("com.jolbox.bonecp", buddyPolicy = Some("global")) settings
     (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1", version := "0.8.0-rc1")
