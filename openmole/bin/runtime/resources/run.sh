@@ -21,7 +21,7 @@ ulimit -S -v unlimited
 ulimit -S -s unlimited
 ulimit -S -s unlimited
 
-export MALLOC_ARNEA_MAX=1
+export MALLOC_ARENA_MAX=1
 
 java -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area=${CONFIGDIR} $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=128m -XX:CompressedClassSpaceSize=128m -XX:+UseG1GC -XX:ParallelGCThreads=1 -jar plugins/org.eclipse.equinox.launcher.jar -consoleLog $@ 
 
