@@ -56,17 +56,15 @@ object GenomeProfile {
 }
 
 trait GenomeProfile extends GAAlgorithm
+    with dynamic.DynamicApplicationGA
     with ProfileRanking
     with BestAggregatedNicheElitism
     with ProfileNiche
     with NoArchive
     with NoDiversity
     with ProfileGenomePlotter
-    with BinaryTournamentSelection
+    with BinaryTournamentSelection with selection.ProportionalNumberOfRound
     with TournamentOnRank
-    with GAGenome
-    with SBXCrossover
-    with BGAMutation
     with GeneticBreeding
     with MGFitness
     with MaxAggregation

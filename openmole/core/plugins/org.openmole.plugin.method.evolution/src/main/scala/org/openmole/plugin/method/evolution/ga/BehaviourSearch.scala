@@ -59,12 +59,10 @@ object BehaviourSearch {
 trait BehaviourSearch extends GAAlgorithm
     with HitMapArchive
     with GeneticBreeding
-    with BinaryTournamentSelection
-    with SBXCrossover
+    with BinaryTournamentSelection with selection.ProportionalNumberOfRound
     with HierarchicalRanking
     with TournamentOnHitCount
-    with AdaptiveCauchyMutation
-    with GAGenomeWithSigma
+    with dynamic.DynamicApplicationGA
     with RandomNicheElitism
     with PhenotypeGridNiche
     with ClampedGenome {

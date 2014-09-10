@@ -63,15 +63,13 @@ object GenomeMap {
 }
 
 trait GenomeMap extends GAAlgorithm
+    with dynamic.DynamicApplicationGA
     with BestAggregatedNicheElitism
     with MapNiche
     with MapGenomePlotter
     with NoArchive
     with NoRanking
     with MapSelection
-    with SBXCrossover
-    with BGAMutation
-    with GAGenome
     with MaxAggregation
     with GeneticBreeding
     with ClampedGenome {
