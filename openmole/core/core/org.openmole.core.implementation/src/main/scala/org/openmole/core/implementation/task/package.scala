@@ -40,5 +40,4 @@ package object task {
   implicit def taskToCapsuleDecorator(task: ITask) = new TaskToCapsuleDecorator(task)
   implicit def taskBuilderToCapsuleDecorator(task: TaskBuilder) = taskToCapsuleDecorator(task)
   implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = t.toTask.toCapsule.toPuzzle
-
 }
