@@ -77,7 +77,6 @@ abstract class AppendToCSVFileHook(
             }
         }.toList
 
-
         def moreThanOneElement(l: List[_]) = !l.tail.isEmpty
 
         @tailrec def write(lists: List[List[_]]): Unit =

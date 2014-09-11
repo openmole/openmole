@@ -28,52 +28,20 @@ import org.openmole.core.model.mole._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
-import org.openmole.plugin.task.stat._
+import org.openmole.plugin.task.statistics._
 import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
 
+import scala.collection.mutable.ListBuffer
+
 package object stochastic {
 
-  object Statistics {
-    def apply() = new Statistics
-  }
-
-  class Statistics {
-    var medians: List[(Prototype[Double], Prototype[Double])] = Nil
-    var medianAbsoluteDeviations: List[(Prototype[Double], Prototype[Double])] = Nil
-    var averages: List[(Prototype[Double], Prototype[Double])] = Nil
-    var sums: List[(Prototype[Double], Prototype[Double])] = Nil
-    var mses: List[(Prototype[Double], Prototype[Double])] = Nil
-
-    def addMedian(output: Prototype[Double], median: Prototype[Double]) = medians ::= (output, median)
-    def addMedianAbsoluteDeviation(output: Prototype[Double], deviation: Prototype[Double]) = medianAbsoluteDeviations ::= (output, deviation)
-    def addAverage(output: Prototype[Double], average: Prototype[Double]) = averages ::= (output, average)
-    def addSum(output: Prototype[Double], sum: Prototype[Double]) = sums ::= (output, sum)
-    def addMeanSquareError(output: Prototype[Double], mse: Prototype[Double]) = mses ::= (output, mse)
-  }
-
-  def statistics(
+  def replicate(
     name: String,
     model: Puzzle,
     replicationFactor: DiscreteFactor[_, _],
-    statistics: Statistics)(implicit plugins: PluginSet): Puzzle = {
+    statisticTask: StatTask)(implicit plugins: PluginSet): Puzzle = {
     val exploration = ExplorationTask(name + "Replication", replicationFactor)
-
-    def create(seq: List[(Prototype[Double], Prototype[Double])], builder: DoubleSequenceStatTaskBuilder) =
-      if (!seq.isEmpty) {
-        seq.foreach { case (out, stat) ⇒ builder addSequence (out.toArray, stat) }
-        Some(Capsule(builder))
-      }
-      else None
-
-    val capsules =
-      List(
-        create(statistics.medians, MedianTask(name + "Median")),
-        create(statistics.medianAbsoluteDeviations, MedianAbsoluteDeviationTask(name + "MedianAbsoluteDeviation")),
-        create(statistics.averages, AverageTask(name + "Average")),
-        create(statistics.sums, SumTask(name + "Sum")),
-        create(statistics.mses, MeanSquareErrorTask(name + "MeanSquareError"))
-      ).flatten.map(_.toPuzzle)
 
     Validation(exploration -< model) foreach {
       case MissingInput(_, d) ⇒
@@ -83,12 +51,9 @@ package object stochastic {
     }
 
     val explorationCapsule = StrainerCapsule(exploration)
-    val aggregationCapsule = StrainerCapsule(EmptyTask(name + "Aggregation"))
     val endCapsule = Slot(StrainerCapsule(EmptyTask(name + "End")))
 
-    explorationCapsule -< model >- aggregationCapsule -- capsules -- endCapsule
-
-    //+(explorationCapsule oo (endCapsule, filter = Block(replicationFactor.prototype)))
+    explorationCapsule -< model >- statisticTask -- endCapsule
   }
 
   def replicate(
@@ -106,7 +71,7 @@ package object stochastic {
 
     val explorationCapsule = StrainerCapsule(exploration)
     val aggregationCapsule = Slot(StrainerCapsule(EmptyTask(name + "Aggregation")))
-    explorationCapsule -< model >- aggregationCapsule + explorationCapsule oo aggregationCapsule
+    explorationCapsule -< model >- aggregationCapsule //+ explorationCapsule oo aggregationCapsule
   }
 
 }

@@ -21,7 +21,7 @@ object Task extends PluginDefaults {
   lazy val netlogo = OsgiProject("netlogo") dependsOn (Core.implementation, base.Core.model, Miscellaneous.tools,
     provided(base.plugin.Task.netLogo4), provided(base.plugin.Task.netLogo5), base.Misc.replication % "test", base.plugin.Tool.netLogo4API, base.plugin.Tool.netLogo5API)
 
-  lazy val stat = OsgiProject("stat") dependsOn (Core.implementation, base.plugin.Task.stat, base.Core.model, base.Misc.replication % "test")
+  lazy val stat = OsgiProject("stat") dependsOn (Core.implementation, base.plugin.Task.statistics, base.Core.model, base.Misc.replication % "test")
 
   lazy val tools = OsgiProject("tools") dependsOn (Core.implementation, base.plugin.Task.tools, base.Core.model, base.Misc.replication % "test")
 
