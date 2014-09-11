@@ -81,4 +81,7 @@ package object data {
     def withName(name: String) = Prototype[T](name)(prototype.`type`)
   }
 
+  implicit def prototypeToArrayConverter[T](p: Prototype[T]) = p.toArray
+  implicit def dataToArrayConverter[T](d: Data[T]) = d.toArray
+
 }
