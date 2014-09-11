@@ -126,7 +126,7 @@ object TarArchiver {
       case (source, entryName) ⇒
         val e = new TarEntry(entryName)
         e.setLinkName(
-          fs.getPath(source.getParentFile.getCanonicalPath).relativize(fs.getPath(source.getCanonicalPath)).toString
+          Files.readSymbolicLink(source.toPath).toString
         )
         e.setMode(source.mode)
         tos.putNextEntry(e)
