@@ -40,7 +40,7 @@ package object stochastic extends StatisticsMethods {
     name: String,
     model: Puzzle,
     replicationFactor: DiscreteFactor[_, _],
-    statisticTask: StatisticsTask)(implicit plugins: PluginSet): Puzzle = {
+    statisticTask: Task)(implicit plugins: PluginSet): Puzzle = {
     val exploration = ExplorationTask(name + "Replication", replicationFactor)
 
     Validation(exploration -< model) foreach {
