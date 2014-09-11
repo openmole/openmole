@@ -102,30 +102,33 @@ object TarArchiver {
     var links = List.empty[(File, String)]
 
     while (!toArchive.isEmpty) {
-      val cur = toArchive.pop
-      if (Files.isSymbolicLink(fs.getPath(cur._1.getAbsolutePath))) links ::= cur._1 -> cur._2
+      val (source, entryName) = toArchive.pop
+      if (Files.isSymbolicLink(fs.getPath(source.getAbsolutePath))) links ::= source -> entryName
       else {
-        val e = if (cur._1.isDirectory) {
-          for (name ← cur._1.list.sorted) toArchive.push((new File(cur._1, name), cur._2 + '/' + name))
-          new TarEntry(cur._2 + '/')
-        }
-        else {
-          val e = new TarEntry(cur._2)
-          e.setSize(cur._1.length)
-          e
-        }
-        e.setMode(cur._1.mode)
+        val e =
+          if (source.isDirectory) {
+            for (name ← source.list.sorted) toArchive.push((new File(source, name), entryName + '/' + name))
+            new TarEntry(entryName + '/')
+          }
+          else {
+            val e = new TarEntry(entryName)
+            e.setSize(source.length)
+            e
+          }
+        e.setMode(source.mode)
         additionnalCommand(e)
         tos.putNextEntry(e)
-        if (!cur._1.isDirectory) try cur._1.copy(tos) finally tos.closeEntry
+        if (!source.isDirectory) try source.copy(tos) finally tos.closeEntry
       }
     }
 
     links.foreach {
-      cur ⇒
-        val e = new TarEntry(cur._2)
-        e.setLinkName(fs.getPath(cur._1.getParentFile.getCanonicalPath).relativize(fs.getPath(cur._1.getCanonicalPath)).toString)
-        e.setMode(cur._1.mode)
+      case (source, entryName) ⇒
+        val e = new TarEntry(entryName)
+        e.setLinkName(
+          fs.getPath(source.getParentFile.getCanonicalPath).relativize(fs.getPath(source.getCanonicalPath)).toString
+        )
+        e.setMode(source.mode)
         tos.putNextEntry(e)
     }
   }
