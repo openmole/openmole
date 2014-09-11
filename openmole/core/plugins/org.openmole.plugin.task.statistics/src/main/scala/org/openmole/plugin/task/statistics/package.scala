@@ -16,31 +16,5 @@
  */
 
 package org.openmole.plugin.task
-import org.openmole.misc.tools.math._
 
-package object statistics {
-
-  lazy val average = new StatisticalAggregation[Double] {
-    override def apply(s: Seq[Double]): Double = Stat.average(s)
-  }
-
-  def confidenceInterval(level: Double) = new StatisticalAggregation[Double] {
-    override def apply(s: Seq[Double]): Double = Stat.confidenceInterval(s, level)
-  }
-
-  lazy val meanSquareError = new StatisticalAggregation[Double] {
-    override def apply(s: Seq[Double]): Double = Stat.meanSquareError(s)
-  }
-
-  lazy val medianAbsoluteDeviation = new StatisticalAggregation[Double] {
-    override def apply(s: Seq[Double]): Double = Stat.medianAbsoluteDeviation(s)
-  }
-
-  lazy val median = new StatisticalAggregation[Double] {
-    override def apply(s: Seq[Double]): Double = Stat.median(s)
-  }
-
-  lazy val sum = new StatisticalAggregation[Double] {
-    override def apply(s: Seq[Double]): Double = s.sum
-  }
-}
+package object statistics extends StatisticsMethods
