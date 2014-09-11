@@ -19,7 +19,7 @@ class AverageTaskDataUI(val name: String = "",
   type S = Double
 
   def coreObject(plugins: PluginSet) = util.Try {
-    val gtBuilder = StatTask(name)(plugins)
+    val gtBuilder = StatisticsTask(name)(plugins)
 
     sequence foreach {
       s ⇒
@@ -30,7 +30,7 @@ class AverageTaskDataUI(val name: String = "",
     gtBuilder.toTask
   }
 
-  def coreClass = classOf[StatTask]
+  def coreClass = classOf[StatisticsTask]
 
   def fatImagePath = "img/average_fat.png"
 

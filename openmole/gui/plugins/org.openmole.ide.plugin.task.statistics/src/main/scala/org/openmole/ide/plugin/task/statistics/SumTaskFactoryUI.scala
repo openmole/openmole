@@ -28,7 +28,7 @@ class SumTaskFactoryUI extends TaskFactoryUI {
   def buildDataUI = new SumTaskDataUI
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
-    val t = SceneFactory.as[StatTask](task)
+    val t = SceneFactory.as[StatisticsTask](task)
     uiMap.task(
       t,
       x ⇒ new MedianTaskDataUI(t.name, t.sequences.toList.map { p ⇒ (uiMap.prototypeUI(p._1).get, uiMap.prototypeUI(p._2).get) })

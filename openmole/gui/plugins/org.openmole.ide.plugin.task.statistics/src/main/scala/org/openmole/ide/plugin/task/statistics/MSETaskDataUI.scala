@@ -28,7 +28,7 @@ class MSETaskDataUI(val name: String = "",
                     val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends StatDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
-    val gtBuilder = StatTask(name)(plugins)
+    val gtBuilder = StatisticsTask(name)(plugins)
     sequence foreach {
       s ⇒
         gtBuilder add (s._1.dataUI.coreObject.get.asInstanceOf[Prototype[Array[Double]]],
@@ -39,7 +39,7 @@ class MSETaskDataUI(val name: String = "",
     gtBuilder.toTask
   }
 
-  def coreClass = classOf[StatTask]
+  def coreClass = classOf[StatisticsTask]
 
   override def imagePath = "img/mse.png"
 

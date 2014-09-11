@@ -23,7 +23,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import scala.collection.mutable.ListBuffer
 
-object StatTask {
+object StatisticsTask {
 
   def apply(name: String)(implicit plugins: PluginSet) = new TaskBuilder { builder ⇒
     private var _sequences = new ListBuffer[(Prototype[Array[Double]], Prototype[Double], StatisticalAggregation[Double])]
@@ -37,14 +37,14 @@ object StatTask {
       this
     }
 
-    def toTask = new StatTask(name) with super.Built {
+    def toTask = new StatisticsTask(name) with super.Built {
       val sequences = builder.sequences
     }
   }
 
 }
 
-abstract class StatTask(val name: String) extends Task {
+abstract class StatisticsTask(val name: String) extends Task {
 
   def sequences: Iterable[(Prototype[Array[Double]], Prototype[Double], StatisticalAggregation[Double])]
 

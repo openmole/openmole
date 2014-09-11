@@ -17,7 +17,7 @@ class SumTaskDataUI(val name: String = "",
                     val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends StatDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
-    val gtBuilder = StatTask(name)(plugins)
+    val gtBuilder = StatisticsTask(name)(plugins)
     sequence foreach {
       s ⇒
         gtBuilder add (
@@ -29,7 +29,7 @@ class SumTaskDataUI(val name: String = "",
     gtBuilder.toTask
   }
 
-  def coreClass = classOf[StatTask]
+  def coreClass = classOf[StatisticsTask]
 
   override def imagePath = "img/sum.png"
 

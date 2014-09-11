@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.task.statistics
 import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.builder.{ SceneFactory, PuzzleUIMap }
-import org.openmole.plugin.task.statistics.{StatTask, MeanSquareErrorTask}
+import org.openmole.plugin.task.statistics.{StatisticsTask, MeanSquareErrorTask}
 
 class ConfidenceIntervalTaskFactoryUI extends TaskFactoryUI {
   override def toString = "Conf Interval"
@@ -27,7 +27,7 @@ class ConfidenceIntervalTaskFactoryUI extends TaskFactoryUI {
   def buildDataUI = new ConfidenceIntervalTaskDataUI()
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
-    val t = SceneFactory.as[StatTask](task)
+    val t = SceneFactory.as[StatisticsTask](task)
     uiMap.task(t, x ⇒ new ConfidenceIntervalTaskDataUI(t.name, t.sequences.toList.map { p ⇒ (uiMap.prototypeUI(p._1).get, uiMap.prototypeUI(p._2).get) }))
   }
 

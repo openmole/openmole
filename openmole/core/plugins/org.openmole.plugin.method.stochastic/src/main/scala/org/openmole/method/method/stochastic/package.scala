@@ -32,15 +32,15 @@ import org.openmole.plugin.task.statistics._
 import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
 
-import scala.collection.mutable.ListBuffer
-
 package object stochastic {
+
+  def StatisticsTask = org.openmole.plugin.task.statistics.StatisticsTask
 
   def replicate(
     name: String,
     model: Puzzle,
     replicationFactor: DiscreteFactor[_, _],
-    statisticTask: StatTask)(implicit plugins: PluginSet): Puzzle = {
+    statisticTask: StatisticsTask)(implicit plugins: PluginSet): Puzzle = {
     val exploration = ExplorationTask(name + "Replication", replicationFactor)
 
     Validation(exploration -< model) foreach {

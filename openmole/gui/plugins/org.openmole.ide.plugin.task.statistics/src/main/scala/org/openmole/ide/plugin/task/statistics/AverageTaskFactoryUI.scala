@@ -18,7 +18,7 @@
 package org.openmole.ide.plugin.task.statistics
 
 import org.openmole.core.model.task.ITask
-import org.openmole.plugin.task.statistics.{StatTask, AverageTask}
+import org.openmole.plugin.task.statistics.{StatisticsTask, AverageTask}
 import org.openmole.ide.core.implementation.builder.{ PuzzleUIMap, SceneFactory }
 import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 
@@ -28,7 +28,7 @@ class AverageTaskFactoryUI extends TaskFactoryUI {
   def buildDataUI = new AverageTaskDataUI
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
-    val t = SceneFactory.as[StatTask](task)
+    val t = SceneFactory.as[StatisticsTask](task)
     uiMap.task(t, x ⇒ new AverageTaskDataUI(t.name, t.sequences.toList.map { p ⇒ (uiMap.prototypeUI(p._1).get, uiMap.prototypeUI(p._2).get) }))
   }
 
