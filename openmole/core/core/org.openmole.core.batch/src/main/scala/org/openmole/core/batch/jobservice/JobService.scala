@@ -24,16 +24,18 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.misc.tools.service.Logger
 
-trait JobService extends BatchService with Logger { js ⇒
+object JobService extends Logger
+
+import JobService._
+
+trait JobService extends BatchService { js ⇒
 
   type J
 
   def submit(serializedJob: SerializedJob)(implicit token: AccessToken): BatchJob = token.synchronized {
     val job = _submit(serializedJob)
     job.state = SUBMITTED
-
     Log.logger.fine(s"Successful submission: ${job}")
-
     job
   }
 

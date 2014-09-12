@@ -19,6 +19,7 @@
 package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.environment.SerializedJob
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.batch.storage.Storage
 import org.openmole.misc.tools.io.FileUtil._
@@ -30,6 +31,10 @@ import StatusFiles._
 import scalax.io.Resource
 import java.io.File
 import org.openmole.misc.tools._
+
+object DIRACGliteJobService extends Logger
+
+import DIRACGliteJobService._
 
 trait DIRACGliteJobService extends GridScaleJobService with JobScript with UnlimitedAccess { js ⇒
 

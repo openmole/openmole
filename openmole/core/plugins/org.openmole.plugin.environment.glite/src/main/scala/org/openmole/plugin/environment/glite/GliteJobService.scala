@@ -22,11 +22,16 @@ import java.io.File
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.storage.{ StorageService, Storage }
 import org.openmole.core.batch.environment.SerializedJob
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import fr.iscpif.gridscale.glite.{ WMSJobService, WMSJobDescription }
 import StatusFiles._
 import scalax.io.Resource
+
+object GliteJobService extends Logger
+
+import GliteJobService._
 
 trait GliteJobService extends GridScaleJobService with JobServiceQualityControl with LimitedAccess with AvailabitityQuality with JobScript { js ⇒
 

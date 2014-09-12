@@ -24,11 +24,16 @@ import org.openmole.core.model.execution.ExecutionState
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.EventListener
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.gridscale._
 import fr.iscpif.gridscale.ssh.{ SSHJobService ⇒ GSSSHJobService, SSHConnectionCache, SSHJobDescription }
 import java.util.concurrent.atomic.AtomicInteger
 import collection.mutable
+
+object SSHJobService extends Logger
+
+import SSHJobService._
 
 trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 

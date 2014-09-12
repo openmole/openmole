@@ -67,7 +67,4 @@ trait BatchJob { bj ⇒
 
   def state: ExecutionState = _state
 
-  override def toString: String = {
-    s"Job ${bj} from job service ${jobService} is ${state}"
-  }
 }

@@ -58,4 +58,6 @@ trait SSHBatchJob extends BatchJob {
       case _                 ⇒ state = KILLED
     }
 
+  override def toString = id.toString
+
 }
