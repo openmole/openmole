@@ -18,7 +18,7 @@
 package org.openmole.ide.plugin.task.statistics
 
 import org.openmole.core.model.task.ITask
-import org.openmole.plugin.task.statistics.{StatisticsTask, AverageTask}
+import org.openmole.plugin.task.statistics._
 import org.openmole.ide.core.implementation.builder.{ PuzzleUIMap, SceneFactory }
 import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 
