@@ -210,7 +210,7 @@ object FileUtil {
       true
     }
 
-    def copy(toF: File) = {
+    def copy(toF: File): Unit = {
 
       def goThrough(f: (File, File) ⇒ Unit) = {
         val toCopy = new ListBuffer[(File, File)]
@@ -230,7 +230,8 @@ object FileUtil {
 
       goThrough(
         (curFrom, curTo) ⇒
-          if (curFrom.isDirectory) curTo.mkdir
+          if (curFrom.isSymbolicLink) curTo.createLink(Files.readSymbolicLink(curFrom.toPath).toString)
+          else if (curFrom.isDirectory) curTo.mkdir
           else curFrom.copyFile(curTo))
 
       goThrough((curFrom, curTo) ⇒ curTo.setSamePermissionsAs(curFrom))
@@ -279,7 +280,7 @@ object FileUtil {
       try fromIS.copy(to) finally fromIS.close
     }
 
-    def copy(to: OutputStream, maxRead: Int, timeout: Duration) = {
+    def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit = {
       val is = bufferedInputStream
       try is.copy(to, maxRead, timeout)
       finally is.close

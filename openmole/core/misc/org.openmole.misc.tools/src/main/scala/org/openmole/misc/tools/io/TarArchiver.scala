@@ -103,7 +103,7 @@ object TarArchiver {
 
     while (!toArchive.isEmpty) {
       val (source, entryName) = toArchive.pop
-      if (Files.isSymbolicLink(fs.getPath(source.getAbsolutePath))) links ::= source -> entryName
+      if (source.isSymbolicLink) links ::= source -> entryName
       else {
         val e =
           if (source.isDirectory) {
