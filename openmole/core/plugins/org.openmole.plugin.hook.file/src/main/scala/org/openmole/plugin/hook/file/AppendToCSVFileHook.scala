@@ -77,7 +77,7 @@ abstract class AppendToCSVFileHook(
             }
         }.toList
 
-        def moreThanOneElement(l: List[_]) = !l.tail.isEmpty
+        def moreThanOneElement(l: List[_]) = !l.isEmpty && !l.tail.isEmpty
 
         @tailrec def write(lists: List[List[_]]): Unit =
           if (!lists.exists(moreThanOneElement)) writeLine(lists.map { _.head })
