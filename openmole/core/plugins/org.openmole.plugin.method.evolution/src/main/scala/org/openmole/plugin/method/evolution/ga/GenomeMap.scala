@@ -20,6 +20,8 @@ package org.openmole.plugin.method.evolution.ga
 import fr.iscpif.mgo._
 import org.openmole.plugin.method.evolution._
 
+import scala.util.Random
+
 object GenomeMap {
 
   def apply(
@@ -54,7 +56,7 @@ object GenomeMap {
       type STATE = termination.STATE
 
       def initialState: STATE = termination.initialState
-      def terminated(population: Population[G, P, F], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+      def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
 
     }
 

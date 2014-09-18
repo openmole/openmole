@@ -297,7 +297,7 @@ package object ga {
       def computeElitism(population: Population[G, P, F], offspring: Population[G, P, F], archive: A)(implicit rng: Random) = evolution.computeElitism(population, offspring, archive)
 
       def initialState = termination.initialState
-      def terminated(population: Population[G, P, F], terminationState: STATE) = termination.terminated(population, terminationState)
+      def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random) = termination.terminated(population, terminationState)
     }
 
     val archive = model.archive.asInstanceOf[Prototype[A]]

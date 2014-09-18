@@ -23,6 +23,8 @@ import org.openmole.plugin.method.evolution._
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.data._
 
+import scala.util.Random
+
 object ModelFamily {
 
   def apply(
@@ -56,7 +58,7 @@ object ModelFamily {
       val mu = _mu
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
-      def terminated(population: Population[G, P, F], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+      def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
 
       override def inputsPrototypes = super.inputsPrototypes ++ Seq(_modelId)
 
