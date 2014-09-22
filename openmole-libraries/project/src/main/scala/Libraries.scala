@@ -225,7 +225,7 @@ object Libraries extends Defaults(Apache) {
   lazy val autowireJVM = OsgiProject("autowire.jvm", exports = Seq("autowire.*")) settings(
     libraryDependencies += "com.lihaoyi" %% "autowire" % scalaAutowireVersion, version := scalaAutowireVersion)
 
-  lazy val scaladget = OsgiProject("fr.iscpif.scaladget", exports = Seq("fr.iscpif.scaladget.*")) settings(
+  lazy val scaladget = OsgiProject("scaladget", exports = Seq("fr.iscpif.scaladget.*")) settings(
     libraryDependencies += "fr.iscpif" %%% "scaladget" % "0.1.0", version := scalaAutowireVersion)
 
   lazy val mgoVersion = "1.78-SNAPSHOT"
