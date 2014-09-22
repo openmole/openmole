@@ -196,6 +196,10 @@ object Libraries extends Defaults(Apache) {
   lazy val scalaUpickleVersion = "0.2.2"
   lazy val scalaAutowireVersion = "0.2.2"
 
+  lazy val scalajsDom = OsgiProject("org.scala-lang.modules.scalajs", exports = Seq("org.scalajs.dom.*")) settings(
+    libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6", version := "0.6")
+
+
   lazy val scalaTagsJS = OsgiProject("com.scalatags.js", exports = Seq("scalatags.*")) settings(
     libraryDependencies += "com.scalatags" %%% "scalatags" % scalaTagsVersion, version := scalaTagsVersion)
 
@@ -220,9 +224,8 @@ object Libraries extends Defaults(Apache) {
   lazy val autowireJVM = OsgiProject("autowire.jvm", exports = Seq("autowire.*")) settings(
     libraryDependencies += "com.lihaoyi" %% "autowire" % scalaAutowireVersion, version := scalaAutowireVersion)
 
-  lazy val scalajsDom = OsgiProject("org.scala-lang.modules.scalajs", exports = Seq("org.scalajs.dom.*")) settings(
-    libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6", version := "0.6")
-
+  lazy val scaladget = OsgiProject("fr.iscpif.scaladget", exports = Seq("fr.iscpif.scaladget.*")) settings(
+    libraryDependencies += "fr.iscpif" %%% "scaladget" % "0.1.0", version := scalaAutowireVersion)
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings(
     libraryDependencies += "fr.iscpif" %% "mgo" % "1.76",
