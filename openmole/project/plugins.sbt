@@ -20,5 +20,5 @@ addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.2")
 
 addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.3.0")
 
-addSbtPlugin("fr.iscpif" %% "jsmanager" % "0.2.0")
+addSbtPlugin("fr.iscpif" %% "jsmanager" % "0.6.0")
 //addSbtPlugin("org.scalatra.sbt" % "scalatra-sbt" % "0.3.5")

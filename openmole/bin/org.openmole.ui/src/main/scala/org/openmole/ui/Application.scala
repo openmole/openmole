@@ -28,10 +28,10 @@ import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.model.task._
-import org.openmole.ide.core.implementation.dialog.GUIApplication
 import org.openmole.ui.console.Console
 import annotation.tailrec
 import org.openmole.web._
+import org.openmole.gui.server._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 
@@ -51,7 +51,7 @@ class Application extends IApplication {
 """
 
   override def start(context: IApplicationContext) = {
-
+    println("start !!")
     case class Config(
       pluginsDirs: List[String] = Nil,
       guiPluginsDirs: List[String] = Nil,
@@ -157,7 +157,7 @@ class Application extends IApplication {
       server.start()
     }
     else {
-
+      /*
       val waitClose = new Semaphore(0)
       val application = new GUIApplication() {
         override def closeOperation = {
@@ -167,7 +167,10 @@ class Application extends IApplication {
       }
 
       application.display
-      waitClose.acquire(1)
+      waitClose.acquire(1)*/
+      println("GUI !")
+      val server = new GUIServer(config.serverPort)
+      server.start
 
     }
     IApplication.EXIT_OK

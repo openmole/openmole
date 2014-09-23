@@ -1,11 +1,7 @@
-package org.openmole.gui.server
-
-import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.webapp.WebAppContext
-import org.scalatra.servlet.ScalatraListener
+package org.openmole.gui.ext.data
 
 /*
- * Copyright (C) 22/09/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 20/08/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -21,21 +17,9 @@ import org.scalatra.servlet.ScalatraListener
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class GUIServer(port: Option[Int]) {
+import rx._
 
-  val p = port getOrElse 8080
+class DataUIs {
 
-  val server = new Server(p)
-  val context = new WebAppContext()
-  context setContextPath "/"
-  context.setResourceBase("src/main/webapp")
-  // context.addEventListener(new ScalatraListener)
-  context.addServlet(classOf[GUIServlet], "/")
-
-  server.setHandler(context)
-
-  def start = {
-    server.start
-    server.join
-  }
+  lazy val tasks: Var[List[Var[TaskDataUI]]] = Var(List())
 }

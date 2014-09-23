@@ -1,10 +1,7 @@
-package org.openmole.gui.client.workflow
-
-import org.openmole.gui.ext.data.TaskDataUI
-import rx.core.Obs
+package org.openmole.gui.ext.data
 
 /*
- * Copyright (C) 08/08/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 20/08/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,11 +16,6 @@ import rx.core.Obs
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import rx._
 
-class TaskWindow(val dataUI: Var[TaskDataUI] = Var(TaskDataUI.empty)) {
-
-  Obs(dataUI) {
-    println("the dataUI changed")
-  }
+trait PrototypeDataUI <: DataUI {
 }
