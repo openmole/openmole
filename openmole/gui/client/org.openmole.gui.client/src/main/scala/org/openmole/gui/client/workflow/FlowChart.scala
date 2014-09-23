@@ -1,5 +1,7 @@
+package org.openmole.gui.client.workflow
+
 /*
- * Copyright (C) 28/07/14 mathieu
+ * Copyright (C) 22/09/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -14,77 +16,263 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.gui.client.workflow
 
-import rx.core.Var
+import fr.iscpif.scaladget.d3._
+import fr.iscpif.scaladget.d3mapping.Selection
+import fr.iscpif.scaladget.d3mapping._
+
+import org.scalajs.dom.{ HTMLElement, Document, Element }
+
+import org.scalajs.dom.SVGPoint
+import org.scalajs.dom
+import scalatags.JsDom.all._
 
 import scala.scalajs.js
-import js.Dynamic.{ literal ⇒ lit }
+
+import js.Dynamic.{ literal ⇒ lit, newInstance ⇒ jsnew }
+
 import rx._
 
-class FlowChart {
-  /*
-  def apply[T](settings: WorkflowSettings,
-               tasks: Seq[TaskWindow],
-               connections: Seq[(TaskWindow, TaskWindow)]) = {
+import fr.iscpif.scaladget.d3._
 
-    val jsplumb = js.Dynamic.global.jsPlumb
-    val tasks: Var[Seq[TaskWindow]] = Var(Seq())
+trait GraphElement <: EventStates {
+  def literal: js.Dynamic
+}
 
-    val plumbInstance = jsplumb.ready { () ⇒
+trait EventStates {
+  val selected: Var[Boolean] = Var(false)
+}
 
-      val plumbInstance = jsplumb.getInstance(
-        settings.defaults
-      )
+class Task(val id: String,
+           val title: Var[String] = Var(""),
+           val location: Var[(Double, Double)] = Var((0.0, 0.0))) extends GraphElement {
+  def literal = lit("id" -> id, "title" -> title(), "x" -> location()._1, "y" -> location()._2)
+}
 
-      def init(connection: js.Dynamic) = {
-        connection.getOverlay("label").setLabel(connection.sourceId.substring(15) + "-" + connection.targetId.substring(15))
-        connection.bind("editCompleted", (o: js.Dynamic) ⇒ {
-          println("connection edited. Path is now " + o.path)
-        })
+class Edge(val source: Var[Task],
+           val target: Var[Task]) extends GraphElement {
+  def literal = lit("source" -> source().literal, "target" -> target().literal)
+}
+
+class Window(nodes: Array[Task] = Array(), edges: Array[Edge] = Array()) {
+
+  val svg = d3.select("body")
+    .append("svg")
+    .attr("width", "2500px")
+    .attr("height", "2500px")
+
+  val graph = new GraphCreator(svg,
+    nodes,
+    edges
+  )
+}
+
+case class Consts(selectedClass: js.String = "selected",
+                  circleGClass: String = "conceptG",
+                  graphClass: js.String = "graph",
+                  activeEditId: js.String = "active-editing",
+                  DELETE_KEY: js.Number = 46,
+                  nodeRadius: js.Number = 50)
+
+class GraphCreator(svgSelection: Selection, _tasks: Array[Task], _edges: Array[Edge]) {
+
+  implicit def dynamicToString(d: js.Dynamic): String = d.asInstanceOf[js.String]
+
+  implicit def dynamicToBoolean(d: js.Dynamic): Boolean = d.asInstanceOf[js.Boolean]
+
+  // SVG DEFINITIONS  //
+  val consts = new Consts
+
+  val svgG = svgSelection.append("g").classed(consts.graphClass, true)
+  val dragLine = svgG.append("svg:path")
+    .attr("class", "link dragline hidden")
+    .attr("d", "M0,0L0,0")
+    .style("marker-end", "url(#mark-end-arrow)")
+  val defs = svgSelection.append("svg:defs")
+  val pathRoot = svgG.append("g")
+  val circleRoot = svgG.append("g")
+
+  val mouseDownTask: Var[Option[Task]] = Var(None)
+
+  svgSelection
+    .on("mousemove", (_: js.Any, _: js.Number) ⇒ mousemove)
+    .on("mouseup.scene", (_: js.Any, _: js.Number) ⇒ mouseup)
+
+  // define arrow markers for graph links
+  defs.append("svg:marker")
+    .attr("id", "end-arrow")
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 32)
+    .attr("markerWidth", 3.5)
+    .attr("markerHeight", 3.5)
+    .attr("orient", "auto")
+    .append("svg:path")
+    .attr("d", "M0,-5L10,0L0,5")
+
+  // define arrow markers for leading arrow
+  defs.append("svg:marker")
+    .attr("id", "mark-end-arrow")
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 7)
+    .attr("markerWidth", 3.5)
+    .attr("markerHeight", 3.5)
+    .attr("orient", "auto")
+    .append("svg:path")
+    .attr("d", "M0,-5L10,0L0,5")
+
+  val tasks: Var[Array[Var[Task]]] = Var(Array())
+  _tasks.map {
+    addTask
+  }
+
+  val edges: Var[Array[Var[Edge]]] = Var(Array())
+  _edges.map {
+    addEdge
+  }
+
+  // GLOBAL EVENTS //
+  d3.select(dom.window)
+    .on("keydown", (_: js.Any, _: js.Number) ⇒ {
+      d3.event.keyCode match {
+        case consts.DELETE_KEY ⇒
+          tasks().filter(t ⇒ t().selected()).map { t ⇒
+            removeTask(t)
+          }
+          edges().filter(e ⇒ e().selected()).map { e ⇒
+            removeEdge(e)
+          }
+        case _ ⇒
       }
+    })
 
-      plumbInstance.doWhileSuspended(() ⇒ {
-        tasks().foreach { task ⇒
-          //addEndpoints(task.proxy.id, js.Array("RightMiddle"), js.Array("LeftMiddle"))
-        }
+  def mousemove = {
+    Seq(mouseDownTask()).flatten.map { t ⇒
+      val x = d3.event.clientX
+      val y = d3.event.clientY
+      if (d3.event.shiftKey) {
+        dragLine.attr("d", "M" + t.location()._1 + "," + t.location()._2 + "L" + x + "," + y)
+      }
+      else {
+        t.location() = (x, y)
+      }
+    }
+  }
 
-        plumbInstance.bind("connection", (conInfo: js.Dynamic, _: js.Dynamic) ⇒ {
-          init(conInfo.connection)
-        })
+  def mouseup = {
+    // Hide the drag line
+    mouseDownTask() = None
+    dragLine
+      .classed("hidden", true)
+      .style("marker-end", " ")
+  }
+
+  // ADD, SELECT AND REMOVE ITEMS //
+  def unselectTasks = tasks().foreach { t ⇒ t().selected() = false }
+
+  def unselectEdges = edges().foreach { e ⇒ e().selected() = false }
+
+  def removeTask(t: Var[Task]) = {
+    tasks() = tasks() diff Array(t)
+    edges() = edges().filterNot(e ⇒ e().source() == t() || e().target() == t())
+  }
+
+  def removeEdge(e: Var[Edge]) = {
+    edges() = edges() diff Array(e)
+  }
+
+  def addTask(id: String, title: String, x: Double, y: Double): Unit = addTask(new Task(id, Var(title), Var((x, y))))
+
+  def addTask(task: Task): Unit = {
+    tasks() = tasks() :+ Var(task)
+
+    Obs(tasks) {
+      val mysel = circleRoot.selectAll("g").data(tasks(), (task: Var[Task], n: js.Number) ⇒ {
+        task().id.toString
       })
 
-      plumbInstance.draggable(jsplumb.getSelector(".flowchart-demo .window"), lit(
-        grid = js.Array(20, 20)
-      ))
+      val newG = mysel.enter().append("g")
+      newG.append("circle").attr("r", consts.nodeRadius)
 
-      def connect(from: String, to: String, _editable: Boolean) =
-        plumbInstance.connect(lit(uuids = js.Array(from + "RightMiddle", to + "LeftMiddle"), lit(editable = _editable)))
+      Rx {
+        newG.classed(consts.circleGClass, true)
+          .attr("transform", (task: Var[Task]) ⇒ {
+            val loc = task().location()
+            "translate(" + loc._1 + "," + loc._2 + ")"
+          })
 
-      connections.foreach { con ⇒
-        connect(con._1.proxy.id, con._2.proxy.id, true)
+        newG.classed(consts.selectedClass, (task: Var[Task]) ⇒ {
+          task().selected()
+        })
       }
 
-      jsplumb.fire("workfow loaded", plumbInstance)
+      newG.on("mousedown", (t: Var[Task], n: js.Number) ⇒ {
+
+        mouseDownTask() = Some(t())
+        d3.event.stopPropagation
+
+        unselectTasks
+        unselectEdges
+        t().selected() = !t().selected()
+
+        if (d3.event.shiftKey) {
+          val x = t().location()._1
+          val y = t().location()._2
+          dragLine
+            .style("marker-end", "url(#mark-end-arrow)")
+            .classed("hidden", false)
+            .attr("d", "M" + x + "," + y + "L" + x + "," + y)
+        }
+      })
+        .on("mouseup.task", (t: Var[Task], n: js.Number) ⇒ {
+          Seq(mouseDownTask()).flatten.map { mdt ⇒
+            if (t() != mdt) {
+              addEdge(mdt, t())
+            }
+          }
+        }
+
+        )
+      mysel.exit().remove()
     }
-    /*
-    def +(tw: TaskWindow) = tasks() = {
-      addEndpoints(tw.proxy.id, js.Array("RightMiddle"), js.Array("LeftMiddle"))
-      tasks() :+ tw
+  }
+
+  def addEdge(source: Task, target: Task): Unit = addEdge(new Edge(Var(source), Var(target)))
+
+  def addEdge(edge: Edge): Unit = {
+    edges() = edges() :+ Var(edge)
+
+    Obs(edges) {
+      val mysel = pathRoot.selectAll("path").data(edges(), (edge: Var[Edge], n: js.Number) ⇒ {
+        edge().source().id + "+" + edge().target().id
+      })
+
+      val newPath = mysel.enter().append("path")
+
+      Rx {
+        newPath.style("marker-end", "url(#end-arrow)")
+          .classed("link", true)
+          .attr("d", (edge: Var[Edge], n: js.Number) ⇒ {
+            val source = edge().source().location()
+            val target = edge().target().location()
+            "M" + source._1 + "," + source._2 + "L" + target._1 + "," + target._2
+          })
+
+        // update existing paths
+        newPath.style("marker-end", "url(#end-arrow)")
+          .classed(consts.selectedClass, (edge: Var[Edge], n: Number) ⇒ {
+            edge().selected()
+          }
+          )
+
+        newPath.on("mousedown", (edge: Var[Edge], n: js.Number) ⇒ {
+          unselectTasks
+          unselectEdges
+          edge().selected() = !edge().selected()
+        })
+
+      }
+
+      mysel.exit().remove()
     }
-
-    def addEndpoints(toId: String, sourceAnchors: Seq[String], targetAnchors: Seq[String]) = {
-      sourceAnchors.foreach { sanch ⇒
-        val sourceUUID = toId + sanch
-        plumbInstance.addEndpoint("flowchart" + toId, settings.sourcePoint, lit(anchor = sanch, uuid = sourceUUID))
-      }
-
-      targetAnchors.foreach { tanch ⇒
-        val targetUUID = toId + tanch
-        plumbInstance.addEndpoint("flowchart" + toId, settings.targetPoint, lit(anchor = tanch, uuid = targetUUID))
-
-      }
-    }*/
-
-  }*/
+  }
 }

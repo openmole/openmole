@@ -29,12 +29,12 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     Libraries.bouncyCastle intransitive ()
   )
 
-  lazy val openmoleui = OsgiProject("org.openmole.gui", singleton = true, buddyPolicy = Some("global")) settings (
+  lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true, buddyPolicy = Some("global")) settings (
     equinoxDependencies,
     bundleType := Set("core"),
-    organization := "org.openmole.gui"
+    organization := "org.openmole.ui"
   ) settings (jsManagerSettings: _*) settings (
-      libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.logging, scopt, robustIt)
+      libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.logging, Apache.log4j, scopt, robustIt)
     ) dependsOn (
         base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
         base.Misc.pluginManager, base.Core.implementation, base.Core.batch, gui.Server.server, gui.Client.client, base.Misc.sftpserver, base.Misc.logging,
