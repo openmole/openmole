@@ -18,8 +18,6 @@
 package org.openmole.plugin.task.scala
 
 import java.io.File
-import java.io.PrintWriter
-import java.util.logging.Logger
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.misc.tools.io.FileUtil._
@@ -27,11 +25,6 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.misc.tools.script._
 import org.openmole.plugin.task.code._
-import reflect.ClassTag
-import org.openmole.misc.tools.service.ObjectPool
-import scala.tools.nsc.interpreter.NamedParam
-import org.openmole.misc.workspace.Workspace
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.console.ScalaREPL
 
 object ScalaTask {
@@ -59,51 +52,27 @@ sealed abstract class ScalaTask(
     imports: Iterable[String],
     libraries: Iterable[File]) extends CodeTask {
 
-  def script = {
-    "def run(" + inputs.map { i ⇒ i.prototype.name + ": " + i.prototype.`type`.toString }.mkString(",") + ") = {\n" +
-      code + "\n" +
-      "Map[String, Any](" + outputs.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",") + ")\n" +
-      "}\n" +
-      "var " + resVariable + ": Map[String, Any] = null"
-  }
+  def script =
+    imports.map("import " + _).mkString("; ") + "\n" +
+      s"""(${inputs.map(i ⇒ i.prototype.name + ": " + i.prototype.`type`).mkString(",")}) => {
+       |    ${code}
+       |    Map[String, Any]( ${outputs.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} )
+       |}
+     """.stripMargin
 
-  @transient lazy val resVariable = Workspace.preference(Task.OpenMOLEVariablePrefix) + "ScalaTaskResult"
-
-  def interpreter = {
+  @transient lazy val compiledScript = {
     val interpreter = new ScalaREPL
-    interpreter.beSilentDuring {
-      //interpreter.intp.addImports(imports.toSeq: _*)
-      libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
-      val importString = imports.map("import " + _).mkString("; ")
-      interpreter.interpret(importString)
-      val res = interpreter.interpret(script)
-      if (res != tools.nsc.interpreter.Results.Success) throw new UserBadDataError("Error in script: " + script)
-    }
-    interpreter
+    libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
+    val evaluated = interpreter.eval(script)
+    (evaluated, evaluated.getClass.getMethod("apply", inputs.map(_.prototype.`type`.runtimeClass).toSeq: _*))
   }
 
-  @transient lazy val interpreterPool = new ObjectPool(interpreter)
-
-  override def processCode(context: Context) = interpreterPool.exec {
-    interpreter ⇒
-      val scalaTaskResult = interpreter.beSilentDuring {
-        try {
-          context.values.foreach {
-            v ⇒ interpreter.bind(v.prototype.name, v.value)
-          }
-          val code = resVariable + " = run(" + inputs.map { i ⇒ i.prototype.name }.mkString(",") + ")"
-          interpreter.interpret(code)
-          interpreter.valueOfTerm(resVariable).getOrElse(throw new UserBadDataError("Error in execution of " + code)).asInstanceOf[Map[String, Any]]
-        }
-        finally {
-          interpreter.interpret(resVariable + " = null")
-          context.values.foreach {
-            v ⇒ interpreter.bind(v.prototype.name, null)
-          }
-        }
-      }
-
-      Context.empty ++ outputs.map { o ⇒ Variable.unsecure(o.prototype, scalaTaskResult(o.prototype.name)) }
+  override def processCode(context: Context) = {
+    val args = inputs.toArray.map(i ⇒ context(i.prototype))
+    val (evaluated, method) = compiledScript
+    val result = method.invoke(evaluated, args.toSeq.map(_.asInstanceOf[AnyRef]): _*).asInstanceOf[Map[String, Any]]
+    context ++ outputs.map { o ⇒ Variable.unsecure(o.prototype, result(o.prototype.name)) }
   }
+
 }
 
