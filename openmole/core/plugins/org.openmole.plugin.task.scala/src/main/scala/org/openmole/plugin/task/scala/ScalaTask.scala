@@ -32,7 +32,6 @@ object ScalaTask {
   def apply(
     name: String,
     code: String)(implicit plugins: PluginSet = PluginSet.empty) = {
-    val _plugins = plugins
     new CodeTaskBuilder { builder ⇒
 
       addImport("org.openmole.misc.tools.service.Random.newRNG")
@@ -52,9 +51,12 @@ sealed abstract class ScalaTask(
     imports: Iterable[String],
     libraries: Iterable[File]) extends CodeTask {
 
+  def prefix = "_input_value_"
+
   def script =
     imports.map("import " + _).mkString("; ") + "\n" +
-      s"""(${inputs.map(i ⇒ i.prototype.name + ": " + i.prototype.`type`).mkString(",")}) => {
+      s"""(${inputs.map(i ⇒ prefix + i.prototype.name + ": " + i.prototype.`type`).mkString(",")}) => {
+       |    ${inputs.map(i ⇒ "var " + i.prototype.name + " = " + prefix + i.prototype.name).mkString("; ")}
        |    ${code}
        |    Map[String, Any]( ${outputs.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} )
        |}
