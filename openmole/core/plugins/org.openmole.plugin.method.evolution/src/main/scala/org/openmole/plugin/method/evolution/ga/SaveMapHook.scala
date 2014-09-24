@@ -30,7 +30,7 @@ object SaveMapHook {
 
   def apply(puzzle: GAPuzzle[GenomeMap], dir: String, name: String): HookBuilder =
     new HookBuilder {
-      addInput(puzzle.individual.toArray)
+      addInput(puzzle.population)
       val _puzzle = puzzle
       val _path = dir + "/" + name
 
@@ -52,7 +52,7 @@ abstract class SaveMapHook extends Hook {
     file.createParentDir
     file.withWriter { w ⇒
       for {
-        i ← context(puzzle.individual.toArray)
+        i ← context(puzzle.population).toIndividuals
       } {
         val scaledGenome = puzzle.evolution.toVariables(i.genome, context)
         w.write("" + scaledGenome(puzzle.evolution.x).value + "," + scaledGenome(puzzle.evolution.y).value + "," + puzzle.evolution.aggregate(i.fitness) + "\n")
