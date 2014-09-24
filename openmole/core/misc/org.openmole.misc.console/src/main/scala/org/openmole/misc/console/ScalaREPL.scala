@@ -21,7 +21,6 @@ import scala.tools.nsc.interpreter._
 import scala.tools.nsc._
 import org.openmole.misc.osgi._
 import scala.tools.nsc.reporters._
-//import scala.tools.nsc.util._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -34,19 +33,19 @@ class ScalaREPL extends ILoop {
   intp = new IMain {
 
     override protected def newCompiler(settings: Settings, reporter: Reporter) = {
-      settings.outputDirs setSingleOutput virtualDirectory
+      settings.outputDirs setSingleOutput replOutput.dir
       settings.exposeEmptyPackage.value = true
-      new OSGiScalaCompiler(settings, reporter, virtualDirectory)
+      new OSGiScalaCompiler(settings, reporter, replOutput.dir)
     }
 
-    override def interpret(s: String) = {
+    /*override def interpret(s: String) = {
       val r = super.interpret(s)
-      virtualDirectory.clear
+      replOutput.dir.clear
       r
-    }
+    }*/
 
     override lazy val classLoader =
-      new AbstractFileClassLoader(virtualDirectory, classOf[OSGiScalaCompiler].getClassLoader)
+      new AbstractFileClassLoader(replOutput.dir, classOf[OSGiScalaCompiler].getClassLoader)
 
   }
 
