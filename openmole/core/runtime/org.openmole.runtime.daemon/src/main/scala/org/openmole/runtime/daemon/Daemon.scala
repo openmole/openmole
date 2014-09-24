@@ -17,6 +17,7 @@
 
 package org.openmole.runtime.daemon
 
+import org.codehaus.groovy.vmplugin.v5.PluginDefaultGroovyMethods
 import org.eclipse.equinox.app._
 import org.openmole.misc.tools.service.Logger
 import scopt._

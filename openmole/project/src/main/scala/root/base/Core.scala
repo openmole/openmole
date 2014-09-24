@@ -15,14 +15,14 @@ object Core extends BaseDefaults {
 
   override val dir = file("core/core")
 
-  lazy val model = OsgiProject("model", openmoleScope = Some("provided")) dependsOn
+  lazy val model = OsgiProject("model", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn
     (eventDispatcher, exception, Misc.tools, updater, Misc.workspace)
 
   lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
     (model, workspace, xstream, pluginManager, hashService, fileService, Misc.tools, iceTar)
 
-  lazy val implementation = OsgiProject("implementation", openmoleScope = Some("provided")) settings
+  lazy val implementation = OsgiProject("implementation", openmoleScope = Some("provided"), imports = Seq("*")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
     (model, workspace, exception, eventDispatcher,
       provided(serializer), pluginManager, scalaLang, Apache.math, groovy, Misc.hashService % "test", Misc.replication % "test") //TODO: THINGS REALLY DEPEND ON THESE LIBS. Deal with it
