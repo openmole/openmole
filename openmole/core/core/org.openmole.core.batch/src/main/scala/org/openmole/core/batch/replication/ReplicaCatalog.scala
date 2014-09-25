@@ -54,7 +54,13 @@ object ReplicaCatalog extends Logger {
   lazy val database = {
     val dbInfoFile = DBServerInfo.dbInfoFile
     val info = DBServerInfo.load(dbInfoFile)
-    Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.dbName}:LOCK_TIMEOUT=${Workspace.preferenceAsDuration(LockTimeout).toMillis}", user = info.user, password = info.password)
+    val db = Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.dbName}", user = info.user, password = info.password)
+    db.withSession {
+      s ⇒
+        val statement = s.createStatement()
+        statement.execute(s"SET LOCK_TIMEOUT ${Workspace.preferenceAsDuration(LockTimeout).toMillis}")
+    }
+    db
   }
 
   lazy val localLock = new LockRepository[ReplicaCacheKey]
