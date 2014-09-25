@@ -40,13 +40,13 @@ object ReplicaCatalog extends Logger {
   val InCatalogCacheTime = new ConfigurationLocation("ReplicaCatalog", "InCatalogCacheTime")
   val ReplicaCacheTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime")
   val ReplicaGraceTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime")
-  //val SocketTimeout = new ConfigurationLocation("ReplicaCatalog", "SocketTimeout")
+  val LockTimeout = new ConfigurationLocation("ReplicaCatalog", "LockTimeout")
 
   Workspace += (NoAccessCleanTime, "P30D")
   Workspace += (InCatalogCacheTime, "PT2M")
   Workspace += (ReplicaCacheTime, "PT30M")
   Workspace += (ReplicaGraceTime, "P1D")
-  //Workspace += (SocketTimeout, "PT2M")
+  Workspace += (LockTimeout, "PT1M")
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
 
@@ -54,7 +54,7 @@ object ReplicaCatalog extends Logger {
   lazy val database = {
     val dbInfoFile = DBServerInfo.dbInfoFile
     val info = DBServerInfo.load(dbInfoFile)
-    Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.dbName}", user = info.user, password = info.password)
+    Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.dbName}:LOCK_TIMEOUT=${Workspace.preferenceAsDuration(LockTimeout).toMillis}", user = info.user, password = info.password)
   }
 
   lazy val localLock = new LockRepository[ReplicaCacheKey]
