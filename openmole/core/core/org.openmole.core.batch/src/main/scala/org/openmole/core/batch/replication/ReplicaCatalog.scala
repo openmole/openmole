@@ -40,15 +40,13 @@ object ReplicaCatalog extends Logger {
   val InCatalogCacheTime = new ConfigurationLocation("ReplicaCatalog", "InCatalogCacheTime")
   val ReplicaCacheTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime")
   val ReplicaGraceTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime")
-
   //val SocketTimeout = new ConfigurationLocation("ReplicaCatalog", "SocketTimeout")
 
   Workspace += (NoAccessCleanTime, "P30D")
   Workspace += (InCatalogCacheTime, "PT2M")
   Workspace += (ReplicaCacheTime, "PT30M")
   Workspace += (ReplicaGraceTime, "P1D")
-
-  //Workspace += (SocketTimeout, "PT10M")
+  //Workspace += (SocketTimeout, "PT2M")
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
 

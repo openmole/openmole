@@ -17,6 +17,9 @@
 
 package org.openmole.misc.console
 
+import java.io.{ PrintStream, PrintWriter, Writer }
+
+import scala.reflect.internal.util.Position
 import scala.tools.nsc.interpreter._
 import scala.tools.nsc._
 import org.openmole.misc.osgi._
@@ -24,13 +27,43 @@ import scala.tools.nsc.reporters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ScalaREPL extends ILoop {
+class ScalaREPL(displayErrors: Boolean = true) extends ILoop {
 
   System.setProperty("jline.shutdownhook", "true")
   //System.setProperty("scala.repl.debug", "true")
   override val prompt = "OpenMOLE>"
 
+  case class ErrorMessage(error: String, line: Int)
+
+  var firstErrorMessage: Option[ErrorMessage] = None
+
+  in = new JLineReader(new JLineCompletion(this))
+
+  super.getClass.getMethods.find(_.getName.contains("globalFuture_$eq")).get.invoke(this, Future { true }.asInstanceOf[AnyRef])
+
+  settings = new Settings
+  settings.Yreplsync.value = true
+  settings
+
   intp = new IMain {
+
+    override lazy val reporter = new ReplReporter(this) {
+      override def error(pos: Position, msg: String): Unit = {
+
+        if (!firstErrorMessage.isDefined && pos.isDefined) {
+          val compiled = new String(pos.source.content).split("\n")
+          val linesLength = compiled.take(pos.line - 1).flatten.size + (pos.line - 1)
+          val offset = pos.start - linesLength
+
+          firstErrorMessage =
+            Some(ErrorMessage(
+              s"""$msg
+              |${compiled(pos.line - 1)}
+              |${new String((0 until offset).map(_ ⇒ ' ').toArray)}^""".stripMargin, pos.line))
+        }
+        if (displayErrors) super.error(pos, msg)
+      }
+    }
 
     override protected def newCompiler(settings: Settings, reporter: Reporter) = {
       settings.outputDirs setSingleOutput replOutput.dir
@@ -48,13 +81,5 @@ class ScalaREPL extends ILoop {
       new AbstractFileClassLoader(replOutput.dir, classOf[OSGiScalaCompiler].getClassLoader)
 
   }
-
-  in = new JLineReader(new JLineCompletion(this))
-
-  super.getClass.getMethods.find(_.getName.contains("globalFuture_$eq")).get.invoke(this, Future { true }.asInstanceOf[AnyRef])
-
-  settings = new Settings
-  settings.Yreplsync.value = true
-  settings
 
 }

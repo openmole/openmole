@@ -17,12 +17,15 @@
 
 package org.openmole.plugin.task.scala
 
-import java.io.File
+import java.io.{ OutputStreamWriter, File }
+import javax.script.SimpleScriptContext
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
+import org.openmole.misc.tools.io.StringBuilderOutputStream
 import org.openmole.misc.tools.script._
 import org.openmole.plugin.task.code._
 import org.openmole.misc.console.ScalaREPL
@@ -42,7 +45,6 @@ object ScalaTask {
         new ScalaTask(name, code, builder.imports, builder.libraries) with builder.Built
     }
   }
-
 }
 
 sealed abstract class ScalaTask(
@@ -53,21 +55,40 @@ sealed abstract class ScalaTask(
 
   def prefix = "_input_value_"
 
+  @transient lazy val compiledScript = {
+    val interpreter = new ScalaREPL(false)
+    libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
+    val evaluated =
+      try interpreter.eval(script)
+      catch {
+        case e: Exception ⇒
+          throw new InternalProcessingError(
+            e,
+            interpreter.firstErrorMessage.map {
+              error ⇒
+                s"""Error while compiling:
+               |${error.error}
+               |on line ${error.line} of script:
+               |${script}""".stripMargin
+            }.getOrElse("Error in compiler")
+          )
+      }
+
+    if (evaluated == null) throw new InternalProcessingError(
+      s"""The return value of the script was null:
+         |${script}""".stripMargin
+    )
+    (evaluated, evaluated.getClass.getMethod("apply", inputs.map(_.prototype.`type`.runtimeClass).toSeq: _*))
+  }
+
   def script =
-    imports.map("import " + _).mkString("; ") + "\n" +
+    imports.map("import " + _).mkString("\n") + "\n\n" +
       s"""(${inputs.map(i ⇒ prefix + i.prototype.name + ": " + i.prototype.`type`).mkString(",")}) => {
        |    ${inputs.map(i ⇒ "var " + i.prototype.name + " = " + prefix + i.prototype.name).mkString("; ")}
        |    ${code}
        |    Map[String, Any]( ${outputs.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} )
        |}
-     """.stripMargin
-
-  @transient lazy val compiledScript = {
-    val interpreter = new ScalaREPL
-    libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
-    val evaluated = interpreter.eval(script)
-    (evaluated, evaluated.getClass.getMethod("apply", inputs.map(_.prototype.`type`.runtimeClass).toSeq: _*))
-  }
+       |""".stripMargin
 
   override def processCode(context: Context) = {
     val args = inputs.toArray.map(i ⇒ context(i.prototype))
