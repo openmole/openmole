@@ -10,6 +10,8 @@ object ThirdParties extends Defaults {
 
   lazy val iceTar = OsgiProject("com.ice.tar")
 
+  lazy val nioUtils = OsgiProject("bbejeck.nio")
+
   lazy val scalaSwing =
     OsgiProject("org.scala-lang.scala-swing", exports = Seq("scala.swing.*", "scala.actors.*")) settings
       (libraryDependencies <+= scalaVersion { v ⇒ "org.scala-lang.modules" %% "scala-swing" % "1.0.1" })

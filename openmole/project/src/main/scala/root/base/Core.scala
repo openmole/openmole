@@ -20,7 +20,7 @@ object Core extends BaseDefaults {
 
   lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (model, workspace, xstream, pluginManager, hashService, fileService, Misc.tools, iceTar)
+    (model, workspace, xstream, pluginManager, hashService, fileService, Misc.tools, iceTar, nioUtils)
 
   lazy val implementation = OsgiProject("implementation", openmoleScope = Some("provided"), imports = Seq("*")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
@@ -29,7 +29,7 @@ object Core extends BaseDefaults {
 
   lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (implementation,
     workspace, Misc.tools, eventDispatcher, replication, h2, slick, updater, Misc.exception,
-    serializer, jasypt, fileService, hashService, pluginManager, iceTar,
+    serializer, jasypt, fileService, hashService, pluginManager, iceTar, nioUtils,
     guava, Apache.config) settings (libraryDependencies += gridscale)
 
   lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global")) dependsOn (implementation, scalaLang /*, scalaCompiler*/ , Misc.macros)

@@ -23,7 +23,7 @@ object Misc extends BaseDefaults {
   val tools = OsgiProject("org.openmole.misc.tools", buddyPolicy = Some("global")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }) dependsOn
     (provided(exception), xstream % "provided", groovy, Apache.exec,
-      Apache.pool % "provided", Apache.math % "provided", osgi % "provided", jodaTime % "provided", iceTar, provided(scalaLang))
+      Apache.pool % "provided", Apache.math % "provided", osgi % "provided", jodaTime % "provided", iceTar, nioUtils, provided(scalaLang))
 
   val eventDispatcher = OsgiProject("org.openmole.misc.eventdispatcher") dependsOn (provided(tools))
 
@@ -58,7 +58,7 @@ object Misc extends BaseDefaults {
 
   val fileService = OsgiProject("org.openmole.misc.fileservice") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (provided(tools), provided(hashService), fileCache, provided(updater), provided(workspace), iceTar % "provided")
+    (provided(tools), provided(hashService), fileCache, provided(updater), provided(workspace), iceTar % "provided", nioUtils % "provided")
 
   val logging = OsgiProject(
     "org.openmole.misc.logging",
