@@ -31,8 +31,7 @@ import java.io.PrintWriter
 import java.io.Writer
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
-import java.nio.file.FileSystems
-import java.nio.file.Files
+import java.nio.file.{ FileVisitOption, Path, Paths, FileSystems, Files }
 import java.security.Permission
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -51,6 +50,9 @@ import org.openmole.misc.tools.service._
 import scala.util.{ Try, Failure, Success }
 import java.util.UUID
 import java.util.zip.ZipFile
+import scala.collection.JavaConversions._ // provide scala foreach over Java collections
+import java.util
+import bbejeck.nio.util.DirUtils
 
 object FileUtil {
 
@@ -68,12 +70,15 @@ object FileUtil {
   implicit def predicateToFileFilter(predicate: File ⇒ Boolean) = new FileFilter {
     def accept(p1: File) = predicate(p1)
   }
-  implicit def file2PathConverter(file: File) = file.toPath
+  // glad you were there...
+  implicit def file2Path(file: File) = file.toPath
+  implicit def path2File(path: Path) = path.toFile
 
   def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
 
   class InputStreamDecorator(is: InputStream) {
 
+    // FIXME useful?
     def copy(to: OutputStream): Unit = {
       val buffer = new Array[Byte](DefaultBufferSize)
       Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach { to.write(buffer, 0, _) }
@@ -114,10 +119,9 @@ object FileUtil {
 
     def toGZ = new GZIPInputStream(is)
 
-    def copy(file: File): Unit = {
-      val os = new FileOutputStream(file)
-      try copy(os)
-      finally os.close
+    // new version using NIO
+    def copy(file: Path): Unit = {
+      Files.copy(is, file)
     }
   }
 
@@ -157,15 +161,18 @@ object FileUtil {
       lastModification
     }
 
+    // TODO replace with listFiles
     def listRecursive(filter: File ⇒ Boolean) = {
       val ret = new ListBuffer[File]
       applyRecursive((f: File) ⇒ if (filter(f)) ret += f)
       ret
     }
 
+    // TODO replace with NIO
     def mode =
       (if (file.canExecute) exec else 0) | (if (file.canWrite) write else 0) | (if (file.canRead) read else 0)
 
+    // TODO replace with NIO
     def mode_=(m: Int) = {
       if ((m & exec) != 0) file.setExecutable(true) else file.setExecutable(false)
       if ((m & write) != 0) file.setWritable(true) else file.setWritable(false)
@@ -210,6 +217,7 @@ object FileUtil {
       true
     }
 
+    // TODO replace with NIO
     def copy(toF: File): Unit = {
 
       def goThrough(f: (File, File) ⇒ Unit) = {
@@ -238,6 +246,8 @@ object FileUtil {
       toF
     }
 
+    // deprecated by nio CopyOption
+    @deprecated
     def setSamePermissionsAs(other: File) = {
       file.setExecutable(other.canExecute)
       file.setReadable(other.canRead)
@@ -264,6 +274,7 @@ object FileUtil {
       toF
     }
 
+    // TODO replace with NIO
     def copyFile(toF: File) = {
       val from = new FileInputStream(file).getChannel
 
@@ -275,38 +286,39 @@ object FileUtil {
       toF
     }
 
-    def copy(to: OutputStream): Unit = {
-      val fromIS = new FileInputStream(file)
-      try fromIS.copy(to) finally fromIS.close
-    }
+    // new version with NIO
+    def copy(to: OutputStream) = Files.copy(file, to)
 
+    // TODO replace with NIO
     def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit = {
       val is = bufferedInputStream
       try is.copy(to, maxRead, timeout)
       finally is.close
     }
 
-    def move(to: File) = {
-      if (!file.renameTo(to)) {
-        copy(to)
-        recursiveDelete
+    // new version using NIO
+    def move(to: Path) = {
+      if (!Files.isDirectory(file)) {
+        Files.move(file, to)
       }
-      to
+      else {
+        DirUtils.move(file, to)
+      }
     }
 
-    def isSymbolicLink = {
-      val fs = FileSystems.getDefault
-      Files.isSymbolicLink(fs.getPath(file.getAbsolutePath))
-    }
+    // new version using NIO
+    def isSymbolicLink = Files.isSymbolicLink(Paths.get(file.getAbsolutePath))
 
+    // new version using NIO
     def isEmpty =
-      if (!file.exists) true
+      if (Files.notExists(file)) true
       else
-        file.isFile match {
-          case true  ⇒ file.length == 0
-          case false ⇒ file.list.isEmpty
+        Files.isDirectory(file) match {
+          case false ⇒ file.size == 0
+          case false ⇒ Files.newDirectoryStream(file).iterator.hasNext
         }
 
+    // TODO reimplement using walkFileTree
     def recursiveDelete: Boolean = {
       if (file.exists && file.isDirectory && !file.isSymbolicLink) {
         for (f ← file.listFiles) f.recursiveDelete
@@ -415,6 +427,7 @@ object FileUtil {
       finally channelI.close
     }
 
+    // TODO replace by createSymlink
     def createLink(target: String) = {
       val fs = FileSystems.getDefault
       val linkTo = fs.getPath(target)
@@ -429,6 +442,7 @@ object FileUtil {
       }
     }
 
+    // TODO replace by createDirectories
     def createParentDir = wrapError {
       val parent = file.getCanonicalFile.getParentFile
       if (parent != null) {
@@ -475,13 +489,13 @@ object FileUtil {
       file
     }
 
-    def newDir(prefix: String): File = {
-      val tempFile = newFile(prefix, "")
-      if (!tempFile.mkdirs) throw new IOException("Cannot create directory " + tempFile)
-      tempFile
-    }
+    // new version using NIO
+    // TODO get rid of toFile
+    def newDir(prefix: String): File = Files.createTempDirectory(prefix).toFile
 
-    def newFile(prefix: String, suffix: String): File = new File(file, prefix + UUID.randomUUID + suffix)
+    // new version using NIO
+    // TODO get rid of toFile
+    def newFile(prefix: String, suffix: String): File = Files.createTempFile(prefix, suffix).toFile
 
     def isJar = Try {
       val zip = new ZipFile(file)
@@ -492,6 +506,4 @@ object FileUtil {
     }.getOrElse(false)
 
   }
-
 }
-
