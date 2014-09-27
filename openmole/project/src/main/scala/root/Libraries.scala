@@ -141,6 +141,8 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "org.objenesis" % "objenesis" % "1.2",
     version := "1.7.4")
 
+  lazy val netLogo5Version = "5.1.0"
+
   lazy val netlogo4_noscala = OsgiProject("ccl.northwestern.edu.netlogo4.noscala", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("!scala.*", "*")) settings
     (libraryDependencies ++=
@@ -155,9 +157,8 @@ object Libraries extends Defaults(Apache) {
   lazy val netlogo5_noscala = OsgiProject("ccl.northwestern.edu.netlogo5.noscala", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("!scala.*", "*")) settings
     (libraryDependencies ++=
-      Seq("ccl.northwestern.edu" % "netlogo" % "5.0.5",
-        "org.picocontainer" % "picocontainer" % "2.13.6",
-        "org.objectweb" % "asm-all" % "3.3.1"), version := "5.0.5", autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.9.2", crossPaths := false,
+      Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
+        "org.picocontainer" % "picocontainer" % "2.13.6"), version := netLogo5Version, autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.9.2", crossPaths := false,
         ivyScala ~= { (is: Option[IvyScala]) ⇒ //See netlogo4_noscala
           for (i ← is) yield i.copy(checkExplicit = false)
         })
@@ -173,10 +174,9 @@ object Libraries extends Defaults(Apache) {
   lazy val netlogo5 = OsgiProject("ccl.northwestern.edu.netlogo5", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("*")) settings
     (libraryDependencies ++=
-      Seq("ccl.northwestern.edu" % "netlogo" % "5.0.5",
+      Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
         "org.scala-lang" % "scala-library" % "2.9.2",
-        "org.objectweb" % "asm-all" % "3.3.1",
-        "org.picocontainer" % "picocontainer" % "2.13.6"), version := "5.0.5", scalaVersion := "2.9.2", bundleType := Set("plugin"))
+        "org.picocontainer" % "picocontainer" % "2.13.6"), version := netLogo5Version, scalaVersion := "2.9.2", bundleType := Set("plugin"))
 
   lazy val guava = OsgiProject("com.google.guava",
     exports = Seq("com.google.common.*"), privatePackages = Seq("!scala.*", "*")) settings (libraryDependencies ++=

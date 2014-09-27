@@ -18,6 +18,7 @@
 package org.openmole.misc.console
 
 import java.io.{ InputStream, IOException, File }
+
 import scala.tools.nsc.io.AbstractFile
 import java.net.URL
 import java.lang.String
