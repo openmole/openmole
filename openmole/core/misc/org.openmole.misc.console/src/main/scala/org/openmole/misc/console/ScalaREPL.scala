@@ -78,7 +78,7 @@ class ScalaREPL(displayErrors: Boolean = true) extends ILoop {
     }*/
 
     override lazy val classLoader =
-      new AbstractFileClassLoader(replOutput.dir, classOf[OSGiScalaCompiler].getClassLoader)
+      new scala.tools.nsc.util.AbstractFileClassLoader(replOutput.dir, classOf[OSGiScalaCompiler].getClassLoader)
 
   }
 
