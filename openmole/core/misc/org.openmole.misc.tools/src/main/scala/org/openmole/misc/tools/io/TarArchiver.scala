@@ -18,19 +18,19 @@
 
 package org.openmole.misc.tools.io
 
-import com.ice.tar.TarEntry
-import com.ice.tar.TarConstants
-import com.ice.tar.TarInputStream
-import com.ice.tar.TarOutputStream
+import com.ice.tar.{ TarEntry, TarConstants, TarInputStream, TarOutputStream }
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Stack
 
 import java.io.IOException
-import java.nio.file.{ LinkOption, StandardCopyOption, Path, FileSystems, Files }
+import java.nio.file._
 import java.nio.file.attribute.PosixFilePermission
 
-import scala.collection.JavaConversions._ // provide scala foreach over Java collections
+import scala.collection.JavaConversions._
+import java.util
+
+// provide scala foreach over Java collections
 import scala.collection.JavaConverters._ // convert Java Set to Scala
 
 object TarArchiver {
@@ -67,38 +67,25 @@ object TarArchiver {
     }
     finally tis.close
 
-    // TODO do we really need to distinguish all the cases?
+    // new implemention using NIO
     def extractDirArchiveWithRelativePath(baseDir: Path) = {
       if (!Files.isDirectory(baseDir)) throw new IOException(baseDir.toString + " is not a directory.")
 
-      val fs = FileSystems.getDefault
-      val links = Iterator.continually(tis.getNextEntry).takeWhile(_ != null).flatMap {
+      Iterator.continually(tis.getNextEntry).takeWhile(_ != null).foreach {
         e ⇒
-          val dest = fs.getPath(baseDir.toString, e.getName)
-          val symlink =
-            if (!e.getLinkName.isEmpty) Some(dest -> e.getLinkName)
-            else if (e.isDirectory) {
-              Files.createDirectories(dest)
-              None
-            }
-            else {
-              Files.createDirectories(dest.getParent)
-              Files.copy(tis, dest, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
-              None
-            }
-          symlink
-      }.toList
-
-      // FIXME useless now?
-      //
-      //      links.foreach {
-      //        case ((dest, name)) ⇒ Files.createSymbolicLink()
-      //      }
-
+          val dest = Paths.get(baseDir.toString, e.getName)
+          if (e.isDirectory) {
+            Files.createDirectories(dest)
+          }
+          else {
+            Files.createDirectories(dest.getParent)
+            Files.copy(tis, dest, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
+          }
+      }
     }
   }
 
-  // TODO do we really need to distinguish all the cases?
+  // new version using NIO
   private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, baseDir: Path, additionalCommand: TarEntry ⇒ Unit) = {
 
     if (!Files.isDirectory(baseDir)) throw new IOException(baseDir.toString + " is not a directory.")
@@ -106,43 +93,34 @@ object TarArchiver {
     val toArchive = new Stack[(Path, String)]
     toArchive.push((baseDir, ""))
 
-    var links = List.empty[(Path, String)]
-    val fs = FileSystems.getDefault
-
     while (!toArchive.isEmpty) {
-      val (source, entryName) = toArchive.pop
-      // tar structure distinguishes symlinks
-      if (Files.isSymbolicLink(source)) links ::= source -> entryName
-      else {
-        val e =
-          if (Files.isDirectory(source)) {
-            for (name ← Files.newDirectoryStream(source)) {
-              val newSource = fs.getPath(source.toString, name.toString)
-              val newEntryName = entryName + '/' + name
-              toArchive.push((newSource, newEntryName))
-            }
-            new TarEntry(entryName + '/')
-          }
-          else {
-            val e = new TarEntry(entryName)
-            e.setSize(Files.size(source))
-            e
-          }
-        e.setMode(FileUtil.permissionsToTarMode(Files.getPosixFilePermissions(source)))
-        additionalCommand(e)
-        tos.putNextEntry(e)
-        if (!Files.isDirectory(source)) try Files.copy(source, tos) finally tos.closeEntry
-      }
-    }
 
-    links.foreach {
-      case (source, entryName) ⇒
-        val e = new TarEntry(entryName, TarConstants.LF_SYMLINK)
-        e.setLinkName(
-          Files.readSymbolicLink(source).toString
-        )
-        e.setMode(FileUtil.permissionsToTarMode(Files.getPosixFilePermissions(source)))
-        tos.putNextEntry(e)
+      val (source, entryName) = toArchive.pop
+
+      val e =
+        if (Files.isDirectory(source)) {
+          // walk the directory tree to add all its entries to stack
+          for (name ← Files.newDirectoryStream(source)) {
+            val newSource = Paths.get(source.toString, name.toString)
+            val newEntryName = entryName + '/' + name
+            toArchive.push((newSource, newEntryName))
+          }
+          // create the actual tar entry for the directory
+          new TarEntry(entryName + '/')
+        }
+        // tar distinguishes symlinks, but the com.ice.tar's implementation decided not to do so...
+        // so any kind of files goes in there
+        else {
+          val e = new TarEntry(entryName)
+          e.setSize(Files.size(source))
+          e
+        }
+
+      // complete current entry by fixing its modes and writing it to the archive
+      e.setMode(FileUtil.permissionsToTarMode(Files.getPosixFilePermissions(source)))
+      additionalCommand(e)
+      tos.putNextEntry(e)
+      if (!Files.isDirectory(source)) try Files.copy(source, tos) finally tos.closeEntry
     }
   }
 

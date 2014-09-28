@@ -68,7 +68,6 @@ object FileUtil {
   val TAR_WRITE = 2 + 16 + 128
   val TAR_READ = 4 + 32 + 256
 
-  /** Replace the now deprecated FileUtil.mode function */
   def permissionsToTarMode(inPermissions: Set[PosixFilePermission]): Int = {
     import PosixFilePermission._
 
