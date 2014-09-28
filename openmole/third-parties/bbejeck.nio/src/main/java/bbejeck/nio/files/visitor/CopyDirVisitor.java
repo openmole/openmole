@@ -14,17 +14,17 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
 
   private Path fromPath;
   private Path toPath;
-  private StandardCopyOption copyOption;
+  private CopyOption[] copyOptions;
 
 
-  public CopyDirVisitor(Path fromPath, Path toPath, StandardCopyOption copyOption) {
+  public CopyDirVisitor(Path fromPath, Path toPath, CopyOption... copyOptions) {
     this.fromPath = fromPath;
     this.toPath = toPath;
-    this.copyOption = copyOption;
+    this.copyOptions = copyOptions;
   }
 
   public CopyDirVisitor(Path fromPath, Path toPath) {
-    this(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING);
+    this(fromPath, toPath, LinkOption.NOFOLLOW_LINKS, StandardCopyOption.COPY_ATTRIBUTES);
   }
 
   @Override
@@ -40,7 +40,7 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
   @Override
   public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 
-    Files.copy(file, toPath.resolve(fromPath.relativize(file)), copyOption);
+    Files.copy(file, toPath.resolve(fromPath.relativize(file)), copyOptions);
     return FileVisitResult.CONTINUE;
   }
 }

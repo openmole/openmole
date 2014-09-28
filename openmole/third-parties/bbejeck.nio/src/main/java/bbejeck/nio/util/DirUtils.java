@@ -7,6 +7,7 @@ import bbejeck.nio.files.visitor.DeleteDirVisitor;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.EnumSet;
+import java.util.Set;
 import java.util.Objects;
 
 /**
@@ -24,9 +25,20 @@ public class DirUtils {
    * @throws IOException
    *    
    */
-  public static void copy(Path from, Path to) throws IOException {
+  public static void copy(Path from, Path to, Set<FileVisitOption> visitOption, CopyOption... copyOptions) throws IOException {
     validate(from);
-    Files.walkFileTree(from, EnumSet.of(FileVisitOption.FOLLOW_LINKS),Integer.MAX_VALUE,new CopyDirVisitor(from, to));
+    Files.walkFileTree(from, visitOption, Integer.MAX_VALUE, new CopyDirVisitor(from, to, copyOptions));
+  }
+  
+  /**
+   * Copies a directory tree with default options
+   * @param from
+   * @param to
+   * @throws IOException
+   *    
+   */
+  public static void copy(Path from, Path to) throws IOException {
+    copy(from, to, EnumSet.noneOf(FileVisitOption.class), LinkOption.NOFOLLOW_LINKS, StandardCopyOption.COPY_ATTRIBUTES);
   }
 
   /**
