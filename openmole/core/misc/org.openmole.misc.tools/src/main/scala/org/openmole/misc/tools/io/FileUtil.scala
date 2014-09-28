@@ -39,7 +39,7 @@ import java.nio.channels.FileChannel
 import java.nio.file.{ Path, Paths, Files, StandardCopyOption, LinkOption }
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermission._
-import bbejeck.nio.util.DirUtils
+import org.openmole.misc.tools.io.DirUtils
 
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit

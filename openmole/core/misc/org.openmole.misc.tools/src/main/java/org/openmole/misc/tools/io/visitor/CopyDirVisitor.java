@@ -1,15 +1,10 @@
-package bbejeck.nio.files.visitor;
+package org.openmole.misc.tools.io.visitor;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
-/**
- *  * Created by IntelliJ IDEA.
- *   * User: bbejeck
- *    * Date: 1/23/12
- *     * Time: 10:29 PM
- *      */
+
 public class CopyDirVisitor extends SimpleFileVisitor<Path> {
 
   private Path fromPath;

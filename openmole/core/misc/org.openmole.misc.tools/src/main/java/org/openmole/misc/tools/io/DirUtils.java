@@ -1,8 +1,7 @@
-/** @file DirUtils.java from https://github.com/bbejeck/Java-7/blob/master/src/main/java/bbejeck/nio/util/DirUtils.java (chosen excerpt) */ 
-package bbejeck.nio.util;
+package org.openmole.misc.tools.io;
 
-import bbejeck.nio.files.visitor.CopyDirVisitor;
-import bbejeck.nio.files.visitor.DeleteDirVisitor;
+import org.openmole.misc.tools.io.visitor.CopyDirVisitor;
+import org.openmole.misc.tools.io.visitor.DeleteDirVisitor;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -10,12 +9,6 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.Objects;
 
-/**
- * Created by IntelliJ IDEA.
- * User: bbejeck
- * Date: 1/22/12
- * Time: 12:46 PM
- */
 
 public class DirUtils {
   /**
