@@ -30,8 +30,8 @@ import java.io.IOException
 import java.nio.file.{ LinkOption, StandardCopyOption, Path, FileSystems, Files }
 import java.nio.file.attribute.PosixFilePermission
 
-import scala.collection.JavaConverters._ // convert Java Set to Scala
 import scala.collection.JavaConversions._ // provide scala foreach over Java collections
+import scala.collection.JavaConverters._ // convert Java Set to Scala
 
 object TarArchiver {
 
@@ -39,26 +39,12 @@ object TarArchiver {
   implicit def TarOutputStream2TarOutputStreamComplement(tos: TarOutputStream) = new TarOutputStreamDecorator(tos)
   implicit def javaSet2ScalaSet(javaSet: java.util.Set[PosixFilePermission]) = (javaSet asScala) toSet
 
-  val TAR_EXEC = 1 + 8 + 64
-  val TAR_WRITE = 2 + 16 + 128
-  val TAR_READ = 4 + 32 + 256
-
-  /** Replace the now deprecated FileUtil.mode function */
-  def permissionsToTarMode(inPermissions: Set[PosixFilePermission]): Int = {
-    import PosixFilePermission._
-
-    { if (inPermissions contains (OWNER_EXECUTE)) TAR_EXEC else 0 } |
-      { if (inPermissions contains (OWNER_READ)) TAR_READ else 0 } |
-      { if (inPermissions contains (OWNER_WRITE)) TAR_WRITE else 0 }
-
-  }
-
   class TarOutputStreamDecorator(tos: TarOutputStream) {
 
     def addFile(f: Path, name: String) = {
       val entry = new TarEntry(name)
       entry.setSize(Files.size(f))
-      entry.setMode(permissionsToTarMode(Files.getPosixFilePermissions(f)))
+      entry.setMode(FileUtil.permissionsToTarMode(Files.getPosixFilePermissions(f)))
       tos.putNextEntry(entry)
       try Files.copy(f, tos) finally tos.closeEntry
     }
@@ -142,7 +128,7 @@ object TarArchiver {
             e.setSize(Files.size(source))
             e
           }
-        e.setMode(permissionsToTarMode(Files.getPosixFilePermissions(source)))
+        e.setMode(FileUtil.permissionsToTarMode(Files.getPosixFilePermissions(source)))
         additionalCommand(e)
         tos.putNextEntry(e)
         if (!Files.isDirectory(source)) try Files.copy(source, tos) finally tos.closeEntry
@@ -155,7 +141,7 @@ object TarArchiver {
         e.setLinkName(
           Files.readSymbolicLink(source).toString
         )
-        e.setMode(permissionsToTarMode(Files.getPosixFilePermissions(source)))
+        e.setMode(FileUtil.permissionsToTarMode(Files.getPosixFilePermissions(source)))
         tos.putNextEntry(e)
     }
   }

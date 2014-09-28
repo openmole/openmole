@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2014 Jonathan Passerat-Palmbach
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -36,6 +37,8 @@ import java.util.zip.ZipFile
 
 import java.nio.channels.FileChannel
 import java.nio.file.{ Path, Paths, Files, StandardCopyOption, LinkOption }
+import java.nio.file.attribute.PosixFilePermission
+import java.nio.file.attribute.PosixFilePermission._
 import bbejeck.nio.util.DirUtils
 
 import java.util.concurrent.Executors
@@ -55,12 +58,25 @@ import org.openmole.misc.tools.service._
 import scala.util.{ Try, Failure, Success }
 
 import scala.collection.JavaConversions._ // provide scala foreach over Java collections
+import scala.collection.JavaConverters._ // convert Java Set to Scala
 
 object FileUtil {
 
-  val exec = 1 + 8 + 64
-  val write = 2 + 16 + 128
-  val read = 4 + 32 + 256
+  implicit def javaSet2ScalaSet(javaSet: java.util.Set[PosixFilePermission]) = (javaSet asScala) toSet
+
+  val TAR_EXEC = 1 + 8 + 64
+  val TAR_WRITE = 2 + 16 + 128
+  val TAR_READ = 4 + 32 + 256
+
+  /** Replace the now deprecated FileUtil.mode function */
+  def permissionsToTarMode(inPermissions: Set[PosixFilePermission]): Int = {
+    import PosixFilePermission._
+
+    { if (inPermissions contains (OWNER_EXECUTE)) TAR_EXEC else 0 } |
+      { if (inPermissions contains (OWNER_READ)) TAR_READ else 0 } |
+      { if (inPermissions contains (OWNER_WRITE)) TAR_WRITE else 0 }
+
+  }
 
   lazy val vmFileLock = new LockRepository[String]
 
@@ -140,6 +156,7 @@ object FileUtil {
 
   class FileDecorator(file: File) {
 
+    // TODO reimplement using NIO getLastModifiedTime
     def lastModification = {
       var lastModification = file.lastModified
 
@@ -169,15 +186,18 @@ object FileUtil {
       ret
     }
 
-    // TODO replace with NIO
+    // new version using NIO
     def mode =
-      (if (file.canExecute) exec else 0) | (if (file.canWrite) write else 0) | (if (file.canRead) read else 0)
+      permissionsToTarMode(Files.getPosixFilePermissions(file))
 
-    // TODO replace with NIO
+    // new version using NIO
     def mode_=(m: Int) = {
-      if ((m & exec) != 0) file.setExecutable(true) else file.setExecutable(false)
-      if ((m & write) != 0) file.setWritable(true) else file.setWritable(false)
-      if ((m & read) != 0) file.setReadable(true) else file.setReadable(false)
+      var permSet: Set[PosixFilePermission] = Set()
+
+      if ((m & TAR_EXEC) != 0) permSet += OWNER_EXECUTE
+      if ((m & TAR_WRITE) != 0) permSet += OWNER_WRITE
+      if ((m & TAR_READ) != 0) permSet += OWNER_READ
+      Files.setPosixFilePermissions(file, permSet)
     }
 
     def recursiveSize = {
