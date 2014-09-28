@@ -39,7 +39,7 @@ import java.nio.channels.FileChannel
 import java.nio.file.{ Path, Paths, Files, StandardCopyOption, LinkOption }
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermission._
-import org.openmole.misc.tools.io.DirUtils
+import org.openmole.misc.tools.io._
 
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -199,12 +199,6 @@ object FileUtil {
       Files.setPosixFilePermissions(file, permSet)
     }
 
-    def recursiveSize = {
-      var size = 0L
-      applyRecursive((f: File) ⇒ size += f.length)
-      size
-    }
-
     def applyRecursive(operation: File ⇒ Unit): Unit =
       applyRecursive(operation, Set.empty)
 
@@ -297,16 +291,14 @@ object FileUtil {
       else isDirectoryEmpty(file)
 
     // new version using NIO
-    def recursiveDelete = {
-      DirUtils.deleteIfExists(file)
-    }
+    def recursiveDelete = DirUtils.deleteIfExists(file)
 
-    // TODO reimplement using NIO
+    // new version using NIO
     def size: Long = {
-      if (file.exists && file.isDirectory) {
-        (for (f ← file.listFiles) yield f.size).sum
+      if (Files.isDirectory(file)) {
+        Files.newDirectoryStream(file).foldLeft(0l)((acc: Long, p: Path) ⇒ { acc + p.size })
       }
-      else file.length
+      else Files.size(file)
     }
 
     // new version using NIO

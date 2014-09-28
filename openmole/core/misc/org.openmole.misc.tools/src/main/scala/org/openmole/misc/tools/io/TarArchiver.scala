@@ -27,10 +27,10 @@ import java.io.IOException
 import java.nio.file._
 import java.nio.file.attribute.PosixFilePermission
 
+// provide scala foreach over Java collections
 import scala.collection.JavaConversions._
 import java.util
 
-// provide scala foreach over Java collections
 import scala.collection.JavaConverters._ // convert Java Set to Scala
 
 object TarArchiver {
@@ -67,7 +67,7 @@ object TarArchiver {
     }
     finally tis.close
 
-    // new implemention using NIO
+    // new implementation using NIO
     def extractDirArchiveWithRelativePath(baseDir: Path) = {
       if (!Files.isDirectory(baseDir)) throw new IOException(baseDir.toString + " is not a directory.")
 
