@@ -62,7 +62,7 @@ import scala.collection.JavaConverters._ // convert Java Set to Scala
 
 object FileUtil {
 
-  implicit def javaSet2ScalaSet(javaSet: java.util.Set[PosixFilePermission]) = (javaSet asScala) toSet
+  val DefaultBufferSize = 8 * 1024
 
   val TAR_EXEC = 1 + 8 + 64
   val TAR_WRITE = 2 + 16 + 128
@@ -77,22 +77,34 @@ object FileUtil {
 
   }
 
-  lazy val vmFileLock = new LockRepository[String]
+  def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
 
-  implicit val fileOrdering = Ordering.by((_: File).getCanonicalPath)
+  def isDirectoryEmpty(d: Path) = Files.newDirectoryStream(d).iterator.hasNext
 
-  val DefaultBufferSize = 8 * 1024
-  implicit def inputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
-  implicit def file2FileDecorator(file: File) = new FileDecorator(file)
-  implicit def predicateToFileFilter(predicate: File ⇒ Boolean) = new FileFilter {
-    def accept(p1: File) = predicate(p1)
-  }
-
+  implicit def javaSet2ScalaSet(javaSet: java.util.Set[PosixFilePermission]) = (javaSet asScala) toSet
   // glad you were there...
   implicit def file2Path(file: File) = file.toPath
   implicit def path2File(path: Path) = path.toFile
 
-  def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
+  implicit val fileOrdering = Ordering.by((_: File).getCanonicalPath)
+  implicit def predicateToFileFilter(predicate: File ⇒ Boolean) = new FileFilter {
+    def accept(p1: File) = predicate(p1)
+  }
+
+  implicit def inputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
+  implicit def file2FileDecorator(file: File) = new FileDecorator(file)
+
+  implicit def outputStreamDecorator(os: OutputStream) = new {
+    def flushClose = {
+      try os.flush
+      finally os.close
+    }
+
+    def toGZ = new GZIPOutputStream(os)
+
+    def append(content: String) = new PrintWriter(os).append(content).flush
+    def appendLine(line: String) = append(line + "\n")
+  }
 
   class InputStreamDecorator(is: InputStream) {
 
@@ -141,21 +153,122 @@ object FileUtil {
     def copy(file: Path) = Files.copy(is, file, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
   }
 
-  implicit def outputStreamDecorator(os: OutputStream) = new {
-    def flushClose = {
-      try os.flush
-      finally os.close
-    }
-
-    def toGZ = new GZIPOutputStream(os)
-
-    def append(content: String) = new PrintWriter(os).append(content).flush
-    def appendLine(line: String) = append(line + "\n")
-  }
-
   class FileDecorator(file: File) {
 
-    // TODO reimplement using NIO getLastModifiedTime
+    /////// copiers ////////
+    def copy(toF: File) = {
+
+      // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES
+      if (Files.isDirectory(file)) DirUtils.copy(file, toF)
+      else Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
+    }
+
+    def copyCompress(toF: File): File = {
+      if (toF.isDirectory) toF.archiveCompressDirWithRelativePathNoVariableContent(file)
+      else copyCompressFile(toF)
+      toF
+    }
+
+    def copyCompressFile(toF: File): File = {
+      val to = new GZIPOutputStream(toF.bufferedOutputStream)
+
+      Files.copy(file, to)
+      toF
+    }
+
+    def copyUncompressFile(toF: File): File = {
+      val from = new GZIPInputStream(file.bufferedInputStream)
+
+      Files.copy(from, toF, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
+      toF
+    }
+
+    def copyFile(toF: File) = Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
+
+    def copy(to: OutputStream) = Files.copy(file, to)
+
+    // TODO replace with NIO
+    def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit = {
+      val is = bufferedInputStream
+      try is.copy(to, maxRead, timeout)
+      finally is.close
+    }
+
+    //////// modifiers ///////
+    def move(to: Path) = {
+      if (!Files.isDirectory(file)) Files.move(file, to)
+      else DirUtils.move(file, to)
+    }
+
+    def recursiveDelete = DirUtils.deleteIfExists(file)
+
+    ////// boolean operations //////
+    def isEmpty =
+      if (Files.notExists(file)) true
+      else if (!Files.isDirectory(file)) file.size == 0
+      else isDirectoryEmpty(file)
+
+    def isJar = Try {
+      val zip = new ZipFile(file)
+      val hasManifestEntry =
+        try zip.getEntry("META-INF/MANIFEST.MF") != null
+        finally zip.close
+      hasManifestEntry
+    }.getOrElse(false)
+
+    def isSymbolicLink = Files.isSymbolicLink(Paths.get(file.getAbsolutePath))
+
+    // TODO replace with NIO
+    def dirContainsNoFileRecursive: Boolean = {
+      val toProceed = new ListBuffer[File]
+      toProceed += file
+
+      while (!toProceed.isEmpty) {
+        val f = toProceed.remove(0)
+        for (sub ← f.listFiles) {
+          if (sub.isFile) return false
+          else if (sub.isDirectory) toProceed += sub
+        }
+      }
+      true
+    }
+
+    //////// general operations ///////
+    def size: Long = {
+      if (Files.isDirectory(file)) {
+        Files.newDirectoryStream(file).foldLeft(0l)((acc: Long, p: Path) ⇒ { acc + p.size })
+      }
+      else Files.size(file)
+    }
+
+    def mode =
+      permissionsToTarMode(Files.getPosixFilePermissions(file))
+
+    def mode_=(m: Int) = {
+      var permSet: Set[PosixFilePermission] = Set()
+
+      if ((m & TAR_EXEC) != 0) permSet += OWNER_EXECUTE
+      if ((m & TAR_WRITE) != 0) permSet += OWNER_WRITE
+      if ((m & TAR_READ) != 0) permSet += OWNER_READ
+      Files.setPosixFilePermissions(file, permSet)
+    }
+
+    def content_=(content: String) = Files.write(file, content.getBytes)
+
+    def content = {
+      val s = Files.readAllLines(file, java.nio.charset.Charset.defaultCharset)
+      s.mkString
+    }
+
+    def contentOption =
+      try Some(file.content)
+      catch {
+        case e: IOException ⇒ None
+      }
+
+    def child(s: String): File = Paths.get(file.toString, s)
+
+    // TODO implement using NIO getLastModifiedTime
     def lastModification = {
       var lastModification = file.lastModified
 
@@ -184,246 +297,6 @@ object FileUtil {
       applyRecursive((f: File) ⇒ if (filter(f)) ret += f)
       ret
     }
-
-    // new version using NIO
-    def mode =
-      permissionsToTarMode(Files.getPosixFilePermissions(file))
-
-    // new version using NIO
-    def mode_=(m: Int) = {
-      var permSet: Set[PosixFilePermission] = Set()
-
-      if ((m & TAR_EXEC) != 0) permSet += OWNER_EXECUTE
-      if ((m & TAR_WRITE) != 0) permSet += OWNER_WRITE
-      if ((m & TAR_READ) != 0) permSet += OWNER_READ
-      Files.setPosixFilePermissions(file, permSet)
-    }
-
-    def applyRecursive(operation: File ⇒ Unit): Unit =
-      applyRecursive(operation, Set.empty)
-
-    def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File], followSymLinks: Boolean = true): Unit = {
-      val toProceed = new ListBuffer[File]
-      toProceed += file
-
-      while (!toProceed.isEmpty) {
-        val f = toProceed.remove(0)
-        if (!stopPath.contains(f)) {
-          operation(f)
-          if (f.isDirectory && (followSymLinks && !f.isSymbolicLink)) {
-            for (child ← f.listFiles) toProceed += child
-          }
-        }
-      }
-    }
-
-    // TODO replace with NIO
-    def dirContainsNoFileRecursive: Boolean = {
-      val toProceed = new ListBuffer[File]
-      toProceed += file
-
-      while (!toProceed.isEmpty) {
-        val f = toProceed.remove(0)
-        for (sub ← f.listFiles) {
-          if (sub.isFile) return false
-          else if (sub.isDirectory) toProceed += sub
-        }
-      }
-      true
-    }
-
-    // new version using NIO
-    def copy(toF: File) = {
-
-      // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES
-      if (Files.isDirectory(file)) DirUtils.copy(file, toF)
-      else Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
-    }
-
-    def copyCompress(toF: File): File = {
-      if (toF.isDirectory) toF.archiveCompressDirWithRelativePathNoVariableContent(file)
-      else copyCompressFile(toF)
-      toF
-    }
-
-    // new version using NIO
-    def copyCompressFile(toF: File): File = {
-      val to = new GZIPOutputStream(toF.bufferedOutputStream)
-
-      Files.copy(file, to)
-      toF
-    }
-
-    // new version using NIO
-    def copyUncompressFile(toF: File): File = {
-      val from = new GZIPInputStream(file.bufferedInputStream)
-
-      Files.copy(from, toF, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
-      toF
-    }
-
-    // new version with NIO
-    def copyFile(toF: File) = Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
-
-    // new version with NIO
-    def copy(to: OutputStream) = Files.copy(file, to)
-
-    // TODO replace with NIO
-    def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit = {
-      val is = bufferedInputStream
-      try is.copy(to, maxRead, timeout)
-      finally is.close
-    }
-
-    // new version using NIO
-    def move(to: Path) = {
-      if (!Files.isDirectory(file)) Files.move(file, to)
-      else DirUtils.move(file, to)
-    }
-
-    // new version using NIO
-    def isSymbolicLink = Files.isSymbolicLink(Paths.get(file.getAbsolutePath))
-
-    // new version using NIO
-    def isEmpty =
-      if (Files.notExists(file)) true
-      else if (!Files.isDirectory(file)) file.size == 0
-      else isDirectoryEmpty(file)
-
-    // new version using NIO
-    def recursiveDelete = DirUtils.deleteIfExists(file)
-
-    // new version using NIO
-    def size: Long = {
-      if (Files.isDirectory(file)) {
-        Files.newDirectoryStream(file).foldLeft(0l)((acc: Long, p: Path) ⇒ { acc + p.size })
-      }
-      else Files.size(file)
-    }
-
-    // new version using NIO
-    def content_=(content: String) = Files.write(file, content.getBytes)
-
-    // new version using NIO
-    def content = {
-      val s = Files.readAllLines(file, java.nio.charset.Charset.defaultCharset)
-      s.mkString
-    }
-
-    def contentOption =
-      try Some(file.content)
-      catch {
-        case e: IOException ⇒ None
-      }
-
-    def bufferedInputStream = new BufferedInputStream(new FileInputStream(file))
-    def bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file))
-
-    def gzipedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
-    def gzipedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream)
-
-    def withOutputStream[T](f: OutputStream ⇒ T) = {
-      val os = bufferedOutputStream
-      try f(os)
-      finally os.close
-    }
-
-    def withInputStream[T](f: InputStream ⇒ T) = {
-      val is = bufferedInputStream
-      try f(is)
-      finally is.close
-    }
-
-    def withWriter[T](f: Writer ⇒ T): T = {
-      val w = new OutputStreamWriter(bufferedOutputStream)
-      try f(w)
-      finally w.close
-    }
-
-    def archiveDirWithRelativePathNoVariableContent(toArchive: File) = {
-      val os = new TarOutputStream(new FileOutputStream(file))
-      try os.createDirArchiveWithRelativePathNoVariableContent(toArchive)
-      finally os.close
-    }
-
-    //FIXME method name is ambiguous rename
-    def archiveCompressDirWithRelativePathNoVariableContent(dest: File) = {
-      val os = new TarOutputStream(gzipedBufferedOutputStream)
-      try os.createDirArchiveWithRelativePathNoVariableContent(dest)
-      finally os.close
-    }
-
-    def extractDirArchiveWithRelativePath(dest: File) = {
-      val is = new TarInputStream(bufferedInputStream)
-      try is.extractDirArchiveWithRelativePath(dest)
-      finally is.close
-    }
-
-    def extractUncompressDirArchiveWithRelativePath(dest: File) = {
-      val is = new TarInputStream(gzipedBufferedInputStream)
-      try is.extractDirArchiveWithRelativePath(dest)
-      finally is.close
-    }
-
-    def withLock[T](f: OutputStream ⇒ T) = vmFileLock.withLock(file.getCanonicalPath) {
-      val fos = new FileOutputStream(file, true)
-      val bfos = new BufferedOutputStream(fos)
-      try {
-        val lock = fos.getChannel.lock
-        try f(bfos)
-        finally lock.release
-      }
-      finally bfos.close
-    }
-
-    def lockAndAppendFile(to: String): Unit = lockAndAppendFile(new File(to))
-
-    def lockAndAppendFile(from: File): Unit = vmFileLock.withLock(file.getCanonicalPath) {
-      val channelI = new FileInputStream(from).getChannel
-      try {
-        val channelO = new FileOutputStream(file, true).getChannel
-        try {
-          val lock = channelO.lock
-          try FileUtil.copy(channelO, channelI)
-          finally lock.release
-        }
-        finally channelO.close
-      }
-      finally channelI.close
-    }
-
-    // new version using NIO
-    /**
-     * Try to create a symbolic link at the calling emplacement.
-     * The function creates a copy of the target file on systems not supporting symlinks.
-     * @param target Target of the link
-     * @return
-     */
-    def createLink(target: String) = {
-
-      val linkTarget = Paths.get(target)
-      try Files.createSymbolicLink(file, linkTarget)
-      catch {
-        case e: UnsupportedOperationException ⇒ {
-          Logger.getLogger(FileUtil.getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
-          Files.copy(file, linkTarget, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
-        }
-      }
-    }
-
-    // new version using NIO
-    def createParentDir = wrapError {
-      Files.createDirectories(file.toPath.getParent)
-    }
-
-    // new version using NIO
-    def child(s: String): File = Paths.get(file.toString, s)
-
-    def wrapError[T](f: ⇒ T): T =
-      try f
-      catch {
-        case t: Throwable ⇒ throw new IOException(s"For file $file", t)
-      }
 
     def updateIfTooOld(
       tooOld: Duration,
@@ -454,7 +327,7 @@ object FileUtil {
       file
     }
 
-    // new version using NIO
+    ///////// creation of new elements ////////
     // TODO get rid of toFile
     /**
      * Create temporary directory
@@ -464,7 +337,6 @@ object FileUtil {
      */
     def newDir(prefix: String): File = Files.createTempDirectory(prefix).toFile
 
-    // new version using NIO
     // TODO get rid of toFile
     /**
      * Create temporary file
@@ -475,15 +347,138 @@ object FileUtil {
      */
     def newFile(prefix: String, suffix: String): File = Files.createTempFile(prefix, suffix).toFile
 
-    def isJar = Try {
-      val zip = new ZipFile(file)
-      val hasManifestEntry =
-        try zip.getEntry("META-INF/MANIFEST.MF") != null
-        finally zip.close
-      hasManifestEntry
-    }.getOrElse(false)
+    /**
+     * Try to create a symbolic link at the calling emplacement.
+     * The function creates a copy of the target file on systems not supporting symlinks.
+     * @param target Target of the link
+     * @return
+     */
+    def createLink(target: String) = {
+
+      val linkTarget = Paths.get(target)
+      try Files.createSymbolicLink(file, linkTarget)
+      catch {
+        case e: UnsupportedOperationException ⇒ {
+          Logger.getLogger(FileUtil.getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
+          Files.copy(file, linkTarget, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
+        }
+      }
+    }
+
+    def createParentDir = wrapError {
+      Files.createDirectories(file.toPath.getParent)
+    }
+
+    ////// potential goers //////
+    // FIXME move to TarArchiver?
+    def archiveDirWithRelativePathNoVariableContent(toArchive: File) = {
+      val os = new TarOutputStream(new FileOutputStream(file))
+      try os.createDirArchiveWithRelativePathNoVariableContent(toArchive)
+      finally os.close
+    }
+
+    // FIXME move to TarArchiver?
+    //FIXME method name is ambiguous rename
+    def archiveCompressDirWithRelativePathNoVariableContent(dest: File) = {
+      val os = new TarOutputStream(gzipedBufferedOutputStream)
+      try os.createDirArchiveWithRelativePathNoVariableContent(dest)
+      finally os.close
+    }
+
+    // FIXME move to TarArchiver?
+    def extractDirArchiveWithRelativePath(dest: File) = {
+      val is = new TarInputStream(bufferedInputStream)
+      try is.extractDirArchiveWithRelativePath(dest)
+      finally is.close
+    }
+
+    // FIXME move to TarArchiver?
+    def extractUncompressDirArchiveWithRelativePath(dest: File) = {
+      val is = new TarInputStream(gzipedBufferedInputStream)
+      try is.extractDirArchiveWithRelativePath(dest)
+      finally is.close
+    }
+
+    /////// wrappers ////////
+    lazy val vmFileLock = new LockRepository[String]
+
+    def withLock[T](f: OutputStream ⇒ T) = vmFileLock.withLock(file.getCanonicalPath) {
+      val fos = new FileOutputStream(file, true)
+      val bfos = new BufferedOutputStream(fos)
+      try {
+        val lock = fos.getChannel.lock
+        try f(bfos)
+        finally lock.release
+      }
+      finally bfos.close
+    }
+
+    def bufferedInputStream = new BufferedInputStream(new FileInputStream(file))
+    def bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file))
+
+    def gzipedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
+    def gzipedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream)
+
+    def withOutputStream[T](f: OutputStream ⇒ T) = {
+      val os = bufferedOutputStream
+      try f(os)
+      finally os.close
+    }
+
+    def withInputStream[T](f: InputStream ⇒ T) = {
+      val is = bufferedInputStream
+      try f(is)
+      finally is.close
+    }
+
+    def withWriter[T](f: Writer ⇒ T): T = {
+      val w = new OutputStreamWriter(bufferedOutputStream)
+      try f(w)
+      finally w.close
+    }
+
+    def wrapError[T](f: ⇒ T): T =
+      try f
+      catch {
+        case t: Throwable ⇒ throw new IOException(s"For file $file", t)
+      }
+
+    ////// synchronized operations //////
+    def lockAndAppendFile(to: String): Unit = lockAndAppendFile(new File(to))
+
+    def lockAndAppendFile(from: File): Unit = vmFileLock.withLock(file.getCanonicalPath) {
+      val channelI = new FileInputStream(from).getChannel
+      try {
+        val channelO = new FileOutputStream(file, true).getChannel
+        try {
+          val lock = channelO.lock
+          try FileUtil.copy(channelO, channelI)
+          finally lock.release
+        }
+        finally channelO.close
+      }
+      finally channelI.close
+    }
+
+    ///////// helpers ///////
+    def applyRecursive(operation: File ⇒ Unit): Unit =
+      applyRecursive(operation, Set.empty)
+
+    def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File], followSymLinks: Boolean = true): Unit = {
+      val toProceed = new ListBuffer[File]
+      toProceed += file
+
+      while (!toProceed.isEmpty) {
+        val f = toProceed.remove(0)
+        if (!stopPath.contains(f)) {
+          operation(f)
+          if (f.isDirectory && (followSymLinks && !f.isSymbolicLink)) {
+            for (child ← f.listFiles) toProceed += child
+          }
+        }
+      }
+    }
 
   }
 
-  def isDirectoryEmpty(d: Path) = Files.newDirectoryStream(d).iterator.hasNext
 }
