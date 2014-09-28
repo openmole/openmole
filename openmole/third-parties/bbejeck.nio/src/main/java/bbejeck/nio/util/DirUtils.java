@@ -43,6 +43,28 @@ public class DirUtils {
     Files.walkFileTree(from, new DeleteDirVisitor());
   }
 
+  /**
+   * Completely removes given file tree starting at and including the given path.
+   *
+   * @param path
+   * @throws IOException
+   */
+  public static void delete(Path path) throws IOException {
+    validate(path);
+    Files.walkFileTree(path, new DeleteDirVisitor());
+  }
+
+
+  /**
+   * If the path exists, completely removes given file tree starting at and including the given path.
+   *
+   * @param path
+   * @throws IOException
+   */
+  public static void deleteIfExists(Path path) throws IOException {
+    if (Files.exists(path))   delete(path);
+  }
+
   private static void validate(Path... paths) {
     for (Path path : paths) {
       Objects.requireNonNull(path);
