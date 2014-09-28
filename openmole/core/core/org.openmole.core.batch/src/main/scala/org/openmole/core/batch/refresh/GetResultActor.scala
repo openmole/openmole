@@ -43,7 +43,7 @@ import GetResultActor.Log._
 
 class GetResultActor(jobManager: ActorRef) extends Actor {
 
-  def receive = {
+  def receive = withRunFinalization {
     case msg @ GetResult(job, sj, resultPath) ⇒
       try sj.storage.tryWithToken {
         case Some(token) ⇒
@@ -56,7 +56,6 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
           jobManager ! Error(job, e)
           jobManager ! Kill(job)
       }
-      System.runFinalization
   }
 
   def getResult(storage: StorageService, outputFilePath: String, batchJob: BatchExecutionJob)(implicit token: AccessToken): Unit = {

@@ -31,7 +31,7 @@ import RefreshActor.Log._
 
 class RefreshActor(jobManager: ActorRef) extends Actor {
 
-  def receive = {
+  def receive = withRunFinalization {
     case Refresh(job, sj, bj, delay, updateErrorsInARow) ⇒
       if (!job.state.isFinal) {
         try bj.jobService.tryWithToken {
@@ -61,7 +61,6 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
             }
         }
       }
-      System.runFinalization
   }
 }
 

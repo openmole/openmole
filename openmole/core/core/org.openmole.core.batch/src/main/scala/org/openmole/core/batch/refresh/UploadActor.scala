@@ -43,7 +43,7 @@ import scala.slick.driver.H2Driver.simple._
 
 class UploadActor(jobManager: ActorRef) extends Actor {
 
-  def receive = {
+  def receive = withRunFinalization {
     case msg @ Upload(job) ⇒
       if (!job.state.isFinal) {
         try {
@@ -56,7 +56,6 @@ class UploadActor(jobManager: ActorRef) extends Actor {
             jobManager ! msg
         }
       }
-      System.runFinalization()
   }
 
   private def initCommunication(environment: BatchEnvironment, job: IJob): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒

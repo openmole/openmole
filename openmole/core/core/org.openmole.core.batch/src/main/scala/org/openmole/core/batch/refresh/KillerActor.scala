@@ -28,7 +28,7 @@ object KillerActor extends Logger
 import KillerActor.Log._
 
 class KillerActor(jobManager: ActorRef) extends Actor {
-  def receive = {
+  def receive = withRunFinalization {
     case msg @ KillBatchJob(bj) ⇒
       try bj.jobService.tryWithToken {
         case Some(t) ⇒ bj.kill(t)
@@ -37,6 +37,5 @@ class KillerActor(jobManager: ActorRef) extends Actor {
       } catch {
         case e: Throwable ⇒ logger.log(FINE, "Could not kill job.", e)
       }
-      System.runFinalization
   }
 }

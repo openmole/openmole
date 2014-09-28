@@ -27,7 +27,7 @@ object CleanerActor extends Logger
 import CleanerActor.Log._
 
 class CleanerActor(jobManager: ActorRef) extends Actor {
-  def receive = {
+  def receive = withRunFinalization {
     case msg @ CleanSerializedJob(sj) ⇒
       try
         sj.synchronized {
@@ -44,7 +44,5 @@ class CleanerActor(jobManager: ActorRef) extends Actor {
         case t: Throwable ⇒
           logger.log(FINE, "Error when deleting a file", t)
       }
-      System.runFinalization
-
   }
 }

@@ -27,7 +27,7 @@ object DeleteActor extends Logger
 import DeleteActor.Log._
 
 class DeleteActor(jobManager: ActorRef) extends Actor {
-  def receive = {
+  def receive = withRunFinalization {
     case msg @ DeleteFile(storage, path, directory) ⇒
       try storage.tryWithToken {
         case Some(t) ⇒
@@ -39,6 +39,5 @@ class DeleteActor(jobManager: ActorRef) extends Actor {
         case t: Throwable ⇒
           logger.log(FINE, "Error when deleting a file", t)
       }
-      System.runFinalization
   }
 }
