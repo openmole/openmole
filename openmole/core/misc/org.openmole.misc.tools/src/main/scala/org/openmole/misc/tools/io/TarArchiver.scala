@@ -79,7 +79,8 @@ object TarArchiver {
           }
           else {
             Files.createDirectories(dest.getParent)
-            Files.copy(tis, dest, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
+            // copy from an InputStream does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
+            Files.copy(tis, dest)
           }
       }
     }
