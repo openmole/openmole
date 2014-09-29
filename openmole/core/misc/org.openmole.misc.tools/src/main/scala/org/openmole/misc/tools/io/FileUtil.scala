@@ -149,8 +149,9 @@ object FileUtil {
 
     def toGZ = new GZIPInputStream(is)
 
-    // new version using NIO
-    def copy(file: Path) = Files.copy(is, file, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
+    // this one must have REPLACE_EXISTING enabled
+    // but does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
+    def copy(file: Path) = Files.copy(is, file, StandardCopyOption.REPLACE_EXISTING)
   }
 
   class FileDecorator(file: File) {
