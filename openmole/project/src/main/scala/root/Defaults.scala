@@ -25,6 +25,8 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
     Seq(version in Global := "3.0-SNAPSHOT",
       scalaVersion in Global := "2.11.2",
       scalacOptions ++= Seq("-deprecation"),
+      javacOptions ++= Seq("-source", "1.7", "-target", "1.7"),
+      scalacOptions += "-target:jvm-1.7",
       publishArtifact in (packageDoc in install) := false,
       publishArtifact in (packageSrc in install) := false,
       scalatestVersion in Global := "2.1.5",
