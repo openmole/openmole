@@ -481,7 +481,11 @@ object FileUtil {
       tempFile
     }
 
-    def newFile(prefix: String, suffix: String): File = new File(file, prefix + UUID.randomUUID + suffix)
+    def newFile(prefix: String, suffix: String): File = {
+      val f = new File(file, prefix + UUID.randomUUID + suffix)
+      f.createNewFile()
+      f
+    }
 
     def isJar = Try {
       val zip = new ZipFile(file)
