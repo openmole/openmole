@@ -164,7 +164,16 @@ object FileUtil {
 
       // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES
       if (Files.isDirectory(file)) DirUtils.copy(file, toF)
-      else Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
+      else Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
+    }
+
+    def copy(to: OutputStream) = Files.copy(file, to)
+
+    // TODO replace with NIO
+    def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit = {
+      val is = bufferedInputStream
+      try is.copy(to, maxRead, timeout)
+      finally is.close
     }
 
     def copyCompress(toF: File): File = {
@@ -185,17 +194,6 @@ object FileUtil {
 
       Files.copy(from, toF, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
       toF
-    }
-
-    def copyFile(toF: File) = Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
-
-    def copy(to: OutputStream) = Files.copy(file, to)
-
-    // TODO replace with NIO
-    def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit = {
-      val is = bufferedInputStream
-      try is.copy(to, maxRead, timeout)
-      finally is.close
     }
 
     //////// modifiers ///////
@@ -334,7 +332,7 @@ object FileUtil {
     ///////// creation of new elements ////////
     // TODO get rid of toFile
     /**
-     * Create temporary directory
+     * Create temporary directory in subdirectory of caller
      *
      * @param prefix String to prefix the generated UUID name.
      * @return Newly created temporary directory
@@ -346,7 +344,7 @@ object FileUtil {
 
     // TODO get rid of toFile
     /**
-     * Create temporary file
+     * Create temporary file in directory of caller
      *
      * @param prefix String to prefix the generated UUID name.
      * @param suffix String to suffix the generated UUID name.
