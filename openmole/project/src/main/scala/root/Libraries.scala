@@ -158,6 +158,7 @@ object Libraries extends Defaults(Apache) {
     privatePackages = Seq("!scala.*", "*")) settings
     (libraryDependencies ++=
       Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
+        "org.objectweb" % "asm-all" % "3.3.1",
         "org.picocontainer" % "picocontainer" % "2.13.6"), version := netLogo5Version, autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.9.2", crossPaths := false,
         ivyScala ~= { (is: Option[IvyScala]) ⇒ //See netlogo4_noscala
           for (i ← is) yield i.copy(checkExplicit = false)
@@ -175,6 +176,7 @@ object Libraries extends Defaults(Apache) {
     privatePackages = Seq("*")) settings
     (libraryDependencies ++=
       Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
+        "org.objectweb" % "asm-all" % "3.3.1",
         "org.scala-lang" % "scala-library" % "2.9.2",
         "org.picocontainer" % "picocontainer" % "2.13.6"), version := netLogo5Version, scalaVersion := "2.9.2", bundleType := Set("plugin"))
 

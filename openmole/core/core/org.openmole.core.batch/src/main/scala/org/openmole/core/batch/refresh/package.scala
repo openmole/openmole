@@ -15,12 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package org.openmole.core.batch
 
 package object refresh {
 
-  def withRunFinalization[T](f: => T) =
+  def withRunFinalization[T](f: ⇒ T) =
     try f
     finally System.runFinalization()
 
