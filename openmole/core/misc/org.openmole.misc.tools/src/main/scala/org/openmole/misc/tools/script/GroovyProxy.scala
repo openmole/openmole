@@ -27,6 +27,7 @@ import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.openmole.misc.exception.UserBadDataError
 import collection.JavaConversions._
+import org.openmole.misc.tools.io.Prettifier._
 
 object GroovyProxy {
 
@@ -72,7 +73,13 @@ class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) extends G
   }
   catch {
     case t: Throwable ⇒
-      throw new UserBadDataError("Script execution error !\n The script was :\n" + code + "\n Error message was:" + t.getMessage);
+      throw new UserBadDataError(
+        s"""Script execution error !
+          |The script was:
+          |${code}
+          |It has raised the exception:
+          |""".stripMargin + t.stackString.split("\n").map(" | " + _).mkString("\n")
+      )
   }
 
 }
