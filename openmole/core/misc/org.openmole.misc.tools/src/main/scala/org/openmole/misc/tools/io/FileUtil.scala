@@ -476,7 +476,7 @@ object FileUtil {
     }
 
     def newDir(prefix: String): File = {
-      val tempFile = newFile(prefix, "")
+      val tempFile = new File(file, prefix + UUID.randomUUID)
       if (!tempFile.mkdirs) throw new IOException("Cannot create directory " + tempFile)
       tempFile
     }
