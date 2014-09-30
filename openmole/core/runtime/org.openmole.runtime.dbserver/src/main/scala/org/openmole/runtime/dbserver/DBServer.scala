@@ -62,7 +62,7 @@ object DBServer extends App {
       val user = "sa"
       val password = UUID.randomUUID.toString.filter(_.isLetterOrDigit)
 
-      val db = Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:file:${DBServerInfo.base}/${DBServerInfo.dbName}", user = user, password = "")
+      val db = Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:file:${DBServerInfo.base}/${DBServerInfo.urlDBPath}", user = user, password = "")
       db.withSession { implicit s ⇒
         replicas.ddl.create
         s.withStatement() {
