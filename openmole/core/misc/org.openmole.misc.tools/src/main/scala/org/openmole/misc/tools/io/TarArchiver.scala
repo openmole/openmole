@@ -25,26 +25,23 @@ import scala.collection.mutable.Stack
 
 import java.io.IOException
 import java.nio.file._
-import java.nio.file.attribute.PosixFilePermission
+import org.openmole.misc.tools.io.FileUtil._
 
 // provide scala foreach over Java collections
 import scala.collection.JavaConversions._
 import java.util
 
-import scala.collection.JavaConverters._ // convert Java Set to Scala
-
 object TarArchiver {
 
   implicit def TarInputStream2TarInputStreamDecorator(tis: TarInputStream) = new TarInputStreamDecorator(tis)
   implicit def TarOutputStream2TarOutputStreamComplement(tos: TarOutputStream) = new TarOutputStreamDecorator(tos)
-  implicit def javaSet2ScalaSet(javaSet: java.util.Set[PosixFilePermission]) = (javaSet asScala) toSet
 
   class TarOutputStreamDecorator(tos: TarOutputStream) {
 
     def addFile(f: Path, name: String) = {
       val entry = new TarEntry(name)
       entry.setSize(Files.size(f))
-      entry.setMode(FileUtil.permissionsToTarMode(Files.getPosixFilePermissions(f)))
+      entry.setMode(f.toFile.mode) // ugly explicit conversion
       tos.putNextEntry(entry)
       try Files.copy(f, tos) finally tos.closeEntry
     }
@@ -118,7 +115,7 @@ object TarArchiver {
         }
 
       // complete current entry by fixing its modes and writing it to the archive
-      e.setMode(FileUtil.permissionsToTarMode(Files.getPosixFilePermissions(source)))
+      e.setMode(source.toFile.mode) // ugly explicit conversion
       additionalCommand(e)
       tos.putNextEntry(e)
       if (!Files.isDirectory(source)) try Files.copy(source, tos) finally tos.closeEntry

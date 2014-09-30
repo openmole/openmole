@@ -37,8 +37,6 @@ import java.util.zip.ZipFile
 
 import java.nio.channels.FileChannel
 import java.nio.file.{ Path, Paths, Files, StandardCopyOption, LinkOption }
-import java.nio.file.attribute.PosixFilePermission
-import java.nio.file.attribute.PosixFilePermission._
 import org.openmole.misc.tools.io._
 
 import java.util.concurrent.Executors
@@ -60,9 +58,6 @@ import scala.util.{ Try, Failure, Success }
 import scala.collection.JavaConversions._
 import java.util.UUID
 
-// provide scala foreach over Java collections
-import scala.collection.JavaConverters._ // convert Java Set to Scala
-
 object FileUtil {
 
   val DefaultBufferSize = 8 * 1024
@@ -71,20 +66,10 @@ object FileUtil {
   val TAR_WRITE = 2 + 16 + 128
   val TAR_READ = 4 + 32 + 256
 
-  def permissionsToTarMode(inPermissions: Set[PosixFilePermission]): Int = {
-    import PosixFilePermission._
-
-    { if (inPermissions contains (OWNER_EXECUTE)) TAR_EXEC else 0 } |
-      { if (inPermissions contains (OWNER_READ)) TAR_READ else 0 } |
-      { if (inPermissions contains (OWNER_WRITE)) TAR_WRITE else 0 }
-
-  }
-
   def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
 
   def isDirectoryEmpty(d: Path) = Files.newDirectoryStream(d).iterator.hasNext
 
-  implicit def javaSet2ScalaSet(javaSet: java.util.Set[PosixFilePermission]) = (javaSet asScala) toSet
   // glad you were there...
   implicit def file2Path(file: File) = file.toPath
   implicit def path2File(path: Path) = path.toFile
@@ -93,9 +78,6 @@ object FileUtil {
   implicit def predicateToFileFilter(predicate: File ⇒ Boolean) = new FileFilter {
     def accept(p1: File) = predicate(p1)
   }
-
-  implicit def inputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
-  implicit def file2FileDecorator(file: File) = new FileDecorator(file)
 
   implicit def outputStreamDecorator(os: OutputStream) = new {
     def flushClose = {
@@ -109,7 +91,7 @@ object FileUtil {
     def appendLine(line: String) = append(line + "\n")
   }
 
-  class InputStreamDecorator(is: InputStream) {
+  implicit class InputStreamDecorator(is: InputStream) {
 
     // FIXME useful?
     def copy(to: OutputStream): Unit = {
@@ -157,7 +139,7 @@ object FileUtil {
     def copy(file: Path) = Files.copy(is, file, StandardCopyOption.REPLACE_EXISTING)
   }
 
-  class FileDecorator(file: File) {
+  implicit class FileDecorator(file: File) {
 
     /////// copiers ////////
     def copy(toF: File) = {
@@ -167,7 +149,10 @@ object FileUtil {
       else Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
     }
 
-    def copy(to: OutputStream) = Files.copy(file, to)
+    def copy(to: OutputStream) = {
+      try Files.copy(file, to)
+      finally to.close
+    }
 
     // TODO replace with NIO
     def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit = {
@@ -185,14 +170,16 @@ object FileUtil {
     def copyCompressFile(toF: File): File = {
       val to = new GZIPOutputStream(toF.bufferedOutputStream)
 
-      Files.copy(file, to)
+      try Files.copy(file, to)
+      finally to.close
       toF
     }
 
     def copyUncompressFile(toF: File): File = {
       val from = new GZIPInputStream(file.bufferedInputStream)
 
-      Files.copy(from, toF, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
+      try Files.copy(from, toF, StandardCopyOption.REPLACE_EXISTING)
+      finally from.close
       toF
     }
 
@@ -243,16 +230,17 @@ object FileUtil {
       else Files.size(file)
     }
 
-    def mode =
-      permissionsToTarMode(Files.getPosixFilePermissions(file))
+    def mode = {
+      { if (Files.isReadable(file)) TAR_READ else 0 } |
+        { if (Files.isWritable(file)) TAR_WRITE else 0 } |
+        { if (Files.isExecutable(file)) TAR_EXEC else 0 }
+    }
 
     def mode_=(m: Int) = {
-      var permSet: Set[PosixFilePermission] = Set()
 
-      if ((m & TAR_EXEC) != 0) permSet += OWNER_EXECUTE
-      if ((m & TAR_WRITE) != 0) permSet += OWNER_WRITE
-      if ((m & TAR_READ) != 0) permSet += OWNER_READ
-      Files.setPosixFilePermissions(file, permSet)
+      file.setReadable((m & TAR_READ) != 0)
+      file.setWritable((m & TAR_WRITE) != 0)
+      file.setExecutable((m & TAR_EXEC) != 0)
     }
 
     def content_=(content: String) = Files.write(file, content.getBytes)
