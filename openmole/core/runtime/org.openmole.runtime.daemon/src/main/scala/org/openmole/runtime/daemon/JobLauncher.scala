@@ -137,7 +137,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 localResultFile.delete
               }
               catch {
-                case e: Throwable ⇒ logger.log(WARNING, "Error durring result upload", e)
+                case e: Throwable ⇒ logger.log(WARNING, "Error during result upload", e)
               }
             })
 
@@ -151,7 +151,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       }
       catch {
         case e: Exception ⇒
-          logger.log(WARNING, "Error while looking for jobs.", e)
+          logger.log(WARNING, s"Error while looking for jobs, it might happen if the jobs have not yep been made on the server side. Automatic retry in ${Workspace.preferenceAsDuration(jobCheckInterval)}.", e)
           Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMillis)
           background { fetchAJob(id, storage) }
       }

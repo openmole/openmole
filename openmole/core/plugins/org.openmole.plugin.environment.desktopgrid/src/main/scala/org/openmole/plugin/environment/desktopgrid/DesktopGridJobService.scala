@@ -36,10 +36,12 @@ trait DesktopGridJobService extends JobService with UnlimitedAccess { js ⇒
 
   val timeStempsDir = new File(environment.path, timeStempsDirName) { mkdirs }
   val jobsDir = new File(environment.path, jobsDirName) { mkdirs }
+  val tmpJobsDir = new File(environment.path, tmpJobsDirName) { mkdirs }
   val resultsDir = new File(environment.path, resultsDirName) { mkdirs }
   val tmpResultsDir = new File(environment.path, tmpResultsDirName) { mkdirs }
 
   def jobSubmissionFile(jobId: String) = new File(jobsDir, jobId)
+  def tmpJobSubmissionFile(jobId: String) = new File(tmpJobsDir, jobId)
   def timeStemps(jobId: String) = timeStempsDir.listFiles.filter { _.getName.startsWith(jobId) }
   def timeStempsExists(jobId: String) = timeStempsDir.list.exists { _.startsWith(jobId) }
   def resultExists(jobId: String) = resultsDir.list.exists { _.startsWith(jobId) }
@@ -50,9 +52,12 @@ trait DesktopGridJobService extends JobService with UnlimitedAccess { js ⇒
     import serializedJob._
     val desktopJobMessage = new DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, environment.openMOLEMemoryValue, inputFile)
 
-    val os = jobSubmissionFile(jobId).gzipedBufferedOutputStream
-    try SerialiserService.serialise(desktopJobMessage, os)
-    finally os.close
+    val tmpJobFile = tmpJobSubmissionFile(jobId)
+    tmpJobFile.withGzipedOutputStream(os ⇒
+      SerialiserService.serialise(desktopJobMessage, os)
+    )
+
+    tmpJobFile.move(jobSubmissionFile(jobId))
 
     new BatchJob with BatchJobId {
       val id = jobId
@@ -70,6 +75,7 @@ trait DesktopGridJobService extends JobService with UnlimitedAccess { js ⇒
   protected def _cancel(j: J) = {}
 
   protected def _purge(j: J) = {
+    tmpJobSubmissionFile(j).delete
     jobSubmissionFile(j).delete
     timeStemps(j).foreach { _.delete }
     results(j).foreach { _.delete }

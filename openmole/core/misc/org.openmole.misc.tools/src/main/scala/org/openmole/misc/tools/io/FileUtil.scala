@@ -345,6 +345,18 @@ object FileUtil {
     def gzipedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
     def gzipedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream)
 
+    def withGzipedOutputStream[T](f: OutputStream ⇒ T) = {
+      val os = gzipedBufferedOutputStream
+      try f(os)
+      finally os.close
+    }
+
+    def withGzipedInputStream[T](f: InputStream ⇒ T) = {
+      val is = gzipedBufferedInputStream
+      try f(is)
+      finally is.close
+    }
+
     def withOutputStream[T](f: OutputStream ⇒ T) = {
       val os = bufferedOutputStream
       try f(os)
