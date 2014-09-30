@@ -78,15 +78,15 @@ sealed abstract class ScalaTask(
       s"""The return value of the script was null:
          |${script}""".stripMargin
     )
-    (evaluated, evaluated.getClass.getMethod("apply", inputs.map(_.prototype.`type`.runtimeClass).toSeq: _*))
+    (evaluated, evaluated.getClass.getMethod("apply", inputs.toSeq.map(_.prototype.`type`.runtimeClass).toSeq: _*))
   }
 
   def script =
     imports.map("import " + _).mkString("\n") + "\n\n" +
-      s"""(${inputs.map(i ⇒ prefix + i.prototype.name + ": " + i.prototype.`type`).mkString(",")}) => {
-       |    ${inputs.map(i ⇒ "var " + i.prototype.name + " = " + prefix + i.prototype.name).mkString("; ")}
+      s"""(${inputs.toSeq.map(i ⇒ prefix + i.prototype.name + ": " + i.prototype.`type`).mkString(",")}) => {
+       |    ${inputs.toSeq.map(i ⇒ "var " + i.prototype.name + " = " + prefix + i.prototype.name).mkString("; ")}
        |    ${code}
-       |    Map[String, Any]( ${outputs.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} )
+       |    Map[String, Any]( ${outputs.toSeq.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} )
        |}
        |""".stripMargin
 
@@ -94,7 +94,7 @@ sealed abstract class ScalaTask(
     val args = inputs.toArray.map(i ⇒ context(i.prototype))
     val (evaluated, method) = compiledScript
     val result = method.invoke(evaluated, args.toSeq.map(_.asInstanceOf[AnyRef]): _*).asInstanceOf[Map[String, Any]]
-    context ++ outputs.map { o ⇒ Variable.unsecure(o.prototype, result(o.prototype.name)) }
+    context ++ outputs.toSeq.map { o ⇒ Variable.unsecure(o.prototype, result(o.prototype.name)) }
   }
 
 }
