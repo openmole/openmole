@@ -9,8 +9,6 @@ import root.ThirdParties._
 object Ext extends GuiDefaults {
   override val dir = super.dir / "ext"
 
-  lazy val dataui = OsgiProject("org.openmole.gui.ext") dependsOn
-    (Tools.tools) settings (
-      libraryDependencies ++= Seq(scalaRxJS)
-    )
+  lazy val data = OsgiProject("org.openmole.gui.ext") settings (
+    libraryDependencies ++= Seq(scaladget))
 }

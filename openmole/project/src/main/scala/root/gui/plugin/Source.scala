@@ -9,5 +9,5 @@ import root.Libraries._
 object Source extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.gui.plugin.source")
 
-  lazy val file = OsgiProject("file") dependsOn (Ext.dataui, base.plugin.Source.file, base.Misc.replication % "test") settings (libraryDependencies += opencsv)
+  // lazy val file = OsgiProject("file") dependsOn (base.plugin.Source.file, base.Misc.replication % "test") settings (libraryDependencies += opencsv)
 }

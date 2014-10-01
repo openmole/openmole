@@ -11,7 +11,8 @@ import com.typesafe.sbt.osgi.{ OsgiKeys, SbtOsgi }
  * Date: 6/5/13
  * Time: 3:57 PM
  */
-trait OsgiBundler { self: BuildSystemDefaults ⇒
+trait OsgiBundler {
+  self: BuildSystemDefaults ⇒
 
   protected val bundleMap = Map("Bundle-ActivationPolicy" -> "lazy")
 
@@ -92,5 +93,10 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
         libraryDependencies <++= testDependencies
       ) ++ sets)
   }
+
+  def OsgiGUIProject(name: String,
+                     ext: ClasspathDep[ProjectReference],
+                     client: ClasspathDep[ProjectReference],
+                     server: ClasspathDep[ProjectReference]) = OsgiProject(name) dependsOn (ext, client, server)
 
 }
