@@ -24,6 +24,7 @@ import java.io.PrintWriter
 import java.util.concurrent.Semaphore
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
+import org.openmole.gui.server.server.GUIServer
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
