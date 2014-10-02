@@ -1,6 +1,5 @@
 package org.openmole.gui.plugin.task.groovy
 
-import org.openmole.gui.client.factoryui.ClientFactories
 import org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData
 import org.openmole.gui.plugin.task.groovy.server.GroovyTaskFactory
 import org.openmole.gui.plugin.task.groovy.client.GroovyTaskFactoryUI
@@ -25,10 +24,6 @@ import org.openmole.gui.server.factory._
 
 class Activator extends OSGiActivator with ServerOSGiActivator {
   val data = new GroovyTaskData
-  override def factories = Seq(new GroovyTaskFactory(data))
-
-  def clientRegistrations = {
-    ClientFactories.add(data.getClass(), new GroovyTaskFactoryUI)
-  }
+  override def factories = Seq((new GroovyTaskFactory(data), (new GroovyTaskFactoryUI).getClass.getName))
 }
 
