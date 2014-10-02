@@ -36,7 +36,7 @@ import java.util.zip.GZIPOutputStream
 import java.util.zip.ZipFile
 
 import java.nio.channels.FileChannel
-import java.nio.file.{ Path, Paths, Files, StandardCopyOption, LinkOption }
+import java.nio.file._
 import org.openmole.misc.tools.io._
 
 import java.util.concurrent.Executors
@@ -56,7 +56,7 @@ import org.openmole.misc.tools.service._
 import scala.util.{ Try, Failure, Success }
 
 import scala.collection.JavaConversions._
-import java.util.UUID
+import java.util.{ EnumSet, UUID }
 
 object FileUtil {
 
@@ -144,9 +144,12 @@ object FileUtil {
     /////// copiers ////////
     def copy(toF: File) = {
 
-      // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES
+      // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES, REPLACE_EXISTING
       if (Files.isDirectory(file)) DirUtils.copy(file, toF)
-      else Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
+      else {
+        Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
+        toF.mode = file
+      }
     }
 
     def copy(to: OutputStream) = {
@@ -185,7 +188,7 @@ object FileUtil {
 
     //////// modifiers ///////
     def move(to: Path) = {
-      if (!Files.isDirectory(file)) Files.move(file, to)
+      if (!Files.isDirectory(file)) Files.move(file, to, StandardCopyOption.REPLACE_EXISTING)
       else DirUtils.move(file, to)
     }
 
@@ -236,11 +239,19 @@ object FileUtil {
         { if (Files.isExecutable(file)) TAR_EXEC else 0 }
     }
 
+    /** set mode from an integer as retrieved from a Tar archive */
     def mode_=(m: Int) = {
 
       file.setReadable((m & TAR_READ) != 0)
       file.setWritable((m & TAR_WRITE) != 0)
       file.setExecutable((m & TAR_EXEC) != 0)
+    }
+
+    /** Copy mode from another file */
+    def mode_=(other: File) = {
+      file.setReadable(Files.isReadable(other))
+      file.setWritable(Files.isWritable(other))
+      file.setExecutable(Files.isExecutable(other))
     }
 
     def content_=(content: String) = Files.write(file, content.getBytes)

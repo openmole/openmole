@@ -5,6 +5,7 @@ import org.openmole.misc.tools.io.visitor.DeleteDirVisitor;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.StandardCopyOption;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.Objects;
@@ -24,28 +25,33 @@ public class DirUtils {
   }
   
   /**
-   * Copies a directory tree with default options
-   * @param from
-   * @param to
+   * Copies a directory tree with the following default options:
+   *    - Symlinks are not followed
+   *    - File attributes are copied to the new file
+   *    - Overwrite destination if it exists
+   * @param from Source file
+   * @param to Destination path
    * @throws IOException
-   *    
+   *
    */
   public static void copy(Path from, Path to) throws IOException {
-    copy(from, to, EnumSet.noneOf(FileVisitOption.class), LinkOption.NOFOLLOW_LINKS, StandardCopyOption.COPY_ATTRIBUTES);
+    copy(from, to, EnumSet.noneOf(FileVisitOption.class), LinkOption.NOFOLLOW_LINKS, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
   }
 
   /**
    * Moves one directory tree to another.  Not a true move operation in that the
    * directory tree is copied, then the original directory tree is deleted.
+   * Reuse the default copy options from DirUtils.copy
    *
    * @param from
    * @param to
    * @throws IOException
+   * @see DirUtils.copy
    */
   public static void move(Path from, Path to) throws IOException {
     validate(from);
-    Files.walkFileTree(from, new CopyDirVisitor(from, to));
-    Files.walkFileTree(from, new DeleteDirVisitor());
+    DirUtils.copy(from, to);
+    DirUtils.delete(from);
   }
 
   /**
@@ -58,7 +64,6 @@ public class DirUtils {
     validate(path);
     Files.walkFileTree(path, new DeleteDirVisitor());
   }
-
 
   /**
    * If the path exists, completely removes given file tree starting at and including the given path.
