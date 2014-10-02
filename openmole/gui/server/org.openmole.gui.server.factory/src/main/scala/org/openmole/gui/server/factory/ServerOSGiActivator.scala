@@ -23,20 +23,18 @@ import org.osgi.framework.BundleContext
 
 trait ServerOSGiActivator extends BundleActivator {
 
-  def factories: Seq[Factory] = Seq()
+  // core factories and name of UI factories
+  def factories: Seq[(Factory, String)] = Seq()
 
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    factories.foreach { factory ⇒ ServerFactories.add(factory.data.getClass, factory) }
-    clientRegistrations
+    factories.foreach { case (factory, uiFactoryName) ⇒ ServerFactories.add(factory.data.getClass, factory, uiFactoryName) }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    factories.foreach { factory ⇒ ServerFactories.remove(factory.data.getClass) }
+    factories.foreach { case (factory, uiFactoryName) ⇒ ServerFactories.remove(factory.data.getClass) }
   }
-
-  def clientRegistrations
 }
 
 class OSGiActivator extends BundleActivator {
