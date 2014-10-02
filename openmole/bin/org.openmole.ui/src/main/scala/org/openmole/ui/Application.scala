@@ -121,7 +121,7 @@ class Application extends IApplication {
         existingUserPlugins ++
         (if (!config.console && !config.server) config.guiPluginsDirs else List.empty)
 
-    PluginManager.load(plugins.map(new File(_)))
+    val bundles = PluginManager.load(plugins.map(new File(_)))
     PluginManager.startAll
 
     try config.password foreach Workspace.setPassword
@@ -170,7 +170,7 @@ class Application extends IApplication {
       application.display
       waitClose.acquire(1)*/
       println("GUI !")
-      val server = new GUIServer(config.serverPort)
+      val server = new GUIServer(bundles, config.serverPort)
       server.start
 
     }

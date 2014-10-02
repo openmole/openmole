@@ -1,9 +1,5 @@
 package org.openmole.gui.server.server
 
-import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.webapp.WebAppContext
-import org.scalatra.servlet.ScalatraListener
-
 /*
  * Copyright (C) 22/09/14 // mathieu.leclaire@openmole.org
  *
@@ -21,7 +17,14 @@ import org.scalatra.servlet.ScalatraListener
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class GUIServer(port: Option[Int]) {
+import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.webapp.WebAppContext
+import org.openmole.misc.pluginmanager.PluginManager
+import org.scalatra.servlet.ScalatraListener
+import org.osgi.framework.Bundle
+import scala.collection.JavaConverters._
+
+class GUIServer(bundles: List[Bundle], port: Option[Int]) {
 
   val p = port getOrElse 8080
 

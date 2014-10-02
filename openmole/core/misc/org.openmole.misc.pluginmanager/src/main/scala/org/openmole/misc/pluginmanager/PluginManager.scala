@@ -122,6 +122,7 @@ object PluginManager extends Logger {
         logger.fine(s"Stating bundle ${b.getLocation}")
         b.start
     }
+    bundles
   }
 
   def loadIfNotAlreadyLoaded(plugins: Iterable[File]) = synchronized {
