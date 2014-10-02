@@ -115,7 +115,7 @@ object FileUtil {
     def toGZ = new GZIPInputStream(is)
 
     def copy(file: File): Unit = {
-      val os = new FileOutputStream(file)
+      val os = file.bufferedOutputStream
       try copy(os)
       finally os.close
     }
