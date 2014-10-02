@@ -27,7 +27,7 @@ import java.util.UUID
 import org.h2.tools.Server
 import org.openmole.misc.replication._
 import scala.slick.driver.H2Driver.simple._
-import scala.util.Try
+import scala.util.{ Success, Failure, Try }
 
 object DBServer extends App {
 
@@ -40,9 +40,6 @@ object DBServer extends App {
   val lock = str.getChannel.tryLock
 
   if (lock != null) {
-
-    val objRepo = DBServerInfo.dbFile
-
     val server = Server.createTcpServer("-tcp", "-tcpDaemon").start()
 
     Runtime.getRuntime.addShutdownHook(
@@ -56,23 +53,41 @@ object DBServer extends App {
 
     val fullDataBaseFile = new File(DBServer.base.getPath, DBServerInfo.dbName + ".h2.db")
 
-    val info = if (!DBServerInfo.dbInfoFile.exists || !fullDataBaseFile.exists) {
+    def db(user: String, password: String) =
+      Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:file:${DBServerInfo.base}/${DBServerInfo.urlDBPath}", user = user, password = password)
+
+    def createDB(user: String, password: String): Unit = {
       Logger.getLogger(this.getClass.getName).info("Create BDD")
       fullDataBaseFile.delete
-      val user = "sa"
-      val password = UUID.randomUUID.toString.filter(_.isLetterOrDigit)
 
-      val db = Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:file:${DBServerInfo.base}/${DBServerInfo.urlDBPath}", user = user, password = "")
-      db.withSession { implicit s ⇒
+      db(user, "").withSession { implicit s ⇒
         replicas.ddl.create
         s.withStatement() {
           _.execute(s"SET PASSWORD '$password';")
         }
       }
-
-      new DBServerInfo(server.getPort, user, password)
     }
-    else DBServerInfo.load(DBServerInfo.dbInfoFile).copy(port = server.getPort)
+
+    val info =
+      if (!DBServerInfo.dbInfoFile.exists || !fullDataBaseFile.exists) {
+        val user = "sa"
+        val password = UUID.randomUUID.toString.filter(_.isLetterOrDigit)
+        createDB(user, password)
+        new DBServerInfo(server.getPort, user, password)
+      }
+      else DBServerInfo.load(DBServerInfo.dbInfoFile).copy(port = server.getPort)
+
+    def dbWorks =
+      Try {
+        db(info.user, info.password).withSession { implicit s ⇒
+          replicas.size.run
+        }
+      } match {
+        case Failure(_) ⇒ false
+        case Success(_) ⇒ true
+      }
+
+    if (!dbWorks) createDB(info.user, info.password)
 
     val dbInfoFile = DBServerInfo.dbInfoFile
     val out = new FileOutputStream(dbInfoFile)
