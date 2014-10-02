@@ -31,11 +31,11 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.environment.BatchEnvironment.{ signalUpload }
 import org.openmole.core.model.job._
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.io.HashService
 import org.openmole.misc.tools.io.TarArchiver._
 
 import org.openmole.core.serializer._
 import org.openmole.misc.fileservice.FileService
-import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.workspace.Workspace
 import scala.collection.immutable.TreeSet
 import org.openmole.misc.exception.UserBadDataError

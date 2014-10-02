@@ -34,10 +34,6 @@ object Misc extends BaseDefaults {
     (osgi, exception, eventDispatcher, tools, replication, jasypt, xstream, Apache.config,
       Apache.math)
 
-  val hashService = OsgiProject("org.openmole.misc.hashservice") settings
-    (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (exception, tools, Apache.pool)
-
   val fileDeleter = OsgiProject("org.openmole.misc.filedeleter") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
     (provided(tools))
@@ -53,17 +49,16 @@ object Misc extends BaseDefaults {
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
     (provided(exception), provided(tools), osgi)
 
-  val updater = OsgiProject("org.openmole.misc.updater") dependsOn (provided(exception), provided(tools),
-    provided(workspace))
+  val updater = OsgiProject("org.openmole.misc.updater") dependsOn (exception, tools, workspace)
 
   val fileService = OsgiProject("org.openmole.misc.fileservice") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (provided(tools), provided(hashService), fileCache, provided(updater), provided(workspace), iceTar % "provided")
+    (tools, fileCache, updater, workspace, iceTar % "provided")
 
   val logging = OsgiProject(
     "org.openmole.misc.logging",
-    bundleActivator = Some("org.openmole.misc.logging.internal.Activator")) dependsOn (provided(tools), provided(workspace),
-      Apache.log4j % "provided", Apache.logging % "provided", logback % "provided", slf4j % "provided"
+    bundleActivator = Some("org.openmole.misc.logging.internal.Activator")) dependsOn (
+      tools, workspace, Apache.log4j, Apache.logging, logback, slf4j
     )
 
   val sftpserver = OsgiProject("org.openmole.misc.sftpserver") dependsOn (tools, Apache.sshd)

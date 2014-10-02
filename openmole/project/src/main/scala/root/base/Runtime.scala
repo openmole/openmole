@@ -17,13 +17,13 @@ object Runtime extends BaseDefaults {
   val dbserver = OsgiProject("dbserver") dependsOn (h2, slf4j, xstream, Misc.replication) settings (bundleType += "dbserver")
 
   val runtime = OsgiProject("runtime", singleton = true) dependsOn (Core.implementation, Core.batch, Core.serializer,
-    Misc.logging, scalaLang, scopt, Misc.hashService, Misc.eventDispatcher, Misc.exception) settings
+    Misc.logging, scalaLang, scopt, Misc.eventDispatcher, Misc.exception) settings
     (libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" % "provided",
       bundleType += "runtime")
 
   val daemon = OsgiProject("daemon", singleton = true, imports = Seq("*")) dependsOn (Core.model, Core.implementation, Core.batch, Misc.workspace,
     Misc.fileService, Misc.exception, Misc.tools, Misc.logging, plugin.Environment.desktopgrid, scalaLang, Apache.logging,
-    jodaTime, Misc.hashService, scopt) settings (
+    jodaTime, scopt) settings (
       libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" % "provided",
       libraryDependencies ++= gridscaleSSH,
       bundleType += "daemon"

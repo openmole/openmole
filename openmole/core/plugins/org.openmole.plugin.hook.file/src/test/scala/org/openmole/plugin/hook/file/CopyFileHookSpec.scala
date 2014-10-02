@@ -24,7 +24,8 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.task._
 import org.openmole.core.model.data.Context
-import org.openmole.misc.hashservice.HashService._
+import org.openmole.misc.tools.io.HashService
+import HashService._
 import org.openmole.misc.tools.io.FileUtil._
 import org.scalatest.FlatSpec
 import org.scalatest._

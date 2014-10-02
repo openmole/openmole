@@ -15,14 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.hashservice
+package org.openmole.misc.tools.io
 
+import java.io.{ File, FileInputStream, InputStream }
 import java.security.MessageDigest
 
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import org.openmole.misc.tools.io.FileUtil
 import org.openmole.misc.tools.service.Hash
 
 object HashService {
