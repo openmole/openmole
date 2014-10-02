@@ -47,6 +47,7 @@ object DBServerInfo {
   def dbLockFile = new File(base, dbLock)
   def dbFile = new File(base, dbName)
   def dbInfoFile = new File(base, dbInfoName)
+  def urlDBPath = s"$dbName;MV_STORE=FALSE"
 
 }
 

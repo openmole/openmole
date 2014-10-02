@@ -29,6 +29,7 @@ import fr.iscpif.gridscale.storage.{ LocalStorage ⇒ GSLocalStorage }
 object DesktopGridEnvironment {
   val timeStempsDirName = "timeStemps"
   val jobsDirName = "jobs"
+  val tmpJobsDirName = "tmpjobs"
   val resultsDirName = "results"
   val tmpResultsDirName = "tmpresults"
   val timeStempSeparator = '@'

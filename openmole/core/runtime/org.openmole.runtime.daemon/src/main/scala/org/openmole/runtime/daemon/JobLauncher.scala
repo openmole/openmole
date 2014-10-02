@@ -137,7 +137,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 localResultFile.delete
               }
               catch {
-                case e: Throwable ⇒ logger.log(WARNING, "Error durring result upload", e)
+                case e: Throwable ⇒ logger.log(WARNING, "Error during result upload", e)
               }
             })
 
@@ -151,7 +151,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       }
       catch {
         case e: Exception ⇒
-          logger.log(WARNING, "Error while looking for jobs.", e)
+          logger.log(WARNING, s"Error while looking for jobs, it might happen if the jobs have not yep been made on the server side. Automatic retry in ${Workspace.preferenceAsDuration(jobCheckInterval)}.", e)
           Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMillis)
           background { fetchAJob(id, storage) }
       }
@@ -161,7 +161,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
   def uploadResult(localResultFile: File, communicationDir: String, job: String, storage: SimpleStorage) = {
     val runtimeResult = {
-      val is = localResultFile.gzipedBufferedInputStream
+      val is = localResultFile.gzippedBufferedInputStream
       try SerialiserService.deserialise[RuntimeResult](is)
       finally is.close
     }
@@ -178,7 +178,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       new FileMessage(uploadedFile, msg.hash)
     }
 
-    val uplodadedResult = runtimeResult.result match {
+    val uploadedResult = runtimeResult.result match {
       case Success((result, log)) ⇒ Success((uploadFileMessage(result), log))
       case Failure(e)             ⇒ Failure(e)
     }
@@ -200,7 +200,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val resultToSend = new RuntimeResult(
       uploadedStdOut,
       uploadedStdErr,
-      uplodadedResult)
+      uploadedResult)
 
     // Upload the result
     Workspace.withTmpFile { outputLocal ⇒
@@ -326,7 +326,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           val localCommunicationDirPath = Workspace.newDir
           val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")
 
-          val os = localExecutionMessage.gzipedBufferedOutputStream
+          val os = localExecutionMessage.gzippedBufferedOutputStream
           try SerialiserService.serialise(new ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath), os)
           finally os.close
 

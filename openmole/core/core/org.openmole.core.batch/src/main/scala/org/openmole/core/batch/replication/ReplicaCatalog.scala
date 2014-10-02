@@ -54,7 +54,7 @@ object ReplicaCatalog extends Logger {
   lazy val database = {
     val dbInfoFile = DBServerInfo.dbInfoFile
     val info = DBServerInfo.load(dbInfoFile)
-    val db = Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.dbName}", user = info.user, password = info.password)
+    val db = Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.urlDBPath}", user = info.user, password = info.password)
     db.withSession {
       s ⇒
         val statement = s.createStatement()

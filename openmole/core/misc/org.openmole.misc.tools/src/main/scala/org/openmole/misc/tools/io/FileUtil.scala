@@ -387,7 +387,7 @@ object FileUtil {
     // FIXME move to TarArchiver?
     //FIXME method name is ambiguous rename
     def archiveCompressDirWithRelativePathNoVariableContent(dest: File) = {
-      val os = new TarOutputStream(gzipedBufferedOutputStream)
+      val os = new TarOutputStream(gzippedBufferedOutputStream)
       try os.createDirArchiveWithRelativePathNoVariableContent(dest)
       finally os.close
     }
@@ -401,7 +401,7 @@ object FileUtil {
 
     // FIXME move to TarArchiver?
     def extractUncompressDirArchiveWithRelativePath(dest: File) = {
-      val is = new TarInputStream(gzipedBufferedInputStream)
+      val is = new TarInputStream(gzippedBufferedInputStream)
       try is.extractDirArchiveWithRelativePath(dest)
       finally is.close
     }
@@ -423,8 +423,20 @@ object FileUtil {
     def bufferedInputStream = new BufferedInputStream(new FileInputStream(file))
     def bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file))
 
-    def gzipedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
-    def gzipedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream)
+    def gzippedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
+    def gzippedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream)
+
+    def withGzippedOutputStream[T](f: OutputStream ⇒ T) = {
+      val os = gzippedBufferedOutputStream
+      try f(os)
+      finally os.close
+    }
+
+    def withGzippedInputStream[T](f: InputStream ⇒ T) = {
+      val is = gzippedBufferedInputStream
+      try f(is)
+      finally is.close
+    }
 
     def withOutputStream[T](f: OutputStream ⇒ T) = {
       val os = bufferedOutputStream
