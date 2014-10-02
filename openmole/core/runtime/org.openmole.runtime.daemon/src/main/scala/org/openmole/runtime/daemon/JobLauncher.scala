@@ -304,10 +304,10 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
           }
 
-          val executionMesageFileCache = Workspace.newFile("executionMessage", ".xml")
-          storage.downloadGZ(jobMessage.executionMessagePath, executionMesageFileCache)
-          val executionMessage = SerialiserService.deserialise[ExecutionMessage](executionMesageFileCache)
-          executionMesageFileCache.delete
+          val executionMessageFileCache = Workspace.newFile("executionMessage", ".xml")
+          storage.downloadGZ(jobMessage.executionMessagePath, executionMessageFileCache)
+          val executionMessage = SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
+          executionMessageFileCache.delete
 
           def localCachedReplicatedFile(replicatedFile: ReplicatedFile) = {
             val localFile = localCache.cache(replicatedFile, getFile)

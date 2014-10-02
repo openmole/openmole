@@ -38,6 +38,7 @@ import org.openmole.misc.osgi
 
 import scala.concurrent.duration.FiniteDuration
 import org.openmole.misc.tools.service._
+import java.nio.file.{ Paths, Files }
 
 object Workspace {
 
@@ -176,16 +177,13 @@ class Workspace(val location: File) {
 
   import Workspace.{ textEncryptor, decrypt, NoneTextEncryptor, persistentLocation, authenticationsLocation, pluginLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
 
-  location.mkdirs
+  Files.createDirectories(location)
 
-  val tmpDir = new File(new File(location, tmpLocation), sessionUUID.toString)
-  tmpDir.mkdirs
+  val tmpDir = location.newDir(tmpLocation)
 
-  val pluginDir = new File(location, pluginLocation)
-  pluginDir.mkdirs
+  val pluginDir = Files.createDirectories(Paths.get(location.toString, pluginLocation)).toFile
 
-  val persistentDir = new File(location, persistentLocation)
-  persistentDir.mkdirs
+  val persistentDir = Files.createDirectories(Paths.get(location.toString, pluginLocation)).toFile
 
   def newSeed = rng.nextLong
 
@@ -205,7 +203,7 @@ class Workspace(val location: File) {
     configuration
   }
 
-  lazy val overriden = collection.mutable.HashMap[String, String]()
+  lazy val overridden = collection.mutable.HashMap[String, String]()
 
   def clean = tmpDir.recursiveDelete
 
@@ -227,15 +225,15 @@ class Workspace(val location: File) {
     overridePreference(preference.toString, value)
 
   def overridePreference(preference: String, value: String): Unit = synchronized {
-    overriden(preference) = value
+    overridden(preference) = value
   }
 
   def unsetOverridePreference(preference: String) = synchronized {
-    overriden.remove(preference)
+    overridden.remove(preference)
   }
 
   def rawPreference(location: ConfigurationLocation): String = synchronized {
-    overriden.getOrElse(location.toString, configuration.subset(location.group).getString(location.name))
+    overridden.getOrElse(location.toString, configuration.subset(location.group).getString(location.name))
   }
 
   def preference(location: ConfigurationLocation): String = synchronized {
