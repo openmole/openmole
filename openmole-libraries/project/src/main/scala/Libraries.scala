@@ -267,9 +267,6 @@ object Libraries extends Defaults(Apache) {
     exportPackage := Seq("scalaj.http.*")
     )
 
-  lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
-    (libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6", version := "7.0.6")
-
   lazy val scopt = OsgiProject("com.github.scopt", exports = Seq("scopt.*")) settings(
     libraryDependencies += "com.github.scopt" %% "scopt" % "3.2.0",
     version := "3.2.0"
