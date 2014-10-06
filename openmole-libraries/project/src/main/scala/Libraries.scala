@@ -97,8 +97,8 @@ object Libraries extends Defaults(Apache) {
   lazy val scalazVersion = "7.0.6"
   lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
     (libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion, version := scalazVersion)
-
-  lazy val xstream = OsgiProject(
+  
+lazy val xstream = OsgiProject(
     "com.thoughtworks.xstream",
     buddyPolicy = Some("global"),
     privatePackages = Seq("!scala.*", "*")) settings(
@@ -181,7 +181,8 @@ object Libraries extends Defaults(Apache) {
   lazy val netlogo5 = OsgiProject("ccl.northwestern.edu.netlogo5", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("*")) settings
     (libraryDependencies ++=
-      Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
+      
+Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
         "org.scala-lang" % "scala-library" % "2.9.2",
         "org.objectweb" % "asm-all" % "3.3.1",
         "org.picocontainer" % "picocontainer" % "2.13.6"), version := netLogo5Version, scalaVersion := "2.9.2", bundleType := Set("plugin"))
@@ -278,6 +279,5 @@ object Libraries extends Defaults(Apache) {
     bundleType := Set("plugin"),
     version := scalabcVersion
   )
-
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
 }

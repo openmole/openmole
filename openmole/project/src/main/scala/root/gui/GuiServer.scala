@@ -3,7 +3,7 @@ package root.gui
 import org.openmole.buildsystem.OMKeys._
 
 import sbt._
-import root.{GuiDefaults, base, Web}
+import root.{ GuiDefaults, base, Web }
 import root.Libraries._
 import root.libraries.Apache
 import sbt.Keys._
@@ -28,5 +28,4 @@ object Server extends GuiDefaults {
   lazy val state = OsgiProject("org.openmole.gui.server.state") settings
     (includeOsgi, libraryDependencies ++= Seq(slick)) dependsOn
     (Ext.data, base.Core.model, base.Core.implementation, base.Misc.workspace)
-
 }

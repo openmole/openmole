@@ -8,6 +8,7 @@ import org.openmole.buildsystem.OMKeys._
 import com.typesafe.sbt.osgi.OsgiKeys
 
 object Misc extends BaseDefaults {
+
   import root.Libraries._
   import root.libraries.Apache
   import root.ThirdParties._
@@ -47,13 +48,14 @@ object Misc extends BaseDefaults {
   val updater = OsgiProject("org.openmole.misc.updater") dependsOn (exception, tools, workspace)
 
   val fileService = OsgiProject("org.openmole.misc.fileservice") settings (includeOsgiProv)
-  dependsOn (tools, fileCache, updater, workspace, iceTar % "provided")
+  dependsOn(tools, fileCache, updater, workspace, iceTar % "provided")
 
   val logging = OsgiProject(
     "org.openmole.misc.logging",
     bundleActivator = Some("org.openmole.misc.logging.internal.Activator")) dependsOn (
       tools, workspace, Apache.log4j, Apache.logging, logback, slf4j
     )
+
   val sftpserver = OsgiProject("org.openmole.misc.sftpserver") dependsOn (tools) settings (libraryDependencies += Apache.sshd)
 
   val console = OsgiProject("org.openmole.misc.console", bundleActivator = Some("org.openmole.misc.console.Activator"), buddyPolicy = Some("global")) dependsOn
