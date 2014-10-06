@@ -48,9 +48,9 @@ object Libraries extends Defaults(Apache) {
 
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
 
-  lazy val includeOsgi = libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % osgiVersion.value
+  //lazy val includeOsgi = libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % osgiVersion.value
 
-  lazy val includeOsgiProv = libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % osgiVersion.value % "provided"
+  lazy val includeOsgi = libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % osgiVersion.value
 
   lazy val jetty = "org.openmole" %% "org-eclipse-jetty" % "8.1.8.v20121106"
 
@@ -64,10 +64,12 @@ object Libraries extends Defaults(Apache) {
 
   lazy val logback = "org.openmole" %% "ch-qos-logback" % "1.0.9"
 
+  lazy val h2Version = "1.4.181"
   lazy val h2 = "org.openmole" %% "org-h2" % h2Version
 
   lazy val bonecp = "org.openmole" %% "com-jolbox-bonecp" % "0.8.0-rc1"
 
+  lazy val slickVersion = "2.1.0"
   lazy val slick = "org.openmole" %% "com-typesafe-slick" % slickVersion
 
   lazy val slf4j = "org.openmole" %% "org-slf4j" % "1.7.2"
@@ -91,7 +93,9 @@ object Libraries extends Defaults(Apache) {
 
   lazy val netlogo4 = "org.openmole" %% "ccl-northwestern-edu-netlogo4" % "4.1.3"
 
+  lazy val netLogo5Version = "5.1.0"
   lazy val netlogo5 = "org.openmole" %% "ccl-northwestern-edu-netlogo5" % netLogo5Version
+  lazy val netlogo5_noscala = "org.openmole" % "ccl-northwestern-edu-netlogo5-noscala" % netLogo5Version
 
   lazy val guava = "org.openmole" %% "com-google-guava" % "16.0.1"
 
@@ -118,6 +122,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scalajsDom = "org.openmole" %% "org-scala-lang-modules-scalajs" % "0.6"
 
+  lazy val mgoVersion = "1.78-SNAPSHOT"
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % mgoVersion
 
   lazy val scaladget = "org.openmole" %% "scaladget" % "0.1.0"
@@ -132,11 +137,23 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scalajHttp = "org.openmole" %% "org-scalaj-scalaj-http" % "0.3.15"
 
+  lazy val scalazVersion = "7.0.6"
   lazy val scalaz = "org.openmole" %% "org-scalaz" % scalazVersion
 
   lazy val scopt = "org.openmole" %% "com-github-scopt" % "3.2.0"
 
-  lazy val scalabc = "org.openmole" %% "scalabc" % scalabcVersion
+  lazy val scalabcVersion = "0.4-SNAPSHOT"
+  lazy val scalabc = "org.openmole" %% "fr-iscpif-scalabc" % scalabcVersion
+
+  lazy val equinoxJobs = "org.openmole" %% "org-eclipse-core-jobs" % "3.5.300.v20120912-155018"
+  lazy val equinoxApp = "org.openmole" %% "org-eclipse-equinox-app" % "1.3.100.v20120522-1841"
+  lazy val equinoxOsgi = "org.openmole" %% "org-eclipse-osgi" % "3.8.2.v20130124-134944"
+  lazy val equinoxCommon = "org.openmole" %% "org-eclipse-equinox-common" % "3.6.100.v20120522-1841"
+  lazy val equinoxRuntime = "org.openmole" %% "org-eclipse-core-runtime" % "3.8.0.v20120912-155025"
+  lazy val equinoxLauncher = "org.openmole" %% "org-eclipse-equinox-launcher" % "1.3.0.v20120522-1813"
+  lazy val equinoxRegistry = "org.openmole" %% "org-eclipse-equinox-registry" % "3.5.200.v20120522-1841"
+  lazy val equinoxPreferences = "org.openmole" %% "org-eclipse-equinox-preferences" % "3.5.1.v20121031-182809"
+  lazy val equinoxContenttype = "org.openmole" %% "org-eclipse-core-contenttype" % "3.4.200.v20120523-2004"
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
 }

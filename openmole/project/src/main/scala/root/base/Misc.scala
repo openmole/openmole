@@ -19,10 +19,10 @@ object Misc extends BaseDefaults {
 
   val osgi = OsgiProject("org.openmole.misc.osgi", buddyPolicy = Some("global"), imports = Seq("*"),
     bundleActivator = Some("org.openmole.misc.osgi.Activator")) dependsOn (provided(exception)) settings
-    (includeOsgiProv, libraryDependencies += scalaLang)
+    (includeOsgi, libraryDependencies += scalaLang)
 
   val tools = OsgiProject("org.openmole.misc.tools", buddyPolicy = Some("global")) settings
-    (includeOsgiProv, libraryDependencies ++= Seq(xstream % "provided", groovy, Apache.exec, Apache.pool % "provided",
+    (includeOsgi, libraryDependencies ++= Seq(xstream % "provided", groovy, Apache.exec, Apache.pool % "provided",
       Apache.math % "provided", jodaTime % "provided", scalaLang % "provided")) dependsOn
       (provided(exception), osgi % "provided", iceTar)
 
@@ -32,33 +32,31 @@ object Misc extends BaseDefaults {
     libraryDependencies ++= Seq(slick, xstream))
 
   val workspace = OsgiProject("org.openmole.misc.workspace") settings
-    (includeOsgiProv, libraryDependencies ++= Seq(jasypt, xstream, Apache.config, Apache.math)) dependsOn
+    (includeOsgi, libraryDependencies ++= Seq(jasypt, xstream, Apache.config, Apache.math)) dependsOn
     (osgi, exception, eventDispatcher, tools, replication)
 
-  val fileDeleter = OsgiProject("org.openmole.misc.filedeleter") settings (includeOsgiProv) dependsOn (tools)
+  val fileDeleter = OsgiProject("org.openmole.misc.filedeleter") settings (includeOsgi) dependsOn (tools)
 
-  val fileCache = OsgiProject("org.openmole.misc.filecache") settings (includeOsgiProv) dependsOn (fileDeleter)
+  val fileCache = OsgiProject("org.openmole.misc.filecache") settings (includeOsgi) dependsOn (fileDeleter)
 
   val macros = OsgiProject("org.openmole.misc.macros") settings (libraryDependencies += scalaLang % "provided" /*, provided(scalaCompiler)*/ )
 
   val pluginManager = OsgiProject("org.openmole.misc.pluginmanager",
     bundleActivator = Some("org.openmole.misc.pluginmanager.internal.Activator")) settings
-    (includeOsgiProv) dependsOn (provided(exception), provided(tools), osgi)
+    (includeOsgi) dependsOn (provided(exception), provided(tools), osgi)
 
   val updater = OsgiProject("org.openmole.misc.updater") dependsOn (exception, tools, workspace)
 
-  val fileService = OsgiProject("org.openmole.misc.fileservice") settings (includeOsgiProv)
-  dependsOn(tools, fileCache, updater, workspace, iceTar % "provided")
+  val fileService = OsgiProject("org.openmole.misc.fileservice") settings (includeOsgi) dependsOn (tools, fileCache, updater, workspace, iceTar % "provided")
 
   val logging = OsgiProject(
     "org.openmole.misc.logging",
-    bundleActivator = Some("org.openmole.misc.logging.internal.Activator")) dependsOn (
-      tools, workspace, Apache.log4j, Apache.logging, logback, slf4j
-    )
+    bundleActivator = Some("org.openmole.misc.logging.internal.Activator")) settings (libraryDependencies ++= Seq(Apache.log4j, Apache.logging, logback, slf4j, equinoxCommon)) dependsOn
+    (tools, workspace)
 
   val sftpserver = OsgiProject("org.openmole.misc.sftpserver") dependsOn (tools) settings (libraryDependencies += Apache.sshd)
 
   val console = OsgiProject("org.openmole.misc.console", bundleActivator = Some("org.openmole.misc.console.Activator"), buddyPolicy = Some("global")) dependsOn
-    (osgi /*, scalaCompiler*/ ) settings (includeOsgiProv, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
+    (osgi /*, scalaCompiler*/ ) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
 
 }

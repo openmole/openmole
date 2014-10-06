@@ -97,8 +97,8 @@ object Libraries extends Defaults(Apache) {
   lazy val scalazVersion = "7.0.6"
   lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
     (libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion, version := scalazVersion)
-  
-lazy val xstream = OsgiProject(
+
+  lazy val xstream = OsgiProject(
     "com.thoughtworks.xstream",
     buddyPolicy = Some("global"),
     privatePackages = Seq("!scala.*", "*")) settings(
@@ -159,16 +159,6 @@ lazy val xstream = OsgiProject(
         for (i ← is) yield i.copy(checkExplicit = false)
       })
 
-  lazy val netLogo5Version = "5.1.0"
-  lazy val netlogo5_noscala = OsgiProject("ccl.northwestern.edu.netlogo5.noscala", exports = Seq("org.nlogo.*"),
-    privatePackages = Seq("!scala.*", "*")) settings
-    (libraryDependencies ++=
-      Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
-        "org.picocontainer" % "picocontainer" % "2.13.6",
-        "org.objectweb" % "asm-all" % "3.3.1"), version := netLogo5Version, autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.9.2", crossPaths := false,
-        ivyScala ~= { (is: Option[IvyScala]) ⇒ //See netlogo4_noscala
-          for (i ← is) yield i.copy(checkExplicit = false)
-        })
 
   lazy val netlogo4 = OsgiProject("ccl.northwestern.edu.netlogo4", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("*")) settings
@@ -178,14 +168,23 @@ lazy val xstream = OsgiProject(
         "org.objectweb" % "asm" % "3.1",
         "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0", bundleType := Set("plugin"))
 
+  lazy val netLogo5Version = "5.1.0"
+  lazy val netlogo5_noscala = OsgiProject("ccl.northwestern.edu.netlogo5.noscala", exports = Seq("org.nlogo.*"),
+    privatePackages = Seq("!scala.*", "*")) settings
+    (libraryDependencies ++=
+      Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
+        "org.objectweb" % "asm-all" % "3.3.1",
+        "org.picocontainer" % "picocontainer" % "2.13.6"), version := netLogo5Version, autoScalaLibrary := false, bundleType := Set("all"), scalaVersion := "2.9.2", crossPaths := false,
+      ivyScala ~= { (is: Option[IvyScala]) ⇒ //See netlogo4_noscala
+        for (i ← is) yield i.copy(checkExplicit = false)
+      })
+
   lazy val netlogo5 = OsgiProject("ccl.northwestern.edu.netlogo5", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("*")) settings
-    (libraryDependencies ++=
-      
-Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
-        "org.scala-lang" % "scala-library" % "2.9.2",
-        "org.objectweb" % "asm-all" % "3.3.1",
-        "org.picocontainer" % "picocontainer" % "2.13.6"), version := netLogo5Version, scalaVersion := "2.9.2", bundleType := Set("plugin"))
+    (libraryDependencies ++= Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
+      "org.scala-lang" % "scala-library" % "2.9.2",
+      "org.objectweb" % "asm-all" % "3.3.1",
+      "org.picocontainer" % "picocontainer" % "2.13.6"), version := netLogo5Version, scalaVersion := "2.9.2", bundleType := Set("plugin"))
 
   lazy val guava = OsgiProject("com.google.guava",
     exports = Seq("com.google.common.*"), privatePackages = Seq("!scala.*", "*")) settings(libraryDependencies ++=
@@ -230,11 +229,11 @@ Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
     libraryDependencies += "fr.iscpif" %%% "scaladget_sjs0.5" % "0.1.0", version := "0.1.0")
 
   lazy val mgoVersion = "1.78-SNAPSHOT"
-  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (
+  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings(
     libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
     bundleType := Set("plugin"),
     version := mgoVersion
-  ) dependsOn (monocle)
+    ) dependsOn (monocle)
 
   val monocleVersion = "0.5.0"
 
@@ -274,10 +273,74 @@ Seq("ccl.northwestern.edu" % "netlogo" % netLogo5Version,
     )
 
   lazy val scalabcVersion = "0.4-SNAPSHOT"
-  lazy val scalabc = OsgiProject("fr.iscpif.scalabc", privatePackages = Seq("!scala.*", "!junit.*", "*")) settings (
+  lazy val scalabc = OsgiProject("fr.iscpif.scalabc", privatePackages = Seq("!scala.*", "!junit.*", "*")) settings(
     libraryDependencies += "fr.iscpif" %% "abc" % scalabcVersion,
     bundleType := Set("plugin"),
     version := scalabcVersion
-  )
+    )
+
+  lazy val equinoxAppVersion = "1.3.100.v20120522-1841"
+  lazy val equinoxApp = OsgiProject("org.eclipse.equinox.app") settings(
+    libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.app" % equinoxAppVersion intransitive(),
+    version := equinoxAppVersion,
+    exportPackage := Seq("org.eclipse.equinox.app.*")
+    )
+
+  lazy val equinoxCommonVersion = "3.6.100.v20120522-1841"
+  lazy val equinoxCommon = OsgiProject("org.eclipse.equinox.common") settings(
+    libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.common" % equinoxCommonVersion intransitive(),
+    version := equinoxCommonVersion,
+    exportPackage := Seq("org.eclipse.equinox.common.*")
+    )
+
+  lazy val equinoxLauncherVersion = "1.3.0.v20120522-1813"
+  lazy val equinoxLauncher = OsgiProject("org.eclipse.equinox.launcher") settings(
+    libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.launcher" % equinoxLauncherVersion intransitive(),
+    version := equinoxLauncherVersion,
+    exportPackage := Seq("org.eclipse.equinox.launcher.*")
+    )
+
+  lazy val equinoxRegistryVersion = "3.5.200.v20120522-1841"
+  lazy val equinoxRegistry = OsgiProject("org.eclipse.equinox.registry") settings(
+    libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.registry" % equinoxRegistryVersion intransitive(),
+    version := equinoxRegistryVersion,
+    exportPackage := Seq("org.eclipse.equinox.registry.*")
+    )
+
+  lazy val equinoxPreferencesVersion = "3.5.1.v20121031-182809"
+  lazy val equinoxPreferences = OsgiProject("org.eclipse.equinox.preferences") settings(
+    libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.preferences" % equinoxPreferencesVersion intransitive(),
+    version := equinoxPreferencesVersion,
+    exportPackage := Seq("org.eclipse.equinox.preferences.*")
+    )
+
+  lazy val equinoxOsgiVersion = "3.8.2.v20130124-134944"
+  lazy val equinoxOsgi = OsgiProject("org.eclipse.osgi") settings(
+    libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % equinoxOsgiVersion intransitive(),
+    version := equinoxOsgiVersion,
+    exportPackage := Seq("org.eclipse.osgi.*")
+    )
+
+  lazy val equinoxContenttypeVersion = "3.4.200.v20120523-2004"
+  lazy val equinoxContenttype = OsgiProject("org.eclipse.core.contenttype") settings(
+    libraryDependencies += "org.eclipse.core" % "org.eclipse.core.contenttype" % equinoxContenttypeVersion intransitive(),
+    version := equinoxContenttypeVersion,
+    exportPackage := Seq("org.eclipse.contenttype.*")
+    )
+
+  lazy val equinoxJobsVersion = "3.5.300.v20120912-155018"
+  lazy val equinoxJobs = OsgiProject("org.eclipse.core.jobs") settings(
+    libraryDependencies += "org.eclipse.core" % "org.eclipse.core.jobs" % equinoxJobsVersion intransitive(),
+    version := equinoxJobsVersion,
+    exportPackage := Seq("org.eclipse.core.jobs.*")
+    )
+
+  lazy val equinoxRuntimeVersion = "3.8.0.v20120912-155025"
+  lazy val equinoxRuntime = OsgiProject("org.eclipse.core.runtime") settings(
+    libraryDependencies += "org.eclipse.core" % "org.eclipse.core.runtime" % equinoxRuntimeVersion intransitive(),
+    version := equinoxRuntimeVersion,
+    exportPackage := Seq("org.eclipse.core.runtime.*")
+    )
+
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
 }

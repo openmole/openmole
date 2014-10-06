@@ -17,15 +17,15 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   val dir = file("bin")
 
   private val equinoxDependencies = libraryDependencies ++= Seq(
-    "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" intransitive (),
-    "org.eclipse.core" % "org.eclipse.core.contenttype" % "3.4.200.v20120523-2004" intransitive (),
-    "org.eclipse.core" % "org.eclipse.core.jobs" % "3.5.300.v20120912-155018" intransitive (),
-    "org.eclipse.core" % "org.eclipse.core.runtime" % "3.8.0.v20120912-155025" intransitive (),
-    "org.eclipse.core" % "org.eclipse.equinox.common" % "3.6.100.v20120522-1841" intransitive (),
-    "org.eclipse.core" % "org.eclipse.equinox.launcher" % "1.3.0.v20120522-1813" intransitive (),
-    "org.eclipse.core" % "org.eclipse.equinox.registry" % "3.5.200.v20120522-1841" intransitive (),
-    "org.eclipse.core" % "org.eclipse.equinox.preferences" % "3.5.1.v20121031-182809" intransitive (),
-    "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944" intransitive (),
+    equinoxApp intransitive (),
+    equinoxContenttype intransitive (),
+    equinoxJobs intransitive (),
+    equinoxRuntime intransitive (),
+    equinoxCommon intransitive (),
+    equinoxLauncher intransitive (),
+    equinoxRegistry intransitive (),
+    equinoxPreferences intransitive (),
+    equinoxOsgi intransitive (),
     Libraries.bouncyCastle intransitive ()
   )
 
