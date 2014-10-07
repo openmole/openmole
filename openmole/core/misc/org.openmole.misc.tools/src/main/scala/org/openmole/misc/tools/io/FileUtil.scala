@@ -68,8 +68,6 @@ object FileUtil {
 
   def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
 
-  def isDirectoryEmpty(d: Path) = Files.newDirectoryStream(d).iterator.hasNext
-
   // glad you were there...
   implicit def file2Path(file: File) = file.toPath
   implicit def path2File(path: Path) = path.toFile
@@ -194,12 +192,6 @@ object FileUtil {
 
     def recursiveDelete = DirUtils.deleteIfExists(file)
 
-    ////// boolean operations //////
-    def isEmpty =
-      if (Files.notExists(file)) true
-      else if (!Files.isDirectory(file)) file.size == 0
-      else isDirectoryEmpty(file)
-
     def isJar = Try {
       val zip = new ZipFile(file)
       val hasManifestEntry =
@@ -225,9 +217,15 @@ object FileUtil {
       true
     }
 
+    def withDirectoryStream[T](f: DirectoryStream[Path] ⇒ T) = {
+      val stream = Files.newDirectoryStream(file)
+      try f(stream)
+      finally stream.close
+    }
+
     //////// general operations ///////
     def size: Long =
-      if (Files.isDirectory(file)) Files.newDirectoryStream(file).foldLeft(0l)((acc: Long, p: Path) ⇒ { acc + p.size })
+      if (Files.isDirectory(file)) file.withDirectoryStream(_.foldLeft(0l)((acc: Long, p: Path) ⇒ { acc + p.size }))
       else Files.size(file)
 
     def mode =
