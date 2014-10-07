@@ -31,6 +31,7 @@ import org.openmole.misc.exception._
 import org.openmole.misc.tools.service._
 import org.openmole.misc.workspace._
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.misc.tools.service.ProcessUtil._
 import org.openmole.misc.tools.service.ThreadUtil._
 import HashService._
