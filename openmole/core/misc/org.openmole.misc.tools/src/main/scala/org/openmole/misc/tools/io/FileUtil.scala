@@ -347,36 +347,6 @@ object FileUtil {
       Files.createDirectories(file.toPath.getParent)
     }
 
-    ////// potential goers //////
-    // FIXME move to TarArchiver?
-    def archiveDirWithRelativePathNoVariableContent(toArchive: File) = {
-      val os = new TarOutputStream(new FileOutputStream(file))
-      try os.createDirArchiveWithRelativePathNoVariableContent(toArchive)
-      finally os.close
-    }
-
-    // FIXME move to TarArchiver?
-    //FIXME method name is ambiguous rename
-    def archiveCompressDirWithRelativePathNoVariableContent(dest: File) = {
-      val os = new TarOutputStream(gzippedBufferedOutputStream)
-      try os.createDirArchiveWithRelativePathNoVariableContent(dest)
-      finally os.close
-    }
-
-    // FIXME move to TarArchiver?
-    def extractDirArchiveWithRelativePath(dest: File) = {
-      val is = new TarInputStream(bufferedInputStream)
-      try is.extractDirArchiveWithRelativePath(dest)
-      finally is.close
-    }
-
-    // FIXME move to TarArchiver?
-    def extractUncompressDirArchiveWithRelativePath(dest: File) = {
-      val is = new TarInputStream(gzippedBufferedInputStream)
-      try is.extractDirArchiveWithRelativePath(dest)
-      finally is.close
-    }
-
     /////// wrappers ////////
     lazy val vmFileLock = new LockRepository[String]
 

@@ -23,7 +23,7 @@ import com.ice.tar.{ TarEntry, TarConstants, TarInputStream, TarOutputStream }
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Stack
 
-import java.io.IOException
+import java.io.{File, IOException}
 import java.nio.file._
 import org.openmole.misc.tools.io.FileUtil._
 
@@ -33,11 +33,7 @@ import java.util
 
 object TarArchiver {
 
-  implicit def TarInputStream2TarInputStreamDecorator(tis: TarInputStream) = new TarInputStreamDecorator(tis)
-  implicit def TarOutputStream2TarOutputStreamComplement(tos: TarOutputStream) = new TarOutputStreamDecorator(tos)
-
-  class TarOutputStreamDecorator(tos: TarOutputStream) {
-
+  implicit class TarOutputStreamDecorator(tos: TarOutputStream) {
     def addFile(f: Path, name: String) = {
       val entry = new TarEntry(name)
       entry.setSize(Files.size(f))
@@ -50,7 +46,7 @@ object TarArchiver {
     def createDirArchiveWithRelativePath(baseDir: Path) = createDirArchiveWithRelativePathWithAdditionalCommand(tos, baseDir, { (e) ⇒ })
   }
 
-  class TarInputStreamDecorator(tis: TarInputStream) {
+  implicit class TarInputStreamDecorator(tis: TarInputStream) {
 
     def applyAndClose[T](f: TarEntry ⇒ T): Iterable[T] = try {
       val ret = new ListBuffer[T]
@@ -82,6 +78,35 @@ object TarArchiver {
       }
     }
   }
+
+  implicit class FileTarArchiveDecorator(file: File) {
+    // FIXME move to TarArchiver?
+    def archiveDirWithRelativePathNoVariableContent(toArchive: File) = {
+      val os = new TarOutputStream(file.gzippedBufferedOutputStream)
+      try os.createDirArchiveWithRelativePathNoVariableContent(toArchive)
+      finally os.close
+    }
+
+    //FIXME method name is ambiguous rename
+    def archiveCompressDirWithRelativePathNoVariableContent(dest: File) = {
+      val os = new TarOutputStream(file.gzippedBufferedOutputStream)
+      try os.createDirArchiveWithRelativePathNoVariableContent(dest)
+      finally os.close
+    }
+
+    def extractDirArchiveWithRelativePath(dest: File) = {
+      val is = new TarInputStream(file.bufferedInputStream)
+      try is.extractDirArchiveWithRelativePath(dest)
+      finally is.close
+    }
+
+    def extractUncompressDirArchiveWithRelativePath(dest: File) = {
+      val is = new TarInputStream(file.gzippedBufferedInputStream)
+      try is.extractDirArchiveWithRelativePath(dest)
+      finally is.close
+    }
+  }
+
 
   // new version using NIO
   private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, baseDir: Path, additionalCommand: TarEntry ⇒ Unit) = {
