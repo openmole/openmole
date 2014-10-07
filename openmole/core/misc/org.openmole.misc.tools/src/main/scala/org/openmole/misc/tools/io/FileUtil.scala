@@ -458,35 +458,6 @@ object FileUtil {
         case t: Throwable ⇒ throw new IOException(s"For file $file", t)
       }
 
-    def updateIfTooOld(
-      tooOld: Duration,
-      timeStamp: File ⇒ File = f ⇒ new File(file.getPath + "-timestamp"),
-      updating: File ⇒ File = f ⇒ new File(file.getPath + "-updating"))(update: File ⇒ Unit) = {
-      val upFile = updating(file)
-      val otherUpdating = !upFile.createNewFile
-
-      try {
-        if (!otherUpdating) {
-          val ts = timeStamp(file)
-          val upToDate =
-            if (!file.exists || !ts.exists) false
-            else
-              Try(ts.content.toLong) match {
-                case Success(v) ⇒ v + tooOld.toMillis > System.currentTimeMillis
-                case Failure(_) ⇒ ts.delete; false
-              }
-
-          if (!upToDate) {
-            update(file)
-            ts.content = System.currentTimeMillis.toString
-          }
-
-        }
-      }
-      finally upFile.delete
-      file
-    }
-
     def newDir(prefix: String): File = {
       val tempFile = new File(file, prefix + UUID.randomUUID)
       if (!tempFile.mkdirs) throw new IOException("Cannot create directory " + tempFile)

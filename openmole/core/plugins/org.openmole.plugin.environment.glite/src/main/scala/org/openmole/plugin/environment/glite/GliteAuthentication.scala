@@ -28,6 +28,7 @@ import java.util.zip.GZIPInputStream
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.fileservice._
 import org.openmole.core.batch.authentication._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.updater.Updater
