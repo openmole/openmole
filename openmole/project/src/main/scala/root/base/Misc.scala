@@ -57,7 +57,7 @@ object Misc extends BaseDefaults {
 
   val logging = OsgiProject(
     "org.openmole.misc.logging",
-    bundleActivator = Some("org.openmole.misc.logging.internal.Activator")) dependsOn (
+    bundleActivator = Some("org.openmole.misc.logging.internal.Activator"), openmoleScope = Some("provided")) dependsOn (
       tools, workspace, Apache.log4j, Apache.logging, logback, slf4j
     )
 

@@ -23,7 +23,7 @@ import com.ice.tar.{ TarEntry, TarConstants, TarInputStream, TarOutputStream }
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Stack
 
-import java.io.{File, IOException}
+import java.io.{ File, IOException }
 import java.nio.file._
 import org.openmole.misc.tools.io.FileUtil._
 
@@ -106,7 +106,6 @@ object TarArchiver {
       finally is.close
     }
   }
-
 
   // new version using NIO
   private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, baseDir: Path, additionalCommand: TarEntry ⇒ Unit) = {
