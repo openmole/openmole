@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2014 Jonathan Passerat-Palmbach
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,19 +18,18 @@
 
 package org.openmole.misc.tools.io
 
-import java.security.{ PrivilegedAction, AccessController }
+import com.ice.tar.{ TarEntry, TarConstants, TarInputStream, TarOutputStream }
 
-import com.ice.tar.TarEntry
-import com.ice.tar.TarInputStream
-import com.ice.tar.TarOutputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Stack
+
+import java.io.IOException
+import java.nio.file._
 import org.openmole.misc.tools.io.FileUtil._
-import java.nio.file.FileSystems
-import java.nio.file.Files
+
+// provide scala foreach over Java collections
+import scala.collection.JavaConversions._
+import java.util
 
 object TarArchiver {
 
@@ -38,16 +38,16 @@ object TarArchiver {
 
   class TarOutputStreamDecorator(tos: TarOutputStream) {
 
-    def addFile(f: File, name: String) = {
+    def addFile(f: Path, name: String) = {
       val entry = new TarEntry(name)
-      entry.setSize(f.length)
-      entry.setMode(f.mode)
+      entry.setSize(Files.size(f))
+      entry.setMode(f.toFile.mode) // ugly explicit conversion
       tos.putNextEntry(entry)
-      try f.copy(tos) finally tos.closeEntry
+      try Files.copy(f, tos) finally tos.closeEntry
     }
 
-    def createDirArchiveWithRelativePathNoVariableContent(baseDir: File) = createDirArchiveWithRelativePathWithAdditionnalCommand(tos, baseDir, (e: TarEntry) ⇒ e.setModTime(0))
-    def createDirArchiveWithRelativePath(baseDir: File) = createDirArchiveWithRelativePathWithAdditionnalCommand(tos, baseDir, { (e) ⇒ })
+    def createDirArchiveWithRelativePathNoVariableContent(baseDir: Path) = createDirArchiveWithRelativePathWithAdditionalCommand(tos, baseDir, (e: TarEntry) ⇒ e.setModTime(0))
+    def createDirArchiveWithRelativePath(baseDir: Path) = createDirArchiveWithRelativePathWithAdditionalCommand(tos, baseDir, { (e) ⇒ })
   }
 
   class TarInputStreamDecorator(tis: TarInputStream) {
@@ -64,72 +64,61 @@ object TarArchiver {
     }
     finally tis.close
 
-    def extractDirArchiveWithRelativePath(baseDir: File) = {
-      if (!baseDir.isDirectory) throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
+    // new implementation using NIO
+    def extractDirArchiveWithRelativePath(baseDir: Path) = {
+      if (!Files.isDirectory(baseDir)) throw new IOException(baseDir.toString + " is not a directory.")
 
-      val links = Iterator.continually(tis.getNextEntry).takeWhile(_ != null).flatMap {
+      Iterator.continually(tis.getNextEntry).takeWhile(_ != null).foreach {
         e ⇒
-          val dest = new File(baseDir, e.getName)
-          val link =
-            if (!e.getLinkName.isEmpty) Some(dest -> e.getLinkName)
-            else if (e.isDirectory) {
-              dest.mkdirs
-              None
-            }
-            else {
-              dest.getParentFile.mkdirs
-              dest.withOutputStream(tis.copy)
-              None
-            }
-          dest.mode = e.getMode
-          link
-      }.toList
-
-      links.foreach {
-        case ((dest, name)) ⇒ dest.createLink(name)
+          val dest = Paths.get(baseDir.toString, e.getName)
+          if (e.isDirectory) {
+            Files.createDirectories(dest)
+          }
+          else {
+            Files.createDirectories(dest.getParent)
+            // copy from an InputStream does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
+            Files.copy(tis, dest)
+          }
       }
-
     }
   }
 
-  private def createDirArchiveWithRelativePathWithAdditionnalCommand(tos: TarOutputStream, baseDir: File, additionnalCommand: TarEntry ⇒ Unit) = {
-    if (!baseDir.isDirectory) throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
+  // new version using NIO
+  private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, baseDir: Path, additionalCommand: TarEntry ⇒ Unit) = {
 
-    val fs = FileSystems.getDefault
-    val toArchive = new Stack[(File, String)]
+    if (!Files.isDirectory(baseDir)) throw new IOException(baseDir.toString + " is not a directory.")
+
+    val toArchive = new Stack[(Path, String)]
     toArchive.push((baseDir, ""))
 
-    var links = List.empty[(File, String)]
-
     while (!toArchive.isEmpty) {
-      val (source, entryName) = toArchive.pop
-      if (source.isSymbolicLink) links ::= source -> entryName
-      else {
-        val e =
-          if (source.isDirectory) {
-            for (name ← source.list.sorted) toArchive.push((new File(source, name), entryName + '/' + name))
-            new TarEntry(entryName + '/')
-          }
-          else {
-            val e = new TarEntry(entryName)
-            e.setSize(source.length)
-            e
-          }
-        e.setMode(source.mode)
-        additionnalCommand(e)
-        tos.putNextEntry(e)
-        if (!source.isDirectory) try source.copy(tos) finally tos.closeEntry
-      }
-    }
 
-    links.foreach {
-      case (source, entryName) ⇒
-        val e = new TarEntry(entryName)
-        e.setLinkName(
-          Files.readSymbolicLink(source.toPath).toString
-        )
-        e.setMode(source.mode)
-        tos.putNextEntry(e)
+      val (source, entryName) = toArchive.pop
+
+      val e =
+        if (Files.isDirectory(source)) {
+          // walk the directory tree to add all its entries to stack
+          for (name ← Files.newDirectoryStream(source)) {
+            val newSource = Paths.get(source.toString, name.toString)
+            val newEntryName = entryName + '/' + name
+            toArchive.push((newSource, newEntryName))
+          }
+          // create the actual tar entry for the directory
+          new TarEntry(entryName + '/')
+        }
+        // tar distinguishes symlinks, but the com.ice.tar's implementation decided not to do so...
+        // so any kind of files goes in there
+        else {
+          val e = new TarEntry(entryName)
+          e.setSize(Files.size(source))
+          e
+        }
+
+      // complete current entry by fixing its modes and writing it to the archive
+      e.setMode(source.toFile.mode) // ugly explicit conversion
+      additionalCommand(e)
+      tos.putNextEntry(e)
+      if (!Files.isDirectory(source)) try Files.copy(source, tos) finally tos.closeEntry
     }
   }
 
