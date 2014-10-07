@@ -58,7 +58,7 @@ object Misc extends BaseDefaults {
   val logging = OsgiProject(
     "org.openmole.misc.logging",
     bundleActivator = Some("org.openmole.misc.logging.internal.Activator"), openmoleScope = Some("provided")) dependsOn (
-      tools, workspace, Apache.log4j, Apache.logging, logback, slf4j
+      tools, workspace, Apache.log4j, logback, slf4j
     )
 
   val sftpserver = OsgiProject("org.openmole.misc.sftpserver") dependsOn (tools, Apache.sshd)

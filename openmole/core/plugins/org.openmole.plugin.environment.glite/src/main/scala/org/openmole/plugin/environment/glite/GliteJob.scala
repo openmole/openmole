@@ -107,5 +107,5 @@ trait GliteJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
     }
     super.state = state
   }
-  
+
 }
