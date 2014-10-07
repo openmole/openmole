@@ -53,7 +53,7 @@ trait DesktopGridJobService extends JobService with UnlimitedAccess { js ⇒
     val desktopJobMessage = new DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, environment.openMOLEMemoryValue, inputFile)
 
     val tmpJobFile = tmpJobSubmissionFile(jobId)
-    tmpJobFile.withGzipedOutputStream(os ⇒
+    tmpJobFile.withGzippedOutputStream(os ⇒
       SerialiserService.serialise(desktopJobMessage, os)
     )
 
