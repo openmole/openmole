@@ -123,7 +123,7 @@ object TarArchiver {
         if (Files.isDirectory(source)) {
           // walk the directory tree to add all its entries to stack
           for (f ← Files.newDirectoryStream(source)) {
-            val newSource = Paths.get(source.toString, f.getFileName.toString)
+            val newSource = source.resolve(f.getFileName)
             val newEntryName = entryName + '/' + f.getFileName
             toArchive.push((newSource, newEntryName))
           }
