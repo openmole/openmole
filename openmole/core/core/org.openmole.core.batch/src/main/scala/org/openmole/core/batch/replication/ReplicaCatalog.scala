@@ -154,6 +154,9 @@ object ReplicaCatalog extends Logger {
                       path = newFile,
                       hash = hash,
                       lastCheckExists = System.currentTimeMillis)
+
+                    assert(newReplica.path != null)
+
                     logger.fine(s"Insert $newReplica")
                     try replicas += newReplica
                     catch {

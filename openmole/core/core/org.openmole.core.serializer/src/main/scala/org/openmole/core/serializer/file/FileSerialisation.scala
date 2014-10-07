@@ -88,7 +88,7 @@ trait FileSerialisation extends Serialiser {
           '<' -> "inf",
           '|' -> "bar").mapValues("$" + _ + "$")
 
-      file.getAbsolutePath.map(c => replacement.getOrElse(c, c)).mkString
+      file.getAbsolutePath.map(c ⇒ replacement.getOrElse(c, c)).mkString
     }
 
     HashMap() ++ fi.map {
