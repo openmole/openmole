@@ -31,9 +31,13 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.method.evolution.algorithm._
 import org.openmole.plugin.task.tools._
 
+import scala.concurrent.duration.Duration
 import scala.util.Random
 
 package object ga {
+
+  implicit def durationToTerminationConverter(d: Duration) = Timed(d)
+  implicit def intToCounterTerminationConverter(n: Int) = Counter(n)
 
   implicit def seqOfTuplesToInputsConversion[T](s: Seq[(Prototype[Double], (T, T))]) =
     Inputs[T](s.map { case (p, (min, max)) ⇒ Scalar[T](p, min, max) })
