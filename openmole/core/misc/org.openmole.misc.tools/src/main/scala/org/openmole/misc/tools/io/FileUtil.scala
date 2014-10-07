@@ -226,22 +226,17 @@ object FileUtil {
     }
 
     //////// general operations ///////
-    def size: Long = {
-      if (Files.isDirectory(file)) {
-        Files.newDirectoryStream(file).foldLeft(0l)((acc: Long, p: Path) ⇒ { acc + p.size })
-      }
+    def size: Long =
+      if (Files.isDirectory(file)) Files.newDirectoryStream(file).foldLeft(0l)((acc: Long, p: Path) ⇒ { acc + p.size })
       else Files.size(file)
-    }
 
-    def mode = {
+    def mode =
       { if (Files.isReadable(file)) TAR_READ else 0 } |
         { if (Files.isWritable(file)) TAR_WRITE else 0 } |
         { if (Files.isExecutable(file)) TAR_EXEC else 0 }
-    }
 
     /** set mode from an integer as retrieved from a Tar archive */
     def mode_=(m: Int) = {
-
       file.setReadable((m & TAR_READ) != 0)
       file.setWritable((m & TAR_WRITE) != 0)
       file.setExecutable((m & TAR_EXEC) != 0)
