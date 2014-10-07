@@ -19,6 +19,7 @@ package org.openmole.core.batch.replication
 
 import com.google.common.cache.CacheBuilder
 import java.io.File
+import org.h2.jdbc.JdbcSQLException
 import org.openmole.misc.replication._
 import org.openmole.misc.tools.service.{ LockRepository, Logger, TimeCache }
 import java.util.regex.Pattern
@@ -154,7 +155,12 @@ object ReplicaCatalog extends Logger {
                       hash = hash,
                       lastCheckExists = System.currentTimeMillis)
                     logger.fine(s"Insert $newReplica")
-                    replicas += newReplica
+                    try replicas += newReplica
+                    catch {
+                      case t: JdbcSQLException ⇒
+                        storage.backgroundRmFile(newFile)
+                        throw t
+                    }
                     newReplica
                 }
               }

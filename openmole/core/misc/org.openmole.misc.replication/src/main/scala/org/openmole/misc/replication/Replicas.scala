@@ -21,11 +21,11 @@ import scala.slick.driver.H2Driver.simple._
 
 class Replicas(tag: Tag) extends Table[Replica](tag, "REPLICAS") {
   def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
-  def source = column[String]("SOURCE")
-  def storage = column[String]("STORAGE")
-  def path = column[String]("PATH")
-  def hash = column[String]("HASH")
-  def lastCheckExists = column[Long]("LAST_CHECK_EXISTS")
+  def source = column[String]("SOURCE", O.NotNull)
+  def storage = column[String]("STORAGE", O.NotNull)
+  def path = column[String]("PATH", O.NotNull)
+  def hash = column[String]("HASH", O.NotNull)
+  def lastCheckExists = column[Long]("LAST_CHECK_EXISTS", O.NotNull)
 
   def idx1 = index("idx1", (source, hash, storage), unique = true)
   def idx3 = index("idx2", (source, storage))
