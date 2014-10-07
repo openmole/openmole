@@ -183,7 +183,7 @@ class Workspace(val location: File) {
 
   val pluginDir = Files.createDirectories(Paths.get(location.toString, pluginLocation)).toFile
 
-  val persistentDir = Files.createDirectories(Paths.get(location.toString, pluginLocation)).toFile
+  val persistentDir = Files.createDirectories(Paths.get(location.toString, persistentLocation)).toFile
 
   def newSeed = rng.nextLong
 
