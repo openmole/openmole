@@ -132,8 +132,8 @@ object Libraries extends Defaults(Apache) {
   )
 
   lazy val jasypt = OsgiProject("org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings (
-    libraryDependencies += "org.jasypt" % "jasypt" % "1.8",
-    version := "1.8"
+    libraryDependencies += "org.jasypt" % "jasypt" % "1.9.2",
+    version := "1.9.2"
   )
 
   lazy val robustIt = OsgiProject("uk.com.robustit.cloning", exports = Seq("com.rits.*"), privatePackages = Seq("org.objenesis.*")) settings (
