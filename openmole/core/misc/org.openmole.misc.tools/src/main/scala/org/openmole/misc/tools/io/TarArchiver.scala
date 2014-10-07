@@ -122,9 +122,9 @@ object TarArchiver {
       val e =
         if (Files.isDirectory(source)) {
           // walk the directory tree to add all its entries to stack
-          for (name ← Files.newDirectoryStream(source)) {
-            val newSource = Paths.get(source.toString, name.toString)
-            val newEntryName = entryName + '/' + name
+          for (f ← Files.newDirectoryStream(source)) {
+            val newSource = Paths.get(source.toString, f.getFileName.toString)
+            val newEntryName = entryName + '/' + f.getFileName
             toArchive.push((newSource, newEntryName))
           }
           // create the actual tar entry for the directory
