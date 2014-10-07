@@ -73,6 +73,7 @@ trait FileSerialisation extends Serialiser {
     val fileInfoFile = new File(archiveExtractDir, fileDir + "/" + filesInfo)
     val fi = fileInfoFile.withInputStream(xStream.fromXML).asInstanceOf[FilesInfo]
     fileInfoFile.delete
+    new File(archiveExtractDir, fileDir).delete
 
     def toPath(file: File) = {
       lazy val replacement =
