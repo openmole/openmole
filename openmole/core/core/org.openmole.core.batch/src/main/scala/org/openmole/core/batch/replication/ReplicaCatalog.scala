@@ -129,12 +129,16 @@ object ReplicaCatalog extends Logger {
           def getReplica =
             replicas.filter { r ⇒ r.source === src.getCanonicalPath && r.storage === storage.id && r.hash === hash }
 
-          /* def getReplicaForHash(hash: String)(implicit session: Session) =
-        replicas.filter { r => r.storage === storage.id && r.hash === hash && r.environment === environment.id }*/
+          def assertReplica(r: Replica) = {
+            assert(r.path != null)
+            assert(r.storage != null)
+            assert(r.hash != null)
+            r
+          }
 
           // RQ: Could be improved by reusing files with same hash already on the storage, may be not very generic though
           getReplica.firstOption match {
-            case Some(replica) ⇒ replica
+            case Some(replica) ⇒ assertReplica(replica)
             case None ⇒
               val name = Storage.uniqName(System.currentTimeMillis.toString, ".rep")
               val newFile = storage.child(storage.persistentDir, name)
@@ -146,7 +150,7 @@ object ReplicaCatalog extends Logger {
                   case Some(r) ⇒
                     logger.fine("Already in database deleting")
                     storage.backgroundRmFile(newFile)
-                    r
+                    assertReplica(r)
                   case None ⇒
                     val newReplica = Replica(
                       source = srcPath.getCanonicalPath,
@@ -164,7 +168,7 @@ object ReplicaCatalog extends Logger {
                         storage.backgroundRmFile(newFile)
                         throw t
                     }
-                    newReplica
+                    assertReplica(newReplica)
                 }
               }
               replicaCache.put(cacheKey, replica)

@@ -27,9 +27,9 @@ class Replicas(tag: Tag) extends Table[Replica](tag, "REPLICAS") {
   def hash = column[String]("HASH", O.NotNull)
   def lastCheckExists = column[Long]("LAST_CHECK_EXISTS", O.NotNull)
 
-  def idx1 = index("idx1", (source, hash, storage), unique = true)
-  def idx3 = index("idx2", (source, storage))
-  def idx4 = index("idx3", (storage))
+  def idx1 = index("idx1", (source, hash, storage) /*, unique = true*/ )
+  def idx2 = index("idx2", (source, storage))
+  def idx3 = index("idx3", (storage))
 
   def * = (id, source, storage, path, hash, lastCheckExists) <> (Replica.tupled, Replica.unapply)
 }

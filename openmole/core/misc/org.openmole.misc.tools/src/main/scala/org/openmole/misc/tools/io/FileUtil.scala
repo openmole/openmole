@@ -225,7 +225,7 @@ object FileUtil {
 
     //////// general operations ///////
     def size: Long =
-      if (Files.isDirectory(file)) file.withDirectoryStream(_.foldLeft(0l)((acc: Long, p: Path) ⇒ { acc + p.size }))
+      if (Files.isDirectory(file)) file.withDirectoryStream(_.foldLeft(0l)((acc: Long, p: Path) ⇒ acc + p.size))
       else Files.size(file)
 
     def mode =
