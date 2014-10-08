@@ -57,7 +57,7 @@ object SystemExecTask extends Logger {
    */
   def apply(
     name: String,
-    commands: Seq[String] = Seq.empty,
+    commands: Commands = Seq.empty,
     directory: String = "",
     errorOnReturnCode: Boolean = true,
     returnValue: Option[Prototype[Int]] = None,
@@ -71,7 +71,7 @@ object SystemExecTask extends Logger {
       List(output, error, returnValue).flatten.foreach(p ⇒ addOutput(p))
 
       private val _variables = new ListBuffer[(Prototype[_], String)]
-      private val _commands = new ListBuffer[(Seq[String], OS)]
+      private val _commands = new ListBuffer[Commands]
 
       command(inCommands)
 
@@ -91,7 +91,7 @@ object SystemExecTask extends Logger {
         this
       }
 
-      def command(cmd: Seq[String], os: OS = OS()) = _commands += (cmd -> os)
+      def command(cmd: Commands) = _commands += cmd
 
       def toTask = new SystemExecTask(name, _commands, directory, errorOnReturnCode, returnValue, output, error, variables) with builder.Built
     }
@@ -101,7 +101,7 @@ object SystemExecTask extends Logger {
 
 sealed abstract class SystemExecTask(
     val name: String,
-    val command: Iterable[(Seq[String], OS)],
+    val command: Iterable[Commands],
     val directory: String,
     val errorOnReturnCode: Boolean,
     val returnValue: Option[Prototype[Int]],
@@ -152,7 +152,7 @@ sealed abstract class SystemExecTask(
       }
     }
 
-    val osCommandLines: Seq[String] = command.find { case (_, os) ⇒ os.compatible }.map { case (cmd, _) ⇒ cmd }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
+    val osCommandLines: Seq[String] = command.find { _.os.compatible }.map { _.parts }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
 
     def execAll(cmds: List[String]): Int =
       cmds match {
