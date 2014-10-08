@@ -51,7 +51,8 @@ trait BDIISRMServers extends BatchEnvironment {
   override def selectAStorage(usedFileHashes: Iterable[(File, Hash)]) =
     if (storages.size == 1) super.selectAStorage(usedFileHashes)
     else {
-      val totalFileSize = usedFileHashes.map { case (f, _) ⇒ f.size }.sum
+      val sizes = usedFileHashes.map { case (f, _) ⇒ f -> f.size }.toMap
+      val totalFileSize = sizes.values.sum
       val onStorage = ReplicaCatalog.withSession(ReplicaCatalog.inCatalog(_))
       val maxTime = storages.map(_.time).max
       val minTime = storages.map(_.time).min
@@ -61,7 +62,7 @@ trait BDIISRMServers extends BatchEnvironment {
           cur ← storages
           token ← cur.tryGetToken
         } yield {
-          val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(cur.id, Set.empty).contains(h.toString) }.map { case (f, _) ⇒ f.size }.sum
+          val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(cur.id, Set.empty).contains(h.toString) }.map { case (f, _) ⇒ sizes(f) }.sum
 
           val sizeFactor =
             if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
