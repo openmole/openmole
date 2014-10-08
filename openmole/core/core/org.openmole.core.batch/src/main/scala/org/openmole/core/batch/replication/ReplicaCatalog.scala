@@ -30,6 +30,7 @@ import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import java.util.concurrent.TimeUnit
+import scala.concurrent.duration._
 import scala.slick.driver.H2Driver.simple._
 import scala.util.Try
 
@@ -114,9 +115,8 @@ object ReplicaCatalog extends Logger {
 
           //Remove deleted replicas
           for {
-            replica ← getReplica
-            if (replica.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMillis < System.currentTimeMillis)
-          } {
+            replica ← replicas.filter { _.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMillis < System.currentTimeMillis }
+          } session.withTransaction {
             if (storage.exists(replica.path)) replicas.filter {
               _.id === replica.id
             }.map(_.lastCheckExists).update(System.currentTimeMillis)
