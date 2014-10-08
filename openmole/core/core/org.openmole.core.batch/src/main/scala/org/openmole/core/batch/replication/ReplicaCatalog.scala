@@ -175,19 +175,18 @@ object ReplicaCatalog extends Logger {
                   }
                 }
 
-                if (!stillExists(replica)) {
+                if (stillExists(replica)) replica
+                else {
                   remove(replica.id)
                   uploadAndInsertIfNotInCatalog
-                }
-                else {
-                  replicaCache.put(cacheKey, replica)
-                  replica
                 }
             }
           }
 
           cleanOldReplicas
-          uploadAndInsertIfNotInCatalog
+          val replica = uploadAndInsertIfNotInCatalog
+          replicaCache.put(cacheKey, replica)
+          replica
       }
     }
 
