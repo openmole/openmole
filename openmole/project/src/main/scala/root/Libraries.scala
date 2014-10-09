@@ -74,8 +74,8 @@ object Libraries extends Defaults(Apache) {
   lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl")) settings
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9")
 
-  lazy val h2 = OsgiProject("org.h2", buddyPolicy = Some("global"), privatePackages = Seq("META-INF.*")) settings
-    (libraryDependencies += "com.h2database" % "h2" % "1.4.181", version := "1.4.181")
+  lazy val h2 = OsgiProject("org.h2", privatePackages = Seq("META-INF.*")) settings
+    (libraryDependencies += "com.h2database" % "h2" % "1.3.176", version := "1.3.176")
 
   lazy val bonecp = OsgiProject("com.jolbox.bonecp", buddyPolicy = Some("global")) settings
     (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1", version := "0.8.0-rc1")
@@ -132,8 +132,8 @@ object Libraries extends Defaults(Apache) {
   )
 
   lazy val jasypt = OsgiProject("org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings (
-    libraryDependencies += "org.jasypt" % "jasypt" % "1.8",
-    version := "1.8"
+    libraryDependencies += "org.jasypt" % "jasypt" % "1.9.2",
+    version := "1.9.2"
   )
 
   lazy val robustIt = OsgiProject("uk.com.robustit.cloning", exports = Seq("com.rits.*"), privatePackages = Seq("org.objenesis.*")) settings (

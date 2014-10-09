@@ -136,7 +136,7 @@ trait ExternalTask extends Task {
           tmpDir.recursiveDelete
           throw e
       }
-    if (tmpDir.isEmpty) tmpDir.delete
+    tmpDir.delete
     res
   }
 

@@ -31,6 +31,7 @@ import org.openmole.misc.exception._
 import org.openmole.misc.tools.service._
 import org.openmole.misc.workspace._
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.misc.tools.service.ProcessUtil._
 import org.openmole.misc.tools.service.ThreadUtil._
 import HashService._
@@ -162,7 +163,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
   def uploadResult(localResultFile: File, communicationDir: String, job: String, storage: SimpleStorage) = {
     val runtimeResult = {
-      val is = localResultFile.gzipedBufferedInputStream
+      val is = localResultFile.gzippedBufferedInputStream
       try SerialiserService.deserialise[RuntimeResult](is)
       finally is.close
     }
@@ -179,7 +180,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       new FileMessage(uploadedFile, msg.hash)
     }
 
-    val uplodadedResult = runtimeResult.result match {
+    val uploadedResult = runtimeResult.result match {
       case Success((result, log)) ⇒ Success((uploadFileMessage(result), log))
       case Failure(e)             ⇒ Failure(e)
     }
@@ -201,7 +202,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val resultToSend = new RuntimeResult(
       uploadedStdOut,
       uploadedStdErr,
-      uplodadedResult)
+      uploadedResult)
 
     // Upload the result
     Workspace.withTmpFile { outputLocal ⇒
@@ -305,10 +306,10 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
           }
 
-          val executionMesageFileCache = Workspace.newFile("executionMessage", ".xml")
-          storage.downloadGZ(jobMessage.executionMessagePath, executionMesageFileCache)
-          val executionMessage = SerialiserService.deserialise[ExecutionMessage](executionMesageFileCache)
-          executionMesageFileCache.delete
+          val executionMessageFileCache = Workspace.newFile("executionMessage", ".xml")
+          storage.downloadGZ(jobMessage.executionMessagePath, executionMessageFileCache)
+          val executionMessage = SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
+          executionMessageFileCache.delete
 
           def localCachedReplicatedFile(replicatedFile: ReplicatedFile) = {
             val localFile = localCache.cache(replicatedFile, getFile)
@@ -327,7 +328,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           val localCommunicationDirPath = Workspace.newDir
           val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")
 
-          val os = localExecutionMessage.gzipedBufferedOutputStream
+          val os = localExecutionMessage.gzippedBufferedOutputStream
           try SerialiserService.serialise(new ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath), os)
           finally os.close
 

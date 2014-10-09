@@ -17,6 +17,8 @@
 
 package org.openmole.core.serializer.file
 
+import org.openmole.misc.tools.service.OS
+
 import scala.collection.immutable.HashMap
 import java.util.UUID
 import org.openmole.misc.workspace.Workspace
@@ -71,6 +73,23 @@ trait FileSerialisation extends Serialiser {
     val fileInfoFile = new File(archiveExtractDir, fileDir + "/" + filesInfo)
     val fi = fileInfoFile.withInputStream(xStream.fromXML).asInstanceOf[FilesInfo]
     fileInfoFile.delete
+    new File(archiveExtractDir, fileDir).delete
+
+    def toPath(file: File) = {
+      lazy val replacement =
+        Map(
+          ':' -> "colon",
+          '\\' -> "backslash",
+          '/' -> "slash",
+          '*' -> "star",
+          '?' -> "question",
+          '\"' -> "quote",
+          '>' -> "sup",
+          '<' -> "inf",
+          '|' -> "bar").mapValues("$" + _ + "$")
+
+      file.getAbsolutePath.map(c ⇒ replacement.getOrElse(c, c)).mkString
+    }
 
     HashMap() ++ fi.map {
       case (name, FileInfo(file, isDirectory, exists)) ⇒
@@ -80,7 +99,7 @@ trait FileSerialisation extends Serialiser {
           if (isDirectory) {
             val dest = if (shortNames) extractDir.newDir("extracted")
             else {
-              val f = new File(extractDir, file.getAbsolutePath)
+              val f = new File(extractDir, toPath(file))
               f.mkdirs()
               f
             }
@@ -92,7 +111,7 @@ trait FileSerialisation extends Serialiser {
             val dest =
               if (shortNames) extractDir.newFile("extracted", ".bin")
               else {
-                val f = new File(extractDir, file.getAbsolutePath)
+                val f = new File(extractDir, toPath(file))
                 f.getParentFile.mkdirs()
                 f
               }

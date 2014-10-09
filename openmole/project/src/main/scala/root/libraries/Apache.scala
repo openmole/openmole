@@ -28,7 +28,7 @@ object Apache extends Defaults {
     (libraryDependencies += "log4j" % "log4j" % "1.2.17", bundleType += "runtime", version := "1.2.17")
 
   lazy val logging = OsgiProject("org.apache.commons.logging") settings
-    (libraryDependencies += "commons-logging" % "commons-logging" % "1.1.1", bundleType += "runtime", version := "1.1.1")
+    (libraryDependencies += "commons-logging" % "commons-logging" % "1.1.1", bundleType := Set("plugin"), version := "1.1.1")
 
   lazy val sshd = OsgiProject("org.apache.sshd", exports = Seq("org.apache.sshd.*", "org.apache.mina.*"), buddyPolicy = Some("global"), privatePackages = Seq("META-INF.*")) settings
     (libraryDependencies += "org.apache.sshd" % "sshd-core" % "0.11.0")

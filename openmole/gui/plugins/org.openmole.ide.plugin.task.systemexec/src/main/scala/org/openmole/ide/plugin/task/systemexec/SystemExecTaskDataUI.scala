@@ -8,6 +8,7 @@ package org.openmole.ide.plugin.task.systemexec
 import java.io.File
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
+import org.openmole.core.implementation.tools._
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.plugin.task.systemexec.SystemExecTask
 import scala.collection.JavaConversions._
@@ -53,7 +54,7 @@ class SystemExecTaskDataUI010(val name: String = "",
 
   def coreObject(plugins: PluginSet) = util.Try {
     val syet = SystemExecTask(name, directory = workdir)(plugins)
-    syet command launchingCommands.filterNot(_ == '\n')
+    syet command Seq(launchingCommands.filterNot(_ == '\n'))
     initialise(syet)
     resources.foreach { case (file, name) ⇒ syet addResource (file, name = Some(name)) }
     variables.foreach {

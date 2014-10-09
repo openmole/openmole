@@ -29,7 +29,7 @@ class SystemExecTaskFactoryUI extends TaskFactoryUI {
 
   def buildDataUI = new SystemExecTaskDataUI010
 
-  def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
+  def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = ??? /*{
     val t = SceneFactory.as[SystemExecTask](task)
     uiMap.task(t, x ⇒ new SystemExecTaskDataUI010(t.name,
       t.directory,
@@ -38,5 +38,5 @@ class SystemExecTaskFactoryUI extends TaskFactoryUI {
       t.inputFiles.toList.map { p ⇒ (uiMap.prototypeUI(p._1).get, p._2) },
       t.outputFiles.toList.map { p ⇒ (p._1, uiMap.prototypeUI(p._2).get) },
       t.variables.toList.map { p ⇒ uiMap.prototypeUI(p._1).get }))
-  }
+  }*/
 }

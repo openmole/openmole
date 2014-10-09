@@ -34,6 +34,8 @@ import org.openmole.misc.exception._
 import org.openmole.misc.osgi._
 import util.Try
 
+import scala.util.{ Failure, Success, Try }
+
 object PluginManager extends Logger {
 
   import Log._
@@ -99,11 +101,9 @@ object PluginManager extends Logger {
     val bundles =
       files.flatMap { plugins }.flatMap {
         b ⇒
-          try {
-            Some(installBundle(b))
-          }
-          catch {
-            case e: Throwable ⇒
+          Try(installBundle(b)) match {
+            case Success(r) ⇒ Some(r)
+            case Failure(e) ⇒
               logger.log(WARNING, s"Error installing bundle $b", e)
               None
           }

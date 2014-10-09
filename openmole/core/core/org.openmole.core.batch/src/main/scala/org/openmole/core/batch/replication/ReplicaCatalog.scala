@@ -17,8 +17,10 @@
 
 package org.openmole.core.batch.replication
 
+import akka.dispatch.sysmsg.Failed
 import com.google.common.cache.CacheBuilder
 import java.io.File
+import org.h2.jdbc.JdbcSQLException
 import org.openmole.misc.replication._
 import org.openmole.misc.tools.service.{ LockRepository, Logger, TimeCache }
 import java.util.regex.Pattern
@@ -29,8 +31,10 @@ import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import java.util.concurrent.TimeUnit
+import scala.annotation.tailrec
+import scala.concurrent.duration._
 import scala.slick.driver.H2Driver.simple._
-import scala.util.Try
+import scala.util.{ Success, Failure, Try }
 
 object ReplicaCatalog extends Logger {
 
@@ -54,11 +58,15 @@ object ReplicaCatalog extends Logger {
   lazy val database = {
     val dbInfoFile = DBServerInfo.dbInfoFile
     val info = DBServerInfo.load(dbInfoFile)
-    val db = Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.urlDBPath}", user = info.user, password = info.password)
+    val db = Database.forDriver(
+      driver = new org.h2.Driver,
+      url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.urlDBPath}",
+      user = info.user,
+      password = info.password)
     db.withSession {
       s ⇒
         val statement = s.createStatement()
-        statement.execute(s"SET LOCK_TIMEOUT ${Workspace.preferenceAsDuration(LockTimeout).toMillis}")
+        statement.execute(s"SET DEFAULT_LOCK_TIMEOUT ${Workspace.preferenceAsDuration(LockTimeout).toMillis}")
     }
     db
   }
@@ -93,70 +101,92 @@ object ReplicaCatalog extends Logger {
       Option(replicaCache.getIfPresent(cacheKey)) match {
         case Some(r) ⇒ r
         case None ⇒
-          def getReplicasForSrcWithOtherHash =
-            replicas.filter { r ⇒
-              r.source === srcPath.getCanonicalPath && r.hash =!= hash && r.storage === storage.id
-            }
 
           //If replica is already present on the storage with another hash
-          val samePath = getReplicasForSrcWithOtherHash
-          samePath.foreach {
-            replica ⇒
-              logger.fine(s"Remove obsolete $replica")
-              storage.backgroundRmFile(replica.path)
-          }
-          samePath.delete
+          def cleanOldReplicas = {
+            def getReplicasForSrcWithOtherHash =
+              replicas.filter { r ⇒
+                r.source === srcPath.getCanonicalPath && r.hash =!= hash && r.storage === storage.id
+              }
 
-          //Remove deleted replicas
-          for {
-            replica ← getReplica
-            if (replica.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMillis < System.currentTimeMillis)
-          } {
-            if (storage.exists(replica.path)) replicas.filter {
-              _.id === replica.id
-            }.map(_.lastCheckExists).update(System.currentTimeMillis)
-            else {
-              logger.fine(s"Remove inexisting $replica")
-              remove(replica.id)
+            val samePath = getReplicasForSrcWithOtherHash
+            samePath.foreach {
+              replica ⇒
+                logger.fine(s"Remove obsolete $replica")
+                storage.backgroundRmFile(replica.path)
+            }
+            samePath.delete
+          }
+
+          @tailrec def uploadAndInsertIfNotInCatalog: Replica = {
+            //Remove deleted replicas
+            def stillExists(r: Replica) =
+              if (r.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMillis < System.currentTimeMillis) {
+                Try(storage.exists(r.path)) match {
+                  case Success(e) ⇒ e
+                  case _          ⇒ false
+                }
+              }
+              else true
+
+            def getReplica =
+              replicas.filter { r ⇒ r.source === src.getCanonicalPath && r.storage === storage.id && r.hash === hash }
+
+            def assertReplica(r: Replica) = {
+              assert(r.path != null)
+              assert(r.storage != null)
+              assert(r.hash != null)
+              r
+            }
+
+            // RQ: Could be improved by reusing files with same hash already on the storage, may be not very generic though
+            getReplica.firstOption match {
+              case Some(replica) ⇒ assertReplica(replica)
+              case None ⇒
+                val name = Storage.uniqName(System.currentTimeMillis.toString, ".rep")
+                val newFile = storage.child(storage.persistentDir, name)
+                logger.fine(s"Upload $src to $newFile on ${storage.id}")
+                signalUpload(storage.uploadGZ(src, newFile), newFile, storage)
+
+                val replica = session.withTransaction {
+                  getReplica.firstOption match {
+                    case Some(r) ⇒
+                      logger.fine("Already in database deleting")
+                      storage.backgroundRmFile(newFile)
+                      assertReplica(r)
+                    case None ⇒
+                      val newReplica = Replica(
+                        source = srcPath.getCanonicalPath,
+                        storage = storage.id,
+                        path = newFile,
+                        hash = hash,
+                        lastCheckExists = System.currentTimeMillis)
+
+                      assert(newReplica.path != null)
+
+                      logger.fine(s"Insert $newReplica")
+                      try replicas += newReplica
+                      catch {
+                        case t: JdbcSQLException ⇒
+                          storage.backgroundRmFile(newFile)
+                          throw t
+                      }
+                      assertReplica(newReplica)
+                  }
+                }
+
+                if (stillExists(replica)) replica
+                else {
+                  remove(replica.id)
+                  uploadAndInsertIfNotInCatalog
+                }
             }
           }
 
-          def getReplica =
-            replicas.filter { r ⇒ r.source === src.getCanonicalPath && r.storage === storage.id && r.hash === hash }
-
-          /* def getReplicaForHash(hash: String)(implicit session: Session) =
-        replicas.filter { r => r.storage === storage.id && r.hash === hash && r.environment === environment.id }*/
-
-          // RQ: Could be improved by reusing files with same hash already on the storage, may be not very generic though
-          getReplica.firstOption match {
-            case Some(replica) ⇒ replica
-            case None ⇒
-              val name = Storage.uniqName(System.currentTimeMillis.toString, ".rep")
-              val newFile = storage.child(storage.persistentDir, name)
-              logger.fine(s"Upload $src to $newFile on ${storage.id}")
-              signalUpload(storage.uploadGZ(src, newFile), newFile, storage)
-
-              val replica = session.withTransaction {
-                getReplica.firstOption match {
-                  case Some(r) ⇒
-                    logger.fine("Already in database deleting")
-                    storage.backgroundRmFile(newFile)
-                    r
-                  case None ⇒
-                    val newReplica = Replica(
-                      source = srcPath.getCanonicalPath,
-                      storage = storage.id,
-                      path = newFile,
-                      hash = hash,
-                      lastCheckExists = System.currentTimeMillis)
-                    logger.fine(s"Insert $newReplica")
-                    replicas += newReplica
-                    newReplica
-                }
-              }
-              replicaCache.put(cacheKey, replica)
-              replica
-          }
+          cleanOldReplicas
+          val replica = uploadAndInsertIfNotInCatalog
+          replicaCache.put(cacheKey, replica)
+          replica
       }
     }
 

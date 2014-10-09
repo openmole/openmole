@@ -56,6 +56,8 @@ object Prettifier extends Logger {
       t.printStackTrace(pw)
       sw.toString
     }
+
+    def stackStringWithMargin = t.stackString.split("\n").map(" | " + _).mkString("\n")
   }
 
 }

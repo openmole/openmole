@@ -78,7 +78,7 @@ class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) extends G
           |The script was:
           |${code}
           |It has raised the exception:
-          |""".stripMargin + t.stackString.split("\n").map(" | " + _).mkString("\n")
+          |""".stripMargin + t.stackStringWithMargin
       )
   }
 

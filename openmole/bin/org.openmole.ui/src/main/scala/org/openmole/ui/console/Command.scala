@@ -31,6 +31,7 @@ import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.IExplorationTransition
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.misc.workspace.Workspace
+import scala.annotation.tailrec
 import scala.collection.mutable.HashMap
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.core.implementation.mole.MoleExecution
@@ -75,9 +76,14 @@ class Command {
 
   def verify(mole: IMole): Unit = Validation(mole).foreach(println)
 
-  def encrypted = {
-    val password = new ConsoleReader().readLine("encrypt:", '*')
-    Workspace.encrypt(password)
+  @tailrec final def encrypted: String = {
+    val password = new ConsoleReader().readLine("enter password:", '*')
+    val confirmation = new ConsoleReader().readLine("confirm password:", '*')
+    if (password != confirmation) {
+      println("Password and confirmation don't match.")
+      encrypted
+    }
+    else Workspace.encrypt(password)
   }
 
   def load[T](f: File) = SerialiserService.deserialise[T](f)
