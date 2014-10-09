@@ -421,24 +421,25 @@ object FileUtil {
     ///////// helpers ///////
     def applyRecursive(operation: File ⇒ Unit): Unit =
       applyRecursive(operation, Set.empty)
+    def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File]): Unit = recurse(file)(operation, stopPath)
+  }
 
-    def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File]): Unit = {
-      val toProceed = new ListBuffer[File]
-      toProceed += file
-
-      while (!toProceed.isEmpty) {
-        val f = toProceed.remove(0)
-        if (!stopPath.contains(f)) {
-          operation(f)
-          if (f.isDirectory) {
-            try f.withDirectoryStream(s ⇒ for (f ← s) toProceed += f)
-            catch {
-              case e: java.nio.file.AccessDeniedException ⇒ Logger.getLogger(FileUtil.getClass.getName).warning(s"Unable to delete temporary directory ${e.getFile}")
-            }
-          }
-        }
-      }
+  private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Set[File]): Unit = if (!stopPath.contains(file)) {
+    def authorizeLS[T](f: File)(g: ⇒ T): T = {
+      val originalMode = f.mode
+      f.setExecutable(true)
+      f.setReadable(true)
+      f.setWritable(true)
+      try g
+      finally f.mode = originalMode
     }
+
+    if (file.isDirectory)
+      file.withDirectoryStream { ls ⇒
+        for (f ← ls) authorizeLS(f) { recurse(f)(operation, stopPath) }
+      }
+
+    operation(file)
   }
 
 }
