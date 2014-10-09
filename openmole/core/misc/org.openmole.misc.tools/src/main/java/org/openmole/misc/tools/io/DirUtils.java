@@ -5,7 +5,6 @@ import org.openmole.misc.tools.io.visitor.DeleteDirVisitor;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.nio.file.StandardCopyOption;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.Objects;
@@ -62,7 +61,13 @@ public class DirUtils {
    */
   public static void delete(Path path) throws IOException {
     validate(path);
-    Files.walkFileTree(path, new DeleteDirVisitor());
+    try {
+        Files.walkFileTree(path, new DeleteDirVisitor());
+    }
+    catch (AccessDeniedException e) {
+        // nuke approach...
+        nukeDelete(e.getFile());
+    }
   }
 
   /**
@@ -82,6 +87,15 @@ public class DirUtils {
         throw new IllegalArgumentException(String.format("%s is not a directory", path.toString()));
       }
     }
+  }
+
+  /** In case permissions make file/dir not cooperative with deletion => nuke approach... */
+  private static void nukeDelete(String filePath) throws IOException {
+    Path cooperativeFile = Paths.get(filePath);
+    cooperativeFile.toFile().setReadable(true);
+    cooperativeFile.toFile().setWritable(true);
+    cooperativeFile.toFile().setExecutable(true);
+    DirUtils.delete(cooperativeFile);
   }
 }
 
