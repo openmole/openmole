@@ -422,7 +422,7 @@ object FileUtil {
     def applyRecursive(operation: File ⇒ Unit): Unit =
       applyRecursive(operation, Set.empty)
 
-    def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File], followSymLinks: Boolean = false): Unit = {
+    def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File]): Unit = {
       val toProceed = new ListBuffer[File]
       toProceed += file
 
@@ -430,7 +430,7 @@ object FileUtil {
         val f = toProceed.remove(0)
         if (!stopPath.contains(f)) {
           operation(f)
-          if (f.isDirectory && (followSymLinks && !f.isSymbolicLink)) {
+          if (f.isDirectory) {
             try f.withDirectoryStream(s ⇒ for (f ← s) toProceed += f)
             catch {
               case e: java.nio.file.AccessDeniedException ⇒ Logger.getLogger(FileUtil.getClass.getName).warning(s"Unable to delete temporary directory ${e.getFile}")
