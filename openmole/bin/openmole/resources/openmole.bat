@@ -1,5 +1,8 @@
+set startdir=%cd%
 set PWD=%~dp0
-start /MIN "%PWD%dbserver\bin\openmole-dbserver.bat"
+cd /d %~dp0
+start /MIN dbserver\bin\openmole-dbserver.bat
+cd %cd%
 mkdir "%UserProfile%\.openmole\.tmp"
 set ran="%UserProfile%\.openmole\.tmp\%random%"
 java -d64 -version >nul 2>&1
