@@ -202,25 +202,24 @@ object FileUtil {
 
     def isSymbolicLink = Files.isSymbolicLink(Paths.get(file.getAbsolutePath))
 
-    // TODO replace with NIO
     def dirContainsNoFileRecursive: Boolean = {
       val toProceed = new ListBuffer[File]
       toProceed += file
 
       while (!toProceed.isEmpty) {
         val f = toProceed.remove(0)
-        for (sub ← f.listFiles) {
-          if (sub.isFile) return false
-          else if (sub.isDirectory) toProceed += sub
+
+        // wrap with try catch in case CARE Archive generates d--------- directories
+        try f.withDirectoryStream(s ⇒
+          for (f ← s) {
+            if (Files.isRegularFile(f)) return false
+            else if (Files.isDirectory(f)) toProceed += f
+          })
+        catch {
+          case e: java.nio.file.AccessDeniedException ⇒ Logger.getLogger(FileUtil.getClass.getName).warning(s"Unable to delete temporary directory ${e.getFile}")
         }
       }
       true
-    }
-
-    def withDirectoryStream[T](f: DirectoryStream[Path] ⇒ T) = {
-      val stream = Files.newDirectoryStream(file)
-      try f(stream)
-      finally stream.close
     }
 
     //////// general operations ///////
@@ -390,6 +389,12 @@ object FileUtil {
       finally w.close
     }
 
+    def withDirectoryStream[T](f: DirectoryStream[Path] ⇒ T): T = {
+      val stream = Files.newDirectoryStream(file)
+      try f(stream)
+      finally stream.close
+    }
+
     def wrapError[T](f: ⇒ T): T =
       try f
       catch {
@@ -426,7 +431,10 @@ object FileUtil {
         if (!stopPath.contains(f)) {
           operation(f)
           if (f.isDirectory && (followSymLinks && !f.isSymbolicLink)) {
-            for (child ← f.listFiles) toProceed += child
+            try f.withDirectoryStream(s ⇒ for (f ← s) toProceed += f)
+            catch {
+              case e: java.nio.file.AccessDeniedException ⇒ Logger.getLogger(FileUtil.getClass.getName).warning(s"Unable to delete temporary directory ${e.getFile}")
+            }
           }
         }
       }
