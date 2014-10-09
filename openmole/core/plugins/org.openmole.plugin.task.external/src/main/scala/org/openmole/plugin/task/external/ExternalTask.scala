@@ -112,18 +112,11 @@ trait ExternalTask extends Task {
         f.file
       }).toSet
 
-    val unusedFiles = new ListBuffer[File]
-    val unusedDirs = new ListBuffer[File]
-
-    localDir.applyRecursive(
-      f ⇒ if (f.isFile) unusedFiles += f else unusedDirs += f,
-      usedFiles ++ links)
-
     links.foreach(_.delete)
-    unusedFiles.foreach(_.delete)
+    localDir.applyRecursive(f ⇒ f.delete, usedFiles)
 
-    //TODO algorithm is no optimal and may be problematic for a huge number of dirs
-    unusedDirs.foreach { d ⇒ if (d.exists && !usedFiles.contains(d) && d.dirContainsNoFileRecursive) d.recursiveDelete }
+    // This delete the dir only if it is empty
+    localDir.delete
     resultContext
   }
 
