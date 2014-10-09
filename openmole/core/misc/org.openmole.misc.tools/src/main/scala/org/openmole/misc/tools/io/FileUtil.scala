@@ -422,7 +422,7 @@ object FileUtil {
     def applyRecursive(operation: File ⇒ Unit): Unit =
       applyRecursive(operation, Set.empty)
 
-    def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File], followSymLinks: Boolean = true): Unit = {
+    def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File], followSymLinks: Boolean = false): Unit = {
       val toProceed = new ListBuffer[File]
       toProceed += file
 
