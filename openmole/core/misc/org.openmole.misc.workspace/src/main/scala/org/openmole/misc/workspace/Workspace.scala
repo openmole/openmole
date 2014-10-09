@@ -315,14 +315,14 @@ class Workspace(val location: File) {
 
   def encrypt(s: String) = textEncryptor(password).encrypt(s)
 
-  def passwordIsCorrect(password: String) = {
+  def passwordIsCorrect(password: String) = synchronized {
     try {
-      if (isPreferenceSet(passwordTest)) {
+      val test = rawPreference(passwordTest)
+      if (test == null) false
+      else {
         val te = textEncryptor(password)
-        te.decrypt(rawPreference(passwordTest))
-        true
+        te.decrypt(test) == passwordTestString
       }
-      else true
     }
     catch {
       case e: Throwable ⇒
