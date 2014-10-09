@@ -25,11 +25,11 @@ trait SourceActivator extends BundleActivator {
 
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    sourceFactories.foreach { f ⇒ KeyRegistry.sources += KeyGenerator(f.coreClass) -> f }
+    sourceFactories.foreach { KeyRegistry.sources += }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    sourceFactories.foreach { f ⇒ KeyRegistry.sources -= KeyGenerator(f.coreClass) }
+    sourceFactories.foreach { KeyRegistry.sources -= }
   }
 }

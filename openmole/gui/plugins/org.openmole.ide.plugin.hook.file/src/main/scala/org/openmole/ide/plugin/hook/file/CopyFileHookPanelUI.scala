@@ -62,9 +62,9 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI010)(implicit val i18n: Reso
           case Some(v: PrototypeDataProxyUI) ⇒ Proxies.check(List(v)).isEmpty
           case _                             ⇒ false
         }
-      }.map { m ⇒ (m.comboValue, new File(m.textFieldValue)) }).map { m ⇒
+      }.map { m ⇒ (m.comboValue, new File(m.textFieldValue)) }) /*.map { m ⇒
         (KeyRegistry.protoProxyKeyMap(PrototypeKey(m._1)), m._2)
-      })
+      }*/ )
 
   override lazy val help = new Helper(List(new URL(i18n.getString("copyFileHookPermalinkText"), i18n.getString("copyFileHookPermalink"))))
 }

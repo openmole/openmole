@@ -27,12 +27,12 @@ trait AuthentificationActivator extends BundleActivator {
 
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    authentificationFactories.foreach { f ⇒ KeyRegistry.authentifications += KeyGenerator(f.coreClass) -> f }
+    authentificationFactories.foreach { KeyRegistry.authentifications += }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    authentificationFactories.foreach { f ⇒ KeyRegistry.authentifications -= KeyGenerator(f.coreClass) }
+    authentificationFactories.foreach { KeyRegistry.authentifications -= }
   }
 }
 

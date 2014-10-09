@@ -34,7 +34,7 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget) extends Settings with Ano
   val incomings = samplingWidget.incomings
 
   val samplings =
-    KeyRegistry.samplings.values.map {
+    KeyRegistry.samplings.map {
       _.buildDataUI
     }.toList.sorted.filter {
       s ⇒

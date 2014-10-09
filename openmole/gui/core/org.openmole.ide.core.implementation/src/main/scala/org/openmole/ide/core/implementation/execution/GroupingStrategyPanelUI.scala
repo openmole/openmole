@@ -25,7 +25,7 @@ import org.openmole.ide.core.implementation.data.GroupingDataUI
 
 class GroupingStrategyPanelUI(dataUI: Option[GroupingDataUI]) extends PluginPanel("wrap") {
 
-  val dataUIs = KeyRegistry.groupingStrategies.values.toList.map { _.buildDataUI }
+  val dataUIs = KeyRegistry.groupingStrategies.toList.map { _.buildDataUI }
   val groupingFactoryComboBox = new MyComboBox(dataUIs)
   var panelUI = dataUI match {
     case Some(gd: GroupingDataUI) ⇒

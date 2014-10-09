@@ -28,12 +28,13 @@ trait DomainActivator extends BundleActivator {
 
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    domainFactories.foreach { f ⇒ KeyRegistry.domains += KeyGenerator(f.buildDataUI.coreClass) -> f }
+    domainFactories.foreach { f ⇒ KeyRegistry.domains += f
+    }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    domainFactories.foreach { f ⇒ KeyRegistry.domains -= KeyGenerator(f.buildDataUI.coreClass) }
+    domainFactories.foreach { f ⇒ KeyRegistry.domains -= f }
   }
 }
 

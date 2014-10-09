@@ -29,26 +29,6 @@ class Activator extends OSGiActivator with SamplingActivator {
     new SamplingFactoryUI {
 
       def buildDataUI = new CompleteSamplingDataUI
-
-      def fromCoreObject(sampling: Sampling,
-                         bSC: IBuiltCompositionSampling) = {
-        val proxy = SamplingProxyUI(buildDataUI)
-        sampling match {
-          case cs: CompleteSampling ⇒ (proxy, Builder.buildConnectedSamplings(proxy, cs.samplings, bSC))
-          case _                    ⇒ (proxy, bSC)
-        }
-      }
-    }, new SamplingFactoryUI {
-      def buildDataUI = new CombineSamplingDataUI
-
-      def fromCoreObject(sampling: Sampling,
-                         bSC: IBuiltCompositionSampling) = {
-        val proxy = SamplingProxyUI(buildDataUI)
-        sampling match {
-          case cs: CombineSampling ⇒ (proxy, Builder.buildConnectedSamplings(proxy, cs.samplings, bSC))
-          case _                   ⇒ (proxy, bSC)
-        }
-      }
     })
 
 }

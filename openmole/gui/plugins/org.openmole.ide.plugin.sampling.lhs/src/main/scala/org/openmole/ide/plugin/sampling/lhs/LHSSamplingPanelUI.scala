@@ -36,7 +36,7 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI)(implicit val i18n: ResourceBund
     contents += sampleTextField
   }))
 
-  def domains = KeyRegistry.domains.values.map {
+  def domains = KeyRegistry.domains.map {
     _.buildDataUI
   }.toList
 

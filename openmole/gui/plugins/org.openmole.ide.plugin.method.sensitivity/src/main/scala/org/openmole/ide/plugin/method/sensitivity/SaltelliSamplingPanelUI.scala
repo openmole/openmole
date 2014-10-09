@@ -26,7 +26,7 @@ class SaltelliSamplingPanelUI(cud: SaltelliSamplingDataUI)(implicit val i18n: Re
     contents += sampleTextField
   }))
 
-  def domains = KeyRegistry.domains.values.map {
+  def domains = KeyRegistry.domains.map {
     _.buildDataUI
   }.toList
 

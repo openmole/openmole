@@ -29,15 +29,6 @@ class Activator extends OSGiActivator with SamplingActivator with TaskActivator 
 
   override def samplingFactories = List(new SamplingFactoryUI {
     def buildDataUI = new SaltelliSamplingDataUI
-
-    def fromCoreObject(sampling: Sampling, bSC: IBuiltCompositionSampling) = {
-      sampling match {
-        case cs: SaltelliSampling ⇒
-          val proxy = SamplingProxyUI(new SaltelliSamplingDataUI(cs.samples.toString))
-          (proxy, Builder.buildConnectedSamplings(proxy, Seq(), bSC))
-        case _ ⇒ (SamplingProxyUI(buildDataUI), bSC)
-      }
-    }
   })
 
   override def taskFactories = List(new FirstOrderEffectTaskFactoryUI,
