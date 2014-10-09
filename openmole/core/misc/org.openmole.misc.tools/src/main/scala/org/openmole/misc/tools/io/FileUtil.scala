@@ -435,9 +435,7 @@ object FileUtil {
     }
 
     if (file.isDirectory)
-      file.withDirectoryStream { ls ⇒
-        for (f ← ls) authorizeLS(f) { recurse(f)(operation, stopPath) }
-      }
+      for (f ← file.listFiles) authorizeLS(f) { recurse(f)(operation, stopPath) }
 
     operation(file)
   }
