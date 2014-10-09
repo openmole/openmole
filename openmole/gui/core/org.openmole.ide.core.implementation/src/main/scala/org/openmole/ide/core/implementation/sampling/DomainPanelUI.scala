@@ -34,7 +34,7 @@ class DomainPanelUI(domainWidget: IDomainWidget) extends Settings with AnonSaveS
   type DATAUI = DomainDataUI
 
   val incomings = domainWidget.incomings
-  val domains = KeyRegistry.domains.values.map {
+  val domains = KeyRegistry.domains.map {
     _.buildDataUI
   }.toList.sorted.filter {
     d ⇒

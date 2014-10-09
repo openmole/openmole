@@ -104,7 +104,7 @@ object ConceptMenu {
 
   def buildTaskMenu(f: TaskDataProxyUI ⇒ Unit, initDataUI: TaskDataUI) = {
     mapping.clear
-    val factories = KeyRegistry.tasks.values.map {
+    val factories = KeyRegistry.tasks.map {
       f ⇒ new TaskDataProxyFactory(f)
     }.toList.sortBy(_.factory.toString)
     // Enforce to build PopupToolBarPresenter, cause Memu.contents still return an empty buffer (Bug SI-2362),
@@ -117,7 +117,7 @@ object ConceptMenu {
 
   def buildEnvironmentMenu(f: EnvironmentDataProxyUI ⇒ Unit, initDataUI: EnvironmentDataUI) = {
     mapping.clear
-    val factories = KeyRegistry.environments.values.map {
+    val factories = KeyRegistry.environments.map {
       f ⇒ new EnvironmentDataProxyFactory(f)
     }.toList.sortBy(_.factory.toString)
 
@@ -138,7 +138,7 @@ object ConceptMenu {
 
   def buildHookMenu(f: HookDataProxyUI ⇒ Unit, initDataUI: HookDataUI) = {
     mapping.clear
-    val factories = KeyRegistry.hooks.values.map {
+    val factories = KeyRegistry.hooks.map {
       f ⇒ new HookDataProxyFactory(f)
     }.toList.sortBy(_.factory.toString)
 
@@ -150,7 +150,7 @@ object ConceptMenu {
 
   def buildSourceMenu(f: SourceDataProxyUI ⇒ Unit, initDataUI: SourceDataUI) = {
     mapping.clear
-    val factories = KeyRegistry.sources.values.map {
+    val factories = KeyRegistry.sources.map {
       f ⇒ new SourceDataProxyFactory(f)
     }.toList.sortBy(_.factory.toString)
 

@@ -26,11 +26,11 @@ trait HookActivator extends BundleActivator {
 
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    hookFactories.foreach { f ⇒ KeyRegistry.hooks += KeyGenerator(f.coreClass) -> f }
+    hookFactories.foreach { KeyRegistry.hooks += }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    hookFactories.foreach { f ⇒ KeyRegistry.hooks -= KeyGenerator(f.coreClass) }
+    hookFactories.foreach { KeyRegistry.hooks -= }
   }
 }

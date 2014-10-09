@@ -29,7 +29,7 @@ import org.openmole.ide.core.implementation.panelsettings.AuthenticationPanelUI
 class AuthenticationPanel extends PluginPanel("wrap", "[grow,fill]", "") {
   val tabbedPane = new TabbedPane
   var auths = new HashSet[AuthenticationPanelUI]()
-  KeyRegistry.authentifications.values.foreach(a ⇒ {
+  KeyRegistry.authentifications.foreach(a ⇒ {
     val p = try {
       Right(a.buildPanelUI)
     }

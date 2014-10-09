@@ -19,34 +19,35 @@ package org.openmole.ide.core.implementation.registry
 
 import org.openmole.misc.tools.obj.ClassUtils.ClassDecorator
 import org.openmole.ide.core.implementation.dataproxy.Proxies
-import scala.collection.JavaConversions._
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.SynchronizedMap
+import scala.collection.JavaConverters._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.factory._
+import java.util.concurrent.ConcurrentLinkedQueue
+
+import java.util.Collections
+import java.util.LinkedList
+import scala.collection.mutable.Buffer
 
 object KeyRegistry {
-  val prototypes = new HashMap[PrototypeKey, PrototypeFactoryUI] with SynchronizedMap[PrototypeKey, PrototypeFactoryUI]
+  val prototypes = Collections.synchronizedList(new LinkedList[PrototypeFactoryUI]).asScala
 
-  val tasks = new HashMap[DefaultKey, TaskFactoryUI] with SynchronizedMap[DefaultKey, TaskFactoryUI]
+  val tasks = Collections.synchronizedList(new LinkedList[TaskFactoryUI]).asScala
 
-  val samplings = new HashMap[DefaultKey, SamplingFactoryUI] with SynchronizedMap[DefaultKey, SamplingFactoryUI]
+  val samplings = Collections.synchronizedList(new LinkedList[SamplingFactoryUI]).asScala
 
-  val environments = new HashMap[DefaultKey, EnvironmentFactoryUI] with SynchronizedMap[DefaultKey, EnvironmentFactoryUI]
+  val environments = Collections.synchronizedList(new LinkedList[EnvironmentFactoryUI]).asScala
 
-  val domains = new HashMap[DefaultKey, IDomainFactoryUI] with SynchronizedMap[DefaultKey, IDomainFactoryUI]
+  val domains = Collections.synchronizedList(new LinkedList[IDomainFactoryUI]).asScala
 
-  val hooks = new HashMap[DefaultKey, HookFactoryUI] with SynchronizedMap[DefaultKey, HookFactoryUI]
+  val hooks = Collections.synchronizedList(new LinkedList[HookFactoryUI]).asScala
 
-  val sources = new HashMap[DefaultKey, SourceFactoryUI] with SynchronizedMap[DefaultKey, SourceFactoryUI]
+  val sources = Collections.synchronizedList(new LinkedList[SourceFactoryUI]).asScala
 
-  val builders = new HashMap[NameKey, BuilderFactoryUI] with SynchronizedMap[NameKey, BuilderFactoryUI]
+  val authentifications = Collections.synchronizedList(new LinkedList[AuthentificationFactoryUI]).asScala
 
-  val authentifications = new HashMap[DefaultKey, AuthentificationFactoryUI] with SynchronizedMap[DefaultKey, AuthentificationFactoryUI]
+  val groupingStrategies = Collections.synchronizedList(new LinkedList[GroupingFactoryUI]).asScala
 
-  val groupingStrategies = new HashMap[DefaultKey, GroupingFactoryUI] with SynchronizedMap[DefaultKey, GroupingFactoryUI]
-
-  def task(c: Class[_]) = {
+  /* def task(c: Class[_]) = {
     val key = Key(c)
     if (tasks.contains(key)) tasks(key)
     else {
@@ -75,7 +76,7 @@ object KeyRegistry {
   }
 
   private def intersection(c: Class[_], lClass: List[Class[_]]) =
-    lClass.intersect(c.listSuperClassesAndInterfaces.tail)
+    lClass.intersect(c.listSuperClassesAndInterfaces.tail)*/
 
   def protoProxyKeyMap = Proxies.instance.prototypes.map { p ⇒ PrototypeKey(p) -> p }.toMap
 

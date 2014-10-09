@@ -27,12 +27,12 @@ trait SamplingActivator extends BundleActivator {
 
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    samplingFactories.foreach { f ⇒ KeyRegistry.samplings += KeyGenerator(f.buildDataUI.coreClass) -> f }
+    samplingFactories.foreach { KeyRegistry.samplings += }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    samplingFactories.foreach { f ⇒ KeyRegistry.samplings -= KeyGenerator(f.buildDataUI.coreClass) }
+    samplingFactories.foreach { KeyRegistry.samplings -= }
   }
 }
 
