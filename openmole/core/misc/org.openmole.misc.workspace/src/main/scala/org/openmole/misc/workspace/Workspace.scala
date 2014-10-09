@@ -179,7 +179,7 @@ class Workspace(val location: File) {
 
   Files.createDirectories(location)
 
-  val tmpDir = location.newDir(tmpLocation)
+  val tmpDir = Files.createDirectories(Paths.get(location.toString, tmpLocation)).toFile
 
   val pluginDir = Files.createDirectories(Paths.get(location.toString, pluginLocation)).toFile
 
