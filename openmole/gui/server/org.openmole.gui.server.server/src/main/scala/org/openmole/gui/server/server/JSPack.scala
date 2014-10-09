@@ -19,37 +19,48 @@ package org.openmole.gui.server.server
 
 import org.openmole.misc.tools.io.FileUtil
 import org.openmole.misc.tools.io.FileUtil._
-/*import scala.scalajs.tools.io._
+import scala.scalajs.tools.io._
 import scala.scalajs.tools.logging._
 import scala.scalajs.tools.classpath._
 import scala.scalajs.tools.classpath.builder._
 import scala.scalajs.tools.optimizer._
+import org.osgi.framework.Bundle
+import scala.collection.JavaConverters._
+import java.io.File
 
 object JSPack {
 
-  def apply = {
+  def apply(bundles: List[Bundle], target: File) = {
     val jsTmpDir = java.nio.file.Files.createTempDirectory("jsFiles").toFile
 
-    println("YYYYYYYYY " + getClass.get)
+    bundles.foreach { b ⇒
+      println(b.getLocation)
+    }
 
     // Extract and copy all the .sjsir files to jsTmpDir
     bundles.map { b ⇒
-      b.findEntries("/", "*.sjsir", true)
+      // b.findEntries("/", "*.sjsir", true)
+      b.findEntries("/", "*", true)
     }.filterNot {
       _ == null
     }.flatMap {
       _.asScala
-    }.map { u ⇒ u.openStream.copy(new java.io.File(jsTmpDir, u.getFile.mkString("/", "-"))) }
+    }.map { u ⇒ u.openStream.copy(new java.io.File(jsTmpDir, u.getFile.split("/").tail.mkString("-"))) }
 
     // you can also add directories which will be traversed for *.sjsir files
-    val cpEntries: scala.collection.immutable.Seq[java.io.File] = jsTmpDir.listFiles
+    // val cpEntries: scala.collection.immutable.Seq[java.io.File] = jsTmpDir.listFiles.to[collection.immutable.Seq]
+
+    //bundles.map { b ⇒ new java.io.File(b.getLocation) }
+
+    //jsTmpDir.listFiles.to[collection.immutable.Seq] //bundles.to[collection.immutable.Seq] //
 
     // Traverse JARs/directories and find *.sjsir files. Evaluate JS_DEPENDENCIES
-    val partialClasspath = PartialClasspathBuilder.buildIR(cpEntries)
+    val partialClasspath = PartialClasspathBuilder.buildIR(collection.immutable.Seq(jsTmpDir))
 
+    val jarClasspath = PartialClasspathBuilder.build(collection.immutable.Seq(new java.io.File("/tmp/jar/")))
     // Resolve any javascript library dependencies.
     // Fail if some could not be found or dependency graph is not linearlizable
-    val completeClasspath = partialClasspath.resolve()
+    val completeClasspath = partialClasspath.append(jarClasspath).resolve()
 
     // The Scala.js optimizer (corresponds to fastOptJS)
     val optimizer = new ScalaJSOptimizer
@@ -85,4 +96,4 @@ object JSPack {
     )
 
   }
-}*/ 
+}

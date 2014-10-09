@@ -9,7 +9,7 @@ resolvers += "Typesafe repository" at
 
 resolvers ++= Seq(Resolver.sonatypeRepo("snapshots"),
   Resolver.url("scala-js-releases",
-    url("http://bintray.com/content/scala-js/scala-js-releases"))(
+    url("http://dl.bintray.com/content/scala-js/scala-js-releases"))(
       Resolver.ivyStylePatterns))
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "0.6.0")

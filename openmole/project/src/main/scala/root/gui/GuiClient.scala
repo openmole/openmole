@@ -5,7 +5,7 @@ import sbt.Keys._
 import root.{ GuiDefaults, base }
 import root.Libraries._
 import root.ThirdParties._
-//import fr.iscpif.jsmanager.JSManagerPlugin._
+import fr.iscpif.jsmanager.JSManagerPlugin._
 import scala.scalajs.sbtplugin.ScalaJSPlugin._
 
 object Client extends GuiDefaults {
@@ -25,5 +25,5 @@ object Client extends GuiDefaults {
     libraryDependencies ++= Seq(autowireJS, scalaTagsJS, scalaRxJS, scalajsDom, scaladget))
 
   lazy val client = OsgiProject("org.openmole.gui.client.client") settings (
-    libraryDependencies ++= Seq(autowireJS, scalaTagsJS, scalaRxJS, scalajsDom, scaladget, upickleJS)) settings (scalaJSSettings: _*)
+    libraryDependencies ++= Seq(autowireJS, scalaTagsJS, scalaRxJS, scalajsDom, scaladget, upickleJS)) settings (jsManagerSettings: _*) //settings (scalaJSSettings: _*) ///settings (jsManagerSettings: _*) (scalaJSSettings: _*)
 }

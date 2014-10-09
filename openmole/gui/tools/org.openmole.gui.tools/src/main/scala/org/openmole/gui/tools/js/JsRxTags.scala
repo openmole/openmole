@@ -17,9 +17,9 @@
 package org.openmole.gui.tools.js
 
 import scala.collection.{ SortedMap, mutable }
-import scalatags.JsDom._
+//import scalatags.JsDom._
 import scala.util.{ Failure, Success, Random }
-import all._
+//import all._
 import rx._
 import rx.core.{ Propagator, Obs }
 import org.scalajs.dom
@@ -29,7 +29,7 @@ import scala.scalajs.js
 /**
  * A minimal binding between Scala.Rx and Scalatags and Scala-Js-Dom
  */
-object JsRxTags {
+object JsRxTags /*{
 
   /**
    * Wraps reactive strings in spans, so they can be referenced/replaced
@@ -75,4 +75,4 @@ object JsRxTags {
     }
   }
 
-}
+}*/

@@ -120,7 +120,10 @@ object Libraries extends Defaults(Apache) {
 
   lazy val autowireJVM = "org.openmole" %% "autowire-jvm" % scalaAutowireVersion
 
-  lazy val scalajsDom = "org.openmole" %% "org-scala-lang-modules-scalajs" % "0.6"
+  lazy val scalajsVersion = "0.5.5"
+  lazy val scalajsTools = "org.openmole" %% "scalajs-tools" % scalajsVersion
+  lazy val scalajsLibrary = "org.openmole" %% "scalajs-library" % scalajsVersion
+  lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % "0.6"
 
   lazy val mgoVersion = "1.78-SNAPSHOT"
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % mgoVersion
@@ -145,15 +148,32 @@ object Libraries extends Defaults(Apache) {
   lazy val scalabcVersion = "0.4-SNAPSHOT"
   lazy val scalabc = "org.openmole" %% "fr-iscpif-scalabc" % scalabcVersion
 
-  lazy val equinoxJobs = "org.openmole" %% "org-eclipse-core-jobs" % "3.5.300.v20120912-155018"
-  lazy val equinoxApp = "org.openmole" %% "org-eclipse-equinox-app" % "1.3.100.v20120522-1841"
-  lazy val equinoxOsgi = "org.openmole" %% "org-eclipse-osgi" % "3.8.2.v20130124-134944"
-  lazy val equinoxCommon = "org.openmole" %% "org-eclipse-equinox-common" % "3.6.100.v20120522-1841"
-  lazy val equinoxRuntime = "org.openmole" %% "org-eclipse-core-runtime" % "3.8.0.v20120912-155025"
-  lazy val equinoxLauncher = "org.openmole" %% "org-eclipse-equinox-launcher" % "1.3.0.v20120522-1813"
-  lazy val equinoxRegistry = "org.openmole" %% "org-eclipse-equinox-registry" % "3.5.200.v20120522-1841"
-  lazy val equinoxPreferences = "org.openmole" %% "org-eclipse-equinox-preferences" % "3.5.1.v20121031-182809"
-  lazy val equinoxContenttype = "org.openmole" %% "org-eclipse-core-contenttype" % "3.4.200.v20120523-2004"
+  lazy val equinoxAppVersion = "1.3.100.v20120522-1841"
+  lazy val equinoxApp = "org.eclipse.core" % "org.eclipse.equinox.app" % equinoxAppVersion
+
+  lazy val equinoxCommonVersion = "3.6.100.v20120522-1841"
+  lazy val equinoxCommon = "org.eclipse.core" % "org.eclipse.equinox.common" % equinoxCommonVersion
+
+  lazy val equinoxLauncherVersion = "1.3.0.v20120522-1813"
+  lazy val equinoxLauncher = "org.eclipse.core" % "org.eclipse.equinox.launcher" % equinoxLauncherVersion
+
+  lazy val equinoxRegistryVersion = "3.5.200.v20120522-1841"
+  lazy val equinoxRegistry = "org.eclipse.core" % "org.eclipse.equinox.registry" % equinoxRegistryVersion
+
+  lazy val equinoxPreferencesVersion = "3.5.1.v20121031-182809"
+  lazy val equinoxPreferences = "org.eclipse.core" % "org.eclipse.equinox.preferences" % equinoxPreferencesVersion
+
+  lazy val equinoxOsgiVersion = "3.8.2.v20130124-134944"
+  lazy val equinoxOsgi = "org.eclipse.core" % "org.eclipse.osgi" % equinoxOsgiVersion
+
+  lazy val equinoxContenttypeVersion = "3.4.200.v20120523-2004"
+  lazy val equinoxContenttype = "org.eclipse.core" % "org.eclipse.core.contenttype" % equinoxContenttypeVersion
+
+  lazy val equinoxJobsVersion = "3.5.300.v20120912-155018"
+  lazy val equinoxJobs = "org.eclipse.core" % "org.eclipse.core.jobs" % equinoxJobsVersion
+
+  lazy val equinoxRuntimeVersion = "3.8.0.v20120912-155025"
+  lazy val equinoxRuntime = "org.eclipse.core" % "org.eclipse.core.runtime" % equinoxRuntimeVersion
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
 }

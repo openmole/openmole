@@ -18,33 +18,7 @@ import fr.iscpif.jsmanager.JSManagerPlugin._
 object Libraries extends Defaults(Apache) {
 
   val dir = file("libraries")
-
-  val gridscaleVersion = "1.76"
-
   val bouncyCastleVersion = "1.50"
-
-  lazy val gridscale = "fr.iscpif.gridscale.bundle" %% "gridscale" % gridscaleVersion
-
-  lazy val gridscaleSSH = Seq(
-    "fr.iscpif.gridscale.bundle" %% "ssh" % gridscaleVersion,
-    bouncyCastle
-  )
-
-  lazy val gridscalePBS = "fr.iscpif.gridscale.bundle" %% "pbs" % gridscaleVersion
-
-  lazy val gridscaleSGE = "fr.iscpif.gridscale.bundle" %% "sge" % gridscaleVersion
-
-  lazy val gridscaleCondor = "fr.iscpif.gridscale.bundle" %% "condor" % gridscaleVersion
-
-  lazy val gridscaleSLURM = "fr.iscpif.gridscale.bundle" %% "slurm" % gridscaleVersion
-
-  lazy val gridscaleGlite = "fr.iscpif.gridscale.bundle" %% "glite" % gridscaleVersion
-
-  lazy val gridscaleDirac = "fr.iscpif.gridscale.bundle" %% "dirac" % gridscaleVersion
-
-  lazy val gridscaleHTTP = "fr.iscpif.gridscale.bundle" %% "http" % gridscaleVersion
-
-  lazy val gridscaleOAR = "fr.iscpif.gridscale.bundle" %% "oar" % gridscaleVersion
 
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
 
@@ -197,9 +171,18 @@ object Libraries extends Defaults(Apache) {
   lazy val scalaUpickleVersion = "0.2.2"
   lazy val scalaAutowireVersion = "0.2.2"
 
-  lazy val scalajsDom = OsgiProject("org.scala-lang.modules.scalajs", exports = Seq("org.scalajs.dom.*")) settings(
+  lazy val scalajsDom = OsgiProject("scalajs-dom", exports = Seq("org.scalajs.dom.*")) settings(
     libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom_sjs0.5" % "0.6", version := "0.6")
 
+  lazy val scalajsVersion = "0.5.5"
+  lazy val scalajsTools = OsgiProject("scalajs-tools", exports = Seq("scala.scalajs.*")) settings(
+    libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-tools" % scalajsVersion, version := scalajsVersion)
+
+  lazy val scalajsLibrary = OsgiProject("scalajs-library", exports = Seq("scala.scalajs.*")) settings(
+    libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-library" % scalajsVersion, version := scalajsVersion)
+
+  //lazy val scalajsIR = OsgiProject("scalajs-ir", exports = Seq("scala.scalajs.ir.*")) settings(
+  //  libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-ir" % scalajsVersion, version := scalajsVersion)
 
   lazy val scalaTagsJS = OsgiProject("com.scalatags.js", exports = Seq("scalatags.*")) settings(
     libraryDependencies += "com.scalatags" %%% "scalatags" % scalaTagsVersion, version := scalaTagsVersion)
@@ -277,69 +260,6 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "fr.iscpif" %% "abc" % scalabcVersion,
     bundleType := Set("plugin"),
     version := scalabcVersion
-    )
-
-  lazy val equinoxAppVersion = "1.3.100.v20120522-1841"
-  lazy val equinoxApp = OsgiProject("org.eclipse.equinox.app") settings(
-    libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.app" % equinoxAppVersion intransitive(),
-    version := equinoxAppVersion,
-    exportPackage := Seq("org.eclipse.equinox.app.*")
-    )
-
-  lazy val equinoxCommonVersion = "3.6.100.v20120522-1841"
-  lazy val equinoxCommon = OsgiProject("org.eclipse.equinox.common") settings(
-    libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.common" % equinoxCommonVersion intransitive(),
-    version := equinoxCommonVersion,
-    exportPackage := Seq("org.eclipse.equinox.common.*")
-    )
-
-  lazy val equinoxLauncherVersion = "1.3.0.v20120522-1813"
-  lazy val equinoxLauncher = OsgiProject("org.eclipse.equinox.launcher") settings(
-    libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.launcher" % equinoxLauncherVersion intransitive(),
-    version := equinoxLauncherVersion,
-    exportPackage := Seq("org.eclipse.equinox.launcher.*")
-    )
-
-  lazy val equinoxRegistryVersion = "3.5.200.v20120522-1841"
-  lazy val equinoxRegistry = OsgiProject("org.eclipse.equinox.registry") settings(
-    libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.registry" % equinoxRegistryVersion intransitive(),
-    version := equinoxRegistryVersion,
-    exportPackage := Seq("org.eclipse.equinox.registry.*")
-    )
-
-  lazy val equinoxPreferencesVersion = "3.5.1.v20121031-182809"
-  lazy val equinoxPreferences = OsgiProject("org.eclipse.equinox.preferences") settings(
-    libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.preferences" % equinoxPreferencesVersion intransitive(),
-    version := equinoxPreferencesVersion,
-    exportPackage := Seq("org.eclipse.equinox.preferences.*")
-    )
-
-  lazy val equinoxOsgiVersion = "3.8.2.v20130124-134944"
-  lazy val equinoxOsgi = OsgiProject("org.eclipse.osgi") settings(
-    libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % equinoxOsgiVersion intransitive(),
-    version := equinoxOsgiVersion,
-    exportPackage := Seq("org.eclipse.osgi.*")
-    )
-
-  lazy val equinoxContenttypeVersion = "3.4.200.v20120523-2004"
-  lazy val equinoxContenttype = OsgiProject("org.eclipse.core.contenttype") settings(
-    libraryDependencies += "org.eclipse.core" % "org.eclipse.core.contenttype" % equinoxContenttypeVersion intransitive(),
-    version := equinoxContenttypeVersion,
-    exportPackage := Seq("org.eclipse.contenttype.*")
-    )
-
-  lazy val equinoxJobsVersion = "3.5.300.v20120912-155018"
-  lazy val equinoxJobs = OsgiProject("org.eclipse.core.jobs") settings(
-    libraryDependencies += "org.eclipse.core" % "org.eclipse.core.jobs" % equinoxJobsVersion intransitive(),
-    version := equinoxJobsVersion,
-    exportPackage := Seq("org.eclipse.core.jobs.*")
-    )
-
-  lazy val equinoxRuntimeVersion = "3.8.0.v20120912-155025"
-  lazy val equinoxRuntime = OsgiProject("org.eclipse.core.runtime") settings(
-    libraryDependencies += "org.eclipse.core" % "org.eclipse.core.runtime" % equinoxRuntimeVersion intransitive(),
-    version := equinoxRuntimeVersion,
-    exportPackage := Seq("org.eclipse.core.runtime.*")
     )
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
