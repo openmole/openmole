@@ -61,7 +61,7 @@ trait CondorJobService extends GridScaleJobService with SSHHost with SharedStora
     }
 
     val jid = js.jobService.submit(jobDescription)
-    Log.logger.fine(s"Condor job [${jid.condorId}], description: \n ${jobDescription}")
+    Log.logger.fine(s"Condor job [${jid.condorId}], description: \n ${jobDescription.toCondor}")
 
     new BatchJob with BatchJobId {
       val jobService = js
