@@ -61,13 +61,7 @@ public class DirUtils {
    */
   public static void delete(Path path) throws IOException {
     validate(path);
-    try {
-        Files.walkFileTree(path, new DeleteDirVisitor());
-    }
-    catch (AccessDeniedException e) {
-        // nuke approach...
-        nukeDelete(e.getFile());
-    }
+    Files.walkFileTree(path, new DeleteDirVisitor());
   }
 
   /**
@@ -87,15 +81,6 @@ public class DirUtils {
         throw new IllegalArgumentException(String.format("%s is not a directory", path.toString()));
       }
     }
-  }
-
-  /** In case permissions make file/dir not cooperative with deletion => nuke approach... */
-  private static void nukeDelete(String filePath) throws IOException {
-    Path cooperativeFile = Paths.get(filePath);
-    cooperativeFile.toFile().setReadable(true);
-    cooperativeFile.toFile().setWritable(true);
-    cooperativeFile.toFile().setExecutable(true);
-    DirUtils.delete(cooperativeFile);
   }
 }
 

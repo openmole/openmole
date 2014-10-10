@@ -216,7 +216,7 @@ object FileUtil {
             else if (Files.isDirectory(f)) toProceed += f
           })
         catch {
-          case e: java.nio.file.AccessDeniedException ⇒ Logger.getLogger(FileUtil.getClass.getName).warning(s"Unable to delete temporary directory ${e.getFile}")
+          case e: java.nio.file.AccessDeniedException ⇒ Logger.getLogger(FileUtil.getClass.getName).warning(s"Unable to browse directory ${e.getFile}")
         }
       }
       true
