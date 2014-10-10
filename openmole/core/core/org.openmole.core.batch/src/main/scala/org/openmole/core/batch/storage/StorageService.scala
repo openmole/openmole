@@ -18,6 +18,7 @@
 package org.openmole.core.batch.storage
 
 import java.net.URI
+import java.nio.file.Paths
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.refresh._
@@ -68,9 +69,11 @@ trait StorageService extends BatchService with Storage {
   protected def initialise(basePath: String)(implicit token: AccessToken) = {}
 
   protected def mkRootDir(implicit token: AccessToken): String = synchronized {
-    root.split("/").toList.filterNot(_.isEmpty).foldLeft("/") {
+    val paths = Iterator.iterate(Paths.get(root))(_.getParent).takeWhile(_ != null).toSeq.reverse
+
+    paths.tail.foldLeft(paths.head.toString) {
       (path, file) ⇒
-        val childPath = child(path, file)
+        val childPath = child(path, file.getFileName.toString)
         try makeDir(childPath)
         catch {
           case e: Throwable ⇒ logger.log(FINEST, "Error creating base directory " + root + e)
