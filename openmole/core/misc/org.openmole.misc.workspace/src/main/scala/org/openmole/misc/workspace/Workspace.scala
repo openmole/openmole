@@ -318,7 +318,9 @@ class Workspace(val location: File) {
   def passwordIsCorrect(password: String) = synchronized {
     try {
       val test = rawPreference(passwordTest)
-      if (test == null) false
+      if (test == null && Workspace.passwordChosen) false
+      // allow password to be set initially
+      else if (!Workspace.passwordChosen) true
       else {
         val te = textEncryptor(password)
         te.decrypt(test) == passwordTestString
@@ -326,7 +328,7 @@ class Workspace(val location: File) {
     }
     catch {
       case e: Throwable ⇒
-        Logger.getLogger(Workspace.getClass.getName).log(Level.FINE, "Password incorrect", e)
+        Logger.getLogger(Workspace.getClass.getName).log(Level.FINE, "Incorrect password", e)
         false
     }
   }
