@@ -200,9 +200,9 @@ object Libraries extends Defaults(Apache) {
       "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo", imports = Seq("*")) settings (
-    libraryDependencies += "fr.iscpif" %% "mgo" % "1.78-SNAPSHOT",
+    libraryDependencies += "fr.iscpif" %% "mgo" % "1.78",
     bundleType := Set("plugin"),
-    version := "1.78-SNAPSHOT"
+    version := "1.78"
   )
 
   lazy val scalabc = OsgiProject("fr.iscpif.scalabc", privatePackages = Seq("!scala.*", "!junit.*", "*")) settings (
