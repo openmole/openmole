@@ -61,7 +61,7 @@ class DesktopGridEnvironment(
     def environment = env
     val remoteStorage: RemoteStorage = new DumyStorage
     def url = env.url
-    def root = path.getAbsolutePath
+    def root = path.getPath
     val storage = new GSLocalStorage {}
     val id = url.toString
   }
