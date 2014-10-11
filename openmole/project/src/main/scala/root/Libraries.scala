@@ -206,9 +206,9 @@ object Libraries extends Defaults(Apache) {
   )
 
   lazy val scalabc = OsgiProject("fr.iscpif.scalabc", privatePackages = Seq("!scala.*", "!junit.*", "*")) settings (
-    libraryDependencies += "fr.iscpif" %% "abc" % "0.4-SNAPSHOT",
+    libraryDependencies += "fr.iscpif" %% "abc" % "0.4",
     bundleType := Set("plugin"),
-    version := "0.4-SNAPSHOT"
+    version := "0.4"
   )
 
   val monocleVersion = "0.4.0"
