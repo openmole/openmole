@@ -17,9 +17,12 @@
 
 package org.openmole.plugin.grouping
 
-import org.openmole.core.implementation.puzzle.Puzzle
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.puzzle._
 
 package object batch {
+
+  implicit def capsuleBatchGroupingDecorator(capsule: Capsule) = puzzleBatchGroupingDecorator(capsule)
 
   implicit def puzzleBatchGroupingDecorator(puzzle: Puzzle) = new {
 
