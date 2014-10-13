@@ -22,9 +22,9 @@ import org.openmole.core.implementation.puzzle._
 
 package object batch {
 
-  implicit def capsuleBatchGroupingDecorator(capsule: Capsule) = puzzleBatchGroupingDecorator(capsule)
+  implicit def capsuleBatchGroupingDecorator(capsule: Capsule) = new PuzzleBatchGroupingDecorator(capsule)
 
-  implicit def puzzleBatchGroupingDecorator(puzzle: Puzzle) = new {
+  implicit class PuzzleBatchGroupingDecorator(puzzle: Puzzle) {
 
     def by(n: Int): Puzzle =
       puzzle.copy(
