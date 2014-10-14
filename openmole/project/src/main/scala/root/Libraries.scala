@@ -118,7 +118,7 @@ object Libraries extends Defaults(Apache) {
         "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3",
         "org.scala-lang" % "scala-compiler" % sV
       )
-    }, bundleType += "dbserver", version := sV)
+    }, bundleType += "dbserver", version := scalaVersion.value)
 
   //  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.tools.*", "scala.reflect.macros.*"),
   //    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
