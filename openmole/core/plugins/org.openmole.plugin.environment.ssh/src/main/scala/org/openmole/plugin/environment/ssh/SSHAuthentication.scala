@@ -33,6 +33,9 @@ object SSHAuthentication {
   def apply(login: String, host: String, port: Int, authentications: AuthenticationProvider): SSHAuthentication = apply(address(login, host, port), authentications)
   def address(login: String, host: String, port: Int) = s"$login@$host:$port"
 
+  def +=(a: SSHAuthentication) =
+    update(Workspace.authentications.size[SSHAuthentication], a)
+
 }
 
 trait SSHAuthentication {
