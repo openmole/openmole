@@ -27,8 +27,12 @@ object Authentication {
 
 trait Authentication <: Persistent {
 
+  def size[T](implicit m: Manifest[T]): Int = size(category[T])
+
+  def category[T](implicit m: Manifest[T]): String = m.runtimeClass.getCanonicalName
+
   def save[T](i: Int, obj: T)(implicit m: Manifest[T]): Unit =
-    save(obj, i.toString, Some(m.runtimeClass.getCanonicalName))
+    save(obj, i.toString, Some(category[T]))
 
   def clean[T](implicit m: Manifest[T]): Unit = super.clean(Some(m.runtimeClass.getCanonicalName))
 
