@@ -87,7 +87,7 @@ object TarArchiver {
   implicit class FileTarArchiveDecorator(file: File) {
 
     def archiveDirWithRelativePathNoVariableContent(toArchive: File) = {
-      val os = new TarOutputStream(file.gzippedBufferedOutputStream)
+      val os = new TarOutputStream(file.bufferedOutputStream)
       try os.createDirArchiveWithRelativePathNoVariableContent(toArchive)
       finally os.close
     }
