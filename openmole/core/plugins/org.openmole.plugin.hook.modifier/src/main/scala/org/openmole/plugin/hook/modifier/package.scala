@@ -25,12 +25,16 @@ import org.openmole.core.model.transition.ICondition
 package object modifier {
 
   implicit class HookModifierDecorator(h: IHook) {
-    def condition(condition: ICondition) = ConditionHook(h, condition)
-    def condition(condition: String) = ConditionHook(h, Condition(condition))
+    def when(condition: ICondition) = ConditionHook(h, condition)
+    def when(condition: String) = ConditionHook(h, Condition(condition))
+    def condition(condition: ICondition) = when(condition)
+    def condition(condition: String) = when(condition)
   }
 
   implicit class HookBuilderModifierDecorator(h: HookBuilder) {
-    def condition(condition: ICondition) = h.toHook.condition(condition)
-    def condition(condition: String) = h.toHook.condition(condition)
+    def when(condition: ICondition) = h.toHook.condition(condition)
+    def when(condition: String) = h.toHook.condition(condition)
+    def condition(condition: ICondition) = when(condition)
+    def condition(condition: String) = when(condition)
   }
 }
