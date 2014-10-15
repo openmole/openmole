@@ -27,7 +27,7 @@ object BehaviourSearch {
 
   def apply(
     termination: GATermination { type G >: BehaviourSearch#G; type P >: BehaviourSearch#P; type F >: BehaviourSearch#F },
-    inputs: Inputs[String],
+    inputs: Inputs[Double],
     observables: Objectives,
     gridSize: Seq[Double],
     reevaluate: Double = 0.0) = {
@@ -69,6 +69,6 @@ trait BehaviourSearch extends GAAlgorithm
     with RandomNicheElitism
     with PhenotypeGridNiche
     with ClampedGenome {
-  type INPUT = String
+  type INPUT = Double
   def inputConverter = implicitly
 }
