@@ -140,7 +140,11 @@ trait Assembly { self: BuildSystemDefaults ⇒
   def zipImpl(targetFolders: Seq[File], s: TaskStreams, t: File, name: Option[String], folder: Option[String]): File = {
     val out = t / ((name getOrElse "assembly") + ".tar.gz")
 
-    val tgzOS = managed(new TarArchiveOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(out)))))
+    val tgzOS = managed {
+      val tos = new TarArchiveOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(out))))
+      tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU)
+      tos
+    }
 
     def findFiles(f: File): Set[File] = if (f.isDirectory) (f.listFiles map findFiles flatten).toSet else Set(f)
 
