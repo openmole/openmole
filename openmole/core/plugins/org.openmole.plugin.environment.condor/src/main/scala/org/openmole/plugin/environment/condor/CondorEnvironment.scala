@@ -20,6 +20,7 @@ package org.openmole.plugin.environment.condor
 
 import fr.iscpif.gridscale.ssh.SSHStorage
 import fr.iscpif.gridscale.ssh.SSHHost
+import fr.iscpif.gridscale.condor.CondorRequirement
 import java.net.URI
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment._
@@ -42,8 +43,9 @@ object CondorEnvironment {
     // TODO not available in the GridScale plugin yet
     //wallTime: Option[Duration] = None,
     memory: Option[Int] = None,
-    workDirectory: Option[String] = None)(implicit authentications: AuthenticationProvider) =
-    new CondorEnvironment(user, host, port, openMOLEMemory, memory, workDirectory)
+    workDirectory: Option[String] = None,
+    requirements: List[CondorRequirement] = List())(implicit authentications: AuthenticationProvider) =
+    new CondorEnvironment(user, host, port, openMOLEMemory, memory, workDirectory, requirements)
 }
 
 class CondorEnvironment(
@@ -56,7 +58,8 @@ class CondorEnvironment(
     // TODO not available in the GridScale plugin yet
     //val wallTime: Option[Duration],
     val memory: Option[Int],
-    val workDirectory: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    val workDirectory: Option[String],
+    val requirements: List[CondorRequirement])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
   type JS = CondorJobService
 

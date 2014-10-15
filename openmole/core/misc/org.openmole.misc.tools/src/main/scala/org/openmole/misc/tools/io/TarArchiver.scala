@@ -37,7 +37,7 @@ object TarArchiver {
     def addFile(f: Path, name: String) = {
       val entry = new TarEntry(name)
       entry.setSize(Files.size(f))
-      entry.setMode(f.toFile.mode) // ugly explicit conversion
+      entry.setMode(f.toFile.mode) // FIXME ugly explicit conversion
       tos.putNextEntry(entry)
       try Files.copy(f, tos) finally tos.closeEntry
     }
@@ -74,13 +74,15 @@ object TarArchiver {
             Files.createDirectories(dest.getParent)
             // copy from an InputStream does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
             Files.copy(tis, dest)
+            // must set permissions explicitly from archive
+            dest.toFile.mode = e.getMode
           }
       }
     }
   }
 
   implicit class FileTarArchiveDecorator(file: File) {
-    // FIXME move to TarArchiver?
+
     def archiveDirWithRelativePathNoVariableContent(toArchive: File) = {
       val os = new TarOutputStream(file.gzippedBufferedOutputStream)
       try os.createDirArchiveWithRelativePathNoVariableContent(toArchive)
@@ -139,7 +141,7 @@ object TarArchiver {
         }
 
       // complete current entry by fixing its modes and writing it to the archive
-      e.setMode(source.toFile.mode) // ugly explicit conversion
+      e.setMode(source.toFile.mode) // FIXME ugly explicit conversion
       additionalCommand(e)
       tos.putNextEntry(e)
       if (!Files.isDirectory(source)) try Files.copy(source, tos) finally tos.closeEntry
