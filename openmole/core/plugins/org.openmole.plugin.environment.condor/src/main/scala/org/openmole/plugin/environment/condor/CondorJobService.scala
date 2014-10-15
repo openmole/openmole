@@ -31,9 +31,9 @@ import org.openmole.plugin.environment.gridscale._
 import org.openmole.misc.workspace.Workspace
 import concurrent.duration._
 
-object CondoJobService extends Logger
+object CondorJobService extends Logger
 
-import CondoJobService._
+import CondorJobService._
 
 trait CondorJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
 
@@ -58,6 +58,7 @@ trait CondorJobService extends GridScaleJobService with SSHHost with SharedStora
       // TODO not available in GridScale plugin yet
       //override val wallTime = environment.wallTime
       override val memory = Some(environment.requiredMemory)
+      override val requirements = environment.requirements
     }
 
     val jid = js.jobService.submit(jobDescription)
