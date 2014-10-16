@@ -21,6 +21,9 @@ import com.thoughtworks.xstream.XStream
 import java.io.File
 import scala.io.Source
 import scala.slick.driver.H2Driver.simple._
+import java.net._
+
+import scala.util.Try
 
 object DBServerInfo {
   val base = {
@@ -32,9 +35,12 @@ object DBServerInfo {
     dir
   }
 
-  val dbName = "replica"
-  val dbInfoName = "replica.info"
-  val dbLock = "replica.lock"
+  def hostName =
+   Try { InetAddress.getLocalHost().getHostName() }.getOrElse("localhost")
+
+  val dbName = s"replica-$hostName"
+  val dbInfoName = s"$dbName.info"
+  val dbLock = s"$dbName.lock"
 
   lazy val xstream = new XStream
 
