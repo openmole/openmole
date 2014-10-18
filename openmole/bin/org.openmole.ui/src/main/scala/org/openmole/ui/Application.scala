@@ -24,7 +24,6 @@ import java.io.PrintWriter
 import java.util.concurrent.Semaphore
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
-import org.openmole.gui.server.server.GUIServer
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
@@ -32,7 +31,7 @@ import org.openmole.core.model.task._
 import org.openmole.ui.console.Console
 import annotation.tailrec
 import org.openmole.web._
-import org.openmole.gui.server._
+import org.openmole.gui.server.core._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 
@@ -171,7 +170,7 @@ class Application extends IApplication {
       waitClose.acquire(1)*/
       println("GUI !")
       val server = new GUIServer(bundles, config.serverPort)
-      server.start
+      server.start()
 
     }
     IApplication.EXIT_OK

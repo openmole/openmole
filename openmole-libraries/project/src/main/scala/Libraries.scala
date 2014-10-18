@@ -166,23 +166,20 @@ object Libraries extends Defaults(Apache) {
     version := "16.0.1"
     )
 
-  lazy val scalaTagsVersion = "0.4.0"
+  lazy val scalaTagsVersion = "0.4.2"
   lazy val scalaRxVersion = "0.2.6"
   lazy val scalaUpickleVersion = "0.2.2"
-  lazy val scalaAutowireVersion = "0.2.2"
+  lazy val scalaAutowireVersion = "0.2.3"
 
   lazy val scalajsDom = OsgiProject("scalajs-dom", exports = Seq("org.scalajs.dom.*")) settings(
     libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom_sjs0.5" % "0.6", version := "0.6")
 
   lazy val scalajsVersion = "0.5.5"
   lazy val scalajsTools = OsgiProject("scalajs-tools", exports = Seq("scala.scalajs.*")) settings(
-    libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-tools" % scalajsVersion, version := scalajsVersion)
+    libraryDependencies += "org.scala-lang.modules.scalajs" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion)
 
   lazy val scalajsLibrary = OsgiProject("scalajs-library", exports = Seq("scala.scalajs.*")) settings(
-    libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-library" % scalajsVersion, version := scalajsVersion)
-
-  //lazy val scalajsIR = OsgiProject("scalajs-ir", exports = Seq("scala.scalajs.ir.*")) settings(
-  //  libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-ir" % scalajsVersion, version := scalajsVersion)
+    libraryDependencies += "org.scala-lang.modules.scalajs" %% "scalajs-library" % scalajsVersion, version := scalajsVersion)
 
   lazy val scalaTagsJS = OsgiProject("com.scalatags.js", exports = Seq("scalatags.*")) settings(
     libraryDependencies += "com.scalatags" %%% "scalatags" % scalaTagsVersion, version := scalaTagsVersion)
@@ -211,7 +208,7 @@ object Libraries extends Defaults(Apache) {
   lazy val scaladget = OsgiProject("scaladget", exports = Seq("fr.iscpif.scaladget.*")) settings(
     libraryDependencies += "fr.iscpif" %%% "scaladget_sjs0.5" % "0.1.0", version := "0.1.0")
 
-  lazy val mgoVersion = "1.78-SNAPSHOT"
+  lazy val mgoVersion = "1.78"
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings(
     libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
     bundleType := Set("plugin"),

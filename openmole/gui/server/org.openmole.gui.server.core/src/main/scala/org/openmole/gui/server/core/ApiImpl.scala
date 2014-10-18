@@ -1,5 +1,10 @@
+package org.openmole.gui.server.core
+
+import org.openmole.gui.server.factory.ServerFactories
+import org.openmole.gui.shared.Api
+
 /*
- * Copyright (C) 30/07/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 10/10/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -14,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.gui.shared
 
-trait Api {
-  def factoriesUI(): Map[String, String]
+object ApiImpl extends Api {
+  def factoriesUI: Map[String, String] = ServerFactories.uiFactories.toMap
+  //def factoriesUI: Seq[(Class[_], String)] = ServerFactories.uiFactories.toSeq
 }

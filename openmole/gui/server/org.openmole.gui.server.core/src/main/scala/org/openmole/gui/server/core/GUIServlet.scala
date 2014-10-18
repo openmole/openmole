@@ -14,25 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.gui.server.server
+package org.openmole.gui.server.core
 
 import java.util.UUID
 
+import org.openmole.gui.server.factory.ServerFactories
 import org.scalatra._
 import scala.concurrent.ExecutionContext.Implicits.global
 import upickle._
 import autowire._
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
-import org.openmole.gui.shared._
 import scala.concurrent.duration._
 import scala.concurrent.Await
-
-object ApiImpl extends Api {
-  def hello(a: Int) = a * 3
-
-  def caseClass: MyCaseClass = new MyCaseClass("Hello !")
-}
+import org.openmole.gui.shared._
 
 object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Writer] {
   def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
@@ -42,17 +37,18 @@ object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Wr
 
 class GUIServlet extends ScalatraServlet {
 
+  println("in GUIServlet ...")
   val basePath = "shared"
 
   get("/") {
     contentType = "text/html"
     tags.html(
       tags.head(
-        tags.meta(tags.httpEquiv := "Content-Type", tags.content := "text/html; charset=UTF-8"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/client-fastopt.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/client-opt.js")
+        tags.meta(tags.httpEquiv := "Content-Type", tags.content := "text/html; charset=UTF-8") //,
+      // tags.script(tags.`type` := "text/javascript", tags.src := "js/client-fastopt.js"),
+      // tags.script(tags.`type` := "text/javascript", tags.src := "js/client-opt.js")
       ),
-      tags.body(tags.onload := "Client().run();")
+      tags.body(tags.h1("OpenMOLE!  ") /*,tags.onload := "Client().run();"*/ )
     )
   }
 

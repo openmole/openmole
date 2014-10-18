@@ -1,5 +1,6 @@
+package org.openmole.gui.server.core
 /*
- * Copyright (C) 30/07/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 10/10/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -14,8 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.gui.shared
+import org.scalatra.LifeCycle
+import javax.servlet.ServletContext
 
-trait Api {
-  def factoriesUI(): Map[String, String]
+class ScalatraBootstrap extends LifeCycle {
+  println("In bootstrap ...")
+  override def init(context: ServletContext) {
+    println("Init bootstrap ...")
+    context mount (new GUIServlet, "/*")
+  }
 }

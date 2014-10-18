@@ -22,7 +22,7 @@ object Misc extends BaseDefaults {
     (includeOsgi, libraryDependencies += scalaLang)
 
   val tools = OsgiProject("org.openmole.misc.tools", buddyPolicy = Some("global")) settings
-    (includeOsgi, libraryDependencies ++= Seq(xstream % "provided", groovy, Apache.exec, Apache.pool % "provided",
+    (includeOsgi, libraryDependencies ++= Seq(xstream % "provided", groovy, Apache.exec, Apache.pool,
       Apache.math % "provided", jodaTime % "provided", scalaLang % "provided")) dependsOn
       (provided(exception), osgi % "provided", iceTar)
 

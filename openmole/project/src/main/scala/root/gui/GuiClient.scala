@@ -11,7 +11,7 @@ import scala.scalajs.sbtplugin.ScalaJSPlugin._
 object Client extends GuiDefaults {
   override val dir = super.dir / "client"
 
-  lazy val dataui = OsgiProject("org.openmole.gui.client.dataui") /*settings (jsManagerSettings: _*)*/ dependsOn
+  lazy val dataui = OsgiProject("org.openmole.gui.client.dataui") settings (jsManagerSettings: _*) dependsOn
     (Ext.data) settings (
       libraryDependencies ++= Seq(scalaRxJS)
     //  jsCall := "Plot().run();",
@@ -24,6 +24,7 @@ object Client extends GuiDefaults {
   lazy val workflow = OsgiProject("org.openmole.gui.client.workflow") settings (
     libraryDependencies ++= Seq(autowireJS, scalaTagsJS, scalaRxJS, scalajsDom, scaladget))
 
-  lazy val client = OsgiProject("org.openmole.gui.client.client") settings (
-    libraryDependencies ++= Seq(autowireJS, scalaTagsJS, scalaRxJS, scalajsDom, scaladget, upickleJS)) settings (jsManagerSettings: _*) //settings (scalaJSSettings: _*) ///settings (jsManagerSettings: _*) (scalaJSSettings: _*)
+  lazy val client = OsgiProject("org.openmole.gui.client.client") dependsOn
+    (factoryui, workflow, Shared.shared, Tools.tools) settings (
+      libraryDependencies ++= Seq(autowireJS, scalaTagsJS, scalaRxJS, scalajsDom /*, scaladget*/ , upickleJS)) settings (jsManagerSettings: _*) //settings (scalaJSSettings: _*) ///settings (jsManagerSettings: _*) (scalaJSSettings: _*)
 }

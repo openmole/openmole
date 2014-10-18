@@ -1,4 +1,4 @@
-package org.openmole.gui.server.server
+package org.openmole.gui.server.core
 
 /*
  * Copyright (C) 22/09/14 // mathieu.leclaire@openmole.org
@@ -18,28 +18,42 @@ package org.openmole.gui.server.server
  */
 
 import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp.WebAppContext
 import org.openmole.misc.pluginmanager.PluginManager
 import org.scalatra.servlet.ScalatraListener
 import org.osgi.framework.Bundle
 import scala.collection.JavaConverters._
+import javax.servlet.ServletContext
+import org.scalatra._
+import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 
 class GUIServer(bundles: List[Bundle], port: Option[Int]) {
 
   val p = port getOrElse 8080
 
-  JSPack(bundles.filter { b ⇒ b.toString.startsWith("org.openmole.gui") }, new java.io.File("/tmp/"))
+  // JSPack(bundles.filter { b ⇒ b.toString.startsWith("org.openmole.gui") }, new java.io.File("/tmp/"))
+
   val server = new Server(p)
+  val res = Res.newResource(classOf[GUIServer].getResource("/"))
+
   val context = new WebAppContext()
-  context setContextPath "/"
-  context.setResourceBase("src/main/webapp")
-  // context.addEventListener(new ScalatraListener)
-  context.addServlet(classOf[GUIServlet], "/")
+
+  context.setContextPath("/")
+  context.setBaseResource(res)
+  context.setClassLoader(classOf[GUIServer].getClassLoader)
+  context.addEventListener(new ScalatraListener)
 
   server.setHandler(context)
 
-  def start = {
+  def start() = {
+    println("start !!!")
     server.start
+    server.join
+  }
+
+  def end() {
+    server.stop
     server.join
   }
 }

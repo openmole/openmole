@@ -11,7 +11,7 @@ import com.typesafe.sbt.osgi.OsgiKeys._
 import sbt.inc.Analysis
 import sbtunidoc.Plugin._
 import UnidocKeys._
-import fr.iscpif.jsmanager.JSManagerPlugin._
+//import fr.iscpif.jsmanager.JSManagerPlugin._
 
 object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   val dir = file("bin")
@@ -33,11 +33,11 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     equinoxDependencies,
     bundleType := Set("core"),
     organization := "org.openmole.ui"
-  ) settings (jsManagerSettings: _*) settings (
+  ) /*settings (jsManagerSettings: _*)*/ settings (
       libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.logging, Apache.log4j, scopt, robustIt)
     ) dependsOn (
         base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
-        base.Misc.pluginManager, base.Core.implementation, base.Core.batch, gui.Server.server, gui.Client.client, base.Misc.sftpserver, base.Misc.logging,
+        base.Misc.pluginManager, base.Core.implementation, base.Core.batch, gui.Server.core, gui.Client.client, base.Misc.sftpserver, base.Misc.logging,
         Web.core, base.Misc.console, base.Core.convenience)
 
   private lazy val openmolePluginDependencies = libraryDependencies ++= Seq(

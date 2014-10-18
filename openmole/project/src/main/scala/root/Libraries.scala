@@ -6,7 +6,7 @@ import com.typesafe.sbt.osgi.OsgiKeys
 import OsgiKeys._
 import root.libraries._
 import org.openmole.buildsystem.OMKeys._
-import fr.iscpif.jsmanager.JSManagerPlugin._
+//import fr.iscpif.jsmanager.JSManagerPlugin._
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +19,7 @@ object Libraries extends Defaults(Apache) {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.79-SNAPSHOT"
+  val gridscaleVersion = "1.79"
 
   val bouncyCastleVersion = "1.50"
 
@@ -99,10 +99,10 @@ object Libraries extends Defaults(Apache) {
 
   lazy val guava = "org.openmole" %% "com-google-guava" % "16.0.1"
 
-  lazy val scalaTagsVersion = "0.4.0"
+  lazy val scalaTagsVersion = "0.4.2"
   lazy val scalaRxVersion = "0.2.6"
   lazy val scalaUpickleVersion = "0.2.2"
-  lazy val scalaAutowireVersion = "0.2.2"
+  lazy val scalaAutowireVersion = "0.2.3"
 
   lazy val scalaTagsJS = "org.openmole" %% "com-scalatags-js" % scalaTagsVersion
 
@@ -125,7 +125,7 @@ object Libraries extends Defaults(Apache) {
   lazy val scalajsLibrary = "org.openmole" %% "scalajs-library" % scalajsVersion
   lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % "0.6"
 
-  lazy val mgoVersion = "1.78-SNAPSHOT"
+  lazy val mgoVersion = "1.78"
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % mgoVersion
 
   lazy val scaladget = "org.openmole" %% "scaladget" % "0.1.0"
