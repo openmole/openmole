@@ -87,9 +87,9 @@ abstract class ExternalTaskBuilder(implicit plugins: PluginSet) extends TaskBuil
   }
 
   trait Built extends super.Built {
-    val inputFiles = builder.inputFiles.toList
-    val outputFiles = builder.outputFiles.toList
-    val resources = builder.resources.toList
+    val inputFiles = builder.inputFiles.toSeq
+    val outputFiles = builder.outputFiles.toSeq
+    val resources = builder.resources.toSeq
   }
 
 }

@@ -18,6 +18,7 @@
 package org.openmole.plugin.task.scala
 
 import java.io.{ OutputStreamWriter, File }
+import java.lang.reflect.Method
 import javax.script.SimpleScriptContext
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
@@ -55,11 +56,11 @@ sealed abstract class ScalaTask(
 
   def prefix = "_input_value_"
 
-  @transient lazy val compiledScript = {
+  def compiledScript(inputs: Seq[Prototype[_]]) = {
     val interpreter = new ScalaREPL(false)
     libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
     val evaluated =
-      try interpreter.eval(script)
+      try interpreter.eval(script(inputs))
       catch {
         case e: Exception ⇒
           throw new InternalProcessingError(
@@ -69,30 +70,38 @@ sealed abstract class ScalaTask(
                 s"""Error while compiling:
                |${error.error}
                |on line ${error.line} of script:
-               |${script}""".stripMargin
+               |${script(inputs)}""".stripMargin
             }.getOrElse("Error in compiler")
           )
       }
 
     if (evaluated == null) throw new InternalProcessingError(
       s"""The return value of the script was null:
-         |${script}""".stripMargin
+         |${script(inputs)}""".stripMargin
     )
-    (evaluated, evaluated.getClass.getMethod("apply", inputs.toSeq.map(_.prototype.`type`.runtimeClass).toSeq: _*))
+    (evaluated, evaluated.getClass.getMethod("apply", inputs.map(_.`type`.runtimeClass).toSeq: _*))
   }
 
-  def script =
+  def script(inputs: Seq[Prototype[_]]) =
     imports.map("import " + _).mkString("\n") + "\n\n" +
-      s"""(${inputs.toSeq.map(i ⇒ prefix + i.prototype.name + ": " + i.prototype.`type`).mkString(",")}) => {
-       |    ${inputs.toSeq.map(i ⇒ "var " + i.prototype.name + " = " + prefix + i.prototype.name).mkString("; ")}
+      s"""(${inputs.toSeq.map(i ⇒ prefix + i.name + ": " + i.`type`).mkString(",")}) => {
+       |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(oMSeed).toScala();
+       |    ${inputs.toSeq.map(i ⇒ "var " + i.name + " = " + prefix + i.name).mkString(";")}
        |    ${code}
        |    Map[String, Any]( ${outputs.toSeq.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} )
        |}
        |""".stripMargin
 
+  @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], (AnyRef, Method)]()
+
+  def cachedCompiledScript(inputs: Seq[Prototype[_]]) = cache.synchronized {
+    cache.getOrElseUpdate(inputs, compiledScript(inputs))
+  }
+
   override def processCode(context: Context) = {
-    val args = inputs.toArray.map(i ⇒ context(i.prototype))
-    val (evaluated, method) = compiledScript
+    val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }.sortBy(_.name)
+    val args = contextPrototypes.map(i ⇒ context(i))
+    val (evaluated, method) = cachedCompiledScript(contextPrototypes)
     val result = method.invoke(evaluated, args.toSeq.map(_.asInstanceOf[AnyRef]): _*).asInstanceOf[Map[String, Any]]
     context ++ outputs.toSeq.map { o ⇒ Variable.unsecure(o.prototype, result(o.prototype.name)) }
   }

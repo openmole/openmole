@@ -65,8 +65,8 @@ abstract class CodeTaskBuilder(implicit plugins: PluginSet) extends ExternalTask
   }
 
   trait Built extends super.Built {
-    val imports: Iterable[String] = builder.imports
-    val libraries: Iterable[File] = builder.libraries
+    val imports: Iterable[String] = builder.imports.toSeq
+    val libraries: Iterable[File] = builder.libraries.toSeq
   }
 
 }
