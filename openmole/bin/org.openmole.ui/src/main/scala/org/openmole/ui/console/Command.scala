@@ -76,15 +76,7 @@ class Command {
 
   def verify(mole: IMole): Unit = Validation(mole).foreach(println)
 
-  @tailrec final def encrypted: String = {
-    val password = new ConsoleReader().readLine("enter password:", '*')
-    val confirmation = new ConsoleReader().readLine("confirm password:", '*')
-    if (password != confirmation) {
-      println("Password and confirmation don't match.")
-      encrypted
-    }
-    else Workspace.encrypt(password)
-  }
+  def encrypted: String = Workspace.encrypt(askPassword)
 
   def load[T](f: File) = SerialiserService.deserialise[T](f)
   def save(o: Any, f: File) = SerialiserService.serialise(o, f)
