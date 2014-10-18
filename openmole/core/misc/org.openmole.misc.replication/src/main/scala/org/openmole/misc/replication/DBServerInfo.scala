@@ -29,7 +29,7 @@ object DBServerInfo {
   val base = {
     val dir = Option(System.getenv("OPENMOLE_HOME")) match {
       case Some(path) ⇒ new File(path)
-      case None       ⇒ new File(System.getProperty("user.home"), ".openmole")
+      case None       ⇒ new File(System.getProperty("user.home"), s".openmole/${hostName}/")
     }
     dir.mkdirs
     dir
@@ -38,7 +38,7 @@ object DBServerInfo {
   def hostName =
     Try { InetAddress.getLocalHost().getHostName() }.getOrElse("localhost")
 
-  val dbName = s"replica-$hostName"
+  val dbName = s"replica"
   val dbInfoName = s"$dbName.info"
   val dbLock = s"$dbName.lock"
 
