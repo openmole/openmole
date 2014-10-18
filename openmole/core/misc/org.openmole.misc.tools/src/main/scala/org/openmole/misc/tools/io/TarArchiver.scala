@@ -72,11 +72,14 @@ object TarArchiver {
           }
           else {
             Files.createDirectories(dest.getParent)
-            // copy from an InputStream does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
-            Files.copy(tis, dest)
-            // must set permissions explicitly from archive
-            dest.toFile.mode = e.getMode
+
+            // has the entry been marked as a symlink in the archive?
+            if (!e.getLinkName.isEmpty) Files.createSymbolicLink(dest, Paths.get(e.getLinkName))
+            // file copy from an InputStream does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
+            else Files.copy(tis, dest)
           }
+          // must set permissions explicitly from archive
+          dest.toFile.mode = e.getMode
       }
     }
   }
@@ -84,7 +87,7 @@ object TarArchiver {
   implicit class FileTarArchiveDecorator(file: File) {
 
     def archiveDirWithRelativePathNoVariableContent(toArchive: File) = {
-      val os = new TarOutputStream(file.gzippedBufferedOutputStream)
+      val os = new TarOutputStream(file.bufferedOutputStream)
       try os.createDirArchiveWithRelativePathNoVariableContent(toArchive)
       finally os.close
     }
@@ -109,7 +112,6 @@ object TarArchiver {
     }
   }
 
-  // new version using NIO
   private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, baseDir: Path, additionalCommand: TarEntry ⇒ Unit) = {
 
     if (!Files.isDirectory(baseDir)) throw new IOException(baseDir.toString + " is not a directory.")
@@ -121,6 +123,7 @@ object TarArchiver {
 
       val (source, entryName) = toArchive.pop
 
+      // tar structure distinguishes symlinks
       val e =
         if (Files.isDirectory(source)) {
           // walk the directory tree to add all its entries to stack
@@ -132,8 +135,13 @@ object TarArchiver {
           // create the actual tar entry for the directory
           new TarEntry(entryName + '/')
         }
-        // tar distinguishes symlinks, but the com.ice.tar's implementation decided not to do so...
-        // so any kind of files goes in there
+        // tar distinguishes symlinks
+        else if (Files.isSymbolicLink(source)) {
+          val e = new TarEntry(entryName, TarConstants.LF_SYMLINK)
+          e.setLinkName(Files.readSymbolicLink(source).toString)
+          e
+        }
+        // plain files
         else {
           val e = new TarEntry(entryName)
           e.setSize(Files.size(source))
