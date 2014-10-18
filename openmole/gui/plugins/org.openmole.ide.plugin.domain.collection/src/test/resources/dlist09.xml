@@ -1,0 +1,11 @@
+<dataUI class="org.openmole.ide.plugin.domain.collection.DynamicListDomainDataUI">
+    <values class="List">
+      <string></string>
+    </values>
+    <domainType class="scala.reflect.ManifestFactory$$anon$12">
+      <toString>Double</toString>
+      <hashCode>450839479</hashCode>
+    </domainType>
+    <org_-openmole_-ide_-plugin_-domain_-collection_-DynamicListDomainDataUI_-_-fs class="org.openmole.misc.tools.io.FromString$$anon$3"/>
+    <name>Value list</name>
+  </dataUI>

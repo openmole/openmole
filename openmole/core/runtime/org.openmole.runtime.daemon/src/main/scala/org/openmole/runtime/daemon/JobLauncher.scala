@@ -21,6 +21,7 @@ import java.io.File
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.Executors
+import org.openmole.misc.tools.io.HashService
 import org.openmole.plugin.environment.desktopgrid._
 import DesktopGridEnvironment._
 import org.openmole.core.batch.message._
@@ -30,9 +31,10 @@ import org.openmole.misc.exception._
 import org.openmole.misc.tools.service._
 import org.openmole.misc.workspace._
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.misc.tools.service.ProcessUtil._
 import org.openmole.misc.tools.service.ThreadUtil._
-import org.openmole.misc.hashservice.HashService._
+import HashService._
 import fr.iscpif.gridscale.ssh.{ SSHStorage, SSHUserPasswordAuthentication }
 
 import org.openmole.core.batch.message.FileMessage._
@@ -46,6 +48,7 @@ object JobLauncher extends Logger {
 
 class JobLauncher(cacheSize: Long, debug: Boolean) {
   import JobLauncher._
+  import Log._
 
   val localCache = new FileCache {
     val limit = cacheSize
@@ -62,23 +65,19 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val _host = splitHost(0)
 
     val storage = new SimpleStorage {
-      val storage = new SSHStorage {
+      val storage = new SSHStorage with SSHUserPasswordAuthentication {
         val host = _host
         override val port = _port
         val user = _user
+        val password = _password
       }
 
       val root = ""
-
-      val authentication = new SSHUserPasswordAuthentication {
-        val user = _user
-        val password = _password
-      }
     }
 
     val storageFileGz = Workspace.withTmpFile {
       storageFile ⇒
-        SerializerService.serializeAndArchiveFiles(new LocalSimpleStorage, storageFile)
+        SerialiserService.serialiseAndArchiveFiles(new LocalSimpleStorage, storageFile)
         val storageFileGz = Workspace.newFile("storage", ".xml.gz")
         storageFile.copyCompress(storageFileGz)
         storageFileGz
@@ -140,7 +139,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 localResultFile.delete
               }
               catch {
-                case e: Throwable ⇒ logger.log(WARNING, "Error durring result upload", e)
+                case e: Throwable ⇒ logger.log(WARNING, "Error during result upload", e)
               }
             })
 
@@ -148,14 +147,14 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             next
           case None ⇒
             logger.info("Job list is empty on the remote host.")
-            Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMilliSeconds)
+            Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMillis)
             background { fetchAJob(id, storage) }
         }
       }
       catch {
         case e: Exception ⇒
-          logger.log(WARNING, "Error while looking for jobs.", e)
-          Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMilliSeconds)
+          logger.log(WARNING, s"Error while looking for jobs, it might happen if the jobs have not yep been made on the server side. Automatic retry in ${Workspace.preferenceAsDuration(jobCheckInterval)}.", e)
+          Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMillis)
           background { fetchAJob(id, storage) }
       }
       processJob(next)
@@ -164,8 +163,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
   def uploadResult(localResultFile: File, communicationDir: String, job: String, storage: SimpleStorage) = {
     val runtimeResult = {
-      val is = localResultFile.gzipedBufferedInputStream
-      try SerializerService.deserialize[RuntimeResult](is)
+      val is = localResultFile.gzippedBufferedInputStream
+      try SerialiserService.deserialise[RuntimeResult](is)
       finally is.close
     }
 
@@ -181,19 +180,21 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       new FileMessage(uploadedFile, msg.hash)
     }
 
-    val uplodadedResult = runtimeResult.result match {
-      case Success(result) ⇒ Success(uploadFileMessage(result))
-      case Failure(e)      ⇒ Failure(e)
+    val uploadedResult = runtimeResult.result match {
+      case Success((result, log)) ⇒ Success((uploadFileMessage(result), log))
+      case Failure(e)             ⇒ Failure(e)
     }
 
     val uploadedStdOut = runtimeResult.stdOut match {
-      case Some(stdOut) ⇒ logger.info("Uploading stdout"); Some(uploadFileMessage(stdOut))
-      case None         ⇒ None
+      case Some(stdOut) ⇒
+        logger.info("Uploading stdout"); Some(uploadFileMessage(stdOut))
+      case None ⇒ None
     }
 
     val uploadedStdErr = runtimeResult.stdErr match {
-      case Some(stdErr) ⇒ logger.info("Uploading stderr"); Some(uploadFileMessage(stdErr))
-      case None         ⇒ None
+      case Some(stdErr) ⇒
+        logger.info("Uploading stderr"); Some(uploadFileMessage(stdErr))
+      case None ⇒ None
     }
 
     logger.info("Context results uploaded")
@@ -201,12 +202,12 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val resultToSend = new RuntimeResult(
       uploadedStdOut,
       uploadedStdErr,
-      uplodadedResult)
+      uploadedResult)
 
     // Upload the result
     Workspace.withTmpFile { outputLocal ⇒
       logger.info("Uploading job results")
-      SerializerService.serialize(resultToSend, outputLocal)
+      SerialiserService.serialise(resultToSend, outputLocal)
       val tmpResultFile = storage.child(tmpResultsDirName, Storage.uniqName(job, ".res"))
       storage.uploadGZ(outputLocal, tmpResultFile)
       val resultFile = storage.child(resultsDirName, Storage.uniqName(job, ".res"))
@@ -256,7 +257,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
         Workspace.withTmpFile {
           f ⇒
             storage.downloadGZ(storage.child(jobsDirName, job), f)
-            SerializerService.deserialize[DesktopGridJobMessage](f)
+            SerialiserService.deserialise[DesktopGridJobMessage](f)
         }
 
       logger.info("Job execution message is " + jobMessage.executionMessagePath)
@@ -305,10 +306,10 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
           }
 
-          val executionMesageFileCache = Workspace.newFile("executionMessage", ".xml")
-          storage.downloadGZ(jobMessage.executionMessagePath, executionMesageFileCache)
-          val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
-          executionMesageFileCache.delete
+          val executionMessageFileCache = Workspace.newFile("executionMessage", ".xml")
+          storage.downloadGZ(jobMessage.executionMessagePath, executionMessageFileCache)
+          val executionMessage = SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
+          executionMessageFileCache.delete
 
           def localCachedReplicatedFile(replicatedFile: ReplicatedFile) = {
             val localFile = localCache.cache(replicatedFile, getFile)
@@ -327,8 +328,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           val localCommunicationDirPath = Workspace.newDir
           val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")
 
-          val os = localExecutionMessage.gzipedBufferedOutputStream
-          try SerializerService.serialize(new ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath), os)
+          val os = localExecutionMessage.gzippedBufferedOutputStream
+          try SerialiserService.serialise(new ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath), os)
           finally os.close
 
           Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, jobMessage.memory, executionMessage, job, cached))

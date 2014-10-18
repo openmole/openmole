@@ -18,9 +18,7 @@
 package org.openmole.ide.core.implementation.execution
 
 import org.openmole.ide.core.implementation.workflow._
-import java.awt.Color
-import java.awt.Dimension
-import java.awt.Point
+import java.awt._
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.ide.core.implementation.data.{ IExplorationTaskDataUI, CheckData }
 import org.openmole.ide.core.implementation.dialog.StatusBar
@@ -37,11 +35,41 @@ import scala.Some
 import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, DataProxyUI }
 import org.openmole.ide.core.implementation.sampling.SamplingCompositionPanelUI
 import org.openmole.ide.core.implementation.panel.SamplingCompositionPanel
+import scala.concurrent.ExecutionContext.Implicits.global
+import org.openmole.ide.misc.tools.image.Images
+import scala.util.Failure
+import scala.Some
+import scala.util.Success
+import scala.List
 
 object ScenesManager {
+  val instance = new ScenesManager
 
-  val tabPane = new TabbedPane
+  def apply() = instance
+}
 
+class ScenesManager {
+  val tabPane = new TabbedPane {
+    val centerPoint = GraphicsEnvironment.getLocalGraphicsEnvironment.getCenterPoint
+    val (x, y) = (centerPoint.x - 125, centerPoint.y - 125)
+
+    override def paintComponent(g: Graphics2D) = {
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+        RenderingHints.VALUE_ANTIALIAS_ON)
+      g.setColor(new Color(255, 255, 255, 128))
+      g.setColor(new Color(120, 120, 120))
+      g.setFont(new Font("Helvetica", Font.PLAIN, 25))
+      g.drawString("No Moles are open", x, y)
+      g.drawLine(x - 15, y + 8, x + 250, y + 8)
+      g.setFont(new Font(g.getFont.getFamily, Font.PLAIN, 15))
+      g.drawString("Create a new Mole, Ctrl + N", x, y + 25)
+      g.drawString("Load a Project, Ctrl + L", x, y + 45)
+      g.drawString("Create new Tasks, Prototypes, etc", x, y + 65)
+      super.paintComponent(g)
+    }
+  }
+
+  val statusBar = new StatusBar
   var countBuild = new AtomicInteger
   var countExec = new AtomicInteger
   val _selection: Ref[Option[List[CapsuleUI]]] = Ref(None)
@@ -90,9 +118,12 @@ object ScenesManager {
     currentScene.getOrElse(addBuildSceneContainer("Mole").scene).displayPropertyPanel(proxy)
   }
 
-  def currentPanels = currentScene match {
-    case Some(s: MoleScene) ⇒ s.currentPanels
-    case _                  ⇒ List()
+  def currentPanels = List(currentScene).flatten.map {
+    _.currentPanels
+  }
+
+  def closePropertyPanels = List(currentScene).flatten.map {
+    _.closePropertyPanels
   }
 
   def currentSamplingCompositionPanelUI = currentPanels.map {
@@ -198,9 +229,13 @@ object ScenesManager {
     case _                        ⇒ None
   }
 
-  def invalidateSceneCaches = moleScenes foreach { _.dataUI.invalidateCache }
+  def invalidateSceneCaches = moleScenes foreach {
+    _.dataUI.invalidateCache
+  }
 
-  def refreshScenes = moleScenes foreach { _.refresh }
+  def refreshScenes = moleScenes foreach {
+    _.refresh
+  }
 
   def moleScenes = buildMoleSceneContainers.map {
     _.scene
@@ -271,6 +306,7 @@ object ScenesManager {
           addTab(page, clone.dataUI.name, new Action("") {
             def apply = {
               container.stop
+              container.save
               tabPane.pages.remove(page.index)
             }
           })
@@ -298,4 +334,5 @@ object ScenesManager {
       icon = CLOSE_TAB
     }
   }
+
 }

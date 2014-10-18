@@ -21,62 +21,36 @@ import org.openmole.core.model.execution._
 import org.openmole.core.model.job._
 import org.openmole.misc.workspace._
 import org.openmole.misc.eventdispatcher._
-import org.openmole.misc.tools.service.ThreadUtil._
-import ref.WeakReference
+import scala.ref.WeakReference
 
-object LocalEnvironment extends Environment {
+object LocalEnvironment {
 
   val DefaultNumberOfThreads = new ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber")
 
-  Workspace += (DefaultNumberOfThreads, Integer.toString(1))
+  Workspace += (DefaultNumberOfThreads, "1")
+  def numberOfThread = Workspace.preferenceAsInt(DefaultNumberOfThreads)
 
-  var initializationNumberOfThread: Option[Int] = None
-  def numberOfThread = initializationNumberOfThread.getOrElse(Workspace.preferenceAsInt(DefaultNumberOfThreads))
+  def apply(nbThreads: Int = numberOfThread) = new LocalEnvironment(nbThreads)
 
-  @transient lazy val default = new LocalEnvironment(numberOfThread)
-
-  override def submit(job: IJob) = default.submit(job)
-
-  def apply(nbThreads: Int) = new LocalEnvironment(nbThreads)
-
+  var default = LocalEnvironment()
 }
 
 class LocalEnvironment(val nbThreads: Int) extends Environment {
 
-  import LocalEnvironment._
+  @transient lazy val pool = new ExecuterPool(nbThreads, WeakReference(this))
 
-  private val jobs = new JobPriorityQueue
+  def nbJobInQueue = pool.inQueue
 
-  private var executers = List.empty[(LocalExecuter, Thread)]
+  override def submit(job: IJob) =
+    submit(new LocalExecutionJob(this, job.moleJobs))
 
-  addExecuters(nbThreads)
-
-  override def finalize = executers.foreach {
-    case (exe, thread) ⇒ exe.stop = true; thread.interrupt
-  }
-
-  private[local] def addExecuters(nbExecuters: Int) = synchronized {
-    for (i ← 0 until nbExecuters) {
-      val executer = new LocalExecuter(WeakReference(this))
-      val thread = daemonThreadFactory.newThread(executer)
-      thread.start
-      executers ::= executer -> thread
-    }
-    executers = executers.filterNot(_._1.stop)
-  }
-
-  def nbJobInQueue = jobs.size
-
-  override def submit(job: IJob) = submit(new LocalExecutionJob(this, job.moleJobs))
-
-  def submit(moleJob: IMoleJob): Unit = submit(new LocalExecutionJob(this, List(moleJob)))
+  def submit(moleJob: IMoleJob): Unit =
+    submit(new LocalExecutionJob(this, List(moleJob)))
 
   private def submit(ejob: LocalExecutionJob) = {
     EventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))
     ejob.state = ExecutionState.SUBMITTED
-    jobs.enqueue(ejob)
+    pool.enqueue(ejob)
   }
-
-  private[local] def takeNextjob: LocalExecutionJob = jobs.dequeue
 
 }

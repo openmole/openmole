@@ -19,8 +19,6 @@ package org.openmole.ide.misc.widget.multirow
 
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
-import scala.swing.Component
-import scala.swing.event.FocusGained
 
 object MultiPanel {
   class Factory[D <: IData](panelFactory: IFactory[D],
@@ -50,6 +48,7 @@ class MultiPanel[D <: IData, P <: IPanel[D]](title: String,
   new Factory(panelFactory, plus, insets),
   minus,
   false) with IMultiPanel[D] {
-  def content = rowWidgets.map(_.content).toList
+
+  def content = rowWidgets.toList.map(_.content)
 }
 

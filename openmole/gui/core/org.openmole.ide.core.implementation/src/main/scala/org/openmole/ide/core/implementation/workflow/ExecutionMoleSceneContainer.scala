@@ -30,6 +30,12 @@ import scala.swing._
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
+import scala.swing.event.ButtonClicked
+import org.openmole.ide.core.implementation.preference.{ Preferences, ServerListPanel }
+import org.openmole.misc.workspace.Workspace
+import java.io.File
+import org.openmole.core.model.mole.ExecutionContext
+import scala.swing.FileChooser.SelectionMode
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
@@ -50,12 +56,32 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
     background = new Color(125, 160, 0)
   }
 
-  /* val exportButton = new Button(export) {
-    background = new Color(55, 170, 200)
-  }*/
-
   val dlLabel = new Label("0/0")
   val ulLabel = new Label("0/0")
+  val serverCheckBox = new CheckBox("Server delegation")
+  val serverTagTextField = new TextField(bmsc.scene.dataUI.name, 10)
+  val serverCombo = new ComboBox(ServerListPanel.serverlist)
+  val serverLabel = new Label("")
+  val uuidLabel = new ExternalLinkLabel
+  val serverPanel = new PluginPanel("wrap") {
+    contents += serverCombo
+    contents += serverLabel
+    contents += serverTagTextField
+    contents += uuidLabel
+  }
+  serverCheckBox.selected = false
+  serverPanel.visible = false
+
+  val sandBoxCheckBox = new CheckBox("Sandbox")
+  val sandBoxTextField: ChooseFileTextField = new ChooseFileTextField(Preferences().sandbox, "Select a directory", SelectionMode.DirectoriesOnly)
+  val sandBoxPanel = new PluginPanel("wrap 2 ") {
+    contents += sandBoxTextField
+    contents += new Label("<html><i>The sandbox folder is a root folder from which all paths are appended; allowing portability of the workflows." +
+      "<br/>Ex: sandbox folder = /tmp/ and a Copy File hook is set to /home/mole/; files will be copied in /tmp/home/mole." +
+      "<br/>It is the default mode when the computation is delegated to a server.</i></html>")
+  }
+
+  sandBoxPanel.visible = false
 
   executionManager match {
     case Some(eManager: ExecutionManager) ⇒
@@ -67,11 +93,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           }
       }
 
-      val executionPanel = new ExecutionPanel
-      executionPanel.peer.setLayout(new BorderLayout)
-      executionPanel.peer.setLayout(new BorderLayout)
-
-      peer.add(new PluginPanel("wrap") {
+      peer.add(new SplitPane(Orientation.Vertical, new PluginPanel("wrap") {
         contents += new TitleLabel("Execution control")
         contents += new PluginPanel("wrap 2", "[]-20[]5[]") {
           contents += startStopButton
@@ -90,11 +112,32 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
               }, "Mole execution"))
           })
         }
+
+        contents += new PluginPanel("wrap 2") {
+          contents += serverCheckBox
+          contents += serverPanel
+        }
+
+        contents += new PluginPanel("wrap 3") {
+          contents += sandBoxCheckBox
+          contents += sandBoxPanel
+        }
+
+        listenTo(`serverCheckBox`, `sandBoxCheckBox`)
+        reactions += {
+          case ButtonClicked(`serverCheckBox`) ⇒
+            serverPanel.visible = serverCheckBox.selected
+            sandBoxPanel.visible = !serverCombo.enabled
+            sandBoxCheckBox.enabled = sandBoxCheckBox.enabled
+          case ButtonClicked(`sandBoxCheckBox`) ⇒
+            sandBoxPanel.visible = sandBoxCheckBox.selected
+        }
         contents += eManager.envBarPanel
-      }.peer, BorderLayout.NORTH)
-
-      peer.add(eManager.peer)
-
+      }, PluginPanel("wrap", "[fill,grow]", "[fill,grow]", Seq(eManager))) {
+        oneTouchExpandable = true
+        continuousLayout = true
+        // resizeWeight = 0.95
+      }.peer, BorderLayout.CENTER)
     case None ⇒
   }
 
@@ -107,17 +150,26 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             startLook
         }
         startStopButton.background = new Color(170, 0, 0)
-        startStopButton.action = new Action("Stop") { def apply = stop }
-        //exportButton.enabled = false
-        x.start
+        startStopButton.action = new Action("Stop") {
+          def apply = stop
+        }
+        x.start({
+          val serverUrl = serverCombo.selection.item
+          if (serverCheckBox.selected) Some((serverUrl, ServerListPanel.map(serverUrl)))
+          else None
+        }, {
+          if (sandBoxCheckBox.selected) ExecutionContext.local.copy(directory = Some(new File(sandBoxTextField.text)))
+          else ExecutionContext.local
+        })
       case _ ⇒
     }
   }
 
+  def save = Preferences.setSandBox(sandBoxTextField.text)
+
   def startLook = {
     startStopButton.background = new Color(125, 160, 0)
     startStopButton.action = start
-    // exportButton.enabled = true
   }
 
   def stop = executionManager match {
@@ -131,7 +183,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   def updateFileTransferLabels(dl: String, ul: String) = {
     dlLabel.text = dl
     ulLabel.text = ul
-    revalidate
+    repaint
   }
 
   def moleExecution = executionManager match {
@@ -147,10 +199,6 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   def finished = moleExecution match {
     case Some(me: MoleExecution) ⇒ me.finished
     case _                       ⇒ false
-  }
-
-  class ExecutionPanel extends Panel {
-    background = new Color(77, 77, 77)
   }
 
 }

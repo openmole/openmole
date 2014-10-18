@@ -1,11 +1,13 @@
-rmdir /s /q "configuration\org.eclipse.core.runtime"
-rmdir /s /q "configuration\org.eclipse.equinox.app"
-rmdir /s /q "configuration\org.eclipse.osgi"
-
-start dbserver\bin\openmole-dbserver.bat
-
-set ran=%random%
-
-java -Dosgi.locking=none -Dosgi.classloader.singleThreadLoads=true -Dosgi.configuration.area=%ran% -splash:splashscreen.png -XX:MaxPermSize=128M -XX:+UseG1GC -Xmx1G  -XX:MaxPermSize=128M -jar ./plugins/org.eclipse.equinox.launcher.jar -cp ./openmole-plugins -gp ./openmole-plugins-gui %*
-
+set startdir=%cd%
+set PWD=%~dp0
+cd /d %~dp0
+start /MIN dbserver\bin\openmole-dbserver.bat
+cd %cd%
+mkdir "%UserProfile%\.openmole\.tmp"
+set ran="%UserProfile%\.openmole\.tmp\%random%"
+java -d64 -version >nul 2>&1
+if errorlevel 1 goto is32bit
+set FLAG="-XX:+UseCompressedOops"
+:is32bit
+java -Dosgi.locking=none -Dopenmole.location="%PWD%\" -Dosgi.classloader.singleThreadLoads=true -Dosgi.configuration.area=%ran% -splash:splashscreen.png -XX:MaxPermSize=128M -XX:+UseG1GC -Xmx1G  -XX:MaxPermSize=128M %FLAG% -jar "%PWD%/plugins/org.eclipse.equinox.launcher.jar" -consoleLog -cp "%PWD%/openmole-plugins" -gp "%PWD%/openmole-plugins-gui" %*
 rmdir /s /q %ran%

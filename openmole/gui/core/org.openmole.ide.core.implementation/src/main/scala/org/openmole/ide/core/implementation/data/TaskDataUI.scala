@@ -57,7 +57,7 @@ abstract class TaskDataUI extends DataUI
   }
 
   def implicitPrototypesFromAggregation =
-    ScenesManager.transitions.flatMap {
+    ScenesManager().transitions.flatMap {
       t ⇒
         t.transitionType match {
           case AggregationTransitionType ⇒

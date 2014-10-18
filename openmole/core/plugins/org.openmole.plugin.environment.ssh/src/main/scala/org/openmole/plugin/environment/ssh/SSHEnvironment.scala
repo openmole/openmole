@@ -22,6 +22,7 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage.PersistentStorageService
 import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
+import concurrent.duration._
 
 object SSHEnvironment {
   val MaxConnections = new ConfigurationLocation("SSHEnvironment", "MaxConnections")
@@ -37,10 +38,10 @@ object SSHEnvironment {
     host: String,
     nbSlots: Int,
     port: Int = 22,
-    path: String = "/tmp/",
+    workDirectory: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
     threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
-    new SSHEnvironment(user, host, nbSlots, port, path, openMOLEMemory, threads)
+    new SSHEnvironment(user, host, nbSlots, port, workDirectory, openMOLEMemory, threads)
 }
 
 import SSHEnvironment._
@@ -50,35 +51,26 @@ class SSHEnvironment(
     val host: String,
     val nbSlots: Int,
     override val port: Int,
-    val path: String,
+    val workDirectory: Option[String],
     override val openMOLEMemory: Option[Int],
-    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHAccess { env ⇒
+    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage { env ⇒
 
-  type SS = SSHStorageService
   type JS = SSHJobService
 
-  @transient lazy val authentication = SSHAuthentication(user, host, port, authentications)(authentications)
-  @transient lazy val id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
-
-  @transient lazy val storage = new PersistentStorageService with SSHStorageService with LimitedAccess with ThisHost {
-    def nbTokens = Workspace.preferenceAsInt(MaxConnections)
-    def root = env.path
-    val environment = env
-  }
+  @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
+  def id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val jobService = new SSHJobService with LimitedAccess with ThisHost {
-    def nbTokens = Workspace.preferenceAsInt(MaxConnections)
+    def nbTokens = maxConnections
     def nbSlots = env.nbSlots
     def sharedFS = storage
     val environment = env
-    val id = url.toString
   }
 
-  def allStorages = List(storage)
   def allJobServices = List(jobService)
 
-  override def minUpdateInterval = Workspace.preferenceAsDuration(UpdateInterval).toMilliSeconds
-  override def maxUpdateInterval = Workspace.preferenceAsDuration(UpdateInterval).toMilliSeconds
-  override def incrementUpdateInterval = 0
+  override def minUpdateInterval = Workspace.preferenceAsDuration(UpdateInterval)
+  override def maxUpdateInterval = Workspace.preferenceAsDuration(UpdateInterval)
+  override def incrementUpdateInterval = 0 second
 
 }

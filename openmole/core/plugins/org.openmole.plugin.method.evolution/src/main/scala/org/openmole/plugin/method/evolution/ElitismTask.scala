@@ -26,37 +26,46 @@ import org.openmole.core.model.task._
 
 object ElitismTask {
 
-  def apply(evolution: Elitism with Termination with Modifier with Archive)(
+  def apply(evolution: Elitism with Termination with Archive)(
     name: String,
-    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
+    population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
+    offspring: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
     archive: Prototype[evolution.A])(implicit plugins: PluginSet) = {
-    val (_individuals, _archive) = (individuals, archive)
+    val (_population, _offspring, _archive) = (population, offspring, archive)
 
     new TaskBuilder { builder ⇒
       addInput(archive)
-      addInput(individuals)
-      addOutput(individuals)
+      addInput(population)
+      addInput(offspring)
+      addOutput(population)
+      addOutput(archive)
 
       def toTask = new ElitismTask(name, evolution) with builder.Built {
-        val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
+        val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
+        val offspring = _offspring.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
+
         val archive = _archive.asInstanceOf[Prototype[evolution.A]]
       }
     }
   }
 }
 
-sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier with Archive](
+sealed abstract class ElitismTask[E <: Elitism with Termination with Archive](
     val name: String, val evolution: E) extends Task {
 
-  def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
+  def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
+  def offspring: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
   def archive: Prototype[evolution.A]
 
   override def process(context: Context) = {
     val a = context(archive)
-    val newIndividuals = evolution.elitism(context(individuals), a)
+    val rng = Task.buildRNG(context)
+    val offspringPopulation = Population.fromIndividuals(context(offspring))
 
-    Context(
-      Variable(individuals, newIndividuals.toArray))
+    val newArchive = evolution.archive(a, context(population), offspringPopulation)(rng)
+    val newPopulation = evolution.elitism(context(population), offspringPopulation, newArchive)(rng)
+
+    Context(Variable(population, newPopulation), Variable(archive, newArchive))
   }
 
 }

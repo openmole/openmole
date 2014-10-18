@@ -8,5 +8,5 @@ import root.Libraries._
 object Source extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.ide.plugin.source")
 
-  lazy val file = OsgiProject("file") dependsOn (Core.implementation, Miscellaneous.tools, base.plugin.Source.file, opencsv)
+  lazy val file = OsgiProject("file") dependsOn (Core.implementation, Miscellaneous.tools, base.plugin.Source.file, opencsv, base.Misc.replication % "test")
 }

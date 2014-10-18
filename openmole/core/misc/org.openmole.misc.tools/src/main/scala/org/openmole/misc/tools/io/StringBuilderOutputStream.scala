@@ -20,5 +20,5 @@ package org.openmole.misc.tools.io
 import java.io.OutputStream
 
 class StringBuilderOutputStream(val builder: StringBuilder = new StringBuilder) extends OutputStream {
-  override def write(b: Int) = builder.append(b)
+  override def write(b: Int) = builder.append(b.toChar)
 }

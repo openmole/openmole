@@ -26,7 +26,7 @@ import org.openmole.misc.tools.io.FileUtil._
 
 object FileCache extends Logger
 
-import FileCache._
+import FileCache.Log._
 
 abstract class FileCache {
 
@@ -43,7 +43,7 @@ abstract class FileCache {
         file
       case None ⇒
         val (file, hash) = get(f)
-        cached(f.hash) = (file, System.currentTimeMillis, 1, file.recursiveSize)
+        cached(f.hash) = (file, System.currentTimeMillis, 1, file.size)
         file
     }
   }

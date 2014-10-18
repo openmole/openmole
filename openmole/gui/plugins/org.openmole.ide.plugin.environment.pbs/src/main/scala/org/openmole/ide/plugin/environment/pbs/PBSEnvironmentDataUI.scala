@@ -9,6 +9,7 @@ import org.openmole.plugin.environment.pbs.PBSEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.ide.core.implementation.data.EnvironmentDataUI
 import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.tools.service._
 
 class PBSEnvironmentDataUI(val name: String = "",
                            val login: String = "",
@@ -31,12 +32,12 @@ class PBSEnvironmentDataUI(val name: String = "",
       port,
       queue,
       openMOLEMemory,
-      wallTime,
+      wallTime.map(_.toDuration),
       memory,
-      path,
-      threads,
       nodes,
-      coreByNode)(Workspace.authenticationProvider)
+      coreByNode,
+      path,
+      threads)(Workspace.authenticationProvider)
   }
 
   def coreClass = classOf[PBSEnvironment]

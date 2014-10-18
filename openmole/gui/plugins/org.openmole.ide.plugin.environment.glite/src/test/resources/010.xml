@@ -1,0 +1,27 @@
+<org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyUI>
+  <dataUI class="org.openmole.ide.plugin.environment.glite.GliteEnvironmentDataUI010">
+    <name>test</name>
+    <vo></vo>
+    <voms></voms>
+    <bdii>ldap://cclcgtopbdii02.in2p3.fr:2170</bdii>
+    <proxy>false</proxy>
+    <proxyTime class="None"/>
+    <proxyHost class="None"/>
+    <proxyPort class="None"/>
+    <fqan class="None"/>
+    <openMOLEMemory class="Some">
+      <x class="int">512</x>
+    </openMOLEMemory>
+    <memory class="None"/>
+    <cpuTime class="None"/>
+    <wallTime class="None"/>
+    <cpuNumber class="None"/>
+    <jobType class="None"/>
+    <smpGranularity class="None"/>
+    <architecture>false</architecture>
+    <threads class="None"/>
+    <freeRequirements></freeRequirements>
+  </dataUI>
+  <generated>false</generated>
+  <id>76d9d61d-c268-4cdb-95df-7a16ee6e283b</id>
+</org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyUI>

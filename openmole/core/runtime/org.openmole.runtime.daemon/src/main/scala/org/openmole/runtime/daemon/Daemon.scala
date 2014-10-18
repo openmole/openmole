@@ -17,11 +17,16 @@
 
 package org.openmole.runtime.daemon
 
+import org.codehaus.groovy.vmplugin.v5.PluginDefaultGroovyMethods
 import org.eclipse.equinox.app._
 import org.openmole.misc.tools.service.Logger
-import scopt.immutable._
+import scopt._
 
-class Daemon extends IApplication with Logger {
+object Daemon extends Logger
+
+import Daemon.Log._
+
+class Daemon extends IApplication {
   override def start(context: IApplicationContext) = {
     try {
       val args = context.getArguments.get(IApplicationContext.APPLICATION_ARGS).asInstanceOf[Array[String]]
@@ -32,20 +37,20 @@ class Daemon extends IApplication with Logger {
         workers: Int = 1,
         cacheSize: Int = 2000)
 
-      val parser = new OptionParser[Config]("openmole", "0.x") {
-        def options = Seq(
-          opt("h", "host", "user@hostname:port") {
-            (v: String, c: Config) ⇒ c.copy(host = Some(v))
-          },
-          opt("p", "password", "password") {
-            (v: String, c: Config) ⇒ c.copy(password = Some(v))
-          },
-          opt("w", "workers", "Number of workers, default is 1") {
-            (v: String, c: Config) ⇒ c.copy(workers = v.toInt)
-          },
-          opt("c", "cache", "Chache size, default is 2000") {
-            (v: String, c: Config) ⇒ c.copy(cacheSize = v.toInt)
-          })
+      val parser = new OptionParser[Config]("OpenMOLE") {
+        head("OpenMOLE deamon", "0.x")
+        opt[String]('h', "host") text ("user@hostname:port") action {
+          (v, c) ⇒ c.copy(host = Some(v))
+        }
+        opt[String]('p', "password") text ("password") action {
+          (v, c) ⇒ c.copy(password = Some(v))
+        }
+        opt[Int]('w', "workers") text ("Number of workers, default is 1") action {
+          (v, c) ⇒ c.copy(workers = v)
+        }
+        opt[Int]('c', "cache") text ("Cache size in MB, default is 2000") action {
+          (v, c) ⇒ c.copy(cacheSize = v)
+        }
       }
 
       val debug = args.contains("-d")

@@ -32,36 +32,57 @@ import org.openmole.ide.misc.tools.util.Types
 import util.Success
 import util.Failure
 import scala.Some
+import org.openmole.ide.core.implementation.preference.Preferences
+import scala.swing.FileChooser
 
 object LoadXML {
 
-  def show = {
-    val fc = DialogFactory.fileChooser(" OpenMOLE project loading",
-      "*.om",
-      "om",
-      Settings.currentPath)
+  def show(chooser: FileChooser) = {
     var text = ""
-    if (fc.showDialog(new Label, "OK") == Approve) text = fc.selectedFile.getPath
-    val file = new File(text)
-    if (file.isFile) {
-      Settings.currentPath = Some(file.getParentFile)
-      Settings.currentProject = Some(file)
-      (new GUISerializer).deserialize(text) match {
-        case Failure(t) ⇒ displayErrors(List(t))
-        case Success((proxies, scene)) ⇒
-          StatusBar().clear
-          ScenesManager.closeAll
-          Proxies.instance = proxies
-          addPrototypes(proxies)
-          addTasks(proxies)
-          addSamplings(proxies)
-          addEnvironments(proxies)
-          addHooks(proxies)
-          addSources(proxies)
-          scene.foreach(mdu ⇒ ScenesManager.addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
-      }
-    }
+    if (chooser.showDialog(new Label, "OK") == Approve) text = chooser.selectedFile.getPath
     text
+  }
+
+  def load(fileName: String, extraDir: Option[File] = None): String = {
+    if (!fileName.isEmpty) {
+      tryFile(fileName).map {
+        f ⇒ _load(f, extraDir)
+      }.headOption.getOrElse("")
+    }
+    else ""
+  }
+
+  def tryFile(text: String) = _tryFile(text, List("", ".om", ".tar"))
+
+  def _tryFile(text: String, exts: List[String]): Option[File] = {
+    if (!exts.isEmpty) {
+      val fileName = text + exts.head
+      val f = new File(fileName)
+      if (f.isFile) Some(f)
+      else _tryFile(text, exts.tail)
+    }
+    else None
+  }
+
+  private def _load(f: File, extraDir: Option[File] = None): String = {
+    Settings.currentPath = Some(f.getParentFile)
+    Settings.currentProject = Some(f)
+    val seriliazer = new GUISerializer
+    seriliazer.init(Proxies.instance)
+    val deserialised = seriliazer.deserialize(f, extraDir)
+    displayErrors(deserialised.written)
+    val (proxies, scene) = deserialised.value
+    StatusBar.clear
+    Proxies.instance ++ proxies
+    addPrototypes(proxies)
+    addTasks(proxies)
+    addSamplings(proxies)
+    addEnvironments(proxies)
+    addHooks(proxies)
+    addSources(proxies)
+    scene.foreach(mdu ⇒ ScenesManager().addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
+    Preferences.addRecentFiles(f.getAbsolutePath)
+    f.getAbsolutePath
   }
 
   def addTasks(proxies: Proxies) =

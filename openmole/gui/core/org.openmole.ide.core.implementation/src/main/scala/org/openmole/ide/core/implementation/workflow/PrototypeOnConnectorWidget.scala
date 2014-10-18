@@ -17,22 +17,20 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import java.awt.BasicStroke
-import java.awt.Color
-import java.awt.Rectangle
-import java.awt.RenderingHints
+import java.awt._
 import org.netbeans.api.visual.widget._
 import org.openmole.ide.misc.widget.LinkLabel
 
 object PrototypeOnConnectorWidget {
   val darkOnLight = (new Color(218, 218, 218), new Color(0, 0, 0, 180))
-
   val lightOnDark = (new Color(0, 0, 0, 180), new Color(200, 200, 200))
+  val lightOnGreen = (new Color(180, 200, 7), Color.white)
+  val lightOnRed = (new Color(170, 0, 0), Color.white)
 }
 
 import PrototypeOnConnectorWidget._
 
-class PrototypeOnConnectorWidget(scene: Scene,
+class PrototypeOnConnectorWidget(val scene: Scene,
                                  var connectorUI: ConnectorViewUI,
                                  val link: LinkLabel,
                                  val colorPattern: (Color, Color) = PrototypeOnConnectorWidget.lightOnDark,
@@ -48,7 +46,6 @@ class PrototypeOnConnectorWidget(scene: Scene,
     g.setColor(colorPattern._1)
     g.fillOval(pos, pos, (dim + 30).toInt, 30)
     link.text = connectorUI.preview
-    revalidate
   }
 
   override def paintBorder = {
@@ -59,7 +56,6 @@ class PrototypeOnConnectorWidget(scene: Scene,
     g.setColor(colorPattern._2)
     if (colorPattern == lightOnDark)
       g.drawOval(pos, pos, 28, 28)
-    revalidate
   }
 }
 

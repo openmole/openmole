@@ -28,11 +28,11 @@ import org.openmole.core.model.transition._
 import org.openmole.core.model.mole._
 import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class TypeUtilSpec extends FlatSpec with ShouldMatchers {
+class TypeUtilSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
 
@@ -79,28 +79,6 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
     val m = manifests.filter(_.name == p.name).head
     m.toArray should equal(true)
     m.manifest.runtimeClass should equal(classOf[Int])
-  }
-
-  "Type system" should "detect an toArray case when a data channel is going from a level to a lower level" in {
-    val i = Prototype[String]("i")
-
-    val exc = new Capsule(ExplorationTask("Exploration", new EmptySampling))
-
-    val testT = EmptyTask("Test")
-    testT addOutput i
-
-    val noOP = EmptyTask("NoOP")
-    val aggT = EmptyTask("Aggregation")
-
-    val testC = new Capsule(testT)
-    val noOPC = new Capsule(noOP)
-    val aggC = Slot(aggT)
-
-    val mole = (exc -< testC -- noOPC >- aggC) + (testC oo aggC)
-
-    val m = TypeUtil.computeManifests(mole, Sources.empty, Hooks.empty)(aggC).head
-    m.toArray should equal(true)
-    m.manifest.runtimeClass should equal(classOf[String])
   }
 
 }

@@ -23,13 +23,12 @@ import java.net.URI
 import org.openmole.misc.exception.UserBadDataError
 import scala.swing.Label
 import scala.swing.event.MousePressed
-import java.io.IOException
 
-class ExternalLinkLabel(val textLink: String,
-                        val href: String,
+class ExternalLinkLabel(val textLink: String = "",
+                        var href: String = "",
                         val textSize: Int = 4,
                         color: String = "#bbc807ff",
-                        bold: Boolean = false) extends Label {
+                        bold: Boolean = false) extends Label("") {
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
   link(textLink)
 
@@ -42,14 +41,19 @@ class ExternalLinkLabel(val textLink: String,
       }
   }
 
-  def link(t: String) = text = "<html>" + {
-    if (bold) "<b>" else ""
-  } +
-    "<font color=\"" + color + "\" size=\"" + textSize + "\">" +
-    t +
-    "</font>" + {
-      if (bold) "</b>" else ""
+  def hlink(t: String) = link(t, t)
+
+  def link(t: String, hr: String = href) = {
+    href = hr
+    text = "<html>" + {
+      if (bold) "<b>" else ""
     } +
-    "</html>"
+      "<font color=\"" + color + "\" size=\"" + textSize + "\">" +
+      t +
+      "</font>" + {
+        if (bold) "</b>" else ""
+      } +
+      "</html>"
+  }
 
 }

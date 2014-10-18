@@ -24,7 +24,7 @@ class SSHEnvironmentDataUI(val name: String = "",
       host,
       nbSlots,
       port,
-      dir,
+      Some(dir),
       openMOLEMemory,
       threads)(Workspace.authenticationProvider)
   }

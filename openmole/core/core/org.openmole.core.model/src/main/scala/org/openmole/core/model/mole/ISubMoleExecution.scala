@@ -47,7 +47,7 @@ trait ISubMoleExecution {
 
   def masterCapsuleRegistry: IRegistryWithTicket[IMasterCapsule, Context]
   def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, Buffer[Variable[_]]]
-  def transitionRegistry: IRegistryWithTicket[ITransition, Buffer[Variable[_]]]
+  def transitionRegistry: IRegistryWithTicket[ITransition, Iterable[Variable[_]]]
   def transitionLock: Lock
 
   def submit(capsule: ICapsule, context: Context, ticket: ITicket)

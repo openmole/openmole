@@ -1,0 +1,10 @@
+<dataUI class="org.openmole.ide.plugin.domain.file.ListFilesDomainDataUI">
+    <directoryPath></directoryPath>
+    <regexp></regexp>
+    <recursive>false</recursive>
+    <domainType class="scala.reflect.ManifestFactory$ClassTypeManifest">
+      <prefix class="None"/>
+      <runtimeClass>java.io.File</runtimeClass>
+      <typeArguments class="List"/>
+    </domainType>
+  </dataUI>

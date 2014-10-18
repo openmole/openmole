@@ -23,7 +23,7 @@ import org.openmole.misc.workspace.{ AuthenticationProvider, Workspace }
 object SSHAuthentication {
 
   def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])
-  def update(i: Int, a: SSHAuthentication) = Workspace.setAuthentication(i, a)
+  def update(i: Int, a: SSHAuthentication) = Workspace.authentications.save(i, a)
   def apply(i: Int)(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])(i)
   def apply(target: String, authentications: AuthenticationProvider) = {
     val list = authentications(classOf[SSHAuthentication])
@@ -32,6 +32,9 @@ object SSHAuthentication {
 
   def apply(login: String, host: String, port: Int, authentications: AuthenticationProvider): SSHAuthentication = apply(address(login, host, port), authentications)
   def address(login: String, host: String, port: Int) = s"$login@$host:$port"
+
+  def +=(a: SSHAuthentication) =
+    update(Workspace.authentications.size[SSHAuthentication], a)
 
 }
 

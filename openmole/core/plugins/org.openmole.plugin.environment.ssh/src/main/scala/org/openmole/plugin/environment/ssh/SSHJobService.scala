@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Romain Reuillon
+ * Copyright (C) 2014 Jonathan Passerat-Palmbach
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,20 +24,25 @@ import org.openmole.core.model.execution.ExecutionState
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.EventListener
+import org.openmole.misc.tools.service.Logger
+import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.gridscale._
 import fr.iscpif.gridscale.ssh.{ SSHJobService ⇒ GSSSHJobService, SSHConnectionCache, SSHJobDescription }
 import java.util.concurrent.atomic.AtomicInteger
 import collection.mutable
-import org.openmole.misc.tools.service.Logger
 
 object SSHJobService extends Logger
+
+import SSHJobService._
 
 trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 
   val environment: BatchEnvironment with SSHAccess
   def nbSlots: Int
 
-  val jobService = new GSSSHJobService with environment.ThisHost with SSHConnectionCache
+  val jobService = new GSSSHJobService with environment.ThisHost with SSHConnectionCache {
+    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout)
+  }
 
   val queue = new mutable.SynchronizedQueue[SSHBatchJob]
   @transient lazy val nbRunning = new AtomicInteger
@@ -80,11 +86,12 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
       val resultPath = result
     }
 
-    SSHJobService.logger.fine(s"Queuing /bin/bash $remoteScript in directory ${sharedFS.root}")
+    Log.logger.fine(s"SSHJobService: Queuing /bin/bash $remoteScript in directory ${sharedFS.root}")
 
     EventDispatcher.listen(sshBatchJob: BatchJob, BatchJobStatusListner, classOf[BatchJob.StateChanged])
 
     synchronized {
+      Log.logger.fine(s"SSHJobService: ${nbRunning.get()} on $nbSlots taken")
       if (nbRunning.get() < nbSlots) {
         nbRunning.incrementAndGet
         sshBatchJob.submit
@@ -95,6 +102,6 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
   }
 
   private[ssh] def submit(description: SSHJobDescription) =
-    jobService.submit(description)(authentication)
+    jobService.submit(description)
 
 }

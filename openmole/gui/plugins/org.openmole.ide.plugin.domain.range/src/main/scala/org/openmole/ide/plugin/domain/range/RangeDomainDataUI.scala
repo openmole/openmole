@@ -20,7 +20,6 @@ package org.openmole.ide.plugin.domain.range
 import java.math.BigDecimal
 import java.math.BigInteger
 import org.openmole.plugin.domain.range._
-import org.openmole.plugin.domain.bounded._
 import org.openmole.misc.tools.io.FromString
 import org.openmole.misc.tools.io.FromString._
 import org.openmole.misc.exception.UserBadDataError
@@ -61,9 +60,9 @@ case class RangeDomainDataUI[S](
       throw new UserBadDataError("Min and Max values are required for defining a Range Domain")
     else step match {
       case Some(s: String) ⇒
-        if (s.isEmpty) new Bounded[S](min, max)
-        else Range[S](min, max, s)
-      case _ ⇒ Bounded[S](min, max)
+        if (s.isEmpty) new Range[S](min, max)
+        else Range[S](min, max) step s
+      case _ ⇒ Range[S](min, max)
     }
   }
 

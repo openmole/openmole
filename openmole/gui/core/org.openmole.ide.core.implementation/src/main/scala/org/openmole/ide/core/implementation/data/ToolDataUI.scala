@@ -17,19 +17,19 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.core.model.data.Prototype
-import org.openmole.ide.core.implementation.registry.{ KeyGenerator, PrototypeKey }
+import org.openmole.ide.core.implementation.registry.PrototypeKey
 import org.openmole.core.model.mole.{ Hooks, Sources, IMole }
 import org.openmole.core.model.transition.{ IAggregationTransition, ITransition }
-import org.openmole.ide.core.implementation.builder.Builder
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 import org.openmole.core.implementation.mole.Mole
+import scala.util._
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 object ToolDataUI {
   def implicitPrototypes(coreInputs: Unit ⇒ List[Prototype[_]],
                          prototypesIn: Seq[PrototypeDataProxyUI],
                          coreOutputs: Unit ⇒ List[Prototype[_]],
                          prototypesOut: Seq[PrototypeDataProxyUI]) = {
-
     def protoFilter(lP: Seq[Prototype[_]], protos: Seq[PrototypeDataProxyUI]) = {
       lP.map { i ⇒ PrototypeKey(i) }.toList.diff(protos.map {
         p ⇒ PrototypeKey(p)
@@ -51,11 +51,14 @@ object ToolDataUI {
   }
 
   def buildUpLevelPrototypes(mole: IMole, sources: Sources, hooks: Hooks) = {
-    Mole.levels(mole).foreach {
-      case (c, level) ⇒
-        c.outputs(mole, sources, hooks).foreach { d ⇒
-          Proxies.instance.prototypeOrElseCreate(d.prototype, level)
-        }
+    Try(Mole.levels(mole)) match {
+      case Success(levels) ⇒ levels.foreach {
+        case (c, level) ⇒
+          c.outputs(mole, sources, hooks).foreach { d ⇒
+            Proxies.instance.prototypeOrElseCreate(d.prototype, level)
+          }
+      }
+      case Failure(e) ⇒ StatusBar().warn(e)
     }
   }
 }

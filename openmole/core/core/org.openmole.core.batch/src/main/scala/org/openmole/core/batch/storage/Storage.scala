@@ -17,23 +17,23 @@
 
 package org.openmole.core.batch.storage
 
-import fr.iscpif.gridscale.{ Storage ⇒ GSStorage }
-import fr.iscpif.gridscale.FileType
+import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage, FileType }
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.workspace._
+import org.openmole.misc.tools.service.ThreadUtil._
 
 object Storage {
-  val Timeout = new ConfigurationLocation("Storage", "Timeout")
   val BufferSize = new ConfigurationLocation("Storage", "BufferSize")
   val CopyTimeout = new ConfigurationLocation("Storage", "CopyTimeout")
+  val CloseTimeout = new ConfigurationLocation("Storage", "CloseTimeout")
 
-  Workspace += (Timeout, "PT2M")
-  Workspace += (BufferSize, "8192")
+  Workspace += (BufferSize, "65535")
   Workspace += (CopyTimeout, "PT1M")
+  Workspace += (CloseTimeout, "PT1M")
 
   def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
 }
@@ -41,46 +41,46 @@ object Storage {
 trait Storage {
 
   val storage: GSStorage
-  def authentication: storage.A
 
   def root: String
 
-  def child(parent: String, child: String) = storage.child(parent, child)
+  def child(parent: String, child: String): String = storage.child(parent, child)
 
-  protected def exists(path: String): Boolean = storage.exists(path)(authentication)
-  protected def listNames(path: String): Seq[String] = storage.listNames(path)(authentication)
-  protected def list(path: String): Seq[(String, FileType)] = storage.list(path)(authentication)
-  protected def makeDir(path: String): Unit = storage.makeDir(path)(authentication)
-  protected def rmDir(path: String): Unit = storage.rmDir(path)(authentication)
-  protected def rmFile(path: String): Unit = storage.rmFile(path)(authentication)
-  protected def openInputStream(path: String): InputStream = storage.openInputStream(path)(authentication)
-  protected def openOutputStream(path: String): OutputStream = storage.openOutputStream(path)(authentication)
-  protected def mv(from: String, to: String) = storage.mv(from, to)(authentication)
+  protected def exists(path: String): Boolean = storage.exists(path)
+  protected def listNames(path: String): Seq[String] = storage.listNames(path)
+  protected def list(path: String): Seq[(String, FileType)] = storage.list(path)
+  protected def makeDir(path: String): Unit = storage.makeDir(path)
+  protected def rmDir(path: String): Unit = storage.rmDir(path)
+  protected def rmFile(path: String): Unit = storage.rmFile(path)
+  protected def openInputStream(path: String): InputStream = storage.openInputStream(path)
+  protected def openOutputStream(path: String): OutputStream = storage.openOutputStream(path)
+  protected def mv(from: String, to: String) = storage.mv(from, to)
 
   protected def upload(src: File, dest: String) = {
     val os = openOutputStream(dest)
     try src.copy(os, bufferSize, copyTimeout)
-    finally os.close
+    finally timeout(os.close)(closeTimeout)
   }
 
   protected def uploadGZ(src: File, dest: String) = {
     val os = openOutputStream(dest).toGZ
     try src.copy(os, bufferSize, copyTimeout)
-    finally os.close
+    finally timeout(os.close)(closeTimeout)
   }
 
   protected def download(src: String, dest: File) = {
     val is = openInputStream(src)
     try is.copy(dest, bufferSize, copyTimeout)
-    finally is.close
+    finally timeout(is.close)(closeTimeout)
   }
 
   protected def downloadGZ(src: String, dest: File) = {
     val is = openInputStream(src).toGZ
     try is.copy(dest, bufferSize, copyTimeout)
-    finally is.close
+    finally timeout(is.close)(closeTimeout)
   }
 
   private def bufferSize = Workspace.preferenceAsInt(Storage.BufferSize)
-  private def copyTimeout = Workspace.preferenceAsDuration(Storage.CopyTimeout).toMilliSeconds
+  private def copyTimeout = Workspace.preferenceAsDuration(Storage.CopyTimeout)
+  private def closeTimeout = Workspace.preferenceAsDuration(Storage.CloseTimeout)
 }

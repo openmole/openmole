@@ -32,11 +32,6 @@ class ToStringHookDataUI(val name: String = "",
 
   def buildPanelUI = new ToStringHookPanelUI(this)
 
-  /*override def cloneWithoutPrototype(proxy: PrototypeDataProxyUI) =
-    new ToStringHookDataUI(name, toBeHooked.filterNot {
-      _ == proxy
-    })      */
-
   def coreObject = util.Try {
     val h = ToStringHook(toBeHooked.map {
       _.dataUI.coreObject.get
@@ -48,7 +43,6 @@ class ToStringHookDataUI(val name: String = "",
   def doClone(ins: Seq[PrototypeDataProxyUI],
               outs: Seq[PrototypeDataProxyUI],
               params: Map[PrototypeDataProxyUI, String]) = {
-    println("in doClone " + Proxies.instance.filter(toBeHooked))
     new ToStringHookDataUI(name, Proxies.instance.filter(toBeHooked), ins, outs, params)
   }
 }

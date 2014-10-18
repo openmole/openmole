@@ -42,7 +42,7 @@ class SlidingDomainPanelUI(val dataUI: SlidingDomainDataUI[_])(implicit val i18n
 
   def saveContent = {
     val classString =
-      ScenesManager.currentSamplingCompositionPanelUI.headOption match {
+      ScenesManager().currentSamplingCompositionPanelUI.headOption match {
         case Some(scp: SamplingCompositionPanelUI) ⇒ scp.firstNoneModifierDomain(dataUI) match {
           case Some(d: DomainDataUI) ⇒ d.domainType.toString.split('.').last
           case _                     ⇒ DOUBLE

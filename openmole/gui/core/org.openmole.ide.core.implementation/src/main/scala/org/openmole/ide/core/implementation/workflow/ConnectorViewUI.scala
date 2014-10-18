@@ -16,8 +16,6 @@
  */
 package org.openmole.ide.core.implementation.workflow
 
-import org.openmole.ide.misc.tools.util.ID
-
 trait ConnectorViewUI {
   def preview: String
 }

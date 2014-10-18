@@ -20,6 +20,5 @@ package org.openmole.core.batch.environment
 import org.openmole.core.batch.control._
 
 trait BatchService extends UsageControl {
-  val id: String
   def environment: BatchEnvironment
 }

@@ -17,27 +17,16 @@
 
 package org.openmole.core.batch.environment
 
-import akka.actor.Actor
 import akka.actor.ActorSystem
-import akka.actor.Props
-import akka.dispatch.Dispatchers
-import akka.routing.RoundRobinRouter
 import com.typesafe.config.ConfigFactory
 import java.io.File
-import java.util.concurrent.TimeoutException
 import org.openmole.misc.exception.InternalProcessingError
-import java.net.URI
 import java.util.concurrent.atomic.AtomicLong
-import java.util.logging.Level
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.jobservice._
-import org.openmole.core.batch.environment.BatchJobWatcher.Watch
-import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication._
-import org.openmole.core.implementation.execution._
-import org.openmole.misc.workspace._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.model.job._
 import org.openmole.misc.tools.service._
@@ -46,17 +35,9 @@ import org.openmole.misc.workspace._
 import org.openmole.misc.pluginmanager._
 import org.openmole.misc.eventdispatcher._
 import org.openmole.core.model.execution._
-import org.openmole.misc.tools.collection._
-import akka.actor.Actor
 import akka.actor.Props
-import akka.routing.SmallestMailboxRouter
-import scala.concurrent.stm._
-import collection.mutable.SynchronizedMap
-import collection.mutable.WeakHashMap
 import org.openmole.misc.tools.service.ThreadUtil._
-import scala.concurrent.duration.{ Duration ⇒ SDuration, MILLISECONDS }
 import ref.WeakReference
-import annotation.tailrec
 
 object BatchEnvironment extends Logger {
 
@@ -87,9 +68,6 @@ object BatchEnvironment extends Logger {
   }
 
   val MemorySizeForRuntime = new ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime")
-  val RuntimeLocation = new ConfigurationLocation("BatchEnvironment", "RuntimeLocation")
-  val JVMLinuxI386Location = new ConfigurationLocation("BatchEnvironment", "JVMLinuxI386Location")
-  val JVMLinuxX64Location = new ConfigurationLocation("BatchEnvironment", "JVMLinuxX64Location")
 
   val CheckInterval = new ConfigurationLocation("BatchEnvironment", "CheckInterval")
 
@@ -98,6 +76,7 @@ object BatchEnvironment extends Logger {
   val MinUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MinUpdateInterval")
   val MaxUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval")
   val IncrementUpdateInterval = new ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval")
+  val MaxUpdateErrorsInARow = ConfigurationLocation("BatchEnvironment", "MaxUpdateErrorsInARow")
 
   val JobManagmentThreads = new ConfigurationLocation("BatchEnvironment", "JobManagmentThreads")
 
@@ -107,15 +86,20 @@ object BatchEnvironment extends Logger {
 
   val NoTokenForSerivceRetryInterval = new ConfigurationLocation("BatchEnvironment", "NoTokenForSerivceRetryInterval")
 
+  val MemoryMargin = ConfigurationLocation("BatchEnvironment", "MemoryMargin")
+
   Workspace += (MinUpdateInterval, "PT1M")
   Workspace += (MaxUpdateInterval, "PT10M")
   Workspace += (IncrementUpdateInterval, "PT1M")
+  Workspace += (MaxUpdateErrorsInARow, "3")
 
-  Workspace += (RuntimeLocation, () ⇒ new File(new File(Workspace.location, "runtime"), "runtime.tar.gz").getAbsolutePath)
-  Workspace += (JVMLinuxI386Location, () ⇒ new File(new File(Workspace.location, "runtime"), "jvm-386.tar.gz").getAbsolutePath)
-  Workspace += (JVMLinuxX64Location, () ⇒ new File(new File(Workspace.location, "runtime"), "jvm-x64.tar.gz").getAbsolutePath)
+  private def runtimeDirLocation = Workspace.openMOLELocation.getOrElse(throw new InternalProcessingError("openmole.location not set")).child("runtime")
 
-  Workspace += (MemorySizeForRuntime, "512")
+  @transient lazy val runtimeLocation = runtimeDirLocation.child("runtime.tar.gz")
+  @transient lazy val JVMLinuxI386Location = runtimeDirLocation.child("jvm-386.tar.gz")
+  @transient lazy val JVMLinuxX64Location = runtimeDirLocation.child("jvm-x64.tar.gz")
+
+  Workspace += (MemorySizeForRuntime, "1024")
   Workspace += (CheckInterval, "PT1M")
   Workspace += (CheckFileExistsInterval, "PT1H")
   Workspace += (JobManagmentThreads, "200")
@@ -124,11 +108,11 @@ object BatchEnvironment extends Logger {
   Workspace += (StoragesGCUpdateInterval, "PT1H")
   Workspace += (NoTokenForSerivceRetryInterval, "PT2M")
 
-  //Workspace += (NbTryOnTimeout, "3")
+  Workspace += (MemoryMargin, "1024")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 
-  @transient lazy val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
+  lazy val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
     """
 akka {
   daemonic="on"
@@ -138,7 +122,7 @@ akka {
       type = Dispatcher
 
       fork-join-executor {
-        parallelism-min = 5
+        parallelism-min = 1
         parallelism-max = 10
       }
     }
@@ -146,7 +130,7 @@ akka {
 }
     """).withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
 
-  @transient lazy val jobManager = system.actorOf(Props(new JobManager))
+  lazy val jobManager = system.actorOf(Props(new JobManager))
 
 }
 
@@ -154,20 +138,7 @@ import BatchEnvironment._
 
 trait BatchEnvironment extends Environment { env ⇒
 
-  val jobRegistry = new ExecutionJobRegistry
-
-  val id: String
-
-  import BatchEnvironment.system.dispatcher
-
-  @transient lazy val watcher = system.actorOf(Props(new BatchJobWatcher(this)))
-  @transient lazy val registerWatcher: Unit = {
-    system.scheduler.schedule(
-      SDuration(Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval).toMilliSeconds, MILLISECONDS),
-      SDuration(Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval).toMilliSeconds, MILLISECONDS),
-      watcher,
-      Watch)
-  }
+  //val id: String
 
   type SS <: StorageService
   type JS <: JobService
@@ -181,18 +152,23 @@ trait BatchEnvironment extends Environment { env ⇒
     case Some(m) ⇒ m
   }
 
+  @transient lazy val batchJobWatcher = {
+    val watcher = new BatchJobWatcher(WeakReference(this))
+    Updater.registerForUpdate(watcher)
+    watcher
+  }
+
   def threads: Option[Int] = None
   def threadsValue = threads.getOrElse(1)
 
   override def submit(job: IJob) = {
-    registerWatcher
     val bej = executionJob(job)
     EventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
-    jobRegistry.register(bej)
-    jobManager ! Upload(bej)
+    batchJobWatcher.register(bej)
+    jobManager ! Manage(bej)
   }
 
-  def clean = ReplicaCatalog.withClient { implicit c ⇒
+  def clean = ReplicaCatalog.withSession { implicit c ⇒
     val cleaningThreadPool = fixedThreadPool(Workspace.preferenceAsInt(EnvironmentCleaningThreads))
     allStorages.foreach {
       s ⇒
@@ -206,9 +182,9 @@ trait BatchEnvironment extends Environment { env ⇒
 
   def executionJob(job: IJob) = new BatchExecutionJob(this, job)
 
-  @transient lazy val runtime = new File(Workspace.preference(BatchEnvironment.RuntimeLocation))
-  @transient lazy val jvmLinuxI386 = new File(Workspace.preference(BatchEnvironment.JVMLinuxI386Location))
-  @transient lazy val jvmLinuxX64 = new File(Workspace.preference(BatchEnvironment.JVMLinuxX64Location))
+  def runtime = BatchEnvironment.runtimeLocation
+  def jvmLinuxI386 = BatchEnvironment.JVMLinuxI386Location
+  def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
 
   @transient lazy val jobServices = {
     val jobServices = allJobServices
@@ -219,7 +195,7 @@ trait BatchEnvironment extends Environment { env ⇒
   @transient lazy val storages = {
     val storages = allStorages
     if (storages.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
-    Updater.delay(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDuration(StoragesGCUpdateInterval).toMilliSeconds)
+    Updater.registerForUpdate(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDuration(StoragesGCUpdateInterval))
     storages
   }
 
@@ -235,8 +211,10 @@ trait BatchEnvironment extends Environment { env ⇒
 
   @transient lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
-  def minUpdateInterval = Workspace.preferenceAsDuration(MinUpdateInterval).toMilliSeconds
-  def maxUpdateInterval = Workspace.preferenceAsDuration(MaxUpdateInterval).toMilliSeconds
-  def incrementUpdateInterval = Workspace.preferenceAsDuration(IncrementUpdateInterval).toMilliSeconds
+  def minUpdateInterval = Workspace.preferenceAsDuration(MinUpdateInterval)
+  def maxUpdateInterval = Workspace.preferenceAsDuration(MaxUpdateInterval)
+  def incrementUpdateInterval = Workspace.preferenceAsDuration(IncrementUpdateInterval)
+
+  def executionJobs: Iterable[BatchExecutionJob] = batchJobWatcher.executionJobs
 
 }

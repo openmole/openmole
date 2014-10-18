@@ -17,6 +17,7 @@
 package org.openmole.ide.core.implementation.panel
 
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI }
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.sampling.SamplingPanelUI
 
@@ -42,9 +43,13 @@ trait SamplingPanel extends Base
     savePanel
     widget.update
     basePanel.contents += samplingPanelUI.bestDisplay
+    basePanel.contents += samplingPanelUI.help
   }
 
-  def savePanel = widget.proxy.dataUI = samplingPanelUI.saveContent
+  def savePanel = {
+    widget.proxy.dataUI = samplingPanelUI.saveContent
+    widget.update
+  }
 
   def deleteProxy = {}
 

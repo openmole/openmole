@@ -23,10 +23,10 @@ package object mole {
   case class Sources(map: Map[ICapsule, Traversable[ISource]])
 
   implicit def hooksToMap(h: Hooks) = h.map.withDefault(_ ⇒ List.empty)
-  implicit def mapToHooks(m: Map[ICapsule, Traversable[IHook]]) = Hooks(m)
+  implicit def mapToHooks(m: Map[ICapsule, Traversable[IHook]]) = new Hooks(m)
 
   implicit def sourcesToMap(s: Sources) = s.map.withDefault(_ ⇒ List.empty)
-  implicit def mapToSources(m: Map[ICapsule, Traversable[ISource]]) = Sources(m)
+  implicit def mapToSources(m: Map[ICapsule, Traversable[ISource]]) = new Sources(m)
 
   object Hooks {
     def empty = Map.empty[ICapsule, Traversable[IHook]]

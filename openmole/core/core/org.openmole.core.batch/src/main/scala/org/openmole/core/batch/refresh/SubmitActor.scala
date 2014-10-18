@@ -32,7 +32,7 @@ object SubmitActor extends Logger
 import SubmitActor._
 
 class SubmitActor(jobManager: ActorRef) extends Actor {
-  def receive = {
+  def receive = withRunFinalization {
     case Submit(job, sj) ⇒
       if (!job.state.isFinal) {
         try {
@@ -46,7 +46,6 @@ class SubmitActor(jobManager: ActorRef) extends Actor {
             jobManager ! Submit(job, sj)
         }
       }
-      System.runFinalization
   }
 
   private def trySubmit(serializedJob: SerializedJob, environment: BatchEnvironment) = {

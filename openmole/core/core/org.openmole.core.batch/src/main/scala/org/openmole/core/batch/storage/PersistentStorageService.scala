@@ -17,15 +17,16 @@
 
 package org.openmole.core.batch.storage
 
-import com.db4o.ObjectContainer
 import java.io.File
 import java.net.URI
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.replication._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
-import fr.iscpif.gridscale.DirectoryType
-import collection.JavaConversions._
+import fr.iscpif.gridscale.storage._
+import scala.concurrent.duration.Duration
+
+import scala.slick.driver.H2Driver.simple._
 
 object PersistentStorageService extends Logger {
 
@@ -48,9 +49,8 @@ trait PersistentStorageService extends StorageService {
   @transient protected var persistentSpaceVar: Option[String] = None
   @transient private var time = System.currentTimeMillis
 
-  override def clean(implicit token: AccessToken, objectContainer: ObjectContainer) = synchronized {
-    for (r ← ReplicaCatalog.replicas(this)) ReplicaCatalog.remove(r)
-
+  override def clean(implicit token: AccessToken, session: Session) = synchronized {
+    ReplicaCatalog.onStorage(this).delete
     super.rmDir(baseDir)
     baseSpaceVar = None
     tmpSpaceVar = None
@@ -58,14 +58,24 @@ trait PersistentStorageService extends StorageService {
     time = System.currentTimeMillis
   }
 
-  override def persistentDir(implicit token: AccessToken, objectContainer: ObjectContainer): String = synchronized {
+  override def persistentDir(implicit token: AccessToken, session: Session): String = synchronized {
     persistentSpaceVar match {
       case None ⇒
         val persistentPath = child(baseDir, persistent)
         if (!super.exists(persistentPath)) super.makeDir(persistentPath)
 
-        for (file ← super.listNames(persistentPath))
-          ReplicaCatalog.rmFileIfNotUsed(this, super.child(persistentPath, file))
+        def graceIsOver(name: String) =
+          ReplicaCatalog.timeOfPersistent(name).map {
+            _ + Workspace.preferenceAsDuration(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
+          }.getOrElse(true)
+
+        for {
+          name ← super.listNames(persistentPath)
+          if graceIsOver(name)
+        } {
+          val path = super.child(persistentPath, name)
+          if (!ReplicaCatalog.forPath(path).exists.run) backgroundRmFile(path)
+        }
 
         persistentSpaceVar = Some(persistentPath)
         persistentPath
@@ -76,7 +86,7 @@ trait PersistentStorageService extends StorageService {
   override def tmpDir(implicit token: AccessToken) = synchronized {
     tmpSpaceVar match {
       case Some(space) ⇒
-        if (time + Workspace.preferenceAsDuration(TmpDirRegenerate).toMilliSeconds < System.currentTimeMillis) {
+        if (time + Workspace.preferenceAsDuration(TmpDirRegenerate).toMillis < System.currentTimeMillis) {
           val tmpDir = createTmpDir
           tmpSpaceVar = Some(tmpDir)
           tmpDir
@@ -96,11 +106,12 @@ trait PersistentStorageService extends StorageService {
     val tmpNoTime = child(baseDir, tmp)
     if (!super.exists(tmpNoTime)) super.makeDir(tmpNoTime)
 
-    val removalDate = System.currentTimeMillis - Workspace.preferenceAsDuration(TmpDirRemoval).toMilliSeconds
+    val removalDate = System.currentTimeMillis - Workspace.preferenceAsDuration(TmpDirRemoval).toMillis
 
     for ((name, fileType) ← super.list(tmpNoTime)) {
       val childPath = child(tmpNoTime, name)
-      if (fileType == DirectoryType) {
+
+      def rmDir =
         try {
           val timeOfDir = (if (name.endsWith("/")) name.substring(0, name.length - 1) else name).toLong
           if (timeOfDir < removalDate) backgroundRmDir(childPath)
@@ -108,8 +119,17 @@ trait PersistentStorageService extends StorageService {
         catch {
           case (ex: NumberFormatException) ⇒ backgroundRmDir(childPath)
         }
+
+      fileType match {
+        case DirectoryType ⇒ rmDir
+        case FileType      ⇒ backgroundRmFile(childPath)
+        case LinkType      ⇒ backgroundRmFile(childPath)
+        case UnknownType ⇒
+          try rmDir
+          catch {
+            case e: Throwable ⇒ backgroundRmFile(childPath)
+          }
       }
-      else backgroundRmFile(childPath)
     }
 
     val tmpTimePath = super.child(tmpNoTime, time.toString)

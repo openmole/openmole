@@ -1,0 +1,12 @@
+<dataUI class="org.openmole.ide.plugin.environment.ssh.SSHEnvironmentDataUI">
+    <name>test</name>
+    <login></login>
+    <host></host>
+    <nbSlots>1</nbSlots>
+    <port>22</port>
+    <dir>/tmp/</dir>
+    <openMOLEMemory class="Some">
+      <x class="int">512</x>
+    </openMOLEMemory>
+    <threads class="None"/>
+  </dataUI>

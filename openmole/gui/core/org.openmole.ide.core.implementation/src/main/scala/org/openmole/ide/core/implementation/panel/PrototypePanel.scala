@@ -16,7 +16,7 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, Proxies, PrototypeDataProxyUI }
+import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.panel.ConceptMenu._
 import org.openmole.ide.core.implementation.data.{ PrototypeDataUI, ImageView }
 import scala.swing.Label
@@ -44,7 +44,7 @@ trait PrototypePanel extends Base
     savePanel
     proxy.dataUI = d
     createSettings
-    scene.updatePanels
+    scene.updatePanels(index)
   }
 
   build
@@ -89,17 +89,6 @@ trait PrototypePanel extends Base
   }
 
   def deleteProxy = {
-
-    //remove in Tasks
-    /* val capsulesWithProtos: List[CapsuleUI] = ScenesManager.moleScenes.flatMap {
-      _.dataUI.capsules.values.flatMap { c ⇒
-        c.dataUI.task match {
-          case Some(x: TaskDataProxyUI) ⇒ if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
-          case _                        ⇒ None
-        }
-      }
-    }.toList */
-
     scene.closePropertyPanel(index)
     Proxies.instance -= proxy
     -=(proxy)
@@ -117,14 +106,13 @@ trait PrototypePanel extends Base
         s.dataUI = s.dataUI.doClone(proxy)
       }
 
-      List(ScenesManager.currentScene).flatten.foreach {
+      List(ScenesManager().currentScene).flatten.foreach {
         _.dataUI.connectors.values.toList.foreach {
           dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy }
         }
       }
-      ScenesManager.invalidateMoles
+      ScenesManager().invalidateMoles
 
     }
   }
-
 }

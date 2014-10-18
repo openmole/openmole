@@ -1,11 +1,33 @@
 #!/bin/bash
 
 CURDIR=$PWD
-LOCATION=`dirname $0`
+
+#REALPATH=`readlink -f $0`
+#LOCATION=`dirname "$REALPATH"`
+
+#readlink -f does not work on mac, use alternate script
+TARGET_FILE=$0
+
+cd `dirname $TARGET_FILE`
+TARGET_FILE=`basename $TARGET_FILE`
+
+# Iterate down a (possible) chain of symlinks
+while [ -L "$TARGET_FILE" ]
+do
+    TARGET_FILE=`readlink $TARGET_FILE`
+    cd `dirname $TARGET_FILE`
+    TARGET_FILE=`basename $TARGET_FILE`
+done
+
+REALPATH=$TARGET_FILE
+#end of readlink -f
+
+LOCATION=$( cd $(dirname $REALPATH) ; pwd -P )
+cd $CURDIR
 
 (nohup sh $LOCATION/dbserver/bin/openmole-dbserver >/dev/null &) 2>/dev/null
 
-MEM="1G"
+MEM=${OPENMOLE_MEMORY:-"1G"}
 
 FLAG=""
 
@@ -15,20 +37,25 @@ case "$JVMVERSION" in
   *64-Bit*) FLAG="-XX:+UseCompressedOops";;
 esac
 
-SPLASHSCREEN="-splash:$LOCATION/splashscreen.png"
+SPLASHSCREEN="${LOCATION}/splashscreen.png"
 
-for ARG in $@
-do
-  if [[ $ARG == "-c" || $ARG == "-ws" ]]; then SPLASHSCREEN=""; fi
+ARGS=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -c|-wc) SPLASHSCREEN=""; ARGS="$ARGS $1";;
+    -mem) shift; MEM=$1 ;;
+    *) ARGS="$ARGS $1" ;;
+  esac
+  shift
 done
 
+mkdir -p $HOME/.openmole/.tmp/
+CONFIGDIR=$HOME/.openmole/.tmp/`date +%s`_$RANDOM
 
-CONFIGDIR=$LOCATION/$RANDOM
-
-
-java -Dosgi.locking=none -Dopenmole.location=${LOCATION} -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} $SPLASHSCREEN -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseG1GC \
-     -jar $LOCATION/plugins/org.eclipse.equinox.launcher.jar \
-     -cp $LOCATION/openmole-plugins -gp $LOCATION/openmole-plugins-gui "$@"
+java -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -splash:"${SPLASHSCREEN}" -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseG1GC \
+     -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog \
+     -cp "$LOCATION/openmole-plugins" -gp "$LOCATION/openmole-plugins-gui" $ARGS
 
 rm -rf ${CONFIGDIR} 
 

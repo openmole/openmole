@@ -17,21 +17,20 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.misc.tools.util._
 import org.openmole.misc.tools.obj.ClassUtils._
 import concurrent.stm._
 import org.openmole.ide.core.implementation.builder.Builder
 import org.openmole.ide.core.implementation.registry.PrototypeKey
-import org.openmole.misc.eventdispatcher.EventDispatcher
+//import org.openmole.misc.eventdispatcher.{ Event, EventListener, EventDispatcher }
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.core.model.data.Prototype
 
 object Proxies {
   var instance = new Proxies
 
-  def check[T <: DataProxyUI](proxyList: List[T]) = proxyList.filter {
-    instance.contains
-  }
+  def check[T <: DataProxyUI](proxyList: List[T]) = proxyList.filter { instance.contains }
 
   def check[T <: DataProxyUI](proxy: T) = instance.contains(proxy)
 }
@@ -67,6 +66,8 @@ class Proxies {
   private def _hooks = castProxies[HookDataProxyUI]
   private def _sources = castProxies[SourceDataProxyUI]
 
+  def ++(p: Proxies) = p.all.foreach { += }
+
   def task(id: ID.Type) = _tasks.get(id)
   def prototype(id: ID.Type) = _prototypes.get(id)
   def sampling(id: ID.Type) = _samplings.get(id)
@@ -87,30 +88,39 @@ class Proxies {
     implicit ctx ⇒
       prototype(k).getOrElse {
         val p = PrototypeKey.build(k)
-        this += p
+        add(p)
         p
       }
   }
 
   def +=(p: DataProxyUI) = {
+    add(p)
+    updateScene
+  }
+
+  def add(p: DataProxyUI) = {
     _proxies.single += p.id -> p
-    EventDispatcher.trigger(this, new ProxyCreatedEvent)
+  }
+
+  def remove(p: DataProxyUI) = {
+    _proxies.single -= p.id
   }
 
   def -=(p: DataProxyUI) = {
-    _proxies.single -= p.id
-    EventDispatcher.trigger(this, new ProxyDeletedEvent)
+    remove(p)
+    // EventDispatcher.trigger(this, new ProxyDeletedEvent)
+    updateScene
   }
 
   def cleanGenerated = prototypes.foreach { p ⇒
     if (p.generated) -=(p)
   }
 
-  def filterListTupleOut[T, P <: DataProxyUI](m: List[(T, P)]) = m.filter {
+  def filterListTupleOut[T, P <: DataProxyUI, Q](m: List[(T, P, Q)]) = m.filter {
     p ⇒ contains(p._2)
   }
 
-  def filterListTupleIn[P <: DataProxyUI, T](m: List[(P, T)]) = m.filter {
+  def filterListTupleIn[P <: DataProxyUI, T, Q](m: List[(P, T, Q)]) = m.filter {
     p ⇒ contains(p._1)
   }
 
@@ -130,7 +140,14 @@ class Proxies {
     p ⇒ contains(p)
   }
 
+  def all = tasks ++ prototypes ++ samplings ++ environments ++ hooks ++ sources
+
   def contains(p: DataProxyUI) = _proxies.single.contains(p.id)
+
+  def prototypesWithMinDim(dim: Int): List[PrototypeDataProxyUI] = prototypesWithMinDim(dim, prototypes.toList)
+
+  def prototypesWithMinDim(dim: Int,
+                           protoList: List[PrototypeDataProxyUI]): List[PrototypeDataProxyUI] = protoList.toList.filter { _.dataUI.dim >= dim }
 
   def classPrototypes(prototypeClass: Class[_]): List[PrototypeDataProxyUI] = {
     classPrototypes(prototypeClass, prototypes.toList)
@@ -149,7 +166,9 @@ class Proxies {
     implicit actx ⇒
       ConceptMenu.clearAllItems
       _proxies.clear
-      EventDispatcher.trigger(this, new ProxyDeletedEvent)
+      updateScene
   }
+
+  def updateScene = ScenesManager.instance.currentScene.map { _.updatePanels(0) }
 }
 

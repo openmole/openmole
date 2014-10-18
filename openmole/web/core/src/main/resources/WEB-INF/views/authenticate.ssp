@@ -1,0 +1,30 @@
+<%@ val goTo: String%>
+
+#set(title) Authentication
+#end
+
+#set(js)
+<%= unescape("var goTo = \"" +goTo+ "\";")%>
+var getKey = function() {$.ajax({
+    url: '/getApiKey',
+    type: 'post',
+    data: {
+      redirect: goTo
+    },
+    headers: {
+        pass: $("#passBox").val()   //passes
+    },
+    success: function (data) {
+            if(data != "")
+              displayError(data);
+
+            window.location.replace(goTo);
+            console.log("issued ajax call");
+    }
+});};
+$("#Submission").click(getKey);
+#end
+
+Password: <input type="text" id="passBox"><br>
+<input type="submit" id="Submission" value="submit">
+

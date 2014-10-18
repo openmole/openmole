@@ -16,9 +16,8 @@
  */
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.registry.KeyRegistry
-import scala.swing.{ Publisher, Label, Component, MyComboBox }
+import scala.swing.{ Label, Component, MyComboBox }
 import swing.event.{ FocusGained, SelectionChanged }
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import javax.swing.ImageIcon
@@ -26,6 +25,8 @@ import javax.imageio.ImageIO
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.data.SamplingDataUI
 import org.openmole.ide.core.implementation.panel.{ AnonSaveSettings, Settings }
+import org.openmole.ide.misc.widget.{ URL, Helper, PluginPanel }
+import java.util.{ Locale, ResourceBundle }
 
 class SamplingPanelUI(samplingWidget: ISamplingWidget) extends Settings with AnonSaveSettings {
 
@@ -33,7 +34,7 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget) extends Settings with Ano
   val incomings = samplingWidget.incomings
 
   val samplings =
-    KeyRegistry.samplings.values.map {
+    KeyRegistry.samplings.map {
       _.buildDataUI
     }.toList.sorted.filter {
       s ⇒
@@ -48,7 +49,7 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget) extends Settings with Ano
       s ⇒ testConstraints(s.inputNumberConstrainst)
     }
 
-  StatusBar().clear
+  StatusBar.clear
 
   val samplingComboBox = new MyComboBox(samplings) {
     peer.setMaximumRowCount(15)
@@ -103,4 +104,6 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget) extends Settings with Ano
       case _            ⇒ true
     }
   }
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+  override lazy val help = new Helper(List(new URL(i18n.getString("samplingPermalinkText"), i18n.getString("samplingPermalink"))))
 }

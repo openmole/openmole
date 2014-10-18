@@ -37,7 +37,7 @@ class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends 
     val itAddFactor = new MenuItem(new Action("Add Domain") {
       def apply = {
         closeExtraPanel
-        val domainFactories = KeyRegistry.domains.values
+        val domainFactories = KeyRegistry.domains
         panelScene.addDomain(DomainProxyUI(domainFactories.map {
           _.buildDataUI
         }.filter(_.name == "Range").headOption.getOrElse(domainFactories.head.buildDataUI)),
@@ -48,7 +48,7 @@ class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends 
     val samplingMenu = new MenuItem(new Action("Add Sampling") {
       def apply = {
         closeExtraPanel
-        val samplingFactories = KeyRegistry.samplings.values
+        val samplingFactories = KeyRegistry.samplings
         panelScene.addSampling(SamplingProxyUI(samplingFactories.map {
           _.buildDataUI
         }.filter(_.name == "Complete").headOption.getOrElse(samplingFactories.head.buildDataUI)),
@@ -61,7 +61,7 @@ class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends 
   }
 
   def closeExtraPanel =
-    ScenesManager.currentSceneContainer match {
+    ScenesManager().currentSceneContainer match {
       case Some(x: ISceneContainer) ⇒ x.scene.closePropertyPanel
       case _                        ⇒
     }

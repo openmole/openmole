@@ -26,7 +26,7 @@ object ExecutionMoleScene {
   def apply(name: String) = new ExecutionMoleScene(new MoleUI(name))
 }
 
-class ExecutionMoleScene(val dataUI: IMoleUI) extends MoleScene {
+class ExecutionMoleScene(val dataUI: MoleUI) extends MoleScene {
 
   val isBuildScene = false
 

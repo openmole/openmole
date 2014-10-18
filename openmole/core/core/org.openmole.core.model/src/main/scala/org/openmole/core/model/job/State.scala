@@ -23,7 +23,7 @@ object State extends Enumeration {
    * @param isFinal Get if the state is a final state. Meaning there is no way
    * it the {@link IMoleJob} state can change again.
    */
-  case class State(name: String, val isFinal: Boolean = false) extends Val(name)
+  case class State(name: String, isFinal: Boolean = false) extends Val(name)
 
   /**
    *

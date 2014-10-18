@@ -123,6 +123,10 @@ object DataflowProblem {
     override def toString = s"Implicit ${`implicit`} not found in input of $capsule"
   }
 
+  case class MoleTaskDataFlowProblem(capsule: ICapsule, problem: DataflowProblem) extends DataflowProblem {
+    override def toString = s"Error in mole task $capsule: $problem"
+  }
+
 }
 
 trait DataflowProblem extends Problem {

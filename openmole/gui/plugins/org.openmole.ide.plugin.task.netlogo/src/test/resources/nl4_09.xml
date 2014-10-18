@@ -1,0 +1,12 @@
+<dataUI class="org.openmole.ide.plugin.task.netlogo.NetLogo4TaskDataUI">
+    <name>test4</name>
+    <workspaceEmbedded>false</workspaceEmbedded>
+    <nlogoPath></nlogoPath>
+    <lauchingCommands></lauchingCommands>
+    <prototypeMappingInput class="List"/>
+    <prototypeMappingOutput class="List"/>
+    <resources class="List"/>
+    <inputs class="List"/>
+    <outputs class="List"/>
+    <inputParameters class="HashMap"/>
+</dataUI>

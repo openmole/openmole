@@ -1,15 +1,15 @@
 package org.openmole.buildsystem
 
+import org.apache.commons.compress.archivers.tar.{ TarArchiveEntry, TarArchiveOutputStream }
 import sbt._
+import sbt.Def
 import Keys._
 import scala.util.matching.Regex
 import OMKeys._
 import java.util.zip.GZIPOutputStream
-import org.kamranzafar.jtar.{ TarEntry, TarOutputStream }
 import resource._
-import java.io.{ BufferedOutputStream, BufferedInputStream, FileOutputStream }
+import java.io.{ BufferedOutputStream, FileOutputStream }
 import scala.io.Source
-import sbt.Path._
 import com.typesafe.sbt.osgi.OsgiKeys._
 import scala.Some
 
@@ -23,11 +23,12 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
   //To add zipping to project, add zipProject to its settings
   lazy val zipProject: Seq[Project.Setting[_]] = Seq(
-    zipFiles <+= copyDependencies map { f ⇒ f },
-    zip <<= (zipFiles, streams, target, tarGZName) map zipImpl,
-    tarGZName := None,
+    zipFiles <+= copyDependencies.toTask,
+    innerZipFolder := None,
+    zip <<= (zipFiles, streams, target, tarGZName, innerZipFolder) map zipImpl,
+    tarGZName := None
 
-    assemble <<= assemble dependsOn zip
+  //assemble <<= assemble dependsOn zip
   )
 
   lazy val urlDownloadProject: Seq[Project.Setting[_]] = Seq(
@@ -44,38 +45,47 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
   lazy val resAssemblyProject: Seq[Project.Setting[_]] = Seq(
     resourceSets := Set.empty,
+    setExecutable := Set.empty,
     resTask,
     zipFiles <++= resourceAssemble map { (f: Set[File]) ⇒ f.toSeq },
     assemble <<= assemble dependsOn resourceAssemble
   )
 
-  lazy val resTask = resourceAssemble <<= (resourceSets, target, assemblyPath, streams, name) map { //TODO: Find a natural way to do this
-    (rS, target, cT, s, name) ⇒
+  lazy val resTask = resourceAssemble <<= (resourceSets, setExecutable, target, assemblyPath, streams, name) map { //TODO: Find a natural way to do this
+    (rS, sE, target, cT, s, name) ⇒
       {
         def expand(f: File, p: File, o: String): Array[(File, File)] = if (f.isDirectory) f.listFiles() flatMap (expand(_, p, o)) else {
           val dest = cT / o / (if (f != p) getDiff(f, p) else f.name)
           Array(f -> dest)
         }
 
-        def isChildOf(f: File, oF: File): Boolean = f.getCanonicalPath.contains(oF.getCanonicalPath)
+        def rExpand(f: File): Set[File] = if (f.isDirectory) (f.listFiles() flatMap rExpand).toSet else Set(f)
+
         def getDiff(f: File, oF: File): String = f.getCanonicalPath.takeRight(f.getCanonicalPath.length - oF.getCanonicalPath.length)
 
-        val resourceMap = (rS flatMap { case (in, out) ⇒ expand(in, in, out) }).toMap
+        val resourceMap = (rS flatMap { case (in, out) ⇒ expand(in, in, out) }).groupBy(_._1).collect { case (k, v) ⇒ k -> (v map (_._2)) }
+
+        val expandedExecSet = sE map (cT / _) flatMap rExpand
+
+        s.log.info(s"List of files to be marked executable: $expandedExecSet")
 
         val copyFunction = FileFunction.cached(target / ("resAssembleCache" + name), FilesInfo.lastModified, FilesInfo.exists) {
-          _ map {
-            rT ⇒
-              /*val out = rS.filter(i ⇒ isChildOf(rT, i._1)).reduce { (a, b) ⇒ if (a._1.getAbsolutePath.length > b._1.getAbsolutePath.length) a else b }
-              val dest = cT / out._2 / (if (out._1.isDirectory) getDiff(rT, out._1) else getDiff(rT, out._1.getParentFile))
-              println(getDiff(rT, out._1.getParentFile))
-              println(rT.getCanonicalPath)
-              println(out._1.getParentFile.getCanonicalPath)*/
-              val dest = resourceMap(rT)
+          f ⇒
+            val res = f flatMap {
+              rT ⇒
+                val dests = resourceMap(rT)
 
-              s.log.info("Copying file " + rT.getPath + " to: " + dest.getCanonicalPath)
-              IO.copyFile(rT, dest)
-              dest
-          }
+                for (dest ← dests) {
+                  s.log.info(s"Copying file ${rT.getPath} to ${dest.getCanonicalPath} ${if (expandedExecSet.contains(dest)) "(e)" else ""}")
+                  IO.copyFile(rT, dest)
+                  dest
+                }
+
+                dests
+            }
+
+            expandedExecSet foreach (ex ⇒ if (!ex.exists()) s.log.error(s"$ex does not exist. Maybe you typed the wrong relative path?") else ex.setExecutable(true))
+            res
         }
 
         copyFunction(resourceMap.keySet)
@@ -127,10 +137,14 @@ trait Assembly { self: BuildSystemDefaults ⇒
     ) ++ s ++ scalariformDefaults)
   }
 
-  def zipImpl(targetFolders: Seq[File], s: TaskStreams, t: File, name: Option[String]): File = {
+  def zipImpl(targetFolders: Seq[File], s: TaskStreams, t: File, name: Option[String], folder: Option[String]): File = {
     val out = t / ((name getOrElse "assembly") + ".tar.gz")
 
-    val tgzOS = managed(new TarOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(out)))))
+    val tgzOS = managed {
+      val tos = new TarArchiveOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(out))))
+      tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU)
+      tos
+    }
 
     def findFiles(f: File): Set[File] = if (f.isDirectory) (f.listFiles map findFiles flatten).toSet else Set(f)
 
@@ -152,15 +166,18 @@ trait Assembly { self: BuildSystemDefaults ⇒
           file ← fileSet
           is ← managed(Source.fromFile(file)(scala.io.Codec.ISO8859))
         } {
-          val relativeFile = (file relativeTo lCP).get.getPath
+          val relativeFile = (if (folder isDefined) folder.get + "/" else "") + (file relativeTo lCP).get.getPath
           s.log.info("\t - " + relativeFile)
-          os.putNextEntry(new TarEntry(file, relativeFile))
 
-          for (c ← is.iter) {
-            os.write(c.toByte)
-          }
+          val entry = new TarArchiveEntry(file, relativeFile)
+          entry.setSize(file.length)
+          if (file.canExecute) entry.setMode(TarArchiveEntry.DEFAULT_FILE_MODE | 111)
 
-          os.flush()
+          os.putArchiveEntry(entry)
+
+          for (c ← is.iter) { os.write(c.toByte) }
+
+          os.closeArchiveEntry()
         }
         Set(out)
     }
@@ -169,57 +186,58 @@ trait Assembly { self: BuildSystemDefaults ⇒
   }
 
   def urlDownloader(urls: Seq[(URL, File)], s: TaskStreams, targetDir: File) = {
-    val cache = targetDir / "url-cache"
+    def cache(url: URL) = targetDir / s"url-cache-${Hash.toHex(Hash(url.toString))}"
 
     targetDir.mkdir() //makes sure target exists
 
-    val cacheInput = managed(Source.fromFile(cache)(io.Codec.ISO8859))
-
-    val hashes = (urls map { case (url, _) ⇒ url.toString } flatten).toIterator
-
-    val alreadyCached = if (cache.exists) {
-      ((cacheInput map { _.iter zip hashes forall { case (n, cached) ⇒ n == cached } }).opt getOrElse false) && (urls forall (_._2.exists))
-    }
-    else {
-      cache.createNewFile()
-      false
-    }
-
-    val cacheOutput = managed(new BufferedOutputStream(new FileOutputStream(cache)))
-
-    if (alreadyCached) {
-      Seq.empty
-    }
-    else {
-      for { os ← cacheOutput; hash ← hashes } { os.write(hash) }
-      urls.map {
-        case (url, file) ⇒
-          s.log.info("Downloading " + url + " to " + file)
-          val os = managed(new BufferedOutputStream(new FileOutputStream(file)))
-          os.foreach(BasicIO.transferFully(url.openStream, _))
-          file
+    for {
+      (url, file) ← urls
+    } yield {
+      val cacheFile = cache(url)
+      if (!cacheFile.exists) {
+        s.log.info("Downloading " + url + " to " + file)
+        val os = managed(new BufferedOutputStream(new FileOutputStream(file)))
+        os.foreach(BasicIO.transferFully(url.openStream, _))
+        cacheFile.createNewFile()
       }
+      file
     }
   }
+
 }
 
 object Assembly {
   //checks to see if settingkey key exists for project p in Seq s. If it does, applies the filter function to key's value, and if that returns true, the project stays in the seq.
-  def projFilter[T](s: Seq[ProjectReference], key: SettingKey[T], filter: T ⇒ Boolean): Project.Initialize[Seq[ProjectReference]] = {
+  def projFilter[T](s: Seq[ProjectReference], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Def.Initialize[Seq[ProjectReference]] = {
     // (key in p) ? returns Initialize[Option[T]]
     // Project.Initialize.join takes a Seq[Initialize[_]] and gives back an Initialize[Seq[_]]
-    Project.Initialize.join(s map { p ⇒ (key in p).?(i ⇒ i -> p) })(_ filter {
+    val ret = Def.Initialize.join(s map { p ⇒ (key in p).?(i ⇒ i -> p) })(_ filter {
       case (None, _)    ⇒ false
       case (Some(v), _) ⇒ filter(v)
     })(_ map { _._2 })
+
+    lazy val ret2 = Def.bind(ret) { r ⇒
+      val x = r.map(expandToDependencies)
+      val y = Def.Initialize.join(x)
+      y { _.flatten.toSet.toSeq } //make sure all references are unique
+    }
+
+    if (intransitive) ret else ret2
   }
 
-  implicit def ProjRefs2RichProjectSeq(s: Seq[ProjectReference]) = new RichProjectSeq(Project.value(s))
+  //recursively explores the dependency tree of pr and adds all dependencies to the list of projects to be copied
+  def expandToDependencies(pr: ProjectReference): Def.Initialize[Seq[ProjectReference]] = {
+    val r = (thisProject in pr) { _.dependencies.map(_.project) }
+    val r3 = Def.bind(Def.bind(r) { ret ⇒ Def.Initialize.join(ret map expandToDependencies) }) { ret ⇒ r(first ⇒ pr +: ret.flatten) }
+    r3
+  }
 
-  implicit def InitProjRefs2RichProjectSeq(s: Project.Initialize[Seq[ProjectReference]]) = new RichProjectSeq(s)
+  implicit def ProjRefs2RichProjectSeq(s: Seq[ProjectReference]) = new RichProjectSeq(Def.value(s))
 
-  class RichProjectSeq(s: Project.Initialize[Seq[ProjectReference]]) {
-    def keyFilter[T](key: SettingKey[T], filter: (T) ⇒ Boolean) = projFilter(s, key, filter)
+  implicit def InitProjRefs2RichProjectSeq(s: Def.Initialize[Seq[ProjectReference]]) = new RichProjectSeq(s)
+
+  class RichProjectSeq(s: Def.Initialize[Seq[ProjectReference]]) {
+    def keyFilter[T](key: SettingKey[T], filter: (T) ⇒ Boolean, intransitive: Boolean = false) = projFilter(s, key, filter, intransitive)
     def sendTo(to: String) = sendBundles(s, to) //TODO: This function is specific to OSGI bundled projects. Make it less specific?
   }
 
@@ -229,13 +247,18 @@ object Assembly {
     (keyFilter.tail foldLeft projFilter(s, head._1, head._2)) { case (s, (key, filter)) ⇒ projFilter(s, key, filter) }
   }*/
 
-  def projFilter[T](s: Project.Initialize[Seq[ProjectReference]], key: SettingKey[T], filter: T ⇒ Boolean): Project.Initialize[Seq[ProjectReference]] = {
-    Project.bind(s)(j ⇒ projFilter(j, key, filter))
+  def projFilter[T](s: Def.Initialize[Seq[ProjectReference]], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Project.Initialize[Seq[ProjectReference]] = {
+    Def.bind(s)(j ⇒ projFilter(j, key, filter, intransitive))
   }
 
-  def sendBundles(bundles: Project.Initialize[Seq[ProjectReference]], to: String): Project.Initialize[Task[Set[(File, String)]]] = Project.bind(bundles) { projs ⇒
+  //TODO: New API makes this much simpler
+  //val bundles: Seq[FIle] = bundle.all( ScopeFilter( inDependencies(ref) ) ).value
+
+  def sendBundles(bundles: Def.Initialize[Seq[ProjectReference]], to: String): Def.Initialize[Task[Set[(File, String)]]] = Def.bind(bundles) { projs ⇒
     require(projs.nonEmpty)
-    val seqOTasks: Project.Initialize[Seq[Task[Set[(File, String)]]]] = Project.Initialize.join(projs.map(p ⇒ (bundle in p) map { f ⇒ Set(f -> to) }))
+    val seqOTasks: Def.Initialize[Seq[Task[Set[(File, String)]]]] = Def.Initialize.join(projs.map(p ⇒ bundle in p map { f ⇒
+      Set(f -> to)
+    }))
     seqOTasks { seq ⇒ seq.reduceLeft[Task[Set[(File, String)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }
   }
 }

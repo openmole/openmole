@@ -23,7 +23,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.misc.workspace._
 import org.openmole.misc.tools.service.Random._
-import org.openmole.core.implementation.task.Task._
+import org.openmole.core.implementation.task._
 import algorithm._
 import fr.iscpif.mgo._
 import org.openmole.core.model.sampling.Sampling
@@ -31,13 +31,13 @@ import org.openmole.core.model.sampling.Sampling
 object BreedSampling {
 
   def apply(evolution: Breeding with GManifest with Archive)(
-    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
+    population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
     archive: Prototype[evolution.A],
     genome: Prototype[evolution.G],
     size: Int)(implicit plugins: PluginSet) = {
-    val (_individuals, _archive, _genome) = (individuals, archive, genome)
+    val (_population, _archive, _genome) = (population, archive, genome)
     new BreedSampling(evolution, size) {
-      val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
+      val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
       val archive = _archive.asInstanceOf[Prototype[evolution.A]]
       val genome = _genome.asInstanceOf[Prototype[evolution.G]]
     }
@@ -45,17 +45,18 @@ object BreedSampling {
 }
 
 sealed abstract class BreedSampling(val evolution: Breeding with GManifest with Archive, val size: Int) extends Sampling {
-  def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
+  def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
   def archive: Prototype[evolution.A]
   def genome: Prototype[evolution.G]
 
   def prototypes = List(genome)
-  override def inputs = DataSet(individuals, archive)
+  override def inputs = DataSet(population, archive)
 
   override def build(context: Context) = {
-    val rng = newRNG(context(openMOLESeed))
-    val is = context(individuals)
+    val rng = Task.buildRNG(context)
+    val p = context(population)
     val a = context(archive)
-    evolution.breed(is.toSeq, a, size)(rng).map(g ⇒ List(Variable(genome, g))).toIterator
+    val breeded = evolution.breed(p, a, size)(rng)
+    breeded.map(g ⇒ List(Variable(genome, g))).toIterator
   }
 }

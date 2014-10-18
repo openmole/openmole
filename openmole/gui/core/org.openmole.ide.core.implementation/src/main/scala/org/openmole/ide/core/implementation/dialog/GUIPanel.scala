@@ -7,9 +7,8 @@ package org.openmole.ide.core.implementation.dialog
 
 import scala.swing._
 import org.openmole.ide.misc.widget.MigPanel
-import java.awt.BorderLayout
+import java.awt.{ Toolkit, BorderLayout, Event }
 import org.openmole.ide.core.implementation.execution._
-import java.awt.Event
 import java.awt.event.KeyEvent
 import javax.swing.KeyStroke
 import org.openide.DialogDescriptor
@@ -19,7 +18,7 @@ import org.openide.NotifyDescriptor._
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
 import java.io.File
-import org.openmole.ide.core.implementation.preference.PreferenceContent
+import org.openmole.ide.core.implementation.preference.{ Preferences, PreferenceContent }
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.action.LoadXML
 import org.openmole.ide.core.implementation.action.SaveXML
@@ -45,10 +44,26 @@ class GUIPanel extends MainFrame {
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, Event.CTRL_MASK))
       })
 
+      contents += new Menu("Recent files") {
+        Preferences().recentFiles.foreach {
+          rf ⇒
+            val f = new File(rf)
+            if (f.isFile) {
+              contents += new MenuItem(new Action(f.getName) {
+                override def apply = {
+                  Proxies.instance.clearAll
+                  ScenesManager().closeAll
+                  mainframe.title = "OpenMOLE - " + LoadXML.load(f.getAbsolutePath)
+                }
+              })
+            }
+        }
+      }
+
       contents += new MenuItem(new Action("Load") {
         override def apply = {
-          Proxies.instance.clearAll
-          mainframe.title = "OpenMOLE - " + LoadXML.show
+          val name = DialogFactory.multiLoadDialog(mainframe)
+          mainframe.title = "OpenMOLE - " + name
         }
 
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, Event.CTRL_MASK))
@@ -56,7 +71,7 @@ class GUIPanel extends MainFrame {
 
       contents += new MenuItem(new Action("Save") {
         override def apply = {
-          ScenesManager.saveCurrentPropertyWidget
+          ScenesManager().saveCurrentPropertyWidget
           SaveXML.save(mainframe)
         }
 
@@ -64,23 +79,36 @@ class GUIPanel extends MainFrame {
       })
 
       contents += new MenuItem(new Action("Save as") {
-        override def apply = SaveXML.save(mainframe, SaveXML.show)
+        override def apply = SaveXML.save(mainframe, SaveXML.show(".om"))
       })
 
-      contents += new MenuItem(new Action("Export") {
-        override def apply = ScenesManager.currentScene match {
+      contents += new MenuItem(new Action("Export as XML") {
+        override def apply = ScenesManager().currentScene match {
           case Some(s: BuildMoleScene) ⇒ DialogFactory.exportPartialMoleExecution(s)
           case _                       ⇒ StatusBar().inform("No mole available for export")
         }
       })
 
+      contents += new MenuItem(new Action("Export project") {
+        override def apply = ScenesManager().currentScene match {
+          case Some(s: BuildMoleScene) ⇒
+            ScenesManager().saveCurrentPropertyWidget
+            SaveXML.export(mainframe)
+          case _ ⇒
+        }
+      })
+
       contents += new MenuItem(new Action("Reset all") {
         override def apply = {
-          ScenesManager.closeAll
+          ScenesManager().closeAll
           Proxies.instance.clearAll
           mainframe.title = "OpenMOLE"
           Settings.currentProject = None
         }
+      })
+
+      contents += new MenuItem(new Action("Quit") {
+        override def apply = closeOperation
       })
     }
 
@@ -121,10 +149,11 @@ class GUIPanel extends MainFrame {
     contents += ConceptMenu.sourceMenu
   }).peer, BorderLayout.NORTH)
 
-  val splitPane = ScenesManager.tabPane
+  val splitPane = new SplitPane(Orientation.Horizontal, ScenesManager().tabPane, ScenesManager().statusBar)
+  splitPane.resizeWeight = 1
 
   peer.add(splitPane.peer, BorderLayout.CENTER)
-  StatusBar().inform("OpenMOLE - 0.8 - Elastic Earth")
+  StatusBar().inform("OpenMOLE - 1.0 - Heroic Hippo")
 
   PasswordListner.apply
 

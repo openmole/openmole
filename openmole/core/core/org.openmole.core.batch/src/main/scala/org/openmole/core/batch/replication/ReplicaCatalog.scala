@@ -17,198 +17,196 @@
 
 package org.openmole.core.batch.replication
 
-import com.db4o.ObjectContainer
-import com.db4o.ObjectSet
-import com.db4o.cs.Db4oClientServer
-import com.db4o.ta.TransparentPersistenceSupport
+import akka.dispatch.sysmsg.Failed
 import com.google.common.cache.CacheBuilder
 import java.io.File
-import org.openmole.misc.replication.DBServerInfo
-import org.openmole.misc.replication.Replica
-import org.openmole.misc.tools.service.Logger
+import org.h2.jdbc.JdbcSQLException
+import org.openmole.misc.replication._
+import org.openmole.misc.tools.service.{ LockRepository, Logger, TimeCache }
 import java.util.regex.Pattern
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.environment.BatchEnvironment._
-import org.openmole.misc.tools.service.TimeCache
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
-import scala.collection.JavaConversions._
 import java.util.concurrent.TimeUnit
+import scala.annotation.tailrec
+import scala.concurrent.duration._
+import scala.slick.driver.H2Driver.simple._
+import scala.util.{ Success, Failure, Try }
 
 object ReplicaCatalog extends Logger {
+
+  import Log._
 
   val NoAccessCleanTime = new ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime")
   val InCatalogCacheTime = new ConfigurationLocation("ReplicaCatalog", "InCatalogCacheTime")
   val ReplicaCacheTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime")
-  val SocketTimeout = new ConfigurationLocation("ReplicaCatalog", "SocketTimeout")
+  val ReplicaGraceTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime")
+  val LockTimeout = new ConfigurationLocation("ReplicaCatalog", "LockTimeout")
 
   Workspace += (NoAccessCleanTime, "P30D")
   Workspace += (InCatalogCacheTime, "PT2M")
   Workspace += (ReplicaCacheTime, "PT30M")
-  Workspace += (SocketTimeout, "PT10M")
+  Workspace += (ReplicaGraceTime, "P1D")
+  Workspace += (LockTimeout, "PT1M")
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
-  lazy val inCatalogCache = new TimeCache[Map[String, Set[String]]]
 
-  type ReplicaCacheKey = (String, String, String, String)
+  lazy val inCatalogCache = new TimeCache[Map[String, Set[String]]]
+  lazy val database = {
+    val dbInfoFile = DBServerInfo.dbInfoFile
+    val info = DBServerInfo.load(dbInfoFile)
+    val db = Database.forDriver(
+      driver = new org.h2.Driver,
+      url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.urlDBPath}",
+      user = info.user,
+      password = info.password)
+    db.withSession {
+      s ⇒
+        val statement = s.createStatement()
+        statement.execute(s"SET DEFAULT_LOCK_TIMEOUT ${Workspace.preferenceAsDuration(LockTimeout).toMillis}")
+    }
+    db
+  }
+
+  lazy val localLock = new LockRepository[ReplicaCacheKey]
+
+  type ReplicaCacheKey = (String, String, String)
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
     expireAfterWrite(Workspace.preferenceAsDuration(ReplicaCacheTime).toSeconds, TimeUnit.SECONDS).build[ReplicaCacheKey, Replica]
 
-  def openClient = {
-    val dbInfoFile = DBServerInfo.dbInfoFile(DBServerInfo.base)
-    val info = DBServerInfo.load(dbInfoFile)
+  def withSession[T](f: Session ⇒ T) = database.withSession { s ⇒ f(s) }
 
-    val configuration = Db4oClientServer.newClientConfiguration
-    configuration.common.add(new TransparentPersistenceSupport)
-    configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
-    configuration.prefetchObjectCount(1000)
-    configuration.common.bTreeNodeSize(256)
-    configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_storage").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_path").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_environment").indexed(true)
-    configuration.timeoutClientSocket(Workspace.preferenceAsDuration(SocketTimeout).toMilliSeconds.toInt)
+  def inCatalog(implicit session: Session) = inCatalogCache(inCatalogQuery, Workspace.preferenceAsDuration(InCatalogCacheTime).toMillis)
 
-    Db4oClientServer.openClient(configuration, "localhost", info.port, info.user, info.password)
-  }
-
-  def withClient[T](f: ObjectContainer ⇒ T) = {
-    val client = openClient
-    try f(client)
-    finally client.close
-  }
-
-  /*private var _dbInfo: Option[(DBServerInfo, Long)] = None
-
-   def dbInfo = synchronized {
-   val dbInfoFile = DBServerInfo.dbInfoFile(DBServerInfo.base)
-
-   if (!dbInfoFile.exists) throw new InternalProcessingError("Database server not launched, file " + dbInfoFile + " doesn't exists.")
-
-   _dbInfo match {
-   case Some((server, modif)) if (modif >= dbInfoFile.lastModification) ⇒ server
-   case _ ⇒
-   val dbInfo = DBServerInfo.load(dbInfoFile) -> dbInfoFile.lastModification
-   _dbInfo = Some(dbInfo)
-   dbInfo._1
-   }
-   }*/
-
-  def inCatalog(environment: String)(implicit objectContainer: ObjectContainer) = inCatalogCache(inCatalogQuery(environment), Workspace.preferenceAsDuration(InCatalogCacheTime).toMilliSeconds)
-
-  private def inCatalogQuery(environment: String)(implicit objectContainer: ObjectContainer): Map[String, Set[String]] =
-    objectContainer.queryByExample[Replica](new Replica(_environment = environment)).map {
-      replica ⇒ replica.hash -> replica.storage
-    }.groupBy(_._1).map { case (k, v) ⇒ k -> v.unzip._2.toSet }
-
-  private def key(hash: String, storage: String, environment: String): String = hash + "_" + storage + "_" + environment
-  private def key(r: Replica): String = key(r.hash, r.storage, r.environment)
-  private def key(hash: String, storage: StorageService): String = key(hash, storage.id, storage.environment.id)
-
-  def withSemaphore[T](key: String, objectContainer: ObjectContainer)(op: ⇒ T) = {
-    objectContainer.ext.setSemaphore(key, Int.MaxValue)
-    try op
-    finally objectContainer.ext.releaseSemaphore(key)
-  }
+  private def inCatalogQuery(implicit session: Session): Map[String, Set[String]] =
+    replicas.map {
+      replica ⇒ (replica.storage, replica.hash)
+    }.run.groupBy(_._1).mapValues {
+      _.map { case (_, hash) ⇒ hash }.toSet
+    }.withDefaultValue(Set.empty)
 
   def uploadAndGet(
     src: File,
     srcPath: File,
     hash: String,
-    storage: StorageService)(implicit token: AccessToken, client: ObjectContainer): Replica = {
-    withSemaphore(key(hash, storage), client) {
-      val environment = storage.environment
-      val cacheKey = (srcPath.getCanonicalPath, hash, storage.id, environment.id)
+    storage: StorageService)(implicit token: AccessToken, session: Session): Replica = {
 
-      def getReplicasForSrc(src: File): ObjectSet[Replica] =
-        client.queryByExample(new Replica(_source = src.getCanonicalPath, _storage = storage.id, _environment = environment.id))
+    val cacheKey = (srcPath.getCanonicalPath, hash, storage.id)
 
-      def getReplica(src: File, hash: String): Option[Replica] = {
-        val set = client.queryByExample(new Replica(_source = src.getCanonicalPath, _storage = storage.id, _hash = hash, _environment = environment.id))
-
-        set.size match {
-          case 0 ⇒ None
-          case 1 ⇒ Some(set.get(0))
-          case _ ⇒ Some(fix(set))
-        }
-      }
-
-      def getReplicaForHash(hash: String)(implicit objectContainer: ObjectContainer): Option[Replica] = {
-        val set = objectContainer.queryByExample(new Replica(_storage = storage.id, _hash = hash, _environment = environment.id))
-        if (!set.isEmpty) Some(set.get(0)) else None
-      }
-
+    // Avoid same transfer in multiple threads
+    localLock.withLock(cacheKey) {
       Option(replicaCache.getIfPresent(cacheKey)) match {
+        case Some(r) ⇒ r
         case None ⇒
-          val replica = getReplica(srcPath, hash) match {
-            case None ⇒
-              //If replica is already present on the storage with another hash
-              getReplicasForSrc(srcPath).foreach { r ⇒ clean(r, storage) }
-              getReplicaForHash(hash) match {
-                case Some(sameContent) ⇒
-                  val replica = checkExists(sameContent, src, srcPath, storage)
-                  val newReplica = new Replica(_source = srcPath.getCanonicalPath, _storage = storage.id, _path = replica.path, _hash = hash, _environment = environment.id, _lastCheckExists = replica.lastCheckExists)
-                  insert(newReplica)
-                  newReplica
-                case None ⇒
-                  uploadAndInsert(src, srcPath, hash, storage)
+
+          //If replica is already present on the storage with another hash
+          def cleanOldReplicas = {
+            def getReplicasForSrcWithOtherHash =
+              replicas.filter { r ⇒
+                r.source === srcPath.getCanonicalPath && r.hash =!= hash && r.storage === storage.id
               }
-            case Some(r) ⇒
-              checkExists(r, src, srcPath, storage)
+
+            val samePath = getReplicasForSrcWithOtherHash
+            samePath.foreach {
+              replica ⇒
+                logger.fine(s"Remove obsolete $replica")
+                storage.backgroundRmFile(replica.path)
+            }
+            samePath.delete
           }
+
+          @tailrec def uploadAndInsertIfNotInCatalog: Replica = {
+            //Remove deleted replicas
+            def stillExists(r: Replica) =
+              if (r.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMillis < System.currentTimeMillis) {
+                Try(storage.exists(r.path)) match {
+                  case Success(e) ⇒ e
+                  case _          ⇒ false
+                }
+              }
+              else true
+
+            def getReplica =
+              replicas.filter { r ⇒ r.source === src.getCanonicalPath && r.storage === storage.id && r.hash === hash }
+
+            def assertReplica(r: Replica) = {
+              assert(r.path != null)
+              assert(r.storage != null)
+              assert(r.hash != null)
+              r
+            }
+
+            // RQ: Could be improved by reusing files with same hash already on the storage, may be not very generic though
+            getReplica.firstOption match {
+              case Some(replica) ⇒ assertReplica(replica)
+              case None ⇒
+                val name = Storage.uniqName(System.currentTimeMillis.toString, ".rep")
+                val newFile = storage.child(storage.persistentDir, name)
+                logger.fine(s"Upload $src to $newFile on ${storage.id}")
+                signalUpload(storage.uploadGZ(src, newFile), newFile, storage)
+
+                val replica = session.withTransaction {
+                  getReplica.firstOption match {
+                    case Some(r) ⇒
+                      logger.fine("Already in database deleting")
+                      storage.backgroundRmFile(newFile)
+                      assertReplica(r)
+                    case None ⇒
+                      val newReplica = Replica(
+                        source = srcPath.getCanonicalPath,
+                        storage = storage.id,
+                        path = newFile,
+                        hash = hash,
+                        lastCheckExists = System.currentTimeMillis)
+
+                      assert(newReplica.path != null)
+
+                      logger.fine(s"Insert $newReplica")
+                      try replicas += newReplica
+                      catch {
+                        case t: JdbcSQLException ⇒
+                          storage.backgroundRmFile(newFile)
+                          throw t
+                      }
+                      assertReplica(newReplica)
+                  }
+                }
+
+                if (stillExists(replica)) replica
+                else {
+                  remove(replica.id)
+                  uploadAndInsertIfNotInCatalog
+                }
+            }
+          }
+
+          cleanOldReplicas
+          val replica = uploadAndInsertIfNotInCatalog
           replicaCache.put(cacheKey, replica)
           replica
-        case Some(r) ⇒ r
       }
     }
+
   }
 
-  private def checkExists(
-    replica: Replica,
-    src: File,
-    srcPath: File,
-    storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer) =
-    if (replica.lastCheckExists + Workspace.preferenceAsDuration(BatchEnvironment.CheckFileExistsInterval).toMilliSeconds < System.currentTimeMillis) {
-      if (storage.exists(replica.path)) {
-        removeNoLock(replica)
-        val toInsert = new Replica(_source = replica.source, _storage = replica.storage, _path = replica.path, _hash = replica.hash, _environment = replica.environment, _lastCheckExists = System.currentTimeMillis)
-        insert(toInsert)
-        toInsert
-      }
-      else {
-        removeNoLock(replica)
-        uploadAndInsert(src, srcPath, replica.hash, storage)
-      }
-    }
-    else replica
+  def forPath(path: String)(implicit session: Session) = replicas.filter { _.path === path }
+  def onStorage(storage: StorageService)(implicit session: Session) = replicas.filter { _.storage === storage.id }
 
-  private def uploadAndInsert(
-    src: File,
-    srcPath: File,
-    hash: String,
-    storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer) = {
-    val name = Storage.uniqName(hash, ".rep")
-    val newFile = storage.child(storage.persistentDir, name)
-    require(replicationPattern.matcher(name).matches)
-
-    logger.fine("Uploading " + src + " to " + newFile)
-    signalUpload(
-      storage.uploadGZ(src, newFile), newFile, storage)
-    logger.fine("Uploaded " + src + " to " + newFile)
-    val newReplica = new Replica(_source = srcPath.getCanonicalPath, _storage = storage.id, _path = newFile, _hash = hash, _environment = storage.environment.id, _lastCheckExists = System.currentTimeMillis)
-    insert(newReplica)
-    newReplica
+  def remove(id: Long)(implicit session: Session) = {
+    logger.fine(s"Remove replica with id $id")
+    replicas.filter { _.id === id }.delete
   }
 
-  private def fix(toFix: Iterable[Replica])(implicit objectContainer: ObjectContainer): Replica = {
-    for (rep ← toFix.tail) objectContainer.delete(rep)
-    toFix.head
+  def timeOfPersistent(name: String) = {
+    val matcher = replicationPattern.matcher(name)
+    if (!matcher.matches) None
+    else Try(matcher.group(1).toLong).toOption
   }
 
-  def replicas(storage: StorageService)(implicit objectContainer: ObjectContainer): Iterable[Replica] =
+  /*def replicas(storage: StorageService)(implicit objectContainer: ObjectContainer): Iterable[Replica] =
     objectContainer.queryByExample(new Replica(_storage = storage.id, _environment = storage.environment.id)).toList
 
   private def insert(replica: Replica)(implicit objectContainer: ObjectContainer) = {
@@ -216,7 +214,8 @@ object ReplicaCatalog extends Logger {
     objectContainer.store(replica)
   }
 
-  def remove(replica: Replica)(implicit objectContainer: ObjectContainer) =
+  def remove(replica: Replica)(implicit session: Session) =
+    replicas.filter { _ === replica }.delete
     withSemaphore(key(replica), objectContainer) {
       removeNoLock(replica)
     }
@@ -250,7 +249,7 @@ object ReplicaCatalog extends Logger {
     !objectContainer.queryByExample(new Replica(_storage = storage, _path = path)).isEmpty
 
   private def contains(replica: Replica)(implicit objectContainer: ObjectContainer) =
-    !objectContainer.queryByExample(replica).isEmpty
+    !objectContainer.queryByExample(replica).isEmpty*/
 
   /*def cleanAll(implicit objectContainer: ObjectContainer) =
     for (rep ← allReplicas) clean(rep)*/

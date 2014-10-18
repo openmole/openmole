@@ -19,15 +19,11 @@ package org.openmole.misc.sftpserver
 
 import java.io.File
 import org.apache.sshd.SshServer
-import org.apache.sshd.common.Session
-import org.apache.sshd.server.FileSystemFactory
-import org.apache.sshd.server.FileSystemView
+import org.apache.sshd.common.file._
+import org.apache.sshd.common.file.nativefs.NativeFileSystemView
+import org.apache.sshd.common.io.IoServiceFactoryFactory
 import org.apache.sshd.server.PasswordAuthenticator
-import org.apache.sshd.server.SshFile
-import org.apache.sshd.server.auth.UserAuthPassword
 import org.apache.sshd.server.command.ScpCommandFactory
-import org.apache.sshd.server.filesystem.NativeFileSystemFactory
-import org.apache.sshd.server.filesystem.NativeFileSystemView
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
 import org.apache.sshd.server.session.ServerSession
 import org.apache.sshd.common.Session

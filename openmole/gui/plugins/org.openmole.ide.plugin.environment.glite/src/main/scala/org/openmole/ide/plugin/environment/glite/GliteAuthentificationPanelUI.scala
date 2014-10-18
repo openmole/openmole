@@ -51,10 +51,10 @@ class GliteAuthentificationPanelUI extends AuthenticationPanelUI {
     buttons += proxyButton
   }
 
-  val pem1TextField = new ChooseFileTextField("Certificate path", "Select afile", Some("pem files"), FilesOnly, Some("pem"))
-  val pem2TextField = new ChooseFileTextField("Key Path", "Select a file", Some("pem files"), FilesOnly, Some("pem"))
-  val p12TextField = new ChooseFileTextField("Certificate path", "Select a file", Some("p12 file"), FilesOnly, Some("p12"))
-  val proxyTextField = new ChooseFileTextField("", "Select a file", Some("proxy file"), FilesOnly, Some("proxy"))
+  val pem1TextField = new ChooseFileTextField("Certificate path", "Select a file", FilesOnly, Some("pem files", Seq("pem")))
+  val pem2TextField = new ChooseFileTextField("Key Path", "Select a file", FilesOnly, Some("pem files", Seq("pem")))
+  val p12TextField = new ChooseFileTextField("Certificate path", "Select a file", FilesOnly, Some("p12 file", Seq("p12")))
+  val proxyTextField = new ChooseFileTextField("", "Select a file", FilesOnly, Some("proxy file", Seq("proxy")))
 
   val pemPanel = buildPemPanel
   val p12Panel = buildP12Panel
@@ -66,7 +66,7 @@ class GliteAuthentificationPanelUI extends AuthenticationPanelUI {
 
   addButtons
   try {
-    Workspace.authenticationProvider(classOf[GliteAuthentication]).headOption match {
+    GliteAuthentication()(Workspace.authenticationProvider) match {
       case Some(x: P12Certificate) ⇒
         initButton = Some(p12Button)
         p12TextField.text = x.certificate.getAbsolutePath
@@ -140,18 +140,15 @@ class GliteAuthentificationPanelUI extends AuthenticationPanelUI {
     try {
       pemPassField match {
         case Some(x: PasswordField) ⇒
-          if (pemButton.selected) Workspace.setAuthentication[GliteAuthentication](0,
-            new PEMCertificate(Workspace.encrypt(new String(x.password)),
+          if (pemButton.selected)
+            GliteAuthentication() = PEMCertificate(Workspace.encrypt(new String(x.password)),
               new File(pem1TextField.text),
-              new File(pem2TextField.text)))
+              new File(pem2TextField.text))
           else if (p12Button.selected)
-            Workspace.setAuthentication[GliteAuthentication](0,
-              new P12Certificate(Workspace.encrypt(new String(p12PassField.get.password)),
-                new File(p12TextField.text)))
-          else if (proxyButton.selected) {
-            Workspace.setAuthentication[GliteAuthentication](0,
-              new ProxyFile(new File(proxyTextField.text)))
-          }
+            GliteAuthentication() =
+              P12Certificate(Workspace.encrypt(new String(p12PassField.get.password)), new File(p12TextField.text))
+          else if (proxyButton.selected)
+            GliteAuthentication() = ProxyFile(new File(proxyTextField.text))
       }
       (pem :: p12 :: proxy :: Nil).filterNot(_._1.selected).foreach(_._3)
     }

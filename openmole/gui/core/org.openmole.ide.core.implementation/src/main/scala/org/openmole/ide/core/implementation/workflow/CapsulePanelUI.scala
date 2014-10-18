@@ -40,9 +40,9 @@ trait CapsulePanelUI extends Publisher with Settings {
   def sources = Proxies.instance.sources.toList
   def hooks = Proxies.instance.hooks.toList
 
-  val sourcePanel = MultiProxies(sources, dataUI.sources)
+  val sourcePanel = MultiProxies.comboLink(sources, dataUI.sources)
 
-  val hookPanel = MultiProxies(hooks, dataUI.hooks)
+  val hookPanel = MultiProxies.comboLink(hooks, dataUI.hooks)
 
   val environmentProxys = Proxies.instance.environments :+ EmptyDataUIs.localEnvironmentProxy
   val environmentCombo = new MyComboBox(environmentProxys)
@@ -65,7 +65,7 @@ trait CapsulePanelUI extends Publisher with Settings {
       contents += new LinkLabel("", new Action("") {
         def apply =
           if (environmentCombo.selection.index != environmentProxys.size - 1) {
-            ScenesManager.displayExtraPropertyPanel(environmentCombo.selection.item)
+            ScenesManager().displayExtraPropertyPanel(environmentCombo.selection.item)
           }
       }) { icon = org.openmole.ide.misc.tools.image.Images.EYE }
     }

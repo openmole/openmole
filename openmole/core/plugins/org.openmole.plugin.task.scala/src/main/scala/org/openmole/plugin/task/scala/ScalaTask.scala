@@ -17,21 +17,18 @@
 
 package org.openmole.plugin.task.scala
 
-import java.io.File
-import java.io.PrintWriter
-import java.util.logging.Logger
+import java.io.{ OutputStreamWriter, File }
+import java.lang.reflect.Method
+import javax.script.SimpleScriptContext
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
+import org.openmole.misc.tools.io.StringBuilderOutputStream
 import org.openmole.misc.tools.script._
 import org.openmole.plugin.task.code._
-import reflect.ClassTag
-import org.openmole.misc.tools.service.ObjectPool
-import scala.tools.nsc.interpreter.NamedParam
-import org.openmole.misc.workspace.Workspace
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.console.ScalaREPL
 
 object ScalaTask {
@@ -39,7 +36,6 @@ object ScalaTask {
   def apply(
     name: String,
     code: String)(implicit plugins: PluginSet = PluginSet.empty) = {
-    val _plugins = plugins
     new CodeTaskBuilder { builder ⇒
 
       addImport("org.openmole.misc.tools.service.Random.newRNG")
@@ -50,7 +46,6 @@ object ScalaTask {
         new ScalaTask(name, code, builder.imports, builder.libraries) with builder.Built
     }
   }
-
 }
 
 sealed abstract class ScalaTask(
@@ -59,49 +54,57 @@ sealed abstract class ScalaTask(
     imports: Iterable[String],
     libraries: Iterable[File]) extends CodeTask {
 
-  def script = {
-    "def run(" + inputs.map { i ⇒ i.prototype.name + ": " + i.prototype.`type`.toString }.mkString(",") + ") = {\n" +
-      code + "\n" +
-      "Map[String, Any](" + outputs.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",") + ")\n" +
-      "}\n" +
-      "var " + resVariable + ": Map[String, Any] = null"
-  }
+  def prefix = "_input_value_"
 
-  @transient lazy val resVariable = Workspace.preference(Task.OpenMOLEVariablePrefix) + "ScalaTaskResult"
-
-  def interpreter = {
-    val interpreter = new ScalaREPL
-    interpreter.beSilentDuring {
-      interpreter.addImports(imports.toSeq: _*)
-      libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
-      val res = interpreter.interpret(script)
-      if (res != tools.nsc.interpreter.Results.Success) throw new UserBadDataError("Error in script: " + script)
-    }
-    interpreter
-  }
-
-  @transient lazy val interpreterPool = new ObjectPool(interpreter)
-
-  override def processCode(context: Context) = interpreterPool.exec {
-    interpreter ⇒
-      val scalaTaskResult = interpreter.beSilentDuring {
-        try {
-          context.values.foreach {
-            v ⇒ interpreter.bindValue(v.prototype.name, v.value)
-          }
-          val code = resVariable + " = run(" + inputs.map { i ⇒ i.prototype.name }.mkString(",") + ")"
-          interpreter.interpret(code)
-          interpreter.valueOfTerm(resVariable).getOrElse(throw new UserBadDataError("Error in execution of " + code)).asInstanceOf[Map[String, Any]]
-        }
-        finally {
-          interpreter.interpret(resVariable + " = null")
-          context.values.foreach {
-            v ⇒ interpreter.bindValue(v.prototype.name, null)
-          }
-        }
+  def compiledScript(inputs: Seq[Prototype[_]]) = {
+    val interpreter = new ScalaREPL(false)
+    libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
+    val evaluated =
+      try interpreter.eval(script(inputs))
+      catch {
+        case e: Exception ⇒
+          throw new InternalProcessingError(
+            e,
+            interpreter.firstErrorMessage.map {
+              error ⇒
+                s"""Error while compiling:
+               |${error.error}
+               |on line ${error.line} of script:
+               |${script(inputs)}""".stripMargin
+            }.getOrElse("Error in compiler")
+          )
       }
 
-      Context.empty ++ outputs.map { o ⇒ Variable.unsecure(o.prototype, scalaTaskResult(o.prototype.name)) }
+    if (evaluated == null) throw new InternalProcessingError(
+      s"""The return value of the script was null:
+         |${script(inputs)}""".stripMargin
+    )
+    (evaluated, evaluated.getClass.getMethod("apply", inputs.map(_.`type`.runtimeClass).toSeq: _*))
   }
+
+  def script(inputs: Seq[Prototype[_]]) =
+    imports.map("import " + _).mkString("\n") + "\n\n" +
+      s"""(${inputs.toSeq.map(i ⇒ prefix + i.name + ": " + i.`type`).mkString(",")}) => {
+       |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(oMSeed).toScala();
+       |    ${inputs.toSeq.map(i ⇒ "var " + i.name + " = " + prefix + i.name).mkString(";")}
+       |    ${code}
+       |    Map[String, Any]( ${outputs.toSeq.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} )
+       |}
+       |""".stripMargin
+
+  @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], (AnyRef, Method)]()
+
+  def cachedCompiledScript(inputs: Seq[Prototype[_]]) = cache.synchronized {
+    cache.getOrElseUpdate(inputs, compiledScript(inputs))
+  }
+
+  override def processCode(context: Context) = {
+    val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }.sortBy(_.name)
+    val args = contextPrototypes.map(i ⇒ context(i))
+    val (evaluated, method) = cachedCompiledScript(contextPrototypes)
+    val result = method.invoke(evaluated, args.toSeq.map(_.asInstanceOf[AnyRef]): _*).asInstanceOf[Map[String, Any]]
+    context ++ outputs.toSeq.map { o ⇒ Variable.unsecure(o.prototype, result(o.prototype.name)) }
+  }
+
 }
 

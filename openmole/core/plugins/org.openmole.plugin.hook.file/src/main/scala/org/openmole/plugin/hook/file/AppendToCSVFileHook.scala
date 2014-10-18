@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.hook.file
 
-import java.io.File
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
@@ -26,14 +25,27 @@ import org.openmole.misc.tools.io.Prettifier._
 import scala.annotation.tailrec
 import org.openmole.core.implementation.mole._
 import org.openmole.core.model.mole.ExecutionContext
+import scala.collection.mutable.ListBuffer
 
 object AppendToCSVFileHook {
 
-  def apply(fileName: String, prototypes: Prototype[_]*) =
-    new HookBuilder {
-      prototypes.foreach(addInput(_))
-      def toHook = new AppendToCSVFileHook(fileName, prototypes: _*) with Built
+  class Builder(fileName: String) extends HookBuilder {
+    private val prototypes = ListBuffer[Prototype[_]]()
+
+    def add(p: Prototype[_]) = {
+      p.foreach(addInput(_))
+      prototypes += p
+      this
     }
+
+    def toHook = new AppendToCSVFileHook(fileName, prototypes.toSeq: _*) with Built
+  }
+
+  def apply(fileName: String, prototypes: Prototype[_]*) = {
+    val builder = new Builder(fileName)
+    prototypes.foreach(builder.add)
+    builder
+  }
 
 }
 
@@ -65,11 +77,15 @@ abstract class AppendToCSVFileHook(
             }
         }.toList
 
+        def moreThanOneElement(l: List[_]) = !l.isEmpty && !l.tail.isEmpty
+
         @tailrec def write(lists: List[List[_]]): Unit =
-          if (!lists.exists(_.size > 1)) writeLine(lists.map { _.head })
+          if (!lists.exists(moreThanOneElement)) writeLine(lists.map { _.head })
           else {
             writeLine(lists.map { _.head })
-            write(lists.map { l ⇒ if (l.size > 1) l.tail else l })
+            write(
+              lists.map { l ⇒ if (moreThanOneElement(l)) l.tail else l }
+            )
           }
 
         def writeLine[T](list: List[T]) =

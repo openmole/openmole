@@ -21,23 +21,24 @@ import org.openmole.ide.plugin.misc.tools.MultiPrototypePanel
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.panelsettings.HookPanelUI
-import scala.swing.Label
+import org.openmole.ide.misc.widget.Helper
+import org.openmole.ide.misc.widget.URL
+import java.util.{ Locale, ResourceBundle }
 
-class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends PluginPanel("") with HookPanelUI {
+class ToStringHookPanelUI(dataUI: ToStringHookDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("") with HookPanelUI {
 
   val combo = new MultiPrototypePanel("Display prototypes",
     dataUI.toBeHooked,
     Proxies.instance.prototypes.toList)
 
-  contents += {
-    if (Proxies.instance.prototypes.isEmpty) new Label("No prototype to be displayed")
-    else combo
-  }
+  contents += combo
 
   val components = List(("Prototypes", this))
 
   def saveContent(name: String) = new ToStringHookDataUI(name,
     Proxies.check(combo.multiPrototypeCombo.content.map {
-      _.comboValue.get
-    }.filter { _ != null }))
+      _.comboValue
+    }.flatten))
+
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 }

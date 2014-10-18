@@ -35,7 +35,9 @@ object Task extends Logger {
 
   Workspace += (OpenMOLEVariablePrefix, "oM")
 
-  val openMOLESeed = Prototype[Long](Workspace.preference(OpenMOLEVariablePrefix) + "Seed")
+  def prefixedVariable(name: String) = Workspace.preference(OpenMOLEVariablePrefix) + name
+
+  val openMOLESeed = Prototype[Long](prefixedVariable("Seed"))
 
   def buildRNG(context: Context) = newRNG(context(Task.openMOLESeed))
 }

@@ -30,7 +30,7 @@ trait SamplingCompositionPanel extends Base
     with Header
     with ProxyShortcut
     with Proxy
-    with Icon {
+    with Icon { sPanel ⇒
 
   override type DATAPROXY = SamplingCompositionDataProxyUI
   type DATAUI = SamplingCompositionDataUI with ImageView
@@ -51,7 +51,7 @@ trait SamplingCompositionPanel extends Base
           addName
           addCreateLink
         }
-        contents += proxyShorcut(proxy.dataUI, index)
+        contents += proxyShorcut(sPanel, proxy.dataUI, index)
       }
     }
     createSettings
@@ -67,10 +67,7 @@ trait SamplingCompositionPanel extends Base
     basePanel.contents += panelSettings.help
   }
 
-  override def updatePanel = {
-    savePanel
-    createSettings
-  }
+  override def updatePanel = createSettings
 
   def updateConceptPanel(d: SamplingCompositionDataUI with ImageView) = {
     savePanel
@@ -84,20 +81,19 @@ trait SamplingCompositionPanel extends Base
   }
 
   def deleteProxy = {
-    val toBeRemovedSamplings = ScenesManager.explorationCapsules.filter { case (c, d) ⇒ d.sampling == Some(proxy) }
+    val toBeRemovedSamplings = ScenesManager().explorationCapsules.filter { case (c, d) ⇒ d.sampling == Some(proxy) }
     toBeRemovedSamplings match {
       case Nil ⇒
         scene.closePropertyPanel(index)
         Proxies.instance -= proxy
         ConceptMenu.-=(proxy)
-      // true
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           toBeRemovedSamplings.foreach { case (c, d) ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.dataUI.removeCapsuleUI(c)) }
           deleteProxy
         }
-      // else false
     }
+    scene.closePropertyPanels
   }
 
 }

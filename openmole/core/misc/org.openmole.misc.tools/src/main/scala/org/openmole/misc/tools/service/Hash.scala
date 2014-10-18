@@ -34,15 +34,19 @@ object Hash {
     new String(hex, "ASCII")
   }
 
-  implicit val ordering = new Ordering[Hash] {
-    override def compare(left: Hash, right: Hash) = {
-      left.toString.compare(right.toString)
-    }
-  }
+  implicit val ordering = Ordering.by[Hash, String](_.toString)
 }
 
-trait Hash {
+case class Hash(content: Array[Byte]) {
   def ==(hash: String) = this.toString == hash
   def !=(hash: String) = !this.==(hash)
   def equals(hash: String) = this == hash
+  override def toString: String = Hash.hexString(content)
+  override def hashCode: Int = content.deep.hashCode
+  override def equals(obj: Any): Boolean = {
+    if (obj == null) return false
+    if (getClass != obj.asInstanceOf[AnyRef].getClass) return false
+    val other = obj.asInstanceOf[Hash]
+    content.deep == other.content.deep
+  }
 }

@@ -1,0 +1,10 @@
+<dataUI class="org.openmole.ide.plugin.task.moletask.MoleTaskDataUI">
+    <name>test</name>
+    <mole class="Some">
+      <x class="string">b718ccad-a191-422e-a2b6-b9a35576995f</x>
+    </mole>
+    <finalCapsule class="None"/>
+    <inputs class="List"/>
+    <outputs class="List"/>
+    <inputParameters class="HashMap"/>
+</dataUI>

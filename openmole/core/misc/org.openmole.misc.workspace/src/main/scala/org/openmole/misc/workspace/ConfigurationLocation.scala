@@ -17,9 +17,17 @@
 
 package org.openmole.misc.workspace
 
+object ConfigurationLocation {
+
+  def apply(group: String, name: String, cyphered: Boolean = false) =
+    new ConfigurationLocation(group, name, cyphered)
+
+}
+
 class ConfigurationLocation(val group: String, val name: String, val cyphered: Boolean) {
   def this(group: String, name: String) = this(group, name, false)
 
   override def equals(obj: Any) = (group, name).equals(obj)
   override def hashCode = (group, name).hashCode
+  override def toString = s"$group.$name"
 }

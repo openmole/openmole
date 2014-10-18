@@ -17,25 +17,26 @@
 
 package org.openmole.ide.core.implementation.serializer
 
-import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import org.openmole.ide.core.implementation.workflow._
 import java.awt.Point
 import org.openmole.ide.misc.tools.util.ID
 
 object MoleData {
 
-  def toScene(moleData: MoleData, proxies: Proxies) = {
+  def toScene(moleData: MoleData2, proxies: Proxies) = {
     val ui = new MoleUI(moleData.name) {
       override val id = moleData.id
     }
     val scene = new BuildMoleScene(ui)
     ui.plugins = moleData.plugins
+    ui.implicits = moleData.implicits
 
     val capsuleUIMap =
       moleData.capsules.map {
         case cd @ CapsuleData(c, x, y) ⇒
           val capsuleUI = CapsuleUI.withMenu(scene, c)
-          scene.add(capsuleUI, new Point(x, y))
+          scene._add(capsuleUI, new Point(x, y))
           cd -> capsuleUI
       }.toMap
 
@@ -46,7 +47,7 @@ object MoleData {
         case (capsule, slots) ⇒
           slots.sortBy(_.index).map {
             data ⇒
-              val slot = capsuleUIMap(capsule).addInputSlot
+              val slot = capsuleUIMap(capsule)._addInputSlot
               data.id -> slot
           }
       }.flatten.toMap
@@ -60,7 +61,7 @@ object MoleData {
             t.transitionType,
             t.condition,
             t.filtered.map(i ⇒ proxies.prototype(i.id).get))
-        scene.add(transition)
+        scene._add(transition)
     }
 
     moleData.dataChannels.foreach {
@@ -70,8 +71,9 @@ object MoleData {
             capsuleUIMap(d.from),
             slots(d.to.id),
             d.filtered)
-        scene.add(dataChannel)
+        scene._add(dataChannel)
     }
+    scene.refresh
     scene
   }
 
@@ -113,7 +115,7 @@ object MoleData {
         case (_, _) ⇒ None
       }
 
-    new MoleData(
+    MoleData2(
       scene.dataUI.id,
       scene.dataUI.name,
       scene.dataUI.startingCapsule.map(capsules),
@@ -121,18 +123,45 @@ object MoleData {
       slots.unzip._2.toList,
       transitions.toList,
       dataChannels.toList,
-      scene.dataUI.plugins.toList)
+      scene.dataUI.plugins.toList,
+      scene.dataUI.implicits
+    )
 
   }
 
 }
 
+@deprecated
 class MoleData(
-  val id: ID.Type,
-  val name: String,
-  val startingCapsule: Option[CapsuleData],
-  val capsules: List[CapsuleData],
-  val slots: List[SlotData],
-  val transitions: List[TransitionData],
-  val dataChannels: List[DataChannelData],
-  val plugins: List[String])
+    val id: ID.Type,
+    val name: String,
+    val startingCapsule: Option[CapsuleData],
+    val capsules: List[CapsuleData],
+    val slots: List[SlotData],
+    val transitions: List[TransitionData],
+    val dataChannels: List[DataChannelData],
+    val plugins: List[String]) extends Update[MoleData2] {
+
+  def update = MoleData2(
+    id,
+    name,
+    startingCapsule,
+    capsules,
+    slots,
+    transitions,
+    dataChannels,
+    plugins,
+    List.empty
+  )
+}
+
+case class MoleData2(
+  id: ID.Type,
+  name: String,
+  startingCapsule: Option[CapsuleData],
+  capsules: List[CapsuleData],
+  slots: List[SlotData],
+  transitions: List[TransitionData],
+  dataChannels: List[DataChannelData],
+  plugins: List[String],
+  implicits: List[(PrototypeDataProxyUI, String)])

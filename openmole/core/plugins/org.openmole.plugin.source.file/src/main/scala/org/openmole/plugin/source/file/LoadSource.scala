@@ -55,7 +55,7 @@ abstract class LoadSource extends Source {
     load.map {
       case (f, p) ⇒
         val from = executionContext.relativise(VariableExpansion(context, f))
-        Variable.unsecure(p, SerializerService.deserializeAndExtractFiles(from))
+        Variable.unsecure(p, SerialiserService.deserialiseAndExtractFiles(from))
     }
 
   }

@@ -25,7 +25,7 @@ import org.openmole.ide.core.implementation.sampling.{ SamplingCompositionPanelU
 
 object ModifierDomainDataUI {
 
-  def computeClassString(pud: DomainDataUI) = ScenesManager.currentSamplingCompositionPanelUI.headOption match {
+  def computeClassString(pud: DomainDataUI) = ScenesManager().currentSamplingCompositionPanelUI.headOption match {
     case Some(scp: SamplingCompositionPanelUI) ⇒ scp.firstNoneModifierDomain(pud) match {
       case Some(d: DomainDataUI) ⇒ d.domainType.toString.split('.').last
       case _                     ⇒ DOUBLE

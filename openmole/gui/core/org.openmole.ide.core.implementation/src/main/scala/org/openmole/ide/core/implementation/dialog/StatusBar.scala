@@ -28,14 +28,13 @@ import org.openmole.ide.core.implementation.workflow.{ ISceneContainer, Executio
 import org.openmole.ide.core.implementation.dataproxy.DataProxyUI
 
 object StatusBar {
-  def apply() = ScenesManager.currentSceneContainer match {
-    case Some(b: BuildMoleSceneContainer)     ⇒ b.statusBar
-    case Some(e: ExecutionMoleSceneContainer) ⇒ e.bmsc.statusBar
-    case _                                    ⇒ new StatusBar
+  def apply() = ScenesManager().currentSceneContainer match {
+    case Some(b: BuildMoleSceneContainer) ⇒ b.statusBar
+    case _                                ⇒ ScenesManager.instance.statusBar
   }
 
   def displayErrors(f: ⇒ Traversable[Throwable]) = {
-    StatusBar().clear
+    StatusBar.clear
     f.foreach {
       t ⇒
         StatusBar().block(
@@ -44,6 +43,10 @@ object StatusBar {
     }
   }
 
+  def clear = {
+    apply().clear
+    ScenesManager.instance.statusBar.clear
+  }
 }
 
 class StatusBar extends MigPanel("wrap 3") {
@@ -60,6 +63,8 @@ class StatusBar extends MigPanel("wrap 3") {
              proxy: Option[DataProxyUI] = None,
              stack: String = ""): Unit =
     printError("[INFO]", info, proxy, stack)
+
+  def warn(t: Throwable): Unit = warn(t, None)
 
   def warn(t: Throwable, proxy: Option[DataProxyUI]): Unit =
     warn(t.getMessage, proxy, t.getClass.getCanonicalName + "\n" + errorStack(t))
@@ -127,7 +132,7 @@ class StatusBar extends MigPanel("wrap 3") {
   def isValid = strings.isEmpty
 
   def displayProxy(proxy: DataProxyUI) =
-    ScenesManager.currentSceneContainer match {
+    ScenesManager().currentSceneContainer match {
       case Some(sc: ISceneContainer) ⇒ sc.scene.saveAndcloseAllAndDisplayPropertyPanel(proxy)
       case None                      ⇒
     }

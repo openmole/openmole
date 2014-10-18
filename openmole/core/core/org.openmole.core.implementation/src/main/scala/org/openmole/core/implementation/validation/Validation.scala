@@ -52,13 +52,20 @@ object Validation {
     (paramsToMap(po), paramsToMap(pno))
   }
 
-  def taskTypeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[_] = {
+  abstract class errorDetect(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) {
+    def checkPrototypeMatch(p: Prototype[_]): Problem
+
+    val implicitMap = prototypesToMap(implicits)
+
+  }
+
+  def taskTypeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) = {
 
     val implicitMap = prototypesToMap(implicits)
 
     (for {
-      c ← capsules
-      sourcesOutputs = TreeMap(sources(c).flatMap(_.outputs).map(o ⇒ o.prototype.name -> o).toSeq: _*)
+      (c: ICapsule) ← capsules
+      sourcesOutputs = TreeMap(sources(c).flatMap((os: ISource) ⇒ os.outputs.toSet).map((o: Data[_]) ⇒ o.prototype.name -> o).toSeq: _*)
       s ← mole.slots(c)
       receivedInputs = TreeMap(computeManifests(mole, sources, hooks)(s).map { p ⇒ p.name -> p }.toSeq: _*)
       (parametersOverride, parametersNonOverride) = separateParameters(c.task.parameters)
@@ -101,12 +108,12 @@ object Validation {
     }).flatten
   }
 
-  def sourceTypeErrors(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[_] = {
+  def sourceTypeErrors(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) = {
     val implicitMap = prototypesToMap(implicits)
 
-    (for {
+    val x = (for {
       c ← mole.capsules
-      so ← sources.getOrElse(c, List.empty)
+      (so: ISource) ← sources.getOrElse(c, List.empty)
       (parametersOverride, parametersNonOverride) = separateParameters(so.parameters)
       sl ← mole.slots(c)
       receivedInputs = TreeMap(computeManifests(mole, sources, hooks)(sl).map { p ⇒ p.name -> p }.toSeq: _*)
@@ -135,7 +142,8 @@ object Validation {
         case (None, None, None, None) ⇒
           if (!(i.mode is Optional)) Some(MissingSourceInput(sl, so, i)) else None
       }
-    }).flatten
+    })
+    x.flatten
   }
 
   def typeErrorsTopMole(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) =
@@ -154,7 +162,7 @@ object Validation {
     while (!toProcess.isEmpty) {
       val (capsule, level, path) = toProcess.dequeue
 
-      Mole.nextCaspules(mole)(capsule, level).foreach {
+      Mole.nextCapsules(mole)(capsule, level).foreach {
         case (nCap, nLvl) ⇒
           if (!seen.contains(nCap)) toProcess.enqueue((nCap, nLvl, capsule :: path))
           seen(nCap) = ((capsule :: path) -> nLvl) :: seen.getOrElse(nCap, List.empty)
@@ -176,9 +184,7 @@ object Validation {
       slot ← mole.slots(end)
       (_, transitions) ← mole.inputTransitions(slot).toList.map { t ⇒ t.start -> t }.groupBy { case (c, _) ⇒ c }
       if (transitions.size > 1)
-    } yield {
-      new DuplicatedTransition(transitions.unzip._2)
-    }
+    } yield DuplicatedTransition(transitions.unzip._2)
 
   def duplicatedName(mole: IMole, sources: Sources, hooks: Hooks) = {
     def duplicated(data: DataSet) =
@@ -192,11 +198,12 @@ object Validation {
   }
 
   private def moleTaskInputMaps(moleTask: IMoleTask) =
-    moleTask.mole.root.inputs(moleTask.mole, Sources.empty, Hooks.empty).toList.map(i ⇒ i.prototype.name -> i.prototype).toMap[String, Prototype[_]]
+    (moleTask.mole.root.inputs(moleTask.mole, Sources.empty, Hooks.empty).toList ++
+      moleTask.inputs).map(i ⇒ i.prototype.name -> i.prototype).toMap[String, Prototype[_]]
 
   def moleTaskImplicitsErrors(moleTask: IMoleTask, capsule: ICapsule) = {
     val inputs = moleTaskInputMaps(moleTask)
-    moleTask.implicits.filterNot(i ⇒ inputs.contains(i)).map(i ⇒ MissingMoleTaskImplicit(capsule, i))
+    moleTask.implicits.filterNot(inputs.contains).map(i ⇒ MissingMoleTaskImplicit(capsule, i))
   }
 
   def hookErrors(m: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[Problem] = {
@@ -237,7 +244,12 @@ object Validation {
     }).flatten
   }
 
-  def apply(mole: IMole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty) =
+  def dataChannelErrors(mole: IMole) =
+    mole.dataChannels.filter {
+      dc ⇒ mole.level(dc.end) < mole.level(dc.start)
+    }.map(DataChannelNegativeLevelProblem(_))
+
+  def apply(mole: IMole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty) = {
     allMoles(mole).flatMap {
       case (m, mt) ⇒
         def moleTaskImplicits(moleTask: IMoleTask) = {
@@ -248,7 +260,7 @@ object Validation {
         (mt match {
           case Some((t, c)) ⇒
             moleTaskImplicitsErrors(t, c) ++
-              typeErrorsMoleTask(m, moleTaskImplicits(t))
+              typeErrorsMoleTask(m, moleTaskImplicits(t)).map { e ⇒ MoleTaskDataFlowProblem(c, e) }
           case None ⇒
             sourceTypeErrors(m, implicits.prototypes, sources, hooks) ++
               hookErrors(m, implicits.prototypes, sources, hooks) ++
@@ -256,7 +268,9 @@ object Validation {
         }) ++
           topologyErrors(m) ++
           duplicatedTransitions(m) ++
-          duplicatedName(m, sources, hooks)
+          duplicatedName(m, sources, hooks) ++
+          dataChannelErrors(m)
     }
+  }
 
 }

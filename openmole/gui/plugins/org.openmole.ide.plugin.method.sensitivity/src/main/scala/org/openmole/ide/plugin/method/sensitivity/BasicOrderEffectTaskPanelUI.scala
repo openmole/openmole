@@ -23,40 +23,34 @@ import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import scala.swing.Label
 import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
 
 abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[PrototypeDataProxyUI],
                                            outputSequence: Iterable[PrototypeDataProxyUI]) extends PluginPanel("wrap 2") with TaskPanelUI {
 
   val doublePrototypes = Proxies.instance.classPrototypes(classOf[Double])
 
-  val inputPrototypeCombo: Option[MultiCombo[PrototypeDataProxyUI]] =
-    if (!doublePrototypes.isEmpty) {
-      Some(new MultiCombo("Model inputs",
-        doublePrototypes,
-        inputSequence.map { is ⇒
-          new ComboPanel(doublePrototypes,
-            new ComboData(Some(is)))
-        }.toList))
-    }
-    else None
+  val inputPrototypeCombo = new MultiCombo("Model inputs",
+    doublePrototypes,
+    inputSequence.map { is ⇒
+      new ComboPanel(doublePrototypes,
+        new ComboData(Some(is)))
+    }.toList,
+    minus = CLOSE_IF_EMPTY)
 
-  val outputPrototypeCombo: Option[MultiCombo[PrototypeDataProxyUI]] =
-    if (!doublePrototypes.isEmpty) {
-      Some(new MultiCombo("Model outputs",
-        doublePrototypes,
-        outputSequence.map { is ⇒
-          new ComboPanel(doublePrototypes,
-            new ComboData(Some(is)))
-        }.toList))
-    }
-    else None
+  val outputPrototypeCombo = new MultiCombo("Model outputs",
+    doublePrototypes,
+    outputSequence.map { is ⇒
+      new ComboPanel(doublePrototypes,
+        new ComboData(Some(is)))
+    }.toList,
+    minus = CLOSE_IF_EMPTY)
 
   val components = List(("Settings",
-    new PluginPanel("wrap 2") {
-      if (inputPrototypeCombo.isDefined && outputPrototypeCombo.isDefined) {
-        contents += inputPrototypeCombo.get.panel
-        add(outputPrototypeCombo.get.panel, "gap bottom 40")
-      }
-      else add(new Label("No Double Prototypes defined"), "gap bottom 40")
-    }))
+    new PluginPanel("wrap 2", "fill", "fill") {
+      contents += inputPrototypeCombo.panel
+      contents += outputPrototypeCombo.panel
+    }
+  )
+  )
 }

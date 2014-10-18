@@ -1,0 +1,9 @@
+<dataUI class="org.openmole.ide.plugin.domain.collection.VariableDomainDataUI">
+    <prototypeArray class="None"/>
+    <domainType class="scala.reflect.ManifestFactory$ClassTypeManifest">
+      <prefix class="None"/>
+      <runtimeClass>double</runtimeClass>
+      <typeArguments class="List"/>
+    </domainType>
+    <name>Prototype Array</name>
+  </dataUI>

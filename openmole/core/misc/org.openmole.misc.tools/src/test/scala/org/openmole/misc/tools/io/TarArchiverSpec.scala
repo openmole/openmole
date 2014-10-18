@@ -20,7 +20,7 @@ import com.ice.tar.TarOutputStream
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import java.io.FileOutputStream
 import java.io.FileWriter
@@ -32,7 +32,7 @@ import TarArchiver._
 import FileUtil._
 
 @RunWith(classOf[JUnitRunner])
-class TarArchiverSpec extends FlatSpec with ShouldMatchers {
+class TarArchiverSpec extends FlatSpec with Matchers {
   "Archive" should "preserve symbolic links" in {
     val tmpDir = Files.createTempDirectory("testArch").toFile
     val file = new File(tmpDir, "file")
@@ -61,7 +61,7 @@ class TarArchiverSpec extends FlatSpec with ShouldMatchers {
     val tmpDir = Files.createTempDirectory("testArch").toFile
     val file1 = new File(tmpDir, "file1")
     val file2 = new File(tmpDir, "file2")
-    val file3 = new File(tmpDir, "dir/file1")
+    val file3 = new File(tmpDir, "category/file1")
     file3.getParentFile.mkdirs
 
     file1.createNewFile
@@ -88,7 +88,7 @@ class TarArchiverSpec extends FlatSpec with ShouldMatchers {
 
     val file1Arch = new File(extractDir, "file1")
     val file2Arch = new File(extractDir, "file2")
-    val file3Arch = new File(extractDir, "dir/file1")
+    val file3Arch = new File(extractDir, "category/file1")
 
     file1Arch.canExecute should equal(true)
     file1Arch.canRead should equal(true)
@@ -120,8 +120,6 @@ class TarArchiverSpec extends FlatSpec with ShouldMatchers {
 
     val extractDir = Files.createTempDirectory("testArchExtract").toFile
     archive.extractDirArchiveWithRelativePath(extractDir)
-
-    extractDir.list.foreach { println }
 
     val extracted = new File(extractDir, file1.getName)
     extracted.canExecute should equal(true)

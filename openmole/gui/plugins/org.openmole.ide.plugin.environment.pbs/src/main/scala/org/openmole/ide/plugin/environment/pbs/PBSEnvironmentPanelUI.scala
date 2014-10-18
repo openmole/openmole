@@ -113,7 +113,7 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI)(implicit val i18n: Resour
   //  requirementsPanelUI.requirementHelp.foreach { hm ⇒ add(hm._1, hm._2) }
   add(loginTextField, new Help(i18n.getString("login"), i18n.getString("loginEx")))
   add(hostTextField, new Help(i18n.getString("host"), i18n.getString("hostEx")))
-  add(pathTextField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
+  add(pathTextField, new Help(i18n.getString("category"), i18n.getString("dirEx")))
   add(queueTextField, new Help(i18n.getString("queue"), i18n.getString("queueEx")))
   add(openMOLEMemoryTextField, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
 

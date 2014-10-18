@@ -1,0 +1,10 @@
+<MoleData>
+  <id>d04b097f-9c76-402b-8731-4ebaa6e9ea08</id>
+  <name>Mole_1</name>
+  <startingCapsule class="None"/>
+  <capsules class="List"/>
+  <slots class="List"/>
+  <transitions class="List"/>
+  <dataChannels class="List"/>
+  <plugins class="List"/>
+</MoleData>

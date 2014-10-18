@@ -26,6 +26,7 @@ import javax.swing.plaf.ColorUIResource
 import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.core.implementation.action.SaveXML
 import java.util.concurrent.Semaphore
+import org.openmole.ide.core.implementation.preference.Preferences
 
 class GUIApplication {
   application ⇒
@@ -43,7 +44,9 @@ class GUIApplication {
 
   val frame =
     new GUIPanel {
+
       import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
+
       peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
 
       iconImage = APPLICATION_ICON.getImage
@@ -60,7 +63,7 @@ class GUIApplication {
     frame.visible = true
   }
 
-  def closeOperation: Unit =
-    if (DialogFactory.confirmationDialog(" Exit OpenMOLE", "<html>You are exiting the OpenMOLE application.<br>SaveSettings the project ?</html>"))
-      SaveXML.save(frame)
+  def closeOperation: Unit = {
+    Preferences.dumpFile
+  }
 }

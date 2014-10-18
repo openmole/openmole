@@ -17,80 +17,84 @@
 
 package org.openmole.runtime.dbserver
 
-import com.db4o.ObjectContainer
-import com.db4o.cs.Db4oClientServer
-import com.db4o.defragment.Defragment
-import com.db4o.defragment.DefragmentConfig
-import com.db4o.ta.TransparentPersistenceSupport
+import java.util.logging.Logger
+
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.UUID
-import org.openmole.misc.replication.DBServerInfo
-import org.openmole.misc.replication.Replica
+import org.h2.tools.Server
+import org.openmole.misc.replication._
+import scala.slick.driver.H2Driver.simple._
+import scala.util.{ Success, Failure, Try }
 
 object DBServer extends App {
 
-  val user = UUID.randomUUID.toString
-  val password = UUID.randomUUID.toString
-
   val base = DBServerInfo.base
 
-  private def dB4oConfiguration = {
-    val configuration = Db4oClientServer.newServerConfiguration
-    configuration.common.add(new TransparentPersistenceSupport)
-    configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
-    configuration.common.bTreeNodeSize(256)
-    configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_storage").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_path").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_environment").indexed(true)
-    configuration.file.lockDatabaseFile(false)
-    configuration
-  }
-
-  def defrag(db: File) = {
-    val defragmentConfig = new DefragmentConfig(db.getAbsolutePath)
-    defragmentConfig.forceBackupDelete(true)
-    Defragment.defrag(defragmentConfig)
-  }
-
-  def open(dbFile: File) = Db4oClientServer.openServer(dB4oConfiguration, dbFile.getAbsolutePath, -1)
-
-  val lockFile = DBServerInfo.dbLockFile(base)
+  val lockFile = DBServerInfo.dbLockFile
   lockFile.createNewFile
 
   val str = new FileOutputStream(lockFile)
   val lock = str.getChannel.tryLock
 
   if (lock != null) {
-    val objRepo = DBServerInfo.dbFile(base)
-    if (objRepo.exists) defrag(objRepo)
-
-    val server = open(objRepo)
+    val server = Server.createTcpServer("-tcp", "-tcpDaemon").start()
 
     Runtime.getRuntime.addShutdownHook(
       new Thread {
         override def run = {
           lock.release
           str.close
-          server.close
+          server.stop
         }
       })
 
-    server.grantAccess(user, password)
-    val serverInfo = new DBServerInfo(server.ext.port, user, password)
-    val dbInfoFile = DBServerInfo.dbInfoFile(base)
-    dbInfoFile.deleteOnExit
+    val fullDataBaseFile = new File(DBServer.base.getPath, DBServerInfo.dbName + ".h2.db")
 
+    def db(user: String, password: String) =
+      Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:file:${DBServerInfo.base}/${DBServerInfo.urlDBPath}", user = user, password = password)
+
+    def createDB(user: String, password: String): Unit = {
+      Logger.getLogger(this.getClass.getName).info("Create BDD")
+      fullDataBaseFile.delete
+
+      db(user, "").withSession { implicit s ⇒
+        replicas.ddl.create
+        s.withStatement() {
+          _.execute(s"SET PASSWORD '$password';")
+        }
+      }
+    }
+
+    val info =
+      if (!DBServerInfo.dbInfoFile.exists || !fullDataBaseFile.exists) {
+        val user = "sa"
+        val password = UUID.randomUUID.toString.filter(_.isLetterOrDigit)
+        createDB(user, password)
+        new DBServerInfo(server.getPort, user, password)
+      }
+      else DBServerInfo.load(DBServerInfo.dbInfoFile).copy(port = server.getPort)
+
+    def dbWorks =
+      Try {
+        db(info.user, info.password).withSession { implicit s ⇒
+          replicas.size.run
+        }
+      } match {
+        case Failure(_) ⇒ false
+        case Success(_) ⇒ true
+      }
+
+    if (!dbWorks) createDB(info.user, info.password)
+
+    val dbInfoFile = DBServerInfo.dbInfoFile
     val out = new FileOutputStream(dbInfoFile)
-    try new XStream().toXML(serverInfo, out) finally out.close
-    server.openClient.close
+    try new XStream().toXML(info, out) finally out.close
 
     Thread.sleep(Long.MaxValue)
   }
-  else println("Server is allready running")
+  else println("Server is already running")
 
 }

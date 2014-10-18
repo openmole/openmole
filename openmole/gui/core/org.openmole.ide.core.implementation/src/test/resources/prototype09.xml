@@ -1,0 +1,9 @@
+<dataUI class="org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI">
+    <name>test</name>
+    <dim>0</dim>
+    <type class="scala.reflect.ManifestFactory$ClassTypeManifest">
+      <prefix class="None"/>
+      <runtimeClass>double</runtimeClass>
+      <typeArguments class="List"/>
+    </type>
+  </dataUI>

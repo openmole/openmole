@@ -27,19 +27,19 @@ import scala.swing.event.Key.Enter
 
 class ChooseFileTextField(initialText: String,
                           chooserTitle: String,
-                          chooserDescription: Option[String],
                           selectionMode: Value,
-                          extensions: Option[String],
+                          chooser: Option[(String, Seq[String])] = None,
                           toDoFunction: ⇒ Unit = {}) extends TextField {
-  def this(iT: String, cT: String, cD: String, ex: String, tdF: ⇒ Unit = {}) = this(iT, cT, Some(cD), FilesOnly, Some(ex), tdF)
 
-  def this(iT: String, cT: String) = this(iT, cT, None, FilesOnly, None)
+  //def this(iT: String, cT: String, cD: String, ex: String, tdF: ⇒ Unit = {}) = this(iT, cT, Some(cD), FilesOnly, Some(ex), tdF)
 
-  def this(iT: String) = this(iT, "Select a directory", None, DirectoriesOnly, None)
+  //def this(iT: String, cT: String) = this(iT, cT, None, FilesOnly, None)
+
+  //def this(iT: String, f: ⇒ Unit = {}) = this(iT, "Select a directory", None, DirectoriesOnly, None, f)
 
   text = initialText
   val fc = new FileChooser {
-    if (chooserDescription.isDefined) fileFilter = new FileNameExtensionFilter(chooserDescription.get, extensions.get)
+    chooser.foreach { case (d, ext) ⇒ fileFilter = new FileNameExtensionFilter(d, ext: _*) }
     fileSelectionMode = selectionMode
     title = chooserTitle
   }
@@ -51,8 +51,9 @@ class ChooseFileTextField(initialText: String,
         publish(new DialogClosedEvent(this))
       }
     case KeyReleased(_, _, _, _) ⇒ toDoFunction
+    case DialogClosedEvent(_)    ⇒ toDoFunction
   }
 
   columns = 15
-  listenTo(this.mouse.clicks, keys)
+  listenTo(this, this.mouse.clicks, keys)
 }

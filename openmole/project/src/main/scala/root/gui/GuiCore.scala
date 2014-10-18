@@ -3,7 +3,7 @@ package root.gui
 import org.openmole.buildsystem.OMKeys._
 
 import sbt._
-import root.{ GuiDefaults, base }
+import root.{ GuiDefaults, base, Web }
 import root.Libraries._
 import root.libraries.Apache
 import sbt.Keys._
@@ -13,7 +13,7 @@ object Core extends GuiDefaults {
 
   lazy val implementation = OsgiProject("org.openmole.ide.core.implementation") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }) dependsOn
-    (provided(robustIt), provided(base.Core.model), provided(base.Core.batch), base.Misc.exception, provided(base.Misc.eventDispatcher),
-      provided(base.Misc.workspace), provided(base.Misc.tools), provided(xstream), provided(Apache.config), provided(Apache.log4j), provided(groovy), provided(jodaTime), provided(netbeans),
-      Misc.widget, Misc.tools, provided(Misc.visualization), provided(gral))
+    (robustIt, base.Core.model, base.Core.batch, base.Misc.exception, base.Misc.eventDispatcher, Web.misc,
+      base.Misc.workspace, base.Misc.tools, xstream, Apache.config, Apache.log4j, groovy, jodaTime, netbeans,
+      Misc.widget, Misc.tools, Misc.visualization, gral, base.Misc.replication, scalaz)
 }

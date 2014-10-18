@@ -20,19 +20,22 @@ package org.openmole.misc
 import collection.JavaConversions._
 import java.io._
 import org.osgi.framework._
+import java.net.URLDecoder
 
 package object osgi {
 
   val OpenMOLEScope = "OpenMOLE-Scope"
   val OpenMOLELocationProperty = "openmole.location"
 
-  def openMOLELocation = System.getProperty(OpenMOLELocationProperty, "")
+  def openMOLELocation =
+    Option(System.getProperty(OpenMOLELocationProperty, null)).map(new File(_))
 
   implicit class BundleDecorator(b: Bundle) {
 
     def isSystem = b.getLocation.toLowerCase.contains("system bundle") || b.getLocation.startsWith("netigso:")
 
-    def isProvided = b.getHeaders.toMap.exists { case (k, v) ⇒ k.toString.toLowerCase.contains("openmole-scope") && v.toString.toLowerCase.contains("provided") }
+    def isProvided =
+      b.getHeaders.toMap.exists { case (k, v) ⇒ k.toString.toLowerCase.contains("openmole-scope") && v.toString.toLowerCase.contains("provided") }
 
     def file = {
       val (ref, url) = if (b.getLocation.startsWith("reference:"))
@@ -47,8 +50,14 @@ package object osgi {
         else noProtocol
       }
 
-      val base = if (ref) new File(openMOLELocation) else new File("")
-      new File(base, location)
+      val decodedLocation = URLDecoder.decode(location, "UTF-8")
+
+      if (ref)
+        openMOLELocation match {
+          case Some(oMLoc) ⇒ new File(oMLoc, decodedLocation)
+          case None        ⇒ new File(decodedLocation)
+        }
+      else new File(decodedLocation)
     }
 
   }

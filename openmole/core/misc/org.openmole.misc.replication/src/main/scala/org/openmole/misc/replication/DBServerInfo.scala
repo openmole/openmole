@@ -20,6 +20,10 @@ package org.openmole.misc.replication
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import scala.io.Source
+import scala.slick.driver.H2Driver.simple._
+import java.net._
+
+import scala.util.Try
 
 object DBServerInfo {
   val base = {
@@ -31,9 +35,12 @@ object DBServerInfo {
     dir
   }
 
-  val dbName = "db.bin"
-  val dbInfoName = "db.info"
-  val dbLock = "db.lock"
+  def hostName =
+    Try { InetAddress.getLocalHost().getHostName() }.getOrElse("localhost")
+
+  val dbName = s"replica-$hostName"
+  val dbInfoName = s"$dbName.info"
+  val dbLock = s"$dbName.lock"
 
   lazy val xstream = new XStream
 
@@ -43,9 +50,11 @@ object DBServerInfo {
     finally src.close
   }
 
-  def dbLockFile(base: File) = new File(base, dbLock)
-  def dbFile(base: File) = new File(base, dbName)
-  def dbInfoFile(base: File) = new File(base, dbInfoName)
+  def dbLockFile = new File(base, dbLock)
+  def dbFile = new File(base, dbName)
+  def dbInfoFile = new File(base, dbInfoName)
+  def urlDBPath = s"$dbName;MV_STORE=FALSE;MVCC=TRUE;"
+
 }
 
-class DBServerInfo(val port: Int, val user: String, val password: String)
+case class DBServerInfo(port: Int, user: String, password: String)

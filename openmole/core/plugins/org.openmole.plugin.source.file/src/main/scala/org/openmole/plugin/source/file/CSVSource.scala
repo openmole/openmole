@@ -30,41 +30,52 @@ import collection.JavaConversions._
 import reflect.ClassTag
 import org.openmole.core.implementation.mole.{ SourceBuilder, Source }
 import org.openmole.core.model.mole.ExecutionContext
+import org.openmole.core.implementation.tools.VariableExpansion
 
 object CSVSource {
 
-  def apply(file: File) =
-    new SourceBuilder { builder ⇒
+  trait CSVSourceBuilder extends SourceBuilder { builder ⇒
+    protected var _columns = new ListBuffer[(String, Prototype[_])]
 
-      private var _columns = new ListBuffer[(String, Prototype[_])]
+    def columns = _columns.toList
 
-      def columns = _columns.toList
-
-      def addColumn(proto: Prototype[_]): this.type = this.addColumn(proto.name, proto)
-      def addColumn(name: String, proto: Prototype[_]): builder.type = {
-        _columns += (name -> proto)
-        addOutput(proto.toArray)
-        this
-      }
-
-      def toSource = new CSVSource(file) with Built {
-        val columns = builder.columns
-      }
-
+    def addColumn(proto: Prototype[_]): this.type = this.addColumn(proto.name, proto)
+    def addColumn(name: String, proto: Prototype[_]): builder.type = {
+      _columns += (name -> proto)
+      addOutput(proto.toArray)
+      this
     }
+
+    trait Built extends super.Built {
+      val columns = builder.columns
+    }
+  }
+
+  def apply(path: String, separator: Char = ',') = {
+    val (_path, _separator) = (path, separator)
+    new CSVSourceBuilder { builder ⇒
+      def toSource = new CSVSource with Built {
+        val path = _path
+        val separator = _separator
+      }
+    }
+  }
 
 }
 
-abstract class CSVSource(val file: File) extends Source {
+abstract class CSVSource extends Source {
 
+  def path: String
   def columns: List[(String, Prototype[_])]
+  def separator: Char
 
   def p = columns.map { case (_, p) ⇒ p }
 
   import org.openmole.core.model.data._
 
   override def process(context: Context, executionContext: ExecutionContext): Context = {
-    val reader = new CSVReader(new FileReader(file))
+    val reader = new CSVReader(new FileReader(VariableExpansion(context, path)), separator)
+
     val headers = reader.readNext.toArray
 
     val columnsIndexes = columns.map {

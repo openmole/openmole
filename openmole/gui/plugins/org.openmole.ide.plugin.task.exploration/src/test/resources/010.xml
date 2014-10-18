@@ -1,0 +1,11 @@
+<TaskDataProxyUI>
+  <dataUI class="org.openmole.ide.plugin.task.exploration.ExplorationTaskDataUI">
+    <name>explore</name>
+    <sampling class="None"/>
+    <inputs class="List"/>
+    <outputs class="List"/>
+    <inputParameters class="HashMap"/>
+  </dataUI>
+  <generated>false</generated>
+  <id>00f6d009-75c3-4c68-bee3-1ca18172026a</id>
+</TaskDataProxyUI>

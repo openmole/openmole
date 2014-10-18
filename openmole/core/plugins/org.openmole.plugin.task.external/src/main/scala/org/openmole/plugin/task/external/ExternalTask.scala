@@ -39,16 +39,17 @@ trait ExternalTask extends Task {
   def outputFiles: Iterable[(String, Prototype[File])]
   def resources: Iterable[(File, String, Boolean, OS)]
 
-  protected class ToPut(val file: File, val name: String, val link: Boolean)
-  protected class ToGet(val name: String, val file: File)
+  protected case class ToPut(file: File, name: String, link: Boolean)
+  protected case class ToGet(name: String, file: File)
 
   protected def listInputFiles(context: Context): Iterable[ToPut] =
     inputFiles.map {
-      case (prototype, name, link) ⇒ new ToPut(context(prototype), VariableExpansion(context, name), link)
+      case (prototype, name, link) ⇒ ToPut(context(prototype), VariableExpansion(context, name), link)
     }
 
   protected def listResources(context: Context, tmpDir: File): Iterable[ToPut] = {
-    val expanded = resources map { case v @ (_, name, _, _) ⇒ v.copy(_2 = VariableExpansion(context, name)) }
+    val expanded =
+      resources map { case v @ (_, name, _, _) ⇒ v.copy(_2 = VariableExpansion(context, name)) }
 
     val byLocation =
       expanded groupBy {
@@ -62,7 +63,7 @@ trait ExternalTask extends Task {
       }
 
     selectedOS.map {
-      case (file, name, link, _) ⇒ new ToPut(file, name, link)
+      case (file, name, link, _) ⇒ ToPut(file, name, link)
     }
   }
 
@@ -74,7 +75,7 @@ trait ExternalTask extends Task {
           val file = new File(localDir, fileName)
 
           val fileVariable = Variable(prototype, file)
-          new ToGet(fileName, file) -> fileVariable
+          ToGet(fileName, file) -> fileVariable
       }
     context ++ files.map { _._2 } -> files.map { _._1 }
   }
@@ -111,19 +112,25 @@ trait ExternalTask extends Task {
         f.file
       }).toSet
 
-    val unusedFiles = new ListBuffer[File]
-    val unusedDirs = new ListBuffer[File]
-
-    localDir.applyRecursive(
-      f ⇒ if (f.isFile) unusedFiles += f else unusedDirs += f,
-      usedFiles ++ links)
-
     links.foreach(_.delete)
-    unusedFiles.foreach(_.delete)
+    localDir.applyRecursive(f ⇒ f.delete, usedFiles)
 
-    //TODO algorithm is no optimal and may be problematic for a huge number of dirs
-    unusedDirs.foreach { d ⇒ if (d.exists && !usedFiles.contains(d) && d.dirContainsNoFileRecursive) d.recursiveDelete }
+    // This delete the dir only if it is empty
+    localDir.delete
     resultContext
+  }
+
+  def withWorkDir[T](f: File ⇒ T): T = {
+    val tmpDir = org.openmole.misc.workspace.Workspace.newDir("externalTask")
+    val res =
+      try f(tmpDir)
+      catch {
+        case e: Throwable ⇒
+          tmpDir.recursiveDelete
+          throw e
+      }
+    tmpDir.delete
+    res
   }
 
 }

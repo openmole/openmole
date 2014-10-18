@@ -32,13 +32,13 @@ object BuildMoleScene {
   def apply(name: String) = new BuildMoleScene(new MoleUI(name))
 }
 
-class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene { buildMoleScene ⇒
+class BuildMoleScene(val dataUI: MoleUI) extends MoleScene { buildMoleScene ⇒
 
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
 
   val isBuildScene = true
 
-  override def refresh {
+  override def refresh = {
     dataUI.invalidateCache
     CheckData.checkMole(this)
     dataUI.capsules.foreach { case (_, c) ⇒ c.update }
@@ -65,11 +65,11 @@ class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene { buildMoleScene ⇒
 
     var capsuleMapping = new HashMap[CapsuleUI, CapsuleUI]
     var islots = new HashMap[InputSlotWidget, InputSlotWidget]
-    val ms = ExecutionMoleScene(dataUI.name + "_" + ScenesManager.countExec.incrementAndGet)
+    val ms = ExecutionMoleScene(dataUI.name + "_" + ScenesManager().countExec.incrementAndGet)
     dataUI.capsules.foreach(n ⇒ {
       val (caps, islotMapping) = deepcopy(n._2, ms)
       if (dataUI.startingCapsule == Some(n._2)) ms.dataUI.startingCapsule = Some(caps)
-      ms.add(caps, new Point(n._2.x.toInt / 2, n._2.y.toInt / 2))
+      ms._add(caps, new Point(n._2.x.toInt / 2, n._2.y.toInt / 2))
       capsuleMapping += n._2 -> caps
       islots ++= islotMapping
       caps.setAsValid
@@ -83,13 +83,13 @@ class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene { buildMoleScene ⇒
             t.transitionType,
             t.condition,
             t.filteredPrototypes)
-          ms.add(transition)
+          ms._add(transition)
         case dc: DataChannelUI ⇒
           val dataC = new DataChannelUI(
             capsuleMapping(dc.source),
             islots(dc.target),
             dc.filteredPrototypes)
-          ms.add(dataC)
+          ms._add(dataC)
         case _ ⇒
       }
     }
@@ -114,7 +114,7 @@ class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene { buildMoleScene ⇒
     connectionWidget
   }
 
-  def removeSelectedWidgets = ScenesManager.selection.foreach { c ⇒
+  def removeSelectedWidgets = ScenesManager().selection.foreach { c ⇒
     graphScene.removeNodeWithEdges(dataUI.removeCapsuleUI(c))
     CheckData.checkMole(buildMoleScene)
   }

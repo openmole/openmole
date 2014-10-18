@@ -27,6 +27,7 @@ import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.openmole.misc.exception.UserBadDataError
 import collection.JavaConversions._
+import org.openmole.misc.tools.io.Prettifier._
 
 object GroovyProxy {
 
@@ -47,7 +48,8 @@ class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) extends G
     val groovyShell = new GroovyShell(config)
     try groovyShell.parse("package script\n" + code)
     catch {
-      case t: Throwable ⇒ throw new UserBadDataError("Script compilation error !\n The script was :\n" + code + "\n Error message was:" + t.getMessage);
+      case t: Throwable ⇒
+        throw new UserBadDataError("Script compilation error !\n The script was :\n" + code + "\n Error (" + t.getClass.getName + ") message was:" + t.getMessage);
     }
   }
 
@@ -62,12 +64,22 @@ class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) extends G
     executeUnsynchronized(binding)
   }
 
-  def executeUnsynchronized(binding: Binding = new Binding) = {
+  def executeUnsynchronized(binding: Binding = new Binding) = try {
     compiledScript.setBinding(binding)
     val ret = compiledScript.run
     InvokerHelper.removeClass(compiledScript.getClass)
     compiledScript.setBinding(null)
     ret
+  }
+  catch {
+    case t: Throwable ⇒
+      throw new UserBadDataError(
+        s"""Script execution error !
+          |The script was:
+          |${code}
+          |It has raised the exception:
+          |""".stripMargin + t.stackStringWithMargin
+      )
   }
 
 }

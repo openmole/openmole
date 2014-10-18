@@ -17,81 +17,78 @@
 
 package org.openmole.ide.plugin.task.moletask
 
-import org.openmole.ide.misc.widget.Help
-import org.openmole.ide.misc.widget.Helper
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget._
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.data.{ EmptyDataUIs }
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.misc.tools.util._
-import scala.swing.event.SelectionChanged
 import scala.swing.Label
-import scala.swing.MyComboBox
-import org.openmole.ide.misc.widget.URL
-import scala.collection.JavaConversions._
-import org.openmole.ide.core.implementation.workflow.{ IMoleUI, MoleUI }
 import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
+import org.openmole.ide.misc.widget.multirow.MultiCombo
+import org.openmole.ide.misc.widget.multirow.RowWidget._
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import scala.swing.event.SelectionChanged
+import org.openmole.ide.misc.widget.multirow.MultiCombo.{ ComboData, ComboPanel }
+import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.workflow.MoleUI
+import org.openmole.ide.core.implementation.data.ToolDataUI
 
-class MoleTaskPanelUI(pud: MoleTaskDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("fillx,wrap 2", "left,grow,fill", "") with TaskPanelUI {
+class MoleTaskPanelUI(pud: MoleTaskDataUI010)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("fillx,wrap 2", "left,grow,fill", "") with TaskPanelUI {
 
-  val moleComboBox = new MyComboBox(MoleTaskDataUI.emptyMoleSceneManager ::
-    ScenesManager.moleScenes.map {
-      _.dataUI
-    }.filter {
-      _ != ScenesManager.currentSceneContainer.get.scene.dataUI
-    }.filter {
-      _.capsules.size > 0
-    }.toList)
+  val moleComboBox = ContentComboBox[ID](currentMoles,
+    ScenesManager().moleScenes.toList.map { _.dataUI }.find { m ⇒ Some(m.id) == pud.mole })
 
-  moleComboBox.selection.item = pud.mole match {
-    case Some(x: ID.Type) ⇒ MoleTaskDataUI.manager(x) match {
-      case Some(m: IMoleUI) ⇒ m.asInstanceOf[MoleUI]
-      case _                ⇒ MoleTaskDataUI.emptyMoleSceneManager
-    }
-    case _ ⇒ MoleTaskDataUI.emptyMoleSceneManager
-  }
+  val capsuleComboBox = ContentComboBox(currentCapsules, pud.finalCapsule)
 
-  val capsuleComboBox = new MyComboBox(EmptyDataUIs.emptyTaskProxy :: currentCapsules.toList)
+  val implicitContent = Proxies.instance.prototypes intersect (pud.inputs ++ pud.implicitPrototypes._1)
 
-  capsuleComboBox.selection.item = pud.finalCapsule.getOrElse(EmptyDataUIs.emptyTaskProxy)
+  val multiImplicits = new MultiCombo("Implicits",
+    implicitContent,
+    pud.implicits.map { i ⇒
+      new ComboPanel(implicitContent,
+        new ComboData(Some(i)))
+    }.toSeq,
+    minus = CLOSE_IF_EMPTY,
+    plus = ADD)
 
   val components = List(("Settings", new PluginPanel("wrap 2") {
     contents += (new Label("Embedded mole"), "gap para")
-    contents += moleComboBox
+    contents += moleComboBox.widget
     contents += (new Label("Final capsule"), "gap para")
-    contents += capsuleComboBox
-  }))
+    contents += capsuleComboBox.widget
+  }), ("Implicits", multiImplicits.panel))
 
-  listenTo(moleComboBox.selection)
+  listenTo(moleComboBox.widget.selection)
   reactions += {
-    case SelectionChanged(`moleComboBox`) ⇒
-      capsuleComboBox.peer.setModel(MyComboBox.newConstantModel(currentCapsules.toList))
+    case SelectionChanged(_) ⇒
+      capsuleComboBox.setModel(currentCapsules)
   }
 
-  def currentCapsules = {
-    val li = ScenesManager.moleScenes.map {
-      _.dataUI
-    }.filter(_ == moleComboBox.selection.item)
-    if (li.size > 0) li.head.capsules.values.filter {
-      _.dataUI.task.isDefined
-    }.map {
-      _.dataUI.task.get
-    }.toList
-    else List(EmptyDataUIs.emptyTaskProxy)
-  }
+  def currentMoles: List[MoleUI] = (for {
+    dataUI ← ScenesManager().moleScenes.map { _.dataUI }
+    if dataUI != ScenesManager().currentSceneContainer.get.scene.dataUI
+    if dataUI.capsules.size > 0
+  } yield dataUI).toList
+
+  def currentCapsules = (for {
+    dataUI ← ScenesManager().moleScenes.map { _.dataUI }
+    if { Some(dataUI.id) == moleComboBox.widget.selection.item.content.map { _.id } }
+    capsule ← dataUI.capsules.values
+    task ← capsule.dataUI.task
+  } yield task).toList
 
   override def saveContent(name: String) =
-    new MoleTaskDataUI(name,
-      if (moleComboBox.selection.item.id == -1) None else Some(moleComboBox.selection.item.id),
-      if (capsuleComboBox.selection.item == EmptyDataUIs.emptyTaskProxy) None else Some(capsuleComboBox.selection.item))
+    new MoleTaskDataUI010(name,
+      moleComboBox.widget.selection.item.content.map { _.id },
+      capsuleComboBox.widget.selection.item.content,
+      multiImplicits.content.flatMap { _.comboValue })
 
   override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 
-  add(moleComboBox,
+  add(moleComboBox.widget,
     new Help(i18n.getString("mole"),
       i18n.getString("moleEx")))
-  add(capsuleComboBox,
+  add(capsuleComboBox.widget,
     new Help(i18n.getString("finalCapsule"),
       i18n.getString("finalCapsuleEx")))
 

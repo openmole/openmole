@@ -1,0 +1,12 @@
+<dataUI class="org.openmole.ide.plugin.task.systemexec.SystemExecTaskDataUI">
+    <name>test</name>
+    <workdir></workdir>
+    <launchingCommands></launchingCommands>
+    <resources class="List"/>
+    <inputMap class="List"/>
+    <outputMap class="List"/>
+    <variables class="List"/>
+    <inputs class="List"/>
+    <outputs class="List"/>
+    <inputParameters class="HashMap"/>
+  </dataUI>

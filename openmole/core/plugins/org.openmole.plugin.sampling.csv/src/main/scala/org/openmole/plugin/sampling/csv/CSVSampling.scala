@@ -34,10 +34,10 @@ import scala.collection.mutable.ListBuffer
 
 object CSVSampling {
 
-  def apply(
-    file: File) = new SamplingBuilder { builder ⇒
+  def apply(file: File, separator: Char = ',') = new SamplingBuilder { builder ⇒
     private var _columns = new ListBuffer[(String, Prototype[_])]
     private var _fileColumns = new ListBuffer[(String, File, Prototype[File])]
+    private val _separartor = separator
 
     def columns = _columns.toList
     def fileColumns = _fileColumns.toList
@@ -58,6 +58,7 @@ object CSVSampling {
     def toSampling = new CSVSampling(file) {
       val columns = builder.columns
       val fileColumns = builder.fileColumns
+      val separator = _separartor
     }
   }
 
@@ -71,13 +72,14 @@ abstract sealed class CSVSampling(val file: File) extends Sampling {
 
   def columns: List[(String, Prototype[_])]
   def fileColumns: List[(String, File, Prototype[File])]
+  def separator: Char
 
   /**
    * Builds the plan.
    *
    */
   override def build(context: Context): Iterator[Iterable[Variable[_]]] = {
-    val reader = new CSVReader(new FileReader(file))
+    val reader = new CSVReader(new FileReader(file), separator)
     val headers = reader.readNext.toArray
 
     //test wether prototype names belong to header names

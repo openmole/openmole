@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.glite
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 import org.openmole.misc.workspace._
-import fr.iscpif.gridscale.FileType
+import fr.iscpif.gridscale.storage.FileType
 import fr.iscpif.gridscale.glite.{ SRMStorage, GlobusAuthentication }
 import java.net.URI
 import java.io.{ File, InputStream, OutputStream }
@@ -28,20 +28,22 @@ import org.openmole.core.batch.environment.BatchEnvironment
 
 object GliteStorageService {
 
-  def emptyRoot(s: SRMStorage, _permissive: Boolean) =
+  def emptyRoot(s: SRMStorage, threads: Int) =
     new SRMStorage {
       val host: String = s.host
       val port: Int = s.port
       val basePath: String = ""
-      override def permissive = _permissive
+      val credential = s.credential
+      override val connections = threads
     }
 
-  def apply(s: SRMStorage, _environment: BatchEnvironment, _authentication: GlobusAuthentication.ProxyCreator, threads: Int, permissive: Boolean, caCertDir: File) = new GliteStorageService {
-    val storage = emptyRoot(s, permissive)
+  def apply(s: SRMStorage, _environment: BatchEnvironment { def voName: String }, _authentication: GlobusAuthentication.ProxyCreator, threads: Int) = new GliteStorageService {
+    val storage = emptyRoot(s, threads)
     val url = new URI("srm", null, s.host, s.port, null, null, null)
-    val remoteStorage = new RemoteGliteStorage(s.host, s.port, permissive, caCertDir)
+    val remoteStorage = new RemoteGliteStorage(s.host, s.port, _environment.voName)
     val environment = _environment
     val root = s.basePath
+    override lazy val id = new URI("srm", environment.voName, s.host, s.port, s.basePath, null, null).toString
     def nbTokens = threads
     def authentication = _authentication
   }

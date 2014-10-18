@@ -1,0 +1,11 @@
+<dataUI class="org.openmole.ide.plugin.domain.distribution.UniformIntDistributionDataUI">
+    <max class="None"/>
+    <domainType class="scala.reflect.ManifestFactory$$anon$9">
+      <toString>Int</toString>
+      <hashCode>32672139</hashCode>
+    </domainType>
+    <name>Uniform distribution</name>
+    <availableTypes class="List">
+      <string>int</string>
+    </availableTypes>
+  </dataUI>

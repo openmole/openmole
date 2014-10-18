@@ -30,23 +30,36 @@ package object combine {
   implicit def combineSamplingDecorator(s: Sampling) = new {
     def +(s2: Sampling) = new CombineSampling(s, s2)
     def x(s2: Sampling) = new CompleteSampling(s, s2)
-    def zip(s2: Sampling) = new ZipSampling(s, s2)
-    def zipWithIndex(index: Prototype[Int]) = new ZipWithIndexSampling(s, index)
-    def take(n: Int) = new TakeSampling(s, n)
-    def shuffle = new ShuffleSampling(s)
-  }
-
-  implicit def zipWithNameFactorDecorator(factor: Factor[File, Domain[File] with Discrete[File]]) = new {
-    def zipWithName(name: Prototype[String]) = new ZipWithNameSampling(factor, name)
   }
 
   implicit def combineFactorDecorator[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) = new {
     def x(s: Sampling) = new CompleteSampling(f, s)
     def +(s2: Sampling) = new CombineSampling(f, s2)
-    def zip(s2: Sampling) = new ZipSampling(f, s2)
-    def zipWithIndex(index: Prototype[Int]) = new ZipWithIndexSampling(f, index)
-    def take(n: Int) = new TakeSampling(f, n)
-    def shuffle = new ShuffleSampling(f)
+  }
+
+  implicit def stringToGroovyFilterConversion(s: String) = new GroovyFilter(s)
+  implicit def modifierSamplingDecorator(s: Sampling) = new {
+    def filter(filters: Filter*) = FilteredSampling(s, filters: _*)
+    def zip(s2: Sampling) = ZipSampling(s, s2)
+    def zipWithIndex(index: Prototype[Int]) = ZipWithIndexSampling(s, index)
+    def take(n: Int) = TakeSampling(s, n)
+    def shuffle = ShuffleSampling(s)
+    def replicate[T](seeder: Factor[T, Domain[T] with Discrete[T]], replications: Int) = ReplicationSampling(s, seeder, replications)
+    def replicate[T2](seeder: Factor[T2, Domain[T2] with Discrete[T2] with Finite[T2]]) = ReplicationSampling(s, seeder)
+  }
+
+  implicit def zipWithNameFactorDecorator(factor: Factor[File, Domain[File] with Discrete[File]]) = new {
+    def zipWithName(name: Prototype[String]) = ZipWithNameSampling(factor, name)
+  }
+
+  implicit def modifierFactorDecorator[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) = new {
+    def filter(filters: Filter*) = FilteredSampling(f, filters: _*)
+    def zip(s2: Sampling) = ZipSampling(f, s2)
+    def zipWithIndex(index: Prototype[Int]) = ZipWithIndexSampling(f, index)
+    def take(n: Int) = TakeSampling(f, n)
+    def shuffle = ShuffleSampling(f)
+    def replicate[T2](seeder: Factor[T2, Domain[T2] with Discrete[T2]], replications: Int) = ReplicationSampling(f, seeder, replications)
+    def replicate[T2](seeder: Factor[T2, Domain[T2] with Discrete[T2] with Finite[T2]]) = ReplicationSampling(f, seeder)
   }
 
 }

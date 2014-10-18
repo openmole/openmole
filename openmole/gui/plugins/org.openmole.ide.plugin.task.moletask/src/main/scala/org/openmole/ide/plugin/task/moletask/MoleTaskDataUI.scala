@@ -14,17 +14,18 @@ import org.openmole.misc.exception.UserBadDataError
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Success, Failure }
-import org.openmole.ide.core.implementation.workflow.{ IMoleUI, MoleUI }
+import org.openmole.ide.core.implementation.workflow.MoleUI
 import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, TaskDataProxyUI }
+import org.openmole.ide.core.implementation.serializer.Update
 
 object MoleTaskDataUI {
-  def manager(i: ID.Type): Option[IMoleUI] = ScenesManager.moleScenes.map {
+  def manager(i: ID.Type): Option[MoleUI] = ScenesManager().moleScenes.map {
     _.dataUI
   }.filter {
     _.id == i
   }.headOption
 
-  def capsule(t: TaskDataProxyUI, manager: IMoleUI): Option[CapsuleDataUI] =
+  def capsule(t: TaskDataProxyUI, manager: MoleUI): Option[CapsuleDataUI] =
     manager.capsules.values.map {
       _.dataUI
     }.filter {
@@ -38,26 +39,29 @@ object MoleTaskDataUI {
 
 import MoleTaskDataUI._
 
-class MoleTaskDataUI(val name: String = "",
-                     val mole: Option[ID.Type] = None,
-                     val finalCapsule: Option[TaskDataProxyUI] = None,
-                     val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                     val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
-                     val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
+class MoleTaskDataUI010(val name: String = "",
+                        val mole: Option[ID.Type] = None,
+                        val finalCapsule: Option[TaskDataProxyUI] = None,
+                        val implicits: Iterable[PrototypeDataProxyUI] = Iterable(),
+                        val inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                        val outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                        val inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends TaskDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
     mole match {
       case Some(x: ID.Type) ⇒ manager(x) match {
-        case Some(y: IMoleUI) ⇒
+        case Some(y: MoleUI) ⇒
           finalCapsule match {
             case Some(z: TaskDataProxyUI) ⇒
               MoleTaskDataUI.capsule(z, y) match {
                 case Some(w: CapsuleDataUI) ⇒
                   MoleFactory.buildMole(y) match {
                     case Success((m, capsMap, errs)) ⇒
-                      val builder = MoleTask(name, m, capsMap.find {
-                        case (k, _) ⇒ k.dataUI == w
-                      }.get._2, List.empty)(plugins)
+                      val builder =
+                        MoleTask(name, m, capsMap.find {
+                          case (k, _) ⇒ k.dataUI == w
+                        }.get._2)(plugins)
+                      implicits foreach (p ⇒ builder.addImplicit(p.dataUI.coreObject.get.name))
                       initialise(builder)
                       builder.toTask
                     case Failure(l) ⇒ throw new UserBadDataError(l)
@@ -82,5 +86,14 @@ class MoleTaskDataUI(val name: String = "",
 
   def doClone(ins: Seq[PrototypeDataProxyUI],
               outs: Seq[PrototypeDataProxyUI],
-              params: Map[PrototypeDataProxyUI, String]) = new MoleTaskDataUI(name, mole, finalCapsule, ins, outs, params)
+              params: Map[PrototypeDataProxyUI, String]) = new MoleTaskDataUI010(name, mole, finalCapsule, implicits, ins, outs, params)
+}
+
+class MoleTaskDataUI(name: String = "",
+                     mole: Option[ID.Type] = None,
+                     finalCapsule: Option[TaskDataProxyUI] = None,
+                     inputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                     outputs: Seq[PrototypeDataProxyUI] = Seq.empty,
+                     inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends Update[MoleTaskDataUI010] {
+  def update = new MoleTaskDataUI010(name, mole, finalCapsule, Iterable(), inputs, outputs, inputParameters)
 }

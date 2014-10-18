@@ -24,8 +24,5 @@ import org.openmole.ide.core.implementation.sampling.{ SamplingProxyUI, IBuiltCo
 trait SamplingFactoryUI extends FactoryUI {
   def buildDataUI: SamplingDataUI
 
-  def fromCoreObject(sampling: Sampling,
-                     bSC: IBuiltCompositionSampling): (SamplingProxyUI, IBuiltCompositionSampling)
-
   def category = List("Sampling")
 }

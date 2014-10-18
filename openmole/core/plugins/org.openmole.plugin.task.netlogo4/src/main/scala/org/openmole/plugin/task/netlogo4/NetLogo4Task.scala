@@ -26,6 +26,7 @@ import org.openmole.core.implementation.task._
 import java.io.File
 import collection.JavaConversions._
 import org.openmole.misc.tools.service.OS
+import org.openmole.plugin.tool.netlogo4.NetLogo4
 
 object NetLogo4Task {
 
@@ -85,6 +86,15 @@ object NetLogo4Task {
         netLogoOutputs = builder.netLogoOutputs,
         netLogoArrayOutputs = builder.netLogoArrayOutputs,
         netLogoFactory = factory)
+    }
+  }
+
+  def apply(name: String,
+            workspace: Workspace,
+            launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
+    workspace.location match {
+      case Left((w: File, s: String)) ⇒ apply(name, w, s, launchingCommands)
+      case Right(s: File)             ⇒ apply(name, s, launchingCommands)
     }
   }
 

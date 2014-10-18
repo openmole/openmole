@@ -30,7 +30,7 @@ import org.netbeans.api.visual.action.ConnectorState
 import org.netbeans.api.visual.widget.Scene
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.dialog.DialogFactory
+import org.openmole.ide.core.implementation.dialog.{ StatusBar, DialogFactory }
 import org.openmole.ide.core.implementation.data.{ IExplorationTaskDataUI, CheckData }
 import org.openmole.ide.core.implementation.commons.{ ExplorationTransitionType, SimpleTransitionType }
 import org.openmole.ide.misc.widget.MigPanel
@@ -41,6 +41,9 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.panel._
 import org.openmole.ide.core.implementation.sampling._
 import scala.Some
+import java.io.File
+import org.netbeans.api.visual.export.SceneExporter
+import org.netbeans.api.visual.export.SceneExporter.{ ZoomType, ImageType }
 
 abstract class MoleScene extends GraphScene.StringGraph
     with SelectProvider
@@ -48,7 +51,7 @@ abstract class MoleScene extends GraphScene.StringGraph
     with RectangularSelectProvider {
   moleScene ⇒
 
-  val dataUI: IMoleUI
+  val dataUI: MoleUI
   var obUI: Option[Widget] = None
   val capsuleLayer = new LayerWidget(this)
   val connectLayer = new LayerWidget(this)
@@ -69,10 +72,13 @@ abstract class MoleScene extends GraphScene.StringGraph
     firstFree0(0)
   }
 
-  def updatePanels = _currentPanels.flatMap {
-    _.base
-  }.reverse.foreach {
-    _.updatePanel
+  def updatePanels(i: Int) = {
+    _currentPanels.flatMap {
+      _.base
+    }.reverse.foreach { p ⇒
+      if ((p.index >= i || !p.created)) p.savePanel
+      p.updatePanel
+    }
   }
 
   class OBase {
@@ -130,29 +136,55 @@ abstract class MoleScene extends GraphScene.StringGraph
 
   def initCapsuleAdd(w: CapsuleUI)
 
-  def add(caps: CapsuleUI, locationPoint: Point) = {
+  def _add(caps: CapsuleUI, locationPoint: Point) = {
     assert(caps.scene == this)
     initCapsuleAdd(caps)
     dataUI.registerCapsuleUI(caps)
     graphScene.addNode(caps.id).setPreferredLocation(locationPoint)
-    CheckData.checkMole(this)
+  }
+
+  def add(caps: CapsuleUI, locationPoint: Point) = {
+    _add(caps, locationPoint)
+    refresh
+  }
+
+  def contains(transition: ConnectorUI) = dataUI.connectors.values.exists {
+    con ⇒ transition.source.id == con.source.id && transition.target.capsule.id == con.target.capsule.id
+  }
+
+  def _add(trans: TransitionUI) = {
+    if (contains(trans)) StatusBar().warn("The transition from " + trans.source.id + " to " + trans.target.capsule.id + " already exists")
+    else {
+      dataUI.registerConnector(trans)
+      createConnectEdge(trans.source.id, trans.target.capsule.id, trans.id, trans.target.index)
+    }
   }
 
   def add(trans: TransitionUI) = {
-    dataUI.registerConnector(trans)
-    createConnectEdge(trans.source.id, trans.target.capsule.id, trans.id, trans.target.index)
+    _add(trans)
     refresh
   }
 
-  def add(dc: DataChannelUI) = {
-    dataUI.registerConnector(dc)
-    createConnectEdge(dc.source.id, dc.target.capsule.id, dc.id)
+  def add(trans: DataChannelUI) = {
+    _add(trans)
     refresh
+  }
+
+  def _add(dc: DataChannelUI) = {
+    if (contains(dc)) StatusBar().warn("The Data Channel from " + dc.source.id + " to " + dc.target.capsule.id + " already exists")
+    else {
+      dataUI.registerConnector(dc)
+      createConnectEdge(dc.source.id, dc.target.capsule.id, dc.id)
+    }
   }
 
   def startingCapsule_=(caps: CapsuleUI) = {
     dataUI.startingCapsule = Some(caps)
     refresh
+  }
+
+  def buildImage(file: File) = if (file.exists) {
+    SceneExporter.createImage(this, file, ImageType.PNG, ZoomType.FIT_IN_WINDOW, true, false, 7, 800, 400)
   }
 
   override def paintChildren = {
@@ -169,7 +201,7 @@ abstract class MoleScene extends GraphScene.StringGraph
   }.flatten
 
   def displayCapsuleProperty(capsuleUI: CapsuleUI, tabIndex: Int) =
-    ScenesManager.currentSceneContainer match {
+    ScenesManager().currentSceneContainer match {
       case (Some(exe: ExecutionMoleSceneContainer)) ⇒
       case _ ⇒
         setPanel(new CapsulePanel {
@@ -191,7 +223,7 @@ abstract class MoleScene extends GraphScene.StringGraph
   }
 
   def displaySamplingPropertyPanel(samplingWidget: ISamplingCompositionWidget): Base = {
-    ScenesManager.currentSceneContainer match {
+    ScenesManager().currentSceneContainer match {
       case (Some(exe: ExecutionMoleSceneContainer)) ⇒ throw new UserBadDataError("No displaying in execution mode")
       case _ ⇒
         val i = firstFree
@@ -213,7 +245,7 @@ abstract class MoleScene extends GraphScene.StringGraph
   }
 
   def displayPropertyPanel(dataproxy: DataProxyUI): Base =
-    ScenesManager.currentSceneContainer match {
+    ScenesManager().currentSceneContainer match {
       case (Some(exe: ExecutionMoleSceneContainer)) ⇒ throw new UserBadDataError("No displaying in execution mode")
       case _ ⇒
         val i = firstFree
@@ -250,15 +282,13 @@ abstract class MoleScene extends GraphScene.StringGraph
           }
           case _ ⇒ throw new UserBadDataError("No displaying available for " + dataproxy)
         }
-        //  currentPanels(i).set(p)
-        // locate(i)
         p.nameTextField.requestFocus
         setPanel(p, i)
-        //  refresh
         p
     }
 
   def setPanel(p: Base, i: Int) = {
+    if (i == 2) saveAndClose(i)
     currentPanel(i).set(p)
     locate(i)
     refresh
@@ -357,8 +387,8 @@ abstract class MoleScene extends GraphScene.StringGraph
   def select(w: Widget, point: Point, change: Boolean) {
     w match {
       case widget: CapsuleUI ⇒
-        ScenesManager.changeSelection(widget)
-      case _ ⇒ ScenesManager.clearSelection
+        ScenesManager().changeSelection(widget)
+      case _ ⇒ ScenesManager().clearSelection
     }
   }
 
@@ -381,14 +411,14 @@ abstract class MoleScene extends GraphScene.StringGraph
       rectangle.height *= -1
     }
 
-    ScenesManager.clearSelection
+    ScenesManager().clearSelection
     getNodes.foreach {
       b ⇒
         findWidget(b) match {
           case w: CapsuleUI ⇒
             val r = new Rectangle(w.getBounds)
             r.setLocation(w.getLocation)
-            if (r.intersects(rectangle)) ScenesManager.addToSelection(w)
+            if (r.intersects(rectangle)) ScenesManager().addToSelection(w)
           case _ ⇒
         }
     }
@@ -400,7 +430,7 @@ abstract class MoleScene extends GraphScene.StringGraph
     var original: Option[Point] = None
 
     def movementStarted(widget: Widget) = {
-      ScenesManager.selection.foreach {
+      ScenesManager().selection.foreach {
         o ⇒
           originals += o -> o.widget.getPreferredLocation
       }
@@ -414,15 +444,15 @@ abstract class MoleScene extends GraphScene.StringGraph
     def getOriginalLocation(widget: Widget) = {
       widget match {
         case x: CapsuleUI ⇒
-          if (!ScenesManager.selection.contains(x)) {
-            ScenesManager.clearSelection
-            ScenesManager.changeSelection(x)
+          if (!ScenesManager().selection.contains(x)) {
+            ScenesManager().clearSelection
+            ScenesManager().changeSelection(x)
             x.repaint
           }
           original = Some(widget.getPreferredLocation)
           original.get
         case _ ⇒
-          ScenesManager.clearSelection
+          ScenesManager().clearSelection
           new Point
       }
     }

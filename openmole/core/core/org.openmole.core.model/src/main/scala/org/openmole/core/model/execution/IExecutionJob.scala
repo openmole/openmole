@@ -18,7 +18,6 @@
 package org.openmole.core.model.execution
 
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.tools.ITimeStamp
 import ExecutionState._
 
 trait IExecutionJob {

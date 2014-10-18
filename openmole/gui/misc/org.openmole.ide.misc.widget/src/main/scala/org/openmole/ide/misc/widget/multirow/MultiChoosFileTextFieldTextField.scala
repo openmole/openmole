@@ -17,7 +17,7 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-import scala.swing.TextField
+import scala.swing.{ Label, TextField }
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
@@ -28,15 +28,16 @@ object MultiChooseFileTextFieldTextField {
 
   class ChooseFileTextFieldTextFieldPanel(data: ChooseFileTextFieldTextFieldData,
                                           chooserTitle: String = "",
-                                          chooserDescription: Option[String] = None,
                                           selectionMode: SelectionMode.Value = SelectionMode.FilesOnly,
-                                          extensions: Option[String] = None)
-      extends PluginPanel("wrap 2") with IPanel[ChooseFileTextFieldTextFieldData] {
+                                          chooserDescription: Option[(String, Seq[String])] = None,
+                                          inBetweenString: String = "")
+      extends PluginPanel("wrap 3") with IPanel[ChooseFileTextFieldTextFieldData] {
 
-    val chooseFileTextField = new ChooseFileTextField(data.chooseFileContent, chooserTitle, chooserDescription, selectionMode, extensions)
+    val chooseFileTextField = new ChooseFileTextField(data.chooseFileContent, chooserTitle, selectionMode, chooserDescription)
     val textField = new TextField(data.textFieldContent, 15)
 
     contents += chooseFileTextField
+    contents += new Label(inBetweenString)
     contents += textField
 
     def content = new ChooseFileTextFieldTextFieldData(chooseFileTextField.text, textField.text)
@@ -46,31 +47,31 @@ object MultiChooseFileTextFieldTextField {
                                          val textFieldContent: String = "") extends IData
 
   class ChooseFileTextFieldTextFieldFactory(chooserTitle: String = "",
-                                            chooserDescription: Option[String] = None,
                                             selectionMode: SelectionMode.Value = SelectionMode.FilesOnly,
-                                            extensions: Option[String] = None) extends IFactory[ChooseFileTextFieldTextFieldData] {
+                                            chooserDescription: Option[(String, Seq[String])] = None,
+                                            inBetweenString: String = "") extends IFactory[ChooseFileTextFieldTextFieldData] {
 
     def apply = new ChooseFileTextFieldTextFieldPanel(new ChooseFileTextFieldTextFieldData,
       chooserTitle,
-      chooserDescription,
       selectionMode,
-      extensions)
+      chooserDescription,
+      inBetweenString)
   }
 }
 
 import MultiChooseFileTextFieldTextField._
 class MultiChooseFileTextFieldTextField(title: String,
                                         initPanels: List[ChooseFileTextFieldTextFieldPanel],
+                                        inBetweenString: String = "",
                                         chooserTitle: String = "",
-                                        chooserDescription: Option[String] = None,
                                         selectionMode: SelectionMode.Value = SelectionMode.FilesOnly,
-                                        extensions: Option[String] = None,
+                                        chooserDescription: Option[(String, Seq[String])] = None,
                                         minus: Minus = NO_EMPTY,
                                         plus: Plus = ADD) extends MultiPanel(title,
   new ChooseFileTextFieldTextFieldFactory(chooserTitle,
-    chooserDescription,
     selectionMode,
-    extensions),
+    chooserDescription,
+    inBetweenString),
   initPanels,
   minus,
   plus)

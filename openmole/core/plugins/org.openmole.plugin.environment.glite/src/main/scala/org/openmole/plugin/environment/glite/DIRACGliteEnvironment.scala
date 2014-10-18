@@ -18,17 +18,23 @@
 package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.model.job.IJob
+import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
 import fr.iscpif.gridscale.glite.BDII
 import org.openmole.misc.filedeleter.FileDeleter
 import org.openmole.misc.exception.UserBadDataError
 import fr.iscpif.gridscale.dirac.DIRACJobService
+import concurrent.duration._
+import scala.ref.WeakReference
 
 object DIRACGliteEnvironment {
 
-  val LocalThreads = new ConfigurationLocation("DIRACEnvironment", "LocalThreads")
+  val LocalThreads = new ConfigurationLocation("DiracGliteEnvironment", "LocalThreads")
+  val EagerSubmissionThreshold = ConfigurationLocation("DiracGliteEnvironment", "EagerSubmissionThreshold")
 
-  Workspace += (LocalThreads, "20")
+  Workspace += (LocalThreads, "100")
+  Workspace += (EagerSubmissionThreshold, "0.2")
 
   def apply(
     voName: String,
@@ -38,8 +44,9 @@ object DIRACGliteEnvironment {
     vomsURL: Option[String] = None,
     setup: Option[String] = None,
     fqan: Option[String] = None,
-    cpuTime: Option[String] = None,
-    openMOLEMemory: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
+    cpuTime: Option[Duration] = None,
+    openMOLEMemory: Option[Int] = None,
+    debug: Boolean = false)(implicit authentications: AuthenticationProvider) =
     new DIRACGliteEnvironment(
       voName,
       service,
@@ -49,7 +56,8 @@ object DIRACGliteEnvironment {
       setup.getOrElse("Dirac-Production"),
       fqan,
       cpuTime,
-      openMOLEMemory
+      openMOLEMemory,
+      debug
     )(authentications)
 
 }
@@ -62,10 +70,21 @@ class DIRACGliteEnvironment(
     val vomsURL: String,
     val setup: String,
     val fqan: Option[String],
-    val cpuTime: Option[String],
-    override val openMOLEMemory: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId { env ⇒
+    val cpuTime: Option[Duration],
+    override val openMOLEMemory: Option[Int],
+    val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId with LCGCp { env ⇒
 
   type JS = DIRACGliteJobService
+
+  @transient lazy val registerAgents = {
+    Updater.delay(new EagerSubmissionAgent(WeakReference(this), DIRACGliteEnvironment.EagerSubmissionThreshold))
+    None
+  }
+
+  override def submit(job: IJob) = {
+    registerAgents
+    super.submit(job)
+  }
 
   def bdiiServer: BDII = new BDII(bdii)
 
@@ -77,20 +96,19 @@ class DIRACGliteEnvironment(
     GliteAuthentication.initialise(getAuthentication)(
       vomsURL,
       voName,
-      FileDeleter.deleteWhenGarbageCollected(Workspace.newFile("proxy", ".x509")),
-      GliteEnvironment.proxyTime.toSeconds,
+      GliteEnvironment.proxyTime,
       fqan)(authentications).cache(GliteEnvironment.proxyRenewalDelay)
   }
 
   def allJobServices = List(jobService)
 
   @transient lazy val jobService = new DIRACGliteJobService {
-    def nbTokens = Workspace.preferenceAsInt(DIRACGliteEnvironment.LocalThreads)
-    val authentication = env.authentication
     val environment = env
     val jobService = new DIRACJobService {
       def group = env.group
       def service = env.service
+      def credential = env.authentication
+      override def maxConnections = Workspace.preferenceAsInt(DIRACGliteEnvironment.LocalThreads)
     }
   }
 

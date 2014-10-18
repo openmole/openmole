@@ -85,7 +85,7 @@ trait EnvironmentPanel extends Base
   }
 
   def deleteProxy = {
-    val capsulesWithEnv = ScenesManager.moleScenes.flatMap {
+    val capsulesWithEnv = ScenesManager().moleScenes.flatMap {
       _.dataUI.capsules.values.filter {
         _.dataUI.environment == Some(proxy)
       }
@@ -95,17 +95,13 @@ trait EnvironmentPanel extends Base
         scene.closePropertyPanel(index)
         Proxies.instance -= proxy
         -=(proxy)
-      //  true
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
+          scene.closePropertyPanel(index)
           capsulesWithEnv.foreach {
             _.environment_=(None)
           }
-          //delete
         }
-      // else false
     }
-
   }
-
 }

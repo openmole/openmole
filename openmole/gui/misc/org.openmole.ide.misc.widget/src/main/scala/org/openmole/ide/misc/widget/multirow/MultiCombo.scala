@@ -27,16 +27,10 @@ object MultiCombo {
   class ComboPanel[B](val comboContent: Seq[B],
                       val data: ComboData[B]) extends PluginPanel("wrap 2") with IPanel[ComboData[B]] {
 
-    val comboBox = new MyComboBox(comboContent.sortBy { _.toString }) {
-      data.comboValue match {
-        case Some(x: B) ⇒ selection.item = x
-        case _          ⇒
-      }
-    }
+    val comboBox = ContentComboBox(comboContent.sortBy { _.toString }.toList, data.comboValue)
+    contents += comboBox.widget
 
-    contents += comboBox
-
-    def content = new ComboData(Some(comboBox.selection.item))
+    def content = new ComboData(comboBox.widget.selection.item.content)
   }
 
   class ComboData[B](val comboValue: Option[B] = None) extends IData

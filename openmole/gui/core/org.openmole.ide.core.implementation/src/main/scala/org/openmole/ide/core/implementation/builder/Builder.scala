@@ -54,27 +54,27 @@ object Builder {
   def samplingCompositionUI(b: Boolean) = SamplingCompositionDataProxyUI(g = b)
 
   def hookUI(g: Boolean) = {
-    val hookValues = KeyRegistry.hooks.values
+    val hookValues = KeyRegistry.hooks
     HookDataProxyUI(hookValues.find { _.toString == "Display" }.getOrElse(hookValues.head).buildDataUI, g)
   }
 
   def sourceUI(g: Boolean) = {
-    val sourceValues = KeyRegistry.sources.values
+    val sourceValues = KeyRegistry.sources
     SourceDataProxyUI(sourceValues.find { _.toString == "CSV" }.getOrElse(sourceValues.head).buildDataUI, g)
   }
 
   def taskUI(g: Boolean) = {
-    val taskValues = KeyRegistry.tasks.values
+    val taskValues = KeyRegistry.tasks
     TaskDataProxyUI(taskValues.find { _.toString == "Groovy" }.getOrElse(taskValues.head).buildDataUI, g)
   }
 
   def environmentUI(g: Boolean) = {
-    val envValues = KeyRegistry.environments.values
+    val envValues = KeyRegistry.environments
     EnvironmentDataProxyUI(envValues.find { _.toString == "Multi threading" }.getOrElse(envValues.head).buildDataUI, g)
   }
 
   /* def puzzles(listsPuzzleCompliant: List[List[CapsuleUI]],
-              manager: IMoleUI,
+              manager: MoleUI,
               uiMap: PuzzleUIMap = new PuzzleUIMap): (List[Puzzle], PuzzleUIMap) = {
 
     def puzzles0(toBeComputed: List[List[CapsuleUI]], puzzleList: List[Puzzle], uiMap0: PuzzleUIMap): (List[Puzzle], PuzzleUIMap) = {
@@ -169,7 +169,7 @@ object Builder {
     scene.refresh
   }    */
 
-  def toTaskUI(t: ITask, uiMap: PuzzleUIMap) =
+  /* def toTaskUI(t: ITask, uiMap: PuzzleUIMap) =
     KeyRegistry.task(t.getClass).buildDataProxyUI(t, uiMap)
 
   def toSamplingCompositionUI(s: Sampling): SamplingCompositionDataProxyUI = {
@@ -192,23 +192,24 @@ object Builder {
                    bsc: IBuiltCompositionSampling) = {
     val (proxy, newBSC) = KeyRegistry.sampling(s.getClass).fromCoreObject(s, bsc)
     (proxy, newBSC.copyWithSamplings(proxy))
-  }
+  }*/
 
-  def toDomainUI(d: Domain[_],
+  /* def toDomainUI(d: Domain[_],
                  bsc: IBuiltCompositionSampling) = {
     //val (proxy, newBSC) = KeyRegistry.domains(new DefaultKey(d.getClass)).fromCoreObject(d)
     val proxy = DomainProxyUI(KeyRegistry.domains(new DefaultKey(d.getClass)).buildDataUI)
     (proxy, bsc.copyWithDomains(proxy))
-  }
+  }*/
 
+  /*
   def buildConnectedDomain(proxy: DomainProxyUI,
                            connectedDomain: Domain[_],
                            bcs: IBuiltCompositionSampling): IBuiltCompositionSampling = {
     val (p, newBSC) = Builder.toDomainUI(connectedDomain, bcs)
     newBSC.copyWithConnections((proxy, p))
-  }
+  }*/
 
-  def buildConnectedSamplings(proxy: SamplingProxyUI,
+  /* def buildConnectedSamplings(proxy: SamplingProxyUI,
                               connectedSamplings: Seq[Sampling],
                               bcs: IBuiltCompositionSampling): IBuiltCompositionSampling = {
 
@@ -229,13 +230,13 @@ object Builder {
       }
     }
     buildSamplingUI0(connectedSamplings, bcs)
-  }
+  }*/
 
   /* def apply(scene: BuildMoleScene,
             b: BuilderFactoryUI,
             sel: List[CapsuleUI] = List()) = {
     try {
-      StatusBar().clear
+      StatusBar.clear
       val selection = {
         if (sel.isEmpty) {
           if (scene.dataUI.puzzlesCompliant.isEmpty) throw new UserBadDataError("Builder error: no Sequence of Task has been found.")

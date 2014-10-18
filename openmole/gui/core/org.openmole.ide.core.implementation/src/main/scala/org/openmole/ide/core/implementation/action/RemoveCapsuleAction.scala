@@ -29,7 +29,7 @@ class RemoveCapsuleAction(scene: MoleScene, capsules: List[CapsuleUI]) extends A
     capsules.foreach { c ⇒
       scene.graphScene.removeNodeWithEdges(scene.dataUI.removeCapsuleUI(c))
     }
-    ScenesManager.invalidateSelection
+    ScenesManager().invalidateSelection
     scene.refresh
   }
 }

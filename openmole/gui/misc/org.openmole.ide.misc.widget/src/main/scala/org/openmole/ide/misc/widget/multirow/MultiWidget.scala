@@ -18,13 +18,12 @@
 package org.openmole.ide.misc.widget.multirow
 
 import java.awt.Color
-import scala.collection.mutable.HashSet
+import scala.collection.mutable.ListBuffer
 import scala.swing.Action
 import scala.swing.Component
 import scala.swing.Label
 import org.openmole.ide.misc.tools.image.Images.ADD
 import org.openmole.ide.misc.widget.ImageLinkLabel
-import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing.event.FocusGained
@@ -43,9 +42,9 @@ class MultiWidget[S, T <: IRowWidget[S]](title: String = "",
                                          factory: IRowWidgetFactory[S, T],
                                          allowEmpty: MultiWidget.Minus = MultiWidget.NO_EMPTY,
                                          buildRowFromFactory: Boolean = false) extends Component {
-  val rowWidgets = new HashSet[T]
+  val rowWidgets = ListBuffer[T]()
   val titleLabel = new Label(title) { foreground = new Color(0, 113, 187) }
-  val addButton = new ImageLinkLabel(ADD, new Action("") { def apply = addRow })
+  val addButton = new ImageLinkLabel(ADD, new Action("") { def apply = += })
 
   val panel = new PluginPanel("wrap " + {
     rWidgets.headOption match {
@@ -54,21 +53,21 @@ class MultiWidget[S, T <: IRowWidget[S]](title: String = "",
     }
   }.toString + ", insets 10 5 0 5")
 
-  rWidgets.foreach(addRow)
+  rWidgets.foreach { += }
   if (!title.isEmpty) panel.contents.insert(0, titleLabel)
 
   panel.contents += addButton
 
-  def addRow: T = addRow(factory.apply)
+  def += : T = +=(factory.apply)
 
-  def addRow(rowWidget: T): T = {
+  def +=(rowWidget: T): T = {
     rowWidgets += rowWidget
     panel.contents.insert(panel.contents.size - 1, rowWidget.panel)
 
     rowWidget.panel.removeButton.action = new Action("") {
       def apply = {
         if (allowEmpty == CLOSE_IF_EMPTY || (allowEmpty == NO_EMPTY && rowWidgets.size > 1)) {
-          removeRow(rowWidget)
+          -=(rowWidget)
           rowWidget.doOnClose
         }
       }
@@ -87,9 +86,7 @@ class MultiWidget[S, T <: IRowWidget[S]](title: String = "",
     rowWidget
   }
 
-  def removeAllRows = rowWidgets.foreach(removeRow)
-
-  def removeRow(rowWidget: T) = {
+  def -=(rowWidget: T) = {
     rowWidgets -= rowWidget
     panel.contents -= rowWidget.panel
     refresh

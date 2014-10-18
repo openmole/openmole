@@ -47,7 +47,7 @@ import javax.xml.bind.annotation.XmlTransient
 import org.openmole.core.model.execution.Environment
 import collection.mutable
 import java.io.File
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.model.mole
 
 object MoleExecution extends Logger {
@@ -58,30 +58,29 @@ object MoleExecution extends Logger {
     hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
     environments: Map[ICapsule, Environment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
-    profiler: Profiler = Profiler.empty,
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
-    executionContext: ExecutionContext = ExecutionContext.local) =
+    defaultEnvironment: Environment = LocalEnvironment.default)(implicit executionContext: ExecutionContext) =
     PartialMoleExecution(
       mole,
       sources,
       hooks,
       environments,
       grouping,
-      profiler,
-      seed).toExecution(implicits, executionContext)
+      seed,
+      defaultEnvironment).toExecution(implicits)(executionContext)
 
 }
 
 class MoleExecution(
     val mole: IMole,
-    val sources: Sources = Sources.empty,
-    val hooks: Hooks = Hooks.empty,
-    val environments: Map[ICapsule, Environment] = Map.empty,
-    val grouping: Map[ICapsule, Grouping] = Map.empty,
-    val profiler: Profiler = Profiler.empty,
-    seed: Long = Workspace.newSeed,
-    override val id: String = UUID.randomUUID().toString)(implicit val implicits: Context = Context.empty, implicit val executionContext: ExecutionContext = ExecutionContext.local) extends IMoleExecution {
+    val sources: Sources,
+    val hooks: Hooks,
+    val environments: Map[ICapsule, Environment],
+    val grouping: Map[ICapsule, Grouping],
+    val seed: Long,
+    val defaultEnvironment: Environment,
+    override val id: String = UUID.randomUUID().toString)(val implicits: Context, val executionContext: ExecutionContext) extends IMoleExecution {
 
   import IMoleExecution._
   import MoleExecution._
@@ -90,8 +89,10 @@ class MoleExecution(
   private val _canceled = Ref(false)
   private val _finished = Ref(false)
 
+  private val _startTime = Ref(None: Option[Long])
+  private val _endTime = Ref(None: Option[Long])
+
   private val ticketNumber = Ref(0L)
-  private val jobId = Ref(0L)
 
   private val waitingJobs: TMap[ICapsule, TMap[IMoleJobGroup, Ref[List[IMoleJob]]]] =
     TMap(grouping.map { case (c, g) ⇒ c -> TMap.empty[IMoleJobGroup, Ref[List[IMoleJob]]] }.toSeq: _*)
@@ -108,6 +109,13 @@ class MoleExecution(
   def numberOfJobs = rootSubMoleExecution.numberOfJobs
 
   def exceptions = _exceptions.single()
+
+  def duration: Option[Long] =
+    (_startTime.single(), _endTime.single()) match {
+      case (None, _)          ⇒ None
+      case (Some(t), None)    ⇒ Some(System.currentTimeMillis - t)
+      case (Some(s), Some(e)) ⇒ Some(e - s)
+    }
 
   def group(moleJob: IMoleJob, capsule: ICapsule, submole: ISubMoleExecution) =
     atomic { implicit txn ⇒
@@ -133,7 +141,7 @@ class MoleExecution(
 
   private def submit(job: IJob, capsule: ICapsule) =
     if (!job.finished) {
-      val env = environments.getOrElse(capsule, LocalEnvironment)
+      val env = environments.getOrElse(capsule, defaultEnvironment)
       env.submit(job)
       EventDispatcher.trigger(this, new IMoleExecution.JobSubmitted(job, capsule, env))
     }
@@ -166,8 +174,8 @@ class MoleExecution(
     if (!_started.getUpdate(_ ⇒ true)) {
       val validationErrors = Validation(mole, implicits, sources, hooks)
       if (!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of your mole has failed, several errors have been found: " + validationErrors.mkString("\n"))
+      _startTime.single() = Some(System.currentTimeMillis)
       start(Context.empty)
-      _started.single() = true
     }
     this
   }
@@ -176,8 +184,8 @@ class MoleExecution(
     if (!_canceled.getUpdate(_ ⇒ true)) {
       rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, new IMoleExecution.Finished)
-      profiler.finished
       _finished.single() = true
+      _endTime.single() = Some(System.currentTimeMillis)
     }
     this
   }
@@ -206,8 +214,8 @@ class MoleExecution(
       if (allWaiting) submitAll
       if (numberOfJobs == 0) {
         EventDispatcher.trigger(this, new IMoleExecution.Finished)
-        profiler.finished
         _finished.single() = true
+        _endTime.single() = Some(System.currentTimeMillis)
       }
     }
 
@@ -217,7 +225,7 @@ class MoleExecution(
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.next)
 
-  def nextJobId = new MoleJobId(id, jobId.next)
+  def nextJobId = UUID.randomUUID
 
   def newSeed = rng.nextLong
 

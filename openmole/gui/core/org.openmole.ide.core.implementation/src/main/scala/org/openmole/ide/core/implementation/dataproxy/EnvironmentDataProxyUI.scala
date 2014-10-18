@@ -18,16 +18,21 @@
 package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.implementation.data.{ ImageView, EnvironmentDataUI }
+import org.openmole.ide.core.implementation.serializer.Update
+import org.openmole.ide.misc.tools.util.ID
 
 object EnvironmentDataProxyUI {
-  def apply(d: EnvironmentDataUI,
-            g: Boolean = false) = new EnvironmentDataProxyUI {
-    var dataUI: DATAUI = d
-    val generated = g
+  def apply(d: EnvironmentDataUI with ImageView,
+            g: Boolean = false) = new EnvironmentDataProxyUI(d, g)
+
+  @deprecated("Used for deserialiation purposes")
+  private def annonymous = new EnvironmentDataProxyUI(???, ???) with Update[EnvironmentDataProxyUI] {
+    def update = new EnvironmentDataProxyUI(dataUI, generated, id)
   }
 }
 
-trait EnvironmentDataProxyUI extends DataProxyUI {
+class EnvironmentDataProxyUI(var dataUI: EnvironmentDataUI with ImageView,
+                             val generated: Boolean,
+                             override val id: ID.Type = ID.newId) extends DataProxyUI {
   type DATAUI = EnvironmentDataUI with ImageView
 }
-

@@ -17,59 +17,60 @@
 
 package org.openmole.core.implementation.job
 
-import org.openmole.core.implementation.tools.TimeStamp
-import org.openmole.core.model.tools.ITimeStamp
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.job.MoleJobId
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
 import org.openmole.core.model.job.State._
-import org.openmole.core.model.job.State
-import org.openmole.core.model.task.ITask
+import org.openmole.core.model.task._
 import org.openmole.misc.tools.service.Logger
-import scala.collection.mutable.ListBuffer
+import java.util.UUID
 
 object MoleJob extends Logger {
   type StateChangedCallBack = (IMoleJob, State, State) ⇒ Unit
-
-  def cpuTime(job: IMoleJob) =
-    job.timeStamps.find(j ⇒ j.state.isFinal) match {
-      case Some(last) ⇒
-        val running = job.timeStamps.find(_.state == RUNNING).get
-        last.time - running.time
-      case None ⇒ 0L
-    }
-
+  def apply(
+    task: ITask,
+    context: Context,
+    id: UUID,
+    stateChangedCallBack: MoleJob.StateChangedCallBack) = {
+    val (prototypes, values) = compressContext(context)
+    new MoleJob(task, prototypes.toArray, values.toArray, id.getMostSignificantBits, id.getLeastSignificantBits, stateChangedCallBack)
+  }
+  def compressContext(context: Context) =
+    context.toSeq.map {
+      case (_, v: Variable[Any]) ⇒ (v.prototype, v.value)
+    }.unzip
 }
-
-import MoleJob._
 
 class MoleJob(
     val task: ITask,
-    private var _context: Context,
-    val id: MoleJobId,
+    private var prototypes: Array[Prototype[Any]],
+    private var values: Array[Any],
+    mostSignificantBits: Long, leastSignificantBits: Long,
     val stateChangedCallBack: MoleJob.StateChangedCallBack) extends IMoleJob {
 
-  import IMoleJob._
-  import MoleJob._
-
-  val timeStamps: ListBuffer[ITimeStamp[State.State]] = new ListBuffer
   var exception: Option[Throwable] = None
 
   @volatile private var _state: State = null
   state = READY
 
   override def state: State = _state
-  override def context: Context = _context
+  override def context: Context =
+    Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) })
+
+  private def context_=(ctx: Context) = {
+    val (_prototypes, _values) = MoleJob.compressContext(ctx)
+    prototypes = _prototypes.toArray
+    values = _values.toArray
+  }
+
+  def id = new UUID(mostSignificantBits, leastSignificantBits)
 
   def state_=(state: State) = {
     val changed = synchronized {
       if (_state == null) {
-        timeStamps += new TimeStamp(state)
         _state = state
         None
       }
       else if (!_state.isFinal) {
-        timeStamps += new TimeStamp(state)
         val oldState = _state
         _state = state
         Some(oldState)
@@ -87,7 +88,7 @@ class MoleJob(
     if (!state.isFinal) {
       try {
         state = RUNNING
-        _context = task.perform(context)
+        context = task.perform(context)
         state = COMPLETED
       }
       catch {
@@ -98,9 +99,8 @@ class MoleJob(
       }
     }
 
-  override def finish(context: Context, timeStamps: Seq[ITimeStamp[State.State]]) = {
-    _context = context
-    this.timeStamps ++= timeStamps
+  override def finish(_context: Context) = {
+    context = _context
     state = COMPLETED
   }
 

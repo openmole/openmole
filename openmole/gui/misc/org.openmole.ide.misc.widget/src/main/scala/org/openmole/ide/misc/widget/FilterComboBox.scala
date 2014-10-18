@@ -38,7 +38,6 @@ class FilterComboBox[T](initialItems: Seq[T]) extends PluginPanel("wrap 2, inset
     case _              ⇒ ""
   }
 
-  // println("img : " + this.getClass.getClassLoader.getResource("img/filter.png").getFile)
   val label = new Label {
     icon = Images.FILTER
     background = new Color(0, 0, 0, 0)

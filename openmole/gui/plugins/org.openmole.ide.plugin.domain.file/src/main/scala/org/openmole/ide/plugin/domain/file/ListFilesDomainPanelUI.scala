@@ -42,7 +42,7 @@ class ListFilesDomainPanelUI(val dataUI: ListFilesDomainDataUI)(implicit val i18
 
   override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 
-  add(dirTField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
+  add(dirTField, new Help(i18n.getString("category"), i18n.getString("dirEx")))
   add(regexpTextField, new Help(i18n.getString("regularExp"), i18n.getString("regularExpEx")))
   add(recursiveCheckBox, new Help(i18n.getString("recursive"), i18n.getString("recursiveEx")))
 

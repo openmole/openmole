@@ -28,6 +28,7 @@ import java.util.zip.GZIPInputStream
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.fileservice._
 import org.openmole.core.batch.authentication._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.updater.Updater
@@ -43,13 +44,16 @@ import fr.iscpif.gridscale.http._
 import fr.iscpif.gridscale._
 import java.io.File
 import scala.util.{ Success, Failure, Try }
+import concurrent.duration._
 
 object GliteAuthentication extends Logger {
+
+  import Log._
 
   val updatedFile = ".updated"
 
   def CACertificatesDir: File =
-    Workspace.file("CACertificates").updateIfTooOld(Workspace.preferenceAsDuration(CACertificatesCacheTime).toMilliSeconds) {
+    Workspace.file("CACertificates").updateIfTooOld(Workspace.preferenceAsDuration(CACertificatesCacheTime)) {
       caDir ⇒
         caDir.mkdir
         downloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
@@ -98,11 +102,11 @@ object GliteAuthentication extends Logger {
   }
 
   def voCards =
-    Workspace.file("voCards.xml").updateIfTooOld(Workspace.preferenceAsDuration(VOCardCacheTime).toMilliSeconds) {
+    Workspace.file("voCards.xml").updateIfTooOld(Workspace.preferenceAsDuration(VOCardCacheTime)) {
       voCards ⇒
         HTTPStorage.withConnection(
           new URI(Workspace.preference(GliteEnvironment.VOInformationSite)),
-          Workspace.preferenceAsDuration(GliteEnvironment.VOCardDownloadTimeOut).toSeconds) { http ⇒
+          Workspace.preferenceAsDuration(GliteEnvironment.VOCardDownloadTimeOut).toSeconds -> SECONDS) { http ⇒
             val is: InputStream = http.getInputStream
             try is.copy(voCards)
             finally is.close
@@ -131,37 +135,34 @@ object GliteAuthentication extends Logger {
     }
   }
 
-  def update(a: GliteAuthentication) = Workspace.setAuthentication(0, a)
+  def update(a: GliteAuthentication) = Workspace.authentications.save(0, a)
   def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[GliteAuthentication]).headOption
 
   def initialise(a: GliteAuthentication)(
     serverURL: String,
     voName: String,
-    proxyFile: => File,
-    lifeTime: Int,
+    lifeTime: FiniteDuration,
     fqan: Option[String])(implicit authenticationProvider: AuthenticationProvider) =
     a match {
       case a: P12Certificate ⇒
         VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
-        val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan) = (serverURL, voName, proxyFile, lifeTime, fqan)
+        val (_serverURL, _voName, _lifeTime, _fqan) = (serverURL, voName, lifeTime, fqan)
         new P12VOMSAuthentication {
           val certificate = a.certificate
           val serverURL = _serverURL
           val voName = _voName
-          def proxyFile = _proxyFile
           val lifeTime = _lifeTime
           val password = a.password(authenticationProvider)
           override val fqan = _fqan
         }
       case a: PEMCertificate ⇒
         VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
-        val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan) = (serverURL, voName, proxyFile, lifeTime, fqan)
+        val (_serverURL, _voName, _lifeTime, _fqan) = (serverURL, voName, lifeTime, fqan)
         new PEMVOMSAuthentication {
           val certificate = a.certificate
           val key = a.key
           val serverURL = _serverURL
           val voName = _voName
-          def proxyFile = _proxyFile
           val lifeTime = _lifeTime
           val password = a.password(authenticationProvider)
           override val fqan = _fqan

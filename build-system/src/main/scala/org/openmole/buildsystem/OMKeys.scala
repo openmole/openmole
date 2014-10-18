@@ -28,6 +28,8 @@ object OMKeys {
 
   val installRemote = TaskKey[Unit]("install-remote", "Builds bundles and adds them to the openmole nexus server")
 
+  //val includeResource = SettingKey[Seq[String]]("includeResource")
+
   val assemblyPath = SettingKey[File]("The path to the project's assembly folder")
 
   val gc = TaskKey[Unit]("gc", "Force SBT to take out the trash")
@@ -41,6 +43,10 @@ object OMKeys {
   val zip = TaskKey[File]("zip")
 
   val zipFiles = TaskKey[Seq[File]]("zip-files", "Collects the list of files to be zipped")
+
+  val innerZipFolder = SettingKey[Option[String]]("innerZipFolder", "All files in zipFiles will be put under this folder")
+
+  val setExecutable = SettingKey[Set[String]]("setExecutable", "Sets the path relative to the assemble folder executable")
 
   val downloadUrls = TaskKey[Seq[File]]("download-urls")
 
@@ -59,4 +65,9 @@ object OMKeys {
   val dependencyFilter = SettingKey[DependencyFilter]("Tells copyDependencies to ignore certain dependencies.")
 
   val dependencyNameMap = SettingKey[Map[Regex, String ⇒ String]]("dependencymap", "A map that is run against dependencies to be copied.")
+
+  val scalatestVersion = SettingKey[String]("Version of scalatest.")
+
+  val junitVersion = SettingKey[String]("Version of junit.")
+
 }

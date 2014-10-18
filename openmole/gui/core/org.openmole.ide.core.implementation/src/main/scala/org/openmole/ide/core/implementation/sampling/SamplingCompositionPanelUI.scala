@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.{ Helper, MigPanel }
 import org.openmole.ide.core.implementation.data._
 import java.awt.{ Point, Color }
 import org.netbeans.api.visual.action.ActionFactory
@@ -37,8 +37,10 @@ import scala.collection.JavaConversions._
 import org.openmole.misc.tools.obj.ClassUtils._
 import scala.Some
 import org.openmole.ide.core.implementation.data.FactorDataUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ DataProxyUI, PrototypeDataProxyUI }
 import org.openmole.ide.core.implementation.panel.{ SaveSettings, Settings }
+import org.openmole.ide.misc.widget.URL
+import java.util.{ Locale, ResourceBundle }
 
 object SamplingCompositionPanelUI {
   val DEFAULT_COLOR = new Color(250, 250, 250)
@@ -67,8 +69,6 @@ trait SamplingCompositionPanelUI extends Scene with Settings with SaveSettings {
   val connectLayer = new LayerWidget(this)
   addChild(boxLayer)
   addChild(connectLayer)
-
-  //setPreferredBounds(new Rectangle(0, 0, 350, 200))
 
   val connectProvider = new SamplingConnectionProvider
   val connectAction = ActionFactory.createExtendedConnectAction(null, connectLayer,
@@ -184,9 +184,12 @@ trait SamplingCompositionPanelUI extends Scene with Settings with SaveSettings {
               c ⇒ connectLayer.removeChild(c)
             }
             s match {
-              case (d: IDomainWidget) ⇒ domains -= d.proxy
+              case (d: IDomainWidget) ⇒
+                domains -= d.proxy
+                unSetFinal(d.proxy)
               case (s: ISamplingWidget) ⇒
                 samplings -= s.proxy
+                unSetFinal(s.proxy)
               case _ ⇒
             }
           case _ ⇒
@@ -207,6 +210,8 @@ trait SamplingCompositionPanelUI extends Scene with Settings with SaveSettings {
     revalidate
     repaint
   }
+
+  def unSetFinal(proxy: DataProxyUI) = if (finalSampling == Some(proxy)) finalSampling = None
 
   def scene = this
 
@@ -245,7 +250,7 @@ trait SamplingCompositionPanelUI extends Scene with Settings with SaveSettings {
   def testConnection(sourceWidget: ISamplingCompositionWidget,
                      targetWidget: ISamplingCompositionWidget,
                      arityTest: Boolean = true): Boolean = {
-    StatusBar().clear
+    StatusBar.clear
     targetWidget match {
       case domainT: IDomainWidget ⇒
         sourceWidget match {
@@ -518,5 +523,9 @@ trait SamplingCompositionPanelUI extends Scene with Settings with SaveSettings {
       connectLayer.addChild(connection)
     }
   }
+
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+  override lazy val help = new Helper(List(new URL(i18n.getString("samplingCPermalinkText"), i18n.getString("samplingCPermalink"))))
+
 }
 

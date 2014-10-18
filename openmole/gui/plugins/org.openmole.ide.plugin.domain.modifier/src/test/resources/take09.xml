@@ -1,0 +1,5 @@
+<dataUI class="org.openmole.ide.plugin.domain.modifier.TakeDomainDataUI">
+    <size>1</size>
+    <previousDomain class="List"/>
+    <name>Take</name>
+  </dataUI>

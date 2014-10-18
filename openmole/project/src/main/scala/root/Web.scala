@@ -14,16 +14,21 @@ import scala.Some
  */
 object Web extends Defaults {
   import Libraries._
+  import libraries.Apache._
   import ThirdParties._
 
   val dir = file("web")
   override val org = "org.openmole.web"
 
   lazy val core = OsgiProject("org.openmole.web.core", "core",
-    exports = Seq("org.openmole.web"),
+    exports = Seq("org.openmole.web.*"),
     buddyPolicy = Some("global"),
     imports = Seq("org.h2.*", "*;resolution:=optional")) dependsOn
-    (h2, jetty, slick, logback, scalatra, bonecp, scalaLang, base.Core.implementation, base.Core.serializer, xstream, jacksonJson, iceTar, arm)
+    (h2, jetty, slick, logback, scalatra, bonecp, scalaLang, base.Core.implementation, base.Core.serializer, xstream, jacksonJson, iceTar, arm, codec, misc) settings
+    (libraryDependencies += bouncyCastle)
+
+  lazy val misc = OsgiProject("org.openmole.web.misc.tools", "misc/tools") dependsOn
+    (scalajHttp, base.Misc.workspace, arm)
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core"))
 }

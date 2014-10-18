@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation
 
+import org.openmole.core.implementation.execution.local.LocalEnvironment
 import org.openmole.core.model.execution._
 import org.openmole.core.model.job._
 import org.openmole.core.model.mole._
@@ -29,6 +30,10 @@ import task._
 import data._
 
 package object mole {
+
+  implicit def default = LocalEnvironment.default
+  implicit lazy val local = ExecutionContext(System.out, None)
+
   implicit def slotToCapsuleConverter(slot: Slot) = slot.capsule
 
   class PuzzleDecorator(puzzle: Puzzle) {
@@ -48,7 +53,7 @@ package object mole {
 
   implicit def puzzleMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
   implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole
-  implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
+  implicit def moleToMoleExecutionConverter(mole: IMole) = MoleExecution(mole)
 
   implicit def hookBuilderToHookConverter(hb: HookBuilder) = hb.toHook
   implicit def sourceBuilderToSourceConverter(sb: SourceBuilder) = sb.toSource

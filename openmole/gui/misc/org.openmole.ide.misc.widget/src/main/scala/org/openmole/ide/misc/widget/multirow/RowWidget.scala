@@ -25,5 +25,6 @@ object RowWidget extends Enumeration {
 
   class RowInsets(val name: String) extends Val(name)
   val SMALL = new RowInsets("SMALL")
+  val MEDIUM = new RowInsets("MEDIUM")
   val REGULAR = new RowInsets("REGULAR")
 }

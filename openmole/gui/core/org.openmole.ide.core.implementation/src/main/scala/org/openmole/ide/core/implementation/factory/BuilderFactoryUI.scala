@@ -17,11 +17,11 @@
 package org.openmole.ide.core.implementation.factory
 
 import org.openmole.core.implementation.puzzle.Puzzle
-import org.openmole.ide.core.implementation.workflow.IMoleUI
+import org.openmole.ide.core.implementation.workflow.MoleUI
 import org.openmole.ide.core.implementation.builder.BuilderPanel
 
 trait BuilderFactoryUI extends FactoryUI {
-  def buildPanelUI(puzzle: List[Puzzle], puzzleSelection: Option[Puzzle], manager: IMoleUI): BuilderPanel
+  def buildPanelUI(puzzle: List[Puzzle], puzzleSelection: Option[Puzzle], manager: MoleUI): BuilderPanel
   def name: String
   def category = List("Builder")
 }

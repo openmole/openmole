@@ -24,9 +24,7 @@ import java.io.InputStream
 import com.thoughtworks.xstream.XStream
 
 trait Deserializer {
-  private val xStream = new XStream
-
-  val xStreams = List(xStream)
+  val xStream = new XStream
 
   protected val reflectionConverter = new ReflectionConverter(xStream.getMapper, xStream.getReflectionProvider)
 

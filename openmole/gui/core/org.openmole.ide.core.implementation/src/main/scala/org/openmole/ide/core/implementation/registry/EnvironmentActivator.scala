@@ -27,12 +27,12 @@ trait EnvironmentActivator extends BundleActivator {
 
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    environmentFactories.foreach { f ⇒ KeyRegistry.environments += KeyGenerator(f.buildDataUI.coreClass) -> f }
+    environmentFactories.foreach { KeyRegistry.environments += }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    environmentFactories.foreach { f ⇒ KeyRegistry.environments -= KeyGenerator(f.buildDataUI.coreClass) }
+    environmentFactories.foreach { KeyRegistry.environments -= }
   }
 }
 

@@ -45,7 +45,7 @@ object Types {
       case "Int"                  ⇒ "int"
       case "java.lang.Integer"    ⇒ "ims"
       case "Double"               ⇒ "double"
-      case "java.lang.Double"     ⇒ println("AAAAAAAAAAaaaah"); "double"
+      case "java.lang.Double"     ⇒ "double"
       case "Long"                 ⇒ "long"
       case "java.lang.Long"       ⇒ "long"
       case "java.math.BigDecimal" ⇒ "BigDecimal"

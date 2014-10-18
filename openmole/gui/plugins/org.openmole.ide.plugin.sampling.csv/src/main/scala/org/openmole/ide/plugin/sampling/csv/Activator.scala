@@ -27,15 +27,6 @@ import org.openmole.ide.core.implementation.factory.SamplingFactoryUI
 class Activator extends OSGiActivator with SamplingActivator {
 
   override def samplingFactories = List(new SamplingFactoryUI {
-    def buildDataUI = new CSVSamplingDataUI
-
-    def fromCoreObject(sampling: Sampling, bSC: IBuiltCompositionSampling) = {
-      sampling match {
-        case cs: CSVSampling ⇒
-          val proxy = SamplingProxyUI(new CSVSamplingDataUI(cs.file.getCanonicalPath))
-          (proxy, Builder.buildConnectedSamplings(proxy, Seq(), bSC))
-        case _ ⇒ (SamplingProxyUI(buildDataUI), bSC)
-      }
-    }
+    def buildDataUI = new CSVSamplingDataUI010
   })
 }

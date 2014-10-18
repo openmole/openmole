@@ -38,13 +38,13 @@ class CapsuleMenuProvider(scene: BuildMoleScene, capsule: CapsuleUI) extends Gen
 
   def initMenu = {
     items.clear
-    if (!ScenesManager.isInSelection(capsule)) {
-      ScenesManager.clearSelection
+    if (!ScenesManager().isInSelection(capsule)) {
+      ScenesManager().clearSelection
       capsule.selected = true
       scene.refresh
-      ScenesManager.invalidateSelection
+      ScenesManager().invalidateSelection
     }
-    val selectionSize = ScenesManager.selection.size
+    val selectionSize = ScenesManager().selection.size
     val itStart = new JMenuItem("Define as starting capsule")
     val itIS = new JMenuItem("Add an input slot")
     val itRIS = new JMenuItem("Remove an input slot")
@@ -52,7 +52,7 @@ class CapsuleMenuProvider(scene: BuildMoleScene, capsule: CapsuleUI) extends Gen
     val menuTask = new Menu("Task")
 
     itIS.addActionListener(new AddInputSlotAction(capsule))
-    itR.addActionListener(new RemoveCapsuleAction(scene, ScenesManager.selection))
+    itR.addActionListener(new RemoveCapsuleAction(scene, ScenesManager().selection))
     itStart.addActionListener(new DefineMoleStartAction(scene, capsule))
     itRIS.addActionListener(new RemoveInputSlot(capsule))
 
@@ -91,7 +91,7 @@ class CapsuleMenuProvider(scene: BuildMoleScene, capsule: CapsuleUI) extends Gen
       b ⇒
         menuBuilder.contents += new MenuItem(b.name) {
           action = new Action(b.name) {
-            def apply = Builder(scene, b, ScenesManager.selection.toList)
+            def apply = Builder(scene, b, ScenesManager().selection.toList)
           }
         }
     }
@@ -120,7 +120,7 @@ class CapsuleMenuProvider(scene: BuildMoleScene, capsule: CapsuleUI) extends Gen
         item.selected = true
 
     }
-    ScenesManager.invalidateSelection
+    ScenesManager().invalidateSelection
   }
 
   abstract class TaskEnvAction(name: String,

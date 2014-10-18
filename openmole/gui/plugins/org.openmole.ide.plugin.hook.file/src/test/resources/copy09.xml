@@ -1,0 +1,7 @@
+<dataUI class="org.openmole.ide.plugin.hook.file.CopyFileHookDataUI">
+    <name>test</name>
+    <prototypes class="List"/>
+    <inputs class="List"/>
+    <outputs class="List"/>
+    <inputParameters class="HashMap"/>
+  </dataUI>

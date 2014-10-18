@@ -24,11 +24,12 @@ import org.openmole.core.batch.control._
 import org.openmole.misc.workspace.{ AuthenticationProvider, Workspace }
 import org.openmole.misc.sftpserver.SFTPServer
 import java.net.URI
-import fr.iscpif.gridscale.{ LocalStorage ⇒ GSLocalStorage }
+import fr.iscpif.gridscale.storage.{ LocalStorage ⇒ GSLocalStorage }
 
 object DesktopGridEnvironment {
   val timeStempsDirName = "timeStemps"
   val jobsDirName = "jobs"
+  val tmpJobsDirName = "tmpjobs"
   val resultsDirName = "results"
   val tmpResultsDirName = "tmpresults"
   val timeStempSeparator = '@'
@@ -55,15 +56,14 @@ class DesktopGridEnvironment(
   new SFTPServer(path, login, password, port)
 
   val url = new URI("desktop", login, "localhost", port, null, null, null)
-  val id = url.toString
 
   @transient lazy val batchStorage = new VolatileStorageService with UnlimitedAccess {
     def environment = env
-    val remoteStorage = new DumyStorage
+    val remoteStorage: RemoteStorage = new DumyStorage
     def url = env.url
-    def root = path.getAbsolutePath
+    def root = path.getPath
     val storage = new GSLocalStorage {}
-    val authentication: Unit = Unit
+    val id = url.toString
   }
 
   @transient override lazy val allStorages = List(batchStorage)
@@ -71,7 +71,6 @@ class DesktopGridEnvironment(
   @transient override lazy val allJobServices = List(
     new DesktopGridJobService {
       def environment = env
-      val id = env.id
     })
 
 }

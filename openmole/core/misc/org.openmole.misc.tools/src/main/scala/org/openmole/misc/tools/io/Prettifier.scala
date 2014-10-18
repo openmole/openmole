@@ -17,12 +17,16 @@
 
 package org.openmole.misc.tools.io
 
+import java.io.{ PrintWriter, StringWriter }
+
 import collection.JavaConversions._
 import org.openmole.misc.tools.service.Logger
 
 object Prettifier extends Logger {
 
-  implicit def objectPrettifer(o: Any) = new {
+  import Log._
+
+  implicit def objectPrettifier(o: Any) = new {
     def prettify(snipArray: Int = Int.MaxValue) = Prettifier.prettify(o, snipArray)
   }
 
@@ -44,5 +48,16 @@ object Prettifier extends Logger {
         logger.log(WARNING, "Error during pretification", t)
         o.toString
     }
+
+  implicit class ExceptionPretiffier(t: Throwable) {
+    def stackString = {
+      val sw = new StringWriter()
+      val pw = new PrintWriter(sw)
+      t.printStackTrace(pw)
+      sw.toString
+    }
+
+    def stackStringWithMargin = t.stackString.split("\n").map(" | " + _).mkString("\n")
+  }
 
 }

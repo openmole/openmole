@@ -30,7 +30,6 @@ class LinkLabel(textLink: String,
                 bold: Boolean = false) extends Label {
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
   link(textLink)
-
   listenTo(this.mouse.clicks)
   reactions += {
     case e: MousePressed ⇒ action.apply

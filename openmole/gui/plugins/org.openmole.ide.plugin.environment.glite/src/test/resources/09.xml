@@ -1,0 +1,22 @@
+<dataUI class="org.openmole.ide.plugin.environment.glite.GliteEnvironmentDataUI">
+    <name>test</name>
+    <vo></vo>
+    <voms></voms>
+    <bdii></bdii>
+    <proxy>false</proxy>
+    <proxyTime class="None"/>
+    <proxyHost class="None"/>
+    <proxyPort class="None"/>
+    <fqan class="None"/>
+    <openMOLEMemory class="Some">
+      <x class="int">512</x>
+    </openMOLEMemory>
+    <memory class="None"/>
+    <cpuTime class="None"/>
+    <wallTime class="None"/>
+    <cpuNumber class="None"/>
+    <jobType class="None"/>
+    <smpGranularity class="None"/>
+    <architecture>false</architecture>
+    <threads class="None"/>
+  </dataUI>

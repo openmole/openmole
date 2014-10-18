@@ -24,10 +24,10 @@ import org.openmole.core.batch.environment.BatchEnvironment
 
 object CleanerActor extends Logger
 
-import CleanerActor._
+import CleanerActor.Log._
 
 class CleanerActor(jobManager: ActorRef) extends Actor {
-  def receive = {
+  def receive = withRunFinalization {
     case msg @ CleanSerializedJob(sj) ⇒
       try
         sj.synchronized {
@@ -36,7 +36,7 @@ class CleanerActor(jobManager: ActorRef) extends Actor {
               sj.storage.rmDir(sj.path)(t)
               sj.cleaned = true
             case None ⇒
-              jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
+              jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval))
           }
 
         }
@@ -44,7 +44,5 @@ class CleanerActor(jobManager: ActorRef) extends Actor {
         case t: Throwable ⇒
           logger.log(FINE, "Error when deleting a file", t)
       }
-      System.runFinalization
-
   }
 }

@@ -26,6 +26,7 @@ import org.openmole.core.implementation.task._
 import java.io.File
 import collection.JavaConversions._
 import org.openmole.misc.tools.service.OS
+import org.openmole.plugin.tool.netlogo5.NetLogo5
 
 object NetLogo5Task {
 
@@ -41,7 +42,8 @@ object NetLogo5Task {
     val _launchingCommands = launchingCommands
     val (_workspace, _script) = (workspace, script)
 
-    new NetLogoTaskBuilder { builder ⇒
+    new NetLogoTaskBuilder {
+      builder ⇒
 
       addResource(workspace)
 
@@ -67,7 +69,8 @@ object NetLogo5Task {
     script: File,
     launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
     val _launchingCommands = launchingCommands
-    new NetLogoTaskBuilder { builder ⇒
+    new NetLogoTaskBuilder {
+      builder ⇒
 
       addResource(script)
 
@@ -85,6 +88,16 @@ object NetLogo5Task {
         netLogoOutputs = builder.netLogoOutputs,
         netLogoArrayOutputs = builder.netLogoArrayOutputs,
         netLogoFactory = factory)
+    }
+  }
+
+  def apply(name: String,
+            workspace: Workspace,
+            launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
+
+    workspace.location match {
+      case Left((w: File, s: String)) ⇒ apply(name, w, s, launchingCommands)
+      case Right(s: File)             ⇒ apply(name, s, launchingCommands)
     }
   }
 

@@ -1,0 +1,11 @@
+ <dataUI class="org.openmole.ide.plugin.domain.distribution.UniformLongDistributionDataUI">
+    <domainType class="scala.reflect.ManifestFactory$$anon$10">
+      <toString>Long</toString>
+      <hashCode>2085288800</hashCode>
+    </domainType>
+    <name>Uniform distribution</name>
+    <max/>
+    <availableTypes class="List">
+      <string>long</string>
+    </availableTypes>
+  </dataUI>

@@ -24,7 +24,6 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.exception._
-import org.openmole.misc.tools.service.Duration._
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.control._
 import org.openmole.misc.tools.service._
@@ -36,8 +35,11 @@ import annotation.tailrec
 import ref.WeakReference
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
+import org.openmole.misc.tools.service._
 import fr.iscpif.gridscale.glite.{ GlobusAuthentication, WMSJobService, BDII }
 import fr.iscpif.gridscale.RenewDecorator
+import java.net.URI
+import concurrent.duration._
 
 object GliteEnvironment extends Logger {
 
@@ -51,11 +53,11 @@ object GliteEnvironment extends Logger {
   val VOCardDownloadTimeOut = new ConfigurationLocation("GliteEnvironment", "VOCardDownloadTimeOut")
   val VOCardCacheTime = new ConfigurationLocation("GliteEnvironment", "VOCardCacheTime")
 
-  val OverSubmissionInterval = new ConfigurationLocation("GliteEnvironment", "OverSubmissionInterval")
-  val OverSubmissionMinNumberOfJob = new ConfigurationLocation("GliteEnvironment", "OverSubmissionMinNumberOfJob")
-  val OverSubmissionNumberOfJobUnderMin = new ConfigurationLocation("GliteEnvironment", "OverSubmissionNumberOfJobUnderMin")
-  val OverSubmissionNbSampling = new ConfigurationLocation("GliteEnvironment", "OverSubmissionNbSampling")
-  val OverSubmissionSamplingWindowFactor = new ConfigurationLocation("GliteEnvironment", "OverSubmissionSamplingWindowFactor")
+  val EagerSubmissionInterval = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionInterval")
+  val EagerSubmissionMinNumberOfJob = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionMinNumberOfJob")
+  val EagerSubmissionNumberOfJobUnderMin = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionNumberOfJobUnderMin")
+  val EagerSubmissionNbSampling = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionNbSampling")
+  val EagerSubmissionSamplingWindowFactor = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionSamplingWindowFactor")
 
   val LocalThreadsBySE = new ConfigurationLocation("GliteEnvironment", "LocalThreadsBySE")
   val LocalThreadsByWMS = new ConfigurationLocation("GliteEnvironment", "LocalThreadsByWMS")
@@ -69,38 +71,47 @@ object GliteEnvironment extends Logger {
   val MinValueForSelectionExploration = new ConfigurationLocation("GliteEnvironment", "MinValueForSelectionExploration")
   val ShallowWMSRetryCount = new ConfigurationLocation("GliteEnvironment", "ShallowWMSRetryCount")
 
-  val JobServiceFitnessPower = new ConfigurationLocation("GliteEnvironment", "JobServiceFitnessPower")
-  val StorageFitnessPower = new ConfigurationLocation("GliteEnvironment", "StorageFitnessPower")
+  val JobServiceFitnessPower = ConfigurationLocation("GliteEnvironment", "JobServiceFitnessPower")
+  val StorageFitnessPower = ConfigurationLocation("GliteEnvironment", "StorageFitnessPower")
 
-  val RunningHistoryDuration = new ConfigurationLocation("GliteEnvironment", "RunningHistoryDuration")
-  val EagerSubmissionThreshold = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionThreshold")
+  val StorageSizeFactor = ConfigurationLocation("GliteEnvironment", "StorageSizeFactor")
+  val StorageTimeFactor = ConfigurationLocation("GliteEnvironment", "StorageTimeFactor")
+  val StorageAvailabilityFactor = ConfigurationLocation("GliteEnvironment", "StorageAvailabilityFactor")
+  val StorageSuccessRateFactor = ConfigurationLocation("GliteEnvironment", "StorageSuccessRateFactor")
 
-  val DefaultBDII = new ConfigurationLocation("GliteEnvironment", "DefaultBDII")
+  val JobServiceJobFactor = ConfigurationLocation("GliteEnvironment", "JobServiceSizeFactor")
+  val JobServiceTimeFactor = ConfigurationLocation("GliteEnvironment", "JobServiceTimeFactor")
+  val JobServiceAvailabilityFactor = ConfigurationLocation("GliteEnvironment", "JobServiceAvailabilityFactor")
+  val JobServiceSuccessRateFactor = ConfigurationLocation("GliteEnvironment", "JobServiceSuccessRateFactor")
+
+  val RunningHistoryDuration = ConfigurationLocation("GliteEnvironment", "RunningHistoryDuration")
+  val EagerSubmissionThreshold = ConfigurationLocation("GliteEnvironment", "EagerSubmissionThreshold")
+
+  val DefaultBDII = ConfigurationLocation("GliteEnvironment", "DefaultBDII")
 
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
 
   Workspace += (FetchResourcesTimeOut, "PT2M")
   Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
-  Workspace += (CACertificatesCacheTime, "P50D")
+  Workspace += (CACertificatesCacheTime, "P7D")
   Workspace += (VOInformationSite, "http://operations-portal.egi.eu/xml/voIDCard/public/all/true")
   Workspace += (VOCardDownloadTimeOut, "PT2M")
-  Workspace += (VOCardCacheTime, "P50D")
+  Workspace += (VOCardCacheTime, "P10D")
 
   Workspace += (LocalThreadsBySE, "10")
   Workspace += (LocalThreadsByWMS, "10")
 
   Workspace += (ProxyRenewalRatio, "0.2")
-
   Workspace += (MinProxyRenewal, "PT5M")
 
-  Workspace += (OverSubmissionNbSampling, "10")
-  Workspace += (OverSubmissionSamplingWindowFactor, "5")
+  Workspace += (EagerSubmissionNbSampling, "10")
+  Workspace += (EagerSubmissionSamplingWindowFactor, "5")
 
-  Workspace += (OverSubmissionInterval, "PT5M")
+  Workspace += (EagerSubmissionInterval, "PT5M")
 
-  Workspace += (OverSubmissionMinNumberOfJob, "100")
-  Workspace += (OverSubmissionNumberOfJobUnderMin, "10")
+  Workspace += (EagerSubmissionMinNumberOfJob, "100")
+  Workspace += (EagerSubmissionNumberOfJobUnderMin, "10")
 
   Workspace += (JobShakingHalfLife, "PT30M")
   Workspace += (JobShakingMaxReady, "100")
@@ -115,7 +126,17 @@ object GliteEnvironment extends Logger {
   Workspace += (JobServiceFitnessPower, "2")
   Workspace += (StorageFitnessPower, "2")
 
-  Workspace += (RunningHistoryDuration, "PT3H")
+  Workspace += (StorageSizeFactor, "5")
+  Workspace += (StorageTimeFactor, "1")
+  Workspace += (StorageAvailabilityFactor, "10")
+  Workspace += (StorageSuccessRateFactor, "10")
+
+  Workspace += (JobServiceJobFactor, "1")
+  Workspace += (JobServiceTimeFactor, "10")
+  Workspace += (JobServiceAvailabilityFactor, "10")
+  Workspace += (JobServiceSuccessRateFactor, "1")
+
+  Workspace += (RunningHistoryDuration, "PT12H")
   Workspace += (EagerSubmissionThreshold, "0.5")
 
   Workspace += (DefaultBDII, "ldap://cclcgtopbdii02.in2p3.fr:2170")
@@ -127,14 +148,16 @@ object GliteEnvironment extends Logger {
     fqan: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
     memory: Option[Int] = None,
-    cpuTime: Option[String] = None,
-    wallTime: Option[String] = None,
+    cpuTime: Option[Duration] = None,
+    wallTime: Option[Duration] = None,
     cpuNumber: Option[Int] = None,
     jobType: Option[String] = None,
     smpGranularity: Option[Int] = None,
     myProxy: Option[MyProxy] = None,
     architecture: Option[String] = None,
-    threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
+    threads: Option[Int] = None,
+    requirements: Option[String] = None,
+    debug: Boolean = false)(implicit authentications: AuthenticationProvider) =
     new GliteEnvironment(voName,
       bdii.getOrElse(Workspace.preference(GliteEnvironment.DefaultBDII)),
       vomsURL.getOrElse(GliteAuthentication.getVMOSOrError(voName)),
@@ -148,16 +171,14 @@ object GliteEnvironment extends Logger {
       smpGranularity,
       myProxy,
       architecture,
-      threads)(authentications)
+      threads,
+      requirements,
+      debug)(authentications)
 
   def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
 
-  def proxyRenewalDelay = {
-    val remainingTime = proxyTime.toSeconds
-    math.max(
-      (remainingTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
-      Workspace.preferenceAsDuration(GliteEnvironment.MinProxyRenewal).toSeconds)
-  }
+  def proxyRenewalDelay =
+    (proxyTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)) max Workspace.preferenceAsDuration(GliteEnvironment.MinProxyRenewal)
 
   def normalizedFitness[T, S](fitness: ⇒ Iterable[(T, S, Double)]): Iterable[(T, S, Double)] = {
     def orMinForExploration(v: Double) = {
@@ -178,14 +199,16 @@ class GliteEnvironment(
     val fqan: Option[String],
     override val openMOLEMemory: Option[Int],
     val memory: Option[Int],
-    val cpuTime: Option[String],
-    val wallTime: Option[String],
+    val cpuTime: Option[Duration],
+    val wallTime: Option[Duration],
     val cpuNumber: Option[Int],
     val jobType: Option[String],
     val smpGranularity: Option[Int],
     val myProxy: Option[MyProxy],
     val architecture: Option[String],
-    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId { env ⇒
+    override val threads: Option[Int],
+    val requirements: Option[String],
+    val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId with LCGCp { env ⇒
 
   import GliteEnvironment._
 
@@ -193,9 +216,9 @@ class GliteEnvironment(
 
   type JS = GliteJobService
 
-  @transient lazy val registerAgents: Unit = {
-    Updater.registerForUpdate(new OverSubmissionAgent(WeakReference(this)))
-    Updater.registerForUpdate(new ProxyChecker(WeakReference(this)))
+  @transient lazy val registerAgents = {
+    Updater.delay(new EagerSubmissionAgent(WeakReference(this), GliteEnvironment.EagerSubmissionThreshold))
+    None
   }
 
   override def submit(job: IJob) = {
@@ -210,29 +233,27 @@ class GliteEnvironment(
       GliteAuthentication.initialise(a)(
         vomsURL,
         voName,
-        FileDeleter.deleteWhenGarbageCollected(Workspace.newFile("proxy", ".x509")),
-        proxyTime.toSeconds,
+        proxyTime,
         fqan)(authentications).cache(proxyRenewalDelay)
     case None ⇒ throw new UserBadDataError("No authentication has been initialized for glite.")
   }
 
-  def delegate =
-    jobServices.foreach { _.delegated = false }
+  @transient lazy val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut))(authentication)
 
-  override def allJobServices = {
-    val jss = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut).toSeconds.toInt)
-    jss.map {
+  override def allJobServices =
+    bdiiWMS.map {
       js ⇒
         new GliteJobService {
           val jobService = new WMSJobService {
             val url = js.url
-            override def delegationRenewal = Int.MaxValue
+            val credential = js.credential
+            override def connections = threadsByWMS
+            override def delegationRenewal = proxyRenewalDelay
           }
           val environment = env
           val nbTokens = threadsByWMS
         }
     }
-  }
 
   override def selectAJobService =
     if (jobServices.size == 1) super.selectAJobService
@@ -263,12 +284,20 @@ class GliteEnvironment(
                   if (cur.submitted > 0 && cur.totalSubmitted > 0) ((cur.runnig.toDouble / cur.submitted) * (cur.totalDone / cur.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
                   else 0.0
 
-                val fitness = math.pow((jobFactor + timeFactor + 10 * cur.availability + 10 * cur.successRate), Workspace.preferenceAsDouble(JobServiceFitnessPower))
+                import Workspace.preferenceAsDouble
+                import GliteEnvironment._
+
+                val fitness = math.pow(
+                  preferenceAsDouble(JobServiceJobFactor) * jobFactor +
+                    preferenceAsDouble(JobServiceTimeFactor) * timeFactor +
+                    preferenceAsDouble(JobServiceAvailabilityFactor) * cur.availability +
+                    preferenceAsDouble(JobServiceSuccessRateFactor) * cur.successRate,
+                  preferenceAsDouble(JobServiceFitnessPower))
                 Some((cur, token, fitness))
             }
         }
 
-      @tailrec def selected(value: Double, jobServices: List[(JobService, AccessToken, Double)]): (JobService, AccessToken) =
+      @tailrec def selected(value: Double, jobServices: List[(GliteJobService, AccessToken, Double)]): (GliteJobService, AccessToken) =
         jobServices match {
           case (js, token, fitness) :: Nil ⇒ (js, token)
           case (js, token, fitness) :: tail ⇒

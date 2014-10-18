@@ -47,13 +47,16 @@ sealed abstract class ExplorationTask(val name: String, val sampling: Sampling) 
 
   //If input prototype as the same name as the output it is erased
   override protected def process(context: Context) = {
-    val sampled = sampling.build(context).toIterable
+    val variablesValues = TreeMap.empty[Prototype[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p -> ArrayBuffer[Any]() }
 
-    val variablesValues = TreeMap.empty[Prototype[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p -> new ArrayBuffer[Any](sampled.size) }
-
-    for (sample ← sampled; v ← sample) variablesValues.get(v.prototype) match {
-      case Some(b) ⇒ b += v.value
-      case None    ⇒
+    for {
+      sample ← sampling.build(context)
+      v ← sample
+    } {
+      variablesValues.get(v.prototype) match {
+        case Some(b) ⇒ b += v.value
+        case None    ⇒
+      }
     }
 
     context ++ variablesValues.map {

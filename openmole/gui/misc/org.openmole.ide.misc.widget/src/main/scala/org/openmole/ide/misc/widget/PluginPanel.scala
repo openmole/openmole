@@ -17,10 +17,16 @@
 
 package org.openmole.ide.misc.widget
 
-import java.awt.Color
-import java.awt.Graphics2D
 import java.awt.RenderingHints
 import scala.swing._
+
+object PluginPanel {
+  def apply(mig1: String, mig2: String = "", mig3: String = "", components: Seq[Component] = Seq()) = {
+    new PluginPanel(mig1, mig2, mig3) {
+      components.foreach { contents += }
+    }
+  }
+}
 
 class PluginPanel(mig1: String, mig2: String = "", mig3: String = "") extends MyMigPanel(mig1, mig2, mig3) {
 

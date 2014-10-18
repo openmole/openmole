@@ -28,10 +28,9 @@ import org.openmole.misc.workspace._
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._
 
-object PBSEnvironment {
-  val MaxConnections = new ConfigurationLocation("PBSEnvironment", "MaxConnections")
+import scala.concurrent.duration.Duration
 
-  Workspace += (MaxConnections, "10")
+object PBSEnvironment {
 
   def apply(
     user: String,
@@ -39,14 +38,13 @@ object PBSEnvironment {
     port: Int = 22,
     queue: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
-    wallTime: Option[String] = None,
+    wallTime: Option[Duration] = None,
     memory: Option[Int] = None,
-    path: Option[String] = None,
-    threads: Option[Int] = None,
     nodes: Option[Int] = None,
     coreByNode: Option[Int] = None,
-    workDirectory: Option[String] = None)(implicit authentications: AuthenticationProvider) =
-    new PBSEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, path, threads, nodes, coreByNode, workDirectory)
+    workDirectory: Option[String] = None,
+    threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
+    new PBSEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, nodes, coreByNode, workDirectory, threads)
 }
 
 import PBSEnvironment._
@@ -57,39 +55,24 @@ class PBSEnvironment(
     override val port: Int,
     val queue: Option[String],
     override val openMOLEMemory: Option[Int],
-    val wallTime: Option[String],
+    val wallTime: Option[Duration],
     val memory: Option[Int],
-    val path: Option[String],
-    override val threads: Option[Int],
     val nodes: Option[Int],
     val coreByNode: Option[Int],
-    val workDirectory: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
+    val workDirectory: Option[String],
+    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
-  type SS = PersistentStorageService
   type JS = PBSJobService
 
-  @transient lazy val authentication = SSHAuthentication(user, host, port, authentications)(authentications)
-  @transient lazy val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
-
-  @transient lazy val storage =
-    new PersistentStorageService with SSHStorageService with ThisHost with LimitedAccess {
-      def nbTokens = Workspace.preferenceAsInt(MaxConnections)
-      val environment = env
-      lazy val root = env.path match {
-        case Some(p) ⇒ p
-        case None    ⇒ child(home, ".openmole")
-      }
-    }
+  @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
 
   @transient lazy val jobService = new PBSJobService with ThisHost with LimitedAccess {
-    def nbTokens = Workspace.preferenceAsInt(MaxConnections)
+    def nbTokens = maxConnections
     def queue = env.queue
     val environment = env
     def sharedFS = storage
-    val id = url.toString
   }
 
-  def allStorages = List(storage)
   def allJobServices = List(jobService)
 
 }

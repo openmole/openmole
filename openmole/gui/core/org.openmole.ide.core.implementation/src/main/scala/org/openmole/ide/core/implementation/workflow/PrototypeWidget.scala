@@ -28,6 +28,7 @@ import org.openmole.ide.core.implementation.commons.Constants
 import Constants._
 import org.openmole.ide.misc.widget.LinkLabel
 import scala.swing.Action
+import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 
 object PrototypeWidget {
   def green(scene: MoleScene) = scene match {
@@ -55,7 +56,7 @@ object PrototypeWidget {
                          location: Point = new Point(0, 0),
                          initColor: Color) extends PrototypeWidget(scene, capsule, link, location, initColor) {
     def activated = !capsule.dataUI.sources.isEmpty
-    override def paintChildren = link.text = capsule.inputs.size.toString
+    override def paintChildren = link.text = (List(capsule.dataUI.task).flatten.foldLeft(0)((acc, t) ⇒ acc + t.dataUI.inputs.size + t.dataUI.implicitPrototypes._1.size)).toString
   }
 
   class OPrototypeWidget(scene: MoleScene,
@@ -64,7 +65,7 @@ object PrototypeWidget {
                          location: Point = new Point(0, 0),
                          initColor: Color) extends PrototypeWidget(scene, capsule, link, location, initColor) {
     def activated = !capsule.dataUI.hooks.isEmpty
-    override def paintChildren = link.text = capsule.outputs.size.toString
+    override def paintChildren = link.text = (List(capsule.dataUI.task).flatten.foldLeft(0)((acc, t) ⇒ acc + t.dataUI.outputs.size + t.dataUI.implicitPrototypes._2.size)).toString
   }
 }
 

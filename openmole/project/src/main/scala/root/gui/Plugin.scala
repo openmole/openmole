@@ -14,7 +14,7 @@ abstract class PluginDefaults(subBuilds: Defaults*) extends GuiDefaults(subBuild
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("guiPlugin"), bundleActivator <<= (name) { n ⇒ Some(n + ".Activator") })
 }
 
-object Plugin extends PluginDefaults(plugin.Task, Domain, Environment, Sampling, Builder, Miscellaneous, Hook, Method, Source) {
+object Plugin extends PluginDefaults(plugin.Task, Domain, Environment, Sampling, Miscellaneous, Hook, Method, Source) {
 
   implicit val artifactPrefix = Some("org.openmole.ide.plugin")
 

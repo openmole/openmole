@@ -24,21 +24,20 @@ import org.openmole.misc.workspace._
 
 object DeleteActor extends Logger
 
-import DeleteActor._
+import DeleteActor.Log._
 
 class DeleteActor(jobManager: ActorRef) extends Actor {
-  def receive = {
+  def receive = withRunFinalization {
     case msg @ DeleteFile(storage, path, directory) ⇒
       try storage.tryWithToken {
         case Some(t) ⇒
           if (directory) storage.rmDir(path)(t) else storage.rmFile(path)(t)
         case None ⇒
-          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
+          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval))
       }
       catch {
         case t: Throwable ⇒
           logger.log(FINE, "Error when deleting a file", t)
       }
-      System.runFinalization
   }
 }

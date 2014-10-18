@@ -51,8 +51,8 @@ class MoleSceneMenuProvider(moleScene: BuildMoleScene) extends GenericMenuProvid
     initMenu
     Proxies.instance.tasks.foreach { p ⇒ items += new JMenuItem(new AddTaskAction(moleScene, p, this).peer)
     }
-    val itPaste = new MenuItem(new Action("Paste") { def apply = ScenesManager.pasteCapsules(moleScene, point) })
-    itPaste.enabled = !ScenesManager.selection.isEmpty
+    val itPaste = new MenuItem(new Action("Paste") { def apply = ScenesManager().pasteCapsules(moleScene, point) })
+    itPaste.enabled = !ScenesManager().selection.isEmpty
     items.insert(0, itPaste.peer)
     super.getPopupMenu(widget, point)
   }

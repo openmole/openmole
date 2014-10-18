@@ -50,7 +50,7 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI)(implicit val i18n: Reso
   val linkLabel = new LinkLabel("", new Action("") {
     def apply =
       if (samplingComboBox.selection.item != emptyProxy) {
-        ScenesManager.currentScene match {
+        ScenesManager().currentScene match {
           case Some(s: MoleScene) ⇒ ConceptMenu.display(samplingComboBox.selection.item)
           case _                  ⇒
         }
@@ -73,7 +73,7 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI)(implicit val i18n: Reso
   }
 
   def contentAction(proxy: SamplingCompositionDataProxyUI) = new ContentAction(proxy.dataUI.name, proxy) {
-    override def apply = ScenesManager.currentSceneContainer.get.scene.displayPropertyPanel(proxy)
+    override def apply = ScenesManager().currentSceneContainer.get.scene.displayPropertyPanel(proxy)
   }
 
   override def saveContent(name: String) =

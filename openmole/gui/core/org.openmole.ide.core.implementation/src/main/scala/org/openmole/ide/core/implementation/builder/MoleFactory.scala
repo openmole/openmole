@@ -36,7 +36,7 @@ import scala.Some
 
 object MoleFactory {
 
-  def buildMoleExecution(manager: IMoleUI): Try[(PartialMoleExecution, Iterable[(Environment, String)])] = {
+  def buildMoleExecution(manager: MoleUI): Try[(PartialMoleExecution, Iterable[(Environment, String)])] = {
     manager.cacheMole match {
       case Some((mole: IMole, capsuleMap: Map[CapsuleUI, ICapsule])) ⇒
         buildMoleExecution(mole, manager, capsuleMap)
@@ -48,7 +48,7 @@ object MoleFactory {
   case class SourceMapping(c: ICapsule, s: ISource)
 
   def buildMoleExecution(mole: IMole,
-                         manager: IMoleUI,
+                         manager: MoleUI,
                          capsuleMapping: Map[CapsuleUI, ICapsule]): Try[(PartialMoleExecution, Iterable[(Environment, String)])] =
     Try {
       val (envs, envNames) = capsuleMapping.flatMap {
@@ -84,7 +84,7 @@ object MoleFactory {
         }), envNames)
     }
 
-  def buildMole(manager: IMoleUI): Try[(IMole, Map[CapsuleUI, ICapsule], Iterable[(CapsuleUI, Throwable)])] =
+  def buildMole(manager: MoleUI): Try[(IMole, Map[CapsuleUI, ICapsule], Iterable[(CapsuleUI, Throwable)])] =
     Try {
       if (manager.startingCapsule.isDefined) {
         val builds = manager.capsules.map {
@@ -109,7 +109,7 @@ object MoleFactory {
     s ⇒ s -> s.dataUI.coreObject.get
   }.toMap
 
-  def moleMapping: Map[MoleScene, IMole] = ScenesManager.moleScenes.map {
+  def moleMapping: Map[MoleScene, IMole] = ScenesManager().moleScenes.map {
     m ⇒ m.graphScene -> buildMole(m.dataUI).get._1
   }.toMap
 

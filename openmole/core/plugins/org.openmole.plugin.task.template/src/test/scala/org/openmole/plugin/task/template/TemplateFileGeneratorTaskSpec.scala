@@ -22,22 +22,27 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
-import org.openmole.misc.hashservice.HashService._
+import org.openmole.misc.tools.io.HashService
+import HashService._
+import org.openmole.misc.tools.io.FileUtil._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import TemplateData._
 
 @RunWith(classOf[JUnitRunner])
-class TemplateFileGeneratorTaskSpec extends FlatSpec with ShouldMatchers {
+class TemplateFileGeneratorTaskSpec extends FlatSpec with Matchers {
   implicit val plugins = PluginSet.empty
 
   "A template file generator task" should "parse a template file and evalutate the ${} expressions" in {
     val outputP = Prototype[File]("file1")
     val t1 = TemplateFileTask("Test TemplateFileGeneratorTask", templateFile, outputP)
 
-    t1.toTask.process(Context.empty).value(outputP).get.hash.equals(targetFile.hash) should equal(true)
+    println(t1.toTask.process(Context.empty)(outputP).content)
+    println(targetFile.content)
+
+    t1.toTask.process(Context.empty)(outputP).hash should equal(targetFile.hash)
   }
 
 }

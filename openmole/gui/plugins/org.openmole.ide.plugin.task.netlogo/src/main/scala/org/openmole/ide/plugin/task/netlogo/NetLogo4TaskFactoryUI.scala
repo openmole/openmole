@@ -21,26 +21,23 @@ import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.builder.{ PuzzleUIMap, SceneFactory }
 import org.openmole.plugin.task.netlogo4.NetLogo4Task
 import org.openmole.ide.core.implementation.factory.TaskFactoryUI
+import org.openmole.ide.misc.tools.util.Converters._
 
 class NetLogo4TaskFactoryUI extends TaskFactoryUI {
 
   override def toString = "NetLogo4"
 
-  def buildDataUI = new NetLogo4TaskDataUI
+  def buildDataUI = new NetLogo4TaskDataUI1
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[NetLogo4Task](task)
-    val embededWS = t.workspace.location match {
-      case Right(r) ⇒ true
-      case Left(l)  ⇒ false
-    }
-    uiMap.task(t, x ⇒ new NetLogo4TaskDataUI(t.name,
-      embededWS,
-      t.scriptPath,
+
+    uiMap.task(t, x ⇒ new NetLogo4TaskDataUI1(t.name,
+      t.workspace,
       t.launchingCommands.mkString("\n"),
       t.netLogoInputs.toList.map { p ⇒ (uiMap.prototypeUI(p._1).get, p._2) },
       t.netLogoOutputs.toList.map { p ⇒ (p._1, uiMap.prototypeUI(p._2).get) },
-      t.resources.map { _._2 }.toList))
+      t.resources.map { _._1 }.toList))
   }
 
   override def category = List("ABM")

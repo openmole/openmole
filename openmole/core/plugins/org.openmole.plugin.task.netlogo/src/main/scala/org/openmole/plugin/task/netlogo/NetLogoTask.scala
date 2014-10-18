@@ -29,7 +29,7 @@ import org.openmole.misc.tools.service.OS
 
 object NetLogoTask {
 
-  class Workspace(val location: Either[(File, String), File]) {
+  case class Workspace(location: Either[(File, String), File]) {
     def this(workspace: File, script: String) = this(Left(workspace, script))
     def this(script: File) = this(Right(script))
   }
@@ -57,9 +57,7 @@ class NetLogoTask(
       case Right(s)     ⇒ s.getName
     }
 
-  override def process(context: Context): Context = {
-
-    val tmpDir = org.openmole.misc.workspace.Workspace.newDir("netLogoTask")
+  override def process(context: Context): Context = withWorkDir { tmpDir ⇒
     val links = prepareInputFiles(context, tmpDir)
 
     val script = new File(tmpDir, scriptPath)

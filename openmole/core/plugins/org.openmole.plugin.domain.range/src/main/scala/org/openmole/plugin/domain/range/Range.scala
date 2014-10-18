@@ -17,43 +17,28 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.domain._
 import org.openmole.misc.tools.io.FromString
-import org.openmole.core.model.data._
-import org.openmole.core.implementation.tools._
 
 object Range {
 
   def apply[T](
     min: String,
+    max: String)(implicit integral: Integral[T], fs: FromString[T]) = new Range[T](min, max)
+
+  def apply[T](
+    min: String,
     max: String,
-    step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) = new Range[T](min, max, step)
+    step: String)(implicit integral: Integral[T], fs: FromString[T]): StepRange[T] =
+    StepRange[T](Range[T](min, max), step)
+
+  def steps[T](
+    min: String,
+    max: String,
+    steps: String)(implicit integral: Integral[T], fs: FromString[T]): SizeRange[T] =
+    SizeRange[T](Range[T](min, max), steps)
 
 }
 
-sealed class Range[T](val min: String, val max: String, val step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) extends Domain[T] with Finite[T] with Center[T] with Bounds[T] {
-
-  import integral._
-  import fs._
-
-  override def computeValues(context: Context): Iterable[T] = {
-    val mi = min(context)
-    val ma = max(context)
-    val s = step(context)
-
-    val size = (ma - mi).abs / s
-
-    (for (i ← 0 to size.toInt) yield { mi + fromInt(i) * s })
-  }
-
-  override def center(context: Context): T = {
-    val mi = min(context);
-    mi + ((max(context) - mi) / fromInt(2))
-  }
-
-  def step(context: Context): T = fromString(VariableExpansion(context, step))
-  override def max(context: Context): T = fromString(VariableExpansion(context, max))
-  override def min(context: Context): T = fromString(VariableExpansion(context, min))
-
+class Range[T](val min: String, val max: String)(implicit val integral: Integral[T], val fs: FromString[T]) extends Bounded[T] {
+  lazy val range = this
 }
-

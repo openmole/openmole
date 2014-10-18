@@ -27,13 +27,13 @@ import org.openmole.core.model.sampling._
 import org.openmole.core.model.task._
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
-class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
+class AggregationTransitionSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
 
@@ -68,9 +68,9 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
 
     val mole = exc -< emptyC >- testC toMole
 
-    new MoleExecution(mole).start.waitUntilEnded
+    MoleExecution(mole).start.waitUntilEnded
     endCapsExecuted should equal(1)
-    new MoleExecution(mole).start.waitUntilEnded
+    MoleExecution(mole).start.waitUntilEnded
     endCapsExecuted should equal(2)
   }
 
@@ -142,9 +142,9 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
 
     val mole = exc -< emptyC >- testC toMole
 
-    new MoleExecution(mole).start.cancel
+    MoleExecution(mole).start.cancel
     endCapsExecuted = 0
-    new MoleExecution(mole).start.waitUntilEnded
+    MoleExecution(mole).start.waitUntilEnded
     endCapsExecuted should equal(1)
   }
 

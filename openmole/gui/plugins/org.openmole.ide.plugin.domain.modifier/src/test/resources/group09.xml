@@ -1,0 +1,9 @@
+<dataUI class="org.openmole.ide.plugin.domain.modifier.GroupDomainDataUI">
+    <size>1</size>
+    <previousDomain class="List"/>
+    <domainType class="scala.reflect.ManifestFactory$$anon$12">
+      <toString>Double</toString>
+      <hashCode>450839479</hashCode>
+    </domainType>
+    <name>Group</name>
+  </dataUI>

@@ -18,56 +18,68 @@
 package org.openmole.core.batch.storage
 
 import java.net.URI
+import java.nio.file.Paths
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.refresh._
 import org.openmole.core.serializer._
 import org.openmole.misc.filedeleter._
 import org.openmole.misc.workspace._
-import com.db4o.ObjectContainer
-import fr.iscpif.gridscale.FileType
+import fr.iscpif.gridscale.storage.FileType
 import java.io._
+import org.openmole.misc.tools.service.Logger
+import scala.slick.driver.H2Driver.simple._
+
+object StorageService extends Logger
+
+import StorageService.Log._
 
 trait StorageService extends BatchService with Storage {
 
-  def remoteStorage: Storage
-  def clean(implicit token: AccessToken, objectContainer: ObjectContainer)
+  def remoteStorage: RemoteStorage
+  def clean(implicit token: AccessToken, session: Session)
 
   def url: URI
-  lazy val id = url.toString
+  val id: String
 
   @transient lazy val serializedRemoteStorage = {
     val file = Workspace.newFile("remoteStorage", ".xml")
     FileDeleter.deleteWhenGarbageCollected(file)
-    SerializerService.serializeAndArchiveFiles(remoteStorage, file)
+    SerialiserService.serialiseAndArchiveFiles(remoteStorage, file)
     file
   }
 
   @transient protected var baseSpaceVar: Option[String] = None
 
-  def persistentDir(implicit token: AccessToken, objectContainer: ObjectContainer): String
+  def persistentDir(implicit token: AccessToken, session: Session): String
   def tmpDir(implicit token: AccessToken): String
   def baseDir(implicit token: AccessToken): String = synchronized {
     baseSpaceVar match {
       case Some(s) ⇒ s
       case None ⇒
-        val basePath = mkBaseDir
+        val rootPath = mkRootDir
+        val basePath = child(rootPath, baseDirName)
+        if (!exists(basePath)) makeDir(basePath)
+        initialise(basePath)
         baseSpaceVar = Some(basePath)
         basePath
     }
   }
 
-  protected def mkBaseDir(implicit token: AccessToken): String = synchronized {
-    val rootFile = new File(root)
-    val baseDir = new File(rootFile, baseDirName)
+  protected def initialise(basePath: String)(implicit token: AccessToken) = {}
 
-    Iterator.iterate(baseDir)(_.getParentFile).takeWhile(_ != null).toList.reverse.filterNot(_.getName.isEmpty).foldLeft("/") {
+  protected def mkRootDir(implicit token: AccessToken): String = synchronized {
+    val paths = Iterator.iterate(Paths.get(root))(_.getParent).takeWhile(_ != null).toSeq.reverse
+
+    paths.tail.foldLeft(paths.head.toString) {
       (path, file) ⇒
-        val childPath = child(path, file.getName)
-        if (!exists(childPath)) makeDir(childPath)
+        val childPath = child(path, file.getFileName.toString)
+        try makeDir(childPath)
+        catch {
+          case e: Throwable ⇒ logger.log(FINEST, "Error creating base directory " + root + e)
+        }
         childPath
     }
-
   }
 
   override def toString: String = id

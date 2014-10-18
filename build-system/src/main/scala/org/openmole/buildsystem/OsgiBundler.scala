@@ -16,15 +16,18 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
   protected val bundleMap = Map("Bundle-ActivationPolicy" -> "lazy")
 
   protected lazy val osgiCachedSettings = Project.defaultSettings ++ SbtOsgi.osgiSettings ++ Seq(
-    OsgiKeys.bundle <<= (
+    /*OsgiKeys.bundle <<= (
       OsgiKeys.manifestHeaders,
+      includeResource,
       OsgiKeys.additionalHeaders,
       fullClasspath in Compile,
       artifactPath in (Compile, packageBin),
       resourceDirectories in Compile,
       OsgiKeys.embeddedJars, target
     ) map Osgi.bundleTask,
+    includeResource := Nil,*/
     OsgiKeys.bundleSymbolicName <<= (name, osgiSingleton) { case (name, singleton) ⇒ name + ";singleton:=" + singleton },
+    autoAPIMappings := true,
     bundleProj := true,
     OsgiKeys.bundleVersion <<= version,
     OsgiKeys.exportPackage <<= name { n ⇒ Seq(n + ".*") },
@@ -34,9 +37,8 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
     OsgiKeys.bundle <<= OsgiKeys.bundle tag Tags.Disk,
     (update in install) <<= update in install tag Tags.Network,
     bundleType := Set("default"),
-    projectID <<= (projectID, bundleType) { (id, bT) ⇒
-      id extra ("project-name" -> projectName, "bundle-type" -> bT.mkString)
-    },
+    testListeners in (Test, test) := Seq(TestLogger(streams.value.log, { _ ⇒ streams.value.log }, logBuffered.value)), //TODO: Quick hack to workaround the file hungriness of SBT 0.13.0 fix when https://github.com/sbt/sbt/issues/937 is fixed
+    test in (Test, test) <<= test in (Test, test) tag (Tags.Disk),
     publishTo <<= isSnapshot(if (_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases"))
   ) ++ scalariformDefaults
 
@@ -60,6 +62,15 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
     val artifactId = artifactPrefix map (_ + "." + artifactSuffix) getOrElse artifactSuffix
     val base = dir / (if (pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
+    val testDependencies = (scalaVersion in thisProject, scalaVersion in Global, scalatestVersion, junitVersion) {
+      (tSV, sv, stv, juv) ⇒
+        (if (tSV == sv)
+          Seq("org.scalatest" %% "scalatest" % stv % "test")
+        else
+          Seq()
+        ) ++ Seq("junit" % "junit" % juv % "test")
+    }
+
     val sets = settings
 
     val additional = buddyPolicy.map(v ⇒ Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++
@@ -77,7 +88,8 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
         OsgiKeys.dynamicImportPackage := dynamicImports,
         OsgiKeys.importPackage := imports,
         OsgiKeys.embeddedJars := embeddedJars,
-        OsgiKeys.bundleActivator <<= OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) }
+        OsgiKeys.bundleActivator <<= OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) },
+        libraryDependencies <++= testDependencies
       ) ++ sets)
   }
 

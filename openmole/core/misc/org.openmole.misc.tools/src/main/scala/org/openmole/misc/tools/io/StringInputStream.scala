@@ -17,31 +17,6 @@
 
 package org.openmole.misc.tools.io
 
-import java.io.InputStream
+import java.io.ByteArrayInputStream
 
-class StringInputStream(val s: String) extends InputStream {
-
-  private var strOffset = 0
-  private var charOffset = 0
-  private var _available = s.length * 2
-
-  override def available = _available
-
-  override def read: Int = {
-    if (available == 0) return -1
-
-    _available -= 1
-    val c = s.charAt(strOffset)
-
-    if (charOffset == 0) {
-      charOffset = 1
-      return (c & 0x0000ff00) >> 8
-    }
-    else {
-      charOffset = 0
-      strOffset += 1
-      return c & 0x000000ff
-    }
-  }
-
-}
+class StringInputStream(val s: String) extends ByteArrayInputStream(s.getBytes("UTF-8"))

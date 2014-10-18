@@ -1,0 +1,6 @@
+<dataUI class="org.openmole.ide.plugin.environment.desktopgrid.DesktopGridEnvironmentDataUI">
+    <name>test</name>
+    <login></login>
+    <pass></pass>
+    <port>0</port>
+  </dataUI>

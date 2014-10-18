@@ -16,28 +16,25 @@
  */
 package org.openmole.ide.plugin.task.netlogo
 
-import org.openmole.ide.core.implementation.data.EmptyDataUIs._
-import org.openmole.ide.osgi.netlogo4.NetLogo4
+import java.io.File
+
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.misc.tools.util.Converters
+import org.openmole.ide.misc.tools.util.Converters._
+import org.openmole.plugin.tool.netlogo4.NetLogo4
 
-class NetLogo4TaskPanelUI(ndu: NetLogo4TaskDataUI) extends GenericNetLogoPanelUI(ndu.nlogoPath,
-  ndu.workspaceEmbedded,
+class NetLogo4TaskPanelUI(ndu: NetLogo4TaskDataUI1) extends GenericNetLogoPanelUI(ndu.workspace,
   ndu.lauchingCommands,
   ndu.prototypeMappingInput,
   ndu.prototypeMappingOutput,
   ndu.resources) {
-  override def saveContent(name: String): TaskDataUI = new NetLogo4TaskDataUI(name,
-    workspaceCheckBox.selected,
-    nlogoTextField.text,
+  override def saveContent(name: String): TaskDataUI = new NetLogo4TaskDataUI1(name,
+    Workspace.toWorkspace(nlogoTextField.text, workspaceCheckBox.selected),
     launchingCommandTextArea.text,
-    if (multiProtoString.isDefined)
-      multiProtoString.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }.filterNot(_._1.dataUI.isInstanceOf[EmptyPrototypeDataUI]).filter { case (p, s) ⇒ Proxies.check(p) }
-    else List(),
-    if (multiStringProto.isDefined)
-      multiStringProto.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }.filterNot(_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).filter { case (s, p) ⇒ Proxies.check(p) }
-    else List(),
-    resourcesMultiTextField.content.map { _.content })
+    Converters.flattenTuple2Options(multiProtoString.content.map { c ⇒ (c.comboValue1, c.comboValue2) }).filter { case (p, s) ⇒ Proxies.check(p) },
+    Converters.flattenTuple2Options(multiStringProto.content.map { c ⇒ (c.comboValue1, c.comboValue2) }).filter { case (s, p) ⇒ Proxies.check(p) },
+    resourcesMultiTextField.content.map { data ⇒ new File(data.content) })
 
   def buildNetLogo = new NetLogo4
 }

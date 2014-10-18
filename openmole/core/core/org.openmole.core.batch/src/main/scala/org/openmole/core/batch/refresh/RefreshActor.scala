@@ -22,15 +22,17 @@ import org.openmole.misc.tools.service.Logger
 import akka.actor.ActorRef
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.batch.environment.BatchEnvironment._
-import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.batch.environment.{ ResubmitException, BatchEnvironment }
+import org.openmole.misc.workspace.Workspace
 
 object RefreshActor extends Logger
 
-import RefreshActor._
+import RefreshActor.Log._
 
 class RefreshActor(jobManager: ActorRef) extends Actor {
-  def receive = {
-    case Refresh(job, sj, bj, delay) ⇒
+
+  def receive = withRunFinalization {
+    case Refresh(job, sj, bj, delay, updateErrorsInARow) ⇒
       if (!job.state.isFinal) {
         try bj.jobService.tryWithToken {
           case Some(t) ⇒
@@ -39,19 +41,26 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
             if (job.state == DONE) jobManager ! GetResult(job, sj, bj.resultPath)
             else if (!job.state.isFinal) {
               val newDelay =
-                if (oldState == job.state) math.min(delay + job.environment.incrementUpdateInterval, job.environment.maxUpdateInterval)
+                if (oldState == job.state) (delay + job.environment.incrementUpdateInterval) min job.environment.maxUpdateInterval
                 else job.environment.minUpdateInterval
-              jobManager ! Delay(Refresh(job, sj, bj, newDelay), newDelay)
+              jobManager ! Delay(Refresh(job, sj, bj, newDelay, 0), newDelay)
             }
             else jobManager ! Kill(job)
-          case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay), delay)
+          case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow), delay)
         } catch {
+          case _: ResubmitException ⇒
+            jobManager ! Resubmit(job, sj.storage)
           case e: Throwable ⇒
-            jobManager ! Error(job, e)
-            jobManager ! Kill(job)
+            if (updateErrorsInARow >= Workspace.preferenceAsInt(MaxUpdateErrorsInARow)) {
+              jobManager ! Error(job, e)
+              jobManager ! Kill(job)
+            }
+            else {
+              logger.log(FINE, s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
+              jobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow + 1), delay)
+            }
         }
       }
-      System.runFinalization
   }
 }
 

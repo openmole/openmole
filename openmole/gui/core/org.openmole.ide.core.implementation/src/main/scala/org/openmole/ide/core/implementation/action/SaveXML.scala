@@ -22,33 +22,46 @@ import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.dialog.GUIPanel
 import org.openmole.ide.core.implementation.execution.{ ScenesManager, Settings }
-import org.openmole.ide.core.implementation.serializer.{ MoleData, GUISerializer }
+import org.openmole.ide.core.implementation.serializer.{ MetaData, MoleData, GUISerializer }
 import scala.swing.FileChooser.Result._
 import scala.swing.Label
 import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.preference.Preferences
 
 object SaveXML {
 
-  def save(frame: GUIPanel, path: Option[File] = Settings.currentProject orElse SaveXML.show): Unit =
+  def save(frame: GUIPanel, path: Option[File] = Settings.currentProject orElse SaveXML.show(".om")): Unit =
     path match {
       case Some(p) ⇒
         frame.title = "OpenMOLE - " + p.getCanonicalPath
-        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager.moleScenes.map(MoleData.fromScene))
+        ScenesManager().moleScenes.foreach {
+          _.closePropertyPanels
+        }
+        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager().moleScenes.map(MoleData.fromScene), Some(MetaData(ScenesManager().moleScenes)))
         Settings.currentProject = path
+        ScenesManager().statusBar.inform(p.getName + " succesfully saved " + " in " + p.getParent)
       case None ⇒
     }
 
-  def show: Option[File] = {
-    val fc = DialogFactory.fileChooser("SaveSettings OpenMOLE project",
-      "*.om",
-      "om",
+  def export(frame: GUIPanel): Unit =
+    SaveXML.show(".omx") match {
+      case Some(p) ⇒
+        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager().moleScenes.map(MoleData.fromScene), Some(MetaData(ScenesManager().moleScenes)), true)
+        ScenesManager().statusBar.inform(p.getName + " succesfully exported " + " in " + p.getParent)
+      case None ⇒
+    }
+
+  def show(ext: String = ".om"): Option[File] = {
+    val fc = DialogFactory.fileChooser("Save OpenMOLE project",
+      "*" + ext,
+      ext,
       Settings.currentPath)
     if (fc.showDialog(new Label, "OK") == Approve) {
       val f = new File(fc.selectedFile.getPath)
       if (f.getParentFile.isDirectory) {
         Settings.currentPath = Some(f.getParentFile)
         val saveAs =
-          if (!f.getName.contains(".")) new File(fc.selectedFile.getPath + ".om")
+          if (!f.getName.contains(".")) new File(fc.selectedFile.getPath + ext)
           else f
         Some(saveAs)
       }

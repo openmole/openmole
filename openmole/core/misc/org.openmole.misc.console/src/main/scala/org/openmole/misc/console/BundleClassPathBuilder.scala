@@ -18,6 +18,7 @@
 package org.openmole.misc.console
 
 import java.io.{ InputStream, IOException, File }
+
 import scala.tools.nsc.io.AbstractFile
 import java.net.URL
 import java.lang.String
@@ -26,7 +27,6 @@ import collection.mutable.ListBuffer
 import org.osgi.framework._
 
 import collection.JavaConversions._
-import org.openmole.misc.console.Activator
 
 /**
  * Helper methods to transform OSGi bundles into {@link AbstractFile} implementations
@@ -106,7 +106,7 @@ object BundleClassPathBuilder {
 
     class DirEntry(url: URL, parent: DirEntry) extends BundleEntry(url, parent) {
 
-      //println("Create dir entry " + url + " " + parent)
+      //println("Create category entry " + url + " " + parent)
       /**
        * @return true
        */
@@ -180,7 +180,7 @@ object BundleClassPathBuilder {
         }
       }
 
-      override def lookupPathUnchecked(path: String, directory: Boolean) = lookupPath(path, directory)
+      //override def lookupPathUnchecked(path: String, directory: Boolean) = lookupPath(path, directory)
       def lookupNameUnchecked(name: String, directory: Boolean) = lookupName(path, directory)
 
       def absolute = unsupported("absolute() is unsupported")
@@ -199,7 +199,7 @@ object BundleClassPathBuilder {
       override def sizeOption: Option[Int] = Some(bundle.getEntry(fullName).openConnection().getContentLength())
       def lookupName(name: String, directory: Boolean): AbstractFile = null
 
-      override def lookupPathUnchecked(path: String, directory: Boolean) = lookupPath(path, directory)
+      //override def lookupPathUnchecked(path: String, directory: Boolean) = lookupPath(path, directory)
       def lookupNameUnchecked(name: String, directory: Boolean) = lookupName(path, directory)
 
       def iterator = Iterator.empty
@@ -238,6 +238,7 @@ object BundleClassPathBuilder {
   //   */
   //  def fromBundle(bundle: Bundle): List[AbstractFile] = {
   //    require(bundle != null, "Bundle should not be null")
+
   //
   //    // add the bundle itself
   //    val files = ListBuffer(create(bundle))

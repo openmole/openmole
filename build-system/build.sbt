@@ -18,20 +18,22 @@ name := "openmole-buildsystem-plugin"
 
 organization := "org.openmole"
 
-version := "0.9.14.2"
+version := "1.2.1"
 
 resolvers += Classpaths.sbtPluginSnapshots
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.5.0")
+resolvers ++= Seq(DefaultMavenRepository,"openmole-public" at "http://maven.openmole.org/public")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.0.1")
 
-libraryDependencies ++= Seq("com.jsuereth" %% "scala-arm" % "1.3",
-                            "org.kamranzafar" % "jtar" % "2.2")
+addSbtPlugin("fr.iscpif" % "sbt-osgi" % "0.5.4-SNAPSHOT") //TODO: Get these changes mainlined
+
+addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.2.0")
+
+libraryDependencies ++= Seq(
+  "com.jsuereth" %% "scala-arm" % "1.3",
+  "org.apache.commons" % "commons-compress" % "1.8.1")
 
 
 publishTo <<= isSnapshot(if(_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases"))
-
-credentials += Credentials(Path.userHome / ".sbt" / "openmole.credentials")
 
 releaseSettings

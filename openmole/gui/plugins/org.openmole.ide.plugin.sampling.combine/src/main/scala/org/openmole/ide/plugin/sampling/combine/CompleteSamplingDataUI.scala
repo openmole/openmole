@@ -13,6 +13,8 @@ import org.openmole.ide.core.implementation.sampling.{ FiniteUI, SamplingUtils }
 import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 import java.util.{ ResourceBundle, Locale }
 
+import org.openmole.ide.core.implementation.panel.NoParameterSamplingPanelUI
+
 class CompleteSamplingDataUI extends SamplingDataUI {
   val name = "Complete"
 
@@ -26,7 +28,7 @@ class CompleteSamplingDataUI extends SamplingDataUI {
 
   def fatImagePath = "img/completeSampling_fat.png"
 
-  def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
+  def buildPanelUI = new NoParameterSamplingPanelUI(this) {
     val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
     override lazy val help = new Helper(List(new URL(i18n.getString("completePermalinkText"),
       i18n.getString("completePermalink"))))
