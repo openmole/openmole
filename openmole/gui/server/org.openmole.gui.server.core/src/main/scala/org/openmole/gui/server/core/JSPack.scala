@@ -29,25 +29,18 @@ import org.osgi.framework.Bundle
 import scala.collection.JavaConverters._
 import java.io.{ FileOutputStream, File }
 
-//import fr.iscpif.scaladget.tools._
-
 object JSPack {
 
-  def apply(bundles: List[Bundle], target: File) = {
-    val jsTmpDir = java.nio.file.Files.createTempDirectory("jsFiles").toFile
+  def apply(bundles: List[Bundle], src: File, target: File) = {
 
-    bundles.foreach { b ⇒
-      println(b.getLocation)
-    }
-
-    // Extract and copy all the .sjsir files to jsTmpDir
+    // Extract and copy all the .sjsir files to src
     bundles.map { b ⇒
       b.findEntries("/", "*.sjsir", true)
     }.filterNot {
       _ == null
     }.flatMap {
       _.asScala
-    }.map { u ⇒ u.openStream.copy(new java.io.File(jsTmpDir, u.getFile.split("/").tail.mkString("-"))) }
+    }.map { u ⇒ u.openStream.copy(new java.io.File(src, u.getFile.split("/").tail.mkString("-"))) }
 
     val libF = File.createTempFile("scalajs-library", ".jar")
     libF.deleteOnExit
@@ -55,16 +48,16 @@ object JSPack {
     getClass.getClassLoader.getResourceAsStream("scalajs-library_2.11.jar").copy(outLib)
 
     // Traverse JARs/directories and find *.sjsir files. Evaluate JS_DEPENDENCIES
-    val partialClasspath = PartialClasspathBuilder.buildIR(collection.immutable.Seq(jsTmpDir, libF))
+    val partialClasspath = PartialClasspathBuilder.buildIR(collection.immutable.Seq(src, libF))
     println("partial done")
 
-    val completeClasspath = partialClasspath. /*merge(jarClasspath).*/ resolve()
+    val completeClasspath = partialClasspath.resolve()
 
     val optimizer = new ScalaJSOptimizer
 
     val logger = new ScalaConsoleLogger
 
-    val out = WritableFileVirtualJSFile(new java.io.File(target, "outXX.js"))
+    val out = WritableMemVirtualJSFile("outXX.js")
 
     val optimizedClasspath = optimizer.optimizeCP(
       ScalaJSOptimizer.Inputs(completeClasspath),
@@ -72,7 +65,7 @@ object JSPack {
       logger
     )
 
-    val fullOptOut = WritableFileVirtualJSFile(new java.io.File(target, "fullOut.js"))
+    val fullOptOut = WritableFileVirtualJSFile(new java.io.File(target, "plugins.js"))
 
     val fullOptimizer = new ScalaJSClosureOptimizer
     val fullyOptimizedCP = fullOptimizer.optimizeCP(

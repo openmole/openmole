@@ -17,10 +17,13 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.File
+
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp.WebAppContext
 import org.openmole.misc.pluginmanager.PluginManager
+import org.openmole.misc.workspace.Workspace
 import org.scalatra.servlet.ScalatraListener
 import org.osgi.framework.Bundle
 import scala.collection.JavaConverters._
@@ -32,7 +35,14 @@ class GUIServer(bundles: List[Bundle], port: Option[Int]) {
 
   val p = port getOrElse 8080
 
-  JSPack(bundles.filter { b ⇒ b.toString.startsWith("org.openmole.gui") }, new java.io.File("/tmp/"))
+  val webui = Workspace.file("webui")
+  val jsSrc = new File(webui, "js/src")
+  val jsCompiled = new File(webui, "js/compiled")
+  jsSrc.mkdirs
+  jsCompiled.mkdirs
+
+  //jsSrc.updateIfChanged(JSPack(bundles, jsSrc, jsCompiled)) // in fileservice
+  JSPack(bundles, jsSrc, jsCompiled)
 
   val server = new Server(p)
   val res = Res.newResource(classOf[GUIServer].getResource("/"))
