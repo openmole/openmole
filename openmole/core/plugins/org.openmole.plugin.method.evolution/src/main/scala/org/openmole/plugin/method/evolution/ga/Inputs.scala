@@ -29,7 +29,7 @@ object InputConverter {
     new InputConverter[Double] {
       override def converter(v: Input[Double]): ToDouble =
         new ToDouble {
-          override def toDouble(context: Context) = (v.min, v.max)
+          override def toDouble(context: ⇒ Context) = (v.min, v.max)
         }
     }
 
@@ -38,7 +38,7 @@ object InputConverter {
       override def converter(v: Input[String]): ToDouble =
         new ToDouble {
           @transient lazy val proxy = groovyProxy(v)
-          override def toDouble(context: Context) = {
+          override def toDouble(context: ⇒ Context) = {
             val (p1, p2) = proxy
             val v1 = p1(context).toString.toDouble
             val v2 = p2(context).toString.toDouble
@@ -49,7 +49,7 @@ object InputConverter {
         }
     }
 
-  def scaled(scales: List[(Input[_], ToDouble)], genome: List[Double], context: Context): List[Variable[_]] =
+  def scaled(scales: List[(Input[_], ToDouble)], genome: List[Double], context: ⇒ Context): List[Variable[_]] =
     if (scales.isEmpty || genome.isEmpty) List.empty
     else {
       val (input, toDouble) = scales.head
@@ -63,7 +63,7 @@ object InputConverter {
       variable :: scaled(scales.tail, tail.toList, context + variable)
     }
 
-  def scaled(input: Input[_], toDouble: ToDouble, context: Context, genomePart: Seq[Double]) = {
+  def scaled(input: Input[_], toDouble: ToDouble, context: ⇒ Context, genomePart: Seq[Double]) = {
     val (min, max) = toDouble.toDouble(context)
 
     input match {
@@ -103,7 +103,7 @@ trait InputsConverter {
 }
 
 trait ToDouble {
-  def toDouble(context: Context): (Double, Double)
+  def toDouble(context: ⇒ Context): (Double, Double)
 }
 
 trait InputConverter[T] {
