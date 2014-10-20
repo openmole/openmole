@@ -17,6 +17,7 @@ package org.openmole.gui.client.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.ext.data.Data
 import rx._
 
 trait DataUI {

@@ -1,5 +1,7 @@
 package org.openmole.gui.client.dataui
 
+import org.openmole.gui.ext.data.PrototypeData
+
 /*
  * Copyright (C) 20/08/14 // mathieu.leclaire@openmole.org
  *
@@ -17,5 +19,6 @@ package org.openmole.gui.client.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait PrototypeDataUI <: DataUI {
+trait PrototypeDataUI[T] <: DataUI {
+  def data: PrototypeData[T]
 }

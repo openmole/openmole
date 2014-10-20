@@ -25,7 +25,7 @@ trait Data {
 }
 
 trait TaskData extends Data
-trait PrototypeData extends Data
+trait PrototypeData[T] extends Data
 
 @JSExport
 case class ErrorData(data: Data, error: String, stack: String)

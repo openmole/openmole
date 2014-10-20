@@ -21,6 +21,6 @@ import org.openmole.gui.ext.data.{TaskData, PrototypeData}
 class GroovyTaskData(val name: String = "",
                      val code: String = "",
                      val libs: Seq[String] = Seq(),
-                     val inputs: Seq[PrototypeData] = Seq(),
-                     val outputs: Seq[PrototypeData] = Seq(),
-                     val inputParameters: Map[PrototypeData, String] = Map()) extends TaskData
+                     val inputs: Seq[PrototypeData[_]] = Seq(),
+                     val outputs: Seq[PrototypeData[_]] = Seq(),
+                     val inputParameters: Map[PrototypeData[_], String] = Map()) extends TaskData

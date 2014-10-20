@@ -15,7 +15,7 @@ object Server extends GuiDefaults {
   override val dir = super.dir / "server"
 
   lazy val core = OsgiProject("org.openmole.gui.server.core") settings
-    (libraryDependencies ++= Seq(scalaTagsJS, jetty, logback, scalatra, scalajsDom, upickleJVM, autowireJVM, /*scaladget*/ scalajsLibrary, scalajsTools)) dependsOn
+    (libraryDependencies ++= Seq(scalaTagsJS, jetty, logback, scalatra, scalajsDom, upickleJVM, autowireJVM, scalajsLibrary, scalajsTools)) dependsOn
     (Server.factory, Shared.shared, Ext.data, base.Core.model, base.Core.implementation, base.Misc.pluginManager)
   /*settings (bundle <<= bundle dependsOn (
        sbt.Keys.`package` in Client.client in Compile, sbt.Keys.`package` in Task.groovyExt in Compile)) settings (scalaJSSettings: _*)*/

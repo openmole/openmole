@@ -175,7 +175,7 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom_sjs0.5" % "0.6", version := "0.6")
 
   lazy val scalajsVersion = "0.5.5"
-  lazy val scalajsTools = OsgiProject("scalajs-tools", exports = Seq("scala.scalajs.*")) settings(
+  lazy val scalajsTools = OsgiProject("scalajs-tools", exports = Seq("scala.scalajs.tools.*;scala.scalajs.ir.*;com.google.javascript.*;com.google.common.*;rhino_ast.java.com.google.javascript.rhino.*;org.json.*")) settings(
     libraryDependencies += "org.scala-lang.modules.scalajs" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion)
 
   lazy val scalajsLibrary = OsgiProject("scalajs-library", exports = Seq("scala.scalajs.*")) settings(
@@ -208,7 +208,15 @@ object Libraries extends Defaults(Apache) {
   lazy val scaladget = OsgiProject("scaladget", exports = Seq("fr.iscpif.scaladget.*")) settings(
     libraryDependencies += "fr.iscpif" %%% "scaladget_sjs0.5" % "0.1.0", version := "0.1.0")
 
-  lazy val mgoVersion = "1.78"
+  lazy val jsonSimpleVersion = "1.1.1"
+  lazy val jsonSimple = OsgiProject("json-simple",exports = Seq("org.json.simple.*")) settings(
+    libraryDependencies += "com.googlecode.json-simple" % "json-simple" % jsonSimpleVersion, version := jsonSimpleVersion)
+
+  lazy val closureCompilerVersion = "v20130603"
+  lazy val closureCompiler = OsgiProject("closure-compiler",exports = Seq("com.google.javascript.*")) settings(
+     libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion)
+  
+lazy val mgoVersion = "1.78"
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings(
     libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
     bundleType := Set("plugin"),

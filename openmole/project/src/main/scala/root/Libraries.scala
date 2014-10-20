@@ -125,6 +125,9 @@ object Libraries extends Defaults(Apache) {
   lazy val scalajsLibrary = "org.openmole" %% "scalajs-library" % scalajsVersion
   lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % "0.6"
 
+  // lazy val jsonSimple = "org.openmole" %% "json-simple" % "1.1.1"
+  // lazy val closureCompiler = "org.openmole" %% "closure-compiler" % "v20130603"
+
   lazy val mgoVersion = "1.78"
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % mgoVersion
 

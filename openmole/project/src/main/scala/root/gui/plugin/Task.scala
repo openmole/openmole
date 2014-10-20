@@ -44,6 +44,9 @@ object Task extends PluginDefaults {
   val (ext, client, server) = project("groovy", serverProjectDependencies = Seq(base.plugin.Task.groovy))
   lazy val groovy = OsgiProject("groovy") dependsOn (ext, client, server)
 
+  val (ext1, client1, server1) = project("systemexec", serverProjectDependencies = Seq(base.plugin.Task.systemexec))
+  lazy val systemexec = OsgiProject("systemexec") dependsOn (ext1, client1, server1)
+
   //
   // lazy val groovy = project("groovy", serverProjectDependencies = Seq(base.plugin.Task.groovy))
 

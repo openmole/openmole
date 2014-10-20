@@ -26,6 +26,6 @@ object DataUIs {
 
 class DataUIs {
   lazy val tasks: Var[List[Var[TaskDataUI]]] = Var(List())
-  lazy val prototypes: Var[List[Var[PrototypeDataUI]]] = Var(List())
+  lazy val prototypes: Var[List[Var[PrototypeDataUI[_]]]] = Var(List())
   lazy val domains: Var[List[Var[DomainDataUI]]] = Var(List())
 }

@@ -32,7 +32,7 @@ class GUIServer(bundles: List[Bundle], port: Option[Int]) {
 
   val p = port getOrElse 8080
 
-  // JSPack(bundles.filter { b ⇒ b.toString.startsWith("org.openmole.gui") }, new java.io.File("/tmp/"))
+  JSPack(bundles.filter { b ⇒ b.toString.startsWith("org.openmole.gui") }, new java.io.File("/tmp/"))
 
   val server = new Server(p)
   val res = Res.newResource(classOf[GUIServer].getResource("/"))
