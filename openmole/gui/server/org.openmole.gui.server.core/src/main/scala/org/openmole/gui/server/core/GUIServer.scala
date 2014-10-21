@@ -31,7 +31,9 @@ import javax.servlet.ServletContext
 import org.scalatra._
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 
-class GUIServer(bundles: List[Bundle], port: Option[Int]) {
+class GUIServer(bundles: List[Bundle], port: Option[Int], optimized: Boolean = true) {
+
+  println("Generated JS with" + { if (!optimized) " no" else "" } + " optimization")
 
   val p = port getOrElse 8080
 
@@ -42,7 +44,7 @@ class GUIServer(bundles: List[Bundle], port: Option[Int]) {
   jsCompiled.mkdirs
 
   //jsSrc.updateIfChanged(JSPack(bundles, jsSrc, jsCompiled)) // in fileservice
-  JSPack(bundles, jsSrc, jsCompiled)
+  JSPack(bundles, jsSrc, jsCompiled, optimized)
 
   val server = new Server(p)
   val res = Res.newResource(classOf[GUIServer].getResource("/"))

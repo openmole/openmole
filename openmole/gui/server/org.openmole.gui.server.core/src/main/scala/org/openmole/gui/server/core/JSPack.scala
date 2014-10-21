@@ -31,7 +31,7 @@ import java.io.{ FileOutputStream, File }
 
 object JSPack {
 
-  def apply(bundles: List[Bundle], src: File, target: File) = {
+  def apply(bundles: List[Bundle], src: File, target: File, optimized: Boolean = true) = {
 
     // Extract and copy all the .sjsir files to src
     bundles.map { b ⇒
@@ -47,9 +47,7 @@ object JSPack {
     val outLib = new FileOutputStream(libF)
     getClass.getClassLoader.getResourceAsStream("scalajs-library_2.11.jar").copy(outLib)
 
-    // Traverse JARs/directories and find *.sjsir files. Evaluate JS_DEPENDENCIES
     val partialClasspath = PartialClasspathBuilder.buildIR(collection.immutable.Seq(src, libF))
-    println("partial done")
 
     val completeClasspath = partialClasspath.resolve()
 
@@ -57,7 +55,9 @@ object JSPack {
 
     val logger = new ScalaConsoleLogger
 
-    val out = WritableMemVirtualJSFile("outXX.js")
+    val out =
+      if (optimized) WritableMemVirtualJSFile("outXX.js")
+      else WritableFileVirtualJSFile(new java.io.File(target, "outXX.js"))
 
     val optimizedClasspath = optimizer.optimizeCP(
       ScalaJSOptimizer.Inputs(completeClasspath),
@@ -65,13 +65,15 @@ object JSPack {
       logger
     )
 
-    val fullOptOut = WritableFileVirtualJSFile(new java.io.File(target, "plugins.js"))
+    if (optimized) {
+      val fullOptOut = WritableFileVirtualJSFile(new java.io.File(target, "plugins.js"))
 
-    val fullOptimizer = new ScalaJSClosureOptimizer
-    val fullyOptimizedCP = fullOptimizer.optimizeCP(
-      ScalaJSClosureOptimizer.Inputs(optimizedClasspath),
-      ScalaJSClosureOptimizer.OutputConfig(fullOptOut),
-      logger
-    )
+      val fullOptimizer = new ScalaJSClosureOptimizer
+      val fullyOptimizedCP = fullOptimizer.optimizeCP(
+        ScalaJSClosureOptimizer.Inputs(optimizedClasspath),
+        ScalaJSClosureOptimizer.OutputConfig(fullOptOut),
+        logger
+      )
+    }
   }
 }

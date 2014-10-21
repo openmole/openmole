@@ -44,11 +44,11 @@ class Application extends IApplication {
   lazy val consoleSplash =
     """  ___                   __  __  ___  _     _____   ____
  / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____| |___ \
-| | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|     __) |
-| |_| | |_) |  __/ | | | |  | | |_| | |___| |___   / __/
+      | | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|     __) |
+      | |_| | |_) |  __/ | | | |  | | |_| | |___| |___   / __/
  \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____| |_____|
       |_|
-"""
+    """
 
   override def start(context: IApplicationContext) = {
     println("start !!")
@@ -67,7 +67,8 @@ class Application extends IApplication {
       allowInsecureConnections: Boolean = false,
       serverPort: Option[Int] = None,
       serverSSLPort: Option[Int] = None,
-      loggerLevel: Option[String] = None)
+      loggerLevel: Option[String] = None,
+      optimizedJS: Boolean = false)
 
     def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
@@ -96,6 +97,7 @@ class Application extends IApplication {
         case "-ssp" :: tail                         ⇒ parse(tail.tail, c.copy(serverSSLPort = Some(tail.head.toInt)))
         case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
         case "--logger-level" :: tail               ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
+        case "--optimizedJS" :: tail                ⇒ parse(tail, c.copy(optimizedJS = true))
         case s :: tail                              ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                    ⇒ c
       }
@@ -169,7 +171,7 @@ class Application extends IApplication {
       application.display
       waitClose.acquire(1)*/
       println("GUI !")
-      val server = new GUIServer(bundles, config.serverPort)
+      val server = new GUIServer(bundles, config.serverPort, config.optimizedJS)
       server.start()
 
     }
