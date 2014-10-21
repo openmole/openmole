@@ -25,10 +25,10 @@ import scala.util.{ Failure, Success, Try }
 
 package object fileservice {
   implicit class FileServiceDecorator(file: File) {
-    def updateIfTooOld(
-      tooOld: Duration,
-      timeStamp: File ⇒ File = f ⇒ new File(file.getPath + "-timestamp"),
-      lock: File ⇒ File = f ⇒ new File(file.getPath + "-lock"))(update: File ⇒ Unit) = {
+    def updateIfTooOld(tooOld: Duration)(update: File ⇒ Unit) = {
+
+      def timeStamp(f: File) = new File(f.getPath + "-timestamp")
+      def lock(f: File) = new File(f.getPath + "-lock")
 
       val lockFile = lock(file)
       lockFile.createNewFile()
@@ -51,9 +51,9 @@ package object fileservice {
       file
     }
 
-    def updateIfChanged(
-      hash: File ⇒ File = f ⇒ new File(f + "-hash"),
-      lock: File ⇒ File = f ⇒ new File(file.getPath + "-lock"))(update: File ⇒ Unit) = {
+    def updateIfChanged(update: File ⇒ Unit) = {
+      def hash(f: File) = new File(f + "-hash")
+      def lock(f: File) = new File(f.getPath + "-lock")
 
       val lockFile = lock(file)
       lockFile.createNewFile()
