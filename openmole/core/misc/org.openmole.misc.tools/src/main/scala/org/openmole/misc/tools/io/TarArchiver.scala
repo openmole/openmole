@@ -125,7 +125,7 @@ object TarArchiver {
 
       // tar structure distinguishes symlinks
       val e =
-        if (Files.isDirectory(source)) {
+        if (Files.isDirectory(source) && !Files.isSymbolicLink(source)) {
           // walk the directory tree to add all its entries to stack
           for (f ← Files.newDirectoryStream(source)) {
             val newSource = source.resolve(f.getFileName)
@@ -152,7 +152,8 @@ object TarArchiver {
       e.setMode(source.toFile.mode) // FIXME ugly explicit conversion
       additionalCommand(e)
       tos.putNextEntry(e)
-      if (!Files.isDirectory(source)) try Files.copy(source, tos) finally tos.closeEntry
+      if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) try Files.copy(source, tos)
+      finally tos.closeEntry
     }
   }
 

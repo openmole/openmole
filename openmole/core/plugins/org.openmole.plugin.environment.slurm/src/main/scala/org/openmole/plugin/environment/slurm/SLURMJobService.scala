@@ -65,7 +65,7 @@ trait SLURMJobService extends GridScaleJobService with SSHHost with SharedStorag
     }
 
     val job = js.jobService.submit(jobDescription)
-    Log.logger.fine(s"SLURM job [${job.slurmId}], description: \n ${jobDescription}")
+    Log.logger.fine(s"SLURM job [${job.slurmId}], description: \n ${jobDescription.toSLURM}")
 
     new BatchJob with BatchJobId {
       val jobService = js
