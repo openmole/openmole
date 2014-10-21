@@ -6,6 +6,7 @@ import Keys._
 import org.openmole.buildsystem.OMKeys._
 
 object Core extends BaseDefaults {
+
   import Misc._
   import root.ThirdParties._
   import root.Libraries._
@@ -19,19 +20,21 @@ object Core extends BaseDefaults {
     (eventDispatcher, exception, Misc.tools, updater, Misc.workspace)
 
   lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided")) settings
-    (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (model, workspace, xstream, pluginManager, fileService, Misc.tools, iceTar)
+    (includeOsgi,
+      libraryDependencies += xstream) dependsOn
+      (model, workspace, pluginManager, fileService, Misc.tools, iceTar)
 
   lazy val implementation = OsgiProject("implementation", openmoleScope = Some("provided"), imports = Seq("*")) settings
-    (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (model, workspace, exception, eventDispatcher,
-      provided(serializer), pluginManager, scalaLang, Apache.math, groovy, Misc.replication % "test") //TODO: THINGS REALLY DEPEND ON THESE LIBS. Deal with it
+    (includeOsgi,
+      libraryDependencies ++= Seq(scalaLang, groovy, Apache.math)) dependsOn
+      (model, workspace, exception, eventDispatcher,
+        provided(serializer), pluginManager, Misc.replication % "test") //TODO: THINGS REALLY DEPEND ON THESE LIBS. Deal with it
 
   lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (implementation,
-    workspace, Misc.tools, eventDispatcher, replication, h2, slick, updater, Misc.exception,
-    serializer, jasypt, fileService, pluginManager, iceTar,
-    guava, Apache.config) settings (libraryDependencies += gridscale)
+    workspace, Misc.tools, eventDispatcher, replication, updater, Misc.exception,
+    serializer, fileService, pluginManager, iceTar) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick, Apache.config))
 
-  lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global")) dependsOn (implementation, scalaLang /*, scalaCompiler*/ , Misc.macros)
+  lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global")) settings
+    (libraryDependencies += scalaLang, includeOsgi) dependsOn (implementation /*, scalaCompiler*/ , Misc.macros)
 
 }

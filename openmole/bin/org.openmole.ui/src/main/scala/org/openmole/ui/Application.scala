@@ -28,10 +28,10 @@ import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.model.task._
-import org.openmole.ide.core.implementation.dialog.GUIApplication
 import org.openmole.ui.console.Console
 import annotation.tailrec
 import org.openmole.web._
+import org.openmole.gui.server.core._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 
@@ -48,10 +48,10 @@ class Application extends IApplication {
 | |_| | |_) |  __/ | | | |  | | |_| | |___| |___   ___) |
  \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____| |____/
       |_|
-"""
+    """
 
   override def start(context: IApplicationContext) = {
-
+    println("start !!")
     case class Config(
       pluginsDirs: List[String] = Nil,
       guiPluginsDirs: List[String] = Nil,
@@ -67,7 +67,8 @@ class Application extends IApplication {
       allowInsecureConnections: Boolean = false,
       serverPort: Option[Int] = None,
       serverSSLPort: Option[Int] = None,
-      loggerLevel: Option[String] = None)
+      loggerLevel: Option[String] = None,
+      optimizedJS: Boolean = false)
 
     def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
@@ -96,6 +97,7 @@ class Application extends IApplication {
         case "-ssp" :: tail                         ⇒ parse(tail.tail, c.copy(serverSSLPort = Some(tail.head.toInt)))
         case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
         case "--logger-level" :: tail               ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
+        case "--optimizedJS" :: tail                ⇒ parse(tail, c.copy(optimizedJS = true))
         case s :: tail                              ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                    ⇒ c
       }
@@ -120,7 +122,7 @@ class Application extends IApplication {
         existingUserPlugins ++
         (if (!config.console && !config.server) config.guiPluginsDirs else List.empty)
 
-    PluginManager.load(plugins.map(new File(_)))
+    val bundles = PluginManager.load(plugins.map(new File(_)))
     PluginManager.startAll
 
     try config.password foreach Workspace.setPassword
@@ -157,7 +159,7 @@ class Application extends IApplication {
       server.start()
     }
     else {
-
+      /*
       val waitClose = new Semaphore(0)
       val application = new GUIApplication() {
         override def closeOperation = {
@@ -167,7 +169,10 @@ class Application extends IApplication {
       }
 
       application.display
-      waitClose.acquire(1)
+      waitClose.acquire(1)*/
+      println("GUI !")
+      val server = new GUIServer(bundles, config.serverPort, config.optimizedJS)
+      server.start()
 
     }
     IApplication.EXIT_OK

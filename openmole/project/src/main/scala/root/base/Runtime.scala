@@ -14,19 +14,16 @@ object Runtime extends BaseDefaults {
 
   override def dir = super.dir / "runtime"
 
-  val dbserver = OsgiProject("dbserver") dependsOn (h2, slf4j, xstream, Misc.replication) settings (bundleType += "dbserver")
+  val dbserver = OsgiProject("dbserver") dependsOn (Misc.replication) settings (bundleType += "dbserver",
+    libraryDependencies ++= Seq(h2, slf4j, xstream))
 
-  val runtime = OsgiProject("runtime", singleton = true) dependsOn (Core.implementation, Core.batch, Core.serializer,
-    Misc.logging, scalaLang, scopt, Misc.eventDispatcher, Misc.exception) settings
-    (libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" % "provided",
-      bundleType += "runtime")
+  val runtime = OsgiProject("runtime", singleton = true) dependsOn (Core.implementation, Core.batch, Core.serializer, Misc.logging, Misc.eventDispatcher, Misc.exception) settings
+    (includeOsgi, bundleType += "runtime", libraryDependencies ++= Seq(scalaLang, scopt, equinoxCommon, equinoxApp))
 
   val daemon = OsgiProject("daemon", singleton = true, imports = Seq("*")) dependsOn (Core.model, Core.implementation, Core.batch, Misc.workspace,
-    Misc.fileService, Misc.exception, Misc.tools, Misc.logging, plugin.Environment.desktopgrid, scalaLang, Apache.logging,
-    jodaTime, scopt) settings (
-      libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" % "provided",
-      libraryDependencies ++= gridscaleSSH,
-      bundleType += "daemon"
+    Misc.fileService, Misc.exception, Misc.tools, Misc.logging, plugin.Environment.desktopgrid) settings
+    (includeOsgi, bundleType += "daemon",
+      libraryDependencies ++= Seq(scalaLang, Apache.logging, jodaTime, scopt, equinoxCommon, equinoxApp) ++ gridscaleSSH
     )
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set())

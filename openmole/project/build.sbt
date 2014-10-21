@@ -13,4 +13,3 @@ ScalariformKeys.preferences <<= ScalariformKeys.preferences (p =>
 scalacOptions += "-optimize"
 
 libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.3"
-

@@ -1,6 +1,7 @@
 package root.base.plugin
 
 import sbt._
+import Keys._
 import root.base._
 import root.Libraries._
 
