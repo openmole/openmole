@@ -19,7 +19,7 @@ object Libraries extends Defaults(Apache) {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.79"
+  val gridscaleVersion = "1.80-SNAPSHOT"
 
   val bouncyCastleVersion = "1.50"
 
