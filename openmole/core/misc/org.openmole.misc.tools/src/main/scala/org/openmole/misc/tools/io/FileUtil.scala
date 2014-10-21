@@ -141,8 +141,8 @@ object FileUtil {
 
     /////// copiers ////////
     def copy(toF: File) = {
-
       // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES, REPLACE_EXISTING
+      toF.getParentFile.mkdirs()
       if (Files.isDirectory(file)) DirUtils.copy(file, toF)
       else {
         Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
