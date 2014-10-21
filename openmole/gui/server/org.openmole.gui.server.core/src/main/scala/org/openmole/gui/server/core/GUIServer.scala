@@ -29,7 +29,9 @@ import org.osgi.framework.Bundle
 import scala.collection.JavaConverters._
 import javax.servlet.ServletContext
 import org.scalatra._
-import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
+import org.openmole.misc.tools.io.FileUtil
+import org.openmole.misc.tools.io.FileUtil._
+//import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 
 class GUIServer(bundles: List[Bundle], port: Option[Int], optimized: Boolean = true) {
 
@@ -40,19 +42,26 @@ class GUIServer(bundles: List[Bundle], port: Option[Int], optimized: Boolean = t
   val webui = Workspace.file("webui")
   val jsSrc = new File(webui, "js/src")
   val jsCompiled = new File(webui, "js/compiled")
+  val webapp = new File(webui, "webapp")
   jsSrc.mkdirs
   jsCompiled.mkdirs
+  webapp.mkdirs
+
+  //Copy fixed webapp resources in Workspace/webapp
+  val classLoader = getClass.getClassLoader
+  
+  //classLoader.getResourceAsStream("js").copy(new File(webapp, "js"))
 
   //jsSrc.updateIfChanged(JSPack(bundles, jsSrc, jsCompiled)) // in fileservice
   JSPack(bundles, jsSrc, jsCompiled, optimized)
 
   val server = new Server(p)
-  val res = Res.newResource(classOf[GUIServer].getResource("/"))
 
   val context = new WebAppContext()
 
   context.setContextPath("/")
-  context.setBaseResource(res)
+  // context.setBaseResource(Res.newResource(classOf[GUIServer].getResource("/")))
+  context.setResourceBase(webapp.getAbsolutePath)
   context.setClassLoader(classOf[GUIServer].getClassLoader)
   context.addEventListener(new ScalatraListener)
 
