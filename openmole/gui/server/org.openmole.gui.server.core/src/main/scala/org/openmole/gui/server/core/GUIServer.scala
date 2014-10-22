@@ -18,7 +18,7 @@ package org.openmole.gui.server.core
  */
 
 import java.io.File
-
+import java.net.URL
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp.WebAppContext
@@ -31,14 +31,12 @@ import javax.servlet.ServletContext
 import org.scalatra._
 import org.openmole.misc.tools.io.FileUtil
 import org.openmole.misc.tools.io.FileUtil._
-//import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
+import org.openmole.misc.fileservice._
 
 class GUIServer(bundles: List[Bundle], port: Option[Int], optimized: Boolean = true) {
-
-  println("Generated JS with" + { if (!optimized) " no" else "" } + " optimization")
-
   val p = port getOrElse 8080
 
+  //Copy all the fixed resources in the workspace if required
   val webui = Workspace.file("webui")
   val jsSrc = new File(webui, "js/src")
   val jsCompiled = new File(webui, "js/compiled")
@@ -47,20 +45,30 @@ class GUIServer(bundles: List[Bundle], port: Option[Int], optimized: Boolean = t
   jsCompiled.mkdirs
   webapp.mkdirs
 
-  //Copy fixed webapp resources in Workspace/webapp
-  val classLoader = getClass.getClassLoader
+  new File(webapp, "js").mkdirs
+  new File(webapp, "css").mkdirs
+  new File(webapp, "fonts").mkdirs
+  new File(webapp, "WEB-INF").mkdirs
 
-  //classLoader.getResourceAsStream("js").copy(new File(webapp, "js"))
+  val thisBundle = PluginManager.bundleForClass(classOf[GUIServer])
+  copyURL(thisBundle.findEntries("/", "*.js", true).asScala)
+  copyURL(thisBundle.findEntries("/", "*.css", true).asScala)
+  copyURL(thisBundle.findEntries("/", "web.xml", true).asScala)
 
-  //jsSrc.updateIfChanged(JSPack(bundles, jsSrc, jsCompiled)) // in fileservice
-  JSPack(bundles, jsSrc, jsCompiled, optimized)
+  //Generates js files if
+  // - the sources changed or
+  // - the optimized js does not exists in optimized mode or
+  // - the not optimized js does not exists in not optimized mode
+  jsSrc.updateIfChanged(JSPack(bundles, _, jsCompiled, optimized))
+  if (optimized && !new File(jsCompiled, JSPack.OPTIMIZED).exists ||
+    !optimized && !new File(jsCompiled, JSPack.NOT_OPTIMIZED).exists)
+    JSPack(bundles, jsSrc, jsCompiled, optimized)
 
   val server = new Server(p)
 
   val context = new WebAppContext()
 
   context.setContextPath("/")
-  // context.setBaseResource(Res.newResource(classOf[GUIServer].getResource("/")))
   context.setResourceBase(webapp.getAbsolutePath)
   context.setClassLoader(classOf[GUIServer].getClassLoader)
   context.addEventListener(new ScalatraListener)
@@ -68,7 +76,6 @@ class GUIServer(bundles: List[Bundle], port: Option[Int], optimized: Boolean = t
   server.setHandler(context)
 
   def start() = {
-    println("start !!!")
     server.start
     server.join
   }
@@ -76,5 +83,11 @@ class GUIServer(bundles: List[Bundle], port: Option[Int], optimized: Boolean = t
   def end() {
     server.stop
     server.join
+  }
+
+  def copyURL(url: Iterator[URL]) = {
+    url.foreach { u ⇒
+      u.openStream.copy(new File(webui, u.getFile))
+    }
   }
 }

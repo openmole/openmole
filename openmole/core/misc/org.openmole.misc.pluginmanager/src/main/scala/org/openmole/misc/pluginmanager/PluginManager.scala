@@ -67,8 +67,10 @@ object PluginManager extends Logger {
   def fileProviding(c: Class[_]) =
     Option(Activator.packageAdmin.getBundle(c)).map(b ⇒ Activator.contextOrException.getBundle(b.getBundleId).file.getCanonicalFile)
 
+  def bundleForClass(c: Class[_]): Bundle = Activator.packageAdmin.getBundle(c)
+
   def pluginsForClass(c: Class[_]): Iterable[File] = synchronized {
-    allPluginDependencies(Activator.packageAdmin.getBundle(c).getBundleId).map { l ⇒ Activator.contextOrException.getBundle(l).file }
+    allPluginDependencies(bundleForClass(c).getBundleId).map { l ⇒ Activator.contextOrException.getBundle(l).file }
   }
 
   def unload(file: File) = synchronized {

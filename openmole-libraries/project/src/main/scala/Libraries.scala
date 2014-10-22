@@ -210,14 +210,14 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "fr.iscpif" %%% "scaladget_sjs0.5" % "0.1.0", version := "0.1.0")
 
   lazy val jsonSimpleVersion = "1.1.1"
-  lazy val jsonSimple = OsgiProject("json-simple",exports = Seq("org.json.simple.*")) settings(
+  lazy val jsonSimple = OsgiProject("json-simple", exports = Seq("org.json.simple.*")) settings(
     libraryDependencies += "com.googlecode.json-simple" % "json-simple" % jsonSimpleVersion, version := jsonSimpleVersion)
 
   lazy val closureCompilerVersion = "v20130603"
-  lazy val closureCompiler = OsgiProject("closure-compiler",exports = Seq("com.google.javascript.*")) settings(
-     libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion)
-  
-lazy val mgoVersion = "1.78"
+  lazy val closureCompiler = OsgiProject("closure-compiler", exports = Seq("com.google.javascript.*")) settings(
+    libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion)
+
+  lazy val mgoVersion = "1.78"
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings(
     libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
     bundleType := Set("plugin"),

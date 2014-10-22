@@ -31,6 +31,9 @@ import java.io.{ FileOutputStream, File }
 
 object JSPack {
 
+  val OPTIMIZED = "plugins-opt.js"
+  val NOT_OPTIMIZED = "plugins.js"
+
   def apply(bundles: List[Bundle], src: File, target: File, optimized: Boolean = true) = {
 
     // Extract and copy all the .sjsir files to src
@@ -40,7 +43,9 @@ object JSPack {
       _ == null
     }.flatMap {
       _.asScala
-    }.map { u ⇒ u.openStream.copy(new java.io.File(src, u.getFile.split("/").tail.mkString("-"))) }
+    }.map { u ⇒
+      u.openStream.copy(new java.io.File(src, u.getFile.split("/").tail.mkString("-")))
+    }
 
     val libF = File.createTempFile("scalajs-library", ".jar")
     libF.deleteOnExit
@@ -56,8 +61,8 @@ object JSPack {
     val logger = new ScalaConsoleLogger
 
     val out =
-      if (optimized) WritableMemVirtualJSFile("outXX.js")
-      else WritableFileVirtualJSFile(new java.io.File(target, "outXX.js"))
+      if (optimized) WritableMemVirtualJSFile("out.js")
+      else WritableFileVirtualJSFile(new java.io.File(target, NOT_OPTIMIZED))
 
     val optimizedClasspath = optimizer.optimizeCP(
       ScalaJSOptimizer.Inputs(completeClasspath),
@@ -66,7 +71,7 @@ object JSPack {
     )
 
     if (optimized) {
-      val fullOptOut = WritableFileVirtualJSFile(new java.io.File(target, "plugins.js"))
+      val fullOptOut = WritableFileVirtualJSFile(new java.io.File(target, OPTIMIZED))
 
       val fullOptimizer = new ScalaJSClosureOptimizer
       val fullyOptimizedCP = fullOptimizer.optimizeCP(
