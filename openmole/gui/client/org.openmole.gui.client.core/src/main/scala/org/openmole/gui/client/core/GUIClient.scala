@@ -1,4 +1,4 @@
-package org.openmole.gui.client.client
+package org.openmole.gui.client.core
 
 /*
  * Copyright (C) 25/09/14 // mathieu.leclaire@openmole.org
@@ -31,7 +31,7 @@ import scalatags.Text.tags._
 import org.openmole.gui.tools.js.JsRxTags._
 
 @JSExport
-object Client {
+class GUIClient {
 
   @JSExport
   def run(): Unit = {

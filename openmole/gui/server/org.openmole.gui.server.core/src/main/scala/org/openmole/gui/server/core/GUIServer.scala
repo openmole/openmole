@@ -18,51 +18,15 @@ package org.openmole.gui.server.core
  */
 
 import java.io.File
-import java.net.URL
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp.WebAppContext
-import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.misc.workspace.Workspace
 import org.scalatra.servlet.ScalatraListener
-import org.osgi.framework.Bundle
-import scala.collection.JavaConverters._
 import javax.servlet.ServletContext
 import org.scalatra._
-import org.openmole.misc.tools.io.FileUtil
-import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.fileservice._
 
-class GUIServer(bundles: List[Bundle], port: Option[Int], optimized: Boolean = true) {
+class GUIServer(port: Option[Int], webapp: File) {
   val p = port getOrElse 8080
-
-  //Copy all the fixed resources in the workspace if required
-  val webui = Workspace.file("webui")
-  val jsSrc = new File(webui, "js/src")
-  val jsCompiled = new File(webui, "js/compiled")
-  val webapp = new File(webui, "webapp")
-  jsSrc.mkdirs
-  jsCompiled.mkdirs
-  webapp.mkdirs
-
-  new File(webapp, "js").mkdirs
-  new File(webapp, "css").mkdirs
-  new File(webapp, "fonts").mkdirs
-  new File(webapp, "WEB-INF").mkdirs
-
-  val thisBundle = PluginManager.bundleForClass(classOf[GUIServer])
-  copyURL(thisBundle.findEntries("/", "*.js", true).asScala)
-  copyURL(thisBundle.findEntries("/", "*.css", true).asScala)
-  copyURL(thisBundle.findEntries("/", "web.xml", true).asScala)
-
-  //Generates js files if
-  // - the sources changed or
-  // - the optimized js does not exists in optimized mode or
-  // - the not optimized js does not exists in not optimized mode
-  jsSrc.updateIfChanged(JSPack(bundles, _, jsCompiled, optimized))
-  if (optimized && !new File(jsCompiled, JSPack.OPTIMIZED).exists ||
-    !optimized && !new File(jsCompiled, JSPack.NOT_OPTIMIZED).exists)
-    JSPack(bundles, jsSrc, jsCompiled, optimized)
 
   val server = new Server(p)
 
@@ -85,9 +49,4 @@ class GUIServer(bundles: List[Bundle], port: Option[Int], optimized: Boolean = t
     server.join
   }
 
-  def copyURL(url: Iterator[URL]) = {
-    url.foreach { u ⇒
-      u.openStream.copy(new File(webui, u.getFile))
-    }
-  }
 }

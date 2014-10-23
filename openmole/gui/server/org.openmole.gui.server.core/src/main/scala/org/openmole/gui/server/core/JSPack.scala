@@ -34,18 +34,7 @@ object JSPack {
   val OPTIMIZED = "plugins-opt.js"
   val NOT_OPTIMIZED = "plugins.js"
 
-  def apply(bundles: List[Bundle], src: File, target: File, optimized: Boolean = true) = {
-
-    // Extract and copy all the .sjsir files to src
-    bundles.map { b ⇒
-      b.findEntries("/", "*.sjsir", true)
-    }.filterNot {
-      _ == null
-    }.flatMap {
-      _.asScala
-    }.map { u ⇒
-      u.openStream.copy(new java.io.File(src, u.getFile.split("/").tail.mkString("-")))
-    }
+  def apply(src: File, target: File, optimized: Boolean = true) = {
 
     val libF = File.createTempFile("scalajs-library", ".jar")
     libF.deleteOnExit

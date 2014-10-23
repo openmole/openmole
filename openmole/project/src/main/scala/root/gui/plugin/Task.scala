@@ -6,15 +6,12 @@ import root.gui._
 import Keys._
 import root._
 import scala.scalajs.sbtplugin.ScalaJSPlugin._
-import fr.iscpif.jsmanager.JSManagerPlugin._
 //import ScalaJSKeys._
 
 import com.typesafe.sbt.osgi.OsgiKeys._
 
 object Task extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.gui.plugin.task")
-
-  // lazy val exploration = OsgiProject("exploration") dependsOn (Ext.data, base.Core.model, base.Misc.exception, base.Misc.replication % "test")
 
   val rootDir = dir / artifactPrefix.get
 
@@ -25,8 +22,8 @@ object Task extends PluginDefaults {
               clientLibDependencies: Seq[ModuleID] = Seq(),
               serverProjectDependencies: Seq[ClasspathDep[ProjectReference]] = Seq(),
               serverLibDependencies: Seq[ModuleID] = Seq()) = {
-    lazy val ext = subProject(suffix + ".ext", extProjectDependencies, extLibDependencies ++ Seq(root.Libraries.scalaTagsJS)) dependsOn (Ext.data) settings (jsManagerSettings: _*) //settings (scalaJSSettings: _*)
-    lazy val client = subProject(suffix + ".client", clientProjectDependencies, clientLibDependencies) dependsOn (ext, Client.dataui, Client.factoryui, base.Misc.replication % "test") settings (jsManagerSettings: _*) //settings (scalaJSSettings: _*)
+    lazy val ext = subProject(suffix + ".ext", extProjectDependencies, extLibDependencies ++ Seq(root.Libraries.scalaTagsJS)) dependsOn (Ext.data) settings (scalaJSSettings: _*)
+    lazy val client = subProject(suffix + ".client", clientProjectDependencies, clientLibDependencies) dependsOn (ext, Client.dataui, Client.factoryui, base.Misc.replication % "test") settings (scalaJSSettings: _*)
     lazy val server = subProject(suffix + ".server", serverProjectDependencies, serverLibDependencies) dependsOn (ext, Server.factory, base.Misc.replication % "test")
 
     //FIXME: how to call directly OsgiProject from here ?
