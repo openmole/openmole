@@ -66,6 +66,8 @@ object FileUtil {
   val TAR_WRITE = 2 + 16 + 128
   val TAR_READ = 4 + 32 + 256
 
+  lazy val vmFileLock = new LockRepository[String]
+
   def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
 
   // glad you were there...
@@ -338,9 +340,6 @@ object FileUtil {
     def createParentDir = wrapError {
       Files.createDirectories(file.toPath.getParent)
     }
-
-    /////// wrappers ////////
-    lazy val vmFileLock = new LockRepository[String]
 
     def withLock[T](f: OutputStream ⇒ T) = vmFileLock.withLock(file.getCanonicalPath) {
       val fos = new FileOutputStream(file, true)
