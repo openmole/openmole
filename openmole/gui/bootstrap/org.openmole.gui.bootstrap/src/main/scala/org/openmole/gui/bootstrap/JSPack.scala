@@ -1,4 +1,4 @@
-package org.openmole.gui.server.core
+package org.openmole.gui.bootstrap
 
 /*
  * Copyright (C) 02/10/14 // mathieu.leclaire@openmole.org
@@ -36,12 +36,19 @@ object JSPack {
 
   def apply(src: File, target: File, optimized: Boolean = true) = {
 
-    val libF = File.createTempFile("scalajs-library", ".jar")
+    /* val libF = File.createTempFile("scalajs-library", ".jar")
     libF.deleteOnExit
     val outLib = new FileOutputStream(libF)
-    getClass.getClassLoader.getResourceAsStream("scalajs-library_2.11.jar").copy(outLib)
+    getClass.getClassLoader.getResourceAsStream("scalajs-library_2.11.jar").copy(outLib)*/
 
-    val partialClasspath = PartialClasspathBuilder.buildIR(collection.immutable.Seq(src, libF))
+    val scalajsLib = copyJar("scalajs-library_2.11")
+    val autow = copyJar("autowire_2.11-0.2.3")
+
+    val upickle = new File("/home/mathieu/Bureau/jar/upickle_2.11-0.2.5.jar")
+    // val autow = new File("/home/mathieu/Bureau/jar/autowire_2.11-0.2.3.jar")
+    val tags = new File("/home/mathieu/Bureau/jar/scalatags_2.11-0.4.2.jar")
+
+    val partialClasspath = PartialClasspathBuilder.buildIR(collection.immutable.Seq(scalajsLib, upickle, /*autow,*/ tags, src))
 
     val completeClasspath = partialClasspath.resolve()
 
@@ -69,5 +76,13 @@ object JSPack {
         logger
       )
     }
+  }
+
+  def copyJar(name: String) = {
+    val libF = File.createTempFile(name, ".jar")
+    libF.deleteOnExit
+    val outLib = new FileOutputStream(libF)
+    getClass.getClassLoader.getResourceAsStream(name + ".jar").copy(outLib)
+    libF
   }
 }

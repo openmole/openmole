@@ -21,9 +21,11 @@ import java.net.URL
 
 import org.openmole.gui.client.dataui.DataUIs
 import org.openmole.gui.client.factoryui.ClientFactories
-import org.openmole.gui.client.workflow.GraphCreator
-import org.openmole.gui.server.core.{ JSPack, GUIServer }
-import org.openmole.gui.client.core.GUIClient
+import org.openmole.gui.server.core.GUIServer
+import org.openmole.gui.client.core.GraphCreator
+import autowire.Client
+import org.openmole.misc.osgi.Activator
+import org.openmole.misc.pluginmanager
 import org.osgi.framework.Bundle
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
@@ -35,15 +37,15 @@ import org.openmole.misc.fileservice._
 
 object Bootstrap {
 
+  // Copy web resources and generate js file
   val webui = Workspace.file("webui")
   val jsSrc = new File(webui, "js/src")
-  val jsCompiled = new File(webui, "js/compiled")
   val webapp = new File(webui, "webapp")
+  val jsCompiled = new File(webapp, "js")
   jsSrc.mkdirs
   jsCompiled.mkdirs
   webapp.mkdirs
 
-  new File(webapp, "js").mkdirs
   new File(webapp, "css").mkdirs
   new File(webapp, "fonts").mkdirs
   new File(webapp, "WEB-INF").mkdirs
@@ -59,10 +61,14 @@ object Bootstrap {
 
     // Extract and copy all the .sjsir files from bundles to src
     val bundles = pluginBundles ++ Seq(
-      PluginManager.bundleForClass(classOf[GUIClient]),
+      PluginManager.bundleForClass(classOf[GraphCreator]),
       PluginManager.bundleForClass(classOf[DataUIs]),
       PluginManager.bundleForClass(classOf[ClientFactories]),
-      PluginManager.bundleForClass(classOf[GraphCreator])
+      PluginManager.bundleForClass(classOf[autowire.Client[String, upickle.Reader, upickle.Writer]]),
+      PluginManager.bundleForClass(classOf[org.scalajs.dom.HTMLHtmlElement]),
+      PluginManager.bundleForClass(classOf[scalatags.DataConverters]),
+      PluginManager.bundleForClass(classOf[upickle.Reader[_]]),
+      PluginManager.bundleForClass(classOf[rx.Rx[_]])
     )
 
     bundles.map { b ⇒

@@ -31,20 +31,34 @@ import scalatags.Text.tags._
 import org.openmole.gui.tools.js.JsRxTags._
 
 @JSExport
-class GUIClient {
+object GUIClient {
+
+  // Get the Factory Map
+  /* Post[Api].factoriesUI.call().foreach {
+    _ map {
+      case (className, factoryName) ⇒
+        ClientFactories.add(Class.forName(className), Class.forName(factoryName).newInstance.asInstanceOf[FactoryUI])
+    }
+  }*/
 
   @JSExport
   def run(): Unit = {
 
-    // Get the Factory Map
-    Post[Api].factoriesUI.call().foreach {
-      _ map {
-        case (className, factoryName) ⇒
-          ClientFactories.add(Class.forName(className), Class.forName(factoryName).newInstance.asInstanceOf[FactoryUI])
-      }
-    }
-
+    val nodes = scala.Array(
+      Graph.task("1", "one", 400, 600),
+      Graph.task("2", "two", 1000, 600),
+      Graph.task("3", "three", 400, 100),
+      Graph.task("4", "four", 1000, 100),
+      Graph.task("5", "five", 105, 60)
+    )
+    val edges = scala.Array(
+      Graph.edge(nodes(0), nodes(1)),
+      Graph.edge(nodes(0), nodes(2)),
+      Graph.edge(nodes(3), nodes(1)),
+      Graph.edge(nodes(3), nodes(2)))
+    val window = new Window(nodes, edges)
   }
+
 }
 
 object Post extends autowire.Client[String, upickle.Reader, upickle.Writer] {

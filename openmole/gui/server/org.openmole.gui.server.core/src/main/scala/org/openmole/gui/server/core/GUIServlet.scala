@@ -44,11 +44,16 @@ class GUIServlet extends ScalatraServlet {
     contentType = "text/html"
     tags.html(
       tags.head(
-        tags.meta(tags.httpEquiv := "Content-Type", tags.content := "text/html; charset=UTF-8") //,
-      // tags.script(tags.`type` := "text/javascript", tags.src := "js/client-fastopt.js"),
-      // tags.script(tags.`type` := "text/javascript", tags.src := "js/client-opt.js")
+        tags.meta(tags.httpEquiv := "Content-Type", tags.content := "text/html; charset=UTF-8"),
+        tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/workflow.css"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/d3.v3.min.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js") /*,
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins-opt.js"*/
+
       ),
-      tags.body(tags.h1("OpenMOLE!  ") /*,tags.onload := "Client().run();"*/ )
+      tags.body(tags.h1("OpenMOLE!  "),
+        tags.onload := "GUIClient().run();"
+      )
     )
   }
 

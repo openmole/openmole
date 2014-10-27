@@ -6,7 +6,7 @@ import com.typesafe.sbt.osgi.OsgiKeys
 import OsgiKeys._
 import root.libraries._
 import org.openmole.buildsystem.OMKeys._
-//import fr.iscpif.jsmanager.JSManagerPlugin._
+import scala.scalajs.sbtplugin.ScalaJSPlugin._
 
 /**
  * Created with IntelliJ IDEA.
@@ -99,7 +99,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scalaTagsVersion = "0.4.2"
   lazy val scalaRxVersion = "0.2.6"
-  lazy val scalaUpickleVersion = "0.2.2"
+  lazy val scalaUpickleVersion = "0.2.5"
   lazy val scalaAutowireVersion = "0.2.3"
 
   lazy val scalaTagsJS = "org.openmole" %% "com-scalatags-js" % scalaTagsVersion

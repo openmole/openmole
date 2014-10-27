@@ -6,7 +6,7 @@ import com.typesafe.sbt.osgi.OsgiKeys
 import OsgiKeys._
 import root.libraries._
 import org.openmole.buildsystem.OMKeys._
-import fr.iscpif.jsmanager.JSManagerPlugin._
+import scala.scalajs.sbtplugin.ScalaJSPlugin._
 
 /**
  * Created with IntelliJ IDEA.
@@ -169,30 +169,31 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scalaTagsVersion = "0.4.2"
   lazy val scalaRxVersion = "0.2.6"
-  lazy val scalaUpickleVersion = "0.2.2"
+  lazy val scalaUpickleVersion = "0.2.5"
   lazy val scalaAutowireVersion = "0.2.3"
+  lazy val jsSuffix = "_sjs0.5"
 
   lazy val scalajsDom = OsgiProject("scalajs-dom", exports = Seq("org.scalajs.dom.*")) settings(
     libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom_sjs0.5" % "0.6", version := "0.6")
 
   lazy val scalajsVersion = "0.5.5"
-  lazy val scalajsTools = OsgiProject("scalajs-tools", exports = Seq("scala.scalajs.tools.*;scala.scalajs.ir.*;com.google.javascript.*;com.google.common.*;rhino_ast.java.com.google.javascript.rhino.*;org.json.*")) settings(
+  lazy val scalajsTools = OsgiProject("scalajs-tools", exports = Seq("scala.scalajs.tools.*","scala.scalajs.ir.*","com.google.javascript.*","com.google.common.*","rhino_ast.java.com.google.javascript.rhino.*","org.json.*")) settings(
     libraryDependencies += "org.scala-lang.modules.scalajs" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion)
 
-  lazy val scalajsLibrary = OsgiProject("scalajs-library", exports = Seq("scala.scalajs.*")) settings(
+  lazy val scalajsLibrary = OsgiProject("scalajs-library", exports = Seq("scala.scalajs.*","*.sjsir")) settings(
     libraryDependencies += "org.scala-lang.modules.scalajs" %% "scalajs-library" % scalajsVersion, version := scalajsVersion)
 
-  lazy val scalaTagsJS = OsgiProject("com.scalatags.js", exports = Seq("scalatags.*")) settings(
-    libraryDependencies += "com.scalatags" %%% "scalatags" % scalaTagsVersion, version := scalaTagsVersion)
+  lazy val scalaTagsJS = OsgiProject("com.scalatags.js", exports = Seq("scalatags.*","*.sjsir")) settings(
+    libraryDependencies += "com.scalatags" %%% ("scalatags" + jsSuffix) % scalaTagsVersion, version := scalaTagsVersion)
 
-  lazy val scalaRxJS = OsgiProject("com.scalarx.js", exports = Seq("rx.*")) settings(
-    libraryDependencies += "com.scalarx" %%% "scalarx" % scalaRxVersion, version := scalaRxVersion)
+  lazy val scalaRxJS = OsgiProject("com.scalarx.js", exports = Seq("rx.*","*.sjsir"))  settings(
+    libraryDependencies += "com.scalarx" %%% ("scalarx" + jsSuffix) % scalaRxVersion, version := scalaRxVersion)
 
-  lazy val upickleJS = OsgiProject("upickle.js", exports = Seq("upickle.*")) settings(
-    libraryDependencies += "com.lihaoyi" %%% "upickle" % scalaUpickleVersion, version := scalaUpickleVersion)
+  lazy val upickleJS = OsgiProject("upickle.js", exports = Seq("upickle.*","*.sjsir")) settings(
+    libraryDependencies += "com.lihaoyi" %%% ("upickle" + jsSuffix) % scalaUpickleVersion, version := scalaUpickleVersion)
 
-  lazy val autowireJS = OsgiProject("autowire.js", exports = Seq("autowire.*")) settings(
-    libraryDependencies += "com.lihaoyi" %%% "autowire" % scalaAutowireVersion, version := scalaAutowireVersion)
+  lazy val autowireJS = OsgiProject("autowire.js", exports = Seq("autowire.*","*.sjsir")) settings(
+    libraryDependencies += "com.lihaoyi" %%% ("autowire" + jsSuffix) % scalaAutowireVersion, version := scalaAutowireVersion)
 
   lazy val scalaTagsJVM = OsgiProject("com.scalatags.jvm", exports = Seq("scalatags.*")) settings(
     libraryDependencies += "com.scalatags" %% "scalatags" % scalaTagsVersion, version := scalaTagsVersion)
