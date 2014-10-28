@@ -1,6 +1,5 @@
 package root
 
-import root.gui.Bootstrap
 import root.base.Misc
 import root.libraries.Apache
 import sbt._
@@ -13,8 +12,6 @@ import com.typesafe.sbt.osgi.OsgiKeys._
 import sbt.inc.Analysis
 import sbtunidoc.Plugin._
 import UnidocKeys._
-import sbtassembly.Plugin._
-import AssemblyKeys._
 
 import scala.util.matching.Regex
 
