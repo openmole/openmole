@@ -2,7 +2,6 @@ package org.openmole.buildsystem
 
 import org.apache.commons.compress.archivers.tar.{ TarArchiveEntry, TarArchiveOutputStream }
 import sbt._
-import sbt.Def
 import Keys._
 import scala.util.matching.Regex
 import OMKeys._
@@ -11,7 +10,6 @@ import resource._
 import java.io.{ BufferedOutputStream, FileOutputStream }
 import scala.io.Source
 import com.typesafe.sbt.osgi.OsgiKeys._
-import scala.Some
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,9 +19,8 @@ import scala.Some
  */
 trait Assembly { self: BuildSystemDefaults ⇒
 
-  //To add zipping to project, add zipProject to its settings
-  lazy val zipProject: Seq[Project.Setting[_]] = Seq(
-    zipFiles <+= copyDependencies.toTask,
+  lazy val zipProject: Seq[Setting[_]] = Seq(
+    zipFiles <++= copyResources.map { _ map (_._2) },
     innerZipFolder := None,
     zip <<= (zipFiles, streams, target, tarGZName, innerZipFolder) map zipImpl,
     tarGZName := None
@@ -31,27 +28,21 @@ trait Assembly { self: BuildSystemDefaults ⇒
   //assemble <<= assemble dependsOn zip
   )
 
-  lazy val urlDownloadProject: Seq[Project.Setting[_]] = Seq(
+  lazy val urlDownloadProject: Seq[Setting[_]] = Seq(
     urls := Nil,
     downloadUrls <<= (urls, streams, target) map urlDownloader,
     assemble <<= assemble dependsOn downloadUrls
   )
 
-  @deprecated
-  lazy val copyResProject: Seq[Project.Setting[_]] = Seq(
-    copyResTask,
-    zipFiles <++= resourceAssemble map { f ⇒ f.toSeq }
-  )
-
-  lazy val resAssemblyProject: Seq[Project.Setting[_]] = Seq(
+  /*lazy val resAssemblyProject: Seq[Setting[_]] = Seq(
     resourceSets := Set.empty,
     setExecutable := Set.empty,
     resTask,
     zipFiles <++= resourceAssemble map { (f: Set[File]) ⇒ f.toSeq },
     assemble <<= assemble dependsOn resourceAssemble
-  )
+  )*/
 
-  lazy val resTask = resourceAssemble <<= (resourceSets, setExecutable, target, assemblyPath, streams, name) map { //TODO: Find a natural way to do this
+  /* lazy val resTask = resourceAssemble <<= (resourceSets, setExecutable, target, assemblyPath, streams, name) map { //TODO: Find a natural way to do this
     (rS, sE, target, cT, s, name) ⇒
       {
         def expand(f: File, p: File, o: String): Array[(File, File)] = if (f.isDirectory) f.listFiles() flatMap (expand(_, p, o)) else {
@@ -90,51 +81,89 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
         copyFunction(resourceMap.keySet)
       }
+  }*/
+
+  private def copyResTask(resourceDirectory: File, assemblyPath: File, outDir: String, streams: TaskStreams) = {
+    val destPath = (assemblyPath / outDir)
+    streams.log.info(s"Copy resource $resourceDirectory to $destPath")
+    IO.copyDirectory(resourceDirectory, destPath, preserveLastModified = true)
+    resourceDirectory -> destPath
   }
 
-  lazy val copyResTask = resourceAssemble <<= (resourceDirectory, outDir, assemblyPath, resourceOutDir) map { //TODO: Find a natural way to do this
-    (rT, outD, cT, rOD) ⇒
-      {
-        val destPath = rOD map (cT / _) getOrElse (cT / outD)
-        IO.copyDirectory(rT, destPath)
-        Set(destPath)
+  private def copyFileTask(from: File, destinationDir: File, streams: TaskStreams) = {
+    streams.log.info(s"Copy file $from to $destinationDir ")
+    val to =
+      if (from.isDirectory) {
+        destinationDir.getParentFile.mkdirs()
+        IO.copyDirectory(from, destinationDir, preserveLastModified = true)
+        destinationDir
       }
+      else {
+        destinationDir.mkdirs
+        val to = destinationDir / from.getName
+        IO.copyFile(from, to, preserveLastModified = true)
+        to
+      }
+    from -> to
   }
 
-  private def copyDepTask(updateReport: UpdateReport, version: String, out: File,
-                          scalaVer: String, subDir: String,
-                          depMap: Map[Regex, String ⇒ String], depFilter: DependencyFilter) = {
-    updateReport matching depFilter map { f ⇒
-      depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse { a: String ⇒ a } -> f
-    } foreach {
+  private def copyDepTask(
+    updateReport: UpdateReport,
+    out: File,
+    subDir: String,
+    depMap: Map[Regex, String ⇒ String],
+    depFilter: ModuleID ⇒ Boolean,
+    streams: TaskStreams) = {
+
+    updateReport.filter(depFilter).allFiles.map { f ⇒
+      depMap.keys.find(
+        _.findFirstIn(f.getName).isDefined
+      ).map(depMap(_)).getOrElse { a: String ⇒ a } -> f
+    } map {
       case (lambda, srcPath) ⇒
         val destPath = out / subDir / lambda(srcPath.getName)
+        streams.log.info(s"Copy dependency $srcPath to $destPath")
+        destPath.getParentFile.mkdirs
         IO.copyFile(srcPath, destPath, preserveLastModified = true)
+        srcPath -> destPath
     }
-    out / subDir
   }
 
   def AssemblyProject(base: String,
-                      outputDir: String = "lib",
+                      outputDir: String = "",
                       baseDir: File = dir,
-                      settings: Seq[Project.Setting[_]] = Nil,
-                      depNameMap: Map[Regex, String ⇒ String] = Map.empty[Regex, String ⇒ String]) = {
+                      settings: Seq[Setting[_]] = Nil) = {
+
     val projBase = baseDir / base
     val s = settings
-    Project(base + "-" + outputDir.replace('/', '_'), projBase, settings = Project.defaultSettings ++ Seq(
-      assemble := false,
-      assemble <<= assemble dependsOn (copyDependencies tag Tags.Disk),
+    Project(base, projBase, settings = Defaults.coreDefaultSettings ++ Seq(
+      resourcesAssemble := Seq.empty,
+      setExecutable := Seq.empty,
+      assemble <<=
+        (assemblyPath, setExecutable) map {
+          (path, files) ⇒
+            files.foreach(f ⇒ new File(path, f).setExecutable(true))
+            path
+        } dependsOn (copyResources),
       assemblyPath <<= target / "assemble",
       bundleProj := false,
       install := true,
       installRemote := true,
       zipFiles := Nil,
       outDir := outputDir,
-      resourceOutDir := None,
-      dependencyNameMap := depNameMap,
-      dependencyFilter := moduleFilter(),
-      copyDependencies <<= (update, version, assemblyPath, scalaVersion, outDir, dependencyNameMap, dependencyFilter) map copyDepTask
-    ) ++ s ++ scalariformDefaults)
+      resourceOutDir := "",
+      dependencyNameMap := Map.empty[Regex, String ⇒ String],
+      dependencyFilter := { _ ⇒ true },
+      // Copy resources
+      copyResources <<= (resourceDirectory in Compile, assemblyPath, resourceOutDir, streams) map copyResTask map (Seq(_)),
+      // Copy user defined files
+      copyResources <++=
+        (resourcesAssemble, assemblyPath, streams) map {
+          case (resources, a, s) ⇒
+            resources.toSeq.map { case (from, to) ⇒ copyFileTask(from, a / to, s) }
+        },
+      copyResources <++= (update, assemblyPath, outDir, dependencyNameMap, dependencyFilter, streams) map copyDepTask
+    ) ++ s ++ scalariformDefaults) dependsOn ()
   }
 
   def zipImpl(targetFolders: Seq[File], s: TaskStreams, t: File, name: Option[String], folder: Option[String]): File = {
@@ -241,12 +270,6 @@ object Assembly {
     def sendTo(to: String) = sendBundles(s, to) //TODO: This function is specific to OSGI bundled projects. Make it less specific?
   }
 
-  /*def projFilter[T](s: Seq[ProjectReference], keyFilter: (SettingKey[T], T ⇒ Boolean)*): Project.Initialize[Seq[ProjectReference]] = {
-    require(keyFilter.size >= 1, "Need at least one key/filter pair for a project filter")
-    val head = keyFilter.head
-    (keyFilter.tail foldLeft projFilter(s, head._1, head._2)) { case (s, (key, filter)) ⇒ projFilter(s, key, filter) }
-  }*/
-
   def projFilter[T](s: Def.Initialize[Seq[ProjectReference]], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Project.Initialize[Seq[ProjectReference]] = {
     Def.bind(s)(j ⇒ projFilter(j, key, filter, intransitive))
   }
@@ -254,11 +277,11 @@ object Assembly {
   //TODO: New API makes this much simpler
   //val bundles: Seq[FIle] = bundle.all( ScopeFilter( inDependencies(ref) ) ).value
 
-  def sendBundles(bundles: Def.Initialize[Seq[ProjectReference]], to: String): Def.Initialize[Task[Set[(File, String)]]] = Def.bind(bundles) { projs ⇒
+  def sendBundles(bundles: Def.Initialize[Seq[ProjectReference]], to: String): Def.Initialize[Task[Seq[(File, String)]]] = Def.bind(bundles) { projs ⇒
     require(projs.nonEmpty)
-    val seqOTasks: Def.Initialize[Seq[Task[Set[(File, String)]]]] = Def.Initialize.join(projs.map(p ⇒ bundle in p map { f ⇒
-      Set(f -> to)
+    val seqOTasks: Def.Initialize[Seq[Task[Seq[(File, String)]]]] = Def.Initialize.join(projs.map(p ⇒ bundle in p map { f ⇒
+      Seq(f -> to)
     }))
-    seqOTasks { seq ⇒ seq.reduceLeft[Task[Set[(File, String)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }
+    seqOTasks { seq ⇒ seq.reduceLeft[Task[Seq[(File, String)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }
   }
 }

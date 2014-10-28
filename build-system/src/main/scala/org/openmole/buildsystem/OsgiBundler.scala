@@ -38,7 +38,7 @@ trait OsgiBundler {
     OsgiKeys.bundle <<= OsgiKeys.bundle tag Tags.Disk,
     (update in install) <<= update in install tag Tags.Network,
     bundleType := Set("default"),
-    testListeners in (Test, test) := Seq(TestLogger(streams.value.log, { _ ⇒ streams.value.log }, logBuffered.value)), //TODO: Quick hack to workaround the file hungriness of SBT 0.13.0 fix when https://github.com/sbt/sbt/issues/937 is fixed
+    //testListeners in (Test, test) := Seq(TestLogger(streams.value.log, { _ ⇒ streams.value.log }, logBuffered.value)), //TODO: Quick hack to workaround the file hungriness of SBT 0.13.0 fix when https://github.com/sbt/sbt/issues/937 is fixed
     test in (Test, test) <<= test in (Test, test) tag (Tags.Disk),
     publishTo <<= isSnapshot(if (_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases"))
   ) ++ scalariformDefaults
@@ -51,7 +51,7 @@ trait OsgiBundler {
                   exports: Seq[String] = Seq(),
                   privatePackages: Seq[String] = Seq(),
                   singleton: Boolean = false,
-                  settings: Seq[Project.Setting[_]] = Nil,
+                  settings: Seq[Setting[_]] = Nil,
                   bundleActivator: Option[String] = None,
                   dynamicImports: Seq[String] = Seq(),
                   imports: Seq[String] = Seq("*;resolution:=optional"),

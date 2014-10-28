@@ -30,7 +30,7 @@ trait BuildSystemDefaults extends Build with OsgiBundler with Assembly {
 
   def gcTask { System.gc(); System.gc(); System.gc() }
 
-  def Aggregator(name: String) = Project(name, dir) settings (compile in Compile := Analysis.Empty, install := false, assemble := false)
+  def Aggregator(name: String) = Project(name, dir) settings (compile in Compile := Analysis.Empty, install := false)
 
   protected lazy val scalariformDefaults = Seq(ScalariformKeys.preferences in Compile <<= ScalariformKeys.preferences(p ⇒
     p.setPreference(DoubleIndentClassDeclaration, true)

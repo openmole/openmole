@@ -23,7 +23,7 @@ object Runtime extends BaseDefaults {
   val daemon = OsgiProject("daemon", singleton = true, imports = Seq("*")) dependsOn (Core.model, Core.implementation, Core.batch, Misc.workspace,
     Misc.fileService, Misc.exception, Misc.tools, Misc.logging, plugin.Environment.desktopgrid) settings
     (includeOsgi, bundleType += "daemon",
-      libraryDependencies ++= Seq(scalaLang, Apache.logging, jodaTime, scopt, equinoxCommon, equinoxApp) ++ gridscaleSSH
+      libraryDependencies ++= Seq(scalaLang, Apache.logging, jodaTime, scopt, equinoxCommon, equinoxApp, gridscaleSSH)
     )
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set())

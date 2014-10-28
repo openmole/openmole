@@ -50,10 +50,9 @@ class Application extends IApplication {
 | |_| | |_) |  __/ | | | |  | | |_| | |___| |___   ___) |
  \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____| |____/
       |_|
-    """
+"""
 
   override def start(context: IApplicationContext) = {
-    println("start !!")
     case class Config(
       pluginsDirs: List[String] = Nil,
       guiPluginsDirs: List[String] = Nil,

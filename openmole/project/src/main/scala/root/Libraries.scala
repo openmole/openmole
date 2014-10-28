@@ -25,10 +25,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val gridscale = "fr.iscpif.gridscale.bundle" %% "gridscale" % gridscaleVersion
 
-  lazy val gridscaleSSH = Seq(
-    "fr.iscpif.gridscale.bundle" %% "ssh" % gridscaleVersion,
-    bouncyCastle
-  )
+  lazy val gridscaleSSH = "fr.iscpif.gridscale.bundle" %% "ssh" % gridscaleVersion
 
   lazy val gridscalePBS = "fr.iscpif.gridscale.bundle" %% "pbs" % gridscaleVersion
 
@@ -89,10 +86,10 @@ object Libraries extends Defaults(Apache) {
 
   lazy val netlogo4_noscala = "org.openmole" % "ccl-northwestern-edu-netlogo4-noscala" % "4.1.3"
 
-  lazy val netlogo4 = "org.openmole" %% "ccl-northwestern-edu-netlogo4" % "4.1.3"
+  lazy val netlogo4 = "org.openmole" % "ccl-northwestern-edu-netlogo4" % "4.1.3"
 
   lazy val netLogo5Version = "5.1.0"
-  lazy val netlogo5 = "org.openmole" %% "ccl-northwestern-edu-netlogo5" % netLogo5Version
+  lazy val netlogo5 = "org.openmole" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
   lazy val netlogo5_noscala = "org.openmole" % "ccl-northwestern-edu-netlogo5-noscala" % netLogo5Version
 
   lazy val guava = "org.openmole" %% "com-google-guava" % "16.0.1"
@@ -161,5 +158,5 @@ object Libraries extends Defaults(Apache) {
 
   lazy val equinoxRuntime = "org.eclipse.core" % "org.eclipse.core.runtime" % "3.8.0.v20120912-155025"
 
-  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
+  //override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
 }

@@ -10,13 +10,12 @@ import scala.util.matching.Regex
  * Time: 3:43 PM
  */
 object OMKeys {
-  val assemble = TaskKey[Unit]("assemble")
 
   val bundleType = SettingKey[Set[String]]("bundle-type") //Default setting for osgiprojects is default.
 
   val bundleProj = SettingKey[Boolean]("bundle-proj")
 
-  val openMoleStandardVer = SettingKey[String]("openmoleversion")
+  val openMoleStandardVer = SettingKey[String]("openmole-version")
 
   val eclipseBuddyPolicy = SettingKey[Option[String]]("OSGi.eclipseBuddyPolicy", "The eclipse buddy policy thing.")
 
@@ -28,9 +27,9 @@ object OMKeys {
 
   val installRemote = TaskKey[Unit]("install-remote", "Builds bundles and adds them to the openmole nexus server")
 
-  //val includeResource = SettingKey[Seq[String]]("includeResource")
+  val assemblyPath = SettingKey[File]("assembly-path", "The path to the project's assembly folder")
 
-  val assemblyPath = SettingKey[File]("The path to the project's assembly folder")
+  val assemble = TaskKey[File]("assemble", "The path with assembled project")
 
   val gc = TaskKey[Unit]("gc", "Force SBT to take out the trash")
 
@@ -38,7 +37,7 @@ object OMKeys {
 
   val osgiSingleton = SettingKey[Boolean]("osgi-singleton")
 
-  val Assemble = Tags.Tag("Assemble")
+  // val Assemble = Tags.Tag("Assemble")
 
   val zip = TaskKey[File]("zip")
 
@@ -46,28 +45,24 @@ object OMKeys {
 
   val innerZipFolder = SettingKey[Option[String]]("innerZipFolder", "All files in zipFiles will be put under this folder")
 
-  val setExecutable = SettingKey[Set[String]]("setExecutable", "Sets the path relative to the assemble folder executable")
+  val setExecutable = SettingKey[Seq[String]]("setExecutable", "Sets the path relative to the assemble folder executable")
 
   val downloadUrls = TaskKey[Seq[File]]("download-urls")
 
   val urls = SettingKey[Seq[(URL, File)]]("urls", "A project setting that describes a urls to download")
 
-  val copyDependencies = TaskKey[File]("copy-dependencies")
+  val resourcesAssemble = TaskKey[Seq[(File, String)]]("resourcesAssemble", "A set of (in,out) tuples that specify where to find the resource (in) and what sub-path of assembly to put it in (out)")
 
-  val resourceSets = TaskKey[Set[(File, String)]]("resourceSets", "A set of (in,out) tuples that specify where to find the resource (in) and what sub-path of assembly to put it in (out)")
-
-  val resourceOutDir = SettingKey[Option[String]]("resource-out-dir")
-
-  val resourceAssemble = TaskKey[Set[File]]("resource-assemble")
+  val resourceOutDir = SettingKey[String]("resource-out-dir")
 
   val ignoreTransitive = SettingKey[Boolean]("ignoreTransitive")
 
-  val dependencyFilter = SettingKey[DependencyFilter]("Tells copyDependencies to ignore certain dependencies.")
+  val dependencyFilter = SettingKey[ModuleID ⇒ Boolean]("dependency-filter", "Tells copyDependencies to ignore certain dependencies.")
 
-  val dependencyNameMap = SettingKey[Map[Regex, String ⇒ String]]("dependencymap", "A map that is run against dependencies to be copied.")
+  val dependencyNameMap = SettingKey[Map[Regex, String ⇒ String]]("dependency-map", "A map that is run against dependencies to be copied.")
 
-  val scalatestVersion = SettingKey[String]("Version of scalatest.")
+  val scalatestVersion = SettingKey[String]("scalatest-version", "Version of scalatest.")
 
-  val junitVersion = SettingKey[String]("Version of junit.")
+  val junitVersion = SettingKey[String]("junit-version", "Version of junit.")
 
 }
