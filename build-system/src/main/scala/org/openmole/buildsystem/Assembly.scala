@@ -106,14 +106,33 @@ trait Assembly { self: BuildSystemDefaults ⇒
   }
 
   private def copyDepTask(
-    updateReport: UpdateReport,
+    cp: Seq[Attributed[File]],
     out: File,
     subDir: String,
     depMap: Map[Regex, String ⇒ String],
     depFilter: ModuleID ⇒ Boolean,
     streams: TaskStreams) = {
 
-    updateReport.filter(depFilter).allFiles.map { f ⇒
+    cp.flatMap { attributed ⇒
+      attributed.get(Keys.moduleID.key) match {
+        case Some(moduleId) ⇒
+          if (depFilter(moduleId)) Some(attributed.data) else None
+        case None ⇒ None
+      }
+    }.map { srcPath ⇒
+      val name =
+        depMap.keys.find(
+          _.findFirstIn(srcPath.getName).isDefined
+        ).map(k ⇒ depMap(k)(srcPath.getName)).getOrElse { srcPath.getName }
+
+      val destPath = out / subDir / name
+      streams.log.info(s"Copy dependency $srcPath to $destPath")
+      destPath.getParentFile.mkdirs
+      IO.copyFile(srcPath, destPath, preserveLastModified = true)
+      srcPath -> destPath
+    }
+
+    /*  updateReport.filter(depFilter).allFiles.map { f ⇒
       depMap.keys.find(
         _.findFirstIn(f.getName).isDefined
       ).map(depMap(_)).getOrElse { a: String ⇒ a } -> f
@@ -124,7 +143,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
         destPath.getParentFile.mkdirs
         IO.copyFile(srcPath, destPath, preserveLastModified = true)
         srcPath -> destPath
-    }
+    }*/
   }
 
   def AssemblyProject(base: String,
@@ -160,7 +179,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
           case (resources, a, s) ⇒
             resources.toSeq.map { case (from, to) ⇒ copyFileTask(from, a / to, s) }
         },
-      copyResources <++= (update, assemblyPath, outDir, dependencyNameMap, dependencyFilter, streams) map copyDepTask
+      copyResources <++= (externalDependencyClasspath in Compile, assemblyPath, outDir, dependencyNameMap, dependencyFilter, streams) map copyDepTask
     ) ++ s ++ scalariformDefaults) dependsOn ()
   }
 
