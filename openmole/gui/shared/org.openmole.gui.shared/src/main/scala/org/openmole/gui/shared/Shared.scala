@@ -18,4 +18,5 @@ package org.openmole.gui.shared
 
 trait Api {
   def factoriesUI(): Map[String, String]
+  def uuid(): String = java.util.UUID.randomUUID.toString
 }

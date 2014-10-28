@@ -1,5 +1,6 @@
 package root
 
+import root.gui.Bootstrap
 import root.libraries.Apache
 import sbt._
 import Keys._
@@ -37,7 +38,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.log4j, scopt, robustIt)
     ) dependsOn (
         base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
-        base.Misc.pluginManager, base.Core.implementation, base.Core.batch, gui.Server.core, gui.Client.client, base.Misc.sftpserver, base.Misc.logging,
+        base.Misc.pluginManager, base.Core.implementation, base.Core.batch, gui.Server.core, gui.Client.core, gui.Bootstrap.core, base.Misc.sftpserver, base.Misc.logging,
         Web.core, base.Misc.console, base.Core.convenience)
 
   private lazy val openmolePluginDependencies = libraryDependencies ++= Seq(
@@ -79,7 +80,6 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   lazy val openmolePlugins = AssemblyProject("openmole-plugins") settings (openmolePluginDependencies, //TODO: This project is only necessary thanks to the lack of dependency mapping in AssemblyProject
     dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "fr.iscpif.gridscale.bundle") }
   )
-
 
   lazy val dbserverProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "dbserver") sendTo "dbserver/lib"
 

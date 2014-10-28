@@ -22,8 +22,10 @@ import java.awt.SplashScreen
 import java.io.File
 import java.io.PrintWriter
 import java.util.concurrent.Semaphore
+import com.fasterxml.jackson.core.json.ByteSourceJsonBootstrapper
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
+import org.openmole.gui.bootstrap.Bootstrap
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
@@ -171,7 +173,8 @@ class Application extends IApplication {
       application.display
       waitClose.acquire(1)*/
       println("GUI !")
-      val server = new GUIServer(bundles, config.serverPort, config.optimizedJS)
+      Bootstrap.init(bundles, config.optimizedJS)
+      val server = new GUIServer(config.serverPort, Bootstrap.webapp)
       server.start()
 
     }
