@@ -19,19 +19,17 @@ import com.typesafe.sbt.osgi.OsgiKeys._
  */
 trait Assembly { self: BuildSystemDefaults ⇒
 
-  lazy val zipProject: Seq[Setting[_]] = Seq(
-    zipFiles <++= copyResources.map { _ map (_._2) },
-    innerZipFolder := None,
-    zip <<= (zipFiles, streams, target, tarGZName, innerZipFolder) map zipImpl,
-    tarGZName := None
-
-  //assemble <<= assemble dependsOn zip
+  lazy val tarProject: Seq[Setting[_]] = Seq(
+    Tar.name := "assemble.tar.gz",
+    Tar.innerFolder := "",
+    Tar.result <<= (assemble, streams, target, Tar.name, Tar.innerFolder) map tarImpl
   )
 
   lazy val urlDownloadProject: Seq[Setting[_]] = Seq(
-    urls := Nil,
-    downloadUrls <<= (urls, streams, target) map urlDownloader,
-    assemble <<= assemble dependsOn downloadUrls
+    downloads := Nil,
+    assemble <<= assemble dependsOn {
+      (downloads, assemblyPath, target, streams) map urlDownloader
+    }
   )
 
   /*lazy val resAssemblyProject: Seq[Setting[_]] = Seq(
@@ -149,7 +147,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
       bundleProj := false,
       install := true,
       installRemote := true,
-      zipFiles := Nil,
+      //zipFiles := Nil,
       outDir := outputDir,
       resourceOutDir := "",
       dependencyNameMap := Map.empty[Regex, String ⇒ String],
@@ -166,8 +164,8 @@ trait Assembly { self: BuildSystemDefaults ⇒
     ) ++ s ++ scalariformDefaults) dependsOn ()
   }
 
-  def zipImpl(targetFolders: Seq[File], s: TaskStreams, t: File, name: Option[String], folder: Option[String]): File = {
-    val out = t / ((name getOrElse "assembly") + ".tar.gz")
+  def tarImpl(folder: File, s: TaskStreams, t: File, name: String, innerFolder: String): File = {
+    val out = t / name
 
     val tgzOS = managed {
       val tos = new TarArchiveOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(out))))
@@ -177,25 +175,25 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
     def findFiles(f: File): Set[File] = if (f.isDirectory) (f.listFiles map findFiles flatten).toSet else Set(f)
 
-    def findLeastCommonPath(f1: File, f2: File): File = file(f1.getCanonicalPath zip f2.getCanonicalPath takeWhile { case (a, b) ⇒ a == b } map (_._1) mkString)
+    //def findLeastCommonPath(f1: File, f2: File): File = file(f1.getCanonicalPath zip f2.getCanonicalPath takeWhile { case (a, b) ⇒ a == b } map (_._1) mkString)
 
-    val files: Set[File] = (targetFolders map findFiles flatten).toSet
+    val files: Set[File] = findFiles(folder).toSet
 
     val fn = FileFunction.cached(t / "zip-cache", FilesInfo.lastModified, FilesInfo.exists) {
       fileSet ⇒
         s.log.info("Zipping:\n\t")
 
-        val lCP = targetFolders reduceLeft findLeastCommonPath
+        val lCP = folder //targetFolders reduceLeft findLeastCommonPath
 
-        s.log.info(lCP.getAbsolutePath)
-        s.log.info(targetFolders.last.relativeTo(lCP).get.getPath)
+        // s.log.info(lCP.getAbsolutePath)
+        // s.log.info(targetFolders.last.relativeTo(lCP).get.getPath)
 
         for {
           os ← tgzOS
           file ← fileSet
           is ← managed(Source.fromFile(file)(scala.io.Codec.ISO8859))
         } {
-          val relativeFile = (if (folder isDefined) folder.get + "/" else "") + (file relativeTo lCP).get.getPath
+          val relativeFile = innerFolder + "/" + (file relativeTo lCP).get.getPath
           s.log.info("\t - " + relativeFile)
 
           val entry = new TarArchiveEntry(file, relativeFile)
@@ -214,18 +212,20 @@ trait Assembly { self: BuildSystemDefaults ⇒
     fn(files).head
   }
 
-  def urlDownloader(urls: Seq[(URL, File)], s: TaskStreams, targetDir: File) = {
+  def urlDownloader(urls: Seq[(URL, String)], assembleDir: File, targetDir: File, s: TaskStreams) = {
     def cache(url: URL) = targetDir / s"url-cache-${Hash.toHex(Hash(url.toString))}"
 
-    targetDir.mkdir() //makes sure target exists
+    targetDir.mkdirs
 
     for {
       (url, file) ← urls
     } yield {
       val cacheFile = cache(url)
+      val destFile = new File(assembleDir, file)
+      destFile.getParentFile.mkdirs
       if (!cacheFile.exists) {
-        s.log.info("Downloading " + url + " to " + file)
-        val os = managed(new BufferedOutputStream(new FileOutputStream(file)))
+        s.log.info("Downloading " + url + " to " + destFile)
+        val os = managed(new BufferedOutputStream(new FileOutputStream(destFile)))
         os.foreach(BasicIO.transferFully(url.openStream, _))
         cacheFile.createNewFile()
       }

@@ -55,23 +55,20 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
         base.Misc.pluginManager, base.Core.implementation, base.Core.batch, gui.Server.core, gui.Client.core, gui.Bootstrap.core, base.Misc.sftpserver, base.Misc.logging,
         Web.core, base.Misc.console, base.Core.convenience)
 
-  lazy val openmole = AssemblyProject("openmole") settings (
-    //FIXME
-    /*resourceSets <+= (baseDirectory, zip in openmoleRuntime, downloadUrls in openmoleRuntime) map { (bd, zipFile, downloadUrls) ⇒
-      Set(bd / "resources" -> "", zipFile -> "runtime") ++ downloadUrls.map(_ -> "runtime")
-    },*/
-    //resourceSets <+= (baseDirectory) map { _ / "db-resources" -> "dbserver/bin" },
-    //FIXME
-    //resourceSets <++= (copyDependencies in openmolePlugins) map { _ -> "openmole-plugins" },
-    //resourcesAssemble <++= Seq(openmoleui.project) sendTo "plugins",
+  lazy val java368URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-386/20-b17/java-jre-linux-386-20-b17.tgz")
+  lazy val javax64URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-x64/20-b17/java-jre-linux-x64-20-b17.tgz")
+
+  lazy val openmole = AssemblyProject("openmole", settings = tarProject ++ urlDownloadProject) settings (
     resourceOutDir := "",
     setExecutable ++= Seq("openmole", "openmole.bat"),
     resourcesAssemble <++= (assemble in openmolePlugins) map { f ⇒ Seq(f -> "plugins") },
     resourcesAssemble <++= (assemble in dbServer) map { f ⇒ Seq(f -> "dbserver") },
     resourcesAssemble <++= (assemble in consolePlugins) map { f ⇒ Seq(f -> "openmole-plugins") },
     resourcesAssemble <++= (assemble in guiPlugins) map { f ⇒ Seq(f -> "openmole-plugins-gui") },
-    tarGZName := Some("openmole"),
-    innerZipFolder := Some("openmole"),
+    resourcesAssemble <++= (Tar.result in openmoleRuntime) map { f ⇒ Seq(f -> "runtime") },
+    downloads := Seq(java368URL -> "runtime/jvm-386.tar.gz", javax64URL -> "runtime/jvm-x64.tar.gz"),
+    Tar.name := "openmole",
+    Tar.innerFolder := "openmole",
     dependencyFilter := filter //DependencyFilter.fnToModuleFilter { m ⇒ m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle" || m.organization == "org.bouncycastle" || m.organization == "org.openmole" }
   )
 
@@ -163,13 +160,37 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       dependencyFilter := filter
   )
 
+  lazy val openmoleRuntime = AssemblyProject("runtime", "plugins", settings = tarProject) settings (
+    resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo "plugins",
+    setExecutable ++= Seq("run.sh"),
+    Tar.name := "runtime.tar.gz",
+    libraryDependencies ++= Seq(
+      Libraries.logback,
+      Libraries.scopt,
+      Libraries.guava,
+      Libraries.xstream,
+      Libraries.slick,
+      Libraries.gridscale,
+      Apache.config,
+      Apache.exec,
+      Apache.math,
+      Apache.pool,
+      Apache.log4j,
+      Libraries.h2,
+      Libraries.jasypt,
+      Libraries.jodaTime,
+      Libraries.scalaLang,
+      Libraries.slf4j,
+      Libraries.groovy
+    ) ++ equinox,
+      dependencyFilter := filter,
+      dependencyNameMap := renameEquinox
+  )
+
   /*lazy val dbserverProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "dbserver") sendTo "dbserver/lib"
 >>>>>>> Stashed changes
 
   lazy val runtimeProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo "plugins"
-
-  lazy val java368URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-386/20-b17/java-jre-linux-386-20-b17.tgz")
-  lazy val javax64URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-x64/20-b17/java-jre-linux-x64-20-b17.tgz")
 
   lazy val openmoleRuntime = AssemblyProject("runtime", "plugins",
     depNameMap = Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },

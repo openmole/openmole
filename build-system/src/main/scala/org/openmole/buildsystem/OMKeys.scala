@@ -23,15 +23,13 @@ object OMKeys {
 
   val install = TaskKey[Unit]("install", "Builds bundles and adds them to the local repo")
 
-  val tarGZName = SettingKey[Option[String]]("targz-name")
-
   val installRemote = TaskKey[Unit]("install-remote", "Builds bundles and adds them to the openmole nexus server")
 
   val assemblyPath = SettingKey[File]("assembly-path", "The path to the project's assembly folder")
 
   val assemble = TaskKey[File]("assemble", "The path with assembled project")
 
-  val gc = TaskKey[Unit]("gc", "Force SBT to take out the trash")
+  //val gc = TaskKey[Unit]("gc", "Force SBT to take out the trash")
 
   val osgiVersion = SettingKey[String]("osgi-version")
 
@@ -39,17 +37,11 @@ object OMKeys {
 
   // val Assemble = Tags.Tag("Assemble")
 
-  val zip = TaskKey[File]("zip")
-
-  val zipFiles = TaskKey[Seq[File]]("zip-files", "Collects the list of files to be zipped")
-
-  val innerZipFolder = SettingKey[Option[String]]("innerZipFolder", "All files in zipFiles will be put under this folder")
-
   val setExecutable = SettingKey[Seq[String]]("setExecutable", "Sets the path relative to the assemble folder executable")
 
-  val downloadUrls = TaskKey[Seq[File]]("download-urls")
+  // val downloadUrls = TaskKey[Seq[File]]("download-urls")
 
-  val urls = SettingKey[Seq[(URL, File)]]("urls", "A project setting that describes a urls to download")
+  val downloads = SettingKey[Seq[(URL, String)]]("downloads", "A project setting that describes a urls to download")
 
   val resourcesAssemble = TaskKey[Seq[(File, String)]]("resourcesAssemble", "A set of (in,out) tuples that specify where to find the resource (in) and what sub-path of assembly to put it in (out)")
 
@@ -64,5 +56,13 @@ object OMKeys {
   val scalatestVersion = SettingKey[String]("scalatest-version", "Version of scalatest.")
 
   val junitVersion = SettingKey[String]("junit-version", "Version of junit.")
+
+  object Tar {
+    val result = TaskKey[File]("tar-result", "Tar file produced by the assembly project")
+    //val zipFiles = TaskKey[Seq[File]]("zip-files", "Collects the list of files to be zipped")
+    val innerFolder = SettingKey[String]("tar-inner-folder", "All files in tar will be put under this folder")
+    val name = SettingKey[String]("tar-name")
+
+  }
 
 }
