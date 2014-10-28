@@ -64,7 +64,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     resourcesAssemble <++= (assemble in guiPlugins) map { f ⇒ Seq(f -> "openmole-plugins-gui") },
     resourcesAssemble <++= (Tar.result in openmoleRuntime) map { f ⇒ Seq(f -> "runtime") },
     downloads := Seq(java368URL -> "runtime/jvm-386.tar.gz", javax64URL -> "runtime/jvm-x64.tar.gz"),
-    Tar.name := "openmole",
+    Tar.name := "openmole.tar.gz",
     Tar.innerFolder := "openmole",
     dependencyFilter := filter //DependencyFilter.fnToModuleFilter { m ⇒ m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle" || m.organization == "org.bouncycastle" || m.organization == "org.openmole" }
   )
