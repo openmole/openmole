@@ -62,7 +62,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     resourcesAssemble <++= (assemble in dbServer) map { f ⇒ Seq(f -> "dbserver") },
     resourcesAssemble <++= (assemble in consolePlugins) map { f ⇒ Seq(f -> "openmole-plugins") },
     resourcesAssemble <++= (assemble in guiPlugins) map { f ⇒ Seq(f -> "openmole-plugins-gui") },
-    resourcesAssemble <++= (Tar.result in openmoleRuntime) map { f ⇒ Seq(f -> "runtime") },
+    resourcesAssemble <++= (Tar.tar in openmoleRuntime) map { f ⇒ Seq(f -> "runtime") },
     downloads := Seq(java368URL -> "runtime/jvm-386.tar.gz", javax64URL -> "runtime/jvm-x64.tar.gz"),
     Tar.name := "openmole.tar.gz",
     Tar.innerFolder := "openmole",

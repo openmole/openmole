@@ -22,7 +22,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
   lazy val tarProject: Seq[Setting[_]] = Seq(
     Tar.name := "assemble.tar.gz",
     Tar.innerFolder := "",
-    Tar.result <<= (assemble, streams, target, Tar.name, Tar.innerFolder) map tarImpl
+    Tar.tar <<= (assemble, streams, target, Tar.name, Tar.innerFolder) map tarImpl
   )
 
   lazy val urlDownloadProject: Seq[Setting[_]] = Seq(

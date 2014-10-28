@@ -58,8 +58,7 @@ object OMKeys {
   val junitVersion = SettingKey[String]("junit-version", "Version of junit.")
 
   object Tar {
-    val result = TaskKey[File]("tar-result", "Tar file produced by the assembly project")
-    //val zipFiles = TaskKey[Seq[File]]("zip-files", "Collects the list of files to be zipped")
+    val tar = TaskKey[File]("tar", "Tar file produced by the assembly project")
     val innerFolder = SettingKey[String]("tar-inner-folder", "All files in tar will be put under this folder")
     val name = SettingKey[String]("tar-name")
 
