@@ -119,6 +119,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo "",
     libraryDependencies ++=
     Seq(
+      Apache.logging,
       Libraries.opencsv,
       Libraries.netlogo4,
       Libraries.netlogo5,
