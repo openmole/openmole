@@ -69,50 +69,54 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     dependencyFilter := filter //DependencyFilter.fnToModuleFilter { m ⇒ m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle" || m.organization == "org.bouncycastle" || m.organization == "org.openmole" }
   )
 
+  lazy val coreDependencies = Seq(
+    bouncyCastle,
+    gridscale,
+    logback,
+    scopt,
+    guava,
+    bonecp,
+    arm,
+    xstream,
+    slick,
+    jline,
+    Apache.ant,
+    Apache.codec,
+    Apache.config,
+    Apache.exec,
+    Apache.math,
+    Apache.pool,
+    Apache.log4j,
+    Apache.sshd,
+    groovy,
+    h2,
+    jasypt,
+    jodaTime,
+    scalaLang,
+    scalaz,
+    slf4j
+  )
+
+  lazy val guiCoreDependencies = Seq(
+    scalajsLibrary,
+    scalajsTools,
+    scalajsDom,
+    scalaTagsJS,
+    autowireJS,
+    upickleJS,
+    scalaRxJS,
+    scalatra,
+    jacksonJson,
+    jetty,
+    scalajHttp
+  )
+
   lazy val openmolePlugins = AssemblyProject("openmoleplugins") settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo "",
     resourcesAssemble <++= Seq(openmoleui.project) sendTo "",
-    libraryDependencies ++= Seq(
-      Libraries.bouncyCastle,
-      Libraries.gridscale,
-      Libraries.logback,
-      Libraries.scopt,
-      Libraries.guava,
-      Libraries.bonecp,
-      Libraries.arm,
-      Libraries.xstream,
-      Libraries.slick,
-      Libraries.jline,
-      Apache.ant,
-      Apache.codec,
-      Apache.config,
-      Apache.exec,
-      Apache.math,
-      Apache.pool,
-      Apache.log4j,
-      Apache.sshd,
-      Libraries.groovy,
-      Libraries.h2,
-      Libraries.jasypt,
-      Libraries.jodaTime,
-      Libraries.scalajHttp,
-      Libraries.scalaLang,
-      Libraries.scalatra,
-      Libraries.scalaz,
-      Libraries.slf4j,
-      Libraries.robustIt,
-      Libraries.jacksonJson,
-      Libraries.jetty,
-      Libraries.scalajsLibrary,
-      Libraries.scalajsTools,
-      Libraries.scalajsDom,
-      Libraries.scalaTagsJS,
-      Libraries.autowireJS,
-      Libraries.upickleJS,
-      Libraries.scalaRxJS
-    ) ++ equinox,
-      dependencyFilter := filter,
-      dependencyNameMap := renameEquinox
+    libraryDependencies ++= coreDependencies ++ guiCoreDependencies ++ equinox,
+    dependencyFilter := filter,
+    dependencyNameMap := renameEquinox
   )
 
   lazy val consolePlugins = AssemblyProject("consoleplugins") settings (
@@ -183,6 +187,20 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     ) ++ equinox,
       dependencyFilter := filter,
       dependencyNameMap := renameEquinox
+  )
+
+  lazy val daemon = AssemblyProject("daemon", "plugins", settings = tarProject) settings (
+    resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ (a contains "core") || (a contains "daemon")) sendTo "plugins",
+    libraryDependencies ++= Seq(
+      gridscale,
+      gridscaleSSH,
+      bouncyCastle
+    ) ++ equinox ++ coreDependencies,
+      setExecutable ++= Seq("openmole-daemon", "openmole-daemon.bat"),
+      dependencyFilter := filter,
+      dependencyNameMap := renameEquinox,
+      Tar.name := "openmole-daemon.tar.gz",
+      Tar.innerFolder := "openmole-daemon"
   )
 
   /*lazy val dbserverProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "dbserver") sendTo "dbserver/lib"
