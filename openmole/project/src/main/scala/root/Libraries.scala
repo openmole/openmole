@@ -124,8 +124,6 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scaladget = "org.openmole" %% "scaladget" % "0.1.0"
 
-  lazy val monocle = "org.openmole" %% "monocle" % "0.5.0"
-
   lazy val opencsv = "org.openmole" %% "au-com-bytecode-opencsv" % "2.0"
 
   lazy val jline = "org.openmole" %% "net-sourceforge-jline" % "0.9.94"
@@ -133,8 +131,6 @@ object Libraries extends Defaults(Apache) {
   lazy val arm = "org.openmole" %% "com-jsuereth-scala-arm" % "1.4"
 
   lazy val scalajHttp = "org.openmole" %% "org-scalaj-scalaj-http" % "0.3.15"
-
-  lazy val scalaz = "org.openmole" %% "org-scalaz" % "7.0.6"
 
   lazy val scopt = "org.openmole" %% "com-github-scopt" % "3.2.0"
 

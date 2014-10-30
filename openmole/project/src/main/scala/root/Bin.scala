@@ -46,7 +46,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true, buddyPolicy = Some("global")) settings (
     organization := "org.openmole.ui"
   ) settings (
-      libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.log4j, scopt, robustIt, equinoxApp)
+      libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.log4j, scopt, equinoxApp)
     ) dependsOn (
         base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
         base.Misc.pluginManager, base.Core.implementation, base.Core.batch, gui.Server.core, gui.Client.core, gui.Bootstrap.core, base.Misc.sftpserver, base.Misc.logging,
@@ -93,7 +93,6 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     jasypt,
     jodaTime,
     scalaLang,
-    scalaz,
     slf4j
   )
 
@@ -124,22 +123,21 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     libraryDependencies ++=
     Seq(
       Apache.logging,
-      Libraries.opencsv,
-      Libraries.netlogo4,
-      Libraries.netlogo5,
-      Libraries.mgo,
-      Libraries.scalabc,
-      Libraries.monocle,
-      Libraries.gridscaleHTTP intransitive (),
-      Libraries.gridscalePBS intransitive (),
-      Libraries.gridscaleSLURM intransitive (),
-      Libraries.gridscaleDirac intransitive (),
-      Libraries.gridscaleGlite intransitive (),
-      Libraries.gridscaleSGE intransitive (),
-      Libraries.gridscaleCondor intransitive (),
-      Libraries.gridscalePBS intransitive (),
-      Libraries.gridscaleOAR intransitive (),
-      Libraries.gridscaleSSH intransitive ()
+      opencsv,
+      netlogo4,
+      netlogo5,
+      mgo,
+      scalabc,
+      gridscaleHTTP intransitive (),
+      gridscalePBS intransitive (),
+      gridscaleSLURM intransitive (),
+      gridscaleDirac intransitive (),
+      gridscaleGlite intransitive (),
+      gridscaleSGE intransitive (),
+      gridscaleCondor intransitive (),
+      gridscalePBS intransitive (),
+      gridscaleOAR intransitive (),
+      gridscaleSSH intransitive ()
     ),
       dependencyFilter := filter
   )

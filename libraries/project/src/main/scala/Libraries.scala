@@ -68,10 +68,6 @@ object Libraries extends Defaults(Apache) {
     version := "1.7.2"
     )
 
-  lazy val scalazVersion = "7.0.6"
-  lazy val scalaz = OsgiProject("org.scalaz", exports = Seq("scalaz.*")) settings
-    (libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion, version := scalazVersion)
-
   lazy val xstream = OsgiProject(
     "com.thoughtworks.xstream",
     buddyPolicy = Some("global"),
@@ -219,20 +215,10 @@ object Libraries extends Defaults(Apache) {
     libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion)
 
   lazy val mgoVersion = "1.78"
-  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings(
+  lazy val mgo = OsgiProject("fr.iscpif.mgo", privatePackages = Seq("!scala.*", "monocle.*", "scalaz.*")) settings(
     libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
     bundleType := Set("plugin"),
     version := mgoVersion
-    ) dependsOn (monocle)
-
-  val monocleVersion = "0.5.0"
-
-  lazy val monocle = OsgiProject("monocle") settings(
-    libraryDependencies += "com.github.julien-truffaut" %% "monocle-core" % monocleVersion,
-    libraryDependencies += "com.github.julien-truffaut" %% "monocle-generic" % monocleVersion,
-    libraryDependencies += "com.github.julien-truffaut" %% "monocle-macro" % monocleVersion,
-    bundleType := Set("plugin"),
-    version := monocleVersion
     )
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings(
