@@ -120,7 +120,6 @@ trait Assembly { self: BuildSystemDefaults ⇒
       _.findFirstIn(srcPath.getName).isDefined
     ).map(k ⇒ depMap(k)(srcPath.getName)).getOrElse { srcPath.getName }
 
-
   private def copyLibraryDependencies(
     cp: Seq[Attributed[File]],
     out: File,
