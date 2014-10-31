@@ -122,6 +122,8 @@ object Libraries extends Defaults(Apache) {
 
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "1.78"
 
+  lazy val monocle = "org.openmole" %% "monocle" % "0.5.0"
+
   lazy val scaladget = "org.openmole" %% "scaladget" % "0.1.0"
 
   lazy val opencsv = "org.openmole" %% "au-com-bytecode-opencsv" % "2.0"

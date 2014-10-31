@@ -127,6 +127,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       netlogo4,
       netlogo5,
       mgo,
+      monocle,
       scalabc,
       gridscaleHTTP intransitive (),
       gridscalePBS intransitive (),
