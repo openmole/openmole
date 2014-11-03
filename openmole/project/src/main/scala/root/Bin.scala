@@ -46,7 +46,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true, buddyPolicy = Some("global")) settings (
     organization := "org.openmole.ui"
   ) settings (
-      libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.log4j, scopt, robustIt, equinoxApp)
+      libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.log4j, scopt, equinoxApp)
     ) dependsOn (
         base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
         base.Misc.pluginManager, base.Core.implementation, base.Core.batch, gui.Server.core, gui.Client.core, gui.Bootstrap.js, gui.Bootstrap.osgi, base.Misc.sftpserver, base.Misc.logging,
@@ -67,6 +67,47 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     Tar.name := "openmole.tar.gz",
     Tar.innerFolder := "openmole",
     dependencyFilter := filter //DependencyFilter.fnToModuleFilter { m ⇒ m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle" || m.organization == "org.bouncycastle" || m.organization == "org.openmole" }
+  )
+
+  lazy val coreDependencies = Seq(
+    bouncyCastle,
+    gridscale,
+    logback,
+    scopt,
+    guava,
+    bonecp,
+    arm,
+    xstream,
+    slick,
+    jline,
+    Apache.ant,
+    Apache.codec,
+    Apache.config,
+    Apache.exec,
+    Apache.math,
+    Apache.pool,
+    Apache.log4j,
+    Apache.sshd,
+    groovy,
+    h2,
+    jasypt,
+    jodaTime,
+    scalaLang,
+    slf4j
+  )
+
+  lazy val guiCoreDependencies = Seq(
+    scalajsLibrary,
+    scalajsTools,
+    scalajsDom,
+    scalaTagsJS,
+    autowireJS,
+    upickleJS,
+    scalaRxJS,
+    scalatra,
+    jacksonJson,
+    jetty,
+    scalajHttp
   )
 
   lazy val openmolePlugins = AssemblyProject("openmoleplugins") settings (
@@ -123,22 +164,22 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     libraryDependencies ++=
     Seq(
       Apache.logging,
-      Libraries.opencsv,
-      Libraries.netlogo4,
-      Libraries.netlogo5,
-      Libraries.mgo,
-      Libraries.scalabc,
-      Libraries.monocle,
-      Libraries.gridscaleHTTP intransitive (),
-      Libraries.gridscalePBS intransitive (),
-      Libraries.gridscaleSLURM intransitive (),
-      Libraries.gridscaleDirac intransitive (),
-      Libraries.gridscaleGlite intransitive (),
-      Libraries.gridscaleSGE intransitive (),
-      Libraries.gridscaleCondor intransitive (),
-      Libraries.gridscalePBS intransitive (),
-      Libraries.gridscaleOAR intransitive (),
-      Libraries.gridscaleSSH intransitive ()
+      opencsv,
+      netlogo4,
+      netlogo5,
+      mgo,
+      monocle,
+      scalabc,
+      gridscaleHTTP intransitive (),
+      gridscalePBS intransitive (),
+      gridscaleSLURM intransitive (),
+      gridscaleDirac intransitive (),
+      gridscaleGlite intransitive (),
+      gridscaleSGE intransitive (),
+      gridscaleCondor intransitive (),
+      gridscalePBS intransitive (),
+      gridscaleOAR intransitive (),
+      gridscaleSSH intransitive ()
     ),
       dependencyFilter := filter
   )
@@ -186,6 +227,20 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     ) ++ equinox,
       dependencyFilter := filter,
       dependencyNameMap := renameEquinox
+  )
+
+  lazy val daemon = AssemblyProject("daemon", "plugins", settings = tarProject) settings (
+    resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ (a contains "core") || (a contains "daemon")) sendTo "plugins",
+    libraryDependencies ++= Seq(
+      gridscale,
+      gridscaleSSH,
+      bouncyCastle
+    ) ++ equinox ++ coreDependencies,
+      setExecutable ++= Seq("openmole-daemon", "openmole-daemon.bat"),
+      dependencyFilter := filter,
+      dependencyNameMap := renameEquinox,
+      Tar.name := "openmole-daemon.tar.gz",
+      Tar.innerFolder := "openmole-daemon"
   )
 
   /*lazy val dbserverProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "dbserver") sendTo "dbserver/lib"

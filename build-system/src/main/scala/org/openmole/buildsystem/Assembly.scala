@@ -113,6 +113,21 @@ trait Assembly { self: BuildSystemDefaults ⇒
     depFilter: ModuleID ⇒ Boolean,
     streams: TaskStreams) = {
 
+  }
+
+  private def rename(srcPath: File, depMap: Map[Regex, String ⇒ String]) =
+    depMap.keys.find(
+      _.findFirstIn(srcPath.getName).isDefined
+    ).map(k ⇒ depMap(k)(srcPath.getName)).getOrElse { srcPath.getName }
+
+  private def copyLibraryDependencies(
+    cp: Seq[Attributed[File]],
+    out: File,
+    subDir: String,
+    depMap: Map[Regex, String ⇒ String],
+    depFilter: ModuleID ⇒ Boolean,
+    streams: TaskStreams) = {
+
     cp.flatMap { attributed ⇒
       attributed.get(Keys.moduleID.key) match {
         case Some(moduleId) ⇒
@@ -120,30 +135,13 @@ trait Assembly { self: BuildSystemDefaults ⇒
         case None ⇒ None
       }
     }.map { srcPath ⇒
-      val name =
-        depMap.keys.find(
-          _.findFirstIn(srcPath.getName).isDefined
-        ).map(k ⇒ depMap(k)(srcPath.getName)).getOrElse { srcPath.getName }
-
+      val name = rename(srcPath, depMap)
       val destPath = out / subDir / name
       streams.log.info(s"Copy dependency $srcPath to $destPath")
       destPath.getParentFile.mkdirs
       IO.copyFile(srcPath, destPath, preserveLastModified = true)
       srcPath -> destPath
     }
-
-    /*  updateReport.filter(depFilter).allFiles.map { f ⇒
-      depMap.keys.find(
-        _.findFirstIn(f.getName).isDefined
-      ).map(depMap(_)).getOrElse { a: String ⇒ a } -> f
-    } map {
-      case (lambda, srcPath) ⇒
-        val destPath = out / subDir / lambda(srcPath.getName)
-        streams.log.info(s"Copy dependency $srcPath to $destPath")
-        destPath.getParentFile.mkdirs
-        IO.copyFile(srcPath, destPath, preserveLastModified = true)
-        srcPath -> destPath
-    }*/
   }
 
   def AssemblyProject(base: String,
@@ -179,7 +177,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
           case (resources, a, s) ⇒
             resources.toSeq.map { case (from, to) ⇒ copyFileTask(from, a / to, s) }
         },
-      copyResources <++= (externalDependencyClasspath in Compile, assemblyPath, outDir, dependencyNameMap, dependencyFilter, streams) map copyDepTask
+      copyResources <++= (externalDependencyClasspath in Compile, assemblyPath, outDir, dependencyNameMap, dependencyFilter, streams) map copyLibraryDependencies
     ) ++ s ++ scalariformDefaults) dependsOn ()
   }
 

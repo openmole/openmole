@@ -4,7 +4,7 @@ import Keys._
 import root._
 
 
-object Root extends Defaults(Libraries) {
+object Root extends Defaults(OSGi) {
   implicit val dir = file(".")
   lazy val all = Project(id = "root", base = dir) aggregate (subProjects: _*)
 

@@ -63,14 +63,14 @@ trait OsgiBundler {
     val artifactId = artifactPrefix map (_ + "." + artifactSuffix) getOrElse artifactSuffix
     val base = dir / (if (pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
-    val testDependencies = (scalaVersion in thisProject, scalaVersion in Global, scalatestVersion, junitVersion) {
+    /* val testDependencies = (scalaVersion in thisProject, scalaVersion in Global, scalatestVersion, junitVersion) {
       (tSV, sv, stv, juv) ⇒
         (if (tSV == sv)
           Seq("org.scalatest" %% "scalatest" % stv % "test")
         else
           Seq()
         ) ++ Seq("junit" % "junit" % juv % "test")
-    }
+    }*/
 
     val sets = settings
 
@@ -89,8 +89,8 @@ trait OsgiBundler {
         OsgiKeys.dynamicImportPackage := dynamicImports,
         OsgiKeys.importPackage := imports,
         OsgiKeys.embeddedJars := embeddedJars,
-        OsgiKeys.bundleActivator <<= OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) },
-        libraryDependencies <++= testDependencies
+        OsgiKeys.bundleActivator <<= OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) }
+      //libraryDependencies <++= testDependencies
       ) ++ sets)
   }
 
