@@ -140,7 +140,6 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       Libraries.scalajHttp,
       Libraries.scalaLang,
       Libraries.scalatra,
-      Libraries.scalaz,
       Libraries.slf4j,
       Libraries.robustIt,
       Libraries.jacksonJson,
