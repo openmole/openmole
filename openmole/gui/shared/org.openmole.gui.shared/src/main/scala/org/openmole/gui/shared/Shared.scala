@@ -16,7 +16,9 @@
  */
 package org.openmole.gui.shared
 
+import org.openmole.gui.ext.factoryui.FactoryUI
+
 trait Api {
-  def factoriesUI(): Map[String, String]
+  // def factoriesUI(): Map[String, FactoryUI]
   def uuid(): String = java.util.UUID.randomUUID.toString
 }

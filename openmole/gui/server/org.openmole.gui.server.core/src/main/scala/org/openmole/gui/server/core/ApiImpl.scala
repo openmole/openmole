@@ -4,7 +4,7 @@ import org.openmole.gui.server.factory.ServerFactories
 import org.openmole.gui.shared.Api
 
 /*
- * Copyright (C) 10/10/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -21,6 +21,5 @@ import org.openmole.gui.shared.Api
  */
 
 object ApiImpl extends Api {
-  def factoriesUI: Map[String, String] = ServerFactories.uiFactories.toMap
-  //def factoriesUI: Seq[(Class[_], String)] = ServerFactories.uiFactories.toSeq
+  // def factoriesUI: Map[String, String] = ServerFactories.uiFactories
 }

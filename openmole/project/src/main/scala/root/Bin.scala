@@ -49,7 +49,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.log4j, scopt, robustIt, equinoxApp)
     ) dependsOn (
         base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
-        base.Misc.pluginManager, base.Core.implementation, base.Core.batch, gui.Server.core, gui.Client.core, gui.Bootstrap.core, base.Misc.sftpserver, base.Misc.logging,
+        base.Misc.pluginManager, base.Core.implementation, base.Core.batch, gui.Server.core, gui.Client.core, gui.Bootstrap.js, gui.Bootstrap.osgi, base.Misc.sftpserver, base.Misc.logging,
         Web.core, base.Misc.console, base.Core.convenience)
 
   lazy val java368URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-386/20-b17/java-jre-linux-386-20-b17.tgz")
@@ -91,6 +91,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       Apache.pool,
       Apache.log4j,
       Apache.sshd,
+      Libraries.jawn,
       Libraries.groovy,
       Libraries.h2,
       Libraries.jasypt,
@@ -106,9 +107,11 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       Libraries.scalajsLibrary,
       Libraries.scalajsTools,
       Libraries.scalajsDom,
+      Libraries.autowireJVM,
       Libraries.scalaTagsJS,
       Libraries.autowireJS,
       Libraries.upickleJS,
+      Libraries.upickleJVM,
       Libraries.scalaRxJS
     ) ++ equinox,
       dependencyFilter := filter,

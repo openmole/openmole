@@ -1,7 +1,7 @@
 package org.openmole.gui.plugin.task.groovy.client
 
-import org.openmole.gui.client.dataui.DataUI
-import org.openmole.gui.client.factoryui.TaskFactoryUI
+import org.openmole.gui.ext.dataui.DataUI
+import org.openmole.gui.ext.factoryui.TaskFactoryUI
 
 /*
  * Copyright (C) 01/10/14 // mathieu.leclaire@openmole.org

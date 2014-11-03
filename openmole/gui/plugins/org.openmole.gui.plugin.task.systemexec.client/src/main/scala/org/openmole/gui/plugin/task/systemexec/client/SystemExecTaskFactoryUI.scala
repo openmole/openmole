@@ -17,7 +17,7 @@ package org.openmole.gui.plugin.task.systemexec.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.factoryui.TaskFactoryUI
+import org.openmole.gui.ext.factoryui.TaskFactoryUI
 
 class SystemExecTaskFactoryUI extends TaskFactoryUI {
 def dataUI = new SystemExecTaskDataUI

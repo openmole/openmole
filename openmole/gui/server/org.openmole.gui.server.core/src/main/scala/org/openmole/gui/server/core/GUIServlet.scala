@@ -18,16 +18,16 @@ package org.openmole.gui.server.core
 
 import java.util.UUID
 
-import org.openmole.gui.server.factory.ServerFactories
 import org.scalatra._
 import scala.concurrent.ExecutionContext.Implicits.global
 import upickle._
 import autowire._
-import scalatags.Text.all._
-import scalatags.Text.{ all ⇒ tags }
+import org.openmole.gui.shared.Api
 import scala.concurrent.duration._
 import scala.concurrent.Await
-import org.openmole.gui.shared._
+import scalatags.Text.all._
+import scalatags.Text.{ all ⇒ tags }
+import org.openmole.gui.server.factory.ServerFactories
 
 object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Writer] {
   def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
@@ -38,7 +38,8 @@ object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Wr
 class GUIServlet extends ScalatraServlet {
 
   println("in GUIServlet ...")
-  val basePath = "shared"
+  println("READ : " + upickle.read[Seq[Int]]("[1, 4, 55]"))
+  val basePath = "org/openmole/gui/shared"
 
   get("/") {
     contentType = "text/html"
@@ -59,9 +60,8 @@ class GUIServlet extends ScalatraServlet {
 
   post(s"/$basePath/*") {
     Await.result(AutowireServer.route[Api](ApiImpl)(
-      autowire.Core.Request(Seq(basePath) ++ multiParams("splat").head.split("/"),
+      autowire.Core.Request(basePath.split("/").toSeq ++ multiParams("splat").head.split("/"),
         upickle.read[Map[String, String]](request.body))
     ), Duration.Inf)
   }
-
 }

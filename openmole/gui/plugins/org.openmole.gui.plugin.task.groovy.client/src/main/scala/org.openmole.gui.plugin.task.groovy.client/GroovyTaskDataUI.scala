@@ -17,11 +17,11 @@ package org.openmole.gui.plugin.task.groovy.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.service.ClientService._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.client.dataui.{PrototypeDataUI, TaskDataUI}
+import org.openmole.gui.ext.dataui.{PrototypeDataUI, TaskDataUI}
 import org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData
-import org.openmole.gui.client.factoryui.ClientFactories._
 import rx._
 
 @JSExport

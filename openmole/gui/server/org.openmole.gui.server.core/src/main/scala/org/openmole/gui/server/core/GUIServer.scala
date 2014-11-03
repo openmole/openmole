@@ -24,6 +24,7 @@ import org.eclipse.jetty.webapp.WebAppContext
 import org.scalatra.servlet.ScalatraListener
 import javax.servlet.ServletContext
 import org.scalatra._
+import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 
 class GUIServer(port: Option[Int], webapp: File) {
   val p = port getOrElse 8080

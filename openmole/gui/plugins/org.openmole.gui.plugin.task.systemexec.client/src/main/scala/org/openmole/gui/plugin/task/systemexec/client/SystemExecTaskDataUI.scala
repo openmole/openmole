@@ -20,7 +20,7 @@ package org.openmole.gui.plugin.task.systemexec.client
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
-import org.openmole.gui.client.dataui.TaskDataUI
+import org.openmole.gui.ext.dataui.TaskDataUI
 import rx._
 
 @JSExport

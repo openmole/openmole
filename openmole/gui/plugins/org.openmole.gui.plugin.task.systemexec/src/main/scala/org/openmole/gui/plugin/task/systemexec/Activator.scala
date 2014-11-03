@@ -17,6 +17,7 @@ package org.openmole.gui.plugin.task.systemexec
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.bootstrap.osgi._
 import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
 import org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskFactoryUI
 import org.openmole.gui.plugin.task.systemexec.server.SystemExecTaskFactory
@@ -24,5 +25,7 @@ import org.openmole.gui.server.factory._
 
 class Activator extends OSGiActivator with ServerOSGiActivator {
   val data = new SystemExecTaskData
-  override def factories = Seq((new SystemExecTaskFactory(data), (new SystemExecTaskFactoryUI).getClass.getName))
+  val dataClass = data.getClass()
+  override def factories = Seq((dataClass, new SystemExecTaskFactory(data)))
+  override def factoriesUI = Seq((dataClass, new SystemExecTaskFactoryUI))
 }

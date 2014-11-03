@@ -34,12 +34,9 @@ object ServerFactories {
     }
   }
 
-  def uiFactories = instance.uiFactoryNames
-
-  def add(dataClass: Class[_], factory: Factory, uiFactoryName: String) = instance.factories.synchronized {
+  def add(dataClass: Class[_], factory: Factory) = instance.factories.synchronized {
     println("Add server " + dataClass)
     instance.factories += dataClass -> factory
-    instance.uiFactoryNames += dataClass.getName -> uiFactoryName
   }
 
   def remove(dataClass: Class[_]) = instance.factories.synchronized {
@@ -49,12 +46,10 @@ object ServerFactories {
 
 class ServerFactories {
   val factories = new mutable.WeakHashMap[Class[_], Factory]
-  val uiFactoryNames = new mutable.WeakHashMap[String, String]
 }
 
 trait Factory {
   def data: Data
-
   def coreObject(implicit plugins: PluginSet): Try[Any]
 }
 

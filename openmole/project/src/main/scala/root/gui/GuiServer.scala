@@ -9,22 +9,18 @@ import root.libraries.Apache
 import sbt.Keys._
 import com.typesafe.sbt.osgi.OsgiKeys._
 import root.gui.plugin.Task
-//import scala.scalajs.sbtplugin.ScalaJSPlugin._
 
 object Server extends GuiDefaults {
   override val dir = super.dir / "server"
 
   lazy val core = OsgiProject("org.openmole.gui.server.core") settings
-    (libraryDependencies ++= Seq(scalaTagsJVM, jetty, logback, scalatra, scalajsDom, upickleJVM, autowireJVM)) dependsOn
+    (libraryDependencies ++= Seq(autowireJVM, upickleJVM, scalaTagsJVM, jetty, logback, scalatra)) dependsOn
     (Server.factory, Shared.shared, Ext.data, base.Core.model, base.Core.implementation)
-  /*settings (bundle <<= bundle dependsOn (
-       sbt.Keys.`package` in Client.client in Compile, sbt.Keys.`package` in Task.groovyExt in Compile)) settings (scalaJSSettings: _*)*/
 
-  lazy val factory = OsgiProject("org.openmole.gui.server.factory") settings
-    (includeOsgi) dependsOn
+  lazy val factory = OsgiProject("org.openmole.gui.server.factory") dependsOn
     (Ext.data, base.Core.model, base.Core.implementation)
 
   lazy val state = OsgiProject("org.openmole.gui.server.state") settings
-    (includeOsgi, libraryDependencies ++= Seq(slick)) dependsOn
+    (libraryDependencies ++= Seq(slick)) dependsOn
     (Ext.data, base.Core.model, base.Core.implementation, base.Misc.workspace)
 }

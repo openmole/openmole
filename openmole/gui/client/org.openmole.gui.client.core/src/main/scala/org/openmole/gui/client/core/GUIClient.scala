@@ -17,10 +17,13 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.factoryui.{ FactoryUI, ClientFactories }
+import org.openmole.gui.ext.factoryui.FactoryUI
+import org.openmole.gui.client.service.ClientService
+import org.openmole.gui.client.service.Post
 import org.scalajs.dom
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.JSExport
+import autowire._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.scalajs.dom.extensions.Ajax
 import org.openmole.gui.shared._
@@ -29,6 +32,7 @@ import autowire._
 import scalatags.Text.{ attrs ⇒ a, styles ⇒ s, _ }
 import scalatags.Text.tags._
 import org.openmole.gui.tools.js.JsRxTags._
+import upickle._
 
 @JSExport
 object GUIClient {
@@ -59,20 +63,4 @@ object GUIClient {
     val window = new Window(nodes, edges)
   }
 
-}
-
-object Post extends autowire.Client[String, upickle.Reader, upickle.Writer] {
-  override def doCall(req: Request): Future[String] = {
-    val url = req.path.mkString("/")
-    dom.extensions.Ajax.post(
-      url = "http://localhost:8080/" + url,
-      data = upickle.write(req.args)
-    ).map {
-        _.responseText
-      }
-  }
-
-  def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
-
-  def write[Result: upickle.Writer](r: Result) = upickle.write(r)
 }
