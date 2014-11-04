@@ -41,27 +41,27 @@ import ref.WeakReference
 
 object BatchEnvironment extends Logger {
 
-  trait Transfert {
+  trait Transfer {
     def id: Long
   }
 
-  val transfertId = new AtomicLong
+  val transferId = new AtomicLong
 
-  case class BeginUpload(id: Long, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfert
-  case class EndUpload(id: Long, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfert
+  case class BeginUpload(id: Long, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
+  case class EndUpload(id: Long, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
 
-  case class BeginDownload(id: Long, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfert
-  case class EndDownload(id: Long, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfert
+  case class BeginDownload(id: Long, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
+  case class EndDownload(id: Long, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
 
   def signalUpload[T](upload: ⇒ T, path: String, storage: StorageService) = {
-    val id = transfertId.getAndIncrement
+    val id = transferId.getAndIncrement
     EventDispatcher.trigger(storage.environment, new BeginUpload(id, path, storage))
     try upload
     finally EventDispatcher.trigger(storage.environment, new EndUpload(id, path, storage))
   }
 
   def signalDownload[T](download: ⇒ T, path: String, storage: StorageService) = {
-    val id = transfertId.getAndIncrement
+    val id = transferId.getAndIncrement
     EventDispatcher.trigger(storage.environment, new BeginDownload(id, path, storage))
     try download
     finally EventDispatcher.trigger(storage.environment, new EndDownload(id, path, storage))
@@ -78,13 +78,13 @@ object BatchEnvironment extends Logger {
   val IncrementUpdateInterval = new ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval")
   val MaxUpdateErrorsInARow = ConfigurationLocation("BatchEnvironment", "MaxUpdateErrorsInARow")
 
-  val JobManagmentThreads = new ConfigurationLocation("BatchEnvironment", "JobManagmentThreads")
+  val JobManagementThreads = new ConfigurationLocation("BatchEnvironment", "JobManagementThreads")
 
   val EnvironmentCleaningThreads = new ConfigurationLocation("BatchEnvironment", "EnvironmentCleaningThreads")
 
   val StoragesGCUpdateInterval = new ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval")
 
-  val NoTokenForSerivceRetryInterval = new ConfigurationLocation("BatchEnvironment", "NoTokenForSerivceRetryInterval")
+  val NoTokenForServiceRetryInterval = new ConfigurationLocation("BatchEnvironment", "NoTokenForServiceRetryInterval")
 
   val MemoryMargin = ConfigurationLocation("BatchEnvironment", "MemoryMargin")
 
@@ -102,11 +102,11 @@ object BatchEnvironment extends Logger {
   Workspace += (MemorySizeForRuntime, "1024")
   Workspace += (CheckInterval, "PT1M")
   Workspace += (CheckFileExistsInterval, "PT1H")
-  Workspace += (JobManagmentThreads, "200")
+  Workspace += (JobManagementThreads, "200")
   Workspace += (EnvironmentCleaningThreads, "20")
 
   Workspace += (StoragesGCUpdateInterval, "PT1H")
-  Workspace += (NoTokenForSerivceRetryInterval, "PT2M")
+  Workspace += (NoTokenForServiceRetryInterval, "PT2M")
 
   Workspace += (MemoryMargin, "1024")
 
