@@ -32,13 +32,38 @@ object Forms {
   val nav_inverse = navPrefix + "navbar-inverse"
   val nav_staticTop = "navbar-static-top"
 
+  def levelComponent(prefix: ClassKeyAggregator, level: String) = prefix + (prefix.key + "-" + level)
+  def defaultComponent(prefix: ClassKeyAggregator) = levelComponent(prefix, "default")
+  def primaryComponent(prefix: ClassKeyAggregator) = levelComponent(prefix, "primary")
+  def successComponent(prefix: ClassKeyAggregator) = levelComponent(prefix, "success")
+  def infoComponent(prefix: ClassKeyAggregator) = levelComponent(prefix, "info")
+  def warningComponent(prefix: ClassKeyAggregator) = levelComponent(prefix, "warning")
+  def dangerComponent(prefix: ClassKeyAggregator) = levelComponent(prefix, "danger")
+
   def label(keys: ClassKeyAggregator)(content: String) = span(`class` := keys.key)(content)
   private val labelPrefix = key("label")
-  val label_default = labelPrefix + "label-default"
-  val label_primary = labelPrefix + "label-primary"
-  val label_success = labelPrefix + "label-success"
-  val label_info = labelPrefix + "label-info"
-  val label_warning = labelPrefix + "label-warning"
-  val label_danger = labelPrefix + "label-danger"
+  val label_default = defaultComponent(labelPrefix)
+  val label_primary = primaryComponent(labelPrefix)
+  val label_success = successComponent(labelPrefix)
+  val label_info = infoComponent(labelPrefix)
+  val label_warning = warningComponent(labelPrefix)
+  val label_danger = dangerComponent(labelPrefix)
+
+  def btn(keys: ClassKeyAggregator)(content: String) = button(`class` := keys.key)(content)
+  private val btnPrefix = key("btn")
+  val btn_default = defaultComponent(btnPrefix)
+  val btn_primary = primaryComponent(btnPrefix)
+  val btn_success = successComponent(btnPrefix)
+  val btn_info = infoComponent(btnPrefix)
+  val btn_warning = warningComponent(btnPrefix)
+  val btn_danger = dangerComponent(btnPrefix)
+
+  def btnGroup(btns: (ClassKeyAggregator, String)*) = {
+    val btnDiv = div(`class` := "btn-group")
+    btnDiv.apply(btns.map {
+      case (key, content) ⇒
+        btn(key)(content)
+    })
+  }
 
 }

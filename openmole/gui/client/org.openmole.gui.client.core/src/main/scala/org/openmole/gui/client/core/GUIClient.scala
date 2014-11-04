@@ -39,7 +39,15 @@ object GUIClient {
   def run(): Unit = {
     val topdiv = dom.document.body.appendChild(div.render)
     topdiv.appendChild(h1(Forms.label(label_primary)("OpenMOLE !")).render)
-
+    topdiv.appendChild(
+      h2(
+        btnGroup(
+          (btn_default, "File"),
+          (btn_default, "Edit"),
+          (btn_primary, "Run")
+        )
+      ).render
+    )
     dom.document.body.appendChild(
       topdiv
     )
