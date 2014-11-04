@@ -27,6 +27,8 @@ import org.openmole.plugin.task.external._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.OS
 
+import org.openmole.misc.tools.io.Prettifier._
+
 object NetLogoTask {
 
   case class Workspace(location: Either[(File, String), File]) {
@@ -57,23 +59,34 @@ class NetLogoTask(
       case Right(s)     ⇒ s.getName
     }
 
+  private def wrapError[T](msg: String)(f: ⇒ T): T =
+    try f
+    catch {
+      case e: Throwable ⇒
+        throw new UserBadDataError(s"$msg:\n" + e.stackStringWithMargin)
+    }
+
   override def process(context: Context): Context = withWorkDir { tmpDir ⇒
     val links = prepareInputFiles(context, tmpDir)
 
     val script = new File(tmpDir, scriptPath)
     val netLogo = netLogoFactory()
     try {
-      netLogo.open(script.getAbsolutePath)
+      wrapError(s"Error while opening the file ${script}") { netLogo.open(script.getAbsolutePath) }
 
       for (inBinding ← netLogoInputs) {
         val v = context(inBinding._1) match {
           case x: String ⇒ '"' + x + '"'
           case x         ⇒ x.toString
         }
-        netLogo.command("set " + inBinding._2 + " " + v)
+        val cmd = "set " + inBinding._2 + " " + v
+        wrapError(s"Error while executing command $cmd") { netLogo.command(cmd) }
       }
 
-      for (cmd ← launchingCommands) netLogo.command(VariableExpansion(context, cmd))
+      for (cmd ← launchingCommands) wrapError(s"Error while executing command $cmd") {
+        netLogo.command(VariableExpansion(context, cmd))
+      }
+
       fetchOutputFiles(context, tmpDir, links) ++ netLogoOutputs.map {
         case (name, prototype) ⇒
           try {
@@ -85,7 +98,9 @@ class NetLogoTask(
             }
           }
           catch {
-            case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when fetching netlogo output $name in variable $prototype")
+            case e: Throwable ⇒
+              throw new UserBadDataError(
+                s"Error when fetching netlogo output $name in variable $prototype:\n" + e.stackStringWithMargin)
           }
       } ++ netLogoArrayOutputs.map {
         case (name, column, prototype) ⇒
