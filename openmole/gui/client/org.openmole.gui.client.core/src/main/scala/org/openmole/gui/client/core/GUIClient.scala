@@ -20,33 +20,29 @@ package org.openmole.gui.client.core
 import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.client.service.Post
-import org.scalajs.dom
-import scala.concurrent.Future
-import scala.scalajs.js.annotation.JSExport
-import autowire._
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.scalajs.dom.extensions.Ajax
 import org.openmole.gui.shared._
-import upickle._
+import Forms._
+
+import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import scalatags.Text.{ attrs ⇒ a, styles ⇒ s, _ }
-import scalatags.Text.tags._
-import org.openmole.gui.tools.js.JsRxTags._
 import upickle._
+
+import org.scalajs.dom
+import scalatags.JsDom._
+import all._
 
 @JSExport
 object GUIClient {
 
-  // Get the Factory Map
-  /* Post[Api].factoriesUI.call().foreach {
-    _ map {
-      case (className, factoryName) ⇒
-        ClientFactories.add(Class.forName(className), Class.forName(factoryName).newInstance.asInstanceOf[FactoryUI])
-    }
-  }*/
-
   @JSExport
   def run(): Unit = {
+    val topdiv = dom.document.body.appendChild(div.render)
+    topdiv.appendChild(h1(Forms.label(label_primary)("OpenMOLE !")).render)
+
+    dom.document.body.appendChild(
+      topdiv
+    )
 
     val nodes = scala.Array(
       Graph.task("1", "one", 400, 600),
@@ -61,6 +57,7 @@ object GUIClient {
       Graph.edge(nodes(3), nodes(1)),
       Graph.edge(nodes(3), nodes(2)))
     val window = new Window(nodes, edges)
+
   }
 
 }

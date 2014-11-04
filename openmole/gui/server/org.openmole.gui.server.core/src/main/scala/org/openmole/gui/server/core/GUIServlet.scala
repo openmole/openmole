@@ -37,8 +37,6 @@ object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Wr
 
 class GUIServlet extends ScalatraServlet {
 
-  println("in GUIServlet ...")
-  println("READ : " + upickle.read[Seq[Int]]("[1, 4, 55]"))
   val basePath = "org/openmole/gui/shared"
 
   get("/") {
@@ -47,12 +45,13 @@ class GUIServlet extends ScalatraServlet {
       tags.head(
         tags.meta(tags.httpEquiv := "Content-Type", tags.content := "text/html; charset=UTF-8"),
         tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/workflow.css"),
+        tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/bootstrap.min.css"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/d3.v3.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js") /*,
         tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins-opt.js"*/
 
       ),
-      tags.body(tags.h1("OpenMOLE!  "),
+      tags.body(
         tags.onload := "GUIClient().run();"
       )
     )
