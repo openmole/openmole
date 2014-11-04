@@ -358,8 +358,8 @@ package object ga {
 
     val preIslandCapsule = Capsule(preIslandTask)
 
-    val islandTask = MoleTask(name + "MoleTask", model)
-    val islandSlot = Slot(islandTask)
+    //val islandTask = MoleTask(name + "MoleTask", model)
+    //val islandSlot = Slot(model)
 
     val scalingIndividualsTask = ScalingGAPopulationTask(evolution)(name + "ScalingIndividuals", population)
 
@@ -385,7 +385,7 @@ package object ga {
     val skel =
       firstCapsule -<
         (preIslandCapsule, size = Some(number.toString)) --
-        islandSlot -- toInidividualsTask --
+        model -- toInidividualsTask --
         elitismCaps --
         terminationSlot --
         scalingIndividualsSlot >| (endCapsule, terminated.name + " == true")
@@ -396,7 +396,7 @@ package object ga {
         preIslandCapsule
 
     val dataChannels =
-      (firstCapsule oo islandSlot) +
+      (firstCapsule oo model) +
         (firstCapsule -- endCapsule)
 
     val puzzle = skel + loop + dataChannels
@@ -409,7 +409,6 @@ package object ga {
       def state = _state
       def generation = _generation
       def genome = model.genome.asInstanceOf[Prototype[evolution.G]]
-      def island = islandSlot.capsule
       def archive = model.archive.asInstanceOf[Prototype[evolution.A]]
       def individual = model.individual.asInstanceOf[Prototype[Individual[evolution.G, evolution.P, evolution.F]]]
       def population = model.population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
