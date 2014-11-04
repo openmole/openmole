@@ -54,24 +54,29 @@ public class DirUtils {
   }
 
   /**
+   *
    * Completely removes given file tree starting at and including the given path.
    *
    * @param path
    * @throws IOException
    */
   public static void delete(Path path) throws IOException {
+
     validate(path);
+
+    //  TODO Shall we introduce a force option, which would force removal of hierarchy
+    //  without any consideration for file permissions only when set to true?
+
+    // make sure directory is traversable before deletion
+    path.toFile().setReadable(true);
+    path.toFile().setWritable(true);
+    path.toFile().setExecutable(true);
+
     Files.walkFileTree(path, new DeleteDirVisitor());
   }
 
-  /**
-   * If the path exists, completely removes given file tree starting at and including the given path.
-   *
-   * @param path
-   * @throws IOException
-   */
   public static void deleteIfExists(Path path) throws IOException {
-    if (Files.exists(path))   delete(path);
+    if (Files.exists(path)) delete(path);
   }
 
   private static void validate(Path... paths) {
@@ -83,4 +88,3 @@ public class DirUtils {
     }
   }
 }
-
