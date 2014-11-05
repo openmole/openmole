@@ -47,7 +47,7 @@ package object ga {
 
   implicit def seqToInputsConversion[T](s: Seq[Input[T]]) = Inputs[T](s)
 
-  implicit def gaPuzzleToGAParameters[ALG](ga: GAPuzzle[ALG]) = ga.parameters
+  implicit def gaPuzzleToGAParameters[ALG <: GAAlgorithm](ga: GAPuzzle[ALG]) = ga.parameters
 
   object GAParameters {
     def apply[ALG <: GAAlgorithm](evolution: ALG)(
