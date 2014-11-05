@@ -26,16 +26,16 @@ import org.openmole.misc.tools.io.FileUtil._
 
 object SaveMapHook {
 
-  def apply(puzzle: GAPuzzle[GenomeMap], dir: String): HookBuilder = apply(puzzle, dir, "map${" + puzzle.generation.name + "}.csv")
+  def apply(p: GAParameters[GenomeMap], dir: String): HookBuilder =
+    apply(p, dir, "map${" + p.generation.name + "}.csv")
 
-  def apply(puzzle: GAPuzzle[GenomeMap], dir: String, name: String): HookBuilder =
+  def apply(p: GAParameters[GenomeMap], dir: String, name: String): HookBuilder =
     new HookBuilder {
-      addInput(puzzle.population)
-      val _puzzle = puzzle
+      addInput(p.population)
       val _path = dir + "/" + name
 
       def toHook = new SaveMapHook with Built {
-        val puzzle = _puzzle
+        val gaParameters = p
         val path = _path
       }
     }
@@ -44,7 +44,7 @@ object SaveMapHook {
 
 abstract class SaveMapHook extends Hook {
 
-  val puzzle: GAPuzzle[_ <: GenomeMap]
+  val gaParameters: GAParameters[_ <: GenomeMap]
   val path: String
 
   def process(context: Context, executionContext: ExecutionContext) = {
@@ -52,10 +52,10 @@ abstract class SaveMapHook extends Hook {
     file.createParentDir
     file.withWriter { w ⇒
       for {
-        i ← context(puzzle.population).toIndividuals
+        i ← context(gaParameters.population).toIndividuals
       } {
-        val scaledGenome = puzzle.evolution.toVariables(i.genome, context)
-        w.write("" + scaledGenome(puzzle.evolution.x).value + "," + scaledGenome(puzzle.evolution.y).value + "," + puzzle.evolution.aggregate(i.fitness) + "\n")
+        val scaledGenome = gaParameters.evolution.toVariables(i.genome, context)
+        w.write("" + scaledGenome(gaParameters.evolution.x).value + "," + scaledGenome(gaParameters.evolution.y).value + "," + gaParameters.evolution.aggregate(i.fitness) + "\n")
       }
     }
     context
