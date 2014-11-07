@@ -20,7 +20,7 @@ package org.openmole.gui.client.core
 import fr.iscpif.scaladget.d3mapping._
 import org.scalajs.dom
 import scala.scalajs.js
-import js.Dynamic.{ literal ⇒ lit, newInstance ⇒ jsnew }
+import js.Dynamic.{ literal ⇒ lit}
 import rx._
 import fr.iscpif.scaladget.d3._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -57,6 +57,7 @@ class Window(nodes: Array[Task] = Array(), edges: Array[Edge] = Array()) {
 
   val svg = d3.select("body")
     .append("svg")
+    .attr("id", "workflow")
     .attr("width", "2500px")
     .attr("height", "2500px")
 
@@ -83,6 +84,7 @@ class GraphCreator(svgSelection: Selection, _tasks: Array[Task], _edges: Array[E
   val consts = new Consts
 
   val svgG = svgSelection.append("g").classed(consts.graphClass, true)
+
   val dragLine = svgG.append("svg:path")
     .attr("class", "link dragline hidden")
     .attr("d", "M0,0L0,0")
@@ -130,6 +132,8 @@ class GraphCreator(svgSelection: Selection, _tasks: Array[Task], _edges: Array[E
     addEdge
   }
 
+  val svgElement = js.Dynamic.global.document.getElementById("workflow")
+
   // GLOBAL EVENTS //
   d3.select(dom.window)
     .on("keydown", (_: js.Any, _: js.Number) ⇒ {
@@ -145,10 +149,14 @@ class GraphCreator(svgSelection: Selection, _tasks: Array[Task], _edges: Array[E
       }
     })
 
+  def mouseXY = d3.mouse(svgElement)
+
   def mousemove = {
     Seq(mouseDownTask()).flatten.map { t ⇒
-      val x = d3.event.clientX
-      val y = d3.event.clientY
+      println("here")
+      val xy = mouseXY
+      val x = xy(0)
+      val y = xy(1)
       if (d3.event.shiftKey) {
         dragging() = true
         dragLine.attr("d", "M" + t.location()._1 + "," + t.location()._2 + "L" + x + "," + y)
@@ -161,8 +169,9 @@ class GraphCreator(svgSelection: Selection, _tasks: Array[Task], _edges: Array[E
 
   def mouseup = {
     // Hide the drag line
+    val xy = mouseXY
     if (d3.event.shiftKey && !dragging()) {
-      val (x, y) = (d3.event.clientX, d3.event.clientY)
+      val (x, y) = (xy(0), xy(1))
       Post[Api].uuid.call().foreach { i ⇒
         addTask(i, i, x, y)
 
