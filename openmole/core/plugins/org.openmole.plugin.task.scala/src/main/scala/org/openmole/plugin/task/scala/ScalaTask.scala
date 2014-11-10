@@ -85,7 +85,7 @@ sealed abstract class ScalaTask(
   def script(inputs: Seq[Prototype[_]]) =
     imports.map("import " + _).mkString("\n") + "\n\n" +
       s"""(${inputs.toSeq.map(i ⇒ prefix + i.name + ": " + i.`type`).mkString(",")}) => {
-       |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(oMSeed).toScala();
+       |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(oMSeed).toScala;
        |    ${inputs.toSeq.map(i ⇒ "var " + i.name + " = " + prefix + i.name).mkString(";")}
        |    ${code}
        |    Map[String, Any]( ${outputs.toSeq.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} )
