@@ -25,7 +25,7 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.workspace.Workspace
 import com.typesafe.config.ConfigFactory
 import org.openmole.core.batch.environment._
-import org.openmole.core.batch.environment.BatchEnvironment.JobManagmentThreads
+import org.openmole.core.batch.environment.BatchEnvironment.JobManagementThreads
 
 import scala.concurrent.duration._
 import org.openmole.misc.exception.UserBadDataError
@@ -38,7 +38,7 @@ import JobManager.Log._
 
 class JobManager extends Actor {
 
-  val workers = ActorSystem.create("JobManagment", ConfigFactory.parseString(
+  val workers = ActorSystem.create("JobManagement", ConfigFactory.parseString(
     """
 akka {
   daemonic="on"
@@ -49,8 +49,8 @@ akka {
       mailbox-type = """ + '"' + classOf[PriorityMailBox].getName + '"' + """
       
       fork-join-executor {
-        parallelism-min = """ + Workspace.preference(JobManagmentThreads) + """
-        parallelism-max = """ + Workspace.preference(JobManagmentThreads) + """
+        parallelism-min = """ + Workspace.preference(JobManagementThreads) + """
+        parallelism-max = """ + Workspace.preference(JobManagementThreads) + """
       }
       throughput = 1
     }
@@ -60,14 +60,14 @@ akka {
 
   import BatchEnvironment.system.dispatcher
 
-  //val resizer = DefaultResizer(lowerBound = 10, upperBound = Workspace.preferenceAsInt(JobManagmentThreads))
-  val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
-  val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
-  val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
-  val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
-  val killer = workers.actorOf(Props(new KillerActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
-  val cleaner = workers.actorOf(Props(new CleanerActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
-  val deleter = workers.actorOf(Props(new DeleteActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
+  //val resizer = DefaultResizer(lowerBound = 10, upperBound = Workspace.preferenceAsInt(JobManagementThreads))
+  val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
+  val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
+  val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
+  val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
+  val killer = workers.actorOf(Props(new KillerActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
+  val cleaner = workers.actorOf(Props(new CleanerActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
+  val deleter = workers.actorOf(Props(new DeleteActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
 
   def receive = {
     case msg: Upload             ⇒ uploader ! msg

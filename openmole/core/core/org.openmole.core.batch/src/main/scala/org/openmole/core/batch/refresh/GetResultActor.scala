@@ -50,7 +50,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
           getResult(sj.storage, resultPath, job)(token)
           jobManager ! Kill(job)
         case None ⇒
-          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval))
+          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
       } catch {
         case e: Throwable ⇒
           jobManager ! Error(job, e)

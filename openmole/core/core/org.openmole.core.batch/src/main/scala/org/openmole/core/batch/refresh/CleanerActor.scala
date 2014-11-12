@@ -36,7 +36,7 @@ class CleanerActor(jobManager: ActorRef) extends Actor {
               sj.storage.rmDir(sj.path)(t)
               sj.cleaned = true
             case None ⇒
-              jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval))
+              jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
           }
 
         }

@@ -1,5 +1,6 @@
 package root.base.plugin
 
+import root.libraries._
 import sbt._
 import Keys._
 import root.base._
@@ -8,13 +9,17 @@ import root.Libraries._
 object Sampling extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.sampling")
 
-  lazy val combine = OsgiProject("combine") dependsOn (provided(Misc.exception), provided(Domain.modifier), provided(Core.implementation), provided(Tool.groovy))
+  lazy val combine = OsgiProject("combine") dependsOn (Misc.exception, Domain.modifier, Core.implementation, Tool.groovy)
 
-  lazy val csv = OsgiProject("csv") dependsOn (provided(Misc.exception), provided(Core.implementation)) settings (
-    libraryDependencies += opencsv % "provided"
+  lazy val csv = OsgiProject("csv") dependsOn (Misc.exception, Core.implementation) settings (
+    libraryDependencies += opencsv
   )
 
-  lazy val hypothesis = OsgiProject("hypothesis") dependsOn (provided(Misc.exception), provided(Core.implementation))
+  lazy val hypothesis = OsgiProject("hypothesis") dependsOn (Misc.exception, Core.implementation)
 
-  lazy val lhs = OsgiProject("lhs") dependsOn (provided(Misc.exception), provided(Core.implementation), provided(Misc.workspace))
+  lazy val lhs = OsgiProject("lhs") dependsOn (Misc.exception, Core.implementation, Misc.workspace)
+
+  lazy val quasirandom = OsgiProject("quasirandom") dependsOn (Misc.exception, Core.implementation, Misc.workspace) settings (
+    libraryDependencies += Apache.math
+  )
 }

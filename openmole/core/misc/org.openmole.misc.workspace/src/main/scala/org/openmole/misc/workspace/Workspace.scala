@@ -177,13 +177,16 @@ class Workspace(val location: File) {
 
   import Workspace.{ textEncryptor, decrypt, NoneTextEncryptor, persistentLocation, authenticationsLocation, pluginLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
 
-  Files.createDirectories(location)
+  location.mkdirs
 
-  val tmpDir = location.newDir("session")
+  val tmpDir = new File(new File(location, tmpLocation), sessionUUID.toString)
+  tmpDir.mkdirs
 
-  val pluginDir = Files.createDirectories(Paths.get(location.toString, pluginLocation)).toFile
+  val pluginDir = new File(location, pluginLocation)
+  pluginDir.mkdirs
 
-  val persistentDir = Files.createDirectories(Paths.get(location.toString, persistentLocation)).toFile
+  val persistentDir = new File(location, persistentLocation)
+  persistentDir.mkdirs
 
   def newSeed = rng.nextLong
 
