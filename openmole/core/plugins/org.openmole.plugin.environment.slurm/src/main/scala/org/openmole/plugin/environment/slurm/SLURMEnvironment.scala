@@ -42,11 +42,12 @@ object SLURMEnvironment {
     openMOLEMemory: Option[Int] = None,
     wallTime: Option[Duration] = None,
     memory: Option[Int] = None,
+    qos: Option[String] = None,
     gres: List[Gres] = List(),
     constraints: List[String] = List(),
     workDirectory: Option[String] = None,
     threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
-    new SLURMEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, gres, constraints, workDirectory, threads)
+    new SLURMEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, qos, gres, constraints, workDirectory, threads)
 }
 
 import SLURMEnvironment._
@@ -59,6 +60,7 @@ class SLURMEnvironment(
     override val openMOLEMemory: Option[Int],
     val wallTime: Option[Duration],
     val memory: Option[Int],
+    val qos: Option[String],
     val gres: List[Gres],
     val constraints: List[String],
     //val nodes: Option[Int],
