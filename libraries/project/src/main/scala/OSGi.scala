@@ -164,7 +164,7 @@ object OSGi extends Defaults(Apache) {
     version := "16.0.1"
     )
 
-  lazy val scalaTagsVersion = "0.4.2"
+  lazy val scalaTagsVersion = "0.4.3-SNAPSHOT"
   lazy val scalaRxVersion = "0.2.6"
   lazy val scalaUpickleVersion = "0.2.5"
   lazy val scalaAutowireVersion = "0.2.3"

@@ -20,7 +20,7 @@ package org.openmole.gui.client.core
 import fr.iscpif.scaladget.d3mapping._
 import org.scalajs.dom
 import scala.scalajs.js
-import js.Dynamic.{ literal ⇒ lit}
+import js.Dynamic.{ literal ⇒ lit }
 import rx._
 import fr.iscpif.scaladget.d3._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -153,7 +153,6 @@ class GraphCreator(svgSelection: Selection, _tasks: Array[Task], _edges: Array[E
 
   def mousemove = {
     Seq(mouseDownTask()).flatten.map { t ⇒
-      println("here")
       val xy = mouseXY
       val x = xy(0)
       val y = xy(1)

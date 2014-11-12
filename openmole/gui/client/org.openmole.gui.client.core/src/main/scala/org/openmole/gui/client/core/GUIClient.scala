@@ -22,6 +22,7 @@ import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.client.service.Post
 import org.openmole.gui.shared._
 import Forms._
+import CSSClasses._
 
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -29,28 +30,55 @@ import autowire._
 import upickle._
 
 import org.scalajs.dom
-import scalatags.JsDom._
-import all._
+import scalatags.JsDom.attrs._
+import scalatags.JsDom.short._
+import scalatags.JsDom.tags.{ h1, h2, div, li }
 
 @JSExport
 object GUIClient {
 
   @JSExport
   def run(): Unit = {
-    val topdiv = dom.document.body.appendChild(div.render)
-    topdiv.appendChild(h1(Forms.label(label_primary)("OpenMOLE !")).render)
+    val topdiv = dom.document.body.appendChild(div)
+
+    topdiv.appendChild(
+      nav(nav_inverse + nav_staticTop + nav_pills)(
+        navItem("Tasks", dataWith("toggle") := "modal", dataWith("target") := "#myID"),
+        navItem("Environments")
+      )
+    )
+
+    topdiv.appendChild(h1(Forms.label("OpenMOLE !", onclick := { () ⇒ println("File") })))
+    topdiv.appendChild(Forms.badge("Tasks", "4", btn_medium))
+    topdiv.appendChild(Forms.badge("Prototype", "4", btn_large + btn_primary))
+
     topdiv.appendChild(
       h2(
-        btnGroup(
-          (btn_default, "File"),
-          (btn_default, "Edit"),
-          (btn_primary, "Run")
+        buttonGroup(
+          button("File", btn_default, onclick := { () ⇒ println("File") }),
+          button("Edit", btn_default, onclick := { () ⇒ pri }),
+          button("Run", btn_primary)
         )
       ).render
     )
-    dom.document.body.appendChild(
-      topdiv
+
+    topdiv.appendChild(
+      Forms.jumbotron(
+        h1("OpenMole !"),
+        Forms.button("Click men", btn_primary + btn_large, dataWith("toggle") := "modal", dataWith("target") := "#myID" /*, onclick := { () ⇒ popupDialog }*/ )
+      )
     )
+
+    // def popupDialog = {
+    topdiv.appendChild(Forms.modalDialog("myID",
+      Forms.modalHeader("My Dialog title"),
+      Forms.modalBody("This my body, eat it ! This is my blood, drink it !"),
+      Forms.modalFooter(button("Yo"))
+    ))
+    //}
+    dom.document.body.appendChild(topdiv)
+
+    def pri = println("OpenMOLE !")
 
     val nodes = scala.Array(
       Graph.task("1", "one", 400, 600),
