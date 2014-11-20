@@ -19,7 +19,7 @@ object Libraries extends Defaults(Apache) {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.80-SNAPSHOT"
+  val gridscaleVersion = "1.81-SNAPSHOT"
 
   val bouncyCastleVersion = "1.50"
 
@@ -96,7 +96,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val jawn = "org.openmole" %% "jawn" % "0.6.0"
 
-  lazy val scalaTagsVersion = "0.4.2"
+  lazy val scalaTagsVersion = "0.4.3-SNAPSHOT"
   lazy val scalaRxVersion = "0.2.6"
   lazy val scalaUpickleVersion = "0.2.5"
   lazy val scalaAutowireVersion = "0.2.3"

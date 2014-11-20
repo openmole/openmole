@@ -164,7 +164,7 @@ object OSGi extends Defaults(Apache) {
     version := "16.0.1"
     )
 
-  lazy val scalaTagsVersion = "0.4.2"
+  lazy val scalaTagsVersion = "0.4.3-SNAPSHOT"
   lazy val scalaRxVersion = "0.2.6"
   lazy val scalaUpickleVersion = "0.2.5"
   lazy val scalaAutowireVersion = "0.2.3"
@@ -181,7 +181,7 @@ object OSGi extends Defaults(Apache) {
     libraryDependencies += "org.scala-lang.modules.scalajs" %% "scalajs-library" % scalajsVersion, version := scalajsVersion)
 
   lazy val scalaTagsJS = OsgiProject("com.scalatags-js", exports = Seq("scalatags.*","*.sjsir")) settings(
-    libraryDependencies += "com.scalatags" %%% ("scalatags" + jsSuffix) % scalaTagsVersion, version := scalaTagsVersion)
+    libraryDependencies += "fr.iscpif" %%% ("scalatags" + jsSuffix) % scalaTagsVersion, version := scalaTagsVersion)
 
   lazy val scalaRxJS = OsgiProject("com.scalarx-js", exports = Seq("rx.*","*.sjsir"))  settings(
     libraryDependencies += "com.scalarx" %%% ("scalarx" + jsSuffix) % scalaRxVersion, version := scalaRxVersion)
@@ -193,7 +193,7 @@ object OSGi extends Defaults(Apache) {
     libraryDependencies += "com.lihaoyi" %%% ("autowire" + jsSuffix) % scalaAutowireVersion, version := scalaAutowireVersion)
 
   lazy val scalaTagsJVM = OsgiProject("com.scalatags-jvm", exports = Seq("scalatags.*")) settings(
-    libraryDependencies += "com.scalatags" %% "scalatags" % scalaTagsVersion, version := scalaTagsVersion)
+    libraryDependencies += "fr.iscpif" %% "scalatags" % scalaTagsVersion, version := scalaTagsVersion)
 
   lazy val scalaRxJVM = OsgiProject("com.scalarx-jvm", exports = Seq("rx.*")) settings(
     libraryDependencies += "com.scalarx" %% "scalarx" % scalaRxVersion, version := scalaRxVersion)

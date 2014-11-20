@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
 /*
- * Copyright (C) 03/11/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 05/11/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,12 +16,8 @@ package org.openmole.gui.client.core
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import scalatags.generic.Attr
 
-object ClassKeyAggregator {
-  def empty = new ClassKeyAggregator("")
-}
+object CSSClasses {
 
-class ClassKeyAggregator(val key: String = "") {
-  def +(otherKey: ClassKeyAggregator): ClassKeyAggregator = new ClassKeyAggregator(key + " " + otherKey.key)
+  lazy val main_nav = "main_nav"
 }

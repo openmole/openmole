@@ -17,53 +17,110 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.JsDom._
-import all._
+import org.scalajs.dom
+import scalatags.JsDom.tags._
+import scalatags.JsDom.tags2._
+import scalatags.JsDom.attrs._
+import scalatags.JsDom.short._
+import scalatags.generic.TypedTag
 
 object Forms {
 
-  implicit def classKeyAggregatorToString(ck: ClassKeyAggregator): String = ck.key
+  type FormTag = TypedTag[dom.Element, dom.Element, dom.Node]
+
+  implicit def stringToClassKeyAggregator(s: String): ClassKeyAggregator = key(s)
+
+  implicit def typedTagToNode[T <: org.scalajs.dom.Element](tt: scalatags.JsDom.TypedTag[T]): org.scalajs.dom.Node = tt.render
+
+  implicit def formTagToNode(tt: FormTag): org.scalajs.dom.Node = tt.render
+
+  def emptyCK = ClassKeyAggregator.empty
 
   def key(s: String) = new ClassKeyAggregator(s)
 
-  // def navbar(keys: ClassKeyAggregator) = nav(`class` := keys.key)
-  private val navPrefix = key("navbar")
+  // Nav
+  def nav(keys: ClassKeyAggregator, navItems: FormTag*) = ul(`class` := keys.key, role := "tablist")(navItems.toSeq: _*)
+
+  private val navPrefix = key("nav")
   val nav_default = navPrefix + "navbar-default"
   val nav_inverse = navPrefix + "navbar-inverse"
-  val nav_staticTop = "navbar-static-top"
+  val nav_staticTop = navPrefix + "navbar-static-top"
+  val nav_pills = navPrefix + "nav-pills"
 
-  def levelComponent(prefix: ClassKeyAggregator, level: String) = prefix + (prefix.key + "-" + level)
-  def defaultComponent(prefix: ClassKeyAggregator) = levelComponent(prefix, "default")
-  def primaryComponent(prefix: ClassKeyAggregator) = levelComponent(prefix, "primary")
-  def successComponent(prefix: ClassKeyAggregator) = levelComponent(prefix, "success")
-  def infoComponent(prefix: ClassKeyAggregator) = levelComponent(prefix, "info")
-  def warningComponent(prefix: ClassKeyAggregator) = levelComponent(prefix, "warning")
-  def dangerComponent(prefix: ClassKeyAggregator) = levelComponent(prefix, "danger")
+  // Nav item
+  def navItem(content: String): FormTag = navItem(content, emptyCK)
+  def navItem(content: String, modifiers: scalatags.JsDom.Modifier*): FormTag = navItem(content, emptyCK, modifiers.toSeq: _*)
+  def navItem(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): FormTag =
+    li(role := "presentation")(a(href := "#")(content))(modifiers.toSeq: _*)
 
-  def label(keys: ClassKeyAggregator)(content: String) = span(`class` := keys.key)(content)
-  private val labelPrefix = key("label")
-  val label_default = defaultComponent(labelPrefix)
-  val label_primary = primaryComponent(labelPrefix)
-  val label_success = successComponent(labelPrefix)
-  val label_info = infoComponent(labelPrefix)
-  val label_warning = warningComponent(labelPrefix)
-  val label_danger = dangerComponent(labelPrefix)
+  val dropdown = "dropdown"
 
-  def btn(keys: ClassKeyAggregator)(content: String) = button(`class` := keys.key)(content)
+  // Label
+  def label(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): FormTag = span(`class` := ("label" + keys.key))(content)(modifiers.toSeq: _*)
+
+  def label(content: String, modifiers: scalatags.JsDom.Modifier*): FormTag = label(content, emptyCK, modifiers.toSeq: _*)
+
+  val label_default = key("label-default")
+  val label_primary = key("label-primary")
+  val label_success = key("label-success")
+  val label_info = key("label-info")
+  val label_warning = key("label-warning")
+  val label_danger = key("label-danger")
+
+  //Button
+  def button(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): FormTag =
+    scalatags.JsDom.tags.button(`class` := ("btn " + keys.key), `type` := "button")(content).apply(modifiers.toSeq: _*)
+
+  def button(content: String, modifiers: scalatags.JsDom.Modifier*): FormTag = button(content, btn_default, modifiers.toSeq: _*)
+
   private val btnPrefix = key("btn")
-  val btn_default = defaultComponent(btnPrefix)
-  val btn_primary = primaryComponent(btnPrefix)
-  val btn_success = successComponent(btnPrefix)
-  val btn_info = infoComponent(btnPrefix)
-  val btn_warning = warningComponent(btnPrefix)
-  val btn_danger = dangerComponent(btnPrefix)
+  val btn_default = key("btn-default")
+  val btn_primary = key("btn-primary")
+  val btn_success = key("btn-success")
+  val btn_info = key("btn-info")
+  val btn_warning = key("btn-warning")
+  val btn_danger = key("btn-danger")
+  //  val btn_dropdown = dropdownComponent(btnPrefix)
+  val btn_large = key("btn-lg")
+  val btn_medium = key("btn-md")
+  val btn_small = key("btn-sm")
 
-  def btnGroup(btns: (ClassKeyAggregator, String)*) = {
-    val btnDiv = div(`class` := "btn-group")
-    btnDiv.apply(btns.map {
-      case (key, content) ⇒
-        btn(key)(content)
-    })
-  }
+  // Badges
+  def badge(content: String, badgeValue: String): FormTag = badge(content, badgeValue, emptyCK)
 
+  def badge(content: String, badgeValue: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): FormTag =
+    button(content, keys, span(`class` := "badge", badgeValue) +: modifiers.toSeq: _*)
+
+  //Button group
+  def buttonGroup = div(`class` := "btn-group")
+
+  def modalDialog(ID: String, parts: FormTag*): FormTag =
+    div(`class` := "modal fade", id := ID)(
+      div(`class` := "modal-dialog")(
+        div(`class` := "modal-content")(
+          parts.toSeq: _*
+        )
+      )
+    )
+
+  def jumbotron(modifiers: scalatags.JsDom.Modifier*): FormTag =
+    div(`class` := "container theme-showcase", role := "main")(
+      div(`class` := "jumbotron")(
+        p(
+          (modifiers.toSeq: _*)
+        )
+      )
+    )
+
+  def modalHeader(content: String): FormTag = div(`class` := "modal-header")(
+    button("", `class` := "close", dataWith("dismiss") := "modal")(
+      span(ariaWith("hidden") := "true", "x"),
+      span(`class` := "sr-only", "Close")
+    ),
+    h4(`class` := "modal-title", content)
+  )
+
+  def modalBody(content: String): FormTag = div(`class` := "modal-body")(p(content))
+
+  def modalFooter: FormTag = div(`class` := "modal-footer")
 }
