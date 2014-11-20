@@ -338,7 +338,10 @@ object FileUtil {
     }
 
     def createParentDir = wrapError {
-      Files.createDirectories(file.toPath.getParent)
+      file.toPath.getParent match {
+        case null ⇒
+        case p    ⇒ Files.createDirectories(p)
+      }
     }
 
     def withLock[T](f: OutputStream ⇒ T) = vmFileLock.withLock(file.getCanonicalPath) {
