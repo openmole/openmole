@@ -33,7 +33,7 @@ class KillerActor(jobManager: ActorRef) extends Actor {
       try bj.jobService.tryWithToken {
         case Some(t) ⇒ bj.kill(t)
         case None ⇒
-          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval))
+          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
       } catch {
         case e: Throwable ⇒ logger.log(FINE, "Could not kill job.", e)
       }

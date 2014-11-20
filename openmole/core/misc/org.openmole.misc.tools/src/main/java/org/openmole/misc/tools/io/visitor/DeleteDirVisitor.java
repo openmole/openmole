@@ -11,15 +11,17 @@ import java.nio.file.attribute.BasicFileAttributes;
 public class DeleteDirVisitor  extends SimpleFileVisitor<Path> {
 
   @Override
-   public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-     throws IOException {
+  public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+          throws IOException {
 
-     // make sure directory will be browsable before deletion
-     dir.toFile().setReadable(true);
-     dir.toFile().setWritable(true);
-     dir.toFile().setExecutable(true);
+    // make sure direct sub-directories are traversable before deletion
+    for (Path subdir: Files.newDirectoryStream(dir, DirectoryFilter.FILTER()) ) {
+      subdir.toFile().setReadable(true);
+      subdir.toFile().setWritable(true);
+      subdir.toFile().setExecutable(true);
+    }
 
-     return FileVisitResult.CONTINUE;
+    return FileVisitResult.CONTINUE;
   }
 
   @Override
@@ -37,4 +39,3 @@ public class DeleteDirVisitor  extends SimpleFileVisitor<Path> {
     throw exc;
   }
 }
-
