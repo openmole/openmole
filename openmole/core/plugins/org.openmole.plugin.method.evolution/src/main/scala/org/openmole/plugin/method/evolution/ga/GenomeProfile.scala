@@ -29,12 +29,12 @@ object GenomeProfile {
     nX: Int,
     termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F },
     inputs: Inputs[Double],
-    objectives: Objectives,
+    objective: Objective,
     reevaluate: Double = 0.0) = {
-    val (_x, _nX, _reevaluate, _inputs, _objectives) = (x, nX, reevaluate, inputs, objectives)
+    val (_x, _nX, _reevaluate, _inputs) = (x, nX, reevaluate, inputs)
     new GenomeProfile {
       val inputs = _inputs
-      val objectives = _objectives
+      val objectives = Seq(objective)
 
       val stateManifest: Manifest[STATE] = termination.stateManifest
       val populationManifest: Manifest[Population[G, P, F]] = implicitly
