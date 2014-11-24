@@ -18,6 +18,7 @@
 package org.openmole.plugin.domain
 
 import java.math.{ MathContext, RoundingMode, BigDecimal }
+import org.openmole.misc.tools.io.FromString
 import org.openmole.misc.tools.math.BigDecimalOperations
 
 package object range {
@@ -43,9 +44,13 @@ package object range {
     }
 
   implicit class RangeDomainDecorator[T](r: Range[T]) {
-    def step(s: String) = StepRange[T](r, s)
-    def size(s: String) = SizeRange[T](r, s)
-    def logSteps(s: String)(implicit l: Log[T]) = LogRange[T](r, s)
+    def step(s: T) = StepRange[T](r, s)
+    def size(s: T) = SizeRange[T](r, s)
+    def logSteps(s: T)(implicit l: Log[T]) = LogRange[T](r, s)
+
+    def step(s: String)(implicit fs: FromString[T]) = StepRange[T](r, s)
+    def size(s: String)(implicit fs: FromString[T]) = SizeRange[T](r, s)
+    def logSteps(s: String)(implicit l: Log[T], fs: FromString[T]) = LogRange[T](r, s)
   }
 
 }

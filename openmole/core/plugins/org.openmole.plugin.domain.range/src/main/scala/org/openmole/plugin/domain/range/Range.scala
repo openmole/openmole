@@ -17,9 +17,16 @@
 
 package org.openmole.plugin.domain.range
 
+import org.openmole.core.implementation.tools.FromContext
 import org.openmole.misc.tools.io.FromString
 
 object Range {
+
+  def apply[T](min: T, max: T)(implicit integral: Integral[T]) =
+    new Range[T](FromContext(min), FromContext(max))
+
+  def apply[T](min: T, max: T, step: T)(implicit integral: Integral[T]): StepRange[T] =
+    StepRange[T](Range(min, max), step)
 
   def apply[T](
     min: String,
@@ -39,6 +46,7 @@ object Range {
 
 }
 
-class Range[T](val min: String, val max: String)(implicit val integral: Integral[T], val fs: FromString[T]) extends Bounded[T] {
+class Range[T](val min: FromContext[T], val max: FromContext[T])(implicit val integral: Integral[T]) extends Bounded[T] {
   lazy val range = this
 }
+

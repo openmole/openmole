@@ -22,55 +22,59 @@ import java.math.{ BigDecimal ⇒ JBigDecimal }
 import java.math.{ BigInteger ⇒ JBigInteger }
 import java.io.File
 
+trait From[F, T] {
+  def from(f: F): T
+}
+
 object FromString {
 
   implicit val doubleFromString =
     new FromString[Double] {
-      def fromString(s: String) = s.toDouble
+      def from(s: String) = s.toDouble
     }
 
   implicit object FileFromString extends FromString[File] {
-    def fromString(s: String) = new File(s)
+    def from(s: String) = new File(s)
   }
 
   implicit val intFromString =
     new FromString[Int] {
-      def fromString(s: String) = s.toInt
+      def from(s: String) = s.toInt
     }
 
   implicit val longFromString =
     new FromString[Long] {
-      def fromString(s: String) = s.toLong
+      def from(s: String) = s.toLong
     }
 
   implicit val floatFromString =
     new FromString[Float] {
-      def fromString(s: String) = s.toFloat
+      def from(s: String) = s.toFloat
     }
 
   implicit val bigDecimalFromString =
     new FromString[BigDecimal] {
-      def fromString(s: String) = BigDecimal(s, MathContext.DECIMAL128)
+      def from(s: String) = BigDecimal(s, MathContext.DECIMAL128)
     }
 
   implicit val bigIntFromString =
     new FromString[BigInt] {
-      def fromString(s: String) = BigInt(s)
+      def from(s: String) = BigInt(s)
     }
 
   implicit val javaBigDecimalFromString =
     new FromString[java.math.BigDecimal] {
-      def fromString(s: String) = BigDecimal(s, MathContext.DECIMAL128).bigDecimal
+      def from(s: String) = BigDecimal(s, MathContext.DECIMAL128).bigDecimal
     }
 
   implicit val javaBigIntegerFromString =
     new FromString[java.math.BigInteger] {
-      def fromString(s: String) = BigInt(s).underlying
+      def from(s: String) = BigInt(s).underlying
     }
 
   implicit val stringFromString =
     new FromString[String] {
-      def fromString(s: String) = s
+      def from(s: String) = s
     }
 
   implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
@@ -109,6 +113,6 @@ object FromString {
 
 }
 
-trait FromString[T] {
-  def fromString(s: String): T
+trait FromString[T] <: From[String, T] {
+  def from(s: String): T
 }

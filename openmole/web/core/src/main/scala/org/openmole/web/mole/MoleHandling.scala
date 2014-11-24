@@ -78,7 +78,7 @@ trait MoleHandling { self: ScalatraBase ⇒
 
   private def reifyCSV(mole: IPartialMoleExecution, csvData: Map[String, String]) = {
     def fromString[T: FromString](s: String) = {
-      implicitly[FromString[T]].fromString(s)
+      implicitly[FromString[T]].from(s)
     }
 
     def createVariable[T: FromString](mI: MissingInput) = csvData get mI.data.prototype.name map (d ⇒ Variable[T](mI.data.prototype.asInstanceOf[Prototype[T]], fromString[T](d)))

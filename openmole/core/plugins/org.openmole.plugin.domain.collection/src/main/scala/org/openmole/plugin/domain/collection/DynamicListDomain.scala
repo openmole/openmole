@@ -39,6 +39,6 @@ sealed class DynamicListDomain[+T](val values: String*)(implicit s: FromString[T
   @transient lazy val proxies = values.map { v ⇒ GroovyProxyPool(v) }
 
   override def computeValues(context: Context): Iterable[T] =
-    proxies.map { p ⇒ s.fromString(p.execute(context).toString) }
+    proxies.map { p ⇒ s.from(p.execute(context).toString) }
 
 }

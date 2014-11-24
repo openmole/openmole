@@ -17,24 +17,25 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.misc.tools.script.GroovyProxyPool
+import org.openmole.misc.tools.io.FromString
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.tools._
 
 object SizeRange {
-
-  def apply[T](range: Range[T], steps: String) = new SizeRange[T](range, steps)
-
+  def apply[T](range: Range[T], steps: T) = new SizeRange[T](range, FromContext(steps))
+  def apply[T](range: Range[T], steps: String)(implicit fromString: FromString[T]) = new SizeRange[T](range, steps)
 }
 
-class SizeRange[T](val range: Range[T], steps: String) extends SizeStep[T] with Bounded[T] {
+class SizeRange[T](val range: Range[T], steps: FromContext[T]) extends SizeStep[T] with Bounded[T] {
   import range._
 
-  lazy val stepsProxy = GroovyProxyPool(steps)
   def stepAndSize(minValue: T, maxValue: T, context: Context) = {
     import integral._
-    val size = fs.fromString(stepsProxy(context).toString) - integral.one
+    val size = steps.from(context) - integral.one
     val step = (maxValue - minValue) / size
     (step, size.toInt)
   }
+
+  def min = range.min
+  def max = range.max
 }

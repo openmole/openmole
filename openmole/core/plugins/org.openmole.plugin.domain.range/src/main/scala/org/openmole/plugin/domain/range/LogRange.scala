@@ -25,8 +25,11 @@ import org.openmole.misc.tools.script.GroovyProxy
 
 object LogRange {
 
-  def apply[T](range: Range[T], steps: String)(implicit lg: Log[T]) =
+  def apply[T](range: Range[T], steps: String)(implicit lg: Log[T], fs: FromString[T]) =
     new LogRange[T](range, steps)
+
+  def apply[T](range: Range[T], steps: T)(implicit lg: Log[T]) =
+    new LogRange[T](range, FromContext(steps))
 
   def apply[T](
     min: String,
@@ -36,7 +39,7 @@ object LogRange {
 
 }
 
-sealed class LogRange[T](val range: Range[T], val steps: String)(implicit lg: Log[T]) extends Domain[T] with Finite[T] with Bounds[T] {
+sealed class LogRange[T](val range: Range[T], val steps: FromContext[T])(implicit lg: Log[T]) extends Domain[T] with Finite[T] with Bounds[T] {
 
   import range._
 
@@ -58,12 +61,8 @@ sealed class LogRange[T](val range: Range[T], val steps: String)(implicit lg: Lo
     }
   }
 
-  @transient lazy val minProxy = GroovyProxy(range.min)
-  @transient lazy val maxProxy = GroovyProxy(range.max)
-  @transient lazy val nbStepProxy = GroovyProxy(steps)
-
-  def nbStep(context: Context): T = fs.fromString(nbStepProxy(context).toString)
-  def min(context: Context): T = fs.fromString(minProxy(context).toString)
-  def max(context: Context): T = fs.fromString(maxProxy(context).toString)
+  def nbStep(context: Context): T = steps.from(context)
+  def min(context: Context): T = range.min.from(context)
+  def max(context: Context): T = range.max.from(context)
 
 }

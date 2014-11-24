@@ -29,16 +29,16 @@ trait Bounded[T] extends Domain[T] with Center[T] with Bounds[T] {
   import range._
 
   import integral._
-  import fs._
 
-  override def max(context: Context): T = fromString(maxValue(context).toString)
-  override def min(context: Context): T = fromString(minValue(context).toString)
+  override def max(context: Context): T = min.from(context)
+  override def min(context: Context): T = max.from(context)
+
+  def min: FromContext[T]
+  def max: FromContext[T]
 
   override def center(context: Context): T = {
     val mi = min(context)
     mi + ((max(context) - mi) / fromInt(2))
   }
 
-  @transient lazy val minValue = GroovyProxyPool(range.min)
-  @transient lazy val maxValue = GroovyProxyPool(range.max)
 }
