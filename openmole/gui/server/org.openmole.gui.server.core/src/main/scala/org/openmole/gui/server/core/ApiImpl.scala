@@ -1,7 +1,11 @@
 package org.openmole.gui.server.core
 
+import org.openmole.gui.ext.dataui.FakeDataUI
+import org.openmole.gui.ext.factoryui.FactoryUI
+import org.openmole.gui.ext.panelui.PanelUI
 import org.openmole.gui.server.factory.ServerFactories
-import org.openmole.gui.shared.Api
+import org.openmole.gui.shared._
+import rx.core.Var
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -21,5 +25,6 @@ import org.openmole.gui.shared.Api
  */
 
 object ApiImpl extends Api {
-  // def factoriesUI: Map[String, String] = ServerFactories.uiFactories
+  //def ee = ServerFactories.factoriesUI.values.head.dataUI.panelUI
+  // def factoriesUI(): Map[String, FactoryUI] = ServerFactories.factoriesUI
 }

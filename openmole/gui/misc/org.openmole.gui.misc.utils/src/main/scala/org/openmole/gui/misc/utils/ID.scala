@@ -1,7 +1,7 @@
-package org.openmole.gui.client.core
+package org.openmole.gui.misc.utils
 
 /*
- * Copyright (C) 03/11/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 10/08/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,12 +16,15 @@ package org.openmole.gui.client.core
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import scalatags.generic.Attr
 
-object ClassKeyAggregator {
-  def empty = new ClassKeyAggregator("")
+import java.util.UUID
+
+object ID {
+  def newId = UUID.randomUUID.toString
+  type Type = String
 }
 
-class ClassKeyAggregator(val key: String = "") {
-  def +(otherKey: ClassKeyAggregator): ClassKeyAggregator = new ClassKeyAggregator(key + " " + otherKey.key)
+trait ID {
+  val id = ID.newId
 }
+

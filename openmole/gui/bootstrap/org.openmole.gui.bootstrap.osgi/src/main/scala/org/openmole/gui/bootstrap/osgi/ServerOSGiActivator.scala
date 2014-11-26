@@ -27,21 +27,18 @@ import org.openmole.gui.server.factory.{ Factory, ServerFactories }
 trait ServerOSGiActivator extends BundleActivator {
 
   // core factories and name of UI factories
-  def factories: Seq[(Class[_], Factory)] = Seq()
-  def factoriesUI: Seq[(Class[_], FactoryUI)] = Seq()
+  def factories: Seq[(Class[_], Factory, FactoryUI)] = Seq()
 
   abstract override def start(context: BundleContext) = {
     super.start(context)
     factories.foreach {
-      case (d, f) ⇒
-        ServerFactories.add(d, f)
+      case (d, f, fUI) ⇒
+        ServerFactories.add(d, f, fUI)
     }
-    factoriesUI.foreach { ClientService.merge }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    factories.foreach { case (d, _) ⇒ ServerFactories.remove(d) }
-    factoriesUI.foreach { case (d, _) ⇒ ClientService.remove(d) }
+    factories.foreach { case (d, _, _) ⇒ ServerFactories.remove(d) }
   }
 }

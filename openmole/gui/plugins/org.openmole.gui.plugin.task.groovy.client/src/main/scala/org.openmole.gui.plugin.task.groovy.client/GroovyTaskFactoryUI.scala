@@ -1,7 +1,9 @@
 package org.openmole.gui.plugin.task.groovy.client
 
-import org.openmole.gui.ext.dataui.DataUI
-import org.openmole.gui.ext.factoryui.TaskFactoryUI
+import org.openmole.gui.ext.dataui.{TaskDataUI}
+import org.openmole.gui.ext.factoryui.{FactoryUI}
+
+import scala.scalajs.js.annotation.JSExport
 
 /*
  * Copyright (C) 01/10/14 // mathieu.leclaire@openmole.org
@@ -20,6 +22,10 @@ import org.openmole.gui.ext.factoryui.TaskFactoryUI
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class GroovyTaskFactoryUI extends TaskFactoryUI {
+@JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskFactoryUI")
+class GroovyTaskFactoryUI extends FactoryUI {
+  type DATAUI = TaskDataUI
+
   def dataUI = new GroovyTaskDataUI
+  //val xxxx = Map("ZZZZZZ" -> new GroovyTaskDataUI)
 }

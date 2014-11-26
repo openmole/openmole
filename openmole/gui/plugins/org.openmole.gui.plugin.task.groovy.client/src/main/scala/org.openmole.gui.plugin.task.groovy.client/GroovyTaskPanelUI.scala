@@ -17,15 +17,18 @@ package org.openmole.gui.plugin.task.groovy.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all._
-import scala.scalajs.js.annotation.JSExport
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import org.openmole.gui.ext.panelui.PanelUI
 
+import scala.scalajs.js.annotation.JSExport
+import org.openmole.gui.misc.js.Forms._
+import scalatags.Text.all._
+
+@JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskPanelUI")
 @JSExport
-object GroovyTaskPanelUI {
+case object GroovyTaskPanelUI extends PanelUI{
 
   @JSExport
-  def run(): Unit = {
+  def run() = {
     html(
       body(
         div(
@@ -33,6 +36,6 @@ object GroovyTaskPanelUI {
           p("This is a big paragraph of text")
         )
       )
-    )
+    ).render
   }
 }

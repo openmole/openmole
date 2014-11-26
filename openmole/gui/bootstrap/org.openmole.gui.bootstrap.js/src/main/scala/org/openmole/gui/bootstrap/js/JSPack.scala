@@ -32,8 +32,8 @@ import java.io.{ FileOutputStream, File }
 
 object JSPack {
 
-  val OPTIMIZED = "plugins-opt.js"
-  val NOT_OPTIMIZED = "plugins.js"
+  // val OPTIMIZED = "plugins-opt.js"
+  val JS_FILE = "plugins.js"
 
   def apply(src: File, target: File, optimized: Boolean = true) = {
 
@@ -50,7 +50,7 @@ object JSPack {
 
     val out =
       if (optimized) WritableMemVirtualJSFile("out.js")
-      else WritableFileVirtualJSFile(new java.io.File(target, NOT_OPTIMIZED))
+      else WritableFileVirtualJSFile(new java.io.File(target, JS_FILE))
 
     val optimizedClasspath = optimizer.optimizeCP(
       ScalaJSOptimizer.Inputs(completeClasspath),
@@ -59,7 +59,7 @@ object JSPack {
     )
 
     if (optimized) {
-      val fullOptOut = WritableFileVirtualJSFile(new java.io.File(target, OPTIMIZED))
+      val fullOptOut = WritableFileVirtualJSFile(new java.io.File(target, JS_FILE))
 
       val fullOptimizer = new ScalaJSClosureOptimizer
       val fullyOptimizedCP = fullOptimizer.optimizeCP(

@@ -31,17 +31,34 @@ sealed class UIFactories {
   val instance: Var[Map[Class[_], FactoryUI]] = Var(Map())
 
   def merge(m: (Class[_], FactoryUI)) = instance() = instance() ++ Map(m._1 -> m._2)
+
   def remove(dataClass: Class[_]) = instance() = instance().filterKeys(k ⇒ k != dataClass)
 }
 
 object ClientService {
 
-  val uiFactories: Var[UIFactories] = Var(new UIFactories)
+  var oo = "rien"
+  println("Client Service " + oo)
+  private val uiFactories: Var[UIFactories] = Var(new UIFactories)
+
   def merge(m: (Class[_], FactoryUI)) = {
     println("Add UI factory " + m._2 + " for data class " + m._1.getName)
     uiFactories().merge(m)
+    println("SIJE : " + uiFactories().instance().size)
   }
+
   def remove(dataClass: Class[_]) = uiFactories().remove(dataClass)
+
+  def taskFactories = {
+    println("Client Service xx " + oo)
+    println("SID " + uiFactories().instance().size)
+    uiFactories().instance().values.filter { f ⇒
+      println("test f " + f)
+      f.dataUI.isInstanceOf[TaskDataUI]
+    }.toSeq
+  }
+
+  // def factories(classType: Class[_]) = classType
 
   implicit def dataToDataClassName(d: Data) = d.getClass.getCanonicalName
 
@@ -68,14 +85,19 @@ object ClientService {
 
   implicit def protoDataUIStringMapToProtoDataString(m: Map[PrototypeDataUI[_], String]): Map[PrototypeData[_], String] = m.map { case (dataUI: PrototypeDataUI[_], s) ⇒ dataUI.data -> s }.toMap
 
-  private def dataUI(data: TaskData) = uiFactories().instance().get(data.getClass) match {
-    case Some(f: TaskFactoryUI) ⇒ Try(f.dataUI)
+  private def factoryUI(data: Data) = uiFactories().instance().get(data.getClass) match {
+    case Some(f: FactoryUI) ⇒ Try(f.dataUI)
+    case _                  ⇒ failure(data)
+  }
+
+  private def dataUI(data: TaskData): TaskDataUI = factoryUI(data) match {
+    case Success(d: TaskDataUI) ⇒ d
     case _                      ⇒ failure(data)
   }
 
-  private def dataUI(data: PrototypeData[_]) = uiFactories().instance().get(data.getClass) match {
-    case Some(f: PrototypeFactoryUI) ⇒ Try(f.dataUI)
-    case _                           ⇒ failure(data)
+  private def dataUI(data: PrototypeData[_]): PrototypeDataUI[_] = factoryUI(data) match {
+    case Success(d: PrototypeDataUI[_]) ⇒ d
+    case _                              ⇒ failure(data)
   }
 
   private def failure[T <: Data](data: T) = Failure(new Throwable("The data " + data.name + " cannot be recontructed on the server."))

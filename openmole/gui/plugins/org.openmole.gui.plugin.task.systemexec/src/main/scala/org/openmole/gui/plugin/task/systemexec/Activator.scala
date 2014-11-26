@@ -26,6 +26,6 @@ import org.openmole.gui.server.factory._
 class Activator extends OSGiActivator with ServerOSGiActivator {
   val data = new SystemExecTaskData
   val dataClass = data.getClass()
-  override def factories = Seq((dataClass, new SystemExecTaskFactory(data)))
-  override def factoriesUI = Seq((dataClass, new SystemExecTaskFactoryUI))
+  override def factories = Seq((dataClass, new SystemExecTaskFactory(data), new SystemExecTaskFactoryUI))
+  // override def factoriesUI = Seq((dataClass, new SystemExecTaskFactoryUI))
 }

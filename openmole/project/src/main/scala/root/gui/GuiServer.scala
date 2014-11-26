@@ -14,11 +14,11 @@ object Server extends GuiDefaults {
   override val dir = super.dir / "server"
 
   lazy val core = OsgiProject("org.openmole.gui.server.core") settings
-    (libraryDependencies ++= Seq(autowireJVM, upickleJVM, scalaTagsJVM, jetty, logback, scalatra)) dependsOn
+    (libraryDependencies ++= Seq(autowireJVM, upickleJVM, playJson, pickling, scalaTagsJVM, jetty, logback, scalatra)) dependsOn
     (Server.factory, Shared.shared, Ext.data, base.Core.model, base.Core.implementation)
 
   lazy val factory = OsgiProject("org.openmole.gui.server.factory") dependsOn
-    (Ext.data, base.Core.model, base.Core.implementation)
+    (Ext.data, Ext.factoryui, Shared.shared, base.Core.model, base.Core.implementation)
 
   lazy val state = OsgiProject("org.openmole.gui.server.state") settings
     (libraryDependencies ++= Seq(slick)) dependsOn

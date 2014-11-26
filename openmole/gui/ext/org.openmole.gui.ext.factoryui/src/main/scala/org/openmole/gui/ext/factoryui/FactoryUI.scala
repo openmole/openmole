@@ -2,6 +2,8 @@ package org.openmole.gui.ext.factoryui
 
 import org.openmole.gui.ext.dataui._
 
+import scala.scalajs.js.annotation.JSExport
+
 /*
  * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
  *
@@ -18,12 +20,18 @@ import org.openmole.gui.ext.dataui._
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-trait FactoryUI
 
+trait FactoryUI {
+  type DATAUI <: DataUI
+  def dataUI: DATAUI
+}
+/*
 trait TaskFactoryUI extends FactoryUI {
+  type DATAUI = TaskDataUI
   def dataUI: TaskDataUI
 }
 
 trait PrototypeFactoryUI extends FactoryUI {
+  type DATAUI = PrototypeDataUI[_]
   def dataUI: PrototypeDataUI[_]
-}
+}*/

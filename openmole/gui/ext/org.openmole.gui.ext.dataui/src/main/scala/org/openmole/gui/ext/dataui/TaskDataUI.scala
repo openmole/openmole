@@ -1,6 +1,7 @@
 package org.openmole.gui.ext.dataui
 
 import org.openmole.gui.ext.data.TaskData
+import org.openmole.gui.ext.panelui.PanelUI
 
 /*
  * Copyright (C) 10/08/14 // mathieu.leclaire@openmole.org

@@ -16,18 +16,13 @@
  */
 package org.openmole.gui.server.core
 
-import java.util.UUID
-
 import org.scalatra._
 import scala.concurrent.ExecutionContext.Implicits.global
-import upickle._
-import autowire._
 import org.openmole.gui.shared.Api
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
-import org.openmole.gui.server.factory.ServerFactories
 
 object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Writer] {
   def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
@@ -49,13 +44,13 @@ class GUIServlet extends ScalatraServlet {
         tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/bootstrap-3.3.0.min.css"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/d3.v3.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery-2.1.1.min.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery-ui-autocomplete.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap-3.3.0.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js") /*,
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins-opt.js"*/
-
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/pluginMapping.js")
       ),
       tags.body(
-        tags.onload := "GUIClient().run();"
+        tags.onload := "fillMap();GUIClient().run();"
       )
     )
   }

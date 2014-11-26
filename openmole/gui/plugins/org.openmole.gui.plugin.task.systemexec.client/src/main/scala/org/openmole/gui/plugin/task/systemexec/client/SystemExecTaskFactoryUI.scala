@@ -17,8 +17,14 @@ package org.openmole.gui.plugin.task.systemexec.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.factoryui.TaskFactoryUI
+import org.openmole.gui.ext.dataui.TaskDataUI
+import org.openmole.gui.ext.factoryui.FactoryUI
 
-class SystemExecTaskFactoryUI extends TaskFactoryUI {
-def dataUI = new SystemExecTaskDataUI
+import scala.scalajs.js.annotation.JSExport
+
+@JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskFactoryUI")
+sealed class SystemExecTaskFactoryUI extends FactoryUI {
+  type DATAUI = TaskDataUI
+
+  def dataUI = new SystemExecTaskDataUI
 }
