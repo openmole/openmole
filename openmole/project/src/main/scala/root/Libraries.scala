@@ -98,7 +98,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scalaTagsVersion = "0.4.3-SNAPSHOT"
   lazy val scalaRxVersion = "0.2.6"
-  lazy val scalaUpickleVersion = "0.2.6-SNAPSHOT"
+  lazy val scalaUpickleVersion = "0.2.6"
   lazy val scalaAutowireVersion = "0.2.3"
 
   lazy val scalaTagsJS = "org.openmole" %% "com-scalatags-js" % scalaTagsVersion
