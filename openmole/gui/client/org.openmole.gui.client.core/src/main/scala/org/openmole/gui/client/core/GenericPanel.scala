@@ -22,11 +22,11 @@ import rx._
 
 object GenericPanel {
 
-  def apply(id: String, title: String, factories: Seq[FactoryUI]) = {
+  def apply(id: String, headTag: FormTag, bodyTag: FormTag, factories: Seq[FactoryUI]) = {
     factories.foreach { f ⇒ println("dis " + f.dataUI.name()) }
     modalDialog(id,
-      modalHeader(title),
-      modalBody("This my body, eat it ! This is my blood, drink it !"),
+      modalHeader(headTag),
+      modalBody(bodyTag),
       modalFooter(button("Yo"))
     )
   }

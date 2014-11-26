@@ -18,14 +18,11 @@ package org.openmole.gui.ext.dataui
  */
 
 import org.openmole.gui.ext.data.Data
-import org.openmole.gui.ext.panelui.PanelUI
 import rx._
 
 trait DataUI {
   //def panelUI: PanelUI
+  type DATA <: Data
   def name: Var[String]
-}
-
-class FakeDataUI extends DataUI {
-  val name = Var("TOto")
+  def panelUI: PanelUI
 }

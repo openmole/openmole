@@ -35,5 +35,5 @@ class GroovyTaskDataUI(val name: Var[String] = Var(""),
 
   def data = new GroovyTaskData(name(), code(), libs().map{c=>c()}, inputs, outputs, inputParameters)
 
-  def panelUI = GroovyTaskPanelUI
+  def panelUI = new GroovyTaskPanelUI(this)
 }

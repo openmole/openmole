@@ -40,9 +40,6 @@ object GUIClient {
   @JSExport
   def run(): Unit = {
 
-    // println("factoryMap :: " + UI.factoryMap.size)
-    //println("groovy  : " + PluginMap.factoryMap("org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData").dataUI.name())
-
     val topdiv = dom.document.body.appendChild(div)
 
     topdiv.appendChild(
@@ -66,7 +63,13 @@ object GUIClient {
       )
     )
 
-    val dialog = GenericPanel("taskPanelID", "Tasks", ClientService.taskFactories)
+    val dialog = GenericPanel("taskPanelID",
+      div(
+        "taskName",
+        button("TaskType", btn_info)
+      ),
+      ClientService.taskFactories(0).dataUI.panelUI.view,
+      ClientService.taskFactories)
 
     topdiv.appendChild(
       jumbotron(
