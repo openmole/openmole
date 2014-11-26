@@ -12,7 +12,7 @@ object Client extends GuiDefaults {
   override val dir = super.dir / "client"
 
   lazy val service = OsgiProject("org.openmole.gui.client.service") settings (scalaJSSettings: _*) settings (
-    libraryDependencies ++= Seq(autowireJS, playJson, pickling, upickleJS, scalaRxJS, scalajsDom)) dependsOn
+    libraryDependencies ++= Seq(autowireJS, upickleJS, scalaRxJS, scalajsDom)) dependsOn
     (Ext.dataui, Ext.factoryui, Shared.shared, Misc.utils)
 
   lazy val core = OsgiProject("org.openmole.gui.client.core") dependsOn

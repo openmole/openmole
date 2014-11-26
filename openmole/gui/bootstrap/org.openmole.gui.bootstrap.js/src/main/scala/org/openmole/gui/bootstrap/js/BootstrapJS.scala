@@ -93,7 +93,6 @@ object BootstrapJS {
     writer.write("function fillMap() {\n")
     ServerFactories.factoriesUI.foreach {
       case (k, v) ⇒
-        println("process " + k)
         writer.write("PluginMap().factoryMap[\"" + k + "\" ] = new " + v.getClass.getCanonicalName + "();\n")
     }
     writer.write("}")
