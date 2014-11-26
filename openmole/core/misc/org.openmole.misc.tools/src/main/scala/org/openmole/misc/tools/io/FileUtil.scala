@@ -330,7 +330,7 @@ object FileUtil {
       val linkTarget = Paths.get(target)
       try Files.createSymbolicLink(file, linkTarget)
       catch {
-        case e: UnsupportedOperationException ⇒ {
+        case e: IOException ⇒ {
           Logger.getLogger(FileUtil.getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
           Files.copy(file, linkTarget, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
         }
