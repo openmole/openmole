@@ -17,25 +17,29 @@ package org.openmole.gui.plugin.task.systemexec.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.panelui.PanelUI
+import org.openmole.gui.ext.dataui.PanelUI
 
-import scalatags.Text.all._
-import org.openmole.gui.misc.js.Forms._
+import org.scalajs.dom
 import scala.scalajs.js.annotation.JSExport
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scalatags.JsDom.tags._
+import scalatags.JsDom.tags2._
+import scalatags.JsDom.attrs._
+import scalatags.JsDom.short._
+import scalatags.generic.TypedTag
+import org.openmole.gui.misc.js.Forms._
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskPanelUI")
-case object SystemExecTaskPanelUI extends PanelUI {
+class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {
 
-    @JSExport
-    def run() = {
-      html(
-        body(
-          div(
-            h1(id := "title", "This is a title"),
-            p("This is a big paragraph of text")
-          )
-        )
-      ).render
-    }
-  }
+  type DATAUI = SystemExecTaskDataUI
+
+  val tag = div(
+    h1(id := "title", "This is a title"),
+    p("SystemExecTask !")
+  )
+
+  @JSExport
+  def view: FormTag = tag
+
+  def save(name: String) = new SystemExecTaskDataUI
+}

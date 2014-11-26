@@ -23,7 +23,7 @@ object Task extends PluginDefaults {
               serverProjectDependencies: Seq[ClasspathDep[ProjectReference]] = Seq(),
               serverLibDependencies: Seq[ModuleID] = Seq()) = {
     lazy val ext = subProject(suffix + ".ext", extProjectDependencies, extLibDependencies ++ Seq(root.Libraries.scalaTagsJS)) dependsOn (Ext.data) settings (scalaJSSettings: _*)
-    lazy val client = subProject(suffix + ".client", clientProjectDependencies, clientLibDependencies) dependsOn (ext, Ext.dataui, Ext.factoryui, Ext.panelui, Misc.js, Bootstrap.osgi, base.Misc.replication % "test") settings (scalaJSSettings: _*)
+    lazy val client = subProject(suffix + ".client", clientProjectDependencies, clientLibDependencies) dependsOn (ext, Ext.dataui, Ext.factoryui, Misc.js, Bootstrap.osgi, base.Misc.replication % "test") settings (scalaJSSettings: _*)
     lazy val server = subProject(suffix + ".server", serverProjectDependencies, serverLibDependencies) dependsOn (ext, Server.factory, base.Misc.replication % "test")
 
     //FIXME: how to call directly OsgiProject from here ?

@@ -1,11 +1,10 @@
-package org.openmole.gui.ext.panelui
+package org.openmole.gui.ext.dataui
 
-import scalatags.Text.tags
 import scalatags.generic.TypedTag
 import org.scalajs.dom
 
 /*
- * Copyright (C) 14/11/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 26/11/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -21,16 +20,8 @@ import org.scalajs.dom
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*object PanelUI {
-  def apply(): PanelUI = new PanelUI {
-    def run() = tags.html.render
-  }
-  def unapply(): Option[PanelUI] = Some(new PanelUI {
-    def run() = tags.html.render
-  })
-}*/
-
-abstract class PanelUI {
-  type FormTag = TypedTag[dom.Element, dom.Element, dom.Node]
-  def run: FormTag
+trait PanelUI {
+  type DATAUI <: DataUI
+  def view: TypedTag[dom.Element, dom.Element, dom.Node]
+  def save(name: String): DATAUI
 }

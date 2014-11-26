@@ -51,7 +51,9 @@ object Forms {
 
   // Nav item
   def navItem(content: String): FormTag = navItem(content, emptyCK)
+
   def navItem(content: String, modifiers: scalatags.JsDom.Modifier*): FormTag = navItem(content, emptyCK, modifiers.toSeq: _*)
+
   def navItem(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): FormTag =
     li(role := "presentation")(a(href := "#")(content))(modifiers.toSeq: _*)
 
@@ -114,15 +116,16 @@ object Forms {
       )
     )
 
-  def modalHeader(content: String): FormTag = div(`class` := "modal-header")(
+  def modalHeader(tag: FormTag): FormTag = div(`class` := "modal-header")(
     button("", `class` := "close", dataWith("dismiss") := "modal")(
       span(ariaWith("hidden") := "true", "x"),
       span(`class` := "sr-only", "Close")
     ),
-    h4(`class` := "modal-title", content)
+    tag
+  // h4(`class` := "modal-title", content)
   )
 
-  def modalBody(content: String): FormTag = div(`class` := "modal-body")(p(content))
+  def modalBody(tag: FormTag): FormTag = div(`class` := "modal-body")(p(tag))
 
   def modalFooter: FormTag = div(`class` := "modal-footer")
 }

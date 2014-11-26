@@ -21,7 +21,6 @@ import java.net.URL
 
 import org.openmole.gui.ext.dataui.DataUIs
 import org.openmole.gui.ext.factoryui.FactoryUI
-import org.openmole.gui.ext.panelui.PanelUI
 import org.openmole.gui.misc.js.ClassKeyAggregator
 import org.openmole.gui.server.core.GUIServer
 import org.openmole.gui.client.core.GraphCreator
@@ -68,7 +67,6 @@ object BootstrapJS {
       PluginManager.bundleForClass(classOf[DataUIs]),
       PluginManager.bundleForClass(classOf[ClassKeyAggregator]),
       PluginManager.bundleForClass(classOf[FactoryUI]),
-      PluginManager.bundleForClass(classOf[PanelUI]),
       PluginManager.bundleForClass(classOf[Api]),
       PluginManager.bundleForClass(classOf[ServiceFlag]),
       PluginManager.bundleForClass(classOf[autowire.Client[String, upickle.Reader, upickle.Writer]]),

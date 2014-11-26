@@ -17,25 +17,29 @@ package org.openmole.gui.plugin.task.groovy.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.panelui.PanelUI
+import org.openmole.gui.ext.dataui.PanelUI
 
+import org.scalajs.dom
 import scala.scalajs.js.annotation.JSExport
+import scalatags.JsDom.tags._
+import scalatags.JsDom.tags2._
+import scalatags.JsDom.attrs._
+import scalatags.JsDom.short._
+import scalatags.generic.TypedTag
 import org.openmole.gui.misc.js.Forms._
-import scalatags.Text.all._
 
 @JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskPanelUI")
-@JSExport
-case object GroovyTaskPanelUI extends PanelUI{
+class GroovyTaskPanelUI(dataUI: GroovyTaskDataUI) extends PanelUI {
+
+  type DATAUI = GroovyTaskDataUI
+
+  val tag = div(
+    h1(id := "title", "This is a title"),
+    p("GroovyTAsk !!")
+  )
 
   @JSExport
-  def run() = {
-    html(
-      body(
-        div(
-          h1(id := "title", "This is a title"),
-          p("This is a big paragraph of text")
-        )
-      )
-    ).render
-  }
+  def view: FormTag = tag
+
+  def save(name: String) = new GroovyTaskDataUI
 }

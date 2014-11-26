@@ -27,5 +27,5 @@ import rx._
 class SystemExecTaskDataUI(val name: Var[String] = Var("")) extends TaskDataUI {
   def data = new SystemExecTaskData()
 
-  def panelUI = SystemExecTaskPanelUI
+  def panelUI = new SystemExecTaskPanelUI(this)
 }
