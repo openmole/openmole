@@ -25,7 +25,7 @@ import org.openmole.gui.ext.panelui.PanelUI
 import org.openmole.gui.misc.js.ClassKeyAggregator
 import org.openmole.gui.server.core.GUIServer
 import org.openmole.gui.client.core.GraphCreator
-import org.openmole.gui.client.service.UIFactories
+import org.openmole.gui.client.service.{ ServiceFlag }
 import org.openmole.gui.server.factory.ServerFactories
 import org.openmole.gui.shared._
 import autowire.Client
@@ -70,7 +70,7 @@ object BootstrapJS {
       PluginManager.bundleForClass(classOf[FactoryUI]),
       PluginManager.bundleForClass(classOf[PanelUI]),
       PluginManager.bundleForClass(classOf[Api]),
-      PluginManager.bundleForClass(classOf[UIFactories]),
+      PluginManager.bundleForClass(classOf[ServiceFlag]),
       PluginManager.bundleForClass(classOf[autowire.Client[String, upickle.Reader, upickle.Writer]]),
       PluginManager.bundleForClass(classOf[org.scalajs.dom.HTMLHtmlElement]),
       PluginManager.bundleForClass(classOf[scalatags.DataConverters]),
@@ -93,7 +93,7 @@ object BootstrapJS {
     writer.write("function fillMap() {\n")
     ServerFactories.factoriesUI.foreach {
       case (k, v) ⇒
-        writer.write("PluginMap().factoryMap[\"" + k + "\" ] = new " + v.getClass.getCanonicalName + "();\n")
+        writer.write("UIFactories().factoryMap[\"" + k + "\" ] = new " + v.getClass.getCanonicalName + "();\n")
     }
     writer.write("}")
     writer.close

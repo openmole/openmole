@@ -40,8 +40,8 @@ object GUIClient {
   @JSExport
   def run(): Unit = {
 
-    println("factoryMap :: " + PluginMap.factoryMap.size)
-    println("groovy  : " + PluginMap.factoryMap("org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData").dataUI.name())
+    // println("factoryMap :: " + UI.factoryMap.size)
+    //println("groovy  : " + PluginMap.factoryMap("org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData").dataUI.name())
 
     val topdiv = dom.document.body.appendChild(div)
 

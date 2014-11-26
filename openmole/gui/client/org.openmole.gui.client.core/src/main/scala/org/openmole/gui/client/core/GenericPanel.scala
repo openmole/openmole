@@ -23,7 +23,7 @@ import rx._
 object GenericPanel {
 
   def apply(id: String, title: String, factories: Seq[FactoryUI]) = {
-    //factories.foreach { f ⇒ println("dis " + f.dataUI.name()) }
+    factories.foreach { f ⇒ println("dis " + f.dataUI.name()) }
     modalDialog(id,
       modalHeader(title),
       modalBody("This my body, eat it ! This is my blood, drink it !"),

@@ -8,7 +8,9 @@ import org.openmole.gui.shared.Api
 import rx._
 import autowire._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.scalajs.js.annotation.JSExport
 import scala.util.{ Failure, Success, Try }
+import scala.scalajs._
 
 /*
  * Copyright (C) 30/10/14 // mathieu.leclaire@openmole.org
@@ -27,38 +29,25 @@ import scala.util.{ Failure, Success, Try }
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-sealed class UIFactories {
-  val instance: Var[Map[Class[_], FactoryUI]] = Var(Map())
+@JSExport("UIFactories")
+object UIFactories {
 
-  def merge(m: (Class[_], FactoryUI)) = instance() = instance() ++ Map(m._1 -> m._2)
-
-  def remove(dataClass: Class[_]) = instance() = instance().filterKeys(k ⇒ k != dataClass)
+  @JSExport
+  val factoryMap = js.Dictionary.empty[FactoryUI]
 }
 
 object ClientService {
 
-  var oo = "rien"
-  println("Client Service " + oo)
-  private val uiFactories: Var[UIFactories] = Var(new UIFactories)
+  private val uiFactories = UIFactories.factoryMap.toMap
 
-  def merge(m: (Class[_], FactoryUI)) = {
-    println("Add UI factory " + m._2 + " for data class " + m._1.getName)
-    uiFactories().merge(m)
-    println("SIJE : " + uiFactories().instance().size)
-  }
-
-  def remove(dataClass: Class[_]) = uiFactories().remove(dataClass)
-
-  def taskFactories = {
-    println("Client Service xx " + oo)
-    println("SID " + uiFactories().instance().size)
-    uiFactories().instance().values.filter { f ⇒
-      println("test f " + f)
-      f.dataUI.isInstanceOf[TaskDataUI]
+  private def factories[T <: DataUI] = {
+    uiFactories.values.filter { f ⇒
+      f.dataUI.isInstanceOf[T]
     }.toSeq
   }
 
-  // def factories(classType: Class[_]) = classType
+  def taskFactories = factories[TaskDataUI]
+  def prototypeFactories = factories[PrototypeDataUI[_]]
 
   implicit def dataToDataClassName(d: Data) = d.getClass.getCanonicalName
 
@@ -85,7 +74,7 @@ object ClientService {
 
   implicit def protoDataUIStringMapToProtoDataString(m: Map[PrototypeDataUI[_], String]): Map[PrototypeData[_], String] = m.map { case (dataUI: PrototypeDataUI[_], s) ⇒ dataUI.data -> s }.toMap
 
-  private def factoryUI(data: Data) = uiFactories().instance().get(data.getClass) match {
+  private def factoryUI(data: Data) = uiFactories.get(data.getClass.getCanonicalName) match {
     case Some(f: FactoryUI) ⇒ Try(f.dataUI)
     case _                  ⇒ failure(data)
   }
@@ -103,3 +92,5 @@ object ClientService {
   private def failure[T <: Data](data: T) = Failure(new Throwable("The data " + data.name + " cannot be recontructed on the server."))
 
 }
+
+trait ServiceFlag //FIXME: pour avoir une class pour bootstrapJS

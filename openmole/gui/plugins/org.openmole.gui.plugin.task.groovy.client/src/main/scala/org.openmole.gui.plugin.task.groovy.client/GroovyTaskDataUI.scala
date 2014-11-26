@@ -25,7 +25,7 @@ import org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData
 import rx._
 
 @JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskDataUI")
-class GroovyTaskDataUI(val name: Var[String] = Var("toto"),
+class GroovyTaskDataUI(val name: Var[String] = Var(""),
                        val code: Var[String] = Var(""),
                        val libs: Var[Seq[Var[String]]] = Var(Seq()),
                        val inputs: Seq[PrototypeDataUI[_]] = Seq(),
