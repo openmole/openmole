@@ -192,7 +192,24 @@ object FileUtil {
       else DirUtils.move(file, to)
     }
 
-    def recursiveDelete = DirUtils.deleteIfExists(file)
+    def recursiveDelete: Unit = {
+      def setAllPermissions(f: File) = {
+        f.setReadable(true)
+        f.setWritable(true)
+        f.setExecutable(true)
+      }
+      setAllPermissions(file)
+
+      for (s ← file.listFiles) {
+        setAllPermissions(s)
+        s.isDirectory match {
+          case true ⇒
+            s.recursiveDelete
+            s.delete()
+          case false ⇒ s.delete
+        }
+      }
+    }
 
     def isJar = Try {
       val zip = new ZipFile(file)
@@ -326,14 +343,13 @@ object FileUtil {
      * @return
      */
     def createLink(target: String) = {
-
       val linkTarget = Paths.get(target)
       try Files.createSymbolicLink(file, linkTarget)
       catch {
-        case e: IOException ⇒ {
+        case e: IOException ⇒
           Logger.getLogger(FileUtil.getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
-          Files.copy(file, linkTarget, StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS)
-        }
+          val fileTarget = new File(file.getParentFile, target)
+          Files.copy(fileTarget, file, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING)
       }
     }
 
