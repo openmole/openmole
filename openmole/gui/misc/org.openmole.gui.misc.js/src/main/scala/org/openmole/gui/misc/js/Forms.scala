@@ -1,4 +1,4 @@
-package org.openmole.gui.client.core
+package org.openmole.gui.misc.js
 
 /*
  * Copyright (C) 03/11/14 // mathieu.leclaire@openmole.org
@@ -18,12 +18,14 @@ package org.openmole.gui.client.core
  */
 
 import org.scalajs.dom
+import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.tags._
 import scalatags.JsDom.tags2._
 import scalatags.JsDom.attrs._
 import scalatags.JsDom.short._
 import scalatags.generic.TypedTag
 
+@JSExport
 object Forms {
 
   type FormTag = TypedTag[dom.Element, dom.Element, dom.Node]

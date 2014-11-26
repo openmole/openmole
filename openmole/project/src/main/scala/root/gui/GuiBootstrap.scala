@@ -14,7 +14,7 @@ object Bootstrap extends GuiDefaults {
 
   lazy val js = OsgiProject("org.openmole.gui.bootstrap.js") settings
     (libraryDependencies ++= Seq(scalajsTools, scalajsDom, autowireJS, scalaTagsJS, scalaRxJS, upickleJS)) dependsOn
-    (Server.core, Client.core, Ext.data, Ext.dataui, Ext.factoryui, Shared.shared, base.Misc.pluginManager, base.Misc.workspace, base.Misc.tools, base.Misc.fileService)
+    (Server.core, Client.core, Ext.data, Ext.dataui, Ext.factoryui, Ext.panelui, Misc.js, Shared.shared, base.Misc.pluginManager, base.Misc.workspace, base.Misc.tools, base.Misc.fileService)
 
   lazy val osgi = OsgiProject("org.openmole.gui.bootstrap.osgi") dependsOn
     (Server.factory, Client.service, Ext.data, Ext.factoryui, base.Core.implementation)

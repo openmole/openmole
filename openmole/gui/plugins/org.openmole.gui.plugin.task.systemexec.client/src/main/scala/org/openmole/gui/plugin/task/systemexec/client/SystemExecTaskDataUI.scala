@@ -23,7 +23,9 @@ import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
 import org.openmole.gui.ext.dataui.TaskDataUI
 import rx._
 
-@JSExport
+@JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskDataUI")
 class SystemExecTaskDataUI(val name: Var[String] = Var("")) extends TaskDataUI {
-def data = new SystemExecTaskData()
+  def data = new SystemExecTaskData()
+
+  def panelUI = SystemExecTaskPanelUI
 }

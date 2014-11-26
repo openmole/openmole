@@ -17,17 +17,17 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.client.service.Post
 import org.openmole.gui.shared._
-import Forms._
-import CSSClasses._
-
+import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.misc.js.CSSClasses._
+import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import upickle._
 
 import org.scalajs.dom
 import scalatags.JsDom.attrs._
@@ -39,46 +39,45 @@ object GUIClient {
 
   @JSExport
   def run(): Unit = {
+
+    // println("factoryMap :: " + UI.factoryMap.size)
+    //println("groovy  : " + PluginMap.factoryMap("org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData").dataUI.name())
+
     val topdiv = dom.document.body.appendChild(div)
 
     topdiv.appendChild(
       nav(nav_inverse + nav_staticTop + nav_pills)(
-        navItem("Tasks", dataWith("toggle") := "modal", dataWith("target") := "#myID"),
+        navItem("Tasks", dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID"),
         navItem("Environments")
       )
     )
 
-    topdiv.appendChild(h1(Forms.label("OpenMOLE !", onclick := { () ⇒ println("File") })))
-    topdiv.appendChild(Forms.badge("Tasks", "4", btn_medium))
-    topdiv.appendChild(Forms.badge("Prototype", "4", btn_large + btn_primary))
+    topdiv.appendChild(h1(label("OpenMOLE !", onclick := { () ⇒ println("File") })))
+    topdiv.appendChild(badge("Tasks", "4", btn_medium))
+    topdiv.appendChild(badge("Prototype", "4", btn_large + btn_primary))
 
     topdiv.appendChild(
       h2(
         buttonGroup(
           button("File", btn_default, onclick := { () ⇒ println("File") }),
-          button("Edit", btn_default, onclick := { () ⇒ pri }),
+          button("Edit", btn_default),
           button("Run", btn_primary)
         )
-      ).render
-    )
-
-    topdiv.appendChild(
-      Forms.jumbotron(
-        h1("OpenMole !"),
-        Forms.button("Click men", btn_primary + btn_large, dataWith("toggle") := "modal", dataWith("target") := "#myID" /*, onclick := { () ⇒ popupDialog }*/ )
       )
     )
 
-    // def popupDialog = {
-    topdiv.appendChild(Forms.modalDialog("myID",
-      Forms.modalHeader("My Dialog title"),
-      Forms.modalBody("This my body, eat it ! This is my blood, drink it !"),
-      Forms.modalFooter(button("Yo"))
-    ))
-    //}
-    dom.document.body.appendChild(topdiv)
+    val dialog = GenericPanel("taskPanelID", "Tasks", ClientService.taskFactories)
 
-    def pri = println("OpenMOLE !")
+    topdiv.appendChild(
+      jumbotron(
+        h1("OpenMole !"),
+        button("Click men", btn_primary + btn_large, dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID")
+      )
+    )
+
+    topdiv.appendChild(dialog)
+
+    dom.document.body.appendChild(topdiv)
 
     val nodes = scala.Array(
       Graph.task("1", "one", 400, 600),

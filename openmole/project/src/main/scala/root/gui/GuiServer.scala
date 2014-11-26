@@ -18,7 +18,7 @@ object Server extends GuiDefaults {
     (Server.factory, Shared.shared, Ext.data, base.Core.model, base.Core.implementation)
 
   lazy val factory = OsgiProject("org.openmole.gui.server.factory") dependsOn
-    (Ext.data, base.Core.model, base.Core.implementation)
+    (Ext.data, Ext.factoryui, Shared.shared, base.Core.model, base.Core.implementation)
 
   lazy val state = OsgiProject("org.openmole.gui.server.state") settings
     (libraryDependencies ++= Seq(slick)) dependsOn

@@ -1,7 +1,10 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.ext.factoryui.FactoryUI
+import org.openmole.gui.misc.js.Forms._
+import rx._
 /*
- * Copyright (C) 03/11/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 12/11/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,12 +19,15 @@ package org.openmole.gui.client.core
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import scalatags.generic.Attr
 
-object ClassKeyAggregator {
-  def empty = new ClassKeyAggregator("")
-}
+object GenericPanel {
 
-class ClassKeyAggregator(val key: String = "") {
-  def +(otherKey: ClassKeyAggregator): ClassKeyAggregator = new ClassKeyAggregator(key + " " + otherKey.key)
+  def apply(id: String, title: String, factories: Seq[FactoryUI]) = {
+    factories.foreach { f ⇒ println("dis " + f.dataUI.name()) }
+    modalDialog(id,
+      modalHeader(title),
+      modalBody("This my body, eat it ! This is my blood, drink it !"),
+      modalFooter(button("Yo"))
+    )
+  }
 }

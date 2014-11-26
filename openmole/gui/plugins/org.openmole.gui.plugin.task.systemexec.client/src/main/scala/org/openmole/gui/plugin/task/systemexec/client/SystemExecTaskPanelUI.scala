@@ -17,15 +17,18 @@ package org.openmole.gui.plugin.task.systemexec.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.ext.panelui.PanelUI
+
 import scalatags.Text.all._
+import org.openmole.gui.misc.js.Forms._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
-@JSExport
-object SystemExecTaskPanelUI {
+@JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskPanelUI")
+case object SystemExecTaskPanelUI extends PanelUI {
 
     @JSExport
-    def run(): Unit = {
+    def run() = {
       html(
         body(
           div(
@@ -33,6 +36,6 @@ object SystemExecTaskPanelUI {
             p("This is a big paragraph of text")
           )
         )
-      )
+      ).render
     }
   }

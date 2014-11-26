@@ -6,6 +6,8 @@ import org.openmole.gui.plugin.task.groovy.server.GroovyTaskFactory
 import org.openmole.gui.plugin.task.groovy.client.GroovyTaskFactoryUI
 import org.openmole.gui.server.factory._
 
+import scala.scalajs.js.annotation.JSExport
+
 /*
  * Copyright (C) 01/10/14 // mathieu.leclaire@openmole.org
  *
@@ -26,7 +28,7 @@ import org.openmole.gui.server.factory._
 class Activator extends OSGiActivator with ServerOSGiActivator {
   val data = new GroovyTaskData
   val dataClass = data.getClass()
-  override def factories = Seq((dataClass, new GroovyTaskFactory(data)))
-  override def factoriesUI = Seq((dataClass, new GroovyTaskFactoryUI))
+  override def factories = Seq((dataClass, new GroovyTaskFactory(data), new GroovyTaskFactoryUI))
+  // override def factoriesUI = Seq((dataClass, new GroovyTaskFactoryUI))
 }
 

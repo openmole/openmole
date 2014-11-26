@@ -16,9 +16,16 @@
  */
 package org.openmole.gui.shared
 
+import org.openmole.gui.ext.dataui.{ DataUI }
 import org.openmole.gui.ext.factoryui.FactoryUI
+import org.openmole.gui.ext.panelui.PanelUI
+import rx.core.Var
+import scala.scalajs.js.annotation.JSExport
+
+//@JSExport
+//case class FactoriesUI(factoryMap: Map[String, FactoryUI])
 
 trait Api {
-  // def factoriesUI(): Map[String, FactoryUI]
+  //def ee(): PanelUI
   def uuid(): String = java.util.UUID.randomUUID.toString
 }

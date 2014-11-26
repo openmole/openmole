@@ -1,7 +1,11 @@
-package org.openmole.gui.client.core
+package org.openmole.gui.ext.panelui
+
+import scalatags.Text.tags
+import scalatags.generic.TypedTag
+import org.scalajs.dom
 
 /*
- * Copyright (C) 05/11/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 14/11/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,7 +21,16 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object CSSClasses {
+/*object PanelUI {
+  def apply(): PanelUI = new PanelUI {
+    def run() = tags.html.render
+  }
+  def unapply(): Option[PanelUI] = Some(new PanelUI {
+    def run() = tags.html.render
+  })
+}*/
 
-  lazy val main_nav = "main_nav"
+abstract class PanelUI {
+  type FormTag = TypedTag[dom.Element, dom.Element, dom.Node]
+  def run: FormTag
 }

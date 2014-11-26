@@ -18,6 +18,8 @@ package org.openmole.gui.server.factory
  */
 
 import org.openmole.core.model.task.PluginSet
+import org.openmole.gui.ext.factoryui.FactoryUI
+//import org.openmole.gui.shared.FactoriesUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import org.openmole.gui.ext.data._
@@ -34,22 +36,26 @@ object ServerFactories {
     }
   }
 
-  def add(dataClass: Class[_], factory: Factory) = instance.factories.synchronized {
+  def add(dataClass: Class[_], factory: Factory, factoryUI: FactoryUI) = instance.factories.synchronized {
     println("Add server " + dataClass)
     instance.factories += dataClass -> factory
+    instance.factoriesUI += dataClass.getName -> factoryUI
   }
 
   def remove(dataClass: Class[_]) = instance.factories.synchronized {
     instance.factories -= dataClass
+    instance.factoriesUI -= dataClass.getName
   }
+
+  def factoriesUI = instance.factoriesUI.toMap
 }
 
 class ServerFactories {
   val factories = new mutable.WeakHashMap[Class[_], Factory]
+  val factoriesUI = new mutable.WeakHashMap[String, FactoryUI]
 }
 
 trait Factory {
   def data: Data
   def coreObject(implicit plugins: PluginSet): Try[Any]
 }
-

@@ -1,11 +1,7 @@
-package org.openmole.gui.ext.factoryui
-
-import org.openmole.gui.ext.dataui._
-
-import scala.scalajs.js.annotation.JSExport
+package org.openmole.gui.misc.js
 
 /*
- * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 03/11/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -20,18 +16,12 @@ import scala.scalajs.js.annotation.JSExport
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import scalatags.generic.Attr
 
-trait FactoryUI {
-  type DATAUI <: DataUI
-  def dataUI: DATAUI
-}
-/*
-trait TaskFactoryUI extends FactoryUI {
-  type DATAUI = TaskDataUI
-  def dataUI: TaskDataUI
+object ClassKeyAggregator {
+  def empty = new ClassKeyAggregator("")
 }
 
-trait PrototypeFactoryUI extends FactoryUI {
-  type DATAUI = PrototypeDataUI[_]
-  def dataUI: PrototypeDataUI[_]
-}*/
+class ClassKeyAggregator(val key: String = "") {
+  def +(otherKey: ClassKeyAggregator): ClassKeyAggregator = new ClassKeyAggregator(key + " " + otherKey.key)
+}
