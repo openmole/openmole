@@ -37,7 +37,7 @@ object CSVSampling {
   def apply(file: File, separator: Char = ',') = new SamplingBuilder { builder ⇒
     private var _columns = new ListBuffer[(String, Prototype[_])]
     private var _fileColumns = new ListBuffer[(String, File, Prototype[File])]
-    private val _separartor = separator
+    private val _separator = separator
 
     def columns = _columns.toList
     def fileColumns = _fileColumns.toList
@@ -58,7 +58,7 @@ object CSVSampling {
     def toSampling = new CSVSampling(file) {
       val columns = builder.columns
       val fileColumns = builder.fileColumns
-      val separator = _separartor
+      val separator = _separator
     }
   }
 

@@ -73,7 +73,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val groovy = "org.openmole" %% "org-codehaus-groovy" % "2.3.3"
 
-  lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.4" 
+  lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.4"
 
   //  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.tools.*", "scala.reflect.macros.*"),
   //    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
