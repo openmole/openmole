@@ -69,6 +69,10 @@ object PluginManager extends Logger {
 
   def bundleForClass(c: Class[_]): Bundle = Activator.packageAdmin.getBundle(c)
 
+  def bundlesForClass(c: Class[_]): Iterable[Bundle] = synchronized {
+    allDependencies(bundleForClass(c).getBundleId).map { Activator.contextOrException.getBundle }
+  }
+
   def pluginsForClass(c: Class[_]): Iterable[File] = synchronized {
     allPluginDependencies(bundleForClass(c).getBundleId).map { l ⇒ Activator.contextOrException.getBundle(l).file }
   }
@@ -140,7 +144,7 @@ object PluginManager extends Logger {
   def bundle(file: File) = files.get(file.getCanonicalFile).map { id ⇒ Activator.contextOrException.getBundle(id._1) }
 
   private def dependencies(bundles: Iterable[Long]): Iterable[Long] = synchronized {
-    val ret = new HashSet[Long]
+    val ret = new ListBuffer[Long]
     var toProceed = new ListBuffer[Long] ++ bundles
 
     while (!toProceed.isEmpty) {
@@ -149,8 +153,10 @@ object PluginManager extends Logger {
       toProceed ++= resolvedDirectDependencies.getOrElse(cur, Iterable.empty).filter(b ⇒ !ret.contains(b))
     }
 
-    ret
+    ret.distinct
   }
+
+  private def allDependencies(b: Long) = synchronized { dependencies(List(b)) }
 
   private def allPluginDependencies(b: Long) = synchronized {
     resolvedPluginDependenciesCache.getOrElseUpdate(b, dependencies(List(b)).filter(b ⇒ !providedDependencies.contains(b)))

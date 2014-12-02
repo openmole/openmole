@@ -35,7 +35,8 @@ object ScalaTask {
 
   def apply(
     name: String,
-    code: String)(implicit plugins: PluginSet = PluginSet.empty) = {
+    code: String,
+    userClasses: Seq[Class[_]] = Seq.empty)(implicit plugins: PluginSet = PluginSet.empty) = {
     new CodeTaskBuilder { builder ⇒
 
       addImport("org.openmole.misc.tools.service.Random.newRNG")
@@ -43,7 +44,7 @@ object ScalaTask {
       addImport("org.openmole.misc.workspace.Workspace.newDir")
 
       def toTask =
-        new ScalaTask(name, code, builder.imports, builder.libraries) with builder.Built
+        new ScalaTask(name, code, builder.imports, builder.libraries, userClasses) with builder.Built
     }
   }
 }
@@ -52,12 +53,13 @@ sealed abstract class ScalaTask(
     val name: String,
     val code: String,
     imports: Iterable[String],
-    libraries: Iterable[File]) extends CodeTask {
+    libraries: Iterable[File],
+    userClasses: Seq[Class[_]]) extends CodeTask {
 
   def prefix = "_input_value_"
 
   def compiledScript(inputs: Seq[Prototype[_]]) = {
-    val interpreter = new ScalaREPL(false)
+    val interpreter = new ScalaREPL(false, userClasses)
     libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
     val evaluated =
       try interpreter.eval(script(inputs))
@@ -102,8 +104,9 @@ sealed abstract class ScalaTask(
     val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }.sortBy(_.name)
     val args = contextPrototypes.map(i ⇒ context(i))
     val (evaluated, method) = cachedCompiledScript(contextPrototypes)
-    val result = method.invoke(evaluated, args.toSeq.map(_.asInstanceOf[AnyRef]): _*).asInstanceOf[Map[String, Any]]
-    context ++ outputs.toSeq.map { o ⇒ Variable.unsecure(o.prototype, result(o.prototype.name)) }
+    val result = method.invoke(evaluated, args.toSeq.map(_.asInstanceOf[AnyRef]): _*)
+    val map = result.asInstanceOf[Map[String, Any]]
+    context ++ outputs.toSeq.map { o ⇒ Variable.unsecure(o.prototype, map(o.prototype.name)) }
   }
 
 }

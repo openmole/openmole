@@ -33,15 +33,19 @@ import scala.tools.util.PathResolver
 import org.openmole.misc.osgi.{ ClassPathBuilder }
 import scala.tools.nsc._
 
-class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory: AbstractFile) extends Global(settings, reporter) with ReplGlobal { g ⇒
+class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory: AbstractFile, priorityClases: Seq[Class[_]]) extends Global(settings, reporter) with ReplGlobal { g ⇒
 
-  settings.bootclasspath.value = ClassPathBuilder.getClassPathFrom(classOf[scala.App].getClassLoader).mkString(":")
+  //settings.bootclasspath.value = ClassPathBuilder.getClassPathFrom(classOf[scala.App].getClassLoader).mkString(":")
 
   lazy val cp = {
     val original = new PathResolver(settings).result
-    val result = BundleClassPathBuilder.allBundles.map { original.context.newClassPath }.toList
+    def bundles: Iterable[AbstractFile] =
+      priorityClases.flatMap(BundleClassPathBuilder.bundles) ++ BundleClassPathBuilder.allBundles
+
+    val result = bundles.map { original.context.newClassPath }.toList
     val vdcp = original.context.newClassPath(virtualDirectory)
-    new MergedClassPath(result.toList ::: original :: vdcp :: Nil, original.context)
+    val cp = new MergedClassPath(result ::: original :: vdcp :: Nil, original.context)
+    cp
   }
 
   lazy val internalClassPath = cp
