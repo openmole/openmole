@@ -95,7 +95,8 @@ sealed abstract class ScalaTask(
        |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(oMSeed).toScala;
        |    ${inputs.toSeq.map(i ⇒ "var " + i.name + " = " + prefix + i.name).mkString(";")}
        |    ${code}
-       |    Map[String, Any]( ${outputs.toSeq.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} )
+       |    import scala.collection.JavaConversions.mapAsJavaMap
+       |    mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} ))
        |}
        |""".stripMargin
 
@@ -110,8 +111,12 @@ sealed abstract class ScalaTask(
     val args = contextPrototypes.map(i ⇒ context(i))
     val (evaluated, method) = cachedCompiledScript(contextPrototypes)
     val result = method.invoke(evaluated, args.toSeq.map(_.asInstanceOf[AnyRef]): _*)
-    val map = result.asInstanceOf[Map[String, Any]]
-    context ++ outputs.toSeq.map { o ⇒ Variable.unsecure(o.prototype, map(o.prototype.name)) }
+    val map = result.asInstanceOf[java.util.Map[String, Any]]
+    context ++
+      outputs.toSeq.map {
+        o ⇒
+          Variable.unsecure(o.prototype, Option(map.get(o.prototype.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
+      }
   }
 
 }
