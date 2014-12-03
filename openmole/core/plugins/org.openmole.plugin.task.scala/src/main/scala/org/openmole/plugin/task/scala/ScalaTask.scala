@@ -31,20 +31,25 @@ import org.openmole.misc.tools.script._
 import org.openmole.plugin.task.code._
 import org.openmole.misc.console.ScalaREPL
 
+import scala.collection.mutable.ListBuffer
+
 object ScalaTask {
 
   def apply(
     name: String,
-    code: String,
-    userClasses: Seq[Class[_]] = Seq.empty)(implicit plugins: PluginSet = PluginSet.empty) = {
+    code: String)(implicit plugins: PluginSet = PluginSet.empty) = {
     new CodeTaskBuilder { builder ⇒
+
+      val usedClasses = ListBuffer[Class[_]]()
+
+      def addClassUse(c: Class[_]) = usedClasses += c
 
       addImport("org.openmole.misc.tools.service.Random.newRNG")
       addImport("org.openmole.misc.workspace.Workspace.newFile")
       addImport("org.openmole.misc.workspace.Workspace.newDir")
 
       def toTask =
-        new ScalaTask(name, code, builder.imports, builder.libraries, userClasses) with builder.Built
+        new ScalaTask(name, code, builder.imports, builder.libraries, usedClasses) with builder.Built
     }
   }
 }
@@ -54,12 +59,12 @@ sealed abstract class ScalaTask(
     val code: String,
     imports: Iterable[String],
     libraries: Iterable[File],
-    userClasses: Seq[Class[_]]) extends CodeTask {
+    usedClasses: Seq[Class[_]]) extends CodeTask {
 
   def prefix = "_input_value_"
 
   def compiledScript(inputs: Seq[Prototype[_]]) = {
-    val interpreter = new ScalaREPL(false, userClasses)
+    val interpreter = new ScalaREPL(false, usedClasses)
     libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
     val evaluated =
       try interpreter.eval(script(inputs))
