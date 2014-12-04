@@ -20,5 +20,6 @@ addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.3.0")
 
 addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.3-SNAPSHOT")
 
-addSbtPlugin("fr.iscpif" %% "jsmanager" % "0.7.0-SNAPSHOT")
+addSbtPlugin("org.scala-lang.modules.scalajs" % "scalajs-sbt-plugin" % "0.5.6")
+//addSbtPlugin("fr.iscpif" %% "jsmanager" % "0.7.0-SNAPSHOT")
 //addSbtPlugin("org.scalatra.sbt" % "scalatra-sbt" % "0.3.5")

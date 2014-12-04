@@ -16,6 +16,7 @@
  */
 package org.openmole.gui.server.core
 
+import org.openmole.misc.workspace.Workspace
 import org.scalatra._
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.Api
@@ -23,6 +24,7 @@ import scala.concurrent.duration._
 import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
+import java.io.File
 
 object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Writer] {
   def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
@@ -34,23 +36,24 @@ class GUIServlet extends ScalatraServlet {
 
   val basePath = "org/openmole/gui/shared"
 
+  // Get all the css files in the workspace (it is not working with js because of the order)
+  val cssFiles = new File(Workspace.file("webui"), "webapp/css").listFiles.map { _.getName }
+
   get("/") {
     contentType = "text/html"
     tags.html(
       tags.head(
         tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset = ISO-8859-1"),
-        link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/style.css"),
-        tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/workflow.css"),
-        tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/bootstrap-3.3.0.min.css"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/d3.v3.min.js"),
+        cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
         tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery-2.1.1.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery-ui-autocomplete.min.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/d3.v3.min.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/select2.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap-3.3.0.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/pluginMapping.js")
       ),
       tags.body(
-        tags.onload := "fillMap();GUIClient().run();"
+        tags.onload := "fillMap();GUIClient().run();Forms().select2();"
       )
     )
   }

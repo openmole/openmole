@@ -17,15 +17,22 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import fr.iscpif.scaladget.mapping.Select2Options
 import org.scalajs.dom
 import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js
 import scalatags.JsDom.tags._
 import scalatags.JsDom.tags2._
 import scalatags.JsDom.attrs._
 import scalatags.JsDom.short._
+import org.scalajs.jquery.jQuery
 import scalatags.generic.TypedTag
+import fr.iscpif.scaladget.select3._
+import fr.iscpif.scaladget.mapping.Utils._
+import scala.scalajs.js
+import js.Dynamic.{ literal ⇒ lit }
 
-@JSExport
+@JSExport("Forms")
 object Forms {
 
   type FormTag = TypedTag[dom.Element, dom.Element, dom.Node]
@@ -128,4 +135,23 @@ object Forms {
   def modalBody(tag: FormTag): FormTag = div(`class` := "modal-body")(p(tag))
 
   def modalFooter: FormTag = div(`class` := "modal-footer")
+
+  def autoinput(autoID: String, placeHolder: String, contents: Seq[String]) = {
+
+    val options = contents.map {
+      option(_).render
+    }
+    select(id := "e1")(
+      contents.map {
+        option(_)
+      }.toSeq: _*
+    )
+
+  }
+
+  @JSExport
+  def select2(): Unit = {
+    jQuery(() ⇒ jQuery("#e1").select2(lit(placeholder = "Yoyo")))
+  }
+
 }

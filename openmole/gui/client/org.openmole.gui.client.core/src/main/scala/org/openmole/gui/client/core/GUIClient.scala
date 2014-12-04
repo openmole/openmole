@@ -21,24 +21,28 @@ import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.client.service.Post
-import org.openmole.gui.shared._
+import org.openmole.gui.misc.js.Forms
 import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.CSSClasses._
-import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 
 import org.scalajs.dom
+
 import scalatags.JsDom.attrs._
 import scalatags.JsDom.short._
 import scalatags.JsDom.tags.{ h1, h2, div, li }
 
-@JSExport
+@JSExport("GUIClient")
 object GUIClient {
 
   @JSExport
   def run(): Unit = {
+
+    ClientService += ClientService.taskFactories(0).dataUI
+    println("All tasks : " + ClientService.taskDataUIs)
 
     val topdiv = dom.document.body.appendChild(div)
 
@@ -49,6 +53,7 @@ object GUIClient {
       )
     )
 
+    topdiv.appendChild(Forms.autoinput("yoID", "Yo", Seq("prototype1", "proto2", "var1", "var2", "yo", "ya", "myveryverylongprototype")))
     topdiv.appendChild(h1(label("OpenMOLE !", onclick := { () ⇒ println("File") })))
     topdiv.appendChild(badge("Tasks", "4", btn_medium))
     topdiv.appendChild(badge("Prototype", "4", btn_large + btn_primary))

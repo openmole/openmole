@@ -17,7 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.d3mapping._
+import fr.iscpif.scaladget.mapping._
 import org.scalajs.dom
 import scala.scalajs.js
 import js.Dynamic.{ literal ⇒ lit }

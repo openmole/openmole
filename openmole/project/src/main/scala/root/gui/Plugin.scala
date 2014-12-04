@@ -13,7 +13,7 @@ abstract class PluginDefaults(subBuilds: Defaults*) extends GuiDefaults(subBuild
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("guiPlugin"),
     bundleActivator <<= (name) { n ⇒ Some(n + ".Activator") },
-    libraryDependencies ++= Seq(root.Libraries.scalaRxJS, root.Libraries.scalaTagsJS, root.Libraries.scalajsDom, root.Libraries.scaladget))
+    libraryDependencies ++= Seq(root.Libraries.rx, root.Libraries.scalaTags, root.Libraries.scalajsDom, root.Libraries.scaladget))
 }
 
 object Plugin extends PluginDefaults(plugin.Task, Domain, Environment, Sampling, Hook, Method, Source) {

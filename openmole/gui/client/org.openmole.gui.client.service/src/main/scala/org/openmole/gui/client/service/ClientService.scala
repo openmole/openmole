@@ -39,6 +39,7 @@ object UIFactories {
 object ClientService {
 
   private val uiFactories = UIFactories.factoryMap.toMap
+  private val uiData: Var[Seq[DataUI]] = Var(Seq())
 
   private def factories[T <: DataUI] = {
     uiFactories.values.filter { f ⇒
@@ -46,8 +47,18 @@ object ClientService {
     }.toSeq
   }
 
+  private def dataUIs[T <: DataUI] = {
+    uiData().filter { d ⇒
+      d.isInstanceOf[T]
+    }
+  }
+
   def taskFactories = factories[TaskDataUI]
   def prototypeFactories = factories[PrototypeDataUI[_]]
+
+  def taskDataUIs = dataUIs[TaskDataUI]
+
+  def +=(d: DataUI) = uiData() = d +: uiData()
 
   implicit def dataToDataClassName(d: Data) = d.getClass.getCanonicalName
 
@@ -93,4 +104,6 @@ object ClientService {
 
 }
 
-trait ServiceFlag //FIXME: pour avoir une class pour bootstrapJS
+trait ServiceFlag
+
+//FIXME: pour avoir une class pour bootstrapJS

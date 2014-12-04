@@ -73,7 +73,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val groovy = "org.openmole" %% "org-codehaus-groovy" % "2.3.3"
 
-  lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.4" 
+  lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.4"
 
   //  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.tools.*", "scala.reflect.macros.*"),
   //    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
@@ -97,36 +97,31 @@ object Libraries extends Defaults(Apache) {
   lazy val jawn = "org.openmole" %% "jawn" % "0.6.0"
 
   lazy val scalaTagsVersion = "0.4.3-SNAPSHOT"
-  lazy val scalaRxVersion = "0.2.6"
+  lazy val scalaJSDomVersion = "0.6"
+  lazy val scalaJQueryVersion = "0.6"
+  lazy val rxVersion = "0.2.6"
   lazy val scalaUpickleVersion = "0.2.5"
   lazy val scalaAutowireVersion = "0.2.3"
 
-  lazy val scalaTagsJS = "org.openmole" %% "com-scalatags-js" % scalaTagsVersion
+  lazy val upickle = "org.openmole" %% "upickle" % scalaUpickleVersion
 
-  lazy val scalaRxJS = "org.openmole" %% "com-scalarx-js" % scalaRxVersion
+  lazy val autowire = "org.openmole" %% "autowire" % scalaAutowireVersion
 
-  lazy val upickleJS = "org.openmole" %% "upickle-js" % scalaUpickleVersion
+  lazy val scalaTags = "org.openmole" %% "com-scalatags" % scalaTagsVersion
 
-  lazy val autowireJS = "org.openmole" %% "autowire-js" % scalaAutowireVersion
+  lazy val rx = "org.openmole" %% "rx" % rxVersion
 
-  lazy val scalaTagsJVM = "org.openmole" %% "com-scalatags-jvm" % scalaTagsVersion
-
-  lazy val scalaRxJVM = "org.openmole" %% "com-scalarx-jvm" % scalaRxVersion
-
-  lazy val upickleJVM = "org.openmole" %% "upickle-jvm" % scalaUpickleVersion
-
-  lazy val autowireJVM = "org.openmole" %% "autowire-jvm" % scalaAutowireVersion
-
-  lazy val scalajsVersion = "0.5.5"
+  lazy val scalajsVersion = "0.5.6"
   lazy val scalajsTools = "org.openmole" %% "scalajs-tools" % scalajsVersion
   lazy val scalajsLibrary = "org.openmole" %% "scalajs-library" % scalajsVersion
-  lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % "0.6"
+  lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % scalaJSDomVersion
+  lazy val scalajsJQuery = "org.openmole" %% "scalajs-jquery" % scalaJQueryVersion
 
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "1.78"
 
   lazy val monocle = "org.openmole" %% "monocle" % "0.5.0"
 
-  lazy val scaladget = "org.openmole" %% "scaladget" % "0.1.0"
+  lazy val scaladget = "org.openmole" %% "scaladget" % "0.2.0-SNAPSHOT"
 
   lazy val opencsv = "org.openmole" %% "au-com-bytecode-opencsv" % "2.0"
 

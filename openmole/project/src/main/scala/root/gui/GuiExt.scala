@@ -12,7 +12,7 @@ object Ext extends GuiDefaults {
   lazy val data = OsgiProject("org.openmole.gui.ext.data") settings (scalaJSSettings: _*)
 
   lazy val dataui: Project = OsgiProject("org.openmole.gui.ext.dataui") dependsOn (data) settings (scalaJSSettings: _*) settings (
-    libraryDependencies ++= Seq(scalaRxJS, scalaTagsJS, scalajsDom)
+    libraryDependencies ++= Seq(rx, scalaTags, scalajsDom)
   )
 
   lazy val factoryui = OsgiProject("org.openmole.gui.ext.factoryui") settings (scalaJSSettings: _*) dependsOn (dataui)

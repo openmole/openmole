@@ -24,7 +24,7 @@ import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.misc.js.ClassKeyAggregator
 import org.openmole.gui.server.core.GUIServer
 import org.openmole.gui.client.core.GraphCreator
-import org.openmole.gui.client.service.{ ServiceFlag }
+import org.openmole.gui.client.service.ServiceFlag
 import org.openmole.gui.server.factory.ServerFactories
 import org.openmole.gui.shared._
 import autowire.Client
@@ -37,6 +37,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.osgi.framework.Bundle
 import scala.collection.JavaConverters._
 import org.openmole.misc.fileservice._
+import fr.iscpif.scaladget.mapping.Base
 
 object BootstrapJS {
 
@@ -59,11 +60,14 @@ object BootstrapJS {
     val thisBundle = PluginManager.bundleForClass(classOf[GUIServer])
     copyURL(thisBundle.findEntries("/", "*.js", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.css", true).asScala)
+    copyURL(thisBundle.findEntries("/", "*.gif", true).asScala)
+    copyURL(thisBundle.findEntries("/", "*.png", true).asScala)
     copyURL(thisBundle.findEntries("/", "web.xml", true).asScala)
 
     // Extract and copy all the .sjsir files from bundles to src
     val bundles = pluginBundles ++ Seq(
       PluginManager.bundleForClass(classOf[GraphCreator]),
+      //  PluginManager.bundleForClass(classOf[Base]),
       PluginManager.bundleForClass(classOf[DataUIs]),
       PluginManager.bundleForClass(classOf[ClassKeyAggregator]),
       PluginManager.bundleForClass(classOf[FactoryUI]),
@@ -74,7 +78,10 @@ object BootstrapJS {
       PluginManager.bundleForClass(classOf[scalatags.DataConverters]),
       PluginManager.bundleForClass(classOf[upickle.Reader[_]]),
       PluginManager.bundleForClass(classOf[rx.Rx[_]])
-    )
+    ) /*++ PluginManager.bundles.filter { b ⇒
+        val bName = b.getName
+        bName.contains("autowireJS") || bName.contains("upickleJS")
+      }*/
 
     bundles.map { b ⇒
       b.findEntries("/", "*.sjsir", true)
