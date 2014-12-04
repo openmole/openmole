@@ -27,7 +27,7 @@ import scalatags.JsDom.attrs._
 import scalatags.JsDom.short._
 import org.scalajs.jquery.jQuery
 import scalatags.generic.TypedTag
-import fr.iscpif.scaladget.select3._
+import fr.iscpif.scaladget.select2._
 import fr.iscpif.scaladget.mapping.Utils._
 import scala.scalajs.js
 import js.Dynamic.{ literal ⇒ lit }
