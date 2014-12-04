@@ -43,7 +43,7 @@ object Misc extends BaseDefaults {
 
   val pluginManager = OsgiProject("org.openmole.misc.pluginmanager",
     bundleActivator = Some("org.openmole.misc.pluginmanager.internal.Activator")) settings
-    (includeOsgi) dependsOn (provided(exception), provided(tools), osgi)
+    (includeOsgi) dependsOn (exception, tools, osgi)
 
   val updater = OsgiProject("org.openmole.misc.updater") dependsOn (exception, tools, workspace)
 
@@ -57,6 +57,6 @@ object Misc extends BaseDefaults {
   val sftpserver = OsgiProject("org.openmole.misc.sftpserver") dependsOn (tools) settings (libraryDependencies += Apache.sshd)
 
   val console = OsgiProject("org.openmole.misc.console", bundleActivator = Some("org.openmole.misc.console.Activator"), buddyPolicy = Some("global")) dependsOn
-    (osgi /*, scalaCompiler*/ ) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
+    (osgi, pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
 
 }

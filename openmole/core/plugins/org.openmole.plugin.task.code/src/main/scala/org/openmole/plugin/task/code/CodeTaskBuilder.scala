@@ -59,7 +59,7 @@ abstract class CodeTaskBuilder(implicit plugins: PluginSet) extends ExternalTask
    * @param l a jar file
    *
    */
-  def addLib(l: File) = {
+  def addLibrary(l: File) = {
     _libraries += l
     this
   }

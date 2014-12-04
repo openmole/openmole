@@ -19,6 +19,9 @@ package org.openmole.misc.console
 
 import java.io.{ PrintStream, PrintWriter, Writer }
 
+import org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader
+import org.openmole.misc.pluginmanager.PluginManager
+
 import scala.reflect.internal.util.Position
 import scala.tools.nsc.interpreter._
 import scala.tools.nsc._
@@ -27,7 +30,7 @@ import scala.tools.nsc.reporters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ScalaREPL(displayErrors: Boolean = true) extends ILoop {
+class ScalaREPL(displayErrors: Boolean = true, priorityClasses: Seq[Class[_]] = Nil) extends ILoop {
 
   System.setProperty("jline.shutdownhook", "true")
   //System.setProperty("scala.repl.debug", "true")
@@ -68,7 +71,7 @@ class ScalaREPL(displayErrors: Boolean = true) extends ILoop {
     override protected def newCompiler(settings: Settings, reporter: Reporter) = {
       settings.outputDirs setSingleOutput replOutput.dir
       settings.exposeEmptyPackage.value = true
-      new OSGiScalaCompiler(settings, reporter, replOutput.dir)
+      new OSGiScalaCompiler(settings, reporter, replOutput.dir, priorityClasses)
     }
 
     /*override def interpret(s: String) = {
@@ -77,8 +80,9 @@ class ScalaREPL(displayErrors: Boolean = true) extends ILoop {
       r
     }*/
 
-    override lazy val classLoader =
-      new scala.tools.nsc.util.AbstractFileClassLoader(replOutput.dir, classOf[OSGiScalaCompiler].getClassLoader)
+    override lazy val classLoader = new scala.tools.nsc.util.AbstractFileClassLoader(
+      replOutput.dir,
+      new CompositeClassLoader(priorityClasses.map(_.getClassLoader) ++ List(classOf[OSGiScalaCompiler].getClassLoader): _*))
 
   }
 
