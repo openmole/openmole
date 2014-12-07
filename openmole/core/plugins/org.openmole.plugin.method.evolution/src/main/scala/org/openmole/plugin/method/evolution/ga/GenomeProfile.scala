@@ -28,7 +28,7 @@ object GenomeProfile {
     x: Int,
     nX: Int,
     termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F },
-    inputs: Inputs[Double],
+    inputs: Inputs,
     objective: Objective,
     reevaluate: Double = 0.0) = {
     val (_x, _nX, _reevaluate, _inputs) = (x, nX, reevaluate, inputs)
@@ -71,8 +71,5 @@ trait GenomeProfile extends GAAlgorithm
     with MGFitness
     with MaxAggregation
     with ClampedGenome {
-  type INPUT = Double
-  def inputConverter = implicitly
-
   def x: Int
 }

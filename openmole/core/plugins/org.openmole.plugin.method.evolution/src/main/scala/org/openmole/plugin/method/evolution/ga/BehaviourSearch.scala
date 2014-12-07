@@ -27,7 +27,7 @@ object BehaviourSearch {
 
   def apply(
     termination: GATermination { type G >: BehaviourSearch#G; type P >: BehaviourSearch#P; type F >: BehaviourSearch#F },
-    inputs: Inputs[Double],
+    inputs: Inputs,
     observables: Objectives,
     gridSize: Seq[Double],
     reevaluate: Double = 0.0) = {
@@ -60,15 +60,12 @@ object BehaviourSearch {
 }
 
 trait BehaviourSearch extends GAAlgorithm
-    with HitMapArchive
-    with GeneticBreeding
-    with BinaryTournamentSelection with selection.ProportionalNumberOfRound
-    with HierarchicalRanking
-    with TournamentOnHitCount
-    with dynamic.DynamicApplicationGA
-    with RandomNicheElitism
-    with PhenotypeGridNiche
-    with ClampedGenome {
-  type INPUT = Double
-  def inputConverter = implicitly
-}
+  with HitMapArchive
+  with GeneticBreeding
+  with BinaryTournamentSelection with selection.ProportionalNumberOfRound
+  with HierarchicalRanking
+  with TournamentOnHitCount
+  with dynamic.DynamicApplicationGA
+  with RandomNicheElitism
+  with PhenotypeGridNiche
+  with ClampedGenome

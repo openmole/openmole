@@ -26,7 +26,7 @@ object CMAES {
 
   def apply(
     termination: GATermination { type G >: CMAES#G; type P >: CMAES#P; type F >: CMAES#F },
-    inputs: Inputs[String],
+    inputs: Inputs,
     objectives: Objectives) = {
     val (_inputs, _objectives) = (inputs, objectives)
     new CMAES {
@@ -50,12 +50,9 @@ object CMAES {
 }
 
 trait CMAES extends GAAlgorithm
-    with KeepOffspringElitism
-    with GAGenomeWithRandomValue
-    with MaxAggregation
-    with CMAESBreeding
-    with CMAESArchive
-    with ClampedGenome {
-  type INPUT = String
-  def inputConverter = implicitly
-}
+  with KeepOffspringElitism
+  with GAGenomeWithRandomValue
+  with MaxAggregation
+  with CMAESBreeding
+  with CMAESArchive
+  with ClampedGenome

@@ -34,7 +34,7 @@ object ModelFamily {
     nicheSize: Int,
     termination: GATermination { type G >: ModelFamily#G; type P >: ModelFamily#P; type F >: ModelFamily#F },
     modelId: Prototype[Int],
-    inputs: Inputs[String],
+    inputs: Inputs,
     objectives: Objectives,
     reevaluate: Double = 0.0) = {
     val (_mu, _reevaluate, _lambda, _inputs, _objectives, _nicheSize, _models, _modelId) = (mu, reevaluate, lambda, inputs, objectives, nicheSize, models, modelId)
@@ -72,18 +72,14 @@ object ModelFamily {
 }
 
 trait ModelFamily extends NoArchive
-    with GAAlgorithm
-    with ModelFamilyElitism
-    with ModelFamilyMutation
-    with SBXCrossover
-    with MaxAggregation
-    with BinaryTournamentSelection
-    with TournamentOnRank
-    with GeneticBreeding
-    with HierarchicalRanking
-    with ModelFamilyGenome
-    with ClampedGenome {
-  type INPUT = String
-  def inputConverter = implicitly
-
-}
+  with GAAlgorithm
+  with ModelFamilyElitism
+  with ModelFamilyMutation
+  with SBXCrossover
+  with MaxAggregation
+  with BinaryTournamentSelection
+  with TournamentOnRank
+  with GeneticBreeding
+  with HierarchicalRanking
+  with ModelFamilyGenome
+  with ClampedGenome

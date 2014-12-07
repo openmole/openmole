@@ -39,13 +39,13 @@ package object ga {
   implicit def durationToTerminationConverter(d: Duration) = Timed(d)
   implicit def intToCounterTerminationConverter(n: Int) = Counter(n)
 
-  implicit def seqOfTuplesToInputsConversion[T](s: Seq[(Prototype[Double], (T, T))]) =
-    Inputs[T](s.map { case (p, (min, max)) ⇒ Scalar[T](p, min, max) })
+  implicit def seqOfDoubleTuplesToInputsConversion(s: Seq[(Prototype[Double], (Double, Double))]) =
+    Inputs(s.map { case (p, (min, max)) ⇒ Scalar(p, min, max) })
 
-  implicit def seqOfTuplesStringToInputsDoubleConversion(s: Seq[(Prototype[Double], (Double, Double))]) =
-    Inputs[String](s.map { case (p, (min, max)) ⇒ Scalar[String](p, min.toString, max.toString) })
+  implicit def seqOfStringTuplesToInputsConversion(s: Seq[(Prototype[Double], (String, String))]) =
+    Inputs(s.map { case (p, (min, max)) ⇒ Scalar(p, min, max) })
 
-  implicit def seqToInputsConversion[T](s: Seq[Input[T]]) = Inputs[T](s)
+  implicit def seqToInputsConversion[T](s: Seq[Input]) = Inputs(s)
 
   implicit def gaPuzzleToGAParameters[ALG <: GAAlgorithm](ga: GAPuzzle[ALG]) = ga.parameters
 
