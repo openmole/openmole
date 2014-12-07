@@ -28,25 +28,23 @@ import org.openmole.core.implementation.tools._
 
 object LHS {
 
-  def apply(samples: String, factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
+  def apply(samples: FromContext[Int], factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
     new LHS(samples, factors: _*)
 
 }
 
-sealed class LHS(val samples: String, val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
-
-  @transient lazy val samplesValue = GroovyProxyPool(samples)
+sealed class LHS(val samples: FromContext[Int], val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
 
   override def inputs = DataSet(factors.flatMap(_.inputs))
   override def prototypes = factors.map { _.prototype }
 
   override def build(context: Context): Iterator[Iterable[Variable[Double]]] = {
     val rng = newRNG(context(openMOLESeed))
-    val samples = samplesValue(context).asInstanceOf[Int]
+    val s = samples.from(context)
     factors.map {
       f ⇒
-        (0 until samples).shuffled(rng).map {
-          i ⇒ Variable(f.prototype, ((i + rng.nextDouble) / samples).scale(f.domain.min(context), f.domain.max(context)))
+        (0 until s).shuffled(rng).map {
+          i ⇒ Variable(f.prototype, ((i + rng.nextDouble) / s).scale(f.domain.min(context), f.domain.max(context)))
         }
     }.transpose.toIterator
 
