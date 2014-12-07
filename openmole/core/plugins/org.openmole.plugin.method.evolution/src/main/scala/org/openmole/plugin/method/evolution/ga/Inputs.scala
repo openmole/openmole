@@ -25,30 +25,6 @@ import util.Try
 
 object InputConverter {
 
-  /*implicit val doubleInputConverter =
-    new InputConverter[Double] {
-      override def converter(v: Input[Double]): ToDouble =
-        new ToDouble {
-          override def toDouble(context: ⇒ Context) = (v.min, v.max)
-        }
-    }
-
-  implicit val stringInputConverter =
-    new InputConverter[String] {
-      override def converter(v: Input[String]): ToDouble =
-        new ToDouble {
-          @transient lazy val proxy = groovyProxy(v)
-          override def toDouble(context: ⇒ Context) = {
-            val (p1, p2) = proxy
-            val v1 = p1(context).toString.toDouble
-            val v2 = p2(context).toString.toDouble
-            assert(!v1.isNaN)
-            assert(!v2.isNaN)
-            (v1, v2)
-          }
-        }
-    }*/
-
   def scaled(scales: List[Input], genome: List[Double], context: ⇒ Context): List[Variable[_]] =
     if (scales.isEmpty || genome.isEmpty) List.empty
     else {
@@ -80,13 +56,7 @@ object InputConverter {
   sealed trait Scaled
   case class ScaledSequence(prototype: Prototype[Array[Double]], s: Array[Double]) extends Scaled
   case class ScaledScalar(prototype: Prototype[Double], v: Double) extends Scaled
-
-  /*def groovyProxy(input: Input[String]) =
-    input match {
-      case s @ Scalar(_, min, max)      ⇒ (GroovyProxyPool(min), GroovyProxyPool(max))
-      case s @ Sequence(_, min, max, _) ⇒ (GroovyProxyPool(min), GroovyProxyPool(max))
-    }*/
-
+  
 }
 
 trait InputsConverter {
@@ -99,13 +69,6 @@ trait InputsConverter {
 
 }
 
-/*trait ToDouble {
-  def toDouble(context: ⇒ Context): (Double, Double)
-}
-
-trait InputConverter[T] {
-  def converter(v: Input[T]): ToDouble
-}*/
 
 sealed trait Input {
   def min: FromContext[Double]
