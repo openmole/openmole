@@ -25,36 +25,12 @@ import util.Try
 
 object InputConverter {
 
-  implicit val doubleInputConverter =
-    new InputConverter[Double] {
-      override def converter(v: Input[Double]): ToDouble =
-        new ToDouble {
-          override def toDouble(context: ⇒ Context) = (v.min, v.max)
-        }
-    }
-
-  implicit val stringInputConverter =
-    new InputConverter[String] {
-      override def converter(v: Input[String]): ToDouble =
-        new ToDouble {
-          @transient lazy val proxy = groovyProxy(v)
-          override def toDouble(context: ⇒ Context) = {
-            val (p1, p2) = proxy
-            val v1 = p1(context).toString.toDouble
-            val v2 = p2(context).toString.toDouble
-            assert(!v1.isNaN)
-            assert(!v2.isNaN)
-            (v1, v2)
-          }
-        }
-    }
-
-  def scaled(scales: List[(Input[_], ToDouble)], genome: List[Double], context: ⇒ Context): List[Variable[_]] =
+  def scaled(scales: List[Input], genome: List[Double], context: ⇒ Context): List[Variable[_]] =
     if (scales.isEmpty || genome.isEmpty) List.empty
     else {
-      val (input, toDouble) = scales.head
+      val input = scales.head
       val (variable, tail) =
-        scaled(input, toDouble, context, genome) match {
+        scaled(input, context, genome) match {
           case ScaledScalar(p, v) ⇒
             assert(!v.isNaN); Variable(p, v) -> genome.tail
           case ScaledSequence(p, v) ⇒ Variable(p, v) -> genome.drop(input.size)
@@ -63,8 +39,9 @@ object InputConverter {
       variable :: scaled(scales.tail, tail.toList, context + variable)
     }
 
-  def scaled(input: Input[_], toDouble: ToDouble, context: ⇒ Context, genomePart: Seq[Double]) = {
-    val (min, max) = toDouble.toDouble(context)
+  def scaled(input: Input, context: ⇒ Context, genomePart: Seq[Double]) = {
+    val min = input.min.from(context)
+    val max = input.max.from(context)
 
     input match {
       case s @ Scalar(p, _, _) ⇒
@@ -80,49 +57,32 @@ object InputConverter {
   case class ScaledSequence(prototype: Prototype[Array[Double]], s: Array[Double]) extends Scaled
   case class ScaledScalar(prototype: Prototype[Double], v: Double) extends Scaled
 
-  def groovyProxy(input: Input[String]) =
-    input match {
-      case s @ Scalar(_, min, max)      ⇒ (GroovyProxyPool(min), GroovyProxyPool(max))
-      case s @ Sequence(_, min, max, _) ⇒ (GroovyProxyPool(min), GroovyProxyPool(max))
-    }
-
 }
 
 trait InputsConverter {
-  type INPUT
 
-  def inputs: Inputs[INPUT]
-  def inputConverter: InputConverter[INPUT]
-
-  @transient lazy val toDoubles: Seq[(Input[INPUT], ToDouble)] = inputs.inputs.map(i ⇒ i -> inputConverter.converter(i))
+  def inputs: Inputs
 
   def scaled(genome: Seq[Double], context: Context): List[Variable[_]] = {
-    InputConverter.scaled(toDoubles.toList, genome.toList, context)
+    InputConverter.scaled(inputs.inputs.toList, genome.toList, context)
   }
 
 }
 
-trait ToDouble {
-  def toDouble(context: ⇒ Context): (Double, Double)
-}
 
-trait InputConverter[T] {
-  def converter(v: Input[T]): ToDouble
-}
-
-sealed trait Input[T] {
-  def min: T
-  def max: T
+sealed trait Input {
+  def min: FromContext[Double]
+  def max: FromContext[Double]
   def prototype: Prototype[_]
   def size: Int
 }
 
-case class Scalar[T](prototype: Prototype[Double], min: T, max: T) extends Input[T] {
+case class Scalar(prototype: Prototype[Double], min: FromContext[Double], max: FromContext[Double]) extends Input {
   def size = 1
 }
 
-case class Sequence[T](prototype: Prototype[Array[Double]], min: T, max: T, size: Int) extends Input[T]
+case class Sequence(prototype: Prototype[Array[Double]], min: FromContext[Double], max: FromContext[Double], size: Int) extends Input
 
-case class Inputs[T](inputs: Seq[Input[T]]) {
+case class Inputs(inputs: Seq[Input]) {
   def size: Int = Try(inputs.map(_.size).sum).getOrElse(0)
 }

@@ -27,7 +27,7 @@ object MonoObjective {
   def apply(
     mu: Int,
     termination: GATermination { type G >: MonoObjective#G; type P >: MonoObjective#P; type F >: MonoObjective#F },
-    inputs: Inputs[String],
+    inputs: Inputs,
     objective: Objective,
     reevaluate: Double = 0.0) = {
     val (_mu, _reevaluate, _inputs) = (mu, reevaluate, inputs)
@@ -54,17 +54,14 @@ object MonoObjective {
 }
 
 trait MonoObjective extends GAAlgorithm
-    with dynamic.DynamicApplicationGA
-    with BinaryTournamentSelection
-    with TournamentOnAggregatedFitness
-    with DiversityAggregatedElitism
-    with NoArchive
-    with CloneRemoval
-    with GeneticBreeding
-    with MGFitness
-    with ClampedGenome
-    with MaxAggregation {
-  type INPUT = String
-  def inputConverter = implicitly
-}
+  with dynamic.DynamicApplicationGA
+  with BinaryTournamentSelection
+  with TournamentOnAggregatedFitness
+  with DiversityAggregatedElitism
+  with NoArchive
+  with CloneRemoval
+  with GeneticBreeding
+  with MGFitness
+  with ClampedGenome
+  with MaxAggregation
 

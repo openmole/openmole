@@ -27,7 +27,7 @@ object NSGA2 {
   def apply(
     mu: Int,
     termination: GATermination { type G >: NSGA2#G; type P >: NSGA2#P; type F >: NSGA2#F },
-    inputs: Inputs[String],
+    inputs: Inputs,
     objectives: Objectives,
     reevaluate: Double = 0.0) = {
     val (_mu, _reevaluate, _inputs, _objectives) = (mu, reevaluate, inputs, objectives)
@@ -54,19 +54,16 @@ object NSGA2 {
 }
 
 trait NSGA2 extends GAAlgorithm
-    with dynamic.DynamicApplicationGA
-    with BinaryTournamentSelection
-    with TournamentOnRankAndDiversity
-    with NonDominatedElitism
-    with FitnessCrowdingDiversity
-    with ParetoRanking
-    with NonStrictDominance
-    with NoArchive
-    with CloneRemoval
-    with GeneticBreeding
-    with MGFitness
-    with ClampedGenome {
-  type INPUT = String
-  def inputConverter = implicitly
-}
+  with dynamic.DynamicApplicationGA
+  with BinaryTournamentSelection
+  with TournamentOnRankAndDiversity
+  with NonDominatedElitism
+  with FitnessCrowdingDiversity
+  with ParetoRanking
+  with NonStrictDominance
+  with NoArchive
+  with CloneRemoval
+  with GeneticBreeding
+  with MGFitness
+  with ClampedGenome
 

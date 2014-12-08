@@ -30,7 +30,7 @@ object GenomeMap {
     y: Int,
     nY: Int,
     termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F },
-    inputs: Inputs[Double],
+    inputs: Inputs,
     objectives: Objectives,
     reevaluate: Double = 0.0) = {
     val (_x, _nX, _y, _nY, _reevaluate, _inputs, _objectives) = (x, nX, y, nY, reevaluate, inputs, objectives)
@@ -75,8 +75,6 @@ trait GenomeMap extends GAAlgorithm
     with MaxAggregation
     with GeneticBreeding
     with ClampedGenome {
-  type INPUT = Double
-  def inputConverter = implicitly
 
   def x: Int
   def y: Int

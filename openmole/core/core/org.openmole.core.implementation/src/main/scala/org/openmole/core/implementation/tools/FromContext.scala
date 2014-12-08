@@ -23,11 +23,13 @@ import org.openmole.misc.tools.script.GroovyProxyPool
 
 object FromContext {
 
-  implicit def fromStringContext[T](code: String)(implicit fromString: FromString[T]) =
+  implicit def fromStringToContext[T](code: String)(implicit fromString: FromString[T]) =
     new FromContext[T] {
       @transient lazy val proxy = GroovyProxyPool(code)
       override def from(context: Context): T = fromString.from(proxy(context).toString)
     }
+
+  implicit def fromTToContext[T](t: T) = FromContext[T](t)
 
   def apply[T](t: T) =
     new FromContext[T] {
