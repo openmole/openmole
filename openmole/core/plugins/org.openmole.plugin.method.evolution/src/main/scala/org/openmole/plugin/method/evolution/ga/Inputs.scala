@@ -56,7 +56,7 @@ object InputConverter {
   sealed trait Scaled
   case class ScaledSequence(prototype: Prototype[Array[Double]], s: Array[Double]) extends Scaled
   case class ScaledScalar(prototype: Prototype[Double], v: Double) extends Scaled
-  
+
 }
 
 trait InputsConverter {
