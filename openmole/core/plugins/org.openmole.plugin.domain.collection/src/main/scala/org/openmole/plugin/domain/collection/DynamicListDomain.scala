@@ -27,6 +27,8 @@ import org.openmole.misc.tools.io.FromString
 import org.openmole.misc.tools.script.GroovyProxyPool
 import org.openmole.core.implementation.tools._
 
+import scala.util.Random
+
 object DynamicListDomain {
 
   def apply[T](values: String*)(implicit s: FromString[T]) =
@@ -38,7 +40,7 @@ sealed class DynamicListDomain[+T](val values: String*)(implicit s: FromString[T
 
   @transient lazy val proxies = values.map { v ⇒ GroovyProxyPool(v) }
 
-  override def computeValues(context: Context): Iterable[T] =
+  override def computeValues(context: Context)(implicit rng: Random): Iterable[T] =
     proxies.map { p ⇒ s.from(p.execute(context).toString) }
 
 }

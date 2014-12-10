@@ -20,6 +20,7 @@ package org.openmole.plugin.domain.collection
 import org.openmole.core.model.domain._
 import org.openmole.core.model.data._
 import scala.collection.JavaConversions._
+import scala.util.Random
 
 object IteratorDomain {
 
@@ -29,5 +30,5 @@ object IteratorDomain {
 }
 
 sealed class IteratorDomain[T](iterator: Iterator[T]) extends Domain[T] with Discrete[T] {
-  override def iterator(context: Context): Iterator[T] = iterator
+  override def iterator(context: Context)(implicit rng: Random): Iterator[T] = iterator
 }

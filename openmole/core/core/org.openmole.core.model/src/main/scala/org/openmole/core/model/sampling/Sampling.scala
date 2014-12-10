@@ -19,6 +19,8 @@ package org.openmole.core.model.sampling
 
 import org.openmole.core.model.data._
 
+import scala.util.Random
+
 trait Sampling {
 
   /**
@@ -41,6 +43,6 @@ trait Sampling {
    * @param context context in which the exploration takes place
    */
   @throws(classOf[Throwable])
-  def build(context: Context): Iterator[Iterable[Variable[_]]]
+  def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]]
 
 }

@@ -20,6 +20,8 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
+import scala.util.Random
+
 object TakeSampling {
 
   def apply(sampling: Sampling, n: Int) =
@@ -32,7 +34,7 @@ sealed class TakeSampling(val sampling: Sampling, val n: Int) extends Sampling {
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
     sampling.build(context).take(n)
 
 }

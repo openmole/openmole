@@ -31,6 +31,7 @@ import org.openmole.core.model.sampling._
 import au.com.bytecode.opencsv.CSVReader
 import collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
+import scala.util.Random
 
 object CSVSampling {
 
@@ -78,7 +79,7 @@ abstract sealed class CSVSampling(val file: File) extends Sampling {
    * Builds the plan.
    *
    */
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] = {
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] = {
     val reader = new CSVReader(new FileReader(file), separator)
     val headers = reader.readNext.toArray
 

@@ -20,6 +20,7 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 import scala.collection.mutable.ListBuffer
+import scala.util.Random
 
 object ZipSampling {
 
@@ -33,7 +34,7 @@ sealed class ZipSampling(val samplings: Sampling*) extends Sampling {
   override def inputs = DataSet(samplings.flatMap(_.inputs))
   override def prototypes = samplings.flatMap(_.prototypes)
 
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
     samplings.headOption match {
       case Some(reference) ⇒
         /* Compute plans */

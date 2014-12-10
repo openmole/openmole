@@ -22,6 +22,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 
 import scala.collection.JavaConversions._
+import scala.util.Random
 
 object IterableVariableDomain {
 
@@ -32,5 +33,5 @@ object IterableVariableDomain {
 
 sealed class IterableVariableDomain[T](variable: Prototype[Iterable[_ <: T]]) extends Domain[T] with Discrete[T] {
   override def inputs = DataSet(variable)
-  override def iterator(context: Context): Iterator[T] = context(variable).iterator
+  override def iterator(context: Context)(implicit rng: Random): Iterator[T] = context(variable).iterator
 }

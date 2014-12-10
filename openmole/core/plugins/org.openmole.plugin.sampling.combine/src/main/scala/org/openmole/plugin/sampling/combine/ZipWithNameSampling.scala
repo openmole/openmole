@@ -22,6 +22,8 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
 
+import scala.util.Random
+
 object ZipWithNameSampling {
 
   def apply(factor: Factor[File, Domain[File] with Discrete[File]], name: Prototype[String]) =
@@ -34,7 +36,7 @@ sealed class ZipWithNameSampling(val factor: Factor[File, Domain[File] with Disc
   override def inputs = factor.inputs
   override def prototypes = List(factor.prototype, name)
 
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
     factor.domain.iterator(context).map {
       v ⇒ List(Variable(factor.prototype, v), Variable(name, v.getName))
     }

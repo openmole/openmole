@@ -20,6 +20,8 @@ package org.openmole.core.model.sampling
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 
+import scala.util.Random
+
 object DiscreteFactor {
 
   def apply[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) =
@@ -36,7 +38,7 @@ trait DiscreteFactor[T, +D <: Domain[T] with Discrete[T]] extends Factor[T, D] w
 
   override def prototypes = List(prototype)
 
-  override def build(context: Context): Iterator[collection.Iterable[Variable[T]]] =
+  override def build(context: Context)(implicit rng: Random): Iterator[collection.Iterable[Variable[T]]] =
     domain.iterator(context).map { v ⇒ List(Variable(prototype, v)) }
 
 }

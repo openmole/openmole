@@ -20,6 +20,8 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.model.domain._
 import org.openmole.core.model.data._
 
+import scala.util.Random
+
 object SortDomain {
 
   def apply[T](domain: Domain[T] with Finite[T])(implicit ord: Ordering[T]) =
@@ -31,7 +33,7 @@ class SortDomain[T](val domain: Domain[T] with Finite[T])(implicit ord: Ordering
 
   override def inputs = domain.inputs
 
-  override def computeValues(context: Context): Iterable[T] =
+  override def computeValues(context: Context)(implicit rng: Random): Iterable[T] =
     domain.computeValues(context).toList.sorted
 
 }

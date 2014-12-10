@@ -20,6 +20,8 @@ package org.openmole.plugin.domain.collection
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 
+import scala.util.Random
+
 object IterableDomain {
 
   def apply[T](iterable: Iterable[_ <: T]) =
@@ -28,5 +30,5 @@ object IterableDomain {
 }
 
 sealed class IterableDomain[T](iterable: Iterable[_ <: T]) extends Domain[T] with Discrete[T] {
-  override def iterator(context: Context): Iterator[T] = iterable.iterator
+  override def iterator(context: Context)(implicit rng: Random): Iterator[T] = iterable.iterator
 }

@@ -22,13 +22,15 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.implementation.tools._
 
+import scala.util.Random
+
 object SelectFileDomain {
   def apply(base: File, path: String) = new SelectFileDomain(base, path)
 }
 
 class SelectFileDomain(val base: File, val path: String) extends Domain[File] with Finite[File] {
 
-  override def computeValues(context: Context): Iterable[File] =
+  override def computeValues(context: Context)(implicit rng: Random): Iterable[File] =
     List(new File(base, VariableExpansion(context, path)))
 
 }

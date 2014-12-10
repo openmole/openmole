@@ -22,6 +22,8 @@ import org.openmole.core.model.domain._
 import org.openmole.core.model.data._
 import org.openmole.misc.exception._
 
+import scala.util.Random
+
 object SortByNameDomain {
   def apply(domain: Domain[File] with Finite[File]) = new SortByNameDomain(domain)
 }
@@ -30,7 +32,7 @@ class SortByNameDomain(val domain: Domain[File] with Finite[File]) extends Domai
 
   override def inputs = domain.inputs
 
-  override def computeValues(context: Context): Iterable[File] = {
+  override def computeValues(context: Context)(implicit rng: Random): Iterable[File] = {
     def extractNumber(name: String) = {
       val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit).reverse
       if (n.isEmpty) throw new UserBadDataError("File name " + name + " doesn't contains a number")

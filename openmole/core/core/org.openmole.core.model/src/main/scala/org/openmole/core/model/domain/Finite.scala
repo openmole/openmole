@@ -19,7 +19,9 @@ package org.openmole.core.model.domain
 
 import org.openmole.core.model.data._
 
+import scala.util.Random
+
 trait Finite[+T] extends Domain[T] with Discrete[T] {
-  def computeValues(context: Context): collection.Iterable[T]
-  override def iterator(context: Context): Iterator[T] = computeValues(context).iterator
+  def computeValues(context: Context)(implicit rng: Random): collection.Iterable[T]
+  override def iterator(context: Context)(implicit rng: Random): Iterator[T] = computeValues(context).iterator
 }

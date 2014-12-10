@@ -19,6 +19,8 @@ package org.openmole.core.model.domain
 
 import org.openmole.core.model.data._
 
+import scala.util.Random
+
 trait Discrete[+T] extends Domain[T] {
-  def iterator(context: Context): Iterator[T]
+  def iterator(context: Context)(implicit rng: Random): Iterator[T]
 }

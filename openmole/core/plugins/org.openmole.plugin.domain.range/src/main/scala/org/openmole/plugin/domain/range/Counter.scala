@@ -20,10 +20,13 @@ package org.openmole.plugin.domain.range
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 
+import scala.util.Random
+
 object Counter {
   def apply(start: Long = 0L, step: Long = 1L) = new Counter(start, step)
 }
 
 sealed class Counter(start: Long = 0L, step: Long = 1L) extends Domain[Long] with Discrete[Long] {
-  override def iterator(context: Context): Iterator[Long] = Iterator.iterate(0L)(_ + 1L)
+  override def iterator(context: Context)(implicit rng: Random): Iterator[Long] =
+    Iterator.iterate(0L)(_ + 1L)
 }

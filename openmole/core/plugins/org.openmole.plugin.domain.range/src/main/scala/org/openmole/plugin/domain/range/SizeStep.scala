@@ -21,6 +21,8 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.implementation.tools._
 
+import scala.util.Random
+
 trait SizeStep[T] extends Domain[T] with Finite[T] with Center[T] with Bounds[T] {
 
   val range: Range[T]
@@ -30,7 +32,7 @@ trait SizeStep[T] extends Domain[T] with Finite[T] with Center[T] with Bounds[T]
 
   def stepAndSize(maxValue: T, minValue: T, context: Context): (T, Int)
 
-  override def computeValues(context: Context): Iterable[T] = {
+  override def computeValues(context: Context)(implicit rng: Random): Iterable[T] = {
     val mi = min(context)
     val ma = max(context)
     val (step, size) = stepAndSize(mi, ma, context)

@@ -28,6 +28,8 @@ import algorithm._
 import fr.iscpif.mgo._
 import org.openmole.core.model.sampling.Sampling
 
+import scala.util.Random
+
 object BreedSampling {
 
   def apply(evolution: Breeding with GManifest with Archive)(
@@ -52,8 +54,7 @@ sealed abstract class BreedSampling(val evolution: Breeding with GManifest with 
   def prototypes = List(genome)
   override def inputs = DataSet(population, archive)
 
-  override def build(context: Context) = {
-    val rng = Task.buildRNG(context)
+  override def build(context: Context)(implicit rng: Random) = {
     val p = context(population)
     val a = context(archive)
     val breeded = evolution.breed(p, a, size)(rng)

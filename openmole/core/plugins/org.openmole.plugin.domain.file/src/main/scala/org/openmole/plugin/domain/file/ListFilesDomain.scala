@@ -25,6 +25,8 @@ import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 import org.openmole.misc.tools.io.FileUtil._
 
+import scala.util.Random
+
 object ListFilesDomain extends Logger {
 
   def apply(
@@ -43,7 +45,7 @@ sealed class ListFilesDomain(
     recursive: Boolean = false,
     filter: File ⇒ Boolean = f ⇒ true) extends Domain[File] with Finite[File] {
 
-  override def computeValues(context: Context): Iterable[File] = {
+  override def computeValues(context: Context)(implicit rng: Random): Iterable[File] = {
     val dir = new File(base, VariableExpansion(context, subdirectory))
 
     if (!dir.exists) {

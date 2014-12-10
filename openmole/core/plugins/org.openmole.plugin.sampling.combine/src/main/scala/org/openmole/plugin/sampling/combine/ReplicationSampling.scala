@@ -22,6 +22,8 @@ import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
 import org.openmole.plugin.domain.modifier._
 
+import scala.util.Random
+
 object ReplicationSampling {
 
   def apply[T](sampling: Sampling, seeder: Factor[T, Domain[T] with Discrete[T]], replications: Int): ReplicationSampling[T] =
@@ -37,7 +39,7 @@ sealed class ReplicationSampling[T](sampling: Sampling, seeder: Factor[T, Domain
   override def inputs = sampling.inputs ++ seeder.inputs
   override def prototypes = seeder.prototype :: sampling.prototypes.toList
 
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
     CompleteSampling(sampling, seeder).build(context)
 
 }

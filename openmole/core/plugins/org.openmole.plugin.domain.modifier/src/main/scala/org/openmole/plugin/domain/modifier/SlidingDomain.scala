@@ -20,6 +20,8 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.model.domain._
 import org.openmole.core.model.data._
 
+import scala.util.Random
+
 object SlidingDomain {
 
   def apply[T](domain: Domain[T] with Discrete[T], size: Int, step: Int = 1)(implicit m: Manifest[T]) =
@@ -31,7 +33,7 @@ class SlidingDomain[T](val domain: Domain[T] with Discrete[T], val size: Int, va
 
   override def inputs = domain.inputs
 
-  override def iterator(context: Context): Iterator[Array[T]] =
+  override def iterator(context: Context)(implicit rng: Random): Iterator[Array[T]] =
     domain.iterator(context).sliding(size, step).map(_.toArray)
 
 }

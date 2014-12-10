@@ -26,6 +26,8 @@ import org.openmole.core.implementation.task.Task._
 import org.openmole.misc.tools.script.GroovyProxyPool
 import org.openmole.core.implementation.tools._
 
+import scala.util.Random
+
 object LHS {
 
   def apply(samples: FromContext[Int], factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
@@ -38,8 +40,7 @@ sealed class LHS(val samples: FromContext[Int], val factors: Factor[Double, Doma
   override def inputs = DataSet(factors.flatMap(_.inputs))
   override def prototypes = factors.map { _.prototype }
 
-  override def build(context: Context): Iterator[Iterable[Variable[Double]]] = {
-    val rng = newRNG(context(openMOLESeed))
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[Double]]] = {
     val s = samples.from(context)
     factors.map {
       f ⇒

@@ -21,6 +21,8 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
+import scala.util.Random
+
 object CompleteSampling {
 
   def apply(samplings: Sampling*) = new CompleteSampling(samplings: _*)
@@ -32,7 +34,7 @@ sealed class CompleteSampling(val samplings: Sampling*) extends Sampling {
   override def inputs = DataSet(samplings.flatMap { _.inputs })
   override def prototypes: Iterable[Prototype[_]] = samplings.flatMap { _.prototypes }
 
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] = {
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] = {
     val values = samplings.map { _.build(context).toList }
     val composed = values.view.reduceOption { (a, b) ⇒ combine(a, b) }
     composed.getOrElse(Iterator.empty).toIterator

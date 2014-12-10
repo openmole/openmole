@@ -20,6 +20,8 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 
+import scala.util.Random
+
 object TakeDomain {
 
   def apply[T](domain: Domain[T] with Discrete[T], size: Int) =
@@ -29,5 +31,6 @@ object TakeDomain {
 
 sealed class TakeDomain[+T](val domain: Domain[T] with Discrete[T], val size: Int) extends Domain[T] with Finite[T] {
   override def inputs = domain.inputs
-  override def computeValues(context: Context): Iterable[T] = domain.iterator(context).slice(0, size).toIterable
+  override def computeValues(context: Context)(implicit rng: Random): Iterable[T] =
+    domain.iterator(context).slice(0, size).toIterable
 }
