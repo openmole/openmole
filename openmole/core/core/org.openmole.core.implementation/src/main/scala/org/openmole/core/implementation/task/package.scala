@@ -19,6 +19,7 @@ package org.openmole.core.implementation
 
 import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.puzzle.Puzzle
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.task.ITask
 import org.openmole.misc.pluginmanager.PluginManager
 import mole._
@@ -40,4 +41,6 @@ package object task {
   implicit def taskToCapsuleDecorator(task: ITask) = new TaskToCapsuleDecorator(task)
   implicit def taskBuilderToCapsuleDecorator(task: TaskBuilder) = taskToCapsuleDecorator(task)
   implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = t.toTask.toCapsule.toPuzzle
+
+  def newRNG(context: Context) = Task.buildRNG(context)
 }
