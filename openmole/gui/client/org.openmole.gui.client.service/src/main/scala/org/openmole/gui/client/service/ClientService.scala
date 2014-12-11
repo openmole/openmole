@@ -126,6 +126,3 @@ object ClientService {
   //implicit def protoDataUIStringMapToProtoDataString(m: Map[PrototypeDataUI[_], String]): Map[PrototypeData[_], String] = m.map { case (dataUI: PrototypeDataUI[_], s) ⇒ dataUI.data -> s }.toMap
 
 }
-trait ServiceFlag
-
-//FIXME: pour avoir une class pour bootstrapJS

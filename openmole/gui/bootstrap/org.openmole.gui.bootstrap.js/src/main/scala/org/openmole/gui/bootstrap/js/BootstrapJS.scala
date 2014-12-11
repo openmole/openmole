@@ -18,27 +18,17 @@ package org.openmole.gui.bootstrap.js
 
 import java.io.File
 import java.net.URL
-
-import org.openmole.gui.ext.dataui.DataUI
-import org.openmole.gui.ext.factoryui.FactoryUI
-import org.openmole.gui.ext.aspects.Identifiable
-import org.openmole.gui.misc.js.ClassKeyAggregator
 import org.openmole.gui.server.core.GUIServer
-import org.openmole.gui.client.core.GraphCreator
-import org.openmole.gui.client.service.ServiceFlag
 import org.openmole.gui.server.factory.ServerFactories
 import org.openmole.gui.shared._
-import autowire.Client
 import org.openmole.misc.osgi.Activator
 import org.openmole.misc.pluginmanager
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.io.FileUtil
 import org.openmole.misc.tools.io.FileUtil._
-import org.osgi.framework.Bundle
 import scala.collection.JavaConverters._
 import org.openmole.misc.fileservice._
-import fr.iscpif.scaladget.mapping.Base
 
 object BootstrapJS {
 
@@ -55,7 +45,7 @@ object BootstrapJS {
   new File(webapp, "fonts").mkdirs
   new File(webapp, "WEB-INF").mkdirs
 
-  def init(pluginBundles: List[Bundle], optimized: Boolean = true) = {
+  def init(optimized: Boolean = true) = {
 
     //Copy all the fixed resources in the workspace if required
     val thisBundle = PluginManager.bundleForClass(classOf[GUIServer])
@@ -66,24 +56,8 @@ object BootstrapJS {
     copyURL(thisBundle.findEntries("/", "web.xml", true).asScala)
 
     // Extract and copy all the .sjsir files from bundles to src
-    val bundles = pluginBundles ++ Seq(
-      PluginManager.bundleForClass(classOf[GraphCreator]),
-      PluginManager.bundleForClass(classOf[Base]),
-      PluginManager.bundleForClass(classOf[DataUI]),
-      PluginManager.bundleForClass(classOf[Identifiable]),
-      PluginManager.bundleForClass(classOf[ClassKeyAggregator]),
-      PluginManager.bundleForClass(classOf[FactoryUI]),
-      PluginManager.bundleForClass(classOf[Api]),
-      PluginManager.bundleForClass(classOf[ServiceFlag]),
-      PluginManager.bundleForClass(classOf[autowire.Client[String, upickle.Reader, upickle.Writer]]),
-      PluginManager.bundleForClass(classOf[org.scalajs.dom.HTMLHtmlElement]),
-      PluginManager.bundleForClass(classOf[scalatags.DataConverters]),
-      PluginManager.bundleForClass(classOf[upickle.Reader[_]]),
-      PluginManager.bundleForClass(classOf[rx.Rx[_]])
-    )
-    //FIXME: try to replace by PluginManager.bundles
 
-    bundles.map { b ⇒
+    PluginManager.bundles.map { b ⇒
       b.findEntries("/", "*.sjsir", true)
     }.filterNot {
       _ == null

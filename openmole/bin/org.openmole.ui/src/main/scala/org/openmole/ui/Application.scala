@@ -171,7 +171,7 @@ class Application extends IApplication {
 
       application.display
       waitClose.acquire(1)*/
-      BootstrapJS.init(bundles, config.optimizedJS)
+      BootstrapJS.init(config.optimizedJS)
       val server = new GUIServer(config.serverPort, BootstrapJS.webapp)
       server.start()
 
