@@ -1,9 +1,7 @@
-package org.openmole.gui.ext.dataui
-
-import org.openmole.gui.ext.data.PrototypeData
+package org.openmole.gui.ext.aspects
 
 /*
- * Copyright (C) 20/08/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 05/12/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,7 +17,10 @@ import org.openmole.gui.ext.data.PrototypeData
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait PrototypeDataUI[T] <: DataUI {
-  type DATA = PrototypeData[T]
-  def data: DATA
+trait Displayable {
+  def name: String
+}
+
+trait Identifiable {
+  val id: String = java.util.UUID.randomUUID.toString
 }

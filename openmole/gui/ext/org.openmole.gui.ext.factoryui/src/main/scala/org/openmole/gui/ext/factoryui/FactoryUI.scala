@@ -1,5 +1,6 @@
 package org.openmole.gui.ext.factoryui
 
+import org.openmole.gui.ext.aspects._
 import org.openmole.gui.ext.dataui._
 
 import scala.scalajs.js.annotation.JSExport
@@ -21,17 +22,7 @@ import scala.scalajs.js.annotation.JSExport
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait FactoryUI {
+trait FactoryUI extends Identifiable with Displayable {
   type DATAUI <: DataUI
   def dataUI: DATAUI
 }
-/*
-trait TaskFactoryUI extends FactoryUI {
-  type DATAUI = TaskDataUI
-  def dataUI: TaskDataUI
-}
-
-trait PrototypeFactoryUI extends FactoryUI {
-  type DATAUI = PrototypeDataUI[_]
-  def dataUI: PrototypeDataUI[_]
-}*/

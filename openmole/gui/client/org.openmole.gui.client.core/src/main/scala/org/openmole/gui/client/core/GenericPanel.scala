@@ -1,8 +1,16 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.ext.dataui.DataUI
 import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.misc.js.Forms._
+import scalatags.JsDom.short._
+
+//import scalatags.JsDom.tags.{ div }
+
+import scalatags.JsDom.attrs._
+import org.openmole.gui.misc.js.JsRxTags._
 import rx._
+
 /*
  * Copyright (C) 12/11/14 // mathieu.leclaire@openmole.org
  *
@@ -22,12 +30,39 @@ import rx._
 
 object GenericPanel {
 
-  def apply(id: String, headTag: FormTag, bodyTag: FormTag, factories: Seq[FactoryUI]) = {
-    factories.foreach { f ⇒ println("dis " + f.dataUI.name()) }
-    modalDialog(id,
-      modalHeader(headTag),
-      modalBody(bodyTag),
-      modalFooter(button("Yo"))
-    )
+  def apply(id: String, factories: Seq[FactoryUI], default: Option[DataUI] = None) = {
+
+    factories.foreach { f ⇒ println("dis " + f.dataUI.getClass()) }
+    val factorySelector = autoinput("factoryUI", "", factories)
+    Rx {
+      val content = Var(factorySelector.content())
+      val panelUI = Var(content().dataUI.panelUI)
+      val body = Var(panelUI().view)
+
+      val header = Var(d(
+        factorySelector.selector
+      )
+      )
+
+      // modalHeader(headTag)
+
+      val footer = Var(d( //  button("Close", btn_default, onclick := { () ⇒ panelUI().save("Yo") })
+      )
+      )
+
+      // panelUI() = factorySelector.content().dataUI.panelUI
+      // body() = modalBody((panelUI().view))
+      println("modal dialoggg body " + body())
+      println("modal dialoggg body render " + body().render)
+
+      Rx {
+        modalDialog(id,
+          header,
+          body,
+          footer
+        )
+      }
+    }
   }
+
 }

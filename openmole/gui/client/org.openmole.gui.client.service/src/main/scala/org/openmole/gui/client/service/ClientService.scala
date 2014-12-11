@@ -53,6 +53,12 @@ object ClientService {
     }
   }
 
+  private def data[T <: Data] = {
+    uiData().map { _.data }.filter { d ⇒
+      d.isInstanceOf[T]
+    }
+  }
+
   def taskFactories = factories[TaskDataUI]
   def prototypeFactories = factories[PrototypeDataUI[_]]
 
@@ -60,30 +66,15 @@ object ClientService {
 
   def +=(d: DataUI) = uiData() = d +: uiData()
 
+  def taskData = data[TaskData]
+  def prototypeData = data[PrototypeData[_]]
+
   implicit def dataToDataClassName(d: Data) = d.getClass.getCanonicalName
 
   implicit def tryToT[T](t: Try[T]): T = t match {
     case Success(s) ⇒ s
     case Failure(f) ⇒ throw (f)
   }
-
-  implicit def taskDataUItoTaskData(dataUI: TaskDataUI): TaskData = dataUI.data
-
-  implicit def taskDataToTaskDataUI(data: TaskData): TaskDataUI = dataUI(data)
-
-  implicit def taskDataUISeqtoTaskDataSeq(s: Seq[TaskDataUI]): Seq[TaskData] = s.map {
-    taskDataUItoTaskData
-  }
-
-  implicit def protoDataUItoProtoData(dataUI: PrototypeDataUI[_]): PrototypeData[_] = dataUI.data
-
-  implicit def prototypeDataToPrototypeDataUI(data: PrototypeData[_]): PrototypeDataUI[_] = dataUI(data)
-
-  implicit def protoDataUISeqtoProtoDataSeq(s: Seq[PrototypeDataUI[_]]): Seq[PrototypeData[_]] = s.map {
-    protoDataUItoProtoData
-  }
-
-  implicit def protoDataUIStringMapToProtoDataString(m: Map[PrototypeDataUI[_], String]): Map[PrototypeData[_], String] = m.map { case (dataUI: PrototypeDataUI[_], s) ⇒ dataUI.data -> s }.toMap
 
   private def factoryUI(data: Data) = uiFactories.get(data.getClass.getCanonicalName) match {
     case Some(f: FactoryUI) ⇒ Try(f.dataUI)
@@ -102,8 +93,39 @@ object ClientService {
 
   private def failure[T <: Data](data: T) = Failure(new Throwable("The data " + data.name + " cannot be recontructed on the server."))
 
-}
+  //Implicit converters for pluging handling convinience
 
+  implicit def stringVarToString(s: Var[String]): String = s()
+
+  implicit def taskDataUItoTaskData(dataUI: TaskDataUI): TaskData = dataUI.data
+
+  implicit def taskDataToTaskDataUI(data: TaskData): TaskDataUI = dataUI(data)
+
+  implicit def taskDataUISeqtoTaskDataSeq(s: Seq[TaskDataUI]): Seq[TaskData] = s.map {
+    taskDataUItoTaskData
+  }
+
+  implicit def protoDataUItoProtoData(dataUI: PrototypeDataUI[_]): PrototypeData[_] = dataUI.data
+
+  implicit def prototypeDataToPrototypeDataUI(data: PrototypeData[_]): PrototypeDataUI[_] = dataUI(data)
+
+  implicit def protoDataUISeqtoProtoDataSeq(s: Seq[PrototypeDataUI[_]]): Seq[PrototypeData[_]] = s.map {
+    protoDataUItoProtoData
+  }
+
+  implicit def outputsConv[T <: DataUI](s: Var[Seq[Var[T]]]): Seq[T#DATA] = s().map { t ⇒ t().data }
+
+  implicit def inputsConv[T <: DataUI](s: Var[Seq[Var[(T, Option[String])]]]): Seq[(T#DATA, Option[String])] =
+    s().map { t ⇒ t() }.map {
+      case (pUI, opt) ⇒
+        (pUI.data, opt)
+    }
+
+  implicit def libConv(seq: Var[Seq[Var[String]]]): Seq[String] = seq().map { e ⇒ e() }
+
+  //implicit def protoDataUIStringMapToProtoDataString(m: Map[PrototypeDataUI[_], String]): Map[PrototypeData[_], String] = m.map { case (dataUI: PrototypeDataUI[_], s) ⇒ dataUI.data -> s }.toMap
+
+}
 trait ServiceFlag
 
 //FIXME: pour avoir une class pour bootstrapJS

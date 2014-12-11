@@ -28,12 +28,11 @@ import rx._
 class GroovyTaskDataUI(val name: Var[String] = Var(""),
                        val code: Var[String] = Var(""),
                        val libs: Var[Seq[Var[String]]] = Var(Seq()),
-                       val inputs: Seq[PrototypeDataUI[_]] = Seq(),
-                       val outputs: Seq[PrototypeDataUI[_]] = Seq(),
-                       val inputParameters: Map[PrototypeDataUI[_], String] = Map()) extends TaskDataUI{
+                       val inputs: Var[Seq[Var[(PrototypeDataUI[_],Option[String])]]] = Var(Seq()),
+                       val outputs: Var[Seq[Var[PrototypeDataUI[_]]]] = Var(Seq())) extends TaskDataUI{
+//libs().map{c=>c()}
 
-
-  def data = new GroovyTaskData(name(), code(), libs().map{c=>c()}, inputs, outputs, inputParameters)
+  def data = new GroovyTaskData(name, code, libConv(libs), inputsConv(inputs), outputsConv(outputs))
 
   def panelUI = new GroovyTaskPanelUI(this)
 }

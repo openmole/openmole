@@ -27,19 +27,22 @@ import scalatags.JsDom.attrs._
 import scalatags.JsDom.short._
 import scalatags.generic.TypedTag
 import org.openmole.gui.misc.js.Forms._
+import rx._
 
 @JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskPanelUI")
 class GroovyTaskPanelUI(dataUI: GroovyTaskDataUI) extends PanelUI {
 
   type DATAUI = GroovyTaskDataUI
 
-  val tag = div(
-    h1(id := "title", "This is a title"),
-    p("GroovyTAsk !!")
-  )
+  val tag = Rx {
+    div(
+      h1(id := "title", "This is a title"),
+      p("GroovyTAsk !!")
+    )
+  }
 
   @JSExport
-  def view: FormTag = tag
+  def view: HtmlTag = tag()
 
   def save(name: String) = new GroovyTaskDataUI
 }

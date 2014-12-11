@@ -18,7 +18,10 @@ package org.openmole.gui.misc.js
  */
 
 import fr.iscpif.scaladget.mapping.Select2Options
+import fr.iscpif.scaladget.mapping.Select2Utils._
+import org.openmole.gui.ext.aspects.{ Identifiable, Displayable }
 import org.scalajs.dom
+import org.scalajs.dom.HTMLElement
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js
 import scalatags.JsDom.tags._
@@ -28,27 +31,31 @@ import scalatags.JsDom.short._
 import org.scalajs.jquery.jQuery
 import scalatags.generic.TypedTag
 import fr.iscpif.scaladget.select2._
-import fr.iscpif.scaladget.mapping.Utils._
 import scala.scalajs.js
 import js.Dynamic.{ literal ⇒ lit }
+import rx._
+import org.openmole.gui.misc.js.JsRxTags._
 
 @JSExport("Forms")
 object Forms {
 
-  type FormTag = TypedTag[dom.Element, dom.Element, dom.Node]
+  //type FormTag = TypedTag[dom.Element, dom.Element, dom.Node]
 
   implicit def stringToClassKeyAggregator(s: String): ClassKeyAggregator = key(s)
 
   implicit def typedTagToNode[T <: org.scalajs.dom.Element](tt: scalatags.JsDom.TypedTag[T]): org.scalajs.dom.Node = tt.render
 
-  implicit def formTagToNode(tt: FormTag): org.scalajs.dom.Node = tt.render
+  implicit def formTagToNode(tt: HtmlTag): org.scalajs.dom.Node = tt.render
 
   def emptyCK = ClassKeyAggregator.empty
 
   def key(s: String) = new ClassKeyAggregator(s)
 
+  //Div
+  def d[T <: HtmlTag](t: T*): HtmlTag = scalatags.JsDom.tags.div(t.toSeq: _*)
+
   // Nav
-  def nav(keys: ClassKeyAggregator, navItems: FormTag*) = ul(`class` := keys.key, role := "tablist")(navItems.toSeq: _*)
+  def nav(keys: ClassKeyAggregator, navItems: HtmlTag*) = ul(`class` := keys.key, role := "tablist")(navItems.toSeq: _*)
 
   private val navPrefix = key("nav")
   val nav_default = navPrefix + "navbar-default"
@@ -57,19 +64,19 @@ object Forms {
   val nav_pills = navPrefix + "nav-pills"
 
   // Nav item
-  def navItem(content: String): FormTag = navItem(content, emptyCK)
+  def navItem(content: String): HtmlTag = navItem(content, emptyCK)
 
-  def navItem(content: String, modifiers: scalatags.JsDom.Modifier*): FormTag = navItem(content, emptyCK, modifiers.toSeq: _*)
+  def navItem(content: String, modifiers: scalatags.JsDom.Modifier*): HtmlTag = navItem(content, emptyCK, modifiers.toSeq: _*)
 
-  def navItem(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): FormTag =
+  def navItem(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): HtmlTag =
     li(role := "presentation")(a(href := "#")(content))(modifiers.toSeq: _*)
 
   val dropdown = "dropdown"
 
   // Label
-  def label(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): FormTag = span(`class` := ("label" + keys.key))(content)(modifiers.toSeq: _*)
+  def label(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): HtmlTag = span(`class` := ("label" + keys.key))(content)(modifiers.toSeq: _*)
 
-  def label(content: String, modifiers: scalatags.JsDom.Modifier*): FormTag = label(content, emptyCK, modifiers.toSeq: _*)
+  def label(content: String, modifiers: scalatags.JsDom.Modifier*): HtmlTag = label(content, emptyCK, modifiers.toSeq: _*)
 
   val label_default = key("label-default")
   val label_primary = key("label-primary")
@@ -79,10 +86,10 @@ object Forms {
   val label_danger = key("label-danger")
 
   //Button
-  def button(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): FormTag =
+  def button(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): HtmlTag =
     scalatags.JsDom.tags.button(`class` := ("btn " + keys.key), `type` := "button")(content).apply(modifiers.toSeq: _*)
 
-  def button(content: String, modifiers: scalatags.JsDom.Modifier*): FormTag = button(content, btn_default, modifiers.toSeq: _*)
+  def button(content: String, modifiers: scalatags.JsDom.Modifier*): HtmlTag = button(content, btn_default, modifiers.toSeq: _*)
 
   private val btnPrefix = key("btn")
   val btn_default = key("btn-default")
@@ -97,24 +104,43 @@ object Forms {
   val btn_small = key("btn-sm")
 
   // Badges
-  def badge(content: String, badgeValue: String): FormTag = badge(content, badgeValue, emptyCK)
+  def badge(content: String, badgeValue: String): HtmlTag = badge(content, badgeValue, emptyCK)
 
-  def badge(content: String, badgeValue: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): FormTag =
+  def badge(content: String, badgeValue: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): HtmlTag =
     button(content, keys, span(`class` := "badge", badgeValue) +: modifiers.toSeq: _*)
 
   //Button group
   def buttonGroup = div(`class` := "btn-group")
 
-  def modalDialog(ID: String, parts: FormTag*): FormTag =
+  def modalDialog(ID: String, header: Var[HtmlTag], body: Var[HtmlTag], footer: Var[HtmlTag]): HtmlTag = {
+    println("modalDialog")
+
     div(`class` := "modal fade", id := ID)(
       div(`class` := "modal-dialog")(
         div(`class` := "modal-content")(
-          parts.toSeq: _*
+          // parts.map { p ⇒ p() }.toSeq: _*
+          //Header
+          div(`class` := "modal-header")(
+            button("", `class` := "close", dataWith("dismiss") := "modal")(
+              span(ariaWith("hidden") := "true", "x"),
+              span(`class` := "sr-only", "Close")
+            ),
+            header()
+          ),
+          //Body
+          Rx {
+            //  println("writing body ...")
+            div(`class` := "modal-body")(body) //
+          },
+          //Footer
+          div(`class` := "modal-footer")(footer())
         )
       )
     )
 
-  def jumbotron(modifiers: scalatags.JsDom.Modifier*): FormTag =
+  }
+
+  def jumbotron(modifiers: scalatags.JsDom.Modifier*): HtmlTag =
     div(`class` := "container theme-showcase", role := "main")(
       div(`class` := "jumbotron")(
         p(
@@ -123,35 +149,38 @@ object Forms {
       )
     )
 
-  def modalHeader(tag: FormTag): FormTag = div(`class` := "modal-header")(
+  /* def modalHeader(tag: HtmlTag): Var[HtmlTag] = Var(div(`class` := "modal-header")(
     button("", `class` := "close", dataWith("dismiss") := "modal")(
       span(ariaWith("hidden") := "true", "x"),
       span(`class` := "sr-only", "Close")
     ),
     tag
-  // h4(`class` := "modal-title", content)
-  )
+  ))
 
-  def modalBody(tag: FormTag): FormTag = div(`class` := "modal-body")(p(tag))
+  def modalBody(tag: Var[HtmlTag]): Var[HtmlTag] = Rx {
+    println("modal body !")
+    div(`class` := "modal-body")(tag())
+  }()
 
-  def modalFooter: FormTag = div(`class` := "modal-footer")
+  def modalFooter(tag: HtmlTag): Var[HtmlTag] = Var(div(`class` := "modal-footer")(tag))*/
 
-  def autoinput(autoID: String, placeHolder: String, contents: Seq[String]) = {
+  def autoinput[T <: Displayable with Identifiable](autoID: String, placeHolder: String, contents: Seq[T]) = {
+    new AutoInput[T](autoID, placeHolder, contents)
+    /*
+    val mapping = contents.map { c ⇒ c.id -> c }.toMap
 
-    val options = contents.map {
-      option(_).render
-    }
     select(id := "e1")(
-      contents.map {
-        option(_)
+      contents.map { c ⇒
+        option(value := c.id)(c.name)
       }.toSeq: _*
-    )
+    )*/
 
   }
 
   @JSExport
-  def select2(): Unit = {
-    jQuery(() ⇒ jQuery("#e1").select2(lit(placeholder = "Yoyo")))
+  protected def select2(): Unit = {
+    jQuery(() ⇒ jQuery("#factoryUI").select2(lit(placeholder = "Yoyo")))
+    jQuery(() ⇒ jQuery("#dataUI").select2(lit(placeholder = "Yoyo")))
   }
 
 }

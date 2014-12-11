@@ -18,9 +18,11 @@ package org.openmole.gui.misc.js
  */
 
 import scala.collection.{ SortedMap, mutable }
-//import scalatags.JsDom._
 import scala.util.{ Failure, Success, Random }
-//import all._
+import scalatags.JsDom.tags._
+import scalatags.JsDom.attrs._
+import scalatags.JsDom.tags2._
+import scalatags.JsDom.short._
 import rx._
 import rx.core.{ Propagator, Obs }
 import org.scalajs.dom
@@ -30,13 +32,14 @@ import scala.scalajs.js
 /**
  * A minimal binding between Scala.Rx and Scalatags and Scala-Js-Dom
  */
-object JsRxTags /*{
+object JsRxTags {
 
   /**
    * Wraps reactive strings in spans, so they can be referenced/replaced
    * when the Rx changes.
    */
   implicit def RxStr[T](r: Rx[T])(implicit f: T ⇒ Frag): Frag = {
+    println("implicit RxStr")
     rxMod(Rx(span(r())))
   }
 
@@ -46,13 +49,22 @@ object JsRxTags /*{
    * the Obs onto the element itself so we have a reference to kill it when
    * the element leaves the DOM (e.g. it gets deleted).
    */
-  implicit def rxMod[T <: dom.HTMLElement](r: Rx[HtmlTag]): Frag = {
+  implicit def rxMod(r: Rx[HtmlTag]): Frag = {
+    println("In Rx Mod ")
     def rSafe = r.toTry match {
-      case Success(v) ⇒ v.render
-      case Failure(e) ⇒ span(e.toString, s.backgroundColor := "red").render
+      case Success(v) ⇒ {
+        println("SUcess ")
+        v.render
+      }
+      case Failure(e) ⇒ {
+        println("Failure ")
+        span(e.toString).render
+      }
     }
+    println("rsafe " + rSafe)
     var last = rSafe
     Obs(r, skipInitial = true) {
+      println("In jsRXTAGs obs")
       val newLast = rSafe
       last.parentElement.replaceChild(newLast, last)
       last = newLast
@@ -61,19 +73,25 @@ object JsRxTags /*{
   }
 
   implicit def RxAttrValue[T: AttrValue] = new AttrValue[Rx[T]] {
+    println("In rxAttrVAlue ")
     def apply(t: Element, a: Attr, r: Rx[T]): Unit = {
+      println("In rxAttrVAlue apply")
       Obs(r) {
+        println("In rxAttrVAlue obs")
         implicitly[AttrValue[T]].apply(t, a, r())
       }
     }
   }
 
   implicit def RxStyleValue[T: StyleValue] = new StyleValue[Rx[T]] {
+    println("In rxStyleVAlue ")
     def apply(t: Element, s: Style, r: Rx[T]): Unit = {
+      println("In rxStyleVAlue applyx")
       Obs(r) {
+        println("In rxStyleVAlue obs")
         implicitly[StyleValue[T]].apply(t, s, r())
       }
     }
   }
 
-}*/
+}

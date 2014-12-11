@@ -29,12 +29,12 @@ class SystemExecTaskFactory(val data: SystemExecTaskData) extends Factory {
 
   def coreObject(implicit plugins: PluginSet): Try[Any] = {
     Try {
-      val syset = SystemExecTask(data.name,
-        data.directory //,
-        //data.returnValue.map{p=>ServerFactories.coreObject(p).flatten},
-        // data.output
+      val syset = SystemExecTask(data.name/*,
+        data.directory ,
+        data.returnValue.map{p=>ServerFactories.coreObject(p).flatten},
+         data.output*/
       )(plugins)
-      syset command data.command.filterNot(_ == '\n')
+      //syset command data.command.filterNot(_ == '\n')
     }
   }
 }

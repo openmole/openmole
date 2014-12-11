@@ -19,8 +19,9 @@ package org.openmole.gui.bootstrap.js
 import java.io.File
 import java.net.URL
 
-import org.openmole.gui.ext.dataui.DataUIs
+import org.openmole.gui.ext.dataui.DataUI
 import org.openmole.gui.ext.factoryui.FactoryUI
+import org.openmole.gui.ext.aspects.Identifiable
 import org.openmole.gui.misc.js.ClassKeyAggregator
 import org.openmole.gui.server.core.GUIServer
 import org.openmole.gui.client.core.GraphCreator
@@ -67,8 +68,9 @@ object BootstrapJS {
     // Extract and copy all the .sjsir files from bundles to src
     val bundles = pluginBundles ++ Seq(
       PluginManager.bundleForClass(classOf[GraphCreator]),
-      //  PluginManager.bundleForClass(classOf[Base]),
-      PluginManager.bundleForClass(classOf[DataUIs]),
+      PluginManager.bundleForClass(classOf[Base]),
+      PluginManager.bundleForClass(classOf[DataUI]),
+      PluginManager.bundleForClass(classOf[Identifiable]),
       PluginManager.bundleForClass(classOf[ClassKeyAggregator]),
       PluginManager.bundleForClass(classOf[FactoryUI]),
       PluginManager.bundleForClass(classOf[Api]),
@@ -78,10 +80,8 @@ object BootstrapJS {
       PluginManager.bundleForClass(classOf[scalatags.DataConverters]),
       PluginManager.bundleForClass(classOf[upickle.Reader[_]]),
       PluginManager.bundleForClass(classOf[rx.Rx[_]])
-    ) /*++ PluginManager.bundles.filter { b ⇒
-        val bName = b.getName
-        bName.contains("autowireJS") || bName.contains("upickleJS")
-      }*/
+    )
+    //FIXME: try to replace by PluginManager.bundles
 
     bundles.map { b ⇒
       b.findEntries("/", "*.sjsir", true)

@@ -21,8 +21,8 @@ import org.openmole.gui.ext.data.Data
 import rx._
 
 trait DataUI {
-  //def panelUI: PanelUI
   type DATA <: Data
   def name: Var[String]
   def panelUI: PanelUI
+  def data: DATA
 }

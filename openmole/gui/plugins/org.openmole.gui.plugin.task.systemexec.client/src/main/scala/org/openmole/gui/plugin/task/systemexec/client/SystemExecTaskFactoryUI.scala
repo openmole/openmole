@@ -27,4 +27,6 @@ sealed class SystemExecTaskFactoryUI extends FactoryUI {
   type DATAUI = TaskDataUI
 
   def dataUI = new SystemExecTaskDataUI
+
+  def name = "External Task"
 }

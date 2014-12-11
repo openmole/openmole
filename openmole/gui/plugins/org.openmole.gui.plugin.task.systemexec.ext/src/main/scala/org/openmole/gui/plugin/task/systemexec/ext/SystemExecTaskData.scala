@@ -20,9 +20,12 @@ package org.openmole.gui.plugin.task.systemexec.ext
 import org.openmole.gui.ext.data.{PrototypeData, TaskData}
 
 class SystemExecTaskData(val name: String = "",
-    val command: String = "",
-    val directory: String = "",
-    val errorOnReturnCode: Boolean = true,
-    val returnValue: Option[PrototypeData[Int]] = None,
-    val output: Option[PrototypeData[String]] = None,
-    val error: Option[PrototypeData[String]] = None) extends TaskData
+                        // val command: String = "",
+                        // val directory: String = "",
+                         val inputs: Seq[(PrototypeData[_], Option[String])] = Seq(),
+                         val outputs: Seq[PrototypeData[_]] = Seq()
+                        // val errorOnReturnCode: Boolean = true,
+                        // val returnValue: Option[PrototypeData[Int]] = None,
+                        // val output: Option[PrototypeData[String]] = None,
+                        // val error: Option[PrototypeData[String]] = None
+) extends TaskData

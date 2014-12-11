@@ -22,7 +22,14 @@ trait Data {
   def name: String
 }
 
-trait TaskData extends Data
 trait PrototypeData[T] extends Data
+
+trait TaskData extends Data {
+  //inputs with optionaly a default value
+  def inputs: Seq[(PrototypeData[_], Option[String])]
+  //outputs
+  def outputs: Seq[PrototypeData[_]]
+
+}
 
 case class ErrorData(data: Data, error: String, stack: String)

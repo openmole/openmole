@@ -1,7 +1,7 @@
 package org.openmole.gui.ext.dataui
 
 import org.openmole.gui.ext.data.TaskData
-
+import rx._
 /*
  * Copyright (C) 10/08/14 // mathieu.leclaire@openmole.org
  *
@@ -20,5 +20,8 @@ import org.openmole.gui.ext.data.TaskData
  */
 
 trait TaskDataUI <: DataUI {
-  def data: TaskData
+  type DATA = TaskData
+  def data: DATA
+  def inputs: Var[Seq[Var[(PrototypeDataUI[_], Option[String])]]]
+  def outputs: Var[Seq[Var[PrototypeDataUI[_]]]]
 }

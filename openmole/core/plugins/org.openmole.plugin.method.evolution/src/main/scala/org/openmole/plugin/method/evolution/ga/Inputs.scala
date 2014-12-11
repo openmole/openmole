@@ -69,7 +69,6 @@ trait InputsConverter {
 
 }
 
-
 sealed trait Input {
   def min: FromContext[Double]
   def max: FromContext[Double]

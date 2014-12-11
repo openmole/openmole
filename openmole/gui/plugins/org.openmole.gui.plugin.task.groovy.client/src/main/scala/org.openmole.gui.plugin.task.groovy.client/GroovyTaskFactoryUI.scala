@@ -27,5 +27,6 @@ class GroovyTaskFactoryUI extends FactoryUI {
   type DATAUI = TaskDataUI
 
   def dataUI = new GroovyTaskDataUI
-  //val xxxx = Map("ZZZZZZ" -> new GroovyTaskDataUI)
+
+  def name = "Groovy Task"
 }

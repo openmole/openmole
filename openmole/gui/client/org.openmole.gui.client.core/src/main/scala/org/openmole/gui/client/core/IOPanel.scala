@@ -1,7 +1,7 @@
-package org.openmole.gui.ext.dataui
+package org.openmole.gui.client.core
 
 /*
- * Copyright (C) 20/08/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 11/12/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,15 +17,10 @@ package org.openmole.gui.ext.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import rx._
+object IOPanel {
 
-object DataUIs {
-  val instance = new DataUIs
-  def apply() = instance
+  def apply() = {
+  }
+
 }
 
-class DataUIs {
-  lazy val tasks: Var[List[Var[TaskDataUI]]] = Var(List())
-  lazy val prototypes: Var[List[Var[PrototypeDataUI[_]]]] = Var(List())
-  lazy val domains: Var[List[Var[DomainDataUI]]] = Var(List())
-}

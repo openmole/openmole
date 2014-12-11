@@ -27,19 +27,23 @@ import scalatags.JsDom.attrs._
 import scalatags.JsDom.short._
 import scalatags.generic.TypedTag
 import org.openmole.gui.misc.js.Forms._
+import rx._
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskPanelUI")
 class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {
 
   type DATAUI = SystemExecTaskDataUI
 
-  val tag = div(
-    h1(id := "title", "This is a title"),
-    p("SystemExecTask !")
-  )
+  val tag = Rx {
+    div(
+      h1(id := "title", "This is a title"),
+      p("SystemExecTask !")
+    )
+  }
+
 
   @JSExport
-  def view: FormTag = tag
+  def view: HtmlTag = tag()
 
   def save(name: String) = new SystemExecTaskDataUI
 }
