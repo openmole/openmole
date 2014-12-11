@@ -22,6 +22,8 @@ import org.openmole.core.model.domain._
 import collection.JavaConversions._
 import org.openmole.misc.tools.obj.ClassUtils._
 
+import scala.util.Random
+
 object GroupDomain {
 
   def apply[T](domain: Domain[T] with Discrete[T], size: Int)(implicit m: Manifest[T]) =
@@ -33,7 +35,7 @@ sealed class GroupDomain[T](val domain: Domain[T] with Discrete[T], val size: In
 
   override def inputs = domain.inputs
 
-  override def iterator(context: Context): Iterator[Array[T]] =
+  override def iterator(context: Context)(implicit rng: Random): Iterator[Array[T]] =
     domain.iterator(context).grouped(size).map {
       i ⇒ i.toArray
     }

@@ -15,8 +15,6 @@ object Sampling extends PluginDefaults {
     libraryDependencies += opencsv
   )
 
-  lazy val hypothesis = OsgiProject("hypothesis") dependsOn (Misc.exception, Core.implementation)
-
   lazy val lhs = OsgiProject("lhs") dependsOn (Misc.exception, Core.implementation, Misc.workspace)
 
   lazy val quasirandom = OsgiProject("quasirandom") dependsOn (Misc.exception, Core.implementation, Misc.workspace) settings (

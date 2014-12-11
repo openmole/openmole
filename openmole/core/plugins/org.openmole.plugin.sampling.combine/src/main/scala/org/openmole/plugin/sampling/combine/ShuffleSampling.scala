@@ -20,7 +20,9 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 import org.openmole.misc.tools.service.Random._
-import org.openmole.core.implementation.task.Task._
+import org.openmole.core.implementation.task._
+
+import scala.util.Random
 
 object ShuffleSampling {
 
@@ -34,9 +36,7 @@ sealed class ShuffleSampling(val sampling: Sampling) extends Sampling {
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] = {
-    val random = newRNG(context(openMOLESeed))
-    shuffled(sampling.build(context).toList)(random).toIterator
-  }
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
+    shuffled(sampling.build(context).toList)(rng).toIterator
 
 }

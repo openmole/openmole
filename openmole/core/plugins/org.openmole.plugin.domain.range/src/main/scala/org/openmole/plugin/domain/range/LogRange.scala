@@ -23,6 +23,8 @@ import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.io.FromString
 import org.openmole.misc.tools.script.GroovyProxy
 
+import scala.util.Random
+
 object LogRange {
 
   def apply[T](range: Range[T], steps: String)(implicit lg: Log[T], fs: FromString[T]) =
@@ -43,7 +45,7 @@ sealed class LogRange[T](val range: Range[T], val steps: FromContext[T])(implici
 
   import range._
 
-  override def computeValues(context: Context): Iterable[T] = {
+  override def computeValues(context: Context)(implicit rng: Random): Iterable[T] = {
     val mi: T = lg.log(min(context))
     val ma: T = lg.log(max(context))
     val nbst: T = nbStep(context)

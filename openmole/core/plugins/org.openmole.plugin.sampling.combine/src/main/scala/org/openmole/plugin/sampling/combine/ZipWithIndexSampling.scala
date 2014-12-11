@@ -20,6 +20,8 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
+import scala.util.Random
+
 object ZipWithIndexSampling {
 
   def apply(sampling: Sampling, index: Prototype[Int]) =
@@ -32,7 +34,7 @@ sealed class ZipWithIndexSampling(val sampling: Sampling, val index: Prototype[I
   override def inputs = sampling.inputs
   override def prototypes = index :: sampling.prototypes.toList
 
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
     sampling.build(context).zipWithIndex.map {
       case (line, i) ⇒ line ++ List(Variable(index, i))
     }

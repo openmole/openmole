@@ -22,6 +22,8 @@ import org.openmole.core.model.domain._
 import org.openmole.plugin.tool.groovy.ContextToGroovyCode
 import org.openmole.core.implementation.tools._
 
+import scala.util.Random
+
 object MapDomain {
 
   def apply[I, O](domain: Domain[I] with Discrete[I], name: String, code: String) =
@@ -37,7 +39,7 @@ sealed class MapDomain[-I, +O](domain: Domain[I] with Discrete[I], name: String,
 
   @transient lazy val contextToGroovyCode = new ContextToGroovyCode(code, Iterable.empty)
 
-  override def iterator(context: Context): Iterator[O] =
+  override def iterator(context: Context)(implicit rng: Random): Iterator[O] =
     domain.iterator(context).map {
       e ⇒
         val b = context.toBinding

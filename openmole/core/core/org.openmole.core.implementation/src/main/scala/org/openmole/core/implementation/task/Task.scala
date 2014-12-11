@@ -17,18 +17,13 @@
 
 package org.openmole.core.implementation.task
 
-import org.openmole.misc.exception._
-import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
-import org.openmole.misc.pluginmanager._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.tools.service.Random
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
-import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.tools.InputOutputCheck
-import util.{ Try, Success, Failure }
 
 object Task extends Logger {
   val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")
@@ -39,7 +34,7 @@ object Task extends Logger {
 
   val openMOLESeed = Prototype[Long](prefixedVariable("Seed"))
 
-  def buildRNG(context: Context) = newRNG(context(Task.openMOLESeed))
+  def buildRNG(context: Context) = Random.newRNG(context(Task.openMOLESeed))
 }
 
 trait Task extends ITask with InputOutputCheck {

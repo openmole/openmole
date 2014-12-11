@@ -20,6 +20,8 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
+import scala.util.Random
+
 object FilteredSampling {
 
   def apply(sampling: Sampling, filters: Filter*) =
@@ -32,7 +34,7 @@ sealed class FilteredSampling(sampling: Sampling, filters: Filter*) extends Samp
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
     sampling.build(context).filter(sample ⇒ !filters.exists(!_(Context(sample))))
 
 }

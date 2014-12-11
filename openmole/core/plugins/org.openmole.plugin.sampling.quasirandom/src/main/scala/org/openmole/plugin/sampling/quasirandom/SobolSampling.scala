@@ -27,6 +27,8 @@ import org.openmole.misc.tools.script.GroovyProxyPool
 import org.openmole.misc.tools.service.Random._
 import org.openmole.misc.tools.service.Scaling._
 
+import scala.util.Random
+
 object SobolSampling {
 
   def apply(samples: String, factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
@@ -41,7 +43,7 @@ sealed class SobolSampling(val samples: String, val factors: Factor[Double, Doma
   override def inputs = DataSet(factors.flatMap(_.inputs))
   override def prototypes = factors.map { _.prototype }
 
-  override def build(context: Context): Iterator[Iterable[Variable[Double]]] = {
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[Double]]] = {
     val sequence = new SobolSequenceGenerator(factors.size)
     val samples = samplesValue(context).asInstanceOf[Int]
 

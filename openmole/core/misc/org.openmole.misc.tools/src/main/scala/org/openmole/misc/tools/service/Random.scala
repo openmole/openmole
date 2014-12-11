@@ -48,7 +48,7 @@ object Random { random ⇒
     max - min
   }
 
-  def shuffle[T](a: Array[T])(implicit rng: java.util.Random) = {
+  def shuffle[T](a: Array[T])(implicit rng: util.Random) = {
     for (i ← 1 until a.size reverse) {
       val j = rng.nextInt(i + 1)
       val t = a(i)
@@ -58,12 +58,12 @@ object Random { random ⇒
     a
   }
 
-  def shuffled[T](a: Iterable[T])(implicit rng: java.util.Random) = {
+  def shuffled[T](a: Iterable[T])(implicit rng: util.Random) = {
     val indexed = a.toIndexedSeq
     shuffle((0 until a.size).toArray).map(i ⇒ indexed(i))
   }
 
-  implicit def randomDecorator(rng: java.util.Random) = new {
+  implicit def randomDecorator(rng: util.Random) = new {
     def shuffle[T](a: Array[T]) = random.shuffle(a)(rng)
 
     def nextLong(max: Long): Long = {
@@ -73,7 +73,7 @@ object Random { random ⇒
   }
 
   implicit def iterableShuffleDecorator[T](a: Iterable[T]) = new {
-    def shuffled(implicit rng: java.util.Random): Seq[T] = random.shuffled(a)(rng)
+    def shuffled(implicit rng: util.Random): Seq[T] = random.shuffled(a)(rng)
   }
 
 }

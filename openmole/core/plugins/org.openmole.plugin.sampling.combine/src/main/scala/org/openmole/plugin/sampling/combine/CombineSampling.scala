@@ -21,6 +21,8 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
+import scala.util.Random
+
 object CombineSampling {
 
   def apply(samplings: Sampling*) = new CombineSampling(samplings: _*)
@@ -32,14 +34,14 @@ class CombineSampling(val samplings: Sampling*) extends Sampling {
   override def inputs = DataSet.empty ++ samplings.flatMap { _.inputs }
   override def prototypes: Iterable[Prototype[_]] = samplings.flatMap { _.prototypes }
 
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
     if (samplings.isEmpty) Iterator.empty
     else
       samplings.tail.foldLeft(samplings.head.build(context)) {
         (a, b) ⇒ combine(a, b, context)
       }
 
-  def combine(s1: Iterator[Iterable[Variable[_]]], s2: Sampling, context: Context) =
+  def combine(s1: Iterator[Iterable[Variable[_]]], s2: Sampling, context: Context)(implicit rng: Random) =
     for (x ← s1; y ← s2.build(context ++ x)) yield x ++ y
 
 }

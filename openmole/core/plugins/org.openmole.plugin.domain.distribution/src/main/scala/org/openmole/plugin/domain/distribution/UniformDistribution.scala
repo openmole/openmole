@@ -17,12 +17,10 @@
 
 package org.openmole.plugin.domain.distribution
 
-import java.util.Random
+import util.Random
 import org.openmole.core.model.data._
-import org.openmole.misc.workspace._
 import org.openmole.core.model.domain._
 import org.openmole.misc.tools.service.Random._
-import org.openmole.core.implementation.task.Task._
 
 object UniformDistribution {
   def apply[T](seed: Option[Long] = None, max: Option[T] = None)(implicit distribution: Distribution[T]) = new UniformDistribution(seed, max)
@@ -30,15 +28,15 @@ object UniformDistribution {
 
 sealed class UniformDistribution[T](seed: Option[Long], max: Option[T])(implicit distribution: Distribution[T]) extends Domain[T] with Discrete[T] {
 
-  override def iterator(context: Context): Iterator[T] = {
-    val rng: Random = seed match {
+  override def iterator(context: Context)(implicit rng: Random): Iterator[T] = {
+    val random: Random = seed match {
       case Some(s) ⇒ newRNG(s)
-      case None    ⇒ newRNG(context(openMOLESeed))
+      case None    ⇒ rng
     }
     Iterator.continually {
       max match {
-        case Some(i) ⇒ distribution.next(rng, i)
-        case None    ⇒ distribution.next(rng)
+        case Some(i) ⇒ distribution.next(random, i)
+        case None    ⇒ distribution.next(random)
       }
     }
   }
