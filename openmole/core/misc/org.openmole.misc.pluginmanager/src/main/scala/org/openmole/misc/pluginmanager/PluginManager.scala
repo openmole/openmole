@@ -54,7 +54,8 @@ object PluginManager extends Logger {
     }
   })
 
-  def bundles = files.keys
+  def bundles = Activator.contextOrException.getBundles.filter(!_.isSystem).toSeq
+  def bundleFiles = files.keys
   def dependencies(file: File): Option[Iterable[File]] =
     files.get(file).map { case (id, _) ⇒ allPluginDependencies(id).map { l ⇒ Activator.contextOrException.getBundle(l).file } }
 
@@ -191,8 +192,6 @@ object PluginManager extends Logger {
   def startAll = Activator.contextOrException.getBundles.foreach(_.start)
 
   private def updateDependencies = synchronized {
-    val bundles = Activator.contextOrException.getBundles.filter(!_.isSystem)
-
     resolvedDirectDependencies = new HashMap[Long, HashSet[Long]]
     bundles.foreach {
       b ⇒
