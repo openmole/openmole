@@ -45,9 +45,10 @@ trait PersistentStorageService extends StorageService {
 
   import PersistentStorageService._
 
-  @transient protected var tmpSpaceVar: Option[String] = None
+  case class TmpSpace(path: String, created: Long)
+
+  @transient protected var tmpSpaceVar: Option[TmpSpace] = None
   @transient protected var persistentSpaceVar: Option[String] = None
-  @transient private var time = System.currentTimeMillis
 
   override def clean(implicit token: AccessToken, session: Session) = synchronized {
     ReplicaCatalog.onStorage(this).delete
@@ -55,7 +56,6 @@ trait PersistentStorageService extends StorageService {
     baseSpaceVar = None
     tmpSpaceVar = None
     persistentSpaceVar = None
-    time = System.currentTimeMillis
   }
 
   override def persistentDir(implicit token: AccessToken, session: Session): String = synchronized {
@@ -85,23 +85,19 @@ trait PersistentStorageService extends StorageService {
 
   override def tmpDir(implicit token: AccessToken) = synchronized {
     tmpSpaceVar match {
-      case Some(space) ⇒
-        if (time + Workspace.preferenceAsDuration(TmpDirRegenerate).toMillis < System.currentTimeMillis) {
-          val tmpDir = createTmpDir
-          tmpSpaceVar = Some(tmpDir)
-          tmpDir
-        }
-        else space
-
+      case Some(tmp @ TmpSpace(path, created)) ⇒
+        val create = (created + Workspace.preferenceAsDuration(TmpDirRegenerate).toMillis) < System.currentTimeMillis
+        val newDir = if (create) createTmpDir else tmp
+        newDir.path
       case None ⇒
-        val tmpDir = createTmpDir(token)
-        tmpSpaceVar = Some(tmpDir)
-        tmpDir
+        val tmpSpace = createTmpDir(token)
+        tmpSpaceVar = Some(tmpSpace)
+        tmpSpace.path
     }
   }
 
   private def createTmpDir(implicit token: AccessToken) = {
-    time = System.currentTimeMillis
+    val time = System.currentTimeMillis
 
     val tmpNoTime = child(baseDir, tmp)
     if (!super.exists(tmpNoTime)) super.makeDir(tmpNoTime)
@@ -135,7 +131,7 @@ trait PersistentStorageService extends StorageService {
     val tmpTimePath = super.child(tmpNoTime, time.toString)
 
     if (!super.exists(tmpTimePath)) super.makeDir(tmpTimePath)
-    tmpTimePath
+    TmpSpace(tmpTimePath, time)
   }
 
 }
