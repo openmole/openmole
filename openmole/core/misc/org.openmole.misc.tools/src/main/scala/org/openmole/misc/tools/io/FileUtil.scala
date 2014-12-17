@@ -186,12 +186,12 @@ object FileUtil {
     }
 
     //////// modifiers ///////
-    def move(to: Path) = {
+    def move(to: Path) = wrapError {
       if (!Files.isDirectory(file)) Files.move(file, to, StandardCopyOption.REPLACE_EXISTING)
       else DirUtils.move(file, to)
     }
 
-    def recursiveDelete: Unit = {
+    def recursiveDelete: Unit = wrapError {
       def setAllPermissions(f: File) = {
         f.setReadable(true)
         f.setWritable(true)
@@ -199,13 +199,15 @@ object FileUtil {
       }
       setAllPermissions(file)
 
-      for (s ← file.listFiles) {
-        setAllPermissions(s)
-        s.isDirectory match {
-          case true ⇒
-            s.recursiveDelete
-            s.delete()
-          case false ⇒ s.delete
+      if (!file.isSymbolicLink) {
+        for (s ← file.listFiles) {
+          setAllPermissions(s)
+          s.isDirectory match {
+            case true ⇒
+              s.recursiveDelete
+              s.delete()
+            case false ⇒ s.delete
+          }
         }
       }
     }
