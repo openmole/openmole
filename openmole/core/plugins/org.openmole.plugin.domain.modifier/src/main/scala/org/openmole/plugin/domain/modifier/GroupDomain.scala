@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.domain.modifier
 
+import org.openmole.core.implementation.tools.FromContext
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import collection.JavaConversions._
@@ -26,17 +27,17 @@ import scala.util.Random
 
 object GroupDomain {
 
-  def apply[T](domain: Domain[T] with Discrete[T], size: Int)(implicit m: Manifest[T]) =
+  def apply[T](domain: Domain[T] with Discrete[T], size: FromContext[Int])(implicit m: Manifest[T]) =
     new GroupDomain(domain, size)
 
 }
 
-sealed class GroupDomain[T](val domain: Domain[T] with Discrete[T], val size: Int)(implicit m: Manifest[T]) extends Domain[Array[T]] with Discrete[Array[T]] {
+sealed class GroupDomain[T](val domain: Domain[T] with Discrete[T], val size: FromContext[Int])(implicit m: Manifest[T]) extends Domain[Array[T]] with Discrete[Array[T]] {
 
   override def inputs = domain.inputs
 
   override def iterator(context: Context)(implicit rng: Random): Iterator[Array[T]] =
-    domain.iterator(context).grouped(size).map {
+    domain.iterator(context).grouped(size.from(context)).map {
       i ⇒ i.toArray
     }
 

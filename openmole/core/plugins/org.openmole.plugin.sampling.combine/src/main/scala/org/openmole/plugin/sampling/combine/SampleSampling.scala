@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2014 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -20,22 +20,28 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.implementation.tools.FromContext
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
+import org.openmole.core.implementation.task._
+import org.openmole.core.implementation.data._
 
 import scala.util.Random
 
-object TakeSampling {
+object SampleSampling {
 
-  def apply(sampling: Sampling, n: FromContext[Int]) =
-    new TakeSampling(sampling, n)
+  def apply(sampling: Sampling, size: FromContext[Int]) =
+    new SampleSampling(sampling, size)
 
 }
 
-sealed class TakeSampling(val sampling: Sampling, val n: FromContext[Int]) extends Sampling {
+sealed class SampleSampling(val sampling: Sampling, val size: FromContext[Int]) extends Sampling {
 
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
-    sampling.build(context).take(n.from(context))
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] = {
+    val sampled = sampling.build(context).toVector
+    val sampledSize = sampled.size
+    val s = size.from(context)
+    Iterator.continually(rng.nextInt(sampledSize)).take(s).map(i ⇒ sampled(i))
+  }
 
 }

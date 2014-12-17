@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.sampling.combine
 
+import org.openmole.core.implementation.tools.FromContext
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
@@ -26,7 +27,7 @@ import scala.util.Random
 
 object ReplicationSampling {
 
-  def apply[T](sampling: Sampling, seeder: Factor[T, Domain[T] with Discrete[T]], replications: Int): ReplicationSampling[T] =
+  def apply[T](sampling: Sampling, seeder: Factor[T, Domain[T] with Discrete[T]], replications: FromContext[Int]): ReplicationSampling[T] =
     apply(sampling, Factor(seeder.prototype, seeder.domain.take(replications)))
 
   def apply[T](sampling: Sampling, seeder: Factor[T, Domain[T] with Discrete[T] with Finite[T]]): ReplicationSampling[T] =

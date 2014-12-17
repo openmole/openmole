@@ -17,15 +17,16 @@
 
 package org.openmole.plugin.domain
 
+import org.openmole.core.implementation.tools.FromContext
 import org.openmole.core.model.domain._
 import java.io.File
 
 package object modifier {
 
   implicit def domainModifierDecorator[T](domain: Domain[T] with Discrete[T]) = new {
-    def take(n: Int) = new TakeDomain(domain, n)
-    def group(n: Int)(implicit m: Manifest[T]) = new GroupDomain(domain, n)
-    def sliding(n: Int, s: Int = 1)(implicit m: Manifest[T]) = new SlidingDomain(domain, n, s)
+    def take(n: FromContext[Int]) = new TakeDomain(domain, n)
+    def group(n: FromContext[Int])(implicit m: Manifest[T]) = new GroupDomain(domain, n)
+    def sliding(n: FromContext[Int], s: FromContext[Int] = 1)(implicit m: Manifest[T]) = new SlidingDomain(domain, n, s)
   }
 
   implicit def finiteDomainModifierDecorator[T](domain: Domain[T] with Finite[T]) = new {
