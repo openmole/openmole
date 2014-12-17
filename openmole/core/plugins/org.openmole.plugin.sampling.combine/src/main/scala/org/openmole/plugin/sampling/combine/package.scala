@@ -43,6 +43,7 @@ package object combine {
     def replicate[T2](seeder: Factor[T2, Domain[T2] with Discrete[T2] with Finite[T2]]) = ReplicationSampling(s, seeder)
     def sample(n: FromContext[Int]) = SampleSampling(s, n)
     def repeat(n: FromContext[Int]) = RepeatSampling(s, n)
+    def bootstrap(samples: FromContext[Int], number: FromContext[Int]) = s sample samples repeat number
   }
 
   implicit class SamplingDecorator(val s: Sampling) extends AbstractSamplingDecorator
