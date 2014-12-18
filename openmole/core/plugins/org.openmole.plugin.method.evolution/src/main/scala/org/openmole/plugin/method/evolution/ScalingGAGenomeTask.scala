@@ -34,17 +34,15 @@ import org.openmole.plugin.method.evolution.ga._
 object ScalingGAGenomeTask {
 
   def apply(evolution: GAAlgorithm)(
-    name: String,
     genome: Prototype[evolution.G])(implicit plugins: PluginSet) = {
 
-    val (_name, _genome) = (name, genome)
+    val (_genome) = (genome)
     new TaskBuilder { builder ⇒
       evolution.inputsPrototypes foreach { i ⇒ this.addOutput(i.prototype) }
       addInput(genome)
       addOutput(genome)
 
       def toTask = new ScalingGAGenomeTask(evolution) with Built {
-        val name = _name
         val genome = _genome.asInstanceOf[Prototype[evolution.G]]
       }
     }

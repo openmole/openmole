@@ -56,7 +56,6 @@ object SystemExecTask extends Logger {
    *
    */
   def apply(
-    name: String,
     commands: Commands = Seq.empty,
     directory: String = "",
     errorOnReturnCode: Boolean = true,
@@ -93,14 +92,13 @@ object SystemExecTask extends Logger {
 
       def command(cmd: Commands) = _commands += cmd
 
-      def toTask = new SystemExecTask(name, _commands, directory, errorOnReturnCode, returnValue, output, error, variables) with builder.Built
+      def toTask = new SystemExecTask(_commands, directory, errorOnReturnCode, returnValue, output, error, variables) with builder.Built
     }
   }
 
 }
 
 sealed abstract class SystemExecTask(
-    val name: String,
     val command: Iterable[Commands],
     val directory: String,
     val errorOnReturnCode: Boolean,

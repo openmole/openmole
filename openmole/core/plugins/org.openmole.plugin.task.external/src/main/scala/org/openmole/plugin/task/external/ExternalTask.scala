@@ -108,7 +108,7 @@ trait ExternalTask extends Task {
 
     val usedFiles = outputFiles.map(
       f ⇒ {
-        if (!f.file.exists) throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + name + " doesn't exist")
+        if (!f.file.exists) throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + this.toString + " doesn't exist")
         f.file
       }).toSet
 

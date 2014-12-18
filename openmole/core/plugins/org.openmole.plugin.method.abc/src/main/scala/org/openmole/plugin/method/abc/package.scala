@@ -36,19 +36,19 @@ package object abc {
   }
 
   def abc(
-    name: String,
     algorithm: Lenormand with ABC,
     model: Puzzle)(implicit plugins: PluginSet) = {
+    val name = "abc"
     val acceptedPrototype = Prototype[Double](name + "Accepted")
     val iterationPrototype = Prototype[Int](name + "Iteration")
     val statePrototype = Prototype[Lenormand#STATE](name + "State")
     val terminatedPrototype = Prototype[Boolean](name + "Terminated")
-    val preModel = StrainerCapsule(EmptyTask(name + "PreModel"))
-    val postModel = Slot(StrainerCapsule(EmptyTask(name + "PostModel")))
-    val last = StrainerCapsule(EmptyTask(name + "Last"))
+    val preModel = StrainerCapsule(EmptyTask() set (_.setName(name + "PreModel")))
+    val postModel = Slot(StrainerCapsule(EmptyTask() set (_.setName(name + "PostModel"))))
+    val last = StrainerCapsule(EmptyTask() set (_.setName(name + "Last")))
 
     val sampling = LenormandSampling(algorithm, statePrototype)
-    val explorationTask = ExplorationTask(name + "Exploration", sampling)
+    val explorationTask = ExplorationTask(sampling) set (_.setName(name + "Exploration"))
     explorationTask addParameter Parameter(statePrototype, algorithm.initialState)
     explorationTask addOutput statePrototype
 
@@ -56,7 +56,6 @@ package object abc {
 
     val analyseTask =
       LenormandAnalyseTask(
-        name + "Analyse",
         algorithm,
         statePrototype,
         terminatedPrototype,

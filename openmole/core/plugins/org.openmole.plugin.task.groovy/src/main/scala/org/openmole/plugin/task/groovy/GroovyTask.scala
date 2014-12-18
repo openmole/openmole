@@ -39,12 +39,9 @@ object GroovyTask {
    *
    * @see CodeTaskBuilder for more info on addImport, addLib...
    *
-   * @param name the task name
    * @param code the groovy source code
    */
-  def apply(
-    name: String,
-    code: String)(implicit plugins: PluginSet) =
+  def apply(code: String)(implicit plugins: PluginSet) =
     new CodeTaskBuilder { builder ⇒
 
       addImport("static org.openmole.plugin.task.groovy.GroovyTask.newRNG")
@@ -52,14 +49,12 @@ object GroovyTask {
       addImport("static org.openmole.plugin.task.groovy.GroovyTask.newDir")
 
       def toTask =
-        new GroovyTask(name, code) with Built
+        new GroovyTask(code) with Built
     }
 
 }
 
-sealed abstract class GroovyTask(
-    val name: String,
-    val code: String) extends CodeTask {
+sealed abstract class GroovyTask(val code: String) extends CodeTask {
 
   def imports: Iterable[String]
   def libraries: Iterable[File]

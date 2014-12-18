@@ -24,7 +24,7 @@ import reflect.ClassTag
 
 object ToArrayTask {
 
-  def apply(name: String, prototypes: Prototype[T] forSome { type T }*)(implicit plugins: PluginSet = PluginSet.empty) =
+  def apply(prototypes: Prototype[T] forSome { type T }*)(implicit plugins: PluginSet = PluginSet.empty) =
     new TaskBuilder { builder ⇒
 
       for (p ← prototypes) {
@@ -33,15 +33,11 @@ object ToArrayTask {
       }
 
       def toTask =
-        new ToArrayTask(name, prototypes: _*) {
-          val inputs = builder.inputs
-          val outputs = builder.outputs
-          val parameters = builder.parameters
-        }
+        new ToArrayTask(prototypes: _*) with builder.Built
     }
 
 }
-sealed abstract class ToArrayTask(val name: String, val prototypes: Prototype[T] forSome { type T }*)(implicit val plugins: PluginSet) extends Task {
+sealed abstract class ToArrayTask(val prototypes: Prototype[T] forSome { type T }*) extends Task {
 
   override def process(context: Context) =
     prototypes.map {

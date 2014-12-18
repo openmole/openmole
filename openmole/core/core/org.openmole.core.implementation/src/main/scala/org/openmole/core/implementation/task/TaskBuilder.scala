@@ -17,14 +17,36 @@
 
 package org.openmole.core.implementation.task
 
+import java.util.concurrent.atomic.AtomicInteger
+
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.core.implementation.tools.InputOutputBuilder
+import org.openmole.misc.tools.obj.ClassUtils._
+
+object TaskBuilder {
+  val nameCounter = new AtomicInteger
+  def generateName(instance: Any) = {
+    val instanceName = instance.getClass.getSuperclass.getSimpleName
+    val name = instanceName.take(1).map(_.toLower) + instanceName.drop(1)
+    name + TaskBuilder.nameCounter.getAndIncrement
+  }
+
+}
 
 abstract class TaskBuilder(implicit val plugins: PluginSet) extends InputOutputBuilder { builder ⇒
   def toTask: ITask
 
+  var name: Option[String] = None
+  def setName(name: String) = builder.name = Some(name)
+
   trait Built extends super.Built {
     val plugins = builder.plugins
+    val name = builder.name.getOrElse(TaskBuilder.generateName(this))
+  }
+
+  def set(f: this.type ⇒ Unit): this.type = {
+    f(this)
+    this
   }
 }

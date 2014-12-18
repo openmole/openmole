@@ -37,11 +37,12 @@ package object stochastic extends StatisticsMethods {
   def StatisticsTask = org.openmole.plugin.task.statistics.StatisticsTask
 
   def Replicate(
-    name: String,
     model: Puzzle,
-    replicationFactor: DiscreteFactor[_, _],
-    statisticTask: ITask)(implicit plugins: PluginSet): Puzzle = {
-    val exploration = ExplorationTask(name + "Replication", replicationFactor)
+    sampling: Sampling,
+    aggregation: ITask)(implicit plugins: PluginSet): Puzzle = {
+    val name = "replicate"
+
+    val exploration = ExplorationTask(sampling) set { _.setName(name + "Exploration") }
 
     Validation(exploration -< model) foreach {
       case MissingInput(_, d) ⇒
@@ -51,16 +52,16 @@ package object stochastic extends StatisticsMethods {
     }
 
     val explorationCapsule = StrainerCapsule(exploration)
-    val endCapsule = Slot(StrainerCapsule(EmptyTask(name + "End")))
+    val endCapsule = Slot(StrainerCapsule(EmptyTask() set { _.setName(name + "End") }))
 
-    explorationCapsule -< model >- statisticTask -- endCapsule
+    explorationCapsule -< model >- aggregation -- endCapsule
   }
 
   def Replicate(
     name: String,
     model: Puzzle,
-    replications: Sampling)(implicit plugins: PluginSet) = {
-    val exploration = ExplorationTask(name + "Replication", replications)
+    sampling: Sampling)(implicit plugins: PluginSet) = {
+    val exploration = ExplorationTask(sampling) set { _.setName(name + "Replication") }
 
     Validation(exploration -< model) foreach {
       case MissingInput(_, d) ⇒
@@ -70,7 +71,7 @@ package object stochastic extends StatisticsMethods {
     }
 
     val explorationCapsule = StrainerCapsule(exploration)
-    val aggregationCapsule = Slot(StrainerCapsule(EmptyTask(name + "Aggregation")))
+    val aggregationCapsule = Slot(StrainerCapsule(EmptyTask() set { _.setName(name + "Aggregation") }))
     explorationCapsule -< model >- aggregationCapsule //+ explorationCapsule oo aggregationCapsule
   }
 

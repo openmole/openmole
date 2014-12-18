@@ -25,7 +25,7 @@ import org.openmole.core.implementation.task._
 
 object AssignTask {
 
-  def apply(name: String)(implicit plugins: PluginSet) =
+  def apply()(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
       val toAssign = ListBuffer[(Prototype[T], Prototype[T]) forSome { type T }]()
@@ -37,12 +37,12 @@ object AssignTask {
       }
 
       def toTask =
-        new AssignTask(name, toAssign.toList: _*) with builder.Built
+        new AssignTask(toAssign.toList: _*) with builder.Built
 
     }
 
 }
-sealed abstract class AssignTask(val name: String, val renamings: (Prototype[T], Prototype[T]) forSome { type T }*) extends Task {
+sealed abstract class AssignTask(val renamings: (Prototype[T], Prototype[T]) forSome { type T }*) extends Task {
 
   override def process(context: Context) =
     renamings.map { case (from, to) ⇒ Variable(to, context(from)) }

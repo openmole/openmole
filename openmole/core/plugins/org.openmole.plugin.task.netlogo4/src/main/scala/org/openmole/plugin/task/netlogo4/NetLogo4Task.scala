@@ -35,7 +35,6 @@ object NetLogo4Task {
   }
 
   def apply(
-    name: String,
     workspace: File,
     script: String,
     launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
@@ -47,7 +46,7 @@ object NetLogo4Task {
       addResource(workspace)
 
       def toTask = new NetLogo4Task(
-        name,
+        builder.taskName,
         workspace = new Workspace(_workspace, _script),
         launchingCommands = _launchingCommands,
         inputs = builder.inputs,
@@ -64,7 +63,6 @@ object NetLogo4Task {
   }
 
   def apply(
-    name: String,
     script: File,
     launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
     val _launchingCommands = launchingCommands
@@ -73,7 +71,7 @@ object NetLogo4Task {
       addResource(script)
 
       def toTask = new NetLogo4Task(
-        name,
+        builder.taskName,
         launchingCommands = _launchingCommands,
         workspace = new Workspace(script),
         inputs = builder.inputs,
@@ -89,22 +87,21 @@ object NetLogo4Task {
     }
   }
 
-  def apply(name: String,
-            workspace: Workspace,
-            launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
+  def apply(
+    workspace: Workspace,
+    launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
     workspace.location match {
-      case Left((w: File, s: String)) ⇒ apply(name, w, s, launchingCommands)
-      case Right(s: File)             ⇒ apply(name, s, launchingCommands)
+      case Left((w: File, s: String)) ⇒ apply(w, s, launchingCommands)
+      case Right(s: File)             ⇒ apply(s, launchingCommands)
     }
   }
 
   def apply(
-    name: String,
     script: File,
     launchingCommands: Iterable[String],
     embedWorkspace: Boolean)(implicit plugins: PluginSet): NetLogoTaskBuilder =
-    if (embedWorkspace) apply(name, script.getParentFile, script.getName, launchingCommands)
-    else apply(name, script, launchingCommands)
+    if (embedWorkspace) apply(script.getParentFile, script.getName, launchingCommands)
+    else apply(script, launchingCommands)
 
 }
 

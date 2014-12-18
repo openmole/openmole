@@ -29,7 +29,6 @@ import fr.iscpif.mgo._
 object SamplePopulationTask {
 
   def apply(evolution: G with P with F)(
-    name: String,
     population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
     size: Int)(implicit plugins: PluginSet) = {
     val (_population) = (population)
@@ -39,7 +38,7 @@ object SamplePopulationTask {
       addOutput(population)
 
       def toTask =
-        new SamplePopulationTask(name, evolution, size) with Built {
+        new SamplePopulationTask(evolution, size) with Built {
           val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
         }
     }
@@ -49,7 +48,6 @@ object SamplePopulationTask {
 }
 
 sealed abstract class SamplePopulationTask(
-    val name: String,
     val evolution: G with P with F,
     val size: Int) extends Task {
 

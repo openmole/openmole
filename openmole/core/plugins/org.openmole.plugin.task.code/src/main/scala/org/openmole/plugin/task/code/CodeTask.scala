@@ -29,6 +29,9 @@ object CodeTask {
 
 trait CodeTask extends ExternalTask {
 
+  def imports: Iterable[String]
+  def libraries: Iterable[File]
+
   override def process(context: Context) = {
     val pwd = Workspace.newDir
     val links = prepareInputFiles(context, pwd.getCanonicalFile)

@@ -24,6 +24,7 @@ import org.openmole.misc.tools.service.Random
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.implementation.tools.InputOutputCheck
+import org.openmole.misc.tools.obj.ClassUtils._
 
 object Task extends Logger {
   val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")

@@ -26,7 +26,6 @@ import org.openmole.core.model.task._
 object LenormandAnalyseTask {
 
   def apply(
-    name: String,
     lenormand: algorithm.Lenormand with ABC,
     state: Prototype[algorithm.Lenormand#STATE],
     terminated: Prototype[Boolean],
@@ -43,7 +42,7 @@ object LenormandAnalyseTask {
       addOutput(iteration)
       addOutput(accepted)
 
-      def toTask = new LenormandAnalyseTask(name) with Built {
+      def toTask = new LenormandAnalyseTask() with Built {
         val lenormand = _lenormand
         val state = _state
         val terminated = _terminated
@@ -55,7 +54,7 @@ object LenormandAnalyseTask {
 
 }
 
-abstract class LenormandAnalyseTask(val name: String) extends Task {
+abstract class LenormandAnalyseTask() extends Task {
 
   val lenormand: algorithm.Lenormand with ABC
   def state: Prototype[algorithm.Lenormand#STATE]

@@ -29,6 +29,8 @@ abstract class NetLogoTaskBuilder(implicit plugins: PluginSet) extends ExternalT
   private var _netLogoOutputs = new ListBuffer[(String, Prototype[_])]
   private var _netLogoArrayOutputs = new ListBuffer[(String, Int, Prototype[_])]
 
+  def taskName = name.getOrElse("netLogoTask")
+
   def netLogoInputs = _netLogoInputs.toList
 
   def addNetLogoInput(p: Prototype[_], n: String): this.type = {

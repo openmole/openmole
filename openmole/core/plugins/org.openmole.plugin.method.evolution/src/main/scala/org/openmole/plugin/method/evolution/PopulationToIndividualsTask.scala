@@ -26,7 +26,6 @@ import org.openmole.core.model.task._
 object PopulationToIndividualsTask {
 
   def apply(evolution: G with P with F)(
-    name: String,
     population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
     individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]])(implicit plugins: PluginSet) = {
     val _population = population
@@ -37,7 +36,7 @@ object PopulationToIndividualsTask {
       addOutput(individuals)
 
       def toTask =
-        new PopulationToIndividualsTask(name, evolution) with Built {
+        new PopulationToIndividualsTask(evolution) with Built {
           val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
           val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
         }
@@ -47,9 +46,7 @@ object PopulationToIndividualsTask {
 
 }
 
-sealed abstract class PopulationToIndividualsTask(
-    val name: String,
-    val evolution: G with P with F) extends Task {
+sealed abstract class PopulationToIndividualsTask(val evolution: G with P with F) extends Task {
 
   def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
   def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]

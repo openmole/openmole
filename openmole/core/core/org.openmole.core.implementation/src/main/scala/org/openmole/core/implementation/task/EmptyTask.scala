@@ -22,14 +22,14 @@ import org.openmole.core.model.task._
 
 object EmptyTask {
 
-  def apply(name: String)(implicit plugins: PluginSet = PluginSet.empty) =
+  def apply()(implicit plugins: PluginSet = PluginSet.empty) =
     new TaskBuilder { builder ⇒
       def toTask =
-        new EmptyTask(name) with builder.Built
+        new EmptyTask with builder.Built
     }
 
 }
 
-sealed abstract class EmptyTask(val name: String) extends Task {
+sealed abstract class EmptyTask extends Task {
   override def process(context: Context) = context
 }

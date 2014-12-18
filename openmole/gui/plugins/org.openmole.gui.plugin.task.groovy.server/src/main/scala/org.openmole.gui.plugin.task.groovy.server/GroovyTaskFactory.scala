@@ -24,5 +24,6 @@ import scala.util.Try
  */
 
 class GroovyTaskFactory(val data: GroovyTaskData) extends Factory {
-  def coreObject(implicit plugins: PluginSet): Try[Any] = Try(GroovyTask(data.name, data.code)(plugins))
+  def coreObject(implicit plugins: PluginSet): Try[Any] =
+    Try { GroovyTask(data.code)(plugins) set { _ setName data.name } }
 }

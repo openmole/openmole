@@ -30,14 +30,14 @@ import scala.collection.mutable.ListBuffer
 
 object MoleTask {
 
-  def apply(name: String, puzzle: Puzzle)(implicit plugins: PluginSet): MoleTaskBuilder =
-    apply(name, puzzle toMole, puzzle.lasts.head)
+  def apply(puzzle: Puzzle)(implicit plugins: PluginSet): MoleTaskBuilder =
+    apply(puzzle toMole, puzzle.lasts.head)
 
-  def apply(name: String, mole: IMole, last: ICapsule)(implicit plugins: PluginSet) =
+  def apply(mole: IMole, last: ICapsule)(implicit plugins: PluginSet) =
     new MoleTaskBuilder { builder ⇒
       mole.root.inputs(mole, Sources.empty, Hooks.empty).foreach(addInput)
       last.outputs(mole, Sources.empty, Hooks.empty).foreach(addOutput)
-      def toTask = new MoleTask(name, mole, last, implicits) with builder.Built
+      def toTask = new MoleTask(mole, last, implicits) with builder.Built
     }
 
   trait MoleTaskBuilder extends TaskBuilder { builder ⇒
@@ -48,7 +48,6 @@ object MoleTask {
 }
 
 sealed abstract class MoleTask(
-    val name: String,
     val mole: IMole,
     val last: ICapsule,
     val implicits: Iterable[String]) extends Task with IMoleTask {

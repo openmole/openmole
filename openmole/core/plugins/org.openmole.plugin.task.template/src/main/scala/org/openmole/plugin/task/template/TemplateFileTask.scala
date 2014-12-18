@@ -25,18 +25,16 @@ import org.openmole.core.model.task._
 
 object TemplateFileTask {
   def apply(
-    name: String,
     template: File,
     output: Prototype[File])(implicit plugins: PluginSet) = new TaskBuilder { builder ⇒
 
     addOutput(output)
 
-    def toTask = new TemplateFileTask(name, template, output) with builder.Built
+    def toTask = new TemplateFileTask(template, output) with builder.Built
   }
 }
 
 sealed abstract class TemplateFileTask(
-    val name: String,
     val template: File,
     val output: Prototype[File]) extends AbstractTemplateFileTask {
 

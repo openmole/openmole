@@ -29,21 +29,21 @@ import scala.collection.mutable.ArrayBuffer
 object ExplorationTask {
   type SampledValues = Iterable[Iterable[Variable[_]]]
 
-  def apply(name: String, sampling: Sampling)(implicit plugins: PluginSet) = {
+  def apply(sampling: Sampling)(implicit plugins: PluginSet) = {
     new TaskBuilder { builder ⇒
 
       addInput(sampling.inputs)
       addOutput(sampling.prototypes.map { p ⇒ Data(p, Explore).toArray })
 
       def toTask =
-        new ExplorationTask(name, sampling) with builder.Built
+        new ExplorationTask(sampling) with builder.Built
 
     }
   }
 
 }
 
-sealed abstract class ExplorationTask(val name: String, val sampling: Sampling) extends Task with IExplorationTask {
+sealed abstract class ExplorationTask(val sampling: Sampling) extends Task with IExplorationTask {
 
   //If input prototype as the same name as the output it is erased
   override protected def process(context: Context) = {

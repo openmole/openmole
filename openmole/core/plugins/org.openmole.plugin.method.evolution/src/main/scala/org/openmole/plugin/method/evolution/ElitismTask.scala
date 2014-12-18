@@ -27,7 +27,6 @@ import org.openmole.core.model.task._
 object ElitismTask {
 
   def apply(evolution: Elitism with Termination with Archive)(
-    name: String,
     population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
     offspring: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
     archive: Prototype[evolution.A])(implicit plugins: PluginSet) = {
@@ -40,7 +39,7 @@ object ElitismTask {
       addOutput(population)
       addOutput(archive)
 
-      def toTask = new ElitismTask(name, evolution) with builder.Built {
+      def toTask = new ElitismTask(evolution) with builder.Built {
         val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
         val offspring = _offspring.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
 
@@ -50,8 +49,7 @@ object ElitismTask {
   }
 }
 
-sealed abstract class ElitismTask[E <: Elitism with Termination with Archive](
-    val name: String, val evolution: E) extends Task {
+sealed abstract class ElitismTask[E <: Elitism with Termination with Archive](val evolution: E) extends Task {
 
   def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
   def offspring: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]

@@ -27,7 +27,6 @@ import ga._
 object ToIndividualTask {
 
   def apply(evolution: GAAlgorithm)(
-    name: String,
     genome: Prototype[evolution.G],
     individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]])(implicit plugins: PluginSet) = {
 
@@ -39,7 +38,7 @@ object ToIndividualTask {
 
       val (_genome, _individual) = (genome, individual)
 
-      def toTask = new ToIndividualTask(evolution)(name) with Built {
+      def toTask = new ToIndividualTask(evolution) with Built {
         val genome = _genome.asInstanceOf[Prototype[evolution.G]]
         val individual = _individual.asInstanceOf[Prototype[Individual[evolution.G, evolution.P, evolution.F]]]
       }
@@ -48,8 +47,7 @@ object ToIndividualTask {
 
 }
 
-sealed abstract class ToIndividualTask(val evolution: GAAlgorithm)(
-    val name: String) extends Task { task ⇒
+sealed abstract class ToIndividualTask(val evolution: GAAlgorithm) extends Task { task ⇒
 
   def genome: Prototype[evolution.G]
   def individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]]

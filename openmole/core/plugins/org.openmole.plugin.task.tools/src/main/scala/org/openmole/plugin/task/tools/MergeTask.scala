@@ -26,19 +26,19 @@ import org.openmole.core.implementation.task.Task
 
 object MergeTask {
 
-  def apply[S, T <: Array[S]](name: String, result: Prototype[Array[S]], prototypes: Prototype[_ <: T]*)(implicit plugins: PluginSet) =
+  def apply[S, T <: Array[S]](result: Prototype[Array[S]], prototypes: Prototype[_ <: T]*)(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
       for (p ← prototypes) addInput(p)
       addOutput(result)
 
       def toTask =
-        new MergeTask[S, T](name, prototypes, result) with builder.Built
+        new MergeTask[S, T](prototypes, result) with builder.Built
     }
 
 }
 
-sealed abstract class MergeTask[S, T <: Array[S]](val name: String, prototypes: Iterable[Prototype[_ <: T]], result: Prototype[Array[S]]) extends Task {
+sealed abstract class MergeTask[S, T <: Array[S]](val prototypes: Iterable[Prototype[_ <: T]], val result: Prototype[Array[S]]) extends Task {
 
   override def process(context: Context) = {
     val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))

@@ -88,6 +88,7 @@ object ClassUtils {
     def fromArray = c.getComponentType
 
     def toManifest = classType[T](c)
+
   }
 
   @tailrec def unArrayify(m1: Class[_], m2: Class[_], level: Int = 0): (Class[_], Class[_], Int) = {

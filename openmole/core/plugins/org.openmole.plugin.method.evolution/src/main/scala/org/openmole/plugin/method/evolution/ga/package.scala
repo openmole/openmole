@@ -101,32 +101,30 @@ package object ga {
     val generation = Prototype[Int](name + "Generation")
     val terminated = Prototype[Boolean](name + "Terminated")
 
-    val firstTask = EmptyTask(name + "First")
+    val firstTask = EmptyTask() set (_.setName(name + "First"))
     firstTask addInput (Data(archive, Optional))
     firstTask addInput (Data(population, Optional))
     firstTask addOutput (Data(archive, Optional))
     firstTask addOutput (Data(population, Optional))
 
-    val scalingGenomeTask = ScalingGAGenomeTask(evolution)(name + "ScalingGenome", genome)
+    val scalingGenomeTask = ScalingGAGenomeTask(evolution)(genome) set (_.setName(name + "ScalingGenome"))
 
-    val toIndividualTask = ToIndividualTask(evolution)(name + "ToIndividual", genome, individual)
+    val toIndividualTask = ToIndividualTask(evolution)(genome, individual) set (_.setName(name + "ToIndividual"))
 
     val elitismTask =
       ElitismTask(evolution)(
-        name + "ElitismTask",
         population,
         individual.toArray,
-        archive)
+        archive) set (_.setName(name + "ElitismTask"))
 
     val terminationTask = TerminationTask(evolution)(
-      name + "TerminationTask",
       population,
       archive,
       generation,
       state,
-      terminated)
+      terminated) set (_.setName(name + "TerminationTask"))
 
-    val scalingIndividualsTask = ScalingGAPopulationTask(evolution)(name + "ScalingIndividuals", population)
+    val scalingIndividualsTask = ScalingGAPopulationTask(evolution)(population) set (_.setName(name + "ScalingIndividuals"))
 
     scalingIndividualsTask addInput state
     scalingIndividualsTask addInput generation
@@ -158,16 +156,17 @@ package object ga {
   }
 
   def GenerationalGA[ALG <: GAAlgorithm](algorithm: ALG)(
-    name: String,
     fitness: Puzzle,
     lambda: Int)(implicit plugins: PluginSet) = {
+
+    val name = "generationalGA"
 
     val cs = components[ALG](name, algorithm)
     import cs._
 
     val firstCapsule = StrainerCapsule(firstTask)
 
-    val breedTask = ExplorationTask(name + "Breed", BreedSampling(algorithm)(population, archive, genome, lambda))
+    val breedTask = ExplorationTask(BreedSampling(algorithm)(population, archive, genome, lambda)) set (_.setName(name + "Breed"))
     breedTask.addParameter(population -> Population.empty[algorithm.G, algorithm.P, algorithm.F])
     breedTask.addParameter(archive -> algorithm.initialArchive(Workspace.rng))
 
@@ -194,7 +193,7 @@ package object ga {
 
     val terminationSlot = Slot(StrainerCapsule(terminationTask))
     val scalingIndividualsSlot = Slot(Capsule(scalingIndividualsTask))
-    val endSlot = Slot(StrainerCapsule(EmptyTask(name + "End")))
+    val endSlot = Slot(StrainerCapsule(EmptyTask() set (_.setName(name + "End"))))
 
     val exploration = firstCapsule -- breedingCaps -< scalingGenomeCaps -- (fitness, filter = Block(genome)) -- toIndividualSlot >- elitismSlot -- terminationSlot -- scalingIndividualsSlot -- (endSlot, terminatedCondition, filter = Keep(individual.toArray))
 
@@ -213,14 +212,15 @@ package object ga {
   }
 
   def SteadyGA[ALG <: GAAlgorithm](algorithm: ALG)(
-    name: String,
     fitness: Puzzle,
     lambda: Int = 1)(implicit plugins: PluginSet) = {
+
+    val name = "steadyGA"
 
     val cs = components[ALG](name, algorithm)
     import cs._
 
-    val breedTask = ExplorationTask(name + "Breed", BreedSampling(algorithm)(population, archive, genome, lambda))
+    val breedTask = ExplorationTask(BreedSampling(algorithm)(population, archive, genome, lambda)) set (_.setName(name + "Breed"))
     breedTask.addParameter(population -> Population.empty[algorithm.G, algorithm.P, algorithm.F])
     breedTask.addParameter(archive -> algorithm.initialArchive(Workspace.rng))
 
@@ -229,7 +229,7 @@ package object ga {
 
     val toIndividualSlot = Slot(InputStrainerCapsule(toIndividualTask))
 
-    val toIndividualArrayCaps = StrainerCapsule(ToArrayTask(name + "IndividualToArray", individual))
+    val toIndividualArrayCaps = StrainerCapsule(ToArrayTask(individual) set (_.setName(name + "IndividualToArray")))
 
     //mergeArchiveTask addParameter (archive -> evolution.initialArchive)
     //val mergeArchiveCaps = MasterCapsule(mergeArchiveTask, archive)
@@ -247,10 +247,10 @@ package object ga {
 
     val scalingIndividualsSlot = Slot(Capsule(scalingIndividualsTask))
 
-    val steadyBreedingTask = ExplorationTask(name + "Breeding", BreedSampling(algorithm)(population, archive, genome, 1))
+    val steadyBreedingTask = ExplorationTask(BreedSampling(algorithm)(population, archive, genome, 1)) set (_.setName(name + "Breeding"))
     val steadyBreedingCaps = Capsule(steadyBreedingTask)
 
-    val endCapsule = Slot(StrainerCapsule(EmptyTask(name + "End")))
+    val endCapsule = Slot(StrainerCapsule(EmptyTask() set (_.setName(name + "End"))))
 
     val skel =
       firstCapsule --
@@ -280,19 +280,18 @@ package object ga {
   }
 
   def IslandSteadyGA[ALG <: GAAlgorithm](algorithm: ALG, fitness: Puzzle)(
-    name: String,
     number: Int,
     termination: GATermination { type G >: algorithm.G; type P >: algorithm.P; type F >: algorithm.F },
     samples: Int)(implicit plugins: PluginSet) = {
 
+    val name = "islandSteadyGA"
+
     val gaPuzzle: GAPuzzle[ALG] =
       SteadyGA[ALG](algorithm)(
-        name = s"${name}Island",
         fitness = fitness
-      ).map(p ⇒ Capsule(MoleTask(s"${name}IslandTask", p)))
+      ).map(p ⇒ Capsule(MoleTask(p) set (_.setName(s"${name}IslandTask"))))
 
     IslandGA[ALG](gaPuzzle)(
-      name = name,
       number = number,
       termination = termination.asInstanceOf[GATermination { type G = gaPuzzle.parameters.evolution.G; type P = gaPuzzle.parameters.evolution.P; type F = gaPuzzle.parameters.evolution.F }],
       samples = samples) -> gaPuzzle.puzzle
@@ -300,10 +299,11 @@ package object ga {
   }
 
   def IslandGA[AG <: GAAlgorithm](fitness: GAPuzzle[AG])(
-    name: String,
     number: Int,
     termination: GATermination { type G >: fitness.parameters.evolution.G; type P >: fitness.parameters.evolution.P; type F >: fitness.parameters.evolution.F },
     samples: Int)(implicit plugins: PluginSet) = {
+
+    val name = "islandGA"
 
     import fitness.parameters
     import fitness.parameters.evolution
@@ -337,29 +337,27 @@ package object ga {
     val generation = Prototype[Int](name + "Generation")
     val terminated = Prototype[Boolean](name + "Terminated")
 
-    val firstCapsule = StrainerCapsule(EmptyTask(name + "First"))
+    val firstCapsule = StrainerCapsule(EmptyTask() set (_.setName(name + "First")))
 
-    val toInidividualsTask = PopulationToIndividualsTask(evolution)(name + "PopulationToIndividualTask", population, individual.toArray)
+    val toInidividualsTask = PopulationToIndividualsTask(evolution)(population, individual.toArray) set (_.setName(name + "PopulationToIndividualTask"))
     //val renameIndividualsTask = AssignTask(name + "RenameIndividuals")
     //renameIndividualsTask.assign(individual.toArray, newIndividual.toArray)
 
     val elitismTask = ElitismTask(islandElitism)(
-      name + "ElitismTask",
       parameters.population,
       parameters.individual.toArray,
-      parameters.archive)
+      parameters.archive) set (_.setName(name + "ElitismTask"))
 
     elitismTask addParameter (population -> Population.empty[evolution.G, evolution.P, evolution.F])
     elitismTask addParameter (archive -> islandElitism.initialArchive(Workspace.rng))
     val elitismCaps = MasterCapsule(elitismTask, population, archive)
 
     val terminationTask = TerminationTask(islandElitism)(
-      name + "TerminationTask",
       population,
       archive,
       generation,
       state,
-      terminated)
+      terminated) set (_.setName(name + "TerminationTask"))
 
     terminationTask addParameter Parameter.delayed(state, islandElitism.initialState)
     terminationTask addParameter (generation -> 0)
@@ -368,9 +366,9 @@ package object ga {
     terminationTask addOutput population
     val terminationSlot = Slot(MasterCapsule(terminationTask, generation, state))
 
-    val endCapsule = Slot(StrainerCapsule(EmptyTask(name + "End")))
+    val endCapsule = Slot(StrainerCapsule(EmptyTask() set (_.setName(name + "End"))))
 
-    val preIslandTask = EmptyTask(name + "PreIsland")
+    val preIslandTask = EmptyTask() set (_.setName(name + "PreIsland"))
     preIslandTask addInput population
     preIslandTask addInput archive
     preIslandTask addOutput population
@@ -384,7 +382,7 @@ package object ga {
     //val islandTask = MoleTask(name + "MoleTask", model)
     //val islandSlot = Slot(model)
 
-    val scalingIndividualsTask = ScalingGAPopulationTask(evolution)(name + "ScalingIndividuals", population)
+    val scalingIndividualsTask = ScalingGAPopulationTask(evolution)(population) set { _.setName(name + "ScalingIndividuals") }
 
     scalingIndividualsTask addInput archive
     scalingIndividualsTask addInput terminated
@@ -397,10 +395,10 @@ package object ga {
     scalingIndividualsTask addOutput generation
     val scalingIndividualsSlot = Slot(scalingIndividualsTask)
 
-    val selectIndividualsTask = SamplePopulationTask(evolution)(
-      name + "Breeding",
-      population,
-      samples)
+    val selectIndividualsTask =
+      SamplePopulationTask(evolution)(
+        population,
+        samples) set { _.setName(name + "Breeding") }
 
     selectIndividualsTask addInput archive
     selectIndividualsTask addOutput archive

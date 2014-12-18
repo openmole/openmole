@@ -27,7 +27,6 @@ import org.openmole.core.model.task._
 object TerminationTask {
 
   def apply(evolution: Termination with Archive)(
-    name: String,
     population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
     archive: Prototype[evolution.A],
     generation: Prototype[Int],
@@ -44,7 +43,7 @@ object TerminationTask {
       addOutput(state)
       addOutput(terminated)
 
-      def toTask = new TerminationTask(name, evolution) with Built {
+      def toTask = new TerminationTask(evolution) with Built {
         val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
         val archive = _archive.asInstanceOf[Prototype[evolution.A]]
         val generation = _generation
@@ -55,8 +54,7 @@ object TerminationTask {
   }
 }
 
-sealed abstract class TerminationTask[E <: Termination with Archive](
-    val name: String, val evolution: E) extends Task {
+sealed abstract class TerminationTask[E <: Termination with Archive](val evolution: E) extends Task {
 
   def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
   def archive: Prototype[evolution.A]

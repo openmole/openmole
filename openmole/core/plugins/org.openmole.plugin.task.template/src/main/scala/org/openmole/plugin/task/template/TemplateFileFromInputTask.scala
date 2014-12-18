@@ -25,20 +25,18 @@ import org.openmole.core.model.task._
 
 object TemplateFileFromInputTask {
   def apply(
-    name: String,
     template: Prototype[File],
     output: Prototype[File])(implicit plugins: PluginSet) = new TaskBuilder { builder ⇒
 
     addInput(template)
     addOutput(output)
 
-    def toTask = new TemplateFileFromInputTask(name, template, output) with builder.Built
+    def toTask = new TemplateFileFromInputTask(template, output) with builder.Built
   }
 }
 
 sealed abstract class TemplateFileFromInputTask(
-    val name: String,
-    template: Prototype[File],
+    val template: Prototype[File],
     val output: Prototype[File]) extends AbstractTemplateFileTask {
 
   override def file(context: Context) = context(template)

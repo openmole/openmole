@@ -29,10 +29,9 @@ import ga._
 object ScalingGAPopulationTask {
 
   def apply(evolution: GAAlgorithm)(
-    name: String,
     population: Prototype[Population[evolution.G, evolution.P, evolution.F]])(implicit plugins: PluginSet) = {
 
-    val (_evolution, _name, _population) = (evolution, name, population)
+    val (_evolution, _population) = (evolution, population)
 
     new TaskBuilder { builder ⇒
 
@@ -42,7 +41,6 @@ object ScalingGAPopulationTask {
 
       def toTask = new ScalingGAPopulationTask with Built {
         val evolution = _evolution
-        val name = _name
         val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
       }
     }

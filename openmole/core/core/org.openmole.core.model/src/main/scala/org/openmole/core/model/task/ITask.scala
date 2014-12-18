@@ -33,7 +33,7 @@ trait ITask {
    *
    * Get the name of the task.
    *
-   * @return
+   * @return the name of the task
    */
   def name: String
 

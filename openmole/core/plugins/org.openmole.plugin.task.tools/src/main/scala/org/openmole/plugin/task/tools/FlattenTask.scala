@@ -26,7 +26,7 @@ import scala.reflect.ClassTag
 
 object FlattenTask {
 
-  def apply(name: String)(implicit plugins: PluginSet) =
+  def apply()(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
       val toFlatten = ListBuffer[(Prototype[Array[Array[S]]], Prototype[Array[S]]) forSome { type S }]()
@@ -39,12 +39,12 @@ object FlattenTask {
       }
 
       def toTask =
-        new FlattenTask(name, toFlatten.toList) with builder.Built
+        new FlattenTask(toFlatten.toList) with builder.Built
     }
 
 }
 
-sealed abstract class FlattenTask(val name: String, val toFlatten: List[(Prototype[Array[Array[S]]], Prototype[Array[S]]) forSome { type S }]) extends Task {
+sealed abstract class FlattenTask(val toFlatten: List[(Prototype[Array[Array[S]]], Prototype[Array[S]]) forSome { type S }]) extends Task {
 
   override def process(context: Context) =
     toFlatten.map { case (f, r) ⇒ Variable(r.asInstanceOf[Prototype[Any]], context(f).flatten.toArray[Any](ClassTag(r.fromArray.`type`.runtimeClass))) }
