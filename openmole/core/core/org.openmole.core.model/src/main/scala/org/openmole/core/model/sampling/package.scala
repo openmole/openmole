@@ -24,4 +24,8 @@ package object sampling {
 
   implicit def factorWithIterableToDiscreteFactor[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) = DiscreteFactor(f)
 
+  implicit class PrototypeFactorDecorator[T](p: Prototype[T]) {
+    def in[D <: Domain[T]](d: D) = Factor(p, d)
+  }
+
 }
