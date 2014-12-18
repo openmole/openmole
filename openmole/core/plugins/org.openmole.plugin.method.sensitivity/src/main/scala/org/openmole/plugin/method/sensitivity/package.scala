@@ -31,7 +31,7 @@ import org.openmole.plugin.method.sensitivity._
 package object sensitivity {
   def indice(name: String, input: Prototype[Double], output: Prototype[Double]) = SensitivityTask.indice(name, input, output)
 
-  def bootStrappedSensitivity(
+  def BootStrappedSensitivity(
     name: String,
     model: Puzzle,
     samples: Int,

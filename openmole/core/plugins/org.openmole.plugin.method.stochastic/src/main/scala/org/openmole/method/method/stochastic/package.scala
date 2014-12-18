@@ -36,7 +36,7 @@ package object stochastic extends StatisticsMethods {
 
   def StatisticsTask = org.openmole.plugin.task.statistics.StatisticsTask
 
-  def replicate(
+  def Replicate(
     name: String,
     model: Puzzle,
     replicationFactor: DiscreteFactor[_, _],
@@ -56,7 +56,7 @@ package object stochastic extends StatisticsMethods {
     explorationCapsule -< model >- statisticTask -- endCapsule
   }
 
-  def replicate(
+  def Replicate(
     name: String,
     model: Puzzle,
     replications: Sampling)(implicit plugins: PluginSet) = {
