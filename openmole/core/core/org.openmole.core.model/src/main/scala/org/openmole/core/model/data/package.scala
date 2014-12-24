@@ -23,7 +23,9 @@ import reflect.macros.blackbox.{ Context ⇒ MContext }
 
 package object data {
 
-  def Val[T] = macro valImpl[T]
+  def Val[T: Manifest](name: String) = Prototype(name)
+
+  def Val[T]: Prototype[T] = macro valImpl[T]
 
   def valImpl[T: c.WeakTypeTag](c: MContext): c.Expr[Prototype[T]] = {
     import c.universe._
