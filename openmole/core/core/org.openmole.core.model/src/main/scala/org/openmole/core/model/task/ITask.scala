@@ -59,7 +59,7 @@ trait ITask {
    *
    * @return the parameters configured for this task.
    */
-  def parameters: ParameterSet
+  def parameters: DefaultSet
 
   def plugins: PluginSet
 

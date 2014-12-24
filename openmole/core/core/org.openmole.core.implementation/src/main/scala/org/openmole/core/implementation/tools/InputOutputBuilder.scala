@@ -22,7 +22,7 @@ import org.openmole.core.model.data._
 trait InputOutputBuilder { builder ⇒
   private var _inputs = DataSet.empty
   private var _outputs = DataSet.empty
-  private var _parameters = ParameterSet.empty
+  private var _parameters = DefaultSet.empty
 
   def addInput(d: DataSet): this.type = { _inputs ++= d; this }
   def addInput(d: Data[_]): this.type = { _inputs += d; this }
@@ -30,12 +30,12 @@ trait InputOutputBuilder { builder ⇒
   def addOutput(d: DataSet): this.type = { _outputs ++= d; this }
   def addOutput(d: Data[_]): this.type = { _outputs += d; this }
 
-  def setDefault[T](p: Prototype[T], v: T, `override`: Boolean = false): this.type = setDefault(Parameter(p, v, `override`))
-  def setDefault(p: Parameter[_]): this.type = { _parameters += p; this }
+  def setDefault[T](p: Prototype[T], v: T, `override`: Boolean = false): this.type = setDefault(Default(p, v, `override`))
+  def setDefault(p: Default[_]): this.type = { _parameters += p; this }
 
   @deprecated("use setDefault instead", "4.0")
-  def addParameter(p: Parameter[_]) = { _parameters += p; this }
-  def addParameter(p: ParameterSet) = { _parameters ++= p; this }
+  def addParameter(p: Default[_]) = { _parameters += p; this }
+  def addParameter(p: DefaultSet) = { _parameters ++= p; this }
 
   def inputs = _inputs
   def outputs = _outputs

@@ -118,7 +118,7 @@ sealed class NetLogo5Task(
   netLogoFactory: NetLogoFactory,
   inputs: DataSet,
   outputs: DataSet,
-  parameters: ParameterSet,
+  parameters: DefaultSet,
   inputFiles: Iterable[(Prototype[File], String, Boolean)],
   outputFiles: Iterable[(String, Prototype[File])],
   resources: Iterable[(File, String, Boolean, OS)])(implicit plugins: PluginSet) extends NetLogoTask(

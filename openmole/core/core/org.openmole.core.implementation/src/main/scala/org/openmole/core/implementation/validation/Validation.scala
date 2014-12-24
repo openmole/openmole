@@ -40,14 +40,14 @@ object Validation {
           }
       ).toList
 
-  private def paramsToMap(params: Iterable[Parameter[_]]) =
+  private def paramsToMap(params: Iterable[Default[_]]) =
     params.map {
       p ⇒ p.prototype.name -> p.prototype
     }.toMap[String, Prototype[_]]
 
   private def prototypesToMap(prototypes: Iterable[Prototype[_]]) = prototypes.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]
 
-  private def separateParameters(p: ParameterSet) = {
+  private def separateParameters(p: DefaultSet) = {
     val (po, pno) = p.partition(_.`override`)
     (paramsToMap(po), paramsToMap(pno))
   }

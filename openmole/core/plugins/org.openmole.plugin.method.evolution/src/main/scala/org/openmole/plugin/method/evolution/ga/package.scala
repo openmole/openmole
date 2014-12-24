@@ -179,7 +179,7 @@ package object ga {
     breedTask addOutput state
 
     breedTask setDefault (generation -> 0)
-    breedTask setDefault Parameter.delayed(state, algorithm.initialState)
+    breedTask setDefault Default.delayed(state, algorithm.initialState)
 
     val breedingCaps = Capsule(breedTask)
     val breedingCapsItSlot = Slot(breedingCaps)
@@ -238,7 +238,7 @@ package object ga {
     elitismTask setDefault (archive -> algorithm.initialArchive(Workspace.rng))
     val elitismSlot = Slot(MasterCapsule(elitismTask, population, archive))
 
-    terminationTask setDefault Parameter.delayed(state, algorithm.initialState)
+    terminationTask setDefault Default.delayed(state, algorithm.initialState)
     terminationTask setDefault generation -> 0
     terminationTask addOutput archive
     terminationTask addOutput population
@@ -359,7 +359,7 @@ package object ga {
       state,
       terminated) set (_.setName(name + "TerminationTask"))
 
-    terminationTask setDefault Parameter.delayed(state, islandElitism.initialState)
+    terminationTask setDefault Default.delayed(state, islandElitism.initialState)
     terminationTask setDefault (generation -> 0)
 
     terminationTask addOutput archive

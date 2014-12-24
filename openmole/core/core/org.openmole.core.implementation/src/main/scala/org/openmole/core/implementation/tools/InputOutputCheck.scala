@@ -48,7 +48,7 @@ trait InputOutputCheck {
 
   def inputs: DataSet
   def outputs: DataSet
-  def parameters: ParameterSet
+  def parameters: DefaultSet
 
   protected def verifyInput(context: Context): Iterable[InputError] =
     (for {

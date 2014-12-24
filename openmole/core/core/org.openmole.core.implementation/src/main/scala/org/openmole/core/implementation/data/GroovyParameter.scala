@@ -25,7 +25,7 @@ object GroovyParameter {
 
   def apply[T](prototype: Prototype[T], value: String, `override`: Boolean = false) = {
     val (p, v, o) = (prototype, value, `override`)
-    new Parameter[T] {
+    new Default[T] {
       @transient lazy val groovyProxy = GroovyProxyPool(v)
       def prototype = p
       def value(ctx: Context) = groovyProxy(ctx).asInstanceOf[T]

@@ -17,12 +17,12 @@
 
 package org.openmole.core.model.data
 
-object Parameter {
-  implicit def tuple2IterableToParameters(values: Iterable[(Prototype[T], T) forSome { type T }]) = values.map { case (p, v) ⇒ Parameter(p, v) }
+object Default {
+  implicit def tuple2IterableToParameters(values: Iterable[(Prototype[T], T) forSome { type T }]) = values.map { case (p, v) ⇒ Default(p, v) }
 
   def apply[T](prototype: Prototype[T], value: T, `override`: Boolean = false) = {
     val (o, p, v) = (`override`, prototype, value)
-    new Parameter[T] {
+    new Default[T] {
       val prototype = p
       def value(ctx: Context) = v
       val `override` = o
@@ -31,7 +31,7 @@ object Parameter {
 
   def delayed[T](_prototype: Prototype[T], _value: ⇒ T, `override`: Boolean = false) = {
     val o = `override`
-    new Parameter[T] {
+    new Default[T] {
       val prototype = _prototype
       def value(ctx: Context) = _value
       val `override` = o
@@ -47,7 +47,7 @@ object Parameter {
  * task.
  *
  */
-trait Parameter[T] {
+trait Default[T] {
 
   def prototype: Prototype[T]
   def value(ctx: Context): T

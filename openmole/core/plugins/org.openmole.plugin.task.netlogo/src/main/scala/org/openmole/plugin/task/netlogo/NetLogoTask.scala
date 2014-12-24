@@ -48,7 +48,7 @@ class NetLogoTask(
     val netLogoFactory: NetLogoFactory,
     val inputs: DataSet,
     val outputs: DataSet,
-    val parameters: ParameterSet,
+    val parameters: DefaultSet,
     val inputFiles: Iterable[(Prototype[File], String, Boolean)],
     val outputFiles: Iterable[(String, Prototype[File])],
     val resources: Iterable[(File, String, Boolean, OS)])(implicit val plugins: PluginSet) extends ExternalTask {
