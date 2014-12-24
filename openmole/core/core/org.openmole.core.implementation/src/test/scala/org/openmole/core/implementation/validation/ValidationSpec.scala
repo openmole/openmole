@@ -65,7 +65,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val t1 = EmptyTask("t1")
     val t2 = EmptyTask("t2")
     t2 addInput p
-    t2 addParameter (p -> "Test")
+    t2 setDefault (p -> "Test")
 
     val c1 = Capsule(t1)
     val c2 = Capsule(t2)
@@ -378,7 +378,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val exploration = ExplorationTask("explo", new EmptySampling)
     exploration addInput j.toArray
     exploration addOutput j.toArray
-    exploration addParameter (j.toArray -> Array.empty[Int])
+    exploration setDefault (j.toArray -> Array.empty[Int])
 
     val explorationCaps = Capsule(exploration)
 

@@ -24,12 +24,16 @@ trait InputOutputBuilder { builder ⇒
   private var _outputs = DataSet.empty
   private var _parameters = ParameterSet.empty
 
-  def addInput(d: DataSet) = { _inputs ++= d; this }
-  def addInput(d: Data[_]) = { _inputs += d; this }
+  def addInput(d: DataSet): this.type = { _inputs ++= d; this }
+  def addInput(d: Data[_]): this.type = { _inputs += d; this }
 
-  def addOutput(d: DataSet) = { _outputs ++= d; this }
-  def addOutput(d: Data[_]) = { _outputs += d; this }
+  def addOutput(d: DataSet): this.type = { _outputs ++= d; this }
+  def addOutput(d: Data[_]): this.type = { _outputs += d; this }
 
+  def setDefault[T](p: Prototype[T], v: T, `override`: Boolean = false): this.type = setDefault(Parameter(p, v, `override`))
+  def setDefault(p: Parameter[_]): this.type = { _parameters += p; this }
+
+  @deprecated("use setDefault instead", "4.0")
   def addParameter(p: Parameter[_]) = { _parameters += p; this }
   def addParameter(p: ParameterSet) = { _parameters ++= p; this }
 
