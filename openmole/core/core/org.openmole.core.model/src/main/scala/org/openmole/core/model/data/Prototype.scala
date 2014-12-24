@@ -20,15 +20,11 @@ package org.openmole.core.model.data
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.misc.tools.obj.{ ClassUtils, Id }
 import scala.reflect.Manifest
+import org.openmole.misc.macros.ExtractValName._
 
 object Prototype {
 
-  implicit lazy val prototypeOrderingOnName = new Ordering[Prototype[_]] {
-    override def compare(left: Prototype[_], right: Prototype[_]) =
-      left.name compare right.name
-  }
-
-  def apply[T](n: String)(implicit t: Manifest[T]) = {
+  def apply[T](n: String)(implicit t: Manifest[T]): Prototype[T] = {
     assert(t != null)
     new Prototype[T] {
       val name = n
@@ -36,6 +32,12 @@ object Prototype {
     }
   }
 
+  //def apply[T]()(implicit t: Manifest[T], name: ValName): Prototype[T] = apply[T](name.name)
+
+  implicit lazy val prototypeOrderingOnName = new Ordering[Prototype[_]] {
+    override def compare(left: Prototype[_], right: Prototype[_]) =
+      left.name compare right.name
+  }
 }
 
 /**

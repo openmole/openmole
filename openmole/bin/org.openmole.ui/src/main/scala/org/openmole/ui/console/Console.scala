@@ -81,7 +81,6 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
           loop.bind("commands", new Command)
           loop.bind("implicits", new Implicits()(plugins))
           loop.interpret(Seq(
-            "org.openmole.core.convenience._",
             "org.openmole.core.implementation.data._",
             "org.openmole.core.implementation.execution._",
             "org.openmole.core.implementation.execution.local._",

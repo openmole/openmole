@@ -83,7 +83,6 @@ class ScalaREPL(displayErrors: Boolean = true, priorityClasses: Seq[Class[_]] = 
     override lazy val classLoader = new scala.tools.nsc.util.AbstractFileClassLoader(
       replOutput.dir,
       new CompositeClassLoader(priorityClasses.map(_.getClassLoader) ++ List(classOf[OSGiScalaCompiler].getClassLoader): _*))
-
   }
 
 }

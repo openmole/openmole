@@ -33,35 +33,25 @@ import scala.tools.util.PathResolver
 import org.openmole.misc.osgi.{ ClassPathBuilder }
 import scala.tools.nsc._
 
-class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory: AbstractFile, priorityClases: Seq[Class[_]]) extends Global(settings, reporter) with ReplGlobal { g ⇒
+class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory: AbstractFile, priorityClasses: Seq[Class[_]]) extends Global(settings, reporter) with ReplGlobal { g ⇒
 
   //settings.bootclasspath.value = ClassPathBuilder.getClassPathFrom(classOf[scala.App].getClassLoader).mkString(":")
 
   lazy val cp = {
     val original = new PathResolver(settings).result
     def bundles: Iterable[AbstractFile] =
-      priorityClases.flatMap(BundleClassPathBuilder.bundles) ++ BundleClassPathBuilder.allBundles
+      priorityClasses.flatMap(BundleClassPathBuilder.bundles) ++ BundleClassPathBuilder.allBundles
 
     val result = bundles.map { original.context.newClassPath }.toList
     val vdcp = original.context.newClassPath(virtualDirectory)
-    val cp = new MergedClassPath(result ::: original :: vdcp :: Nil, original.context)
-    cp
+    new MergedClassPath(result ::: original :: vdcp :: Nil, original.context) {
+      override def asURLs = List.empty
+    }
   }
-
-  lazy val internalClassPath = cp
-
-  override def classPath = internalClassPath
-
-  /* def createClassPath[T](original: ClassPath[T]) = {
-    println("create class path")
-    val result = BundleClassPathBuilder.allBundles.map { original.context.newClassPath }.toList
-    val vdcp = original.context.newClassPath(virtualDirectory)
-    new MergedClassPath(vdcp :: result.toList ::: original :: Nil, original.context)
-  }*/
 
   override lazy val platform = new JavaPlatform {
     val global: OSGiScalaCompiler.this.type = OSGiScalaCompiler.this
-    override lazy val classPath = cp
+    override def classPath = cp
   }
 
 }

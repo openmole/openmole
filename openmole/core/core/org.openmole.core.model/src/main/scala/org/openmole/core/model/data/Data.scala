@@ -19,10 +19,10 @@ package org.openmole.core.model.data
 
 object Data {
 
-  implicit lazy val dataOrderingOnName = new Ordering[Data[_]] {
+  /*implicit lazy val dataOrderingOnName = new Ordering[Data[_]] {
     override def compare(left: Data[_], right: Data[_]) =
       Prototype.prototypeOrderingOnName.compare(left.prototype, right.prototype)
-  }
+  }*/
 
   def apply[T](p: Prototype[T], m: DataMode) = new Data[T] {
     val prototype = p
