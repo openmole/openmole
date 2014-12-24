@@ -26,8 +26,8 @@ object ConditionHook {
 
   def apply(hook: IHook, condition: ICondition) =
     new HookBuilder {
-      addInput(hook.inputs)
-      addOutput(hook.outputs)
+      addInput(hook.inputs.toSeq: _*)
+      addOutput(hook.outputs.toSeq: _*)
       def toHook = new ConditionHook(hook, condition) with Built
     }
 

@@ -81,7 +81,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
       val name = "select"
       override val inputs = DataSet(n, i)
       override val outputs = DataSet(n, i)
-      override val parameters = DefaultSet(n -> 0)
+      override val defaults = DefaultSet(n -> 0)
       override def process(context: Context) = {
         val nVal = context(n)
         context + Variable(n, nVal + 1) + Variable(i, (nVal + 1).toString)
@@ -124,7 +124,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
       val name = "select"
       override val inputs = DataSet(archive, i)
       override val outputs = DataSet(archive, i)
-      override val parameters = DefaultSet(archive -> Array.empty[Int])
+      override val defaults = DefaultSet(archive -> Array.empty[Int])
       override def process(context: Context) = {
         context.contains(archive) should equal(true)
         selectTaskExecuted += 1

@@ -36,7 +36,7 @@ object StrainerCapsule {
 
     override def perform(context: Context) = process(context)
     override def process(context: Context) = context + task.perform(context)
-    override def parameters = task.parameters
+    override def defaults = task.defaults
 
     override def name = task.name
   }

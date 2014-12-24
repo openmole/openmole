@@ -24,6 +24,6 @@ import org.openmole.core.model.task._
 trait TestTask extends Task {
   def inputs = DataSet.empty
   def outputs = DataSet.empty
-  def parameters = DefaultSet.empty
+  def defaults = DefaultSet.empty
   def plugins = PluginSet.empty
 }

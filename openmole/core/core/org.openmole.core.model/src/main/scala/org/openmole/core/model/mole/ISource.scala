@@ -22,6 +22,6 @@ import org.openmole.core.model.data._
 trait ISource {
   def inputs: DataSet
   def outputs: DataSet
-  def parameters: DefaultSet
+  def defaults: DefaultSet
   def perform(context: Context, executionContext: ExecutionContext): Context
 }

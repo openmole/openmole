@@ -51,7 +51,7 @@ class CopyFileHookSpec extends FlatSpec with Matchers {
       val outputs = DataSet(p)
       val inputs = DataSet.empty
       val plugins = PluginSet.empty
-      val parameters = DefaultSet.empty
+      val defaults = DefaultSet.empty
       override def process(context: Context) = context + (p -> f)
     }
 

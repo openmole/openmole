@@ -48,7 +48,7 @@ trait InputOutputCheck {
 
   def inputs: DataSet
   def outputs: DataSet
-  def parameters: DefaultSet
+  def defaults: DefaultSet
 
   protected def verifyInput(context: Context): Iterable[InputError] =
     (for {
@@ -78,7 +78,7 @@ trait InputOutputCheck {
 
   protected def initializeInput(context: Context): Context =
     context ++
-      parameters.flatMap {
+      defaults.flatMap {
         parameter ⇒
           if (parameter.`override` || !context.contains(parameter.prototype.name)) Some(parameter.toVariable(context))
           else Option.empty[Variable[_]]

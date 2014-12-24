@@ -47,7 +47,7 @@ object Validation {
 
   private def prototypesToMap(prototypes: Iterable[Prototype[_]]) = prototypes.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]
 
-  private def separateParameters(p: DefaultSet) = {
+  private def separateDefaults(p: DefaultSet) = {
     val (po, pno) = p.partition(_.`override`)
     (paramsToMap(po), paramsToMap(pno))
   }
@@ -68,7 +68,7 @@ object Validation {
       sourcesOutputs = TreeMap(sources(c).flatMap((os: ISource) ⇒ os.outputs.toSet).map((o: Data[_]) ⇒ o.prototype.name -> o).toSeq: _*)
       s ← mole.slots(c)
       receivedInputs = TreeMap(computeManifests(mole, sources, hooks)(s).map { p ⇒ p.name -> p }.toSeq: _*)
-      (parametersOverride, parametersNonOverride) = separateParameters(c.task.parameters)
+      (defaultsOverride, defaultsNonOverride) = separateDefaults(c.task.defaults)
       input ← c.task.inputs
     } yield {
       def checkPrototypeMatch(p: Prototype[_]) =
@@ -77,13 +77,13 @@ object Validation {
 
       val inputName = input.prototype.name
 
-      val parameterOverride = parametersOverride.get(inputName)
+      val defaultOverride = defaultsOverride.get(inputName)
       val receivedInput = receivedInputs.get(inputName)
       val receivedSource = sourcesOutputs.get(inputName)
       val receivedImplicit = implicitMap.get(inputName)
-      val parameterNonOverride = parametersNonOverride.get(inputName)
+      val defaultNonOverride = defaultsNonOverride.get(inputName)
 
-      (parameterOverride, receivedInput, receivedSource, receivedImplicit, parameterNonOverride) match {
+      (defaultOverride, receivedInput, receivedSource, receivedImplicit, defaultNonOverride) match {
         case (Some(parameter), _, _, _, _) ⇒ checkPrototypeMatch(parameter)
         case (None, Some(received), impl, source, param) ⇒
           def providedAfterward = impl.isDefined || source.isDefined || param.isDefined
@@ -114,7 +114,7 @@ object Validation {
     val x = (for {
       c ← mole.capsules
       (so: ISource) ← sources.getOrElse(c, List.empty)
-      (parametersOverride, parametersNonOverride) = separateParameters(so.parameters)
+      (defaultsOverride, defaultsNonOverride) = separateDefaults(so.defaults)
       sl ← mole.slots(c)
       receivedInputs = TreeMap(computeManifests(mole, sources, hooks)(sl).map { p ⇒ p.name -> p }.toSeq: _*)
       i ← so.inputs
@@ -125,12 +125,12 @@ object Validation {
 
       val inputName = i.prototype.name
 
-      val parameterOverride = parametersOverride.get(inputName)
+      val defaultOverride = defaultsOverride.get(inputName)
       val receivedInput = receivedInputs.get(inputName)
       val receivedImplicit = implicitMap.get(inputName)
-      val parameterNonOverride = parametersNonOverride.get(inputName)
+      val defaultNonOverride = defaultsNonOverride.get(inputName)
 
-      (parameterOverride, receivedInput, receivedImplicit, parameterNonOverride) match {
+      (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
         case (Some(parameter), _, _, _) ⇒ checkPrototypeMatch(parameter)
         case (None, Some(received), impl, param) ⇒
           def providedAfterward = impl.isDefined || param.isDefined
@@ -213,7 +213,7 @@ object Validation {
       c ← m.capsules
       outputs = c.outputs(m, sources, Hooks.empty).toMap
       h ← hooks(c)
-      (parametersOverride, parametersNonOverride) = separateParameters(h.parameters)
+      (defaultsOverride, defaultsNonOverride) = separateDefaults(h.defaults)
       i ← h.inputs
     } yield {
       def checkPrototypeMatch(p: Prototype[_]) =
@@ -222,14 +222,14 @@ object Validation {
 
       val inputName = i.prototype.name
 
-      val parameterOverride = parametersOverride.get(inputName)
+      val defaultOverride = defaultsOverride.get(inputName)
       val receivedInput = outputs.get(inputName)
       val receivedImplicit = implicitMap.get(inputName)
-      val parameterNonOverride = parametersNonOverride.get(inputName)
+      val defaultNonOverride = defaultsNonOverride.get(inputName)
 
-      (parameterOverride, receivedInput, receivedImplicit, parameterNonOverride)
+      (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride)
 
-      (parameterOverride, receivedInput, receivedImplicit, parameterNonOverride) match {
+      (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
         case (Some(parameter), _, _, _) ⇒ checkPrototypeMatch(parameter)
         case (None, Some(received), impl, param) ⇒
           def providedAfterward = impl.isDefined || param.isDefined

@@ -35,8 +35,8 @@ object MoleTask {
 
   def apply(mole: IMole, last: ICapsule)(implicit plugins: PluginSet) =
     new MoleTaskBuilder { builder ⇒
-      mole.root.inputs(mole, Sources.empty, Hooks.empty).foreach(addInput)
-      last.outputs(mole, Sources.empty, Hooks.empty).foreach(addOutput)
+      addInput(mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*)
+      addOutput(last.outputs(mole, Sources.empty, Hooks.empty).toSeq: _*)
       def toTask = new MoleTask(mole, last, implicits) with builder.Built
     }
 

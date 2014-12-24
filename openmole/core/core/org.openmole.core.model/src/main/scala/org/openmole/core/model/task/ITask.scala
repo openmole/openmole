@@ -55,11 +55,11 @@ trait ITask {
 
   /**
    *
-   * Get all the parameters configured for this task.
+   * Get all the defaults configured for this task.
    *
-   * @return the parameters configured for this task.
+   * @return the defaults configured for this task.
    */
-  def parameters: DefaultSet
+  def defaults: DefaultSet
 
   def plugins: PluginSet
 

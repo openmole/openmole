@@ -32,8 +32,8 @@ object ExplorationTask {
   def apply(sampling: Sampling)(implicit plugins: PluginSet) = {
     new TaskBuilder { builder ⇒
 
-      addInput(sampling.inputs)
-      addOutput(sampling.prototypes.map { p ⇒ Data(p, Explore).toArray })
+      addInput(sampling.inputs.toSeq: _*)
+      addOutput(sampling.prototypes.map { p ⇒ Data(p, Explore).toArray }.toSeq: _*)
 
       def toTask =
         new ExplorationTask(sampling) with builder.Built
