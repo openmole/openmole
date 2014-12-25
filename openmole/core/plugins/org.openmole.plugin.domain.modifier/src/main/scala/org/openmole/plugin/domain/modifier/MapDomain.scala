@@ -26,24 +26,21 @@ import scala.util.Random
 
 object MapDomain {
 
-  def apply[I, O](domain: Domain[I] with Discrete[I], name: String, code: String) =
-    new MapDomain[I, O](domain, name, code)
+  def apply[I, O](domain: Domain[I] with Discrete[I], name: String, source: String) =
+    new MapDomain[I, O](domain, name, source)
 
 }
 
-sealed class MapDomain[-I, +O](domain: Domain[I] with Discrete[I], name: String, code: String) extends Domain[O] with Discrete[O] {
-
-  def this(domain: Domain[I] with Discrete[I], prototype: Prototype[I], code: String) = this(domain, prototype.name, code)
+sealed class MapDomain[-I, +O](domain: Domain[I] with Discrete[I], name: String, val source: String) extends Domain[O] with Discrete[O] with ContextToGroovyCode { d ⇒
 
   override def inputs = domain.inputs
-
-  @transient lazy val contextToGroovyCode = new ContextToGroovyCode(code, Iterable.empty)
+  def libraries = Seq.empty
 
   override def iterator(context: Context)(implicit rng: Random): Iterator[O] =
     domain.iterator(context).map {
       e ⇒
         val b = context.toBinding
         b.setVariable(name, e)
-        contextToGroovyCode.execute(b).asInstanceOf[O]
+        execute(b).asInstanceOf[O]
     }
 }

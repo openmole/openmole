@@ -59,8 +59,7 @@ sealed abstract class ScalaTask(
   def prefix = "_input_value_"
 
   def compiledScript(inputs: Seq[Prototype[_]]) = {
-    val interpreter = new ScalaREPL(false, usedClasses)
-    libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
+    val interpreter = new ScalaREPL(false, usedClasses, libraries)
     val evaluated =
       try interpreter.eval(script(inputs))
       catch {
@@ -87,11 +86,11 @@ sealed abstract class ScalaTask(
   def script(inputs: Seq[Prototype[_]]) =
     imports.map("import " + _).mkString("\n") + "\n\n" +
       s"""(${inputs.toSeq.map(i ⇒ prefix + i.name + ": " + i.`type`).mkString(",")}) => {
-       |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(oMSeed).toScala;
        |    object input {
-       |      ${inputs.toSeq.map(i ⇒ "var " + i.name + " = " + prefix + i.name).mkString(";")}
+       |      ${inputs.toSeq.map(i ⇒ "var " + i.name + " = " + prefix + i.name).mkString("; ")}
        |    }
        |    import input._
+       |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(oMSeed).toScala;
        |    ${code}
        |    import scala.collection.JavaConversions.mapAsJavaMap
        |    mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} ))

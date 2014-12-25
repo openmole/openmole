@@ -25,9 +25,12 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
 
-class ContextToGroovyCode(source: String, libs: Iterable[File]) {
+trait ContextToGroovyCode {
 
-  @transient lazy val editorPool = new GroovyProxyPool(source, libs)
+  def source: String
+  def libraries: Seq[File]
+
+  @transient lazy val editorPool = new GroovyProxyPool(source, libraries)
 
   def execute(binding: Binding): Object = editorPool.execute(binding)
 

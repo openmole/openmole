@@ -29,8 +29,8 @@ object CodeTask {
 
 trait CodeTask extends ExternalTask {
 
-  def imports: Iterable[String]
-  def libraries: Iterable[File]
+  def imports: Seq[String]
+  def libraries: Seq[File]
 
   override def process(context: Context) = {
     val pwd = Workspace.newDir

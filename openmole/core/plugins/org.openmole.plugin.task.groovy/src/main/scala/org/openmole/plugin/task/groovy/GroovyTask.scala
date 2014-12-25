@@ -41,7 +41,7 @@ object GroovyTask {
    *
    * @param code the groovy source code
    */
-  def apply(code: String)(implicit plugins: PluginSet) =
+  def apply(source: String)(implicit plugins: PluginSet) =
     new CodeTaskBuilder { builder ⇒
 
       addImport("static org.openmole.plugin.task.groovy.GroovyTask.newRNG")
@@ -49,20 +49,15 @@ object GroovyTask {
       addImport("static org.openmole.plugin.task.groovy.GroovyTask.newDir")
 
       def toTask =
-        new GroovyTask(code) with Built
+        new GroovyTask(source) with Built
     }
 
 }
 
-sealed abstract class GroovyTask(val code: String) extends CodeTask {
+sealed abstract class GroovyTask(val source: String) extends CodeTask with ContextToGroovyCode {
 
-  def imports: Iterable[String]
-  def libraries: Iterable[File]
+  def processCode(context: Context) = execute(context, outputs)
 
-  @transient lazy val contextToCode = new ContextToGroovyCode(codeWithImports, libraries)
-
-  def processCode(context: Context) = contextToCode.execute(context, outputs)
-
-  private def codeWithImports = imports.map("import " + _).mkString("\n") + "\n" + code
+  private def codeWithImports = imports.map("import " + _).mkString("\n") + "\n" + source
 
 }

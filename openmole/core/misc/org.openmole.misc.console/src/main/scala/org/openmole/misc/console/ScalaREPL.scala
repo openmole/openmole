@@ -18,6 +18,7 @@
 package org.openmole.misc.console
 
 import java.io.{ PrintStream, PrintWriter, Writer }
+import java.net.URLClassLoader
 
 import org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader
 import org.openmole.misc.pluginmanager.PluginManager
@@ -30,7 +31,7 @@ import scala.tools.nsc.reporters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ScalaREPL(displayErrors: Boolean = true, priorityClasses: Seq[Class[_]] = Nil) extends ILoop {
+class ScalaREPL(displayErrors: Boolean = true, priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
 
   System.setProperty("jline.shutdownhook", "true")
   //System.setProperty("scala.repl.debug", "true")
@@ -71,18 +72,16 @@ class ScalaREPL(displayErrors: Boolean = true, priorityClasses: Seq[Class[_]] = 
     override protected def newCompiler(settings: Settings, reporter: Reporter) = {
       settings.outputDirs setSingleOutput replOutput.dir
       settings.exposeEmptyPackage.value = true
-      new OSGiScalaCompiler(settings, reporter, replOutput.dir, priorityClasses)
+      new OSGiScalaCompiler(settings, reporter, replOutput.dir, priorityClasses, jars)
     }
-
-    /*override def interpret(s: String) = {
-      val r = super.interpret(s)
-      replOutput.dir.clear
-      r
-    }*/
 
     override lazy val classLoader = new scala.tools.nsc.util.AbstractFileClassLoader(
       replOutput.dir,
-      new CompositeClassLoader(priorityClasses.map(_.getClassLoader) ++ List(classOf[OSGiScalaCompiler].getClassLoader): _*))
+      new CompositeClassLoader(
+        priorityClasses.map(_.getClassLoader) ++
+          List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
+          List(classOf[OSGiScalaCompiler].getClassLoader): _*)
+    )
   }
 
 }

@@ -21,6 +21,7 @@ import java.io.InputStream
 import java.net.URL
 import java.util
 import collection.JavaConversions._
+import scala.util._
 
 class CompositeClassLoader(val classLoaders: ClassLoader*) extends ClassLoader {
 
@@ -28,16 +29,16 @@ class CompositeClassLoader(val classLoaders: ClassLoader*) extends ClassLoader {
     cl match {
       case Nil ⇒ None
       case h :: t ⇒
-        f(h) match {
-          case null ⇒ loop(f, t)
-          case r    ⇒ Some(r)
+        Try(f(h)) match {
+          case Success(null) ⇒ loop(f, t)
+          case Failure(_)    ⇒ loop(f, t)
+          case Success(r)    ⇒ Some(r)
         }
     }
   }
 
-  override def loadClass(s: String, b: Boolean): Class[_] = loop(_.loadClass(s)).getOrElse(null)
-
-  override def loadClass(s: String): Class[_] = loop(_.loadClass(s)).getOrElse(null)
+  override def loadClass(s: String, b: Boolean): Class[_] =
+    loop(_.loadClass(s)).getOrElse(throw new ClassNotFoundException)
 
   override def getResource(s: String): URL = loop(_.getResource(s)).getOrElse(null)
 
