@@ -52,16 +52,15 @@ package object stochastic extends StatisticsMethods {
     }
 
     val explorationCapsule = StrainerCapsule(exploration)
-    val endCapsule = Slot(StrainerCapsule(EmptyTask() set { _.setName(name + "End") }))
-
-    explorationCapsule -< model >- aggregation -- endCapsule
+    explorationCapsule -< model >- aggregation
   }
 
   def Replicate(
-    name: String,
     model: Puzzle,
     sampling: Sampling)(implicit plugins: PluginSet) = {
-    val exploration = ExplorationTask(sampling) set { _.setName(name + "Replication") }
+    val name = "replicate"
+
+    val exploration = ExplorationTask(sampling) set { _.setName(name + "Exploration") }
 
     Validation(exploration -< model) foreach {
       case MissingInput(_, d) ⇒
