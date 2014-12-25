@@ -88,7 +88,10 @@ sealed abstract class ScalaTask(
     imports.map("import " + _).mkString("\n") + "\n\n" +
       s"""(${inputs.toSeq.map(i ⇒ prefix + i.name + ": " + i.`type`).mkString(",")}) => {
        |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(oMSeed).toScala;
-       |    ${inputs.toSeq.map(i ⇒ "var " + i.name + " = " + prefix + i.name).mkString(";")}
+       |    object input {
+       |      ${inputs.toSeq.map(i ⇒ "var " + i.name + " = " + prefix + i.name).mkString(";")}
+       |    }
+       |    import input._
        |    ${code}
        |    import scala.collection.JavaConversions.mapAsJavaMap
        |    mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} ))
