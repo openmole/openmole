@@ -43,8 +43,8 @@ abstract class CodeTaskBuilder(implicit plugins: PluginSet) extends ExternalTask
    *
    * @param s a namespace
    */
-  def addImport(s: String) = {
-    _imports += s
+  def addImport(s: String*): this.type = {
+    _imports ++= s
     this
   }
 
@@ -59,8 +59,8 @@ abstract class CodeTaskBuilder(implicit plugins: PluginSet) extends ExternalTask
    * @param l a jar file
    *
    */
-  def addLibrary(l: File) = {
-    _libraries += l
+  def addLibrary(l: File*): this.type = {
+    _libraries ++= l
     this
   }
 

@@ -25,6 +25,7 @@ import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.builder._
 import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
 

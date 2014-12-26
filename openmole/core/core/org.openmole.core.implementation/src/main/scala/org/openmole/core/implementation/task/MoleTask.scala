@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.task
 
+import org.openmole.core.implementation.builder.TaskBuilder
 import org.openmole.misc.eventdispatcher._
 import org.openmole.misc.exception._
 import org.openmole.core.implementation.puzzle._

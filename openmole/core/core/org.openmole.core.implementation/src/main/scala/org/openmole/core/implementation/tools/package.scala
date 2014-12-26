@@ -17,10 +17,12 @@
 
 package org.openmole.core.implementation
 
+import org.openmole.core.implementation.builder.InputOutputBuilder
+
 import scala.ref.WeakReference
 
 import scala.concurrent.stm._
-import org.openmole.core.model.data.Context
+import org.openmole.core.model.data.{ Data, Context }
 import groovy.lang.Binding
 import org.openmole.misc.tools.script.GroovyProxy
 

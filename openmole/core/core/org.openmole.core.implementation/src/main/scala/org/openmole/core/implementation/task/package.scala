@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation
 
+import org.openmole.core.implementation.builder.TaskBuilder
 import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.puzzle.Puzzle
 import org.openmole.core.model.data.Context
@@ -27,20 +28,13 @@ import puzzle._
 import java.io.File
 
 package object task {
-  implicit def taskBuilderToTask[TB <: TaskBuilder](builder: TB) = builder.toTask
   implicit def taskToCapsuleConverter(task: ITask) = new Capsule(task)
-  implicit def taskBuilderToCapsuleConverter[TB <: TaskBuilder](builder: TB) = new Capsule(builder)
-
   implicit def taskToPuzzleConverter(task: ITask) = new Capsule(task).toPuzzle
 
-  class TaskToCapsuleDecorator(task: ITask) {
+  implicit class TaskToCapsuleDecorator(task: ITask) {
     def toCapsule = new Capsule(task)
     def toStrainerCapsule = new StrainerCapsule(task)
   }
-
-  implicit def taskToCapsuleDecorator(task: ITask) = new TaskToCapsuleDecorator(task)
-  implicit def taskBuilderToCapsuleDecorator(task: TaskBuilder) = taskToCapsuleDecorator(task)
-  implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = t.toTask.toCapsule.toPuzzle
 
   def newRNG(context: Context) = Task.buildRNG(context)
 }

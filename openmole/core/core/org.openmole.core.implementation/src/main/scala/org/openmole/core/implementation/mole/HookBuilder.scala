@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.implementation.tools.InputOutputBuilder
+import org.openmole.core.implementation.builder.InputOutputBuilder
 import org.openmole.core.model.mole.IHook
 
 abstract class HookBuilder extends InputOutputBuilder {

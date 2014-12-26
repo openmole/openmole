@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.task.tools
 
+import org.openmole.core.implementation.builder.TaskBuilder
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.core.implementation.data._

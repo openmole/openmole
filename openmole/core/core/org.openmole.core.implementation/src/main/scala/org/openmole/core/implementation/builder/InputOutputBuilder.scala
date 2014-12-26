@@ -15,11 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.tools
+package org.openmole.core.implementation.builder
 
+import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
 
-trait InputOutputBuilder { builder ⇒
+trait InputOutputBuilder <: Builder { builder ⇒
   private var _inputs = DataSet.empty
   private var _outputs = DataSet.empty
   private var _defaults = DefaultSet.empty
@@ -42,4 +43,6 @@ trait InputOutputBuilder { builder ⇒
     val outputs = builder.outputs
     val defaults = builder.defaults
   }
+
 }
+

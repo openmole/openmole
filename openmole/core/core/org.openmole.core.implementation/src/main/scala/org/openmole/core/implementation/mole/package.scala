@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation
 
+import org.openmole.core.implementation.builder.TaskBuilder
 import org.openmole.core.implementation.execution.local.LocalEnvironment
 import org.openmole.core.model.execution._
 import org.openmole.core.model.job._

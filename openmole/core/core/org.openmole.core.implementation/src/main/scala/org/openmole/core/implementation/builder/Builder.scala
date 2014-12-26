@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2014 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,14 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation
+package org.openmole.core.implementation.builder
 
-import org.openmole.core.model.data._
-import org.openmole.core.model.domain._
-import org.openmole.core.model.sampling._
+trait Builder {
 
-package object sampling {
-
-  implicit def samplingBuilderToSampling(s: SamplingBuilder) = s.toSampling
+  def set(ops: Op[this.type]*): this.type = {
+    ops.foreach(_(this))
+    this
+  }
 
 }

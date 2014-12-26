@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation
 
+import org.openmole.core.implementation.builder.TaskBuilder
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.tools._

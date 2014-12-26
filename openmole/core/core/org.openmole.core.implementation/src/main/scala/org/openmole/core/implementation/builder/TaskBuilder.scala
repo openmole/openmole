@@ -15,14 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.task
+package org.openmole.core.implementation.builder
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import org.openmole.core.model.data._
 import org.openmole.core.model.task._
-import org.openmole.core.implementation.tools.InputOutputBuilder
-import org.openmole.misc.tools.obj.ClassUtils._
 
 object TaskBuilder {
   val nameCounter = new AtomicInteger
@@ -34,7 +31,7 @@ object TaskBuilder {
 
 }
 
-abstract class TaskBuilder(implicit val plugins: PluginSet) extends InputOutputBuilder { builder ⇒
+abstract class TaskBuilder(implicit val plugins: PluginSet) extends InputOutputBuilder with Builder { builder ⇒
   def toTask: ITask
 
   var name: Option[String] = None
@@ -43,10 +40,5 @@ abstract class TaskBuilder(implicit val plugins: PluginSet) extends InputOutputB
   trait Built extends super.Built {
     val plugins = builder.plugins
     val name = builder.name.getOrElse(TaskBuilder.generateName(this))
-  }
-
-  def set(f: this.type ⇒ Unit): this.type = {
-    f(this)
-    this
   }
 }

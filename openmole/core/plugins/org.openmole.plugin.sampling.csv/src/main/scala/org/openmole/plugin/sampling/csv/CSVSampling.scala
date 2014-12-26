@@ -18,10 +18,11 @@
 package org.openmole.plugin.sampling.csv
 
 import java.io.File
+import org.openmole.core.implementation.builder.SamplingBuilder
+
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeMap
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.implementation.sampling._
 import org.openmole.core.model.data._
 import java.io.FileReader
 import java.math.BigInteger

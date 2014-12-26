@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.method.evolution
 
+import org.openmole.core.implementation.builder.TaskBuilder
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.task._

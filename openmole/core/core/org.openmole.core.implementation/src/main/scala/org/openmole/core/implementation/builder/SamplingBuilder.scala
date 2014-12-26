@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.sampling
+package org.openmole.core.implementation.builder
 
 import org.openmole.core.model.sampling._
 

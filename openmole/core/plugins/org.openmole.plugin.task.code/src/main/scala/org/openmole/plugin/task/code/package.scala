@@ -17,4 +17,6 @@
 
 package org.openmole.plugin.task
 
-package object code
+package object code {
+
+}

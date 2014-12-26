@@ -19,7 +19,6 @@ package org.openmole.plugin.task
 
 import java.io.File
 import org.openmole.core.model.data.Prototype
+import org.openmole.core.implementation.builder._
 
-package object external {
-
-}
+package object external {}
