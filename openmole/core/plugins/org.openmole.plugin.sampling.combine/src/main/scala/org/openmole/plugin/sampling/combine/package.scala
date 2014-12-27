@@ -24,7 +24,6 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
 import org.openmole.misc.workspace._
-import org.openmole.core.implementation.sampling._
 
 package object combine {
 
