@@ -22,6 +22,14 @@ import org.openmole.core.model.data.Prototype
 import org.openmole.core.implementation.builder
 import org.openmole.misc.tools.service.OS
 
+package external {
+  trait ExternalPackage {
+    type InputsDecorator = external.InputsDecorator
+    type OutputsDecorator = external.OutputsDecorator
+    lazy val resources = external.resources
+  }
+}
+
 package object external {
 
   implicit class InputsDecorator(i: builder.inputs.type) {
@@ -37,12 +45,6 @@ package object external {
   lazy val resources = new {
     def +=(file: File, name: Option[String] = None, link: Boolean = false, os: OS = OS()): builder.Op[ExternalTaskBuilder] =
       (_: ExternalTaskBuilder).addResource(file, name, link, os)
-  }
-
-  trait ExternalPackage {
-    type InputsDecorator = external.InputsDecorator
-    type OutputsDecorator = external.OutputsDecorator
-    lazy val resources = external.resources
   }
 
 }
