@@ -19,7 +19,7 @@ package org.openmole.plugin.task.statistics
 
 import org.openmole.misc.tools.math.Stat
 
-trait StatisticsMethods {
+trait StatisticMethods {
   lazy val average = new StatisticalAggregation[Double] {
     override def apply(s: Seq[Double]): Double = Stat.average(s)
   }

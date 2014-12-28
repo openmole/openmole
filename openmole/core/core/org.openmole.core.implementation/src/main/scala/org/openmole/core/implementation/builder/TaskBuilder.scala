@@ -35,7 +35,11 @@ abstract class TaskBuilder(implicit val plugins: PluginSet) extends InputOutputB
   def toTask: ITask
 
   var name: Option[String] = None
-  def setName(name: String) = builder.name = Some(name)
+
+  def setName(name: String): this.type = {
+    builder.name = Some(name)
+    this
+  }
 
   trait Built extends super.Built {
     val plugins = builder.plugins

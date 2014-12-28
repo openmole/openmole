@@ -32,9 +32,9 @@ import org.openmole.plugin.task.statistics._
 import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
 
-package object stochastic extends StatisticsMethods {
+package object stochastic extends StatisticMethods {
 
-  def StatisticsTask = org.openmole.plugin.task.statistics.StatisticsTask
+  def StatisticsTask = org.openmole.plugin.task.statistics.StatisticTask
 
   def Replicate(
     model: Puzzle,

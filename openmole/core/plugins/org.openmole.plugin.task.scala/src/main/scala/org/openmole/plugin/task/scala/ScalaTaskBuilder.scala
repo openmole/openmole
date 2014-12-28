@@ -15,16 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task
+package org.openmole.plugin.task.scala
 
-import org.openmole.core.implementation.builder._
-import org.openmole.core.model.data.Prototype
+import org.openmole.core.model.task.PluginSet
+import org.openmole.plugin.task.code.CodeTaskBuilder
 
-package object statistics extends StatisticMethods {
+import scala.collection.mutable.ListBuffer
 
-  lazy val statistics = new {
-    def +=(sequence: Prototype[Array[Double]], stat: Prototype[Double], agg: StatisticalAggregation[Double]): Op[StatisticTaskBuilder] =
-      _.addStatistic(sequence, stat, agg)
-  }
+class ScalaTaskBuilder(code: String)(implicit plugins: PluginSet) extends CodeTaskBuilder { builder ⇒
 
+  val usedClasses = ListBuffer[Class[_]]()
+
+  def addClassUse(c: Class[_]) = usedClasses += c
+
+  addImport("org.openmole.misc.tools.service.Random.newRNG")
+  addImport("org.openmole.misc.workspace.Workspace.newFile")
+  addImport("org.openmole.misc.workspace.Workspace.newDir")
+
+  def toTask =
+    new ScalaTask(code, usedClasses) with builder.Built
 }

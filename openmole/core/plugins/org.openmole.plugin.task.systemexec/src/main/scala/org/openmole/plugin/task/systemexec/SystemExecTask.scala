@@ -57,55 +57,19 @@ object SystemExecTask extends Logger {
    */
   def apply(
     commands: Commands = Seq.empty,
-    directory: String = "",
-    errorOnReturnCode: Boolean = true,
-    returnValue: Option[Prototype[Int]] = None,
-    output: Option[Prototype[String]] = None,
-    error: Option[Prototype[String]] = None)(implicit plugins: PluginSet) = {
-    val inCommands = commands
-
-    new ExternalTaskBuilder {
-      builder ⇒
-
-      List(output, error, returnValue).flatten.foreach(p ⇒ addOutput(p))
-
-      private val _variables = new ListBuffer[(Prototype[_], String)]
-      private val _commands = new ListBuffer[Commands]
-
-      command(inCommands)
-
-      def variables = _variables.toList
-
-      /**
-       * Add variable from openmole to the environment of the system exec task. The
-       * environment variable is set using a toString of the openmole variable content.
-       *
-       * @param prototype the prototype of the openmole variable to inject in the environment
-       * @param variable the name of the environment variable. By default the name of the environment
-       *                 variable is the same as the one of the openmole protoype.
-       */
-      def addVariable(prototype: Prototype[_], variable: Option[String] = None): this.type = {
-        _variables += prototype -> variable.getOrElse(prototype.name)
-        addInput(prototype)
-        this
-      }
-
-      def command(cmd: Commands) = _commands += cmd
-
-      def toTask = new SystemExecTask(_commands, directory, errorOnReturnCode, returnValue, output, error, variables) with builder.Built
-    }
-  }
+    directory: String = "")(implicit plugins: PluginSet) =
+    new SystemExecTaskBuilder(commands, directory)
 
 }
 
-sealed abstract class SystemExecTask(
-    val command: Iterable[Commands],
+abstract class SystemExecTask(
+    val command: Seq[Commands],
     val directory: String,
     val errorOnReturnCode: Boolean,
     val returnValue: Option[Prototype[Int]],
     val output: Option[Prototype[String]],
     val error: Option[Prototype[String]],
-    val variables: Iterable[(Prototype[_], String)]) extends ExternalTask {
+    val variables: Seq[(Prototype[_], String)]) extends ExternalTask {
 
   override protected def process(context: Context) = withWorkDir { tmpDir ⇒
     val workDir = if (directory.isEmpty) tmpDir else new File(tmpDir, directory)

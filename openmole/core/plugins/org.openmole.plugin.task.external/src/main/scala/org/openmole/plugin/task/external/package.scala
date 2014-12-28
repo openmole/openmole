@@ -19,6 +19,30 @@ package org.openmole.plugin.task
 
 import java.io.File
 import org.openmole.core.model.data.Prototype
-import org.openmole.core.implementation.builder._
+import org.openmole.core.implementation.builder
+import org.openmole.misc.tools.service.OS
 
-package object external {}
+package object external {
+
+  implicit class InputsDecorator(i: builder.inputs.type) {
+    def +=(p: Prototype[File], name: String, link: Boolean = false): builder.Op[ExternalTaskBuilder] =
+      (_: ExternalTaskBuilder).addInput(p, name, link)
+  }
+
+  implicit class OutputsDecorator(i: builder.outputs.type) {
+    def +=(name: String, p: Prototype[File]): builder.Op[ExternalTaskBuilder] =
+      (_: ExternalTaskBuilder).addOutput(name, p)
+  }
+
+  lazy val resources = new {
+    def +=(file: File, name: Option[String] = None, link: Boolean = false, os: OS = OS()): builder.Op[ExternalTaskBuilder] =
+      (_: ExternalTaskBuilder).addResource(file, name, link, os)
+  }
+
+  trait ExternalPackage {
+    type InputsDecorator = external.InputsDecorator
+    type OutputsDecorator = external.OutputsDecorator
+    lazy val resources = external.resources
+  }
+
+}

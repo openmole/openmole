@@ -18,7 +18,7 @@
 package org.openmole.core.implementation
 
 import org.openmole.core.model.data._
-import org.openmole.core.model.task.ITask
+import org.openmole.core.model.task._
 import task._
 import mole._
 import puzzle._
@@ -31,5 +31,27 @@ package object builder {
   implicit def taskBuilderToCapsuleDecorator(task: TaskBuilder) = new TaskToCapsuleDecorator(task)
   implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = t.toTask.toCapsule.toPuzzle
 
-  type Op[T] = T ⇒ Unit
+  type Op[-T] = T ⇒ Unit
+
+  lazy val inputs = new {
+    def +=(d: Data[_]*): Op[InputOutputBuilder] = _.addInput(d: _*)
+  }
+
+  lazy val outputs = new {
+    def +=(d: Data[_]*): Op[InputOutputBuilder] = _.addOutput(d: _*)
+  }
+
+  class AssignDefault[T](p: Prototype[T]) {
+    def :=(v: T, `override`: Boolean = false): Op[InputOutputBuilder] =
+      _.setDefault(p, v, `override`)
+  }
+
+  lazy val default = new {
+    def apply[T](p: Prototype[T]) = new AssignDefault[T](p)
+  }
+
+  lazy val name = new {
+    def :=(name: String): Op[TaskBuilder] = _.setName(name)
+  }
+
 }

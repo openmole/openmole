@@ -35,24 +35,11 @@ import scala.collection.mutable.ListBuffer
 
 object ScalaTask {
 
-  def apply(code: String)(implicit plugins: PluginSet = PluginSet.empty) = {
-    new CodeTaskBuilder { builder ⇒
-
-      val usedClasses = ListBuffer[Class[_]]()
-
-      def addClassUse(c: Class[_]) = usedClasses += c
-
-      addImport("org.openmole.misc.tools.service.Random.newRNG")
-      addImport("org.openmole.misc.workspace.Workspace.newFile")
-      addImport("org.openmole.misc.workspace.Workspace.newDir")
-
-      def toTask =
-        new ScalaTask(code, usedClasses) with builder.Built
-    }
-  }
+  def apply(code: String)(implicit plugins: PluginSet = PluginSet.empty) =
+    new ScalaTaskBuilder(code)
 }
 
-sealed abstract class ScalaTask(
+abstract class ScalaTask(
     val code: String,
     val usedClasses: Seq[Class[_]]) extends CodeTask {
 

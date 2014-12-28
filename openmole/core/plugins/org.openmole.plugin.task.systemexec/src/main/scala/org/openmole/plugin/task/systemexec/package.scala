@@ -17,14 +17,44 @@
 
 package org.openmole.plugin.task
 
+import org.openmole.core.model.data.Prototype
 import org.openmole.misc.tools.service.OS
+import org.openmole.core.implementation.builder._
 
-package object systemexec {
-
+package object systemexec extends external.ExternalPackage {
   case class Commands(parts: Seq[String], os: OS = OS())
 
   implicit def stringToCommands(s: String) = Commands(Seq(s))
   implicit def seqOfStringToCommands(s: Seq[String]) = Commands(s)
   implicit def tupleToCommands(t: (String, OS)) = Commands(Seq(t._1), t._2)
   implicit def tupleSeqToCommands(t: (Seq[String], OS)) = Commands(t._1, t._2)
+
+  lazy val errorOnReturnCode = new {
+    def :=(b: Boolean): Op[SystemExecTaskBuilder] =
+      _.setErrorOnReturnValue(b)
+  }
+
+  lazy val returnValue = new {
+    def :=(v: Option[Prototype[Int]]): Op[SystemExecTaskBuilder] =
+      _.setReturnValue(v)
+  }
+
+  lazy val stdOut = new {
+    def :=(v: Option[Prototype[String]]): Op[SystemExecTaskBuilder] =
+      _.setStdOut(v)
+  }
+
+  lazy val stdErr = new {
+    def :=(v: Option[Prototype[String]]): Op[SystemExecTaskBuilder] =
+      _.setStdErr(v)
+  }
+
+  lazy val commands = new {
+    def +=(c: Commands): Op[SystemExecTaskBuilder] = _.addCommand(c)
+  }
+
+  lazy val environmentVariable = new {
+    def +=(prototype: Prototype[_], variable: Option[String] = None): Op[SystemExecTaskBuilder] =
+      _.addEnvironmentVariable(prototype, variable)
+  }
 }

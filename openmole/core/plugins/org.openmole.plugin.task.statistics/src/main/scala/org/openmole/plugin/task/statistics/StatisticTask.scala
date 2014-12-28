@@ -24,34 +24,17 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import scala.collection.mutable.ListBuffer
 
-object StatisticsTask {
-
-  def apply()(implicit plugins: PluginSet) = new TaskBuilder { builder ⇒
-    private var _sequences = new ListBuffer[(Prototype[Array[Double]], Prototype[Double], StatisticalAggregation[Double])]
-
-    def sequences = _sequences.toList
-
-    def add(sequence: Prototype[Array[Double]], stat: Prototype[Double], agg: StatisticalAggregation[Double]): this.type = {
-      this addInput sequence
-      this addOutput stat
-      _sequences += ((sequence, stat, agg))
-      this
-    }
-
-    def toTask = new StatisticsTask with super.Built {
-      val sequences = builder.sequences
-    }
-  }
-
+object StatisticTask {
+  def apply()(implicit plugins: PluginSet) = new StatisticTaskBuilder
 }
 
-abstract class StatisticsTask extends Task {
+abstract class StatisticTask extends Task {
 
-  def sequences: Iterable[(Prototype[Array[Double]], Prototype[Double], StatisticalAggregation[Double])]
+  def statistics: Iterable[(Prototype[Array[Double]], Prototype[Double], StatisticalAggregation[Double])]
 
   override def process(context: Context) =
     Context(
-      sequences.map {
+      statistics.map {
         case (sequence, statProto, agg) ⇒ Variable(statProto, agg(context(sequence)))
       })
 

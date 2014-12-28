@@ -17,14 +17,4 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.core.implementation.builder._
-import org.openmole.core.model.data.Prototype
-
-package object statistics extends StatisticMethods {
-
-  lazy val statistics = new {
-    def +=(sequence: Prototype[Array[Double]], stat: Prototype[Double], agg: StatisticalAggregation[Double]): Op[StatisticTaskBuilder] =
-      _.addStatistic(sequence, stat, agg)
-  }
-
-}
+package object netlogo5 extends netlogo.NetLogoPackage

@@ -17,14 +17,30 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.core.implementation.builder._
 import org.openmole.core.model.data.Prototype
+import org.openmole.core.implementation.builder._
 
-package object statistics extends StatisticMethods {
+package object netlogo {
 
-  lazy val statistics = new {
-    def +=(sequence: Prototype[Array[Double]], stat: Prototype[Double], agg: StatisticalAggregation[Double]): Op[StatisticTaskBuilder] =
-      _.addStatistic(sequence, stat, agg)
+  lazy val netLogoInputs = new {
+    def +=(p: Prototype[_], n: String): Op[NetLogoTaskBuilder] =
+      _.addNetLogoInput(p, n)
+    def +=(p: Prototype[_]): Op[NetLogoTaskBuilder] =
+      _.addNetLogoInput(p)
+  }
+
+  lazy val netLogoOutput = new {
+    def +=(n: String, p: Prototype[_]): Op[NetLogoTaskBuilder] =
+      _.addNetLogoOutput(n, p)
+    def +=(p: Prototype[_]): Op[NetLogoTaskBuilder] =
+      _.addNetLogoOutput(p)
+    def +=(name: String, column: Int, p: Prototype[_]): Op[NetLogoTaskBuilder] =
+      _.addNetLogoOutput(name, column, p)
+  }
+
+  trait NetLogoPackage extends external.ExternalPackage {
+    lazy val netLogoInputs = netlogo.netLogoInputs
+    lazy val netLogoOutput = netlogo.netLogoOutput
   }
 
 }
