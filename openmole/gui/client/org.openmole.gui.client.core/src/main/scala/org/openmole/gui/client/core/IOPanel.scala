@@ -1,5 +1,20 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.client.service.ClientService
+import org.openmole.gui.ext.dataui._
+//import org.openmole.gui.misc.js.Forms
+import org.openmole.gui.misc.js.Forms._
+//import org.scalajs.dom
+//import scalatags.JsDom._
+import org.openmole.gui.misc.js.JsRxTags._
+
+//import scalatags.JsDom.tags.{ div, ul, li, label, form, input, button }
+//import scalatags.JsDom.attrs._
+import scalatags.JsDom.all._
+//import scalatags.JsDom.all._
+
+import rx._
+
 /*
  * Copyright (C) 11/12/14 // mathieu.leclaire@openmole.org
  *
@@ -17,9 +32,28 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object IOPanel {
+class IOPanel[T <: IODataUI](dataUI: T) {
 
-  def apply() = {
+  def render = {
+    println("IO PANL ----")
+
+    //val prototypeSelector = autoinput("prototypes", "!", ClientService.prototypeDataUIs)
+
+    div( // prototypeSelector.selector
+    /*Rx {
+
+        ul(id := "input-prototypes")(
+          //for (prototype ← taskDataUI.inputs()) yield {
+          li(
+            // label(prototype()._1.name())
+            label("my li")
+          )
+        // }
+
+        //  taskDataUI.inputs().map { p ⇒ li(label(p()._1.name())) }.toSeq: _*
+        )
+
+      }*/ )
   }
 
 }

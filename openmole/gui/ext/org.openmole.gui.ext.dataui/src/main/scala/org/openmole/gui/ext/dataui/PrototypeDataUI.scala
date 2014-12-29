@@ -1,6 +1,8 @@
 package org.openmole.gui.ext.dataui
 
+import org.openmole.gui.ext.data.ProtoTYPE.ProtoTYPE
 import org.openmole.gui.ext.data.PrototypeData
+import rx._
 
 /*
  * Copyright (C) 20/08/14 // mathieu.leclaire@openmole.org
@@ -19,7 +21,12 @@ import org.openmole.gui.ext.data.PrototypeData
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait PrototypeDataUI[T] <: DataUI {
-  type DATA = PrototypeData[T]
+trait PrototypeDataUI <: DataUI {
+  type DATA = PrototypeData
+
+  def dimension: Var[Int]
+
   def data: DATA
+
+  def `type`: Var[ProtoTYPE]
 }

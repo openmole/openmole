@@ -17,6 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.ext.data.ProtoTYPE.ALL
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.client.service.ClientService
@@ -25,7 +26,6 @@ import org.openmole.gui.misc.js.Forms
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.CSSClasses._
-import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.misc.js.JsRxTags._
@@ -34,9 +34,11 @@ import rx._
 
 import org.scalajs.dom
 
-import scalatags.JsDom.attrs._
-import scalatags.JsDom.short._
-import scalatags.JsDom.tags.{ h1, h2, div, li }
+//import scalatags.JsDom.attrs._
+
+import scalatags.JsDom.all._
+
+//import scalatags.JsDom.tags.{ h1, h2, div, li }
 
 @JSExport("GUIClient")
 object GUIClient {
@@ -45,7 +47,6 @@ object GUIClient {
   def run(): Unit = {
 
     ClientService += ClientService.taskFactories(0).dataUI
-    println("All tasks : " + ClientService.taskDataUIs)
 
     val topdiv = dom.document.body.appendChild(div)
 
@@ -55,27 +56,29 @@ object GUIClient {
         navItem("Environments")
       )
     )
+    topdiv.appendChild(Forms.autoinput("dataUI", ClientService.taskFactories, placeHolder = Some("select men"), default = Some(ClientService.taskFactories(1))).selector)
 
-    // topdiv.appendChild(Forms.autoinput("dataUI", "Yo", ClientService.taskFactories).selector)
-    topdiv.appendChild(h1(label("OpenMOLE !", onclick := { () ⇒ println("File") })))
+    topdiv.appendChild(h1(Forms.label("OpenMOLE !!!", onclick := { () ⇒ println("File") })))
     topdiv.appendChild(badge("Tasks", "4", btn_medium))
     topdiv.appendChild(badge("Prototype", "4", btn_large + btn_primary))
 
     topdiv.appendChild(
       h2(
-        buttonGroup(
-          button("File", btn_default, onclick := { () ⇒ println("File") }),
-          button("Edit", btn_default),
-          button("Run", btn_primary)
+        Forms.buttonGroup(
+          Forms.button("File", btn_default, onclick := { () ⇒ println("File") }),
+          Forms.button("Edit", btn_default),
+          Forms.button("Run", btn_primary)
         )
       )
     )
 
-    val dialog = //Rx {
-      GenericPanel("taskPanelID",
-        ClientService.taskFactories,
-        Some(ClientService.taskDataUIs.head))
-    // }
+    val dialog = Panel.generic("taskPanelID",
+      ClientService.taskFactories
+    )
+
+    /*val dialog = new PanelWithIO("taskPanelID",
+      ClientService.taskFactories
+    )*/
 
     /*div(
         "taskName",
@@ -85,12 +88,14 @@ object GUIClient {
 
     topdiv.appendChild(
       jumbotron(
-        h1("OpenMole !"),
-        button("Click men", btn_primary + btn_large, dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID")
+        h1("OpenMole !!!!"),
+        Forms.button("Click men", btn_primary + btn_large, dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID")
       )
     )
 
-    topdiv.appendChild(dialog().render)
+    topdiv.appendChild(dialog.render)
+
+    println("GUIClient 1")
 
     dom.document.body.appendChild(topdiv)
 

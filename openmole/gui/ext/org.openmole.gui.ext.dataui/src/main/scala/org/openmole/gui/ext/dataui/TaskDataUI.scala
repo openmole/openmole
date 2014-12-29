@@ -22,6 +22,6 @@ import rx._
 trait TaskDataUI <: DataUI {
   type DATA = TaskData
   def data: DATA
-  def inputs: Var[Seq[Var[(PrototypeDataUI[_], Option[String])]]]
-  def outputs: Var[Seq[Var[PrototypeDataUI[_]]]]
+  def inputs: InputsUI
+  def outputs: OutputsUI
 }
