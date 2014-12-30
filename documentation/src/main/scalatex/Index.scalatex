@@ -1,0 +1,5 @@
+
+@import scalatex.site.Section
+@object sect extends Section()
+
+@a("Console documentation", href:="console.html")
