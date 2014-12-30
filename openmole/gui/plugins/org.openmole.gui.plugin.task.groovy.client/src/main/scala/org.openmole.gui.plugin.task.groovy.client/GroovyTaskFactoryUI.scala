@@ -4,6 +4,7 @@ import org.openmole.gui.ext.dataui.{TaskDataUI}
 import org.openmole.gui.ext.factoryui.{FactoryUI}
 
 import scala.scalajs.js.annotation.JSExport
+import rx._
 
 /*
  * Copyright (C) 01/10/14 // mathieu.leclaire@openmole.org
@@ -28,5 +29,5 @@ class GroovyTaskFactoryUI extends FactoryUI {
 
   def dataUI = new GroovyTaskDataUI
 
-  def name = "Groovy Task"
+  val name = Var("Groovy Task")
 }

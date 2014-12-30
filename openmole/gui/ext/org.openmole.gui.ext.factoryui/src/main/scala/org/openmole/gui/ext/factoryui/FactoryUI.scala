@@ -1,9 +1,9 @@
 package org.openmole.gui.ext.factoryui
 
-import org.openmole.gui.ext.aspects._
 import org.openmole.gui.ext.dataui._
 
 import scala.scalajs.js.annotation.JSExport
+import rx._
 
 /*
  * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
@@ -22,7 +22,9 @@ import scala.scalajs.js.annotation.JSExport
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait FactoryUI extends Identifiable with Displayable {
+trait FactoryUI {
   type DATAUI <: DataUI
   def dataUI: DATAUI
+  val name: Var[String]
+  val uuid: String = java.util.UUID.randomUUID.toString
 }

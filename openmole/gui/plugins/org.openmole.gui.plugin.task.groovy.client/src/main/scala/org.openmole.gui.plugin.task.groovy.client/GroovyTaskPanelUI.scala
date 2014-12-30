@@ -19,13 +19,10 @@ package org.openmole.gui.plugin.task.groovy.client
 
 import org.openmole.gui.ext.dataui.PanelUI
 
-import org.scalajs.dom
 import scala.scalajs.js.annotation.JSExport
-import scalatags.JsDom.tags._
-import scalatags.JsDom.tags2._
-import scalatags.JsDom.attrs._
-import scalatags.JsDom.short._
-import scalatags.generic.TypedTag
+//import scalatags.JsDom.tags._
+//import scalatags.JsDom.attrs._
+import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.Forms._
 import rx._
 
@@ -34,15 +31,19 @@ class GroovyTaskPanelUI(dataUI: GroovyTaskDataUI) extends PanelUI {
 
   type DATAUI = GroovyTaskDataUI
 
-  val tag = Rx {
-    div(
+  /*val tag = Rx {
+    d(
       h1(id := "title", "This is a title"),
       p("GroovyTAsk !!")
     )
-  }
+  }*/
 
   @JSExport
-  def view: HtmlTag = tag()
+  val view = div(
+      h1(id := "title", "This is a title"),
+      p("GroovyTAsk !!")
+    )
+
 
   def save(name: String) = new GroovyTaskDataUI
 }

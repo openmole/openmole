@@ -11,6 +11,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import scala.scalajs.js.annotation.JSExport
 import scala.util.{ Failure, Success, Try }
 import scala.scalajs._
+import reflect.runtime.universe._
 
 /*
  * Copyright (C) 30/10/14 // mathieu.leclaire@openmole.org
@@ -41,33 +42,43 @@ object ClientService {
   private val uiFactories = UIFactories.factoryMap.toMap
   private val uiData: Var[Seq[DataUI]] = Var(Seq())
 
-  private def factories[T <: DataUI] = {
-    uiFactories.values.filter { f ⇒
-      f.dataUI.isInstanceOf[T]
-    }.toSeq
-  }
-
-  private def dataUIs[T <: DataUI] = {
-    uiData().filter { d ⇒
-      d.isInstanceOf[T]
+  def taskFactories = uiFactories.values.flatMap { f ⇒
+    f.dataUI match {
+      case t: TaskDataUI ⇒ Some(f.asInstanceOf[IOFactoryUI])
+      case _             ⇒ None
     }
-  }
+  }.toSeq
 
-  private def data[T <: Data] = {
-    uiData().map { _.data }.filter { d ⇒
-      d.isInstanceOf[T]
+  def prototypeFactories = uiFactories.values.flatMap { f ⇒
+    f.dataUI match {
+      case t: PrototypeDataUI ⇒ Some(f)
+      case _                  ⇒ None
     }
-  }
+  }.toSeq
 
-  def taskFactories = factories[TaskDataUI]
-  def prototypeFactories = factories[PrototypeDataUI[_]]
+  def taskDataUIs: Seq[TaskDataUI] = uiData().flatMap {
+    _ match {
+      case t: TaskDataUI ⇒ Some(t)
+      case _             ⇒ None
+    }
+  }.toSeq
 
-  def taskDataUIs = dataUIs[TaskDataUI]
+  def prototypeDataUIs = uiData().flatMap {
+    _ match {
+      case t: PrototypeDataUI ⇒ Some(t)
+      case _                  ⇒ None
+    }
+  }.toSeq
 
   def +=(d: DataUI) = uiData() = d +: uiData()
 
-  def taskData = data[TaskData]
-  def prototypeData = data[PrototypeData[_]]
+  def taskData = taskDataUIs.map {
+    _.data
+  }
+
+  def prototypeData = prototypeDataUIs.map {
+    _.data
+  }
 
   implicit def dataToDataClassName(d: Data) = d.getClass.getCanonicalName
 
@@ -86,9 +97,9 @@ object ClientService {
     case _                      ⇒ failure(data)
   }
 
-  private def dataUI(data: PrototypeData[_]): PrototypeDataUI[_] = factoryUI(data) match {
-    case Success(d: PrototypeDataUI[_]) ⇒ d
-    case _                              ⇒ failure(data)
+  private def dataUI(data: PrototypeData): PrototypeDataUI = factoryUI(data) match {
+    case Success(d: PrototypeDataUI) ⇒ d
+    case _                           ⇒ failure(data)
   }
 
   private def failure[T <: Data](data: T) = Failure(new Throwable("The data " + data.name + " cannot be recontructed on the server."))
@@ -105,24 +116,23 @@ object ClientService {
     taskDataUItoTaskData
   }
 
-  implicit def protoDataUItoProtoData(dataUI: PrototypeDataUI[_]): PrototypeData[_] = dataUI.data
+  implicit def protoDataUItoProtoData(dataUI: PrototypeDataUI): PrototypeData = dataUI.data
 
-  implicit def prototypeDataToPrototypeDataUI(data: PrototypeData[_]): PrototypeDataUI[_] = dataUI(data)
+  implicit def prototypeDataToPrototypeDataUI(data: PrototypeData): PrototypeDataUI = dataUI(data)
 
-  implicit def protoDataUISeqtoProtoDataSeq(s: Seq[PrototypeDataUI[_]]): Seq[PrototypeData[_]] = s.map {
+  implicit def protoDataUISeqtoProtoDataSeq(s: Seq[PrototypeDataUI]): Seq[PrototypeData] = s.map {
     protoDataUItoProtoData
   }
 
-  implicit def outputsConv[T <: DataUI](s: Var[Seq[Var[T]]]): Seq[T#DATA] = s().map { t ⇒ t().data }
-
-  implicit def inputsConv[T <: DataUI](s: Var[Seq[Var[(T, Option[String])]]]): Seq[(T#DATA, Option[String])] =
-    s().map { t ⇒ t() }.map {
-      case (pUI, opt) ⇒
-        (pUI.data, opt)
-    }
-
   implicit def libConv(seq: Var[Seq[Var[String]]]): Seq[String] = seq().map { e ⇒ e() }
 
-  //implicit def protoDataUIStringMapToProtoDataString(m: Map[PrototypeDataUI[_], String]): Map[PrototypeData[_], String] = m.map { case (dataUI: PrototypeDataUI[_], s) ⇒ dataUI.data -> s }.toMap
+  implicit def outputsConv(s: OutputsUI): Outputs = s().map { t ⇒ t().data }.toSeq
+
+  implicit def inputsConv(s: InputsUI): Inputs = s().map { t ⇒ t() }.map {
+    case (pUI, opt) ⇒
+      (pUI.data, opt)
+  }
+
+  implicit def dataUIToFactoryUI(d: DataUI): Option[FactoryUI] = uiFactories.values.find { _.dataUI == d }
 
 }

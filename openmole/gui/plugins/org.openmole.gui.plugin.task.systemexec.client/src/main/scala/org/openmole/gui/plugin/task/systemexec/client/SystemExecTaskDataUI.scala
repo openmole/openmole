@@ -20,15 +20,15 @@ package org.openmole.gui.plugin.task.systemexec.client
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
-import org.openmole.gui.ext.dataui.{PrototypeDataUI, TaskDataUI}
+import org.openmole.gui.ext.dataui._
 import org.openmole.gui.client.service.ClientService._
 import rx._
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskDataUI")
 class SystemExecTaskDataUI(val name: Var[String] = Var(""),
-                           val inputs: Var[Seq[Var[(PrototypeDataUI[_], Option[String])]]] = Var(Seq()),
-                           val outputs: Var[Seq[Var[PrototypeDataUI[_]]]] = Var(Seq())) extends TaskDataUI {
-  def data = new SystemExecTaskData(name, inputsConv(inputs), outputsConv(outputs))
+                           val inputs: InputsUI = Var(Seq()),
+                           val outputs: OutputsUI = Var(Seq())) extends TaskDataUI {
+  def data = new SystemExecTaskData(name, inputs, outputs)
 
   def panelUI = new SystemExecTaskPanelUI(this)
 }

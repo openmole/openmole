@@ -20,7 +20,7 @@ package org.openmole.gui.plugin.task.groovy.client
 import org.openmole.gui.client.service.ClientService._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.ext.dataui.{PrototypeDataUI, TaskDataUI}
+import org.openmole.gui.ext.dataui._
 import org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData
 import rx._
 
@@ -28,11 +28,11 @@ import rx._
 class GroovyTaskDataUI(val name: Var[String] = Var(""),
                        val code: Var[String] = Var(""),
                        val libs: Var[Seq[Var[String]]] = Var(Seq()),
-                       val inputs: Var[Seq[Var[(PrototypeDataUI[_],Option[String])]]] = Var(Seq()),
-                       val outputs: Var[Seq[Var[PrototypeDataUI[_]]]] = Var(Seq())) extends TaskDataUI{
+                       val inputs: InputsUI = Var(Seq()),
+                       val outputs: OutputsUI = Var(Seq())) extends TaskDataUI{
 //libs().map{c=>c()}
 
-  def data = new GroovyTaskData(name, code, libConv(libs), inputsConv(inputs), outputsConv(outputs))
+  def data = new GroovyTaskData(name, code, libs, inputs, outputs)
 
   def panelUI = new GroovyTaskPanelUI(this)
 }

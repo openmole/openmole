@@ -54,7 +54,7 @@ object JSPack {
 
     val optimizedClasspath = optimizer.optimizeCP(
       ScalaJSOptimizer.Inputs(completeClasspath),
-      ScalaJSOptimizer.OutputConfig(out, checkIR = false),
+      ScalaJSOptimizer.OutputConfig(out, checkIR = false, wantSourceMap = !optimized),
       logger
     )
 

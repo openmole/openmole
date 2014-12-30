@@ -18,18 +18,38 @@ package org.openmole.gui.ext.data
  */
 
 trait Data {
-  val id: String = java.util.UUID.randomUUID.toString
+  val uuid: String = java.util.UUID.randomUUID.toString
   def name: String
 }
 
-trait PrototypeData[T] extends Data
+object ProtoTYPE extends Enumeration {
+  case class ProtoTYPE(name: String, uuid: String = java.util.UUID.randomUUID.toString) extends Val(name)
+  val INT = new ProtoTYPE("Integer")
+  val DOUBLE = new ProtoTYPE("Double")
+  val LONG = new ProtoTYPE("Long")
+  val BOOLEAN = new ProtoTYPE("Boolean")
+  val STRING = new ProtoTYPE("java.lang.String")
+  val FILE = new ProtoTYPE("java.io.File")
+  val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE)
+}
+
+import ProtoTYPE._
+class PrototypeData(val name: String, val `type`: ProtoTYPE, val dimension: Int) extends Data
+
+object PrototypeData {
+  def apply(name: String, `type`: ProtoTYPE, dimension: Int) = new PrototypeData(name, `type`, dimension)
+  def integer(name: String, dimension: Int) = new PrototypeData(name, INT, dimension)
+  def double(name: String, dimension: Int) = new PrototypeData(name, DOUBLE, dimension)
+  def long(name: String, dimension: Int) = new PrototypeData(name, LONG, dimension)
+  def boolean(name: String, dimension: Int) = new PrototypeData(name, BOOLEAN, dimension)
+  def string(name: String, dimension: Int) = new PrototypeData(name, STRING, dimension)
+  def file(name: String, dimension: Int) = new PrototypeData(name, FILE, dimension)
+
+}
 
 trait TaskData extends Data {
-  //inputs with optionaly a default value
-  def inputs: Seq[(PrototypeData[_], Option[String])]
-  //outputs
-  def outputs: Seq[PrototypeData[_]]
-
+  def inputs: Seq[(PrototypeData, Option[String])]
+  def outputs: Seq[PrototypeData]
 }
 
 case class ErrorData(data: Data, error: String, stack: String)

@@ -17,34 +17,41 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.JsDom.tags._
-import scalatags.JsDom.short._
-import scalatags.JsDom.attrs._
-import org.openmole.gui.ext.aspects._
+import org.scalajs.dom.HTMLSelectElement
+import scalatags.JsDom.TypedTag
+import scalatags.JsDom.all._
 import org.scalajs.jquery.jQuery
-import scala.scalajs.js
 import rx._
 
-class AutoInput[T <: Displayable with Identifiable](autoID: String, placeHolder: String, contents: Seq[T]) {
+abstract class GenericAutoInput[T](autoID: String, contents: Seq[T], default: Option[T] = None, placeHolder: Option[String]) {
 
-  val mapping: Map[Int, T] = contents.zipWithIndex.map { case (v, ind) ⇒ ind -> v }.toMap
-  //contents.map { c ⇒ c.id -> c }.toMap
+  def selector: TypedTag[HTMLSelectElement]
+
+  protected lazy val firstInd = default match {
+    case None ⇒ 0
+    case _ ⇒
+      val ind = contents.indexOf(default.get)
+      if (ind != -1) ind else 0
+  }
+
+  lazy val content: Var[T] = Var(contents(firstInd))
+}
+
+class AutoInput[T <: DisplayableRx with Identifiable](autoID: String, contents: Seq[T], default: Option[T] = None, placeHolder: Option[String]) extends GenericAutoInput[T](autoID, contents, default, placeHolder) {
+
+  def jQid = "#" + autoID
 
   val selector = select(id := autoID,
-    onchange := { () ⇒ applyOnChange })(
+    placeholder := placeHolder.getOrElse(""),
+    onchange := { () ⇒ applyOnChange }
+  )(
       contents.map { c ⇒
-        option(value := c.id)(c.name)
+        option(value := c.uuid)(c.name())
       }.toSeq: _*
     )
 
-  private val selectorRender = selector.render
-
-  println("firste seleceted " + mapping(selectorRender.selectedIndex).name)
-  val content: Var[T] = Var(mapping(selectorRender.selectedIndex))
-
   def applyOnChange: Unit = {
-    val ind = jQuery("#" + autoID).find("option:selected").index()
-    println("jqauery : " + ind)
-    content() = mapping(ind)
+    val ind = jQuery(jQid).find("option:selected").index()
+    content() = contents(ind)
   }
 }

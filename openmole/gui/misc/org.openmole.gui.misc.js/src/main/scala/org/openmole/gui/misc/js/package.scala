@@ -1,9 +1,7 @@
-package org.openmole.gui.ext.dataui
-
-import scalatags.JsDom.all.HtmlTag
+package org.openmole.gui.misc
 
 /*
- * Copyright (C) 26/11/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 10/12/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,8 +17,12 @@ import scalatags.JsDom.all.HtmlTag
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait PanelUI {
-  type DATAUI <: DataUI
-  def view: HtmlTag
-  def save(name: String): DATAUI
+import rx._
+
+package object js {
+
+  type DisplayableRx = { def name: Var[String] }
+
+  type Identifiable = { def uuid: String }
+
 }

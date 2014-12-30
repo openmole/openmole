@@ -1,7 +1,6 @@
-package org.openmole.gui.ext.aspects
-
+package org.openmole.gui.ext
 /*
- * Copyright (C) 05/12/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 16/12/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,10 +16,8 @@ package org.openmole.gui.ext.aspects
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait Displayable {
-  def name: String
-}
+import org.openmole.gui.ext.dataui.IODataUI
 
-trait Identifiable {
-  val id: String = java.util.UUID.randomUUID.toString
+package object factoryui {
+  type IOFactoryUI = FactoryUI { type DATAUI <: IODataUI }
 }

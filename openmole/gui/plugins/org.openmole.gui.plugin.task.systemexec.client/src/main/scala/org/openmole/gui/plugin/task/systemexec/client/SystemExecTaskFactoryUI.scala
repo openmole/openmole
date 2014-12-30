@@ -21,6 +21,7 @@ import org.openmole.gui.ext.dataui.TaskDataUI
 import org.openmole.gui.ext.factoryui.FactoryUI
 
 import scala.scalajs.js.annotation.JSExport
+import rx._
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskFactoryUI")
 sealed class SystemExecTaskFactoryUI extends FactoryUI {
@@ -28,5 +29,5 @@ sealed class SystemExecTaskFactoryUI extends FactoryUI {
 
   def dataUI = new SystemExecTaskDataUI
 
-  def name = "External Task"
+  val name = Var("External Task")
 }

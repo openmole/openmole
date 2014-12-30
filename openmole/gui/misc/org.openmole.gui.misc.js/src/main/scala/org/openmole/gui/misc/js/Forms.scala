@@ -19,17 +19,14 @@ package org.openmole.gui.misc.js
 
 import fr.iscpif.scaladget.mapping.Select2Options
 import fr.iscpif.scaladget.mapping.Select2Utils._
-import org.openmole.gui.ext.aspects.{ Identifiable, Displayable }
 import org.scalajs.dom
-import org.scalajs.dom.HTMLElement
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js
-import scalatags.JsDom.tags._
-import scalatags.JsDom.tags2._
-import scalatags.JsDom.attrs._
-import scalatags.JsDom.short._
+import scalatags.JsDom.TypedTag
+
+import scalatags.JsDom.all._
+
 import org.scalajs.jquery.jQuery
-import scalatags.generic.TypedTag
 import fr.iscpif.scaladget.select2._
 import scala.scalajs.js
 import js.Dynamic.{ literal ⇒ lit }
@@ -39,11 +36,7 @@ import org.openmole.gui.misc.js.JsRxTags._
 @JSExport("Forms")
 object Forms {
 
-  //type FormTag = TypedTag[dom.Element, dom.Element, dom.Node]
-
   implicit def stringToClassKeyAggregator(s: String): ClassKeyAggregator = key(s)
-
-  implicit def typedTagToNode[T <: org.scalajs.dom.Element](tt: scalatags.JsDom.TypedTag[T]): org.scalajs.dom.Node = tt.render
 
   implicit def formTagToNode(tt: HtmlTag): org.scalajs.dom.Node = tt.render
 
@@ -55,7 +48,7 @@ object Forms {
   def d[T <: HtmlTag](t: T*): HtmlTag = scalatags.JsDom.tags.div(t.toSeq: _*)
 
   // Nav
-  def nav(keys: ClassKeyAggregator, navItems: HtmlTag*) = ul(`class` := keys.key, role := "tablist")(navItems.toSeq: _*)
+  def nav(keys: ClassKeyAggregator, navItems: HtmlTag*): HtmlTag = ul(`class` := keys.key, role := "tablist")(navItems.toSeq: _*)
 
   private val navPrefix = key("nav")
   val nav_default = navPrefix + "navbar-default"
@@ -112,33 +105,8 @@ object Forms {
   //Button group
   def buttonGroup = div(`class` := "btn-group")
 
-  def modalDialog(ID: String, header: Var[HtmlTag], body: Var[HtmlTag], footer: Var[HtmlTag]): HtmlTag = {
-    println("modalDialog")
-
-    div(`class` := "modal fade", id := ID)(
-      div(`class` := "modal-dialog")(
-        div(`class` := "modal-content")(
-          // parts.map { p ⇒ p() }.toSeq: _*
-          //Header
-          div(`class` := "modal-header")(
-            button("", `class` := "close", dataWith("dismiss") := "modal")(
-              span(ariaWith("hidden") := "true", "x"),
-              span(`class` := "sr-only", "Close")
-            ),
-            header()
-          ),
-          //Body
-          Rx {
-            //  println("writing body ...")
-            div(`class` := "modal-body")(body) //
-          },
-          //Footer
-          div(`class` := "modal-footer")(footer())
-        )
-      )
-    )
-
-  }
+  def modalDialog(ID: String, header: HtmlTag, body: Var[HtmlTag], footer: HtmlTag) =
+    new ModalDialog(ID, header, body, footer)
 
   def jumbotron(modifiers: scalatags.JsDom.Modifier*): HtmlTag =
     div(`class` := "container theme-showcase", role := "main")(
@@ -149,37 +117,15 @@ object Forms {
       )
     )
 
-  /* def modalHeader(tag: HtmlTag): Var[HtmlTag] = Var(div(`class` := "modal-header")(
-    button("", `class` := "close", dataWith("dismiss") := "modal")(
-      span(ariaWith("hidden") := "true", "x"),
-      span(`class` := "sr-only", "Close")
-    ),
-    tag
-  ))
-
-  def modalBody(tag: Var[HtmlTag]): Var[HtmlTag] = Rx {
-    println("modal body !")
-    div(`class` := "modal-body")(tag())
-  }()
-
-  def modalFooter(tag: HtmlTag): Var[HtmlTag] = Var(div(`class` := "modal-footer")(tag))*/
-
-  def autoinput[T <: Displayable with Identifiable](autoID: String, placeHolder: String, contents: Seq[T]) = {
-    new AutoInput[T](autoID, placeHolder, contents)
-    /*
-    val mapping = contents.map { c ⇒ c.id -> c }.toMap
-
-    select(id := "e1")(
-      contents.map { c ⇒
-        option(value := c.id)(c.name)
-      }.toSeq: _*
-    )*/
-
+  def autoinput[T <: DisplayableRx with Identifiable](autoID: String, contents: Seq[T], default: Option[T] = None, placeHolder: Option[String] = None) = {
+    new AutoInput[T](autoID, contents, default, placeHolder)
   }
 
   @JSExport
   protected def select2(): Unit = {
-    jQuery(() ⇒ jQuery("#factoryUI").select2(lit(placeholder = "Yoyo")))
+    jQuery(() ⇒ jQuery("#factoryUI").select2(lit(placeholder = "Yoyoo")))
+    // jQuery(() ⇒ jQuery("#taskPanelID").select2(lit(placeholder = "Yoyo")))
+    jQuery(() ⇒ jQuery("#prototypes").select2(lit(placeholder = "Yoyo")))
     jQuery(() ⇒ jQuery("#dataUI").select2(lit(placeholder = "Yoyo")))
   }
 
