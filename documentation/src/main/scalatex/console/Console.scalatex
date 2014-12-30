@@ -1,3 +1,5 @@
+@package console
+
 @import Objects._
 
 @sect{Getting started}
