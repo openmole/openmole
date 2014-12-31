@@ -15,15 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object Documentation extends App {
+package documentation
 
-  val site = new scalatex.site.Site {
-    def content =
-      Map(
-        "index.html" -> Index(),
-        "console.html" -> Console()
-      )
+import scalatex.site._
+
+object Objects {
+  object sect extends Section()
+  object hl extends Highlighter {
+    def suffixMappings = Map().withDefault(identity)
+    def openmole(code: String) = highlight(code, "scala")
   }
-  site.renderTo(args(0) + "/")
-
 }

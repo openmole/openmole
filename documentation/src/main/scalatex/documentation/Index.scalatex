@@ -1,0 +1,7 @@
+
+@import scalatex.site.Section
+@object sect extends Section()
+
+@import Pages._
+
+@a("Console documentation", href := @console.index)

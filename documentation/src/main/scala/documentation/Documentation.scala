@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2014 Romain Reuillon
  *
@@ -15,12 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatex.site._
+package documentation
 
-object Objects {
-  object sect extends Section()
-  object hl extends Highlighter {
-    def suffixMappings = Map().withDefault(identity)
-    def openmole(code: String) = highlight(code, "scala")
+object Documentation extends App {
+
+  val site = new scalatex.site.Site {
+    def content =
+      Map(
+        "index.html" -> Index(),
+        Pages.console.index -> console.Console(),
+        Pages.console.java -> console.Java()
+      )
   }
+  site.renderTo(args(0) + "/")
+
 }
