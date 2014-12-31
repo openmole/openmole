@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import console._
-
 object Documentation extends App {
 
   val site = new scalatex.site.Site {
