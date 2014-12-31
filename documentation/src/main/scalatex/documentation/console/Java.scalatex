@@ -143,7 +143,7 @@
 
       //Defines the GroovyTask as a launcher of the hello executable
       val javaTask =
-        ScalaTask("outputFile = workspace.newFile(); Hello.run(proto1, inputFile, outputFile)") set (
+        ScalaTask("val outputFile = newFile(); Hello.run(proto1, inputFile, outputFile)") set (
           libraries += "/path/to/my/Hello.jar",
           imports += "hello.Hello",
           inputs += proto1,
