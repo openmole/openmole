@@ -25,7 +25,10 @@ object Documentation extends App {
       Map(
         "index.html" -> Index(),
         Pages.console.index -> console.Console(),
-        Pages.console.java -> console.Java()
+        Pages.console.task -> console.Task(),
+        Pages.console.java -> console.task.Java(),
+        Pages.console.systemExec -> console.task.SystemExec(),
+        Pages.console.netlogo -> console.task.NetLogo()
       )
   }
   site.renderTo(args(0) + "/")

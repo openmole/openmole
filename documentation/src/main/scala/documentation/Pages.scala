@@ -18,11 +18,31 @@
 
 package documentation
 
+import scalatags.Text.all.Frag
+
 object Pages {
+
+  case class Section(name: String)(pages: Seq[Page])
+  case class Page(file: String, content: Frag)(sections: Seq[Section]*)
+
+
+  /*Page("index.html", Index()) (
+    Section("console") ( Page("task"))
+  )
+    def content = Index()
+    def sections = Seq(
+      new Section {
+        def name = "console"
+        def pages =Seq(new Page {
+
+        })
+      }
+  }*/
 
   trait Dir {
     def dir: String
-    def /(file: String) = dir + "/" + file
+    def /(file: String) =
+      (if(!dir.isEmpty) dir + "/" else "")  + file
   }
 
   object console extends Dir {
@@ -30,5 +50,7 @@ object Pages {
     def index = "console.html"
     def task = /("task.html")
     def java = /("java.html")
+    def systemExec = /("systemexec.html")
+    def netlogo = /("netlogo.html")
   }
 }

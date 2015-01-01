@@ -1,0 +1,112 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+  <head>
+  <title>neufbox -&nbsp;Accueil</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate" />
+  <meta http-equiv="Expires" content="Mon, 26 Jul 1997 05:00:00 GMT" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="stylesheet" type="text/css" media="screen" href="/css/reset.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="/css/common.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="/css/index.css" />
+  <script type="text/javascript" src="/js/global.js"></script>
+  <script type="text/javascript" src="/js/index.js"></script>
+  </head>
+  <body>
+  <div id="header">
+  <div id="logo">
+  <a href="/" title="Accueil">Accueil</a>
+  </div>
+  <div id="infos">
+  <table>
+  <tr>
+  <th>Version&nbsp;</th>
+  <td>: NB4-MAIN-R3.2.12</td>
+  </tr>
+  <tr>
+  <th>Adresse MAC&nbsp;</th>
+  <td>: 00:17:33:b5:04:24</td>
+  </tr>
+  <tr>
+  <th>Adresse IP&nbsp;</th>
+  <td>: </td>
+  </tr>
+  <tr>
+  <th>Profil d'accès&nbsp;</th>
+  <td>:&nbsp;inconnu&nbsp;
+  </td>
+  </tr>
+  </table>
+  </div>
+  </div>
+<div id="menu">
+  <ul>
+  <li id="id_state_tab" class="tab_off">
+  <a href="/state" title="Etat">Etat</a>
+		</li>
+  <li id="id_network_tab" class="tab_off">
+  <a href="/network" title="Réseau">Réseau</a>
+		</li>
+  <li id="id_wifi_tab" class="tab_off">
+  <a href="/wifi" title="Wifi">Wifi</a>
+		</li>
+  <li id="id_hotspot_tab" class="tab_off">
+  <a href="/hotspot" title="Hotspot">Hotspot</a>
+		</li>
+  <li id="id_service_tab" class="tab_off">
+  <a href="/service" title="Applications">Applications</a>
+		</li>
+  <li id="id_maintenance_tab" class="tab_off">
+  <a href="/maintenance" title="Maintenance">Maintenance</a>
+		</li>
+  </ul>
+</div>
+<div id="submenu">
+  <ul>
+  <li class="tab_on">
+  <a href="/index" title="Général">Général</a>
+  </li>
+  </ul>
+</div>
+  <div id="main">
+<div class="title">
+	<h1>Etat des services</h1>
+</div>
+<div class="content">
+	<table id="global_status">
+		<tr>
+		<th scope="row">Internet</th>
+		<td class="disabled" id="internet_status">
+		Pas de connexion internet
+		</td>
+		</tr>
+  <tr>
+  <th scope="row">Internet IPv6</th>
+  <td class="unused" id="internet_status_v6">
+  Non connecté
+  </td>
+  </tr>
+		<tr>
+		<th scope="row">Téléphonie</th>
+		<td class="disabled" id="voip_status">
+		Téléphonie non fonctionnelle
+		</td>
+		</tr>
+		<tr>
+		<th scope="row">Télévision</th>
+		<td class="disabled" id="tv_status">
+		Télévision non connectée
+		</td>
+		</tr>
+	</table>
+</div>
+		</div>
+		<div id="help">
+		<h1 id="help_title"><span>Aide</span></h1>
+		<p id="help_text">Vous retrouvez ici l'état général de vos services neufbox : accès à Internet, téléphonie, et télévision. Utilisez le menu principal pour vous rendre dans chacune des rubriques de configuration et le sous-menu pour accéder aux sous-parties.</p>
+		</div>
+	</body>
+</html>

@@ -35,7 +35,7 @@
       //Defines the task to perform the hello function
       val javaTask = ScalaTask("Hello.run(proto1)") set (
         libraries += "/path/to/Hello.jar",
-        imports += "hello.Hello",
+        imports += "hello._",
         inputs += proto1
       )
 
@@ -72,7 +72,7 @@
       import org.openmole.plugin.domain.collection._
       import org.openmole.plugin.sampling.combine._
       import org.openmole.plugin.task.scala._
-      improt org.openmole.plugin.hook.file._
+      import org.openmole.plugin.hook.file._
 
       val arg1 = Val[Double]
       val arg2 = Val[Double]
@@ -81,9 +81,9 @@
 
       val explo = ExplorationTask(arg1 in (0 until 10) x arg2 in (0 until 10))
 
-      val javaTask = ScalaTask("val res = Hello.run(arg1, arg2); val out1 = res[0]; val out2 = res[1]") set (
+      val javaTask = ScalaTask("Array(out1, out2) = Hello.run(arg1, arg2)") set (
         libraries += "/path/to/Hello.jar",
-        imports += "hello.Hello",
+        imports += "hello._",
         inputs += (arg1, arg2),
         outputs += (arg1, arg2, out1, out2)
       )
