@@ -25,7 +25,7 @@ package object systemexec extends external.ExternalPackage {
   case class Commands(parts: Seq[String], os: OS = OS())
 
   implicit def stringToCommands(s: String) = Commands(Seq(s))
-  implicit def seqOfStringToCommands(s: Seq[String]) = Commands(s)
+  implicit def seqOfStringToCommands(s: String*) = Commands(s)
   implicit def tupleToCommands(t: (String, OS)) = Commands(Seq(t._1), t._2)
   implicit def tupleSeqToCommands(t: (Seq[String], OS)) = Commands(t._1, t._2)
 
@@ -56,5 +56,9 @@ package object systemexec extends external.ExternalPackage {
   lazy val environmentVariable = new {
     def +=(prototype: Prototype[_], variable: Option[String] = None): Op[SystemExecTaskBuilder] =
       _.addEnvironmentVariable(prototype, variable)
+  }
+
+  lazy val workDirectory = new {
+    def :=(s: Option[String]): Op[SystemExecTaskBuilder] = _.setWorkDirectory(s)
   }
 }

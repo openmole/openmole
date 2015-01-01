@@ -55,16 +55,14 @@ object SystemExecTask extends Logger {
    * @param error optionally a prototype to output the standard error output of the process
    *
    */
-  def apply(
-    commands: Commands = Seq.empty,
-    directory: String = "")(implicit plugins: PluginSet) =
-    new SystemExecTaskBuilder(commands, directory)
+  def apply(commands: Commands)(implicit plugins: PluginSet) =
+    new SystemExecTaskBuilder(commands)
 
 }
 
 abstract class SystemExecTask(
     val command: Seq[Commands],
-    val directory: String,
+    val directory: Option[String],
     val errorOnReturnCode: Boolean,
     val returnValue: Option[Prototype[Int]],
     val output: Option[Prototype[String]],
@@ -72,8 +70,12 @@ abstract class SystemExecTask(
     val variables: Seq[(Prototype[_], String)]) extends ExternalTask {
 
   override protected def process(context: Context) = withWorkDir { tmpDir ⇒
-    val workDir = if (directory.isEmpty) tmpDir else new File(tmpDir, directory)
-    val links = prepareInputFiles(context, tmpDir, directory)
+    val workDir =
+      directory match {
+        case None    ⇒ tmpDir
+        case Some(d) ⇒ new File(tmpDir, d)
+      }
+    val links = prepareInputFiles(context, tmpDir, directory.getOrElse(""))
 
     val outBuilder = new StringBuilder
     val errBuilder = new StringBuilder
