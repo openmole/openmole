@@ -21,7 +21,6 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 
-import scala.collection.JavaConversions._
 import scala.util.Random
 
 object IterableVariableDomain {

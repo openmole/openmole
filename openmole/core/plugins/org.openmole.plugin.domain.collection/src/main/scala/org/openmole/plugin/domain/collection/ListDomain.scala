@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.domain.collection
 
+import org.openmole.core.implementation.tools.FromContext
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 
@@ -24,11 +25,11 @@ import scala.util.Random
 
 object ListDomain {
 
-  def apply[T](values: T*) = new ListDomain[T](values: _*)
+  def apply[T](values: FromContext[T]*) = new ListDomain[T](values: _*)
 
 }
 
-sealed class ListDomain[T](values: T*) extends Domain[T] with Finite[T] {
-  override def computeValues(context: Context)(implicit rng: Random): Iterable[T] = values
+sealed class ListDomain[T](values: FromContext[T]*) extends Domain[T] with Finite[T] {
+  override def computeValues(context: Context)(implicit rng: Random): Iterable[T] = values.map(_.from(context))
 }
 

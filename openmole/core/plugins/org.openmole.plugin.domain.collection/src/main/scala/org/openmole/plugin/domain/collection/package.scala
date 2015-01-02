@@ -18,28 +18,31 @@
 package org.openmole.plugin.domain
 
 import org.openmole.core.model.data._
-import org.openmole.core.model.sampling._
 import org.openmole.core.implementation.data._
+import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
 
 package object collection {
 
-  implicit class scalaIterableDomainDecorator[T](iterable: Iterable[T]) {
+  implicit class ScalaIterableDomainDecorator[T](iterable: Iterable[T]) {
     def toDomain = new IterableDomain[T](iterable)
   }
 
-  implicit class prototypeDomainDecorator[T](variable: Prototype[Array[T]]) {
-    def toDomain = new VariableDomain[T](variable)
-    def toFactor = Factor(variable.fromArray, new VariableDomain[T](variable))
+  implicit class PrototypeDomainDecorator[T](p: Prototype[Array[T]]) {
+    def toDomain = new VariableDomain[T](p)
+    def toFactor = Factor(p.fromArray, new VariableDomain[T](p))
   }
 
-  implicit def booleanPrototypeDecorator(p: Prototype[Boolean]) = new {
-    def toFactor = Factor(p, List(true, false) toDomain)
+  implicit class BooleanPrototypeDecorator(p: Prototype[Boolean]) {
+    def toFactor = Factor(p, List(true, false).toDomain)
   }
 
-  implicit class PrototypeCollectionConverter[T](p: Prototype[T]) {
-    def in(i: Iterable[T]): Factor[T, IterableDomain[T]] = new PrototypeFactorDecorator(p) in (i.toDomain)
-    def in(p2: Prototype[Array[T]]): Factor[T, VariableDomain[T]] = new PrototypeFactorDecorator(p) in (p2.toDomain)
+  //implicit def IterableToDomain[T](i: Iterable[T]) = i.toDomain
+  //implicit def PrototypeArrayToDomain[T](p: Prototype[Array[T]]) = p.toDomain
+
+  implicit def PrototypeCollectionConverter[T](p: Prototype[T]) = new {
+    def in(i: Iterable[T]): Factor[T, IterableDomain[T]] = p in (i.toDomain)
+    def in(p2: Prototype[Array[T]]): Factor[T, VariableDomain[T]] = p in (p2.toDomain)
   }
 
 }
