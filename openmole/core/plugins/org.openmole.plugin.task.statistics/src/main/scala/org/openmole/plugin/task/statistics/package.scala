@@ -20,11 +20,10 @@ package org.openmole.plugin.task
 import org.openmole.core.implementation.builder._
 import org.openmole.core.model.data.Prototype
 
+import org.openmole.misc.macros.Keyword._
+
 package object statistics extends StatisticMethods {
 
-  lazy val statistics = new {
-    def +=(sequence: Prototype[Array[Double]], stat: Prototype[Double], agg: StatisticalAggregation[Double]): Op[StatisticTaskBuilder] =
-      _.addStatistic(sequence, stat, agg)
-  }
+  lazy val statistics = add[{ def addStatistic(sequence: Prototype[Array[Double]], stat: Prototype[Double], agg: StatisticalAggregation[Double]) }]
 
 }

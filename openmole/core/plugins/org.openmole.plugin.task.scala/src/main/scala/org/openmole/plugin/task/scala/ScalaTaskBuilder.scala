@@ -26,7 +26,10 @@ class ScalaTaskBuilder(code: String)(implicit plugins: PluginSet) extends CodeTa
 
   val usedClasses = ListBuffer[Class[_]]()
 
-  def addClassUse(c: Class[_]) = usedClasses += c
+  def addClassUse(c: Class[_]) = {
+    usedClasses += c
+    this
+  }
 
   addImport("org.openmole.misc.tools.service.Random.newRNG")
   addImport("org.openmole.misc.workspace.Workspace.newFile")

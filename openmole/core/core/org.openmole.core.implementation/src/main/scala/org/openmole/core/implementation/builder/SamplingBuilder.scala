@@ -19,6 +19,6 @@ package org.openmole.core.implementation.builder
 
 import org.openmole.core.model.sampling._
 
-trait SamplingBuilder {
+trait SamplingBuilder <: Builder {
   def toSampling: Sampling
 }

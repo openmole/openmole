@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,30 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task
+package org.openmole.plugin.sampling
+
+import java.io.File
 
 import org.openmole.core.model.data.Prototype
-import org.openmole.core.implementation.builder._
 import org.openmole.misc.macros.Keyword._
 
-package object netlogo {
+package object csv {
 
-  lazy val netLogoInputs =
-    add[{
-      def addNetLogoInput(p: Prototype[_], n: String)
-      def addNetLogoInput(p: Prototype[_])
-    }]
-
-  lazy val netLogoOutput =
-    add[{
-      def addNetLogoOutput(n: String, p: Prototype[_])
-      def addNetLogoOutput(p: Prototype[_])
-      def addNetLogoOutput(name: String, column: Int, p: Prototype[_])
-    }]
-
-  trait NetLogoPackage extends external.ExternalPackage {
-    lazy val netLogoInputs = netlogo.netLogoInputs
-    lazy val netLogoOutput = netlogo.netLogoOutput
-  }
+  lazy val columns = add[{ def addColumn(proto: Prototype[_]) }]
+  lazy val fileColumns = add[{
+    def addFileColumn(name: String, dir: File, proto: Prototype[File])
+    def addFileColumn(dir: File, proto: Prototype[File])
+  }]
+  lazy val separator = set[{ def setSeparator(s: Option[Char]) }]
 
 }

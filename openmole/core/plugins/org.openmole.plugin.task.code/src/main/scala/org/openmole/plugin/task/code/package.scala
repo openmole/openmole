@@ -20,16 +20,12 @@ package org.openmole.plugin.task
 import java.io.File
 
 import org.openmole.core.implementation.builder._
+import org.openmole.misc.macros.Keyword._
 
 package object code {
 
-  lazy val imports = new {
-    def +=(s: String): Op[CodeTaskBuilder] = _.addImport(s)
-  }
-
-  lazy val libraries = new {
-    def +=(l: File): Op[CodeTaskBuilder] = _.addLibrary(l)
-  }
+  lazy val imports = add[{ def addImport(s: String) }]
+  lazy val libraries = add[{ def addLibrary(l: File) }]
 
   trait CodePackage extends external.ExternalPackage {
     lazy val imports = code.imports

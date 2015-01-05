@@ -20,6 +20,7 @@ package org.openmole.plugin.task
 import org.openmole.core.model.data.Prototype
 import org.openmole.misc.tools.service.OS
 import org.openmole.core.implementation.builder._
+import org.openmole.misc.macros.Keyword._
 
 package object systemexec extends external.ExternalPackage {
   case class Commands(parts: Seq[String], os: OS = OS())
@@ -29,36 +30,21 @@ package object systemexec extends external.ExternalPackage {
   implicit def tupleToCommands(t: (String, OS)) = Commands(Seq(t._1), t._2)
   implicit def tupleSeqToCommands(t: (Seq[String], OS)) = Commands(t._1, t._2)
 
-  lazy val errorOnReturnCode = new {
-    def :=(b: Boolean): Op[SystemExecTaskBuilder] =
-      _.setErrorOnReturnValue(b)
-  }
+  lazy val errorOnReturnCode = set[{ def setErrorOnReturnValue(b: Boolean) }]
 
-  lazy val returnValue = new {
-    def :=(v: Option[Prototype[Int]]): Op[SystemExecTaskBuilder] =
-      _.setReturnValue(v)
-  }
+  lazy val returnValue = set[{ def setReturnValue(v: Option[Prototype[Int]]) }]
 
-  lazy val stdOut = new {
-    def :=(v: Option[Prototype[String]]): Op[SystemExecTaskBuilder] =
-      _.setStdOut(v)
-  }
+  lazy val stdOut = set[{ def setStdOut(v: Option[Prototype[String]]) }]
 
-  lazy val stdErr = new {
-    def :=(v: Option[Prototype[String]]): Op[SystemExecTaskBuilder] =
-      _.setStdErr(v)
-  }
+  lazy val stdErr = set[{ def setStdErr(v: Option[Prototype[String]]) }]
 
-  lazy val commands = new {
-    def +=(c: Commands): Op[SystemExecTaskBuilder] = _.addCommand(c)
-  }
+  lazy val commands = add[{ def addCommand(c: Commands) }]
 
-  lazy val environmentVariable = new {
-    def +=(prototype: Prototype[_], variable: Option[String] = None): Op[SystemExecTaskBuilder] =
-      _.addEnvironmentVariable(prototype, variable)
-  }
+  lazy val environmentVariable =
+    new {
+      def +=(prototype: Prototype[_], variable: Option[String] = None) =
+        (_: SystemExecTaskBuilder).addEnvironmentVariable(prototype, variable)
+    }
 
-  lazy val workDirectory = new {
-    def :=(s: Option[String]): Op[SystemExecTaskBuilder] = _.setWorkDirectory(s)
-  }
+  lazy val workDirectory = set[{ def setWorkDirectory(s: Option[String]) }]
 }
