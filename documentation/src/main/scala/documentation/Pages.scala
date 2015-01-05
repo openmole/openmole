@@ -22,7 +22,27 @@ import scala.reflect.ClassTag
 import scalatags.Text.all._
 import scala.reflect.runtime.universe._
 
+object Page {
+
+  private def pageLine(p: Page): Frag = {
+    def ref = a(p.name, href := p.file )
+    if (p.children.isEmpty) li(ref)
+    else li(ref, ul(p.children.map(pageLine)))
+  }
+
+
+  def menu(p: Page): Frag =
+    ul ( p.children.map(pageLine) )
+
+
+ /* def menu(p: Page) =
+    ul(p.children.map(subMenu))*/
+
+}
+
+
 trait Page {
+
   def content: Frag
   def parent: Page
   def name: String
@@ -52,7 +72,7 @@ object Pages extends Page { index =>
     new Page { console =>
       def parent = index
       def name = "console"
-      def children = Seq(task)
+      def children = Seq(task, sampling)
 
       def content = documentation.console.Console()
       def task = new Page { task =>
