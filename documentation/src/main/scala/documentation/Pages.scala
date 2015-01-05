@@ -30,27 +30,24 @@ object Page {
     else li(ref, ul(p.children.map(pageLine)))
   }
 
-
   def menu(p: Page): Frag =
     ul ( p.children.map(pageLine) )
 
-
- /* def menu(p: Page) =
-    ul(p.children.map(subMenu))*/
-
 }
 
+abstract class Page(implicit parent: Option[Page] = None) {
 
-trait Page {
+  implicit def thisIsParent: Option[Page] = Some(this)
 
   def content: Frag
-  def parent: Page
   def name: String
   def children: Seq[Page]
 
   def location: String =
-    if(parent == this) name
-    else parent.location + "_" + name
+    parent match {
+      case None => name
+      case Some(p) => p.location + "_" + name
+    }
 
   def file = location + ".html"
 
@@ -62,48 +59,42 @@ trait Page {
 
 }
 
-object Pages extends Page { index =>
-  def parent = this
+object Pages extends Page() { index =>
   def children = Seq(console)
   def name = "index"
 
   def content = Index()
+
   def console =
-    new Page { console =>
-      def parent = index
+    new Page {
       def name = "console"
-      def children = Seq(task, sampling)
+      def children = Seq(task, sampling, transition)
 
       def content = documentation.console.Console()
-      def task = new Page { task =>
-        def parent = console
+      def task = new Page {
         def name = "task"
         def children = Seq(scala, systemExec, netLogo, mole)
         def content = documentation.console.Task()
 
         def scala = new Page {
-          def parent = task
           def name = "scala"
           def children = Seq()
           def content = documentation.console.task.Scala()
         }
 
         def systemExec = new Page {
-          def parent = task
           def name = "systemexec"
           def children = Seq()
           def content = documentation.console.task.SystemExec()
         }
 
         def netLogo = new Page {
-          def parent = task
           def name = "netlogo"
           def children = Seq()
           def content = documentation.console.task.NetLogo()
         }
 
         def mole = new Page {
-          def parent = task
           def name = "mole"
           def children = Seq()
           def content = documentation.console.task.MoleTask()
@@ -111,10 +102,15 @@ object Pages extends Page { index =>
       }
 
       def sampling = new Page {
-        def parent = console
         def name = "sampling"
         def children = Seq()
         def content = documentation.console.Sampling()
+      }
+
+      def transition =  new Page {
+        def name = "transition"
+        def children = Seq()
+        def content = documentation.console.Transition()
       }
     }
 
