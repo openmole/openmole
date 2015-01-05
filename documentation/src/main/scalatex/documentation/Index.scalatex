@@ -4,4 +4,3 @@
 
 @import Pages._
 
-@a("Console documentation", href := console.index )

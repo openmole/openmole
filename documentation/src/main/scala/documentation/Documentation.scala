@@ -18,20 +18,16 @@
 
 package documentation
 
+import Pages._
+
+import scalatags.Text.all._
+
 object Documentation extends App {
 
   val site = new scalatex.site.Site {
-    def content =
-      Map(
-        "index.html" -> Index(),
-        Pages.console.index -> console.Console(),
-        Pages.console.task -> console.Task(),
-        Pages.console.java -> console.task.Java(),
-        Pages.console.systemExec -> console.task.SystemExec(),
-        Pages.console.netlogo -> console.task.NetLogo(),
-        Pages.console.sampling -> console.Sampling()
-      )
+    def content = Pages.allPages.map{ p => p.file -> p.content }.toMap
   }
   site.renderTo(args(0) + "/")
+
 
 }

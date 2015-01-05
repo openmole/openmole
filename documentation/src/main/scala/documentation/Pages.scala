@@ -18,40 +18,84 @@
 
 package documentation
 
-import scalatags.Text.all.Frag
+import scala.reflect.ClassTag
+import scalatags.Text.all._
+import scala.reflect.runtime.universe._
 
-object Pages {
+trait Page {
+  def content: Frag
+  def parent: Page
+  def name: String
+  def children: Seq[Page]
 
-  case class Section(name: String)(pages: Seq[Page])
-  case class Page(file: String, content: Frag)(sections: Seq[Section]*)
+  def location: String =
+    if(parent == this) name
+    else parent.location + "_" + name
 
+  def file = location + ".html"
 
-  /*Page("index.html", Index()) (
-    Section("console") ( Page("task"))
-  )
-    def content = Index()
-    def sections = Seq(
-      new Section {
-        def name = "console"
-        def pages =Seq(new Page {
+  def allPages: Seq[Page] = {
+    def pages(p: Page): List[Page] =
+      p.children.toList ::: p.children.flatMap(_.allPages).toList
+    this :: pages(this)
+  }
 
-        })
+}
+
+object Pages extends Page { index =>
+  def parent = this
+  def children = Seq(console)
+  def name = "index"
+
+  def content = Index()
+  def console =
+    new Page { console =>
+      def parent = index
+      def name = "console"
+      def children = Seq(task)
+
+      def content = documentation.console.Console()
+      def task = new Page { task =>
+        def parent = console
+        def name = "task"
+        def children = Seq(scala, systemExec, netLogo, mole)
+        def content = documentation.console.Task()
+
+        def scala = new Page {
+          def parent = task
+          def name = "scala"
+          def children = Seq()
+          def content = documentation.console.task.Scala()
+        }
+
+        def systemExec = new Page {
+          def parent = task
+          def name = "systemexec"
+          def children = Seq()
+          def content = documentation.console.task.SystemExec()
+        }
+
+        def netLogo = new Page {
+          def parent = task
+          def name = "netlogo"
+          def children = Seq()
+          def content = documentation.console.task.NetLogo()
+        }
+
+        def mole = new Page {
+          def parent = task
+          def name = "mole"
+          def children = Seq()
+          def content = documentation.console.task.MoleTask()
+        }
       }
-  }*/
 
-  trait Dir {
-    def dir: String
-    def /(file: String) =
-      (if(!dir.isEmpty) dir + "/" else "")  + file
-  }
+      def sampling = new Page {
+        def parent = console
+        def name = "sampling"
+        def children = Seq()
+        def content = documentation.console.Sampling()
+      }
+    }
 
-  object console extends Dir {
-    def dir = ""
-    def index = "console.html"
-    def task = /("task.html")
-    def java = /("java.html")
-    def systemExec = /("systemexec.html")
-    def netlogo = /("netlogo.html")
-    def sampling = /("sampling.html")
-  }
 }

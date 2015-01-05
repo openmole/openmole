@@ -25,11 +25,10 @@ import org.openmole.misc.macros.Keyword._
 
 package external {
   trait ExternalPackage {
-    implicit def inputsFileDecorator(i: builder.inputs.type) =
-      new {
-        def +=(p: Prototype[File], name: String, link: Boolean = false) =
-          (_: ExternalTaskBuilder).addInput(p, name, link)
-      }
+    implicit def inputsFileDecorator(i: builder.inputs.type) = {
+      def +=(p: Prototype[File], name: String, link: Boolean = false) =
+        (_: ExternalTaskBuilder).addInput(p, name, link)
+    }
 
     implicit def outputsFileDecorator(i: builder.outputs.type) =
       add[{ def addOutput(n: String, p: Prototype[File]) }]
