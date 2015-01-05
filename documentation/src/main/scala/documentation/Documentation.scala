@@ -28,7 +28,8 @@ object Documentation extends App {
         Pages.console.task -> console.Task(),
         Pages.console.java -> console.task.Java(),
         Pages.console.systemExec -> console.task.SystemExec(),
-        Pages.console.netlogo -> console.task.NetLogo()
+        Pages.console.netlogo -> console.task.NetLogo(),
+        Pages.console.sampling -> console.Sampling()
       )
   }
   site.renderTo(args(0) + "/")

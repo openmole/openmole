@@ -52,5 +52,6 @@ object Pages {
     def java = /("java.html")
     def systemExec = /("systemexec.html")
     def netlogo = /("netlogo.html")
+    def sampling = /("sampling.html")
   }
 }
