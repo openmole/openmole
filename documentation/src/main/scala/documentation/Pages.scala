@@ -70,7 +70,7 @@ object Pages extends Page() { index =>
   def console =
     new Page {
       def name = "console"
-      def children = Seq(task, sampling, transition)
+      def children = Seq(task, sampling, transition, hook)
 
       def content = documentation.console.Console()
       def task = new Page {
@@ -109,10 +109,16 @@ object Pages extends Page() { index =>
         def content = documentation.console.Sampling()
       }
 
-      def transition =  new Page {
+      def transition = new Page {
         def name = "transition"
         def children = Seq()
         def content = documentation.console.Transition()
+      }
+
+      def hook = new Page {
+        def name = "hook"
+        def children = Seq()
+        def content = documentation.console.Hook()
       }
     }
 
