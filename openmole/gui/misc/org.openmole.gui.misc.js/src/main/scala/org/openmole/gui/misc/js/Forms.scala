@@ -17,9 +17,10 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.mapping.Select2Options
+import fr.iscpif.scaladget.mapping.{ Select2QueryOptions, Select2Options }
 import fr.iscpif.scaladget.mapping.Select2Utils._
 import org.scalajs.dom
+import org.scalajs.dom._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js
 import scalatags.JsDom.TypedTag
@@ -32,6 +33,8 @@ import scala.scalajs.js
 import js.Dynamic.{ literal ⇒ lit }
 import rx._
 import org.openmole.gui.misc.js.JsRxTags._
+import org.scalajs.dom
+import scala.scalajs.js
 
 @JSExport("Forms")
 object Forms {
@@ -40,15 +43,22 @@ object Forms {
 
   implicit def formTagToNode(tt: HtmlTag): org.scalajs.dom.Node = tt.render
 
+  implicit class BootstrapTypedTag[+Output <: dom.Element](t: TypedTag[Output]) {
+    def +++(m: Seq[Modifier]) = t.copy(modifiers = t.modifiers :+ m.toSeq)
+  }
+
   def emptyCK = ClassKeyAggregator.empty
 
   def key(s: String) = new ClassKeyAggregator(s)
 
   //Div
-  def d[T <: HtmlTag](t: T*): HtmlTag = scalatags.JsDom.tags.div(t.toSeq: _*)
+  def d[T <: TypedTag[HTMLDivElement]](t: T*): TypedTag[HTMLDivElement] = scalatags.JsDom.tags.div(t.toSeq: _*)
+
+  // def dd(m: Modifier*) = div.copy(modifiers = div.modifiers :+ m.toSeq)
+  def dd(m: Modifier*) = div(m.toSeq)
 
   // Nav
-  def nav(keys: ClassKeyAggregator, navItems: HtmlTag*): HtmlTag = ul(`class` := keys.key, role := "tablist")(navItems.toSeq: _*)
+  def nav(keys: ClassKeyAggregator, navItems: TypedTag[HTMLElement]*): TypedTag[HTMLElement] = ul(`class` := keys.key, role := "tablist")(navItems.toSeq: _*)
 
   private val navPrefix = key("nav")
   val nav_default = navPrefix + "navbar-default"
@@ -57,19 +67,13 @@ object Forms {
   val nav_pills = navPrefix + "nav-pills"
 
   // Nav item
-  def navItem(content: String): HtmlTag = navItem(content, emptyCK)
-
-  def navItem(content: String, modifiers: scalatags.JsDom.Modifier*): HtmlTag = navItem(content, emptyCK, modifiers.toSeq: _*)
-
-  def navItem(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): HtmlTag =
-    li(role := "presentation")(a(href := "#")(content))(modifiers.toSeq: _*)
+  def navItem(content: String, keys: ClassKeyAggregator = emptyCK): TypedTag[HTMLElement] =
+    li(role := "presentation")(a(href := "#")(content))
 
   val dropdown = "dropdown"
 
   // Label
-  def label(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): HtmlTag = span(`class` := ("label" + keys.key))(content)(modifiers.toSeq: _*)
-
-  def label(content: String, modifiers: scalatags.JsDom.Modifier*): HtmlTag = label(content, emptyCK, modifiers.toSeq: _*)
+  def label(content: String, keys: ClassKeyAggregator = emptyCK): TypedTag[HTMLSpanElement] = span(`class` := ("label " + keys.key))(content)
 
   val label_default = key("label-default")
   val label_primary = key("label-primary")
@@ -78,11 +82,23 @@ object Forms {
   val label_warning = key("label-warning")
   val label_danger = key("label-danger")
 
-  //Button
-  def button(content: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): HtmlTag =
-    scalatags.JsDom.tags.button(`class` := ("btn " + keys.key), `type` := "button")(content).apply(modifiers.toSeq: _*)
+  def glyph(key: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
+    span(`class` := "glyphicon " + key.key, ariaWith("hidden") := "true")
 
-  def button(content: String, modifiers: scalatags.JsDom.Modifier*): HtmlTag = button(content, btn_default, modifiers.toSeq: _*)
+  val glyph_edit = "glyphicon-pencil"
+  val glyph_trash = "glyphicon-trash"
+  val glyph_plus = "glyphicon-plus"
+
+  //Button
+  def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
+    scalatags.JsDom.tags.button(`class` := ("btn " + keys.key), `type` := "button")(content)
+
+  def button(content: TypedTag[HTMLElement], keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
+    scalatags.JsDom.tags.button(`class` := ("btn " + keys.key), `type` := "button")(content)
+
+  def button(content: String): TypedTag[HTMLElement] = button(content, btn_default)
+
+  def button(content: TypedTag[HTMLElement]): TypedTag[HTMLButtonElement] = button(content, btn_default)
 
   private val btnPrefix = key("btn")
   val btn_default = key("btn-default")
@@ -97,18 +113,18 @@ object Forms {
   val btn_small = key("btn-sm")
 
   // Badges
-  def badge(content: String, badgeValue: String): HtmlTag = badge(content, badgeValue, emptyCK)
-
-  def badge(content: String, badgeValue: String, keys: ClassKeyAggregator, modifiers: scalatags.JsDom.Modifier*): HtmlTag =
-    button(content, keys, span(`class` := "badge", badgeValue) +: modifiers.toSeq: _*)
+  def badge(content: String, badgeValue: String, keys: ClassKeyAggregator = emptyCK) =
+    button(content, keys)(span(`class` := "badge", badgeValue))
 
   //Button group
   def buttonGroup = div(`class` := "btn-group")
 
-  def modalDialog(ID: String, header: HtmlTag, body: Var[HtmlTag], footer: HtmlTag) =
+  def buttonToolBar = div(`class` := "btn-toolbar", role := "toolbar")
+
+  def modalDialog(ID: String, header: TypedTag[HTMLElement], body: Var[TypedTag[HTMLElement]], footer: TypedTag[HTMLElement]) =
     new ModalDialog(ID, header, body, footer)
 
-  def jumbotron(modifiers: scalatags.JsDom.Modifier*): HtmlTag =
+  def jumbotron(modifiers: scalatags.JsDom.Modifier*) =
     div(`class` := "container theme-showcase", role := "main")(
       div(`class` := "jumbotron")(
         p(
@@ -117,16 +133,35 @@ object Forms {
       )
     )
 
+  def autoselect[T <: DisplayableRx with Identifiable](autoID: String,
+                                                       contents: Seq[T],
+                                                       default: Option[T] = None,
+                                                       placeHolder: Option[String] = None): AutoSelect[T] = {
+    new AutoSelect[T](autoID, Var(contents), default, placeHolder)
+  }
+
+  //rows
+  /* def row(columns: TypedTag[_]*) = div(`class` := "row")(columns: _*)
+
+  def col(tag: TypedTag[_], width: Int) = div(`class` := "col-md-" + width, tag)*/
+
+  //Forms
+  def formGroup = div(`class` := "form-group ")
+  def formLine = div(`class` := "form-inline")
+
+  val large_form_group = key("form-group-lg")
+  val small_form_group = key("form-group-sm")
+  /*
   def autoinput[T <: DisplayableRx with Identifiable](autoID: String, contents: Seq[T], default: Option[T] = None, placeHolder: Option[String] = None) = {
     new AutoInput[T](autoID, contents, default, placeHolder)
-  }
+  }*/
 
   @JSExport
   protected def select2(): Unit = {
     jQuery(() ⇒ jQuery("#factoryUI").select2(lit(placeholder = "Yoyoo")))
     // jQuery(() ⇒ jQuery("#taskPanelID").select2(lit(placeholder = "Yoyo")))
     jQuery(() ⇒ jQuery("#prototypes").select2(lit(placeholder = "Yoyo")))
-    jQuery(() ⇒ jQuery("#dataUI").select2(lit(placeholder = "Yoyo")))
+    jQuery(() ⇒ jQuery("#dataUI").select2(lit(placeholder = "Display a settings", width = "200px", formatNoMatches = "")))
   }
 
 }

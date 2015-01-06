@@ -45,5 +45,5 @@ class GroovyTaskPanelUI(dataUI: GroovyTaskDataUI) extends PanelUI {
     )
 
 
-  def save(name: String) = new GroovyTaskDataUI
+  def save(name: String) = new GroovyTaskDataUI(Var(name))
 }

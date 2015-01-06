@@ -40,7 +40,7 @@ object UIFactories {
 object ClientService {
 
   private val uiFactories = UIFactories.factoryMap.toMap
-  private val uiData: Var[Seq[DataUI]] = Var(Seq())
+  private val uiData: Var[Seq[Var[DataUI]]] = Var(Seq())
 
   def taskFactories = uiFactories.values.flatMap { f ⇒
     f.dataUI match {
@@ -56,21 +56,43 @@ object ClientService {
     }
   }.toSeq
 
-  def taskDataUIs: Seq[TaskDataUI] = uiData().flatMap {
+  def taskDataUIs: Seq[TaskDataUI] = uiData().map {
+    _()
+  }.flatMap {
     _ match {
       case t: TaskDataUI ⇒ Some(t)
       case _             ⇒ None
     }
   }.toSeq
 
-  def prototypeDataUIs = uiData().flatMap {
+  def prototypeDataUIs = uiData().map {
+    _()
+  }.flatMap {
     _ match {
       case t: PrototypeDataUI ⇒ Some(t)
       case _                  ⇒ None
     }
   }.toSeq
 
-  def +=(d: DataUI) = uiData() = d +: uiData()
+  def +=(dataUI: DataUI) = find(dataUI) match {
+    case Some(d: Var[_]) ⇒
+      d() = dataUI
+      println("SOME ")
+
+    case _ ⇒
+      println("NONE, new one ")
+      uiData() = Var(dataUI) +: uiData()
+  }
+
+  def -=(dataUI: Var[DataUI]) = {
+    println("DIFF " + { uiData() diff Seq(dataUI) })
+    uiData() = uiData() diff Seq(dataUI)
+  }
+
+  def find(dataUI: DataUI) = uiData().find(d ⇒ {
+    println("FIND " + d().getClass + " VS " + dataUI.getClass + " and " + d().name() + " VS " + dataUI.name())
+    d().getClass == dataUI.getClass && d().name() == dataUI.name()
+  })
 
   def taskData = taskDataUIs.map {
     _.data
@@ -133,6 +155,8 @@ object ClientService {
       (pUI.data, opt)
   }
 
-  implicit def dataUIToFactoryUI(d: DataUI): Option[FactoryUI] = uiFactories.values.find { _.dataUI == d }
+  implicit def dataUIToFactoryUI(d: DataUI): Option[FactoryUI] = uiFactories.values.find {
+    _.dataUI == d
+  }
 
 }
