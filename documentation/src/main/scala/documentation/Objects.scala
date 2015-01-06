@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2014 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,10 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.builder
+package documentation
 
-import org.openmole.core.model.sampling._
+import scalatex.site._
 
-trait SamplingBuilder <: Builder {
-  def toSampling: Sampling
+object Objects {
+  object sect extends Section()
+  object hl extends Highlighter {
+    def suffixMappings = Map().withDefault(identity)
+    def openmole(code: String) = highlight(code, "scala")
+  }
 }

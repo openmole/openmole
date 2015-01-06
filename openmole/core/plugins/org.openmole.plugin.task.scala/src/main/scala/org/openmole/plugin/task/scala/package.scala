@@ -18,10 +18,10 @@
 package org.openmole.plugin.task
 
 import org.openmole.core.implementation.builder._
+import org.openmole.misc.macros.Keyword._
 
 package object scala extends code.CodePackage {
 
-  lazy val usedClasses = new {
-    def +=(c: Class[_]): Op[ScalaTaskBuilder] = _.addClassUse(c)
-  }
+  lazy val usedClasses = add[{ def addClassUse(c: Class[_]) }]
+
 }

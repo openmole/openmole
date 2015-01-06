@@ -36,37 +36,10 @@ import scala.util.Random
 
 object CSVSampling {
 
-  def apply(file: File, separator: Char = ',') = new SamplingBuilder { builder ⇒
-    private var _columns = new ListBuffer[(String, Prototype[_])]
-    private var _fileColumns = new ListBuffer[(String, File, Prototype[File])]
-    private val _separator = separator
-
-    def columns = _columns.toList
-    def fileColumns = _fileColumns.toList
-
-    def addColumn(proto: Prototype[_]): this.type = this.addColumn(proto.name, proto)
-    def addColumn(name: String, proto: Prototype[_]): builder.type = {
-      _columns += (name -> proto)
-      this
-    }
-
-    def addFileColumn(name: String, dir: File, proto: Prototype[File]): builder.type = {
-      _fileColumns += ((name, dir, proto))
-      this
-    }
-
-    def addFileColumn(dir: File, proto: Prototype[File]): this.type = this.addFileColumn(proto.name, dir, proto)
-
-    def toSampling = new CSVSampling(file) {
-      val columns = builder.columns
-      val fileColumns = builder.fileColumns
-      val separator = _separator
-    }
-  }
-
+  def apply(file: File) = new CSVSamplingBuilder(file)
 }
 
-abstract sealed class CSVSampling(val file: File) extends Sampling {
+abstract class CSVSampling(val file: File) extends Sampling {
 
   override def prototypes =
     columns.map { case (_, p) ⇒ p } :::

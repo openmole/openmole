@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2014 Romain Reuillon
  *
@@ -15,30 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task
+package documentation
 
-import org.openmole.core.model.data.Prototype
-import org.openmole.core.implementation.builder._
-import org.openmole.misc.macros.Keyword._
+import Pages._
 
-package object netlogo {
+import scalatags.Text.all._
 
-  lazy val netLogoInputs =
-    add[{
-      def addNetLogoInput(p: Prototype[_], n: String)
-      def addNetLogoInput(p: Prototype[_])
-    }]
+object Documentation extends App {
 
-  lazy val netLogoOutput =
-    add[{
-      def addNetLogoOutput(n: String, p: Prototype[_])
-      def addNetLogoOutput(p: Prototype[_])
-      def addNetLogoOutput(name: String, column: Int, p: Prototype[_])
-    }]
-
-  trait NetLogoPackage extends external.ExternalPackage {
-    lazy val netLogoInputs = netlogo.netLogoInputs
-    lazy val netLogoOutput = netlogo.netLogoOutput
+  val site = new scalatex.site.Site {
+    def content = Pages.allPages.map{ p => p.file -> p.content }.toMap
   }
+  site.renderTo(args(0) + "/")
+
 
 }

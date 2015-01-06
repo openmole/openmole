@@ -38,8 +38,6 @@ package object combine {
     def zipWithIndex(index: Prototype[Int]) = ZipWithIndexSampling(s, index)
     def take(n: FromContext[Int]) = TakeSampling(s, n)
     def shuffle = ShuffleSampling(s)
-    def replicate[T](seeder: Factor[T, Domain[T] with Discrete[T]], replications: FromContext[Int]) = ReplicationSampling(s, seeder, replications)
-    def replicate[T2](seeder: Factor[T2, Domain[T2] with Discrete[T2] with Finite[T2]]) = ReplicationSampling(s, seeder)
     def sample(n: FromContext[Int]) = SampleSampling(s, n)
     def repeat(n: FromContext[Int]) = RepeatSampling(s, n)
     def bootstrap(samples: FromContext[Int], number: FromContext[Int]) = s sample samples repeat number

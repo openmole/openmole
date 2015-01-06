@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation
 
+import org.openmole.misc.macros.Keyword._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import task._
@@ -31,27 +32,18 @@ package object builder {
   implicit def taskBuilderToCapsuleDecorator(task: TaskBuilder) = new TaskToCapsuleDecorator(task)
   implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = t.toTask.toCapsule.toPuzzle
 
-  type Op[-T] = T ⇒ Unit
-
-  lazy val inputs = new {
-    def +=(d: Data[_]*): Op[InputOutputBuilder] = _.addInput(d: _*)
-  }
-
-  lazy val outputs = new {
-    def +=(d: Data[_]*): Op[InputOutputBuilder] = _.addOutput(d: _*)
-  }
+  lazy val inputs = add[{ def addInput(d: Data[_]*) }]
+  lazy val outputs = add[{ def addOutput(d: Data[_]*) }]
 
   class AssignDefault[T](p: Prototype[T]) {
-    def :=(v: T, `override`: Boolean = false): Op[InputOutputBuilder] =
-      _.setDefault(p, v, `override`)
+    def :=(v: T, `override`: Boolean = false) =
+      (_: InputOutputBuilder).setDefault(p, v, `override`)
   }
 
   lazy val default = new {
     def apply[T](p: Prototype[T]) = new AssignDefault[T](p)
   }
 
-  lazy val name = new {
-    def :=(name: String): Op[TaskBuilder] = _.setName(name)
-  }
+  lazy val name = set[{ def setName(name: String) }]
 
 }

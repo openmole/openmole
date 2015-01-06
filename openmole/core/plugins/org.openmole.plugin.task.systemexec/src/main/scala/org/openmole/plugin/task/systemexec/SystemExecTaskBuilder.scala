@@ -24,9 +24,7 @@ import org.openmole.core.implementation.data._
 
 import scala.collection.mutable.ListBuffer
 
-class SystemExecTaskBuilder(
-    commands: Commands,
-    directory: String)(implicit plugins: PluginSet) extends ExternalTaskBuilder { builder ⇒
+class SystemExecTaskBuilder(commands: Commands)(implicit plugins: PluginSet) extends ExternalTaskBuilder { builder ⇒
 
   private val variables = new ListBuffer[(Prototype[_], String)]
   private val _commands = new ListBuffer[Commands]
@@ -34,6 +32,7 @@ class SystemExecTaskBuilder(
   private var returnValue: Option[Prototype[Int]] = None
   private var stdOut: Option[Prototype[String]] = None
   private var stdErr: Option[Prototype[String]] = None
+  private var workDirectory: Option[String] = None
 
   addCommand(commands)
 
@@ -51,15 +50,38 @@ class SystemExecTaskBuilder(
     this
   }
 
-  def addCommand(cmd: Commands) = _commands += cmd
+  def addCommand(cmd: Commands) = {
+    _commands += cmd
+    this
+  }
 
-  def setErrorOnReturnValue(b: Boolean) = errorOnReturnValue = b
-  def setReturnValue(p: Option[Prototype[Int]]) = returnValue = p
-  def setStdOut(p: Option[Prototype[String]]) = stdOut = p
-  def setStdErr(p: Option[Prototype[String]]) = stdErr = p
+  def setErrorOnReturnValue(b: Boolean) = {
+    errorOnReturnValue = b
+    this
+  }
+
+  def setReturnValue(p: Option[Prototype[Int]]) = {
+    returnValue = p
+    this
+  }
+
+  def setStdOut(p: Option[Prototype[String]]) = {
+    stdOut = p
+    this
+  }
+
+  def setStdErr(p: Option[Prototype[String]]) = {
+    stdErr = p
+    this
+  }
+
+  def setWorkDirectory(s: Option[String]) = {
+    workDirectory = s
+    this
+  }
 
   def toTask =
-    new SystemExecTask(_commands.toList, directory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
+    new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
       override val outputs = builder.outputs ++ DataSet(List(stdOut, stdErr, returnValue).flatten)
     }
 

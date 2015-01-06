@@ -1,0 +1,6 @@
+
+@import scalatex.site.Section
+@object sect extends Section()
+
+
+@Page.menu(Pages)

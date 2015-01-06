@@ -1,0 +1,172 @@
+
+@import documentation.Objects._
+
+@sect{Sampling}
+  Sampling are tools for exploring a space of parameter. The term @i{parameter} is understood in a very broad acceptation in OpenMOLE. It may concern numbers, files, random streams...
+
+  @sect{Complete sampling}
+    The most common way of exploring a model is achieved by using a complete sampling:
+    @br @hl.openmole("""
+    import org.openmole.plugin.domain.collection._
+    import org.openmole.plugin.sampling.combine._
+    import org.openmole.plugin.domain.distribution._
+    import org.openmole.plugin.domain.modifier._
+
+    val i = Val[Int]
+    val j = Val[Double]
+    val k = Val[String]
+    val l = Val[Long]
+
+    val explo =
+      ExplorationTask (
+        (i in (0 to 10 by 2)) x
+        (j in (0.0 to 5.0 by 0.5)) x
+        (k in List("hello", "world")) x
+        (l in (UniformDistribution[Long]() take 10))
+      )""")
+    Using the @i{x} combinator means that first all the domains are unrolled, then they are combined with each other.
+
+    @p In some cases it is convenient to have domains bounds depending on each others. This is the purpose of the "+" combinator. Notice how a bound of the second factor depends on the value of the first one.
+    @br @hl.openmole("""
+    import org.openmole.plugin.domain.range._
+
+    val i = Val[Int]
+    val j = Val[Double]
+
+     val explo =
+       ExplorationTask (
+         (i in (0 to 10 by 2)) +
+         (j in Range[Double]("0.0", "2 * i", "0.5"))
+       )""")
+  @sect{Combine samplings}
+    To define samplings you can combine them with each other. For instance, the complete sampling is a way to achieve that. Other composition functions are implemented in OpenMOLE:
+    @br @hl.openmole("""
+    import org.openmole.plugin.sampling.combine._
+
+    val s1 = ... // Code to build sampling 1
+    val s2 = ... // Code to build sampling 2
+
+    val s = s1 zip s2 // Create a sampling by zipping line by line s1 and s2
+
+    // Create a sampling containing an id for each experiment in a variable called id
+    val id = Val[Int]
+    val s = s2 zipWithIndex id
+
+    val s = s1 take 10 // Create a sampling containing the 10 first values of s1
+
+    val s = s1.shuffle // Create a sampling containing the values of s1 in a random order
+
+    // Replicate 100 times the sampling s1 and provide seed for each experiment
+    import org.openmole.plugin.domain.distribution._
+    import org.openmole.plugin.domain.modifier._
+
+    val seed = Val[Int]
+    val s = s1 x (seed in (UniformDistribution[Int]() take 100))
+
+    // Create a new sampling containing only the lines of s1 for which the given predicate is true
+    val s = s1 filter ("p1 + p2 < 100")
+
+    val s = s1 sample 5 // Sample 5 values in s1""")
+
+  @sect{Exploring files}
+    In OpenMOLE the concept of domain is large and comprise a variable varying along with a set of files. For instance to explore a program over a set of files in a subdirectory you may use:
+  @br @hl.openmole("""
+  import org.openmole.plugin.domain.file._
+  val f = Val[File]
+  val explo = ExplorationTask (f in ListFilesDomain("/path/to/a/dir"))""")
+  @p To explore files located in several directories:
+  @br @hl.openmole("""
+  import org.openmole.plugin.domain.collection._
+  import org.openmole.plugin.sampling.combine._
+
+  val i = Val[Int]
+  val explo =
+    ExplorationTask (
+      (i in (0 to 10)) +
+      (f in ListFilesDomain("/path/to/a/dir", "subdir${i}"))
+    )""")
+  @p If you wish to select one single file for each value of @i{i} you may use the select file domain:
+  @br @hl.openmole("""
+  val explo =
+    ExplorationTask (
+      (i in (0 to 10)) +
+      (f in SelectFileDomain("/path/to/a/dir", "file${i}.txt"))""")
+  @p In OpenMOLE files names are not retained through the dataflow, only the content is. If you want to keep the name of the file for future use, you need to store the name in a variable of type String:
+  @br @hl.openmole("""
+  val name = Val[String]
+
+  val explo =
+    ExplorationTask (
+      (i in (0 to 10)) +
+      ((f in SelectFileDomain("/path/to/a/dir", "file${i}.txt"))
+        zipWithName name)
+    )""")
+
+  @sect{Latin hypercube sampling}
+    For wilder space of parameter @a("LHS", href := "http://en.wikipedia.org/wiki/Latin_hypercube_sampling") is available. To use it:
+    @br @hl.openmole("""
+    import org.openmole.plugin.domain.bounded._
+    import org.openmole.plugin.sampling.lhs._
+
+    val i = Val[Double]
+    val j = Val[Double]
+
+    val explo =
+      ExplorationTask (
+        LHS(
+          100, // Number of points of the LHS
+          i in Range(0.0, 10.0),
+          j in Range(0.0, 5.0)
+        )
+      )""")
+  @sect{CSV Sampling}
+    You can inject your own sampling in OpenMOLE through a CSV file. Considering a csv file like:
+    @hl.highlight("""
+    coldD,colFileName,i
+    0.7,fic1,8
+    0.9,fic2,19
+    0.8,fic2,19""", "csv")
+    @p A CSVSampling using this file can may like:
+    @br @hl.openmole("""
+    import org.openmole.plugin.sampling.csv._
+
+    val i = Val[Int]
+    val d = Val[Double]
+    val f = Val[File]
+
+    //Only comma separated files with header are supported for now
+    val s = CSVSampling("/path/to/a/file.csv") set (
+      columns += i,
+      columns += ("colD", d),
+      fileColumns += ("colFileName", "/path/of/the/base/dir/", f)
+    )""")
+    @p In this example the column name i in the csv file is mapped to the variable i of OpenMOLE. The column name colD is mapped to the variable d. The column named colFileName is appended to the base dir "/path/of/the/base/dir/" and used as a file in OpenMOLE.
+
+  @sect{Higher level sampling}
+    Some samplings combination generate higher level sampling such as:
+    @br @hl.openmole("""
+    val s = s1 repeat 10 // Re-sample 10 times s1, the output is an array of array of values
+    // Create 10 samples of 5 values from s1, it is equivalent to "s1 sample 5 repeat 10", the output type is an array of array of
+    val s = s1 bootstrap (5, 10) values
+
+    // An example of mole using higher an higher level sampling
+    // This code compute 10 couples (for f1 and f2) of medians among 5 samples picked at random in f1 x f2
+    import org.openmole.plugin.sampling.combine._
+    import org.openmole.plugin.domain.collection._
+    import org.openmole.plugin.hook.display._
+    import org.openmole.plugin.task.statistics._
+
+    val p1 = Val[Double]
+    val p2 = Val[Double]
+
+    val f1 = p1 in (0.0 to 1.0 by 0.1)
+    val f2 = p2 in (0.0 to 1.0 by 0.1)
+
+    val e1 = ExplorationTask((f1 x f2) bootstrap (5, 10))
+
+    val stat = StatisticsTask("stat") set (
+      statistics += (p1.toArray, p1, median),
+      statistics += (p2.toArray, p2, median)
+    )
+
+    val mole = e1 -< (stat hook ToStringHook())""")

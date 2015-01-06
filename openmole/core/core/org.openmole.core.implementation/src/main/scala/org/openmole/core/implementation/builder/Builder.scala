@@ -19,7 +19,7 @@ package org.openmole.core.implementation.builder
 
 trait Builder {
 
-  def set(ops: Op[this.type]*): this.type = {
+  def set(ops: (this.type ⇒ this.type)*): this.type = {
     ops.foreach(_(this))
     this
   }

@@ -21,30 +21,24 @@ import java.io.File
 import org.openmole.core.model.data.Prototype
 import org.openmole.core.implementation.builder
 import org.openmole.misc.tools.service.OS
+import org.openmole.misc.macros.Keyword._
 
 package external {
   trait ExternalPackage {
-    type InputsDecorator = external.InputsDecorator
-    type OutputsDecorator = external.OutputsDecorator
-    lazy val resources = external.resources
+    implicit def inputsFileDecorator(i: builder.inputs.type) = {
+      def +=(p: Prototype[File], name: String, link: Boolean = false) =
+        (_: ExternalTaskBuilder).addInput(p, name, link)
+    }
+
+    implicit def outputsFileDecorator(i: builder.outputs.type) =
+      add[{ def addOutput(n: String, p: Prototype[File]) }]
+
+    lazy val resources =
+      new {
+        def +=(file: File, name: Option[String] = None, link: Boolean = false, os: OS = OS()) =
+          (_: ExternalTaskBuilder).addResource(file, name, link, os)
+      }
   }
 }
 
-package object external {
-
-  implicit class InputsDecorator(i: builder.inputs.type) {
-    def +=(p: Prototype[File], name: String, link: Boolean = false): builder.Op[ExternalTaskBuilder] =
-      (_: ExternalTaskBuilder).addInput(p, name, link)
-  }
-
-  implicit class OutputsDecorator(i: builder.outputs.type) {
-    def +=(name: String, p: Prototype[File]): builder.Op[ExternalTaskBuilder] =
-      (_: ExternalTaskBuilder).addOutput(name, p)
-  }
-
-  lazy val resources = new {
-    def +=(file: File, name: Option[String] = None, link: Boolean = false, os: OS = OS()): builder.Op[ExternalTaskBuilder] =
-      (_: ExternalTaskBuilder).addResource(file, name, link, os)
-  }
-
-}
+package object external extends ExternalPackage
