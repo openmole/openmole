@@ -17,32 +17,41 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.scalajs.dom.HTMLElement
+import org.scalajs.jquery.jQuery
+
+import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
+import org.scalajs.dom
 import org.openmole.gui.misc.js.JsRxTags._
+import fr.iscpif.scaladget.mapping.Select2Utils._
 import rx._
 
-class ModalDialog(ID: String, val header: HtmlTag, val body: Var[HtmlTag], val footer: HtmlTag) {
+class ModalDialog(ID: String, val header: TypedTag[HTMLElement], val body: Var[TypedTag[HTMLElement]], val footer: TypedTag[HTMLElement]) {
 
   val content =
     div(`class` := "modal-content",
-      div(
-        div(`class` := "modal-header")(
-          button("", `class` := "close", dataWith("dismiss") := "modal")(
-            span("x"),
-            span(`class` := "sr-only", "Close")
-          ),
-          header
-        ),
-        Rx {
-          div(`class` := "modal-body", body())
-        },
-        div(`class` := "modal-footer")(footer)
-      )
+      div(`class` := "modal-header")(header),
+      Rx {
+        div(`class` := "modal-body", body())
+      },
+      div(`class` := "modal-footer")(footer)
+
     )
 
-  val shell = div(`class` := "modal fade", dataWith("backdrop") := "static", id := ID,
+  val shell = div(`class` := "modal fade", id := ID,
     div(`class` := "modal-dialog",
       content
     )
   )
+
+  /*jQuery(jQid).on("hide.bs.modal", { () ⇒
+    {
+      println("in hide.bs.modal reove")
+      jQuery(jQid).remove()
+    }
+  })*/
+
+  def jQid = "#" + ID
+
 }

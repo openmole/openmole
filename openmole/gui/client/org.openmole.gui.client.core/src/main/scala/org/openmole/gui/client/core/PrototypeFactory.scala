@@ -45,23 +45,19 @@ class PrototypePanelUI(dataUI: PrototypeDataUI) extends PanelUI {
   val dimInput = input(`type` := "text", dataUI.dimension().toString).render
   val typeInput = new PrototypeAutoInput("protoTYPE", ALL)
 
-  val view = div(nameInput, typeInput.selector.render, dimInput)
+  val view = div(nameInput, typeInput.selector().render, dimInput)
 
-  override def save(n: String): DATAUI = PrototypeFactory(nameInput.value, typeInput.content(), dimInput.value.toInt)
+  override def save(n: String): DATAUI = PrototypeFactory(nameInput.value, typeInput.content().get, dimInput.value.toInt)
 }
 
-sealed class PrototypeAutoInput(autoID: String, contents: Seq[ProtoTYPE]) extends GenericAutoInput[ProtoTYPE](autoID, contents, Some(DOUBLE), Some("Select a Prototype")) {
+sealed class PrototypeAutoInput(autoID: String, contents: Seq[ProtoTYPE]) extends GenericAutoInput[ProtoTYPE](autoID, Var(contents), Some(DOUBLE), Some("Select a Prototype")) {
 
-  val selector = select(id := autoID,
-    onchange := { () ⇒ applyOnChange })(
-      contents.map { c ⇒
-        option(value := c.uuid)(c.name)
-      }.toSeq: _*
-    )
-
-  def applyOnChange: Unit = {
-    val ind = jQuery("#" + autoID).find("option:selected").index()
-    println("jqauery : " + ind)
-    content() = contents(ind)
+  val selector = Rx {
+    select(id := autoID,
+      onchange := { () ⇒ applyOnChange })(
+        contents.map { c ⇒
+          option(value := c.uuid)(c.name)
+        }.toSeq: _*
+      )
   }
 }

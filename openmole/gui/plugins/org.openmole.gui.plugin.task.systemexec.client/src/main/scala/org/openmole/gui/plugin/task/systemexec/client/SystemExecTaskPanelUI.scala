@@ -40,5 +40,5 @@ class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {
     p("SystemExecTask !")
   )
 
-  def save(name: String) = new SystemExecTaskDataUI
+  def save(name: String) = new SystemExecTaskDataUI(Var(name))
 }

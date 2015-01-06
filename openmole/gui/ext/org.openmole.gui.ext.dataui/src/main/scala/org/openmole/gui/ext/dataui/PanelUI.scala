@@ -1,6 +1,9 @@
 package org.openmole.gui.ext.dataui
 
-import scalatags.JsDom.all.HtmlTag
+import org.scalajs.dom.HTMLElement
+
+import scalatags.JsDom.TypedTag
+import scalatags.JsDom.all._
 
 /*
  * Copyright (C) 26/11/14 // mathieu.leclaire@openmole.org
@@ -21,6 +24,6 @@ import scalatags.JsDom.all.HtmlTag
 
 trait PanelUI {
   type DATAUI <: DataUI
-  def view: HtmlTag
+  def view: TypedTag[HTMLElement]
   def save(name: String): DATAUI
 }

@@ -52,20 +52,20 @@ object GUIClient {
 
     topdiv.appendChild(
       nav(nav_inverse + nav_staticTop + nav_pills)(
-        navItem("Tasks", dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID"),
+        navItem("Tasks")(dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID"),
         navItem("Environments")
       )
     )
-    topdiv.appendChild(Forms.autoinput("dataUI", ClientService.taskFactories, placeHolder = Some("select men"), default = Some(ClientService.taskFactories(1))).selector)
+    //topdiv.appendChild(Forms.autoinput("dataUI", ClientService.taskFactories, placeHolder = Some("select men"), default = Some(ClientService.taskFactories(1))).selector)
 
-    topdiv.appendChild(h1(Forms.label("OpenMOLE !!!", onclick := { () ⇒ println("File") })))
+    topdiv.appendChild(h1(Forms.label("OpenMOLE !!!")(onclick := { () ⇒ println("File") })))
     topdiv.appendChild(badge("Tasks", "4", btn_medium))
-    topdiv.appendChild(badge("Prototype", "4", btn_large + btn_primary))
+    topdiv.appendChild(badge("Prototype", "4", btn_primary))
 
     topdiv.appendChild(
       h2(
         Forms.buttonGroup(
-          Forms.button("File", btn_default, onclick := { () ⇒ println("File") }),
+          Forms.button("File", btn_default)(onclick := { () ⇒ println("File") }),
           Forms.button("Edit", btn_default),
           Forms.button("Run", btn_primary)
         )
@@ -73,7 +73,8 @@ object GUIClient {
     )
 
     val dialog = Panel.generic("taskPanelID",
-      ClientService.taskFactories
+      ClientService.taskFactories,
+      ClientService.taskDataUIs
     )
 
     /*val dialog = new PanelWithIO("taskPanelID",
@@ -89,13 +90,11 @@ object GUIClient {
     topdiv.appendChild(
       jumbotron(
         h1("OpenMole !!!!"),
-        Forms.button("Click men", btn_primary + btn_large, dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID")
+        Forms.button("Click men", btn_primary + btn_large)(dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID")
       )
     )
 
     topdiv.appendChild(dialog.render)
-
-    println("GUIClient 1")
 
     dom.document.body.appendChild(topdiv)
 
@@ -114,5 +113,4 @@ object GUIClient {
     val window = new Window(nodes, edges)
 
   }
-
 }

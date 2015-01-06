@@ -1,4 +1,12 @@
 .main_nav {
       padding : 15px 15px 15px 15px;
-      margin: 15px 15px 15px 15px;
+      margin : 15px 15px 15px 15px;
 }
+
+.right2{
+      padding-right : 2px;
+      }
+
+.right5{
+      padding-right : 5px;
+      }
