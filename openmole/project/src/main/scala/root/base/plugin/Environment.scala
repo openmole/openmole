@@ -15,7 +15,7 @@ object Environment extends PluginDefaults {
   lazy val desktopgrid = OsgiProject("desktopgrid") dependsOn (Core.model, Misc.workspace, Misc.tools,
     Core.batch, Core.serializer, Misc.sftpserver) settings (bundleType += "daemon")
 
-  lazy val glite = OsgiProject("glite") dependsOn (Core.model, Misc.exception, Misc.updater, Core.batch,
+  lazy val egi = OsgiProject("egi") dependsOn (Core.model, Misc.exception, Misc.updater, Core.batch,
     Misc.workspace, Misc.fileService, gridscale) settings (
       libraryDependencies ++= Seq(Libraries.gridscaleGlite, Libraries.gridscaleDirac, Libraries.gridscaleHTTP, Libraries.scalaLang % "provided"))
 
