@@ -43,6 +43,8 @@ abstract class Page(implicit parent: Option[Page] = None) {
   def name: String
   def children: Seq[Page]
 
+  def apply() = content
+
   def location: String =
     parent match {
       case None => name

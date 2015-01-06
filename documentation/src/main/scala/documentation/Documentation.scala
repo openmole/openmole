@@ -29,5 +29,4 @@ object Documentation extends App {
   }
   site.renderTo(args(0) + "/")
 
-
 }
