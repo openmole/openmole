@@ -176,7 +176,8 @@ object Pages extends Page() { index =>
 
       def environment = new Page {
         def name = "environment"
-        def children = Seq(multithread, ssh, egi, cluster)
+
+        def children = Seq(multithread, ssh, egi, cluster, desktopGrid)
         def content = documentation.console.Environment()
 
         def multithread = new Page {
@@ -201,6 +202,12 @@ object Pages extends Page() { index =>
           def name = "cluster"
           def children = Seq()
           def content = documentation.console.environment.Cluster()
+        }
+
+        def desktopGrid = new Page {
+          def name = "desktop grid"
+          def children = Seq()
+          def content = documentation.console.environment.DesktopGrid()
         }
 
       }
