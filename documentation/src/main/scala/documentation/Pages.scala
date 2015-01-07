@@ -70,7 +70,7 @@ object Pages extends Page() { index =>
   def console =
     new Page {
       def name = "console"
-      def children = Seq(task, sampling, transition, hook)
+      def children = Seq(task, sampling, transition, hook, environment)
 
       def content = documentation.console.Console()
       def task = new Page {
@@ -119,6 +119,30 @@ object Pages extends Page() { index =>
         def name = "hook"
         def children = Seq()
         def content = documentation.console.Hook()
+      }
+
+      def environment = new Page {
+        def name = "environment"
+        def children = Seq(multithread, ssh, egi)
+        def content = documentation.console.Environment()
+
+        def multithread = new Page {
+          def name = "multi-thread"
+          def children = Seq()
+          def content = documentation.console.environment.Multithread()
+        }
+
+        def ssh = new Page {
+          def name = "SSH"
+          def children = Seq()
+          def content = documentation.console.environment.SSH()
+        }
+
+        def egi = new Page {
+          def name = "EGI"
+          def children = Seq()
+          def content = documentation.console.environment.EGI()
+        }
       }
     }
 

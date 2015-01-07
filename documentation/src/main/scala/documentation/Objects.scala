@@ -18,11 +18,17 @@
 package documentation
 
 import scalatex.site._
+import scalatags.Text.all._
 
 object Objects {
   object sect extends Section()
   object hl extends Highlighter {
     def suffixMappings = Map().withDefault(identity)
     def openmole(code: String) = highlight(code, "scala")
+  }
+  case class Parameter(name: String, `type`: String, description: String)
+  def parameters(p: Parameter*) = {
+    def toRow(p: Parameter) = li ( p.name + ": " + p.`type` + ": "+ p.description)
+    ul( p.map(toRow) )
   }
 }
