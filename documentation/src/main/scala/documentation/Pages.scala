@@ -24,15 +24,14 @@ import scala.reflect.runtime.universe._
 
 object Page {
 
-  def menuEntry(p: Page) = a(p.name, href := p.file )
+  def menuEntry(p: Page) = a(p.name, href := p.file)
 
   def pageLine(p: Page): Frag =
     if (p.children.isEmpty) li(menuEntry(p))
     else li(menuEntry(p), ul(p.children.map(pageLine)))
 
-
   def menu(p: Page): Frag =
-    Seq[Frag](
+    div(id := "documentation-menu")(
       menuEntry(p),
       p.children.map(pageLine)
     )
@@ -60,10 +59,10 @@ object Page {
 
     def up(p: Page): Option[Page] = p.parent
 
-    table (
+    table(id := "documentation-bottom-links") (
       Seq("previous" -> previous(p), "up" -> up(p), "next" -> next(p)).map {
-        case (_, None) => td()
-        case (item, Some(p)) => td(a(item, href := p.file))
+        case (t, None) => td(id := "documentation-bottom-link-unavailable")(t)
+        case (item, Some(p)) => td(id := "documentation-bottom-link")(a(item, href := p.file))
       }
     )
   }
@@ -71,7 +70,7 @@ object Page {
   def decorate(p: Page) =
     table(
       td(verticalAlign:="top")(Page.menu(Pages)),
-      td(verticalAlign:="top")(p.content, bottomLinks(p))
+      td(verticalAlign:="top")(div(id := "documentation-content")(p.content), bottomLinks(p))
     )
 
   case class Parent(page: Option[Page])
