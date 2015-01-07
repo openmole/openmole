@@ -27,14 +27,14 @@
     @p Many options are available to configure the EGI environment:
     @ul
       @li{cpuTime: the maximum duration for the job in term of CPU consumption, for instance 1 hour,}
-      @li{wallTime: the maximum duration for the job in term of user time, for instance 1 hour,}
-      @li{memory: the memory in mega-byte for the job, for instance 2000,}
-      @li{openMOLEMemory: the memory of attributed to the OpenMOLE runtime on the worker node, if you run external tasks you can reduce the memory for the OpenMOLE runtime to 256 mega in order to have more memory for you program on the worker node,}
+      @li{@wallTime,}
+      @li{@memory,}
+      @li{@openMOLEMemory,}
       @li{architecture: could be "x86_64" for restricting your jobs to 64 bit systems,}
       @li{jobType: should be set to "MPI" for MPI jobs,}
       @li{cpuNumber: the number of CPU required for your job,}
       @li{smpGranularity: the number of cores linked to a shared memory (same as cpuNumber for multi-threaded processes),}
-      @li{threads: the number of threads for concurrent execution of tasks on the worker node,}
+      @li{@threads,}
       @li{requirements: a free requirement string that will be added to the other requirements}
       @li{bdii: the bdii to use for listing resources accessible to the VO, if not specified, the on in your preference file is used,}
       @li{vomsURL: the URL of the VOMS server used fo the authentication,}

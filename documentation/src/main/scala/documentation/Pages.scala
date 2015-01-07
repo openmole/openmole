@@ -123,7 +123,7 @@ object Pages extends Page() { index =>
 
       def environment = new Page {
         def name = "environment"
-        def children = Seq(multithread, ssh, egi)
+        def children = Seq(multithread, ssh, egi, cluster)
         def content = documentation.console.Environment()
 
         def multithread = new Page {
@@ -143,6 +143,13 @@ object Pages extends Page() { index =>
           def children = Seq()
           def content = documentation.console.environment.EGI()
         }
+
+        def cluster = new Page {
+          def name = "cluster"
+          def children = Seq()
+          def content = documentation.console.environment.Cluster()
+        }
+
       }
     }
 
