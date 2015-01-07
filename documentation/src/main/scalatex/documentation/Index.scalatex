@@ -1,7 +1,5 @@
 
-@import scalatex.site.Section
-@object sect extends Section()
+@import documentation.Objects._
 
-@table
-  @td(verticalAlign:="top"){@Page.menu(Pages)}
-  @td{@Pages.console.task()}
+@sect{Documentation}
+  Welcome to OpenMOLE documentation

@@ -24,20 +24,67 @@ import scala.reflect.runtime.universe._
 
 object Page {
 
-  private def pageLine(p: Page): Frag = {
-    def ref = a(p.name, href := p.file )
-    if (p.children.isEmpty) li(ref)
-    else li(ref, ul(p.children.map(pageLine)))
-  }
+  def menuEntry(p: Page) = a(p.name, href := p.file )
+
+  def pageLine(p: Page): Frag =
+    if (p.children.isEmpty) li(menuEntry(p))
+    else li(menuEntry(p), ul(p.children.map(pageLine)))
+
 
   def menu(p: Page): Frag =
-    ul ( p.children.map(pageLine) )
+    Seq[Frag](
+      menuEntry(p),
+      p.children.map(pageLine)
+    )
+
+  def bottomLinks(p: Page) = {
+    def previous(p: Page): Option[Page] =
+      p.parent match {
+        case None => None
+        case Some(parent) =>
+          parent.children.indexOf(p) match {
+            case x if (x - 1) < 0 => None
+            case x => Some(parent.children(x - 1))
+          }
+      }
+
+    def next(p: Page): Option[Page] =
+      p.parent match {
+        case None => None
+        case Some(parent) =>
+          parent.children.indexOf(p) match {
+            case x if (x + 1 >= parent.children.size) || (x == -1) => None
+            case x => Some(parent.children(x + 1))
+          }
+      }
+
+    def up(p: Page): Option[Page] = p.parent
+
+    table (
+      Seq("previous" -> previous(p), "up" -> up(p), "next" -> next(p)).map {
+        case (_, None) => td()
+        case (item, Some(p)) => td(a(item, href := p.file))
+      }
+    )
+  }
+
+  def decorate(p: Page) =
+    table(
+      td(verticalAlign:="top")(Page.menu(Pages)),
+      td(verticalAlign:="top")(p.content, bottomLinks(p))
+    )
+
+  case class Parent(page: Option[Page])
 
 }
 
-abstract class Page(implicit parent: Option[Page] = None) {
 
-  implicit def thisIsParent: Option[Page] = Some(this)
+
+
+abstract class Page(implicit p: Page.Parent = Page.Parent(None)) {
+
+  def parent = p.page
+  implicit def thisIsParent = Page.Parent(Some(this))
 
   def content: Frag
   def name: String
@@ -59,11 +106,18 @@ abstract class Page(implicit parent: Option[Page] = None) {
     this :: pages(this)
   }
 
+  override def equals(o: scala.Any): Boolean =
+   o match {
+     case p2: Page => this.location == p2.location
+     case _ => false
+   }
+
+  override def hashCode(): Int = location.hashCode()
 }
 
 object Pages extends Page() { index =>
   def children = Seq(console)
-  def name = "index"
+  def name = "documentation"
 
   def content = Index()
 

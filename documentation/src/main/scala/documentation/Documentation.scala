@@ -25,7 +25,7 @@ import scalatags.Text.all._
 object Documentation extends App {
 
   val site = new scalatex.site.Site {
-    def content = Pages.allPages.map{ p => p.file -> p.content }.toMap
+    def content = Pages.allPages.map{ p => p.file -> Page.decorate(p) }.toMap
   }
   site.renderTo(args(0) + "/")
 
