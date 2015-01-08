@@ -24,8 +24,8 @@ import org.openmole.misc.macros.Keyword._
 
 package object code {
 
-  lazy val imports = add[{ def addImport(s: String) }]
-  lazy val libraries = add[{ def addLibrary(l: File) }]
+  lazy val imports = add[{ def addImport(s: String*) }]
+  lazy val libraries = add[{ def addLibrary(l: File*) }]
 
   trait CodePackage extends external.ExternalPackage {
     lazy val imports = code.imports
