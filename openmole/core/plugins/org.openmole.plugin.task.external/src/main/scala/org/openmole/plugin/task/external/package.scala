@@ -24,18 +24,21 @@ import org.openmole.misc.tools.service.OS
 import org.openmole.misc.macros.Keyword._
 
 package external {
+
+  import org.openmole.core.implementation.tools.ExpandedString
+
   trait ExternalPackage {
     implicit def inputsFileDecorator(i: builder.inputs.type) = {
-      def +=(p: Prototype[File], name: String, link: Boolean = false) =
+      def +=(p: Prototype[File], name: ExpandedString, link: Boolean = false) =
         (_: ExternalTaskBuilder).addInput(p, name, link)
     }
 
     implicit def outputsFileDecorator(i: builder.outputs.type) =
-      add[{ def addOutput(n: String, p: Prototype[File]) }]
+      add[{ def addOutput(n: ExpandedString, p: Prototype[File]) }]
 
     lazy val resources =
       new {
-        def +=(file: File, name: Option[String] = None, link: Boolean = false, os: OS = OS()) =
+        def +=(file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()) =
           (_: ExternalTaskBuilder).addResource(file, name, link, os)
       }
   }

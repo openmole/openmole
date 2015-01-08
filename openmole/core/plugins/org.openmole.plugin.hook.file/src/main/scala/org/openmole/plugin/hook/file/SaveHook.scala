@@ -20,6 +20,7 @@ package org.openmole.plugin.hook.file
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.mole._
+import org.openmole.misc.exception.UserBadDataError
 import collection.mutable.ListBuffer
 import org.openmole.core.model.mole._
 import org.openmole.core.serializer._
@@ -29,34 +30,20 @@ import java.io.File
 
 object SaveHook {
 
-  def apply =
+  def apply(file: ExpandedString, prototypes: Prototype[_]*) =
     new HookBuilder {
-      private val _save = ListBuffer[(Prototype[_], String)]()
-
-      def save(p: Prototype[_], f: String) = {
-        addInput(p)
-        _save += p -> f
-      }
-
+      prototypes.foreach(p ⇒ addInput(p))
       def toHook =
-        new SaveHook with Built {
-          val save = _save.toList
-        }
+        new SaveHook(file, prototypes: _*) with Built
     }
-
 }
 
-abstract class SaveHook extends Hook {
-
-  def save: List[(Prototype[_], String)]
+abstract class SaveHook(file: ExpandedString, prototypes: Prototype[_]*) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    save.map {
-      case (p, f) ⇒
-        val to = executionContext.relativise(VariableExpansion(context, f))
-        SerialiserService.serialiseAndArchiveFiles(context(p), to)
-
-    }
+    val saveContext: Context = prototypes.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found")))
+    val to = executionContext.relativise(file.from(context))
+    SerialiserService.serialiseAndArchiveFiles(saveContext, to)
     context
   }
 }

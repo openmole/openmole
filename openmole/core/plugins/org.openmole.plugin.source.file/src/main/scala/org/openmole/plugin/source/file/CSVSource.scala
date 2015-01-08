@@ -32,7 +32,7 @@ import collection.JavaConversions._
 import reflect.ClassTag
 import org.openmole.core.implementation.mole.{ SourceBuilder, Source }
 import org.openmole.core.model.mole.ExecutionContext
-import org.openmole.core.implementation.tools.{ ExpandedString, VariableExpansion }
+import org.openmole.core.implementation.tools.ExpandedString
 
 object CSVSource {
 

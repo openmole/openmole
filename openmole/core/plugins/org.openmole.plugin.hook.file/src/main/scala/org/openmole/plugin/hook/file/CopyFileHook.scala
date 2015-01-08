@@ -30,24 +30,24 @@ import collection.mutable.ListBuffer
 object CopyFileHook {
 
   trait CopyFileHookBuilder extends HookBuilder {
-    def copy(prototype: Prototype[File], destination: String, remove: Boolean = false, compress: Boolean = false)
+    def addCopy(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false)
   }
 
   def apply(
     prototype: Prototype[File],
-    destination: String,
+    destination: ExpandedString,
     remove: Boolean = false,
     compress: Boolean = false): CopyFileHookBuilder = {
     val builder = apply()
-    builder copy (prototype, destination, remove, compress)
+    builder addCopy (prototype, destination, remove, compress)
     builder
   }
 
   def apply(): CopyFileHookBuilder =
     new CopyFileHookBuilder { hook ⇒
-      private val copy = ListBuffer[(Prototype[File], String, Boolean, Boolean)]()
+      private val copy = ListBuffer[(Prototype[File], ExpandedString, Boolean, Boolean)]()
 
-      def copy(prototype: Prototype[File], destination: String, remove: Boolean = false, compress: Boolean = false) = {
+      def addCopy(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false) = {
         copy += ((prototype, destination, remove, compress))
         addInput(prototype)
       }
@@ -62,7 +62,7 @@ object CopyFileHook {
 
 abstract class CopyFileHook extends Hook {
 
-  def copy: Iterable[(Prototype[File], String, Boolean, Boolean)]
+  def copy: Iterable[(Prototype[File], ExpandedString, Boolean, Boolean)]
 
   override def process(context: Context, executionContext: ExecutionContext) = {
     for ((p, d, r, c) ← copy) copy(context, executionContext, p, d, r, c)
@@ -73,11 +73,11 @@ abstract class CopyFileHook extends Hook {
     context: Context,
     executionContext: ExecutionContext,
     filePrototype: Prototype[File],
-    destination: String,
+    destination: ExpandedString,
     remove: Boolean,
     compress: Boolean) = {
     val from = context(filePrototype)
-    val to = executionContext.relativise(VariableExpansion(context, destination))
+    val to = executionContext.relativise(destination.from(context))
 
     to.getParentFile.mkdirs
     if (compress) from.copyCompress(to)

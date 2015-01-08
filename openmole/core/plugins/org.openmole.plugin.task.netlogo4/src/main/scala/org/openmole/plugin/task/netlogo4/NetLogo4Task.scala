@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.task.netlogo4
 
+import org.openmole.core.implementation.tools.ExpandedString
 import org.openmole.core.model.task._
 import org.openmole.core.model.data._
 import org.openmole.plugin.task.netlogo._
@@ -116,9 +117,9 @@ sealed class NetLogo4Task(
   inputs: DataSet,
   outputs: DataSet,
   parameters: DefaultSet,
-  inputFiles: Iterable[(Prototype[File], String, Boolean)],
-  outputFiles: Iterable[(String, Prototype[File])],
-  resources: Iterable[(File, String, Boolean, OS)])(implicit plugins: PluginSet) extends NetLogoTask(
+  inputFiles: Iterable[(Prototype[File], ExpandedString, Boolean)],
+  outputFiles: Iterable[(ExpandedString, Prototype[File])],
+  resources: Iterable[(File, ExpandedString, Boolean, OS)])(implicit plugins: PluginSet) extends NetLogoTask(
   name,
   workspace,
   launchingCommands,

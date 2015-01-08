@@ -22,29 +22,28 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import java.io.File
 import org.openmole.core.model.mole._
-import org.openmole.core.implementation.tools.{ExpandedString, VariableExpansion}
+import org.openmole.core.implementation.tools.ExpandedString
 import org.openmole.misc.tools.io.FileUtil._
 import scala.collection.mutable.ListBuffer
 
 object ListFilesSource {
 
-  def apply() = new ListFilesSourceBuilder
+  def apply(path: ExpandedString, prototype: Prototype[File], regExp: ExpandedString = ".*") =
+    new SourceBuilder {
+      addOutput(prototype)
+      override def toSource: ISource = new ListFilesSource(path, prototype, regExp) with Built
+    }
 
 }
-abstract class ListFilesSource extends Source {
+abstract class ListFilesSource(path: ExpandedString, prototype: Prototype[File], regExp: ExpandedString) extends Source {
 
-  def directory: Seq[(ExpandedString, ExpandedString, Prototype[File])]
-
-  override def process(context: Context, executionContext: ExecutionContext) =
-    directory.map {
-      case (path, regexp, prototype) ⇒
-        val expandedPath = executionContext.relativise(path.from(context))
-        val expandedRegExp = regexp.from(context)
-        Variable(
-          prototype.toArray,
-          expandedPath.listFiles.filter(_.getName.matches(expandedRegExp))
-        )
-
-    }
+  override def process(context: Context, executionContext: ExecutionContext) = {
+    val expandedPath = executionContext.relativise(path.from(context))
+    val expandedRegExp = regExp.from(context)
+    Variable(
+      prototype.toArray,
+      expandedPath.listFiles.filter(_.getName.matches(expandedRegExp))
+    )
+  }
 
 }

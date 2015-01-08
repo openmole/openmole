@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.hook.file
 
-import java.io.File
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
@@ -27,21 +26,20 @@ import org.openmole.core.model.mole.ExecutionContext
 
 object AppendArrayToFileHook {
 
-  def apply(fileName: String, content: Prototype[Array[_]]) =
+  def apply(fileName: ExpandedString, content: Prototype[Array[_]]) =
     new HookBuilder {
       addInput(content)
-
       def toHook = new AppendArrayToFileIHook(fileName, content) with Built
     }
 
 }
 
 abstract class AppendArrayToFileIHook(
-    fileName: String,
+    fileName: ExpandedString,
     content: Prototype[Array[_]]) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    val file = executionContext.relativise(VariableExpansion(context, fileName))
+    val file = executionContext.relativise(fileName.from(context))
     file.createParentDir
     val toWrite = context.option(content).getOrElse(Array("not found")).mkString(",")
     file.withLock(_.appendLine(toWrite))

@@ -23,17 +23,12 @@ import org.openmole.misc.tools.script.GroovyProxyPool
 
 object FromContext {
 
+  implicit def fromTToContext[T](t: T) = FromContext[T](t)
+
   implicit def fromStringToContext[T](code: String)(implicit fromString: FromString[T]) =
     new FromContext[T] {
       @transient lazy val proxy = GroovyProxyPool(code)
       override def from(context: Context): T = fromString.from(proxy(context).toString)
-    }
-
-  implicit def fromTToContext[T](t: T) = FromContext[T](t)
-
-  implicit def fromStringToExpandedString(s: String) =
-    new ExpandedString {
-      override def string = s
     }
 
   def apply[T](t: T) =
@@ -47,7 +42,22 @@ trait FromContext[T] {
   def from(context: Context): T
 }
 
+object ExpandedString {
+
+  implicit def fromStringToExpandedString(s: String) = ExpandedString(s)
+
+  implicit def fromStringToExpandedStringOption(s: String) = Some[ExpandedString](s)
+
+  implicit def fromTraversableOfStringToTraversableOfExpandedString[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
+
+  def apply(s: String) =
+    new ExpandedString {
+      override def string = s
+    }
+}
+
 trait ExpandedString <: FromContext[String] {
+  def +(s: ExpandedString): ExpandedString = string + s.string
   def string: String
   def from(context: Context) = VariableExpansion.apply(context, string)
 }

@@ -24,17 +24,17 @@ import org.openmole.core.model.mole._
 
 object DisplayHook {
 
-  def apply(toDisplay: String) =
+  def apply(toDisplay: ExpandedString) =
     new HookBuilder {
       def toHook = new DisplayHook(toDisplay) with Built
     }
 
 }
 
-abstract class DisplayHook(toDisplay: String) extends Hook {
+abstract class DisplayHook(toDisplay: ExpandedString) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    executionContext.out.println(VariableExpansion(context, toDisplay))
+    executionContext.out.println(toDisplay.from(context))
     context
   }
 

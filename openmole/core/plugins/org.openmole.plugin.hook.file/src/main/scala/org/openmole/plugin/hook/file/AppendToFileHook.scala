@@ -26,7 +26,7 @@ import org.openmole.core.model.mole.ExecutionContext
 
 object AppendToFileHook {
 
-  def apply(fileName: String, content: String) =
+  def apply(fileName: ExpandedString, content: ExpandedString) =
     new HookBuilder {
       def toHook = new AppendToFileHook(fileName, content) with Built
     }
@@ -34,13 +34,13 @@ object AppendToFileHook {
 }
 
 abstract class AppendToFileHook(
-    fileName: String,
-    content: String) extends Hook {
+    fileName: ExpandedString,
+    content: ExpandedString) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    val file = executionContext.relativise(VariableExpansion(context, fileName))
+    val file = executionContext.relativise(fileName.from(context))
     file.createParentDir
-    file.withLock(_.append(VariableExpansion(context, content)))
+    file.withLock(_.append(content.from(context)))
     context
   }
 

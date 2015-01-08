@@ -15,29 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package org.openmole.plugin.hook.file
 
-package org.openmole.plugin.source.file
-
-import java.io.File
-
-import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.mole.HookBuilder
+import org.openmole.core.implementation.tools.ExpandedString
 import org.openmole.core.model.data._
+import org.openmole.core.implementation.data._
 
-import scala.collection.mutable.ListBuffer
-
-class ListFilesSourceBuilder extends SourceBuilder {
-  private val _directories = new ListBuffer[(ExpandedString, ExpandedString, Prototype[File])]
-
-  def addListedDirectory(path: ExpandedString, prototype: Prototype[File], regExp: ExpandedString = ".*") = {
-    addOutput(prototype.toArray)
-    _directories += ((path, regExp, prototype))
-  }
-
-  def toSource =
-    new ListFilesSource with Built {
-      val directory = _directories.toList
-    }
-
+class AppendToCSVFileHookBuilder(fileName: ExpandedString, prototypes: Prototype[_]*) extends HookBuilder {
+  prototypes.foreach(p ⇒ addInput(p))
+  override def toHook = new AppendToCSVFileHook(fileName, prototypes: _*) with Built
 }

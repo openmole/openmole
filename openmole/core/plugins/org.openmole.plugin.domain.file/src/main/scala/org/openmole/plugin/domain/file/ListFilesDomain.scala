@@ -31,7 +31,7 @@ object ListFilesDomain extends Logger {
 
   def apply(
     base: File,
-    subdirectory: String = "",
+    subdirectory: ExpandedString = "",
     recursive: Boolean = false,
     filter: File ⇒ Boolean = f ⇒ true) = new ListFilesDomain(base, subdirectory, recursive, filter)
 
@@ -41,12 +41,12 @@ import ListFilesDomain.Log._
 
 sealed class ListFilesDomain(
     base: File,
-    subdirectory: String = "",
+    subdirectory: ExpandedString = "",
     recursive: Boolean = false,
     filter: File ⇒ Boolean = f ⇒ true) extends Domain[File] with Finite[File] {
 
   override def computeValues(context: Context)(implicit rng: Random): Iterable[File] = {
-    val dir = new File(base, VariableExpansion(context, subdirectory))
+    val dir = new File(base, subdirectory.from(context))
 
     if (!dir.exists) {
       logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")

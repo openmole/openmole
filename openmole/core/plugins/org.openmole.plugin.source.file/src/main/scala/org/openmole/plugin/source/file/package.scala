@@ -23,11 +23,4 @@ import org.openmole.core.implementation.tools.ExpandedString
 import org.openmole.core.model.data.Prototype
 import org.openmole.plugin.tool.csv.CSVPackage
 
-package object file extends CSVPackage {
-
-  def listedDirectories = new {
-    def +=(path: ExpandedString, prototype: Prototype[File], regExp: ExpandedString = ".*") =
-      (_: ListFilesSourceBuilder).addListedDirectory(path, prototype, regExp)
-  }
-
-}
+package object file extends CSVPackage

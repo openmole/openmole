@@ -17,18 +17,17 @@
 
 package org.openmole.plugin.method.abc
 
+import org.openmole.core.implementation.mole.HookBuilder
+import org.openmole.core.implementation.tools.ExpandedString
 import org.openmole.plugin.hook.file._
 import org.openmole.core.implementation.data._
 
 object SaveABCHook {
 
-  def apply(puzzle: ABCPuzzle, dir: String): AppendToCSVFileHook.Builder = apply(puzzle, dir, "/abc{" + puzzle.iteration.name + "}.csv")
-
-  def apply(puzzle: ABCPuzzle, dir: String, name: String): AppendToCSVFileHook.Builder = {
-    val builder = new AppendToCSVFileHook.Builder(dir + "/" + name)
-    builder.add(puzzle.iteration)
-    puzzle.algorithm.priorPrototypes.foreach(p ⇒ builder.add(p.toArray))
-    puzzle.algorithm.targetPrototypes.foreach { o ⇒ builder.add(o.toArray) }
-    builder
+  def apply(puzzle: ABCPuzzle, dir: ExpandedString) = {
+    val fileName = dir + "/abc${" + puzzle.iteration.name + "}.csv"
+    val prototypes = Seq(puzzle.iteration) ++ puzzle.algorithm.priorPrototypes.map(_.toArray) ++ puzzle.algorithm.targetPrototypes.map(_.toArray)
+    new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
   }
+
 }

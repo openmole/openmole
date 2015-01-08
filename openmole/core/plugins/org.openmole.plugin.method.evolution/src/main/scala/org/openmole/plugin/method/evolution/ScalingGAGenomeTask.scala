@@ -28,7 +28,6 @@ import org.openmole.core.model.sampling._
 import org.openmole.core.model.domain._
 
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.misc.tools.script.{ GroovyFunction, GroovyProxyPool, GroovyProxy }
 import org.openmole.plugin.method.evolution.ga._
 
