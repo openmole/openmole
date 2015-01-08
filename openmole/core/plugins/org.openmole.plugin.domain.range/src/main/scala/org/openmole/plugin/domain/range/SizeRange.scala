@@ -22,7 +22,11 @@ import org.openmole.core.model.data._
 import org.openmole.core.implementation.tools._
 
 object SizeRange {
-  def apply[T](range: Range[T], size: FromContext[Int]) = new SizeRange[T](range, size)
+  def apply[T](min: FromContext[T], max: FromContext[T], size: FromContext[Int]): SizeRange[T] =
+    apply(Range(min, max), size)
+  
+  def apply[T](range: Range[T], size: FromContext[Int]): SizeRange[T] =
+    new SizeRange[T](range, size)
 }
 
 class SizeRange[T](val range: Range[T], size: FromContext[Int]) extends SizeStep[T] with Bounded[T] {
