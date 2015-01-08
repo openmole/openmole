@@ -122,15 +122,15 @@ abstract class Page(implicit p: Page.Parent = Page.Parent(None)) {
 object Pages extends Page() { index =>
 
   def name = "documentation"
-  def content = Index()
-  def children = Seq(console, development)
+  def content = documentation.Documentation()
+  def children = Seq(console, gui, development)
 
   def console =
     new Page {
       def name = "console"
       def children = Seq(task, sampling, transition, hook, environment, sources)
 
-      def content = documentation.console.Console()
+      def content = documentation.Console()
       def task = new Page {
         def name = "task"
         def children = Seq(scala, systemExec, netLogo, mole)
@@ -224,10 +224,17 @@ object Pages extends Page() { index =>
       }
     }
 
+
+    def gui = new Page {
+      def name = "GUI"
+      def children = Seq()
+      def content = documentation.GUI()
+    }
+
     def development = new Page {
       def name = "development"
       def children = Seq(compilation, plugin, branching)
-      def content = documentation.development.Development()
+      def content = documentation.Development()
 
       def compilation = new Page {
         def name = "compilation"

@@ -22,7 +22,7 @@ import Pages._
 
 import scalatags.Text.all._
 
-object Documentation extends App {
+object DocumentationSite extends App {
 
   val site = new scalatex.site.Site {
     def content = Pages.allPages.map{ p => p.file -> Page.decorate(p) }.toMap
