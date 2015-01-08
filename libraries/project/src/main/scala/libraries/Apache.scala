@@ -18,7 +18,7 @@ object Apache extends Defaults {
   lazy val config = OsgiProject("org.apache.commons.configuration", privatePackages = Seq("org.apache.commons.*")) settings
     (libraryDependencies += "commons-configuration" % "commons-configuration" % "1.6", bundleType += "runtime", version := "1.6")
 
-  lazy val mathVersion = "3.3"
+  lazy val mathVersion = "3.4"
   lazy val math = OsgiProject("org.apache.commons.math", exports = Seq("org.apache.commons.math3.*")) settings
     (libraryDependencies += "org.apache.commons" % "commons-math3" % mathVersion, bundleType += "runtime", version := mathVersion)
 
