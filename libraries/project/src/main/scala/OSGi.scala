@@ -17,7 +17,7 @@ import scala.scalajs.sbtplugin.ScalaJSPlugin._
  */
 object OSGi extends Defaults(Apache) {
 
-  val dir = file("libraries")
+  val dir = file("target/libraries")
   val bouncyCastleVersion = "1.50"
 
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
