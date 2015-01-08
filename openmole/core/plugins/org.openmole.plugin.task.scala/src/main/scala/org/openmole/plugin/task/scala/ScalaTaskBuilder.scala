@@ -26,7 +26,7 @@ class ScalaTaskBuilder(code: String)(implicit plugins: PluginSet) extends CodeTa
 
   val usedClasses = ListBuffer[Class[_]]()
 
-  def addClassUse(c: Class[_]) = {
+  def addClassUse(c: Class[_]): this.type = {
     usedClasses += c
     this
   }
