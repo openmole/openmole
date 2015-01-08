@@ -16,9 +16,9 @@
 }
 
 #documentation-menu {
-  width: 180;
+  width: 210;
   padding-left: 10;
-  padding-right: 10;
+  padding-right: 0;
   margin-top: 40;
 }
 
@@ -29,6 +29,13 @@
 
 #documentation-content {
 }
+
+#documentation-menu-entry {
+}
+
+#documentation-menu-entry-current {
+}
+
 
 .scalatex-content *{
   position: relative;

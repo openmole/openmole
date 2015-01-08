@@ -24,17 +24,22 @@ import scala.reflect.runtime.universe._
 
 object Page {
 
-  def menuEntry(p: Page) = a(p.name, href := p.file)
+  def menu(root: Page, currentPage: Page): Frag = {
+    def menuEntry(p: Page) = {
+      def current = p == currentPage
+      def idLabel = "documentation-menu-entry" + (if(current) "-current" else "")
+      a(id := idLabel)(p.name + (if(current) " <-" else ""), href := p.file)
+    }
 
-  def pageLine(p: Page): Frag =
-    if (p.children.isEmpty) li(menuEntry(p))
-    else li(menuEntry(p), ul(p.children.map(pageLine)))
+    def pageLine(p: Page): Frag =
+      if (p.children.isEmpty) li(menuEntry(p))
+      else li(menuEntry(p), ul(p.children.map(pageLine)))
 
-  def menu(p: Page): Frag =
     div(id := "documentation-menu")(
-      menuEntry(p),
-      p.children.map(pageLine)
+      menuEntry(root),
+      root.children.map(pageLine)
     )
+  }
 
   def bottomLinks(p: Page) = {
     def previous(p: Page): Option[Page] =
@@ -69,7 +74,7 @@ object Page {
 
   def decorate(p: Page) =
     table(
-      td(verticalAlign:="top")(Page.menu(Pages)),
+      td(verticalAlign:="top")(Page.menu(Pages, p)),
       td(verticalAlign:="top")(div(id := "documentation-content")(p.content), bottomLinks(p))
     )
 
