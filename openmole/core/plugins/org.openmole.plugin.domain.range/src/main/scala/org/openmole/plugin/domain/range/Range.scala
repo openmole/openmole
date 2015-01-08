@@ -35,7 +35,7 @@ object Range {
   def steps[T](
     min: FromContext[T],
     max: FromContext[T],
-    steps: FromContext[T])(implicit integral: Integral[T], fs: FromString[T]): SizeRange[T] =
+    steps: FromContext[Int])(implicit integral: Integral[T]): SizeRange[T] =
     SizeRange[T](Range[T](min, max), steps)
 
 }

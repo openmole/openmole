@@ -22,17 +22,17 @@ import org.openmole.core.model.data._
 import org.openmole.core.implementation.tools._
 
 object SizeRange {
-  def apply[T](range: Range[T], steps: FromContext[T]) = new SizeRange[T](range, steps)
+  def apply[T](range: Range[T], size: FromContext[Int]) = new SizeRange[T](range, size)
 }
 
-class SizeRange[T](val range: Range[T], steps: FromContext[T]) extends SizeStep[T] with Bounded[T] {
+class SizeRange[T](val range: Range[T], size: FromContext[Int]) extends SizeStep[T] with Bounded[T] {
   import range._
 
   def stepAndSize(minValue: T, maxValue: T, context: Context) = {
     import integral._
-    val size = steps.from(context) - integral.one
-    val step = (maxValue - minValue) / size
-    (step, size.toInt)
+    val s = size.from(context) - 1
+    val step = (maxValue - minValue) / fromInt(s)
+    (step, s.toInt)
   }
 
   def min = range.min
