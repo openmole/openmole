@@ -47,7 +47,7 @@
       @li{@openMOLEMemory,}
       @li{@threads.}
   @sect{SLURM}
-    To delegate some computation load to a @a("SLURM", href := "https://en.wikipedia.org/wiki/Simple_Linux_Utility_for_Resource_Management") based cluster you can use the SLURM environment as follow:
+    To delegate some computation load to a @a("SLURM", href := "https://en.wikipedia.org/wiki/Simple_Linux_Utility_for_Resource_Management") based cluster you can use the SLURM environment as follow:
     @br @hl.openmole("""
     import org.openmole.plugin.environment.slurm._
 

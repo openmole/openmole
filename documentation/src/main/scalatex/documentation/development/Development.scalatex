@@ -1,0 +1,7 @@
+
+
+@import documentation.Objects._
+
+
+@sect{Development}
+  This part of the documentation concern the development of OpenMOLE. It explains how to compile OpenMOLE, how to write the doc, how to develop plugins...

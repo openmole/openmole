@@ -120,10 +120,10 @@ abstract class Page(implicit p: Page.Parent = Page.Parent(None)) {
 }
 
 object Pages extends Page() { index =>
-  def children = Seq(console)
-  def name = "documentation"
 
+  def name = "documentation"
   def content = Index()
+  def children = Seq(console, development)
 
   def console =
     new Page {
@@ -221,6 +221,18 @@ object Pages extends Page() { index =>
         def name = "source"
         def children = Seq()
         def content = documentation.console.Source()
+      }
+    }
+
+    def development = new Page {
+      def name = "development"
+      def children = Seq(compilation)
+      def content = documentation.development.Development()
+
+      def compilation = new Page {
+        def name = "compilation"
+        def children = Seq()
+        def content = documentation.development.Compilation()
       }
     }
 
