@@ -26,4 +26,9 @@ object Tool extends PluginDefaults {
     crossPaths := false,
     libraryDependencies ++= Seq(Libraries.netlogo5_noscala)
   )
+
+  lazy val csv = OsgiProject("csv") dependsOn (Misc.exception, Core.implementation) settings (
+    libraryDependencies += Libraries.opencsv
+  )
+
 }

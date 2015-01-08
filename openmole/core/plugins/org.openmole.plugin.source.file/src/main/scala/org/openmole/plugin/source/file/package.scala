@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling
+package org.openmole.plugin.source
 
 import org.openmole.plugin.tool.csv.CSVPackage
 
-package object csv extends CSVPackage
+package object file extends CSVPackage

@@ -23,6 +23,8 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.task._
 import org.openmole.core.implementation.task._
 import java.io._
+import org.openmole.plugin.tool.csv.{ CSVToVariablesBuilder, CSVToVariables }
+
 import collection.mutable.ListBuffer
 import org.openmole.misc.exception.UserBadDataError
 import java.math._
@@ -30,92 +32,57 @@ import collection.JavaConversions._
 import reflect.ClassTag
 import org.openmole.core.implementation.mole.{ SourceBuilder, Source }
 import org.openmole.core.model.mole.ExecutionContext
-import org.openmole.core.implementation.tools.VariableExpansion
+import org.openmole.core.implementation.tools.{ ExpandedString, VariableExpansion }
 
 object CSVSource {
 
-  trait CSVSourceBuilder extends SourceBuilder { builder ⇒
-    protected var _columns = new ListBuffer[(String, Prototype[_])]
-
-    def columns = _columns.toList
-
-    def addColumn(proto: Prototype[_]): this.type = this.addColumn(proto.name, proto)
-    def addColumn(name: String, proto: Prototype[_]): builder.type = {
-      _columns += (name -> proto)
+  trait CSVSourceBuilder extends SourceBuilder with CSVToVariablesBuilder { builder ⇒
+    override def addColumn(name: String, proto: Prototype[_]): this.type = {
       addOutput(proto.toArray)
-      this
+      super.addColumn(name, proto)
     }
 
-    trait Built extends super.Built {
-      val columns = builder.columns
+    override def addFileColumn(name: String, dir: File, proto: Prototype[File]): this.type = {
+      addOutput(proto.toArray)
+      super.addFileColumn(name, dir, proto)
     }
+
+    trait Built <: super.Built with BuiltCSVToVariables
   }
 
-  def apply(path: String, separator: Char = ',') = {
-    val (_path, _separator) = (path, separator)
+  def apply(path: ExpandedString) = {
+    val _path = path
     new CSVSourceBuilder { builder ⇒
       def toSource = new CSVSource with Built {
         val path = _path
-        val separator = _separator
       }
     }
   }
 
 }
 
-abstract class CSVSource extends Source {
+abstract class CSVSource extends Source with CSVToVariables {
 
-  def path: String
-  def columns: List[(String, Prototype[_])]
-  def separator: Char
-
-  def p = columns.map { case (_, p) ⇒ p }
-
-  import org.openmole.core.model.data._
+  def path: ExpandedString
 
   override def process(context: Context, executionContext: ExecutionContext): Context = {
-    val reader = new CSVReader(new FileReader(VariableExpansion(context, path)), separator)
+    val file = new File(path.from(context))
+    val transposed = toVariables(file, context).toSeq.transpose
 
-    val headers = reader.readNext.toArray
+    def variables =
+      for {
+        v ← transposed
+      } yield {
+        val p = v.head.prototype
+        val content =
+          if (v.isEmpty) Array.empty
+          else v.map(_.value).toArray(ClassTag(p.`type`.runtimeClass))
 
-    val columnsIndexes = columns.map {
-      case (name, _) ⇒
-        val i = headers.indexOf(name)
-        if (i == -1) throw new UserBadDataError("Unknown column name : " + name)
-        else i
-    }
+        Variable.unsecure(p.toArray, v.map(_.value).toArray(ClassTag(p.`type`.runtimeClass)))
+      }
 
-    //manual mapping
-    val transposer = Iterator.continually(reader.readNext).takeWhile(_ != null).map {
-      line ⇒
-        (columns zip columnsIndexes).map {
-          case ((_, p), i) ⇒ converter(p)(line(i))
-        }
-    }.toList.transpose
-
-    //val pToArray = columns.map { case(name,p) =>  }
-    val array: Array[(String, List[_])] = headers zip transposer
-
-    val result = (columns zip array).map {
-      case ((pname, p), (name, v)) ⇒
-        Variable(p.toArray.asInstanceOf[Prototype[Array[Any]]], v.toArray(ClassTag(p.`type`.runtimeClass)))
-    }.toIterable
-
-    context ++ result
+    context ++ variables
   }
-
-  val converters = Map[Class[_], (String ⇒ _)](
-    classOf[BigInteger] -> (new BigInteger(_: String)),
-    classOf[BigDecimal] -> (new BigDecimal(_: String)),
-    classOf[Double] -> ((_: String).toDouble),
-    classOf[String] -> ((_: String).toString),
-    classOf[Boolean] -> ((_: String).toBoolean),
-    classOf[Int] -> ((_: String).toInt),
-    classOf[Float] -> ((_: String).toFloat),
-    classOf[Long] -> ((_: String).toLong))
-
-  def converter[T](p: Prototype[_]): String ⇒ _ =
-    converters.getOrElse(p.`type`.runtimeClass, throw new UserBadDataError("Unmanaged type for csv sampling for column binded to prototype " + p))
 
 }
 

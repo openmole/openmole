@@ -31,6 +31,11 @@ object FromContext {
 
   implicit def fromTToContext[T](t: T) = FromContext[T](t)
 
+  implicit def fromStringToExpandedString(s: String) =
+    new ExpandedString {
+      override def string = s
+    }
+
   def apply[T](t: T) =
     new FromContext[T] {
       def from(context: Context): T = t
@@ -40,5 +45,10 @@ object FromContext {
 
 trait FromContext[T] {
   def from(context: Context): T
+}
+
+trait ExpandedString <: FromContext[String] {
+  def string: String
+  def from(context: Context) = VariableExpansion.apply(context, string)
 }
 
