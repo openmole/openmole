@@ -28,20 +28,20 @@ import scala.collection.mutable.ListBuffer
 
 object ListFilesSource {
 
-  def apply(path: ExpandedString, prototype: Prototype[File], regExp: ExpandedString = ".*") =
+  def apply(path: ExpandedString, prototype: Prototype[Array[File]], regExp: ExpandedString = ".*") =
     new SourceBuilder {
       addOutput(prototype)
       override def toSource: ISource = new ListFilesSource(path, prototype, regExp) with Built
     }
 
 }
-abstract class ListFilesSource(path: ExpandedString, prototype: Prototype[File], regExp: ExpandedString) extends Source {
+abstract class ListFilesSource(path: ExpandedString, prototype: Prototype[Array[File]], regExp: ExpandedString) extends Source {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
     val expandedPath = executionContext.relativise(path.from(context))
     val expandedRegExp = regExp.from(context)
     Variable(
-      prototype.toArray,
+      prototype,
       expandedPath.listFiles.filter(_.getName.matches(expandedRegExp))
     )
   }
