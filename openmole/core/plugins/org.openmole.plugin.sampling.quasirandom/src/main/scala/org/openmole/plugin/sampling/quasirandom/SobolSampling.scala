@@ -31,24 +31,22 @@ import scala.util.Random
 
 object SobolSampling {
 
-  def apply(samples: String, factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
+  def apply(samples: FromContext[Int], factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
     new SobolSampling(samples, factors: _*)
 
 }
 
-sealed class SobolSampling(val samples: String, val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
-
-  @transient lazy val samplesValue = GroovyProxyPool(samples)
+sealed class SobolSampling(val samples: FromContext[Int], val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
 
   override def inputs = DataSet(factors.flatMap(_.inputs))
   override def prototypes = factors.map { _.prototype }
 
   override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[Double]]] = {
     val sequence = new SobolSequenceGenerator(factors.size)
-    val samples = samplesValue(context).asInstanceOf[Int]
+    val s = samples.from(context)
 
     for {
-      v ← Iterator.continually(sequence.nextVector()).take(samples)
+      v ← Iterator.continually(sequence.nextVector()).take(s)
     } yield (factors zip v).map {
       case (f, v) ⇒ Variable(f.prototype, v.scale(f.domain.min(context), f.domain.max(context)))
     }
