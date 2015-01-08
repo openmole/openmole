@@ -123,7 +123,7 @@ object Pages extends Page() { index =>
   def console =
     new Page {
       def name = "console"
-      def children = Seq(task, sampling, transition, hook, environment)
+      def children = Seq(task, sampling, transition, hook, environment, sources)
 
       def content = documentation.console.Console()
       def task = new Page {
@@ -210,6 +210,12 @@ object Pages extends Page() { index =>
           def content = documentation.console.environment.DesktopGrid()
         }
 
+      }
+
+      def sources = new Page {
+        def name = "source"
+        def children = Seq()
+        def content = documentation.console.Source()
       }
     }
 

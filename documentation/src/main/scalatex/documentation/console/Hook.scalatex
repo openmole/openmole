@@ -2,7 +2,7 @@
 @import documentation.Objects._
 
 @sect{Hook}
-  Task are mute pieces of software as there are not conceived to write files or display values or have any side effects at all. Their role is to compute some output data from the input data. That's what guaranty that their executions can be deported on other computer. To save your results, you should use the hooks. Hooks are conceived to perform listen to perform some action when a task is finished.
+  Task are mute pieces of software. It means that there are not conceived to write files or display values or have any side effects at all. Their role is to compute some output data from the input data. That's what guaranty that their executions can be deported on other computer. To save your results, you should use the hooks. Hooks are conceived to perform listen to perform some action when a task is finished.
   @sect{Plug a hook}
      Let consider this simple workflow:
      @br @hl.openmole("""
@@ -11,10 +11,10 @@
      import org.openmole.plugin.hook.display._
 
      val i = Val[Int]
-     val hello = ScalaTask("i = i * 2")
-
-     hello addInput i
-     hello addOutput i
+     val hello = ScalaTask("i = i * 2") set (
+       inputs += i,
+       outputs += i
+     )
 
      val exploration = ExplorationTask(i in (0 to 9))
 

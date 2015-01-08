@@ -3,7 +3,7 @@
 @sect{Task}
     This documentation explains how you can embed your programs and compose them in simple OpenMOLE workflows.
 
-    @p A workflow is a set of tasks linked with each other through transitions. At the higher level tasks comprise inputs, outputs and  optional default values. Tasks are the atomic computing element of OpenMOLE. They describe what OpenMOLE should execute and delegate to remote environments. They embed your own programs. Depending on what kind of program (binary executable, java...) you want to embed in OpenMOLE you have to choose the matching task. The execution of the tasks depends of inputs variables which are provided by the dataflow and each task produce outputs which are provided to the dataflow and transmited to the input of other tasks.
+    @p A workflow is a set of tasks linked with each other through transitions. At the higher level tasks comprise inputs, outputs and  optional default values. Tasks are the atomic computing element of OpenMOLE. They describe what OpenMOLE should execute and delegate to remote environments. They embed your own programs. Depending on what kind of program (binary executable, java...) you want to embed in OpenMOLE you have to choose the matching task. The execution of the tasks depends of inputs variables which are provided by the dataflow and each task produce outputs which are provided to the dataflow and transmitted to the input of other tasks.
 
     @p Lets begin by a very useless task that does nothing:
     @br @hl.openmole("""
