@@ -29,8 +29,8 @@ package external {
 
   trait ExternalPackage {
     implicit def inputsFileDecorator(i: builder.inputs.type) = {
-      def +=(p: Prototype[File], name: ExpandedString, link: Boolean = false) =
-        (_: ExternalTaskBuilder).addInput(p, name, link)
+      def +=[T <: ExternalTaskBuilder](p: Prototype[File], name: ExpandedString, link: Boolean = false) =
+        (_: T).addInput(p, name, link)
     }
 
     implicit def outputsFileDecorator(i: builder.outputs.type) =
@@ -38,8 +38,8 @@ package external {
 
     lazy val resources =
       new {
-        def +=(file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()) =
-          (_: ExternalTaskBuilder).addResource(file, name, link, os)
+        def +=[T <: ExternalTaskBuilder](file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()) =
+          (_: T).addResource(file, name, link, os)
       }
   }
 }
