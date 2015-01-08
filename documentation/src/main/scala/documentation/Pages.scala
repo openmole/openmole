@@ -226,13 +226,19 @@ object Pages extends Page() { index =>
 
     def development = new Page {
       def name = "development"
-      def children = Seq(compilation)
+      def children = Seq(compilation, plugin)
       def content = documentation.development.Development()
 
       def compilation = new Page {
         def name = "compilation"
         def children = Seq()
         def content = documentation.development.Compilation()
+      }
+
+      def plugin = new Page {
+        def name = "plugin"
+        def children = Seq()
+        def content = documentation.development.Plugin()
       }
     }
 
