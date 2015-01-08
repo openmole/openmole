@@ -92,12 +92,7 @@ abstract class Page(implicit p: Page.Parent = Page.Parent(None)) {
 
   def content: Frag
   def name: String
-  def children: Seq[Page] =
-    for {
-      m <- getClass.getMethods
-      if classOf[Page].isAssignableFrom(m.getReturnType)
-      if m.getParameterCount == 0
-    }  yield m.invoke(this).asInstanceOf[Page]
+  def children: Seq[Page]
 
   def apply() = content
 
@@ -128,78 +123,95 @@ object Pages extends Page() { index =>
 
   def name = "documentation"
   def content = Index()
+  def children = Seq(console, development)
 
   def console =
     new Page {
       def name = "console"
+      def children = Seq(task, sampling, transition, hook, environment, sources)
 
       def content = documentation.console.Console()
       def task = new Page {
         def name = "task"
+        def children = Seq(scala, systemExec, netLogo, mole)
         def content = documentation.console.Task()
 
         def scala = new Page {
           def name = "scala"
+          def children = Seq()
           def content = documentation.console.task.Scala()
         }
 
         def systemExec = new Page {
           def name = "systemexec"
+          def children = Seq()
           def content = documentation.console.task.SystemExec()
         }
 
         def netLogo = new Page {
           def name = "netlogo"
+          def children = Seq()
           def content = documentation.console.task.NetLogo()
         }
 
         def mole = new Page {
           def name = "mole"
+          def children = Seq()
           def content = documentation.console.task.MoleTask()
         }
       }
 
       def sampling = new Page {
         def name = "sampling"
+        def children = Seq()
         def content = documentation.console.Sampling()
       }
 
       def transition = new Page {
         def name = "transition"
+        def children = Seq()
         def content = documentation.console.Transition()
       }
 
       def hook = new Page {
         def name = "hook"
+        def children = Seq()
         def content = documentation.console.Hook()
       }
 
       def environment = new Page {
         def name = "environment"
+
+        def children = Seq(multithread, ssh, egi, cluster, desktopGrid)
         def content = documentation.console.Environment()
 
         def multithread = new Page {
           def name = "multi-thread"
+          def children = Seq()
           def content = documentation.console.environment.Multithread()
         }
 
         def ssh = new Page {
           def name = "SSH"
+          def children = Seq()
           def content = documentation.console.environment.SSH()
         }
 
         def egi = new Page {
           def name = "EGI"
+          def children = Seq()
           def content = documentation.console.environment.EGI()
         }
 
         def cluster = new Page {
           def name = "cluster"
+          def children = Seq()
           def content = documentation.console.environment.Cluster()
         }
 
         def desktopGrid = new Page {
           def name = "desktop grid"
+          def children = Seq()
           def content = documentation.console.environment.DesktopGrid()
         }
 
@@ -207,16 +219,19 @@ object Pages extends Page() { index =>
 
       def sources = new Page {
         def name = "source"
+        def children = Seq()
         def content = documentation.console.Source()
       }
     }
 
     def development = new Page {
       def name = "development"
+      def children = Seq(compilation)
       def content = documentation.development.Development()
 
       def compilation = new Page {
         def name = "compilation"
+        def children = Seq()
         def content = documentation.development.Compilation()
       }
     }
