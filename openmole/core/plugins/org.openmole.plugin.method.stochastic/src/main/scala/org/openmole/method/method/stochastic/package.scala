@@ -53,7 +53,7 @@ package object stochastic extends StatisticsPackage {
 
     val explorationCapsule = StrainerCapsule(exploration)
     val aggregationCapsule = Slot(StrainerCapsule(aggregation))
-    explorationCapsule -< model >- aggregationCapsule + explorationCapsule oo aggregationCapsule
+    explorationCapsule -< model >- aggregationCapsule //+ explorationCapsule oo aggregationCapsule
   }
 
   def Replicate(
@@ -72,7 +72,7 @@ package object stochastic extends StatisticsPackage {
 
     val explorationCapsule = StrainerCapsule(exploration)
     val aggregationCapsule = Slot(StrainerCapsule(EmptyTask() set { _.setName(name + "Aggregation") }))
-    explorationCapsule -< model >- aggregationCapsule + explorationCapsule oo aggregationCapsule
+    explorationCapsule -< model >- aggregationCapsule //+ explorationCapsule oo aggregationCapsule
   }
 
 }
