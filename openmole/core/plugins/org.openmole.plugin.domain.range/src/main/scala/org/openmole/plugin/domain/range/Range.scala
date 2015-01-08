@@ -22,26 +22,20 @@ import org.openmole.misc.tools.io.FromString
 
 object Range {
 
-  def apply[T](min: T, max: T)(implicit integral: Integral[T]) =
-    new Range[T](FromContext(min), FromContext(max))
-
-  def apply[T](min: T, max: T, step: T)(implicit integral: Integral[T]): StepRange[T] =
-    StepRange[T](Range(min, max), step)
+  def apply[T](
+    min: FromContext[T],
+    max: FromContext[T])(implicit integral: Integral[T]) = new Range[T](min, max)
 
   def apply[T](
-    min: String,
-    max: String)(implicit integral: Integral[T], fs: FromString[T]) = new Range[T](min, max)
-
-  def apply[T](
-    min: String,
-    max: String,
-    step: String)(implicit integral: Integral[T], fs: FromString[T]): StepRange[T] =
+    min: FromContext[T],
+    max: FromContext[T],
+    step: FromContext[T])(implicit integral: Integral[T]): StepRange[T] =
     StepRange[T](Range[T](min, max), step)
 
   def steps[T](
-    min: String,
-    max: String,
-    steps: String)(implicit integral: Integral[T], fs: FromString[T]): SizeRange[T] =
+    min: FromContext[T],
+    max: FromContext[T],
+    steps: FromContext[T])(implicit integral: Integral[T], fs: FromString[T]): SizeRange[T] =
     SizeRange[T](Range[T](min, max), steps)
 
 }

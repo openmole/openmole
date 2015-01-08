@@ -22,8 +22,7 @@ import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.io.FromString
 
 object StepRange {
-  def apply[T](range: Range[T], step: T) = new StepRange[T](range, FromContext(step))
-  def apply[T](range: Range[T], step: String)(implicit fromString: FromString[T]) = new StepRange[T](range, step)
+  def apply[T](range: Range[T], step: FromContext[T]) = new StepRange[T](range, step)
 }
 
 class StepRange[T](val range: Range[T], steps: FromContext[T]) extends SizeStep[T] with Bounded[T] {

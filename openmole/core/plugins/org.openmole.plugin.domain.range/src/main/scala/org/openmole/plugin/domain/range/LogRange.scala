@@ -27,16 +27,16 @@ import scala.util.Random
 
 object LogRange {
 
-  def apply[T](range: Range[T], steps: String)(implicit lg: Log[T], fs: FromString[T]) =
+  def apply[T](range: Range[T], steps: FromContext[T])(implicit lg: Log[T]) =
     new LogRange[T](range, steps)
 
   def apply[T](range: Range[T], steps: T)(implicit lg: Log[T]) =
     new LogRange[T](range, FromContext(steps))
 
   def apply[T](
-    min: String,
-    max: String,
-    steps: String)(implicit integral: Integral[T], log: Log[T], fs: FromString[T]): LogRange[T] =
+    min: FromContext[T],
+    max: FromContext[T],
+    steps: FromContext[T])(implicit integral: Integral[T], log: Log[T]): LogRange[T] =
     LogRange[T](Range[T](min, max), steps)
 
 }
