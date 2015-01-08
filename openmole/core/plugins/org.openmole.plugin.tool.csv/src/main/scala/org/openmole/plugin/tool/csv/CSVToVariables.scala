@@ -80,6 +80,6 @@ trait CSVToVariables {
     classOf[Long] -> ((_: String).toLong))
 
   def converter[T](p: Prototype[_]): String ⇒ _ =
-    conveters.getOrElse(p.`type`.erasure, throw new UserBadDataError("Unmanaged type for csv sampling for column binded to prototype " + p))
+    conveters.getOrElse(p.`type`.runtimeClass, throw new UserBadDataError("Unmanaged type for csv sampling for column binded to prototype " + p))
 
 }

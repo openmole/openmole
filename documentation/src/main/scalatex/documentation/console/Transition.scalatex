@@ -12,7 +12,7 @@
     val d = Val[Double]
     val e = Val[Double]
 
-    val t1 = ScalaTask("val d = 42") set ( outputs += d )
+    val t1 = ScalaTask("val d = 42.0") set ( outputs += d )
     val t2 = ScalaTask("val e = d / 42") set ( inputs += d, outputs += e)
 
     val ex = t1 -- (t2 hook ToStringHook()) start""")
