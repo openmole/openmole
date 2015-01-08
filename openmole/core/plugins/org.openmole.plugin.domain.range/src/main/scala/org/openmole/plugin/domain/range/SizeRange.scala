@@ -22,9 +22,9 @@ import org.openmole.core.model.data._
 import org.openmole.core.implementation.tools._
 
 object SizeRange {
-  def apply[T](min: FromContext[T], max: FromContext[T], size: FromContext[Int]): SizeRange[T] =
+  def apply[T](min: FromContext[T], max: FromContext[T], size: FromContext[Int])(implicit integral: Integral[T]): SizeRange[T] =
     apply(Range(min, max), size)
-  
+
   def apply[T](range: Range[T], size: FromContext[Int]): SizeRange[T] =
     new SizeRange[T](range, size)
 }
