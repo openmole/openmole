@@ -52,7 +52,7 @@ package object stochastic extends StatisticsPackage {
     }
 
     val explorationCapsule = StrainerCapsule(exploration)
-    val aggregationCapsule = Slot(StrainerCapsule(aggregation))
+    val aggregationCapsule = Slot(Capsule(aggregation))
     explorationCapsule -< model >- aggregationCapsule //+ explorationCapsule oo aggregationCapsule
   }
 
@@ -71,7 +71,7 @@ package object stochastic extends StatisticsPackage {
     }
 
     val explorationCapsule = StrainerCapsule(exploration)
-    val aggregationCapsule = Slot(StrainerCapsule(EmptyTask() set { _.setName(name + "Aggregation") }))
+    val aggregationCapsule = Slot(Capsule(EmptyTask() set { _.setName(name + "Aggregation") }))
     explorationCapsule -< model >- aggregationCapsule //+ explorationCapsule oo aggregationCapsule
   }
 

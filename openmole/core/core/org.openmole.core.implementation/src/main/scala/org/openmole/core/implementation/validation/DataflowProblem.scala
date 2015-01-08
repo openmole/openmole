@@ -105,7 +105,7 @@ object DataflowProblem {
       input: Data[_],
       found: Prototype[_]) extends HookProblem {
 
-    override def toString = s"Input has incompatible type $found whereas $input was expected"
+    override def toString = s"Input has incompatible type $found whereas $input was expected for hook $hook of capsule $capsule"
   }
 
   case class OptionalHookOutput(
@@ -113,7 +113,7 @@ object DataflowProblem {
       hook: IHook,
       data: Data[_]) extends HookProblem {
 
-    override def toString = s"Input $data is provided by an optional output for misc $hook of capsule $capsule and no default value (parameter) is provided."
+    override def toString = s"Input $data is provided by an optional output for misc $hook of capsule $capsule and no default value (parameter) is provided"
   }
 
   case class MissingMoleTaskImplicit(
