@@ -15,19 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.source
+
+package org.openmole.plugin.source.file
 
 import java.io.File
 
-import org.openmole.core.implementation.tools.ExpandedString
-import org.openmole.core.model.data.Prototype
-import org.openmole.plugin.tool.csv.CSVPackage
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.tools._
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 
-package object file extends CSVPackage {
+import scala.collection.mutable.ListBuffer
 
-  def listedDirectories = new {
-    def +=(path: ExpandedString, prototype: Prototype[File], regExp: ExpandedString = ".*") =
-      (_: ListFilesSourceBuilder).addListedDirectory(path, prototype, regExp)
+class ListFilesSourceBuilder extends SourceBuilder {
+  private val _directories = new ListBuffer[(ExpandedString, ExpandedString, Prototype[File])]
+
+  def addListedDirectory(path: ExpandedString, prototype: Prototype[File], regExp: ExpandedString = ".*") = {
+    addOutput(prototype.toArray)
+    _directories += ((path, regExp, prototype))
   }
+
+  def toSource =
+    new ListFilesSource with Built {
+      val directory = _directories.toList
+    }
 
 }
