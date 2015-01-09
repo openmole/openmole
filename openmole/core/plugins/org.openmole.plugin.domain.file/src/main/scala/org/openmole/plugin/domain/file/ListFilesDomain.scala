@@ -18,9 +18,10 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
-import org.openmole.core.implementation.tools._
+import org.openmole.core.model.tools._
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
+import org.openmole.core.model.tools.ExpandedString
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 import org.openmole.misc.tools.io.FileUtil._

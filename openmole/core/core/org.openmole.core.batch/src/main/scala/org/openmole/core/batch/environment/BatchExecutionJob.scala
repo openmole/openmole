@@ -18,7 +18,8 @@
 package org.openmole.core.batch.environment
 
 import org.openmole.core.batch.jobservice._
-import org.openmole.core.implementation.execution._
+import org.openmole.core.model.execution._
+import org.openmole.core.model.execution.ExecutionJob
 import org.openmole.core.model.job._
 
 class BatchExecutionJob(val environment: BatchEnvironment, val job: IJob) extends ExecutionJob {

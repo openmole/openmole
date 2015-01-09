@@ -19,10 +19,10 @@ package org.openmole.plugin.hook.file
 
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 import org.openmole.core.model.data._
 import org.openmole.misc.exception._
-import org.openmole.core.implementation.mole._
+import org.openmole.core.model.mole._
 import org.openmole.core.model.mole.ExecutionContext
 
 object DeleteFileHook {

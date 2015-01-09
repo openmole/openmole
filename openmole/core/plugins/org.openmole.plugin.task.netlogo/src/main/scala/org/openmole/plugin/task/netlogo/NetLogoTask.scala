@@ -19,10 +19,11 @@ package org.openmole.plugin.task.netlogo
 
 import java.io.File
 import java.util.AbstractCollection
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.tools._
+import org.openmole.core.model.data._
+import org.openmole.core.model.tools._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
+import org.openmole.core.model.tools.{ VariableExpansion, ExpandedString }
 import org.openmole.plugin.task.external._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.OS

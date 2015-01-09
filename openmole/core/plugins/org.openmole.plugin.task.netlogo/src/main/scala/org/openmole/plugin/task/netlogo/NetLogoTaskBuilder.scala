@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task.netlogo
 
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 import org.openmole.core.model.data.Prototype
 import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer

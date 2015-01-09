@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.domain.collection
 
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 

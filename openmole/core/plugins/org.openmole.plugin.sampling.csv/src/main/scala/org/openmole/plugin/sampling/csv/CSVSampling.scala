@@ -18,7 +18,7 @@
 package org.openmole.plugin.sampling.csv
 
 import java.io.File
-import org.openmole.core.implementation.builder.SamplingBuilder
+import org.openmole.core.model.builder.SamplingBuilder
 import org.openmole.plugin.tool.csv.CSVToVariables
 
 import scala.collection.mutable.HashMap
@@ -28,7 +28,7 @@ import org.openmole.core.model.data._
 import java.io.FileReader
 import java.math.BigInteger
 import java.math.BigDecimal
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 import au.com.bytecode.opencsv.CSVReader
 import collection.JavaConversions._

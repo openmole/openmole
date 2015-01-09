@@ -17,9 +17,10 @@
 
 package org.openmole.plugin.domain.range
 
+import org.openmole.core.model.tools.FromContext
 import org.openmole.misc.tools.io.FromString
 import org.openmole.core.model.data._
-import org.openmole.core.implementation.tools._
+import org.openmole.core.model.tools._
 
 object SizeRange {
   def apply[T](min: FromContext[T], max: FromContext[T], size: FromContext[Int])(implicit integral: Integral[T]): SizeRange[T] =

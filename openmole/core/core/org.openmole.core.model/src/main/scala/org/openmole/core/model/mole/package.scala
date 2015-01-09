@@ -17,6 +17,13 @@
 
 package org.openmole.core.model
 
+import org.openmole.core.model.builder._
+import org.openmole.core.model.execution._
+import org.openmole.core.model.execution.local._
+import org.openmole.core.model.puzzle._
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
+
 package object mole {
 
   case class Hooks(map: Map[ICapsule, Traversable[IHook]])
@@ -35,5 +42,32 @@ package object mole {
   object Sources {
     def empty = Map.empty[ICapsule, Traversable[ISource]]
   }
+
+  implicit def default = LocalEnvironment.default
+  implicit lazy val local = ExecutionContext(System.out, None)
+
+  implicit def slotToCapsuleConverter(slot: Slot) = slot.capsule
+
+  class PuzzleDecorator(puzzle: Puzzle) {
+    def on(env: Environment) =
+      puzzle.copy(environments = puzzle.environments ++ puzzle.lasts.map(_ -> env))
+    def hook(hooks: IHook*) =
+      puzzle.copy(hooks = puzzle.hooks.toList ::: puzzle.lasts.flatMap(c ⇒ hooks.map(c -> _)).toList)
+    def source(sources: ISource*) =
+      puzzle.copy(sources = puzzle.sources.toList ::: puzzle.lasts.flatMap(c ⇒ sources.map(c -> _)).toList)
+  }
+
+  implicit def puzzleMoleExecutionDecoration(puzzle: Puzzle) = new PuzzleDecorator(puzzle)
+  implicit def capsuleMoleExecutionDecoration(capsule: ICapsule) = new PuzzleDecorator(capsule.toPuzzle)
+  implicit def slotPuzzleDecoration(slot: Slot) = new PuzzleDecorator(slot.toPuzzle)
+  implicit def taskMoleExecutionDecoration(task: ITask): PuzzleDecorator = new PuzzleDecorator(task.toCapsule.toPuzzle)
+  implicit def taskMoleBuilderDecoration(taskBuilder: TaskBuilder) = new PuzzleDecorator(taskBuilder.toTask.toCapsule.toPuzzle)
+
+  implicit def puzzleMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
+  implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole
+  implicit def moleToMoleExecutionConverter(mole: IMole) = MoleExecution(mole)
+
+  implicit def hookBuilderToHookConverter(hb: HookBuilder) = hb.toHook
+  implicit def sourceBuilderToSourceConverter(sb: SourceBuilder) = sb.toSource
 
 }

@@ -21,7 +21,7 @@ import fr.iscpif.mgo._
 import fr.iscpif.mgo.modelfamily._
 import org.openmole.plugin.method.evolution._
 import org.openmole.core.model.data._
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 
 import scala.util.Random
 

@@ -18,9 +18,8 @@
 package org.openmole.plugin.source
 
 import java.io.File
-
-import org.openmole.core.implementation.tools.ExpandedString
 import org.openmole.core.model.data.Prototype
+import org.openmole.core.model.tools.ExpandedString
 import org.openmole.plugin.tool.csv.CSVPackage
 
 package object file extends CSVPackage

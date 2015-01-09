@@ -20,7 +20,7 @@ package org.openmole.plugin.method.abc
 import org.openmole.core.model.sampling._
 import fr.iscpif.scalabc.algorithm._
 import org.openmole.core.model.data._
-import org.openmole.core.implementation.task._
+import org.openmole.core.model.task._
 import org.openmole.misc.tools.service.Random._
 
 import scala.util.Random

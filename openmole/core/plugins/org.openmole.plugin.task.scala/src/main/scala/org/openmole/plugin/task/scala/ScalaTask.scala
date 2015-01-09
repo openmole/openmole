@@ -24,8 +24,8 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.openmole.misc.tools.io.StringBuilderOutputStream
 import org.openmole.misc.tools.script._
 import org.openmole.plugin.task.code._

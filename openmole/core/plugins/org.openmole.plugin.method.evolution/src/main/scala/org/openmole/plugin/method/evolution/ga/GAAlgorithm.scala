@@ -21,7 +21,7 @@ import fr.iscpif.mgo._
 import org.openmole.plugin.method.evolution.algorithm._
 import org.openmole.plugin.method.evolution._
 import org.openmole.core.model.data._
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 import org.openmole.plugin.method.evolution._
 
 trait GAAlgorithm extends Archive

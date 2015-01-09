@@ -17,20 +17,20 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.puzzle._
-import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.implementation.transition._
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.puzzle._
+import org.openmole.core.model.task._
+import org.openmole.core.model.tools._
+import org.openmole.core.model.transition._
+import org.openmole.core.model.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
+import org.openmole.core.model.validation.{ Validation, DataflowProblem }
 import org.openmole.plugin.task.statistics._
-import org.openmole.core.implementation.validation.Validation
-import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
+import DataflowProblem.MissingInput
 
 package object stochastic extends StatisticsPackage {
 

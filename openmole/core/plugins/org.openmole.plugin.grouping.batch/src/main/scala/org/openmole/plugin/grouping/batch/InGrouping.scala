@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.grouping.batch
 
-import org.openmole.core.implementation.mole._
+import org.openmole.core.model.mole._
 import org.openmole.core.model.data._
 import org.openmole.core.model.job._
 import org.openmole.core.model.mole._

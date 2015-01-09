@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.domain.collection
 
-import org.openmole.core.implementation.tools.FromContext
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
+import org.openmole.core.model.tools.FromContext
 
 import scala.util.Random
 

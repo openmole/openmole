@@ -17,11 +17,12 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
+import org.openmole.core.model.tools._
+import org.openmole.core.model.data._
+import org.openmole.core.model.tools.ExpandedString
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.implementation.mole._
+import org.openmole.core.model.mole._
 import org.openmole.core.model.mole.ExecutionContext
 
 object AppendArrayToFileHook {

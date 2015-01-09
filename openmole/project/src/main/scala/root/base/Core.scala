@@ -16,25 +16,19 @@ object Core extends BaseDefaults {
 
   override val dir = file("core/core")
 
-  lazy val model = OsgiProject("model", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn
-    (eventDispatcher, exception, Misc.tools, updater, Misc.workspace, Misc.macros)
+  lazy val model = OsgiProject("model", openmoleScope = Some("provided"), imports = Seq("*")) settings (
+    includeOsgi,
+    libraryDependencies ++= Seq(scalaLang, groovy, Apache.math)
+  ) dependsOn
+    (Misc.eventDispatcher, Misc.exception, Misc.tools, Misc.updater, Misc.workspace, Misc.macros, Misc.pluginManager, serializer, Misc.replication % "test")
 
   lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided")) settings
     (includeOsgi,
       libraryDependencies += xstream) dependsOn
-      (model, workspace, pluginManager, fileService, Misc.tools, iceTar)
+      (workspace, pluginManager, fileService, Misc.tools, iceTar)
 
-  lazy val implementation = OsgiProject("implementation", openmoleScope = Some("provided"), imports = Seq("*")) settings
-    (includeOsgi,
-      libraryDependencies ++= Seq(scalaLang, groovy, Apache.math)) dependsOn
-      (model, workspace, exception, eventDispatcher,
-        serializer, pluginManager, Misc.replication % "test") //TODO: THINGS REALLY DEPEND ON THESE LIBS. Deal with it
-
-  lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (implementation,
-    workspace, Misc.tools, eventDispatcher, replication, updater, Misc.exception,
+  lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (
+    model, workspace, Misc.tools, eventDispatcher, replication, updater, Misc.exception,
     serializer, fileService, pluginManager, iceTar) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick, Apache.config))
-
-  // lazy val convenience = OsgiProject("convenience", openmoleScope = Some("provided"), buddyPolicy = Some("global")) settings
-  //  (libraryDependencies += scalaLang, includeOsgi) dependsOn (implementation /*, scalaCompiler*/ , Misc.macros)
 
 }

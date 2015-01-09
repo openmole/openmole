@@ -33,7 +33,7 @@ import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.misc.tools.service._
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.storage._
-import org.openmole.core.implementation.execution.local._
+import org.openmole.core.model.execution.local._
 import org.openmole.core.batch.message._
 import org.openmole.misc.tools.service.Retry
 import org.openmole.core.serializer._

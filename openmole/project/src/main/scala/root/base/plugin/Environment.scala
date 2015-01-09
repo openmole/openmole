@@ -19,7 +19,7 @@ object Environment extends PluginDefaults {
     Misc.workspace, Misc.fileService, gridscale) settings (
       libraryDependencies ++= Seq(Libraries.gridscaleGlite, Libraries.gridscaleDirac, Libraries.gridscaleHTTP, Libraries.scalaLang % "provided"))
 
-  lazy val gridscale = OsgiProject("gridscale") dependsOn (Core.model, Misc.workspace, Misc.tools, Core.implementation,
+  lazy val gridscale = OsgiProject("gridscale") dependsOn (Core.model, Misc.workspace, Misc.tools, Core.model,
     provided(Core.batch), Misc.exception)
 
   lazy val pbs = OsgiProject("pbs") dependsOn (Misc.exception, Misc.workspace, Core.batch, gridscale, ssh) settings

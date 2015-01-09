@@ -19,10 +19,10 @@ package org.openmole.plugin.sampling
 
 import java.io.File
 import java.util.Random
-import org.openmole.core.implementation.tools.FromContext
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
+import org.openmole.core.model.tools.FromContext
 import org.openmole.misc.workspace._
 
 package object combine {

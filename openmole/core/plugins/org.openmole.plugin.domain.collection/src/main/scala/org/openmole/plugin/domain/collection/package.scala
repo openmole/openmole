@@ -18,7 +18,7 @@
 package org.openmole.plugin.domain
 
 import org.openmole.core.model.data._
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
 

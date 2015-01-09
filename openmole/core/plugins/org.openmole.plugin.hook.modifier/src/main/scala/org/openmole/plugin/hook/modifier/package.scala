@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.hook
 
-import org.openmole.core.implementation.mole.HookBuilder
-import org.openmole.core.implementation.transition.Condition
+import org.openmole.core.model.mole.HookBuilder
+import org.openmole.core.model.transition.Condition
 import org.openmole.core.model.mole.IHook
 import org.openmole.core.model.transition.ICondition
 

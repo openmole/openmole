@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 

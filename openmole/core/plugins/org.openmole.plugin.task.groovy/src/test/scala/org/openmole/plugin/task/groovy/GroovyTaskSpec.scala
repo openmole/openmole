@@ -19,8 +19,8 @@ package org.openmole.plugin.task.groovy
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 
 import org.scalatest.FlatSpec
 import org.scalatest._

@@ -19,7 +19,7 @@ package org.openmole.plugin.domain.range
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
-import org.openmole.core.implementation.tools._
+import org.openmole.core.model.tools._
 
 import scala.util.Random
 

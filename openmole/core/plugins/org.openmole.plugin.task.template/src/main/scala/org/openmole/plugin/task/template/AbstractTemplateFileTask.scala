@@ -20,11 +20,13 @@ package org.openmole.plugin.task.template
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task._
 import org.openmole.core.model.data._
+import org.openmole.core.model.task._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task.Task
+import org.openmole.core.model.tools.VariableExpansion
 import org.openmole.misc.workspace._
-import org.openmole.core.implementation.tools.VariableExpansion._
+import VariableExpansion._
 
 abstract class AbstractTemplateFileTask extends Task {
 

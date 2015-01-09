@@ -18,9 +18,10 @@
 package org.openmole.plugin.hook.display
 
 import org.openmole.core.model.data._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.implementation.mole._
+import org.openmole.core.model.tools._
 import org.openmole.core.model.mole._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.tools.ExpandedString
 
 object DisplayHook {
 

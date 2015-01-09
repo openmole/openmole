@@ -20,9 +20,9 @@ package org.openmole.plugin.hook.file
 import java.io.File
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.task._
 import org.openmole.core.model.data.Context
 import org.openmole.misc.tools.io.HashService
 import HashService._

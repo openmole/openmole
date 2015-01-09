@@ -26,7 +26,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
-import org.openmole.core.model.task.ITask
 import java.io.File
 
 object PluginConverter extends Logger
@@ -37,7 +36,7 @@ class PluginConverter[A <: { def pluginUsed(f: File) }](serializer: A, reflectio
 
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
     if (PluginManager.isClassProvidedByAPlugin(o.getClass)) PluginManager.pluginsForClass(o.getClass).foreach(serializer.pluginUsed)
-    if (classOf[ITask].isAssignableFrom(o.getClass)) o.asInstanceOf[ITask].plugins.foreach(serializer.pluginUsed)
+    if (classOf[Plugins].isAssignableFrom(o.getClass)) o.asInstanceOf[Plugins].plugins.foreach(serializer.pluginUsed)
     reflectionConverter.marshal(o, writer, mc)
   }
 
@@ -46,6 +45,6 @@ class PluginConverter[A <: { def pluginUsed(f: File) }](serializer: A, reflectio
   }
 
   override def canConvert(c: Class[_]): Boolean =
-    classOf[ITask].isAssignableFrom(c) || PluginManager.isClassProvidedByAPlugin(c)
+    classOf[Plugins].isAssignableFrom(c) || PluginManager.isClassProvidedByAPlugin(c)
 
 }

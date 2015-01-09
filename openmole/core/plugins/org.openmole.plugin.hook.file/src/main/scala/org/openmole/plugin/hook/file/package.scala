@@ -18,9 +18,8 @@
 package org.openmole.plugin.hook
 
 import java.io.File
-
-import org.openmole.core.implementation.tools.ExpandedString
 import org.openmole.core.model.data.Prototype
+import org.openmole.core.model.tools.ExpandedString
 import org.openmole.plugin.hook.file.CopyFileHook.CopyFileHookBuilder
 
 package object file {

@@ -18,11 +18,13 @@
 package org.openmole.plugin.task.external
 
 import java.io.File
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.openmole.core.model.data._
 
-import org.openmole.core.implementation.tools._
+import org.openmole.core.model.tools._
+import org.openmole.core.model.task.Task
+import org.openmole.core.model.tools.ExpandedString
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.OS
 import scala.collection.mutable.ListBuffer

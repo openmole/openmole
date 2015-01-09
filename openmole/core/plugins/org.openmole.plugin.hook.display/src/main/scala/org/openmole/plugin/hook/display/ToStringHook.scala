@@ -19,8 +19,8 @@ package org.openmole.plugin.hook.display
 
 import java.io.PrintStream
 import org.openmole.core.model.data._
-import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.data._
 import org.openmole.core.model.mole.ExecutionContext
 
 object ToStringHook {

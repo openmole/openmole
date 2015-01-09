@@ -17,11 +17,11 @@
 
 package org.openmole.plugin.task.tools
 
-import org.openmole.core.implementation.builder.TaskBuilder
+import org.openmole.core.model.builder.TaskBuilder
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
-import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.task._
+import org.openmole.core.model.data._
 import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
 

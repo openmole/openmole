@@ -18,11 +18,11 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.puzzle._
-import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.transition._
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.puzzle._
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
+import org.openmole.core.model.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.task._

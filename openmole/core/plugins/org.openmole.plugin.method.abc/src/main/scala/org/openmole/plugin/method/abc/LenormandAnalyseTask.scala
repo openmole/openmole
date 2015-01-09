@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.method.abc
 
-import org.openmole.core.implementation.builder.TaskBuilder
-import org.openmole.core.implementation.task._
+import org.openmole.core.model.builder.TaskBuilder
+import org.openmole.core.model.task._
 import org.openmole.core.model.data._
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 import fr.iscpif.scalabc._
 import org.openmole.core.model.task._
 

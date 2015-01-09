@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.core.implementation.builder._
+import org.openmole.core.model.builder._
 import org.openmole.core.model.data.Prototype
 
 import org.openmole.misc.macros.Keyword._

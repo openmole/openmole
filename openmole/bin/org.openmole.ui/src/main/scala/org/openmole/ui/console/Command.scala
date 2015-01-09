@@ -22,19 +22,19 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.implementation.execution.local._
-import org.openmole.core.implementation.validation.Validation
+import org.openmole.core.model.execution.local._
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.job.State
 import org.openmole.core.model.mole.{ ExecutionContext, IMole, IMoleExecution }
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.IExplorationTransition
+import org.openmole.core.model.validation.Validation
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.misc.workspace.Workspace
 import scala.annotation.tailrec
 import scala.collection.mutable.HashMap
 import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.core.implementation.mole.MoleExecution
+import org.openmole.core.model.mole.MoleExecution
 
 class Command {
 

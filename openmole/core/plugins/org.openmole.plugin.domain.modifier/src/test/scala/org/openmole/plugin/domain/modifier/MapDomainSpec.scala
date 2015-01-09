@@ -19,7 +19,7 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 
 import org.scalatest.FlatSpec
 import org.scalatest._

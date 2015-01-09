@@ -31,7 +31,7 @@ import org.osgi.framework._
 import collection.JavaConversions._
 
 /**
- * Helper methods to transform OSGi bundles into {@link AbstractFile} implementations
+ * Helper methods to transform OSGi bundles into {@link AbstractFile} models
  * suitable for use with the Scala compiler
  */
 object BundleClassPathBuilder {

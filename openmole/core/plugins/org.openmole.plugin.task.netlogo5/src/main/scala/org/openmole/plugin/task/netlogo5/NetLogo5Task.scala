@@ -17,13 +17,13 @@
 
 package org.openmole.plugin.task.netlogo5
 
-import org.openmole.core.implementation.tools.ExpandedString
 import org.openmole.core.model.task._
 import org.openmole.core.model.data._
+import org.openmole.core.model.tools.ExpandedString
 import org.openmole.plugin.task.netlogo._
 import org.openmole.plugin.task.external._
 import NetLogoTask.Workspace
-import org.openmole.core.implementation.task._
+import org.openmole.core.model.task._
 import java.io.File
 import collection.JavaConversions._
 import org.openmole.misc.tools.service.OS

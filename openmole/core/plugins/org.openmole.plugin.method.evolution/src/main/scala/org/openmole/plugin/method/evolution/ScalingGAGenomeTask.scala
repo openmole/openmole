@@ -18,10 +18,10 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.core.implementation.builder.TaskBuilder
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.tools._
+import org.openmole.core.model.builder.TaskBuilder
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
+import org.openmole.core.model.tools._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.core.model.sampling._

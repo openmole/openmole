@@ -19,7 +19,7 @@ package org.openmole.plugin.tool.csv
 
 import java.io.File
 
-import org.openmole.core.implementation.builder.{ Builder, InputOutputBuilder, SamplingBuilder }
+import org.openmole.core.model.builder.{ Builder, InputOutputBuilder, SamplingBuilder }
 import org.openmole.core.model.data.Prototype
 
 import scala.collection.mutable.ListBuffer

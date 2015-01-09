@@ -19,7 +19,7 @@ package org.openmole.plugin.hook.modifier
 
 import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.data._
-import org.openmole.core.implementation.mole._
+import org.openmole.core.model.mole._
 import org.openmole.core.model.mole._
 
 object ConditionHook {

@@ -1,6 +1,7 @@
 package org.openmole.web.mole
 
 import _root_.akka.actor.ActorSystem
+import org.openmole.core.model.validation.DataflowProblem
 import org.scalatra._
 import scalate.ScalateSupport
 import servlet.{ FileItem, FileUploadSupport }
@@ -18,7 +19,7 @@ import json.JacksonJsonSupport
 import org.json4s._
 import org.json4s.JsonDSL._
 import org.json4s.{ Formats, DefaultFormats }
-import org.openmole.core.implementation.validation.DataflowProblem.{ MissingSourceInput, MissingInput }
+import DataflowProblem.{ MissingSourceInput, MissingInput }
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.web.Authentication
 import org.openmole.web.db.SlickDB

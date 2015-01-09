@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.grouping.onvariable
 
-import org.openmole.core.implementation.mole._
+import org.openmole.core.model.mole._
 import org.openmole.core.model.job._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.data._

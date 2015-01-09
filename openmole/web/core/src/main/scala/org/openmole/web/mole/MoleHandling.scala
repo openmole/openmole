@@ -1,6 +1,7 @@
 package org.openmole.web.mole
 
-import org.openmole.core.implementation.execution.local.LocalEnvironment
+import org.openmole.core.model.execution.local.LocalEnvironment
+import org.openmole.core.model.validation.{ Validation, DataflowProblem }
 
 import scala.reflect.ClassTag
 import scala.io.{ Codec, Source }
@@ -10,7 +11,6 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException
 import org.openmole.core.model.mole.{ IPartialMoleExecution, IMoleExecution, ExecutionContext }
 import org.openmole.misc.tools.io.FromString
 import org.openmole.core.model.data.{ Context, Prototype, Variable }
-import org.openmole.core.implementation.validation.Validation
 import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
 import org.openmole.misc.eventdispatcher.{ EventListener, EventDispatcher }
 import akka.actor.ActorSystem
@@ -22,8 +22,8 @@ import slick.driver.H2Driver.simple._
 import org.openmole.misc.workspace.Workspace
 import com.ice.tar.{ TarInputStream, Tar }
 import scala.Some
-import org.openmole.core.implementation.validation.DataflowProblem.MissingSourceInput
-import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
+import DataflowProblem.MissingSourceInput
+import DataflowProblem.MissingInput
 import org.scalatra.ScalatraBase
 import org.openmole.web.db.tables.{ MoleData, MoleStats }
 import org.openmole.web.cache.{ Stats, Status, Cache, DataHandler }

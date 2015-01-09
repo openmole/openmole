@@ -20,7 +20,7 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.plugin.tool.groovy.ContextToGroovyCode
-import org.openmole.core.implementation.tools._
+import org.openmole.core.model.tools._
 
 import scala.util.Random
 

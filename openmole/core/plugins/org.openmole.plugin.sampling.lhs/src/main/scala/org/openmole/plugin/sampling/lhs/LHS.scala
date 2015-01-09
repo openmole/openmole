@@ -17,14 +17,16 @@
 
 package org.openmole.plugin.sampling.lhs
 
+import org.openmole.core.model.task.Task
+import org.openmole.core.model.tools.FromContext
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
-import org.openmole.core.implementation.task.Task._
+import Task._
 import org.openmole.misc.tools.script.GroovyProxyPool
-import org.openmole.core.implementation.tools._
+import org.openmole.core.model.tools._
 
 import scala.util.Random
 

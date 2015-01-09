@@ -18,9 +18,10 @@
 package org.openmole.plugin.method.evolution.ga
 
 import org.openmole.core.model.data.{ Variable, Context, Prototype }
+import org.openmole.core.model.tools.FromContext
 import org.openmole.misc.tools.script.{ GroovyProxyPool, GroovyFunction }
 import fr.iscpif.mgo.double2Scalable
-import org.openmole.core.implementation.tools._
+import org.openmole.core.model.tools._
 import util.Try
 
 object InputConverter {

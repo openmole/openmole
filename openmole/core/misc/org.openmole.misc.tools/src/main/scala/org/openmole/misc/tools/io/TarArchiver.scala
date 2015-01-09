@@ -60,7 +60,7 @@ object TarArchiver {
     }
     finally tis.close
 
-    // new implementation using NIO
+    // new model using NIO
     def extractDirArchiveWithRelativePath(baseDir: Path) = {
       if (!Files.isDirectory(baseDir)) throw new IOException(baseDir.toString + " is not a directory.")
 

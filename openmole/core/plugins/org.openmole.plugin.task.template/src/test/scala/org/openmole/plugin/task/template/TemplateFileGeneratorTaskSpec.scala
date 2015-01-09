@@ -18,8 +18,8 @@
 package org.openmole.plugin.task.template
 
 import java.io.File
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.misc.tools.io.HashService

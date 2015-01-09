@@ -17,12 +17,13 @@
 
 package org.openmole.plugin.source.file
 
-import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.data._
 import org.openmole.core.model.data._
 import java.io.File
 import org.openmole.core.model.mole._
-import org.openmole.core.implementation.tools._
+import org.openmole.core.model.tools._
+import org.openmole.core.model.tools.ExpandedString
 import scala.collection.mutable.ListBuffer
 
 object FileSource {

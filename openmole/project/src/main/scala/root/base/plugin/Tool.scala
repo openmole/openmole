@@ -10,7 +10,7 @@ object Tool extends PluginDefaults {
 
   implicit val artifactPrefix = Some("org.openmole.plugin.tool")
 
-  lazy val groovy = OsgiProject("groovy") dependsOn (provided(Misc.exception), provided(Core.implementation)) settings
+  lazy val groovy = OsgiProject("groovy") dependsOn (provided(Misc.exception), provided(Core.model)) settings
     (libraryDependencies += Libraries.groovy % "provided")
 
   lazy val netLogoAPI = OsgiProject("netlogo") settings (autoScalaLibrary := false, crossPaths := false)
@@ -27,7 +27,7 @@ object Tool extends PluginDefaults {
     libraryDependencies ++= Seq(Libraries.netlogo5_noscala)
   )
 
-  lazy val csv = OsgiProject("csv") dependsOn (Misc.exception, Core.implementation) settings (
+  lazy val csv = OsgiProject("csv") dependsOn (Misc.exception, Core.model) settings (
     libraryDependencies += Libraries.opencsv
   )
 

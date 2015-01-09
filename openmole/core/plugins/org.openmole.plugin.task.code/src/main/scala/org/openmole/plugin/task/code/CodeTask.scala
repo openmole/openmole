@@ -18,7 +18,7 @@
 package org.openmole.plugin.task.code
 
 import org.openmole.core.model.data._
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.ExternalTask
 import java.io.File

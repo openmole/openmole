@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.method.evolution.ga
 
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.mole.HookBuilder
-import org.openmole.core.implementation.tools.ExpandedString
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole.HookBuilder
 import org.openmole.core.model.data.Prototype
+import org.openmole.core.model.tools.ExpandedString
 import org.openmole.plugin.hook.file.{ AppendToCSVFileHookBuilder, AppendToCSVFileHook }
 
 object SavePopulationHook {

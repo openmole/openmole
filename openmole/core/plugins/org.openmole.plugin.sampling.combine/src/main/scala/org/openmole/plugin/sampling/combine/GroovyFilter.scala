@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.sampling.combine
 
+import org.openmole.core.model.tools.GroovyContextAdapter
 import org.openmole.misc.tools.script.GroovyProxy
-import org.openmole.core.implementation.tools.GroovyContextAdapter
 import org.openmole.core.model.data.Context
 
 class GroovyFilter(code: String) extends Filter {

@@ -18,9 +18,9 @@
 package org.openmole.core.model.task
 
 import org.openmole.core.model.data._
-import util.Try
+import org.openmole.core.serializer.plugin.Plugins
 
-trait ITask {
+trait ITask <: Plugins {
   /**
    *
    * Perform this task.
