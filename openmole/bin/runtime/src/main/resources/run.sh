@@ -19,7 +19,6 @@ cp -r configuration ${CONFIGDIR}
 
 ulimit -S -v unlimited
 ulimit -S -s unlimited
-ulimit -S -s unlimited
 
 export MALLOC_ARENA_MAX=1
 
