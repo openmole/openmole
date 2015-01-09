@@ -24,6 +24,9 @@ import org.openmole.misc.workspace.Workspace
 
 object Context {
 
+  implicit def variableToContextConverter(variable: Variable[_]) = Context(variable)
+  implicit def variablesToContextConverter(variables: Traversable[Variable[_]]): Context = variables.toContext
+
   def fromMap(v: Traversable[(String, Variable[_])]) = new Context {
     val variables = TreeMap.empty[String, Variable[_]] ++ v
   }

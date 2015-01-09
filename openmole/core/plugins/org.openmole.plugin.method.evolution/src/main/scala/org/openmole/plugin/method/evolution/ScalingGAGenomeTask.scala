@@ -38,7 +38,7 @@ object ScalingGAGenomeTask {
 
     val (_genome) = (genome)
     new TaskBuilder { builder ⇒
-      evolution.inputsPrototypes foreach { i ⇒ this.addOutput(i.prototype) }
+      evolution.inputsPrototypes foreach { p ⇒ addOutput(p) }
       addInput(genome)
       addOutput(genome)
 

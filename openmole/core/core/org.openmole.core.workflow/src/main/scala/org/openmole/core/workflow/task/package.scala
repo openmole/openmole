@@ -22,8 +22,6 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 
 package object task {
-  implicit def taskToCapsuleConverter(task: Task) = new Capsule(task)
-  implicit def taskToPuzzleConverter(task: Task) = new Capsule(task).toPuzzle
 
   implicit class TaskToCapsuleDecorator(task: Task) {
     def toCapsule = new Capsule(task)

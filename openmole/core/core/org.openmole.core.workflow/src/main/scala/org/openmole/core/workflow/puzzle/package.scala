@@ -22,6 +22,10 @@ import org.openmole.core.workflow.mole._
 
 package object puzzle {
 
+  implicit def puzzleDecoration(puzzle: Puzzle) = new {
+    def last = puzzle.lasts.head
+  }
+
   implicit def capsulePuzzleDecorator(capsule: Capsule) = new {
     def toPuzzle: Puzzle =
       Puzzle(
@@ -35,8 +39,6 @@ package object puzzle {
         Map.empty)
   }
 
-  implicit def capsuleToPuzzleConverter(capsule: Capsule) = capsule.toPuzzle
-
   implicit def slotDecorator(slot: Slot) = new {
     def toPuzzle =
       Puzzle(
@@ -48,12 +50,6 @@ package object puzzle {
         Iterable.empty,
         Map.empty,
         Map.empty)
-  }
-
-  implicit def slotToPuzzleConverter(slot: Slot) = slot.toPuzzle
-
-  implicit def puzzleDecoration(puzzle: Puzzle) = new {
-    def last = puzzle.lasts.head
   }
 
 }

@@ -24,6 +24,7 @@ import org.openmole.misc.exception.InternalProcessingError
 object InputOutputCheck {
 
   trait InputError
+
   case class InputNotFound(input: Prototype[_]) extends InputError {
     override def toString = s"Input data $input has not been found"
   }

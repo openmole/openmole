@@ -82,7 +82,7 @@ class SystemExecTaskBuilder(commands: Commands)(implicit plugins: PluginSet) ext
 
   def toTask =
     new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
-      override val outputs = builder.outputs ++ DataSet(List(stdOut, stdErr, returnValue).flatten)
+      override val outputs: DataSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
     }
 
 }

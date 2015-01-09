@@ -19,13 +19,17 @@ package org.openmole.core.workflow.puzzle
 
 import org.openmole.core.workflow.execution.local.LocalEnvironment
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.mole._
 import org.openmole.misc.workspace._
 import org.openmole.core.workflow.execution._
 
 object Puzzle {
+
+  implicit def slotToPuzzleConverter(slot: Slot) = slot.toPuzzle
+  implicit def capsuleToPuzzleConverter(capsule: Capsule) = capsule.toPuzzle
+  implicit def taskToPuzzleConverter(task: Task) = new Capsule(task).toPuzzle
 
   def merge(p1: Puzzle, p2: Puzzle) =
     new Puzzle(

@@ -167,8 +167,8 @@ package object ga {
     val firstCapsule = StrainerCapsule(firstTask)
 
     val breedTask = ExplorationTask(BreedSampling(algorithm)(population, archive, genome, lambda)) set (_.setName(name + "Breed"))
-    breedTask.setDefault(population -> Population.empty[algorithm.G, algorithm.P, algorithm.F])
-    breedTask.setDefault(archive -> algorithm.initialArchive(Workspace.rng))
+    breedTask.setDefault(population, Population.empty[algorithm.G, algorithm.P, algorithm.F])
+    breedTask.setDefault(archive, algorithm.initialArchive(Workspace.rng))
 
     breedTask addInput generation
     breedTask addInput state
@@ -178,7 +178,7 @@ package object ga {
     breedTask addOutput generation
     breedTask addOutput state
 
-    breedTask setDefault (generation -> 0)
+    breedTask setDefault (generation, 0)
     breedTask setDefault Default.delayed(state, algorithm.initialState)
 
     val breedingCaps = Capsule(breedTask)
@@ -221,8 +221,8 @@ package object ga {
     import cs._
 
     val breedTask = ExplorationTask(BreedSampling(algorithm)(population, archive, genome, lambda)) set (_.setName(name + "Breed"))
-    breedTask.setDefault(population -> Population.empty[algorithm.G, algorithm.P, algorithm.F])
-    breedTask.setDefault(archive -> algorithm.initialArchive(Workspace.rng))
+    breedTask.setDefault(population, Population.empty[algorithm.G, algorithm.P, algorithm.F])
+    breedTask.setDefault(archive, algorithm.initialArchive(Workspace.rng))
 
     val firstCapsule = StrainerCapsule(firstTask)
     val scalingCaps = Capsule(scalingGenomeTask)
@@ -234,12 +234,12 @@ package object ga {
     //mergeArchiveTask addParameter (archive -> evolution.initialArchive)
     //val mergeArchiveCaps = MasterCapsule(mergeArchiveTask, archive)
 
-    elitismTask setDefault (population -> Population.empty[algorithm.G, algorithm.P, algorithm.F])
-    elitismTask setDefault (archive -> algorithm.initialArchive(Workspace.rng))
+    elitismTask setDefault (population, Population.empty[algorithm.G, algorithm.P, algorithm.F])
+    elitismTask setDefault (archive, algorithm.initialArchive(Workspace.rng))
     val elitismSlot = Slot(MasterCapsule(elitismTask, population, archive))
 
     terminationTask setDefault Default.delayed(state, algorithm.initialState)
-    terminationTask setDefault generation -> 0
+    terminationTask setDefault (generation, 0)
     terminationTask addOutput archive
     terminationTask addOutput population
 
@@ -348,8 +348,8 @@ package object ga {
       parameters.individual.toArray,
       parameters.archive) set (_.setName(name + "ElitismTask"))
 
-    elitismTask setDefault (population -> Population.empty[evolution.G, evolution.P, evolution.F])
-    elitismTask setDefault (archive -> islandElitism.initialArchive(Workspace.rng))
+    elitismTask setDefault (population, Population.empty[evolution.G, evolution.P, evolution.F])
+    elitismTask setDefault (archive, islandElitism.initialArchive(Workspace.rng))
     val elitismCaps = MasterCapsule(elitismTask, population, archive)
 
     val terminationTask = TerminationTask(islandElitism)(
@@ -360,7 +360,7 @@ package object ga {
       terminated) set (_.setName(name + "TerminationTask"))
 
     terminationTask setDefault Default.delayed(state, islandElitism.initialState)
-    terminationTask setDefault (generation -> 0)
+    terminationTask setDefault (generation, 0)
 
     terminationTask addOutput archive
     terminationTask addOutput population
@@ -374,8 +374,8 @@ package object ga {
     preIslandTask addOutput population
     preIslandTask addOutput archive
 
-    preIslandTask setDefault (population -> Population.empty[evolution.G, evolution.P, evolution.F])
-    preIslandTask setDefault (archive -> evolution.initialArchive(Workspace.rng))
+    preIslandTask setDefault (population, Population.empty[evolution.G, evolution.P, evolution.F])
+    preIslandTask setDefault (archive, evolution.initialArchive(Workspace.rng))
 
     val preIslandCapsule = Capsule(preIslandTask)
 

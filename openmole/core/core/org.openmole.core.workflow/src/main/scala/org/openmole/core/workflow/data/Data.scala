@@ -19,6 +19,9 @@ package org.openmole.core.workflow.data
 
 object Data {
 
+  implicit def prototypeToData[T](p: Prototype[T]) = Data[T](p)
+  implicit def dataToArrayConverter[T](d: Data[T]) = d.toArray
+
   /*implicit lazy val dataOrderingOnName = new Ordering[Data[_]] {
     override def compare(left: Data[_], right: Data[_]) =
       Prototype.prototypeOrderingOnName.compare(left.prototype, right.prototype)

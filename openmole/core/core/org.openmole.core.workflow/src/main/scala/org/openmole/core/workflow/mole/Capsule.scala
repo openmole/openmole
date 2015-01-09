@@ -24,6 +24,9 @@ import org.openmole.core.workflow.transition._
 import org.openmole.misc.exception._
 
 object Capsule {
+
+  implicit def taskToCapsuleConverter(task: Task) = new Capsule(task)
+
   def apply(task: Task) = new Capsule(task)
 }
 

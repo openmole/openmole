@@ -24,6 +24,8 @@ import org.openmole.misc.macros.ExtractValName._
 
 object Prototype {
 
+  implicit def prototypeToArrayConverter[T](p: Prototype[T]) = p.toArray
+
   def apply[T](n: String)(implicit t: Manifest[T]): Prototype[T] = {
     assert(t != null)
     new Prototype[T] {

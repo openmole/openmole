@@ -26,6 +26,9 @@ import scala.collection.immutable.TreeMap
 
 object DataSet {
 
+  implicit def dataIterableDecorator(data: Traversable[Data[_]]) = DataSet(data.toList)
+  implicit def iterableOfPrototypeToIterableOfDataConverter(prototypes: Traversable[Prototype[_]]) = DataSet(prototypes.map { p ⇒ p: Data[_] })
+
   val empty = DataSet(List.empty)
 
   def apply(d: Traversable[Data[_]]): DataSet =

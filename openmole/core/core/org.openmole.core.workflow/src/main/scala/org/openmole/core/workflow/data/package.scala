@@ -35,11 +35,6 @@ package object data {
     c.Expr[Prototype[T]](q"Prototype[$wt](${n})")
   }
 
-  implicit def tupleToParameter[T](t: (Prototype[T], T)) = Default(t._1, t._2)
-  implicit def tuple3ToParameter[T](t: (Prototype[T], T, Boolean)) = Default(t._1, t._2, t._3)
-  implicit def prototypeToData[T](p: Prototype[T]) = Data[T](p)
-  implicit def dataIterableDecorator(data: Traversable[Data[_]]) = DataSet(data.toList)
-  implicit def iterableOfPrototypeToIterableOfDataConverter(prototypes: Traversable[Prototype[_]]) = DataSet(prototypes.map { p ⇒ prototypeToData(p) })
   implicit def prototypeToStringConverter(p: Prototype[_]) = p.name
   implicit def dataToStringConverter(d: Data[_]) = d.prototype.name
 
@@ -79,15 +74,8 @@ package object data {
     def toContext: Context = Context(variables)
   }
 
-  implicit def variableToContextConverter(variable: Variable[_]) = Context(variable)
-
-  implicit def variablesToContextConverter(variables: Traversable[Variable[_]]): Context = variables.toContext
-
   implicit def prototypeDecorator[T](prototype: Prototype[T]) = new {
     def withName(name: String) = Prototype[T](name)(prototype.`type`)
   }
-
-  implicit def prototypeToArrayConverter[T](p: Prototype[T]) = p.toArray
-  implicit def dataToArrayConverter[T](d: Data[T]) = d.toArray
 
 }
