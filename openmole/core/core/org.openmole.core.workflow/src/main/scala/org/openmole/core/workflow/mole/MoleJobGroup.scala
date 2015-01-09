@@ -17,7 +17,6 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.workflow.mole.IMoleJobGroup
 import org.openmole.core.workflow.tools._
 import scala.concurrent.stm._
 
@@ -28,4 +27,4 @@ object MoleJobGroup {
 
 }
 
-case class MoleJobGroup(val values: Any*) extends IMoleJobGroup
+case class MoleJobGroup(val values: Any*)

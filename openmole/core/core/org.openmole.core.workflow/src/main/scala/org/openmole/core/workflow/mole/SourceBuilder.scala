@@ -20,6 +20,6 @@ package org.openmole.core.workflow.mole
 import org.openmole.core.workflow.builder.InputOutputBuilder
 
 abstract class SourceBuilder extends InputOutputBuilder {
-  def toSource: ISource
+  def toSource: Source
 }
 

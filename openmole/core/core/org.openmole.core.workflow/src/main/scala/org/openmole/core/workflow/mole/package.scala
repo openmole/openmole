@@ -26,21 +26,21 @@ import org.openmole.core.workflow.transition._
 
 package object mole {
 
-  case class Hooks(map: Map[ICapsule, Traversable[IHook]])
-  case class Sources(map: Map[ICapsule, Traversable[ISource]])
+  case class Hooks(map: Map[Capsule, Traversable[Hook]])
+  case class Sources(map: Map[Capsule, Traversable[Source]])
 
   implicit def hooksToMap(h: Hooks) = h.map.withDefault(_ ⇒ List.empty)
-  implicit def mapToHooks(m: Map[ICapsule, Traversable[IHook]]) = new Hooks(m)
+  implicit def mapToHooks(m: Map[Capsule, Traversable[Hook]]) = new Hooks(m)
 
   implicit def sourcesToMap(s: Sources) = s.map.withDefault(_ ⇒ List.empty)
-  implicit def mapToSources(m: Map[ICapsule, Traversable[ISource]]) = new Sources(m)
+  implicit def mapToSources(m: Map[Capsule, Traversable[Source]]) = new Sources(m)
 
   object Hooks {
-    def empty = Map.empty[ICapsule, Traversable[IHook]]
+    def empty = Map.empty[Capsule, Traversable[Hook]]
   }
 
   object Sources {
-    def empty = Map.empty[ICapsule, Traversable[ISource]]
+    def empty = Map.empty[Capsule, Traversable[Source]]
   }
 
   implicit def default = LocalEnvironment.default
@@ -51,21 +51,21 @@ package object mole {
   class PuzzleDecorator(puzzle: Puzzle) {
     def on(env: Environment) =
       puzzle.copy(environments = puzzle.environments ++ puzzle.lasts.map(_ -> env))
-    def hook(hooks: IHook*) =
+    def hook(hooks: Hook*) =
       puzzle.copy(hooks = puzzle.hooks.toList ::: puzzle.lasts.flatMap(c ⇒ hooks.map(c -> _)).toList)
-    def source(sources: ISource*) =
+    def source(sources: Source*) =
       puzzle.copy(sources = puzzle.sources.toList ::: puzzle.lasts.flatMap(c ⇒ sources.map(c -> _)).toList)
   }
 
   implicit def puzzleMoleExecutionDecoration(puzzle: Puzzle) = new PuzzleDecorator(puzzle)
-  implicit def capsuleMoleExecutionDecoration(capsule: ICapsule) = new PuzzleDecorator(capsule.toPuzzle)
+  implicit def capsuleMoleExecutionDecoration(capsule: Capsule) = new PuzzleDecorator(capsule.toPuzzle)
   implicit def slotPuzzleDecoration(slot: Slot) = new PuzzleDecorator(slot.toPuzzle)
-  implicit def taskMoleExecutionDecoration(task: ITask): PuzzleDecorator = new PuzzleDecorator(task.toCapsule.toPuzzle)
+  implicit def taskMoleExecutionDecoration(task: Task): PuzzleDecorator = new PuzzleDecorator(task.toCapsule.toPuzzle)
   implicit def taskMoleBuilderDecoration(taskBuilder: TaskBuilder) = new PuzzleDecorator(taskBuilder.toTask.toCapsule.toPuzzle)
 
   implicit def puzzleMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
   implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole
-  implicit def moleToMoleExecutionConverter(mole: IMole) = MoleExecution(mole)
+  implicit def moleToMoleExecutionConverter(mole: Mole) = MoleExecution(mole)
 
   implicit def hookBuilderToHookConverter(hb: HookBuilder) = hb.toHook
   implicit def sourceBuilderToSourceConverter(sb: SourceBuilder) = sb.toSource

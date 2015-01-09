@@ -17,18 +17,15 @@
 
 package org.openmole.core.batch.message
 
-import org.openmole.core.workflow.job.{ MoleJob, IMoleJob, MoleJobId }
-import MoleJob.StateChangedCallBack
 import org.openmole.core.workflow.data.Context
-import org.openmole.core.workflow.job.{ MoleJob, IMoleJob, MoleJobId }
-import org.openmole.core.workflow.task.ITask
+import org.openmole.core.workflow.job.{ MoleJob, MoleJobId }
+import MoleJob.StateChangedCallBack
+import org.openmole.core.workflow.task.Task
 
 object RunnableTask {
-
-  def apply(moleJob: IMoleJob) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
-
+  def apply(moleJob: MoleJob) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
 }
 
-class RunnableTask(val task: ITask, val context: Context, val id: MoleJobId) {
+class RunnableTask(val task: Task, val context: Context, val id: MoleJobId) {
   def toMoleJob(stateChangedCallBack: StateChangedCallBack) = MoleJob(task, context, id, stateChangedCallBack)
 }

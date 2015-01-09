@@ -40,7 +40,7 @@ object InShuffledGrouping {
  */
 class InShuffledGrouping(numberOfBatch: Int) extends Grouping {
 
-  override def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup =
+  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup =
     new MoleJobGroup(newRNG(context(openMOLESeed)).nextInt(numberOfBatch))
 
 }

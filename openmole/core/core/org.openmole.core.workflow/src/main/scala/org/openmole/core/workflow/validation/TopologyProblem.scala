@@ -17,8 +17,8 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.workflow.data.IDataChannel
-import org.openmole.core.workflow.mole.ICapsule
+import org.openmole.core.workflow.data.DataChannel
+import org.openmole.core.workflow.mole.Capsule
 import org.openmole.core.workflow.transition.ITransition
 
 object TopologyProblem {
@@ -29,21 +29,21 @@ object TopologyProblem {
   }
 
   case class LevelProblem(
-      capsule: ICapsule,
-      paths: List[(List[ICapsule], Int)]) extends TopologyProblem {
+      capsule: Capsule,
+      paths: List[(List[Capsule], Int)]) extends TopologyProblem {
 
     override def toString = "LevelProblem: " + capsule + ", " + paths.map { case (p, l) ⇒ "Folowing the path (" + p.mkString(", ") + " has level " + l + ")" }.mkString(", ")
   }
 
   case class NegativeLevelProblem(
-      capsule: ICapsule,
-      path: List[ICapsule],
+      capsule: Capsule,
+      path: List[Capsule],
       level: Int) extends TopologyProblem {
 
     override def toString = "LevelProblem: " + capsule + ", " + path.mkString(", ") + " has a negative level " + level
   }
 
-  case class DataChannelNegativeLevelProblem(dataChannel: IDataChannel) extends TopologyProblem {
+  case class DataChannelNegativeLevelProblem(dataChannel: DataChannel) extends TopologyProblem {
 
     override def toString = "DataChannelNegativeLevelProblem: " + dataChannel + ", links a capsule of upper level to lower level, this is not supported, use aggregation transitions."
   }

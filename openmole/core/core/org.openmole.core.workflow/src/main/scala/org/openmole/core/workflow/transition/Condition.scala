@@ -18,25 +18,43 @@
 package org.openmole.core.workflow.transition
 
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.GroovyContextAdapter
+import org.openmole.core.workflow.tools._
 import org.openmole.misc.tools.script._
 
 object Condition {
 
-  def apply(_code: String) = new Condition {
-    val code = _code
+  val True = new Condition {
+    def evaluate(context: Context): Boolean = true
+  }
+
+  val False = new Condition {
+    def evaluate(context: Context): Boolean = false
+  }
+
+  implicit def function2IConditionConverter(f: Context ⇒ Boolean) = new Condition {
+    override def evaluate(context: Context) = f(context)
+  }
+
+  def apply(code: String) = new Condition {
+    @transient lazy val groovyProxy = new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
+    override def evaluate(context: Context) = groovyProxy.execute(context).asInstanceOf[Boolean]
   }
 
 }
 
-trait Condition extends ICondition {
+trait Condition { c ⇒
 
-  def code: String
+  /**
+   *
+   * Evaluate the value of this condition in a given context.
+   *
+   * @param context the context in which the condition is evaluated
+   * @return the value of this condition
+   */
+  def evaluate(context: Context): Boolean
 
-  @transient lazy val groovyProxy = new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
-
-  override def evaluate(context: Context) = groovyProxy.execute(context).asInstanceOf[Boolean]
-
-  def unary_! = Condition(s"!($code)")
+  def unary_! = new Condition {
+    override def evaluate(context: Context): Boolean = !c.evaluate(context)
+  }
 
 }

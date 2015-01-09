@@ -36,18 +36,18 @@ object Transition extends Logger
 import Transition.Log._
 
 class Transition(
-    val start: ICapsule,
+    val start: Capsule,
     val end: Slot,
-    val condition: ICondition = ICondition.True,
+    val condition: Condition = Condition.True,
     val filter: Filter[String] = Filter.empty) extends ITransition {
 
-  private def nextTaskReady(ticket: ITicket, subMole: ISubMoleExecution): Boolean = {
+  private def nextTaskReady(ticket: Ticket, subMole: SubMoleExecution): Boolean = {
     val registry = subMole.transitionRegistry
     val mole = subMole.moleExecution.mole
     mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
   }
 
-  protected def submitNextJobsIfReady(context: Iterable[Variable[_]], ticket: ITicket, subMole: ISubMoleExecution) = {
+  protected def submitNextJobsIfReady(context: Iterable[Variable[_]], ticket: Ticket, subMole: SubMoleExecution) = {
     val moleExecution = subMole.moleExecution
     val registry = subMole.transitionRegistry
     val mole = subMole.moleExecution.mole
@@ -80,7 +80,7 @@ class Transition(
     }
   }
 
-  override def perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) =
+  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) =
     try {
       if (isConditionTrue(context)) _perform(context, ticket, subMole)
     }
@@ -92,10 +92,10 @@ class Transition(
 
   override def isConditionTrue(context: Context): Boolean = condition.evaluate(context)
 
-  override def data(mole: IMole, sources: Sources, hooks: Hooks) =
+  override def data(mole: Mole, sources: Sources, hooks: Hooks) =
     start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.prototype.name))
 
-  protected def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, ticket, subMole)
+  protected def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, ticket, subMole)
   protected def filtered(context: Context) = context.filterNot { case (n, _) ⇒ filter(n) }
 
   override def toString = this.getClass.getSimpleName + " from " + start + " to " + end

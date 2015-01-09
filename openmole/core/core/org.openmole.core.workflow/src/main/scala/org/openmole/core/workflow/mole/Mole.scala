@@ -17,19 +17,17 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.transition._
-import org.openmole.misc.exception.UserBadDataError
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.ListBuffer
+import org.openmole.core.workflow.data._
+import org.openmole.misc.exception._
+import scala.collection._
 
 object Mole {
 
-  def nextCapsules(mole: IMole)(from: ICapsule, lvl: Int) =
+  def nextCapsules(mole: Mole)(from: Capsule, lvl: Int) =
     nextTransitions(mole)(from, lvl).map { case (t, lvl) ⇒ t.end.capsule -> lvl }
 
-  def nextTransitions(mole: IMole)(from: ICapsule, lvl: Int) =
+  def nextTransitions(mole: Mole)(from: Capsule, lvl: Int) =
     mole.outputTransitions(from).map {
       case t: IAggregationTransition    ⇒ t -> (lvl - 1)
       case t: IEndExplorationTransition ⇒ t -> (lvl - 1)
@@ -38,9 +36,9 @@ object Mole {
       case t: ITransition               ⇒ t -> lvl
     }
 
-  def levels(mole: IMole) = {
-    val cache = HashMap(mole.root -> 0)
-    val toProceed = ListBuffer(mole.root -> 0)
+  def levels(mole: Mole) = {
+    val cache = mutable.HashMap(mole.root -> 0)
+    val toProceed = mutable.ListBuffer(mole.root -> 0)
 
     while (!toProceed.isEmpty) {
       val (capsule, level) = toProceed.remove(0)
@@ -56,17 +54,24 @@ object Mole {
   }
 
   def apply(
-    root: ICapsule,
+    root: Capsule,
     transitions: Iterable[ITransition] = Iterable.empty,
-    dataChannels: Iterable[IDataChannel] = Iterable.empty) = new Mole(root, transitions, dataChannels)
+    dataChannels: Iterable[DataChannel] = Iterable.empty) = new Mole(root, transitions, dataChannels)
 
 }
 
 class Mole(
-    val root: ICapsule,
+    val root: Capsule,
     val transitions: Iterable[ITransition],
-    val dataChannels: Iterable[IDataChannel]) extends IMole {
+    val dataChannels: Iterable[DataChannel]) {
+
+  lazy val slots = (Slot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val capsules = slots.keys
+  lazy val inputTransitions = transitions.groupBy(_.end).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val outputTransitions = transitions.groupBy(_.start).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val inputDataChannels = dataChannels.groupBy(_.end).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val outputDataChannels = dataChannels.groupBy(_.start).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
 
   lazy val levels = Mole.levels(this)
-  def level(c: ICapsule) = levels(c)
+  def level(c: Capsule) = levels(c)
 }

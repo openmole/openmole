@@ -31,7 +31,7 @@ object MoleTask {
   def apply(puzzle: Puzzle)(implicit plugins: PluginSet): MoleTaskBuilder =
     apply(puzzle toMole, puzzle.lasts.head)
 
-  def apply(mole: IMole, last: ICapsule)(implicit plugins: PluginSet) =
+  def apply(mole: Mole, last: Capsule)(implicit plugins: PluginSet) =
     new MoleTaskBuilder { builder ⇒
       addInput(mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*)
       addOutput(last.outputs(mole, Sources.empty, Hooks.empty).toSeq: _*)
@@ -45,20 +45,27 @@ object MoleTask {
 
 }
 
+/**
+ * *
+ *
+ * @param mole the mole executed by this task.
+ * @param last the capsule which returns the results
+ * @param implicits the implicit values for the inputs
+ */
 sealed abstract class MoleTask(
-    val mole: IMole,
-    val last: ICapsule,
-    val implicits: Iterable[String]) extends Task with IMoleTask {
+    val mole: Mole,
+    val last: Capsule,
+    val implicits: Iterable[String]) extends Task {
 
-  class ResultGathering extends EventListener[IMoleExecution] {
+  class ResultGathering extends EventListener[MoleExecution] {
     @volatile var lastContext: Option[Context] = None
     @volatile var exceptions: List[Throwable] = List.empty
 
-    override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) = synchronized {
+    override def triggered(obj: MoleExecution, ev: Event[MoleExecution]) = synchronized {
       ev match {
-        case ev: IMoleExecution.JobFinished ⇒
+        case ev: MoleExecution.JobFinished ⇒
           if (ev.capsule == last) lastContext = Some(ev.moleJob.context)
-        case ev: IMoleExecution.ExceptionRaised ⇒
+        case ev: MoleExecution.ExceptionRaised ⇒
           exceptions ::= ev.exception
         case _ ⇒
       }
@@ -78,8 +85,8 @@ sealed abstract class MoleTask(
     val execution = MoleExecution(mole, seed = context(Task.openMOLESeed), implicits = implicitsValues)
     val resultGathering = new ResultGathering
 
-    EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.JobFinished])
-    EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.ExceptionRaised])
+    EventDispatcher.listen(execution: MoleExecution, resultGathering, classOf[MoleExecution.JobFinished])
+    EventDispatcher.listen(execution: MoleExecution, resultGathering, classOf[MoleExecution.ExceptionRaised])
 
     execution.start(firstTaskContext)
     execution.waitUntilEnded

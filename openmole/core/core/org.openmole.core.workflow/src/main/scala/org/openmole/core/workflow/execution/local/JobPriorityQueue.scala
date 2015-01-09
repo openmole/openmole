@@ -18,70 +18,14 @@
 package org.openmole.core.workflow.execution.local
 
 import java.util.concurrent.Semaphore
-import org.openmole.core.workflow.job.IJob
-import org.openmole.core.workflow.job.IMoleJob
-import org.openmole.core.workflow.task.IMoleTask
+import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.task._
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.Stack
 
 object JobPriorityQueue {
-
-  //  class JobQueue {
-  //    val minSize = 1000
-  //    val shrinkFactor = 0.5
-  //    val shrinkCeil = 0.25
-  //    val growthFactor = 2.
-  //
-  //    var jobs: Array[LocalExecutionJob] = Array.ofDim(minSize)
-  //    var nextQueue = 0
-  //    var nextDequeue = 0
-  //    var size = 0
-  //
-  //    private def resize(newSize: Int) =
-  //      if (newSize >= minSize) {
-  //        val newJobs = Array.ofDim[LocalExecutionJob](newSize)
-  //
-  //        if (nextDequeue < nextQueue)
-  //          jobs.slice(nextDequeue, nextQueue).zipWithIndex.foreach {
-  //            case (j, i) ⇒ newJobs(i) = j
-  //          }
-  //        else
-  //          (jobs.slice(nextDequeue, jobs.size) ++ jobs.slice(0, nextQueue)).zipWithIndex.foreach {
-  //            case (j, i) ⇒ newJobs(i) = j
-  //          }
-  //
-  //        jobs = newJobs
-  //        nextDequeue = 0
-  //        nextQueue = size
-  //      }
-  //
-  //    def enqueue(job: LocalExecutionJob) = {
-  //      if (size >= jobs.size) resize((jobs.size * growthFactor).toInt)
-  //
-  //      jobs(nextQueue) = job
-  //      nextQueue = increment(nextQueue)
-  //      size += 1
-  //    }
-  //
-  //    private def increment(i: Int) = if ((i + 1) < jobs.size) i + 1 else 0
-  //
-  //    def dequeue = {
-  //      if (isEmpty) throw new IndexOutOfBoundsException("Dequeing from an empty queue")
-  //
-  //      val dequeued = jobs(nextDequeue)
-  //      jobs(nextDequeue) = null
-  //      nextDequeue = increment(nextDequeue)
-  //      size -= 1
-  //
-  //      if (size < (jobs.size * shrinkCeil)) resize((jobs.size * shrinkFactor).toInt)
-  //      dequeued
-  //    }
-  //
-  //    def isEmpty = size == 0
-  //  }
-
-  def priority(jobs: Iterable[IMoleJob]) =
-    jobs.count(mj ⇒ classOf[IMoleTask].isAssignableFrom(mj.task.getClass))
+  def priority(jobs: Iterable[MoleJob]) =
+    jobs.count(mj ⇒ classOf[MoleTask].isAssignableFrom(mj.task.getClass))
 
 }
 

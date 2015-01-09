@@ -17,10 +17,9 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.workflow.mole.ISubMoleExecution
-import org.openmole.core.workflow.mole.ITicket
+import org.openmole.core.workflow.mole._
 
 trait IAggregationTransition extends ITransition {
-  def aggregate(subMole: ISubMoleExecution, ticket: ITicket)
-  def hasBeenPerformed(subMole: ISubMoleExecution, ticket: ITicket): Boolean
+  def aggregate(subMole: SubMoleExecution, ticket: Ticket)
+  def hasBeenPerformed(subMole: SubMoleExecution, ticket: Ticket): Boolean
 }

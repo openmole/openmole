@@ -84,7 +84,7 @@ package object ga {
     def generation: Prototype[Int]
   }
 
-  case class GAPuzzle[+ALG <: GAAlgorithm](parameters: GAParameters[ALG], puzzle: Puzzle, output: ICapsule) {
+  case class GAPuzzle[+ALG <: GAAlgorithm](parameters: GAParameters[ALG], puzzle: Puzzle, output: Capsule) {
     def map(f: Puzzle ⇒ Puzzle) = GAPuzzle[ALG](parameters, f(puzzle), output)
   }
 
@@ -139,7 +139,7 @@ package object ga {
 
     val terminatedCondition = Condition(terminated.name + " == true")
 
-    def gaPuzzle(puzzle: Puzzle, output: ICapsule) =
+    def gaPuzzle(puzzle: Puzzle, output: Capsule) =
       GAPuzzle(
         GAParameters[ALG](evolution)(
           archive.asInstanceOf[Prototype[evolution.A]],

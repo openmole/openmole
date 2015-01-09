@@ -31,7 +31,7 @@ object ListFilesSource {
   def apply(path: ExpandedString, prototype: Prototype[Array[File]], regExp: ExpandedString = ".*") =
     new SourceBuilder {
       addOutput(prototype)
-      override def toSource: ISource = new ListFilesSource(path, prototype, regExp) with Built
+      override def toSource: Source = new ListFilesSource(path, prototype, regExp) with Built
     }
 
 }

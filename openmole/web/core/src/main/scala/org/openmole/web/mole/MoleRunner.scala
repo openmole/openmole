@@ -7,7 +7,7 @@ import scalate.ScalateSupport
 import servlet.{ FileItem, FileUploadSupport }
 import java.io.{ PrintStream, InputStream }
 import javax.servlet.annotation.MultipartConfig
-import org.openmole.core.workflow.mole.IMoleExecution
+import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.data.Variable
 import concurrent.Future
 

@@ -20,11 +20,11 @@ package org.openmole.core.workflow.transition
 import org.openmole.core.workflow.mole._
 import org.openmole.misc.eventdispatcher._
 
-class AggregationTransitionAdapter(transition: IAggregationTransition) extends EventListener[ISubMoleExecution] {
+class AggregationTransitionAdapter(transition: IAggregationTransition) extends EventListener[SubMoleExecution] {
 
-  override def triggered(subMole: ISubMoleExecution, ev: Event[ISubMoleExecution]) =
+  override def triggered(subMole: SubMoleExecution, ev: Event[SubMoleExecution]) =
     ev match {
-      case ev: ISubMoleExecution.Finished ⇒ transition.aggregate(subMole, ev.ticket)
+      case ev: SubMoleExecution.Finished ⇒ transition.aggregate(subMole, ev.ticket)
     }
 
 }

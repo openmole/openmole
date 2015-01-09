@@ -19,15 +19,16 @@ package org.openmole.core.workflow.job
 
 import java.util.UUID
 
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.job.State._
-import org.openmole.core.workflow.task._
-import org.openmole.misc.tools.service.Logger
+import org.openmole.core.workflow.task.Task
+import org.openmole.core.workflow.data.{ Prototype, Variable, Context }
 
-object MoleJob extends Logger {
-  type StateChangedCallBack = (IMoleJob, State, State) ⇒ Unit
+object MoleJob {
+  implicit val moleJobOrdering = Ordering.by((_: MoleJob).id)
+
+  type StateChangedCallBack = (MoleJob, State, State) ⇒ Unit
   def apply(
-    task: ITask,
+    task: Task,
     context: Context,
     id: UUID,
     stateChangedCallBack: MoleJob.StateChangedCallBack) = {
@@ -41,19 +42,19 @@ object MoleJob extends Logger {
 }
 
 class MoleJob(
-    val task: ITask,
+    val task: Task,
     private var prototypes: Array[Prototype[Any]],
     private var values: Array[Any],
     mostSignificantBits: Long, leastSignificantBits: Long,
-    val stateChangedCallBack: MoleJob.StateChangedCallBack) extends IMoleJob {
+    val stateChangedCallBack: MoleJob.StateChangedCallBack) {
 
   var exception: Option[Throwable] = None
 
   @volatile private var _state: State = null
   state = READY
 
-  override def state: State = _state
-  override def context: Context =
+  def state: State = _state
+  def context: Context =
     Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) })
 
   private def context_=(ctx: Context) = {
@@ -84,7 +85,7 @@ class MoleJob(
     }
   }
 
-  override def perform =
+  def perform =
     if (!state.isFinal) {
       try {
         state = RUNNING
@@ -99,13 +100,13 @@ class MoleJob(
       }
     }
 
-  override def finish(_context: Context) = {
+  def finish(_context: Context) = {
     context = _context
     state = COMPLETED
   }
 
-  override def finished: Boolean = state.isFinal
+  def finished: Boolean = state.isFinal
 
-  override def cancel = state = CANCELED
+  def cancel = state = CANCELED
 
 }

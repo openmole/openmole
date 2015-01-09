@@ -21,9 +21,9 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 
 object StrainerCapsule {
-  def apply(task: ITask) = new StrainerCapsule(task)
+  def apply(task: Task) = new StrainerCapsule(task)
 
-  class StrainerTaskDecorator(val task: ITask) extends Task {
+  class StrainerTaskDecorator(val task: Task) extends Task {
     override def inputs = task.inputs
     override def outputs = task.outputs
     override def plugins = task.plugins
@@ -37,13 +37,13 @@ object StrainerCapsule {
 
 }
 
-class StrainerCapsule(task: ITask) extends Capsule(new StrainerCapsule.StrainerTaskDecorator(task)) with Strainer {
+class StrainerCapsule(task: Task) extends Capsule(new StrainerCapsule.StrainerTaskDecorator(task)) with Strainer {
 
-  override def inputs(mole: IMole, sources: Sources, hooks: Hooks) =
+  override def inputs(mole: Mole, sources: Sources, hooks: Hooks) =
     received(mole, sources, hooks).filterNot(d ⇒ super.inputs(mole, sources, hooks).contains(d.prototype.name)) ++
       super.inputs(mole, sources, hooks)
 
-  override def outputs(mole: IMole, sources: Sources, hooks: Hooks) =
+  override def outputs(mole: Mole, sources: Sources, hooks: Hooks) =
     received(mole, sources, hooks).filterNot(d ⇒ super.outputs(mole, sources, hooks).contains(d.prototype.name)) ++
       super.outputs(mole, sources, hooks)
 

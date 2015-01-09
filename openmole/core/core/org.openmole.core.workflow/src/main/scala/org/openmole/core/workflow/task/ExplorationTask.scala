@@ -42,7 +42,7 @@ object ExplorationTask {
 
 }
 
-sealed abstract class ExplorationTask(val sampling: Sampling) extends Task with IExplorationTask {
+abstract class ExplorationTask(val sampling: Sampling) extends Task {
 
   //If input prototype as the same name as the output it is erased
   override protected def process(context: Context) = {

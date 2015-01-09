@@ -1,6 +1,6 @@
 package org.openmole.web.cache
 
-import org.openmole.core.workflow.mole.IMoleExecution
+import org.openmole.core.workflow.mole.MoleExecution
 import java.io.File
 import akka.actor.ActorSystem
 import org.openmole.web.db.SlickDB
@@ -14,10 +14,10 @@ import javax.sql.rowset.serial.SerialBlob
  * Created by mhammons on 4/23/14.
  */
 class Cache(system: ActorSystem, database: SlickDB) {
-  private val cachedMoles = new DataHandler[String, IMoleExecution](system)
+  private val cachedMoles = new DataHandler[String, MoleExecution](system)
   private val capsules = new DataHandler[String, File](system)
   private val moleStats = new DataHandler[String, Stats](system)
-  private val mole2CacheId = new DataHandler[IMoleExecution, String](system)
+  private val mole2CacheId = new DataHandler[MoleExecution, String](system)
 
   val logger = org.openmole.web.Log.log
 
@@ -33,7 +33,7 @@ class Cache(system: ActorSystem, database: SlickDB) {
       MoleStats.instance.ddl.create
   }
 
-  def cacheMoleExecution(moleExecution: IMoleExecution, path: Option[File], cacheId: String) = {
+  def cacheMoleExecution(moleExecution: MoleExecution, path: Option[File], cacheId: String) = {
     path foreach (capsules.add(cacheId, _))
     cachedMoles add (cacheId, moleExecution)
     mole2CacheId add (moleExecution, cacheId)
@@ -42,7 +42,7 @@ class Cache(system: ActorSystem, database: SlickDB) {
 
   def getMole(key: String) = cachedMoles get key
 
-  def getCacheId(mole: IMoleExecution) = mole2CacheId get mole getOrElse (throw new Exception("Cache ID requested for uncached mole."))
+  def getCacheId(mole: MoleExecution) = mole2CacheId get mole getOrElse (throw new Exception("Cache ID requested for uncached mole."))
 
   def getMoleStats(key: String): Stats = {
     lazy val stats = getStatus(key) flatMap (s ⇒ dataB withSession { implicit session ⇒
@@ -71,7 +71,7 @@ class Cache(system: ActorSystem, database: SlickDB) {
       (for (m ← MoleData.instance if m.id === moleId) yield m.state).list.headOption
     }
 
-  def decacheMole(mole: IMoleExecution) = {
+  def decacheMole(mole: MoleExecution) = {
     val mKey = mole2CacheId get mole
     mKey foreach (id ⇒ logger.info(s"decaching mole id: $id"))
     mKey foreach (cachedMoles get _ foreach (_.cancel))
@@ -97,7 +97,7 @@ class Cache(system: ActorSystem, database: SlickDB) {
 
   }
 
-  def setStatus(mole: IMoleExecution, status: Status) {
+  def setStatus(mole: MoleExecution, status: Status) {
     val moleId = getCacheId(mole)
     dataB withSession { implicit session ⇒
       val x = for { m ← MoleData.instance if m.id === moleId } yield m.state
@@ -112,16 +112,16 @@ class Cache(system: ActorSystem, database: SlickDB) {
     blob.getBytes(1, blob.length.toInt)
   }
 
-  def storeResultBlob(exec: IMoleExecution, blob: SerialBlob) = dataB withSession { implicit session ⇒
+  def storeResultBlob(exec: MoleExecution, blob: SerialBlob) = dataB withSession { implicit session ⇒
     val moleId = getCacheId(exec)
     val r = for (m ← MoleData.instance if m.id === moleId) yield m.result
     r.update(blob)
     logger.info(s"Blob stored for mole: $moleId")
   }
 
-  def getCapsule(exec: IMoleExecution) = mole2CacheId get exec flatMap (capsules get _)
+  def getCapsule(exec: MoleExecution) = mole2CacheId get exec flatMap (capsules get _)
 
-  def updateStats(exec: IMoleExecution, stats: Stats) {
+  def updateStats(exec: MoleExecution, stats: Stats) {
     val moleId = getCacheId(exec)
     moleStats add (moleId, stats)
     logger.info(s"Updated the stats of mole $moleId to $stats")

@@ -17,10 +17,13 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.workflow.data.Context
-import org.openmole.core.workflow.tools.InputOutputCheck
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
 
-trait Source extends ISource with InputOutputCheck {
+trait Source <: InputOutputCheck {
+  def inputs: DataSet
+  def outputs: DataSet
+  def defaults: DefaultSet
   protected def process(context: Context, executionContext: ExecutionContext): Context
-  def perform(context: Context, executionContext: ExecutionContext) = perform(context, process(_, executionContext))
+  def perform(context: Context, executionContext: ExecutionContext): Context = perform(context, process(_, executionContext))
 }

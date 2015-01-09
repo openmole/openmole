@@ -17,17 +17,30 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.workflow.mole.ITicket
-
 object Ticket {
   def apply(category: String, content: Long) = {
     new Ticket(category, content, None)
   }
 
-  def apply(parent: ITicket, content: Long) = {
+  def apply(parent: Ticket, content: Long) = {
     new Ticket(parent.category, content, Some(parent))
   }
 
+  implicit def ordering = new Ordering[Ticket] {
+    override def compare(left: Ticket, right: Ticket): Int = {
+      val compare = left.content.compare(right.content)
+      if (compare != 0) return compare
+      left.category.compare(right.category)
+    }
+  }
 }
 
-class Ticket(val category: String, val content: Long, val parent: Option[ITicket]) extends ITicket
+class Ticket(val category: String, val content: Long, val parent: Option[Ticket]) {
+  def parentOrException = parent.getOrElse(throw new InternalError("This is a root ticket, it has no parent."))
+
+  def isRoot: Boolean = parent.equals(None)
+
+  override def equals(obj: Any): Boolean = (content, category).equals(obj)
+  override def hashCode = (content, category).hashCode
+}
+

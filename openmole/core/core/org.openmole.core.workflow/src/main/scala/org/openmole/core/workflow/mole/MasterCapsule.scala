@@ -17,18 +17,15 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.job._
 
 object MasterCapsule {
-  def apply(task: ITask, persist: Set[String] = Set.empty) = new MasterCapsule(task, persist)
-  def apply(t: ITask, persist: String*): MasterCapsule = apply(t, persist.toSet)
-  def apply(t: ITask, head: Prototype[_], persist: Prototype[_]*): MasterCapsule = apply(t, (head :: persist.toList).map { _.name }.toSet)
+  def apply(task: Task, persist: Set[String] = Set.empty) = new MasterCapsule(task, persist)
+  def apply(t: Task, persist: String*): MasterCapsule = apply(t, persist.toSet)
+  def apply(t: Task, head: Prototype[_], persist: Prototype[_]*): MasterCapsule = apply(t, (head :: persist.toList).map { _.name }.toSet)
 }
 
-class MasterCapsule(task: ITask, val persist: Set[String] = Set.empty) extends Capsule(task) with IMasterCapsule {
-  override def toPersist(context: Context) = persist.flatMap { n ⇒ context.variable(n).toList }.toContext
+class MasterCapsule(task: Task, val persist: Set[String] = Set.empty) extends Capsule(task) {
+  def toPersist(context: Context) = persist.flatMap { n ⇒ context.variable(n).toList }.toContext
 }

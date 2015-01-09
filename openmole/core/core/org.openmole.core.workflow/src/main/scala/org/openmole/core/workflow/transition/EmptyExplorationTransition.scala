@@ -23,9 +23,9 @@ import org.openmole.core.workflow.tools._
 
 import scala.collection.mutable.ListBuffer
 
-class EmptyExplorationTransition(start: ICapsule, end: Slot, size: FromContext[Int], condition: ICondition = ICondition.True, filter: Filter[String] = Filter.empty) extends ExplorationTransition(start, end, condition, filter) {
+class EmptyExplorationTransition(start: Capsule, end: Slot, size: FromContext[Int], condition: Condition = Condition.True, filter: Filter[String] = Filter.empty) extends ExplorationTransition(start, end, condition, filter) {
 
-  override def submitIn(context: Context, ticket: ITicket, subMole: ISubMoleExecution) =
+  override def submitIn(context: Context, ticket: Ticket, subMole: SubMoleExecution) =
     for (i ← 0 until size.from(context)) submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, subMole.moleExecution.nextTicket(ticket), subMole)
 
 }

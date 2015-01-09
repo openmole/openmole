@@ -46,7 +46,7 @@ class HookSpec extends FlatSpec with Matchers {
     val t1c = Capsule(t1)
 
     val hook = new HookBuilder {
-      def toHook = new IHook with Built {
+      def toHook = new Hook with Built {
         override def perform(context: Context, executionContext: ExecutionContext) = {
           context.contains(p) should equal(true)
           context(p) should equal("test")
@@ -78,7 +78,7 @@ class HookSpec extends FlatSpec with Matchers {
     val t1c = new MasterCapsule(t1)
 
     val hook = new HookBuilder {
-      def toHook = new IHook with Built {
+      def toHook = new Hook with Built {
         override def perform(context: Context, executionContext: ExecutionContext) = {
           context.contains(p) should equal(true)
           context(p) should equal("test")

@@ -23,13 +23,13 @@ import org.openmole.core.workflow.validation.TypeUtil
 
 object Strainer {
 
-  def isStrainer(c: ICapsule) =
+  def isStrainer(c: Capsule) =
     c match {
       case _: StrainerCapsule ⇒ true
       case _                  ⇒ false
     }
 
-  def reachNoStrainer(mole: IMole)(slot: Slot, seen: Set[Slot] = Set.empty): Boolean = {
+  def reachNoStrainer(mole: Mole)(slot: Slot, seen: Set[Slot] = Set.empty): Boolean = {
     if (slot.capsule == mole.root) true
     else if (seen.contains(slot)) false
     else {
@@ -43,9 +43,9 @@ object Strainer {
 
 import org.openmole.core.workflow.mole.Strainer._
 
-trait Strainer extends ICapsule {
+trait Strainer extends Capsule {
 
-  def received(mole: IMole, sources: Sources, hooks: Hooks) =
+  def received(mole: Mole, sources: Sources, hooks: Hooks) =
     if (this == mole.root) Iterable.empty
     else {
       val slots = mole.slots(this)

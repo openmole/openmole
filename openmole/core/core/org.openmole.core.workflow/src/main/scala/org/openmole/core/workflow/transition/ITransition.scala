@@ -29,7 +29,7 @@ trait ITransition {
    *
    * @return the starting capsule of this transition
    */
-  def start: ICapsule
+  def start: Capsule
 
   /**
    *
@@ -45,7 +45,7 @@ trait ITransition {
    *
    * @return the condition under which this transition is performed
    */
-  def condition: ICondition
+  def condition: Condition
 
   /**
    *
@@ -70,7 +70,7 @@ trait ITransition {
    *
    * @return the unfiltred output data of the staring capsule
    */
-  def data(mole: IMole, sources: Sources, hooks: Hooks): Iterable[Data[_]]
+  def data(mole: Mole, sources: Sources, hooks: Hooks): Iterable[Data[_]]
 
   /**
    *
@@ -80,6 +80,6 @@ trait ITransition {
    * @param ticket    ticket of the previous job
    * @param subMole   current submole
    */
-  def perform(from: Context, ticket: ITicket, subMole: ISubMoleExecution)
+  def perform(from: Context, ticket: Ticket, subMole: SubMoleExecution)
 
 }

@@ -19,6 +19,6 @@ package org.openmole.core.workflow.job
 
 import org.openmole.core.workflow.mole._
 
-class Job(val moleExecution: IMoleExecution, val moleJobs: Iterable[IMoleJob]) extends IJob {
-  override def finished: Boolean = moleJobs.forall { _.finished }
+class Job(val moleExecution: MoleExecution, val moleJobs: Iterable[MoleJob]) {
+  def finished: Boolean = moleJobs.forall { _.finished }
 }

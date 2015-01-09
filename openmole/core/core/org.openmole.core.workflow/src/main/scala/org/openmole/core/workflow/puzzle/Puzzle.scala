@@ -40,10 +40,10 @@ object Puzzle {
 
   def merge(
     first: Slot,
-    lasts: Iterable[ICapsule],
+    lasts: Iterable[Capsule],
     puzzles: Iterable[Puzzle],
     transitions: Iterable[ITransition] = Iterable.empty,
-    dataChannels: Iterable[IDataChannel] = Iterable.empty) =
+    dataChannels: Iterable[DataChannel] = Iterable.empty) =
     new Puzzle(
       first,
       lasts,
@@ -58,13 +58,13 @@ object Puzzle {
 
 case class Puzzle(
     first: Slot,
-    lasts: Iterable[ICapsule],
+    lasts: Iterable[Capsule],
     transitions: Iterable[ITransition],
-    dataChannels: Iterable[IDataChannel],
-    sources: Iterable[(ICapsule, ISource)],
-    hooks: Iterable[(ICapsule, IHook)],
-    environments: Map[ICapsule, Environment],
-    grouping: Map[ICapsule, Grouping]) {
+    dataChannels: Iterable[DataChannel],
+    sources: Iterable[(Capsule, Source)],
+    hooks: Iterable[(Capsule, Hook)],
+    environments: Map[Capsule, Environment],
+    grouping: Map[Capsule, Grouping]) {
 
   def this(p: Puzzle) =
     this(
@@ -82,10 +82,10 @@ case class Puzzle(
   def toPartialExecution = PartialMoleExecution(toMole, sources, hooks, environments, grouping)
 
   def toPartialExecution(
-    sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
-    hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    environment: Map[ICapsule, Environment] = Map.empty,
-    grouping: Map[ICapsule, Grouping] = Map.empty,
+    sources: Iterable[(Capsule, Source)] = Iterable.empty,
+    hooks: Iterable[(Capsule, Hook)] = Iterable.empty,
+    environment: Map[Capsule, Environment] = Map.empty,
+    grouping: Map[Capsule, Grouping] = Map.empty,
     seed: Long = Workspace.newSeed,
     defaultEnvironment: Environment = LocalEnvironment.default) =
     PartialMoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.environments ++ environments, this.grouping ++ grouping, seed, defaultEnvironment)
@@ -94,10 +94,10 @@ case class Puzzle(
     MoleExecution(toMole, sources, hooks, environments, grouping)
 
   def toExecution(
-    sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
-    hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    selection: Map[ICapsule, Environment] = Map.empty,
-    grouping: Map[ICapsule, Grouping] = Map.empty,
+    sources: Iterable[(Capsule, Source)] = Iterable.empty,
+    hooks: Iterable[(Capsule, Hook)] = Iterable.empty,
+    selection: Map[Capsule, Environment] = Map.empty,
+    grouping: Map[Capsule, Grouping] = Map.empty,
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
     executionContext: ExecutionContext = ExecutionContext.local,

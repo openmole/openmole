@@ -21,7 +21,7 @@ import org.openmole.core.workflow.mole._
 
 object Slot {
 
-  def apply(c: ICapsule) = new Slot {
+  def apply(c: Capsule) = new Slot {
     val capsule = c
   }
 
@@ -36,7 +36,7 @@ trait Slot {
    *
    * @return the capsule this slot belongs to
    */
-  def capsule: ICapsule
+  def capsule: Capsule
 
   override def toString = "Slot hash " + hashCode + " of " + capsule
 

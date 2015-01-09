@@ -25,7 +25,7 @@ import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.workflow.execution.local._
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.job.State
-import org.openmole.core.workflow.mole.{ ExecutionContext, IMole, IMoleExecution }
+import org.openmole.core.workflow.mole.{ ExecutionContext, Mole, MoleExecution }
 import org.openmole.core.workflow.transition.IAggregationTransition
 import org.openmole.core.workflow.transition.IExplorationTransition
 import org.openmole.core.workflow.validation.Validation
@@ -61,20 +61,20 @@ class Command {
     }
   }
 
-  def print(mole: IMole): Unit = {
+  def print(mole: Mole): Unit = {
     println("root: " + mole.root)
     mole.transitions.foreach(println)
     mole.dataChannels.foreach(println)
   }
 
-  def print(moleExecution: IMoleExecution): Unit = {
+  def print(moleExecution: MoleExecution): Unit = {
     val toDisplay = new Array[AtomicInteger](State.values.size)
     for (state ← State.values) toDisplay(state.id) = new AtomicInteger
     for (job ← moleExecution.moleJobs) toDisplay(job.state.id).incrementAndGet
     for (state ← State.values) System.out.println(state.toString + ": " + toDisplay(state.id))
   }
 
-  def verify(mole: IMole): Unit = Validation(mole).foreach(println)
+  def verify(mole: Mole): Unit = Validation(mole).foreach(println)
 
   def encrypted: String = Workspace.encrypt(askPassword)
 

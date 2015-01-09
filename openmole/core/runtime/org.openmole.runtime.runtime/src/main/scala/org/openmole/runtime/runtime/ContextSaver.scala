@@ -38,7 +38,7 @@ class ContextSaver(val nbJobs: Int) {
   var _results = new TreeMap[MoleJobId, Try[Context]]
   def results = _results
 
-  def save(job: IMoleJob, oldState: State, newState: State) = synchronized {
+  def save(job: MoleJob, oldState: State, newState: State) = synchronized {
     newState match {
       case COMPLETED | FAILED ⇒
         job.exception match {

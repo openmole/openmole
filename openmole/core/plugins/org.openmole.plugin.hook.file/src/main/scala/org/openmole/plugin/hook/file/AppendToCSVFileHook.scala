@@ -25,7 +25,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.Prettifier._
 import scala.annotation.tailrec
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.mole.{ IHook, ExecutionContext }
+import org.openmole.core.workflow.mole.{ Hook, ExecutionContext }
 import scala.collection.mutable.ListBuffer
 
 object AppendToCSVFileHook {

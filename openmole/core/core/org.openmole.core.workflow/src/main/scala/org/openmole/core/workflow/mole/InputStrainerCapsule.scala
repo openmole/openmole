@@ -22,12 +22,12 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 
 object InputStrainerCapsule {
-  def apply(task: ITask) = new InputStrainerCapsule(task)
+  def apply(task: Task) = new InputStrainerCapsule(task)
 }
 
-class InputStrainerCapsule(task: ITask) extends Capsule(task) with Strainer {
+class InputStrainerCapsule(task: Task) extends Capsule(task) with Strainer {
 
-  override def inputs(mole: IMole, sources: Sources, hooks: Hooks) =
+  override def inputs(mole: Mole, sources: Sources, hooks: Hooks) =
     received(mole, sources, hooks).filterNot(d ⇒ super.inputs(mole, sources, hooks).contains(d.prototype.name)) ++
       super.inputs(mole, sources, hooks)
 

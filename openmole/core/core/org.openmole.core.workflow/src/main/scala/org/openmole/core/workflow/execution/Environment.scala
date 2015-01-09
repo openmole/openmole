@@ -18,23 +18,23 @@
 package org.openmole.core.workflow.execution
 
 import java.util.logging.Level
-import org.openmole.core.workflow.job.IJob
-import org.openmole.core.workflow.job.IMoleJob
+import org.openmole.core.workflow.job.Job
+import org.openmole.core.workflow.job.MoleJob
 import org.openmole.misc.eventdispatcher.Event
 import ExecutionState._
 import org.openmole.core.workflow.tools.ExceptionEvent
 import org.openmole.misc.workspace.AuthenticationProvider
 
 object Environment {
-  case class JobSubmitted(job: IExecutionJob) extends Event[Environment]
-  case class JobStateChanged(job: IExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
-  case class ExceptionRaised(job: IExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
-  case class MoleJobExceptionRaised(job: IExecutionJob, exception: Throwable, level: Level, moleJob: IMoleJob) extends Event[Environment]
-  case class JobCompleted(job: IExecutionJob, log: RuntimeLog) extends Event[Environment]
+  case class JobSubmitted(job: ExecutionJob) extends Event[Environment]
+  case class JobStateChanged(job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
+  case class ExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
+  case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: MoleJob) extends Event[Environment]
+  case class JobCompleted(job: ExecutionJob, log: RuntimeLog) extends Event[Environment]
 
   case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long, hostName: String)
 }
 
 trait Environment {
-  def submit(job: IJob)
+  def submit(job: Job)
 }

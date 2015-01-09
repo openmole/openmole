@@ -29,7 +29,7 @@ import org.openmole.core.workflow.mole._
  */
 class InGrouping(numberOfBatch: Int) extends Grouping {
 
-  override def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
+  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup = {
     if (groups.size < numberOfBatch) MoleJobGroup()
     else groups.minBy { case (_, g) ⇒ g.size }._1
   }

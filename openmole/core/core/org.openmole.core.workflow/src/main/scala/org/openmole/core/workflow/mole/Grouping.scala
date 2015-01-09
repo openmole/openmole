@@ -18,9 +18,9 @@
 package org.openmole.core.workflow.mole
 
 import org.openmole.core.workflow.data.Context
-import org.openmole.core.workflow.job.IMoleJob
+import org.openmole.core.workflow.job.MoleJob
 
 trait Grouping {
-  def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup
-  def complete(job: Iterable[IMoleJob]) = false
+  def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup
+  def complete(job: Iterable[MoleJob]) = false
 }

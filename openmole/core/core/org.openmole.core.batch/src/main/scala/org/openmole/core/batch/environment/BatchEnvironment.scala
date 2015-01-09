@@ -161,7 +161,7 @@ trait BatchEnvironment extends Environment { env ⇒
   def threads: Option[Int] = None
   def threadsValue = threads.getOrElse(1)
 
-  override def submit(job: IJob) = {
+  override def submit(job: Job) = {
     val bej = executionJob(job)
     EventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
     batchJobWatcher.register(bej)
@@ -180,7 +180,7 @@ trait BatchEnvironment extends Environment { env ⇒
     }
   }
 
-  def executionJob(job: IJob) = new BatchExecutionJob(this, job)
+  def executionJob(job: Job) = new BatchExecutionJob(this, job)
 
   def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxI386 = BatchEnvironment.JVMLinuxI386Location

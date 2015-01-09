@@ -42,7 +42,7 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
 
   class JobGroupingBy2Test extends Grouping {
 
-    def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
+    def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup = {
       groups.find { case (_, g) ⇒ g.size < 2 } match {
         case Some((mg, _)) ⇒ mg
         case None          ⇒ MoleJobGroup()

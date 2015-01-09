@@ -17,38 +17,79 @@
 
 package org.openmole.core.workflow.tools
 
-import org.openmole.core.workflow.mole.ITicket
+import org.openmole.core.workflow.mole._
 
-import scala.collection.mutable.{ HashMap, WeakHashMap }
+import scala.collection.mutable
 
-class RegistryWithTicket[K, V] extends IRegistryWithTicket[K, V] {
+/**
+ *
+ * Registry to register value in fonction of a key and a ticket. The values are
+ * stored in a WeakHashMap and are garbage collected after the ticket is gabage
+ * collected.
+ *
+ * @author Romain Reuillon <romain.Romain Reuillon at openmole.org>
+ * @tparam K the type of the keys
+ * @tparam V the type of the values
+ */
+class RegistryWithTicket[K, V] {
 
-  class Registry extends HashMap[K, V]
-  val registries = new WeakHashMap[ITicket, Registry]
+  class Registry extends mutable.HashMap[K, V]
+  val registries = new mutable.WeakHashMap[Ticket, Registry]
 
-  def registry(ticket: ITicket): Registry = synchronized {
+  def registry(ticket: Ticket): Registry = synchronized {
     registries.getOrElseUpdate(ticket, new Registry)
   }
 
-  override def consult(key: K, ticket: ITicket): Option[V] = synchronized {
+  /**
+   *
+   * Consult a value for a given key and ticket.
+   *
+   * @param key the index key
+   * @param ticket the index ticket
+   * @return the value or null if not found
+   */
+  def consult(key: K, ticket: Ticket): Option[V] = synchronized {
     registry(ticket)(key)
   }
 
-  override def isRegistred(key: K, ticket: ITicket): Boolean = synchronized {
+  /**
+   *
+   * Look if a value is registred for a given key and ticket.
+   *
+   * @param key the index key
+   * @param ticket the index ticket
+   * @return true if the value is present
+   */
+  def isRegistred(key: K, ticket: Ticket): Boolean = synchronized {
     registry(ticket).contains(key)
   }
 
-  override def register(key: K, ticket: ITicket, value: V) = synchronized {
+  /**
+   *
+   * Register a value for given key and ticket.
+   *
+   * @param key the index key
+   * @param ticket the index ticket
+   * @param value the value to register
+   */
+  def register(key: K, ticket: Ticket, value: V) = synchronized {
     registry(ticket) += (key -> value)
   }
 
-  override def remove(key: K, ticket: ITicket): Option[V] = synchronized {
+  /**
+   *
+   * Remove a value from the registry.
+   *
+   * @param key the index key
+   * @param ticket the index ticket
+   */
+  def remove(key: K, ticket: Ticket): Option[V] = synchronized {
     val ret = registry(ticket).remove(key)
     if (registries(ticket).isEmpty) registries -= ticket
     ret
   }
 
-  override def getOrElseUpdate(key: K, ticket: ITicket, f: ⇒ V): V = synchronized {
+  def getOrElseUpdate(key: K, ticket: Ticket, f: ⇒ V): V = synchronized {
     registries.getOrElseUpdate(ticket, new Registry).getOrElseUpdate(key, f)
   }
 

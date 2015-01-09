@@ -41,7 +41,7 @@ object TypeUtil {
     r.flatten
   }
 
-  def receivedTypes(mole: IMole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[Prototype[_]] =
+  def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[Prototype[_]] =
     computeManifests(mole, sources, hooks)(slot).map { _.toPrototype }
 
   case class ComputedType(val name: String, val manifest: Manifest[_], val toArray: Boolean, val isOptional: Boolean) {
@@ -50,7 +50,7 @@ object TypeUtil {
       else Prototype(name)(manifest)
   }
 
-  def computeManifests(mole: IMole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ComputedType] = {
+  def computeManifests(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ComputedType] = {
     import org.openmole.misc.tools.obj.ClassUtils._
 
     val (varNames, direct, toArray, fromArray, optional) =
@@ -76,7 +76,7 @@ object TypeUtil {
 
   private def s(m: Iterable[Manifest[_]]) = ClassUtils.intersectionArray(m map (_.runtimeClass))
 
-  private def computeTransmissions(mole: IMole, sources: Sources, hooks: Hooks)(transitions: Iterable[ITransition], dataChannels: Iterable[IDataChannel]) = {
+  private def computeTransmissions(mole: Mole, sources: Sources, hooks: Hooks)(transitions: Iterable[ITransition], dataChannels: Iterable[DataChannel]) = {
     val direct = new HashMap[String, ListBuffer[Manifest[_]]] // Direct transmission through transition or data channel
     val toArray = new HashMap[String, ListBuffer[Manifest[_]]] // Transmission through exploration transition
     val fromArray = new HashMap[String, ListBuffer[Manifest[_]]] // Transmission through aggregation transition

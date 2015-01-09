@@ -18,7 +18,7 @@
 package org.openmole.core.batch.environment
 
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.core.workflow.job.IJob
+import org.openmole.core.workflow.job.Job
 import org.openmole.misc.tools.service.Logger
 import collection.mutable._
 import org.openmole.core.batch.refresh.{ Kill, Manage }
@@ -30,11 +30,11 @@ object BatchJobWatcher extends Logger {
   case object Watch
 
   class ExecutionJobRegistry {
-    val jobs = new HashMap[IJob, Set[BatchExecutionJob]] with MultiMap[IJob, BatchExecutionJob]
+    val jobs = new HashMap[Job, Set[BatchExecutionJob]] with MultiMap[Job, BatchExecutionJob]
 
     def allJobs = jobs.keySet
 
-    def executionJobs(job: IJob) = jobs.getOrElse(job, Set.empty)
+    def executionJobs(job: Job) = jobs.getOrElse(job, Set.empty)
 
     def remove(ejob: BatchExecutionJob) = jobs.removeBinding(ejob.job, ejob)
 
@@ -42,7 +42,7 @@ object BatchJobWatcher extends Logger {
 
     def register(ejob: BatchExecutionJob) = jobs.addBinding(ejob.job, ejob)
 
-    def removeJob(job: IJob) = jobs -= job
+    def removeJob(job: Job) = jobs -= job
 
     def allExecutionJobs = jobs.values.flatMap(_.toSeq)
   }
@@ -65,7 +65,7 @@ class BatchJobWatcher(environment: WeakReference[BatchEnvironment]) extends IUpd
       case Some(env) ⇒ env
     }
 
-    val jobGroupsToRemove = new ListBuffer[IJob]
+    val jobGroupsToRemove = new ListBuffer[Job]
 
     Log.logger.fine("Watch jobs " + registry.allJobs.size)
     for (job ← registry.allJobs) {

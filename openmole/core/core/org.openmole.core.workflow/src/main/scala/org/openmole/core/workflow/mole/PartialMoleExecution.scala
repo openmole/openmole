@@ -24,11 +24,11 @@ import org.openmole.misc.workspace._
 
 object PartialMoleExecution {
   def apply(
-    mole: IMole,
-    sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
-    hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    environments: Map[ICapsule, Environment] = Map.empty,
-    grouping: Map[ICapsule, Grouping] = Map.empty,
+    mole: Mole,
+    sources: Iterable[(Capsule, Source)] = Iterable.empty,
+    hooks: Iterable[(Capsule, Hook)] = Iterable.empty,
+    environments: Map[Capsule, Environment] = Map.empty,
+    grouping: Map[Capsule, Grouping] = Map.empty,
     seed: Long = Workspace.newSeed,
     defaultEnvironment: Environment = LocalEnvironment.default): PartialMoleExecution = new PartialMoleExecution(
     mole,
@@ -41,13 +41,13 @@ object PartialMoleExecution {
 }
 
 class PartialMoleExecution(
-    val mole: IMole,
+    val mole: Mole,
     val sources: Sources,
     val hooks: Hooks,
-    val environments: Map[ICapsule, Environment],
-    val grouping: Map[ICapsule, Grouping],
+    val environments: Map[Capsule, Environment],
+    val grouping: Map[Capsule, Grouping],
     val seed: Long,
-    val defaultEnvironment: Environment) extends IPartialMoleExecution {
+    val defaultEnvironment: Environment) {
 
   def toExecution(implicits: Context = Context.empty)(implicit executionContext: ExecutionContext = ExecutionContext.local) =
     new MoleExecution(mole,

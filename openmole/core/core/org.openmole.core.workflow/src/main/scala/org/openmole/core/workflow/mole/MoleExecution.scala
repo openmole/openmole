@@ -21,12 +21,12 @@ import java.util.UUID
 import java.util.concurrent.{ Executors, Executor, Semaphore }
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
-import org.openmole.core.workflow.data._
+import java.util.logging.Level
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.job._
-import org.openmole.core.workflow.job.IMoleJob.moleJobOrdering
+import org.openmole.core.workflow.job.State._
+import org.openmole.core.workflow.job.MoleJob.moleJobOrdering
 import org.openmole.misc.exception._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.exception.MultipleException
@@ -45,19 +45,28 @@ import scala.collection.mutable.Buffer
 import scala.concurrent.stm.{ Ref, TMap, atomic, retry }
 import javax.xml.bind.annotation.XmlTransient
 import org.openmole.core.workflow.execution.Environment
-import collection.mutable
-import java.io.File
-import org.openmole.core.serializer.SerialiserService
-import org.openmole.core.workflow.mole
 
 object MoleExecution extends Logger {
 
+  class Starting extends Event[MoleExecution]
+  class Finished extends Event[MoleExecution]
+  case class JobStatusChanged(moleJob: MoleJob, capsule: Capsule, newState: State, oldState: State) extends Event[MoleExecution]
+  case class JobCreated(moleJob: MoleJob, capsule: Capsule) extends Event[MoleExecution]
+  case class JobSubmitted(moleJob: Job, capsule: Capsule, environment: Environment) extends Event[MoleExecution]
+  case class JobFinished(moleJob: MoleJob, capsule: Capsule) extends Event[MoleExecution]
+  case class JobFailed(moleJob: MoleJob, capsule: Capsule, exception: Throwable) extends Event[MoleExecution] with ExceptionEvent {
+    def level = Level.SEVERE
+  }
+  case class ExceptionRaised(moleJob: MoleJob, exception: Throwable, level: Level) extends Event[MoleExecution] with ExceptionEvent
+  case class SourceExceptionRaised(source: Source, capsule: Capsule, exception: Throwable, level: Level) extends Event[MoleExecution] with ExceptionEvent
+  case class HookExceptionRaised(hook: Hook, moleJob: MoleJob, exception: Throwable, level: Level) extends Event[MoleExecution] with ExceptionEvent
+
   def apply(
-    mole: IMole,
-    sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
-    hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    environments: Map[ICapsule, Environment] = Map.empty,
-    grouping: Map[ICapsule, Grouping] = Map.empty,
+    mole: Mole,
+    sources: Iterable[(Capsule, Source)] = Iterable.empty,
+    hooks: Iterable[(Capsule, Hook)] = Iterable.empty,
+    environments: Map[Capsule, Environment] = Map.empty,
+    grouping: Map[Capsule, Grouping] = Map.empty,
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
     defaultEnvironment: Environment = LocalEnvironment.default)(implicit executionContext: ExecutionContext) =
@@ -73,17 +82,14 @@ object MoleExecution extends Logger {
 }
 
 class MoleExecution(
-    val mole: IMole,
+    val mole: Mole,
     val sources: Sources,
     val hooks: Hooks,
-    val environments: Map[ICapsule, Environment],
-    val grouping: Map[ICapsule, Grouping],
+    val environments: Map[Capsule, Environment],
+    val grouping: Map[Capsule, Grouping],
     val seed: Long,
     val defaultEnvironment: Environment,
-    override val id: String = UUID.randomUUID().toString)(val implicits: Context, val executionContext: ExecutionContext) extends IMoleExecution {
-
-  import IMoleExecution._
-  import MoleExecution._
+    val id: String = UUID.randomUUID().toString)(val implicits: Context, val executionContext: ExecutionContext) {
 
   private val _started = Ref(false)
   private val _canceled = Ref(false)
@@ -94,15 +100,15 @@ class MoleExecution(
 
   private val ticketNumber = Ref(0L)
 
-  private val waitingJobs: TMap[ICapsule, TMap[IMoleJobGroup, Ref[List[IMoleJob]]]] =
-    TMap(grouping.map { case (c, g) ⇒ c -> TMap.empty[IMoleJobGroup, Ref[List[IMoleJob]]] }.toSeq: _*)
+  private val waitingJobs: TMap[Capsule, TMap[MoleJobGroup, Ref[List[MoleJob]]]] =
+    TMap(grouping.map { case (c, g) ⇒ c -> TMap.empty[MoleJobGroup, Ref[List[MoleJob]]] }.toSeq: _*)
 
   private val nbWaiting = Ref(0)
 
   val rootSubMoleExecution = new SubMoleExecution(None, this)
   val rootTicket = Ticket(id, ticketNumber.next)
 
-  val dataChannelRegistry = new RegistryWithTicket[IDataChannel, Buffer[Variable[_]]]
+  val dataChannelRegistry = new RegistryWithTicket[DataChannel, Buffer[Variable[_]]]
 
   val _exceptions = Ref(List.empty[Throwable])
 
@@ -117,7 +123,7 @@ class MoleExecution(
       case (Some(s), Some(e)) ⇒ Some(e - s)
     }
 
-  def group(moleJob: IMoleJob, capsule: ICapsule, submole: ISubMoleExecution) =
+  def group(moleJob: MoleJob, capsule: Capsule, submole: SubMoleExecution) =
     atomic { implicit txn ⇒
       grouping.get(capsule) match {
         case Some(strategy) ⇒
@@ -139,11 +145,11 @@ class MoleExecution(
       }
     }.map { case (j, c) ⇒ submit(j, c) }
 
-  private def submit(job: IJob, capsule: ICapsule) =
+  private def submit(job: Job, capsule: Capsule) =
     if (!job.finished) {
       val env = environments.getOrElse(capsule, defaultEnvironment)
       env.submit(job)
-      EventDispatcher.trigger(this, new IMoleExecution.JobSubmitted(job, capsule, env))
+      EventDispatcher.trigger(this, new MoleExecution.JobSubmitted(job, capsule, env))
     }
 
   def submitAll =
@@ -163,14 +169,14 @@ class MoleExecution(
   def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }
 
   def start(context: Context): this.type = {
-    EventDispatcher.trigger(this, new IMoleExecution.Starting)
+    EventDispatcher.trigger(this, new MoleExecution.Starting)
     executionContext.directory.foreach(_.mkdirs)
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
     if (allWaiting) submitAll
     this
   }
 
-  override def start = {
+  def start: this.type = {
     if (!_started.getUpdate(_ ⇒ true)) {
       val validationErrors = Validation(mole, implicits, sources, hooks)
       if (!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of your mole has failed, several errors have been found: " + validationErrors.mkString("\n"))
@@ -180,19 +186,19 @@ class MoleExecution(
     this
   }
 
-  override def cancel: this.type = {
+  def cancel: this.type = {
     if (!_canceled.getUpdate(_ ⇒ true)) {
       rootSubMoleExecution.cancel
-      EventDispatcher.trigger(this, new IMoleExecution.Finished)
+      EventDispatcher.trigger(this, new MoleExecution.Finished)
       _finished.single() = true
       _endTime.single() = Some(System.currentTimeMillis)
     }
     this
   }
 
-  override def moleJobs = rootSubMoleExecution.jobs
+  def moleJobs = rootSubMoleExecution.jobs
 
-  override def waitUntilEnded = {
+  def waitUntilEnded = {
     atomic { implicit txn ⇒
       if (!_finished()) retry
       if (!_exceptions().isEmpty) throw new MultipleException(_exceptions().reverse)
@@ -200,7 +206,7 @@ class MoleExecution(
     this
   }
 
-  def jobFailedOrCanceled(moleJob: IMoleJob, capsule: ICapsule) = {
+  def jobFailedOrCanceled(moleJob: MoleJob, capsule: Capsule) = {
     moleJob.exception match {
       case None ⇒
       case Some(e) ⇒
@@ -209,21 +215,21 @@ class MoleExecution(
     jobOutputTransitionsPerformed(moleJob, capsule)
   }
 
-  def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) =
+  def jobOutputTransitionsPerformed(job: MoleJob, capsule: Capsule) =
     if (!_canceled.single()) {
       if (allWaiting) submitAll
       if (numberOfJobs == 0) {
-        EventDispatcher.trigger(this, new IMoleExecution.Finished)
+        EventDispatcher.trigger(this, new MoleExecution.Finished)
         _finished.single() = true
         _endTime.single() = Some(System.currentTimeMillis)
       }
     }
 
-  override def finished: Boolean = _finished.single()
+  def finished: Boolean = _finished.single()
 
-  override def started: Boolean = _started.single()
+  def started: Boolean = _started.single()
 
-  override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.next)
+  def nextTicket(parent: Ticket): Ticket = Ticket(parent, ticketNumber.next)
 
   def nextJobId = UUID.randomUUID
 

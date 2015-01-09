@@ -17,9 +17,8 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.workflow.builder.InputOutputBuilder
-import org.openmole.core.workflow.mole.IHook
+import org.openmole.core.workflow.builder._
 
 abstract class HookBuilder extends InputOutputBuilder {
-  def toHook: IHook
+  def toHook: Hook
 }

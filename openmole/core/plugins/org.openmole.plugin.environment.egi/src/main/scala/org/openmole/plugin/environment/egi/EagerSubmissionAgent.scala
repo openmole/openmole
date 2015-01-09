@@ -18,9 +18,9 @@
 package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.environment.{ BatchEnvironment, BatchExecutionJob }
-import org.openmole.core.workflow.mole.IMoleExecution
+import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.core.workflow.job.IJob
+import org.openmole.core.workflow.job.Job
 import org.openmole.misc.tools.cache.AssociativeCache
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
@@ -93,7 +93,7 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment], thresho
 
       if (nbRessub > 0) {
         // Resubmit nbRessub jobs in a fair manner
-        val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
+        val order = new HashMap[Int, Set[Job]] with MultiMap[Int, Job]
         var keys = new TreeSet[Int]
 
         for (job ← executionJobs.keys) {

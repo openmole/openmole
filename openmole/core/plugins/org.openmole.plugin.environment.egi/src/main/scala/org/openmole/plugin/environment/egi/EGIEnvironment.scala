@@ -22,7 +22,7 @@ import org.openmole.misc.updater.Updater
 import java.io.File
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
-import org.openmole.core.workflow.job.IJob
+import org.openmole.core.workflow.job.Job
 import org.openmole.misc.exception._
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.control._
@@ -221,7 +221,7 @@ class EGIEnvironment(
     None
   }
 
-  override def submit(job: IJob) = {
+  override def submit(job: Job) = {
     registerAgents
     super.submit(job)
   }

@@ -18,9 +18,10 @@
 package org.openmole.core.workflow.task
 
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.InputOutputCheck
-import org.openmole.misc.tools.service.{ Logger, Random }
-import org.openmole.misc.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.serializer.plugin._
+import org.openmole.core.workflow.tools._
+import org.openmole.misc.tools.service._
+import org.openmole.misc.workspace._
 
 object Task extends Logger {
   val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")
@@ -34,11 +35,52 @@ object Task extends Logger {
   def buildRNG(context: Context) = Random.newRNG(context(Task.openMOLESeed))
 }
 
-trait Task extends ITask with InputOutputCheck {
+trait Task <: InputOutputCheck with Plugins {
+  /**
+   *
+   * Perform this task.
+   *
+   * @param context the context in which the task will be executed
+   */
+  def perform(context: Context): Context = perform(context, process)
 
   protected def process(context: Context): Context
 
-  def perform(context: Context) = perform(context, process)
+  /**
+   *
+   * Get the name of the task.
+   *
+   * @return the name of the task
+   */
+  def name: String
+
+  /**
+   *
+   * Get the input data of the task.
+   *
+   * @return the input of the task
+   */
+  def inputs: DataSet
+
+  /**
+   *
+   * Get the output data of the task.
+   *
+   * @return the output data of the task
+   */
+  def outputs: DataSet
+
+  /**
+   *
+   * Get all the defaults configured for this task.
+   *
+   * @return the defaults configured for this task.
+   */
+  def defaults: DefaultSet
+
+  def plugins: PluginSet
 
   override def toString: String = name
+
 }
+

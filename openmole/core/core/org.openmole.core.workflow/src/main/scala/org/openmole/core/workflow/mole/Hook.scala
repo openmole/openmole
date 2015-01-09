@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 20/02/13 Romain Reuillon
+ * Copyright (C) 2013 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,17 +11,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.workflow.tools.InputOutputCheck
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data.Context
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
 
-trait Hook extends IHook with InputOutputCheck {
+trait Hook <: InputOutputCheck {
+  def inputs: DataSet
+  def outputs: DataSet
+  def defaults: DefaultSet
+  def perform(context: Context, executionContext: ExecutionContext): Context = perform(context, process(_, executionContext))
   protected def process(context: Context, executionContext: ExecutionContext): Context
-  def perform(context: Context, executionContext: ExecutionContext) = perform(context, process(_, executionContext))
 }

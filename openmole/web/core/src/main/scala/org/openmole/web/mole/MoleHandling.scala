@@ -8,9 +8,9 @@ import scala.io.{ Codec, Source }
 import java.io._
 import org.openmole.core.serializer.SerialiserService
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
-import org.openmole.core.workflow.mole.{ IPartialMoleExecution, IMoleExecution, ExecutionContext }
+import org.openmole.core.workflow.mole._
 import org.openmole.misc.tools.io.FromString
-import org.openmole.core.workflow.data.{ Context, Prototype, Variable }
+import org.openmole.core.workflow.data._
 import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
 import org.openmole.misc.eventdispatcher.{ EventListener, EventDispatcher }
 import akka.actor.ActorSystem
@@ -37,7 +37,7 @@ trait MoleHandling { self: ScalatraBase ⇒
 
   protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
 
-  private val listener: EventListener[IMoleExecution] = new JobEventListener(this)
+  private val listener: EventListener[MoleExecution] = new JobEventListener(this)
   private val mStatusListener = new MoleStatusListener(this)
 
   (cache.getUnfinishedMoleKeys map getMole).flatten foreach (_.start)
@@ -61,11 +61,11 @@ trait MoleHandling { self: ScalatraBase ⇒
     case None ⇒ Right("No data was uploaded..")
   }
 
-  private def processPack(is: Option[InputStream]): (Either[IPartialMoleExecution, String], Option[File]) = is match {
+  private def processPack(is: Option[InputStream]): (Either[PartialMoleExecution, String], Option[File]) = is match {
     case Some(stream) ⇒
       try {
         val p = Workspace.newDir // Todo: make sure that the encapsulate flag is implicit for packs
-        val ret = managed(new TarInputStream(stream)) acquireAndGet { SerialiserService.deserialiseAndExtractFiles[IPartialMoleExecution](_, p) }
+        val ret = managed(new TarInputStream(stream)) acquireAndGet { SerialiserService.deserialiseAndExtractFiles[PartialMoleExecution](_, p) }
         Left(ret) -> Some(p)
       }
       catch {
@@ -76,7 +76,7 @@ trait MoleHandling { self: ScalatraBase ⇒
     case None ⇒ Right("No data was uploaded") -> None
   }
 
-  private def reifyCSV(mole: IPartialMoleExecution, csvData: Map[String, String]) = {
+  private def reifyCSV(mole: PartialMoleExecution, csvData: Map[String, String]) = {
     def fromString[T: FromString](s: String) = {
       implicitly[FromString[T]].from(s)
     }
@@ -108,19 +108,19 @@ trait MoleHandling { self: ScalatraBase ⇒
     Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
   }
 
-  private def createMoleExecution(pMole: IPartialMoleExecution, context: Context, encapsulated: Boolean, mPath: Option[File] = None) = {
+  private def createMoleExecution(pMole: PartialMoleExecution, context: Context, encapsulated: Boolean, mPath: Option[File] = None) = {
     val path: Option[File] = mPath orElse (if (encapsulated) Some(Workspace.newDir("")) else None)
     val executionContext = ExecutionContext(new PrintStream(new File(path.getOrElse(".") + "/out")), path)
     val mole = pMole.toExecution(context)(executionContext = executionContext)
 
-    EventDispatcher.listen(mole, listener, classOf[IMoleExecution.JobStatusChanged])
-    EventDispatcher.listen(mole, listener, classOf[IMoleExecution.JobCreated])
-    EventDispatcher.listen(mole, mStatusListener, classOf[IMoleExecution.Starting])
-    EventDispatcher.listen(mole, mStatusListener, classOf[IMoleExecution.Finished])
+    EventDispatcher.listen(mole, listener, classOf[MoleExecution.JobStatusChanged])
+    EventDispatcher.listen(mole, listener, classOf[MoleExecution.JobCreated])
+    EventDispatcher.listen(mole, mStatusListener, classOf[MoleExecution.Starting])
+    EventDispatcher.listen(mole, mStatusListener, classOf[MoleExecution.Finished])
     (mole, path)
   }
 
-  def createMole(moleInput: ⇒ Option[InputStream], csvInput: ⇒ Option[InputStream], encapsulate: Boolean = false, pack: Boolean = false, name: String = ""): Either[String, IMoleExecution] = {
+  def createMole(moleInput: ⇒ Option[InputStream], csvInput: ⇒ Option[InputStream], encapsulate: Boolean = false, pack: Boolean = false, name: String = ""): Either[String, MoleExecution] = {
     val r = csvInput map Source.fromInputStream
 
     val regex = """(.*),(.*)""".r
@@ -133,7 +133,7 @@ trait MoleHandling { self: ScalatraBase ⇒
 
     val moleStream = moleBinary map (b ⇒ new ByteArrayInputStream(b map (_.toByte)))
 
-    val (moleExec, genPath) = if (pack) processPack(moleStream) else (processXMLFile[IPartialMoleExecution](moleStream), None)
+    val (moleExec, genPath) = if (pack) processPack(moleStream) else (processXMLFile[PartialMoleExecution](moleStream), None)
 
     moleExec match {
       case Left(pEx) ⇒ {
@@ -160,15 +160,15 @@ trait MoleHandling { self: ScalatraBase ⇒
 
   def getMoleKeys = cache.getMoleKeys
 
-  def getMole(key: String): Option[IMoleExecution] = { //TODO: move a large part of this to cache
-    lazy val mole: Option[IMoleExecution] = db withSession { implicit session ⇒
+  def getMole(key: String): Option[MoleExecution] = { //TODO: move a large part of this to cache
+    lazy val mole: Option[MoleExecution] = db withSession { implicit session ⇒
 
       val row = MoleData.instance filter (_.id === key)
       val molePack = (row map (_.molePackage)).list.headOption.getOrElse(false)
       val workDir = if (molePack) Some(Workspace.newDir) else None
-      val moleDeserialiser: InputStream ⇒ IPartialMoleExecution = workDir map (dir ⇒
-        (in: InputStream) ⇒ SerialiserService.deserialiseAndExtractFiles[IPartialMoleExecution](new TarInputStream(in), dir)
-      ) getOrElse (SerialiserService.deserialise[IPartialMoleExecution](_))
+      val moleDeserialiser: InputStream ⇒ PartialMoleExecution = workDir map (dir ⇒
+        (in: InputStream) ⇒ SerialiserService.deserialiseAndExtractFiles[PartialMoleExecution](new TarInputStream(in), dir)
+      ) getOrElse (SerialiserService.deserialise[PartialMoleExecution](_))
 
       val r = (row map (r ⇒ (r.clobbedMole, r.clobbedContext, r.encapsulated))).list.headOption map {
         case (pMClob, ctxtClob, e) ⇒ (moleDeserialiser(pMClob.getAsciiStream), SerialiserService.deserialise[Context](ctxtClob.getAsciiStream), e)
@@ -182,7 +182,7 @@ trait MoleHandling { self: ScalatraBase ⇒
 
   def getMoleResult(key: String) = cache.getMoleResult(key)
 
-  def getMoleStats(mole: IMoleExecution) = cache.getMoleStats(cache.getCacheId(mole))
+  def getMoleStats(mole: MoleExecution) = cache.getMoleStats(cache.getCacheId(mole))
 
   def getMoleStats(key: String) = cache.getMoleStats(key)
 
@@ -202,22 +202,22 @@ trait MoleHandling { self: ScalatraBase ⇒
     statNames zip stats.getJobStatsAsSeq
   }
 
-  def updateStats(mole: IMoleExecution, stats: Stats) {
+  def updateStats(mole: MoleExecution, stats: Stats) {
     cache.updateStats(mole, stats)
   }
 
   //Called automatically when execution is complete.
-  def decacheMole(mole: IMoleExecution) = cache.decacheMole(mole)
+  def decacheMole(mole: MoleExecution) = cache.decacheMole(mole)
 
   //todo fix to remove decached moles
-  def setStatus(mole: IMoleExecution, status: Status) = cache.setStatus(mole, status)
+  def setStatus(mole: MoleExecution, status: Status) = cache.setStatus(mole, status)
 
   def isEncapsulated(key: String): Boolean = db withSession { implicit session ⇒
     (for { m ← MoleData.instance if m.id === key } yield m.encapsulated).list.forall(b ⇒ b)
   }
 
   //TODO - FRAGILE
-  def storeResultBlob(exec: IMoleExecution) = {
+  def storeResultBlob(exec: MoleExecution) = {
     val mPath = cache.getCapsule(exec)
     for (path ← mPath) {
       val outFile = new File(Workspace.newFile.toString + ".tar")

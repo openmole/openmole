@@ -20,13 +20,10 @@ package org.openmole.core.workflow.execution.local
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.execution.Environment._
-import org.openmole.core.workflow.job.IMoleJob
 import org.openmole.core.workflow.job.State
-import org.openmole.core.workflow.task.IMoleTask
-import org.openmole.core.workflow.job.MoleJob._
+import org.openmole.core.workflow.task._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.{ LocalHostName, Logger }
-import scala.collection.JavaConversions._
 import ref.WeakReference
 import org.openmole.core.workflow.mole.StrainerCapsule
 
@@ -59,9 +56,9 @@ class LocalExecuter(environment: WeakReference[LocalEnvironment]) extends Runnab
             for (moleJob ← executionJob.moleJobs) {
               if (moleJob.state != State.CANCELED) {
                 moleJob.task match {
-                  case _: IMoleTask ⇒ jobGoneIdle()
+                  case _: MoleTask ⇒ jobGoneIdle()
                   case t: StrainerCapsule.StrainerTaskDecorator ⇒
-                    if (classOf[IMoleTask].isAssignableFrom(t.task.getClass)) jobGoneIdle()
+                    if (classOf[MoleTask].isAssignableFrom(t.task.getClass)) jobGoneIdle()
                   case _ ⇒
                 }
                 moleJob.perform

@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.workflow.job.IJob
+import org.openmole.core.workflow.job.Job
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
 import fr.iscpif.gridscale.glite.BDII
@@ -81,7 +81,7 @@ class DIRACEnvironment(
     None
   }
 
-  override def submit(job: IJob) = {
+  override def submit(job: Job) = {
     registerAgents
     super.submit(job)
   }

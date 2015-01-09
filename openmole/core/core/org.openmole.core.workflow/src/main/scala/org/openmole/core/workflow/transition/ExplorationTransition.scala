@@ -27,16 +27,16 @@ import org.openmole.misc.tools.service.Priority
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
 
-class ExplorationTransition(start: ICapsule, end: Slot, condition: ICondition = ICondition.True, filter: Filter[String] = Filter.empty) extends Transition(start, end, condition, filter) with IExplorationTransition {
+class ExplorationTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: Filter[String] = Filter.empty) extends Transition(start, end, condition, filter) with IExplorationTransition {
 
-  override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = {
+  override def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) = {
     val subSubMole = subMole.newChild
 
     registerAggregationTransitions(ticket, subSubMole)
     subSubMole.transitionLock { submitIn(filtered(context), ticket, subSubMole) }
   }
 
-  def submitIn(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = {
+  def submitIn(context: Context, ticket: Ticket, subMole: SubMoleExecution) = {
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
     val (factors, outputs) = start.outputs(mole, moleExecution.sources, moleExecution.hooks).partition(d ⇒ (d.mode is Explore) && d.prototype.`type`.isArray)
@@ -63,9 +63,9 @@ class ExplorationTransition(start: ICapsule, end: Slot, condition: ICondition = 
 
   }
 
-  private def registerAggregationTransitions(ticket: ITicket, subMoleExecution: ISubMoleExecution) = {
-    val alreadySeen = new HashSet[ICapsule]
-    val toProcess = new ListBuffer[(ICapsule, Int)]
+  private def registerAggregationTransitions(ticket: Ticket, subMoleExecution: SubMoleExecution) = {
+    val alreadySeen = new HashSet[Capsule]
+    val toProcess = new ListBuffer[(Capsule, Int)]
     toProcess += ((end.capsule, 0))
 
     while (!toProcess.isEmpty) {
@@ -81,7 +81,7 @@ class ExplorationTransition(start: ICapsule, end: Slot, condition: ICondition = 
             if (level > 0) toProcess += t.end.capsule -> (level - 1)
             else if (level == 0) {
               subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
-              EventDispatcher.listen(subMoleExecution, Priority.LOW, new AggregationTransitionAdapter(t), classOf[ISubMoleExecution.Finished])
+              EventDispatcher.listen(subMoleExecution, Priority.LOW, new AggregationTransitionAdapter(t), classOf[SubMoleExecution.Finished])
             }
           case t: IExplorationTransition ⇒ toProcess += t.end.capsule -> (level + 1)
           case t                         ⇒ toProcess += t.end.capsule -> level

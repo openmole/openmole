@@ -34,12 +34,12 @@ import data._
 package object transition {
 
   implicit def transitionsPuzzleDecorator(from: Puzzle) = new TransitionDecorator(from)
-  implicit def transitionsCapsuleDecorator(from: ICapsule) = new TransitionDecorator(from.toPuzzle)
-  implicit def transitionsTaskDecorator(from: ITask) = new TransitionDecorator(from.toCapsule.toPuzzle)
+  implicit def transitionsCapsuleDecorator(from: Capsule) = new TransitionDecorator(from.toPuzzle)
+  implicit def transitionsTaskDecorator(from: Task) = new TransitionDecorator(from.toCapsule.toPuzzle)
   implicit def transitionsTaskBuilderDecorator(from: TaskBuilder) = new TransitionDecorator(from.toTask.toCapsule.toPuzzle)
   implicit def transitionsSlotDecorator(slot: Slot) = new TransitionDecorator(slot.toPuzzle)
 
-  implicit def taskToSlotConverter(task: ITask) = Slot(Capsule(task))
+  implicit def taskToSlotConverter(task: Task) = Slot(Capsule(task))
   implicit def transitionToSlotConverter(transition: ITransition) = transition.end
   implicit def conditionStringConverter(condition: String) = Condition(condition)
 
@@ -47,7 +47,7 @@ package object transition {
 
     def -<(
       to: Puzzle,
-      condition: ICondition = ICondition.True,
+      condition: Condition = Condition.True,
       filter: Filter[String] = Filter.empty,
       size: Option[String] = None) = {
 
@@ -71,7 +71,7 @@ package object transition {
 
     def -<-(
       to: Puzzle,
-      condition: ICondition = ICondition.True,
+      condition: Condition = Condition.True,
       filter: Filter[String] = Filter.empty) = {
 
       val transitions = from.lasts.map {
@@ -90,9 +90,9 @@ package object transition {
 
     def >-(
       to: Puzzle,
-      condition: ICondition = ICondition.True,
+      condition: Condition = Condition.True,
       filter: Filter[String] = Filter.empty,
-      trigger: ICondition = ICondition.False) = {
+      trigger: Condition = Condition.False) = {
       val transitions = from.lasts.map { c ⇒ new AggregationTransition(c, to.first, condition, filter, trigger) }
       Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
     }
@@ -106,13 +106,13 @@ package object transition {
 
     def >|(
       to: Puzzle,
-      trigger: ICondition,
+      trigger: Condition,
       filter: Filter[String] = Filter.empty) = {
       val transitions = from.lasts.map { c ⇒ new EndExplorationTransition(c, to.first, trigger, filter) }
       Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
     }
 
-    def --(to: Puzzle, condition: ICondition = ICondition.True, filter: Filter[String] = Filter.empty) = {
+    def --(to: Puzzle, condition: Condition = Condition.True, filter: Filter[String] = Filter.empty) = {
       val transitions = from.lasts.map {
         c ⇒ new Transition(c, to.first, condition, filter)
       }

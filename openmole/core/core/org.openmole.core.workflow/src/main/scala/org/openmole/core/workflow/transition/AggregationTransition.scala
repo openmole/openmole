@@ -19,23 +19,23 @@ package org.openmole.core.workflow.transition
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools.ContextAggregator
-import org.openmole.core.workflow.transition.ICondition._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.transition.Condition._
 import org.openmole.misc.exception._
 import org.openmole.misc.tools.service.LockUtil._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
 
 object AggregationTransition {
-  def aggregateOutputs(moleExecution: IMoleExecution, transition: IAggregationTransition, results: Iterable[Variable[_]]) = {
+  def aggregateOutputs(moleExecution: MoleExecution, transition: IAggregationTransition, results: Iterable[Variable[_]]) = {
     val toArrayManifests = Map.empty[String, Manifest[_]] ++ transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }
     ContextAggregator.aggregate(transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, results)
   }
 }
 
-class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = True, filter: Filter[String] = Filter.empty, trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
+class AggregationTransition(start: Capsule, end: Slot, condition: Condition = True, filter: Filter[String] = Filter.empty, trigger: Condition = Condition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
 
-  override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = {
+  override def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) = {
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
@@ -45,7 +45,7 @@ class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = 
         case Some(results) ⇒
           results ++= filtered(context).values
 
-          if (trigger != ICondition.False) {
+          if (trigger != Condition.False) {
             val context = AggregationTransition.aggregateOutputs(moleExecution, this, results)
             if (trigger.evaluate(context)) {
               aggregate(subMole, ticket)
@@ -58,7 +58,7 @@ class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = 
     }
   }
 
-  override def aggregate(subMole: ISubMoleExecution, ticket: ITicket) = subMole.transitionLock {
+  override def aggregate(subMole: SubMoleExecution, ticket: Ticket) = subMole.transitionLock {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
 
     if (!subMole.canceled && !hasBeenPerformed(subMole, parentTicket)) {
@@ -70,14 +70,14 @@ class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = 
     }
   }
 
-  override def hasBeenPerformed(subMole: ISubMoleExecution, ticket: ITicket) = !subMole.aggregationTransitionRegistry.isRegistred(this, ticket)
+  override def hasBeenPerformed(subMole: SubMoleExecution, ticket: Ticket) = !subMole.aggregationTransitionRegistry.isRegistred(this, ticket)
 
-  protected def allAggregationTransitionsPerformed(subMole: ISubMoleExecution, ticket: ITicket) = !oneAggregationTransitionNotPerformed(subMole, ticket)
+  protected def allAggregationTransitionsPerformed(subMole: SubMoleExecution, ticket: Ticket) = !oneAggregationTransitionNotPerformed(subMole, ticket)
 
-  private def oneAggregationTransitionNotPerformed(subMole: ISubMoleExecution, ticket: ITicket): Boolean = {
+  private def oneAggregationTransitionNotPerformed(subMole: SubMoleExecution, ticket: Ticket): Boolean = {
     val mole = subMole.moleExecution.mole
-    val alreadySeen = new HashSet[ICapsule]
-    val toProcess = new ListBuffer[(ICapsule, Int)]
+    val alreadySeen = new HashSet[Capsule]
+    val toProcess = new ListBuffer[(Capsule, Int)]
     toProcess += ((this.start, 0))
 
     while (!toProcess.isEmpty) {

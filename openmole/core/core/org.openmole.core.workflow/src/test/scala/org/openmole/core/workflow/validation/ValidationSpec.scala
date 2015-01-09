@@ -262,7 +262,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val h = new HookBuilder {
       addInput(i)
 
-      def toHook = new IHook with Built {
+      def toHook = new Hook with Built {
         def perform(ctx: Context, executionContext: ExecutionContext) = ctx
       }
     }
@@ -286,7 +286,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val h = new HookBuilder {
       addInput(iInt)
 
-      def toHook = new IHook with Built {
+      def toHook = new Hook with Built {
         def perform(ctx: Context, executionContext: ExecutionContext) = ctx
       }
     }

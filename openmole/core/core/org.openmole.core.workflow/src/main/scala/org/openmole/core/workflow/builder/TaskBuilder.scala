@@ -32,7 +32,7 @@ object TaskBuilder {
 }
 
 abstract class TaskBuilder(implicit val plugins: PluginSet) extends InputOutputBuilder with Builder { builder ⇒
-  def toTask: ITask
+  def toTask: Task
 
   var name: Option[String] = None
 
