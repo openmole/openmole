@@ -18,12 +18,12 @@
 package org.openmole.plugin.task.groovy
 
 import java.io.File
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.task._
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import org.openmole.plugin.task.code._
-import org.openmole.core.model.task._
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.data._
 import org.openmole.plugin.tool.groovy.ContextToGroovyCode
 
 object GroovyTask {

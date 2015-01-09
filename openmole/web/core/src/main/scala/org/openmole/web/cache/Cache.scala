@@ -1,6 +1,6 @@
 package org.openmole.web.cache
 
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.workflow.mole.IMoleExecution
 import java.io.File
 import akka.actor.ActorSystem
 import org.openmole.web.db.SlickDB

@@ -16,7 +16,7 @@ object Core extends BaseDefaults {
 
   override val dir = file("core/core")
 
-  lazy val model = OsgiProject("model", openmoleScope = Some("provided"), imports = Seq("*")) settings (
+  lazy val workflow = OsgiProject("workflow", openmoleScope = Some("provided"), imports = Seq("*")) settings (
     includeOsgi,
     libraryDependencies ++= Seq(scalaLang, groovy, Apache.math)
   ) dependsOn
@@ -28,7 +28,7 @@ object Core extends BaseDefaults {
       (workspace, pluginManager, fileService, Misc.tools, iceTar)
 
   lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (
-    model, workspace, Misc.tools, eventDispatcher, replication, updater, Misc.exception,
+    workflow, workspace, Misc.tools, eventDispatcher, replication, updater, Misc.exception,
     serializer, fileService, pluginManager, iceTar) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick, Apache.config))
 
 }

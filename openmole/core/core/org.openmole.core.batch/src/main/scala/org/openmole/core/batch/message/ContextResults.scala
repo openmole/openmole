@@ -17,9 +17,9 @@
 
 package org.openmole.core.batch.message
 
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.job.MoleJobId
-import org.openmole.core.model.job.State.State
+import org.openmole.core.workflow.data.Context
+import org.openmole.core.workflow.job.MoleJobId
+import org.openmole.core.workflow.job.State.State
 import util.Try
 
 class ContextResults(val results: PartialFunction[MoleJobId, Try[Context]])

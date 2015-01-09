@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.model.job.IJob
+import org.openmole.core.workflow.job.IJob
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
 import fr.iscpif.gridscale.glite.BDII

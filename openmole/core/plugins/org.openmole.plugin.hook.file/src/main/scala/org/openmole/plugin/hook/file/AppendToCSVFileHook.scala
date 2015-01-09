@@ -17,15 +17,15 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.model.data._
-import org.openmole.core.model.tools._
-import org.openmole.core.model.data._
-import org.openmole.core.model.tools.ExpandedString
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.Prettifier._
 import scala.annotation.tailrec
-import org.openmole.core.model.mole._
-import org.openmole.core.model.mole.{ IHook, ExecutionContext }
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.mole.{ IHook, ExecutionContext }
 import scala.collection.mutable.ListBuffer
 
 object AppendToCSVFileHook {

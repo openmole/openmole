@@ -18,14 +18,14 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.core.model.builder.TaskBuilder
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
-import org.openmole.core.model.tools._
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
-import org.openmole.core.model.sampling._
-import org.openmole.core.model.domain._
+import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.domain._
 
 import scala.collection.mutable.ListBuffer
 import org.openmole.misc.tools.script.{ GroovyFunction, GroovyProxyPool, GroovyProxy }

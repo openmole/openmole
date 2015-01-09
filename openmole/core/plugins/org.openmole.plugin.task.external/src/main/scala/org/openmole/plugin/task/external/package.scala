@@ -18,22 +18,22 @@
 package org.openmole.plugin.task
 
 import java.io.File
-import org.openmole.core.model.data.Prototype
-import org.openmole.core.model.builder
+import org.openmole.core.workflow.data.Prototype
+import org.openmole.core.workflow.builder
 import org.openmole.misc.tools.service.OS
 import org.openmole.misc.macros.Keyword._
 
 package external {
 
-  import org.openmole.core.model.tools.ExpandedString
+  import org.openmole.core.workflow.tools.ExpandedString
 
   trait ExternalPackage {
-    implicit def inputsFileDecorator(i: org.openmole.core.model.builder.inputs.type) = {
+    implicit def inputsFileDecorator(i: org.openmole.core.workflow.builder.inputs.type) = {
       def +=[T <: ExternalTaskBuilder](p: Prototype[File], name: ExpandedString, link: Boolean = false) =
         (_: T).addInput(p, name, link)
     }
 
-    implicit def outputsFileDecorator(i: org.openmole.core.model.builder.outputs.type) =
+    implicit def outputsFileDecorator(i: org.openmole.core.workflow.builder.outputs.type) =
       add[{ def addOutput(n: ExpandedString, p: Prototype[File]) }]
 
     lazy val resources =

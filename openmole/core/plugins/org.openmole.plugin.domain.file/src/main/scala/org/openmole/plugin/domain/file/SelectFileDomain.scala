@@ -18,10 +18,10 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
-import org.openmole.core.model.data._
-import org.openmole.core.model.domain._
-import org.openmole.core.model.tools._
-import org.openmole.core.model.tools.ExpandedString
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.tools.ExpandedString
 
 import scala.util.Random
 

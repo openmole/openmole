@@ -1,14 +1,14 @@
 package org.openmole.web.mole
 
 import _root_.akka.actor.ActorSystem
-import org.openmole.core.model.validation.DataflowProblem
+import org.openmole.core.workflow.validation.DataflowProblem
 import org.scalatra._
 import scalate.ScalateSupport
 import servlet.{ FileItem, FileUploadSupport }
 import java.io.{ PrintStream, InputStream }
 import javax.servlet.annotation.MultipartConfig
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.data.Variable
+import org.openmole.core.workflow.mole.IMoleExecution
+import org.openmole.core.workflow.data.Variable
 import concurrent.Future
 
 import slick.driver.H2Driver.simple._

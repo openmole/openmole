@@ -21,7 +21,7 @@ package org.openmole.core.batch.jobservice
 import org.openmole.core.batch.control._
 import org.openmole.misc.workspace._
 import org.openmole.core.batch.environment._
-import org.openmole.core.model.execution.ExecutionState._
+import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.misc.tools.service.Logger
 
 object JobService extends Logger

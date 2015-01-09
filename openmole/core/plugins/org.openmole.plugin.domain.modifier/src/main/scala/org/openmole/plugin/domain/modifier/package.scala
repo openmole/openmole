@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.domain
 
-import org.openmole.core.model.domain._
+import org.openmole.core.workflow.domain._
 import java.io.File
 
-import org.openmole.core.model.tools.FromContext
+import org.openmole.core.workflow.tools.FromContext
 
 package object modifier {
 

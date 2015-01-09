@@ -27,7 +27,7 @@ import org.openmole.core.serializer.SerialiserService
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
 import org.openmole.core.batch.storage._
-import org.openmole.core.model.execution.local.LocalEnvironment
+import org.openmole.core.workflow.execution.local.LocalEnvironment
 import scala.util.{ Success, Failure }
 
 object SimExplorer extends Logger

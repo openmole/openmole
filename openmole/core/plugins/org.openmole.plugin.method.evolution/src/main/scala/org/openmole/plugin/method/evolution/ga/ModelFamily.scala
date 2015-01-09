@@ -20,8 +20,8 @@ package org.openmole.plugin.method.evolution.ga
 import fr.iscpif.mgo._
 import fr.iscpif.mgo.modelfamily._
 import org.openmole.plugin.method.evolution._
-import org.openmole.core.model.data._
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
 
 import scala.util.Random
 

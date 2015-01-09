@@ -19,7 +19,7 @@ package org.openmole.plugin.tool
 
 import java.io.File
 
-import org.openmole.core.model.data.Prototype
+import org.openmole.core.workflow.data.Prototype
 import org.openmole.misc.macros.Keyword._
 
 package csv {

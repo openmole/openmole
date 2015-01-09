@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.core.model.data.Prototype
-import org.openmole.core.model.builder._
+import org.openmole.core.workflow.data.Prototype
+import org.openmole.core.workflow.builder._
 import org.openmole.misc.macros.Keyword._
 
 package object netlogo {

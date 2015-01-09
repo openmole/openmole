@@ -1,11 +1,11 @@
 package org.openmole.web.mole
 
 import org.openmole.misc.eventdispatcher.{ Event, EventListener }
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.mole.IMoleExecution.{ Finished, Starting, JobCreated, JobStatusChanged }
+import org.openmole.core.workflow.mole.IMoleExecution
+import org.openmole.core.workflow.mole.IMoleExecution.{ Finished, Starting, JobCreated, JobStatusChanged }
 import org.openmole.web.db.tables.MoleStats
 import org.openmole.web.cache.{ Stats, Status, DataHandler }
-import org.openmole.core.model.job
+import org.openmole.core.workflow.job
 
 /**
  * Created with IntelliJ IDEA.

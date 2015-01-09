@@ -29,7 +29,7 @@ import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.environment.BatchEnvironment.{ signalUpload }
-import org.openmole.core.model.job._
+import org.openmole.core.workflow.job._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.HashService
 import org.openmole.misc.tools.io.TarArchiver._

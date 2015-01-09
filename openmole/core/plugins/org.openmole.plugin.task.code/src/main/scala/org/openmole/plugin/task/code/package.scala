@@ -19,7 +19,7 @@ package org.openmole.plugin.task
 
 import java.io.File
 
-import org.openmole.core.model.builder._
+import org.openmole.core.workflow.builder._
 import org.openmole.misc.macros.Keyword._
 
 package object code {

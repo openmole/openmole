@@ -17,12 +17,12 @@
 
 package org.openmole.plugin.task.tools
 
-import org.openmole.core.model.builder.TaskBuilder
-import org.openmole.core.model.data._
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.task._
 
 object AssignTask {
 

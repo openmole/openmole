@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.grouping
 
-import org.openmole.core.model.mole._
-import org.openmole.core.model.puzzle._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.puzzle._
 
 package object batch {
 

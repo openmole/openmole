@@ -21,9 +21,9 @@ import groovy.lang.Binding
 import java.io.File
 import org.openmole.misc.exception._
 import org.openmole.misc.tools.script.GroovyProxyPool
-import org.openmole.core.model.data._
-import org.openmole.core.model.tools._
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data._
 
 trait ContextToGroovyCode {
 

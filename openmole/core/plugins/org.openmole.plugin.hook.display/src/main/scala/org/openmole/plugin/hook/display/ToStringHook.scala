@@ -18,10 +18,10 @@
 package org.openmole.plugin.hook.display
 
 import java.io.PrintStream
-import org.openmole.core.model.data._
-import org.openmole.core.model.mole._
-import org.openmole.core.model.data._
-import org.openmole.core.model.mole.ExecutionContext
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole.ExecutionContext
 
 object ToStringHook {
 

@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.core.model.data.Prototype
+import org.openmole.core.workflow.data.Prototype
 import fr.iscpif.mgo.Individual
 import evolution.ga._
 

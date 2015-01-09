@@ -17,11 +17,11 @@
 
 package org.openmole.plugin.hook.display
 
-import org.openmole.core.model.data._
-import org.openmole.core.model.tools._
-import org.openmole.core.model.mole._
-import org.openmole.core.model.mole._
-import org.openmole.core.model.tools.ExpandedString
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.tools.ExpandedString
 
 object DisplayHook {
 

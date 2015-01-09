@@ -18,11 +18,11 @@
 package org.openmole.plugin.task.template
 
 import java.io.File
-import org.openmole.core.model.builder.TaskBuilder
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
 
 object TemplateFileFromInputTask {
   def apply(

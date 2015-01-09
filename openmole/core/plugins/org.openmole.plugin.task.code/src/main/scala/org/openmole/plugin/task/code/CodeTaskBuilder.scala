@@ -20,7 +20,7 @@ package org.openmole.plugin.task.code
 import java.io.File
 import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.model.task.PluginSet
+import org.openmole.core.workflow.task.PluginSet
 
 /**
  * Builder for any code task

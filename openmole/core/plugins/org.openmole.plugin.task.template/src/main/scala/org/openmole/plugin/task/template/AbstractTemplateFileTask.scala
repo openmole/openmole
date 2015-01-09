@@ -20,11 +20,11 @@ package org.openmole.plugin.task.template
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
-import org.openmole.core.model.data._
-import org.openmole.core.model.task.Task
-import org.openmole.core.model.tools.VariableExpansion
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task.Task
+import org.openmole.core.workflow.tools.VariableExpansion
 import org.openmole.misc.workspace._
 import VariableExpansion._
 

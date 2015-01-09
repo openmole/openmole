@@ -28,7 +28,7 @@ import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.ILoop
 import scala.tools.nsc.interpreter.JLineCompletion
 import scala.tools.nsc.interpreter.JLineReader
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.task._
 import java.util.concurrent.TimeUnit
 import scala.tools.nsc.io.{ File ⇒ SFile }
 import java.io.File
@@ -81,22 +81,18 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
           loop.bind("commands", new Command)
           loop.bind("implicits", new Implicits()(plugins))
           loop.interpret(Seq(
-            "org.openmole.core.model.data._",
-            "org.openmole.core.model.execution._",
-            "org.openmole.core.model.execution.local._",
-            "org.openmole.core.model.job._",
-            "org.openmole.core.model.mole._",
-            "org.openmole.core.model.task._",
-            "org.openmole.core.model.transition._",
-            "org.openmole.core.model.tools._",
-            "org.openmole.core.model.puzzle._",
-            "org.openmole.core.model.builder._",
+            "org.openmole.core.workflow.data._",
+            "org.openmole.core.workflow.execution._",
+            "org.openmole.core.workflow.execution.local._",
+            "org.openmole.core.workflow.job._",
+            "org.openmole.core.workflow.mole._",
+            "org.openmole.core.workflow.task._",
+            "org.openmole.core.workflow.transition._",
+            "org.openmole.core.workflow.tools._",
+            "org.openmole.core.workflow.puzzle._",
+            "org.openmole.core.workflow.builder._",
+            "org.openmole.core.workflow.sampling._",
             "org.openmole.core.batch.authentication._",
-            "org.openmole.core.model.data._",
-            "org.openmole.core.model.transition._",
-            "org.openmole.core.model.mole._",
-            "org.openmole.core.model.sampling._",
-            "org.openmole.core.model.task._",
             "org.openmole.core.batch.authentication._",
             "org.openmole.misc.workspace._",
             "Workspace.authenticationProvider",

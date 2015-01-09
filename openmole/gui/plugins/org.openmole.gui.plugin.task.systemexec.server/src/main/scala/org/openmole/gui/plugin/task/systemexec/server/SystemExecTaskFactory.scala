@@ -17,7 +17,7 @@ package org.openmole.gui.plugin.task.systemexec.server
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.model.task.PluginSet
+import org.openmole.core.workflow.task.PluginSet
 import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
 import org.openmole.gui.server.factory.{ServerFactories, Factory}
 import org.openmole.plugin.task.systemexec.SystemExecTask

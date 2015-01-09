@@ -17,18 +17,18 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.core.model.mole._
-import org.openmole.core.model.puzzle._
-import org.openmole.core.model.task._
-import org.openmole.core.model.tools._
-import org.openmole.core.model.transition._
-import org.openmole.core.model.data._
-import org.openmole.core.model.data._
-import org.openmole.core.model.mole._
-import org.openmole.core.model.sampling._
-import org.openmole.core.model.task._
-import org.openmole.core.model.transition._
-import org.openmole.core.model.validation.{ Validation, DataflowProblem }
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.validation.{ Validation, DataflowProblem }
 import org.openmole.plugin.task.statistics._
 import DataflowProblem.MissingInput
 

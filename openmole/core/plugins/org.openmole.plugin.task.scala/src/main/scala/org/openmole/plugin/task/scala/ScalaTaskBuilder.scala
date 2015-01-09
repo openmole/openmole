@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task.scala
 
-import org.openmole.core.model.task.PluginSet
+import org.openmole.core.workflow.task.PluginSet
 import org.openmole.plugin.task.code.CodeTaskBuilder
 
 import scala.collection.mutable.ListBuffer

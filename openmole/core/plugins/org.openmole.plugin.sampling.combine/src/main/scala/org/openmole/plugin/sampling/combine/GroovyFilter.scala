@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.model.tools.GroovyContextAdapter
+import org.openmole.core.workflow.tools.GroovyContextAdapter
 import org.openmole.misc.tools.script.GroovyProxy
-import org.openmole.core.model.data.Context
+import org.openmole.core.workflow.data.Context
 
 class GroovyFilter(code: String) extends Filter {
   @transient lazy val groovyProxy = new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter

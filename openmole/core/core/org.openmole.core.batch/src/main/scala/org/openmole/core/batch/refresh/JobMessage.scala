@@ -19,7 +19,7 @@ package org.openmole.core.batch.refresh
 
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice._
-import org.openmole.core.model.job._
+import org.openmole.core.workflow.job._
 import org.openmole.core.batch.storage._
 
 import scala.concurrent.duration.{ FiniteDuration, Duration }

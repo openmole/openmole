@@ -18,9 +18,9 @@
 package org.openmole.ui.console
 
 import java.io.File
-import org.openmole.core.model.task.PluginSet
-import org.openmole.core.model.mole.ExecutionContext
-import org.openmole.core.model.data.Context
+import org.openmole.core.workflow.task.PluginSet
+import org.openmole.core.workflow.mole.ExecutionContext
+import org.openmole.core.workflow.data.Context
 
 class Implicits(
     implicit val plugins: PluginSet) {

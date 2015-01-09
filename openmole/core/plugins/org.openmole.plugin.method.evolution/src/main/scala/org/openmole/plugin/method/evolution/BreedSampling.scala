@@ -17,16 +17,16 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
 import org.openmole.misc.workspace._
 import org.openmole.misc.tools.service.Random._
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.task._
 import algorithm._
 import fr.iscpif.mgo._
-import org.openmole.core.model.sampling.Sampling
+import org.openmole.core.workflow.sampling.Sampling
 
 import scala.util.Random
 

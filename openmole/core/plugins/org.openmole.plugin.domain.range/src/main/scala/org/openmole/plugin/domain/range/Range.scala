@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.tools.FromContext
+import org.openmole.core.workflow.tools.FromContext
 import org.openmole.misc.tools.io.FromString
 
 object Range {

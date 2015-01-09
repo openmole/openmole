@@ -17,11 +17,11 @@
 
 package org.openmole.plugin.task.netlogo
 
-import org.openmole.core.model.data._
-import org.openmole.core.model.data.Prototype
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data.Prototype
 import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.model.task.PluginSet
+import org.openmole.core.workflow.task.PluginSet
 
 abstract class NetLogoTaskBuilder(implicit plugins: PluginSet) extends ExternalTaskBuilder {
 

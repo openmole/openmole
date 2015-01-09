@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.task.systemexec
 
-import org.openmole.core.model.data._
-import org.openmole.core.model.task.PluginSet
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task.PluginSet
 import org.openmole.plugin.task.external._
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.data._
 
 import scala.collection.mutable.ListBuffer
 

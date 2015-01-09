@@ -24,7 +24,7 @@ import collection.JavaConversions._
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.model.execution.ExecutionState._
+import org.openmole.core.workflow.execution.ExecutionState._
 
 import DesktopGridEnvironment._
 

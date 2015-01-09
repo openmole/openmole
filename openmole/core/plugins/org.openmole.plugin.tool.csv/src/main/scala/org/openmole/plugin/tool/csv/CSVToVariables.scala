@@ -21,8 +21,8 @@ import java.io.{ File, FileReader }
 import java.math.{ BigDecimal, BigInteger }
 
 import au.com.bytecode.opencsv.CSVReader
-import org.openmole.core.model.data._
-import org.openmole.core.model.sampling._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.sampling._
 import org.openmole.misc.exception.UserBadDataError
 
 import scala.util.Random

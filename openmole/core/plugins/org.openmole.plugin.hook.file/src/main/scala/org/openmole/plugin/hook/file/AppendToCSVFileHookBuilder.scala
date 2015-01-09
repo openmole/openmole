@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.model.mole.HookBuilder
-import org.openmole.core.model.data._
-import org.openmole.core.model.data._
-import org.openmole.core.model.tools.ExpandedString
+import org.openmole.core.workflow.mole.HookBuilder
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools.ExpandedString
 
 class AppendToCSVFileHookBuilder(fileName: ExpandedString, prototypes: Prototype[_]*) extends HookBuilder {
   prototypes.foreach(p ⇒ addInput(p))

@@ -18,10 +18,10 @@
 package org.openmole.runtime.runtime
 
 import java.util.concurrent.Semaphore
-import org.openmole.core.model.data._
-import org.openmole.core.model.job._
-import org.openmole.core.model.tools._
-import org.openmole.core.model.job.State._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.job.State._
 import scala.collection.immutable.TreeMap
 import org.openmole.misc.tools.service.Logger
 import util.{ Failure, Success, Try }

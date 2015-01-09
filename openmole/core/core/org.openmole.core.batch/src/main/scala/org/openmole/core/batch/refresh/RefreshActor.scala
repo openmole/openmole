@@ -20,7 +20,7 @@ package org.openmole.core.batch.refresh
 import akka.actor.Actor
 import org.openmole.misc.tools.service.Logger
 import akka.actor.ActorRef
-import org.openmole.core.model.execution.ExecutionState._
+import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.batch.environment.{ ResubmitException, BatchEnvironment }
 import org.openmole.misc.workspace.Workspace

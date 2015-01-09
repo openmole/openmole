@@ -19,7 +19,7 @@ package org.openmole.core.batch.refresh
 
 import akka.actor.{ ActorRef, Actor, ActorSystem, Props }
 import akka.routing.SmallestMailboxRouter
-import org.openmole.core.model.execution._
+import org.openmole.core.workflow.execution._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 
 import org.openmole.misc.workspace.Workspace

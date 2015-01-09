@@ -17,8 +17,8 @@
 
 package org.openmole.core.batch.environment
 
-import org.openmole.core.model.execution.ExecutionState._
-import org.openmole.core.model.job.IJob
+import org.openmole.core.workflow.execution.ExecutionState._
+import org.openmole.core.workflow.job.IJob
 import org.openmole.misc.tools.service.Logger
 import collection.mutable._
 import org.openmole.core.batch.refresh.{ Kill, Manage }

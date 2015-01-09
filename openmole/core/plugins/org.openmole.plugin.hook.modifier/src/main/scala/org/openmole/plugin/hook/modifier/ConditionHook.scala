@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.hook.modifier
 
-import org.openmole.core.model.transition.ICondition
-import org.openmole.core.model.data._
-import org.openmole.core.model.mole._
-import org.openmole.core.model.mole._
+import org.openmole.core.workflow.transition.ICondition
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.mole._
 
 object ConditionHook {
 

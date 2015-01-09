@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.model.data.Context
+import org.openmole.core.workflow.data.Context
 
 trait Filter {
   def apply(factorsValues: Context): Boolean

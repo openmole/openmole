@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.method.abc
 
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.data._
 
 trait ABC {
   def targetPrototypes: Seq[Prototype[Double]]

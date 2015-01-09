@@ -1,16 +1,16 @@
 package org.openmole.web.mole
 
-import org.openmole.core.model.execution.local.LocalEnvironment
-import org.openmole.core.model.validation.{ Validation, DataflowProblem }
+import org.openmole.core.workflow.execution.local.LocalEnvironment
+import org.openmole.core.workflow.validation.{ Validation, DataflowProblem }
 
 import scala.reflect.ClassTag
 import scala.io.{ Codec, Source }
 import java.io._
 import org.openmole.core.serializer.SerialiserService
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
-import org.openmole.core.model.mole.{ IPartialMoleExecution, IMoleExecution, ExecutionContext }
+import org.openmole.core.workflow.mole.{ IPartialMoleExecution, IMoleExecution, ExecutionContext }
 import org.openmole.misc.tools.io.FromString
-import org.openmole.core.model.data.{ Context, Prototype, Variable }
+import org.openmole.core.workflow.data.{ Context, Prototype, Variable }
 import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
 import org.openmole.misc.eventdispatcher.{ EventListener, EventDispatcher }
 import akka.actor.ActorSystem

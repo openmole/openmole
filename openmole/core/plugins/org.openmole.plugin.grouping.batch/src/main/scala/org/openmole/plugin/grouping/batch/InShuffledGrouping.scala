@@ -17,11 +17,11 @@
 
 package org.openmole.plugin.grouping.batch
 
-import org.openmole.core.model.mole._
-import org.openmole.core.model.data._
-import org.openmole.core.model.job._
-import org.openmole.core.model.mole._
-import org.openmole.core.model.task.Task
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.task.Task
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service._
 import Task._

@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.task.statistics
 
-import org.openmole.core.model.builder._
-import org.openmole.core.model.data._
-import org.openmole.core.model.data._
-import org.openmole.core.model.task.PluginSet
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task.PluginSet
 
 import scala.collection.mutable.ListBuffer
 

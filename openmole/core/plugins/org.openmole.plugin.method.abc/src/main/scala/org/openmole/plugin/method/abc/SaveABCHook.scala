@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.method.abc
 
-import org.openmole.core.model.mole.HookBuilder
-import org.openmole.core.model.tools.ExpandedString
+import org.openmole.core.workflow.mole.HookBuilder
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.hook.file._
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.data._
 
 object SaveABCHook {
 

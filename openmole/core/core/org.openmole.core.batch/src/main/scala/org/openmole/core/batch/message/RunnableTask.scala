@@ -17,11 +17,11 @@
 
 package org.openmole.core.batch.message
 
-import org.openmole.core.model.job.{ MoleJob, IMoleJob, MoleJobId }
+import org.openmole.core.workflow.job.{ MoleJob, IMoleJob, MoleJobId }
 import MoleJob.StateChangedCallBack
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.job.{ MoleJob, IMoleJob, MoleJobId }
-import org.openmole.core.model.task.ITask
+import org.openmole.core.workflow.data.Context
+import org.openmole.core.workflow.job.{ MoleJob, IMoleJob, MoleJobId }
+import org.openmole.core.workflow.task.ITask
 
 object RunnableTask {
 

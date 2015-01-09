@@ -20,12 +20,12 @@ package org.openmole.plugin.task.scala
 import java.io.{ OutputStreamWriter, File }
 import java.lang.reflect.Method
 import javax.script.SimpleScriptContext
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
 import org.openmole.misc.tools.io.StringBuilderOutputStream
 import org.openmole.misc.tools.script._
 import org.openmole.plugin.task.code._
