@@ -38,7 +38,7 @@ object NetLogo5Task {
   def apply(
     workspace: File,
     script: String,
-    launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
+    launchingCommands: Iterable[String]): NetLogoTaskBuilder = {
     val _launchingCommands = launchingCommands
     val (_workspace, _script) = (workspace, script)
 
@@ -66,7 +66,7 @@ object NetLogo5Task {
 
   def apply(
     script: File,
-    launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
+    launchingCommands: Iterable[String]): NetLogoTaskBuilder = {
     val _launchingCommands = launchingCommands
     new NetLogoTaskBuilder {
       builder ⇒
@@ -92,7 +92,7 @@ object NetLogo5Task {
 
   def apply(
     workspace: Workspace,
-    launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
+    launchingCommands: Iterable[String]): NetLogoTaskBuilder = {
 
     workspace.location match {
       case Left((w: File, s: String)) ⇒ apply(w, s, launchingCommands)
@@ -103,7 +103,7 @@ object NetLogo5Task {
   def apply(
     script: File,
     launchingCommands: Iterable[String],
-    embedWorkspace: Boolean)(implicit plugins: PluginSet): NetLogoTaskBuilder =
+    embedWorkspace: Boolean): NetLogoTaskBuilder =
     if (embedWorkspace) apply(script.getParentFile, script.getName, launchingCommands)
     else apply(script, launchingCommands)
 
@@ -122,7 +122,7 @@ sealed class NetLogo5Task(
   parameters: DefaultSet,
   inputFiles: Iterable[(Prototype[File], ExpandedString, Boolean)],
   outputFiles: Iterable[(ExpandedString, Prototype[File])],
-  resources: Iterable[(File, ExpandedString, Boolean, OS)])(implicit plugins: PluginSet) extends NetLogoTask(
+  resources: Iterable[(File, ExpandedString, Boolean, OS)]) extends NetLogoTask(
   name,
   workspace,
   launchingCommands,

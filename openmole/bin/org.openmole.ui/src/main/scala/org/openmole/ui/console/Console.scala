@@ -92,7 +92,6 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
             "org.openmole.core.workflow.puzzle._",
             "org.openmole.core.workflow.builder._",
             "org.openmole.core.workflow.sampling._",
-            "org.openmole.core.batch.authentication._",
             "org.openmole.misc.workspace._",
             "Workspace.authenticationProvider",
             "scala.concurrent.duration._",

@@ -24,7 +24,7 @@ import scala.reflect.ClassTag
 
 object ToArrayTask {
 
-  def apply(prototypes: Prototype[T] forSome { type T }*)(implicit plugins: PluginSet = PluginSet.empty) =
+  def apply(prototypes: Prototype[T] forSome { type T }*) =
     new TaskBuilder { builder ⇒
 
       for (p ← prototypes) {

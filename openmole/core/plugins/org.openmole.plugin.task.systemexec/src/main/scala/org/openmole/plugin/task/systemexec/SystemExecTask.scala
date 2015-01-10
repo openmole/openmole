@@ -56,7 +56,7 @@ object SystemExecTask extends Logger {
    * @param error optionally a prototype to output the standard error output of the process
    *
    */
-  def apply(commands: Commands)(implicit plugins: PluginSet) =
+  def apply(commands: Commands) =
     new SystemExecTaskBuilder(commands)
 
 }

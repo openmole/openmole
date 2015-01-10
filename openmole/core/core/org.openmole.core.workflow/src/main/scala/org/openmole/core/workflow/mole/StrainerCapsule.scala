@@ -26,7 +26,6 @@ object StrainerCapsule {
   class StrainerTaskDecorator(val task: Task) extends Task {
     override def inputs = task.inputs
     override def outputs = task.outputs
-    override def plugins = task.plugins
 
     override def perform(context: Context) = process(context)
     override def process(context: Context) = context + task.perform(context)

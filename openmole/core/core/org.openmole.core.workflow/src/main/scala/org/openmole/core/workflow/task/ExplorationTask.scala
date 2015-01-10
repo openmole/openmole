@@ -28,7 +28,7 @@ import scala.collection.mutable.ArrayBuffer
 object ExplorationTask {
   type SampledValues = Iterable[Iterable[Variable[_]]]
 
-  def apply(sampling: Sampling)(implicit plugins: PluginSet) = {
+  def apply(sampling: Sampling) = {
     new TaskBuilder { builder ⇒
 
       addInput(sampling.inputs.toSeq: _*)

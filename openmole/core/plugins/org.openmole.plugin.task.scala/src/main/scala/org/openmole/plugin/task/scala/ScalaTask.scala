@@ -20,6 +20,7 @@ package org.openmole.plugin.task.scala
 import java.io.{ OutputStreamWriter, File }
 import java.lang.reflect.Method
 import javax.script.SimpleScriptContext
+import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.misc.exception.InternalProcessingError
@@ -41,7 +42,7 @@ object ScalaTask {
 
 abstract class ScalaTask(
     val code: String,
-    val usedClasses: Seq[Class[_]]) extends CodeTask {
+    val usedClasses: Seq[Class[_]]) extends JVMLanguageTask {
 
   def prefix = "_input_value_"
 

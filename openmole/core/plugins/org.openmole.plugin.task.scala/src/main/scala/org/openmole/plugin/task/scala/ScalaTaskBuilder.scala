@@ -18,11 +18,11 @@
 package org.openmole.plugin.task.scala
 
 import org.openmole.core.workflow.task.PluginSet
-import org.openmole.plugin.task.code.CodeTaskBuilder
+import org.openmole.plugin.task.code.JVMLanguageTaskBuilder
 
 import scala.collection.mutable.ListBuffer
 
-class ScalaTaskBuilder(code: String)(implicit plugins: PluginSet) extends CodeTaskBuilder { builder ⇒
+class ScalaTaskBuilder(code: String)(implicit plugins: PluginSet) extends JVMLanguageTaskBuilder { builder ⇒
 
   val usedClasses = ListBuffer[Class[_]]()
 

@@ -34,7 +34,7 @@ import org.openmole.core.workflow.task.PluginSet
  * task after its execution.
  *
  */
-abstract class ExternalTaskBuilder(implicit plugins: PluginSet) extends TaskBuilder { builder ⇒
+abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
 
   private val _inputFiles = new ListBuffer[(Prototype[File], ExpandedString, Boolean)]
   private val _outputFiles = new ListBuffer[(ExpandedString, Prototype[File])]

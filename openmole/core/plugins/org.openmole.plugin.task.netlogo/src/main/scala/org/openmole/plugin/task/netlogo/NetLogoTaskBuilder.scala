@@ -23,7 +23,7 @@ import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.task.PluginSet
 
-abstract class NetLogoTaskBuilder(implicit plugins: PluginSet) extends ExternalTaskBuilder {
+abstract class NetLogoTaskBuilder extends ExternalTaskBuilder {
 
   private var _netLogoInputs = new ListBuffer[(Prototype[_], String)]
   private var _netLogoOutputs = new ListBuffer[(String, Prototype[_])]

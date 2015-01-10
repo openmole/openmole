@@ -27,7 +27,7 @@ import org.openmole.core.workflow.task._
 object TemplateFileTask {
   def apply(
     template: File,
-    output: Prototype[File])(implicit plugins: PluginSet) = new TaskBuilder { builder ⇒
+    output: Prototype[File]) = new TaskBuilder { builder ⇒
 
     addOutput(output)
 

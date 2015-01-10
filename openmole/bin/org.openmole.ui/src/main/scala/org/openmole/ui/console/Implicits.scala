@@ -22,8 +22,7 @@ import org.openmole.core.workflow.task.PluginSet
 import org.openmole.core.workflow.mole.ExecutionContext
 import org.openmole.core.workflow.data.Context
 
-class Implicits(
-    implicit val plugins: PluginSet) {
+class Implicits(implicit val plugins: PluginSet) {
   implicit def stringToFile(path: String) = new File(path)
   implicit lazy val executionContext = ExecutionContext.local
   implicit lazy val implicits = Context.empty

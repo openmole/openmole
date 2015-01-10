@@ -26,7 +26,7 @@ import reflect.ClassTag
 
 object MergeTask {
 
-  def apply[S, T <: Array[S]](result: Prototype[Array[S]], prototypes: Prototype[_ <: T]*)(implicit plugins: PluginSet) =
+  def apply[S, T <: Array[S]](result: Prototype[Array[S]], prototypes: Prototype[_ <: T]*) =
     new TaskBuilder { builder ⇒
 
       for (p ← prototypes) addInput(p)

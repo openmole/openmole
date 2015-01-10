@@ -17,17 +17,18 @@
 
 package org.openmole.plugin.task.code
 
+import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.ExternalTask
 import java.io.File
 
-object CodeTask {
+object JVMLanguageTask {
   lazy val workDir = Prototype[File]("workDir")
 }
 
-trait CodeTask extends ExternalTask {
+trait JVMLanguageTask extends ExternalTask with Plugins {
 
   def imports: Seq[String]
   def libraries: Seq[File]
@@ -35,7 +36,7 @@ trait CodeTask extends ExternalTask {
   override def process(context: Context) = {
     val pwd = Workspace.newDir
     val links = prepareInputFiles(context, pwd.getCanonicalFile)
-    val newContext = context + Variable(CodeTask.workDir, pwd)
+    val newContext = context + Variable(JVMLanguageTask.workDir, pwd)
     fetchOutputFiles(processCode(newContext), pwd.getCanonicalFile, links)
   }
 

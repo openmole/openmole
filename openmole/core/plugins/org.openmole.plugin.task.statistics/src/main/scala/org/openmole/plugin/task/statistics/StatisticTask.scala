@@ -25,7 +25,7 @@ import org.openmole.core.workflow.task._
 import scala.collection.mutable.ListBuffer
 
 object StatisticTask {
-  def apply()(implicit plugins: PluginSet) = new StatisticTaskBuilder
+  def apply() = new StatisticTaskBuilder
 }
 
 abstract class StatisticTask extends Task {

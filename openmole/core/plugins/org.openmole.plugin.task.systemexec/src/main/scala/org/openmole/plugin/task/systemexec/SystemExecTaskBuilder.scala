@@ -24,7 +24,7 @@ import org.openmole.core.workflow.data._
 
 import scala.collection.mutable.ListBuffer
 
-class SystemExecTaskBuilder(commands: Commands)(implicit plugins: PluginSet) extends ExternalTaskBuilder { builder ⇒
+class SystemExecTaskBuilder(commands: Commands) extends ExternalTaskBuilder { builder ⇒
 
   private val variables = new ListBuffer[(Prototype[_], String)]
   private val _commands = new ListBuffer[Commands]

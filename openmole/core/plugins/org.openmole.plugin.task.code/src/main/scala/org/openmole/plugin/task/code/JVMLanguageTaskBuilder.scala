@@ -18,6 +18,7 @@
 package org.openmole.plugin.task.code
 
 import java.io.File
+import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.task.PluginSet
@@ -28,7 +29,7 @@ import org.openmole.core.workflow.task.PluginSet
  * The code task builder is an external task builder, you may want to look
  * at the @see ExternalTaskBuilder for a complement of documentation.
  */
-abstract class CodeTaskBuilder(implicit plugins: PluginSet) extends ExternalTaskBuilder { builder ⇒
+abstract class JVMLanguageTaskBuilder(implicit val plugins: PluginSet) extends ExternalTaskBuilder { builder ⇒
   private var _imports = new ListBuffer[String]
   private var _libraries = new ListBuffer[File]
 
@@ -64,9 +65,10 @@ abstract class CodeTaskBuilder(implicit plugins: PluginSet) extends ExternalTask
     this
   }
 
-  trait Built extends super.Built {
+  trait Built extends super.Built with Plugins {
     val imports: Seq[String] = builder.imports.toSeq
     val libraries: Seq[File] = builder.libraries.toSeq
+    val plugins = builder.plugins
   }
 
 }

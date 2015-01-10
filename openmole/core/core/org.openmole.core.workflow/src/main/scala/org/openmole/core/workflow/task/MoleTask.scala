@@ -28,10 +28,10 @@ import scala.collection.mutable.ListBuffer
 
 object MoleTask {
 
-  def apply(puzzle: Puzzle)(implicit plugins: PluginSet): MoleTaskBuilder =
+  def apply(puzzle: Puzzle): MoleTaskBuilder =
     apply(puzzle toMole, puzzle.lasts.head)
 
-  def apply(mole: Mole, last: Capsule)(implicit plugins: PluginSet) =
+  def apply(mole: Mole, last: Capsule) =
     new MoleTaskBuilder { builder ⇒
       addInput(mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*)
       addOutput(last.outputs(mole, Sources.empty, Hooks.empty).toSeq: _*)

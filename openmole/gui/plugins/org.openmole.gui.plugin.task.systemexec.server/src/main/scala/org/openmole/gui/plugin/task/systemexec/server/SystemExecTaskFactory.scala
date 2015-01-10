@@ -33,7 +33,7 @@ class SystemExecTaskFactory(val data: SystemExecTaskData) extends Factory {
         data.directory ,
         data.returnValue.map{p=>ServerFactories.coreObject(p).flatten},
          data.output*/
-      )(plugins)
+      )
       //syset command data.command.filterNot(_ == '\n')
     }
   }

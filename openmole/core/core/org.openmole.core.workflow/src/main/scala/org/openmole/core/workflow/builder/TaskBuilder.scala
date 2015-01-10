@@ -31,7 +31,7 @@ object TaskBuilder {
 
 }
 
-abstract class TaskBuilder(implicit val plugins: PluginSet) extends InputOutputBuilder with Builder { builder ⇒
+trait TaskBuilder extends InputOutputBuilder with Builder { builder ⇒
   def toTask: Task
 
   var name: Option[String] = None
@@ -42,7 +42,6 @@ abstract class TaskBuilder(implicit val plugins: PluginSet) extends InputOutputB
   }
 
   trait Built extends super.Built {
-    val plugins = builder.plugins
     val name = builder.name.getOrElse(TaskBuilder.generateName(this))
   }
 }

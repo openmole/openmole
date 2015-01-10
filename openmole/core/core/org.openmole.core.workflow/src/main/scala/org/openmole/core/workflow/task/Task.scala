@@ -35,7 +35,7 @@ object Task extends Logger {
   def buildRNG(context: Context) = Random.newRNG(context(Task.openMOLESeed))
 }
 
-trait Task <: InputOutputCheck with Plugins {
+trait Task <: InputOutputCheck {
   /**
    *
    * Perform this task.
@@ -77,8 +77,6 @@ trait Task <: InputOutputCheck with Plugins {
    * @return the defaults configured for this task.
    */
   def defaults: DefaultSet
-
-  def plugins: PluginSet
 
   override def toString: String = name
 

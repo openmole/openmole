@@ -24,7 +24,7 @@ import org.openmole.core.workflow.task.PluginSet
 
 import scala.collection.mutable.ListBuffer
 
-class StatisticTaskBuilder(implicit plugins: PluginSet) extends TaskBuilder { builder ⇒
+class StatisticTaskBuilder extends TaskBuilder { builder ⇒
   private var _sequences = new ListBuffer[(Prototype[Array[Double]], Prototype[Double], StatisticalAggregation[Double])]
 
   def sequences = _sequences.toList
