@@ -108,7 +108,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     scalajHttp
   )
 
-  lazy val openmolePlugins = AssemblyProject("openmoleplugins") settings (
+  lazy val openmolePlugins = AssemblyProject("openmoleplugins", baseDir = dir / "target") settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo "",
     resourcesAssemble <++= Seq(openmoleui.project) sendTo "",
     libraryDependencies ++= Seq(
@@ -158,7 +158,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       dependencyNameMap := renameEquinox
   )
 
-  lazy val consolePlugins = AssemblyProject("consoleplugins") settings (
+  lazy val consolePlugins = AssemblyProject("consoleplugins", baseDir = dir / "target") settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo "",
     libraryDependencies ++=
     Seq(
@@ -183,7 +183,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       dependencyFilter := filter
   )
 
-  lazy val guiPlugins = AssemblyProject("guiplugins") settings (
+  lazy val guiPlugins = AssemblyProject("guiplugins", baseDir = dir / "target") settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"), true) sendTo "",
     dependencyFilter := filter
   )
@@ -242,10 +242,14 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       Tar.innerFolder := "openmole-daemon"
   )
 
-  lazy val docProj = Project("documentation", dir / "documentation") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (
+  lazy val api = Project("api", dir / "target/api") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (
     unidocSettings: _*
   ) settings (compile := Analysis.Empty,
       unidocProjectFilter in (ScalaUnidoc, unidoc) := inAnyProject -- inProjects(Libraries.subProjects: _*) -- inProjects(ThirdParties.subProjects: _*)
     )
+
+  lazy val documentation = Project("documentation", dir / "documentation") settings (
+    libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.0"
+  )
 
 }
