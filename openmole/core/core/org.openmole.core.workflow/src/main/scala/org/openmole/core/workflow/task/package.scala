@@ -21,12 +21,15 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 
-package object task {
+package task {
+  trait TaskPackage {
+    implicit class TaskToCapsuleDecorator(task: Task) {
+      def toCapsule = new Capsule(task)
+      def toStrainerCapsule = new StrainerCapsule(task)
+    }
 
-  implicit class TaskToCapsuleDecorator(task: Task) {
-    def toCapsule = new Capsule(task)
-    def toStrainerCapsule = new StrainerCapsule(task)
+    def newRNG(context: Context) = Task.buildRNG(context)
   }
-
-  def newRNG(context: Context) = Task.buildRNG(context)
 }
+
+package object task extends TaskPackage

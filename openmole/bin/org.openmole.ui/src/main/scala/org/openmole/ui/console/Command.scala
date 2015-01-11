@@ -78,11 +78,5 @@ class Command {
 
   def encrypted: String = Workspace.encrypt(askPassword)
 
-  def load[T](f: File) = SerialiserService.deserialise[T](f)
-  def save(o: Any, f: File) = SerialiserService.serialise(o, f)
-
-  def bundles = PluginManager.bundleFiles
-  def dependencies(file: File) = PluginManager.dependencies(file)
-
 }
 

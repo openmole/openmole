@@ -20,12 +20,15 @@ package org.openmole.core.workflow
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 
-package object sampling {
+package sampling {
+  trait SamplingPackage {
 
-  implicit def factorWithIterableToDiscreteFactor[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) = DiscreteFactor(f)
+    implicit def factorWithIterableToDiscreteFactor[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) = DiscreteFactor(f)
 
-  implicit def PrototypeFactorDecorator[T](p: Prototype[T]) = new {
-    def in[D <: Domain[T]](d: D): Factor[T, D] = Factor(p, d)
+    implicit def PrototypeFactorDecorator[T](p: Prototype[T]) = new {
+      def in[D <: Domain[T]](d: D): Factor[T, D] = Factor(p, d)
+    }
   }
-
 }
+
+package object sampling extends SamplingPackage

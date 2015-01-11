@@ -22,60 +22,53 @@ import org.openmole.misc.macros.ExtractValName._
 import reflect.macros.blackbox.{ Context ⇒ MContext }
 import org.openmole.misc.tools.obj.ClassUtils._
 
-package object data {
+package data {
 
-  def Val[T: Manifest](name: String) = Prototype(name)
+  trait DataPackage {
 
-  def Val[T]: Prototype[T] = macro valImpl[T]
+    implicit def prototypeToStringConverter(p: Prototype[_]) = p.name
+    implicit def dataToStringConverter(d: Data[_]) = d.prototype.name
 
-  def valImpl[T: c.WeakTypeTag](c: MContext): c.Expr[Prototype[T]] = {
-    import c.universe._
-    val n = getValName(c)
-    val wt = weakTypeTag[T].tpe
-    c.Expr[Prototype[T]](q"Prototype[$wt](${n})")
-  }
-
-  implicit def prototypeToStringConverter(p: Prototype[_]) = p.name
-  implicit def dataToStringConverter(d: Data[_]) = d.prototype.name
-
-  implicit def prototypeToArrayDecorator[T](prototype: Prototype[T]) = new {
-    def toArray(level: Int): Prototype[_] = {
-      def toArrayRecursive[A](prototype: Prototype[A], level: Int): Prototype[_] = {
-        if (level <= 0) prototype
-        else {
-          val arrayProto = Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[Prototype[Array[_]]]
-          if (level <= 1) arrayProto
-          else toArrayRecursive(arrayProto, level - 1)
+    implicit def prototypeToArrayDecorator[T](prototype: Prototype[T]) = new {
+      def toArray(level: Int): Prototype[_] = {
+        def toArrayRecursive[A](prototype: Prototype[A], level: Int): Prototype[_] = {
+          if (level <= 0) prototype
+          else {
+            val arrayProto = Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[Prototype[Array[_]]]
+            if (level <= 1) arrayProto
+            else toArrayRecursive(arrayProto, level - 1)
+          }
         }
+
+        toArrayRecursive(prototype, level)
       }
 
-      toArrayRecursive(prototype, level)
+      def toArray: Prototype[Array[T]] =
+        Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[Prototype[Array[T]]]
+
+      def unsecureType = prototype.`type`.asInstanceOf[Manifest[Any]]
+
     }
 
-    def toArray: Prototype[Array[T]] =
-      Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[Prototype[Array[T]]]
+    implicit def prototypeFromArrayDecorator[T](prototype: Prototype[Array[T]]) = new {
 
-    def unsecureType = prototype.`type`.asInstanceOf[Manifest[Any]]
+      def fromArray: Prototype[T] =
+        (Prototype(prototype.name)(prototype.`type`.fromArray.toManifest)).asInstanceOf[Prototype[T]]
 
+    }
+
+    implicit def dataToArrayDecorator[T](data: Data[T]) = new {
+      def toArray: Data[Array[T]] = Data[Array[T]](data.prototype.toArray, data.mode)
+    }
+
+    implicit def decorateVariableIterable(variables: Traversable[Variable[_]]) = new {
+      def toContext: Context = Context(variables)
+    }
+
+    implicit def prototypeDecorator[T](prototype: Prototype[T]) = new {
+      def withName(name: String) = Prototype[T](name)(prototype.`type`)
+    }
   }
-
-  implicit def prototypeFromArrayDecorator[T](prototype: Prototype[Array[T]]) = new {
-
-    def fromArray: Prototype[T] =
-      (Prototype(prototype.name)(prototype.`type`.fromArray.toManifest)).asInstanceOf[Prototype[T]]
-
-  }
-
-  implicit def dataToArrayDecorator[T](data: Data[T]) = new {
-    def toArray: Data[Array[T]] = Data[Array[T]](data.prototype.toArray, data.mode)
-  }
-
-  implicit def decorateVariableIterable(variables: Traversable[Variable[_]]) = new {
-    def toContext: Context = Context(variables)
-  }
-
-  implicit def prototypeDecorator[T](prototype: Prototype[T]) = new {
-    def withName(name: String) = Prototype[T](name)(prototype.`type`)
-  }
-
 }
+
+package object data extends DataPackage

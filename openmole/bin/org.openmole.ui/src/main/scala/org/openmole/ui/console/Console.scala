@@ -19,6 +19,7 @@ package org.openmole.ui.console
 
 import jline.console.ConsoleReader
 import java.util.concurrent.Executors
+import org.openmole.core.dsl.Serializer
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.pluginmanager.PluginManager
@@ -75,30 +76,12 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
 
       try {
         loop.beQuietDuring {
-          loop.bind(workspace, Workspace)
-          loop.bind(logger, LoggerService)
-          loop.bind(serializer, new Serializer)
           loop.bind("commands", new Command)
-          loop.bind("implicits", new Implicits()(plugins))
+          loop.bind("_plugins_", plugins)
+          loop.interpret("implicit lazy val plugins = _plugins_")
           loop.interpret(Seq(
-            "org.openmole.core.workflow.data._",
-            "org.openmole.core.workflow.execution._",
-            "org.openmole.core.workflow.execution.local._",
-            "org.openmole.core.workflow.job._",
-            "org.openmole.core.workflow.mole._",
-            "org.openmole.core.workflow.task._",
-            "org.openmole.core.workflow.transition._",
-            "org.openmole.core.workflow.tools._",
-            "org.openmole.core.workflow.puzzle._",
-            "org.openmole.core.workflow.builder._",
-            "org.openmole.core.workflow.sampling._",
-            "org.openmole.misc.workspace._",
-            "Workspace.authenticationProvider",
-            "scala.concurrent.duration._",
-            "org.openmole.misc.tools.service._",
-            "java.io.File",
-            "commands._",
-            "implicits._").map("import " + _).mkString("; "))
+            "org.openmole.core.dsl._",
+            "commands._").map("import " + _).mkString("; "))
 
         }
 

@@ -31,6 +31,6 @@ object Core extends BaseDefaults {
     workflow, workspace, Misc.tools, eventDispatcher, replication, updater, Misc.exception,
     serializer, fileService, pluginManager, iceTar) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick, Apache.config))
 
-  lazy val dsl = OsgiProject("dsl", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (workflow)
+  lazy val dsl = OsgiProject("dsl", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (workflow, Misc.logging)
 
 }

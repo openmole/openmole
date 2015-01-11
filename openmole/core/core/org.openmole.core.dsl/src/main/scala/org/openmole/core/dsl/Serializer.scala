@@ -15,12 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console
+package org.openmole.core.dsl
 
-import java.io.File
 import org.openmole.core.serializer.SerialiserService
 
-class Serializer {
+trait Serializer {
   def load(file: File) = SerialiserService.deserialise[Object](file)
   def loadArchive(file: File) = SerialiserService.deserialiseAndExtractFiles[Object](file)
 

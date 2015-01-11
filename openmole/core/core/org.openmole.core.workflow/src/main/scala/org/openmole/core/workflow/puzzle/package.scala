@@ -20,36 +20,41 @@ package org.openmole.core.workflow
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.mole._
 
-package object puzzle {
+package puzzle {
 
-  implicit def puzzleDecoration(puzzle: Puzzle) = new {
-    def last = puzzle.lasts.head
-  }
+  trait PuzzlePackage {
 
-  implicit def capsulePuzzleDecorator(capsule: Capsule) = new {
-    def toPuzzle: Puzzle =
-      Puzzle(
-        Slot(capsule),
-        List(capsule),
-        Iterable.empty,
-        Iterable.empty,
-        Iterable.empty,
-        Iterable.empty,
-        Map.empty,
-        Map.empty)
-  }
+    implicit def puzzleDecoration(puzzle: Puzzle) = new {
+      def last = puzzle.lasts.head
+    }
 
-  implicit def slotDecorator(slot: Slot) = new {
-    def toPuzzle =
-      Puzzle(
-        slot,
-        List(slot.capsule),
-        Iterable.empty,
-        Iterable.empty,
-        Iterable.empty,
-        Iterable.empty,
-        Map.empty,
-        Map.empty)
+    implicit def capsulePuzzleDecorator(capsule: Capsule) = new {
+      def toPuzzle: Puzzle =
+        Puzzle(
+          Slot(capsule),
+          List(capsule),
+          Iterable.empty,
+          Iterable.empty,
+          Iterable.empty,
+          Iterable.empty,
+          Map.empty,
+          Map.empty)
+    }
+
+    implicit def slotDecorator(slot: Slot) = new {
+      def toPuzzle =
+        Puzzle(
+          slot,
+          List(slot.capsule),
+          Iterable.empty,
+          Iterable.empty,
+          Iterable.empty,
+          Iterable.empty,
+          Map.empty,
+          Map.empty)
+    }
   }
 
 }
+
+package object puzzle extends PuzzlePackage

@@ -92,7 +92,7 @@ trait MoleHandling { self: ScalatraBase ⇒
 
     val c = mIS.map {
       mI ⇒
-        mI.data.prototype.`type`.erasure match {
+        mI.data.prototype.`type`.runtimeClass match {
           case t if t.equals(classOf[Int])    ⇒ createVariable[Int](mI)
           case t if t.equals(classOf[Double]) ⇒ createVariable[Double](mI)
           case t if t.equals(classOf[Float])  ⇒ createVariable[Float](mI)

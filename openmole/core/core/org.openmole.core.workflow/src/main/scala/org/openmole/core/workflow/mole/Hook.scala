@@ -20,6 +20,10 @@ package org.openmole.core.workflow.mole
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 
+object Hook {
+  implicit def hookBuilderToHookConverter(hb: HookBuilder) = hb.toHook
+}
+
 trait Hook <: InputOutputCheck {
   def inputs: DataSet
   def outputs: DataSet

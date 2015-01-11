@@ -26,6 +26,7 @@ import org.openmole.misc.exception._
 object Capsule {
 
   implicit def taskToCapsuleConverter(task: Task) = new Capsule(task)
+  implicit def slotToCapsuleConverter(slot: Slot) = slot.capsule
 
   def apply(task: Task) = new Capsule(task)
 }
