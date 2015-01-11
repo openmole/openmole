@@ -50,32 +50,32 @@ class SystemExecTaskBuilder(commands: Commands) extends ExternalTaskBuilder { bu
     this
   }
 
-  def addCommand(cmd: Commands) = {
+  def addCommand(cmd: Commands): this.type = {
     _commands += cmd
     this
   }
 
-  def setErrorOnReturnValue(b: Boolean) = {
+  def setErrorOnReturnValue(b: Boolean): this.type = {
     errorOnReturnValue = b
     this
   }
 
-  def setReturnValue(p: Option[Prototype[Int]]) = {
+  def setReturnValue(p: Option[Prototype[Int]]): this.type = {
     returnValue = p
     this
   }
 
-  def setStdOut(p: Option[Prototype[String]]) = {
+  def setStdOut(p: Option[Prototype[String]]): this.type = {
     stdOut = p
     this
   }
 
-  def setStdErr(p: Option[Prototype[String]]) = {
+  def setStdErr(p: Option[Prototype[String]]): this.type = {
     stdErr = p
     this
   }
 
-  def setWorkDirectory(s: Option[String]) = {
+  def setWorkDirectory(s: Option[String]): this.type = {
     workDirectory = s
     this
   }
