@@ -35,6 +35,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable.HashMap
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.core.workflow.mole.MoleExecution
+import org.openmole.core.dsl._
 
 class Command {
 
@@ -76,7 +77,7 @@ class Command {
 
   def verify(mole: Mole): Unit = Validation(mole).foreach(println)
 
-  def encrypted: String = Workspace.encrypt(askPassword)
+  def encrypted: String = encrypt(askPassword)
 
 }
 

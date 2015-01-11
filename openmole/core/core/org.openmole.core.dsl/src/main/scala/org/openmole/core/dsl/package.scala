@@ -81,4 +81,6 @@ package object dsl extends Commands
 
   lazy val LocalEnvironment = org.openmole.core.workflow.execution.local.LocalEnvironment
 
+  def encrypt(s: String) = Workspace.encrypt(s)
+
 }
