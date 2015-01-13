@@ -4,7 +4,7 @@
 @sect{Source}
   Sources have been designed it possible to inject data in the dataflow from diverse sources: CSV files, database, sensors... For now very few sources are available in OpenMOLE. If you need to interface OpenMOLE with external datasources we can probably help you.
 
-  @sect{Plug a hook}
+  @sect{Plug a source}
     You can plus sources in the data flow in the same way you can plug @a("hooks", href := Pages.console.hook.file ). Let consider this simple workflow:
     @br @hl.openmole("""
     import org.openmole.plugin.domain.collection._
