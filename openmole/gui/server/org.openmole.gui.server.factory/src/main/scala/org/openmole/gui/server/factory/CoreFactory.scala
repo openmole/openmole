@@ -1,6 +1,5 @@
 package main.scala.org.openmole.gui.server.factory
 
-
 import org.openmole.core.workflow.data.Prototype
 import org.openmole.gui.ext.data.{DataBag, ErrorData}
 import org.openmole.gui.server.factory.ServerFactories
