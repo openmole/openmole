@@ -44,10 +44,8 @@ object DSLTest {
   def test(code: String, header: String) = Try {
     def testCode = s"""import org.openmole.core.dsl._
         |
-        |def test = {
-        |  $header
-        |  $code
-        |}
+        |$header
+        |$code
       """.stripMargin
 
     engines.exec(_.compiled(testCode))
