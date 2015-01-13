@@ -28,13 +28,13 @@ import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication._
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.model.job._
+import org.openmole.core.workflow.job._
 import org.openmole.misc.tools.service._
 import org.openmole.misc.updater._
 import org.openmole.misc.workspace._
 import org.openmole.misc.pluginmanager._
 import org.openmole.misc.eventdispatcher._
-import org.openmole.core.model.execution._
+import org.openmole.core.workflow.execution._
 import akka.actor.Props
 import org.openmole.misc.tools.service.ThreadUtil._
 import ref.WeakReference
@@ -161,7 +161,7 @@ trait BatchEnvironment extends Environment { env ⇒
   def threads: Option[Int] = None
   def threadsValue = threads.getOrElse(1)
 
-  override def submit(job: IJob) = {
+  override def submit(job: Job) = {
     val bej = executionJob(job)
     EventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
     batchJobWatcher.register(bej)
@@ -180,7 +180,7 @@ trait BatchEnvironment extends Environment { env ⇒
     }
   }
 
-  def executionJob(job: IJob) = new BatchExecutionJob(this, job)
+  def executionJob(job: Job) = new BatchExecutionJob(this, job)
 
   def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxI386 = BatchEnvironment.JVMLinuxI386Location

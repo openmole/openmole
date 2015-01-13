@@ -1,13 +1,14 @@
 package org.openmole.web.mole
 
 import _root_.akka.actor.ActorSystem
+import org.openmole.core.workflow.validation.DataflowProblem
 import org.scalatra._
 import scalate.ScalateSupport
 import servlet.{ FileItem, FileUploadSupport }
 import java.io.{ PrintStream, InputStream }
 import javax.servlet.annotation.MultipartConfig
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.data.Variable
+import org.openmole.core.workflow.mole.MoleExecution
+import org.openmole.core.workflow.data.Variable
 import concurrent.Future
 
 import slick.driver.H2Driver.simple._
@@ -18,7 +19,7 @@ import json.JacksonJsonSupport
 import org.json4s._
 import org.json4s.JsonDSL._
 import org.json4s.{ Formats, DefaultFormats }
-import org.openmole.core.implementation.validation.DataflowProblem.{ MissingSourceInput, MissingInput }
+import DataflowProblem.{ MissingSourceInput, MissingInput }
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.web.Authentication
 import org.openmole.web.db.SlickDB

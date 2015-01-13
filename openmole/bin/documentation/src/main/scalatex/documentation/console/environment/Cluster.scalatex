@@ -1,0 +1,107 @@
+
+@import documentation.Objects._
+
+
+@sect{Batch systems}
+  Many distributed computing environments offer @a("batch processing", "https://en.wikipedia.org/wiki/Batch_processing") capabilities. OpenMOLE supports most of the batch systems. The batch systems works generally by exposing an entry point on which the user can log on and submit jobs. OpenMOLE access this entry point using SSH. The first thing to do to be able to use you batch system with OpenMOLE is to provide you authentication information to OpenMOLE.
+
+  @part.SSHAuthentication()
+
+  @sect{PBS / Torque}
+    @a("PBS", href :="http://en.wikipedia.org/wiki/Portable_Batch_System") is a venerable batch system for clusters. You may use a PBS computing environment as follow:
+    @br @hl.openmole("""
+    import org.openmole.plugin.environment.pbs._
+
+    val env =
+      PBSEnvironment(
+        "login",
+        "machine.domain"
+      )""")
+
+   @p @provideOptions:
+   @ul
+     @li{@port,}
+     @li{@workDirectory,}
+     @li{@queue,}
+     @li{@wallTime,}
+     @li{@memory,}
+     @li{@openMOLEMemory,}
+     @li{@threads.}
+  @sect{SGE}
+    To delegate some computation load to a @a("SGE", href := "https://en.wikipedia.org/wiki/Oracle_Grid_Engine") based cluster you can use the SGEEnvironment as follow:
+    @br @hl.openmole("""
+    import org.openmole.plugin.environment.sge._
+
+    val env =
+      SGEEnvironment(
+        "login",
+        "machine.domain"
+      )""")
+    @p @provideOptions:
+    @ul
+      @li{@port,}
+      @li{@workDirectory,}
+      @li{@queue,}
+      @li{@wallTime,}
+      @li{@memory,}
+      @li{@openMOLEMemory,}
+      @li{@threads.}
+  @sect{SLURM}
+    To delegate some computation load to a @a("SLURM", href := "https://en.wikipedia.org/wiki/Simple_Linux_Utility_for_Resource_Management") based cluster you can use the SLURM environment as follow:
+    @br @hl.openmole("""
+    import org.openmole.plugin.environment.slurm._
+
+    val env =
+      SLURMEnvironment(
+        "login",
+        "machine.domain"
+      )""")
+    @p @provideOptions:
+    @ul
+      @li{@port,}
+      @li{@workDirectory,}
+      @li{@queue,}
+      @li{@wallTime,}
+      @li{@memory,}
+      @li{@openMOLEMemory,}
+      @li{@threads,}
+      @li{qos: }
+      @li{gres: }
+      @li{constraints: }
+  @sect{Condor}
+    To delegate some computation load to a @a("Condor", href := "https://en.wikipedia.org/wiki/HTCondor") condor based cluster you can use the CondorEnvironment as follow:
+    @br @hl.openmole("""
+    import org.openmole.plugin.environment.condor._
+
+    val env =
+      CondorEnvironment(
+        "login",
+        "machine.domain"
+      )""")
+    @p @provideOptions:
+    @ul
+      @li{@port,}
+      @li{@workDirectory,}
+      @li{@memory,}
+      @li{@openMOLEMemory,}
+      @li{@threads.}
+  @sect{OAR}
+    To delegate some computation load to an @a("OAR", href := "http://oar.imag.fr/dokuwiki/doku.php") cluster, you can do a follow:
+    @br @hl.openmole("""
+    import org.openmole.plugin.environment.oar._
+
+    val env =
+      OAREnvironment(
+        "login",
+        "machine.domain"
+      )""")
+    @p @provideOptions:
+    @ul
+      @li{@port,}
+      @li{@workDirectory,}
+      @li{@queue,}
+      @li{@wallTime,}
+      @li{@openMOLEMemory,}
+      @li{@threads,}
+      @li{core: number of core allocated for each job,}
+      @li{cpu: number of CPUs allocated for each job.}

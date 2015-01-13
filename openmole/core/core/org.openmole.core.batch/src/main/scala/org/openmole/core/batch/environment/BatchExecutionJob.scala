@@ -18,10 +18,11 @@
 package org.openmole.core.batch.environment
 
 import org.openmole.core.batch.jobservice._
-import org.openmole.core.implementation.execution._
-import org.openmole.core.model.job._
+import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.execution.ExecutionJob
+import org.openmole.core.workflow.job._
 
-class BatchExecutionJob(val environment: BatchEnvironment, val job: IJob) extends ExecutionJob {
+class BatchExecutionJob(val environment: BatchEnvironment, val job: Job) extends ExecutionJob {
   var serializedJob: Option[SerializedJob] = None
   var batchJob: Option[BatchJob] = None
   def moleJobs = job.moleJobs

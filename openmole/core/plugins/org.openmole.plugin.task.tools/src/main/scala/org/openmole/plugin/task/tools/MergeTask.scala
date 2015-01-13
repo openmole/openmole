@@ -17,17 +17,16 @@
 
 package org.openmole.plugin.task.tools
 
-import org.openmole.core.implementation.builder.TaskBuilder
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task._
+import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
 import reflect.ClassTag
-import org.openmole.core.implementation.task.Task
 
 object MergeTask {
 
-  def apply[S, T <: Array[S]](result: Prototype[Array[S]], prototypes: Prototype[_ <: T]*)(implicit plugins: PluginSet) =
+  def apply[S, T <: Array[S]](result: Prototype[Array[S]], prototypes: Prototype[_ <: T]*) =
     new TaskBuilder { builder ⇒
 
       for (p ← prototypes) addInput(p)

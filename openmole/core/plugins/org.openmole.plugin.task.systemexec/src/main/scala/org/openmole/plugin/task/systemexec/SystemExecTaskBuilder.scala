@@ -17,14 +17,14 @@
 
 package org.openmole.plugin.task.systemexec
 
-import org.openmole.core.model.data._
-import org.openmole.core.model.task.PluginSet
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task.PluginSet
 import org.openmole.plugin.task.external._
-import org.openmole.core.implementation.data._
+import org.openmole.core.workflow.data._
 
 import scala.collection.mutable.ListBuffer
 
-class SystemExecTaskBuilder(commands: Commands)(implicit plugins: PluginSet) extends ExternalTaskBuilder { builder ⇒
+class SystemExecTaskBuilder(commands: Commands) extends ExternalTaskBuilder { builder ⇒
 
   private val variables = new ListBuffer[(Prototype[_], String)]
   private val _commands = new ListBuffer[Commands]
@@ -50,39 +50,39 @@ class SystemExecTaskBuilder(commands: Commands)(implicit plugins: PluginSet) ext
     this
   }
 
-  def addCommand(cmd: Commands) = {
+  def addCommand(cmd: Commands): this.type = {
     _commands += cmd
     this
   }
 
-  def setErrorOnReturnValue(b: Boolean) = {
+  def setErrorOnReturnValue(b: Boolean): this.type = {
     errorOnReturnValue = b
     this
   }
 
-  def setReturnValue(p: Option[Prototype[Int]]) = {
+  def setReturnValue(p: Option[Prototype[Int]]): this.type = {
     returnValue = p
     this
   }
 
-  def setStdOut(p: Option[Prototype[String]]) = {
+  def setStdOut(p: Option[Prototype[String]]): this.type = {
     stdOut = p
     this
   }
 
-  def setStdErr(p: Option[Prototype[String]]) = {
+  def setStdErr(p: Option[Prototype[String]]): this.type = {
     stdErr = p
     this
   }
 
-  def setWorkDirectory(s: Option[String]) = {
+  def setWorkDirectory(s: Option[String]): this.type = {
     workDirectory = s
     this
   }
 
   def toTask =
     new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
-      override val outputs = builder.outputs ++ DataSet(List(stdOut, stdErr, returnValue).flatten)
+      override val outputs: DataSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
     }
 
 }

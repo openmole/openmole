@@ -25,8 +25,8 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.message._
 import org.openmole.core.batch.storage._
-import org.openmole.core.model.execution._
-import org.openmole.core.model.job._
+import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.job._
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.misc.exception.InternalProcessingError

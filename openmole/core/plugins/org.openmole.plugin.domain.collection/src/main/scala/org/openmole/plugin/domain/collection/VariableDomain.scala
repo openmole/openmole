@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.domain.collection
 
-import org.openmole.core.implementation.data._
-import org.openmole.core.model.data._
-import org.openmole.core.model.domain._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.domain._
 
 import scala.util.Random
 

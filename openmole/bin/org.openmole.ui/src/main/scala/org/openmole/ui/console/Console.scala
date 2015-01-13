@@ -19,6 +19,7 @@ package org.openmole.ui.console
 
 import jline.console.ConsoleReader
 import java.util.concurrent.Executors
+import org.openmole.core.dsl.Serializer
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.pluginmanager.PluginManager
@@ -28,7 +29,7 @@ import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.ILoop
 import scala.tools.nsc.interpreter.JLineCompletion
 import scala.tools.nsc.interpreter.JLineReader
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.task._
 import java.util.concurrent.TimeUnit
 import scala.tools.nsc.io.{ File ⇒ SFile }
 import java.io.File
@@ -75,37 +76,12 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
 
       try {
         loop.beQuietDuring {
-          loop.bind(workspace, Workspace)
-          loop.bind(logger, LoggerService)
-          loop.bind(serializer, new Serializer)
           loop.bind("commands", new Command)
-          loop.bind("implicits", new Implicits()(plugins))
+          loop.bind("_plugins_", plugins)
+          loop.interpret("implicit lazy val plugins = _plugins_")
           loop.interpret(Seq(
-            "org.openmole.core.implementation.data._",
-            "org.openmole.core.implementation.execution._",
-            "org.openmole.core.implementation.execution.local._",
-            "org.openmole.core.implementation.job._",
-            "org.openmole.core.implementation.mole._",
-            "org.openmole.core.implementation.task._",
-            "org.openmole.core.implementation.transition._",
-            "org.openmole.core.implementation.tools._",
-            "org.openmole.core.implementation.puzzle._",
-            "org.openmole.core.implementation.builder._",
-            "org.openmole.core.batch.authentication._",
-            "org.openmole.core.model.data._",
-            "org.openmole.core.model.transition._",
-            "org.openmole.core.model.mole._",
-            "org.openmole.core.model.sampling._",
-            "org.openmole.core.model.task._",
-            "org.openmole.core.batch.authentication._",
-            "org.openmole.misc.workspace._",
-            "Workspace.authenticationProvider",
-            "org.openmole.misc.tools.io.FromString._",
-            "scala.concurrent.duration._",
-            "org.openmole.misc.tools.service._",
-            "java.io.File",
-            "commands._",
-            "implicits._").map("import " + _).mkString("; "))
+            "org.openmole.core.dsl._",
+            "commands._").map("import " + _).mkString("; "))
 
         }
 

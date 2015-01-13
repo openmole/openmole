@@ -17,19 +17,21 @@
 
 package org.openmole.plugin.method.evolution.ga
 
-import org.openmole.core.implementation.data._
-import org.openmole.plugin.hook.file.AppendToCSVFileHook
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole.HookBuilder
+import org.openmole.core.workflow.data.Prototype
+import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.plugin.hook.file.{ AppendToCSVFileHookBuilder, AppendToCSVFileHook }
 
 object SavePopulationHook {
 
-  def apply(puzzle: GAPuzzle[GAAlgorithm], dir: String): AppendToCSVFileHook.Builder = apply(puzzle, dir, "/population${" + puzzle.parameters.generation.name + "}.csv")
-
-  def apply(puzzle: GAPuzzle[GAAlgorithm], dir: String, name: String): AppendToCSVFileHook.Builder = {
-    val builder = new AppendToCSVFileHook.Builder(dir + "/" + name)
-    builder.add(puzzle.parameters.generation)
-    puzzle.parameters.evolution.inputsPrototypes.foreach(p ⇒ builder.add(p.toArray))
-    puzzle.parameters.evolution.objectives.foreach { o ⇒ builder.add(o.toArray) }
-    builder
+  def apply(puzzle: GAPuzzle[GAAlgorithm], dir: ExpandedString) = {
+    val fileName = dir + "/population${" + puzzle.generation.name + "}.csv"
+    val prototypes =
+      Seq[Prototype[_]](puzzle.parameters.generation) ++
+        puzzle.evolution.inputsPrototypes.map(_.toArray) ++
+        puzzle.evolution.objectives.map(_.toArray)
+    new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
   }
 
 }

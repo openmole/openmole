@@ -8,7 +8,7 @@ import org.openmole.buildsystem.OMKeys._
 object Apache extends Defaults {
 
   //todo: switch to discluding pattern
-  val dir = file("libraries") / "apache"
+  val dir = file("target/libraries") / "apache"
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core", "lib")) //TODO make library defaults
 
@@ -18,8 +18,8 @@ object Apache extends Defaults {
   lazy val config = OsgiProject("org.apache.commons.configuration", privatePackages = Seq("org.apache.commons.*")) settings
     (libraryDependencies += "commons-configuration" % "commons-configuration" % "1.6", bundleType += "runtime", version := "1.6")
 
-  lazy val mathVersion = "3.3"
-  lazy val math = OsgiProject("org.apache.commons.math", exports = Seq("org.apache.commons.math3.*")) settings
+  lazy val mathVersion = "3.4"
+  lazy val math = OsgiProject("org.apache.commons.math", exports = Seq("org.apache.commons.math3.*"), privatePackages = Seq("assets.*")) settings
     (libraryDependencies += "org.apache.commons" % "commons-math3" % mathVersion, bundleType += "runtime", version := mathVersion)
 
   lazy val exec = OsgiProject("org.apache.commons.exec") settings

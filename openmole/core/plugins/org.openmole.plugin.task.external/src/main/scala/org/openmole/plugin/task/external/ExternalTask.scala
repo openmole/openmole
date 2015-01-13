@@ -18,11 +18,13 @@
 package org.openmole.plugin.task.external
 
 import java.io.File
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task._
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.data._
 
-import org.openmole.core.implementation.tools._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.task.Task
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.OS
 import scala.collection.mutable.ListBuffer
@@ -35,21 +37,21 @@ object ExternalTask {
 
 trait ExternalTask extends Task {
 
-  def inputFiles: Iterable[(Prototype[File], String, Boolean)]
-  def outputFiles: Iterable[(String, Prototype[File])]
-  def resources: Iterable[(File, String, Boolean, OS)]
+  def inputFiles: Iterable[(Prototype[File], ExpandedString, Boolean)]
+  def outputFiles: Iterable[(ExpandedString, Prototype[File])]
+  def resources: Iterable[(File, ExpandedString, Boolean, OS)]
 
   protected case class ToPut(file: File, name: String, link: Boolean)
   protected case class ToGet(name: String, file: File)
 
   protected def listInputFiles(context: Context): Iterable[ToPut] =
     inputFiles.map {
-      case (prototype, name, link) ⇒ ToPut(context(prototype), VariableExpansion(context, name), link)
+      case (prototype, name, link) ⇒ ToPut(context(prototype), name.from(context), link)
     }
 
   protected def listResources(context: Context, tmpDir: File): Iterable[ToPut] = {
     val expanded =
-      resources map { case v @ (_, name, _, _) ⇒ v.copy(_2 = VariableExpansion(context, name)) }
+      resources map { case v @ (_, name, _, _) ⇒ v.copy(_2 = name.from(context)) }
 
     val byLocation =
       expanded groupBy {
@@ -71,7 +73,7 @@ trait ExternalTask extends Task {
     val files =
       outputFiles.map {
         case (name, prototype) ⇒
-          val fileName = VariableExpansion(context, name)
+          val fileName = name.from(context)
           val file = new File(localDir, fileName)
 
           val fileVariable = Variable(prototype, file)

@@ -12,14 +12,14 @@ object Environment extends PluginDefaults {
   lazy val oar = OsgiProject("oar") dependsOn (Misc.exception, Misc.workspace, Core.batch, gridscale, ssh) settings
     (libraryDependencies += Libraries.gridscaleOAR)
 
-  lazy val desktopgrid = OsgiProject("desktopgrid") dependsOn (Core.model, Misc.workspace, Misc.tools,
+  lazy val desktopgrid = OsgiProject("desktopgrid") dependsOn (Core.workflow, Misc.workspace, Misc.tools,
     Core.batch, Core.serializer, Misc.sftpserver) settings (bundleType += "daemon")
 
-  lazy val glite = OsgiProject("glite") dependsOn (Core.model, Misc.exception, Misc.updater, Core.batch,
+  lazy val egi = OsgiProject("egi") dependsOn (Core.workflow, Misc.exception, Misc.updater, Core.batch,
     Misc.workspace, Misc.fileService, gridscale) settings (
       libraryDependencies ++= Seq(Libraries.gridscaleGlite, Libraries.gridscaleDirac, Libraries.gridscaleHTTP, Libraries.scalaLang % "provided"))
 
-  lazy val gridscale = OsgiProject("gridscale") dependsOn (Core.model, Misc.workspace, Misc.tools, Core.implementation,
+  lazy val gridscale = OsgiProject("gridscale") dependsOn (Core.workflow, Misc.workspace, Misc.tools, Core.workflow,
     provided(Core.batch), Misc.exception)
 
   lazy val pbs = OsgiProject("pbs") dependsOn (Misc.exception, Misc.workspace, Core.batch, gridscale, ssh) settings

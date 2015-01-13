@@ -22,19 +22,20 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.implementation.execution.local._
-import org.openmole.core.implementation.validation.Validation
-import org.openmole.core.model.execution.ExecutionState
-import org.openmole.core.model.job.State
-import org.openmole.core.model.mole.{ ExecutionContext, IMole, IMoleExecution }
-import org.openmole.core.model.transition.IAggregationTransition
-import org.openmole.core.model.transition.IExplorationTransition
+import org.openmole.core.workflow.execution.local._
+import org.openmole.core.workflow.execution.ExecutionState
+import org.openmole.core.workflow.job.State
+import org.openmole.core.workflow.mole.{ ExecutionContext, Mole, MoleExecution }
+import org.openmole.core.workflow.transition.IAggregationTransition
+import org.openmole.core.workflow.transition.IExplorationTransition
+import org.openmole.core.workflow.validation.Validation
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.misc.workspace.Workspace
 import scala.annotation.tailrec
 import scala.collection.mutable.HashMap
 import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.core.implementation.mole.MoleExecution
+import org.openmole.core.workflow.mole.MoleExecution
+import org.openmole.core.dsl._
 
 class Command {
 
@@ -61,28 +62,22 @@ class Command {
     }
   }
 
-  def print(mole: IMole): Unit = {
+  def print(mole: Mole): Unit = {
     println("root: " + mole.root)
     mole.transitions.foreach(println)
     mole.dataChannels.foreach(println)
   }
 
-  def print(moleExecution: IMoleExecution): Unit = {
+  def print(moleExecution: MoleExecution): Unit = {
     val toDisplay = new Array[AtomicInteger](State.values.size)
     for (state ← State.values) toDisplay(state.id) = new AtomicInteger
     for (job ← moleExecution.moleJobs) toDisplay(job.state.id).incrementAndGet
     for (state ← State.values) System.out.println(state.toString + ": " + toDisplay(state.id))
   }
 
-  def verify(mole: IMole): Unit = Validation(mole).foreach(println)
+  def verify(mole: Mole): Unit = Validation(mole).foreach(println)
 
-  def encrypted: String = Workspace.encrypt(askPassword)
-
-  def load[T](f: File) = SerialiserService.deserialise[T](f)
-  def save(o: Any, f: File) = SerialiserService.serialise(o, f)
-
-  def bundles = PluginManager.bundleFiles
-  def dependencies(file: File) = PluginManager.dependencies(file)
+  def encrypted: String = encrypt(askPassword)
 
 }
 

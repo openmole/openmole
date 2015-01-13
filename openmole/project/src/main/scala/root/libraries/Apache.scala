@@ -16,7 +16,7 @@ object Apache extends Defaults {
 
   lazy val config = "org.openmole" %% "org-apache-commons-configuration" % "1.6"
 
-  lazy val mathVersion = "3.3"
+  lazy val mathVersion = "3.4"
   lazy val math = "org.openmole" %% "org-apache-commons-math" % mathVersion
 
   lazy val exec = "org.openmole" %% "org-apache-commons-exec" % "1.1"

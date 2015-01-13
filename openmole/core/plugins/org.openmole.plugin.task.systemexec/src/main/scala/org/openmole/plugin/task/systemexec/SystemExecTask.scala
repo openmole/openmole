@@ -17,11 +17,12 @@
 
 package org.openmole.plugin.task.systemexec
 
-import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools.VariableExpansion
 import org.openmole.misc.exception._
 import org.openmole.misc.tools.io.StringBuilderOutputStream
 import org.openmole.misc.tools.service.ProcessUtil._
@@ -29,7 +30,7 @@ import java.io.File
 import java.io.IOException
 import java.io.PrintStream
 import org.apache.commons.exec.CommandLine
-import org.openmole.core.implementation.data._
+import org.openmole.core.workflow.data._
 import org.openmole.misc.workspace._
 import org.openmole.misc.tools.service.{ Logger, OS }
 import org.openmole.plugin.task.external._
@@ -55,7 +56,7 @@ object SystemExecTask extends Logger {
    * @param error optionally a prototype to output the standard error output of the process
    *
    */
-  def apply(commands: Commands)(implicit plugins: PluginSet) =
+  def apply(commands: Commands) =
     new SystemExecTaskBuilder(commands)
 
 }

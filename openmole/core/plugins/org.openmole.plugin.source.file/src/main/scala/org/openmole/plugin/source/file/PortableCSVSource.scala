@@ -27,7 +27,6 @@ object PortableCSVSource {
     new CSVSourceBuilder { builder ⇒
       def toSource = new PortableCSVSource with Built {
         val file = _file
-        val separator = _separator
       }
     }
   }

@@ -18,9 +18,10 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
-import org.openmole.core.implementation.tools._
-import org.openmole.core.model.data._
-import org.openmole.core.model.domain._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 import org.openmole.misc.tools.io.FileUtil._
@@ -31,7 +32,7 @@ object ListFilesDomain extends Logger {
 
   def apply(
     base: File,
-    subdirectory: String = "",
+    subdirectory: ExpandedString = "",
     recursive: Boolean = false,
     filter: File ⇒ Boolean = f ⇒ true) = new ListFilesDomain(base, subdirectory, recursive, filter)
 
@@ -41,12 +42,12 @@ import ListFilesDomain.Log._
 
 sealed class ListFilesDomain(
     base: File,
-    subdirectory: String = "",
+    subdirectory: ExpandedString = "",
     recursive: Boolean = false,
     filter: File ⇒ Boolean = f ⇒ true) extends Domain[File] with Finite[File] {
 
   override def computeValues(context: Context)(implicit rng: Random): Iterable[File] = {
-    val dir = new File(base, VariableExpansion(context, subdirectory))
+    val dir = new File(base, subdirectory.from(context))
 
     if (!dir.exists) {
       logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")

@@ -21,8 +21,8 @@ import au.com.bytecode.opencsv.CSVReader
 import java.io.File
 import java.io.FileReader
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.implementation.data._
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
 import org.scalatest.FlatSpec
 import org.scalatest._
 import org.scalatest.junit.JUnitRunner

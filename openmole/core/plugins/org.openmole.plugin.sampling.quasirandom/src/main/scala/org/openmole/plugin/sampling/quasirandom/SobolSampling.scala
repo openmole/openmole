@@ -18,11 +18,13 @@
 package org.openmole.plugin.sampling.quasirandom
 
 import org.apache.commons.math3.random.SobolSequenceGenerator
-import org.openmole.core.implementation.task.Task._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.model.data._
-import org.openmole.core.model.domain._
-import org.openmole.core.model.sampling._
+import org.openmole.core.workflow.task.Task
+import Task._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.tools.FromContext
 import org.openmole.misc.tools.script.GroovyProxyPool
 import org.openmole.misc.tools.service.Random._
 import org.openmole.misc.tools.service.Scaling._
@@ -31,24 +33,22 @@ import scala.util.Random
 
 object SobolSampling {
 
-  def apply(samples: String, factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
+  def apply(samples: FromContext[Int], factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
     new SobolSampling(samples, factors: _*)
 
 }
 
-sealed class SobolSampling(val samples: String, val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
-
-  @transient lazy val samplesValue = GroovyProxyPool(samples)
+sealed class SobolSampling(val samples: FromContext[Int], val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
 
   override def inputs = DataSet(factors.flatMap(_.inputs))
   override def prototypes = factors.map { _.prototype }
 
   override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[Double]]] = {
     val sequence = new SobolSequenceGenerator(factors.size)
-    val samples = samplesValue(context).asInstanceOf[Int]
+    val s = samples.from(context)
 
     for {
-      v ← Iterator.continually(sequence.nextVector()).take(samples)
+      v ← Iterator.continually(sequence.nextVector()).take(s)
     } yield (factors zip v).map {
       case (f, v) ⇒ Variable(f.prototype, v.scale(f.domain.min(context), f.domain.max(context)))
     }

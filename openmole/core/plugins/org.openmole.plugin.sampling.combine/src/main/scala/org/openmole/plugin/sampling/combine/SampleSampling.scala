@@ -17,11 +17,11 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.implementation.tools.FromContext
-import org.openmole.core.model.data._
-import org.openmole.core.model.sampling._
-import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools.FromContext
 
 import scala.util.Random
 

@@ -17,18 +17,6 @@
 
 package org.openmole.plugin.sampling
 
-import java.io.File
+import org.openmole.plugin.tool.csv.CSVPackage
 
-import org.openmole.core.model.data.Prototype
-import org.openmole.misc.macros.Keyword._
-
-package object csv {
-
-  lazy val columns = add[{ def addColumn(proto: Prototype[_]) }]
-  lazy val fileColumns = add[{
-    def addFileColumn(name: String, dir: File, proto: Prototype[File])
-    def addFileColumn(dir: File, proto: Prototype[File])
-  }]
-  lazy val separator = set[{ def setSeparator(s: Option[Char]) }]
-
-}
+package object csv extends CSVPackage

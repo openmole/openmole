@@ -29,7 +29,7 @@ import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.environment.BatchEnvironment.{ signalUpload }
-import org.openmole.core.model.job._
+import org.openmole.core.workflow.job._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.HashService
 import org.openmole.misc.tools.io.TarArchiver._
@@ -58,7 +58,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
       }
   }
 
-  private def initCommunication(environment: BatchEnvironment, job: IJob): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
+  private def initCommunication(environment: BatchEnvironment, job: Job): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
 
     val (serializationFiles, serialisationPluginFiles) = serializeJob(jobFile, job)
 
@@ -97,7 +97,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     } finally storage.releaseToken(token)
   }
 
-  def serializeJob(file: File, job: IJob) = {
+  def serializeJob(file: File, job: Job) = {
     var files = new TreeSet[File]
     var plugins = new TreeSet[File]
 
@@ -125,7 +125,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     (files, plugins)
   }
 
-  def toReplicatedFile(job: IJob, file: File, storage: StorageService)(implicit token: AccessToken, session: Session): ReplicatedFile = {
+  def toReplicatedFile(job: Job, file: File, storage: StorageService)(implicit token: AccessToken, session: Session): ReplicatedFile = {
     if (!file.exists) throw new UserBadDataError(s"File/category $file is required but doesn't exist.")
 
     val isDir = file.isDirectory
@@ -146,7 +146,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
   }
 
   def replicateTheRuntime(
-    job: IJob,
+    job: Job,
     environment: BatchEnvironment,
     storage: StorageService)(implicit token: AccessToken, session: Session) = {
 
@@ -166,7 +166,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
   }
 
   def createExecutionMessage(
-    job: IJob,
+    job: Job,
     jobFile: File,
     serializationFile: Iterable[File],
     serializationPlugin: Iterable[File],

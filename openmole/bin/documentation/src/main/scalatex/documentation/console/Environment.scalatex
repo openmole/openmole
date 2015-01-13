@@ -1,0 +1,26 @@
+
+@import documentation.Objects._
+
+@sect{Environment}
+  A big feature in OpenMOLE is the possibility of delegating the workload to a remote execution environment. Tasks in OpenMOLE have been designed so that the delegation a part of the workload to a remote environment is declarative. To achieve it first define the environment, then tells OpenMOLE witch task to delegate.
+    @br @hl.openmole("""
+    val env = BlaBlaEnvironment(....)
+    val mole = task1 -- (task2 on env) -- task3""")
+
+  @p OpenMOLE will then delegate the execution of the task to the designated environment from bare metal. You do not need to install anything or perform any kind of configuration on the target execution environment for OpenMOLE to work on it. You will however be required to provide the authentication information in order for OpenMOLE to access the remote environment.
+
+  @p The use of a batch environment is generally not suited for short tasks (less than a 1 minute for a cluster to less than 1 hour for a grid). In case your tasks are short you can group several executions. To group the execution by 100 in each job submitted to the environment you should like that:
+  @br @hl.openmole("""
+  // required for grouping with the keyword 'by'
+  import org.openmole.plugin.grouping.batch._
+
+  val env = BlaBlaEnvironment(....)
+  val mole = task1 -- (task2 on env by 100) -- task3""")
+
+  @p Depending on which environment you want to delegate your workload to you can check the following doc:
+  @ul
+    @li{@a("Multi-thread", href := Pages.console.environment.multithread.file), to execute the tasks concurrently on your machine,}
+    @li{@a("SSH", href := Pages.console.environment.ssh.file), to execute tasks on remote server through SSH,}
+    @li{clusters}
+    @li{@a("EGI", href := Pages.console.environment.egi.file), to execute tasks on the EGI grid or using DIRAC,}
+

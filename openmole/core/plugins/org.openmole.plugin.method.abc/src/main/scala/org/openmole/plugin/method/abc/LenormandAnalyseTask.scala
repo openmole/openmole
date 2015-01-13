@@ -17,12 +17,12 @@
 
 package org.openmole.plugin.method.abc
 
-import org.openmole.core.implementation.builder.TaskBuilder
-import org.openmole.core.implementation.task._
-import org.openmole.core.model.data._
-import org.openmole.core.implementation.data._
+import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
 import fr.iscpif.scalabc._
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.task._
 
 object LenormandAnalyseTask {
 

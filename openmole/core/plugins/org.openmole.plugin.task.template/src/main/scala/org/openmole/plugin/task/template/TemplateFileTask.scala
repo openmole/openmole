@@ -18,16 +18,16 @@
 package org.openmole.plugin.task.template
 
 import java.io.File
-import org.openmole.core.implementation.builder.TaskBuilder
-import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.data._
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
 
 object TemplateFileTask {
   def apply(
     template: File,
-    output: Prototype[File])(implicit plugins: PluginSet) = new TaskBuilder { builder ⇒
+    output: Prototype[File]) = new TaskBuilder { builder ⇒
 
     addOutput(output)
 

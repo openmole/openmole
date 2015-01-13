@@ -29,7 +29,7 @@ import org.openmole.gui.bootstrap.js.BootstrapJS
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.task._
 import org.openmole.ui.console.Console
 import annotation.tailrec
 import org.openmole.web._

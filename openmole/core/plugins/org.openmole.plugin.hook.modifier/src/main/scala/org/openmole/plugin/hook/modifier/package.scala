@@ -17,24 +17,24 @@
 
 package org.openmole.plugin.hook
 
-import org.openmole.core.implementation.mole.HookBuilder
-import org.openmole.core.implementation.transition.Condition
-import org.openmole.core.model.mole.IHook
-import org.openmole.core.model.transition.ICondition
+import org.openmole.core.workflow.mole.HookBuilder
+import org.openmole.core.workflow.transition.Condition
+import org.openmole.core.workflow.mole.Hook
+import org.openmole.core.workflow.transition.Condition$
 
 package object modifier {
 
-  implicit class HookModifierDecorator(h: IHook) {
-    def when(condition: ICondition) = ConditionHook(h, condition)
+  implicit class HookModifierDecorator(h: Hook) {
+    def when(condition: Condition) = ConditionHook(h, condition)
     def when(condition: String) = ConditionHook(h, Condition(condition))
-    def condition(condition: ICondition) = when(condition)
+    def condition(condition: Condition) = when(condition)
     def condition(condition: String) = when(condition)
   }
 
   implicit class HookBuilderModifierDecorator(h: HookBuilder) {
-    def when(condition: ICondition) = h.toHook.condition(condition)
+    def when(condition: Condition) = h.toHook.condition(condition)
     def when(condition: String) = h.toHook.condition(condition)
-    def condition(condition: ICondition) = when(condition)
+    def condition(condition: Condition) = when(condition)
     def condition(condition: String) = when(condition)
   }
 }

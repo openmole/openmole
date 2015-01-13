@@ -17,37 +17,30 @@
 
 package org.openmole.plugin.method.evolution.ga
 
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.model.data._
-import org.openmole.core.model.mole._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.misc.tools.io.FileUtil._
 
 object SaveProfileHook {
 
-  def apply(p: GAParameters[GenomeProfile], dir: String): HookBuilder = apply(p, dir, "profile${" + p.generation.name + "}.csv")
-
-  def apply(p: GAParameters[GenomeProfile], dir: String, name: String): HookBuilder =
+  def apply(p: GAParameters[GenomeProfile], dir: ExpandedString): HookBuilder = {
+    val path = dir + "/profile${" + p.generation.name + "}.csv"
     new HookBuilder {
       addInput(p.population)
-      val _path = dir + "/" + name
-
-      def toHook = new SaveProfileHook with Built {
-        val gaParameters = p
-        val path = _path
-      }
+      def toHook = new SaveProfileHook(p, path) with Built
     }
+  }
 
 }
 
-abstract class SaveProfileHook extends Hook {
-
-  val gaParameters: GAParameters[GenomeProfile]
-  val path: String
+abstract class SaveProfileHook(gaParameters: GAParameters[GenomeProfile], path: ExpandedString) extends Hook {
 
   def process(context: Context, executionContext: ExecutionContext) = {
-    val file = executionContext.relativise(VariableExpansion(context, path))
+    val file = executionContext.relativise(path.from(context))
     file.createParentDir
     file.withWriter { w ⇒
       for {

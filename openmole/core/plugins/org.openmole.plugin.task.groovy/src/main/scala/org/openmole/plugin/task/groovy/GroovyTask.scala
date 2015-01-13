@@ -18,12 +18,13 @@
 package org.openmole.plugin.task.groovy
 
 import java.io.File
-import org.openmole.core.model.task._
+import org.openmole.core.serializer.plugin.Plugins
+import org.openmole.core.workflow.task._
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import org.openmole.plugin.task.code._
-import org.openmole.core.implementation.task._
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.data._
 import org.openmole.plugin.tool.groovy.ContextToGroovyCode
 
 object GroovyTask {
@@ -39,10 +40,10 @@ object GroovyTask {
    *
    * @see CodeTaskBuilder for more info on addImport, addLib...
    *
-   * @param code the groovy source code
+   * @param source the groovy source code
    */
-  def apply(source: String)(implicit plugins: PluginSet) =
-    new CodeTaskBuilder { builder ⇒
+  def apply(source: String)(implicit plugins: PluginSet = PluginSet.empty) =
+    new JVMLanguageTaskBuilder { builder ⇒
 
       addImport("static org.openmole.plugin.task.groovy.GroovyTask.newRNG")
       addImport("static org.openmole.plugin.task.groovy.GroovyTask.newFile")
@@ -54,7 +55,7 @@ object GroovyTask {
 
 }
 
-sealed abstract class GroovyTask(val source: String) extends CodeTask with ContextToGroovyCode {
+sealed abstract class GroovyTask(val source: String) extends JVMLanguageTask with ContextToGroovyCode {
 
   def processCode(context: Context) = execute(context, outputs)
 

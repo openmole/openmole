@@ -19,7 +19,7 @@ package org.openmole.core.batch.refresh
 
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice._
-import org.openmole.core.model.job._
+import org.openmole.core.workflow.job._
 import org.openmole.core.batch.storage._
 
 import scala.concurrent.duration.{ FiniteDuration, Duration }
@@ -37,6 +37,6 @@ case class Kill(job: BatchExecutionJob) extends JobMessage
 case class KillBatchJob(batchJob: BatchJob) extends JobMessage
 case class GetResult(job: BatchExecutionJob, serializedJob: SerializedJob, outputFilePath: String) extends JobMessage
 case class Manage(job: BatchExecutionJob) extends JobMessage
-case class MoleJobError(moleJob: IMoleJob, job: BatchExecutionJob, exception: Throwable) extends JobMessage
+case class MoleJobError(moleJob: MoleJob, job: BatchExecutionJob, exception: Throwable) extends JobMessage
 case class CleanSerializedJob(job: SerializedJob) extends JobMessage
 case class DeleteFile(storage: StorageService, path: String, directory: Boolean) extends JobMessage

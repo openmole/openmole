@@ -48,9 +48,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   ) settings (
       libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.log4j, scopt, equinoxApp)
     ) dependsOn (
-        base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
-        base.Misc.pluginManager, base.Core.implementation, base.Core.batch, gui.Server.core, gui.Client.core, gui.Bootstrap.js, gui.Bootstrap.osgi, base.Misc.sftpserver, base.Misc.logging,
-        Web.core, base.Misc.console)
+        base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher, base.Misc.pluginManager, base.Core.workflow, base.Core.batch, gui.Server.core, gui.Client.core, gui.Bootstrap.js, gui.Bootstrap.osgi, base.Misc.sftpserver, base.Misc.logging, Web.core, base.Misc.console, base.Core.dsl)
 
   lazy val java368URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-386/20-b17/java-jre-linux-386-20-b17.tgz")
   lazy val javax64URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-x64/20-b17/java-jre-linux-x64-20-b17.tgz")
@@ -110,7 +108,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     scalajHttp
   )
 
-  lazy val openmolePlugins = AssemblyProject("openmoleplugins") settings (
+  lazy val openmolePlugins = AssemblyProject("openmoleplugins", baseDir = dir / "target") settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo "",
     resourcesAssemble <++= Seq(openmoleui.project) sendTo "",
     libraryDependencies ++= Seq(
@@ -160,7 +158,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       dependencyNameMap := renameEquinox
   )
 
-  lazy val consolePlugins = AssemblyProject("consoleplugins") settings (
+  lazy val consolePlugins = AssemblyProject("consoleplugins", baseDir = dir / "target") settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo "",
     libraryDependencies ++=
     Seq(
@@ -185,7 +183,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       dependencyFilter := filter
   )
 
-  lazy val guiPlugins = AssemblyProject("guiplugins") settings (
+  lazy val guiPlugins = AssemblyProject("guiplugins", baseDir = dir / "target") settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"), true) sendTo "",
     dependencyFilter := filter
   )
@@ -244,10 +242,14 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       Tar.innerFolder := "openmole-daemon"
   )
 
-  lazy val docProj = Project("documentation", dir / "documentation") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (
+  lazy val api = Project("api", dir / "target/api") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (
     unidocSettings: _*
   ) settings (compile := Analysis.Empty,
       unidocProjectFilter in (ScalaUnidoc, unidoc) := inAnyProject -- inProjects(Libraries.subProjects: _*) -- inProjects(ThirdParties.subProjects: _*)
     )
+
+  lazy val documentation = Project("documentation", dir / "documentation") settings (
+    libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.0"
+  )
 
 }

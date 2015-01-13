@@ -17,13 +17,14 @@
 
 package org.openmole.plugin.grouping.batch
 
-import org.openmole.core.implementation.mole._
-import org.openmole.core.model.data._
-import org.openmole.core.model.job._
-import org.openmole.core.model.mole._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.task.Task
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service._
-import org.openmole.core.implementation.task.Task._
+import Task._
 
 object InShuffledGrouping {
 
@@ -39,7 +40,7 @@ object InShuffledGrouping {
  */
 class InShuffledGrouping(numberOfBatch: Int) extends Grouping {
 
-  override def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup =
+  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup =
     new MoleJobGroup(newRNG(context(openMOLESeed)).nextInt(numberOfBatch))
 
 }

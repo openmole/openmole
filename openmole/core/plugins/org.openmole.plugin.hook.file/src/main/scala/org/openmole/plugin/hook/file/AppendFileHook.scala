@@ -17,14 +17,15 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data._
 import java.io.File
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.exception._
-import org.openmole.core.implementation.mole._
-import org.openmole.core.model.mole.ExecutionContext
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.mole.ExecutionContext
 
 /**
  * Appends a variable content to an existing file.
@@ -35,7 +36,7 @@ import org.openmole.core.model.mole.ExecutionContext
  */
 object AppendFileHook {
 
-  def apply(prototype: Prototype[File], outputFile: String) =
+  def apply(prototype: Prototype[File], outputFile: ExpandedString) =
     new HookBuilder {
       addInput(prototype)
 
@@ -44,13 +45,13 @@ object AppendFileHook {
 
 }
 
-abstract class AppendFileHook(prototype: Prototype[File], outputFile: String) extends Hook {
+abstract class AppendFileHook(prototype: Prototype[File], outputFile: ExpandedString) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
     context.option(prototype) match {
       case Some(from) ⇒
 
-        val to = executionContext.relativise(VariableExpansion(context, outputFile))
+        val to = executionContext.relativise(outputFile.from(context))
         if (!from.exists) throw new UserBadDataError("The file " + from + " does not exist.")
 
         if (!to.exists) {

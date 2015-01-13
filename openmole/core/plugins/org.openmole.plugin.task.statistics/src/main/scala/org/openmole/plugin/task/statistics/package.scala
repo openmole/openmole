@@ -17,13 +17,15 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.core.implementation.builder._
-import org.openmole.core.model.data.Prototype
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.data.Prototype
 
 import org.openmole.misc.macros.Keyword._
 
-package object statistics extends StatisticMethods {
-
-  lazy val statistics = add[{ def addStatistic(sequence: Prototype[Array[Double]], stat: Prototype[Double], agg: StatisticalAggregation[Double]) }]
-
+package statistics {
+  trait StatisticsPackage <: StatisticMethods {
+    lazy val statistics = add[{ def addStatistic(sequence: Prototype[Array[Double]], stat: Prototype[Double], agg: StatisticalAggregation[Double]) }]
+  }
 }
+
+package object statistics extends StatisticsPackage

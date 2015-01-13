@@ -17,35 +17,36 @@
 
 package org.openmole.plugin.task.tools
 
-import org.openmole.core.implementation.builder.TaskBuilder
-import org.openmole.core.implementation.data._
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.implementation.task._
+import org.openmole.core.workflow.task._
 
 object AssignTask {
 
-  def apply()(implicit plugins: PluginSet) =
+  def apply() =
     new TaskBuilder { builder ⇒
 
-      val toAssign = ListBuffer[(Prototype[T], Prototype[T]) forSome { type T }]()
+      val assignments = ListBuffer[(Prototype[T], Prototype[T]) forSome { type T }]()
 
-      def assign[T](from: Prototype[T], to: Prototype[T]) = {
+      def addAssignment[T](from: Prototype[T], to: Prototype[T]) = {
         addInput(from)
         addOutput(to)
-        toAssign += ((from, to))
+        assignments += ((from, to))
+        this
       }
 
       def toTask =
-        new AssignTask(toAssign.toList: _*) with builder.Built
+        new AssignTask(assignments.toList: _*) with builder.Built
 
     }
 
 }
-sealed abstract class AssignTask(val renamings: (Prototype[T], Prototype[T]) forSome { type T }*) extends Task {
+sealed abstract class AssignTask(val assignments: (Prototype[T], Prototype[T]) forSome { type T }*) extends Task {
 
   override def process(context: Context) =
-    renamings.map { case (from, to) ⇒ Variable(to, context(from)) }
+    assignments.map { case (from, to) ⇒ Variable(to, context(from)) }
 
 }

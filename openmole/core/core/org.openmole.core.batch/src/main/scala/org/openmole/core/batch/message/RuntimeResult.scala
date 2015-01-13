@@ -18,7 +18,7 @@
 package org.openmole.core.batch.message
 
 import util.Try
-import org.openmole.core.model.execution.Environment._
+import org.openmole.core.workflow.execution.Environment._
 
 case class RuntimeResult(
   stdOut: Option[FileMessage],

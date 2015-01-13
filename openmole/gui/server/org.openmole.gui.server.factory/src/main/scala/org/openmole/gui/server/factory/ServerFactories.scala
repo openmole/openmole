@@ -17,7 +17,7 @@ package org.openmole.gui.server.factory
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.model.task.PluginSet
+import org.openmole.core.workflow.task.PluginSet
 import org.openmole.gui.ext.factoryui.FactoryUI
 //import org.openmole.gui.shared.FactoriesUI
 import scala.collection.JavaConversions._

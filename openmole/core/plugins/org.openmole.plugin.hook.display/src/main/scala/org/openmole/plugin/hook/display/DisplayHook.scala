@@ -17,24 +17,25 @@
 
 package org.openmole.plugin.hook.display
 
-import org.openmole.core.model.data._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.implementation.mole._
-import org.openmole.core.model.mole._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.tools.ExpandedString
 
 object DisplayHook {
 
-  def apply(toDisplay: String) =
+  def apply(toDisplay: ExpandedString) =
     new HookBuilder {
       def toHook = new DisplayHook(toDisplay) with Built
     }
 
 }
 
-abstract class DisplayHook(toDisplay: String) extends Hook {
+abstract class DisplayHook(toDisplay: ExpandedString) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    executionContext.out.println(VariableExpansion(context, toDisplay))
+    executionContext.out.println(toDisplay.from(context))
     context
   }
 

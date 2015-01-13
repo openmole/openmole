@@ -44,8 +44,9 @@ object CondorEnvironment {
     //wallTime: Option[Duration] = None,
     memory: Option[Int] = None,
     workDirectory: Option[String] = None,
-    requirements: List[CondorRequirement] = List())(implicit authentications: AuthenticationProvider) =
-    new CondorEnvironment(user, host, port, openMOLEMemory, memory, workDirectory, requirements)
+    requirements: List[CondorRequirement] = List(),
+    threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
+    new CondorEnvironment(user, host, port, openMOLEMemory, memory, workDirectory, requirements, threads)
 }
 
 class CondorEnvironment(
@@ -59,7 +60,8 @@ class CondorEnvironment(
     //val wallTime: Option[Duration],
     val memory: Option[Int],
     val workDirectory: Option[String],
-    val requirements: List[CondorRequirement])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    val requirements: List[CondorRequirement],
+    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
   type JS = CondorJobService
 

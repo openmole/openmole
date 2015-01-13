@@ -19,15 +19,15 @@ package org.openmole.plugin.method
 
 import org.openmole.plugin.method.abc._
 import fr.iscpif.scalabc.algorithm.Lenormand
-import org.openmole.core.model.data._
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.puzzle._
-import org.openmole.core.implementation.transition._
-import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.builder._
-import org.openmole.core.model.task._
-import org.openmole.core.model.transition._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.transition._
 
 package object abc {
 

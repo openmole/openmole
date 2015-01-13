@@ -17,14 +17,13 @@
 
 package org.openmole.plugin.hook.modifier
 
-import org.openmole.core.model.transition.ICondition
-import org.openmole.core.model.data._
-import org.openmole.core.implementation.mole._
-import org.openmole.core.model.mole._
+import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole._
 
 object ConditionHook {
 
-  def apply(hook: IHook, condition: ICondition) =
+  def apply(hook: Hook, condition: Condition) =
     new HookBuilder {
       addInput(hook.inputs.toSeq: _*)
       addOutput(hook.outputs.toSeq: _*)
@@ -34,8 +33,8 @@ object ConditionHook {
 }
 
 abstract class ConditionHook(
-    val hook: IHook,
-    val condition: ICondition) extends Hook {
+    val hook: Hook,
+    val condition: Condition) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) =
     if (condition.evaluate(context)) hook.perform(context, executionContext) else context

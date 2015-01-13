@@ -17,46 +17,35 @@
 
 package org.openmole.plugin.source.file
 
-import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.data._
-import org.openmole.core.model.data._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.model.mole._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.mole._
 import java.io.File
-import org.openmole.core.implementation.tools._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.serializer._
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
 import collection.mutable.ListBuffer
 
 object LoadSource {
 
-  def apply() =
+  def apply(file: ExpandedString, prototypes: Prototype[_]*) =
     new SourceBuilder {
-      private val _load = ListBuffer[(String, Prototype[_])]()
-
-      def load(f: String, p: Prototype[_]) = {
-        addOutput(p)
-        _load += f -> p
-      }
-
-      def toSource =
-        new LoadSource with Built {
-          val load = _load.toList
-        }
+      prototypes.foreach(p ⇒ addOutput(p))
+      def toSource = new LoadSource(file, prototypes: _*) with Built
     }
 
 }
 
-abstract class LoadSource extends Source {
-
-  def load: List[(String, Prototype[_])]
+abstract class LoadSource(file: ExpandedString, prototypes: Prototype[_]*) extends Source {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    load.map {
-      case (f, p) ⇒
-        val from = executionContext.relativise(VariableExpansion(context, f))
-        Variable.unsecure(p, SerialiserService.deserialiseAndExtractFiles(from))
-    }
-
+    val from = executionContext.relativise(file.from(context))
+    val loadedContext = SerialiserService.deserialiseAndExtractFiles[Context](from)
+    context ++ prototypes.map(p ⇒ loadedContext.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found in the loaded context")))
   }
+
 }

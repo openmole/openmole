@@ -18,17 +18,18 @@
 package org.openmole.plugin.sampling.csv
 
 import java.io.File
-import org.openmole.core.implementation.builder.SamplingBuilder
+import org.openmole.core.workflow.builder.SamplingBuilder
+import org.openmole.plugin.tool.csv.CSVToVariables
 
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeMap
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.data._
 import java.io.FileReader
 import java.math.BigInteger
 import java.math.BigDecimal
-import org.openmole.core.implementation.data._
-import org.openmole.core.model.sampling._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.sampling._
 import au.com.bytecode.opencsv.CSVReader
 import collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
@@ -39,63 +40,12 @@ object CSVSampling {
   def apply(file: File) = new CSVSamplingBuilder(file)
 }
 
-abstract class CSVSampling(val file: File) extends Sampling {
+abstract class CSVSampling(val file: File) extends Sampling with CSVToVariables {
 
   override def prototypes =
     columns.map { case (_, p) ⇒ p } :::
       fileColumns.map { case (_, _, p) ⇒ p } ::: Nil
 
-  def columns: List[(String, Prototype[_])]
-  def fileColumns: List[(String, File, Prototype[File])]
-  def separator: Char
-
-  /**
-   * Builds the plan.
-   *
-   */
-  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] = {
-    val reader = new CSVReader(new FileReader(file), separator)
-    val headers = reader.readNext.toArray
-
-    //test wether prototype names belong to header names
-    val columnsIndexes = columns.map {
-      case (name, _) ⇒
-        val i = headers.indexOf(name)
-        if (i == -1) throw new UserBadDataError("Unknown column name : " + name)
-        else i
-    }
-
-    val fileColumnsIndexes =
-      fileColumns.map {
-        case (name, _, _) ⇒
-          val i = headers.indexOf(name)
-          if (i == -1) throw new UserBadDataError("Unknown column name : " + name)
-          else i
-      }
-
-    Iterator.continually(reader.readNext).takeWhile(_ != null).map {
-      line ⇒
-        (columns zip columnsIndexes).map {
-          case ((_, p), i) ⇒ Variable(p.asInstanceOf[Prototype[Any]], converter(p)(line(i)))
-        } :::
-          (fileColumns zip fileColumnsIndexes).map {
-            case ((_, f, p), i) ⇒ Variable(p, new File(f, line(i)))
-          } ::: Nil
-    }
-
-  }
-
-  val conveters = Map[Class[_], (String ⇒ _)](
-    classOf[BigInteger] -> (new BigInteger(_: String)),
-    classOf[BigDecimal] -> (new BigDecimal(_: String)),
-    classOf[Double] -> ((_: String).toDouble),
-    classOf[String] -> ((_: String).toString),
-    classOf[Boolean] -> ((_: String).toBoolean),
-    classOf[Int] -> ((_: String).toInt),
-    classOf[Float] -> ((_: String).toFloat),
-    classOf[Long] -> ((_: String).toLong))
-
-  def converter[T](p: Prototype[_]): String ⇒ _ =
-    conveters.getOrElse(p.`type`.erasure, throw new UserBadDataError("Unmanaged type for csv sampling for column binded to prototype " + p))
+  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] = toVariables(file, context)
 
 }

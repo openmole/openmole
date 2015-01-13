@@ -18,12 +18,13 @@
 package org.openmole.plugin.task.external
 
 import java.io.File
-import org.openmole.core.implementation.builder.TaskBuilder
-import org.openmole.core.implementation.data._
+import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.misc.tools.service.OS
-import org.openmole.core.model.data.Prototype
+import org.openmole.core.workflow.data.Prototype
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.model.task.PluginSet
+import org.openmole.core.workflow.task.PluginSet
 
 /**
  * Builder for task using external files or directories
@@ -33,11 +34,11 @@ import org.openmole.core.model.task.PluginSet
  * task after its execution.
  *
  */
-abstract class ExternalTaskBuilder(implicit plugins: PluginSet) extends TaskBuilder { builder ⇒
+abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
 
-  private val _inputFiles = new ListBuffer[(Prototype[File], String, Boolean)]
-  private val _outputFiles = new ListBuffer[(String, Prototype[File])]
-  private val _resources = new ListBuffer[(File, String, Boolean, OS)]
+  private val _inputFiles = new ListBuffer[(Prototype[File], ExpandedString, Boolean)]
+  private val _outputFiles = new ListBuffer[(ExpandedString, Prototype[File])]
+  private val _resources = new ListBuffer[(File, ExpandedString, Boolean, OS)]
 
   def inputFiles = _inputFiles.toList
   def outputFiles = _outputFiles.toList
@@ -54,7 +55,7 @@ abstract class ExternalTaskBuilder(implicit plugins: PluginSet) extends TaskBuil
    * try to use a symbolic link if available on your system.
    *
    */
-  def addResource(file: File, name: Option[String] = None, link: Boolean = false, os: OS = OS()): ExternalTaskBuilder.this.type = {
+  def addResource(file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()): ExternalTaskBuilder.this.type = {
     _resources += ((file, name.getOrElse(file.getName), link, os))
     this
   }
@@ -67,7 +68,7 @@ abstract class ExternalTaskBuilder(implicit plugins: PluginSet) extends TaskBuil
    * @param link @see addResouce
    *
    */
-  def addInput(p: Prototype[File], name: String, link: Boolean = false): this.type = {
+  def addInput(p: Prototype[File], name: ExpandedString, link: Boolean = false): this.type = {
     _inputFiles += ((p, name, link))
     this addInput p
     this
@@ -80,7 +81,7 @@ abstract class ExternalTaskBuilder(implicit plugins: PluginSet) extends TaskBuil
    * @param p the prototype that is injected
    *
    */
-  def addOutput(name: String, p: Prototype[File]): this.type = {
+  def addOutput(name: ExpandedString, p: Prototype[File]): this.type = {
     _outputFiles += ((name, p))
     this addOutput p
     this

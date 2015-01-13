@@ -18,7 +18,7 @@
 package org.openmole.plugin.method.evolution.ga
 
 import fr.iscpif.mgo._
-import org.openmole.core.model.data.Prototype
+import org.openmole.core.workflow.data.Prototype
 import org.openmole.plugin.method.evolution._
 
 import scala.util.Random

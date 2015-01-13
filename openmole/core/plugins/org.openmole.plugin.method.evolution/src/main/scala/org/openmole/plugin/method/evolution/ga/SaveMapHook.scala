@@ -17,38 +17,30 @@
 
 package org.openmole.plugin.method.evolution.ga
 
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.model.data._
-import org.openmole.core.model.mole.ExecutionContext
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole.ExecutionContext
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.misc.tools.io.FileUtil._
 
 object SaveMapHook {
 
-  def apply(p: GAParameters[GenomeMap], dir: String): HookBuilder =
-    apply(p, dir, "map${" + p.generation.name + "}.csv")
-
-  def apply(p: GAParameters[GenomeMap], dir: String, name: String): HookBuilder =
+  def apply(p: GAParameters[GenomeMap], dir: ExpandedString): HookBuilder = {
+    val path = dir + "/map${" + p.generation.name + "}.csv"
     new HookBuilder {
       addInput(p.population)
-      val _path = dir + "/" + name
-
-      def toHook = new SaveMapHook with Built {
-        val gaParameters = p
-        val path = _path
-      }
+      def toHook = new SaveMapHook(p, path) with Built
     }
+  }
 
 }
 
-abstract class SaveMapHook extends Hook {
-
-  val gaParameters: GAParameters[_ <: GenomeMap]
-  val path: String
+abstract class SaveMapHook(gaParameters: GAParameters[_ <: GenomeMap], path: ExpandedString) extends Hook {
 
   def process(context: Context, executionContext: ExecutionContext) = {
-    val file = executionContext.relativise(VariableExpansion(context, path))
+    val file = executionContext.relativise(path.from(context))
     file.createParentDir
     file.withWriter { w ⇒
       for {

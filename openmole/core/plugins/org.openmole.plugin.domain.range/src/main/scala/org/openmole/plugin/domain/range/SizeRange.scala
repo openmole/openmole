@@ -17,23 +17,27 @@
 
 package org.openmole.plugin.domain.range
 
+import org.openmole.core.workflow.tools.FromContext
 import org.openmole.misc.tools.io.FromString
-import org.openmole.core.model.data._
-import org.openmole.core.implementation.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
 
 object SizeRange {
-  def apply[T](range: Range[T], steps: T) = new SizeRange[T](range, FromContext(steps))
-  def apply[T](range: Range[T], steps: String)(implicit fromString: FromString[T]) = new SizeRange[T](range, steps)
+  def apply[T](min: FromContext[T], max: FromContext[T], size: FromContext[Int])(implicit integral: Integral[T]): SizeRange[T] =
+    apply(Range(min, max), size)
+
+  def apply[T](range: Range[T], size: FromContext[Int]): SizeRange[T] =
+    new SizeRange[T](range, size)
 }
 
-class SizeRange[T](val range: Range[T], steps: FromContext[T]) extends SizeStep[T] with Bounded[T] {
+class SizeRange[T](val range: Range[T], size: FromContext[Int]) extends SizeStep[T] with Bounded[T] {
   import range._
 
   def stepAndSize(minValue: T, maxValue: T, context: Context) = {
     import integral._
-    val size = steps.from(context) - integral.one
-    val step = (maxValue - minValue) / size
-    (step, size.toInt)
+    val s = size.from(context) - 1
+    val step = (maxValue - minValue) / fromInt(s)
+    (step, s.toInt)
   }
 
   def min = range.min

@@ -17,44 +17,30 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.Prettifier._
 import scala.annotation.tailrec
-import org.openmole.core.implementation.mole._
-import org.openmole.core.model.mole.ExecutionContext
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.mole.{ Hook, ExecutionContext }
 import scala.collection.mutable.ListBuffer
 
 object AppendToCSVFileHook {
 
-  class Builder(fileName: String) extends HookBuilder {
-    private val prototypes = ListBuffer[Prototype[_]]()
-
-    def add(p: Prototype[_]) = {
-      p.foreach(addInput(_))
-      prototypes += p
-      this
-    }
-
-    def toHook = new AppendToCSVFileHook(fileName, prototypes.toSeq: _*) with Built
-  }
-
-  def apply(fileName: String, prototypes: Prototype[_]*) = {
-    val builder = new Builder(fileName)
-    prototypes.foreach(builder.add)
-    builder
-  }
+  def apply(fileName: ExpandedString, prototypes: Prototype[_]*) =
+    new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
 
 }
 
 abstract class AppendToCSVFileHook(
-    fileName: String,
+    fileName: ExpandedString,
     prototypes: Prototype[_]*) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    val file = executionContext.relativise(VariableExpansion(context, fileName))
+    val file = executionContext.relativise(fileName.from(context))
     file.createParentDir
 
     val ps =

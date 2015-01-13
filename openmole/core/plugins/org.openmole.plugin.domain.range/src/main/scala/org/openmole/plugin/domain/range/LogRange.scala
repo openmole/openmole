@@ -17,9 +17,10 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.data._
-import org.openmole.core.model.domain._
-import org.openmole.core.implementation.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.tools.FromContext
 import org.openmole.misc.tools.io.FromString
 import org.openmole.misc.tools.script.GroovyProxy
 
@@ -27,16 +28,16 @@ import scala.util.Random
 
 object LogRange {
 
-  def apply[T](range: Range[T], steps: String)(implicit lg: Log[T], fs: FromString[T]) =
+  def apply[T](range: Range[T], steps: FromContext[T])(implicit lg: Log[T]) =
     new LogRange[T](range, steps)
 
   def apply[T](range: Range[T], steps: T)(implicit lg: Log[T]) =
     new LogRange[T](range, FromContext(steps))
 
   def apply[T](
-    min: String,
-    max: String,
-    steps: String)(implicit integral: Integral[T], log: Log[T], fs: FromString[T]): LogRange[T] =
+    min: FromContext[T],
+    max: FromContext[T],
+    steps: FromContext[T])(implicit integral: Integral[T], log: Log[T]): LogRange[T] =
     LogRange[T](Range[T](min, max), steps)
 
 }

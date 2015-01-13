@@ -17,45 +17,32 @@
 
 package org.openmole.plugin.source.file
 
-import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.data._
-import org.openmole.core.model.data._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
 import java.io.File
-import org.openmole.core.model.mole._
-import org.openmole.core.implementation.tools._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.tools.ExpandedString
 import scala.collection.mutable.ListBuffer
 
 object FileSource {
 
-  def apply() =
+  def apply(path: ExpandedString, prototype: Prototype[File]) =
     new SourceBuilder {
-      private val _list = new ListBuffer[(String, Prototype[File])]
-
-      def add(path: String, prototype: Prototype[File]) = {
-        addOutput(prototype)
-        _list += ((path, prototype))
-      }
-
-      def toSource =
-        new FileSource with Built {
-          val add = _list.toList
-        }
+      addOutput(prototype)
+      def toSource = new FileSource(path, prototype) with Built
     }
 
 }
 
-trait FileSource extends Source {
+abstract class FileSource(path: ExpandedString, prototype: Prototype[File]) extends Source {
 
-  def add: Seq[(String, Prototype[File])]
-
-  override def process(context: Context, executionContext: ExecutionContext) =
-    add.map {
-      case (path, prototype) ⇒
-        val expandedPath = executionContext.relativise(VariableExpansion(context, path))
-        Variable(
-          prototype,
-          expandedPath
-        )
-
-    }
+  override def process(context: Context, executionContext: ExecutionContext) = {
+    val expandedPath = executionContext.relativise(path.from(context))
+    Variable(
+      prototype,
+      expandedPath
+    )
+  }
 }

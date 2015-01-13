@@ -1,7 +1,0 @@
-
-@import scalatex.site.Section
-@object sect extends Section()
-
-@table
-  @td(verticalAlign:="top"){@Page.menu(Pages)}
-  @td{@Pages.console.task()}

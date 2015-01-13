@@ -19,10 +19,11 @@ package org.openmole.plugin.task.netlogo
 
 import java.io.File
 import java.util.AbstractCollection
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools.{ VariableExpansion, ExpandedString }
 import org.openmole.plugin.task.external._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.OS
@@ -49,9 +50,9 @@ class NetLogoTask(
     val inputs: DataSet,
     val outputs: DataSet,
     val defaults: DefaultSet,
-    val inputFiles: Iterable[(Prototype[File], String, Boolean)],
-    val outputFiles: Iterable[(String, Prototype[File])],
-    val resources: Iterable[(File, String, Boolean, OS)])(implicit val plugins: PluginSet) extends ExternalTask {
+    val inputFiles: Iterable[(Prototype[File], ExpandedString, Boolean)],
+    val outputFiles: Iterable[(ExpandedString, Prototype[File])],
+    val resources: Iterable[(File, ExpandedString, Boolean, OS)]) extends ExternalTask {
 
   val scriptPath =
     workspace.location match {

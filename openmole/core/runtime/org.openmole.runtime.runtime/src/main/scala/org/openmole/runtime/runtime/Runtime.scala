@@ -33,7 +33,7 @@ import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.misc.tools.service._
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.storage._
-import org.openmole.core.implementation.execution.local._
+import org.openmole.core.workflow.execution.local._
 import org.openmole.core.batch.message._
 import org.openmole.misc.tools.service.Retry
 import org.openmole.core.serializer._
@@ -42,7 +42,7 @@ import org.openmole.misc.workspace._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import util.{ Success, Failure }
-import org.openmole.core.model.execution.Environment.RuntimeLog
+import org.openmole.core.workflow.execution.Environment.RuntimeLog
 
 object Runtime extends Logger {
   val NbRetry = 3

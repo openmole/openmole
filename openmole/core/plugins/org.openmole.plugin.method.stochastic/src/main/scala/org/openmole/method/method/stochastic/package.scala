@@ -17,29 +17,29 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.puzzle._
-import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.implementation.transition._
-import org.openmole.core.implementation.data._
-import org.openmole.core.model.data._
-import org.openmole.core.model.mole._
-import org.openmole.core.model.sampling._
-import org.openmole.core.model.task._
-import org.openmole.core.model.transition._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.validation.{ Validation, DataflowProblem }
 import org.openmole.plugin.task.statistics._
-import org.openmole.core.implementation.validation.Validation
-import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
+import DataflowProblem.MissingInput
 
-package object stochastic extends StatisticMethods {
+package object stochastic extends StatisticsPackage {
 
   def StatisticsTask = org.openmole.plugin.task.statistics.StatisticTask
 
   def Replicate(
     model: Puzzle,
     sampling: Sampling,
-    aggregation: ITask)(implicit plugins: PluginSet): Puzzle = {
+    aggregation: Task)(implicit plugins: PluginSet): Puzzle = {
     val name = "replicate"
 
     val exploration = ExplorationTask(sampling) set { _.setName(name + "Exploration") }
@@ -52,7 +52,8 @@ package object stochastic extends StatisticMethods {
     }
 
     val explorationCapsule = StrainerCapsule(exploration)
-    explorationCapsule -< model >- aggregation
+    val aggregationCapsule = Slot(Capsule(aggregation))
+    explorationCapsule -< model >- aggregationCapsule //+ explorationCapsule oo aggregationCapsule
   }
 
   def Replicate(
@@ -70,7 +71,7 @@ package object stochastic extends StatisticMethods {
     }
 
     val explorationCapsule = StrainerCapsule(exploration)
-    val aggregationCapsule = Slot(StrainerCapsule(EmptyTask() set { _.setName(name + "Aggregation") }))
+    val aggregationCapsule = Slot(Capsule(EmptyTask() set { _.setName(name + "Aggregation") }))
     explorationCapsule -< model >- aggregationCapsule //+ explorationCapsule oo aggregationCapsule
   }
 

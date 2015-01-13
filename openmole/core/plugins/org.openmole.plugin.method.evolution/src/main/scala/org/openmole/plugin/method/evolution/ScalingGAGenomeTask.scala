@@ -18,17 +18,16 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.core.implementation.builder.TaskBuilder
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.tools._
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
-import org.openmole.core.model.sampling._
-import org.openmole.core.model.domain._
+import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.domain._
 
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.misc.tools.script.{ GroovyFunction, GroovyProxyPool, GroovyProxy }
 import org.openmole.plugin.method.evolution.ga._
 
@@ -39,7 +38,7 @@ object ScalingGAGenomeTask {
 
     val (_genome) = (genome)
     new TaskBuilder { builder ⇒
-      evolution.inputsPrototypes foreach { i ⇒ this.addOutput(i.prototype) }
+      evolution.inputsPrototypes foreach { p ⇒ addOutput(p) }
       addInput(genome)
       addOutput(genome)
 

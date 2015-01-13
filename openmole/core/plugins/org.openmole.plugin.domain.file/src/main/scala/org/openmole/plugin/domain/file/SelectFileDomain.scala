@@ -18,19 +18,20 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
-import org.openmole.core.model.data._
-import org.openmole.core.model.domain._
-import org.openmole.core.implementation.tools._
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.tools.ExpandedString
 
 import scala.util.Random
 
 object SelectFileDomain {
-  def apply(base: File, path: String) = new SelectFileDomain(base, path)
+  def apply(base: File, path: ExpandedString) = new SelectFileDomain(base, path)
 }
 
-class SelectFileDomain(val base: File, val path: String) extends Domain[File] with Finite[File] {
+class SelectFileDomain(val base: File, val path: ExpandedString) extends Domain[File] with Finite[File] {
 
   override def computeValues(context: Context)(implicit rng: Random): Iterable[File] =
-    List(new File(base, VariableExpansion(context, path)))
+    List(new File(base, path.from(context)))
 
 }

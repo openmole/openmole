@@ -17,37 +17,28 @@
 
 package org.openmole.plugin.task.tools
 
-import org.openmole.core.implementation.builder.TaskBuilder
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
-import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.data._
+import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.data._
 import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
 
 object FlattenTask {
 
-  def apply()(implicit plugins: PluginSet) =
-    new TaskBuilder { builder ⇒
-
-      val toFlatten = ListBuffer[(Prototype[Array[Array[S]]], Prototype[Array[S]]) forSome { type S }]()
-
-      def flatten[S](from: Prototype[Array[Array[S]]], to: Prototype[Array[S]]) = {
-        toFlatten += (from -> to)
-        addInput(from)
-        addOutput(to)
-        this
-      }
-
-      def toTask =
-        new FlattenTask(toFlatten.toList) with builder.Built
+  def apply[S](flatten: Prototype[Array[Array[S]]], in: Prototype[Array[S]]) =
+    new TaskBuilder { builder ⇒ def toTask =
+        new FlattenTask(flatten, in) with builder.Built
     }
 
 }
 
-sealed abstract class FlattenTask(val toFlatten: List[(Prototype[Array[Array[S]]], Prototype[Array[S]]) forSome { type S }]) extends Task {
+sealed abstract class FlattenTask[S](val flatten: Prototype[Array[Array[S]]], val in: Prototype[Array[S]]) extends Task {
 
-  override def process(context: Context) =
-    toFlatten.map { case (f, r) ⇒ Variable(r.asInstanceOf[Prototype[Any]], context(f).flatten.toArray[Any](ClassTag(r.fromArray.`type`.runtimeClass))) }
+  override def process(context: Context) = {
+    implicit val sClassTag = ClassTag[S](in.fromArray.`type`.runtimeClass)
+    Variable(in, context(flatten).flatten.toArray[S])
+  }
 
 }

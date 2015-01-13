@@ -23,7 +23,7 @@ import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.core.model.execution.ExecutionState._
+import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.misc.tools.service.Logger
 import akka.actor.Actor
 
