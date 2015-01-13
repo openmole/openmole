@@ -24,7 +24,10 @@ import org.openmole.misc.macros.Keyword._
 
 package csv {
   trait CSVPackage {
-    lazy val columns = add[{ def addColumn(proto: Prototype[_]) }]
+    lazy val columns = add[{
+      def addColumn(proto: Prototype[_])
+      def addColumn(name: String, proto: Prototype[_])
+    }]
     lazy val fileColumns = add[{
       def addFileColumn(name: String, dir: File, proto: Prototype[File])
       def addFileColumn(dir: File, proto: Prototype[File])

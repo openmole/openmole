@@ -19,12 +19,13 @@ package org.openmole.plugin.task.systemexec
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.PluginSet
+import org.openmole.misc.tools.service.OS
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.data._
 
 import scala.collection.mutable.ListBuffer
 
-class SystemExecTaskBuilder(commands: Commands) extends ExternalTaskBuilder { builder ⇒
+class SystemExecTaskBuilder(commands: String*) extends ExternalTaskBuilder { builder ⇒
 
   private val variables = new ListBuffer[(Prototype[_], String)]
   private val _commands = new ListBuffer[Commands]
@@ -34,7 +35,7 @@ class SystemExecTaskBuilder(commands: Commands) extends ExternalTaskBuilder { bu
   private var stdErr: Option[Prototype[String]] = None
   private var workDirectory: Option[String] = None
 
-  addCommand(commands)
+  addCommand(OS(), commands: _*)
 
   /**
    * Add variable from openmole to the environment of the system exec task. The
@@ -50,8 +51,8 @@ class SystemExecTaskBuilder(commands: Commands) extends ExternalTaskBuilder { bu
     this
   }
 
-  def addCommand(cmd: Commands): this.type = {
-    _commands += cmd
+  def addCommand(os: OS, cmd: String*): this.type = {
+    _commands += Commands(os, cmd: _*)
     this
   }
 

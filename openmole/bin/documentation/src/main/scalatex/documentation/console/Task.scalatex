@@ -19,6 +19,8 @@
 
     @p It is also possible to specify default values which are used by the task in case no input data is provided by the dataflow:
     @br @hl.openmole("""
+      val i = Val[Int]
+
       val t = EmptyTask() set (
         inputs += i,
         outputs += i,

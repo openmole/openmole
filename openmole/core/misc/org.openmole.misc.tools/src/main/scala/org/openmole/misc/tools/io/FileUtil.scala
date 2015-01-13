@@ -58,8 +58,7 @@ import scala.util.{ Try, Failure, Success }
 import scala.collection.JavaConversions._
 import java.util.{ EnumSet, UUID }
 
-object FileUtil {
-
+trait FileUtil {
   val DefaultBufferSize = 8 * 1024
 
   val TAR_EXEC = 1 + 8 + 64
@@ -461,3 +460,5 @@ object FileUtil {
   }
 
 }
+
+object FileUtil extends FileUtil

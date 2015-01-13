@@ -79,7 +79,10 @@
       val out1 = Val[Double]
       val out2 = Val[Double]
 
-      val explo = ExplorationTask(arg1 in (0 until 10) x arg2 in (0 until 10))
+      val explo = ExplorationTask(
+        (arg1 in (0.0 to 10.0 by 1.0)) x
+        (arg2 in (0.0 until 10.0 by 1.0))
+      )
 
       val javaTask = ScalaTask("Array(out1, out2) = Hello.run(arg1, arg2)") set (
         libraries += "/path/to/Hello.jar",
@@ -89,7 +92,7 @@
       )
 
       // save the result in a CSV file
-      val csvHook = CSVHook("/tmp/result.csv")
+      val csvHook = AppendToCSVFileHook("/tmp/result.csv")
 
       val ex = explo -< (javaTask hook csvHook) start""")
 

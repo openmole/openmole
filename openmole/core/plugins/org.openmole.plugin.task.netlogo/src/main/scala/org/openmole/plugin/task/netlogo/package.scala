@@ -29,7 +29,7 @@ package object netlogo {
       def addNetLogoInput(p: Prototype[_])
     }]
 
-  lazy val netLogoOutput =
+  lazy val netLogoOutputs =
     add[{
       def addNetLogoOutput(n: String, p: Prototype[_])
       def addNetLogoOutput(p: Prototype[_])
@@ -38,7 +38,7 @@ package object netlogo {
 
   trait NetLogoPackage extends external.ExternalPackage {
     lazy val netLogoInputs = netlogo.netLogoInputs
-    lazy val netLogoOutput = netlogo.netLogoOutput
+    lazy val netLogoOutputs = netlogo.netLogoOutputs
   }
 
 }

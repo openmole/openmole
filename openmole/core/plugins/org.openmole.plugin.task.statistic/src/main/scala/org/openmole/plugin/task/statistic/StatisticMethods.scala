@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.statistics
+package org.openmole.plugin.task.statistic
 
 import org.openmole.misc.tools.math.Stat
 

@@ -58,13 +58,13 @@
 
       val exploration =
         ExplorationTask(
-          i in (1 to 10) x
-          input in (ListFilesDomain("/tmp/data/")) zipWithName inputName
+          (i in (1 to 10)) x
+          (input in ListFilesDomain("/tmp/data/") zipWithName inputName)
         )
 
 
       val copy = CopyFileHook(output, "/tmp/results/result-${inputName}-${i}.csv")
-      val ex = exploration -< (hello hook copy hook ToStringHook()) start""")
+      val ex = exploration -< (rTask hook copy hook ToStringHook()) start""")
 
       @p The input files are taken from /tmp/data and result files are written in /tmp/results.
 

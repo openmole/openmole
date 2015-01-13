@@ -19,9 +19,6 @@ package org.openmole.plugin.task.external
 
 import java.io.File
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.data._
-
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.tools.ExpandedString

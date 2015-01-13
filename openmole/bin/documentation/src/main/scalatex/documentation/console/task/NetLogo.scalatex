@@ -1,5 +1,44 @@
 @import documentation.Objects._
 
+@def variables = """
+  val replication = Val[Int]
+  val similar_wanted = Val[Double]"""
+
+@def exploration = """
+  import org.openmole.plugin.domain.collection._
+  import org.openmole.plugin.domain.distribution._
+  import org.openmole.plugin.domain.modifier._
+  import org.openmole.plugin.sampling.combine._
+
+  val exploration =
+    ExplorationTask(
+      (similar_wanted in (20.0 to 80.0 by 10.0)) x
+      (replication in (UniformDistribution[Int]() take 10))
+    )"""
+
+@def netlogo = """
+  import org.openmole.plugin.task.netlogo5._
+
+  val psimilar = Val[Double]
+  val punhappy = Val[Double]
+
+  val cmds = List(
+    "random-seed ${replication}",
+    "go-openMOLE 2000 ${similar_wanted} 30",
+    "export-context")
+
+  // FIXME why not using netLogoInputs ?
+  val segregationTask = NetLogo5Task("/path/to/the/segregation.nlogo", cmds) set (
+    inputs += (replication, similar_wanted),
+    netLogoOutputs += ("percent-similar", psimilar),
+    netLogoOutputs += ("percent-unhappy", punhappy)
+  )"""
+
+@def csvHook = """
+  import org.openmole.plugin.hook.file._
+
+  val csvHook = AppendToCSVFileHook("result.csv", similar_wanted, psimilar, punhappy)"""
+
 @sect{Embed your NetLogo model}
   In this example, we present step by step how to explore a NetLogo model. Thomas Schelling's segregation model is a common NetLogo examples. It studies the evolution of two populations whom people get a mixing rate.
 
@@ -14,22 +53,11 @@
 	  @li{an integer (Int) representing the seed of the random number generator for exploring the replications,}
 	  @li{and a Double to set @i{%-SIMILAR-WANTED},}
 
-    @br @hl.openmole("""
-    val replication = Val[Int]
-    val similar_wanted = Val[Double]""")
+    @br @hl.openmole(variables)
 
     @p We can now define a design of experiment need the range where the @i{similar_wanted} varies from 20 to 80 by step of 10 and replication takes 10 random values:
 
-    @br @hl.openmole("""
-    import org.openmole.plugin.domain.collection._
-    import org.openmole.plugin.domain.distribution._
-    import org.openmole.plugin.domain.modifier._
-    import org.openmole.plugin.sampling.combine._
-
-    val exploration =
-      ExplorationTask(
-        similar_wanted in (20.0 to 80.0 by 10.0) x
-        replication in (UniformDistribution[Int]() take 10)""")
+    @br @hl.openmole(exploration, header = variables)
 
     @p This design of experiment will generate 70 distinct sets of input values for the NetLogo model:
     @ul
@@ -56,37 +84,32 @@
 	  @li{the initial number of similar agents,}
 	  @li{the maximum number of simulation steps in the case the model does not converge.}
 
-	@br @hl.openmole("""
-	import org.openmole.plugin.task.netlogo5._
-
-    val psimilar = Val[Double]
-    val punhappy = Val[Double]
-
-    val cmds = List(
-      "random-seed ${replication}",
-      "go-openMOLE 2000 ${similar_wanted} 30"
-      "export-context")
-
-    // FIXME why not using netLogoInputs ?
-    val segregationTask = NetLogo5Task("/path/to/the/segregation.nlogo", cmds) set (
-        inputs += (replication, similar_wanted),
-        netLogoOutputs += ("percent-similar", psimilar),
-        netLogoOutputs += ("percent-unhappy", punhappy)
-    )""")
+	@br @hl.openmole(netlogo, header =
+	s"""
+	$variables
+	$exploration
+	""")
 
     @p As you can see, we use the @i{replication} and the @i{similar_wanted} OpenMOLE values are parameters of NetLogo method. Therefore they are added as inputs. In this example 2 outputs of the model are considered and collected by OpenMOLE at the end of each model execution.
 
   @sect{Storing the results}
     In OpenMOLE, tasks executions are usually delegated to many different computers. To gather the results these task's executions it is required to use @i{hooks}. A hook is a kind of listener that saves or display results. Here we will create a hook to listen to the model executions and save the results in a CSV file at the end of each model execution:
-    @br @hl.openmole("""
-    import org.openmole.plugin.hook.file._
 
-    val csvHook = AppendToCSVFileHook("result.csv", similar_wanted, psimilar, punhappy)""")
+    @br @hl.openmole(csvHook, header =
+    s"""
+	$variables
+	$exploration
+	$netlogo
+	""")
 
   @sect{Bringing the pieces altogether}
     Now that we have defined each components we can define the workflow that bring the pieces together:
-    @br @hl.openmole("""
-    val ex = exploration -< (segregationTask hook csvHook) start""")
+    @br @hl.openmole("""val ex = exploration -< (segregationTask hook csvHook) start""", header = s"""
+    $variables
+	$exploration
+	$netlogo
+	$csvHook
+    """)
 
-    @p To see the progress of the simulation, print the state of the execution variable: @hl.openmole("""print(ex)""")
+    @p To see the progress of the simulation, print the state of the execution variable: @hl.openmole("""print(ex)""", test = false)
     @p At the end of the execution you will find the a file called @i{result.csv}, which compiles the output values.

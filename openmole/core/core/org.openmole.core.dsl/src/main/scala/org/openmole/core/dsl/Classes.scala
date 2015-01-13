@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,13 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.builder
+package org.openmole.core.dsl
 
-trait Builder {
+import org.openmole.core.workflow._
 
-  def set[T](ops: (this.type ⇒ T)*): this.type = {
-    ops.foreach(_(this))
-    this
-  }
+trait Classes {
+
+  lazy val Prototype = org.openmole.core.workflow.data.Prototype
+
+  lazy val LocalEnvironment = org.openmole.core.workflow.execution.local.LocalEnvironment
+
+  lazy val EmptyTask = task.EmptyTask
+  lazy val ExplorationTask = task.ExplorationTask
+  lazy val MoleTask = task.MoleTask
+
+  lazy val Capsule = mole.Capsule
+  lazy val StrainerCapsule = mole.StrainerCapsule
+  lazy val MasterCapsule = mole.MasterCapsule
+
+  lazy val Slot = transition.Slot
 
 }

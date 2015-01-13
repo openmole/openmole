@@ -34,7 +34,7 @@ object Keyword {
       val params = func.paramLists.map(_.map(ValDef(_)))
       val names = params.map(_.map(p ⇒ if (p.tpt.toString.endsWith("*")) q"${p.name}: _*" else q"${p.name}"))
       val opTerm = TermName(op)
-      q"def ${opTerm}[V <: {def ${func.name}(...${params}): this.type}](...${params}) = (_: V).${func.name}(...${names})"
+      q"def ${opTerm}[V <: {def ${func.name}(...${params}): Any}](...${params}) = (_: V).${func.name}(...${names})"
     }
 
     val g = funcs.map(f ⇒ generate(f))

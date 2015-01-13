@@ -37,10 +37,10 @@ package object collection {
     def toFactor = Factor(p, List(true, false).toDomain)
   }
 
-  //implicit def IterableToDomain[T](i: Iterable[T]) = i.toDomain
-  //implicit def PrototypeArrayToDomain[T](p: Prototype[Array[T]]) = p.toDomain
+  //implicit def iterableToDomain[T](i: Iterable[T]) = i.toDomain
+  //implicit def prototypeArrayToDomain[T](p: Prototype[Array[T]]) = p.toDomain
 
-  implicit def PrototypeCollectionConverter[T](p: Prototype[T]) = new {
+  implicit def prototypeCollectionConverter[T](p: Prototype[T]) = new {
     def in(i: Iterable[T]): Factor[T, IterableDomain[T]] = p in (i.toDomain)
     def in(p2: Prototype[Array[T]]): Factor[T, VariableDomain[T]] = p in (p2.toDomain)
   }

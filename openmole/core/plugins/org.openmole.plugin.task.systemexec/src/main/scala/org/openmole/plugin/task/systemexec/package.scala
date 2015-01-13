@@ -23,12 +23,10 @@ import org.openmole.core.workflow.builder._
 import org.openmole.misc.macros.Keyword._
 
 package object systemexec extends external.ExternalPackage {
-  case class Commands(parts: Seq[String], os: OS = OS())
+  case class Commands(os: OS, parts: String*)
 
-  implicit def stringToCommands(s: String) = Commands(Seq(s))
-  implicit def seqOfStringToCommands(s: String*) = Commands(s)
-  implicit def tupleToCommands(t: (String, OS)) = Commands(Seq(t._1), t._2)
-  implicit def tupleSeqToCommands(t: (Seq[String], OS)) = Commands(t._1, t._2)
+  implicit def stringToCommands(s: String) = Commands(OS(), s)
+  implicit def seqOfStringToCommands(s: Seq[String]) = Commands(OS(), s: _*)
 
   lazy val errorOnReturnCode = set[{ def setErrorOnReturnValue(b: Boolean) }]
 
@@ -38,7 +36,7 @@ package object systemexec extends external.ExternalPackage {
 
   lazy val stdErr = set[{ def setStdErr(v: Option[Prototype[String]]) }]
 
-  lazy val commands = add[{ def addCommand(c: Commands) }]
+  lazy val commands = add[{ def addCommand(os: OS, cmd: String*) }]
 
   lazy val environmentVariable =
     new {

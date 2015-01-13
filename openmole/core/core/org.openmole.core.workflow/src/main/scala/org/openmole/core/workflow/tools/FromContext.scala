@@ -18,8 +18,8 @@
 package org.openmole.core.workflow.tools
 
 import org.openmole.core.workflow.data._
-import org.openmole.misc.tools.io.FromString
-import org.openmole.misc.tools.script.GroovyProxyPool
+import org.openmole.misc.tools.io._
+import org.openmole.misc.tools.script._
 
 object FromContext {
 
@@ -28,7 +28,7 @@ object FromContext {
   implicit def fromStringToContext[T](code: String)(implicit fromString: FromString[T]) =
     new FromContext[T] {
       @transient lazy val proxy = GroovyProxyPool(code)
-      override def from(context: Context): T = fromString.from(proxy(context).toString)
+      override def from(context: Context): T = fromString.from(proxy(context.toBinding).toString)
     }
 
   def apply[T](t: T) =
@@ -45,9 +45,7 @@ trait FromContext[T] {
 object ExpandedString {
 
   implicit def fromStringToExpandedString(s: String) = ExpandedString(s)
-
   implicit def fromStringToExpandedStringOption(s: String) = Some[ExpandedString](s)
-
   implicit def fromTraversableOfStringToTraversableOfExpandedString[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
 
   def apply(s: String) =

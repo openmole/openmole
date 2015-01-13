@@ -22,10 +22,10 @@ import org.openmole.core.workflow.data.Prototype
 
 import org.openmole.misc.macros.Keyword._
 
-package statistics {
-  trait StatisticsPackage <: StatisticMethods {
+package statistic {
+  trait StatisticPackage <: StatisticMethods {
     lazy val statistics = add[{ def addStatistic(sequence: Prototype[Array[Double]], stat: Prototype[Double], agg: StatisticalAggregation[Double]) }]
   }
 }
 
-package object statistics extends StatisticsPackage
+package object statistic extends StatisticPackage

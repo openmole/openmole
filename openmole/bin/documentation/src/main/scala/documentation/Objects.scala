@@ -17,6 +17,9 @@
 
 package documentation
 
+import org.openmole.misc.exception.UserBadDataError
+
+import scala.util.Failure
 import scalatex.site._
 import scalatags.Text.all._
 
@@ -24,7 +27,14 @@ object Objects {
   object sect extends Section()
   object hl extends Highlighter {
     def suffixMappings = Map().withDefault(identity)
-    def openmole(code: String) = highlight(code, "scala")
+    def openmole(code: String, test: Boolean = true, header: String = "") = {
+      if (test)
+        DSLTest.test(code, header) match {
+          case Failure(f) => throw new UserBadDataError(f, s"Error testing code:\n$code")
+          case _ =>
+        }
+      highlight(code, "scala")
+    }
   }
   case class Parameter(name: String, `type`: String, description: String)
   def parameters(p: Parameter*) = {

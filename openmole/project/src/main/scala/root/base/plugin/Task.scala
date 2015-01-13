@@ -15,7 +15,7 @@ import scala.Some
 object Task extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.task")
 
-  lazy val external = OsgiProject("external") dependsOn (Misc.exception, Core.workflow, Misc.workspace)
+  lazy val external = OsgiProject("external") dependsOn (Misc.exception, Core.dsl, Misc.workspace)
 
   lazy val netLogo = OsgiProject("netlogo") dependsOn (Misc.exception, Core.workflow, Misc.workspace, external, Tool.netLogoAPI)
 
@@ -41,7 +41,7 @@ object Task extends PluginDefaults {
       libraryDependencies ++= Seq(Apache.exec)
     )
 
-  lazy val statistics = OsgiProject("statistics") dependsOn (Core.workflow)
+  lazy val statistic = OsgiProject("statistic") dependsOn (Core.workflow)
 
   lazy val tools = OsgiProject("tools") dependsOn (Core.workflow)
 

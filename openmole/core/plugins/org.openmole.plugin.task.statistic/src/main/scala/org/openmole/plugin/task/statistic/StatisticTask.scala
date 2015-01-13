@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.statistics
+package org.openmole.plugin.task.statistic
 
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._

@@ -38,49 +38,65 @@ import org.openmole.misc.workspace._
 import scala.concurrent.duration
 import scala.concurrent.duration.FiniteDuration
 import scala.reflect.macros.blackbox.{ Context ⇒ MContext }
+import org.openmole.misc.macros.Keyword._
 
-package object dsl extends Commands
-    with Serializer
-    with DataPackage
-    with MolePackage
-    with PuzzlePackage
-    with SamplingPackage
-    with TaskPackage
-    with ToolsPackage
-    with TransitionPackage
-    with BuilderPackage {
+package dsl {
+  trait DSLPackage <: Commands
+      with Serializer
+      with DataPackage
+      with MolePackage
+      with PuzzlePackage
+      with SamplingPackage
+      with TaskPackage
+      with ToolsPackage
+      with TransitionPackage
+      with BuilderPackage
+      with Classes {
 
-  lazy val Prototype = org.openmole.core.workflow.data.Prototype
+    def valImpl[T: c.WeakTypeTag](c: MContext): c.Expr[Prototype[T]] = {
+      import c.universe._
+      val n = getValName(c)
+      val wt = weakTypeTag[T].tpe
+      c.Expr[Prototype[T]](q"Prototype[$wt](${n})")
+    }
 
-  def Val[T: Manifest](name: String) = Prototype(name)
+    implicit lazy val executionContext = ExecutionContext.local
+    implicit lazy val implicits = Context.empty
 
-  def Val[T]: Prototype[T] = macro valImpl[T]
+    lazy val workspace = Workspace
+    lazy val logger = LoggerService
 
-  def valImpl[T: c.WeakTypeTag](c: MContext): c.Expr[Prototype[T]] = {
-    import c.universe._
-    val n = getValName(c)
-    val wt = weakTypeTag[T].tpe
-    c.Expr[Prototype[T]](q"Prototype[$wt](${n})")
+    implicit def authenticationProvider = Workspace.authenticationProvider
+
+    type File = java.io.File
+    def File(s: String): File = new File(s)
+
+    implicit def stringToFile(path: String) = File(path)
+
+    implicit def durationInt(n: Int) = duration.DurationInt(n)
+
+    implicit def durationLong(n: Long) = duration.DurationLong(n)
+
+    implicit def stringToDuration(s: String): FiniteDuration = org.openmole.misc.tools.service.stringToDuration(s)
+
+    def encrypt(s: String) = Workspace.encrypt(s)
+
+    implicit def byteIsIntegral = Numeric.ByteIsIntegral
+
+    implicit def floatAsIfIntegral = Numeric.FloatAsIfIntegral
+
+    implicit def doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
+
+    implicit def bigDecimalAsIfIntegral = Numeric.BigDecimalAsIfIntegral
+
+    implicit def bigIntAsIfIntegral = Numeric.BigIntIsIntegral
+
   }
 
-  implicit lazy val executionContext = ExecutionContext.local
-  implicit lazy val implicits = Context.empty
-  implicit def stringToFile(path: String) = new File(path)
+}
 
-  lazy val workspace = Workspace
-  lazy val logger = LoggerService
-
-  implicit def authenticationProvider = Workspace.authenticationProvider
-
-  type File = java.io.File
-  def File(s: String) = new File(s)
-
-  implicit def durationInt(n: Int) = duration.DurationInt(n)
-  implicit def durationLong(n: Long) = duration.DurationLong(n)
-  implicit def stringToDuration(s: String): FiniteDuration = org.openmole.misc.tools.service.stringToDuration(s)
-
-  lazy val LocalEnvironment = org.openmole.core.workflow.execution.local.LocalEnvironment
-
-  def encrypt(s: String) = Workspace.encrypt(s)
+package object dsl extends DSLPackage {
+  def Val[T]: Prototype[T] = macro valImpl[T]
+  def Val[T: Manifest](name: String): Prototype[T] = Prototype(name)
 
 }

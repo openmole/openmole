@@ -17,15 +17,24 @@
 
 package org.openmole.core.workflow
 
-import org.openmole.core.workflow.builder.BuilderPackage
-import org.openmole.misc.macros.Keyword._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 
+import org.openmole.misc.macros.Keyword._
+
 package builder {
+
+  class Inputs {
+    def +=(d: Data[_]*) = (_: InputOutputBuilder).addInput(d: _*)
+  }
+
+  class Outputs {
+    def +=(d: Data[_]*) = (_: InputOutputBuilder).addOutput(d: _*)
+  }
+
   trait BuilderPackage {
     implicit def samplingBuilderToSampling(s: SamplingBuilder) = s.toSampling
     implicit def taskBuilderToTask[TB <: TaskBuilder](builder: TB) = builder.toTask
@@ -33,20 +42,19 @@ package builder {
     implicit def taskBuilderToCapsuleDecorator(task: TaskBuilder) = new TaskToCapsuleDecorator(task)
     implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = t.toTask.toCapsule.toPuzzle
 
-    lazy val inputs = add[{ def addInput(d: Data[_]*) }]
-    lazy val outputs = add[{ def addOutput(d: Data[_]*) }]
+    final lazy val inputs: Inputs = new Inputs
+    final lazy val outputs: Outputs = new Outputs
 
     class AssignDefault[T](p: Prototype[T]) {
-      def :=(v: T, `override`: Boolean = false) =
-        (_: InputOutputBuilder).setDefault(p, v, `override`)
+      def :=[U <: InputOutputBuilder](v: T, `override`: Boolean = false) =
+        (_: U).setDefault(p, v, `override`)
     }
 
-    lazy val default = new {
+    final lazy val default = new {
       def apply[T](p: Prototype[T]) = new AssignDefault[T](p)
     }
 
-    lazy val name = set[{ def setName(name: String) }]
-
+    final lazy val name = set[{ def setName(name: String) }]
   }
 }
 

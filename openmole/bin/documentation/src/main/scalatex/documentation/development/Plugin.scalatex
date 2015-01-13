@@ -58,4 +58,4 @@
 
   val exploration = ExplorationTask(i in (0 to 2))
 
-  val ex = exploration -< (hello hook ToStringHook()) start""")
+  val ex = exploration -< (hello hook ToStringHook()) start""", header = "object myopenmoleplugin { class Hello }")

@@ -7,6 +7,8 @@
   @p To encapsulate a mole in a mole task you could do like that:
   @br @hl.openmole("""
   // Define tasks t1 and t2
-  val moleTask = MoleTask(t1 -- t2)""")
+  val moleTask = MoleTask(t1 -- t2)""", header = """
+  val t1 = EmptyTask()
+  val t2 = EmptyTask()""")
 
   @p In that case the inputs of the mole task are the same as t1 and the outputs are the same as t2.

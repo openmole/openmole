@@ -29,12 +29,12 @@ import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.validation.{ Validation, DataflowProblem }
-import org.openmole.plugin.task.statistics._
+import org.openmole.plugin.task.statistic._
 import DataflowProblem.MissingInput
 
-package object stochastic extends StatisticsPackage {
+package object stochastic extends StatisticPackage {
 
-  def StatisticsTask = org.openmole.plugin.task.statistics.StatisticTask
+  def StatisticsTask = org.openmole.plugin.task.statistic.StatisticTask
 
   def Replicate(
     model: Puzzle,

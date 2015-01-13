@@ -17,29 +17,29 @@
 
 package org.openmole.plugin.task
 
-import java.io.File
-import org.openmole.core.workflow.data.Prototype
-import org.openmole.core.workflow.builder
 import org.openmole.misc.tools.service.OS
-import org.openmole.misc.macros.Keyword._
 
 package external {
 
-  import org.openmole.core.workflow.tools.ExpandedString
+  import java.io._
+  import org.openmole.core.workflow.data._
+  import org.openmole.core.workflow.tools._
 
   trait ExternalPackage {
-    implicit def inputsFileDecorator(i: org.openmole.core.workflow.builder.inputs.type) = {
-      def +=[T <: ExternalTaskBuilder](p: Prototype[File], name: ExpandedString, link: Boolean = false) =
-        (_: T).addInput(p, name, link)
+    implicit def inputsFileDecorator(i: org.openmole.core.workflow.builder.Inputs) = new {
+      def +=(p: Prototype[File], name: String, link: Boolean = false) =
+        (_: ExternalTaskBuilder).addInput(p, name, link)
     }
 
-    implicit def outputsFileDecorator(i: org.openmole.core.workflow.builder.outputs.type) =
-      add[{ def addOutput(n: ExpandedString, p: Prototype[File]) }]
+    implicit def outputsFileDecorator(o: org.openmole.core.workflow.builder.Outputs) = new {
+      def +=(name: String, p: Prototype[File]) =
+        (_: ExternalTaskBuilder).addOutput(name, p)
+    }
 
     lazy val resources =
       new {
-        def +=[T <: ExternalTaskBuilder](file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()) =
-          (_: T).addResource(file, name, link, os)
+        def +=(file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()) =
+          (_: ExternalTaskBuilder).addResource(file, name, link, os)
       }
   }
 }

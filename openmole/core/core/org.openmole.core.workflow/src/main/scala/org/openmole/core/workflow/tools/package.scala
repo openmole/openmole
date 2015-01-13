@@ -26,6 +26,7 @@ import scala.ref.WeakReference
 package tools {
 
   trait ToolsPackage {
+
     implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
     implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
 

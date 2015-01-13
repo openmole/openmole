@@ -33,7 +33,7 @@ trait CSVToVariablesBuilder extends Builder { builder ⇒
   def fileColumns = _fileColumns.toList
 
   def addColumn(proto: Prototype[_]): this.type = this.addColumn(proto.name, proto)
-  def addColumn(name: String, proto: Prototype[_]): builder.type = {
+  def addColumn(name: String, proto: Prototype[_]): this.type = {
     _columns += (name -> proto)
     this
   }
