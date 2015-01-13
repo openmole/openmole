@@ -28,7 +28,7 @@ object Page {
     def menuEntry(p: Page) = {
       def current = p == currentPage
       def idLabel = "documentation-menu-entry" + (if(current) "-current" else "")
-      a(id := idLabel)(p.name + (if(current) " <-" else ""), href := p.file)
+      a(id := idLabel)(p.name, href := p.file)
     }
 
     def pageLine(p: Page): Frag =
