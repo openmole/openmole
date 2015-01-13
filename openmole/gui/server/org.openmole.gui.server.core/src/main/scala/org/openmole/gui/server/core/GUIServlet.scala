@@ -37,7 +37,9 @@ class GUIServlet extends ScalatraServlet {
   val basePath = "org/openmole/gui/shared"
 
   // Get all the css files in the workspace (it is not working with js because of the order)
-  val cssFiles = new File(Workspace.file("webui"), "webapp/css").listFiles.map { _.getName }
+  val cssFiles = new File(Workspace.file("webui"), "webapp/css").listFiles.map {
+    _.getName
+  }
 
   get("/") {
     contentType = "text/html"
@@ -47,13 +49,13 @@ class GUIServlet extends ScalatraServlet {
         cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
         tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery-2.1.1.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/d3.v3.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/select2.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap-3.3.0.min.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap-select-1.6.3.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/pluginMapping.js")
       ),
       tags.body(
-        tags.onload := "fillMap();GUIClient().run();Forms().select2();"
+        tags.onload := "fillMap();GUIClient().run();"
       )
     )
   }

@@ -17,33 +17,32 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait Data {
-  val uuid: String = java.util.UUID.randomUUID.toString
-  def name: String
-}
+case class DataBag(uuid: String, data: Data, name: String)
+
+trait Data
 
 object ProtoTYPE extends Enumeration {
-  case class ProtoTYPE(name: String, uuid: String = java.util.UUID.randomUUID.toString) extends Val(name)
-  val INT = new ProtoTYPE("Integer")
-  val DOUBLE = new ProtoTYPE("Double")
-  val LONG = new ProtoTYPE("Long")
-  val BOOLEAN = new ProtoTYPE("Boolean")
-  val STRING = new ProtoTYPE("java.lang.String")
-  val FILE = new ProtoTYPE("java.io.File")
+  case class ProtoTYPE(uuid: String, name: String) extends Val(name)
+  val INT = new ProtoTYPE("Integer", "Integer")
+  val DOUBLE = new ProtoTYPE("Double", "Double")
+  val LONG = new ProtoTYPE("Long", "Long")
+  val BOOLEAN = new ProtoTYPE("Boolean", "Boolean")
+  val STRING = new ProtoTYPE("String", "java.lang.String")
+  val FILE = new ProtoTYPE("File", "java.io.File")
   val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE)
 }
 
 import ProtoTYPE._
-class PrototypeData(val name: String, val `type`: ProtoTYPE, val dimension: Int) extends Data
+class PrototypeData(val `type`: ProtoTYPE, val dimension: Int) extends Data
 
 object PrototypeData {
-  def apply(name: String, `type`: ProtoTYPE, dimension: Int) = new PrototypeData(name, `type`, dimension)
-  def integer(name: String, dimension: Int) = new PrototypeData(name, INT, dimension)
-  def double(name: String, dimension: Int) = new PrototypeData(name, DOUBLE, dimension)
-  def long(name: String, dimension: Int) = new PrototypeData(name, LONG, dimension)
-  def boolean(name: String, dimension: Int) = new PrototypeData(name, BOOLEAN, dimension)
-  def string(name: String, dimension: Int) = new PrototypeData(name, STRING, dimension)
-  def file(name: String, dimension: Int) = new PrototypeData(name, FILE, dimension)
+  def apply(`type`: ProtoTYPE, dimension: Int) = new PrototypeData(`type`, dimension)
+  def integer(dimension: Int) = new PrototypeData(INT, dimension)
+  def double(dimension: Int) = new PrototypeData(DOUBLE, dimension)
+  def long(dimension: Int) = new PrototypeData(LONG, dimension)
+  def boolean(dimension: Int) = new PrototypeData(BOOLEAN, dimension)
+  def string(dimension: Int) = new PrototypeData(STRING, dimension)
+  def file(dimension: Int) = new PrototypeData(FILE, dimension)
 
 }
 
@@ -52,4 +51,4 @@ trait TaskData extends Data {
   def outputs: Seq[PrototypeData]
 }
 
-case class ErrorData(data: Data, error: String, stack: String)
+case class ErrorData(data: DataBag, error: String, stack: String)

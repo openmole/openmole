@@ -1,7 +1,7 @@
-package org.openmole.gui.plugin.task.systemexec.client
+package org.openmole.gui.ext.dataui
 
 /*
- * Copyright (C) 19/10/2014 // mathieu.leclaire@openmole.org
+ * Copyright (C) 07/01/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,29 +16,8 @@ package org.openmole.gui.plugin.task.systemexec.client
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import org.openmole.gui.ext.dataui.PanelUI
-import org.openmole.gui.misc.js.Forms._
-
-import scala.scalajs.js.annotation.JSExport
-
-//import scalatags.JsDom.tags._
-//import scalatags.JsDom.attrs._
-
-import scalatags.JsDom.all._
-
 import rx._
 
-@JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskPanelUI")
-class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {
-
-  @JSExport
-  val view = div(
-    h1(id := "title", "This is a title"),
-    p("SystemExecTask !")
-  )
-
-  def save = {
-    //dataUI.truc() = trucInput.value
-  }
+class DataBagUI(val dataUI: Var[DataUI], val name: Var[String] = Var("")) {
+  val uuid: String = java.util.UUID.randomUUID.toString
 }

@@ -51,8 +51,6 @@ object BootstrapJS {
     val thisBundle = PluginManager.bundleForClass(classOf[GUIServer])
     copyURL(thisBundle.findEntries("/", "*.js", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.css", true).asScala)
-    copyURL(thisBundle.findEntries("/", "*.gif", true).asScala)
-    copyURL(thisBundle.findEntries("/", "*.png", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.ttf", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.woff", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.svg", true).asScala)

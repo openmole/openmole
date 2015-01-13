@@ -29,5 +29,5 @@ sealed class SystemExecTaskFactoryUI extends FactoryUI {
 
   def dataUI = new SystemExecTaskDataUI
 
-  val name = Var("External Task")
+  val name = "External"
 }

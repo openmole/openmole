@@ -46,7 +46,13 @@ object GUIClient {
   @JSExport
   def run(): Unit = {
 
-    ClientService += ClientService.taskFactories(0).dataUI
+    val db = new DataBagUI(Var(ClientService.taskFactories(1).dataUI))
+    db.name() = "premier"
+    ClientService += db
+    db.name() = "first"
+    val db2 = new DataBagUI(Var(ClientService.taskFactories(1).dataUI))
+    ClientService += db2
+    db2.name() = "yop"
 
     val topdiv = dom.document.body.appendChild(div)
 
@@ -64,7 +70,7 @@ object GUIClient {
 
     topdiv.appendChild(
       h2(
-        Forms.buttonGroup(
+        Forms.buttonGroup()(
           Forms.button("File", btn_default)(onclick := { () ⇒ println("File") }),
           Forms.button("Edit", btn_default),
           Forms.button("Run", btn_primary)
@@ -74,7 +80,8 @@ object GUIClient {
 
     val dialog = Panel.generic("taskPanelID",
       ClientService.taskFactories,
-      ClientService.taskDataUIs
+      ClientService.taskDataBagUIs,
+      Some(db)
     )
 
     /*val dialog = new PanelWithIO("taskPanelID",

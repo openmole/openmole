@@ -23,6 +23,8 @@ package object js {
 
   type DisplayableRx = { def name: Var[String] }
 
+  type Displayable = { def name: String }
+
   type Identifiable = { def uuid: String }
 
 }

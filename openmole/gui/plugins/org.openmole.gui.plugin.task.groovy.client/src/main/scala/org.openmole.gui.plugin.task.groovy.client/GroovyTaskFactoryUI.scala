@@ -29,5 +29,5 @@ class GroovyTaskFactoryUI extends FactoryUI {
 
   def dataUI = new GroovyTaskDataUI
 
-  val name = Var("Groovy Task")
+  val name = "Groovy"
 }
