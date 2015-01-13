@@ -16,12 +16,11 @@
 }
 
 #documentation-menu {
-  padding-left: 10;
+  padding-left: 20;
   padding-right: 0;
   position: fixed;
   left: 0;
   top: 20%;
-  width: 15em;
   margin-top: -2.5em;
 }
 
@@ -31,8 +30,8 @@
 }
 
 #documentation-content {
-  margin-left: 50;
   padding-right: 0;
+  width: 100%;
 }
 
 #documentation-menu-entry {
