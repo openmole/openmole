@@ -34,6 +34,8 @@ object PrototypeFactory {
     def data = PrototypeData(`type`(), dimension())
 
     def panelUI = new PrototypePanelUI(this)
+
+    def dataType = `type`().name
   }
 }
 

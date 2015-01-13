@@ -25,14 +25,15 @@ import org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData
 import rx._
 
 @JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskDataUI")
-class GroovyTaskDataUI(val name: Var[String] = Var(""),
-                       val code: Var[String] = Var(""),
+class GroovyTaskDataUI(val code: Var[String] = Var(""),
                        val libs: Var[Seq[Var[String]]] = Var(Seq()),
                        val inputs: InputsUI = Var(Seq()),
                        val outputs: OutputsUI = Var(Seq())) extends TaskDataUI{
 //libs().map{c=>c()}
 
-  def data = new GroovyTaskData(name, code, libs, inputs, outputs)
+  def data = new GroovyTaskData(code, libs, inputs, outputs)
 
   def panelUI = new GroovyTaskPanelUI(this)
+
+  def dataType = "Groovy"
 }

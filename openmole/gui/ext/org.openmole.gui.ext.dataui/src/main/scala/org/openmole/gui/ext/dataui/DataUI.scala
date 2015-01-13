@@ -26,4 +26,6 @@ trait DataUI {
   def panelUI: PanelUI
 
   def data: DATA
+
+  def dataType: String
 }

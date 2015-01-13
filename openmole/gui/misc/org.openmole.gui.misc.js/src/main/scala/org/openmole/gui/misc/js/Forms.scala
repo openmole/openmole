@@ -133,7 +133,7 @@ object Forms {
 
   def buttonToolBar = div(`class` := "btn-toolbar", role := "toolbar")
 
-  def modalDialog(ID: String, header: TypedTag[HTMLFormElement], body: Var[TypedTag[HTMLElement]], footer: TypedTag[HTMLElement]) =
+  def modalDialog(ID: String, header: TypedTag[HTMLFormElement], body: TypedTag[HTMLDivElement], footer: TypedTag[HTMLElement]) =
     new ModalDialog(ID, header, body, footer)
 
   def jumbotron(modifiers: scalatags.JsDom.Modifier*) =
@@ -145,10 +145,8 @@ object Forms {
       )
     )
 
-  //rows
-  /* def row(columns: TypedTag[_]*) = div(`class` := "row")(columns: _*)
-
-  def col(tag: TypedTag[_], width: Int) = div(`class` := "col-md-" + width, tag)*/
+  //table
+  def table = scalatags.JsDom.tags.table(`class` := "table table-stripped")
 
   //Forms
   def formGroup = div(`class` := "form-group ")

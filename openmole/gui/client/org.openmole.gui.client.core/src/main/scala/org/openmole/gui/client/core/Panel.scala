@@ -4,7 +4,7 @@ import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.misc.js.{ Select, ModalDialog, Forms }
-import org.scalajs.dom.{ HTMLDivElement, HTMLElement }
+import org.scalajs.dom.{ Event, HTMLDivElement, HTMLElement }
 
 import scalatags.JsDom.all
 import org.scalajs.jquery.jQuery
@@ -41,6 +41,7 @@ object Panel {
     new GenericPanel(uuid, factories, dataBagUIs, defaultProxyUI, extraCategories).render()
 }
 
+/*
 object PanelState {
 
   class PanelState(val name: String)
@@ -58,7 +59,7 @@ object PanelState {
   def creation(db: DataBagUI) = new Creation(db)
 }
 
-import PanelState._
+import PanelState._*/
 
 class GenericPanel(uuid: String,
                    factories: Seq[FactoryUI],
@@ -67,35 +68,45 @@ class GenericPanel(uuid: String,
                    extraCategories: Seq[(String, HtmlTag)] = Seq()) {
 
   val jQid = "#" + uuid
-  val state: Var[PanelState] = Var(read)
+  val editionState: Var[Boolean] = Var(false)
 
   val factorySelector = new Select[FactoryUI]("factories", Var(factories), defaultDataBagUI, btn_primary)
 
-  val currentDataBagUI = Var(defaultDataBagUI) /*Rx {
-    println("In CURRENT DATABAGUI RX")
-    state() match {
-      case c: Creation ⇒ Some(c.dataBagUI)
-      case _           ⇒ ???
-    }
-  }*/
+  val currentDataBagUI = Var(defaultDataBagUI)
+  /*Rx {
+     println("In CURRENT DATABAGUI RX")
+     state() match {
+       case c: Creation ⇒ Some(c.dataBagUI)
+       case _           ⇒ ???
+     }
+   }*/
+
+  val conceptTable = new ConceptTable(dataBagUIs)
+
+  val inputFilter = Forms.input(
+    currentDataBagUI().map {
+      _.name()
+    }.getOrElse(""))(
+      placeholder := "Filter"
+    ).render
+
+  inputFilter.oninput = (e: Event) ⇒ conceptTable.nameFilter() = inputFilter.value
 
   val currentPanelUI = Rx(currentDataBagUI().map {
     _.dataUI().panelUI
   })
 
-  val inputFilter = Forms.input(currentDataBagUI().map { _.name() }.getOrElse(""))(placeholder := "Filter").render
-
   //New button
   val newGlyph = Forms.button(glyph(glyph_plus))(onclick := { () ⇒
     println("-- NEWWWW")
-    state() match {
+    /*state() match {
       case e: Edition ⇒ println("edit")
       case _ ⇒
         println("NOT edit " + generateDataUI)
         generateDataUI.map { cdUI ⇒
           state() = creation(new DataBagUI(Var(cdUI)))
         }
-    }
+    }*/
   })
 
   //Trash dataUI
@@ -111,7 +122,7 @@ class GenericPanel(uuid: String,
   })
 
   val cancelHeaderButton = Forms.button("Cancel")(onclick := { () ⇒
-    state() = read
+    // state() = read
   })
 
   val saveButton = Forms.button("Close", btn_primary)(dataWith("dismiss") := "modal", onclick := { () ⇒
@@ -165,26 +176,32 @@ class GenericPanel(uuid: String,
 
   val mdHeader = form(inputFilter)
 
-  def mdBody = bodyPanel({
-    currentPanelUI() match {
-      case Some(p: PanelUI) ⇒
-        println("change BODY PANEL " + p.view.toString())
-        bodyPanel(p.view)
-      case _ ⇒ div(h1("Create a  first data !"))
-    }
+  val mdBody = Rx {
+    println("EDITION STATE " + editionState())
+    if (editionState()) div()
+    else div(conceptTable.view)
   }
-  )
+
+  /*bodyPanel({
+  currentPanelUI() match {
+    case Some(p: PanelUI) ⇒
+      println("change BODY PANEL " + p.view.toString())
+      bodyPanel(p.view)
+    case _ ⇒ div(h1("Create a  first data !"))
+  }
+}
+)*/
 
   val mD /*: ModalDialog*/ = {
     println("IN MD RX")
     modalDialog(uuid,
       mdHeader,
-      Var(mdBody),
+      mdBody(),
       panelFooter)
   }
 
   def save: Unit = {
-    currentPanelUI().map { cpUI ⇒
+    /*  currentPanelUI().map { cpUI ⇒
       state() match {
         case c: Creation ⇒ ClientService += c.dataBagUI
         case _           ⇒
@@ -195,9 +212,9 @@ class GenericPanel(uuid: String,
       }
       cpUI.save
 
-      println("TASKS " + ClientService.taskDataBagUI)
+      println("TASKS " + ClientService.taskDataBagUIs)
     }
-    state() = read
+    state() = read*/
   }
 
   def bodyPanel(view: HtmlTag) = extraCategories.size match {

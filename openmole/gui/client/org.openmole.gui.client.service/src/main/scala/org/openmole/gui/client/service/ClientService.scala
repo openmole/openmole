@@ -53,21 +53,20 @@ object ClientService {
     }
   }.toSeq
 
-  def prototypeFactories = uiFactories.values.flatMap { f ⇒
-    f.dataUI match {
-      case t: PrototypeDataUI ⇒ Some(f)
-      case _                  ⇒ None
-    }
-  }.toSeq
+  def prototypeFactories = uiDataBags().filter { isPrototypeUI }
 
-  def taskDataBagUI: Seq[DataBagUI] = uiDataBags().flatMap { p ⇒
+  def taskDataBagUIs: Seq[DataBagUI] = uiDataBags().filter { isTaskUI }
+
+  //uiDataBags().collect { case t:  TaskDataUI ⇒ t }.toSeq
+
+  /*uiDataBags().flatMap { p ⇒
     p.dataUI() match {
       case t: TaskDataUI ⇒
         println("A task here ! " + p.name())
         Some(p)
       case _ ⇒ None
     }
-  }.toSeq
+  }.toSeq*/
 
   def name(db: DataBagUI, name: String) = {
     get(db).map { _.name() = name }
@@ -75,16 +74,18 @@ object ClientService {
   }
 
   private def get(db: DataBagUI) = uiDataBags().find(_.uuid == db.uuid)
-  /*uiData().map {
-    _()
-  }.flatMap {
-    _ match {
-      case t: TaskDataUI ⇒ Some(t)
-      case _             ⇒ None
-    }
-  }.toSeq*/
 
-  def prototypeProxies: Seq[DataBagUI] = uiDataBags().flatMap { p ⇒
+  def isTaskUI(db: DataBagUI) = db.dataUI() match {
+    case t: TaskDataUI ⇒ true
+    case _             ⇒ false
+  }
+
+  def isPrototypeUI(db: DataBagUI) = db.dataUI() match {
+    case t: PrototypeDataUI ⇒ true
+    case _                  ⇒ false
+  }
+
+  def prototypeDataBagUIs: Seq[DataBagUI] = uiDataBags().flatMap { p ⇒
     p.dataUI() match {
       case t: PrototypeDataUI ⇒
         println("A task here ! " + p.name())
@@ -99,35 +100,20 @@ object ClientService {
 
     println("Size" + uiDataBags().size)
   }
-  /*match {
-    case Some(d: Var[_]) ⇒
-      d() = dataUI
-      println("SOME ")
-
-    case _ ⇒
-      uiData() = Var(dataUI) +: uiData()
-      println("NONE, new one " + uiData().size + " " + taskDataUIs.size)
-  }*/
-
-  def -=(dataBagUI: DataBagUI) = /*{
-    println("DIFF " + {
-      uiData() diff Seq(dataUI)
-    })
-    uiData() = uiData() diff Seq(dataUI)
-  }*/ uiDataBags() = uiDataBags().filter {
-      _.uuid != dataBagUI.uuid
-    }
+  def -=(dataBagUI: DataBagUI) = uiDataBags() = uiDataBags().filter {
+    _.uuid != dataBagUI.uuid
+  }
 
   def exists(dataBagUI: DataBagUI) = uiDataBags().exists(p ⇒ {
     println("FIND " + p.uuid + " VS " + dataBagUI.uuid)
     p.uuid == dataBagUI.uuid
   })
 
-  def taskData = taskDataBagUI.map {
+  def taskData = taskDataBagUIs.map {
     _.dataUI().data
   }
 
-  def prototypeData = prototypeProxies.map {
+  def prototypeData = prototypeDataBagUIs.map {
     _.dataUI().data
   }
 

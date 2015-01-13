@@ -46,7 +46,6 @@ object GUIClient {
   @JSExport
   def run(): Unit = {
 
-    println("Ad " + ClientService.taskFactories(1).dataUI.getClass)
     val db = new DataBagUI(Var(ClientService.taskFactories(1).dataUI))
     db.name() = "premier"
     ClientService += db
@@ -81,7 +80,7 @@ object GUIClient {
 
     val dialog = Panel.generic("taskPanelID",
       ClientService.taskFactories,
-      ClientService.taskDataBagUI,
+      ClientService.taskDataBagUIs,
       Some(db)
     )
 

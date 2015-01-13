@@ -27,7 +27,7 @@ import org.openmole.gui.misc.js.JsRxTags._
 import fr.iscpif.scaladget.mapping.Select2Utils._
 import rx._
 
-class ModalDialog(ID: String, val header: TypedTag[HTMLFormElement], val body: Var[TypedTag[HTMLElement]], val footer: TypedTag[HTMLElement]) {
+class ModalDialog(ID: String, val header: TypedTag[HTMLFormElement], val body: TypedTag[HTMLElement], val footer: TypedTag[HTMLElement]) {
 
   val content =
 
@@ -35,9 +35,9 @@ class ModalDialog(ID: String, val header: TypedTag[HTMLFormElement], val body: V
       // Rx {
       div(`class` := "modal-header")(header) //  }
       ,
-      Rx {
-        div(`class` := "modal-body", body())
-      },
+      // Rx {
+      div(`class` := "modal-body", body) //      }
+      ,
       div(`class` := "modal-footer")(footer)
     )
 
