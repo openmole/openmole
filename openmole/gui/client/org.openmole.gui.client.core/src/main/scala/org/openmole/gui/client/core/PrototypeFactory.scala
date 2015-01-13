@@ -20,19 +20,18 @@ package org.openmole.gui.client.core
 import org.openmole.gui.ext.data.ProtoTYPE._
 import org.openmole.gui.ext.data.PrototypeData
 import org.openmole.gui.ext.dataui._
-import org.openmole.gui.misc.js.Forms._
-import org.openmole.gui.misc.js.GenericAutoInput
+import org.openmole.gui.misc.js.{ Select, Forms }
 import org.scalajs.jquery.jQuery
 import scalatags.JsDom.short._
 import scalatags.JsDom.attrs._
 import scalatags.JsDom.tags._
 import rx._
 
-abstract class BasePrototypeDataUI(val name: Var[String], val `type`: Var[ProtoTYPE], val dimension: Var[Int]) extends PrototypeDataUI
+abstract class BasePrototypeDataUI(val `type`: Var[ProtoTYPE], val dimension: Var[Int]) extends PrototypeDataUI
 
 object PrototypeFactory {
-  def apply(name: String, `type`: ProtoTYPE, dimension: Int) = new BasePrototypeDataUI(Var(name), Var(`type`), Var(dimension)) {
-    def data = PrototypeData(name(), `type`(), dimension())
+  def dataUI(`type`: ProtoTYPE, dimension: Int) = new BasePrototypeDataUI(Var(`type`), Var(dimension)) {
+    def data = PrototypeData(`type`(), dimension())
 
     def panelUI = new PrototypePanelUI(this)
   }
@@ -40,24 +39,15 @@ object PrototypeFactory {
 
 class PrototypePanelUI(dataUI: PrototypeDataUI) extends PanelUI {
 
-  type DATAUI = PrototypeDataUI
-  val nameInput = input(`type` := "text", dataUI.name()).render
-  val dimInput = input(`type` := "text", dataUI.dimension().toString).render
-  val typeInput = new PrototypeAutoInput("protoTYPE", ALL)
+  // val nameInput = Forms.input(dataUI.name()).render
+  val dimInput = Forms.input(dataUI.dimension().toString).render
+  val typeInput = new Select("protoTYPE", Var(ALL))
 
-  val view = div(nameInput, typeInput.selector().render, dimInput)
+  val view = div(typeInput.selector().render, dimInput)
 
-  override def save(n: String): DATAUI = PrototypeFactory(nameInput.value, typeInput.content().get, dimInput.value.toInt)
-}
-
-sealed class PrototypeAutoInput(autoID: String, contents: Seq[ProtoTYPE]) extends GenericAutoInput[ProtoTYPE](autoID, Var(contents), Some(DOUBLE), Some("Select a Prototype")) {
-
-  val selector = Rx {
-    select(id := autoID,
-      onchange := { () ⇒ applyOnChange })(
-        contents.map { c ⇒
-          option(value := c.uuid)(c.name)
-        }.toSeq: _*
-      )
+  def save = {
+    dataUI.`type`() = typeInput.content().getOrElse(DOUBLE)
+    dataUI.dimension() = dimInput.value.toInt
   }
+
 }

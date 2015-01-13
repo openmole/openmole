@@ -25,6 +25,6 @@ import rx._
 trait FactoryUI {
   type DATAUI <: DataUI
   def dataUI: DATAUI
-  val name: Var[String]
+  val name: String
   val uuid: String = java.util.UUID.randomUUID.toString
 }

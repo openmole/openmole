@@ -23,10 +23,6 @@ import rx._
 trait DataUI {
   type DATA <: Data
 
-  val name: Var[String]
-
-  val uuid: String = java.util.UUID.randomUUID.toString
-
   def panelUI: PanelUI
 
   def data: DATA

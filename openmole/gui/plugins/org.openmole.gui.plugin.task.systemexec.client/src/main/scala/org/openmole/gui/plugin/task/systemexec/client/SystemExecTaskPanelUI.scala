@@ -32,13 +32,13 @@ import rx._
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskPanelUI")
 class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {
 
-  type DATAUI = SystemExecTaskDataUI
-
   @JSExport
   val view = div(
     h1(id := "title", "This is a title"),
     p("SystemExecTask !")
   )
 
-  def save(name: String) = new SystemExecTaskDataUI(Var(name))
+  def save = {
+    //dataUI.truc() = trucInput.value
+  }
 }

@@ -28,7 +28,6 @@ import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
 import org.scalajs.jquery.jQuery
-import fr.iscpif.scaladget.select2._
 import scala.scalajs.js
 import js.Dynamic.{ literal ⇒ lit }
 import rx._
@@ -72,6 +71,9 @@ object Forms {
 
   val dropdown = "dropdown"
 
+  //Input
+  def input(content: String) = scalatags.JsDom.tags.input(content, `class` := "form-control")
+
   // Label
   def label(content: String, keys: ClassKeyAggregator = emptyCK): TypedTag[HTMLSpanElement] = span(`class` := ("label " + keys.key))(content)
 
@@ -82,12 +84,19 @@ object Forms {
   val label_warning = key("label-warning")
   val label_danger = key("label-danger")
 
+  //Select (to be used with button class aggregators )
+  def select(key: ClassKeyAggregator, contents: Seq[(String, String)]) =
+    scalatags.JsDom.tags.select(`class` := "selectpicker", dataWith("style") := key.key)(
+      for (c ← contents) yield { scalatags.JsDom.tags.option(value := c._1)(c._2) }
+    )
+
   def glyph(key: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
     span(`class` := "glyphicon " + key.key, ariaWith("hidden") := "true")
 
   val glyph_edit = "glyphicon-pencil"
   val glyph_trash = "glyphicon-trash"
   val glyph_plus = "glyphicon-plus"
+  val glyph_ok = "glyphicon-ok"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
@@ -117,11 +126,14 @@ object Forms {
     button(content, keys)(span(`class` := "badge", badgeValue))
 
   //Button group
-  def buttonGroup = div(`class` := "btn-group")
+  def buttonGroup(keys: ClassKeyAggregator = emptyCK) = div(`class` := "btn-group")
+  val btn_group_large = key("btn-group-lg")
+  val btn_group_medium = key("btn-group-sm")
+  val btn_group_small = key("btn-group-xs")
 
   def buttonToolBar = div(`class` := "btn-toolbar", role := "toolbar")
 
-  def modalDialog(ID: String, header: TypedTag[HTMLElement], body: Var[TypedTag[HTMLElement]], footer: TypedTag[HTMLElement]) =
+  def modalDialog(ID: String, header: TypedTag[HTMLFormElement], body: Var[TypedTag[HTMLElement]], footer: TypedTag[HTMLElement]) =
     new ModalDialog(ID, header, body, footer)
 
   def jumbotron(modifiers: scalatags.JsDom.Modifier*) =
@@ -132,13 +144,6 @@ object Forms {
         )
       )
     )
-
-  def autoselect[T <: DisplayableRx with Identifiable](autoID: String,
-                                                       contents: Seq[T],
-                                                       default: Option[T] = None,
-                                                       placeHolder: Option[String] = None): AutoSelect[T] = {
-    new AutoSelect[T](autoID, Var(contents), default, placeHolder)
-  }
 
   //rows
   /* def row(columns: TypedTag[_]*) = div(`class` := "row")(columns: _*)
@@ -151,17 +156,5 @@ object Forms {
 
   val large_form_group = key("form-group-lg")
   val small_form_group = key("form-group-sm")
-  /*
-  def autoinput[T <: DisplayableRx with Identifiable](autoID: String, contents: Seq[T], default: Option[T] = None, placeHolder: Option[String] = None) = {
-    new AutoInput[T](autoID, contents, default, placeHolder)
-  }*/
-
-  @JSExport
-  protected def select2(): Unit = {
-    jQuery(() ⇒ jQuery("#factoryUI").select2(lit(placeholder = "Yoyoo")))
-    // jQuery(() ⇒ jQuery("#taskPanelID").select2(lit(placeholder = "Yoyo")))
-    jQuery(() ⇒ jQuery("#prototypes").select2(lit(placeholder = "Yoyo")))
-    jQuery(() ⇒ jQuery("#dataUI").select2(lit(placeholder = "Display a settings", width = "200px", formatNoMatches = "")))
-  }
 
 }

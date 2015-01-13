@@ -40,7 +40,11 @@ object UIFactories {
 object ClientService {
 
   private val uiFactories = UIFactories.factoryMap.toMap
-  private val uiData: Var[Seq[Var[DataUI]]] = Var(Seq())
+  private val uiDataBags: Var[Seq[DataBagUI]] = Var(Seq())
+
+  /*def uiData = uiProxies().map {
+    _.dataUI()
+  }*/
 
   def taskFactories = uiFactories.values.flatMap { f ⇒
     f.dataUI match {
@@ -56,50 +60,75 @@ object ClientService {
     }
   }.toSeq
 
-  def taskDataUIs: Seq[TaskDataUI] = uiData().map {
+  def taskDataBagUI: Seq[DataBagUI] = uiDataBags().flatMap { p ⇒
+    p.dataUI() match {
+      case t: TaskDataUI ⇒
+        println("A task here ! " + p.name())
+        Some(p)
+      case _ ⇒ None
+    }
+  }.toSeq
+
+  def name(db: DataBagUI, name: String) = {
+    get(db).map { _.name() = name }
+    println("Named " + get(db).map { _.name() })
+  }
+
+  private def get(db: DataBagUI) = uiDataBags().find(_.uuid == db.uuid)
+  /*uiData().map {
     _()
   }.flatMap {
     _ match {
       case t: TaskDataUI ⇒ Some(t)
       case _             ⇒ None
     }
-  }.toSeq
+  }.toSeq*/
 
-  def prototypeDataUIs = uiData().map {
-    _()
-  }.flatMap {
-    _ match {
-      case t: PrototypeDataUI ⇒ Some(t)
-      case _                  ⇒ None
+  def prototypeProxies: Seq[DataBagUI] = uiDataBags().flatMap { p ⇒
+    p.dataUI() match {
+      case t: PrototypeDataUI ⇒
+        println("A task here ! " + p.name())
+        Some(p)
+      case _ ⇒ None
     }
   }.toSeq
 
-  def +=(dataUI: DataUI) = find(dataUI) match {
+  def +=(dataBagUI: DataBagUI) = {
+    if (!exists(dataBagUI))
+      uiDataBags() = dataBagUI +: uiDataBags()
+
+    println("Size" + uiDataBags().size)
+  }
+  /*match {
     case Some(d: Var[_]) ⇒
       d() = dataUI
       println("SOME ")
 
     case _ ⇒
-      println("NONE, new one ")
       uiData() = Var(dataUI) +: uiData()
-  }
+      println("NONE, new one " + uiData().size + " " + taskDataUIs.size)
+  }*/
 
-  def -=(dataUI: Var[DataUI]) = {
-    println("DIFF " + { uiData() diff Seq(dataUI) })
+  def -=(dataBagUI: DataBagUI) = /*{
+    println("DIFF " + {
+      uiData() diff Seq(dataUI)
+    })
     uiData() = uiData() diff Seq(dataUI)
-  }
+  }*/ uiDataBags() = uiDataBags().filter {
+      _.uuid != dataBagUI.uuid
+    }
 
-  def find(dataUI: DataUI) = uiData().find(d ⇒ {
-    println("FIND " + d().getClass + " VS " + dataUI.getClass + " and " + d().name() + " VS " + dataUI.name())
-    d().getClass == dataUI.getClass && d().name() == dataUI.name()
+  def exists(dataBagUI: DataBagUI) = uiDataBags().exists(p ⇒ {
+    println("FIND " + p.uuid + " VS " + dataBagUI.uuid)
+    p.uuid == dataBagUI.uuid
   })
 
-  def taskData = taskDataUIs.map {
-    _.data
+  def taskData = taskDataBagUI.map {
+    _.dataUI().data
   }
 
-  def prototypeData = prototypeDataUIs.map {
-    _.data
+  def prototypeData = prototypeProxies.map {
+    _.dataUI().data
   }
 
   implicit def dataToDataClassName(d: Data) = d.getClass.getCanonicalName
@@ -124,7 +153,7 @@ object ClientService {
     case _                           ⇒ failure(data)
   }
 
-  private def failure[T <: Data](data: T) = Failure(new Throwable("The data " + data.name + " cannot be recontructed on the server."))
+  private def failure[T <: Data](data: T) = Failure(new Throwable("The data " + data.getClass.getCanonicalName + " cannot be recontructed on the server."))
 
   //Implicit converters for pluging handling convinience
 
@@ -157,6 +186,15 @@ object ClientService {
 
   implicit def dataUIToFactoryUI(d: DataUI): Option[FactoryUI] = uiFactories.values.find {
     _.dataUI == d
+  }
+
+  implicit def dataBagUIToFactoryUI(p: Option[DataBagUI]): Option[FactoryUI] = p flatMap { dataBagUI ⇒
+    val oo = uiFactories.values.find { f ⇒
+      println(f.dataUI.getClass + " VS " + dataBagUI.dataUI().getClass + " => " + (f.dataUI.getClass == dataBagUI.dataUI().getClass))
+      f.dataUI.getClass == dataBagUI.dataUI().getClass
+    }
+    println("INNN " + oo.get.dataUI.getClass)
+    oo
   }
 
 }

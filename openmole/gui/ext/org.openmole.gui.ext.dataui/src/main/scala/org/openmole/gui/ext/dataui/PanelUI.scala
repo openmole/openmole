@@ -23,7 +23,6 @@ import scalatags.JsDom.all._
  */
 
 trait PanelUI {
-  type DATAUI <: DataUI
   def view: TypedTag[HTMLElement]
-  def save(name: String): DATAUI
+  def save: Unit
 }

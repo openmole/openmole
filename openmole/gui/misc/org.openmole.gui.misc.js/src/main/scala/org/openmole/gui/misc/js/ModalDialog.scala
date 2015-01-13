@@ -17,7 +17,7 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.scalajs.dom.HTMLElement
+import org.scalajs.dom.{ HTMLDivElement, HTMLFormElement, HTMLElement }
 import org.scalajs.jquery.jQuery
 
 import scalatags.JsDom.TypedTag
@@ -27,16 +27,18 @@ import org.openmole.gui.misc.js.JsRxTags._
 import fr.iscpif.scaladget.mapping.Select2Utils._
 import rx._
 
-class ModalDialog(ID: String, val header: TypedTag[HTMLElement], val body: Var[TypedTag[HTMLElement]], val footer: TypedTag[HTMLElement]) {
+class ModalDialog(ID: String, val header: TypedTag[HTMLFormElement], val body: Var[TypedTag[HTMLElement]], val footer: TypedTag[HTMLElement]) {
 
   val content =
+
     div(`class` := "modal-content",
-      div(`class` := "modal-header")(header),
+      // Rx {
+      div(`class` := "modal-header")(header) //  }
+      ,
       Rx {
         div(`class` := "modal-body", body())
       },
       div(`class` := "modal-footer")(footer)
-
     )
 
   val shell = div(`class` := "modal fade", id := ID,

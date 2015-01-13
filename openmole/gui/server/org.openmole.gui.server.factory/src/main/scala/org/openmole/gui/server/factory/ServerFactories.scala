@@ -29,10 +29,10 @@ import scala.util.{ Failure, Try }
 object ServerFactories {
   lazy private val instance = new ServerFactories
 
-  def coreObject(data: Data): Try[Any] = instance.factories.synchronized {
-    instance.factories.get(data.getClass()) match {
+  def coreObject(dataBag: DataBag): Try[Any] = instance.factories.synchronized {
+    instance.factories.get(dataBag.data.getClass()) match {
       case Some(f: Factory) ⇒ f.coreObject(PluginSet.empty) //FIXME AND TAKE THE PLUGINS
-      case _                ⇒ Failure(new Throwable("The data " + data.name + " cannot be recontructed on the server."))
+      case _                ⇒ Failure(new Throwable("The data " + dataBag.name + " cannot be recontructed on the server."))
     }
   }
 

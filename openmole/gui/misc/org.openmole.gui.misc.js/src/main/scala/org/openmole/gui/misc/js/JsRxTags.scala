@@ -54,12 +54,8 @@ object JsRxTags {
    */
   implicit def rxMod[T <: dom.HTMLElement](r: Rx[HtmlTag]): Modifier = {
     def rSafe = r.toTry match {
-      case Success(v) ⇒ {
-        v.render
-      }
-      case Failure(e) ⇒ {
-        span(e.toString).render
-      }
+      case Success(v) ⇒ v.render
+      case Failure(e) ⇒ span(e.toString).render
     }
     var last = rSafe
     Obs(r, skipInitial = true) {

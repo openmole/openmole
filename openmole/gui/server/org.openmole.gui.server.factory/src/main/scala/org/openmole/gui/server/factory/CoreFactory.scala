@@ -1,7 +1,7 @@
 package main.scala.org.openmole.gui.server.factory
 
 import org.openmole.core.model.data.Prototype
-import org.openmole.gui.ext.data.{ PrototypeData, ErrorData, Data }
+import org.openmole.gui.ext.data.{ DataBag, PrototypeData, ErrorData, Data }
 import org.openmole.gui.server.factory.ServerFactories
 
 import scala.util.Failure
@@ -25,10 +25,10 @@ import scala.util.Failure
 
 object CoreFactory {
 
-  def check(data: Seq[Data]): Seq[ErrorData] = {
-    data.map { d ⇒
+  def check(dataBag: Seq[DataBag]): Seq[ErrorData] = {
+    dataBag.map { d ⇒
       d -> ServerFactories.coreObject(d)
-    }.collect { case (data: Data, f: Failure[_]) ⇒ ErrorData(data, f.exception.getMessage, f.exception.getStackTrace.mkString("\n")) }
+    }.collect { case (data: DataBag, f: Failure[_]) ⇒ ErrorData(data, f.exception.getMessage, f.exception.getStackTrace.mkString("\n")) }
 
   }
 
