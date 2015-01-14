@@ -42,10 +42,7 @@ object ClientService {
   private val uiFactories = UIFactories.factoryMap.toMap
   private val uiDataBags: Var[Seq[DataBagUI]] = Var(Seq())
 
-  /*def uiData = uiProxies().map {
-    _.dataUI()
-  }*/
-
+  // Factories
   def taskFactories = uiFactories.values.flatMap { f ⇒
     f.dataUI match {
       case t: TaskDataUI ⇒ Some(f.asInstanceOf[IOFactoryUI])
@@ -53,10 +50,20 @@ object ClientService {
     }
   }.toSeq
 
-  def prototypeFactories = uiDataBags().filter { isPrototypeUI }
+  def prototypeFactories: Seq[FactoryUI] = uiFactories.values.filter { f ⇒ isPrototypeUI(f.dataUI) }.toSeq
 
-  def taskDataBagUIs: Seq[DataBagUI] = uiDataBags().filter { isTaskUI }
+  def factories = uiFactories.values.toSeq
 
+  //DataBagUIs
+  def taskDataBagUIs: Seq[DataBagUI] = uiDataBags().filter {
+    isTaskUI
+  }
+
+  def prototypeDataBagUIs: Seq[DataBagUI] = uiDataBags().filter {
+    isPrototypeUI
+  }
+
+  def dataBagUIs = uiDataBags()
   //uiDataBags().collect { case t:  TaskDataUI ⇒ t }.toSeq
 
   /*uiDataBags().flatMap { p ⇒
@@ -69,30 +76,31 @@ object ClientService {
   }.toSeq*/
 
   def name(db: DataBagUI, name: String) = {
-    get(db).map { _.name() = name }
-    println("Named " + get(db).map { _.name() })
+    get(db).map {
+      _.name() = name
+    }
+    println("Named " + get(db).map {
+      _.name()
+    })
   }
 
   private def get(db: DataBagUI) = uiDataBags().find(_.uuid == db.uuid)
 
-  def isTaskUI(db: DataBagUI) = db.dataUI() match {
+  def isTaskUI(dataUI: DataUI) = dataUI match {
     case t: TaskDataUI ⇒ true
     case _             ⇒ false
   }
 
-  def isPrototypeUI(db: DataBagUI) = db.dataUI() match {
+  def isPrototypeUI(d: DataUI) = d match {
     case t: PrototypeDataUI ⇒ true
     case _                  ⇒ false
   }
 
-  def prototypeDataBagUIs: Seq[DataBagUI] = uiDataBags().flatMap { p ⇒
-    p.dataUI() match {
-      case t: PrototypeDataUI ⇒
-        println("A task here ! " + p.name())
-        Some(p)
-      case _ ⇒ None
-    }
-  }.toSeq
+  def isPrototypeUI(db: DataBagUI): Boolean = isPrototypeUI(db.dataUI())
+  def isTaskUI(db: DataBagUI): Boolean = isTaskUI(db.dataUI())
+
+  def isPrototypeUI(f: FactoryUI): Boolean = isPrototypeUI(f.dataUI)
+  def isTaskUI(f: FactoryUI): Boolean = isTaskUI(f.dataUI)
 
   def +=(dataBagUI: DataBagUI) = {
     if (!exists(dataBagUI))
@@ -100,6 +108,7 @@ object ClientService {
 
     println("Size" + uiDataBags().size)
   }
+
   def -=(dataBagUI: DataBagUI) = uiDataBags() = uiDataBags().filter {
     _.uuid != dataBagUI.uuid
   }
@@ -175,12 +184,16 @@ object ClientService {
   }
 
   implicit def dataBagUIToFactoryUI(p: Option[DataBagUI]): Option[FactoryUI] = p flatMap { dataBagUI ⇒
-    val oo = uiFactories.values.find { f ⇒
+    uiFactories.values.find { f ⇒
       println(f.dataUI.getClass + " VS " + dataBagUI.dataUI().getClass + " => " + (f.dataUI.getClass == dataBagUI.dataUI().getClass))
       f.dataUI.getClass == dataBagUI.dataUI().getClass
     }
-    println("INNN " + oo.get.dataUI.getClass)
-    oo
+  }
+
+  implicit def dataBagsUIFromFactoryUI(f: FactoryUI): Seq[DataBagUI] = f.dataUI match {
+    case t if isTaskUI(t)      ⇒ taskDataBagUIs
+    case p if isPrototypeUI(p) ⇒ prototypeDataBagUIs
+    case _                     ⇒ dataBagUIs
   }
 
 }

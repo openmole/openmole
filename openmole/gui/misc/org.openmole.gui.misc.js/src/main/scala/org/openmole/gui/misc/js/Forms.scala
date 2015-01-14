@@ -87,7 +87,9 @@ object Forms {
   //Select (to be used with button class aggregators )
   def select(key: ClassKeyAggregator, contents: Seq[(String, String)]) =
     scalatags.JsDom.tags.select(`class` := "selectpicker", dataWith("style") := key.key)(
-      for (c ← contents) yield { scalatags.JsDom.tags.option(value := c._1)(c._2) }
+      for (c ← contents) yield {
+        scalatags.JsDom.tags.option(value := c._1)(c._2)
+      }
     )
 
   def glyph(key: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
@@ -127,15 +129,31 @@ object Forms {
 
   //Button group
   def buttonGroup(keys: ClassKeyAggregator = emptyCK) = div(`class` := "btn-group")
+
   val btn_group_large = key("btn-group-lg")
   val btn_group_medium = key("btn-group-sm")
   val btn_group_small = key("btn-group-xs")
 
   def buttonToolBar = div(`class` := "btn-toolbar", role := "toolbar")
 
+  //Modalg Dialog
   def modalDialog(ID: String, header: TypedTag[HTMLFormElement], body: TypedTag[HTMLDivElement], footer: TypedTag[HTMLElement]) =
     new ModalDialog(ID, header, body, footer)
 
+  def modalDialog(ID: String, typedTag: TypedTag[_]*) =
+    div(`class` := "modal fade", id := ID,
+      div(`class` := "modal-dialog",
+        div(`class` := "modal-content", typedTag)
+      )
+    )
+
+  def headerDialog = div(`class` := "modal-header")
+
+  def bodyDialog = div(`class` := "modal-body")
+
+  def footerDialog = div(`class` := "modal-footer")
+
+  //Jumbotron
   def jumbotron(modifiers: scalatags.JsDom.Modifier*) =
     div(`class` := "container theme-showcase", role := "main")(
       div(`class` := "jumbotron")(
@@ -150,6 +168,7 @@ object Forms {
 
   //Forms
   def formGroup = div(`class` := "form-group ")
+
   def formLine = div(`class` := "form-inline")
 
   val large_form_group = key("form-group-lg")

@@ -78,11 +78,7 @@ object GUIClient {
       )
     )
 
-    val dialog = Panel.generic("taskPanelID",
-      ClientService.taskFactories,
-      ClientService.taskDataBagUIs,
-      Some(db)
-    )
+    val dialog = Panel.generic("taskPanelID")
 
     /*val dialog = new PanelWithIO("taskPanelID",
       ClientService.taskFactories
