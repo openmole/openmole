@@ -88,6 +88,7 @@ trait PersistentStorageService extends StorageService {
       case Some(tmp @ TmpSpace(path, created)) ⇒
         val create = (created + Workspace.preferenceAsDuration(TmpDirRegenerate).toMillis) < System.currentTimeMillis
         val newDir = if (create) createTmpDir else tmp
+        tmpSpaceVar = Some(newDir)
         newDir.path
       case None ⇒
         val tmpSpace = createTmpDir(token)
