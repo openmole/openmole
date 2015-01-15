@@ -33,12 +33,18 @@ import rx._
  */
 
 object Panel {
+  object ConceptFilter extends Enumeration {
+    case class ConceptState(name: String, factories: Seq[FactoryUI]) extends Val(name)
+    val ALL = ConceptState("All", ClientService.factories)
+    val TASKS = ConceptState("Tasks", ClientService.taskFactories)
+    val PROTOTYPES = ConceptState("Prototypes", ClientService.prototypeFactories)
+  }
+
+  import ConceptFilter._
   def generic(uuid: String,
-              factories: Seq[FactoryUI],
-              dataBagUIs: Seq[DataBagUI],
-              defaultProxyUI: Option[DataBagUI] = None,
+              defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(ALL),
               extraCategories: Seq[(String, HtmlTag)] = Seq()) =
-    new GenericPanel(uuid, factories, dataBagUIs, defaultProxyUI, extraCategories).render()
+    new GenericPanel(uuid, defaultDataBagUI, extraCategories).dialog
 }
 
 /*
@@ -57,22 +63,24 @@ object PanelState {
   def edition = new Edition
 
   def creation(db: DataBagUI) = new Creation(db)
-}
+}*/
 
-import PanelState._*/
+import Panel.ConceptFilter._
 
 class GenericPanel(uuid: String,
-                   factories: Seq[FactoryUI],
-                   dataBagUIs: Seq[DataBagUI],
-                   defaultDataBagUI: Option[DataBagUI] = None,
+                   // factories: Seq[FactoryUI],
+                   //  dataBagUIs: Seq[DataBagUI],
+                   defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(ALL),
                    extraCategories: Seq[(String, HtmlTag)] = Seq()) {
 
   val jQid = "#" + uuid
   val editionState: Var[Boolean] = Var(false)
+  val filter: Var[ConceptState] = Var(defaultDataBagUI.right.toOption.getOrElse(ALL))
+  var nameFilter = Var("")
+  val currentDataBagUI = Var(defaultDataBagUI.left.toOption)
 
-  val factorySelector = new Select[FactoryUI]("factories", Var(factories), defaultDataBagUI, btn_primary)
+  val factorySelector = new Select[FactoryUI]("factories", Var(filter().factories), currentDataBagUI(), btn_primary)
 
-  val currentDataBagUI = Var(defaultDataBagUI)
   /*Rx {
      println("In CURRENT DATABAGUI RX")
      state() match {
@@ -81,7 +89,37 @@ class GenericPanel(uuid: String,
      }
    }*/
 
-  val conceptTable = new ConceptTable(dataBagUIs)
+  /* val conceptTable = new ConceptTable(dataBagUIs, { () ⇒
+    println("Clicked")
+    editionState() = true
+  })*/
+
+  def contains(db: DataBagUI) = db.name().contains(nameFilter())
+
+  private val filters = Map[ConceptState, DataBagUI ⇒ Boolean](
+    (ALL, contains),
+    (TASKS, db ⇒ isTaskUI(db) && contains(db)),
+    (PROTOTYPES, db ⇒ isPrototypeUI(db) && contains(db))
+  //("Environments", isEnvironmentUI)
+  )
+
+  val conceptTable = Forms.table(
+    thead,
+    Rx {
+      val dbUIs: Seq[DataBagUI] = filter().factories.head
+      tbody(
+        for (db ← dbUIs if filters(filter())(db)) yield {
+          tr(
+            td(db.name())(`class` := "col-md-6"),
+            td(Forms.label(db.dataUI().dataType, label_primary + "col-md-4")),
+            td(Forms.button(glyph(glyph_trash + "col-md-2"))(onclick := { () ⇒
+              println("trash dataui clicked")
+            }))
+          )
+        }
+      )
+    }
+  ).render
 
   val inputFilter = Forms.input(
     currentDataBagUI().map {
@@ -90,7 +128,7 @@ class GenericPanel(uuid: String,
       placeholder := "Filter"
     ).render
 
-  inputFilter.oninput = (e: Event) ⇒ conceptTable.nameFilter() = inputFilter.value
+  inputFilter.oninput = (e: Event) ⇒ nameFilter() = inputFilter.value
 
   val currentPanelUI = Rx(currentDataBagUI().map {
     _.dataUI().panelUI
@@ -128,8 +166,6 @@ class GenericPanel(uuid: String,
   val saveButton = Forms.button("Close", btn_primary)(dataWith("dismiss") := "modal", onclick := { () ⇒
     save
   })
-
-  val panelFooter = h2(saveButton)
 
   /*val mdHeader = {
     form(
@@ -174,13 +210,11 @@ class GenericPanel(uuid: String,
     )
   }*/
 
-  val mdHeader = form(inputFilter)
-
-  val mdBody = Rx {
+  /* val mdBody = Rx {
     println("EDITION STATE " + editionState())
     if (editionState()) div()
     else div(conceptTable.view)
-  }
+  }*/
 
   /*bodyPanel({
   currentPanelUI() match {
@@ -192,12 +226,21 @@ class GenericPanel(uuid: String,
 }
 )*/
 
-  val mD /*: ModalDialog*/ = {
-    println("IN MD RX")
+  val dialog = {
     modalDialog(uuid,
-      mdHeader,
-      mdBody(),
-      panelFooter)
+      bodyDialog(Rx {
+        println("IN DIALOG RX")
+        div(
+          form(inputFilter),
+          if (editionState()) div()
+          else div(conceptTable)
+        )
+      }
+      ),
+      footerDialog(
+        h2(saveButton)
+      )
+    )
   }
 
   def save: Unit = {
@@ -243,8 +286,6 @@ class GenericPanel(uuid: String,
       mD.body() = mdBody
     }
   }*/
-
-  def render = mD.shell
 
 }
 
