@@ -19,6 +19,8 @@ package org.openmole.core.batch.storage
 
 import java.net.URI
 import java.nio.file.Paths
+import java.util.concurrent.{ Callable, TimeUnit }
+import com.google.common.cache.CacheBuilder
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.refresh._
@@ -30,11 +32,24 @@ import java.io._
 import org.openmole.misc.tools.service.Logger
 import scala.slick.driver.H2Driver.simple._
 
-object StorageService extends Logger
+object StorageService extends Logger {
+
+  val DirRegenerate = new ConfigurationLocation("StorageService", "DirRegenerate")
+  Workspace += (DirRegenerate, "P1D")
+
+}
 
 import StorageService.Log._
 
 trait StorageService extends BatchService with Storage {
+
+  @transient lazy val directoryCache =
+    CacheBuilder.
+      newBuilder().
+      expireAfterWrite(Workspace.preferenceAsDuration(StorageService.DirRegenerate).toMillis, TimeUnit.MILLISECONDS).
+      build[String, String]()
+
+  protected implicit def callable[T](f: () ⇒ T): Callable[T] = new Callable[T]() { def call() = f() }
 
   def remoteStorage: RemoteStorage
   def clean(implicit token: AccessToken, session: Session)
@@ -49,22 +64,20 @@ trait StorageService extends BatchService with Storage {
     file
   }
 
-  @transient protected var baseSpaceVar: Option[String] = None
-
   def persistentDir(implicit token: AccessToken, session: Session): String
   def tmpDir(implicit token: AccessToken): String
-  def baseDir(implicit token: AccessToken): String = synchronized {
-    baseSpaceVar match {
-      case Some(s) ⇒ s
-      case None ⇒
+
+  def baseDir(implicit token: AccessToken): String =
+    directoryCache.get(
+      "baseDir",
+      () ⇒ {
         val rootPath = mkRootDir
         val basePath = child(rootPath, baseDirName)
         if (!exists(basePath)) makeDir(basePath)
         initialise(basePath)
-        baseSpaceVar = Some(basePath)
         basePath
-    }
-  }
+      }
+    )
 
   protected def initialise(basePath: String)(implicit token: AccessToken) = {}
 
