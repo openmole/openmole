@@ -43,34 +43,30 @@ trait PersistentStorageService extends StorageService {
 
   import PersistentStorageService._
 
-  override def clean(implicit token: AccessToken, session: Session) = {
-    ReplicaCatalog.onStorage(this).delete
-    super.rmDir(baseDir)
-    directoryCache.invalidateAll
-  }
-
   override def persistentDir(implicit token: AccessToken, session: Session): String =
     directoryCache.get(
       "persistentDir",
-      () ⇒ {
-        val persistentPath = child(baseDir, persistent)
-        if (!super.exists(persistentPath)) super.makeDir(persistentPath)
-
-        def graceIsOver(name: String) =
-          ReplicaCatalog.timeOfPersistent(name).map {
-            _ + Workspace.preferenceAsDuration(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
-          }.getOrElse(true)
-
-        for {
-          name ← super.listNames(persistentPath)
-          if graceIsOver(name)
-        } {
-          val path = super.child(persistentPath, name)
-          if (!ReplicaCatalog.forPath(path).exists.run) backgroundRmFile(path)
-        }
-        persistentPath
-      }
+      () ⇒ createPersistentDir
     )
+
+  private def createPersistentDir(implicit token: AccessToken, session: Session) = {
+    val persistentPath = child(baseDir, persistent)
+    if (!super.exists(persistentPath)) super.makeDir(persistentPath)
+
+    def graceIsOver(name: String) =
+      ReplicaCatalog.timeOfPersistent(name).map {
+        _ + Workspace.preferenceAsDuration(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
+      }.getOrElse(true)
+
+    for {
+      name ← super.listNames(persistentPath)
+      if graceIsOver(name)
+    } {
+      val path = super.child(persistentPath, name)
+      if (!ReplicaCatalog.forPath(path).exists.run) backgroundRmFile(path)
+    }
+    persistentPath
+  }
 
   override def tmpDir(implicit token: AccessToken) =
     directoryCache.get(
