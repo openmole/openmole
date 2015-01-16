@@ -47,7 +47,7 @@ class GUIServlet extends ScalatraServlet {
       tags.head(
         tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset = ISO-8859-1"),
         cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery-2.1.1.min.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery-2.1.3.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/d3.v3.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap-3.3.0.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap-select-1.6.3.min.js"),

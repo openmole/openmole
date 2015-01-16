@@ -57,14 +57,15 @@ object GUIClient {
     val topdiv = dom.document.body.appendChild(div)
 
     topdiv.appendChild(
-      nav(nav_inverse + nav_staticTop + nav_pills)(
+      nav(key(nav_inverse) + nav_staticTop + nav_pills)(
         navItem("Tasks")(dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID"),
         navItem("Environments")
       )
     )
     //topdiv.appendChild(Forms.autoinput("dataUI", ClientService.taskFactories, placeHolder = Some("select men"), default = Some(ClientService.taskFactories(1))).selector)
 
-    topdiv.appendChild(h1(Forms.label("OpenMOLE !!!")(onclick := { () ⇒ println("File") })))
+    topdiv.appendChild(Forms.select("iii", Seq(("1", "yo"), ("2", "groovy"), ("3", "snati")), btn_primary))
+
     topdiv.appendChild(badge("Tasks", "4", btn_medium))
     topdiv.appendChild(badge("Prototype", "4", btn_primary))
 
@@ -92,7 +93,7 @@ object GUIClient {
 
     topdiv.appendChild(
       jumbotron(
-        h1("OpenMole !!!!"),
+        h1("OpenMole !"),
         Forms.button("Click men", btn_primary + btn_large)(dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID")
       )
     )

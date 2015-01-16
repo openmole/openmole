@@ -38,14 +38,24 @@ class Select[T <: Displayable with Identifiable](autoID: String,
     }
   })
 
-  val selector =
-    Forms.select(key, contents().map { c ⇒ c.uuid -> c.name })(
-      onchange := { () ⇒ applyOnChange }
+  val selector = Forms.buttonGroup()(
+    a(
+      `class` := "btn " + key.key + " dropdown-toggle", dataWith("toggle") := "dropdown", href := "#"
+    )("Select", span(`class` := "caret")),
+    ul(`class` := "dropdown-menu", id := autoID)(
+      for (c ← contents().zipWithIndex) yield {
+        scalatags.JsDom.tags.li(a(
+          href := "#", onclick := { () ⇒ applyOnChange(c._2) })(c._1.name)
+        )
+      }
     )
+  )
 
-  def applyOnChange: Unit = {
-    content() = Some(contents()(jQuery(jQid).find("option:selected").index()))
+  def applyOnChange(ind: Int): Unit = {
+    content() = Some(contents()(ind))
+    jQuery(jQid).parents(".btn-group").find(".dropdown-toggle").html(content().get.name + " <span class=\"caret\"><span>")
   }
 
   def set(t: T) = jQuery(jQid).`val`(t.uuid)
+
 }

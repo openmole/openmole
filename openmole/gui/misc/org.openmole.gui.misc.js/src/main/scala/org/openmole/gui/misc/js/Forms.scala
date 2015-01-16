@@ -57,13 +57,12 @@ object Forms {
   def dd(m: Modifier*) = div(m.toSeq)
 
   // Nav
-  def nav(keys: ClassKeyAggregator, navItems: TypedTag[HTMLElement]*): TypedTag[HTMLElement] = ul(`class` := keys.key, role := "tablist")(navItems.toSeq: _*)
+  def nav(keys: ClassKeyAggregator, navItems: TypedTag[HTMLElement]*): TypedTag[HTMLElement] = ul(`class` := "nav " + keys.key, role := "tablist")(navItems.toSeq: _*)
 
-  private val navPrefix = key("nav")
-  val nav_default = navPrefix + "navbar-default"
-  val nav_inverse = navPrefix + "navbar-inverse"
-  val nav_staticTop = navPrefix + "navbar-static-top"
-  val nav_pills = navPrefix + "nav-pills"
+  val nav_default = "navbar-default"
+  val nav_inverse = "navbar-inverse"
+  val nav_staticTop = "navbar-static-top"
+  val nav_pills = "nav-pills"
 
   // Nav item
   def navItem(content: String, keys: ClassKeyAggregator = emptyCK): TypedTag[HTMLElement] =
@@ -85,12 +84,23 @@ object Forms {
   val label_danger = key("label-danger")
 
   //Select (to be used with button class aggregators )
-  def select(key: ClassKeyAggregator, contents: Seq[(String, String)]) =
-    scalatags.JsDom.tags.select(`class` := "selectpicker", dataWith("style") := key.key)(
+  def select(id: String, contents: Seq[(String, String)], key: ClassKeyAggregator) = buttonGroup()(
+    a(
+      `class` := "btn " + key.key + " dropdown-toggle", dataWith("toggle") := "dropdown", href := "#"
+    )("Select", span(`class` := "caret")),
+    ul(`class` := "dropdown-menu")(
       for (c ← contents) yield {
-        scalatags.JsDom.tags.option(value := c._1)(c._2)
+        scalatags.JsDom.tags.li(a(
+          href := "#")(c._2)
+        )
       }
     )
+  )
+
+  /*scalatags.JsDom.tags.select(`class` := "selectpicker", dataWith("style") := key.key)(
+    for (c ← contents) yield {
+      scalatags.JsDom.tags.option(value := c._1)(c._2)
+    }*/
 
   def glyph(key: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
     span(`class` := "glyphicon " + key.key, ariaWith("hidden") := "true")
@@ -109,16 +119,14 @@ object Forms {
 
   def button(content: String): TypedTag[HTMLElement] = button(content, btn_default)
 
-  def button(content: TypedTag[HTMLElement]): TypedTag[HTMLButtonElement] = button(content, btn_default)
+  def button(content: TypedTag[HTMLElement]): TypedTag[HTMLButtonElement] = button(content, btn_default)(span(" "))
 
-  private val btnPrefix = key("btn")
   val btn_default = key("btn-default")
   val btn_primary = key("btn-primary")
   val btn_success = key("btn-success")
   val btn_info = key("btn-info")
   val btn_warning = key("btn-warning")
   val btn_danger = key("btn-danger")
-  //  val btn_dropdown = dropdownComponent(btnPrefix)
   val btn_large = key("btn-lg")
   val btn_medium = key("btn-md")
   val btn_small = key("btn-sm")
@@ -173,5 +181,10 @@ object Forms {
 
   val large_form_group = key("form-group-lg")
   val small_form_group = key("form-group-sm")
+
+  //Input group
+  def inputGroup = div(`class` := "input-group")
+
+  def inputGroupButton = span(`class` := "input-group-btn")
 
 }
