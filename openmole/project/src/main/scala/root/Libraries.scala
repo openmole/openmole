@@ -45,8 +45,6 @@ object Libraries extends Defaults(Apache) {
 
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
 
-  //lazy val includeOsgi = libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % osgiVersion.value
-
   lazy val includeOsgi = libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % osgiVersion.value
 
   lazy val jetty = "org.openmole" %% "org-eclipse-jetty" % "8.1.8.v20121106"
@@ -75,9 +73,6 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.4"
 
-  //  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.tools.*", "scala.reflect.macros.*"),
-  //    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
-
   lazy val jodaTime = "org.openmole" %% "org-joda-time" % "1.6"
 
   lazy val jasypt = "org.openmole" %% "org-jasypt-encryption" % "1.9.2"
@@ -92,7 +87,7 @@ object Libraries extends Defaults(Apache) {
   lazy val netlogo5 = "org.openmole" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
   lazy val netlogo5_noscala = "org.openmole" % "ccl-northwestern-edu-netlogo5-noscala" % netLogo5Version
 
-  lazy val guava = "org.openmole" %% "com-google-guava" % "16.0.1"
+  lazy val guava = "org.openmole" %% "com-google-guava" % "18.0"
 
   lazy val jawn = "org.openmole" %% "jawn" % "0.6.0"
 

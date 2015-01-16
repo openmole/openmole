@@ -19,9 +19,12 @@ package org.openmole.core.batch.storage
 
 import java.net.URI
 import java.nio.file.Paths
+import java.util.concurrent.{ Callable, TimeUnit }
+import com.google.common.cache.CacheBuilder
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.refresh._
+import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.serializer._
 import org.openmole.misc.filedeleter._
 import org.openmole.misc.workspace._
@@ -30,17 +33,37 @@ import java.io._
 import org.openmole.misc.tools.service.Logger
 import scala.slick.driver.H2Driver.simple._
 
-object StorageService extends Logger
+object StorageService extends Logger {
+
+  val DirRegenerate = new ConfigurationLocation("StorageService", "DirRegenerate")
+  Workspace += (DirRegenerate, "P1D")
+
+}
 
 import StorageService.Log._
 
 trait StorageService extends BatchService with Storage {
 
-  def remoteStorage: RemoteStorage
-  def clean(implicit token: AccessToken, session: Session)
-
   def url: URI
   val id: String
+  def remoteStorage: RemoteStorage
+
+  def persistentDir(implicit token: AccessToken, session: Session): String
+  def tmpDir(implicit token: AccessToken): String
+
+  @transient lazy val directoryCache =
+    CacheBuilder.
+      newBuilder().
+      expireAfterWrite(Workspace.preferenceAsDuration(StorageService.DirRegenerate).toMillis, TimeUnit.MILLISECONDS).
+      build[String, String]()
+
+  protected implicit def callable[T](f: () ⇒ T): Callable[T] = new Callable[T]() { def call() = f() }
+
+  def clean(implicit token: AccessToken, session: Session) = {
+    ReplicaCatalog.onStorage(this).delete
+    super.rmDir(baseDir)
+    directoryCache.invalidateAll
+  }
 
   @transient lazy val serializedRemoteStorage = {
     val file = Workspace.newFile("remoteStorage", ".xml")
@@ -49,24 +72,18 @@ trait StorageService extends BatchService with Storage {
     file
   }
 
-  @transient protected var baseSpaceVar: Option[String] = None
+  def baseDir(implicit token: AccessToken): String =
+    directoryCache.get(
+      "baseDir",
+      () ⇒ createBasePath
+    )
 
-  def persistentDir(implicit token: AccessToken, session: Session): String
-  def tmpDir(implicit token: AccessToken): String
-  def baseDir(implicit token: AccessToken): String = synchronized {
-    baseSpaceVar match {
-      case Some(s) ⇒ s
-      case None ⇒
-        val rootPath = mkRootDir
-        val basePath = child(rootPath, baseDirName)
-        if (!exists(basePath)) makeDir(basePath)
-        initialise(basePath)
-        baseSpaceVar = Some(basePath)
-        basePath
-    }
+  protected def createBasePath(implicit token: AccessToken) = {
+    val rootPath = mkRootDir
+    val basePath = child(rootPath, baseDirName)
+    if (!exists(basePath)) makeDir(basePath)
+    basePath
   }
-
-  protected def initialise(basePath: String)(implicit token: AccessToken) = {}
 
   protected def mkRootDir(implicit token: AccessToken): String = synchronized {
     val paths = Iterator.iterate(Paths.get(root))(_.getParent).takeWhile(_ != null).toSeq.reverse

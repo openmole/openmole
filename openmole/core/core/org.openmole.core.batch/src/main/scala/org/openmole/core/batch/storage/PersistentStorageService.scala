@@ -25,16 +25,14 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
 import fr.iscpif.gridscale.storage._
 import scala.concurrent.duration.Duration
+import org.openmole.misc.tools.service.ThreadUtil._
 
 import scala.slick.driver.H2Driver.simple._
 
 object PersistentStorageService extends Logger {
 
   val TmpDirRemoval = new ConfigurationLocation("StorageService", "TmpDirRemoval")
-  val TmpDirRegenerate = new ConfigurationLocation("StorageService", "TmpDirRegenerate")
-
   Workspace += (TmpDirRemoval, "P30D")
-  Workspace += (TmpDirRegenerate, "P1D")
 
   val persistent = "persistent/"
   val tmp = "tmp/"
@@ -45,56 +43,36 @@ trait PersistentStorageService extends StorageService {
 
   import PersistentStorageService._
 
-  case class TmpSpace(path: String, created: Long)
+  override def persistentDir(implicit token: AccessToken, session: Session): String =
+    directoryCache.get(
+      "persistentDir",
+      () ⇒ createPersistentDir
+    )
 
-  @transient protected var tmpSpaceVar: Option[TmpSpace] = None
-  @transient protected var persistentSpaceVar: Option[String] = None
+  private def createPersistentDir(implicit token: AccessToken, session: Session) = {
+    val persistentPath = child(baseDir, persistent)
+    if (!super.exists(persistentPath)) super.makeDir(persistentPath)
 
-  override def clean(implicit token: AccessToken, session: Session) = synchronized {
-    ReplicaCatalog.onStorage(this).delete
-    super.rmDir(baseDir)
-    baseSpaceVar = None
-    tmpSpaceVar = None
-    persistentSpaceVar = None
-  }
+    def graceIsOver(name: String) =
+      ReplicaCatalog.timeOfPersistent(name).map {
+        _ + Workspace.preferenceAsDuration(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
+      }.getOrElse(true)
 
-  override def persistentDir(implicit token: AccessToken, session: Session): String = synchronized {
-    persistentSpaceVar match {
-      case None ⇒
-        val persistentPath = child(baseDir, persistent)
-        if (!super.exists(persistentPath)) super.makeDir(persistentPath)
-
-        def graceIsOver(name: String) =
-          ReplicaCatalog.timeOfPersistent(name).map {
-            _ + Workspace.preferenceAsDuration(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
-          }.getOrElse(true)
-
-        for {
-          name ← super.listNames(persistentPath)
-          if graceIsOver(name)
-        } {
-          val path = super.child(persistentPath, name)
-          if (!ReplicaCatalog.forPath(path).exists.run) backgroundRmFile(path)
-        }
-
-        persistentSpaceVar = Some(persistentPath)
-        persistentPath
-      case Some(s) ⇒ s
+    for {
+      name ← super.listNames(persistentPath)
+      if graceIsOver(name)
+    } {
+      val path = super.child(persistentPath, name)
+      if (!ReplicaCatalog.forPath(path).exists.run) backgroundRmFile(path)
     }
+    persistentPath
   }
 
-  override def tmpDir(implicit token: AccessToken) = synchronized {
-    tmpSpaceVar match {
-      case Some(tmp @ TmpSpace(path, created)) ⇒
-        val create = (created + Workspace.preferenceAsDuration(TmpDirRegenerate).toMillis) < System.currentTimeMillis
-        val newDir = if (create) createTmpDir else tmp
-        newDir.path
-      case None ⇒
-        val tmpSpace = createTmpDir(token)
-        tmpSpaceVar = Some(tmpSpace)
-        tmpSpace.path
-    }
-  }
+  override def tmpDir(implicit token: AccessToken) =
+    directoryCache.get(
+      "tmpDir",
+      () ⇒ createTmpDir
+    )
 
   private def createTmpDir(implicit token: AccessToken) = {
     val time = System.currentTimeMillis
@@ -129,9 +107,8 @@ trait PersistentStorageService extends StorageService {
     }
 
     val tmpTimePath = super.child(tmpNoTime, time.toString)
-
     if (!super.exists(tmpTimePath)) super.makeDir(tmpTimePath)
-    TmpSpace(tmpTimePath, time)
+    tmpTimePath
   }
 
 }

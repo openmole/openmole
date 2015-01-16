@@ -160,8 +160,8 @@ object OSGi extends Defaults(Apache) {
 
   lazy val guava = OsgiProject("com.google.guava",
     exports = Seq("com.google.common.*"), privatePackages = Seq("!scala.*", "*")) settings(libraryDependencies ++=
-    Seq("com.google.guava" % "guava" % "16.0.1", "com.google.code.findbugs" % "jsr305" % "1.3.9"),
-    version := "16.0.1"
+    Seq("com.google.guava" % "guava" % "18.0", "com.google.code.findbugs" % "jsr305" % "1.3.9"),
+    version := "18.0"
     )
 
   lazy val scalaTagsVersion = "0.4.3-SNAPSHOT"
