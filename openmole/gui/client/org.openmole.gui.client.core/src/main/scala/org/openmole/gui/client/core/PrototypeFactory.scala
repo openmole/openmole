@@ -45,7 +45,7 @@ class PrototypePanelUI(dataUI: PrototypeDataUI) extends PanelUI {
   val dimInput = Forms.input(dataUI.dimension().toString).render
   val typeInput = new Select("protoTYPE", Var(ALL))
 
-  val view = div(typeInput.selector().render, dimInput)
+  val view = div(typeInput.selector.render, dimInput)
 
   def save = {
     dataUI.`type`() = typeInput.content().getOrElse(DOUBLE)
