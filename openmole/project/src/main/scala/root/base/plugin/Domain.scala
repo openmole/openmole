@@ -13,7 +13,7 @@ object Domain extends PluginDefaults {
   lazy val distribution = OsgiProject("distribution") dependsOn (Misc.exception, Core.workflow, Misc.workspace) settings
     (libraryDependencies ++= Seq(Apache.math % "provided"))
 
-  lazy val file = OsgiProject("file") dependsOn (Misc.exception, Core.workflow)
+  lazy val fileDomain = OsgiProject("file") dependsOn (Misc.exception, Core.workflow)
 
   lazy val modifier = OsgiProject("modifier") dependsOn (Misc.exception, Core.workflow, Tool.groovy)
 
