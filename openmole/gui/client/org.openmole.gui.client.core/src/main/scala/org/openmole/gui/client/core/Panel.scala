@@ -91,7 +91,7 @@ class GenericPanel(uuid: String,
       tbody({
         val elements = for (db ← dbUIs if filters(filter())(db)) yield {
           tr(
-            td(a(db.name(), onclick := { () ⇒
+            td(a(db.name(), cursor := "pointer", onclick := { () ⇒
               currentDataBagUI() = Some(db)
               editionState() = true
             }))(`class` := "col-md-6"),
