@@ -61,7 +61,6 @@ class Select[T <: Displayable with Identifiable](autoID: String,
   def applyOnChange(ind: Int): Unit = {
     content() = Some(contents()(ind))
     content().map { c ⇒ jQuery(jQid).parents(".btn-group").find(".dropdown-toggle").html(c.name + " <span class=\"caret\"><span>")
-      // setDefault
     }
   }
 

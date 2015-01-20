@@ -62,9 +62,6 @@ object GUIClient {
         navItem("Environments")
       )
     )
-    //topdiv.appendChild(Forms.autoinput("dataUI", ClientService.taskFactories, placeHolder = Some("select men"), default = Some(ClientService.taskFactories(1))).selector)
-
-    topdiv.appendChild(Forms.select("iii", Seq(("1", "yo"), ("2", "groovy"), ("3", "snati")), btn_primary))
 
     topdiv.appendChild(badge("Tasks", "4", btn_medium))
     topdiv.appendChild(badge("Prototype", "4", btn_primary))

@@ -133,7 +133,7 @@ object Forms {
 
   // Badges
   def badge(content: String, badgeValue: String, keys: ClassKeyAggregator = emptyCK) =
-    button(content, keys)(span(`class` := "badge", badgeValue))
+    button(content + " ", keys)(span(`class` := "badge", badgeValue))
 
   //Button group
   def buttonGroup(keys: ClassKeyAggregator = emptyCK) = div(`class` := "btn-group")

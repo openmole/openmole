@@ -92,10 +92,7 @@ class GenericPanel(uuid: String,
         val elements = for (db ← dbUIs if filters(filter())(db)) yield {
           tr(
             td(a(db.name(), onclick := { () ⇒
-              println("FACTORY SELECTOR " + factorySelector.content())
               currentDataBagUI() = Some(db)
-              //factorySelector.content() = currentDataBagUI()
-              println("FACTORY SELECTOR " + factorySelector.content())
               editionState() = true
             }))(`class` := "col-md-6"),
             td(Forms.label(db.dataUI().dataType, label_primary + "col-md-4")),
