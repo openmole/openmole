@@ -71,7 +71,7 @@ object Forms {
   val dropdown = "dropdown"
 
   //Input
-  def input(content: String) = scalatags.JsDom.tags.input(content, `class` := "form-control")
+  def input(content: String = "") = scalatags.JsDom.tags.input(content, `class` := "form-control")
 
   // Label
   def label(content: String, keys: ClassKeyAggregator = emptyCK): TypedTag[HTMLSpanElement] = span(`class` := ("label " + keys.key))(content)

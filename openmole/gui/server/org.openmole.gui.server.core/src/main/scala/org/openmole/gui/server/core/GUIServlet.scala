@@ -50,7 +50,6 @@ class GUIServlet extends ScalatraServlet {
         tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery-2.1.3.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/d3.v3.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap-3.3.0.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap-select-1.6.3.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/pluginMapping.js")
       ),

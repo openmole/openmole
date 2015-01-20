@@ -93,7 +93,7 @@ object GUIClient {
 
     topdiv.appendChild(
       jumbotron(
-        h1("OpenMole !"),
+        h1("OpenMole !!!"),
         Forms.button("Click men", btn_primary + btn_large)(dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID")
       )
     )

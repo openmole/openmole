@@ -32,14 +32,17 @@ import rx._
 @JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskPanelUI")
 class GroovyTaskPanelUI(dataUI: GroovyTaskDataUI) extends PanelUI {
 
-  val codeInput = Forms.input(dataUI.code())(placeholder := "Code").render
+  val codeInput = Forms.input()(placeholder := "Code").render
 
   @JSExport
-  val view = div(
-    h1(id := "title", "This is a title"),
-    p("GroovyTAsk !!"),
-    codeInput
-  )
+  val view = {
+    codeInput.value = dataUI.code()
+    div(
+      h1(id := "title", "This is a title"),
+      p("GroovyTAsk !!"),
+      codeInput
+    )
+  }
 
   def save = {
     dataUI.code() = codeInput.value

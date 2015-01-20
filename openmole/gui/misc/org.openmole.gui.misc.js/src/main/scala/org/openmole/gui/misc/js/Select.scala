@@ -20,6 +20,7 @@ package org.openmole.gui.misc.js
 import rx._
 import scalatags.JsDom.all._
 import org.scalajs.jquery.jQuery
+import org.openmole.gui.misc.js.JsRxTags._
 
 class Select[T <: Displayable with Identifiable](autoID: String,
                                                  val contents: Var[Seq[T]],
@@ -28,7 +29,7 @@ class Select[T <: Displayable with Identifiable](autoID: String,
 
   val jQid = "#" + autoID
 
-  lazy val content: Var[Option[T]] = Var(contents().size match {
+  val content: Var[Option[T]] = Var(contents().size match {
     case 0 ⇒ None
     case _ ⇒ default match {
       case None ⇒ Some(contents()(0))
@@ -40,8 +41,14 @@ class Select[T <: Displayable with Identifiable](autoID: String,
 
   val selector = Forms.buttonGroup()(
     a(
-      `class` := "btn " + key.key + " dropdown-toggle", dataWith("toggle") := "dropdown", href := "#"
-    )("Select", span(`class` := "caret")),
+      `class` := "btn " + key.key + " dropdown-toggle", dataWith("toggle") := "dropdown", href := "#")(
+        Rx {
+          content().map {
+            _.name
+          }.getOrElse(contents()(0).name) + " "
+        },
+        span(`class` := "caret")
+      ),
     ul(`class` := "dropdown-menu", id := autoID)(
       for (c ← contents().zipWithIndex) yield {
         scalatags.JsDom.tags.li(a(
@@ -49,13 +56,13 @@ class Select[T <: Displayable with Identifiable](autoID: String,
         )
       }
     )
-  )
+  ).render
 
   def applyOnChange(ind: Int): Unit = {
     content() = Some(contents()(ind))
-    jQuery(jQid).parents(".btn-group").find(".dropdown-toggle").html(content().get.name + " <span class=\"caret\"><span>")
+    content().map { c ⇒ jQuery(jQid).parents(".btn-group").find(".dropdown-toggle").html(c.name + " <span class=\"caret\"><span>")
+      // setDefault
+    }
   }
-
-  def set(t: T) = jQuery(jQid).`val`(t.uuid)
 
 }

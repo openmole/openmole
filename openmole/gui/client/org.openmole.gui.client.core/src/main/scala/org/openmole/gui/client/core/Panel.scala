@@ -91,7 +91,13 @@ class GenericPanel(uuid: String,
       tbody({
         val elements = for (db ← dbUIs if filters(filter())(db)) yield {
           tr(
-            td(db.name())(`class` := "col-md-6"),
+            td(a(db.name(), onclick := { () ⇒
+              println("FACTORY SELECTOR " + factorySelector.content())
+              currentDataBagUI() = Some(db)
+              //factorySelector.content() = currentDataBagUI()
+              println("FACTORY SELECTOR " + factorySelector.content())
+              editionState() = true
+            }))(`class` := "col-md-6"),
             td(Forms.label(db.dataUI().dataType, label_primary + "col-md-4")),
             td(Forms.button(glyph(glyph_trash + "col-md-2"))(onclick := { () ⇒
               println("trash dataui clicked")
@@ -116,7 +122,10 @@ class GenericPanel(uuid: String,
   inputFilter.oninput = (e: Event) ⇒ nameFilter() = inputFilter.value
 
   //New button
-  val newGlyph = Forms.button(glyph(glyph_plus))(`type` := "submit", onclick := { () ⇒
+  val newGlyph = Forms.button(glyph(glyph_plus))(`type` := "submit", onclick := { () ⇒ add
+  })
+
+  def add = {
     if (rows() == 0) {
       val dbUI = new DataBagUI(Var(filter().factories.head.dataUI))
       dbUI.name() = inputFilter.value
@@ -124,7 +133,7 @@ class GenericPanel(uuid: String,
       currentDataBagUI() = Some(dbUI)
       editionState() = true
     }
-  })
+  }
 
   val conceptFilter = Forms.nav(nav_pills)(
     navItem("Val")(onclick := { () ⇒
@@ -166,22 +175,26 @@ class GenericPanel(uuid: String,
                 inputGroupButton(newGlyph)
               ),
               if (editionState()) {
-                formLine(
+                span(
                   factorySelector.selector,
                   saveHeaderButton
                 )
               }
               else conceptFilter
-            )
-          ),
+            ) /*,
+            onsubmit := { () ⇒
+              println("SUBMITTTT " + editionState())
+              if (editionState()) add
+              else save
+            }*/ ),
           if (editionState()) {
-            currentPanelUI() match {
-              case Some(p: PanelUI) ⇒
-                bodyPanel(p.view)
-              case _ ⇒ div(h1("Create a  first data !"))
-            }
+            inputFilter.value = currentDataBagUI().map { _.name() }.getOrElse((""))
+            conceptPanel
           }
-          else div(conceptTable)
+          else {
+            inputFilter.value = ""
+            div(conceptTable)
+          }
         )
       }
       ),
@@ -191,19 +204,27 @@ class GenericPanel(uuid: String,
     )
   }
 
-  def save = {
-    currentPanelUI().map { cpUI ⇒
-      cpUI.save
-    }
+  def conceptPanel = currentPanelUI() match {
+    case Some(p: PanelUI) ⇒
+      bodyPanel(p.view)
+    case _ ⇒ div(h1("Create a  first data !"))
+  }
 
+  def save = {
+    println("SAVEEE " + inputFilter.value)
     currentDataBagUI().map {
       db ⇒
         ClientService.name(db, inputFilter.value)
     }
 
-    inputFilter.value = ""
-    nameFilter() = ""
+    currentPanelUI().map { cpUI ⇒
+      cpUI.save
+    }
+
     editionState() = false
+    currentDataBagUI() = None
+    nameFilter() = ""
+    println("END SAVDe ")
   }
 
   def bodyPanel(view: HtmlTag) = extraCategories.size match {
@@ -216,9 +237,11 @@ class GenericPanel(uuid: String,
       )
   }
 
-  def generateDataUI: Option[DataUI] = factorySelector.content().map {
-    _.dataUI
+  Obs(currentDataBagUI) {
+    factorySelector.content() = currentDataBagUI()
+    println("OBS databag " + factorySelector.content())
   }
+
 }
 
 /*
