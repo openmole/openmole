@@ -41,7 +41,7 @@ class Select[T <: Displayable with Identifiable](autoID: String,
 
   val selector = Forms.buttonGroup()(
     a(
-      `class` := "btn " + key.key + " dropdown-toggle", dataWith("toggle") := "dropdown", href := "#")(
+      `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", href := "#")(
         Rx {
           content().map {
             _.name

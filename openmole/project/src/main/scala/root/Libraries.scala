@@ -91,11 +91,15 @@ object Libraries extends Defaults(Apache) {
 
   lazy val jawn = "org.openmole" %% "jawn" % "0.6.0"
 
+  // lazy val scalaTagsVersion = "0.4.3-RC1"
   lazy val scalaTagsVersion = "0.4.3-SNAPSHOT"
-  lazy val scalaJSDomVersion = "0.6"
+  lazy val scalaJSDomVersion = "0.6.1"
   lazy val scalaJQueryVersion = "0.6"
+  // lazy val rxVersion = "0.2.7-M3"
   lazy val rxVersion = "0.2.6"
   lazy val scalaUpickleVersion = "0.2.5"
+  //lazy val scalaUpickleVersion = "0.2.6-RC1"
+  //lazy val scalaAutowireVersion = "0.2.4-RC1"
   lazy val scalaAutowireVersion = "0.2.3"
 
   lazy val upickle = "org.openmole" %% "upickle" % scalaUpickleVersion

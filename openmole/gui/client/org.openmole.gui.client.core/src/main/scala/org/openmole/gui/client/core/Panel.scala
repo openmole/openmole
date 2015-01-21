@@ -92,11 +92,16 @@ class GenericPanel(uuid: String,
         val elements = for (db ← dbUIs if filters(filter())(db)) yield {
           tr(
             td(a(db.name(), cursor := "pointer", onclick := { () ⇒
-              currentDataBagUI() = Some(db)
+              //  currentDataBagUI() = Some(db)
+              setCurrent(db)
+
               editionState() = true
             }))(`class` := "col-md-6"),
             td(Forms.label(db.dataUI().dataType, label_primary + "col-md-4")),
             td(Forms.button(glyph(glyph_trash + "col-md-2"))(onclick := { () ⇒
+              currentDataBagUI().map {
+                ClientService -=
+              }
               println("trash dataui clicked")
             }))
           )
@@ -119,15 +124,16 @@ class GenericPanel(uuid: String,
   inputFilter.oninput = (e: Event) ⇒ nameFilter() = inputFilter.value
 
   //New button
-  val newGlyph = Forms.button(glyph(glyph_plus))(`type` := "submit", onclick := { () ⇒ add
-  })
+  val newGlyph = Forms.button(glyph(glyph_plus))( /*`type` := "submit",*/ onclick := { () ⇒ add
+  }).render
 
   def add = {
     if (rows() == 0) {
       val dbUI = new DataBagUI(Var(filter().factories.head.dataUI))
       dbUI.name() = inputFilter.value
       ClientService += dbUI
-      currentDataBagUI() = Some(dbUI)
+      //currentDataBagUI() = Some(dbUI)
+      setCurrent(dbUI)
       editionState() = true
     }
   }
@@ -143,27 +149,31 @@ class GenericPanel(uuid: String,
     }),
     navItem("Environment")(onclick := { () ⇒ println("not impl yet") })
   )
-
+  /*
   //Trash dataUI
   val trashDataUIGlyph = Forms.button(glyph(glyph_trash))(onclick := { () ⇒
     println("trash dataui   clicked")
     currentDataBagUI().map {
       ClientService -=
     }
-  })
+  })*/
 
-  val saveHeaderButton = Forms.button("Apply", btn_primary)(`type` := "submit", onclick := { () ⇒
+  def setCurrent(dbUI: DataBagUI) = {
+    currentDataBagUI() = Some(dbUI)
+    factorySelector.content() = currentDataBagUI()
+  }
+
+  val saveHeaderButton = Forms.button("Apply", btn_primary)( /*`type` := "submit",*/ onclick := { () ⇒
     save
-  })
+  }).render
 
-  val saveButton = Forms.button("Close", btn_primary)(dataWith("dismiss") := "modal", onclick := { () ⇒
+  val saveButton = Forms.button("Close", btn_primary)("data-dismiss".attr := "modal", onclick := { () ⇒
     save
   })
 
   val dialog = {
     modalDialog(uuid,
       bodyDialog(Rx {
-        println("IN DIALOG RX")
         div(
           form(
             formLine(
@@ -178,14 +188,16 @@ class GenericPanel(uuid: String,
                 )
               }
               else conceptFilter
-            ) /*,
-            onsubmit := { () ⇒
-              println("SUBMITTTT " + editionState())
-              if (editionState()) add
-              else save
-            }*/ ),
+            ), onsubmit := { () ⇒
+              println("----------------- " + editionState())
+              if (editionState()) save
+              else add
+            }
+          ),
           if (editionState()) {
-            inputFilter.value = currentDataBagUI().map { _.name() }.getOrElse((""))
+            inputFilter.value = currentDataBagUI().map {
+              _.name()
+            }.getOrElse((""))
             conceptPanel
           }
           else {
@@ -199,7 +211,7 @@ class GenericPanel(uuid: String,
         h2(saveButton)
       )
     )
-  }
+  }.render
 
   def conceptPanel = currentPanelUI() match {
     case Some(p: PanelUI) ⇒
@@ -208,7 +220,6 @@ class GenericPanel(uuid: String,
   }
 
   def save = {
-    println("SAVEEE " + inputFilter.value)
     currentDataBagUI().map {
       db ⇒
         ClientService.name(db, inputFilter.value)
@@ -219,9 +230,7 @@ class GenericPanel(uuid: String,
     }
 
     editionState() = false
-    currentDataBagUI() = None
     nameFilter() = ""
-    println("END SAVDe ")
   }
 
   def bodyPanel(view: HtmlTag) = extraCategories.size match {
@@ -234,10 +243,9 @@ class GenericPanel(uuid: String,
       )
   }
 
-  Obs(currentDataBagUI) {
-    factorySelector.content() = currentDataBagUI()
-    println("OBS databag " + factorySelector.content())
-  }
+  /* Obs(currentDataBagUI) {
+     factorySelector.content() = currentDataBagUI()
+   }*/
 
 }
 

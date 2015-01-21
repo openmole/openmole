@@ -86,7 +86,7 @@ object Forms {
   //Select (to be used with button class aggregators )
   def select(id: String, contents: Seq[(String, String)], key: ClassKeyAggregator) = buttonGroup()(
     a(
-      `class` := "btn " + key.key + " dropdown-toggle", dataWith("toggle") := "dropdown", href := "#"
+      `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", href := "#"
     )("Select", span(`class` := "caret")),
     ul(`class` := "dropdown-menu")(
       for (c ← contents) yield {
@@ -97,13 +97,13 @@ object Forms {
     )
   )
 
-  /*scalatags.JsDom.tags.select(`class` := "selectpicker", dataWith("style") := key.key)(
+  /*scalatags.JsDom.tags.select(`class` := "selectpicker", data("style") := key.key)(
     for (c ← contents) yield {
       scalatags.JsDom.tags.option(value := c._1)(c._2)
     }*/
 
   def glyph(key: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
-    span(`class` := "glyphicon " + key.key, ariaWith("hidden") := "true")
+    span(`class` := "glyphicon " + key.key, "aria-hidden".attr := "true")
 
   val glyph_edit = "glyphicon-pencil"
   val glyph_trash = "glyphicon-trash"

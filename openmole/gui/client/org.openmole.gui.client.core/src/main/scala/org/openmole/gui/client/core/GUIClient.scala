@@ -58,7 +58,7 @@ object GUIClient {
 
     topdiv.appendChild(
       nav(key(nav_inverse) + nav_staticTop + nav_pills)(
-        navItem("Tasks")(dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID"),
+        navItem("Tasks")("data-toggle".attr := "modal", "data-target".attr := "#taskPanelID"),
         navItem("Environments")
       )
     )
@@ -91,7 +91,7 @@ object GUIClient {
     topdiv.appendChild(
       jumbotron(
         h1("OpenMole !!!"),
-        Forms.button("Click men", btn_primary + btn_large)(dataWith("toggle") := "modal", dataWith("target") := "#taskPanelID")
+        Forms.button("Click men", btn_primary + btn_large)("data-toggle".attr := "modal", "data-target".attr := "#taskPanelID")
       )
     )
 
