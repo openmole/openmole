@@ -19,8 +19,8 @@ package org.openmole.gui.misc.js
 
 import fr.iscpif.scaladget.mapping.{ Select2QueryOptions, Select2Options }
 import fr.iscpif.scaladget.mapping.Select2Utils._
-import org.scalajs.dom
 import org.scalajs.dom._
+//import org.scalajs.dom._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js
 import scalatags.JsDom.TypedTag
@@ -57,16 +57,29 @@ object Forms {
   def dd(m: Modifier*) = div(m.toSeq)
 
   // Nav
-  def nav(keys: ClassKeyAggregator, navItems: TypedTag[HTMLElement]*): TypedTag[HTMLElement] = ul(`class` := "nav " + keys.key, role := "tablist")(navItems.toSeq: _*)
+  class NavItem(val navid: String, content: String, val todo: () ⇒ Unit = () ⇒ {}) {
+    def render = li(role := "presentation", id := navid)(a(href := "#")(content))
+  }
+
+  def navItem(id: String, content: String, todo: () ⇒ Unit = () ⇒ {}) = new NavItem(id, content, todo)
+
+  def nav(contents: Seq[(TypedTag[HTMLLIElement], String, () ⇒ Unit)], keys: ClassKeyAggregator): TypedTag[HTMLElement] =
+    ul(`class` := "nav " + keys.key, role := "tablist")(
+      contents.map { c ⇒
+        c._1(scalatags.JsDom.attrs.onclick := { () ⇒
+          jQuery(".active").removeClass("active")
+          jQuery("#" + c._2).addClass("active")
+          c._3()
+        })
+      }: _*)
+
+  def nav(keys: ClassKeyAggregator, contents: NavItem*): TypedTag[HTMLElement] =
+    nav(contents.map { c ⇒ (c.render, c.navid, c.todo) }, keys)
 
   val nav_default = "navbar-default"
   val nav_inverse = "navbar-inverse"
   val nav_staticTop = "navbar-static-top"
   val nav_pills = "nav-pills"
-
-  // Nav item
-  def navItem(content: String, keys: ClassKeyAggregator = emptyCK): TypedTag[HTMLElement] =
-    li(role := "presentation")(a(href := "#")(content))
 
   val dropdown = "dropdown"
 

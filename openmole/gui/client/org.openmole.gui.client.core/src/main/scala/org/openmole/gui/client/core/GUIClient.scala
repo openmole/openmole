@@ -57,10 +57,16 @@ object GUIClient {
     val topdiv = dom.document.body.appendChild(div)
 
     topdiv.appendChild(
-      nav(key(nav_inverse) + nav_staticTop + nav_pills)(
-        navItem("Tasks")("data-toggle".attr := "modal", "data-target".attr := "#taskPanelID"),
-        navItem("Environments")
+      nav(
+        Seq(
+          (navItem("task", "Tasks").render("data-toggle".attr := "modal", "data-target".attr := "#taskPanelID"), "task", () ⇒ {}),
+          (navItem("env", "Environments").render, "env", () ⇒ {})
+        ), key(nav_pills) + nav_inverse + nav_staticTop
       )
+    /*nav(
+            navItem("Tasks")("data-toggle".attr := "modal", "data-target".attr := "#taskPanelID"),
+            navItem("Environments")
+          )*/
     )
 
     topdiv.appendChild(badge("Tasks", "4", btn_medium))

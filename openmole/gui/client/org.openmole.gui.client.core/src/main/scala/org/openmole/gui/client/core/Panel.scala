@@ -3,8 +3,8 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
-import org.openmole.gui.misc.js.{ Select, ModalDialog, Forms }
-import org.scalajs.dom.{ KeyboardEvent, Event, HTMLDivElement, HTMLElement }
+import org.openmole.gui.misc.js.{ Select, Forms }
+import org.scalajs.dom.Event
 
 import scalatags.JsDom.all
 import org.scalajs.jquery.jQuery
@@ -131,17 +131,27 @@ class GenericPanel(uuid: String,
     editionState() = true
   }
 
-  val conceptFilter = Forms.nav(nav_pills)(
-    navItem("Val")(onclick := { () ⇒
-      filter() = PROTOTYPES
-      factorySelector.contents() = ClientService.prototypeFactories
-    }),
-    navItem("Task")(onclick := { () ⇒
-      filter() = TASKS
-      factorySelector.contents() = ClientService.taskFactories
-    }),
-    navItem("Environment")(onclick := { () ⇒ println("not impl yet") })
-  )
+  val conceptFilter = Rx {
+    nav(nav_pills,
+      navItem("valfilter", "Val", () ⇒ {
+        filter() = PROTOTYPES
+        factorySelector.contents() = ClientService.prototypeFactories
+      }),
+      navItem("taskfilter", "Task", () ⇒ {
+        filter() = TASKS
+        factorySelector.contents() = ClientService.taskFactories
+      }),
+      navItem("envfilter", "Environments", () ⇒ {
+        println("not impl yet")
+      })
+    )
+  }
+
+  /* def setActive(id: String) = {
+    println("SET active " + id)
+    jQuery(".active").removeClass("active")
+    jQuery("#" + id).addClass("active")
+  }*/
 
   def setCurrent(dbUI: DataBagUI) = {
     currentDataBagUI() = Some(dbUI)
@@ -220,9 +230,9 @@ class GenericPanel(uuid: String,
   def bodyPanel(view: HtmlTag) = extraCategories.size match {
     case 0 ⇒ view
     case _ ⇒
-      nav(nav_pills,
+      Forms.nav(nav_pills,
         (for (c ← ("Settings", view) +: extraCategories) yield {
-          navItem(c._1)(c._2)
+          navItem(c._1, c._1)
         }): _*
       )
   }
