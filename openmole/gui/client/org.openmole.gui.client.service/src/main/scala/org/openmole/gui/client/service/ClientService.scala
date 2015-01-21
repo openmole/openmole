@@ -75,7 +75,7 @@ object ClientService {
     }
   }.toSeq*/
 
-  def name(db: DataBagUI, name: String) = {
+  def setName(db: DataBagUI, name: String) = {
     get(db).map {
       _.name() = name
     }
@@ -105,8 +105,6 @@ object ClientService {
   def +=(dataBagUI: DataBagUI) = {
     if (!exists(dataBagUI))
       uiDataBags() = dataBagUI +: uiDataBags()
-
-    println("Size" + uiDataBags().size)
   }
 
   def -=(dataBagUI: DataBagUI) = uiDataBags() = uiDataBags().filter {
@@ -114,7 +112,6 @@ object ClientService {
   }
 
   def exists(dataBagUI: DataBagUI) = uiDataBags().exists(p ⇒ {
-    println("FIND " + p.uuid + " VS " + dataBagUI.uuid)
     p.uuid == dataBagUI.uuid
   })
 

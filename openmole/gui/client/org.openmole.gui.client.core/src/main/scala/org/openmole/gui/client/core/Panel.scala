@@ -4,7 +4,7 @@ import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.misc.js.{ Select, ModalDialog, Forms }
-import org.scalajs.dom.{ Event, HTMLDivElement, HTMLElement }
+import org.scalajs.dom.{ KeyboardEvent, Event, HTMLDivElement, HTMLElement }
 
 import scalatags.JsDom.all
 import org.scalajs.jquery.jQuery
@@ -90,19 +90,14 @@ class GenericPanel(uuid: String,
       val dbUIs: Seq[DataBagUI] = filter().factories.head
       tbody({
         val elements = for (db ← dbUIs if filters(filter())(db)) yield {
-          tr(
+          tr(`class` := "row",
             td(a(db.name(), cursor := "pointer", onclick := { () ⇒
-              //  currentDataBagUI() = Some(db)
               setCurrent(db)
-
               editionState() = true
-            }))(`class` := "col-md-6"),
-            td(Forms.label(db.dataUI().dataType, label_primary + "col-md-4")),
-            td(Forms.button(glyph(glyph_trash + "col-md-2"))(onclick := { () ⇒
-              currentDataBagUI().map {
-                ClientService -=
-              }
-              println("trash dataui clicked")
+            }))(`class` := "col-md-5"),
+            td(Forms.label(db.dataUI().dataType, label_primary + "col-md-5")),
+            td(Forms.button(glyph(glyph_trash), "col-md-2")(onclick := { () ⇒
+              ClientService -= db
             }))
           )
         }
@@ -117,8 +112,9 @@ class GenericPanel(uuid: String,
     currentDataBagUI().map {
       _.name()
     }.getOrElse(""))(
+      value := "",
       placeholder := "Filter",
-      autofocus := "autofocus"
+      autofocus := "true"
     ).render
 
   inputFilter.oninput = (e: Event) ⇒ nameFilter() = inputFilter.value
@@ -128,14 +124,11 @@ class GenericPanel(uuid: String,
   }).render
 
   def add = {
-    if (rows() == 0) {
-      val dbUI = new DataBagUI(Var(filter().factories.head.dataUI))
-      dbUI.name() = inputFilter.value
-      ClientService += dbUI
-      //currentDataBagUI() = Some(dbUI)
-      setCurrent(dbUI)
-      editionState() = true
-    }
+    val dbUI = new DataBagUI(Var(filter().factories.head.dataUI))
+    dbUI.name() = inputFilter.value
+    ClientService += dbUI
+    setCurrent(dbUI)
+    editionState() = true
   }
 
   val conceptFilter = Forms.nav(nav_pills)(
@@ -149,14 +142,6 @@ class GenericPanel(uuid: String,
     }),
     navItem("Environment")(onclick := { () ⇒ println("not impl yet") })
   )
-  /*
-  //Trash dataUI
-  val trashDataUIGlyph = Forms.button(glyph(glyph_trash))(onclick := { () ⇒
-    println("trash dataui   clicked")
-    currentDataBagUI().map {
-      ClientService -=
-    }
-  })*/
 
   def setCurrent(dbUI: DataBagUI) = {
     currentDataBagUI() = Some(dbUI)
@@ -189,9 +174,8 @@ class GenericPanel(uuid: String,
               }
               else conceptFilter
             ), onsubmit := { () ⇒
-              println("----------------- " + editionState())
               if (editionState()) save
-              else add
+              else if (rows() == 0) add
             }
           ),
           if (editionState()) {
@@ -222,7 +206,7 @@ class GenericPanel(uuid: String,
   def save = {
     currentDataBagUI().map {
       db ⇒
-        ClientService.name(db, inputFilter.value)
+        ClientService.setName(db, inputFilter.value)
     }
 
     currentPanelUI().map { cpUI ⇒
@@ -242,10 +226,6 @@ class GenericPanel(uuid: String,
         }): _*
       )
   }
-
-  /* Obs(currentDataBagUI) {
-     factorySelector.content() = currentDataBagUI()
-   }*/
 
 }
 
