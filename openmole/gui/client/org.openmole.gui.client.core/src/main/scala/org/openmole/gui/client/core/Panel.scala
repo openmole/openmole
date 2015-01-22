@@ -162,7 +162,7 @@ class GenericPanel(uuid: String,
     save
   }).render
 
-  val saveButton = Forms.button("Close", btn_primary)("data-dismiss".attr := "modal", onclick := { () ⇒
+  val saveButton = Forms.button("Close", btn_test)("data-dismiss".attr := "modal", onclick := { () ⇒
     save
   })
 

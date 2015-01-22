@@ -110,11 +110,6 @@ object Forms {
     )
   )
 
-  /*scalatags.JsDom.tags.select(`class` := "selectpicker", data("style") := key.key)(
-    for (c ← contents) yield {
-      scalatags.JsDom.tags.option(value := c._1)(c._2)
-    }*/
-
   def glyph(key: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
     span(`class` := "glyphicon " + key.key, "aria-hidden".attr := "true")
 
@@ -134,7 +129,7 @@ object Forms {
 
   def button(content: TypedTag[HTMLElement]): TypedTag[HTMLButtonElement] = button(content, btn_default)(span(" "))
 
-  val btn_default = key("btn-default")
+  val btn_default = key("primary")
   val btn_primary = key("btn-primary")
   val btn_success = key("btn-success")
   val btn_info = key("btn-info")
@@ -143,6 +138,7 @@ object Forms {
   val btn_large = key("btn-lg")
   val btn_medium = key("btn-md")
   val btn_small = key("btn-sm")
+  val  = key("myButton")
 
   // Badges
   def badge(content: String, badgeValue: String, keys: ClassKeyAggregator = emptyCK) =

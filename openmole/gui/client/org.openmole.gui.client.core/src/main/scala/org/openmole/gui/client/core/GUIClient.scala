@@ -63,10 +63,6 @@ object GUIClient {
           (navItem("env", "Environments").render, "env", () ⇒ {})
         ), key(nav_pills) + nav_inverse + nav_staticTop
       )
-    /*nav(
-            navItem("Tasks")("data-toggle".attr := "modal", "data-target".attr := "#taskPanelID"),
-            navItem("Environments")
-          )*/
     )
 
     topdiv.appendChild(badge("Tasks", "4", btn_medium))
@@ -93,13 +89,6 @@ object GUIClient {
         button("TaskType", btn_info)
       ),
       ClientService.taskFactories(0).dataUI.panelUI.view,*/
-
-    topdiv.appendChild(
-      jumbotron(
-        h1("OpenMole !!!"),
-        Forms.button("Click men", btn_primary + btn_large)("data-toggle".attr := "modal", "data-target".attr := "#taskPanelID")
-      )
-    )
 
     topdiv.appendChild(dialog.render)
 
