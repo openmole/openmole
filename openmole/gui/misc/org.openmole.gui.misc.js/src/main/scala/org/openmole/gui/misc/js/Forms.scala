@@ -129,7 +129,7 @@ object Forms {
 
   def button(content: TypedTag[HTMLElement]): TypedTag[HTMLButtonElement] = button(content, btn_default)(span(" "))
 
-  val btn_default = key("primary")
+  val btn_default = key("btn-default")
   val btn_primary = key("btn-primary")
   val btn_success = key("btn-success")
   val btn_info = key("btn-info")
@@ -138,7 +138,7 @@ object Forms {
   val btn_large = key("btn-lg")
   val btn_medium = key("btn-md")
   val btn_small = key("btn-sm")
-  val  = key("myButton")
+  val btn_test = key("myButton")
 
   // Badges
   def badge(content: String, badgeValue: String, keys: ClassKeyAggregator = emptyCK) =
@@ -182,6 +182,8 @@ object Forms {
 
   //table
   def table = scalatags.JsDom.tags.table(`class` := "table table-stripped")
+  def tr(keys: ClassKeyAggregator = emptyCK) = scalatags.JsDom.tags.tr(`class` := keys.key)
+  def td(keys: ClassKeyAggregator = emptyCK) = scalatags.JsDom.tags.td(`class` := keys.key)
 
   //Forms
   def formGroup = div(`class` := "form-group ")
@@ -196,4 +198,10 @@ object Forms {
 
   def inputGroupButton = span(`class` := "input-group-btn")
 
+  //Grid
+  val row = key("row")
+  val col_md_1 = key("col-md-1")
+  val col_md_2 = key("col-md-2")
+  val col_md_5 = key("col-md-5")
+  val col_md_6 = key("col-md-6")
 }

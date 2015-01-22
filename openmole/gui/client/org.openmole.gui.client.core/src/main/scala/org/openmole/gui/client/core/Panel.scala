@@ -90,13 +90,13 @@ class GenericPanel(uuid: String,
       val dbUIs: Seq[DataBagUI] = filter().factories.head
       tbody({
         val elements = for (db ← dbUIs if filters(filter())(db)) yield {
-          tr(`class` := "row",
-            td(a(db.name(), cursor := "pointer", onclick := { () ⇒
+          Forms.tr(row)(
+            Forms.td(col_md_6)(a(db.name(), cursor := "pointer", onclick := { () ⇒
               setCurrent(db)
               editionState() = true
-            }))(`class` := "col-md-5"),
-            td(Forms.label(db.dataUI().dataType, label_primary + "col-md-5")),
-            td(Forms.button(glyph(glyph_trash), "col-md-2")(onclick := { () ⇒
+            })),
+            Forms.td(col_md_5)(Forms.label(db.dataUI().dataType, label_primary)),
+            Forms.td(col_md_1)(Forms.button(glyph(glyph_trash))(onclick := { () ⇒
               ClientService -= db
             }))
           )
@@ -146,12 +146,6 @@ class GenericPanel(uuid: String,
       })
     )
   }
-
-  /* def setActive(id: String) = {
-    println("SET active " + id)
-    jQuery(".active").removeClass("active")
-    jQuery("#" + id).addClass("active")
-  }*/
 
   def setCurrent(dbUI: DataBagUI) = {
     currentDataBagUI() = Some(dbUI)
