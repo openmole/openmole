@@ -3,8 +3,8 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
-import org.openmole.gui.misc.js.{ Select, ModalDialog, Forms }
-import org.scalajs.dom.{ Event, HTMLDivElement, HTMLElement }
+import org.openmole.gui.misc.js.{ Select, Forms }
+import org.scalajs.dom.Event
 
 import scalatags.JsDom.all
 import org.scalajs.jquery.jQuery
@@ -90,11 +90,14 @@ class GenericPanel(uuid: String,
       val dbUIs: Seq[DataBagUI] = filter().factories.head
       tbody({
         val elements = for (db ← dbUIs if filters(filter())(db)) yield {
-          tr(
-            td(db.name())(`class` := "col-md-6"),
-            td(Forms.label(db.dataUI().dataType, label_primary + "col-md-4")),
-            td(Forms.button(glyph(glyph_trash + "col-md-2"))(onclick := { () ⇒
-              println("trash dataui clicked")
+          Forms.tr(row)(
+            Forms.td(col_md_6)(a(db.name(), cursor := "pointer", onclick := { () ⇒
+              setCurrent(db)
+              editionState() = true
+            })),
+            Forms.td(col_md_5)(Forms.label(db.dataUI().dataType, label_primary)),
+            Forms.td(col_md_1)(Forms.button(glyph(glyph_trash))(onclick := { () ⇒
+              ClientService -= db
             }))
           )
         }
@@ -109,55 +112,57 @@ class GenericPanel(uuid: String,
     currentDataBagUI().map {
       _.name()
     }.getOrElse(""))(
+      value := "",
       placeholder := "Filter",
-      autofocus := "autofocus"
+      autofocus := "true"
     ).render
 
   inputFilter.oninput = (e: Event) ⇒ nameFilter() = inputFilter.value
 
   //New button
-  val newGlyph = Forms.button(glyph(glyph_plus))(`type` := "submit", onclick := { () ⇒
-    if (rows() == 0) {
-      val dbUI = new DataBagUI(Var(filter().factories.head.dataUI))
-      dbUI.name() = inputFilter.value
-      ClientService += dbUI
-      currentDataBagUI() = Some(dbUI)
-      editionState() = true
-    }
-  })
+  val newGlyph = Forms.button(glyph(glyph_plus))( /*`type` := "submit",*/ onclick := { () ⇒ add
+  }).render
 
-  val conceptFilter = Forms.nav(nav_pills)(
-    navItem("Val")(onclick := { () ⇒
-      filter() = PROTOTYPES
-      factorySelector.contents() = ClientService.prototypeFactories
-    }),
-    navItem("Task")(onclick := { () ⇒
-      filter() = TASKS
-      factorySelector.contents() = ClientService.taskFactories
-    }),
-    navItem("Environment")(onclick := { () ⇒ println("not impl yet") })
-  )
+  def add = {
+    val dbUI = new DataBagUI(Var(filter().factories.head.dataUI))
+    dbUI.name() = inputFilter.value
+    ClientService += dbUI
+    setCurrent(dbUI)
+    editionState() = true
+  }
 
-  //Trash dataUI
-  val trashDataUIGlyph = Forms.button(glyph(glyph_trash))(onclick := { () ⇒
-    println("trash dataui   clicked")
-    currentDataBagUI().map {
-      ClientService -=
-    }
-  })
+  val conceptFilter = Rx {
+    nav(nav_pills,
+      navItem("valfilter", "Val", () ⇒ {
+        filter() = PROTOTYPES
+        factorySelector.contents() = ClientService.prototypeFactories
+      }),
+      navItem("taskfilter", "Task", () ⇒ {
+        filter() = TASKS
+        factorySelector.contents() = ClientService.taskFactories
+      }),
+      navItem("envfilter", "Environments", () ⇒ {
+        println("not impl yet")
+      })
+    )
+  }
 
-  val saveHeaderButton = Forms.button("Apply", btn_primary)(`type` := "submit", onclick := { () ⇒
+  def setCurrent(dbUI: DataBagUI) = {
+    currentDataBagUI() = Some(dbUI)
+    factorySelector.content() = currentDataBagUI()
+  }
+
+  val saveHeaderButton = Forms.button("Apply", btn_primary)( /*`type` := "submit",*/ onclick := { () ⇒
     save
-  })
+  }).render
 
-  val saveButton = Forms.button("Close", btn_primary)(dataWith("dismiss") := "modal", onclick := { () ⇒
+  val saveButton = Forms.button("Close", btn_test)("data-dismiss".attr := "modal", onclick := { () ⇒
     save
   })
 
   val dialog = {
     modalDialog(uuid,
       bodyDialog(Rx {
-        println("IN DIALOG RX")
         div(
           form(
             formLine(
@@ -166,22 +171,27 @@ class GenericPanel(uuid: String,
                 inputGroupButton(newGlyph)
               ),
               if (editionState()) {
-                formLine(
+                span(
                   factorySelector.selector,
                   saveHeaderButton
                 )
               }
               else conceptFilter
-            )
+            ), onsubmit := { () ⇒
+              if (editionState()) save
+              else if (rows() == 0) add
+            }
           ),
           if (editionState()) {
-            currentPanelUI() match {
-              case Some(p: PanelUI) ⇒
-                bodyPanel(p.view)
-              case _ ⇒ div(h1("Create a  first data !"))
-            }
+            inputFilter.value = currentDataBagUI().map {
+              _.name()
+            }.getOrElse((""))
+            conceptPanel
           }
-          else div(conceptTable)
+          else {
+            inputFilter.value = ""
+            div(conceptTable)
+          }
         )
       }
       ),
@@ -189,36 +199,38 @@ class GenericPanel(uuid: String,
         h2(saveButton)
       )
     )
+  }.render
+
+  def conceptPanel = currentPanelUI() match {
+    case Some(p: PanelUI) ⇒
+      bodyPanel(p.view)
+    case _ ⇒ div(h1("Create a  first data !"))
   }
 
   def save = {
+    currentDataBagUI().map {
+      db ⇒
+        ClientService.setName(db, inputFilter.value)
+    }
+
     currentPanelUI().map { cpUI ⇒
       cpUI.save
     }
 
-    currentDataBagUI().map {
-      db ⇒
-        ClientService.name(db, inputFilter.value)
-    }
-
-    inputFilter.value = ""
-    nameFilter() = ""
     editionState() = false
+    nameFilter() = ""
   }
 
   def bodyPanel(view: HtmlTag) = extraCategories.size match {
     case 0 ⇒ view
     case _ ⇒
-      nav(nav_pills,
+      Forms.nav(nav_pills,
         (for (c ← ("Settings", view) +: extraCategories) yield {
-          navItem(c._1)(c._2)
+          navItem(c._1, c._1)
         }): _*
       )
   }
 
-  def generateDataUI: Option[DataUI] = factorySelector.content().map {
-    _.dataUI
-  }
 }
 
 /*
