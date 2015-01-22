@@ -119,8 +119,11 @@ class GenericPanel(uuid: String,
   inputFilter.oninput = (e: Event) ⇒ nameFilter() = inputFilter.value
 
   //New button
-  val newGlyph = bs.button(glyph(glyph_plus))( /*`type` := "submit",*/ onclick := { () ⇒ add
-  }).render
+  val newGlyph =
+    //FIXME: THE SIZE OF THE GLYPH IS SMALLER THAN THE REST OF THE GROUP WHEN GROUPEL
+    // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
+    bs.button("Add")(onclick := { () ⇒ add
+    }).render
 
   def add = {
     val dbUI = new DataBagUI(Var(filter().factories.head.dataUI))
@@ -170,11 +173,11 @@ class GenericPanel(uuid: String,
             form(
               inputGroup(navbar_left)(
                 inputFilter,
-                inputGroupButton(newGlyph)
+                if (editionState()) inputGroupButton(factorySelector.selector)
+                else inputGroupButton(newGlyph)
               ),
               if (editionState()) {
                 bs.span(navbar_right)(
-                  factorySelector.selector,
                   saveHeaderButton
                 )
               }
