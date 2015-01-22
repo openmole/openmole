@@ -21,23 +21,19 @@ import org.openmole.gui.ext.dataui.PanelUI
 
 import scala.scalajs.js.annotation.JSExport
 
-//import scalatags.JsDom.tags._
-//import scalatags.JsDom.attrs._
-
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.Forms
-import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.misc.js.{Forms=> bs}
 import rx._
 
 @JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskPanelUI")
 class GroovyTaskPanelUI(dataUI: GroovyTaskDataUI) extends PanelUI {
 
-  val codeInput = Forms.input()(placeholder := "Code").render
+  val codeInput = bs.input()(placeholder := "Code").render
 
   @JSExport
   val view = {
     codeInput.value = dataUI.code()
-    div(
+    bs.div()(
       h1(id := "title", "This is a title"),
       p("GroovyTAsk !!"),
       codeInput

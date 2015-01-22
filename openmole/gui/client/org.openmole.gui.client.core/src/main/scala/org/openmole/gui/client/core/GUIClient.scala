@@ -38,8 +38,6 @@ import org.scalajs.dom
 
 import scalatags.JsDom.all._
 
-//import scalatags.JsDom.tags.{ h1, h2, div, li }
-
 @JSExport("GUIClient")
 object GUIClient {
 
@@ -54,27 +52,14 @@ object GUIClient {
     ClientService += db2
     db2.name() = "yop"
 
-    val topdiv = dom.document.body.appendChild(div)
+    val topdiv = dom.document.body.appendChild(Forms.div())
 
     topdiv.appendChild(
-      nav(
+      nav("mainMav",
         Seq(
-          (navItem("task", "Tasks").render("data-toggle".attr := "modal", "data-target".attr := "#taskPanelID"), "task", () ⇒ {}),
-          (navItem("env", "Environments").render, "env", () ⇒ {})
+          (navItem("settings", "Settings").render("data-toggle".attr := "modal", "data-target".attr := "#taskPanelID"), "task", () ⇒ {}),
+          (navItem("executions", "Executions").render, "env", () ⇒ { println("Not yet") })
         ), key(nav_pills) + nav_inverse + nav_staticTop
-      )
-    )
-
-    topdiv.appendChild(badge("Tasks", "4", btn_medium))
-    topdiv.appendChild(badge("Prototype", "4", btn_primary))
-
-    topdiv.appendChild(
-      h2(
-        Forms.buttonGroup()(
-          Forms.button("File", btn_default)(onclick := { () ⇒ println("File") }),
-          Forms.button("Edit", btn_default),
-          Forms.button("Run", btn_primary)
-        )
       )
     )
 

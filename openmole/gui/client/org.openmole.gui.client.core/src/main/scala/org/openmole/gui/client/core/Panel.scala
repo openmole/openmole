@@ -3,12 +3,11 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
-import org.openmole.gui.misc.js.{ Select, Forms }
+import org.openmole.gui.misc.js.{ Select, Forms ⇒ bs }
 import org.scalajs.dom.Event
 
 import scalatags.JsDom.all
 import org.scalajs.jquery.jQuery
-
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.client.service.ClientService._
@@ -84,19 +83,19 @@ class GenericPanel(uuid: String,
     (PROTOTYPES, db ⇒ isPrototypeUI(db) && contains(db))
   )
 
-  val conceptTable = Forms.table(
+  val conceptTable = bs.table(
     thead,
     Rx {
       val dbUIs: Seq[DataBagUI] = filter().factories.head
       tbody({
         val elements = for (db ← dbUIs if filters(filter())(db)) yield {
-          Forms.tr(row)(
-            Forms.td(col_md_6)(a(db.name(), cursor := "pointer", onclick := { () ⇒
+          bs.tr(row)(
+            bs.td(col_md_6)(a(db.name(), cursor := "pointer", onclick := { () ⇒
               setCurrent(db)
               editionState() = true
             })),
-            Forms.td(col_md_5)(Forms.label(db.dataUI().dataType, label_primary)),
-            Forms.td(col_md_1)(Forms.button(glyph(glyph_trash))(onclick := { () ⇒
+            bs.td(col_md_5)(bs.label(db.dataUI().dataType, label_primary)),
+            bs.td(col_md_1)(bs.button(glyph(glyph_trash))(onclick := { () ⇒
               ClientService -= db
             }))
           )
@@ -108,7 +107,7 @@ class GenericPanel(uuid: String,
     }
   ).render
 
-  val inputFilter = Forms.input(
+  val inputFilter = bs.input(
     currentDataBagUI().map {
       _.name()
     }.getOrElse(""))(
@@ -120,7 +119,7 @@ class GenericPanel(uuid: String,
   inputFilter.oninput = (e: Event) ⇒ nameFilter() = inputFilter.value
 
   //New button
-  val newGlyph = Forms.button(glyph(glyph_plus))( /*`type` := "submit",*/ onclick := { () ⇒ add
+  val newGlyph = bs.button(glyph(glyph_plus))( /*`type` := "submit",*/ onclick := { () ⇒ add
   }).render
 
   def add = {
@@ -132,7 +131,10 @@ class GenericPanel(uuid: String,
   }
 
   val conceptFilter = Rx {
-    nav(nav_pills,
+    nav("filterNav", nav_pills, navItem("allfilter", "All", () ⇒ {
+      filter() = ALL
+      factorySelector.contents() = ClientService.factories
+    }),
       navItem("valfilter", "Val", () ⇒ {
         filter() = PROTOTYPES
         factorySelector.contents() = ClientService.prototypeFactories
@@ -140,8 +142,8 @@ class GenericPanel(uuid: String,
       navItem("taskfilter", "Task", () ⇒ {
         filter() = TASKS
         factorySelector.contents() = ClientService.taskFactories
-      }),
-      navItem("envfilter", "Environments", () ⇒ {
+      }, true),
+      navItem("envfilter", "Env", () ⇒ {
         println("not impl yet")
       })
     )
@@ -152,35 +154,35 @@ class GenericPanel(uuid: String,
     factorySelector.content() = currentDataBagUI()
   }
 
-  val saveHeaderButton = Forms.button("Apply", btn_primary)( /*`type` := "submit",*/ onclick := { () ⇒
+  val saveHeaderButton = bs.button("Apply", btn_primary)( /*`type` := "submit",*/ onclick := { () ⇒
     save
   }).render
 
-  val saveButton = Forms.button("Close", btn_test)("data-dismiss".attr := "modal", onclick := { () ⇒
+  val saveButton = bs.button("Close", btn_test)("data-dismiss".attr := "modal", onclick := { () ⇒
     save
   })
 
   val dialog = {
     modalDialog(uuid,
       bodyDialog(Rx {
-        div(
-          form(
-            formLine(
-              inputGroup(
+        bs.div()(
+          nav("navbar_form", navbar_form)(
+            form(
+              inputGroup(navbar_left)(
                 inputFilter,
                 inputGroupButton(newGlyph)
               ),
               if (editionState()) {
-                span(
+                bs.span(navbar_right)(
                   factorySelector.selector,
                   saveHeaderButton
                 )
               }
-              else conceptFilter
-            ), onsubmit := { () ⇒
-              if (editionState()) save
-              else if (rows() == 0) add
-            }
+              else bs.span(navbar_right)(conceptFilter), onsubmit := { () ⇒
+                if (editionState()) save
+                else if (rows() == 0) add
+              }
+            )
           ),
           if (editionState()) {
             inputFilter.value = currentDataBagUI().map {
@@ -190,7 +192,7 @@ class GenericPanel(uuid: String,
           }
           else {
             inputFilter.value = ""
-            div(conceptTable)
+            bs.div()(conceptTable)
           }
         )
       }
@@ -203,8 +205,9 @@ class GenericPanel(uuid: String,
 
   def conceptPanel = currentPanelUI() match {
     case Some(p: PanelUI) ⇒
-      bodyPanel(p.view)
-    case _ ⇒ div(h1("Create a  first data !"))
+      bodyPanel(
+        p.view)
+    case _ ⇒ bs.div()(h1("Create a  first data !"))
   }
 
   def save = {
@@ -224,7 +227,7 @@ class GenericPanel(uuid: String,
   def bodyPanel(view: HtmlTag) = extraCategories.size match {
     case 0 ⇒ view
     case _ ⇒
-      Forms.nav(nav_pills,
+      bs.nav("settingsNav", nav_pills,
         (for (c ← ("Settings", view) +: extraCategories) yield {
           navItem(c._1, c._1)
         }): _*
