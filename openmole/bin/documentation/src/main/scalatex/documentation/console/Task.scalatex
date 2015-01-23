@@ -24,7 +24,7 @@
       val t = EmptyTask() set (
         inputs += i,
         outputs += i,
-        default(i) := 0
+        i := 0
       )""")
 
     @p Depending on what you which kind of operation you want to achieve with OpenMOLE you should use the matching task. The one you might want to use to embed your own executable into OpenMOLE are:

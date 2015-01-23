@@ -144,14 +144,14 @@
 
       val explo = ExplorationTask(proto1 in (0 to 10))
 
-      //Defines the GroovyTask as a launcher of the hello executable
+      //Defines the scala task as a launcher of the hello executable
       val javaTask =
         ScalaTask("val outputFile = newFile(); Hello.run(proto1, inputFile, outputFile)") set (
           libraries += "/path/to/my/Hello.jar",
           imports += "hello.Hello",
           inputs += proto1,
           outputs += proto1,
-          default(inputFile) := "/path/to/my/input/file"
+          inputFile := "/path/to/my/input/file"
         )
 
       //Save the output file locally

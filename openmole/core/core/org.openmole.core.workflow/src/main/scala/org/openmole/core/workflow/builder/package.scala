@@ -50,10 +50,6 @@ package builder {
         (_: U).setDefault(p, v, `override`)
     }
 
-    final lazy val default = new {
-      def apply[T](p: Prototype[T]) = new AssignDefault[T](p)
-    }
-
     implicit def prototypeToAssignDefault[T](p: Prototype[T]) = new AssignDefault[T](p)
 
     final lazy val name = set[{ def setName(name: String) }]
