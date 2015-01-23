@@ -54,6 +54,8 @@ package builder {
       def apply[T](p: Prototype[T]) = new AssignDefault[T](p)
     }
 
+    implicit def prototypeToAssignDefault[T](p: Prototype[T]) = new AssignDefault[T](p)
+
     final lazy val name = set[{ def setName(name: String) }]
   }
 }
