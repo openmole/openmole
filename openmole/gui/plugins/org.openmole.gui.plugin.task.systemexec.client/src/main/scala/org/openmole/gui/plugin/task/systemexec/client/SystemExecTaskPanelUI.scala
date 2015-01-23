@@ -22,10 +22,8 @@ import org.openmole.gui.misc.js.Forms._
 
 import scala.scalajs.js.annotation.JSExport
 
-//import scalatags.JsDom.tags._
-//import scalatags.JsDom.attrs._
-
 import scalatags.JsDom.all._
+import org.openmole.gui.misc.js.{Forms=> bs}
 
 import rx._
 
@@ -33,7 +31,7 @@ import rx._
 class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {
 
   @JSExport
-  val view = div(
+  val view = bs.div()(
     h1(id := "title", "This is a title"),
     p("SystemExecTask !")
   )

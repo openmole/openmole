@@ -19,20 +19,19 @@ package org.openmole.gui.misc.js
 
 import fr.iscpif.scaladget.mapping.{ Select2QueryOptions, Select2Options }
 import fr.iscpif.scaladget.mapping.Select2Utils._
+import org.scalajs.dom
 import org.scalajs.dom._
-//import org.scalajs.dom._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js
 import scalatags.JsDom.TypedTag
 
+import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 
 import org.scalajs.jquery.jQuery
 import scala.scalajs.js
-import js.Dynamic.{ literal ⇒ lit }
 import rx._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.scalajs.dom
 import scala.scalajs.js
 
 @JSExport("Forms")
@@ -51,43 +50,50 @@ object Forms {
   def key(s: String) = new ClassKeyAggregator(s)
 
   //Div
-  def d[T <: TypedTag[HTMLDivElement]](t: T*): TypedTag[HTMLDivElement] = scalatags.JsDom.tags.div(t.toSeq: _*)
+  def div(keys: ClassKeyAggregator = emptyCK) = tags.div(`class` := keys.key)
 
-  // def dd(m: Modifier*) = div.copy(modifiers = div.modifiers :+ m.toSeq)
-  def dd(m: Modifier*) = div(m.toSeq)
+  //span
+  def span(keys: ClassKeyAggregator = emptyCK) = tags.span(`class` := keys.key)
 
   // Nav
-  class NavItem(val navid: String, content: String, val todo: () ⇒ Unit = () ⇒ {}) {
-    def render = li(role := "presentation", id := navid)(a(href := "#")(content))
+  class NavItem(val navid: String, content: String, val todo: () ⇒ Unit = () ⇒ {}, active: Boolean = false) {
+    val activeString = { if (active) "active" else "" }
+    println("ite " + content + " " + activeString)
+    def render = li(role := "presentation", id := navid, `class` := activeString)(a(href := "#")(content))
   }
 
-  def navItem(id: String, content: String, todo: () ⇒ Unit = () ⇒ {}) = new NavItem(id, content, todo)
+  def navItem(id: String, content: String, todo: () ⇒ Unit = () ⇒ {}, active: Boolean = false) = new NavItem(id, content, todo, active)
 
-  def nav(contents: Seq[(TypedTag[HTMLLIElement], String, () ⇒ Unit)], keys: ClassKeyAggregator): TypedTag[HTMLElement] =
-    ul(`class` := "nav " + keys.key, role := "tablist")(
+  def nav(uuid: String, contents: Seq[(TypedTag[HTMLLIElement], String, () ⇒ Unit)], keys: ClassKeyAggregator): TypedTag[HTMLElement] =
+    ul(`class` := "nav " + keys.key, id := uuid, role := "tablist")(
       contents.map { c ⇒
         c._1(scalatags.JsDom.attrs.onclick := { () ⇒
-          jQuery(".active").removeClass("active")
+          println("onclick ... " + c._2)
+          jQuery("#" + uuid + " .active").removeClass("active")
           jQuery("#" + c._2).addClass("active")
           c._3()
         })
       }: _*)
 
-  def nav(keys: ClassKeyAggregator, contents: NavItem*): TypedTag[HTMLElement] =
-    nav(contents.map { c ⇒ (c.render, c.navid, c.todo) }, keys)
+  def nav(uuid: String, keys: ClassKeyAggregator, contents: NavItem*): TypedTag[HTMLElement] =
+    nav(uuid, contents.map { c ⇒ (c.render, c.navid, c.todo) }, keys)
 
   val nav_default = "navbar-default"
   val nav_inverse = "navbar-inverse"
   val nav_staticTop = "navbar-static-top"
   val nav_pills = "nav-pills"
+  val navbar = "navbar-nav"
+  val navbar_form = "navbar-form"
+  val navbar_right = "navbar-right"
+  val navbar_left = "navbar-left"
 
   val dropdown = "dropdown"
 
   //Input
-  def input(content: String = "") = scalatags.JsDom.tags.input(content, `class` := "form-control")
+  def input(content: String = "") = tags.input(content, `class` := "form-control")
 
   // Label
-  def label(content: String, keys: ClassKeyAggregator = emptyCK): TypedTag[HTMLSpanElement] = span(`class` := ("label " + keys.key))(content)
+  def label(content: String, keys: ClassKeyAggregator = emptyCK): TypedTag[HTMLSpanElement] = span("label " + keys.key)(content)
 
   val label_default = key("label-default")
   val label_primary = key("label-primary")
@@ -100,10 +106,10 @@ object Forms {
   def select(id: String, contents: Seq[(String, String)], key: ClassKeyAggregator) = buttonGroup()(
     a(
       `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", href := "#"
-    )("Select", span(`class` := "caret")),
+    )("Select", span("caret")),
     ul(`class` := "dropdown-menu")(
       for (c ← contents) yield {
-        scalatags.JsDom.tags.li(a(
+        tags.li(a(
           href := "#")(c._2)
         )
       }
@@ -111,7 +117,7 @@ object Forms {
   )
 
   def glyph(key: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
-    span(`class` := "glyphicon " + key.key, "aria-hidden".attr := "true")
+    span("glyphicon " + key.key)("aria-hidden".attr := "true")
 
   val glyph_edit = "glyphicon-pencil"
   val glyph_trash = "glyphicon-trash"
@@ -120,10 +126,10 @@ object Forms {
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
-    scalatags.JsDom.tags.button(`class` := ("btn " + keys.key), `type` := "button")(content)
+    tags.button(`class` := ("btn " + keys.key), `type` := "button")(content)
 
   def button(content: TypedTag[HTMLElement], keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
-    scalatags.JsDom.tags.button(`class` := ("btn " + keys.key), `type` := "button")(content)
+    tags.button(`class` := ("btn " + keys.key), `type` := "button")(content)
 
   def button(content: String): TypedTag[HTMLElement] = button(content, btn_default)
 
@@ -142,38 +148,39 @@ object Forms {
 
   // Badges
   def badge(content: String, badgeValue: String, keys: ClassKeyAggregator = emptyCK) =
-    button(content + " ", keys)(span(`class` := "badge", badgeValue))
+    button(content + " ", keys)(span("badge")(badgeValue))
 
   //Button group
-  def buttonGroup(keys: ClassKeyAggregator = emptyCK) = div(`class` := "btn-group")
+  def buttonGroup(keys: ClassKeyAggregator = emptyCK) = div("btn-group")
 
   val btn_group_large = key("btn-group-lg")
   val btn_group_medium = key("btn-group-sm")
   val btn_group_small = key("btn-group-xs")
 
-  def buttonToolBar = div(`class` := "btn-toolbar", role := "toolbar")
+  def buttonToolBar = div("btn-toolbar")(role := "toolbar")
 
   //Modalg Dialog
   def modalDialog(ID: String, header: TypedTag[HTMLFormElement], body: TypedTag[HTMLDivElement], footer: TypedTag[HTMLElement]) =
     new ModalDialog(ID, header, body, footer)
 
   def modalDialog(ID: String, typedTag: TypedTag[_]*) =
-    div(`class` := "modal fade", id := ID,
-      div(`class` := "modal-dialog",
-        div(`class` := "modal-content", typedTag)
+    div("modal fade")(id := ID,
+      div("modal-dialog")(
+        div("modal-content")(
+          typedTag)
       )
     )
 
-  def headerDialog = div(`class` := "modal-header")
+  def headerDialog = div("modal-header")
 
-  def bodyDialog = div(`class` := "modal-body")
+  def bodyDialog = div("modal-body")
 
-  def footerDialog = div(`class` := "modal-footer")
+  def footerDialog = div("modal-footer")
 
   //Jumbotron
   def jumbotron(modifiers: scalatags.JsDom.Modifier*) =
-    div(`class` := "container theme-showcase", role := "main")(
-      div(`class` := "jumbotron")(
+    div("container theme-showcase")(role := "main")(
+      div("jumbotron")(
         p(
           (modifiers.toSeq: _*)
         )
@@ -181,22 +188,23 @@ object Forms {
     )
 
   //table
-  def table = scalatags.JsDom.tags.table(`class` := "table table-stripped")
-  def tr(keys: ClassKeyAggregator = emptyCK) = scalatags.JsDom.tags.tr(`class` := keys.key)
-  def td(keys: ClassKeyAggregator = emptyCK) = scalatags.JsDom.tags.td(`class` := keys.key)
+  def table = tags.table(`class` := "table table-stripped")
+  def tr(keys: ClassKeyAggregator = emptyCK) = tags.tr(`class` := keys.key)
+  def td(keys: ClassKeyAggregator = emptyCK) = tags.td(`class` := keys.key)
 
   //Forms
-  def formGroup = div(`class` := "form-group ")
+  def formGroup = div("form-group ")
 
-  def formLine = div(`class` := "form-inline")
+  def formLine = div("form-inline")
 
   val large_form_group = key("form-group-lg")
   val small_form_group = key("form-group-sm")
 
   //Input group
-  def inputGroup = div(`class` := "input-group")
+  def inputGroup(keys: ClassKeyAggregator) = div(key("input-group") + keys.key)
 
-  def inputGroupButton = span(`class` := "input-group-btn")
+  def inputGroupButton = span("input-group-btn")
+  val input_group_lg = "input-group-lg"
 
   //Grid
   val row = key("row")
