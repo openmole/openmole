@@ -17,92 +17,22 @@
 
 package org.openmole.plugin.task.scala
 
-import java.io.{ OutputStreamWriter, File }
-import java.lang.reflect.Method
-import javax.script.SimpleScriptContext
-import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.misc.tools.io.StringBuilderOutputStream
 import org.openmole.misc.tools.script._
 import org.openmole.plugin.task.code._
-import org.openmole.misc.console.ScalaREPL
-
-import scala.collection.mutable.ListBuffer
 
 object ScalaTask {
 
-  def apply(code: String)(implicit plugins: PluginSet = PluginSet.empty) =
-    new ScalaTaskBuilder(code)
+  def apply(source: String)(implicit plugins: PluginSet = PluginSet.empty) =
+    new ScalaTaskBuilder {
+      def toTask = new ScalaTask(source) with Built
+    }
 }
 
-abstract class ScalaTask(
-    val code: String,
-    val usedClasses: Seq[Class[_]]) extends JVMLanguageTask {
-
-  def prefix = "_input_value_"
-
-  def compiledScript(inputs: Seq[Prototype[_]]) = {
-    val interpreter = new ScalaREPL(false, usedClasses, libraries)
-    val evaluated =
-      try interpreter.eval(script(inputs))
-      catch {
-        case e: Exception ⇒
-          throw new InternalProcessingError(
-            e,
-            interpreter.firstErrorMessage.map {
-              error ⇒
-                s"""Error while compiling:
-               |${error.error}
-               |on line ${error.line} of script:
-               |${script(inputs)}""".stripMargin
-            }.getOrElse("Error in compiler")
-          )
-      }
-
-    if (evaluated == null) throw new InternalProcessingError(
-      s"""The return value of the script was null:
-         |${script(inputs)}""".stripMargin
-    )
-    (evaluated, evaluated.getClass.getMethod("apply", inputs.map(_.`type`.runtimeClass).toSeq: _*))
-  }
-
-  def script(inputs: Seq[Prototype[_]]) =
-    imports.map("import " + _).mkString("\n") + "\n\n" +
-      s"""(${inputs.toSeq.map(i ⇒ prefix + i.name + ": " + i.`type`).mkString(",")}) => {
-       |    object input {
-       |      ${inputs.toSeq.map(i ⇒ "var " + i.name + " = " + prefix + i.name).mkString("; ")}
-       |    }
-       |    import input._
-       |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(oMSeed).toScala;
-       |    ${code}
-       |    import scala.collection.JavaConversions.mapAsJavaMap
-       |    mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",")} ))
-       |}
-       |""".stripMargin
-
-  @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], (AnyRef, Method)]()
-
-  def cachedCompiledScript(inputs: Seq[Prototype[_]]) = cache.synchronized {
-    cache.getOrElseUpdate(inputs, compiledScript(inputs))
-  }
-
-  override def processCode(context: Context) = {
-    val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }.sortBy(_.name)
-    val args = contextPrototypes.map(i ⇒ context(i))
-    val (evaluated, method) = cachedCompiledScript(contextPrototypes)
-    val result = method.invoke(evaluated, args.toSeq.map(_.asInstanceOf[AnyRef]): _*)
-    val map = result.asInstanceOf[java.util.Map[String, Any]]
-    context ++
-      outputs.toSeq.map {
-        o ⇒
-          Variable.unsecure(o.prototype, Option(map.get(o.prototype.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
-      }
-  }
-
+abstract class ScalaTask(val source: String) extends JVMLanguageTask with ScalaCompilation {
+  override def processCode(context: Context) = compiled(context).get.run(context)
 }
 

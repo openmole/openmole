@@ -10,8 +10,8 @@ object Tool extends PluginDefaults {
 
   implicit val artifactPrefix = Some("org.openmole.plugin.tool")
 
-  lazy val groovy = OsgiProject("groovy") dependsOn (provided(Misc.exception), provided(Core.workflow)) settings
-    (libraryDependencies += Libraries.groovy % "provided")
+  lazy val groovy = OsgiProject("groovy") dependsOn (Misc.exception, Core.workflow) settings
+    (libraryDependencies += Libraries.groovy)
 
   lazy val netLogoAPI = OsgiProject("netlogo") settings (autoScalaLibrary := false, crossPaths := false)
 

@@ -16,4 +16,6 @@ object Method extends PluginDefaults {
   lazy val abc = OsgiProject("abc") dependsOn (Misc.exception, Core.workflow, Misc.workspace, Hook.fileHook, plugin.Task.tools) settings
     (libraryDependencies += scalabc)
 
+  lazy val modelFamily = OsgiProject("modelfamily") dependsOn (evolution, Core.workflow, Task.scala)
+
 }

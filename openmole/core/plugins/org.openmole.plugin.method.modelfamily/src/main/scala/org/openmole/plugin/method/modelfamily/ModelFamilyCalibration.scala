@@ -15,30 +15,30 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.modelfamily
 
 import fr.iscpif.mgo._
 import fr.iscpif.mgo.modelfamily._
+import org.openmole.core.workflow.data._
 import org.openmole.plugin.method.evolution._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
+import org.openmole.plugin.method.evolution.ga.{ GAAlgorithm, GATermination, Inputs }
 
 import scala.util.Random
 
-object ModelFamily {
+object ModelFamilyCalibration {
 
   def apply(
     mu: Int,
     lambda: Int,
     models: Int,
     nicheSize: Int,
-    termination: GATermination { type G >: ModelFamily#G; type P >: ModelFamily#P; type F >: ModelFamily#F },
+    termination: GATermination { type G >: ModelFamilyCalibration#G; type P >: ModelFamilyCalibration#P; type F >: ModelFamilyCalibration#F },
     modelId: Prototype[Int],
     inputs: Inputs,
     objectives: Objectives,
     reevaluate: Double = 0.0) = {
     val (_mu, _reevaluate, _lambda, _inputs, _objectives, _nicheSize, _models, _modelId) = (mu, reevaluate, lambda, inputs, objectives, nicheSize, models, modelId)
-    new ModelFamily {
+    new ModelFamilyCalibration {
       val inputs = _inputs
       val objectives = _objectives
       val stateManifest: Manifest[STATE] = termination.stateManifest
@@ -71,7 +71,7 @@ object ModelFamily {
   }
 }
 
-trait ModelFamily extends NoArchive
+trait ModelFamilyCalibration extends NoArchive
   with GAAlgorithm
   with ModelFamilyElitism
   with ModelFamilyMutation

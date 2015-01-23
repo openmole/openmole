@@ -22,7 +22,7 @@ import org.openmole.plugin.task.code.JVMLanguageTaskBuilder
 
 import scala.collection.mutable.ListBuffer
 
-class ScalaTaskBuilder(code: String)(implicit plugins: PluginSet) extends JVMLanguageTaskBuilder { builder ⇒
+abstract class ScalaTaskBuilder(implicit plugins: PluginSet) extends JVMLanguageTaskBuilder { builder ⇒
 
   val usedClasses = ListBuffer[Class[_]]()
 
@@ -35,6 +35,8 @@ class ScalaTaskBuilder(code: String)(implicit plugins: PluginSet) extends JVMLan
   addImport("org.openmole.misc.workspace.Workspace.newFile")
   addImport("org.openmole.misc.workspace.Workspace.newDir")
 
-  def toTask =
-    new ScalaTask(code, usedClasses) with builder.Built
+  trait Built <: super.Built {
+    def usedClasses = builder.usedClasses.toList
+  }
+
 }
