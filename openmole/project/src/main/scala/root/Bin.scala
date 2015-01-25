@@ -248,7 +248,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       unidocProjectFilter in (ScalaUnidoc, unidoc) := inAnyProject -- inProjects(Libraries.subProjects: _*) -- inProjects(ThirdParties.subProjects: _*)
     )
 
-  lazy val documentation = Project("documentation", dir / "documentation") dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
+  lazy val documentation = Project("documentation", dir / "documentation", settings = scalatex.SbtPlugin.projectSettings) dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
     libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.0",
     libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value
   )

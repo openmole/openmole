@@ -55,9 +55,9 @@ package mole {
 
     implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole
 
-    implicit def capsuleToMoleExecutionConverter(capsule: Capsule) = capsule.toPuzzle.toExecution
-    implicit def taskToMoleExecutionConverter(task: Task) = task.toCapsule.toPuzzle.toExecution
-    implicit def taskBuilderToMoleExecutionConverter(taskBuilder: TaskBuilder) = taskBuilder.toCapsule.toPuzzle.toExecution
+    implicit def capsuleToMoleExecutionConverter(capsule: Capsule): MoleExecution = capsule.toPuzzle.toExecution
+    implicit def taskToMoleExecutionConverter(task: Task): MoleExecution = task.toCapsule.toPuzzle.toExecution
+    implicit def taskBuilderToMoleExecutionConverter(taskBuilder: TaskBuilder): MoleExecution = taskBuilder.toCapsule.toPuzzle.toExecution
 
     implicit def moleToMoleExecutionConverter(mole: Mole) = MoleExecution(mole)
   }
