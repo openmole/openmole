@@ -170,7 +170,7 @@ object Forms {
       )
     )
 
-  def headerDialog = div("modal-header")
+  def headerDialog = div("modal-header modal-info")
 
   def bodyDialog = div("modal-body")
 

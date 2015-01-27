@@ -122,7 +122,7 @@ class GenericPanel(uuid: String,
       autofocus := "true"
     ).render
 
-  val dimInput = bs.input("0")(placeholder := "Dim", width := 45, autofocus := true).render
+  val dimInput = bs.input("0")(placeholder := "Dim", width := 50, autofocus := true).render
   inputFilter.oninput = (e: Event) ⇒ nameFilter() = inputFilter.value
 
   //New button
@@ -135,7 +135,7 @@ class GenericPanel(uuid: String,
   def add = {
     val dbUI = new DataBagUI(Var(filter().factories.head.dataUI))
     dbUI.name() = inputFilter.value
-    dimInput.value = ""
+    dimInput.value = "0"
     ClientService += dbUI
     setCurrent(dbUI)
     editionState() = true
@@ -175,7 +175,7 @@ class GenericPanel(uuid: String,
 
   val dialog = {
     modalDialog(uuid,
-      bodyDialog(Rx {
+      headerDialog(Rx {
         bs.div()(
           nav("navbar_form", navbar_form)(
             bs.form()(
@@ -196,7 +196,10 @@ class GenericPanel(uuid: String,
                 else if (rows() == 0) add
               }
             )
-          ),
+          ))
+      }),
+      bodyDialog(Rx {
+        bs.div()(
           if (editionState()) {
             inputFilter.value = currentDataBagUI().map {
               _.name()
