@@ -97,6 +97,11 @@ object ClientService {
   def isPrototypeUI(f: FactoryUI): Boolean = isPrototypeUI(f.dataUI)
   def isTaskUI(f: FactoryUI): Boolean = isTaskUI(f.dataUI)
 
+  def prototypeUI(db: DataBagUI): Option[PrototypeDataUI] = db.dataUI() match {
+    case p: PrototypeDataUI ⇒ Some(p)
+    case _                  ⇒ None
+  }
+
   def +=(dataKey: String, factoryUI: FactoryUI) = uiFactories() += dataKey -> factoryUI
 
   def +=(dataBagUI: DataBagUI) = {

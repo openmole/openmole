@@ -21,17 +21,9 @@ import org.openmole.gui.ext.data.ProtoTYPE._
 import org.openmole.gui.ext.data.PrototypeData
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
-import org.openmole.gui.misc.js.{ Select, Forms ⇒ bs }
-import org.openmole.gui.misc.js.Forms._
-import scalatags.JsDom.{ tags ⇒ tags }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 
-import org.scalajs.jquery.jQuery
-import scalatags.JsDom.attrs.placeholder
-import scalatags.JsDom.styles.width
-import scalatags.JsDom.short._
 import rx._
-
-//abstract class BasePrototypeDataUI extends PrototypeDataUI
 
 object PrototypeFactoryUI {
 
@@ -68,21 +60,9 @@ object PrototypeFactoryUI {
 
 class PrototypePanelUI(dataUI: PrototypeDataUI) extends PanelUI {
 
-  // val nameInput = Forms.input(dataUI.name()).render
-  val dimInput = bs.input()(placeholder := "Dim", width := 50).render
-
-  val view = {
-    dimInput.value = dataUI.dimension().toString
-    bs.form(form_inline)(
-      bs.formGroup(
-        bs.label("Dimension", black_label).render,
-        dimInput
-      )
-    )
-  }
+  val view = bs.div()
 
   def save = {
-    dataUI.dimension() = dimInput.value.toInt
   }
 
 }
