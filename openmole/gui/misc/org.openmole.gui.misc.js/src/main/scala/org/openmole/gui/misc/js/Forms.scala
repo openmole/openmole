@@ -58,7 +58,6 @@ object Forms {
   // Nav
   class NavItem(val navid: String, content: String, val todo: () ⇒ Unit = () ⇒ {}, active: Boolean = false) {
     val activeString = { if (active) "active" else "" }
-    println("ite " + content + " " + activeString)
     def render = li(role := "presentation", id := navid, `class` := activeString)(a(href := "#")(content))
   }
 
@@ -68,7 +67,6 @@ object Forms {
     ul(`class` := "nav " + keys.key, id := uuid, role := "tablist")(
       contents.map { c ⇒
         c._1(scalatags.JsDom.attrs.onclick := { () ⇒
-          println("onclick ... " + c._2)
           jQuery("#" + uuid + " .active").removeClass("active")
           jQuery("#" + c._2).addClass("active")
           c._3()
@@ -101,6 +99,7 @@ object Forms {
   val label_info = key("label-info")
   val label_warning = key("label-warning")
   val label_danger = key("label-danger")
+  val black_label = key("black-label")
 
   //Select (to be used with button class aggregators )
   def select(id: String, contents: Seq[(String, String)], key: ClassKeyAggregator) = buttonGroup()(
@@ -193,12 +192,12 @@ object Forms {
   def td(keys: ClassKeyAggregator = emptyCK) = tags.td(`class` := keys.key)
 
   //Forms
+  def form(keys: ClassKeyAggregator = emptyCK) = tags.form(`class` := keys.key)
   def formGroup = div("form-group ")
-
-  def formLine = div("form-inline")
 
   val large_form_group = key("form-group-lg")
   val small_form_group = key("form-group-sm")
+  val form_inline = key("form-inline")
 
   //Input group
   def inputGroup(keys: ClassKeyAggregator) = div(key("input-group") + keys.key)

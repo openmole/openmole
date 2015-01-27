@@ -76,9 +76,8 @@ object ClientService {
   }.toSeq*/
 
   def setName(db: DataBagUI, name: String) = get(db).map {
-      _.name() = name
-    }
-
+    _.name() = name
+  }
 
   private def get(db: DataBagUI) = uiDataBags().find(_.uuid == db.uuid)
 

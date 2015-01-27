@@ -65,15 +65,16 @@ class GenericPanel(uuid: String,
   val currentPanelUI = Rx(currentDataBagUI().map {
     _.dataUI().panelUI
   })
-  val factorySelector = new Select[FactoryUI]("factories", Var(filter().factories), currentDataBagUI(), btn_primary)
-
-  Obs(factorySelector.content) {
-    currentDataBagUI().map {
-      _.dataUI() = factorySelector.content().map {
-        _.dataUI
-      }.get
-    }
-  }
+  val factorySelector: Select[FactoryUI] = new Select("factories",
+    Var(filter().factories),
+    currentDataBagUI(),
+    btn_primary, () ⇒ {
+      currentDataBagUI().map {
+        _.dataUI() = factorySelector.content().map {
+          _.dataUI
+        }.get
+      }
+    })
 
   def contains(db: DataBagUI) = db.name().contains(nameFilter())
 
@@ -170,7 +171,7 @@ class GenericPanel(uuid: String,
       bodyDialog(Rx {
         bs.div()(
           nav("navbar_form", navbar_form)(
-            form(
+            bs.form()(
               inputGroup(navbar_left)(
                 inputFilter,
                 if (editionState()) inputGroupButton(factorySelector.selector)
@@ -206,11 +207,13 @@ class GenericPanel(uuid: String,
     )
   }.render
 
-  def conceptPanel = currentPanelUI() match {
-    case Some(p: PanelUI) ⇒
-      bodyPanel(
-        p.view)
-    case _ ⇒ bs.div()(h1("Create a  first data !"))
+  val conceptPanel = Rx {
+    currentPanelUI() match {
+      case Some(p: PanelUI) ⇒
+        bodyPanel(
+          p.view)
+      case _ ⇒ bs.div()(h1("Create a  first data !"))
+    }
   }
 
   def save = {

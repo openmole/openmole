@@ -21,12 +21,14 @@ import org.openmole.gui.ext.data.ProtoTYPE._
 import org.openmole.gui.ext.data.PrototypeData
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
-import org.openmole.gui.misc.js.{ Select, Forms }
+import org.openmole.gui.misc.js.{ Select, Forms ⇒ bs }
+import org.openmole.gui.misc.js.Forms._
+import scalatags.JsDom.{ tags ⇒ tags }
+
 import org.scalajs.jquery.jQuery
+import scalatags.JsDom.attrs.placeholder
+import scalatags.JsDom.styles.width
 import scalatags.JsDom.short._
-import scalatags.JsDom.attrs._
-import scalatags.JsDom.tags._
-import scalatags.JsDom.styles._
 import rx._
 
 //abstract class BasePrototypeDataUI extends PrototypeDataUI
@@ -34,35 +36,53 @@ import rx._
 object PrototypeFactoryUI {
 
   private def buildDataUI(`type`: ProtoTYPE, dim: Int = 0) = new PrototypeDataUI {
-    def dimension = Var(dim)
+    val dimension = Var(dim)
+
     def data = PrototypeData(`type`, dimension())
+
     def panelUI = new PrototypePanelUI(this)
+
     val dataType = `type`.name
   }
 
   class PrototypeFactoryUI(factoryName: String, `type`: ProtoTYPE) extends FactoryUI {
     type DATAUI = PrototypeDataUI
+
     def dataUI = buildDataUI(`type`)
+
     val name = factoryName
   }
 
   def intFactory = new PrototypeFactoryUI("Integer", INT)
+
   def doubleFactory = new PrototypeFactoryUI("Double", DOUBLE)
+
   def longFactory = new PrototypeFactoryUI("Long", LONG)
+
   def booleanFactory = new PrototypeFactoryUI("Boolean", BOOLEAN)
+
   def stringFactory = new PrototypeFactoryUI("String", STRING)
+
   def fileFactory = new PrototypeFactoryUI("File", FILE)
 }
 
 class PrototypePanelUI(dataUI: PrototypeDataUI) extends PanelUI {
 
   // val nameInput = Forms.input(dataUI.name()).render
-  val dimInput = Forms.input(dataUI.dimension().toString)(placeholder := "Dim", width := 50)
+  val dimInput = bs.input()(placeholder := "Dim", width := 50).render
 
-  val view = div(dimInput)
+  val view = {
+    dimInput.value = dataUI.dimension().toString
+    bs.form(form_inline)(
+      bs.formGroup(
+        bs.label("Dimension", black_label).render,
+        dimInput
+      )
+    )
+  }
 
   def save = {
-    dataUI.dimension() = dimInput.render.value.toInt
+    dataUI.dimension() = dimInput.value.toInt
   }
 
 }

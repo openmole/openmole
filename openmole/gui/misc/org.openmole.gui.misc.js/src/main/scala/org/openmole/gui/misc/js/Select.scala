@@ -25,7 +25,8 @@ import org.openmole.gui.misc.js.JsRxTags._
 class Select[T <: Displayable with Identifiable](autoID: String,
                                                  val contents: Var[Seq[T]],
                                                  default: Option[T] = None,
-                                                 key: ClassKeyAggregator = Forms.emptyCK) {
+                                                 key: ClassKeyAggregator = Forms.emptyCK,
+                                                 onclickExtra: () ⇒ Unit = () ⇒ {}) {
 
   val jQid = "#" + autoID
 
@@ -53,12 +54,13 @@ class Select[T <: Displayable with Identifiable](autoID: String,
       Rx {
         for (c ← contents().zipWithIndex) yield {
           scalatags.JsDom.tags.li(a(
-            href := "#", onclick := { () ⇒ content() = Some(contents()(c._2)) })(c._1.name)
+            href := "#", onclick := { () ⇒
+              content() = Some(contents()(c._2))
+              onclickExtra()
+            })(c._1.name)
           )
         }
       }
     )
   ).render
-
-  //def applyOnChange(ind: Int) = content() = Some(contents()(ind))
 }

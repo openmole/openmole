@@ -63,3 +63,7 @@ select::-moz-focus-inner {
 	position:relative;
 	top:1px;
 }
+
+.black-label {
+	color: black;
+}
