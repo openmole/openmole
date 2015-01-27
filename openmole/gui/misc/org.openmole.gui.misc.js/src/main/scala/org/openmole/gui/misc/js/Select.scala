@@ -48,20 +48,17 @@ class Select[T <: Displayable with Identifiable](autoID: String,
           }.getOrElse(contents()(0).name) + " "
         },
         span(`class` := "caret")
-      ),
+      ).render,
     ul(`class` := "dropdown-menu", id := autoID)(
-      for (c ← contents().zipWithIndex) yield {
-        scalatags.JsDom.tags.li(a(
-          href := "#", onclick := { () ⇒ applyOnChange(c._2) })(c._1.name)
-        )
+      Rx {
+        for (c ← contents().zipWithIndex) yield {
+          scalatags.JsDom.tags.li(a(
+            href := "#", onclick := { () ⇒ content() = Some(contents()(c._2)) })(c._1.name)
+          )
+        }
       }
     )
   ).render
 
-  def applyOnChange(ind: Int): Unit = {
-    content() = Some(contents()(ind))
-    content().map { c ⇒ jQuery(jQid).parents(".btn-group").find(".dropdown-toggle").html(c.name + " <span class=\"caret\"><span>")
-    }
-  }
-
+  //def applyOnChange(ind: Int) = content() = Some(contents()(ind))
 }

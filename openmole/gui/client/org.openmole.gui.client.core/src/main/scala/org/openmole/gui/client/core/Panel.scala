@@ -45,7 +45,7 @@ object Panel {
   import ConceptFilter._
 
   def generic(uuid: String,
-              defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(ALL),
+              defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS),
               extraCategories: Seq[(String, HtmlTag)] = Seq()) =
     new GenericPanel(uuid, defaultDataBagUI, extraCategories).dialog
 }
@@ -53,12 +53,12 @@ object Panel {
 import Panel.ConceptFilter._
 
 class GenericPanel(uuid: String,
-                   defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(ALL),
+                   defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS),
                    extraCategories: Seq[(String, HtmlTag)] = Seq()) {
 
   val jQid = "#" + uuid
   val editionState: Var[Boolean] = Var(false)
-  val filter: Var[ConceptState] = Var(defaultDataBagUI.right.toOption.getOrElse(ALL))
+  val filter: Var[ConceptState] = Var(defaultDataBagUI.right.toOption.getOrElse(TASKS))
   var nameFilter = Var("")
   val rows = Var(0)
   val currentDataBagUI = Var(defaultDataBagUI.left.toOption)
@@ -137,15 +137,15 @@ class GenericPanel(uuid: String,
     nav("filterNav", nav_pills, navItem("allfilter", "All", () ⇒ {
       filter() = ALL
       factorySelector.contents() = ClientService.factories
-    }),
+    }, filter() == ALL),
       navItem("valfilter", "Val", () ⇒ {
         filter() = PROTOTYPES
         factorySelector.contents() = ClientService.prototypeFactories
-      }),
+      }, filter() == PROTOTYPES),
       navItem("taskfilter", "Task", () ⇒ {
         filter() = TASKS
         factorySelector.contents() = ClientService.taskFactories
-      }, true),
+      }, filter() == TASKS),
       navItem("envfilter", "Env", () ⇒ {
         println("not impl yet")
       })

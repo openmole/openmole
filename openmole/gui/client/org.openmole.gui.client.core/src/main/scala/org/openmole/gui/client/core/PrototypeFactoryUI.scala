@@ -20,36 +20,49 @@ package org.openmole.gui.client.core
 import org.openmole.gui.ext.data.ProtoTYPE._
 import org.openmole.gui.ext.data.PrototypeData
 import org.openmole.gui.ext.dataui._
+import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.misc.js.{ Select, Forms }
 import org.scalajs.jquery.jQuery
 import scalatags.JsDom.short._
 import scalatags.JsDom.attrs._
 import scalatags.JsDom.tags._
+import scalatags.JsDom.styles._
 import rx._
 
-abstract class BasePrototypeDataUI(val `type`: Var[ProtoTYPE], val dimension: Var[Int]) extends PrototypeDataUI
+//abstract class BasePrototypeDataUI extends PrototypeDataUI
 
-object PrototypeFactory {
-  def dataUI(`type`: ProtoTYPE, dimension: Int) = new BasePrototypeDataUI(Var(`type`), Var(dimension)) {
-    def data = PrototypeData(`type`(), dimension())
+object PrototypeFactoryUI {
 
+  private def buildDataUI(`type`: ProtoTYPE, dim: Int = 0) = new PrototypeDataUI {
+    def dimension = Var(dim)
+    def data = PrototypeData(`type`, dimension())
     def panelUI = new PrototypePanelUI(this)
-
-    def dataType = `type`().name
+    val dataType = `type`.name
   }
+
+  class PrototypeFactoryUI(factoryName: String, `type`: ProtoTYPE) extends FactoryUI {
+    type DATAUI = PrototypeDataUI
+    def dataUI = buildDataUI(`type`)
+    val name = factoryName
+  }
+
+  def intFactory = new PrototypeFactoryUI("Integer", INT)
+  def doubleFactory = new PrototypeFactoryUI("Double", DOUBLE)
+  def longFactory = new PrototypeFactoryUI("Long", LONG)
+  def booleanFactory = new PrototypeFactoryUI("Boolean", BOOLEAN)
+  def stringFactory = new PrototypeFactoryUI("String", STRING)
+  def fileFactory = new PrototypeFactoryUI("File", FILE)
 }
 
 class PrototypePanelUI(dataUI: PrototypeDataUI) extends PanelUI {
 
   // val nameInput = Forms.input(dataUI.name()).render
-  val dimInput = Forms.input(dataUI.dimension().toString).render
-  val typeInput = new Select("protoTYPE", Var(ALL))
+  val dimInput = Forms.input(dataUI.dimension().toString)(placeholder := "Dim", width := 50)
 
-  val view = div(typeInput.selector.render, dimInput)
+  val view = div(dimInput)
 
   def save = {
-    dataUI.`type`() = typeInput.content().getOrElse(DOUBLE)
-    dataUI.dimension() = dimInput.value.toInt
+    dataUI.dimension() = dimInput.render.value.toInt
   }
 
 }

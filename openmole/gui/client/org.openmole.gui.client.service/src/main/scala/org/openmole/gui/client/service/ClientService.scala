@@ -39,20 +39,20 @@ object UIFactories {
 
 object ClientService {
 
-  private val uiFactories = UIFactories.factoryMap.toMap
+  private val uiFactories = Var(UIFactories.factoryMap.toMap)
   private val uiDataBags: Var[Seq[DataBagUI]] = Var(Seq())
 
   // Factories
-  def taskFactories = uiFactories.values.flatMap { f ⇒
+  def taskFactories = uiFactories().values.flatMap { f ⇒
     f.dataUI match {
       case t: TaskDataUI ⇒ Some(f.asInstanceOf[IOFactoryUI])
       case _             ⇒ None
     }
   }.toSeq
 
-  def prototypeFactories: Seq[FactoryUI] = uiFactories.values.filter { f ⇒ isPrototypeUI(f.dataUI) }.toSeq
+  def prototypeFactories: Seq[FactoryUI] = uiFactories().values.filter { f ⇒ isPrototypeUI(f.dataUI) }.toSeq
 
-  def factories = uiFactories.values.toSeq
+  def factories = uiFactories().values.toSeq
 
   //DataBagUIs
   def taskDataBagUIs: Seq[DataBagUI] = uiDataBags().filter {
@@ -75,14 +75,10 @@ object ClientService {
     }
   }.toSeq*/
 
-  def setName(db: DataBagUI, name: String) = {
-    get(db).map {
+  def setName(db: DataBagUI, name: String) = get(db).map {
       _.name() = name
     }
-    println("Named " + get(db).map {
-      _.name()
-    })
-  }
+
 
   private def get(db: DataBagUI) = uiDataBags().find(_.uuid == db.uuid)
 
@@ -101,6 +97,8 @@ object ClientService {
 
   def isPrototypeUI(f: FactoryUI): Boolean = isPrototypeUI(f.dataUI)
   def isTaskUI(f: FactoryUI): Boolean = isTaskUI(f.dataUI)
+
+  def +=(dataKey: String, factoryUI: FactoryUI) = uiFactories() += dataKey -> factoryUI
 
   def +=(dataBagUI: DataBagUI) = {
     if (!exists(dataBagUI))
@@ -130,7 +128,7 @@ object ClientService {
     case Failure(f) ⇒ throw (f)
   }
 
-  private def factoryUI(data: Data) = uiFactories.get(data.getClass.getCanonicalName) match {
+  private def factoryUI(data: Data) = uiFactories().get(data.getClass.getCanonicalName) match {
     case Some(f: FactoryUI) ⇒ Try(f.dataUI)
     case _                  ⇒ failure(data)
   }
@@ -176,12 +174,12 @@ object ClientService {
       (pUI.data, opt)
   }
 
-  implicit def dataUIToFactoryUI(d: DataUI): Option[FactoryUI] = uiFactories.values.find {
+  implicit def dataUIToFactoryUI(d: DataUI): Option[FactoryUI] = uiFactories().values.find {
     _.dataUI == d
   }
 
   implicit def dataBagUIToFactoryUI(p: Option[DataBagUI]): Option[FactoryUI] = p flatMap { dataBagUI ⇒
-    uiFactories.values.find { f ⇒
+    uiFactories().values.find { f ⇒
       f.dataUI.getClass == dataBagUI.dataUI().getClass
     }
   }

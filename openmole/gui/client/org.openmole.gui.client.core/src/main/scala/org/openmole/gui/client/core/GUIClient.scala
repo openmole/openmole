@@ -44,6 +44,14 @@ object GUIClient {
   @JSExport
   def run(): Unit = {
 
+    //Register Prototype factories (forced to use strings since getClass does not work with scalajs)
+    ClientService += ("org.openmole.gui.ext.data.IntPrototypeDataUI", PrototypeFactoryUI.intFactory)
+    ClientService += ("org.openmole.gui.ext.data.DoublePrototypeDataUI", PrototypeFactoryUI.doubleFactory)
+    ClientService += ("org.openmole.gui.ext.data.LongPrototypeDataUI", PrototypeFactoryUI.longFactory)
+    ClientService += ("org.openmole.gui.ext.data.StringPrototypeDataUI", PrototypeFactoryUI.stringFactory)
+    ClientService += ("org.openmole.gui.ext.data.BooleanPrototypeDataUI", PrototypeFactoryUI.booleanFactory)
+    ClientService += ("org.openmole.gui.ext.data.FilePrototypeDataUI", PrototypeFactoryUI.fileFactory)
+
     val db = new DataBagUI(Var(ClientService.taskFactories(1).dataUI))
     db.name() = "premier"
     ClientService += db
@@ -51,6 +59,9 @@ object GUIClient {
     val db2 = new DataBagUI(Var(ClientService.taskFactories(1).dataUI))
     ClientService += db2
     db2.name() = "yop"
+    val proto = new DataBagUI(Var(ClientService.prototypeFactories(0).dataUI))
+    proto.name() = "proto1"
+    ClientService += proto
 
     val topdiv = dom.document.body.appendChild(Forms.div())
 
@@ -58,7 +69,9 @@ object GUIClient {
       nav("mainMav",
         Seq(
           (navItem("settings", "Settings").render("data-toggle".attr := "modal", "data-target".attr := "#taskPanelID"), "task", () ⇒ {}),
-          (navItem("executions", "Executions").render, "env", () ⇒ { println("Not yet") })
+          (navItem("executions", "Executions").render, "env", () ⇒ {
+            println("Not yet")
+          })
         ), key(nav_pills) + nav_inverse + nav_staticTop
       )
     )

@@ -27,6 +27,4 @@ trait PrototypeDataUI <: DataUI {
   def dimension: Var[Int]
 
   def data: DATA
-
-  def `type`: Var[ProtoTYPE]
 }
