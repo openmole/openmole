@@ -63,3 +63,14 @@ select::-moz-focus-inner {
 	position:relative;
 	top:1px;
 }
+
+.black-label {
+	color: black;
+}
+
+.modal-info {
+    background-image: linear-gradient(#d9edf7 0%, #b9def0 100%);
+    background-repeat: repeat-x;
+    border-color: #9acfea;
+    border-radius: 6px 6px 0 0;
+}

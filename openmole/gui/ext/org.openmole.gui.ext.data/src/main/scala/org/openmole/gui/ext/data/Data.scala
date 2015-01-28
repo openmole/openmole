@@ -27,22 +27,31 @@ object ProtoTYPE extends Enumeration {
   val DOUBLE = new ProtoTYPE("Double", "Double")
   val LONG = new ProtoTYPE("Long", "Long")
   val BOOLEAN = new ProtoTYPE("Boolean", "Boolean")
-  val STRING = new ProtoTYPE("String", "java.lang.String")
-  val FILE = new ProtoTYPE("File", "java.io.File")
+  val STRING = new ProtoTYPE("String", "String")
+  val FILE = new ProtoTYPE("File", "File")
   val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE)
 }
 
 import ProtoTYPE._
 class PrototypeData(val `type`: ProtoTYPE, val dimension: Int) extends Data
 
+class IntPrototypeData(dimension: Int) extends PrototypeData(INT, dimension)
+class DoublePrototypeData(dimension: Int) extends PrototypeData(DOUBLE, dimension)
+class StringPrototypeData(dimension: Int) extends PrototypeData(STRING, dimension)
+class LongPrototypeData(dimension: Int) extends PrototypeData(LONG, dimension)
+class BooleanPrototypeData(dimension: Int) extends PrototypeData(BOOLEAN, dimension)
+class FilePrototypeData(dimension: Int) extends PrototypeData(FILE, dimension)
+
 object PrototypeData {
+
   def apply(`type`: ProtoTYPE, dimension: Int) = new PrototypeData(`type`, dimension)
-  def integer(dimension: Int) = new PrototypeData(INT, dimension)
-  def double(dimension: Int) = new PrototypeData(DOUBLE, dimension)
-  def long(dimension: Int) = new PrototypeData(LONG, dimension)
-  def boolean(dimension: Int) = new PrototypeData(BOOLEAN, dimension)
-  def string(dimension: Int) = new PrototypeData(STRING, dimension)
-  def file(dimension: Int) = new PrototypeData(FILE, dimension)
+
+  def integer(dimension: Int) = new IntPrototypeData(dimension)
+  def double(dimension: Int) = new DoublePrototypeData(dimension)
+  def long(dimension: Int) = new LongPrototypeData(dimension)
+  def boolean(dimension: Int) = new BooleanPrototypeData(dimension)
+  def string(dimension: Int) = new StringPrototypeData(dimension)
+  def file(dimension: Int) = new FilePrototypeData(dimension)
 
 }
 

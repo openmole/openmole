@@ -24,9 +24,7 @@ import rx._
 trait PrototypeDataUI <: DataUI {
   type DATA = PrototypeData
 
-  def dimension: Var[Int]
+  val dimension: Var[Int]
 
   def data: DATA
-
-  def `type`: Var[ProtoTYPE]
 }

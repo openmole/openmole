@@ -45,7 +45,7 @@ object Panel {
   import ConceptFilter._
 
   def generic(uuid: String,
-              defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(ALL),
+              defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS),
               extraCategories: Seq[(String, HtmlTag)] = Seq()) =
     new GenericPanel(uuid, defaultDataBagUI, extraCategories).dialog
 }
@@ -53,27 +53,28 @@ object Panel {
 import Panel.ConceptFilter._
 
 class GenericPanel(uuid: String,
-                   defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(ALL),
+                   defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS),
                    extraCategories: Seq[(String, HtmlTag)] = Seq()) {
 
   val jQid = "#" + uuid
   val editionState: Var[Boolean] = Var(false)
-  val filter: Var[ConceptState] = Var(defaultDataBagUI.right.toOption.getOrElse(ALL))
+  val filter: Var[ConceptState] = Var(defaultDataBagUI.right.toOption.getOrElse(TASKS))
   var nameFilter = Var("")
   val rows = Var(0)
   val currentDataBagUI = Var(defaultDataBagUI.left.toOption)
   val currentPanelUI = Rx(currentDataBagUI().map {
     _.dataUI().panelUI
   })
-  val factorySelector = new Select[FactoryUI]("factories", Var(filter().factories), currentDataBagUI(), btn_primary)
-
-  Obs(factorySelector.content) {
-    currentDataBagUI().map {
-      _.dataUI() = factorySelector.content().map {
-        _.dataUI
-      }.get
-    }
-  }
+  val factorySelector: Select[FactoryUI] = new Select("factories",
+    Var(filter().factories),
+    currentDataBagUI(),
+    btn_primary, () ⇒ {
+      currentDataBagUI().map {
+        _.dataUI() = factorySelector.content().map {
+          _.dataUI
+        }.get
+      }
+    })
 
   def contains(db: DataBagUI) = db.name().contains(nameFilter())
 
@@ -90,7 +91,7 @@ class GenericPanel(uuid: String,
       tbody({
         val elements = for (db ← dbUIs if filters(filter())(db)) yield {
           bs.tr(row)(
-            bs.td(col_md_6)(a(db.name(), cursor := "pointer", onclick := { () ⇒
+            bs.td(col_md_6)(a(dataBagUIView(db), cursor := "pointer", onclick := { () ⇒
               setCurrent(db)
               editionState() = true
             })),
@@ -107,6 +108,11 @@ class GenericPanel(uuid: String,
     }
   ).render
 
+  def dataBagUIView(db: DataBagUI) = db.dataUI() match {
+    case dataUI: PrototypeDataUI ⇒ db.name() + " [" + dataUI.dimension() + "]"
+    case _                       ⇒ db.name() + ""
+  }
+
   val inputFilter = bs.input(
     currentDataBagUI().map {
       _.name()
@@ -116,6 +122,7 @@ class GenericPanel(uuid: String,
       autofocus := "true"
     ).render
 
+  val dimInput = bs.input("0")(placeholder := "Dim", width := 50, autofocus := true).render
   inputFilter.oninput = (e: Event) ⇒ nameFilter() = inputFilter.value
 
   //New button
@@ -128,6 +135,7 @@ class GenericPanel(uuid: String,
   def add = {
     val dbUI = new DataBagUI(Var(filter().factories.head.dataUI))
     dbUI.name() = inputFilter.value
+    dimInput.value = "0"
     ClientService += dbUI
     setCurrent(dbUI)
     editionState() = true
@@ -137,15 +145,15 @@ class GenericPanel(uuid: String,
     nav("filterNav", nav_pills, navItem("allfilter", "All", () ⇒ {
       filter() = ALL
       factorySelector.contents() = ClientService.factories
-    }),
+    }, filter() == ALL),
       navItem("valfilter", "Val", () ⇒ {
         filter() = PROTOTYPES
         factorySelector.contents() = ClientService.prototypeFactories
-      }),
+      }, filter() == PROTOTYPES),
       navItem("taskfilter", "Task", () ⇒ {
         filter() = TASKS
         factorySelector.contents() = ClientService.taskFactories
-      }, true),
+      }, filter() == TASKS),
       navItem("envfilter", "Env", () ⇒ {
         println("not impl yet")
       })
@@ -167,12 +175,13 @@ class GenericPanel(uuid: String,
 
   val dialog = {
     modalDialog(uuid,
-      bodyDialog(Rx {
+      headerDialog(Rx {
         bs.div()(
           nav("navbar_form", navbar_form)(
-            form(
+            bs.form()(
               inputGroup(navbar_left)(
                 inputFilter,
+                for (c ← prototypeExtraForm) yield c,
                 if (editionState()) inputGroupButton(factorySelector.selector)
                 else inputGroupButton(newGlyph)
               ),
@@ -181,12 +190,16 @@ class GenericPanel(uuid: String,
                   saveHeaderButton
                 )
               }
-              else bs.span(navbar_right)(conceptFilter), onsubmit := { () ⇒
+              else bs.span(navbar_right)(conceptFilter),
+              onsubmit := { () ⇒
                 if (editionState()) save
                 else if (rows() == 0) add
               }
             )
-          ),
+          ))
+      }),
+      bodyDialog(Rx {
+        bs.div()(
           if (editionState()) {
             inputFilter.value = currentDataBagUI().map {
               _.name()
@@ -206,17 +219,33 @@ class GenericPanel(uuid: String,
     )
   }.render
 
-  def conceptPanel = currentPanelUI() match {
-    case Some(p: PanelUI) ⇒
-      bodyPanel(
-        p.view)
-    case _ ⇒ bs.div()(h1("Create a  first data !"))
+  val conceptPanel = Rx {
+    currentPanelUI() match {
+      case Some(p: PanelUI) ⇒
+        bodyPanel(
+          p.view)
+      case _ ⇒ bs.div()(h1("Create a  first data !"))
+    }
+  }
+
+  def prototypeExtraForm: Seq[Modifier] = currentDataBagUI() match {
+    case Some(db: DataBagUI) ⇒
+      if (isPrototypeUI(db) && editionState()) {
+        Seq(inputGroupButton(style := "width:0px;"),
+          dimInput)
+      }
+      else Seq()
+    case _ ⇒ Seq()
   }
 
   def save = {
     currentDataBagUI().map {
       db ⇒
         ClientService.setName(db, inputFilter.value)
+        //In case of prototype
+        prototypeUI(db).map {
+          _.dimension() = dimInput.value.toInt
+        }
     }
 
     currentPanelUI().map { cpUI ⇒
