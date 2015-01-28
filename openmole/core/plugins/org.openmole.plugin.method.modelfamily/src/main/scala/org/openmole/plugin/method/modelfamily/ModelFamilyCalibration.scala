@@ -18,10 +18,10 @@
 package org.openmole.plugin.method.modelfamily
 
 import fr.iscpif.mgo._
-import fr.iscpif.mgo.modelfamily._
 import org.openmole.core.workflow.data._
 import org.openmole.plugin.method.evolution._
-import org.openmole.plugin.method.evolution.ga.{ GAAlgorithm, GATermination, Inputs }
+import org.openmole.plugin.method.evolution.ga._
+import ga._
 
 import scala.util.Random
 
@@ -42,11 +42,11 @@ object ModelFamilyCalibration {
       val inputs = _inputs
       val objectives = _objectives
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F]] = implicitly
-      val individualManifest: Manifest[Individual[G, P, F]] = implicitly
-      val aManifest: Manifest[A] = implicitly
-      val fManifest: Manifest[F] = implicitly
-      val gManifest: Manifest[G] = implicitly
+      val populationManifest = implicitly[Manifest[Population[G, P, F]]]
+      val individualManifest = implicitly[Manifest[Individual[G, P, F]]]
+      val aManifest = implicitly[Manifest[A]]
+      val fManifest = implicitly[Manifest[F]]
+      val gManifest = implicitly[Manifest[G]]
 
       val genomeSize = inputs.size
       val lambda = _lambda
@@ -75,11 +75,12 @@ trait ModelFamilyCalibration extends NoArchive
   with GAAlgorithm
   with ModelFamilyElitism
   with ModelFamilyMutation
-  with SBXCrossover
-  with MaxAggregation
+  with DynamicGACrossover
   with BinaryTournamentSelection
   with TournamentOnRank
   with GeneticBreeding
-  with HierarchicalRanking
+  with ParetoRanking
+  with FitnessCrowdingDiversity
   with ModelFamilyGenome
+  with NonStrictDominance
   with ClampedGenome

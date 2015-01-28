@@ -19,7 +19,6 @@ package org.openmole.plugin.method.evolution.ga
 
 import fr.iscpif.mgo._
 import org.openmole.plugin.method.evolution._
-
 import scala.util.Random
 
 object NSGA2 {
@@ -35,11 +34,11 @@ object NSGA2 {
       val inputs = _inputs
       val objectives = _objectives
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F]] = implicitly
-      val individualManifest: Manifest[Individual[G, P, F]] = implicitly
-      val aManifest: Manifest[A] = implicitly
-      val fManifest: Manifest[F] = implicitly
-      val gManifest: Manifest[G] = implicitly
+      val populationManifest = implicitly[Manifest[Population[G, P, F]]]
+      val individualManifest = implicitly[Manifest[Individual[G, P, F]]]
+      val aManifest = implicitly[Manifest[A]]
+      val fManifest = implicitly[Manifest[F]]
+      val gManifest = implicitly[Manifest[G]]
 
       val genomeSize = inputs.size
 
@@ -54,7 +53,8 @@ object NSGA2 {
 }
 
 trait NSGA2 extends GAAlgorithm
-  with dynamic.DynamicApplicationGA
+  with DynamicGACrossover
+  with DynamicGAMutation
   with BinaryTournamentSelection
   with TournamentOnRankAndDiversity
   with NonDominatedElitism
@@ -66,4 +66,5 @@ trait NSGA2 extends GAAlgorithm
   with GeneticBreeding
   with MGFitness
   with ClampedGenome
+  with GAGenomeWithSigma
 

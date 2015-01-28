@@ -39,11 +39,11 @@ object GenomeMap {
       val objectives = _objectives
 
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F]] = implicitly
-      val individualManifest: Manifest[Individual[G, P, F]] = implicitly
-      val aManifest: Manifest[A] = implicitly
-      val fManifest: Manifest[F] = implicitly
-      val gManifest: Manifest[G] = implicitly
+      val populationManifest = implicitly[Manifest[Population[G, P, F]]]
+      val individualManifest = implicitly[Manifest[Individual[G, P, F]]]
+      val aManifest = implicitly[Manifest[A]]
+      val fManifest = implicitly[Manifest[F]]
+      val gManifest = implicitly[Manifest[G]]
 
       val genomeSize = inputs.size
       override val cloneProbability: Double = _reevaluate
@@ -65,7 +65,8 @@ object GenomeMap {
 }
 
 trait GenomeMap extends GAAlgorithm
-    with dynamic.DynamicApplicationGA
+    with DynamicGACrossover
+    with DynamicGAMutation
     with BestAggregatedNicheElitism
     with MapNiche
     with MapGenomePlotter
@@ -74,7 +75,8 @@ trait GenomeMap extends GAAlgorithm
     with MapSelection
     with MaxAggregation
     with GeneticBreeding
-    with ClampedGenome {
+    with ClampedGenome
+    with GAGenomeWithSigma {
 
   def x: Int
   def y: Int

@@ -35,11 +35,11 @@ object MonoObjective {
       val inputs = _inputs
       val objectives = Seq(objective)
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F]] = implicitly
-      val individualManifest: Manifest[Individual[G, P, F]] = implicitly
-      val aManifest: Manifest[A] = implicitly
-      val fManifest: Manifest[F] = implicitly
-      val gManifest: Manifest[G] = implicitly
+      val populationManifest = implicitly[Manifest[Population[G, P, F]]]
+      val individualManifest = implicitly[Manifest[Individual[G, P, F]]]
+      val aManifest = implicitly[Manifest[A]]
+      val fManifest = implicitly[Manifest[F]]
+      val gManifest = implicitly[Manifest[G]]
 
       val genomeSize = inputs.size
 
@@ -54,7 +54,8 @@ object MonoObjective {
 }
 
 trait MonoObjective extends GAAlgorithm
-  with dynamic.DynamicApplicationGA
+  with DynamicGACrossover
+  with DynamicGAMutation
   with BinaryTournamentSelection
   with TournamentOnAggregatedFitness
   with DiversityAggregatedElitism
@@ -64,4 +65,5 @@ trait MonoObjective extends GAAlgorithm
   with MGFitness
   with ClampedGenome
   with MaxAggregation
+  with GAGenomeWithSigma
 
