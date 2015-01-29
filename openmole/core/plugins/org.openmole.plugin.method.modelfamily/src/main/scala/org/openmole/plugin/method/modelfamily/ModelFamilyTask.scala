@@ -30,7 +30,7 @@ import scala.tools.ant.ScalaTask
 object ModelFamilyTask {
 
   def apply(modelFamily: ModelFamily)(implicit plugins: PluginSet = PluginSet.empty) = new ScalaTaskBuilder {
-    modelFamily.attributes.map { case (p, _) ⇒ addInput(p) }
+    modelFamily.attributes.map { a ⇒ addInput(a.prototype) }
     override def toTask: Task = new ModelFamilyTask(modelFamily) with Built
   }
 
