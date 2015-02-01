@@ -113,11 +113,18 @@ trait ScalaCompilation { compilation ⇒
        |    }
        |    import input._
        |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(${Task.openMOLESeed.name}).toScala;
-       |    ${source}
-       |    import scala.collection.JavaConversions.mapAsJavaMap
-       |    mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.prototype.name}" -> ${p.prototype.name}""").mkString(",")} ))
+       |    $source
+       |    ${if (wrapOutput) outputMap else ""}
        |}
        |""".stripMargin
+
+  def wrapOutput = true
+
+  def outputMap =
+    s"""
+       |import scala.collection.JavaConversions.mapAsJavaMap
+       |mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.prototype.name}" -> ${p.prototype.name}""").mkString(",")} ))
+    """.stripMargin
 
   @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], Try[(AnyRef, Method)]]()
 

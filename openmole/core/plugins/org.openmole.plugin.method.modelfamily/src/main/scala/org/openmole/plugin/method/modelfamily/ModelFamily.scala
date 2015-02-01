@@ -122,22 +122,37 @@ trait ModelFamily <: Plugins { family ⇒
     }
   }
 
-  @transient lazy val compilations =
-    codes.map {
-      code ⇒
-        val compilation =
-          new ScalaCompilation {
-            override def imports: Seq[String] = family.imports
-            override def source: String = code
-            override def outputs: DataSet = objectives
-            override def libraries: Seq[File] = family.libraries
-            override def usedClasses: Seq[Class[_]] = family.usedClasses
-          }
-        compilation.compiled(attributes.map(_.prototype))
-    }
+  @transient lazy val compilation = {
+    val compilation =
+      new ScalaCompilation {
 
-  @transient lazy val models = compilations.map(_.get)
+        def codeMatch =
+          codes.zipWithIndex.map {
+            case (code, i) ⇒
+              s"""
+                 |  case $i =>
+                 |    $code
+                 |    $outputMap
+              """.stripMargin
+          }.mkString("\n")
 
-  def compileModels = compilations.foreach(_.get)
+        def code =
+          s"""
+            |${modelIdPrototype.name} match {
+            |  $codeMatch
+            |  case x => throw new org.openmole.misc.exception.InternalProcessingError("Model id " + x + " too large")
+            |}
+          """.stripMargin
+
+        override def wrapOutput = false
+
+        override def imports: Seq[String] = family.imports
+        override def source: String = code
+        override def outputs: DataSet = objectives
+        override def libraries: Seq[File] = family.libraries
+        override def usedClasses: Seq[Class[_]] = family.usedClasses
+      }
+    compilation.compiled(Seq(modelIdPrototype) ++ attributes.map(_.prototype)).get
+  }
 
 }
