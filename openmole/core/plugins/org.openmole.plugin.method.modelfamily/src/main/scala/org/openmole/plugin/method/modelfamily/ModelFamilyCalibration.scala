@@ -20,27 +20,21 @@ package org.openmole.plugin.method.modelfamily
 import fr.iscpif.mgo._
 import org.openmole.core.workflow.data._
 import org.openmole.plugin.method.evolution._
-import org.openmole.plugin.method.evolution.ga._
 import ga._
 
 import scala.util.Random
 
 object ModelFamilyCalibration {
 
-  def apply(
-    mu: Int,
-    lambda: Int,
-    models: Int,
+  def apply(modelFamily: ModelFamily)(
     nicheSize: Int,
+    lambda: Int,
     termination: GATermination { type G >: ModelFamilyCalibration#G; type P >: ModelFamilyCalibration#P; type F >: ModelFamilyCalibration#F },
-    modelId: Prototype[Int],
-    inputs: Inputs,
-    objectives: Objectives,
     reevaluate: Double = 0.0) = {
-    val (_mu, _reevaluate, _lambda, _inputs, _objectives, _nicheSize, _models, _modelId) = (mu, reevaluate, lambda, inputs, objectives, nicheSize, models, modelId)
+    val (_reevaluate, _lambda, _nicheSize) = (reevaluate, lambda, nicheSize)
     new ModelFamilyCalibration {
-      val inputs = _inputs
-      val objectives = _objectives
+      val inputs = Inputs(modelFamily.attributes.map(_.toInput))
+      val objectives = modelFamily.objectives
       val stateManifest: Manifest[STATE] = termination.stateManifest
       val populationManifest = implicitly[Manifest[Population[G, P, F]]]
       val individualManifest = implicitly[Manifest[Individual[G, P, F]]]
@@ -51,22 +45,21 @@ object ModelFamilyCalibration {
       val genomeSize = inputs.size
       val lambda = _lambda
       val nicheSize = _nicheSize
-      val models = _models
+      val models = modelFamily.codes.size
 
       override val cloneProbability: Double = _reevaluate
 
-      val mu = _mu
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
       def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
 
-      override def inputsPrototypes = super.inputsPrototypes ++ Seq(_modelId)
+      override def inputsPrototypes = super.inputsPrototypes ++ Seq(modelFamily.modelIdPrototype)
 
       override def toVariables(genome: G, context: Context): Seq[Variable[_]] =
-        super.toVariables(genome, context) ++ Seq(Variable(_modelId, modelId.get(genome)))
+        super.toVariables(genome, context) ++ Seq(Variable(modelFamily.modelIdPrototype, modelId.get(genome)))
 
       override def toVariables(population: Population[G, P, F], context: Context): Seq[Variable[_]] =
-        super.toVariables(population, context) ++ Seq(Variable(_modelId.toArray, population.map(i ⇒ modelId.get(i.genome)).toArray))
+        super.toVariables(population, context) ++ Seq(Variable(modelFamily.modelIdPrototype.toArray, population.map(i ⇒ modelId.get(i.genome)).toArray))
     }
   }
 }

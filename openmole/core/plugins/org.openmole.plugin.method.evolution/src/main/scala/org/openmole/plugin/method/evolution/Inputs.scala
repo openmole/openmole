@@ -15,13 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.evolution
 
-import org.openmole.core.workflow.data.{ Variable, Context, Prototype }
-import org.openmole.core.workflow.tools.FromContext
-import org.openmole.misc.tools.script.{ GroovyProxyPool, GroovyFunction }
 import fr.iscpif.mgo.double2Scalable
-import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.data.{ Context, Prototype, Variable }
+import org.openmole.core.workflow.tools.FromContext
 import util.Try
 
 object InputConverter {

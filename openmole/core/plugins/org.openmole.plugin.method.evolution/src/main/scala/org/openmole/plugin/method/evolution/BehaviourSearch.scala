@@ -15,44 +15,58 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.plugin.method.evolution._
 
 import scala.util.Random
 
-object CMAES {
+object BehaviourSearch {
 
   def apply(
-    termination: GATermination { type G >: CMAES#G; type P >: CMAES#P; type F >: CMAES#F },
+    termination: GATermination { type G >: BehaviourSearch#G; type P >: BehaviourSearch#P; type F >: BehaviourSearch#F },
     inputs: Inputs,
-    objectives: Objectives) = {
-    val (_inputs, _objectives) = (inputs, objectives)
-    new CMAES {
+    observables: Objectives,
+    gridSize: Seq[Double],
+    reevaluate: Double = 0.0) = {
+    val _inputs = inputs
+    val _gridSize = gridSize
+    val _objectives = observables
+    val _reevaluate = reevaluate
+    new BehaviourSearch {
       val inputs = _inputs
       val objectives = _objectives
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F]] = implicitly
-      val individualManifest: Manifest[Individual[G, P, F]] = implicitly
-      val aManifest: Manifest[A] = implicitly
-      val fManifest: Manifest[F] = implicitly
-      val gManifest: Manifest[G] = implicitly
+      val populationManifest = implicitly[Manifest[Population[G, P, F]]]
+      val individualManifest = implicitly[Manifest[Individual[G, P, F]]]
+      val aManifest = implicitly[Manifest[A]]
+      val fManifest = implicitly[Manifest[F]]
+      val gManifest = implicitly[Manifest[G]]
 
       val genomeSize = inputs.size
 
-      //val mu = _mu
+      val gridSize = _gridSize
+
+      override val cloneProbability: Double = _reevaluate
+
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
       def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
     }
   }
+
 }
 
-trait CMAES extends GAAlgorithm
-  with KeepOffspringElitism
-  with GAGenomeWithRandomValue
-  with MaxAggregation
-  with CMAESBreeding
-  with CMAESArchive
+trait BehaviourSearch extends GAAlgorithm
+  with HitMapArchive
+  with GeneticBreeding
+  with BinaryTournamentSelection
+  with selection.ProportionalNumberOfRound
+  with HierarchicalRanking
+  with TournamentOnHitCount
+  with DynamicGACrossover
+  with DynamicGAMutation
+  with RandomNicheElitism
+  with PhenotypeGridNiche
   with ClampedGenome
+  with GAGenomeWithSigma

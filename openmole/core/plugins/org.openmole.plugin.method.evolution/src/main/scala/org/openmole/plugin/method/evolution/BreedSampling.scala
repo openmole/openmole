@@ -24,7 +24,6 @@ import org.openmole.core.workflow.task._
 import org.openmole.misc.workspace._
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.workflow.task._
-import algorithm._
 import fr.iscpif.mgo._
 import org.openmole.core.workflow.sampling.Sampling
 

@@ -15,14 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.plugin.method.evolution.algorithm._
-import org.openmole.plugin.method.evolution._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
-import org.openmole.plugin.method.evolution._
 
 trait GAAlgorithm extends Archive
     with EvolutionManifest

@@ -23,7 +23,8 @@ import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.builder.Builder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.PluginSet
-import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.core.workflow.tools.{ FromContext, ExpandedString }
+import org.openmole.plugin.method.evolution.Scalar
 import org.openmole.plugin.task.scala._
 
 import scala.collection.mutable.ListBuffer
@@ -31,7 +32,9 @@ import scala.util.Success
 
 object ModelFamily {
 
-  case class Attribute(prototype: Prototype[_], name: String, min: Double, max: Double)
+  case class Attribute(prototype: Prototype[Double], name: String, min: FromContext[Double], max: FromContext[Double]) {
+    def toInput = Scalar(prototype, min, max)
+  }
 
   def apply(source: ExpandedString)(implicit plugins: PluginSet) = new ModelFamilyBuilder(source)
 
@@ -49,12 +52,12 @@ object ModelFamilyBuilder {
 class ModelFamilyBuilder(val source: ExpandedString)(implicit val plugins: PluginSet) extends Builder with ScalaBuilder { builder ⇒
   private val _attributes = ListBuffer[Attribute]()
 
-  def addAttribute(prototype: Prototype[Double], name: String, min: Double, max: Double) = {
+  def addAttribute(prototype: Prototype[Double], name: String, min: FromContext[Double], max: FromContext[Double]) = {
     _attributes += Attribute(prototype, name, min, max)
     this
   }
 
-  def addAttribute(prototype: Prototype[Double], min: Double, max: Double) = {
+  def addAttribute(prototype: Prototype[Double], min: FromContext[Double], max: FromContext[Double]) = {
     _attributes += Attribute(prototype, prototype.name, min, max)
     this
   }

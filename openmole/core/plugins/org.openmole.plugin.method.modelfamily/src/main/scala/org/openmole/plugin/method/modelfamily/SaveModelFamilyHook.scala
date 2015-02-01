@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,10 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.modelfamily
 
-import fr.iscpif.mgo._
+import org.openmole.plugin.hook.file.AppendToCSVFileHookBuilder
 
-trait GARankingBuilder {
-  def apply(dominance: Dominance): Ranking
-}
+//object SaveModelFamilyHook {
+//
+//  def apply(modelFamily: GAPuzzle[ModelFamily], dir: ExpandedString) = {
+//    val fileName = dir + "/population${" + puzzle.generation.name + "}.csv"
+//    val prototypes =
+//      Seq[Prototype[_]](puzzle.parameters.generation) ++
+//        puzzle.evolution.inputsPrototypes.map(_.toArray) ++
+//        puzzle.evolution.objectives.map(_.toArray)
+//    new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
+//  }
+//}

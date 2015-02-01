@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2012 reuillon
+ * Copyright (C) 2014 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -15,10 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.algorithm
-import fr.iscpif.mgo._
+package org.openmole.plugin.method.evolution
 
-/**
- * Cake layer with the manifests of the types used by the evolution
- */
-trait EvolutionManifest extends GManifest with PopulationManifest with IndividualManifest with ArchiveManifest with FManifest with TerminationManifest
+import fr.iscpif.mgo.termination.TimedTermination
+
+import scala.concurrent.duration.Duration
+
+object Timed {
+
+  def apply(_duration: Duration) = new GATermination with TimedTermination {
+    type G = Any
+    type F = Any
+    type P = Any
+    type MF = Any
+    val stateManifest: Manifest[STATE] = manifest[STATE]
+    val duration = _duration.toMillis
+  }
+
+}

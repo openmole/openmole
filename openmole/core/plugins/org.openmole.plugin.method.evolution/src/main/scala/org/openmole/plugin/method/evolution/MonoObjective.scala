@@ -15,29 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.plugin.method.evolution._
 
 import scala.util.Random
 
-object GenomeMap {
+object MonoObjective {
 
   def apply(
-    x: Int,
-    nX: Int,
-    y: Int,
-    nY: Int,
-    termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F },
+    mu: Int,
+    termination: GATermination { type G >: MonoObjective#G; type P >: MonoObjective#P; type F >: MonoObjective#F },
     inputs: Inputs,
-    objectives: Objectives,
+    objective: Objective,
     reevaluate: Double = 0.0) = {
-    val (_x, _nX, _y, _nY, _reevaluate, _inputs, _objectives) = (x, nX, y, nY, reevaluate, inputs, objectives)
-    new GenomeMap {
+    val (_mu, _reevaluate, _inputs) = (mu, reevaluate, inputs)
+    new MonoObjective {
       val inputs = _inputs
-      val objectives = _objectives
-
+      val objectives = Seq(objective)
       val stateManifest: Manifest[STATE] = termination.stateManifest
       val populationManifest = implicitly[Manifest[Population[G, P, F]]]
       val individualManifest = implicitly[Manifest[Individual[G, P, F]]]
@@ -46,38 +41,28 @@ object GenomeMap {
       val gManifest = implicitly[Manifest[G]]
 
       val genomeSize = inputs.size
+
       override val cloneProbability: Double = _reevaluate
 
-      val x = _x
-      val y = _y
-      val nX = _nX
-      val nY = _nY
-
+      val mu = _mu
       type STATE = termination.STATE
-
       def initialState: STATE = termination.initialState
       def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
-
     }
-
   }
-
 }
 
-trait GenomeMap extends GAAlgorithm
-    with DynamicGACrossover
-    with DynamicGAMutation
-    with BestAggregatedNicheElitism
-    with MapNiche
-    with MapGenomePlotter
-    with NoArchive
-    with NoRanking
-    with MapSelection
-    with MaxAggregation
-    with GeneticBreeding
-    with ClampedGenome
-    with GAGenomeWithSigma {
+trait MonoObjective extends GAAlgorithm
+  with DynamicGACrossover
+  with DynamicGAMutation
+  with BinaryTournamentSelection
+  with TournamentOnAggregatedFitness
+  with DiversityAggregatedElitism
+  with NoArchive
+  with CloneRemoval
+  with GeneticBreeding
+  with MGFitness
+  with ClampedGenome
+  with MaxAggregation
+  with GAGenomeWithSigma
 
-  def x: Int
-  def y: Int
-}

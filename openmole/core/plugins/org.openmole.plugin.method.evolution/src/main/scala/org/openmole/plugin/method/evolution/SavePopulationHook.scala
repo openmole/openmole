@@ -15,21 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.termination.TimedTermination
+import org.openmole.core.workflow.data.{ Prototype, _ }
+import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.plugin.hook.file.AppendToCSVFileHookBuilder
 
-import scala.concurrent.duration.Duration
+object SavePopulationHook {
 
-object Timed {
-
-  def apply(_duration: Duration) = new GATermination with TimedTermination {
-    type G = Any
-    type F = Any
-    type P = Any
-    type MF = Any
-    val stateManifest: Manifest[STATE] = manifest[STATE]
-    val duration = _duration.toMillis
+  def apply(puzzle: GAParameters[GAAlgorithm], dir: ExpandedString) = {
+    val fileName = dir + "/population${" + puzzle.generation.name + "}.csv"
+    val prototypes =
+      Seq[Prototype[_]](puzzle.generation) ++
+        puzzle.evolution.inputsPrototypes.map(_.toArray) ++
+        puzzle.evolution.objectives.map(_.toArray)
+    new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
   }
 
 }

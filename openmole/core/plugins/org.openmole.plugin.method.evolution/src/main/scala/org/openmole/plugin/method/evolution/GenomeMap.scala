@@ -15,26 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.plugin.method.evolution._
 
 import scala.util.Random
 
-object GenomeProfile {
+object GenomeMap {
 
   def apply(
     x: Int,
     nX: Int,
-    termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F },
+    y: Int,
+    nY: Int,
+    termination: GATermination { type G >: GenomeMap#G; type P >: GenomeMap#P; type F >: GenomeMap#F },
     inputs: Inputs,
-    objective: Objective,
+    objectives: Objectives,
     reevaluate: Double = 0.0) = {
-    val (_x, _nX, _reevaluate, _inputs) = (x, nX, reevaluate, inputs)
-    new GenomeProfile {
+    val (_x, _nX, _y, _nY, _reevaluate, _inputs, _objectives) = (x, nX, y, nY, reevaluate, inputs, objectives)
+    new GenomeMap {
       val inputs = _inputs
-      val objectives = Seq(objective)
+      val objectives = _objectives
 
       val stateManifest: Manifest[STATE] = termination.stateManifest
       val populationManifest = implicitly[Manifest[Population[G, P, F]]]
@@ -47,32 +48,35 @@ object GenomeProfile {
       override val cloneProbability: Double = _reevaluate
 
       val x = _x
+      val y = _y
       val nX = _nX
+      val nY = _nY
+
       type STATE = termination.STATE
+
       def initialState: STATE = termination.initialState
       def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
+
     }
 
   }
 
 }
 
-trait GenomeProfile extends GAAlgorithm
+trait GenomeMap extends GAAlgorithm
     with DynamicGACrossover
     with DynamicGAMutation
-    with ProfileRanking
     with BestAggregatedNicheElitism
-    with ProfileNiche
+    with MapNiche
+    with MapGenomePlotter
     with NoArchive
-    with NoDiversity
-    with ProfileGenomePlotter
-    with BinaryTournamentSelection
-    with selection.ProportionalNumberOfRound
-    with TournamentOnRank
-    with GeneticBreeding
-    with MGFitness
+    with NoRanking
+    with MapSelection
     with MaxAggregation
+    with GeneticBreeding
     with ClampedGenome
     with GAGenomeWithSigma {
+
   def x: Int
+  def y: Int
 }

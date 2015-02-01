@@ -15,13 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.evolution
 
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.mole.ExecutionContext
+import org.openmole.core.workflow.mole.{ ExecutionContext, _ }
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.misc.tools.io.FileUtil._
 

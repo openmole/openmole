@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 21/11/12 Romain Reuillon
+ * Copyright (C) 13/11/12 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,9 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.algorithm
-import fr.iscpif.mgo.archive.Archive
+package org.openmole.plugin.method.evolution
 
-trait ArchiveManifest extends Archive {
-  implicit val aManifest: Manifest[A]
+import fr.iscpif.mgo.fitness.F
+
+trait FManifest extends F {
+  /** Manifest for the genome type */
+  implicit val fManifest: Manifest[F]
 }

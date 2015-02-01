@@ -18,12 +18,11 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import ga._
 
 object ToIndividualTask {
 

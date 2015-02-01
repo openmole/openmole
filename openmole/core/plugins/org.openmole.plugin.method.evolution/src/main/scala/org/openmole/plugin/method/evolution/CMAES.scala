@@ -15,37 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.evolution
 
-import org.openmole.plugin.method.evolution._
 import fr.iscpif.mgo._
 
 import scala.util.Random
 
-object MonoObjective {
+object CMAES {
 
   def apply(
-    mu: Int,
-    termination: GATermination { type G >: MonoObjective#G; type P >: MonoObjective#P; type F >: MonoObjective#F },
+    termination: GATermination { type G >: CMAES#G; type P >: CMAES#P; type F >: CMAES#F },
     inputs: Inputs,
-    objective: Objective,
-    reevaluate: Double = 0.0) = {
-    val (_mu, _reevaluate, _inputs) = (mu, reevaluate, inputs)
-    new MonoObjective {
+    objectives: Objectives) = {
+    val (_inputs, _objectives) = (inputs, objectives)
+    new CMAES {
       val inputs = _inputs
-      val objectives = Seq(objective)
+      val objectives = _objectives
       val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest = implicitly[Manifest[Population[G, P, F]]]
-      val individualManifest = implicitly[Manifest[Individual[G, P, F]]]
-      val aManifest = implicitly[Manifest[A]]
-      val fManifest = implicitly[Manifest[F]]
-      val gManifest = implicitly[Manifest[G]]
+      val populationManifest: Manifest[Population[G, P, F]] = implicitly
+      val individualManifest: Manifest[Individual[G, P, F]] = implicitly
+      val aManifest: Manifest[A] = implicitly
+      val fManifest: Manifest[F] = implicitly
+      val gManifest: Manifest[G] = implicitly
 
       val genomeSize = inputs.size
 
-      override val cloneProbability: Double = _reevaluate
-
-      val mu = _mu
+      //val mu = _mu
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
       def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
@@ -53,17 +48,10 @@ object MonoObjective {
   }
 }
 
-trait MonoObjective extends GAAlgorithm
-  with DynamicGACrossover
-  with DynamicGAMutation
-  with BinaryTournamentSelection
-  with TournamentOnAggregatedFitness
-  with DiversityAggregatedElitism
-  with NoArchive
-  with CloneRemoval
-  with GeneticBreeding
-  with MGFitness
-  with ClampedGenome
+trait CMAES extends GAAlgorithm
+  with KeepOffspringElitism
+  with GAGenomeWithRandomValue
   with MaxAggregation
-  with GAGenomeWithSigma
-
+  with CMAESBreeding
+  with CMAESArchive
+  with ClampedGenome

@@ -15,27 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.core.workflow.data.Prototype
-import org.openmole.plugin.method.evolution._
 
 import scala.util.Random
 
-object BehaviourSearch {
+object NSGA2 {
 
   def apply(
-    termination: GATermination { type G >: BehaviourSearch#G; type P >: BehaviourSearch#P; type F >: BehaviourSearch#F },
+    mu: Int,
+    termination: GATermination { type G >: NSGA2#G; type P >: NSGA2#P; type F >: NSGA2#F },
     inputs: Inputs,
-    observables: Objectives,
-    gridSize: Seq[Double],
+    objectives: Objectives,
     reevaluate: Double = 0.0) = {
-    val _inputs = inputs
-    val _gridSize = gridSize
-    val _objectives = observables
-    val _reevaluate = reevaluate
-    new BehaviourSearch {
+    val (_mu, _reevaluate, _inputs, _objectives) = (mu, reevaluate, inputs, objectives)
+    new NSGA2 {
       val inputs = _inputs
       val objectives = _objectives
       val stateManifest: Manifest[STATE] = termination.stateManifest
@@ -47,28 +42,29 @@ object BehaviourSearch {
 
       val genomeSize = inputs.size
 
-      val gridSize = _gridSize
-
       override val cloneProbability: Double = _reevaluate
 
+      val mu = _mu
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
       def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
     }
   }
-
 }
 
-trait BehaviourSearch extends GAAlgorithm
-  with HitMapArchive
-  with GeneticBreeding
-  with BinaryTournamentSelection
-  with selection.ProportionalNumberOfRound
-  with HierarchicalRanking
-  with TournamentOnHitCount
+trait NSGA2 extends GAAlgorithm
   with DynamicGACrossover
   with DynamicGAMutation
-  with RandomNicheElitism
-  with PhenotypeGridNiche
+  with BinaryTournamentSelection
+  with TournamentOnRankAndDiversity
+  with NonDominatedElitism
+  with FitnessCrowdingDiversity
+  with ParetoRanking
+  with NonStrictDominance
+  with NoArchive
+  with CloneRemoval
+  with GeneticBreeding
+  with MGFitness
   with ClampedGenome
   with GAGenomeWithSigma
+

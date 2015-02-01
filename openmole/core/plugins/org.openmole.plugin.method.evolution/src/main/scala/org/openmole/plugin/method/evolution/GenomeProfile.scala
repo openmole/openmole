@@ -15,24 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.plugin.method.evolution._
+
 import scala.util.Random
 
-object NSGA2 {
+object GenomeProfile {
 
   def apply(
-    mu: Int,
-    termination: GATermination { type G >: NSGA2#G; type P >: NSGA2#P; type F >: NSGA2#F },
+    x: Int,
+    nX: Int,
+    termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F },
     inputs: Inputs,
-    objectives: Objectives,
+    objective: Objective,
     reevaluate: Double = 0.0) = {
-    val (_mu, _reevaluate, _inputs, _objectives) = (mu, reevaluate, inputs, objectives)
-    new NSGA2 {
+    val (_x, _nX, _reevaluate, _inputs) = (x, nX, reevaluate, inputs)
+    new GenomeProfile {
       val inputs = _inputs
-      val objectives = _objectives
+      val objectives = Seq(objective)
+
       val stateManifest: Manifest[STATE] = termination.stateManifest
       val populationManifest = implicitly[Manifest[Population[G, P, F]]]
       val individualManifest = implicitly[Manifest[Individual[G, P, F]]]
@@ -41,30 +43,35 @@ object NSGA2 {
       val gManifest = implicitly[Manifest[G]]
 
       val genomeSize = inputs.size
-
       override val cloneProbability: Double = _reevaluate
 
-      val mu = _mu
+      val x = _x
+      val nX = _nX
       type STATE = termination.STATE
       def initialState: STATE = termination.initialState
       def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
     }
+
   }
+
 }
 
-trait NSGA2 extends GAAlgorithm
-  with DynamicGACrossover
-  with DynamicGAMutation
-  with BinaryTournamentSelection
-  with TournamentOnRankAndDiversity
-  with NonDominatedElitism
-  with FitnessCrowdingDiversity
-  with ParetoRanking
-  with NonStrictDominance
-  with NoArchive
-  with CloneRemoval
-  with GeneticBreeding
-  with MGFitness
-  with ClampedGenome
-  with GAGenomeWithSigma
-
+trait GenomeProfile extends GAAlgorithm
+    with DynamicGACrossover
+    with DynamicGAMutation
+    with ProfileRanking
+    with BestAggregatedNicheElitism
+    with ProfileNiche
+    with NoArchive
+    with NoDiversity
+    with ProfileGenomePlotter
+    with BinaryTournamentSelection
+    with selection.ProportionalNumberOfRound
+    with TournamentOnRank
+    with GeneticBreeding
+    with MGFitness
+    with MaxAggregation
+    with ClampedGenome
+    with GAGenomeWithSigma {
+  def x: Int
+}

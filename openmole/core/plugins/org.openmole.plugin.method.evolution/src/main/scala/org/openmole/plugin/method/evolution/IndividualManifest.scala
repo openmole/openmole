@@ -15,7 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.algorithm
+package org.openmole.plugin.method.evolution
+
 import fr.iscpif.mgo._
 
 /**

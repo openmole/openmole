@@ -15,10 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
 
-trait DiversityMetricBuilder {
-  def apply(dominance: Dominance): Diversity
-}
+trait GATermination extends Termination with TerminationManifest

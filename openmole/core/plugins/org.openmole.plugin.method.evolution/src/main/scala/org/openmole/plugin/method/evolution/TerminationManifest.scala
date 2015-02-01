@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Romain Reuillon
+ * Copyright (C) 22/11/12 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,25 +9,16 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.ga
+package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.termination.CounterTermination
+import fr.iscpif.mgo._
 
-object Counter {
-
-  def apply(_steps: Int) = new GATermination with CounterTermination {
-    type G = Any
-    type F = Any
-    type P = Any
-    type MF = Any
-    val stateManifest: Manifest[STATE] = manifest[STATE]
-    val steps = _steps
-  }
-
+trait TerminationManifest extends Termination {
+  implicit val stateManifest: Manifest[STATE]
 }
