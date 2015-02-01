@@ -70,7 +70,7 @@ trait ModelFamilyCalibration extends NoArchive
     with ModelFamilyMutation
     with DynamicGACrossover
     with BinaryTournamentSelection
-    with TournamentOnRank
+    with TournamentOnRankAndDiversity
     with GeneticBreeding
     with ParetoRanking
     with FitnessCrowdingDiversity
