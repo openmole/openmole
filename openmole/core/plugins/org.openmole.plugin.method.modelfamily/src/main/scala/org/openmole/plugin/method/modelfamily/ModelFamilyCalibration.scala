@@ -28,10 +28,9 @@ object ModelFamilyCalibration {
 
   def apply(modelFamily: ModelFamily)(
     nicheSize: Int,
-    lambda: Int,
     termination: GATermination { type G >: ModelFamilyCalibration#G; type P >: ModelFamilyCalibration#P; type F >: ModelFamilyCalibration#F },
     reevaluate: Double = 0.0) = {
-    val (_reevaluate, _lambda, _nicheSize) = (reevaluate, lambda, nicheSize)
+    val (_reevaluate, _nicheSize, _modelFamily) = (reevaluate, nicheSize, modelFamily)
     new ModelFamilyCalibration {
       val inputs = Inputs(modelFamily.attributes.map(_.toInput))
       val objectives = modelFamily.objectives
@@ -43,7 +42,6 @@ object ModelFamilyCalibration {
       val gManifest = implicitly[Manifest[G]]
 
       val genomeSize = inputs.size
-      val lambda = _lambda
       val nicheSize = _nicheSize
       val models = modelFamily.codes.size
 
@@ -60,20 +58,24 @@ object ModelFamilyCalibration {
 
       override def toVariables(population: Population[G, P, F], context: Context): Seq[Variable[_]] =
         super.toVariables(population, context) ++ Seq(Variable(modelFamily.modelIdPrototype.toArray, population.map(i ⇒ modelId.get(i.genome)).toArray))
+
+      def modelFamily = _modelFamily
     }
   }
 }
 
 trait ModelFamilyCalibration extends NoArchive
-  with GAAlgorithm
-  with ModelFamilyElitism
-  with ModelFamilyMutation
-  with DynamicGACrossover
-  with BinaryTournamentSelection
-  with TournamentOnRank
-  with GeneticBreeding
-  with ParetoRanking
-  with FitnessCrowdingDiversity
-  with ModelFamilyGenome
-  with NonStrictDominance
-  with ClampedGenome
+    with GAAlgorithm
+    with ModelFamilyElitism
+    with ModelFamilyMutation
+    with DynamicGACrossover
+    with BinaryTournamentSelection
+    with TournamentOnRank
+    with GeneticBreeding
+    with ParetoRanking
+    with FitnessCrowdingDiversity
+    with ModelFamilyGenome
+    with NonStrictDominance
+    with ClampedGenome {
+  def modelFamily: ModelFamily
+}

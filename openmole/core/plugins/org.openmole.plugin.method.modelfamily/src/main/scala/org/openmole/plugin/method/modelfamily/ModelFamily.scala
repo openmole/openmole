@@ -81,16 +81,18 @@ class ModelFamilyBuilder(val source: ExpandedString)(implicit val plugins: Plugi
     this
   }
 
-  def toModelFamily = new ModelFamily with super[ScalaBuilder].Built {
-    override def source = builder.source
-    override def attributes = _attributes.toList
-    override def traits = _traits
-    override def modelIdPrototype = _modelIdPrototype
-    override def objectives = _objectives.toList
-  }
+  def toModelFamily =
+    new ModelFamily with super[ScalaBuilder].Built {
+      override def source = builder.source
+      override def attributes = _attributes.toList
+      override def traits = _traits
+      override def modelIdPrototype = _modelIdPrototype
+      override def objectives = _objectives.toList
+    }
 }
 
 trait ModelFamily <: Plugins { family ⇒
+
   def imports: Seq[String]
   def source: ExpandedString
   def traits: Seq[Class[_]]
@@ -106,17 +108,16 @@ trait ModelFamily <: Plugins { family ⇒
       case Attribute(p, name, _, _) ⇒ s"def ${p.name}: ${p.`type`} = ${ScalaCompilation.inputObject}.${name}"
     }
 
-  def codes = {
-    traitsCombinations.map {
-      ts ⇒
-        def traitsString = ts.map(t ⇒ s"with ${t.getName}").mkString(" ")
+  def traitsString = traitsCombinations.map { ts ⇒ ts.map(t ⇒ s"with ${t.getName}").mkString(" ") }
 
+  def codes = {
+    traitsString.map {
+      ts ⇒
         val context =
           Context(
-            Variable(traitsVariable, traitsString),
+            Variable(traitsVariable, ts),
             Variable(attributesVariable, attributesStrings.map("  " + _).mkString("\n"))
           )
-
         source.from(context)
     }
   }
@@ -136,5 +137,7 @@ trait ModelFamily <: Plugins { family ⇒
     }
 
   @transient lazy val models = compilations.map(_.get)
+
+  def compileModels = compilations.foreach(_.get)
 
 }

@@ -28,6 +28,7 @@ import org.openmole.plugin.task.scala._
 object ModelFamilyTask {
 
   def apply(modelFamily: ModelFamily) = new TaskBuilder {
+    modelFamily.compileModels
     modelFamily.attributes.foreach { a ⇒ addInput(a.prototype) }
     addInput(modelFamily.modelIdPrototype)
     modelFamily.objectives.foreach { addOutput(_) }

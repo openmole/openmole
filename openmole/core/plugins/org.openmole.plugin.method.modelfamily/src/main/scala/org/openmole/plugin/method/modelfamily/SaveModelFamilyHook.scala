@@ -17,16 +17,47 @@
 
 package org.openmole.plugin.method.modelfamily
 
-import org.openmole.plugin.hook.file.AppendToCSVFileHookBuilder
+import org.openmole.core.workflow.data.Context
+import org.openmole.core.workflow.mole.{ HookBuilder, ExecutionContext, Hook }
+import org.openmole.core.workflow.tools.ExpandedString
+import org.openmole.plugin.method.evolution._
+import org.openmole.plugin.hook.file._
+import org.openmole.misc.tools.io.FileUtil._
 
-//object SaveModelFamilyHook {
-//
-//  def apply(modelFamily: GAPuzzle[ModelFamily], dir: ExpandedString) = {
-//    val fileName = dir + "/population${" + puzzle.generation.name + "}.csv"
-//    val prototypes =
-//      Seq[Prototype[_]](puzzle.parameters.generation) ++
-//        puzzle.evolution.inputsPrototypes.map(_.toArray) ++
-//        puzzle.evolution.objectives.map(_.toArray)
-//    new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
-//  }
-//}
+object SaveModelFamilyHook {
+
+  def apply(puzzle: GAPuzzle[ModelFamilyCalibration], dir: ExpandedString) = {
+    val fileName = dir + "/population${" + puzzle.generation.name + "}.csv"
+    new HookBuilder {
+      def toHook =
+        new SaveModelFamilyHook(puzzle, fileName) with Built
+    }
+  }
+}
+
+abstract class SaveModelFamilyHook(puzzle: GAPuzzle[ModelFamilyCalibration], path: ExpandedString) extends Hook {
+
+  def mf = puzzle.parameters.evolution
+  def headers = s"${mf.modelFamily.modelIdPrototype.name},${mf.inputsPrototypes.map(_.name).mkString(",")},${mf.objectives.map(_.name).mkString(",")}"
+
+  def process(context: Context, executionContext: ExecutionContext) = {
+
+    def idArray: Array[Int] = context(mf.modelFamily.modelIdPrototype.toArray)
+    def inputsArray = puzzle.parameters.evolution.inputsPrototypes.map(p ⇒ context(p.toArray))
+    def outputsArray = puzzle.parameters.evolution.objectives.map(p ⇒ context(p.toArray))
+
+    val file = executionContext.relativise(path.from(context))
+    file.createParentDir
+    file.withWriter { w ⇒
+      w.write(headers + "\n")
+      for {
+        ((id, inputs), outputs) ← idArray zip inputsArray zip outputsArray
+      } {
+        def traits = s"$id: ${mf.modelFamily.traitsString(id)}"
+        w.write(s"""$traits,${inputs.mkString(",")},${outputs.mkString(",")}\n""")
+      }
+    }
+    context
+  }
+
+}
