@@ -23,6 +23,7 @@ import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.builder.Builder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.PluginSet
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.task.scala._
 
 import scala.collection.mutable.ListBuffer
@@ -32,7 +33,10 @@ object ModelFamily {
 
   case class Attribute(prototype: Prototype[_], name: String, min: Double, max: Double)
 
-  def apply(model: Class[_])(implicit plugins: PluginSet) = new ModelFamilyBuilder(model)
+  def apply(source: ExpandedString)(implicit plugins: PluginSet) = new ModelFamilyBuilder(source)
+
+  def traitsVariable = Prototype[String]("traits")
+  def attributesVariable = Prototype[String]("attributes")
 
 }
 
@@ -42,34 +46,23 @@ object ModelFamilyBuilder {
   implicit def modelFamilyBuilderToModelFamily(builder: ModelFamilyBuilder) = builder.toModelFamily
 }
 
-class ModelFamilyBuilder(val model: Class[_])(implicit val plugins: PluginSet) extends Builder { builder ⇒
+class ModelFamilyBuilder(val source: ExpandedString)(implicit val plugins: PluginSet) extends Builder with ScalaBuilder { builder ⇒
   private val _attributes = ListBuffer[Attribute]()
 
-  def addAttribute(prototype: Prototype[_], name: String, min: Double, max: Double) = {
+  def addAttribute(prototype: Prototype[Double], name: String, min: Double, max: Double) = {
     _attributes += Attribute(prototype, name, min, max)
     this
   }
 
-  def addAttribute(prototype: Prototype[_], min: Double, max: Double) = {
+  def addAttribute(prototype: Prototype[Double], min: Double, max: Double) = {
     _attributes += Attribute(prototype, prototype.name, min, max)
-    this
-  }
-
-  private var _modelPrototype = Prototype[AnyRef]("model")
-  def setModelPrototype(prototype: Prototype[AnyRef]) = {
-    _modelPrototype = prototype
-    this
-  }
-
-  private val _libraries = ListBuffer[File]()
-  def addLibrary(library: File*) = {
-    _libraries ++= library
     this
   }
 
   private val _traits = ListBuffer[Class[_]]()
   def addTrait(t: Class[_]*) = {
     _traits ++= t
+    addClassUse(t: _*)
     this
   }
 
@@ -79,27 +72,33 @@ class ModelFamilyBuilder(val model: Class[_])(implicit val plugins: PluginSet) e
     this
   }
 
-  def toModelFamily = new ModelFamily {
-    override def model = builder.model
+  private var _objectives = ListBuffer[Prototype[Double]]()
+  def addObjective(prototype: Prototype[Double]*) = {
+    _objectives ++= prototype
+    this
+  }
+
+  def toModelFamily = new ModelFamily with super[ScalaBuilder].Built {
+    override def source = builder.source
     override def attributes = _attributes.toList
-    override def libraries = _libraries
     override def traits = _traits
-    override def modelPrototype = _modelPrototype
-    override def plugins = builder.plugins
     override def modelIdPrototype = _modelIdPrototype
+    override def objectives = _objectives.toList
   }
 }
 
 trait ModelFamily <: Plugins { family ⇒
-  def model: Class[_]
+  def imports: Seq[String]
+  def source: ExpandedString
   def traits: Seq[Class[_]]
   def attributes: Seq[Attribute]
+  def objectives: Seq[Prototype[Double]]
   def libraries: Seq[File]
-  def modelPrototype: Prototype[AnyRef]
   def modelIdPrototype: Prototype[Int]
+  def usedClasses: Seq[Class[_]]
 
   def traitsCombinations: Seq[Seq[Class[_]]] = (0 to traits.size).flatMap(traits.combinations)
-  def attributesString =
+  def attributesStrings =
     attributes.map {
       case Attribute(p, name, _, _) ⇒ s"def ${p.name}: ${p.`type`} = ${ScalaCompilation.inputObject}.${name}"
     }
@@ -109,11 +108,13 @@ trait ModelFamily <: Plugins { family ⇒
       ts ⇒
         def traitsString = ts.map(t ⇒ s"with ${t.getName}").mkString(" ")
 
-        s"""
-           |lazy val ${modelPrototype.name} = new ${model.getName} $traitsString {
-           |${attributesString.map("  " + _).mkString("\n")}
-           |}
-         """.stripMargin
+        val context =
+          Context(
+            Variable(traitsVariable, traitsString),
+            Variable(attributesVariable, attributesStrings.map("  " + _).mkString("\n"))
+          )
+
+        source.from(context)
     }
   }
 
@@ -122,15 +123,15 @@ trait ModelFamily <: Plugins { family ⇒
       code ⇒
         val compilation =
           new ScalaCompilation {
-            override def imports: Seq[String] = Seq.empty
+            override def imports: Seq[String] = family.imports
             override def source: String = code
-            override def outputs: DataSet = DataSet(modelPrototype)
+            override def outputs: DataSet = objectives
             override def libraries: Seq[File] = family.libraries
-            override def usedClasses: Seq[Class[_]] = traits ++ Seq(model)
+            override def usedClasses: Seq[Class[_]] = family.usedClasses
           }
         compilation.compiled(attributes.map(_.prototype))
     }
 
-  def workingModels = compilations.collect { case Success(m) ⇒ m }
+  @transient lazy val models = compilations.map(_.get)
 
 }

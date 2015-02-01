@@ -20,28 +20,25 @@ package org.openmole.plugin.method.modelfamily
 import java.io.File
 
 import org.openmole.core.workflow.builder.TaskBuilder
-import org.openmole.core.workflow.data.{ DataSet, Context }
+import org.openmole.core.workflow.data.{ Variable, DataSet, Context }
 import org.openmole.core.workflow.task._
-import org.openmole.plugin.task.code.JVMLanguageTask
+import org.openmole.plugin.task.jvm.JVMLanguageTask
 import org.openmole.plugin.task.scala._
-
-import scala.tools.ant.ScalaTask
 
 object ModelFamilyTask {
 
-  def apply(modelFamily: ModelFamily)(implicit plugins: PluginSet = PluginSet.empty) = new ScalaTaskBuilder {
-    modelFamily.attributes.map { a ⇒ addInput(a.prototype) }
+  def apply(modelFamily: ModelFamily) = new TaskBuilder {
+    modelFamily.attributes.foreach { a ⇒ addInput(a.prototype) }
+    addInput(modelFamily.modelIdPrototype)
+    modelFamily.objectives.foreach { addOutput(_) }
     override def toTask: Task = new ModelFamilyTask(modelFamily) with Built
   }
 
 }
 
-abstract class ModelFamilyTask(val modelFamily: ModelFamily) extends JVMLanguageTask { t ⇒
+abstract class ModelFamilyTask(val modelFamily: ModelFamily) extends Task { t ⇒
 
-  override def processCode(context: Context): Context = {
-    modelFamily.compilations.foreach(println)
-    println(modelFamily.workingModels.size)
-    context
-  }
+  override def process(context: Context): Context =
+    modelFamily.models(context(modelFamily.modelIdPrototype)).run(context)
 
 }

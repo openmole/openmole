@@ -72,22 +72,30 @@ trait ScalaCompilation { compilation ⇒
   def prefix = "_input_value_"
 
   def compile(inputs: Seq[Prototype[_]]) = Try {
-    val interpreter = new ScalaREPL(false, usedClasses, libraries)
+    val interpreter = new ScalaREPL(true, usedClasses, libraries)
+
+    def exceptionMessage = {
+      def error(error: interpreter.ErrorMessage) =
+        s"""
+           |${error.error}
+           |on line  ${error.line}
+           |""".stripMargin
+
+      s"""
+         |Errors while compiling:
+         |${interpreter.errorMessages.map(error).mkString("\n")}
+         |in script ${script(inputs)}
+       """.stripMargin
+    }
+
     val evaluated =
       try interpreter.eval(script(inputs))
       catch {
         case e: Exception ⇒
-          throw new InternalProcessingError(
-            e,
-            interpreter.firstErrorMessage.map {
-              error ⇒
-                s"""Error while compiling:
-               |${error.error}
-               |on line ${error.line} of script:
-               |${script(inputs)}""".stripMargin
-            }.getOrElse("Error in compiler")
-          )
+          throw new InternalProcessingError(e, exceptionMessage)
       }
+
+    if (!interpreter.errorMessages.isEmpty) throw new InternalProcessingError(exceptionMessage)
 
     if (evaluated == null) throw new InternalProcessingError(
       s"""The return value of the script was null:

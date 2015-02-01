@@ -17,4 +17,4 @@
 
 package org.openmole.plugin.task
 
-package object groovy extends code.CodePackage
+package object groovy extends jvm.CodePackage

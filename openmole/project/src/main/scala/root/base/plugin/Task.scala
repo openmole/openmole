@@ -26,11 +26,11 @@ object Task extends PluginDefaults {
 
   lazy val netLogo5 = OsgiProject("netlogo5") dependsOn (netLogo, Core.workflow, external, Tool.netLogo5API)
 
-  lazy val code = OsgiProject("code") dependsOn (Misc.exception, Core.workflow, external, Misc.workspace)
+  lazy val jvm = OsgiProject("jvm") dependsOn (Misc.exception, Core.workflow, external, Misc.workspace)
 
-  lazy val scala = OsgiProject("scala") dependsOn (Misc.exception, Core.workflow, code, Misc.console)
+  lazy val scala = OsgiProject("scala") dependsOn (Misc.exception, Core.workflow, jvm, Misc.console)
 
-  lazy val groovy = OsgiProject("groovy") dependsOn (Misc.exception, Core.workflow, Tool.groovy, code, Misc.replication % "test")
+  lazy val groovy = OsgiProject("groovy") dependsOn (Misc.exception, Core.workflow, Tool.groovy, jvm, Misc.replication % "test")
 
   lazy val template = OsgiProject("template") dependsOn (Misc.exception, Core.workflow, Misc.workspace, Misc.replication % "test")
 

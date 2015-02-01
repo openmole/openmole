@@ -31,7 +31,7 @@ import scala.tools.nsc.reporters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ScalaREPL(displayErrors: Boolean = true, priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
+class ScalaREPL(storeErrors: Boolean = false, priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
 
   System.setProperty("jline.shutdownhook", "true")
   //System.setProperty("scala.repl.debug", "true")
@@ -39,7 +39,7 @@ class ScalaREPL(displayErrors: Boolean = true, priorityClasses: Seq[Class[_]] = 
 
   case class ErrorMessage(error: String, line: Int)
 
-  var firstErrorMessage: Option[ErrorMessage] = None
+  var errorMessages: List[ErrorMessage] = Nil
 
   in = new JLineReader(new JLineCompletion(this))
 
@@ -52,20 +52,19 @@ class ScalaREPL(displayErrors: Boolean = true, priorityClasses: Seq[Class[_]] = 
   intp = new IMain {
 
     override lazy val reporter = new ReplReporter(this) {
-      override def error(pos: Position, msg: String): Unit = {
-
-        if (!firstErrorMessage.isDefined && pos.isDefined) {
+      override def error(pos: Position, msg: String): Unit = synchronized {
+        if (storeErrors) {
           val compiled = new String(pos.source.content).split("\n")
           val linesLength = compiled.take(pos.line - 1).flatten.size + (pos.line - 1)
           val offset = pos.start - linesLength
 
-          firstErrorMessage =
-            Some(ErrorMessage(
+          errorMessages :+=
+            ErrorMessage(
               s"""$msg
               |${compiled(pos.line - 1)}
-              |${new String((0 until offset).map(_ ⇒ ' ').toArray)}^""".stripMargin, pos.line))
+              |${new String((0 until offset).map(_ ⇒ ' ').toArray)}^""".stripMargin, pos.line)
         }
-        if (displayErrors) super.error(pos, msg)
+        else super.error(pos, msg)
       }
     }
 

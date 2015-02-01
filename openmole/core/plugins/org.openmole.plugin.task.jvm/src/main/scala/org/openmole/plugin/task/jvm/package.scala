@@ -22,14 +22,14 @@ import java.io.File
 import org.openmole.core.workflow.builder._
 import org.openmole.misc.macros.Keyword._
 
-package object code {
+package object jvm {
 
   lazy val imports = add[{ def addImport(s: String*) }]
   lazy val libraries = add[{ def addLibrary(l: File*) }]
 
   trait CodePackage extends external.ExternalPackage {
-    lazy val imports = code.imports
-    lazy val libraries = code.libraries
+    lazy val imports = jvm.imports
+    lazy val libraries = jvm.libraries
   }
 
 }

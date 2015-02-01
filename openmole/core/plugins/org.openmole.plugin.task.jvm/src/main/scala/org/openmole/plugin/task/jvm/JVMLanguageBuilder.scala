@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.code
+package org.openmole.plugin.task.jvm
 
 import java.io.File
 import org.openmole.core.serializer.plugin.Plugins
@@ -23,18 +23,13 @@ import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.task.PluginSet
 
-/**
- * Builder for any code task
- *
- * The code task builder is an external task builder, you may want to look
- * at the @see ExternalTaskBuilder for a complement of documentation.
- */
-abstract class JVMLanguageTaskBuilder(implicit val plugins: PluginSet) extends ExternalTaskBuilder { builder ⇒
+trait JVMLanguageBuilder { builder ⇒
   private var _imports = new ListBuffer[String]
   private var _libraries = new ListBuffer[File]
 
   def imports = _imports.toList
   def libraries = _libraries.toList
+  def plugins: PluginSet
 
   /**
    * Add a namespace import and make it available to in the task
@@ -65,10 +60,19 @@ abstract class JVMLanguageTaskBuilder(implicit val plugins: PluginSet) extends E
     this
   }
 
-  trait Built extends super.Built with Plugins {
+  trait Built <: Plugins {
     val imports: Seq[String] = builder.imports.toSeq
     val libraries: Seq[File] = builder.libraries.toSeq
     val plugins = builder.plugins
   }
+}
 
+/**
+ * Builder for any code task
+ *
+ * The code task builder is an external task builder, you may want to look
+ * at the @see ExternalTaskBuilder for a complement of documentation.
+ */
+abstract class JVMLanguageTaskBuilder(implicit val plugins: PluginSet) extends ExternalTaskBuilder with JVMLanguageBuilder {
+  trait Built extends super[ExternalTaskBuilder].Built with super[JVMLanguageBuilder].Built with Plugins
 }

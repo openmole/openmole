@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.code
+package org.openmole.plugin.task.jvm
 
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.data._

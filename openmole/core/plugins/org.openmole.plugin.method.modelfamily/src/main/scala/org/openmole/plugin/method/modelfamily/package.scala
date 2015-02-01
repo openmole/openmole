@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,15 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task
+package org.openmole.plugin.method
 
-import org.openmole.core.workflow.builder._
-import org.openmole.misc.macros.Keyword._
+import org.openmole.plugin.task.scala.ScalaPackage
 
-package scala {
-  trait ScalaPackage <: jvm.CodePackage {
-    lazy val usedClasses = add[{ def addClassUse(c: Class[_]*) }]
-  }
-}
-
-package object scala extends ScalaPackage
+package object modelfamily extends ScalaPackage

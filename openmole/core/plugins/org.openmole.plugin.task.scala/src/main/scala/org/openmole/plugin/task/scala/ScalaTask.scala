@@ -22,7 +22,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.misc.tools.script._
-import org.openmole.plugin.task.code._
+import org.openmole.plugin.task.jvm._
 
 object ScalaTask {
 

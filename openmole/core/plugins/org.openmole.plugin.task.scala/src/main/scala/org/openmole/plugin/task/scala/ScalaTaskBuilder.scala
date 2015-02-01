@@ -18,16 +18,16 @@
 package org.openmole.plugin.task.scala
 
 import org.openmole.core.workflow.task.PluginSet
-import org.openmole.plugin.task.code.JVMLanguageTaskBuilder
+import org.openmole.plugin.task.jvm.{ JVMLanguageBuilder, JVMLanguageTaskBuilder }
 
 import scala.collection.mutable.ListBuffer
 
-abstract class ScalaTaskBuilder(implicit plugins: PluginSet) extends JVMLanguageTaskBuilder { builder ⇒
+trait ScalaBuilder <: JVMLanguageBuilder { builder ⇒
 
   val usedClasses = ListBuffer[Class[_]]()
 
-  def addClassUse(c: Class[_]): this.type = {
-    usedClasses += c
+  def addClassUse(c: Class[_]*): this.type = {
+    usedClasses ++= c
     this
   }
 
@@ -38,5 +38,8 @@ abstract class ScalaTaskBuilder(implicit plugins: PluginSet) extends JVMLanguage
   trait Built <: super.Built {
     def usedClasses = builder.usedClasses.toList
   }
+}
 
+abstract class ScalaTaskBuilder(implicit plugins: PluginSet) extends JVMLanguageTaskBuilder with ScalaBuilder { builder ⇒
+  trait Built <: super[JVMLanguageTaskBuilder].Built with super[ScalaBuilder].Built
 }
