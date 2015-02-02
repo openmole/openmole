@@ -68,13 +68,9 @@ object PrototypeData {
 
 }
 
-trait InputData extends Data {
-  def inputs: Seq[(PrototypeData, Option[String])]
-}
+case class InputData(inputs: Seq[Input]) extends Data
 
-trait OutputData extends Data {
-  def outputs: Seq[PrototypeData]
-}
+case class OutputData(outputs: Seq[Output]) extends Data
 
 trait TaskData extends Data
 

@@ -1,7 +1,7 @@
-package org.openmole.gui.ext.dataui
+package org.openmole.gui.ext
 
 /*
- * Copyright (C) 30/01/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 02/02/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,25 +17,10 @@ package org.openmole.gui.ext.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data._
-import rx._
+package object data {
 
-object OutputDataUI {
-  def build = new OutputDataUI {
-    def panelUI = new OutputPanelUI(this)
-  }
-}
+  case class Input(val prototype: PrototypeData, val default: Option[String], val mapping: Option[Any ⇒ PrototypeData])
 
-trait OutputDataUI <: DataUI {
-  type DATA = OutputData
+  case class Output(val prototype: PrototypeData, val mapping: Option[PrototypeData ⇒ Any])
 
-  def dataType = "Outputs"
-
-  val outputsUI: Var[Seq[OutputUI]] = Var(Seq())
-
-  def data: DATA = OutputData(outputsUI().map { id ⇒
-    Output(id.prototypeUI().data, None /*o.mapping.map { (p:PrototypeDataUI => x: Any) =>  (p.data => x)}*/
-    )
-  }
-  )
 }

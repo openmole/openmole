@@ -1,6 +1,6 @@
 package org.openmole.gui.ext.dataui
 
-import org.openmole.gui.ext.data.{ InputData, OutputData, PrototypeData }
+import org.openmole.gui.ext.data._
 import rx._
 
 /*
@@ -31,11 +31,11 @@ trait InputDataUI <: DataUI {
 
   def dataType = "Inputs"
 
-  val inputsUI: InputsUI = Var(Seq())
+  val inputsUI: Var[Seq[InputUI]] = Var(Seq())
 
-  def data: DATA = new InputData {
-    val inputs: Seq[(PrototypeData, Option[String])] = inputsUI().map { tu ⇒
-      (tu()._1.data, tu()._2)
-    }
+  def data: DATA = new InputData(inputsUI().map { id ⇒
+    Input(id.prototypeUI().data, id.default(), None /*tu.mapping.map { (a:Any ⇒ p:PrototypeDataUI) ⇒ a ⇒ p.data }*/ )
   }
+  )
 }
+

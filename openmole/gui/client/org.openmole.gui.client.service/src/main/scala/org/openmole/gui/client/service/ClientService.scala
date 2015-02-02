@@ -173,13 +173,6 @@ object ClientService {
 
   implicit def libConv(seq: Var[Seq[Var[String]]]): Seq[String] = seq().map { e ⇒ e() }
 
-  implicit def outputsConv(s: OutputsUI): Outputs = s().map { t ⇒ t().data }.toSeq
-
-  implicit def inputsConv(s: InputsUI): Inputs = s().map { t ⇒ t() }.map {
-    case (pUI, opt) ⇒
-      (pUI.data, opt)
-  }
-
   implicit def dataUIToFactoryUI(d: DataUI): Option[FactoryUI] = uiFactories().values.find {
     _.dataUI == d
   }
