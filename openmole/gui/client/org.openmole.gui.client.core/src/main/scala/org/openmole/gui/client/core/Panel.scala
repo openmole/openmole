@@ -1,14 +1,18 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.client
+import org.openmole.gui.client.core.PrototypeFactoryUI
 import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.misc.js.{ Select, Forms ⇒ bs }
 import org.scalajs.dom.Event
 
+import scala.sys.Prop.DoubleProp
 import scalatags.JsDom.all
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.ext.data.ProtoTYPE.DOUBLE
 import org.openmole.gui.client.service.ClientService._
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
@@ -38,7 +42,10 @@ object Panel {
 
     val ALL = ConceptState("All", ClientService.factories)
     val TASKS = ConceptState("Tasks", ClientService.taskFactories)
-    val PROTOTYPES = ConceptState("Prototypes", ClientService.prototypeFactories)
+    val PROTOTYPES = ConceptState("Prototypes",
+      PrototypeFactoryUI.doubleFactory +: ClientService.prototypeFactories filterNot (_.dataUI.dataType == DOUBLE)
+
+    )
   }
 
   import ConceptFilter._
@@ -161,7 +168,6 @@ class GenericPanel(uuid: String,
 
   def setCurrent(dbUI: DataBagUI) = {
     currentDataBagUI() = Some(dbUI)
-    println("curnetdatabax " + currentDataBagUI().get.dataUI().dataType)
     factorySelector.content() = currentDataBagUI()
   }
 
@@ -246,9 +252,6 @@ class GenericPanel(uuid: String,
         }
     }
 
-    /* currentPanelUI().map { cpUI ⇒
-      cpUI.save
-    }*/
     settingTabs().map {
       _.save
     }

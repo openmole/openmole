@@ -28,7 +28,6 @@ class Select[T <: Displayable with Identifiable](autoID: String,
                                                  key: ClassKeyAggregator = Forms.emptyCK,
                                                  onclickExtra: () ⇒ Unit = () ⇒ {}) {
 
-  println("in const " + default.map { _.name })
   val content: Var[Option[T]] = Var(contents().size match {
     case 0 ⇒ None
     case _ ⇒ default match {
@@ -43,7 +42,6 @@ class Select[T <: Displayable with Identifiable](autoID: String,
     a(
       `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", href := "#")(
         Rx {
-          println("header rx " + content() + "  " + content().map { _.name })
           content().map {
             _.name
           }.getOrElse(contents()(0).name) + " "

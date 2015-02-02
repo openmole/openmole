@@ -185,9 +185,7 @@ object ClientService {
   }
 
   implicit def dataBagUIToFactoryUI(p: Option[DataBagUI]): Option[FactoryUI] = p flatMap { dataBagUI ⇒
-    println("in flatMAP " + dataBagUI.dataUI())
     uiFactories().values.find { f ⇒
-      println(" ++ " + f.dataUI.getClass + " " + dataBagUI.dataUI().getClass + "  " + f.dataUI.getClass == dataBagUI.dataUI().getClass)
       f.dataUI.getClass == dataBagUI.dataUI().getClass
     }
   }
