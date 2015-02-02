@@ -1,6 +1,7 @@
-package org.openmole.gui.ext
+package org.openmole.gui.ext.dataui
+
 /*
- * Copyright (C) 16/12/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 30/01/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,8 +17,25 @@ package org.openmole.gui.ext
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.dataui.IODataUI
+import org.openmole.gui.ext.data.{ OutputData, PrototypeData }
+import rx._
 
-package object factoryui {
-  type IOFactoryUI = FactoryUI { type DATAUI <: IODataUI }
+object OutputDataUI {
+  def build = new OutputDataUI {
+    def panelUI = new OutputPanelUI(this)
+  }
+}
+
+trait OutputDataUI <: DataUI {
+  type DATA = OutputData
+
+  def dataType = "Outputs"
+
+  val outputsUI: OutputsUI = Var(Seq())
+
+  def data: DATA = new OutputData {
+    val outputs: Seq[PrototypeData] = outputsUI().map {
+      _().data
+    }
+  }
 }

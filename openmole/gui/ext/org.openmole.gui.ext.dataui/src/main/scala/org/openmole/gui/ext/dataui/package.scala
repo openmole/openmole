@@ -29,8 +29,8 @@ package object dataui {
   type Inputs = Seq[(PrototypeData, Option[String])]
   type Outputs = Seq[PrototypeData]
 
-  type Inputable = { def inputs: InputsUI }
+  /*type Inputable = { def inputs: InputsUI }
   type Outputable = { def outputs: OutputsUI }
 
-  type IODataUI = DataUI with Inputable with Outputable
+  type IODataUI = DataUI with Inputable with Outputable*/
 }

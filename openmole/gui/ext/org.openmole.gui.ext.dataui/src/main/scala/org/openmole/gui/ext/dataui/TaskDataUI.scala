@@ -22,6 +22,4 @@ import rx._
 trait TaskDataUI <: DataUI {
   type DATA = TaskData
   def data: DATA
-  def inputs: InputsUI
-  def outputs: OutputsUI
 }

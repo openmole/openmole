@@ -1,7 +1,10 @@
-package org.openmole.gui.plugin.task.systemexec.client
+package org.openmole.gui.ext.dataui
+
+import org.openmole.gui.ext.data.{ InputData, OutputData, PrototypeData }
+import rx._
 
 /*
- * Copyright (C) 19/10/2014 // mathieu.leclaire@openmole.org
+ * Copyright (C) 28/01/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,18 +20,22 @@ package org.openmole.gui.plugin.task.systemexec.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scala.scalajs.js.annotation.JSExport
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
-import org.openmole.gui.ext.dataui._
-import org.openmole.gui.client.service.ClientService._
-import rx._
+object InputDataUI {
+  def build = new InputDataUI {
+    def panelUI = new InputPanelUI(this)
+  }
+}
 
-@JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskDataUI")
-class SystemExecTaskDataUI extends TaskDataUI {
-  def data = new SystemExecTaskData
+trait InputDataUI <: DataUI {
+  type DATA = InputData
 
-  def panelUI = new SystemExecTaskPanelUI(this)
+  def dataType = "Inputs"
 
-  def dataType = "External"
+  val inputsUI: InputsUI = Var(Seq())
+
+  def data: DATA = new InputData {
+    val inputs: Seq[(PrototypeData, Option[String])] = inputsUI().map { tu ⇒
+      (tu()._1.data, tu()._2)
+    }
+  }
 }

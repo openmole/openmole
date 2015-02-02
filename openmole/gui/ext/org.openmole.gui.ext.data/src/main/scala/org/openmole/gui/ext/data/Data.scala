@@ -17,12 +17,14 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-case class DataBag(uuid: String, data: Data, name: String)
+case class DataBag(uuid: String, name: String, data: Data, inputData: Option[InputData] = None, ouputData: Option[OutputData] = None)
 
 trait Data
 
 object ProtoTYPE extends Enumeration {
+
   case class ProtoTYPE(uuid: String, name: String) extends Val(name)
+
   val INT = new ProtoTYPE("Integer", "Integer")
   val DOUBLE = new ProtoTYPE("Double", "Double")
   val LONG = new ProtoTYPE("Long", "Long")
@@ -33,13 +35,19 @@ object ProtoTYPE extends Enumeration {
 }
 
 import ProtoTYPE._
+
 class PrototypeData(val `type`: ProtoTYPE, val dimension: Int) extends Data
 
 class IntPrototypeData(dimension: Int) extends PrototypeData(INT, dimension)
+
 class DoublePrototypeData(dimension: Int) extends PrototypeData(DOUBLE, dimension)
+
 class StringPrototypeData(dimension: Int) extends PrototypeData(STRING, dimension)
+
 class LongPrototypeData(dimension: Int) extends PrototypeData(LONG, dimension)
+
 class BooleanPrototypeData(dimension: Int) extends PrototypeData(BOOLEAN, dimension)
+
 class FilePrototypeData(dimension: Int) extends PrototypeData(FILE, dimension)
 
 object PrototypeData {
@@ -47,17 +55,31 @@ object PrototypeData {
   def apply(`type`: ProtoTYPE, dimension: Int) = new PrototypeData(`type`, dimension)
 
   def integer(dimension: Int) = new IntPrototypeData(dimension)
+
   def double(dimension: Int) = new DoublePrototypeData(dimension)
+
   def long(dimension: Int) = new LongPrototypeData(dimension)
+
   def boolean(dimension: Int) = new BooleanPrototypeData(dimension)
+
   def string(dimension: Int) = new StringPrototypeData(dimension)
+
   def file(dimension: Int) = new FilePrototypeData(dimension)
 
 }
 
-trait TaskData extends Data {
+trait InputData extends Data {
   def inputs: Seq[(PrototypeData, Option[String])]
+}
+
+trait OutputData extends Data {
   def outputs: Seq[PrototypeData]
 }
+
+trait TaskData extends Data
+
+trait EnvironmentData extends Data
+
+trait HookData extends Data
 
 case class ErrorData(data: DataBag, error: String, stack: String)

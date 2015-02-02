@@ -17,20 +17,13 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.ProtoTYPE.ALL
 import org.openmole.gui.ext.dataui._
-import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.client.service.ClientService
-import org.openmole.gui.client.service.Post
 import org.openmole.gui.misc.js.Forms
 import org.openmole.gui.misc.js.Forms._
-import org.openmole.gui.shared._
-import org.openmole.gui.misc.js.CSSClasses._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.misc.js.JsRxTags._
-import autowire._
-import rx._
 
 import org.scalajs.dom
 
@@ -52,14 +45,14 @@ object GUIClient {
     ClientService += ("org.openmole.gui.ext.data.BooleanPrototypeDataUI", PrototypeFactoryUI.booleanFactory)
     ClientService += ("org.openmole.gui.ext.data.FilePrototypeDataUI", PrototypeFactoryUI.fileFactory)
 
-    val db = new DataBagUI(Var(ClientService.taskFactories(1).dataUI))
-    db.name() = "premier"
+    val db = DataBagUI(ClientService.taskFactories(1).dataUI)
+    db.name() = "premierr"
     ClientService += db
     db.name() = "first"
-    val db2 = new DataBagUI(Var(ClientService.taskFactories(1).dataUI))
+    val db2 = DataBagUI(ClientService.taskFactories(1).dataUI)
     ClientService += db2
     db2.name() = "yop"
-    val proto = new DataBagUI(Var(ClientService.prototypeFactories(0).dataUI))
+    val proto = DataBagUI(ClientService.prototypeFactories(0).dataUI)
     proto.name() = "proto1"
     ClientService += proto
 
@@ -72,7 +65,7 @@ object GUIClient {
           (navItem("executions", "Executions").render, "env", () ⇒ {
             println("Not yet")
           })
-        ), key(nav_pills) + nav_inverse + nav_staticTop
+        ), nav_pills + nav_inverse + nav_staticTop
       )
     )
 

@@ -27,7 +27,7 @@ import rx._
 
 object PrototypeFactoryUI {
 
-  private def buildDataUI(`type`: ProtoTYPE, dim: Int = 0) = new PrototypeDataUI {
+  sealed class GenericPrototypeDataUI(val `type`: ProtoTYPE, dim: Int = 0) extends PrototypeDataUI {
     val dimension = Var(dim)
 
     def data = PrototypeData(`type`, dimension())
@@ -37,25 +37,48 @@ object PrototypeFactoryUI {
     val dataType = `type`.name
   }
 
-  class PrototypeFactoryUI(factoryName: String, `type`: ProtoTYPE) extends FactoryUI {
-    type DATAUI = PrototypeDataUI
+  class StringDataUI extends GenericPrototypeDataUI(STRING)
+  class DoubleDataUI extends GenericPrototypeDataUI(DOUBLE)
+  class BooleanDataUI extends GenericPrototypeDataUI(BOOLEAN)
+  class IntDataUI extends GenericPrototypeDataUI(INT)
+  class LongDataUI extends GenericPrototypeDataUI(LONG)
+  class FileDataUI extends GenericPrototypeDataUI(FILE)
 
-    def dataUI = buildDataUI(`type`)
-
-    val name = factoryName
+  def intFactory = new FactoryUI {
+    type DATAUI = IntDataUI
+    def dataUI = new IntDataUI
+    val name = "Integer"
   }
 
-  def intFactory = new PrototypeFactoryUI("Integer", INT)
+  def doubleFactory = new FactoryUI {
+    type DATAUI = DoubleDataUI
+    def dataUI = new DoubleDataUI
+    val name = "Double"
+  }
 
-  def doubleFactory = new PrototypeFactoryUI("Double", DOUBLE)
+  def longFactory = new FactoryUI {
+    type DATAUI = LongDataUI
+    def dataUI = new LongDataUI
+    val name = "Long"
+  }
 
-  def longFactory = new PrototypeFactoryUI("Long", LONG)
+  def booleanFactory = new FactoryUI {
+    type DATAUI = BooleanDataUI
+    def dataUI = new BooleanDataUI
+    val name = "Boolean"
+  }
 
-  def booleanFactory = new PrototypeFactoryUI("Boolean", BOOLEAN)
+  def stringFactory = new FactoryUI {
+    type DATAUI = StringDataUI
+    def dataUI = new StringDataUI
+    val name = "String"
+  }
 
-  def stringFactory = new PrototypeFactoryUI("String", STRING)
-
-  def fileFactory = new PrototypeFactoryUI("File", FILE)
+  def fileFactory = new FactoryUI {
+    type DATAUI = FileDataUI
+    def dataUI = new FileDataUI
+    val name = "File"
+  }
 }
 
 class PrototypePanelUI(dataUI: PrototypeDataUI) extends PanelUI {

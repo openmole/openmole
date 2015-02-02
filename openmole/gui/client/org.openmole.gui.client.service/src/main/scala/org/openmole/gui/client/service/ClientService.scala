@@ -45,7 +45,7 @@ object ClientService {
   // Factories
   def taskFactories = uiFactories().values.flatMap { f ⇒
     f.dataUI match {
-      case t: TaskDataUI ⇒ Some(f.asInstanceOf[IOFactoryUI])
+      case t: TaskDataUI ⇒ Some(f)
       case _             ⇒ None
     }
   }.toSeq
@@ -55,9 +55,9 @@ object ClientService {
   def factories = uiFactories().values.toSeq
 
   //DataBagUIs
-  def taskDataBagUIs: Seq[DataBagUI] = uiDataBags().filter {
+  def taskDataBagUIs: Seq[IODataBagUI] = uiDataBags().filter {
     isTaskUI
-  }
+  }.map { _.asInstanceOf[IODataBagUI] }
 
   def prototypeDataBagUIs: Seq[DataBagUI] = uiDataBags().filter {
     isPrototypeUI
@@ -129,7 +129,9 @@ object ClientService {
 
   implicit def tryToT[T](t: Try[T]): T = t match {
     case Success(s) ⇒ s
-    case Failure(f) ⇒ throw (f)
+    case Failure(f) ⇒
+      println("in failure " + f)
+      throw (f)
   }
 
   private def factoryUI(data: Data) = uiFactories().get(data.getClass.getCanonicalName) match {
@@ -183,7 +185,9 @@ object ClientService {
   }
 
   implicit def dataBagUIToFactoryUI(p: Option[DataBagUI]): Option[FactoryUI] = p flatMap { dataBagUI ⇒
+    println("in flatMAP " + dataBagUI.dataUI())
     uiFactories().values.find { f ⇒
+      println(" ++ " + f.dataUI.getClass + " " + dataBagUI.dataUI().getClass + "  " + f.dataUI.getClass == dataBagUI.dataUI().getClass)
       f.dataUI.getClass == dataBagUI.dataUI().getClass
     }
   }

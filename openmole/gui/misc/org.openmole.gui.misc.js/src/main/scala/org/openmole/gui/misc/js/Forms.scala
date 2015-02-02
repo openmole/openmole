@@ -45,6 +45,8 @@ object Forms {
     def +++(m: Seq[Modifier]) = t.copy(modifiers = t.modifiers :+ m.toSeq)
   }
 
+  def getID: String = java.util.UUID.randomUUID.toString
+
   def emptyCK = ClassKeyAggregator.empty
 
   def key(s: String) = new ClassKeyAggregator(s)
@@ -76,16 +78,16 @@ object Forms {
   def nav(uuid: String, keys: ClassKeyAggregator, contents: NavItem*): TypedTag[HTMLElement] =
     nav(uuid, contents.map { c ⇒ (c.render, c.navid, c.todo) }, keys)
 
-  val nav_default = "navbar-default"
-  val nav_inverse = "navbar-inverse"
-  val nav_staticTop = "navbar-static-top"
-  val nav_pills = "nav-pills"
-  val navbar = "navbar-nav"
-  val navbar_form = "navbar-form"
-  val navbar_right = "navbar-right"
-  val navbar_left = "navbar-left"
+  val nav_default = key("navbar-default")
+  val nav_inverse = key("navbar-inverse")
+  val nav_staticTop = key("navbar-static-top")
+  val nav_pills = key("nav-pills")
+  val navbar = key("navbar-nav")
+  val navbar_form = key("navbar-form")
+  val navbar_right = key("navbar-right")
+  val navbar_left = key("navbar-left")
 
-  val dropdown = "dropdown"
+  val dropdown = key("dropdown")
 
   //Input
   def input(content: String = "") = tags.input(content, `class` := "form-control")
