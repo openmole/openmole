@@ -43,8 +43,8 @@ abstract class SaveModelFamilyHook(puzzle: GAPuzzle[ModelFamilyCalibration], pat
   def process(context: Context, executionContext: ExecutionContext) = {
 
     def idArray: Array[Int] = context(mf.modelFamily.modelIdPrototype.toArray)
-    def inputsArray = puzzle.parameters.evolution.inputsPrototypes.map(p ⇒ context(p.toArray)).transpose
-    def outputsArray = puzzle.parameters.evolution.objectives.map(p ⇒ context(p.toArray)).transpose
+    def inputsArray = puzzle.parameters.evolution.inputsPrototypes.map(p ⇒ context(p.toArray).toSeq).transpose
+    def outputsArray = puzzle.parameters.evolution.objectives.map(p ⇒ context(p.toArray).toSeq).transpose
 
     val file = executionContext.relativise(path.from(context))
     file.createParentDir
