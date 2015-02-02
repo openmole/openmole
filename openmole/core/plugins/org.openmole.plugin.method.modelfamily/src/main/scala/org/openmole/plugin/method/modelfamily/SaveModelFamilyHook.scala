@@ -38,13 +38,13 @@ object SaveModelFamilyHook {
 abstract class SaveModelFamilyHook(puzzle: GAPuzzle[ModelFamilyCalibration], path: ExpandedString) extends Hook {
 
   def mf = puzzle.parameters.evolution
-  def headers = s"${mf.modelFamily.modelIdPrototype.name},${mf.inputsPrototypes.map(_.name).mkString(",")},${mf.objectives.map(_.name).mkString(",")}"
+  def headers = s"${mf.modelFamily.modelIdPrototype.name},traits,number of traits,${mf.inputsPrototypes.map(_.name).mkString(",")},${mf.objectives.map(_.name).mkString(",")}"
 
   def process(context: Context, executionContext: ExecutionContext) = {
 
     def idArray: Array[Int] = context(mf.modelFamily.modelIdPrototype.toArray)
-    def inputsArray = puzzle.parameters.evolution.inputsPrototypes.map(p ⇒ context(p.toArray))
-    def outputsArray = puzzle.parameters.evolution.objectives.map(p ⇒ context(p.toArray))
+    def inputsArray = puzzle.parameters.evolution.inputsPrototypes.map(p ⇒ context(p.toArray)).transpose
+    def outputsArray = puzzle.parameters.evolution.objectives.map(p ⇒ context(p.toArray)).transpose
 
     val file = executionContext.relativise(path.from(context))
     file.createParentDir
@@ -53,7 +53,8 @@ abstract class SaveModelFamilyHook(puzzle: GAPuzzle[ModelFamilyCalibration], pat
       for {
         ((id, inputs), outputs) ← idArray zip inputsArray zip outputsArray
       } {
-        def traits = s"$id: ${mf.modelFamily.traitsString(id)}"
+
+        def traits = s"$id,${mf.modelFamily.traitsString(id)},${mf.modelFamily.traitsCombinations(id).size}"
         w.write(s"""$traits,${inputs.mkString(",")},${outputs.mkString(",")}\n""")
       }
     }
