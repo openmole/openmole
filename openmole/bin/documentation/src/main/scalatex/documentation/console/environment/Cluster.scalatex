@@ -50,11 +50,15 @@
     To delegate some computation load to a @a("SLURM", href := "https://en.wikipedia.org/wiki/Simple_Linux_Utility_for_Resource_Management") based cluster you can use the SLURM environment as follow:
     @br @hl.openmole("""
     import org.openmole.plugin.environment.slurm._
+    import fr.iscpif.gridscale.slurm.Gres // only when using GRES Scheduling
 
     val env =
       SLURMEnvironment(
         "login",
-        "machine.domain"
+        "machine.domain",
+        // optional parameters
+        gres = List( Gres("resource", 1) ),
+        constraints = List("constraint1", "constraint2")
       )""")
     @p @provideOptions:
     @ul
@@ -65,9 +69,9 @@
       @li{@memory,}
       @li{@openMOLEMemory,}
       @li{@threads,}
-      @li{qos: }
-      @li{gres: }
-      @li{constraints: }
+      @li{qos: Quality of Service (QOS) as defined in the Slurm database}
+      @li{gres: a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar).}
+      @li{constraints: a list of Slurm defined constraints which selected nodes must match.}
   @sect{Condor}
     To delegate some computation load to a @a("Condor", href := "https://en.wikipedia.org/wiki/HTCondor") condor based cluster you can use the CondorEnvironment as follow:
     @br @hl.openmole("""
