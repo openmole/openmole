@@ -1,7 +1,7 @@
 
 @import documentation.Objects._
 
-To authenticate with login / password:
+@p To authenticate with login / password:
 @br @hl.openmole("""
     import org.openmole.plugin.environment.ssh._
 
