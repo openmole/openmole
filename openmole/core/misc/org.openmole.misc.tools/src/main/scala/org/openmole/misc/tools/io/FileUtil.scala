@@ -454,8 +454,7 @@ trait FileUtil {
     }
 
     if (file.isDirectory)
-      for (f ← file.listFiles) authorizeLS(f) { recurse(f)(operation, stopPath) }
-
+      for (f ← Option(file.listFiles).getOrElse(Array.empty)) authorizeLS(f) { recurse(f)(operation, stopPath) }
     operation(file)
   }
 
