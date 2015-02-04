@@ -17,7 +17,14 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-case class DataBag(uuid: String, name: String, data: Data, inputData: Option[InputData] = None, ouputData: Option[OutputData] = None)
+trait IDataBag {
+  def uuid: String
+  def name: String
+  def data: Data
+}
+case class DataBag(uuid: String, name: String, data: Data) extends IDataBag
+
+case class IODataBag(uuid: String, name: String, data: Data, inputData: InputData, ouputData: OutputData) extends IDataBag
 
 trait Data
 
@@ -68,9 +75,13 @@ object PrototypeData {
 
 }
 
-case class InputData(inputs: Seq[Input]) extends Data
+trait InputData <: Data {
+  def inputs: Seq[Input]
+}
 
-case class OutputData(outputs: Seq[Output]) extends Data
+trait OutputData <: Data {
+  def outputs: Seq[Output]
+}
 
 trait TaskData extends Data
 

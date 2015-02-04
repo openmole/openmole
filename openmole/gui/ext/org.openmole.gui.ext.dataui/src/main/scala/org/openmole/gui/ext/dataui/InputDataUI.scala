@@ -1,6 +1,7 @@
 package org.openmole.gui.ext.dataui
 
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.ProtoTYPE._
 import rx._
 
 /*
@@ -20,22 +21,20 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object InputDataUI {
-  def build = new InputDataUI {
-    def panelUI = new InputPanelUI(this)
-  }
-}
-
-trait InputDataUI <: DataUI {
+class InputDataUI(val prototypeFilter: Seq[ProtoTYPE] = ALL) extends DataUI {
   type DATA = InputData
 
   def dataType = "Inputs"
 
   val inputsUI: Var[Seq[InputUI]] = Var(Seq())
 
-  def data: DATA = new InputData(inputsUI().map { id ⇒
-    Input(id.prototypeUI().data, id.default(), None /*tu.mapping.map { (a:Any ⇒ p:PrototypeDataUI) ⇒ a ⇒ p.data }*/ )
+  def panelUI = new InputPanelUI(this)
+
+  def data = new InputData {
+    def inputs = inputsUI().map { id ⇒
+      Input(id.prototypeUI().data, id.default(), id.mapping.map { m ⇒ (m._1, m._2.data) })
+    }
   }
-  )
+
 }
 

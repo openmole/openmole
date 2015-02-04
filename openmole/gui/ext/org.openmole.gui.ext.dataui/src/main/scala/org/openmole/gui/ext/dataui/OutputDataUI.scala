@@ -18,24 +18,22 @@ package org.openmole.gui.ext.dataui
  */
 
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.ProtoTYPE._
 import rx._
 
-object OutputDataUI {
-  def build = new OutputDataUI {
-    def panelUI = new OutputPanelUI(this)
-  }
-}
-
-trait OutputDataUI <: DataUI {
+class OutputDataUI(val prototypeFilter: Seq[ProtoTYPE] = ALL) extends DataUI {
   type DATA = OutputData
 
   def dataType = "Outputs"
 
   val outputsUI: Var[Seq[OutputUI]] = Var(Seq())
 
-  def data: DATA = OutputData(outputsUI().map { id ⇒
-    Output(id.prototypeUI().data, None /*o.mapping.map { (p:PrototypeDataUI => x: Any) =>  (p.data => x)}*/
-    )
+  def panelUI = new OutputPanelUI(this)
+
+  def data = new OutputData {
+    def outputs = outputsUI().map { o ⇒
+      Output(o.prototypeUI().data, o.mapping.map { m ⇒ (m._1.data, m._2) }
+      )
+    }
   }
-  )
 }

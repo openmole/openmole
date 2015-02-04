@@ -19,7 +19,9 @@ package org.openmole.gui.server.factory
 
 import org.openmole.core.workflow.task.PluginSet
 import org.openmole.gui.ext.factoryui.FactoryUI
+
 //import org.openmole.gui.shared.FactoriesUI
+
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import org.openmole.gui.ext.data._
@@ -29,14 +31,21 @@ import scala.util.{ Failure, Try }
 object ServerFactories {
   lazy private val instance = new ServerFactories
 
-  def coreObject(dataBag: DataBag): Try[Any] = instance.factories.synchronized {
-    instance.factories.get(dataBag.data.getClass()) match {
-      case Some(f: Factory) ⇒ f.coreObject(PluginSet.empty) //FIXME AND TAKE THE PLUGINS
-      case _                ⇒ Failure(new Throwable("The data " + dataBag.name + " cannot be recontructed on the server."))
+  def coreObject(iDataBag: IDataBag): Try[Any] = instance.factories.synchronized {
+    iDataBag match {
+      case db: DataBag ⇒ instance.factories.get(iDataBag.data.getClass()) match {
+        case Some(f: Factory) ⇒ f.coreObject(PluginSet.empty) //FIXME AND TAKE THE PLUGINS
+
+        case _                ⇒ Failure(new Throwable("The data " + iDataBag.name + " cannot be recontructed on the server."))
+      }
+      case iodb: IODataBag ⇒ instance.factories.get(iDataBag.data.getClass()) match {
+        case Some(f: IOFactory) ⇒ f.coreObject(iodb.inputData, iodb.ouputData)(PluginSet.empty) //FIXME AND TAKE THE PLUGINS
+        case _                  ⇒ Failure(new Throwable("The data " + iDataBag.name + " cannot be recontructed on the server."))
+      }
     }
   }
 
-  def add(dataClass: Class[_], factory: Factory, factoryUI: FactoryUI) = instance.factories.synchronized {
+  def add(dataClass: Class[_], factory: IFactory, factoryUI: FactoryUI) = instance.factories.synchronized {
     println("Add server " + dataClass)
     instance.factories += dataClass -> factory
     instance.factoriesUI += dataClass.getName -> factoryUI
@@ -51,11 +60,18 @@ object ServerFactories {
 }
 
 class ServerFactories {
-  val factories = new mutable.WeakHashMap[Class[_], Factory]
+  val factories = new mutable.WeakHashMap[Class[_], IFactory]
   val factoriesUI = new mutable.WeakHashMap[String, FactoryUI]
 }
 
-trait Factory {
+trait IFactory {
   def data: Data
+}
+
+trait Factory <: IFactory {
   def coreObject(implicit plugins: PluginSet): Try[Any]
+}
+
+trait IOFactory <: IFactory {
+  def coreObject(inputData: InputData, outputData: OutputData)(implicit plugins: PluginSet): Try[Any]
 }
