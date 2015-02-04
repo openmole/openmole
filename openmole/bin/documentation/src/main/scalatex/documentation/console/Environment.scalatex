@@ -1,5 +1,6 @@
 
 @import documentation.Objects._
+@import DocumentationPages._
 
 @sect{Environment}
   A big feature in OpenMOLE is the possibility of delegating the workload to a remote execution environment. Tasks in OpenMOLE have been designed so that the delegation a part of the workload to a remote environment is declarative. To achieve it first define the environment, then tells OpenMOLE witch task to delegate.
@@ -29,8 +30,8 @@
 
   @p Depending on which environment you want to delegate your workload to you can check the following doc:
   @ul
-    @li{@a("Multi-thread", href := DocumentationPages.console.environment.multithread.file), to execute the tasks concurrently on your machine,}
-    @li{@a("SSH", href := DocumentationPages.console.environment.ssh.file), to execute tasks on remote server through SSH,}
+    @li{@a("Multi-thread", href := root.console.environment.multithread.file), to execute the tasks concurrently on your machine,}
+    @li{@a("SSH", href := root.console.environment.ssh.file), to execute tasks on remote server through SSH,}
     @li{clusters}
-    @li{@a("EGI", href := DocumentationPages.console.environment.egi.file), to execute tasks on the EGI grid or using DIRAC,}
+    @li{@a("EGI", href := root.console.environment.egi.file), to execute tasks on the EGI grid or using DIRAC,}
 

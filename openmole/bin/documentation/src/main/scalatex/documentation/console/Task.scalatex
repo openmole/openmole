@@ -1,4 +1,5 @@
 @import documentation.Objects._
+@import DocumentationPages._
 
 @sect{Task}
     This documentation explains how you can embed your programs and compose them in simple OpenMOLE workflows.
@@ -30,7 +31,7 @@
     @p Depending on what you which kind of operation you want to achieve with OpenMOLE you should use the matching task. The one you might want to use to embed your own executable into OpenMOLE are:
 
     @ul
-      @li{@a("the SystemExecTask", href := DocumentationPages.console.task.systemExec.file), to execute your own binary executables,}
-      @li{@a("the ScalaTask", href := DocumentationPages.console.task.scala.file), to execute Java programs (works as well for other JVM based languages),}
-      @li{@a("the NetLogoTask", href := DocumentationPages.console.task.netLogo.file), to execute your NetLogo models,}
-      @li{@a("the MoleTask", href := DocumentationPages.console.task.mole.file), to execute workflows inside your workflows}
+      @li{@a("the SystemExecTask", href := root.console.task.systemExec.file), to execute your own binary executables,}
+      @li{@a("the ScalaTask", href := root.console.task.scala.file), to execute Java programs (works as well for other JVM based languages),}
+      @li{@a("the NetLogoTask", href := root.console.task.netLogo.file), to execute your NetLogo models,}
+      @li{@a("the MoleTask", href := root.console.task.mole.file), to execute workflows inside your workflows}

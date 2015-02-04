@@ -42,7 +42,7 @@ object DocumentationSite extends App {
 
 
   val site = new scalatex.site.Site {
-    def content = DocumentationPages.allPages.map{ p => p.file -> Page.documentation(p) }.toMap
+    def content = DocumentationPages.allPages.map{ p => p.file -> DocumentationPages.decorate(p) }.toMap
   }
   site.renderTo(Path(dest))
 
