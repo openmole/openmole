@@ -29,8 +29,8 @@
 
   @p Depending on which environment you want to delegate your workload to you can check the following doc:
   @ul
-    @li{@a("Multi-thread", href := Pages.console.environment.multithread.file), to execute the tasks concurrently on your machine,}
-    @li{@a("SSH", href := Pages.console.environment.ssh.file), to execute tasks on remote server through SSH,}
+    @li{@a("Multi-thread", href := DocumentationPages.console.environment.multithread.file), to execute the tasks concurrently on your machine,}
+    @li{@a("SSH", href := DocumentationPages.console.environment.ssh.file), to execute tasks on remote server through SSH,}
     @li{clusters}
-    @li{@a("EGI", href := Pages.console.environment.egi.file), to execute tasks on the EGI grid or using DIRAC,}
+    @li{@a("EGI", href := DocumentationPages.console.environment.egi.file), to execute tasks on the EGI grid or using DIRAC,}
 

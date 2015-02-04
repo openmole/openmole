@@ -1,4 +1,5 @@
 
+
 #documentation-bottom-link-unavailable {
   padding-left: 5;
   padding-right: 5;
@@ -20,8 +21,7 @@
   padding-right: 0;
   position: fixed;
   left: 0;
-  top: 20%;
-  margin-top: -2.5em;
+  top: 270;
 }
 
 #documentation-menu ul {
@@ -30,8 +30,7 @@
 }
 
 #documentation-content {
-  padding-right: 0;
-  width: 100%;
+  width: 800;
 }
 
 #documentation-menu-entry {
@@ -55,10 +54,11 @@
 The content `<div>` is where all your content goes.
 */
 .scalatex-content {
-  margin: 0 auto;
-  padding: 0 1em;
-  max-width: 800px;
-  padding-bottom: 50px;
+  position: absolute;
+  margin: 0 0;
+  padding: 0 210;
+  max-width: 800;
+  padding-bottom: 50;
   line-height: 1.6em;
   color: #777;
 }

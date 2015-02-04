@@ -22,9 +22,16 @@ import scala.reflect.ClassTag
 import scalatags.Text.all._
 import scala.reflect.runtime.universe._
 
-object Page {
 
-  def menu(root: Page, currentPage: Page): Frag = {
+object Resource {
+  def logo = "openmole.png"
+  def all = Seq(logo)
+}
+
+object Page {
+  
+
+  def documentationMenu(root: Page, currentPage: Page): Frag = {
     def menuEntry(p: Page) = {
       def current = p == currentPage
       def idLabel = "documentation-menu-entry" + (if(current) "-current" else "")
@@ -72,11 +79,20 @@ object Page {
     )
   }
 
-  def decorate(p: Page) =
-    table(
-      td(verticalAlign:="top")(Page.menu(Pages, p)),
-      td(verticalAlign:="top")(div(id := "documentation-content")(p.content), bottomLinks(p))
+  def documentation(p: Page): Frag =
+    decorate(
+      table(
+        td(verticalAlign:="top")(Page.documentationMenu(DocumentationPages, p)),
+        td(verticalAlign:="top")(div(id := "documentation-content")(p.content), bottomLinks(p))
+      )
     )
+
+  def decorate(p: Frag): Frag =
+    table (
+      tr( img(id := "logo")( src := Resource.logo ) ),
+      p
+    )
+
 
   case class Parent(page: Option[Page])
 
@@ -119,7 +135,7 @@ abstract class Page(implicit p: Page.Parent = Page.Parent(None)) {
   override def hashCode(): Int = location.hashCode()
 }
 
-object Pages extends Page() { index =>
+object DocumentationPages extends Page() { index =>
 
   def name = "documentation"
   def content = documentation.Documentation()

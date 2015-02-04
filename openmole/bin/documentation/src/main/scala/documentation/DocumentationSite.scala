@@ -19,15 +19,31 @@
 package documentation
 
 import javax.script.ScriptEngineManager
-import Pages._
+import DocumentationPages._
+import scala.sys.process.BasicIO
 import scalatags.Text.all._
 import ammonite.ops.Path
 import java.io.File
+import org.openmole.misc.tools.io.FileUtil._
 
 object DocumentationSite extends App {
-  val site = new scalatex.site.Site {
-    def content = Pages.allPages.map{ p => p.file -> Page.decorate(p) }.toMap
+
+  val dest = new File(args(0))
+
+  for {
+    r <- Resource.all
+  } {
+    new File(dest, r).withOutputStream { os =>
+      val is = getClass.getClassLoader.getResourceAsStream(r)
+      try BasicIO.transferFully(is, os)
+      finally is.close
+    }
   }
-  site.renderTo(Path(new File(args(0))))
+
+
+  val site = new scalatex.site.Site {
+    def content = DocumentationPages.allPages.map{ p => p.file -> Page.documentation(p) }.toMap
+  }
+  site.renderTo(Path(dest))
 
 }
