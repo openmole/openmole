@@ -1,7 +1,7 @@
-package org.openmole.gui.plugin.task.systemexec.client
+package org.openmole.gui.ext
 
 /*
- * Copyright (C) 19/10/2014 // mathieu.leclaire@openmole.org
+ * Copyright (C) 02/02/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,18 +17,10 @@ package org.openmole.gui.plugin.task.systemexec.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scala.scalajs.js.annotation.JSExport
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
-import org.openmole.gui.ext.dataui._
-import org.openmole.gui.client.service.ClientService._
-import rx._
+package object data {
 
-@JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskDataUI")
-class SystemExecTaskDataUI extends TaskDataUI {
-  def data = new SystemExecTaskData
+  case class Input(val prototype: PrototypeData, val default: Option[String], val mapping: Option[(Any, PrototypeData)])
 
-  def panelUI = new SystemExecTaskPanelUI(this)
+  case class Output(val prototype: PrototypeData, val mapping: Option[(PrototypeData, Any)])
 
-  def dataType = "External"
 }

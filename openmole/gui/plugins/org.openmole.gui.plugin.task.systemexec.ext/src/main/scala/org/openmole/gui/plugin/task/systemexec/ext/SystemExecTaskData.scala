@@ -17,12 +17,10 @@ package org.openmole.gui.plugin.task.systemexec.ext
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.{PrototypeData, TaskData}
+import org.openmole.gui.ext.data.TaskData
 
 class SystemExecTaskData(// val command: String = "",
                         // val directory: String = "",
-                         val inputs: Seq[(PrototypeData, Option[String])] = Seq(),
-                         val outputs: Seq[PrototypeData] = Seq()
                         // val errorOnReturnCode: Boolean = true,
                         // val returnValue: Option[PrototypeData[Int]] = None,
                         // val output: Option[PrototypeData[String]] = None,

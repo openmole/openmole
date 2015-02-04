@@ -28,8 +28,6 @@ class Select[T <: Displayable with Identifiable](autoID: String,
                                                  key: ClassKeyAggregator = Forms.emptyCK,
                                                  onclickExtra: () ⇒ Unit = () ⇒ {}) {
 
-  val jQid = "#" + autoID
-
   val content: Var[Option[T]] = Var(contents().size match {
     case 0 ⇒ None
     case _ ⇒ default match {

@@ -23,14 +23,8 @@ import org.scalajs.dom
 import scalatags.JsDom.TypedTag
 
 package object dataui {
-  type InputsUI = Var[Seq[Var[(PrototypeDataUI, Option[String])]]]
-  type OutputsUI = Var[Seq[Var[PrototypeDataUI]]]
 
-  type Inputs = Seq[(PrototypeData, Option[String])]
-  type Outputs = Seq[PrototypeData]
+  case class InputUI(val prototypeUI: Var[PrototypeDataUI], val default: Var[Option[String]], val mapping: Option[(Any, PrototypeDataUI)])
+  case class OutputUI(val prototypeUI: Var[PrototypeDataUI], val mapping: Option[(PrototypeDataUI, Any)])
 
-  type Inputable = { def inputs: InputsUI }
-  type Outputable = { def outputs: OutputsUI }
-
-  type IODataUI = DataUI with Inputable with Outputable
 }

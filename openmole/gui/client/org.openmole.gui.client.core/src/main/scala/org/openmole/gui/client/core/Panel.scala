@@ -1,15 +1,17 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.client
 import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.misc.js.{ Select, Forms ⇒ bs }
 import org.scalajs.dom.Event
 
+import scala.sys.Prop.DoubleProp
 import scalatags.JsDom.all
-import org.scalajs.jquery.jQuery
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.ext.data.ProtoTYPE.DOUBLE
 import org.openmole.gui.client.service.ClientService._
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
@@ -39,32 +41,35 @@ object Panel {
 
     val ALL = ConceptState("All", ClientService.factories)
     val TASKS = ConceptState("Tasks", ClientService.taskFactories)
-    val PROTOTYPES = ConceptState("Prototypes", ClientService.prototypeFactories)
+    val PROTOTYPES = ConceptState("Prototypes",
+      PrototypeFactoryUI.doubleFactory +: ClientService.prototypeFactories filterNot (_.dataUI.dataType == DOUBLE)
+
+    )
   }
 
   import ConceptFilter._
 
   def generic(uuid: String,
-              defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS),
-              extraCategories: Seq[(String, HtmlTag)] = Seq()) =
-    new GenericPanel(uuid, defaultDataBagUI, extraCategories).dialog
+              defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS)) =
+    new GenericPanel(uuid, defaultDataBagUI).dialog
 }
 
 import Panel.ConceptFilter._
 
 class GenericPanel(uuid: String,
-                   defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS),
-                   extraCategories: Seq[(String, HtmlTag)] = Seq()) {
+                   defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS)) {
 
-  val jQid = "#" + uuid
   val editionState: Var[Boolean] = Var(false)
   val filter: Var[ConceptState] = Var(defaultDataBagUI.right.toOption.getOrElse(TASKS))
   var nameFilter = Var("")
   val rows = Var(0)
+
   val currentDataBagUI = Var(defaultDataBagUI.left.toOption)
-  val currentPanelUI = Rx(currentDataBagUI().map {
-    _.dataUI().panelUI
-  })
+  val settingTabs = Rx {
+    currentDataBagUI().map {
+      SettingTabs(_)
+    }
+  }
   val factorySelector: Select[FactoryUI] = new Select("factories",
     Var(filter().factories),
     currentDataBagUI(),
@@ -133,7 +138,7 @@ class GenericPanel(uuid: String,
     }).render
 
   def add = {
-    val dbUI = new DataBagUI(Var(filter().factories.head.dataUI))
+    val dbUI = DataBagUI(filter().factories.head.dataUI)
     dbUI.name() = inputFilter.value
     dimInput.value = "0"
     ClientService += dbUI
@@ -177,7 +182,7 @@ class GenericPanel(uuid: String,
     modalDialog(uuid,
       headerDialog(Rx {
         bs.div()(
-          nav("navbar_form", navbar_form)(
+          nav(getID, navbar_form)(
             bs.form()(
               inputGroup(navbar_left)(
                 inputFilter,
@@ -204,7 +209,10 @@ class GenericPanel(uuid: String,
             inputFilter.value = currentDataBagUI().map {
               _.name()
             }.getOrElse((""))
-            conceptPanel
+            settingTabs() match {
+              case Some(s: SettingTabs) ⇒ s.view
+              case _                    ⇒ bs.div()(h1("Create a  first data !"))
+            }
           }
           else {
             inputFilter.value = ""
@@ -219,22 +227,17 @@ class GenericPanel(uuid: String,
     )
   }.render
 
-  val conceptPanel = Rx {
-    currentPanelUI() match {
-      case Some(p: PanelUI) ⇒
-        bodyPanel(
-          p.view)
-      case _ ⇒ bs.div()(h1("Create a  first data !"))
-    }
-  }
-
   def prototypeExtraForm: Seq[Modifier] = currentDataBagUI() match {
-    case Some(db: DataBagUI) ⇒
-      if (isPrototypeUI(db) && editionState()) {
-        Seq(inputGroupButton(style := "width:0px;"),
-          dimInput)
-      }
-      else Seq()
+    case Some(db: DataBagUI) ⇒ db.dataUI() match {
+      case p: PrototypeDataUI ⇒
+        if (editionState()) {
+          dimInput.value = p.dimension().toString
+          Seq(inputGroupButton(style := "width:0px;"),
+            dimInput)
+        }
+        else Seq()
+      case _ ⇒ Seq()
+    }
     case _ ⇒ Seq()
   }
 
@@ -248,22 +251,12 @@ class GenericPanel(uuid: String,
         }
     }
 
-    currentPanelUI().map { cpUI ⇒
-      cpUI.save
+    settingTabs().map {
+      _.save
     }
 
     editionState() = false
     nameFilter() = ""
-  }
-
-  def bodyPanel(view: HtmlTag) = extraCategories.size match {
-    case 0 ⇒ view
-    case _ ⇒
-      bs.nav("settingsNav", nav_pills,
-        (for (c ← ("Settings", view) +: extraCategories) yield {
-          navItem(c._1, c._1)
-        }): _*
-      )
   }
 
 }

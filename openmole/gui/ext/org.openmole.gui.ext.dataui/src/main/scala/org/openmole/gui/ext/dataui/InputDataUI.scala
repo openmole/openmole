@@ -1,6 +1,11 @@
-package org.openmole.gui.ext
+package org.openmole.gui.ext.dataui
+
+import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.ProtoTYPE._
+import rx._
+
 /*
- * Copyright (C) 16/12/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 28/01/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,8 +21,20 @@ package org.openmole.gui.ext
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.dataui.IODataUI
+class InputDataUI(val prototypeFilter: Seq[ProtoTYPE] = ALL) extends DataUI {
+  type DATA = InputData
 
-package object factoryui {
-  type IOFactoryUI = FactoryUI { type DATAUI <: IODataUI }
+  def dataType = "Inputs"
+
+  val inputsUI: Var[Seq[InputUI]] = Var(Seq())
+
+  def panelUI = new InputPanelUI(this)
+
+  def data = new InputData {
+    def inputs = inputsUI().map { id ⇒
+      Input(id.prototypeUI().data, id.default(), id.mapping.map { m ⇒ (m._1, m._2.data) })
+    }
+  }
+
 }
+
