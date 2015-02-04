@@ -249,7 +249,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     )
 
   lazy val documentation = Project("documentation", dir / "documentation", settings = scalatex.SbtPlugin.projectSettings) dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
-    libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.0",
+    libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.1",
     libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value
   )
 

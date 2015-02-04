@@ -19,15 +19,15 @@
 package documentation
 
 import javax.script.ScriptEngineManager
-
 import Pages._
-
 import scalatags.Text.all._
+import ammonite.ops.Path
+import java.io.File
 
 object DocumentationSite extends App {
   val site = new scalatex.site.Site {
     def content = Pages.allPages.map{ p => p.file -> Page.decorate(p) }.toMap
   }
-  site.renderTo(args(0) + "/")
+  site.renderTo(Path(new File(args(0))))
 
 }

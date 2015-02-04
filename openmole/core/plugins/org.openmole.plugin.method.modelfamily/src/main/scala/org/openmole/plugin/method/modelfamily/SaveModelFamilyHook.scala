@@ -38,7 +38,7 @@ object SaveModelFamilyHook {
 abstract class SaveModelFamilyHook(puzzle: GAPuzzle[ModelFamilyCalibration], path: ExpandedString) extends Hook {
 
   def mf = puzzle.parameters.evolution
-  def headers = s"${mf.modelFamily.modelIdPrototype.name},traits,number of traits,${mf.inputsPrototypes.map(_.name).mkString(",")},${mf.objectives.map(_.name).mkString(",")}"
+  def headers = s"traits,number of traits,${mf.inputsPrototypes.map(_.name).mkString(",")},${mf.objectives.map(_.name).mkString(",")}"
 
   def process(context: Context, executionContext: ExecutionContext) = {
 
@@ -53,8 +53,7 @@ abstract class SaveModelFamilyHook(puzzle: GAPuzzle[ModelFamilyCalibration], pat
       for {
         ((id, inputs), outputs) ← idArray zip inputsArray zip outputsArray
       } {
-
-        def traits = s"$id,${mf.modelFamily.traitsString(id)},${mf.modelFamily.traitsCombinations(id).size}"
+        def traits = s"${mf.modelFamily.traitsString(id)},${mf.modelFamily.traitsCombinations(id).size}"
         w.write(s"""$traits,${inputs.mkString(",")},${outputs.mkString(",")}\n""")
       }
     }
