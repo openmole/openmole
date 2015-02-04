@@ -21,7 +21,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.ProtoTYPE._
 import rx._
 
-class OutputDataUI(val prototypeFilter: Seq[ProtoTYPE] = ALL) extends DataUI {
+class OutputDataUI(val ioMapping: Boolean, val prototypeFilter: Seq[ProtoTYPE] = ALL) extends DataUI {
   type DATA = OutputData
 
   def dataType = "Outputs"

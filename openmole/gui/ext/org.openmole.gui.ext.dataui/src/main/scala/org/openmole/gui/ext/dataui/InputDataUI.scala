@@ -21,7 +21,7 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class InputDataUI(val prototypeFilter: Seq[ProtoTYPE] = ALL) extends DataUI {
+class InputDataUI(val ioMapping: Boolean, val prototypeFilter: Seq[ProtoTYPE] = ALL) extends DataUI {
   type DATA = InputData
 
   def dataType = "Inputs"

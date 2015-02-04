@@ -26,7 +26,7 @@ class OutputPanelUI(dataUI: OutputDataUI) extends PanelUI {
 
   @JSExport
   val view = bs.div()(
-    "Output Panel !"
+    "Output Panel ! " + dataUI.ioMapping
   )
 
   def save = {

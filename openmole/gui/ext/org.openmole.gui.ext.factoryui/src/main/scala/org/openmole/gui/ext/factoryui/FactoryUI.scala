@@ -27,4 +27,7 @@ trait FactoryUI {
   def dataUI: DATAUI
   val name: String
   val uuid: String = java.util.UUID.randomUUID.toString
+  //FIXME, it is not clean; FactoryUI should be specialized in smtg like IOFactoryUI containing
+  // ioMapping, but it impacts a lot and implies a lot of modifications
+  val ioMapping: Boolean = false
 }
