@@ -34,6 +34,8 @@ class InputPanelUI(dataUI: InputDataUI) extends PanelUI {
     autofocus := "true"
   ).render
 
+  var nameFilter = Var("")
+
   //New button
   val newGlyph =
     //FIXME: THE SIZE OF THE GLYPH IS SMALLER THAN THE REST OF THE GROUP WHEN GROUPEL
