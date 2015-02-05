@@ -32,55 +32,6 @@ trait Assembly { self: BuildSystemDefaults ⇒
     }
   )
 
-  /*lazy val resAssemblyProject: Seq[Setting[_]] = Seq(
-    resourceSets := Set.empty,
-    setExecutable := Set.empty,
-    resTask,
-    zipFiles <++= resourceAssemble map { (f: Set[File]) ⇒ f.toSeq },
-    assemble <<= assemble dependsOn resourceAssemble
-  )*/
-
-  /* lazy val resTask = resourceAssemble <<= (resourceSets, setExecutable, target, assemblyPath, streams, name) map { //TODO: Find a natural way to do this
-    (rS, sE, target, cT, s, name) ⇒
-      {
-        def expand(f: File, p: File, o: String): Array[(File, File)] = if (f.isDirectory) f.listFiles() flatMap (expand(_, p, o)) else {
-          val dest = cT / o / (if (f != p) getDiff(f, p) else f.name)
-          Array(f -> dest)
-        }
-
-        def rExpand(f: File): Set[File] = if (f.isDirectory) (f.listFiles() flatMap rExpand).toSet else Set(f)
-
-        def getDiff(f: File, oF: File): String = f.getCanonicalPath.takeRight(f.getCanonicalPath.length - oF.getCanonicalPath.length)
-
-        val resourceMap = (rS flatMap { case (in, out) ⇒ expand(in, in, out) }).groupBy(_._1).collect { case (k, v) ⇒ k -> (v map (_._2)) }
-
-        val expandedExecSet = sE map (cT / _) flatMap rExpand
-
-        s.log.info(s"List of files to be marked executable: $expandedExecSet")
-
-        val copyFunction = FileFunction.cached(target / ("resAssembleCache" + name), FilesInfo.lastModified, FilesInfo.exists) {
-          f ⇒
-            val res = f flatMap {
-              rT ⇒
-                val dests = resourceMap(rT)
-
-                for (dest ← dests) {
-                  s.log.info(s"Copying file ${rT.getPath} to ${dest.getCanonicalPath} ${if (expandedExecSet.contains(dest)) "(e)" else ""}")
-                  IO.copyFile(rT, dest)
-                  dest
-                }
-
-                dests
-            }
-
-            expandedExecSet foreach (ex ⇒ if (!ex.exists()) s.log.error(s"$ex does not exist. Maybe you typed the wrong relative path?") else ex.setExecutable(true))
-            res
-        }
-
-        copyFunction(resourceMap.keySet)
-      }
-  }*/
-
   private def copyResTask(resourceDirectory: File, assemblyPath: File, outDir: String, streams: TaskStreams) = {
     val destPath = (assemblyPath / outDir)
     streams.log.info(s"Copy resource $resourceDirectory to $destPath")
@@ -144,7 +95,35 @@ trait Assembly { self: BuildSystemDefaults ⇒
     }
   }
 
-  def AssemblyProject(base: String,
+  def assemblySettings = Seq(
+    resourcesAssemble := Seq.empty,
+    setExecutable := Seq.empty,
+    outputDir := "",
+    assemble <<=
+      (assemblyPath, setExecutable) map {
+        (path, files) ⇒
+          files.foreach(f ⇒ new File(path, f).setExecutable(true))
+          path
+      } dependsOn (copyResources),
+    assemblyPath <<= target / "assemble",
+    bundleProj := false,
+    install := true,
+    installRemote := true,
+    resourceOutDir := "",
+    dependencyNameMap := Map.empty[Regex, String ⇒ String],
+    dependencyFilter := { _ ⇒ true },
+    // Copy resources
+    copyResources <<= (resourceDirectory in Compile, assemblyPath, resourceOutDir, streams) map copyResTask map (Seq(_)),
+    // Copy user defined files
+    copyResources <++=
+      (resourcesAssemble, assemblyPath, streams) map {
+        case (resources, a, s) ⇒
+          resources.toSeq.map { case (from, to) ⇒ copyFileTask(from, a / to, s) }
+      },
+    copyResources <++= (externalDependencyClasspath in Compile, assemblyPath, outputDir, dependencyNameMap, dependencyFilter, streams) map copyLibraryDependencies
+  )
+
+  /*def AssemblyProject(base: String,
                       outputDir: String = "",
                       baseDir: File = dir,
                       settings: Seq[Setting[_]] = Nil) = {
@@ -179,7 +158,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
         },
       copyResources <++= (externalDependencyClasspath in Compile, assemblyPath, outDir, dependencyNameMap, dependencyFilter, streams) map copyLibraryDependencies
     ) ++ s ++ scalariformDefaults) dependsOn ()
-  }
+  }*/
 
   def tarImpl(folder: File, s: TaskStreams, t: File, name: String, innerFolder: String): File = {
     val out = t / name

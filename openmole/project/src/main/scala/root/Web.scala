@@ -30,5 +30,5 @@ object Web extends Defaults {
   lazy val misc = OsgiProject("org.openmole.web.misc.tools", "misc/tools") dependsOn
     (base.Misc.workspace) settings (libraryDependencies ++= Seq(scalajHttp, arm))
 
-  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core"))
+  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core"))
 }

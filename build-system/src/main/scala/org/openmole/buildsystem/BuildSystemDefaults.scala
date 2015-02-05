@@ -20,25 +20,25 @@ trait BuildSystemDefaults extends Build with OsgiBundler with Assembly {
 
   def subProjects: Seq[ProjectReference] = Nil
 
-  val cred = Path.userHome / ".sbt" / "openmole.credentials"
+  val credential = Path.userHome / ".sbt" / "openmole.credentials"
 
-  override def settings = super.settings ++
+  lazy val commonsSettings =
     Seq(scalacOptions ++= Seq("-feature", "-language:reflectiveCalls", "-language:implicitConversions",
       "-language:existentials", "-language:postfixOps", "-Yinline-warnings"),
       osgiVersion := "3.8.2.v20130124-134944"
-    ) ++ (if (cred.exists()) Seq(credentials += Credentials(cred)) else Seq.empty)
+    ) ++ (if (credential.exists()) Seq(credentials += Credentials(credential)) else Seq.empty) ++ scalariformDefaults
 
-  //def gcTask { System.gc(); System.gc(); System.gc() }
+  protected lazy val scalariformDefaults =
+    Seq(
+      ScalariformKeys.preferences in Compile <<= ScalariformKeys.preferences(p ⇒
+        p.setPreference(DoubleIndentClassDeclaration, true)
+          .setPreference(RewriteArrowSymbols, true)
+          .setPreference(AlignParameters, true)
+          .setPreference(AlignSingleLineCaseStatements, true)
+          .setPreference(CompactControlReadability, true)
+          .setPreference(PreserveDanglingCloseParenthesis, true)
+      )
+    ) ++ scalariformSettings
 
-  // def Aggregator(name: String) = Project(name, dir) settings (compile in Compile := Analysis.Empty, install := false)
-
-  protected lazy val scalariformDefaults = Seq(ScalariformKeys.preferences in Compile <<= ScalariformKeys.preferences(p ⇒
-    p.setPreference(DoubleIndentClassDeclaration, true)
-      .setPreference(RewriteArrowSymbols, true)
-      .setPreference(AlignParameters, true)
-      .setPreference(AlignSingleLineCaseStatements, true)
-      .setPreference(CompactControlReadability, true)
-      .setPreference(PreserveDanglingCloseParenthesis, true))) ++ scalariformSettings
-
-  def provided(p: Project) = p % "provided"
+  //def provided(p: Project) = p % "provided"
 }

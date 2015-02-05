@@ -10,7 +10,7 @@ object Apache extends Defaults {
   //todo: switch to discluding pattern
   val dir = file("libraries") / "apache"
 
-  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core", "lib")) //TODO make library defaults
+  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core", "lib")) //TODO make library defaults
 
   lazy val pool = "org.openmole" %% "org-apache-commons-pool" % "1.5.4"
 

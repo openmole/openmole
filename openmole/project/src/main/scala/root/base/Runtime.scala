@@ -26,6 +26,6 @@ object Runtime extends BaseDefaults {
       libraryDependencies ++= Seq(scalaLang, Apache.logging, jodaTime, scopt, equinoxCommon, equinoxApp, gridscaleSSH)
     )
 
-  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set())
+  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set())
 
 }

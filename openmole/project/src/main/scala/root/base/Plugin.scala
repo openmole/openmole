@@ -7,7 +7,7 @@ import org.openmole.buildsystem.OMKeys._
 
 abstract class PluginDefaults(subBuilds: Defaults*) extends BaseDefaults(subBuilds: _*) {
   override val dir = file("core/plugins")
-  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("plugin"))
+  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("plugin"))
 
 }
 

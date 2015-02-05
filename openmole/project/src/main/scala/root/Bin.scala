@@ -53,7 +53,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   lazy val java368URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-386/20-b17/java-jre-linux-386-20-b17.tgz")
   lazy val javax64URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-x64/20-b17/java-jre-linux-x64-20-b17.tgz")
 
-  lazy val openmole = AssemblyProject("openmole", settings = tarProject ++ urlDownloadProject) settings (
+  lazy val openmole = Project("openmole", dir / "openmole", settings = tarProject ++ urlDownloadProject ++ assemblySettings) settings (commonsSettings: _*) settings (
     resourceOutDir := "",
     setExecutable ++= Seq("openmole", "openmole.bat"),
     resourcesAssemble <++= (assemble in openmolePlugins) map { f ⇒ Seq(f -> "plugins") },
@@ -64,7 +64,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     downloads := Seq(java368URL -> "runtime/jvm-386.tar.gz", javax64URL -> "runtime/jvm-x64.tar.gz"),
     Tar.name := "openmole.tar.gz",
     Tar.innerFolder := "openmole",
-    dependencyFilter := filter //DependencyFilter.fnToModuleFilter { m ⇒ m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle" || m.organization == "org.bouncycastle" || m.organization == "org.openmole" }
+    dependencyFilter := filter
   )
 
   lazy val coreDependencies = Seq(
@@ -108,7 +108,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     scalajHttp
   )
 
-  lazy val openmolePlugins = AssemblyProject("openmoleplugins", baseDir = dir / "target") settings (
+  lazy val openmolePlugins = Project("openmoleplugins", dir / "target" / "openmoleplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo "",
     resourcesAssemble <++= Seq(openmoleui.project) sendTo "",
     libraryDependencies ++= Seq(
@@ -147,18 +147,16 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       Libraries.scalajsTools,
       Libraries.scalajsDom,
       Libraries.scalajsJQuery,
-      // Libraries.autowireJVM,
       Libraries.scalaTags,
       Libraries.autowire,
       Libraries.upickle,
-      // Libraries.upickleJVM,
       Libraries.rx
     ) ++ equinox,
       dependencyFilter := filter,
       dependencyNameMap := renameEquinox
   )
 
-  lazy val consolePlugins = AssemblyProject("consoleplugins", baseDir = dir / "target") settings (
+  lazy val consolePlugins = Project("consoleplugins", dir / "target" / "consoleplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo "",
     libraryDependencies ++=
     Seq(
@@ -183,12 +181,13 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       dependencyFilter := filter
   )
 
-  lazy val guiPlugins = AssemblyProject("guiplugins", baseDir = dir / "target") settings (
+  lazy val guiPlugins = Project("guiplugins", dir / "target" / "guiplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"), true) sendTo "",
     dependencyFilter := filter
   )
 
-  lazy val dbServer = AssemblyProject("dbserver", "lib") settings (
+  lazy val dbServer = Project("dbserver", dir / "dbserver", settings = assemblySettings) settings (commonsSettings: _*) settings (
+    outputDir := "lib",
     resourceOutDir := "bin",
     resourcesAssemble <++= Seq(Misc.replication.project, base.Runtime.dbserver.project) sendTo "lib",
     libraryDependencies ++= Seq(
@@ -201,7 +200,8 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       dependencyFilter := filter
   )
 
-  lazy val openmoleRuntime = AssemblyProject("runtime", "plugins", settings = tarProject) settings (
+  lazy val openmoleRuntime = Project("runtime", dir / "runtime", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
+    outputDir := "plugins",
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo "plugins",
     setExecutable ++= Seq("run.sh"),
     Tar.name := "runtime.tar.gz",
@@ -228,7 +228,8 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       dependencyNameMap := renameEquinox
   )
 
-  lazy val daemon = AssemblyProject("daemon", "plugins", settings = tarProject) settings (
+  lazy val daemon = Project("daemon", dir / "daemon", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
+    outputDir := "plugins",
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ (a contains "core") || (a contains "daemon")) sendTo "plugins",
     libraryDependencies ++= Seq(
       gridscale,
@@ -242,15 +243,16 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       Tar.innerFolder := "openmole-daemon"
   )
 
-  lazy val api = Project("api", dir / "target/api") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (
+  lazy val api = Project("api", dir / "target" / "api") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (commonsSettings: _*) settings (
     unidocSettings: _*
   ) settings (compile := Analysis.Empty,
       unidocProjectFilter in (ScalaUnidoc, unidoc) := inAnyProject -- inProjects(Libraries.subProjects: _*) -- inProjects(ThirdParties.subProjects: _*)
     )
 
-  lazy val documentation = Project("documentation", dir / "documentation", settings = scalatex.SbtPlugin.projectSettings ++ scalariformDefaults) dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
+  lazy val documentation = Project("documentation", dir / "documentation", settings = scalatex.SbtPlugin.projectSettings) settings (commonsSettings: _*) dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
     libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.1",
     libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value
+  // resourcesAssemble <++= (Tar.tar in openmole) map { f ⇒ Seq(f -> "openmole") }
   )
 
 }

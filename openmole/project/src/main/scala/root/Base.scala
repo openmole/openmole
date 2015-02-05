@@ -15,5 +15,5 @@ abstract class BaseDefaults(subBuilds: Defaults*) extends Defaults(subBuilds: _*
 
   def dir = file("core") //TODO change to base
 
-  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core"))
+  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core"))
 }

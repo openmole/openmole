@@ -19,7 +19,7 @@ object OMKeys {
 
   val eclipseBuddyPolicy = SettingKey[Option[String]]("OSGi.eclipseBuddyPolicy", "The eclipse buddy policy thing.")
 
-  val outDir = SettingKey[String]("outDir", "A setting to control where copyDepTask outputs it's dependencies")
+  val outputDir = SettingKey[String]("outputDir", "A setting to control where copyDepTask outputs it's dependencies")
 
   val install = TaskKey[Unit]("install", "Builds bundles and adds them to the local repo")
 
