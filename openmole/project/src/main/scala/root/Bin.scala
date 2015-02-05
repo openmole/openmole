@@ -256,6 +256,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.1",
     libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value,
     resourcesAssemble <+= (Tar.tar in openmole, classDirectory in Compile) map { case (f, d) ⇒ f -> d },
+    resourcesAssemble <+= (Tar.tar in daemon, classDirectory in Compile) map { case (f, d) ⇒ f -> d },
     dependencyFilter := { d ⇒ false }
   )
 
