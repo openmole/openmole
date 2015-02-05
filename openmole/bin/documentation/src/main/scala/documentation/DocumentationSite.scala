@@ -31,18 +31,17 @@ object DocumentationSite extends App {
   val dest = new File(args(0))
 
   for {
-    r <- Resource.all
+    r ← Resource.all
   } {
-    new File(dest, r).withOutputStream { os =>
+    new File(dest, r).withOutputStream { os ⇒
       val is = getClass.getClassLoader.getResourceAsStream(r)
       try BasicIO.transferFully(is, os)
       finally is.close
     }
   }
 
-
   val site = new scalatex.site.Site {
-    def content = DocumentationPages.allPages.map{ p => p.file -> DocumentationPages.decorate(p) }.toMap
+    def content = DocumentationPages.allPages.map { p ⇒ p.file -> DocumentationPages.decorate(p) }.toMap
   }
   site.renderTo(Path(dest))
 

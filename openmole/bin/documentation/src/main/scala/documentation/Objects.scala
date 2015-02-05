@@ -30,15 +30,15 @@ object Objects {
     def openmole(code: String, test: Boolean = true, header: String = "") = {
       if (test)
         DSLTest.test(code, header) match {
-          case Failure(f) => throw new UserBadDataError(f, s"Error testing code:\n$code")
-          case _ =>
+          case Failure(f) ⇒ throw new UserBadDataError(f, s"Error testing code:\n$code")
+          case _          ⇒
         }
       highlight(code, "scala")
     }
   }
   case class Parameter(name: String, `type`: String, description: String)
   def parameters(p: Parameter*) = {
-    def toRow(p: Parameter) = li ( p.name + ": " + p.`type` + ": "+ p.description)
-    ul( p.map(toRow) )
+    def toRow(p: Parameter) = li(p.name + ": " + p.`type` + ": " + p.description)
+    ul(p.map(toRow))
   }
 }

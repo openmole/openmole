@@ -40,5 +40,4 @@ trait BuildSystemDefaults extends Build with OsgiBundler with Assembly {
       )
     ) ++ scalariformSettings
 
-  //def provided(p: Project) = p % "provided"
 }

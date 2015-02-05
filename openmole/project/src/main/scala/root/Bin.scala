@@ -54,8 +54,8 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   lazy val javax64URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-x64/20-b17/java-jre-linux-x64-20-b17.tgz")
 
   lazy val openmole = Project("openmole", dir / "openmole", settings = tarProject ++ urlDownloadProject ++ assemblySettings) settings (commonsSettings: _*) settings (
-    resourceOutDir := "",
     setExecutable ++= Seq("openmole", "openmole.bat"),
+    resourcesAssemble <+= (resourceDirectory in Compile) map { _ -> "" },
     resourcesAssemble <++= (assemble in openmolePlugins) map { f ⇒ Seq(f -> "plugins") },
     resourcesAssemble <++= (assemble in dbServer) map { f ⇒ Seq(f -> "dbserver") },
     resourcesAssemble <++= (assemble in consolePlugins) map { f ⇒ Seq(f -> "openmole-plugins") },
@@ -188,7 +188,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
 
   lazy val dbServer = Project("dbserver", dir / "dbserver", settings = assemblySettings) settings (commonsSettings: _*) settings (
     outputDir := "lib",
-    resourceOutDir := "bin",
+    resourcesAssemble <+= (resourceDirectory in Compile) map { _ -> "bin" },
     resourcesAssemble <++= Seq(Misc.replication.project, base.Runtime.dbserver.project) sendTo "lib",
     libraryDependencies ++= Seq(
       Libraries.xstream,
@@ -202,6 +202,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
 
   lazy val openmoleRuntime = Project("runtime", dir / "runtime", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
     outputDir := "plugins",
+    resourcesAssemble <+= (resourceDirectory in Compile) map { _ -> "" },
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo "plugins",
     setExecutable ++= Seq("run.sh"),
     Tar.name := "runtime.tar.gz",
@@ -230,6 +231,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
 
   lazy val daemon = Project("daemon", dir / "daemon", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
     outputDir := "plugins",
+    resourcesAssemble <+= (resourceDirectory in Compile) map { _ -> "" },
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ (a contains "core") || (a contains "daemon")) sendTo "plugins",
     libraryDependencies ++= Seq(
       gridscale,
@@ -249,10 +251,11 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       unidocProjectFilter in (ScalaUnidoc, unidoc) := inAnyProject -- inProjects(Libraries.subProjects: _*) -- inProjects(ThirdParties.subProjects: _*)
     )
 
-  lazy val documentation = Project("documentation", dir / "documentation", settings = scalatex.SbtPlugin.projectSettings) settings (commonsSettings: _*) dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
+  lazy val documentation = Project("documentation", dir / "documentation", settings = scalatex.SbtPlugin.projectSettings ++ assemblySettings) settings (commonsSettings: _*) dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
     libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.1",
-    libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value
-  // resourcesAssemble <++= (Tar.tar in openmole) map { f ⇒ Seq(f -> "openmole") }
+    libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+    resourcesAssemble <++= (Tar.tar in openmole) map { f ⇒ Seq(f -> "openmole") },
+    dependencyFilter := { d ⇒ false }
   )
 
 }

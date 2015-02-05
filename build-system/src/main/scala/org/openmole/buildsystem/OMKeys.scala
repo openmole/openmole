@@ -29,23 +29,15 @@ object OMKeys {
 
   val assemble = TaskKey[File]("assemble", "The path with assembled project")
 
-  //val gc = TaskKey[Unit]("gc", "Force SBT to take out the trash")
-
   val osgiVersion = SettingKey[String]("osgi-version")
 
   val osgiSingleton = SettingKey[Boolean]("osgi-singleton")
 
-  // val Assemble = Tags.Tag("Assemble")
-
   val setExecutable = SettingKey[Seq[String]]("setExecutable", "Sets the path relative to the assemble folder executable")
-
-  // val downloadUrls = TaskKey[Seq[File]]("download-urls")
 
   val downloads = SettingKey[Seq[(URL, String)]]("downloads", "A project setting that describes a urls to download")
 
   val resourcesAssemble = TaskKey[Seq[(File, String)]]("resourcesAssemble", "A set of (in,out) tuples that specify where to find the resource (in) and what sub-path of assembly to put it in (out)")
-
-  val resourceOutDir = SettingKey[String]("resource-out-dir")
 
   val ignoreTransitive = SettingKey[Boolean]("ignoreTransitive")
 

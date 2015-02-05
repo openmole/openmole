@@ -22,7 +22,6 @@ import scala.reflect.ClassTag
 import scalatags.Text.all._
 import scala.reflect.runtime.universe._
 
-
 object Resource {
   def logo = "openmole.png"
   def all = Seq(logo)
@@ -31,8 +30,8 @@ object Resource {
 object Pages {
 
   def decorate(p: Frag): Frag =
-    table (
-      tr( img(id := "logo")( src := Resource.logo ) ),
+    table(
+      tr(img(id := "logo")(src := Resource.logo)),
       p
     )
 
@@ -52,8 +51,8 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
 
   def location: String =
     parent match {
-      case None => name
-      case Some(p) => p.location + "_" + name
+      case None    ⇒ name
+      case Some(p) ⇒ p.location + "_" + name
     }
 
   def file = location + ".html"
@@ -65,29 +64,28 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
   }
 
   override def equals(o: scala.Any): Boolean =
-   o match {
-     case p2: DocumentationPage => this.location == p2.location
-     case _ => false
-   }
+    o match {
+      case p2: DocumentationPage ⇒ this.location == p2.location
+      case _                     ⇒ false
+    }
 
   override def hashCode(): Int = location.hashCode()
 }
 
-
-object DocumentationPages  { index =>
+object DocumentationPages { index ⇒
 
   def decorate(p: DocumentationPage): Frag =
     Pages.decorate(
       table(
-        td(verticalAlign:="top")(documentationMenu(root, p)),
-        td(verticalAlign:="top")(div(id := "documentation-content")(p.content), bottomLinks(p))
+        td(verticalAlign := "top")(documentationMenu(root, p)),
+        td(verticalAlign := "top")(div(id := "documentation-content")(p.content), bottomLinks(p))
       )
     )
 
   def documentationMenu(root: DocumentationPage, currentPage: DocumentationPage): Frag = {
     def menuEntry(p: DocumentationPage) = {
       def current = p == currentPage
-      def idLabel = "documentation-menu-entry" + (if(current) "-current" else "")
+      def idLabel = "documentation-menu-entry" + (if (current) "-current" else "")
       a(id := idLabel)(p.name, href := p.file)
     }
 
@@ -104,30 +102,30 @@ object DocumentationPages  { index =>
   def bottomLinks(p: DocumentationPage) = {
     def previous(p: DocumentationPage): Option[DocumentationPage] =
       p.parent match {
-        case None => None
-        case Some(parent) =>
+        case None ⇒ None
+        case Some(parent) ⇒
           parent.children.indexOf(p) match {
-            case x if (x - 1) < 0 => None
-            case x => Some(parent.children(x - 1))
+            case x if (x - 1) < 0 ⇒ None
+            case x                ⇒ Some(parent.children(x - 1))
           }
       }
 
     def next(p: DocumentationPage): Option[DocumentationPage] =
       p.parent match {
-        case None => None
-        case Some(parent) =>
+        case None ⇒ None
+        case Some(parent) ⇒
           parent.children.indexOf(p) match {
-            case x if (x + 1 >= parent.children.size) || (x == -1) => None
-            case x => Some(parent.children(x + 1))
+            case x if (x + 1 >= parent.children.size) || (x == -1) ⇒ None
+            case x ⇒ Some(parent.children(x + 1))
           }
       }
 
     def up(p: DocumentationPage): Option[DocumentationPage] = p.parent
 
-    table(id := "documentation-bottom-links") (
+    table(id := "documentation-bottom-links")(
       Seq("previous" -> previous(p), "up" -> up(p), "next" -> next(p)).map {
-        case (t, None) => td(id := "documentation-bottom-link-unavailable")(t)
-        case (item, Some(p)) => td(id := "documentation-bottom-link")(a(item, href := p.file))
+        case (t, None)       ⇒ td(id := "documentation-bottom-link-unavailable")(t)
+        case (item, Some(p)) ⇒ td(id := "documentation-bottom-link")(a(item, href := p.file))
       }
     )
   }
@@ -236,7 +234,6 @@ object DocumentationPages  { index =>
           def content = documentation.console.Source()
         }
       }
-
 
     def gui = new DocumentationPage {
       def name = "GUI"

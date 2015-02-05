@@ -32,13 +32,6 @@ trait Assembly { self: BuildSystemDefaults ⇒
     }
   )
 
-  private def copyResTask(resourceDirectory: File, assemblyPath: File, outDir: String, streams: TaskStreams) = {
-    val destPath = (assemblyPath / outDir)
-    streams.log.info(s"Copy resource $resourceDirectory to $destPath")
-    IO.copyDirectory(resourceDirectory, destPath, preserveLastModified = true)
-    resourceDirectory -> destPath
-  }
-
   private def copyFileTask(from: File, destinationDir: File, streams: TaskStreams) = {
     streams.log.info(s"Copy file $from to $destinationDir ")
     val to =
@@ -54,16 +47,6 @@ trait Assembly { self: BuildSystemDefaults ⇒
         to
       }
     from -> to
-  }
-
-  private def copyDepTask(
-    cp: Seq[Attributed[File]],
-    out: File,
-    subDir: String,
-    depMap: Map[Regex, String ⇒ String],
-    depFilter: ModuleID ⇒ Boolean,
-    streams: TaskStreams) = {
-
   }
 
   private def rename(srcPath: File, depMap: Map[Regex, String ⇒ String]) =
@@ -109,56 +92,15 @@ trait Assembly { self: BuildSystemDefaults ⇒
     bundleProj := false,
     install := true,
     installRemote := true,
-    resourceOutDir := "",
     dependencyNameMap := Map.empty[Regex, String ⇒ String],
     dependencyFilter := { _ ⇒ true },
-    // Copy resources
-    copyResources <<= (resourceDirectory in Compile, assemblyPath, resourceOutDir, streams) map copyResTask map (Seq(_)),
-    // Copy user defined files
-    copyResources <++=
+    copyResources <<=
       (resourcesAssemble, assemblyPath, streams) map {
         case (resources, a, s) ⇒
           resources.toSeq.map { case (from, to) ⇒ copyFileTask(from, a / to, s) }
       },
     copyResources <++= (externalDependencyClasspath in Compile, assemblyPath, outputDir, dependencyNameMap, dependencyFilter, streams) map copyLibraryDependencies
   )
-
-  /*def AssemblyProject(base: String,
-                      outputDir: String = "",
-                      baseDir: File = dir,
-                      settings: Seq[Setting[_]] = Nil) = {
-
-    val projBase = baseDir / base
-    val s = settings
-    Project(base, projBase, settings = Defaults.coreDefaultSettings ++ Seq(
-      resourcesAssemble := Seq.empty,
-      setExecutable := Seq.empty,
-      assemble <<=
-        (assemblyPath, setExecutable) map {
-          (path, files) ⇒
-            files.foreach(f ⇒ new File(path, f).setExecutable(true))
-            path
-        } dependsOn (copyResources),
-      assemblyPath <<= target / "assemble",
-      bundleProj := false,
-      install := true,
-      installRemote := true,
-      //zipFiles := Nil,
-      outDir := outputDir,
-      resourceOutDir := "",
-      dependencyNameMap := Map.empty[Regex, String ⇒ String],
-      dependencyFilter := { _ ⇒ true },
-      // Copy resources
-      copyResources <<= (resourceDirectory in Compile, assemblyPath, resourceOutDir, streams) map copyResTask map (Seq(_)),
-      // Copy user defined files
-      copyResources <++=
-        (resourcesAssemble, assemblyPath, streams) map {
-          case (resources, a, s) ⇒
-            resources.toSeq.map { case (from, to) ⇒ copyFileTask(from, a / to, s) }
-        },
-      copyResources <++= (externalDependencyClasspath in Compile, assemblyPath, outDir, dependencyNameMap, dependencyFilter, streams) map copyLibraryDependencies
-    ) ++ s ++ scalariformDefaults) dependsOn ()
-  }*/
 
   def tarImpl(folder: File, s: TaskStreams, t: File, name: String, innerFolder: String): File = {
     val out = t / name
@@ -170,8 +112,6 @@ trait Assembly { self: BuildSystemDefaults ⇒
     }
 
     def findFiles(f: File): Set[File] = if (f.isDirectory) (f.listFiles map findFiles flatten).toSet else Set(f)
-
-    //def findLeastCommonPath(f1: File, f2: File): File = file(f1.getCanonicalPath zip f2.getCanonicalPath takeWhile { case (a, b) ⇒ a == b } map (_._1) mkString)
 
     val files: Set[File] = findFiles(folder).toSet
 
