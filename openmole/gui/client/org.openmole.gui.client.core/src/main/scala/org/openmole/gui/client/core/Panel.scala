@@ -4,7 +4,7 @@ import org.openmole.gui.client
 import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
-import org.openmole.gui.misc.js.{ Select, Forms ⇒ bs }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter, Select }
 import org.scalajs.dom.Event
 
 import scala.sys.Prop.DoubleProp
@@ -61,15 +61,18 @@ class GenericPanel(uuid: String,
 
   val editionState: Var[Boolean] = Var(false)
   val filter: Var[ConceptState] = Var(defaultDataBagUI.right.toOption.getOrElse(TASKS))
-  var nameFilter = Var("")
   val rows = Var(0)
-
   val currentDataBagUI = Var(defaultDataBagUI.left.toOption)
+
   val settingTabs = Rx {
     currentDataBagUI().map {
       SettingTabs(_)
     }
   }
+  val inputFilter = new InputFilter(currentDataBagUI().map {
+    _.name()
+  }.getOrElse(""))
+
   val factorySelector: Select[FactoryUI] = new Select("factories",
     Var(filter().factories),
     currentDataBagUI(),
@@ -83,12 +86,10 @@ class GenericPanel(uuid: String,
       }
     })
 
-  def contains(db: DataBagUI) = db.name().contains(nameFilter())
-
   private val filters = Map[ConceptState, DataBagUI ⇒ Boolean](
-    (ALL, contains),
-    (TASKS, db ⇒ isTaskUI(db) && contains(db)),
-    (PROTOTYPES, db ⇒ isPrototypeUI(db) && contains(db))
+    (ALL, db ⇒ inputFilter.contains(db.name())),
+    (TASKS, db ⇒ isTaskUI(db) && inputFilter.contains(db.name())),
+    (PROTOTYPES, db ⇒ isPrototypeUI(db) && inputFilter.contains(db.name()))
   )
 
   val conceptTable = bs.table(
@@ -96,7 +97,7 @@ class GenericPanel(uuid: String,
     Rx {
       val dbUIs: Seq[DataBagUI] = filter().factories.head
       tbody({
-        val elements = for (db ← dbUIs if filters(filter())(db)) yield {
+        val elements = for (db ← dbUIs.sortBy(_.name()) if filters(filter())(db)) yield {
           bs.tr(row)(
             bs.td(col_md_6)(a(dataBagUIView(db), cursor := "pointer", onclick := { () ⇒
               setCurrent(db)
@@ -120,17 +121,7 @@ class GenericPanel(uuid: String,
     case _                         ⇒ db.name() + ""
   }
 
-  val inputFilter = bs.input(
-    currentDataBagUI().map {
-      _.name()
-    }.getOrElse(""))(
-      value := "",
-      placeholder := "Filter",
-      autofocus := "true"
-    ).render
-
   val dimInput = bs.input("0")(placeholder := "Dim", width := 50, autofocus := true).render
-  inputFilter.oninput = (e: Event) ⇒ nameFilter() = inputFilter.value
 
   //New button
   val newGlyph =
@@ -143,7 +134,8 @@ class GenericPanel(uuid: String,
     val factory = filter().factories.head
     val dbUI = DataBagUI(factory.dataUI)
     resetIODataUI(dbUI, factory)
-    dbUI.name() = inputFilter.value
+    //  dbUI.name() = inputFilter.value
+    dbUI.name() = inputFilter.tag.value
     dimInput.value = "0"
     ClientService += dbUI
     setCurrent(dbUI)
@@ -196,7 +188,7 @@ class GenericPanel(uuid: String,
           nav(getID, navbar_form)(
             bs.form()(
               inputGroup(navbar_left)(
-                inputFilter,
+                inputFilter.tag,
                 for (c ← prototypeExtraForm) yield c,
                 if (editionState()) inputGroupButton(factorySelector.selector)
                 else inputGroupButton(newGlyph)
@@ -217,7 +209,7 @@ class GenericPanel(uuid: String,
       bodyDialog(Rx {
         bs.div()(
           if (editionState()) {
-            inputFilter.value = currentDataBagUI().map {
+            inputFilter.tag.value = currentDataBagUI().map {
               _.name()
             }.getOrElse((""))
             settingTabs() match {
@@ -226,7 +218,7 @@ class GenericPanel(uuid: String,
             }
           }
           else {
-            inputFilter.value = ""
+            inputFilter.tag.value = ""
             bs.div()(conceptTable)
           }
         )
@@ -255,7 +247,7 @@ class GenericPanel(uuid: String,
   def save = {
     currentDataBagUI().map {
       db ⇒
-        ClientService.setName(db, inputFilter.value)
+        ClientService.setName(db, inputFilter.tag.value)
         //In case of prototype
         prototypeUI(db).map {
           _.dimension() = dimInput.value.toInt
@@ -267,21 +259,7 @@ class GenericPanel(uuid: String,
     }
 
     editionState() = false
-    nameFilter() = ""
+    inputFilter.nameFilter() = ""
   }
 
 }
-
-/*
-class PanelWithIO[T <: IODataUI](id: String, factories: Seq[IOFactoryUI], default: Option[T] = None) /*extends GenericPanel(id, factories, default) */ {
-  val _default: IODataUI = default.getOrElse(factories.head.dataUI)
-  // type DEF_DATAUI = IODataUI
-  val panel = Panel.generic("taskPanelID", factories)
-  val ioPanel = new IOPanel(_default)
-
-  val body =
-    nav(nav_pills,
-      navItem("Settings", panel.render) /*,
-      navItem("I/O", ioPanel.render)*/ )
-
-}*/ 
