@@ -187,7 +187,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   )
 
   lazy val dbServer = Project("dbserver", dir / "dbserver", settings = assemblySettings) settings (commonsSettings: _*) settings (
-    outputDir := "lib",
+    assemblyDependenciesPath := assemblyPath.value / "lib",
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p / "bin" },
     resourcesAssemble <++= Seq(Misc.replication.project, base.Runtime.dbserver.project) sendTo (assemblyPath / "lib"),
     libraryDependencies ++= Seq(
@@ -201,7 +201,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   )
 
   lazy val openmoleRuntime = Project("runtime", dir / "runtime", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
-    outputDir := "plugins",
+    assemblyDependenciesPath := assemblyPath.value / "plugins",
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo (assemblyPath / "plugins"),
     setExecutable ++= Seq("run.sh"),
@@ -230,7 +230,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   )
 
   lazy val daemon = Project("daemon", dir / "daemon", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
-    outputDir := "plugins",
+    assemblyDependenciesPath := assemblyPath.value / "plugins",
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ (a contains "core") || (a contains "daemon")) sendTo (assemblyPath / "plugins"),
     libraryDependencies ++= Seq(
@@ -252,9 +252,10 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     )
 
   lazy val documentation = Project("documentation", dir / "documentation", settings = scalatex.SbtPlugin.projectSettings ++ assemblySettings) settings (commonsSettings: _*) dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
+    //run := (assemble zip run),
     libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.1",
     libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-    //resourcesAssemble <++= (Tar.tar in openmole, resourceManaged) map { case(f, d) ⇒ Seq(f -> d) },
+    resourcesAssemble <+= (Tar.tar in openmole, resourceManaged) map { case (f, d) ⇒ f -> d },
     dependencyFilter := { d ⇒ false }
   )
 

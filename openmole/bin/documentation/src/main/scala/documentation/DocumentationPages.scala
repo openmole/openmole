@@ -24,7 +24,8 @@ import scala.reflect.runtime.universe._
 
 object Resource {
   def logo = "openmole.png"
-  def all = Seq(logo)
+  def openmole = "openmole.tar.gz"
+  def all = Seq(logo, openmole)
 }
 
 object Pages {

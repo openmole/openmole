@@ -57,7 +57,6 @@ trait Assembly { self: BuildSystemDefaults ⇒
   private def copyLibraryDependencies(
     cp: Seq[Attributed[File]],
     out: File,
-    subDir: String,
     depMap: Map[Regex, String ⇒ String],
     depFilter: ModuleID ⇒ Boolean,
     streams: TaskStreams) = {
@@ -70,7 +69,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
       }
     }.map { srcPath ⇒
       val name = rename(srcPath, depMap)
-      val destPath = out / subDir / name
+      val destPath = out / name
       streams.log.info(s"Copy dependency $srcPath to $destPath")
       destPath.getParentFile.mkdirs
       IO.copyFile(srcPath, destPath, preserveLastModified = true)
@@ -81,14 +80,14 @@ trait Assembly { self: BuildSystemDefaults ⇒
   def assemblySettings = Seq(
     resourcesAssemble := Seq.empty,
     setExecutable := Seq.empty,
-    outputDir := "",
+    assemblyPath := target.value / "assemble",
+    assemblyDependenciesPath := assemblyPath.value,
     assemble <<=
       (assemblyPath, setExecutable) map {
         (path, files) ⇒
           files.foreach(f ⇒ new File(path, f).setExecutable(true))
           path
       } dependsOn (copyResources),
-    assemblyPath := target.value / "assemble",
     bundleProj := false,
     install := true,
     installRemote := true,
@@ -99,7 +98,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
         case (resources, s) ⇒
           resources.toSeq.map { case (from, to) ⇒ copyFileTask(from, to, s) }
       },
-    copyResources <++= (externalDependencyClasspath in Compile, assemblyPath, outputDir, dependencyNameMap, dependencyFilter, streams) map copyLibraryDependencies
+    copyResources <++= (externalDependencyClasspath in Compile, assemblyDependenciesPath, dependencyNameMap, dependencyFilter, streams) map copyLibraryDependencies
   )
 
   def tarImpl(folder: File, s: TaskStreams, t: File, name: String, innerFolder: String): File = {

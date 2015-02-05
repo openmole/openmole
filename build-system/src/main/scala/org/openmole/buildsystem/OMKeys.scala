@@ -19,13 +19,13 @@ object OMKeys {
 
   val eclipseBuddyPolicy = SettingKey[Option[String]]("OSGi.eclipseBuddyPolicy", "The eclipse buddy policy thing.")
 
-  val outputDir = SettingKey[String]("outputDir", "A setting to control where copyDepTask outputs it's dependencies")
+  val assemblyPath = SettingKey[File]("assemblyPath", "A setting to control assembly outputs directory.")
+
+  val assemblyDependenciesPath = SettingKey[File]("assemblyDependenciesPath", "A setting to control assembly outputs directory for dependencies.")
 
   val install = TaskKey[Unit]("install", "Builds bundles and adds them to the local repo")
 
   val installRemote = TaskKey[Unit]("install-remote", "Builds bundles and adds them to the openmole nexus server")
-
-  val assemblyPath = SettingKey[File]("assembly-path", "The path to the project's assembly folder")
 
   val assemble = TaskKey[File]("assemble", "The path with assembled project")
 

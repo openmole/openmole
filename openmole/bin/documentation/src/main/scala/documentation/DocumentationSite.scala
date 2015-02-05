@@ -33,7 +33,9 @@ object DocumentationSite extends App {
   for {
     r ← Resource.all
   } {
-    new File(dest, r).withOutputStream { os ⇒
+    val f = new File(dest, r)
+    f.getParentFile.mkdirs()
+    f.withOutputStream { os ⇒
       val is = getClass.getClassLoader.getResourceAsStream(r)
       try BasicIO.transferFully(is, os)
       finally is.close
