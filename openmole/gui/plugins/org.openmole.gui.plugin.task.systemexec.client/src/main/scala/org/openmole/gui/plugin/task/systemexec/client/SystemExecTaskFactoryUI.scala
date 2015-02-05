@@ -30,4 +30,6 @@ sealed class SystemExecTaskFactoryUI extends FactoryUI {
   def dataUI = new SystemExecTaskDataUI
 
   val name = "External"
+
+  override val ioMapping = true
 }

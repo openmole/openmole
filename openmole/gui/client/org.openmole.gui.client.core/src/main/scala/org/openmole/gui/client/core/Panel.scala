@@ -74,9 +74,10 @@ class GenericPanel(uuid: String,
     Var(filter().factories),
     currentDataBagUI(),
     btn_primary, () ⇒ {
-      currentDataBagUI().map {
-        _.dataUI() = factorySelector.content().map {
-          _.dataUI
+      currentDataBagUI().map { db ⇒
+        db.dataUI() = factorySelector.content().map { f ⇒
+          resetIODataUI(db, f)
+          f.dataUI
         }.get
       }
     })
@@ -138,12 +139,21 @@ class GenericPanel(uuid: String,
     }).render
 
   def add = {
-    val dbUI = DataBagUI(filter().factories.head.dataUI)
+    val factory = filter().factories.head
+    val dbUI = DataBagUI(factory.dataUI)
+    resetIODataUI(dbUI, factory)
     dbUI.name() = inputFilter.value
     dimInput.value = "0"
     ClientService += dbUI
     setCurrent(dbUI)
     editionState() = true
+  }
+
+  def resetIODataUI(dbUI: DataBagUI, factory: FactoryUI) = dbUI match {
+    case iodb: IODataBagUI ⇒
+      iodb.inputDataUI() = DataBagUI.buildInput(factory.ioMapping)
+      iodb.outputDataUI() = DataBagUI.buildOutput(factory.ioMapping)
+    case _ ⇒
   }
 
   val conceptFilter = Rx {
