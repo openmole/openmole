@@ -97,7 +97,7 @@ class GenericPanel(uuid: String,
     Rx {
       val dbUIs: Seq[DataBagUI] = filter().factories.head
       tbody({
-        val elements = for (db ← dbUIs if filters(filter())(db)) yield {
+        val elements = for (db ← dbUIs.sortBy(_.name()) if filters(filter())(db)) yield {
           bs.tr(row)(
             bs.td(col_md_6)(a(dataBagUIView(db), cursor := "pointer", onclick := { () ⇒
               setCurrent(db)
