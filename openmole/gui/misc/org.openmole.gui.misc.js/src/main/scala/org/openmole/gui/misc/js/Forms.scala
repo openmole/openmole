@@ -191,6 +191,7 @@ object Forms {
   //table
   def table = tags.table(`class` := "table table-stripped")
   def tr(keys: ClassKeyAggregator = emptyCK) = tags.tr(`class` := keys.key)
+  def th(keys: ClassKeyAggregator = emptyCK) = tags.th(`class` := keys.key)
   def td(keys: ClassKeyAggregator = emptyCK) = tags.td(`class` := keys.key)
 
   //Forms
@@ -211,6 +212,7 @@ object Forms {
   val row = key("row")
   val col_md_1 = key("col-md-1")
   val col_md_2 = key("col-md-2")
+  val col_md_4 = key("col-md-4")
   val col_md_5 = key("col-md-5")
   val col_md_6 = key("col-md-6")
 }

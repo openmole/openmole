@@ -32,7 +32,7 @@ class InputDataUI(val ioMapping: Boolean, val prototypeFilter: Seq[ProtoTYPE] = 
 
   def data = new InputData {
     def inputs = inputsUI().map { id ⇒
-      Input(id.prototypeUI().data, id.default(), id.mapping.map { m ⇒ (m._1, m._2.data) })
+      Input(id.protoDataBagUI.dataUI().data, id.default(), id.mapping())
     }
   }
 
