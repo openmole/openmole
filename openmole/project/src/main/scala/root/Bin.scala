@@ -252,10 +252,10 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     )
 
   lazy val documentation = Project("documentation", dir / "documentation", settings = scalatex.SbtPlugin.projectSettings ++ assemblySettings) settings (commonsSettings: _*) dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
-    //run := (assemble zip run),
+    (run in Compile) <<= (run in Compile) dependsOn assemble,
     libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.1",
     libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-    resourcesAssemble <+= (Tar.tar in openmole, resourceManaged) map { case (f, d) ⇒ f -> d },
+    resourcesAssemble <+= (Tar.tar in openmole, classDirectory in Compile) map { case (f, d) ⇒ f -> d },
     dependencyFilter := { d ⇒ false }
   )
 
