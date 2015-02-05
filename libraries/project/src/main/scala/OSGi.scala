@@ -292,5 +292,5 @@ object OSGi extends Defaults(Apache) {
     version := scalabcVersion
     )
 
-  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
+  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
 }
