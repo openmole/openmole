@@ -37,7 +37,7 @@ object OMKeys {
 
   val downloads = SettingKey[Seq[(URL, String)]]("downloads", "A project setting that describes a urls to download")
 
-  val resourcesAssemble = TaskKey[Seq[(File, String)]]("resourcesAssemble", "A set of (in,out) tuples that specify where to find the resource (in) and what sub-path of assembly to put it in (out)")
+  val resourcesAssemble = TaskKey[Seq[(File, File)]]("resourcesAssemble", "A set of (in,out) tuples that specify where to find the resource (in) and what sub-path of assembly to put it in (out)")
 
   val ignoreTransitive = SettingKey[Boolean]("ignoreTransitive")
 

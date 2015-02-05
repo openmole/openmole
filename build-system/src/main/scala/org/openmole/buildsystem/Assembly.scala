@@ -88,16 +88,16 @@ trait Assembly { self: BuildSystemDefaults ⇒
           files.foreach(f ⇒ new File(path, f).setExecutable(true))
           path
       } dependsOn (copyResources),
-    assemblyPath <<= target / "assemble",
+    assemblyPath := target.value / "assemble",
     bundleProj := false,
     install := true,
     installRemote := true,
     dependencyNameMap := Map.empty[Regex, String ⇒ String],
     dependencyFilter := { _ ⇒ true },
     copyResources <<=
-      (resourcesAssemble, assemblyPath, streams) map {
-        case (resources, a, s) ⇒
-          resources.toSeq.map { case (from, to) ⇒ copyFileTask(from, a / to, s) }
+      (resourcesAssemble, streams) map {
+        case (resources, s) ⇒
+          resources.toSeq.map { case (from, to) ⇒ copyFileTask(from, to, s) }
       },
     copyResources <++= (externalDependencyClasspath in Compile, assemblyPath, outputDir, dependencyNameMap, dependencyFilter, streams) map copyLibraryDependencies
   )
@@ -203,21 +203,22 @@ object Assembly {
 
   class RichProjectSeq(s: Def.Initialize[Seq[ProjectReference]]) {
     def keyFilter[T](key: SettingKey[T], filter: (T) ⇒ Boolean, intransitive: Boolean = false) = projFilter(s, key, filter, intransitive)
-    def sendTo(to: String) = sendBundles(s, to) //TODO: This function is specific to OSGI bundled projects. Make it less specific?
+    def sendTo(to: Def.Initialize[File]) = sendBundles(s zip to) //TODO: This function is specific to OSGI bundled projects. Make it less specific?
   }
 
-  def projFilter[T](s: Def.Initialize[Seq[ProjectReference]], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Project.Initialize[Seq[ProjectReference]] = {
+  def projFilter[T](s: Def.Initialize[Seq[ProjectReference]], key: SettingKey[T], filter: T ⇒ Boolean, intransitive: Boolean): Def.Initialize[Seq[ProjectReference]] = {
     Def.bind(s)(j ⇒ projFilter(j, key, filter, intransitive))
   }
 
   //TODO: New API makes this much simpler
   //val bundles: Seq[FIle] = bundle.all( ScopeFilter( inDependencies(ref) ) ).value
 
-  def sendBundles(bundles: Def.Initialize[Seq[ProjectReference]], to: String): Def.Initialize[Task[Seq[(File, String)]]] = Def.bind(bundles) { projs ⇒
-    require(projs.nonEmpty)
-    val seqOTasks: Def.Initialize[Seq[Task[Seq[(File, String)]]]] = Def.Initialize.join(projs.map(p ⇒ bundle in p map { f ⇒
-      Seq(f -> to)
-    }))
-    seqOTasks { seq ⇒ seq.reduceLeft[Task[Seq[(File, String)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }
+  def sendBundles(bundles: Def.Initialize[(Seq[ProjectReference], File)]): Def.Initialize[Task[Seq[(File, File)]]] = Def.bind(bundles) {
+    case (projs, to) ⇒
+      require(projs.nonEmpty)
+      val seqOTasks: Def.Initialize[Seq[Task[Seq[(File, File)]]]] = Def.Initialize.join(projs.map(p ⇒ (bundle in p) map {
+        f ⇒ Seq(f -> to)
+      }))
+      seqOTasks { seq ⇒ seq.reduceLeft[Task[Seq[(File, File)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }
   }
 }
