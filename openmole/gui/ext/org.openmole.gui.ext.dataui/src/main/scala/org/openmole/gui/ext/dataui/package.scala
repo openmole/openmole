@@ -24,7 +24,7 @@ import scalatags.JsDom.TypedTag
 
 package object dataui {
 
-  case class InputUI(val prototypeUI: Var[PrototypeDataUI], val default: Var[Option[String]], val mapping: Option[(Any, PrototypeDataUI)] = None)
-  case class OutputUI(val prototypeUI: Var[PrototypeDataUI], val mapping: Option[(PrototypeDataUI, Any)] = None)
+  case class InputUI(val protoDataBagUI: PrototypeDataBagUI, val default: Var[Option[String]], val mapping: Var[Option[Any]] = Var(None))
+  case class OutputUI(val protoDataBagUI: PrototypeDataBagUI, val mapping: Var[Option[Any]] = Var(None))
 
 }

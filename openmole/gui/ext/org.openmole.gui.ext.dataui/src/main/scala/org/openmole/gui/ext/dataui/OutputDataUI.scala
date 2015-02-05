@@ -32,8 +32,7 @@ class OutputDataUI(val ioMapping: Boolean, val prototypeFilter: Seq[ProtoTYPE] =
 
   def data = new OutputData {
     def outputs = outputsUI().map { o ⇒
-      Output(o.prototypeUI().data, o.mapping.map { m ⇒ (m._1.data, m._2) }
-      )
+      Output(o.protoDataBagUI.dataUI().data, o.mapping())
     }
   }
 }

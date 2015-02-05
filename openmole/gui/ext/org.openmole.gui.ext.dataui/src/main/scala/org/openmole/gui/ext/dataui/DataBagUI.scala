@@ -23,29 +23,52 @@ import rx._
 object DataBagUI {
 
   def buildInput(ioMapping: Boolean) = new InputDataUI(ioMapping)
+
   def buildOutput(ioMapping: Boolean) = new OutputDataUI(ioMapping)
 
   def apply(dataUI: DataUI): DataBagUI = dataUI match {
     //FIXME: find how to write this lik case t @ (TaskDataUI | HookDataUI)
-    case t: TaskDataUI ⇒
-      new IODataBagUI(Var(t))
-    case h: HookDataUI ⇒ new IODataBagUI(Var(h))
-    case _             ⇒ new DataBagUI(Var(dataUI))
+    case t: TaskDataUI        ⇒ new TaskDataBagUI(Var(t))
+    case p: PrototypeDataUI   ⇒ new PrototypeDataBagUI(Var(p))
+    case e: EnvironmentDataUI ⇒ new EnvironmentDataBagUI(Var(e))
+    case h: HookDataUI        ⇒ new HookDataBagUI(Var(h))
   }
 }
 
 import DataBagUI._
-class DataBagUI(val dataUI: Var[DataUI], val name: Var[String] = Var("")) {
+
+trait DataBagUI {
+  type DATAUI <: DataUI
+  val dataUI: Var[DATAUI]
+
+  var name: Var[String] = Var("")
+
   val uuid: String = java.util.UUID.randomUUID.toString
 
   def dataBag: IDataBag = new DataBag(uuid, name(), dataUI().data)
 }
 
-class IODataBagUI(d: Var[DataUI],
-                  n: Var[String] = Var("")) extends DataBagUI(d, n) {
+trait IODataBagUI <: DataBagUI {
 
   val inputDataUI: Var[InputDataUI] = Var(buildInput(false))
+
   val outputDataUI: Var[OutputDataUI] = Var(buildOutput(false))
 
   override def dataBag = new IODataBag(uuid, name(), dataUI().data, inputDataUI().data, outputDataUI().data)
+}
+
+class TaskDataBagUI(val dataUI: Var[TaskDataUI]) extends IODataBagUI {
+  type DATAUI = TaskDataUI
+}
+
+class PrototypeDataBagUI(val dataUI: Var[PrototypeDataUI]) extends IODataBagUI {
+  type DATAUI = PrototypeDataUI
+}
+
+class HookDataBagUI(val dataUI: Var[HookDataUI]) extends IODataBagUI {
+  type DATAUI = HookDataUI
+}
+
+class EnvironmentDataBagUI(val dataUI: Var[EnvironmentDataUI]) extends IODataBagUI {
+  type DATAUI = EnvironmentDataUI
 }

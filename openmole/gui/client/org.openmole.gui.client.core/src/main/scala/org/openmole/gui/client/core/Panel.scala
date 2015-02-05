@@ -77,7 +77,8 @@ class GenericPanel(uuid: String,
       currentDataBagUI().map { db ⇒
         db.dataUI() = factorySelector.content().map { f ⇒
           resetIODataUI(db, f)
-          f.dataUI
+          //FIXME: I am sure, there is a better idea than a cast...
+          f.dataUI.asInstanceOf[db.DATAUI]
         }.get
       }
     })
@@ -114,9 +115,9 @@ class GenericPanel(uuid: String,
     }
   ).render
 
-  def dataBagUIView(db: DataBagUI) = db.dataUI() match {
-    case dataUI: PrototypeDataUI ⇒ db.name() + " [" + dataUI.dimension() + "]"
-    case _                       ⇒ db.name() + ""
+  def dataBagUIView(db: DataBagUI) = db match {
+    case proto: PrototypeDataBagUI ⇒ proto.name() + " [" + proto.dataUI().dimension().toString + "]"
+    case _                         ⇒ db.name() + ""
   }
 
   val inputFilter = bs.input(
