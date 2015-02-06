@@ -2,7 +2,21 @@
 
 @import documentation.Resource._
 
+@p(style := "text-align: center")
+  Need to tune parameters of your program?
+  @br Need to execute your program against many datasets?
+  @br Need to calibrate?
+  @br Need to optimize?
+  @br ...
 
-@p @a("Documentation", href := DocumentationPages.root.file)
-@p @a("OpenMOLE", href := openmole)
-@p @a("OpenMOLE Daemon", href := openmoleDaemon)
+@p OpenMOLE (Open MOdeL Experiment) makes it simple to execute your programs on distributed computing environments. If you want to execute the same program for many different inputs (parameters or datasets), OpenMOLE is the tool that you need. The typical usage of OpenMOLE are high performance model calibration, model exploration, machine learning, optimization, data processing.
+
+  @ul
+    @li{@b{Expressive} - Graphical and scripted workflow system to describe your naturally parallel processes.}
+    @li{@b{Distributed computing} - Works with your multi-core machines, desktop room, clusters, grids.}
+    @li{@b{Works with your programs} - Java, Binary exe, NetLogo, R, SciLab, Python, C++...}
+    @li{@b{Scalable} - Handles millions of tasks and GBs of data.}
+    @li{@b{Model analysis} - Design of experiments, stochastic model replication, calibration, sensitivity analysis...}
+    @li{@b{Mature} - Developed since 2008 and widely used.}
+    @li{@b{Open} -AGPLv3 free software license }
+

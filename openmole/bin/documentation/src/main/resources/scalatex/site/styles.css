@@ -1,5 +1,14 @@
 
 
+#sections {
+  padding-top: 5;
+  padding-bottom: 5;
+}
+
+#section {
+  padding-right: 15;
+}
+
 #documentation-bottom-link-unavailable {
   padding-left: 5;
   padding-right: 5;
@@ -54,9 +63,10 @@
 The content `<div>` is where all your content goes.
 */
 .scalatex-content {
-  position: absolute;
+  font-size: 14px;
+  position: auto;
   margin: 0 0;
-  padding: 0 210;
+  padding: 0 0;
   max-width: 800;
   padding-bottom: 50;
   line-height: 1.6em;
@@ -64,11 +74,11 @@ The content `<div>` is where all your content goes.
 }
 /* Custom Stuff */
 .scalatex-content a:link {
-  color: #37a;
+  color: darkblue;
   text-decoration: none;
 }
 .scalatex-content a:visited {
-  color: #949;
+  color: darkblue;
   text-decoration: none;
 }
 .scalatex-content a:hover {

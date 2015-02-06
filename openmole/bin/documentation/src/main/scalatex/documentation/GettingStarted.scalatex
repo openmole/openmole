@@ -1,0 +1,9 @@
+
+@import documentation.Resource._
+
+
+@p @a("OpenMOLE", href := openmole)
+
+@p To get help please contact the mailing list: users 'at' list.openmole.org (you should @a("subscribe", href := "http://list.openmole.org/") first).
+
+@p @a("OpenMOLE Daemon", href := openmoleDaemon)
