@@ -1,0 +1,8 @@
+
+
+@import documentation.Resource._
+
+
+@p @a("Documentation", href := DocumentationPages.root.file)
+@p @a("OpenMOLE", href := openmole)
+@p @a("OpenMOLE Daemon", href := openmoleDaemon)

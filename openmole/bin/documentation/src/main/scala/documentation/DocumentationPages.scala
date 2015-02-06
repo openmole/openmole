@@ -19,28 +19,56 @@
 package documentation
 
 import scala.reflect.ClassTag
+import scalatags.Text.all
 import scalatags.Text.all._
 import scala.reflect.runtime.universe._
 
 object Resource {
   def logo = "openmole.png"
   def openmole = "openmole.tar.gz"
-  def all = Seq(logo, openmole)
+  def openmoleDaemon = "openmole-daemon.tar.gz"
+  def all = Seq(logo, openmole, openmoleDaemon)
 }
 
 object Pages {
 
+  def decorate(p: Page): Frag =
+    p match {
+      case p: DocumentationPage ⇒ DocumentationPages.decorate(p)
+      case _                    ⇒ decorate(p.content)
+    }
+
   def decorate(p: Frag): Frag =
     table(
-      tr(img(id := "logo")(src := Resource.logo)),
+      tr(a(img(id := "logo")(src := Resource.logo), href := index.file)),
       p
     )
 
+  def index = Page("index", Index())
+
+  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index)
+
+}
+
+object Page {
+  def apply(_name: String, _content: Frag) =
+    new Page {
+      override def name: String = _name
+      override def content: all.Frag = _content
+    }
+}
+
+trait Page {
+  def content: Frag
+  def name: String
+
+  def location = name
+  def file = location + ".html"
 }
 
 case class Parent[T](parent: Option[T])
 
-abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(None)) {
+abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(None)) extends Page {
   def parent = p.parent
   implicit def thisIsParent = Parent[DocumentationPage](Some(this))
 
@@ -50,13 +78,11 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
 
   def apply() = content
 
-  def location: String =
+  override def location: String =
     parent match {
       case None    ⇒ name
       case Some(p) ⇒ p.location + "_" + name
     }
-
-  def file = location + ".html"
 
   def allPages: Seq[DocumentationPage] = {
     def pages(p: DocumentationPage): List[DocumentationPage] =
