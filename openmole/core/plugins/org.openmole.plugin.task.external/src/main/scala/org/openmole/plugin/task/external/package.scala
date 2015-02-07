@@ -28,17 +28,17 @@ package external {
   trait ExternalPackage {
 
     lazy val inputFiles = new {
-      def +=(p: Prototype[File], name: String, link: Boolean = false) = (_: ExternalTaskBuilder).addInputFile(p, name, link)
+      def +=(p: Prototype[File], name: String, link: Boolean = false, inWorkDir: Boolean = true) = (_: ExternalTaskBuilder).addInputFile(p, name, link, inWorkDir)
     }
 
     lazy val outputFiles = new {
-      def +=(name: String, p: Prototype[File]) = (_: ExternalTaskBuilder).addOutputFile(name, p)
+      def +=(name: String, p: Prototype[File], inWorkDir: Boolean = true) = (_: ExternalTaskBuilder).addOutputFile(name, p, inWorkDir)
     }
 
     lazy val resources =
       new {
-        def +=(file: File, name: Option[ExpandedString] = None, link: Boolean = false, os: OS = OS()) =
-          (_: ExternalTaskBuilder).addResource(file, name, link, os)
+        def +=(file: File, name: Option[ExpandedString] = None, link: Boolean = false, inWorkDir: Boolean = false, os: OS = OS()) =
+          (_: ExternalTaskBuilder).addResource(file, name, link, inWorkDir, os)
       }
   }
 }
