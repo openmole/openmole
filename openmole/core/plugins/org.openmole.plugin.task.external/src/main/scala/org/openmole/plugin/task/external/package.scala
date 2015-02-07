@@ -26,14 +26,13 @@ package external {
   import org.openmole.core.workflow.tools._
 
   trait ExternalPackage {
-    implicit def inputsFileDecorator(i: org.openmole.core.workflow.builder.Inputs) = new {
-      def +=(p: Prototype[File], name: String, link: Boolean = false) =
-        (_: ExternalTaskBuilder).addInput(p, name, link)
+
+    lazy val inputFiles = new {
+      def +=(p: Prototype[File], name: String, link: Boolean = false) = (_: ExternalTaskBuilder).addInputFile(p, name, link)
     }
 
-    implicit def outputsFileDecorator(o: org.openmole.core.workflow.builder.Outputs) = new {
-      def +=(name: String, p: Prototype[File]) =
-        (_: ExternalTaskBuilder).addOutput(name, p)
+    lazy val outputFiles = new {
+      def +=(name: String, p: Prototype[File]) = (_: ExternalTaskBuilder).addOutputFile(name, p)
     }
 
     lazy val resources =

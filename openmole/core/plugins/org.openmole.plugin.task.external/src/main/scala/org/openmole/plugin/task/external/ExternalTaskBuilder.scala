@@ -68,7 +68,7 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
    * @param link @see addResouce
    *
    */
-  def addInput(p: Prototype[File], name: ExpandedString, link: Boolean = false): this.type = {
+  def addInputFile(p: Prototype[File], name: ExpandedString, link: Boolean = false): this.type = {
     _inputFiles += ((p, name, link))
     this addInput p
     this
@@ -81,7 +81,7 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
    * @param p the prototype that is injected
    *
    */
-  def addOutput(name: ExpandedString, p: Prototype[File]): this.type = {
+  def addOutputFile(name: ExpandedString, p: Prototype[File]): this.type = {
     _outputFiles += ((name, p))
     this addOutput p
     this
