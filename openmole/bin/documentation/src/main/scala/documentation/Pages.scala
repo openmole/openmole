@@ -40,11 +40,13 @@ object Pages {
 
   def decorate(p: Frag): Frag =
     Seq(
+      meta(charset := "UTF-8"),
       div(id := "logo")(a(img(src := Resource.logo), href := index.file)),
       div(id := "sections",
         table(
           td(a("Getting Started", id := "section", href := gettingStarted.file)),
-          td(a("Documentation", id := "section", href := DocumentationPages.root.file))
+          td(a("Documentation", id := "section", href := DocumentationPages.root.file)),
+          td(a("Who are we?", id := "section", href := whoAreWe.file))
         )
       ),
       div(id := "content")(p)
@@ -52,8 +54,9 @@ object Pages {
 
   def index = Page("index", Index())
   def gettingStarted = Page("getting_started", GettingStarted())
+  def whoAreWe = Page("who_are_we", WhoAreWe())
 
-  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted)
+  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe)
 
 }
 
