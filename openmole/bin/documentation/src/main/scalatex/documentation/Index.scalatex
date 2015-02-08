@@ -13,10 +13,9 @@
 
   @ul
     @li{@b{Expressive} - Graphical and scripted workflow system to describe your naturally parallel processes.}
-    @li{@b{Distributed computing} - Works with your multi-core machines, desktop room, clusters, grids.}
+    @li{@b{Distributed computing} - Works on your multi-core machines, clusters, grids, desktop grid.}
     @li{@b{Works with your programs} - Java, Binary exe, NetLogo, R, SciLab, Python, C++...}
-    @li{@b{Scalable} - Handles millions of tasks and GBs of data.}
-    @li{@b{Model analysis} - Design of experiments, stochastic model replication, calibration, sensitivity analysis...}
+    @li{@b{Scalable} - Handles millions of tasks, years of computation, and GBs of data.}
     @li{@b{Mature} - Developed since 2008 and widely used.}
-    @li{@b{Open} - AGPLv3 free software license }
+    @li{@b{Open} - AGPLv3 free software license.}
 
