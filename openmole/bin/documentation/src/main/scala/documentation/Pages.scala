@@ -39,15 +39,15 @@ object Pages {
     }
 
   def decorate(p: Frag): Frag =
-    table(
-      tr(a(img(id := "logo")(src := Resource.logo), href := index.file)),
-      tr(
-        div(id := "sections", table(
+    Seq(
+      div(id := "logo")(a(img(src := Resource.logo), href := index.file)),
+      div(id := "sections",
+        table(
           td(a("Getting Started", id := "section", href := gettingStarted.file)),
           td(a("Documentation", id := "section", href := DocumentationPages.root.file))
-        ))
+        )
       ),
-      p
+      div(id := "content")(p)
     )
 
   def index = Page("index", Index())
@@ -110,9 +110,9 @@ object DocumentationPages { index ⇒
 
   def decorate(p: DocumentationPage): Frag =
     Pages.decorate(
-      table(
-        td(verticalAlign := "top")(documentationMenu(root, p)),
-        td(verticalAlign := "top")(
+      Seq(
+        documentationMenu(root, p),
+        div(
           div(id := "documentation-content", p.content),
           if (p != root) bottomLinks(p) else ""
         )
