@@ -21,7 +21,7 @@ import org.openmole.core.workflow.builder._
 import org.openmole.misc.macros.Keyword._
 
 package scala {
-  trait ScalaPackage <: jvm.CodePackage {
+  trait ScalaPackage <: jvm.JVMPackage {
     lazy val usedClasses = add[{ def addClassUse(c: Class[_]*) }]
   }
 }

@@ -53,7 +53,7 @@ object OMKeys {
     val tar = TaskKey[File]("tar", "Tar file produced by the assembly project")
     val innerFolder = SettingKey[String]("tar-inner-folder", "All files in tar will be put under this folder")
     val name = SettingKey[String]("tar-name")
-
+    val folder = TaskKey[File]("tar-folder", "The folder to tar.")
   }
 
 }

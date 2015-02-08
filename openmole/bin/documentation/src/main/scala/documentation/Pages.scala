@@ -23,11 +23,16 @@ import scalatags.Text.all
 import scalatags.Text.all._
 import scala.reflect.runtime.universe._
 
+sealed trait Resource
+case class FileResource(file: String) extends Resource
+case class ArchiveResource(source: String, file: String) extends Resource
+
 object Resource {
-  def logo = "openmole.png"
-  def openmole = "openmole.tar.gz"
-  def openmoleDaemon = "openmole-daemon.tar.gz"
-  def all = Seq(logo, openmole, openmoleDaemon)
+  def logo = FileResource("openmole.png")
+  def openmole = FileResource("openmole.tar.gz")
+  def openmoleDaemon = FileResource("openmole-daemon.tar.gz")
+  def api = ArchiveResource("openmole-api.tar.gz", "api")
+  def all = Seq[Resource](logo, openmole, openmoleDaemon, api)
 }
 
 object Pages {
@@ -41,7 +46,7 @@ object Pages {
   def decorate(p: Frag): Frag =
     Seq(
       meta(charset := "UTF-8"),
-      div(id := "logo")(a(img(src := Resource.logo), href := index.file)),
+      div(id := "logo")(a(img(src := Resource.logo.file), href := index.file)),
       div(id := "sections",
         table(
           td(a("Getting Started", id := "section", href := gettingStarted.file)),

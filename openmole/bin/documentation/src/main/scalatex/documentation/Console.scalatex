@@ -1,5 +1,6 @@
 @import documentation.Objects._
 @import documentation.DocumentationPages
+@import documentation.Resource
 
 @sect{Getting started}
   @sect{Launch the console}
@@ -48,5 +49,7 @@
              @li{ @a("the scala books", href := "http://www.scala-lang.org/node/959") }
              @li{ @a("the standard API documentation", href := "http://www.scala-lang.org/api/current/index.html") }
 
+          @sect{API documentation}
+            You can browse the @a("automatically generated documentation", href := Resource.api.file + "/index.html")
 
 

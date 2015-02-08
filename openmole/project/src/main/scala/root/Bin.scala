@@ -248,8 +248,11 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
 
   lazy val api = Project("api", dir / "target" / "api") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (commonsSettings: _*) settings (
     unidocSettings: _*
-  ) settings (compile := Analysis.Empty,
-      unidocProjectFilter in (ScalaUnidoc, unidoc) := inAnyProject -- inProjects(Libraries.subProjects: _*) -- inProjects(ThirdParties.subProjects: _*)
+  ) settings (tarProject: _*) settings (
+      compile := Analysis.Empty,
+      unidocProjectFilter in (ScalaUnidoc, unidoc) := inAnyProject -- inProjects(Libraries.subProjects: _*) -- inProjects(ThirdParties.subProjects: _*),
+      Tar.name := "openmole-api.tar.gz",
+      Tar.folder <<= (unidoc in Compile).map(_.head)
     )
 
   lazy val documentation = Project("documentation", dir / "documentation", settings = scalatex.SbtPlugin.projectSettings ++ assemblySettings) settings (commonsSettings: _*) dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
@@ -258,6 +261,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value,
     resourcesAssemble <+= (Tar.tar in openmole, classDirectory in Compile) map { case (f, d) ⇒ f -> d },
     resourcesAssemble <+= (Tar.tar in daemon, classDirectory in Compile) map { case (f, d) ⇒ f -> d },
+    resourcesAssemble <+= (Tar.tar in api, classDirectory in Compile) map { case (doc, d) ⇒ doc -> d },
     dependencyFilter := { d ⇒ false }
   ) settings (
       (

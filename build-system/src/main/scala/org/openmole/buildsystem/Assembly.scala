@@ -22,7 +22,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
   lazy val tarProject: Seq[Setting[_]] = Seq(
     Tar.name := "assemble.tar.gz",
     Tar.innerFolder := "",
-    Tar.tar <<= (assemble, streams, target, Tar.name, Tar.innerFolder) map tarImpl
+    Tar.tar <<= (Tar.folder, streams, target, Tar.name, Tar.innerFolder) map tarImpl
   )
 
   lazy val urlDownloadProject: Seq[Setting[_]] = Seq(
@@ -83,6 +83,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
           files.foreach(f ⇒ new File(path, f).setExecutable(true))
           path
       } dependsOn (copyResources),
+    Tar.folder <<= assemble,
     bundleProj := false,
     install := true,
     installRemote := true,

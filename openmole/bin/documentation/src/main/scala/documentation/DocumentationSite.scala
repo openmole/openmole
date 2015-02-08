@@ -18,28 +18,38 @@
 
 package documentation
 
-import javax.script.ScriptEngineManager
+import java.util.zip.GZIPInputStream
 import DocumentationPages._
+import com.ice.tar.TarInputStream
 import scala.sys.process.BasicIO
 import scalatags.Text.all._
 import ammonite.ops.Path
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.io.TarArchiver._
 
 object DocumentationSite extends App {
 
   val dest = new File(args(0))
+  dest.recursiveDelete
 
   for {
     r ← Resource.all
-  } {
-    val f = new File(dest, r)
-    f.getParentFile.mkdirs()
-    f.withOutputStream { os ⇒
-      val is = getClass.getClassLoader.getResourceAsStream(r)
-      try BasicIO.transferFully(is, os)
+  } r match {
+    case FileResource(name) ⇒
+      val f = new File(dest, name)
+      f.getParentFile.mkdirs
+      f.withOutputStream { os ⇒
+        val is = getClass.getClassLoader.getResourceAsStream(name)
+        try BasicIO.transferFully(is, os)
+        finally is.close
+      }
+    case ArchiveResource(name, dir) ⇒
+      val f = new File(dest, dir)
+      f.mkdirs
+      val is = new TarInputStream(new GZIPInputStream(getClass.getClassLoader.getResourceAsStream(name)))
+      try is.extractDirArchiveWithRelativePath(f)
       finally is.close
-    }
   }
 
   val site = new scalatex.site.Site {
