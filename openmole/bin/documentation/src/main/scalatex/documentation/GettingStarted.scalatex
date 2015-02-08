@@ -16,5 +16,4 @@
 @sect{Launch}
   Once installed you should launch openmole by executing the "openmole" file in the installation directory (it is called openmole.bat for windozers). It will bring up the OpenMOLE graphical interface. Instruction to launch the console interface (basically "openmole -c") are available in the @a("documentation", href := documentation.DocumentationPages.root.file).
 
-  @p To get help please contact the mailing list: users 'at' list.openmole.org (you should @a("subscribe", href := "http://list.openmole.org/") first).
 
