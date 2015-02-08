@@ -22,6 +22,7 @@
 
 #documentation-bottom-links {
   text-decoration: underline;
+  top: 10;
   left: 250;
 }
 
