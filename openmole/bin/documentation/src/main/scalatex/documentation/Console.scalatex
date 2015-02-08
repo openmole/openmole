@@ -1,4 +1,5 @@
 @import documentation.Objects._
+@import documentation.DocumentationPages
 
 @sect{Getting started}
   @sect{Launch the console}
@@ -18,27 +19,30 @@
     @p A good way to get a first glimpse at what OpenMOLE can do is to read this @a("research paper", href := "http://www.openmole.org/files/FGCS2013.pdf").
 
        @sect{Basic scala constructs}
-         You need only a very basic scala understanding to design OpenMOLE workflows.
+         You need only a very basic understanding of the scala language in order to design OpenMOLE workflows.
          @sect{Importing the content of a namespace}
            @hl.openmole("""import path.to.the.namespace._""", test = false)
-           @p It renders accessible all the entities contained in the namespace "path.to.the.namespace" by using their simple name. In the console core the use of OpenMOLE classes doesn't require import statements, however functionalities provided by plugins have to be imported.
+           @p It renders accessible all the entities contained in the namespace "path.to.the.namespace" by using their simple name. As you will see in OpenMOLE scripts, you will have to import namespaces in order to use OpenMOLE plugins.
          @sect{To declare variables}
            @hl.openmole("""
-           val a = 1 // It declares the variable a of type Int
-           val a = "Text" // It declares the variable a of type String
-           val a = if(condition) 5 else 10 // Depending of the condition the variable a of type Int is equal either to 5 or to 10""", test = false)
+           val a = 1 // declares a variable a of type Int
+           val b = "Text" // declares a variable a of type String
+           val c = if(condition) 5 else 10 // declare a variable c of type Int, the value of c depends on the condition""", test = false)
 
          @sect{To constructing objects}
            OpenMOLE takes advantage of the object oriented aspect of scala. It proposes a set of objects that you can build and assemble together to specify your workflow. In general an object is instantiated using the "new" keyword:
            @br @hl.openmole("""val f = new File("/tmp/file.txt")""")
-           @p In OpenMOLE we have choosen to use factories instead of directly constructing objects, that's why most of the OpenMOLE scripts doesn't contain the "new" keyword at all. The scala standard library uses the same pattern: @hl.openmole("""val l = File("/tmp/file.txt")""")
-           @p Under the hood, it calls a method that is in charge of building the list (the apply method of the so called companion object)")
+           @p In OpenMOLE we have choosen to use factories instead of directly constructing objects, that's why most of the OpenMOLE scripts doesn't contain the "new" keyword at all.
+           @p For instance: @hl.openmole("""val l = File("/tmp/file.txt")""")
+           @p Under the hood, it calls a method that is in charge of building the file (the apply method of the object File)")
          @sect{Named parameters}
-           Functions calls generally require that the parameters are provided in a predefined order. In scala you can get rid of this ordering constraint by using named parameters. In OpenMOLE you often find this pattern:
+           Functions calls generally require that the parameters are provided in a predefined order. In scala you can get rid of this ordering constraint by using named parameters. In OpenMOLE you will often find this pattern:
            @br @hl.openmole("val t = SomeClass(value1, value2, otherParam = otherValue)", test = false)
-           @p It means that value1 and value2 are taken as the first two parameter values and that the parameter named otherParam take the value otherValue, the other parameters take their default values.
+           @p It means that value1 and value2 are the values for the first two parameters and that the parameter named otherParam is set to the value otherValue, the other parameters are set to their default values.
          @sect{Going further}
-           What you have red here should be be sufficient in order to start with OpenMOLE. However, Scala is a very nice language with an extensive very well designed standard library. To get more insight on this language you should look at:
+           What you have red here should be be sufficient in order to start with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Task documentation", href := DocumentationPages.root.console.task.file).
+
+           @p Scala is a very nice language with an extensive very well designed standard library. To get more insight on this language you should look at:
            @ul
              @li{ @a("the scala website", href := "http://www.scala-lang.org/") }
              @li{ @a("the scala books", href := "http://www.scala-lang.org/node/959") }
