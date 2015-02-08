@@ -126,9 +126,23 @@ object DocumentationPages { index ⇒
       a(id := idLabel)(p.name, href := p.file)
     }
 
-    def pageLine(p: DocumentationPage): Frag =
-      if (p.children.isEmpty) li(menuEntry(p))
-      else li(menuEntry(p), ul(p.children.map(pageLine)))
+    def parents(p: DocumentationPage): List[DocumentationPage] =
+      p.parent match {
+        case None         ⇒ Nil
+        case Some(parent) ⇒ parent :: parents(parent)
+      }
+
+    val currentPageParents = parents(currentPage).toSet
+
+    def pageLine(p: DocumentationPage): Frag = {
+      def contracted = li(menuEntry(p))
+      def expanded = li(menuEntry(p), ul(p.children.map(pageLine)))
+
+      if (p.children.isEmpty) contracted
+      else if (p == currentPage) expanded
+      else if (currentPageParents.contains(p)) expanded
+      else contracted
+    }
 
     div(id := "documentation-menu")(
       menuEntry(root),
