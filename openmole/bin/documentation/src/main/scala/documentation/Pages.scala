@@ -112,7 +112,10 @@ object DocumentationPages { index ⇒
     Pages.decorate(
       table(
         td(verticalAlign := "top")(documentationMenu(root, p)),
-        td(verticalAlign := "top")(div(id := "documentation-content", p.content), bottomLinks(p))
+        td(verticalAlign := "top")(
+          div(id := "documentation-content", p.content),
+          if (p != root) bottomLinks(p) else ""
+        )
       )
     )
 
