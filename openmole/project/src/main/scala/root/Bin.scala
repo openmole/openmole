@@ -14,6 +14,7 @@ import sbtunidoc.Plugin._
 import UnidocKeys._
 
 import scala.util.matching.Regex
+import sbtbuildinfo.Plugin._
 
 object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   val dir = file("bin")
@@ -258,6 +259,23 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     resourcesAssemble <+= (Tar.tar in openmole, classDirectory in Compile) map { case (f, d) ⇒ f -> d },
     resourcesAssemble <+= (Tar.tar in daemon, classDirectory in Compile) map { case (f, d) ⇒ f -> d },
     dependencyFilter := { d ⇒ false }
-  )
+  ) settings (
+      (
+        buildInfoSettings ++
+        Seq(
+          sourceGenerators in Compile <+= buildInfo,
+          buildInfoKeys :=
+            Seq[BuildInfoKey](
+              name,
+              version,
+              scalaVersion,
+              sbtVersion,
+              BuildInfoKey.action("buildTime") {
+                System.currentTimeMillis
+              }),
+          buildInfoPackage := "buildinfo"
+        )
+      ): _*
+    )
 
 }
