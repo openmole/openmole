@@ -17,6 +17,9 @@
 
 package documentation
 
+import java.text.DateFormat
+import java.util.{ Locale, Calendar, Date }
+
 import org.openmole.misc.exception.UserBadDataError
 
 import scala.util.Failure
@@ -40,5 +43,13 @@ object Objects {
   def parameters(p: Parameter*) = {
     def toRow(p: Parameter) = li(p.name + ": " + p.`type` + ": " + p.description)
     ul(p.map(toRow))
+  }
+
+  def version = buildinfo.BuildInfo.version
+  def generationDate = {
+    val d = Calendar.getInstance()
+    d.setTimeInMillis(buildinfo.BuildInfo.buildTime)
+    val format = DateFormat.getDateInstance(DateFormat.LONG, new Locale("EN", "en"))
+    format.format(d.getTime)
   }
 }

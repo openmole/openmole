@@ -200,7 +200,7 @@ trait FileUtil {
       setAllPermissions(file)
 
       if (!file.isSymbolicLink) {
-        for (s ← file.listFiles) {
+        for (s ← Option(file.listFiles).getOrElse(Array.empty)) {
           setAllPermissions(s)
           s.isDirectory match {
             case true ⇒
@@ -210,6 +210,7 @@ trait FileUtil {
           }
         }
       }
+      else file.delete()
     }
 
     def isJar = Try {
@@ -453,7 +454,7 @@ trait FileUtil {
       finally f.mode = originalMode
     }
 
-    if (file.isDirectory)
+    if (file.isDirectory && !file.isSymbolicLink)
       for (f ← Option(file.listFiles).getOrElse(Array.empty)) authorizeLS(f) { recurse(f)(operation, stopPath) }
     operation(file)
   }

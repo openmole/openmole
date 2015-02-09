@@ -1,0 +1,21 @@
+
+@import documentation.Resource._
+@import documentation.Objects._
+
+@sect{Download}
+
+  The version @version of OpenMOLE is available @a("here", href := openmole.file). It has been released on @generationDate.
+
+  @p Optionally the daemon for desktop computing is available @a("here", href := openmoleDaemon.file).
+
+@sect{Install}
+  Just extract the archive, and you're done! OpenMOLE is installed.
+
+  @p OpenMOLE requires that Java version 7 or above is installed and available on your computer.
+
+  @p OpenMOLE is fully working under OpenJDK 7 and 8. This is the recommended option. If you use the closed-source Oracle Java virtual machine (which is probably the case if you are working on Mac or Windows), you have to install the Java Cryptography Extension (JCE) available at the bottom of this @a("page", href := "http://www.oracle.com/technetwork/java/javase/downloads/index.html") in order for OpenMOLE to be fully functional. JCE is an archive containing a bunch of files that you should replace in you jre/lib/security directory of your java install location. It enables strong cryptographic algorithms.
+
+@sect{Launch}
+  Once installed you should launch openmole by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up the OpenMOLE graphical interface. Instruction to launch the console interface (basically @i{openmole -c}) are available in the @a("documentation", href := documentation.DocumentationPages.root.console.file).
+
+

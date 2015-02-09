@@ -19,28 +19,71 @@
 package documentation
 
 import scala.reflect.ClassTag
+import scalatags.Text.all
 import scalatags.Text.all._
 import scala.reflect.runtime.universe._
 
+sealed trait Resource
+case class FileResource(file: String) extends Resource
+case class ArchiveResource(source: String, file: String) extends Resource
+
 object Resource {
-  def logo = "openmole.png"
-  def openmole = "openmole.tar.gz"
-  def all = Seq(logo, openmole)
+  def logo = FileResource("openmole.png")
+  def openmole = FileResource("openmole.tar.gz")
+  def openmoleDaemon = FileResource("openmole-daemon.tar.gz")
+  def api = ArchiveResource("openmole-api.tar.gz", "api")
+  def all = Seq[Resource](logo, openmole, openmoleDaemon, api)
 }
 
 object Pages {
 
+  def decorate(p: Page): Frag =
+    p match {
+      case p: DocumentationPage ⇒ DocumentationPages.decorate(p)
+      case _                    ⇒ decorate(p.content)
+    }
+
   def decorate(p: Frag): Frag =
-    table(
-      tr(img(id := "logo")(src := Resource.logo)),
-      p
+    Seq(
+      meta(charset := "UTF-8"),
+      div(id := "logo")(a(img(src := Resource.logo.file), href := index.file)),
+      div(id := "sections",
+        table(
+          td(a("Getting Started", id := "section", href := gettingStarted.file)),
+          td(a("Documentation", id := "section", href := DocumentationPages.root.file)),
+          td(a("Who are we?", id := "section", href := whoAreWe.file))
+        )
+      ),
+      div(id := "content")(p)
     )
 
+  def index = Page("index", Index())
+  def gettingStarted = Page("getting_started", GettingStarted())
+  def whoAreWe = Page("who_are_we", WhoAreWe())
+
+  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe)
+
+}
+
+object Page {
+  def apply(_name: String, _content: Frag) =
+    new Page {
+      override def name: String = _name
+      override def content: all.Frag = _content
+    }
+}
+
+trait Page {
+  def content: Frag
+  def name: String
+
+  def location = name
+  def file = location + ".html"
 }
 
 case class Parent[T](parent: Option[T])
 
-abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(None)) {
+abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(None)) extends Page {
   def parent = p.parent
   implicit def thisIsParent = Parent[DocumentationPage](Some(this))
 
@@ -50,13 +93,11 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
 
   def apply() = content
 
-  def location: String =
+  override def location: String =
     parent match {
       case None    ⇒ name
       case Some(p) ⇒ p.location + "_" + name
     }
-
-  def file = location + ".html"
 
   def allPages: Seq[DocumentationPage] = {
     def pages(p: DocumentationPage): List[DocumentationPage] =
@@ -77,9 +118,12 @@ object DocumentationPages { index ⇒
 
   def decorate(p: DocumentationPage): Frag =
     Pages.decorate(
-      table(
-        td(verticalAlign := "top")(documentationMenu(root, p)),
-        td(verticalAlign := "top")(div(id := "documentation-content")(p.content), bottomLinks(p))
+      Seq(
+        documentationMenu(root, p),
+        div(
+          div(id := "documentation-content", p.content),
+          if (p != root) bottomLinks(p) else ""
+        )
       )
     )
 
@@ -90,9 +134,23 @@ object DocumentationPages { index ⇒
       a(id := idLabel)(p.name, href := p.file)
     }
 
-    def pageLine(p: DocumentationPage): Frag =
-      if (p.children.isEmpty) li(menuEntry(p))
-      else li(menuEntry(p), ul(p.children.map(pageLine)))
+    def parents(p: DocumentationPage): List[DocumentationPage] =
+      p.parent match {
+        case None         ⇒ Nil
+        case Some(parent) ⇒ parent :: parents(parent)
+      }
+
+    val currentPageParents = parents(currentPage).toSet
+
+    def pageLine(p: DocumentationPage): Frag = {
+      def contracted = li(menuEntry(p))
+      def expanded = li(menuEntry(p), ul(p.children.map(pageLine)))
+
+      if (p.children.isEmpty) contracted
+      else if (p == currentPage) expanded
+      else if (currentPageParents.contains(p)) expanded
+      else contracted
+    }
 
     div(id := "documentation-menu")(
       menuEntry(root),

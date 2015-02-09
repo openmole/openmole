@@ -76,7 +76,9 @@ abstract class SystemExecTask(
         case None    ⇒ tmpDir
         case Some(d) ⇒ new File(tmpDir, d)
       }
-    val links = prepareInputFiles(context, tmpDir, directory.getOrElse(""))
+
+    def workDirPath = directory.getOrElse("")
+    prepareInputFiles(context, tmpDir, workDirPath)
 
     val outBuilder = new StringBuilder
     val errBuilder = new StringBuilder
@@ -130,7 +132,7 @@ abstract class SystemExecTask(
       }
 
     val retCode = execAll(osCommandLines.toList)
-    val retContext: Context = fetchOutputFiles(context, workDir, links)
+    val retContext: Context = fetchOutputFiles(context, workDir, workDirPath)
 
     retContext ++
       List(

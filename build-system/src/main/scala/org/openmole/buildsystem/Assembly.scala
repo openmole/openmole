@@ -22,7 +22,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
   lazy val tarProject: Seq[Setting[_]] = Seq(
     Tar.name := "assemble.tar.gz",
     Tar.innerFolder := "",
-    Tar.tar <<= (assemble, streams, target, Tar.name, Tar.innerFolder) map tarImpl
+    Tar.tar <<= (Tar.folder, streams, target, Tar.name, Tar.innerFolder) map tarImpl
   )
 
   lazy val urlDownloadProject: Seq[Setting[_]] = Seq(
@@ -32,20 +32,19 @@ trait Assembly { self: BuildSystemDefaults ⇒
     }
   )
 
-  private def copyFileTask(from: File, destinationDir: File, streams: TaskStreams) = {
-    streams.log.info(s"Copy file $from to $destinationDir ")
-    val to =
+  private def copyFileTask(from: File, destinationDir: File, streams: TaskStreams, name: Option[String] = None) = {
+    val to: File = if (from.isDirectory) destinationDir else destinationDir / name.getOrElse(from.getName)
+    if (!to.exists() || from.lastModified() > to.lastModified) {
+      streams.log.info(s"Copy file $from to $destinationDir ")
       if (from.isDirectory) {
-        destinationDir.getParentFile.mkdirs()
-        IO.copyDirectory(from, destinationDir, preserveLastModified = true)
-        destinationDir
+        to.getParentFile.mkdirs
+        IO.copyDirectory(from, to, preserveLastModified = true)
       }
       else {
-        destinationDir.mkdirs
-        val to = destinationDir / from.getName
+        to.getParentFile.mkdirs
         IO.copyFile(from, to, preserveLastModified = true)
-        to
       }
+    }
     from -> to
   }
 
@@ -69,11 +68,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
       }
     }.map { srcPath ⇒
       val name = rename(srcPath, depMap)
-      val destPath = out / name
-      streams.log.info(s"Copy dependency $srcPath to $destPath")
-      destPath.getParentFile.mkdirs
-      IO.copyFile(srcPath, destPath, preserveLastModified = true)
-      srcPath -> destPath
+      copyFileTask(srcPath, out, streams, name = Some(name))
     }
   }
 
@@ -88,6 +83,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
           files.foreach(f ⇒ new File(path, f).setExecutable(true))
           path
       } dependsOn (copyResources),
+    Tar.folder <<= assemble,
     bundleProj := false,
     install := true,
     installRemote := true,
