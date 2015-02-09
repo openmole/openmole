@@ -17,14 +17,13 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.scalajs.dom.{ HTMLDivElement, HTMLFormElement, HTMLElement }
+import org.scalajs.dom.raw.{ HTMLFormElement, HTMLElement }
 import org.scalajs.jquery.jQuery
 
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import org.scalajs.dom
+import org.scalajs.dom.raw
 import org.openmole.gui.misc.js.JsRxTags._
-import fr.iscpif.scaladget.mapping.Select2Utils._
 import rx._
 
 class ModalDialog(ID: String, val header: TypedTag[HTMLFormElement], val body: TypedTag[HTMLElement], val footer: TypedTag[HTMLElement]) {
@@ -32,12 +31,8 @@ class ModalDialog(ID: String, val header: TypedTag[HTMLFormElement], val body: T
   val content =
 
     div(`class` := "modal-content",
-      // Rx {
-      div(`class` := "modal-header")(header) //  }
-      ,
-      // Rx {
-      div(`class` := "modal-body", body) //      }
-      ,
+      div(`class` := "modal-header")(header),
+      div(`class` := "modal-body", body),
       div(`class` := "modal-footer")(footer)
     )
 
@@ -46,13 +41,6 @@ class ModalDialog(ID: String, val header: TypedTag[HTMLFormElement], val body: T
       content
     )
   )
-
-  /*jQuery(jQid).on("hide.bs.modal", { () ⇒
-    {
-      println("in hide.bs.modal reove")
-      jQuery(jQid).remove()
-    }
-  })*/
 
   def jQid = "#" + ID
 

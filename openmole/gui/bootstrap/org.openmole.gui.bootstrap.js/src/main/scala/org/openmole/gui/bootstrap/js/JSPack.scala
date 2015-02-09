@@ -20,53 +20,52 @@ package org.openmole.gui.bootstrap.js
 import org.openmole.misc.osgi.Activator
 import org.openmole.misc.tools.io.FileUtil
 import org.openmole.misc.tools.io.FileUtil._
-import scala.scalajs.tools.io._
-import scala.scalajs.tools.logging._
-import scala.scalajs.tools.classpath._
-import scala.scalajs.tools.classpath.builder._
-import scala.scalajs.tools.optimizer._
-import scala.scalajs.ir.Infos._
+import org.scalajs.core.tools.io._
+import org.scalajs.core.tools.logging._
+import org.scalajs.core.tools.classpath._
+import org.scalajs.core.tools.classpath.builder._
+import org.scalajs.core.tools.optimizer._
 import org.osgi.framework.Bundle
 import scala.collection.JavaConverters._
 import java.io.{ FileOutputStream, File }
 
 object JSPack {
 
-  // val OPTIMIZED = "plugins-opt.js"
   val JS_FILE = "plugins.js"
 
   def apply(src: File, target: File, optimized: Boolean = true) = {
 
     //FIXME: get the jar from bundles
-    val scalajsLib = copyJar("scalajs-library_2.11")
+    val scalajsLib = copyJar("scalajs-library_2.11-0.6.0")
 
-    val partialClasspath = PartialClasspathBuilder.buildIR(collection.immutable.Seq(scalajsLib, src))
+    val semantics = org.scalajs.core.tools.sem.Semantics.Defaults
+
+    val partialClasspath = PartialClasspathBuilder.build(collection.immutable.Seq(scalajsLib, src))
 
     val completeClasspath = partialClasspath.resolve()
 
-    val optimizer = new ScalaJSOptimizer
+    val optimizer = new ScalaJSOptimizer(semantics)
 
     val logger = new ScalaConsoleLogger
 
-    val out =
-      if (optimized) WritableMemVirtualJSFile("out.js")
-      else WritableFileVirtualJSFile(new java.io.File(target, JS_FILE))
-
-    val optimizedClasspath = optimizer.optimizeCP(
-      ScalaJSOptimizer.Inputs(completeClasspath),
-      ScalaJSOptimizer.OutputConfig(out, checkIR = false /*, wantSourceMap = !optimized*/ ),
-      logger
-    )
-
+    val out = WritableFileVirtualJSFile(new java.io.File(target, JS_FILE))
     if (optimized) {
-      val fullOptOut = WritableFileVirtualJSFile(new java.io.File(target, JS_FILE))
+      val sems = semantics.optimized
 
-      val fullOptimizer = new ScalaJSClosureOptimizer
-      val fullyOptimizedCP = fullOptimizer.optimizeCP(
-        ScalaJSClosureOptimizer.Inputs(optimizedClasspath),
-        ScalaJSClosureOptimizer.OutputConfig(fullOptOut),
+      new ScalaJSClosureOptimizer(sems).optimizeCP(
+        new ScalaJSOptimizer(sems),
+        completeClasspath,
+        ScalaJSClosureOptimizer.Config(out),
         logger
       )
+    }
+    else {
+      optimizer.optimizeCP(
+        completeClasspath,
+        ScalaJSOptimizer.Config(out, checkIR = false /*, wantSourceMap = !optimized*/ ),
+        logger
+      )
+
     }
   }
 

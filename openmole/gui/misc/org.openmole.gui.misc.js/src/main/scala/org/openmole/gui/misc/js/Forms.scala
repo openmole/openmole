@@ -17,10 +17,8 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.mapping.{ Select2QueryOptions, Select2Options }
-import fr.iscpif.scaladget.mapping.Select2Utils._
-import org.scalajs.dom
-import org.scalajs.dom._
+import org.scalajs.dom.raw
+import org.scalajs.dom.raw._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js
 import scalatags.JsDom.TypedTag
@@ -41,7 +39,7 @@ object Forms {
 
   implicit def formTagToNode(tt: HtmlTag): org.scalajs.dom.Node = tt.render
 
-  implicit class BootstrapTypedTag[+Output <: dom.Element](t: TypedTag[Output]) {
+  implicit class BootstrapTypedTag[+Output <: raw.Element](t: TypedTag[Output]) {
     def +++(m: Seq[Modifier]) = t.copy(modifiers = t.modifiers :+ m.toSeq)
   }
 
@@ -106,7 +104,7 @@ object Forms {
   //Select (to be used with button class aggregators )
   def select(id: String, contents: Seq[(String, String)], key: ClassKeyAggregator) = buttonGroup()(
     a(
-      `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", href := "#"
+      `class` := "btn " + key.key + " dropdown-toggle", data("toggle") := "dropdown", href := "#"
     )("Select", span("caret")),
     ul(`class` := "dropdown-menu")(
       for (c ← contents) yield {
@@ -118,7 +116,7 @@ object Forms {
   )
 
   def glyph(key: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
-    span("glyphicon " + key.key)("aria-hidden".attr := "true")
+    span("glyphicon " + key.key)(aria.hidden := "true")
 
   val glyph_edit = "glyphicon-pencil"
   val glyph_trash = "glyphicon-trash"

@@ -20,14 +20,13 @@ package org.openmole.gui.client.service
 import autowire._
 import upickle._
 import org.scalajs.dom
-import org.scalajs.dom.extensions.Ajax
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import scala.concurrent.Future
 
 object Post extends autowire.Client[String, upickle.Reader, upickle.Writer] {
   override def doCall(req: Request): Future[String] = {
     val url = req.path.mkString("/")
-    dom.extensions.Ajax.post(
+    dom.ext.Ajax.post(
       url = "http://localhost:8080/" + url,
       data = upickle.write(req.args)
     ).map {

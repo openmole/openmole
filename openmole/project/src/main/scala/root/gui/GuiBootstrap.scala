@@ -7,7 +7,6 @@ import root.{ GuiDefaults, base }
 import root.Libraries._
 import sbt.Keys._
 import com.typesafe.sbt.osgi.OsgiKeys._
-import scala.scalajs.sbtplugin.ScalaJSPlugin._
 
 object Bootstrap extends GuiDefaults {
   override val dir = super.dir / "bootstrap"
