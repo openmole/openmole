@@ -21,7 +21,6 @@ import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import scalatags.JsDom.all._
 import scala.scalajs.js.annotation.JSExport
-import org.openmole.gui.ext.dataui.PrototypeDataUI
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow

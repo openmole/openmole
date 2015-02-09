@@ -1,6 +1,6 @@
 package org.openmole.gui.ext.dataui
 
-import org.scalajs.dom.HTMLElement
+import org.scalajs.dom.raw.HTMLElement
 
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._

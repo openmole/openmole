@@ -46,12 +46,12 @@ object GUIClient {
     ClientService += ("org.openmole.gui.ext.data.FilePrototypeDataUI", PrototypeFactoryUI.fileFactory)
 
     val db = DataBagUI(ClientService.taskFactories(1).dataUI)
-    db.name() = "premierr"
+    db.name() = "premier"
     ClientService += db
     db.name() = "first"
     val db2 = DataBagUI(ClientService.taskFactories(1).dataUI)
     ClientService += db2
-    db2.name() = "yop"
+    db2.name() = "yopp"
     val proto = DataBagUI(ClientService.prototypeFactories(0).dataUI)
     proto.name() = "proto1"
     ClientService += proto
@@ -61,7 +61,7 @@ object GUIClient {
     topdiv.appendChild(
       nav("mainMav",
         Seq(
-          (navItem("settings", "Settings").render("data-toggle".attr := "modal", "data-target".attr := "#taskPanelID"), "task", () ⇒ {}),
+          (navItem("settings", "Settings").render(data("toggle") := "modal", data("target") := "#taskPanelID"), "task", () ⇒ {}),
           (navItem("executions", "Executions").render, "env", () ⇒ {
             println("Not yet")
           })

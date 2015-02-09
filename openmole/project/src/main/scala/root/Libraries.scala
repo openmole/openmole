@@ -6,7 +6,8 @@ import com.typesafe.sbt.osgi.OsgiKeys
 import OsgiKeys._
 import root.libraries._
 import org.openmole.buildsystem.OMKeys._
-import scala.scalajs.sbtplugin.ScalaJSPlugin._
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 /**
  * Created with IntelliJ IDEA.
@@ -71,7 +72,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val groovy = "org.openmole" %% "org-codehaus-groovy" % "2.3.3"
 
-  lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.4"
+  lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.5"
 
   lazy val jodaTime = "org.openmole" %% "org-joda-time" % "1.6"
 
@@ -91,16 +92,12 @@ object Libraries extends Defaults(Apache) {
 
   lazy val jawn = "org.openmole" %% "jawn" % "0.6.0"
 
-  // lazy val scalaTagsVersion = "0.4.3-RC1"
-  lazy val scalaTagsVersion = "0.4.3-SNAPSHOT"
-  lazy val scalaJSDomVersion = "0.6.1"
-  lazy val scalaJQueryVersion = "0.6"
-  // lazy val rxVersion = "0.2.7-M3"
-  lazy val rxVersion = "0.2.6"
-  lazy val scalaUpickleVersion = "0.2.5"
-  //lazy val scalaUpickleVersion = "0.2.6-RC1"
-  //lazy val scalaAutowireVersion = "0.2.4-RC1"
-  lazy val scalaAutowireVersion = "0.2.3"
+  lazy val scalaTagsVersion = "0.4.5"
+  lazy val scalaJSDomVersion = "0.8.0"
+  lazy val scalaJQueryVersion = "0.8.0"
+  lazy val rxVersion = "0.2.7"
+  lazy val scalaUpickleVersion = "0.2.6"
+  lazy val scalaAutowireVersion = "0.2.4"
 
   lazy val upickle = "org.openmole" %% "upickle" % scalaUpickleVersion
 
@@ -110,7 +107,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val rx = "org.openmole" %% "rx" % rxVersion
 
-  lazy val scalajsVersion = "0.5.6"
+  lazy val scalajsVersion = "0.6.0"
   lazy val scalajsTools = "org.openmole" %% "scalajs-tools" % scalajsVersion
   lazy val scalajsLibrary = "org.openmole" %% "scalajs-library" % scalajsVersion
   lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % scalaJSDomVersion
@@ -120,7 +117,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val monocle = "org.openmole" %% "monocle" % "0.5.0"
 
-  lazy val scaladget = "org.openmole" %% "scaladget" % "0.3.0-SNAPSHOT"
+  lazy val scaladget = "org.openmole" %% "scaladget" % "0.3.0"
 
   lazy val opencsv = "org.openmole" %% "au-com-bytecode-opencsv" % "2.0"
 

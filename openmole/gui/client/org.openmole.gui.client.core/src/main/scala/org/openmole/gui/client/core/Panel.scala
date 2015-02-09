@@ -134,7 +134,6 @@ class GenericPanel(uuid: String,
     val factory = filter().factories.head
     val dbUI = DataBagUI(factory.dataUI)
     resetIODataUI(dbUI, factory)
-    //  dbUI.name() = inputFilter.value
     dbUI.name() = inputFilter.tag.value
     dimInput.value = "0"
     ClientService += dbUI
@@ -177,7 +176,7 @@ class GenericPanel(uuid: String,
     save
   }).render
 
-  val saveButton = bs.button("Close", btn_test)("data-dismiss".attr := "modal", onclick := { () ⇒
+  val saveButton = bs.button("Close", btn_test)(data("dismiss") := "modal", onclick := { () ⇒
     save
   })
 
