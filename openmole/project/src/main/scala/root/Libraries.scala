@@ -152,5 +152,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val equinoxRuntime = "org.eclipse.core" % "org.eclipse.core.runtime" % "3.8.0.v20120912-155025"
 
+  lazy val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
+
   //override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
 }

@@ -21,22 +21,22 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.data._
 
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
+import scala.util.Random
+
 class GroupDomainSpec extends FlatSpec with Matchers {
 
   "GroupDomain" should "change the values of a domain to an iterable of array" in {
+    implicit val rng = new Random(42)
+
     val r1 = (1 to 10)
 
     val d1 = new Domain[Int] with Discrete[Int] {
-      override def iterator(context: Context) = r1.iterator
+      override def iterator(context: Context)(implicit rng: Random) = r1.iterator
     }
 
-    val md = new GroupDomain(d1, 3).iterator(Context.empty)
+    val md = GroupDomain(d1, 3).iterator(Context.empty)
 
     md.toList.size should equal(4)
   }

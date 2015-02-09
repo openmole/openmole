@@ -17,12 +17,9 @@
 
 package org.openmole.misc.eventdispatcher
 
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+import org.scalatest.junit._
 
-@RunWith(classOf[JUnitRunner])
 class SortedListnerSpec extends FlatSpec with Matchers {
   "Sorted listner" should "sort listner by priority" in {
     val sortedListners = new SortedListeners[String]

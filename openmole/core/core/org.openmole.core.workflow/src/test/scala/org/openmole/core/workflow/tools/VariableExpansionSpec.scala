@@ -17,9 +17,6 @@
 
 package org.openmole.core.workflow.tools
 
-import org.openmole.core.workflow.tools.VariableExpansion
-import org.scalatest.FlatSpec
-import org.scalatest.junit.JUnitRunner
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
@@ -27,9 +24,7 @@ import org.scalatest._
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
 class VariableExpansionSpec extends FlatSpec with Matchers {
 
   "A expandData" should "expand all the ${} top level sequence from an inputStream and return a parsed OuputStream" in {

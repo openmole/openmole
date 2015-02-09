@@ -18,13 +18,10 @@
 package org.openmole.core.workflow.data
 
 import org.openmole.core.workflow.data._
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+import org.scalatest.junit._
 import scala.collection.mutable.ListBuffer
 
-@RunWith(classOf[JUnitRunner])
 class PrototypeSpec extends FlatSpec with Matchers {
   "ToArray of dim 0" should "return the prototype itself" in {
     val a = Prototype[Int]("a")

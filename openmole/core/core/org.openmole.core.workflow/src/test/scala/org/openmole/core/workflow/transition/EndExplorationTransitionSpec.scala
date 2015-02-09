@@ -24,13 +24,9 @@ import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
 
-@RunWith(classOf[JUnitRunner])
 class EndExplorationTransitionSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
@@ -43,9 +39,9 @@ class EndExplorationTransitionSpec extends FlatSpec with Matchers {
 
     val sampling = new ExplicitSampling(i, data)
 
-    val exc = new Capsule(ExplorationTask("Exploration", sampling))
+    val exc = new Capsule(ExplorationTask(sampling))
 
-    val emptyT = EmptyTask("Empty")
+    val emptyT = EmptyTask()
     emptyT addInput i
     emptyT addOutput i
 

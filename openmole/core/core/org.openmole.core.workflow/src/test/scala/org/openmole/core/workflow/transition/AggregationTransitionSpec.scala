@@ -26,13 +26,9 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
 
-@RunWith(classOf[JUnitRunner])
 class AggregationTransitionSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
@@ -45,13 +41,13 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val sampling = new ExplicitSampling(i, data)
 
-    val exc = new Capsule(ExplorationTask("Exploration", sampling))
+    val exc = Capsule(ExplorationTask(sampling))
 
-    val emptyT = EmptyTask("Empty")
+    val emptyT = EmptyTask()
     emptyT addInput i
     emptyT addOutput i
 
-    val emptyC = new Capsule(emptyT)
+    val emptyC = Capsule(emptyT)
 
     val testT = new TestTask {
       val name = "Test"
@@ -82,13 +78,13 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val sampling = new ExplicitSampling(i, data)
 
-    val exc = new Capsule(ExplorationTask("Exploration", sampling))
+    val exc = Capsule(ExplorationTask(sampling))
 
-    val emptyT = EmptyTask("Empty")
+    val emptyT = EmptyTask()
     emptyT addInput i
     emptyT addOutput i
 
-    val emptyC = new Capsule(emptyT)
+    val emptyC = Capsule(emptyT)
 
     val testT = new TestTask {
       val name = "Test"
@@ -103,7 +99,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
       }
     }
 
-    val testC = new Capsule(testT)
+    val testC = Capsule(testT)
 
     val ex = exc -< emptyC >- testC
 
@@ -119,13 +115,13 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val sampling = new ExplicitSampling(i, data)
 
-    val exc = new Capsule(ExplorationTask("Exploration", sampling))
+    val exc = new Capsule(ExplorationTask(sampling))
 
-    val emptyT = EmptyTask("Empty")
+    val emptyT = EmptyTask()
     emptyT addInput i
     emptyT addOutput i
 
-    val emptyC = new Capsule(emptyT)
+    val emptyC = Capsule(emptyT)
 
     val testT = new TestTask {
       val name = "Test"
@@ -138,7 +134,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
       }
     }
 
-    val testC = new Capsule(testT)
+    val testC = Capsule(testT)
 
     val mole = exc -< emptyC >- testC toMole
 

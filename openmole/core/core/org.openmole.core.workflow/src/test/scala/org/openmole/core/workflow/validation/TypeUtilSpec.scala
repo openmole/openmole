@@ -26,13 +26,8 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.validation.TypeUtil
-import org.scalatest.FlatSpec
-import org.scalatest.junit.JUnitRunner
 import org.scalatest._
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
 class TypeUtilSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
@@ -40,10 +35,10 @@ class TypeUtilSpec extends FlatSpec with Matchers {
   "To array finder" should "not detect a toArray case" in {
     val p = Prototype[Int]("p")
 
-    val t1 = EmptyTask("T1")
+    val t1 = EmptyTask()
     t1 addOutput p
 
-    val t2 = EmptyTask("T2")
+    val t2 = EmptyTask()
     t2 addInput p
 
     val t1c = Capsule(t1)
@@ -61,17 +56,17 @@ class TypeUtilSpec extends FlatSpec with Matchers {
   "To array finder" should "detect a toArray case" in {
     val p = Prototype[Int]("p")
 
-    val t1 = EmptyTask("T1")
+    val t1 = EmptyTask()
     t1 addOutput p
 
-    val t2 = EmptyTask("T2")
+    val t2 = EmptyTask()
     t2 addOutput p
 
-    val t3 = EmptyTask("T3")
+    val t3 = EmptyTask()
     t3 addInput p
 
-    val t1c = new Capsule(t1)
-    val t2c = new Capsule(t2)
+    val t1c = Capsule(t1)
+    val t2c = Capsule(t2)
     val t3c = Slot(t3)
 
     val mole = (t1c -- t3c) + (t2c -- t3c)

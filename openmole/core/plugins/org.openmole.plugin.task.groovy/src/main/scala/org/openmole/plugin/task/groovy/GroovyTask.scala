@@ -55,10 +55,11 @@ object GroovyTask {
 
 }
 
-sealed abstract class GroovyTask(val source: String) extends JVMLanguageTask with ContextToGroovyCode {
+sealed abstract class GroovyTask(val userSource: String) extends JVMLanguageTask with ContextToGroovyCode {
 
   def processCode(context: Context) = execute(context, outputs)
 
-  private def codeWithImports = imports.map("import " + _).mkString("\n") + "\n" + source
+  override def source =
+    imports.map("import " + _).mkString("\n") + "\n" + userSource
 
 }

@@ -23,12 +23,8 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.EmptyTask
 import org.openmole.core.workflow.transition._
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
 class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
   "The strainer capsule" should "let the data pass through" in {
@@ -40,7 +36,7 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
       override def process(context: Context) = context + (p -> "Test")
     }
 
-    val strainer = EmptyTask("Strainer")
+    val strainer = EmptyTask()
 
     val t2 = new TestTask {
       val name = "Test read"
@@ -51,9 +47,9 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
       }
     }
 
-    val t1c = new Capsule(t1)
-    val strainerC = new StrainerCapsule(strainer)
-    val t2c = new Capsule(t2)
+    val t1c = Capsule(t1)
+    val strainerC = StrainerCapsule(strainer)
+    val t2c = Capsule(t2)
 
     val ex = t1c -- strainerC -- t2c
     ex.start.waitUntilEnded
@@ -62,7 +58,7 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
   "The strainer capsule" should "let the data pass through even if linked with a data channel to the root" in {
     val p = Prototype[String]("p")
 
-    val root = new StrainerCapsule(EmptyTask("root"))
+    val root = StrainerCapsule(EmptyTask())
 
     val t1 = new TestTask {
       val name = "Test write"
@@ -70,10 +66,10 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
       override def process(context: Context) = context + (p -> "Test")
     }
 
-    val tNone = new StrainerCapsule(EmptyTask("None"))
-    val tNone2 = new StrainerCapsule(EmptyTask("None"))
+    val tNone = StrainerCapsule(EmptyTask())
+    val tNone2 = StrainerCapsule(EmptyTask())
 
-    val strainer = EmptyTask("Strainer")
+    val strainer = EmptyTask()
 
     val t2 = new TestTask {
       val name = "Test read"
@@ -84,7 +80,7 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
       }
     }
 
-    val strainerC = Slot(new StrainerCapsule(strainer))
+    val strainerC = Slot(StrainerCapsule(strainer))
 
     val ex = (root -- tNone -- (t1, tNone2) -- strainerC -- t2) + (root oo strainerC)
     ex.start.waitUntilEnded

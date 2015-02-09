@@ -29,9 +29,7 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
       scalacOptions += "-target:jvm-1.7",
       publishArtifact in (packageDoc in install) := false,
       publishArtifact in (packageSrc in install) := false,
-      scalatestVersion in Global := "2.1.5",
-      junitVersion in Global := "4.11",
       resolvers += Resolver.defaultLocal,
-      resolvers += Resolver.sonatypeRepo("snapshots") // for scalatra 2.3
+      resolvers += Resolver.sonatypeRepo("snapshots")
     )
 }

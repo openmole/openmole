@@ -22,17 +22,16 @@ import java.io.File
 import java.io.FileReader
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import org.openmole.misc.tools.io.FileUtil._
 
-@RunWith(classOf[JUnitRunner])
+import scala.util.Random
+
 class CSVSamplingSpec extends FlatSpec with Matchers {
 
   "CSVSampling" should "detect the correct mapping between csv header defined column" in {
+    implicit val rng = new Random(42)
+
     val p1 = Prototype[String]("col1")
     val p2 = Prototype[Int]("col2")
 

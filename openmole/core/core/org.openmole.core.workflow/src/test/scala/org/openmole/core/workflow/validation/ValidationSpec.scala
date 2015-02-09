@@ -23,20 +23,16 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.validation.{Validation, DataflowProblem, TopologyProblem}
+import org.openmole.core.workflow.validation._
 import DataflowProblem._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 
-import org.scalatest.FlatSpec
-import org.scalatest.junit.JUnitRunner
 import org.scalatest._
-import org.junit.runner.RunWith
 import TopologyProblem.DataChannelNegativeLevelProblem
 
-@RunWith(classOf[JUnitRunner])
 class ValidationSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
@@ -44,8 +40,8 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "detect a missing input error" in {
     val p = Prototype[String]("t")
 
-    val t1 = EmptyTask("t1")
-    val t2 = EmptyTask("t2")
+    val t1 = EmptyTask()
+    val t2 = EmptyTask()
     t2 addInput p
 
     val c1 = Capsule(t1)
@@ -63,10 +59,10 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "not detect a missing input error" in {
     val p = Prototype[String]("t")
 
-    val t1 = EmptyTask("t1")
-    val t2 = EmptyTask("t2")
+    val t1 = EmptyTask()
+    val t2 = EmptyTask()
     t2 addInput p
-    t2 setDefault (p -> "Test")
+    t2 setDefault (p, "Test")
 
     val c1 = Capsule(t1)
     val c2 = Capsule(t2)
@@ -80,10 +76,10 @@ class ValidationSpec extends FlatSpec with Matchers {
     val pInt = Prototype[Int]("t")
     val pString = Prototype[String]("t")
 
-    val t1 = EmptyTask("t1")
+    val t1 = EmptyTask()
     t1 addOutput pInt
 
-    val t2 = EmptyTask("t2")
+    val t2 = EmptyTask()
     t2 addInput pString
 
     val c1 = Capsule(t1)
@@ -103,8 +99,8 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "detect a topology error" in {
     val p = Prototype[String]("t")
 
-    val t1 = EmptyTask("t1")
-    val t2 = EmptyTask("t2")
+    val t1 = EmptyTask()
+    val t2 = EmptyTask()
 
     val c1 = Slot(t1)
     val c2 = Capsule(t2)
@@ -116,8 +112,8 @@ class ValidationSpec extends FlatSpec with Matchers {
   }
 
   "Validation" should "detect a duplicated transition" in {
-    val t1 = EmptyTask("t1")
-    val t2 = EmptyTask("t2")
+    val t1 = EmptyTask()
+    val t2 = EmptyTask()
 
     val c1 = Capsule(t1)
     val c2 = Slot(t2)
@@ -138,8 +134,8 @@ class ValidationSpec extends FlatSpec with Matchers {
         override def process(context: Context) = Context(Variable(p, "test"))
       }
 
-    val t2 = EmptyTask("t2")
-    val t3 = EmptyTask("t2")
+    val t2 = EmptyTask()
+    val t3 = EmptyTask()
     t3 addInput p
 
     val c1 = Capsule(t1)
@@ -159,15 +155,15 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "detect a missing input in the submole" in {
     val p = Prototype[String]("t")
 
-    val t1 = EmptyTask("t1")
+    val t1 = EmptyTask()
 
-    val t2 = EmptyTask("t2")
+    val t2 = EmptyTask()
     t2 addInput p
 
     val c1 = Capsule(t1)
     val c2 = Capsule(t2)
 
-    val mt = MoleTask("mt", c1 -- c2)
+    val mt = MoleTask(c1 -- c2)
 
     val errors = Validation(Mole(mt))
 
@@ -190,11 +186,11 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val c1 = Capsule(t1)
 
-    val t2 = EmptyTask("t2")
+    val t2 = EmptyTask()
     t2 addInput p
     val c2 = Capsule(t2)
 
-    val mt = MoleTask("mt", c2)
+    val mt = MoleTask(c2)
 
     val mtC = Capsule(mt)
 
@@ -216,15 +212,15 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val c1 = Capsule(t1)
 
-    val t2 = EmptyTask("t2")
+    val t2 = EmptyTask()
     t2 addInput p
     val c2 = Capsule(t2)
 
-    val t3 = EmptyTask("t3")
+    val t3 = EmptyTask()
     t3 addInput p
     val c3 = Capsule(t3)
 
-    val mt = MoleTask("mt", c2 -- c3)
+    val mt = MoleTask(c2 -- c3)
     mt addImplicit p
 
     val mtC = Capsule(mt)
@@ -239,7 +235,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val pInt = Prototype[Int]("t")
     val pString = Prototype[String]("t")
 
-    val t1 = EmptyTask("t1")
+    val t1 = EmptyTask()
     t1 addOutput pInt
     t1 addOutput pString
 
@@ -255,7 +251,7 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "detect a missing input error for the misc" in {
     val i = Prototype[Int]("t")
 
-    val t1 = EmptyTask("t1")
+    val t1 = EmptyTask()
 
     val c1 = Capsule(t1)
 
@@ -263,7 +259,7 @@ class ValidationSpec extends FlatSpec with Matchers {
       addInput(i)
 
       def toHook = new Hook with Built {
-        def perform(ctx: Context, executionContext: ExecutionContext) = ctx
+        def process(ctx: Context, executionContext: ExecutionContext) = ctx
       }
     }
 
@@ -278,7 +274,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val iInt = Prototype[Int]("i")
     val iString = Prototype[String]("i")
 
-    val t1 = EmptyTask("t1")
+    val t1 = EmptyTask()
     t1 addOutput iString
 
     val c1 = Capsule(t1)
@@ -287,7 +283,7 @@ class ValidationSpec extends FlatSpec with Matchers {
       addInput(iInt)
 
       def toHook = new Hook with Built {
-        def perform(ctx: Context, executionContext: ExecutionContext) = ctx
+        def process(ctx: Context, executionContext: ExecutionContext) = ctx
       }
     }
 
@@ -301,7 +297,7 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "take into account outputs produced by a source" in {
     val t = Prototype[Int]("t")
 
-    val t1 = EmptyTask("t1")
+    val t1 = EmptyTask()
     t1 addInput t
 
     val c1 = Capsule(t1)
@@ -323,7 +319,7 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "detect a missing input for a source" in {
     val t = Prototype[Int]("t")
 
-    val t1 = EmptyTask("t1")
+    val t1 = EmptyTask()
 
     val c1 = Capsule(t1)
 
@@ -347,13 +343,13 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "detect a data channel error when a data channel is going from a level to a lower level" in {
     val i = Prototype[String]("i")
 
-    val exc = Capsule(ExplorationTask("Exploration", new EmptySampling))
+    val exc = Capsule(ExplorationTask(new EmptySampling))
 
-    val testT = EmptyTask("Test")
+    val testT = EmptyTask()
     testT addOutput i
 
-    val noOP = EmptyTask("NoOP")
-    val aggT = EmptyTask("Aggregation")
+    val noOP = EmptyTask()
+    val aggT = EmptyTask()
 
     val testC = Capsule(testT)
     val noOPC = Capsule(noOP)
@@ -371,19 +367,19 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Merge between aggregation and simple transition" should "be supported" in {
     val j = Prototype[Int]("j")
 
-    val t1 = EmptyTask("t1")
+    val t1 = EmptyTask()
     t1 addOutput j
 
     val t1Caps = Capsule(t1)
 
-    val exploration = ExplorationTask("explo", new EmptySampling)
+    val exploration = ExplorationTask(new EmptySampling)
     exploration addInput j.toArray
     exploration addOutput j.toArray
-    exploration setDefault (j.toArray -> Array.empty[Int])
+    exploration setDefault (j.toArray, Array.empty[Int])
 
     val explorationCaps = Capsule(exploration)
 
-    val agg = EmptyTask("agg")
+    val agg = EmptyTask()
     agg addInput j.toArray.toArray
 
     val aggSlot = Slot(agg)

@@ -22,13 +22,9 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
 import java.util.concurrent.atomic.AtomicBoolean
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
 class GroovyTaskSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
@@ -36,18 +32,18 @@ class GroovyTaskSpec extends FlatSpec with Matchers {
   "GroovyTask" should "run a groovy code" in {
     val p1 = Prototype[Int]("p1")
 
-    val groovyTask = GroovyTask("GroovyTask", "p1 *= 2")
+    val groovyTask = GroovyTask("p1 *= 2")
     groovyTask addOutput p1
 
     val ctx = Context.empty + (p1 -> 2)
 
-    groovyTask.toTask.process(ctx).value(p1).get should equal(4)
+    groovyTask.toTask.process(ctx)(p1) should equal(4)
   }
 
   "GroovyTask" should "allow importing namespace" in {
     val p1 = Prototype[AtomicBoolean]("p1")
 
-    val groovyTask = GroovyTask("GroovyTask", "p1 = new AtomicBoolean()")
+    val groovyTask = GroovyTask("p1 = new AtomicBoolean()")
     groovyTask addImport "java.util.concurrent.atomic.*"
     groovyTask addOutput p1
 
