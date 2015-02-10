@@ -38,12 +38,12 @@ object GUIClient {
   def run(): Unit = {
 
     //Register Prototype factories (forced to use strings since getClass does not work with scalajs)
-    ClientService += ("org.openmole.gui.ext.data.IntPrototypeDataUI", PrototypeFactoryUI.intFactory)
-    ClientService += ("org.openmole.gui.ext.data.DoublePrototypeDataUI", PrototypeFactoryUI.doubleFactory)
-    ClientService += ("org.openmole.gui.ext.data.LongPrototypeDataUI", PrototypeFactoryUI.longFactory)
-    ClientService += ("org.openmole.gui.ext.data.StringPrototypeDataUI", PrototypeFactoryUI.stringFactory)
-    ClientService += ("org.openmole.gui.ext.data.BooleanPrototypeDataUI", PrototypeFactoryUI.booleanFactory)
-    ClientService += ("org.openmole.gui.ext.data.FilePrototypeDataUI", PrototypeFactoryUI.fileFactory)
+    ClientService += ("org.openmole.gui.ext.dataui.IntPrototypeDataUI", PrototypeFactoryUI.intFactory)
+    ClientService += ("org.openmole.gui.ext.dataui.DoublePrototypeDataUI", PrototypeFactoryUI.doubleFactory)
+    ClientService += ("org.openmole.gui.ext.dataui.LongPrototypeDataUI", PrototypeFactoryUI.longFactory)
+    ClientService += ("org.openmole.gui.ext.dataui.StringPrototypeDataUI", PrototypeFactoryUI.stringFactory)
+    ClientService += ("org.openmole.gui.ext.dataui.BooleanPrototypeDataUI", PrototypeFactoryUI.booleanFactory)
+    ClientService += ("org.openmole.gui.ext.dataui.FilePrototypeDataUI", PrototypeFactoryUI.fileFactory)
 
     val db = DataBagUI(ClientService.taskFactories(1).dataUI)
     db.name() = "premier"

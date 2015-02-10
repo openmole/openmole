@@ -61,7 +61,7 @@ class TaskDataBagUI(val dataUI: Var[TaskDataUI]) extends IODataBagUI {
   type DATAUI = TaskDataUI
 }
 
-class PrototypeDataBagUI(val dataUI: Var[PrototypeDataUI]) extends IODataBagUI {
+class PrototypeDataBagUI(val dataUI: Var[PrototypeDataUI]) extends DataBagUI {
   type DATAUI = PrototypeDataUI
 }
 
@@ -69,6 +69,6 @@ class HookDataBagUI(val dataUI: Var[HookDataUI]) extends IODataBagUI {
   type DATAUI = HookDataUI
 }
 
-class EnvironmentDataBagUI(val dataUI: Var[EnvironmentDataUI]) extends IODataBagUI {
+class EnvironmentDataBagUI(val dataUI: Var[EnvironmentDataUI]) extends DataBagUI {
   type DATAUI = EnvironmentDataUI
 }
