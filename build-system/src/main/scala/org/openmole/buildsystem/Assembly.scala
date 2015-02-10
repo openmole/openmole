@@ -41,6 +41,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
     }
     else if (!to.exists() || from.lastModified() > to.lastModified) {
       streams.log.info(s"Copy file $from to $to ")
+      from.getParentFile.mkdirs
       IO.copyFile(from, to, preserveLastModified = true)
     }
   }
