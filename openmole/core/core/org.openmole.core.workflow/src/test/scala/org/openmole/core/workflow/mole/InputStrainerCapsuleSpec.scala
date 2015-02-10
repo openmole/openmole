@@ -17,17 +17,14 @@
 
 package org.openmole.core.workflow.mole
 
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+import org.scalatest.junit._
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 
-@RunWith(classOf[JUnitRunner])
 class InputStrainerCapsuleSpec extends FlatSpec with Matchers {
   "The input strainer capsule" should "let the data in but not out" in {
     val p = Prototype[String]("p")

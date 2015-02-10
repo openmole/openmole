@@ -26,13 +26,10 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+import org.scalatest.junit._
 import scala.collection.mutable.ListBuffer
 
-@RunWith(classOf[JUnitRunner])
 class DataChannelSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
@@ -47,7 +44,7 @@ class DataChannelSpec extends FlatSpec with Matchers {
         override def process(context: Context) = context + (p -> "Test")
       }
 
-    val t2 = EmptyTask("Inter task")
+    val t2 = EmptyTask()
 
     val t3 = new TestTask {
       val name = "Test read"
@@ -58,9 +55,9 @@ class DataChannelSpec extends FlatSpec with Matchers {
       }
     }
 
-    val t1c = new Capsule(t1)
-    val t2c = new Capsule(t2)
-    val t3c = Slot(new Capsule(t3))
+    val t1c = Capsule(t1)
+    val t2c = Capsule(t2)
+    val t3c = Slot(Capsule(t3))
 
     val ex = (t1c -- t2c -- t3c) + (t1c oo t3c)
 
@@ -81,7 +78,7 @@ class DataChannelSpec extends FlatSpec with Matchers {
 
     val sampling = new ExplicitSampling(i, data)
 
-    val exc = new Capsule(ExplorationTask("Exploration", sampling))
+    val exc = Capsule(ExplorationTask(sampling))
 
     val res = new ListBuffer[String]
 

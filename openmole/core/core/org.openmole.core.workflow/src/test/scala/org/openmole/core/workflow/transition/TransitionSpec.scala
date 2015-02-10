@@ -24,12 +24,8 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
 class TransitionSpec extends FlatSpec with Matchers {
 
   "A transition" should "enable variable values to be transmitted from a task to another" in {
@@ -60,7 +56,7 @@ class TransitionSpec extends FlatSpec with Matchers {
     val p1 = Prototype[String]("p1")
     val p2 = Prototype[String]("p2")
 
-    val init = EmptyTask("Init")
+    val init = EmptyTask()
 
     val t1 = new TestTask {
       val name = "Test write 1"
@@ -84,9 +80,9 @@ class TransitionSpec extends FlatSpec with Matchers {
       }
     }
 
-    val initc = new Capsule(init)
-    val t1c = new Capsule(t1)
-    val t2c = new Capsule(t2)
+    val initc = Capsule(init)
+    val t1c = Capsule(t1)
+    val t2c = Capsule(t2)
     val t3c = Slot(Capsule(t3))
 
     val ex = (initc -- t1c -- t3c) + (initc -- t2c -- t3c)
@@ -101,7 +97,7 @@ class TransitionSpec extends FlatSpec with Matchers {
     val p2 = Prototype[java.lang.Integer]("p")
     val pArray = Prototype[Array[java.lang.Number]]("p")
 
-    val init = EmptyTask("Init")
+    val init = EmptyTask()
 
     val t1 = new TestTask {
       val name = "Test write 1"
@@ -142,7 +138,7 @@ class TransitionSpec extends FlatSpec with Matchers {
     val p1 = Prototype[String]("p1")
     val p2 = Prototype[String]("p2")
 
-    val init = EmptyTask("Init conjonctive")
+    val init = EmptyTask()
 
     val t1 = new TestTask {
       val name = "Test write 1 conjonctive"
@@ -187,7 +183,7 @@ class TransitionSpec extends FlatSpec with Matchers {
     val p2 = Prototype[Array[java.lang.Integer]]("p")
     val pArray = Prototype[Array[Array[java.lang.Number]]]("p")
 
-    val init = EmptyTask("Init")
+    val init = EmptyTask()
 
     val t1 = new TestTask {
       val name = "Test write 1"

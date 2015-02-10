@@ -19,21 +19,16 @@ package org.openmole.core.workflow.task
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task.EmptyTask
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.misc.tools.io.BufferInputStream
 import org.openmole.misc.tools.io.BufferOutputStream
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
 class SerializationSpec extends FlatSpec with Matchers {
   "Task " should "be the same after serialization and deserialization" in {
     val p = Prototype[Int]("p")
 
-    val t = EmptyTask("Test")
+    val t = EmptyTask()
     t.addInput(p)
     t.addOutput(p)
 

@@ -19,30 +19,23 @@ package org.openmole.core.workflow.task
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.task.{MoleTask, EmptyTask, PluginSet}
 
-@RunWith(classOf[JUnitRunner])
 class MoleTaskSpec extends FlatSpec with Matchers {
 
   "Implicits" should "work with mole task" in {
     val i = Prototype[String]("i")
-    val emptyT = EmptyTask("Empty")
+    val emptyT = EmptyTask()
     emptyT.addInput(i)
 
     val emptyC = new Capsule(emptyT)
 
     val moleTask =
-      MoleTask(
-        "MoleTask",
-        Mole(emptyC), emptyC)(PluginSet.empty)
+      MoleTask(Mole(emptyC), emptyC)
 
     moleTask addImplicit i
-    moleTask addParameter (i -> "test")
+    moleTask setDefault (i, "test")
 
     MoleExecution(Mole(moleTask)).start.waitUntilEnded
   }

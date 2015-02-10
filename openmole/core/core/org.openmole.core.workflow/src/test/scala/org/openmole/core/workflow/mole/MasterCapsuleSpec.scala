@@ -24,16 +24,13 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+import org.scalatest.junit._
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 
-@RunWith(classOf[JUnitRunner])
 class MasterCapsuleSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
@@ -56,8 +53,8 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
       }
     }
 
-    val t1c = new MasterCapsule(t1)
-    val t2c = new MasterCapsule(t2)
+    val t1c = MasterCapsule(t1)
+    val t2c = MasterCapsule(t2)
 
     val ex = t1c -- t2c toExecution
 
@@ -71,9 +68,9 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val sampling = new ExplicitSampling(i, data)
 
-    val exc = new Capsule(ExplorationTask("Exploration", sampling))
+    val exc = Capsule(ExplorationTask(sampling))
 
-    val emptyT = EmptyTask("Slave")
+    val emptyT = EmptyTask()
     emptyT.addInput(i)
     emptyT.addOutput(i)
 
@@ -81,14 +78,14 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
       val name = "select"
       override val inputs = DataSet(n, i)
       override val outputs = DataSet(n, i)
-      override val defaults = DefaultSet(n -> 0)
+      override val defaults = DefaultSet(Default(n, 0))
       override def process(context: Context) = {
         val nVal = context(n)
         context + Variable(n, nVal + 1) + Variable(i, (nVal + 1).toString)
       }
     }
 
-    val emptyC = new Capsule(emptyT)
+    val emptyC = Capsule(emptyT)
     val slot1 = Slot(emptyC)
     val slot2 = Slot(emptyC)
 
@@ -110,9 +107,9 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val sampling = new ExplicitSampling(i, 0 until 10)
 
-    val exploration = ExplorationTask("Exploration", sampling)
+    val exploration = ExplorationTask(sampling)
 
-    val model = EmptyTask("model")
+    val model = EmptyTask()
     model addInput i
     model addOutput i
 
@@ -124,7 +121,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
       val name = "select"
       override val inputs = DataSet(archive, i)
       override val outputs = DataSet(archive, i)
-      override val defaults = DefaultSet(archive -> Array.empty[Int])
+      override val defaults = DefaultSet(Default(archive, Array.empty[Int]))
       override def process(context: Context) = {
         context.contains(archive) should equal(true)
         selectTaskExecuted += 1
@@ -163,15 +160,15 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
       override def process(context: Context) = context
     }
 
-    val mole = t1 toMole
+    val mole = Mole(t1)
 
-    val mt = MoleTask("MoleTask", mole, mole.root)
+    val mt = MoleTask(mole, mole.root)
 
-    val t1c = new MasterCapsule(mt.toTask)
+    val t1c = MasterCapsule(mt.toTask)
 
     val i = Prototype[Int]("i")
 
-    val explo = ExplorationTask("Exploration", new ExplicitSampling(i, 0 to 100))
+    val explo = ExplorationTask(new ExplicitSampling(i, 0 to 100))
 
     val ex = explo -< t1c
 

@@ -19,10 +19,8 @@ package org.openmole.misc.tools.collection
 
 import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+import org.scalatest.junit._
 
-@RunWith(classOf[JUnitRunner])
 class OrderedSlidingListSpec extends FlatSpec with Matchers {
   "OrderedSlidingList" should "preserve the max size" in {
     val list = new OrderedSlidingList[Int](5)

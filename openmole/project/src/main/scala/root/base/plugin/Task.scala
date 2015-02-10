@@ -30,9 +30,13 @@ object Task extends PluginDefaults {
 
   lazy val scala = OsgiProject("scala") dependsOn (Misc.exception, Core.workflow, jvm, Misc.console)
 
-  lazy val groovy = OsgiProject("groovy") dependsOn (Misc.exception, Core.workflow, Tool.groovy, jvm, Misc.replication % "test")
+  lazy val groovy = OsgiProject("groovy") dependsOn (Misc.exception, Core.workflow, Tool.groovy, jvm, Misc.replication % "test") settings (
+    libraryDependencies += Libraries.scalatest
+  )
 
-  lazy val template = OsgiProject("template") dependsOn (Misc.exception, Core.workflow, Misc.workspace, Misc.replication % "test")
+  lazy val template = OsgiProject("template") dependsOn (Misc.exception, Core.workflow, Misc.workspace, Misc.replication % "test") settings (
+    libraryDependencies += Libraries.scalatest
+  )
 
   lazy val systemexec = OsgiProject("systemexec") dependsOn (Misc.exception, Core.workflow, external,
     Misc.workspace) settings (

@@ -26,12 +26,10 @@ import java.io.FileOutputStream
 import java.io.FileWriter
 import java.nio.file.FileSystems
 import java.nio.file.Files
-import org.junit.runner.RunWith
 import scala.io.Source
 import TarArchiver._
 import FileUtil._
 
-@RunWith(classOf[JUnitRunner])
 class TarArchiverSpec extends FlatSpec with Matchers {
   "Archive" should "preserve symbolic links" in {
     val tmpDir = Files.createTempDirectory("testArch").toFile
@@ -40,7 +38,7 @@ class TarArchiverSpec extends FlatSpec with Matchers {
 
     val fs = FileSystems.getDefault
 
-    Files.createSymbolicLink(fs.getPath(tmpDir.getAbsolutePath, "link"), fs.getPath(file.getAbsolutePath))
+    Files.createSymbolicLink(fs.getPath(tmpDir.getAbsolutePath, "link"), fs.getPath("file"))
     // Files.createSymbolicLink(fs.getPath(tmpDir.getAbsolutePath, "linkNoDest"), fs.getPath(file.getAbsolutePath))
 
     val archive = Files.createTempFile("archiveTest", ".tar").toFile
@@ -50,7 +48,7 @@ class TarArchiverSpec extends FlatSpec with Matchers {
     archive.extractDirArchiveWithRelativePath(extractDir)
 
     Files.isSymbolicLink(fs.getPath(extractDir.getAbsolutePath, "link")) should equal(true)
-    Files.isSameFile(fs.getPath(extractDir.getAbsolutePath, "link"), fs.getPath(extractDir.getAbsolutePath, "file")) should equal(true)
+    Files.isSameFile(fs.getPath(extractDir.getAbsolutePath, "link").toRealPath(), fs.getPath(extractDir.getAbsolutePath, "file")) should equal(true)
 
     extractDir.recursiveDelete
     archive.delete

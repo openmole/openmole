@@ -18,7 +18,7 @@ object Core extends BaseDefaults {
 
   lazy val workflow = OsgiProject("workflow", openmoleScope = Some("provided"), imports = Seq("*")) settings (
     includeOsgi,
-    libraryDependencies ++= Seq(scalaLang, groovy, Apache.math)
+    libraryDependencies ++= Seq(scalaLang, groovy, Apache.math, scalatest)
   ) dependsOn
     (Misc.eventDispatcher, Misc.exception, Misc.tools, Misc.updater, Misc.workspace, Misc.macros, Misc.pluginManager, serializer, Misc.replication % "test")
 

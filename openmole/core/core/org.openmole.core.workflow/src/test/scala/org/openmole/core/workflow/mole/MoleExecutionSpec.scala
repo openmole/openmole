@@ -29,13 +29,10 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+import org.scalatest.junit._
 import scala.collection.mutable.ListBuffer
 
-@RunWith(classOf[JUnitRunner])
 class MoleExecutionSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
@@ -57,9 +54,9 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
 
     val sampling = new ExplicitSampling(i, data)
 
-    val exc = new Capsule(ExplorationTask("Exploration", sampling))
+    val exc = Capsule(ExplorationTask(sampling))
 
-    val emptyT = EmptyTask("Empty")
+    val emptyT = EmptyTask()
     emptyT.addInput(i)
     emptyT.addOutput(i)
 
@@ -86,7 +83,7 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
 
   "Implicits" should "be used when input is missing" in {
     val i = Prototype[String]("i")
-    val emptyT = EmptyTask("Empty")
+    val emptyT = EmptyTask()
     emptyT.addInput(i)
 
     val emptyC = Capsule(emptyT)

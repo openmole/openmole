@@ -24,12 +24,9 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
 
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+import org.scalatest.junit._
 
-@RunWith(classOf[JUnitRunner])
 class HookSpec extends FlatSpec with Matchers {
 
   "A capsule execution misc" should "intercept the execution of a capsule" in {
@@ -47,7 +44,7 @@ class HookSpec extends FlatSpec with Matchers {
 
     val hook = new HookBuilder {
       def toHook = new Hook with Built {
-        override def perform(context: Context, executionContext: ExecutionContext) = {
+        override def process(context: Context, executionContext: ExecutionContext) = {
           context.contains(p) should equal(true)
           context(p) should equal("test")
           executed = true
@@ -79,7 +76,7 @@ class HookSpec extends FlatSpec with Matchers {
 
     val hook = new HookBuilder {
       def toHook = new Hook with Built {
-        override def perform(context: Context, executionContext: ExecutionContext) = {
+        override def process(context: Context, executionContext: ExecutionContext) = {
           context.contains(p) should equal(true)
           context(p) should equal("test")
           executed = true

@@ -18,23 +18,17 @@
 package org.openmole.plugin.hook.file
 
 import java.io.File
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data.Context
 import org.openmole.misc.tools.io.HashService
 import HashService._
 import org.openmole.misc.tools.io.FileUtil._
-import org.scalatest.FlatSpec
 import org.scalatest._
-import org.scalatest.junit.JUnitRunner
 import java.io.FileWriter
-import org.junit.runner.RunWith
 import scala.io.Source
 
-@RunWith(classOf[JUnitRunner])
 class CopyFileHookSpec extends FlatSpec with Matchers {
 
   "A copy file misc" should "copy a file after the execution of a capsule" in {
@@ -64,9 +58,6 @@ class CopyFileHookSpec extends FlatSpec with Matchers {
     val ex = MoleExecution(Mole(t1c), hooks = List(t1c -> hook))
 
     ex.start.waitUntilEnded
-
-    println(f.content)
-    println(fDest.content)
 
     f.hash should equal(fDest.hash)
     f.delete
