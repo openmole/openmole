@@ -22,6 +22,10 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
 
+object InGrouping {
+  def apply(numberOfBatch: Int) = new InGrouping(numberOfBatch)
+}
+
 /**
  * Group mole jobs given a fixed number of batch.
  *

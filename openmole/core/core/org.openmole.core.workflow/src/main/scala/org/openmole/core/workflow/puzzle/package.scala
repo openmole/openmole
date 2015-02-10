@@ -28,30 +28,22 @@ package puzzle {
       def last = puzzle.lasts.head
     }
 
+    implicit def pieceOfPuzzleToPuzzleDecorator(piece: PuzzlePiece) = piece.toPuzzle
+
+    implicit def capsuleToPuzzlePieceDecorator(capsule: Capsule) = new {
+      def toPuzzlePiece = PuzzlePiece(Slot(capsule))
+    }
+
+    implicit def slotToPuzzlePieceDecorator(slot: Slot) = new {
+      def toPuzzlePiece = PuzzlePiece(slot)
+    }
+
     implicit def capsulePuzzleDecorator(capsule: Capsule) = new {
-      def toPuzzle: Puzzle =
-        Puzzle(
-          Slot(capsule),
-          List(capsule),
-          Iterable.empty,
-          Iterable.empty,
-          Iterable.empty,
-          Iterable.empty,
-          Map.empty,
-          Map.empty)
+      def toPuzzle: Puzzle = Puzzle(Slot(capsule), List(capsule))
     }
 
     implicit def slotDecorator(slot: Slot) = new {
-      def toPuzzle =
-        Puzzle(
-          slot,
-          List(slot.capsule),
-          Iterable.empty,
-          Iterable.empty,
-          Iterable.empty,
-          Iterable.empty,
-          Map.empty,
-          Map.empty)
+      def toPuzzle = Puzzle(slot, List(slot.capsule))
     }
   }
 

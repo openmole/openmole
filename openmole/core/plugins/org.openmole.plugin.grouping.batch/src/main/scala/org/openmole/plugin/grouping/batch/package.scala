@@ -22,21 +22,24 @@ import org.openmole.core.workflow.puzzle._
 
 package object batch {
 
-  implicit def capsuleBatchGroupingDecorator(capsule: Capsule) = new PuzzleBatchGroupingDecorator(capsule)
+  implicit def capsuleBatchGroupingDecorator(capsule: Capsule) = new PuzzlePieceBatchGroupingDecorator(capsule)
 
-  implicit class PuzzleBatchGroupingDecorator(puzzle: Puzzle) {
+  implicit class PuzzlePieceBatchGroupingDecorator(puzzle: PuzzlePiece) {
 
     def by(n: Int): Puzzle =
       puzzle.copy(
-        grouping = puzzle.grouping ++ puzzle.lasts.map(_ -> new ByGrouping(n)))
+        grouping = Some(ByGrouping(n))
+      )
 
     def in(n: Int): Puzzle =
       puzzle.copy(
-        grouping = puzzle.grouping ++ puzzle.lasts.map(_ -> new InGrouping(n)))
+        grouping = Some(InGrouping(n))
+      )
 
     def inShuffled(n: Int): Puzzle =
       puzzle.copy(
-        grouping = puzzle.grouping ++ puzzle.lasts.map(_ -> new InShuffledGrouping(n)))
+        grouping = Some(InShuffledGrouping(n))
+      )
 
   }
 
