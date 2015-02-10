@@ -32,7 +32,7 @@ class InputFilter(initValue: String) {
     initValue)(
       value := initValue,
       placeholder := "Filter",
-      autofocus := "true"
+      autofocus
     ).render
 
   tag.oninput = (e: Event) ⇒ nameFilter() = tag.value

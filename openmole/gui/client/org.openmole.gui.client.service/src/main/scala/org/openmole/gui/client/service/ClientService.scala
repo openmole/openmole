@@ -59,16 +59,6 @@ object ClientService {
   }
 
   def dataBagUIs = uiDataBags()
-  //uiDataBags().collect { case t:  TaskDataUI ⇒ t }.toSeq
-
-  /*uiDataBags().flatMap { p ⇒
-    p.dataUI() match {
-      case t: TaskDataUI ⇒
-        println("A task here ! " + p.name())
-        Some(p)
-      case _ ⇒ None
-    }
-  }.toSeq*/
 
   def setName(db: DataBagUI, name: String) = get(db).map {
     _.name() = name
@@ -76,14 +66,18 @@ object ClientService {
 
   private def get(db: DataBagUI) = uiDataBags().find(_.uuid == db.uuid)
 
-  def isTaskUI(dataUI: DataUI) = dataUI match {
-    case t: TaskDataUI ⇒ true
-    case _             ⇒ false
+  def isTaskUI(dataUI: DataUI) = {
+    dataUI match {
+      case t: TaskDataUI ⇒ true
+      case _             ⇒ false
+    }
   }
 
-  def isPrototypeUI(d: DataUI) = d match {
-    case t: PrototypeDataUI ⇒ true
-    case _                  ⇒ false
+  def isPrototypeUI(d: DataUI) = {
+    d match {
+      case t: PrototypeDataUI ⇒ true
+      case _                  ⇒ false
+    }
   }
 
   def isPrototypeUI(db: DataBagUI): Boolean = isPrototypeUI(db.dataUI())
@@ -92,11 +86,12 @@ object ClientService {
   def isPrototypeUI(f: FactoryUI): Boolean = isPrototypeUI(f.dataUI)
   def isTaskUI(f: FactoryUI): Boolean = isTaskUI(f.dataUI)
 
-  def prototypeUI(db: DataBagUI): Option[PrototypeDataUI] = db.dataUI() match {
-    case p: PrototypeDataUI ⇒ Some(p)
-    case _                  ⇒ None
+  def prototypeUI(db: DataBagUI): Option[PrototypeDataUI] = {
+    db.dataUI() match {
+      case p: PrototypeDataUI ⇒ Some(p)
+      case _                  ⇒ None
+    }
   }
-
   def +=(dataKey: String, factoryUI: FactoryUI) = uiFactories() += dataKey -> factoryUI
 
   def +=(dataBagUI: DataBagUI) = {
@@ -129,19 +124,25 @@ object ClientService {
       throw (f)
   }
 
-  private def factoryUI(data: Data) = uiFactories().get(data.getClass.getCanonicalName) match {
-    case Some(f: FactoryUI) ⇒ Try(f.dataUI)
-    case _                  ⇒ failure(data)
+  private def factoryUI(data: Data) = {
+    uiFactories().get(data.getClass.getCanonicalName) match {
+      case Some(f: FactoryUI) ⇒ Try(f.dataUI)
+      case _                  ⇒ failure(data)
+    }
   }
 
-  private def dataUI(data: TaskData): TaskDataUI = factoryUI(data) match {
-    case Success(d: TaskDataUI) ⇒ d
-    case _                      ⇒ failure(data)
+  private def dataUI(data: TaskData): TaskDataUI = {
+    factoryUI(data) match {
+      case Success(d: TaskDataUI) ⇒ d
+      case _                      ⇒ failure(data)
+    }
   }
 
-  private def dataUI(data: PrototypeData): PrototypeDataUI = factoryUI(data) match {
-    case Success(d: PrototypeDataUI) ⇒ d
-    case _                           ⇒ failure(data)
+  private def dataUI(data: PrototypeData): PrototypeDataUI = {
+    factoryUI(data) match {
+      case Success(d: PrototypeDataUI) ⇒ d
+      case _                           ⇒ failure(data)
+    }
   }
 
   private def failure[T <: Data](data: T) = Failure(new Throwable("The data " + data.getClass.getCanonicalName + " cannot be recontructed on the server."))
