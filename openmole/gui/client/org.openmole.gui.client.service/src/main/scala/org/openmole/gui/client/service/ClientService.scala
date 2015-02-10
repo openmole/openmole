@@ -43,12 +43,7 @@ object ClientService {
   private val uiDataBags: Var[Seq[DataBagUI]] = Var(Seq())
 
   // Factories
-  def taskFactories = uiFactories().values.flatMap { f ⇒
-    f.dataUI match {
-      case t: TaskDataUI ⇒ Some(f)
-      case _             ⇒ None
-    }
-  }.toSeq
+  def taskFactories = uiFactories().values.filter { f ⇒ isTaskUI(f.dataUI) }.toSeq
 
   def prototypeFactories: Seq[FactoryUI] = uiFactories().values.filter { f ⇒ isPrototypeUI(f.dataUI) }.toSeq
 
