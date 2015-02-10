@@ -32,19 +32,22 @@ trait Assembly { self: BuildSystemDefaults ⇒
     }
   )
 
+  private def recursiveCopy(from: File, to: File, streams: TaskStreams): Unit = {
+    if (from.isDirectory) {
+      to.mkdirs()
+      for {
+        f ← from.listFiles()
+      } recursiveCopy(f, new File(to, f.getName), streams)
+    }
+    else if (!to.exists() || from.lastModified() > to.lastModified) {
+      streams.log.info(s"Copy file $from to $to ")
+      IO.copyFile(from, to, preserveLastModified = true)
+    }
+  }
+
   private def copyFileTask(from: File, destinationDir: File, streams: TaskStreams, name: Option[String] = None) = {
     val to: File = if (from.isDirectory) destinationDir else destinationDir / name.getOrElse(from.getName)
-    if (!to.exists() || from.lastModified() > to.lastModified) {
-      streams.log.info(s"Copy file $from to $destinationDir ")
-      if (from.isDirectory) {
-        to.getParentFile.mkdirs
-        IO.copyDirectory(from, to, preserveLastModified = true)
-      }
-      else {
-        to.getParentFile.mkdirs
-        IO.copyFile(from, to, preserveLastModified = true)
-      }
-    }
+    recursiveCopy(from, to, streams)
     from -> to
   }
 
