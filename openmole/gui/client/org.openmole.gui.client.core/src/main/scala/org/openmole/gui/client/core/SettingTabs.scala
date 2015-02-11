@@ -1,7 +1,9 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.client.service.dataui._
 import org.openmole.gui.ext.dataui._
 
+import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
@@ -77,15 +79,15 @@ import SettingTabs.SettingTab._
 class SettingTabs(tabs: SettingTab*) {
   val currentTab = Var(tabs.headOption)
 
-  val view = bs.div()(
+  val view = tags.div(
     bs.nav("settingsNav", nav_pills,
       (for (c ← tabs) yield {
         navItem(c.id, c.name, () ⇒ currentTab() = Some(c), c.defaultActive)
       }): _*
     ), Rx {
-      bs.div()(currentTab().map { t: SettingTab ⇒
+      tags.div(currentTab().map { t: SettingTab ⇒
         for (el ← t.panelUIs) yield {
-          bs.div()(el.view)
+          tags.div(el.view)
         }
       }.getOrElse(Seq()).toSeq: _*
       )

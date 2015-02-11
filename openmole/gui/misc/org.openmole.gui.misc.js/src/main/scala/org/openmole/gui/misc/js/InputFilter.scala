@@ -25,17 +25,22 @@ import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.js.Forms._
 import rx._
 
-class InputFilter(initValue: String) {
-  var nameFilter = Var("")
+class InputFilter(initValue: String = "", pHolder: String = "Filter") {
+  var nameFilter: Var[String] = Var("")
 
   val tag = bs.input(
     initValue)(
       value := initValue,
-      placeholder := "Filter",
+      placeholder := pHolder,
       autofocus
     ).render
 
   tag.oninput = (e: Event) ⇒ nameFilter() = tag.value
 
   def contains(st: String) = st.contains(nameFilter())
+
+  def clear = {
+    tag.value = ""
+    nameFilter() = ""
+  }
 }

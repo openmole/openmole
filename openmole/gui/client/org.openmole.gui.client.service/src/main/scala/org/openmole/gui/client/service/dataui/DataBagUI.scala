@@ -1,4 +1,4 @@
-package org.openmole.gui.ext.dataui
+package org.openmole.gui.client.service.dataui
 
 /*
  * Copyright (C) 07/01/15 // mathieu.leclaire@openmole.org
@@ -18,6 +18,8 @@ package org.openmole.gui.ext.dataui
  */
 
 import org.openmole.gui.ext.data.{ IDataBag, DataBag, IODataBag }
+import org.openmole.gui.ext.dataui._
+import org.openmole.gui.ext.factoryui.FactoryUI
 import rx._
 
 object DataBagUI {
@@ -26,12 +28,20 @@ object DataBagUI {
 
   def buildOutput(ioMapping: Boolean) = new OutputDataUI(ioMapping)
 
-  def apply(dataUI: DataUI): DataBagUI = dataUI match {
+  def apply(factory: FactoryUI, name: String = ""): DataBagUI = apply(factory.dataUI, name, factory.ioMapping)
+
+  private def apply(dataUI: DataUI, name: String, ioMapping: Boolean): DataBagUI = {
+    val db = DataBagUI(dataUI, ioMapping)
+    db.name() = name
+    db
+  }
+
+  private def apply(dataUI: DataUI, ioMapping: Boolean): DataBagUI = dataUI match {
     //FIXME: find how to write this lik case t @ (TaskDataUI | HookDataUI)
-    case t: TaskDataUI        ⇒ new TaskDataBagUI(Var(t))
+    case t: TaskDataUI        ⇒ new TaskDataBagUI(Var(t), ioMapping)
     case p: PrototypeDataUI   ⇒ new PrototypeDataBagUI(Var(p))
     case e: EnvironmentDataUI ⇒ new EnvironmentDataBagUI(Var(e))
-    case h: HookDataUI        ⇒ new HookDataBagUI(Var(h))
+    case h: HookDataUI        ⇒ new HookDataBagUI(Var(h), ioMapping)
   }
 }
 
@@ -50,14 +60,16 @@ trait DataBagUI {
 
 trait IODataBagUI <: DataBagUI {
 
-  val inputDataUI: Var[InputDataUI] = Var(buildInput(false))
+  def ioMapping: Boolean
 
-  val outputDataUI: Var[OutputDataUI] = Var(buildOutput(false))
+  val inputDataUI: Var[InputDataUI] = Var(buildInput(ioMapping))
+
+  val outputDataUI: Var[OutputDataUI] = Var(buildOutput(ioMapping))
 
   override def dataBag = new IODataBag(uuid, name(), dataUI().data, inputDataUI().data, outputDataUI().data)
 }
 
-class TaskDataBagUI(val dataUI: Var[TaskDataUI]) extends IODataBagUI {
+class TaskDataBagUI(val dataUI: Var[TaskDataUI], val ioMapping: Boolean) extends IODataBagUI {
   type DATAUI = TaskDataUI
 }
 
@@ -65,7 +77,7 @@ class PrototypeDataBagUI(val dataUI: Var[PrototypeDataUI]) extends DataBagUI {
   type DATAUI = PrototypeDataUI
 }
 
-class HookDataBagUI(val dataUI: Var[HookDataUI]) extends IODataBagUI {
+class HookDataBagUI(val dataUI: Var[HookDataUI], val ioMapping: Boolean) extends IODataBagUI {
   type DATAUI = HookDataUI
 }
 

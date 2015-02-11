@@ -1,5 +1,6 @@
 package org.openmole.gui.client.service
 
+import org.openmole.gui.client.service.dataui._
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui._
 import org.openmole.gui.ext.data._
@@ -50,13 +51,13 @@ object ClientService {
   def factories = uiFactories().values.toSeq
 
   //DataBagUIs
-  def taskDataBagUIs: Seq[IODataBagUI] = uiDataBags().filter {
+  def taskDataBagUIs: Seq[TaskDataBagUI] = uiDataBags().filter {
     isTaskUI
-  }.map { _.asInstanceOf[IODataBagUI] }
+  }.map(_.asInstanceOf[TaskDataBagUI])
 
-  def prototypeDataBagUIs: Seq[DataBagUI] = uiDataBags().filter {
+  def prototypeDataBagUIs: Seq[PrototypeDataBagUI] = uiDataBags().filter {
     isPrototypeUI
-  }
+  }.map(_.asInstanceOf[PrototypeDataBagUI])
 
   def dataBagUIs = uiDataBags()
 

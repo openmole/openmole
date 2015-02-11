@@ -1,11 +1,7 @@
-package org.openmole.gui.ext.dataui
-
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.ProtoTYPE._
-import rx._
+package org.openmole.gui.client.service.dataui
 
 /*
- * Copyright (C) 28/01/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 30/01/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -21,20 +17,20 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class InputDataUI(val ioMapping: Boolean, val prototypeFilter: Seq[ProtoTYPE] = ALL) extends DataUI {
-  type DATA = InputData
+import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import scalatags.JsDom.all._
+import scala.scalajs.js.annotation.JSExport
+import org.openmole.gui.ext.dataui.PanelUI
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
-  def dataType = "Inputs"
+class OutputPanelUI(dataUI: OutputDataUI) extends PanelUI {
 
-  val inputsUI: Var[Seq[InputUI]] = Var(Seq())
+  @JSExport
+  val view = bs.div()(
+    "Output Panel ! " + dataUI.ioMapping
+  )
 
-  def panelUI = new InputPanelUI(this)
-
-  def data = new InputData {
-    def inputs = inputsUI().map { id ⇒
-      Input(id.protoDataBagUI.dataUI().data, id.default(), id.mapping())
-    }
+  def save = {
+    //dataUI.truc() = trucInput.value
   }
-
 }
-

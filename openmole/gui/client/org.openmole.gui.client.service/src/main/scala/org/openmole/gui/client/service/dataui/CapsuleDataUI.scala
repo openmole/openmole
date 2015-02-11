@@ -1,4 +1,4 @@
-package org.openmole.gui.ext.dataui
+package org.openmole.gui.client.service.dataui
 
 /*
  * Copyright (C) 28/01/15 // mathieu.leclaire@openmole.org
@@ -16,6 +16,7 @@ package org.openmole.gui.ext.dataui
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import org.openmole.gui.ext.dataui._
 
 class CapsuleDataUI(val dataUI: Option[TaskDataUI] = None,
                     val inputDataUI: Option[InputDataUI] = None,

@@ -17,9 +17,9 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.dataui._
+import org.openmole.gui.client.service.dataui.DataBagUI
 import org.openmole.gui.client.service.ClientService
-import org.openmole.gui.misc.js.Forms
+import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.Forms._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -45,18 +45,21 @@ object GUIClient {
     ClientService += ("org.openmole.gui.ext.dataui.BooleanPrototypeDataUI", PrototypeFactoryUI.booleanFactory)
     ClientService += ("org.openmole.gui.ext.dataui.FilePrototypeDataUI", PrototypeFactoryUI.fileFactory)
 
-    val db = DataBagUI(ClientService.taskFactories(1).dataUI)
+    val db = DataBagUI(ClientService.taskFactories(1))
     db.name() = "premier"
     ClientService += db
     db.name() = "first"
-    val db2 = DataBagUI(ClientService.taskFactories(1).dataUI)
+    val db2 = DataBagUI(ClientService.taskFactories(1))
     ClientService += db2
     db2.name() = "yopp"
-    val proto = DataBagUI(ClientService.prototypeFactories(0).dataUI)
-    proto.name() = "proto1"
-    ClientService += proto
+    ClientService += DataBagUI(ClientService.prototypeFactories(0), "proto1")
+    ClientService += DataBagUI(ClientService.prototypeFactories(1), "proto2")
+    ClientService += DataBagUI(ClientService.prototypeFactories(1), "proto3")
+    ClientService += DataBagUI(ClientService.prototypeFactories(2), "proto4")
+    ClientService += DataBagUI(ClientService.prototypeFactories(3), "proto5")
+    ClientService += DataBagUI(ClientService.prototypeFactories(2), "proto6")
 
-    val topdiv = dom.document.body.appendChild(Forms.div())
+    val topdiv = dom.document.body.appendChild(tags.div)
 
     topdiv.appendChild(
       nav("mainMav",

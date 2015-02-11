@@ -156,7 +156,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
           val entry = new TarArchiveEntry(file, relativeFile)
           entry.setSize(file.length)
-          if (file.canExecute) en try.setMode(TarArchiveEntry.DEFAULT_FILE_MODE | 111)
+          if (file.canExecute) entry.setMode(TarArchiveEntry.DEFAULT_FILE_MODE | 111)
 
           os.putArchiveEntry(entry)
 

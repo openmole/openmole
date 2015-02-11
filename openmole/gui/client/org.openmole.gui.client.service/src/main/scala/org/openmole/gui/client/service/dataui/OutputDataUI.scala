@@ -1,4 +1,4 @@
-package org.openmole.gui.ext.dataui
+package org.openmole.gui.client.service.dataui
 
 /*
  * Copyright (C) 30/01/15 // mathieu.leclaire@openmole.org
@@ -19,9 +19,10 @@ package org.openmole.gui.ext.dataui
 
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.ProtoTYPE._
+import org.openmole.gui.ext.dataui._
 import rx._
 
-class OutputDataUI(val ioMapping: Boolean, val prototypeFilter: Seq[ProtoTYPE] = ALL) extends DataUI {
+class OutputDataUI(val ioMapping: Boolean) extends DataUI {
   type DATA = OutputData
 
   def dataType = "Outputs"

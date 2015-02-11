@@ -21,7 +21,7 @@ import org.openmole.gui.ext.data.ProtoTYPE._
 import org.openmole.gui.ext.data.PrototypeData
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import scalatags.JsDom.{ tags ⇒ tags }
 
 import rx._
 
@@ -83,7 +83,7 @@ object PrototypeFactoryUI {
 
 class PrototypePanelUI(dataUI: PrototypeDataUI) extends PanelUI {
 
-  val view = bs.div()
+  val view = tags.div
 
   def save = {
   }
