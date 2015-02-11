@@ -94,7 +94,7 @@ class GenericPanel(uuid: String,
     (PROTOTYPES, db ⇒ isPrototypeUI(db) && inputFilter.contains(db.name()))
   )
 
-  val conceptTable = tags.table(
+  val conceptTable = bs.table(striped)(
     thead,
     Rx {
       val dbUIs: Seq[DataBagUI] = filter().factories.head

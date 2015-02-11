@@ -194,7 +194,7 @@ object Forms {
   def td(keys: ClassKeyAggregator) = tags.td(`class` := keys.key)
 
   val bordered = key("table table-bordered")
-  val stripped = key("table table-stripped")
+  val striped = key("table table-striped")
 
   //Forms
   def form(keys: ClassKeyAggregator = emptyCK) = tags.form(`class` := keys.key)

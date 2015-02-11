@@ -43,7 +43,7 @@ class InputPanelUI(dataUI: InputDataUI) extends PanelUI {
       }
     }).render
 
-  val table = bs.table(col_md_12)(
+  val table = bs.table(col_md_12 + striped)(
     thead(
       tags.tr(
         tags.th("Name"),
