@@ -134,8 +134,7 @@ class GenericPanel(uuid: String,
 
   def add = {
     val factory = filter().factories.head
-    val dbUI = DataBagUI(factory.dataUI)
-    resetIODataUI(dbUI, factory)
+    val dbUI = DataBagUI(factory)
     dbUI.name() = inputFilter.tag.value
     dimInput.value = "0"
     ClientService += dbUI

@@ -50,7 +50,7 @@ class InputPanelUI(dataUI: InputDataUI) extends PanelUI {
         tags.th("Type"),
         tags.th("Dimension"),
         tags.th("Default"),
-        tags.th("Map to"),
+        if (dataUI.ioMapping) tags.th("Map to"),
         tags.th("")
       )), Rx {
       tbody(
