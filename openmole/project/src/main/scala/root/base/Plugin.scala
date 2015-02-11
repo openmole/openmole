@@ -13,7 +13,7 @@ abstract class PluginDefaults(subBuilds: Defaults*) extends BaseDefaults(subBuil
     Seq(
       bundleType := Set("plugin"),
       bundleActivator <<= (name) { n ⇒ Some(n + ".Activator") },
-      libraryDependencies += Libraries.equinoxOsgi
+      libraryDependencies += Libraries.equinoxOSGi
     )
 
 }

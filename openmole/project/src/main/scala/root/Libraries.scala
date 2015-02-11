@@ -141,15 +141,14 @@ object Libraries extends Defaults(Apache) {
 
   lazy val equinoxPreferences = "org.eclipse.core" % "org.eclipse.equinox.preferences" % "3.5.1.v20121031-182809"
 
-  lazy val equinoxOsgi = "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944"
-
   lazy val equinoxContenttype = "org.eclipse.core" % "org.eclipse.core.contenttype" % "3.4.200.v20120523-2004"
 
   lazy val equinoxJobs = "org.eclipse.core" % "org.eclipse.core.jobs" % "3.5.300.v20120912-155018"
 
   lazy val equinoxRuntime = "org.eclipse.core" % "org.eclipse.core.runtime" % "3.8.0.v20120912-155025"
 
+  lazy val equinoxOSGi = "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944"
+
   lazy val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 
-  //override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
 }

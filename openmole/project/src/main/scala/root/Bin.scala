@@ -41,7 +41,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     equinoxLauncher intransitive (),
     equinoxRegistry intransitive (),
     equinoxPreferences intransitive (),
-    equinoxOsgi intransitive ()
+    equinoxOSGi intransitive ()
   )
 
   lazy val renameEquinox =
