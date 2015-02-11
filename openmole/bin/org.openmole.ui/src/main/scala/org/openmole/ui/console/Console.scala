@@ -20,6 +20,7 @@ package org.openmole.ui.console
 import jline.console.ConsoleReader
 import java.util.concurrent.Executors
 import org.openmole.core.dsl.Serializer
+import org.openmole.core.workflow.tools.PluginInfo
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.pluginmanager.PluginManager
@@ -63,6 +64,13 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
   def logger = "logger"
   def serializer = "serializer"
 
+  def autoImports: Seq[String] = PluginInfo.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"$n._")
+  def imports =
+    Seq(
+      "org.openmole.core.dsl._",
+      "commands._"
+    ) ++ autoImports
+
   def run {
     val correctPassword =
       password match {
@@ -79,10 +87,7 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
           loop.bind("commands", new Command)
           loop.bind("_plugins_", plugins)
           loop.interpret("implicit lazy val plugins = _plugins_")
-          loop.interpret(Seq(
-            "org.openmole.core.dsl._",
-            "commands._").map("import " + _).mkString("; "))
-
+          loop.interpret(imports.map("import " + _).mkString("; "))
         }
 
         script match {
