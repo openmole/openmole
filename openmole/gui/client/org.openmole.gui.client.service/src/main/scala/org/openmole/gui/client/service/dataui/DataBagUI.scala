@@ -1,4 +1,4 @@
-package org.openmole.gui.ext.dataui
+package org.openmole.gui.client.service.dataui
 
 /*
  * Copyright (C) 07/01/15 // mathieu.leclaire@openmole.org
@@ -18,6 +18,7 @@ package org.openmole.gui.ext.dataui
  */
 
 import org.openmole.gui.ext.data.{ IDataBag, DataBag, IODataBag }
+import org.openmole.gui.ext.dataui._
 import rx._
 
 object DataBagUI {
@@ -25,6 +26,12 @@ object DataBagUI {
   def buildInput(ioMapping: Boolean) = new InputDataUI(ioMapping)
 
   def buildOutput(ioMapping: Boolean) = new OutputDataUI(ioMapping)
+
+  def apply(dataUI: DataUI, name: String): DataBagUI = {
+    val db = DataBagUI(dataUI)
+    db.name() = name
+    db
+  }
 
   def apply(dataUI: DataUI): DataBagUI = dataUI match {
     //FIXME: find how to write this lik case t @ (TaskDataUI | HookDataUI)

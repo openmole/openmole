@@ -17,6 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.service.dataui.DataBagUI
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.client.service.ClientService
 import org.openmole.gui.misc.js.Forms
@@ -52,9 +53,12 @@ object GUIClient {
     val db2 = DataBagUI(ClientService.taskFactories(1).dataUI)
     ClientService += db2
     db2.name() = "yopp"
-    val proto = DataBagUI(ClientService.prototypeFactories(0).dataUI)
-    proto.name() = "proto1"
-    ClientService += proto
+    ClientService += DataBagUI(ClientService.prototypeFactories(1).dataUI, "proto1")
+    ClientService += DataBagUI(ClientService.prototypeFactories(1).dataUI, "proto2")
+    ClientService += DataBagUI(ClientService.prototypeFactories(1).dataUI, "proto3")
+    ClientService += DataBagUI(ClientService.prototypeFactories(2).dataUI, "proto4")
+    ClientService += DataBagUI(ClientService.prototypeFactories(3).dataUI, "proto5")
+    ClientService += DataBagUI(ClientService.prototypeFactories(2).dataUI, "proto6")
 
     val topdiv = dom.document.body.appendChild(Forms.div())
 

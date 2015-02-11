@@ -1,4 +1,4 @@
-package org.openmole.gui.ext
+package org.openmole.gui.client.service
 
 /*
  * Copyright (C) 16/12/14 // mathieu.leclaire@openmole.org
@@ -17,14 +17,18 @@ package org.openmole.gui.ext
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.PrototypeData
+import org.openmole.gui.misc.utils.ID
 import rx._
-import org.scalajs.dom
-import scalatags.JsDom.TypedTag
 
 package object dataui {
 
-  case class InputUI(val protoDataBagUI: PrototypeDataBagUI, val default: Var[Option[String]], val mapping: Var[Option[Any]] = Var(None))
-  case class OutputUI(val protoDataBagUI: PrototypeDataBagUI, val mapping: Var[Option[Any]] = Var(None))
+  def inputUI(protoDataBagUI: PrototypeDataBagUI, default: Var[Option[String]] = Var(None), mapping: Var[Option[Any]] = Var(None)) =
+    InputUI(protoDataBagUI.uuid, protoDataBagUI, default, mapping)
+
+  def outputUI(protoDataBagUI: PrototypeDataBagUI, mapping: Var[Option[Any]] = Var(None)) =
+    OutputUI(protoDataBagUI.uuid, protoDataBagUI, mapping)
+
+  case class InputUI(id: String, protoDataBagUI: PrototypeDataBagUI, default: Var[Option[String]] = Var(None), mapping: Var[Option[Any]] = Var(None))
+  case class OutputUI(id: String, protoDataBagUI: PrototypeDataBagUI, mapping: Var[Option[Any]] = Var(None))
 
 }

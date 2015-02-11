@@ -2,13 +2,15 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client
 import org.openmole.gui.client.service.ClientService
+import org.openmole.gui.client.service.dataui._
 import org.openmole.gui.ext.dataui._
 import org.openmole.gui.ext.factoryui.FactoryUI
-import org.openmole.gui.misc.js.{Forms ⇒ bs, InputFilter, Select}
+import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter, Select }
 import org.scalajs.dom.Event
 
 import scala.sys.Prop.DoubleProp
 import scalatags.JsDom.all
+import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.ext.data.ProtoTYPE.DOUBLE
@@ -92,7 +94,7 @@ class GenericPanel(uuid: String,
     (PROTOTYPES, db ⇒ isPrototypeUI(db) && inputFilter.contains(db.name()))
   )
 
-  val conceptTable = bs.table(
+  val conceptTable = tags.table(
     thead,
     Rx {
       val dbUIs: Seq[DataBagUI] = filter().factories.head
@@ -118,15 +120,15 @@ class GenericPanel(uuid: String,
 
   def dataBagUIView(db: DataBagUI) = db match {
     case proto: PrototypeDataBagUI ⇒ proto.name() + " [" + proto.dataUI().dimension().toString + "]"
-    case _ ⇒ db.name() + ""
+    case _                         ⇒ db.name() + ""
   }
 
   val dimInput = bs.input("0")(placeholder := "Dim", width := 50, autofocus := true).render
 
   //New button
   val newGlyph =
-  //FIXME: THE SIZE OF THE GLYPH IS SMALLER THAN THE REST OF THE GROUP WHEN GROUPEL
-  // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
+    //FIXME: THE SIZE OF THE GLYPH IS SMALLER THAN THE REST OF THE GROUP WHEN GROUPEL
+    // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
     bs.button("Add")(onclick := { () ⇒ add
     }).render
 
@@ -172,7 +174,7 @@ class GenericPanel(uuid: String,
     factorySelector.content() = currentDataBagUI()
   }
 
-  val saveHeaderButton = bs.button("Apply", btn_primary)(/*`type` := "submit",*/ onclick := { () ⇒
+  val saveHeaderButton = bs.button("Apply", btn_primary)( /*`type` := "submit",*/ onclick := { () ⇒
     save
   }).render
 
@@ -183,7 +185,7 @@ class GenericPanel(uuid: String,
   val dialog = {
     modalDialog(uuid,
       headerDialog(Rx {
-        bs.div()(
+        tags.div(
           nav(getID, navbar_form)(
             bs.form()(
               inputGroup(navbar_left)(
@@ -206,19 +208,19 @@ class GenericPanel(uuid: String,
           ))
       }),
       bodyDialog(Rx {
-        bs.div()(
+        tags.div(
           if (editionState()) {
             inputFilter.tag.value = currentDataBagUI().map {
               _.name()
             }.getOrElse((""))
             settingTabs() match {
               case Some(s: SettingTabs) ⇒ s.view
-              case _ ⇒ bs.div()(h1("Create a  first data !"))
+              case _                    ⇒ tags.div(h1("Create a  first data !"))
             }
           }
           else {
             inputFilter.tag.value = ""
-            bs.div()(conceptTable)
+            tags.div(conceptTable)
           }
         )
       }
