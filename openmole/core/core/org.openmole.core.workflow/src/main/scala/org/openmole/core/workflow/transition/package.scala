@@ -35,20 +35,14 @@ package transition {
 
   trait TransitionPackage {
 
+    implicit def transitionsPuzzlePieceDecorator(from: PuzzlePiece) = new TransitionDecorator(from)
     implicit def transitionsPuzzleDecorator(from: Puzzle) = new TransitionDecorator(from)
-
     implicit def transitionsCapsuleDecorator(from: Capsule) = new TransitionDecorator(from.toPuzzle)
-
     implicit def transitionsTaskDecorator(from: Task) = new TransitionDecorator(from.toCapsule.toPuzzle)
-
     implicit def transitionsTaskBuilderDecorator(from: TaskBuilder) = new TransitionDecorator(from.toTask.toCapsule.toPuzzle)
-
     implicit def transitionsSlotDecorator(slot: Slot) = new TransitionDecorator(slot.toPuzzle)
-
     implicit def taskToSlotConverter(task: Task) = Slot(Capsule(task))
-
     implicit def transitionToSlotConverter(transition: ITransition) = transition.end
-
     implicit def conditionStringConverter(condition: String) = Condition(condition)
 
     class TransitionDecorator(from: Puzzle) {

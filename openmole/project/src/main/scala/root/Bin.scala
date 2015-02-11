@@ -54,7 +54,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   lazy val java368URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-386/20-b17/java-jre-linux-386-20-b17.tgz")
   lazy val javax64URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-x64/20-b17/java-jre-linux-x64-20-b17.tgz")
 
-  lazy val openmole = Project("openmole", dir / "openmole", settings = tarProject ++ urlDownloadProject ++ assemblySettings) settings (commonsSettings: _*) settings (
+  lazy val openmole = Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings) settings (commonsSettings: _*) settings (
     setExecutable ++= Seq("openmole", "openmole.bat"),
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
     resourcesAssemble <+= (assemble in openmolePlugins, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },

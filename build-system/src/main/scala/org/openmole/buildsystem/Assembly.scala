@@ -22,14 +22,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
   lazy val tarProject: Seq[Setting[_]] = Seq(
     Tar.name := "assemble.tar.gz",
     Tar.innerFolder := "",
-    Tar.tar <<= (Tar.folder, streams, target, Tar.name, Tar.innerFolder) map tarImpl
-  )
-
-  lazy val urlDownloadProject: Seq[Setting[_]] = Seq(
-    downloads := Nil,
-    assemble <<= assemble dependsOn {
-      (downloads, assemblyPath, target, streams) map urlDownloader
-    }
+    Tar.tar <<= (Tar.folder, streams, target, Tar.name, Tar.innerFolder, streams) map tarImpl
   )
 
   private def recursiveCopy(from: File, to: File, streams: TaskStreams): Unit = {
@@ -77,6 +70,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
   }
 
   def assemblySettings = Seq(
+    downloads := Nil,
     resourcesAssemble := Seq.empty,
     setExecutable := Seq.empty,
     assemblyPath := target.value / "assemble",
@@ -86,7 +80,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
         (path, files) ⇒
           files.foreach(f ⇒ new File(path, f).setExecutable(true))
           path
-      } dependsOn (copyResources),
+      } dependsOn (copyResources, (downloads, assemblyPath, target, streams) map urlDownloader),
     Tar.folder <<= assemble,
     bundleProj := false,
     install := true,
@@ -101,7 +95,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
     copyResources <++= (externalDependencyClasspath in Compile, assemblyDependenciesPath, dependencyNameMap, dependencyFilter, streams) map copyLibraryDependencies
   )
 
-  def tarImpl(folder: File, s: TaskStreams, t: File, name: String, innerFolder: String): File = {
+  def tarImpl(folder: File, s: TaskStreams, t: File, name: String, innerFolder: String, streams: TaskStreams): File = {
     val out = t / name
 
     val tgzOS = managed {

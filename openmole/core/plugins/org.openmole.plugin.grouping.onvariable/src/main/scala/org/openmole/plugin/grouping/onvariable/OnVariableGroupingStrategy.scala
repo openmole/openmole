@@ -23,6 +23,10 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 
+object OnVariableGroupingStrategy {
+  def apply(prototypes: Prototype[_]*) = new OnVariableGroupingStrategy(prototypes: _*)
+}
+
 class OnVariableGroupingStrategy(prototypes: Prototype[_]*) extends Grouping {
   def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup = new MoleJobGroup(prototypes.flatMap { context.option(_) }.toSeq: _*)
 }

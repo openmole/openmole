@@ -60,15 +60,41 @@ object Puzzle {
 
 }
 
+object PuzzlePiece {
+  implicit def slotToPuzzlePieceConverter(slot: Slot) = slot.toPuzzlePiece
+  implicit def capsuleToPuzzlePieceConverter(capsule: Capsule) = capsule.toPuzzlePiece
+  implicit def taskToPuzzlePieceConverter(task: Task) = new Capsule(task).toPuzzlePiece
+}
+
+case class PuzzlePiece(
+    slot: Slot,
+    sources: Iterable[Source] = Iterable.empty,
+    hooks: Iterable[Hook] = Iterable.empty,
+    environment: Option[Environment] = None,
+    grouping: Option[Grouping] = None) {
+  def capsule = slot.capsule
+  def toPuzzle: Puzzle =
+    Puzzle(
+      slot,
+      Seq(capsule),
+      Iterable.empty,
+      Iterable.empty,
+      sources.map(capsule -> _),
+      hooks.map(capsule -> _),
+      Map() ++ environment.map(capsule -> _),
+      Map() ++ grouping.map(capsule -> _)
+    )
+}
+
 case class Puzzle(
     first: Slot,
-    lasts: Iterable[Capsule],
-    transitions: Iterable[ITransition],
-    dataChannels: Iterable[DataChannel],
-    sources: Iterable[(Capsule, Source)],
-    hooks: Iterable[(Capsule, Hook)],
-    environments: Map[Capsule, Environment],
-    grouping: Map[Capsule, Grouping]) {
+    lasts: Iterable[Capsule] = Iterable.empty,
+    transitions: Iterable[ITransition] = Iterable.empty,
+    dataChannels: Iterable[DataChannel] = Iterable.empty,
+    sources: Iterable[(Capsule, Source)] = Iterable.empty,
+    hooks: Iterable[(Capsule, Hook)] = Iterable.empty,
+    environments: Map[Capsule, Environment] = Map.empty,
+    grouping: Map[Capsule, Grouping] = Map.empty) {
 
   def this(p: Puzzle) =
     this(
