@@ -195,6 +195,12 @@ object Forms {
 
   val bordered = key("table table-bordered")
   val striped = key("table table-striped")
+  val active = key("active")
+  val success = key("success")
+  val danger = key("danger")
+  val warning = key("warning")
+  val info = key("info")
+  val nothing = key("")
 
   //Forms
   def form(keys: ClassKeyAggregator = emptyCK) = tags.form(`class` := keys.key)

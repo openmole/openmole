@@ -57,26 +57,29 @@ class InputPanelUI(dataUI: InputDataUI) extends PanelUI {
         for (
           i ← (dataUI.inputsUI() ++ filteredInputsUI).sortBy(_.protoDataBagUI.name())
         ) yield {
-          tags.tr(
-            bs.td(col_md_3)(a(i.protoDataBagUI.name(),
-              cursor := "pointer",
-              onclick := { () ⇒
-                {
-                  println("click")
-                }
-              })),
-            bs.td(col_md_2)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
-            bs.td(col_md_2)(tags.span(i.protoDataBagUI.dataUI().dimension)),
-            bs.td(col_md_2)(i.default().getOrElse("").toString),
-            bs.td(col_md_2),
-            bs.td(col_md_1)(bs.button(glyph(glyph_minus))(onclick := { () ⇒
-              dataUI -= i
-            }))
-          /*  bs.td(col_md_5)(bs.label(db.dataUI().dataType, label_primary)),
+          bs.tr(
+            if (dataUI.inputsUI().contains(i)) nothing
+            else warning
+          )(
+              bs.td(col_md_3)(a(i.protoDataBagUI.name(),
+                cursor := "pointer",
+                onclick := { () ⇒
+                  {
+                    println("click")
+                  }
+                })),
+              bs.td(col_md_2)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
+              bs.td(col_md_2)(tags.span(i.protoDataBagUI.dataUI().dimension)),
+              bs.td(col_md_2)(i.default().getOrElse("").toString),
+              bs.td(col_md_2),
+              bs.td(col_md_1)(bs.button(glyph(glyph_minus))(onclick := { () ⇒
+                dataUI -= i
+              }))
+            /*  bs.td(col_md_5)(bs.label(db.dataUI().dataType, label_primary)),
                                   bs.td(col_md_1)(bs.button(glyph(glyph_trash))(onclick := { () ⇒
                                     ClientService -= db
                                   }))*/
-          )
+            )
         }
       )
     }
