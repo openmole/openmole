@@ -46,7 +46,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
 
-  lazy val includeOsgi = libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % osgiVersion.value
+  lazy val includeOsgi = libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944"
 
   lazy val jetty = "org.openmole" %% "org-eclipse-jetty" % "8.1.8.v20121106"
 
