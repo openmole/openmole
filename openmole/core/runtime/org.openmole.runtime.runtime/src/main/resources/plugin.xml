@@ -1,30 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
    <extension
-         id="runtime"
-         point="org.eclipse.core.runtime.products">
-      <product
-            application="org.openmole.runtime.runtime"
-            name="runtime">
-         <property
-               name="appName"
-               value="runtime">
-         </property>
-      </product>
-   </extension>
-   <extension
-         id="runtime"
+         id="org.openmole.runtime.runtime"
          name="runtime"
          point="org.eclipse.core.runtime.applications">
       <application
             cardinality="singleton-global"
             thread="main"
             visible="true">
-         <run
-               class="org.openmole.runtime.runtime.SimExplorer">
-         </run>
+         <run class="org.openmole.runtime.runtime.SimExplorer"/>
       </application>
    </extension>
 

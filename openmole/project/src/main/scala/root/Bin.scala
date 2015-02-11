@@ -78,9 +78,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       pluginsDirectory := assemblyPath.value / "plugins",
       header :=
       """|eclipse.application=org.openmole.ui
-         |osgi.bundles.defaultStartLevel=4
-         |eclipse.product=org.openmole.ui
-         |osgi.splashPath=platform:/base/plugins/org.openmole.example""".stripMargin,
+         |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels,
       config := assemblyPath.value / "configuration/config.ini"
     )
@@ -247,10 +245,8 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       dependencyNameMap := renameEquinox,
       pluginsDirectory := assemblyPath.value / "plugins",
       header :=
-      """ |eclipse.application=org.openmole.runtime.runtime.runtime
-          |osgi.bundles.defaultStartLevel=4
-          |eclipse.product=org.openmole.runtime.runtime
-          |osgi.splashPath=platform:/base/plugins/org.openmole.runtime.runtime""".stripMargin,
+      """ |eclipse.application=org.openmole.runtime.runtime
+          |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels,
       config := assemblyPath.value / "configuration/config.ini"
   )
@@ -271,10 +267,8 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       Tar.innerFolder := "openmole-daemon",
       pluginsDirectory := assemblyPath.value / "plugins",
       header :=
-      """|eclipse.application=org.openmole.runtime.daemon.daemon
-         |osgi.bundles.defaultStartLevel=4
-         |eclipse.product=org.openmole.runtime.daemon.daemon
-         |osgi.splashPath=platform:/base/plugins/org.openmole.daemon""".stripMargin,
+      """|eclipse.application=org.openmole.runtime.daemon
+         |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels,
       config := assemblyPath.value / "configuration/config.ini"
   )

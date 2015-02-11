@@ -9,22 +9,7 @@
             cardinality="singleton-global"
             thread="main"
             visible="true">
-         <run
-               class="org.openmole.ui.Application">
-         </run>
+         <run class="org.openmole.ui.Application" />
       </application>
    </extension>
-   <extension
-         id="simexplorer"
-         point="org.eclipse.core.runtime.products">
-      <product
-            application="org.openmole.ui"
-            name="openmole">
-         <property
-               name="appName"
-               value="openmole">
-         </property>
-      </product>
-   </extension>
-
 </plugin>
