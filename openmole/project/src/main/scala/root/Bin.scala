@@ -282,7 +282,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       Tar.folder <<= (unidoc in Compile).map(_.head)
     )
 
-  lazy val documentation = Project("documentation", dir / "documentation", settings = scalatex.SbtPlugin.projectSettings ++ assemblySettings) settings (commonsSettings: _*) dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
+  lazy val site = Project("site", dir / "org.openmole.site", settings = scalatex.SbtPlugin.projectSettings ++ assemblySettings) settings (commonsSettings: _*) dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
     (run in Compile) <<= (run in Compile) dependsOn assemble,
     libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.1",
     libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value,

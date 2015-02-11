@@ -1,0 +1,12 @@
+
+@import org.openmole.site.Objects._
+
+@sect{Branching model}
+  The branching model of OpenMOLE that has been chosen until now is this one:
+  @ul
+	@li{the next version of OpenMOLE is in the master,}
+	@li{disrupting features are developed in branches,}
+    @li{new features are merged into the master as soon as they are working good enough to be likely operational for the next release,}
+	@li{at each release a maintenance branch is created to be able to patch the last released version, this branch is called version-dev.}
+
+  @p The advantage of this model is that new features are tested early in interaction with each others. This scheme serves an hybrid, date-based / feature-based release schedule. At the beginning of a development cycle, an approximate date is given for the next release. This date depends on what are the new features wanted in it. This date is not written in stone and can be modulated given the progress of the developments.

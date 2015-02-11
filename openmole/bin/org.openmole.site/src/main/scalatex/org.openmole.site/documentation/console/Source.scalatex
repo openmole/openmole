@@ -1,0 +1,44 @@
+
+@import org.openmole.site.Objects._
+@import DocumentationPages._
+
+@sect{Source}
+  Sources have been designed it possible to inject data in the dataflow from diverse sources: CSV files, database, sensors... For now very few sources are available in OpenMOLE. If you need to interface OpenMOLE with external datasources we can probably help you.
+
+  @sect{Plug a source}
+    You can plus sources in the data flow in the same way you can plug @a("hooks", href := root.console.hook.file ). Let consider this simple workflow:
+    @br @hl.openmole("""
+    import org.openmole.plugin.domain.collection._
+    import org.openmole.plugin.task.scala._
+    import org.openmole.plugin.source.file._
+
+    val files = Val[Array[File]]
+    val result = Val[Double]
+
+    val hello =
+      ScalaTask("val result = computeFromFiles(files)") set (
+        inputs += files,
+        outputs += result
+      )
+
+    val s = ListFilesSource("/some/directory", files)
+
+    val ex = (hello source s) start""")
+
+    @p The source @i{s} is plugged a the beginning of the task @i{hello}. The source is executed prior to each execution of @i{hello}. You can also plug multiple sources on the same task using the syntax: (hello source (s1, s2, s3)).
+
+  @sect{List files in a directory}
+    This source list dirs and inject array of files into the dataflow.
+    @br @hl.openmole("""
+    import org.openmole.plugin.source.file._
+
+    val someVariable = Val[String]
+    val txtFiles = Val[Array[File]]
+    val files = Val[Array[File]]
+
+    val s1 = ListFilesSource("/some/directory", files)
+
+    val s2 =
+      ListFilesSource("/my/directory/${someVariable}/", txtFiles, ".*\\.txt") set (
+        inputs += someVariable
+      )""")

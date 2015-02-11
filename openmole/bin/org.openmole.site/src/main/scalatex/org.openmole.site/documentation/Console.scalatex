@@ -1,0 +1,55 @@
+@import org.openmole.site.Objects._
+@import org.openmole.site.DocumentationPages
+@import org.openmole.site.Resource
+
+@sect{Getting started}
+  @sect{Launch the console}
+    @p First you should open a system console (on windows the low quality console available by default is called cmd.exe, run that and a console will appear). Then you should go to the OpenMOLE install directory and  launch the console use the -c option of OpenMOLE executable.
+    @p Under Unix like shells: @hl.highlight("./openmole -c", "plain")
+    @p Under Windows Dos: @hl.highlight("openmole.bat -c", "plain")
+    @p Console provides a headless / batch mode for running scripts. To use it you should use the -s option: @hl.highlight("./openmole -c -s /path/to/you/mole/script", "plain")
+    @p In that case OpenMOLE still asks for you preference cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -c -s /path/to/your/mole/script -pw password", "plain")
+    @p In batch mode in order for OpenMOLE to block until the execution of your mole has ended you may add at the end of your script:
+    @br @hl.openmole("""ex.waitUntilEnded // ex is the name of your mole execution variable""", test = false)
+
+    @p To load plugins in the OpenMOLE console you should use the -p option: @hl.highlight("./openmole -c -p /path/to/plugin.jar /path/to/anotherplugin.jar", "plain")
+
+  @sect{The OpenMOLE language}
+    @p The OpenMOLE console language is an extension of the scala language designed for distributed computing. It supports all the scala constructs and additional operators and classes especially designed to compose workflows. OpenMOLE workflows expose explicit parallel aspect of the workload that can be delegated to distributed computing environments in a transparent manner. The philosophy of OpenMOLE is test small (on your computer) and scale for free (on remote distributed computing environments).
+
+    @p A good way to get a first glimpse at what OpenMOLE can do is to read this @a("research paper", href := "http://www.openmole.org/files/FGCS2013.pdf").
+
+       @sect{Basic scala constructs}
+         You need only a very basic understanding of the scala language in order to design OpenMOLE workflows.
+         @sect{Importing the content of a namespace}
+           @hl.openmole("""import path.to.the.namespace._""", test = false)
+           @p It renders accessible all the entities contained in the namespace "path.to.the.namespace" by using their simple name. As you will see in OpenMOLE scripts, you will have to import namespaces in order to use OpenMOLE plugins.
+         @sect{To declare variables}
+           @hl.openmole("""
+           val a = 1 // declares a variable a of type Int
+           val b = "Text" // declares a variable a of type String
+           val c = if(condition) 5 else 10 // declare a variable c of type Int, the value of c depends on the condition""", test = false)
+
+         @sect{To constructing objects}
+           OpenMOLE takes advantage of the object oriented aspect of scala. It proposes a set of objects that you can build and assemble together to specify your workflow. In general an object is instantiated using the "new" keyword:
+           @br @hl.openmole("""val f = new File("/tmp/file.txt")""")
+           @p In OpenMOLE we have choosen to use factories instead of directly constructing objects, that's why most of the OpenMOLE scripts doesn't contain the "new" keyword at all.
+           @p For instance: @hl.openmole("""val l = File("/tmp/file.txt")""")
+           @p Under the hood, it calls a method that is in charge of building the file (the apply method of the object File)")
+         @sect{Named parameters}
+           Functions calls generally require that the parameters are provided in a predefined order. In scala you can get rid of this ordering constraint by using named parameters. In OpenMOLE you will often find this pattern:
+           @br @hl.openmole("val t = SomeClass(value1, value2, otherParam = otherValue)", test = false)
+           @p It means that value1 and value2 are the values for the first two parameters and that the parameter named otherParam is set to the value otherValue, the other parameters are set to their default values.
+         @sect{Going further}
+           What you have red here should be be sufficient in order to start with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Task documentation", href := DocumentationPages.root.console.task.file).
+
+           @p Scala is a very nice language with an extensive very well designed standard library. To get more insight on this language you should look at:
+           @ul
+             @li{ @a("the scala website", href := "http://www.scala-lang.org/") }
+             @li{ @a("the scala books", href := "http://www.scala-lang.org/node/959") }
+             @li{ @a("the standard API documentation", href := "http://www.scala-lang.org/api/current/index.html") }
+
+          @sect{API documentation}
+            You can browse the @a("automatically generated documentation", href := Resource.api.file + "/index.html")
+
+
