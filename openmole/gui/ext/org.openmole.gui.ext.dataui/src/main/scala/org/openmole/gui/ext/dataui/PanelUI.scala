@@ -22,6 +22,14 @@ import scalatags.JsDom.all._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+object PanelUI {
+  def empty = new PanelUI {
+    def view = div
+
+    def save = {}
+  }
+}
+
 trait PanelUI {
   def view: TypedTag[HTMLElement]
   def save: Unit

@@ -1,4 +1,4 @@
-package org.openmole.gui.client.service.dataui
+package org.openmole.gui.client.core
 
 /*
  * Copyright (C) 29/01/2015 // mathieu.leclaire@openmole.org
@@ -17,18 +17,19 @@ package org.openmole.gui.client.service.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.service.dataui._
 import org.openmole.gui.client.service.ClientService
+import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.js.{ InputFilter, Forms ⇒ bs }
 import rx._
 
 import scala.scalajs.js.annotation.JSExport
-import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
-import org.openmole.gui.ext.dataui.PanelUI
+import scalatags.JsDom.tags
 
-class InputPanelUI(dataUI: InputDataUI) extends PanelUI {
+class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
 
   val inputFilter = new InputFilter(pHolder = "Add a prototype")
 
@@ -65,7 +66,8 @@ class InputPanelUI(dataUI: InputDataUI) extends PanelUI {
                 cursor := "pointer",
                 onclick := { () ⇒
                   {
-                    println("click")
+                    panel.currentDataBagUI().map { db ⇒ panel.stack(db, 1) }
+                    panel.setCurrent(i.protoDataBagUI)
                   }
                 })),
               bs.td(col_md_2)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
@@ -76,9 +78,9 @@ class InputPanelUI(dataUI: InputDataUI) extends PanelUI {
                 dataUI -= i
               }))
             /*  bs.td(col_md_5)(bs.label(db.dataUI().dataType, label_primary)),
-                                  bs.td(col_md_1)(bs.button(glyph(glyph_trash))(onclick := { () ⇒
-                                    ClientService -= db
-                                  }))*/
+                                      bs.td(col_md_1)(bs.button(glyph(glyph_trash))(onclick := { () ⇒
+                                        ClientService -= db
+                                      }))*/
             )
         }
       )

@@ -1,7 +1,9 @@
-package org.openmole.gui.client.service.dataui
+package org.openmole.gui.client.core
+
+import org.openmole.gui.client.service.dataui.DataBagUI
 
 /*
- * Copyright (C) 30/01/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 11/02/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,23 +19,16 @@ package org.openmole.gui.client.service.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.ProtoTYPE._
-import org.openmole.gui.ext.dataui._
 import rx._
 
-class OutputDataUI(val ioMapping: Boolean) extends DataUI {
-  type DATA = OutputData
+class PanelSequences {
+  private val sequences: Var[Seq[(DataBagUI, Int)]] = Var(Seq())
 
-  def dataType = "Outputs"
+  def stack(dataBagUI: DataBagUI, index: Int) = sequences() = sequences() :+ (dataBagUI, index)
 
-  val outputsUI: Var[Seq[OutputUI]] = Var(Seq())
-
-  def panelUI = PanelUI.empty
-
-  def data = new OutputData {
-    def outputs = outputsUI().map { o ⇒
-      Output(o.protoDataBagUI.dataUI().data, o.mapping())
-    }
+  def flush: Option[(DataBagUI, Int)] = {
+    val last = sequences().lastOption
+    last.map { l ⇒ sequences() = sequences().filterNot(_._1.uuid == l._1.uuid) }
+    last
   }
 }
