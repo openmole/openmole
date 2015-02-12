@@ -21,24 +21,21 @@ import org.openmole.core.workflow.data.Prototype
 import org.openmole.core.workflow.builder._
 import org.openmole.misc.macros.Keyword._
 
-package object netlogo {
-
-  lazy val netLogoInputs =
-    add[{
-      def addNetLogoInput(p: Prototype[_], n: String)
-      def addNetLogoInput(p: Prototype[_])
-    }]
-
-  lazy val netLogoOutputs =
-    add[{
-      def addNetLogoOutput(n: String, p: Prototype[_])
-      def addNetLogoOutput(p: Prototype[_])
-      def addNetLogoOutput(name: String, column: Int, p: Prototype[_])
-    }]
-
+package netlogo {
   trait NetLogoPackage extends external.ExternalPackage {
-    lazy val netLogoInputs = netlogo.netLogoInputs
-    lazy val netLogoOutputs = netlogo.netLogoOutputs
-  }
+    lazy val netLogoInputs =
+      add[{
+        def addNetLogoInput(p: Prototype[_], n: String)
+        def addNetLogoInput(p: Prototype[_])
+      }]
 
+    lazy val netLogoOutputs =
+      add[{
+        def addNetLogoOutput(n: String, p: Prototype[_])
+        def addNetLogoOutput(p: Prototype[_])
+        def addNetLogoOutput(name: String, column: Int, p: Prototype[_])
+      }]
+  }
 }
+
+package object netlogo extends NetLogoPackage

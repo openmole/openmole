@@ -29,10 +29,6 @@ object OMKeys {
 
   val assemble = TaskKey[File]("assemble", "The path with assembled project")
 
-  val osgiVersion = SettingKey[String]("osgi-version")
-
-  val osgiSingleton = SettingKey[Boolean]("osgi-singleton")
-
   val setExecutable = SettingKey[Seq[String]]("setExecutable", "Sets the path relative to the assemble folder executable")
 
   val downloads = SettingKey[Seq[(URL, String)]]("downloads", "A project setting that describes a urls to download")
@@ -54,6 +50,17 @@ object OMKeys {
     val innerFolder = SettingKey[String]("tar-inner-folder", "All files in tar will be put under this folder")
     val name = SettingKey[String]("tar-name")
     val folder = TaskKey[File]("tar-folder", "The folder to tar.")
+  }
+
+  object OSGiApplication {
+    val pluginsDirectory = SettingKey[File]("osgi-plugins-directory")
+    val config = SettingKey[File]("osgi-config")
+    val startLevels = SettingKey[Seq[(String, Int)]]("osgi-start-levels")
+    val header = SettingKey[String]("osgi-header")
+  }
+
+  object OSGi {
+    val singleton = SettingKey[Boolean]("osgi-singleton")
   }
 
 }

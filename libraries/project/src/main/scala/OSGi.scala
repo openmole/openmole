@@ -19,11 +19,6 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 object OSGi extends Defaults(Apache) {
 
   val dir = file("target/libraries")
-  val bouncyCastleVersion = "1.50"
-
-  lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
-
-  lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV}
 
   lazy val jetty = OsgiProject(
     "org.eclipse.jetty",
@@ -68,7 +63,6 @@ object OSGi extends Defaults(Apache) {
     libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2",
     version := "1.7.2"
     )
-
 
   lazy val xstream = OsgiProject(
     "com.thoughtworks.xstream",

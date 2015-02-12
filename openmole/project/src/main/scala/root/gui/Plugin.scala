@@ -6,7 +6,6 @@ import Keys._
 import com.typesafe.sbt.osgi.OsgiKeys._
 import root.gui.plugin._
 import org.openmole.buildsystem.OMKeys._
-import scala.Some
 
 abstract class PluginDefaults(subBuilds: Defaults*) extends GuiDefaults(subBuilds: _*) {
   override def dir = super.dir / "plugins"
