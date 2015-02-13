@@ -40,7 +40,9 @@ object MoleJob {
       case (_, v: Variable[Any]) ⇒ (v.prototype, v.value)
     }.unzip
 
-  case class StateChange(old: State, state: State)
+  sealed trait StateChange
+  case object Unchanged extends StateChange
+  case class Changed(old: State, state: State) extends StateChange
 }
 
 import MoleJob._
@@ -72,20 +74,20 @@ class MoleJob(
   private def changeState(state: State) = synchronized {
     if (_state == null) {
       _state = state
-      None
+      Unchanged
     }
     else if (!_state.isFinal) {
       val oldState = _state
       _state = state
-      Some(StateChange(oldState, state))
+      Changed(oldState, state)
     }
-    else None
+    else Unchanged
   }
 
-  private def signalChanged(change: Option[StateChange]) =
+  private def signalChanged(change: StateChange) =
     change match {
-      case Some(StateChange(old, state)) ⇒ stateChangedCallBack(this, old, state)
-      case _                             ⇒
+      case Changed(old, state) ⇒ stateChangedCallBack(this, old, state)
+      case _                   ⇒
     }
 
   def state_=(state: State) = signalChanged(changeState(state))
