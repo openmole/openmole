@@ -76,17 +76,10 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
         for (moleJob ← job.moleJobs) {
           if (contextResults.results.isDefinedAt(moleJob.id)) {
             val executionResult = contextResults.results(moleJob.id)
-
-            moleJob.synchronized {
-              if (!moleJob.finished) {
-                executionResult match {
-                  case Success(context) ⇒
-                    moleJob.finish(context)
-                  case Failure(e) ⇒
-                    sender ! MoleJobError(moleJob, batchJob, e)
-                }
-              }
-            }
+            executionResult match {
+               case Success(context) ⇒ moleJob.finish(context)
+               case Failure(e) ⇒ if(!moleJob.finished) sender ! MoleJobError(moleJob, batchJob, e)
+             }
           }
         }
     }
