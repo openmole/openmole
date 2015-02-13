@@ -31,15 +31,6 @@
 
       @p Now say we want to explore a complete combination of data files located in the @i{/tmp/data/} directory over 10 values from 1 to 10 for the input parameter. The OpenMOLE script would be:
       @p @hl.openmole("""
-      import org.openmole.plugin.domain.collection._
-      import org.openmole.plugin.domain.distribution._
-      import org.openmole.plugin.domain.modifier._
-      import org.openmole.plugin.domain.file._
-      import org.openmole.plugin.sampling.combine._
-      import org.openmole.plugin.task.systemexec._
-      import org.openmole.plugin.hook.display._
-      import org.openmole.plugin.hook.file._
-
       // Declare the variable
       val i = Val[Int]
       val input = Val[File]
@@ -78,16 +69,6 @@
     @p This script is located in the @i{/tmp/hello} directory. First package it with care: @hl.highlight("""care -o hello.bin python hello.py 42 test.txt""", "plain")
     @p Then you can run it in OpenMOLE using the script:
     @br @hl.openmole("""
-    import org.openmole.plugin.domain.collection._
-    import org.openmole.plugin.domain.distribution._
-    import org.openmole.plugin.domain.modifier._
-    import org.openmole.plugin.domain.file._
-    import org.openmole.plugin.sampling.combine._
-    import org.openmole.plugin.task.systemexec._
-    import org.openmole.plugin.hook.display._
-    import org.openmole.plugin.hook.file._
-    import org.openmole.plugin.grouping.batch._
-
     // Declare the variable
     val arg = Val[Int]
     val output = Val[File]

@@ -5,11 +5,6 @@
   val similar_wanted = Val[Double]"""
 
 @def exploration = """
-  import org.openmole.plugin.domain.collection._
-  import org.openmole.plugin.domain.distribution._
-  import org.openmole.plugin.domain.modifier._
-  import org.openmole.plugin.sampling.combine._
-
   val exploration =
     ExplorationTask(
       (similar_wanted in (20.0 to 80.0 by 10.0)) x
@@ -17,8 +12,6 @@
     )"""
 
 @def netlogo = """
-  import org.openmole.plugin.task.netlogo5._
-
   val psimilar = Val[Double]
   val punhappy = Val[Double]
 
@@ -35,8 +28,6 @@
   )"""
 
 @def csvHook = """
-  import org.openmole.plugin.hook.file._
-
   val csvHook = AppendToCSVFileHook("result.csv", similar_wanted, psimilar, punhappy)"""
 
 @sect{Embed your NetLogo model}

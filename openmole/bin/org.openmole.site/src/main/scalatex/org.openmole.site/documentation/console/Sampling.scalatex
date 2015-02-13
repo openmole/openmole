@@ -7,11 +7,6 @@
   @sect{Complete sampling}
     The most common way of exploring a model is achieved by using a complete sampling:
     @br @hl.openmole("""
-    import org.openmole.plugin.domain.collection._
-    import org.openmole.plugin.sampling.combine._
-    import org.openmole.plugin.domain.distribution._
-    import org.openmole.plugin.domain.modifier._
-
     val i = Val[Int]
     val j = Val[Double]
     val k = Val[String]
@@ -28,10 +23,6 @@
 
     @p In some cases it is convenient to have domains bounds depending on each others. This is the purpose of the "+" combinator. Notice how a bound of the second factor depends on the value of the first one.
     @br @hl.openmole("""
-    import org.openmole.plugin.domain.range._
-    import org.openmole.plugin.domain.collection._
-    import org.openmole.plugin.sampling.combine._
-
     val i = Val[Int]
     val j = Val[Double]
 
@@ -43,9 +34,6 @@
   @sect{Combine samplings}
     To define samplings you can combine them with each other. For instance, the complete sampling is a way to achieve that. Other composition functions are implemented in OpenMOLE:
     @br @hl.openmole("""
-    import org.openmole.plugin.sampling.combine._
-    import org.openmole.plugin.domain.collection._
-
     val p1 = Val[Int]
     val p2 = Val[Int]
 
@@ -63,9 +51,6 @@
     val s6 = s1.shuffle // Create a sampling containing the values of s1 in a random order
 
     // Replicate 100 times the sampling s1 and provide seed for each experiment
-    import org.openmole.plugin.domain.distribution._
-    import org.openmole.plugin.domain.modifier._
-
     val seed = Val[Int]
     val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))
 
@@ -77,15 +62,10 @@
   @sect{Exploring files}
     In OpenMOLE the concept of domain is large and comprise a variable varying along with a set of files. For instance to explore a program over a set of files in a subdirectory you may use:
   @br @hl.openmole("""
-  import org.openmole.plugin.domain.file._
   val f = Val[File]
   val explo = ExplorationTask (f in ListFilesDomain("/path/to/a/dir"))""")
   @p To explore files located in several directories:
   @br @hl.openmole("""
-  import org.openmole.plugin.domain.collection._
-  import org.openmole.plugin.sampling.combine._
-  import org.openmole.plugin.domain.file._
-
   val i = Val[Int]
   val f = Val[File]
 
@@ -96,10 +76,6 @@
     )""")
   @p If you wish to select one single file for each value of @i{i} you may use the select file domain:
   @br @hl.openmole("""
-  import org.openmole.plugin.domain.collection._
-  import org.openmole.plugin.sampling.combine._
-  import org.openmole.plugin.domain.file._
-
   val i = Val[Int]
   val f = Val[File]
 
@@ -110,10 +86,6 @@
     )""")
   @p In OpenMOLE files names are not retained through the dataflow, only the content is. If you want to keep the name of the file for future use, you need to store the name in a variable of type String:
   @br @hl.openmole("""
-  import org.openmole.plugin.domain.collection._
-  import org.openmole.plugin.sampling.combine._
-  import org.openmole.plugin.domain.file._
-
   val i = Val[Int]
   val f = Val[File]
   val name = Val[String]
@@ -128,9 +100,6 @@
   @sect{Latin hypercube sampling}
     For wilder space of parameter @a("LHS", href := "http://en.wikipedia.org/wiki/Latin_hypercube_sampling") is available. To use it:
     @br @hl.openmole("""
-    import org.openmole.plugin.domain.range._
-    import org.openmole.plugin.sampling.lhs._
-
     val i = Val[Double]
     val j = Val[Double]
 
@@ -145,9 +114,6 @@
   @sect{Low-discrepancy sequences}
      For uniform sampling can also use the @a("Sobol sequence", href := "https://en.wikipedia.org/wiki/Sobol_sequence"), which is a low discrepancy sequence. To use it:
           @br @hl.openmole("""
-          import org.openmole.plugin.domain.range._
-          import org.openmole.plugin.sampling.quasirandom._
-
           val i = Val[Double]
           val j = Val[Double]
 
@@ -169,8 +135,6 @@
     0.8,fic2,19""", "csv")
     @p A CSVSampling using this file can may like:
     @br @hl.openmole("""
-    import org.openmole.plugin.sampling.csv._
-
     val i = Val[Int]
     val d = Val[Double]
     val f = Val[File]
@@ -186,9 +150,6 @@
   @sect{Higher level sampling}
     Some samplings combination generate higher level sampling such as:
     @br @hl.openmole("""
-    import org.openmole.plugin.domain.collection._
-    import org.openmole.plugin.sampling.combine._
-
     val i = Val[Int]
 
     val s1 = i in (0 to 100)
@@ -200,11 +161,6 @@
     @p An example of mole using higher an higher level sampling.
     @br @hl.openmole("""
     // This code compute 10 couples (for f1 and f2) of medians among 5 samples picked at random in f1 x f2
-    import org.openmole.plugin.sampling.combine._
-    import org.openmole.plugin.domain.collection._
-    import org.openmole.plugin.hook.display._
-    import org.openmole.plugin.task.statistic._
-
     val p1 = Val[Double]
     val p2 = Val[Double]
 

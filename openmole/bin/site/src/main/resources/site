@@ -25,6 +25,8 @@ REALPATH=$TARGET_FILE
 LOCATION=$( cd $(dirname $REALPATH) ; pwd -P )
 cd "$CURDIR"
 
+CONFIGDIR=/tmp/site_`date +%s`_$RANDOM
+
 java -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog $@
 
 rm -rf "${CONFIGDIR}" 

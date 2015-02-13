@@ -9,8 +9,6 @@
 
   @p Then you can use the SSH environment:
   @br @hl.openmole("""
-  import org.openmole.plugin.environment.ssh._
-
   val env =
     SSHEnvironment(
       "login",

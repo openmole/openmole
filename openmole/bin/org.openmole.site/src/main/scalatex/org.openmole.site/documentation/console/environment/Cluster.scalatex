@@ -12,8 +12,6 @@
   @sect{PBS / Torque}
     @a("PBS", href :="http://en.wikipedia.org/wiki/Portable_Batch_System") is a venerable batch system for clusters. You may use a PBS computing environment as follow:
     @br @hl.openmole("""
-    import org.openmole.plugin.environment.pbs._
-
     val env =
       PBSEnvironment(
         "login",
@@ -32,8 +30,6 @@
   @sect{SGE}
     To delegate some computation load to a @a("SGE", href := "https://en.wikipedia.org/wiki/Oracle_Grid_Engine") based cluster you can use the SGEEnvironment as follow:
     @br @hl.openmole("""
-    import org.openmole.plugin.environment.sge._
-
     val env =
       SGEEnvironment(
         "login",
@@ -51,9 +47,6 @@
   @sect{SLURM}
     To delegate some computation load to a @a("SLURM", href := "https://en.wikipedia.org/wiki/Simple_Linux_Utility_for_Resource_Management") based cluster you can use the SLURM environment as follow:
     @br @hl.openmole("""
-    import org.openmole.plugin.environment.slurm._
-    import fr.iscpif.gridscale.slurm.Gres // only when using GRES Scheduling
-
     val env =
       SLURMEnvironment(
         "login",
@@ -77,8 +70,6 @@
   @sect{Condor}
     To delegate some computation load to a @a("Condor", href := "https://en.wikipedia.org/wiki/HTCondor") condor based cluster you can use the CondorEnvironment as follow:
     @br @hl.openmole("""
-    import org.openmole.plugin.environment.condor._
-
     val env =
       CondorEnvironment(
         "login",
@@ -94,8 +85,6 @@
   @sect{OAR}
     To delegate some computation load to an @a("OAR", href := "http://oar.imag.fr/dokuwiki/doku.php") cluster, you can do a follow:
     @br @hl.openmole("""
-    import org.openmole.plugin.environment.oar._
-
     val env =
       OAREnvironment(
         "login",

@@ -25,9 +25,6 @@
 
       @p Now, we will run the java program inside the OpenMOLE runtime with the following script (copy-paste that in the OpenMOLE console).
       @hl.openmole("""
-      import org.openmole.plugin.domain.collection._
-      import org.openmole.plugin.task.scala._
-
       val proto1 = Val[Int]
 
       val explo = ExplorationTask(proto1 in (0 until 10))
@@ -69,11 +66,6 @@
     @p Once you have package this code in the same way as in above, it can be explored:
 
       @hl.openmole("""
-      import org.openmole.plugin.domain.collection._
-      import org.openmole.plugin.sampling.combine._
-      import org.openmole.plugin.task.scala._
-      import org.openmole.plugin.hook.file._
-
       val arg1 = Val[Double]
       val arg2 = Val[Double]
       val out1 = Val[Double]
@@ -134,10 +126,6 @@
       @p Now, we will run the java program inside the OpenMOLE runtime with the following script:
 
       @hl.openmole("""
-      import org.openmole.plugin.task.scala._
-      import org.openmole.plugin.hook.file._
-      import org.openmole.plugin.domain.collection._
-
       val proto1 = Val[Int]
       val inputFile = Val[File]
       val outputFile = Val[File]

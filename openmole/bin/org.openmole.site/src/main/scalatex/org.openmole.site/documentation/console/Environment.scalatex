@@ -16,12 +16,7 @@
   @p OpenMOLE will then delegate the execution of the task to the designated environment from bare metal. You do not need to install anything or perform any kind of configuration on the target execution environment for OpenMOLE to work on it. You will however be required to provide the authentication information in order for OpenMOLE to access the remote environment.
 
   @p The use of a batch environment is generally not suited for short tasks (less than a 1 minute for a cluster to less than 1 hour for a grid). In case your tasks are short you can group several executions. To group the execution by 100 in each job submitted to the environment you should like that:
-  @br @hl.openmole("""
-  // required for grouping with the keyword 'by'
-  import org.openmole.plugin.grouping.batch._
-
-  val mole = explo -< (t1 on env by 100)""", header = """
-    import org.openmole.plugin.domain.collection._
+  @br @hl.openmole("""val mole = explo -< (t1 on env by 100)""", header = """
     val env = LocalEnvironment(10)
     val t1 = EmptyTask()
     val i = Val[Int]

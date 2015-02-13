@@ -7,15 +7,11 @@
  @sect{Setup your grid authentication}
    To delegate a task on EGI you need to register your certificate in OpenMOLE. In the console execute:
    @br @hl.openmole("""
-   import org.openmole.plugin.environment.egi._
-
    EGIAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")""", header = """def encrypted = "" """)
 
    @p You need to execute this operation only once and for all. OpenMOLE persist this information.
    @p Other certificate types are also available: pem certificates and X509 proxy files:
    @br @hl.openmole("""
-   import org.openmole.plugin.environment.egi._
-
    //For pem
    EGIAuthentication() = PEMCertificate(encrypted, "/path/to/the/cert", "/path/to/the/key")
 
@@ -25,8 +21,6 @@
   @sect{Delegate tasks on EGI}
     To use EGI you should be registered in the virtual organisation (VO). To delegate a task on a VO you can create an EGI environment:
     @br @hl.openmole("""
-    import org.openmole.plugin.environment.egi._
-
     val env = EGIEnvironment("biomed")""")
     @p Here the VO @i{biomed} is specified but you can specify the EGI VO of you choice.
     @p Many options are available to configure the EGI environment:
@@ -47,8 +41,6 @@
 
     @p To pass these options the the environment you should pass them as parameters of the constructor:
     @br @hl.openmole("""
-    import org.openmole.plugin.environment.egi._
-
     val env =
       EGIEnvironment(
         "biomed",
@@ -63,14 +55,10 @@
   @sect{DIRAC}
     To use EGI through DIRAC you have first to set up you DIRAC authentication with a P12Certificate:
     @br @hl.openmole("""
-    import org.openmole.plugin.environment.egi._
-
     DIRACAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")""", header = """def encrypted = "" """)
 
     @p Then you can declare a DIRAC environment providing the VO name and the URL of the DIRAC REST endpoint:
     @br @hl.openmole("""
-    import org.openmole.plugin.environment.egi._
-
     val env =
       DIRACEnvironment(
         "biomed",

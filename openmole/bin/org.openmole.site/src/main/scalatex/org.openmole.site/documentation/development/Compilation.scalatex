@@ -30,7 +30,16 @@
     @p You will find the resulting archive in @i{bin/openmole/target/openmole.tar.gz}.
   @sect{Publish the bundles}
     @hl.highlight("""
-    cd openmole-libraries
+    cd libraries
     sbt install-remote
     cd ../openmole
     sbt install-remote""", "plain")
+  @sect{Build the web site}
+    @hl.highlight("""
+    cd openmole
+    sbt "project site" assemble
+    cd bin/site/target/assemble
+    ./site /path/of/the/site
+    """, "plain")
+
+    @p Optionally you can use @hl.highlight("./site /path/of/the/site -np", "plain") in order to bypass the testing of the scripts which is time-consuming.

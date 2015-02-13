@@ -306,7 +306,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       header :=
       """|eclipse.application=org.openmole.site
          |osgi.bundles.defaultStartLevel=4""".stripMargin,
-      startLevels := openmoleStartLevels,
+      startLevels := openmoleStartLevels ++ Seq("openmole-plugin" -> 3),
       pluginsDirectory := assemblyPath.value / "plugins",
       config := assemblyPath.value / "configuration/config.ini"
     ) dependsOn (siteGeneration)

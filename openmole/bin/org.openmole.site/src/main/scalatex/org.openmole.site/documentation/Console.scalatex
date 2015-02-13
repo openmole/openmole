@@ -21,9 +21,6 @@
 
        @sect{Basic scala constructs}
          You need only a very basic understanding of the scala language in order to design OpenMOLE workflows.
-         @sect{Importing the content of a namespace}
-           @hl.openmole("""import path.to.the.namespace._""", test = false)
-           @p It renders accessible all the entities contained in the namespace "path.to.the.namespace" by using their simple name. As you will see in OpenMOLE scripts, you will have to import namespaces in order to use OpenMOLE plugins.
          @sect{To declare variables}
            @hl.openmole("""
            val a = 1 // declares a variable a of type Int

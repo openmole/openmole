@@ -2,14 +2,9 @@
 @import org.openmole.site.Objects._
 
 @p To authenticate with login / password:
-@br @hl.openmole("""
-    import org.openmole.plugin.environment.ssh._
-
-    SSHAuthentication += LoginPassword("login", encrypted, "machine.domain")""", header = """def encrypted = "" """)
+@br @hl.openmole("""SSHAuthentication += LoginPassword("login", encrypted, "machine.domain")""", header = """def encrypted = "" """)
 @p To authenticate with a private key:
 @br @hl.openmole("""
-    import org.openmole.plugin.environment.ssh._
-
     SSHAuthentication +=
       PrivateKey(
         "/path/to/the/private/key",
