@@ -134,7 +134,8 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     Libraries.h2,
     Libraries.jasypt,
     Libraries.jodaTime,
-    Libraries.scalaLang
+    Libraries.scalaLang,
+    Libraries.slf4j
   )
 
   lazy val guiCoreDependencies = Seq(
