@@ -8,7 +8,7 @@ import Keys._
 import org.openmole.buildsystem.OMKeys._
 import org.openmole.buildsystem._, Assembly._
 import Libraries._
-import com.typesafe.sbt.osgi.OsgiKeys._
+import com.typesafe.sbt.osgi.OsgiKeys
 import sbt.inc.Analysis
 import sbtunidoc.Plugin._
 import UnidocKeys._
@@ -50,12 +50,37 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }
     )
 
-  lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true, buddyPolicy = Some("global")) settings (
-    organization := "org.openmole.ui"
-  ) settings (
-      libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.log4j, scopt, equinoxApp)
-    ) dependsOn (
-        base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher, base.Misc.pluginManager, base.Core.workflow, base.Core.batch, gui.Server.core, gui.Client.core, gui.Bootstrap.js, gui.Bootstrap.osgi, base.Misc.sftpserver, base.Misc.logging, Web.core, base.Misc.console, base.Core.dsl)
+  lazy val openmoleConsole = OsgiProject("org.openmole.console") settings (
+    organization := "org.openmole.console"
+  ) dependsOn (
+      base.Core.workflow,
+      base.Misc.console,
+      base.Core.dsl,
+      base.Core.batch
+    )
+
+  lazy val openmoleUI = OsgiProject("org.openmole.ui", singleton = true) settings (
+    organization := "org.openmole.ui",
+    libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.log4j, scopt, equinoxApp)
+  ) dependsOn (
+      openmoleConsole,
+      base.Misc.workspace,
+      base.Misc.replication,
+      base.Misc.exception,
+      base.Misc.tools,
+      base.Misc.eventDispatcher,
+      base.Misc.pluginManager,
+      base.Core.workflow,
+      base.Core.batch,
+      gui.Server.core,
+      gui.Client.core,
+      gui.Bootstrap.js,
+      gui.Bootstrap.osgi,
+      base.Misc.sftpserver,
+      base.Misc.logging,
+      Web.core,
+      base.Misc.console,
+      base.Core.dsl)
 
   lazy val java368URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-386/20-b17/java-jre-linux-386-20-b17.tgz")
   lazy val javax64URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-x64/20-b17/java-jre-linux-x64-20-b17.tgz")
@@ -66,15 +91,18 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
-      resourcesAssemble <+= (assemble in openmolePlugins, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
+      resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
+      resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r -> p / "dbserver" },
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r -> p / "openmole-plugins" },
       resourcesAssemble <+= (assemble in guiPlugins, assemblyPath) map { case (r, p) ⇒ r -> p / "openmole-plugins-gui" },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r -> p / "runtime" },
       downloads := Seq(java368URL -> "runtime/jvm-386.tar.gz", javax64URL -> "runtime/jvm-x64.tar.gz"),
+      libraryDependencies += Libraries.scalajHttp,
+      dependencyFilter := filter,
+      assemblyDependenciesPath := assemblyPath.value / "plugins",
       Tar.name := "openmole.tar.gz",
       Tar.innerFolder := "openmole",
-      dependencyFilter := filter,
       pluginsDirectory := assemblyPath.value / "plugins",
       header :=
       """|eclipse.application=org.openmole.ui
@@ -83,17 +111,17 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       config := assemblyPath.value / "configuration/config.ini"
     )
 
-  lazy val coreDependencies = Seq(
-    bouncyCastle,
-    gridscale,
-    logback,
-    scopt,
-    guava,
-    bonecp,
-    arm,
-    xstream,
-    slick,
-    jline,
+  lazy val coreDependencies = Seq[sbt.ModuleID](
+    Libraries.bouncyCastle,
+    Libraries.gridscale,
+    Libraries.logback,
+    Libraries.scopt,
+    Libraries.guava,
+    Libraries.bonecp,
+    Libraries.arm,
+    Libraries.xstream,
+    Libraries.slick,
+    Libraries.jline,
     Apache.ant,
     Apache.codec,
     Apache.config,
@@ -102,12 +130,11 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     Apache.pool,
     Apache.log4j,
     Apache.sshd,
-    groovy,
-    h2,
-    jasypt,
-    jodaTime,
-    scalaLang,
-    slf4j
+    Libraries.groovy,
+    Libraries.h2,
+    Libraries.jasypt,
+    Libraries.jodaTime,
+    Libraries.scalaLang
   )
 
   lazy val guiCoreDependencies = Seq(
@@ -124,52 +151,20 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     scalajHttp
   )
 
-  lazy val openmolePlugins = Project("openmoleplugins", dir / "target" / "openmoleplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
+  lazy val openmoleCore = Project("openmolecore", dir / "target" / "openmolecore", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo assemblyPath,
-    resourcesAssemble <++= Seq(openmoleui.project) sendTo assemblyPath,
-    libraryDependencies ++= Seq(
-      Libraries.bouncyCastle,
-      Libraries.gridscale,
-      Libraries.logback,
-      Libraries.scopt,
-      Libraries.guava,
-      Libraries.bonecp,
-      Libraries.arm,
-      Libraries.xstream,
-      Libraries.slick,
-      Libraries.jline,
-      Apache.ant,
-      Apache.codec,
-      Apache.config,
-      Apache.exec,
-      Apache.math,
-      Apache.pool,
-      Apache.log4j,
-      Apache.sshd,
-      Libraries.jawn,
-      Libraries.groovy,
-      Libraries.h2,
-      Libraries.jasypt,
-      Libraries.jodaTime,
-      Libraries.scalajHttp,
-      Libraries.scalaLang,
-      Libraries.scalatra,
-      Libraries.scaladget,
-      Libraries.slf4j,
-      Libraries.robustIt,
-      Libraries.jacksonJson,
-      Libraries.jetty,
-      Libraries.scalajsLibrary,
-      Libraries.scalajsTools,
-      Libraries.scalajsDom,
-      Libraries.scalajsJQuery,
-      Libraries.scalaTags,
-      Libraries.autowire,
-      Libraries.upickle,
-      Libraries.rx
-    ) ++ equinox,
-      dependencyFilter := filter,
-      dependencyNameMap := renameEquinox
+    resourcesAssemble <++= Seq(openmoleConsole.project) sendTo assemblyPath,
+    libraryDependencies ++= coreDependencies,
+    libraryDependencies ++= equinox,
+    dependencyFilter := filter,
+    dependencyNameMap := renameEquinox
+  )
+
+  lazy val openmoleGUI = Project("openmoleGUI", dir / "target" / "openmoleGUI", settings = assemblySettings) settings (commonsSettings: _*) settings (
+    resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "gui") sendTo assemblyPath,
+    resourcesAssemble <++= Seq(openmoleUI.project, openmoleConsole.project) sendTo assemblyPath,
+    libraryDependencies ++= guiCoreDependencies,
+    dependencyFilter := filter
   )
 
   lazy val consolePlugins = Project("consoleplugins", dir / "target" / "consoleplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
@@ -222,46 +217,29 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo (assemblyPath / "plugins"),
     setExecutable ++= Seq("run.sh"),
     Tar.name := "runtime.tar.gz",
-    libraryDependencies ++= Seq(
-      Libraries.logback,
-      Libraries.scopt,
-      Libraries.guava,
-      Libraries.xstream,
-      Libraries.slick,
-      Libraries.gridscale,
-      Apache.config,
-      Apache.exec,
-      Apache.math,
-      Apache.pool,
-      Apache.log4j,
-      Libraries.h2,
-      Libraries.jasypt,
-      Libraries.jodaTime,
-      Libraries.scalaLang,
-      Libraries.slf4j,
-      Libraries.groovy
-    ) ++ equinox,
-      dependencyFilter := filter,
-      dependencyNameMap := renameEquinox,
-      pluginsDirectory := assemblyPath.value / "plugins",
-      header :=
-      """ |eclipse.application=org.openmole.runtime.runtime
+    libraryDependencies ++= coreDependencies ++ equinox,
+    dependencyFilter := filter,
+    dependencyNameMap := renameEquinox,
+    pluginsDirectory := assemblyPath.value / "plugins",
+    header :=
+    """ |eclipse.application=org.openmole.runtime.runtime
           |osgi.bundles.defaultStartLevel=4""".stripMargin,
-      startLevels := openmoleStartLevels,
-      config := assemblyPath.value / "configuration/config.ini"
+    startLevels := openmoleStartLevels,
+    config := assemblyPath.value / "configuration/config.ini"
   )
 
   lazy val daemon = Project("daemon", dir / "daemon", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
     assemblyDependenciesPath := assemblyPath.value / "plugins",
+    resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
-    resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ (a contains "core") || (a contains "daemon")) sendTo (assemblyPath / "plugins"),
     libraryDependencies ++= Seq(
       gridscale,
       gridscaleSSH,
       bouncyCastle
     ) ++ equinox ++ coreDependencies,
-      setExecutable ++= Seq("openmole-daemon", "openmole-daemon.bat"),
+      assemblyDependenciesPath := assemblyPath.value / "plugins",
       dependencyFilter := filter,
+      setExecutable ++= Seq("openmole-daemon", "openmole-daemon.bat"),
       dependencyNameMap := renameEquinox,
       Tar.name := "openmole-daemon.tar.gz",
       Tar.innerFolder := "openmole-daemon",
@@ -282,31 +260,55 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       Tar.folder <<= (unidoc in Compile).map(_.head)
     )
 
-  lazy val site = Project("site", dir / "org.openmole.site", settings = scalatex.SbtPlugin.projectSettings ++ assemblySettings) settings (commonsSettings: _*) dependsOn (Seq[sbt.ClasspathDep[sbt.ProjectReference]](base.Core.dsl, base.Misc.tools) ++ base.Plugin.subProjects.map(p ⇒ ClasspathDependency(p, None)): _*) settings (
-    (run in Compile) <<= (run in Compile) dependsOn assemble,
-    libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.1",
-    libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-    resourcesAssemble <+= (Tar.tar in openmole, classDirectory in Compile) map { case (f, d) ⇒ f -> d },
-    resourcesAssemble <+= (Tar.tar in daemon, classDirectory in Compile) map { case (f, d) ⇒ f -> d },
-    resourcesAssemble <+= (Tar.tar in api, classDirectory in Compile) map { case (doc, d) ⇒ doc -> d },
-    dependencyFilter := { d ⇒ false }
-  ) settings (
-      (
-        buildInfoSettings ++
-        Seq(
-          sourceGenerators in Compile <+= buildInfo,
-          buildInfoKeys :=
-            Seq[BuildInfoKey](
-              name,
-              version,
-              scalaVersion,
-              sbtVersion,
-              BuildInfoKey.action("buildTime") {
-                System.currentTimeMillis
-              }),
-          buildInfoPackage := "buildinfo"
-        )
-      ): _*
-    )
+  lazy val siteGeneration =
+    OsgiProject(
+      "org.openmole.site",
+      singleton = true,
+      imports = Seq("*"),
+      settings = commonsSettings ++ scalatex.SbtPlugin.projectSettings ++ assemblySettings
+    ) settings (
+        OsgiKeys.bundle <<= OsgiKeys.bundle dependsOn (assemble),
+        organization := "org.openmole.site",
+        libraryDependencies += Libraries.scalatexSite,
+        libraryDependencies += Libraries.scalaLang,
+        libraryDependencies += Libraries.equinoxApp,
+        resourcesAssemble <+= (Tar.tar in openmole, resourceManaged in Compile) map { case (f, d) ⇒ f -> d },
+        resourcesAssemble <+= (Tar.tar in daemon, resourceManaged in Compile) map { case (f, d) ⇒ f -> d },
+        resourcesAssemble <+= (Tar.tar in api, resourceManaged in Compile) map { case (doc, d) ⇒ doc -> d },
+        dependencyFilter := { d ⇒ false }
+      ) settings (
+          buildInfoSettings ++
+            Seq(
+              sourceGenerators in Compile <+= buildInfo,
+              buildInfoKeys :=
+                Seq[BuildInfoKey](
+                  name,
+                  version,
+                  scalaVersion,
+                  sbtVersion,
+                  BuildInfoKey.action("buildTime") {
+                    System.currentTimeMillis
+                  }),
+              buildInfoPackage := "org.openmole.site.buildinfo"
+            ): _*
+        ) dependsOn (openmoleConsole)
+
+  lazy val site =
+    Project("site", dir / "site", settings = assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
+      setExecutable ++= Seq("site"),
+      resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
+      resourcesAssemble <++= Seq(siteGeneration.project) sendTo (assemblyPath / "plugins"),
+      resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
+      resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
+      dependencyFilter := filter,
+      assemblyDependenciesPath := assemblyPath.value / "plugins",
+      dependencyNameMap := renameEquinox,
+      header :=
+      """|eclipse.application=org.openmole.site
+         |osgi.bundles.defaultStartLevel=4""".stripMargin,
+      startLevels := openmoleStartLevels,
+      pluginsDirectory := assemblyPath.value / "plugins",
+      config := assemblyPath.value / "configuration/config.ini"
+    ) dependsOn (siteGeneration)
 
 }

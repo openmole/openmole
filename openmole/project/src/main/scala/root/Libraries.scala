@@ -151,4 +151,6 @@ object Libraries extends Defaults(Apache) {
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 
+  lazy val scalatexSite = "org.openmole" %% "com-lihaoyi-scalatex-site" % "0.1.1"
+
 }

@@ -86,30 +86,27 @@ object TarArchiver {
 
   implicit class FileTarArchiveDecorator(file: File) {
 
-    def archiveDirWithRelativePathNoVariableContent(toArchive: File) = {
-      val os = new TarOutputStream(file.bufferedOutputStream)
-      try os.createDirArchiveWithRelativePathNoVariableContent(toArchive)
-      finally os.close
-    }
+    def archiveDirWithRelativePathNoVariableContent(toArchive: File) =
+      withClosable(new TarOutputStream(file.bufferedOutputStream())) {
+        _.createDirArchiveWithRelativePathNoVariableContent(toArchive)
+      }
 
     //FIXME method name is ambiguous rename
-    def archiveCompressDirWithRelativePathNoVariableContent(dest: File) = {
-      val os = new TarOutputStream(file.gzippedBufferedOutputStream)
-      try os.createDirArchiveWithRelativePathNoVariableContent(dest)
-      finally os.close
-    }
+    def archiveCompressDirWithRelativePathNoVariableContent(dest: File) =
+      withClosable(new TarOutputStream(file.gzippedBufferedOutputStream)) {
+        _.createDirArchiveWithRelativePathNoVariableContent(dest)
+      }
 
-    def extractDirArchiveWithRelativePath(dest: File) = {
-      val is = new TarInputStream(file.bufferedInputStream)
-      try is.extractDirArchiveWithRelativePath(dest)
-      finally is.close
-    }
+    def extractDirArchiveWithRelativePath(dest: File) =
+      withClosable(new TarInputStream(file.bufferedInputStream)) {
+        _.extractDirArchiveWithRelativePath(dest)
+      }
 
-    def extractUncompressDirArchiveWithRelativePath(dest: File) = {
-      val is = new TarInputStream(file.gzippedBufferedInputStream)
-      try is.extractDirArchiveWithRelativePath(dest)
-      finally is.close
-    }
+    def extractUncompressDirArchiveWithRelativePath(dest: File) =
+      withClosable(new TarInputStream(file.gzippedBufferedInputStream)) {
+        _.extractDirArchiveWithRelativePath(dest)
+      }
+
   }
 
   private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, baseDir: Path, additionalCommand: TarEntry ⇒ Unit) = {

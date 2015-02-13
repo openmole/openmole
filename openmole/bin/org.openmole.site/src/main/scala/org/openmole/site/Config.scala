@@ -17,16 +17,6 @@
 
 package org.openmole.site
 
-object Resource {
-  def css = "styles.css"
-  def logo = FileResource("openmole.png")
-  def openmole = FileResource("openmole.tar.gz")
-  def openmoleDaemon = FileResource("openmole-daemon.tar.gz")
-  def api = ArchiveResource("openmole-api.tar.gz", "api")
-  def all = Seq[Resource](logo, openmole, openmoleDaemon, api)
+object Config {
+  var testScript = true
 }
-
-sealed trait Resource
-case class FileResource(file: String) extends Resource
-case class ArchiveResource(source: String, file: String) extends Resource
-

@@ -110,7 +110,7 @@ object SerialiserService extends Logger {
   }
 
   def serialiseAndArchiveFiles(obj: Any, f: File): Unit = {
-    val os = new TarOutputStream(f.bufferedOutputStream)
+    val os = new TarOutputStream(f.bufferedOutputStream())
     try serialiseAndArchiveFiles(obj, os)
     finally os.close
   }
@@ -124,7 +124,7 @@ object SerialiserService extends Logger {
   }
 
   def serialiseGetPluginsAndFiles(obj: Any, file: File): PluginClassAndFiles = lock.read {
-    val os = file.bufferedOutputStream
+    val os = file.bufferedOutputStream()
     try serialiseGetPluginsAndFiles(obj, os)
     finally os.close
   }
@@ -155,7 +155,7 @@ object SerialiserService extends Logger {
   def serialise(obj: Any, os: OutputStream) = lock.read(xstream.toXML(obj, os))
 
   def serialise(obj: Any, file: File): Unit = lock.read {
-    val os = file.bufferedOutputStream
+    val os = file.bufferedOutputStream()
     try serialise(obj, os)
     finally os.close
   }

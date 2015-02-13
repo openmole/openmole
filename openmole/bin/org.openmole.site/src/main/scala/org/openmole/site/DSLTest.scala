@@ -20,30 +20,27 @@ package org.openmole.site
 import javax.script.ScriptEngineManager
 
 import org.openmole.misc.tools.service.ObjectPool
+import org.openmole.console.Console
+import org.openmole.misc.console.ScalaREPL
 
-import scala.tools.nsc.interpreter.IMain
 import scala.util.Try
 
 object DSLTest {
 
-  def engine = {
-    val eng = new ScriptEngineManager().getEngineByName("scala").asInstanceOf[IMain]
-    val settings = eng.settings
-    class Plop
-    settings.embeddedDefaults[Plop]
-    eng
-  }
+  lazy val console = new Console()
 
-  lazy val engines = new ObjectPool[IMain](engine) {
-    override def release(t: IMain) = {
+  def engine = console.newREPL
+
+  lazy val engines = new ObjectPool[ScalaREPL](engine) {
+    override def release(t: ScalaREPL) = {
       t.reset
+      console.initialise(t)
       super.release(t)
     }
   }
 
   def test(code: String, header: String) = Try {
-    def testCode = s"""import org.openmole.core.dsl._
-        |
+    def testCode = s"""
         |$header
         |$code
       """.stripMargin

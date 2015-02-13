@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console
+package org.openmole.console
 
 import jline.console.ConsoleReader
 import java.util.concurrent.Executors
@@ -36,7 +36,22 @@ import scala.tools.nsc.io.{ File ⇒ SFile }
 import java.io.File
 import org.openmole.misc.console.ScalaREPL
 
-class Console(plugins: PluginSet, password: Option[String], script: Option[String]) { console ⇒
+object Console {
+  @tailrec def askPassword: String = {
+    val password = new ConsoleReader().readLine("enter password:", '*')
+    val confirmation = new ConsoleReader().readLine("confirm password:", '*')
+    if (password != confirmation) {
+      println("Password and confirmation don't match.")
+      askPassword
+    }
+    else password
+  }
+
+}
+
+import Console._
+
+class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = None, script: Option[String] = None) { console ⇒
 
   def setPassword(password: String) =
     try {
@@ -71,6 +86,12 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
       "commands._"
     ) ++ autoImports
 
+  def initialisationCommands =
+    Seq(
+      "implicit lazy val plugins = _plugins_",
+      imports.map("import " + _).mkString("; ")
+    )
+
   def run {
     val correctPassword =
       password match {
@@ -79,33 +100,35 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
         case Some(p) ⇒ setPassword(p)
       }
 
-    if (correctPassword) {
-      val loop = new ScalaREPL
-
-      try {
-        loop.beQuietDuring {
-          loop.bind("commands", new Command)
-          loop.bind("_plugins_", plugins)
-          loop.interpret("implicit lazy val plugins = _plugins_")
-          loop.interpret(imports.map("import " + _).mkString("; "))
-        }
-
-        script match {
-          case None ⇒ loop.loop
-          case Some(s) ⇒
-            val scriptFile = new File(s)
-            if (scriptFile.exists) loop.interpretAllFrom(new SFile(scriptFile))
-            else println("File " + scriptFile + " doesn't exist.")
-        }
+    if (correctPassword) withREPL { loop ⇒
+      script match {
+        case None ⇒ loop.loop
+        case Some(s) ⇒
+          val scriptFile = new File(s)
+          if (scriptFile.exists) loop.interpretAllFrom(new SFile(scriptFile))
+          else println("File " + scriptFile + " doesn't exist.")
       }
-      finally loop.close
     }
   }
 
-  //def setVariable(name: String, value: Object) = binding.setVariable(name, value)
+  def initialise(loop: ScalaREPL) = {
+    loop.beQuietDuring {
+      loop.bind("commands", new Command)
+      loop.bind("_plugins_", plugins)
+      initialisationCommands.foreach(loop.interpret)
+    }
+    loop
+  }
 
-  //def run(command: String) = groovysh.run(command)
+  def newREPL = {
+    val loop = new ScalaREPL(priorityClasses = List(this.getClass))
+    initialise(loop)
+  }
 
-  //def leftShift(cmnd: Command): Object = groovysh.leftShift(cmnd)
+  def withREPL[T](f: ScalaREPL ⇒ T) = {
+    val loop = newREPL
+    try f(loop)
+    finally loop.close
+  }
 
 }

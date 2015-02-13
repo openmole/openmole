@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console
+package org.openmole.console
 
 import jline.console.ConsoleReader
 import java.io.File
@@ -36,6 +36,7 @@ import scala.collection.mutable.HashMap
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.dsl._
+import Console._
 
 class Command {
 
