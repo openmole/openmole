@@ -1,4 +1,4 @@
-package org.openmole.gui.client.service.dataui
+package org.openmole.gui.client.core
 
 /*
  * Copyright (C) 30/01/15 // mathieu.leclaire@openmole.org
@@ -17,18 +17,17 @@ package org.openmole.gui.client.service.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
-import scalatags.JsDom.all._
-import scala.scalajs.js.annotation.JSExport
+import org.openmole.gui.client.service.dataui.OutputDataUI
 import org.openmole.gui.ext.dataui.PanelUI
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scalatags.JsDom.tags
+import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 
-class OutputPanelUI(dataUI: OutputDataUI) extends PanelUI {
+import scala.scalajs.js.annotation.JSExport
+
+class OutputPanelUI(panel: GenericPanel, dataUI: OutputDataUI) extends PanelUI {
 
   @JSExport
-  val view = bs.div()(
-    "Output Panel ! " + dataUI.ioMapping
-  )
+  val view = tags.div()
 
   def save = {
     //dataUI.truc() = trucInput.value

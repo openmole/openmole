@@ -41,7 +41,7 @@ class InputDataUI(val ioMapping: Boolean) extends DataUI {
 
   val inputsUI: Var[Seq[InputUI]] = Var(Seq())
 
-  def panelUI = new InputPanelUI(this)
+  def panelUI = PanelUI.empty
 
   def data = new InputData {
     def inputs = inputsUI().map { id ⇒

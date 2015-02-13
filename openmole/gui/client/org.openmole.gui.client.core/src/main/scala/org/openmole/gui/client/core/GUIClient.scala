@@ -64,7 +64,7 @@ object GUIClient {
     topdiv.appendChild(
       nav("mainMav",
         Seq(
-          (navItem("settings", "Settings").render(data("toggle") := "modal", data("target") := "#taskPanelID"), "task", () ⇒ {}),
+          (navItem("settings", "Settings").render(data("toggle") := "modal", data("target") := "#conceptPanelID"), "task", () ⇒ {}),
           (navItem("executions", "Executions").render, "env", () ⇒ {
             println("Not yet")
           })
@@ -72,7 +72,7 @@ object GUIClient {
       )
     )
 
-    val dialog = Panel.generic("taskPanelID")
+    val dialog = Panel.generic
 
     /*val dialog = new PanelWithIO("taskPanelID",
       ClientService.taskFactories

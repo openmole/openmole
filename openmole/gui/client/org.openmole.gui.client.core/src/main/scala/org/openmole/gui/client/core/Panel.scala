@@ -39,36 +39,37 @@ object Panel {
 
   object ConceptFilter extends Enumeration {
 
+    implicit def dataBagToConceptState(db: DataBagUI): ConceptState = db match {
+      case t: TaskDataBagUI      ⇒ TASKS
+      case p: PrototypeDataBagUI ⇒ PROTOTYPES
+      case _                     ⇒ ALL
+    }
+
     case class ConceptState(name: String, factories: Seq[FactoryUI]) extends Val(name)
 
     val ALL = ConceptState("All", ClientService.factories)
     val TASKS = ConceptState("Tasks", ClientService.taskFactories)
     val PROTOTYPES = ConceptState("Prototypes",
       PrototypeFactoryUI.doubleFactory +: ClientService.prototypeFactories filterNot (_.dataUI.dataType == DOUBLE)
-
     )
   }
 
-  import ConceptFilter._
-
-  def generic(uuid: String,
-              defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS)) =
-    new GenericPanel(uuid, defaultDataBagUI).dialog
+  def generic = new GenericPanel().dialog
 }
 
 import Panel.ConceptFilter._
 
-class GenericPanel(uuid: String,
-                   defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS)) {
+class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS)) {
 
   val editionState: Var[Boolean] = Var(false)
   val filter: Var[ConceptState] = Var(defaultDataBagUI.right.toOption.getOrElse(TASKS))
   val rows = Var(0)
   val currentDataBagUI = Var(defaultDataBagUI.left.toOption)
+  val panelSequences = new PanelSequences
 
   val settingTabs = Rx {
-    currentDataBagUI().map {
-      SettingTabs(_)
+    currentDataBagUI().map { db ⇒
+      SettingTabs(this, db)
     }
   }
   val inputFilter = new InputFilter(currentDataBagUI().map {
@@ -94,6 +95,14 @@ class GenericPanel(uuid: String,
     (PROTOTYPES, db ⇒ isPrototypeUI(db) && inputFilter.contains(db.name()))
   )
 
+  Obs(filter) {
+    filter() match {
+      case TASKS      ⇒ factorySelector.contents() = ClientService.taskFactories
+      case PROTOTYPES ⇒ factorySelector.contents() = ClientService.prototypeFactories
+      case _          ⇒ factorySelector.contents() = ClientService.factories
+    }
+  }
+
   val conceptTable = bs.table(striped)(
     thead,
     Rx {
@@ -117,6 +126,10 @@ class GenericPanel(uuid: String,
       )
     }
   ).render
+
+  def stack(db: DataBagUI, index: Int) = {
+    panelSequences.stack(db, index)
+  }
 
   def dataBagUIView(db: DataBagUI) = db match {
     case proto: PrototypeDataBagUI ⇒ proto.name() + " [" + proto.dataUI().dimension().toString + "]"
@@ -152,15 +165,12 @@ class GenericPanel(uuid: String,
   val conceptFilter = Rx {
     nav("filterNav", nav_pills, navItem("allfilter", "All", () ⇒ {
       filter() = ALL
-      factorySelector.contents() = ClientService.factories
     }, filter() == ALL),
       navItem("valfilter", "Val", () ⇒ {
         filter() = PROTOTYPES
-        factorySelector.contents() = ClientService.prototypeFactories
       }, filter() == PROTOTYPES),
       navItem("taskfilter", "Task", () ⇒ {
         filter() = TASKS
-        factorySelector.contents() = ClientService.taskFactories
       }, filter() == TASKS),
       navItem("envfilter", "Env", () ⇒ {
         println("not impl yet")
@@ -171,10 +181,22 @@ class GenericPanel(uuid: String,
   def setCurrent(dbUI: DataBagUI) = {
     currentDataBagUI() = Some(dbUI)
     factorySelector.content() = currentDataBagUI()
+    filter() = currentDataBagUI().get
   }
 
-  val saveHeaderButton = bs.button("Apply", btn_primary)( /*`type` := "submit",*/ onclick := { () ⇒
+  val saveHeaderButton = bs.button("Apply", btn_primary)(`type` := "submit", onclick := { () ⇒
     save
+
+    panelSequences.flush match {
+      case Some((db: DataBagUI, ind: Int)) ⇒
+        setCurrent(db)
+        settingTabs().map {
+          _.set(ind)
+        }
+      case _ ⇒
+        editionState() = false
+        inputFilter.nameFilter() = ""
+    }
   }).render
 
   val saveButton = bs.button("Close", btn_test)(data("dismiss") := "modal", onclick := { () ⇒
@@ -182,7 +204,7 @@ class GenericPanel(uuid: String,
   })
 
   val dialog = {
-    modalDialog(uuid,
+    modalDialog("conceptPanelID",
       headerDialog(Rx {
         tags.div(
           nav(getID, navbar_form)(
@@ -245,6 +267,7 @@ class GenericPanel(uuid: String,
   }
 
   def save = {
+
     currentDataBagUI().map {
       db ⇒
         ClientService.setName(db, inputFilter.tag.value)
@@ -258,8 +281,6 @@ class GenericPanel(uuid: String,
       _.save
     }
 
-    editionState() = false
-    inputFilter.nameFilter() = ""
   }
 
 }

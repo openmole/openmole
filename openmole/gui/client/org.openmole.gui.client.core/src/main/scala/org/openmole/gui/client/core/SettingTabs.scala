@@ -52,13 +52,13 @@ object SettingTabs {
 
   import SettingTab._
 
-  def apply(db: DataBagUI): SettingTabs = db match {
+  def apply(panel: GenericPanel, db: DataBagUI): SettingTabs = db match {
     case dbio: IODataBagUI ⇒ new SettingTabs(dbio.dataUI() match {
       case t: TaskDataUI ⇒ taskTab(Seq(t.panelUI), true)
       case h: HookDataUI ⇒ hookTab(Seq(h.panelUI))
     },
-      inputTab(Seq(dbio.inputDataUI().panelUI)),
-      outputTab(Seq(dbio.outputDataUI().panelUI))
+      inputTab(Seq(new InputPanelUI(panel, dbio.inputDataUI()))),
+      outputTab(Seq(new OutputPanelUI(panel, dbio.outputDataUI())))
     )
     case db: DataBagUI ⇒ db.dataUI() match {
       case e: EnvironmentDataUI ⇒ new SettingTabs(environmentTab(Seq(e.panelUI)))
@@ -93,6 +93,8 @@ class SettingTabs(tabs: SettingTab*) {
       )
     }
   )
+
+  def set(index: Int) = currentTab() = Some(tabs(index))
 
   def save = tabs.map { _.save }
 
