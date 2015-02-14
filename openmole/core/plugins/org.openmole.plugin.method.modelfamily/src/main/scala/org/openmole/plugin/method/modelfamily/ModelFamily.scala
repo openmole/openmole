@@ -27,6 +27,7 @@ import org.openmole.core.workflow.tools.{ FromContext, ExpandedString }
 import org.openmole.plugin.method.evolution.Scalar
 import org.openmole.plugin.task.scala._
 
+import scala.collection.BitSet
 import scala.collection.mutable.ListBuffer
 import scala.util.Success
 
@@ -36,7 +37,7 @@ object ModelFamily {
     def toInput = Scalar(prototype, min, max)
   }
 
-  def apply(source: ExpandedString)(implicit plugins: PluginSet) = new ModelFamilyBuilder(source)
+  def apply(source: ExpandedString, combination: Combination[Class[_]])(implicit plugins: PluginSet) = new ModelFamilyBuilder(source, combination)
 
   def traitsVariable = Prototype[String]("traits")
   def attributesVariable = Prototype[String]("attributes")
@@ -49,7 +50,10 @@ object ModelFamilyBuilder {
   implicit def modelFamilyBuilderToModelFamily(builder: ModelFamilyBuilder) = builder.toModelFamily
 }
 
-class ModelFamilyBuilder(val source: ExpandedString)(implicit val plugins: PluginSet) extends Builder with ScalaBuilder { builder ⇒
+class ModelFamilyBuilder(val source: ExpandedString, val combination: Combination[Class[_]])(implicit val plugins: PluginSet) extends Builder with ScalaBuilder { builder ⇒
+
+  addClassUse(combination.components: _*)
+
   private val _attributes = ListBuffer[Attribute]()
 
   def addAttribute(prototype: Prototype[Double], name: String, min: FromContext[Double], max: FromContext[Double]) = {
@@ -59,13 +63,6 @@ class ModelFamilyBuilder(val source: ExpandedString)(implicit val plugins: Plugi
 
   def addAttribute(prototype: Prototype[Double], min: FromContext[Double], max: FromContext[Double]) = {
     _attributes += Attribute(prototype, prototype.name, min, max)
-    this
-  }
-
-  private val _traits = ListBuffer[Class[_]]()
-  def addTrait(t: Class[_]*) = {
-    _traits ++= t
-    addClassUse(t: _*)
     this
   }
 
@@ -85,24 +82,55 @@ class ModelFamilyBuilder(val source: ExpandedString)(implicit val plugins: Plugi
     new ModelFamily with super[ScalaBuilder].Built {
       override def source = builder.source
       override def attributes = _attributes.toList
-      override def traits = _traits
+      override def combination = builder.combination
       override def modelIdPrototype = _modelIdPrototype
       override def objectives = _objectives.toList
     }
+}
+
+object Combination {
+  def empty[T] = new Combination[T] {
+    def combinations = Seq.empty
+    def components = Seq.empty
+  }
+}
+
+sealed trait Combination[T] {
+  def combinations: Seq[Seq[T]]
+  def components: Seq[T]
+}
+
+case class AnyOf[T](components: T*) extends Combination[T] {
+  def combinations = (0 to components.size).flatMap(components.combinations)
+}
+
+case class OneOf[T](components: T*) extends Combination[T] {
+  def combinations = components.map(t ⇒ Seq(t))
+}
+
+case class AllToAll[T](cs: Combination[T]*) extends Combination[T] {
+  def components = cs.flatMap(_.components).distinct
+
+  def combinations =
+    cs.map(_.combinations).reduceOption((ts1, ts2) ⇒ combine(ts1, ts2)).getOrElse(Seq.empty)
+
+  def combine[A](it1: Seq[Seq[A]], it2: Seq[Seq[A]]): Seq[Seq[A]] =
+    for (v1 ← it1; v2 ← it2) yield v1 ++ v2
 }
 
 trait ModelFamily <: Plugins { family ⇒
 
   def imports: Seq[String]
   def source: ExpandedString
-  def traits: Seq[Class[_]]
+  def traits: Seq[Class[_]] = combination.components
   def attributes: Seq[Attribute]
   def objectives: Seq[Prototype[Double]]
   def libraries: Seq[File]
   def modelIdPrototype: Prototype[Int]
   def usedClasses: Seq[Class[_]]
 
-  def traitsCombinations: Seq[Seq[Class[_]]] = (0 to traits.size).flatMap(traits.combinations)
+  def combination: Combination[Class[_]]
+  def traitsCombinations = combination.combinations
   def attributesStrings =
     attributes.map {
       case Attribute(p, name, _, _) ⇒ s"def ${p.name}: ${p.`type`} = ${ScalaCompilation.inputObject}.${name}"
