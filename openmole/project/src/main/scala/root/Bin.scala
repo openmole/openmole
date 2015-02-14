@@ -112,7 +112,6 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     )
 
   lazy val coreDependencies = Seq[sbt.ModuleID](
-    Libraries.bouncyCastle,
     Libraries.gridscale,
     Libraries.logback,
     Libraries.scopt,
@@ -172,6 +171,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo assemblyPath,
     libraryDependencies ++=
     Seq(
+      Libraries.bouncyCastle,
       Apache.logging,
       opencsv,
       netlogo4,
