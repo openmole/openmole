@@ -78,8 +78,6 @@ object Libraries extends Defaults(Apache) {
 
   lazy val jasypt = "org.openmole" %% "org-jasypt-encryption" % "1.9.2"
 
-  lazy val robustIt = "org.openmole" %% "uk-com-robustit-cloning" % "1.7.4"
-
   lazy val netlogo4_noscala = "org.openmole" % "ccl-northwestern-edu-netlogo4-noscala" % "4.1.3"
 
   lazy val netlogo4 = "org.openmole" % "ccl-northwestern-edu-netlogo4" % "4.1.3"
