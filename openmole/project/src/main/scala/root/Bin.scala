@@ -76,7 +76,6 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       gui.Client.core,
       gui.Bootstrap.js,
       gui.Bootstrap.osgi,
-      base.Misc.sftpserver,
       base.Misc.logging,
       Web.core,
       base.Misc.console,
@@ -128,7 +127,6 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     Apache.math,
     Apache.pool,
     Apache.log4j,
-    Apache.sshd,
     Libraries.groovy,
     Libraries.h2,
     Libraries.jasypt,
@@ -151,6 +149,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     scalajHttp
   )
 
+  //FIXME separate web plugins from core ones
   lazy val openmoleCore = Project("openmolecore", dir / "target" / "openmolecore", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo assemblyPath,
     resourcesAssemble <++= Seq(openmoleConsole.project) sendTo assemblyPath,
@@ -171,6 +170,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo assemblyPath,
     libraryDependencies ++=
     Seq(
+      Apache.sshd,
       Libraries.bouncyCastle,
       Apache.logging,
       opencsv,
@@ -231,9 +231,12 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
 
   lazy val daemon = Project("daemon", dir / "daemon", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
     assemblyDependenciesPath := assemblyPath.value / "plugins",
+    resourcesAssemble <++=
+    Seq(base.Runtime.daemon.project, base.plugin.Environment.desktopgrid.project, base.plugin.Tool.sftpserver.project) sendTo (assemblyPath / "plugins"),
     resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
     libraryDependencies ++= Seq(
+      Apache.sshd,
       gridscale,
       gridscaleSSH,
       bouncyCastle

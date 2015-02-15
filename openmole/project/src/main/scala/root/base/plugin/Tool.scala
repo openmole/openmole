@@ -1,10 +1,12 @@
 package root.base.plugin
 
+import root.base.Misc._
 import root.base._
 import root.Libraries
+import root.libraries.Apache
 import sbt._
 import sbt.Keys._
-import scala.Some
+import com.typesafe.sbt.osgi.OsgiKeys._
 
 object Tool extends PluginDefaults {
 
@@ -31,5 +33,9 @@ object Tool extends PluginDefaults {
   lazy val csv = OsgiProject("csv") dependsOn (Misc.exception, Core.workflow) settings (
     libraryDependencies += Libraries.opencsv
   )
+
+  val sftpserver = OsgiProject("sftpserver", imports = Seq("*")) dependsOn (Misc.tools) settings (libraryDependencies += Apache.sshd)
+
+  override def osgiSettings = super.osgiSettings ++ Seq(bundleActivator := None)
 
 }
