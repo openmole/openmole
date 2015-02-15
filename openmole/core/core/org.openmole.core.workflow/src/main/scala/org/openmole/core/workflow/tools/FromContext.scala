@@ -28,18 +28,18 @@ object FromContext {
   implicit def fromStringToContext[T](code: String)(implicit fromString: FromString[T]) =
     new FromContext[T] {
       @transient lazy val proxy = GroovyProxyPool(code)
-      override def from(context: Context): T = fromString.from(proxy(context.toBinding).toString)
+      override def from(context: ⇒ Context): T = fromString.from(proxy(context.toBinding).toString)
     }
 
   def apply[T](t: T) =
     new FromContext[T] {
-      def from(context: Context): T = t
+      def from(context: ⇒ Context): T = t
     }
 
 }
 
 trait FromContext[T] {
-  def from(context: Context): T
+  def from(context: ⇒ Context): T
 }
 
 object ExpandedString {
@@ -57,6 +57,6 @@ object ExpandedString {
 trait ExpandedString <: FromContext[String] {
   def +(s: ExpandedString): ExpandedString = string + s.string
   def string: String
-  def from(context: Context) = VariableExpansion.apply(context, string)
+  def from(context: ⇒ Context) = VariableExpansion.apply(context, string)
 }
 
