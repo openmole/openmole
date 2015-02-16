@@ -70,7 +70,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val xstream = "org.openmole" %% "com-thoughtworks-xstream" % "1.4.7"
 
-  lazy val groovy = "org.openmole" %% "org-codehaus-groovy" % "2.3.3"
+  lazy val groovy = "org.openmole" %% "org-codehaus-groovy" % "2.4.0"
 
   lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.5"
 

@@ -77,8 +77,8 @@ object OSGi extends Defaults(Apache) {
     buddyPolicy = Some("global"),
     exports = Seq("groovy.*", "org.codehaus.*"),
     privatePackages = Seq("!scala.*,*")) settings(
-    libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.3.3", "org.fusesource.jansi" % "jansi" % "1.2.1"),
-    version := "2.3.3"
+    libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.4.0", "org.fusesource.jansi" % "jansi" % "1.2.1"),
+    version := "2.4.0"
     )
 
   lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
