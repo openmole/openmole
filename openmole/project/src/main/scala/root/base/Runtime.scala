@@ -17,7 +17,7 @@ object Runtime extends BaseDefaults {
   val dbserver = OsgiProject("dbserver") dependsOn (Misc.replication) settings (bundleType += "dbserver",
     libraryDependencies ++= Seq(h2, slf4j, xstream))
 
-  val runtime = OsgiProject("runtime", singleton = true) dependsOn (Core.workflow, Core.batch, Core.serializer, Misc.logging, Misc.eventDispatcher, Misc.exception) settings
+  val runtime = OsgiProject("runtime", singleton = true, imports = Seq("*")) dependsOn (Core.workflow, Core.batch, Core.serializer, Misc.logging, Misc.eventDispatcher, Misc.exception) settings
     (includeOsgi, bundleType += "runtime", libraryDependencies ++= Seq(scalaLang, scopt, equinoxCommon, equinoxApp))
 
   val daemon = OsgiProject("daemon", singleton = true, imports = Seq("*")) dependsOn (Core.workflow, Core.workflow, Core.batch, Misc.workspace,
