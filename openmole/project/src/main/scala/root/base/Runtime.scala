@@ -14,7 +14,7 @@ object Runtime extends BaseDefaults {
 
   override def dir = super.dir / "runtime"
 
-  val dbserver = OsgiProject("dbserver") dependsOn (Misc.replication) settings (bundleType += "dbserver",
+  val dbserver = OsgiProject("dbserver", imports = Seq("*")) dependsOn (Misc.replication) settings (bundleType += "dbserver",
     libraryDependencies ++= Seq(h2, slf4j, xstream))
 
   val runtime = OsgiProject("runtime", singleton = true, imports = Seq("*")) dependsOn (Core.workflow, Core.batch, Core.serializer, Misc.logging, Misc.eventDispatcher, Misc.exception) settings
