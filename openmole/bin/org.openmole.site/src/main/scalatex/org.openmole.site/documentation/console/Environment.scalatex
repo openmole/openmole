@@ -27,6 +27,6 @@
   @ul
     @li{@a("Multi-thread", href := root.console.environment.multithread.file), to execute the tasks concurrently on your machine,}
     @li{@a("SSH", href := root.console.environment.ssh.file), to execute tasks on remote server through SSH,}
-    @li{clusters}
-    @li{@a("EGI", href := root.console.environment.egi.file), to execute tasks on the EGI grid or using DIRAC,}
+    @li{@a("Clusters", href := root.console.environment.cluster.file), to execute tasks on a cluster managed by @a("PBS/Torque", href := root.console.environment.cluster.file + "#PBS/Torque"), @a("SGE", href := root.console.environment.cluster.file + "#SGE"), @a("Slurm", href := root.console.environment.cluster.file + "#SLURM"), @a("Condor", href := root.console.environment.cluster.file + "#Condor"), or @a("OAR", href := root.console.environment.cluster.file + "#OAR").}
+    @li{@a("EGI", href := root.console.environment.egi.file), to execute tasks on the @a("EGI grid", href := root.console.environment.egi.file + "#DelegatetasksonEGI") or using @a("DIRAC", href := root.console.environment.egi.file + "#DIRAC").}
 

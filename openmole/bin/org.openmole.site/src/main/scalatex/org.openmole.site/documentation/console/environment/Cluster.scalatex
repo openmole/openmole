@@ -26,7 +26,9 @@
      @li{@wallTime,}
      @li{@memory,}
      @li{@openMOLEMemory,}
-     @li{@threads.}
+     @li{nodes: Number of nodes requested,}
+     @li{@threads,}
+     @li{coreByNodes: An alternative to specifying the number of threads. If it's not specified, it takes the value of threads, or 1 if none of them was specified.}
   @sect{SGE}
     To delegate some computation load to a @a("SGE", href := "https://en.wikipedia.org/wiki/Oracle_Grid_Engine") based cluster you can use the SGEEnvironment as follow:
     @br @hl.openmole("""
@@ -63,7 +65,9 @@
       @li{@wallTime,}
       @li{@memory,}
       @li{@openMOLEMemory,}
+      @li{nodes: Number of nodes requested,}
       @li{@threads,}
+      @li{coresByNodes: An alternative to specifying the number of threads. If it's not specified, it takes the value of threads, or 1 if none of them was specified.}
       @li{qos: Quality of Service (QOS) as defined in the Slurm database}
       @li{gres: a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar).}
       @li{constraints: a list of Slurm defined constraints which selected nodes must match.}

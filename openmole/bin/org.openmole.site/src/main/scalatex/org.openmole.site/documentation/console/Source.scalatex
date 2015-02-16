@@ -36,3 +36,53 @@
       ListFilesSource("/my/directory/${someVariable}/", txtFiles, ".*\\.txt") set (
         inputs += someVariable
       )""")
+
+  @sect{List directories in a directory}
+    In the same way, you can inject an array of directories in the dataflow.
+    This can be done by either passing a complete directory name, or a glob pattern that will be matched against the names of the directories found.
+
+    @br @hl.openmole("""
+    import org.openmole.plugin.source.file._
+
+    val someVariable = Val[String]
+    val dirs = Val[Array[File]]
+    val aaaDirs = Val[Array[File]]
+
+    // will fill dirs with all the subdirectories of "/some/directory"
+    val s1 = ListDirectoriesSource("/some/directory", dirs)
+
+    val s2 =
+      // will fill aaaDirs with all the subdirectories of "/some/directory" starting with aaa
+      ListDirectoriesSource("/my/directory/${someVariable}/", aaaDirs, "^aaa.*") set (
+        inputs += someVariable
+      )""")
+
+    The source stores each subdirectory found in an Array. In most cases, you will want each of the subdirectories to feed a different task. Let's now see how this can be done by reusing what we've discovered with @a("samplings", href := root.console.sampling.file + "#Exploringfiles").
+
+  @sect{Exploring files / directories}
+
+    Here, we are collecting all the directories which bear the name "care_archive". See how they are gathered in an Array[File] container and can be explored by an @a("ExplorationTask", href := root.console.sampling.file) using the keyword in.
+    This exploration generates one "analysisTask" per directory collected by the source.
+
+    @br @hl.openmole("""
+    import org.openmole.plugin.domain.collection._
+    import org.openmole.plugin.task.systemexec._
+    import org.openmole.plugin.source.file._
+
+    val directoriesToAnalyze  = Val[Array[File]]
+
+    val s = ListDirectoriesSource("/data/care_DoE", directoriesToAnalyze, "care_archive")
+
+    val inDir = Val[File]
+    val myWorkDirectory = "care_archive"
+
+    val analysisTask =
+    SystemExecTask(s"${myWorkDirectory}/re-execute.sh") set (
+      inputFiles    += (inDir, myWorkDirectory)
+    )
+
+    val exploration = ExplorationTask(inDir in directoriesToAnalyze)
+
+    val ex = (exploration source s) -< analysisTask start
+    """)
+
