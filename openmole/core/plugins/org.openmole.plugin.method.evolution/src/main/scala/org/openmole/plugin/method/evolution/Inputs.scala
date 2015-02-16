@@ -32,7 +32,7 @@ object InputConverter {
       val input = scales.head
       val (variable, tail) =
         scaled(input, context, genome) match {
-          case ScaledScalar(p, v)   ⇒
+          case ScaledScalar(p, v) ⇒
             assert(!v.isNaN); Variable(p, v) -> genome.tail
           case ScaledSequence(p, v) ⇒ Variable(p, v) -> genome.drop(input.size)
         }
