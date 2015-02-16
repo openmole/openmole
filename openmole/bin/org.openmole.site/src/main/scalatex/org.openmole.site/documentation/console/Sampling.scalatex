@@ -143,9 +143,15 @@
     val s = CSVSampling("/path/to/a/file.csv") set (
       columns += i,
       columns += ("colD", d),
-      fileColumns += ("colFileName", "/path/of/the/base/dir/", f)
-    )""")
+      fileColumns += ("colFileName", "/path/of/the/base/dir/", f),
+      // ',' is the default separator, but you can specify a different one using
+      separator := ','
+    )
+
+    val exploration = ExplorationTask(s)
+    """)
     @p In this example the column name i in the csv file is mapped to the variable i of OpenMOLE. The column name colD is mapped to the variable d. The column named colFileName is appended to the base dir "/path/of/the/base/dir/" and used as a file in OpenMOLE.
+    @br As a sampling, the CSVSampling can directly be injected in an ExplorationTask. It will generate a different task for each entry in the file.
 
   @sect{Higher level sampling}
     Some samplings combination generate higher level sampling such as:
