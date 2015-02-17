@@ -1,0 +1,45 @@
+
+@import org.openmole.site.Objects._
+
+@sect{Compile OpenMOLE}
+  This documentation explains how to compile OpenMOLE from its sources and how to modify the sources. The development site can be found @a("here", href := "https://github.com/openmole/openmole").
+  @sect{Get the sources}
+    To get the sources, you need @a("git", href :=  "https://en.wikipedia.org/wiki/Git_%28software%29"). Then you can get the sources as follow:
+    @br @hl.highlight("""git clone git://git.openmole.org/openmole""", "plain") or
+    @br @hl.highlight("""git clone git@github.com:openmole/openmole.git""", "plain")
+
+    @p The current development versions stands in the master branch.
+  @sect{Compile}
+    In order to compile OpenMOLE, you should have @a("SBT", href := "http://www.scala-sbt.org/") and java 7. Then you can compile it as follow:
+    @br @hl.highlight("""
+    cd libraries
+    sbt install
+    cd ../openmole
+    sbt assemble""", "plain")
+    @p You can now find the application in bin/openmole/target/assemble/.
+    @p To compile offline (plain / train...) you should use: @hl.highlight("""set offline in Global := true""", "plain")
+  @sect{Develop}
+    To develop OpenMOLE we generally use the community version of @a("IntelliJ", href := "http://www.jetbrains.com/idea/"). One installed you should install the SBT and Scala plugins. Then you can create an intelliJ project from the OpenMOLE project with one SBT command.
+    @br @hl.highlight("""
+    sbt "gen-idea no-classifiers"""", "plain")
+  @sect{Create a standalone archive}
+    You can create a standalone archive of your fresh OpenMOLE build and ship it around by using the task @i{openmole:tar}:
+    @br @hl.highlight("""sbt openmole:tar""", "plain")
+    @p You will find the resulting archive in @i{bin/openmole/target/openmole.tar.gz}.
+  @sect{Publish the bundles}
+    @hl.highlight("""
+    cd libraries
+    sbt install-remote
+    cd ../openmole
+    sbt install-remote""", "plain")
+  @sect{Build the web site}
+    @hl.highlight("""
+    cd openmole
+    sbt "project site" assemble
+    cd bin/site/target/assemble
+    ./site /path/of/the/site
+    """, "plain")
+
+    @p The site will be generated in the target directory.
+
+    @p Optionally you can use @hl.highlight("./site /path/of/the/site -np", "plain") in order to bypass the testing of the scripts which is time-consuming.

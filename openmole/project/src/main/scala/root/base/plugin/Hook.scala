@@ -8,13 +8,13 @@ import root.base._
 object Hook extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.hook")
 
-  lazy val display = OsgiProject("display") dependsOn (Misc.exception, Core.workflow, Misc.workspace)
+  lazy val display = OsgiProject("display", imports = Seq("*")) dependsOn (Misc.exception, Core.workflow, Misc.workspace)
 
-  lazy val fileHook = OsgiProject("file") dependsOn (Misc.exception, Core.workflow, Misc.workspace, Core.serializer, Misc.replication % "test") settings (
+  lazy val fileHook = OsgiProject("file", imports = Seq("*")) dependsOn (Misc.exception, Core.workflow, Misc.workspace, Core.serializer, Misc.replication % "test") settings (
     libraryDependencies += Libraries.scalatest
   )
 
-  lazy val modifier = OsgiProject("modifier") dependsOn (Core.workflow) settings (
+  lazy val modifier = OsgiProject("modifier", imports = Seq("*")) dependsOn (Core.workflow) settings (
     libraryDependencies += Libraries.scalatest
   )
 

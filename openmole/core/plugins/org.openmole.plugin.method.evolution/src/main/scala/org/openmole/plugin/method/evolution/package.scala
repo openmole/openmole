@@ -290,13 +290,14 @@ package object evolution {
     val gaPuzzle: GAPuzzle[ALG] =
       SteadyGA[ALG](algorithm)(
         fitness = fitness
-      ).map(p ⇒ Capsule(MoleTask(p) set (_.setName(s"${name}IslandTask"))))
+      ).map(
+          p ⇒ Capsule(MoleTask(p) set (_.setName(s"${name}IslandTask")))
+        )
 
     IslandGA[ALG](gaPuzzle)(
       number = number,
       termination = termination.asInstanceOf[GATermination { type G = gaPuzzle.parameters.evolution.G; type P = gaPuzzle.parameters.evolution.P; type F = gaPuzzle.parameters.evolution.F }],
-      samples = samples) -> gaPuzzle.puzzle
-
+      samples = samples) -> gaPuzzle.puzzle.last
   }
 
   def IslandGA[AG <: GAAlgorithm](fitness: GAPuzzle[AG])(

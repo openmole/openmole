@@ -101,7 +101,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     var files = new TreeSet[File]
     var plugins = new TreeSet[File]
 
-    val tos = new TarOutputStream(file.bufferedOutputStream)
+    val tos = new TarOutputStream(file.bufferedOutputStream())
     try {
       for (moleJob ← job.moleJobs) moleJob.synchronized {
         if (!moleJob.finished) {

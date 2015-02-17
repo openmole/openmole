@@ -1,0 +1,89 @@
+
+@import org.openmole.site.Objects._
+
+@sect{Embed an external program (C, C++, Python, R, Scilab...)}
+
+  In OpenMOLE, a generic task named SystemExecTask offers to run external code. It has been designed to embed native binaries such as programs in C, C++, Fortran, Scilab, R... For that you mainly need you program to be executable on a Linux computer.
+
+  @p The embedding operation is a 2 phases process. First you should package it, then you should provide you package along with some other information to OpenMOLE.
+
+  @p The easiest way of packaging you executable is to use @a("CARE", href := "http://reproducible.io/"). CARE makes it possible to package you application on any Linux computer and then to run it on any other Linux computer. The duo CARE / OpenMOLE is a very effective way to distribute you application on a very large scale with very little effort.
+
+  @p The following demonstrate how to embed applications for some plateforms. You should be able to achieve exactly the same process with almost any executable running on Linux.
+
+  @sect{An example with R}
+
+      For example, let's consider a file myscript.R that you would like to execute on the grid. The method that is described here embeds everything, including R. Therefore there is no need to install R on the target execution machine. All that is needed is that these computer runs Linux which is the case for the vast majority of high performance computing environment.
+
+      @p First your script should run heedlessly with no user input required during the script initialisation. Your script should produce files or write your results to the standard output.
+
+      @p An example R script could be:
+      @br @hl.highlight("""
+        print(commandArgs(trailingOnly = TRUE))
+        data<-read.csv("data.csv",header=T,sep=",")
+        trans<-subset(datab,trials=="Trans")
+        sumTransD<-tapply(trans$bet,list(trans$time,trans$naive2),sum)
+        write.csv(sumTransD,"results.csv")""", "R")
+      @p This script displays the command line arguments, then it reads a file called @i{data.csv} and produces a file called @i{results.csv}. To call this script from the command line you should type: @hl.highlight("R -f myscript.R --slave --args 42", "plain")
+      @p Once you have your script up and running you need to package it. First package you R script locally using Care:
+      @br @hl.highlight("""./care -r /home/reuillon/ -o care.bin R -f myscript.R --slave --args 42""", "plain")
+      @p A @i{care.bin} file is created. It is a portable version of your execution, which can be extracted an executed on any other Linux platform.
+
+      @p Now say we want to explore a complete combination of data files located in the @i{/tmp/data/} directory over 10 values from 1 to 10 for the input parameter. The OpenMOLE script would be:
+      @p @hl.openmole("""
+      // Declare the variable
+      val i = Val[Int]
+      val input = Val[File]
+      val inputName = Val[String]
+      val output = Val[File]
+
+      // R task
+      // "path/on/your/system" is a path on the original system on which you packaged R
+      val rTask = SystemExecTask("care.bin", "care/re-execute.sh R --slave -f myscript.R --args ${i}") set (
+        resources += "/path/to/care.bin",
+        inputs += (i, inputName),
+        inputFiles += (input, "care/rootfs/path/on/your/system/data.csv"),
+        outputs += (i, inputName),
+        outputFiles += ("care/rootfs/path/on/your/system/result.csv", output)
+      )
+
+      val exploration =
+        ExplorationTask(
+          (i in (1 to 10)) x
+          (input in ListFilesDomain("/tmp/data/") zipWithName inputName)
+        )
+
+
+      val copy = CopyFileHook(output, "/tmp/results/result-${inputName}-${i}.csv")
+      val ex = exploration -< (rTask hook copy hook ToStringHook()) start""")
+
+      @p The input files are taken from /tmp/data and result files are written in /tmp/results.
+
+  @sect{Example with Python}
+    To integrate this python script in OpenMOLE with CARE:
+    @br @hl.highlight("""
+    import sys with open(sys.argv[2], 'w') as f:
+    f.write(sys.argv[1])
+    exit(0)""", "python")
+
+    @p This script is located in the @i{/tmp/hello} directory. First package it with care: @hl.highlight("""care -o hello.bin python hello.py 42 test.txt""", "plain")
+    @p Then you can run it in OpenMOLE using the script:
+    @br @hl.openmole("""
+    // Declare the variable
+    val arg = Val[Int]
+    val output = Val[File]
+
+    // R task
+    val pythonTask =
+      SystemExecTask("hello.bin", "hello/re-execute.sh python hello.py ${arg} output.txt") set (
+        resources += "/tmp/hello/hello.bin",
+        inputs += arg,
+        outputFiles += ("hello/rootfs/tmp/hello/output.txt", output),
+        outputs += arg
+      )
+
+    val exploration = ExplorationTask(arg in (0 to 10))
+
+    val copy = CopyFileHook(output, "/tmp/results/hello${arg}.txt")
+    val env = LocalEnvironment(4)
+    val ex = exploration -< (pythonTask hook copy on env by 2) start""")

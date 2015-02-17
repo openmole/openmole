@@ -77,8 +77,8 @@ object OSGi extends Defaults(Apache) {
     buddyPolicy = Some("global"),
     exports = Seq("groovy.*", "org.codehaus.*"),
     privatePackages = Seq("!scala.*,*")) settings(
-    libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.3.3", "org.fusesource.jansi" % "jansi" % "1.2.1"),
-    version := "2.3.3"
+    libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.4.0", "org.fusesource.jansi" % "jansi" % "1.2.1"),
+    version := "2.4.0"
     )
 
   lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
@@ -94,7 +94,7 @@ object OSGi extends Defaults(Apache) {
         "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3",
         "org.scala-lang" % "scala-compiler" % sV
       )
-    }, bundleType += "dbserver", version := scalaVersion.value)
+    }, version := scalaVersion.value)
 
   //  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.tools.*", "scala.reflect.macros.*"),
   //    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
@@ -225,7 +225,6 @@ object OSGi extends Defaults(Apache) {
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings(
     libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
-    bundleType := Set("plugin"),
     version := mgoVersion
     )
 
@@ -235,14 +234,12 @@ object OSGi extends Defaults(Apache) {
     libraryDependencies += "com.github.julien-truffaut" %% "monocle-core" % monocleVersion,
     libraryDependencies += "com.github.julien-truffaut" %% "monocle-generic" % monocleVersion,
     libraryDependencies += "com.github.julien-truffaut" %% "monocle-macro" % monocleVersion,
-    bundleType := Set("plugin"),
     version := monocleVersion
     )
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings(
     libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0",
-    version := "2.0",
-    bundleType := Set("plugin")
+    version := "2.0"
     )
 
   lazy val jline = OsgiProject("net.sourceforge.jline") settings(
@@ -266,12 +263,15 @@ object OSGi extends Defaults(Apache) {
     version := "3.2.0"
     )
 
-  lazy val scalabcVersion = "0.4"
   lazy val scalabc = OsgiProject("fr.iscpif.scalabc", privatePackages = Seq("!scala.*", "!junit.*", "*")) settings(
-    libraryDependencies += "fr.iscpif" %% "scalabc" % scalabcVersion,
-    bundleType := Set("plugin"),
-    version := scalabcVersion
+    libraryDependencies += "fr.iscpif" %% "scalabc" % "0.4",
+    version := "0.4"
     )
 
-  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core")) //TODO make library defaults
+   lazy val scalatexSite =
+     OsgiProject("com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "scalatags.*"), privatePackages = Seq("!scala.*", "*")) settings (
+       libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.1",
+       version := "0.1.1"
+       )
+
 }

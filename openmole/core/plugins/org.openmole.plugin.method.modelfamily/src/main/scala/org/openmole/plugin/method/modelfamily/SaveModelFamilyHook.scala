@@ -38,13 +38,16 @@ object SaveModelFamilyHook {
 abstract class SaveModelFamilyHook(puzzle: GAPuzzle[ModelFamilyCalibration], path: ExpandedString) extends Hook {
 
   def mf = puzzle.parameters.evolution
-  def headers = s"traits,number of traits,${mf.inputsPrototypes.map(_.name).mkString(",")},${mf.objectives.map(_.name).mkString(",")}"
+  def traitsHeader = mf.modelFamily.traits.map(_.getName).mkString(",")
+  def headers = s"${traitsHeader},${mf.inputsPrototypes.map(_.name).mkString(",")},${mf.objectives.map(_.name).mkString(",")}"
 
   def process(context: Context, executionContext: ExecutionContext) = {
 
     def idArray: Array[Int] = context(mf.modelFamily.modelIdPrototype.toArray)
     def inputsArray = puzzle.parameters.evolution.inputsPrototypes.map(p ⇒ context(p.toArray).toSeq).transpose
     def outputsArray = puzzle.parameters.evolution.objectives.map(p ⇒ context(p.toArray).toSeq).transpose
+
+    lazy val combinations = mf.modelFamily.traitsCombinations.map(_.toSet)
 
     val file = executionContext.relativise(path.from(context))
     file.createParentDir
@@ -53,7 +56,8 @@ abstract class SaveModelFamilyHook(puzzle: GAPuzzle[ModelFamilyCalibration], pat
       for {
         ((id, inputs), outputs) ← idArray zip inputsArray zip outputsArray
       } {
-        def traits = s"${mf.modelFamily.traitsString(id)},${mf.modelFamily.traitsCombinations(id).size}"
+        lazy val combination = combinations(id)
+        def traits = mf.modelFamily.traits.map(combination.contains).mkString(",")
         w.write(s"""$traits,${inputs.mkString(",")},${outputs.mkString(",")}\n""")
       }
     }

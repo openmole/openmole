@@ -22,20 +22,22 @@ import org.openmole.core.workflow.data.{ Context, Prototype, Variable }
 import org.openmole.core.workflow.tools.FromContext
 import util.Try
 
+import scala.annotation.tailrec
+
 object InputConverter {
 
-  def scaled(scales: List[Input], genome: List[Double], context: ⇒ Context): List[Variable[_]] =
-    if (scales.isEmpty || genome.isEmpty) List.empty
+  @tailrec def scaled(scales: List[Input], genome: List[Double], context: ⇒ Context, acc: List[Variable[_]] = Nil): List[Variable[_]] =
+    if (scales.isEmpty || genome.isEmpty) acc.reverse
     else {
       val input = scales.head
       val (variable, tail) =
         scaled(input, context, genome) match {
-          case ScaledScalar(p, v) ⇒
+          case ScaledScalar(p, v)   ⇒
             assert(!v.isNaN); Variable(p, v) -> genome.tail
           case ScaledSequence(p, v) ⇒ Variable(p, v) -> genome.drop(input.size)
         }
 
-      variable :: scaled(scales.tail, tail.toList, context + variable)
+      scaled(scales.tail, tail.toList, { context + variable }, variable :: acc)
     }
 
   def scaled(input: Input, context: ⇒ Context, genomePart: Seq[Double]) = {

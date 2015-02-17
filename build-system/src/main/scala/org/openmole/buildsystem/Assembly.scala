@@ -98,7 +98,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
   def generateConfigImpl(plugins: File, header: String, config: File, startLevels: Seq[(String, Int)]): File = {
     def line(file: File) = {
       val name = file.getName
-      val level = startLevels.find { case (s, _) ⇒ name.startsWith(s) }.map { case (_, l) ⇒ l }
+      val level = startLevels.find { case (s, _) ⇒ name.contains(s) }.map { case (_, l) ⇒ l }
       level match {
         case None    ⇒ name
         case Some(l) ⇒ s"$name@$l:start"

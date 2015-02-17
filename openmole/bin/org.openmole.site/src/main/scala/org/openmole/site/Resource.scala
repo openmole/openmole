@@ -1,0 +1,32 @@
+/*
+ * Copyright (C) 2015 Romain Reuillon
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.openmole.site
+
+object Resource {
+  def css = "styles.css"
+  def logo = FileResource("openmole.png")
+  def openmole = FileResource("openmole.tar.gz")
+  def openmoleDaemon = FileResource("openmole-daemon.tar.gz")
+  def api = ArchiveResource("openmole-api.tar.gz", "api")
+  def all = Seq[Resource](logo, openmole, openmoleDaemon, api)
+}
+
+sealed trait Resource
+case class FileResource(file: String) extends Resource
+case class ArchiveResource(source: String, file: String) extends Resource
+

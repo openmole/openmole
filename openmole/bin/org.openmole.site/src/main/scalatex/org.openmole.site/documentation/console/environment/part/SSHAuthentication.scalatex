@@ -1,0 +1,14 @@
+
+@import org.openmole.site.Objects._
+
+@p To authenticate with login / password:
+@br @hl.openmole("""SSHAuthentication += LoginPassword("login", encrypted, "machine.domain")""", header = """def encrypted = "" """)
+@p To authenticate with a private key:
+@br @hl.openmole("""
+    SSHAuthentication +=
+      PrivateKey(
+        "/path/to/the/private/key",
+        "login",
+        encrypted,
+        "machine.domain")""", header = """def encrypted = "" """)
+@p The last part "machine.domain" can also be only the "domain" if you which to use the authentication for an entire domain.

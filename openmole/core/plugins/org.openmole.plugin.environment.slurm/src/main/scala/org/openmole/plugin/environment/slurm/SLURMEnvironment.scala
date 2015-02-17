@@ -28,7 +28,6 @@ import org.openmole.core.batch.storage.StorageService
 import org.openmole.misc.workspace._
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._
-import fr.iscpif.gridscale.slurm.Gres
 
 import scala.concurrent.duration.Duration
 

@@ -1,0 +1,11 @@
+
+
+@import Objects._
+
+@sect{Active developers}
+  @Developer.active
+
+  @p The development activity can be seen from @a("github", href := "https://github.com/openmole/openmole").
+
+@sect{How to cite OpenMOLE}
+  @Publication.publication(Publication.fgcs2013)

@@ -70,15 +70,13 @@ object Libraries extends Defaults(Apache) {
 
   lazy val xstream = "org.openmole" %% "com-thoughtworks-xstream" % "1.4.7"
 
-  lazy val groovy = "org.openmole" %% "org-codehaus-groovy" % "2.3.3"
+  lazy val groovy = "org.openmole" %% "org-codehaus-groovy" % "2.4.0"
 
   lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.5"
 
   lazy val jodaTime = "org.openmole" %% "org-joda-time" % "1.6"
 
   lazy val jasypt = "org.openmole" %% "org-jasypt-encryption" % "1.9.2"
-
-  lazy val robustIt = "org.openmole" %% "uk-com-robustit-cloning" % "1.7.4"
 
   lazy val netlogo4_noscala = "org.openmole" % "ccl-northwestern-edu-netlogo4-noscala" % "4.1.3"
 
@@ -150,5 +148,7 @@ object Libraries extends Defaults(Apache) {
   lazy val equinoxOSGi = "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944"
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
+
+  lazy val scalatexSite = "org.openmole" %% "com-lihaoyi-scalatex-site" % "0.1.1"
 
 }

@@ -1,0 +1,37 @@
+@import org.openmole.site.Objects._
+@import DocumentationPages._
+
+@sect{Task}
+    This documentation explains how you can embed your programs and compose them in simple OpenMOLE workflows.
+
+    @p A workflow is a set of tasks linked with each other through transitions. At the higher level tasks comprise inputs, outputs and  optional default values. Tasks are the atomic computing element of OpenMOLE. They describe what OpenMOLE should execute and delegate to remote environments. They embed your own programs. Depending on what kind of program (binary executable, java...) you want to embed in OpenMOLE you have to choose the matching task. The execution of the tasks depends of inputs variables which are provided by the dataflow and each task produce outputs which are provided to the dataflow and transmitted to the input of other tasks.
+
+    @p Lets begin by a very useless task that does nothing:
+    @br @hl.openmole("""
+      // Define a variable i of type Int
+      val i = Val[Int]
+
+      // Instantiate a task that does nothing
+      // this task takes the i variable as input and provide back to the output
+      val t = EmptyTask() set (
+        inputs += i,
+        outputs += i
+      )""")
+
+    @p It is also possible to specify default values which are used by the task in case no input data is provided by the dataflow:
+    @br @hl.openmole("""
+      val i = Val[Int]
+
+      val t = EmptyTask() set (
+        inputs += i,
+        outputs += i,
+        i := 0
+      )""")
+
+    @p Depending on what you which kind of operation you want to achieve with OpenMOLE you should use the matching task. The one you might want to use to embed your own executable into OpenMOLE are:
+
+    @ul
+      @li{@a("the SystemExecTask", href := root.console.task.systemExec.file), to execute your own binary executables,}
+      @li{@a("the ScalaTask", href := root.console.task.scala.file), to execute Java programs (works as well for other JVM based languages),}
+      @li{@a("the NetLogoTask", href := root.console.task.netLogo.file), to execute your NetLogo models,}
+      @li{@a("the MoleTask", href := root.console.task.mole.file), to execute workflows inside your workflows}

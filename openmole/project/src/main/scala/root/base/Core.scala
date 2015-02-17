@@ -22,7 +22,7 @@ object Core extends BaseDefaults {
   ) dependsOn
     (Misc.eventDispatcher, Misc.exception, Misc.tools, Misc.updater, Misc.workspace, Misc.macros, Misc.pluginManager, serializer, Misc.replication % "test")
 
-  lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided")) settings
+  lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided"), imports = Seq("*")) settings
     (includeOsgi,
       libraryDependencies += xstream) dependsOn
       (workspace, pluginManager, fileService, Misc.tools, iceTar)

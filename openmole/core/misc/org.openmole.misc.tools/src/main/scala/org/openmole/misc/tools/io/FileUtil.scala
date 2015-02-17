@@ -98,11 +98,8 @@ trait FileUtil {
       Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach { to.write(buffer, 0, _) }
     }
 
-    def copy(to: File, maxRead: Int, timeout: Duration): Unit = {
-      val os = to.bufferedOutputStream
-      try copy(os, maxRead, timeout)
-      finally os.close
-    }
+    def copy(to: File, maxRead: Int, timeout: Duration): Unit =
+      withClosable(to.bufferedOutputStream()) { copy(_, maxRead, timeout) }
 
     def copy(to: OutputStream, maxRead: Int, timeout: Duration) = {
       val buffer = new Array[Byte](maxRead)
@@ -151,17 +148,9 @@ trait FileUtil {
       }
     }
 
-    def copy(to: OutputStream) = {
-      try Files.copy(file, to)
-      finally to.close
-    }
-
     // TODO replace with NIO
-    def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit = {
-      val is = bufferedInputStream
-      try is.copy(to, maxRead, timeout)
-      finally is.close
-    }
+    def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit =
+      withClosable(bufferedInputStream) { _.copy(to, maxRead, timeout) }
 
     def copyCompress(toF: File): File = {
       if (toF.isDirectory) toF.archiveCompressDirWithRelativePathNoVariableContent(file)
@@ -169,19 +158,13 @@ trait FileUtil {
       toF
     }
 
-    def copyCompressFile(toF: File): File = {
-      val to = new GZIPOutputStream(toF.bufferedOutputStream)
-
-      try Files.copy(file, to)
-      finally to.close
+    def copyCompressFile(toF: File): File = withClosable(new GZIPOutputStream(toF.bufferedOutputStream())) { to ⇒
+      Files.copy(file, to)
       toF
     }
 
-    def copyUncompressFile(toF: File): File = {
-      val from = new GZIPInputStream(file.bufferedInputStream)
-
-      try Files.copy(from, toF, StandardCopyOption.REPLACE_EXISTING)
-      finally from.close
+    def copyUncompressFile(toF: File): File = withClosable(new GZIPInputStream(file.bufferedInputStream)) { from ⇒
+      Files.copy(from, toF, StandardCopyOption.REPLACE_EXISTING)
       toF
     }
 
@@ -363,57 +346,27 @@ trait FileUtil {
     }
 
     def withLock[T](f: OutputStream ⇒ T) = vmFileLock.withLock(file.getCanonicalPath) {
-      val fos = new FileOutputStream(file, true)
-      val bfos = new BufferedOutputStream(fos)
-      try {
-        val lock = fos.getChannel.lock
-        try f(bfos)
-        finally lock.release
+      withClosable(new FileOutputStream(file, true)) { fos ⇒
+        withClosable(new BufferedOutputStream(fos)) { bfos ⇒
+          val lock = fos.getChannel.lock
+          try f(bfos)
+          finally lock.release
+        }
       }
-      finally bfos.close
     }
 
     def bufferedInputStream = new BufferedInputStream(new FileInputStream(file))
-    def bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file))
+    def bufferedOutputStream(append: Boolean = false) = new BufferedOutputStream(new FileOutputStream(file, append))
 
     def gzippedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
-    def gzippedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream)
+    def gzippedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream())
 
-    def withGzippedOutputStream[T](f: OutputStream ⇒ T) = {
-      val os = gzippedBufferedOutputStream
-      try f(os)
-      finally os.close
-    }
-
-    def withGzippedInputStream[T](f: InputStream ⇒ T) = {
-      val is = gzippedBufferedInputStream
-      try f(is)
-      finally is.close
-    }
-
-    def withOutputStream[T](f: OutputStream ⇒ T) = {
-      val os = bufferedOutputStream
-      try f(os)
-      finally os.close
-    }
-
-    def withInputStream[T](f: InputStream ⇒ T) = {
-      val is = bufferedInputStream
-      try f(is)
-      finally is.close
-    }
-
-    def withWriter[T](f: Writer ⇒ T): T = {
-      val w = new OutputStreamWriter(bufferedOutputStream)
-      try f(w)
-      finally w.close
-    }
-
-    def withDirectoryStream[T](f: DirectoryStream[Path] ⇒ T): T = {
-      val stream = Files.newDirectoryStream(file)
-      try f(stream)
-      finally stream.close
-    }
+    def withGzippedOutputStream[T] = withClosable[GZIPOutputStream, T](gzippedBufferedOutputStream)(_)
+    def withGzippedInputStream[T] = withClosable[GZIPInputStream, T](gzippedBufferedInputStream)(_)
+    def withOutputStream[T] = withClosable[OutputStream, T](bufferedOutputStream())(_)
+    def withInputStream[T] = withClosable[InputStream, T](bufferedInputStream)(_)
+    def withWriter[T] = withClosable[Writer, T](new OutputStreamWriter(bufferedOutputStream()))(_)
+    def withDirectoryStream[T] = withClosable[DirectoryStream[Path], T](Files.newDirectoryStream(file))(_)
 
     def wrapError[T](f: ⇒ T): T =
       try f
@@ -442,6 +395,12 @@ trait FileUtil {
     def applyRecursive(operation: File ⇒ Unit): Unit =
       applyRecursive(operation, Set.empty)
     def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File]): Unit = recurse(file)(operation, stopPath)
+  }
+
+  def withClosable[C <: { def close() }, T](open: ⇒ C)(f: C ⇒ T): T = {
+    val c = open
+    try f(c)
+    finally c.close()
   }
 
   private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Set[File]): Unit = if (!stopPath.contains(file)) {

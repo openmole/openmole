@@ -1,0 +1,72 @@
+
+@import org.openmole.site.Objects._
+
+@sect{Delegation to the EGI grid}
+  @a("EGI", href := "http://www.egi.eu/") is a grid infrastructure gathering computing resource all over the word. It is a very powerful computing environment but it is technically challenging to use. OpenMOLE makes it very simple to benefit from the grid.
+
+ @sect{Setup your grid authentication}
+   To delegate a task on EGI you need to register your certificate in OpenMOLE. In the console execute:
+   @br @hl.openmole("""
+   EGIAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")""", header = """def encrypted = "" """)
+
+   @p You need to execute this operation only once and for all. OpenMOLE persist this information.
+   @p Other certificate types are also available: pem certificates and X509 proxy files:
+   @br @hl.openmole("""
+   //For pem
+   EGIAuthentication() = PEMCertificate(encrypted, "/path/to/the/cert", "/path/to/the/key")
+
+   //For proxy file
+   EGIAuthentication() = ProxyFile("/path/to/the/proxy")""", header = """def encrypted = "" """)
+
+  @sect{Delegate tasks on EGI}
+    To use EGI you should be registered in the virtual organisation (VO). To delegate a task on a VO you can create an EGI environment:
+    @br @hl.openmole("""
+    val env = EGIEnvironment("biomed")""")
+    @p Here the VO @i{biomed} is specified but you can specify the EGI VO of you choice.
+    @p Many options are available to configure the EGI environment:
+    @ul
+      @li{cpuTime: the maximum duration for the job in term of CPU consumption, for instance 1 hour,}
+      @li{@wallTime,}
+      @li{@memory,}
+      @li{@openMOLEMemory,}
+      @li{architecture: could be "x86_64" for restricting your jobs to 64 bit systems,}
+      @li{jobType: should be set to "MPI" for MPI jobs,}
+      @li{cpuNumber: the number of CPU required for your job,}
+      @li{smpGranularity: the number of cores linked to a shared memory (same as cpuNumber for multi-threaded processes),}
+      @li{@threads,}
+      @li{requirements: a free requirement string that will be added to the other requirements}
+      @li{bdii: the bdii to use for listing resources accessible to the VO, if not specified, the on in your preference file is used,}
+      @li{vomsURL: the URL of the VOMS server used fo the authentication,}
+      @li{fqan: additional flags for authentication.}
+
+    @p To pass these options the the environment you should pass them as parameters of the constructor:
+    @br @hl.openmole("""
+    val env =
+      EGIEnvironment(
+        "biomed",
+        cpuTime = 4 hours,
+        memory = 2000,
+        architecture = "x64_86",
+        jobType = "MPI",
+        cpuNumber = 8,
+        smpGranularity = 1,
+        openMOLEMemory = 200
+      )""")
+  @sect{DIRAC}
+    To use EGI through DIRAC you have first to set up you DIRAC authentication with a P12Certificate:
+    @br @hl.openmole("""
+    DIRACAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")""", header = """def encrypted = "" """)
+
+    @p Then you can declare a DIRAC environment providing the VO name and the URL of the DIRAC REST endpoint:
+    @br @hl.openmole("""
+    val env =
+      DIRACEnvironment(
+        "biomed",
+        "https://ccdirac06.in2p3.fr:9178")""")
+
+    @p Options available for DIRAC are:
+    @ul
+      @li{group, the name of the DIRAC group,}
+      @li{fqan, cpuTime, openMOLEMemory, bdii, vomsURL are the also usable in the same way as for the EGI environment, however the cpuTime as a different in the DIRAC standard (see DIRAC doc),}
+      @li{setup: setup to use on the DIRAC server, by default it is set to "Dirac-Production".}
+

@@ -39,7 +39,13 @@ object MoleJob {
     context.toSeq.map {
       case (_, v: Variable[Any]) ⇒ (v.prototype, v.value)
     }.unzip
+
+  sealed trait StateChange
+  case object Unchanged extends StateChange
+  case class Changed(old: State, state: State) extends StateChange
 }
+
+import MoleJob._
 
 class MoleJob(
     val task: Task,
@@ -65,25 +71,26 @@ class MoleJob(
 
   def id = new UUID(mostSignificantBits, leastSignificantBits)
 
-  def state_=(state: State) = {
-    val changed = synchronized {
-      if (_state == null) {
-        _state = state
-        None
-      }
-      else if (!_state.isFinal) {
-        val oldState = _state
-        _state = state
-        Some(oldState)
-      }
-      else None
+  private def changeState(state: State) = synchronized {
+    if (_state == null) {
+      _state = state
+      Unchanged
+    }
+    else if (!_state.isFinal) {
+      val oldState = _state
+      _state = state
+      Changed(oldState, state)
+    }
+    else Unchanged
+  }
+
+  private def signalChanged(change: StateChange) =
+    change match {
+      case Changed(old, state) ⇒ stateChangedCallBack(this, old, state)
+      case _                   ⇒
     }
 
-    changed match {
-      case Some(oldState) ⇒ stateChangedCallBack(this, oldState, state)
-      case _              ⇒
-    }
-  }
+  def state_=(state: State) = signalChanged(changeState(state))
 
   def perform =
     if (!state.isFinal) {
@@ -101,8 +108,13 @@ class MoleJob(
     }
 
   def finish(_context: Context) = {
-    context = _context
-    state = COMPLETED
+    val changed =
+      synchronized {
+        if (!finished) context = _context
+        changeState(COMPLETED)
+      }
+
+    signalChanged(changed)
   }
 
   def finished: Boolean = state.isFinal

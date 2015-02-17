@@ -18,7 +18,7 @@ object Apache extends Defaults {
   lazy val config = OsgiProject("org.apache.commons.configuration", privatePackages = Seq("org.apache.commons.*")) settings
     (libraryDependencies += "commons-configuration" % "commons-configuration" % "1.6", bundleType += "runtime", version := "1.6")
 
-  lazy val mathVersion = "3.4"
+  lazy val mathVersion = "3.4.1"
   lazy val math = OsgiProject("org.apache.commons.math", exports = Seq("org.apache.commons.math3.*"), privatePackages = Seq("assets.*")) settings
     (libraryDependencies += "org.apache.commons" % "commons-math3" % mathVersion, bundleType += "runtime", version := mathVersion)
 
@@ -32,7 +32,7 @@ object Apache extends Defaults {
     (libraryDependencies += "commons-logging" % "commons-logging" % "1.1.1", bundleType += "runtime", version := "1.1.1")
 
   lazy val sshd = OsgiProject("org.apache.sshd", exports = Seq("org.apache.sshd.*", "org.apache.mina.*"), buddyPolicy = Some("global"), privatePackages = Seq("META-INF.*")) settings
-    (libraryDependencies += "org.apache.sshd" % "sshd-core" % "0.11.0", version := "0.11.0")
+    (libraryDependencies += "org.apache.sshd" % "sshd-core" % "0.13.0", version := "0.13.0")
 
   lazy val ant = OsgiProject("org.apache.ant") settings
     (libraryDependencies += "org.apache.ant" % "ant" % "1.8.0", version := "1.8.0")

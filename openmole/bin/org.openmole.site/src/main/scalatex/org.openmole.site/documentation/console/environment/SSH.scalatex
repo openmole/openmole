@@ -1,0 +1,24 @@
+
+@import org.openmole.site.Objects._
+
+@sect{Delegation a SSH server}
+  This environment make it possible to delegate task to a remote multi-core server using the @a("SSH", href := "https://en.wikipedia.org/wiki/Secure_Shell") protocol. In order to do that you should be able to connect to server with ssh using either a key/password authentication or a private key based authentication.
+
+  @p First you should provide the authentication information to access the server (this will be persisted by OpenMOLE you only need to perform that operation once and for all).
+  @part.SSHAuthentication()
+
+  @p Then you can use the SSH environment:
+  @br @hl.openmole("""
+  val env =
+    SSHEnvironment(
+      "login",
+      "machine.domain",
+      10 // The number of cores you want to use on the remote server
+    )""")
+
+  @p @provideOptions:
+  @ul
+    @li{@port,}
+    @li{@openMOLEMemory,}
+    @li{@threads,}
+    @li{workDirectory}

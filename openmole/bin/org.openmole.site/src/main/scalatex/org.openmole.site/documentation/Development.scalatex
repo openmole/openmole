@@ -1,0 +1,12 @@
+
+
+@import org.openmole.site.Objects._
+
+
+@sect{Development}
+  This part of the documentation concern the development of OpenMOLE. It explains how to compile OpenMOLE, how to write the doc, how to develop plugins...
+
+  @p To interact with the OpenMOLE development team, you can post on the OpenMOLE development mailing list: devs 'at' list.openmole.org (you should @a("subscribe", href := "http://devlist.openmole.org/") first).
+
+@sect{Bug report}
+  Please report bugs you may find in OpenMOLE on the @a("bug tracker", href := "https://github.com/openmole/openmole/issues").

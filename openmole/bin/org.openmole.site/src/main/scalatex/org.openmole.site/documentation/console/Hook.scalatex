@@ -1,0 +1,65 @@
+
+@import org.openmole.site.Objects._
+
+@sect{Hook}
+  Task are mute pieces of software. It means that there are not conceived to write files or display values or have any side effects at all. Their role is to compute some output data from the input data. That's what guaranty that their executions can be deported on other computer. To save your results, you should use the hooks. Hooks are conceived to perform listen to perform some action when a task is finished.
+  @sect{Plug a hook}
+     Let consider this simple workflow:
+     @br @hl.openmole("""
+     val i = Val[Int]
+     val hello = ScalaTask("i = i * 2") set (
+       inputs += i,
+       outputs += i
+     )
+
+     val exploration = ExplorationTask(i in (0 to 9))
+
+     val h = ToStringHook()
+
+     val ex = exploration -< (hello hook h) start""")
+     @p The hook @i{h} is plugged a the end of the task hello. Each time hello finishes the hook is executed. You can also plug multiple hooks on the same task using the syntax:
+     @br @hl.openmole("""
+     val i = Val[Int]
+
+     val hello = ScalaTask("val i = 2") set (
+       outputs += i
+     )
+
+     val h1 = ToStringHook()
+     val h2 = ToStringHook()
+     val h3 = ToStringHook()
+
+     val ex = (hello hook (h1, h2, h3)) start""").
+  @sect{Save your data in CSV}
+    The AppendToCSVFileHook take data from the dataflow and copy them into a CSV file:
+    @br @hl.openmole("""
+    val i = Val[Int]
+
+    val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv")""")
+    @p The path is expanded (expressions between ${} are evaluated and replaced).
+  @sect{Save files computed by your tasks}
+    The copyFile hook makes it possible to copy a file / directory from the dataflow to a given location.
+    @br @hl.openmole("""
+    val file = Val[File]
+    val i = Val[Int]
+
+    val h = CopyFileHook(file, "/path/to/copy/the/file${i}.txt")""")
+  @sect{Append some content to a file}
+    To append a string to a file, use this hook:
+    @br @hl.openmole("""
+    val h = AppendToFileHook("/path/to/copy/the/file.txt", "string ${i} to append")""")
+  @sect{To display some variables}
+    To display a variable in the console
+    @br @hl.openmole("""
+    val i = Val[Int]
+    val j = Val[Int]
+
+    val h = ToStringHook(i, j)""")
+    If no prototype is provided it display all the content of the dataflow.
+  @sect{To display some result in the console}
+    To display a string in the console:
+    @br @hl.openmole("""
+    val i = Val[Int]
+
+    val h = DisplayHook("The value of i is ${i}.")""")
+
