@@ -1,7 +1,10 @@
-package org.openmole.gui.client.core
+package org.openmole.gui.client.core.dataui
 
+import org.openmole.gui.ext.data.TaskData
+import org.openmole.gui.ext.dataui.DataUI
+import rx._
 /*
- * Copyright (C) 30/01/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 10/08/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,19 +20,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.service.dataui.OutputDataUI
-import org.openmole.gui.ext.dataui.PanelUI
-import scalatags.JsDom.tags
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
-
-import scala.scalajs.js.annotation.JSExport
-
-class OutputPanelUI(panel: GenericPanel, dataUI: OutputDataUI) extends PanelUI {
-
-  @JSExport
-  val view = tags.div()
-
-  def save = {
-    //dataUI.truc() = trucInput.value
-  }
+trait TaskDataUI <: DataUI with IODataUI {
+  type DATA = TaskData
+  def data: DATA
 }

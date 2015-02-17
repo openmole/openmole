@@ -1,4 +1,4 @@
-package org.openmole.gui.client.service
+package org.openmole.gui.client.core
 
 /*
  * Copyright (C) 16/12/14 // mathieu.leclaire@openmole.org
@@ -17,18 +17,19 @@ package org.openmole.gui.client.service
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.misc.utils.ID
+import org.openmole.gui.ext.dataui.PanelUI
 import rx._
 
 package object dataui {
 
-  def inputUI(protoDataBagUI: PrototypeDataBagUI, default: Var[Option[String]] = Var(None), mapping: Var[Option[Any]] = Var(None)) =
-    InputUI(protoDataBagUI.uuid, protoDataBagUI, default, mapping)
+  def inputUI(protoDataBagUI: PrototypeDataBagUI, default: Var[Option[String]] = Var(None)) =
+    InputUI(protoDataBagUI.uuid, protoDataBagUI, default, Var(IOMappingsFactory.default.build))
 
-  def outputUI(protoDataBagUI: PrototypeDataBagUI, mapping: Var[Option[Any]] = Var(None)) =
-    OutputUI(protoDataBagUI.uuid, protoDataBagUI, mapping)
+  def outputUI(protoDataBagUI: PrototypeDataBagUI) =
+    OutputUI(protoDataBagUI.uuid, protoDataBagUI)
 
-  case class InputUI(id: String, protoDataBagUI: PrototypeDataBagUI, default: Var[Option[String]] = Var(None), mapping: Var[Option[Any]] = Var(None))
-  case class OutputUI(id: String, protoDataBagUI: PrototypeDataBagUI, mapping: Var[Option[Any]] = Var(None))
+  case class InputUI(id: String, protoDataBagUI: PrototypeDataBagUI, default: Var[Option[String]] = Var(None), extraInputFields: Var[IOMappingsUI])
+
+  case class OutputUI(id: String, protoDataBagUI: PrototypeDataBagUI)
 
 }

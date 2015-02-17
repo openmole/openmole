@@ -1,8 +1,8 @@
-package org.openmole.gui.client.service.dataui
+package org.openmole.gui.client.core.dataui
 
+import org.openmole.gui.client.core.GenericPanel
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.dataui._
-import org.openmole.gui.ext.data.ProtoTYPE._
+import org.openmole.gui.ext.dataui.{ PanelUI, DataUI }
 import rx._
 
 /*
@@ -22,14 +22,17 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class InputDataUI(val ioMapping: Boolean) extends DataUI {
+class InputDataUI(mappingsFactory: IOMappingsFactory) extends DataUI {
+
   type DATA = InputData
 
   def dataType = "Inputs"
 
   def +=(inputUI: InputUI) =
-    if (!exists(inputUI))
+    if (!exists(inputUI)) {
+      inputUI.extraInputFields() = IOMappingsFactory(extraFields: _*).build
       inputsUI() = inputUI +: inputsUI()
+    }
 
   def -=(inputUI: InputUI) = inputsUI() = inputsUI().filter {
     _.id != inputUI.id
@@ -41,11 +44,15 @@ class InputDataUI(val ioMapping: Boolean) extends DataUI {
 
   val inputsUI: Var[Seq[InputUI]] = Var(Seq())
 
-  def panelUI = PanelUI.empty
+  def panelUI: PanelUI = PanelUI.empty
+
+  def panelUI(panel: GenericPanel): PanelUI = new InputPanelUI(panel, this)
+
+  val extraFields = IOMappingFactory.defaultInputField +: mappingsFactory.build.fields()
 
   def data = new InputData {
     def inputs = inputsUI().map { id ⇒
-      Input(id.protoDataBagUI.dataUI().data, id.default(), id.mapping())
+      Input(id.protoDataBagUI.dataUI().data, id.default())
     }
   }
 

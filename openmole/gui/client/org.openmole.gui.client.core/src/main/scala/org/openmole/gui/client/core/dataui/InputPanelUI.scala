@@ -1,4 +1,4 @@
-package org.openmole.gui.client.core
+package org.openmole.gui.client.core.dataui
 
 /*
  * Copyright (C) 29/01/2015 // mathieu.leclaire@openmole.org
@@ -17,8 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.service.dataui._
-import org.openmole.gui.client.service.ClientService
+import org.openmole.gui.client.core.{ ClientService, GenericPanel }
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
@@ -30,7 +29,6 @@ import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 
 class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
-
   val inputFilter = new InputFilter(pHolder = "Add a prototype")
 
   //New button
@@ -39,19 +37,28 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
     // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
     bs.button("Add")(`type` := "submit", onclick := { () ⇒
       if (filteredInputsUI.size == 1) {
-        dataUI += filteredInputsUI.head
+        val head = filteredInputsUI.head
+        dataUI += head
         inputFilter.clear
       }
     }).render
+
+  def getRow(iUI: InputUI) = {
+    (iUI, iUI.extraInputFields().fields().map {
+      _.buildPanelUI
+    }.toSeq)
+  }
 
   val table = bs.table(col_md_12 + striped)(
     thead(
       tags.tr(
         tags.th("Name"),
         tags.th("Type"),
-        tags.th("Dimension"),
-        tags.th("Default"),
-        if (dataUI.ioMapping) tags.th("Map to"),
+        tags.th("Dim"),
+        // tags.th("Default"),
+        for (f ← dataUI.extraFields) yield {
+          tags.th(f.key)
+        },
         tags.th("")
       )), Rx {
       tbody(
@@ -62,7 +69,7 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
             if (dataUI.inputsUI().contains(i)) nothing
             else warning
           )(
-              bs.td(col_md_3)(a(i.protoDataBagUI.name(),
+              bs.td(col_md_2)(a(i.protoDataBagUI.name(),
                 cursor := "pointer",
                 onclick := { () ⇒
                   {
@@ -70,17 +77,16 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
                     panel.setCurrent(i.protoDataBagUI)
                   }
                 })),
-              bs.td(col_md_2)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
-              bs.td(col_md_2)(tags.span(i.protoDataBagUI.dataUI().dimension)),
-              bs.td(col_md_2)(i.default().getOrElse("").toString),
-              bs.td(col_md_2),
+              bs.td(col_md_1)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
+              bs.td(col_md_1)(tags.span(i.protoDataBagUI.dataUI().dimension)),
+              if (dataUI.inputsUI().contains(i)) {
+                for (f ← i.extraInputFields().fields().map { _.buildPanelUI }) yield {
+                  tags.td(f.view)
+                }
+              },
               bs.td(col_md_1)(bs.button(glyph(glyph_minus))(onclick := { () ⇒
                 dataUI -= i
               }))
-            /*  bs.td(col_md_5)(bs.label(db.dataUI().dataType, label_primary)),
-                                      bs.td(col_md_1)(bs.button(glyph(glyph_trash))(onclick := { () ⇒
-                                        ClientService -= db
-                                      }))*/
             )
         }
       )
@@ -105,7 +111,5 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
     )
 
   def save = {
-    //dataUI.inputsUI() =
-    //dataUI.truc() = trucInput.value
   }
 }

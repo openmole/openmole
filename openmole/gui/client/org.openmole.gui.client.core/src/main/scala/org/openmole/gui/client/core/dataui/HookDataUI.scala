@@ -1,13 +1,11 @@
-package main.scala.org.openmole.gui.server.factory
+package org.openmole.gui.client.core.dataui
 
-import org.openmole.core.workflow.data.Prototype
-import org.openmole.gui.ext.data.{ DataBag, ErrorData }
-import org.openmole.gui.server.factory.ServerFactories
-
-import scala.util.Failure
+import org.openmole.gui.ext.data.HookData
+import org.openmole.gui.ext.dataui.DataUI
+import rx._
 
 /*
- * Copyright (C) 26/09/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 28/01/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -23,14 +21,8 @@ import scala.util.Failure
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object CoreFactory {
+trait HookDataUI <: DataUI with IODataUI {
+  type DATA = HookData
 
-  def check(dataBag: Seq[DataBag]): Seq[ErrorData] = {
-    dataBag.map { d ⇒
-      d -> ServerFactories.coreObject(d)
-    }.collect { case (data: DataBag, f: Failure[_]) ⇒ ErrorData(data, f.exception.getMessage, f.exception.getStackTrace.mkString("\n")) }
-
-  }
-
-  // def prototype(prototypeData: PrototypeData): Prototype[_] =
+  def data: DATA
 }

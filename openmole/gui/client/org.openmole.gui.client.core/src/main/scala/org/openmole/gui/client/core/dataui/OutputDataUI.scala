@@ -1,4 +1,4 @@
-package org.openmole.gui.client.service.dataui
+package org.openmole.gui.client.core.dataui
 
 /*
  * Copyright (C) 30/01/15 // mathieu.leclaire@openmole.org
@@ -17,12 +17,14 @@ package org.openmole.gui.client.service.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.GenericPanel
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.ProtoTYPE._
-import org.openmole.gui.ext.dataui._
+import org.openmole.gui.ext.dataui.{ PanelUI, DataUI }
 import rx._
 
-class OutputDataUI(val ioMapping: Boolean) extends DataUI {
+import scala.collection.immutable.Stream.Empty
+
+class OutputDataUI(extraFieldsFactory: IOMappingsFactory) extends DataUI {
   type DATA = OutputData
 
   def dataType = "Outputs"
@@ -31,9 +33,12 @@ class OutputDataUI(val ioMapping: Boolean) extends DataUI {
 
   def panelUI = PanelUI.empty
 
+  //FIXME Change empty by OuputPanelUI
+  def panelUI(panel: GenericPanel): PanelUI = PanelUI.empty
+
   def data = new OutputData {
     def outputs = outputsUI().map { o ⇒
-      Output(o.protoDataBagUI.dataUI().data, o.mapping())
+      Output(o.protoDataBagUI.dataUI().data)
     }
   }
 }

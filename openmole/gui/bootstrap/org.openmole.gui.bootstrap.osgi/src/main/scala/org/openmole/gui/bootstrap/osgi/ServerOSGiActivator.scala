@@ -1,11 +1,12 @@
 package org.openmole.gui.bootstrap.osgi
 
+import org.openmole.gui.client.core.ClientService
+import org.openmole.gui.ext.dataui.FactoryUI
+import org.openmole.gui.ext.data.Factory
+import org.openmole.gui.server.core.ServerFactories
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
-import org.openmole.gui.client.service.ClientService
-import org.openmole.gui.ext.factoryui.FactoryUI
 import org.openmole.gui.ext.data.Data
-import org.openmole.gui.server.factory.{ IFactory, ServerFactories }
 
 /*
  * Copyright (C) 22/09/14 // mathieu.leclaire@openmole.org
@@ -27,7 +28,7 @@ import org.openmole.gui.server.factory.{ IFactory, ServerFactories }
 trait ServerOSGiActivator extends BundleActivator {
 
   // core factories and name of UI factories
-  def factories: Seq[(Class[_], IFactory, FactoryUI)] = Seq()
+  def factories: Seq[(Class[_], Factory, FactoryUI)] = Seq()
 
   abstract override def start(context: BundleContext) = {
     super.start(context)

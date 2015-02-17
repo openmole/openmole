@@ -17,8 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.service.dataui.DataBagUI
-import org.openmole.gui.client.service.ClientService
+import org.openmole.gui.client.core.dataui.DataBagUI
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.Forms._
 import scala.scalajs.js.annotation.JSExport

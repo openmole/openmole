@@ -1,4 +1,4 @@
-package org.openmole.gui.client.service.dataui
+package org.openmole.gui.client.core.dataui
 
 /*
  * Copyright (C) 07/01/15 // mathieu.leclaire@openmole.org
@@ -17,35 +17,27 @@ package org.openmole.gui.client.service.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.{ IDataBag, DataBag, IODataBag }
+import org.openmole.gui.ext.data.DataBag
 import org.openmole.gui.ext.dataui._
-import org.openmole.gui.ext.factoryui.FactoryUI
 import rx._
 
 object DataBagUI {
 
-  def buildInput(ioMapping: Boolean) = new InputDataUI(ioMapping)
+  def apply(factory: FactoryUI, name: String = ""): DataBagUI = apply(factory.dataUI, name)
 
-  def buildOutput(ioMapping: Boolean) = new OutputDataUI(ioMapping)
-
-  def apply(factory: FactoryUI, name: String = ""): DataBagUI = apply(factory.dataUI, name, factory.ioMapping)
-
-  private def apply(dataUI: DataUI, name: String, ioMapping: Boolean): DataBagUI = {
-    val db = DataBagUI(dataUI, ioMapping)
+  private def apply(dataUI: DataUI, name: String): DataBagUI = {
+    val db = DataBagUI(dataUI)
     db.name() = name
     db
   }
 
-  private def apply(dataUI: DataUI, ioMapping: Boolean): DataBagUI = dataUI match {
-    //FIXME: find how to write this lik case t @ (TaskDataUI | HookDataUI)
-    case t: TaskDataUI        ⇒ new TaskDataBagUI(Var(t), ioMapping)
+  private def apply(dataUI: DataUI): DataBagUI = dataUI match {
+    case t: TaskDataUI        ⇒ new TaskDataBagUI(Var(t))
     case p: PrototypeDataUI   ⇒ new PrototypeDataBagUI(Var(p))
     case e: EnvironmentDataUI ⇒ new EnvironmentDataBagUI(Var(e))
-    case h: HookDataUI        ⇒ new HookDataBagUI(Var(h), ioMapping)
+    case h: HookDataUI        ⇒ new HookDataBagUI(Var(h))
   }
 }
-
-import DataBagUI._
 
 trait DataBagUI {
   type DATAUI <: DataUI
@@ -55,21 +47,10 @@ trait DataBagUI {
 
   val uuid: String = java.util.UUID.randomUUID.toString
 
-  def dataBag: IDataBag = new DataBag(uuid, name(), dataUI().data)
+  def dataBag: DataBag = new DataBag(uuid, name(), dataUI().data)
 }
 
-trait IODataBagUI <: DataBagUI {
-
-  def ioMapping: Boolean
-
-  val inputDataUI: Var[InputDataUI] = Var(buildInput(ioMapping))
-
-  val outputDataUI: Var[OutputDataUI] = Var(buildOutput(ioMapping))
-
-  override def dataBag = new IODataBag(uuid, name(), dataUI().data, inputDataUI().data, outputDataUI().data)
-}
-
-class TaskDataBagUI(val dataUI: Var[TaskDataUI], val ioMapping: Boolean) extends IODataBagUI {
+class TaskDataBagUI(val dataUI: Var[TaskDataUI]) extends DataBagUI {
   type DATAUI = TaskDataUI
 }
 
@@ -77,7 +58,7 @@ class PrototypeDataBagUI(val dataUI: Var[PrototypeDataUI]) extends DataBagUI {
   type DATAUI = PrototypeDataUI
 }
 
-class HookDataBagUI(val dataUI: Var[HookDataUI], val ioMapping: Boolean) extends IODataBagUI {
+class HookDataBagUI(val dataUI: Var[HookDataUI]) extends DataBagUI {
   type DATAUI = HookDataUI
 }
 

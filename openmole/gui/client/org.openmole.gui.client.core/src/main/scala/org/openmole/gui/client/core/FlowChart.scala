@@ -26,7 +26,6 @@ import fr.iscpif.scaladget.d3._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.shared._
-import org.openmole.gui.client.service.Post
 import js.JSConverters._
 
 trait GraphElement <: EventStates {

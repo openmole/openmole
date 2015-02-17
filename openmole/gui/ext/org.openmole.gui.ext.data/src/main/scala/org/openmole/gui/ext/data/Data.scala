@@ -17,14 +17,7 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait IDataBag {
-  def uuid: String
-  def name: String
-  def data: Data
-}
-case class DataBag(uuid: String, name: String, data: Data) extends IDataBag
-
-case class IODataBag(uuid: String, name: String, data: Data, inputData: InputData, ouputData: OutputData) extends IDataBag
+case class DataBag(uuid: String, name: String, data: Data)
 
 trait Data
 
@@ -83,10 +76,10 @@ trait OutputData <: Data {
   def outputs: Seq[Output]
 }
 
-trait TaskData extends Data
+trait TaskData extends Data with InputData with OutputData
 
 trait EnvironmentData extends Data
 
-trait HookData extends Data
+trait HookData extends Data with InputData with OutputData
 
 case class ErrorData(data: DataBag, error: String, stack: String)

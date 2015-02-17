@@ -1,6 +1,7 @@
-package org.openmole.gui.ext.dataui
+package org.openmole.gui.client.core.dataui
 
 import org.openmole.gui.ext.data.EnvironmentData
+import org.openmole.gui.ext.dataui.DataUI
 
 /*
  * Copyright (C) 28/01/15 // mathieu.leclaire@openmole.org

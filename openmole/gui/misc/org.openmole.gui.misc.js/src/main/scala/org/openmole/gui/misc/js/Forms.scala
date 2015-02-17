@@ -87,8 +87,10 @@ object Forms {
 
   val dropdown = key("dropdown")
 
-  //Input
+  //Inputs
   def input(content: String = "") = tags.input(content, `class` := "form-control")
+
+  def checkbox(default: Boolean) = tags.input(`type` := "checkbox", checked := default)
 
   // Label
   def label(content: String, keys: ClassKeyAggregator = emptyCK): TypedTag[HTMLSpanElement] = span("label " + keys.key)(content)
