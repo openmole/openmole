@@ -89,9 +89,9 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
   }
 
   trait Built extends super.Built {
-    val inputFiles = builder.inputFiles.toSeq
-    val outputFiles = builder.outputFiles.toSeq
-    val resources = builder.resources.toSeq
+    def inputFiles = builder.inputFiles.toList
+    def outputFiles = builder.outputFiles.toList
+    def resources = builder.resources.toList
   }
 
 }

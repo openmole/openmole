@@ -61,9 +61,9 @@ trait JVMLanguageBuilder { builder ⇒
   }
 
   trait Built <: Plugins {
-    val imports: Seq[String] = builder.imports.toSeq
-    val libraries: Seq[File] = builder.libraries.toSeq
-    val plugins = builder.plugins
+    def imports: Seq[String] = builder.imports.toList
+    def libraries: Seq[File] = builder.libraries.toList
+    def plugins = builder.plugins
   }
 }
 
