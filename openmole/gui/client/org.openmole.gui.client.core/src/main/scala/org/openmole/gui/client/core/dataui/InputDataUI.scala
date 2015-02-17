@@ -28,10 +28,10 @@ class InputDataUI(mappingsFactory: IOMappingsFactory) extends DataUI {
 
   def dataType = "Inputs"
 
-  def +=(inputUI: InputUI) =
-    if (!exists(inputUI)) {
-      inputUI.extraInputFields() = IOMappingsFactory(extraFields: _*).build
-      inputsUI() = inputUI +: inputsUI()
+  def +=(proto: PrototypeDataBagUI) =
+    if (!exists(proto)) {
+      //inputUI.mappings() = IOMappingsFactory(mappings: _*).build
+      inputsUI() = inputsUI() :+ inputUI(proto, mappingsFactory.build)
     }
 
   def -=(inputUI: InputUI) = inputsUI() = inputsUI().filter {
@@ -42,17 +42,21 @@ class InputDataUI(mappingsFactory: IOMappingsFactory) extends DataUI {
     _.id == inputUI.id
   }
 
+  def exists(proto: PrototypeDataBagUI) = inputsUI().exists {
+    _.protoDataBagUI.uuid == proto.uuid
+  }
+
   val inputsUI: Var[Seq[InputUI]] = Var(Seq())
 
   def panelUI: PanelUI = PanelUI.empty
 
   def panelUI(panel: GenericPanel): PanelUI = new InputPanelUI(panel, this)
 
-  val extraFields = IOMappingFactory.defaultInputField +: mappingsFactory.build.fields()
+  val mappingKeys = mappingsFactory.build.fields.map { _.key }
 
   def data = new InputData {
     def inputs = inputsUI().map { id ⇒
-      Input(id.protoDataBagUI.dataUI().data, id.default())
+      Input(id.protoDataBagUI.dataUI().data, id.mappings.fields.map { _.data })
     }
   }
 

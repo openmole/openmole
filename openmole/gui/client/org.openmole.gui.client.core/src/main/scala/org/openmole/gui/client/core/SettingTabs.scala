@@ -46,13 +46,6 @@ object SettingTabs {
 
     def prototypeTab(panelUIs: Seq[PanelUI], default: Boolean = false) = SettingTab("Prototypes", panelUIs, default)
 
-    /*  def buildInputPanelUI(panel: GenericPanel, dataUI: InputDataUI): PanelUI = {
-      println("in method panelUI of InputDataUI")
-      new InputPanelUI(panel, dataUI)
-    }
-
-    def buildOutputPanelUI(panel: GenericPanel, dataUI: OutputDataUI): PanelUI = new OutputPanelUI(panel, dataUI)*/
-
   }
 
   import SettingTab._
@@ -113,7 +106,9 @@ class SettingTabs(tabs: Seq[SettingTab]) {
     }
   )
 
-  def set(index: Int) = currentTab() = Some(tabs(index))
+  def set(index: Int) = {
+    currentTab() = Some(tabs(index))
+  }
 
   def save = tabs.map {
     _.save

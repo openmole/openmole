@@ -80,7 +80,6 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
     btn_primary, () ⇒ {
       currentDataBagUI().map { db ⇒
         db.dataUI() = factorySelector.content().map { f ⇒
-          resetIODataUI(db)
           //FIXME: I am sure, there is a better idea than a cast...
           f.dataUI.asInstanceOf[db.DATAUI]
         }.get
@@ -151,11 +150,6 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
     ClientService += dbUI
     setCurrent(dbUI)
     editionState() = true
-  }
-
-  def resetIODataUI(dbUI: DataBagUI) = dbUI.dataUI() match {
-    case dataUI: IODataUI ⇒ dataUI.reset
-    case _                ⇒
   }
 
   val conceptFilter = Rx {

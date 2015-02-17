@@ -18,7 +18,7 @@ package org.openmole.gui.plugin.task.systemexec.client
  */
 
 import org.openmole.gui.client.core.ClientService
-import org.openmole.gui.client.core.dataui.{IOMappingsFactory, TaskDataUI}
+import org.openmole.gui.client.core.dataui.{IOMappingsUI, IOMappingFactory, IOMappingsFactory, TaskDataUI}
 import org.openmole.gui.client.core.dataui.IOMappingFactory._
 
 import scala.scalajs.js.annotation.JSExport
@@ -28,16 +28,21 @@ import rx._
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskDataUI")
 class SystemExecTaskDataUI extends TaskDataUI {
-  def data = new SystemExecTaskData
+  def data = new SystemExecTaskData(inputDataUI().data.inputs, outputDataUI().data.outputs)
 
   def panelUI = new SystemExecTaskPanelUI(this)
 
   def dataType = "External"
 
-  override val inputExtraFieldsFactory = IOMappingsFactory(
-      stringField("File"),
-      booleanField("Workdir", true),
-      booleanField("Link", false)
+  val fileMapping = stringField("File")
+  val workDirMapping = booleanField("Workdir", true)
+  val linkMapping = booleanField("Link", false)
+
+  override def inputMappingsFactory = IOMappingsFactory(
+    IOMappingFactory.defaultInputField,
+    stringField("File"),
+    booleanField("Workdir", true),
+    booleanField("Link", false)
   )
 
 }
