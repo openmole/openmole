@@ -34,7 +34,7 @@ class SystemExecTaskDataUI extends TaskDataUI {
 
   def dataType = "External"
 
-  override val inputExtraFieldsFactory = IOMappingsFactory(
+  override val inputMappingsFactory = IOMappingsFactory(
       stringField("File"),
       booleanField("Workdir", true),
       booleanField("Link", false)
