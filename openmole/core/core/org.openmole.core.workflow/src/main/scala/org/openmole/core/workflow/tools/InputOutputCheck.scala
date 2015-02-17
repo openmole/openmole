@@ -82,7 +82,7 @@ trait InputOutputCheck {
       defaults.flatMap {
         parameter ⇒
           if (parameter.`override` || !context.contains(parameter.prototype.name)) Some(parameter.toVariable(context))
-          else None
+          else Option.empty[Variable[_]]
       }
 
   def perform(context: Context, process: (Context ⇒ Context)) = {
