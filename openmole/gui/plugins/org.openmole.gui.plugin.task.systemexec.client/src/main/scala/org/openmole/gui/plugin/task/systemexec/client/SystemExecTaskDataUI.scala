@@ -17,11 +17,13 @@ package org.openmole.gui.plugin.task.systemexec.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.ClientService
+import org.openmole.gui.client.core.dataui.{IOMappingsFactory, TaskDataUI}
+import org.openmole.gui.client.core.dataui.IOMappingFactory._
+
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
-import org.openmole.gui.ext.dataui._
-import org.openmole.gui.client.service.ClientService._
 import rx._
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskDataUI")
@@ -31,4 +33,11 @@ class SystemExecTaskDataUI extends TaskDataUI {
   def panelUI = new SystemExecTaskPanelUI(this)
 
   def dataType = "External"
+
+  override val inputExtraFieldsFactory = IOMappingsFactory(
+      stringField("File"),
+      booleanField("Workdir", true),
+      booleanField("Link", false)
+  )
+
 }

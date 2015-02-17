@@ -1,7 +1,11 @@
-package org.openmole.gui.client.service.dataui
+package org.openmole.gui.client.core.dataui
+
+import org.openmole.gui.ext.data.PrototypeData
+import org.openmole.gui.ext.dataui.DataUI
+import rx._
 
 /*
- * Copyright (C) 28/01/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 20/08/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,12 +20,11 @@ package org.openmole.gui.client.service.dataui
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import org.openmole.gui.ext.dataui._
 
-class CapsuleDataUI(val dataUI: Option[TaskDataUI] = None,
-                    val inputDataUI: Option[InputDataUI] = None,
-                    val outputDataUI: Option[OutputDataUI] = None,
-                    val environment: Option[EnvironmentDataUI] = None,
-                    val hooks: Seq[HookDataUI] = Seq()) {
+trait PrototypeDataUI <: DataUI {
+  type DATA = PrototypeData
 
+  val dimension: Var[Int]
+
+  def data: DATA
 }

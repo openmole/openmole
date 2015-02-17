@@ -17,10 +17,10 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.dataui.PrototypeDataUI
 import org.openmole.gui.ext.data.ProtoTYPE._
 import org.openmole.gui.ext.data.PrototypeData
 import org.openmole.gui.ext.dataui._
-import org.openmole.gui.ext.factoryui.FactoryUI
 import scalatags.JsDom.{ tags ⇒ tags }
 
 import rx._

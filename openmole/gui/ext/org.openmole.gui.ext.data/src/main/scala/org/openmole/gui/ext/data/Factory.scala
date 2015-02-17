@@ -1,12 +1,7 @@
-package org.openmole.gui.ext.factoryui
-
-import org.openmole.gui.ext.dataui._
-
-import scala.scalajs.js.annotation.JSExport
-import rx._
+package org.openmole.gui.ext.data
 
 /*
- * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 13/02/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -22,12 +17,10 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait FactoryUI {
-  type DATAUI <: DataUI
-  def dataUI: DATAUI
-  val name: String
-  val uuid: String = java.util.UUID.randomUUID.toString
-  //FIXME, it is not clean; FactoryUI should be specialized in smtg like IOFactoryUI containing
-  // ioMapping, but it impacts a lot and implies a lot of modifications
-  val ioMapping: Boolean = false
+import org.openmole.core.workflow.task.PluginSet
+import scala.util.Try
+
+trait Factory {
+  def data: Data
+  def coreObject(implicit plugins: PluginSet): Try[Any]
 }

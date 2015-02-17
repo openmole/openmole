@@ -1,6 +1,4 @@
-package org.openmole.gui.ext.dataui
-
-import org.openmole.gui.ext.data.HookData
+package org.openmole.gui.client.core.dataui
 
 /*
  * Copyright (C) 28/01/15 // mathieu.leclaire@openmole.org
@@ -19,8 +17,12 @@ import org.openmole.gui.ext.data.HookData
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait HookDataUI <: DataUI {
-  type DATA = HookData
+import org.openmole.gui.ext.dataui._
 
-  def data: DATA
+class CapsuleDataUI(val dataUI: Option[TaskDataUI] = None,
+                    val inputDataUI: Option[InputDataUI] = None,
+                    val outputDataUI: Option[OutputDataUI] = None,
+                    val environment: Option[EnvironmentDataUI] = None,
+                    val hooks: Seq[HookDataUI] = Seq()) {
+
 }

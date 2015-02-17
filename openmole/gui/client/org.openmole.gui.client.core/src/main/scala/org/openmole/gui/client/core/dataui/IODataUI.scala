@@ -1,11 +1,7 @@
-package org.openmole.gui.ext.dataui
-
-import org.openmole.gui.ext.data.ProtoTYPE.ProtoTYPE
-import org.openmole.gui.ext.data.PrototypeData
-import rx._
+package org.openmole.gui.client.core.dataui
 
 /*
- * Copyright (C) 20/08/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 13/02/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -20,11 +16,21 @@ import rx._
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import rx._
 
-trait PrototypeDataUI <: DataUI {
-  type DATA = PrototypeData
+trait IODataUI {
 
-  val dimension: Var[Int]
+  def inputExtraFieldsFactory: IOMappingsFactory = IOMappingsFactory.default
 
-  def data: DATA
+  def outputExtraFieldsFactory: IOMappingsFactory = IOMappingsFactory.default
+
+  lazy val inputDataUI: Var[InputDataUI] = Var(new InputDataUI(inputExtraFieldsFactory))
+
+  lazy val outputDataUI: Var[OutputDataUI] = Var(new OutputDataUI(outputExtraFieldsFactory))
+
+  def reset = {
+    inputDataUI() = new InputDataUI(inputExtraFieldsFactory)
+    outputDataUI() = new OutputDataUI(outputExtraFieldsFactory)
+  }
+
 }

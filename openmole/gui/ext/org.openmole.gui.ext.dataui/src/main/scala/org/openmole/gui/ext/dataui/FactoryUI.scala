@@ -1,4 +1,4 @@
-package org.openmole.gui.client.service
+package org.openmole.gui.ext.dataui
 
 /*
  * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
@@ -17,24 +17,9 @@ package org.openmole.gui.client.service
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import autowire._
-import upickle._
-import org.scalajs.dom
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import scala.concurrent.Future
-
-object Post extends autowire.Client[String, upickle.Reader, upickle.Writer] {
-  override def doCall(req: Request): Future[String] = {
-    val url = req.path.mkString("/")
-    dom.ext.Ajax.post(
-      url = "http://localhost:8080/" + url,
-      data = upickle.write(req.args)
-    ).map {
-        _.responseText
-      }
-  }
-
-  def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
-
-  def write[Result: upickle.Writer](r: Result) = upickle.write(r)
+trait FactoryUI {
+  type DATAUI <: DataUI
+  def dataUI: DATAUI
+  val name: String
+  val uuid: String = java.util.UUID.randomUUID.toString
 }

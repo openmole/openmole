@@ -18,7 +18,6 @@ package org.openmole.gui.ext.dataui
  */
 
 import org.openmole.gui.ext.data.Data
-import rx._
 
 trait DataUI {
   type DATA <: Data

@@ -1,9 +1,7 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.dataui.DataBagUI
-
 /*
- * Copyright (C) 11/02/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,16 +17,23 @@ import org.openmole.gui.client.core.dataui.DataBagUI
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import rx._
+import org.scalajs.dom
 
-class PanelSequences {
-  private val sequences: Var[Seq[(DataBagUI, Int)]] = Var(Seq())
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
-  def stack(dataBagUI: DataBagUI, index: Int) = sequences() = sequences() :+ (dataBagUI, index)
-
-  def flush: Option[(DataBagUI, Int)] = {
-    val last = sequences().lastOption
-    last.map { l ⇒ sequences() = sequences().filterNot(_._1.uuid == l._1.uuid) }
-    last
+object Post extends autowire.Client[String, upickle.Reader, upickle.Writer] {
+  override def doCall(req: Request): Future[String] = {
+    val url = req.path.mkString("/")
+    dom.ext.Ajax.post(
+      url = "http://localhost:8080/" + url,
+      data = upickle.write(req.args)
+    ).map {
+        _.responseText
+      }
   }
+
+  def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
+
+  def write[Result: upickle.Writer](r: Result) = upickle.write(r)
 }

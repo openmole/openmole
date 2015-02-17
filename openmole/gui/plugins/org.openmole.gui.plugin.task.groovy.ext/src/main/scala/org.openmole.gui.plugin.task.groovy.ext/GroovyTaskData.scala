@@ -1,4 +1,5 @@
 package org.openmole.gui.plugin.task.groovy.ext
+
 /*
  * Copyright (C) 25/09/14 // mathieu.leclaire@openmole.org
  *
@@ -16,7 +17,9 @@ package org.openmole.gui.plugin.task.groovy.ext
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.{TaskData, PrototypeData}
+import org.openmole.gui.ext.data.{Input, Output, TaskData}
 
-class GroovyTaskData(val code: String = "",
-                     val libs: Seq[String] = Seq()) extends TaskData
+case class GroovyTaskData(inputs: Seq[Input] = Seq(),
+                          outputs: Seq[Output] = Seq(),
+                          code: String = "",
+                          libs: Seq[String] = Seq()) extends TaskData

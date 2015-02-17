@@ -1,10 +1,8 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client
-import org.openmole.gui.client.service.ClientService
-import org.openmole.gui.client.service.dataui._
-import org.openmole.gui.ext.dataui._
-import org.openmole.gui.ext.factoryui.FactoryUI
+import org.openmole.gui.client.core.dataui._
+import org.openmole.gui.ext.dataui.FactoryUI
 import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter, Select }
 import org.scalajs.dom.Event
 
@@ -14,7 +12,7 @@ import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.ext.data.ProtoTYPE.DOUBLE
-import org.openmole.gui.client.service.ClientService._
+import ClientService._
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 
@@ -82,7 +80,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
     btn_primary, () ⇒ {
       currentDataBagUI().map { db ⇒
         db.dataUI() = factorySelector.content().map { f ⇒
-          resetIODataUI(db, f)
+          resetIODataUI(db)
           //FIXME: I am sure, there is a better idea than a cast...
           f.dataUI.asInstanceOf[db.DATAUI]
         }.get
@@ -136,7 +134,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
     case _                         ⇒ db.name() + ""
   }
 
-  val dimInput = bs.input("0")(placeholder := "Dim", width := 50, autofocus := true).render
+  val dimInput = bs.input("0")(placeholder := "Dim", width := 50, autofocus).render
 
   //New button
   val newGlyph =
@@ -155,11 +153,9 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
     editionState() = true
   }
 
-  def resetIODataUI(dbUI: DataBagUI, factory: FactoryUI) = dbUI match {
-    case iodb: IODataBagUI ⇒
-      iodb.inputDataUI() = DataBagUI.buildInput(factory.ioMapping)
-      iodb.outputDataUI() = DataBagUI.buildOutput(factory.ioMapping)
-    case _ ⇒
+  def resetIODataUI(dbUI: DataBagUI) = dbUI.dataUI() match {
+    case dataUI: IODataUI ⇒ dataUI.reset
+    case _                ⇒
   }
 
   val conceptFilter = Rx {

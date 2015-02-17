@@ -1,9 +1,11 @@
-package org.openmole.gui.ext.dataui
+package org.openmole.gui.server.core
 
-import org.openmole.gui.ext.data.TaskData
-import rx._
+import org.openmole.gui.ext.data.{ DataBag, ErrorData }
+
+import scala.util.Failure
+
 /*
- * Copyright (C) 10/08/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 26/09/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,7 +21,14 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait TaskDataUI <: DataUI {
-  type DATA = TaskData
-  def data: DATA
+object CoreFactory {
+
+  def check(dataBag: Seq[DataBag]): Seq[ErrorData] = {
+    dataBag.map { d ⇒
+      d -> ServerFactories.coreObject(d)
+    }.collect { case (data: DataBag, f: Failure[_]) ⇒ ErrorData(data, f.exception.getMessage, f.exception.getStackTrace.mkString("\n")) }
+
+  }
+
+  // def prototype(prototypeData: PrototypeData): Prototype[_] =
 }

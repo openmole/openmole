@@ -16,5 +16,5 @@ object Bootstrap extends GuiDefaults {
     (Server.core, Client.core, base.Misc.pluginManager, base.Misc.workspace, base.Misc.tools, base.Misc.fileService)
 
   lazy val osgi = OsgiProject("org.openmole.gui.bootstrap.osgi") dependsOn
-    (Server.factory, Client.service, Ext.data, Ext.factoryui, base.Core.workflow)
+    (Server.core, Client.core, Ext.data, base.Core.workflow)
 }

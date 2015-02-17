@@ -1,18 +1,13 @@
-package org.openmole.gui.client.service
+package org.openmole.gui.client.core
 
-import org.openmole.gui.client.service.dataui._
-import org.openmole.gui.ext.dataui._
-import org.openmole.gui.ext.factoryui._
+import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.shared.Api
-
+import org.openmole.gui.ext.dataui.{ DataUI, FactoryUI }
 import rx._
-import autowire._
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+
+import scala.scalajs._
 import scala.scalajs.js.annotation.JSExport
 import scala.util.{ Failure, Success, Try }
-import scala.scalajs._
-import reflect.runtime.universe._
 
 /*
  * Copyright (C) 30/10/14 // mathieu.leclaire@openmole.org
