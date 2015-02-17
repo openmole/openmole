@@ -94,7 +94,7 @@ trait InputOutputCheck {
       try initializedContext + process(initializedContext)
       catch {
         case e: Throwable ⇒
-          throw new InternalProcessingError(e, s"Error for context values in ${this} ${context.prettified()}")
+          throw new InternalProcessingError(e, s"Error for context values in ${this} ${initializedContext.prettified()}")
       }
 
     val outputErrors = verifyOutput(result)
