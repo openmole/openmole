@@ -22,13 +22,13 @@ import rx._
 
 package object dataui {
 
-  def inputUI(protoDataBagUI: PrototypeDataBagUI, default: Var[Option[String]] = Var(None)) =
-    InputUI(protoDataBagUI.uuid, protoDataBagUI, default, Var(IOMappingsFactory.default.build))
+  def inputUI(protoDataBagUI: PrototypeDataBagUI, mappings: IOMappingsUI = IOMappingsFactory.default.build) =
+    InputUI(protoDataBagUI.uuid, protoDataBagUI, mappings)
 
   def outputUI(protoDataBagUI: PrototypeDataBagUI) =
     OutputUI(protoDataBagUI.uuid, protoDataBagUI)
 
-  case class InputUI(id: String, protoDataBagUI: PrototypeDataBagUI, default: Var[Option[String]] = Var(None), extraInputFields: Var[IOMappingsUI])
+  case class InputUI(id: String, protoDataBagUI: PrototypeDataBagUI, mappings: IOMappingsUI)
 
   case class OutputUI(id: String, protoDataBagUI: PrototypeDataBagUI)
 

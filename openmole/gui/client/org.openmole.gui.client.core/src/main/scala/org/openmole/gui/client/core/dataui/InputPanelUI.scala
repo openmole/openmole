@@ -38,16 +38,10 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
     bs.button("Add")(`type` := "submit", onclick := { () ⇒
       if (filteredInputsUI.size == 1) {
         val head = filteredInputsUI.head
-        dataUI += head
+        dataUI += head.protoDataBagUI
         inputFilter.clear
       }
     }).render
-
-  def getRow(iUI: InputUI) = {
-    (iUI, iUI.extraInputFields().fields().map {
-      _.buildPanelUI
-    }.toSeq)
-  }
 
   val table = bs.table(col_md_12 + striped)(
     thead(
@@ -56,8 +50,8 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
         tags.th("Type"),
         tags.th("Dim"),
         // tags.th("Default"),
-        for (f ← dataUI.extraFields) yield {
-          tags.th(f.key)
+        for (k ← dataUI.mappingKeys) yield {
+          tags.th(k)
         },
         tags.th("")
       )), Rx {
@@ -73,6 +67,7 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
                 cursor := "pointer",
                 onclick := { () ⇒
                   {
+                    save
                     panel.currentDataBagUI().map { db ⇒ panel.stack(db, 1) }
                     panel.setCurrent(i.protoDataBagUI)
                   }
@@ -80,7 +75,7 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
               bs.td(col_md_1)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
               bs.td(col_md_1)(tags.span(i.protoDataBagUI.dataUI().dimension)),
               if (dataUI.inputsUI().contains(i)) {
-                for (f ← i.extraInputFields().fields().map { _.buildPanelUI }) yield {
+                for (f ← i.mappings.fields.map { _.panelUI }) yield {
                   tags.td(f.view)
                 }
               },
@@ -111,5 +106,6 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
     )
 
   def save = {
+    dataUI.inputsUI().map { _.mappings.fields.map { _.panelUI.save } }
   }
 }

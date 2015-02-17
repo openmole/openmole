@@ -2,6 +2,7 @@ package org.openmole.gui.client.core.dataui
 
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
@@ -29,56 +30,71 @@ trait IOMappingDataUI[T] {
 
   val value: Var[T]
 
-  def buildPanelUI: PanelUI
+  val panelUI: PanelUI
+
+  def data = IOMappingData(key, value)
 }
 
-object IOMappingsFactory {
-  def apply(extraFieldsDataUI: IOMappingDataUI[_]*) = new IOMappingsFactory {
-    def build: IOMappingsUI = new IOMappingsUI(Var(extraFieldsDataUI))
+object IOMappingFactory {
+  def defaultInputField = IOMappingFactory.stringField("Default")
+
+  def stringField(keyName: String) = new IOMappingFactory {
+    def build = new IOMappingDataUI[String] {
+
+      val key = keyName
+      val value = Var("")
+
+      val panelUI = new PanelUI {
+        val input = bs.input(value())(placeholder := key).render
+
+        def view: TypedTag[HTMLElement] = span(input)
+
+        def save = value() = input.value
+      }
+    }
   }
 
-  def default = new IOMappingsFactory {
-    def build = new IOMappingsUI
+  def booleanField(keyName: String, default: Boolean) = new IOMappingFactory {
+    def build = new IOMappingDataUI[Boolean] {
+
+      val key = keyName
+
+      val value: Var[Boolean] = Var(default)
+
+      val panelUI = new PanelUI {
+        val input = bs.checkbox(value()).render
+
+        def view: TypedTag[HTMLElement] = span(input)
+
+        def save: Unit = value() = input.checked
+      }
+    }
   }
+
+}
+
+trait IOMappingFactory {
+  def build: IOMappingDataUI[_]
+}
+
+import IOMappingFactory._
+
+object IOMappingsFactory {
+
+  def apply(mappingFactories: IOMappingFactory*) = new IOMappingsFactory {
+    def build: IOMappingsUI = new IOMappingsUI(mappingFactories.map {
+      _.build
+    })
+  }
+
+  def default = IOMappingsFactory(defaultInputField)
 }
 
 trait IOMappingsFactory {
   def build: IOMappingsUI
 }
 
-case class IOMappingsUI(fields: Var[Seq[IOMappingDataUI[_]]] = Var(Seq()))
-
-object IOMappingFactory {
-
-  def defaultInputField = IOMappingFactory.stringField("Default")
-
-  def stringField(keyName: String) = new IOMappingDataUI[String] {
-
-    val key = keyName
-    val value = Var("")
-
-    def buildPanelUI = new PanelUI {
-      val input = bs.input(value())(placeholder := key).render
-
-      def view: TypedTag[HTMLElement] = span(input)
-
-      def save = value() = input.value
-    }
-  }
-
-  def booleanField(keyName: String, default: Boolean) = new IOMappingDataUI[Boolean] {
-
-    val key = keyName
-    val value = Var(default)
-
-    def buildPanelUI = new PanelUI {
-      val input = bs.checkbox(value()).render
-
-      def view: TypedTag[HTMLElement] = span(input)
-
-      def save: Unit = value() = input.checked
-    }
-  }
-
+case class IOMappingsUI(fields: Seq[IOMappingDataUI[_]] = Seq()) {
+  def ++(iom: IOMappingsUI) = IOMappingsUI(fields ++ iom.fields)
 }
 

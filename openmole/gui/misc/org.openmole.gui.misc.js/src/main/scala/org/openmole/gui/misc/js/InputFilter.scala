@@ -26,7 +26,7 @@ import org.openmole.gui.misc.js.Forms._
 import rx._
 
 class InputFilter(initValue: String = "", pHolder: String = "Filter") {
-  var nameFilter: Var[String] = Var("")
+  val nameFilter = Var("")
 
   val tag = bs.input(
     initValue)(

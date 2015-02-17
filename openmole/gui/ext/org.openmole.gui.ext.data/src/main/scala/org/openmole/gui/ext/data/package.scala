@@ -19,7 +19,9 @@ package org.openmole.gui.ext
 
 package object data {
 
-  case class Input(val prototype: PrototypeData, val default: Option[String])
+  case class IOMappingData[T](key: String, value: T)
+
+  case class Input(val prototype: PrototypeData, mappings: Seq[IOMappingData[_]])
 
   case class Output(val prototype: PrototypeData)
 }
