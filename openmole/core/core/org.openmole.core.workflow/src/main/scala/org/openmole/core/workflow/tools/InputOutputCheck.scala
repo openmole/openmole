@@ -91,10 +91,10 @@ trait InputOutputCheck {
     if (!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found in ${this}: ${inputErrors.mkString(", ")}.")
 
     val result =
-      try context + process(initializedContext)
+      try initializedContext + process(initializedContext)
       catch {
         case e: Throwable ⇒
-          throw new InternalProcessingError(e, s"Error for context values in ${this} ${context.prettified()}")
+          throw new InternalProcessingError(e, s"Error for context values in ${this} ${initializedContext.prettified()}")
       }
 
     val outputErrors = verifyOutput(result)
