@@ -31,7 +31,7 @@ class InputDataUI(mappingsFactory: IOMappingsFactory) extends DataUI {
   def +=(proto: PrototypeDataBagUI) =
     if (!exists(proto)) {
       //inputUI.mappings() = IOMappingsFactory(mappings: _*).build
-      inputsUI() = inputsUI() :+ inputUI(proto, mappingsFactory.build)
+      inputsUI() = inputsUI() :+ inputUI(proto, new IOMappingsUI(mappingsFactory.build.fields.filter(_.prototypeFilter(proto))))
     }
 
   def -=(inputUI: InputUI) = inputsUI() = inputsUI().filter {
@@ -52,7 +52,7 @@ class InputDataUI(mappingsFactory: IOMappingsFactory) extends DataUI {
 
   def panelUI(panel: GenericPanel): PanelUI = new InputPanelUI(panel, this)
 
-  val mappingKeys = mappingsFactory.build.fields.map { _.key }
+  def mappingKeys(p: PrototypeDataBagUI) = mappingsFactory.build.fields.filter { _.prototypeFilter(p) }.map { _.key }
 
   def data = new InputData {
     def inputs = inputsUI().map { id ⇒

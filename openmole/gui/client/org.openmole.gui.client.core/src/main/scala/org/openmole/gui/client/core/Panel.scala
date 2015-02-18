@@ -65,11 +65,12 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
   val currentDataBagUI = Var(defaultDataBagUI.left.toOption)
   val panelSequences = new PanelSequences
 
-  val settingTabs = Rx {
-    currentDataBagUI().map { db ⇒
-      SettingTabs(this, db)
-    }
+  val settingTabs: Var[Option[SettingTabs]] = Var(None)
+
+  Obs(currentDataBagUI) {
+    settingTabs() = currentDataBagUI().map { db ⇒ SettingTabs(this, db) }
   }
+
   val inputFilter = new InputFilter(currentDataBagUI().map {
     _.name()
   }.getOrElse(""))

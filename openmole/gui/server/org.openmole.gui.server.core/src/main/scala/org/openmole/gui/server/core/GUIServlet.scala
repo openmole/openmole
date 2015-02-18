@@ -41,6 +41,15 @@ class GUIServlet extends ScalatraServlet {
     _.getName
   }.sorted
 
+  get("/plugins.js.map") {
+    contentType = "text/javascript"
+    val webui = Workspace.file("webui")
+    val webapp = new File(webui, "webapp")
+    val jsSrc = new File(webapp, "js/plugins.js.map")
+    response.setHeader("Content-Disposition", "attachment; filename=" + jsSrc.getName)
+    jsSrc
+  }
+
   get("/") {
     contentType = "text/html"
     tags.html(
