@@ -32,6 +32,7 @@ import org.openmole.misc.exception.InternalProcessingError
 import org.scalatest._
 import scala.collection.mutable.ListBuffer
 import scala.reflect.macros.whitebox
+import scala.util.Try
 
 class AggregationTransitionSpec extends FlatSpec with Matchers {
 
@@ -174,10 +175,8 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
       }
     }
 
-    util.Try {
-      val ex = (exploration -< run >- test).start
-      ex.waitUntilEnded
-    }
+    val ex = (exploration -< run >- test).start
+    Try { ex.waitUntilEnded }
 
     endCapsExecuted.get() should equal(0)
   }

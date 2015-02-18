@@ -59,14 +59,11 @@ sealed abstract class MoleTask(
 
   class ResultGathering extends EventListener[MoleExecution] {
     @volatile var lastContext: Option[Context] = None
-    @volatile var exceptions: List[Throwable] = List.empty
 
     override def triggered(obj: MoleExecution, ev: Event[MoleExecution]) = synchronized {
       ev match {
         case ev: MoleExecution.JobFinished ⇒
           if (ev.capsule == last) lastContext = Some(ev.moleJob.context)
-        case ev: MoleExecution.ExceptionRaised ⇒
-          exceptions ::= ev.exception
         case _ ⇒
       }
     }
@@ -91,7 +88,7 @@ sealed abstract class MoleTask(
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 
-    if (!resultGathering.exceptions.isEmpty) throw new MultipleException(resultGathering.exceptions.reverse)
+    execution.exception.foreach(throw _)
 
     context + resultGathering.lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
   }

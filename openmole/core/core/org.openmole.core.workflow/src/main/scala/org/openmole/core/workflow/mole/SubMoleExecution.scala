@@ -240,6 +240,7 @@ class SubMoleExecution(
   def finalState(job: MoleJob, state: State) = {
     job.exception match {
       case Some(e) ⇒
+        moleExecution.cancel(e)
         val (capsule, _) = _jobs.single(job)
         logger.log(SEVERE, s"Error in user job execution for capsule $capsule, job state is FAILED.", e)
         EventDispatcher.trigger(moleExecution, MoleExecution.JobFailed(job, capsule, e))
@@ -252,12 +253,9 @@ class SubMoleExecution(
     }
 
     state match {
-      case COMPLETED ⇒ jobFinished(job)
-      case FAILED ⇒
-        cancel
-        jobFailedOrCanceled(job)
-      case CANCELED ⇒ jobFailedOrCanceled(job)
-      case _        ⇒
+      case COMPLETED         ⇒ jobFinished(job)
+      case FAILED | CANCELED ⇒ jobFailedOrCanceled(job)
+      case _                 ⇒
     }
   }
 
