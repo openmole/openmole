@@ -49,7 +49,7 @@ import org.openmole.core.workflow.execution.Environment
 object MoleExecution extends Logger {
 
   class Starting extends Event[MoleExecution]
-  class Finished extends Event[MoleExecution]
+  case class Finished(canceled: Boolean) extends Event[MoleExecution]
   case class JobStatusChanged(moleJob: MoleJob, capsule: Capsule, newState: State, oldState: State) extends Event[MoleExecution]
   case class JobCreated(moleJob: MoleJob, capsule: Capsule) extends Event[MoleExecution]
   case class JobSubmitted(moleJob: Job, capsule: Capsule, environment: Environment) extends Event[MoleExecution]
@@ -110,11 +110,11 @@ class MoleExecution(
 
   val dataChannelRegistry = new RegistryWithTicket[DataChannel, Buffer[Variable[_]]]
 
-  val _exceptions = Ref(List.empty[Throwable])
+  val _exception = Ref(Option.empty[Throwable])
 
   def numberOfJobs = rootSubMoleExecution.numberOfJobs
 
-  def exceptions = _exceptions.single()
+  def exception = _exception.single()
 
   def duration: Option[Long] =
     (_startTime.single(), _endTime.single()) match {
@@ -186,10 +186,15 @@ class MoleExecution(
     this
   }
 
+  def cancel(t: Throwable): this.type = {
+    _exception.single() = Some(t)
+    cancel
+  }
+
   def cancel: this.type = {
     if (!_canceled.getUpdate(_ ⇒ true)) {
       rootSubMoleExecution.cancel
-      EventDispatcher.trigger(this, new MoleExecution.Finished)
+      EventDispatcher.trigger(this, MoleExecution.Finished(canceled = true))
       _finished.single() = true
       _endTime.single() = Some(System.currentTimeMillis)
     }
@@ -201,25 +206,18 @@ class MoleExecution(
   def waitUntilEnded = {
     atomic { implicit txn ⇒
       if (!_finished()) retry
-      if (!_exceptions().isEmpty) throw new MultipleException(_exceptions().reverse)
+      _exception().foreach { throw _ }
     }
     this
   }
 
-  def jobFailedOrCanceled(moleJob: MoleJob, capsule: Capsule) = {
-    moleJob.exception match {
-      case None ⇒
-      case Some(e) ⇒
-        atomic { implicit txn ⇒ _exceptions() = e :: _exceptions() }
-    }
-    jobOutputTransitionsPerformed(moleJob, capsule)
-  }
+  def jobFailedOrCanceled(moleJob: MoleJob, capsule: Capsule) = jobOutputTransitionsPerformed(moleJob, capsule)
 
   def jobOutputTransitionsPerformed(job: MoleJob, capsule: Capsule) =
     if (!_canceled.single()) {
       if (allWaiting) submitAll
       if (numberOfJobs == 0) {
-        EventDispatcher.trigger(this, new MoleExecution.Finished)
+        EventDispatcher.trigger(this, MoleExecution.Finished(canceled = false))
         _finished.single() = true
         _endTime.single() = Some(System.currentTimeMillis)
       }
