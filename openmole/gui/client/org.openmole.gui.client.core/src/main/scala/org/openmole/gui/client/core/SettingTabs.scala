@@ -30,21 +30,21 @@ object SettingTabs {
 
   object SettingTab extends Enumeration {
 
-    case class SettingTab(val name: String, val panelUIs: Seq[PanelUI], val defaultActive: Boolean = false, val id: String = getID) {
+    case class SettingTab(val name: String, val panelUIs: Seq[PanelUI], val id: String = getID) {
       def save = panelUIs.map {
         _.save
       }
     }
 
-    def ioTab(name: String, panelUIs: Seq[PanelUI], default: Boolean = false) = SettingTab(name, panelUIs, default)
+    def ioTab(name: String, panelUIs: Seq[PanelUI]) = SettingTab(name, panelUIs)
 
-    def inputTab(panelUIs: Seq[PanelUI], default: Boolean = false) = SettingTab("Inputs", panelUIs, default)
+    def inputTab(panelUIs: Seq[PanelUI]) = SettingTab("Inputs", panelUIs)
 
-    def outputTab(panelUIs: Seq[PanelUI], default: Boolean = false) = SettingTab("Outputs", panelUIs, default)
+    def outputTab(panelUIs: Seq[PanelUI]) = SettingTab("Outputs", panelUIs)
 
-    def environmentTab(panelUIs: Seq[PanelUI], default: Boolean = false) = SettingTab("Environment", panelUIs, default)
+    def environmentTab(panelUIs: Seq[PanelUI]) = SettingTab("Environment", panelUIs)
 
-    def prototypeTab(panelUIs: Seq[PanelUI], default: Boolean = false) = SettingTab("Prototypes", panelUIs, default)
+    def prototypeTab(panelUIs: Seq[PanelUI]) = SettingTab("Prototypes", panelUIs)
 
   }
 
@@ -57,7 +57,7 @@ object SettingTabs {
         case _             ⇒ "Settings"
       }
       Seq(
-        ioTab(name, Seq(io.panelUI), true),
+        ioTab(name, Seq(io.panelUI)),
         inputTab(Seq(io.inputDataUI().panelUI(panel))), //new InputPanelUI(panel, t.inputDataUI()))),
         outputTab(Seq(io.outputDataUI().panelUI(panel)))
       )
@@ -70,7 +70,7 @@ object SettingTabs {
 
   def apply(dataUI: CapsuleDataUI): SettingTabs = new SettingTabs(Seq(
     dataUI.dataUI.map {
-      d ⇒ ioTab("Settings", Seq(d.panelUI), true)
+      d ⇒ ioTab("Settings", Seq(d.panelUI))
     },
     dataUI.inputDataUI.map {
       i ⇒ inputTab(Seq(i.panelUI))
@@ -92,11 +92,13 @@ class SettingTabs(tabs: Seq[SettingTab]) {
   val currentTab = Var(tabs.headOption)
 
   val view = tags.div(
-    bs.nav("settingsNav", nav_pills,
-      (for (c ← tabs) yield {
-        navItem(c.id, c.name, () ⇒ currentTab() = Some(c), c.defaultActive)
-      }): _*
-    ), Rx {
+    Rx {
+      bs.nav("settingsNav", nav_pills,
+        (for (c ← tabs) yield {
+          navItem(c.id, c.name, () ⇒ { currentTab() = Some(c) }, currentTab() == Some(c))
+        }): _*
+      )
+    }, Rx {
       tags.div(currentTab().map { t: SettingTab ⇒
         for (el ← t.panelUIs) yield {
           tags.div(el.view)
@@ -106,9 +108,7 @@ class SettingTabs(tabs: Seq[SettingTab]) {
     }
   )
 
-  def set(index: Int) = {
-    currentTab() = Some(tabs(index))
-  }
+  def set(index: Int) = currentTab() = Some(tabs(index))
 
   def save = tabs.map {
     _.save
