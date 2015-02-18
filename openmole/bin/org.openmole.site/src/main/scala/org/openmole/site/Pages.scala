@@ -185,7 +185,7 @@ object DocumentationPages { index ⇒
     def console =
       new DocumentationPage {
         def name = "console"
-        def children = Seq(task, sampling, transition, hook, environment, sources)
+        def children = Seq(task, sampling, transition, hook, environment, sources, methods)
         def content = documentation.Console()
 
         def task = new DocumentationPage {
@@ -277,6 +277,12 @@ object DocumentationPages { index ⇒
           def name = "source"
           def children = Seq()
           def content = documentation.console.Source()
+        }
+
+        def methods = new DocumentationPage {
+          def name = "method"
+          def children = Seq()
+          def content = documentation.console.Method()
         }
       }
 
