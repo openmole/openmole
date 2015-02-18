@@ -7,6 +7,7 @@ import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import rx._
+import org.openmole.gui.ext.data.ProtoTYPE._
 
 /*
  * Copyright (C) 13/02/15 // mathieu.leclaire@openmole.org
@@ -32,17 +33,22 @@ trait IOMappingDataUI[T] {
 
   val panelUI: PanelUI
 
+  def prototypeFilter(p: PrototypeDataBagUI): Boolean = true
+
   def data = IOMappingData(key, value)
 }
 
 object IOMappingFactory {
   def defaultInputField = IOMappingFactory.stringField("Default")
 
-  def stringField(keyName: String) = new IOMappingFactory {
+  def stringField(keyName: String, protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory {
+
     def build = new IOMappingDataUI[String] {
 
       val key = keyName
       val value = Var("")
+
+      override def prototypeFilter(proto: PrototypeDataBagUI) = protoFilter(proto)
 
       val panelUI = new PanelUI {
         val input = bs.input(value())(placeholder := key).render
@@ -54,12 +60,15 @@ object IOMappingFactory {
     }
   }
 
-  def booleanField(keyName: String, default: Boolean) = new IOMappingFactory {
+  def booleanField(keyName: String, default: Boolean, protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory {
+
     def build = new IOMappingDataUI[Boolean] {
 
       val key = keyName
 
       val value: Var[Boolean] = Var(default)
+
+      override def prototypeFilter(proto: PrototypeDataBagUI) = protoFilter(proto)
 
       val panelUI = new PanelUI {
         val input = bs.checkbox(value()).render
@@ -71,6 +80,7 @@ object IOMappingFactory {
     }
   }
 
+  def fileFilter = (p: PrototypeDataBagUI) ⇒ p.dataUI().data.`type` == FILE
 }
 
 trait IOMappingFactory {

@@ -31,6 +31,12 @@ import scalatags.JsDom.tags
 class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
   val inputFilter = new InputFilter(pHolder = "Add a prototype")
 
+  def filteredInputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ inputUI(p) }.filter { i ⇒
+    inputFilter.contains(i.protoDataBagUI.name()) &&
+      !inputFilter.nameFilter().isEmpty &&
+      !dataUI.exists(i)
+  }
+
   //New button
   val newGlyph =
     //FIXME: THE SIZE OF THE GLYPH IS SMALLER THAN THE REST OF THE GROUP WHEN GROUPEL
@@ -43,57 +49,6 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
       }
     }).render
 
-  val table = bs.table(col_md_12 + striped)(
-    thead(
-      tags.tr(
-        tags.th("Name"),
-        tags.th("Type"),
-        tags.th("Dim"),
-        // tags.th("Default"),
-        for (k ← dataUI.mappingKeys) yield {
-          tags.th(k)
-        },
-        tags.th("")
-      )), Rx {
-      tbody(
-        for (
-          i ← (dataUI.inputsUI() ++ filteredInputsUI).sortBy(_.protoDataBagUI.name())
-        ) yield {
-          bs.tr(
-            if (dataUI.inputsUI().contains(i)) nothing
-            else warning
-          )(
-              bs.td(col_md_2)(a(i.protoDataBagUI.name(),
-                cursor := "pointer",
-                onclick := { () ⇒
-                  {
-                    save
-                    panel.currentDataBagUI().map { db ⇒ panel.stack(db, 1) }
-                    panel.setCurrent(i.protoDataBagUI)
-                  }
-                })),
-              bs.td(col_md_1)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
-              bs.td(col_md_1)(tags.span(i.protoDataBagUI.dataUI().dimension)),
-              if (dataUI.inputsUI().contains(i)) {
-                for (f ← i.mappings.fields.map { _.panelUI }) yield {
-                  tags.td(f.view)
-                }
-              },
-              bs.td(col_md_1)(bs.button(glyph(glyph_minus))(onclick := { () ⇒
-                dataUI -= i
-              }))
-            )
-        }
-      )
-    }
-  ).render
-
-  def filteredInputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ inputUI(p) }.filter { i ⇒
-    inputFilter.contains(i.protoDataBagUI.name()) &&
-      !inputFilter.nameFilter().isEmpty &&
-      !dataUI.exists(i)
-  }
-
   @JSExport
   val view =
     bs.form(spacer20)(
@@ -102,10 +57,58 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
           inputFilter.tag,
           bs.inputGroupButton(newGlyph)
         )),
-      bs.formGroup(col_md_12)(table)
+      bs.formGroup(col_md_12)(Rx {
+        (for ((headers, inputsUI) ← dataUI.inputsUI().groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI) }) yield {
+          bs.table(col_md_12 + striped)(
+            thead(
+              tags.tr(
+                tags.th("Name"),
+                tags.th("Type"),
+                tags.th("Dim"),
+                for (k ← headers) yield {
+                  tags.th(k)
+                },
+                tags.th("")
+              )
+            ),
+            tbody(
+              for (i ← inputsUI.sortBy(_.protoDataBagUI.name())) yield {
+                tags.tr(
+                  bs.td(col_md_2)(a(i.protoDataBagUI.name(),
+                    cursor := "pointer",
+                    onclick := { () ⇒
+                      {
+                        save
+                        panel.currentDataBagUI().map { db ⇒ panel.stack(db, 1) }
+                        panel.setCurrent(i.protoDataBagUI)
+                      }
+                    })),
+                  bs.td(col_md_1)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
+                  bs.td(col_md_1)(tags.span(i.protoDataBagUI.dataUI().dimension)),
+                  for (
+                    f ← i.mappings.fields.map {
+                      _.panelUI
+                    }
+                  ) yield {
+                    tags.td(f.view)
+                  },
+                  bs.td(col_md_1)(bs.button(glyph(glyph_minus))(onclick := { () ⇒
+                    dataUI -= i
+                  }))
+                )
+              }
+            )
+          )
+        }).toSeq
+      }
+      )
     )
 
   def save = {
-    dataUI.inputsUI().map { _.mappings.fields.map { _.panelUI.save } }
+    dataUI.inputsUI().map {
+      _.mappings.fields.map {
+        _.panelUI.save
+      }
+    }
   }
 }

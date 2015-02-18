@@ -51,7 +51,7 @@ object GUIClient {
     val db2 = DataBagUI(ClientService.taskFactories(1))
     ClientService += db2
     db2.name() = "yopp"
-    ClientService += DataBagUI(ClientService.prototypeFactories(0), "proto1")
+    ClientService += DataBagUI(ClientService.prototypeFactories(4), "proto1")
     ClientService += DataBagUI(ClientService.prototypeFactories(1), "proto2")
     ClientService += DataBagUI(ClientService.prototypeFactories(1), "proto3")
     ClientService += DataBagUI(ClientService.prototypeFactories(2), "proto4")
