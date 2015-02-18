@@ -17,6 +17,8 @@
 
 package org.openmole.core.workflow.transition
 
+import java.util.concurrent.atomic.AtomicInteger
+
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
@@ -25,9 +27,11 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
+import org.openmole.misc.exception.InternalProcessingError
 
 import org.scalatest._
 import scala.collection.mutable.ListBuffer
+import scala.reflect.macros.whitebox
 
 class AggregationTransitionSpec extends FlatSpec with Matchers {
 
@@ -108,14 +112,14 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
   }
 
   "Aggregation transition" should "support cancel and start of a new execution" in {
-    @volatile var endCapsExecuted = 0
+    val endCapsExecuted = new AtomicInteger()
 
     val data = 0 to 1000
     val i = Prototype[Int]("i")
 
     val sampling = new ExplicitSampling(i, data)
 
-    val exc = new Capsule(ExplorationTask(sampling))
+    val exc = Capsule(ExplorationTask(sampling))
 
     val emptyT = EmptyTask()
     emptyT addInput i
@@ -129,7 +133,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
       override def process(context: Context) = {
         context.contains(i.toArray) should equal(true)
         context(i.toArray).sorted.deep should equal(data.toArray.deep)
-        endCapsExecuted += 1
+        endCapsExecuted.incrementAndGet()
         context
       }
     }
@@ -139,9 +143,43 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
     val mole = exc -< emptyC >- testC toMole
 
     MoleExecution(mole).start.cancel
-    endCapsExecuted = 0
+    endCapsExecuted.set(0)
     MoleExecution(mole).start.waitUntilEnded
-    endCapsExecuted should equal(1)
+    endCapsExecuted.get() should equal(1)
+  }
+
+  "Aggregation transition" should "not be executed when a task failed in exploration" in {
+    val data = 0 to 1000
+    val i = Prototype[Int]("i")
+    val sampling = new ExplicitSampling(i, data)
+    val exploration = ExplorationTask(sampling)
+    val endCapsExecuted = new AtomicInteger()
+
+    val run = new TestTask {
+      val name = "Run"
+      override val inputs = DataSet(i)
+      override val outputs = DataSet(i)
+      override def process(context: Context) = {
+        if (context(i) == 42) throw new InternalProcessingError("Some error for test")
+        context
+      }
+    }
+
+    val test = new TestTask {
+      val name = "Test"
+      override val inputs = DataSet(i.toArray)
+      override def process(context: Context) = {
+        endCapsExecuted.incrementAndGet()
+        context
+      }
+    }
+
+    util.Try {
+      val ex = (exploration -< run >- test).start
+      ex.waitUntilEnded
+    }
+
+    endCapsExecuted.get() should equal(0)
   }
 
 }

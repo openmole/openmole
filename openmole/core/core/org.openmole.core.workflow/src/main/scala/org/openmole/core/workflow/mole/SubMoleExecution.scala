@@ -40,7 +40,7 @@ import org.openmole.misc.tools.service.LockUtil._
 import org.openmole.misc.tools.service.Logger
 
 object SubMoleExecution extends Logger {
-  case class Finished(val ticket: Ticket) extends Event[SubMoleExecution]
+  case class Finished(val ticket: Ticket, canceled: Boolean) extends Event[SubMoleExecution]
 }
 
 import SubMoleExecution.Log._
@@ -53,7 +53,7 @@ class SubMoleExecution(
   @transient lazy val masterCapsuleSemaphore = new Semaphore(1)
 
   private val _nbJobs = Ref(0)
-  private val _childs = TSet.empty[SubMoleExecution]
+  private val _children = TSet.empty[SubMoleExecution]
   private val _jobs = TMap[MoleJob, (Capsule, Ticket)]()
   private val _canceled = Ref(false)
 
@@ -88,7 +88,7 @@ class SubMoleExecution(
     atomic { implicit txn ⇒
       _canceled() = true
       cancelJobs
-      TSet.asSet(_childs)
+      TSet.asSet(_children)
     }.foreach { _.cancel }
     parentApply(_.-=(this))
     this
@@ -96,30 +96,29 @@ class SubMoleExecution(
 
   def cancelJobs = _jobs.single.keys.foreach { _.cancel }
 
-  def childs = _childs.single
+  def children = _children.single
 
   private def +=(submoleExecution: SubMoleExecution) =
-    _childs.single += submoleExecution
+    _children.single += submoleExecution
 
   private def -=(submoleExecution: SubMoleExecution) =
-    _childs.single -= submoleExecution
+    _children.single -= submoleExecution
 
   def jobs: Seq[MoleJob] =
     atomic {
       implicit txn ⇒
-        (_jobs.keys ++ TSet.asSet(_childs).toSeq.flatMap(_.jobs)).toSeq
+        (_jobs.keys ++ TSet.asSet(_children).toSeq.flatMap(_.jobs)).toSeq
     }
 
   private def jobFailedOrCanceled(job: MoleJob) = {
-    val (capsule, ticket) = _jobs.single.get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
-
+    val (capsule, ticket) = _jobs.single.get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registered."))
     val finished =
       atomic { implicit txn ⇒
         rmJob(job)
         isFinished
       }
-    if (finished) finish(ticket)
 
+    if (finished) finish(ticket)
     moleExecution.jobFailedOrCanceled(job, capsule)
   }
 
@@ -157,6 +156,7 @@ class SubMoleExecution(
           rmJob(job)
           isFinished
         }
+
       if (finished) finish(ticket)
       moleExecution.jobOutputTransitionsPerformed(job, capsule)
     }
@@ -165,7 +165,7 @@ class SubMoleExecution(
   private def isFinished = _nbJobs.single() == 0
 
   private def finish(ticket: Ticket) = {
-    EventDispatcher.trigger(this, new SubMoleExecution.Finished(ticket))
+    EventDispatcher.trigger(this, new SubMoleExecution.Finished(ticket, canceled = _canceled.single()))
     parentApply(_.-=(this))
   }
 
@@ -252,9 +252,12 @@ class SubMoleExecution(
     }
 
     state match {
-      case COMPLETED         ⇒ jobFinished(job)
-      case FAILED | CANCELED ⇒ jobFailedOrCanceled(job)
-      case _                 ⇒
+      case COMPLETED ⇒ jobFinished(job)
+      case FAILED ⇒
+        cancel
+        jobFailedOrCanceled(job)
+      case CANCELED ⇒ jobFailedOrCanceled(job)
+      case _        ⇒
     }
   }
 

@@ -1,4 +1,44 @@
 @import org.openmole.site.Objects._
+@import org.openmole.site.DocumentationPages
+
+@sect{Simple scala tasks}
+  You can program you data processing task using the scala task. For instance the following workflow sum all the elements of an array using a scala task and displays the results. To get more detail on the hook part you can check the doc on @a("hooks", href := DocumentationPages.root.console.hook.file).
+
+  @br @hl.openmole("""
+    val array = Val[Array[Double]]
+    val result = Val[Double]
+
+    val sum = ScalaTask("val result = array.sum") set (
+        inputs += array,
+        outputs += result,
+        array := Array(8.0, 9.0, 10.0)
+      )
+
+    val ex = (sum hook ToStringHook()) start""")
+
+
+  @p You can so easily compose scala task to achieve distributed computation. Lets imagine that you want to perform an expensive computation on each the elements of an array. For the sake of the simplicity here the expensive computation is a multiplication by 2.
+
+  @br @hl.openmole("""
+    val element = Val[Double]
+    val multiplied = Val[Double]
+    val result = Val[Double]
+
+    val expensive = ScalaTask("val multiplied = element * 2") set (
+      inputs += element,
+      outputs += multiplied
+    )
+
+    val exploration = ExplorationTask(element in List(8.0, 9.0, 10.0))
+
+    val sum = ScalaTask("val result = multiplied.sum") set (
+      inputs += multiplied.toArray,
+      outputs += result
+    )
+
+    val ex = exploration -< expensive >- (sum hook ToStringHook()) start""")
+
+  @p To distribute the execution of that workflow you can check @a("the environment documentation", href := DocumentationPages.root.console.environment.file).
 
 @sect{Execute your java code into OpenMOLE}
 
