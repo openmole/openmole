@@ -68,7 +68,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
   val settingTabs: Var[Option[SettingTabs]] = Var(None)
 
   Obs(currentDataBagUI) {
-    settingTabs() = currentDataBagUI().map { db ⇒ SettingTabs(this, db) }
+    resetSettingTabs
   }
 
   val inputFilter = new InputFilter(currentDataBagUI().map {
@@ -84,6 +84,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
           //FIXME: I am sure, there is a better idea than a cast...
           f.dataUI.asInstanceOf[db.DATAUI]
         }.get
+        resetSettingTabs
       }
     })
 
@@ -124,6 +125,8 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
       )
     }
   ).render
+
+  def resetSettingTabs = settingTabs() = currentDataBagUI().map { db ⇒ SettingTabs(this, db) }
 
   def stack(db: DataBagUI, index: Int) = {
     panelSequences.stack(db, index)
