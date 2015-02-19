@@ -1,0 +1,213 @@
+
+@import org.openmole.site.Objects._
+@import org.openmole.site.Resource
+@import org.openmole.site.DocumentationPages._
+
+@def model = """
+    // Define the input variables
+    val gPopulation = Val[Double]
+    val gDiffusionRate = Val[Double]
+    val gEvaporationRate = Val[Double]
+    val seed = Val[Int]
+
+    // Define the output variables
+    val food1 = Val[Double]
+    val food2 = Val[Double]
+    val food3 = Val[Double]
+
+    // Define the NetlogoTask
+
+
+    val cmds = Seq("random-seed ${seed}", "run-to-grid")
+    val ants =
+      NetLogo5Task("Ants.nlogo", cmds) set (
+        // Map the OpenMOLE variables to NetLogo variables
+        netLogoInputs += (gPopulation, "gpopulation"),
+        netLogoInputs += (gDiffusionRate, "gdiffusion-rate"),
+        netLogoInputs += (gEvaporationRate, "gevaporation-rate"),
+        netLogoOutputs += ("final-ticks-food1", food1),
+        netLogoOutputs += ("final-ticks-food2", food2),
+        netLogoOutputs += ("final-ticks-food3", food3),
+        // The seed is used to control the initialisation of the random number generator of NetLogo
+        inputs += seed,
+        // Define default values for inputs of the model
+        seed := 42,
+        gPopulation := 125.0,
+        gDiffusionRate := 50.0,
+        gEvaporationRate := 50
+      )"""
+
+@def replication = """
+    val modelCapsule = Capsule(ants)
+
+    // Define the output variables
+    val medNumberFood1 = Val[Double]
+    val medNumberFood2 = Val[Double]
+    val medNumberFood3 = Val[Double]
+
+    // We compute three median
+    val statistic =
+      StatisticTask() set (
+        statistics += (food1, medNumberFood1, median),
+        statistics += (food2, medNumberFood2, median),
+        statistics += (food3, medNumberFood3, median)
+      )
+
+    val statisticCapsule = Capsule(statistic)
+
+    val seedFactor = seed in (UniformDistribution[Int]() take 5)
+    val replicateModel = Replicate(modelCapsule, seedFactor, statisticCapsule)"""
+
+@sect{Calibrating a NetLogo model using genetic algorithms}
+  This example presents step by step how to explore a NetLogo model with EA (evolutionary algorithm) and OpenMOLE.
+
+  @sect{The ant model}
+    We demonstrate this tutorial using the ants foraging present in Netlogo library, created by Ury Wilensky. The description you can find for this model on NetLogo Site is:
+    @br @i{In this project, a colony of ants forages for food. Though each ant follows a set of simple rules, the colony as a whole acts in a sophisticated way. When an ant finds a piece of food, it carries the food back to the nest, dropping a chemical as it moves. When other ants “sniff” the chemical, they follow the chemical toward the food. As more ants carry food to the nest, they reinforce the chemical trail.
+    }
+
+    @p It looks like that:
+    @br @img(src := Resource.ants.file)
+
+    @p You can find more information about the mechanisms implemented in this model the on the @a("NetLogo site", href := "http://ccl.northwestern.edu/netlogo/models/Ants").
+
+    @p In this tutorial we use @a("a headless version", href := root.console.tutorial.headlessNetLogo.file) of the model. This modified version is available @a("here", href := Resource.antsNLogo.file).
+
+  @sect{Define the problem to resolve as an optimisation problem}
+    There is three parameters for this models.
+    @ul
+      @li{Population : number of Ants in the model}
+      @li{Evaporation-rate : controls the evaporation rate of the chemical}
+      @li{Diffusion-rate : controls the diffusion rate of the chemical}
+
+    @p Ants forage on three sources of food (see the number on the picture bellow), fixed at different distances from the Ant colony.
+    @br @img(src := Resource.antNumbers.file)
+
+    @p It can be interesting to search the best combination of the two parameters evaporation-rate and diffusion-rate which minimize the eating time for each source of food. To build our fitness, we modify the NetLogo Ants source to store for each food source the first ticks which indicate that this food source is empty.
+
+    @p @hl.highlight("""
+    to compute-fitness
+      if ((sum [food] of patches with [food-source-number = 1] = 0) and (final-tiks-food1 = 0)) [
+        set final-ticks-food1 ticks ]
+      if ((sum [food] of patches with [food-source-number = 2] = 0) and (final-tiks-food2 = 0)) [
+        set final-ticks-food2 ticks ]
+      if ((sum [food] of patches with [food-source-number = 3] = 0) and (final-tiks-food3 = 0)) [
+        set final-ticks-food3 ticks ]
+    end""", "plain")
+
+    @p At the end of each simulation we return the values for the three objective :
+    @ul
+      @li{The simulation ticks which indicate source 1 empty.}
+      @li{The simulation ticks which indicate source 2 empty.}
+      @li{The simulation ticks which indicate source 3 empty.}
+
+    @p The combination of the three objective indicate if the value of parameters used to run the simulation is good or not. We are in a @a("multiObjective optimization", href := "http://en.wikipedia.org/wiki/Multiobjective_optimization"). In case there is a compromise between these objective we will obtain a @a("Pareto front", href := "http://en.wikipedia.org/wiki/Pareto_efficiency") at the end of optimisation process.
+
+
+  @sect{Getting the ant model to run in OpenMOLE}
+    When building a calibration or optimisation workflow with OpenMOLE, the first thing is to make your model run in OpenMOLE. This script simply embed the NetLogo model and run one single execution of the model with arbitrary parameters.
+
+    @hl.openmole(s"""
+    $model
+
+    // Define the hooks on the workflow
+    val displayHook = ToStringHook(food1, food2, food3)
+
+    // Start a workflow with 1 task
+    val ex = (ants hook displayHook) start
+    """)
+
+    @p The result of this execution should look like:
+    @br @hl.highlight("{food1=746.0, food2=1000.0, food3=2109.0}", "plain")
+
+  @sect{Managing the stochasticity}
+    Generally agents models are stochastic. It means that their executions dependent on realisations of random variates. Therefore their output variables are also random variates and when we want to estimate their distribution. Getting one single realisation of these output random variates doesn’t provide information of to estimate their distributions. That’s why the model should be executed serval times. All these executions should be statistically independant in order to lead to independant realisation of the output random variates of the model. This operation is called “replication”.
+
+    @p OpenMOLE provides necessary mechanism to easily replicate the model execution and aggregating the result using simple statistical descriptor. The following script executes 5 times the ants model and compute the median of each output. The median is a statistical descriptor of the ouputs of the model (however the form of the distribution is unknown). Replication a model only 5 times is generally unreliable, we use only 5 replications here as a toy example.
+
+    @br @hl.openmole(s"""
+    $replication
+
+    // Define the hooks on the workflow
+    val displayOutputs = ToStringHook(food1, food2, food3)
+    val displayMedians = ToStringHook(medNumberFood1, medNumberFood2, medNumberFood3)
+
+    // Execute the workflow
+    val ex = replicateModel + (modelCapsule hook displayOutputs) + (statisticCapsule hook displayMedians) start
+    """, header = model)
+
+    @p This execution should display the output values for each model executions and the medians of this values. Note that the values of the outputs will be different each time since the seeds are randomly generated by OpenMOLE.
+
+    @br @hl.highlight("""
+    {food1=727.0, food2=1243.0, food3=1910.0}
+    {food1=679.0, food2=1178.0, food3=2100.0}
+    {food1=550.0, food2=1026.0, food3=2014.0}
+    {food1=610.0, food2=1176.0, food3=1858.0}
+    {food1=650.0, food2=1389.0, food3=1810.0}
+    {medNumberFood1=650.0, medNumberFood2=1178.0, medNumberFood3=1910.0}
+    """, "plain")
+
+  @sect{The optimisation algorithm}
+    Now that we have estimators of the output distribution of the model we will try to find the parameter settings of the model minimizing these estimators. This script describe how to use the NSGA2 multi-objective optimisation algorithm in OpenMOLE. The result files are writen in /tmp/ants.
+
+    @br @hl.openmole("""
+    // Define the population (10) and the number of generation (100)
+    // Define the inputs and their respective variation bounds
+    // Define the objectives to minimize
+    // Set that 1 percent of the computing time should be dedicated to reevaluation of parameters settings to eliminated overevaluated individuals
+    val evolution =
+      NSGA2(
+        mu = 10,
+        termination = 100,
+        inputs = Seq(gDiffusionRate -> (0.0, 99.0), gEvaporationRate -> (0.0, 99.0)),
+        objectives = Seq(medNumberFood1, medNumberFood2, medNumberFood3),
+        reevaluate = 0.01
+      )
+
+    // Defining a builder to use nsga2 generational EA algorithm
+    // First list define (min,max) value for each value in our Genome
+    // Second list define the minimun to obtain for each fitness
+    val nsga2 =
+      GenerationalGA(evolution)(
+        replicateModel,
+        lambda = 10
+      )
+
+    //Define a csv hook to save our pareto front
+    val savePopulationHook = SavePopulationHook(nsga2, "/tmp/ants/")
+
+    // Define the hook to display the generation in the console
+    val display = DisplayHook("Generation ${" + nsga2.generation.name + "}")
+    val ex = nsga2.puzzle + (nsga2.output hook savePopulationHook hook display) start
+    """, header = model + replication)
+
+  @sect{Scale up}
+    If you use distributed computing it might be a good idea do to take advantage of an Island model which is way better at taking advantage of distributed computing resources than classical generational genetic algorithm. To compute 2000 islands in parallel running each during 1 hour on the European grid you may change the end of the script and use:
+    @br @hl.openmole("""
+    // Define the population (200) and the computation time (1h)
+    // The remaining is the same as above
+    val evolution =
+      NSGA2(
+        mu = 200,
+        termination = Timed(1 hour),
+        inputs = Seq(gDiffusionRate -> (0.0, 99.0), gEvaporationRate -> (0.0, 99.0)),
+        objectives = Seq(medNumberFood1, medNumberFood2, medNumberFood3),
+        reevaluate = 0.01
+      )
+
+    // Define the island model with 2000 islands. Each island gets 50 individuals
+    // sampled from the global population. The algorithm stops after 200000 evaluated
+    // islands
+    val (ga, island) = IslandSteadyGA(evolution, replicateModel)(2000, 200000, 50)
+
+    val savePopulationHook = SavePopulationHook(ga, "/tmp/ants/")
+    val display = DisplayHook("Generation ${" + ga.generation.name + "}")
+
+    // Define the execution environment
+    val env = EGIEnvironment("biomed", openMOLEMemory = 1200, wallTime = 4 hours)
+
+    // Define the execution
+    val ex =
+      (ga.puzzle +
+       (island on env) +
+   (ga.output hook savePopulationHook hook display)) start""", header = model + replication)

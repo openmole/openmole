@@ -185,7 +185,7 @@ object DocumentationPages { index ⇒
     def console =
       new DocumentationPage {
         def name = "console"
-        def children = Seq(task, sampling, transition, hook, environment, sources, methods)
+        def children = Seq(task, sampling, transition, hook, environment, source, method, tutorial)
         def content = documentation.Console()
 
         def task = new DocumentationPage {
@@ -273,16 +273,34 @@ object DocumentationPages { index ⇒
 
         }
 
-        def sources = new DocumentationPage {
+        def source = new DocumentationPage {
           def name = "source"
           def children = Seq()
           def content = documentation.console.Source()
         }
 
-        def methods = new DocumentationPage {
+        def method = new DocumentationPage {
           def name = "method"
           def children = Seq()
           def content = documentation.console.Method()
+        }
+
+        def tutorial = new DocumentationPage {
+          def name = "tutorial"
+          def children = Seq(headlessNetLogo, netLogoGA)
+          def content = documentation.console.Tutorial()
+
+          def headlessNetLogo = new DocumentationPage {
+            def name = "headless NetLogo"
+            def children = Seq()
+            def content = documentation.console.tutorial.HeadlessNetLogo()
+          }
+
+          def netLogoGA = new DocumentationPage {
+            def name = "netLogo GA"
+            def children = Seq()
+            def content = documentation.console.tutorial.NetLogoGA()
+          }
         }
       }
 

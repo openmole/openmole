@@ -81,6 +81,7 @@ class Site extends IApplication {
         f.getParentFile.mkdirs
         f.withOutputStream { os ⇒
           withClosable(getClass.getClassLoader.getResourceAsStream(name)) { is ⇒
+            assert(is != null, s"Resource $name doesn't exist")
             BasicIO.transferFully(is, os)
           }
         }

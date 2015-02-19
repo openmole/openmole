@@ -39,7 +39,7 @@ package object stochastic extends StatisticPackage {
   def Replicate(
     model: Puzzle,
     sampling: Sampling,
-    aggregation: Task)(implicit plugins: PluginSet): Puzzle = {
+    aggregation: Capsule)(implicit plugins: PluginSet): Puzzle = {
     val name = "replicate"
 
     val exploration = ExplorationTask(sampling) set { _.setName(name + "Exploration") }
@@ -52,7 +52,7 @@ package object stochastic extends StatisticPackage {
     }
 
     val explorationCapsule = StrainerCapsule(exploration)
-    val aggregationCapsule = Slot(Capsule(aggregation))
+    val aggregationCapsule = Slot(aggregation)
     explorationCapsule -< model >- aggregationCapsule //+ explorationCapsule oo aggregationCapsule
   }
 
