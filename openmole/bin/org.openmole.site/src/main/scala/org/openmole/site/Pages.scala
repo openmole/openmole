@@ -294,7 +294,7 @@ object DocumentationPages { index ⇒
 
     def development = new DocumentationPage {
       def name = "development"
-      def children = Seq(compilation, plugin, branching)
+      def children = Seq(compilation, plugin, branching, webserver)
       def content = documentation.Development()
 
       def compilation = new DocumentationPage {
@@ -313,6 +313,12 @@ object DocumentationPages { index ⇒
         def name = "branching"
         def children = Seq()
         def content = documentation.development.Branching()
+      }
+
+      def webserver = new DocumentationPage {
+        def name = "web server"
+        def children = Seq()
+        def content = documentation.development.WebServer()
       }
     }
   }
