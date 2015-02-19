@@ -69,11 +69,11 @@ object PrototypeData {
 }
 
 trait InputData <: Data {
-  def inputs: Seq[Input]
+  def inputs: Seq[InOutput]
 }
 
 trait OutputData <: Data {
-  def outputs: Seq[Output]
+  def outputs: Seq[InOutput]
 }
 
 trait TaskData extends Data with InputData with OutputData

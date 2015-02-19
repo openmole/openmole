@@ -28,10 +28,10 @@ import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 
-class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
+class InOutputPanelUI(panel: GenericPanel, dataUI: InOutputDataUI) extends PanelUI {
   val inputFilter = InputFilter(pHolder = "Add a prototype", inputID = InputFilter.protoFilterId)
 
-  def filteredInputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ inputUI(p) }.filter { i ⇒
+  def filteredInputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ inoutputUI(p) }.filter { i ⇒
     inputFilter.contains(i.protoDataBagUI.name()) &&
       !inputFilter.nameFilter().isEmpty &&
       !dataUI.exists(i)
@@ -62,7 +62,7 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
           bs.inputGroupButton(newGlyph)
         )),
       bs.formGroup(col_md_12)(Rx {
-        (for ((headers, inputsUI) ← (filteredInputsUI ++ dataUI.inputsUI()).groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI) }) yield {
+        (for ((headers, inputsUI) ← (filteredInputsUI ++ dataUI.inoutputsUI()).groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI) }) yield {
           bs.table(col_md_12 + striped)(
             thead(
               tags.tr(
@@ -78,7 +78,7 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
             tbody(
               for (i ← inputsUI.sortBy(_.protoDataBagUI.name())) yield {
                 bs.tr(
-                  if (dataUI.inputsUI().contains(i)) nothing
+                  if (dataUI.inoutputsUI().contains(i)) nothing
                   else warning
                 )(
                     bs.td(col_md_2)(a(i.protoDataBagUI.name(),
@@ -118,7 +118,7 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
   }
 
   def save = {
-    dataUI.inputsUI().map {
+    dataUI.inoutputsUI().map {
       _.mappings.fields.map {
         _.panelUI.save
       }

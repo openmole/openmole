@@ -41,7 +41,7 @@ object SettingTabs {
 
     def ioTab(name: String, panelUIs: Seq[PanelUI]) = SettingTab(name, panelUIs)
 
-    def inputTab(panelUIs: Seq[InputPanelUI]) = SettingTab("Inputs", panelUIs, focusID = Some(InputFilter.protoFilterId))
+    def inputTab(panelUIs: Seq[InOutputPanelUI]) = SettingTab("Inputs", panelUIs, focusID = Some(InputFilter.protoFilterId))
 
     def outputTab(panelUIs: Seq[PanelUI]) = SettingTab("Outputs", panelUIs)
 

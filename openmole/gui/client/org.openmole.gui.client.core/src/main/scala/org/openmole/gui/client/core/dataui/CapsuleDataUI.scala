@@ -20,7 +20,7 @@ package org.openmole.gui.client.core.dataui
 import org.openmole.gui.ext.dataui._
 
 class CapsuleDataUI(val dataUI: Option[TaskDataUI] = None,
-                    val inputDataUI: Option[InputDataUI] = None,
+                    val inputDataUI: Option[InOutputDataUI] = None,
                     val outputDataUI: Option[OutputDataUI] = None,
                     val environment: Option[EnvironmentDataUI] = None,
                     val hooks: Seq[HookDataUI] = Seq()) {
