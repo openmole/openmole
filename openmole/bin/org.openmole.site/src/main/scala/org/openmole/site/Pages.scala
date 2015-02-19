@@ -26,21 +26,21 @@ object Pages {
   def decorate(p: Page): Frag =
     p match {
       case p: DocumentationPage ⇒ DocumentationPages.decorate(p)
-      case _                    ⇒ decorate(p.content)
+      case _                    ⇒ decorate(p.content, "-main")
     }
 
-  def decorate(p: Frag): Frag =
+  def decorate(p: Frag, postfix: String): Frag =
     Seq(
       meta(charset := "UTF-8"),
-      div(id := "logo")(a(img(src := Resource.logo.file), href := index.file)),
-      div(id := "sections",
+      div(id := s"logo$postfix")(a(img(src := Resource.logo.file), href := index.file)),
+      div(id := s"sections$postfix",
         table(
           td(a("Getting Started", id := "section", href := gettingStarted.file)),
           td(a("Documentation", id := "section", href := DocumentationPages.root.file)),
           td(a("Who are we?", id := "section", href := whoAreWe.file))
         )
       ),
-      div(id := "content")(p)
+      div(id := s"content$postfix")(p)
     )
 
   def index = Page("index", Index())
@@ -110,7 +110,7 @@ object DocumentationPages { index ⇒
           div(id := "documentation-content", p.content),
           if (p != root) bottomLinks(p) else ""
         )
-      )
+      ), "-documentation"
     )
 
   def documentationMenu(root: DocumentationPage, currentPage: DocumentationPage): Frag = {
