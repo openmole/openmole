@@ -50,7 +50,7 @@ class InputDataUI(mappingsFactory: IOMappingsFactory) extends DataUI {
 
   def panelUI: PanelUI = PanelUI.empty
 
-  def panelUI(panel: GenericPanel): PanelUI = new InputPanelUI(panel, this)
+  def panelUI(panel: GenericPanel): InputPanelUI = new InputPanelUI(panel, this)
 
   def mappingKeys(p: PrototypeDataBagUI) = mappingsFactory.build.fields.filter { _.prototypeFilter(p) }.map { _.key }
 

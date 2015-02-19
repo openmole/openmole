@@ -18,7 +18,6 @@ package org.openmole.gui.misc.js
  */
 
 import org.scalajs.dom.raw.{ HTMLFormElement, HTMLElement }
-import org.scalajs.jquery.jQuery
 
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
@@ -41,7 +40,5 @@ class ModalDialog(ID: String, val header: TypedTag[HTMLFormElement], val body: T
       content
     )
   )
-
-  def jQid = "#" + ID
 
 }

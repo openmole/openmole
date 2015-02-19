@@ -4,10 +4,11 @@ import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.ext.dataui._
 
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter }
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
+import org.scalajs.jquery.jQuery
 
 /*
  * Copyright (C) 28/01/15 // mathieu.leclaire@openmole.org
@@ -30,15 +31,17 @@ object SettingTabs {
 
   object SettingTab extends Enumeration {
 
-    case class SettingTab(val name: String, val panelUIs: Seq[PanelUI], val id: String = getID) {
+    case class SettingTab(name: String, panelUIs: Seq[PanelUI], id: String = getID, focusID: Option[String] = None) {
       def save = panelUIs.map {
         _.save
       }
+
+      def focus = focusID.map { f ⇒ jQuery("#" + f).focus }
     }
 
     def ioTab(name: String, panelUIs: Seq[PanelUI]) = SettingTab(name, panelUIs)
 
-    def inputTab(panelUIs: Seq[PanelUI]) = SettingTab("Inputs", panelUIs)
+    def inputTab(panelUIs: Seq[InputPanelUI]) = SettingTab("Inputs", panelUIs, focusID = Some(InputFilter.protoFilterId))
 
     def outputTab(panelUIs: Seq[PanelUI]) = SettingTab("Outputs", panelUIs)
 
@@ -58,7 +61,7 @@ object SettingTabs {
       }
       Seq(
         ioTab(name, Seq(io.panelUI)),
-        inputTab(Seq(io.inputDataUI().panelUI(panel))), //new InputPanelUI(panel, t.inputDataUI()))),
+        inputTab(Seq(io.inputDataUI().panelUI(panel))),
         outputTab(Seq(io.outputDataUI().panelUI(panel)))
       )
     case e: EnvironmentDataUI ⇒ Seq(environmentTab(Seq(e.panelUI)))
@@ -68,12 +71,12 @@ object SettingTabs {
   }
   )
 
-  def apply(dataUI: CapsuleDataUI): SettingTabs = new SettingTabs(Seq(
+  def apply(panel: GenericPanel, dataUI: CapsuleDataUI): SettingTabs = new SettingTabs(Seq(
     dataUI.dataUI.map {
       d ⇒ ioTab("Settings", Seq(d.panelUI))
     },
     dataUI.inputDataUI.map {
-      i ⇒ inputTab(Seq(i.panelUI))
+      i ⇒ inputTab(Seq(i.panelUI(panel)))
     },
     dataUI.outputDataUI.map {
       o ⇒ outputTab(Seq(o.panelUI))
@@ -108,7 +111,10 @@ class SettingTabs(tabs: Seq[SettingTab]) {
     }
   )
 
-  def set(index: Int) = currentTab() = Some(tabs(index))
+  def set(index: Int) = {
+    currentTab() = Some(tabs(index))
+    currentTab().map { _.focus }
+  }
 
   def save = tabs.map {
     _.save

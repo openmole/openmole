@@ -17,7 +17,7 @@ package org.openmole.gui.client.core.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.{ ClientService, GenericPanel }
+import org.openmole.gui.client.core.{ PrototypeFactoryUI, ClientService, GenericPanel }
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
@@ -29,7 +29,7 @@ import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 
 class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
-  val inputFilter = new InputFilter(pHolder = "Add a prototype")
+  val inputFilter = InputFilter(pHolder = "Add a prototype", inputID = InputFilter.protoFilterId)
 
   def filteredInputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ inputUI(p) }.filter { i ⇒
     inputFilter.contains(i.protoDataBagUI.name()) &&
@@ -43,9 +43,13 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
     // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
     bs.button("Add")(`type` := "submit", onclick := { () ⇒
       if (filteredInputsUI.size == 1) {
-        val head = filteredInputsUI.head
-        dataUI += head.protoDataBagUI
-        inputFilter.clear
+        add(filteredInputsUI.head.protoDataBagUI)
+      }
+      else if (!inputFilter.nameFilter().isEmpty) {
+        val newProto = DataBagUI.prototype(PrototypeFactoryUI.doubleFactory, inputFilter.nameFilter())
+        ClientService += newProto
+        setCurrent(newProto)
+        add(newProto)
       }
     }).render
 
@@ -79,12 +83,7 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
                 )(
                     bs.td(col_md_2)(a(i.protoDataBagUI.name(),
                       cursor := "pointer",
-                      onclick := { () ⇒
-                        {
-                          save
-                          panel.currentDataBagUI().map { db ⇒ panel.stack(db, 1) }
-                          panel.setCurrent(i.protoDataBagUI)
-                        }
+                      onclick := { () ⇒ setCurrent(i.protoDataBagUI)
                       })),
                     bs.td(col_md_1)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
                     bs.td(col_md_1)(tags.span(i.protoDataBagUI.dataUI().dimension)),
@@ -106,6 +105,17 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
       }
       )
     )
+
+  def add(pdb: PrototypeDataBagUI) = {
+    dataUI += pdb
+    inputFilter.clear
+  }
+
+  def setCurrent(pdb: PrototypeDataBagUI) = {
+    save
+    panel.currentDataBagUI().map { db ⇒ panel.stack(db, 1) }
+    panel.setCurrent(pdb)
+  }
 
   def save = {
     dataUI.inputsUI().map {

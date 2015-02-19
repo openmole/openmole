@@ -17,13 +17,18 @@ package org.openmole.gui.client.core.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.DataBag
+import org.openmole.gui.ext.data.{ ErrorData, DataBag }
 import org.openmole.gui.ext.dataui._
 import rx._
 
 object DataBagUI {
 
   def apply(factory: FactoryUI, name: String = ""): DataBagUI = apply(factory.dataUI, name)
+
+  def prototype(factory: FactoryUI, name: String = ""): PrototypeDataBagUI = factory.dataUI match {
+    case p: PrototypeDataUI ⇒ apply(p, name).asInstanceOf[PrototypeDataBagUI]
+    case _                  ⇒ throw new DataUIError("The factory " + factory.name + " is not a Prototype factory")
+  }
 
   private def apply(dataUI: DataUI, name: String): DataBagUI = {
     val db = DataBagUI(dataUI)

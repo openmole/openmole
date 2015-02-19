@@ -19,7 +19,6 @@ package org.openmole.gui.misc.js
 
 import rx._
 import scalatags.JsDom.all._
-import org.scalajs.jquery.jQuery
 import org.openmole.gui.misc.js.JsRxTags._
 
 class Select[T <: Displayable with Identifiable](autoID: String,
