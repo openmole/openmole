@@ -31,4 +31,6 @@ class PanelSequences {
     last.map { l ⇒ sequences() = sequences().filterNot(_._1.uuid == l._1.uuid) }
     last
   }
+
+  def isEmpty = sequences().isEmpty
 }
