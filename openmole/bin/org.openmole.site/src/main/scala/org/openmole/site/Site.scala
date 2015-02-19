@@ -50,7 +50,25 @@ class Site extends IApplication {
           |		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
           |	})();
         """.stripMargin))
-      def content = Pages.all.map { p ⇒ p.file -> Pages.decorate(p) }.toMap
+
+      /**
+       * The body of this site's HTML page
+       */
+      override def bodyFrag(frag: Frag): Frag = body(
+        Seq(
+          maxWidth := "768px",
+          marginLeft := "auto",
+          marginRight := "auto",
+          cls := "scalatex-content"
+        ) ++ (if (documentationFrags.contains(frag)) Seq(id := "top-content-documentation") else Seq())
+          ++ Seq(frag): _*
+      )
+
+      case class PageFrag(page: Page, frag: Frag)
+
+      lazy val pagesFrag = Pages.all.map { p ⇒ PageFrag(p, Pages.decorate(p)) }
+      lazy val documentationFrags = pagesFrag.collect { case PageFrag(p: DocumentationPage, f) ⇒ f }.toSet
+      def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file -> f }.toMap
     }
 
     site.renderTo(Path(dest))

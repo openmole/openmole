@@ -1,0 +1,30 @@
+
+@import org.openmole.site.Objects._
+
+@sect{WebServer}
+  OpenMOLE provides a web server which provides a REST API to launch workflows, manage their execution and recover the output data. To start the openmole websersver, you run the command: "openmole -ws" in the console.
+
+  @p The webserver can be accessed from your browser at "localhost:8080" or if it’s running on a remote machine, the ip-address of said machine instead of localhost.
+
+  @p The API of the webserver is as such:
+  @br GET:
+  @ul
+    @li{createMole - returns the webpage form for creating a new mole}
+    @li{execs – returns the loaded mole executions}
+    @li{execs/:id – returns the stats of the mole execution specified by the id}
+    @li{start/:id – starts the mole execution specified by the id}
+    @li{remove/:id – purges the execution and any stored data from the database}
+    @li{data/:id/data.tar – the tarred results of an execution}
+
+  @br POST:
+  @ul
+    @li{createMole – used to upload moles to the server. It has the following parameters:
+      @ul
+        @li{file – the mole file. must be a partialmoleexecution serialized as an xml.}
+        @li{csv – a csv file containing data bindings for free prototypes in your mole execution}
+        @li{encapsulate – pass the value “on” if you want the server to create a special working dir for your mole execution. after the mole is completed, you can retrieve the working directory as a tar file from data/:id/data.tar}
+        @li{name – allows you to name a PartialMoleExecution for reuse purposes}
+    }
+  @p The api is used like other restful APIs. when something like createMole is written in the api, that means you make a get or post request to "http://<serverAddresshere>/createMole".
+
+  @p To get the results of requests in json format instead of http format, prepend /json/ to the api (except in the case of data/:id/data.tar, it only returns data in tar format).
