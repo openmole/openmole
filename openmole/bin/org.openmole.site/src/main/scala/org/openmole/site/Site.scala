@@ -24,7 +24,7 @@ import com.ice.tar.TarInputStream
 import org.eclipse.equinox.app._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
-
+import scalatags.Text.all._
 import scala.sys.process.BasicIO
 
 class Site extends IApplication {
@@ -39,6 +39,17 @@ class Site extends IApplication {
 
     val site = new scalatex.site.Site {
       override def siteCss = Set.empty
+      override def headFrags =
+        super.headFrags ++ Seq(script(`type` := "text/javascript")(
+          """
+          |	var _gaq = _gaq || [];
+          |	_gaq.push(['_setAccount', 'UA-25912998-1']);_gaq.push(['_trackPageview']);
+          |	(function() {
+          |		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+          |		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+          |		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+          |	})();
+        """.stripMargin))
       def content = Pages.all.map { p ⇒ p.file -> Pages.decorate(p) }.toMap
     }
 
