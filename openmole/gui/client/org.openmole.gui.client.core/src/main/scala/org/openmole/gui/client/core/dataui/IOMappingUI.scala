@@ -80,7 +80,11 @@ object IOMappingFactory {
     }
   }
 
-  def fileFilter = (p: PrototypeDataBagUI) ⇒ p.dataUI().data.`type` == FILE
+  def typeFilter(t: ProtoTYPE) = (p: PrototypeDataBagUI) ⇒ p.dataUI().data.`type` == t
+
+  def fileFilter = typeFilter(FILE)
+
+  def stringFilter = typeFilter(STRING)
 }
 
 trait IOMappingFactory {

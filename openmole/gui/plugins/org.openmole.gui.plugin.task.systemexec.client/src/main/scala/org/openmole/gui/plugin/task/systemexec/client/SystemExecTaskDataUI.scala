@@ -43,7 +43,9 @@ class SystemExecTaskDataUI extends TaskDataUI {
 
 override def outputMappingsFactory = IOMappingsFactory(
     IOMappingFactory.defaultInputField,
-    stringField("Destination", fileFilter),
-    booleanField("Workdir", true, fileFilter)
+    stringField("Source", fileFilter),
+    booleanField("Workdir", true, fileFilter),
+    booleanField("StdOut", false, stringFilter),
+    booleanField("StdErr", false, stringFilter)
   )
 }
