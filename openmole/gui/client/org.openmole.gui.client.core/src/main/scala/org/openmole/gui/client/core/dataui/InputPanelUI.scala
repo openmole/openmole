@@ -58,7 +58,7 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
           bs.inputGroupButton(newGlyph)
         )),
       bs.formGroup(col_md_12)(Rx {
-        (for ((headers, inputsUI) ← dataUI.inputsUI().groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI) }) yield {
+        (for ((headers, inputsUI) ← (filteredInputsUI ++ dataUI.inputsUI()).groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI) }) yield {
           bs.table(col_md_12 + striped)(
             thead(
               tags.tr(
@@ -73,29 +73,32 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
             ),
             tbody(
               for (i ← inputsUI.sortBy(_.protoDataBagUI.name())) yield {
-                tags.tr(
-                  bs.td(col_md_2)(a(i.protoDataBagUI.name(),
-                    cursor := "pointer",
-                    onclick := { () ⇒
-                      {
-                        save
-                        panel.currentDataBagUI().map { db ⇒ panel.stack(db, 1) }
-                        panel.setCurrent(i.protoDataBagUI)
+                bs.tr(
+                  if (dataUI.inputsUI().contains(i)) nothing
+                  else warning
+                )(
+                    bs.td(col_md_2)(a(i.protoDataBagUI.name(),
+                      cursor := "pointer",
+                      onclick := { () ⇒
+                        {
+                          save
+                          panel.currentDataBagUI().map { db ⇒ panel.stack(db, 1) }
+                          panel.setCurrent(i.protoDataBagUI)
+                        }
+                      })),
+                    bs.td(col_md_1)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
+                    bs.td(col_md_1)(tags.span(i.protoDataBagUI.dataUI().dimension)),
+                    for (
+                      f ← i.mappings.fields.map {
+                        _.panelUI
                       }
-                    })),
-                  bs.td(col_md_1)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
-                  bs.td(col_md_1)(tags.span(i.protoDataBagUI.dataUI().dimension)),
-                  for (
-                    f ← i.mappings.fields.map {
-                      _.panelUI
-                    }
-                  ) yield {
-                    tags.td(f.view)
-                  },
-                  bs.td(col_md_1)(bs.button(glyph(glyph_minus))(onclick := { () ⇒
-                    dataUI -= i
-                  }))
-                )
+                    ) yield {
+                      tags.td(f.view)
+                    },
+                    bs.td(col_md_1)(bs.button(glyph(glyph_minus))(onclick := { () ⇒
+                      dataUI -= i
+                    }))
+                  )
               }
             )
           )
