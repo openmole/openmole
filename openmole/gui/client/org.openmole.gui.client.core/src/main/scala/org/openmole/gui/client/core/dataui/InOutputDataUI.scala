@@ -22,43 +22,54 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class InputDataUI(mappingsFactory: IOMappingsFactory) extends DataUI {
-
-  type DATA = InputData
+abstract class InOutputDataUI(mappingsFactory: IOMappingsFactory) extends DataUI {
 
   def dataType = "Inputs"
 
   def +=(proto: PrototypeDataBagUI) =
     if (!exists(proto)) {
-      //inputUI.mappings() = IOMappingsFactory(mappings: _*).build
-      inputsUI() = inputsUI() :+ inputUI(proto, new IOMappingsUI(mappingsFactory.build.fields.filter(_.prototypeFilter(proto))))
+      inoutputsUI() = inoutputsUI() :+ inoutputUI(proto, new IOMappingsUI(mappingsFactory.build.fields.filter(_.prototypeFilter(proto))))
     }
 
-  def -=(inputUI: InputUI) = inputsUI() = inputsUI().filter {
-    _.id != inputUI.id
+  def -=(inoutputUI: InOutputUI) = inoutputsUI() = inoutputsUI().filter {
+    _.id != inoutputUI.id
   }
 
-  def exists(inputUI: InputUI) = inputsUI().exists {
-    _.id == inputUI.id
+  def exists(inoutputUI: InOutputUI) = inoutputsUI().exists {
+    _.id == inoutputUI.id
   }
 
-  def exists(proto: PrototypeDataBagUI) = inputsUI().exists {
+  def exists(proto: PrototypeDataBagUI) = inoutputsUI().exists {
     _.protoDataBagUI.uuid == proto.uuid
   }
 
-  val inputsUI: Var[Seq[InputUI]] = Var(Seq())
+  val inoutputsUI: Var[Seq[InOutputUI]] = Var(Seq())
 
   def panelUI: PanelUI = PanelUI.empty
 
-  def panelUI(panel: GenericPanel): PanelUI = new InputPanelUI(panel, this)
+  def panelUI(panel: GenericPanel): InOutputPanelUI = new InOutputPanelUI(panel, this)
 
   def mappingKeys(p: PrototypeDataBagUI) = mappingsFactory.build.fields.filter { _.prototypeFilter(p) }.map { _.key }
 
+}
+
+class InputDataUI(mappingsFactory: IOMappingsFactory) extends InOutputDataUI((mappingsFactory)) {
+  type DATA = InputData
+
   def data = new InputData {
-    def inputs = inputsUI().map { id ⇒
-      Input(id.protoDataBagUI.dataUI().data, id.mappings.fields.map { _.data })
+    def inputs = inoutputsUI().map { id ⇒
+      InOutput(id.protoDataBagUI.dataUI().data, id.mappings.fields.map { _.data })
     }
   }
+}
 
+class OutputDataUI(mappingsFactory: IOMappingsFactory) extends InOutputDataUI((mappingsFactory)) {
+  type DATA = OutputData
+
+  def data = new OutputData {
+    def outputs = inoutputsUI().map { id ⇒
+      InOutput(id.protoDataBagUI.dataUI().data, id.mappings.fields.map { _.data })
+    }
+  }
 }
 

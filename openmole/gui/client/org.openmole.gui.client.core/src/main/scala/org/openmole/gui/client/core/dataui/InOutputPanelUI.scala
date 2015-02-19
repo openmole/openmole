@@ -17,7 +17,7 @@ package org.openmole.gui.client.core.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.{ ClientService, GenericPanel }
+import org.openmole.gui.client.core.{ PrototypeFactoryUI, ClientService, GenericPanel }
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
@@ -28,10 +28,10 @@ import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 
-class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
-  val inputFilter = new InputFilter(pHolder = "Add a prototype")
+class InOutputPanelUI(panel: GenericPanel, dataUI: InOutputDataUI) extends PanelUI {
+  val inputFilter = InputFilter(pHolder = "Add a prototype", inputID = InputFilter.protoFilterId)
 
-  def filteredInputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ inputUI(p) }.filter { i ⇒
+  def filteredInputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ inoutputUI(p) }.filter { i ⇒
     inputFilter.contains(i.protoDataBagUI.name()) &&
       !inputFilter.nameFilter().isEmpty &&
       !dataUI.exists(i)
@@ -43,9 +43,13 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
     // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
     bs.button("Add")(`type` := "submit", onclick := { () ⇒
       if (filteredInputsUI.size == 1) {
-        val head = filteredInputsUI.head
-        dataUI += head.protoDataBagUI
-        inputFilter.clear
+        add(filteredInputsUI.head.protoDataBagUI)
+      }
+      else if (!inputFilter.nameFilter().isEmpty) {
+        val newProto = DataBagUI.prototype(PrototypeFactoryUI.doubleFactory, inputFilter.nameFilter())
+        ClientService += newProto
+        setCurrent(newProto)
+        add(newProto)
       }
     }).render
 
@@ -58,7 +62,7 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
           bs.inputGroupButton(newGlyph)
         )),
       bs.formGroup(col_md_12)(Rx {
-        (for ((headers, inputsUI) ← (filteredInputsUI ++ dataUI.inputsUI()).groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI) }) yield {
+        (for ((headers, inputsUI) ← (filteredInputsUI ++ dataUI.inoutputsUI()).groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI) }) yield {
           bs.table(col_md_12 + striped)(
             thead(
               tags.tr(
@@ -74,17 +78,12 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
             tbody(
               for (i ← inputsUI.sortBy(_.protoDataBagUI.name())) yield {
                 bs.tr(
-                  if (dataUI.inputsUI().contains(i)) nothing
+                  if (dataUI.inoutputsUI().contains(i)) nothing
                   else warning
                 )(
                     bs.td(col_md_2)(a(i.protoDataBagUI.name(),
                       cursor := "pointer",
-                      onclick := { () ⇒
-                        {
-                          save
-                          panel.currentDataBagUI().map { db ⇒ panel.stack(db, 1) }
-                          panel.setCurrent(i.protoDataBagUI)
-                        }
+                      onclick := { () ⇒ setCurrent(i.protoDataBagUI)
                       })),
                     bs.td(col_md_1)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
                     bs.td(col_md_1)(tags.span(i.protoDataBagUI.dataUI().dimension)),
@@ -107,8 +106,19 @@ class InputPanelUI(panel: GenericPanel, dataUI: InputDataUI) extends PanelUI {
       )
     )
 
+  def add(pdb: PrototypeDataBagUI) = {
+    dataUI += pdb
+    inputFilter.clear
+  }
+
+  def setCurrent(pdb: PrototypeDataBagUI) = {
+    save
+    panel.currentDataBagUI().map { db ⇒ panel.stack(db, 1) }
+    panel.setCurrent(pdb)
+  }
+
   def save = {
-    dataUI.inputsUI().map {
+    dataUI.inoutputsUI().map {
       _.mappings.fields.map {
         _.panelUI.save
       }

@@ -71,7 +71,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
     resetSettingTabs
   }
 
-  val inputFilter = new InputFilter(currentDataBagUI().map {
+  val inputFilter = InputFilter(currentDataBagUI().map {
     _.name()
   }.getOrElse(""))
 
@@ -176,6 +176,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
     currentDataBagUI() = Some(dbUI)
     factorySelector.content() = currentDataBagUI()
     filter() = currentDataBagUI().get
+    inputFilter.focus
   }
 
   def saveHeader = {

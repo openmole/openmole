@@ -51,12 +51,12 @@ object GUIClient {
     val db2 = DataBagUI(ClientService.taskFactories(1))
     ClientService += db2
     db2.name() = "yopp"
-    ClientService += DataBagUI(ClientService.prototypeFactories(4), "proto1")
-    ClientService += DataBagUI(ClientService.prototypeFactories(1), "proto2")
-    ClientService += DataBagUI(ClientService.prototypeFactories(1), "proto3")
-    ClientService += DataBagUI(ClientService.prototypeFactories(2), "proto4")
-    ClientService += DataBagUI(ClientService.prototypeFactories(3), "proto5")
-    ClientService += DataBagUI(ClientService.prototypeFactories(2), "proto6")
+    ClientService += DataBagUI(PrototypeFactoryUI.fileFactory, "proto1")
+    ClientService += DataBagUI(PrototypeFactoryUI.fileFactory, "proto2")
+    ClientService += DataBagUI(PrototypeFactoryUI.doubleFactory, "proto3")
+    ClientService += DataBagUI(PrototypeFactoryUI.intFactory, "proto4")
+    ClientService += DataBagUI(PrototypeFactoryUI.booleanFactory, "proto5")
+    ClientService += DataBagUI(PrototypeFactoryUI.stringFactory, "proto6")
 
     val topdiv = dom.document.body.appendChild(tags.div)
 

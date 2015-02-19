@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.dataui
 
 /*
- * Copyright (C) 30/01/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 19/02/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,28 +17,14 @@ package org.openmole.gui.client.core.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.GenericPanel
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.dataui.{ PanelUI, DataUI }
-import rx._
+class DataUIError(exception: Throwable, val message: String) extends Exception(message, exception) {
 
-import scala.collection.immutable.Stream.Empty
-
-class OutputDataUI(extraFieldsFactory: IOMappingsFactory) extends DataUI {
-  type DATA = OutputData
-
-  def dataType = "Outputs"
-
-  val outputsUI: Var[Seq[OutputUI]] = Var(Seq())
-
-  def panelUI = PanelUI.empty
-
-  //FIXME Change empty by OuputPanelUI
-  def panelUI(panel: GenericPanel): PanelUI = PanelUI.empty
-
-  def data = new OutputData {
-    def outputs = outputsUI().map { o ⇒
-      Output(o.protoDataBagUI.dataUI().data)
-    }
+  def this(message: String) = {
+    this(null, message)
   }
+
+  def this(e: Throwable) {
+    this(e, null)
+  }
+
 }

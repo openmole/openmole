@@ -21,15 +21,26 @@ import org.scalajs.dom.Event
 
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import org.scalajs.jquery.jQuery
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.js.Forms._
 import rx._
 
-class InputFilter(initValue: String = "", pHolder: String = "Filter") {
-  val nameFilter = Var("")
+object InputFilter {
+  def apply(initValue: String = "", pHolder: String = "Filter", inputID: String = filterId) = new InputFilter(initValue, pHolder, inputID)
+
+  val filterId: String = "inputFilter"
+
+  val protoFilterId: String = "protoInputFilter"
+}
+
+import InputFilter._
+class InputFilter(initValue: String, pHolder: String, inputID: String) {
+  val nameFilter: Var[String] = Var("")
 
   val tag = bs.input(
     initValue)(
+      id := inputID,
       value := initValue,
       placeholder := pHolder,
       autofocus
@@ -43,4 +54,6 @@ class InputFilter(initValue: String = "", pHolder: String = "Filter") {
     tag.value = ""
     nameFilter() = ""
   }
+
+  def focus = jQuery("#" + inputID).focus
 }

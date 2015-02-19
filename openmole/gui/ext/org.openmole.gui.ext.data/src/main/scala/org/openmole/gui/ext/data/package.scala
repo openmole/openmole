@@ -21,7 +21,5 @@ package object data {
 
   case class IOMappingData[T](key: String, value: T)
 
-  case class Input(val prototype: PrototypeData, mappings: Seq[IOMappingData[_]])
-
-  case class Output(val prototype: PrototypeData)
+  case class InOutput(val prototype: PrototypeData, mappings: Seq[IOMappingData[_]])
 }
