@@ -28,7 +28,7 @@ abstract class InOutputDataUI(mappingsFactory: IOMappingsFactory) extends DataUI
 
   def +=(proto: PrototypeDataBagUI) =
     if (!exists(proto)) {
-      inoutputsUI() = inoutputsUI() :+ inoutputUI(proto, new IOMappingsUI(mappingsFactory.build.fields.filter(_.prototypeFilter(proto))))
+      inoutputsUI() = inoutputsUI() :+ inoutputUI(proto, mappingsFactory)
     }
 
   def -=(inoutputUI: InOutputUI) = inoutputsUI() = inoutputsUI().filter {
@@ -58,7 +58,7 @@ class InputDataUI(mappingsFactory: IOMappingsFactory) extends InOutputDataUI((ma
 
   def data = new InputData {
     def inputs = inoutputsUI().map { id ⇒
-      InOutput(id.protoDataBagUI.dataUI().data, id.mappings.fields.map { _.data })
+      InOutput(id.protoDataBagUI.dataUI().data, id.mappings().fields.map { _.data })
     }
   }
 }
@@ -68,7 +68,7 @@ class OutputDataUI(mappingsFactory: IOMappingsFactory) extends InOutputDataUI((m
 
   def data = new OutputData {
     def outputs = inoutputsUI().map { id ⇒
-      InOutput(id.protoDataBagUI.dataUI().data, id.mappings.fields.map { _.data })
+      InOutput(id.protoDataBagUI.dataUI().data, id.mappings().fields.map { _.data })
     }
   }
 }
