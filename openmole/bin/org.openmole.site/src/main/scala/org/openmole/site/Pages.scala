@@ -130,7 +130,7 @@ object DocumentationPages { index ⇒
 
     def pageLine(p: DocumentationPage): Frag = {
       def contracted = li(menuEntry(p))
-      def expanded = li(menuEntry(p), ul(p.children.map(pageLine)))
+      def expanded = li(menuEntry(p), ul(id := "documentation-menu-ul")(p.children.map(pageLine)))
 
       if (p.children.isEmpty) contracted
       else if (p == currentPage) expanded

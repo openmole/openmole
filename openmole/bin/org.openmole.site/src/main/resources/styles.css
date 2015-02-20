@@ -62,9 +62,11 @@
   top: 270;
 }
 
-#documentation-menu ul {
+#documentation-menu-ul {
   margin-bottom: 0;
   margin-top: 0;
+  margin-left: 15;
+  padding-left: 5;
 }
 
 #documentation-menu-entry {
