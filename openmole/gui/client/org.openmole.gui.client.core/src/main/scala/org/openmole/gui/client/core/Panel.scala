@@ -1,6 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client
+import org.openmole.gui.client.core.PrototypeFactoryUI.DoubleDataUI
 import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.ext.dataui.FactoryUI
 import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter, Select }

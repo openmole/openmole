@@ -88,7 +88,7 @@ class InOutputPanelUI(panel: GenericPanel, dataUI: InOutputDataUI) extends Panel
                     bs.td(col_md_1)(bs.label(i.protoDataBagUI.dataUI().dataType, label_primary)),
                     bs.td(col_md_1)(tags.span(i.protoDataBagUI.dataUI().dimension)),
                     for (
-                      f ← i.mappings.fields.map {
+                      f ← i.mappings().fields.map {
                         _.panelUI
                       }
                     ) yield {
@@ -113,13 +113,18 @@ class InOutputPanelUI(panel: GenericPanel, dataUI: InOutputDataUI) extends Panel
 
   def setCurrent(pdb: PrototypeDataBagUI) = {
     save
-    panel.currentDataBagUI().map { db ⇒ panel.stack(db, 1) }
+    panel.currentDataBagUI().map { db ⇒
+      panel.stack(db, dataUI match {
+        case i: InputDataUI  ⇒ 1
+        case i: OutputDataUI ⇒ 2
+      })
+    }
     panel.setCurrent(pdb)
   }
 
   def save = {
     dataUI.inoutputsUI().map {
-      _.mappings.fields.map {
+      _.mappings().fields.map {
         _.panelUI.save
       }
     }

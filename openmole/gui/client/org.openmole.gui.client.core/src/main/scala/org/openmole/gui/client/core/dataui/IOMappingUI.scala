@@ -1,5 +1,6 @@
 package org.openmole.gui.client.core.dataui
 
+import org.openmole.gui.client.core.PrototypeFactoryUI.GenericPrototypeDataUI
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import org.openmole.gui.ext.data._

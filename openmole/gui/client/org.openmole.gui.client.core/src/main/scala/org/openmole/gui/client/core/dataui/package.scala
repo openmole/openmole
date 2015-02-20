@@ -22,9 +22,17 @@ import rx._
 
 package object dataui {
 
-  def inoutputUI(protoDataBagUI: PrototypeDataBagUI, mappings: IOMappingsUI = IOMappingsFactory.default.build) =
-    InOutputUI(protoDataBagUI.uuid, protoDataBagUI, mappings)
+  def inoutputUI(protoDataBagUI: PrototypeDataBagUI, mappingsFactory: IOMappingsFactory = IOMappingsFactory.default) = {
+    def mappings = new IOMappingsUI(mappingsFactory.build.fields.filter(_.prototypeFilter(protoDataBagUI)))
+    val ioputUI = InOutputUI(protoDataBagUI.uuid, protoDataBagUI, Var(mappings))
 
-  case class InOutputUI(id: String, protoDataBagUI: PrototypeDataBagUI, mappings: IOMappingsUI)
+    Obs(protoDataBagUI.dataUI) {
+      ioputUI.mappings() = mappings
+    }
+
+    ioputUI
+  }
+
+  case class InOutputUI(id: String, protoDataBagUI: PrototypeDataBagUI, mappings: Var[IOMappingsUI])
 
 }
