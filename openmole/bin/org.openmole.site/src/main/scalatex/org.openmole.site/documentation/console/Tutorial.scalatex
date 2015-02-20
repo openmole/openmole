@@ -7,3 +7,4 @@
   @ul
     @li{@a("build a headless version of you NetLogo model to integrate in into OpenMOLE", href := root.console.tutorial.headlessNetLogo.file)}
     @li{@a("calibrate a NetLogo model using genetic algorithms", href := root.console.tutorial.netLogoGA.file)}
+    @li{@a("use advanced features of capsules", href := root.console.tutorial.capsule.file)}

@@ -65,7 +65,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
       }
     }
 
-    val testC = new Capsule(testT)
+    val testC = Capsule(testT)
 
     val mole = exc -< emptyC >- testC toMole
 

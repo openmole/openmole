@@ -38,7 +38,7 @@ package builder {
   trait BuilderPackage {
     implicit def samplingBuilderToSampling(s: SamplingBuilder) = s.toSampling
     implicit def taskBuilderToTask[TB <: TaskBuilder](builder: TB) = builder.toTask
-    implicit def taskBuilderToCapsuleConverter[TB <: TaskBuilder](builder: TB) = new Capsule(builder)
+    implicit def taskBuilderToCapsuleConverter[TB <: TaskBuilder](builder: TB) = Capsule(builder)
     implicit def taskBuilderToCapsuleDecorator(task: TaskBuilder) = new TaskToCapsuleDecorator(task)
     implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = t.toTask.toCapsule.toPuzzle
 

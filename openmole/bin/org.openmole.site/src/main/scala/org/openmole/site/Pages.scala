@@ -287,7 +287,7 @@ object DocumentationPages { index ⇒
 
         def tutorial = new DocumentationPage {
           def name = "tutorial"
-          def children = Seq(headlessNetLogo, netLogoGA)
+          def children = Seq(headlessNetLogo, netLogoGA, capsule)
           def content = documentation.console.Tutorial()
 
           def headlessNetLogo = new DocumentationPage {
@@ -300,6 +300,12 @@ object DocumentationPages { index ⇒
             def name = "netLogo GA"
             def children = Seq()
             def content = documentation.console.tutorial.NetLogoGA()
+          }
+
+          def capsule = new DocumentationPage {
+            def name = "capsule"
+            def children = Seq()
+            def content = documentation.console.tutorial.Capsule()
           }
         }
       }

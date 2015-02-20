@@ -152,16 +152,21 @@ object ClassUtils {
     case x: TypeVariable[_]  ⇒ intersect(x.getBounds())
   }
 
+  case class NativeType[T](native: Class[_], java: Class[_], scala: Class[T])(implicit val scalaManifest: Manifest[T])
+
+  lazy val classEquivalences = Seq(
+    NativeType(java.lang.Byte.TYPE, classOf[java.lang.Byte], classOf[Byte]),
+    NativeType(java.lang.Short.TYPE, classOf[java.lang.Short], classOf[Short]),
+    NativeType(java.lang.Integer.TYPE, classOf[java.lang.Integer], classOf[Int]),
+    NativeType(java.lang.Long.TYPE, classOf[java.lang.Long], classOf[Long]),
+    NativeType(java.lang.Float.TYPE, classOf[java.lang.Float], classOf[Float]),
+    NativeType(java.lang.Double.TYPE, classOf[java.lang.Double], classOf[Double]),
+    NativeType(java.lang.Character.TYPE, classOf[java.lang.Character], classOf[Char]),
+    NativeType(java.lang.Boolean.TYPE, classOf[java.lang.Boolean], classOf[Boolean])
+  )
+
   def classEquivalence(c: Class[_]) =
-    if (c == classOf[Byte] || c == classOf[java.lang.Byte]) java.lang.Byte.TYPE
-    else if (c == classOf[Short] || c == classOf[java.lang.Short]) java.lang.Short.TYPE
-    else if (c == classOf[Int] || c == classOf[java.lang.Integer]) java.lang.Integer.TYPE
-    else if (c == classOf[Long] || c == classOf[java.lang.Long]) java.lang.Long.TYPE
-    else if (c == classOf[Float] || c == classOf[java.lang.Float]) java.lang.Float.TYPE
-    else if (c == classOf[Double] || c == classOf[java.lang.Double]) java.lang.Double.TYPE
-    else if (c == classOf[Char] || c == classOf[java.lang.Character]) java.lang.Character.TYPE
-    else if (c == classOf[Boolean] || c == classOf[java.lang.Boolean]) java.lang.Boolean.TYPE
-    else c
+    classEquivalences.find(_.java == c).map(_.native) orElse classEquivalences.find(_.scala == c).map(_.native) getOrElse (c)
 
   def toClass(s: String) = classEquivalence(
     s match {
@@ -197,7 +202,6 @@ object ClassUtils {
 
   implicit def manifestDecoration(m: Manifest[_]) = new {
     def isArray = m.runtimeClass.isArray
-
     def fromArray = m.runtimeClass.fromArray
   }
 

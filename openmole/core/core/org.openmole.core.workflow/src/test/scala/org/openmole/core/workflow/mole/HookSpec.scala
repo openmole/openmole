@@ -72,7 +72,7 @@ class HookSpec extends FlatSpec with Matchers {
 
     }
 
-    val t1c = new MasterCapsule(t1)
+    val t1c = MasterCapsule(t1)
 
     val hook = new HookBuilder {
       def toHook = new Hook with Built {

@@ -32,7 +32,7 @@ class MoleTaskSpec extends FlatSpec with Matchers {
     val emptyT = EmptyTask()
     emptyT.addInput(i)
 
-    val emptyC = new Capsule(emptyT)
+    val emptyC = Capsule(emptyT)
 
     val moleTask =
       MoleTask(Mole(emptyC), emptyC)

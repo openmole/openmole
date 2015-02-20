@@ -25,7 +25,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.{ LocalHostName, Logger }
 import ref.WeakReference
-import org.openmole.core.workflow.mole.StrainerCapsule
+import org.openmole.core.workflow.mole.{ StrainerTaskDecorator, StrainerCapsule }
 
 object LocalExecuter extends Logger
 
@@ -57,7 +57,7 @@ class LocalExecuter(environment: WeakReference[LocalEnvironment]) extends Runnab
               if (moleJob.state != State.CANCELED) {
                 moleJob.task match {
                   case _: MoleTask ⇒ jobGoneIdle()
-                  case t: StrainerCapsule.StrainerTaskDecorator ⇒
+                  case t: StrainerTaskDecorator ⇒
                     if (classOf[MoleTask].isAssignableFrom(t.task.getClass)) jobGoneIdle()
                   case _ ⇒
                 }
