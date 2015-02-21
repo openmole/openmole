@@ -1,6 +1,6 @@
 
-
 @import Objects._
+@import credits._
 
 @sect{Active developers}
   @Developer.active
@@ -9,3 +9,4 @@
 
 @sect{How to cite OpenMOLE}
   @Publication.publication(Publication.fgcs2013)
+  @Publication.publication2(Publication.fgcs2013_B)
