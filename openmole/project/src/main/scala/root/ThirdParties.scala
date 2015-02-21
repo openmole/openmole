@@ -12,12 +12,12 @@ object ThirdParties extends Defaults {
   lazy val iceTar = OsgiProject("com.ice.tar") settings (bundleType := Set("core"))
 
   lazy val toolxitBibtexMacros = OsgiProject("toolxit.bibtex.macros", "toolxit.bibtex/macros") settings (
-    bundleType := Set("core"),
+//    bundleType := Set("core"),
     libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-reflect" % _)
   )
 
-  lazy val toolxitBibtex = OsgiProject("toolxit.bibtex.core", "toolxit.bibtex/core", exports = Seq("toolxit.bibtex.*"), buddyPolicy = Some("global"), imports = Seq("*")) dependsOn (toolxitBibtexMacros) settings (
-    bundleType := Set("core"),
+  lazy val toolxitBibtex = OsgiProject("toolxit.bibtex.core", "toolxit.bibtex/core", exports = Seq("toolxit.bibtex.*"), imports = Seq("*"), privatePackages = Seq("!scala.*", "*")) dependsOn (toolxitBibtexMacros) settings (
+//    bundleType := Set("core"),
     OsgiKeys.importPackage := Seq("*"),
     libraryDependencies ++= Seq(
       "org.scala-lang.modules" %% "scala-xml" % "1.0.3",
