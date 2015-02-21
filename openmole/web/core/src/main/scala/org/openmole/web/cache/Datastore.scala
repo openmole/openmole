@@ -10,8 +10,10 @@ class Datastore[T, U] extends Actor {
   var data = Map.empty[T, U]
   def receive = {
     case ("put", pair: (T, U)) ⇒ data += pair
-    case ("get", key: T)       ⇒ sender ! data.get(key)
-    case ("remove", key: T)    ⇒ data -= key
+    // asInstanceOf to remove warning "abstract type pattern is unchecked since it is eliminated by erasure"
+    // as suggested in http://stackoverflow.com/a/18136667/470341
+    case ("get", key)          ⇒ sender ! data.get(key.asInstanceOf[T])
+    case ("remove", key)       ⇒ data -= (key.asInstanceOf[T])
     case "getKeys"             ⇒ sender ! data.keys
   }
 }
