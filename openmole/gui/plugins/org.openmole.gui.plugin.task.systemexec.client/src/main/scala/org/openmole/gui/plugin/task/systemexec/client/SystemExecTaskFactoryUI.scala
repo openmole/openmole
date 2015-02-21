@@ -17,8 +17,8 @@ package org.openmole.gui.plugin.task.systemexec.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.dataui.TaskDataUI
-import org.openmole.gui.ext.factoryui.FactoryUI
+import org.openmole.gui.client.core.dataui.TaskDataUI
+import org.openmole.gui.ext.dataui.FactoryUI
 
 import scala.scalajs.js.annotation.JSExport
 import rx._
@@ -30,6 +30,4 @@ sealed class SystemExecTaskFactoryUI extends FactoryUI {
   def dataUI = new SystemExecTaskDataUI
 
   val name = "External"
-
-  override val ioMapping = true
 }

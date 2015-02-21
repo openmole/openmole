@@ -1,0 +1,122 @@
+
+
+@import org.openmole.site.Objects._
+
+@def model = """
+  val x = Val[Double]
+  val y = Val[Double]
+
+  val o1 = Val[Double]
+  val o2 = Val[Double]
+
+  val modelTask =
+    ScalaTask("val o1 = x; val o2 = y") set (
+      inputs += (x, y),
+      outputs += (o1, o2)
+    )
+
+  val modelCapsule = Capsule(modelTask)"""
+
+@sect{Methods}
+  OpenMOLE provides advanced methods to explore space of parameters. These methods generates workflow automatically in order to solve exploration problems.
+
+  @sect{Genetic algorithms}
+    This workflow optimises a dummy model using generational NSGA II multi-objective algorithm. You are free to replace the dummy model with you own.
+
+    @br @hl.openmole(s"""
+  $model
+
+  // Definition of the optimisation algorithm
+  // mu is the size of the population
+  // termination is the termination criterion, here it run for 100 generation an alternative could be Timed(1 hour) for which it would run for 1 hour
+  // inputs is the inputs prototype and their variation ranges
+  // objectives the objectives to minimize
+  val evolution =
+    NSGA2 (
+      mu = 100,
+      termination = 100,
+      inputs = Seq(x -> (0.0, 1.0), y -> (0.0, 1.0)),
+      objectives = Seq(o1, o2)
+    )
+
+  // Construction of the workflow orchestrating the genetic algorithm
+  // modelCapsule is the fitness function on optimise
+  // lambda is the size of the offspring (and the parallelism level)
+  val nsga2 =
+    GenerationalGA(evolution)(
+      modelCapsule,
+      lambda = 100
+    )
+
+  // Definition of a hook to save the population of solutions
+  val savePopulation = SavePopulationHook(nsga2, "/tmp/evolution/")
+
+  // Construction of the complete mole with the execution environment, and the hook
+  val ex = nsga2.puzzle + (modelCapsule on LocalEnvironment(4)) + (nsga2.output hook savePopulation)
+  ex.start""")
+
+  @p In order to use a steady state algorithm individuals are merged into the archive immediately after the evaluation and a new evaluation is generated, you may change the end of the script:
+
+  @br @hl.openmole(s"""
+  // Definition of the optimisation algorithm
+  // mu is the size of the population
+  // termination is the termination criterion, here it run for 100 generation an alternative could be "1 hour" for which it would run for 1 hour
+  // inputs is the inputs prototype and their variation ranges
+  // objectives the objectives to minimize
+  val evolution =
+    NSGA2 (
+      mu = 100,
+      termination = 10000,
+      inputs = Seq(x -> (0.0, 1.0), y -> (0.0, 1.0)),
+      objectives = Seq(o1, o2)
+    )
+
+  // Construction of the workflow orchestrating the genetic algorithm
+  // modelCapsule is the fitness function on optimise
+  // an optional lambda parameter can be set to specify the parallelism level of the workflow
+  val nsga2 = SteadyGA(evolution)(modelCapsule)
+
+  // Definition of a hook to save the population of solutions
+  val savePopulation = SavePopulationHook(nsga2, "/tmp/evolution/")
+
+  // Construction of the complete mole with the execution environment, and the hook
+  val ex = nsga2.puzzle + (modelCapsule on LocalEnvironment(4))  + (nsga2.output hook savePopulation)
+  ex.start""", header = model)
+
+  @p For distributed environments the island distribution scheme is well adapted. In this scheme islands of population evolve during a while on a remote node and when an island is finished, its final population is merge into a global archive and a new island is generated. To do so:
+
+  @br @hl.openmole("""
+  val evolution =
+    NSGA2 (
+      mu = 100,
+      termination = Timed(10 minutes),
+      inputs = Seq(x -> (0.0, 1.0), y -> (0.0, 1.0)),
+      objectives = Seq(o1, o2)
+    )
+
+  // Generate a workflow that ochestrate 100 concurent islands, stops when 10000 islands have been finished. Each island is initialised with a random sampling of 50 individual among the global population
+  val (ga, island) = IslandSteadyGA(evolution, modelCapsule)(
+    number = 100,
+    termination = 400000,
+    samples = 50)
+
+  // Definition of a hook to save the population of solutions
+  val savePopulation = SavePopulationHook(ga, "/tmp/evolution/")
+
+  // Construction of the complete mole with the execution environment, and the hook
+  val ex = ga.puzzle + (island on LocalEnvironment(4)) + (ga.output hook savePopulation)
+  ex.start""", header = model)
+
+  @p Calibration of stochastic models leads to noisy fitness functions. To deal with such fitness function one strategy is to allocate a small amount of computation to reevaluate already evaluated solution in order to discard solutions which have previously been over estimated. To do so you should use the reevaluate attribute of the optimization algorithm:
+
+  @br @hl.openmole("""
+  // 1 on 100 fitness evaluation is a reevaluation of an already evaluated individual
+  val evolution =
+    NSGA2 (
+      mu = 100,
+      termination = 10 minutes,
+      inputs = Seq(x -> (0.0, 1.0), y -> (0.0, 1.0)),
+      objectives = Seq(o1, o2),
+      reevaluate = 0.01
+    )""", header = model)
+

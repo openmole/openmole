@@ -1,13 +1,41 @@
 
+#content-main {
+  margin-left: 0%;
+  width: 100%;
+}
 
-#sections {
+#logo-main {
+  margin-left: 20%;
+}
+
+#sections-main {
   padding-top: 20;
   padding-bottom: 5;
+  margin-left: 25%;
+  width: 100%;
+}
+
+#content-documentation {
+  margin-left: 200px;
+  width: 100%;
+}
+
+#logo-documentation {
+  margin-left: 300px;
+}
+
+#sections-documentation {
+  padding-top: 20;
+  padding-bottom: 5;
+  margin-left: 330px;
+  width: 100%;
 }
 
 #section {
   padding-right: 15;
 }
+
+
 
 #documentation-bottom-link-unavailable {
   padding-left: 5;
@@ -23,7 +51,7 @@
 #documentation-bottom-links {
   text-decoration: underline;
   top: 10;
-  left: 270;
+  left: 40%;
 }
 
 #documentation-menu {
@@ -34,13 +62,11 @@
   top: 270;
 }
 
-#documentation-menu ul {
+#documentation-menu-ul {
   margin-bottom: 0;
   margin-top: 0;
-}
-
-#documentation-content {
-  width: 800;
+  margin-left: 15;
+  padding-left: 5;
 }
 
 #documentation-menu-entry {
@@ -54,25 +80,34 @@
     color: brown;
 }
 
+
+#top-content-documentation {
+  font-size: 14px;
+  position: absolute;
+  margin: 0 0;
+  padding: 0 0;
+  padding-bottom: 50;
+  line-height: 1.6em;
+  color: #777;
+}
+
 .scalatex-content *{
   position: relative;
 }
 .scalatex-content p{
   text-align: justify;
 }
-/*
-The content `<div>` is where all your content goes.
-*/
+
 .scalatex-content {
   font-size: 14px;
-  position: auto;
-  margin: 0 0;
-  padding: 0 0;
-  max-width: 800;
-  padding-bottom: 50;
+  margin: 0 auto;
+  padding: 0 1em;
+  max-width: 800px;
+  padding-bottom: 50px;
   line-height: 1.6em;
   color: #777;
 }
+
 /* Custom Stuff */
 .scalatex-content a:link {
   color: darkblue;

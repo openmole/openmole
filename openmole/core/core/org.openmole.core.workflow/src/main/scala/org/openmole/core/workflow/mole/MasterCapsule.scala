@@ -21,11 +21,11 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 
 object MasterCapsule {
-  def apply(task: Task, persist: Set[String] = Set.empty) = new MasterCapsule(task, persist)
-  def apply(t: Task, persist: String*): MasterCapsule = apply(t, persist.toSet)
-  def apply(t: Task, head: Prototype[_], persist: Prototype[_]*): MasterCapsule = apply(t, (head :: persist.toList).map { _.name }.toSet)
+  def apply(task: Task, persist: Seq[String] = Seq.empty, strainer: Boolean = false) = new MasterCapsule(task, persist, strainer)
+  def apply(t: Task, persist: String*): MasterCapsule = apply(t, persist)
+  def apply(t: Task, head: Prototype[_], persist: Prototype[_]*): MasterCapsule = apply(t, (head :: persist.toList).map { _.name })
 }
 
-class MasterCapsule(task: Task, val persist: Set[String] = Set.empty) extends Capsule(task) {
+class MasterCapsule(task: Task, val persist: Seq[String] = Seq.empty, strainer: Boolean) extends Capsule(task, strainer) {
   def toPersist(context: Context) = persist.flatMap { n ⇒ context.variable(n).toList }.toContext
 }

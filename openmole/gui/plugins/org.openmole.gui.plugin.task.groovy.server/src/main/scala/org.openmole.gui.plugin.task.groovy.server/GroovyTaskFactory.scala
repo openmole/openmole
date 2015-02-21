@@ -1,7 +1,7 @@
 package org.openmole.gui.plugin.task.groovy.server
 
+import org.openmole.gui.ext.data.Factory
 import org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData
-import org.openmole.gui.server.factory.Factory
 import org.openmole.core.workflow.task.PluginSet
 import org.openmole.plugin.task.groovy.GroovyTask
 import scala.util.Try

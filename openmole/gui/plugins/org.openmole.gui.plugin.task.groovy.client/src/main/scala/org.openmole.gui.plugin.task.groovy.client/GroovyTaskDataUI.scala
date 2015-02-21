@@ -17,7 +17,9 @@ package org.openmole.gui.plugin.task.groovy.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.service.ClientService._
+import org.openmole.gui.client.core.ClientService
+import org.openmole.gui.client.core.dataui.{IOMappingsFactory, TaskDataUI}
+import ClientService._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.ext.dataui._
@@ -26,10 +28,10 @@ import rx._
 
 @JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskDataUI")
 class GroovyTaskDataUI(val code: Var[String] = Var(""),
-                       val libs: Var[Seq[Var[String]]] = Var(Seq())) extends TaskDataUI{
+                       val libs: Var[Seq[Var[String]]] = Var(Seq())) extends TaskDataUI {
 //libs().map{c=>c()}
 
-  def data = new GroovyTaskData(code, libs)
+  def data = new GroovyTaskData(inputDataUI().data.inputs, outputDataUI().data.outputs, code, libs)
 
   def panelUI = new GroovyTaskPanelUI(this)
 

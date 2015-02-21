@@ -18,8 +18,6 @@
     sbt assemble""", "plain")
     @p You can now find the application in bin/openmole/target/assemble/.
     @p To compile offline (plain / train...) you should use: @hl.highlight("""set offline in Global := true""", "plain")
-    @p To generate the documentation you should run: @hl.highlight("""sbt "project documentation" "run /target/dir/"""", "plain")
-    @p The documentation will be generated in the target directory
   @sect{Develop}
     To develop OpenMOLE we generally use the community version of @a("IntelliJ", href := "http://www.jetbrains.com/idea/"). One installed you should install the SBT and Scala plugins. Then you can create an intelliJ project from the OpenMOLE project with one SBT command.
     @br @hl.highlight("""
@@ -41,5 +39,7 @@
     cd bin/site/target/assemble
     ./site /path/of/the/site
     """, "plain")
+
+    @p The site will be generated in the target directory.
 
     @p Optionally you can use @hl.highlight("./site /path/of/the/site -np", "plain") in order to bypass the testing of the scripts which is time-consuming.

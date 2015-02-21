@@ -3,7 +3,7 @@ package root.gui
 import org.openmole.buildsystem.OMKeys._
 
 import sbt._
-import root.{ GuiDefaults, base, Web }
+import root.{ GuiDefaults, base }
 import root.Libraries._
 import root.libraries.Apache
 import sbt.Keys._
@@ -15,12 +15,9 @@ object Server extends GuiDefaults {
 
   lazy val core = OsgiProject("org.openmole.gui.server.core") settings
     (libraryDependencies ++= Seq(autowire, upickle, scalaTags, jetty, logback, scalatra)) dependsOn
-    (Server.factory, Shared.shared, Ext.data, base.Core.workflow, base.Core.workflow)
-
-  lazy val factory = OsgiProject("org.openmole.gui.server.factory") dependsOn
-    (Ext.data, Ext.factoryui, Shared.shared, base.Core.workflow, base.Core.workflow)
+    (Shared.shared, Ext.dataui, Ext.data, base.Core.workflow)
 
   lazy val state = OsgiProject("org.openmole.gui.server.state") settings
     (libraryDependencies ++= Seq(slick)) dependsOn
-    (Ext.data, base.Core.workflow, base.Core.workflow, base.Misc.workspace)
+    (Ext.data, base.Core.workflow, base.Misc.workspace)
 }

@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.service.dataui.DataBagUI
+import org.openmole.gui.client.core.dataui.DataBagUI
 
 /*
  * Copyright (C) 11/02/15 // mathieu.leclaire@openmole.org
@@ -31,4 +31,6 @@ class PanelSequences {
     last.map { l ⇒ sequences() = sequences().filterNot(_._1.uuid == l._1.uuid) }
     last
   }
+
+  def isEmpty = sequences().isEmpty
 }

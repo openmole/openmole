@@ -1,7 +1,7 @@
 package org.openmole.gui.plugin.task.groovy.client
 
-import org.openmole.gui.ext.dataui.{TaskDataUI}
-import org.openmole.gui.ext.factoryui.{FactoryUI}
+import org.openmole.gui.client.core.dataui.TaskDataUI
+import org.openmole.gui.ext.dataui.FactoryUI
 
 import scala.scalajs.js.annotation.JSExport
 import rx._

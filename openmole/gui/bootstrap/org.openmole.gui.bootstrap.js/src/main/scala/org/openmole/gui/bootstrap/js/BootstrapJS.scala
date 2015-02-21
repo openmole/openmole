@@ -18,8 +18,7 @@ package org.openmole.gui.bootstrap.js
 
 import java.io.File
 import java.net.URL
-import org.openmole.gui.server.core.GUIServer
-import org.openmole.gui.server.factory.ServerFactories
+import org.openmole.gui.server.core.{ ServerFactories, GUIServer }
 import org.openmole.gui.shared._
 import org.openmole.misc.osgi.Activator
 import org.openmole.misc.pluginmanager

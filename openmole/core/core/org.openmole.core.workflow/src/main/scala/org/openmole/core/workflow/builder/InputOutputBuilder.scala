@@ -39,9 +39,9 @@ trait InputOutputBuilder <: Builder { builder ⇒
   def defaults = _defaults
 
   trait Built {
-    val inputs = builder.inputs
-    val outputs = builder.outputs
-    val defaults = builder.defaults
+    def inputs = builder.inputs
+    def outputs = builder.outputs
+    def defaults = builder.defaults
   }
 
 }

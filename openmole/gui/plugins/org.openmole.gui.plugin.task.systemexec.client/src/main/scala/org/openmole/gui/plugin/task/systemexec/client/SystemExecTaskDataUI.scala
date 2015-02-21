@@ -17,18 +17,35 @@ package org.openmole.gui.plugin.task.systemexec.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.ClientService
+import org.openmole.gui.client.core.dataui._
+import org.openmole.gui.client.core.dataui.IOMappingFactory._
+
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
-import org.openmole.gui.ext.dataui._
-import org.openmole.gui.client.service.ClientService._
 import rx._
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskDataUI")
 class SystemExecTaskDataUI extends TaskDataUI {
-  def data = new SystemExecTaskData
+  def data = new SystemExecTaskData(inputDataUI().data.inputs, outputDataUI().data.outputs)
 
   def panelUI = new SystemExecTaskPanelUI(this)
 
   def dataType = "External"
+
+  override def inputMappingsFactory = IOMappingsFactory(
+    IOMappingFactory.defaultInputField,
+    stringField("Destination", fileFilter),
+    booleanField("Workdir", true, fileFilter),
+    booleanField("Link", false, fileFilter)
+  )
+
+override def outputMappingsFactory = IOMappingsFactory(
+    IOMappingFactory.defaultInputField,
+    stringField("Source", fileFilter),
+    booleanField("Workdir", true, fileFilter),
+    booleanField("StdOut", false, stringFilter),
+    booleanField("StdErr", false, stringFilter)
+  )
 }

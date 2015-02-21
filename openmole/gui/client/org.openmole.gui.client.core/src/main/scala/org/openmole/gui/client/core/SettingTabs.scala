@@ -1,13 +1,14 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.service.dataui._
+import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.ext.dataui._
 
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter }
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
+import org.scalajs.jquery.jQuery
 
 /*
  * Copyright (C) 28/01/15 // mathieu.leclaire@openmole.org
@@ -30,61 +31,77 @@ object SettingTabs {
 
   object SettingTab extends Enumeration {
 
-    case class SettingTab(val name: String, val panelUIs: Seq[PanelUI], val defaultActive: Boolean = false, val id: String = getID) {
+    case class SettingTab(name: String, panelUIs: Seq[PanelUI], id: String = getID, focusID: Option[String] = None) {
       def save = panelUIs.map {
         _.save
       }
+
+      def focus = focusID.map { f ⇒ jQuery("#" + f).focus }
     }
 
-    def taskTab(panelUIs: Seq[PanelUI], default: Boolean = false) = SettingTab("Settings", panelUIs, default)
+    def ioTab(name: String, panelUIs: Seq[PanelUI]) = SettingTab(name, panelUIs)
 
-    def inputTab(panelUIs: Seq[PanelUI], default: Boolean = false) = SettingTab("Inputs", panelUIs, default)
+    def inputTab(panelUIs: Seq[InOutputPanelUI]) = SettingTab("Inputs", panelUIs, focusID = Some(InputFilter.protoFilterId))
 
-    def outputTab(panelUIs: Seq[PanelUI], default: Boolean = false) = SettingTab("Outputs", panelUIs, default)
+    def outputTab(panelUIs: Seq[PanelUI]) = SettingTab("Outputs", panelUIs)
 
-    def environmentTab(panelUIs: Seq[PanelUI], default: Boolean = false) = SettingTab("Environment", panelUIs, default)
+    def environmentTab(panelUIs: Seq[PanelUI]) = SettingTab("Environment", panelUIs)
 
-    def hookTab(panelUIs: Seq[PanelUI], default: Boolean = false) = SettingTab("Hooks", panelUIs, default)
-
-    def prototypeTab(panelUIs: Seq[PanelUI], default: Boolean = false) = SettingTab("Prototypes", panelUIs, default)
+    def prototypeTab(panelUIs: Seq[PanelUI]) = SettingTab("Prototypes", panelUIs)
 
   }
 
   import SettingTab._
 
-  def apply(panel: GenericPanel, db: DataBagUI): SettingTabs = db match {
-    case dbio: IODataBagUI ⇒ new SettingTabs(dbio.dataUI() match {
-      case t: TaskDataUI ⇒ taskTab(Seq(t.panelUI), true)
-      case h: HookDataUI ⇒ hookTab(Seq(h.panelUI))
-    },
-      inputTab(Seq(new InputPanelUI(panel, dbio.inputDataUI()))),
-      outputTab(Seq(new OutputPanelUI(panel, dbio.outputDataUI())))
-    )
-    case db: DataBagUI ⇒ db.dataUI() match {
-      case e: EnvironmentDataUI ⇒ new SettingTabs(environmentTab(Seq(e.panelUI)))
-      case _                    ⇒ new SettingTabs
-    }
-  }
+  def apply(panel: GenericPanel, db: DataBagUI): SettingTabs = new SettingTabs(db.dataUI() match {
+    case io: IODataUI ⇒
+      val name = io match {
+        case h: HookDataUI ⇒ "Hooks"
+        case _             ⇒ "Settings"
+      }
+      Seq(
+        ioTab(name, Seq(io.panelUI)),
+        inputTab(Seq(io.inputDataUI().panelUI(panel))),
+        outputTab(Seq(io.outputDataUI().panelUI(panel)))
+      )
+    case e: EnvironmentDataUI ⇒ Seq(environmentTab(Seq(e.panelUI)))
 
-  def apply(dataUI: CapsuleDataUI): SettingTabs = new SettingTabs(Seq(
-    dataUI.dataUI.map { d ⇒ taskTab(Seq(d.panelUI), true) },
-    dataUI.inputDataUI.map { i ⇒ inputTab(Seq(i.panelUI)) },
-    dataUI.outputDataUI.map { o ⇒ outputTab(Seq(o.panelUI)) },
-    dataUI.environment.map { env ⇒ environmentTab(Seq(env.panelUI)) },
-    Some(hookTab(dataUI.hooks.map { _.panelUI }))).flatten: _*)
+    case _                    ⇒ Seq()
+
+  }
+  )
+
+  def apply(panel: GenericPanel, dataUI: CapsuleDataUI): SettingTabs = new SettingTabs(Seq(
+    dataUI.dataUI.map {
+      d ⇒ ioTab("Settings", Seq(d.panelUI))
+    },
+    dataUI.inputDataUI.map {
+      i ⇒ inputTab(Seq(i.panelUI(panel)))
+    },
+    dataUI.outputDataUI.map {
+      o ⇒ outputTab(Seq(o.panelUI))
+    },
+    dataUI.environment.map {
+      env ⇒ environmentTab(Seq(env.panelUI))
+    },
+    Some(ioTab("Hooks", dataUI.hooks.map {
+      _.panelUI
+    }))).flatten)
 }
 
 import SettingTabs.SettingTab._
 
-class SettingTabs(tabs: SettingTab*) {
+class SettingTabs(tabs: Seq[SettingTab]) {
   val currentTab = Var(tabs.headOption)
 
   val view = tags.div(
-    bs.nav("settingsNav", nav_pills,
-      (for (c ← tabs) yield {
-        navItem(c.id, c.name, () ⇒ currentTab() = Some(c), c.defaultActive)
-      }): _*
-    ), Rx {
+    Rx {
+      bs.nav("settingsNav", nav_pills,
+        (for (c ← tabs) yield {
+          navItem(c.id, c.name, () ⇒ { currentTab() = Some(c) }, currentTab() == Some(c))
+        }): _*
+      )
+    }, Rx {
       tags.div(currentTab().map { t: SettingTab ⇒
         for (el ← t.panelUIs) yield {
           tags.div(el.view)
@@ -94,8 +111,13 @@ class SettingTabs(tabs: SettingTab*) {
     }
   )
 
-  def set(index: Int) = currentTab() = Some(tabs(index))
+  def set(index: Int) = {
+    currentTab() = Some(tabs(index))
+    currentTab().map { _.focus }
+  }
 
-  def save = tabs.map { _.save }
+  def save = tabs.map {
+    _.save
+  }
 
 }

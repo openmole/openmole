@@ -186,7 +186,7 @@ package object evolution {
     val breedingCapsItSlot = Slot(breedingCaps)
 
     val scalingGenomeCaps = Capsule(scalingGenomeTask)
-    val toIndividualSlot = Slot(InputStrainerCapsule(toIndividualTask))
+    val toIndividualSlot = Slot(toIndividualTask)
     val elitismSlot = Slot(elitismTask)
 
     terminationTask addOutput archive
@@ -228,7 +228,7 @@ package object evolution {
     val firstCapsule = StrainerCapsule(firstTask)
     val scalingCaps = Capsule(scalingGenomeTask)
 
-    val toIndividualSlot = Slot(InputStrainerCapsule(toIndividualTask))
+    val toIndividualSlot = Slot(toIndividualTask)
 
     val toIndividualArrayCaps = StrainerCapsule(ToArrayTask(individual) set (_.setName(name + "IndividualToArray")))
 

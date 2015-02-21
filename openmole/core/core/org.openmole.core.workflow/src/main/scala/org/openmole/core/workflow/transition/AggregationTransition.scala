@@ -53,7 +53,7 @@ class AggregationTransition(start: Capsule, end: Slot, condition: Condition = Tr
             }
           }
 
-        case None ⇒ throw new InternalProcessingError("No context registred for aggregation.")
+        case None ⇒ throw new InternalProcessingError("No context registered for aggregation.")
       }
     }
   }
@@ -65,7 +65,6 @@ class AggregationTransition(start: Capsule, end: Slot, condition: Condition = Tr
       val results = subMole.aggregationTransitionRegistry.remove(this, parentTicket).getOrElse(throw new InternalProcessingError("No context registred for the aggregation transition"))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
       val aggregated = AggregationTransition.aggregateOutputs(subMole.moleExecution, this, results)
-
       subMoleParent.transitionLock { submitNextJobsIfReady(aggregated.values, parentTicket, subMoleParent) }
     }
   }

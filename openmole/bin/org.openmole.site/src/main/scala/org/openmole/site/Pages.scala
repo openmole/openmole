@@ -26,21 +26,21 @@ object Pages {
   def decorate(p: Page): Frag =
     p match {
       case p: DocumentationPage ⇒ DocumentationPages.decorate(p)
-      case _                    ⇒ decorate(p.content)
+      case _                    ⇒ decorate(p.content, "-main")
     }
 
-  def decorate(p: Frag): Frag =
+  def decorate(p: Frag, postfix: String): Frag =
     Seq(
       meta(charset := "UTF-8"),
-      div(id := "logo")(a(img(src := Resource.logo.file), href := index.file)),
-      div(id := "sections",
+      div(id := s"logo$postfix")(a(img(src := Resource.logo.file), href := index.file)),
+      div(id := s"sections$postfix",
         table(
           td(a("Getting Started", id := "section", href := gettingStarted.file)),
           td(a("Documentation", id := "section", href := DocumentationPages.root.file)),
           td(a("Who are we?", id := "section", href := whoAreWe.file))
         )
       ),
-      div(id := "content")(p)
+      div(id := s"content$postfix")(p)
     )
 
   def index = Page("index", Index())
@@ -110,7 +110,7 @@ object DocumentationPages { index ⇒
           div(id := "documentation-content", p.content),
           if (p != root) bottomLinks(p) else ""
         )
-      )
+      ), "-documentation"
     )
 
   def documentationMenu(root: DocumentationPage, currentPage: DocumentationPage): Frag = {
@@ -130,7 +130,7 @@ object DocumentationPages { index ⇒
 
     def pageLine(p: DocumentationPage): Frag = {
       def contracted = li(menuEntry(p))
-      def expanded = li(menuEntry(p), ul(p.children.map(pageLine)))
+      def expanded = li(menuEntry(p), ul(id := "documentation-menu-ul")(p.children.map(pageLine)))
 
       if (p.children.isEmpty) contracted
       else if (p == currentPage) expanded
@@ -185,7 +185,7 @@ object DocumentationPages { index ⇒
     def console =
       new DocumentationPage {
         def name = "console"
-        def children = Seq(task, sampling, transition, hook, environment, sources)
+        def children = Seq(task, sampling, transition, hook, environment, source, method, tutorial)
         def content = documentation.Console()
 
         def task = new DocumentationPage {
@@ -273,10 +273,40 @@ object DocumentationPages { index ⇒
 
         }
 
-        def sources = new DocumentationPage {
+        def source = new DocumentationPage {
           def name = "source"
           def children = Seq()
           def content = documentation.console.Source()
+        }
+
+        def method = new DocumentationPage {
+          def name = "method"
+          def children = Seq()
+          def content = documentation.console.Method()
+        }
+
+        def tutorial = new DocumentationPage {
+          def name = "tutorial"
+          def children = Seq(headlessNetLogo, netLogoGA, capsule)
+          def content = documentation.console.Tutorial()
+
+          def headlessNetLogo = new DocumentationPage {
+            def name = "headless NetLogo"
+            def children = Seq()
+            def content = documentation.console.tutorial.HeadlessNetLogo()
+          }
+
+          def netLogoGA = new DocumentationPage {
+            def name = "netLogo GA"
+            def children = Seq()
+            def content = documentation.console.tutorial.NetLogoGA()
+          }
+
+          def capsule = new DocumentationPage {
+            def name = "capsule"
+            def children = Seq()
+            def content = documentation.console.tutorial.Capsule()
+          }
         }
       }
 
@@ -288,7 +318,7 @@ object DocumentationPages { index ⇒
 
     def development = new DocumentationPage {
       def name = "development"
-      def children = Seq(compilation, plugin, branching)
+      def children = Seq(compilation, plugin, branching, webserver)
       def content = documentation.Development()
 
       def compilation = new DocumentationPage {
@@ -307,6 +337,12 @@ object DocumentationPages { index ⇒
         def name = "branching"
         def children = Seq()
         def content = documentation.development.Branching()
+      }
+
+      def webserver = new DocumentationPage {
+        def name = "web server"
+        def children = Seq()
+        def content = documentation.development.WebServer()
       }
     }
   }

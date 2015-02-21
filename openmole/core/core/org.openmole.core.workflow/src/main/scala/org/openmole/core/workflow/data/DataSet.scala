@@ -21,7 +21,7 @@ package org.openmole.core.workflow.data
  * It is a set of @link{Data}. It allows manipulating data by set instead of
  * individualy.
  */
-import scala.collection.SetLike
+import scala.collection.{ TraversableLike, SetLike }
 import scala.collection.immutable.TreeMap
 
 object DataSet {
@@ -39,7 +39,7 @@ object DataSet {
   def apply(d: Data[_]*): DataSet = DataSet(d)
 }
 
-trait DataSet extends Set[Data[_]] with SetLike[Data[_], DataSet] { self ⇒
+trait DataSet extends Set[Data[_]] with SetLike[Data[_], DataSet] with TraversableLike[Data[_], DataSet] { self ⇒
 
   def data: Iterable[Data[_]]
 
@@ -69,7 +69,7 @@ trait DataSet extends Set[Data[_]] with SetLike[Data[_], DataSet] { self ⇒
 
   def ++(d: Traversable[Data[_]]) = DataSet(d.toList ::: data.toList)
 
-  def +(set: DataSet): DataSet = DataSet(set.toList ::: data.toList)
+  def +(set: DataSet): DataSet = DataSet(set.data.toList ::: data.toList)
 
   def +(d: Data[_]) = DataSet(d :: data.toList)
 

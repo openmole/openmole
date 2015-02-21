@@ -19,8 +19,11 @@ package org.openmole.core.workflow.task
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
+import org.openmole.misc.exception.InternalProcessingError
 import org.scalatest._
 import org.openmole.core.workflow.mole._
+
+import scala.util.Try
 
 class MoleTaskSpec extends FlatSpec with Matchers {
 
@@ -29,7 +32,7 @@ class MoleTaskSpec extends FlatSpec with Matchers {
     val emptyT = EmptyTask()
     emptyT.addInput(i)
 
-    val emptyC = new Capsule(emptyT)
+    val emptyC = Capsule(emptyT)
 
     val moleTask =
       MoleTask(Mole(emptyC), emptyC)
@@ -38,6 +41,22 @@ class MoleTaskSpec extends FlatSpec with Matchers {
     moleTask setDefault (i, "test")
 
     MoleExecution(Mole(moleTask)).start.waitUntilEnded
+  }
+
+  "MoleTask" should "propagate errors" in {
+
+    val error = new TestTask {
+      val name = "error"
+      override def process(context: Context) =
+        throw new InternalProcessingError("Some error for test")
+    }
+    val moleTask = MoleTask(error)
+
+    val ex = moleTask.start
+    Try { ex.waitUntilEnded }
+
+    ex.exception shouldNot equal(None)
+
   }
 
 }
