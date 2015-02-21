@@ -10,26 +10,21 @@ object Apache extends Defaults {
   //todo: switch to discluding pattern
   val dir = file("target/libraries") / "apache"
 
-  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core", "lib")) //TODO make library defaults
-
-  lazy val pool = OsgiProject("org.apache.commons.pool") settings
-    (libraryDependencies += "commons-pool" % "commons-pool" % "1.5.4", bundleType += "runtime", version := "1.5.4")
-
   lazy val config = OsgiProject("org.apache.commons.configuration", privatePackages = Seq("org.apache.commons.*")) settings
-    (libraryDependencies += "commons-configuration" % "commons-configuration" % "1.6", bundleType += "runtime", version := "1.6")
+    (libraryDependencies += "commons-configuration" % "commons-configuration" % "1.10", version := "1.10")
 
   lazy val mathVersion = "3.4.1"
   lazy val math = OsgiProject("org.apache.commons.math", exports = Seq("org.apache.commons.math3.*"), privatePackages = Seq("assets.*")) settings
-    (libraryDependencies += "org.apache.commons" % "commons-math3" % mathVersion, bundleType += "runtime", version := mathVersion)
+    (libraryDependencies += "org.apache.commons" % "commons-math3" % mathVersion, version := mathVersion)
 
   lazy val exec = OsgiProject("org.apache.commons.exec") settings
-    (libraryDependencies += "org.apache.commons" % "commons-exec" % "1.1", bundleType += "runtime", version := "1.1")
+    (libraryDependencies += "org.apache.commons" % "commons-exec" % "1.1", version := "1.1")
 
   lazy val log4j = OsgiProject("org.apache.log4j") settings
-    (libraryDependencies += "log4j" % "log4j" % "1.2.17", bundleType += "runtime", version := "1.2.17")
+    (libraryDependencies += "log4j" % "log4j" % "1.2.17", version := "1.2.17")
 
   lazy val logging = OsgiProject("org.apache.commons.logging") settings
-    (libraryDependencies += "commons-logging" % "commons-logging" % "1.1.1", bundleType += "runtime", version := "1.1.1")
+    (libraryDependencies += "commons-logging" % "commons-logging" % "1.1.1", version := "1.1.1")
 
   lazy val sshd = OsgiProject("org.apache.sshd", exports = Seq("org.apache.sshd.*", "org.apache.mina.*"), buddyPolicy = Some("global"), privatePackages = Seq("META-INF.*")) settings
     (libraryDependencies += "org.apache.sshd" % "sshd-core" % "0.13.0", version := "0.13.0")
@@ -38,5 +33,5 @@ object Apache extends Defaults {
     (libraryDependencies += "org.apache.ant" % "ant" % "1.8.0", version := "1.8.0")
 
   lazy val codec = OsgiProject("org.apache.commons.codec") settings
-    (libraryDependencies += "commons-codec" % "commons-codec" % "1.5", version := "1.5")
+    (libraryDependencies += "commons-codec" % "commons-codec" % "1.10", version := "1.10")
 }

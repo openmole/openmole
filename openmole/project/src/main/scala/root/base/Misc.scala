@@ -23,9 +23,8 @@ object Misc extends BaseDefaults {
 
   val tools = OsgiProject("org.openmole.misc.tools", buddyPolicy = Some("global"), imports = Seq("*")) settings
     (includeOsgi,
-      libraryDependencies ++= Seq(xstream, groovy, Apache.exec, Apache.pool,
-        Apache.math, jodaTime, scalaLang, scalatest)) dependsOn
-        (exception, osgi, iceTar)
+      libraryDependencies ++= Seq(xstream, groovy, Apache.exec, Apache.math, jodaTime, scalaLang, scalatest)) dependsOn
+      (exception, osgi, iceTar)
 
   val eventDispatcher = OsgiProject("org.openmole.misc.eventdispatcher", imports = Seq("*")) dependsOn (tools) settings (
     libraryDependencies += scalatest

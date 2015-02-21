@@ -125,7 +125,6 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     Apache.config,
     Apache.exec,
     Apache.math,
-    Apache.pool,
     Apache.log4j,
     Libraries.groovy,
     Libraries.h2,
