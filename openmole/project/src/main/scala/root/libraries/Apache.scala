@@ -12,9 +12,7 @@ object Apache extends Defaults {
 
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core", "lib")) //TODO make library defaults
 
-  lazy val pool = "org.openmole" %% "org-apache-commons-pool" % "1.5.4"
-
-  lazy val config = "org.openmole" %% "org-apache-commons-configuration" % "1.6"
+  lazy val config = "org.openmole" %% "org-apache-commons-configuration" % "1.10"
 
   lazy val math = "org.openmole" %% "org-apache-commons-math" % "3.4.1"
 
@@ -28,5 +26,5 @@ object Apache extends Defaults {
 
   lazy val ant = "org.openmole" %% "org-apache-ant" % "1.8.0"
 
-  lazy val codec = "org.openmole" %% "org-apache-commons-codec" % "1.5"
+  lazy val codec = "org.openmole" %% "org-apache-commons-codec" % "1.10"
 }

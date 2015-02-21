@@ -66,11 +66,11 @@ object Libraries extends Defaults(Apache) {
 
   lazy val slick = "org.openmole" %% "com-typesafe-slick" % "2.1.0"
 
-  lazy val slf4j = "org.openmole" %% "org-slf4j" % "1.7.2"
+  lazy val slf4j = "org.openmole" %% "org-slf4j" % "1.7.10"
 
-  lazy val xstream = "org.openmole" %% "com-thoughtworks-xstream" % "1.4.7"
+  lazy val xstream = "org.openmole" %% "com-thoughtworks-xstream" % "1.4.8"
 
-  lazy val groovy = "org.openmole" %% "org-codehaus-groovy" % "2.4.0"
+  lazy val groovy = "org.openmole" %% "org-codehaus-groovy" % "2.4.1"
 
   lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.5"
 
@@ -113,11 +113,11 @@ object Libraries extends Defaults(Apache) {
 
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "1.79-SNAPSHOT"
 
-  lazy val monocle = "org.openmole" %% "monocle" % "0.5.0"
+  lazy val monocle = "org.openmole" %% "monocle" % "1.0.1"
 
   lazy val scaladget = "org.openmole" %% "scaladget" % "0.3.0"
 
-  lazy val opencsv = "org.openmole" %% "au-com-bytecode-opencsv" % "2.0"
+  lazy val opencsv = "org.openmole" %% "au-com-bytecode-opencsv" % "2.3"
 
   lazy val jline = "org.openmole" %% "net-sourceforge-jline" % "0.9.94"
 

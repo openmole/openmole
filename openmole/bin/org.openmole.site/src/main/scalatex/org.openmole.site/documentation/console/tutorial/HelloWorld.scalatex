@@ -1,0 +1,20 @@
+
+
+@import org.openmole.site.Objects._
+
+@sect{An OpenMOLE Hello World!}
+  To demonstrate OpenMOLE console we will design a workflow that explore one variable multiplies it by 2 and then display each result. The computation is executed on multi-threaded environment.
+
+  @br @hl.openmole("""
+  val i = Val[Double]
+  val res = Val[Double]
+
+  val exploration = ExplorationTask(i in (0.0 to 100.0 by 1.0))
+  val model =
+    ScalaTask("val res = i * 2") set (
+      inputs += i,
+      outputs += (i, res)
+    )
+
+  val ex = exploration -< (model on LocalEnvironment(4) hook ToStringHook()) start
+  """)

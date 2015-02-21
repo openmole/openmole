@@ -27,7 +27,7 @@ trait ModelFamilyMutation <: DynamicGAMutation with ModelFamilyGenome {
 
   override def mutate(genome: G, population: Population[G, P, F], archive: A)(implicit rng: Random): G = {
     def mutated = super.mutate(genome, population, archive)
-    if (rng.nextDouble < changeModel) modelId.set(mutated, rng.nextInt(models)) else mutated
+    if (rng.nextDouble < changeModel) modelId.set(rng.nextInt(models))(mutated) else mutated
   }
 
 }

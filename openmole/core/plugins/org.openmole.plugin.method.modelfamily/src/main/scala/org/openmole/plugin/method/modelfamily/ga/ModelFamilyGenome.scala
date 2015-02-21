@@ -18,7 +18,8 @@
 package org.openmole.plugin.method.modelfamily.ga
 
 import fr.iscpif.mgo.genome._
-import monocle.Lenser
+import monocle._
+import monocle.macros._
 
 import scala.util.Random
 
