@@ -295,7 +295,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
                   }),
               buildInfoPackage := "org.openmole.site.buildinfo"
             ): _*
-        ) dependsOn (openmoleConsole)
+        ) dependsOn (openmoleConsole, ThirdParties.toolxitBibtex)
 
   lazy val site =
     Project("site", dir / "site", settings = assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
