@@ -76,12 +76,12 @@ class Site extends IApplication {
     for {
       r ← Resource.all
     } r match {
-      case FileResource(name) ⇒
-        val f = new File(dest, name)
+      case RenameFileResource(source, destination) ⇒
+        val f = new File(dest, destination)
         f.getParentFile.mkdirs
         f.withOutputStream { os ⇒
-          withClosable(getClass.getClassLoader.getResourceAsStream(name)) { is ⇒
-            assert(is != null, s"Resource $name doesn't exist")
+          withClosable(getClass.getClassLoader.getResourceAsStream(source)) { is ⇒
+            assert(is != null, s"Resource $source doesn't exist")
             BasicIO.transferFully(is, os)
           }
         }
