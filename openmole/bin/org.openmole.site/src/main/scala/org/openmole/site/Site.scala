@@ -95,6 +95,7 @@ class Site extends IApplication {
 
     withClosable(getClass.getClassLoader.getResourceAsStream(Resource.css)) { is ⇒
       withClosable(new File(dest, "styles.css").bufferedOutputStream(true)) { os ⇒
+        os.write('\n')
         BasicIO.transferFully(is, os)
       }
     }

@@ -105,10 +105,11 @@ object DocumentationPages { index ⇒
   def decorate(p: DocumentationPage): Frag =
     Pages.decorate(
       Seq(
-        documentationMenu(root, p),
-        div(
-          div(id := "documentation-content", p.content),
-          if (p != root) bottomLinks(p) else ""
+        div(id := "documentation-content",
+          table(
+            td(verticalAlign := "top")(documentationMenu(root, p)),
+            td(verticalAlign := "top")(div(p.content, if (p != root) bottomLinks(p) else ""))
+          )
         )
       ), "-documentation"
     )
