@@ -9,3 +9,6 @@
 
 @sect{How to cite OpenMOLE}
   @Publication.publication(Publication.fgcs2013)
+
+@sect{Contact us}
+  For any question regarding OpenMOLE contact us through the OpenMOLE user mailing list: users 'at' list.openmole.org (you should @a("subscribe", href := "http://list.openmole.org/") first).
