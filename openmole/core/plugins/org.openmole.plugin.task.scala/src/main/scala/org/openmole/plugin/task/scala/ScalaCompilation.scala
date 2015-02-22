@@ -66,7 +66,7 @@ trait ScalaCompilation { compilation ⇒
   def prefix = "_input_value_"
 
   def compile(inputs: Seq[Prototype[_]]) = Try {
-    val interpreter = new ScalaREPL(true, Seq(getClass) ++ usedClasses, libraries)
+    val interpreter = new ScalaREPL(true, usedClasses ++ Seq(getClass), libraries)
 
     def exceptionMessage = {
       def error(error: interpreter.ErrorMessage) =
