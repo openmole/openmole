@@ -89,7 +89,7 @@
   val evolution =
     NSGA2 (
       mu = 100,
-      termination = Timed(10 minutes),
+      termination = 10 minutes,
       inputs = Seq(x -> (0.0, 1.0), y -> (0.0, 1.0)),
       objectives = Seq(o1, o2)
     )
@@ -97,7 +97,7 @@
   // Generate a workflow that ochestrate 100 concurent islands, stops when 10000 islands have been finished. Each island is initialised with a random sampling of 50 individual among the global population
   val (ga, island) = IslandSteadyGA(evolution, modelCapsule)(
     number = 100,
-    termination = 400000,
+    termination = 10000,
     samples = 50)
 
   // Definition of a hook to save the population of solutions
