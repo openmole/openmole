@@ -287,23 +287,29 @@ object DocumentationPages { index ⇒
 
         def tutorial = new DocumentationPage {
           def name = "tutorial"
-          def children = Seq(headlessNetLogo, netLogoGA, capsule)
+          def children = Seq(helloWorld, headlessNetLogo, netLogoGA, capsule)
           def content = documentation.console.Tutorial()
 
+          def helloWorld = new DocumentationPage {
+            def name = "Hello World"
+            def children = Seq()
+            def content = documentation.console.tutorial.HelloWorld()
+          }
+
           def headlessNetLogo = new DocumentationPage {
-            def name = "headless NetLogo"
+            def name = "NetLogo Headless"
             def children = Seq()
             def content = documentation.console.tutorial.HeadlessNetLogo()
           }
 
           def netLogoGA = new DocumentationPage {
-            def name = "netLogo GA"
+            def name = "NetLogo GA"
             def children = Seq()
             def content = documentation.console.tutorial.NetLogoGA()
           }
 
           def capsule = new DocumentationPage {
-            def name = "capsule"
+            def name = "Capsule"
             def children = Seq()
             def content = documentation.console.tutorial.Capsule()
           }

@@ -21,5 +21,5 @@ import fr.iscpif.mgo.genome.G
 import monocle._
 
 trait ModelId <: G {
-  def modelId: SimpleLens[G, Int]
+  def modelId: Lens[G, Int]
 }

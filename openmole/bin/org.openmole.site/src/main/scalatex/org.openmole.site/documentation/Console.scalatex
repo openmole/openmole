@@ -38,7 +38,7 @@
            @br @hl.openmole("val t = SomeClass(value1, value2, otherParam = otherValue)", test = false)
            @p It means that value1 and value2 are the values for the first two parameters and that the parameter named otherParam is set to the value otherValue, the other parameters are set to their default values.
          @sect{Going further}
-           What you have red here should be be sufficient in order to start with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Task documentation", href := DocumentationPages.root.console.task.file).
+           What you have red here should be be sufficient in order to start with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Task documentation", href := DocumentationPages.root.console.task.file). You may also want to look at the @a("Hello World tutorial", href := root.console.tutorial.helloWorld.file).
 
            @p Scala is a very nice language with an extensive very well designed standard library. To get more insight on this language you should look at:
            @ul

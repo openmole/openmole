@@ -60,16 +60,16 @@ object OSGi extends Defaults(Apache) {
     (libraryDependencies += "com.typesafe.slick" %% "slick" % slickVersion, version := slickVersion)
 
   lazy val slf4j = OsgiProject("org.slf4j") settings(
-    libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2",
-    version := "1.7.2"
+    libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.10",
+    version := "1.7.10"
     )
 
   lazy val xstream = OsgiProject(
     "com.thoughtworks.xstream",
     buddyPolicy = Some("global"),
     privatePackages = Seq("!scala.*", "*")) settings(
-    libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.7", "net.sf.kxml" % "kxml2" % "2.3.0"),
-    version := "1.4.7",
+    libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.8", "net.sf.kxml" % "kxml2" % "2.3.0"),
+    version := "1.4.8",
     bundleType += "dbserver")
 
   lazy val groovy = OsgiProject(
@@ -77,8 +77,8 @@ object OSGi extends Defaults(Apache) {
     buddyPolicy = Some("global"),
     exports = Seq("groovy.*", "org.codehaus.*"),
     privatePackages = Seq("!scala.*,*")) settings(
-    libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.4.0", "org.fusesource.jansi" % "jansi" % "1.2.1"),
-    version := "2.4.0"
+    libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.4.1", "org.fusesource.jansi" % "jansi" % "1.11"),
+    version := "2.4.1"
     )
 
   lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
@@ -88,16 +88,13 @@ object OSGi extends Defaults(Apache) {
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,
         "jline" % "jline" % "2.11",
-        "com.typesafe.akka" %% "akka-actor" % "2.3.3",
-        "com.typesafe.akka" %% "akka-transactor" % "2.3.3",
+        "com.typesafe.akka" %% "akka-actor" % "2.3.9",
+        "com.typesafe.akka" %% "akka-transactor" % "2.3.9",
         "com.typesafe" % "config" % "1.2.1",
         "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3",
         "org.scala-lang" % "scala-compiler" % sV
       )
     }, version := scalaVersion.value)
-
-  //  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.tools.*", "scala.reflect.macros.*"),
-  //    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
 
   lazy val jodaTime = OsgiProject("org.joda.time") settings(
     libraryDependencies += "joda-time" % "joda-time" % "1.6",
@@ -109,11 +106,6 @@ object OSGi extends Defaults(Apache) {
     libraryDependencies += "org.jasypt" % "jasypt" % jasyptVersion,
     version := jasyptVersion
     )
-
-  lazy val robustIt = OsgiProject("uk.com.robustit.cloning", exports = Seq("com.rits.*"), privatePackages = Seq("org.objenesis.*")) settings(
-    libraryDependencies += "uk.com.robust-it" % "cloning" % "1.7.4",
-    libraryDependencies += "org.objenesis" % "objenesis" % "1.2",
-    version := "1.7.4")
 
   lazy val netlogo4_noscala = OsgiProject("ccl.northwestern.edu.netlogo4.noscala", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("!scala.*", "*")) settings
@@ -228,7 +220,7 @@ object OSGi extends Defaults(Apache) {
     version := mgoVersion
     )
 
-  val monocleVersion = "0.5.0"
+  val monocleVersion = "1.0.1"
 
   lazy val monocle = OsgiProject("monocle", privatePackages = Seq("!scala.*", "*")) settings(
     libraryDependencies += "com.github.julien-truffaut" %% "monocle-core" % monocleVersion,
@@ -238,8 +230,8 @@ object OSGi extends Defaults(Apache) {
     )
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings(
-    libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0",
-    version := "2.0"
+    libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.3",
+    version := "2.3"
     )
 
   lazy val jline = OsgiProject("net.sourceforge.jline") settings(
