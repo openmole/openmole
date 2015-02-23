@@ -31,7 +31,7 @@ object Pages {
 
   def decorate(p: Frag, postfix: String): Frag =
     Seq(
-      div(id := s"logo$postfix")(a(img(src := Resource.logo.file), href := index.file)),
+      div(id := s"logo$postfix")(a(img(id := "logo-openmole", src := Resource.logo.file), href := index.file), a(img(id := "logo-version", src := Resource.versionLogo.file), href := Pages.gettingStarted.file)),
       div(id := s"sections$postfix",
         table(
           td(a("Getting Started", id := "section", href := gettingStarted.file)),

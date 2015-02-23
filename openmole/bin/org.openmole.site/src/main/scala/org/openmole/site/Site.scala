@@ -43,7 +43,7 @@ class Site extends IApplication {
         super.headFrags ++ Seq(
           meta(charset := "UTF-8"),
           script(`type` := "text/javascript")(
-          """
+            """
           |	var _gaq = _gaq || [];
           |	_gaq.push(['_setAccount', 'UA-25912998-1']);_gaq.push(['_trackPageview']);
           |	(function() {
