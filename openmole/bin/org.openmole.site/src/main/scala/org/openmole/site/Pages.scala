@@ -31,7 +31,6 @@ object Pages {
 
   def decorate(p: Frag, postfix: String): Frag =
     Seq(
-      meta(charset := "UTF-8"),
       div(id := s"logo$postfix")(a(img(src := Resource.logo.file), href := index.file)),
       div(id := s"sections$postfix",
         table(

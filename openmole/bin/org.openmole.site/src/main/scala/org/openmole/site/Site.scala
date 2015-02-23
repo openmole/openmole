@@ -40,7 +40,9 @@ class Site extends IApplication {
     val site = new scalatex.site.Site {
       override def siteCss = Set.empty
       override def headFrags =
-        super.headFrags ++ Seq(script(`type` := "text/javascript")(
+        super.headFrags ++ Seq(
+          meta(charset := "UTF-8"),
+          script(`type` := "text/javascript")(
           """
           |	var _gaq = _gaq || [];
           |	_gaq.push(['_setAccount', 'UA-25912998-1']);_gaq.push(['_trackPageview']);
