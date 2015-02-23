@@ -108,7 +108,8 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       """|eclipse.application=org.openmole.ui
          |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels,
-      config := assemblyPath.value / "configuration/config.ini"
+      config := assemblyPath.value / "configuration/config.ini",
+      cleanFiles <+= baseDirectory { base ⇒ dir / "target" }
     )
 
   lazy val coreDependencies = Seq[sbt.ModuleID](
