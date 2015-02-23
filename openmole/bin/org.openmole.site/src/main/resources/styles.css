@@ -4,7 +4,18 @@
 }
 
 #logo-main {
-  margin-left: 20%;
+  margin-left: 16%;
+}
+
+#logo-documentation {
+  margin-left: 270px;
+  width: 110%;
+}
+
+#logo-version {
+    height: 130px;
+    margin-left: 25px;
+    margin-bottom: 15px;
 }
 
 #sections-main {
@@ -19,9 +30,7 @@
   width: 120%;
 }
 
-#logo-documentation {
-  margin-left: 300px;
-}
+
 
 #sections-documentation {
   padding-top: 20;
