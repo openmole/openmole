@@ -24,6 +24,7 @@ import com.ice.tar.TarInputStream
 import org.eclipse.equinox.app._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
+import scalatags.Text.all
 import scalatags.Text.all._
 import scala.sys.process.BasicIO
 
@@ -42,6 +43,9 @@ class Site extends IApplication {
       override def headFrags =
         super.headFrags ++ Seq(
           meta(charset := "UTF-8"),
+          meta(name := "description", all.content := "OpenMOLE, a workflow system for distributed computing and parameter tuning"),
+          meta(name := "keywords", all.content := "Scientific Workflow Engine, Distributed Computing, Cluster, Grid, Parameter Tuning, Model Exploration, Design of Experiment, Sensitivity Analysis, Data Parallelism"),
+
           script(`type` := "text/javascript")(
             """
           |	var _gaq = _gaq || [];
