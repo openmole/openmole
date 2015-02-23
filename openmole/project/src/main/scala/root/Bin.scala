@@ -90,6 +90,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
+      resourcesAssemble <++= Seq(openmoleUI.project, openmoleConsole.project) sendTo { assemblyPath / "plugins" },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r -> p / "dbserver" },
@@ -160,7 +161,6 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
 
   lazy val openmoleGUI = Project("openmoleGUI", dir / "target" / "openmoleGUI", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "gui") sendTo assemblyPath,
-    resourcesAssemble <++= Seq(openmoleUI.project, openmoleConsole.project) sendTo assemblyPath,
     libraryDependencies ++= guiCoreDependencies,
     dependencyFilter := filter
   )
