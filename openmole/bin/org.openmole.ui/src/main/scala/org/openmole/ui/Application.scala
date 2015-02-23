@@ -20,12 +20,8 @@ package org.openmole.ui
 import java.awt.GraphicsEnvironment
 import java.awt.SplashScreen
 import java.io.File
-import java.io.PrintWriter
-import java.util.concurrent.Semaphore
-import com.fasterxml.jackson.core.json.ByteSourceJsonBootstrapper
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
-import org.openmole.gui.bootstrap.js.BootstrapJS
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
@@ -33,7 +29,6 @@ import org.openmole.core.workflow.task._
 import org.openmole.console.Console
 import annotation.tailrec
 import org.openmole.web._
-import org.openmole.gui.server.core._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 
@@ -119,9 +114,7 @@ class Application extends IApplication {
     logger.fine(s"Loading user plugins " + userPlugins)
 
     val plugins: List[String] =
-      config.pluginsDirs ++
-        existingUserPlugins ++
-        (if (!config.console && !config.server) config.guiPluginsDirs else List.empty)
+      config.pluginsDirs ++ existingUserPlugins
 
     val bundles = PluginManager.load(plugins.map(new File(_)))
     PluginManager.startAll
@@ -136,19 +129,6 @@ class Application extends IApplication {
     if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
 
     if (config.help) println(usage)
-    else if (config.console) {
-      try {
-        val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
-        if (!headless && SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
-      }
-      catch {
-        case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
-      }
-
-      print(consoleSplash)
-      val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
-      console.run
-    }
     else if (config.server) {
       try {
         if (SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
@@ -160,21 +140,17 @@ class Application extends IApplication {
       server.start()
     }
     else {
-      /*
-      val waitClose = new Semaphore(0)
-      val application = new GUIApplication() {
-        override def closeOperation = {
-          super.closeOperation
-          waitClose.release(1)
-        }
+      try {
+        val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
+        if (!headless && SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
+      }
+      catch {
+        case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
       }
 
-      application.display
-      waitClose.acquire(1)*/
-      BootstrapJS.init(config.optimizedJS)
-      val server = new GUIServer(config.serverPort, BootstrapJS.webapp)
-      server.start()
-
+      print(consoleSplash)
+      val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
+      console.run
     }
     IApplication.EXIT_OK
   }

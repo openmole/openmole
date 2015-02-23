@@ -72,10 +72,10 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       base.Misc.pluginManager,
       base.Core.workflow,
       base.Core.batch,
-      gui.Server.core,
-      gui.Client.core,
-      gui.Bootstrap.js,
-      gui.Bootstrap.osgi,
+      //gui.Server.core,
+      //gui.Client.core,
+      //gui.Bootstrap.js,
+      //gui.Bootstrap.osgi,
       base.Misc.logging,
       Web.core,
       base.Misc.console,
@@ -91,10 +91,11 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
-      resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
+      resourcesAssemble <++= Seq(openmoleUI.project, openmoleConsole.project) sendTo { assemblyPath / "plugins" },
+      //resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r -> p / "dbserver" },
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r -> p / "openmole-plugins" },
-      resourcesAssemble <+= (assemble in guiPlugins, assemblyPath) map { case (r, p) ⇒ r -> p / "openmole-plugins-gui" },
+      //resourcesAssemble <+= (assemble in guiPlugins, assemblyPath) map { case (r, p) ⇒ r -> p / "openmole-plugins-gui" },
       resourcesAssemble <+= (Tar.tar in openmoleRuntime, assemblyPath) map { case (r, p) ⇒ r -> p / "runtime" },
       downloads := Seq(java368URL -> "runtime/jvm-386.tar.gz", javax64URL -> "runtime/jvm-x64.tar.gz"),
       libraryDependencies += Libraries.scalajHttp,
@@ -160,7 +161,6 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
 
   lazy val openmoleGUI = Project("openmoleGUI", dir / "target" / "openmoleGUI", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "gui") sendTo assemblyPath,
-    resourcesAssemble <++= Seq(openmoleUI.project, openmoleConsole.project) sendTo assemblyPath,
     libraryDependencies ++= guiCoreDependencies,
     dependencyFilter := filter
   )
