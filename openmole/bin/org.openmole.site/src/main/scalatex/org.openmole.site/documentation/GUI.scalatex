@@ -3,4 +3,4 @@
 @import org.openmole.site.DocumentationPages._
 
 @sect{GUI}
-  The graphical user interface is being entirely rewritten. So, there is no graphical user interface available for the version @version of OpenMOLE. You could get one using the @a("version 3.0 of OpenMOLE", href := "all/3.0/") or you can use the @a("console", href := root.console.file) interface.
+  The graphical user interface is being entirely rewritten. So, there is no graphical user interface available for the version @version of OpenMOLE. You could get one using the @a("version 3.0 of OpenMOLE", href := "/all/3.0/") or you can use the @a("console", href := root.console.file) interface.
