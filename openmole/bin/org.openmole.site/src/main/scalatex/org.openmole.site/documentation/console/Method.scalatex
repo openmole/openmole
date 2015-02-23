@@ -40,7 +40,7 @@
     )
 
   // Construction of the workflow orchestrating the genetic algorithm
-  // modelCapsule is the fitness function on optimise
+  // modelCapsule is the fitness function to optimise
   // lambda is the size of the offspring (and the parallelism level)
   val nsga2 =
     GenerationalGA(evolution)(
@@ -94,7 +94,7 @@
       objectives = Seq(o1, o2)
     )
 
-  // Generate a workflow that ochestrate 100 concurent islands, stops when 10000 islands have been finished. Each island is initialised with a random sampling of 50 individual among the global population
+  // Generate a workflow that orchestrate 100 concurrent islands, stops when 10,000 islands have been finished. Each island is initialised with a random sampling of 50 individual among the global population
   val (ga, island) = IslandSteadyGA(evolution, modelCapsule)(
     number = 100,
     termination = 10000,
