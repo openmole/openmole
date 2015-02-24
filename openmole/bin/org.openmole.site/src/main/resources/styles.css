@@ -1,43 +1,43 @@
-#content-main {
-  margin-left: 0%;
-  width: 100%;
+
+@media (min-width: 1200px) {
+    .container {
+      width:800px;
+    }
+
 }
 
-#logo-main {
-  margin-left: 16%;
+.pull-center {
+  text-align: center;
 }
 
-#logo-documentation {
-  margin-left: 270px;
-  width: 110%;
+.pull-center > .nav {
+  float:none;
+  display:inline-block;
+}
+
+ul {
+  margin-top: 0px
+}
+
+* {
+  font-size: 14px;
+  line-height: 1.6em;
+}
+
+pre {
+  background-color: transparent;
+  border: 0px;
 }
 
 #logo-version {
-    height: 130px;
-    margin-left: 25px;
-    margin-bottom: 15px;
+  height: 130px;
+  margin-top: 30px;
+  margin-left: 30px;
 }
 
-#sections-main {
+#sections {
   padding-top: 20;
   padding-bottom: 5;
-  margin-left: 25%;
-  width: 100%;
-}
-
-#content-documentation {
-  margin-left: 0px;
-  width: 120%;
-}
-
-
-
-#sections-documentation {
-  padding-top: 20;
-  padding-bottom: 5;
-  margin-left: 330px;
-  width: 100%;
-  font-size: 16px;
 }
 
 #section {
@@ -92,14 +92,6 @@
   line-height: 1em;
 }
 
-#top-content-documentation {
-  position: absolute;
-  margin: 0 0;
-  padding: 0 0;
-  padding-bottom: 50;
-  color: #777;
-}
-
 .scalatex-content *{
   position: relative;
 }
@@ -107,15 +99,8 @@
   text-align: justify;
 }
 
-* {
-  font-size: 14px;
-  line-height: 1.6em;
-}
-
 .scalatex-content {
   margin: 0 auto;
-  padding: 0 1em;
-  max-width: 800px;
   padding-bottom: 50px;
   color: #777;
 }
