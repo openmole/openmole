@@ -29,7 +29,7 @@ object Puzzle {
 
   implicit def slotToPuzzleConverter(slot: Slot) = slot.toPuzzle
   implicit def capsuleToPuzzleConverter(capsule: Capsule) = capsule.toPuzzle
-  implicit def taskToPuzzleConverter(task: Task) = new Capsule(task).toPuzzle
+  implicit def taskToPuzzleConverter(task: Task) = Capsule(task).toPuzzle
 
   def merge(p1: Puzzle, p2: Puzzle) =
     new Puzzle(
@@ -63,7 +63,7 @@ object Puzzle {
 object PuzzlePiece {
   implicit def slotToPuzzlePieceConverter(slot: Slot) = slot.toPuzzlePiece
   implicit def capsuleToPuzzlePieceConverter(capsule: Capsule) = capsule.toPuzzlePiece
-  implicit def taskToPuzzlePieceConverter(task: Task) = new Capsule(task).toPuzzlePiece
+  implicit def taskToPuzzlePieceConverter(task: Task) = Capsule(task).toPuzzlePiece
 }
 
 case class PuzzlePiece(

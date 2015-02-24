@@ -60,6 +60,7 @@
 
 @sect{Calibrating a NetLogo model using genetic algorithms}
   This example presents step by step how to explore a NetLogo model with EA (evolutionary algorithm) and OpenMOLE.
+  @br For more generic details regarding the exploitation of Genetic Algorithms using OpenMOLE, you can check the @a("GA section of the methods documentation", href := root.console.method.file + "#Geneticalgorithms").
 
   @sect{The ant model}
     We demonstrate this tutorial using the ants foraging present in Netlogo library, created by Ury Wilensky. The description you can find for this model on NetLogo Site is:
@@ -69,12 +70,12 @@
     @p It looks like that:
     @br @img(src := Resource.ants.file)
 
-    @p You can find more information about the mechanisms implemented in this model the on the @a("NetLogo site", href := "http://ccl.northwestern.edu/netlogo/models/Ants").
+    @p You can find more information about the mechanisms implemented in this model on the @a("NetLogo site", href := "http://ccl.northwestern.edu/netlogo/models/Ants").
 
     @p In this tutorial we use @a("a headless version", href := root.console.tutorial.headlessNetLogo.file) of the model. This modified version is available @a("here", href := Resource.antsNLogo.file).
 
   @sect{Define the problem to resolve as an optimisation problem}
-    There is three parameters for this models.
+    This model manipulates three parameters:
     @ul
       @li{Population : number of Ants in the model}
       @li{Evaporation-rate : controls the evaporation rate of the chemical}
@@ -95,17 +96,17 @@
         set final-ticks-food3 ticks ]
     end""", "plain")
 
-    @p At the end of each simulation we return the values for the three objective :
+    @p At the end of each simulation we return the values for the three objectives :
     @ul
       @li{The simulation ticks which indicate source 1 empty.}
       @li{The simulation ticks which indicate source 2 empty.}
       @li{The simulation ticks which indicate source 3 empty.}
 
-    @p The combination of the three objective indicate if the value of parameters used to run the simulation is good or not. We are in a @a("multiObjective optimization", href := "http://en.wikipedia.org/wiki/Multiobjective_optimization"). In case there is a compromise between these objective we will obtain a @a("Pareto front", href := "http://en.wikipedia.org/wiki/Pareto_efficiency") at the end of optimisation process.
+    @p The combination of the three objectives indicate if the value of parameters used to run the simulation is good or not. We are in a @a("multiObjective optimization", href := "http://en.wikipedia.org/wiki/Multiobjective_optimization"). In case there is a compromise between these objectives we will obtain a @a("Pareto frontier", href := "http://en.wikipedia.org/wiki/Pareto_efficiency") at the end of the optimization process.
 
 
   @sect{Getting the ant model to run in OpenMOLE}
-    When building a calibration or optimisation workflow with OpenMOLE, the first thing is to make your model run in OpenMOLE. This script simply embed the NetLogo model and run one single execution of the model with arbitrary parameters.
+    When building a calibration or optimisation workflow with OpenMOLE, the first thing is to make your model run in OpenMOLE. This script simply embeds the NetLogo model and runs one single execution of the model with arbitrary parameters.
 
     @hl.openmole(s"""
     $model
@@ -121,9 +122,9 @@
     @br @hl.highlight("{food1=746.0, food2=1000.0, food3=2109.0}", "plain")
 
   @sect{Managing the stochasticity}
-    Generally agents models are stochastic. It means that their executions dependent on realisations of random variates. Therefore their output variables are also random variates and when we want to estimate their distribution. Getting one single realisation of these output random variates doesn’t provide information of to estimate their distributions. That’s why the model should be executed serval times. All these executions should be statistically independant in order to lead to independant realisation of the output random variates of the model. This operation is called “replication”.
+    Generally agents models are stochastic. It means that their executions depend on the realisation of random variates. Therefore, their output variables are also random variates, and we want to estimate their distribution. Getting one single realisation of these output random variates doesn’t provide enough information to estimate their distributions. That’s why the model should be executed several times. All these executions should be statistically independent in order to lead to independent realisation of the output random variates of the model. This operation is called “replication”.
 
-    @p OpenMOLE provides necessary mechanism to easily replicate the model execution and aggregating the result using simple statistical descriptor. The following script executes 5 times the ants model and compute the median of each output. The median is a statistical descriptor of the ouputs of the model (however the form of the distribution is unknown). Replication a model only 5 times is generally unreliable, we use only 5 replications here as a toy example.
+    @p OpenMOLE provides the necessary mechanisms to easily replicate the model execution and aggregating the result using a simple statistical descriptor. The following script executes 5 times the ants model and computes the median of each output. The median is a statistical descriptor of the outputs of the model (however the form of the distribution is unknown). Replicating a stochastic experiment only 5 times is generally unreliable, we use only 5 replications here as a toy example.
 
     @br @hl.openmole(s"""
     $replication
@@ -148,13 +149,14 @@
     """, "plain")
 
   @sect{The optimisation algorithm}
-    Now that we have estimators of the output distribution of the model we will try to find the parameter settings of the model minimizing these estimators. This script describe how to use the NSGA2 multi-objective optimisation algorithm in OpenMOLE. The result files are writen in /tmp/ants.
+    Now that we have estimators of the output distribution of the model we will try to find the parameter settings of the model minimizing these estimators. This script describes how to use the NSGA2 multi-objective optimisation algorithm in OpenMOLE. The result files are written to @hl.highlight("/tmp/ants", "plain").
 
     @br @hl.openmole("""
-    // Define the population (10) and the number of generation (100)
+    // Define the population (10) and the number of generations (100)
     // Define the inputs and their respective variation bounds
     // Define the objectives to minimize
-    // Set that 1 percent of the computing time should be dedicated to reevaluation of parameters settings to eliminated overevaluated individuals
+    // Set that 1 percent of the computing time should be dedicated to reevaluating
+    // parameter settings to eliminate overevaluated individuals
     val evolution =
       NSGA2(
         mu = 10,
@@ -165,15 +167,15 @@
       )
 
     // Defining a builder to use nsga2 generational EA algorithm
-    // First list define (min,max) value for each value in our Genome
-    // Second list define the minimun to obtain for each fitness
+    // replicateModel is the fitness function to optimise
+    // lambda is the size of the offspring (and the parallelism level)
     val nsga2 =
       GenerationalGA(evolution)(
         replicateModel,
         lambda = 10
       )
 
-    //Define a csv hook to save our pareto front
+    //Define a hook to save our pareto frontier
     val savePopulationHook = SavePopulationHook(nsga2, "/tmp/ants/")
 
     // Define the hook to display the generation in the console
@@ -182,7 +184,7 @@
     """, header = model + replication)
 
   @sect{Scale up}
-    If you use distributed computing it might be a good idea do to take advantage of an Island model which is way better at taking advantage of distributed computing resources than classical generational genetic algorithm. To compute 2000 islands in parallel running each during 1 hour on the European grid you may change the end of the script and use:
+    If you use distributed computing it might be a good idea do to opt for an Island model which is way better at taking advantage of distributed computing resources than classical generational genetic algorithms. To compute 2,000 islands in parallel running each during 1 hour on the European grid you may change the end of the script and use:
     @br @hl.openmole("""
     // Define the population (200) and the computation time (1h)
     // The remaining is the same as above
@@ -195,8 +197,8 @@
         reevaluate = 0.01
       )
 
-    // Define the island model with 2000 islands. Each island gets 50 individuals
-    // sampled from the global population. The algorithm stops after 200000 evaluated
+    // Define the island model with 2,000 concurrent islands. Each island gets 50 individuals
+    // sampled from the global population. The algorithm stops after 200,000 evaluated
     // islands
     val (ga, island) = IslandSteadyGA(evolution, replicateModel)(2000, 200000, 50)
 

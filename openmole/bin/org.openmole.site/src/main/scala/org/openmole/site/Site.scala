@@ -24,6 +24,7 @@ import com.ice.tar.TarInputStream
 import org.eclipse.equinox.app._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
+import scalatags.Text.all
 import scalatags.Text.all._
 import scala.sys.process.BasicIO
 
@@ -40,8 +41,17 @@ class Site extends IApplication {
     val site = new scalatex.site.Site {
       override def siteCss = Set.empty
       override def headFrags =
-        super.headFrags ++ Seq(script(`type` := "text/javascript")(
-          """
+        Seq(
+          meta(charset := "UTF-8"),
+          meta(name := "description", all.content := "OpenMOLE, a workflow system for distributed computing and parameter tuning"),
+          meta(name := "keywords", all.content := "Scientific Workflow Engine, Distributed Computing, Cluster, Grid, Parameter Tuning, Model Exploration, Design of Experiment, Sensitivity Analysis, Data Parallelism"),
+          meta(name := "viewport", all.content := "width=device-width, initial-scale=1"),
+          link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"),
+          link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css"),
+          script(src := "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"),
+          script(src := "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"),
+          script(`type` := "text/javascript")(
+            """
           |	var _gaq = _gaq || [];
           |	_gaq.push(['_setAccount', 'UA-25912998-1']);_gaq.push(['_trackPageview']);
           |	(function() {
@@ -49,16 +59,13 @@ class Site extends IApplication {
           |		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
           |		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
           |	})();
-        """.stripMargin))
+        """.stripMargin)) ++ super.headFrags
 
       /**
        * The body of this site's HTML page
        */
       override def bodyFrag(frag: Frag): Frag = body(
         Seq(
-          maxWidth := "768px",
-          marginLeft := "auto",
-          marginRight := "auto",
           cls := "scalatex-content"
         ) ++ (if (documentationFrags.contains(frag)) Seq(id := "top-content-documentation") else Seq())
           ++ Seq(frag): _*
@@ -76,12 +83,12 @@ class Site extends IApplication {
     for {
       r ← Resource.all
     } r match {
-      case FileResource(name) ⇒
-        val f = new File(dest, name)
+      case RenameFileResource(source, destination) ⇒
+        val f = new File(dest, destination)
         f.getParentFile.mkdirs
         f.withOutputStream { os ⇒
-          withClosable(getClass.getClassLoader.getResourceAsStream(name)) { is ⇒
-            assert(is != null, s"Resource $name doesn't exist")
+          withClosable(getClass.getClassLoader.getResourceAsStream(source)) { is ⇒
+            assert(is != null, s"Resource $source doesn't exist")
             BasicIO.transferFully(is, os)
           }
         }
@@ -95,6 +102,7 @@ class Site extends IApplication {
 
     withClosable(getClass.getClassLoader.getResourceAsStream(Resource.css)) { is ⇒
       withClosable(new File(dest, "styles.css").bufferedOutputStream(true)) { os ⇒
+        os.write('\n')
         BasicIO.transferFully(is, os)
       }
     }

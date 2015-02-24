@@ -5,5 +5,7 @@
 @sect{Tutorial}
   This part exposes tutorial how to handle certain use cases with OpenMOLE. You can discover how to:
   @ul
+    @li{@a("get started with OpenMOLE with a simple workflow", href := root.console.tutorial.helloWorld.file)}
     @li{@a("build a headless version of you NetLogo model to integrate in into OpenMOLE", href := root.console.tutorial.headlessNetLogo.file)}
     @li{@a("calibrate a NetLogo model using genetic algorithms", href := root.console.tutorial.netLogoGA.file)}
+    @li{@a("use advanced features of capsules", href := root.console.tutorial.capsule.file)}

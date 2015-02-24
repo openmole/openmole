@@ -25,6 +25,7 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.Task
 import org.openmole.misc.console._
 import org.openmole.misc.exception._
+import org.openmole.misc.tools.obj.ClassUtils._
 
 import scala.util.Try
 
@@ -62,23 +63,16 @@ trait ScalaCompilation { compilation ⇒
   def imports: Seq[String]
   def outputs: DataSet
 
-  def openMOLEImports =
-    Seq(
-      "org.openmole.misc.tools.service.Random.newRNG",
-      "org.openmole.misc.workspace.Workspace.newFile",
-      "org.openmole.misc.workspace.Workspace.newDir"
-    )
-
   def prefix = "_input_value_"
 
   def compile(inputs: Seq[Prototype[_]]) = Try {
-    val interpreter = new ScalaREPL(true, usedClasses, libraries)
+    val interpreter = new ScalaREPL(true, usedClasses ++ Seq(getClass), libraries)
 
     def exceptionMessage = {
       def error(error: interpreter.ErrorMessage) =
         s"""
            |${error.error}
-           |on line  ${error.line}
+           |on line ${error.line}
            |""".stripMargin
 
       s"""
@@ -101,13 +95,16 @@ trait ScalaCompilation { compilation ⇒
       s"""The return value of the script was null:
          |${script(inputs)}""".stripMargin
     )
-    (evaluated, evaluated.getClass.getMethod("apply", inputs.map(_.`type`.runtimeClass).toSeq: _*))
+    (evaluated, evaluated.getClass.getMethod("apply", inputs.map(c ⇒ toScalaNativeType(c.`type`).runtimeClass).toSeq: _*))
   }
+
+  def toScalaNativeType(m: Manifest[_]): Manifest[_] =
+    classEquivalences.find(_.native == m.runtimeClass).map(_.scalaManifest) getOrElse (m)
 
   //FIXME deal with optional outputs
   def script(inputs: Seq[Prototype[_]]) =
-    (openMOLEImports ++ imports).map("import " + _).mkString("\n") + "\n\n" +
-      s"""(${inputs.toSeq.map(i ⇒ prefix + i.name + ": " + i.`type`).mkString(",")}) => {
+    imports.map("import " + _).mkString("\n") + "\n\n" +
+      s"""(${inputs.toSeq.map(i ⇒ prefix + i.name + ": " + toScalaNativeType(i.`type`)).mkString(",")}) => {
        |    object $inputObject {
        |      ${inputs.toSeq.map(i ⇒ "var " + i.name + " = " + prefix + i.name).mkString("; ")}
        |    }

@@ -3,6 +3,19 @@
 
 @sect{Transition}
   In OpenMOLE, transitions link task with each-other. The following examples illustrate several kind of transitions available in OpenMOLE.
+  @sect{Capsules and slots}
+    Even if it has been made transparent most of the time tasks are not directly linked to each-other by transitions. They are encapsulated in a so called @i{Capsule}. Each capsule has one or several input @i{Slots} in which transitions are plugged. To encapsulate a task explicitly you should write:
+    @br @hl.openmole("""
+    val t1 = ScalaTask("1 + 1")
+    val c1 = Capsule(t1)
+    """)
+    @p Capsules are the atomic element in the workflow on which transitions are plugged and on which hooks, sources and execution environments are specified. When you link a task directly without specifying a capsule explicitly a new capsule is created. It means that if you want several transitions to reach the same task you should create the capsule explicitly.
+    @p Capsules might own several input slots in which transition are plugged. Slots made it possible to specify iterative workflows (with cycles) as well as synchronisation points between several parts of a workflow. The rule is that the task encapsulated in the capsule is executed each time all the transitions reaching a given input slot have been crossed. To specify slots explicitly you should write:
+    @br @hl.openmole("""
+    val t1 = ScalaTask("1 + 1")
+    val c1 = Capsule(t1)
+    val s1 = Slot(c1)
+    """)
   @sect{A simple transition}
     A transition specify a precedence relationship between 2 task. In the following example, the task @i{t1} produces a variable @i{i} which travels along a transition to the task @i{t2} which uses it in order to compute it's output:
     @br @hl.openmole("""
@@ -75,10 +88,13 @@
     The OpenMOLE workflow formalism is very flexible. You can seamlessly create loops in the workflow and it will work. However to achieve that, you have to use an artifact that has been hidden to you until now: the @i{slot}. Slots are useful to distinguish synchronization points from loops. A task may possess multiple input slots and the execution of a task is triggered when all the incoming transitions belonging to the same input slot have been passed through. In the following workflow we use several slots to define a loop in the workflow:
     @br @hl.openmole("""
     val i = Val[Int]
-    val initialTask = ScalaTask("val i = 0") set ( outputs += i )
+    val t0 = ScalaTask("val i = 0") set ( outputs += i )
     val t1 = ScalaTask("i = i + 1") set ( inputs += i, outputs += i )
-    val t1Capsule = Capsule(t1)
-    val slot1 = Slot(t1Capsule)
-    val slot2 = Slot(t1Capsule)
+    val c1 = Capsule(t1)
+    val s1 = Slot(c1)
+    val s2 = Slot(c1)
 
-    val ex = initialTask -- slot1 -- (slot2 hook ToStringHook(), "i < 100") start""")
+    val ex = (
+        t0 -- s1 -- (s2, "i < 100") +
+        (c1 hook ToStringHook())
+      ) start""")

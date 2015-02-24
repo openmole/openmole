@@ -24,8 +24,8 @@ import org.openmole.core.workflow.mole._
 package task {
   trait TaskPackage {
     implicit class TaskToCapsuleDecorator(task: Task) {
-      def toCapsule = new Capsule(task)
-      def toStrainerCapsule = new StrainerCapsule(task)
+      def toCapsule = Capsule(task)
+      def toCapsule(strainer: Boolean) = Capsule(task, true)
     }
 
     def newRNG(context: Context) = Task.buildRNG(context)

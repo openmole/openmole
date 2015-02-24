@@ -39,13 +39,13 @@ class EndExplorationTransitionSpec extends FlatSpec with Matchers {
 
     val sampling = new ExplicitSampling(i, data)
 
-    val exc = new Capsule(ExplorationTask(sampling))
+    val exc = Capsule(ExplorationTask(sampling))
 
     val emptyT = EmptyTask()
     emptyT addInput i
     emptyT addOutput i
 
-    val emptyC = new Capsule(emptyT)
+    val emptyC = Capsule(emptyT)
 
     val testT = new TestTask {
       val name = "Test"
@@ -57,7 +57,7 @@ class EndExplorationTransitionSpec extends FlatSpec with Matchers {
       }
     }
 
-    val testC = new Capsule(testT)
+    val testC = Capsule(testT)
 
     val ex = exc -< emptyC >| (testC, "true")
 

@@ -46,8 +46,8 @@ class TransitionSpec extends FlatSpec with Matchers {
       }
     }
 
-    val t1c = new Capsule(t1)
-    val t2c = new Capsule(t2)
+    val t1c = Capsule(t1)
+    val t2c = Capsule(t2)
 
     (t1c -- t2c).start.waitUntilEnded
   }

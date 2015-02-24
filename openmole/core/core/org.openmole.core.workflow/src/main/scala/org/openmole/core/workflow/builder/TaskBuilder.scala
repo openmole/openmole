@@ -42,6 +42,6 @@ trait TaskBuilder extends InputOutputBuilder with Builder { builder ⇒
   }
 
   trait Built extends super.Built {
-    def name = builder.name.getOrElse(TaskBuilder.generateName(this))
+    lazy val name = builder.name.getOrElse(TaskBuilder.generateName(this))
   }
 }

@@ -1,41 +1,49 @@
 
-#content-main {
-  margin-left: 0%;
-  width: 100%;
+@media (min-width: 1200px) {
+    .container {
+      width:800px;
+    }
+
 }
 
-#logo-main {
-  margin-left: 20%;
+.pull-center {
+  text-align: center;
 }
 
-#sections-main {
+.pull-center > .nav {
+  float:none;
+  display:inline-block;
+}
+
+ul {
+  margin-top: 0px
+}
+
+* {
+  font-size: 14px;
+  line-height: 1.6em;
+}
+
+pre {
+  background-color: transparent;
+  border: 0px;
+}
+
+#logo-version {
+  height: 130px;
+  margin-top: 30px;
+  margin-left: 30px;
+}
+
+#sections {
   padding-top: 20;
   padding-bottom: 5;
-  margin-left: 25%;
-  width: 100%;
-}
-
-#content-documentation {
-  margin-left: 200px;
-  width: 100%;
-}
-
-#logo-documentation {
-  margin-left: 300px;
-}
-
-#sections-documentation {
-  padding-top: 20;
-  padding-bottom: 5;
-  margin-left: 330px;
-  width: 100%;
 }
 
 #section {
   padding-right: 15;
+  font-size: 16px;
 }
-
-
 
 #documentation-bottom-link-unavailable {
   padding-left: 5;
@@ -57,9 +65,11 @@
 #documentation-menu {
   padding-left: 20;
   padding-right: 0;
-  position: fixed;
   left: 0;
-  top: 270;
+  top: 0;
+  margin-right: 20;
+  margin-top: 40;
+  width: 120%;
 }
 
 #documentation-menu-ul {
@@ -70,25 +80,16 @@
 }
 
 #documentation-menu-entry {
-   color: darkblue;
-   text-decoration: none;
-   text-decoration:none;
-   cursor:pointer;
+  color: darkblue;
+  text-decoration: none;
+  text-decoration: none;
+  cursor:pointer;
+  line-height: 1em;
 }
 
 #documentation-menu-entry-current {
-    color: brown;
-}
-
-
-#top-content-documentation {
-  font-size: 14px;
-  position: absolute;
-  margin: 0 0;
-  padding: 0 0;
-  padding-bottom: 50;
-  line-height: 1.6em;
-  color: #777;
+  color: brown;
+  line-height: 1em;
 }
 
 .scalatex-content *{
@@ -99,12 +100,8 @@
 }
 
 .scalatex-content {
-  font-size: 14px;
   margin: 0 auto;
-  padding: 0 1em;
-  max-width: 800px;
   padding-bottom: 50px;
-  line-height: 1.6em;
   color: #777;
 }
 

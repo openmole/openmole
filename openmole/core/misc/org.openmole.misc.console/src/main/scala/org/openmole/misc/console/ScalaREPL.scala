@@ -23,7 +23,7 @@ import java.net.URLClassLoader
 import org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader
 import org.openmole.misc.pluginmanager.PluginManager
 
-import scala.reflect.internal.util.Position
+import scala.reflect.internal.util.{ NoPosition, Position }
 import scala.tools.nsc.interpreter._
 import scala.tools.nsc._
 import org.openmole.misc.osgi._
@@ -56,13 +56,17 @@ class ScalaREPL(storeErrors: Boolean = false, priorityClasses: Seq[Class[_]] = N
         if (storeErrors) {
           val compiled = new String(pos.source.content).split("\n")
           val linesLength = compiled.take(pos.line - 1).flatten.size + (pos.line - 1)
-          val offset = pos.start - linesLength
 
-          errorMessages :+=
-            ErrorMessage(
-              s"""$msg
-              |${compiled(pos.line - 1)}
-              |${new String((0 until offset).map(_ ⇒ ' ').toArray)}^""".stripMargin, pos.line)
+          pos match {
+            case NoPosition ⇒ errorMessages :+= ErrorMessage(msg, pos.line)
+            case _ ⇒
+              val offset = pos.start - linesLength
+              errorMessages :+=
+                ErrorMessage(
+                  s"""|$msg
+                      |${compiled(pos.line - 1)}
+                      |${new String((0 until offset).map(_ ⇒ ' ').toArray)}^""".stripMargin, pos.line)
+          }
         }
         else super.error(pos, msg)
       }

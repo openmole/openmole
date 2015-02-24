@@ -26,21 +26,23 @@ object Pages {
   def decorate(p: Page): Frag =
     p match {
       case p: DocumentationPage ⇒ DocumentationPages.decorate(p)
-      case _                    ⇒ decorate(p.content, "-main")
+      case _                    ⇒ decorate(p.content)
     }
 
-  def decorate(p: Frag, postfix: String): Frag =
-    Seq(
-      meta(charset := "UTF-8"),
-      div(id := s"logo$postfix")(a(img(src := Resource.logo.file), href := index.file)),
-      div(id := s"sections$postfix",
-        table(
-          td(a("Getting Started", id := "section", href := gettingStarted.file)),
-          td(a("Documentation", id := "section", href := DocumentationPages.root.file)),
-          td(a("Who are we?", id := "section", href := whoAreWe.file))
+  def decorate(p: Frag): Frag =
+    div(`class` := "container")(
+      div(`class` := "header pull-center")(
+        div(`class` := "title")(
+          a(img(id := "logo", src := Resource.logo.file), href := index.file),
+          a(img(id := "logo-version", src := Resource.versionLogo.file), href := Pages.gettingStarted.file)
+        ),
+        ul(id := "sections", `class` := "nav nav-pills")(
+          li(a("Getting Started", id := "section", href := gettingStarted.file)),
+          li(a("Documentation", id := "section", href := DocumentationPages.root.file)),
+          li(a("Who are we?", id := "section", href := whoAreWe.file))
         )
       ),
-      div(id := s"content$postfix")(p)
+      div(`class` := "row")(p)
     )
 
   def index = Page("index", Index())
@@ -105,12 +107,11 @@ object DocumentationPages { index ⇒
   def decorate(p: DocumentationPage): Frag =
     Pages.decorate(
       Seq(
-        documentationMenu(root, p),
-        div(
-          div(id := "documentation-content", p.content),
-          if (p != root) bottomLinks(p) else ""
+        div(id := "documentation-content", `class` := "row")(
+          div(`class` := "col-sm-3")(documentationMenu(root, p)),
+          div(`class` := "col-sm-9 main")(div(p.content, if (p != root) bottomLinks(p) else ""))
         )
-      ), "-documentation"
+      )
     )
 
   def documentationMenu(root: DocumentationPage, currentPage: DocumentationPage): Frag = {
@@ -287,19 +288,31 @@ object DocumentationPages { index ⇒
 
         def tutorial = new DocumentationPage {
           def name = "tutorial"
-          def children = Seq(headlessNetLogo, netLogoGA)
+          def children = Seq(helloWorld, headlessNetLogo, netLogoGA, capsule)
           def content = documentation.console.Tutorial()
 
+          def helloWorld = new DocumentationPage {
+            def name = "Hello World"
+            def children = Seq()
+            def content = documentation.console.tutorial.HelloWorld()
+          }
+
           def headlessNetLogo = new DocumentationPage {
-            def name = "headless NetLogo"
+            def name = "NetLogo Headless"
             def children = Seq()
             def content = documentation.console.tutorial.HeadlessNetLogo()
           }
 
           def netLogoGA = new DocumentationPage {
-            def name = "netLogo GA"
+            def name = "NetLogo GA"
             def children = Seq()
             def content = documentation.console.tutorial.NetLogoGA()
+          }
+
+          def capsule = new DocumentationPage {
+            def name = "Capsule"
+            def children = Seq()
+            def content = documentation.console.tutorial.Capsule()
           }
         }
       }
