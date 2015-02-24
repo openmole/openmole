@@ -102,7 +102,7 @@
       @li{The simulation ticks which indicate source 2 empty.}
       @li{The simulation ticks which indicate source 3 empty.}
 
-    @p The combination of the three objectives indicate if the value of parameters used to run the simulation is good or not. We are in a @a("multiObjective optimization", href := "http://en.wikipedia.org/wiki/Multiobjective_optimization"). In case there is a compromise between these objectives we will obtain a @a("Pareto front", href := "http://en.wikipedia.org/wiki/Pareto_efficiency") at the end of the optimization process.
+    @p The combination of the three objectives indicate if the value of parameters used to run the simulation is good or not. We are in a @a("multiObjective optimization", href := "http://en.wikipedia.org/wiki/Multiobjective_optimization"). In case there is a compromise between these objectives we will obtain a @a("Pareto frontier", href := "http://en.wikipedia.org/wiki/Pareto_efficiency") at the end of the optimization process.
 
 
   @sect{Getting the ant model to run in OpenMOLE}
@@ -175,7 +175,7 @@
         lambda = 10
       )
 
-    //Define a hook to save our pareto front
+    //Define a hook to save our pareto frontier
     val savePopulationHook = SavePopulationHook(nsga2, "/tmp/ants/")
 
     // Define the hook to display the generation in the console
