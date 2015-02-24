@@ -88,10 +88,13 @@
     The OpenMOLE workflow formalism is very flexible. You can seamlessly create loops in the workflow and it will work. However to achieve that, you have to use an artifact that has been hidden to you until now: the @i{slot}. Slots are useful to distinguish synchronization points from loops. A task may possess multiple input slots and the execution of a task is triggered when all the incoming transitions belonging to the same input slot have been passed through. In the following workflow we use several slots to define a loop in the workflow:
     @br @hl.openmole("""
     val i = Val[Int]
-    val initialTask = ScalaTask("val i = 0") set ( outputs += i )
+    val t0 = ScalaTask("val i = 0") set ( outputs += i )
     val t1 = ScalaTask("i = i + 1") set ( inputs += i, outputs += i )
-    val t1Capsule = Capsule(t1)
-    val slot1 = Slot(t1Capsule)
-    val slot2 = Slot(t1Capsule)
+    val c1 = Capsule(t1)
+    val s1 = Slot(c1)
+    val s2 = Slot(c1)
 
-    val ex = initialTask -- slot1 -- (slot2 hook ToStringHook(), "i < 100") start""")
+    val ex = (
+        t0 -- s1 -- (s2, "i < 100") +
+        (c1 hook ToStringHook())
+      ) start""")
