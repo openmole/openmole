@@ -1,7 +1,7 @@
-package org.openmole.gui.plugin.task.groovy.client
+package org.openmole.gui.plugin.task.statistic.client
 
 /*
- * Copyright (C) 25/09/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 24/02/2015 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,21 +17,15 @@ package org.openmole.gui.plugin.task.groovy.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.ClientService
+import org.openmole.gui.plugin.task.statistic.ext.StatisticTaskData
 import org.openmole.gui.client.core.dataui.TaskDataUI
+import org.openmole.gui.client.core.ClientService
 import ClientService._
 import scala.scalajs.js.annotation.JSExport
-import org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData
 import rx._
+class StatisticTaskDataUI(val name: Var[String] = Var("")) extends TaskDataUI {
 
-@JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskDataUI")
-class GroovyTaskDataUI(val code: Var[String] = Var(""),
-                       val libs: Var[Seq[Var[String]]] = Var(Seq())) extends TaskDataUI {
-//libs().map{c=>c()}
-
-  def data = new GroovyTaskData(inputDataUI().data.inputs, outputDataUI().data.outputs, code, libs)
-
-  def panelUI = new GroovyTaskPanelUI(this)
-
-  def dataType = "Groovy"
+ def data = new StatisticTaskData(inputDataUI().data.inputs, outputDataUI().data.outputs)
+ def panelUI = new StatisticTaskPanelUI(this)
+ def dataType = "Statistic"
 }

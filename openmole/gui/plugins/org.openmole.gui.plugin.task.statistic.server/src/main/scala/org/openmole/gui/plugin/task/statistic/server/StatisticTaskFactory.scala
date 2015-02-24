@@ -1,7 +1,7 @@
-package org.openmole.gui.plugin.task.systemexec.client
+package org.openmole.gui.plugin.task.statistic.server
 
 /*
- * Copyright (C) 19/10/2014 // mathieu.leclaire@openmole.org
+ * Copyright (C) 24/02/2015 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,16 +17,14 @@ package org.openmole.gui.plugin.task.systemexec.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.dataui.TaskDataUI
-import org.openmole.gui.ext.dataui.FactoryUI
+import org.openmole.gui.plugin.task.statistic.ext.StatisticTaskData
+import org.openmole.plugin.task.statistic.StatisticTask
+import org.openmole.gui.ext.data.Factory
 
-import scala.scalajs.js.annotation.JSExport
+import org.openmole.core.workflow.task.PluginSet
+import scala.util.Try
 
-@JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskFactoryUI")
-sealed class SystemExecTaskFactoryUI extends FactoryUI {
-  type DATAUI = TaskDataUI
-
-  def dataUI = new SystemExecTaskDataUI
-
-  val name = "External"
+class StatisticTaskFactory(val data: StatisticTaskData) extends Factory {
+  def coreObject(implicit plugins: PluginSet): Try[Any] = Try {
+  }
 }

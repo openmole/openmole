@@ -1,7 +1,7 @@
-package org.openmole.gui.plugin.task.systemexec.client
+package org.openmole.gui.plugin.task.statistic
 
 /*
- * Copyright (C) 19/10/2014 // mathieu.leclaire@openmole.org
+ * Copyright (C) 24/02/2015 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,16 +17,12 @@ package org.openmole.gui.plugin.task.systemexec.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.dataui.TaskDataUI
-import org.openmole.gui.ext.dataui.FactoryUI
+import org.openmole.gui.plugin.task.statistic.ext.StatisticTaskData
+import org.openmole.gui.plugin.task.statistic.client.StatisticTaskFactoryUI
+import org.openmole.gui.plugin.task.statistic.server.StatisticTaskFactory
+import org.openmole.gui.bootstrap.osgi._
 
-import scala.scalajs.js.annotation.JSExport
-
-@JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskFactoryUI")
-sealed class SystemExecTaskFactoryUI extends FactoryUI {
-  type DATAUI = TaskDataUI
-
-  def dataUI = new SystemExecTaskDataUI
-
-  val name = "External"
+class Activator extends OSGiActivator with ServerOSGiActivator {
+  val data = new StatisticTaskData
+  override def factories = Seq((data.getClass, new StatisticTaskFactory(data), new StatisticTaskFactoryUI))
 }
