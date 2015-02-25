@@ -19,4 +19,5 @@ package org.openmole.site
 
 object Config {
   var testScript = true
+  val baseURL = "http://www.openmole.org"
 }

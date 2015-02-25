@@ -1,0 +1,7 @@
+
+
+@import org.openmole.site.Config._
+@import org.openmole.site.Objects._
+
+@sect{OpenMOLE citations}
+  @Communication.all
