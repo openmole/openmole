@@ -37,9 +37,9 @@ object Pages {
           a(img(id := "logo-version", src := Resource.versionLogo.file), href := Pages.gettingStarted.file)
         ),
         ul(id := "sections", `class` := "nav nav-pills")(
-          li(a("Getting Started", id := "section", href := gettingStarted.file)),
-          li(a("Documentation", id := "section", href := DocumentationPages.root.file)),
-          li(a("Who are we?", id := "section", href := whoAreWe.file))
+          li(a("Getting Started", `class` := "amenu", id := "section", href := gettingStarted.file)),
+          li(a("Documentation", `class` := "amenu", id := "section", href := DocumentationPages.root.file)),
+          li(a("Who are we?", `class` := "amenu", id := "section", href := whoAreWe.file))
         )
       ),
       div(`class` := "row")(p)
@@ -48,8 +48,9 @@ object Pages {
   def index = Page("index", Index())
   def gettingStarted = Page("getting_started", GettingStarted())
   def whoAreWe = Page("who_are_we", WhoAreWe())
+  def communications = Page("communications", Communications())
 
-  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe)
+  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, communications)
 
 }
 

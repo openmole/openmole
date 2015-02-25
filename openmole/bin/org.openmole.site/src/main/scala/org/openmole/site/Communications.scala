@@ -60,10 +60,17 @@ object Communication {
       Media("La taupe sort de son trou", "https://linuxfr.org/news/openmole-la-taupe-sort-de-son-trou", "2012")
     )
 
+<<<<<<< HEAD
     def mediaBody(medias: Seq[Media]) = tbody(
       for {
         media ← medias
       } yield {
+=======
+    def mediaBody(medias: Seq[Media]) = for {
+      media ← medias
+    } yield {
+      tbody(
+>>>>>>> 92cebf0... Add Communications to doc, tune css
         tr(
           td(
             if (media.filePath.isEmpty) media.title
@@ -73,8 +80,13 @@ object Communication {
           ),
           td(media.year, `class` := "text-right")
         )
+<<<<<<< HEAD
       }
     )
+=======
+      )
+    }
+>>>>>>> 92cebf0... Add Communications to doc, tune css
 
     def header(title: String) = thead(
       tr(
@@ -83,7 +95,11 @@ object Communication {
       )
     )
 
+<<<<<<< HEAD
     def mediaTable(title: String, medias: Seq[Media]) = table(width := "100%", `class` := "table table-striped table-bordered")(
+=======
+    def mediaTable(title: String, medias: Seq[Media]) = table(width := "100%", `class` := "table table-striped")(
+>>>>>>> 92cebf0... Add Communications to doc, tune css
       header(title),
       mediaBody(medias)
     )
