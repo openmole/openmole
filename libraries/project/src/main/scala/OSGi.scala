@@ -184,7 +184,7 @@ object OSGi extends Defaults(Apache) {
     version := scalaRxVersion
     )
 
-  lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*", "*.sjsir")) settings(
+  lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*", "jawn.*", "*.sjsir")) settings(
     libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion,
       "com.lihaoyi" %%% ("upickle" + jsSuffix) % scalaUpickleVersion),
     version := scalaUpickleVersion
