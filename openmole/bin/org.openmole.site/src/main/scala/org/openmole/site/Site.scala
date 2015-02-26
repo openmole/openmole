@@ -40,26 +40,25 @@ class Site extends IApplication {
 
     val site = new scalatex.site.Site {
       override def siteCss = Set.empty
+
       override def headFrags =
         Seq(
           meta(charset := "UTF-8"),
           meta(name := "description", all.content := "OpenMOLE, a workflow system for distributed computing and parameter tuning"),
           meta(name := "keywords", all.content := "Scientific Workflow Engine, Distributed Computing, Cluster, Grid, Parameter Tuning, Model Exploration, Design of Experiment, Sensitivity Analysis, Data Parallelism"),
           meta(name := "viewport", all.content := "width=device-width, initial-scale=1"),
-          link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"),
-          link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css"),
+          link(rel := "stylesheet", href := Resource.bootstrapCss),
           script(src := "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"),
-          script(src := "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"),
           script(`type` := "text/javascript")(
             """
-          |	var _gaq = _gaq || [];
-          |	_gaq.push(['_setAccount', 'UA-25912998-1']);_gaq.push(['_trackPageview']);
-          |	(function() {
-          |		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-          |		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-          |		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-          |	})();
-        """.stripMargin)) ++ super.headFrags
+              |	var _gaq = _gaq || [];
+              |	_gaq.push(['_setAccount', 'UA-25912998-1']);_gaq.push(['_trackPageview']);
+              |	(function() {
+              |		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+              |		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+              |		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+              |	})();
+            """.stripMargin)) ++ super.headFrags
 
       /**
        * The body of this site's HTML page
@@ -75,7 +74,15 @@ class Site extends IApplication {
 
       lazy val pagesFrag = Pages.all.map { p ⇒ PageFrag(p, Pages.decorate(p)) }
       lazy val documentationFrags = pagesFrag.collect { case PageFrag(p: DocumentationPage, f) ⇒ f }.toSet
+
       def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file -> f }.toMap
+    }
+
+    def copyOtherResource(resourceName: String) = withClosable(getClass.getClassLoader.getResourceAsStream(resourceName)) { is ⇒
+      withClosable(new File(dest, resourceName).bufferedOutputStream(true)) { os ⇒
+        os.write('\n')
+        BasicIO.transferFully(is, os)
+      }
     }
 
     site.renderTo(Path(dest))
@@ -100,12 +107,8 @@ class Site extends IApplication {
         }
     }
 
-    withClosable(getClass.getClassLoader.getResourceAsStream(Resource.css)) { is ⇒
-      withClosable(new File(dest, "styles.css").bufferedOutputStream(true)) { os ⇒
-        os.write('\n')
-        BasicIO.transferFully(is, os)
-      }
-    }
+    copyOtherResource(Resource.css)
+    copyOtherResource(Resource.bootstrapCss)
 
     IApplication.EXIT_OK
   }
