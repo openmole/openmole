@@ -60,10 +60,10 @@ object Communication {
       Media("La taupe sort de son trou", "https://linuxfr.org/news/openmole-la-taupe-sort-de-son-trou", "2012")
     )
 
-    def mediaBody(medias: Seq[Media]) = for {
-      media ← medias
-    } yield {
-      tbody(
+    def mediaBody(medias: Seq[Media]) = tbody(
+      for {
+        media ← medias
+      } yield {
         tr(
           td(
             if (media.filePath.isEmpty) media.title
@@ -73,8 +73,8 @@ object Communication {
           ),
           td(media.year, `class` := "text-right")
         )
-      )
-    }
+      }
+    )
 
     def header(title: String) = thead(
       tr(
@@ -83,7 +83,7 @@ object Communication {
       )
     )
 
-    def mediaTable(title: String, medias: Seq[Media]) = table(width := "100%", `class` := "table table-striped")(
+    def mediaTable(title: String, medias: Seq[Media]) = table(width := "100%", `class` := "table table-striped table-bordered")(
       header(title),
       mediaBody(medias)
     )
