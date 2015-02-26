@@ -22,11 +22,11 @@ object Resource {
 
   def FileResource(name: String) = RenameFileResource(name, name)
 
-  def css = "styles.css"
-  def bootstrapCss = "bootstrap-3.3.2.css"
+  def css = FileResource("openMOLEStyles.css")
   def ants = FileResource("ants.png")
   def antNumbers = FileResource("antnumbers.png")
   def antsNLogo = FileResource("ants.nlogo")
+  def bootstrapCss = FileResource("bootstrap-3.3.2.css")
   def fireScreen = FileResource("firescreen.png")
   def fireGlobals = FileResource("fireGlobals.png")
   def fireNewGlobals = FileResource("fireNewGlobals.png")
@@ -41,6 +41,8 @@ object Resource {
   def api = ArchiveResource("openmole-api.tar.gz", "api")
 
   def all = Seq[Resource](
+    css,
+    bootstrapCss,
     logo,
     openmole,
     openmoleDaemon,
