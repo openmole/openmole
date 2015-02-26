@@ -47,7 +47,22 @@ class Site extends IApplication {
           meta(name := "description", all.content := "OpenMOLE, a workflow system for distributed computing and parameter tuning"),
           meta(name := "keywords", all.content := "Scientific Workflow Engine, Distributed Computing, Cluster, Grid, Parameter Tuning, Model Exploration, Design of Experiment, Sensitivity Analysis, Data Parallelism"),
           meta(name := "viewport", all.content := "width=device-width, initial-scale=1"),
-          link(rel := "stylesheet", href := Resource.bootstrapCss),
+          link(href := stylesName, rel := "stylesheet"),
+          script(src := scriptName),
+          script(
+            """
+              |['DOMContentLoaded', 'load'].forEach(function(ev){
+              |  addEventListener(ev, function(){
+              |    Array.prototype.forEach.call(
+              |      document.querySelectorAll('code.scalatex-highlight-js'),
+              |      hljs.highlightBlock
+              |  );
+              |  })
+              |})
+            """.stripMargin),
+          link(rel := "stylesheet", href := "style.css"),
+          link(rel := "stylesheet", href := Resource.bootstrapCss.file),
+          link(rel := "stylesheet", href := Resource.css.file),
           script(src := "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"),
           script(`type` := "text/javascript")(
             """
@@ -58,7 +73,8 @@ class Site extends IApplication {
               |		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
               |		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
               |	})();
-            """.stripMargin)) ++ super.headFrags
+            """.stripMargin)
+        )
 
       /**
        * The body of this site's HTML page
@@ -76,13 +92,6 @@ class Site extends IApplication {
       lazy val documentationFrags = pagesFrag.collect { case PageFrag(p: DocumentationPage, f) ⇒ f }.toSet
 
       def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file -> f }.toMap
-    }
-
-    def copyOtherResource(resourceName: String) = withClosable(getClass.getClassLoader.getResourceAsStream(resourceName)) { is ⇒
-      withClosable(new File(dest, resourceName).bufferedOutputStream(true)) { os ⇒
-        os.write('\n')
-        BasicIO.transferFully(is, os)
-      }
     }
 
     site.renderTo(Path(dest))
@@ -106,9 +115,6 @@ class Site extends IApplication {
           _.extractDirArchiveWithRelativePath(f)
         }
     }
-
-    copyOtherResource(Resource.css)
-    copyOtherResource(Resource.bootstrapCss)
 
     IApplication.EXIT_OK
   }
