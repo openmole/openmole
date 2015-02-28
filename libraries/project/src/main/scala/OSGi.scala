@@ -184,7 +184,7 @@ object OSGi extends Defaults(Apache) {
     version := scalaRxVersion
     )
 
-  lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*", "*.sjsir")) settings(
+  lazy val upickle = OsgiProject("upickle", exports = Seq("upickle.*", "jawn.*", "*.sjsir")) settings(
     libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion,
       "com.lihaoyi" %%% ("upickle" + jsSuffix) % scalaUpickleVersion),
     version := scalaUpickleVersion
@@ -213,7 +213,7 @@ object OSGi extends Defaults(Apache) {
   lazy val closureCompiler = OsgiProject("closure-compiler", exports = Seq("com.google.javascript.*")) settings(
     libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion)
 
-  lazy val mgoVersion = "1.79-SNAPSHOT"
+  lazy val mgoVersion = "1.79"
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings(
     libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,

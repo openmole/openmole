@@ -26,28 +26,31 @@ object Pages {
   def decorate(p: Page): Frag =
     p match {
       case p: DocumentationPage ⇒ DocumentationPages.decorate(p)
-      case _                    ⇒ decorate(p.content, "-main")
+      case _                    ⇒ decorate(p.content)
     }
 
-  def decorate(p: Frag, postfix: String): Frag =
-    Seq(
-      meta(charset := "UTF-8"),
-      div(id := s"logo$postfix")(a(img(src := Resource.logo.file), href := index.file)),
-      div(id := s"sections$postfix",
-        table(
-          td(a("Getting Started", id := "section", href := gettingStarted.file)),
-          td(a("Documentation", id := "section", href := DocumentationPages.root.file)),
-          td(a("Who are we?", id := "section", href := whoAreWe.file))
+  def decorate(p: Frag): Frag =
+    div(`class` := "container")(
+      div(`class` := "header pull-center")(
+        div(`class` := "title")(
+          a(img(id := "logo", src := Resource.logo.file), href := index.file),
+          a(img(id := "logo-version", src := Resource.versionLogo.file), href := Pages.gettingStarted.file)
+        ),
+        ul(id := "sections", `class` := "nav nav-pills")(
+          li(a("Getting Started", `class` := "amenu", id := "section", href := gettingStarted.file)),
+          li(a("Documentation", `class` := "amenu", id := "section", href := DocumentationPages.root.file)),
+          li(a("Who are we?", `class` := "amenu", id := "section", href := whoAreWe.file))
         )
       ),
-      div(id := s"content$postfix")(p)
+      div(`class` := "row")(p)
     )
 
   def index = Page("index", Index())
   def gettingStarted = Page("getting_started", GettingStarted())
   def whoAreWe = Page("who_are_we", WhoAreWe())
+  def communications = Page("communications", Communications())
 
-  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe)
+  def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, communications)
 
 }
 
@@ -105,12 +108,11 @@ object DocumentationPages { index ⇒
   def decorate(p: DocumentationPage): Frag =
     Pages.decorate(
       Seq(
-        documentationMenu(root, p),
-        div(
-          div(id := "documentation-content", p.content),
-          if (p != root) bottomLinks(p) else ""
+        div(id := "documentation-content", `class` := "row")(
+          div(`class` := "col-sm-3")(documentationMenu(root, p)),
+          div(`class` := "col-sm-9 main")(div(p.content, if (p != root) bottomLinks(p) else ""))
         )
-      ), "-documentation"
+      )
     )
 
   def documentationMenu(root: DocumentationPage, currentPage: DocumentationPage): Frag = {

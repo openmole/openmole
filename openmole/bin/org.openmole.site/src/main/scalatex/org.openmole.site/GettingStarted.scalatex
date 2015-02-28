@@ -4,7 +4,7 @@
 
 @sect{Download}
 
-  The version @version of OpenMOLE is available @a("here", href := openmole.file). It has been released on @generationDate.
+  The version @version - @b{@name} - of OpenMOLE is available @a("here", href := openmole.file). It has been released on @generationDate.
 
   @p Optionally the daemon for desktop computing is available @a("here", href := openmoleDaemon.file).
 

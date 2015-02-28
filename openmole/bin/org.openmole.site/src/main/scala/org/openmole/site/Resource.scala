@@ -19,10 +19,14 @@ package org.openmole.site
 
 //TODO automatically generate this object as a managed source using sbt
 object Resource {
-  def css = "styles.css"
+
+  def FileResource(name: String) = RenameFileResource(name, name)
+
+  def css = FileResource("openMOLEStyles.css")
   def ants = FileResource("ants.png")
   def antNumbers = FileResource("antnumbers.png")
   def antsNLogo = FileResource("ants.nlogo")
+  def bootstrapCss = FileResource("bootstrap-3.3.2.css")
   def fireScreen = FileResource("firescreen.png")
   def fireGlobals = FileResource("fireGlobals.png")
   def fireNewGlobals = FileResource("fireNewGlobals.png")
@@ -31,11 +35,14 @@ object Resource {
   def fireOldSetup = FileResource("fireOldSetup.png")
   def fireRemoveClearAll = FileResource("fireRemoveClearAll.png")
   def logo = FileResource("openmole.png")
-  def openmole = FileResource("openmole.tar.gz")
-  def openmoleDaemon = FileResource("openmole-daemon.tar.gz")
+  def openmole = RenameFileResource("openmole.tar.gz", s"openmole-${Objects.version}.tar.gz")
+  def openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${Objects.version}.tar.gz")
+  def versionLogo = FileResource("versionLogo.png")
   def api = ArchiveResource("openmole-api.tar.gz", "api")
 
   def all = Seq[Resource](
+    css,
+    bootstrapCss,
     logo,
     openmole,
     openmoleDaemon,
@@ -48,10 +55,11 @@ object Resource {
     fireNewGlobals,
     fireNewFunction,
     fireOldSetup,
-    fireRemoveClearAll)
+    fireRemoveClearAll,
+    versionLogo)
 }
 
 sealed trait Resource
-case class FileResource(file: String) extends Resource
+case class RenameFileResource(source: String, file: String) extends Resource
 case class ArchiveResource(source: String, file: String) extends Resource
 

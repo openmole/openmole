@@ -19,4 +19,7 @@ object Task extends PluginDefaults {
 
   val (ext1, client1, server1) = Util.project(rootDir, "systemexec", serverProjectDependencies = Seq(base.plugin.Task.systemexec))
   lazy val systemexec = OsgiProject("systemexec") dependsOn (ext1, client1, server1)
+
+  val (ext2, client2, server2) = Util.project(rootDir, "statistic", serverProjectDependencies = Seq(base.plugin.Task.statistic))
+  lazy val statistic = OsgiProject("statistic") dependsOn (ext2, client2, server2)
 }

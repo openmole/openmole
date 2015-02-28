@@ -46,6 +46,7 @@ object Objects {
     ul(p.map(toRow))
   }
 
+  def name = "Killer King"
   def version = buildinfo.BuildInfo.version
   def generationDate = {
     val d = Calendar.getInstance()
