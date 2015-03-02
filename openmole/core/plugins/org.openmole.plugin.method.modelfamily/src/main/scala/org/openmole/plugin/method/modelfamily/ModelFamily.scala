@@ -160,7 +160,7 @@ trait ModelFamily <: Plugins { family ⇒
               s"""
                  |  case $i =>
                  |    $code
-                     $outputMap
+                 |    $outputMap
               """.stripMargin
           }.mkString("\n")
 

@@ -20,9 +20,11 @@ object Web extends Defaults {
   val dir = file("web")
   override val org = "org.openmole.web"
 
-  lazy val core = OsgiProject("org.openmole.web.core", "core",
+  lazy val core = OsgiProject(
+    "org.openmole.web.core",
+    "core",
     exports = Seq("org.openmole.web.*"),
-    buddyPolicy = Some("global"),
+    dynamicImports = Seq("*"),
     imports = Seq("org.h2.*", "*;resolution:=optional")) dependsOn
     (base.Core.workflow, base.Core.serializer, iceTar, misc) settings
     (libraryDependencies ++= Seq(bouncyCastle, h2, jetty, slick, logback, scalatra, scalate, bonecp, scalaLang, xstream, jacksonJson, arm, codec))

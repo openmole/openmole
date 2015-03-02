@@ -28,7 +28,6 @@ trait OsgiBundler {
 
   def OsgiProject(artifactSuffix: String,
                   pathFromDir: String = "",
-                  buddyPolicy: Option[String] = None,
                   exports: Seq[String] = Seq(),
                   privatePackages: Seq[String] = Seq(),
                   singleton: Boolean = false,
@@ -46,8 +45,7 @@ trait OsgiBundler {
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
 
     val additional =
-      buddyPolicy.map(v ⇒ Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++
-        openmoleScope.map(os ⇒ Map("OpenMOLE-Scope" -> os)).getOrElse(Map()) ++
+      openmoleScope.map(os ⇒ Map("OpenMOLE-Scope" -> os)).getOrElse(Map()) ++
         Map("Bundle-ActivationPolicy" -> "lazy")
 
     Project(artifactId.replace('.', '-'), base, settings = settings).settings(commonsSettings ++ osgiSettings: _*).settings(

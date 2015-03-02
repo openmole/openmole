@@ -17,11 +17,11 @@ object Misc extends BaseDefaults {
 
   val exception = OsgiProject("org.openmole.misc.exception", imports = Seq("*"))
 
-  val osgi = OsgiProject("org.openmole.misc.osgi", buddyPolicy = Some("global"), imports = Seq("*"),
+  val osgi = OsgiProject("org.openmole.misc.osgi", dynamicImports = Seq("*"), imports = Seq("*"),
     bundleActivator = Some("org.openmole.misc.osgi.Activator")) dependsOn (exception) settings
     (includeOsgi, libraryDependencies += scalaLang)
 
-  val tools = OsgiProject("org.openmole.misc.tools", buddyPolicy = Some("global"), imports = Seq("*")) settings
+  val tools = OsgiProject("org.openmole.misc.tools", dynamicImports = Seq("*"), imports = Seq("*")) settings
     (includeOsgi,
       libraryDependencies ++= Seq(xstream, groovy, Apache.exec, Apache.math, jodaTime, scalaLang, scalatest)) dependsOn
       (exception, osgi, iceTar)
@@ -56,7 +56,7 @@ object Misc extends BaseDefaults {
     bundleActivator = Some("org.openmole.misc.logging.internal.Activator"), imports = Seq("*")) settings (libraryDependencies ++= Seq(Apache.log4j, logback, slf4j, equinoxCommon)) dependsOn
     (tools, workspace)
 
-  val console = OsgiProject("org.openmole.misc.console", bundleActivator = Some("org.openmole.misc.console.Activator"), buddyPolicy = Some("global"), imports = Seq("*")) dependsOn
+  val console = OsgiProject("org.openmole.misc.console", bundleActivator = Some("org.openmole.misc.console.Activator"), dynamicImports = Seq("*"), imports = Seq("*")) dependsOn
     (osgi, pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
 
 }

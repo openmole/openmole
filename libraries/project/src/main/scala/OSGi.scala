@@ -30,7 +30,7 @@ object OSGi extends Defaults(Apache) {
   lazy val scalatraVersion = "2.3.0"
 
   lazy val scalatra = OsgiProject("org.scalatra",
-    buddyPolicy = Some("global"),
+    dynamicImports = Seq("*"),
     exports = Seq("org.scalatra.*, org.fusesource.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.json4s", "*")) settings
     (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % scalatraVersion,
@@ -49,10 +49,10 @@ object OSGi extends Defaults(Apache) {
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9")
 
   lazy val h2Version = "1.3.176"
-  lazy val h2 = OsgiProject("org.h2", buddyPolicy = Some("global"), privatePackages = Seq("META-INF.*")) settings
+  lazy val h2 = OsgiProject("org.h2", dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
     (libraryDependencies += "com.h2database" % "h2" % h2Version, version := h2Version)
 
-  lazy val bonecp = OsgiProject("com.jolbox.bonecp", buddyPolicy = Some("global")) settings
+  lazy val bonecp = OsgiProject("com.jolbox.bonecp", dynamicImports = Seq("*")) settings
     (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1", version := "0.8.0-rc1")
 
   lazy val slickVersion = "2.1.0"
@@ -66,7 +66,7 @@ object OSGi extends Defaults(Apache) {
 
   lazy val xstream = OsgiProject(
     "com.thoughtworks.xstream",
-    buddyPolicy = Some("global"),
+    dynamicImports = Seq("*"),
     privatePackages = Seq("!scala.*", "*")) settings(
     libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.8", "net.sf.kxml" % "kxml2" % "2.3.0"),
     version := "1.4.8",
@@ -74,7 +74,7 @@ object OSGi extends Defaults(Apache) {
 
   lazy val groovy = OsgiProject(
     "org.codehaus.groovy",
-    buddyPolicy = Some("global"),
+    dynamicImports = Seq("*"),
     exports = Seq("groovy.*", "org.codehaus.*"),
     privatePackages = Seq("!scala.*,*")) settings(
     libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.4.1", "org.fusesource.jansi" % "jansi" % "1.11"),
@@ -82,8 +82,7 @@ object OSGi extends Defaults(Apache) {
     )
 
   lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
-    privatePackages = Seq("*"), buddyPolicy = Some("global")
-  ) settings
+    privatePackages = Seq("*"), dynamicImports = Seq("*")) settings
     (libraryDependencies <++= (scalaVersion) { sV ⇒
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,
