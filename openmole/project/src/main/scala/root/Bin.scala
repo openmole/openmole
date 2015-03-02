@@ -61,7 +61,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
 
   lazy val openmoleUI = OsgiProject("org.openmole.ui", singleton = true) settings (
     organization := "org.openmole.ui",
-    libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.log4j, scopt, equinoxApp)
+    libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, Apache.log4j, scopt, equinoxApp)
   ) dependsOn (
       openmoleConsole,
       base.Misc.workspace,
@@ -121,7 +121,6 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     Libraries.arm,
     Libraries.xstream,
     Libraries.slick,
-    Libraries.jline,
     Apache.ant,
     Apache.codec,
     Apache.config,

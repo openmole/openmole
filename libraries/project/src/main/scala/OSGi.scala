@@ -234,11 +234,6 @@ object OSGi extends Defaults(Apache) {
     version := "2.3"
     )
 
-  lazy val jline = OsgiProject("net.sourceforge.jline") settings(
-    libraryDependencies += "jline" % "jline" % "0.9.94",
-    version := "0.9.94",
-    exportPackage := Seq("jline.*"))
-
   lazy val arm = OsgiProject("com.jsuereth.scala-arm") settings(
     libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.4",
     version := "1.4",

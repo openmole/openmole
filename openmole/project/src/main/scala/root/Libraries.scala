@@ -119,8 +119,6 @@ object Libraries extends Defaults(Apache) {
 
   lazy val opencsv = "org.openmole" %% "au-com-bytecode-opencsv" % "2.3"
 
-  lazy val jline = "org.openmole" %% "net-sourceforge-jline" % "0.9.94"
-
   lazy val arm = "org.openmole" %% "com-jsuereth-scala-arm" % "1.4"
 
   lazy val scalajHttp = "org.openmole" %% "org-scalaj-scalaj-http" % "0.3.15"
