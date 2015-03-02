@@ -29,8 +29,12 @@ pre {
   border: 0px;
 }
 
+#logo {
+ height: 180px;
+}
+
 #logo-version {
-  height: 180px;
+  height: 140px;
   margin-top: 30px;
   margin-left: 30px;
 }
