@@ -43,7 +43,6 @@ class Site extends IApplication {
 
       override def headFrags =
         Seq(
-          meta(charset := "UTF-8"),
           meta(name := "description", all.content := "OpenMOLE, a workflow system for distributed computing and parameter tuning"),
           meta(name := "keywords", all.content := "Scientific Workflow Engine, Distributed Computing, Cluster, Grid, Parameter Tuning, Model Exploration, Design of Experiment, Sensitivity Analysis, Data Parallelism"),
           meta(name := "viewport", all.content := "width=device-width, initial-scale=1"),
@@ -63,6 +62,7 @@ class Site extends IApplication {
           link(rel := "stylesheet", href := "style.css"),
           link(rel := "stylesheet", href := Resource.bootstrapCss.file),
           link(rel := "stylesheet", href := Resource.css.file),
+          meta(charset := "UTF-8"),
           script(src := "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"),
           script(`type` := "text/javascript")(
             """
