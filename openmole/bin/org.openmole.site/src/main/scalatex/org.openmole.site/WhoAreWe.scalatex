@@ -10,7 +10,6 @@
 
 @sect{How to cite OpenMOLE}
   @Publication.publication(Publication.fgcs2013)
-  @Publication.publication2(Publication.fgcs2013_B)
 
 @sect{Communications}
   All the papers citing OpenMOLE, conference slides, videos can be found at the @a("Contributions page", href := communications.file).
