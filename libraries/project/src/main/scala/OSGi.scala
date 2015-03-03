@@ -86,7 +86,7 @@ object OSGi extends Defaults(Apache) {
     (libraryDependencies <++= (scalaVersion) { sV ⇒
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,
-        "jline" % "jline" % "2.11",
+        "jline" % "jline" % "2.12.1",
         "com.typesafe.akka" %% "akka-actor" % "2.3.9",
         "com.typesafe.akka" %% "akka-transactor" % "2.3.9",
         "com.typesafe" % "config" % "1.2.1",
