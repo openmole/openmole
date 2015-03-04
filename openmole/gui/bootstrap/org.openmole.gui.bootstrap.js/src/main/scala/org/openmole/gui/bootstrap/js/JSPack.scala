@@ -17,7 +17,6 @@ package org.openmole.gui.bootstrap.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.misc.osgi.Activator
 import org.openmole.misc.tools.io.FileUtil
 import org.openmole.misc.tools.io.FileUtil._
 import org.scalajs.core.tools.io._

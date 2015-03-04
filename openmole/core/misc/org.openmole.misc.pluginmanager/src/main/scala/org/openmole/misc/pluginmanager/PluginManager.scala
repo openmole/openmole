@@ -31,7 +31,6 @@ import org.osgi.framework.BundleEvent
 import org.osgi.framework.BundleListener
 import scala.collection.JavaConversions._
 import org.openmole.misc.exception._
-import org.openmole.misc.osgi._
 import util.Try
 
 import scala.util.{ Failure, Success, Try }

@@ -17,14 +17,10 @@ object Misc extends BaseDefaults {
 
   val exception = OsgiProject("org.openmole.misc.exception", imports = Seq("*"))
 
-  val osgi = OsgiProject("org.openmole.misc.osgi", dynamicImports = Seq("*"), imports = Seq("*"),
-    bundleActivator = Some("org.openmole.misc.osgi.Activator")) dependsOn (exception) settings
-    (includeOsgi, libraryDependencies += scalaLang)
-
   val tools = OsgiProject("org.openmole.misc.tools", dynamicImports = Seq("*"), imports = Seq("*")) settings
     (includeOsgi,
       libraryDependencies ++= Seq(xstream, groovy, Apache.exec, Apache.math, jodaTime, scalaLang, scalatest)) dependsOn
-      (exception, osgi, iceTar)
+      (exception, iceTar)
 
   val eventDispatcher = OsgiProject("org.openmole.misc.eventdispatcher", imports = Seq("*")) dependsOn (tools) settings (
     libraryDependencies += scalatest
@@ -35,7 +31,7 @@ object Misc extends BaseDefaults {
 
   val workspace = OsgiProject("org.openmole.misc.workspace", imports = Seq("*")) settings
     (includeOsgi, libraryDependencies ++= Seq(jasypt, xstream, Apache.config, Apache.math)) dependsOn
-    (osgi, exception, eventDispatcher, tools, replication)
+    (exception, eventDispatcher, tools, replication)
 
   val fileDeleter = OsgiProject("org.openmole.misc.filedeleter", imports = Seq("*")) settings (includeOsgi) dependsOn (tools)
 
@@ -45,7 +41,7 @@ object Misc extends BaseDefaults {
 
   val pluginManager = OsgiProject("org.openmole.misc.pluginmanager",
     bundleActivator = Some("org.openmole.misc.pluginmanager.internal.Activator"), imports = Seq("*")) settings
-    (includeOsgi) dependsOn (exception, tools, osgi)
+    (includeOsgi) dependsOn (exception, tools, workspace)
 
   val updater = OsgiProject("org.openmole.misc.updater", imports = Seq("*")) dependsOn (exception, tools, workspace)
 
@@ -57,6 +53,6 @@ object Misc extends BaseDefaults {
     (tools, workspace)
 
   val console = OsgiProject("org.openmole.misc.console", bundleActivator = Some("org.openmole.misc.console.Activator"), dynamicImports = Seq("*"), imports = Seq("*")) dependsOn
-    (osgi, pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
+    (pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
 
 }

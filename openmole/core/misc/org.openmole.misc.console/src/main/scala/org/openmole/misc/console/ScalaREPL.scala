@@ -26,7 +26,6 @@ import org.openmole.misc.pluginmanager.PluginManager
 import scala.reflect.internal.util.{ NoPosition, Position }
 import scala.tools.nsc.interpreter._
 import scala.tools.nsc._
-import org.openmole.misc.osgi._
 import scala.tools.nsc.reporters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global

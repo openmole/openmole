@@ -34,7 +34,6 @@ import org.openmole.misc.eventdispatcher.{ EventDispatcher, Event }
 import org.openmole.misc.exception._
 import org.openmole.misc.replication._
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.osgi
 
 import scala.concurrent.duration.FiniteDuration
 import org.openmole.misc.tools.service._
@@ -170,7 +169,11 @@ object Workspace {
     if (s.isEmpty) s
     else Workspace.textEncryptor(password).decrypt(s)
 
-  def openMOLELocation = osgi.openMOLELocation
+  val OpenMOLELocationProperty = "openmole.location"
+
+  def openMOLELocation =
+    Option(System.getProperty(OpenMOLELocationProperty, null)).map(new File(_))
+
 }
 
 class Workspace(val location: File) {

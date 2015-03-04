@@ -20,7 +20,6 @@ import java.io.File
 import java.net.URL
 import org.openmole.gui.server.core.{ ServerFactories, GUIServer }
 import org.openmole.gui.shared._
-import org.openmole.misc.osgi.Activator
 import org.openmole.misc.pluginmanager
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace

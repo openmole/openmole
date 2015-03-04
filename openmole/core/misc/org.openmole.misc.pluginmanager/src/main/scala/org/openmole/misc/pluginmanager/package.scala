@@ -17,18 +17,17 @@
 
 package org.openmole.misc
 
-import collection.JavaConversions._
 import java.io._
-import org.osgi.framework._
 import java.net.URLDecoder
 
-package object osgi {
+import org.openmole.misc.workspace.Workspace
+import org.osgi.framework._
+
+import scala.collection.JavaConversions._
+
+package object pluginmanager {
 
   val OpenMOLEScope = "OpenMOLE-Scope"
-  val OpenMOLELocationProperty = "openmole.location"
-
-  def openMOLELocation =
-    Option(System.getProperty(OpenMOLELocationProperty, null)).map(new File(_))
 
   implicit class BundleDecorator(b: Bundle) {
 
@@ -53,7 +52,7 @@ package object osgi {
       val decodedLocation = URLDecoder.decode(location, "UTF-8")
 
       if (ref)
-        openMOLELocation match {
+        Workspace.openMOLELocation match {
           case Some(oMLoc) ⇒ new File(oMLoc, decodedLocation)
           case None        ⇒ new File(decodedLocation)
         }

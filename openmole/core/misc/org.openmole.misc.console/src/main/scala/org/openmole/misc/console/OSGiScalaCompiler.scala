@@ -31,7 +31,6 @@ import java.io.{ PrintWriter, StringWriter, File }
 import scala.tools.nsc.symtab.SymbolLoaders
 import scala.tools.nsc.backend.JavaPlatform
 import scala.tools.util.PathResolver
-import org.openmole.misc.osgi.{ ClassPathBuilder }
 import scala.tools.nsc._
 
 class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory: AbstractFile, priorityClasses: Seq[Class[_]], jars: Seq[File]) extends Global(settings, reporter) with ReplGlobal { g ⇒
