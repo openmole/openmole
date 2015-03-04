@@ -34,9 +34,7 @@ trait OsgiBundler {
                   settings: Seq[Setting[_]] = Nil,
                   bundleActivator: Option[String] = None,
                   dynamicImports: Seq[String] = Seq(),
-                  imports: Seq[String] = Seq("*;resolution:=optional"),
-                  embeddedJars: Seq[File] = Seq(), //TODO make this actually useful, using an EitherT or something
-                  openmoleScope: Option[String] = None)(implicit artifactPrefix: Option[String] = None) = {
+                  imports: Seq[String] = Seq("*;resolution:=optional"))(implicit artifactPrefix: Option[String] = None) = {
 
     require(artifactPrefix.forall(!_.endsWith(".")), "Do not end your artifact prefix with ., it will be added automatically.")
 
@@ -44,20 +42,19 @@ trait OsgiBundler {
     val base = dir / (if (pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
 
-    val additional =
-      openmoleScope.map(os ⇒ Map("OpenMOLE-Scope" -> os)).getOrElse(Map()) ++
-        Map("Bundle-ActivationPolicy" -> "lazy")
-
     Project(artifactId.replace('.', '-'), base, settings = settings).settings(commonsSettings ++ osgiSettings: _*).settings(
       name := artifactId,
       organization := org,
       OSGi.singleton := singleton,
+      OSGi.openMOLEScope := None,
       OsgiKeys.exportPackage := exportedPackages,
-      OsgiKeys.additionalHeaders := additional,
+      OsgiKeys.additionalHeaders <<=
+        (OSGi.openMOLEScope) {
+          omScope ⇒ omScope.map(os ⇒ Map("OpenMOLE-Scope" -> os)).getOrElse(Map()) ++ Map("Bundle-ActivationPolicy" -> "lazy")
+        },
       OsgiKeys.privatePackage := privatePackages,
       OsgiKeys.dynamicImportPackage := dynamicImports,
       OsgiKeys.importPackage := imports,
-      OsgiKeys.embeddedJars := embeddedJars,
       OsgiKeys.bundleActivator <<= OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) }
     )
   }

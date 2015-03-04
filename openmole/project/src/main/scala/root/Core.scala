@@ -15,22 +15,22 @@ object Core extends Defaults {
 
   implicit val artifactPrefix = Some("org.openmole.core")
 
-  lazy val workflow = OsgiProject("workflow", openmoleScope = Some("provided"), imports = Seq("*")) settings (
+  lazy val workflow = OsgiProject("workflow", imports = Seq("*")) settings (
     includeOsgi,
     libraryDependencies ++= Seq(scalaLang, groovy, math, scalatest)
   ) dependsOn
     (eventDispatcher, exception, tools, updater, workspace, macros, pluginManager, serializer, replication % "test")
 
-  lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided"), imports = Seq("*")) settings
+  lazy val serializer = OsgiProject("serializer", imports = Seq("*")) settings
     (includeOsgi,
       libraryDependencies += xstream) dependsOn
       (workspace, pluginManager, fileService, tools, iceTar)
 
-  lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (
+  lazy val batch = OsgiProject("batch", imports = Seq("*")) dependsOn (
     workflow, workspace, tools, eventDispatcher, replication, updater, exception,
     serializer, fileService, pluginManager, iceTar) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick, apacheConfig))
 
-  lazy val dsl = OsgiProject("dsl", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (workflow, logging)
+  lazy val dsl = OsgiProject("dsl", imports = Seq("*")) dependsOn (workflow, logging)
 
   val exception = OsgiProject("exception", imports = Seq("*"))
 
@@ -72,5 +72,5 @@ object Core extends Defaults {
   val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), dynamicImports = Seq("*"), imports = Seq("*")) dependsOn
     (pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
 
-  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core"))
+  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core"), OSGi.openMOLEScope := Some("provided"))
 }
