@@ -1,12 +1,13 @@
-package root.base.plugin
+package plugin
 
 import root.base.Misc._
-import root.base._
 import root.Libraries
 import root.libraries.Apache
 import sbt._
 import sbt.Keys._
 import com.typesafe.sbt.osgi.OsgiKeys._
+import root._
+import root.base._
 
 object Tool extends PluginDefaults {
 

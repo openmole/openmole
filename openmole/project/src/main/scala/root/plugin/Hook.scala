@@ -1,8 +1,9 @@
-package root.base.plugin
+package plugin
 
 import root.Libraries
 import sbt._
 import Keys._
+import root._
 import root.base._
 
 object Hook extends PluginDefaults {

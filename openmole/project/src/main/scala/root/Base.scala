@@ -4,7 +4,7 @@ import root.base._
 import sbt._
 import org.openmole.buildsystem.OMKeys._
 
-object Base extends BaseDefaults(Core, Misc, Plugin, base.Runtime) {
+object Base extends BaseDefaults(Core, Misc) {
   override def dir = file("core")
 
   lazy val all = Project("base", dir) aggregate (subProjects: _*) //TODO: Quick hack to workaround the file hungriness of SBT 0.13.0 fix when https://github.com/sbt/sbt/issues/937 is fixed

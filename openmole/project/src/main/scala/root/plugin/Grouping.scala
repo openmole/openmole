@@ -1,6 +1,7 @@
-package root.base.plugin
+package plugin
 
 import sbt._
+import root._
 import root.base._
 
 object Grouping extends PluginDefaults {

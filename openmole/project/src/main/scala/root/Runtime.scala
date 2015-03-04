@@ -1,18 +1,16 @@
-package root.base
+package root
 
 import org.openmole.buildsystem.OMKeys._
-
-import root.BaseDefaults
-import sbt._
-import Keys._
 import root.Libraries._
+import root.base.{ Core, Misc }
 import root.libraries.Apache
-import root.ThirdParties._
+import sbt.Keys._
+import sbt._
 
-object Runtime extends BaseDefaults {
+object Runtime extends Defaults {
   implicit val artifactPrefix = Some("org.openmole.runtime")
 
-  override def dir = super.dir / "runtime"
+  override def dir = file("runtime")
 
   val dbserver = OsgiProject("dbserver", imports = Seq("*")) dependsOn (Misc.replication) settings (bundleType += "dbserver",
     libraryDependencies ++= Seq(h2, slf4j, xstream))

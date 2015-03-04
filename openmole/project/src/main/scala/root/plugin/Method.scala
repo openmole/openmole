@@ -1,9 +1,10 @@
-package root.base.plugin
+package plugin
 
-import root.base._
 import root.Libraries._
 import sbt._
 import Keys._
+import root._
+import root.base._
 
 object Method extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.method")

@@ -1,10 +1,11 @@
-package root.base.plugin
+package plugin
 
-import root.base._
 import root.Libraries
 import sbt._
 import Keys._
 import org.openmole.buildsystem.OMKeys._
+import root._
+import root.base._
 
 object Environment extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.environment")
@@ -13,7 +14,7 @@ object Environment extends PluginDefaults {
     (libraryDependencies += Libraries.gridscaleOAR)
 
   lazy val desktopgrid = OsgiProject("desktopgrid", imports = Seq("*")) dependsOn (Core.workflow, Misc.workspace, Misc.tools,
-    Core.batch, Core.serializer, plugin.Tool.sftpserver) //settings (bundleType += "daemon")
+    Core.batch, Core.serializer, Tool.sftpserver) //settings (bundleType += "daemon")
 
   lazy val egi = OsgiProject("egi", imports = Seq("!org.apache.http.*", "!fr.iscpif.gridscale.libraries.srmstub", "!fr.iscpif.gridscale.libraries.lbstub", "!fr.iscpif.gridscale.libraries.wmsstub", "*")) dependsOn (Core.workflow, Misc.exception, Misc.updater, Core.batch,
     Misc.workspace, Misc.fileService, gridscale) settings (

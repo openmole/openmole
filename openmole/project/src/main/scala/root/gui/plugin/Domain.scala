@@ -4,7 +4,7 @@ import root.base
 import sbt._
 import root.gui._
 
-object Domain extends PluginDefaults {
+object Domain extends GUIPluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.gui.plugin.domain")
   /*
   lazy val collection = OsgiProject("collection") dependsOn (base.plugin.Domain.collection, base.Misc.replication % "test")

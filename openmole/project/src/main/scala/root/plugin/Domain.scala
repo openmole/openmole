@@ -1,10 +1,11 @@
-package root.base.plugin
+package plugin
 
 import root.Libraries
 import sbt._
 import Keys._
-import root.base._
 import root.libraries.Apache
+import root._
+import root.base._
 
 object Domain extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.domain")

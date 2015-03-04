@@ -1,13 +1,14 @@
-package root.base.plugin
+package plugin
 
 import root.Libraries
 import sbt._
 
 import root.libraries.Apache
-import root.base._
 import root.Libraries._
 import sbt.Keys._
 import scala.Some
+import root._
+import root.base._
 
 //The task plugins for openmole go in here.
 

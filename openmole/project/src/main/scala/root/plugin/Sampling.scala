@@ -1,4 +1,4 @@
-package root.base.plugin
+package plugin
 
 import root.Libraries
 import root.libraries._
@@ -6,7 +6,7 @@ import sbt._
 import Keys._
 import root.base._
 
-object Sampling extends PluginDefaults {
+object Sampling extends root.PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.sampling")
 
   lazy val combine = OsgiProject("combine", imports = Seq("*")) dependsOn (Misc.exception, Domain.modifier, Core.workflow, Tool.groovy)

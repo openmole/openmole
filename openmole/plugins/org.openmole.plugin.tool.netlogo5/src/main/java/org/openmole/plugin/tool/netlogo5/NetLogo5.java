@@ -22,7 +22,6 @@ import org.nlogo.headless.HeadlessWorkspace;
 import org.nlogo.nvm.Procedure;
 import org.openmole.plugin.tool.netlogo.NetLogo;
 
-import java.lang.RuntimeException;
 import java.util.LinkedList;
 import java.util.Map;
 

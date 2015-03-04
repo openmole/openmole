@@ -16,7 +16,7 @@ import UnidocKeys._
 import scala.util.matching.Regex
 import sbtbuildinfo.Plugin._
 
-object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
+object Bin extends Defaults(Base, Plugin, Runtime, Gui, Libraries, ThirdParties, Web) {
   val dir = file("bin")
 
   def filter(m: ModuleID) = {
@@ -200,7 +200,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   lazy val dbServer = Project("dbserver", dir / "dbserver", settings = assemblySettings) settings (commonsSettings: _*) settings (
     assemblyDependenciesPath := assemblyPath.value / "lib",
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p / "bin" },
-    resourcesAssemble <++= Seq(Misc.replication.project, base.Runtime.dbserver.project) sendTo (assemblyPath / "lib"),
+    resourcesAssemble <++= Seq(Misc.replication.project, Runtime.dbserver.project) sendTo (assemblyPath / "lib"),
     libraryDependencies ++= Seq(
       Libraries.xstream,
       Libraries.slick,
@@ -231,7 +231,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   lazy val daemon = Project("daemon", dir / "daemon", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     resourcesAssemble <++=
-    Seq(base.Runtime.daemon.project, base.plugin.Environment.desktopgrid.project, base.plugin.Tool.sftpserver.project) sendTo (assemblyPath / "plugins"),
+    Seq(Runtime.daemon.project, plugin.Environment.desktopgrid.project, plugin.Tool.sftpserver.project) sendTo (assemblyPath / "plugins"),
     resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
     libraryDependencies ++= Seq(
