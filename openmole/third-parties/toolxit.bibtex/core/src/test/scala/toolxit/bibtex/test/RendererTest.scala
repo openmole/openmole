@@ -37,7 +37,6 @@ object Renderer extends App {
           </html>
 
         val file = new File(Properties.userHome, "bib.html")
-        file.createNewFile
         val writer = new OutputStreamWriter(
           new FileOutputStream(file), encoding)
         writer.write(html.toString)
@@ -45,7 +44,6 @@ object Renderer extends App {
         writer.close
 
         val bibfile = new File(Properties.userHome, "bib.bib")
-        file.createNewFile
         val bibwriter = new OutputStreamWriter(
           new FileOutputStream(bibfile), encoding)
         bibwriter.write(bibrenderer.render)
