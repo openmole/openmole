@@ -20,10 +20,11 @@ package org.openmole.plugin.environment.desktopgrid
 import java.io.File
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
+import org.openmole.core.tools.io.FileUtil
 import collection.JavaConversions._
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.serializer.SerialiserService
-import org.openmole.misc.tools.io.FileUtil._
+import FileUtil._
 import org.openmole.core.workflow.execution.ExecutionState._
 
 import DesktopGridEnvironment._

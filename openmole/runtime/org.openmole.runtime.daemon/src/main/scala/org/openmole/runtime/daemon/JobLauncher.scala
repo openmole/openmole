@@ -21,19 +21,20 @@ import java.io.File
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.Executors
-import org.openmole.misc.tools.io.HashService
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
+import org.openmole.core.tools.io.{HashService, FileUtil, TarArchiver}
+import org.openmole.core.tools.service.{Logger, OS, ProcessUtil, ThreadUtil}
+import org.openmole.core.workspace.{Workspace, ConfigurationLocation}
 import org.openmole.plugin.environment.desktopgrid._
 import DesktopGridEnvironment._
 import org.openmole.core.batch.message._
 import org.openmole.core.batch.storage._
 import org.openmole.core.serializer._
-import org.openmole.misc.exception._
-import org.openmole.misc.tools.service._
-import org.openmole.misc.workspace._
-import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.tools.io.TarArchiver._
-import org.openmole.misc.tools.service.ProcessUtil._
-import org.openmole.misc.tools.service.ThreadUtil._
+import org.openmole.core.tools.service._
+import FileUtil._
+import TarArchiver._
+import ProcessUtil._
+import ThreadUtil._
 import HashService._
 import fr.iscpif.gridscale.ssh.{ SSHStorage, SSHUserPasswordAuthentication }
 

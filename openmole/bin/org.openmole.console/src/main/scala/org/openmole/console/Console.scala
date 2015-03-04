@@ -19,12 +19,13 @@ package org.openmole.console
 
 import jline.console.ConsoleReader
 import java.util.concurrent.Executors
+import org.openmole.core.console.ScalaREPL
 import org.openmole.core.dsl.Serializer
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.logging.LoggerService
+import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.tools.PluginInfo
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.logging.LoggerService
-import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.workspace.Workspace
 import scala.annotation.tailrec
 import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.ILoop
@@ -34,7 +35,6 @@ import org.openmole.core.workflow.task._
 import java.util.concurrent.TimeUnit
 import scala.tools.nsc.io.{ File ⇒ SFile }
 import java.io.File
-import org.openmole.misc.console.ScalaREPL
 
 object Console {
   @tailrec def askPassword: String = {

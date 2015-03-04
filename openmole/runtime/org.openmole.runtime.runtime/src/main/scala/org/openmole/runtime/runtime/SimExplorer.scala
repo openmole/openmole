@@ -18,14 +18,15 @@
 package org.openmole.runtime.runtime
 
 import org.eclipse.equinox.app._
+import org.openmole.core.logging.LoggerService
+import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.tools.io.FileUtil
+import org.openmole.core.tools.service.Logger
+import org.openmole.core.workspace.Workspace
 import scopt._
-import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.misc.logging.LoggerService
-import org.openmole.misc.tools.io.FileUtil._
+import FileUtil._
 import java.io.File
 import org.openmole.core.serializer.SerialiserService
-import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.workspace._
 import org.openmole.core.batch.storage._
 import org.openmole.core.workflow.execution.local.LocalEnvironment
 import scala.util.{ Success, Failure }

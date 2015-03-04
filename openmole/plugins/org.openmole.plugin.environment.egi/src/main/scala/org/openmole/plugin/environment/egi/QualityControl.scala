@@ -17,7 +17,8 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.misc.tools.service._
+import org.openmole.core.tools.service.MovingAverage
+import org.openmole.core.tools.service._
 
 trait QualityControl {
   def hysteresis: Int

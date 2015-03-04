@@ -17,18 +17,20 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.tools.io.FileUtil
+import org.openmole.core.tools.service.{ Hash, Scaling, Random }
 import org.openmole.core.batch.environment.BatchEnvironment
 import fr.iscpif.gridscale.glite.{ GlobusAuthentication, BDII }
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.batch.storage.StorageService
 import org.openmole.core.batch.control.AccessToken
+import org.openmole.core.workspace.Workspace
 import concurrent.stm._
 import java.io.File
-import org.openmole.misc.tools.service.{ Random, Hash }
-import org.openmole.misc.tools.service.Random._
-import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.tools.service.Scaling._
+import org.openmole.core.tools.service.Hash
+import Random._
+import FileUtil._
+import Scaling._
 import scala.annotation.tailrec
 
 trait BDIISRMServers extends BatchEnvironment {

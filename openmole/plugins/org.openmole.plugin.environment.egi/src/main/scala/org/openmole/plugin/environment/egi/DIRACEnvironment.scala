@@ -18,12 +18,12 @@
 package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.filedeleter.FileDeleter
+import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.job.Job
-import org.openmole.misc.updater.Updater
-import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
+import org.openmole.core.workspace.{ Workspace, ConfigurationLocation, AuthenticationProvider }
 import fr.iscpif.gridscale.glite.BDII
-import org.openmole.misc.filedeleter.FileDeleter
-import org.openmole.misc.exception.UserBadDataError
 import fr.iscpif.gridscale.dirac.{ DIRACJobService ⇒ GSDIRACJobService }
 import concurrent.duration._
 import scala.ref.WeakReference

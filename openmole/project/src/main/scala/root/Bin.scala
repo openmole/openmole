@@ -1,6 +1,5 @@
 package root
 
-import root.base.Misc
 import root.libraries.Apache
 import sbt._
 import Keys._
@@ -16,7 +15,7 @@ import UnidocKeys._
 import scala.util.matching.Regex
 import sbtbuildinfo.Plugin._
 
-object Bin extends Defaults(Base, Plugin, Runtime, Gui, Libraries, ThirdParties, Web) {
+object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties, Web) {
   val dir = file("bin")
 
   def filter(m: ModuleID) = {
@@ -53,10 +52,10 @@ object Bin extends Defaults(Base, Plugin, Runtime, Gui, Libraries, ThirdParties,
   lazy val openmoleConsole = OsgiProject("org.openmole.console") settings (
     organization := "org.openmole.console"
   ) dependsOn (
-      base.Core.workflow,
-      base.Misc.console,
-      base.Core.dsl,
-      base.Core.batch
+      Core.workflow,
+      Core.console,
+      Core.dsl,
+      Core.batch
     )
 
   lazy val openmoleUI = OsgiProject("org.openmole.ui", singleton = true) settings (
@@ -64,22 +63,22 @@ object Bin extends Defaults(Base, Plugin, Runtime, Gui, Libraries, ThirdParties,
     libraryDependencies += equinoxApp
   ) dependsOn (
       openmoleConsole,
-      base.Misc.workspace,
-      base.Misc.replication,
-      base.Misc.exception,
-      base.Misc.tools,
-      base.Misc.eventDispatcher,
-      base.Misc.pluginManager,
-      base.Core.workflow,
-      base.Core.batch,
+      Core.workspace,
+      Core.replication,
+      Core.exception,
+      Core.tools,
+      Core.eventDispatcher,
+      Core.pluginManager,
+      Core.workflow,
+      Core.batch,
       gui.Server.core,
       gui.Client.core,
       gui.Bootstrap.js,
       gui.Bootstrap.osgi,
-      base.Misc.logging,
+      Core.logging,
       Web.core,
-      base.Misc.console,
-      base.Core.dsl)
+      Core.console,
+      Core.dsl)
 
   lazy val java368URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-386/20-b17/java-jre-linux-386-20-b17.tgz")
   lazy val javax64URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-x64/20-b17/java-jre-linux-x64-20-b17.tgz")
@@ -200,7 +199,7 @@ object Bin extends Defaults(Base, Plugin, Runtime, Gui, Libraries, ThirdParties,
   lazy val dbServer = Project("dbserver", dir / "dbserver", settings = assemblySettings) settings (commonsSettings: _*) settings (
     assemblyDependenciesPath := assemblyPath.value / "lib",
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p / "bin" },
-    resourcesAssemble <++= Seq(Misc.replication.project, Runtime.dbserver.project) sendTo (assemblyPath / "lib"),
+    resourcesAssemble <++= Seq(Core.replication.project, Runtime.dbserver.project) sendTo (assemblyPath / "lib"),
     libraryDependencies ++= Seq(
       Libraries.xstream,
       Libraries.slick,
@@ -254,7 +253,7 @@ object Bin extends Defaults(Base, Plugin, Runtime, Gui, Libraries, ThirdParties,
       config := assemblyPath.value / "configuration/config.ini"
   )
 
-  lazy val api = Project("api", dir / "target" / "api") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (commonsSettings: _*) settings (
+  lazy val api = Project("api", dir / "target" / "api") aggregate ((Core.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (commonsSettings: _*) settings (
     unidocSettings: _*
   ) settings (tarProject: _*) settings (
       compile := Analysis.Empty,

@@ -8,7 +8,6 @@ import root.Libraries._
 import sbt.Keys._
 import scala.Some
 import root._
-import root.base._
 
 //The task plugins for openmole go in here.
 
@@ -16,9 +15,9 @@ import root.base._
 object Task extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.task")
 
-  lazy val external = OsgiProject("external", imports = Seq("*")) dependsOn (Misc.exception, Core.dsl, Misc.workspace)
+  lazy val external = OsgiProject("external", imports = Seq("*")) dependsOn (Core.exception, Core.dsl, Core.workspace)
 
-  lazy val netLogo = OsgiProject("netlogo", imports = Seq("*")) dependsOn (Misc.exception, Core.workflow, Misc.workspace, external, Tool.netLogoAPI)
+  lazy val netLogo = OsgiProject("netlogo", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Core.workspace, external, Tool.netLogoAPI)
 
   //the imports disambiguates netlogo5 from netlogo4
   lazy val netLogo4 = OsgiProject("netlogo4",
@@ -27,20 +26,20 @@ object Task extends PluginDefaults {
 
   lazy val netLogo5 = OsgiProject("netlogo5") dependsOn (netLogo, Core.workflow, external, Tool.netLogo5API)
 
-  lazy val jvm = OsgiProject("jvm", imports = Seq("*")) dependsOn (Misc.exception, Core.workflow, external, Misc.workspace)
+  lazy val jvm = OsgiProject("jvm", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, external, Core.workspace)
 
-  lazy val scala = OsgiProject("scala", imports = Seq("*")) dependsOn (Misc.exception, Core.workflow, jvm, Misc.console)
+  lazy val scala = OsgiProject("scala", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, jvm, Core.console)
 
-  lazy val groovy = OsgiProject("groovy", imports = Seq("*")) dependsOn (Misc.exception, Core.workflow, Tool.groovy, jvm, Misc.replication % "test") settings (
+  lazy val groovy = OsgiProject("groovy", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Tool.groovy, jvm, Core.replication % "test") settings (
     libraryDependencies += Libraries.scalatest
   )
 
-  lazy val template = OsgiProject("template", imports = Seq("*")) dependsOn (Misc.exception, Core.workflow, Misc.workspace, Misc.replication % "test") settings (
+  lazy val template = OsgiProject("template", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Core.workspace, Core.replication % "test") settings (
     libraryDependencies += Libraries.scalatest
   )
 
-  lazy val systemexec = OsgiProject("systemexec", imports = Seq("*")) dependsOn (Misc.exception, Core.workflow, external,
-    Misc.workspace) settings (
+  lazy val systemexec = OsgiProject("systemexec", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, external,
+    Core.workspace) settings (
       libraryDependencies ++= Seq(Apache.exec)
     )
 

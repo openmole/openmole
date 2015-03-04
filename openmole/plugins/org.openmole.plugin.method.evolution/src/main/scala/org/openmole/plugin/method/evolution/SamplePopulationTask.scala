@@ -17,13 +17,14 @@
 
 package org.openmole.plugin.method.evolution
 
+import org.openmole.core.tools.service.Random
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.misc.tools.service.Random._
+import Random._
 
 import fr.iscpif.mgo._
 

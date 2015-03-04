@@ -18,20 +18,20 @@
 package org.openmole.plugin.task.groovy
 
 import java.io.File
+import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.plugin.Plugins
+import org.openmole.core.tools.io.FileUtil
+import org.openmole.core.tools.service.Random
 import org.openmole.core.workflow.task._
-import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.misc.tools.io.FileUtil.fileOrdering
+import FileUtil.fileOrdering
+import org.openmole.core.workspace
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.task.jvm._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.plugin.tool.groovy.ContextToGroovyCode
 
 object GroovyTask {
-
-  def newRNG(seed: Long) = org.openmole.misc.tools.service.Random.newRNG(seed)
-  def newFile() = org.openmole.misc.workspace.Workspace.newFile
-  def newDir() = org.openmole.misc.workspace.Workspace.newDir
 
   /**
    * Instanciate a builder for the groovy task
@@ -45,9 +45,9 @@ object GroovyTask {
   def apply(source: String)(implicit plugins: PluginSet = PluginSet.empty) =
     new JVMLanguageTaskBuilder { builder ⇒
 
-      addImport("static org.openmole.plugin.task.groovy.GroovyTask.newRNG")
-      addImport("static org.openmole.plugin.task.groovy.GroovyTask.newFile")
-      addImport("static org.openmole.plugin.task.groovy.GroovyTask.newDir")
+      addImport("static org.openmole.plugin.task.jvm.JVMLanguageTask.newRNG")
+      addImport("static org.openmole.plugin.task.jvm.JVMLanguageTask.newFile")
+      addImport("static org.openmole.plugin.task.jvm.JVMLanguageTask.newDir")
 
       def toTask =
         new GroovyTask(source) with Built

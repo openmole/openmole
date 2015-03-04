@@ -17,8 +17,10 @@
 
 package org.openmole.plugin.environment
 
+import org.openmole.core.workspace.Workspace
+
 package object egi {
-  private implicit def auth = org.openmole.misc.workspace.Workspace.instance.authenticationProvider
+  private implicit def auth = Workspace.instance.authenticationProvider
 
   lazy val complexsystems = EGIEnvironment("vo.complex-systems.eu")
   lazy val biomed = EGIEnvironment("biomed")

@@ -19,6 +19,9 @@ package org.openmole.plugin.task.netlogo
 
 import java.io.File
 import java.util.AbstractCollection
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.tools.io.Prettifier
+import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
@@ -26,10 +29,8 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.{ VariableExpansion, ExpandedString }
 import org.openmole.plugin.task.external.ExternalTask._
 import org.openmole.plugin.task.external._
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.tools.service.OS
 
-import org.openmole.misc.tools.io.Prettifier._
+import Prettifier._
 
 object NetLogoTask {
 

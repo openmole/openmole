@@ -22,7 +22,7 @@ import java.net.URI
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.storage.PersistentStorageService
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.workspace.Workspace
 
 trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
 

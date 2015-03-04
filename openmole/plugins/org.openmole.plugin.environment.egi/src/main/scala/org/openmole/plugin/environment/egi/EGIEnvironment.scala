@@ -17,25 +17,27 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.misc.filedeleter.FileDeleter
-import org.openmole.misc.updater.Updater
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.filedeleter.FileDeleter
+import org.openmole.core.tools.io.FileUtil
+import org.openmole.core.tools.service.{ Logger, Scaling, Random }
 import java.io.File
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
+import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.job.Job
-import org.openmole.misc.exception._
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.control._
-import org.openmole.misc.tools.service._
-import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.core.workspace.{ Workspace, ConfigurationLocation, AuthenticationProvider }
+import org.openmole.core.tools.service._
+import FileUtil._
 import org.openmole.core.batch.replication._
-import org.openmole.misc.workspace._
 import concurrent.stm._
 import annotation.tailrec
 import ref.WeakReference
-import org.openmole.misc.tools.service.Scaling._
-import org.openmole.misc.tools.service.Random._
-import org.openmole.misc.tools.service._
+import Scaling._
+import Random._
+import org.openmole.core.tools.service._
 import fr.iscpif.gridscale.glite.{ GlobusAuthentication, WMSJobService, BDII }
 import fr.iscpif.gridscale.RenewDecorator
 import java.net.URI

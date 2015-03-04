@@ -19,7 +19,8 @@ package org.openmole.plugin.environment.ssh
 
 import fr.iscpif.gridscale.ssh.SSHUserPasswordAuthentication
 import org.openmole.core.batch.authentication.CypheredPassword
-import org.openmole.misc.workspace.AuthenticationProvider
+import org.openmole.core.workspace.AuthenticationProvider
+
 object LoginPassword {
 
   def apply(

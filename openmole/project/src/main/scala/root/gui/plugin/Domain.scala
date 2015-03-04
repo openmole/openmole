@@ -1,6 +1,5 @@
 package root.gui.plugin
 
-import root.base
 import sbt._
 import root.gui._
 

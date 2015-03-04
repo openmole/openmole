@@ -18,13 +18,13 @@
 package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.environment.{ BatchEnvironment, BatchExecutionJob }
+import org.openmole.core.tools.cache.AssociativeCache
+import org.openmole.core.tools.service.Logger
+import org.openmole.core.updater.IUpdatableWithVariableDelay
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.job.Job
-import org.openmole.misc.tools.cache.AssociativeCache
-import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.updater.IUpdatableWithVariableDelay
-import org.openmole.misc.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.HashSet

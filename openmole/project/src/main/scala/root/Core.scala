@@ -1,0 +1,77 @@
+package root
+
+import org.openmole.buildsystem.OMKeys._
+import com.typesafe.sbt.osgi.OsgiKeys
+import root.Libraries._
+import root.ThirdParties._
+import root.libraries.Apache
+import sbt.Keys._
+import sbt._
+
+object Core extends Defaults {
+  override val org = "org.openmole.core"
+  override def dir = file("core")
+
+  lazy val all = Project("base", dir) aggregate (subProjects: _*) //TODO: Quick hack to workaround the file hungriness of SBT 0.13.0 fix when https://github.com/sbt/sbt/issues/937 is fixed
+
+  implicit val artifactPrefix = Some("org.openmole.core")
+
+  lazy val workflow = OsgiProject("workflow", openmoleScope = Some("provided"), imports = Seq("*")) settings (
+    includeOsgi,
+    libraryDependencies ++= Seq(scalaLang, groovy, Apache.math, scalatest)
+  ) dependsOn
+    (eventDispatcher, exception, tools, updater, workspace, macros, pluginManager, serializer, replication % "test")
+
+  lazy val serializer = OsgiProject("serializer", openmoleScope = Some("provided"), imports = Seq("*")) settings
+    (includeOsgi,
+      libraryDependencies += xstream) dependsOn
+      (workspace, pluginManager, fileService, tools, iceTar)
+
+  lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (
+    workflow, workspace, tools, eventDispatcher, replication, updater, exception,
+    serializer, fileService, pluginManager, iceTar) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick, Apache.config))
+
+  lazy val dsl = OsgiProject("dsl", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (workflow, logging)
+
+  val exception = OsgiProject("exception", imports = Seq("*"))
+
+  val tools = OsgiProject("tools", dynamicImports = Seq("*"), imports = Seq("*")) settings
+    (includeOsgi,
+      libraryDependencies ++= Seq(xstream, groovy, Apache.exec, Apache.math, jodaTime, scalaLang, scalatest)) dependsOn
+      (exception, iceTar)
+
+  val eventDispatcher = OsgiProject("eventdispatcher", imports = Seq("*")) dependsOn (tools) settings (
+    libraryDependencies += scalatest
+  )
+
+  val replication = OsgiProject("replication", imports = Seq("*")) settings (bundleType += "dbserver",
+    libraryDependencies ++= Seq(slick, xstream))
+
+  val workspace = OsgiProject("workspace", imports = Seq("*")) settings
+    (includeOsgi, libraryDependencies ++= Seq(jasypt, xstream, Apache.config, Apache.math)) dependsOn
+    (exception, eventDispatcher, tools, replication)
+
+  val fileDeleter = OsgiProject("filedeleter", imports = Seq("*")) settings (includeOsgi) dependsOn (tools)
+
+  val fileCache = OsgiProject("filecache", imports = Seq("*")) settings (includeOsgi) dependsOn (fileDeleter)
+
+  val macros = OsgiProject("macros", imports = Seq("*")) settings (libraryDependencies += scalaLang % "provided" /*, provided(scalaCompiler)*/ )
+
+  val pluginManager = OsgiProject("pluginmanager",
+    bundleActivator = Some("org.openmole.core.pluginmanager.internal.Activator"), imports = Seq("*")) settings
+    (includeOsgi) dependsOn (exception, tools, workspace)
+
+  val updater = OsgiProject("updater", imports = Seq("*")) dependsOn (exception, tools, workspace)
+
+  val fileService = OsgiProject("fileservice", imports = Seq("*")) settings (includeOsgi) dependsOn (tools, fileCache, updater, workspace, iceTar % "provided")
+
+  val logging = OsgiProject(
+    "logging",
+    bundleActivator = Some("org.openmole.core.logging.internal.Activator"), imports = Seq("*")) settings (libraryDependencies ++= Seq(Apache.log4j, logback, slf4j, equinoxCommon)) dependsOn
+    (tools, workspace)
+
+  val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), dynamicImports = Seq("*"), imports = Seq("*")) dependsOn
+    (pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
+
+  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core"))
+}

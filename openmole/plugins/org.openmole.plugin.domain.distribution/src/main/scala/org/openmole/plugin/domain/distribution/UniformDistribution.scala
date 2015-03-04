@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.domain.distribution
 
+import org.openmole.core.tools.service.Random._
 import util.Random
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
-import org.openmole.misc.tools.service.Random._
 
 object UniformDistribution {
   def apply[T](seed: Option[Long] = None, max: Option[T] = None)(implicit distribution: Distribution[T]) = new UniformDistribution(seed, max)

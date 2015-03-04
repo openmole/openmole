@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.egi
 
 import fr.iscpif.gridscale.dirac.P12HTTPSAuthentication
-import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
+import org.openmole.core.workspace.{ Workspace, AuthenticationProvider }
 
 object DIRACAuthentication {
   def update(a: DIRACAuthentication) = Workspace.authentications.save(0, a)

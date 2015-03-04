@@ -18,10 +18,10 @@
 package org.openmole.plugin.task.external
 
 import java.io.File
+import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.misc.tools.service.OS
 import org.openmole.core.workflow.data.Prototype
 import org.openmole.plugin.task.external.ExternalTask._
 import scala.collection.mutable.ListBuffer

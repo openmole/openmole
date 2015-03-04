@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.ssh
 
 import org.openmole.core.batch.storage.{ RemoteStorage, StorageService }
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.LocalStorage
 import fr.iscpif.gridscale.ssh.SSHConnectionCache
 

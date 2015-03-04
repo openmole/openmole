@@ -18,14 +18,16 @@
 package org.openmole.plugin.task.external
 
 import java.io.File
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.tools.io.FileUtil
+import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.tools.service.OS
+import org.openmole.core.workspace.Workspace
 import scala.collection.mutable.ListBuffer
-import org.openmole.misc.tools.io.FileUtil._
+import FileUtil._
 import collection.mutable
 
 object ExternalTask {
@@ -132,7 +134,7 @@ trait ExternalTask extends Task {
   }
 
   def withWorkDir[T](f: File ⇒ T): T = {
-    val tmpDir = org.openmole.misc.workspace.Workspace.newDir("externalTask")
+    val tmpDir = Workspace.newDir("externalTask")
     val res =
       try f(tmpDir)
       catch {

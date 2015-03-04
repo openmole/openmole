@@ -4,7 +4,7 @@ import sbt._
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import Keys._
-import root.{ GuiDefaults, base }
+import root._
 import root.Libraries._
 
 object Misc extends GuiDefaults {
@@ -13,7 +13,7 @@ object Misc extends GuiDefaults {
   lazy val utils = OsgiProject("org.openmole.gui.misc.utils") enablePlugins (ScalaJSPlugin)
 
   lazy val js = OsgiProject("org.openmole.gui.misc.js") enablePlugins (ScalaJSPlugin) dependsOn
-    (base.Misc.workspace) settings (
+    (Core.workspace) settings (
       libraryDependencies ++= Seq(scalajsLibrary, scalajsDom, scalaTags, rx, scaladget)
     )
 }

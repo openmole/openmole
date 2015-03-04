@@ -17,12 +17,11 @@
 
 package org.openmole.plugin.sampling.combine
 
+import org.openmole.core.tools.service.Random._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
-import org.openmole.misc.tools.service.Random._
+import util.Random
 import org.openmole.core.workflow.task._
-
-import scala.util.Random
 
 object ShuffleSampling {
 

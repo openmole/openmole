@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.ssh
 
 import java.io.File
 import org.openmole.core.batch.authentication.CypheredPassword
-import org.openmole.misc.workspace.AuthenticationProvider
+import org.openmole.core.workspace.AuthenticationProvider
 
 object PrivateKey {
   def apply(

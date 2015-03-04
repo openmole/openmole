@@ -19,12 +19,16 @@ package org.openmole.plugin.task.jvm
 
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.workspace
+import org.openmole.core.workspace.Workspace
+import org.openmole.core.tools.service.Random
 import org.openmole.plugin.task.external.ExternalTask
 import java.io.File
 
 object JVMLanguageTask {
+  def newRNG(seed: Long) = Random.newRNG(seed)
+  def newFile() = Workspace.newFile
+  def newDir() = workspace.Workspace.newDir
   lazy val workDir = Prototype[File]("workDir")
 }
 

@@ -18,13 +18,13 @@
 package org.openmole.plugin.task.template
 
 import java.io.File
+import org.openmole.core.tools.io.{HashService, FileUtil}
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.misc.tools.io.HashService
 import HashService._
-import org.openmole.misc.tools.io.FileUtil._
+import FileUtil._
 import org.scalatest._
 import TemplateData._
 

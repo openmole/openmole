@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.task.netlogo4
 
+import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
@@ -27,7 +28,6 @@ import NetLogoTask.Workspace
 import org.openmole.core.workflow.task._
 import java.io.File
 import collection.JavaConversions._
-import org.openmole.misc.tools.service.OS
 import org.openmole.plugin.tool.netlogo4.NetLogo4
 
 object NetLogo4Task {

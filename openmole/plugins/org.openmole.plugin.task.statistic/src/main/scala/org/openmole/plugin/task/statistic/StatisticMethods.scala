@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task.statistic
 
-import org.openmole.misc.tools.math.Stat
+import org.openmole.core.tools.math.Stat
 
 trait StatisticMethods {
   lazy val average = new StatisticalAggregation[Double] {

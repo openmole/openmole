@@ -25,7 +25,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.UUID
 import org.h2.tools.Server
-import org.openmole.misc.replication._
+import org.openmole.core.replication.{ replicas, DBServerInfo }
 import scala.slick.driver.H2Driver.simple._
 import scala.util.{ Success, Failure, Try }
 

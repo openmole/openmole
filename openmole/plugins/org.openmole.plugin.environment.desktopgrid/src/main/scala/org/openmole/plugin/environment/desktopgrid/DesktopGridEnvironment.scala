@@ -20,8 +20,8 @@ package org.openmole.plugin.environment.desktopgrid
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
+import org.openmole.core.workspace.Workspace
 
-import org.openmole.misc.workspace.{ AuthenticationProvider, Workspace }
 import org.openmole.plugin.tool.sftpserver.SFTPServer
 import java.net.URI
 import fr.iscpif.gridscale.storage.{ LocalStorage ⇒ GSLocalStorage }

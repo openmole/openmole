@@ -3,6 +3,7 @@ package org.openmole.web
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 import org.eclipse.jetty.webapp.WebAppContext
+import org.openmole.core.workspace.Workspace
 import org.scalatra.ScalatraBase
 import java.security.{ Security, SecureRandom, KeyPairGenerator, KeyStore }
 import java.io.{ FileOutputStream, FileInputStream, File }
@@ -14,7 +15,6 @@ import java.util.Date
 import org.bouncycastle.jce.X509Principal
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Provider.Service
-import org.openmole.misc.workspace.Workspace
 import org.bouncycastle.asn1.{ ASN1EncodableVector, DEROctetString, ASN1ObjectIdentifier, DERObjectIdentifier }
 import sun.security.x509.SubjectAlternativeNameExtension
 import org.eclipse.jetty.server.nio.SelectChannelConnector

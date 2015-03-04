@@ -31,9 +31,9 @@ trait ScalaBuilder <: JVMLanguageBuilder { builder ⇒
     this
   }
 
-  addImport("org.openmole.misc.tools.service.Random.newRNG")
-  addImport("org.openmole.misc.workspace.Workspace.newFile")
-  addImport("org.openmole.misc.workspace.Workspace.newDir")
+  addImport("org.openmole.plugin.task.jvm.JVMLanguageTask.newRNG")
+  addImport("org.openmole.plugin.task.jvm.JVMLanguageTask.newFile")
+  addImport("org.openmole.plugin.task.jvm.JVMLanguageTask.newDir")
 
   trait Built <: super.Built {
     def usedClasses = builder.usedClasses.toList

@@ -24,11 +24,11 @@ import java.net.URI
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
-import org.openmole.misc.tools.service.Logger
+import org.openmole.core.tools.service.Logger
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.ssh.{ SharedStorage, SSHService }
 import org.openmole.core.batch.storage.SimpleStorage
 import org.openmole.plugin.environment.gridscale._
-import org.openmole.misc.workspace.Workspace
 import concurrent.duration._
 
 object SGEJobService extends Logger

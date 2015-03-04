@@ -17,26 +17,26 @@
 
 package org.openmole.plugin.task.systemexec
 
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.tools.io.{ StringBuilderOutputStream, FileUtil }
+import org.openmole.core.tools.service.{ Logger, OS, ProcessUtil }
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.VariableExpansion
-import org.openmole.misc.exception._
-import org.openmole.misc.tools.io.StringBuilderOutputStream
-import org.openmole.misc.tools.service.ProcessUtil._
+import ProcessUtil._
 import java.io.File
 import java.io.IOException
 import java.io.PrintStream
 import org.apache.commons.exec.CommandLine
 import org.openmole.core.workflow.data._
-import org.openmole.misc.workspace._
-import org.openmole.misc.tools.service.{ Logger, OS }
+import org.openmole.core.tools.service.Logger
 import org.openmole.plugin.task.external._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
-import org.openmole.misc.tools.io.FileUtil._
+import FileUtil._
 
 object SystemExecTask extends Logger {
 

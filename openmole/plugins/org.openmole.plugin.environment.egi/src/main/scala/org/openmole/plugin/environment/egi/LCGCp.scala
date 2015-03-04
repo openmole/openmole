@@ -18,8 +18,8 @@
 package org.openmole.plugin.environment.egi
 
 import java.net.URI
-import org.openmole.misc.workspace.Workspace
 import fr.iscpif.gridscale.glite.SRMStorage
+import org.openmole.core.workspace.Workspace
 
 trait LCGCp {
 

@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task
 
-import org.openmole.misc.tools.service.OS
+import org.openmole.core.tools.service.OS
 
 package external {
 

@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.task
 
+import org.openmole.core.macros.Keyword._
 import org.openmole.core.workflow.data.Prototype
 import org.openmole.core.workflow.builder._
-import org.openmole.misc.macros.Keyword._
 
 package netlogo {
   trait NetLogoPackage extends external.ExternalPackage {

@@ -20,9 +20,10 @@ package org.openmole.runtime.daemon
 import java.io.File
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.ReplicatedFile
-import org.openmole.misc.tools.service.Logger
+import org.openmole.core.tools.io.FileUtil
+import org.openmole.core.tools.service.Logger
 import scala.collection.mutable.HashMap
-import org.openmole.misc.tools.io.FileUtil._
+import FileUtil._
 
 object FileCache extends Logger
 

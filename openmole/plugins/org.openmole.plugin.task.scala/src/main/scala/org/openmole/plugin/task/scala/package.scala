@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.task
 
+import org.openmole.core.macros.Keyword._
 import org.openmole.core.workflow.builder._
-import org.openmole.misc.macros.Keyword._
 
 package scala {
   trait ScalaPackage <: jvm.JVMPackage {

@@ -27,7 +27,7 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.task.tools._
 
 import scala.concurrent.duration.Duration

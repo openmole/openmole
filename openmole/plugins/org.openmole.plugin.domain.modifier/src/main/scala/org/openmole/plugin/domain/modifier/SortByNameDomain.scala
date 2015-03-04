@@ -18,9 +18,9 @@
 package org.openmole.plugin.domain.modifier
 
 import java.io.File
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.data._
-import org.openmole.misc.exception._
 
 import scala.util.Random
 

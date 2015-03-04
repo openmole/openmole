@@ -26,11 +26,11 @@ object Web extends Defaults {
     exports = Seq("org.openmole.web.*"),
     dynamicImports = Seq("*"),
     imports = Seq("org.h2.*", "*;resolution:=optional")) dependsOn
-    (base.Core.workflow, base.Core.serializer, iceTar, misc) settings
+    (Core.workflow, Core.serializer, iceTar, misc) settings
     (libraryDependencies ++= Seq(bouncyCastle, h2, jetty, slick, logback, scalatra, scalate, bonecp, scalaLang, xstream, jacksonJson, arm, codec))
 
   lazy val misc = OsgiProject("org.openmole.web.misc.tools", "misc/tools") dependsOn
-    (base.Misc.workspace) settings (libraryDependencies ++= Seq(scalajHttp, arm))
+    (Core.workspace) settings (libraryDependencies ++= Seq(scalajHttp, arm))
 
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core"))
 }

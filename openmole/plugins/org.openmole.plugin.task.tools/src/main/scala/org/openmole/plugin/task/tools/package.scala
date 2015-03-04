@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.task
 
+import org.openmole.core.macros.Keyword
 import org.openmole.core.workflow.data._
-import org.openmole.misc.macros.Keyword._
 
 package object tools {
 

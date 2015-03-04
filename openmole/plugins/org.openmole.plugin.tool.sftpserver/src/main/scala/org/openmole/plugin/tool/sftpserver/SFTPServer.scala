@@ -28,7 +28,8 @@ import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
 import org.apache.sshd.server.session.ServerSession
 import org.apache.sshd.common.Session
 import org.apache.sshd.server.sftp.SftpSubsystem
-import org.openmole.misc.tools.service.ThreadUtil._
+import org.openmole.core.tools.service.ThreadUtil
+import ThreadUtil._
 import collection.JavaConversions._
 
 class SFTPServer(path: File, login: String, password: String, port: Int) {

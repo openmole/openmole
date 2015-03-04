@@ -1,7 +1,7 @@
 package org.openmole.web.misc.tools
 
 import java.security.KeyStore
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.workspace.Workspace
 import resource._
 import java.io.{ FileOutputStream, FileInputStream, File }
 

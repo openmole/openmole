@@ -19,18 +19,19 @@
 package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.tools.io.FileUtil
+import org.openmole.core.tools.service.Logger
 import org.openmole.core.batch.storage.Storage
-import org.openmole.misc.tools.io.FileUtil._
+import FileUtil._
 import fr.iscpif.gridscale.dirac.{ DIRACJobService ⇒ GSDIRACJobService, DIRACJobDescription ⇒ GSDIRACJobDescription }
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }
 import org.openmole.core.batch.control.{ UnlimitedAccess, LimitedAccess }
 import StatusFiles._
 import scalax.io.Resource
 import java.io.File
-import org.openmole.misc.tools._
+import org.openmole.core.tools._
 
 object DIRACJobService extends Logger
 

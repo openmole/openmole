@@ -20,7 +20,8 @@ package org.openmole.plugin.environment.egi
 import org.openmole.core.batch.environment.{ BatchEnvironment, SerializedJob }
 import java.util.UUID
 import java.net.URI
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.workspace.Workspace
+
 import scala.collection.mutable.ListBuffer
 
 trait JobScript {

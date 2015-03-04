@@ -4,7 +4,7 @@ import sbt._
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys._
-import root.{ GuiDefaults, base }
+import root.{ GuiDefaults }
 import root.Libraries._
 import java.io.File
 

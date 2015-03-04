@@ -17,13 +17,14 @@
 
 package org.openmole.plugin.hook.file
 
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.tools.io.FileUtil
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import java.io.File
 import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.exception._
+import FileUtil._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole.ExecutionContext
 

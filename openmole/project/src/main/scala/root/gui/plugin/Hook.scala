@@ -2,7 +2,6 @@ package root.gui.plugin
 
 import sbt._
 import root.gui._
-import root.base
 
 object Hook extends GUIPluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.gui.plugin.hook")

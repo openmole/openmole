@@ -18,6 +18,7 @@
 package org.openmole.plugin.source.file
 
 import au.com.bytecode.opencsv.CSVReader
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
@@ -27,7 +28,6 @@ import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.tool.csv.{ CSVToVariablesBuilder, CSVToVariables }
 
 import collection.mutable.ListBuffer
-import org.openmole.misc.exception.UserBadDataError
 import java.math._
 import collection.JavaConversions._
 import reflect.ClassTag

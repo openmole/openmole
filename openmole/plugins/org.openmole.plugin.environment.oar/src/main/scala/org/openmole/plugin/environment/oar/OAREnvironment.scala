@@ -21,7 +21,7 @@ import java.net.URI
 
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment._
-import org.openmole.misc.workspace._
+import org.openmole.core.workspace.AuthenticationProvider
 import org.openmole.plugin.environment.ssh._
 
 import scala.concurrent.duration.Duration

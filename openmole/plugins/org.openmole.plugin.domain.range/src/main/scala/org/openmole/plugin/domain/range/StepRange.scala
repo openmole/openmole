@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.domain.range
 
+import org.openmole.core.tools.io.FromString
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.tools.FromContext
-import org.openmole.misc.tools.io.FromString
 
 object StepRange {
   def apply[T](range: Range[T], step: FromContext[T]) = new StepRange[T](range, step)

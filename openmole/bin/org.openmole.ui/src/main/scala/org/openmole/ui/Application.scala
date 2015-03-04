@@ -25,17 +25,17 @@ import java.util.concurrent.Semaphore
 import com.fasterxml.jackson.core.json.ByteSourceJsonBootstrapper
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.logging.LoggerService
+import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.tools.service.Logger
+import org.openmole.core.workspace.Workspace
 import org.openmole.gui.bootstrap.js.BootstrapJS
-import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.workspace.Workspace
 import org.openmole.core.workflow.task._
 import org.openmole.console.Console
 import annotation.tailrec
 import org.openmole.web._
 import org.openmole.gui.server.core._
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.logging.LoggerService
 
 object Application extends Logger
 

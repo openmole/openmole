@@ -17,10 +17,11 @@
 
 package org.openmole.plugin.method.evolution
 
+import org.openmole.core.tools.io.FileUtil
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.misc.tools.io.FileUtil._
+import FileUtil._
 
 object SaveProfileHook {
 

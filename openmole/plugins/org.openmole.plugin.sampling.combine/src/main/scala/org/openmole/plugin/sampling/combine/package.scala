@@ -23,7 +23,6 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools.FromContext
-import org.openmole.misc.workspace._
 
 package object combine {
 

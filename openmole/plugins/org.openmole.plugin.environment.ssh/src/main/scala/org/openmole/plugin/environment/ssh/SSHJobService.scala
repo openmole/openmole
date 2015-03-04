@@ -20,12 +20,10 @@ package org.openmole.plugin.environment.ssh
 
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice.BatchJob
+import org.openmole.core.eventdispatcher.{ Event, EventDispatcher, EventListener }
+import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution.ExecutionState
-import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale._
 import fr.iscpif.gridscale.ssh.{ SSHJobService ⇒ GSSSHJobService, SSHConnectionCache, SSHJobDescription }
 import java.util.concurrent.atomic.AtomicInteger

@@ -21,7 +21,7 @@ import java.net.URI
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage.PersistentStorageService
-import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
+import org.openmole.core.workspace.{ Workspace, ConfigurationLocation, AuthenticationProvider }
 import concurrent.duration._
 
 object SSHEnvironment {

@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.task
 
+import org.openmole.core.macros.Keyword._
+import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data.Prototype
-import org.openmole.misc.tools.service.OS
 import org.openmole.core.workflow.builder._
-import org.openmole.misc.macros.Keyword._
 
 package object systemexec extends external.ExternalPackage {
   case class Commands(os: OS, parts: String*)

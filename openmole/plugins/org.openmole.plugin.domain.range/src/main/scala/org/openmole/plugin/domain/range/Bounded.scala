@@ -20,7 +20,7 @@ package org.openmole.plugin.domain.range
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.FromContext
-import org.openmole.misc.tools.script._
+import org.openmole.core.tools.script._
 import org.openmole.core.workflow.tools._
 
 trait Bounded[T] extends Domain[T] with Center[T] with Bounds[T] {

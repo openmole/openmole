@@ -25,20 +25,20 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.PrintStream
 import java.util.UUID
-import org.openmole.misc.eventdispatcher._
-import org.openmole.misc.exception._
-import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.tools.io.HashService
-import org.openmole.misc.tools.io.TarArchiver._
-import org.openmole.misc.tools.service._
+import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.tools.io.{ HashService, FileUtil, TarArchiver }
+import org.openmole.core.tools.service.{ Logger, LocalHostName, Retry }
+import FileUtil._
+import TarArchiver._
+import org.openmole.core.workspace.Workspace
+import org.openmole.core.tools.service._
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.storage._
 import org.openmole.core.workflow.execution.local._
 import org.openmole.core.batch.message._
-import org.openmole.misc.tools.service.Retry
 import org.openmole.core.serializer._
-import org.openmole.misc.pluginmanager._
-import org.openmole.misc.workspace._
+import org.openmole.core.pluginmanager._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import util.{ Success, Failure }

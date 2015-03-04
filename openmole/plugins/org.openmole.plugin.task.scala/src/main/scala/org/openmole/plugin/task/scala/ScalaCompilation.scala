@@ -21,11 +21,12 @@ import java.io.File
 import java.lang.reflect.Method
 import java.util
 
+import org.openmole.core.console.ScalaREPL
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.tools.obj.ClassUtils
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.Task
-import org.openmole.misc.console._
-import org.openmole.misc.exception._
-import org.openmole.misc.tools.obj.ClassUtils._
+import ClassUtils._
 
 import scala.util.Try
 

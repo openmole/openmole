@@ -20,19 +20,17 @@ package org.openmole.plugin.environment.egi
 import com.ice.tar.TarInputStream
 import java.io._
 import java.net.URI
-import org.openmole.misc.tools.service.Logger
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import java.nio.file.FileSystems
 import java.security.InvalidKeyException
 import java.security.NoSuchAlgorithmException
 import java.util.zip.GZIPInputStream
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.fileservice._
+import org.openmole.core.tools.io.FileUtil
+import org.openmole.core.tools.service.Logger
+import FileUtil._
 import org.openmole.core.batch.authentication._
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.updater.Updater
-import org.openmole.misc.workspace.{ AuthenticationProvider, Workspace }
+import org.openmole.core.updater.Updater
+import org.openmole.core.workspace.{ Workspace, AuthenticationProvider }
 import EGIEnvironment._
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import scala.collection.JavaConversions._
@@ -45,6 +43,7 @@ import fr.iscpif.gridscale._
 import java.io.File
 import scala.util.{ Success, Failure, Try }
 import concurrent.duration._
+import org.openmole.core.fileservice._
 
 object EGIAuthentication extends Logger {
 

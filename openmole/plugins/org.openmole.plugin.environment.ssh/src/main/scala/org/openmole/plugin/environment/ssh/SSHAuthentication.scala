@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.environment.ssh
 
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.workspace.{ AuthenticationProvider, Workspace }
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.workspace.{ Workspace, AuthenticationProvider }
 
 object SSHAuthentication {
 

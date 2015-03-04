@@ -1,6 +1,5 @@
 package root.gui.plugin
 
-import root.base
 import sbt._
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
@@ -21,10 +20,10 @@ object Util {
               serverLibDependencies: Seq[ModuleID] = Seq()) = {
     lazy val ext = subProject(rootDir, suffix + ".ext", extProjectDependencies, extLibDependencies ++ Seq(root.Libraries.scalaTags)) dependsOn (Ext.data) enablePlugins (ScalaJSPlugin)
     lazy val client = subProject(rootDir, suffix + ".client", clientProjectDependencies, clientLibDependencies) dependsOn (
-      ext, Ext.dataui, Misc.js, Bootstrap.osgi, gui.Client.core, base.Misc.replication % "test") enablePlugins (ScalaJSPlugin)
+      ext, Ext.dataui, Misc.js, Bootstrap.osgi, gui.Client.core, Core.replication % "test") enablePlugins (ScalaJSPlugin)
 
     lazy val server = subProject(rootDir, suffix + ".server", serverProjectDependencies, serverLibDependencies) dependsOn (
-      ext, Server.core, base.Misc.replication % "test")
+      ext, Server.core, Core.replication % "test")
 
     //FIXME: how to call directly OsgiProject from here ?
     // OsgiProject(suffix) dependsOn (ext, client, server)

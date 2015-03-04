@@ -17,11 +17,12 @@
 
 package org.openmole.plugin.domain.modifier
 
+import org.openmole.core.tools.obj.ClassUtils
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools.FromContext
 import collection.JavaConversions._
-import org.openmole.misc.tools.obj.ClassUtils._
+import ClassUtils._
 
 import scala.util.Random
 
