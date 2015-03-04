@@ -11,6 +11,7 @@ object Communication {
 
   def all: Frag = {
 
+    // TODO replace with BibTex
     val papers = Seq(
       Media("A New Method to Evaluate Simulation Models: The Calibration Profile (CP) Algorithm", "http://jasss.soc.surrey.ac.uk/18/1/12.html", "2015"),
       Media("Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal geographical model", "https://hal.archives-ouvertes.fr/hal-01118918", "2015"),

@@ -9,7 +9,8 @@
   @p The development activity can be seen from @a("github", href := "https://github.com/openmole/openmole").
 
 @sect{How to cite OpenMOLE}
-  @Publication.publication(Publication.fgcs2013)
+  @Publication.print(Papers.fgcs2013)
+  @Publication.generateBibtex(Papers.fgcs2013)
 
 @sect{Communications}
   All the papers citing OpenMOLE, conference slides, videos can be found at the @a("Contributions page", href := communications.file).

@@ -18,12 +18,42 @@
 package org.openmole.site
 package credits
 
+import java.io.{ FileOutputStream, OutputStreamWriter }
+
 import toolxit.bibtex._
 import toolxit.bibtex.{ Number ⇒ BibTexNumber }
 
 import scalatags.Text.all._
 
 object Publication {
+
+  def print(publication: BibtexEntry): Frag = {
+
+    def authors = publication.get("Author")
+    def title = publication.get("Title")
+    def url = publication.get("Url")
+    def journal = publication.get("Journal")
+    def year = publication.get("Year")
+
+    // and add a link to the file on the website
+    Seq[Frag](authors, ", ", a(i(title), href := url), " published in ", journal, ", ", year)
+  }
+
+  def generateBibtex(publication: BibtexEntry): Frag = {
+
+    // write bibtex to a separate file
+    val bibfile = s"${publication.sortKey}.bib"
+    val bibwriter = new OutputStreamWriter(new FileOutputStream(bibfile), "UTF8")
+
+    bibwriter.write(publication.toBibTeX)
+    bibwriter.flush
+    bibwriter.close
+
+    Seq[Frag](a(i("BibTex"), href := bibfile))
+  }
+}
+
+object Papers {
 
   def fgcs2013 =
     Article(
@@ -37,14 +67,4 @@ object Publication {
       Year(2013),
       Url("http://www.openmole.org/files/FGCS2013.pdf")
     )
-
-  def publication(publication: BibtexEntry): Frag = {
-
-    def authors = publication.get("Author")
-    def title = publication.get("Title")
-    def url = publication.get("Url")
-    def journal = publication.get("Journal")
-    def year = publication.get("Year")
-    Seq[Frag](authors, ", ", a(i(title), href := url), " published in ", journal, ", ", year, "\n", publication.toBibTeX)
-  }
 }
