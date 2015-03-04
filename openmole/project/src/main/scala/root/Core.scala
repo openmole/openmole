@@ -11,8 +11,6 @@ object Core extends Defaults {
   override val org = "org.openmole.core"
   override def dir = file("core")
 
-  lazy val all = Project("base", dir) aggregate (subProjects: _*) //TODO: Quick hack to workaround the file hungriness of SBT 0.13.0 fix when https://github.com/sbt/sbt/issues/937 is fixed
-
   implicit val artifactPrefix = Some("org.openmole.core")
 
   lazy val workflow = OsgiProject("workflow", imports = Seq("*")) settings (
