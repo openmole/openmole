@@ -5,7 +5,6 @@ import org.openmole.buildsystem.OMKeys._
 import sbt._
 import root._
 import root.Libraries._
-import root.libraries.Apache
 import sbt.Keys._
 import com.typesafe.sbt.osgi.OsgiKeys._
 import root.gui.plugin.Task

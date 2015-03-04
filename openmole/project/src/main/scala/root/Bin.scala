@@ -1,6 +1,5 @@
 package root
 
-import root.libraries.Apache
 import sbt._
 import Keys._
 
@@ -120,12 +119,12 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Libraries.arm,
     Libraries.xstream,
     Libraries.slick,
-    Apache.ant,
-    Apache.codec,
-    Apache.config,
-    Apache.exec,
-    Apache.math,
-    Apache.log4j,
+    Libraries.ant,
+    Libraries.codec,
+    Libraries.apacheConfig,
+    Libraries.exec,
+    Libraries.math,
+    Libraries.log4j,
     Libraries.groovy,
     Libraries.h2,
     Libraries.jasypt,
@@ -168,9 +167,9 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo assemblyPath,
     libraryDependencies ++=
     Seq(
-      Apache.sshd,
+      Libraries.sshd,
       Libraries.bouncyCastle,
-      Apache.logging,
+      Libraries.logging,
       opencsv,
       netlogo4,
       netlogo5,
@@ -234,7 +233,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
     libraryDependencies ++= Seq(
-      Apache.sshd,
+      Libraries.sshd,
       gridscale,
       gridscaleSSH,
       bouncyCastle

@@ -1,7 +1,6 @@
 package plugin
 
 import root.Libraries
-import root.libraries.Apache
 import sbt._
 import sbt.Keys._
 import com.typesafe.sbt.osgi.OsgiKeys._
@@ -33,7 +32,7 @@ object Tool extends PluginDefaults {
     libraryDependencies += Libraries.opencsv
   )
 
-  val sftpserver = OsgiProject("sftpserver", imports = Seq("*")) dependsOn (Core.tools) settings (libraryDependencies += Apache.sshd)
+  val sftpserver = OsgiProject("sftpserver", imports = Seq("*")) dependsOn (Core.tools) settings (libraryDependencies += Libraries.sshd)
 
   override def osgiSettings = super.osgiSettings ++ Seq(bundleActivator := None)
 

@@ -4,7 +4,6 @@ import sbt._
 import Keys._
 import com.typesafe.sbt.osgi.OsgiKeys
 import OsgiKeys._
-import root.libraries._
 import org.openmole.buildsystem.OMKeys._
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
@@ -16,7 +15,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
  * Time: 6:50 PM
  * To change this template use File | Settings | File Templates.
  */
-object Libraries extends Defaults(Apache) {
+object Libraries extends Defaults {
 
   val dir = file("libraries")
 
@@ -148,5 +147,21 @@ object Libraries extends Defaults(Apache) {
   lazy val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 
   lazy val scalatexSite = "org.openmole" %% "com-lihaoyi-scalatex-site" % "0.1.1"
+
+  lazy val apacheConfig = "org.openmole" %% "org-apache-commons-configuration" % "1.10"
+
+  lazy val math = "org.openmole" %% "org-apache-commons-math" % "3.4.1"
+
+  lazy val exec = "org.openmole" %% "org-apache-commons-exec" % "1.1"
+
+  lazy val log4j = "org.openmole" %% "org-apache-log4j" % "1.2.17"
+
+  lazy val logging = "org.openmole" %% "org-apache-commons-logging" % "1.1.1"
+
+  lazy val sshd = "org.openmole" %% "org-apache-sshd" % "0.13.0"
+
+  lazy val ant = "org.openmole" %% "org-apache-ant" % "1.8.0"
+
+  lazy val codec = "org.openmole" %% "org-apache-commons-codec" % "1.10"
 
 }

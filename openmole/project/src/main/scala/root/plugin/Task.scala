@@ -3,7 +3,6 @@ package plugin
 import root.Libraries
 import sbt._
 
-import root.libraries.Apache
 import root.Libraries._
 import sbt.Keys._
 import scala.Some
@@ -40,7 +39,7 @@ object Task extends PluginDefaults {
 
   lazy val systemexec = OsgiProject("systemexec", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, external,
     Core.workspace) settings (
-      libraryDependencies ++= Seq(Apache.exec)
+      libraryDependencies ++= Seq(exec)
     )
 
   lazy val statistic = OsgiProject("statistic", imports = Seq("*")) dependsOn (Core.workflow)

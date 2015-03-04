@@ -4,7 +4,6 @@ import org.openmole.buildsystem.OMKeys._
 import com.typesafe.sbt.osgi.OsgiKeys
 import root.Libraries._
 import root.ThirdParties._
-import root.libraries.Apache
 import sbt.Keys._
 import sbt._
 
@@ -18,7 +17,7 @@ object Core extends Defaults {
 
   lazy val workflow = OsgiProject("workflow", openmoleScope = Some("provided"), imports = Seq("*")) settings (
     includeOsgi,
-    libraryDependencies ++= Seq(scalaLang, groovy, Apache.math, scalatest)
+    libraryDependencies ++= Seq(scalaLang, groovy, math, scalatest)
   ) dependsOn
     (eventDispatcher, exception, tools, updater, workspace, macros, pluginManager, serializer, replication % "test")
 
@@ -29,7 +28,7 @@ object Core extends Defaults {
 
   lazy val batch = OsgiProject("batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (
     workflow, workspace, tools, eventDispatcher, replication, updater, exception,
-    serializer, fileService, pluginManager, iceTar) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick, Apache.config))
+    serializer, fileService, pluginManager, iceTar) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick, apacheConfig))
 
   lazy val dsl = OsgiProject("dsl", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (workflow, logging)
 
@@ -37,7 +36,7 @@ object Core extends Defaults {
 
   val tools = OsgiProject("tools", dynamicImports = Seq("*"), imports = Seq("*")) settings
     (includeOsgi,
-      libraryDependencies ++= Seq(xstream, groovy, Apache.exec, Apache.math, jodaTime, scalaLang, scalatest)) dependsOn
+      libraryDependencies ++= Seq(xstream, groovy, exec, math, jodaTime, scalaLang, scalatest)) dependsOn
       (exception, iceTar)
 
   val eventDispatcher = OsgiProject("eventdispatcher", imports = Seq("*")) dependsOn (tools) settings (
@@ -48,7 +47,7 @@ object Core extends Defaults {
     libraryDependencies ++= Seq(slick, xstream))
 
   val workspace = OsgiProject("workspace", imports = Seq("*")) settings
-    (includeOsgi, libraryDependencies ++= Seq(jasypt, xstream, Apache.config, Apache.math)) dependsOn
+    (includeOsgi, libraryDependencies ++= Seq(jasypt, xstream, apacheConfig, math)) dependsOn
     (exception, eventDispatcher, tools, replication)
 
   val fileDeleter = OsgiProject("filedeleter", imports = Seq("*")) settings (includeOsgi) dependsOn (tools)
@@ -67,7 +66,7 @@ object Core extends Defaults {
 
   val logging = OsgiProject(
     "logging",
-    bundleActivator = Some("org.openmole.core.logging.internal.Activator"), imports = Seq("*")) settings (libraryDependencies ++= Seq(Apache.log4j, logback, slf4j, equinoxCommon)) dependsOn
+    bundleActivator = Some("org.openmole.core.logging.internal.Activator"), imports = Seq("*")) settings (libraryDependencies ++= Seq(log4j, logback, slf4j, equinoxCommon)) dependsOn
     (tools, workspace)
 
   val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), dynamicImports = Seq("*"), imports = Seq("*")) dependsOn

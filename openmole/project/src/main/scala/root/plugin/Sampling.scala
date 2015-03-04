@@ -2,7 +2,6 @@ package plugin
 
 import root._
 import root.Libraries
-import root.libraries._
 import sbt._
 import Keys._
 
@@ -18,6 +17,6 @@ object Sampling extends root.PluginDefaults {
   lazy val lhs = OsgiProject("lhs", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Core.workspace)
 
   lazy val quasirandom = OsgiProject("quasirandom", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Core.workspace) settings (
-    libraryDependencies += Apache.math
+    libraryDependencies += Libraries.math
   )
 }

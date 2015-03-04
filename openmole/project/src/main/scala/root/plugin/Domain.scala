@@ -2,7 +2,6 @@ package plugin
 
 import sbt._
 import Keys._
-import root.libraries.Apache
 import root._
 
 object Domain extends PluginDefaults {
@@ -11,7 +10,7 @@ object Domain extends PluginDefaults {
   lazy val collection = OsgiProject("collection", imports = Seq("*")) dependsOn (Core.exception, Core.workflow)
 
   lazy val distribution = OsgiProject("distribution", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Core.workspace) settings
-    (libraryDependencies ++= Seq(Apache.math))
+    (libraryDependencies ++= Seq(Libraries.math))
 
   lazy val fileDomain = OsgiProject("file", imports = Seq("*")) dependsOn (Core.exception, Core.workflow)
 

@@ -14,7 +14,6 @@ import scala.Some
  */
 object Web extends Defaults {
   import Libraries._
-  import libraries.Apache._
   import ThirdParties._
 
   val dir = file("web")
