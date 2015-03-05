@@ -35,6 +35,7 @@ class Site extends IApplication {
 
     Config.testScript = !args.contains("-nc")
 
+    Site.dest = args(0)
     val dest = new File(args(0))
     dest.recursiveDelete
 
@@ -121,4 +122,8 @@ class Site extends IApplication {
 
   override def stop() = {}
 
+}
+
+object Site {
+  var dest: String = ""
 }

@@ -18,8 +18,7 @@
 package org.openmole.site
 package credits
 
-import java.io.{ FileOutputStream, OutputStreamWriter }
-
+import org.openmole.misc.tools.io.FileUtil._
 import toolxit.bibtex._
 import toolxit.bibtex.{ Number ⇒ BibTexNumber }
 
@@ -43,11 +42,11 @@ object Publication {
 
     // write bibtex to a separate file
     val bibfile = s"${publication.sortKey}.bib"
-    val bibwriter = new OutputStreamWriter(new FileOutputStream(bibfile), "UTF8")
 
-    bibwriter.write(publication.toBibTeX)
-    bibwriter.flush
-    bibwriter.close
+    val f = new File(Site.dest, bibfile)
+    f.withWriter { writer ⇒
+      writer.write(publication.toBibTeX)
+    }
 
     Seq[Frag](a(i("BibTex"), href := bibfile))
   }
