@@ -17,15 +17,21 @@ package org.openmole.gui.plugin.task.statistic.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.plugin.task.statistic.ext.StatisticTaskData
-import org.openmole.gui.client.core.dataui.TaskDataUI
-import org.openmole.gui.client.core.ClientService
-import ClientService._
-import scala.scalajs.js.annotation.JSExport
-import rx._
-class StatisticTaskDataUI(val name: Var[String] = Var("")) extends TaskDataUI {
+import org.openmole.gui.plugin.task.statistic.ext._
+import org.openmole.gui.client.core.dataui._
+import org.openmole.gui.client.core.dataui.IOMappingFactory._
 
- def data = new StatisticTaskData(inputDataUI().data.inputs, outputDataUI().data.outputs)
- def panelUI = new StatisticTaskPanelUI(this)
- def dataType = "Statistic"
+import rx._
+
+class StatisticTaskDataUI(val name: Var[String] = Var("")) extends InAndOutTaskDataUI {
+
+  def data = new StatisticTaskData(inputDataUI().data.inputs, outputDataUI().data.outputs, inAndOutDataUI().data.inAndOutputs)
+
+  def panelUI = new StatisticTaskPanelUI(this)
+
+  def dataType = "Statistic"
+
+  def inAndOutMappingsFactory = IOMappingsFactory(
+    selectField("Statistic", StatisticType.MEDIAN, StatisticType.ALL, dimension1Filter, dimension0Filter)
+  )
 }

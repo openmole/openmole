@@ -17,8 +17,18 @@ package org.openmole.gui.plugin.task.statistic.ext
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.{TaskData, InOutput}
+import org.openmole.gui.ext.data.{InAndOutput, TaskData, InOutput}
+
+object StatisticType extends Enumeration {
+
+  case class StatisticType(uuid: String, name: String) extends Val(name)
+  val SUM = new StatisticType("SUM", "Sum")
+  val MEDIAN = new StatisticType("MEDIAN", "Median")
+
+ val ALL = Seq(SUM, MEDIAN)
+}
 
 case class StatisticTaskData(inputs: Seq[InOutput] = Seq(),
-                             outputs: Seq[InOutput] = Seq()) extends TaskData {
+                             outputs: Seq[InOutput] = Seq(),
+                             inAndOutputs: Seq[InAndOutput] = Seq()) extends TaskData {
 }

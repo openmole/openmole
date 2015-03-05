@@ -61,6 +61,7 @@ object OMKeys {
 
   object OSGi {
     val singleton = SettingKey[Boolean]("osgi-singleton")
+    val openMOLEScope = SettingKey[Option[String]]("openmole-scope")
   }
 
 }

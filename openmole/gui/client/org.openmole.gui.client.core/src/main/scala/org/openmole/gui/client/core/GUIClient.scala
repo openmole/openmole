@@ -44,13 +44,15 @@ object GUIClient {
     ClientService += ("org.openmole.gui.ext.dataui.BooleanPrototypeDataUI", PrototypeFactoryUI.booleanFactory)
     ClientService += ("org.openmole.gui.ext.dataui.FilePrototypeDataUI", PrototypeFactoryUI.fileFactory)
 
-    val db = DataBagUI(ClientService.taskFactories(1))
+    val db = DataBagUI(ClientService.taskFactories(0))
     db.name() = "premier"
     ClientService += db
-    db.name() = "first"
     val db2 = DataBagUI(ClientService.taskFactories(1))
     ClientService += db2
     db2.name() = "yopp"
+    val db3 = DataBagUI(ClientService.taskFactories(2))
+    ClientService += db3
+    db3.name() = "yopp3"
     ClientService += DataBagUI(PrototypeFactoryUI.fileFactory, "proto1")
     ClientService += DataBagUI(PrototypeFactoryUI.fileFactory, "proto2")
     ClientService += DataBagUI(PrototypeFactoryUI.doubleFactory, "proto3")

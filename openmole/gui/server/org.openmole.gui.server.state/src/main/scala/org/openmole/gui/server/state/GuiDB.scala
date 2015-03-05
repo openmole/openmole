@@ -17,7 +17,8 @@ package org.openmole.gui.server.state
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.workspace.Workspace
+
 import slick.driver.H2Driver.simple._
 import scala.slick.jdbc.meta.MTable
 

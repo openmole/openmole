@@ -76,8 +76,8 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
     _.name()
   }.getOrElse(""))
 
-  val factorySelector: Select[FactoryUI] = new Select("factories",
-    Var(filter().factories),
+  val factorySelector: Select[FactoryUI] = Select("factories",
+    filter().factories,
     currentDataBagUI(),
     btn_primary, () ⇒ {
       currentDataBagUI().map { db ⇒
@@ -129,7 +129,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
 
   def resetSettingTabs = settingTabs() = currentDataBagUI().map { db ⇒ SettingTabs(this, db) }
 
-  def stack(db: DataBagUI, index: Int) = {
+  def stack(db: DataBagUI, index: Int = 0) = {
     panelSequences.stack(db, index)
   }
 

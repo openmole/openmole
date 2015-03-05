@@ -27,7 +27,7 @@ cd "$CURDIR"
 
 CONFIGDIR=/tmp/site_`date +%s`_$RANDOM
 
-java -Xmx2G -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog $@
+java -Dfile.encoding=UTF-8 -Xmx2G -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog $@
 
 rm -rf "${CONFIGDIR}" 
 

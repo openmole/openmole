@@ -17,12 +17,12 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.dataui.PanelUI
+import org.openmole.gui.ext.data._
 import rx._
 
 package object dataui {
 
-  def inoutputUI(protoDataBagUI: PrototypeDataBagUI, mappingsFactory: IOMappingsFactory = IOMappingsFactory.default) = {
+  def inoutputUI(protoDataBagUI: PrototypeDataBagUI, mappingsFactory: IOMappingsFactory) = {
     def mappings = new IOMappingsUI(mappingsFactory.build.fields.filter(_.prototypeFilter(protoDataBagUI)))
     val ioputUI = InOutputUI(protoDataBagUI.uuid, protoDataBagUI, Var(mappings))
 
@@ -33,6 +33,28 @@ package object dataui {
     ioputUI
   }
 
+  def defaultInOutputUI(protoDataBagUI: PrototypeDataBagUI) = inoutputUI(protoDataBagUI, IOMappingsFactory.default)
+
+  def emptyInOutputUI(protoDataBagUI: PrototypeDataBagUI) = inoutputUI(protoDataBagUI, IOMappingsFactory.empty)
+
+  def inAndOutputUI(i: PrototypeDataBagUI, o: PrototypeDataBagUI, mapping: IOMappingDataUI[_]) = {
+    val in = inoutputUI(i, IOMappingsFactory.default)
+    val out = inoutputUI(o, IOMappingsFactory.empty)
+    InAndOutputUI(i.uuid + o.uuid, in, out, mapping)
+  }
+
+  object InOutputUI {
+    def inputData(inoutputsUI: Seq[InOutputUI]) = inoutputsUI.map { id ⇒
+      InOutput(id.protoDataBagUI.dataUI().data, id.mappings().fields.map { _.data })
+    }
+
+    def outputData(inoutputsUI: Seq[InOutputUI]) = inoutputsUI.map { id ⇒
+      InOutput(id.protoDataBagUI.dataUI().data, id.mappings().fields.map { _.data })
+    }
+  }
+
   case class InOutputUI(id: String, protoDataBagUI: PrototypeDataBagUI, mappings: Var[IOMappingsUI])
+
+  case class InAndOutputUI(id: String, in: InOutputUI, out: InOutputUI, mapping: IOMappingDataUI[_])
 
 }

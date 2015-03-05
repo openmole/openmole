@@ -31,7 +31,9 @@ object InputFilter {
 
   val filterId: String = "inputFilter"
 
-  val protoFilterId: String = "protoInputFilter"
+  val protoFilterId1: String = "protoInputFilter1"
+
+  val protoFilterId2: String = "protoInputFilter2"
 }
 
 import InputFilter._

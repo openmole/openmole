@@ -1,7 +1,5 @@
 package root
 
-import root.base.Misc
-import root.libraries.Apache
 import sbt._
 import Keys._
 
@@ -16,7 +14,7 @@ import UnidocKeys._
 import scala.util.matching.Regex
 import sbtbuildinfo.Plugin._
 
-object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
+object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties, Web) {
   val dir = file("bin")
 
   def filter(m: ModuleID) = {
@@ -53,33 +51,33 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   lazy val openmoleConsole = OsgiProject("org.openmole.console") settings (
     organization := "org.openmole.console"
   ) dependsOn (
-      base.Core.workflow,
-      base.Misc.console,
-      base.Core.dsl,
-      base.Core.batch
+      Core.workflow,
+      Core.console,
+      Core.dsl,
+      Core.batch
     )
 
   lazy val openmoleUI = OsgiProject("org.openmole.ui", singleton = true) settings (
     organization := "org.openmole.ui",
-    libraryDependencies ++= Seq(jodaTime, scalaLang, jasypt, Apache.config, Apache.ant, jline, Apache.log4j, scopt, equinoxApp)
+    libraryDependencies += equinoxApp
   ) dependsOn (
       openmoleConsole,
-      base.Misc.workspace,
-      base.Misc.replication,
-      base.Misc.exception,
-      base.Misc.tools,
-      base.Misc.eventDispatcher,
-      base.Misc.pluginManager,
-      base.Core.workflow,
-      base.Core.batch,
+      Core.workspace,
+      Core.replication,
+      Core.exception,
+      Core.tools,
+      Core.eventDispatcher,
+      Core.pluginManager,
+      Core.workflow,
+      Core.batch,
       gui.Server.core,
       gui.Client.core,
       gui.Bootstrap.js,
       gui.Bootstrap.osgi,
-      base.Misc.logging,
+      Core.logging,
       Web.core,
-      base.Misc.console,
-      base.Core.dsl)
+      Core.console,
+      Core.dsl)
 
   lazy val java368URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-386/20-b17/java-jre-linux-386-20-b17.tgz")
   lazy val javax64URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-x64/20-b17/java-jre-linux-x64-20-b17.tgz")
@@ -121,13 +119,12 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     Libraries.arm,
     Libraries.xstream,
     Libraries.slick,
-    Libraries.jline,
-    Apache.ant,
-    Apache.codec,
-    Apache.config,
-    Apache.exec,
-    Apache.math,
-    Apache.log4j,
+    Libraries.ant,
+    Libraries.codec,
+    Libraries.apacheConfig,
+    Libraries.exec,
+    Libraries.math,
+    Libraries.log4j,
     Libraries.groovy,
     Libraries.h2,
     Libraries.jasypt,
@@ -170,9 +167,9 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo assemblyPath,
     libraryDependencies ++=
     Seq(
-      Apache.sshd,
+      Libraries.sshd,
       Libraries.bouncyCastle,
-      Apache.logging,
+      Libraries.logging,
       opencsv,
       netlogo4,
       netlogo5,
@@ -201,7 +198,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   lazy val dbServer = Project("dbserver", dir / "dbserver", settings = assemblySettings) settings (commonsSettings: _*) settings (
     assemblyDependenciesPath := assemblyPath.value / "lib",
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p / "bin" },
-    resourcesAssemble <++= Seq(Misc.replication.project, base.Runtime.dbserver.project) sendTo (assemblyPath / "lib"),
+    resourcesAssemble <++= Seq(Core.replication.project, Runtime.dbserver.project) sendTo (assemblyPath / "lib"),
     libraryDependencies ++= Seq(
       Libraries.xstream,
       Libraries.slick,
@@ -232,11 +229,11 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
   lazy val daemon = Project("daemon", dir / "daemon", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     resourcesAssemble <++=
-    Seq(base.Runtime.daemon.project, base.plugin.Environment.desktopgrid.project, base.plugin.Tool.sftpserver.project) sendTo (assemblyPath / "plugins"),
+    Seq(Runtime.daemon.project, plugin.Environment.desktopgrid.project, plugin.Tool.sftpserver.project) sendTo (assemblyPath / "plugins"),
     resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
     libraryDependencies ++= Seq(
-      Apache.sshd,
+      Libraries.sshd,
       gridscale,
       gridscaleSSH,
       bouncyCastle
@@ -255,7 +252,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       config := assemblyPath.value / "configuration/config.ini"
   )
 
-  lazy val api = Project("api", dir / "target" / "api") aggregate ((Base.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (commonsSettings: _*) settings (
+  lazy val api = Project("api", dir / "target" / "api") aggregate ((Core.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (commonsSettings: _*) settings (
     unidocSettings: _*
   ) settings (tarProject: _*) settings (
       compile := Analysis.Empty,

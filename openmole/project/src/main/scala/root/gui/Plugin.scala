@@ -7,7 +7,7 @@ import com.typesafe.sbt.osgi.OsgiKeys._
 import root.gui.plugin._
 import org.openmole.buildsystem.OMKeys._
 
-abstract class PluginDefaults(subBuilds: Defaults*) extends GuiDefaults(subBuilds: _*) {
+abstract class GUIPluginDefaults(subBuilds: Defaults*) extends GuiDefaults(subBuilds: _*) {
   override def dir = super.dir / "plugins"
 
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("guiPlugin"),
@@ -15,7 +15,7 @@ abstract class PluginDefaults(subBuilds: Defaults*) extends GuiDefaults(subBuild
     libraryDependencies ++= Seq(root.Libraries.rx, root.Libraries.scalaTags, root.Libraries.scalajsDom, root.Libraries.scaladget))
 }
 
-object Plugin extends PluginDefaults(plugin.Task, Domain, Environment, Sampling, Hook, Method, Source) {
+object Plugin extends GUIPluginDefaults(plugin.Task, Domain, Environment, Sampling, Hook, Method, Source) {
 
   implicit val artifactPrefix = Some("org.openmole.gui.plugin")
 

@@ -20,7 +20,7 @@ package org.openmole.site
 import java.text.DateFormat
 import java.util.{ Locale, Calendar }
 
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.exception.UserBadDataError
 
 import scala.util.Failure
 import scalatex.site.{ Highlighter, Section }

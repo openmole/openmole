@@ -16,7 +16,7 @@
  */
 package org.openmole.gui.server.core
 
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.workspace.Workspace
 import org.scalatra._
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.Api

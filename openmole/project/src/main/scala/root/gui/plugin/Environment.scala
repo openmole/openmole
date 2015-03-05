@@ -1,10 +1,9 @@
 package root.gui.plugin
 
-import root.base
 import sbt._
 import root.gui._
 
-object Environment extends PluginDefaults {
+object Environment extends GUIPluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.gui.plugin.environment")
   /*
   lazy val desktopgrid = OsgiProject("desktopgrid") dependsOn ( base.Misc.exception,

@@ -17,11 +17,7 @@ package org.openmole.gui.misc
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import rx._
-
 package object js {
-
-  type DisplayableRx = { def name: Var[String] }
 
   type Displayable = { def name: String }
 
