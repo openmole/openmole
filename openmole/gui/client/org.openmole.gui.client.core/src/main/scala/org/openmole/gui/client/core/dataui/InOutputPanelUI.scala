@@ -17,43 +17,38 @@ package org.openmole.gui.client.core.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.{ PrototypeFactoryUI, ClientService, GenericPanel }
+import org.openmole.gui.client.core.GenericPanel
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.{ InputFilter, Forms ⇒ bs }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter }
 import rx._
 
-import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
-import scalatags.JsDom.tags
+import scalatags.JsDom.{ tags }
+import IOPanelUIUtil._
 
-class InOutputPanelUI(panel: GenericPanel, dataUI: InOutputDataUI) extends PanelUI {
-  val inputFilter = InputFilter(pHolder = "Add a prototype", inputID = InputFilter.protoFilterId)
+class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) extends PanelUI {
+  val inputFilter = InputFilter(pHolder = "Add a prototype", inputID = InputFilter.protoFilterId1)
 
-  def filteredInputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ inoutputUI(p) }.filter { i ⇒
-    inputFilter.contains(i.protoDataBagUI.name()) &&
-      !inputFilter.nameFilter().isEmpty &&
-      !dataUI.exists(i)
-  }
+  def filteredInputsUI = filtered(inputFilter, dataUI, dataUI.mappingsFactory)
 
   //New button
   val newGlyph =
     //FIXME: THE SIZE OF THE GLYPH IS SMALLER THAN THE REST OF THE GROUP WHEN GROUPEL
     // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
     bs.button("Add")(`type` := "submit", onclick := { () ⇒
-      if (filteredInputsUI.size == 1) {
-        add(filteredInputsUI.head.protoDataBagUI)
+      val filtering = filteredInputsUI
+      if (filtering.size == 1) {
+        add(filtering.head.protoDataBagUI)
       }
       else if (!inputFilter.nameFilter().isEmpty) {
-        val newProto = DataBagUI.prototype(PrototypeFactoryUI.doubleFactory, inputFilter.nameFilter())
-        ClientService += newProto
+        val newProto = buildProto(inputFilter.nameFilter())
         setCurrent(newProto)
         add(newProto)
       }
     }).render
 
-  @JSExport
   val view =
     bs.form(spacer20)(
       bs.formGroup( /*row + */ col_md_12)(
@@ -64,17 +59,7 @@ class InOutputPanelUI(panel: GenericPanel, dataUI: InOutputDataUI) extends Panel
       bs.formGroup(col_md_12)(Rx {
         (for ((headers, inputsUI) ← (filteredInputsUI ++ dataUI.inoutputsUI()).groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI) }) yield {
           bs.table(col_md_12 + striped)(
-            thead(
-              tags.tr(
-                tags.th("Name"),
-                tags.th("Type"),
-                tags.th("Dim"),
-                for (k ← headers) yield {
-                  tags.th(k)
-                },
-                tags.th("")
-              )
-            ),
+            buildHeaders(prototypeHeaderSequence ++ headers :+ ""),
             tbody(
               for (i ← inputsUI.sortBy(_.protoDataBagUI.name())) yield {
                 bs.tr(
@@ -122,11 +107,6 @@ class InOutputPanelUI(panel: GenericPanel, dataUI: InOutputDataUI) extends Panel
     panel.setCurrent(pdb)
   }
 
-  def save = {
-    dataUI.inoutputsUI().map {
-      _.mappings().fields.map {
-        _.panelUI.save
-      }
-    }
-  }
+  def save = saveInOutputsUI(dataUI.inoutputsUI())
+
 }

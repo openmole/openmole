@@ -20,11 +20,9 @@ package org.openmole.gui.plugin.task.groovy.client
 import org.openmole.gui.client.core.ClientService
 import org.openmole.gui.client.core.dataui.TaskDataUI
 import ClientService._
-import scala.scalajs.js.annotation.JSExport
 import org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData
 import rx._
 
-@JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskDataUI")
 class GroovyTaskDataUI(val code: Var[String] = Var(""),
                        val libs: Var[Seq[Var[String]]] = Var(Seq())) extends TaskDataUI {
 //libs().map{c=>c()}

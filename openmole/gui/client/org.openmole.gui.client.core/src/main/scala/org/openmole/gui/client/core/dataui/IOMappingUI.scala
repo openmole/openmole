@@ -2,6 +2,7 @@ package org.openmole.gui.client.core.dataui
 
 import org.openmole.gui.client.core.PrototypeFactoryUI.GenericPrototypeDataUI
 import org.openmole.gui.ext.dataui.PanelUI
+import org.openmole.gui.misc.js.{ Select, Displayable, Identifiable }
 import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.HTMLElement
@@ -36,23 +37,30 @@ trait IOMappingDataUI[T] {
 
   def prototypeFilter(p: PrototypeDataBagUI): Boolean = true
 
+  def prototypeFilter2(p: PrototypeDataBagUI): Boolean = true
+
   def data = IOMappingData(key, value)
 }
 
 object IOMappingFactory {
+
   def defaultInputField = IOMappingFactory.stringField("Default")
 
-  def stringField(keyName: String, protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory {
-
+  def stringField(keyName: String,
+                  protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true,
+                  protoFilter2: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory[String] {
     def build = new IOMappingDataUI[String] {
 
       val key = keyName
-      val value = Var("")
+
+      val value: Var[String] = Var("")
 
       override def prototypeFilter(proto: PrototypeDataBagUI) = protoFilter(proto)
 
+      override def prototypeFilter2(proto: PrototypeDataBagUI) = protoFilter2(proto)
+
       val panelUI = new PanelUI {
-        val input = bs.input(value())(placeholder := key).render
+        val input = bs.input("")(placeholder := keyName).render
 
         def view: TypedTag[HTMLElement] = span(input)
 
@@ -61,8 +69,10 @@ object IOMappingFactory {
     }
   }
 
-  def booleanField(keyName: String, default: Boolean, protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory {
-
+  def booleanField(keyName: String,
+                   default: Boolean,
+                   protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true,
+                   protoFilter2: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory[Boolean] {
     def build = new IOMappingDataUI[Boolean] {
 
       val key = keyName
@@ -70,6 +80,8 @@ object IOMappingFactory {
       val value: Var[Boolean] = Var(default)
 
       override def prototypeFilter(proto: PrototypeDataBagUI) = protoFilter(proto)
+
+      override def prototypeFilter2(proto: PrototypeDataBagUI) = protoFilter2(proto)
 
       val panelUI = new PanelUI {
         val input = bs.checkbox(value()).render
@@ -81,25 +93,63 @@ object IOMappingFactory {
     }
   }
 
+  def selectField[T <: Displayable with Identifiable](keyName: String,
+                                                      default: T,
+                                                      options: Seq[T],
+                                                      protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true,
+                                                      protoFilter2: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory[T] {
+    def build = new IOMappingDataUI[T] {
+
+      val key = keyName
+
+      val value: Var[T] = Var(default)
+
+      override def prototypeFilter(proto: PrototypeDataBagUI) = protoFilter(proto)
+
+      override def prototypeFilter2(proto: PrototypeDataBagUI) = protoFilter2(proto)
+
+      val panelUI = new PanelUI {
+        val selectorT = Select("selectField",
+          options,
+          Some(default))
+
+        def view: TypedTag[HTMLElement] = span(selectorT.selector)
+
+        def save: Unit = selectorT.content().map { c ⇒ value() = c }
+      }
+    }
+  }
+
   def typeFilter(t: ProtoTYPE) = (p: PrototypeDataBagUI) ⇒ p.dataUI().data.`type` == t
 
   def fileFilter = typeFilter(FILE)
 
   def stringFilter = typeFilter(STRING)
+
+  def dimensionFilter(d: Int) = (p: PrototypeDataBagUI) ⇒ p.dataUI().data.dimension == d
+
+  def dimension1Filter = dimensionFilter(1)
+
+  def dimension0Filter = dimensionFilter(0)
 }
 
-trait IOMappingFactory {
-  def build: IOMappingDataUI[_]
+trait IOMappingFactory[T] {
+  def build: IOMappingDataUI[T]
 }
 
 import IOMappingFactory._
 
 object IOMappingsFactory {
 
-  def apply(mappingFactories: IOMappingFactory*) = new IOMappingsFactory {
+  def apply(mappingFactories: IOMappingFactory[_]*) = new IOMappingsFactory {
     def build: IOMappingsUI = new IOMappingsUI(mappingFactories.map {
       _.build
     })
+  }
+
+  def empty = new IOMappingsFactory {
+    def name: String = ""
+    def build: IOMappingsUI = new IOMappingsUI()
   }
 
   def default = IOMappingsFactory(defaultInputField)

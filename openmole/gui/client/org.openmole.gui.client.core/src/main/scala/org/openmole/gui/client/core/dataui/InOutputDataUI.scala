@@ -22,14 +22,17 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-abstract class InOutputDataUI(mappingsFactory: IOMappingsFactory) extends DataUI {
-
-  def dataType = "Inputs"
+abstract class InOutputDataUI(val mappingsFactory: IOMappingsFactory) extends DataUI {
 
   def +=(proto: PrototypeDataBagUI) =
     if (!exists(proto)) {
+      println("ADD with MAPP " + mappingsFactory.build.fields.map { _.key })
       inoutputsUI() = inoutputsUI() :+ inoutputUI(proto, mappingsFactory)
     }
+
+  def -=(p: PrototypeDataBagUI) = inoutputsUI() = inoutputsUI().filter {
+    _.id != p.uuid
+  }
 
   def -=(inoutputUI: InOutputUI) = inoutputsUI() = inoutputsUI().filter {
     _.id != inoutputUI.id
@@ -53,23 +56,22 @@ abstract class InOutputDataUI(mappingsFactory: IOMappingsFactory) extends DataUI
 
 }
 
-class InputDataUI(mappingsFactory: IOMappingsFactory) extends InOutputDataUI((mappingsFactory)) {
+class InputDataUI(mFactory: IOMappingsFactory) extends InOutputDataUI(mFactory) {
   type DATA = InputData
 
+  def dataType = "Inputs"
   def data = new InputData {
-    def inputs = inoutputsUI().map { id ⇒
-      InOutput(id.protoDataBagUI.dataUI().data, id.mappings().fields.map { _.data })
-    }
+    def inputs = InOutputUI.inputData(inoutputsUI())
   }
+
 }
 
-class OutputDataUI(mappingsFactory: IOMappingsFactory) extends InOutputDataUI((mappingsFactory)) {
+class OutputDataUI(mFactory: IOMappingsFactory) extends InOutputDataUI(mFactory) {
   type DATA = OutputData
 
+  def dataType = "Outputs"
   def data = new OutputData {
-    def outputs = inoutputsUI().map { id ⇒
-      InOutput(id.protoDataBagUI.dataUI().data, id.mappings().fields.map { _.data })
-    }
+    def outputs = InOutputUI.outputData(inoutputsUI())
   }
 }
 

@@ -76,6 +76,10 @@ trait OutputData <: Data {
   def outputs: Seq[InOutput]
 }
 
+trait InAndOutputData <: Data {
+  def inAndOutputs: Seq[InAndOutput]
+}
+
 trait TaskData extends Data with InputData with OutputData
 
 trait EnvironmentData extends Data

@@ -193,7 +193,7 @@ object Forms {
   def table(keys: ClassKeyAggregator) = tags.table(`class` := keys.key)
   def tr(keys: ClassKeyAggregator) = tags.tr(`class` := keys.key)
   def th(keys: ClassKeyAggregator) = tags.th(`class` := keys.key)
-  def td(keys: ClassKeyAggregator) = tags.td(`class` := keys.key)
+  def td(keys: ClassKeyAggregator) = tags.td(`class` := (keys + key("vert-align")).key)
 
   val bordered = key("table table-bordered")
   val striped = key("table table-striped")

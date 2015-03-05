@@ -20,12 +20,19 @@ import rx._
 
 trait IODataUI {
 
-  def inputMappingsFactory: IOMappingsFactory = IOMappingsFactory.default
+  lazy val inputMappingsFactory: IOMappingsFactory = IOMappingsFactory.default
 
-  def outputMappingsFactory: IOMappingsFactory = IOMappingsFactory.default
+  lazy val outputMappingsFactory: IOMappingsFactory = IOMappingsFactory.empty
 
   lazy val inputDataUI: Var[InputDataUI] = Var(new InputDataUI(inputMappingsFactory))
 
   lazy val outputDataUI: Var[OutputDataUI] = Var(new OutputDataUI(outputMappingsFactory))
+}
+
+trait IAndODataUI <: IODataUI {
+
+  def inAndOutMappingsFactory: IOMappingsFactory
+
+  lazy val inAndOutDataUI: Var[InAndOutputDataUI] = Var(new InAndOutputDataUI(inAndOutMappingsFactory))
 
 }

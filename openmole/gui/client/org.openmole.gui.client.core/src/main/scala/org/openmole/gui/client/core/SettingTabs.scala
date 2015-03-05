@@ -41,9 +41,11 @@ object SettingTabs {
 
     def ioTab(name: String, panelUIs: Seq[PanelUI]) = SettingTab(name, panelUIs)
 
-    def inputTab(panelUIs: Seq[InOutputPanelUI]) = SettingTab("Inputs", panelUIs, focusID = Some(InputFilter.protoFilterId))
+    def inputTab(panelUIs: Seq[InOutputPanelUI]) = SettingTab("Inputs", panelUIs, focusID = Some(InputFilter.protoFilterId1))
 
-    def outputTab(panelUIs: Seq[PanelUI]) = SettingTab("Outputs", panelUIs)
+    def outputTab(panelUIs: Seq[InOutputPanelUI]) = SettingTab("Outputs", panelUIs)
+
+    def inAndOutTab(panelUIs: Seq[InAndOutPanelUI]) = SettingTab("Inputs and Outputs", panelUIs)
 
     def environmentTab(panelUIs: Seq[PanelUI]) = SettingTab("Environment", panelUIs)
 
@@ -54,6 +56,7 @@ object SettingTabs {
   import SettingTab._
 
   def apply(panel: GenericPanel, db: DataBagUI): SettingTabs = new SettingTabs(db.dataUI() match {
+    case iAo: InAndOutTaskDataUI ⇒ Seq(inAndOutTab(Seq(iAo.inAndOutDataUI().panelUI(panel))))
     case io: IODataUI ⇒
       val name = io match {
         case h: HookDataUI ⇒ "Hooks"
@@ -79,7 +82,7 @@ object SettingTabs {
       i ⇒ inputTab(Seq(i.panelUI(panel)))
     },
     dataUI.outputDataUI.map {
-      o ⇒ outputTab(Seq(o.panelUI))
+      o ⇒ outputTab(Seq(o.panelUI(panel)))
     },
     dataUI.environment.map {
       env ⇒ environmentTab(Seq(env.panelUI))
