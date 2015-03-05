@@ -68,6 +68,24 @@ select::-moz-focus-inner {
 	color: black;
 }
 
+#conceptPanelID .modal-dialog {
+    width: 60%;
+}
+
+.table tbody>tr>td.vert-align{
+    vertical-align: middle;
+}
+
+.table th,tr{
+	text-align: center;
+    vertical-align: middle;
+}
+
+.table th span input {
+    min-width: 20px;
+    max-width: 150px;
+}
+
 .modal-info {
     background-image: linear-gradient(#d9edf7 0%, #b9def0 100%);
     background-repeat: repeat-x;

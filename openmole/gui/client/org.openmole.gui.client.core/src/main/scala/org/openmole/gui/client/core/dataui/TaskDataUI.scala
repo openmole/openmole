@@ -24,3 +24,5 @@ trait TaskDataUI <: DataUI with IODataUI {
   type DATA = TaskData
   def data: DATA
 }
+
+trait InAndOutTaskDataUI <: TaskDataUI with IAndODataUI
