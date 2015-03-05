@@ -39,6 +39,9 @@ package mole {
 
       def source(sources: Source*) =
         puzzle.copy(sources = puzzle.sources.toList ::: sources.toList)
+
+      def by(strategy: Grouping) =
+        puzzle.copy(grouping = Some(strategy))
     }
 
     implicit def puzzlePuzzlePieceDecoration(puzzle: PuzzlePiece) = new PuzzlePieceDecorator(puzzle)
