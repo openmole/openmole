@@ -43,6 +43,8 @@ object DBServerInfo {
   val dbLock = s"$dbName.lock"
 
   lazy val xstream = new XStream
+  xstream.alias("org.openmole.misc.replication.DBServerInfo", classOf[DBServerInfo])
+  xstream.alias("DBServerInfo", classOf[DBServerInfo])
 
   def load(f: File) = {
     val src = Source.fromFile(f)
