@@ -1,7 +1,10 @@
 package org.openmole.web.mole
 
+import org.openmole.core.eventdispatcher.{ EventDispatcher, EventListener }
+import org.openmole.core.tools.io.FromString
 import org.openmole.core.workflow.execution.local.LocalEnvironment
 import org.openmole.core.workflow.validation.{ Validation, DataflowProblem }
+import org.openmole.core.workspace.Workspace
 
 import scala.reflect.ClassTag
 import scala.io.{ Codec, Source }
@@ -9,17 +12,13 @@ import java.io._
 import org.openmole.core.serializer.SerialiserService
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
 import org.openmole.core.workflow.mole._
-import org.openmole.misc.tools.io.FromString
 import org.openmole.core.workflow.data._
 import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
-import org.openmole.misc.eventdispatcher.{ EventListener, EventDispatcher }
 import akka.actor.ActorSystem
 
 import resource._
 
 import slick.driver.H2Driver.simple._
-
-import org.openmole.misc.workspace.Workspace
 import com.ice.tar.{ TarInputStream, Tar }
 import scala.Some
 import DataflowProblem.MissingSourceInput

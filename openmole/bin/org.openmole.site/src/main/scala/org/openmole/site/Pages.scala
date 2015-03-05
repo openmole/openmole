@@ -141,7 +141,6 @@ object DocumentationPages { index ⇒
     }
 
     div(id := "documentation-menu")(
-      menuEntry(root),
       root.children.map(pageLine)
     )
   }

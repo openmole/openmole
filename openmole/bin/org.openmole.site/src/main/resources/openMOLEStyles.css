@@ -1,0 +1,153 @@
+
+@media (min-width: 1200px) {
+    .container {
+      width:800px;
+    }
+
+}
+
+.pull-center {
+  text-align: center;
+}
+
+.pull-center > .nav {
+  float:none;
+  display:inline-block;
+}
+
+ul {
+  margin-top: 0px
+}
+
+* {
+  font-size: 14px;
+  line-height: 1.6em;
+}
+
+pre {
+  background-color: transparent;
+  border: 0px;
+}
+
+#logo {
+ height: 180px;
+}
+
+#logo-version {
+  height: 140px;
+  margin-top: 30px;
+  margin-left: 30px;
+}
+
+#sections {
+  padding-top: 20;
+  padding-bottom: 5;
+}
+
+#section {
+  padding-right: 15;
+  font-size: 16px;
+}
+
+#documentation-bottom-link-unavailable {
+  padding-left: 5;
+  padding-right: 5;
+  text-decoration: line-through;
+}
+
+#documentation-bottom-link {
+  padding-left: 5;
+  padding-right: 5;
+}
+
+#documentation-bottom-links {
+  text-decoration: underline;
+  top: 10;
+  left: 40%;
+}
+
+#documentation-menu {
+  padding-left: 20;
+  padding-right: 0;
+  left: 0;
+  top: 0;
+  margin-right: 20;
+  margin-top: 40;
+  width: 120%;
+}
+
+#documentation-menu-ul {
+  margin-bottom: 0;
+  margin-top: 0;
+  margin-left: 15;
+  padding-left: 5;
+}
+
+#documentation-menu-entry {
+  color: #6A7224;
+  text-decoration: none;
+  text-decoration: none;
+  cursor:pointer;
+  line-height: 1em;
+}
+
+#documentation-menu-entry-current {
+  color: brown;
+  line-height: 1em;
+}
+
+.scalatex-content *{
+  position: relative;
+}
+.scalatex-content p{
+  text-align: justify;
+}
+
+.scalatex-content {
+  margin: 0 auto;
+  padding-bottom: 50px;
+  color: #777;
+}
+
+.amenu {
+  color: #6A7224;
+  font-weight: bold;
+}
+
+/* Custom Stuff */
+.scalatex-content a:link {
+  color: #6A7224;
+  text-decoration: none;
+}
+.scalatex-content a:visited {
+  color: #6A7224;
+  text-decoration: none;
+}
+.scalatex-content a:hover {
+  text-decoration: underline;
+}
+.scalatex-content a:active {
+  color: #000;
+  text-decoration: underline;
+}
+.scalatex-content code{
+  color: #000;
+}
+.scalatex-hover-container:hover .scalatex-header-link:hover > i{
+  opacity: 1.0;
+}
+.scalatex-hover-container:hover .scalatex-header-link > i:active{
+  opacity: 0.75;
+}
+.scalatex-hover-container:hover .scalatex-header-link > i{
+  opacity: 0.5;
+}
+.scalatex-header-link > i{
+  color: #777;
+  opacity: 0.05;
+  text-decoration: none;
+}
+/*Workaround for bug in highlight.js IDEA theme*/
+span.hljs-tag, span.hljs-symbol{
+  background: none;
+}

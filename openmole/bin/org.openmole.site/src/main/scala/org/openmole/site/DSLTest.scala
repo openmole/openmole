@@ -19,9 +19,9 @@ package org.openmole.site
 
 import javax.script.ScriptEngineManager
 
-import org.openmole.misc.tools.service.ObjectPool
+import org.openmole.core.console.ScalaREPL
 import org.openmole.console.Console
-import org.openmole.misc.console.ScalaREPL
+import org.openmole.core.tools.service.ObjectPool
 
 import scala.util.Try
 

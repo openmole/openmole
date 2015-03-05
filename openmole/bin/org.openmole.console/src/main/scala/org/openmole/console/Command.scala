@@ -22,6 +22,7 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.execution.local._
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.job.State
@@ -30,10 +31,9 @@ import org.openmole.core.workflow.transition.IAggregationTransition
 import org.openmole.core.workflow.transition.IExplorationTransition
 import org.openmole.core.workflow.validation.Validation
 import org.openmole.core.serializer.SerialiserService
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.workspace.Workspace
 import scala.annotation.tailrec
 import scala.collection.mutable.HashMap
-import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.dsl._
 import Console._

@@ -1,6 +1,6 @@
 package org.openmole.web.mole
 
-import org.openmole.misc.eventdispatcher.{ Event, EventListener }
+import org.openmole.core.eventdispatcher.{ Event, EventListener }
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.mole.MoleExecution.{ Finished, Starting, JobCreated, JobStatusChanged }
 import org.openmole.web.db.tables.MoleStats

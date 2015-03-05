@@ -2,9 +2,8 @@ package root.gui.plugin
 
 import sbt._
 import root.gui._
-import root.base
 
-object Hook extends PluginDefaults {
+object Hook extends GUIPluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.gui.plugin.hook")
 
   // lazy val display = OsgiProject("display") dependsOn (base.plugin.Hook.display, base.Misc.replication % "test")

@@ -5,15 +5,18 @@ import org.openmole.site.Config._
 
 object Communication {
 
-  case class Media(title: String, filePath: String = "", year: String, local: Boolean = true)
+  case class Media(title: String, filePath: String = "", year: String) {
+    def local = !filePath.contains("://")
+  }
 
   def all: Frag = {
 
     val papers = Seq(
-      Media("OpenMOLE: a Workflow Engine for Distributed Medical Image Analysis", "https://hal.inria.fr/hal-01099220/document", "2014", false),
+      Media("A New Method to Evaluate Simulation Models: The Calibration Profile (CP) Algorithm", "http://jasss.soc.surrey.ac.uk/18/1/12.html", "2015"),
+      Media("Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal geographical model", "https://hal.archives-ouvertes.fr/hal-01118918", "2015"),
+      Media("OpenMOLE: a Workflow Engine for Distributed Medical Image Analysis", "https://hal.inria.fr/hal-01099220/document", "2014"),
       Media("Towards vulnerability minimization of grassland soil organic matter using metamodels", "Lardy2014.pdf", "2014"),
-      Media("Facilitating Parameter Estimation and Sensitivity Analysis of Agent-Based Models: A Cookbook Using NetLogo and R", "http://jasss.soc.surrey.ac.uk/17/3/11.html", "2014", false),
-      Media("Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal geographical model", "Schmitt2014.pdf", "2014"),
+      Media("Facilitating Parameter Estimation and Sensitivity Analysis of Agent-Based Models: A Cookbook Using NetLogo and R", "http://jasss.soc.surrey.ac.uk/17/3/11.html", "2014"),
       Media("Automated Processing of Zebrafish Imaging Data: A Survey", "Mikut2013.pdf", "2013"),
       Media("Initialize and Calibrate a Dynamic Stochastic Microsimulation Model: Application to the SimVillages Model", "Lenormand2012.pdf", "2012"),
       Media("Endogenization of network topology in metamimetic games", "Ratamero2012.pdf", "2012"),
@@ -60,10 +63,10 @@ object Communication {
       Media("La taupe sort de son trou", "https://linuxfr.org/news/openmole-la-taupe-sort-de-son-trou", "2012")
     )
 
-    def mediaBody(medias: Seq[Media]) = tbody(
-      for {
-        media ← medias
-      } yield {
+    def mediaBody(medias: Seq[Media]) = for {
+      media ← medias
+    } yield {
+      tbody(
         tr(
           td(
             if (media.filePath.isEmpty) media.title
@@ -73,8 +76,8 @@ object Communication {
           ),
           td(media.year, `class` := "text-right")
         )
-      }
-    )
+      )
+    }
 
     def header(title: String) = thead(
       tr(
@@ -83,7 +86,7 @@ object Communication {
       )
     )
 
-    def mediaTable(title: String, medias: Seq[Media]) = table(width := "100%", `class` := "table table-striped table-bordered")(
+    def mediaTable(title: String, medias: Seq[Media]) = table(width := "100%", `class` := "table table-striped")(
       header(title),
       mediaBody(medias)
     )

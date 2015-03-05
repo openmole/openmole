@@ -9,7 +9,8 @@ package org.openmole.web
 
 import javax.crypto.spec.SecretKeySpec
 import javax.crypto.Mac
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.workspace.Workspace
+
 import scala.collection.mutable.HashMap
 import akka.actor.ActorSystem
 import org.apache.commons.codec.binary.Base64

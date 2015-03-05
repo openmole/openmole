@@ -1,12 +1,13 @@
 package org.openmole.web.misc.tools
 
+import org.openmole.core.workspace.Workspace
+
 import scalaj.http._
 import java.net.URL
 import java.util.UUID
 import com.sun.net.ssl.{ SSLContext, TrustManagerFactory }
 import javax.net.ssl._
 import java.security.cert.{ CertificateException, X509Certificate, Certificate }
-import org.openmole.misc.workspace.Workspace
 import java.io.FileOutputStream
 import java.security.KeyStore
 

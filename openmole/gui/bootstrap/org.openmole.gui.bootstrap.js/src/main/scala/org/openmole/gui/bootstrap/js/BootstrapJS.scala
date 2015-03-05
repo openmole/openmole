@@ -18,16 +18,15 @@ package org.openmole.gui.bootstrap.js
 
 import java.io.File
 import java.net.URL
+import org.openmole.core.pluginmanager
+import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.tools.io.FileUtil
+import org.openmole.core.workspace.Workspace
+import org.openmole.core.fileservice._
 import org.openmole.gui.server.core.{ ServerFactories, GUIServer }
 import org.openmole.gui.shared._
-import org.openmole.misc.osgi.Activator
-import org.openmole.misc.pluginmanager
-import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.misc.workspace.Workspace
-import org.openmole.misc.tools.io.FileUtil
-import org.openmole.misc.tools.io.FileUtil._
+import FileUtil._
 import scala.collection.JavaConverters._
-import org.openmole.misc.fileservice._
 
 object BootstrapJS {
 
