@@ -2,12 +2,13 @@ package org.openmole.gui.client.core.dataui
 
 import org.openmole.gui.client.core.{ PrototypeFactoryUI, ClientService }
 import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import org.openmole.gui.misc.js.{ ClassKeyAggregator, InputFilter }
-import org.scalajs.dom.html._
+import org.scalajs.dom.html.TableCell
 
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags }
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import scalatags.JsDom.{ tags }
 
 /*
  * Copyright (C) 05/03/15 // mathieu.leclaire@openmole.org
@@ -52,43 +53,43 @@ object IOPanelUIUtil {
     newProto
   }
 
-  def buildPrototypeTableView(io: InOutputUI, todo: ⇒ Unit): Seq[TypedTag[TableCell]] = Seq(
-    clickablePrototypeTD(io.protoDataBagUI, () ⇒ todo),
-    labelTD(io.protoDataBagUI.dataUI().dataType, label_primary),
-    basicTD(io.protoDataBagUI.dataUI().dimension().toString)
-  ) ++ mappingsTD(io)
-
-  def clickablePrototypeTD(p: PrototypeDataBagUI, todo: () ⇒ Unit) = bs.td(col_md_2)(
-    a(p.name(),
-      cursor := "pointer",
-      onclick := {
-        println("TODO ")
-        todo
-      }))
-
-  def emptyTD(nb: Int) = for (i ← (0 to nb - 1)) yield {
-    bs.td(col_md_1)("")
+  def buildPrototypeTableView(io: InOutputUI, todo: () ⇒ Unit = () ⇒ {}) /*: Seq[TableCell]*/ = {
+    Seq(
+      clickablePrototypeTD(io.protoDataBagUI, todo),
+      labelTD(io.protoDataBagUI.dataUI().dataType, label_primary),
+      basicTD(io.protoDataBagUI.dataUI().dimension().toString)
+    ) ++ mappingsTD(io)
   }
 
-  def labelTD(s: String, labelType: ClassKeyAggregator) = bs.td(col_md_1)(bs.label(s, labelType))
+  def clickablePrototypeTD(p: PrototypeDataBagUI, todo: () ⇒ Unit = () ⇒ {}) = bs.td(col_md_2)(
+    a(p.name(),
+      cursor := "pointer",
+      onclick := { () ⇒
+        todo()
+      })).render
 
-  def basicTD(s: String) = bs.td(col_md_1)(tags.span(s))
+  def emptyTD(nb: Int) = for (i ← (0 to nb - 1)) yield {
+    bs.td(col_md_1)("").render
+  }
+
+  def labelTD(s: String, labelType: ClassKeyAggregator) = bs.td(col_md_1)(bs.label(s, labelType)).render
+
+  def basicTD(s: String) = bs.td(col_md_1)(tags.span(s)).render
 
   def mappingsTD(i: InOutputUI) = for (
     f ← i.mappings().fields.map {
       _.panelUI
     }
   ) yield {
-    tags.td(f.view)
+    tags.td(f.view).render
   }
 
-  def delButtonTD(todo: ⇒ Unit) = bs.td(col_md_1)(bs.button(glyph(glyph_minus))(onclick := {
-    () ⇒ todo
-    //dataUI -= io
+  def delButtonTD(todo: () ⇒ Unit) = bs.td(col_md_1)(bs.button(glyph(glyph_minus))(onclick := { () ⇒
+    todo()
   }
-  ))
+  )).render
 
-  def coloredTR(tds: Seq[TypedTag[TableCell]], filter: () ⇒ Boolean) = bs.tr(
+  def coloredTR(tds: Seq[TableCell], filter: () ⇒ Boolean) = bs.tr(
     if (filter()) warning
     else nothing
   )(tds)

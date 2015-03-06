@@ -21,11 +21,11 @@ import org.openmole.gui.client.core.GenericPanel
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter }
+import org.openmole.gui.misc.js.{Forms ⇒ bs, InputFilter}
 import rx._
 
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ tags }
+import scalatags.JsDom.{tags}
 import IOPanelUIUtil._
 
 class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) extends PanelUI {
@@ -35,8 +35,8 @@ class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) exten
 
   //New button
   val newGlyph =
-    //FIXME: THE SIZE OF THE GLYPH IS SMALLER THAN THE REST OF THE GROUP WHEN GROUPEL
-    // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
+  //FIXME: THE SIZE OF THE GLYPH IS SMALLER THAN THE REST OF THE GROUP WHEN GROUPEL
+  // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
     bs.button("Add")(`type` := "submit", onclick := { () ⇒
       val filtering = filteredInputsUI
       if (filtering.size == 1) {
@@ -51,13 +51,13 @@ class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) exten
 
   val view =
     bs.form(spacer20)(
-      bs.formGroup( /*row + */ col_md_12)(
+      bs.formGroup(/*row + */ col_md_12)(
         bs.inputGroup(col_md_6 + col_md_offset_3)(
           inputFilter.tag,
           bs.inputGroupButton(newGlyph)
         )),
       bs.formGroup(col_md_12)(Rx {
-        (for ((headers, inputsUI) ← (filteredInputsUI ++ dataUI.inoutputsUI()).groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI) }) yield {
+        (for ((headers, inputsUI) ← (filteredInputsUI ++ dataUI.inoutputsUI()).groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI)}) yield {
           bs.table(col_md_12 + striped)(
             buildHeaders(prototypeHeaderSequence ++ headers :+ ""),
             tbody(
@@ -79,9 +79,7 @@ class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) exten
                     ) yield {
                       tags.td(f.view)
                     },
-                    bs.td(col_md_1)(bs.button(glyph(glyph_minus))(onclick := { () ⇒
-                      dataUI -= i
-                    }))
+                    delButtonTD(() ⇒ dataUI -= i)
                   )
               }
             )
@@ -100,7 +98,7 @@ class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) exten
     save
     panel.currentDataBagUI().map { db ⇒
       panel.stack(db, dataUI match {
-        case i: InputDataUI  ⇒ 1
+        case i: InputDataUI ⇒ 1
         case i: OutputDataUI ⇒ 2
       })
     }

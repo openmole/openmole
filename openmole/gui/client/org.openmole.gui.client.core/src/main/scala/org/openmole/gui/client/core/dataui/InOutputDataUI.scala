@@ -26,7 +26,6 @@ abstract class InOutputDataUI(val mappingsFactory: IOMappingsFactory) extends Da
 
   def +=(proto: PrototypeDataBagUI) =
     if (!exists(proto)) {
-      println("ADD with MAPP " + mappingsFactory.build.fields.map { _.key })
       inoutputsUI() = inoutputsUI() :+ inoutputUI(proto, mappingsFactory)
     }
 
