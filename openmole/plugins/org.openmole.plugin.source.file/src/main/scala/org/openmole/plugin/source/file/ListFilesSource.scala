@@ -43,7 +43,7 @@ abstract class ListFilesSource(path: ExpandedString, prototype: Prototype[Array[
     val expandedRegExp = regExp.from(context)
     Variable(
       prototype,
-      expandedPath.listFiles.filter(_.getName.matches(expandedRegExp))
+      Option(expandedPath.listFiles).getOrElse(Array.empty).filter(_.getName.matches(expandedRegExp))
     )
   }
 
