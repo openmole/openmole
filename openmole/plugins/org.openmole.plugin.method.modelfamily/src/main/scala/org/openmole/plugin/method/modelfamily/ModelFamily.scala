@@ -22,14 +22,15 @@ import java.io.File
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.builder.Builder
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task.PluginSet
+import org.openmole.core.workflow.task.{ Task, PluginSet }
 import org.openmole.core.workflow.tools.{ FromContext, ExpandedString }
 import org.openmole.plugin.method.evolution.Scalar
 import org.openmole.plugin.task.scala._
 
 import scala.collection.BitSet
 import scala.collection.mutable.ListBuffer
-import scala.util.Success
+import scala.util.{ Try, Success }
+import fr.iscpif.family.{ ModelFamily ⇒ FModelFamily, Combination }
 
 object ModelFamily {
 
@@ -79,46 +80,36 @@ class ModelFamilyBuilder(val source: ExpandedString, val combination: Combinatio
   }
 
   def toModelFamily =
-    new ModelFamily with super[ScalaBuilder].Built {
-      override def source = builder.source
-      override def attributes = _attributes.toList
-      override def combination = builder.combination
-      override def modelIdPrototype = _modelIdPrototype
-      override def objectives = _objectives.toList
+    new ModelFamily with super[ScalaBuilder].Built { mf ⇒
+      def source = builder.source
+      def attributes = _attributes.toList
+      def combination = builder.combination
+      def modelIdPrototype = _modelIdPrototype
+      def objectives = _objectives.toList
     }
 }
 
-object Combination {
-  def empty[T] = new Combination[T] {
-    def combinations = Seq.empty
-    def components = Seq.empty
+trait ModelFamily <: Plugins { f ⇒
+
+  @transient lazy val family = new FModelFamily {
+    def imports: Seq[String] = f.imports
+    def outputs: Seq[String] = f.objectives.map(_.name)
+    def attributes: Seq[String] = f.attributes.map(_.prototype.name)
+    def combination: Combination[Class[_]] = f.combination
+    def compile(code: String): Try[Any] = compilation.compile(code)
+    def compilation = new ScalaCompilation {
+      def libraries: Seq[File] = f.libraries
+      def usedClasses: Seq[Class[_]] = f.usedClasses
+    }
+    def source(traits: String, attributes: String) = {
+      val context =
+        Context(
+          Variable(traitsVariable, traits),
+          Variable(attributesVariable, attributes)
+        )
+      f.source.from(context)
+    }
   }
-}
-
-sealed trait Combination[T] {
-  def combinations: Seq[Seq[T]]
-  def components: Seq[T]
-}
-
-case class AnyOf[T](components: T*) extends Combination[T] {
-  def combinations = (0 to components.size).flatMap(components.combinations)
-}
-
-case class OneOf[T](components: T*) extends Combination[T] {
-  def combinations = components.map(t ⇒ Seq(t))
-}
-
-case class AllToAll[T](cs: Combination[T]*) extends Combination[T] {
-  def components = cs.flatMap(_.components).distinct
-
-  def combinations =
-    cs.map(_.combinations).reduceOption((ts1, ts2) ⇒ combine(ts1, ts2)).getOrElse(Seq.empty)
-
-  def combine[A](it1: Seq[Seq[A]], it2: Seq[Seq[A]]): Seq[Seq[A]] =
-    for (v1 ← it1; v2 ← it2) yield v1 ++ v2
-}
-
-trait ModelFamily <: Plugins { family ⇒
 
   def imports: Seq[String]
   def source: ExpandedString
@@ -128,59 +119,16 @@ trait ModelFamily <: Plugins { family ⇒
   def libraries: Seq[File]
   def modelIdPrototype: Prototype[Int]
   def usedClasses: Seq[Class[_]]
-
   def combination: Combination[Class[_]]
   def traitsCombinations = combination.combinations
-  def attributesStrings =
-    attributes.map {
-      case Attribute(p, name, _, _) ⇒ s"def ${p.name}: ${p.`type`} = ${ScalaCompilation.inputObject}.${name}"
-    }
+  lazy val size = traitsCombinations.size
 
-  def traitsString = traitsCombinations.map { ts ⇒ ts.map(t ⇒ s"with ${t.getName}").mkString(" ") }
-
-  def codes = {
-    traitsString.map {
-      ts ⇒
-        val context =
-          Context(
-            Variable(traitsVariable, ts),
-            Variable(attributesVariable, attributesStrings.map("  " + _).mkString("\n"))
-          )
-        source.from(context)
-    }
-  }
-
-  @transient lazy val compilation = {
-    val compilation =
-      new ScalaCompilation {
-
-        def codeMatch =
-          codes.zipWithIndex.map {
-            case (code, i) ⇒
-              s"""
-                 |  case $i =>
-                 |    $code
-                 |    $outputMap
-              """.stripMargin
-          }.mkString("\n")
-
-        def code =
-          s"""
-            |${modelIdPrototype.name} match {
-            |  $codeMatch
-            |  case x => throw new org.openmole.misc.exception.InternalProcessingError("Model id " + x + " too large")
-            |}
-          """.stripMargin
-
-        override def wrapOutput = false
-
-        override def imports: Seq[String] = family.imports
-        override def source: String = code
-        override def outputs: DataSet = objectives
-        override def libraries: Seq[File] = family.libraries
-        override def usedClasses: Seq[Class[_]] = family.usedClasses
-      }
-    compilation.compiled(Seq(modelIdPrototype) ++ attributes.map(_.prototype)).get
+  def run(context: Context) = {
+    implicit lazy val rng = Task.buildRNG(context)
+    val attributeValues = attributes.map(a ⇒ context(a.prototype))
+    val modelId = context(modelIdPrototype)
+    val map = family.run(modelId, attributeValues: _*)(rng).get
+    objectives.map(o ⇒ Variable.unsecure(o, map(o.name)))
   }
 
 }

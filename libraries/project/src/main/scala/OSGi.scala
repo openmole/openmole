@@ -228,6 +228,12 @@ object OSGi extends Defaults(Apache) {
     version := monocleVersion
     )
 
+  lazy val familyVersion = "1.0-SNAPSHOT"
+  lazy val family = OsgiProject("fr.iscpif.family") settings(
+    libraryDependencies += "fr.iscpif" %% "family" % familyVersion,
+    version := familyVersion
+    )
+
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings(
     libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.3",
     version := "2.3"

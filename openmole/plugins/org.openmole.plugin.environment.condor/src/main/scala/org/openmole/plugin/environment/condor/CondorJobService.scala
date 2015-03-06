@@ -58,6 +58,9 @@ trait CondorJobService extends GridScaleJobService with SSHHost with SharedStora
       // TODO not available in GridScale plugin yet
       //override val wallTime = environment.wallTime
       override val memory = Some(environment.requiredMemory)
+      override val nodes = environment.nodes
+      // TODO typo in coreByNode in GridScale -> should be coresByNode
+      override val coreByNode = environment.coresByNode orElse environment.threads
       override val requirements = environment.requirements
     }
 

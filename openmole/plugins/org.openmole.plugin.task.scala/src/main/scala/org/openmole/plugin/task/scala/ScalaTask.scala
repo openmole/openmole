@@ -32,7 +32,7 @@ object ScalaTask {
     }
 }
 
-abstract class ScalaTask(val source: String) extends JVMLanguageTask with ScalaCompilation {
+abstract class ScalaTask(val source: String) extends JVMLanguageTask with ScalaWrappedCompilation {
   override def processCode(context: Context) = compiled(context).get.run(context)
 }
 

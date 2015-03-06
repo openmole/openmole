@@ -21,10 +21,10 @@ import java.io.File
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.Executors
-import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
-import org.openmole.core.tools.io.{HashService, FileUtil, TarArchiver}
-import org.openmole.core.tools.service.{Logger, OS, ProcessUtil, ThreadUtil}
-import org.openmole.core.workspace.{Workspace, ConfigurationLocation}
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.tools.io.{ HashService, FileUtil, TarArchiver }
+import org.openmole.core.tools.service.{ Logger, OS, ProcessUtil, ThreadUtil }
+import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.plugin.environment.desktopgrid._
 import DesktopGridEnvironment._
 import org.openmole.core.batch.message._
