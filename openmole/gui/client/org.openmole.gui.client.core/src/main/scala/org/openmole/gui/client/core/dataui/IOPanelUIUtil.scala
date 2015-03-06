@@ -53,7 +53,7 @@ object IOPanelUIUtil {
     newProto
   }
 
-  def buildPrototypeTableView(io: InOutputUI, todo: () ⇒ Unit = () ⇒ {}) /*: Seq[TableCell]*/ = {
+  def buildPrototypeTableView(io: InOutputUI, todo: () ⇒ Unit = ()) = {
     Seq(
       clickablePrototypeTD(io.protoDataBagUI, todo),
       labelTD(io.protoDataBagUI.dataUI().dataType, label_primary),
@@ -61,7 +61,7 @@ object IOPanelUIUtil {
     ) ++ mappingsTD(io)
   }
 
-  def clickablePrototypeTD(p: PrototypeDataBagUI, todo: () ⇒ Unit = () ⇒ {}) = bs.td(col_md_2)(
+  def clickablePrototypeTD(p: PrototypeDataBagUI, todo: () ⇒ Unit = ()) = bs.td(col_md_2)(
     a(p.name(),
       cursor := "pointer",
       onclick := { () ⇒

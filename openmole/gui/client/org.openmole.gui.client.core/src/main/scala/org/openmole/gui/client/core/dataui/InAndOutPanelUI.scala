@@ -1,12 +1,12 @@
 package org.openmole.gui.client.core.dataui
 
-import org.openmole.gui.client.core.{ClientService, GenericPanel}
+import org.openmole.gui.client.core.{ ClientService, GenericPanel }
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
-import org.openmole.gui.misc.js.{Forms ⇒ bs}
+import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.js.InputFilter
 import IOPanelUIUtil._
@@ -34,12 +34,12 @@ class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extend
 
   val outputFilter = InputFilter(pHolder = "Output prototype", inputID = InputFilter.protoFilterId2)
 
-  def filteredInputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ defaultInOutputUI(p)}.filter { i ⇒
+  def filteredInputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ defaultInOutputUI(p) }.filter { i ⇒
     inputFilter.contains(i.protoDataBagUI.name()) &&
       !inputFilter.nameFilter().isEmpty
   }
 
-  def filteredOutputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ emptyInOutputUI(p)}.filter { o ⇒
+  def filteredOutputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ emptyInOutputUI(p) }.filter { o ⇒
     outputFilter.contains(o.protoDataBagUI.name()) &&
       !outputFilter.nameFilter().isEmpty
   }
@@ -48,8 +48,8 @@ class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extend
 
   //New button
   val newGlyph =
-  //FIXME: THE SIZE OF THE GLYPH IS SMALLER THAN THE REST OF THE GROUP WHEN GROUPEL
-  // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
+    //FIXME: THE SIZE OF THE GLYPH IS SMALLER THAN THE REST OF THE GROUP WHEN GROUPEL
+    // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
     bs.button("Add")(`type` := "submit", onclick := { () ⇒
       val filteringI = filteredInputsUI
       val filteringO = filteredOutputsUI
@@ -94,7 +94,7 @@ class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extend
   }
 
   def addInAndOut(i: PrototypeDataBagUI, o: PrototypeDataBagUI) = {
-    dataUI +=(i, o, buildDefaultMapping)
+    dataUI += (i, o, buildDefaultMapping)
     dataUI.inputDataUI -= i
     dataUI.outputDataUI -= o
     clear
@@ -102,7 +102,7 @@ class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extend
 
   val view =
     bs.form(spacer20)(
-      bs.formGroup(/*row + */ col_md_12)(
+      bs.formGroup( /*row + */ col_md_12)(
         bs.inputGroup(col_md_6 + col_md_offset_3)(
           inputFilter.tag,
           outputFilter.tag,
@@ -110,33 +110,33 @@ class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extend
         )),
       bs.formGroup(col_md_12)(Rx {
         bs.table(col_md_12 + striped)(
-        buildHeaders(prototypeHeaderSequence ++ Seq("Default", buildDefaultMapping.key) ++ prototypeHeaderSequence), {
-          tbody(
-            for (iAo ← dataUI.inAndOutputsUI()) yield {
-              coloredTR(((buildPrototypeTableView(iAo.in, () ⇒ setCurrent(iAo.in.protoDataBagUI)) :+
-                tags.td(iAo.mapping.panelUI.view).render) ++
-                (buildPrototypeTableView(iAo.out, () ⇒ setCurrent(iAo.out.protoDataBagUI)) :+
-                  delButtonTD(() ⇒ dataUI -= iAo)
+          buildHeaders(prototypeHeaderSequence ++ Seq("Default", buildDefaultMapping.key) ++ prototypeHeaderSequence), {
+            tbody(
+              for (iAo ← dataUI.inAndOutputsUI()) yield {
+                coloredTR(((buildPrototypeTableView(iAo.in, () ⇒ setCurrent(iAo.in.protoDataBagUI)) :+
+                  tags.td(iAo.mapping.panelUI.view).render) ++
+                  (buildPrototypeTableView(iAo.out, () ⇒ setCurrent(iAo.out.protoDataBagUI)) :+
+                    delButtonTD(() ⇒ dataUI -= iAo)
                   )),
-                () ⇒ false)
-            },
-            for (iodataUI ← Seq(dataUI.inputDataUI, dataUI.outputDataUI)) yield {
-              iodataUI match {
-                case idataUI: InputDataUI ⇒ for (i ← idataUI.inoutputsUI() ++ filteredInputsUI) yield {
-                  coloredTR((buildPrototypeTableView(i, () ⇒ setCurrent(i.protoDataBagUI)) ++ emptyTD(4)) :+
-                    delButtonTD(() ⇒ idataUI -= i ),
-                    () ⇒ filteredInputsUI.contains(i))
-                }
-                case odataUI: OutputDataUI ⇒ for (o ← odataUI.inoutputsUI() ++ filteredOutputsUI) yield {
-                  coloredTR((emptyTD(5) ++ buildPrototypeTableView(o, () ⇒ setCurrent(o.protoDataBagUI)) :+
-                    delButtonTD(() ⇒  odataUI -= o )
+                  () ⇒ false)
+              },
+              for (iodataUI ← Seq(dataUI.inputDataUI, dataUI.outputDataUI)) yield {
+                iodataUI match {
+                  case idataUI: InputDataUI ⇒ for (i ← idataUI.inoutputsUI() ++ filteredInputsUI) yield {
+                    coloredTR((buildPrototypeTableView(i, () ⇒ setCurrent(i.protoDataBagUI)) ++ emptyTD(4)) :+
+                      delButtonTD(() ⇒ idataUI -= i),
+                      () ⇒ filteredInputsUI.contains(i))
+                  }
+                  case odataUI: OutputDataUI ⇒ for (o ← odataUI.inoutputsUI() ++ filteredOutputsUI) yield {
+                    coloredTR((emptyTD(5) ++ buildPrototypeTableView(o, () ⇒ setCurrent(o.protoDataBagUI)) :+
+                      delButtonTD(() ⇒ odataUI -= o)
                     ),
-                    () ⇒ filteredOutputsUI.contains(o))
+                      () ⇒ filteredOutputsUI.contains(o))
+                  }
                 }
               }
-            }
-          )
-        }
+            )
+          }
         )
       }
       )
