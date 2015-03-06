@@ -112,6 +112,8 @@ object Libraries extends Defaults {
 
   lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "1.79"
 
+  lazy val family = "org.openmole" %% "fr-iscpif-family" % "1.0-SNAPSHOT"
+
   lazy val monocle = "org.openmole" %% "monocle" % "1.0.1"
 
   lazy val scaladget = "org.openmole" %% "scaladget" % "0.3.0"

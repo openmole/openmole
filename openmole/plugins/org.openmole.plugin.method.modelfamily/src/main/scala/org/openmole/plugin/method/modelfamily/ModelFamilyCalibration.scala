@@ -43,7 +43,7 @@ object ModelFamilyCalibration {
 
       val genomeSize = inputs.size
       val nicheSize = _nicheSize
-      val models = modelFamily.codes.size
+      val models = modelFamily.size
 
       override val cloneProbability: Double = _reevaluate
 

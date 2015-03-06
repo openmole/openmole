@@ -28,7 +28,7 @@ import org.openmole.plugin.task.scala._
 object ModelFamilyTask {
 
   def apply(modelFamily: ModelFamily) = new TaskBuilder {
-    modelFamily.compilation
+    modelFamily.family.compiled
     modelFamily.attributes.foreach { a ⇒ addInput(a.prototype) }
     addInput(modelFamily.modelIdPrototype)
     modelFamily.objectives.foreach { addOutput(_) }
@@ -38,8 +38,6 @@ object ModelFamilyTask {
 }
 
 abstract class ModelFamilyTask(val modelFamily: ModelFamily) extends Task { t ⇒
-
   override def process(context: Context): Context =
-    modelFamily.compilation.run(context)
-
+    context ++ modelFamily.run(context)
 }

@@ -36,5 +36,5 @@ class OnVariableGroupingStrategy(numberOfMoleJobs: Option[Int], prototypes: Prot
     new MoleJobGroup(prototypes.flatMap { context.option(_) }.toSeq: _*)
 
   override def complete(jobs: Iterable[MoleJob]) =
-    numberOfMoleJobs map { jobs.size >= _ } getOrElse(false)
+    numberOfMoleJobs map { jobs.size >= _ } getOrElse (false)
 }

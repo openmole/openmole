@@ -167,9 +167,10 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo assemblyPath,
     libraryDependencies ++=
     Seq(
-      Libraries.sshd,
-      Libraries.bouncyCastle,
-      Libraries.logging,
+      sshd,
+      bouncyCastle,
+      family,
+      logging,
       opencsv,
       netlogo4,
       netlogo5,

@@ -30,8 +30,10 @@ object PluginInfo {
 case class PluginInfo(namespaces: List[String])
 
 trait PluginInfoActivator extends BundleActivator {
+  def info = PluginInfo(List(this.getClass.getPackage.getName))
+
   override def start(bundleContext: BundleContext): Unit =
-    PluginInfo.plugins += this.getClass -> PluginInfo(List(this.getClass.getPackage.getName))
+    PluginInfo.plugins += this.getClass -> info
 
   override def stop(bundleContext: BundleContext): Unit =
     PluginInfo.plugins -= this.getClass

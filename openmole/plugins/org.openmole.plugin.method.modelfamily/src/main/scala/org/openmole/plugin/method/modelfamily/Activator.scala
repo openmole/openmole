@@ -17,6 +17,8 @@
 
 package org.openmole.plugin.method.modelfamily
 
-import org.openmole.core.workflow.tools.PluginInfoActivator
+import org.openmole.core.workflow.tools.{ PluginInfo, PluginInfoActivator }
 
-class Activator extends PluginInfoActivator
+class Activator extends PluginInfoActivator {
+  override def info: PluginInfo = super.info.copy(classOf[fr.iscpif.family.ModelFamily].getPackage.getName :: super.info.namespaces)
+}
