@@ -65,7 +65,8 @@ class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) exten
               for (i ← inputsUI.sortBy(_.protoDataBagUI.name())) yield {
                 coloredTR((buildPrototypeTableView(i, () ⇒ setCurrent(i.protoDataBagUI)) :+
                   delButtonTD(() ⇒ dataUI -= i)
-                ), () ⇒ !dataUI.inoutputsUI().contains(i))
+                ), () ⇒ !dataUI.inoutputsUI().contains(i),
+                  () ⇒ add(i.protoDataBagUI))
               }
             )
           ).render

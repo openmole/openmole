@@ -125,20 +125,21 @@ class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extend
                   case idataUI: InputDataUI ⇒ for (i ← idataUI.inoutputsUI() ++ filteredInputsUI) yield {
                     coloredTR((buildPrototypeTableView(i, () ⇒ setCurrent(i.protoDataBagUI)) ++ emptyTD(4)) :+
                       delButtonTD(() ⇒ idataUI -= i),
-                      () ⇒ {
-                        filteredInputsUI.map { _.id }.contains(i.id)
-                      })
+                      () ⇒ filteredInputsUI.map { _.id }.contains(i.id),
+                      () ⇒ addInput(i.protoDataBagUI))
                   }
                   case odataUI: OutputDataUI ⇒ for (o ← odataUI.inoutputsUI() ++ filteredOutputsUI) yield {
                     coloredTR((emptyTD(5) ++ buildPrototypeTableView(o, () ⇒ setCurrent(o.protoDataBagUI)) :+
                       delButtonTD(() ⇒ odataUI -= o)
                     ),
-                      () ⇒ filteredOutputsUI.map { _.id }.contains(o.id))
+                      () ⇒ filteredOutputsUI.map { _.id }.contains(o.id),
+                      () ⇒ addOutput(o.protoDataBagUI))
                   }
                 }
               }
             )
           }
+
         )
       }
       )

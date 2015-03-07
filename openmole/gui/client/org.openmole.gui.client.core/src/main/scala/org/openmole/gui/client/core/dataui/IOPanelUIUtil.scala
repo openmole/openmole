@@ -89,10 +89,17 @@ object IOPanelUIUtil {
   }
   )).render
 
-  def coloredTR(tds: Seq[TableCell], filter: () ⇒ Boolean) = bs.tr(
+  def coloredTR(tds: Seq[TableCell], filter: () ⇒ Boolean, click: () ⇒ Unit = () ⇒ {}) = bs.tr(
     if (filter()) warning
     else nothing
-  )(tds)
+  )(if (filter()) {
+      Seq(cursor := "pointer",
+        onclick := { () ⇒ println("cliced"); click() }
+      )
+    }
+    else {
+      Seq(cursor := "default")
+    }, tds)
 
   def saveInOutputsUI(inouts: Seq[InOutputUI]) = {
     inouts.map {
