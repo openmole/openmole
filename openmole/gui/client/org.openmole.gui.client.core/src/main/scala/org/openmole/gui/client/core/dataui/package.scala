@@ -26,10 +26,9 @@ package object dataui {
     def mappings = new IOMappingsUI(mappingsFactory.build.fields.filter(_.prototypeFilter(protoDataBagUI)))
     val ioputUI = InOutputUI(protoDataBagUI.uuid, protoDataBagUI, Var(mappings))
 
-    Obs(protoDataBagUI.dataUI) {
+    /* Obs(protoDataBagUI.dataUI) {
       ioputUI.mappings() = mappings
-    }
-
+    }*/
     ioputUI
   }
 
