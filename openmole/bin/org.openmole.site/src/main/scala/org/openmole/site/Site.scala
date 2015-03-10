@@ -27,6 +27,7 @@ import org.openmole.misc.tools.io.TarArchiver._
 import scalatags.Text.all
 import scalatags.Text.all._
 import scala.sys.process.BasicIO
+import org.openmole.site.credits._
 
 class Site extends IApplication {
 
@@ -35,7 +36,6 @@ class Site extends IApplication {
 
     Config.testScript = !args.contains("-nc")
 
-    Site.dest = args(0)
     val dest = new File(args(0))
     dest.recursiveDelete
 
@@ -90,6 +90,10 @@ class Site extends IApplication {
       case class PageFrag(page: Page, frag: Frag)
 
       lazy val pagesFrag = Pages.all.map { p ⇒ PageFrag(p, Pages.decorate(p)) }
+
+      lazy val bibPapers = Publication.papers ++ Communication.papers
+      bibPapers foreach (_.generateBibtex(dest))
+
       lazy val documentationFrags = pagesFrag.collect { case PageFrag(p: DocumentationPage, f) ⇒ f }.toSet
 
       def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file -> f }.toMap
@@ -122,8 +126,4 @@ class Site extends IApplication {
 
   override def stop() = {}
 
-}
-
-object Site {
-  var dest: String = ""
 }

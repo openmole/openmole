@@ -19,14 +19,15 @@ package org.openmole.site
 package credits
 
 import org.openmole.misc.tools.io.FileUtil._
+import java.io.File
 import toolxit.bibtex._
-import toolxit.bibtex.{ Number ⇒ BibTexNumber }
+import toolxit.bibtex.{ Number ⇒ VolumeNumber }
 
 import scalatags.Text.all._
 
-object Publication {
+class Publication(val publication: BibtexEntry) {
 
-  def print(publication: BibtexEntry): Frag = {
+  def print: Frag = {
 
     def authors = publication.get("Author")
     def title = publication.get("Title")
@@ -35,35 +36,36 @@ object Publication {
     def year = publication.get("Year")
 
     // and add a link to the file on the website
-    Seq[Frag](authors, ", ", a(i(title), href := url), " published in ", journal, ", ", year)
+    Seq[Frag](authors, ", ", a(i(title), href := url), " published in ", journal, ", ", year, a(i("BibTex"), href := s"${publication.sortKey}.bib"))
   }
 
-  def generateBibtex(publication: BibtexEntry): Frag = {
+  def generateBibtex(dest: File) = {
 
     // write bibtex to a separate file
     val bibfile = s"${publication.sortKey}.bib"
 
-    val f = new File(Site.dest, bibfile)
+    val f = new File(dest, bibfile)
     f.withWriter { writer ⇒
       writer.write(publication.toBibTeX)
     }
-
-    Seq[Frag](a(i("BibTex"), href := bibfile))
   }
 }
 
-object Papers {
+object Publication {
 
-  def fgcs2013 =
+  def fgcs2013 = new Publication(
     Article(
       "Reuillon.etal.2013",
       Authors("Romain Reuillon", "Mathieu Leclaire", "Sebastien Rey-Coyrehourcq"),
       Title("OpenMOLE, a workflow engine specifically tailored for the distributed exploration of simulation models"),
       Journal("Future Generation Computer Systems"),
       Volume(29),
-      BibTexNumber(8),
+      VolumeNumber(8),
       Pages("1981 - 1990"),
       Year(2013),
       Url("http://www.openmole.org/files/FGCS2013.pdf")
     )
+  )
+
+  def papers = Seq(fgcs2013)
 }
