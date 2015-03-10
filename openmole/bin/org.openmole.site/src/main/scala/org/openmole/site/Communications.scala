@@ -2,6 +2,10 @@ package org.openmole.site
 
 import scalatags.Text.all._
 import org.openmole.site.Config._
+import org.openmole.site.credits.Publication
+
+import toolxit.bibtex._
+import toolxit.bibtex.{ Number ⇒ VolumeNumber, Pages ⇒ BibtexPages }
 
 object Communication {
 
@@ -9,30 +13,136 @@ object Communication {
     def local = !filePath.contains("://")
   }
 
-  def all: Frag = {
+  // avoid boilerplate...
+  implicit def bibtexEntry2Publication(b: BibtexEntry) = new Publication(b)
+  implicit def publication2bibtexEntry2(p: Publication) = p.publication
 
-    // TODO replace with BibTex
-    val papers = Seq(
-      Media("A New Method to Evaluate Simulation Models: The Calibration Profile (CP) Algorithm", "http://jasss.soc.surrey.ac.uk/18/1/12.html", "2015"),
-      Media("Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal geographical model", "https://hal.archives-ouvertes.fr/hal-01118918", "2015"),
-      Media("OpenMOLE: a Workflow Engine for Distributed Medical Image Analysis", "https://hal.inria.fr/hal-01099220/document", "2014"),
-      Media("Towards vulnerability minimization of grassland soil organic matter using metamodels", "Lardy2014.pdf", "2014"),
-      Media("Facilitating Parameter Estimation and Sensitivity Analysis of Agent-Based Models: A Cookbook Using NetLogo and R", "http://jasss.soc.surrey.ac.uk/17/3/11.html", "2014"),
-      Media("Automated Processing of Zebrafish Imaging Data: A Survey", "Mikut2013.pdf", "2013"),
-      Media("Initialize and Calibrate a Dynamic Stochastic Microsimulation Model: Application to the SimVillages Model", "Lenormand2012.pdf", "2012"),
-      Media("Endogenization of network topology in metamimetic games", "Ratamero2012.pdf", "2012"),
-      Media("CTCF-mediated transcriptional regulation through cell type-specific chromosome organization in the β-globin locus", "Junier2012.pdf", "2012"),
-      Media("Ecosystem Climate Change Vulnerability Assessment Framework", "LardyEcosystem2012.pdf", "2012"),
-      Media("Steady-state soil organic matter approximation model: application to the Pasture Simulation Model", "LardySteady2012.pdf", "2012"),
-      Media("Algorithmes évolutionnaires sur grille de calcul pour le calibrage de modèles géographiques", "ReuillonFG2012.pdf", "2012"),
-      Media("SimAnalyzer : Automated description of groups dynamics in agent-based simulations", "Caillou2012.pdf", "2012"),
-      Media("Technical support for Life Sciences communities on a production grid infrastructure", "Michel2012.pdf", "2012"),
-      Media("EPIS: A Grid Platform to Ease and Optimize Multi-agent Simulators Running (content not available online :()", year = "2012"),
-      Media("The complex system science for optimal strategy of management of a food system: the camembert cheese ripening", "Perrot2011.pdf", "2011"),
-      Media("Utilisation de EGI par la communauté des modélisateurs en systèmes complexes", "Reuillon2011.pdf", "2011"),
-      Media("Optimal viable path search for a cheese ripening process using a multi-objective ea", "Mesmoudi2010.pdf", "2010"),
-      Media("Declarative Task Delegation in OpenMOLE", "Reuillon2010.pdf", "2010")
+  def papers: Seq[Publication] = {
+    // TODO complete entries
+    Seq(
+      Article(
+        "Somebody2015",
+        Title("A New Method to Evaluate Simulation Models: The Calibration Profile (CP) Algorithm"),
+        Url("http://jasss.soc.surrey.ac.uk/18/1/12.html"),
+        Year(2015)
+      ),
+      Article(
+        "Schmitt.etal.2015",
+        Authors("Clara Schmitt"),
+        Title("Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal geographical model"),
+        Url("https://hal.archives-ouvertes.fr/hal-01118918"),
+        Year(2015)
+      ),
+      Conference(
+        "Passerat-Palmbach.etal.2014",
+        Authors("Jonathan Passerat-Palmbach", "Mathieu Leclaire", "Romain Reuillon", "Zehan Wang", "Daniel Rueckert"),
+        Title("OpenMOLE: a Workflow Engine for Distributed Medical Image Analysis"),
+        Url("https://hal.inria.fr/hal-01099220/document"),
+        BookTitle("High Performance Computing MICCAI Workshop (part of MICCAI 2014)"),
+        Year(2014)
+      ),
+      Article(
+        "Lardy.etal.2014",
+        Authors("Romain Lardy"),
+        Title("Towards vulnerability minimization of grassland soil organic matter using metamodels"),
+        Url(baseURL + "/files/Lardy2014.pdf"),
+        Year(2014)
+      ),
+      Article(
+        "Somebody2014",
+        Title("Facilitating Parameter Estimation and Sensitivity Analysis of Agent-Based Models: A Cookbook Using NetLogo and R"),
+        Url("http://jasss.soc.surrey.ac.uk/17/3/11.html"),
+        Year(2014)
+      ),
+      Article(
+        "Mikut2013",
+        Title("Automated Processing of Zebrafish Imaging Data: A Survey"),
+        Url(baseURL + "/files/Mikut2013.pdf"),
+        Year(2013)
+      ),
+      Article(
+        "Lenormand2012",
+        Title("Initialize and Calibrate a Dynamic Stochastic Microsimulation Model: Application to the SimVillages Model"),
+        Url(baseURL + "/files/Lenormand2012.pdf"),
+        Year(2012)
+      ),
+      Article(
+        "Ratamero2012",
+        Title("Endogenization of network topology in metamimetic games"),
+        Url(baseURL + "/files/Ratamero2012.pdf"),
+        Year(2012)
+      ),
+      Article(
+        "Junier2012",
+        Title("CTCF-mediated transcriptional regulation through cell type-specific chromosome organization in the β-globin locus"),
+        Url(baseURL + "/files/Junier2012.pdf"),
+        Year(2012)
+      ),
+      Article(
+        "LardyEcosystem2012",
+        Title("Ecosystem Climate Change Vulnerability Assessment Framework"),
+        Url(baseURL + "/files/LardyEcosystem2012.pdf"),
+        Year(2012)
+      ),
+      Article(
+        "LardySteady2012",
+        Title("Steady-state soil organic matter approximation model: application to the Pasture Simulation Model"),
+        Url(baseURL + "/files/LardySteady2012.pdf"),
+        Year(2012)
+      ),
+      Article(
+        "ReuillonFG2012",
+        Title("Algorithmes évolutionnaires sur grille de calcul pour le calibrage de modèles géographiques"),
+        Url(baseURL + "/files/ReuillonFG2012.pdf"),
+        Year(2012)
+      ),
+      Article(
+        "Caillou2012",
+        Title("SimAnalyzer : Automated description of groups dynamics in agent-based simulations"),
+        Url(baseURL + "/files/Caillou2012.pdf"),
+        Year(2012)
+      ),
+      Article(
+        "Michel2012",
+        Title("Technical support for Life Sciences communities on a production grid infrastructure"),
+        Url(baseURL + "/files/Michel2012.pdf"),
+        Year(2012)
+      ),
+      Article(
+        "Somebody2012",
+        Title("EPIS: A Grid Platform to Ease and Optimize Multi-agent Simulators Running (content not available online :()"),
+        Year(2012)
+      ),
+      Article(
+        "Perrot2011",
+        Title("The complex system science for optimal strategy of management of a food system: the camembert cheese ripening"),
+        Url(baseURL + "/files/Perrot2011.pdf"),
+        Year(2011)
+      ),
+      Article(
+        "Reuillon2011",
+        Title("Utilisation de EGI par la communauté des modélisateurs en systèmes complexes"),
+        Url(baseURL + "/files/Reuillon2011.pdf"),
+        Year(2011)
+      ),
+      Article(
+        "Mesmoudi2010",
+        Title("Optimal viable path search for a cheese ripening process using a multi-objective ea"),
+        Url(baseURL + "/files/Mesmoudi2010.pdf"),
+        Year(2010)
+      ),
+      InProceedings(
+        "Reuillon2010",
+        Title("Declarative Task Delegation in OpenMOLE"),
+        Authors("Romain Reuillon", "Florent Chuffart", "Mathieu Leclaire", "Thierry Faure", "Nicolas Dumoulin", "David R.C. Hill"),
+        BibtexPages("55-62"),
+        BookTitle("High Performance Computing and Simulation (HPCS), 2010 international conference on"),
+        Year(2010)
+      )
     )
+  }
+
+  def all: Frag = {
 
     val videos = Seq(
       Media("Complex systems numerical campus", "CNSC2013.webm", "2012"),
@@ -80,6 +190,21 @@ object Communication {
       )
     }
 
+    def paperBody(papers: Seq[Publication]) = for {
+      paper ← papers
+    } yield {
+      tbody(
+        tr(
+          td(
+            // TODO handle empty title/url
+            a(paper.get("Title"), href := paper.get("Url"))
+          ),
+          td(paper.get("Year"), `class` := "text-right")
+        // TODO add link to bibtex
+        )
+      )
+    }
+
     def header(title: String) = thead(
       tr(
         th(title),
@@ -92,8 +217,13 @@ object Communication {
       mediaBody(medias)
     )
 
+    def paperTable(papers: Seq[Publication]) = table(width := "100%", `class` := "table table-striped")(
+      header("Related papers"),
+      paperBody(papers)
+    )
+
     div(
-      mediaTable("Papers", papers),
+      paperTable(papers),
       mediaTable("Videos", videos),
       mediaTable("Slides", slides),
       mediaTable("In the news", news)
@@ -101,4 +231,3 @@ object Communication {
   }
 
 }
-
