@@ -90,14 +90,13 @@ class Site extends IApplication {
       case class PageFrag(page: Page, frag: Frag)
 
       lazy val pagesFrag = Pages.all.map { p ⇒ PageFrag(p, Pages.decorate(p)) }
-
-      lazy val bibPapers = Publication.papers ++ Communication.papers
-      bibPapers foreach (_.generateBibtex(dest))
-
       lazy val documentationFrags = pagesFrag.collect { case PageFrag(p: DocumentationPage, f) ⇒ f }.toSet
 
       def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file -> f }.toMap
     }
+
+    lazy val bibPapers = Publication.papers ++ Communication.papers
+    bibPapers foreach (_.generateBibtex(dest))
 
     site.renderTo(Path(dest))
 
