@@ -62,7 +62,7 @@ object IOMappingFactory {
       val panelUI = new PanelUI {
         val input = bs.input("")(placeholder := keyName).render
 
-        def view: TypedTag[HTMLElement] = span(input)
+        val view: TypedTag[HTMLElement] = span(input)
 
         def save = value() = input.value
       }
@@ -86,7 +86,7 @@ object IOMappingFactory {
       val panelUI = new PanelUI {
         val input = bs.checkbox(value()).render
 
-        def view: TypedTag[HTMLElement] = span(input)
+        val view: TypedTag[HTMLElement] = span(input)
 
         def save: Unit = value() = input.checked
       }
@@ -113,7 +113,7 @@ object IOMappingFactory {
           options,
           Some(default))
 
-        def view: TypedTag[HTMLElement] = span(selectorT.selector)
+        val view: TypedTag[HTMLElement] = span(selectorT.selector)
 
         def save: Unit = selectorT.content().map { c ⇒ value() = c }
       }

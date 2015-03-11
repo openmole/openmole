@@ -100,7 +100,7 @@ class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extend
     clear
   }
 
-  val view =
+  def view =
     bs.form(spacer20)(
       bs.formGroup( /*row + */ col_md_12)(
         bs.inputGroup(col_md_6 + col_md_offset_3)(

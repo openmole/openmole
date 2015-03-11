@@ -29,11 +29,6 @@ abstract class InOutputDataUI(val mappingsFactory: IOMappingsFactory) extends Da
       inoutputsUI() = inoutputsUI() :+ inoutputUI(proto, mappingsFactory)
     }
 
-  def +=(io: InOutputUI) =
-    if (!exists(io.protoDataBagUI)) {
-      inoutputsUI() = inoutputsUI() :+ io
-    }
-
   def -=(p: PrototypeDataBagUI) = inoutputsUI() = inoutputsUI().filter {
     _.id != p.uuid
   }

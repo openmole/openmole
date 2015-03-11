@@ -29,7 +29,7 @@ import scalatags.JsDom.{ tags }
 import IOPanelUIUtil._
 
 class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) extends PanelUI {
-  val inputFilter = InputFilter(pHolder = "Add a prototype", inputID = InputFilter.protoFilterId1)
+  val inputFilter = InputFilter(pHolder = "Add a prototype", inputID = InputFilter.filterId)
 
   def filteredInputsUI = filtered(inputFilter, dataUI, dataUI.mappingsFactory)
 
@@ -49,14 +49,13 @@ class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) exten
       }
     }).render
 
-  val view =
+  def view = {
     bs.form(spacer20)(
       bs.formGroup( /*row + */ col_md_12)(
         bs.inputGroup(col_md_6 + col_md_offset_3)(
           inputFilter.tag,
           bs.inputGroupButton(newGlyph)
         )),
-
       bs.formGroup(col_md_12)(Rx {
         (for ((headers, inputsUI) ← (filteredInputsUI ++ dataUI.inoutputsUI()).groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI) }) yield {
           bs.table(col_md_12 + striped)(
@@ -66,16 +65,20 @@ class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) exten
                 coloredTR((buildPrototypeTableView(i, () ⇒ setCurrent(i.protoDataBagUI)) :+
                   delButtonTD(() ⇒ dataUI -= i)
                 ), () ⇒ !dataUI.inoutputsUI().contains(i),
-                  () ⇒ add(i.protoDataBagUI))
+                  () ⇒ add(i))
               }
             )
           ).render
         }
         ).toSeq
-      })
+      }
+      )
     )
+  }
 
-  def add(pdb: PrototypeDataBagUI) = {
+  def add(io: InOutputUI): Unit = add(io.protoDataBagUI)
+
+  def add(pdb: PrototypeDataBagUI): Unit = {
     dataUI += pdb
     inputFilter.clear
   }
