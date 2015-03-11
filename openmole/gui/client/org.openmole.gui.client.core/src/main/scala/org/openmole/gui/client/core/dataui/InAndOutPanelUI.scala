@@ -30,9 +30,9 @@ import IOPanelUIUtil._
 
 class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extends PanelUI {
 
-  val inputFilter = InputFilter(pHolder = "Input prototype", inputID = InputFilter.protoFilterId1)
+  val inputFilter = InputFilter(pHolder = "Input prototype", inputID = InputFilter.protoFilterId1, size = "50%")
 
-  val outputFilter = InputFilter(pHolder = "Output prototype", inputID = InputFilter.protoFilterId2)
+  val outputFilter = InputFilter(pHolder = "Output prototype", inputID = InputFilter.protoFilterId2, size = "50%")
 
   def filteredInputsUI = ClientService.prototypeDataBagUIs.map { p ⇒ defaultInOutputUI(p) }.filter { i ⇒
     inputFilter.contains(i.protoDataBagUI.name()) &&
@@ -105,14 +105,13 @@ class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extend
     clear
   }
 
-  val view =
-    bs.form(spacer20)(
-      bs.formGroup( /*row + */ col_md_12)(
-        bs.inputGroup(col_md_6 + col_md_offset_3)(
-          inputFilter.tag,
-          outputFilter.tag,
-          bs.inputGroupButton(newGlyph)
-        )),
+  val view = bs.form(spacer20)(
+    bs.inputGroup(col_md_8 + col_md_offset_2)(
+      inputFilter.tag,
+      outputFilter.tag,
+      bs.inputGroupButton(newGlyph)
+    ),
+    bs.div(spacer20)(
       bs.formGroup(col_md_12)(Rx {
         bs.table(col_md_12 + striped)(
           buildHeaders(prototypeHeaderSequence ++ Seq("Default", buildDefaultMapping.key) ++ prototypeHeaderSequence), {
@@ -153,6 +152,7 @@ class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extend
       }
       )
     )
+  )
 
   def setCurrent(pdb: PrototypeDataBagUI) = {
     save
