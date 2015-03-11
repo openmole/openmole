@@ -29,17 +29,19 @@ class SystemExecTaskDataUI extends TaskDataUI {
 
   def dataType = "External"
 
-  override lazy val inputMappingsFactory = IOMappingsFactory(
+  override lazy val inputMappingsFactory = IOMappingsFactory(Seq(
     defaultInputField,
     stringField("Destination", fileFilter),
     booleanField("Workdir", true, fileFilter),
     booleanField("Link", false, fileFilter)
   )
+  )
 
-  override lazy val outputMappingsFactory = IOMappingsFactory(
+  override lazy val outputMappingsFactory = IOMappingsFactory(Seq(
     stringField("Source", fileFilter),
     booleanField("Workdir", true, fileFilter),
     booleanField("StdOut", false, stringFilter),
     booleanField("StdErr", false, stringFilter)
+  )
   )
 }

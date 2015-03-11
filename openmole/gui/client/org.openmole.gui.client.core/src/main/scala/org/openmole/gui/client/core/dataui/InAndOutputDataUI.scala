@@ -51,12 +51,7 @@ class InAndOutputDataUI(val mappingsFactory: IOMappingsFactory) extends DataUI {
       InAndOutput(
         i.in.protoDataBagUI.dataUI().data,
         i.out.protoDataBagUI.dataUI().data,
-        (new IOMappingsUI(mappingsFactory.build.fields.filter {
-          _.prototypeFilter(i.in.protoDataBagUI)
-        }.filter {
-          _.prototypeFilter2(i.out.protoDataBagUI)
-        })).fields.head.data
-      )
+        (new IOMappingsUI(mappingsFactory.build.fields)).fields.head.data)
     }
 
     def inputs = InOutputUI.inputData(inputDataUI.inoutputsUI())

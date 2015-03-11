@@ -31,7 +31,8 @@ class StatisticTaskDataUI(val name: Var[String] = Var("")) extends InAndOutTaskD
 
   def dataType = "Statistic"
 
-  def inAndOutMappingsFactory = IOMappingsFactory(
-    selectField("Statistic", StatisticType.MEDIAN, StatisticType.ALL, dimension1Filter, dimension0Filter)
+  def inAndOutMappingsFactory = IOMappingsFactory(Seq(
+    selectField("Statistic", StatisticType.MEDIAN, StatisticType.ALL)
+  ),dimension1Filter, dimension0Filter
   )
 }
