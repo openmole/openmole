@@ -17,7 +17,7 @@ package org.openmole.gui.client.core.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.GenericPanel
+import org.openmole.gui.client.core.{ ClientService, GenericPanel }
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
@@ -39,11 +39,12 @@ class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) exten
     // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
     bs.button("Add")(`type` := "submit", onclick := { () ⇒
       val filtering = filteredInputsUI
+      val inputValue = inputFilter.nameFilter()
       if (filtering.size == 1) {
         add(filtering.head.protoDataBagUI)
       }
-      else if (!inputFilter.nameFilter().isEmpty) {
-        val newProto = buildProto(inputFilter.nameFilter())
+      else if (!inputValue.isEmpty && !ClientService.existsPrototype(inputValue)) {
+        val newProto = buildProto(inputValue)
         setCurrent(newProto)
         add(newProto)
       }
