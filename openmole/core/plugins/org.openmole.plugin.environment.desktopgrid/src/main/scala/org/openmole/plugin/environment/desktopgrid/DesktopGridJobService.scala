@@ -42,10 +42,10 @@ trait DesktopGridJobService extends JobService with UnlimitedAccess { js ⇒
 
   def jobSubmissionFile(jobId: String) = new File(jobsDir, jobId)
   def tmpJobSubmissionFile(jobId: String) = new File(tmpJobsDir, jobId)
-  def timeStemps(jobId: String) = timeStempsDir.listFiles.filter { _.getName.startsWith(jobId) }
-  def timeStempsExists(jobId: String) = timeStempsDir.list.exists { _.startsWith(jobId) }
-  def resultExists(jobId: String) = resultsDir.list.exists { _.startsWith(jobId) }
-  def results(jobId: String) = resultsDir.listFiles.filter { _.getName.startsWith(jobId) }
+  def timeStemps(jobId: String) = Option(timeStempsDir.listFiles).getOrElse(Array.empty).filter { _.getName.startsWith(jobId) }
+  def timeStempsExists(jobId: String) = Option(timeStempsDir.list).getOrElse(Array.empty).exists { _.startsWith(jobId) }
+  def resultExists(jobId: String) = Option(resultsDir.list).getOrElse(Array.empty).exists { _.startsWith(jobId) }
+  def results(jobId: String) = Option(resultsDir.listFiles).getOrElse(Array.empty).filter { _.getName.startsWith(jobId) }
 
   protected def _submit(serializedJob: SerializedJob): BatchJob = {
     val jobId = new File(serializedJob.path).getName
