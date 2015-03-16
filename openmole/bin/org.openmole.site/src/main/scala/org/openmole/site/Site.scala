@@ -22,8 +22,9 @@ import java.util.zip.GZIPInputStream
 import ammonite.ops.Path
 import com.ice.tar.TarInputStream
 import org.eclipse.equinox.app._
-import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.tools.io.TarArchiver._
+import org.openmole.core.tools.io.{ FileUtil, TarArchiver }
+import FileUtil._
+import TarArchiver._
 import scalatags.Text.all
 import scalatags.Text.all._
 import scala.sys.process.BasicIO
