@@ -22,7 +22,7 @@ import java.util.zip.GZIPInputStream
 import ammonite.ops.Path
 import com.ice.tar.TarInputStream
 import org.eclipse.equinox.app._
-import org.openmole.core.tools.io.{FileUtil, TarArchiver}
+import org.openmole.core.tools.io.{ FileUtil, TarArchiver }
 import FileUtil._
 import TarArchiver._
 import scalatags.Text.all
