@@ -13,7 +13,7 @@ object Misc extends GuiDefaults {
   lazy val utils = OsgiProject("org.openmole.gui.misc.utils") enablePlugins (ScalaJSPlugin)
 
   lazy val js = OsgiProject("org.openmole.gui.misc.js") enablePlugins (ScalaJSPlugin) dependsOn
-    (Core.workspace) settings (
+    (Core.workspace, utils) settings (
       libraryDependencies ++= Seq(scalajsLibrary, scalajsDom, scalaTags, rx, scaladget)
     )
 }

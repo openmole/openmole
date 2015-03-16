@@ -17,7 +17,7 @@ package org.openmole.gui.client.core.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.GenericPanel
+import org.openmole.gui.client.core.{ ClientService, GenericPanel }
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
@@ -29,7 +29,7 @@ import scalatags.JsDom.{ tags }
 import IOPanelUIUtil._
 
 class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) extends PanelUI {
-  val inputFilter = InputFilter(pHolder = "Add a prototype", inputID = InputFilter.protoFilterId1)
+  val inputFilter = InputFilter(pHolder = "Add a prototype", inputID = InputFilter.filterId)
 
   def filteredInputsUI = filtered(inputFilter, dataUI, dataUI.mappingsFactory)
 
@@ -39,24 +39,24 @@ class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) exten
     // bs.button(glyph(glyph_plus))(onclick := { () ⇒ add
     bs.button("Add")(`type` := "submit", onclick := { () ⇒
       val filtering = filteredInputsUI
+      val inputValue = inputFilter.nameFilter()
       if (filtering.size == 1) {
         add(filtering.head.protoDataBagUI)
       }
-      else if (!inputFilter.nameFilter().isEmpty) {
-        val newProto = buildProto(inputFilter.nameFilter())
+      else if (!inputValue.isEmpty && !ClientService.existsPrototype(inputValue)) {
+        val newProto = buildProto(inputValue)
         setCurrent(newProto)
         add(newProto)
       }
     }).render
 
-  val view =
+  def view = {
     bs.form(spacer20)(
       bs.formGroup( /*row + */ col_md_12)(
         bs.inputGroup(col_md_6 + col_md_offset_3)(
           inputFilter.tag,
           bs.inputGroupButton(newGlyph)
         )),
-
       bs.formGroup(col_md_12)(Rx {
         (for ((headers, inputsUI) ← (filteredInputsUI ++ dataUI.inoutputsUI()).groupBy { i ⇒ dataUI.mappingKeys(i.protoDataBagUI) }) yield {
           bs.table(col_md_12 + striped)(
@@ -65,16 +65,21 @@ class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) exten
               for (i ← inputsUI.sortBy(_.protoDataBagUI.name())) yield {
                 coloredTR((buildPrototypeTableView(i, () ⇒ setCurrent(i.protoDataBagUI)) :+
                   delButtonTD(() ⇒ dataUI -= i)
-                ), () ⇒ !dataUI.inoutputsUI().contains(i))
+                ), () ⇒ !dataUI.inoutputsUI().contains(i),
+                  () ⇒ add(i))
               }
             )
           ).render
         }
         ).toSeq
-      })
+      }
+      )
     )
+  }
 
-  def add(pdb: PrototypeDataBagUI) = {
+  def add(io: InOutputUI): Unit = add(io.protoDataBagUI)
+
+  def add(pdb: PrototypeDataBagUI): Unit = {
     dataUI += pdb
     inputFilter.clear
   }

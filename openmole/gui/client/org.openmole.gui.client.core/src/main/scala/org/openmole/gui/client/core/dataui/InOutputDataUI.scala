@@ -51,7 +51,11 @@ abstract class InOutputDataUI(val mappingsFactory: IOMappingsFactory) extends Da
 
   def panelUI(panel: GenericPanel): InOutputPanelUI = new InOutputPanelUI(panel, this)
 
-  def mappingKeys(p: PrototypeDataBagUI) = mappingsFactory.build.fields.filter { _.prototypeFilter(p) }.map { _.key }
+  def mappingKeys(p: PrototypeDataBagUI) = mappingsFactory.build.fields.filter {
+    _.prototypeFilter(p)
+  }.map {
+    _.key
+  }
 
 }
 
@@ -59,6 +63,7 @@ class InputDataUI(mFactory: IOMappingsFactory) extends InOutputDataUI(mFactory) 
   type DATA = InputData
 
   def dataType = "Inputs"
+
   def data = new InputData {
     def inputs = InOutputUI.inputData(inoutputsUI())
   }
@@ -69,6 +74,7 @@ class OutputDataUI(mFactory: IOMappingsFactory) extends InOutputDataUI(mFactory)
   type DATA = OutputData
 
   def dataType = "Outputs"
+
   def data = new OutputData {
     def outputs = InOutputUI.outputData(inoutputsUI())
   }

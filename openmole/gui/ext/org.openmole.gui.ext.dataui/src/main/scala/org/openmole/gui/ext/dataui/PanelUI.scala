@@ -24,7 +24,7 @@ import scalatags.JsDom.all._
 
 object PanelUI {
   def empty = new PanelUI {
-    def view = div
+    val view = div
 
     def save = {}
   }

@@ -18,10 +18,11 @@ package org.openmole.gui.plugin.task.groovy.client
  */
 
 import org.openmole.gui.client.core.ClientService
-import org.openmole.gui.client.core.dataui.TaskDataUI
+import org.openmole.gui.client.core.dataui.{IOMappingsFactory, TaskDataUI}
 import ClientService._
 import org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData
 import rx._
+import org.openmole.gui.client.core.dataui.IOMappingFactory._
 
 class GroovyTaskDataUI(val code: Var[String] = Var(""),
                        val libs: Var[Seq[Var[String]]] = Var(Seq())) extends TaskDataUI {

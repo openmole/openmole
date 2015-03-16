@@ -15,4 +15,4 @@ addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.4-SNAPSHOT")
 
 addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.3.0")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.0")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.1")

@@ -27,7 +27,7 @@ import org.openmole.gui.misc.js.Forms._
 import rx._
 
 object InputFilter {
-  def apply(initValue: String = "", pHolder: String = "Filter", inputID: String = filterId) = new InputFilter(initValue, pHolder, inputID)
+  def apply(initValue: String = "", pHolder: String = "Filter", inputID: String = filterId, size: String = "100%") = new InputFilter(initValue, pHolder, inputID, size)
 
   val filterId: String = "inputFilter"
 
@@ -37,7 +37,7 @@ object InputFilter {
 }
 
 import InputFilter._
-class InputFilter(initValue: String, pHolder: String, inputID: String) {
+class InputFilter(initValue: String, pHolder: String, inputID: String, size: String = "100%") {
   val nameFilter: Var[String] = Var("")
 
   val tag = bs.input(
@@ -45,6 +45,7 @@ class InputFilter(initValue: String, pHolder: String, inputID: String) {
       id := inputID,
       value := initValue,
       placeholder := pHolder,
+      width := size,
       autofocus
     ).render
 

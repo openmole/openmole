@@ -53,13 +53,11 @@ object IOPanelUIUtil {
     newProto
   }
 
-  def buildPrototypeTableView(io: InOutputUI, todo: () ⇒ Unit) = {
-    Seq(
-      clickablePrototypeTD(io.protoDataBagUI, todo),
-      labelTD(io.protoDataBagUI.dataUI().dataType, label_primary),
-      basicTD(io.protoDataBagUI.dataUI().dimension().toString)
-    ) ++ mappingsTD(io)
-  }
+  def buildPrototypeTableView(io: InOutputUI, todo: () ⇒ Unit) = Seq(
+    clickablePrototypeTD(io.protoDataBagUI, todo),
+    labelTD(io.protoDataBagUI.dataUI().dataType, label_primary),
+    basicTD(io.protoDataBagUI.dataUI().dimension().toString)
+  ) ++ mappingsTD(io)
 
   def clickablePrototypeTD(p: PrototypeDataBagUI, todo: () ⇒ Unit) = bs.td(col_md_2)(
     a(p.name(),
@@ -76,12 +74,14 @@ object IOPanelUIUtil {
 
   def basicTD(s: String) = bs.td(col_md_1)(tags.span(s)).render
 
-  def mappingsTD(i: InOutputUI) = for (
-    f ← i.mappings().fields.map {
-      _.panelUI
+  def mappingsTD(i: InOutputUI) = {
+    for (
+      f ← i.mappings().fields.map { f ⇒
+        f.panelUI
+      }
+    ) yield {
+      tags.td(f.view).render
     }
-  ) yield {
-    tags.td(f.view).render
   }
 
   def delButtonTD(todo: () ⇒ Unit) = bs.td(col_md_1)(bs.button(glyph(glyph_minus))(onclick := { () ⇒
@@ -89,10 +89,19 @@ object IOPanelUIUtil {
   }
   )).render
 
-  def coloredTR(tds: Seq[TableCell], filter: () ⇒ Boolean) = bs.tr(
-    if (filter()) warning
-    else nothing
-  )(tds)
+  def coloredTR(tds: Seq[TableCell], filter: () ⇒ Boolean, click: () ⇒ Unit = () ⇒ {}) = {
+    bs.tr(
+      if (filter()) warning
+      else nothing
+    )(if (filter()) {
+        Seq(cursor := "pointer",
+          onclick := { () ⇒ click() }
+        )
+      }
+      else {
+        Seq(cursor := "default")
+      }, tds)
+  }
 
   def saveInOutputsUI(inouts: Seq[InOutputUI]) = {
     inouts.map {

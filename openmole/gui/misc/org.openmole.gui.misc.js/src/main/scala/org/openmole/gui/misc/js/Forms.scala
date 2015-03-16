@@ -226,9 +226,11 @@ object Forms {
   val col_md_4 = key("col-md-4")
   val col_md_5 = key("col-md-5")
   val col_md_6 = key("col-md-6")
+  val col_md_8 = key("col-md-8")
   val col_md_12 = key("col-md-12")
 
   val col_md_offset_3 = key("col-md-offset-3")
+  val col_md_offset_2 = key("col-md-offset-2")
 
   //Misc
   val center = key("text-center")

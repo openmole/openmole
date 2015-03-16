@@ -99,6 +99,8 @@ object ClientService {
     _.uuid != dataBagUI.uuid
   }
 
+  def existsPrototype(name: String) = prototypeDataBagUIs.exists(_.name() == name)
+
   def exists(dataBagUI: DataBagUI) = uiDataBags().exists(p ⇒ {
     p.uuid == dataBagUI.uuid
   })

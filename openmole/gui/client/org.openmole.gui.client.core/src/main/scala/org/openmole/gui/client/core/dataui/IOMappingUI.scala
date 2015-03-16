@@ -37,8 +37,6 @@ trait IOMappingDataUI[T] {
 
   def prototypeFilter(p: PrototypeDataBagUI): Boolean = true
 
-  def prototypeFilter2(p: PrototypeDataBagUI): Boolean = true
-
   def data = IOMappingData(key, value)
 }
 
@@ -47,8 +45,7 @@ object IOMappingFactory {
   def defaultInputField = IOMappingFactory.stringField("Default")
 
   def stringField(keyName: String,
-                  protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true,
-                  protoFilter2: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory[String] {
+                  protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory[String] {
     def build = new IOMappingDataUI[String] {
 
       val key = keyName
@@ -57,12 +54,10 @@ object IOMappingFactory {
 
       override def prototypeFilter(proto: PrototypeDataBagUI) = protoFilter(proto)
 
-      override def prototypeFilter2(proto: PrototypeDataBagUI) = protoFilter2(proto)
-
       val panelUI = new PanelUI {
         val input = bs.input("")(placeholder := keyName).render
 
-        def view: TypedTag[HTMLElement] = span(input)
+        val view: TypedTag[HTMLElement] = span(input)
 
         def save = value() = input.value
       }
@@ -71,8 +66,7 @@ object IOMappingFactory {
 
   def booleanField(keyName: String,
                    default: Boolean,
-                   protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true,
-                   protoFilter2: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory[Boolean] {
+                   protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory[Boolean] {
     def build = new IOMappingDataUI[Boolean] {
 
       val key = keyName
@@ -81,12 +75,10 @@ object IOMappingFactory {
 
       override def prototypeFilter(proto: PrototypeDataBagUI) = protoFilter(proto)
 
-      override def prototypeFilter2(proto: PrototypeDataBagUI) = protoFilter2(proto)
-
       val panelUI = new PanelUI {
         val input = bs.checkbox(value()).render
 
-        def view: TypedTag[HTMLElement] = span(input)
+        val view: TypedTag[HTMLElement] = span(input)
 
         def save: Unit = value() = input.checked
       }
@@ -96,8 +88,7 @@ object IOMappingFactory {
   def selectField[T <: Displayable with Identifiable](keyName: String,
                                                       default: T,
                                                       options: Seq[T],
-                                                      protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true,
-                                                      protoFilter2: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory[T] {
+                                                      protoFilter: (PrototypeDataBagUI) ⇒ Boolean = (p: PrototypeDataBagUI) ⇒ true) = new IOMappingFactory[T] {
     def build = new IOMappingDataUI[T] {
 
       val key = keyName
@@ -106,14 +97,12 @@ object IOMappingFactory {
 
       override def prototypeFilter(proto: PrototypeDataBagUI) = protoFilter(proto)
 
-      override def prototypeFilter2(proto: PrototypeDataBagUI) = protoFilter2(proto)
-
       val panelUI = new PanelUI {
         val selectorT = Select("selectField",
           options,
           Some(default))
 
-        def view: TypedTag[HTMLElement] = span(selectorT.selector)
+        val view: TypedTag[HTMLElement] = span(selectorT.selector)
 
         def save: Unit = selectorT.content().map { c ⇒ value() = c }
       }
@@ -141,22 +130,33 @@ import IOMappingFactory._
 
 object IOMappingsFactory {
 
-  def apply(mappingFactories: IOMappingFactory[_]*) = new IOMappingsFactory {
+  def apply(mappingFactories: Seq[IOMappingFactory[_]],
+            iprotoFilter: PrototypeDataBagUI ⇒ Boolean = PrototypeDataBagUI ⇒ true,
+            oprotoFilter: PrototypeDataBagUI ⇒ Boolean = PrototypeDataBagUI ⇒ true) = new IOMappingsFactory {
     def build: IOMappingsUI = new IOMappingsUI(mappingFactories.map {
       _.build
     })
+
+    override def inputPrototypeFilter(p: PrototypeDataBagUI): Boolean = iprotoFilter(p)
+
+    override def outputPrototypeFilter(p: PrototypeDataBagUI): Boolean = oprotoFilter(p)
   }
 
   def empty = new IOMappingsFactory {
     def name: String = ""
+
     def build: IOMappingsUI = new IOMappingsUI()
   }
 
-  def default = IOMappingsFactory(defaultInputField)
+  def default = IOMappingsFactory(Seq(defaultInputField))
 }
 
 trait IOMappingsFactory {
   def build: IOMappingsUI
+
+  def inputPrototypeFilter(p: PrototypeDataBagUI): Boolean = true
+
+  def outputPrototypeFilter(p: PrototypeDataBagUI): Boolean = true
 }
 
 case class IOMappingsUI(fields: Seq[IOMappingDataUI[_]] = Seq()) {
