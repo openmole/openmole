@@ -110,6 +110,10 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       cleanFiles <+= baseDirectory { base ⇒ dir / "target" }
     )
 
+  lazy val webServerDependencies = Seq(
+    scalate
+  )
+
   lazy val coreDependencies = Seq[sbt.ModuleID](
     Libraries.gridscale,
     Libraries.logback,
@@ -131,7 +135,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Libraries.jodaTime,
     Libraries.scalaLang,
     Libraries.slf4j
-  )
+  ) ++ webServerDependencies
 
   lazy val guiCoreDependencies = Seq(
     scalajsLibrary,
