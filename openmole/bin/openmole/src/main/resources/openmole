@@ -43,7 +43,7 @@ ARGS=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -c|-wc) SPLASHSCREEN=""; ARGS="$ARGS $1";;
+    -c|-ws) SPLASHSCREEN=""; ARGS="$ARGS $1";;
     -mem) shift; MEM=$1 ;;
     *) ARGS="$ARGS $1" ;;
   esac
