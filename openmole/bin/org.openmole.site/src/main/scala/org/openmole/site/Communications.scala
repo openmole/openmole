@@ -205,20 +205,20 @@ object Communication {
       )
     }
 
-    def header(title: String) = thead(
-      tr(
-        th(title),
-        th("Year", `class` := "text-right")
+    def header(columns: (String, Option[String])*) =
+      thead(
+        tr(for { (column, cssClass) ← columns } yield {
+          th(column, `class` := cssClass.getOrElse(""))
+        })
       )
-    )
 
     def mediaTable(title: String, medias: Seq[Media]) = table(width := "100%", `class` := "table table-striped")(
-      header(title),
+      header((title, None), ("Year", Some("text-right"))),
       mediaBody(medias)
     )
 
     def paperTable(papers: Seq[Publication]) = table(width := "100%", `class` := "table table-striped")(
-      header("Related papers"),
+      header(("Related papers", None), ("Year", Some("text-right")), ("Cite", None)),
       paperBody(papers)
     )
 
