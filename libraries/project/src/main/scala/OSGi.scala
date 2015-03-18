@@ -81,7 +81,7 @@ object OSGi extends Defaults(Apache) {
     )
 
   lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
-    privatePackages = Seq("*"), dynamicImports = Seq("*")) settings
+    privatePackages = Seq("*"), dynamicImports = Seq("*"), imports = Seq("*")) settings
     (libraryDependencies <++= (scalaVersion) { sV ⇒
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,

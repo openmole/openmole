@@ -23,7 +23,7 @@ object Web extends Defaults {
     "org.openmole.web.core",
     "core",
     exports = Seq("org.openmole.web.*"),
-    //  dynamicImports = Seq("*"),
+    dynamicImports = Seq("*"),
     imports = Seq("org.h2.*", "!com.sun.*", "*")) dependsOn
     (Core.workflow, Core.serializer, iceTar, misc) settings
     (libraryDependencies ++= Seq(bouncyCastle, h2, jetty, slick, logback, scalatra, scalate, bonecp, scalaLang, xstream, jacksonJson, arm, codec))
