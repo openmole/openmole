@@ -199,8 +199,8 @@ object Communication {
             // TODO handle empty title/url
             a(paper.get("Title"), href := paper.get("Url"))
           ),
-          td(paper.get("Year"), `class` := "text-right")
-        // TODO add link to bibtex
+          td(paper.get("Year"), `class` := "text-right"),
+          td(a(i("BibTex"), href := s"${paper.sortKey}.bib"))
         )
       )
     }
