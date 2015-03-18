@@ -9,6 +9,7 @@ package org.openmole.web
 
 import javax.crypto.spec.SecretKeySpec
 import javax.crypto.Mac
+import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.Workspace
 
 import scala.collection.mutable.HashMap
@@ -20,9 +21,11 @@ import javax.servlet.http.HttpServletRequest
 import org.openmole.web.cache.DataHandler
 import org.openmole.web.mole.MoleHandling
 
-trait Authentication { self ⇒
+object Authentication extends Logger
 
-  //private val logger = LoggerFactory.getLogger(getClass)
+import Authentication.Log._
+
+trait Authentication { self ⇒
 
   def system: ActorSystem
 
@@ -53,8 +56,7 @@ trait Authentication { self ⇒
       hash
     }
     else {
-      //logger.info("Submitted password was incorrect")
-      println("Submitted password was incorrect")
+      logger.info("Submitted password was incorrect")
       throw new InvalidPasswordException("Submitted password was incorrect")
     }
   }
@@ -66,10 +68,10 @@ trait Authentication { self ⇒
   def checkKey(key: String, hostname: String): Boolean = {
     keyStorage get hostname match {
       case Some(k) ⇒ {
-        println(s"key is valid: ${k.isValid}")
-        println(s"key matches key given: ${k.hash == key}")
-        println(s"stored key: ${k.hash}")
-        println(s"given key: $key")
+        logger.info(s"key is valid: ${k.isValid}")
+        logger.info(s"key matches key given: ${k.hash == key}")
+        logger.info(s"stored key: ${k.hash}")
+        logger.info(s"given key: $key")
 
         k.isValid && k.hash == key
       }

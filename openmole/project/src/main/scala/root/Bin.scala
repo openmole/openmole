@@ -48,7 +48,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }
     )
 
-  lazy val openmoleConsole = OsgiProject("org.openmole.console") settings (
+  lazy val openmoleConsole = OsgiProject("org.openmole.console", imports = Seq("*")) settings (
     organization := "org.openmole.console"
   ) dependsOn (
       Core.workflow,
@@ -57,7 +57,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       Core.batch
     )
 
-  lazy val openmoleUI = OsgiProject("org.openmole.ui", singleton = true) settings (
+  lazy val openmoleUI = OsgiProject("org.openmole.ui", singleton = true, imports = Seq("*")) settings (
     organization := "org.openmole.ui",
     libraryDependencies += equinoxApp
   ) dependsOn (
@@ -111,7 +111,9 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     )
 
   lazy val webServerDependencies = Seq(
-    scalate
+    jacksonJson,
+    scalatra,
+    bouncyCastle
   )
 
   lazy val coreDependencies = Seq[sbt.ModuleID](
@@ -172,7 +174,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     libraryDependencies ++=
     Seq(
       sshd,
-      bouncyCastle,
       family,
       logging,
       opencsv,
