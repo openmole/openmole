@@ -34,7 +34,6 @@ object OSGi extends Defaults(Apache) {
     exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.json4s", "*")) settings(
       libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion,
-      libraryDependencies += "org.scalatra" %% "scalatra-scalate" % scalatraVersion,
       libraryDependencies += "org.scalatra" %% "scalatra-json" % scalatraVersion,
       version := scalatraVersion) dependsOn (slf4j)
 
