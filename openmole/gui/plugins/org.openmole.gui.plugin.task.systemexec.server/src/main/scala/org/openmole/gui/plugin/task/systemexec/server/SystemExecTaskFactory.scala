@@ -18,7 +18,7 @@ package org.openmole.gui.plugin.task.systemexec.server
  */
 
 import org.openmole.core.workflow.task.PluginSet
-import org.openmole.gui.ext.data.{Factory, InputData, OutputData}
+import org.openmole.gui.ext.data.Factory
 import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
 import org.openmole.plugin.task.systemexec.SystemExecTask
 

@@ -18,14 +18,11 @@ package org.openmole.gui.plugin.task.systemexec.client
  */
 
 import org.openmole.gui.ext.dataui.PanelUI
-import org.openmole.gui.misc.js.Forms._
 
 import scala.scalajs.js.annotation.JSExport
 
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{Forms=> bs}
-
-import rx._
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskPanelUI")
 class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {

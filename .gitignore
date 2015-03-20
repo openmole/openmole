@@ -22,3 +22,4 @@ release/*
 *.bak
 .directory
 .DS_Store
+*.history
