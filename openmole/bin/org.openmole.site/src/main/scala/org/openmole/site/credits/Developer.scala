@@ -16,6 +16,7 @@
  */
 
 package org.openmole.site
+package credits
 
 import scalatags.Text.all._
 
@@ -32,7 +33,7 @@ object Developer {
       Seq(
         Developer("Romain Reuillon", Seq(geocite, iscpif)),
         Developer("Mathieu Leclaire", Seq(geocite, iscpif)),
-        Developer("Jonathan Passerat", Seq(biomedia))
+        Developer("Jonathan Passerat-Palmbach", Seq(biomedia))
       )
 
     def lines =
@@ -50,21 +51,3 @@ object Developer {
 
 case class Affiliation(name: String, site: String)
 case class Developer(name: String, affiliations: Seq[Affiliation])
-
-object Publication {
-  def fgcs2013 =
-    Publication(
-      Seq("Romain Reuillon", "Mathieu Leclaire", "Sebastien Rey-Coyrehourcq"),
-      "OpenMOLE, a workflow engine specifically tailored for the distributed exploration of simulation models",
-      "Future Generation Computer Systems, vol 29, num 8, pp 1981-1990",
-      2013,
-      url = "http://www.openmole.org/files/FGCS2013.pdf"
-    )
-
-  def publication(publication: Publication): Frag = {
-    def authors = publication.authors.map(s ⇒ s: Frag).reduceLeft { (a1, a2) ⇒ Seq[Frag](a1, ", ", a2): Frag }
-    Seq[Frag](authors, ", ", a(i(publication.title), href := publication.url), " published in ", publication.in, ", ", publication.year)
-  }
-}
-
-case class Publication(authors: Seq[String], title: String, in: String, year: Int, url: String)
