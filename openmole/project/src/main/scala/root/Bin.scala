@@ -315,6 +315,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       startLevels := openmoleStartLevels ++ Seq("openmole-plugin" -> 3),
       pluginsDirectory := assemblyPath.value / "plugins",
       config := assemblyPath.value / "configuration/config.ini"
-    ) dependsOn (siteGeneration, base.Misc.tools)
+    ) dependsOn (siteGeneration, Core.tools)
 
 }
