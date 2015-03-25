@@ -102,7 +102,7 @@ object NetLogo4Task {
     script: File,
     launchingCommands: Iterable[String],
     embedWorkspace: Boolean): NetLogoTaskBuilder =
-    if (embedWorkspace) apply(script.getParentFile, script.getName, launchingCommands)
+    if (embedWorkspace) apply(script.getCanonicalFile.getParentFile, script.getName, launchingCommands)
     else apply(script, launchingCommands)
 
 }

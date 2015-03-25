@@ -137,6 +137,8 @@ trait FileUtil {
 
   implicit class FileDecorator(file: File) {
 
+    def createParentDirs = file.getCanonicalFile.getParentFile.mkdirs
+
     /////// copiers ////////
     def copy(toF: File) = {
       // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES, REPLACE_EXISTING

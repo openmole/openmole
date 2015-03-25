@@ -98,7 +98,7 @@ trait ExternalTask extends Task {
   }
 
   private def copy(f: ToPut, to: File) = {
-    to.getAbsoluteFile.getParentFile.mkdirs
+    to.createParentDirs
 
     if (f.link) to.createLink(f.file.getAbsolutePath)
     else {
