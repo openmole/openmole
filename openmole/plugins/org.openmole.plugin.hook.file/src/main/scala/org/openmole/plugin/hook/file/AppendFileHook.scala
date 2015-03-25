@@ -58,7 +58,7 @@ abstract class AppendFileHook(prototype: Prototype[File], outputFile: ExpandedSt
         if (!to.exists) {
           if (from.isDirectory) to.mkdirs
           else {
-            to.createParentDirs
+            to.createParentDir
             to.createNewFile
           }
         }
