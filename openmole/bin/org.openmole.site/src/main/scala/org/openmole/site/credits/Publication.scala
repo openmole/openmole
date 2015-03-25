@@ -40,12 +40,13 @@ class Publication(val publication: BibtexEntry) {
   }
 
   def generateBibtex(dest: File) = {
-    dest.createParentDir
+    dest.mkdirs()
 
     // write bibtex to a separate file
     val bibfile = s"${publication.sortKey}.bib"
 
     val f = new File(dest, bibfile)
+
     f.withWriter { writer ⇒
       writer.write(publication.toBibTeX)
     }
