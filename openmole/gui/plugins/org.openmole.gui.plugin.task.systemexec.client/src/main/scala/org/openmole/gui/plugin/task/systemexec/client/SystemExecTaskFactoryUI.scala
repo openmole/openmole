@@ -21,7 +21,6 @@ import org.openmole.gui.client.core.dataui.TaskDataUI
 import org.openmole.gui.ext.dataui.FactoryUI
 
 import scala.scalajs.js.annotation.JSExport
-import rx._
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskFactoryUI")
 sealed class SystemExecTaskFactoryUI extends FactoryUI {

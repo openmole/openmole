@@ -18,11 +18,9 @@ package org.openmole.gui.plugin.task.groovy.client
  */
 
 import org.openmole.gui.client.core.ClientService
-import org.openmole.gui.client.core.dataui.{IOMappingsFactory, TaskDataUI}
+import org.openmole.gui.client.core.dataui.TaskDataUI
 import ClientService._
 import scala.scalajs.js.annotation.JSExport
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.ext.dataui._
 import org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData
 import rx._
 

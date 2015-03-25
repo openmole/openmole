@@ -1,6 +1,6 @@
 
-
 @import Objects._
+@import credits._
 @import Pages._
 
 @sect{Active developers}
@@ -9,7 +9,10 @@
   @p The development activity can be seen from @a("github", href := "https://github.com/openmole/openmole").
 
 @sect{How to cite OpenMOLE}
-  @Publication.publication(Publication.fgcs2013)
+  @Publication.papers.map(_.print)
+
+@sect{Communications}
+  All the papers citing OpenMOLE, conference slides, videos can be found at the @a("Contributions page", href := communications.file).
 
 @sect{Communications}
   All the papers citing OpenMOLE, conference slides, videos can be found at the @a("Contributions page", href := communications.file).

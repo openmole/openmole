@@ -90,6 +90,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
+      resourcesAssemble <++= Seq(openmoleUI.project, openmoleConsole.project) sendTo { assemblyPath / "plugins" },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <++= Seq(openmoleUI.project, openmoleConsole.project) sendTo { assemblyPath / "plugins" },
       //resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
@@ -283,7 +284,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
         resourcesAssemble <+= (Tar.tar in openmole, resourceManaged in Compile) map { case (f, d) ⇒ f -> d },
         resourcesAssemble <+= (Tar.tar in daemon, resourceManaged in Compile) map { case (f, d) ⇒ f -> d },
         resourcesAssemble <+= (Tar.tar in api, resourceManaged in Compile) map { case (doc, d) ⇒ doc -> d },
-        dependencyFilter := { d ⇒ false }
+        dependencyFilter := { _ ⇒ false }
       ) settings (
           buildInfoSettings ++
             Seq(
@@ -299,13 +300,13 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
                   }),
               buildInfoPackage := "org.openmole.site.buildinfo"
             ): _*
-        ) dependsOn (openmoleConsole)
+        ) dependsOn (openmoleConsole, ThirdParties.toolxitBibtex)
 
   lazy val site =
     Project("site", dir / "site", settings = assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("site"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
-      resourcesAssemble <++= Seq(siteGeneration.project) sendTo (assemblyPath / "plugins"),
+      resourcesAssemble <++= Seq(siteGeneration.project, ThirdParties.toolxitBibtex.project) sendTo (assemblyPath / "plugins"),
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       dependencyFilter := filter,
@@ -317,6 +318,6 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web) {
       startLevels := openmoleStartLevels ++ Seq("openmole-plugin" -> 3),
       pluginsDirectory := assemblyPath.value / "plugins",
       config := assemblyPath.value / "configuration/config.ini"
-    ) dependsOn (siteGeneration)
+    ) dependsOn (siteGeneration, base.Misc.tools)
 
 }
