@@ -142,6 +142,8 @@ object Workspace {
 
   def persistent(name: String) = instance.persistent(name)
 
+  def isPreferenceSet(location: ConfigurationLocation) = instance.isPreferenceSet(location)
+
   implicit def authenticationProvider = instance.authenticationProvider
 
   def authentications = instance.authentications

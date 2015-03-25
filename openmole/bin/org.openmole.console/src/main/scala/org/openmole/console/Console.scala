@@ -37,6 +37,7 @@ import scala.tools.nsc.io.{ File ⇒ SFile }
 import java.io.File
 
 object Console {
+
   @tailrec def askPassword: String = {
     val password = new ConsoleReader().readLine("enter password:", '*')
     val confirmation = new ConsoleReader().readLine("confirm password:", '*')
@@ -46,12 +47,6 @@ object Console {
     }
     else password
   }
-
-}
-
-import Console._
-
-class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = None, script: Option[String] = None) { console ⇒
 
   def setPassword(password: String) =
     try {
@@ -74,6 +69,12 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
     if (!setPassword(password)) initPassword
   }
 
+}
+
+import Console._
+
+class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = None, script: Option[String] = None) { console ⇒
+
   def workspace = "workspace"
   def registry = "registry"
   def logger = "logger"
@@ -92,11 +93,10 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
       imports.map("import " + _).mkString("; ")
     )
 
-  def run {
+  def run = {
     val correctPassword =
       password match {
-        case None ⇒
-          initPassword; true
+        case None ⇒ initPassword; true
         case Some(p) ⇒ setPassword(p)
       }
 

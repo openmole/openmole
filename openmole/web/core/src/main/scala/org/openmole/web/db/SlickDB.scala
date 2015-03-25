@@ -23,7 +23,7 @@ class SlickDB(private val pw: String) {
     val dbFile: java.io.File = Workspace.file("WebserverDB")
     boneCfg.setJdbcUrl(s"jdbc:h2:${dbFile.getCanonicalPath};TRACE_LEVEL_FILE=4;MVCC=TRUE;CIPHER=AES")
     boneCfg.setUser("root")
-    boneCfg.setPassword(s"$pw openmole")
+    boneCfg.setPassword(s"$pw")
     boneCfg.setMinConnectionsPerPartition(5)
     boneCfg.setMaxConnectionsPerPartition(10)
     boneCfg.setPartitionCount(1)

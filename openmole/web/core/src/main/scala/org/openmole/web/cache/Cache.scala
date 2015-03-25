@@ -3,6 +3,7 @@ package org.openmole.web.cache
 import org.openmole.core.workflow.mole.MoleExecution
 import java.io.File
 import akka.actor.ActorSystem
+import org.openmole.web.DataHandler
 import org.openmole.web.db.SlickDB
 import org.openmole.web.db.tables.{ MoleStats, MoleData }
 import slick.driver.H2Driver.simple._
@@ -13,11 +14,11 @@ import javax.sql.rowset.serial.SerialBlob
 /**
  * Created by mhammons on 4/23/14.
  */
-class Cache(system: ActorSystem, database: SlickDB) {
-  private val cachedMoles = new DataHandler[String, MoleExecution](system)
-  private val capsules = new DataHandler[String, File](system)
-  private val moleStats = new DataHandler[String, Stats](system)
-  private val mole2CacheId = new DataHandler[MoleExecution, String](system)
+class Cache(database: SlickDB) {
+  private val cachedMoles = DataHandler[String, MoleExecution]()
+  private val capsules = DataHandler[String, File]()
+  private val moleStats = DataHandler[String, Stats]()
+  private val mole2CacheId = DataHandler[MoleExecution, String]()
 
   val logger = org.openmole.web.Log.log
 
@@ -108,8 +109,9 @@ class Cache(system: ActorSystem, database: SlickDB) {
   }
 
   def getMoleResult(key: String) = dataB withSession { implicit session ⇒
-    val blob = (for (m ← MoleData.instance if m.id === key) yield m.result).list.head
-    blob.getBytes(1, blob.length.toInt)
+    (for (m ← MoleData.instance if m.id === key) yield m.result).list.headOption map { blob ⇒
+      blob.getBytes(1, blob.length.toInt)
+    }
   }
 
   def storeResultBlob(exec: MoleExecution, blob: SerialBlob) = dataB withSession { implicit session ⇒

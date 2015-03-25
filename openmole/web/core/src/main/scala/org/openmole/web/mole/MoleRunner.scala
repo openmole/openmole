@@ -1,5 +1,7 @@
 package org.openmole.web.mole
 
+import javax.servlet.http.HttpServletRequest
+
 import _root_.akka.actor.ActorSystem
 import org.openmole.core.eventdispatcher.Event
 import org.openmole.core.tools.io.FromString
@@ -9,6 +11,7 @@ import servlet.{ FileItem, FileUploadSupport }
 import java.io.{ PrintStream, InputStream }
 import javax.servlet.annotation.MultipartConfig
 import concurrent.Future
+import scala.util.{ Failure, Success }
 
 import slick.driver.H2Driver.simple._
 
@@ -20,56 +23,31 @@ import DataflowProblem.{ MissingSourceInput, MissingInput }
 import org.openmole.web.Authentication
 import org.openmole.web.db.SlickDB
 
-@MultipartConfig(maxFileSize = 3145728 /*max file size of 3 MiB*/ ) //research scala multipart config
+@MultipartConfig //research scala multipart config
 class MoleRunner(val system: ActorSystem, val database: SlickDB /*TODO: is this safe??*/ ) extends ScalatraServlet
-    with FileUploadSupport with FlashMapSupport with FutureSupport with JacksonJsonSupport with MoleHandling with Authentication {
+    with FileUploadSupport with FlashMapSupport with JacksonJsonSupport with MoleHandling with Authentication {
 
   protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal
 
   private val logger = org.openmole.web.Log.log
 
-  post("/getApiKey") {
-    contentType = "text/plain"
-    logger.info("received apiKey request")
-    try {
-      request.headers get "pass" map issueKey foreach (cookies("apiKey") = _)
-      cookies get "apiKey" foreach (k ⇒ logger.info(s"created api key: $k"))
-      ""
-    }
-    catch {
-      case e: InvalidPasswordException ⇒ "Invalid password entered"
-    }
-  }
+  def noPasswordSent = "No password sent with request"
+  def passwordRequired = "This service requires a password"
 
-  post("/json/getApiKey") {
+  post("/token") {
     contentType = formats("json")
 
-    try {
-      request.headers get "pass" map issueKey map (render("apiKey", _)) getOrElse render("error", "no password sent with request")
-    }
-    catch {
-      case e: InvalidPasswordException ⇒ render(("error", e.getMessage) ~ ("stackTrace", e.getStackTrace.map(e ⇒ s"\tat$e").reduceLeft((prev, next) ⇒ s"$prev\n$next")))
+    request.headers get "pass" map issueKey match {
+      case None               ⇒ ExpectationFailed(render("error", noPasswordSent))
+      case Some(Failure(e))   ⇒ InternalServerError(render(("error", e.getMessage) ~ ("stackTrace", e.getStackTrace.map(e ⇒ s"\tat$e").reduceLeft((prev, next) ⇒ s"$prev\n$next"))))
+      case Some(Success(key)) ⇒ Ok(render("token", key))
     }
   }
 
-  post("/xml/getApiKey") {
-    contentType = "application/xml"
+  post("/createMole") {
+    authenticated {
+      contentType = formats("json")
 
-    try {
-      request.headers get "pass" map issueKey map (k ⇒ <apiKey>{ k }</apiKey>) getOrElse <error>"no password sent with request"</error>
-    }
-    catch {
-      case e: InvalidPasswordException ⇒ <error><message>{ e.getMessage }</message><stackTrace>{ e.getStackTrace.map(e ⇒ s"\tat $e").reduceLeft((prev, next) ⇒ s"$prev\n$next") }</stackTrace></error>
-    }
-
-  }
-
-  post("/xml/createMole") {
-    contentType = "application/xml"
-
-    logger.info(request.headers get "apiKey" toString)
-
-    requireAuth(request.headers get "apiKey") {
       logger.info("starting the create operation")
       val encapsulate = params get "encapsulate" match {
         case Some("on") ⇒ true
@@ -89,143 +67,72 @@ class MoleRunner(val system: ActorSystem, val database: SlickDB /*TODO: is this 
       logger.info(res.toString)
 
       res match {
-        case Left(error) ⇒ <error>{ error }</error>
-        case Right(exec) ⇒ <moleID>{ exec.id }</moleID>
+        case Left(error) ⇒ InternalServerError(Xml.toJson(<error>{ error }</error>))
+        case Right(exec) ⇒ Ok(Xml.toJson(<moleID>{ exec.id }</moleID>))
       }
-    } {
-      <error>"This service requires a password"</error>
     }
   }
 
-  post("/json/createMole") {
-    contentType = formats("json")
-
-    requireAuth(request.headers get "apiKey") {
-      val encapsulate = params get "encapsulate" match {
-        case Some("on") ⇒ true
-        case _          ⇒ false
+  get("/execs/:id") {
+    authenticated {
+      contentType = formats("json")
+      val id = params("id")
+      getStatus(id) match {
+        case None    ⇒ NotFound(s"Execution with id $id has not been found.")
+        case Some(r) ⇒ Ok(render(("status", r) ~ ("stats", getWebStats(id))))
       }
-
-      val molePack = params get "pack" match {
-        case Some("on") ⇒ true
-        case _          ⇒ false
-      }
-
-      val res = createMole(fileParams get "file" map (_.getInputStream), fileParams get "csv" map (_.getInputStream), encapsulate, pack = molePack)
-
-      res match {
-        case Left(error) ⇒ Xml.toJson(<error>{ error }</error>)
-        case Right(exec) ⇒ Xml.toJson(<moleID>{ exec.id }</moleID>)
-      }
-    } {
-      Xml.toJson(<error>"This service requires a password"</error>)
     }
   }
 
-  get("/json/execs/:id") {
-    contentType = formats("json")
-
-    val pRams = params("id")
-
-    val r = getStatus(pRams)
-
-    render(("status", r) ~ ("stats", getWebStats(pRams)))
-  }
-
-  get("/json/execs") {
-    contentType = formats("json")
-
-    render(("execIds", getMoleKeys))
+  get("/execs") {
+    authenticated {
+      contentType = formats("json")
+      Ok(render(("execIds", getMoleKeys)))
+    }
   }
 
   get("/data/:id/data.tar") {
-    contentType = "application/octet-stream"
-    getMoleResult(params("id"))
-  }
-
-  get("/xml/execs") {
-    contentType = "application/xml"
-
-    <mole-execs>
-      { for (key ← getMoleKeys) yield <moleID>{ key }</moleID> }
-    </mole-execs>
-  }
-
-  get("/xml/execs/:id") {
-    contentType = "application/xml"
-
-    val pRams = params("id")
-
-    val stats = getWebStats(pRams).toMap
-    val r = getStatus(pRams)
-
-    <status current={ r }>
-      {
-        for (stat ← stats.keys) <stat id={ stat }>{ stats(stat) }</stat>
+    authenticated {
+      contentType = "application/octet-stream"
+      val id = params("id")
+      getMoleResult(id) match {
+        case None    ⇒ NotFound(s"Result for id $id has not found.")
+        case Some(f) ⇒ Ok(f)
       }
-    </status>
-
+    }
   }
 
-  get("/xml/start/:id") {
-    contentType = "text/html"
+  get("/start/:id") {
+    authenticated {
+      contentType = formats("json")
 
-    val exec = getMole(params("id"))
-    val res = exec map { x ⇒ x.start; "started" }
+      val id = params("id")
+      val exec = getMole(id)
 
-    <exec-result> { res.getOrElse("id didn't exist") } </exec-result>
+      exec match {
+        case None ⇒ NotFound(s"No mole registered for $id.")
+        case Some(e) ⇒
+          e.start
+          Ok()
+      }
+    }
   }
 
-  get("/json/start/:id") {
-    contentType = formats("json")
-
-    val exec = getMole(params("id"))
-
-    render(("id", exec map (_.id) getOrElse "none") ~
-      ("execResult", exec map { e ⇒ e.start; getStatus(params("id")) } getOrElse "id didn't exist"))
-  }
-
-  get("/xml/start/:id") {
-    contentType = "application/xml"
-
-    val exec = getMole(params("id"))
-
-    <moleID status={ exec map { e ⇒ e.start; getStatus(params("id")) } getOrElse ("id doesn't exist") }>{ params("id") }</moleID>
-  }
-
-  get("/json/remove/:id") {
-    contentType = formats("json")
-
-    requireAuth(request.headers get "apiKey") {
+  get("/remove/:id") {
+    authenticated {
+      contentType = formats("json")
       val exec = deleteMole(params("id"))
-
-      render(("id", exec map (_.id) getOrElse "none") ~
-        ("status", "deleted"))
-    } {
-      render(("error", "This service requires a password"))
+      Ok(render(("id", exec map (_.id) getOrElse "none") ~ ("status", "deleted")))
     }
   }
 
-  get("/xml/remove/:id") {
-    contentType = "application/xml"
+  def authenticated[T](success: ⇒ ActionResult)(implicit r: HttpServletRequest): ActionResult = {
+    def fail = Unauthorized(render(("error", "This service requires a token")))
 
-    new AsyncResult() {
-      val is = Future {
-        requireAuth(request.headers get "apiKey") {
-          val exec = deleteMole(params("id"))
-
-          <moleID status={ if (exec.isDefined) "deleted" else "id doesn't exist" }>{ params("id") }</moleID>
-        } {
-          <error>"This service requires a password"</error>
-        }
-      }
+    r.headers.get("token") match {
+      case None    ⇒ fail
+      case Some(k) ⇒ if (checkKey(k)) success else fail
     }
   }
 
-  notFound {
-    // remove content type in case it was set through an action
-    contentType = null
-    // Try to render a ScalateTemplate if no route matched
-    resourceNotFound()
-  }
 }

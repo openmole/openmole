@@ -11,62 +11,65 @@ import javax.crypto.spec.SecretKeySpec
 import javax.crypto.Mac
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.Workspace
-
-import scala.collection.mutable.HashMap
-import akka.actor.ActorSystem
 import org.apache.commons.codec.binary.Base64
-import org.slf4j.LoggerFactory
-import org.scalatra.ScalatraBase
 import javax.servlet.http.HttpServletRequest
-import org.openmole.web.cache.DataHandler
-import org.openmole.web.mole.MoleHandling
+
+import scala.concurrent.stm._
+import scala.util.{ Failure, Success, Try }
+
+case class Key(hash: String, start: Long, end: Long) {
+  def isValid = {
+    val cTime = java.util.Calendar.getInstance.getTimeInMillis
+    start <= cTime && end > cTime
+  }
+}
+
+class TokenHandler extends DataHandler[String, Key] {
+
+  private def clean[T](f: ⇒ T): T = {
+    atomic { implicit t ⇒
+      val outdated = map.filter { case (_, v) ⇒ !v.isValid }.map { case (k, _) ⇒ k }
+      outdated.foreach(map.remove)
+    }
+    f
+  }
+
+  override def add(key: String, data: Key) = clean { super.add(key, data) }
+  override def remove(key: String) = clean { super.remove(key) }
+  override def get(key: String) = clean { super.get(key) }
+
+}
+
+class InvalidPasswordException(cause: String) extends Exception(cause)
 
 object Authentication extends Logger
 
-import Authentication.Log._
-
 trait Authentication { self ⇒
+  import Authentication.Log._
 
-  def system: ActorSystem
+  /// FIXME remove outdated keys
+  private val keyStorage = new TokenHandler
 
-  class InvalidPasswordException(cause: String) extends Exception(cause)
-
-  case class Key(hash: String, start: Long, end: Long) {
-    def isValid = {
-      val cTime = java.util.Calendar.getInstance.getTimeInMillis
-      start <= cTime && end > cTime
-    }
-  }
-
-  private val keyStorage = new DataHandler[String, Key](system)
-
-  def issueKey(pwH: String)(implicit r: HttpServletRequest): String = {
-    if (Workspace.passwordIsCorrect(pwH)) { //TODO this is probably terribly unsafe
+  def issueKey(pwH: String)(implicit r: HttpServletRequest): Try[String] = {
+    if (RESTServer.isPasswordCorrect(pwH)) {
       val signingKey = new SecretKeySpec(pwH.getBytes, "HmacSHA256")
       val mac = Mac.getInstance("HmacSHA256")
       mac.init(signingKey)
       val start = java.util.Calendar.getInstance().getTimeInMillis
       val end = start + (24 * 60 * 60 * 1000)
       val rawHmac = mac.doFinal((r.getRemoteHost + Workspace.sessionUUID + start + end) getBytes ())
-
       val hash = new String(Base64.encodeBase64(rawHmac))
-
-      keyStorage.add(r.getRemoteHost, Key(hash, start, end))
-
-      hash
+      keyStorage.add(hash, Key(hash, start, end))
+      Success(hash)
     }
     else {
       logger.info("Submitted password was incorrect")
-      throw new InvalidPasswordException("Submitted password was incorrect")
+      Failure(new InvalidPasswordException("Submitted password was incorrect"))
     }
   }
 
-  def requireAuth[T](key: ⇒ Option[String])(success: ⇒ T)(fail: ⇒ T = { throw new InvalidPasswordException("Api-key is not valid") })(implicit r: HttpServletRequest): T = {
-    if (key map (checkKey(_, r.getRemoteHost)) getOrElse false) success else fail
-  }
-
-  def checkKey(key: String, hostname: String): Boolean = {
-    keyStorage get hostname match {
+  def checkKey(key: String): Boolean = {
+    keyStorage get key match {
       case Some(k) ⇒ {
         logger.info(s"key is valid: ${k.isValid}")
         logger.info(s"key matches key given: ${k.hash == key}")
@@ -79,3 +82,4 @@ trait Authentication { self ⇒
     }
   }
 }
+

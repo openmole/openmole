@@ -3,8 +3,7 @@ package org.openmole.web.mole
 import org.openmole.core.eventdispatcher.{ Event, EventListener }
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.mole.MoleExecution.{ Finished, Starting, JobCreated, JobStatusChanged }
-import org.openmole.web.db.tables.MoleStats
-import org.openmole.web.cache.{ Stats, Status, DataHandler }
+import org.openmole.web.cache.{ Stats, Status }
 import org.openmole.core.workflow.job
 
 /**
@@ -20,7 +19,6 @@ class JobEventListener(mH: MoleHandling) extends EventListener[MoleExecution] {
 
     def state2Lens(s: job.State.State, stats: Stats) = {
       import job.State._
-      println(s)
       s match {
         case READY     ⇒ stats.lens.ready
         case RUNNING   ⇒ stats.lens.running

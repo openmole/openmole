@@ -22,7 +22,11 @@ import java.security.MessageDigest
 
 import org.openmole.core.tools.service.Hash
 
-object HashService {
+object HashUtil {
+
+  implicit class StringHashDecorator(s: String) {
+    def hash = computeHash(new StringInputStream(s))
+  }
 
   implicit class FileHashServiceDecorator(file: File) {
     def hash = computeHash(file)

@@ -1,49 +1,43 @@
 package org.openmole.web.mole
 
-import org.openmole.core.eventdispatcher.{ EventDispatcher, EventListener }
-import org.openmole.core.tools.io.FromString
-import org.openmole.core.workflow.execution.local.LocalEnvironment
-import org.openmole.core.workflow.validation.{ Validation, DataflowProblem }
-import org.openmole.core.workspace.Workspace
-
-import scala.reflect.ClassTag
-import scala.io.{ Codec, Source }
 import java.io._
-import org.openmole.core.serializer.SerialiserService
-import com.thoughtworks.xstream.mapper.CannotResolveClassException
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
 import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
-import akka.actor.ActorSystem
 
+import com.ice.tar.{ Tar, TarInputStream }
+import com.thoughtworks.xstream.mapper.CannotResolveClassException
+import org.openmole.core.eventdispatcher.{ EventDispatcher, EventListener }
+import org.openmole.core.serializer.SerialiserService
+import org.openmole.core.tools.io.FromString
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.validation.DataflowProblem.{ MissingInput, MissingSourceInput }
+import org.openmole.core.workflow.validation.Validation
+import org.openmole.core.workspace.Workspace
+import org.openmole.web.cache.{ Cache, Stats, Status }
+import org.openmole.web.db.SlickDB
+import org.openmole.web.db.tables.{ MoleData, MoleStats }
+import org.scalatra.ScalatraBase
 import resource._
 
-import slick.driver.H2Driver.simple._
-import com.ice.tar.{ TarInputStream, Tar }
-import scala.Some
-import DataflowProblem.MissingSourceInput
-import DataflowProblem.MissingInput
-import org.scalatra.ScalatraBase
-import org.openmole.web.db.tables.{ MoleData, MoleStats }
-import org.openmole.web.cache.{ Stats, Status, Cache, DataHandler }
-import org.openmole.web.db.{ SlickDB }
+import scala.io.{ Codec, Source }
+import scala.reflect.ClassTag
+import scala.slick.driver.H2Driver.simple._
 
 trait MoleHandling { self: ScalatraBase ⇒
-  def system: ActorSystem
   val database: SlickDB
   val db = database.db
-  val cache = new Cache(system, database)
+  val cache = new Cache(database)
 
-  protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
+  //protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
 
   private val listener: EventListener[MoleExecution] = new JobEventListener(this)
   private val mStatusListener = new MoleStatusListener(this)
 
   (cache.getUnfinishedMoleKeys map getMole).flatten foreach (_.start)
 
-  def getStatus(moleId: String): String =
+  def getStatus(moleId: String): Option[String] =
     db withSession { implicit session ⇒
-      (for (m ← MoleData.instance if m.id === moleId) yield m.state).list.headOption.getOrElse("Doesn't Exist")
+      (for (m ← MoleData.instance if m.id === moleId) yield m.state).list.headOption
     }
 
   private def processXMLFile[A: ClassTag](is: Option[InputStream]): Either[A, String] = is match {

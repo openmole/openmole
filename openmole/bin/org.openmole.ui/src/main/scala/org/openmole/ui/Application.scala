@@ -137,47 +137,29 @@ class Application extends IApplication {
 
     if (config.help) println(usage)
     else if (config.console) {
-      try {
-        val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
-        if (!headless && SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
-      }
-      catch {
-        case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
-      }
-
+      closeSplashScreen
       print(consoleSplash)
       val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
       console.run
-    }
-    else if (config.server) {
-      try {
-        if (SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
-      }
-      catch {
-        case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
-      }
-      val server = new Openmolewebserver(config.serverPort, config.serverSSLPort, config.hostName, config.password, config.allowInsecureConnections)
+    } else if (config.server) {
+      closeSplashScreen
+      val server = new RESTServer(config.serverPort, config.serverSSLPort, config.hostName, config.password, config.allowInsecureConnections)
       server.start()
-    }
-    else {
-      /*
-      val waitClose = new Semaphore(0)
-      val application = new GUIApplication() {
-        override def closeOperation = {
-          super.closeOperation
-          waitClose.release(1)
-        }
-      }
-
-      application.display
-      waitClose.acquire(1)*/
+    } else {
       BootstrapJS.init(config.optimizedJS)
       val server = new GUIServer(config.serverPort, BootstrapJS.webapp)
       server.start()
-
     }
+
     IApplication.EXIT_OK
   }
+
+
+  private def closeSplashScreen =
+    try if (SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
+    catch {
+      case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
+    }
 
   override def stop = {}
 }
