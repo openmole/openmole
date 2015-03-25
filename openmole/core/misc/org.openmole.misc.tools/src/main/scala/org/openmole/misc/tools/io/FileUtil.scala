@@ -137,8 +137,6 @@ trait FileUtil {
 
   implicit class FileDecorator(file: File) {
 
-    def createParentDirs = file.getCanonicalFile.getParentFile.mkdirs
-
     /////// copiers ////////
     def copy(toF: File) = {
       // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES, REPLACE_EXISTING
@@ -340,12 +338,7 @@ trait FileUtil {
       }
     }
 
-    def createParentDir = wrapError {
-      file.toPath.getParent match {
-        case null ⇒
-        case p    ⇒ Files.createDirectories(p)
-      }
-    }
+    def createParentDir = wrapError { file.getCanonicalFile.getParentFile.mkdirs }
 
     def withLock[T](f: OutputStream ⇒ T) = vmFileLock.withLock(file.getCanonicalPath) {
       withClosable(new FileOutputStream(file, true)) { fos ⇒

@@ -80,7 +80,7 @@ abstract class CopyFileHook extends Hook {
     val from = context(filePrototype)
     val to = executionContext.relativise(destination.from(context))
 
-    to.createParentDirs
+    to.createParentDir
     if (compress) from.copyCompress(to)
     else from.copy(to)
 
