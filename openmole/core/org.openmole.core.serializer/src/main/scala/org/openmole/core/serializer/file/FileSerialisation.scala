@@ -113,7 +113,7 @@ trait FileSerialisation extends Serialiser {
               if (shortNames) extractDir.newFile("extracted", ".bin")
               else {
                 val f = new File(extractDir, toPath(file))
-                f.getParentFile.mkdirs()
+                f.createParentDir
                 f
               }
             if (exists) fromArchive.move(dest)
