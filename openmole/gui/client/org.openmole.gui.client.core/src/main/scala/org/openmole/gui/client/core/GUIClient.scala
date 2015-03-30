@@ -75,16 +75,6 @@ object GUIClient {
 
     val dialog = Panel.generic
 
-    /*val dialog = new PanelWithIO("taskPanelID",
-      ClientService.taskFactories
-    )*/
-
-    /*div(
-        "taskName",
-        button("TaskType", btn_info)
-      ),
-      ClientService.taskFactories(0).dataUI.panelUI.view,*/
-
     topdiv.appendChild(dialog.render)
 
     dom.document.body.appendChild(topdiv)
