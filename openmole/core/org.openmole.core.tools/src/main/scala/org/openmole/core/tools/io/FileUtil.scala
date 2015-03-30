@@ -337,12 +337,7 @@ trait FileUtil {
       }
     }
 
-    def createParentDir = wrapError {
-      file.toPath.getParent match {
-        case null ⇒
-        case p    ⇒ Files.createDirectories(p)
-      }
-    }
+    def createParentDir = wrapError { file.getCanonicalFile.getParentFile.mkdirs }
 
     def withLock[T](f: OutputStream ⇒ T) = vmFileLock.withLock(file.getCanonicalPath) {
       withClosable(new FileOutputStream(file, true)) { fos ⇒

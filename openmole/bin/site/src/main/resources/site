@@ -29,5 +29,9 @@ CONFIGDIR=/tmp/site_`date +%s`_$RANDOM
 
 java -Dfile.encoding=UTF-8 -Xmx2G -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog $@
 
-rm -rf "${CONFIGDIR}" 
+RETURNCODE=$?
+
+rm -rf "${CONFIGDIR}"
+
+exit $RETURNCODE
 

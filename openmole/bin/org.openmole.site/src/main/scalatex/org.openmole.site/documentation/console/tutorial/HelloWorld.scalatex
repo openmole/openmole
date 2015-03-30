@@ -1,20 +1,47 @@
 
-
+@import org.openmole.site.DocumentationPages._
 @import org.openmole.site.Objects._
 
-@sect{An OpenMOLE Hello World!}
-  To demonstrate OpenMOLE console we will design a workflow that explore one variable multiplies it by 2 and then display each result. The computation is executed on multi-threaded environment.
-
-  @br @hl.openmole("""
+@def tasks = """
+  // Define the variables that are transmitted between the tasks
   val i = Val[Double]
   val res = Val[Double]
 
+  // Define the design of experiment
   val exploration = ExplorationTask(i in (0.0 to 100.0 by 1.0))
+
+  // Define the model, here it is a simple task executing "res = i * 2", but it can be your model
   val model =
     ScalaTask("val res = i * 2") set (
       inputs += i,
       outputs += (i, res)
-    )
+    )"""
 
-  val ex = exploration -< (model on LocalEnvironment(4) hook ToStringHook()) start
+@sect{An OpenMOLE Hello World!}
+  To demonstrate OpenMOLE console we will design a workflow that explore one variable multiplies it by 2 and then display each result. The computation is executed on multi-threaded environment.
+
+  @br @hl.openmole(s"""
+  $tasks
+
+  // Define the execution environment, here it is a local execution environment with 4 threads but is can a remote cluster or a grid, it will work the same way with no installation step required on the execution environment.
+  val env = LocalEnvironment(4)
+
+  // Define and start the workflow
+  val ex = exploration -< (model on env hook ToStringHook()) start
   """)
+
+  @p If you want to distribute the exact same code on a remote cluster the only change you have to do is to switch the environment.
+
+  @br @hl.openmole(s"""
+  // All you need is an account on the cluster. You should also provide you authentication to OpenMOLE as explained in the documentation of each environment.
+  val env = SLURMEnvironment("myLogin", "cluster.iscpif.fr")
+
+  // Define and start the workflow
+  val ex = exploration -< (model on env hook ToStringHook()) start
+  """, header = tasks)
+
+  @p To go further, you might want to find how to:
+  @ul
+    @li{define your environment in the @a("environment documentation", href := root.console.environment.file),}
+    @li{include your program in the @a("task documentation", href := root.console.task.file),}
+    @li{describe you design of experiments in the @a("sampling documentation", href := root.console.sampling.file).}

@@ -7,4 +7,4 @@
 
   @p OpenMOLE is a tool for high-performance parameter tuning that works with your own programs and on your own execution environments. It comes with 2 different flavors. The @a("scripting interface", href := root.console.file) (console) and the @a("graphical user interface", href := root.gui.file) (GUI). New features are always integrated in the console version first and then integrated in the GUI. If you are comfortable with writing scripts, getting into the console shouldn't be much of a problem. However using the graphical user interface is a good way to understand quickly the OpenMOLE core concepts such as Task, Transition, Environment, Workflow, Hook...
 
-  @p The OpenMOLE community is very friendly, to get help you post your question on the OpenMOLE user mailing list: users 'at' list.openmole.org (you should @a("subscribe", href := "http://list.openmole.org/") first).
+  @p The OpenMOLE community is very friendly. To get help post your question on the OpenMOLE user mailing list: users 'at' list.openmole.org (you should @a("subscribe", href := "http://list.openmole.org/") first).

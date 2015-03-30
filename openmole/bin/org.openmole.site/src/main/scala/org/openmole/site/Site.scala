@@ -22,12 +22,13 @@ import java.util.zip.GZIPInputStream
 import ammonite.ops.Path
 import com.ice.tar.TarInputStream
 import org.eclipse.equinox.app._
-import org.openmole.core.tools.io.{FileUtil, TarArchiver}
+import org.openmole.core.tools.io.{ FileUtil, TarArchiver }
 import FileUtil._
 import TarArchiver._
 import scalatags.Text.all
 import scalatags.Text.all._
 import scala.sys.process.BasicIO
+import org.openmole.site.credits._
 
 class Site extends IApplication {
 
@@ -95,6 +96,9 @@ class Site extends IApplication {
       def content = pagesFrag.map { case PageFrag(p, f) ⇒ p.file -> f }.toMap
     }
 
+    lazy val bibPapers = Publication.papers ++ Communication.papers
+    bibPapers foreach (_.generateBibtex(dest))
+
     site.renderTo(Path(dest))
 
     for {
@@ -102,7 +106,7 @@ class Site extends IApplication {
     } r match {
       case RenameFileResource(source, destination) ⇒
         val f = new File(dest, destination)
-        f.getParentFile.mkdirs
+        f.createParentDir
         f.withOutputStream { os ⇒
           withClosable(getClass.getClassLoader.getResourceAsStream(source)) { is ⇒
             assert(is != null, s"Resource $source doesn't exist")
