@@ -197,6 +197,9 @@ object Forms {
       )
     )
 
+  //TextArea
+  def textArea(nbRows: Int) = tags.textarea(`class` := "form-control", rows := nbRows)
+
   //table
   def table(keys: ClassKeyAggregator) = tags.table(`class` := keys.key)
 
