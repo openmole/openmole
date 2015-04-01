@@ -17,6 +17,7 @@ package org.openmole.gui.plugin.task.statistic.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.ext.dataui.Help
 import org.openmole.gui.plugin.task.statistic.ext._
 import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.client.core.dataui.IOMappingFactory._
@@ -35,4 +36,6 @@ class StatisticTaskDataUI(val name: Var[String] = Var("")) extends InAndOutTaskD
     selectField("Statistic", StatisticType.MEDIAN, StatisticType.ALL)
   ),dimension1Filter, dimension0Filter
   )
+
+  override def help = Help("Statistic help", "The statistic task map vectors into scalars. The output scalar represents the statistic made on the vector (average, median, sum, ...)")
 }

@@ -93,6 +93,12 @@ select::-moz-focus-inner {
     border-radius: 6px 6px 0 0;
 }
 
+#conceptPanelID .modal-footer {
+	padding: 15px;
+	text-align: right;
+	border-top: 0px;
+}
+
 .spacer20 {
 	margin-top: 20px;
 }

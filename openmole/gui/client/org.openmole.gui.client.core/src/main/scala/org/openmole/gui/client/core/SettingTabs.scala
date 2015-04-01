@@ -107,7 +107,7 @@ class SettingTabs(tabs: Seq[SettingTab]) {
     }, Rx {
       tags.div(currentTab().map { t: SettingTab ⇒
         for (el ← t.panelUIs) yield {
-          tags.div(el.view)
+          bs.div(spacer20)(el.view)
         }
       }.getOrElse(Seq()).toSeq: _*
       )

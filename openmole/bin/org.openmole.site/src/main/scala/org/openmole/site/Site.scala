@@ -106,7 +106,7 @@ class Site extends IApplication {
     } r match {
       case RenameFileResource(source, destination) ⇒
         val f = new File(dest, destination)
-        f.getParentFile.mkdirs
+        f.createParentDir
         f.withOutputStream { os ⇒
           withClosable(getClass.getClassLoader.getResourceAsStream(source)) { is ⇒
             assert(is != null, s"Resource $source doesn't exist")

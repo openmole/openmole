@@ -21,9 +21,12 @@ import org.openmole.gui.client.core.ClientService._
 import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.client.core.dataui.IOMappingFactory._
 import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
+import rx._
 
-class SystemExecTaskDataUI extends TaskDataUI {
-  def data = new SystemExecTaskData(inputDataUI().data.inputs, outputDataUI().data.outputs)
+class SystemExecTaskDataUI(val code: Var[String] = Var("")) extends TaskDataUI {
+  def data = new SystemExecTaskData(code,
+                                    inputDataUI().data.inputs,
+                                    outputDataUI().data.outputs)
 
   def panelUI = new SystemExecTaskPanelUI(this)
 

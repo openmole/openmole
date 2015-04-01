@@ -19,6 +19,8 @@ package org.openmole.gui.ext.dataui
 
 import org.openmole.gui.ext.data.Data
 
+case class Help(title: String = "", content: String = "")
+
 trait DataUI {
   type DATA <: Data
 
@@ -27,4 +29,6 @@ trait DataUI {
   def data: DATA
 
   def dataType: String
+
+  def help: Help = Help()
 }

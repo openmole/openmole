@@ -27,10 +27,7 @@ import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 
 import org.scalajs.jquery.jQuery
-import scala.scalajs.js
-import rx._
-import org.openmole.gui.misc.js.JsRxTags._
-import scala.scalajs.js
+import fr.iscpif.scaladget.mapping.BootstrapUtils._
 
 @JSExport("Forms")
 object Forms {
@@ -57,7 +54,10 @@ object Forms {
 
   // Nav
   class NavItem(val navid: String, content: String, val todo: () ⇒ Unit = () ⇒ {}, active: Boolean = false) {
-    val activeString = { if (active) "active" else "" }
+    val activeString = {
+      if (active) "active" else ""
+    }
+
     def render = li(role := "presentation", id := navid, `class` := activeString)(a(href := "#")(content))
   }
 
@@ -125,6 +125,7 @@ object Forms {
   val glyph_plus = "glyphicon-plus"
   val glyph_minus = "glyphicon-minus"
   val glyph_ok = "glyphicon-ok"
+  val glyph_question = "glyphicon-question-sign"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
@@ -147,6 +148,13 @@ object Forms {
   val btn_medium = key("btn-md")
   val btn_small = key("btn-sm")
   val btn_test = key("myButton")
+  val btn_right = key("pull-right")
+
+  def helpButton(helpTitle: String, helpContent: String): TypedTag[HTMLButtonElement] = //button("Help")
+    //button(glyph(glyph_question))(data("toggle") := "popover", data("content") := helpContent, title := helpTitle, style := "font-size:24px")
+    button("Help", btn_default)(data("toggle") := "popover", data("content") := helpContent, title := helpTitle) /*, style := "font-size:24px"*/
+
+  def helpButton(helpContent: (String, String)): TypedTag[HTMLButtonElement] = helpButton(helpContent._1, helpContent._2)
 
   // Badges
   def badge(content: String, badgeValue: String, keys: ClassKeyAggregator = emptyCK) =
@@ -189,10 +197,16 @@ object Forms {
       )
     )
 
+  //TextArea
+  def textArea(nbRows: Int) = tags.textarea(`class` := "form-control", rows := nbRows)
+
   //table
   def table(keys: ClassKeyAggregator) = tags.table(`class` := keys.key)
+
   def tr(keys: ClassKeyAggregator) = tags.tr(`class` := keys.key)
+
   def th(keys: ClassKeyAggregator) = tags.th(`class` := keys.key)
+
   def td(keys: ClassKeyAggregator) = tags.td(`class` := (keys + key("vert-align")).key)
 
   val bordered = key("table table-bordered")
@@ -206,6 +220,7 @@ object Forms {
 
   //Forms
   def form(keys: ClassKeyAggregator = emptyCK) = tags.form(`class` := keys.key)
+
   def formGroup(keys: ClassKeyAggregator = emptyCK) = div("form-group ")
 
   val large_form_group = key("form-group-lg")
@@ -216,6 +231,7 @@ object Forms {
   def inputGroup(keys: ClassKeyAggregator = emptyCK) = div(key("input-group") + keys.key)
 
   def inputGroupButton = span("input-group-btn")
+
   val input_group_lg = "input-group-lg"
 
   //Grid
@@ -235,4 +251,7 @@ object Forms {
   //Misc
   val center = key("text-center")
   val spacer20 = key("spacer20")
+
+  //JQuery calls
+  def popoverJQ = jQuery("[data-toggle=\"popover\"]").popover()
 }

@@ -3,7 +3,9 @@ package org.openmole.gui.client.core.dataui
 import org.openmole.gui.client.core.{ ClientService, GenericPanel }
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
+import org.scalajs.jquery._
 import rx._
+import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import org.openmole.gui.misc.js.{ Forms ⇒ bs }
@@ -105,54 +107,54 @@ class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extend
     clear
   }
 
-  val view = bs.form(spacer20)(
-    bs.inputGroup(col_md_8 + col_md_offset_2)(
-      inputFilter.tag,
-      outputFilter.tag,
-      bs.inputGroupButton(newGlyph)
-    ),
-    bs.div(spacer20)(
-      bs.formGroup(col_md_12)(Rx {
-        bs.table(col_md_12 + striped)(
-          buildHeaders(prototypeHeaderSequence ++ Seq("Default", buildDefaultMapping.key) ++ prototypeHeaderSequence), {
-            tbody(
-              for (iAo ← dataUI.inAndOutputsUI()) yield {
-                coloredTR(((buildPrototypeTableView(iAo.in, () ⇒ setCurrent(iAo.in.protoDataBagUI)) :+
-                  tags.td(iAo.mapping.panelUI.view).render) ++
-                  (buildPrototypeTableView(iAo.out, () ⇒ setCurrent(iAo.out.protoDataBagUI)) :+
-                    delButtonTD(() ⇒ dataUI -= iAo)
-                  )),
-                  () ⇒ false)
-              },
-              for (iodataUI ← Seq(dataUI.inputDataUI, dataUI.outputDataUI)) yield {
-                iodataUI match {
-                  case idataUI: InputDataUI ⇒ for (i ← idataUI.inoutputsUI() ++ filteredInputsUI) yield {
-                    coloredTR((buildPrototypeTableView(i, () ⇒ setCurrent(i.protoDataBagUI)) ++ emptyTD(4)) :+
-                      delButtonTD(() ⇒ idataUI -= i),
-                      () ⇒ filteredInputsUI.map {
-                        _.id
-                      }.contains(i.id),
-                      () ⇒ addInput(i.protoDataBagUI))
-                  }
-                  case odataUI: OutputDataUI ⇒ for (o ← odataUI.inoutputsUI() ++ filteredOutputsUI) yield {
-                    coloredTR((emptyTD(5) ++ buildPrototypeTableView(o, () ⇒ setCurrent(o.protoDataBagUI)) :+
-                      delButtonTD(() ⇒ odataUI -= o)
-                    ),
-                      () ⇒ filteredOutputsUI.map {
-                        _.id
-                      }.contains(o.id),
-                      () ⇒ addOutput(o.protoDataBagUI))
+  val view =
+    bs.form(spacer20)(
+      bs.inputGroup(col_md_8 + col_md_offset_2)(
+        inputFilter.tag,
+        outputFilter.tag,
+        bs.inputGroupButton(newGlyph)
+      ),
+      bs.div(spacer20)(
+        bs.formGroup(col_md_12)(Rx {
+          bs.table(col_md_12 + striped)(
+            buildHeaders(prototypeHeaderSequence ++ Seq("Default", buildDefaultMapping.key) ++ prototypeHeaderSequence), {
+              tbody(
+                for (iAo ← dataUI.inAndOutputsUI()) yield {
+                  coloredTR(((buildPrototypeTableView(iAo.in, () ⇒ setCurrent(iAo.in.protoDataBagUI)) :+
+                    tags.td(iAo.mapping.panelUI.view).render) ++
+                    (buildPrototypeTableView(iAo.out, () ⇒ setCurrent(iAo.out.protoDataBagUI)) :+
+                      delButtonTD(() ⇒ dataUI -= iAo)
+                    )),
+                    () ⇒ false)
+                },
+                for (iodataUI ← Seq(dataUI.inputDataUI, dataUI.outputDataUI)) yield {
+                  iodataUI match {
+                    case idataUI: InputDataUI ⇒ for (i ← idataUI.inoutputsUI() ++ filteredInputsUI) yield {
+                      coloredTR((buildPrototypeTableView(i, () ⇒ setCurrent(i.protoDataBagUI)) ++ emptyTD(4)) :+
+                        delButtonTD(() ⇒ idataUI -= i),
+                        () ⇒ filteredInputsUI.map {
+                          _.id
+                        }.contains(i.id),
+                        () ⇒ addInput(i.protoDataBagUI))
+                    }
+                    case odataUI: OutputDataUI ⇒ for (o ← odataUI.inoutputsUI() ++ filteredOutputsUI) yield {
+                      coloredTR((emptyTD(5) ++ buildPrototypeTableView(o, () ⇒ setCurrent(o.protoDataBagUI)) :+
+                        delButtonTD(() ⇒ odataUI -= o)
+                      ),
+                        () ⇒ filteredOutputsUI.map {
+                          _.id
+                        }.contains(o.id),
+                        () ⇒ addOutput(o.protoDataBagUI))
+                    }
                   }
                 }
-              }
-            )
-          }
-
+              )
+            }
+          )
+        }
         )
-      }
       )
     )
-  )
 
   def setCurrent(pdb: PrototypeDataBagUI) = {
     save
@@ -170,5 +172,4 @@ class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extend
       _.mapping.panelUI.save
     }
   }
-
 }
