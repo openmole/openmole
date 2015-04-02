@@ -42,10 +42,11 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
     override def timeout = Workspace.preferenceAsDuration(SSHService.timeout)
   }
 
-  val queue = new mutable.SynchronizedQueue[SSHBatchJob]
+  // replaced mutable.SynchronizedQueue according to recommendation in scala doc
+  val queue = new java.util.concurrent.ConcurrentLinkedQueue[SSHBatchJob]
   @transient lazy val nbRunning = new AtomicInteger
 
-  object BatchJobStatusListner extends EventListener[BatchJob] {
+  object BatchJobStatusListener extends EventListener[BatchJob] {
 
     import ExecutionState._
 
@@ -53,15 +54,22 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
       ev match {
         case ev: BatchJob.StateChanged ⇒
           ev.newState match {
-            case DONE | KILLED | FAILED ⇒
+            case DONE | FAILED | KILLED ⇒
               ev.oldState match {
                 case DONE | FAILED | KILLED ⇒
                 case _ ⇒
-                  queue.dequeueFirst(_ ⇒ true) match {
+                  // make it atomic
+                  synchronized {
+                    import collection.JavaConversions._
+
+                    val e = queue.find(_ ⇒ true)
+                    // harmless is None is passed
+                    queue.remove(e)
+                    e
+                  } match {
                     case Some(j) ⇒ j.submit
                     case None    ⇒ nbRunning.decrementAndGet
                   }
-
               }
             case _ ⇒
           }
@@ -84,9 +92,9 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
       val resultPath = result
     }
 
-    Log.logger.fine(s"SSHJobService: Queuing /bin/bash $remoteScript in directory ${sharedFS.root}")
+    Log.logger.fine(s"SSHJobService: Queueing /bin/bash $remoteScript in directory ${sharedFS.root}")
 
-    EventDispatcher.listen(sshBatchJob: BatchJob, BatchJobStatusListner, classOf[BatchJob.StateChanged])
+    EventDispatcher.listen(sshBatchJob: BatchJob, BatchJobStatusListener, classOf[BatchJob.StateChanged])
 
     synchronized {
       Log.logger.fine(s"SSHJobService: ${nbRunning.get()} on $nbSlots taken")
@@ -94,7 +102,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
         nbRunning.incrementAndGet
         sshBatchJob.submit
       }
-      else queue.enqueue(sshBatchJob)
+      else queue.add(sshBatchJob)
     }
     sshBatchJob
   }
