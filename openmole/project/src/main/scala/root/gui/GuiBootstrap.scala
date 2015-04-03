@@ -11,8 +11,24 @@ import com.typesafe.sbt.osgi.OsgiKeys._
 object Bootstrap extends GuiDefaults {
   override val dir = super.dir / "bootstrap"
 
-  lazy val js = OsgiProject("org.openmole.gui.bootstrap.js") settings
-    (libraryDependencies ++= Seq(scalajsTools, scalajsDom, autowire, scalaTags, rx, upickle)) dependsOn
+  implicit def webJarResourcePath(moduleIDs: Seq[ModuleID]): Seq[String] = moduleIDs.flatMap {
+    m ⇒
+      Seq(
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".src.*",
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".fonts.*",
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".grunt.*",
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".less.*",
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".js.*",
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".dist.fonts.*",
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".dist.css.*",
+        "META-INF.resources.webjars." + m.name + "." + m.revision + ".*"
+      )
+  }
+
+  lazy val webJarsResources = Seq(d3, bootstrap, jquery)
+
+  lazy val js = OsgiProject("org.openmole.gui.bootstrap.js", privatePackages = webJarsResources) settings
+    (libraryDependencies ++= Seq(scalajsTools, scalajsDom, autowire, scalaTags, rx, upickle) ++ webJarsResources) dependsOn
     (Server.core, Client.core, Core.pluginManager, Core.workspace, Core.tools, Core.fileService)
 
   lazy val osgi = OsgiProject("org.openmole.gui.bootstrap.osgi") dependsOn

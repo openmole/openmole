@@ -22,18 +22,19 @@ import org.openmole.gui.ext.dataui.PanelUI
 import scala.scalajs.js.annotation.JSExport
 
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{Forms=> bs}
+import org.openmole.gui.misc.js.{Forms => bs}
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskPanelUI")
 class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {
 
+  val codeInput = bs.textArea(7)(placeholder := "Code").render
+
   @JSExport
   val view = bs.div()(
-    h1(id := "title", "This is a title"),
-    p("SystemExecTask !")
+    codeInput
   )
 
   def save = {
-    //dataUI.truc() = trucInput.value
+    dataUI.code() = codeInput.value
   }
 }
