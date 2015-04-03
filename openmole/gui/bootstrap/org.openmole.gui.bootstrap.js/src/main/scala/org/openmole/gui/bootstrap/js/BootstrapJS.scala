@@ -16,8 +16,8 @@
  */
 package org.openmole.gui.bootstrap.js
 
-import java.io.File
 import java.net.URL
+import java.io.{ FileOutputStream, File }
 import org.openmole.core.pluginmanager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.tools.io.FileUtil
@@ -47,7 +47,13 @@ object BootstrapJS {
 
     //Copy all the fixed resources in the workspace if required
     val thisBundle = PluginManager.bundleForClass(classOf[GUIServer])
-    copyURL(thisBundle.findEntries("/", "*.js", true).asScala)
+
+    //Add lib js files from webjars
+    copyWebJarResource("d3", "3.5.5")
+    copyWebJarResource("bootstrap", "3.3.4", "dist/js/")
+    copyWebJarResource("jquery", "1.11.0", "dist/")
+
+    //All other resources
     copyURL(thisBundle.findEntries("/", "*.css", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.ttf", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.woff", true).asScala)
@@ -56,7 +62,6 @@ object BootstrapJS {
     copyURL(thisBundle.findEntries("/", "web.xml", true).asScala)
 
     // Extract and copy all the .sjsir files from bundles to src
-
     PluginManager.bundles.map { b ⇒
       b.findEntries("/", "*.sjsir", true)
     }.filterNot {
@@ -85,6 +90,12 @@ object BootstrapJS {
     if (!new File(jsCompiled, JSPack.JS_FILE).exists)
       JSPack(jsSrc, jsCompiled, optimized)
 
+  }
+
+  def copyWebJarResource(resourceName: String, version: String, extraPath: String = "") = {
+    val fileStream = new FileOutputStream(new File(webui, "webapp/js/" + resourceName + ".min.js"))
+    getClass.getClassLoader.getResourceAsStream("/META-INF/resources/webjars/" + resourceName + "/" + version + "/" + extraPath + resourceName + ".min.js").copy(fileStream)
+    fileStream.close
   }
 
   def copyURL(url: Iterator[URL]) = {

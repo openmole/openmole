@@ -118,6 +118,12 @@ object Libraries extends Defaults {
 
   lazy val scaladget = "org.openmole" %% "scaladget" % "0.4.0"
 
+  lazy val d3 = "org.webjars.bower" % "d3" % "3.5.5"
+
+  lazy val bootstrap = "org.webjars.bower" % "bootstrap" % "3.3.4"
+
+  lazy val jquery = "org.webjars.bower" % "jquery" % "1.11.0"
+
   lazy val opencsv = "org.openmole" %% "au-com-bytecode-opencsv" % "2.3"
 
   lazy val arm = "org.openmole" %% "com-jsuereth-scala-arm" % "1.4"

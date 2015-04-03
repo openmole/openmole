@@ -88,7 +88,9 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
-      resourcesAssemble <++= Seq(openmoleUI.project, openmoleConsole.project) sendTo { assemblyPath / "plugins" },
+      resourcesAssemble <++= Seq(openmoleUI.project, openmoleConsole.project) sendTo {
+        assemblyPath / "plugins"
+      },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r -> p / "dbserver" },
@@ -104,7 +106,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       pluginsDirectory := assemblyPath.value / "plugins",
       header :=
       """|eclipse.application=org.openmole.ui
-         |osgi.bundles.defaultStartLevel=4""".stripMargin,
+          |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels,
       config := assemblyPath.value / "configuration/config.ini",
       cleanFiles <+= baseDirectory { base ⇒ dir / "target" }
@@ -148,7 +150,10 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     scalatra,
     jacksonJson,
     jetty,
-    scalajHttp
+    scalajHttp,
+    d3,
+    bootstrap,
+    jquery
   )
 
   //FIXME separate web plugins from core ones
@@ -226,7 +231,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     pluginsDirectory := assemblyPath.value / "plugins",
     header :=
     """ |eclipse.application=org.openmole.runtime.runtime
-          |osgi.bundles.defaultStartLevel=4""".stripMargin,
+        |osgi.bundles.defaultStartLevel=4""".stripMargin,
     startLevels := openmoleStartLevels,
     config := assemblyPath.value / "configuration/config.ini"
   )
@@ -252,7 +257,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       pluginsDirectory := assemblyPath.value / "plugins",
       header :=
       """|eclipse.application=org.openmole.runtime.daemon
-         |osgi.bundles.defaultStartLevel=4""".stripMargin,
+        |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels,
       config := assemblyPath.value / "configuration/config.ini"
   )
@@ -311,7 +316,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       dependencyNameMap := renameEquinox,
       header :=
       """|eclipse.application=org.openmole.site
-         |osgi.bundles.defaultStartLevel=4""".stripMargin,
+          |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels ++ Seq("openmole-plugin" -> 3),
       pluginsDirectory := assemblyPath.value / "plugins",
       config := assemblyPath.value / "configuration/config.ini"
