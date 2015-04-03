@@ -33,6 +33,14 @@ import data._
 
 package transition {
 
+  case class TransitionParameter(
+      puzzleParameter: Puzzle,
+      conditionParameter: Condition = Condition.True,
+      filterParameter: Filter[String] = Filter.empty) {
+    def when(condition: Condition) = copy(conditionParameter = condition)
+    def filter(filter: Filter[String]) = copy(filterParameter = filter)
+  }
+
   trait TransitionPackage {
 
     implicit def transitionsPuzzlePieceDecorator(from: PuzzlePiece) = new TransitionDecorator(from)
@@ -46,6 +54,9 @@ package transition {
     implicit def conditionStringConverter(condition: String) = Condition(condition)
 
     class TransitionDecorator(from: Puzzle) {
+
+      def when(condition: Condition) = TransitionParameter(from, condition)
+      def filter(filter: Filter[String]) = TransitionParameter(from, filterParameter = filter)
 
       def -<(
         to: Puzzle,
@@ -120,20 +131,17 @@ package transition {
         Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
       }
 
-      def --(to: Puzzle, condition: Condition = Condition.True, filter: Filter[String] = Filter.empty) = {
-        val transitions = from.lasts.map {
-          c ⇒ new Transition(c, to.first, condition, filter)
-        }
+      def --(to: Puzzle, condition: Condition = Condition.True, filter: Filter[String] = Filter.empty): Puzzle = {
+        val transitions =
+          from.lasts.map {
+            c ⇒ new Transition(c, to.first, condition, filter)
+          }
         Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
       }
 
-      def --(toHead: Puzzle, toTail: Puzzle*): Puzzle = --(toHead :: toTail.toList)
-
-      def --(toPuzzles: Seq[Puzzle]) = {
-        val transitions = for (f ← from.lasts; l ← toPuzzles) yield new Transition(f, l.first)
-        Puzzle.merge(from.first, toPuzzles.flatMap {
-          _.lasts
-        }, from :: toPuzzles.toList ::: Nil, transitions)
+      def --(parameters: TransitionParameter*): Puzzle = {
+        val puzzles = parameters.map { case TransitionParameter(t, condition, filter) ⇒ this.--(t, condition, filter) }
+        Puzzle.merge(from.first, puzzles.flatMap(_.lasts), puzzles)
       }
 
       def oo(to: Puzzle, filter: Filter[String] = Filter.empty) = {
