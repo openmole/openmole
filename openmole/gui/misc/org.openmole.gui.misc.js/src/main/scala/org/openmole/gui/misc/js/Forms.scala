@@ -27,10 +27,13 @@ import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 
 import org.scalajs.jquery.jQuery
-import fr.iscpif.scaladget.mapping.BootstrapUtils._
+import org.scalajs.jquery.JQuery
+import fr.iscpif.scaladget.mapping.BootstrapStatic
 
 @JSExport("Forms")
 object Forms {
+
+  implicit def jq2BootstrapStatic(jq: JQuery): BootstrapStatic = jq.asInstanceOf[BootstrapStatic]
 
   implicit def stringToClassKeyAggregator(s: String): ClassKeyAggregator = key(s)
 
