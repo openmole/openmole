@@ -19,6 +19,7 @@ package org.openmole.core.workflow.builder
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import org.openmole.core.workflow.puzzle.PuzzlePiece
 import org.openmole.core.workflow.task._
 
 object TaskBuilder {

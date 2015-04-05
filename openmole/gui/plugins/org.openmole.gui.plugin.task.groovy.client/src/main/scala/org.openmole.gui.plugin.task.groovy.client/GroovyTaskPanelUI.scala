@@ -28,14 +28,12 @@ import rx._
 @JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskPanelUI")
 class GroovyTaskPanelUI(dataUI: GroovyTaskDataUI) extends PanelUI {
 
-  val codeInput = bs.input()(placeholder := "Code").render
+  val codeInput = bs.textArea(7)(placeholder := "Code").render
 
   @JSExport
   val view = {
     codeInput.value = dataUI.code()
     bs.div()(
-      h1(id := "title", "This is a title"),
-      p("GroovyTAsk !!"),
       codeInput
     )
   }

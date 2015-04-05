@@ -96,7 +96,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
       pluginsDirectory := assemblyPath.value / "plugins",
       header :=
       """|eclipse.application=org.openmole.ui
-         |osgi.bundles.defaultStartLevel=4""".stripMargin,
+          |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels,
       config := assemblyPath.value / "configuration/config.ini",
       cleanFiles <+= baseDirectory { base ⇒ dir / "target" }
@@ -140,7 +140,10 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
     rx,
     scalatra,
     jetty,
-    scalajHttp
+    scalajHttp,
+    d3,
+    bootstrap,
+    jquery
   )
 
   //FIXME separate web plugins from core ones
@@ -217,7 +220,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
     pluginsDirectory := assemblyPath.value / "plugins",
     header :=
     """ |eclipse.application=org.openmole.runtime.runtime
-          |osgi.bundles.defaultStartLevel=4""".stripMargin,
+        |osgi.bundles.defaultStartLevel=4""".stripMargin,
     startLevels := openmoleStartLevels,
     config := assemblyPath.value / "configuration/config.ini"
   )
@@ -243,7 +246,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
       pluginsDirectory := assemblyPath.value / "plugins",
       header :=
       """|eclipse.application=org.openmole.runtime.daemon
-         |osgi.bundles.defaultStartLevel=4""".stripMargin,
+        |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels,
       config := assemblyPath.value / "configuration/config.ini"
   )
@@ -302,7 +305,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
       dependencyNameMap := renameEquinox,
       header :=
       """|eclipse.application=org.openmole.site
-         |osgi.bundles.defaultStartLevel=4""".stripMargin,
+          |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels ++ Seq("openmole-plugin" -> 3),
       pluginsDirectory := assemblyPath.value / "plugins",
       config := assemblyPath.value / "configuration/config.ini"

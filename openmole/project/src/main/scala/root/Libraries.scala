@@ -100,7 +100,7 @@ object Libraries extends Defaults {
 
   lazy val rx = "org.openmole" %% "rx" % rxVersion
 
-  lazy val scalajsVersion = "0.6.1"
+  lazy val scalajsVersion = "0.6.2"
   lazy val scalajsTools = "org.openmole" %% "scalajs-tools" % scalajsVersion
   lazy val scalajsLibrary = "org.openmole" %% "scalajs-library" % scalajsVersion
   lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % scalaJSDomVersion
@@ -112,7 +112,13 @@ object Libraries extends Defaults {
 
   lazy val monocle = "org.openmole" %% "monocle" % "1.0.1"
 
-  lazy val scaladget = "org.openmole" %% "scaladget" % "0.3.0"
+  lazy val scaladget = "org.openmole" %% "scaladget" % "0.4.0"
+
+  lazy val d3 = "org.webjars.bower" % "d3" % "3.5.5"
+
+  lazy val bootstrap = "org.webjars.bower" % "bootstrap" % "3.3.4"
+
+  lazy val jquery = "org.webjars.bower" % "jquery" % "1.11.0"
 
   lazy val opencsv = "org.openmole" %% "au-com-bytecode-opencsv" % "2.3"
 

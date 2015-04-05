@@ -137,4 +137,5 @@ case class Puzzle(
   def +(p: Puzzle) = Puzzle.merge(this, p)
 
   def slots: Set[Slot] = (first :: transitions.map(_.end).toList).toSet
+
 }
