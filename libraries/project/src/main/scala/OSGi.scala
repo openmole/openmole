@@ -31,17 +31,17 @@ object OSGi extends Defaults(Apache) {
 
   lazy val scalatra = OsgiProject("org.scalatra",
     dynamicImports = Seq("*"),
-    exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*"),
-    privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.json4s", "*")) settings(
+    exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "com.fasterxml.jackson.*", "org.json4s.*"),
+    privatePackages = Seq("!scala.*", "!org.slf4j.*", "*")) settings(
       libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion,
       libraryDependencies += "org.scalatra" %% "scalatra-json" % scalatraVersion,
-      version := scalatraVersion) dependsOn (slf4j)
+       libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.2.10",
+      version := scalatraVersion)
 
-  lazy val jacksonJson = OsgiProject("org.json4s") settings(
+  /*lazy val jacksonJson = OsgiProject("org.json4s", privatePackages = Seq("com.fasterxml.*",  "com.thoughtworks.paranamer.*")) settings(
     libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.9",
-    exportPackage += "com.fasterxml.*",
     version := "3.2.9"
-    )
+    )*/
 
   lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl")) settings
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9")
@@ -79,11 +79,14 @@ object OSGi extends Defaults(Apache) {
     version := "2.4.1"
     )
 
-  lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
-    privatePackages = Seq("*"), dynamicImports = Seq("*"), imports = Seq("*")) settings
+  lazy val scalaLang = OsgiProject(
+    "org.scala-lang.scala-library",
+    exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
+    privatePackages = Seq("*"), dynamicImports = Seq("*"), imports = Seq("!org.apache.tools.ant.*", "!sun.misc.*" ,"*")) settings
     (libraryDependencies <++= (scalaVersion) { sV ⇒
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,
+        "org.scala-lang" % "scalap" % sV,
         "jline" % "jline" % "2.12.1",
         "com.typesafe.akka" %% "akka-actor" % "2.3.9",
         "com.typesafe.akka" %% "akka-transactor" % "2.3.9",

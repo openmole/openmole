@@ -33,8 +33,8 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.gui.bootstrap.js.BootstrapJS
 import org.openmole.core.workflow.task._
 import org.openmole.console.Console
+import org.openmole.rest.server.RESTServer
 import annotation.tailrec
-import org.openmole.web._
 import org.openmole.gui.server.core._
 
 object Application extends Logger
@@ -53,6 +53,14 @@ class Application extends IApplication {
 """
 
   override def start(context: IApplicationContext) = {
+
+    sealed trait LaunchMode
+    object ConsoleMode extends LaunchMode
+    object GUIMode extends LaunchMode
+    object HelpMode extends LaunchMode
+    object ServerMode extends LaunchMode
+    object ServerConfigMode extends LaunchMode
+
     case class Config(
       pluginsDirs: List[String] = Nil,
       guiPluginsDirs: List[String] = Nil,
@@ -61,15 +69,25 @@ class Application extends IApplication {
       scriptFile: Option[String] = None,
       password: Option[String] = None,
       hostName: Option[String] = None,
-      console: Boolean = false,
-      help: Boolean = false,
+      launchMode: LaunchMode = GUIMode,
       ignored: List[String] = Nil,
-      server: Boolean = false,
       allowInsecureConnections: Boolean = false,
       serverPort: Option[Int] = None,
       serverSSLPort: Option[Int] = None,
       loggerLevel: Option[String] = None,
       optimizedJS: Boolean = false)
+
+    def takeArg(args: List[String]) =
+      args match {
+        case h :: t ⇒ h
+        case Nil    ⇒ ""
+      }
+
+    def dropArg(args: List[String]) =
+      args match {
+        case h :: t ⇒ t
+        case Nil    ⇒ Nil
+      }
 
     def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
@@ -89,11 +107,12 @@ class Application extends IApplication {
         case "-gp" :: tail                          ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
         case "-p" :: tail                           ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
         case "-s" :: tail                           ⇒ parse(tail.tail, c.copy(scriptFile = Some(tail.head)))
-        case "-pw" :: tail                          ⇒ parse(tail.tail, c.copy(password = Some(tail.head)))
+        case "-pw" :: tail                          ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
         case "-hn" :: tail                          ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
-        case "-c" :: tail                           ⇒ parse(tail, c.copy(console = true))
-        case "-h" :: tail                           ⇒ parse(tail, c.copy(help = true))
-        case "-ws" :: tail                          ⇒ parse(tail, c.copy(server = true))
+        case "-c" :: tail                           ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
+        case "-h" :: tail                           ⇒ parse(tail, c.copy(launchMode = HelpMode))
+        case "-ws" :: tail                          ⇒ parse(tail, c.copy(launchMode = ServerMode))
+        case "--ws-configure" :: tail               ⇒ parse(tail, c.copy(launchMode = ServerConfigMode))
         case "-sp" :: tail                          ⇒ parse(tail.tail, c.copy(serverPort = Some(tail.head.toInt))) // Server port
         case "-ssp" :: tail                         ⇒ parse(tail.tail, c.copy(serverSSLPort = Some(tail.head.toInt)))
         case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
@@ -121,7 +140,7 @@ class Application extends IApplication {
     val plugins: List[String] =
       config.pluginsDirs ++
         existingUserPlugins ++
-        (if (!config.console && !config.server) config.guiPluginsDirs else List.empty)
+        (if (config.launchMode == GUIMode) config.guiPluginsDirs else List.empty)
 
     val bundles = PluginManager.load(plugins.map(new File(_)))
     PluginManager.startAll
@@ -135,31 +154,26 @@ class Application extends IApplication {
 
     if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
 
-    if (config.help) println(usage)
-    else if (config.console) {
-      closeSplashScreen
-      print(consoleSplash)
-      val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
-      console.run
-    } else if (config.server) {
-      closeSplashScreen
-      val server = new RESTServer(config.serverPort, config.serverSSLPort, config.hostName, config.password, config.allowInsecureConnections)
-      server.start()
-    } else {
-      BootstrapJS.init(config.optimizedJS)
-      val server = new GUIServer(config.serverPort, BootstrapJS.webapp)
-      server.start()
+    config.launchMode match {
+      case HelpMode ⇒ println(usage)
+      case ServerConfigMode ⇒
+        RESTServer.configure
+      case ServerMode ⇒
+        if (!config.password.isDefined) Console.initPassword
+        val server = new RESTServer(config.serverPort, config.serverSSLPort, config.hostName, config.allowInsecureConnections)
+        server.start()
+      case ConsoleMode ⇒
+        print(consoleSplash)
+        val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
+        console.run
+      case GUIMode ⇒
+        BootstrapJS.init(config.optimizedJS)
+        val server = new GUIServer(config.serverPort, BootstrapJS.webapp)
+        server.start()
     }
 
     IApplication.EXIT_OK
   }
-
-
-  private def closeSplashScreen =
-    try if (SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
-    catch {
-      case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
-    }
 
   override def stop = {}
 }
