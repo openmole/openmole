@@ -12,9 +12,11 @@
   @br @hl.highlight("""
   package myopenmoleplugin
 
-  object Hello {
+  trait Hello {
     def world(i: Int) = i * 2
-  }""", "scala")
+  }
+
+  object Hello extends Hello""", "scala")
 
   @p The file @i{build.sbt} contains the building instructions for SBT. The most important part are the OSGi instructions:
   @br @hl.highlight("""
