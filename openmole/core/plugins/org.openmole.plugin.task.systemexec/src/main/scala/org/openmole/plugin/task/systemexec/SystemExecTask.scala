@@ -92,10 +92,10 @@ abstract class SystemExecTask(
       case None    ⇒ System.err
     }
 
-    def commandLine(cmd: String): String =
-      CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context + Variable(ExternalTask.PWD, workDir.getAbsolutePath), cmd)).toString
+    def commandLine(cmd: String): Array[String] =
+      CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context + Variable(ExternalTask.PWD, workDir.getAbsolutePath), cmd)).toStrings
 
-    def execute(command: String, out: PrintStream, err: PrintStream): Int = {
+    def execute(command: Array[String], out: PrintStream, err: PrintStream): Int = {
       try {
         val runtime = Runtime.getRuntime
 
