@@ -203,7 +203,7 @@ package object evolution {
     val dataChannels =
       (scalingGenomeCaps -- (toIndividualSlot, filter = Keep(genome))) +
         (breedingCaps -- (elitismSlot, filter = Keep(population, archive))) +
-        (breedingCaps oo (fitness.first, filter = Block(archive, population, genome.toArray))) +
+        (breedingCaps oo (fitness.firstSlot, filter = Block(archive, population, genome.toArray))) +
         (breedingCaps -- (endSlot, filter = Block(archive, population, state, generation, terminated, genome.toArray))) +
         (breedingCaps -- (terminationSlot, filter = Block(archive, population, genome.toArray)))
 
@@ -271,7 +271,7 @@ package object evolution {
 
     val dataChannels =
       (scalingCaps -- (toIndividualSlot, filter = Keep(genome))) +
-        (firstCapsule oo (fitness.first, filter = Block(archive, population))) +
+        (firstCapsule oo (fitness.firstSlot, filter = Block(archive, population))) +
         (firstCapsule -- (endCapsule, filter = Block(archive, population))) +
         (firstCapsule oo (elitismSlot, filter = Keep(population, archive)))
 

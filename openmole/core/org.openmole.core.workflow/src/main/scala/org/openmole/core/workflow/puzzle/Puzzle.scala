@@ -33,7 +33,7 @@ object Puzzle {
 
   def merge(p1: Puzzle, p2: Puzzle) =
     new Puzzle(
-      p1.first,
+      p1.firstSlot,
       p1.lasts,
       p1.transitions.toList ::: p2.transitions.toList,
       p1.dataChannels.toList ::: p2.dataChannels.toList,
@@ -87,7 +87,7 @@ case class PuzzlePiece(
 }
 
 case class Puzzle(
-    first: Slot,
+    firstSlot: Slot,
     lasts: Iterable[Capsule] = Iterable.empty,
     transitions: Iterable[ITransition] = Iterable.empty,
     dataChannels: Iterable[DataChannel] = Iterable.empty,
@@ -98,7 +98,7 @@ case class Puzzle(
 
   def this(p: Puzzle) =
     this(
-      p.first,
+      p.firstSlot,
       p.lasts,
       p.transitions,
       p.dataChannels,
@@ -107,7 +107,7 @@ case class Puzzle(
       p.environments,
       p.grouping)
 
-  def toMole = new Mole(first.capsule, transitions, dataChannels)
+  def toMole = new Mole(firstSlot.capsule, transitions, dataChannels)
 
   def toPartialExecution = PartialMoleExecution(toMole, sources, hooks, environments, grouping)
 
@@ -136,6 +136,8 @@ case class Puzzle(
 
   def +(p: Puzzle) = Puzzle.merge(this, p)
 
-  def slots: Set[Slot] = (first :: transitions.map(_.end).toList).toSet
+  def slots: Set[Slot] = (firstSlot :: transitions.map(_.end).toList).toSet
+
+  def first = firstSlot.capsule
 
 }

@@ -74,7 +74,7 @@ package object abc {
       (exploration -< (preModel, filter = Block(statePrototype.name)) -- model -- postModel >- analyse -- (last, terminated)) +
         (exploration -- (analyse, filter = Block(modelVariables: _*))) +
         (preModel -- postModel) +
-        (exploration oo (model.first, filter = Block(modelVariables: _*))) +
+        (exploration oo (model.firstSlot, filter = Block(modelVariables: _*))) +
         (analyse -- (exploration, !terminated, filter = Block(modelVariables: _*)))
 
     val _algorithm = algorithm
