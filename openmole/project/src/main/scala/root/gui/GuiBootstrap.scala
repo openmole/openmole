@@ -21,11 +21,17 @@ object Bootstrap extends GuiDefaults {
         "!META-INF.resources.webjars." + m.name + "." + m.revision + ".js.*",
         "!META-INF.resources.webjars." + m.name + "." + m.revision + ".dist.fonts.*",
         "!META-INF.resources.webjars." + m.name + "." + m.revision + ".dist.css.*",
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".textarea.*",
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".src-noconflict.*",
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".src-min-noconflict.*",
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".kitchen-sink.*",
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".demo.*",
+        "!META-INF.resources.webjars." + m.name + "." + m.revision + ".src-min.snippets.*",
         "META-INF.resources.webjars." + m.name + "." + m.revision + ".*"
       )
   }
 
-  lazy val webJarsResources = Seq(d3, bootstrap, jquery)
+  lazy val webJarsResources = Seq(d3, bootstrap, jquery, ace)
 
   lazy val js = OsgiProject("org.openmole.gui.bootstrap.js", privatePackages = webJarsResources) settings
     (libraryDependencies ++= Seq(scalajsTools, scalajsDom, autowire, scalaTags, rx, upickle) ++ webJarsResources) dependsOn

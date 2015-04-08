@@ -199,7 +199,7 @@ object OSGi extends Defaults(Apache) {
   lazy val jawn = OsgiProject("jawn", exports = Seq("jawn.*", "utf8.json")) settings(
     libraryDependencies += "org.spire-math" %% "jawn-parser" % jawnVersion, version := jawnVersion)
 
-  lazy val scaladgetVersion = "0.4.0"
+  lazy val scaladgetVersion = "0.5.0-SNAPSHOT"
   lazy val scaladget = OsgiProject("scaladget", exports = Seq("fr.iscpif.scaladget.*", "*.sjsir")) settings(
     libraryDependencies += "fr.iscpif" %%% ("scaladget" + jsSuffix) % scaladgetVersion, version := scaladgetVersion)
 
@@ -265,4 +265,10 @@ object OSGi extends Defaults(Apache) {
        version := "0.1.1"
        )
 
+   lazy val async =
+     OsgiProject("scala-async") settings (
+       libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.1",
+       version := "0.9.1",
+	exportPackage := Seq("scala.async.*")
+       )
 }

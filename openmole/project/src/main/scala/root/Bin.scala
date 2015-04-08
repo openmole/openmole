@@ -153,7 +153,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     scalajHttp,
     d3,
     bootstrap,
-    jquery
+    jquery,
+    ace
   )
 
   //FIXME separate web plugins from core ones

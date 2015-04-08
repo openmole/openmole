@@ -49,9 +49,10 @@ object BootstrapJS {
     val thisBundle = PluginManager.bundleForClass(classOf[GUIServer])
 
     //Add lib js files from webjars
-    copyWebJarResource("d3", "3.5.5")
-    copyWebJarResource("bootstrap", "3.3.4", "dist/js/")
-    copyWebJarResource("jquery", "1.11.0", "dist/")
+    copyMinWebJarResource("d3", "3.5.5")
+    copyMinWebJarResource("jquery", "2.1.3")
+    copyMinWebJarResource("bootstrap", "3.3.4", "dist/js/")
+    copyWebJarResource("ace", "01.08.2014", "src-min/")
 
     //All other resources
     copyURL(thisBundle.findEntries("/", "*.css", true).asScala)
@@ -92,9 +93,11 @@ object BootstrapJS {
 
   }
 
-  def copyWebJarResource(resourceName: String, version: String, extraPath: String = "") = {
-    val fileStream = new FileOutputStream(new File(webui, "webapp/js/" + resourceName + ".min.js"))
-    getClass.getClassLoader.getResourceAsStream("/META-INF/resources/webjars/" + resourceName + "/" + version + "/" + extraPath + resourceName + ".min.js").copy(fileStream)
+  def copyMinWebJarResource(resourceName: String, version: String, extraPath: String = "") = copyWebJarResource(resourceName, version, extraPath, ".min")
+
+  def copyWebJarResource(resourceName: String, version: String, extraPath: String = "", filePreExtension: String = "") = {
+    val fileStream = new FileOutputStream(new File(webui, "webapp/js/" + resourceName + filePreExtension + ".js"))
+    getClass.getClassLoader.getResourceAsStream("/META-INF/resources/webjars/" + resourceName + "/" + version + "/" + extraPath + resourceName + filePreExtension + ".js").copy(fileStream)
     fileStream.close
   }
 
