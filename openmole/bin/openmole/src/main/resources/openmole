@@ -31,10 +31,16 @@ MEM=${OPENMOLE_MEMORY:-"1G"}
 
 FLAG=""
 
-JVMVERSION=`java -version 2>&1 | tail -1`
+JAVAVERSION=`java -version 2>&1`
 
-case "$JVMVERSION" in
+JVMFLAVOR=`echo "$JAVAVERSION" | tail -1`
+case "$JVMFLAVOR" in
   *64-Bit*) FLAG="-XX:+UseCompressedOops";;
+esac
+
+JVMVERSION=`echo "$JAVAVERSION" | grep version | rev | cut -d' ' -f1 | rev`
+case "$JVMVERSION" in
+  *1\.7\.*) FLAG="$FLAG -XX:MaxPermSize=128M"
 esac
 
 ARGS=""
@@ -50,7 +56,7 @@ done
 mkdir -p "$HOME/.openmole/.tmp/"
 CONFIGDIR=$HOME/.openmole/.tmp/`date +%s`_$RANDOM
 
-java -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseG1GC \
+java -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -Xmx${MEM} $FLAG -XX:+UseG1GC \
      -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog \
      -cp "$LOCATION/openmole-plugins" -gp "$LOCATION/openmole-plugins-gui" $ARGS
 
