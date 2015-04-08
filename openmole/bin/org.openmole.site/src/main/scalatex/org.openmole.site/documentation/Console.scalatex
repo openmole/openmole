@@ -4,49 +4,54 @@
 
 @sect{Getting started}
   @sect{Launch the console}
-    @p First you should open a system console (on windows the low quality console available by default is called cmd.exe, run that and a console will appear). Then you should go to the OpenMOLE install directory and  launch the console use the -c option of OpenMOLE executable.
+    @p Start by opening a system console (on windows the low quality console available by default is called @i{cmd.exe}, run that and a console will appear). Change to the OpenMOLE installation directory and launch OpenMOLE with the -c option to switch to console mode.
     @p Under Unix like shells: @hl.highlight("./openmole -c", "plain")
     @p Under Windows Dos: @hl.highlight("openmole.bat -c", "plain")
-    @p Console provides a headless / batch mode for running scripts. To use it you should use the -s option: @hl.highlight("./openmole -c -s /path/to/you/mole/script", "plain")
-    @p In that case OpenMOLE still asks for you preference cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -c -s /path/to/your/mole/script -pw password", "plain")
-    @p In batch mode in order for OpenMOLE to block until the execution of your mole has ended you may add at the end of your script:
+
+  @sect{Batch / headless mode}
+    @p Console provides a headless / batch mode for running scripts. You can enable it thanks to the -s option: @hl.highlight("./openmole -c -s /path/to/you/mole/script", "plain")
+    @p In that case OpenMOLE still asks for you preferences cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -c -s /path/to/your/mole/script -pw password", "plain")
+    @p OpenMOLE will wait until the execution of your mole has ended if you add at the end of your script:
     @br @hl.openmole("""ex.waitUntilEnded // ex is the name of your mole execution variable""", test = false)
 
-    @p To load plugins in the OpenMOLE console you should use the -p option: @hl.highlight("./openmole -c -p /path/to/plugin.jar /path/to/anotherplugin.jar", "plain")
+  @sect{Plugins}
+    @p The -p option load plugins in the OpenMOLE console: @hl.highlight("./openmole -c -p /path/to/plugin.jar /path/to/anotherplugin.jar", "plain")
+    @p Check @a("this section", href := DocumentationPages.root.development.plugin.file) to discover how to create your very own OpenMOLE plugins.
 
   @sect{The OpenMOLE language}
-    @p The OpenMOLE console language is an extension of the scala language designed for distributed computing. It supports all the scala constructs and additional operators and classes especially designed to compose workflows. OpenMOLE workflows expose explicit parallel aspect of the workload that can be delegated to distributed computing environments in a transparent manner. The philosophy of OpenMOLE is test small (on your computer) and scale for free (on remote distributed computing environments).
+    @p The OpenMOLE console language is an extension of the Scala language designed for distributed computing. It supports all the scala constructs and additional operators and classes especially designed to compose workflows. OpenMOLE workflows expose explicit parallel aspect of the workload that can be delegated to distributed computing environments in a transparent manner. The philosophy of OpenMOLE is @i{test small} (on your computer) and @i{scale for free} (on remote distributed computing environments).
 
     @p A good way to get a first glimpse at what OpenMOLE can do is to read this @a("research paper", href := "http://www.openmole.org/files/FGCS2013.pdf").
 
        @sect{Basic scala constructs}
          You need only a very basic understanding of the scala language in order to design OpenMOLE workflows.
-         @sect{To declare variables}
+         @sect{Declare variables}
            @hl.openmole("""
            val a = 1 // declares a variable a of type Int
            val b = "Text" // declares a variable a of type String
            val c = if(condition) 5 else 10 // declare a variable c of type Int, the value of c depends on the condition""", test = false)
 
-         @sect{To constructing objects}
-           OpenMOLE takes advantage of the object oriented aspect of scala. It proposes a set of objects that you can build and assemble together to specify your workflow. In general an object is instantiated using the "new" keyword:
+         @sect{Construct objects}
+           OpenMOLE takes advantage of the object oriented aspect of scala. It proposes a set of objects that you can build and assemble together to specify your workflow. In general, an object is instantiated using the "new" keyword:
            @br @hl.openmole("""val f = new File("/tmp/file.txt")""")
            @p In OpenMOLE we have choosen to use factories instead of directly constructing objects, that's why most of the OpenMOLE scripts doesn't contain the "new" keyword at all.
            @p For instance: @hl.openmole("""val l = File("/tmp/file.txt")""")
-           @p Under the hood, it calls a method that is in charge of building the file (the apply method of the object File)")
+           @p Under the hood, it calls a method that is in charge of building the file.")
          @sect{Named parameters}
-           Functions calls generally require that the parameters are provided in a predefined order. In scala you can get rid of this ordering constraint by using named parameters. In OpenMOLE you will often find this pattern:
+           Functions calls generally require the parameters to be provided in a predefined order. In scala you can get rid of this ordering constraint by using named parameters. OpenMOLE scripts will often make use of this pattern:
            @br @hl.openmole("val t = SomeClass(value1, value2, otherParam = otherValue)", test = false)
-           @p It means that value1 and value2 are the values for the first two parameters and that the parameter named otherParam is set to the value otherValue, the other parameters are set to their default values.
-         @sect{Going further}
-           What you have red here should be be sufficient in order to start with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Task documentation", href := DocumentationPages.root.console.task.file). You may also want to look at the @a("Hello World tutorial", href := DocumentationPages.root.console.tutorial.helloWorld.file).
+           @p It means that @hl.openmole("""value1""") and @hl.openmole("""value2""") are the values for the first two parameters and that the parameter named @hl.openmole("""otherParam""") is set to the value @i{otherValue}. Unspecified parameters are set to their default value.
 
-           @p Scala is a very nice language with an extensive very well designed standard library. To get more insight on this language you should look at:
-           @ul
-             @li{ @a("the scala website", href := "http://www.scala-lang.org/") }
-             @li{ @a("the scala books", href := "http://www.scala-lang.org/node/959") }
-             @li{ @a("the standard API documentation", href := "http://www.scala-lang.org/api/current/index.html") }
+   @sect{Going further}
+     What you have read so far should be sufficient in order to get started with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Hello World tutorial", href := DocumentationPages.root.console.tutorial.helloWorld.file). You may also want to look at the @a("Task documentation", href := DocumentationPages.root.console.task.file) and other sections detailing specific concepts.
 
-          @sect{API documentation}
-            You can browse the @a("automatically generated documentation", href := Resource.api.file + "/index.html")
+     @p Scala is a very nice language with an extensive very well designed standard library. To get more insights on this language, check these links:
+     @ul
+       @li{ @a("Scala website", href := "http://www.scala-lang.org/") }
+       @li{ @a("Scala books", href := "http://www.scala-lang.org/node/959") }
+       @li{ @a("Standard API documentation", href := "http://www.scala-lang.org/api/current/index.html") }
+
+    @sect{API documentation}
+      You can browse OpenMOLE's @a("automatically generated documentation", href := Resource.api.file + "/index.html")
 
 
