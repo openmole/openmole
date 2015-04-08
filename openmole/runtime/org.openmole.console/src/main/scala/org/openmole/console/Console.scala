@@ -73,7 +73,7 @@ object Console {
 
 import Console._
 
-class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = None, script: Option[String] = None) { console ⇒
+class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = None, script: List[String] = Nil) { console ⇒
 
   def workspace = "workspace"
   def registry = "registry"
@@ -103,11 +103,13 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
 
     if (correctPassword) withREPL { loop ⇒
       script match {
-        case None ⇒ loop.loop
-        case Some(s) ⇒
-          val scriptFile = new File(s)
-          if (scriptFile.exists) loop.interpretAllFrom(new SFile(scriptFile))
-          else println("File " + scriptFile + " doesn't exist.")
+        case Nil ⇒ loop.loop
+        case scripts ⇒
+          scripts.foreach { s ⇒
+            val scriptFile = new File(s)
+            if (scriptFile.exists) loop.interpretAllFrom(new SFile(scriptFile))
+            else println("File " + scriptFile + " doesn't exist.")
+          }
       }
     }
   }

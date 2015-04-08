@@ -66,7 +66,7 @@ class Application extends IApplication {
       guiPluginsDirs: List[String] = Nil,
       userPlugins: List[String] = Nil,
       workspaceDir: Option[String] = None,
-      scriptFile: Option[String] = None,
+      scriptFile: List[String] = Nil,
       password: Option[String] = None,
       hostName: Option[String] = None,
       launchMode: LaunchMode = GUIMode,
@@ -106,7 +106,7 @@ class Application extends IApplication {
         case "-cp" :: tail                          ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
         case "-gp" :: tail                          ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
         case "-p" :: tail                           ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
-        case "-s" :: tail                           ⇒ parse(tail.tail, c.copy(scriptFile = Some(tail.head)))
+        case "-s" :: tail                           ⇒ parse(dropArgs(tail), c.copy(scriptFile = takeArgs(tail)))
         case "-pw" :: tail                          ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
         case "-hn" :: tail                          ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "-c" :: tail                           ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
