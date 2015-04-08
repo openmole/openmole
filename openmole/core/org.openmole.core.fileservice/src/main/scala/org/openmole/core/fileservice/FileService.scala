@@ -23,7 +23,7 @@ import java.io.FileOutputStream
 import java.util.logging.Logger
 import org.openmole.core.filecache.{ FileCacheDeleteOnFinalize, IFileCache }
 import org.openmole.core.tools.cache.AssociativeCache
-import org.openmole.core.tools.io.{ HashService, FileUtil, TarArchiver }
+import org.openmole.core.tools.io.{ HashUtil, FileUtil, TarArchiver }
 import org.openmole.core.tools.service.Hash
 import FileUtil._
 import TarArchiver._
@@ -52,7 +52,7 @@ object FileService {
     hashCache.cache(
       key,
       file.getAbsolutePath,
-      HashService.computeHash(if (file.isDirectory) archiveForDir(key, file).file(false) else file))
+      HashUtil.computeHash(if (file.isDirectory) archiveForDir(key, file).file(false) else file))
 
   def archiveForDir(key: Object, file: File) = {
     archiveCache.cache(key, file.getAbsolutePath, {

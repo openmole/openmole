@@ -27,7 +27,7 @@ import java.io.PrintStream
 import java.util.UUID
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.tools.io.{ HashService, FileUtil, TarArchiver }
+import org.openmole.core.tools.io.{ HashUtil, FileUtil, TarArchiver }
 import org.openmole.core.tools.service.{ Logger, LocalHostName, Retry }
 import FileUtil._
 import TarArchiver._
@@ -86,7 +86,7 @@ class Runtime {
       val cache = Workspace.newFile
 
       retry(storage.downloadGZ(replicatedFile.path, cache))
-      val cacheHash = HashService.computeHash(cache).toString
+      val cacheHash = HashUtil.computeHash(cache).toString
 
       if (cacheHash != replicatedFile.hash)
         throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.src.toString + " replicated at " + replicatedFile.path)
@@ -141,7 +141,7 @@ class Runtime {
       logger.fine("Downloading execution message")
       retry(storage.downloadGZ(executionMessage.jobs.path, jobsFileCache))
 
-      if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
+      if (HashUtil.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
 
       val tis = new TarInputStream(new FileInputStream(jobsFileCache))
       val runableTasks = tis.applyAndClose(e ⇒ { SerialiserService.deserialiseReplaceFiles[RunnableTask](tis, usedFiles) })
@@ -167,7 +167,7 @@ class Runtime {
 
       SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
       val uploadedcontextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("uplodedTar", ".tgz"))
-      val result = new FileMessage(uploadedcontextResults, HashService.computeHash(contextResultFile).toString)
+      val result = new FileMessage(uploadedcontextResults, HashUtil.computeHash(contextResultFile).toString)
 
       logger.fine("Upload the results")
       retry(storage.uploadGZ(contextResultFile, uploadedcontextResults))
@@ -195,7 +195,7 @@ class Runtime {
       if (out.length != 0) {
         val output = storage.child(executionMessage.communicationDirPath, Storage.uniqName("output", ".txt"))
         retry(storage.uploadGZ(out, output))
-        Some(new FileMessage(output, HashService.computeHash(out).toString))
+        Some(new FileMessage(output, HashUtil.computeHash(out).toString))
       }
       else None
 
@@ -205,7 +205,7 @@ class Runtime {
       if (err.length != 0) {
         val errout = storage.child(executionMessage.communicationDirPath, Storage.uniqName("outputError", ".txt"))
         retry(storage.uploadGZ(err, errout))
-        Some(new FileMessage(errout, HashService.computeHash(err).toString))
+        Some(new FileMessage(errout, HashUtil.computeHash(err).toString))
       }
       else None
 

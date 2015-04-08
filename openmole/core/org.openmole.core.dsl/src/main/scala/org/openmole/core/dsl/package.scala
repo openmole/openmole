@@ -67,7 +67,7 @@ package dsl {
     lazy val workspace = Workspace
     lazy val logger = LoggerService
 
-    implicit def authenticationProvider = Workspace.authenticationProvider
+    implicit def authenticationProvider = workspace.authenticationProvider
 
     type File = java.io.File
     def File(s: String): File = new File(s)

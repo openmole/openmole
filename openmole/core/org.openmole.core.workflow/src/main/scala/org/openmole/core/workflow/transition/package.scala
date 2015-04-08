@@ -139,6 +139,8 @@ package transition {
         Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
       }
 
+      def --(head: Puzzle, tail: Puzzle*): Puzzle = this.--((Seq(head) ++ tail).map(TransitionParameter(_)): _*)
+
       def --(parameters: TransitionParameter*): Puzzle = {
         val puzzles = parameters.map { case TransitionParameter(t, condition, filter) ⇒ this.--(t, condition, filter) }
         Puzzle.merge(from.first, puzzles.flatMap(_.lasts), puzzles)

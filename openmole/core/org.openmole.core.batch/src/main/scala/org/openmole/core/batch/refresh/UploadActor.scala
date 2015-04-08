@@ -31,7 +31,7 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.environment.BatchEnvironment.{ signalUpload }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.tools.io.{ HashService, FileUtil, TarArchiver }
+import org.openmole.core.tools.io.{ HashUtil, FileUtil, TarArchiver }
 import org.openmole.core.workflow.job._
 import FileUtil._
 import TarArchiver._
@@ -176,7 +176,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
 
     signalUpload(
       storage.uploadGZ(jobFile, jobForRuntimePath), jobForRuntimePath, storage)
-    val jobHash = HashService.computeHash(jobFile).toString
+    val jobHash = HashUtil.computeHash(jobFile).toString
 
     val pluginReplicas = serializationPlugin.map { toReplicatedFile(job, _, storage) }
     val files = serializationFile.map { toReplicatedFile(job, _, storage) }

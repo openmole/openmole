@@ -19,6 +19,7 @@ package org.openmole.plugin.sampling
 
 import java.io.File
 import java.util.Random
+import org.openmole.core.workflow.builder.SamplingBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
@@ -28,7 +29,7 @@ package object combine {
 
   implicit def stringToGroovyFilterConversion(s: String) = new GroovyFilter(s)
 
-  trait AbstractSamplingDecorator {
+  trait AbstractSamplingCombineDecorator {
     def s: Sampling
     def +(s2: Sampling) = new CombineSampling(s, s2)
     def x(s2: Sampling) = new CompleteSampling(s, s2)
@@ -42,8 +43,9 @@ package object combine {
     def bootstrap(samples: FromContext[Int], number: FromContext[Int]) = s sample samples repeat number
   }
 
-  implicit class SamplingDecorator(val s: Sampling) extends AbstractSamplingDecorator
-  implicit class DiscreteFactorDecorator[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) extends AbstractSamplingDecorator {
+  implicit class SamplingCombineDecorator(val s: Sampling) extends AbstractSamplingCombineDecorator
+  implicit def samplingBuilderCombineDecorator(s: SamplingBuilder) = SamplingCombineDecorator(s.toSampling)
+  implicit class DiscreteFactorDecorator[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) extends AbstractSamplingCombineDecorator {
     def s: Sampling = f
   }
 

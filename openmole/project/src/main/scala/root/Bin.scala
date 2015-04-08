@@ -1,5 +1,6 @@
 package root
 
+import root.runtime.REST
 import sbt._
 import Keys._
 
@@ -14,7 +15,7 @@ import UnidocKeys._
 import scala.util.matching.Regex
 import sbtbuildinfo.Plugin._
 
-object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties, Web) {
+object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties) {
   val dir = file("bin")
 
   def filter(m: ModuleID) = {
@@ -48,20 +49,11 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }
     )
 
-  lazy val openmoleConsole = OsgiProject("org.openmole.console") settings (
-    organization := "org.openmole.console"
-  ) dependsOn (
-      Core.workflow,
-      Core.console,
-      Core.dsl,
-      Core.batch
-    )
-
-  lazy val openmoleUI = OsgiProject("org.openmole.ui", singleton = true) settings (
+  lazy val openmoleUI = OsgiProject("org.openmole.ui", singleton = true, imports = Seq("*")) settings (
     organization := "org.openmole.ui",
     libraryDependencies += equinoxApp
   ) dependsOn (
-      openmoleConsole,
+      Runtime.console,
       Core.workspace,
       Core.replication,
       Core.exception,
@@ -75,7 +67,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       gui.Bootstrap.js,
       gui.Bootstrap.osgi,
       Core.logging,
-      Web.core,
+      runtime.REST.server,
       Core.console,
       Core.dsl)
 
@@ -88,9 +80,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
-      resourcesAssemble <++= Seq(openmoleUI.project, openmoleConsole.project) sendTo {
-        assemblyPath / "plugins"
-      },
+      resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project) sendTo { assemblyPath / "plugins" },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r -> p / "dbserver" },
@@ -113,7 +103,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     )
 
   lazy val webServerDependencies = Seq(
-    scalate
+    scalatra,
+    bouncyCastle
   )
 
   lazy val coreDependencies = Seq[sbt.ModuleID](
@@ -148,7 +139,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     upickle,
     rx,
     scalatra,
-    jacksonJson,
     jetty,
     scalajHttp,
     d3,
@@ -160,7 +150,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
   //FIXME separate web plugins from core ones
   lazy val openmoleCore = Project("openmolecore", dir / "target" / "openmolecore", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo assemblyPath,
-    resourcesAssemble <++= Seq(openmoleConsole.project) sendTo assemblyPath,
+    resourcesAssemble <++= Seq(Runtime.console.project, REST.server.project) sendTo assemblyPath,
     libraryDependencies ++= coreDependencies,
     libraryDependencies ++= equinox,
     dependencyFilter := filter,
@@ -178,7 +168,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     libraryDependencies ++=
     Seq(
       sshd,
-      bouncyCastle,
       family,
       logging,
       opencsv,
@@ -263,7 +252,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       config := assemblyPath.value / "configuration/config.ini"
   )
 
-  lazy val api = Project("api", dir / "target" / "api") aggregate ((Core.subProjects ++ Gui.subProjects ++ Web.subProjects): _*) settings (commonsSettings: _*) settings (
+  lazy val api = Project("api", dir / "target" / "api") aggregate ((Core.subProjects ++ Gui.subProjects ++ Runtime.subProjects): _*) settings (commonsSettings: _*) settings (
     unidocSettings: _*
   ) settings (tarProject: _*) settings (
       compile := Analysis.Empty,
@@ -303,7 +292,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
                   }),
               buildInfoPackage := "org.openmole.site.buildinfo"
             ): _*
-        ) dependsOn (openmoleConsole, ThirdParties.toolxitBibtex)
+        ) dependsOn (Runtime.console, ThirdParties.toolxitBibtex)
 
   lazy val site =
     Project("site", dir / "site", settings = assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (

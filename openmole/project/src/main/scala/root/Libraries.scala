@@ -53,10 +53,6 @@ object Libraries extends Defaults {
 
   lazy val scalatra = "org.openmole" %% "org-scalatra" % scalatraVersion
 
-  lazy val scalate = "org.openmole" %% "scalate" % scalatraVersion
-
-  lazy val jacksonJson = "org.openmole" %% "org-json4s" % "3.2.9"
-
   lazy val logback = "org.openmole" %% "ch-qos-logback" % "1.0.9"
 
   lazy val h2 = "org.openmole" %% "org-h2" % "1.3.176"
