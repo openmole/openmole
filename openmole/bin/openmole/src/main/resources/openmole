@@ -40,7 +40,7 @@ esac
 
 JVMVERSION=`echo "$JAVAVERSION" | grep version | rev | cut -d' ' -f1 | rev`
 case "$JVMVERSION" in
-  *1\.7\.*) FLAG="$FLAG -XX:MaxPermSize=128M"
+  *1\.7\.*) FLAG="$FLAG -XX:MaxPermSize=128M";;
 esac
 
 ARGS=""
