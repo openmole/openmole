@@ -44,7 +44,7 @@ import Application.Log._
 class Application extends IApplication {
 
   lazy val consoleSplash =
-  """  ___                   __  __  ___  _     _____   ____
+    """  ___                   __  __  ___  _     _____   ____
  / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____| | ___|
 | | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   |___ \
 | |_| | |_) |  __/ | | | |  | | |_| | |___| |___   ___) |

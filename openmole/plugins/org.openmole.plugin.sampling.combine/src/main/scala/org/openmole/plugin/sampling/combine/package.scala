@@ -31,7 +31,6 @@ package object combine {
 
   trait AbstractSamplingCombineDecorator {
     def s: Sampling
-    def +(s2: Sampling) = new CombineSampling(s, s2)
     def x(s2: Sampling) = new CompleteSampling(s, s2)
     def ::(s2: Sampling) = new ConcatenateSampling(s, s2)
     def filter(filters: Filter*) = FilteredSampling(s, filters: _*)
