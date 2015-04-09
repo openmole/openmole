@@ -126,7 +126,10 @@ trait ExternalTask extends Task {
         f.file
       }).toSet
 
-    tmpDir.applyRecursive(f ⇒ f.delete, usedFiles)
+    def contextFiles =
+      context.values.map(_.value).collect { case f: File ⇒ f }
+
+    tmpDir.applyRecursive(f ⇒ f.delete, usedFiles ++ contextFiles)
 
     // This delete the dir only if it is empty
     tmpDir.delete
