@@ -61,7 +61,7 @@ trait ExternalTask extends Task {
   def resources: Iterable[Resource]
 
   protected case class ToPut(file: File, name: String, link: Boolean, inWorkDir: Boolean)
-  protected case class ToGet(name: String, file: File, inWorkDir: Boolean)
+  //protected case class ToGet(name: String, file: File, inWorkDir: Boolean)
 
   protected def listInputFiles(context: Context): Iterable[ToPut] =
     inputFiles.map {
@@ -84,19 +84,15 @@ trait ExternalTask extends Task {
     }
   }
 
-  protected def listOutputFiles(context: Context, tmpDir: File, workDirPath: String): (Context, Iterable[ToGet]) = {
+  protected def outputFileVariables(context: Context, tmpDir: File, workDirPath: String) = {
     val workDir = new File(tmpDir, workDirPath)
 
-    val files =
-      outputFiles.map {
-        case OutputFile(name, prototype, inWorkDir) ⇒
-          val fileName = name.from(context)
-          val file = if (inWorkDir) new File(workDir, fileName) else new File(tmpDir, fileName)
-
-          val fileVariable = Variable(prototype, file)
-          ToGet(fileName, file, inWorkDir) -> fileVariable
-      }
-    context ++ files.map { _._2 } -> files.map { _._1 }
+    outputFiles.map {
+      case OutputFile(name, prototype, inWorkDir) ⇒
+        val fileName = name.from(context)
+        val file = if (inWorkDir) new File(workDir, fileName) else new File(tmpDir, fileName)
+        Variable(prototype, file)
+    }
   }
 
   private def copy(f: ToPut, to: File) = {
@@ -118,18 +114,17 @@ trait ExternalTask extends Task {
   }
 
   def fetchOutputFiles(context: Context, tmpDir: File, workDirPath: String): Context = {
-    val (resultContext, outputFiles) = listOutputFiles(context, tmpDir, workDirPath: String)
-
-    val usedFiles = outputFiles.map(
-      f ⇒ {
-        if (!f.file.exists) throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + this.toString + " doesn't exist")
-        f.file
-      }).toSet
+    val resultContext = context ++ outputFileVariables(context, tmpDir, workDirPath)
 
     def contextFiles =
-      context.values.map(_.value).collect { case f: File ⇒ f }
+      resultContext.values.map(_.value).collect { case f: File ⇒ f }
 
-    tmpDir.applyRecursive(f ⇒ f.delete, usedFiles ++ contextFiles)
+    for {
+      f ← contextFiles
+      if !f.exists
+    } throw new UserBadDataError("Output file " + f.getAbsolutePath + " for task " + this.toString + " doesn't exist")
+
+    tmpDir.applyRecursive(f ⇒ f.delete, contextFiles.toSet)
 
     // This delete the dir only if it is empty
     tmpDir.delete
