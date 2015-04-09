@@ -160,7 +160,7 @@ class Application extends IApplication {
         RESTServer.configure
       case ServerMode ⇒
         if (!config.password.isDefined) Console.initPassword
-        val server = new RESTServer(config.serverPort, config.serverSSLPort, config.hostName, config.allowInsecureConnections)
+        val server = new RESTServer(config.serverPort, config.serverSSLPort, config.hostName, config.allowInsecureConnections, PluginSet(userPlugins))
         server.start()
       case ConsoleMode ⇒
         print(consoleSplash)

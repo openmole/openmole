@@ -30,6 +30,7 @@ object REST extends Defaults {
 
   lazy val client = Project("org-openmole-rest-client", dir / "client") settings (
     libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.3.5",
+    libraryDependencies += "org.apache.httpcomponents" % "httpmime" % "4.3.5",
     libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.10"
   ) dependsOn (messages)
 

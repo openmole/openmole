@@ -58,6 +58,8 @@ object MoleExecution extends Logger {
   case class SourceExceptionRaised(source: Source, capsule: Capsule, exception: Throwable, level: Level) extends Event[MoleExecution] with ExceptionEvent
   case class HookExceptionRaised(hook: Hook, moleJob: MoleJob, exception: Throwable, level: Level) extends Event[MoleExecution] with ExceptionEvent
 
+  private def listOfTupleToMap[K, V](l: Traversable[(K, V)]): Map[K, Traversable[V]] = l.groupBy(_._1).mapValues(_.map(_._2))
+
   def apply(
     mole: Mole,
     sources: Iterable[(Capsule, Source)] = Iterable.empty,
@@ -67,14 +69,14 @@ object MoleExecution extends Logger {
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
     defaultEnvironment: Environment = LocalEnvironment.default)(implicit executionContext: ExecutionContext) =
-    PartialMoleExecution(
+    new MoleExecution(
       mole,
-      sources,
-      hooks,
+      listOfTupleToMap(sources),
+      listOfTupleToMap(hooks),
       environments,
       grouping,
       seed,
-      defaultEnvironment).toExecution(implicits)(executionContext)
+      defaultEnvironment)(implicits, executionContext)
 
 }
 

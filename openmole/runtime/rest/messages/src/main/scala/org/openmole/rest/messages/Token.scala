@@ -16,4 +16,9 @@
  */
 package org.openmole.rest.messages
 
+object Error {
+  def apply(e: Throwable): Error =
+    Error(e.getMessage, Some(e.getStackTrace.map(e ⇒ s"\tat$e").reduceLeft((prev, next) ⇒ s"$prev\n$next")))
+}
+case class Error(message: String, stackTrace: Option[String])
 case class Token(token: String, duration: Long)

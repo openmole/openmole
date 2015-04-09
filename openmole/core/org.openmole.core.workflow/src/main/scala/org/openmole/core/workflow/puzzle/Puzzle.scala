@@ -109,17 +109,6 @@ case class Puzzle(
 
   def toMole = new Mole(firstSlot.capsule, transitions, dataChannels)
 
-  def toPartialExecution = PartialMoleExecution(toMole, sources, hooks, environments, grouping)
-
-  def toPartialExecution(
-    sources: Iterable[(Capsule, Source)] = Iterable.empty,
-    hooks: Iterable[(Capsule, Hook)] = Iterable.empty,
-    environment: Map[Capsule, Environment] = Map.empty,
-    grouping: Map[Capsule, Grouping] = Map.empty,
-    seed: Long = Workspace.newSeed,
-    defaultEnvironment: Environment = LocalEnvironment.default) =
-    PartialMoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.environments ++ environments, this.grouping ++ grouping, seed, defaultEnvironment)
-
   def toExecution: MoleExecution =
     MoleExecution(toMole, sources, hooks, environments, grouping)
 

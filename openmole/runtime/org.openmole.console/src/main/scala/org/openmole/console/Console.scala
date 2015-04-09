@@ -79,17 +79,19 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
   def registry = "registry"
   def logger = "logger"
   def serializer = "serializer"
+  def commandsName = "_commands_"
+  def pluginsName = "_plugins_"
 
   def autoImports: Seq[String] = PluginInfo.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"$n._")
   def imports =
     Seq(
       "org.openmole.core.dsl._",
-      "commands._"
+      s"$commandsName._"
     ) ++ autoImports
 
   def initialisationCommands =
     Seq(
-      "implicit lazy val plugins = _plugins_",
+      s"implicit lazy val plugins = $pluginsName",
       imports.map("import " + _).mkString("; ")
     )
 
@@ -116,20 +118,20 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
 
   def initialise(loop: ScalaREPL) = {
     loop.beQuietDuring {
-      loop.bind("commands", new Command)
-      loop.bind("_plugins_", plugins)
-      initialisationCommands.foreach(loop.interpret)
+      loop.bind(commandsName, new Command)
+      loop.bind(pluginsName, plugins)
+      initialisationCommands.foreach { loop.interpret }
     }
     loop
   }
 
-  def newREPL = {
+  def newREPL() = {
     val loop = new ScalaREPL(priorityClasses = List(this.getClass))
     initialise(loop)
   }
 
   def withREPL[T](f: ScalaREPL ⇒ T) = {
-    val loop = newREPL
+    val loop = newREPL()
     try f(loop)
     finally loop.close
   }

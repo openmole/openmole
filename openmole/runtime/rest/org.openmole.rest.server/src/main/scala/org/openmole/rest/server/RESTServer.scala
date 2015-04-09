@@ -1,5 +1,7 @@
 package org.openmole.rest.server
 
+import javax.servlet.ServletContext
+
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
@@ -10,7 +12,9 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 import org.eclipse.jetty.webapp.WebAppContext
+import org.openmole.core.console.ScalaREPL
 import org.openmole.core.tools.service.Logger
+import org.openmole.core.workflow.task.PluginSet
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.rest.server.db.SlickDB
 import org.scalatra.ScalatraBase
@@ -38,11 +42,31 @@ object RESTServer extends Logger {
   def passwordHash = ConfigurationLocation("REST", "PasswordHash", true)
   def setPassword(p: String) = Workspace.setPreference(passwordHash, p.hash.toString)
   def isPasswordCorrect(p: String) = Workspace.preference(passwordHash) == p.hash.toString
+
 }
 
 import RESTServer.Log._
 
-class RESTServer(port: Option[Int], sslPort: Option[Int], hostName: Option[String], allowInsecureConnections: Boolean) {
+object RESTLifeCycle {
+  def arguments = "arguments"
+  case class Arguments(plugins: PluginSet)
+}
+
+class RESTLifeCycle extends LifeCycle {
+
+  override def init(context: ServletContext) {
+    val args = context.getAttribute(RESTLifeCycle.arguments).asInstanceOf[RESTLifeCycle.Arguments]
+    context.mount(
+      new RESTAPI {
+        def arguments = args
+      },
+      "/*"
+    )
+  }
+
+}
+
+class RESTServer(port: Option[Int], sslPort: Option[Int], hostName: Option[String], allowInsecureConnections: Boolean, plugins: PluginSet) {
 
   private lazy val server = {
     val p = port getOrElse 8080
@@ -90,7 +114,9 @@ class RESTServer(port: Option[Int], sslPort: Option[Int], hostName: Option[Strin
     hostName foreach (context.setInitParameter(ScalatraBase.HostNameKey, _))
     context.setInitParameter("org.scalatra.Port", sslP.toString)
     context.setInitParameter(ScalatraBase.ForceHttpsKey, allowInsecureConnections.toString)
-    context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[Scalatra].getCanonicalName)
+
+    context.setAttribute(RESTLifeCycle.arguments, RESTLifeCycle.Arguments(plugins))
+    context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[RESTLifeCycle].getCanonicalName)
     context.addEventListener(new ScalatraListener)
 
     val db = new SlickDB(Workspace.file("WebserverDB"))

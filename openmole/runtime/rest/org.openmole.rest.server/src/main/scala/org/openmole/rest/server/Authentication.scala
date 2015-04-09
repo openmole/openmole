@@ -66,17 +66,12 @@ trait Authentication { self ⇒
     else Failure(new InvalidPasswordException("Server password is incorrect"))
   }
 
-  def checkKey(key: String): Boolean = {
-    keyStorage get key match {
-      case Some(k) ⇒ {
-        logger.info(s"key is valid: ${k.isValid}")
-        logger.info(s"key matches key given: ${k.hash == key}")
-        logger.info(s"stored key: ${k.hash}")
-        logger.info(s"given key: $key")
+  def checkToken(token: String): Boolean = {
+    logger.info("checking token")
 
-        k.isValid && k.hash == key
-      }
-      case _ ⇒ false
+    keyStorage get token match {
+      case Some(k) ⇒ k.isValid
+      case _       ⇒ false
     }
   }
 }

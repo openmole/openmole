@@ -27,30 +27,13 @@ trait ScalaCompilation {
   def libraries: Seq[File]
 
   def compile(code: String) = Try {
-    val interpreter = new ScalaREPL(true, usedClasses ++ Seq(getClass), libraries)
-
-    def exceptionMessage = {
-      def error(error: interpreter.ErrorMessage) =
-        s"""
-           |${error.error}
-            |on line ${error.line}
-            |""".stripMargin
-
-      s"""
-         |Errors while compiling:
-         |${interpreter.errorMessages.map(error).mkString("\n")}
-          |in script $code
-       """.stripMargin
-    }
+    val interpreter = new ScalaREPL(usedClasses ++ Seq(getClass), libraries)
 
     val evaluated =
       try interpreter.eval(code)
       catch {
-        case e: Exception ⇒
-          throw new InternalProcessingError(e, exceptionMessage)
+        case e: Throwable ⇒ throw new InternalProcessingError(e, s"Error compiling $code")
       }
-
-    if (!interpreter.errorMessages.isEmpty) throw new InternalProcessingError(exceptionMessage)
 
     if (evaluated == null) throw new InternalProcessingError(
       s"""The return value of the script was null:

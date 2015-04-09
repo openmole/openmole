@@ -5,11 +5,16 @@ import javax.servlet.http.HttpServletRequest
 
 import org.json4s.JsonDSL._
 import org.json4s._
+import org.openmole.console.Console
+import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.task._
+import org.openmole.core.dsl._
 import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.FileUploadSupport
 import org.openmole.rest.messages
 
+import scala.io.Source
 import scala.util.{ Try, Failure, Success }
 
 @MultipartConfig //research scala multipart config
@@ -21,8 +26,13 @@ trait RESTAPI extends ScalatraServlet
 
   protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal
   private val logger = Log.log
+  implicit class ToJsonDecorator(x: Any) {
+    def toJson = pretty(Extraction.decompose(x))
+  }
 
-  def exceptionToHttpError(e: Throwable) = InternalServerError(render(("error", e.getMessage) ~ ("stackTrace", e.getStackTrace.map(e ⇒ s"\tat$e").reduceLeft((prev, next) ⇒ s"$prev\n$next"))))
+  def arguments: RESTLifeCycle.Arguments
+
+  def exceptionToHttpError(e: Throwable) = InternalServerError(messages.Error(e).toJson)
 
   post("/token") {
     contentType = formats("json")
@@ -32,9 +42,7 @@ trait RESTAPI extends ScalatraServlet
       case Success(Failure(InvalidPasswordException(msg))) ⇒ Forbidden(msg)
       case Success(Failure(e))                             ⇒ exceptionToHttpError(e)
       case Success(Success(Token(token, start, end))) ⇒
-        val json = pretty(Extraction.decompose(messages.Token(token, end - start)))
-        println(json)
-        Accepted(json)
+        Accepted(messages.Token(token, end - start).toJson)
     }
   }
 
@@ -42,14 +50,33 @@ trait RESTAPI extends ScalatraServlet
     contentType = formats("json")
 
     authenticated {
-      (fileParams get "script") match {
-        case None ⇒ ExpectationFailed("Missing mandatory script file.")
+      (params get "script") match {
+        case None ⇒ ExpectationFailed("Missing mandatory script parameter.")
         case Some(script) ⇒
           logger.info("starting the create operation")
 
-          println(script)
+          val console = new Console(arguments.plugins)
+          val repl = console.newREPL()
 
-          Ok(script)
+          Try(repl.eval(script)) match {
+            case Failure(e) ⇒ InternalServerError(messages.Error(e).toJson)
+            case Success(o) ⇒
+              o match {
+                case puzzle: Puzzle ⇒
+                  val ex = puzzle.start
+                  ex.waitUntilEnded
+                  Ok("running")
+                case _ ⇒ InternalServerError(messages.Error("The last line of the script should be a puzzle", None))
+              }
+          }
+
+        /*val repl = arguments.repl()
+
+          Try(repl.eval(script)) match {
+            case Success(_) ⇒
+            case Failure(e) ⇒ println(repl.errorMessages.head.error)
+          }
+*/
 
         /* val directory = Workspace.newFile
 
@@ -143,9 +170,9 @@ trait RESTAPI extends ScalatraServlet
   def authenticated[T](success: ⇒ ActionResult)(implicit r: HttpServletRequest): ActionResult = {
     def fail = Unauthorized(render(("error", "This service requires a token")))
 
-    r.headers.get("token") match {
-      case None    ⇒ fail
-      case Some(k) ⇒ if (checkKey(k)) success else fail
+    Try(params("token")(r)) match {
+      case Failure(_) ⇒ fail
+      case Success(k) ⇒ if (checkToken(k)) success else fail
     }
   }
 

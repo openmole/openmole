@@ -1,10 +1,12 @@
 package org.openmole.rest.client
 
+import java.io.File
 import javax.net.ssl.{SSLContext, SSLSocket}
 
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpEntityEnclosingRequestBase, HttpPost}
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.conn.ssl.{TrustSelfSignedStrategy, SSLContextBuilder, SSLConnectionSocketFactory}
+import org.apache.http.entity.mime._
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
 import org.openmole.rest.messages.Token
 
@@ -26,7 +28,24 @@ object RESTClient extends App {
     }
 
 
-  println(client.requestToken(password))
+  val token = client.requestToken(password).get.token
+
+  val script =
+    """
+      |val i = Val[Double]
+      |val res = Val[Double]
+      |val exploration = ExplorationTask(i in (0.0 to 100.0 by 1.0))
+      |
+      |val model =
+      |  ScalaTask("val res = i * 2") set (
+      |    inputs += i,
+      |    outputs += (i, res)
+      |    )
+      |
+      |exploration -< (model on LocalEnvironment(4) hook ToStringHook())
+    """.stripMargin
+
+  println(client.start(token, script, None))
 
 }
 
@@ -46,6 +65,25 @@ trait Client {
     execute(post) { response =>
       parse(response.getEntity.getContent).extract[Token]
      }
+  }
+
+  def start(token: String, script: String, inputFiles: Option[File]) = {
+    def files = inputFiles.map{ f =>
+      val builder = MultipartEntityBuilder.create()
+      builder addBinaryBody ("inputFiles", f)
+      builder.build
+    }
+    
+    val uri =
+      new URIBuilder(address + "/start").
+        setParameter("token", token).
+        setParameter("script", script).build
+
+    val post = new HttpPost(uri)
+    files.foreach(post.setEntity)
+    execute(post) { response =>
+      responseContent(response).mkString
+    }
   }
 
   def execute[T](request: HttpEntityEnclosingRequestBase)(f: CloseableHttpResponse => T): Try[T] = withClient { client =>

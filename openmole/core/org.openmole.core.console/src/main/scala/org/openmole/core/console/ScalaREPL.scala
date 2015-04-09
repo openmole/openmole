@@ -21,6 +21,7 @@ import java.io.{ PrintStream, PrintWriter, Writer }
 import java.net.URLClassLoader
 
 import org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader
+import org.openmole.core.exception.{ UserBadDataError, InternalProcessingError }
 import org.openmole.core.pluginmanager.PluginManager
 
 import scala.reflect.internal.util.{ NoPosition, Position }
@@ -30,15 +31,14 @@ import scala.tools.nsc.reporters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ScalaREPL(storeErrors: Boolean = false, priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
+class ScalaREPL(priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
+
+  case class ErrorMessage(error: String, line: Int)
+  var errorMessage: Option[ErrorMessage] = None
 
   System.setProperty("jline.shutdownhook", "true")
   //System.setProperty("scala.repl.debug", "true")
   override val prompt = "OpenMOLE>"
-
-  case class ErrorMessage(error: String, line: Int)
-
-  var errorMessages: List[ErrorMessage] = Nil
 
   in = new JLineReader(new JLineCompletion(this))
 
@@ -46,29 +46,49 @@ class ScalaREPL(storeErrors: Boolean = false, priorityClasses: Seq[Class[_]] = N
 
   settings = new Settings
   settings.Yreplsync.value = true
+  settings.verbose.value = false
   settings
+
+  def eval(code: String) = synchronized {
+    errorMessage = None
+    try intp.eval(code)
+    catch {
+      case e: Throwable ⇒
+        def readableErrorMessages(error: ErrorMessage) =
+          s"""Errors while compiling:
+            |${error.error}
+            |on line ${error.line}""".stripMargin
+        errorMessage.foreach(e ⇒ throw new UserBadDataError(readableErrorMessages(e)))
+        throw e
+    }
+  }
 
   intp = new IMain {
 
     override lazy val reporter = new ReplReporter(this) {
-      override def error(pos: Position, msg: String): Unit = synchronized {
-        if (storeErrors) {
-          val compiled = new String(pos.source.content).split("\n")
-          val linesLength = compiled.take(pos.line - 1).flatten.size + (pos.line - 1)
 
-          pos match {
-            case NoPosition ⇒ errorMessages :+= ErrorMessage(msg, pos.line)
-            case _ ⇒
-              val offset = pos.start - linesLength
-              errorMessages :+=
-                ErrorMessage(
-                  s"""|$msg
-                      |${compiled(pos.line - 1)}
-                      |${new String((0 until offset).map(_ ⇒ ' ').toArray)}^""".stripMargin, pos.line)
-          }
+      /*override protected def info0(pos: Position, msg: String, severity: Severity, force: Boolean): Unit =
+        if (!storeErrors) super.info0(pos, msg, severity, force)*/
+
+      override def error(pos: Position, msg: String): Unit = {
+        val compiled = new String(pos.source.content).split("\n")
+        val linesLength = compiled.take(pos.line - 1).flatten.size + (pos.line - 1)
+
+        val error = pos match {
+          case NoPosition ⇒ ErrorMessage(msg, pos.line)
+          case _ ⇒
+            val offset = pos.start - linesLength
+
+            ErrorMessage(
+              s"""|$msg
+                        |${compiled(pos.line - 1)}
+                        |${new String((0 until offset).map(_ ⇒ ' ').toArray)}^""".stripMargin, pos.line)
         }
-        else super.error(pos, msg)
+
+        errorMessage = Some(error)
+        super.error(pos, msg)
       }
+
     }
 
     override protected def newCompiler(settings: Settings, reporter: Reporter) = {
