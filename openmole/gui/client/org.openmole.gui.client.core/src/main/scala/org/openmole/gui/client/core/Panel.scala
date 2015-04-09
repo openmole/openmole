@@ -88,7 +88,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
           f.dataUI.asInstanceOf[db.DATAUI]
         }.get
         resetSettingTabs
-        popoverJQ
+        jQueryCalls(db.dataUI().panelUI.jQueryCalls)
       }
     })
 
@@ -116,7 +116,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
             bs.td(col_md_6)(a(dataBagUIView(db), cursor := "pointer", onclick := { () ⇒
               setCurrent(db)
               editionState() = true
-              popoverJQ
+              jQueryCalls(db.dataUI().panelUI.jQueryCalls)
             })),
             bs.td(col_md_5)(bs.label(db.dataUI().dataType, label_primary)),
             bs.td(col_md_1)(bs.button(glyph(glyph_trash))(onclick := { () ⇒

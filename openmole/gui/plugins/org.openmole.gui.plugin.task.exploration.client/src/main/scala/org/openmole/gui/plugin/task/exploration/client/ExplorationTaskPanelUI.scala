@@ -19,22 +19,38 @@ package org.openmole.gui.plugin.task.exploration.client
 
 import org.openmole.gui.ext.dataui.PanelUI
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{Forms => bs}
+import org.openmole.gui.misc.js.{Forms => bs, OMEditor}
+import scalatags.JsDom.{tags ⇒ tags}
 import scala.scalajs.js.annotation.JSExport
+import scalatags.JsDom.all._
+import scalatags.JsDom.tags
 
 @JSExport("org.openmole.gui.plugin.task.exploration.client.ExplorationTaskPanelUI")
 class ExplorationTaskPanelUI(dataUI: ExplorationTaskDataUI) extends PanelUI {
 
-
-  val samplingCode = bs.textArea(7)(placeholder := "Sampling").render
-
   @JSExport
-  val view = bs.div()(
-    samplingCode
-  )
+  val view = {
+    bs.div()(
+      tags.div(id := "editor")
+    )
+  }
 
   def save = {
-    dataUI.code() = samplingCode.value
+    dataUI.code() = editor.code
   }
+
+  lazy val editor = OMEditor(Seq(
+    ("Compile", "Enter", () ⇒ println("Compile  !"))
+  )
+  )
+
+  def getEditor = {
+    editor
+  }
+
+  override def jQueryCalls = {
+    Seq(() => getEditor)
+  }
+
 
 }
