@@ -8,7 +8,6 @@ import sbt.Keys._
 import sbt._
 
 object Core extends Defaults {
-  override val org = "org.openmole.core"
   override def dir = file("core")
 
   implicit val artifactPrefix = Some("org.openmole.core")

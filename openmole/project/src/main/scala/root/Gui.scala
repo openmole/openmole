@@ -12,7 +12,6 @@ object Gui extends GuiDefaults(gui.Bootstrap, gui.Misc, gui.Server, gui.Client, 
 
 abstract class GuiDefaults(subBuilds: Defaults*) extends Defaults(subBuilds: _*) {
   def dir = file("gui")
-  override val org = "org.openmole.gui"
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("gui"))
 }
 
