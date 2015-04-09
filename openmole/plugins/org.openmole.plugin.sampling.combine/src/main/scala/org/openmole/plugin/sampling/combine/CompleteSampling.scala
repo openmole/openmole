@@ -24,9 +24,7 @@ import org.openmole.core.workflow.sampling._
 import scala.util.Random
 
 object CompleteSampling {
-
   def apply(samplings: Sampling*) = new CompleteSampling(samplings: _*)
-
 }
 
 class CompleteSampling(val samplings: Sampling*) extends Sampling {
