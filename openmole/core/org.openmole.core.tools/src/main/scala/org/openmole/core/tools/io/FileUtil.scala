@@ -388,7 +388,7 @@ trait FileUtil {
     ///////// helpers ///////
     def applyRecursive(operation: File ⇒ Unit): Unit =
       applyRecursive(operation, Set.empty)
-    def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File]): Unit = recurse(file)(operation, stopPath)
+    def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File]): Unit = recurse(file)(operation, stopPath.map(_.getCanonicalFile))
   }
 
   def withClosable[C <: { def close() }, T](open: ⇒ C)(f: C ⇒ T): T = {
@@ -397,7 +397,7 @@ trait FileUtil {
     finally c.close()
   }
 
-  private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Set[File]): Unit = if (!stopPath.contains(file)) {
+  private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Set[File]): Unit = if (!stopPath.contains(file.getCanonicalFile)) {
     def authorizeLS[T](f: File)(g: ⇒ T): T = {
       val originalMode = f.mode
       f.setExecutable(true)
