@@ -18,29 +18,34 @@
     )"""
 
 @sect{An OpenMOLE Hello World!}
-  To demonstrate OpenMOLE console we will design a workflow that explore one variable multiplies it by 2 and then display each result. The computation is executed on multi-threaded environment.
+  Let's design a Console workflow that explores one variable multiplies it by 2 and then displays each result. The
+  computation is executed in a multi-threaded environment on the local machine.
 
   @br @hl.openmole(s"""
   $tasks
 
-  // Define the execution environment, here it is a local execution environment with 4 threads but is can a remote cluster or a grid, it will work the same way with no installation step required on the execution environment.
+  // Define the execution environment, here it is a local execution environment with 4 threads but
+  // it could be a remote cluster or a grid.
+  // The workflow will work the same way with no installation step required on the execution environment.
   val env = LocalEnvironment(4)
 
   // Define and start the workflow
   val ex = exploration -< (model on env hook ToStringHook()) start
   """)
 
-  @p If you want to distribute the exact same code on a remote cluster the only change you have to do is to switch the environment.
+  @p Distributing the execution of the exact same code to a remote cluster only requires to switch the
+  environment definition.
 
   @br @hl.openmole(s"""
-  // All you need is an account on the cluster. You should also provide you authentication to OpenMOLE as explained in the documentation of each environment.
+  // All you need is an account on the cluster.
+  // You should also provide your authentication to OpenMOLE as explained in the specific section for each environment.
   val env = SLURMEnvironment("myLogin", "cluster.iscpif.fr")
 
   // Define and start the workflow
   val ex = exploration -< (model on env hook ToStringHook()) start
   """, header = tasks)
 
-  @p To go further, you might want to find how to:
+  @p This is just a tiny bit of what OpenMOLE can achieve! Discover how to:
   @ul
     @li{define your environment in the @a("environment documentation", href := root.console.environment.file),}
     @li{include your program in the @a("task documentation", href := root.console.task.file),}
