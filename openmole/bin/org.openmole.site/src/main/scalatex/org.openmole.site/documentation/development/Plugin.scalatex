@@ -8,7 +8,7 @@
 
   @p To start this tutorial, clone the code available @a("here", href := "https://github.com/openmole/myopenmoleplugin"):
   @br @hl.highlight("git clone git://github.com/openmole/myopenmoleplugin.git", "plain")
-  @p This repository contains all you need to create an OpenMOLE plugin. The @i{src/main/scala/myopemoleplugin} directory contains the source code of the plugin:
+  @p This repository contains all you need to create an OpenMOLE plugin in the hello directory. The @i{src/main/scala/myopemoleplugin} directory contains the source code of the plugin:
   @br @hl.highlight("""
   package myopenmoleplugin
 
