@@ -1,6 +1,5 @@
 package org.openmole.gui.misc.js
 
-import org.openmole.core.tools.service.Logger
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
 import scala.scalajs.js
@@ -27,16 +26,14 @@ import fr.iscpif.scaladget.ace._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class OMEditor(bindings: Seq[(String, String, () ⇒ Any)],
-               completions: () ⇒ Future[Seq[(String, String)]],
-               implicit val logger: Logger) {
+class OMEditor(bindings: Seq[(String, String, () ⇒ Any)]) {
   lazy val Autocomplete = ace.require("ace/autocomplete").Autocomplete
 
   def sess = editor.getSession()
 
   def aceDoc = sess.getDocument()
 
-  def code = sess.getValue().asInstanceOf[String]
+  def code: String = sess.getValue().asInstanceOf[String]
 
   def row = editor.getCursorPosition().row.asInstanceOf[Int]
 
@@ -57,27 +54,39 @@ class OMEditor(bindings: Seq[(String, String, () ⇒ Any)],
 
     for ((name, key, func) ← bindings) {
       val binding = s"Ctrl-$key|Cmd-$key"
-      val command = editorCommand
-      command.name = name
-      command.bindKey = lit(
-        "win" -> binding,
-        "mac" -> binding,
-        "sender" -> "editor|cli"
-      )
-      command.exec = func
-      editor.commands.addCommand(
-        command
 
-      /*  lit(
-        "name" -> name,
-        "bindKey" -> lit(
-          "win" -> binding,
-          "mac" -> binding,
-          "sender" -> "editor|cli"
-        ),
-        "exec" -> func
-      )*/
+      editor.commands.addCommand(
+        lit(
+          "name" -> name,
+          "bindKey" -> lit(
+            "win" -> binding,
+            "mac" -> binding,
+            "sender" -> "editor|cli"
+          ),
+          "exec" -> func
+        )
       )
+    }
+
+    def completions() = async {
+      val code = sess.getValue().asInstanceOf[String]
+
+      val intOffset = column + code.split("\n")
+        .take(row)
+        .map(_.length + 1)
+        .sum
+
+      val flag = if (code.take(intOffset).endsWith(".")) "member" else "scope"
+
+      //FIXME: CALL FOR COMPILATION AND  COMPLETION
+      val res = await(Future {
+        println("fixme: comeletestuff and completion")
+        List(("ss", "auie"))
+      })
+      //await(Post[Api].completeStuff(code, flag, intOffset).call())
+      //  log("Done")
+      //  logln()
+      res
     }
 
     editor.completers = js.Array(lit(
@@ -102,11 +111,13 @@ class OMEditor(bindings: Seq[(String, String, () ⇒ Any)],
 }
 
 object OMEditor {
+  def apply(bindings: Seq[(String, String, () ⇒ Any)]) = new OMEditor(bindings)
+
   def initEditorIn(id: String) = {
     val editor = ace.edit(id)
-    editor.setTheme("ace/theme/twilight")
-    editor.renderer.setShowGutter(false)
-    editor.setShowPrintMargin(false)
+    editor.setTheme("ace/theme/github")
+    editor.renderer.setShowGutter(true)
+    editor.setShowPrintMargin(true)
     editor
   }
 

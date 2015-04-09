@@ -49,15 +49,20 @@ object BootstrapJS {
     val thisBundle = PluginManager.bundleForClass(classOf[GUIServer])
 
     //Add lib js files from webjars
-    copyMinWebJarResource("d3", "3.5.5")
-    copyMinWebJarResource("jquery", "2.1.3")
-    copyMinWebJarResource("bootstrap", "3.3.4", "dist/js/")
-    copyWebJarResource("ace", "01.08.2014", "src-min/")
+    copyWebJarResource("d3", "3.5.5", "d3.min.js")
+    copyWebJarResource("jquery", "2.1.3", "jquery.min.js")
+    copyWebJarResource("bootstrap", "3.3.4", FilePath("dist/js/", "bootstrap.min.js"))
+    copyWebJarResource("ace", "01.08.2014",
+      FilePath("src-min/", "ace.js"),
+      FilePath("src-min/", "theme-github.js"),
+      FilePath("src-min/", "mode-scala.js")
+    )
 
     //All other resources
     copyURL(thisBundle.findEntries("/", "*.css", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.ttf", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.woff", true).asScala)
+    copyURL(thisBundle.findEntries("/", "*.woff2", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.svg", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.eot", true).asScala)
     copyURL(thisBundle.findEntries("/", "web.xml", true).asScala)
@@ -93,11 +98,11 @@ object BootstrapJS {
 
   }
 
-  def copyMinWebJarResource(resourceName: String, version: String, extraPath: String = "") = copyWebJarResource(resourceName, version, extraPath, ".min")
+  def copyWebJarResource(resourceName: String, version: String, file: String): Unit = copyWebJarResource(resourceName, version, FilePath("", file))
 
-  def copyWebJarResource(resourceName: String, version: String, extraPath: String = "", filePreExtension: String = "") = {
-    val fileStream = new FileOutputStream(new File(webui, "webapp/js/" + resourceName + filePreExtension + ".js"))
-    getClass.getClassLoader.getResourceAsStream("/META-INF/resources/webjars/" + resourceName + "/" + version + "/" + extraPath + resourceName + filePreExtension + ".js").copy(fileStream)
+  def copyWebJarResource(resourceName: String, version: String, filePaths: FilePath*): Unit = for (filePath ← filePaths) {
+    val fileStream = new FileOutputStream(new File(webui, "webapp/js/" + filePath.file))
+    getClass.getClassLoader.getResourceAsStream("/META-INF/resources/webjars/" + resourceName + "/" + version + "/" + filePath.path + filePath.file).copy(fileStream)
     fileStream.close
   }
 
@@ -106,5 +111,7 @@ object BootstrapJS {
       u.openStream.copy(new File(webui, u.getFile))
     }
   }
+
+  case class FilePath(path: String, file: String)
 
 }
