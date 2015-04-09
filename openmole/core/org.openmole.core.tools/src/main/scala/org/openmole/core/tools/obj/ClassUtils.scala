@@ -203,6 +203,7 @@ object ClassUtils {
   implicit def manifestDecoration(m: Manifest[_]) = new {
     def isArray = m.runtimeClass.isArray
     def fromArray = m.runtimeClass.fromArray
+    def toClass = manifestToClass(m)
   }
 
   implicit def manifestToClass[T](m: Manifest[T]) = m.runtimeClass
