@@ -46,7 +46,7 @@ abstract class LenormandSampling extends Sampling {
   def prototypes = lenormand.priorPrototypes
   override def inputs = DataSet(Data(state))
 
-  override def build(context: Context)(implicit rng: Random) = {
+  override def build(context: ⇒ Context)(implicit rng: Random) = {
     lenormand.sample(context(state))(rng).map {
       sampled ⇒
         (lenormand.priorPrototypes zip sampled).map {
