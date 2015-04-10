@@ -75,7 +75,8 @@ class Application extends IApplication {
       serverPort: Option[Int] = None,
       serverSSLPort: Option[Int] = None,
       loggerLevel: Option[String] = None,
-      optimizedJS: Boolean = false)
+      optimizedJS: Boolean = false,
+      args: List[String] = Nil)
 
     def takeArg(args: List[String]) =
       args match {
@@ -118,6 +119,7 @@ class Application extends IApplication {
         case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
         case "--logger-level" :: tail               ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
         case "--optimizedJS" :: tail                ⇒ parse(tail, c.copy(optimizedJS = true))
+        case "--args" :: tail                       ⇒ parse(dropArgs(tail), c.copy(args = takeArgs(tail)))
         case s :: tail                              ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                    ⇒ c
       }
@@ -165,7 +167,7 @@ class Application extends IApplication {
       case ConsoleMode ⇒
         print(consoleSplash)
         val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
-        console.run
+        console.run(config.args)
       case GUIMode ⇒
         BootstrapJS.init(config.optimizedJS)
         val server = new GUIServer(config.serverPort, BootstrapJS.webapp)

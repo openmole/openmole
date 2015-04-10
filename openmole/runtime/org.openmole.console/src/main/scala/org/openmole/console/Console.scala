@@ -81,6 +81,7 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
   def serializer = "serializer"
   def commandsName = "_commands_"
   def pluginsName = "_plugins_"
+  def argsName = "args"
 
   def autoImports: Seq[String] = PluginInfo.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"$n._")
   def imports =
@@ -95,7 +96,7 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
       imports.map("import " + _).mkString("; ")
     )
 
-  def run = {
+  def run(args: Seq[String]) = {
     val correctPassword =
       password match {
         case None ⇒
@@ -104,6 +105,7 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
       }
 
     if (correctPassword) withREPL { loop ⇒
+      loop.beQuietDuring { loop.bind[Seq[String]](argsName, args) }
       script match {
         case Nil ⇒ loop.loop
         case scripts ⇒
