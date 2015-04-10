@@ -26,8 +26,6 @@ import org.openmole.gui.misc.js.JsRxTags._
 
 import org.scalajs.dom
 
-//import scalatags.JsDom.attrs._
-
 import scalatags.JsDom.all._
 
 @JSExport("GUIClient")
@@ -47,7 +45,7 @@ object GUIClient {
     val db = DataBagUI(ClientService.taskFactories(0))
     db.name() = "premier"
     ClientService += db
-    val db2 = DataBagUI(ClientService.taskFactories(1))
+    val db2 = DataBagUI(ClientService.taskFactories(3))
     ClientService += db2
     db2.name() = "yopp"
     val db3 = DataBagUI(ClientService.taskFactories(2))

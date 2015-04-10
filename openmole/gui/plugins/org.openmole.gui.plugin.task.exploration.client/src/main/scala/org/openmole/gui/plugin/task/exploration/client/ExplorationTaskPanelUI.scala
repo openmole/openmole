@@ -31,7 +31,7 @@ class ExplorationTaskPanelUI(dataUI: ExplorationTaskDataUI) extends PanelUI {
   @JSExport
   val view = {
     bs.div()(
-      tags.div(id := "editor")
+      OMEditor.tag
     )
   }
 

@@ -3,8 +3,10 @@ package org.openmole.gui.misc.js
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
 import scala.scalajs.js
+import scalatags.JsDom.{ tags ⇒ tags }
 import js.Dynamic.{ literal ⇒ lit }
 import js.{ Dynamic ⇒ Dyn }
+import org.scalajs.jquery.jQuery
 import scala.async.Async.{ async, await }
 import fr.iscpif.scaladget.mapping.ace._
 import fr.iscpif.scaladget.ace._
@@ -112,6 +114,17 @@ class OMEditor(bindings: Seq[(String, String, () ⇒ Any)]) {
 
 object OMEditor {
   def apply(bindings: Seq[(String, String, () ⇒ Any)]) = new OMEditor(bindings)
+
+  import scalatags.JsDom.all._
+
+  def tag =
+    tags.div(`class` := "container", width := "95%")(
+      tags.div(`class` := "panel panel-default")(
+        tags.div(`class` := "panel-body")(
+          tags.div(id := "editor")
+        )
+      )
+    )
 
   def initEditorIn(id: String) = {
     val editor = ace.edit(id)
