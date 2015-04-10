@@ -43,12 +43,11 @@ case "$JVMVERSION" in
   *1\.7\.*) FLAG="$FLAG -XX:MaxPermSize=128M";;
 esac
 
-ARGS=""
-
+ARGS=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -mem) shift; MEM=$1 ;;
-    *) ARGS="$ARGS $1" ;;
+    *) ARGS+=("$1") ;;
   esac
   shift
 done
@@ -58,7 +57,7 @@ CONFIGDIR=$HOME/.openmole/.tmp/`date +%s`_$RANDOM
 
 java -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -Xmx${MEM} $FLAG -XX:+UseG1GC \
      -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog \
-     -cp "$LOCATION/openmole-plugins" -gp "$LOCATION/openmole-plugins-gui" $ARGS
+     -cp "$LOCATION/openmole-plugins" -gp "$LOCATION/openmole-plugins-gui" "${ARGS[@]}"
 
 rm -rf "${CONFIGDIR}" 
 
