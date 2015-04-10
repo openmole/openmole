@@ -71,7 +71,7 @@
 
   val explo =
     ExplorationTask (
-      (i in (0 to 10)) +
+      (i in (0 to 10)) x
       (f in ListFilesDomain("/path/to/a/dir", "subdir${i}"))
     )""")
   @p If you wish to select one single file for each value of @i{i} you may use the select file domain:
@@ -81,7 +81,7 @@
 
   val explo =
     ExplorationTask (
-      (i in (0 to 10)) +
+      (i in (0 to 10)) x
       (f in SelectFileDomain("/path/to/a/dir", "file${i}.txt"))
     )""")
   @p In OpenMOLE files names are not retained through the dataflow, only the content is. If you want to keep the name of the file for future use, you need to store the name in a variable of type String:
@@ -92,7 +92,7 @@
 
   val explo =
     ExplorationTask (
-      (i in (0 to 10)) +
+      (i in (0 to 10)) x
       ((f in SelectFileDomain("/path/to/a/dir", "file${i}.txt"))
         zipWithName name)
     )""")
