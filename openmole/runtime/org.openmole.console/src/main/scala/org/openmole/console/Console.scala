@@ -28,9 +28,7 @@ import org.openmole.core.workflow.tools.PluginInfo
 import org.openmole.core.workspace.Workspace
 import scala.annotation.tailrec
 import scala.tools.nsc.Settings
-import scala.tools.nsc.interpreter.ILoop
-import scala.tools.nsc.interpreter.JLineCompletion
-import scala.tools.nsc.interpreter.JLineReader
+import scala.tools.nsc.interpreter.{ NamedParam, ILoop, JLineCompletion, JLineReader }
 import org.openmole.core.workflow.task._
 import java.util.concurrent.TimeUnit
 import scala.tools.nsc.io.{ File ⇒ SFile }
@@ -73,6 +71,7 @@ object Console {
 
 import Console._
 
+class ConsoleArgs(val args: Seq[String])
 class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = None, script: List[String] = Nil) { console ⇒
 
   def workspace = "workspace"
@@ -81,6 +80,7 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
   def serializer = "serializer"
   def commandsName = "_commands_"
   def pluginsName = "_plugins_"
+  def variablesName = "_variables_"
   def argsName = "args"
 
   def autoImports: Seq[String] = PluginInfo.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"$n._")
@@ -105,7 +105,10 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
       }
 
     if (correctPassword) withREPL { loop ⇒
-      loop.beQuietDuring { loop.bind[Seq[String]](argsName, args) }
+      loop.beQuietDuring {
+        loop.bind(variablesName, new ConsoleArgs(args))
+        loop.eval(s"import $variablesName._")
+      }
       script match {
         case Nil ⇒ loop.loop
         case scripts ⇒
