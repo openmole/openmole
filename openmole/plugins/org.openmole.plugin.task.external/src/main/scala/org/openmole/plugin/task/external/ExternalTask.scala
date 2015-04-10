@@ -23,6 +23,7 @@ import org.openmole.core.tools.io.FileUtil
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
+import org.openmole.core.tools.obj.ClassUtils._
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workspace.Workspace
@@ -117,7 +118,7 @@ trait ExternalTask extends Task {
     val resultContext = context ++ outputFileVariables(context, tmpDir, workDirPath)
 
     def contextFiles =
-      resultContext.values.map(_.value).collect { case f: File ⇒ f }
+      resultContext.values.flatMap(_.allRelatedObjects).collect { case f: File ⇒ f }
 
     for {
       f ← contextFiles

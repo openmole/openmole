@@ -18,8 +18,9 @@
 package org.openmole.core.tools.obj
 
 import _root_.groovy.lang.GroovyShell
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import scala.annotation.tailrec
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import java.lang.reflect.{ Type ⇒ JType, Array ⇒ _, _ }
 import scala.reflect.Manifest.{ classType, intersectionType, arrayType, wildcardType }
@@ -85,10 +86,45 @@ object ClassUtils {
       ret
     }
 
+    def allDeclaredFields = listSuperClassesAndInterfaces.flatMap(_.getDeclaredFields)
+
     def fromArray = c.getComponentType
 
     def toManifest = classType[T](c)
 
+  }
+
+  implicit class ObjectClassDecorator(o: Any) {
+    def allRelatedObjects: Seq[Any] = {
+      val objects = mutable.HashSet[Any]()
+      val toCrawl = mutable.Stack[Any]()
+
+      toCrawl push o
+
+      while (!toCrawl.isEmpty) {
+        val cur = toCrawl pop ()
+        cur match {
+          case null                        ⇒
+          case r if r.getClass.isPrimitive ⇒ objects += o
+          case r: java.lang.Number         ⇒ objects += o
+          case r: AnyRef ⇒
+            if (!objects.contains(r)) {
+              objects += r
+              for {
+                f ← r.getClass.allDeclaredFields
+              } {
+                val access = f.isAccessible
+                f.setAccessible(true)
+                val v = try f.get(r) finally f.setAccessible(access)
+                toCrawl push v
+              }
+            }
+          case o ⇒ throw new InternalProcessingError("Unexpected type " + o.getClass)
+        }
+      }
+
+      objects.toVector
+    }
   }
 
   @tailrec def unArrayify(m1: Class[_], m2: Class[_], level: Int = 0): (Class[_], Class[_], Int) = {
