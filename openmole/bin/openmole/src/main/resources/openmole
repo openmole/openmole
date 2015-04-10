@@ -46,6 +46,8 @@ esac
 ARGS=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --) ARGS+=("$@"); break ;;
+    --args) scriptArgs "$@"; shift $? ;;
     -mem) shift; MEM=$1 ;;
     *) ARGS+=("$1") ;;
   esac

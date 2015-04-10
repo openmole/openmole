@@ -119,7 +119,7 @@ class Application extends IApplication {
         case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
         case "--logger-level" :: tail               ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
         case "--optimizedJS" :: tail                ⇒ parse(tail, c.copy(optimizedJS = true))
-        case "--args" :: tail                       ⇒ parse(dropArgs(tail), c.copy(args = takeArgs(tail)))
+        case "--" :: tail                           ⇒ parse(Nil, c.copy(args = tail))
         case s :: tail                              ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                    ⇒ c
       }
