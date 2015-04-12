@@ -8,10 +8,13 @@ import sbt._
 
 abstract class PluginDefaults(subBuilds: Defaults*) extends Defaults(subBuilds: _*) {
   override val dir = file("plugins")
+
+  lazy val defaultActivator = bundleActivator <<= (name) { n ⇒ Some(n + ".Activator") }
+
   override def osgiSettings = super.osgiSettings ++
     Seq(
       bundleType := Set("plugin"),
-      bundleActivator <<= (name) { n ⇒ Some(n + ".Activator") },
+      defaultActivator,
       libraryDependencies += Libraries.equinoxOSGi
     )
 
