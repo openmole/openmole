@@ -58,13 +58,16 @@ object Console {
     }
 
   @tailrec def initPassword: Unit = {
-    val password =
-      if (Workspace.passwordChosen) new ConsoleReader().readLine("Enter your OpenMOLE password (for preferences encryption): ", '*')
-      else {
-        println("OpenMOLE Password for preferences encryption has not been set yet, choose a  password.")
-        askPassword("Preferences password")
-      }
-    if (!setPassword(password)) initPassword
+    if (Workspace.passwordChosen && Workspace.passwordIsCorrect("")) setPassword("")
+    else {
+      val password =
+        if (Workspace.passwordChosen) new ConsoleReader().readLine("Enter your OpenMOLE password (for preferences encryption): ", '*')
+        else {
+          println("OpenMOLE Password for preferences encryption has not been set yet, choose a  password.")
+          askPassword("Preferences password")
+        }
+      if (!setPassword(password)) initPassword
+    }
   }
 
 }
