@@ -38,6 +38,7 @@ object AppendToCSVFileHook {
 
 abstract class AppendToCSVFileHook(
     fileName: ExpandedString,
+    header: Option[ExpandedString],
     prototypes: Prototype[_]*) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
@@ -50,7 +51,11 @@ abstract class AppendToCSVFileHook(
 
     file.withLock {
       fos ⇒
-        if (file.size == 0) fos.appendLine(ps.map { _.name }.mkString(","))
+        if (file.size == 0)
+          fos.appendLine {
+            def defaultHeader = ps.map { _.name }.mkString(",")
+            header.map(_.from(context)) getOrElse defaultHeader
+          }
 
         val lists = ps.map {
           p ⇒

@@ -24,5 +24,12 @@ import org.openmole.core.workflow.tools.ExpandedString
 
 class AppendToCSVFileHookBuilder(fileName: ExpandedString, prototypes: Prototype[_]*) extends HookBuilder {
   prototypes.foreach(p ⇒ addInput(p))
-  override def toHook = new AppendToCSVFileHook(fileName, prototypes: _*) with Built
+  private var csvHeader: Option[ExpandedString] = None
+
+  def setCSVHeader(h: Option[ExpandedString]) = {
+    csvHeader = h
+    this
+  }
+
+  override def toHook = new AppendToCSVFileHook(fileName, csvHeader, prototypes: _*) with Built
 }
