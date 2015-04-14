@@ -124,7 +124,7 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
     }
   }
 
-  def initialise(loop: ScalaREPL, variables: ConsoleVariables) = {
+  def initialise(loop: ScalaREPL, variables: ConsoleVariables = ConsoleVariables()) = {
     loop.beQuietDuring {
       loop.bind(commandsName, new Command)
       loop.bind(pluginsName, plugins)
@@ -135,7 +135,7 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
     loop
   }
 
-  def newREPL(args: ConsoleVariables) = {
+  def newREPL(args: ConsoleVariables = ConsoleVariables()) = {
     val loop = new ScalaREPL(priorityClasses = List(this.getClass))
     initialise(loop, args)
   }
