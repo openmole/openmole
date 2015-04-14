@@ -33,7 +33,7 @@ object TypeUtil {
     def superType(d: Seq[Prototype[_]]) =
       ClassUtils.intersectionArray(d.map { p ⇒ p.`type`.runtimeClass })
 
-    val indexedD = d.flatten.groupBy(_.name)
+    val indexedD = d.flatten.groupBy(_.name).toSeq
 
     val r: Seq[Option[Prototype[_]]] = indexedD.map {
       case (name, prototypes) ⇒
