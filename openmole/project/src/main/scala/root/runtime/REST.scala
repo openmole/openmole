@@ -25,8 +25,8 @@ object REST extends Defaults {
     "server",
     privatePackages = Seq("org.openmole.rest.messages.*"),
     imports = Seq("org.h2", "!com.sun.*", "*")) dependsOn
-    (Core.workflow, Core.serializer, iceTar, root.Runtime.console, messages) settings
-    (libraryDependencies ++= Seq(bouncyCastle, h2, jetty, slick, logback, scalatra, bonecp, scalaLang, xstream, arm, codec))
+    (Core.workflow, iceTar, root.Runtime.console, messages) settings
+    (libraryDependencies ++= Seq(bouncyCastle, jetty, logback, scalatra, scalaLang, arm, codec))
 
   lazy val client = Project("org-openmole-rest-client", dir / "client") settings (
     libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.3.5",

@@ -22,4 +22,4 @@ object Error {
 }
 case class Error(message: String, stackTrace: Option[String])
 case class Token(token: String, duration: Long)
-case class MoleExecutionId(id: Long)
+case class MoleExecutionId(id: String)

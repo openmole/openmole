@@ -34,10 +34,10 @@ import java.util
 object TarArchiver {
 
   implicit class TarOutputStreamDecorator(tos: TarOutputStream) {
-    def addFile(f: Path, name: String) = {
+    def addFile(f: File, name: String) = {
       val entry = new TarEntry(name)
       entry.setSize(Files.size(f))
-      entry.setMode(f.toFile.mode) // FIXME ugly explicit conversion
+      entry.setMode(f.mode) // FIXME ugly explicit conversion
       tos.putNextEntry(entry)
       try Files.copy(f, tos) finally tos.closeEntry
     }
@@ -61,7 +61,7 @@ object TarArchiver {
     finally tis.close
 
     // new model using NIO
-    def extractDirArchiveWithRelativePath(baseDir: Path) = {
+    def extractDirArchiveWithRelativePath(baseDir: File) = {
       if (!Files.isDirectory(baseDir)) throw new IOException(baseDir.toString + " is not a directory.")
 
       Iterator.continually(tis.getNextEntry).takeWhile(_ != null).foreach {
@@ -109,7 +109,7 @@ object TarArchiver {
 
   }
 
-  private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, baseDir: Path, additionalCommand: TarEntry ⇒ Unit) = {
+  private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, baseDir: File, additionalCommand: TarEntry ⇒ Unit) = {
 
     if (!Files.isDirectory(baseDir)) throw new IOException(baseDir.toString + " is not a directory.")
 

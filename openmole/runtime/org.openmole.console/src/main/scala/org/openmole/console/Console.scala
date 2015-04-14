@@ -24,6 +24,7 @@ import org.openmole.core.dsl.Serializer
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.tools.io.FileUtil
 import org.openmole.core.workflow.tools.PluginInfo
 import org.openmole.core.workspace.Workspace
 import scala.annotation.tailrec
@@ -74,7 +75,11 @@ object Console {
 
 import Console._
 
-class ConsoleArgs(val args: Seq[String])
+case class ConsoleVariables(
+  args: Seq[String] = Seq.empty,
+  inputDirectory: File = FileUtil.currentDirectory,
+  outputDirectory: File = FileUtil.currentDirectory)
+
 class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = None, script: List[String] = Nil) { console ⇒
 
   def workspace = "workspace"
@@ -84,7 +89,6 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
   def commandsName = "_commands_"
   def pluginsName = "_plugins_"
   def variablesName = "_variables_"
-  def argsName = "args"
 
   def autoImports: Seq[String] = PluginInfo.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"$n._")
   def imports =
@@ -99,7 +103,7 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
       imports.map("import " + _).mkString("; ")
     )
 
-  def run(args: Seq[String]) = {
+  def run(args: ConsoleVariables) = {
     val correctPassword =
       password match {
         case None ⇒
@@ -107,11 +111,7 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
         case Some(p) ⇒ setPassword(p)
       }
 
-    if (correctPassword) withREPL { loop ⇒
-      loop.beQuietDuring {
-        loop.bind(variablesName, new ConsoleArgs(args))
-        loop.eval(s"import $variablesName._")
-      }
+    if (correctPassword) withREPL(args) { loop ⇒
       script match {
         case Nil ⇒ loop.loop
         case scripts ⇒
@@ -124,22 +124,24 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
     }
   }
 
-  def initialise(loop: ScalaREPL) = {
+  def initialise(loop: ScalaREPL, variables: ConsoleVariables) = {
     loop.beQuietDuring {
       loop.bind(commandsName, new Command)
       loop.bind(pluginsName, plugins)
       initialisationCommands.foreach { loop.interpret }
+      loop.bind(variablesName, variables)
+      loop.eval(s"import $variablesName._")
     }
     loop
   }
 
-  def newREPL() = {
+  def newREPL(args: ConsoleVariables) = {
     val loop = new ScalaREPL(priorityClasses = List(this.getClass))
-    initialise(loop)
+    initialise(loop, args)
   }
 
-  def withREPL[T](f: ScalaREPL ⇒ T) = {
-    val loop = newREPL()
+  def withREPL[T](args: ConsoleVariables)(f: ScalaREPL ⇒ T) = {
+    val loop = newREPL(args)
     try f(loop)
     finally loop.close
   }

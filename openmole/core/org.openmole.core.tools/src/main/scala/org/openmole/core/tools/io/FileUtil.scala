@@ -414,4 +414,6 @@ trait FileUtil {
 
 }
 
-object FileUtil extends FileUtil
+object FileUtil extends FileUtil {
+  def currentDirectory = new File(".")
+}

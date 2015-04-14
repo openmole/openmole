@@ -17,12 +17,7 @@
 
 package org.openmole.ui
 
-import java.awt.GraphicsEnvironment
-import java.awt.SplashScreen
 import java.io.File
-import java.io.PrintWriter
-import java.util.concurrent.Semaphore
-import com.fasterxml.jackson.core.json.ByteSourceJsonBootstrapper
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
 import org.openmole.core.exception.UserBadDataError
@@ -36,6 +31,7 @@ import org.openmole.console.Console
 import org.openmole.rest.server.RESTServer
 import annotation.tailrec
 import org.openmole.gui.server.core._
+import org.openmole.console._
 
 object Application extends Logger
 
@@ -167,7 +163,7 @@ class Application extends IApplication {
       case ConsoleMode ⇒
         print(consoleSplash)
         val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
-        console.run(config.args)
+        console.run(ConsoleVariables(args = config.args))
       case GUIMode ⇒
         BootstrapJS.init(config.optimizedJS)
         val server = new GUIServer(config.serverPort, BootstrapJS.webapp)
