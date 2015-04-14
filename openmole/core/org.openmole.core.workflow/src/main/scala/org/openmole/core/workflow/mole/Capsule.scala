@@ -85,11 +85,17 @@ class Capsule(_task: Task, val strainer: Boolean) {
     task.outputs -- hooks(this).flatMap(_.outputs) ++ hooks(this).flatMap(_.outputs)
 
   def strainerInputs(mole: Mole, sources: Sources, hooks: Hooks): DataSet =
-    if (strainer) received(mole, sources, hooks).filterNot(d ⇒ capsuleInputs(mole, sources, hooks).contains(d.prototype.name))
+    if (strainer) {
+      lazy val capsInputs = capsuleInputs(mole, sources, hooks)
+      received(mole, sources, hooks).filterNot(d ⇒ capsInputs.contains(d.prototype.name))
+    }
     else DataSet.empty
 
   def strainerOutputs(mole: Mole, sources: Sources, hooks: Hooks): DataSet =
-    if (strainer) received(mole, sources, hooks).filterNot(d ⇒ capsuleOutputs(mole, sources, hooks).contains(d.prototype.name))
+    if (strainer) {
+      lazy val capsOutputs = capsuleOutputs(mole, sources, hooks)
+      received(mole, sources, hooks).filterNot(d ⇒ capsOutputs.contains(d.prototype.name))
+    }
     else DataSet.empty
 
   def received(mole: Mole, sources: Sources, hooks: Hooks) =
@@ -97,7 +103,7 @@ class Capsule(_task: Task, val strainer: Boolean) {
     else {
       val slots = mole.slots(this)
       val noStrainer = slots.filter(s ⇒ Capsule.reachNoStrainer(mole)(s))
-      TypeUtil.intersect(noStrainer.map { TypeUtil.receivedTypes(mole, sources, hooks) }).map(Data(_))
+      TypeUtil.intersect(noStrainer.map { s ⇒ TypeUtil.receivedTypes(mole, sources, hooks)(s).toSeq }.toSeq).map(Data(_))
     }
 
   override def toString = task.toString

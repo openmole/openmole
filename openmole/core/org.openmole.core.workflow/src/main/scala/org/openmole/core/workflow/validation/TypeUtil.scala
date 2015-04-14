@@ -28,16 +28,17 @@ import scala.collection.mutable.{ HashMap, HashSet, ListBuffer }
 
 object TypeUtil {
 
-  def intersect(d: Iterable[Iterable[Prototype[_]]]) = {
+  def intersect(d: Seq[Seq[Prototype[_]]]) = {
+    val numberOfGroups = d.size
 
-    def superType(d: Iterable[Prototype[_]]) =
-      ClassUtils.intersectionArray(d.map { _.`type`.runtimeClass })
+    def superType(d: Seq[Prototype[_]]) =
+      ClassUtils.intersectionArray(d.map { p ⇒ p.`type`.runtimeClass })
 
-    val indexedD = d.flatten.toList.groupBy(_.name)
+    val indexedD = d.flatten.groupBy(_.name)
 
-    val r: Iterable[Option[Prototype[_]]] = indexedD.map {
+    val r: Seq[Option[Prototype[_]]] = indexedD.map {
       case (name, prototypes) ⇒
-        if (prototypes.size == d.size) Some(Prototype(name)(superType(prototypes))) else None
+        if (prototypes.size == numberOfGroups) Some(Prototype(name)(superType(prototypes))) else None
     }
     r.flatten
   }
