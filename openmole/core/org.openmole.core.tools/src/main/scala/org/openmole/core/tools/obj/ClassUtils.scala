@@ -107,6 +107,7 @@ object ClassUtils {
           case null                        ⇒
           case r if r.getClass.isPrimitive ⇒ objects += o
           case r: java.lang.Number         ⇒ objects += o
+          case r: java.lang.Class => objects += o
           case r: AnyRef ⇒
             if (!objects.contains(r)) {
               objects += r
