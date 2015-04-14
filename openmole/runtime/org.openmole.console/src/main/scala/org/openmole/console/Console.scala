@@ -26,7 +26,7 @@ import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.tools.io.FileUtil
 import org.openmole.core.workflow.tools.PluginInfo
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace._
 import scala.annotation.tailrec
 import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.{ NamedParam, ILoop, JLineCompletion, JLineReader }
