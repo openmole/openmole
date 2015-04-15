@@ -77,9 +77,7 @@ class RESTServer(port: Option[Int], sslPort: Option[Int], hostName: Option[Strin
 
     val ks = KeyStore.getInstance(KeyStore.getDefaultType)
     val ksLoc = Workspace.file("OMServerKeystore")
-
     val ksPassword = "openmole"
-    val dbPassword = "openmole"
 
     Certificate.loadOrGenerate(ksLoc, ks, ksPassword, hostName)
 

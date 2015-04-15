@@ -8,7 +8,7 @@ import org.apache.http.client.utils.URIBuilder
 import org.apache.http.conn.ssl.{TrustSelfSignedStrategy, SSLContextBuilder, SSLConnectionSocketFactory}
 import org.apache.http.entity.mime._
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
-import org.openmole.rest.messages.Token
+import org.openmole.rest.messages.{Output, ExecutionId, Token}
 
 import scala.concurrent.duration._
 import scala.io.Source
@@ -45,7 +45,9 @@ object RESTClient extends App {
       |exploration -< (model on LocalEnvironment(4) hook ToStringHook())
     """.stripMargin
 
-  println(client.start(token, script, None))
+  val id = client.start(token, script, None)
+  Thread.sleep(10000)
+  println(client.output(token, id.get.id))
 
 }
 
@@ -67,10 +69,10 @@ trait Client {
      }
   }
 
-  def start(token: String, script: String, inputFiles: Option[File]) = {
+  def start(token: String, script: String, inputFiles: Option[File]): Try[ExecutionId] = {
     def files = inputFiles.map{ f =>
       val builder = MultipartEntityBuilder.create()
-      builder addBinaryBody ("inputFiles", f)
+      builder addBinaryBody ("inputs", f)
       builder.build
     }
     
@@ -82,7 +84,19 @@ trait Client {
     val post = new HttpPost(uri)
     files.foreach(post.setEntity)
     execute(post) { response =>
-      responseContent(response).mkString
+      parse(response.getEntity.getContent).extract[ExecutionId]
+    }
+  }
+
+  def output(token: String, id: String): Try[Output] = {
+    val uri =
+      new URIBuilder(address + "/output").
+        setParameter("token", token).
+        setParameter("id", id).build
+
+    val post = new HttpPost(uri)
+    execute(post) { response =>
+      parse(response.getEntity.getContent).extract[Output]
     }
   }
 

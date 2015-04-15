@@ -1,5 +1,6 @@
 package org.openmole.rest.server
 
+import java.io.PrintStream
 import java.util.UUID
 import java.util.zip.GZIPInputStream
 import javax.servlet.annotation.MultipartConfig
@@ -10,6 +11,7 @@ import groovy.ui.ConsoleView
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.openmole.console._
+import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
 import org.openmole.core.dsl._
@@ -19,14 +21,22 @@ import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.FileUploadSupport
 import org.openmole.rest.messages._
 import org.openmole.core.tools.io.TarArchiver._
+import org.openmole.core.tools.io.FileUtil._
 
 import scala.io.Source
 import scala.util.{ Try, Failure, Success }
 
-case class MoleExecution(moleExecution: MoleExecution)
+case class Execution(moleExecution: MoleExecution, workDirectory: WorkDirectory)
+
 case class WorkDirectory(baseDirectory: File) {
   def inputDirectory = new File(baseDirectory, "inputs")
   def outputDirectory = new File(baseDirectory, "outputs")
+  def output = new File(baseDirectory, "output")
+  lazy val outputStream = new PrintStream(output.bufferedOutputStream())
+  def readOutput = {
+    outputStream.flush
+    output.content
+  }
 }
 
 @MultipartConfig //research scala multipart config
@@ -39,7 +49,7 @@ trait RESTAPI extends ScalatraServlet
   protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal
   private val logger = Log.log
 
-  private lazy val moles = DataHandler[MoleExecutionId, MoleExecution]()
+  private lazy val moles = DataHandler[ExecutionId, Execution]()
 
   implicit class ToJsonDecorator(x: Any) {
     def toJson = pretty(Extraction.decompose(x))
@@ -53,8 +63,8 @@ trait RESTAPI extends ScalatraServlet
     contentType = formats("json")
 
     Try(params("password")) map issueToken match {
-      case Failure(_)                                      ⇒ ExpectationFailed(render("error", "No password sent with request"))
-      case Success(Failure(InvalidPasswordException(msg))) ⇒ Forbidden(msg)
+      case Failure(_)                                      ⇒ ExpectationFailed(Error("error", "No password sent with request").toJson)
+      case Success(Failure(InvalidPasswordException(msg))) ⇒ Forbidden(Error(msg).toJson)
       case Success(Failure(e))                             ⇒ exceptionToHttpError(e)
       case Success(Success(AuthenticationToken(token, start, end))) ⇒
         Accepted(Token(token, end - start).toJson)
@@ -66,7 +76,7 @@ trait RESTAPI extends ScalatraServlet
 
     authenticated {
       (params get "script") match {
-        case None ⇒ ExpectationFailed("Missing mandatory script parameter.")
+        case None ⇒ ExpectationFailed(Error("Missing mandatory script parameter.").toJson)
         case Some(script) ⇒
           logger.info("starting the create operation")
 
@@ -90,9 +100,10 @@ trait RESTAPI extends ScalatraServlet
               case Success(o) ⇒
                 o match {
                   case puzzle: Puzzle ⇒
-                    Try(puzzle.start) match {
+                    Try(puzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream)).start) match {
                       case Success(ex) ⇒
-                        val id = MoleExecutionId(UUID.randomUUID().toString)
+                        val id = ExecutionId(UUID.randomUUID().toString)
+                        moles.add(id, Execution(ex, directory))
                         Ok(id)
                       case Failure(error) ⇒ InternalServerError(Error(error))
                     }
@@ -107,8 +118,26 @@ trait RESTAPI extends ScalatraServlet
     }
   }
 
+  post("/output") {
+    contentType = formats("json")
+    authenticated {
+      getId {
+        moles.get(_) match {
+          case None     ⇒ ExpectationFailed(Error("Execution not found").toJson)
+          case Some(ex) ⇒ Ok(Output(ex.workDirectory.readOutput).toJson)
+        }
+      }
+    }
+  }
+
+  def getId(success: ExecutionId ⇒ ActionResult)(implicit r: HttpServletRequest): ActionResult =
+    Try(params("id")(r)) match {
+      case Failure(_)  ⇒ ExpectationFailed(Error("id is missing").toJson)
+      case Success(id) ⇒ success(ExecutionId(id))
+    }
+
   def authenticated[T](success: ⇒ ActionResult)(implicit r: HttpServletRequest): ActionResult = {
-    def fail = Unauthorized(render(("error", "This service requires a token")))
+    def fail = Unauthorized(Error("This service requires a token").toJson)
 
     Try(params("token")(r)) match {
       case Failure(_) ⇒ fail

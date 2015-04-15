@@ -23,7 +23,7 @@ import FileUtil._
 import org.openmole.core.workspace.AuthenticationProvider
 
 object ExecutionContext {
-  def apply(out: PrintStream, directory: Option[File]) = {
+  def apply(out: PrintStream = System.out, directory: Option[File] = None) = {
     val (_out, _directory) = (out, directory)
     new ExecutionContext {
       def out = _out
@@ -31,7 +31,7 @@ object ExecutionContext {
     }
   }
 
-  lazy val local = ExecutionContext(System.out, None)
+  lazy val local = ExecutionContext()
 }
 
 trait ExecutionContext {

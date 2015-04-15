@@ -52,6 +52,7 @@ import TarArchiver._
 import java.util.logging.Logger
 
 import scala.concurrent.duration.Duration
+import scala.io.Source
 import scala.util.{ Try, Failure, Success }
 
 import scala.collection.JavaConversions._
@@ -251,10 +252,7 @@ trait FileUtil {
 
     def content_=(content: String) = Files.write(file, content.getBytes)
 
-    def content = {
-      val s = Files.readAllLines(file, java.nio.charset.Charset.defaultCharset)
-      s.mkString
-    }
+    def content = withSource(_.mkString)
 
     def contentOption =
       try Some(file.content)
@@ -361,6 +359,7 @@ trait FileUtil {
     def withInputStream[T] = withClosable[InputStream, T](bufferedInputStream)(_)
     def withWriter[T] = withClosable[Writer, T](new OutputStreamWriter(bufferedOutputStream()))(_)
     def withDirectoryStream[T] = withClosable[DirectoryStream[Path], T](Files.newDirectoryStream(file))(_)
+    def withSource[T] = withClosable[Source, T](Source.fromFile(file))(_)
 
     def wrapError[T](f: ⇒ T): T =
       try f

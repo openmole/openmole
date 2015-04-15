@@ -20,6 +20,7 @@ object Error {
   def apply(e: Throwable): Error =
     Error(e.getMessage, Some(e.getStackTrace.map(e ⇒ s"\tat$e").reduceLeft((prev, next) ⇒ s"$prev\n$next")))
 }
-case class Error(message: String, stackTrace: Option[String])
+case class Error(message: String, stackTrace: Option[String] = None)
 case class Token(token: String, duration: Long)
-case class MoleExecutionId(id: String)
+case class ExecutionId(id: String)
+case class Output(output: String)
