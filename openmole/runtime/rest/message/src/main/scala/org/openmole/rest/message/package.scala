@@ -14,13 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.rest.messages
+package org.openmole.rest
 
-object Error {
-  def apply(e: Throwable): Error =
-    Error(e.getMessage, Some(e.getStackTrace.map(e ⇒ s"\tat$e").reduceLeft((prev, next) ⇒ s"$prev\n$next")))
+package object message {
+
+  object Error {
+    def apply(e: Throwable): Error =
+      Error(e.getMessage, Some(e.getStackTrace.map(e ⇒ s"\tat$e").reduceLeft((prev, next) ⇒ s"$prev\n$next")))
+  }
+  case class Error(message: String, stackTrace: Option[String] = None)
+  case class Token(token: String, duration: Long)
+  case class ExecutionId(id: String)
+  case class Output(output: String)
+
+  type ExecutionState = String
+  val running: ExecutionState = "running"
+  val finished: ExecutionState = "finished"
+  val canceled: ExecutionState = "canceled"
+
+  case class State(state: ExecutionState)
 }
-case class Error(message: String, stackTrace: Option[String] = None)
-case class Token(token: String, duration: Long)
-case class ExecutionId(id: String)
-case class Output(output: String)

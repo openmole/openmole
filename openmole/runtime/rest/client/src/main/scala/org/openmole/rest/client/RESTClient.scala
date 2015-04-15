@@ -8,7 +8,7 @@ import org.apache.http.client.utils.URIBuilder
 import org.apache.http.conn.ssl.{TrustSelfSignedStrategy, SSLContextBuilder, SSLConnectionSocketFactory}
 import org.apache.http.entity.mime._
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
-import org.openmole.rest.messages.{Output, ExecutionId, Token}
+import org.openmole.rest.message._
 
 import scala.concurrent.duration._
 import scala.io.Source
@@ -46,8 +46,12 @@ object RESTClient extends App {
     """.stripMargin
 
   val id = client.start(token, script, None)
-  Thread.sleep(10000)
+  Iterator.continually(client.state(token, id.get.id)).takeWhile(_.get.state == running).foreach { s =>
+    println(s)
+    Thread.sleep(1000)
+  }
   println(client.output(token, id.get.id))
+  println(client.remove(token, id.get.id))
 
 }
 
@@ -61,11 +65,18 @@ trait Client {
   def address: String
   def timeout: Duration
 
+  private def extractOrError[T: Manifest](value: JValue): Try[T] =
+    value.extractOpt[T].map(t => Success(t)).getOrElse {
+      val error = value.extract[Error]
+      Failure(new RuntimeException(error.message))
+    }
+
+
   def requestToken(password: String): Try[Token] = {
     val uri = new URIBuilder(address + "/token").setParameter("password", password).build
     val post = new HttpPost(uri)
     execute(post) { response =>
-      parse(response.getEntity.getContent).extract[Token]
+      extractOrError[Token](parse(response.content))
      }
   }
 
@@ -84,7 +95,19 @@ trait Client {
     val post = new HttpPost(uri)
     files.foreach(post.setEntity)
     execute(post) { response =>
-      parse(response.getEntity.getContent).extract[ExecutionId]
+      extractOrError[ExecutionId](parse(response.content))
+    }
+  }
+
+  def state(token: String, id: String): Try[State] = {
+    val uri =
+      new URIBuilder(address + "/state").
+        setParameter("token", token).
+        setParameter("id", id).build
+        val post = new HttpPost(uri)
+
+    execute(post) { response =>
+      extractOrError[State](parse(response.content))
     }
   }
 
@@ -96,46 +119,54 @@ trait Client {
 
     val post = new HttpPost(uri)
     execute(post) { response =>
-      parse(response.getEntity.getContent).extract[Output]
+      extractOrError[Output](parse(response.content))
     }
   }
 
-  def execute[T](request: HttpEntityEnclosingRequestBase)(f: CloseableHttpResponse => T): Try[T] = withClient { client =>
+  def remove(token: String, id: String): Try[Unit] = {
+    val uri =
+      new URIBuilder(address + "/remove").
+        setParameter("token", token).
+        setParameter("id", id).build
+        val post = new HttpPost(uri)
+        execute(post) { _ => Success(Unit) }
+    }
+
+
+  def execute[T](request: HttpEntityEnclosingRequestBase)(f: CloseableHttpResponse => Try[T]): Try[T] = withClient { client =>
     val response = client.execute(request)
     try
       response.getStatusLine.getStatusCode match {
-        case c if c < 400 => Success(f(response))
+        case c if c < 400 => f(response)
         case c =>
-          val error = HttpError(c, responseContent(response).mkString)
-          println(error.message)
+          val error = HttpError(c, response.content)
           Failure(error)
       }
     finally response.close
   }
 
-
-  def responseContent(response: CloseableHttpResponse) = Source.fromInputStream(response.getEntity.getContent)
-
-
+  implicit class ResponseDecorator(response: CloseableHttpResponse) {
+    def content = {
+      val source = Source.fromInputStream(response.getEntity.getContent)
+      try source.mkString
+      finally source.close
+    }
+  }
+  
   def withClient[T](f: CloseableHttpClient => T): T = {
-       val client = HttpClients.custom().setSSLSocketFactory(factory).build()
-      try f(client)
+    val client = HttpClients.custom().setSSLSocketFactory(factory).build()
+    try f(client)
     finally client.close
   }
-
-  //def start
 
   @transient lazy val factory = {
     val builder = new SSLContextBuilder
     builder.loadTrustMaterial(null, new TrustSelfSignedStrategy)
-    new SSLConnectionSocketFactory(builder.build, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER)
-  }
-
-
-   /* new SSLConnectionSocketFactory(, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER) {
+    new SSLConnectionSocketFactory(builder.build, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER) {
       override protected def prepareSocket(socket: SSLSocket) = {
         socket.setSoTimeout(timeout.toMillis.toInt)
       }
-    }*/
+    }
+  }
 
 }
