@@ -13,5 +13,5 @@ object Client extends GuiDefaults {
 
   lazy val core = OsgiProject("org.openmole.gui.client.core") enablePlugins (ScalaJSPlugin) dependsOn
     (Ext.dataui, Shared.shared, Misc.utils, Misc.js) settings (
-      libraryDependencies ++= Seq(autowire, upickle, scalaTags, rx, scalajsDom, scaladget))
+      libraryDependencies ++= Seq(autowire, upickle, scalaTags, rx, scalajsDom, scaladget, async))
 }

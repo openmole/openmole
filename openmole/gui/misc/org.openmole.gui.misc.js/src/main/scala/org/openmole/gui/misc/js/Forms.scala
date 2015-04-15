@@ -256,7 +256,7 @@ object Forms {
   val spacer20 = key("spacer20")
 
   //JQuery calls
-  def jQueryCalls(calls: Seq[() ⇒ Unit] = Seq()) = {
+  def jQueryCalls(calls: Seq[() ⇒ Any] = Seq()) = {
     popoverJQ
     calls.map { _() }
   }

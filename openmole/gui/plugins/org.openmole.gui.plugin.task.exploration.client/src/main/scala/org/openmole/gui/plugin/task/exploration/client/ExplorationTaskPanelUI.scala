@@ -17,9 +17,10 @@ package org.openmole.gui.plugin.task.exploration.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.dataui.EditorPanelUI
 import org.openmole.gui.ext.dataui.PanelUI
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{Forms => bs, OMEditor}
+import org.openmole.gui.misc.js.{Forms => bs}
 import scalatags.JsDom.{tags ⇒ tags}
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
@@ -28,10 +29,15 @@ import scalatags.JsDom.tags
 @JSExport("org.openmole.gui.plugin.task.exploration.client.ExplorationTaskPanelUI")
 class ExplorationTaskPanelUI(dataUI: ExplorationTaskDataUI) extends PanelUI {
 
+  lazy val editor = EditorPanelUI(Seq(
+    ("Compile", "Enter", () ⇒ println("Compile  !"))
+  ), dataUI.code()
+  )
+
   @JSExport
-  val view = {
+  lazy val view = {
     bs.div()(
-      OMEditor.tag
+      editor.view
     )
   }
 
@@ -39,17 +45,8 @@ class ExplorationTaskPanelUI(dataUI: ExplorationTaskDataUI) extends PanelUI {
     dataUI.code() = editor.code
   }
 
-  lazy val editor = OMEditor(Seq(
-    ("Compile", "Enter", () ⇒ println("Compile  !"))
-  )
-  )
-
-  def getEditor = {
-    editor
-  }
-
   override def jQueryCalls = {
-    Seq(() => getEditor)
+    editor.jQueryCalls
   }
 
 

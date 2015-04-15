@@ -2,13 +2,16 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.ext.dataui._
+import org.scalajs.dom.raw.Event
 
 import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter }
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 import org.scalajs.jquery.jQuery
+import org.scalajs.dom
 
 /*
  * Copyright (C) 28/01/15 // mathieu.leclaire@openmole.org
@@ -95,28 +98,47 @@ object SettingTabs {
 import SettingTabs.SettingTab._
 
 class SettingTabs(tabs: Seq[SettingTab]) {
+
   val currentTab = Var(tabs.headOption)
 
   val view = tags.div(
     Rx {
       bs.nav("settingsNav", nav_pills,
         (for (c ← tabs) yield {
-          navItem(c.id, c.name, () ⇒ { currentTab() = Some(c) }, currentTab() == Some(c))
+          navItem(c.id, c.name, () ⇒ {
+            currentTab() = Some(c)
+          }, currentTab() == Some(c))
         }): _*
       )
-    }, Rx {
-      tags.div(currentTab().map { t: SettingTab ⇒
-        for (el ← t.panelUIs) yield {
-          bs.div(spacer20)(el.view)
-        }
-      }.getOrElse(Seq()).toSeq: _*
-      )
-    }
+    },
+    rxMod(
+      Rx {
+        tags.div(id := "tabContent")(currentTab().map { t: SettingTab ⇒
+          for (el ← t.panelUIs) yield {
+            bs.div(spacer20)(el.view)
+          }
+        }.getOrElse(Seq()).toSeq: _*
+        )
+      }, jQueryCalls
+    )
   )
+
+  def popoverJQ = jQuery("[data-toggle=\"popover\"]").popover()
+
+  def jQueryCalls = {
+    popoverJQ
+    currentTab().map {
+      _.panelUIs.map {
+        _.jQueryCalls
+      }
+    }.getOrElse(Seq())
+  }
 
   def set(index: Int) = {
     currentTab() = Some(tabs(index))
-    currentTab().map { _.focus }
+    currentTab().map {
+      _.focus
+    }
   }
 
   def save = tabs.map {
