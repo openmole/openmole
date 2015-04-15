@@ -36,7 +36,7 @@ object RESTClient extends App {
       |val exploration = ExplorationTask(i in (0.0 to 100.0 by 1.0))
       |
       |val model =
-      |  ScalaTask("val res = i * 2e") set (
+      |  ScalaTask("val res = i * 2") set (
       |    inputs += i,
       |    outputs += (i, res)
       |    )

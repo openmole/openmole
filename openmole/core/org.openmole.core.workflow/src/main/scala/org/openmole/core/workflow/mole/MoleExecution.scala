@@ -103,6 +103,7 @@ class MoleExecution(
     TMap(grouping.map { case (c, g) ⇒ c -> TMap.empty[MoleJobGroup, Ref[List[MoleJob]]] }.toSeq: _*)
 
   private val nbWaiting = Ref(0)
+  private val _nbFinished = Ref(0L)
 
   val rootSubMoleExecution = new SubMoleExecution(None, this)
   val rootTicket = Ticket(id, ticketNumber.next)
@@ -210,9 +211,15 @@ class MoleExecution(
     this
   }
 
-  def jobFailedOrCanceled(moleJob: MoleJob, capsule: Capsule) = jobOutputTransitionsPerformed(moleJob, capsule)
+  def numberOfFinishedJobs: Long = _nbFinished.single()
 
-  def jobOutputTransitionsPerformed(job: MoleJob, capsule: Capsule) =
+  private[mole] def jobFailedOrCanceled(moleJob: MoleJob, capsule: Capsule) = jobOutputTransitionsPerformed(moleJob, capsule)
+  private[mole] def jobFinished(moleJob: MoleJob, capsule: Capsule) = {
+    _nbFinished.single() += 1
+    jobOutputTransitionsPerformed(moleJob, capsule)
+  }
+
+  private def jobOutputTransitionsPerformed(job: MoleJob, capsule: Capsule) =
     if (!_canceled.single()) {
       if (allWaiting) submitAll
       if (numberOfJobs == 0) {

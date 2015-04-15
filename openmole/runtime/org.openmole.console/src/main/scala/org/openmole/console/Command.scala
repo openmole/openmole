@@ -19,7 +19,7 @@ package org.openmole.console
 
 import jline.console.ConsoleReader
 import java.io.File
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.{ AtomicLong, AtomicInteger }
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.pluginmanager.PluginManager
@@ -70,10 +70,15 @@ class Command {
   }
 
   def print(moleExecution: MoleExecution): Unit = {
-    val toDisplay = new Array[AtomicInteger](State.values.size)
-    for (state ← State.values) toDisplay(state.id) = new AtomicInteger
+    val toDisplay = Array.fill(State.values.size)(new AtomicLong)
     for (job ← moleExecution.moleJobs) toDisplay(job.state.id).incrementAndGet
-    for (state ← State.values) System.out.println(state.toString + ": " + toDisplay(state.id))
+    for (state ← State.values)
+      state match {
+        case State.COMPLETED ⇒ System.out.println(state.toString + ": " + moleExecution.numberOfFinishedJobs)
+        case State.FAILED    ⇒
+        case State.CANCELED  ⇒
+        case _               ⇒ System.out.println(state.toString + ": " + toDisplay(state.id))
+      }
   }
 
   def verify(mole: Mole): Unit = Validation(mole).foreach(println)

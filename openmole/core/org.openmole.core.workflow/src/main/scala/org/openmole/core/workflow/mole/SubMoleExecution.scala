@@ -158,7 +158,7 @@ class SubMoleExecution(
         }
 
       if (finished) finish(ticket)
-      moleExecution.jobOutputTransitionsPerformed(job, capsule)
+      moleExecution.jobFinished(job, capsule)
     }
   }
 
