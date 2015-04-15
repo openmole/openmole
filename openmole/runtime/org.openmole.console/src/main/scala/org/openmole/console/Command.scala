@@ -53,9 +53,13 @@ class Command {
       accounting(executionJob.state.id).incrementAndGet
     }
 
-    for (state ← ExecutionState.values) {
-      println(state.toString + ": " + accounting(state.id))
-    }
+    for (state ← ExecutionState.values)
+      state match {
+        case ExecutionState.DONE   ⇒ println(state.toString + ": " + environment.done)
+        case ExecutionState.FAILED ⇒ println(state.toString + ": " + environment.failed)
+        case ExecutionState.KILLED ⇒
+        case _                     ⇒ println(state.toString + ": " + accounting(state.id))
+      }
   }
 
   def print(mole: Mole): Unit = {

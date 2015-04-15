@@ -18,29 +18,20 @@
 package org.openmole.core.workflow.mole
 
 import java.util.UUID
-import java.util.concurrent.{ Executors, Executor, Semaphore }
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
 import org.openmole.core.eventdispatcher.{ Event, EventDispatcher }
 import org.openmole.core.exception.{ UserBadDataError, MultipleException }
 import org.openmole.core.tools.service.{ Logger, Priority, Random }
-import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.job.State._
-import org.openmole.core.workflow.job.MoleJob.moleJobOrdering
 import org.openmole.core.workflow.execution.local._
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.tools.collection._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.tools._
-import scala.collection.JavaConversions._
-
-import scala.collection.immutable.HashMap
 import scala.collection.mutable.Buffer
-import scala.concurrent.stm.{ Ref, TMap, atomic, retry }
-import javax.xml.bind.annotation.XmlTransient
+import scala.concurrent.stm._
 import org.openmole.core.workflow.execution.Environment
 
 object MoleExecution extends Logger {

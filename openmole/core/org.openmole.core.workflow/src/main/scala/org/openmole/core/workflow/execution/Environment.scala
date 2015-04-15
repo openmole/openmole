@@ -23,7 +23,7 @@ import org.openmole.core.workflow.job.Job
 import org.openmole.core.workflow.job.MoleJob
 import ExecutionState._
 import org.openmole.core.workflow.tools.ExceptionEvent
-import org.openmole.core.workspace.AuthenticationProvider
+import scala.concurrent.stm._
 
 object Environment {
   case class JobSubmitted(job: ExecutionJob) extends Event[Environment]
@@ -36,5 +36,11 @@ object Environment {
 }
 
 trait Environment {
+  private[execution] val _done = Ref(0L)
+  private[execution] val _failed = Ref(0L)
+
+  def done: Long = _done.single()
+  def failed: Long = _failed.single()
+
   def submit(job: Job)
 }
