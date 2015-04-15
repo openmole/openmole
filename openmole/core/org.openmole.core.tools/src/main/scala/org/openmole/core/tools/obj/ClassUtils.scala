@@ -17,6 +17,8 @@
 
 package org.openmole.core.tools.obj
 
+import java.util
+
 import _root_.groovy.lang.GroovyShell
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import scala.annotation.tailrec
@@ -24,7 +26,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import java.lang.reflect.{ Type ⇒ JType, Array ⇒ _, _ }
 import scala.reflect.Manifest.{ classType, intersectionType, arrayType, wildcardType }
-import scala.reflect.ClassManifest
+import collection.JavaConversions._
 
 object ClassUtils {
 
@@ -94,25 +96,31 @@ object ClassUtils {
 
   }
 
+  implicit class FieldDecorator(f: Field) {
+    def isStatic = Modifier.isStatic(f.getModifiers())
+  }
+
   implicit class ObjectClassDecorator(o: Any) {
-    def allRelatedObjects: Seq[Any] = {
-      val objects = mutable.HashSet[Any]()
+    def flatObjectGraph: Seq[Any] = {
+      val objects = new util.IdentityHashMap[Any, Null]()
       val toCrawl = mutable.Stack[Any]()
 
       toCrawl push o
 
       while (!toCrawl.isEmpty) {
         val cur = toCrawl pop ()
+
         cur match {
           case null                        ⇒
-          case r if r.getClass.isPrimitive ⇒ objects += o
-          case r: java.lang.Number         ⇒ objects += o
-          case r: java.lang.Class[_]       ⇒ objects += o
+          case r if r.getClass.isPrimitive ⇒ objects.put(o, null)
+          case r: java.lang.Number         ⇒ objects.put(o, null)
+          case r: java.lang.Class[_]       ⇒ objects.put(o, null)
           case r: AnyRef ⇒
-            if (!objects.contains(r)) {
-              objects += r
+            if (!objects.containsKey(r)) {
+              objects.put(r, null)
               for {
                 f ← r.getClass.allDeclaredFields
+                if !f.isStatic
               } {
                 val access = f.isAccessible
                 f.setAccessible(true)
@@ -124,7 +132,7 @@ object ClassUtils {
         }
       }
 
-      objects.toVector
+      objects.keySet().toVector
     }
   }
 

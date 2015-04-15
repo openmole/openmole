@@ -19,7 +19,7 @@ import org.openmole.core.workspace.Workspace
 import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.FileUploadSupport
-import org.openmole.rest.messages._
+import org.openmole.rest.message._
 import org.openmole.core.tools.io.TarArchiver._
 import org.openmole.core.tools.io.FileUtil._
 
@@ -36,6 +36,10 @@ case class WorkDirectory(baseDirectory: File) {
   def readOutput = {
     outputStream.flush
     output.content
+  }
+  def clean = {
+    outputStream.close
+    baseDirectory.recursiveDelete
   }
 }
 
@@ -107,7 +111,7 @@ trait RESTAPI extends ScalatraServlet
                         Ok(id)
                       case Failure(error) ⇒ InternalServerError(Error(error))
                     }
-                  case _ ⇒ InternalServerError(Error("The last line of the script should be a puzzle", None))
+                  case _ ⇒ InternalServerError(Error("The last line of the script should be a puzzle"))
                 }
             }
           }
@@ -121,14 +125,52 @@ trait RESTAPI extends ScalatraServlet
   post("/output") {
     contentType = formats("json")
     authenticated {
+      getExecution { ex ⇒ Ok(Output(ex.workDirectory.readOutput).toJson) }
+    }
+  }
+
+  post("/state") {
+    contentType = formats("json")
+    authenticated {
+      getExecution { ex ⇒
+        val state =
+          (ex.moleExecution.canceled, ex.moleExecution.finished) match {
+            case (true, _) ⇒ canceled
+            case (_, true) ⇒ finished
+            case _         ⇒ running
+          }
+        Ok(
+          State(
+            state,
+            ex.moleExecution.exception.map(Error(_))
+          ).toJson
+        )
+      }
+    }
+  }
+
+  post("/remove") {
+    contentType = formats("json")
+    authenticated {
       getId {
-        moles.get(_) match {
-          case None     ⇒ ExpectationFailed(Error("Execution not found").toJson)
-          case Some(ex) ⇒ Ok(Output(ex.workDirectory.readOutput).toJson)
+        moles.remove(_) match {
+          case None ⇒ ExpectationFailed(Error("Execution not found").toJson)
+          case Some(ex) ⇒
+            ex.moleExecution.cancel
+            ex.workDirectory.clean
+            Ok()
         }
       }
     }
   }
+
+  def getExecution(success: Execution ⇒ ActionResult)(implicit r: HttpServletRequest): ActionResult =
+    getId {
+      moles.get(_) match {
+        case None     ⇒ ExpectationFailed(Error("Execution not found").toJson)
+        case Some(ex) ⇒ success(ex)
+      }
+    }(r)
 
   def getId(success: ExecutionId ⇒ ActionResult)(implicit r: HttpServletRequest): ActionResult =
     Try(params("id")(r)) match {

@@ -222,8 +222,8 @@ class MoleExecution(
       }
     }
 
+  def canceled: Boolean = _canceled.single()
   def finished: Boolean = _finished.single()
-
   def started: Boolean = _started.single()
 
   def nextTicket(parent: Ticket): Ticket = Ticket(parent, ticketNumber.next)
