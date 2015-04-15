@@ -80,8 +80,15 @@ abstract class AppendToCSVFileHook(
             )
           }
 
-        def writeLine[T](list: List[T]) =
-          fos.appendLine(list.map(l ⇒ l.prettify()).mkString(","))
+        def writeLine[T](list: List[T]) = {
+          fos.appendLine(list.map(l ⇒ {
+            val prettified = l.prettify()
+            if (prettified.contains(',') || prettified.contains('"')) {
+              '"' + prettified.replaceAll("\"", "\"\"") + '"'
+            }
+            else prettified
+          }).mkString(","))
+        }
 
         write(lists)
     }
