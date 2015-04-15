@@ -118,7 +118,7 @@ trait ExternalTask extends Task {
     val resultContext = context ++ outputFileVariables(context, tmpDir, workDirPath)
 
     def contextFiles =
-      resultContext.values.collect { case f: File ⇒ f }
+      resultContext.values.map(_.value).collect { case f: File ⇒ f }
 
     for {
       f ← contextFiles
