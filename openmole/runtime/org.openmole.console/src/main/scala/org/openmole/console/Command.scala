@@ -24,7 +24,7 @@ import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.execution.local._
-import org.openmole.core.workflow.execution.ExecutionState
+import org.openmole.core.workflow.execution.{ Environment, ExecutionState }
 import org.openmole.core.workflow.job.State
 import org.openmole.core.workflow.mole.{ ExecutionContext, Mole, MoleExecution }
 import org.openmole.core.workflow.transition.IAggregationTransition
@@ -40,27 +40,15 @@ import Console._
 
 class Command {
 
-  def print(environment: LocalEnvironment): Unit = {
-    println("Queued jobs: " + environment.nbJobInQueue)
-    println("Number of threads: " + environment.nbThreads)
-  }
-
-  def print(environment: BatchEnvironment): Unit = {
-    val accounting = Array.fill(ExecutionState.values.size)(new AtomicLong)
-
-    val executionJobs = environment.executionJobs
-    for (executionJob ← executionJobs) {
-      accounting(executionJob.state.id).incrementAndGet
-    }
-
-    for (state ← ExecutionState.values)
-      state match {
-        case ExecutionState.DONE   ⇒ println(state.toString + ": " + environment.done)
-        case ExecutionState.FAILED ⇒ println(state.toString + ": " + environment.failed)
-        case ExecutionState.KILLED ⇒
-        case _                     ⇒ println(state.toString + ": " + accounting(state.id))
-      }
-  }
+  def print(environment: Environment): Unit =
+    for {
+      (label, number) ← List(
+        "Submitted" -> environment.submitted,
+        "Running" -> environment.running,
+        "Done" -> environment.done,
+        "Failed" -> environment.failed
+      )
+    } println(s"$label: $number")
 
   def print(mole: Mole): Unit = {
     println("root: " + mole.root)

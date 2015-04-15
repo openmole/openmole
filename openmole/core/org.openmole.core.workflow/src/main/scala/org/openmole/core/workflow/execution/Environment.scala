@@ -39,6 +39,8 @@ trait Environment {
   private[execution] val _done = Ref(0L)
   private[execution] val _failed = Ref(0L)
 
+  def submitted: Long
+  def running: Long
   def done: Long = _done.single()
   def failed: Long = _failed.single()
 

@@ -39,7 +39,7 @@ class LocalEnvironment(val nbThreads: Int) extends Environment {
 
   @transient lazy val pool = new ExecuterPool(nbThreads, WeakReference(this))
 
-  def nbJobInQueue = pool.inQueue
+  def nbJobInQueue = pool.waiting
 
   override def submit(job: Job) =
     submit(new LocalExecutionJob(this, job.moleJobs))
@@ -53,4 +53,6 @@ class LocalEnvironment(val nbThreads: Int) extends Environment {
     pool.enqueue(ejob)
   }
 
+  def submitted: Long = pool.waiting
+  def running: Long = pool.running
 }

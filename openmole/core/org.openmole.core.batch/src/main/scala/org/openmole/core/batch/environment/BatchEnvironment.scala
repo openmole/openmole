@@ -217,4 +217,6 @@ trait BatchEnvironment extends Environment { env ⇒
 
   def executionJobs: Iterable[BatchExecutionJob] = batchJobWatcher.executionJobs
 
+  def submitted: Long = executionJobs.count { _.state == ExecutionState.SUBMITTED }
+  def running: Long = executionJobs.count { _.state == ExecutionState.RUNNING }
 }
