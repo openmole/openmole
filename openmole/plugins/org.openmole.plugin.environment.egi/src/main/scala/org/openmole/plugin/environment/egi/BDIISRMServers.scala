@@ -24,7 +24,7 @@ import fr.iscpif.gridscale.glite.{ GlobusAuthentication, BDII }
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.batch.storage.StorageService
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace._
 import concurrent.stm._
 import java.io.File
 import org.openmole.core.tools.service.Hash
@@ -75,14 +75,13 @@ trait BDIISRMServers extends BatchEnvironment {
             else 1 - time.normalize(minTime, maxTime)
 
           import EGIEnvironment._
-          import Workspace.preferenceAsDouble
 
           val fitness = math.pow(
-            preferenceAsDouble(StorageSizeFactor) * sizeFactor +
-              preferenceAsDouble(StorageTimeFactor) * timeFactor +
-              preferenceAsDouble(StorageAvailabilityFactor) * cur.availability +
-              preferenceAsDouble(StorageSuccessRateFactor) * cur.successRate,
-            preferenceAsDouble(StorageFitnessPower))
+            Workspace.preferenceAsDouble(StorageSizeFactor) * sizeFactor +
+              Workspace.preferenceAsDouble(StorageTimeFactor) * timeFactor +
+              Workspace.preferenceAsDouble(StorageAvailabilityFactor) * cur.availability +
+              Workspace.preferenceAsDouble(StorageSuccessRateFactor) * cur.successRate,
+            Workspace.preferenceAsDouble(StorageFitnessPower))
 
           (cur, token, fitness)
         }

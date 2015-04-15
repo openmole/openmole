@@ -28,7 +28,7 @@ import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.control._
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation, AuthenticationProvider }
+import org.openmole.core.workspace._
 import org.openmole.core.tools.service._
 import FileUtil._
 import org.openmole.core.batch.replication._
@@ -286,15 +286,14 @@ class EGIEnvironment(
                   if (cur.submitted > 0 && cur.totalSubmitted > 0) ((cur.runnig.toDouble / cur.submitted) * (cur.totalDone / cur.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
                   else 0.0
 
-                import Workspace.preferenceAsDouble
                 import EGIEnvironment._
 
                 val fitness = math.pow(
-                  preferenceAsDouble(JobServiceJobFactor) * jobFactor +
-                    preferenceAsDouble(JobServiceTimeFactor) * timeFactor +
-                    preferenceAsDouble(JobServiceAvailabilityFactor) * cur.availability +
-                    preferenceAsDouble(JobServiceSuccessRateFactor) * cur.successRate,
-                  preferenceAsDouble(JobServiceFitnessPower))
+                  Workspace.preferenceAsDouble(JobServiceJobFactor) * jobFactor +
+                    Workspace.preferenceAsDouble(JobServiceTimeFactor) * timeFactor +
+                    Workspace.preferenceAsDouble(JobServiceAvailabilityFactor) * cur.availability +
+                    Workspace.preferenceAsDouble(JobServiceSuccessRateFactor) * cur.successRate,
+                  Workspace.preferenceAsDouble(JobServiceFitnessPower))
                 Some((cur, token, fitness))
             }
         }
