@@ -72,6 +72,26 @@ class GUIServlet extends ScalatraServlet {
     )
   }
 
+  get("/script") {
+    contentType = "text/html"
+    tags.html(
+      tags.head(
+        tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset = ISO-8859-1"),
+        cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery.min.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-scala.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/theme-github.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap.min.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js")
+      ),
+      tags.body(
+        tags.onload := "ScriptClient().run();"
+      )
+    )
+
+  }
+
   post(s"/$basePath/*") {
     Await.result(AutowireServer.route[Api](ApiImpl)(
       autowire.Core.Request(basePath.split("/").toSeq ++ multiParams("splat").head.split("/"),
