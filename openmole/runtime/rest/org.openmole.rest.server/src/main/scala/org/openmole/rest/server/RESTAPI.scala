@@ -139,7 +139,12 @@ trait RESTAPI extends ScalatraServlet
             case (_, true) ⇒ finished
             case _         ⇒ running
           }
-        Ok(State(state).toJson)
+        Ok(
+          State(
+            state,
+            ex.moleExecution.exception.map(Error(_))
+          ).toJson
+        )
       }
     }
   }

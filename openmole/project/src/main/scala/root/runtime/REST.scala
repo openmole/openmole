@@ -42,6 +42,6 @@ object REST extends Defaults {
     libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.3.5",
     libraryDependencies += "org.apache.httpcomponents" % "httpmime" % "4.3.5",
     libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.10"
-  ) dependsOn (message)
+  ) dependsOn (message) settings (scalariformDefaults: _*)
 
 }

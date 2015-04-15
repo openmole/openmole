@@ -16,11 +16,16 @@
  */
 package org.openmole.rest
 
+import java.io.{ PrintWriter, StringWriter }
+
 package object message {
 
   object Error {
-    def apply(e: Throwable): Error =
-      Error(e.getMessage, Some(e.getStackTrace.map(e ⇒ s"\tat$e").reduceLeft((prev, next) ⇒ s"$prev\n$next")))
+    def apply(e: Throwable): Error = {
+      val sw = new StringWriter()
+      e.printStackTrace(new PrintWriter(sw))
+      Error(e.getMessage, Some(sw.toString))
+    }
   }
   case class Error(message: String, stackTrace: Option[String] = None)
   case class Token(token: String, duration: Long)
@@ -32,5 +37,7 @@ package object message {
   val finished: ExecutionState = "finished"
   val canceled: ExecutionState = "canceled"
 
-  case class State(state: ExecutionState)
+  case class State(
+    state: ExecutionState,
+    error: Option[Error])
 }

@@ -1,18 +1,18 @@
 package org.openmole.rest.client
 
 import java.io.File
-import javax.net.ssl.{SSLContext, SSLSocket}
+import javax.net.ssl.{ SSLContext, SSLSocket }
 
-import org.apache.http.client.methods.{CloseableHttpResponse, HttpEntityEnclosingRequestBase, HttpPost}
+import org.apache.http.client.methods.{ CloseableHttpResponse, HttpEntityEnclosingRequestBase, HttpPost }
 import org.apache.http.client.utils.URIBuilder
-import org.apache.http.conn.ssl.{TrustSelfSignedStrategy, SSLContextBuilder, SSLConnectionSocketFactory}
+import org.apache.http.conn.ssl.{ TrustSelfSignedStrategy, SSLContextBuilder, SSLConnectionSocketFactory }
 import org.apache.http.entity.mime._
-import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
+import org.apache.http.impl.client.{ CloseableHttpClient, HttpClients }
 import org.openmole.rest.message._
 
 import scala.concurrent.duration._
 import scala.io.Source
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
@@ -27,7 +27,6 @@ object RESTClient extends App {
       override def timeout: Duration = 5 minutes
     }
 
-
   val token = client.requestToken(password).get.token
 
   val script =
@@ -37,7 +36,7 @@ object RESTClient extends App {
       |val exploration = ExplorationTask(i in (0.0 to 100.0 by 1.0))
       |
       |val model =
-      |  ScalaTask("val res = i * 2") set (
+      |  ScalaTask("val res = i * 2e") set (
       |    inputs += i,
       |    outputs += (i, res)
       |    )
@@ -46,17 +45,18 @@ object RESTClient extends App {
     """.stripMargin
 
   val id = client.start(token, script, None)
-  Iterator.continually(client.state(token, id.get.id)).takeWhile(_.get.state == running).foreach { s =>
+  Iterator.continually(client.state(token, id.get.id)).takeWhile(_.get.state == running).foreach { s ⇒
     println(s)
     Thread.sleep(1000)
   }
+
+  println(client.state(token, id.get.id))
   println(client.output(token, id.get.id))
   println(client.remove(token, id.get.id))
 
 }
 
 case class HttpError(code: Int, message: String) extends Exception
-
 
 trait Client {
 
@@ -66,27 +66,26 @@ trait Client {
   def timeout: Duration
 
   private def extractOrError[T: Manifest](value: JValue): Try[T] =
-    value.extractOpt[T].map(t => Success(t)).getOrElse {
+    value.extractOpt[T].map(t ⇒ Success(t)).getOrElse {
       val error = value.extract[Error]
       Failure(new RuntimeException(error.message))
     }
 
-
   def requestToken(password: String): Try[Token] = {
     val uri = new URIBuilder(address + "/token").setParameter("password", password).build
     val post = new HttpPost(uri)
-    execute(post) { response =>
+    execute(post) { response ⇒
       extractOrError[Token](parse(response.content))
-     }
+    }
   }
 
   def start(token: String, script: String, inputFiles: Option[File]): Try[ExecutionId] = {
-    def files = inputFiles.map{ f =>
+    def files = inputFiles.map { f ⇒
       val builder = MultipartEntityBuilder.create()
       builder addBinaryBody ("inputs", f)
       builder.build
     }
-    
+
     val uri =
       new URIBuilder(address + "/start").
         setParameter("token", token).
@@ -94,7 +93,7 @@ trait Client {
 
     val post = new HttpPost(uri)
     files.foreach(post.setEntity)
-    execute(post) { response =>
+    execute(post) { response ⇒
       extractOrError[ExecutionId](parse(response.content))
     }
   }
@@ -104,9 +103,9 @@ trait Client {
       new URIBuilder(address + "/state").
         setParameter("token", token).
         setParameter("id", id).build
-        val post = new HttpPost(uri)
+    val post = new HttpPost(uri)
 
-    execute(post) { response =>
+    execute(post) { response ⇒
       extractOrError[State](parse(response.content))
     }
   }
@@ -118,7 +117,7 @@ trait Client {
         setParameter("id", id).build
 
     val post = new HttpPost(uri)
-    execute(post) { response =>
+    execute(post) { response ⇒
       extractOrError[Output](parse(response.content))
     }
   }
@@ -128,17 +127,16 @@ trait Client {
       new URIBuilder(address + "/remove").
         setParameter("token", token).
         setParameter("id", id).build
-        val post = new HttpPost(uri)
-        execute(post) { _ => Success(Unit) }
-    }
+    val post = new HttpPost(uri)
+    execute(post) { _ ⇒ Success(Unit) }
+  }
 
-
-  def execute[T](request: HttpEntityEnclosingRequestBase)(f: CloseableHttpResponse => Try[T]): Try[T] = withClient { client =>
+  def execute[T](request: HttpEntityEnclosingRequestBase)(f: CloseableHttpResponse ⇒ Try[T]): Try[T] = withClient { client ⇒
     val response = client.execute(request)
     try
       response.getStatusLine.getStatusCode match {
-        case c if c < 400 => f(response)
-        case c =>
+        case c if c < 400 ⇒ f(response)
+        case c ⇒
           val error = HttpError(c, response.content)
           Failure(error)
       }
@@ -152,8 +150,8 @@ trait Client {
       finally source.close
     }
   }
-  
-  def withClient[T](f: CloseableHttpClient => T): T = {
+
+  def withClient[T](f: CloseableHttpClient ⇒ T): T = {
     val client = HttpClients.custom().setSSLSocketFactory(factory).build()
     try f(client)
     finally client.close
