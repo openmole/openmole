@@ -46,14 +46,9 @@ class Command {
   }
 
   def print(environment: BatchEnvironment): Unit = {
-    val accounting = new Array[AtomicInteger](ExecutionState.values.size)
-
-    for (state ← ExecutionState.values) {
-      accounting(state.id) = new AtomicInteger
-    }
+    val accounting = Array.fill(ExecutionState.values.size)(new AtomicLong)
 
     val executionJobs = environment.executionJobs
-
     for (executionJob ← executionJobs) {
       accounting(executionJob.state.id).incrementAndGet
     }

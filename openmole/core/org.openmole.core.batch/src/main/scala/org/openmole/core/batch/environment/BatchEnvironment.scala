@@ -140,8 +140,6 @@ import BatchEnvironment._
 
 trait BatchEnvironment extends Environment { env ⇒
 
-  //val id: String
-
   type SS <: StorageService
   type JS <: JobService
 
