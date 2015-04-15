@@ -49,6 +49,7 @@ object ExpandedString {
   implicit def fromStringToExpandedString(s: String) = ExpandedString(s)
   implicit def fromStringToExpandedStringOption(s: String) = Some[ExpandedString](s)
   implicit def fromTraversableOfStringToTraversableOfExpandedString[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
+  implicit def fromProtoypeToExpandedString(p: Prototype[_]) = ExpandedString("${p}")
 
   def apply(s: String) =
     new ExpandedString {
