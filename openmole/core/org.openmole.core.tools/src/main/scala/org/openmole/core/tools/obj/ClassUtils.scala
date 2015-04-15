@@ -100,42 +100,6 @@ object ClassUtils {
     def isStatic = Modifier.isStatic(f.getModifiers())
   }
 
-  implicit class ObjectClassDecorator(o: Any) {
-    def flatObjectGraph: Seq[Any] = {
-      val objects = new util.IdentityHashMap[Any, Null]()
-      val toCrawl = mutable.Stack[Any]()
-
-      toCrawl push o
-
-      while (!toCrawl.isEmpty) {
-        val cur = toCrawl pop ()
-
-        cur match {
-          case null                        ⇒
-          case r if r.getClass.isPrimitive ⇒ objects.put(o, null)
-          case r: java.lang.Number         ⇒ objects.put(o, null)
-          case r: java.lang.Class[_]       ⇒ objects.put(o, null)
-          case r: AnyRef ⇒
-            if (!objects.containsKey(r)) {
-              objects.put(r, null)
-              for {
-                f ← r.getClass.allDeclaredFields
-                if !f.isStatic
-              } {
-                val access = f.isAccessible
-                f.setAccessible(true)
-                val v = try f.get(r) finally f.setAccessible(access)
-                toCrawl push v
-              }
-            }
-          case o ⇒ throw new InternalProcessingError("Unexpected type " + o.getClass)
-        }
-      }
-
-      objects.keySet().toVector
-    }
-  }
-
   @tailrec def unArrayify(m1: Class[_], m2: Class[_], level: Int = 0): (Class[_], Class[_], Int) = {
     if (!m1.isArray || !m2.isArray) (m1, m2, level)
     else unArrayify(m1.getComponentType, m2.getComponentType, level + 1)
