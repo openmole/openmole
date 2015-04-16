@@ -17,11 +17,10 @@
 
 package org.openmole.core.workflow.execution.local
 
-import org.openmole.core.tools.service.ThreadUtil
+import org.openmole.tool.thread._
 
 import collection.mutable
 import scala.ref.WeakReference
-import ThreadUtil._
 
 class ExecuterPool(nbThreads: Int, environment: WeakReference[LocalEnvironment]) {
   private val jobs = new JobPriorityQueue

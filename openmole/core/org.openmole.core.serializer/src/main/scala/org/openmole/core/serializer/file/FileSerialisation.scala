@@ -17,16 +17,14 @@
 
 package org.openmole.core.serializer.file
 
-import org.openmole.core.tools.io.{ FileUtil, TarArchiver }
-import org.openmole.core.tools.service.OS
+import org.openmole.tool.file._
+import org.openmole.tool.tar._
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.tar.TarOutputStream
 
 import scala.collection.immutable.HashMap
 import java.util.UUID
-import com.ice.tar.TarOutputStream
 import java.io.{ File, FileOutputStream }
-import TarArchiver._
-import FileUtil._
 import org.openmole.core.serializer.converter.Serialiser
 
 object FileSerialisation {

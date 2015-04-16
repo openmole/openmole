@@ -19,6 +19,7 @@ package org.openmole.core.tools.io
 
 import java.io.File
 import FileUtil._
+import org.openmole.tool.stream.StringBuilderOutputStream
 import org.scalatest.FlatSpec
 import org.scalatest._
 import org.scalatest.junit.JUnitRunner

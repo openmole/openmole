@@ -17,8 +17,7 @@
 
 package org.openmole.core.workspace
 
-import org.openmole.core.tools.io.FileUtil
-import FileUtil._
+import org.openmole.tool.file._
 import scala.util.Try
 import java.io.File
 

@@ -18,8 +18,7 @@
 package org.openmole.core.workspace
 
 import java.io.File
-import org.openmole.core.tools.io.FileUtil
-import FileUtil._
+import org.openmole.tool.file._
 import com.thoughtworks.xstream.XStream
 
 object Persistent {

@@ -22,18 +22,14 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
-import org.openmole.core.tools.io.{ FileUtil, TarArchiver }
-import org.openmole.core.tools.service.{ Logger, LockUtils }
-import FileUtil._
-import TarArchiver._
+import org.openmole.tool.file._
+import org.openmole.core.tools.service.Logger
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.core.serializer.converter._
-import com.ice.tar.TarOutputStream
-import com.ice.tar.TarInputStream
-import LockUtils._
 import java.util.concurrent.locks.{ ReentrantReadWriteLock, ReadWriteLock }
 import org.openmole.core.workspace.Workspace
-
+import org.openmole.tool.tar._
+import org.openmole.tool.lock._
 import collection.mutable.ListBuffer
 import org.openmole.core.serializer.file.{ FileInjection, FileListing, FileSerialisation }
 import org.openmole.core.serializer.plugin.PluginListing

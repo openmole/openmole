@@ -26,9 +26,8 @@ import java.net.URI
 import java.util.UUID
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.tools.service.Logger
-import FileUtil._
 
 import scala.collection.JavaConversions._
 

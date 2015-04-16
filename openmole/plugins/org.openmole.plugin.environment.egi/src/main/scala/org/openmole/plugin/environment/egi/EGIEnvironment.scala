@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.egi
 
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.filedeleter.FileDeleter
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.tools.service.{ Logger, Scaling, Random }
 import java.io.File
 import org.openmole.core.batch.environment._
@@ -30,7 +30,6 @@ import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.control._
 import org.openmole.core.workspace._
 import org.openmole.core.tools.service._
-import FileUtil._
 import org.openmole.core.batch.replication._
 import concurrent.stm._
 import annotation.tailrec

@@ -17,13 +17,12 @@
 
 package org.openmole.plugin.method.modelfamily
 
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.workflow.data.Context
 import org.openmole.core.workflow.mole.{ HookBuilder, ExecutionContext, Hook }
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.method.evolution._
 import org.openmole.plugin.hook.file._
-import FileUtil._
 
 object SaveModelFamilyHook {
 

@@ -17,11 +17,10 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole.{ ExecutionContext, _ }
 import org.openmole.core.workflow.tools.ExpandedString
-import FileUtil._
 
 object SaveMapHook {
 

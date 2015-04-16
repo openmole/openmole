@@ -20,11 +20,10 @@ package org.openmole.site
 import java.io.File
 import java.util.zip.GZIPInputStream
 import ammonite.ops.Path
-import com.ice.tar.TarInputStream
 import org.eclipse.equinox.app._
-import org.openmole.core.tools.io.{ FileUtil, TarArchiver }
+import org.openmole.core.tools.io.FileUtil
 import FileUtil._
-import TarArchiver._
+import org.openmole.tool.tar.TarInputStream
 import scalatags.Text.all
 import scalatags.Text.all._
 import scala.sys.process.BasicIO

@@ -21,7 +21,7 @@ import java.util.concurrent.locks.Lock
 
 import org.openmole.core.eventdispatcher.{ Event, EventDispatcher }
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.tools.service.{ Logger, ThreadUtil, LockUtil }
+import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.job._
@@ -32,12 +32,12 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.job.State._
 import MoleJob._
-import ThreadUtil.background
+import org.openmole.tool.lock._
+import org.openmole.tool.thread._
 import scala.collection.mutable.Buffer
 
 import scala.concurrent.stm._
 import java.util.concurrent.{ Semaphore, locks, Executors }
-import LockUtil._
 
 object SubMoleExecution extends Logger {
   case class Finished(val ticket: Ticket, canceled: Boolean) extends Event[SubMoleExecution]

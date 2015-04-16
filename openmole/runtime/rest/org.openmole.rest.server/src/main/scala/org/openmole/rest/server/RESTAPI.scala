@@ -5,8 +5,6 @@ import java.util.UUID
 import java.util.zip.GZIPInputStream
 import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.HttpServletRequest
-
-import com.ice.tar.TarInputStream
 import groovy.ui.ConsoleView
 import org.json4s.JsonDSL._
 import org.json4s._
@@ -16,14 +14,12 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
 import org.openmole.core.dsl._
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.tar.TarInputStream
 import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.FileUploadSupport
 import org.openmole.rest.message._
-import org.openmole.core.tools.io.TarArchiver._
-import org.openmole.core.tools.io.FileUtil._
-
-import scala.io.Source
+import org.openmole.tool.file._
 import scala.util.{ Try, Failure, Success }
 
 case class Execution(moleExecution: MoleExecution, workDirectory: WorkDirectory)

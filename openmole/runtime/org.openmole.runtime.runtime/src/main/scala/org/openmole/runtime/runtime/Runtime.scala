@@ -17,9 +17,6 @@
 
 package org.openmole.runtime.runtime
 
-import com.ice.tar.TarEntry
-import com.ice.tar.TarInputStream
-import com.ice.tar.TarOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -27,10 +24,10 @@ import java.io.PrintStream
 import java.util.UUID
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.tools.io.{ HashUtil, FileUtil, TarArchiver }
+import org.openmole.tool.file._
+import org.openmole.tool.hash._
+import org.openmole.tool.tar._
 import org.openmole.core.tools.service.{ Logger, LocalHostName, Retry }
-import FileUtil._
-import TarArchiver._
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.tools.service._
 import org.openmole.core.batch.authentication._
@@ -39,6 +36,7 @@ import org.openmole.core.workflow.execution.local._
 import org.openmole.core.batch.message._
 import org.openmole.core.serializer._
 import org.openmole.core.pluginmanager._
+import org.openmole.tool.tar.TarInputStream
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import util.{ Success, Failure }
@@ -86,7 +84,7 @@ class Runtime {
       val cache = Workspace.newFile
 
       retry(storage.downloadGZ(replicatedFile.path, cache))
-      val cacheHash = HashUtil.computeHash(cache).toString
+      val cacheHash = cache.hash.toString
 
       if (cacheHash != replicatedFile.hash)
         throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.src.toString + " replicated at " + replicatedFile.path)
@@ -141,7 +139,7 @@ class Runtime {
       logger.fine("Downloading execution message")
       retry(storage.downloadGZ(executionMessage.jobs.path, jobsFileCache))
 
-      if (HashUtil.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
+      if (jobsFileCache.hash.toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
 
       val tis = new TarInputStream(new FileInputStream(jobsFileCache))
       val runableTasks = tis.applyAndClose(e ⇒ { SerialiserService.deserialiseReplaceFiles[RunnableTask](tis, usedFiles) })
@@ -167,7 +165,7 @@ class Runtime {
 
       SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
       val uploadedcontextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("uplodedTar", ".tgz"))
-      val result = new FileMessage(uploadedcontextResults, HashUtil.computeHash(contextResultFile).toString)
+      val result = new FileMessage(uploadedcontextResults, contextResultFile.hash.toString)
 
       logger.fine("Upload the results")
       retry(storage.uploadGZ(contextResultFile, uploadedcontextResults))
@@ -195,7 +193,7 @@ class Runtime {
       if (out.length != 0) {
         val output = storage.child(executionMessage.communicationDirPath, Storage.uniqName("output", ".txt"))
         retry(storage.uploadGZ(out, output))
-        Some(new FileMessage(output, HashUtil.computeHash(out).toString))
+        Some(new FileMessage(output, out.hash.toString))
       }
       else None
 
@@ -205,7 +203,7 @@ class Runtime {
       if (err.length != 0) {
         val errout = storage.child(executionMessage.communicationDirPath, Storage.uniqName("outputError", ".txt"))
         retry(storage.uploadGZ(err, errout))
-        Some(new FileMessage(errout, HashUtil.computeHash(err).toString))
+        Some(new FileMessage(errout, err.hash.toString))
       }
       else None
 

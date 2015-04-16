@@ -18,12 +18,11 @@
 package org.openmole.core.workflow.transition
 
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.tools.service.LockUtil
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition.Condition._
-import LockUtil._
+import org.openmole.tool.lock._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
 

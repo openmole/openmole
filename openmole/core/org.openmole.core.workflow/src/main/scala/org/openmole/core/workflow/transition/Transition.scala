@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.transition
 
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.tools.service.{ Logger, LockUtil }
+import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.validation.TypeUtil
 import org.openmole.core.workflow.tools.ContextAggregator._
 import org.openmole.core.workflow.tools._
@@ -29,7 +29,6 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
-import LockUtil._
 
 object Transition extends Logger
 

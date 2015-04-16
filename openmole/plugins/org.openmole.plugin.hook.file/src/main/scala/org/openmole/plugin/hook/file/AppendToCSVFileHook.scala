@@ -17,12 +17,12 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.tools.io.{ FileUtil, Prettifier }
+import org.openmole.core.tools.io.{ Prettifier }
+import org.openmole.tool.file._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
-import FileUtil._
 import Prettifier._
 import scala.annotation.tailrec
 import org.openmole.core.workflow.mole._

@@ -20,11 +20,10 @@ package org.openmole.runtime.runtime
 import org.eclipse.equinox.app._
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.Workspace
 import scopt._
-import FileUtil._
 import java.io.File
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.batch.storage._

@@ -18,12 +18,11 @@
 package org.openmole.plugin.hook.file
 
 import java.io.File
-import org.openmole.core.tools.io.{HashUtil, FileUtil}
+import org.openmole.core.tools.io.FileUtil
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data.Context
-import HashUtil._
 import FileUtil._
 import org.scalatest._
 import java.io.FileWriter

@@ -18,11 +18,10 @@
 package org.openmole.plugin.hook.file
 
 import java.io.File
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
-import FileUtil._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.mole.ExecutionContext
 

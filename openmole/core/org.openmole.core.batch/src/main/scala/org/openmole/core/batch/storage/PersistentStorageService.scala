@@ -17,15 +17,11 @@
 
 package org.openmole.core.batch.storage
 
-import java.io.File
-import java.net.URI
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.replication._
-import org.openmole.core.tools.service.{ Logger, ThreadUtil }
+import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import fr.iscpif.gridscale.storage._
-import scala.concurrent.duration.Duration
-import ThreadUtil._
 
 import scala.slick.driver.H2Driver.simple._
 

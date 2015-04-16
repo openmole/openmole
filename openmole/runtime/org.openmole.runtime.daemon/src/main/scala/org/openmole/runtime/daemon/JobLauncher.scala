@@ -22,8 +22,8 @@ import java.util.Random
 import java.util.UUID
 import java.util.concurrent.Executors
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.tools.io.{ HashUtil, FileUtil, TarArchiver }
-import org.openmole.core.tools.service.{ Logger, OS, ProcessUtil, ThreadUtil }
+import org.openmole.core.tools.io.FileUtil
+import org.openmole.core.tools.service.{ Logger, OS, ProcessUtil }
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.plugin.environment.desktopgrid._
 import DesktopGridEnvironment._
@@ -32,10 +32,9 @@ import org.openmole.core.batch.storage._
 import org.openmole.core.serializer._
 import org.openmole.core.tools.service._
 import FileUtil._
-import TarArchiver._
 import ProcessUtil._
+import org.openmole.tool.thread.ThreadUtil
 import ThreadUtil._
-import HashUtil._
 import fr.iscpif.gridscale.ssh.{ SSHStorage, SSHUserPasswordAuthentication }
 
 import org.openmole.core.batch.message.FileMessage._
