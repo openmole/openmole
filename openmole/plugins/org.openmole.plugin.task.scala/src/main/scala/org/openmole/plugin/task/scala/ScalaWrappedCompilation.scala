@@ -68,8 +68,17 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
       (evaluated, evaluated.getClass.getMethod("apply", inputs.map(c ⇒ toScalaNativeType(c.`type`).runtimeClass).toSeq: _*))
     }
 
-  def toScalaNativeType(m: Manifest[_]): Manifest[_] =
-    classEquivalences.find(_.native == m.runtimeClass).map(_.scalaManifest) getOrElse (m)
+  def toScalaNativeType(m: Manifest[_]): Manifest[_] = {
+    def native = {
+      val (contentClass, level) = unArrayify(m.runtimeClass)
+      for {
+        c ← classEquivalences.find(_.native == contentClass)
+      } yield (0 until level).foldLeft[Manifest[_]](c.scalaManifest) {
+        (c, _) ⇒ c.arrayManifest
+      }
+    }
+    native getOrElse m
+  }
 
   //FIXME deal with optional outputs
   def script(inputs: Seq[Prototype[_]]) =

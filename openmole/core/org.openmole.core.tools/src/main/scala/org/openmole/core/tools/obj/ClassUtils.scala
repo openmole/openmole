@@ -88,8 +88,6 @@ object ClassUtils {
       ret
     }
 
-    def allDeclaredFields = listSuperClassesAndInterfaces.flatMap(_.getDeclaredFields)
-
     def fromArray = c.getComponentType
 
     def toManifest = classType[T](c)
@@ -98,6 +96,13 @@ object ClassUtils {
 
   implicit class FieldDecorator(f: Field) {
     def isStatic = Modifier.isStatic(f.getModifiers())
+  }
+
+  def unArrayify(c: Class[_]): (Class[_], Int) = {
+    @tailrec def rec(c: Class[_], level: Int = 0): (Class[_], Int) =
+      if (!c.isArray) (c, level)
+      else rec(c.getComponentType, level + 1)
+    rec(c)
   }
 
   @tailrec def unArrayify(m1: Class[_], m2: Class[_], level: Int = 0): (Class[_], Class[_], Int) = {
