@@ -25,7 +25,7 @@ import org.openmole.tool.hash._
 import org.openmole.core.updater.Updater
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.tool.hash.Hash
-import org.openmole.tool.tar.TarOutputStream
+import org.openmole.tool.tar._
 
 object FileService {
   val GCInterval = new ConfigurationLocation("FileService", "GCInterval")
@@ -51,12 +51,10 @@ object FileService {
       file.getAbsolutePath,
       computeHash(if (file.isDirectory) archiveForDir(key, file).file(false) else file))
 
-  def archiveForDir(key: Object, file: File) = {
-    archiveCache.cache(key, file.getAbsolutePath, {
+  def archiveForDir(key: Object, directory: File) = {
+    archiveCache.cache(key, directory.getAbsolutePath, {
       val ret = Workspace.newFile("archive", ".tar")
-      val os = new TarOutputStream(new FileOutputStream(ret))
-      try os.createDirArchiveWithRelativePathNoVariableContent(file)
-      finally os.close
+      directory.archive(ret, time = false)
       new FileCacheDeleteOnFinalize(ret)
     })
   }

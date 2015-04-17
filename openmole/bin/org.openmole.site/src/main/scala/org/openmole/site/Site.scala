@@ -115,7 +115,7 @@ class Site extends IApplication {
         val f = new File(dest, dir)
         f.mkdirs
         withClosable(new TarInputStream(new GZIPInputStream(getClass.getClassLoader.getResourceAsStream(name)))) {
-          _.extractDirArchiveWithRelativePath(f)
+          _.extract(f)
         }
     }
 

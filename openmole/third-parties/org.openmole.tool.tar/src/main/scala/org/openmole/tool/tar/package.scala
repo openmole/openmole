@@ -35,8 +35,8 @@ package object tar {
       try Files.copy(f, tos) finally tos.closeEntry
     }
 
-    def createDirArchiveWithRelativePathNoVariableContent(baseDir: File) = createDirArchiveWithRelativePathWithAdditionalCommand(tos, baseDir, (e: TarEntry) ⇒ e.setModTime(0))
-    def createDirArchiveWithRelativePath(baseDir: File) = createDirArchiveWithRelativePathWithAdditionalCommand(tos, baseDir, { (e) ⇒ })
+    def archive(directory: File, time: Boolean = true) =
+      createDirArchiveWithRelativePathWithAdditionalCommand(tos, directory, if (time) identity(_) else _.setModTime(0))
   }
 
   implicit class TarInputStreamDecorator(tis: TarInputStream) {
@@ -54,12 +54,12 @@ package object tar {
     finally tis.close
 
     // new model using NIO
-    def extractDirArchiveWithRelativePath(baseDir: File) = {
-      if (!Files.isDirectory(baseDir)) throw new IOException(baseDir.toString + " is not a directory.")
+    def extract(directory: File) = {
+      if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
       Iterator.continually(tis.getNextEntry).takeWhile(_ != null).foreach {
         e ⇒
-          val dest = Paths.get(baseDir.toString, e.getName)
+          val dest = Paths.get(directory.toString, e.getName)
           if (e.isDirectory) {
             Files.createDirectories(dest)
           }
@@ -79,29 +79,29 @@ package object tar {
 
   implicit class FileTarArchiveDecorator(file: File) {
 
-    def archiveDirWithRelativePathNoVariableContent(toArchive: File) =
+    def archive(archive: File, time: Boolean = true) =
       withClosable(new TarOutputStream(file.bufferedOutputStream())) {
-        _.createDirArchiveWithRelativePathNoVariableContent(toArchive)
+        _.archive(archive, time)
       }
 
     //FIXME method name is ambiguous rename
-    def archiveCompressDirWithRelativePathNoVariableContent(dest: File) =
+    def archiveCompress(dest: File, time: Boolean = true) =
       withClosable(new TarOutputStream(file.gzippedBufferedOutputStream)) {
-        _.createDirArchiveWithRelativePathNoVariableContent(dest)
+        _.archive(dest, time)
       }
 
-    def extractDirArchiveWithRelativePath(dest: File) =
+    def extract(dest: File) =
       withClosable(new TarInputStream(file.bufferedInputStream)) {
-        _.extractDirArchiveWithRelativePath(dest)
+        _.extract(dest)
       }
 
-    def extractUncompressDirArchiveWithRelativePath(dest: File) =
+    def extractUncompress(dest: File) =
       withClosable(new TarInputStream(file.gzippedBufferedInputStream)) {
-        _.extractDirArchiveWithRelativePath(dest)
+        _.extract(dest)
       }
 
     def copyCompress(toF: File): File = {
-      if (toF.isDirectory) toF.archiveCompressDirWithRelativePathNoVariableContent(file)
+      if (toF.isDirectory) toF.archiveCompress(file)
       else file.copyCompressFile(toF)
       toF
     }

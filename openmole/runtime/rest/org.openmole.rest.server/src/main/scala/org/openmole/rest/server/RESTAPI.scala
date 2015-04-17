@@ -86,10 +86,10 @@ trait RESTAPI extends ScalatraServlet
 
           def extract =
             for {
-              archive ← fileParams get "inputs"
+              archive ← fileParams get "inputDirectory"
             } {
               val is = new TarInputStream(new GZIPInputStream(archive.getInputStream))
-              try is.extractDirArchiveWithRelativePath(directory.inputDirectory) finally is.close
+              try is.extract(directory.inputDirectory) finally is.close
             }
 
           def launch: ActionResult = {
@@ -118,7 +118,15 @@ trait RESTAPI extends ScalatraServlet
     }
   }
 
-  post("/output") {
+  /*post("/output") {
+    authenticated {
+      getExecution {
+        _.workDirectory.outputDirectory
+      }
+    }
+  }*/
+
+  post("/outputDirectory") {
     contentType = formats("json")
     authenticated {
       getExecution { ex ⇒ Ok(Output(ex.workDirectory.readOutput).toJson) }

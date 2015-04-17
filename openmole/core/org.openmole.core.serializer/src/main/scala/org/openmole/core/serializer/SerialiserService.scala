@@ -98,7 +98,7 @@ object SerialiserService extends Logger {
 
   def deserialiseAndExtractFiles[T](tis: TarInputStream, extractDir: File): T = lock.read {
     val archiveExtractDir = extractDir.newDir("archive")
-    tis.extractDirArchiveWithRelativePath(archiveExtractDir)
+    tis.extract(archiveExtractDir)
     val fileReplacement = fileSerialisation.exec(_.deserialiseFileReplacements(archiveExtractDir, extractDir))
     val contentFile = new File(archiveExtractDir, content)
     val obj = deserialiseReplaceFiles[T](contentFile, fileReplacement)

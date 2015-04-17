@@ -92,7 +92,7 @@ trait Client {
   def start(token: String, script: String, inputFiles: Option[File]): Either[ExecutionId, HttpError] = {
     def files = inputFiles.map { f ⇒
       val builder = MultipartEntityBuilder.create()
-      builder addBinaryBody ("inputs", f)
+      builder addBinaryBody ("inputDirectory", f)
       builder.build
     }
 

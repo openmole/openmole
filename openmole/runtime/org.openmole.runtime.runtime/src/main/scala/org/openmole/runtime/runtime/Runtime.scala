@@ -91,7 +91,7 @@ class Runtime {
 
       val dl = if (replicatedFile.directory) {
         val local = Workspace.newDir("dirReplica")
-        cache.extractDirArchiveWithRelativePath(local)
+        cache.extract(local)
         local.mode = replicatedFile.mode
         cache.delete
         local

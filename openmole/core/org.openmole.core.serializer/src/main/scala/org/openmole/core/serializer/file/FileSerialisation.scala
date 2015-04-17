@@ -47,11 +47,7 @@ trait FileSerialisation extends Serialiser {
         val toArchive =
           if (file.isDirectory) {
             val toArchive = Workspace.newFile
-            val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
-
-            try outputStream.createDirArchiveWithRelativePath(file)
-            finally outputStream.close
-
+            file.archive(toArchive)
             toArchive
           }
           else file
@@ -102,7 +98,7 @@ trait FileSerialisation extends Serialiser {
               f.mkdirs()
               f
             }
-            if (exists) fromArchive.extractDirArchiveWithRelativePath(dest)
+            if (exists) fromArchive.extract(dest)
             else dest.delete
             dest
           }
