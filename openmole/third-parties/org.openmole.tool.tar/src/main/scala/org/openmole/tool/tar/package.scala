@@ -106,6 +106,10 @@ package object tar {
       toF
     }
 
+    def tarOutputStream = new TarOutputStream(file.bufferedOutputStream())
+
+    def withTarOutputStream[T] = withClosable[TarOutputStream, T](new TarOutputStream(file.bufferedOutputStream()))(_)
+    def withTarGZOutputStream[T] = withClosable[TarOutputStream, T](new TarOutputStream(file.bufferedOutputStream().toGZ))(_)
   }
 
   private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, baseDir: File, additionalCommand: TarEntry ⇒ Unit) = {

@@ -9,6 +9,8 @@ import org.apache.http.conn.ssl.{ TrustSelfSignedStrategy, SSLContextBuilder, SS
 import org.apache.http.entity.mime._
 import org.apache.http.impl.client.{ CloseableHttpClient, HttpClients }
 import org.openmole.rest.message._
+import org.openmole.tool.tar._
+import org.openmole.tool.file._
 
 import scala.concurrent.duration._
 import scala.io.Source
@@ -27,36 +29,50 @@ object RESTClient extends App {
       override def timeout: Duration = 5 minutes
     }
 
-  val token = client.requestToken(password).get.token
+  val token = client.requestToken(password).left.get.token
+
+  val file = new File("/tmp/test.txt")
+  file.content = "test"
+
+  val archive = new File("/tmp/archive.tgz")
+  archive.withTarGZOutputStream { tos ⇒
+    tos.addFile(file, file.getName)
+  }
 
   val script =
     """
       |val i = Val[Double]
       |val res = Val[Double]
+      |val test = Val[File]
+      |
+      |val file = inputDirectory / "test.txt"
+      |
       |val exploration = ExplorationTask(i in (0.0 to 100.0 by 1.0))
       |
       |val model =
       |  ScalaTask("val res = i * 2") set (
       |    inputs += i,
-      |    outputs += (i, res)
-      |    )
+      |    outputs += (i, res, test),
+      |    test := file
+      |  )
       |
       |exploration -< (model on LocalEnvironment(4) hook ToStringHook())
     """.stripMargin
 
-  val id = client.start(token, script, None)
-  Iterator.continually(client.state(token, id.get.id)).takeWhile(_.get.state == running).foreach { s ⇒
+  val id = client.start(token, script, Some(archive))
+  println(id)
+  Iterator.continually(client.state(token, id.left.get.id)).takeWhile(_.left.get.state == running).foreach { s ⇒
     println(s)
     Thread.sleep(1000)
   }
 
-  println(client.state(token, id.get.id))
-  println(client.output(token, id.get.id))
-  println(client.remove(token, id.get.id))
+  println(client.state(token, id.left.get.id))
+  println(client.output(token, id.left.get.id))
+  println(client.remove(token, id.left.get.id))
 
 }
 
-case class HttpError(code: Int, message: String) extends Exception
+case class HttpError(code: Int, error: Option[Error])
 
 trait Client {
 
@@ -65,21 +81,15 @@ trait Client {
   def address: String
   def timeout: Duration
 
-  private def extractOrError[T: Manifest](value: JValue): Try[T] =
-    value.extractOpt[T].map(t ⇒ Success(t)).getOrElse {
-      val error = value.extract[Error]
-      Failure(new RuntimeException(error.message))
-    }
-
-  def requestToken(password: String): Try[Token] = {
+  def requestToken(password: String): Either[Token, HttpError] = {
     val uri = new URIBuilder(address + "/token").setParameter("password", password).build
     val post = new HttpPost(uri)
     execute(post) { response ⇒
-      extractOrError[Token](parse(response.content))
+      parse(response.content).extract[Token]
     }
   }
 
-  def start(token: String, script: String, inputFiles: Option[File]): Try[ExecutionId] = {
+  def start(token: String, script: String, inputFiles: Option[File]): Either[ExecutionId, HttpError] = {
     def files = inputFiles.map { f ⇒
       val builder = MultipartEntityBuilder.create()
       builder addBinaryBody ("inputs", f)
@@ -94,51 +104,45 @@ trait Client {
     val post = new HttpPost(uri)
     files.foreach(post.setEntity)
     execute(post) { response ⇒
-      extractOrError[ExecutionId](parse(response.content))
+      parse(response.content).extract[ExecutionId]
     }
   }
 
-  def state(token: String, id: String): Try[State] = {
+  def state(token: String, id: String): Either[State, HttpError] = {
     val uri =
       new URIBuilder(address + "/state").
         setParameter("token", token).
         setParameter("id", id).build
     val post = new HttpPost(uri)
 
-    execute(post) { response ⇒
-      extractOrError[State](parse(response.content))
-    }
+    execute(post) { response ⇒ parse(response.content).extract[State] }
   }
 
-  def output(token: String, id: String): Try[Output] = {
+  def output(token: String, id: String): Either[Output, HttpError] = {
     val uri =
       new URIBuilder(address + "/output").
         setParameter("token", token).
         setParameter("id", id).build
 
     val post = new HttpPost(uri)
-    execute(post) { response ⇒
-      extractOrError[Output](parse(response.content))
-    }
+    execute(post) { response ⇒ parse(response.content).extract[Output] }
   }
 
-  def remove(token: String, id: String): Try[Unit] = {
+  def remove(token: String, id: String): Either[Unit, HttpError] = {
     val uri =
       new URIBuilder(address + "/remove").
         setParameter("token", token).
         setParameter("id", id).build
     val post = new HttpPost(uri)
-    execute(post) { _ ⇒ Success(Unit) }
+    execute(post) { _ ⇒ Unit }
   }
 
-  def execute[T](request: HttpEntityEnclosingRequestBase)(f: CloseableHttpResponse ⇒ Try[T]): Try[T] = withClient { client ⇒
+  def execute[T](request: HttpEntityEnclosingRequestBase)(f: CloseableHttpResponse ⇒ T): Either[T, HttpError] = withClient { client ⇒
     val response = client.execute(request)
     try
       response.getStatusLine.getStatusCode match {
-        case c if c < 400 ⇒ f(response)
-        case c ⇒
-          val error = HttpError(c, response.content)
-          Failure(error)
+        case c if c < 400 ⇒ Left(f(response))
+        case c            ⇒ Right(HttpError(c, parse(response.content).extractOpt[Error]))
       }
     finally response.close
   }

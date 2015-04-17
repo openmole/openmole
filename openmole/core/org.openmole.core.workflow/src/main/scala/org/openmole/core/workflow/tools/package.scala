@@ -25,17 +25,19 @@ import scala.ref.WeakReference
 
 package tools {
 
+  import java.io.File
+
   trait ToolsPackage {
 
     implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
     implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
 
-    implicit def refDecorator[T](r: Ref[T]) = new {
+    implicit class RefDecorator[T](r: Ref[T]) {
       def getUpdate(t: T ⇒ T): T = atomic { implicit txn ⇒ val v = r(); r() = t(v); v }
     }
 
-    implicit def longRefDecorator(r: Ref[Long]) = new {
-      def next: Long = r.getUpdate(_ + 1)
+    implicit class RefLongDecorator(r: Ref[Long]) {
+      def next = r getUpdate (_ + 1)
     }
 
     implicit class ContextDecorator(variables: Context) {
@@ -47,6 +49,10 @@ package tools {
     }
 
     implicit def ContextToBindingConverter(c: Context) = c.toBinding
+
+    implicit class FileSubdirectoryDecorator(f: File) {
+      def /(s: String) = new File(f, s)
+    }
 
   }
 }
