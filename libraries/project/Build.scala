@@ -14,4 +14,6 @@ object Root extends Defaults(OSGi) {
     resolvers += "openmole-public" at "http://maven.openmole.org/public",
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("releases")
+  )
+  
 }
