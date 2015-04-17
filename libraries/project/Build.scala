@@ -15,5 +15,5 @@ object Root extends Defaults(OSGi) {
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("releases")
   )
-  
+
 }

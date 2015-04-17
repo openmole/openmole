@@ -291,7 +291,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               logger.info("Downloading the runtime.")
               val (archive, hash) = getFileUnzipVerifyHash(msg)
               logger.info("Extracting runtime.")
-              archive.extractUncompressDirArchiveWithRelativePath(dir)
+              archive.extractUncompress(dir)
               dir -> hash
             })
           cached ::= jobMessage.runtime
