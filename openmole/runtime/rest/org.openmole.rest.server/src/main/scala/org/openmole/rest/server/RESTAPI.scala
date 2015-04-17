@@ -118,15 +118,18 @@ trait RESTAPI extends ScalatraServlet
     }
   }
 
-  /*post("/output") {
+  /*post("/outputDirectory") {
     authenticated {
-      getExecution {
-        _.workDirectory.outputDirectory
+      getExecution { ex =>
+        val f = Workspace.newFile("rest", "tar.gz")
+        response.setHeader("Content-Disposition", "attachment; filename=" + "outputDirectory.tgz")
+        ex.workDirectory.outputDirectory.archive(f)
+        f
       }
     }
   }*/
 
-  post("/outputDirectory") {
+  post("/output") {
     contentType = formats("json")
     authenticated {
       getExecution { ex ⇒ Ok(Output(ex.workDirectory.readOutput).toJson) }
