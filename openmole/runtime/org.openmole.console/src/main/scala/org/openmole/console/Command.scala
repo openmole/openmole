@@ -61,7 +61,7 @@ class Command {
     for (job ← moleExecution.moleJobs) toDisplay(job.state.id).incrementAndGet
     for (state ← State.values)
       state match {
-        case State.COMPLETED ⇒ System.out.println(state.toString + ": " + moleExecution.numberOfFinishedJobs)
+        case State.COMPLETED ⇒ System.out.println(state.toString + ": " + moleExecution.completed)
         case State.FAILED    ⇒
         case State.CANCELED  ⇒
         case _               ⇒ System.out.println(state.toString + ": " + toDisplay(state.id))

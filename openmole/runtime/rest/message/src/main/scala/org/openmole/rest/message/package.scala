@@ -39,6 +39,7 @@ package object message {
 
   case class State(
     state: ExecutionState,
-    error: Option[Error])
+    error: Option[Error],
+    ready: Long, running: Long, completed: Long)
 
 }

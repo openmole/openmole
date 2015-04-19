@@ -153,7 +153,10 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
         Ok(
           State(
             state,
-            ex.moleExecution.exception.map(Error(_))
+            ex.moleExecution.exception.map(Error(_)),
+            ready = ex.moleExecution.ready,
+            running = ex.moleExecution.running,
+            completed = ex.moleExecution.completed
           ).toJson
         )
       }
