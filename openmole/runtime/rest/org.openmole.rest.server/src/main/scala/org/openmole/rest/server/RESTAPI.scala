@@ -131,7 +131,6 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
         Ok()
       }
     }
-    Unit()
   }
 
   post("/output") {

@@ -40,4 +40,5 @@ package object message {
   case class State(
     state: ExecutionState,
     error: Option[Error])
+
 }
