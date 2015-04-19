@@ -3,7 +3,7 @@ package org.openmole.rest.client
 import java.io.File
 import javax.net.ssl.{ SSLContext, SSLSocket }
 
-import org.apache.http.client.methods.{ CloseableHttpResponse, HttpEntityEnclosingRequestBase, HttpPost }
+import org.apache.http.client.methods._
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.conn.ssl.{ TrustSelfSignedStrategy, SSLContextBuilder, SSLConnectionSocketFactory }
 import org.apache.http.entity.mime._
@@ -56,7 +56,9 @@ object RESTClient extends App {
       |    test := file
       |  )
       |
-      |exploration -< (model on LocalEnvironment(4) hook ToStringHook())
+      |val copyFile = CopyFileHook(test, outputDirectory / "result${i}.txt")
+      |
+      |exploration -< (model on LocalEnvironment(4) hook ToStringHook() hook copyFile)
     """.stripMargin
 
   val id = client.start(token, script, Some(archive))
@@ -68,6 +70,8 @@ object RESTClient extends App {
 
   println(client.state(token, id.left.get.id))
   println(client.output(token, id.left.get.id))
+  val res = new File("/tmp/result.tgz")
+  println(client.outputDirectory(token, id.left.get.id, res))
   println(client.remove(token, id.left.get.id))
 
 }
@@ -128,6 +132,18 @@ trait Client {
     execute(post) { response ⇒ parse(response.content).extract[Output] }
   }
 
+  def outputDirectory(token: String, id: String, file: File): Either[Unit, HttpError] = {
+    val uri =
+      new URIBuilder(address + "/outputDirectory").
+        setParameter("token", token).
+        setParameter("id", id).build
+    val post = new HttpPost(uri)
+    execute(post) {
+      response ⇒
+        response.getEntity.getContent().copy(file)
+    }
+  }
+
   def remove(token: String, id: String): Either[Unit, HttpError] = {
     val uri =
       new URIBuilder(address + "/remove").
@@ -137,7 +153,7 @@ trait Client {
     execute(post) { _ ⇒ Unit }
   }
 
-  def execute[T](request: HttpEntityEnclosingRequestBase)(f: CloseableHttpResponse ⇒ T): Either[T, HttpError] = withClient { client ⇒
+  def execute[T](request: HttpRequestBase)(f: CloseableHttpResponse ⇒ T): Either[T, HttpError] = withClient { client ⇒
     val response = client.execute(request)
     try
       response.getStatusLine.getStatusCode match {

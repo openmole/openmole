@@ -30,7 +30,7 @@ package object tar {
     def addFile(f: File, name: String) = {
       val entry = new TarEntry(name)
       entry.setSize(Files.size(f))
-      entry.setMode(f.mode) // FIXME ugly explicit conversion
+      entry.setMode(f.mode)
       tos.putNextEntry(entry)
       try Files.copy(f, tos) finally tos.closeEntry
     }
@@ -112,12 +112,12 @@ package object tar {
     def withTarGZOutputStream[T] = withClosable[TarOutputStream, T](new TarOutputStream(file.bufferedOutputStream().toGZ))(_)
   }
 
-  private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, baseDir: File, additionalCommand: TarEntry ⇒ Unit) = {
+  private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, directory: File, additionalCommand: TarEntry ⇒ Unit) = {
 
-    if (!Files.isDirectory(baseDir)) throw new IOException(baseDir.toString + " is not a directory.")
+    if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
-    val toArchive = new Stack[(Path, String)]
-    toArchive.push((baseDir, ""))
+    val toArchive = new Stack[(File, String)]
+    toArchive.push(directory -> "")
 
     while (!toArchive.isEmpty) {
 
@@ -149,11 +149,13 @@ package object tar {
         }
 
       // complete current entry by fixing its modes and writing it to the archive
-      e.setMode(source.toFile.mode) // FIXME ugly explicit conversion
-      additionalCommand(e)
-      tos.putNextEntry(e)
-      if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) try Files.copy(source, tos)
-      finally tos.closeEntry
+      if (source != directory) {
+        e.setMode(source.mode)
+        additionalCommand(e)
+        tos.putNextEntry(e)
+        if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) try Files.copy(source, tos)
+        finally tos.closeEntry
+      }
     }
   }
 }

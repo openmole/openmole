@@ -110,7 +110,7 @@ package object file { p ⇒
 
     // this one must have REPLACE_EXISTING enabled
     // but does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
-    def copy(file: Path) = Files.copy(is, file, StandardCopyOption.REPLACE_EXISTING)
+    def copy(file: File) = Files.copy(is, file, StandardCopyOption.REPLACE_EXISTING)
   }
 
   implicit class FileDecorator(file: File) {

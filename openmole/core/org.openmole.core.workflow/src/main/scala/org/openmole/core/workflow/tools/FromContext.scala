@@ -17,6 +17,8 @@
 
 package org.openmole.core.workflow.tools
 
+import java.io.File
+
 import org.openmole.core.tools.io.FromString
 import org.openmole.core.tools.script.GroovyProxyPool
 import org.openmole.core.workflow.data._
@@ -49,7 +51,8 @@ object ExpandedString {
   implicit def fromStringToExpandedString(s: String) = ExpandedString(s)
   implicit def fromStringToExpandedStringOption(s: String) = Some[ExpandedString](s)
   implicit def fromTraversableOfStringToTraversableOfExpandedString[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
-  implicit def fromProtoypeToExpandedString(p: Prototype[_]) = ExpandedString("${p}")
+  implicit def fromPrototypeToExpandedString(p: Prototype[_]) = ExpandedString("${p}")
+  implicit def fromFileToExpandedString(f: File) = ExpandedString(f.getPath)
 
   def apply(s: String) =
     new ExpandedString {

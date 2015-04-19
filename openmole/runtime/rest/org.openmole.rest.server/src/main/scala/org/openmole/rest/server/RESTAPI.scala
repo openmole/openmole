@@ -2,7 +2,7 @@ package org.openmole.rest.server
 
 import java.io.PrintStream
 import java.util.UUID
-import java.util.zip.GZIPInputStream
+import java.util.zip.{ GZIPOutputStream, GZIPInputStream }
 import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.HttpServletRequest
 import groovy.ui.ConsoleView
@@ -14,12 +14,13 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
 import org.openmole.core.dsl._
 import org.openmole.core.workspace.Workspace
-import org.openmole.tool.tar.TarInputStream
+import org.openmole.tool.tar.{ TarOutputStream, TarInputStream }
 import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.FileUploadSupport
 import org.openmole.rest.message._
 import org.openmole.tool.file._
+import org.openmole.tool.tar._
 import scala.util.{ Try, Failure, Success }
 
 case class Execution(moleExecution: MoleExecution, workDirectory: WorkDirectory)
@@ -39,8 +40,8 @@ case class WorkDirectory(baseDirectory: File) {
   }
 }
 
-@MultipartConfig //research scala multipart config
-trait RESTAPI extends ScalatraServlet
+@MultipartConfig(fileSizeThreshold = 1024 * 1024) //research scala multipart config
+trait RESTAPI extends ScalatraServlet with GZipSupport
     with FileUploadSupport
     with FlashMapSupport
     with JacksonJsonSupport
@@ -96,7 +97,7 @@ trait RESTAPI extends ScalatraServlet
             val console = new Console(arguments.plugins)
             val repl = console.newREPL(ConsoleVariables(inputDirectory = directory.inputDirectory, outputDirectory = directory.outputDirectory))
             Try(repl.eval(script)) match {
-              case Failure(e) ⇒ InternalServerError(Error(e).toJson)
+              case Failure(e) ⇒ ExpectationFailed(Error(e).toJson)
               case Success(o) ⇒
                 o match {
                   case puzzle: Puzzle ⇒
@@ -105,9 +106,9 @@ trait RESTAPI extends ScalatraServlet
                         val id = ExecutionId(UUID.randomUUID().toString)
                         moles.add(id, Execution(ex, directory))
                         Ok(id)
-                      case Failure(error) ⇒ InternalServerError(Error(error))
+                      case Failure(error) ⇒ ExpectationFailed(Error(error))
                     }
-                  case _ ⇒ InternalServerError(Error("The last line of the script should be a puzzle"))
+                  case _ ⇒ ExpectationFailed(Error("The last line of the script should be a puzzle"))
                 }
             }
           }
@@ -118,16 +119,20 @@ trait RESTAPI extends ScalatraServlet
     }
   }
 
-  /*post("/outputDirectory") {
+  post("/outputDirectory") {
     authenticated {
-      getExecution { ex =>
-        val f = Workspace.newFile("rest", "tar.gz")
+      getExecution { ex ⇒
+        val gzOs = response.getOutputStream.toGZ
+        val os = new TarOutputStream(gzOs)
+        contentType = "application/octet-stream"
         response.setHeader("Content-Disposition", "attachment; filename=" + "outputDirectory.tgz")
-        ex.workDirectory.outputDirectory.archive(f)
-        f
+        os.archive(ex.workDirectory.outputDirectory)
+        os.close()
+        Ok()
       }
     }
-  }*/
+    Unit()
+  }
 
   post("/output") {
     contentType = formats("json")
