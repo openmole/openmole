@@ -6,16 +6,18 @@
 @sect{Active developers}
   @Developer.active
 
-  @p The development activity can be seen from @a("github", href := "https://github.com/openmole/openmole").
+  @p The development activity can be seen on @a("GitHub", href := "https://github.com/openmole/openmole").
 
 @sect{How to cite OpenMOLE}
   @Publication.papers.map(_.print)
 
 @sect{Communications}
-  All the papers citing OpenMOLE, conference slides, videos can be found at the @a("Contributions page", href := communications.file).
+  All the papers citing OpenMOLE, conference slides, videos can be found on the
+  @a("Contributions page", href := communications.file).
 
 @sect{Communications}
   All the papers citing OpenMOLE, conference slides, videos can be found at the @a("Contributions page", href := communications.file).
 
 @sect{Contact us}
-  For any question regarding OpenMOLE contact us through the OpenMOLE user mailing list: users 'at' list.openmole.org (you should @a("subscribe", href := "http://list.openmole.org/") first).
+  For any question regarding OpenMOLE, contact us through the OpenMOLE user mailing list: users 'at' list.openmole.org
+  (you should @a("subscribe", href := "http://list.openmole.org/") first).

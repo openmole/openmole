@@ -20,7 +20,8 @@
         (k in List("hello", "world")) x
         (l in (UniformDistribution[Long]() take 10))
       )""")
-    Using the @i{x} combinator means that all the domains are @b{unrolled before being combined} with each other.
+
+Using the @i{x} combinator means that all the domains are @b{unrolled before being combined} with each other.
 
   @sect{Combine samplings}
 
@@ -31,18 +32,20 @@
     factor depends on the value of the first one.
 
     @p
-        @hl.openmole(
-        """val i = Val[Int]
-        val j = Val[Double]
+      @hl.openmole(
+      """val i = Val[Int]
+      val j = Val[Double]
 
-        val explo =
-         ExplorationTask (
-           (i in (0 to 10 by 2)) x
-           (j in Range[Double]("0.0", "2 * i", "0.5"))
-         )"""
-        )
+      val explo =
+       ExplorationTask (
+         (i in (0 to 10 by 2)) x
+         (j in Range[Double]("0.0", "2 * i", "0.5"))
+       )"""
+      )
+
 Samplings can also be combined using variants of the zip operator.
-      @sect{Zip samplings}
+
+    @sect{Zip samplings}
     @p
       Zip Samplings come in three declinations in OpenMOLE.
 
@@ -134,19 +137,19 @@ Samplings can also be combined using variants of the zip operator.
 
       @p Check the following script to discover how to use these random-based operations in a workflow:
 
-@br @hl.openmole("""
+    @br @hl.openmole("""
     val p1 = Val[Int]
     val p2 = Val[Int]
 
     val s1 = p1 in (0 to 100) // Code to build sampling 1
     val s2 = p2 in (0 to 100) // Code to build sampling 2
-// Create a sampling containing the values of s1 in a random order
-val s6 = s1.shuffle
+    // Create a sampling containing the values of s1 in a random order
+    val s6 = s1.shuffle
 
-// Replicate 100 times the sampling s1 and provide seed for each experiment
-val seed = Val[Int]
-val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))
-""")
+    // Replicate 100 times the sampling s1 and provide seed for each experiment
+    val seed = Val[Int]
+    val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))
+    """)
 
     @sect{Higher level samplings}
     Some sampling combinations generate higher level samplings such as @hl.openmole("""repeat""") and
