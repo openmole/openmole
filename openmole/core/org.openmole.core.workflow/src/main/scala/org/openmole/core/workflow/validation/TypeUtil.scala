@@ -32,7 +32,7 @@ object TypeUtil {
     val numberOfGroups = d.size
 
     def superType(d: Seq[Prototype[_]]) =
-      ClassUtils.intersectionArray(d.map { p ⇒ p.`type`.runtimeClass })
+      ClassUtils.intersectionArray(d.map { p ⇒ p.`type` })
 
     val indexedD = d.flatten.groupBy(_.name).toSeq
 
@@ -69,14 +69,14 @@ object TypeUtil {
           case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ ComputedType(name, t.arrayManifest, false, optional(name))
           case (d, t, ListBuffer())                        ⇒ ComputedType(name, s(d ++ t.map(_.arrayManifest)), true, optional(name))
           case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒
-            if (f.isArray) new ComputedType(name, f.fromArray.toManifest, false, optional(name))
+            if (f.isArray) new ComputedType(name, f.fromArray, false, optional(name))
             else new ComputedType(name, f, false, optional(name))
           case (d, t, f) ⇒ throw new UserBadDataError("Type computation doesn't match specification, direct " + d + ", toArray " + t + ", fromArray " + f + " in " + slot)
         }
     }
   }
 
-  private def s(m: Iterable[Manifest[_]]) = ClassUtils.intersectionArray(m map (_.runtimeClass))
+  private def s(m: Iterable[Manifest[_]]) = ClassUtils.intersectionArray(m)
 
   private def computeTransmissions(mole: Mole, sources: Sources, hooks: Hooks)(transitions: Iterable[ITransition], dataChannels: Iterable[DataChannel]) = {
     val direct = new HashMap[String, ListBuffer[Manifest[_]]] // Direct transmission through transition or data channel

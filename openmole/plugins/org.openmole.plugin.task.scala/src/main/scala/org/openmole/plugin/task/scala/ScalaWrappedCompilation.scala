@@ -70,9 +70,9 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
   def toScalaNativeType(m: Manifest[_]): Manifest[_] = {
     def native = {
-      val (contentClass, level) = unArrayify(m.runtimeClass)
+      val (contentClass, level) = unArrayify(m)
       for {
-        c ← classEquivalences.find(_.native == contentClass)
+        c ← classEquivalences.find(_.native == contentClass.runtimeClass)
       } yield (0 until level).foldLeft[Manifest[_]](c.scalaManifest) {
         (c, _) ⇒ c.arrayManifest
       }

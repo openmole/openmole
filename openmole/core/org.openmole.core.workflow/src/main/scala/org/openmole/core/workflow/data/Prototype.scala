@@ -71,16 +71,16 @@ trait Prototype[T] extends Id {
    * Test if this prototype can be assigned from another prototype. This work
    * in the same way as java.lang.Class.isAssignableFrom.
    *
-   * @param prototype the prototype to test
+   * @param p the prototype to test
    * @return true if the prototype is assignable from the given prototype
    */
   def isAssignableFrom(p: Prototype[_]): Boolean =
-    ClassUtils.assignable(p.`type`.runtimeClass, `type`.runtimeClass)
+    ClassUtils.assignable(p.`type`, `type`)
 
   def accepts(obj: Any): Boolean =
-    obj == null || assignable(manifest(clazzOf(obj)).runtimeClass, `type`.runtimeClass)
+    obj == null || classAssignable(manifest(clazzOf(obj)).runtimeClass, `type`.runtimeClass)
 
-  override def id = (name, `type`.runtimeClass)
+  override def id = (name, `type`)
   override def toString = name + ": " + `type`.toString
 
 }

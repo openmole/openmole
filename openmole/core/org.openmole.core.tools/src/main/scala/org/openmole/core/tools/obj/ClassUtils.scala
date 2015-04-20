@@ -30,6 +30,12 @@ import collection.JavaConversions._
 
 object ClassUtils {
 
+  implicit class ManifestDecoration(m: Manifest[_]) {
+    def isArray = m.runtimeClass.isArray
+    def fromArray = m.typeArguments.head
+    def toClass = manifestToClass(m)
+  }
+
   implicit class ClassDecorator[T](c: Class[T]) {
     def equivalence = classEquivalence(c).asInstanceOf[Class[T]]
 
@@ -98,29 +104,27 @@ object ClassUtils {
     def isStatic = Modifier.isStatic(f.getModifiers())
   }
 
-  def unArrayify(c: Class[_]): (Class[_], Int) = {
-    @tailrec def rec(c: Class[_], level: Int = 0): (Class[_], Int) =
+  def unArrayify(c: Manifest[_]): (Manifest[_], Int) = {
+    @tailrec def rec(c: Manifest[_], level: Int = 0): (Manifest[_], Int) =
       if (!c.isArray) (c, level)
-      else rec(c.getComponentType, level + 1)
+      else rec(c.typeArguments.head, level + 1)
     rec(c)
   }
 
-  @tailrec def unArrayify(m1: Class[_], m2: Class[_], level: Int = 0): (Class[_], Class[_], Int) = {
+  @tailrec def unArrayify(m1: Manifest[_], m2: Manifest[_], level: Int = 0): (Manifest[_], Manifest[_], Int) = {
     if (!m1.isArray || !m2.isArray) (m1, m2, level)
-    else unArrayify(m1.getComponentType, m2.getComponentType, level + 1)
+    else unArrayify(m1.typeArguments.head, m2.typeArguments.head, level + 1)
   }
 
-  def unArrayify(c: Iterable[Class[_]]): (Iterable[Class[_]], Int) = {
-    @tailrec def rec(c: Iterable[Class[_]], level: Int = 0): (Iterable[Class[_]], Int) = {
+  def unArrayify(c: Iterable[Manifest[_]]): (Iterable[Manifest[_]], Int) = {
+    @tailrec def rec(c: Iterable[Manifest[_]], level: Int = 0): (Iterable[Manifest[_]], Int) = {
       if (c.isEmpty || c.exists(!_.isArray)) (c, level)
-      else rec(c.map {
-        _.getComponentType
-      }, level + 1)
+      else rec(c.map { _.typeArguments.head }, level + 1)
     }
     rec(c)
   }
 
-  def intersectionArray(t: Iterable[Class[_]]) =
+  def intersectionArray(t: Iterable[Manifest[_]]) =
     unArrayify(t) match {
       case (cls, level) ⇒
         val c = intersection(cls)
@@ -128,18 +132,12 @@ object ClassUtils {
         arrayManifest(c, level)
     }
 
-  def intersection(t: Iterable[Class[_]]) = {
-    def intersectionClass(t1: Class[_], t2: Class[_]) = {
-      val classes = (t1.listSuperClasses.toSet & t2.listSuperClasses.toSet)
-      if (classes.isEmpty) classOf[Any]
-      else classes.head
+  // This is not a true intersection, returned class is either the type itself or Any
+  // Not sure if a true intersection would be possible while keeping the type arguments
+  def intersection(t: Iterable[Manifest[_]]) =
+    t.reduce {
+      (m1, m2) ⇒ if (m1 == m2) m1 else Predef.manifest[Any]
     }
-
-    val c = t.reduceLeft((t1, t2) ⇒ intersectionClass(t1, t2))
-    val interfaces = t.map(_.listImplementedInterfaces.toSet).reduceLeft((t1, t2) ⇒ t1 & t2)
-
-    intersect((List(c) ++ interfaces))
-  }
 
   def intersect(tps: Iterable[JType]): Manifest[_] = intersectionType(tps.toSeq map manifest: _*)
 
@@ -214,26 +212,28 @@ object ClassUtils {
     }
   }
 
-  implicit def manifestDecoration(m: Manifest[_]) = new {
-    def isArray = m.runtimeClass.isArray
-    def fromArray = m.runtimeClass.fromArray
-    def toClass = manifestToClass(m)
-  }
-
-  implicit def manifestToClass[T](m: Manifest[T]) = m.runtimeClass
+  def manifestToClass[T](m: Manifest[T]) = m.runtimeClass
 
   implicit def classToManifestDecorator[T](c: Class[T]) = manifest(c)
 
-  def assignable(from: Class[_], to: Class[_]) =
+  def classAssignable(from: Class[_], to: Class[_]) = {
+    def unArrayify(c1: Class[_], c2: Class[_]): (Class[_], Class[_]) =
+      if (!c1.isArray || !c2.isArray) (c1, c2) else unArrayify(c1.getComponentType, c2.getComponentType)
+
+    val (ufrom, uto) = unArrayify(from, to)
+    isAssignableFromPrimitive(ufrom, uto) || uto.isAssignableFrom(ufrom)
+  }
+
+  def assignable(from: Manifest[_], to: Manifest[_]) =
     unArrayify(from, to) match {
-      case (c1, c2, _) ⇒ isAssignableFromPrimitive(c1, c2)
+      case (c1, c2, _) ⇒
+        isAssignableFromPrimitive(c1.runtimeClass, c2.runtimeClass) || from <:< to
     }
 
-  def isAssignableFromPrimitive(from: Class[_], to: Class[_]) = {
+  private def isAssignableFromPrimitive(from: Class[_], to: Class[_]) = {
     val fromEq = classEquivalence(from)
     val toEq = classEquivalence(to)
-    if (fromEq.isPrimitive || toEq.isPrimitive) fromEq == toEq
-    else to.isAssignableFrom(from)
+    if (fromEq.isPrimitive || toEq.isPrimitive) fromEq == toEq else false
   }
 
 }

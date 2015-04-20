@@ -45,17 +45,14 @@ package data {
         toArrayRecursive(prototype, level)
       }
 
-      def toArray: Prototype[Array[T]] =
-        Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[Prototype[Array[T]]]
-
+      def toArray: Prototype[Array[T]] = Prototype(prototype.name)(prototype.`type`.arrayManifest)
       def unsecureType = prototype.`type`.asInstanceOf[Manifest[Any]]
-
     }
 
     implicit def prototypeFromArrayDecorator[T](prototype: Prototype[Array[T]]) = new {
 
       def fromArray: Prototype[T] =
-        (Prototype(prototype.name)(prototype.`type`.fromArray.toManifest)).asInstanceOf[Prototype[T]]
+        (Prototype(prototype.name)(prototype.`type`.fromArray)).asInstanceOf[Prototype[T]]
 
     }
 
