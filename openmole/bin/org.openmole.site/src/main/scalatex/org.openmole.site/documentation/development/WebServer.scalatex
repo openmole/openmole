@@ -1,30 +1,43 @@
 
 @import org.openmole.site.Objects._
 
-@sect{WebServer}
-  OpenMOLE provides a web server which provides a REST API to launch workflows, manage their execution and recover the output data. To start the openmole websersver, you run the command: "openmole -ws" in the console.
+@sect{Web Server}
+  OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution and
+  @b{retrieve} their output data. To start the OpenMOLE web server, run the command: "openmole -ws" in your favourite
+  console.
 
-  @p The webserver can be accessed from your browser at "localhost:8080" or if it’s running on a remote machine, the ip-address of said machine instead of localhost.
+  @p The web server can be accessed from your browser when pointing to
+  @a("http://localhost:8080", href := "http://localhost:8080"). Replace @i{localhost} with the remote machine's hostname
+  or IP address if the web server is not running on your local system.
 
-  @p The API of the webserver is as such:
-  @br GET:
-  @ul
-    @li{createMole - returns the webpage form for creating a new mole}
-    @li{execs – returns the loaded mole executions}
-    @li{execs/:id – returns the stats of the mole execution specified by the id}
-    @li{start/:id – starts the mole execution specified by the id}
-    @li{remove/:id – purges the execution and any stored data from the database}
-    @li{data/:id/data.tar – the tarred results of an execution}
+  @sect{API Reference}
 
-  @br POST:
-  @ul
-    @li{createMole – used to upload moles to the server. It has the following parameters:
-      @ul
-        @li{file – the mole file. must be a partialmoleexecution serialized as an xml.}
-        @li{csv – a csv file containing data bindings for free prototypes in your mole execution}
-        @li{encapsulate – pass the value “on” if you want the server to create a special working dir for your mole execution. after the mole is completed, you can retrieve the working directory as a tar file from data/:id/data.tar}
-        @li{name – allows you to name a PartialMoleExecution for reuse purposes}
-    }
-  @p The api is used like other restful APIs. when something like createMole is written in the api, that means you make a get or post request to "http://<serverAddresshere>/createMole".
+    @p The API of the web server is as such:
+    @br @b{GET}:
+    @ul
+      @li{@b{createMole} - return the webpage form for creating a new mole}
+      @li{@b{execs} – return the loaded mole executions}
+      @li{@b{execs/:id} – return the stats of the mole execution identified by @b{id}}
+      @li{@b{start/:id} – start the mole execution identified by @b{id}}
+      @li{@b{remove/:id} – purge the execution identified by @b{id} and any stored data from the database}
+      @li{@b{data/:id/data.tar} – retrieve the TAR archive containing the results of the execution identified by @b{id}}
 
-  @p To get the results of requests in json format instead of http format, prepend /json/ to the api (except in the case of data/:id/data.tar, it only returns data in tar format).
+    @br @b{POST}:
+    @ul
+      @li{@b{createMole} – used to upload new @i{Moles} to the server. It has the following parameters:
+        @ul
+          @li{@b{file} – the mole file. must be a @hl.openmole("PartialMoleExecution") serialized to XML.}
+          @li{@b{csv} – a CSV file containing data bindings for free @hl.openmole("Vals") in your @i{Mole} execution}
+          @li{@b{encapsulate} – pass the value @b{“on”} for the server to create a special working directory for your Mole
+          execution. You can retrieve the working directory as a tar file from @b{GET data/:id/data.tar} upon completion
+          of the Mole.}
+          @li{@b{name} – allows you to name a @hl.openmole("PartialMoleExecution") for reuse purposes.}
+      }
+
+  @sect{RESTful APIs 101}
+
+    @p The API is used like other RESTful APIs. When something like @i{createMole} is written in the API, it suggests a
+    GET or POST request to "http://<serverAddresshere>/createMole".
+
+    @p Requests' results can be returned as JSON strings instead of the HTTP format. To do so, prepend /json/ to the API
+    calls (except in the case of @b{data/:id/data.tar} that only returns data as a TAR archive).
