@@ -18,6 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo.termination.CounterTermination
+import org.openmole.core.workflow.data.PrototypeType
 
 object Counter {
 
@@ -26,7 +27,7 @@ object Counter {
     type F = Any
     type P = Any
     type MF = Any
-    val stateManifest: Manifest[STATE] = manifest[STATE]
+    val stateType = PrototypeType[STATE]
     val steps = _steps
   }
 

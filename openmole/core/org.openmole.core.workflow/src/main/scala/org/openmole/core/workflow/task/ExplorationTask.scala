@@ -61,8 +61,12 @@ abstract class ExplorationTask(val sampling: Sampling) extends Task {
 
     context ++ variablesValues.map {
       case (k, v) ⇒
-        try Variable(k.toArray.asInstanceOf[Prototype[Array[_]]],
-          v.toArray(k.`type`.asInstanceOf[Manifest[Any]]))
+        try {
+          Variable.unsecure(
+            k.toArray,
+            v.toArray(k.`type`.manifest.asInstanceOf[Manifest[Any]])
+          )
+        }
         catch {
           case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
         }

@@ -17,12 +17,9 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo._
+import fr.iscpif.mgo.genome.G
+import org.openmole.core.workflow.data.PrototypeType
 
-/**
- * Layer of the cake that exposes the manifest for the population
- */
-trait PopulationManifest extends G with P with F {
-  /** manifest for the population type */
-  implicit val populationManifest: Manifest[Population[G, P, F]]
+trait GType extends G {
+  implicit val gType: PrototypeType[G]
 }

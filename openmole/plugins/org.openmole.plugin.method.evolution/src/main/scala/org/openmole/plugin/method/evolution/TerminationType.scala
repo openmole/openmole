@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 21/11/12 Romain Reuillon
+ * Copyright (C) 22/11/12 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,8 +17,9 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.archive.Archive
+import fr.iscpif.mgo._
+import org.openmole.core.workflow.data.PrototypeType
 
-trait ArchiveManifest extends Archive {
-  implicit val aManifest: Manifest[A]
+trait TerminationType extends Termination {
+  implicit val stateType: PrototypeType[STATE]
 }

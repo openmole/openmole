@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 reuillon
+ * Copyright (C) 2012 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,9 @@
 
 package org.openmole.plugin.method.evolution
 
-/**
- * Cake layer with the manifests of the types used by the evolution
- */
-trait EvolutionManifest extends GManifest with PopulationManifest with IndividualManifest with ArchiveManifest with FManifest with TerminationManifest
+import fr.iscpif.mgo._
+import org.openmole.core.workflow.data.PrototypeType
+
+trait IndividualType extends G with P with F {
+  implicit val individualType: PrototypeType[Individual[G, P, F]]
+}

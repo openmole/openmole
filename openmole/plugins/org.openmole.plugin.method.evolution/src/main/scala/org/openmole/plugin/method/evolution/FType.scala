@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 09/01/13 Romain Reuillon
+ * Copyright (C) 13/11/12 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,8 +17,9 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo._
+import fr.iscpif.mgo.fitness.F
+import org.openmole.core.workflow.data.PrototypeType
 
-trait PManifest extends P {
-  implicit val pManifest: Manifest[P] = manifest[P]
+trait FType extends F {
+  implicit val fType: PrototypeType[F]
 }

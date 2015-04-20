@@ -25,146 +25,44 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import java.lang.reflect.{ Type ⇒ JType, Array ⇒ _, _ }
+import scala.reflect.ClassTag
 import scala.reflect.Manifest.{ classType, intersectionType, arrayType, wildcardType }
 import collection.JavaConversions._
+import scala.reflect.runtime.universe._
 
 object ClassUtils {
 
-  implicit class ManifestDecoration(m: Manifest[_]) {
+  implicit class ManifestDecoration[T](m: Manifest[T]) {
     def isArray = m.runtimeClass.isArray
-    def fromArray = m.typeArguments.head
-    def toClass = manifestToClass(m)
+    def toArray = m.arrayManifest
+    def asArray = m.asInstanceOf[Manifest[Array[T]]]
   }
 
-  implicit class ClassDecorator[T](c: Class[T]) {
-    def equivalence = classEquivalence(c).asInstanceOf[Class[T]]
-
-    def listSuperClasses = {
-      new Iterator[Class[_]] {
-        var cur: Class[_] = c
-
-        override def hasNext = cur != null
-
-        override def next: Class[_] = {
-          val ret = cur
-          cur = cur.getSuperclass
-          ret
-        }
-      }.toIterable
-    }
-
-    def listSuperClassesAndInterfaces = listIndexedSuperClassesAndInterfaces.unzip._1
-
-    def listIndexedSuperClassesAndInterfaces = {
-      val toExplore = new ListBuffer[Class[_]]
-      toExplore += c
-
-      val ret = new ListBuffer[(Class[_], Int)]
-      var index = 0
-
-      while (!toExplore.isEmpty) {
-        val current = toExplore.remove(0)
-        ret += current -> index
-        val superClass = current.getSuperclass
-        if (superClass != null) toExplore += superClass
-        for (inter ← current.getInterfaces) toExplore += inter
-        index += 1
-      }
-      ret
-    }
-
-    def listImplementedInterfaces = {
-      val toExplore = new ListBuffer[Class[_]]
-      toExplore += c
-
-      val ret = new ListBuffer[Class[_]]
-
-      while (!toExplore.isEmpty) {
-        val current = toExplore.remove(0)
-
-        val superClass = current.getSuperclass
-        if (superClass != null) toExplore += superClass
-
-        for (inter ← current.getInterfaces) {
-          toExplore += inter
-          ret += inter
-        }
-      }
-
-      ret
-    }
-
-    def fromArray = c.getComponentType
-
-    def toManifest = classType[T](c)
-
+  implicit class ManifestArrayDecoration[T](m: Manifest[Array[T]]) {
+    def fromArray: Manifest[T] = m.typeArguments.head.asInstanceOf[Manifest[T]]
   }
 
-  implicit class FieldDecorator(f: Field) {
-    def isStatic = Modifier.isStatic(f.getModifiers())
+  implicit class TypeDecoration(t: Type) {
+    def isArray = t <:< typeTag[Array[_]].tpe
+    def fromArray = t.typeArgs.head
+    def toArray = appliedType(definitions.ArrayClass.toType, List(t))
   }
 
-  def unArrayify(c: Manifest[_]): (Manifest[_], Int) = {
-    @tailrec def rec(c: Manifest[_], level: Int = 0): (Manifest[_], Int) =
-      if (!c.isArray) (c, level)
-      else rec(c.typeArguments.head, level + 1)
-    rec(c)
+  implicit class ClassTagDecoration[T](c: ClassTag[T]) {
+    def isArray = c.runtimeClass.isArray
+    def toArray = c.wrap
   }
 
-  @tailrec def unArrayify(m1: Manifest[_], m2: Manifest[_], level: Int = 0): (Manifest[_], Manifest[_], Int) = {
+  implicit class ArrayClassTagDecorator[T](c: ClassTag[Array[T]]) {
+    def fromArray: ClassTag[T] = ClassTag(c.runtimeClass.getComponentType)
+  }
+
+  @tailrec private def unArrayify(m1: Manifest[_], m2: Manifest[_], level: Int = 0): (Manifest[_], Manifest[_], Int) = {
     if (!m1.isArray || !m2.isArray) (m1, m2, level)
-    else unArrayify(m1.typeArguments.head, m2.typeArguments.head, level + 1)
+    else unArrayify(m1.asArray.fromArray, m2.asArray.fromArray, level + 1)
   }
 
-  def unArrayify(c: Iterable[Manifest[_]]): (Iterable[Manifest[_]], Int) = {
-    @tailrec def rec(c: Iterable[Manifest[_]], level: Int = 0): (Iterable[Manifest[_]], Int) = {
-      if (c.isEmpty || c.exists(!_.isArray)) (c, level)
-      else rec(c.map { _.typeArguments.head }, level + 1)
-    }
-    rec(c)
-  }
-
-  def intersectionArray(t: Iterable[Manifest[_]]) =
-    unArrayify(t) match {
-      case (cls, level) ⇒
-        val c = intersection(cls)
-        def arrayManifest(m: Manifest[_], l: Int): Manifest[_] = if (l == 0) m else arrayManifest(m.arrayManifest, l - 1)
-        arrayManifest(c, level)
-    }
-
-  // This is not a true intersection, returned class is either the type itself or Any
-  // Not sure if a true intersection would be possible while keeping the type arguments
-  def intersection(t: Iterable[Manifest[_]]) =
-    t.reduce {
-      (m1, m2) ⇒ if (m1 == m2) m1 else Predef.manifest[Any]
-    }
-
-  def intersect(tps: Iterable[JType]): Manifest[_] = intersectionType(tps.toSeq map manifest: _*)
-
-  def manifest(s: String): Manifest[_] = manifest(toClass(s))
-
-  def manifest[T](cls: Class[T]): Manifest[T] = classType(cls)
-
-  def manifest(tp: JType): Manifest[_] = tp match {
-    case x: Class[_] ⇒ classType(x)
-    case x: ParameterizedType ⇒
-      val owner = x.getOwnerType
-      val raw = x.getRawType() match {
-        case clazz: Class[_] ⇒ clazz
-      }
-      val targs = x.getActualTypeArguments() map manifest
-
-      (owner == null, targs.isEmpty) match {
-        case (true, true)  ⇒ manifest(raw)
-        case (true, false) ⇒ classType(raw, targs.head, targs.tail: _*)
-        case (false, _)    ⇒ classType(manifest(owner), raw, targs: _*)
-      }
-    case x: GenericArrayType ⇒ arrayType(manifest(x.getGenericComponentType))
-    case x: WildcardType     ⇒ wildcardType(intersect(x.getLowerBounds), intersect(x.getUpperBounds))
-    case x: TypeVariable[_]  ⇒ intersect(x.getBounds())
-  }
-
-  case class NativeType[T](native: Class[_], java: Class[_], scala: Class[T])(implicit val scalaManifest: Manifest[T])
+  case class NativeType[T](native: Class[_], java: Class[_], scala: Class[T])(implicit val typeTag: TypeTag[T], val manifest: Manifest[T])
 
   lazy val classEquivalences = Seq(
     NativeType(java.lang.Byte.TYPE, classOf[java.lang.Byte], classOf[Byte]),
@@ -178,7 +76,10 @@ object ClassUtils {
   )
 
   def classEquivalence(c: Class[_]) =
-    classEquivalences.find(_.java == c).map(_.native) orElse classEquivalences.find(_.scala == c).map(_.native) getOrElse (c)
+    classEquivalences.find(_.java == c) orElse
+      classEquivalences.find(_.scala == c)
+
+  def typeEquivalence(t: Type) = classEquivalences.find(_.typeTag.tpe == t)
 
   def toClass(s: String) = classEquivalence(
     s match {
@@ -212,28 +113,23 @@ object ClassUtils {
     }
   }
 
-  def manifestToClass[T](m: Manifest[T]) = m.runtimeClass
-
-  implicit def classToManifestDecorator[T](c: Class[T]) = manifest(c)
-
   def classAssignable(from: Class[_], to: Class[_]) = {
     def unArrayify(c1: Class[_], c2: Class[_]): (Class[_], Class[_]) =
       if (!c1.isArray || !c2.isArray) (c1, c2) else unArrayify(c1.getComponentType, c2.getComponentType)
 
     val (ufrom, uto) = unArrayify(from, to)
-    isAssignableFromPrimitive(ufrom, uto) || uto.isAssignableFrom(ufrom)
+    val eqTo = classEquivalence(uto).map(_.native).getOrElse(to)
+    val eqFrom = classEquivalence(ufrom).map(_.native).getOrElse(from)
+
+    eqTo.isAssignableFrom(eqFrom)
   }
 
-  def assignable(from: Manifest[_], to: Manifest[_]) =
+  def assignable(from: Manifest[_], to: Manifest[_]): Boolean =
     unArrayify(from, to) match {
       case (c1, c2, _) ⇒
-        isAssignableFromPrimitive(c1.runtimeClass, c2.runtimeClass) || from <:< to
+        val eqFrom = classEquivalence(from.runtimeClass).map(_.manifest).getOrElse(from)
+        val eqTo = classEquivalence(to.runtimeClass).map(_.manifest).getOrElse(to)
+        eqTo.runtimeClass.isAssignableFrom(eqFrom.runtimeClass)
     }
-
-  private def isAssignableFromPrimitive(from: Class[_], to: Class[_]) = {
-    val fromEq = classEquivalence(from)
-    val toEq = classEquivalence(to)
-    if (fromEq.isPrimitive || toEq.isPrimitive) fromEq == toEq else false
-  }
 
 }

@@ -17,11 +17,9 @@
 
 package org.openmole.core.workflow.task
 
-import org.openmole.core.tools.io.BufferInputStream
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.serializer.SerialiserService
-import org.openmole.tool.stream.{BufferInputStream, BufferOutputStream}
+import org.openmole.tool.stream.{ BufferInputStream, BufferOutputStream }
 import org.scalatest._
 
 class SerializationSpec extends FlatSpec with Matchers {

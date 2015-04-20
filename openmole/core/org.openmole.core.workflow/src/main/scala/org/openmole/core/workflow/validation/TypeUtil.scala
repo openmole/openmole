@@ -24,15 +24,45 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.tools.obj._
 
+import scala.annotation.tailrec
 import scala.collection.mutable.{ HashMap, HashSet, ListBuffer }
 
 object TypeUtil {
 
+  def intersectionArray(t: Iterable[PrototypeType[_]]) =
+    unArrayify(t) match {
+      case (cls, level) ⇒
+        val c = intersection(cls)
+        def arrayType(m: PrototypeType[_], l: Int): PrototypeType[_] = if (l == 0) m else arrayType(m.toArray, l - 1)
+        arrayType(c, level)
+    }
+
+  def unArrayify(t: PrototypeType[_]): (PrototypeType[_], Int) = {
+    @tailrec def rec(c: PrototypeType[_], level: Int = 0): (PrototypeType[_], Int) =
+      if (!c.isArray) (c, level)
+      else rec(c.asArray.fromArray, level + 1)
+    rec(t)
+  }
+
+  def unArrayify(c: Iterable[PrototypeType[_]]): (Iterable[PrototypeType[_]], Int) = {
+    @tailrec def rec(c: Iterable[PrototypeType[_]], level: Int = 0): (Iterable[PrototypeType[_]], Int) = {
+      if (c.isEmpty || c.exists(!_.isArray)) (c, level)
+      else rec(c.map(_.asArray.fromArray), level + 1)
+    }
+    rec(c)
+  }
+
+  // This is not a true intersection, returned class is either the type itself or Any
+  // Not sure if a true intersection would be possible while keeping the type arguments
+  def intersection(t: Iterable[PrototypeType[_]]): PrototypeType[_] =
+    t.reduce {
+      (t1, t2) ⇒ if (t1 == t2) t1 else PrototypeType[Any]
+    }
+
   def intersect(d: Seq[Seq[Prototype[_]]]) = {
     val numberOfGroups = d.size
 
-    def superType(d: Seq[Prototype[_]]) =
-      ClassUtils.intersectionArray(d.map { p ⇒ p.`type` })
+    def superType(d: Seq[Prototype[_]]) = intersectionArray(d.map { p ⇒ p.`type` })
 
     val indexedD = d.flatten.groupBy(_.name).toSeq
 
@@ -46,10 +76,10 @@ object TypeUtil {
   def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[Prototype[_]] =
     computeManifests(mole, sources, hooks)(slot).map { _.toPrototype }
 
-  case class ComputedType(val name: String, val manifest: Manifest[_], val toArray: Boolean, val isOptional: Boolean) {
+  case class ComputedType(val name: String, val `type`: PrototypeType[_], val toArray: Boolean, val isOptional: Boolean) {
     def toPrototype =
-      if (toArray) Prototype(name)(manifest.arrayManifest)
-      else Prototype(name)(manifest)
+      if (toArray) Prototype(name)(`type`.toArray)
+      else Prototype(name)(`type`)
   }
 
   def computeManifests(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ComputedType] = {
@@ -66,28 +96,28 @@ object TypeUtil {
       name ⇒
         (direct.getOrElse(name, empty), toArray.getOrElse(name, empty), fromArray.getOrElse(name, empty)) match {
           case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ ComputedType(name, d, false, optional(name))
-          case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ ComputedType(name, t.arrayManifest, false, optional(name))
-          case (d, t, ListBuffer())                        ⇒ ComputedType(name, s(d ++ t.map(_.arrayManifest)), true, optional(name))
+          case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ ComputedType(name, t.toArray, false, optional(name))
+          case (d, t, ListBuffer())                        ⇒ ComputedType(name, s(d ++ t.map(_.toArray)), true, optional(name))
           case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒
-            if (f.isArray) new ComputedType(name, f.fromArray, false, optional(name))
+            if (f.isArray) new ComputedType(name, f.asArray.fromArray, false, optional(name))
             else new ComputedType(name, f, false, optional(name))
           case (d, t, f) ⇒ throw new UserBadDataError("Type computation doesn't match specification, direct " + d + ", toArray " + t + ", fromArray " + f + " in " + slot)
         }
     }
   }
 
-  private def s(m: Iterable[Manifest[_]]) = ClassUtils.intersectionArray(m)
+  private def s(m: Iterable[PrototypeType[_]]) = intersectionArray(m)
 
   private def computeTransmissions(mole: Mole, sources: Sources, hooks: Hooks)(transitions: Iterable[ITransition], dataChannels: Iterable[DataChannel]) = {
-    val direct = new HashMap[String, ListBuffer[Manifest[_]]] // Direct transmission through transition or data channel
-    val toArray = new HashMap[String, ListBuffer[Manifest[_]]] // Transmission through exploration transition
-    val fromArray = new HashMap[String, ListBuffer[Manifest[_]]] // Transmission through aggregation transition
+    val direct = new HashMap[String, ListBuffer[PrototypeType[_]]] // Direct transmission through transition or data channel
+    val toArray = new HashMap[String, ListBuffer[PrototypeType[_]]] // Transmission through exploration transition
+    val fromArray = new HashMap[String, ListBuffer[PrototypeType[_]]] // Transmission through aggregation transition
     val optional = new HashMap[String, ListBuffer[Boolean]]
     val varNames = new HashSet[String]
 
     for (t ← transitions; d ← t.data(mole, sources, hooks)) {
       def setFromArray =
-        if (d.mode is Explore) fromArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Manifest[_]]) += d.prototype.`type`
+        if (d.mode is Explore) fromArray.getOrElseUpdate(d.prototype.name, new ListBuffer[PrototypeType[_]]) += d.prototype.`type`
         else direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
 
       varNames += d.prototype.name
