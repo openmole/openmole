@@ -14,6 +14,7 @@ trait OsgiBundler {
     OsgiKeys.bundleSymbolicName <<= (name, OSGi.singleton) { case (name, singleton) ⇒ name + ";singleton:=" + singleton },
     autoAPIMappings := true,
     bundleProj := true,
+    OSGi.openMOLEScope := None,
     OsgiKeys.bundleVersion <<= version,
     OsgiKeys.exportPackage <<= name { n ⇒ Seq(n + ".*") },
     OsgiKeys.bundleActivator := None,
@@ -46,11 +47,13 @@ trait OsgiBundler {
       name := artifactId,
       organization := org,
       OSGi.singleton := singleton,
-      OSGi.openMOLEScope := None,
       OsgiKeys.exportPackage := exportedPackages,
       OsgiKeys.additionalHeaders <<=
         (OSGi.openMOLEScope) {
-          omScope ⇒ omScope.map(os ⇒ Map("OpenMOLE-Scope" -> os)).getOrElse(Map()) ++ Map("Bundle-ActivationPolicy" -> "lazy")
+          omScope ⇒
+            Map[String, String]() +
+              ("Bundle-ActivationPolicy" -> "lazy") ++
+              omScope.map(os ⇒ "OpenMOLE-Scope" -> os)
         },
       OsgiKeys.privatePackage := privatePackages,
       OsgiKeys.dynamicImportPackage := dynamicImports,
