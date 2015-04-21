@@ -6,7 +6,8 @@
   A key feature in OpenMOLE is the possibility to delegate the workload to a remote execution environment. Tasks in OpenMOLE have been designed so that the delegation a part of the workload to a remote environment is declarative.
 
   @sect{Defining an execution Environment}
-    You first need to define the environment(s) you want to use an authentication method. Then, the actual delegation of the task is noted by the keyword @hl.openmole("""on""") followed by a defined environment:
+    You first need to define the environment(s) you want to use an authentication method. Then, the actual delegation of
+    the task is noted by the keyword @hl.openmoleNoTest("on") followed by a defined @i{Environment}:
     @br @hl.openmole("""
     val env = LocalEnvironment(10)
 
@@ -28,7 +29,7 @@
   @sect{Grouping}
     @p The use of a batch environment is generally not suited for short tasks (less than a 1 minute for a cluster to less
     than 1 hour for a grid). In case your tasks are short you can group several executions. To group the execution by 100
-    in each job submitted to the environment, use the keyword @hl.openmole("""by"""):
+    in each job submitted to the environment, use the keyword @hl.openmoleNoTest("by"):
     @br @hl.openmole("""val mole = explo -< (t1 on env by 100)""", header = """
     val env = LocalEnvironment(10)
     val t1 = EmptyTask()

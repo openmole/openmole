@@ -26,12 +26,12 @@
     @ul
       @li{@b{createMole} – used to upload new @i{Moles} to the server. It has the following parameters:
         @ul
-          @li{@b{file} – the mole file. must be a @hl.openmole("PartialMoleExecution") serialized to XML.}
-          @li{@b{csv} – a CSV file containing data bindings for free @hl.openmole("Vals") in your @i{Mole} execution}
+          @li{@b{file} – the mole file. must be a @hl.openmoleNoTest("PartialMoleExecution") serialized to XML.}
+          @li{@b{csv} – a CSV file containing data bindings for free @i{Vals} in your @i{Mole} execution}
           @li{@b{encapsulate} – pass the value @b{“on”} for the server to create a special working directory for your Mole
           execution. You can retrieve the working directory as a tar file from @b{GET data/:id/data.tar} upon completion
           of the Mole.}
-          @li{@b{name} – allows you to name a @hl.openmole("PartialMoleExecution") for reuse purposes.}
+          @li{@b{name} – allows you to name a @hl.openmoleNoTest("PartialMoleExecution") for reuse purposes.}
       }
 
   @sect{RESTful APIs 101}
