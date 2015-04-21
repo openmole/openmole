@@ -29,7 +29,7 @@ object DSLTest {
 
   lazy val console = new Console()
 
-  def engine = console.newREPL()
+  def engine = console.newREPL
 
   lazy val engines = new ObjectPool[ScalaREPL](engine) {
     override def release(t: ScalaREPL) = {
