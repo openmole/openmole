@@ -39,24 +39,24 @@ import JobManager.Log._
 class JobManager extends Actor {
 
   val workers = ActorSystem.create("JobManagement", ConfigFactory.parseString(
-    """
+    s"""
 akka {
   daemonic="on"
   actor {
     default-dispatcher {
       executor = "fork-join-executor"
       type = Dispatcher
-      mailbox-type = """ + '"' + classOf[PriorityMailBox].getName + '"' + """
+      mailbox-type = "${classOf[PriorityMailBox].getName}"
       
       fork-join-executor {
-        parallelism-min = """ + Workspace.preference(JobManagementThreads) + """
-        parallelism-max = """ + Workspace.preference(JobManagementThreads) + """
+        parallelism-min = ${Workspace.preference(JobManagementThreads)}
+        parallelism-max = ${Workspace.preference(JobManagementThreads)}
       }
       throughput = 1
     }
   }
 }
-""").withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
+""").withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)), getClass().getClassLoader())
 
   import BatchEnvironment.system.dispatcher
 
