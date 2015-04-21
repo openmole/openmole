@@ -181,12 +181,12 @@ object DocumentationPages { index ⇒
   def root = new DocumentationPage {
     def name = "Documentation"
     def content = documentation.Documentation()
-    def children = Seq(console, gui, development)
+    def children = Seq(console, gui, tutorial, development)
 
     def console =
       new DocumentationPage {
         def name = "Console DSL"
-        def children = Seq(task, sampling, transition, hook, environment, source, method, tutorial)
+        def children = Seq(task, sampling, transition, hook, environment, source, method)
         def content = documentation.Console()
 
         def task = new DocumentationPage {
@@ -285,42 +285,42 @@ object DocumentationPages { index ⇒
           def children = Seq()
           def content = documentation.console.Method()
         }
-
-        def tutorial = new DocumentationPage {
-          def name = "Tutorials"
-          def children = Seq(helloWorld, headlessNetLogo, netLogoGA, capsule)
-          def content = documentation.console.Tutorial()
-
-          def helloWorld = new DocumentationPage {
-            def name = "Hello World"
-            def children = Seq()
-            def content = documentation.console.tutorial.HelloWorld()
-          }
-
-          def headlessNetLogo = new DocumentationPage {
-            def name = "NetLogo Headless"
-            def children = Seq()
-            def content = documentation.console.tutorial.HeadlessNetLogo()
-          }
-
-          def netLogoGA = new DocumentationPage {
-            def name = "GA with NetLogo"
-            def children = Seq()
-            def content = documentation.console.tutorial.NetLogoGA()
-          }
-
-          def capsule = new DocumentationPage {
-            def name = "Capsule"
-            def children = Seq()
-            def content = documentation.console.tutorial.Capsule()
-          }
-        }
       }
 
     def gui = new DocumentationPage {
       def name = "GUI"
       def children = Seq()
       def content = documentation.GUI()
+    }
+
+    def tutorial = new DocumentationPage {
+      def name = "Tutorials"
+      def children = Seq(helloWorld, headlessNetLogo, netLogoGA, capsule)
+      def content = documentation.console.Tutorial()
+
+      def helloWorld = new DocumentationPage {
+        def name = "Hello World"
+        def children = Seq()
+        def content = documentation.console.tutorial.HelloWorld()
+      }
+
+      def headlessNetLogo = new DocumentationPage {
+        def name = "NetLogo Headless"
+        def children = Seq()
+        def content = documentation.console.tutorial.HeadlessNetLogo()
+      }
+
+      def netLogoGA = new DocumentationPage {
+        def name = "GA with NetLogo"
+        def children = Seq()
+        def content = documentation.console.tutorial.NetLogoGA()
+      }
+
+      def capsule = new DocumentationPage {
+        def name = "Capsule"
+        def children = Seq()
+        def content = documentation.console.tutorial.Capsule()
+      }
     }
 
     def development = new DocumentationPage {
