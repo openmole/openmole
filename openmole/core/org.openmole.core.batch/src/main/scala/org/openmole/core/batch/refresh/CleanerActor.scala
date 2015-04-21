@@ -26,23 +26,23 @@ object CleanerActor extends Logger
 
 import CleanerActor.Log._
 
-class CleanerActor(jobManager: ActorRef) extends Actor {
-  def receive = withRunFinalization {
-    case msg @ CleanSerializedJob(sj) ⇒
-      try
-        sj.synchronized {
-          if (!sj.cleaned) sj.storage.tryWithToken {
-            case Some(t) ⇒
-              sj.storage.rmDir(sj.path)(t)
-              sj.cleaned = true
-            case None ⇒
-              jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
-          }
-
+class CleanerActor(jobManager: ActorRef) {
+  def receive(msg: CleanSerializedJob) = withRunFinalization {
+    val CleanSerializedJob(sj) = msg
+    try
+      sj.synchronized {
+        if (!sj.cleaned) sj.storage.tryWithToken {
+          case Some(t) ⇒
+            sj.storage.rmDir(sj.path)(t)
+            sj.cleaned = true
+          case None ⇒
+            jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
         }
-      catch {
-        case t: Throwable ⇒
-          logger.log(FINE, "Error when deleting a file", t)
+
       }
+    catch {
+      case t: Throwable ⇒
+        logger.log(FINE, "Error when deleting a file", t)
+    }
   }
 }

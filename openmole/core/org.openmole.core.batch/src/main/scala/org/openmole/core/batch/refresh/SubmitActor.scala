@@ -31,21 +31,22 @@ object SubmitActor extends Logger
 
 import SubmitActor._
 
-class SubmitActor(jobManager: ActorRef) extends Actor {
-  def receive = withRunFinalization {
-    case Submit(job, sj) ⇒
-      if (!job.state.isFinal) {
-        try {
-          val bj = trySubmit(sj, job.environment)
-          job.state = SUBMITTED
-          jobManager ! Submitted(job, sj, bj)
-        }
-        catch {
-          case e: Throwable ⇒
-            jobManager ! Error(job, e)
-            jobManager ! Submit(job, sj)
-        }
+class SubmitActor(jobManager: ActorRef) {
+
+  def receive(submit: Submit) = withRunFinalization {
+    val Submit(job, sj) = submit
+    if (!job.state.isFinal) {
+      try {
+        val bj = trySubmit(sj, job.environment)
+        job.state = SUBMITTED
+        jobManager ! Submitted(job, sj, bj)
       }
+      catch {
+        case e: Throwable ⇒
+          jobManager ! Error(job, e)
+          jobManager ! Submit(job, sj)
+      }
+    }
   }
 
   private def trySubmit(serializedJob: SerializedJob, environment: BatchEnvironment) = {

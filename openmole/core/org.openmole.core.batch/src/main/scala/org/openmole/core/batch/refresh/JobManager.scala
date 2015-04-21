@@ -18,7 +18,8 @@
 package org.openmole.core.batch.refresh
 
 import akka.actor.{ ActorRef, Actor, ActorSystem, Props }
-import akka.routing.{SmallestMailboxPool, SmallestMailboxRouter}
+import akka.dispatch.{ PriorityGenerator, UnboundedPriorityMailbox }
+import akka.routing.{ SmallestMailboxPool, SmallestMailboxRouter }
 import org.openmole.core.eventdispatcher.EventDispatcher
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.tools.service.Logger
@@ -59,23 +60,37 @@ akka {
 
   import BatchEnvironment.system.dispatcher
 
+  val uploader = new UploadActor(self)
+  val submitter = new SubmitActor(self)
+  val refresher = new RefreshActor(self)
+  val resultGetters = new GetResultActor(self)
+  val killer = new KillerActor(self)
+  val cleaner = new CleanerActor(self)
+  val deleter = new DeleteActor(self)
+
+  class DispatcherActor extends Actor {
+    def receive = {
+      case msg: Upload             ⇒ uploader.receive(msg)
+      case msg: Submit             ⇒ submitter.receive(msg)
+      case msg: Refresh            ⇒ refresher.receive(msg)
+      case msg: GetResult          ⇒ resultGetters.receive(msg)
+      case msg: KillBatchJob       ⇒ killer.receive(msg)
+      case msg: DeleteFile         ⇒ deleter.receive(msg)
+      case msg: CleanSerializedJob ⇒ cleaner.receive(msg)
+    }
+  }
+
   val router = SmallestMailboxPool(Workspace.preferenceAsInt(JobManagementThreads))
-  val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(router))
-  val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(router))
-  val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(router))
-  val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(router))
-  val killer = workers.actorOf(Props(new KillerActor(self)).withRouter(router))
-  val cleaner = workers.actorOf(Props(new CleanerActor(self)).withRouter(router))
-  val deleter = workers.actorOf(Props(new DeleteActor(self)).withRouter(router))
+  val dispatchers = workers.actorOf(Props(new DispatcherActor).withRouter(router))
 
   def receive = {
-    case msg: Upload             ⇒ uploader ! msg
-    case msg: Submit             ⇒ submitter ! msg
-    case msg: Refresh            ⇒ refresher ! msg
-    case msg: GetResult          ⇒ resultGetters ! msg
-    case msg: KillBatchJob       ⇒ killer ! msg
-    case msg: DeleteFile         ⇒ deleter ! msg
-    case msg: CleanSerializedJob ⇒ cleaner ! msg
+    case msg: Upload             ⇒ dispatchers ! msg
+    case msg: Submit             ⇒ dispatchers ! msg
+    case msg: Refresh            ⇒ dispatchers ! msg
+    case msg: GetResult          ⇒ dispatchers ! msg
+    case msg: KillBatchJob       ⇒ dispatchers ! msg
+    case msg: DeleteFile         ⇒ dispatchers ! msg
+    case msg: CleanSerializedJob ⇒ dispatchers ! msg
 
     case Manage(job) ⇒
       self ! Upload(job)
@@ -101,7 +116,7 @@ akka {
     case Resubmit(job, storage) ⇒
       killAndClean(job)
       job.state = ExecutionState.READY
-      uploader ! Upload(job)
+      dispatchers ! Upload(job)
 
     case Error(job, exception) ⇒
       val level = exception match {
