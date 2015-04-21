@@ -18,7 +18,7 @@
 package org.openmole.core.batch.refresh
 
 import akka.actor.{ ActorRef, Actor, ActorSystem, Props }
-import akka.routing.SmallestMailboxRouter
+import akka.routing.{SmallestMailboxPool, SmallestMailboxRouter}
 import org.openmole.core.eventdispatcher.EventDispatcher
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.tools.service.Logger
@@ -59,14 +59,14 @@ akka {
 
   import BatchEnvironment.system.dispatcher
 
-  //val resizer = DefaultResizer(lowerBound = 10, upperBound = Workspace.preferenceAsInt(JobManagementThreads))
-  val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
-  val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
-  val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
-  val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
-  val killer = workers.actorOf(Props(new KillerActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
-  val cleaner = workers.actorOf(Props(new CleanerActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
-  val deleter = workers.actorOf(Props(new DeleteActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagementThreads))))
+  val router = SmallestMailboxPool(Workspace.preferenceAsInt(JobManagementThreads))
+  val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(router))
+  val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(router))
+  val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(router))
+  val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(router))
+  val killer = workers.actorOf(Props(new KillerActor(self)).withRouter(router))
+  val cleaner = workers.actorOf(Props(new CleanerActor(self)).withRouter(router))
+  val deleter = workers.actorOf(Props(new DeleteActor(self)).withRouter(router))
 
   def receive = {
     case msg: Upload             ⇒ uploader ! msg
@@ -86,6 +86,7 @@ akka {
       }
 
     case Uploaded(job, sj) ⇒
+      logger.fine(s"Uploaded $job send it to submit pool")
       job.serializedJob = Some(sj)
       self ! Submit(job, sj)
 
