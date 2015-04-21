@@ -86,10 +86,8 @@ class GUIServlet extends ScalatraServlet {
         tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js")
       ),
       tags.body(
-        tags.onload := "ScriptClient().run();"
-      )
+        tags.onload := "ScriptClient().run();")
     )
-
   }
 
   post(s"/$basePath/*") {

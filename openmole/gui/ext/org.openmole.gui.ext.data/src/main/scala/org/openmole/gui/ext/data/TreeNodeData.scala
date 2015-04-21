@@ -1,10 +1,9 @@
-package org.openmole.gui.server.core
+package org.openmole.gui.ext.data
 
-import org.openmole.gui.shared._
-import org.openmole.gui.ext.data.TreeNodeData
+import scala.scalajs.js.annotation.JSExport
 
 /*
- * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -20,8 +19,8 @@ import org.openmole.gui.ext.data.TreeNodeData
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object ApiImpl extends Api {
-
-  def listFiles(path: String): Seq[TreeNodeData] = Utils.listFiles(path)
-
-}
+@JSExport
+case class TreeNodeData(
+  name: String,
+  canonicalPath: String,
+  isDirectory: Boolean)

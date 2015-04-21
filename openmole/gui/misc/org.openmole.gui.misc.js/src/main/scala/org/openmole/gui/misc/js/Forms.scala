@@ -61,7 +61,7 @@ object Forms {
       if (active) "active" else ""
     }
 
-    def render = li(role := "presentation", id := navid, `class` := activeString)(a(href := "#")(content))
+    def render = li(role := "presentation", id := navid, `class` := activeString)(tags.a(href := "#")(content))
   }
 
   def navItem(id: String, content: String, todo: () ⇒ Unit = () ⇒ {}, active: Boolean = false) = new NavItem(id, content, todo, active)
@@ -108,12 +108,12 @@ object Forms {
 
   //Select (to be used with button class aggregators )
   def select(id: String, contents: Seq[(String, String)], key: ClassKeyAggregator) = buttonGroup()(
-    a(
+    tags.a(
       `class` := "btn " + key.key + " dropdown-toggle", data("toggle") := "dropdown", href := "#"
     )("Select", span("caret")),
     ul(`class` := "dropdown-menu")(
       for (c ← contents) yield {
-        tags.li(a(
+        tags.li(tags.a(
           href := "#")(c._2)
         )
       }
@@ -126,9 +126,12 @@ object Forms {
   val glyph_edit = "glyphicon-pencil"
   val glyph_trash = "glyphicon-trash"
   val glyph_plus = "glyphicon-plus"
+  val glyph_plus_sign = "glyphicon-plus-sign"
+  val glyph_minus_sign = "glyphicon-minus-sign"
   val glyph_minus = "glyphicon-minus"
   val glyph_ok = "glyphicon-ok"
   val glyph_question = "glyphicon-question-sign"
+  val glyph_file = "glyphicon-file"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
@@ -258,7 +261,9 @@ object Forms {
   //JQuery calls
   def jQueryCalls(calls: Seq[() ⇒ Any] = Seq()) = {
     popoverJQ
-    calls.map { _() }
+    calls.map {
+      _()
+    }
   }
 
   def popoverJQ = jQuery("[data-toggle=\"popover\"]").popover()

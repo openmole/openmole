@@ -60,7 +60,7 @@ object IOPanelUIUtil {
   ) ++ mappingsTD(io)
 
   def clickablePrototypeTD(p: PrototypeDataBagUI, todo: () ⇒ Unit) = bs.td(col_md_2)(
-    a(p.name(),
+    tags.a(p.name(),
       cursor := "pointer",
       onclick := { () ⇒
         todo()
