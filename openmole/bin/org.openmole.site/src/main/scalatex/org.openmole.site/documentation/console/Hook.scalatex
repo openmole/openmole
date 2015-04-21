@@ -47,6 +47,31 @@
 
     val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv")""")
     @p The path is expanded using the variables from the dataflow (expressions between ${} are evaluated and replaced).
+
+    @p The optional last parameter of @i{AppendToCSVFileHook} is the list of variables to write to the CSV file. The
+    default behaviour when this list is not specified is to dump all the variables from the dataflow to the file. You
+    can restrict this behaviour by @b{listing only the variables you want to save}
+
+    @p Some additional optional parameters can be set by calling the function @hl.openmoleNoTest("set") on the newly
+    created @i{Hook}.
+    @br Setting @hl.openmoleNoTest("csvHeader := Col1, Col2, ColZ") customises the header of the CSV file to be created
+    with the string it receives as a parameter.
+    @br @hl.openmoleNoTest("singleRow := true") forces the flattening of the input lists such that all variables values
+    are written to a single row/line of the CSV file.
+
+    @p This workflow demonstrates the optional behaviour of @i{AppendToCSVFileHook}:
+    @br @hl.openmole("""
+      val i = Val[Int]
+      val j = Val[Int]
+      // this variable will not be written to the CSV file
+      val z = Val[Double]
+
+      val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv", i, j) set (
+        csvHeader := "i, j",
+        singleRow := true
+      )
+      """)
+
   @sect{Save files computed by your tasks}
     The @i{CopyFileHook} makes it possible to copy a file / directory from the dataflow to a given location on the machine
     running OpenMOLE.
