@@ -79,15 +79,15 @@ package object tar {
 
   implicit class FileTarArchiveDecorator(file: File) {
 
-    def archive(archive: File, time: Boolean = true) =
-      withClosable(new TarOutputStream(archive.bufferedOutputStream())) {
+    def archive(dest: File, time: Boolean = true) =
+      withClosable(new TarOutputStream(dest.bufferedOutputStream())) {
         _.archive(file, time)
       }
 
     //FIXME method name is ambiguous rename
     def archiveCompress(dest: File, time: Boolean = true) =
-      withClosable(new TarOutputStream(file.gzippedBufferedOutputStream)) {
-        _.archive(dest, time)
+      withClosable(new TarOutputStream(dest.gzippedBufferedOutputStream)) {
+        _.archive(file, time)
       }
 
     def extract(dest: File) =
@@ -101,7 +101,7 @@ package object tar {
       }
 
     def copyCompress(toF: File): File = {
-      if (toF.isDirectory) toF.archiveCompress(file)
+      if (toF.isDirectory) file.archiveCompress(toF)
       else file.copyCompressFile(toF)
       toF
     }
