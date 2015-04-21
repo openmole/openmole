@@ -49,19 +49,19 @@
       @p
         Zip Samplings come in three declinations in OpenMOLE.
 
-      @p The first one is the @hl.openmole("""ZipSampling""", false). It combines the elements of corresponding indices
-      from two samplings. @hl.openmole("""ZipSampling""", false) mimics the traditional @i{zip} operation from functional
-      programming that combining elements from two lists. OpenMOLE implements the @hl.openmole("""ZipSampling""", false)
-      through the keyword @hl.openmole("""zip""", false).
+      @p The first one is the @hl.openmole("ZipSampling"). It combines the elements of corresponding indices
+      from two samplings. @hl.openmole("ZipSampling") mimics the traditional @i{zip} operation from functional
+      programming that combining elements from two lists. OpenMOLE implements the @hl.openmole("ZipSampling")
+      through the keyword @hl.openmoleNoTest("zip").
 
-      @p The second sampling from the Zip family is the @hl.openmole("""ZipWithIndexSampling""", false). Again, this is
+      @p The second sampling from the Zip family is the @hl.openmole("ZipWithIndexSampling"). Again, this is
       inspired from a common functional programming operation called @i{zipWithIndex}. Applying @i{zipWithIndex} to a list
       would create a new list of pairs formed by the elements of the original list and the index of their position in the
-      list. For instance @hl.openmole("""List('A', 'B', 'C') zipWithIndex""") would returns the new list
-      @hl.openmole("""List(('A',0), ('B',1), ('C',2))"""). @hl.openmole("""ZipWithIndexSampling""", false) performs a
+      list. For instance @hl.openmole("List('A', 'B', 'C') zipWithIndex") would returns the new list
+      @hl.openmole("List(('A',0), ('B',1), ('C',2))"). @hl.openmole("ZipWithIndexSampling") performs a
       similar operation in the dataflow. An integer variable from the dataflow is filled with the index instead of
-      generating a new pair. OpenMOLE implements the @hl.openmole("""ZipWithIndexSampling""", false) through the keyword
-      @hl.openmole("""zipWithIndex""", false).
+      generating a new pair. OpenMOLE implements the @hl.openmole("ZipWithIndexSampling") through the keyword
+      @hl.openmoleNoTest("zipWithIndex").
 
       @p The following code snippet gives an example of how to use these two first Zip samplings.
 
@@ -79,11 +79,11 @@
         val id = Val[Int]
         val s4 = s2 zipWithIndex id""")
 
-        @p The third and last sampling from the Zip family is the @hl.openmole("""ZipWithNameSampling"""). It maps the name
+        @p The third and last sampling from the Zip family is the @hl.openmole("ZipWithNameSampling"). It maps the name
         the files from a @i{FileDomain} (see the next section for more details about exploring files) to a String variable
         in the dataflow. In the following excerpt, we map the name of the file and print it along to its size. When running
-        this snippet, notice the difference between the file name issued from @hl.openmole("""ZipWithNameSampling""") and a
-        call to the @hl.openmole("""toString""") of the file object that returns the complete path to the file:
+        this snippet, notice the difference between the file name issued from @hl.openmole("ZipWithNameSampling") and a
+        call to the @hl.openmoleNoTest("toString") of the file object that returns the complete path to the file:
 
         @br @hl.openmole("""
           val f = Val[File]
@@ -103,13 +103,13 @@
   @sect{Shrink the initial Sampling with Take, Filter, Sample}
     You can modify a Sampling using various operations in OpenMOLE.
 
-    @p When calling @hl.openmole("""take N""") on a Sampling, along with @i{N} an integer, OpenMOLE will generate a
+    @p When calling @hl.openmoleNoTest("take N") on a Sampling, along with @i{N} an integer, OpenMOLE will generate a
     new Sampling from the first @i{N} values of the initial Sampling.
 
-    @p Similarly, you can use @hl.openmole("""sample N""") to create a new Sampling with @i{N} random values picked up
+    @p Similarly, you can use @hl.openmoleNoTest("sample N") to create a new Sampling with @i{N} random values picked up
     at random from the initial Sampling.
 
-    @p More advanced Sampling reductions happen through @hl.openmole("""filter (\"predicate\")"""). It filters out all
+    @p More advanced Sampling reductions happen through @hl.openmoleNoTest("""filter ("predicate")"""). It filters out all
     the values from the initial Sampling for which the given predicate is wrong.
 
     @p The 3 sampling operations presented in this section are put into play in the following example:
@@ -129,11 +129,11 @@
       // Sample 5 values from s1
       val s9 = s1 sample 5""")
   @sect{Generate random Samplings}
-    OpenMOLE can generate random samplings from an initial sampling using @hl.openmole("""shuffle""") that creates
+    OpenMOLE can generate random samplings from an initial sampling using @hl.openmoleNoTest("shuffle") that creates
     a new sampling which is a randomly shuffled version of the initial one.
 
     @p OpenMOLE can also generate a fresh new Sampling made of random numbers using
-    @hl.openmole("""UniformDistribution[T]"""), with @i{T} the type of random numbers to be generated.
+    @hl.openmoleNoTest("UniformDistribution[T]"), with @i{T} the type of random numbers to be generated.
 
     @p Check the following script to discover how to use these random-based operations in a workflow:
 
@@ -152,8 +152,8 @@
     """)
 
   @sect{Higher level samplings}
-    Some sampling combinations generate higher level samplings such as @hl.openmole("""repeat""") and
-    @hl.openmole("""bootstrap"""):
+    Some sampling combinations generate higher level samplings such as @hl.openmoleNoTest("repeat") and
+    @hl.openmoleNoTest("bootstrap"):
       @br @hl.openmole("""
         val i = Val[Int]
 
@@ -223,7 +223,7 @@
         0.7,fic1,8
         0.9,fic2,19
         0.8,fic2,19""", "csv")
-      @p The corresponding @hl.openmole("""CSVSampling""") is:
+      @p The corresponding @hl.openmole("CSVSampling") is:
       @br @hl.openmole("""
         val i = Val[Int]
         val d = Val[Double]

@@ -1,5 +1,4 @@
 
-
 @import org.openmole.site.Objects._
 
 @def model = """

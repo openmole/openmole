@@ -12,7 +12,7 @@
     @p Console provides a headless / batch mode for running scripts. You can enable it thanks to the -s option: @hl.highlight("./openmole -c -s /path/to/you/mole/script", "plain")
     @p In that case OpenMOLE still asks for you preferences cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -c -s /path/to/your/mole/script -pw password", "plain")
     @p OpenMOLE will wait until the execution of your mole has ended if you add at the end of your script:
-    @br @hl.openmole("""ex.waitUntilEnded // ex is the name of your mole execution variable""", test = false)
+    @br @hl.openmoleNoTest("""ex.waitUntilEnded // ex is the name of your mole execution variable""")
 
   @sect{Plugins}
     @p The -p option load plugins in the OpenMOLE console: @hl.highlight("./openmole -c -p /path/to/plugin.jar /path/to/anotherplugin.jar", "plain")
@@ -26,10 +26,10 @@
        @sect{Basic scala constructs}
          You need only a very basic understanding of the scala language in order to design OpenMOLE workflows.
          @sect{Declare variables}
-           @hl.openmole("""
+           @hl.openmoleNoTest("""
            val a = 1 // declares a variable a of type Int
            val b = "Text" // declares a variable a of type String
-           val c = if(condition) 5 else 10 // declare a variable c of type Int, the value of c depends on the condition""", test = false)
+           val c = if(condition) 5 else 10 // declare a variable c of type Int, the value of c depends on the condition""")
 
          @sect{Construct objects}
            OpenMOLE takes advantage of the object oriented aspect of scala. It proposes a set of objects that you can build and assemble together to specify your workflow. In general, an object is instantiated using the "new" keyword:
@@ -39,8 +39,8 @@
            @p Under the hood, it calls a method that is in charge of building the file.")
          @sect{Named parameters}
            Functions calls generally require the parameters to be provided in a predefined order. In scala you can get rid of this ordering constraint by using named parameters. OpenMOLE scripts will often make use of this pattern:
-           @br @hl.openmole("val t = SomeClass(value1, value2, otherParam = otherValue)", test = false)
-           @p It means that @hl.openmole("""value1""") and @hl.openmole("""value2""") are the values for the first two parameters and that the parameter named @hl.openmole("""otherParam""") is set to the value @i{otherValue}. Unspecified parameters are set to their default value.
+           @br @hl.openmoleNoTest("val t = SomeClass(value1, value2, otherParam = otherValue)")
+           @p It means that @i{value1} and @i{value2} are the values for the first two parameters and that the parameter named @i{otherParam} is set to the value @i{otherValue}. Unspecified parameters are set to their default value.
 
    @sect{Going further}
      What you have read so far should be sufficient in order to get started with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Hello World tutorial", href := DocumentationPages.root.console.tutorial.helloWorld.file). You may also want to look at the @a("Task documentation", href := DocumentationPages.root.console.task.file) and other sections detailing specific concepts.

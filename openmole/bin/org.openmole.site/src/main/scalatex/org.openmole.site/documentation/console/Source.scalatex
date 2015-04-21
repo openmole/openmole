@@ -29,7 +29,7 @@
 
     @p The source @i{s} is plugged at the beginning of the task @i{hello}. The source is executed prior to
     @b{each execution} of @i{hello}. You can also plug multiple sources on the same task using the syntax:
-    @hl.openmole("hello source (s1, s2, s3)").
+    @hl.openmoleNoTest("hello source (s1, s2, s3)").
 
   @sect{List files in a directory}
     This source lists directories and injects an array of @i{File} objects into the dataflow. See how the range of files
@@ -75,7 +75,7 @@
 
     Here, we are collecting all the directories which named "care_archive". See how they are gathered in an
     @i{Array[File]} container and can be explored by an @a("ExplorationTask", href := root.console.sampling.file) using
-    the keyword @hl.openmole("in"). This exploration generates one @i{analysisTask} per directory collected by the
+    the keyword @hl.openmoleNoTest("in"). This exploration generates one @i{analysisTask} per directory collected by the
     source.
 
     @br @hl.openmole("""

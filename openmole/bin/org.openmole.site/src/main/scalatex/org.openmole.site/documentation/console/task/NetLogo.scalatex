@@ -125,6 +125,6 @@
     """)
 
     @p The progress of the simulation can be monitored by printing the state of the execution variable:
-    @hl.openmole("""print(ex)""", test = false).
+    @hl.openmoleNoTest("print(ex)").
 
     @p At the end of the execution, you will find the output values in a file called @i{result.csv}.
