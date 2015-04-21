@@ -179,71 +179,71 @@ object DocumentationPages { index ⇒
   def allPages = root.allPages
 
   def root = new DocumentationPage {
-    def name = "documentation"
+    def name = "Documentation"
     def content = documentation.Documentation()
-    def children = Seq(console, gui, development)
+    def children = Seq(console, gui, tutorial, development)
 
     def console =
       new DocumentationPage {
-        def name = "console"
-        def children = Seq(task, sampling, transition, hook, environment, source, method, tutorial)
+        def name = "Console DSL"
+        def children = Seq(task, sampling, transition, hook, environment, source, method)
         def content = documentation.Console()
 
         def task = new DocumentationPage {
-          def name = "task"
+          def name = "Tasks"
           def children = Seq(scala, systemExec, netLogo, mole)
           def content = documentation.console.Task()
 
           def scala = new DocumentationPage {
-            def name = "scala"
+            def name = "Scala"
             def children = Seq()
             def content = documentation.console.task.Scala()
           }
 
           def systemExec = new DocumentationPage {
-            def name = "systemexec"
+            def name = "SystemExec"
             def children = Seq()
             def content = documentation.console.task.SystemExec()
           }
 
           def netLogo = new DocumentationPage {
-            def name = "netlogo"
+            def name = "NetLogo"
             def children = Seq()
             def content = documentation.console.task.NetLogo()
           }
 
           def mole = new DocumentationPage {
-            def name = "mole"
+            def name = "Mole"
             def children = Seq()
             def content = documentation.console.task.MoleTask()
           }
         }
 
         def sampling = new DocumentationPage {
-          def name = "sampling"
+          def name = "Samplings"
           def children = Seq()
           def content = documentation.console.Sampling()
         }
 
         def transition = new DocumentationPage {
-          def name = "transition"
+          def name = "Transitions"
           def children = Seq()
           def content = documentation.console.Transition()
         }
 
         def hook = new DocumentationPage {
-          def name = "hook"
+          def name = "Hooks"
           def children = Seq()
           def content = documentation.console.Hook()
         }
 
         def environment = new DocumentationPage {
-          def name = "environment"
+          def name = "Environments"
           def children = Seq(multithread, ssh, egi, cluster, desktopGrid)
           def content = documentation.console.Environment()
 
           def multithread = new DocumentationPage {
-            def name = "multi-thread"
+            def name = "Multi-threads"
             def children = Seq()
             def content = documentation.console.environment.Multithread()
           }
@@ -261,13 +261,13 @@ object DocumentationPages { index ⇒
           }
 
           def cluster = new DocumentationPage {
-            def name = "cluster"
+            def name = "Clusters"
             def children = Seq()
             def content = documentation.console.environment.Cluster()
           }
 
           def desktopGrid = new DocumentationPage {
-            def name = "desktop grid"
+            def name = "Desktop Grid"
             def children = Seq()
             def content = documentation.console.environment.DesktopGrid()
           }
@@ -275,45 +275,15 @@ object DocumentationPages { index ⇒
         }
 
         def source = new DocumentationPage {
-          def name = "source"
+          def name = "Sources"
           def children = Seq()
           def content = documentation.console.Source()
         }
 
         def method = new DocumentationPage {
-          def name = "method"
+          def name = "Exploration Methods"
           def children = Seq()
           def content = documentation.console.Method()
-        }
-
-        def tutorial = new DocumentationPage {
-          def name = "tutorial"
-          def children = Seq(helloWorld, headlessNetLogo, netLogoGA, capsule)
-          def content = documentation.console.Tutorial()
-
-          def helloWorld = new DocumentationPage {
-            def name = "Hello World"
-            def children = Seq()
-            def content = documentation.console.tutorial.HelloWorld()
-          }
-
-          def headlessNetLogo = new DocumentationPage {
-            def name = "NetLogo Headless"
-            def children = Seq()
-            def content = documentation.console.tutorial.HeadlessNetLogo()
-          }
-
-          def netLogoGA = new DocumentationPage {
-            def name = "NetLogo GA"
-            def children = Seq()
-            def content = documentation.console.tutorial.NetLogoGA()
-          }
-
-          def capsule = new DocumentationPage {
-            def name = "Capsule"
-            def children = Seq()
-            def content = documentation.console.tutorial.Capsule()
-          }
         }
       }
 
@@ -323,31 +293,61 @@ object DocumentationPages { index ⇒
       def content = documentation.GUI()
     }
 
+    def tutorial = new DocumentationPage {
+      def name = "Tutorials"
+      def children = Seq(helloWorld, headlessNetLogo, netLogoGA, capsule)
+      def content = documentation.console.Tutorial()
+
+      def helloWorld = new DocumentationPage {
+        def name = "Hello World"
+        def children = Seq()
+        def content = documentation.console.tutorial.HelloWorld()
+      }
+
+      def headlessNetLogo = new DocumentationPage {
+        def name = "NetLogo Headless"
+        def children = Seq()
+        def content = documentation.console.tutorial.HeadlessNetLogo()
+      }
+
+      def netLogoGA = new DocumentationPage {
+        def name = "GA with NetLogo"
+        def children = Seq()
+        def content = documentation.console.tutorial.NetLogoGA()
+      }
+
+      def capsule = new DocumentationPage {
+        def name = "Capsule"
+        def children = Seq()
+        def content = documentation.console.tutorial.Capsule()
+      }
+    }
+
     def development = new DocumentationPage {
-      def name = "development"
+      def name = "Development"
       def children = Seq(compilation, plugin, branching, webserver)
       def content = documentation.Development()
 
       def compilation = new DocumentationPage {
-        def name = "compilation"
+        def name = "Compilation"
         def children = Seq()
         def content = documentation.development.Compilation()
       }
 
       def plugin = new DocumentationPage {
-        def name = "plugin"
+        def name = "Plugins"
         def children = Seq()
         def content = documentation.development.Plugin()
       }
 
       def branching = new DocumentationPage {
-        def name = "branching"
+        def name = "Branching model"
         def children = Seq()
         def content = documentation.development.Branching()
       }
 
       def webserver = new DocumentationPage {
-        def name = "web server"
+        def name = "Web Server"
         def children = Seq()
         def content = documentation.development.WebServer()
       }

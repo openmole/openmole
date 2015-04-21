@@ -39,6 +39,8 @@ object Objects {
         }
       highlight(code, "scala")
     }
+
+    def openmoleNoTest(code: String) = openmole(code, test = false)
   }
   case class Parameter(name: String, `type`: String, description: String)
   def parameters(p: Parameter*) = {

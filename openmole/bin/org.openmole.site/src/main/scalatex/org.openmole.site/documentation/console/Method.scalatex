@@ -1,5 +1,4 @@
 
-
 @import org.openmole.site.Objects._
 
 @def model = """
@@ -17,20 +16,25 @@
 
   val modelCapsule = Capsule(modelTask)"""
 
-@sect{Methods}
-  OpenMOLE provides advanced methods to explore space of parameters. These methods generates workflow automatically in order to solve exploration problems.
+@sect{Automatic parameter exploration methods}
+  OpenMOLE provides advanced methods to help you explore your application's space of parameters. These methods
+  automatically generate workflows in order to solve exploration problems.
 
   @sect{Genetic algorithms}
-    This workflow optimises a dummy model using generational NSGA II multi-objective algorithm. You are free to replace the dummy model with you own.
+    This workflow optimises a dummy model using the generational NSGA II multi-objective algorithm. You can replace the
+  instances of @i{modelCapsule} by your own model and adapt the variation range of its input variables. If you're not
+  familiar with parameter tuning using Genetic Algorithms (GA), you should first consult the
+  @a("tutorial explaining how to calibrate a NetLogo model with a GA", href := DocumentationPages.root.tutorial.netLogoGA.file).
 
     @br @hl.openmole(s"""
   $model
 
   // Definition of the optimisation algorithm
   // mu is the size of the population
-  // termination is the termination criterion, here it run for 100 generation an alternative could be Timed(1 hour) for which it would run for 1 hour
+  // termination is the termination criterion, here it runs for 100 generations. A time limit could be set as an
+  // alternative by replacing 100 by 1 hour (hour is a duration type understood by OpenMOLE).
   // inputs is the inputs prototype and their variation ranges
-  // objectives the objectives to minimize
+  // objectives are the objectives to minimise
   val evolution =
     NSGA2 (
       mu = 100,
@@ -48,42 +52,45 @@
       lambda = 100
     )
 
-  // Definition of a hook to save the population of solutions
+  // Definition of a hook to save the population of solutions to /tmp/evolution on the local machine running OpenMOLE
   val savePopulation = SavePopulationHook(nsga2, "/tmp/evolution/")
 
-  // Construction of the complete mole with the execution environment, and the hook
+  // Construction of the complete mole with the execution environment, and the hook.
+  // Here the generated workflow will run using 4 threads of the local machine.
   val ex = nsga2.puzzle + (modelCapsule on LocalEnvironment(4)) + (nsga2.output hook savePopulation)
   ex.start""")
 
-  @p In order to use a steady state algorithm individuals are merged into the archive immediately after the evaluation and a new evaluation is generated, you may change the end of the script:
+  @p In order to use a steady state algorithm individuals are merged into the archive immediately after the evaluation
+  and a new evaluation is generated. Note how the end how this modifies the end of the script:
 
   @br @hl.openmole(s"""
-  // Definition of the optimisation algorithm
-  // mu is the size of the population
-  // termination is the termination criterion, here it run for 100 generation an alternative could be "1 hour" for which it would run for 1 hour
-  // inputs is the inputs prototype and their variation ranges
-  // objectives the objectives to minimize
+  // Definition of the optimisation algorithm just as before.
+  // Only the termination criterion has been updated for the sake of demonstrating the use of time limits
   val evolution =
     NSGA2 (
       mu = 100,
-      termination = 10000,
+      termination = 1 hour,
       inputs = Seq(x -> (0.0, 1.0), y -> (0.0, 1.0)),
       objectives = Seq(o1, o2)
     )
 
   // Construction of the workflow orchestrating the genetic algorithm
-  // modelCapsule is the fitness function on optimise
+  // modelCapsule is the fitness function to optimise
   // an optional lambda parameter can be set to specify the parallelism level of the workflow
   val nsga2 = SteadyGA(evolution)(modelCapsule)
 
-  // Definition of a hook to save the population of solutions
+  // Definition of a hook to save the population of solutions to /tmp/evolution on the local machine running OpenMOLE
   val savePopulation = SavePopulationHook(nsga2, "/tmp/evolution/")
 
-  // Construction of the complete mole with the execution environment, and the hook
-  val ex = nsga2.puzzle + (modelCapsule on LocalEnvironment(4))  + (nsga2.output hook savePopulation)
+  // Construction of the complete mole with the execution environment, and the hook.
+  // Here the generated workflow will run using 4 threads of the local machine.
+  val ex = nsga2.puzzle + (modelCapsule on LocalEnvironment(4)) + (nsga2.output hook savePopulation)
   ex.start""", header = model)
 
-  @p For distributed environments the island distribution scheme is well adapted. In this scheme islands of population evolve during a while on a remote node and when an island is finished, its final population is merge into a global archive and a new island is generated. To do so:
+  @p For distributed environments the island distribution scheme is well adapted. Islands of population evolve for a
+  while on a remote node. When an island is finished, its final population is merged back into a global archive.
+  A new island is then generated until the termination criterion: i.e. the total number of islands to generate is met.
+  Islands can be used as follows:
 
   @br @hl.openmole("""
   val evolution =
@@ -94,23 +101,29 @@
       objectives = Seq(o1, o2)
     )
 
-  // Generate a workflow that orchestrate 100 concurrent islands, stops when 10,000 islands have been finished. Each island is initialised with a random sampling of 50 individual among the global population
+  // Generate a workflow that orchestrates 100 concurrent islands.
+  // The workflow stops when 10,000 islands have completed.
+  // Each island is initialised with a random sampling of 50 individuals among the global population.
   val (ga, island) = IslandSteadyGA(evolution, modelCapsule)(
     number = 100,
     termination = 10000,
     samples = 50)
 
-  // Definition of a hook to save the population of solutions
+  // Definition of a hook to save the population of solutions to /tmp/evolution on the local machine running OpenMOLE
   val savePopulation = SavePopulationHook(ga, "/tmp/evolution/")
 
-  // Construction of the complete mole with the execution environment, and the hook
+  // Construction of the complete mole with the execution environment, and the hook.
+  // Here the generated workflow will run using 4 threads of the local machine.
   val ex = ga.puzzle + (island on LocalEnvironment(4)) + (ga.output hook savePopulation)
   ex.start""", header = model)
 
-  @p Calibration of stochastic models leads to noisy fitness functions. To deal with such fitness function one strategy is to allocate a small amount of computation to reevaluate already evaluated solution in order to discard solutions which have previously been over estimated. To do so you should use the reevaluate attribute of the optimization algorithm:
+  @p Calibration of stochastic models leads to noisy fitness functions. To deal with such fitness functions, one
+  strategy consists in allocating a small amount of computation time to reevaluate already evaluated solutions.
+  This process discards solutions which have previously been over estimated.
+  Reeveluating solutions can be enabled thanks to the @i{reevaluate} attribute of the optimisation algorithm:
 
   @br @hl.openmole("""
-  // 1 on 100 fitness evaluation is a reevaluation of an already evaluated individual
+  // 1 out of 100 fitness evaluations is a reevaluation of an already evaluated individual
   val evolution =
     NSGA2 (
       mu = 100,
@@ -119,4 +132,3 @@
       objectives = Seq(o1, o2),
       reevaluate = 0.01
     )""", header = model)
-
