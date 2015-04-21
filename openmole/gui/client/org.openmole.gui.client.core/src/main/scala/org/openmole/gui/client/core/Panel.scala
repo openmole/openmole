@@ -115,7 +115,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
       tbody({
         val elements = for (db ← dbUIs.sortBy(_.name()) if filters(filter())(db)) yield {
           bs.tr(row)(
-            bs.td(col_md_6)(a(dataBagUIView(db), cursor := "pointer", onclick := { () ⇒
+            bs.td(col_md_6)(tags.a(dataBagUIView(db), cursor := "pointer", onclick := { () ⇒
               setCurrent(db)
               editionState() = true
               //  jQueryCalls(db.dataUI().panelUI.jQueryCalls)

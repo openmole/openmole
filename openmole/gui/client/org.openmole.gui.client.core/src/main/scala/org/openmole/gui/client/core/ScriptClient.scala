@@ -1,15 +1,16 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.dataui.EditorPanelUI
+import org.openmole.gui.client.core.files.TreeNodePanel
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.Forms._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.misc.js.JsRxTags._
-
 import org.scalajs.dom
-
+import rx._
 import scalatags.JsDom.all._
+
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
  *
@@ -39,20 +40,43 @@ object ScriptClient {
       ""
     )
 
-    val topdiv = dom.document.body.appendChild(tags.div.render)
+    val body = dom.document.body
 
-    topdiv.appendChild(
+    val tree = TreeNodePanel("/tmp")
+    val openFileTree = Var(false)
+
+    dom.document.body.appendChild(
       nav("mainMav",
         Seq(
           (navItem("executions", "Executions").render, "env", () ⇒ {
             println("Not yet")
+          }),
+          (navItem("files", "Files").render, "files", () ⇒ {
+            openFileTree() = !openFileTree()
+            println("POS " + openFileTree())
           })
         ), nav_pills + nav_inverse + nav_staticTop
       )
     )
 
-    topdiv.appendChild(editor.view.render)
-    dom.document.body.appendChild(topdiv)
+    val site_canvas = tags.div(id := "site-canvas")(
+      tags.div(id := "site-menu")(
+        tree.view.render
+      ),
+      editor.view.render
+    )
+
+    val maindiv = dom.document.body.appendChild(tags.div.render)
+
+    maindiv.appendChild(
+      tags.div(`class` := Rx {
+        if (openFileTree()) "show-nav"
+        else ""
+      }
+      )(site_canvas.render)
+    )
+
+    body.appendChild(maindiv)
 
     editor.init
 

@@ -16,6 +16,10 @@
  */
 package org.openmole.gui.shared
 
+import org.openmole.gui.ext.data.TreeNodeData
+
 trait Api {
   def uuid(): String = java.util.UUID.randomUUID.toString
+
+  def listFiles(path: String): Seq[TreeNodeData]
 }

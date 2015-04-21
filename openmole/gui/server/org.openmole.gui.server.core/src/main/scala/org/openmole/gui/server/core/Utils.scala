@@ -1,10 +1,7 @@
 package org.openmole.gui.server.core
 
-import org.openmole.gui.shared._
-import org.openmole.gui.ext.data.TreeNodeData
-
 /*
- * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -20,8 +17,14 @@ import org.openmole.gui.ext.data.TreeNodeData
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object ApiImpl extends Api {
+import org.openmole.gui.ext.data._
+import java.io.File
 
-  def listFiles(path: String): Seq[TreeNodeData] = Utils.listFiles(path)
+object Utils {
+
+  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f.getCanonicalPath, f.isDirectory)
+  implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map { fileToTreeNodeData(_) }
+
+  def listFiles(path: String): Seq[TreeNodeData] = new File(path).listFiles.toSeq
 
 }
