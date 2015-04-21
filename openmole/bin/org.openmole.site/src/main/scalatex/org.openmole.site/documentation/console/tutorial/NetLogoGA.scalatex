@@ -76,7 +76,7 @@
     @p A visual representation of this model looks like that:
     @br @img(src := Resource.ants.file)
 
-    @p In this tutorial we use @a("a headless version", href := root.console.tutorial.headlessNetLogo.file) of the
+    @p In this tutorial we use @a("a headless version", href := root.tutorial.headlessNetLogo.file) of the
     model. This modified version is available @a("here", href := Resource.antsNLogo.file).
 
   @sect{Define the problem to solve as an optimisation problem}
