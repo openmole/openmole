@@ -18,14 +18,12 @@
 package org.openmole.core.updater
 
 import java.util.concurrent.Executors
-import org.openmole.core.tools.service.ThreadUtil
-import ThreadUtil._
+import org.openmole.tool.thread._
 
 import scala.concurrent.duration.FiniteDuration
 
 object Updater {
 
-  private var shutDown = false
   private lazy val scheduler = Executors.newScheduledThreadPool(1, daemonThreadFactory)
   private lazy val pool = Executors.newCachedThreadPool(daemonThreadFactory)
 
@@ -48,13 +46,10 @@ object Updater {
   }
 
   def delay(updaterTask: UpdaterTask) = {
-    if (!shutDown) {
-      scheduler.schedule(
-        new Runnable {
-          override def run = pool.submit(updaterTask)
-        }, updaterTask.updatable.delay.length, updaterTask.updatable.delay.unit)
-    }
-
+    scheduler.schedule(
+      new Runnable {
+        override def run = pool.submit(updaterTask)
+      }, updaterTask.updatable.delay.length, updaterTask.updatable.delay.unit)
   }
 
 }

@@ -22,20 +22,18 @@ import java.util.Random
 import java.util.UUID
 import java.util.concurrent.Executors
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.tools.io.{ HashUtil, FileUtil, TarArchiver }
-import org.openmole.core.tools.service.{ Logger, OS, ProcessUtil, ThreadUtil }
+import org.openmole.tool.file._
+import org.openmole.tool.thread._
+import org.openmole.core.tools.service.{ Logger, OS, ProcessUtil }
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.plugin.environment.desktopgrid._
 import DesktopGridEnvironment._
 import org.openmole.core.batch.message._
 import org.openmole.core.batch.storage._
 import org.openmole.core.serializer._
-import org.openmole.core.tools.service._
-import FileUtil._
-import TarArchiver._
+import org.openmole.tool.tar._
+import org.openmole.tool.hash._
 import ProcessUtil._
-import ThreadUtil._
-import HashUtil._
 import fr.iscpif.gridscale.ssh.{ SSHStorage, SSHUserPasswordAuthentication }
 
 import org.openmole.core.batch.message.FileMessage._
@@ -293,7 +291,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               logger.info("Downloading the runtime.")
               val (archive, hash) = getFileUnzipVerifyHash(msg)
               logger.info("Extracting runtime.")
-              archive.extractUncompressDirArchiveWithRelativePath(dir)
+              archive.extractUncompress(dir)
               dir -> hash
             })
           cached ::= jobMessage.runtime

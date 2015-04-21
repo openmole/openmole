@@ -2,11 +2,9 @@ package org.openmole.rest.server
 
 import java.io.PrintStream
 import java.util.UUID
-import java.util.zip.GZIPInputStream
+import java.util.zip.{ GZIPOutputStream, GZIPInputStream }
 import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.HttpServletRequest
-
-import com.ice.tar.TarInputStream
 import groovy.ui.ConsoleView
 import org.json4s.JsonDSL._
 import org.json4s._
@@ -16,14 +14,13 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
 import org.openmole.core.dsl._
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.tar.{ TarOutputStream, TarInputStream }
 import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.servlet.FileUploadSupport
 import org.openmole.rest.message._
-import org.openmole.core.tools.io.TarArchiver._
-import org.openmole.core.tools.io.FileUtil._
-
-import scala.io.Source
+import org.openmole.tool.file._
+import org.openmole.tool.tar._
 import scala.util.{ Try, Failure, Success }
 
 case class Execution(moleExecution: MoleExecution, workDirectory: WorkDirectory)
@@ -43,8 +40,8 @@ case class WorkDirectory(baseDirectory: File) {
   }
 }
 
-@MultipartConfig //research scala multipart config
-trait RESTAPI extends ScalatraServlet
+@MultipartConfig(fileSizeThreshold = 1024 * 1024) //research scala multipart config
+trait RESTAPI extends ScalatraServlet with GZipSupport
     with FileUploadSupport
     with FlashMapSupport
     with JacksonJsonSupport
@@ -90,17 +87,17 @@ trait RESTAPI extends ScalatraServlet
 
           def extract =
             for {
-              archive ← fileParams get "inputs"
+              archive ← fileParams get "inputDirectory"
             } {
               val is = new TarInputStream(new GZIPInputStream(archive.getInputStream))
-              try is.extractDirArchiveWithRelativePath(directory.inputDirectory) finally is.close
+              try is.extract(directory.inputDirectory) finally is.close
             }
 
           def launch: ActionResult = {
             val console = new Console(arguments.plugins)
             val repl = console.newREPL(ConsoleVariables(inputDirectory = directory.inputDirectory, outputDirectory = directory.outputDirectory))
             Try(repl.eval(script)) match {
-              case Failure(e) ⇒ InternalServerError(Error(e).toJson)
+              case Failure(e) ⇒ ExpectationFailed(Error(e).toJson)
               case Success(o) ⇒
                 o match {
                   case puzzle: Puzzle ⇒
@@ -109,15 +106,29 @@ trait RESTAPI extends ScalatraServlet
                         val id = ExecutionId(UUID.randomUUID().toString)
                         moles.add(id, Execution(ex, directory))
                         Ok(id)
-                      case Failure(error) ⇒ InternalServerError(Error(error))
+                      case Failure(error) ⇒ ExpectationFailed(Error(error))
                     }
-                  case _ ⇒ InternalServerError(Error("The last line of the script should be a puzzle"))
+                  case _ ⇒ ExpectationFailed(Error("The last line of the script should be a puzzle"))
                 }
             }
           }
 
           extract
           launch
+      }
+    }
+  }
+
+  post("/outputDirectory") {
+    authenticated {
+      getExecution { ex ⇒
+        val gzOs = response.getOutputStream.toGZ
+        val os = new TarOutputStream(gzOs)
+        contentType = "application/octet-stream"
+        response.setHeader("Content-Disposition", "attachment; filename=" + "outputDirectory.tgz")
+        os.archive(ex.workDirectory.outputDirectory)
+        os.close()
+        Ok()
       }
     }
   }
@@ -142,7 +153,10 @@ trait RESTAPI extends ScalatraServlet
         Ok(
           State(
             state,
-            ex.moleExecution.exception.map(Error(_))
+            ex.moleExecution.exception.map(Error(_)),
+            ready = ex.moleExecution.ready,
+            running = ex.moleExecution.running,
+            completed = ex.moleExecution.completed
           ).toJson
         )
       }

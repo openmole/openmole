@@ -32,4 +32,5 @@ package object file {
 
   def csvHeader = set[{ def setCSVHeader(h: Option[ExpandedString]) }]
 
+  def singleRow = set[{ def setSingleRow(b: Boolean) }]
 }

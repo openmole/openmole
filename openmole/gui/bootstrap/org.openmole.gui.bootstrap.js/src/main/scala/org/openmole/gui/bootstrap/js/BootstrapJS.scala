@@ -20,12 +20,11 @@ import java.net.URL
 import java.io.{ FileOutputStream, File }
 import org.openmole.core.pluginmanager
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.fileservice._
 import org.openmole.gui.server.core.{ ServerFactories, GUIServer }
 import org.openmole.gui.shared._
-import FileUtil._
 import scala.collection.JavaConverters._
 
 object BootstrapJS {

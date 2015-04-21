@@ -17,8 +17,7 @@ package org.openmole.gui.bootstrap.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.tools.io.FileUtil
-import FileUtil._
+import org.openmole.tool.file._
 import org.scalajs.core.tools.io._
 import org.scalajs.core.tools.logging._
 import org.scalajs.core.tools.classpath._

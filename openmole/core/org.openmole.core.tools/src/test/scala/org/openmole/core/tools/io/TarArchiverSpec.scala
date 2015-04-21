@@ -17,9 +17,9 @@
 
 package org.openmole.core.tools.io
 
-import com.ice.tar.TarOutputStream
 import java.io.File
 import FileUtil._
+import org.openmole.tool.tar.TarOutputStream
 import org.scalatest.FlatSpec
 import org.scalatest._
 import org.scalatest.junit.JUnitRunner
@@ -28,7 +28,6 @@ import java.io.FileWriter
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import scala.io.Source
-import TarArchiver._
 import FileUtil._
 
 class TarArchiverSpec extends FlatSpec with Matchers {

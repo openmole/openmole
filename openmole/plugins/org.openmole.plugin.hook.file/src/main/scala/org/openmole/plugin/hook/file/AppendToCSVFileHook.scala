@@ -17,12 +17,12 @@
 
 package org.openmole.plugin.hook.file
 
-import org.openmole.core.tools.io.{ FileUtil, Prettifier }
+import org.openmole.core.tools.io.{ Prettifier }
+import org.openmole.tool.file._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.ExpandedString
-import FileUtil._
 import Prettifier._
 import scala.annotation.tailrec
 import org.openmole.core.workflow.mole._
@@ -39,6 +39,7 @@ object AppendToCSVFileHook {
 abstract class AppendToCSVFileHook(
     fileName: ExpandedString,
     header: Option[ExpandedString],
+    singleRow: Boolean,
     prototypes: Prototype[_]*) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
@@ -71,13 +72,17 @@ abstract class AppendToCSVFileHook(
 
         def moreThanOneElement(l: List[_]) = !l.isEmpty && !l.tail.isEmpty
 
+        def flatAny(o: Any): List[Any] = o match {
+          case o: List[_] ⇒ o
+          case _          ⇒ List(o)
+        }
+
         @tailrec def write(lists: List[List[_]]): Unit =
-          if (!lists.exists(moreThanOneElement)) writeLine(lists.map { _.head })
+          if (singleRow || !lists.exists(moreThanOneElement))
+            writeLine(lists.flatten(flatAny))
           else {
             writeLine(lists.map { _.head })
-            write(
-              lists.map { l ⇒ if (moreThanOneElement(l)) l.tail else l }
-            )
+            write(lists.map { l ⇒ if (moreThanOneElement(l)) l.tail else l })
           }
 
         def writeLine[T](list: List[T]) = {

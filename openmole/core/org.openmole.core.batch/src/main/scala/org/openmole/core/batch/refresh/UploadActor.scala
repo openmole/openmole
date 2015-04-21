@@ -20,7 +20,6 @@ package org.openmole.core.batch.refresh
 import akka.actor.Actor
 
 import akka.actor.ActorRef
-import com.ice.tar.TarOutputStream
 import java.io.File
 import java.util.UUID
 import org.openmole.core.batch.message._
@@ -31,13 +30,13 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.environment.BatchEnvironment.{ signalUpload }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.tools.io.{ HashUtil, FileUtil, TarArchiver }
+import org.openmole.tool.file._
+import org.openmole.tool.hash._
 import org.openmole.core.workflow.job._
-import FileUtil._
-import TarArchiver._
 
 import org.openmole.core.serializer._
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.tar.TarOutputStream
 import scala.collection.immutable.TreeSet
 import scala.slick.driver.H2Driver.simple._
 
@@ -176,7 +175,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
 
     signalUpload(
       storage.uploadGZ(jobFile, jobForRuntimePath), jobForRuntimePath, storage)
-    val jobHash = HashUtil.computeHash(jobFile).toString
+    val jobHash = jobFile.hash.toString
 
     val pluginReplicas = serializationPlugin.map { toReplicatedFile(job, _, storage) }
     val files = serializationFile.map { toReplicatedFile(job, _, storage) }

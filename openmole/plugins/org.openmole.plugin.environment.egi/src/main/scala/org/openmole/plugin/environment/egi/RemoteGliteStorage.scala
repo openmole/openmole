@@ -18,9 +18,8 @@
 package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.storage.{ RemoteStorage, SimpleStorage }
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
-import FileUtil._
 import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage }
 import java.io.File
 import java.net.URI

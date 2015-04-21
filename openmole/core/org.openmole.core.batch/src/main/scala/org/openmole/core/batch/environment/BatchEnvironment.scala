@@ -29,16 +29,15 @@ import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.tools.io.FileUtil
-import org.openmole.core.tools.service.{ Logger, Hash, ThreadUtil }
-import FileUtil._
+import org.openmole.tool.file._
+import org.openmole.tool.thread._
+import org.openmole.core.tools.service.Logger
 import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.job._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
-import org.openmole.core.tools.service._
 import org.openmole.core.workflow.execution._
 import akka.actor.Props
-import ThreadUtil._
+import org.openmole.tool.hash.Hash
 import ref.WeakReference
 
 object BatchEnvironment extends Logger {
@@ -140,8 +139,6 @@ import BatchEnvironment._
 
 trait BatchEnvironment extends Environment { env ⇒
 
-  //val id: String
-
   type SS <: StorageService
   type JS <: JobService
 
@@ -219,4 +216,6 @@ trait BatchEnvironment extends Environment { env ⇒
 
   def executionJobs: Iterable[BatchExecutionJob] = batchJobWatcher.executionJobs
 
+  def submitted: Long = executionJobs.count { _.state == ExecutionState.SUBMITTED }
+  def running: Long = executionJobs.count { _.state == ExecutionState.RUNNING }
 }

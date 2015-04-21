@@ -20,11 +20,9 @@ package org.openmole.site
 import java.io.File
 import java.util.zip.GZIPInputStream
 import ammonite.ops.Path
-import com.ice.tar.TarInputStream
 import org.eclipse.equinox.app._
-import org.openmole.core.tools.io.{ FileUtil, TarArchiver }
-import FileUtil._
-import TarArchiver._
+import org.openmole.tool.file._
+import org.openmole.tool.tar._
 import scalatags.Text.all
 import scalatags.Text.all._
 import scala.sys.process.BasicIO
@@ -117,7 +115,7 @@ class Site extends IApplication {
         val f = new File(dest, dir)
         f.mkdirs
         withClosable(new TarInputStream(new GZIPInputStream(getClass.getClassLoader.getResourceAsStream(name)))) {
-          _.extractDirArchiveWithRelativePath(f)
+          _.extract(f)
         }
     }
 

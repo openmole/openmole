@@ -18,6 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
+import org.openmole.core.workflow.data.PrototypeType
 
 import scala.util.Random
 
@@ -33,12 +34,13 @@ object NSGA2 {
     new NSGA2 {
       val inputs = _inputs
       val objectives = _objectives
-      val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest = implicitly[Manifest[Population[G, P, F]]]
-      val individualManifest = implicitly[Manifest[Individual[G, P, F]]]
-      val aManifest = implicitly[Manifest[A]]
-      val fManifest = implicitly[Manifest[F]]
-      val gManifest = implicitly[Manifest[G]]
+
+      val stateType = termination.stateType
+      val populationType = PrototypeType[Population[G, P, F]]
+      val individualType = PrototypeType[Individual[G, P, F]]
+      val aType = PrototypeType[A]
+      val fType = PrototypeType[F]
+      val gType = PrototypeType[G]
 
       val genomeSize = inputs.size
 

@@ -17,15 +17,6 @@
 
 package org.openmole.plugin.task.groovy
 
-import java.io.File
-import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.serializer.plugin.Plugins
-import org.openmole.core.tools.io.FileUtil
-import org.openmole.core.tools.service.Random
-import org.openmole.core.workflow.task._
-import FileUtil.fileOrdering
-import org.openmole.core.workspace
-import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.task.jvm._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._

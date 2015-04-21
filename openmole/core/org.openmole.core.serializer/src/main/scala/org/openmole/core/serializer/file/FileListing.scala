@@ -17,12 +17,11 @@
 
 package org.openmole.core.serializer.file
 
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 
 import scala.collection.immutable.TreeSet
 import java.io.File
 import java.io.OutputStream
-import FileUtil.fileOrdering
 import org.openmole.core.serializer.converter.Serialiser
 
 trait FileListing <: Serialiser {

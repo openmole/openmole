@@ -16,15 +16,11 @@ import org.scalatra.ScalatraBase
 import java.security.{ Security, SecureRandom, KeyPairGenerator, KeyStore }
 import java.io.{ FileOutputStream, FileInputStream }
 import org.scalatra.servlet.ScalatraListener
-import resource._
-import org.bouncycastle.cert.X509v3CertificateBuilder
-import org.bouncycastle.asn1.x509._
-import java.math.BigInteger
-import java.util.Date
+
 import org.eclipse.jetty.security.{ ConstraintMapping, ConstraintSecurityHandler }
-import org.openmole.core.tools.io.HashUtil._
 import org.scalatra._
 import org.openmole.console._
+import org.openmole.tool.hash._
 
 object RESTServer extends Logger {
 

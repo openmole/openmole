@@ -17,11 +17,10 @@
 
 package org.openmole.core.workflow.execution.local
 
-import org.openmole.core.tools.service.ThreadUtil
+import org.openmole.tool.thread._
 
 import collection.mutable
 import scala.ref.WeakReference
-import ThreadUtil._
 
 class ExecuterPool(nbThreads: Int, environment: WeakReference[LocalEnvironment]) {
   private val jobs = new JobPriorityQueue
@@ -43,14 +42,15 @@ class ExecuterPool(nbThreads: Int, environment: WeakReference[LocalEnvironment])
     (executer, thread)
   }
 
-  private[local] def addExecuter() = synchronized { executers += createExecuter }
+  private[local] def addExecuter() = executers.synchronized { executers += createExecuter }
 
-  private[local] def removeExecuter(ex: LocalExecuter) = synchronized { executers.remove(ex) }
+  private[local] def removeExecuter(ex: LocalExecuter) = executers.synchronized { executers.remove(ex) }
 
   private[local] def takeNextjob: LocalExecutionJob = jobs.dequeue
 
   def enqueue(job: LocalExecutionJob) = jobs.enqueue(job)
 
-  def inQueue: Int = jobs.size
+  def waiting: Int = jobs.size
+  def running: Int = executers.synchronized { executers.values.count(_.getState == Thread.State.RUNNABLE) }
 
 }

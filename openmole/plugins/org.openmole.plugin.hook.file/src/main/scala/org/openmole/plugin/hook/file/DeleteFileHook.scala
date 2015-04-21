@@ -19,8 +19,7 @@ package org.openmole.plugin.hook.file
 
 import java.io.File
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.io.FileUtil
-import FileUtil._
+import org.openmole.tool.file._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._

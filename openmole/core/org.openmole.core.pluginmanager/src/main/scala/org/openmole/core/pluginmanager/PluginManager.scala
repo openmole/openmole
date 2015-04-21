@@ -22,9 +22,8 @@ import java.io.FileFilter
 import java.io.FileInputStream
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.pluginmanager.internal.Activator
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.tools.service.Logger
-import FileUtil._
 import org.osgi.framework.Bundle
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet

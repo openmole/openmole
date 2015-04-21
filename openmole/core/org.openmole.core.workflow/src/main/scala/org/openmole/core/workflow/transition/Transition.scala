@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.transition
 
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.tools.service.{ Logger, LockUtil }
+import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.validation.TypeUtil
 import org.openmole.core.workflow.tools.ContextAggregator._
 import org.openmole.core.workflow.tools._
@@ -29,7 +29,6 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
-import LockUtil._
 
 object Transition extends Logger
 
@@ -70,9 +69,7 @@ class Transition(
         else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
       val toArrayManifests =
-        Map.empty[String, Manifest[_]] ++
-          computeManifests(mole, moleExecution.sources, moleExecution.hooks)(end).
-          filter(_.toArray).map(ct ⇒ ct.name -> ct.manifest)
+        computeManifests(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.`type`).toMap[String, PrototypeType[_]]
 
       val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinaison)
 

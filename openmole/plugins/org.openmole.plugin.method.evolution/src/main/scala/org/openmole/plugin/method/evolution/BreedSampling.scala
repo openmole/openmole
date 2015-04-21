@@ -31,7 +31,7 @@ import scala.util.Random
 
 object BreedSampling {
 
-  def apply(evolution: Breeding with GManifest with Archive)(
+  def apply(evolution: Breeding with GType with Archive)(
     population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
     archive: Prototype[evolution.A],
     genome: Prototype[evolution.G],
@@ -45,7 +45,7 @@ object BreedSampling {
   }
 }
 
-sealed abstract class BreedSampling(val evolution: Breeding with GManifest with Archive, val size: Int) extends Sampling {
+sealed abstract class BreedSampling(val evolution: Breeding with GType with Archive, val size: Int) extends Sampling {
   def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
   def archive: Prototype[evolution.A]
   def genome: Prototype[evolution.G]

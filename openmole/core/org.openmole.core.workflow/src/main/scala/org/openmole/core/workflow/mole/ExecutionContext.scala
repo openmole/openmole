@@ -18,9 +18,7 @@
 package org.openmole.core.workflow.mole
 
 import java.io.{ PrintStream, File }
-import org.openmole.core.tools.io.FileUtil
-import FileUtil._
-import org.openmole.core.workspace.AuthenticationProvider
+import org.openmole.tool.file._
 
 object ExecutionContext {
   def apply(out: PrintStream = System.out, directory: Option[File] = None) = {

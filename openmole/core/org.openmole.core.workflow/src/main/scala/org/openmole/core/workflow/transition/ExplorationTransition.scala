@@ -20,11 +20,11 @@ package org.openmole.core.workflow.transition
 import org.openmole.core.eventdispatcher.EventDispatcher
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.tools.obj.ClassUtils
-import org.openmole.core.tools.service.{ Priority, LockUtil }
+import org.openmole.core.tools.service.Priority
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import ClassUtils._
-import LockUtil._
+import org.openmole.tool.lock._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
 

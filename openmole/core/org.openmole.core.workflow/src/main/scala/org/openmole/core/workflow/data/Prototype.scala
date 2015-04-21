@@ -21,13 +21,32 @@ import org.openmole.core.macros.ExtractValName
 import org.openmole.core.tools.obj.{ Id, ClassUtils }
 import ClassUtils._
 import org.openmole.core.tools.obj.ClassUtils
-import scala.reflect.Manifest
+import scala.reflect._
+import scala.reflect.runtime.universe._
+
+object PrototypeType {
+
+  def apply[T](implicit m: Manifest[T]): PrototypeType[T] =
+    new PrototypeType[T] {
+      val manifest = m
+    }
+
+  def unsecure(c: Manifest[_]): PrototypeType[Any] = apply(c.asInstanceOf[Manifest[Any]])
+
+}
+
+trait PrototypeType[T] extends Id {
+  def manifest: Manifest[T]
+  override def toString = manifest.toString
+  def id = manifest
+  def runtimeClass = manifest.runtimeClass
+}
 
 object Prototype {
 
   implicit def prototypeToArrayConverter[T](p: Prototype[T]) = p.toArray
 
-  def apply[T](n: String)(implicit t: Manifest[T]): Prototype[T] = {
+  def apply[T](n: String)(implicit t: PrototypeType[T]): Prototype[T] = {
     assert(t != null)
     new Prototype[T] {
       val name = n
@@ -35,12 +54,11 @@ object Prototype {
     }
   }
 
-  //def apply[T]()(implicit t: Manifest[T], name: ValName): Prototype[T] = apply[T](name.name)
-
   implicit lazy val prototypeOrderingOnName = new Ordering[Prototype[_]] {
     override def compare(left: Prototype[_], right: Prototype[_]) =
       left.name compare right.name
   }
+
 }
 
 /**
@@ -65,22 +83,21 @@ trait Prototype[T] extends Id {
    *
    * @return the type of the prototype
    */
-  def `type`: Manifest[T]
+  def `type`: PrototypeType[T]
 
   /**
    * Test if this prototype can be assigned from another prototype. This work
    * in the same way as java.lang.Class.isAssignableFrom.
    *
-   * @param prototype the prototype to test
+   * @param p the prototype to test
    * @return true if the prototype is assignable from the given prototype
    */
-  def isAssignableFrom(p: Prototype[_]): Boolean =
-    ClassUtils.assignable(p.`type`.runtimeClass, `type`.runtimeClass)
+  def isAssignableFrom(p: Prototype[_]): Boolean = ClassUtils.assignable(p.`type`.manifest, `type`.manifest)
 
   def accepts(obj: Any): Boolean =
-    obj == null || assignable(manifest(clazzOf(obj)).runtimeClass, `type`.runtimeClass)
+    obj == null || classAssignable(obj.getClass, `type`.runtimeClass)
 
-  override def id = (name, `type`.runtimeClass)
+  override def id = (name, `type`)
   override def toString = name + ": " + `type`.toString
 
 }

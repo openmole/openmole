@@ -74,7 +74,7 @@ class TypeUtilSpec extends FlatSpec with Matchers {
     val manifests = TypeUtil.computeManifests(mole, Sources.empty, Hooks.empty)(t3c)
     val m = manifests.filter(_.name == p.name).head
     m.toArray should equal(true)
-    m.manifest.runtimeClass should equal(classOf[Int])
+    m.`type`.runtimeClass should equal(classOf[Int])
   }
 
 }

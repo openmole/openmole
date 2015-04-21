@@ -27,11 +27,10 @@ import org.jasypt.util.text._
 import org.openmole.core.eventdispatcher.{ Event, EventDispatcher }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.replication.DBServerInfo
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.tools.service._
 import Random._
 import scala.collection.mutable.HashMap
-import FileUtil._
 import scala.concurrent.duration.FiniteDuration
 
 object Workspace {

@@ -24,7 +24,7 @@ import org.openmole.core.dsl.Serializer
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.workflow.tools.PluginInfo
 import org.openmole.core.workspace._
 import scala.annotation.tailrec
@@ -77,8 +77,8 @@ import Console._
 
 case class ConsoleVariables(
   args: Seq[String] = Seq.empty,
-  inputDirectory: File = FileUtil.currentDirectory,
-  outputDirectory: File = FileUtil.currentDirectory)
+  inputDirectory: File = currentDirectory,
+  outputDirectory: File = currentDirectory)
 
 class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = None, script: List[String] = Nil) { console ⇒
 

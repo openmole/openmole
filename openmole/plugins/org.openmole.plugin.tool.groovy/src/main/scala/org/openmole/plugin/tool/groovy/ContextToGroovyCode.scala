@@ -52,7 +52,7 @@ trait ContextToGroovyCode {
           case null ⇒ None
           case value ⇒
             if (out.accepts(value)) Some(Variable(out.asInstanceOf[Prototype[Any]], value))
-            else throw new InternalProcessingError("Variable " + out.name + " of type " + value.asInstanceOf[AnyRef].getClass.getName + " has been found at the end of the execution of the groovy code but type doesn't match : " + out.`type`.erasure.getName + ".")
+            else throw new InternalProcessingError("Variable " + out.name + " of type " + value.asInstanceOf[AnyRef].getClass.getName + " has been found at the end of the execution of the groovy code but type doesn't match : " + out.`type` + ".")
         }
     }
   }

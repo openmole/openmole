@@ -19,17 +19,13 @@ package org.openmole.plugin.task.external
 
 import java.io.File
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.tools.obj.ClassUtils._
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workspace.Workspace
-import scala.collection.mutable.ListBuffer
-import FileUtil._
-import collection.mutable
 
 object ExternalTask {
   val PWD = Prototype[String]("PWD")
@@ -118,7 +114,7 @@ trait ExternalTask extends Task {
     val resultContext = context ++ outputFileVariables(context, tmpDir, workDirPath)
 
     def contextFiles =
-      resultContext.values.flatMap(_.flatObjectGraph).collect { case f: File ⇒ f }
+      resultContext.values.map(_.value).collect { case f: File ⇒ f }
 
     for {
       f ← contextFiles
