@@ -18,14 +18,13 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools.ExpandedString
 import scala.collection.JavaConversions._
-import FileUtil._
 
 import scala.util.Random
 

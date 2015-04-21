@@ -32,6 +32,8 @@ object Tool extends PluginDefaults {
     libraryDependencies += Libraries.opencsv
   )
 
+  lazy val pattern = OsgiProject("pattern", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Core.dsl) settings (defaultActivator)
+
   val sftpserver = OsgiProject("sftpserver", imports = Seq("*")) dependsOn (Core.tools) settings (libraryDependencies += Libraries.sshd)
 
   override def osgiSettings = super.osgiSettings ++ Seq(bundleActivator := None)

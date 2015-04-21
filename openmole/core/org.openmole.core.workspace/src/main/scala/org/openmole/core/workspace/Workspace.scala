@@ -17,7 +17,6 @@
 
 package org.openmole.core.workspace
 
-import com.thoughtworks.xstream.XStream
 import java.io.File
 import java.util.UUID
 import java.util.logging.Level
@@ -28,14 +27,11 @@ import org.jasypt.util.text._
 import org.openmole.core.eventdispatcher.{ Event, EventDispatcher }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.replication.DBServerInfo
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.tools.service._
 import Random._
 import scala.collection.mutable.HashMap
-import FileUtil._
-
 import scala.concurrent.duration.FiniteDuration
-import java.nio.file.{ Paths, Files }
 
 object Workspace {
 
@@ -67,7 +63,7 @@ object Workspace {
   this += (passwordTest, passwordTestString)
   this += (ErrorArraySnipSize, "10")
 
-  lazy val defaultLocation = DBServerInfo.base //new File(System.getProperty("user.home"), openMoleDir)
+  lazy val defaultLocation = DBServerInfo.base
   lazy val instance = new Workspace(defaultLocation)
 
   Runtime.getRuntime.addShutdownHook(new Thread {
@@ -76,8 +72,6 @@ object Workspace {
     }
   })
 
-  //implicit def objectToInstance(ws: this.type) = instance
-
   def +=(location: ConfigurationLocation, defaultValue: () ⇒ String) = synchronized {
     configurations(location) = defaultValue
   }
@@ -85,72 +79,6 @@ object Workspace {
   def +=(location: ConfigurationLocation, defaultValue: String) = synchronized {
     configurations(location) = () ⇒ defaultValue
   }
-
-  def pluginDirLocation = instance.pluginDir
-
-  def location = instance.location
-
-  def tmpDir = instance.tmpDir
-
-  def newDir(prefix: String): File = instance.newDir(prefix)
-
-  def newFile(prefix: String, suffix: String): File = instance.newFile(prefix, suffix)
-
-  def defaultValue(location: ConfigurationLocation): String = instance.defaultValue(location)
-
-  def overridePreference(preference: String, value: String) = instance.overridePreference(preference, value)
-
-  def overridePreference(preference: ConfigurationLocation, value: String) = instance.overridePreference(preference, value)
-
-  def unsetOverridePreference(preference: String) = instance.unsetOverridePreference(preference)
-
-  def rawPreference(location: ConfigurationLocation): String = instance.rawPreference(location)
-
-  def preference(location: ConfigurationLocation): String = instance.preference(location)
-
-  def setPreference(location: ConfigurationLocation, value: String) = instance.setPreference(location, value)
-
-  def removePreference(location: ConfigurationLocation) = instance.removePreference(location)
-
-  def file(name: String): File = instance.file(name)
-
-  def preferenceAsInt(location: ConfigurationLocation): Int = instance.preferenceAsInt(location)
-
-  def preferenceAsDouble(location: ConfigurationLocation): Double = instance.preferenceAsDouble(location)
-
-  def withTmpFile[T](f: File ⇒ T): T = instance.withTmpFile(f)
-
-  def withTmpFile[T](prefix: String, postfix: String)(f: File ⇒ T): T = instance.withTmpFile(prefix, postfix)(f)
-
-  def newFile: File = instance.newFile
-
-  def newDir: File = instance.newDir
-
-  def reset = instance.reset
-
-  def preferenceAsLong(location: ConfigurationLocation): Long = instance.preferenceAsLong(location)
-
-  def setPassword(password: String) = instance.password_=(password)
-
-  def passwordIsCorrect(password: String) = instance.passwordIsCorrect(password)
-
-  def passwordChosen = instance.passwordChosen
-
-  def preferenceAsDuration(location: ConfigurationLocation) = instance.preferenceAsDuration(location)
-
-  def encrypt(s: String) = instance.encrypt(s)
-
-  def persistent(name: String) = instance.persistent(name)
-
-  def isPreferenceSet(location: ConfigurationLocation) = instance.isPreferenceSet(location)
-
-  implicit def authenticationProvider = instance.authenticationProvider
-
-  def authentications = instance.authentications
-
-  def rng = instance.rng
-
-  def newSeed = instance.newSeed
 
   object NoneTextEncryptor extends TextEncryptor {
     def decrypt(encryptedMessage: String) = encryptedMessage
@@ -178,7 +106,7 @@ object Workspace {
 
 class Workspace(val location: File) {
 
-  import Workspace.{ textEncryptor, decrypt, NoneTextEncryptor, persistentLocation, authenticationsLocation, pluginLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
+  import Workspace._ //{ textEncryptor, decrypt, NoneTextEncryptor, persistentLocation, authenticationsLocation, pluginLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
 
   location.mkdirs
 
@@ -275,7 +203,6 @@ class Workspace(val location: File) {
   def file(name: String): File = new File(location, name)
 
   def preferenceAsInt(location: ConfigurationLocation): Int = preference(location).toInt
-
   def preferenceAsDouble(location: ConfigurationLocation): Double = preference(location).toDouble
 
   def withTmpFile[T](prefix: String, postfix: String)(f: File ⇒ T): T = {
@@ -305,7 +232,7 @@ class Workspace(val location: File) {
 
   def preferenceAsLong(location: ConfigurationLocation): Long = preference(location).toLong
 
-  def password_=(password: String): Unit = synchronized {
+  def setPassword(password: String): Unit = synchronized {
     if (!passwordIsCorrect(password)) throw new UserBadDataError("Password is incorrect.")
     this._password = Some(password)
     if (!isPreferenceSet(passwordTest)) setToDefaultValue(passwordTest)

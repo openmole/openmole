@@ -112,13 +112,15 @@ object Libraries extends Defaults {
 
   lazy val monocle = "org.openmole" %% "monocle" % "1.0.1"
 
-  lazy val scaladget = "org.openmole" %% "scaladget" % "0.4.0"
+  lazy val scaladget = "org.openmole" %% "scaladget" % "0.5.0-SNAPSHOT"
 
   lazy val d3 = "org.webjars.bower" % "d3" % "3.5.5"
 
   lazy val bootstrap = "org.webjars.bower" % "bootstrap" % "3.3.4"
 
-  lazy val jquery = "org.webjars.bower" % "jquery" % "1.11.0"
+  lazy val jquery = "org.webjars.bower" % "jquery" % "2.1.3"
+
+  lazy val ace = "org.webjars" % "ace" % "01.08.2014"
 
   lazy val opencsv = "org.openmole" %% "au-com-bytecode-opencsv" % "2.3"
 
@@ -167,5 +169,7 @@ object Libraries extends Defaults {
   lazy val ant = "org.openmole" %% "org-apache-ant" % "1.8.0"
 
   lazy val codec = "org.openmole" %% "org-apache-commons-codec" % "1.10"
+
+  lazy val async = "org.openmole" %% "scala-async" % "0.9.1"
 
 }

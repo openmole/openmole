@@ -22,7 +22,7 @@ import com.google.common.cache.CacheBuilder
 import java.io.File
 import org.h2.jdbc.JdbcSQLException
 import org.openmole.core.replication.{ replicas, Replica, DBServerInfo }
-import org.openmole.core.tools.service.{ Logger, LockRepository, TimeCache }
+import org.openmole.core.tools.service.{ Logger, TimeCache }
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.core.tools.service.Logger
 import java.util.regex.Pattern
@@ -31,6 +31,9 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.environment.BatchEnvironment._
 import java.util.concurrent.TimeUnit
+
+import org.openmole.tool.lock.LockRepository
+
 import scala.annotation.tailrec
 import scala.concurrent.duration._
 import scala.slick.driver.H2Driver.simple._

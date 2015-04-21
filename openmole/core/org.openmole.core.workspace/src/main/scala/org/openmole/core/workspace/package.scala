@@ -17,4 +17,6 @@
 
 package org.openmole.core
 
-package object workspace
+package object workspace {
+  implicit def workspaceObjectToInstance(w: Workspace.type) = w.instance
+}

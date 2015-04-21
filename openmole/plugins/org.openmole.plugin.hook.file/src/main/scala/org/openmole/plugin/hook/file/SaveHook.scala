@@ -18,7 +18,7 @@
 package org.openmole.plugin.hook.file
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
@@ -27,7 +27,6 @@ import collection.mutable.ListBuffer
 import org.openmole.core.workflow.mole._
 import org.openmole.core.serializer._
 import org.openmole.core.workflow.tools._
-import FileUtil._
 import java.io.File
 
 object SaveHook {
@@ -45,6 +44,7 @@ abstract class SaveHook(file: ExpandedString, prototypes: Prototype[_]*) extends
   override def process(context: Context, executionContext: ExecutionContext) = {
     val saveContext: Context = prototypes.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found")))
     val to = executionContext.relativise(file.from(context))
+    to.createParentDir
     SerialiserService.serialiseAndArchiveFiles(saveContext, to)
     context
   }

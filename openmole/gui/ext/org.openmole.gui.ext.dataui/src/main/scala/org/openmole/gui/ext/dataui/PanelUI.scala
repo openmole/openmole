@@ -33,4 +33,5 @@ object PanelUI {
 trait PanelUI {
   def view: TypedTag[HTMLElement]
   def save: Unit
+  def jQueryCalls: () ⇒ Unit = () ⇒ {}
 }

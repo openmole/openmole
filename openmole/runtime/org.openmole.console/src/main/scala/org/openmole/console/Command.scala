@@ -19,12 +19,12 @@ package org.openmole.console
 
 import jline.console.ConsoleReader
 import java.io.File
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.{ AtomicLong, AtomicInteger }
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.execution.local._
-import org.openmole.core.workflow.execution.ExecutionState
+import org.openmole.core.workflow.execution.{ Environment, ExecutionState }
 import org.openmole.core.workflow.job.State
 import org.openmole.core.workflow.mole.{ ExecutionContext, Mole, MoleExecution }
 import org.openmole.core.workflow.transition.IAggregationTransition
@@ -40,28 +40,15 @@ import Console._
 
 class Command {
 
-  def print(environment: LocalEnvironment): Unit = {
-    println("Queued jobs: " + environment.nbJobInQueue)
-    println("Number of threads: " + environment.nbThreads)
-  }
-
-  def print(environment: BatchEnvironment): Unit = {
-    val accounting = new Array[AtomicInteger](ExecutionState.values.size)
-
-    for (state ← ExecutionState.values) {
-      accounting(state.id) = new AtomicInteger
-    }
-
-    val executionJobs = environment.executionJobs
-
-    for (executionJob ← executionJobs) {
-      accounting(executionJob.state.id).incrementAndGet
-    }
-
-    for (state ← ExecutionState.values) {
-      println(state.toString + ": " + accounting(state.id))
-    }
-  }
+  def print(environment: Environment): Unit =
+    for {
+      (label, number) ← List(
+        "Submitted" -> environment.submitted,
+        "Running" -> environment.running,
+        "Done" -> environment.done,
+        "Failed" -> environment.failed
+      )
+    } println(s"$label: $number")
 
   def print(mole: Mole): Unit = {
     println("root: " + mole.root)
@@ -70,10 +57,15 @@ class Command {
   }
 
   def print(moleExecution: MoleExecution): Unit = {
-    val toDisplay = new Array[AtomicInteger](State.values.size)
-    for (state ← State.values) toDisplay(state.id) = new AtomicInteger
+    val toDisplay = Array.fill(State.values.size)(new AtomicLong)
     for (job ← moleExecution.moleJobs) toDisplay(job.state.id).incrementAndGet
-    for (state ← State.values) System.out.println(state.toString + ": " + toDisplay(state.id))
+    for (state ← State.values)
+      state match {
+        case State.COMPLETED ⇒ System.out.println(state.toString + ": " + moleExecution.completed)
+        case State.FAILED    ⇒
+        case State.CANCELED  ⇒
+        case _               ⇒ System.out.println(state.toString + ": " + toDisplay(state.id))
+      }
   }
 
   def verify(mole: Mole): Unit = Validation(mole).foreach(println)

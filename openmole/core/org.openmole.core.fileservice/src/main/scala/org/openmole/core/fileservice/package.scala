@@ -18,10 +18,10 @@
 package org.openmole.core
 
 import java.io.File
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
+import org.openmole.tool.hash._
 
 import scala.concurrent.duration.Duration
-import FileUtil._
 
 import scala.util.{ Failure, Success, Try }
 

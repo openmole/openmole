@@ -17,14 +17,14 @@ import javax.servlet.http.HttpServletRequest
 import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
 
-case class Token(hash: String, start: Long, end: Long) {
+case class AuthenticationToken(hash: String, start: Long, end: Long) {
   def isValid = {
     val cTime = java.util.Calendar.getInstance.getTimeInMillis
     start <= cTime && end > cTime
   }
 }
 
-class TokenHandler extends DataHandler[String, Token] {
+class TokenHandler extends DataHandler[String, AuthenticationToken] {
 
   private def clean[T](f: ⇒ T): T = {
     atomic { implicit t ⇒
@@ -34,7 +34,7 @@ class TokenHandler extends DataHandler[String, Token] {
     f
   }
 
-  override def add(key: String, data: Token) = clean { super.add(key, data) }
+  override def add(key: String, data: AuthenticationToken) = clean { super.add(key, data) }
   override def remove(key: String) = clean { super.remove(key) }
   override def get(key: String) = clean { super.get(key) }
 
@@ -59,24 +59,19 @@ trait Authentication { self ⇒
       val end = start + (24 * 60 * 60 * 1000)
       val rawHmac = mac.doFinal((r.getRemoteHost + Workspace.sessionUUID + start + end) getBytes ())
       val hash = new String(Base64.encodeBase64(rawHmac))
-      val token = Token(hash, start, end)
+      val token = AuthenticationToken(hash, start, end)
       keyStorage.add(hash, token)
       Success(token)
     }
     else Failure(new InvalidPasswordException("Server password is incorrect"))
   }
 
-  def checkKey(key: String): Boolean = {
-    keyStorage get key match {
-      case Some(k) ⇒ {
-        logger.info(s"key is valid: ${k.isValid}")
-        logger.info(s"key matches key given: ${k.hash == key}")
-        logger.info(s"stored key: ${k.hash}")
-        logger.info(s"given key: $key")
+  def checkToken(token: String): Boolean = {
+    logger.info("checking token")
 
-        k.isValid && k.hash == key
-      }
-      case _ ⇒ false
+    keyStorage get token match {
+      case Some(k) ⇒ k.isValid
+      case _       ⇒ false
     }
   }
 }

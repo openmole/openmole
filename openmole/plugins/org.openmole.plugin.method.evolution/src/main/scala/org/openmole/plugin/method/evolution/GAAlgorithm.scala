@@ -21,7 +21,7 @@ import fr.iscpif.mgo._
 import org.openmole.core.workflow.data._
 
 trait GAAlgorithm extends Archive
-    with EvolutionManifest
+    with EvolutionType
     with G with P with F with GA with DoubleSeqPhenotype with MGFitness
     with Elitism
     with Termination

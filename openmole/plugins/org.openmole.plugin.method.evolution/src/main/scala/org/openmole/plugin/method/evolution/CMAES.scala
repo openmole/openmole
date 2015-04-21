@@ -18,6 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
+import org.openmole.core.workflow.data.PrototypeType
 
 import scala.util.Random
 
@@ -31,12 +32,13 @@ object CMAES {
     new CMAES {
       val inputs = _inputs
       val objectives = _objectives
-      val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest: Manifest[Population[G, P, F]] = implicitly
-      val individualManifest: Manifest[Individual[G, P, F]] = implicitly
-      val aManifest: Manifest[A] = implicitly
-      val fManifest: Manifest[F] = implicitly
-      val gManifest: Manifest[G] = implicitly
+
+      val stateType = termination.stateType
+      val populationType = PrototypeType[Population[G, P, F]]
+      val individualType = PrototypeType[Individual[G, P, F]]
+      val aType = PrototypeType[A]
+      val fType = PrototypeType[F]
+      val gType = PrototypeType[G]
 
       val genomeSize = inputs.size
 

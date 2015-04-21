@@ -19,16 +19,13 @@ package org.openmole.plugin.task.external
 
 import java.io.File
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workspace.Workspace
-import scala.collection.mutable.ListBuffer
-import FileUtil._
-import collection.mutable
 
 object ExternalTask {
   val PWD = Prototype[String]("PWD")
@@ -61,7 +58,7 @@ trait ExternalTask extends Task {
   def resources: Iterable[Resource]
 
   protected case class ToPut(file: File, name: String, link: Boolean, inWorkDir: Boolean)
-  protected case class ToGet(name: String, file: File, inWorkDir: Boolean)
+  //protected case class ToGet(name: String, file: File, inWorkDir: Boolean)
 
   protected def listInputFiles(context: Context): Iterable[ToPut] =
     inputFiles.map {
@@ -84,19 +81,15 @@ trait ExternalTask extends Task {
     }
   }
 
-  protected def listOutputFiles(context: Context, tmpDir: File, workDirPath: String): (Context, Iterable[ToGet]) = {
+  protected def outputFileVariables(context: Context, tmpDir: File, workDirPath: String) = {
     val workDir = new File(tmpDir, workDirPath)
 
-    val files =
-      outputFiles.map {
-        case OutputFile(name, prototype, inWorkDir) ⇒
-          val fileName = name.from(context)
-          val file = if (inWorkDir) new File(workDir, fileName) else new File(tmpDir, fileName)
-
-          val fileVariable = Variable(prototype, file)
-          ToGet(fileName, file, inWorkDir) -> fileVariable
-      }
-    context ++ files.map { _._2 } -> files.map { _._1 }
+    outputFiles.map {
+      case OutputFile(name, prototype, inWorkDir) ⇒
+        val fileName = name.from(context)
+        val file = if (inWorkDir) new File(workDir, fileName) else new File(tmpDir, fileName)
+        Variable(prototype, file)
+    }
   }
 
   private def copy(f: ToPut, to: File) = {
@@ -118,15 +111,17 @@ trait ExternalTask extends Task {
   }
 
   def fetchOutputFiles(context: Context, tmpDir: File, workDirPath: String): Context = {
-    val (resultContext, outputFiles) = listOutputFiles(context, tmpDir, workDirPath: String)
+    val resultContext = context ++ outputFileVariables(context, tmpDir, workDirPath)
 
-    val usedFiles = outputFiles.map(
-      f ⇒ {
-        if (!f.file.exists) throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + this.toString + " doesn't exist")
-        f.file
-      }).toSet
+    def contextFiles =
+      resultContext.values.map(_.value).collect { case f: File ⇒ f }
 
-    tmpDir.applyRecursive(f ⇒ f.delete, usedFiles)
+    for {
+      f ← contextFiles
+      if !f.exists
+    } throw new UserBadDataError("Output file " + f.getAbsolutePath + " for task " + this.toString + " doesn't exist")
+
+    tmpDir.applyRecursive(f ⇒ f.delete, contextFiles.toSet)
 
     // This delete the dir only if it is empty
     tmpDir.delete

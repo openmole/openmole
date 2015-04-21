@@ -18,6 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo.termination.TimedTermination
+import org.openmole.core.workflow.data.PrototypeType
 
 import scala.concurrent.duration.Duration
 
@@ -28,7 +29,7 @@ object Timed {
     type F = Any
     type P = Any
     type MF = Any
-    val stateManifest: Manifest[STATE] = manifest[STATE]
+    val stateType = PrototypeType[STATE]
     val duration = _duration.toMillis
   }
 

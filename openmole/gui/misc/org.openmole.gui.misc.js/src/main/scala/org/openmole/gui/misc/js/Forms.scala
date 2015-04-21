@@ -256,5 +256,10 @@ object Forms {
   val spacer20 = key("spacer20")
 
   //JQuery calls
+  def jQueryCalls(calls: Seq[() ⇒ Any] = Seq()) = {
+    popoverJQ
+    calls.map { _() }
+  }
+
   def popoverJQ = jQuery("[data-toggle=\"popover\"]").popover()
 }

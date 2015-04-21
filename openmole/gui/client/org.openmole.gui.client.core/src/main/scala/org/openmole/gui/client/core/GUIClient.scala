@@ -18,15 +18,14 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.gui.client.core.dataui.DataBagUI
+import org.scalajs.dom.raw.Event
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.Forms._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.misc.js.JsRxTags._
 
-import org.scalajs.dom
-
-//import scalatags.JsDom.attrs._
+import org.scalajs.{ jquery, dom }
 
 import scalatags.JsDom.all._
 
@@ -47,7 +46,7 @@ object GUIClient {
     val db = DataBagUI(ClientService.taskFactories(0))
     db.name() = "premier"
     ClientService += db
-    val db2 = DataBagUI(ClientService.taskFactories(1))
+    val db2 = DataBagUI(ClientService.taskFactories(3))
     ClientService += db2
     db2.name() = "yopp"
     val db3 = DataBagUI(ClientService.taskFactories(2))
@@ -73,9 +72,9 @@ object GUIClient {
       )
     )
 
-    val dialog = Panel.generic
+    val generic = Panel.generic
 
-    topdiv.appendChild(dialog.render)
+    topdiv.appendChild(generic.dialog.render)
 
     dom.document.body.appendChild(topdiv)
 

@@ -18,7 +18,7 @@
 package org.openmole.plugin.task.systemexec
 
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.tools.io.{ StringBuilderOutputStream, FileUtil }
+import org.openmole.tool.file._
 import org.openmole.core.tools.service.{ Logger, OS, ProcessUtil }
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
@@ -34,9 +34,9 @@ import org.apache.commons.exec.CommandLine
 import org.openmole.core.workflow.data._
 import org.openmole.core.tools.service.Logger
 import org.openmole.plugin.task.external._
+import org.openmole.tool.stream.StringBuilderOutputStream
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
-import FileUtil._
 
 object SystemExecTask extends Logger {
 
@@ -44,17 +44,6 @@ object SystemExecTask extends Logger {
    * System exec task execute an external process.
    * To communicate with the dataflow the result should be either a file / category or the return
    * value of the process.
-   *
-   * @param name the name of the task
-   * @param commands the commands to run. The command is expanded before evaluation.
-   * @param directory a subdirectory of the workspace that serve as reference for the command
-   * execution and the files deployment / gathering
-   * @param errorOnReturnCode if true an exception is thrown by the task in case the return
-   * value of the process is not 0
-   * @param returnValue optionally a prototype to output the return value of the process
-   * @param output optionally a prototype to output the standard output of the process
-   * @param error optionally a prototype to output the standard error output of the process
-   *
    */
   def apply(commands: String*) =
     new SystemExecTaskBuilder(commands: _*)

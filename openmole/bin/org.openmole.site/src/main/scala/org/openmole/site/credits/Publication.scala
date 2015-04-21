@@ -18,7 +18,7 @@
 package org.openmole.site
 package credits
 
-import org.openmole.core.tools.io.FileUtil._
+import org.openmole.tool.file._
 import java.io.File
 import toolxit.bibtex._
 import toolxit.bibtex.{ Number ⇒ VolumeNumber }

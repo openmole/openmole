@@ -18,19 +18,18 @@
 package org.openmole.core.workflow.transition
 
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.tools.service.LockUtil
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition.Condition._
-import LockUtil._
+import org.openmole.tool.lock._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
 
 object AggregationTransition {
   def aggregateOutputs(moleExecution: MoleExecution, transition: IAggregationTransition, results: Iterable[Variable[_]]) = {
-    val toArrayManifests = Map.empty[String, Manifest[_]] ++ transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }
-    ContextAggregator.aggregate(transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, results)
+    val toArrayTypes = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }.toMap[String, PrototypeType[_]]
+    ContextAggregator.aggregate(transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks), toArrayTypes, results)
   }
 }
 

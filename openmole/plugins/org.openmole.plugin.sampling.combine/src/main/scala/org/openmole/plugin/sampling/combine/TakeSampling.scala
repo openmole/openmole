@@ -35,7 +35,7 @@ sealed class TakeSampling(val sampling: Sampling, val n: FromContext[Int]) exten
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
+  override def build(context: ⇒ Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
     sampling.build(context).take(n.from(context))
 
 }

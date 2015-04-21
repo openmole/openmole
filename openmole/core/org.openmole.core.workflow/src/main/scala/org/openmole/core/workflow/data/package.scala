@@ -24,19 +24,33 @@ import scala.language.experimental.macros
 import reflect.macros.blackbox.{ Context ⇒ MContext }
 import ClassUtils._
 
+import scala.reflect.runtime.universe._
+
 package data {
+
+  import scala.reflect.ClassTag
 
   trait DataPackage {
 
     implicit def prototypeToStringConverter(p: Prototype[_]) = p.name
     implicit def dataToStringConverter(d: Data[_]) = d.prototype.name
 
-    implicit def prototypeToArrayDecorator[T](prototype: Prototype[T]) = new {
+    implicit class PrototypeTypeDecorator[T](p: PrototypeType[T]) {
+      def toArray = PrototypeType[Array[T]](p.manifest.toArray)
+      def isArray = p.manifest.isArray
+      def asArray = p.asInstanceOf[PrototypeType[Array[T]]]
+    }
+
+    implicit class PrototypeTypeArrayDecorator[T](p: PrototypeType[Array[T]]) {
+      def fromArray = PrototypeType[T](p.manifest.fromArray)
+    }
+
+    implicit class PrototypeToArrayDecorator[T](prototype: Prototype[T]) {
       def toArray(level: Int): Prototype[_] = {
         def toArrayRecursive[A](prototype: Prototype[A], level: Int): Prototype[_] = {
           if (level <= 0) prototype
           else {
-            val arrayProto = Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[Prototype[Array[_]]]
+            val arrayProto = Prototype(prototype.name)(prototype.`type`.toArray).asInstanceOf[Prototype[Array[_]]]
             if (level <= 1) arrayProto
             else toArrayRecursive(arrayProto, level - 1)
           }
@@ -45,17 +59,12 @@ package data {
         toArrayRecursive(prototype, level)
       }
 
-      def toArray: Prototype[Array[T]] =
-        Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[Prototype[Array[T]]]
-
+      def toArray: Prototype[Array[T]] = Prototype(prototype.name)(prototype.`type`.toArray)
       def unsecureType = prototype.`type`.asInstanceOf[Manifest[Any]]
-
     }
 
-    implicit def prototypeFromArrayDecorator[T](prototype: Prototype[Array[T]]) = new {
-
-      def fromArray: Prototype[T] =
-        (Prototype(prototype.name)(prototype.`type`.fromArray.toManifest)).asInstanceOf[Prototype[T]]
+    implicit class PrototypeFromArrayDecorator[T](prototype: Prototype[Array[T]]) {
+      def fromArray: Prototype[T] = Prototype(prototype.name)(prototype.`type`.fromArray)
 
     }
 
@@ -70,7 +79,11 @@ package data {
     implicit def prototypeDecorator[T](prototype: Prototype[T]) = new {
       def withName(name: String) = Prototype[T](name)(prototype.`type`)
     }
+
+    implicit def buildPrototypeType[T: Manifest]: PrototypeType[T] = PrototypeType[T]
+
   }
+
 }
 
 package object data extends DataPackage

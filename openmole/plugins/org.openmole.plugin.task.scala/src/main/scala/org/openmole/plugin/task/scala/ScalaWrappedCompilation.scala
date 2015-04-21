@@ -27,6 +27,7 @@ import org.openmole.core.tools.obj.ClassUtils
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.Task
 import ClassUtils._
+import org.openmole.core.workflow.validation.TypeUtil
 
 import scala.util.Try
 
@@ -68,8 +69,17 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
       (evaluated, evaluated.getClass.getMethod("apply", inputs.map(c ⇒ toScalaNativeType(c.`type`).runtimeClass).toSeq: _*))
     }
 
-  def toScalaNativeType(m: Manifest[_]): Manifest[_] =
-    classEquivalences.find(_.native == m.runtimeClass).map(_.scalaManifest) getOrElse (m)
+  def toScalaNativeType(t: PrototypeType[_]): PrototypeType[_] = {
+    def native = {
+      val (contentType, level) = TypeUtil.unArrayify(t)
+      for {
+        m ← classEquivalence(contentType.runtimeClass).map(_.manifest)
+      } yield (0 until level).foldLeft(PrototypeType.unsecure(m)) {
+        (c, _) ⇒ c.toArray.asInstanceOf[PrototypeType[Any]]
+      }
+    }
+    native getOrElse t
+  }
 
   //FIXME deal with optional outputs
   def script(inputs: Seq[Prototype[_]]) =

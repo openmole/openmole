@@ -17,18 +17,15 @@
 
 package org.openmole.core.fileservice
 
-import com.ice.tar.TarOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.util.logging.Logger
 import org.openmole.core.filecache.{ FileCacheDeleteOnFinalize, IFileCache }
 import org.openmole.core.tools.cache.AssociativeCache
-import org.openmole.core.tools.io.{ HashUtil, FileUtil, TarArchiver }
-import org.openmole.core.tools.service.Hash
-import FileUtil._
-import TarArchiver._
+import org.openmole.tool.hash._
 import org.openmole.core.updater.Updater
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
+import org.openmole.tool.hash.Hash
+import org.openmole.tool.tar._
 
 object FileService {
   val GCInterval = new ConfigurationLocation("FileService", "GCInterval")
@@ -52,14 +49,12 @@ object FileService {
     hashCache.cache(
       key,
       file.getAbsolutePath,
-      HashUtil.computeHash(if (file.isDirectory) archiveForDir(key, file).file(false) else file))
+      computeHash(if (file.isDirectory) archiveForDir(key, file).file(false) else file))
 
-  def archiveForDir(key: Object, file: File) = {
-    archiveCache.cache(key, file.getAbsolutePath, {
+  def archiveForDir(key: Object, directory: File) = {
+    archiveCache.cache(key, directory.getAbsolutePath, {
       val ret = Workspace.newFile("archive", ".tar")
-      val os = new TarOutputStream(new FileOutputStream(ret))
-      try os.createDirArchiveWithRelativePathNoVariableContent(file)
-      finally os.close
+      directory.archive(ret, time = false)
       new FileCacheDeleteOnFinalize(ret)
     })
   }

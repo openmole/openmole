@@ -20,10 +20,9 @@ package org.openmole.core.workflow.tools
 import java.io.{ InputStream, OutputStream, OutputStreamWriter }
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.io.{ StringBuilderOutputStream, StringInputStream }
 import org.openmole.core.tools.script.GroovyProxy
 import org.openmole.core.workflow.data.{ Context, Variable }
-import org.openmole.core.tools.io.StringBuilderOutputStream
+import org.openmole.tool.stream.{ StringBuilderOutputStream, StringInputStream }
 
 import scala.math.BigDecimal
 import scala.util.Try

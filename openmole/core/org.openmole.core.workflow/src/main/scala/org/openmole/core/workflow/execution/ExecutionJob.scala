@@ -31,6 +31,12 @@ trait ExecutionJob {
 
   def state_=(state: ExecutionState) = synchronized {
     if (!this.state.isFinal) {
+      state match {
+        case DONE   ⇒ environment._done.single += 1
+        case FAILED ⇒ environment._failed.single += 1
+        case _      ⇒
+      }
+
       EventDispatcher.trigger(environment, new Environment.JobStateChanged(this, state, this.state))
       _state = state
     }

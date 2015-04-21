@@ -11,8 +11,10 @@
 
   @p The first step is to clone the code available @a("here", href := "https://github.com/openmole/myopenmoleplugin"):
   @br @hl.highlight("git clone git://github.com/openmole/myopenmoleplugin.git", "plain")
+
   @p This repository contains a template to help you create OpenMOLE plugins easily. The
-  @i{src/main/scala/myopemoleplugin} directory contains the source code of the plugin:
+  @i{hello} directory contains the source code of the plugin and the materials to build it:
+
   @br @hl.highlight("""
   package myopenmoleplugin
 
@@ -21,6 +23,7 @@
   }
 
   object Hello extends Hello""", "scala")
+  """)
 
   @p The file @i{build.sbt} contains the building instructions for SBT. The most important part are the OSGi
   instructions:

@@ -21,6 +21,7 @@ import java.io.File
 import org.openmole.core.workflow.data.Prototype
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.hook.file.CopyFileHook.CopyFileHookBuilder
+import org.openmole.core.macros.Keyword._
 
 package object file {
 
@@ -29,4 +30,7 @@ package object file {
       (_: CopyFileHookBuilder).addCopy(prototype, destination, remove, compress)
   }
 
+  def csvHeader = set[{ def setCSVHeader(h: Option[ExpandedString]) }]
+
+  def singleRow = set[{ def setSingleRow(b: Boolean) }]
 }

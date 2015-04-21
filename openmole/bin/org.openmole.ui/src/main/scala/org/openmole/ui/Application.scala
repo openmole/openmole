@@ -17,12 +17,7 @@
 
 package org.openmole.ui
 
-import java.awt.GraphicsEnvironment
-import java.awt.SplashScreen
 import java.io.File
-import java.io.PrintWriter
-import java.util.concurrent.Semaphore
-import com.fasterxml.jackson.core.json.ByteSourceJsonBootstrapper
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
 import org.openmole.core.exception.UserBadDataError
@@ -36,6 +31,7 @@ import org.openmole.console.Console
 import org.openmole.rest.server.RESTServer
 import annotation.tailrec
 import org.openmole.gui.server.core._
+import org.openmole.console._
 
 object Application extends Logger
 
@@ -44,11 +40,11 @@ import Application.Log._
 class Application extends IApplication {
 
   lazy val consoleSplash =
-    """  ___                   __  __  ___  _     _____   _  _
- / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____| | || |
-| | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   | || |_
-| |_| | |_) |  __/ | | | |  | | |_| | |___| |___  |__   _|
- \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____|    |_|
+    """  ___                   __  __  ___  _     _____   ____
+ / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____| | ___|
+| | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   |___ \
+| |_| | |_) |  __/ | | | |  | | |_| | |___| |___   ___) |
+ \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____| |____/
       |_|
 """
 
@@ -66,7 +62,7 @@ class Application extends IApplication {
       guiPluginsDirs: List[String] = Nil,
       userPlugins: List[String] = Nil,
       workspaceDir: Option[String] = None,
-      scriptFile: Option[String] = None,
+      scriptFile: List[String] = Nil,
       password: Option[String] = None,
       hostName: Option[String] = None,
       launchMode: LaunchMode = GUIMode,
@@ -75,7 +71,8 @@ class Application extends IApplication {
       serverPort: Option[Int] = None,
       serverSSLPort: Option[Int] = None,
       loggerLevel: Option[String] = None,
-      optimizedJS: Boolean = false)
+      optimizedJS: Boolean = false,
+      args: List[String] = Nil)
 
     def takeArg(args: List[String]) =
       args match {
@@ -106,7 +103,7 @@ class Application extends IApplication {
         case "-cp" :: tail                          ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
         case "-gp" :: tail                          ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
         case "-p" :: tail                           ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
-        case "-s" :: tail                           ⇒ parse(tail.tail, c.copy(scriptFile = Some(tail.head)))
+        case "-s" :: tail                           ⇒ parse(dropArgs(tail), c.copy(scriptFile = takeArgs(tail)))
         case "-pw" :: tail                          ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
         case "-hn" :: tail                          ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "-c" :: tail                           ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
@@ -118,6 +115,7 @@ class Application extends IApplication {
         case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
         case "--logger-level" :: tail               ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
         case "--optimizedJS" :: tail                ⇒ parse(tail, c.copy(optimizedJS = true))
+        case "--" :: tail                           ⇒ parse(Nil, c.copy(args = tail))
         case s :: tail                              ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                    ⇒ c
       }
@@ -160,12 +158,12 @@ class Application extends IApplication {
         RESTServer.configure
       case ServerMode ⇒
         if (!config.password.isDefined) Console.initPassword
-        val server = new RESTServer(config.serverPort, config.serverSSLPort, config.hostName, config.allowInsecureConnections)
+        val server = new RESTServer(config.serverPort, config.serverSSLPort, config.hostName, config.allowInsecureConnections, PluginSet(userPlugins))
         server.start()
       case ConsoleMode ⇒
         print(consoleSplash)
         val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
-        console.run
+        console.run(ConsoleVariables(args = config.args))
       case GUIMode ⇒
         BootstrapJS.init(config.optimizedJS)
         val server = new GUIServer(config.serverPort, BootstrapJS.webapp)

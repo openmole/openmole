@@ -5,7 +5,9 @@ import org.openmole.gui.client.core.PrototypeFactoryUI.DoubleDataUI
 import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.ext.dataui.FactoryUI
 import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter, Select }
+import org.scalajs.dom
 import org.scalajs.dom.Event
+import org.scalajs.dom.raw.Event
 import org.scalajs.jquery._
 
 import scala.scalajs.js.annotation.JSExport
@@ -55,13 +57,12 @@ object Panel {
     )
   }
 
-  def generic = new GenericPanel().dialog
+  def generic = new GenericPanel()
 }
 
 import Panel.ConceptFilter._
 
 class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS)) {
-
   val editionState: Var[Boolean] = Var(false)
   val filter: Var[ConceptState] = Var(defaultDataBagUI.right.toOption.getOrElse(TASKS))
   val rows = Var(0)
@@ -88,7 +89,8 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
           f.dataUI.asInstanceOf[db.DATAUI]
         }.get
         resetSettingTabs
-        popoverJQ
+        jQueryCalls
+        //jQueryCalls(db.dataUI().panelUI.jQueryCalls)
       }
     })
 
@@ -116,7 +118,8 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
             bs.td(col_md_6)(a(dataBagUIView(db), cursor := "pointer", onclick := { () ⇒
               setCurrent(db)
               editionState() = true
-              popoverJQ
+              //  jQueryCalls(db.dataUI().panelUI.jQueryCalls)
+              // jQueryCalls
             })),
             bs.td(col_md_5)(bs.label(db.dataUI().dataType, label_primary)),
             bs.td(col_md_1)(bs.button(glyph(glyph_trash))(onclick := { () ⇒
@@ -211,58 +214,61 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
 
   val dialog = {
     modalDialog("conceptPanelID",
-      headerDialog(Rx {
-        tags.div(
-          nav(getID, navbar_form)(
-            bs.form()(
-              inputGroup(navbar_left)(
-                inputFilter.tag,
-                for (c ← prototypeExtraForm) yield c,
-                if (editionState()) inputGroupButton(factorySelector.selector)
-                else inputGroupButton(newGlyph)
-              ),
-              if (editionState()) {
-                tags.span(inputGroup(navbar_right)(
-                  currentDataBagUI().map { db ⇒
-                    val h = db.dataUI().help
-                    inputGroupButton(bs.helpButton((h.title, h.content)))
-                  },
-                  inputGroupButton(saveHeaderButton)
-                )
-                )
-              }
-              else bs.span(navbar_right)(conceptFilter),
-              onsubmit := { () ⇒
-                if (editionState()) save
-                else if (rows() == 0) add
-              }
-            )
-          ))
-      }),
-      bodyDialog(Rx {
-        if (editionState()) {
-          inputFilter.tag.value = currentDataBagUI().map {
-            _.name()
-          }.getOrElse((""))
-          settingTabs() match {
-            case Some(s: SettingTabs) ⇒ s.view
-            case _                    ⇒ tags.div(h1("Create a  first data !"))
-          }
+      headerDialog(
+        Rx {
+          tags.div(
+            nav(getID, navbar_form)(
+              bs.form()(
+                inputGroup(navbar_left)(
+                  inputFilter.tag,
+                  for (c ← prototypeExtraForm) yield c,
+                  if (editionState()) inputGroupButton(factorySelector.selector)
+                  else inputGroupButton(newGlyph)
+                ),
+                if (editionState()) {
+                  tags.span(inputGroup(navbar_right)(
+                    currentDataBagUI().map { db ⇒
+                      val h = db.dataUI().help
+                      inputGroupButton(bs.helpButton((h.title, h.content)))
+                    },
+                    inputGroupButton(saveHeaderButton)
+                  )
+                  )
+                }
+                else bs.span(navbar_right)(conceptFilter),
+                onsubmit := { () ⇒
+                  if (editionState()) save
+                  else if (rows() == 0) add
+                }
+              )
+            ))
         }
-        else {
-          inputFilter.tag.value = ""
-          tags.div(conceptTable)
-        }
-
-      }
       ),
+      bodyDialog(
+        Rx {
+          if (editionState()) {
+            inputFilter.tag.value = currentDataBagUI().map {
+              _.name()
+            }.getOrElse((""))
+            settingTabs() match {
+              case Some(s: SettingTabs) ⇒ s.view
+              case _                    ⇒ tags.div(h1("Create a  first data !"))
+            }
+          }
+          else {
+            inputFilter.tag.value = ""
+            tags.div(conceptTable)
+          }
+        }),
       footerDialog(
         h2(saveButton)
       )
     )
-  }
+  }.render
 
-    .render
+  def jQueryCalls = settingTabs().map {
+    _.jQueryCalls
+  }.getOrElse(Seq())
 
   def prototypeExtraForm: Seq[Modifier] = currentDataBagUI() match {
     case Some(db: DataBagUI) ⇒ db.dataUI() match {

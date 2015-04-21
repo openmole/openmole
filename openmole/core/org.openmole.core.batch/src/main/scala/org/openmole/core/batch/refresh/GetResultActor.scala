@@ -27,13 +27,13 @@ import org.openmole.core.batch.message._
 import org.openmole.core.batch.storage._
 import org.openmole.core.eventdispatcher.EventDispatcher
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.tools.io.{ HashUtil, FileUtil }
+import org.openmole.tool.file._
+import org.openmole.tool.hash._
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.batch.environment.BatchEnvironment._
-import FileUtil._
 import org.openmole.core.workspace.Workspace
 import util.{ Failure, Success }
 
@@ -130,7 +130,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
     val contextResutsFileCache = Workspace.newFile
     try {
       signalDownload(storage.downloadGZ(resultPath.path, contextResutsFileCache), resultPath.path, storage)
-      if (HashUtil.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted during the transfer.")
+      if (contextResutsFileCache.hash != resultPath.hash) throw new InternalProcessingError("Results have been corrupted during the transfer.")
       SerialiserService.deserialiseAndExtractFiles(contextResutsFileCache)
     }
     finally contextResutsFileCache.delete

@@ -22,11 +22,9 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
-import org.openmole.core.tools.io.FileUtil
-import org.openmole.core.tools.service.ThreadUtil
-import FileUtil._
+import org.openmole.tool.file._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
-import ThreadUtil._
+import org.openmole.tool.thread._
 
 object Storage {
   val BufferSize = new ConfigurationLocation("Storage", "BufferSize")

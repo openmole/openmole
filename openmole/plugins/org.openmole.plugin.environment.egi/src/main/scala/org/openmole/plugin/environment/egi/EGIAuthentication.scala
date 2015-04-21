@@ -17,26 +17,18 @@
 
 package org.openmole.plugin.environment.egi
 
-import com.ice.tar.TarInputStream
 import java.io._
 import java.net.URI
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import java.nio.file.FileSystems
-import java.security.InvalidKeyException
-import java.security.NoSuchAlgorithmException
 import java.util.zip.GZIPInputStream
-import org.openmole.core.tools.io.FileUtil
+import org.openmole.tool.file._
 import org.openmole.core.tools.service.Logger
-import FileUtil._
-import org.openmole.core.batch.authentication._
-import org.openmole.core.updater.Updater
 import org.openmole.core.workspace.{ Workspace, AuthenticationProvider }
 import EGIEnvironment._
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
+import org.openmole.tool.tar.TarInputStream
 import scala.collection.JavaConversions._
-import scala.ref.WeakReference
-import scala.Some
-import scala.Some
 import fr.iscpif.gridscale.glite._
 import fr.iscpif.gridscale.http._
 import fr.iscpif.gridscale._

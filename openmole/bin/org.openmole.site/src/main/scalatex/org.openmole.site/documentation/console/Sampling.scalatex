@@ -21,7 +21,7 @@
         (l in (UniformDistribution[Long]() take 10))
       )""")
 
-Using the @i{x} combinator means that all the domains are @b{unrolled before being combined} with each other.
+    Using the @i{x} combinator means that all the domains are @b{unrolled before being combined} with each other.
 
   @sect{Combine samplings}
 
@@ -43,99 +43,99 @@ Using the @i{x} combinator means that all the domains are @b{unrolled before bei
        )"""
       )
 
-Samplings can also be combined using variants of the zip operator.
+      Samplings can also be combined using variants of the zip operator.
 
     @sect{Zip samplings}
-    @p
-      Zip Samplings come in three declinations in OpenMOLE.
+      @p
+        Zip Samplings come in three declinations in OpenMOLE.
 
-    @p The first one is the @hl.openmole("""ZipSampling""", false). It combines the elements of corresponding indices
-    from two samplings. @hl.openmole("""ZipSampling""", false) mimics the traditional @i{zip} operation from functional
-    programming that combining elements from two lists. OpenMOLE implements the @hl.openmole("""ZipSampling""", false)
-    through the keyword @hl.openmole("""zip""", false).
+      @p The first one is the @hl.openmole("""ZipSampling""", false). It combines the elements of corresponding indices
+      from two samplings. @hl.openmole("""ZipSampling""", false) mimics the traditional @i{zip} operation from functional
+      programming that combining elements from two lists. OpenMOLE implements the @hl.openmole("""ZipSampling""", false)
+      through the keyword @hl.openmole("""zip""", false).
 
-    @p The second sampling from the Zip family is the @hl.openmole("""ZipWithIndexSampling""", false). Again, this is
-    inspired from a common functional programming operation called @i{zipWithIndex}. Applying @i{zipWithIndex} to a list
-    would create a new list of pairs formed by the elements of the original list and the index of their position in the
-    list. For instance @hl.openmole("""List('A', 'B', 'C') zipWithIndex""") would returns the new list
-    @hl.openmole("""List(('A',0), ('B',1), ('C',2))"""). @hl.openmole("""ZipWithIndexSampling""", false) performs a
-    similar operation in the dataflow. An integer variable from the dataflow is filled with the index instead of
-    generating a new pair. OpenMOLE implements the @hl.openmole("""ZipWithIndexSampling""", false) through the keyword
-    @hl.openmole("""zipWithIndex""", false).
+      @p The second sampling from the Zip family is the @hl.openmole("""ZipWithIndexSampling""", false). Again, this is
+      inspired from a common functional programming operation called @i{zipWithIndex}. Applying @i{zipWithIndex} to a list
+      would create a new list of pairs formed by the elements of the original list and the index of their position in the
+      list. For instance @hl.openmole("""List('A', 'B', 'C') zipWithIndex""") would returns the new list
+      @hl.openmole("""List(('A',0), ('B',1), ('C',2))"""). @hl.openmole("""ZipWithIndexSampling""", false) performs a
+      similar operation in the dataflow. An integer variable from the dataflow is filled with the index instead of
+      generating a new pair. OpenMOLE implements the @hl.openmole("""ZipWithIndexSampling""", false) through the keyword
+      @hl.openmole("""zipWithIndex""", false).
 
-    @p The following code snippet gives an example of how to use these two first Zip samplings.
+      @p The following code snippet gives an example of how to use these two first Zip samplings.
 
-  @br @hl.openmole("""
-    val p1 = Val[Int]
-    val p2 = Val[Int]
-
-    val s1 = p1 in (0 to 100) // Code to build sampling 1
-    val s2 = p2 in (0 to 100) // Code to build sampling 2
-
-    // Create a sampling by zipping line by line s1 and s2
-    val s3 = s1 zip s2
-
-    // Create a sampling containing an id for each experiment in a variable called id
-    val id = Val[Int]
-    val s4 = s2 zipWithIndex id""")
-
-    @p The third and last sampling from the Zip family is the @hl.openmole("""ZipWithNameSampling"""). It maps the name
-    the files from a @i{FileDomain} (see the next section for more details about exploring files) to a String variable
-    in the dataflow. In the following excerpt, we map the name of the file and print it along to its size. When running
-    this snippet, notice the difference between the file name issued from @hl.openmole("""ZipWithNameSampling""") and a
-    call to the @hl.openmole("""toString""") of the file object that returns the complete path to the file:
-
-    @br @hl.openmole("""
-      val f = Val[File]
-      val fDomain = f in ListFilesDomain("/tmp", "docOM")
-      val str = Val[String]
-      val samp = fDomain zipWithName str
-
-      val t = ScalaTask(
-      "println(\"filename = \" + str + \" filesize = \" + f.length + \" filelocation = \" + f.toString)"
-      ) set (
-        inputs += (f, str)
-      )
-
-      val ex = ExplorationTask(samp) -< t start
-     """)
-
-      @sect{Shrink the initial Sampling with Take, Filter, Sample}
-      You can modify a Sampling using various operations in OpenMOLE.
-
-      @p When calling @hl.openmole("""take N""") on a Sampling, along with @i{N} an integer, OpenMOLE will generate a
-      new Sampling from the first @i{N} values of the initial Sampling.
-
-      @p Similarly, you can use @hl.openmole("""sample N""") to create a new Sampling with @i{N} random values picked up
-      at random from the initial Sampling.
-
-      @p More advanced Sampling reductions happen through @hl.openmole("""filter (\"predicate\")"""). It filters out all
-      the values from the initial Sampling for which the given predicate is wrong.
-
-      @p The 3 sampling operations presented in this section are put into play in the following example:
       @br @hl.openmole("""
-    val p1 = Val[Int]
-    val p2 = Val[Int]
+        val p1 = Val[Int]
+        val p2 = Val[Int]
 
-    val s1 = p1 in (0 to 100) // Code to build sampling 1
-    val s2 = p2 in (0 to 100) // Code to build sampling 2
+        val s1 = p1 in (0 to 100) // Code to build sampling 1
+        val s2 = p2 in (0 to 100) // Code to build sampling 2
 
-    // Create a sampling containing the 10 first values of s1
-    val s5 = s1 take 10
+        // Create a sampling by zipping line by line s1 and s2
+        val s3 = s1 zip s2
 
-    // Create a new sampling containing only the lines of s1 for which the given predicate is true
-    val s8 = s1 filter ("p1 + p2 < 100")
+        // Create a sampling containing an id for each experiment in a variable called id
+        val id = Val[Int]
+        val s4 = s2 zipWithIndex id""")
 
-    // Sample 5 values from s1
-    val s9 = s1 sample 5""")
-    @sect{Generate random Samplings}
-      OpenMOLE can generate random samplings from an initial sampling using @hl.openmole("""shuffle""") that creates
-      a new sampling which is a randomly shuffled version of the initial one.
+        @p The third and last sampling from the Zip family is the @hl.openmole("""ZipWithNameSampling"""). It maps the name
+        the files from a @i{FileDomain} (see the next section for more details about exploring files) to a String variable
+        in the dataflow. In the following excerpt, we map the name of the file and print it along to its size. When running
+        this snippet, notice the difference between the file name issued from @hl.openmole("""ZipWithNameSampling""") and a
+        call to the @hl.openmole("""toString""") of the file object that returns the complete path to the file:
 
-      @p OpenMOLE can also generate a fresh new Sampling made of random numbers using
-      @hl.openmole("""UniformDistribution[T]"""), with @i{T} the type of random numbers to be generated.
+        @br @hl.openmole("""
+          val f = Val[File]
+          val fDomain = f in ListFilesDomain("/tmp", "docOM")
+          val str = Val[String]
+          val samp = fDomain zipWithName str
 
-      @p Check the following script to discover how to use these random-based operations in a workflow:
+          val t = ScalaTask(
+          "println(\"filename = \" + str + \" filesize = \" + f.length + \" filelocation = \" + f.toString)"
+          ) set (
+            inputs += (f, str)
+          )
+
+          val ex = ExplorationTask(samp) -< t start
+         """)
+
+  @sect{Shrink the initial Sampling with Take, Filter, Sample}
+    You can modify a Sampling using various operations in OpenMOLE.
+
+    @p When calling @hl.openmole("""take N""") on a Sampling, along with @i{N} an integer, OpenMOLE will generate a
+    new Sampling from the first @i{N} values of the initial Sampling.
+
+    @p Similarly, you can use @hl.openmole("""sample N""") to create a new Sampling with @i{N} random values picked up
+    at random from the initial Sampling.
+
+    @p More advanced Sampling reductions happen through @hl.openmole("""filter (\"predicate\")"""). It filters out all
+    the values from the initial Sampling for which the given predicate is wrong.
+
+    @p The 3 sampling operations presented in this section are put into play in the following example:
+    @br @hl.openmole("""
+      val p1 = Val[Int]
+      val p2 = Val[Int]
+
+      val s1 = p1 in (0 to 100) // Code to build sampling 1
+      val s2 = p2 in (0 to 100) // Code to build sampling 2
+
+      // Create a sampling containing the 10 first values of s1
+      val s5 = s1 take 10
+
+      // Create a new sampling containing only the lines of s1 for which the given predicate is true
+      val s8 = s1 filter ("p1 + p2 < 100")
+
+      // Sample 5 values from s1
+      val s9 = s1 sample 5""")
+  @sect{Generate random Samplings}
+    OpenMOLE can generate random samplings from an initial sampling using @hl.openmole("""shuffle""") that creates
+    a new sampling which is a randomly shuffled version of the initial one.
+
+    @p OpenMOLE can also generate a fresh new Sampling made of random numbers using
+    @hl.openmole("""UniformDistribution[T]"""), with @i{T} the type of random numbers to be generated.
+
+    @p Check the following script to discover how to use these random-based operations in a workflow:
 
     @br @hl.openmole("""
     val p1 = Val[Int]
@@ -151,7 +151,7 @@ Samplings can also be combined using variants of the zip operator.
     val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))
     """)
 
-    @sect{Higher level samplings}
+  @sect{Higher level samplings}
     Some sampling combinations generate higher level samplings such as @hl.openmole("""repeat""") and
     @hl.openmole("""bootstrap"""):
       @br @hl.openmole("""
@@ -187,89 +187,88 @@ Samplings can also be combined using variants of the zip operator.
   @sect{Exploring files}
     OpenMOLE introduces the concept of @i{Domains} as a variable ranging along a set of files. For instance to explore a
     program over a set of files in a subdirectory you may use:
-  @br @hl.openmole("""
-  val f = Val[File]
-  val explo = ExplorationTask (f in ListFilesDomain("/path/to/a/dir"))""")
-  @p To explore files located in several directories:
-  @br @hl.openmole("""
-  val i = Val[Int]
-  val f = Val[File]
+    @br @hl.openmole("""
+    val f = Val[File]
+    val explo = ExplorationTask (f in ListFilesDomain("/path/to/a/dir"))""")
+    @p To explore files located in several directories:
+    @br @hl.openmole("""
+    val i = Val[Int]
+    val f = Val[File]
 
-  val explo =
-    ExplorationTask (
-      (i in (0 to 10)) +
-      (f in ListFilesDomain("/path/to/a/dir", "subdir${i}"))
-    )""")
-  @p If you wish to select one single file for each value of @i{i} you may use SelectFileDomain:
-  @br @hl.openmole("""
-  val i = Val[Int]
-  val f = Val[File]
+    val explo =
+      ExplorationTask (
+        (i in (0 to 10)) x
+        (f in ListFilesDomain("/path/to/a/dir", "subdir${i}"))
+      )""")
+    @p If you wish to select one single file for each value of @i{i} you may use SelectFileDomain:
+    @br @hl.openmole("""
+    val i = Val[Int]
+    val f = Val[File]
 
-  val explo =
-    ExplorationTask (
-      (i in (0 to 10)) +
-      (f in SelectFileDomain("/path/to/a/dir", "file${i}.txt"))
-    )""")
-
+    val explo =
+      ExplorationTask (
+        (i in (0 to 10)) x
+        (f in SelectFileDomain("/path/to/a/dir", "file${i}.txt"))
+      )""")
 
     @p Files can also be injected in the dataflow through
     @a("Sources", href := DocumentationPages.root.console.source.file). They provide more powerful file filtering
       possibilities using regular expressions and can also target directories only.
 
-      @sect{CSV files Sampling}
+    @sect{CSV files Sampling}
       As an extension to undifferientiated files, you can inject your own sampling in OpenMOLE through a CSV file.
       Considering a CSV file like:
-        @hl.highlight("""
-          coldD,colFileName,i
-          0.7,fic1,8
-          0.9,fic2,19
-          0.8,fic2,19""", "csv")
+      @hl.highlight("""
+        coldD,colFileName,i
+        0.7,fic1,8
+        0.9,fic2,19
+        0.8,fic2,19""", "csv")
       @p The corresponding @hl.openmole("""CSVSampling""") is:
-        @br @hl.openmole("""
-          val i = Val[Int]
-          val d = Val[Double]
-          val f = Val[File]
+      @br @hl.openmole("""
+        val i = Val[Int]
+        val d = Val[Double]
+        val f = Val[File]
 
-          //Only comma separated files with header are supported for now
-          val s = CSVSampling("/path/to/a/file.csv") set (
-            columns += i,
-            columns += ("colD", d),
-            fileColumns += ("colFileName", "/path/of/the/base/dir/", f),
-            // ',' is the default separator, but you can specify a different one using
-            separator := ','
-          )
+        //Only comma separated files with header are supported for now
+        val s = CSVSampling("/path/to/a/file.csv") set (
+          columns += i,
+          columns += ("colD", d),
+          fileColumns += ("colFileName", "/path/of/the/base/dir/", f),
+          // ',' is the default separator, but you can specify a different one using
+          separator := ','
+        )
 
-          val exploration = ExplorationTask(s)
-                         """)
+        val exploration = ExplorationTask(s)
+                       """)
 
-      @p In this example the column name i in the csv file is mapped to the variable i of OpenMOLE. The column name colD
-      is mapped to the variable d. The column named colFileName is appended to the base dir "/path/of/the/base/dir/" and
-      used as a file in OpenMOLE.
-      @br As a sampling, the CSVSampling can directly be injected in an ExplorationTask. It will generate a different task
-      for each entry in the file.
+        @p In this example the column name @i{i} in the CSV file is mapped to the variable @i{i} of OpenMOLE.
+        The column name @i{colD} is mapped to the variable @i{d}. The column named @i{colFileName} is appended to the
+        base directory @i{"/path/of/the/base/dir/"} and used as a file in OpenMOLE.
+        @br As a sampling, the @hl.openmole("CSVSampling") can directly be injected in an
+        @hl.openmole("ExplorationTask"). It will generate a different task for each entry in the file.
 
   @sect{Samplings from the literature}
-  @p OpenMOLE also implements widely spread Samplings from the literature.
+    @p OpenMOLE also implements widely spread Samplings from the literature.
 
     @sect{Latin hypercube sampling}
-    For wilder spaces of parameters @a("LHS", href := "http://en.wikipedia.org/wiki/Latin_hypercube_sampling") is
-    available:
-    @br @hl.openmole("""
-    val i = Val[Double]
-    val j = Val[Double]
+      For wilder spaces of parameters @a("LHS", href := "http://en.wikipedia.org/wiki/Latin_hypercube_sampling") is
+      available:
+      @br @hl.openmole("""
+      val i = Val[Double]
+      val j = Val[Double]
 
-    val explo =
-      ExplorationTask (
-        LHS(
-          100, // Number of points of the LHS
-          i in Range(0.0, 10.0),
-          j in Range(0.0, 5.0)
-        )
-      )""")
+      val explo =
+        ExplorationTask (
+          LHS(
+            100, // Number of points of the LHS
+            i in Range(0.0, 10.0),
+            j in Range(0.0, 5.0)
+          )
+        )""")
 
     @sect{Low-discrepancy sequences}
-     For uniform sampling, you can also use the @a("Sobol sequence", href := "https://en.wikipedia.org/wiki/Sobol_sequence"),
-    which is a low discrepancy sequence:
+      For uniform sampling, you can also use the
+      @a("Sobol sequence", href := "https://en.wikipedia.org/wiki/Sobol_sequence"), which is a low discrepancy sequence:
           @br @hl.openmole("""
           val i = Val[Double]
           val j = Val[Double]

@@ -14,7 +14,6 @@ object Root extends Defaults(OSGi) {
     resolvers += "openmole-public" at "http://maven.openmole.org/public",
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("releases")
-   /* resolvers += Resolver.url("scala-js-releases",
-    url("http://dl.bintray.com/content/scala-js/scala-js-releases"))(
-      Resolver.ivyStylePatterns)*/)
+  )
+
 }

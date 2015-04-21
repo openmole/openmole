@@ -26,12 +26,8 @@ trait DataHandler[K, V] {
   val map = TMap[K, V]()
 
   def add(key: K, data: V) = map.single put (key, data)
-
   def remove(key: K) = map.single remove key
-
   def get(key: K) = map.single get key
-
   def getKeys = map.single.keys
-
   def getOrElseUpdate(k: K, v: ⇒ V) = map.single.getOrElseUpdate(k, v)
 }

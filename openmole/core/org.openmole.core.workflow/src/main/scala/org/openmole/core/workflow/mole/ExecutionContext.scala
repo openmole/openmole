@@ -18,12 +18,10 @@
 package org.openmole.core.workflow.mole
 
 import java.io.{ PrintStream, File }
-import org.openmole.core.tools.io.FileUtil
-import FileUtil._
-import org.openmole.core.workspace.AuthenticationProvider
+import org.openmole.tool.file._
 
 object ExecutionContext {
-  def apply(out: PrintStream, directory: Option[File]) = {
+  def apply(out: PrintStream = System.out, directory: Option[File] = None) = {
     val (_out, _directory) = (out, directory)
     new ExecutionContext {
       def out = _out
@@ -31,7 +29,7 @@ object ExecutionContext {
     }
   }
 
-  lazy val local = ExecutionContext(System.out, None)
+  lazy val local = ExecutionContext()
 }
 
 trait ExecutionContext {

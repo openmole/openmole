@@ -38,7 +38,7 @@ trait DiscreteFactor[T, +D <: Domain[T] with Discrete[T]] extends Factor[T, D] w
 
   override def prototypes = List(prototype)
 
-  override def build(context: Context)(implicit rng: Random): Iterator[collection.Iterable[Variable[T]]] =
+  override def build(context: ⇒ Context)(implicit rng: Random): Iterator[collection.Iterable[Variable[T]]] =
     domain.iterator(context).map { v ⇒ List(Variable(prototype, v)) }
 
 }

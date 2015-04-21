@@ -19,4 +19,4 @@ package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
 
-trait GATermination extends Termination with TerminationManifest
+trait GATermination extends Termination with TerminationType

@@ -94,7 +94,7 @@ package object evolution {
     evolution: ALG)(implicit plugins: PluginSet) = new { components ⇒
     import evolution._
 
-    val genome = Prototype[evolution.G](name + "Genome")(gManifest)
+    val genome = Prototype[evolution.G](name + "Genome")
     val individual = Prototype[Individual[evolution.G, evolution.P, evolution.F]](name + "Individual")
     val population = Prototype[Population[evolution.G, evolution.P, evolution.F]](name + "Population")
     val archive = Prototype[evolution.A](name + "Archive")
@@ -203,7 +203,7 @@ package object evolution {
     val dataChannels =
       (scalingGenomeCaps -- (toIndividualSlot, filter = Keep(genome))) +
         (breedingCaps -- (elitismSlot, filter = Keep(population, archive))) +
-        (breedingCaps oo (fitness.first, filter = Block(archive, population, genome.toArray))) +
+        (breedingCaps oo (fitness.firstSlot, filter = Block(archive, population, genome.toArray))) +
         (breedingCaps -- (endSlot, filter = Block(archive, population, state, generation, terminated, genome.toArray))) +
         (breedingCaps -- (terminationSlot, filter = Block(archive, population, genome.toArray)))
 
@@ -271,7 +271,7 @@ package object evolution {
 
     val dataChannels =
       (scalingCaps -- (toIndividualSlot, filter = Keep(genome))) +
-        (firstCapsule oo (fitness.first, filter = Block(archive, population))) +
+        (firstCapsule oo (fitness.firstSlot, filter = Block(archive, population))) +
         (firstCapsule -- (endCapsule, filter = Block(archive, population))) +
         (firstCapsule oo (elitismSlot, filter = Keep(population, archive)))
 
@@ -311,7 +311,7 @@ package object evolution {
     import fitness.parameters.evolution
     import parameters._
 
-    val islandElitism = new Elitism with Termination with Archive with TerminationManifest {
+    val islandElitism = new Elitism with Termination with Archive with TerminationType {
       type G = evolution.G
       type P = evolution.P
       type A = evolution.A
@@ -319,7 +319,7 @@ package object evolution {
 
       type STATE = termination.STATE
 
-      implicit val stateManifest = termination.stateManifest
+      implicit val stateType = termination.stateType
 
       def initialArchive(implicit rng: Random) = evolution.initialArchive
       def archive(a: A, population: Population[G, P, F], offspring: Population[G, P, F])(implicit rng: Random) = evolution.archive(a, population, offspring)
@@ -335,7 +335,7 @@ package object evolution {
     //val individual = parameters.individual.asInstanceOf[Prototype[Individual[G, P, F]]]
     //val population = parameters.population //Prototype[Population[G, P, F]](name + "Population")
 
-    val state = Prototype[islandElitism.STATE](name + "State")(islandElitism.stateManifest)
+    val state = Prototype[islandElitism.STATE](name + "State")(islandElitism.stateType)
     val generation = Prototype[Int](name + "Generation")
     val terminated = Prototype[Boolean](name + "Terminated")
 

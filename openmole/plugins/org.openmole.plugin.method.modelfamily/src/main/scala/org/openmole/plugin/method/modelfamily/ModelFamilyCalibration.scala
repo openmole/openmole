@@ -34,12 +34,12 @@ object ModelFamilyCalibration {
     new ModelFamilyCalibration {
       val inputs = Inputs(modelFamily.attributes.map(_.toInput))
       val objectives = modelFamily.objectives
-      val stateManifest: Manifest[STATE] = termination.stateManifest
-      val populationManifest = implicitly[Manifest[Population[G, P, F]]]
-      val individualManifest = implicitly[Manifest[Individual[G, P, F]]]
-      val aManifest = implicitly[Manifest[A]]
-      val fManifest = implicitly[Manifest[F]]
-      val gManifest = implicitly[Manifest[G]]
+      val stateType = termination.stateType
+      val populationType = PrototypeType[Population[G, P, F]]
+      val individualType = PrototypeType[Individual[G, P, F]]
+      val aType = PrototypeType[A]
+      val fType = PrototypeType[F]
+      val gType = PrototypeType[G]
 
       val genomeSize = inputs.size
       val nicheSize = _nicheSize
