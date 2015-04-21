@@ -80,8 +80,8 @@ package object tar {
   implicit class FileTarArchiveDecorator(file: File) {
 
     def archive(archive: File, time: Boolean = true) =
-      withClosable(new TarOutputStream(file.bufferedOutputStream())) {
-        _.archive(archive, time)
+      withClosable(new TarOutputStream(archive.bufferedOutputStream())) {
+        _.archive(file, time)
       }
 
     //FIXME method name is ambiguous rename
