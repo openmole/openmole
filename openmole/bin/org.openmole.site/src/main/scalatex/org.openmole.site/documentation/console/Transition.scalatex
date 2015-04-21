@@ -51,8 +51,8 @@
     val ex = exploration -< t1 -- (t2 hook ToStringHook()) start""")
   @sect{Conditions}
     When needed, it is possible to set a condition on the transition so that the task after the transition is executed
-    under this condition only. Conditional transitions are specified after the @hl.openmoleNoTest("when"). For instance we can
-    add a condition on the execution of @i{t2} in the previous workflow:
+    under this condition only. Conditional transitions are specified after the the task they are guarding. For instance
+    we can add a condition on the execution of @i{t2} in the previous workflow:
     @br @hl.openmole("""
     val d = Val[Double]
 
@@ -60,7 +60,7 @@
     val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
     val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
-    val ex = exploration -< t1 -- (t2 hook ToStringHook() when "d < 1000") start""")
+    val ex = exploration -< t1 -- (t2 hook ToStringHook(), "d < 1000") start""")
     @p In this case the task @i{t2} is executed only if the variable "d" is greater than 1,000.
   @sect{Tasks in parallel}
     In OpenMOLE you can also define task as being independent from each other so they can be executed concurrently.
