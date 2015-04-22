@@ -64,7 +64,11 @@ object TreeNodePanel {
   }
 
   def clickableElement(name: String, state: NodeState, classType: String, todo: () ⇒ Unit) = tags.li(
-    tags.span(cursor := "pointer", `class` := classType)(
+    tags.span(cursor := "pointer", onclick := { () ⇒
+      {
+        todo()
+      }
+    }, `class` := classType)(
       tags.i(`class` := {
         state match {
           case COLLAPSED ⇒ "glyphicon glyphicon-plus-sign"
@@ -72,11 +76,7 @@ object TreeNodePanel {
           case _         ⇒ ""
         }
       }),
-      tags.i(name, onclick := { () ⇒
-        {
-          todo()
-        }
-      })
+      tags.i(name)
     )
   )
 }

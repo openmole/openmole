@@ -1,5 +1,6 @@
 package org.openmole.gui.server.core
 
+import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data.TreeNodeData
 
@@ -24,4 +25,5 @@ object ApiImpl extends Api {
 
   def listFiles(path: String): Seq[TreeNodeData] = Utils.listFiles(path)
 
+  def workspacePath(workspaceKey: String): String = Workspace.file(workspaceKey).getCanonicalPath()
 }

@@ -1,11 +1,14 @@
 package org.openmole.gui.client.core
 
+import org.openmole.core.workspace.Workspace
 import org.openmole.gui.client.core.dataui.EditorPanelUI
 import org.openmole.gui.client.core.files.TreeNodePanel
+import org.openmole.gui.shared.Api
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.Forms._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import autowire._
 import org.openmole.gui.misc.js.JsRxTags._
 import org.scalajs.dom
 import rx._
@@ -42,7 +45,7 @@ object ScriptClient {
 
     val body = dom.document.body
 
-    val tree = TreeNodePanel("/tmp")
+    // val tree = TreeNodePanel(Workspace.file("webui/projects").getCanonicalPath)
     val openFileTree = Var(false)
 
     dom.document.body.appendChild(
@@ -59,26 +62,26 @@ object ScriptClient {
       )
     )
 
-    val site_canvas = tags.div(id := "site-canvas")(
-      tags.div(id := "site-menu")(
-        tree.view.render
-      ),
-      editor.view.render
-    )
-
     val maindiv = dom.document.body.appendChild(tags.div.render)
 
-    maindiv.appendChild(
-      tags.div(`class` := Rx {
-        if (openFileTree()) "show-nav"
-        else ""
-      }
-      )(site_canvas.render)
-    )
+    Post[Api].workspacePath("webui/projects").call().foreach { projectsPath ⇒
+      maindiv.appendChild(
+        tags.div(`class` := Rx {
+          if (openFileTree()) "show-nav"
+          else ""
+        }
+        )(tags.div(id := "site-canvas")(
+          tags.div(id := "site-menu")(
+            TreeNodePanel(projectsPath).view.render
+          ),
+          editor.view.render
+        ).render)
+      )
 
-    body.appendChild(maindiv)
+      body.appendChild(maindiv)
 
-    editor.init
+      editor.init
+    }
 
   }
 }
