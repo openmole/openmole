@@ -31,12 +31,14 @@ object BootstrapJS {
 
   // Copy web resources and generate js file
   val webui = Workspace.file("webui")
+  val projects = new File(webui, "projects")
   val jsSrc = new File(webui, "js/src")
   val webapp = new File(webui, "webapp")
   val jsCompiled = new File(webapp, "js")
   jsSrc.mkdirs
   jsCompiled.mkdirs
   webapp.mkdirs
+  projects.mkdirs
 
   new File(webapp, "css").mkdirs
   new File(webapp, "fonts").mkdirs

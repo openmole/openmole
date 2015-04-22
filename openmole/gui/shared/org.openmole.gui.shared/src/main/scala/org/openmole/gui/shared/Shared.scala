@@ -22,4 +22,6 @@ trait Api {
   def uuid(): String = java.util.UUID.randomUUID.toString
 
   def listFiles(path: String): Seq[TreeNodeData]
+
+  def workspacePath(workspaceKey: String): String
 }
