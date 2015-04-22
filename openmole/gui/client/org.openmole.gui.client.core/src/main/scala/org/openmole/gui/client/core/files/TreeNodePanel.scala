@@ -49,10 +49,10 @@ object TreeNodePanel {
   }
 
   def drawNode(node: TreeNode) = node match {
-    case fn: FileNode ⇒ clickableElement(fn.name(), FILE, () ⇒ {
+    case fn: FileNode ⇒ clickableElement(fn.name(), FILE, "file", () ⇒ {
       println(fn.name() + " display the file")
     })
-    case dn: DirNode ⇒ clickableElement(dn.name(), dn.state(), () ⇒ {
+    case dn: DirNode ⇒ clickableElement(dn.name(), dn.state(), "dir", () ⇒ {
       dn.state() match {
         case EXPANDED ⇒ dn.state() = COLLAPSED
         case COLLAPSED ⇒
@@ -63,13 +63,13 @@ object TreeNodePanel {
     )
   }
 
-  def clickableElement(name: String, state: NodeState, todo: () ⇒ Unit) = tags.li(`class` := "parent_li", style := "list-item")(
-    tags.span(cursor := "pointer")(
+  def clickableElement(name: String, state: NodeState, classType: String, todo: () ⇒ Unit) = tags.li(
+    tags.span(cursor := "pointer", `class` := classType)(
       tags.i(`class` := {
         state match {
-          case COLLAPSED ⇒ "glyphicon glyphicon-minus-sign"
-          case EXPANDED  ⇒ "glyphicon glyphicon-plus-sign"
-          case _         ⇒ "glyphicon glyphicon-file"
+          case COLLAPSED ⇒ "glyphicon glyphicon-plus-sign"
+          case EXPANDED  ⇒ "glyphicon glyphicon-minus-sign"
+          case _         ⇒ ""
         }
       }),
       tags.i(name, onclick := { () ⇒
@@ -95,6 +95,7 @@ class TreeNodePanel(_treeNode: DirNode) {
 
   def drawTree(tn: TreeNode): Rx[TypedTag[UList]] =
     Rx {
+      println("RX")
       tags.ul(
         drawNode(tn),
         tn match {
