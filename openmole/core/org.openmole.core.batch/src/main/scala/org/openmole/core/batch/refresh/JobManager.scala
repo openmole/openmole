@@ -108,7 +108,6 @@ class JobManager { self ⇒
       delayedExecutor.schedule(self ! msg, delay.toMillis, TimeUnit.MILLISECONDS)
 
     case Uploaded(job, sj) ⇒
-      logger.fine(s"Uploaded $job send it to submit pool")
       job.serializedJob = Some(sj)
       self ! Submit(job, sj)
 
