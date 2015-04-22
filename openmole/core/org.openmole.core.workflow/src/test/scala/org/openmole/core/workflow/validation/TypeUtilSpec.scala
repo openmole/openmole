@@ -26,6 +26,7 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.validation.TypeUtil.{ ValidType, InvalidType }
 import org.scalatest._
 
 class TypeUtilSpec extends FlatSpec with Matchers {
@@ -46,10 +47,13 @@ class TypeUtilSpec extends FlatSpec with Matchers {
 
     val mole = t1c -- t2c
 
-    val manifests = TypeUtil.computeManifests(mole, Sources.empty, Hooks.empty)(t2c)
+    val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(t2c)
 
-    manifests.filter(_.toArray).isEmpty should equal(true)
-    val tc = manifests.filter(_.name == p.name).head
+    types.collect { case x: InvalidType ⇒ x }.isEmpty should equal(true)
+
+    val validTypes = types.collect { case x: ValidType ⇒ x }
+    validTypes.filter(_.toArray).isEmpty should equal(true)
+    val tc = validTypes.filter(_.name == p.name).head
     tc.toArray should equal(false)
   }
 
@@ -71,8 +75,11 @@ class TypeUtilSpec extends FlatSpec with Matchers {
 
     val mole = (t1c -- t3c) + (t2c -- t3c)
 
-    val manifests = TypeUtil.computeManifests(mole, Sources.empty, Hooks.empty)(t3c)
-    val m = manifests.filter(_.name == p.name).head
+    val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(t3c)
+
+    types.collect { case x: InvalidType ⇒ x }.isEmpty should equal(true)
+    val validTypes = types.collect { case x: ValidType ⇒ x }
+    val m = validTypes.filter(_.name == p.name).head
     m.toArray should equal(true)
     m.`type`.runtimeClass should equal(classOf[Int])
   }

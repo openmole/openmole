@@ -29,14 +29,6 @@ import scala.collection.mutable.{ HashMap, HashSet, ListBuffer }
 
 object TypeUtil {
 
-  def intersectionArray(t: Iterable[PrototypeType[_]]) =
-    unArrayify(t) match {
-      case (cls, level) ⇒
-        val c = intersection(cls)
-        def arrayType(m: PrototypeType[_], l: Int): PrototypeType[_] = if (l == 0) m else arrayType(m.toArray, l - 1)
-        arrayType(c, level)
-    }
-
   def unArrayify(t: PrototypeType[_]): (PrototypeType[_], Int) = {
     @tailrec def rec(c: PrototypeType[_], level: Int = 0): (PrototypeType[_], Int) =
       if (!c.isArray) (c, level)
@@ -44,45 +36,20 @@ object TypeUtil {
     rec(t)
   }
 
-  def unArrayify(c: Iterable[PrototypeType[_]]): (Iterable[PrototypeType[_]], Int) = {
-    @tailrec def rec(c: Iterable[PrototypeType[_]], level: Int = 0): (Iterable[PrototypeType[_]], Int) = {
-      if (c.isEmpty || c.exists(!_.isArray)) (c, level)
-      else rec(c.map(_.asArray.fromArray), level + 1)
-    }
-    rec(c)
-  }
-
-  // This is not a true intersection, returned class is either the type itself or Any
-  // Not sure if a true intersection would be possible while keeping the type arguments
-  def intersection(t: Iterable[PrototypeType[_]]): PrototypeType[_] =
-    t.reduce {
-      (t1, t2) ⇒ if (t1 == t2) t1 else PrototypeType[Any]
-    }
-
-  def intersect(d: Seq[Seq[Prototype[_]]]) = {
-    val numberOfGroups = d.size
-
-    def superType(d: Seq[Prototype[_]]) = intersectionArray(d.map { p ⇒ p.`type` })
-
-    val indexedD = d.flatten.groupBy(_.name).toSeq
-
-    val r: Seq[Option[Prototype[_]]] = indexedD.map {
-      case (name, prototypes) ⇒
-        if (prototypes.size == numberOfGroups) Some(Prototype(name)(superType(prototypes))) else None
-    }
-    r.flatten
-  }
-
   def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[Prototype[_]] =
-    computeManifests(mole, sources, hooks)(slot).map { _.toPrototype }
+    validTypes(mole, sources, hooks)(slot).map { _.toPrototype }
 
-  case class ComputedType(val name: String, val `type`: PrototypeType[_], val toArray: Boolean, val isOptional: Boolean) {
+  sealed trait ComputedType
+  case class InvalidType(name: String, direct: Seq[PrototypeType[_]], toArray: Seq[PrototypeType[_]], fromArray: Seq[PrototypeType[_]]) extends ComputedType
+  case class ValidType(name: String, `type`: PrototypeType[_], toArray: Boolean, isOptional: Boolean) extends ComputedType {
     def toPrototype =
       if (toArray) Prototype(name)(`type`.toArray)
       else Prototype(name)(`type`)
   }
 
-  def computeManifests(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ComputedType] = {
+  def validTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ValidType] = computeTypes(mole, sources, hooks)(slot).collect { case x: ValidType ⇒ x }
+
+  def computeTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ComputedType] = {
     import ClassUtils._
 
     val (varNames, direct, toArray, fromArray, optional) =
@@ -95,18 +62,20 @@ object TypeUtil {
 
       name ⇒
         (direct.getOrElse(name, empty), toArray.getOrElse(name, empty), fromArray.getOrElse(name, empty)) match {
-          case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ ComputedType(name, d, false, optional(name))
-          case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ ComputedType(name, t.toArray, false, optional(name))
-          case (d, t, ListBuffer())                        ⇒ ComputedType(name, s(d ++ t.map(_.toArray)), true, optional(name))
+          case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ ValidType(name, d, false, optional(name))
+          case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ ValidType(name, t.toArray, false, optional(name))
+          case (d, t, ListBuffer()) ⇒
+            val allTypes = d.toList ++ t.map(_.toArray)
+            val types = allTypes.distinct
+            if (types.size == 1) ValidType(name, types.head, true, optional(name))
+            else InvalidType(name, d, t, Seq.empty)
           case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒
-            if (f.isArray) new ComputedType(name, f.asArray.fromArray, false, optional(name))
-            else new ComputedType(name, f, false, optional(name))
-          case (d, t, f) ⇒ throw new UserBadDataError("Type computation doesn't match specification, direct " + d + ", toArray " + t + ", fromArray " + f + " in " + slot)
+            if (f.isArray) ValidType(name, f.asArray.fromArray, false, optional(name))
+            else ValidType(name, f, false, optional(name))
+          case (d, t, f) ⇒ InvalidType(name, d, t, f)
         }
     }
   }
-
-  private def s(m: Iterable[PrototypeType[_]]) = intersectionArray(m)
 
   private def computeTransmissions(mole: Mole, sources: Sources, hooks: Hooks)(transitions: Iterable[ITransition], dataChannels: Iterable[DataChannel]) = {
     val direct = new HashMap[String, ListBuffer[PrototypeType[_]]] // Direct transmission through transition or data channel
