@@ -31,7 +31,7 @@ object SubmitActor extends Logger
 
 import SubmitActor._
 
-class SubmitActor(jobManager: ActorRef) {
+class SubmitActor(jobManager: JobManager) {
 
   def receive(submit: Submit) = withRunFinalization {
     val Submit(job, sj) = submit

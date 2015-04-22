@@ -15,20 +15,52 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.execution.local
+package org.openmole.core.tools.collection
 
 import java.util.concurrent.Semaphore
-import org.openmole.core.workflow.job._
-import org.openmole.core.workflow.task._
+
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.Stack
-import org.openmole.core.tools.collection.PriorityQueue
 
-object JobPriorityQueue {
+object PriorityQueue {
 
-  def apply() =
-    PriorityQueue[LocalExecutionJob](
-      _.moleJobs.count(mj ⇒ classOf[MoleTask].isAssignableFrom(mj.task.getClass))
-    )
+  def apply[T](p: T ⇒ Int) =
+    new PriorityQueue[T] {
+      def priority = p
+    }
 
+}
+
+trait PriorityQueue[T] {
+  private val inQueue = new Semaphore(0)
+
+  def priority: T ⇒ Int
+
+  var queues = new TreeMap[Int, Stack[T]]
+
+  def size: Int = synchronized { queues.map { case (_, q) ⇒ q.size }.sum }
+
+  def enqueue(e: T) = {
+    synchronized {
+      val p = priority(e)
+      queues.get(p) match {
+        case Some(queue) ⇒ queue.push(e)
+        case None ⇒
+          val q = new Stack[T]
+          q.push(e)
+          queues += p -> q
+      }
+    }
+    inQueue.release
+  }
+
+  def dequeue = {
+    inQueue.acquire
+    synchronized {
+      val (p, q) = queues.last
+      val job = q.pop
+      if (q.isEmpty) queues -= p
+      job
+    }
+  }
 }

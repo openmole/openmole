@@ -41,7 +41,7 @@ object GetResultActor extends Logger
 
 import GetResultActor.Log._
 
-class GetResultActor(jobManager: ActorRef) {
+class GetResultActor(jobManager: JobManager) {
 
   def receive(msg: GetResult) = withRunFinalization {
     val GetResult(job, sj, resultPath) = msg

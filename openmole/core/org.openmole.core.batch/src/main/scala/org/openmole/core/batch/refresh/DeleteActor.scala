@@ -26,7 +26,7 @@ object DeleteActor extends Logger
 
 import DeleteActor.Log._
 
-class DeleteActor(jobManager: ActorRef) {
+class DeleteActor(jobManager: JobManager) {
   def receive(msg: DeleteFile) = withRunFinalization {
     val DeleteFile(storage, path, directory) = msg
     try storage.tryWithToken {

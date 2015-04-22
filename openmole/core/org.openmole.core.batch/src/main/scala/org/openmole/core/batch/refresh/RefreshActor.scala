@@ -29,7 +29,7 @@ object RefreshActor extends Logger
 
 import RefreshActor.Log._
 
-class RefreshActor(jobManager: ActorRef) {
+class RefreshActor(jobManager: JobManager) {
 
   def receive(refresh: Refresh) = withRunFinalization {
     val Refresh(job, sj, bj, delay, updateErrorsInARow) = refresh

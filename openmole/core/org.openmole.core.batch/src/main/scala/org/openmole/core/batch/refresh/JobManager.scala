@@ -17,17 +17,19 @@
 
 package org.openmole.core.batch.refresh
 
-import akka.actor.{ ActorRef, Actor, ActorSystem, Props }
-import akka.dispatch.{ PriorityGenerator, UnboundedPriorityMailbox }
-import akka.routing.{ SmallestMailboxPool, SmallestMailboxRouter }
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.{ TimeUnit, Executors }
+
 import org.openmole.core.eventdispatcher.EventDispatcher
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.tools.collection.PriorityQueue
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution._
 import com.typesafe.config.ConfigFactory
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.environment.BatchEnvironment.JobManagementThreads
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.thread._
 
 import scala.concurrent.duration._
 import scala.concurrent.duration.{ Duration ⇒ SDuration, MILLISECONDS }
@@ -36,29 +38,31 @@ object JobManager extends Logger
 
 import JobManager.Log._
 
-class JobManager extends Actor {
+class JobManager { self ⇒
 
-  val workers = ActorSystem.create("JobManagement", ConfigFactory.parseString(
-    s"""
-akka {
-  daemonic="on"
-  actor {
-    default-dispatcher {
-      executor = "fork-join-executor"
-      type = Dispatcher
-      mailbox-type = "${classOf[PriorityMailBox].getName}"
-      
-      fork-join-executor {
-        parallelism-min = ${Workspace.preference(JobManagementThreads)}
-        parallelism-max = ${Workspace.preference(JobManagementThreads)}
-      }
-      throughput = 1
-    }
+  var finalized = new AtomicBoolean(false)
+
+  override def finalize(): Unit = {
+    finalized.set(true)
+    super.finalize()
   }
-}
-""").withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)), getClass().getClassLoader())
 
-  import BatchEnvironment.system.dispatcher
+  val messageQueue = PriorityQueue[DispatchedMessage] {
+    case msg: Upload             ⇒ 10
+    case msg: Submit             ⇒ 50
+    case msg: Refresh            ⇒ 5
+    case msg: GetResult          ⇒ 50
+    case msg: KillBatchJob       ⇒ 1
+    case msg: DeleteFile         ⇒ 1
+    case msg: CleanSerializedJob ⇒ 1
+  }
+
+  val delayedExecutor = Executors.newSingleThreadScheduledExecutor(daemonThreadFactory)
+  val executors = Executors.newFixedThreadPool(Workspace.preferenceAsInt(JobManagementThreads), daemonThreadFactory)
+
+  for {
+    i ← 0 until Workspace.preferenceAsInt(JobManagementThreads)
+  } executors.submit { while (!self.finalized.get) DispatcherActor.receive(messageQueue.dequeue) }
 
   val uploader = new UploadActor(self)
   val submitter = new SubmitActor(self)
@@ -68,37 +72,33 @@ akka {
   val cleaner = new CleanerActor(self)
   val deleter = new DeleteActor(self)
 
-  class DispatcherActor extends Actor {
-    def receive = {
-      case msg: Upload             ⇒ uploader.receive(msg)
-      case msg: Submit             ⇒ submitter.receive(msg)
-      case msg: Refresh            ⇒ refresher.receive(msg)
-      case msg: GetResult          ⇒ resultGetters.receive(msg)
-      case msg: KillBatchJob       ⇒ killer.receive(msg)
-      case msg: DeleteFile         ⇒ deleter.receive(msg)
-      case msg: CleanSerializedJob ⇒ cleaner.receive(msg)
-    }
+  object DispatcherActor {
+    def receive(dispatched: DispatchedMessage) =
+      dispatched match {
+        case msg: Upload             ⇒ uploader.receive(msg)
+        case msg: Submit             ⇒ submitter.receive(msg)
+        case msg: Refresh            ⇒ refresher.receive(msg)
+        case msg: GetResult          ⇒ resultGetters.receive(msg)
+        case msg: KillBatchJob       ⇒ killer.receive(msg)
+        case msg: DeleteFile         ⇒ deleter.receive(msg)
+        case msg: CleanSerializedJob ⇒ cleaner.receive(msg)
+      }
   }
 
-  val router = SmallestMailboxPool(Workspace.preferenceAsInt(JobManagementThreads))
-  val dispatchers = workers.actorOf(Props(new DispatcherActor).withRouter(router))
-
-  def receive = {
-    case msg: Upload             ⇒ dispatchers ! msg
-    case msg: Submit             ⇒ dispatchers ! msg
-    case msg: Refresh            ⇒ dispatchers ! msg
-    case msg: GetResult          ⇒ dispatchers ! msg
-    case msg: KillBatchJob       ⇒ dispatchers ! msg
-    case msg: DeleteFile         ⇒ dispatchers ! msg
-    case msg: CleanSerializedJob ⇒ dispatchers ! msg
+  def !(msg: JobMessage): Unit = msg match {
+    case msg: Upload             ⇒ messageQueue.enqueue(msg)
+    case msg: Submit             ⇒ messageQueue.enqueue(msg)
+    case msg: Refresh            ⇒ messageQueue.enqueue(msg)
+    case msg: GetResult          ⇒ messageQueue.enqueue(msg)
+    case msg: KillBatchJob       ⇒ messageQueue.enqueue(msg)
+    case msg: DeleteFile         ⇒ messageQueue.enqueue(msg)
+    case msg: CleanSerializedJob ⇒ messageQueue.enqueue(msg)
 
     case Manage(job) ⇒
       self ! Upload(job)
 
     case Delay(msg, delay) ⇒
-      context.system.scheduler.scheduleOnce(delay) {
-        self ! msg
-      }
+      delayedExecutor.schedule(self ! msg, delay.toMillis, TimeUnit.MILLISECONDS)
 
     case Uploaded(job, sj) ⇒
       logger.fine(s"Uploaded $job send it to submit pool")
@@ -116,7 +116,7 @@ akka {
     case Resubmit(job, storage) ⇒
       killAndClean(job)
       job.state = ExecutionState.READY
-      dispatchers ! Upload(job)
+      messageQueue.enqueue(Upload(job))
 
     case Error(job, exception) ⇒
       val level = exception match {

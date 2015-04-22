@@ -40,7 +40,7 @@ import org.openmole.tool.tar.TarOutputStream
 import scala.collection.immutable.TreeSet
 import scala.slick.driver.H2Driver.simple._
 
-class UploadActor(jobManager: ActorRef) {
+class UploadActor(jobManager: JobManager) {
 
   def receive(msg: Upload) = withRunFinalization {
     val job = msg.job

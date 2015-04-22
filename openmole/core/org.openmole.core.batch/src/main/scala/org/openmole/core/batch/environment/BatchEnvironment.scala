@@ -113,26 +113,7 @@ object BatchEnvironment extends Logger {
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 
-  lazy val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
-    """
-akka {
-  daemonic="on"
-  actor {
-    default-dispatcher {
-      executor = "fork-join-executor"
-      type = Dispatcher
-
-      fork-join-executor {
-        parallelism-min = 1
-        parallelism-max = 10
-      }
-    }
-  }
-}
-    """).withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
-
-  lazy val jobManager = system.actorOf(Props(new JobManager))
-
+  lazy val jobManager = new JobManager
 }
 
 import BatchEnvironment._
