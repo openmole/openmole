@@ -85,17 +85,26 @@ import TreeNodePanel._
 
 class TreeNodePanel(_treeNode: DirNode) {
 
-  val treeNode = Var(_treeNode)
+  val treeNodes: Var[Seq[TreeNode]] = Var(Seq())
 
-  val view = tags.div(
+  Post[Api].listFiles(_treeNode.canonicalPath()).call().foreach { sons ⇒
+    treeNodes() = sons
+  }
+
+  lazy val view = tags.div(
     `class` := "tree"
-  )(
-      drawTree(treeNode())
-    )
+  )(Rx {
+      drawTree(treeNodes())
+    })
+
+  def drawTree(tns: Seq[TreeNode]): TypedTag[UList] = tags.ul(
+    for (tn ← tns.sorted(TreeNodeOrdering)) yield {
+      drawTree(tn)
+    }
+  )
 
   def drawTree(tn: TreeNode): Rx[TypedTag[UList]] =
     Rx {
-      println("RX")
       tags.ul(
         drawNode(tn),
         tn match {
