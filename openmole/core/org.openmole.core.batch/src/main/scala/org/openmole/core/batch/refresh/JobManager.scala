@@ -65,6 +65,7 @@ class JobManager { self ⇒
     } {
       val t = new Thread { while (!self.finalized.get) DispatcherActor.receive(messageQueue.dequeue) }
       t.setDaemon(true)
+      t.start()
       t
     }
 
