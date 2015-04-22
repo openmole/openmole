@@ -17,8 +17,6 @@
 
 package org.openmole.core.batch.environment
 
-import akka.actor.ActorSystem
-import com.typesafe.config.ConfigFactory
 import java.io.File
 import org.openmole.core.eventdispatcher.{ Event, EventDispatcher }
 import java.util.concurrent.atomic.AtomicLong
@@ -36,7 +34,6 @@ import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.job._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.core.workflow.execution._
-import akka.actor.Props
 import org.openmole.tool.hash.Hash
 import ref.WeakReference
 
@@ -113,26 +110,7 @@ object BatchEnvironment extends Logger {
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 
-  lazy val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
-    """
-akka {
-  daemonic="on"
-  actor {
-    default-dispatcher {
-      executor = "fork-join-executor"
-      type = Dispatcher
-
-      fork-join-executor {
-        parallelism-min = 1
-        parallelism-max = 10
-      }
-    }
-  }
-}
-    """).withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
-
-  lazy val jobManager = system.actorOf(Props(new JobManager))
-
+  lazy val jobManager = new JobManager
 }
 
 import BatchEnvironment._

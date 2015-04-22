@@ -23,7 +23,7 @@ import collection.mutable
 import scala.ref.WeakReference
 
 class ExecuterPool(nbThreads: Int, environment: WeakReference[LocalEnvironment]) {
-  private val jobs = new JobPriorityQueue
+  private val jobs = JobPriorityQueue()
 
   private val executers = {
     val map = mutable.HashMap[LocalExecuter, Thread]()

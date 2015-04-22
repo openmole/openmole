@@ -27,15 +27,15 @@ object KillerActor extends Logger
 
 import KillerActor.Log._
 
-class KillerActor(jobManager: ActorRef) extends Actor {
-  def receive = withRunFinalization {
-    case msg @ KillBatchJob(bj) ⇒
-      try bj.jobService.tryWithToken {
-        case Some(t) ⇒ bj.kill(t)
-        case None ⇒
-          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
-      } catch {
-        case e: Throwable ⇒ logger.log(FINE, "Could not kill job.", e)
-      }
+class KillerActor(jobManager: JobManager) {
+  def receive(msg: KillBatchJob) = withRunFinalization {
+    val KillBatchJob(bj) = msg
+    try bj.jobService.tryWithToken {
+      case Some(t) ⇒ bj.kill(t)
+      case None ⇒
+        jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
+    } catch {
+      case e: Throwable ⇒ logger.log(FINE, "Could not kill job.", e)
+    }
   }
 }

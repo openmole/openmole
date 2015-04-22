@@ -1,13 +1,17 @@
 
 @import org.openmole.site.Objects._
 
-@sect{Delegation a SSH server}
-  This environment make it possible to delegate task to a remote multi-core server using the @a("SSH", href := "https://en.wikipedia.org/wiki/Secure_Shell") protocol. In order to do that you should be able to connect to server with ssh using either a key/password authentication or a private key based authentication.
+@sect{Delegation to an SSH server}
+  The @hl.openmole("SSHEnvironment") makes it possible to delegate tasks to a remote multi-core server through an
+  @a("SSH", href := "https://en.wikipedia.org/wiki/Secure_Shell") connection. In order to do that you should be able to
+  connect to server with ssh using either a key/password authentication or a private key based authentication.
 
-  @p First you should provide the authentication information to access the server (this will be persisted by OpenMOLE you only need to perform that operation once and for all).
+  @p First you should provide your authentication details to access the server (this will be persisted by OpenMOLE
+  so this operation only needs to be done once and for all).
   @part.SSHAuthentication()
 
-  @p Then you can use the SSH environment:
+  @p Once the @hl.openmole("SSHAuthentication") is defined, all that is left is to define the
+  @hl.openmole("SSHEnvironment"):
   @br @hl.openmole("""
   val env =
     SSHEnvironment(

@@ -26,18 +26,18 @@ object DeleteActor extends Logger
 
 import DeleteActor.Log._
 
-class DeleteActor(jobManager: ActorRef) extends Actor {
-  def receive = withRunFinalization {
-    case msg @ DeleteFile(storage, path, directory) ⇒
-      try storage.tryWithToken {
-        case Some(t) ⇒
-          if (directory) storage.rmDir(path)(t) else storage.rmFile(path)(t)
-        case None ⇒
-          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
-      }
-      catch {
-        case t: Throwable ⇒
-          logger.log(FINE, "Error when deleting a file", t)
-      }
+class DeleteActor(jobManager: JobManager) {
+  def receive(msg: DeleteFile) = withRunFinalization {
+    val DeleteFile(storage, path, directory) = msg
+    try storage.tryWithToken {
+      case Some(t) ⇒
+        if (directory) storage.rmDir(path)(t) else storage.rmFile(path)(t)
+      case None ⇒
+        jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
+    }
+    catch {
+      case t: Throwable ⇒
+        logger.log(FINE, "Error when deleting a file", t)
+    }
   }
 }

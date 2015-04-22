@@ -41,21 +41,21 @@ object GetResultActor extends Logger
 
 import GetResultActor.Log._
 
-class GetResultActor(jobManager: ActorRef) extends Actor {
+class GetResultActor(jobManager: JobManager) {
 
-  def receive = withRunFinalization {
-    case msg @ GetResult(job, sj, resultPath) ⇒
-      try sj.storage.tryWithToken {
-        case Some(token) ⇒
-          getResult(sj.storage, resultPath, job)(token)
-          jobManager ! Kill(job)
-        case None ⇒
-          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
-      } catch {
-        case e: Throwable ⇒
-          jobManager ! Error(job, e)
-          jobManager ! Kill(job)
-      }
+  def receive(msg: GetResult) = withRunFinalization {
+    val GetResult(job, sj, resultPath) = msg
+    try sj.storage.tryWithToken {
+      case Some(token) ⇒
+        getResult(sj.storage, resultPath, job)(token)
+        jobManager ! Kill(job)
+      case None ⇒
+        jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
+    } catch {
+      case e: Throwable ⇒
+        jobManager ! Error(job, e)
+        jobManager ! Kill(job)
+    }
   }
 
   def getResult(storage: StorageService, outputFilePath: String, batchJob: BatchExecutionJob)(implicit token: AccessToken): Unit = {
@@ -78,7 +78,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
             val executionResult = contextResults.results(moleJob.id)
             executionResult match {
               case Success(context) ⇒ moleJob.finish(context)
-              case Failure(e)       ⇒ if (!moleJob.finished) sender ! MoleJobError(moleJob, batchJob, e)
+              case Failure(e)       ⇒ if (!moleJob.finished) jobManager ! MoleJobError(moleJob, batchJob, e)
             }
           }
         }

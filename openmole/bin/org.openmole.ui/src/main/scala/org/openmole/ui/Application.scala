@@ -48,6 +48,9 @@ class Application extends IApplication {
       |_|
 """
 
+  // since CTRL-C is disabled in the Console
+  lazy val consoleUsage = "(Type :q or :quit to quit)"
+
   override def start(context: IApplicationContext) = {
 
     sealed trait LaunchMode
@@ -162,6 +165,7 @@ class Application extends IApplication {
         server.start()
       case ConsoleMode ⇒
         print(consoleSplash)
+        println(consoleUsage)
         val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
         console.run(ConsoleVariables(args = config.args))
       case GUIMode ⇒

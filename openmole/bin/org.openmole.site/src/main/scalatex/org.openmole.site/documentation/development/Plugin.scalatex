@@ -2,13 +2,19 @@
 @import org.openmole.site.Objects._
 
 @sect{Plugin development}
-  OpenMOLE is an pluggable platform, meaning that you can easily write your own code (or OpenMOLE extension) and plug it into the plateform. This tutorial explains how to write an OpenMOLE plugin using Scala and SBT. OpenMOLE is based on the JVM so you can successfully create OpenMOLE plugins using other JVM based languages such as Java, Groovy, Clojure, Jython...
+  @p OpenMOLE is a pluggable platform. It means that you can easily write your own extension and plug it into OpenMOLE.
+  This tutorial explains how to write an OpenMOLE plugin using Scala and SBT. OpenMOLE is based on the JVM so you can
+  create OpenMOLE plugins using Scala or any other JVM based languages such as Java, Groovy, Clojure, Jython...
 
-  @p The prerequisite for the tutorial is to have @a("git", href := "http://git-scm.com/") and @a("SBT", href := "http://www.scala-sbt.org/") installed on your system.
+  @p The prerequisite for the tutorial is to have @a("git", href := "http://git-scm.com/") and
+  @a("SBT", href := "http://www.scala-sbt.org/") installed on your system.
 
-  @p To start this tutorial, clone the code available @a("here", href := "https://github.com/openmole/myopenmoleplugin"):
+  @p The first step is to clone the code available @a("here", href := "https://github.com/openmole/myopenmoleplugin"):
   @br @hl.highlight("git clone git://github.com/openmole/myopenmoleplugin.git", "plain")
-  @p This repository contains all you need to create an OpenMOLE plugin in the hello directory. The @i{src/main/scala/myopemoleplugin} directory contains the source code of the plugin:
+
+  @p This repository contains a template to help you create OpenMOLE plugins easily. The
+  @i{hello} directory contains the source code of the plugin and the materials to build it:
+
   @br @hl.highlight("""
   package myopenmoleplugin
 
@@ -17,8 +23,10 @@
   }
 
   object Hello extends Hello""", "scala")
+  """)
 
-  @p The file @i{build.sbt} contains the building instructions for SBT. The most important part are the OSGi instructions:
+  @p The file @i{build.sbt} contains the building instructions for SBT. The most important part are the OSGi
+  instructions:
   @br @hl.highlight("""
   OsgiKeys.exportPackage := Seq("myopenmoleplugin.*")
 
@@ -26,19 +34,24 @@
 
   OsgiKeys.privatePackage := Seq("!scala.*,*")""", "plain")
 
-  @p The @i{exportPackage} instruction make the @i{myopenmole} package visible to OpenMOLE. The @i{importPackage} instruction means that every package that is not included into the plugin should be imported. The @i{privatePackage} means that every package in the project or in the dependencies should be embedded except for the package starting by the scala word, instead the scala packages provided by OpenMOLE platform will be used by the plugin.
+  @p The @i{exportPackage} instruction makes the @i{myopenmole} package visible to OpenMOLE. The @i{importPackage}
+  instruction means that every package that is not included into the plugin should be imported.
+  The @i{privatePackage} means that every package in the project, or in the dependencies, should be embedded except for
+  the package starting by the scala word. The scala packages provided by OpenMOLE will be used by the plugin instead.
 
   @p To build the plugin execute: @hl.highlight("sbt osgi-bundle", "plain")
-  @p The plugin is constructed in target/scala-2.11/myopenmoleplugin_2.11-1.0.jar. As you can observe it contains the classes you have developed *.class and the metadata about import and export in the MANIFEST.INF:
+  @p SBT constructs the plugin in @i{target/scala-2.11/myopenmoleplugin_2.11-1.0.jar}. This JAR file contains the
+  classes you have developed (*.class) along with the metadata realtive to imports and exports in the @i{MANIFEST.INF}
+  file:
   @br @hl.highlight("""
   META-INF/MANIFEST.MF
   myopenmoleplugin/
   myopenmoleplugin/Hello$.class
   myopenmoleplugin/Hello.class""", "plain")
 
-  @p To use this plugin in OpenMOLE you should launch OpenMOLE with the option -p:
+  @p To enable this plugin in OpenMOLE, use the option @i{-p}:
   @br @hl.highlight("""openmole -p target/scala-2.11/myopenmoleplugin_2.11-1.0.jar -c""", "plain")
-  @p You can now use the Hello object in the scripts for instance:
+  @p You can now use the @i{Hello} object in your workflows:
   @br @hl.openmole("""
   import org.openmole.plugin.domain.collection._
   import org.openmole.plugin.domain.distribution._

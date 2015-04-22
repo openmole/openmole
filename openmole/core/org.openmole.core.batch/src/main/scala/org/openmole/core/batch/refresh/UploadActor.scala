@@ -40,21 +40,21 @@ import org.openmole.tool.tar.TarOutputStream
 import scala.collection.immutable.TreeSet
 import scala.slick.driver.H2Driver.simple._
 
-class UploadActor(jobManager: ActorRef) extends Actor {
+class UploadActor(jobManager: JobManager) {
 
-  def receive = withRunFinalization {
-    case msg @ Upload(job) ⇒
-      if (!job.state.isFinal) {
-        try {
-          val sj = initCommunication(job.environment, job.job)
-          jobManager ! Uploaded(job, sj)
-        }
-        catch {
-          case e: Throwable ⇒
-            jobManager ! Error(job, e)
-            jobManager ! msg
-        }
+  def receive(msg: Upload) = withRunFinalization {
+    val job = msg.job
+    if (!job.state.isFinal) {
+      try {
+        val sj = initCommunication(job.environment, job.job)
+        jobManager ! Uploaded(job, sj)
       }
+      catch {
+        case e: Throwable ⇒
+          jobManager ! Error(job, e)
+          jobManager ! msg
+      }
+    }
   }
 
   private def initCommunication(environment: BatchEnvironment, job: Job): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒

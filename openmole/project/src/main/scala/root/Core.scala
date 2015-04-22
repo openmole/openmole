@@ -69,5 +69,5 @@ object Core extends Defaults {
   val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), dynamicImports = Seq("*"), imports = Seq("*")) dependsOn
     (pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
 
-  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core"), OSGi.openMOLEScope := Some("provided"))
+  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core", "runtime"), OSGi.openMOLEScope := Some("provided"))
 }

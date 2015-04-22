@@ -29,38 +29,38 @@ object RefreshActor extends Logger
 
 import RefreshActor.Log._
 
-class RefreshActor(jobManager: ActorRef) extends Actor {
+class RefreshActor(jobManager: JobManager) {
 
-  def receive = withRunFinalization {
-    case Refresh(job, sj, bj, delay, updateErrorsInARow) ⇒
-      if (!job.state.isFinal) {
-        try bj.jobService.tryWithToken {
-          case Some(t) ⇒
-            val oldState = job.state
-            job.state = bj.updateState(t)
-            if (job.state == DONE) jobManager ! GetResult(job, sj, bj.resultPath)
-            else if (!job.state.isFinal) {
-              val newDelay =
-                if (oldState == job.state) (delay + job.environment.incrementUpdateInterval) min job.environment.maxUpdateInterval
-                else job.environment.minUpdateInterval
-              jobManager ! Delay(Refresh(job, sj, bj, newDelay, 0), newDelay)
-            }
-            else jobManager ! Kill(job)
-          case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow), delay)
-        } catch {
-          case _: ResubmitException ⇒
-            jobManager ! Resubmit(job, sj.storage)
-          case e: Throwable ⇒
-            if (updateErrorsInARow >= Workspace.preferenceAsInt(MaxUpdateErrorsInARow)) {
-              jobManager ! Error(job, e)
-              jobManager ! Kill(job)
-            }
-            else {
-              logger.log(FINE, s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
-              jobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow + 1), delay)
-            }
-        }
+  def receive(refresh: Refresh) = withRunFinalization {
+    val Refresh(job, sj, bj, delay, updateErrorsInARow) = refresh
+    if (!job.state.isFinal) {
+      try bj.jobService.tryWithToken {
+        case Some(t) ⇒
+          val oldState = job.state
+          job.state = bj.updateState(t)
+          if (job.state == DONE) jobManager ! GetResult(job, sj, bj.resultPath)
+          else if (!job.state.isFinal) {
+            val newDelay =
+              if (oldState == job.state) (delay + job.environment.incrementUpdateInterval) min job.environment.maxUpdateInterval
+              else job.environment.minUpdateInterval
+            jobManager ! Delay(Refresh(job, sj, bj, newDelay, 0), newDelay)
+          }
+          else jobManager ! Kill(job)
+        case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow), delay)
+      } catch {
+        case _: ResubmitException ⇒
+          jobManager ! Resubmit(job, sj.storage)
+        case e: Throwable ⇒
+          if (updateErrorsInARow >= Workspace.preferenceAsInt(MaxUpdateErrorsInARow)) {
+            jobManager ! Error(job, e)
+            jobManager ! Kill(job)
+          }
+          else {
+            logger.log(FINE, s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
+            jobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow + 1), delay)
+          }
       }
+    }
   }
 }
 
