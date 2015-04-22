@@ -58,11 +58,15 @@ class JobManager { self ⇒
   }
 
   val delayedExecutor = Executors.newSingleThreadScheduledExecutor(daemonThreadFactory)
-  val executors = Executors.newFixedThreadPool(Workspace.preferenceAsInt(JobManagementThreads), daemonThreadFactory)
 
-  for {
-    i ← 0 until Workspace.preferenceAsInt(JobManagementThreads)
-  } executors.submit { while (!self.finalized.get) DispatcherActor.receive(messageQueue.dequeue) }
+  val executors =
+    for {
+      i ← 0 until Workspace.preferenceAsInt(JobManagementThreads)
+    } {
+      val t = new Thread { while (!self.finalized.get) DispatcherActor.receive(messageQueue.dequeue) }
+      t.setDaemon(true)
+      t
+    }
 
   val uploader = new UploadActor(self)
   val submitter = new SubmitActor(self)
