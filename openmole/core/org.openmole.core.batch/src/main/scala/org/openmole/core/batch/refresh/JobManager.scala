@@ -47,7 +47,7 @@ class JobManager { self ⇒
     super.finalize()
   }
 
-  val messageQueue = PriorityQueue[DispatchedMessage] {
+  lazy val messageQueue = PriorityQueue[DispatchedMessage] {
     case msg: Upload             ⇒ 10
     case msg: Submit             ⇒ 50
     case msg: Refresh            ⇒ 5
@@ -57,25 +57,27 @@ class JobManager { self ⇒
     case msg: CleanSerializedJob ⇒ 1
   }
 
-  val delayedExecutor = Executors.newSingleThreadScheduledExecutor(daemonThreadFactory)
+  lazy val delayedExecutor = Executors.newSingleThreadScheduledExecutor(daemonThreadFactory)
 
-  val executors =
-    for {
-      i ← 0 until Workspace.preferenceAsInt(JobManagementThreads)
-    } {
-      val t = new Thread { while (!self.finalized.get) DispatcherActor.receive(messageQueue.dequeue) }
-      t.setDaemon(true)
-      t.start()
-      t
-    }
+  for {
+    i ← 0 until Workspace.preferenceAsInt(JobManagementThreads)
+  } {
+    val t =
+      new Thread {
+        override def run = while (!self.finalized.get) DispatcherActor.receive(messageQueue.dequeue)
+      }
+    t.setDaemon(true)
+    t.start()
+    t
+  }
 
-  val uploader = new UploadActor(self)
-  val submitter = new SubmitActor(self)
-  val refresher = new RefreshActor(self)
-  val resultGetters = new GetResultActor(self)
-  val killer = new KillerActor(self)
-  val cleaner = new CleanerActor(self)
-  val deleter = new DeleteActor(self)
+  lazy val uploader = new UploadActor(self)
+  lazy val submitter = new SubmitActor(self)
+  lazy val refresher = new RefreshActor(self)
+  lazy val resultGetters = new GetResultActor(self)
+  lazy val killer = new KillerActor(self)
+  lazy val cleaner = new CleanerActor(self)
+  lazy val deleter = new DeleteActor(self)
 
   object DispatcherActor {
     def receive(dispatched: DispatchedMessage) =
