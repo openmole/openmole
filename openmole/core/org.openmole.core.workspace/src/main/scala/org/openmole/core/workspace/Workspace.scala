@@ -64,7 +64,6 @@ object Workspace {
   this += (ErrorArraySnipSize, "10")
 
   lazy val defaultLocation = DBServerInfo.base
-  lazy val instance = new Workspace(defaultLocation)
 
   Runtime.getRuntime.addShutdownHook(new Thread {
     override def run = synchronized {
@@ -101,6 +100,8 @@ object Workspace {
 
   def openMOLELocation =
     Option(System.getProperty(OpenMOLELocationProperty, null)).map(new File(_))
+
+  val instance = new Workspace(defaultLocation)
 
 }
 
