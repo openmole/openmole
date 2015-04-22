@@ -25,14 +25,10 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.tools.collection.PriorityQueue
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution._
-import com.typesafe.config.ConfigFactory
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.environment.BatchEnvironment.JobManagementThreads
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.thread._
-
-import scala.concurrent.duration._
-import scala.concurrent.duration.{ Duration ⇒ SDuration, MILLISECONDS }
 
 object JobManager extends Logger
 
