@@ -24,17 +24,20 @@ import org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader
 import org.openmole.core.exception.{ UserBadDataError, InternalProcessingError }
 import org.openmole.core.pluginmanager.PluginManager
 
+import scala.annotation.tailrec
 import scala.reflect.internal.util.{ NoPosition, Position }
 import scala.tools.nsc.interpreter._
 import scala.tools.nsc._
 import scala.tools.nsc.reporters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Try
 
 class ScalaREPL(priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
 
   case class ErrorMessage(error: String, line: Int)
   var errorMessage: List[ErrorMessage] = Nil
+  var loopExitCode = 0
 
   System.setProperty("jline.shutdownhook", "true")
   //System.setProperty("scala.repl.debug", "true")
@@ -65,6 +68,25 @@ class ScalaREPL(priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.emp
             throw new UserBadDataError(messages)
         }
     }
+  }
+
+  def loopWithExitCode = {
+    loop()
+    loopExitCode
+  }
+
+  def interpretAllFromWithExitCode(file: reflect.io.File) = {
+    interpretAllFrom(file)
+    loopExitCode
+  }
+
+  override def commands: List[LoopCommand] = super.commands.filter(_.name != "quit") ++ List(
+    LoopCommand.cmd("quit", "[code]", "exit the application with a return code", exit)
+  )
+
+  def exit(s: String) = {
+    if (!s.isEmpty) loopExitCode = s.toInt
+    Result(keepRunning = false, None)
   }
 
   intp = new IMain {

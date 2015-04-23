@@ -155,26 +155,32 @@ class Application extends IApplication {
 
     if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
 
-    config.launchMode match {
-      case HelpMode ⇒ println(usage)
-      case ServerConfigMode ⇒
-        RESTServer.configure
-      case ServerMode ⇒
-        if (!config.password.isDefined) Console.initPassword
-        val server = new RESTServer(config.serverPort, config.serverSSLPort, config.hostName, config.allowInsecureConnections, PluginSet(userPlugins))
-        server.start()
-      case ConsoleMode ⇒
-        print(consoleSplash)
-        println(consoleUsage)
-        val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
-        console.run(ConsoleVariables(args = config.args))
-      case GUIMode ⇒
-        BootstrapJS.init(config.optimizedJS)
-        val server = new GUIServer(config.serverPort, BootstrapJS.webapp)
-        server.start()
-    }
+    val retCode =
+      config.launchMode match {
+        case HelpMode ⇒
+          println(usage)
+          None
+        case ServerConfigMode ⇒
+          RESTServer.configure
+          None
+        case ServerMode ⇒
+          if (!config.password.isDefined) Console.initPassword
+          val server = new RESTServer(config.serverPort, config.serverSSLPort, config.hostName, config.allowInsecureConnections, PluginSet(userPlugins))
+          server.start()
+          None
+        case ConsoleMode ⇒
+          print(consoleSplash)
+          println(consoleUsage)
+          val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
+          Some(console.run(ConsoleVariables(args = config.args)))
+        case GUIMode ⇒
+          BootstrapJS.init(config.optimizedJS)
+          val server = new GUIServer(config.serverPort, BootstrapJS.webapp)
+          server.start()
+          None
+      }
 
-    IApplication.EXIT_OK
+    retCode.map(new Integer(_)).getOrElse(IApplication.EXIT_OK)
   }
 
   override def stop = {}
