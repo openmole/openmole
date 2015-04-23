@@ -60,6 +60,8 @@ java -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Dosgi.lockin
      -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog \
      -cp "$LOCATION/openmole-plugins" -gp "$LOCATION/openmole-plugins-gui" "${ARGS[@]}"
 
+RET=$?
+
 rm -rf "${CONFIGDIR}"
 
-
+exit $RET

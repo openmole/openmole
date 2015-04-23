@@ -71,6 +71,12 @@ object Console {
     }
   }
 
+  object ExitCodes {
+    def ok = 0
+    def incorrectPassword = 1
+    def scriptDoesNotExit = 2
+  }
+
 }
 
 import Console._
@@ -103,7 +109,7 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
       imports.map("import " + _).mkString("; ")
     )
 
-  def run(args: ConsoleVariables) = {
+  def run(args: ConsoleVariables): Int = {
     val correctPassword =
       password match {
         case None ⇒
@@ -111,17 +117,26 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
         case Some(p) ⇒ setPassword(p)
       }
 
-    if (correctPassword) withREPL(args) { loop ⇒
-      script match {
-        case Nil ⇒ loop.loop
-        case scripts ⇒
-          scripts.foreach { s ⇒
-            val scriptFile = new File(s)
-            if (scriptFile.exists) loop.interpretAllFrom(new SFile(scriptFile))
-            else println("File " + scriptFile + " doesn't exist.")
+    correctPassword match {
+      case false ⇒ ExitCodes.incorrectPassword
+      case true ⇒
+        withREPL(args) { loop ⇒
+          script match {
+            case Nil ⇒ loop.loopWithExitCode
+            case scripts ⇒
+              scripts.foldLeft(ExitCodes.ok) {
+                (code, s) ⇒
+                  val scriptFile = new File(s)
+                  if (scriptFile.exists) loop.interpretAllFromWithExitCode(new SFile(scriptFile))
+                  else {
+                    println("File " + scriptFile + " doesn't exist.")
+                    ExitCodes.scriptDoesNotExit
+                  }
+              }
           }
-      }
+        }
     }
+
   }
 
   def initialise(loop: ScalaREPL, variables: ConsoleVariables = ConsoleVariables()) = {
