@@ -3,9 +3,10 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core.Post
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.Forms._
-import org.scalajs.dom.html.UList
+import org.scalajs.dom.html.{ Input, UList }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -95,14 +96,44 @@ import TreeNodePanel._
 class TreeNodePanel(_dirNode: DirNode) {
 
   val treeNode: Var[DirNode] = Var(_dirNode)
+  val addDirState: Var[Boolean] = Var(false)
 
   computeAllSons(_dirNode)
 
-  val view = tags.div(
-    `class` := "tree"
-  )(Rx {
-      drawTree(treeNode().sons())
+  val addRootDirButton =
+    bs.glyphButton(" Add", btn_success, glyph_folder_close)(`type` := "submit")(onclick := { () ⇒
+      rootDirInput.value = ""
+      addDirState() = !addDirState()
     })
+
+  val rootDirInput: Input = bs.input("")(
+    placeholder := "Folder name",
+    width := "130px",
+    autofocus
+  ).render
+
+  val view = tags.div(
+    Rx {
+      bs.form()(
+        inputGroup(navbar_left)(
+          inputGroupButton(addRootDirButton),
+          if (addDirState()) rootDirInput else tags.span()
+        ),
+        onsubmit := { () ⇒
+          {
+            Post[Api].addRootDirectory(rootDirInput.value).call().foreach { b ⇒
+              if (b) computeAllSons(treeNode())
+              addDirState() = !addDirState()
+            }
+          }
+        })
+    },
+    tags.div(`class` := "tree")(
+      Rx {
+        drawTree(treeNode().sons())
+      }
+    )
+  )
 
   def drawTree(tns: Seq[TreeNode]): TypedTag[UList] = tags.ul(
     for (tn ← tns.sorted(TreeNodeOrdering)) yield {

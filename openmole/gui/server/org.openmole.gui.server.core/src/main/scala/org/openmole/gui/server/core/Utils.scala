@@ -17,6 +17,7 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
 import java.io.File
 
@@ -27,6 +28,8 @@ object Utils {
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)
   }
+
+  val workspaceProjectFile = Workspace.file("webui/projects")
 
   def listFiles(path: String): Seq[TreeNodeData] = new File(path).listFiles.toSeq
 
