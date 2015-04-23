@@ -10,7 +10,9 @@ import root.Libraries._
 object Misc extends GuiDefaults {
   override val dir = super.dir / "misc"
 
-  lazy val utils = OsgiProject("org.openmole.gui.misc.utils") enablePlugins (ScalaJSPlugin)
+  lazy val utils = OsgiProject("org.openmole.gui.misc.utils") enablePlugins (ScalaJSPlugin) settings (
+    libraryDependencies ++= Seq(rx)
+  )
 
   lazy val js = OsgiProject("org.openmole.gui.misc.js") enablePlugins (ScalaJSPlugin) dependsOn
     (Core.workspace, utils) settings (

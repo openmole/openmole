@@ -21,7 +21,9 @@ import org.openmole.gui.ext.data.TreeNodeData
 trait Api {
   def uuid(): String = java.util.UUID.randomUUID.toString
 
-  def listFiles(path: String): Seq[TreeNodeData]
+  def listFiles(path: TreeNodeData): Seq[TreeNodeData]
+
+  def listFilesSeq(path: Seq[TreeNodeData]): Seq[(TreeNodeData, Seq[TreeNodeData])]
 
   def workspacePath(workspaceKey: String): String
 }

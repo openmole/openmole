@@ -179,20 +179,18 @@ select::-moz-focus-inner {
   padding: 5% 0; /* Temp: Just spacing. */
 }
 .show-nav #site-canvas {
-  -webkit-transform: translateX(350px);
-  transform: translateX(350px);
+  -webkit-transform: translateX(250px);
+  transform: translateX(250px);
 
-  -webkit-transform: translate3d(350px, 0, 0);
-  transform: translate3d(350px, 0, 0);
+  -webkit-transform: translate3d(250px, 0, 0);
+  transform: translate3d(250px, 0, 0);
 }
 #site-menu {
-  width: 350px;
+  width: 250px;
   height: 100%;
   position: absolute;
   top: 0;
-  left: -350px;
-  /*  background-color:#9abddb;*/
- /* background: white;*/
+  left: -250px;
   padding: 15px;
 }
 
