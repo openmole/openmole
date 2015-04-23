@@ -2,9 +2,14 @@
 @import org.openmole.site.Objects._
 
 @sect{Hook}
-  Task are mute pieces of software. It means that there are not conceived to write files or display values or have any side effects at all. Their role is to compute some output data from the input data. That's what guaranty that their executions can be deported on other computer. To save your results, you should use the hooks. Hooks are conceived to perform listen to perform some action when a task is finished.
+ @p Tasks are mute pieces of software. They are not conceived to write files, display values, nor more generally present
+  any side effects at all. Tasks' role is to compute some output data from their input data. That's what guaranties that
+  their execution can be deported to other machines.
+
+@p OpenMOLE introduces a mechanims called @b{Hooks} to save or display results generated on remote environments. Hooks
+  are conceived to perform an action upon completion of the task they are attached to.
   @sect{Plug a hook}
-     Let consider this simple workflow:
+     Let's consider this simple workflow:
      @br @hl.openmole("""
      val i = Val[Int]
      val hello = ScalaTask("i = i * 2") set (
@@ -17,7 +22,8 @@
      val h = ToStringHook()
 
      val ex = exploration -< (hello hook h) start""")
-     @p The hook @i{h} is plugged a the end of the task hello. Each time hello finishes the hook is executed. You can also plug multiple hooks on the same task using the syntax:
+     @p The hook @i{h} is plugged to the end of the @i{hello} task. Everytime @i{hello} finishes, the hook @i{h} is
+     executed. Multiple hooks can also be plugged to the same task as in the present example:
      @br @hl.openmole("""
      val i = Val[Int]
 
@@ -30,36 +36,42 @@
      val h3 = ToStringHook()
 
      val ex = (hello hook (h1, h2, h3)) start""").
-  @sect{Save your data in CSV}
-    The AppendToCSVFileHook take data from the dataflow and copy them into a CSV file:
+
+  @p Hooks come in various declinations, with different actions on the results. The available hooks are described
+  hereafter.
+
+  @sect{Save your data as CSV}
+    The @i{AppendToCSVFileHook} takes data from the dataflow and appends it to a file formatted as CSV:
     @br @hl.openmole("""
     val i = Val[Int]
 
     val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv")""")
-    @p The path is expanded (expressions between ${} are evaluated and replaced).
+    @p The path is expanded using the variables from the dataflow (expressions between ${} are evaluated and replaced).
   @sect{Save files computed by your tasks}
-    The copyFile hook makes it possible to copy a file / directory from the dataflow to a given location.
+    The @i{CopyFileHook} makes it possible to copy a file / directory from the dataflow to a given location on the machine
+    running OpenMOLE.
     @br @hl.openmole("""
     val file = Val[File]
     val i = Val[Int]
 
     val h = CopyFileHook(file, "/path/to/copy/the/file${i}.txt")""")
   @sect{Append some content to a file}
-    To append a string to a file, use this hook:
+    Similarly to the @i{AppendToCSVFileHook}, any string can be appended to a file, using the more general
+    @i{AppendToFileHook}. The appended strings can be a combination of variables from the dataflow and plain text.
     @br @hl.openmole("""
     val h = AppendToFileHook("/path/to/copy/the/file.txt", "string ${i} to append")""")
-  @sect{To display some variables}
-    To display a variable in the console
+  @sect{Display variables}
+    To display a variable in the console, use the @i{ToStringHook}:
     @br @hl.openmole("""
     val i = Val[Int]
     val j = Val[Int]
 
     val h = ToStringHook(i, j)""")
-    If no prototype is provided it display all the content of the dataflow.
-  @sect{To display some result in the console}
-    To display a string in the console:
+    If no variable is specified, @i{ToStringHook} displays the whole dataflow.
+  @sect{Display results in the console}
+    To display a string formed of variables and plain text in the console, use the @i{DisplayHook}. You can think of the
+    @i{DisplayHook} as an OpenMOLE equivalent to Scala's @i{println}.
     @br @hl.openmole("""
     val i = Val[Int]
 
     val h = DisplayHook("The value of i is ${i}.")""")
-
