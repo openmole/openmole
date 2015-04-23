@@ -388,4 +388,52 @@ class ValidationSpec extends FlatSpec with Matchers {
     Validation(mole).isEmpty should equal(true)
   }
 
+  "Validation" should "detect a incoherent input in slot" in {
+    val pInt = Prototype[Int]("t")
+    val pString = Prototype[String]("t")
+
+    val t0 = EmptyTask()
+
+    val t1 = EmptyTask()
+    t1 addOutput pInt
+
+    val t2 = EmptyTask()
+    t2 addOutput pString
+
+    val t3 = EmptyTask()
+    t3 addInput pInt
+
+    val mole = (t0 -- (t1, t2) -- t3).toMole
+
+    val errors = Validation.incoherentTypeAggregation(mole, Sources.empty, Hooks.empty)
+    errors.headOption match {
+      case Some(IncoherentTypeAggregation(_, _)) ⇒
+      case _                                     ⇒ sys.error("Error should have been detected")
+    }
+  }
+
+  "Validation" should "detect a incoherent input between slots" in {
+    val pInt = Prototype[Int]("t")
+    val pString = Prototype[String]("t")
+
+    val t0 = EmptyTask()
+
+    val t1 = EmptyTask()
+    t1 addOutput pInt
+
+    val t2 = EmptyTask()
+    t2 addOutput pString
+
+    val t3 = EmptyTask()
+    t3 addInput pInt
+
+    val mole = (t0 -- (t1, t2) --= t3).toMole
+
+    val errors = Validation.incoherentTypeBetweenSlots(mole, Sources.empty, Hooks.empty)
+    errors.headOption match {
+      case Some(IncoherentTypesBetweenSlots(_, _, _)) ⇒
+      case _ ⇒ sys.error("Error should have been detected")
+    }
+  }
+
 }

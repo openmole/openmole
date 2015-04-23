@@ -34,7 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class ScalaREPL(priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
 
   case class ErrorMessage(error: String, line: Int)
-  var errorMessage: Option[ErrorMessage] = None
+  var errorMessage: List[ErrorMessage] = Nil
 
   System.setProperty("jline.shutdownhook", "true")
   //System.setProperty("scala.repl.debug", "true")
@@ -50,16 +50,20 @@ class ScalaREPL(priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.emp
   settings
 
   def eval(code: String) = synchronized {
-    errorMessage = None
+    errorMessage = Nil
     try intp.eval(code)
     catch {
       case e: Throwable ⇒
         def readableErrorMessages(error: ErrorMessage) =
-          s"""Errors while compiling:
+          s"""Error while compiling:
             |${error.error}
             |on line ${error.line}""".stripMargin
-        errorMessage.foreach(e ⇒ throw new UserBadDataError(readableErrorMessages(e)))
-        throw e
+        errorMessage match {
+          case Nil ⇒ throw e
+          case l ⇒
+            def messages = l.map(readableErrorMessages).mkString("\n")
+            throw new UserBadDataError(messages)
+        }
     }
   }
 
@@ -81,11 +85,11 @@ class ScalaREPL(priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.emp
 
             ErrorMessage(
               s"""|$msg
-                        |${compiled(pos.line - 1)}
-                        |${new String((0 until offset).map(_ ⇒ ' ').toArray)}^""".stripMargin, pos.line)
+                  |${compiled(pos.line - 1)}
+                  |${new String((0 until offset).map(_ ⇒ ' ').toArray)}^""".stripMargin, pos.line)
         }
 
-        errorMessage = Some(error)
+        errorMessage ::= error
         super.error(pos, msg)
       }
 

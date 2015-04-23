@@ -98,12 +98,27 @@ class Capsule(_task: Task, val strainer: Boolean) {
     }
     else DataSet.empty
 
-  def received(mole: Mole, sources: Sources, hooks: Hooks) =
+  private def received(mole: Mole, sources: Sources, hooks: Hooks) =
     if (this == mole.root) Iterable.empty
     else {
       val slots = mole.slots(this)
       val noStrainer = slots.filter(s ⇒ Capsule.reachNoStrainer(mole)(s))
-      TypeUtil.intersect(noStrainer.map { s ⇒ TypeUtil.receivedTypes(mole, sources, hooks)(s).toSeq }.toSeq).map(Data(_))
+
+      val bySlot =
+        for {
+          slot ← noStrainer
+        } yield TypeUtil.validTypes(mole, sources, hooks)(slot).map(_.toPrototype).groupBy(_.name)
+
+      val allNames = bySlot.toSeq.flatMap(_.map { case (name, _) ⇒ name }.toSeq).distinct
+
+      val prototypes =
+        for {
+          name ← allNames
+          all ← bySlot.map(_(name).toSeq)
+          if all.size == noStrainer.size && all.distinct.size == 1
+        } yield all.head
+
+      prototypes.map(Data(_))
     }
 
   override def toString = task.toString

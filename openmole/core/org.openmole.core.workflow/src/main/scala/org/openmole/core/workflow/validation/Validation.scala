@@ -22,7 +22,7 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation.TopologyProblem._
-import org.openmole.core.workflow.validation.TypeUtil.computeManifests
+import org.openmole.core.workflow.validation.TypeUtil.{ InvalidType, ValidType, computeTypes }
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.{ HashMap, Queue }
@@ -53,9 +53,7 @@ object Validation {
 
   abstract class errorDetect(mole: Mole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) {
     def checkPrototypeMatch(p: Prototype[_]): Problem
-
     val implicitMap = prototypesToMap(implicits)
-
   }
 
   def taskTypeErrors(mole: Mole)(capsules: Iterable[Capsule], implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) = {
@@ -63,10 +61,11 @@ object Validation {
     val implicitMap = prototypesToMap(implicits)
 
     (for {
-      (c: Capsule) ← capsules
+      c ← capsules
       sourcesOutputs = TreeMap(sources(c).flatMap((os: Source) ⇒ os.outputs.toSet).map((o: Data[_]) ⇒ o.prototype.name -> o).toSeq: _*)
       s ← mole.slots(c)
-      receivedInputs = TreeMap(computeManifests(mole, sources, hooks)(s).map { p ⇒ p.name -> p }.toSeq: _*)
+      computedTypes = TypeUtil.validTypes(mole, sources, hooks)(s)
+      receivedInputs = TreeMap(computedTypes.map { p ⇒ p.name -> p }.toSeq: _*)
       (defaultsOverride, defaultsNonOverride) = separateDefaults(c.task.defaults)
       input ← c.task.inputs
     } yield {
@@ -101,8 +100,7 @@ object Validation {
 
         case (None, None, None, Some(impl), _)         ⇒ checkPrototypeMatch(impl)
         case (None, None, None, None, Some(parameter)) ⇒ checkPrototypeMatch(parameter)
-        case (None, None, None, None, None) ⇒
-          if (!(input.mode is Optional)) Some(MissingInput(s, input)) else None
+        case (None, None, None, None, None)            ⇒ if (!(input.mode is Optional)) Some(MissingInput(s, input)) else None
       }
     }).flatten
   }
@@ -115,7 +113,7 @@ object Validation {
       (so: Source) ← sources.getOrElse(c, List.empty)
       (defaultsOverride, defaultsNonOverride) = separateDefaults(so.defaults)
       sl ← mole.slots(c)
-      receivedInputs = TreeMap(computeManifests(mole, sources, hooks)(sl).map { p ⇒ p.name -> p }.toSeq: _*)
+      receivedInputs = TreeMap(TypeUtil.validTypes(mole, sources, hooks)(sl).map { p ⇒ p.name -> p }.toSeq: _*)
       i ← so.inputs
     } yield {
       def checkPrototypeMatch(p: Prototype[_]) =
@@ -196,6 +194,30 @@ object Validation {
     }
   }
 
+  def incoherentTypeAggregation(mole: Mole, sources: Sources, hooks: Hooks) =
+    for {
+      c ← mole.capsules
+      inputs = c.inputs(mole, sources, hooks)
+      slot ← mole.slots(c)
+      invalidType ← TypeUtil.computeTypes(mole, sources, hooks)(slot).collect { case x: InvalidType ⇒ x }
+      if inputs.contains(invalidType.name)
+    } yield IncoherentTypeAggregation(slot, invalidType)
+
+  def incoherentTypeBetweenSlots(mole: Mole, sources: Sources, hooks: Hooks) =
+    (for {
+      c ← mole.capsules
+      inputs = c.inputs(mole, sources, hooks)
+    } yield {
+      val slotsInputs = mole.slots(c).map { s ⇒ TypeUtil.validTypes(mole, sources, hooks)(s).toSeq }.flatten.groupBy(_.name).toSeq
+      for {
+        (name, ts) ← slotsInputs
+        if inputs.contains(name)
+        types = ts.toSeq.map(_.`type`)
+        if types.distinct.size != 1
+      } yield IncoherentTypesBetweenSlots(c, name, types)
+
+    }).flatten
+
   private def moleTaskInputMaps(moleTask: MoleTask) =
     (moleTask.mole.root.inputs(moleTask.mole, Sources.empty, Hooks.empty).toList ++
       moleTask.inputs).map(i ⇒ i.prototype.name -> i.prototype).toMap[String, Prototype[_]]
@@ -268,7 +290,9 @@ object Validation {
           topologyErrors(m) ++
           duplicatedTransitions(m) ++
           duplicatedName(m, sources, hooks) ++
-          dataChannelErrors(m)
+          dataChannelErrors(m) ++
+          incoherentTypeAggregation(m, sources, hooks) ++
+          incoherentTypeBetweenSlots(m, sources, hooks)
     }
   }
 

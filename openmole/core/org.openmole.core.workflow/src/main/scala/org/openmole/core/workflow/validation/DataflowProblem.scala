@@ -20,6 +20,7 @@ package org.openmole.core.workflow.validation
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole.{ Capsule, Hook, Source }
 import org.openmole.core.workflow.transition.Slot
+import org.openmole.core.workflow.validation.TypeUtil.InvalidType
 
 object DataflowProblem {
 
@@ -61,6 +62,20 @@ object DataflowProblem {
       slotType: SlotType) extends DataflowProblem {
 
     override def toString = name + " has been found several time in capsule in " + slotType + " of capsule " + capsule + ": " + data.mkString(", ") + "."
+  }
+
+  case class IncoherentTypesBetweenSlots(
+      capsule: Capsule,
+      name: String,
+      types: Iterable[PrototypeType[_]]) extends DataflowProblem {
+
+    override def toString = name + " is present in multiple slot of capsule " + capsule + " but has different types: " + types.mkString(", ") + "."
+  }
+
+  case class IncoherentTypeAggregation(
+      slot: Slot,
+      `type`: InvalidType) extends SlotDataflowProblem {
+    override def toString = s"Cannot aggregate type for slot ${slot}, the incoming data type are inconsistent (it may be because variables with the same name but not the same type reach the slot): ${`type`}."
   }
 
   sealed trait SourceProblem extends SlotDataflowProblem
