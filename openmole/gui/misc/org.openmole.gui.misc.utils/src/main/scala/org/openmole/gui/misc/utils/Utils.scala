@@ -1,7 +1,7 @@
-package org.openmole.gui.server.core
+package org.openmole.gui.misc.utils
 
 /*
- * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 22/04/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,17 +17,9 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data._
-import java.io.File
+import rx._
 
 object Utils {
-
-  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f.getCanonicalPath, f.isDirectory)
-
-  implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
-    fileToTreeNodeData(_)
-  }
-
-  def listFiles(path: String): Seq[TreeNodeData] = new File(path).listFiles.toSeq
+  implicit def stringToVarString(s: String): Var[String] = Var(s)
 
 }

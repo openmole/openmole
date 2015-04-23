@@ -3,10 +3,12 @@ package org.openmole.gui.client.core
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.client.core.dataui.EditorPanelUI
 import org.openmole.gui.client.core.files.TreeNodePanel
+import org.openmole.gui.client.core.files.TreeNodePanel._
 import org.openmole.gui.shared.Api
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.Forms._
 import scala.scalajs.js.annotation.JSExport
+import scala.util.{ Success, Failure }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.misc.js.JsRxTags._
@@ -44,8 +46,6 @@ object ScriptClient {
     )
 
     val body = dom.document.body
-
-    // val tree = TreeNodePanel(Workspace.file("webui/projects").getCanonicalPath)
     val openFileTree = Var(false)
 
     dom.document.body.appendChild(
@@ -72,7 +72,7 @@ object ScriptClient {
         }
         )(tags.div(id := "site-canvas")(
           tags.div(id := "site-menu")(
-            TreeNodePanel(projectsPath).view.render
+            TreeNodePanel(dirNode(projectsPath)).view.render
           ),
           editor.view.render
         ).render)
@@ -84,4 +84,5 @@ object ScriptClient {
     }
 
   }
+
 }

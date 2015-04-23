@@ -17,6 +17,8 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.ext.data.TreeNodeData
+import org.openmole.gui.misc.utils.Utils._
 import rx._
 
 object NodeState extends Enumeration {
@@ -36,6 +38,30 @@ sealed trait TreeNode {
   def canonicalPath: Var[String]
 
   def state: Var[NodeState]
+
+  def hasSons: Boolean
+}
+
+object TreeNode {
+
+  implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode =
+    if (tnd.isDirectory) DirNode(tnd.name, tnd.canonicalPath, Var(Seq()))
+    else FileNode(tnd.name, tnd.canonicalPath)
+
+  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.canonicalPath(), tn match {
+    case DirNode(_, _, _, _) ⇒ true
+    case _                   ⇒ false
+  })
+
+  implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map {
+    treeNodeToTreeNodeData
+  }
+
+  implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
+
+  implicit def oo(s: Seq[(TreeNodeData, Seq[TreeNodeData])]): Seq[(TreeNode, Seq[TreeNode])] = s.map { tu ⇒
+    (treeNodeDataToTreeNode(tu._1), seqTreeNodeDataToSeqTreeNode(tu._2))
+  }
 }
 
 object TreeNodeOrdering extends Ordering[TreeNode] {
@@ -53,9 +79,12 @@ object TreeNodeOrdering extends Ordering[TreeNode] {
 
 case class DirNode(name: Var[String],
                    canonicalPath: Var[String],
-                   sons: Var[Seq[TreeNode]] = Var(Seq()), state: Var[NodeState] = Var(COLLAPSED)) extends TreeNode
+                   sons: Var[Seq[TreeNode]] = Var(Seq()), state: Var[NodeState] = Var(COLLAPSED)) extends TreeNode {
+  def hasSons = sons().size > 0
+}
 
 case class FileNode(name: Var[String],
                     canonicalPath: Var[String]) extends TreeNode {
+  val hasSons = false
   val state = Var(FILE)
 }

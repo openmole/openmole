@@ -23,7 +23,9 @@ import org.openmole.gui.ext.data.TreeNodeData
 
 object ApiImpl extends Api {
 
-  def listFiles(path: String): Seq[TreeNodeData] = Utils.listFiles(path)
+  def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.canonicalPath)
+
+  def listFilesSeq(paths: Seq[TreeNodeData]): Seq[(TreeNodeData, Seq[TreeNodeData])] = paths.map { path ⇒ path -> listFiles(path) }
 
   def workspacePath(workspaceKey: String): String = Workspace.file(workspaceKey).getCanonicalPath()
 }

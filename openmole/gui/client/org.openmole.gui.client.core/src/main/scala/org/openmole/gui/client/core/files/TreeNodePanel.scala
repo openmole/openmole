@@ -1,16 +1,15 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.Post
-import org.openmole.gui.ext.data._
 import org.openmole.gui.shared._
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import org.openmole.gui.misc.js.Forms._
 import org.scalajs.dom.html.UList
-import org.scalajs.dom.raw.{ HTMLUListElement, HTMLDivElement }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import TreeNode._
 import NodeState._
 import autowire._
 import rx._
@@ -34,67 +33,75 @@ import rx._
 
 object TreeNodePanel {
 
-  implicit def stringToVarString(s: String): Var[String] = Var(s)
+  def apply(dirNode: DirNode): TreeNodePanel = new TreeNodePanel(dirNode)
 
-  implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode =
-    if (tnd.isDirectory) DirNode(tnd.name, tnd.canonicalPath, Var(Seq()))
-    else FileNode(tnd.name, tnd.canonicalPath)
+  def dirNode(path: String) = DirNode(path.split("/").last, path)
 
-  implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
-
-  def apply(path: String) = new TreeNodePanel(DirNode(path.split("/").last, path))
-
-  def computeSons(dirNode: DirNode) = Post[Api].listFiles(dirNode.canonicalPath()).call().foreach { sons ⇒
-    dirNode.sons() = sons
+  def computeAllSons(dn: DirNode): Unit = {
+    sons(dn).foreach { sons ⇒
+      dn.sons() = sons
+      dn.sons().foreach { tn ⇒
+        tn match {
+          case (d: DirNode) ⇒
+            computeAllSons(d)
+          case _ ⇒
+        }
+      }
+    }
   }
 
+  def sons(dirNode: DirNode) = Post[Api].listFiles(dirNode).call()
+
   def drawNode(node: TreeNode) = node match {
-    case fn: FileNode ⇒ clickableElement(fn.name(), FILE, "file", () ⇒ {
+    case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ {
       println(fn.name() + " display the file")
     })
-    case dn: DirNode ⇒ clickableElement(dn.name(), dn.state(), "dir", () ⇒ {
+    case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
       dn.state() match {
         case EXPANDED ⇒ dn.state() = COLLAPSED
         case COLLAPSED ⇒
-          computeSons(dn)
           dn.state() = EXPANDED
       }
     }
     )
   }
 
-  def clickableElement(name: String, state: NodeState, classType: String, todo: () ⇒ Unit) = tags.li(
+  def clickableElement(treeNode: TreeNode,
+                       classType: String,
+                       todo: () ⇒ Unit) = tags.li(
     tags.span(cursor := "pointer", onclick := { () ⇒
       {
         todo()
       }
     }, `class` := classType)(
       tags.i(`class` := {
-        state match {
-          case COLLAPSED ⇒ "glyphicon glyphicon-plus-sign"
-          case EXPANDED  ⇒ "glyphicon glyphicon-minus-sign"
-          case _         ⇒ ""
+        treeNode.hasSons match {
+          case true ⇒
+            treeNode.state() match {
+              case COLLAPSED ⇒ "glyphicon glyphicon-plus-sign"
+              case EXPANDED  ⇒ "glyphicon glyphicon-minus-sign"
+            }
+          case false ⇒ ""
         }
       }),
-      tags.i(name)
+      tags.i(treeNode.name())
     )
   )
+
 }
 
 import TreeNodePanel._
 
-class TreeNodePanel(_treeNode: DirNode) {
+class TreeNodePanel(_dirNode: DirNode) {
 
-  val treeNodes: Var[Seq[TreeNode]] = Var(Seq())
+  val treeNode: Var[DirNode] = Var(_dirNode)
 
-  Post[Api].listFiles(_treeNode.canonicalPath()).call().foreach { sons ⇒
-    treeNodes() = sons
-  }
+  computeAllSons(_dirNode)
 
-  lazy val view = tags.div(
+  val view = tags.div(
     `class` := "tree"
   )(Rx {
-      drawTree(treeNodes())
+      drawTree(treeNode().sons())
     })
 
   def drawTree(tns: Seq[TreeNode]): TypedTag[UList] = tags.ul(
