@@ -109,6 +109,10 @@ select::-moz-focus-inner {
 
 
 /*File tree panels*/
+.tree {
+	padding-top: 40px;
+}
+
 .tree ul {
     margin-left: -35px;
 }

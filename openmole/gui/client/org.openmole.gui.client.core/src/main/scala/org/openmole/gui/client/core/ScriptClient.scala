@@ -56,7 +56,6 @@ object ScriptClient {
           }),
           (navItem("files", "Files").render, "files", () ⇒ {
             openFileTree() = !openFileTree()
-            println("POS " + openFileTree())
           })
         ), nav_pills + nav_inverse + nav_staticTop
       )
@@ -64,7 +63,7 @@ object ScriptClient {
 
     val maindiv = dom.document.body.appendChild(tags.div.render)
 
-    Post[Api].workspacePath("webui/projects").call().foreach { projectsPath ⇒
+    Post[Api].workspacePath.call().foreach { projectsPath ⇒
       maindiv.appendChild(
         tags.div(`class` := Rx {
           if (openFileTree()) "show-nav"

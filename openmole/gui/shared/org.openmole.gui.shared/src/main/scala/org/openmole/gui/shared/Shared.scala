@@ -23,7 +23,7 @@ trait Api {
 
   def listFiles(path: TreeNodeData): Seq[TreeNodeData]
 
-  def listFilesSeq(path: Seq[TreeNodeData]): Seq[(TreeNodeData, Seq[TreeNodeData])]
+  def addRootDirectory(name: String): Boolean
 
-  def workspacePath(workspaceKey: String): String
+  def workspacePath(): String
 }

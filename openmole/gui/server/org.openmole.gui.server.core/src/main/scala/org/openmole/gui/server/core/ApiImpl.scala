@@ -3,6 +3,7 @@ package org.openmole.gui.server.core
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data.TreeNodeData
+import java.io.File
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -25,7 +26,7 @@ object ApiImpl extends Api {
 
   def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.canonicalPath)
 
-  def listFilesSeq(paths: Seq[TreeNodeData]): Seq[(TreeNodeData, Seq[TreeNodeData])] = paths.map { path ⇒ path -> listFiles(path) }
+  def addRootDirectory(name: String): Boolean = new File(Utils.workspaceProjectFile, name).mkdir
 
-  def workspacePath(workspaceKey: String): String = Workspace.file(workspaceKey).getCanonicalPath()
+  def workspacePath(): String = Utils.workspaceProjectFile.getCanonicalPath()
 }

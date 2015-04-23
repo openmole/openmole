@@ -132,6 +132,7 @@ object Forms {
   val glyph_ok = "glyphicon-ok"
   val glyph_question = "glyphicon-question-sign"
   val glyph_file = "glyphicon-file"
+  val glyph_folder_close = "glyphicon-folder-close"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
@@ -143,6 +144,10 @@ object Forms {
   def button(content: String): TypedTag[HTMLElement] = button(content, btn_default)
 
   def button(content: TypedTag[HTMLElement]): TypedTag[HTMLButtonElement] = button(content, btn_default)(span(" "))
+
+  def glyphButton(text: String, buttonCB: ClassKeyAggregator, glyCA: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
+    // tags.a(href := "#", `class` := "btn " + buttonCB.key)(tags.span(glyph(glyCA)))(text)
+    tags.span(cursor := "pointer", `class` := "btn " + buttonCB.key)(tags.span(glyph(glyCA)))(text)
 
   val btn_default = key("btn-default")
   val btn_primary = key("btn-primary")
