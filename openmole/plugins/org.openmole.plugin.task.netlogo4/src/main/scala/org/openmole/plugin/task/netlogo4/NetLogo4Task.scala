@@ -39,59 +39,30 @@ object NetLogo4Task {
   def apply(
     workspace: File,
     script: String,
-    launchingCommands: Iterable[String]): NetLogoTaskBuilder = {
-    val _launchingCommands = launchingCommands
-    val (_workspace, _script) = (workspace, script)
+    launchingCommands: Seq[String]): NetLogoTaskBuilder = {
 
-    new NetLogoTaskBuilder { builder ⇒
-
+    new NetLogoTaskBuilder(new Workspace(workspace, script), launchingCommands, factory) { builder ⇒
       addResource(workspace)
-
-      def toTask = new NetLogo4Task(
-        builder.taskName,
-        workspace = new Workspace(_workspace, _script),
-        launchingCommands = _launchingCommands,
-        inputs = builder.inputs,
-        outputs = builder.outputs,
-        parameters = builder.defaults,
-        inputFiles = builder.inputFiles,
-        outputFiles = builder.outputFiles,
-        resources = builder.resources,
-        netLogoInputs = builder.netLogoInputs,
-        netLogoOutputs = builder.netLogoOutputs,
-        netLogoArrayOutputs = builder.netLogoArrayOutputs,
-        netLogoFactory = factory)
+      def toTask = new NetLogo4Task with Built
     }
   }
 
   def apply(
     script: File,
-    launchingCommands: Iterable[String]): NetLogoTaskBuilder = {
-    val _launchingCommands = launchingCommands
-    new NetLogoTaskBuilder { builder ⇒
+    launchingCommands: Seq[String]): NetLogoTaskBuilder = {
+    new NetLogoTaskBuilder(new Workspace(script), launchingCommands, factory) {
+      builder ⇒
 
       addResource(script)
 
-      def toTask = new NetLogo4Task(
-        builder.taskName,
-        launchingCommands = _launchingCommands,
-        workspace = new Workspace(script),
-        inputs = builder.inputs,
-        outputs = builder.outputs,
-        parameters = builder.defaults,
-        inputFiles = builder.inputFiles,
-        outputFiles = builder.outputFiles,
-        resources = builder.resources,
-        netLogoInputs = builder.netLogoInputs,
-        netLogoOutputs = builder.netLogoOutputs,
-        netLogoArrayOutputs = builder.netLogoArrayOutputs,
-        netLogoFactory = factory)
+      def toTask = new NetLogo4Task with Built
     }
+
   }
 
   def apply(
     workspace: Workspace,
-    launchingCommands: Iterable[String]): NetLogoTaskBuilder = {
+    launchingCommands: Seq[String]): NetLogoTaskBuilder = {
     workspace.location match {
       case Left((w: File, s: String)) ⇒ apply(w, s, launchingCommands)
       case Right(s: File)             ⇒ apply(s, launchingCommands)
@@ -100,38 +71,12 @@ object NetLogo4Task {
 
   def apply(
     script: File,
-    launchingCommands: Iterable[String],
+    launchingCommands: Seq[String],
     embedWorkspace: Boolean): NetLogoTaskBuilder =
     if (embedWorkspace) apply(script.getCanonicalFile.getParentFile, script.getName, launchingCommands)
     else apply(script, launchingCommands)
 
 }
 
-sealed class NetLogo4Task(
-  name: String,
-  workspace: NetLogoTask.Workspace,
-  launchingCommands: Iterable[String],
-  netLogoInputs: Iterable[(Prototype[_], String)],
-  netLogoOutputs: Iterable[(String, Prototype[_])],
-  netLogoArrayOutputs: Iterable[(String, Int, Prototype[_])],
-  netLogoFactory: NetLogoFactory,
-  inputs: DataSet,
-  outputs: DataSet,
-  parameters: DefaultSet,
-  inputFiles: Iterable[InputFile],
-  outputFiles: Iterable[OutputFile],
-  resources: Iterable[Resource]) extends NetLogoTask(
-  name,
-  workspace,
-  launchingCommands,
-  netLogoInputs,
-  netLogoOutputs,
-  netLogoArrayOutputs,
-  netLogoFactory,
-  inputs,
-  outputs,
-  parameters,
-  inputFiles,
-  outputFiles,
-  resources)
+trait NetLogo4Task extends NetLogoTask
 

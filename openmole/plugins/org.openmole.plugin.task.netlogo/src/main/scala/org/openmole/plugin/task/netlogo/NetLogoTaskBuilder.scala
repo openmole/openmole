@@ -23,7 +23,7 @@ import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.task.PluginSet
 
-abstract class NetLogoTaskBuilder extends ExternalTaskBuilder {
+abstract class NetLogoTaskBuilder(private val workspace: NetLogoTask.Workspace, private val launchingCommands: Seq[String], private val netLogoFactory: NetLogoFactory) extends ExternalTaskBuilder { builder ⇒
 
   private var _netLogoInputs = new ListBuffer[(Prototype[_], String)]
   private var _netLogoOutputs = new ListBuffer[(String, Prototype[_])]
@@ -58,5 +58,14 @@ abstract class NetLogoTaskBuilder extends ExternalTaskBuilder {
   }
 
   def netLogoArrayOutputs = _netLogoArrayOutputs.toList
+
+  trait Built extends super.Built {
+    def workspace: NetLogoTask.Workspace = builder.workspace
+    def launchingCommands: Seq[String] = builder.launchingCommands
+    def netLogoInputs: Seq[(Prototype[_], String)] = builder.netLogoInputs
+    def netLogoOutputs: Iterable[(String, Prototype[_])] = builder.netLogoOutputs
+    def netLogoArrayOutputs: Iterable[(String, Int, Prototype[_])] = builder.netLogoArrayOutputs
+    def netLogoFactory: NetLogoFactory = builder.netLogoFactory
+  }
 
 }

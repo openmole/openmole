@@ -41,20 +41,14 @@ object NetLogoTask {
 
 }
 
-class NetLogoTask(
-    val name: String,
-    val workspace: NetLogoTask.Workspace,
-    val launchingCommands: Iterable[String],
-    val netLogoInputs: Iterable[(Prototype[_], String)],
-    val netLogoOutputs: Iterable[(String, Prototype[_])],
-    val netLogoArrayOutputs: Iterable[(String, Int, Prototype[_])],
-    val netLogoFactory: NetLogoFactory,
-    val inputs: DataSet,
-    val outputs: DataSet,
-    val defaults: DefaultSet,
-    val inputFiles: Iterable[InputFile],
-    val outputFiles: Iterable[OutputFile],
-    val resources: Iterable[Resource]) extends ExternalTask {
+trait NetLogoTask extends ExternalTask {
+
+  def workspace: NetLogoTask.Workspace
+  def launchingCommands: Seq[String]
+  def netLogoInputs: Seq[(Prototype[_], String)]
+  def netLogoOutputs: Iterable[(String, Prototype[_])]
+  def netLogoArrayOutputs: Iterable[(String, Int, Prototype[_])]
+  def netLogoFactory: NetLogoFactory
 
   val scriptPath =
     workspace.location match {
