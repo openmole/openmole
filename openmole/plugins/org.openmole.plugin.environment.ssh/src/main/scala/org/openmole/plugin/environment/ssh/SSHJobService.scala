@@ -64,7 +64,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 
     import ExecutionState._
 
-    EventDispatcher.listen(sshBatchJob) {
+    sshBatchJob listen {
       case ev: BatchJob.StateChanged ⇒
         ev.newState match {
           case DONE | FAILED | KILLED ⇒
@@ -83,6 +83,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
                   case None    ⇒ nbRunning.decrementAndGet
                 }
             }
+          case _ ⇒
         }
     }
 

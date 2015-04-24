@@ -75,7 +75,7 @@ sealed abstract class MoleTask(
     @volatile var lastContext: Option[Context] = None
     val lastContextLock = new ReentrantLock()
 
-    EventDispatcher.listen(execution) {
+    execution listen {
       case ev: MoleExecution.JobFinished ⇒
         lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
     }
