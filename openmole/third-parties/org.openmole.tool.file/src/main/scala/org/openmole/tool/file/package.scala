@@ -154,7 +154,7 @@ package object file { p ⇒
       }
       setAllPermissions(file)
 
-      if (!file.isSymbolicLink) {
+      if (!file.isSymbolicLink && file.isDirectory) {
         for (s ← Option(file.listFiles).getOrElse(Array.empty)) {
           setAllPermissions(s)
           s.isDirectory match {
@@ -165,7 +165,7 @@ package object file { p ⇒
           }
         }
       }
-      else file.delete()
+      file.delete()
     }
 
     def isJar = Try {
