@@ -3,10 +3,10 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core.Post
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.Forms._
-import org.scalajs.dom.html.{Input, UList}
+import org.scalajs.dom.html.{ Input, UList }
 import scalatags.JsDom.all._
-import scalatags.JsDom.{TypedTag, tags ⇒ tags}
-import org.openmole.gui.misc.js.{Forms ⇒ bs}
+import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -84,14 +84,15 @@ class TreeNodePanel(_dirNode: DirNode) {
           inputGroupButton(addRootDirButton),
           if (addDirState()) rootDirInput else tags.span()
         ),
-        onsubmit := { () ⇒ {
-          val newDirName = rootDirInput.value
-          Post[Api].addRootDirectory(newDirName).call().foreach { b ⇒
-            if (b) rootNode().sons() = rootNode().sons() :+ DirNode(newDirName, Var(rootNode().canonicalPath() + "/" + newDirName))
-            addDirState() = !addDirState()
-            reComputeAllSons(rootNode())
+        onsubmit := { () ⇒
+          {
+            val newDirName = rootDirInput.value
+            Post[Api].addRootDirectory(newDirName).call().foreach { b ⇒
+              if (b) rootNode().sons() = rootNode().sons() :+ DirNode(newDirName, Var(rootNode().canonicalPath() + "/" + newDirName))
+              addDirState() = !addDirState()
+              reComputeAllSons(rootNode())
+            }
           }
-        }
         })
     },
     tags.div(`class` := "tree")(
@@ -168,7 +169,7 @@ class TreeNodePanel(_dirNode: DirNode) {
             case true ⇒
               tn.state() match {
                 case COLLAPSED ⇒ "glyphicon glyphicon-plus-sign"
-                case EXPANDED ⇒ "glyphicon glyphicon-minus-sign"
+                case EXPANDED  ⇒ "glyphicon glyphicon-minus-sign"
               }
             case false ⇒ ""
           }
@@ -177,23 +178,23 @@ class TreeNodePanel(_dirNode: DirNode) {
       ),
     if (tn.selected())
       tn match {
-        case dn: DirNode ⇒ tags.span(
-          glyphButton(glyph_trash, () ⇒ trashNode(dn)),
-          glyphButton(glyph_folder_close, () ⇒
-            Post[Api].addDirectory(dn, "TOTO").call().foreach {
-              b ⇒
-                if (b) reComputeAllSons(dn)
-            }),
-          glyphButton(glyph_file, () ⇒
-            Post[Api].addFile(dn, "TOTO.scala").call().foreach {
-              b ⇒
-                if (b) reComputeAllSons(dn)
-            })
-        )
-        case fn: FileNode ⇒ tags.span(
-          glyphButton(glyph_trash, () ⇒ trashNode(fn))
-        )
-      }
+      case dn: DirNode ⇒ tags.span(
+        glyphButton(glyph_trash, () ⇒ trashNode(dn)),
+        glyphButton(glyph_folder_close, () ⇒
+          Post[Api].addDirectory(dn, "TOTO").call().foreach {
+            b ⇒
+              if (b) reComputeAllSons(dn)
+          }),
+        glyphButton(glyph_file, () ⇒
+          Post[Api].addFile(dn, "TOTO.scala").call().foreach {
+            b ⇒
+              if (b) reComputeAllSons(dn)
+          })
+      )
+      case fn: FileNode ⇒ tags.span(
+        glyphButton(glyph_trash, () ⇒ trashNode(fn))
+      )
+    }
   )
 
   def trashNode(treeNode: TreeNode) =

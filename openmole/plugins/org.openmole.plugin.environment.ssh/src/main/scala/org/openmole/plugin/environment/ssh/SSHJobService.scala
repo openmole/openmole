@@ -20,14 +20,13 @@ package org.openmole.plugin.environment.ssh
 
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice.BatchJob
-import org.openmole.core.eventdispatcher.{ Event, EventDispatcher, EventListener }
+import org.openmole.core.eventdispatcher._
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale._
 import fr.iscpif.gridscale.ssh.{ SSHJobService ⇒ GSSSHJobService, SSHConnectionCache, SSHJobDescription }
 import java.util.concurrent.atomic.AtomicInteger
-import collection.mutable
 
 object SSHJobService extends Logger
 
@@ -46,37 +45,6 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
   val queue = new java.util.concurrent.ConcurrentLinkedQueue[SSHBatchJob]
   @transient lazy val nbRunning = new AtomicInteger
 
-  object BatchJobStatusListener extends EventListener[BatchJob] {
-
-    import ExecutionState._
-
-    override def triggered(job: BatchJob, ev: Event[BatchJob]) = SSHJobService.this.synchronized {
-      ev match {
-        case ev: BatchJob.StateChanged ⇒
-          ev.newState match {
-            case DONE | FAILED | KILLED ⇒
-              ev.oldState match {
-                case DONE | FAILED | KILLED ⇒
-                case _ ⇒
-                  // make it atomic
-                  synchronized {
-                    import collection.JavaConversions._
-
-                    val e = queue.find(_ ⇒ true)
-                    // harmless is None is passed
-                    queue.remove(e)
-                    e
-                  } match {
-                    case Some(j) ⇒ j.submit
-                    case None    ⇒ nbRunning.decrementAndGet
-                  }
-              }
-            case _ ⇒
-          }
-      }
-    }
-  }
-
   protected def _submit(serializedJob: SerializedJob) = {
     val (remoteScript, result) = buildScript(serializedJob)
 
@@ -94,9 +62,31 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 
     Log.logger.fine(s"SSHJobService: Queueing /bin/bash $remoteScript in directory ${sharedFS.root}")
 
-    EventDispatcher.listen(sshBatchJob: BatchJob, BatchJobStatusListener, classOf[BatchJob.StateChanged])
+    import ExecutionState._
 
-    synchronized {
+    EventDispatcher.listen(sshBatchJob) {
+      case ev: BatchJob.StateChanged ⇒
+        ev.newState match {
+          case DONE | FAILED | KILLED ⇒
+            ev.oldState match {
+              case DONE | FAILED | KILLED ⇒
+              case _ ⇒
+                // make it atomic
+                queue.synchronized {
+                  import collection.JavaConversions._
+                  val e = queue.find(_ ⇒ true)
+                  // harmless is None is passed
+                  queue.remove(e)
+                  e
+                } match {
+                  case Some(j) ⇒ j.submit
+                  case None    ⇒ nbRunning.decrementAndGet
+                }
+            }
+        }
+    }
+
+    queue.synchronized {
       Log.logger.fine(s"SSHJobService: ${nbRunning.get()} on $nbSlots taken")
       if (nbRunning.get() < nbSlots) {
         nbRunning.incrementAndGet

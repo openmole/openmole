@@ -56,7 +56,7 @@ package object file { p ⇒
     def accept(p1: File) = predicate(p1)
   }
 
-  implicit def outputStreamDecorator(os: OutputStream) = new {
+  implicit class OutputStreamDecorator(os: OutputStream) {
     def flushClose = {
       try os.flush
       finally os.close
