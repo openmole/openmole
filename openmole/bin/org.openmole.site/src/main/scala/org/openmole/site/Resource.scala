@@ -27,6 +27,7 @@ object Resource {
   def antNumbers = FileResource("antnumbers.png")
   def antsNLogo = FileResource("ants.nlogo")
   def bootstrapCss = FileResource("bootstrap-3.3.2.css")
+  def fireNLogo = FileResource("Fire.nlogo")
   def fireScreen = FileResource("firescreen.png")
   def fireGlobals = FileResource("fireGlobals.png")
   def fireNewGlobals = FileResource("fireNewGlobals.png")
@@ -50,6 +51,7 @@ object Resource {
     ants,
     antNumbers,
     antsNLogo,
+    fireNLogo,
     fireScreen,
     fireGlobals,
     fireNewGlobals,
