@@ -3,10 +3,10 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core.Post
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.Forms._
-import org.scalajs.dom.html.{ Input, UList }
+import org.scalajs.dom.html.{Input, UList}
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import scalatags.JsDom.{TypedTag, tags ⇒ tags}
+import org.openmole.gui.misc.js.{Forms ⇒ bs}
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -34,9 +34,9 @@ import rx._
 
 object TreeNodePanel {
 
-  def apply(dirNode: DirNode): TreeNodePanel = new TreeNodePanel(dirNode)
+  def apply(path: String): TreeNodePanel = apply(DirNode(path))
 
-  def dirNode(path: String) = DirNode(path.split("/").last, path)
+  def apply(dirNode: DirNode): TreeNodePanel = new TreeNodePanel(dirNode)
 
   def computeAllSons(dn: DirNode): Unit = {
     sons(dn).foreach { sons ⇒
@@ -53,50 +53,15 @@ object TreeNodePanel {
 
   def sons(dirNode: DirNode) = Post[Api].listFiles(dirNode).call()
 
-  def drawNode(node: TreeNode) = node match {
-    case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ {
-      println(fn.name() + " display the file")
-    })
-    case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
-      dn.state() match {
-        case EXPANDED ⇒ dn.state() = COLLAPSED
-        case COLLAPSED ⇒
-          dn.state() = EXPANDED
-      }
-    }
-    )
-  }
-
-  def clickableElement(treeNode: TreeNode,
-                       classType: String,
-                       todo: () ⇒ Unit) = tags.li(
-    tags.span(cursor := "pointer", onclick := { () ⇒
-      {
-        todo()
-      }
-    }, `class` := classType)(
-      tags.i(`class` := {
-        treeNode.hasSons match {
-          case true ⇒
-            treeNode.state() match {
-              case COLLAPSED ⇒ "glyphicon glyphicon-plus-sign"
-              case EXPANDED  ⇒ "glyphicon glyphicon-minus-sign"
-            }
-          case false ⇒ ""
-        }
-      }),
-      tags.i(treeNode.name())
-    )
-  )
-
 }
 
 import TreeNodePanel._
 
 class TreeNodePanel(_dirNode: DirNode) {
 
-  val treeNode: Var[DirNode] = Var(_dirNode)
+  val rootNode: Var[DirNode] = Var(_dirNode)
   val addDirState: Var[Boolean] = Var(false)
+  val selectedNode: Var[Option[TreeNode]] = Var(None)
 
   computeAllSons(_dirNode)
 
@@ -119,18 +84,19 @@ class TreeNodePanel(_dirNode: DirNode) {
           inputGroupButton(addRootDirButton),
           if (addDirState()) rootDirInput else tags.span()
         ),
-        onsubmit := { () ⇒
-          {
-            Post[Api].addRootDirectory(rootDirInput.value).call().foreach { b ⇒
-              if (b) computeAllSons(treeNode())
-              addDirState() = !addDirState()
-            }
+        onsubmit := { () ⇒ {
+          val newDirName = rootDirInput.value
+          Post[Api].addRootDirectory(newDirName).call().foreach { b ⇒
+            if (b) rootNode().sons() = rootNode().sons() :+ DirNode(newDirName, Var(rootNode().canonicalPath() + "/" + newDirName))
+            addDirState() = !addDirState()
+            reComputeAllSons(rootNode())
           }
+        }
         })
     },
     tags.div(`class` := "tree")(
       Rx {
-        drawTree(treeNode().sons())
+        drawTree(rootNode().sons())
       }
     )
   )
@@ -158,6 +124,81 @@ class TreeNodePanel(_dirNode: DirNode) {
           case _ ⇒
         }
       )
+    }
+
+  def drawNode(node: TreeNode) = node match {
+    case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ {
+      println(fn.name() + " display the file")
+    })
+    case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
+      dn.state() match {
+        case EXPANDED ⇒ dn.state() = COLLAPSED
+        case COLLAPSED ⇒
+          dn.state() = EXPANDED
+      }
+    }
+    )
+  }
+
+  def reComputeAllSons(dn: DirNode) = {
+    dn.selected() = false
+    selectedNode() = None
+    computeAllSons(dn)
+  }
+
+  def clickableElement(tn: TreeNode,
+                       classType: String,
+                       todo: () ⇒ Unit) = tags.li(
+    tags.span(
+      cursor := "pointer",
+      if (tn.selected()) {
+        backgroundColor := "green"
+      },
+      onclick := {
+        () ⇒
+          selectedNode().map {
+            _.selected() = false
+          }
+          selectedNode() = Some(tn)
+          tn.selected() = !tn.selected()
+          todo()
+      }, `class` := classType)(
+        tags.i(`class` := {
+          tn.hasSons match {
+            case true ⇒
+              tn.state() match {
+                case COLLAPSED ⇒ "glyphicon glyphicon-plus-sign"
+                case EXPANDED ⇒ "glyphicon glyphicon-minus-sign"
+              }
+            case false ⇒ ""
+          }
+        }),
+        tags.i(tn.name())
+      ),
+    if (tn.selected())
+      tn match {
+        case dn: DirNode ⇒ tags.span(
+          glyphButton(glyph_trash, () ⇒ trashNode(dn)),
+          glyphButton(glyph_folder_close, () ⇒
+            Post[Api].addDirectory(dn, "TOTO").call().foreach {
+              b ⇒
+                if (b) reComputeAllSons(dn)
+            }),
+          glyphButton(glyph_file, () ⇒
+            Post[Api].addFile(dn, "TOTO.scala").call().foreach {
+              b ⇒
+                if (b) reComputeAllSons(dn)
+            })
+        )
+        case fn: FileNode ⇒ tags.span(
+          glyphButton(glyph_trash, () ⇒ trashNode(fn))
+        )
+      }
+  )
+
+  def trashNode(treeNode: TreeNode) =
+    Post[Api].deleteFile(treeNode).call().foreach { _ ⇒
+      reComputeAllSons(rootNode())
     }
 
 }

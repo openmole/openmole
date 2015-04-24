@@ -2,7 +2,7 @@ package org.openmole.gui.client.core
 
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.client.core.dataui.EditorPanelUI
-import org.openmole.gui.client.core.files.TreeNodePanel
+import org.openmole.gui.client.core.files.{ DirNode, TreeNodePanel }
 import org.openmole.gui.client.core.files.TreeNodePanel._
 import org.openmole.gui.shared.Api
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -71,7 +71,7 @@ object ScriptClient {
         }
         )(tags.div(id := "site-canvas")(
           tags.div(id := "site-menu")(
-            TreeNodePanel(dirNode(projectsPath)).view.render
+            TreeNodePanel(projectsPath).view.render
           ),
           editor.view.render
         ).render)

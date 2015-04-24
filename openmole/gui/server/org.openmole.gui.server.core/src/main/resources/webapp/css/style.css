@@ -141,11 +141,8 @@ select::-moz-focus-inner {
     padding:2px 8px;
     text-decoration:none
 }
-/*
-.tree li>span {
-    cursor:pointer
-}*/
-.tree li>span:hover, .tree li>span:hover+ul li span {
+
+.tree .dir:hover, .tree .file:hover {
     background:#88265b;
     color:white;
     -moz-border-radius:5px;
