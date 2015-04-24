@@ -23,6 +23,12 @@ trait Api {
 
   def listFiles(path: TreeNodeData): Seq[TreeNodeData]
 
+  def deleteFile(treeNode: TreeNodeData): Unit
+
+  def addFile(treeNode: TreeNodeData, fileName: String): Boolean
+
+  def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean
+
   def addRootDirectory(name: String): Boolean
 
   def workspacePath(): String

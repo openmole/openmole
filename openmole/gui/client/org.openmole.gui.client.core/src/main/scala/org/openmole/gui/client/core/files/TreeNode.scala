@@ -39,7 +39,15 @@ sealed trait TreeNode {
 
   def state: Var[NodeState]
 
+  val selected: Var[Boolean] = Var(false)
+
   def hasSons: Boolean
+
+  def parent: Option[DirNode] = {
+    val parentSeqPath = canonicalPath().split("/").dropRight(1)
+    if (parentSeqPath.isEmpty) None
+    else Some(DirNode(parentSeqPath.mkString("/"), parentSeqPath.last))
+  }
 }
 
 object TreeNode {
@@ -75,6 +83,10 @@ object TreeNodeOrdering extends Ordering[TreeNode] {
       case _            ⇒ tn1.name() compare tn2.name()
     }
   }
+}
+
+object DirNode {
+  def apply(path: String): DirNode = DirNode(path.split("/").last, path)
 }
 
 case class DirNode(name: Var[String],
