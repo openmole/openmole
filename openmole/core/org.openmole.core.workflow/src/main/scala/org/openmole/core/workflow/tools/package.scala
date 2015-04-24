@@ -22,6 +22,7 @@ import org.openmole.core.workflow.data.Context
 
 import scala.concurrent.stm._
 import scala.ref.WeakReference
+import org.openmole.tool.file._
 
 package tools {
 
@@ -51,7 +52,7 @@ package tools {
     implicit def ContextToBindingConverter(c: Context) = c.toBinding
 
     implicit class FileSubdirectoryDecorator(f: File) {
-      def /(s: String) = new File(f, s)
+      def /(s: String) = new FileDecorator(f) / s
     }
 
   }

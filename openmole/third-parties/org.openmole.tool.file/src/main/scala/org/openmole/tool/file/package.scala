@@ -232,7 +232,7 @@ package object file { p ⇒
         case e: IOException ⇒ None
       }
 
-    def child(s: String): File = Paths.get(file.toString, s)
+    def /(s: String): File = Paths.get(file.toString, s)
 
     // TODO implement using NIO getLastModifiedTime
     def lastModification = {

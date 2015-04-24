@@ -36,7 +36,7 @@ trait ExecutionContext {
   def out: PrintStream
   def directory: Option[File]
   def relativise(f: String): File =
-    directory.map(_.child(f)).getOrElse(new File(f))
+    directory.map(_./(f)).getOrElse(new File(f))
 
   def copy(
     out: PrintStream = out,

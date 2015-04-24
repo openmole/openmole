@@ -92,7 +92,7 @@ object PluginManager extends Logger {
   }
 
   def plugins(path: File): Iterable[File] = {
-    def isDirectoryPlugin(file: File) = file.isDirectory && file.child("META-INF").child("MANIFEST.MF").exists
+    def isDirectoryPlugin(file: File) = file.isDirectory && file./("META-INF")./("MANIFEST.MF").exists
 
     if (isDirectoryPlugin(path) || path.isJar) List(path)
     else
