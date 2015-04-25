@@ -32,8 +32,8 @@
     factor depends on the value of the first one.
 
     @p
-      @hl.openmole(
-      """val i = Val[Int]
+      @hl.openmole("""
+      val i = Val[Int]
       val j = Val[Double]
 
       val explo =
