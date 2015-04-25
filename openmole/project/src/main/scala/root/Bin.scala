@@ -80,7 +80,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
-      resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project) sendTo { assemblyPath / "plugins" },
+      resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo { assemblyPath / "plugins" },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r -> p / "dbserver" },
@@ -150,7 +150,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
   //FIXME separate web plugins from core ones
   lazy val openmoleCore = Project("openmolecore", dir / "target" / "openmolecore", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo assemblyPath,
-    resourcesAssemble <++= Seq(Runtime.console.project, REST.server.project) sendTo assemblyPath,
+    resourcesAssemble <++= Seq(Runtime.console.project) sendTo assemblyPath,
     libraryDependencies ++= coreDependencies,
     libraryDependencies ++= equinox,
     dependencyFilter := filter,
