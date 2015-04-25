@@ -91,9 +91,9 @@
           val name = Val[String]
           val size = Val[Long]
 
-          val t = ScalaTask(\"\"\"
+          val t = ScalaTask("
             import java.io.File
-            val size = new File(workDir, "file").length\"\"\") set (
+            val size = new File(workDir, \"file\").length") set (
             inputFiles += (file, "file"),
             inputs += name,
             outputs += (name, size)
