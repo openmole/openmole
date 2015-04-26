@@ -20,17 +20,17 @@ package org.openmole.plugin.method.modelfamily
 import java.io.File
 
 import org.openmole.core.serializer.plugin.Plugins
-import org.openmole.core.workflow.builder.Builder
+import org.openmole.core.workflow.builder.{ OutputBuilder, InputBuilder, InputOutputBuilder, Builder }
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.{ Task, PluginSet }
-import org.openmole.core.workflow.tools.{ FromContext, ExpandedString }
+import org.openmole.core.workflow.tools.{ InputOutputCheck, FromContext, ExpandedString }
 import org.openmole.plugin.method.evolution.Scalar
 import org.openmole.plugin.task.scala._
 
 import scala.collection.BitSet
 import scala.collection.mutable.ListBuffer
 import scala.util.{ Try, Success }
-import fr.iscpif.family.{ ModelFamily ⇒ FModelFamily, Combination }
+import fr.iscpif.family.{ ModelFamily ⇒ FModelFamily, Combination, TypedValue }
 
 object ModelFamily {
 
@@ -51,7 +51,7 @@ object ModelFamilyBuilder {
   implicit def modelFamilyBuilderToModelFamily(builder: ModelFamilyBuilder) = builder.toModelFamily
 }
 
-class ModelFamilyBuilder(val source: ExpandedString, val combination: Combination[Class[_]])(implicit val plugins: PluginSet) extends Builder with ScalaBuilder { builder ⇒
+class ModelFamilyBuilder(val source: ExpandedString, val combination: Combination[Class[_]])(implicit val plugins: PluginSet) extends Builder with ScalaBuilder with InputBuilder with OutputBuilder { builder ⇒
 
   addClassUse(combination.components: _*)
 
@@ -80,7 +80,7 @@ class ModelFamilyBuilder(val source: ExpandedString, val combination: Combinatio
   }
 
   def toModelFamily =
-    new ModelFamily with super[ScalaBuilder].Built { mf ⇒
+    new ModelFamily with super[ScalaBuilder].Built with super[InputBuilder].Built with super[OutputBuilder].Built { mf ⇒
       def source = builder.source
       def attributes = _attributes.toList
       def combination = builder.combination
@@ -91,26 +91,8 @@ class ModelFamilyBuilder(val source: ExpandedString, val combination: Combinatio
 
 trait ModelFamily <: Plugins { f ⇒
 
-  @transient lazy val family = new FModelFamily {
-    def imports: Seq[String] = f.imports
-    def outputs: Seq[String] = f.objectives.map(_.name)
-    def attributes: Seq[String] = f.attributes.map(_.prototype.name)
-    def combination: Combination[Class[_]] = f.combination
-    def compile(code: String): Try[Any] = compilation.compile(code)
-    def compilation = new ScalaCompilation {
-      def libraries: Seq[File] = f.libraries
-      def usedClasses: Seq[Class[_]] = f.usedClasses
-    }
-    def source(traits: String, attributes: String) = {
-      val context =
-        Context(
-          Variable(traitsVariable, traits),
-          Variable(attributesVariable, attributes)
-        )
-      f.source.from(context)
-    }
-  }
-
+  def inputs: DataSet
+  def outputs: DataSet
   def imports: Seq[String]
   def source: ExpandedString
   def traits: Seq[Class[_]] = combination.components
@@ -122,13 +104,5 @@ trait ModelFamily <: Plugins { f ⇒
   def combination: Combination[Class[_]]
   def traitsCombinations = combination.combinations
   lazy val size = traitsCombinations.size
-
-  def run(context: Context) = {
-    implicit lazy val rng = Task.buildRNG(context)
-    val attributeValues = attributes.map(a ⇒ context(a.prototype))
-    val modelId = context(modelIdPrototype)
-    val map = family.run(modelId, attributeValues: _*)(rng).get
-    objectives.map(o ⇒ Variable.unsecure(o, map(o.name)))
-  }
 
 }
