@@ -133,6 +133,7 @@ object Forms {
   val glyph_question = "glyphicon-question-sign"
   val glyph_file = "glyphicon-file"
   val glyph_folder_close = "glyphicon-folder-close"
+  val glyph_home = "glyphicon-home"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
@@ -145,10 +146,14 @@ object Forms {
 
   def button(content: TypedTag[HTMLElement]): TypedTag[HTMLButtonElement] = button(content, btn_default)(span(" "))
 
-  def glyphButton(text: String, buttonCB: ClassKeyAggregator, glyCA: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
-    tags.span(cursor := "pointer", `class` := "btn " + buttonCB.key)(tags.span(glyph(glyCA)))(text)
+  def glyphButton(text: String, buttonCB: ClassKeyAggregator, glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLSpanElement] =
+    tags.span(cursor := "pointer", `class` := "btn " + buttonCB.key, `type` := "button")(tags.span(glyph(glyCA)))(text)(onclick := {
+      () ⇒ todo()
+    })
 
-  def glyphButton(glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLSpanElement] =
+  def glyphButton(glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLSpanElement] = glyphButton("", emptyCK, glyCA, todo)
+
+  def glyphSpan(glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLSpanElement] =
     tags.span(cursor := "pointer")(tags.span(glyph(glyCA))(onclick := { () ⇒
       todo()
     }))
