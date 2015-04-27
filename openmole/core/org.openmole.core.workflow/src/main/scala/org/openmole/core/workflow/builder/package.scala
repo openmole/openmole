@@ -27,11 +27,11 @@ import org.openmole.core.workflow.puzzle._
 package builder {
 
   class Inputs {
-    def +=(d: Data[_]*) = (_: InputOutputBuilder).addInput(d: _*)
+    def +=(d: Data[_]*) = (_: InputBuilder).addInput(d: _*)
   }
 
   class Outputs {
-    def +=(d: Data[_]*) = (_: InputOutputBuilder).addOutput(d: _*)
+    def +=(d: Data[_]*) = (_: OutputBuilder).addOutput(d: _*)
   }
 
   trait BuilderPackage {
@@ -45,7 +45,7 @@ package builder {
     final lazy val outputs: Outputs = new Outputs
 
     class AssignDefault[T](p: Prototype[T]) {
-      def :=[U <: InputOutputBuilder](v: T, `override`: Boolean = false) =
+      def :=[U <: DefaultBuilder](v: T, `override`: Boolean = false) =
         (_: U).setDefault(p, v, `override`)
     }
 
