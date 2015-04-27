@@ -9,10 +9,11 @@ import groovy.ui.ConsoleView
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.openmole.console._
+import org.openmole.core.eventdispatcher._
 import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ Persistent, Workspace }
 import org.openmole.tool.tar.{ TarOutputStream, TarInputStream }
 import org.scalatra._
 import org.scalatra.json.JacksonJsonSupport
@@ -22,7 +23,7 @@ import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import scala.util.{ Try, Failure, Success }
 
-case class Execution(moleExecution: MoleExecution, workDirectory: WorkDirectory)
+case class Execution(workDirectory: WorkDirectory, moleExecution: MoleExecution)
 
 case class WorkDirectory(baseDirectory: File) {
   lazy val inputDirectory = {
@@ -38,17 +39,18 @@ case class WorkDirectory(baseDirectory: File) {
   }
 
   def output = new File(baseDirectory, "output")
-
   lazy val outputStream = new PrintStream(output.bufferedOutputStream())
 
   def readOutput = {
     outputStream.flush
     output.content
   }
+
   def clean = {
     outputStream.close
     baseDirectory.recursiveDelete
   }
+
 }
 
 @MultipartConfig(fileSizeThreshold = 1024 * 1024) //research scala multipart config
@@ -68,25 +70,20 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
   }
 
   def arguments: RESTLifeCycle.Arguments
-  def baseDirectory = Workspace.location / "rest"
+  def baseDirectory = Workspace.newDir("rest")
 
   def exceptionToHttpError(e: Throwable) = InternalServerError(Error(e).toJson)
 
   post("/token") {
-    contentType = formats("json")
-
     Try(params("password")) map issueToken match {
       case Failure(_)                                      ⇒ ExpectationFailed(Error("No password sent with request").toJson)
       case Success(Failure(InvalidPasswordException(msg))) ⇒ Forbidden(Error(msg).toJson)
       case Success(Failure(e))                             ⇒ exceptionToHttpError(e)
-      case Success(Success(AuthenticationToken(token, start, end))) ⇒
-        Accepted(Token(token, end - start).toJson)
+      case Success(Success(AuthenticationToken(token, start, end))) ⇒ Accepted(Token(token, end - start).toJson)
     }
   }
 
   post("/start") {
-    contentType = formats("json")
-
     authenticated {
       (params get "script") match {
         case None ⇒ ExpectationFailed(Error("Missing mandatory script parameter.").toJson)
@@ -116,11 +113,11 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
                   case puzzle: Puzzle ⇒
                     Try(puzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream)).start) match {
                       case Success(ex) ⇒
-                        moles.add(id, Execution(ex, directory))
-                        Ok(id)
+                        moles.add(id, Execution(directory, ex))
+                        Ok(id.toJson)
                       case Failure(error) ⇒
                         directory.clean
-                        ExpectationFailed(Error(error))
+                        ExpectationFailed(Error(error).toJson)
                     }
                   case _ ⇒
                     directory.clean
@@ -150,37 +147,27 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
   }
 
   post("/output") {
-    contentType = formats("json")
     authenticated {
       getExecution { ex ⇒ Ok(Output(ex.workDirectory.readOutput).toJson) }
     }
   }
 
   post("/state") {
-    contentType = formats("json")
     authenticated {
       getExecution { ex ⇒
-        val state =
-          (ex.moleExecution.canceled, ex.moleExecution.finished) match {
-            case (true, _) ⇒ canceled
-            case (_, true) ⇒ finished
-            case _         ⇒ running
-          }
-        Ok(
-          State(
-            state,
-            ex.moleExecution.exception.map(Error(_)),
-            ready = ex.moleExecution.ready,
-            running = ex.moleExecution.running,
-            completed = ex.moleExecution.completed
-          ).toJson
-        )
+        val moleExecution = ex.moleExecution
+        val state = (moleExecution.exception, moleExecution.finished) match {
+          case (Some(t), _) ⇒ Failed(Error(t))
+          case (None, true) ⇒ Finished()
+          case _            ⇒ Running(moleExecution.ready, moleExecution.running, moleExecution.completed)
+
+        }
+        Ok(state.toJson)
       }
     }
   }
 
   post("/remove") {
-    contentType = formats("json")
     authenticated {
       getId {
         moles.remove(_) match {
@@ -191,6 +178,12 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
             Ok()
         }
       }
+    }
+  }
+
+  post("/list") {
+    authenticated {
+      Ok(moles.getKeys.toSeq.toJson)
     }
   }
 
