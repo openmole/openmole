@@ -56,7 +56,7 @@ package object file { p ⇒
     def accept(p1: File) = predicate(p1)
   }
 
-  implicit def outputStreamDecorator(os: OutputStream) = new {
+  implicit class OutputStreamDecorator(os: OutputStream) {
     def flushClose = {
       try os.flush
       finally os.close
@@ -232,7 +232,7 @@ package object file { p ⇒
         case e: IOException ⇒ None
       }
 
-    def child(s: String): File = Paths.get(file.toString, s)
+    def /(s: String): File = Paths.get(file.toString, s)
 
     // TODO implement using NIO getLastModifiedTime
     def lastModification = {

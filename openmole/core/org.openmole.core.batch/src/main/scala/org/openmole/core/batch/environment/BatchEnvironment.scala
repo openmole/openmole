@@ -91,11 +91,11 @@ object BatchEnvironment extends Logger {
   Workspace += (IncrementUpdateInterval, "PT1M")
   Workspace += (MaxUpdateErrorsInARow, "3")
 
-  private def runtimeDirLocation = Workspace.openMOLELocation.getOrElse(throw new InternalProcessingError("openmole.location not set")).child("runtime")
+  private def runtimeDirLocation = Workspace.openMOLELocation.getOrElse(throw new InternalProcessingError("openmole.location not set"))./("runtime")
 
-  @transient lazy val runtimeLocation = runtimeDirLocation.child("runtime.tar.gz")
-  @transient lazy val JVMLinuxI386Location = runtimeDirLocation.child("jvm-386.tar.gz")
-  @transient lazy val JVMLinuxX64Location = runtimeDirLocation.child("jvm-x64.tar.gz")
+  @transient lazy val runtimeLocation = runtimeDirLocation./("runtime.tar.gz")
+  @transient lazy val JVMLinuxI386Location = runtimeDirLocation./("jvm-386.tar.gz")
+  @transient lazy val JVMLinuxX64Location = runtimeDirLocation./("jvm-x64.tar.gz")
 
   Workspace += (MemorySizeForRuntime, "1024")
   Workspace += (CheckInterval, "PT1M")

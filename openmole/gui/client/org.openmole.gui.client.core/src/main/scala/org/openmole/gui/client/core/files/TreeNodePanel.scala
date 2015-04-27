@@ -6,7 +6,7 @@ import org.openmole.gui.misc.js.Forms._
 import org.scalajs.dom.html.{ Input, UList }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
-import org.openmole.gui.misc.js.{ Forms ⇒ bs, ClassKeyAggregator }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow

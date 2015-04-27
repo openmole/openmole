@@ -17,12 +17,15 @@
 
 package org.openmole.core.workflow.task
 
-import org.openmole.core.eventdispatcher.{ Event, EventDispatcher, EventListener }
+import java.util.concurrent.locks.ReentrantLock
+
+import org.openmole.core.eventdispatcher._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
+import org.openmole.tool.lock._
 
 import scala.collection.mutable.ListBuffer
 
@@ -57,18 +60,6 @@ sealed abstract class MoleTask(
     val last: Capsule,
     val implicits: Iterable[String]) extends Task {
 
-  class ResultGathering extends EventListener[MoleExecution] {
-    @volatile var lastContext: Option[Context] = None
-
-    override def triggered(obj: MoleExecution, ev: Event[MoleExecution]) = synchronized {
-      ev match {
-        case ev: MoleExecution.JobFinished ⇒
-          if (ev.capsule == last) lastContext = Some(ev.moleJob.context)
-        case _ ⇒
-      }
-    }
-  }
-
   override protected def process(context: Context) = {
     val firstTaskContext = inputs.foldLeft(List.empty[Variable[_]]) {
       (acc, input) ⇒
@@ -80,17 +71,21 @@ sealed abstract class MoleTask(
     val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
 
     val execution = MoleExecution(mole, seed = context(Task.openMOLESeed), implicits = implicitsValues)
-    val resultGathering = new ResultGathering
 
-    EventDispatcher.listen(execution: MoleExecution, resultGathering, classOf[MoleExecution.JobFinished])
-    EventDispatcher.listen(execution: MoleExecution, resultGathering, classOf[MoleExecution.ExceptionRaised])
+    @volatile var lastContext: Option[Context] = None
+    val lastContextLock = new ReentrantLock()
+
+    execution listen {
+      case ev: MoleExecution.JobFinished ⇒
+        lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
+    }
 
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 
     execution.exception.foreach(throw _)
 
-    context + resultGathering.lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
+    context + lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
   }
 
 }

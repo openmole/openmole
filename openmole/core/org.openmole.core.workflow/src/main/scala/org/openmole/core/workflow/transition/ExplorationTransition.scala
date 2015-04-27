@@ -17,13 +17,10 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.eventdispatcher.EventDispatcher
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.obj.ClassUtils
-import org.openmole.core.tools.service.Priority
+import org.openmole.core.eventdispatcher._
+import org.openmole.core.exception._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
-import ClassUtils._
 import org.openmole.tool.lock._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
@@ -82,7 +79,9 @@ class ExplorationTransition(start: Capsule, end: Slot, condition: Condition = Co
             if (level > 0) toProcess += t.end.capsule -> (level - 1)
             else if (level == 0) {
               subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
-              EventDispatcher.listen(subMoleExecution, Priority.LOW, new AggregationTransitionAdapter(t), classOf[SubMoleExecution.Finished])
+              subMoleExecution listen {
+                case ev: SubMoleExecution.Finished ⇒ t.aggregate(subMoleExecution, ev.ticket)
+              }
             }
           case t: IExplorationTransition ⇒ toProcess += t.end.capsule -> (level + 1)
           case t                         ⇒ toProcess += t.end.capsule -> level

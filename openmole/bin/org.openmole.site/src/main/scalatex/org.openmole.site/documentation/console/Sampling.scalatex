@@ -32,8 +32,8 @@
     factor depends on the value of the first one.
 
     @p
-      @hl.openmole(
-      """val i = Val[Int]
+      @hl.openmole("""
+      val i = Val[Int]
       val j = Val[Double]
 
       val explo =
@@ -81,23 +81,23 @@
 
         @p The third and last sampling from the Zip family is the @hl.openmole("ZipWithNameSampling"). It maps the name
         the files from a @i{FileDomain} (see the next section for more details about exploring files) to a String variable
-        in the dataflow. In the following excerpt, we map the name of the file and print it along to its size. When running
-        this snippet, notice the difference between the file name issued from @hl.openmole("ZipWithNameSampling") and a
-        call to the @hl.openmoleNoTest("toString") of the file object that returns the complete path to the file:
+        in the dataflow. In the following excerpt, we map the name of the file and print it along to its size. In OpenMOLE file
+        variables generally don't preserve the name of the file from which it was originally created. In order to save some
+        output results depending on the input filename the filename should be transmitted in a variable of type String. When running
+        this snippet, the file is renamed by the ScalaTask however, its name is saved in the @i{name} variable.
 
         @br @hl.openmole("""
-          val f = Val[File]
-          val fDomain = f in ListFilesDomain("/tmp", "docOM")
-          val str = Val[String]
-          val samp = fDomain zipWithName str
+          val file = Val[File]
+          val name = Val[String]
+          val size = Val[Long]
 
-          val t = ScalaTask(
-          "println(\"filename = \" + str + \" filesize = \" + f.length + \" filelocation = \" + f.toString)"
-          ) set (
-            inputs += (f, str)
+          val t = ScalaTask("val size = new java.io.File(workDir, \"file\").length") set (
+            inputFiles += (file, "file"),
+            inputs += name,
+            outputs += (name, size)
           )
 
-          val ex = ExplorationTask(samp) -< t start
+          val ex = ExplorationTask((file in ListFilesDomain("/tmp/dir/")) zipWithName name) -< (t hook ToStringHook()) start
          """)
 
   @sect{Shrink the initial Sampling with Take, Filter, Sample}

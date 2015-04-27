@@ -1,6 +1,6 @@
 package org.openmole.rest.server
 
-import java.io.PrintStream
+import java.io.{ File, PrintStream }
 import java.util.UUID
 import java.util.zip.{ GZIPOutputStream, GZIPInputStream }
 import javax.servlet.annotation.MultipartConfig
@@ -12,7 +12,6 @@ import org.openmole.console._
 import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
-import org.openmole.core.dsl._
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.tar.{ TarOutputStream, TarInputStream }
 import org.scalatra._
@@ -26,10 +25,22 @@ import scala.util.{ Try, Failure, Success }
 case class Execution(moleExecution: MoleExecution, workDirectory: WorkDirectory)
 
 case class WorkDirectory(baseDirectory: File) {
-  def inputDirectory = new File(baseDirectory, "inputs")
-  def outputDirectory = new File(baseDirectory, "outputs")
+  lazy val inputDirectory = {
+    val f = new File(baseDirectory, "inputs")
+    f.mkdirs()
+    f
+  }
+
+  lazy val outputDirectory = {
+    val f = new File(baseDirectory, "outputs")
+    f.mkdirs()
+    f
+  }
+
   def output = new File(baseDirectory, "output")
+
   lazy val outputStream = new PrintStream(output.bufferedOutputStream())
+
   def readOutput = {
     outputStream.flush
     output.content
@@ -57,6 +68,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
   }
 
   def arguments: RESTLifeCycle.Arguments
+  def baseDirectory = Workspace.location / "rest"
 
   def exceptionToHttpError(e: Throwable) = InternalServerError(Error(e).toJson)
 
@@ -64,7 +76,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
     contentType = formats("json")
 
     Try(params("password")) map issueToken match {
-      case Failure(_)                                      ⇒ ExpectationFailed(Error("error", "No password sent with request").toJson)
+      case Failure(_)                                      ⇒ ExpectationFailed(Error("No password sent with request").toJson)
       case Success(Failure(InvalidPasswordException(msg))) ⇒ Forbidden(Error(msg).toJson)
       case Success(Failure(e))                             ⇒ exceptionToHttpError(e)
       case Success(Success(AuthenticationToken(token, start, end))) ⇒
@@ -81,9 +93,8 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
         case Some(script) ⇒
           logger.info("starting the create operation")
 
-          val directory = WorkDirectory(Workspace.newDir("restExecution"))
-          directory.inputDirectory.mkdirs()
-          directory.outputDirectory.mkdirs()
+          val id = ExecutionId(UUID.randomUUID().toString)
+          val directory = WorkDirectory(baseDirectory / id.id)
 
           def extract =
             for {
@@ -97,18 +108,23 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
             val console = new Console(arguments.plugins)
             val repl = console.newREPL(ConsoleVariables(inputDirectory = directory.inputDirectory, outputDirectory = directory.outputDirectory))
             Try(repl.eval(script)) match {
-              case Failure(e) ⇒ ExpectationFailed(Error(e).toJson)
+              case Failure(e) ⇒
+                directory.clean
+                ExpectationFailed(Error(e).toJson)
               case Success(o) ⇒
                 o match {
                   case puzzle: Puzzle ⇒
                     Try(puzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream)).start) match {
                       case Success(ex) ⇒
-                        val id = ExecutionId(UUID.randomUUID().toString)
                         moles.add(id, Execution(ex, directory))
                         Ok(id)
-                      case Failure(error) ⇒ ExpectationFailed(Error(error))
+                      case Failure(error) ⇒
+                        directory.clean
+                        ExpectationFailed(Error(error))
                     }
-                  case _ ⇒ ExpectationFailed(Error("The last line of the script should be a puzzle"))
+                  case _ ⇒
+                    directory.clean
+                    ExpectationFailed(Error("The last line of the script should be a puzzle"))
                 }
             }
           }

@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2011 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -14,7 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.core.workflow.builder
 
-package org.openmole.core.eventdispatcher
+import org.openmole.core.workflow.data._
 
-class Event[T]
+trait OutputBuilder { builder ⇒
+  private var _outputs = DataSet.empty
+
+  def addOutput(d: Data[_]*): this.type = { _outputs ++= d; this }
+
+  def outputs = _outputs
+
+  trait Built {
+    def outputs = builder.outputs
+  }
+
+}

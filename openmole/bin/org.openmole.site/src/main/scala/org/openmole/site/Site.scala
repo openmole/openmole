@@ -38,6 +38,28 @@ class Site extends IApplication {
     val dest = new File(args(0))
     dest.recursiveDelete
 
+    val noscript = "noscript".tag[String]
+
+    def piwik =
+      RawFrag("""
+        |<!-- Piwik -->
+        |<script type="text/javascript">
+        |  var _paq = _paq || [];
+        |  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+        |  _paq.push(['trackPageView']);
+        |  _paq.push(['enableLinkTracking']);
+        |  (function() {
+        |    var u="//piwik.iscpif.fr/";
+        |    _paq.push(['setTrackerUrl', u+'piwik.php']);
+        |    _paq.push(['setSiteId', 1]);
+        |    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+        |    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+        |  })();
+        |</script>
+        |<noscript><p><img src="//piwik.iscpif.fr/piwik.php?idsite=1" style="border:0;" alt="" /></p></noscript>
+        |<!-- End Piwik Code -->
+      """.stripMargin)
+
     val site = new scalatex.site.Site {
       override def siteCss = Set.empty
 
@@ -73,7 +95,8 @@ class Site extends IApplication {
               |		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
               |		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
               |	})();
-            """.stripMargin)
+            """.stripMargin),
+            piwik
         )
 
       /**
