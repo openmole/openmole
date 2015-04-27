@@ -3,15 +3,14 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core.Post
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.Forms._
-import org.scalajs.dom.html.{Input, UList}
+import org.scalajs.dom.html.{ Input, UList }
 import scalatags.JsDom.all._
-import scalatags.JsDom.{TypedTag, tags ⇒ tags}
-import org.openmole.gui.misc.js.{Forms ⇒ bs}
+import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs, ClassKeyAggregator }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import TreeNode._
-import NodeState._
 import autowire._
 import rx._
 
@@ -62,14 +61,15 @@ class TreeNodePanel(_dirNode: DirNode) {
   val rootNode: Var[DirNode] = Var(_dirNode)
   val addDirState: Var[Boolean] = Var(false)
   val selectedNode: Var[Option[TreeNode]] = Var(None)
+  val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode()))
 
   computeAllSons(_dirNode)
 
   val addRootDirButton =
-    bs.glyphButton(" Add", btn_success, glyph_folder_close)(`type` := "submit")(onclick := { () ⇒
+    bs.glyphButton(" Add", btn_success, glyph_folder_close, () ⇒ {
       rootDirInput.value = ""
       addDirState() = !addDirState()
-    })
+    })(`type` := "submit")
 
   val rootDirInput: Input = bs.input("")(
     placeholder := "Folder name",
@@ -79,63 +79,61 @@ class TreeNodePanel(_dirNode: DirNode) {
 
   val view = tags.div(
     Rx {
+      val toDraw = dirNodeLine().drop(1)
+      val dirNodeLineSize = toDraw.size
+      buttonGroup()(
+        glyphButton(" Home", btn_primary, glyph_home, goToDirAction(dirNodeLine().head)),
+        if (dirNodeLineSize > 2) goToDirButton(toDraw(dirNodeLineSize - 3), Some("...")),
+        toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
+      )
+    },
+    Rx {
       bs.form()(
         inputGroup(navbar_left)(
           inputGroupButton(addRootDirButton),
           if (addDirState()) rootDirInput else tags.span()
         ),
-        onsubmit := { () ⇒ {
-          val newDirName = rootDirInput.value
-          Post[Api].addRootDirectory(newDirName).call().foreach { b ⇒
-            if (b) rootNode().sons() = rootNode().sons() :+ DirNode(newDirName, Var(rootNode().canonicalPath() + "/" + newDirName))
-            addDirState() = !addDirState()
-            reComputeAllSons(rootNode())
+        onsubmit := { () ⇒
+          {
+            val newDirName = rootDirInput.value
+            Post[Api].addRootDirectory(newDirName).call().foreach { b ⇒
+              if (b) rootNode().sons() = rootNode().sons() :+ DirNode(newDirName, Var(rootNode().canonicalPath() + "/" + newDirName))
+              addDirState() = !addDirState()
+              reComputeAllSons(rootNode())
+            }
           }
-        }
         })
     },
     tags.div(`class` := "tree")(
       Rx {
-        drawTree(rootNode().sons())
+        drawTree(dirNodeLine().last.sons())
       }
     )
   )
 
+  def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(onclick := { () ⇒
+    goToDirAction(dn)()
+  })
+
+  def goToDirAction(dn: DirNode): () ⇒ Unit = () ⇒ {
+    dirNodeLine() = dirNodeLine().zipWithIndex.filter(_._1 == dn).headOption.map {
+      case (dn, index) ⇒ dirNodeLine().take(index + 1)
+    }.getOrElse(dirNodeLine())
+    drawTree(dirNodeLine().last.sons())
+  }
+
   def drawTree(tns: Seq[TreeNode]): TypedTag[UList] = tags.ul(
     for (tn ← tns.sorted(TreeNodeOrdering)) yield {
-      drawTree(tn)
+      drawNode(tn)
     }
   )
-
-  def drawTree(tn: TreeNode): Rx[TypedTag[UList]] =
-    Rx {
-      tags.ul(
-        drawNode(tn),
-        tn match {
-          case d: DirNode ⇒
-            d.state() match {
-              case EXPANDED ⇒ tags.ul(
-                for (son ← d.sons().sorted(TreeNodeOrdering)) yield {
-                  drawTree(son)
-                }
-              )
-              case _ ⇒
-            }
-          case _ ⇒
-        }
-      )
-    }
 
   def drawNode(node: TreeNode) = node match {
     case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ {
       println(fn.name() + " display the file")
     })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
-      dn.state() match {
-        case EXPANDED ⇒ dn.state() = COLLAPSED
-        case COLLAPSED ⇒
-          dn.state() = EXPANDED
-      }
+      dirNodeLine() = dirNodeLine() :+ dn
     }
     )
   }
@@ -165,35 +163,31 @@ class TreeNodePanel(_dirNode: DirNode) {
       }, `class` := classType)(
         tags.i(`class` := {
           tn.hasSons match {
-            case true ⇒
-              tn.state() match {
-                case COLLAPSED ⇒ "glyphicon glyphicon-plus-sign"
-                case EXPANDED ⇒ "glyphicon glyphicon-minus-sign"
-              }
+            case true  ⇒ "glyphicon glyphicon-plus-sign"
             case false ⇒ ""
           }
         }),
         tags.i(tn.name())
       ),
     if (tn.selected())
-      tn match {
-        case dn: DirNode ⇒ tags.span(
-          glyphButton(glyph_trash, () ⇒ trashNode(dn)),
-          glyphButton(glyph_folder_close, () ⇒
-            Post[Api].addDirectory(dn, "TOTO").call().foreach {
-              b ⇒
-                if (b) reComputeAllSons(dn)
-            }),
-          glyphButton(glyph_file, () ⇒
-            Post[Api].addFile(dn, "TOTO.scala").call().foreach {
-              b ⇒
-                if (b) reComputeAllSons(dn)
-            })
-        )
-        case fn: FileNode ⇒ tags.span(
-          glyphButton(glyph_trash, () ⇒ trashNode(fn))
-        )
-      }
+      tags.div(
+      (tn match {
+        case dn: DirNode ⇒
+          Seq(tags.span(glyphSpan(glyph_trash, () ⇒ trashNode(dn)),
+            glyphSpan(glyph_folder_close, () ⇒
+              Post[Api].addDirectory(dn, "TOTO").call().foreach {
+                b ⇒
+                  if (b) reComputeAllSons(dn)
+              }),
+            glyphSpan(glyph_file, () ⇒
+              Post[Api].addFile(dn, "TOTO.scala").call().foreach {
+                b ⇒
+                  if (b) reComputeAllSons(dn)
+              })))
+        case fn: FileNode ⇒
+          Seq(glyphSpan(glyph_trash, () ⇒ trashNode(fn)))
+
+      }) :+ glyphSpan(glyph_edit, () ⇒ println("edit")): _*)
   )
 
   def trashNode(treeNode: TreeNode) =

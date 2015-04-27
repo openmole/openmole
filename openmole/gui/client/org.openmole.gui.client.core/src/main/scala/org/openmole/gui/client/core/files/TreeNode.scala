@@ -21,23 +21,10 @@ import org.openmole.gui.ext.data.TreeNodeData
 import org.openmole.gui.misc.utils.Utils._
 import rx._
 
-object NodeState extends Enumeration {
-
-  case class NodeState(state: String) extends Val(state)
-
-  val EXPANDED = new NodeState("EXPANDED")
-  val COLLAPSED = new NodeState("COLLAPSED")
-  val FILE = new NodeState("FILE")
-}
-
-import NodeState._
-
 sealed trait TreeNode {
   def name: Var[String]
 
   def canonicalPath: Var[String]
-
-  def state: Var[NodeState]
 
   val selected: Var[Boolean] = Var(false)
 
@@ -57,8 +44,8 @@ object TreeNode {
     else FileNode(tnd.name, tnd.canonicalPath)
 
   implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.canonicalPath(), tn match {
-    case DirNode(_, _, _, _) ⇒ true
-    case _                   ⇒ false
+    case DirNode(_, _, _) ⇒ true
+    case _                ⇒ false
   })
 
   implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map {
@@ -91,12 +78,11 @@ object DirNode {
 
 case class DirNode(name: Var[String],
                    canonicalPath: Var[String],
-                   sons: Var[Seq[TreeNode]] = Var(Seq()), state: Var[NodeState] = Var(COLLAPSED)) extends TreeNode {
+                   sons: Var[Seq[TreeNode]] = Var(Seq())) extends TreeNode {
   def hasSons = sons().size > 0
 }
 
 case class FileNode(name: Var[String],
                     canonicalPath: Var[String]) extends TreeNode {
   val hasSons = false
-  val state = Var(FILE)
 }

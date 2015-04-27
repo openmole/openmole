@@ -180,18 +180,18 @@ select::-moz-focus-inner {
   padding: 5% 0; /* Temp: Just spacing. */
 }
 .show-nav #site-canvas {
-  -webkit-transform: translateX(250px);
-  transform: translateX(250px);
+  -webkit-transform: translateX(300px);
+  transform: translateX(300px);
 
-  -webkit-transform: translate3d(250px, 0, 0);
-  transform: translate3d(250px, 0, 0);
+  -webkit-transform: translate3d(300px, 0, 0);
+  transform: translate3d(300px, 0, 0);
 }
 #site-menu {
-  width: 250px;
+  width: 300px;
   height: 100%;
   position: absolute;
   top: 0;
-  left: -250px;
+  left: -300px;
   padding: 15px;
 }
 
