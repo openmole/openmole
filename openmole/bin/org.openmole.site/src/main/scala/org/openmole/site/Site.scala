@@ -94,7 +94,7 @@ class Site extends IApplication {
               |		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
               |	})();
             """.stripMargin),
-            piwik
+          piwik
         )
 
       /**
