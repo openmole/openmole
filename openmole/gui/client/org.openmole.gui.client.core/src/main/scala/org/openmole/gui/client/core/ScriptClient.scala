@@ -49,7 +49,7 @@ object ScriptClient {
     val openFileTree = Var(false)
 
     dom.document.body.appendChild(
-      nav("mainMav",
+      nav("mainNav",
         Seq(
           (navItem("executions", "Executions").render, "env", () ⇒ {
             println("Not yet")
