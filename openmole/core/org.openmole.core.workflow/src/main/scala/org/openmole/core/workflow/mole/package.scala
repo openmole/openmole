@@ -30,20 +30,6 @@ package mole {
 
     implicit lazy val localExecutionContext = ExecutionContext(System.out, None)
 
-    class PuzzlePieceDecorator(puzzle: PuzzlePiece) {
-      def on(env: Environment) =
-        puzzle.copy(environment = Some(env))
-
-      def hook(hooks: Hook*) =
-        puzzle.copy(hooks = puzzle.hooks.toList ::: hooks.toList)
-
-      def source(sources: Source*) =
-        puzzle.copy(sources = puzzle.sources.toList ::: sources.toList)
-
-      def by(strategy: Grouping) =
-        puzzle.copy(grouping = Some(strategy))
-    }
-
     implicit def puzzlePuzzlePieceDecoration(puzzle: PuzzlePiece) = new PuzzlePieceDecorator(puzzle)
     implicit def capsulePuzzlePieceDecoration(capsule: Capsule) = new PuzzlePieceDecorator(capsule.toPuzzlePiece)
     implicit def slotPuzzlePieceDecoration(slot: Slot) = new PuzzlePieceDecorator(slot.toPuzzlePiece)

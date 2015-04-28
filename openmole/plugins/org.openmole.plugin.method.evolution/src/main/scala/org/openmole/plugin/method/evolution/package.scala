@@ -48,8 +48,6 @@ package object evolution {
 
   implicit def seqToInputsConversion[T](s: Seq[Input]) = Inputs(s)
 
-  implicit def gaPuzzleToGAParameters[ALG <: GAAlgorithm](ga: GAPuzzle[ALG]) = ga.parameters
-
   object GAParameters {
     def apply[ALG <: GAAlgorithm](evolution: ALG)(
       archive: Prototype[evolution.A],
@@ -84,8 +82,6 @@ package object evolution {
     def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
     def generation: Prototype[Int]
   }
-
-  case class GAPuzzle[+ALG <: GAAlgorithm](parameters: GAParameters[ALG], puzzle: Puzzle, output: Capsule)
 
   private def components[ALG <: GAAlgorithm](
     name: String,
@@ -138,18 +134,13 @@ package object evolution {
 
     val terminatedCondition = Condition(terminated.name + " == true")
 
-    def gaPuzzle(puzzle: Puzzle, output: Capsule) =
-      GAPuzzle(
-        GAParameters[ALG](evolution)(
-          archive.asInstanceOf[Prototype[evolution.A]],
-          genome.asInstanceOf[Prototype[evolution.G]],
-          individual.asInstanceOf[Prototype[Individual[evolution.G, evolution.P, evolution.F]]],
-          population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]],
-          //state,
-          components.generation
-        ),
-        puzzle,
-        output
+    def gaParameters =
+      GAParameters[ALG](evolution)(
+        archive.asInstanceOf[Prototype[evolution.A]],
+        genome.asInstanceOf[Prototype[evolution.G]],
+        individual.asInstanceOf[Prototype[Individual[evolution.G, evolution.P, evolution.F]]],
+        population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]],
+        components.generation
       )
 
   }
@@ -205,9 +196,12 @@ package object evolution {
         (breedingCaps -- (endSlot, filter = Block(archive, population, state, generation, terminated, genome.toArray))) +
         (breedingCaps -- (terminationSlot, filter = Block(archive, population, genome.toArray)))
 
-    val gaPuzzle = exploration + loop + dataChannels
+    val gaPuzzle =
+      new Puzzle(exploration + loop + dataChannels) with OutputHookPuzzle {
+        def output = scalingIndividualsSlot.capsule
+      }
 
-    cs.gaPuzzle(gaPuzzle, scalingIndividualsSlot.capsule)
+    (gaPuzzle, cs.gaParameters)
   }
 
   def SteadyGA[ALG <: GAAlgorithm](algorithm: ALG)(
@@ -273,41 +267,48 @@ package object evolution {
         (firstCapsule -- (endCapsule, filter = Block(archive, population))) +
         (firstCapsule oo (elitismSlot, filter = Keep(population, archive)))
 
-    val gaPuzzle = skel + loop + dataChannels
+    val gaPuzzle =
+      new Puzzle(skel + loop + dataChannels) with OutputHookPuzzle {
+        def output = scalingIndividualsSlot.capsule
+      }
 
-    cs.gaPuzzle(gaPuzzle, scalingIndividualsSlot.capsule)
+    (gaPuzzle, cs.gaParameters)
   }
 
-  def IslandSteadyGA[ALG <: GAAlgorithm](algorithm: ALG, fitness: Puzzle)(
+  def IslandSteadyGA[ALG <: GAAlgorithm](algorithm: ALG)(
+    fitness: Puzzle,
     number: Int,
     termination: GATermination { type G >: algorithm.G; type P >: algorithm.P; type F >: algorithm.F },
     samples: Int)(implicit plugins: PluginSet) = {
 
     val name = "islandSteadyGA"
 
-    val gaPuzzle: GAPuzzle[ALG] =
-      SteadyGA[ALG](algorithm)(
-        fitness = fitness
-      ).copy(
-          puzzle =
-            Capsule(MoleTask(fitness) set (_.setName(s"${name}IslandTask")))
-        )
+    val (gaPuzzle, parameters) = SteadyGA[ALG](algorithm)(fitness)
+    val mt = Capsule(MoleTask(gaPuzzle) set (_.setName(s"${name}IslandTask")))
 
-    IslandGA[ALG](gaPuzzle)(
+    val (puzzle, islandGA) = IslandGA[ALG](parameters)(
+      mt,
       number = number,
-      termination = termination.asInstanceOf[GATermination { type G = gaPuzzle.parameters.evolution.G; type P = gaPuzzle.parameters.evolution.P; type F = gaPuzzle.parameters.evolution.F }],
-      samples = samples) -> gaPuzzle.puzzle.last
+      termination = termination.asInstanceOf[GATermination { type G = parameters.evolution.G; type P = parameters.evolution.P; type F = parameters.evolution.F }],
+      samples = samples)
+
+    val islandSteadyPuzzle =
+      new Puzzle(puzzle) with EnvironmentPuzzle {
+        def delegate: Capsule = mt
+      }
+
+    (islandSteadyPuzzle, islandGA)
   }
 
-  def IslandGA[AG <: GAAlgorithm](fitness: GAPuzzle[AG])(
+  def IslandGA[AG <: GAAlgorithm](parameters: GAParameters[AG])(
+    fitness: Puzzle,
     number: Int,
-    termination: GATermination { type G >: fitness.parameters.evolution.G; type P >: fitness.parameters.evolution.P; type F >: fitness.parameters.evolution.F },
+    termination: GATermination { type G >: parameters.evolution.G; type P >: parameters.evolution.P; type F >: parameters.evolution.F },
     samples: Int)(implicit plugins: PluginSet) = {
 
     val name = "islandGA"
 
-    import fitness.parameters
-    import fitness.parameters.evolution
+    import parameters.evolution
     import parameters._
 
     val islandElitism = new Elitism with Termination with Archive with TerminationType {
@@ -328,12 +329,7 @@ package object evolution {
       def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random) = termination.terminated(population, terminationState)
     }
 
-    //val archive = parameters.archive.asInstanceOf[Prototype[A]]
     val originalArchive = Prototype[A](name + "OriginalArchive")
-
-    //val individual = parameters.individual.asInstanceOf[Prototype[Individual[G, P, F]]]
-    //val population = parameters.population //Prototype[Population[G, P, F]](name + "Population")
-
     val state = Prototype[islandElitism.STATE](name + "State")(islandElitism.stateType)
     val generation = Prototype[Int](name + "Generation")
     val terminated = Prototype[Boolean](name + "Terminated")
@@ -341,8 +337,6 @@ package object evolution {
     val firstCapsule = StrainerCapsule(EmptyTask() set (_.setName(name + "First")))
 
     val toInidividualsTask = PopulationToIndividualsTask(evolution)(population, individual.toArray) set (_.setName(name + "PopulationToIndividualTask"))
-    //val renameIndividualsTask = AssignTask(name + "RenameIndividuals")
-    //renameIndividualsTask.assign(individual.toArray, newIndividual.toArray)
 
     val elitismTask = ElitismTask(islandElitism)(
       parameters.population,
@@ -407,7 +401,7 @@ package object evolution {
     val skel =
       firstCapsule -<
         (preIslandCapsule, size = Some(number.toString)) --
-        fitness.puzzle -- toInidividualsTask --
+        fitness -- toInidividualsTask --
         elitismCaps --
         terminationSlot --
         scalingIndividualsSlot >| (endCapsule, terminated.name + " == true")
@@ -418,21 +412,21 @@ package object evolution {
         preIslandCapsule
 
     val dataChannels =
-      (firstCapsule oo fitness.puzzle) +
+      (firstCapsule oo fitness) +
         (firstCapsule -- endCapsule)
 
-    val puzzle = skel + loop + dataChannels
-
-    GAPuzzle(
+    val islandParameters =
       GAParameters(parameters.evolution)(
         parameters.archive,
         parameters.genome,
         parameters.individual,
         parameters.population,
         generation
-      ),
-      puzzle,
-      scalingIndividualsSlot.capsule
-    )
+      )
+
+    val puzzle = new Puzzle(skel + loop + dataChannels) with OutputHookPuzzle {
+      def output = scalingIndividualsSlot.capsule
+    }
+    (puzzle, islandParameters)
   }
 }

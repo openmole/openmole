@@ -24,13 +24,13 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 
-object OnVariableGroupingStrategy {
+object OnVariableGrouping {
 
-  def apply(prototypes: Prototype[_]*) = new OnVariableGroupingStrategy(None, prototypes: _*)
-  def apply(numberOfMoleJobs: Int, prototypes: Prototype[_]*) = new OnVariableGroupingStrategy(Some(numberOfMoleJobs), prototypes: _*)
+  def apply(prototypes: Prototype[_]*) = new OnVariableGrouping(None, prototypes: _*)
+  def apply(numberOfMoleJobs: Int, prototypes: Prototype[_]*) = new OnVariableGrouping(Some(numberOfMoleJobs), prototypes: _*)
 }
 
-class OnVariableGroupingStrategy(numberOfMoleJobs: Option[Int], prototypes: Prototype[_]*) extends Grouping {
+class OnVariableGrouping(numberOfMoleJobs: Option[Int], prototypes: Prototype[_]*) extends Grouping {
 
   def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup =
     new MoleJobGroup(prototypes.flatMap { context.option(_) }.toSeq: _*)

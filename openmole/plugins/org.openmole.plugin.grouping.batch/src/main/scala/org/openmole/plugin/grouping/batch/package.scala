@@ -17,30 +17,6 @@
 
 package org.openmole.plugin.grouping
 
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
-
 package object batch {
-
-  implicit def capsuleBatchGroupingDecorator(capsule: Capsule) = new PuzzlePieceBatchGroupingDecorator(capsule)
-
-  implicit class PuzzlePieceBatchGroupingDecorator(puzzle: PuzzlePiece) {
-
-    def by(n: Int) =
-      puzzle.copy(
-        grouping = Some(ByGrouping(n))
-      )
-
-    def in(n: Int) =
-      puzzle.copy(
-        grouping = Some(InGrouping(n))
-      )
-
-    def inShuffled(n: Int) =
-      puzzle.copy(
-        grouping = Some(InShuffledGrouping(n))
-      )
-
-  }
-
+  implicit def intToByGrouping(n: Int) = ByGrouping(n)
 }
