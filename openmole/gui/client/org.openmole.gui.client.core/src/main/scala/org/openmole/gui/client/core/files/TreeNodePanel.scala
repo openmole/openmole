@@ -157,8 +157,8 @@ class TreeNodePanel(rootNode: DirNode) {
           }),
           tags.i(tn.name())
         ),
-      glyphSpan(glyph_trash, () ⇒ trashNode(tn))(`class` := "glyphitem"),
-      glyphSpan(glyph_edit, () ⇒ println("edit"))(id := "glyphedit", `class` := "glyphitem")
+      glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
+      glyphSpan(glyph_edit, () ⇒ println("edit"))(`class` := "glyphitem")
     )
 
   def computeAllSons(dn: DirNode): Unit = {

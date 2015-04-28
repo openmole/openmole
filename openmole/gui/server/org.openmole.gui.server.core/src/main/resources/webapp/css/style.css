@@ -110,20 +110,6 @@ select::-moz-focus-inner {
 	padding-top: 20px;
 }
 
-/*File tree panels*/
-/*.tree {
-	padding-top: 40px;
-}
-
-.tree table {
-width: 100%
-}
-
-.tree .table th,tr{
-	text-align: left;
-    vertical-align: middle;
-}*/
-
 .file {
     display:inline-block;
     text-decoration:none;
@@ -174,6 +160,10 @@ width: 100%
 .filelist li {
 	width: 100%;
 	height: 30px;
+}
+
+.filelist li #glyphtrash:hover{
+color: red;
 }
 
 #adddir{
