@@ -53,17 +53,13 @@ object Mole {
     cache
   }
 
-  def apply(
-    root: Capsule,
-    transitions: Iterable[ITransition] = Iterable.empty,
-    dataChannels: Iterable[DataChannel] = Iterable.empty) = new Mole(root, transitions, dataChannels)
-
 }
 
-class Mole(
+case class Mole(
     val root: Capsule,
-    val transitions: Iterable[ITransition],
-    val dataChannels: Iterable[DataChannel]) {
+    val transitions: Iterable[ITransition] = Iterable.empty,
+    val dataChannels: Iterable[DataChannel] = Iterable.empty,
+    val inputs: DataSet = DataSet.empty) {
 
   lazy val slots = (Slot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
   lazy val capsules = slots.keys

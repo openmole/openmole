@@ -99,7 +99,7 @@ class Capsule(_task: Task, val strainer: Boolean) {
     else DataSet.empty
 
   private def received(mole: Mole, sources: Sources, hooks: Hooks) =
-    if (this == mole.root) Iterable.empty
+    if (this == mole.root) mole.inputs
     else {
       val slots = mole.slots(this)
       val noStrainer = slots.filter(s ⇒ Capsule.reachNoStrainer(mole)(s))

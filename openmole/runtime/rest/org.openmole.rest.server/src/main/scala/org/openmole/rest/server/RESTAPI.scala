@@ -76,9 +76,9 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
 
   post("/token") {
     Try(params("password")) map issueToken match {
-      case Failure(_)                                      ⇒ ExpectationFailed(Error("No password sent with request").toJson)
+      case Failure(_) ⇒ ExpectationFailed(Error("No password sent with request").toJson)
       case Success(Failure(InvalidPasswordException(msg))) ⇒ Forbidden(Error(msg).toJson)
-      case Success(Failure(e))                             ⇒ exceptionToHttpError(e)
+      case Success(Failure(e)) ⇒ exceptionToHttpError(e)
       case Success(Success(AuthenticationToken(token, start, end))) ⇒ Accepted(Token(token, end - start).toJson)
     }
   }
