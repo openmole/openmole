@@ -290,7 +290,7 @@ package object evolution {
         fitness = fitness
       ).copy(
           puzzle =
-            Capsule(MoleTask(gaPuzzle.puzzle) set (_.setName(s"${name}IslandTask")))
+            Capsule(MoleTask(fitness) set (_.setName(s"${name}IslandTask")))
         )
 
     IslandGA[ALG](gaPuzzle)(
