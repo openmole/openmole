@@ -27,8 +27,6 @@ object ApiImpl extends Api {
 
   def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.canonicalPath)
 
-  def addRootDirectory(name: String): Boolean = new File(Utils.workspaceProjectFile, name).mkdir
-
   def addFile(treeNode: TreeNodeData, fileName: String): Boolean = new File(treeNode.canonicalPath, fileName).createNewFile
 
   def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean = new File(treeNode.canonicalPath, directoryName).mkdirs
