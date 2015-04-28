@@ -18,6 +18,7 @@ package org.openmole.core.workflow.puzzle
 
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.transition.TransitionDecorator
 
 trait HookDecorator[T] {
   def hook(hook: Hook*): T
@@ -32,28 +33,3 @@ trait SourceDecorator[T] {
   def source(sources: Source*): T
 }
 
-class PuzzlePieceDecorator(puzzle: PuzzlePiece) extends HookDecorator[PuzzlePiece] with EnvironmentDecorator[PuzzlePiece] with SourceDecorator[PuzzlePiece] {
-  def on(env: Environment) =
-    puzzle.copy(environment = Some(env))
-
-  def hook(hooks: Hook*) =
-    puzzle.copy(hooks = puzzle.hooks.toList ::: hooks.toList)
-
-  def source(sources: Source*) =
-    puzzle.copy(sources = puzzle.sources.toList ::: sources.toList)
-
-  def by(strategy: Grouping) =
-    puzzle.copy(grouping = Some(strategy))
-}
-
-trait OutputHookPuzzle <: HookDecorator[Puzzle] { self: Puzzle ⇒
-  def output: Capsule
-  def hook(hooks: Hook*) = self.copy(hooks = self.hooks.toList ++ hooks.map(h ⇒ output -> h))
-}
-
-trait EnvironmentPuzzle <: EnvironmentDecorator[Puzzle] { self: Puzzle ⇒
-  def delegate: Capsule
-
-  override def by(strategy: Grouping): Puzzle = self.copy(grouping = self.grouping + (delegate -> strategy))
-  override def on(environment: Environment): Puzzle = self.copy(environments = self.environments + (delegate -> environment))
-}

@@ -18,6 +18,7 @@
 package org.openmole.plugin.method
 
 import fr.iscpif.mgo._
+import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
@@ -196,11 +197,7 @@ package object evolution {
         (breedingCaps -- (endSlot, filter = Block(archive, population, state, generation, terminated, genome.toArray))) +
         (breedingCaps -- (terminationSlot, filter = Block(archive, population, genome.toArray)))
 
-    val gaPuzzle =
-      new Puzzle(exploration + loop + dataChannels) with OutputHookPuzzle {
-        def output = scalingIndividualsSlot.capsule
-      }
-
+    val gaPuzzle = OutputPuzzleContainer(exploration + loop + dataChannels, scalingIndividualsSlot.capsule)
     (gaPuzzle, cs.gaParameters)
   }
 
@@ -267,11 +264,7 @@ package object evolution {
         (firstCapsule -- (endCapsule, filter = Block(archive, population))) +
         (firstCapsule oo (elitismSlot, filter = Keep(population, archive)))
 
-    val gaPuzzle =
-      new Puzzle(skel + loop + dataChannels) with OutputHookPuzzle {
-        def output = scalingIndividualsSlot.capsule
-      }
-
+    val gaPuzzle = OutputPuzzleContainer(skel + loop + dataChannels, scalingIndividualsSlot.capsule)
     (gaPuzzle, cs.gaParameters)
   }
 
@@ -292,11 +285,7 @@ package object evolution {
       termination = termination.asInstanceOf[GATermination { type G = parameters.evolution.G; type P = parameters.evolution.P; type F = parameters.evolution.F }],
       samples = samples)
 
-    val islandSteadyPuzzle =
-      new Puzzle(puzzle) with EnvironmentPuzzle {
-        def delegate: Capsule = mt
-      }
-
+    val islandSteadyPuzzle = OutputEnvironmentPuzzleContainer(puzzle, puzzle.output, mt)
     (islandSteadyPuzzle, islandGA)
   }
 
@@ -424,9 +413,7 @@ package object evolution {
         generation
       )
 
-    val puzzle = new Puzzle(skel + loop + dataChannels) with OutputHookPuzzle {
-      def output = scalingIndividualsSlot.capsule
-    }
+    val puzzle = OutputPuzzleContainer(skel + loop + dataChannels, scalingIndividualsSlot.capsule)
     (puzzle, islandParameters)
   }
 }

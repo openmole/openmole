@@ -27,27 +27,7 @@ import org.openmole.core.workflow.transition._
 package mole {
 
   trait MolePackage {
-
     implicit lazy val localExecutionContext = ExecutionContext(System.out, None)
-
-    implicit def puzzlePuzzlePieceDecoration(puzzle: PuzzlePiece) = new PuzzlePieceDecorator(puzzle)
-    implicit def capsulePuzzlePieceDecoration(capsule: Capsule) = new PuzzlePieceDecorator(capsule.toPuzzlePiece)
-    implicit def slotPuzzlePieceDecoration(slot: Slot) = new PuzzlePieceDecorator(slot.toPuzzlePiece)
-
-    implicit def taskPuzzlePieceDecoration(task: Task): PuzzlePieceDecorator = new PuzzlePieceDecorator(task.toCapsule.toPuzzlePiece)
-
-    implicit def taskMoleBuilderPuzzlePieceDecoration(taskBuilder: TaskBuilder) = new PuzzlePieceDecorator(taskBuilder.toTask.toCapsule.toPuzzlePiece)
-
-    implicit def puzzlePieceMoleExecutionConverter(puzzle: PuzzlePiece) = puzzle.toPuzzle.toExecution
-    implicit def puzzlePieceMoleConverter(puzzle: PuzzlePiece) = puzzle.toPuzzle.toMole
-
-    implicit def puzzleMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
-    implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole
-
-    implicit def capsuleToMoleExecutionConverter(capsule: Capsule): MoleExecution = capsule.toPuzzle.toExecution
-    implicit def taskToMoleExecutionConverter(task: Task): MoleExecution = task.toCapsule.toPuzzle.toExecution
-    implicit def taskBuilderToMoleExecutionConverter(taskBuilder: TaskBuilder): MoleExecution = taskBuilder.toCapsule.toPuzzle.toExecution
-    implicit def moleToMoleExecutionConverter(mole: Mole) = MoleExecution(mole)
   }
 
 }
