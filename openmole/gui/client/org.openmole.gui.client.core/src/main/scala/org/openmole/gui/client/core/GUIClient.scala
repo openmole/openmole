@@ -66,7 +66,7 @@ object GUIClient {
     val topdiv = dom.document.body.appendChild(tags.div)
 
     topdiv.appendChild(
-      nav("mainMav",
+      nav("mainNav",
         Seq(
           (navItem("settings", "Settings").render(data("toggle") := "modal", data("target") := "#conceptPanelID"), "task", () ⇒ {}),
           (navItem("executions", "Executions").render, "env", () ⇒ {

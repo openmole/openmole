@@ -1,6 +1,5 @@
-.main_nav {
-      padding : 15px 15px 15px 15px;
-      margin : 15px 15px 15px 15px;
+#mainNav {
+padding-left: 300px;
 }
 
 .right2{
@@ -217,6 +216,8 @@ padding-top: 40px;
   -webkit-transform: translate3d(300px, 0, 0);
   transform: translate3d(300px, 0, 0);
 }
+
+
 #site-menu {
   background: #222222;
   width: 300px;
@@ -224,10 +225,7 @@ padding-top: 40px;
   position: absolute;
   top: 0;
   left: -300px;
-  padding-top: 25px;
+  padding-top: 10px;
   padding-left: 10px;
   padding-right: 0;
-
 }
-
-
