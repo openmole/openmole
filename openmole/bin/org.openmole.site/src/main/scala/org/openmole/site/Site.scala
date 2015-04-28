@@ -38,8 +38,6 @@ class Site extends IApplication {
     val dest = new File(args(0))
     dest.recursiveDelete
 
-    val noscript = "noscript".tag[String]
-
     def piwik =
       RawFrag("""
         |<!-- Piwik -->

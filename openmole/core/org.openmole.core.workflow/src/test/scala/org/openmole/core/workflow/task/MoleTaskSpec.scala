@@ -22,6 +22,8 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.scalatest._
 import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.puzzle._
 
 import scala.util.Try
 
@@ -57,6 +59,23 @@ class MoleTaskSpec extends FlatSpec with Matchers {
 
     ex.exception shouldNot equal(None)
 
+  }
+
+  "MoleTask" should "provide its inputs to the first capsule if it is a strainer" in {
+    val tm1 = Capsule(EmptyTask(), strainer = true)
+
+    val i = Prototype[String]("i")
+
+    val emptyT = EmptyTask()
+    emptyT.addInput(i)
+    val emptyC = Capsule(emptyT)
+
+    val moleTask = MoleTask(tm1 -- emptyC, emptyC)
+
+    moleTask addInput i
+    moleTask setDefault (i, "test")
+
+    MoleExecution(Mole(moleTask)).start.waitUntilEnded
   }
 
 }

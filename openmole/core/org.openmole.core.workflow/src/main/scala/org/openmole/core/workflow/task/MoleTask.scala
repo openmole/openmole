@@ -38,7 +38,7 @@ object MoleTask {
     new MoleTaskBuilder { builder ⇒
       addInput(mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*)
       addOutput(last.outputs(mole, Sources.empty, Hooks.empty).toSeq: _*)
-      def toTask = new MoleTask(mole, last, implicits) with builder.Built
+      def toTask = new MoleTask(mole.copy(inputs = builder.inputs), last, implicits) with builder.Built
     }
 
   trait MoleTaskBuilder extends TaskBuilder { builder ⇒

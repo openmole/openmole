@@ -32,14 +32,17 @@ package object message {
   case class ExecutionId(id: String)
   case class Output(output: String)
 
-  type ExecutionState = String
-  val running: ExecutionState = "running"
-  val finished: ExecutionState = "finished"
-  val canceled: ExecutionState = "canceled"
+  object ExecutionState {
+    type ExecutionState = String
+    val running: ExecutionState = "running"
+    val finished: ExecutionState = "finished"
+    val failed: ExecutionState = "failed"
+  }
 
-  case class State(
-    state: ExecutionState,
-    error: Option[Error],
-    ready: Long, running: Long, completed: Long)
-
+  sealed trait State {
+    def state: ExecutionState.ExecutionState
+  }
+  case class Failed(error: Error, state: ExecutionState.ExecutionState = ExecutionState.failed) extends State
+  case class Running(ready: Long, running: Long, completed: Long, state: ExecutionState.ExecutionState = ExecutionState.running) extends State
+  case class Finished(state: ExecutionState.ExecutionState = ExecutionState.finished) extends State
 }

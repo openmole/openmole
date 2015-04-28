@@ -85,9 +85,7 @@ package object evolution {
     def generation: Prototype[Int]
   }
 
-  case class GAPuzzle[+ALG <: GAAlgorithm](parameters: GAParameters[ALG], puzzle: Puzzle, output: Capsule) {
-    def map(f: Puzzle ⇒ Puzzle) = GAPuzzle[ALG](parameters, f(puzzle), output)
-  }
+  case class GAPuzzle[+ALG <: GAAlgorithm](parameters: GAParameters[ALG], puzzle: Puzzle, output: Capsule)
 
   private def components[ALG <: GAAlgorithm](
     name: String,
@@ -290,8 +288,9 @@ package object evolution {
     val gaPuzzle: GAPuzzle[ALG] =
       SteadyGA[ALG](algorithm)(
         fitness = fitness
-      ).map(
-          p ⇒ Capsule(MoleTask(p) set (_.setName(s"${name}IslandTask")))
+      ).copy(
+          puzzle =
+            Capsule(MoleTask(fitness) set (_.setName(s"${name}IslandTask")))
         )
 
     IslandGA[ALG](gaPuzzle)(

@@ -63,7 +63,7 @@ object RESTClient extends App {
 
   val id = client.start(token, script, Some(archive))
   println(id)
-  Iterator.continually(client.state(token, id.left.get.id)).takeWhile(_.left.get.state == running).foreach { s ⇒
+  Iterator.continually(client.state(token, id.left.get.id)).takeWhile(_.left.get.state == ExecutionState.running).foreach { s ⇒
     println(s)
     Thread.sleep(1000)
   }
@@ -119,7 +119,15 @@ trait Client {
         setParameter("id", id).build
     val post = new HttpPost(uri)
 
-    execute(post) { response ⇒ parse(response.content).extract[State] }
+    execute(post) { response ⇒
+      val json = parse(response.content)
+      json \ "state" match {
+        case JString(ExecutionState.failed)   ⇒ json.extract[Failed]
+        case JString(ExecutionState.running)  ⇒ json.extract[Running]
+        case JString(ExecutionState.finished) ⇒ json.extract[Finished]
+        case _                                ⇒ sys.error("Unexpected state in: " + json)
+      }
+    }
   }
 
   def output(token: String, id: String): Either[Output, HttpError] = {
