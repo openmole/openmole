@@ -54,16 +54,18 @@ class TreeNodePanel(rootNode: DirNode) {
     }
   }
 
-  val addRootDirButton = {
-    val content = Seq(TreeNodeType.folder, TreeNodeType.file)
-    Select("fileOrFolder", content, content.headOption, btn_success, glyph_folder_close)
-  }
-
   val rootDirInput: Input = bs.input("")(
     placeholder := "Folder name",
     width := "130px",
     autofocus
   ).render
+
+  val addRootDirButton: Select[TreeNodeType] = {
+    val content = Seq(TreeNodeType.folder, TreeNodeType.file)
+    Select("fileOrFolder", content, content.headOption, btn_success, glyph_folder_close, () ⇒ {
+      addRootDirButton.content().map { c ⇒ rootDirInput.placeholder = c.name + " name" }
+    })
+  }
 
   val view = tags.div(
     Rx {
