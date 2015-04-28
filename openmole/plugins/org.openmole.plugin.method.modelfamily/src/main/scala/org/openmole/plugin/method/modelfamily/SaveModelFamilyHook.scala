@@ -26,26 +26,26 @@ import org.openmole.plugin.hook.file._
 
 object SaveModelFamilyHook {
 
-  def apply(puzzle: GAPuzzle[ModelFamilyCalibration], dir: ExpandedString) = {
-    val fileName = dir + "/population${" + puzzle.generation.name + "}.csv"
+  def apply(parameters: GAParameters[ModelFamilyCalibration], dir: ExpandedString) = {
+    val fileName = dir + "/population${" + parameters.generation.name + "}.csv"
     new HookBuilder {
       def toHook =
-        new SaveModelFamilyHook(puzzle, fileName) with Built
+        new SaveModelFamilyHook(parameters, fileName) with Built
     }
   }
 }
 
-abstract class SaveModelFamilyHook(puzzle: GAPuzzle[ModelFamilyCalibration], path: ExpandedString) extends Hook {
+abstract class SaveModelFamilyHook(parameters: GAParameters[ModelFamilyCalibration], path: ExpandedString) extends Hook {
 
-  def mf = puzzle.parameters.evolution
+  def mf = parameters.evolution
   def traitsHeader = mf.modelFamily.traits.map(_.getName).mkString(",")
   def headers = s"${traitsHeader},${mf.inputsPrototypes.map(_.name).mkString(",")},${mf.objectives.map(_.name).mkString(",")}"
 
   def process(context: Context, executionContext: ExecutionContext) = {
 
     def idArray: Array[Int] = context(mf.modelFamily.modelIdPrototype.toArray)
-    def inputsArray = puzzle.parameters.evolution.inputsPrototypes.map(p ⇒ context(p.toArray).toSeq).transpose
-    def outputsArray = puzzle.parameters.evolution.objectives.map(p ⇒ context(p.toArray).toSeq).transpose
+    def inputsArray = parameters.evolution.inputsPrototypes.map(p ⇒ context(p.toArray).toSeq).transpose
+    def outputsArray = parameters.evolution.objectives.map(p ⇒ context(p.toArray).toSeq).transpose
 
     lazy val combinations = mf.modelFamily.traitsCombinations.map(_.toSet)
 

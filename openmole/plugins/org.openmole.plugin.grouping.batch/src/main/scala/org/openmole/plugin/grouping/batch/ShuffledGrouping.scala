@@ -27,9 +27,9 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.core.tools.service._
 import Task._
 
-object InShuffledGrouping {
+object ShuffledGrouping {
 
-  def apply(numberOfBatch: Int) = new InShuffledGrouping(numberOfBatch)
+  def apply(numberOfBatch: Int) = new ShuffledGrouping(numberOfBatch)
 
 }
 
@@ -39,7 +39,7 @@ object InShuffledGrouping {
  *
  * @param numberOfBatch total number of groups
  */
-class InShuffledGrouping(numberOfBatch: Int) extends Grouping {
+class ShuffledGrouping(numberOfBatch: Int) extends Grouping {
 
   override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup =
     new MoleJobGroup(newRNG(context(openMOLESeed)).nextInt(numberOfBatch))
