@@ -147,7 +147,7 @@ object Forms {
   def button(content: TypedTag[HTMLElement]): TypedTag[HTMLButtonElement] = button(content, btn_default)(span(" "))
 
   def glyphButton(text: String, buttonCB: ClassKeyAggregator, glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLSpanElement] =
-    tags.span(cursor := "pointer", `class` := "btn " + buttonCB.key, `type` := "button")(tags.span(glyph(glyCA)))(text)(onclick := {
+    tags.span(cursor := "pointer", `class` := "btn " + buttonCB.key, `type` := "button")(glyph(glyCA))(text)(onclick := {
       () ⇒ todo()
     })
 

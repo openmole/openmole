@@ -6,7 +6,7 @@ import org.openmole.gui.misc.js.Forms._
 import org.scalajs.dom.html.{ Input, UList }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs, Select }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -37,36 +37,27 @@ object TreeNodePanel {
 
   def apply(dirNode: DirNode): TreeNodePanel = new TreeNodePanel(dirNode)
 
-  def computeAllSons(dn: DirNode): Unit = {
-    sons(dn).foreach { sons ⇒
-      dn.sons() = sons
-      dn.sons().foreach { tn ⇒
-        tn match {
-          case (d: DirNode) ⇒
-            computeAllSons(d)
-          case _ ⇒
-        }
-      }
-    }
-  }
-
   def sons(dirNode: DirNode) = Post[Api].listFiles(dirNode).call()
 
 }
 
 import TreeNodePanel._
 
-class TreeNodePanel(_dirNode: DirNode) {
+class TreeNodePanel(rootNode: DirNode) {
 
-  val rootNode: Var[DirNode] = Var(_dirNode)
-  val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode()))
+  val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode))
+  val toBeRefreshed: Var[Option[DirNode]] = Var(Some(rootNode))
 
-  computeAllSons(_dirNode)
+  Rx {
+    toBeRefreshed().map {
+      refreshAfterTreeChange
+    }
+  }
 
-  val addRootDirButton =
-    bs.glyphButton(" New", btn_success, glyph_folder_close, () ⇒ {
-      rootDirInput.value = ""
-    })(`type` := "submit")
+  val addRootDirButton = {
+    val content = Seq(TreeNodeType.folder, TreeNodeType.file)
+    Select("fileOrFolder", content, content.headOption, btn_success, glyph_folder_close)
+  }
 
   val rootDirInput: Input = bs.input("")(
     placeholder := "Folder name",
@@ -87,16 +78,23 @@ class TreeNodePanel(_dirNode: DirNode) {
     Rx {
       tags.form(id := "adddir")(
         inputGroup(navbar_left)(
-          inputGroupButton(addRootDirButton),
+          inputGroupButton(addRootDirButton.selector),
           rootDirInput
         ),
         onsubmit := { () ⇒
           {
-            val newDirName = rootDirInput.value
-            Post[Api].addRootDirectory(newDirName).call().foreach { b ⇒
-              if (b) rootNode().sons() = rootNode().sons() :+ DirNode(newDirName, Var(rootNode().canonicalPath() + "/" + newDirName))
-              computeAllSons(rootNode())
-              rootDirInput.value = ""
+            val newFile = rootDirInput.value
+            val currentDirNode = dirNodeLine().last
+            addRootDirButton.content().map {
+              _ match {
+                case dt: DirType ⇒ Post[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
+                  if (b) toBeRefreshed() = Some(currentDirNode)
+                }
+                case ft: FileType ⇒ Post[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
+                  println("finished file")
+                  if (b) toBeRefreshed() = Some(currentDirNode)
+                }
+              }
             }
           }
         })
@@ -107,6 +105,11 @@ class TreeNodePanel(_dirNode: DirNode) {
       }
     )
   )
+
+  def refreshAfterTreeChange(dn: DirNode) = {
+    computeAllSons(dn)
+    rootDirInput.value = ""
+  }
 
   def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(onclick := { () ⇒
     goToDirAction(dn)()
@@ -158,29 +161,22 @@ class TreeNodePanel(_dirNode: DirNode) {
       glyphSpan(glyph_edit, () ⇒ println("edit"))(id := "glyphedit", `class` := "glyphitem")
     )
 
-  /* (tn match {
-          case dn: DirNode ⇒
-            Seq(glyphSpan(glyph_trash, () ⇒ trashNode(dn)) /*,
-              glyphSpan(glyph_folder_close, () ⇒
-                Post[Api].addDirectory(dn, "TOTO").call().foreach {
-                  b ⇒
-                    if (b) reComputeAllSons(dn)
-                }),
-              glyphSpan(glyph_file, () ⇒
-                Post[Api].addFile(dn, "TOTO.scala").call().foreach {
-                  b ⇒
-                    if (b) reComputeAllSons(dn)
-                })*/
-            )
-          case fn: FileNode ⇒
-            Seq(glyphSpan(glyph_trash, () ⇒ trashNode(fn)))
-
-        }) :+ glyphSpan(glyph_edit, () ⇒ println("edit")): _*)*/
-
-  def trashNode(treeNode: TreeNode) =
-    Post[Api].deleteFile(treeNode).call().foreach {
-      _ ⇒
-        computeAllSons(rootNode())
+  def computeAllSons(dn: DirNode): Unit = {
+    sons(dn).foreach { sons ⇒
+      dn.sons() = sons
+      dn.sons().foreach { tn ⇒
+        tn match {
+          case (d: DirNode) ⇒
+            computeAllSons(d)
+          case _ ⇒
+        }
+      }
     }
+    toBeRefreshed() = None
+  }
+
+  def trashNode(treeNode: TreeNode) = Post[Api].deleteFile(treeNode).call().foreach { d ⇒
+    toBeRefreshed() = Some(dirNodeLine().last)
+  }
 
 }

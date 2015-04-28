@@ -82,7 +82,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
   val factorySelector: Select[FactoryUI] = Select("factories",
     filter().factories,
     currentDataBagUI(),
-    btn_primary, () ⇒ {
+    btn_primary, onclickExtra = () ⇒ {
       currentDataBagUI().map { db ⇒
         db.dataUI() = factorySelector.content().map { f ⇒
           //FIXME: I am sure, there is a better idea than a cast...

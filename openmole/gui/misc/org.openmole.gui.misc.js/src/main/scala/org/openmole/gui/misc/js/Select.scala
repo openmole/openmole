@@ -19,6 +19,7 @@ package org.openmole.gui.misc.js
 
 import rx._
 import scalatags.JsDom.all._
+import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
 
 object Select {
@@ -26,13 +27,15 @@ object Select {
                                                 contents: Seq[T],
                                                 default: Option[T],
                                                 key: ClassKeyAggregator = Forms.emptyCK,
-                                                onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, onclickExtra)
+                                                glyphicon: ClassKeyAggregator = Forms.emptyCK,
+                                                onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, glyphicon, onclickExtra)
 }
 
 class Select[T <: Displayable with Identifiable](autoID: String,
                                                  val contents: Var[Seq[T]],
                                                  default: Option[T] = None,
                                                  key: ClassKeyAggregator = Forms.emptyCK,
+                                                 glyphicon: ClassKeyAggregator = Forms.emptyCK,
                                                  onclickExtra: () ⇒ Unit = () ⇒ {}) {
 
   val content: Var[Option[T]] = Var(contents().size match {
@@ -48,6 +51,7 @@ class Select[T <: Displayable with Identifiable](autoID: String,
   val selector = Forms.buttonGroup()(
     a(
       `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", href := "#")(
+        bs.glyph(glyphicon),
         Rx {
           content().map {
             _.name

@@ -18,23 +18,34 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.ext.data.TreeNodeData
+import org.openmole.gui.misc.js.{ Identifiable, Displayable }
 import org.openmole.gui.misc.utils.Utils._
 import rx._
+
+sealed trait TreeNodeType {
+  val uuid: String = java.util.UUID.randomUUID.toString
+  val name: String
+}
+
+trait DirType extends TreeNodeType {
+  val name: String = " Folder"
+}
+
+trait FileType extends TreeNodeType {
+  val name: String = " File"
+}
+
+object TreeNodeType {
+  def file = new FileType {}
+  def folder = new DirType {}
+}
 
 sealed trait TreeNode {
   def name: Var[String]
 
   def canonicalPath: Var[String]
 
-  val selected: Var[Boolean] = Var(false)
-
   def hasSons: Boolean
-
-  def parent: Option[DirNode] = {
-    val parentSeqPath = canonicalPath().split("/").dropRight(1)
-    if (parentSeqPath.isEmpty) None
-    else Some(DirNode(parentSeqPath.mkString("/"), parentSeqPath.last))
-  }
 }
 
 object TreeNode {
