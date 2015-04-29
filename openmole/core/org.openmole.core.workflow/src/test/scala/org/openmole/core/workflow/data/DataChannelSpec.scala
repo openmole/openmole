@@ -17,6 +17,8 @@
 
 package org.openmole.core.workflow.data
 
+import java.util.concurrent.locks.ReentrantLock
+
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
@@ -37,23 +39,19 @@ class DataChannelSpec extends FlatSpec with Matchers {
   "A datachannel" should "enable variable values to be transmitted from a task to another" in {
     val p = Prototype[String]("p")
 
-    val t1 =
-      new TestTask {
-        val name = "Test write"
-        override val outputs = PrototypeSet(p)
-        override def process(context: Context) = context + (p -> "Test")
-      }
+    val t1 = TestTask { _ + (p -> "Test") }
+    t1 setName "Test write"
+    t1 addOutput p
 
     val t2 = EmptyTask()
 
-    val t3 = new TestTask {
-      val name = "Test read"
-      override val inputs = PrototypeSet(p)
-      override def process(context: Context) = {
+    val t3 =
+      TestTask { context ⇒
         context(p) should equal("Test")
         context
       }
-    }
+    t3 setName "Test read"
+    t3 addInput p
 
     val t1c = Capsule(t1)
     val t2c = Capsule(t2)
@@ -67,11 +65,9 @@ class DataChannelSpec extends FlatSpec with Matchers {
   "A data channel" should "be able to transmit the value to the multiple execution of an explored task" in {
 
     val j = Prototype[String]("j")
-    val tw = new TestTask {
-      val name = "Test write"
-      override def outputs = PrototypeSet(j)
-      override def process(context: Context) = context + (j -> "J")
-    }
+    val tw = TestTask { _ + (j -> "J") }
+    tw setName "Test write"
+    tw addOutput j
 
     val data = List("A", "B", "C")
     val i = Prototype[String]("i")
@@ -82,16 +78,16 @@ class DataChannelSpec extends FlatSpec with Matchers {
 
     val res = new ListBuffer[String]
 
-    val t = new TestTask {
-      val name = "Test"
-      override val inputs = PrototypeSet(i, j)
-      override def process(context: Context) = synchronized {
+    val t = TestTask { context ⇒
+      res.synchronized {
         context.contains(i) should equal(true)
         context.contains(j) should equal(true)
         res += context(i)
-        context
       }
+      context
     }
+    t setName "Test"
+    t addInput (i, j)
 
     val twc = Capsule(tw)
     val tc = Slot(t)

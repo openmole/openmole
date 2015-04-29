@@ -22,7 +22,7 @@ import org.openmole.core.workflow.sampling._
 
 import scala.util.Random
 
-class ExplicitSampling[T](prototype: Prototype[T], data: Iterable[T]) extends Sampling {
+case class ExplicitSampling[T](prototype: Prototype[T], data: Iterable[T]) extends Sampling {
   override def prototypes = List(prototype)
   override def build(context: ⇒ Context)(implicit rng: Random) = data.map { v ⇒ List(Variable(prototype, v)) }.iterator
 }

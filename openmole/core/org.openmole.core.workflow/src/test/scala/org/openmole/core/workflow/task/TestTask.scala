@@ -17,13 +17,15 @@
 
 package org.openmole.core.workflow.task
 
+import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 
-trait TestTask extends Task {
-  def inputs = PrototypeSet.empty
-  def outputs = PrototypeSet.empty
-  def defaults = DefaultSet.empty
-  def plugins = PluginSet.empty
+object TestTask {
+  def apply(f: Context ⇒ Context) = new TaskBuilder {
+    override def toTask: Task = new Task with Built {
+      override protected def process(context: Context): Context = f(context)
+    }
+  }
 }

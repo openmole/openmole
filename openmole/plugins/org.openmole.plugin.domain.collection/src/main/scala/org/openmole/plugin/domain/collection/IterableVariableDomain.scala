@@ -31,6 +31,6 @@ object IterableVariableDomain {
 }
 
 sealed class IterableVariableDomain[T](variable: Prototype[Iterable[_ <: T]]) extends Domain[T] with Discrete[T] {
-  override def inputs = PrototypeSet(variable)
+  override def inputs = Seq(variable)
   override def iterator(context: Context)(implicit rng: Random): Iterator[T] = context(variable).iterator
 }

@@ -34,6 +34,8 @@ import org.openmole.core.workflow.puzzle._
 import org.scalatest._
 import TopologyProblem.DataChannelNegativeLevelProblem
 
+import scala.reflect.macros.whitebox
+
 class ValidationSpec extends FlatSpec with Matchers {
 
   implicit val plugins = PluginSet.empty
@@ -128,12 +130,9 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "detect a missing input error due to datachannel filtering" in {
     val p = Prototype[String]("t")
 
-    val t1 =
-      new TestTask {
-        val name = "t1"
-        override def outputs = PrototypeSet(p)
-        override def process(context: Context) = Context(Variable(p, "test"))
-      }
+    val t1 = TestTask { _ + (p, "test") }
+    t1 setName "t1"
+    t1 addOutput p
 
     val t2 = EmptyTask()
     val t3 = EmptyTask()
@@ -178,12 +177,9 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "not detect a missing input" in {
     val p = Prototype[String]("t")
 
-    val t1 =
-      new TestTask {
-        val name = "t1"
-        override def outputs = PrototypeSet(p)
-        override def process(context: Context) = Context(Variable(p, "test"))
-      }
+    val t1 = TestTask { _ + (p, "test") }
+    t1 setName "t1"
+    t1 addOutput p
 
     val c1 = Capsule(t1)
 
@@ -204,12 +200,9 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "not detect a missing input when provided by the implicits" in {
     val p = Prototype[String]("t")
 
-    val t1 =
-      new TestTask {
-        val name = "t1"
-        override def outputs = PrototypeSet(p)
-        override def process(context: Context) = Context(Variable(p, "test"))
-      }
+    val t1 = TestTask { _ + (p, "test") }
+    t1 setName "t1"
+    t1 addOutput p
 
     val c1 = Capsule(t1)
 
@@ -435,6 +428,24 @@ class ValidationSpec extends FlatSpec with Matchers {
       case Some(IncoherentTypesBetweenSlots(_, _, _)) ⇒
       case _ ⇒ sys.error("Error should have been detected")
     }
+  }
+
+  "Workflow with exploration and strainer" should "be ok" in {
+    val pInt = Prototype[Int]("t")
+
+    val exploration = ExplorationTask(ExplicitSampling(pInt, (0 to 10)))
+
+    val t1 = EmptyTask()
+    t1 addInput pInt
+
+    val t2 = EmptyTask()
+    t2 addInput pInt
+
+    val puzzle = (Capsule(exploration, strainer = true) -< Capsule(t1, strainer = true) -- t2)
+
+    val ex = puzzle start
+
+    ex.waitUntilEnded
   }
 
 }

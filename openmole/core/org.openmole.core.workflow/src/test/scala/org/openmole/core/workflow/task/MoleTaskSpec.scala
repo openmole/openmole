@@ -47,11 +47,8 @@ class MoleTaskSpec extends FlatSpec with Matchers {
 
   "MoleTask" should "propagate errors" in {
 
-    val error = new TestTask {
-      val name = "error"
-      override def process(context: Context) =
-        throw new InternalProcessingError("Some error for test")
-    }
+    val error = TestTask { _ ⇒ throw new InternalProcessingError("Some error for test") }
+    error setName "error"
     val moleTask = MoleTask(error)
 
     val ex = moleTask.start

@@ -43,15 +43,15 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
 
     val res = new ListBuffer[String]
 
-    val t = new TestTask {
-      val name = "Test"
-      override def inputs = PrototypeSet(i)
-      override def process(context: Context) = synchronized {
+    val t = TestTask { context ⇒
+      res.synchronized {
         context.contains(i) should equal(true)
         res += context(i)
         context
       }
     }
+    t setName "Test"
+    t addInput i
 
     val ex = exc -< t
     ex.start.waitUntilEnded
@@ -69,15 +69,15 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
 
     val res = new ListBuffer[String]
 
-    val t = new TestTask {
-      val name = "Test"
-      override def inputs = PrototypeSet(i)
-      override def process(context: Context) = synchronized {
+    val t = TestTask { context ⇒
+      res.synchronized {
         context.contains(i) should equal(true)
         res += context(i)
         context
       }
     }
+    t setName "Test"
+    t addInput i
 
     (explo -< t).start.waitUntilEnded
     res.toArray.sorted.deep should equal(data.toArray.deep)

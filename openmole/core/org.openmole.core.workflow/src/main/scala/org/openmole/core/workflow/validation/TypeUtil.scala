@@ -51,8 +51,6 @@ object TypeUtil {
   def validTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ValidType] = computeTypes(mole, sources, hooks)(slot).collect { case x: ValidType ⇒ x }
 
   def computeTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ComputedType] = {
-    import ClassUtils._
-
     val (varNames, direct, toArray, fromArray) =
       computeTransmissions(mole, sources, hooks)(
         mole.inputTransitions(slot),
@@ -71,7 +69,7 @@ object TypeUtil {
             if (types.size == 1) ValidType(name, types.head, true)
             else InvalidType(name, d, t, Seq.empty)
           case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒ ValidType(name, f.asArray.fromArray, false)
-          case (d, t, f) ⇒ InvalidType(name, d, t, f)
+          case (d, t, f)                                   ⇒ InvalidType(name, d, t, f)
         }
     }
   }
@@ -83,7 +81,7 @@ object TypeUtil {
     val varNames = new HashSet[String]
 
     for (t ← transitions; d ← t.data(mole, sources, hooks)) {
-      def explored = Explore.explored(t.start)
+      def explored = ExplorationTask.explored(t.start)
       def setFromArray =
         if (explored(d)) fromArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
         else direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`

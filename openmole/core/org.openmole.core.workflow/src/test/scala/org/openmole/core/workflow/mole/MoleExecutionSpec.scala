@@ -61,15 +61,13 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
 
     val emptyC = Capsule(emptyT)
 
-    val testT = new TestTask {
-      val name = "Test"
-      override val inputs = PrototypeSet(i.toArray)
-      override def process(context: Context) = {
-        context.contains(i.toArray) should equal(true)
-        context(i.toArray).sorted.deep should equal(data.toArray.deep)
-        context
-      }
+    val testT = TestTask { context ⇒
+      context.contains(i.toArray) should equal(true)
+      context(i.toArray).sorted.deep should equal(data.toArray.deep)
+      context
     }
+    testT setName "Test"
+    testT addInput (i.toArray)
 
     val testC = Capsule(testT)
 

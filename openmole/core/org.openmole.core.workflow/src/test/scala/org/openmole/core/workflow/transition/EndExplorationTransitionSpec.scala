@@ -48,15 +48,13 @@ class EndExplorationTransitionSpec extends FlatSpec with Matchers {
 
     val emptyC = Capsule(emptyT)
 
-    val testT = new TestTask {
-      val name = "Test"
-      override def inputs = PrototypeSet(i)
-      override def process(context: Context) = {
-        context.contains(i) should equal(true)
-        endCapsExecuted += 1
-        context
-      }
+    val testT = TestTask { context ⇒
+      context.contains(i) should equal(true)
+      endCapsExecuted += 1
+      context
     }
+    testT setName "Test"
+    testT addInput i
 
     val testC = Capsule(testT)
 

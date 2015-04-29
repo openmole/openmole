@@ -17,30 +17,15 @@
 
 package org.openmole.core.workflow.data
 
-/**
- * It is a set of @link{Data}. It allows manipulating data by set instead of
- * individualy.
- */
-import scala.collection.{ TraversableLike, SetLike }
+import scala.collection.{ IterableLike, TraversableLike, SetLike }
 import scala.collection.immutable.TreeMap
 
 object PrototypeSet {
-
-  implicit def traversableOfPrototypesToPrototoypeSet(ps: Traversable[Prototype[_]]) = apply(ps)
-
-  val empty = PrototypeSet(List.empty)
-
-  def apply(ps: Traversable[Prototype[_]]): PrototypeSet =
-    new PrototypeSet {
-      val prototypes = ps.toIterable
-    }
-
-  def apply(d: Prototype[_]*): PrototypeSet = PrototypeSet(d)
+  implicit def traversableToProtoypeSet(ps: Traversable[Prototype[_]]) = PrototypeSet(ps.toSeq)
+  val empty = PrototypeSet(Seq.empty)
 }
 
-trait PrototypeSet extends Set[Prototype[_]] with SetLike[Prototype[_], PrototypeSet] with TraversableLike[Prototype[_], PrototypeSet] { self ⇒
-
-  def prototypes: Iterable[Prototype[_]]
+case class PrototypeSet(prototypes: Seq[Prototype[_]], explore: Set[String] = Set.empty) extends Iterable[Prototype[_]] { self ⇒
 
   @transient lazy val prototypeMap: Map[String, Prototype[_]] =
     TreeMap.empty[String, Prototype[_]] ++ prototypes.map { d ⇒ (d.name, d) }
@@ -62,20 +47,25 @@ trait PrototypeSet extends Set[Prototype[_]] with SetLike[Prototype[_], Prototyp
    */
   def contains(name: String): Boolean = prototypeMap.contains(name)
 
-  override def empty = PrototypeSet.empty
+  //override def empty = PrototypeSet.empty
 
-  override def iterator: Iterator[Prototype[_]] = prototypeMap.values.iterator
+  override def iterator: Iterator[Prototype[_]] = prototypes.iterator
 
-  def ++(d: Traversable[Prototype[_]]) = PrototypeSet(d.toList ::: prototypes.toList)
+  def ++(d: Traversable[Prototype[_]]) = copy(prototypes = d.toList ::: prototypes.toList)
 
-  def +(set: PrototypeSet): PrototypeSet = PrototypeSet(set.prototypes.toList ::: prototypes.toList)
+  def +(set: PrototypeSet): PrototypeSet = copy(prototypes = set.prototypes.toList ::: prototypes.toList)
 
-  def +(d: Prototype[_]) = PrototypeSet(d :: prototypes.toList)
+  def +(d: Prototype[_]) = copy(prototypes = d :: prototypes.toList)
 
-  def -(d: Prototype[_]) = PrototypeSet((prototypeMap - d.name).map { _._2 }.toList)
+  def -(d: Prototype[_]) = copy(prototypes = prototypes.filter(_.name != d.name).toList)
 
-  override def contains(data: Prototype[_]) = prototypeMap.contains(data.name)
+  def --(d: Traversable[Prototype[_]]) = {
+    val dset = d.map(_.name).toSet
+    copy(prototypes = prototypes.filter(p ⇒ !dset.contains(p.name)).toList)
+  }
 
-  def toMap = map(d ⇒ d.name -> d).toMap[String, Prototype[_]]
+  def contains(data: Prototype[_]) = prototypeMap.contains(data.name)
+
+  def toMap = prototypeMap
 
 }
