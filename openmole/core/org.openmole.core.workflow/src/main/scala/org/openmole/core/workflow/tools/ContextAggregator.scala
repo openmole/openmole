@@ -22,23 +22,23 @@ import org.openmole.core.workflow.data._
 
 object ContextAggregator {
 
-  def aggregate(aggregate: DataSet, toArray: PartialFunction[String, PrototypeType[_]], toAggregateList: Iterable[Variable[_]]): Context = {
+  def aggregate(aggregate: PrototypeSet, toArray: PartialFunction[String, PrototypeType[_]], toAggregateList: Iterable[Variable[_]]): Context = {
     val toAggregate = toAggregateList.groupBy(_.prototype.name)
 
     aggregate.foldLeft(List.empty[Variable[_]]) {
       case (acc, d) ⇒
-        val merging = if (toAggregate.isDefinedAt(d.prototype.name)) toAggregate(d.prototype.name) else Iterable.empty
+        val merging = if (toAggregate.isDefinedAt(d.name)) toAggregate(d.name) else Iterable.empty
 
-        if (toArray.isDefinedAt(d.prototype.name)) {
-          val `type` = toArray(d.prototype.name)
+        if (toArray.isDefinedAt(d.name)) {
+          val `type` = toArray(d.name)
 
           val array = `type`.manifest.newArray(merging.size)
           merging.zipWithIndex.foreach { e ⇒ java.lang.reflect.Array.set(array, e._2, e._1.value) }
-          Variable(Prototype(d.prototype.name)(`type`.toArray).asInstanceOf[Prototype[Any]], array) :: acc
+          Variable(Prototype(d.name)(`type`.toArray).asInstanceOf[Prototype[Any]], array) :: acc
         }
         else if (!merging.isEmpty) {
-          if (merging.size > 1) throw new InternalProcessingError("Variable " + d.prototype + " has been found multiple times, it doesn't match data flow specification, " + toAggregateList)
-          Variable(d.prototype.asInstanceOf[Prototype[Any]], merging.head.value) :: acc
+          if (merging.size > 1) throw new InternalProcessingError("Variable " + d + " has been found multiple times, it doesn't match data flow specification, " + toAggregateList)
+          Variable.unsecure(d, merging.head.value) :: acc
         }
         else acc
     }.toContext

@@ -32,17 +32,19 @@ object ExplorationTask {
     new TaskBuilder { builder ⇒
 
       addInput(sampling.inputs.toSeq: _*)
-      addOutput(sampling.prototypes.map { p ⇒ Data(p, Explore).toArray }.toSeq: _*)
+      addOutput(sampling.prototypes.toSeq.map(_.toArray): _*)
 
       def toTask =
-        new ExplorationTask(sampling) with builder.Built
+        new ExplorationTask(sampling) with builder.Built {
+          val explored = sampling.prototypes.map(_.name).toSet
+        }
 
     }
   }
 
 }
 
-abstract class ExplorationTask(val sampling: Sampling) extends Task {
+abstract class ExplorationTask(val sampling: Sampling) extends Task with Explore {
 
   //If input prototype as the same name as the output it is erased
   override protected def process(context: Context) = {

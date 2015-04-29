@@ -25,6 +25,7 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.scalatest._
+import org.openmole.core.workflow.puzzle._
 
 class TransitionSpec extends FlatSpec with Matchers {
 
@@ -33,13 +34,13 @@ class TransitionSpec extends FlatSpec with Matchers {
 
     val t1 = new TestTask {
       val name = "Test write"
-      override def outputs = DataSet(p)
+      override def outputs = PrototypeSet(p)
       override def process(context: Context) = context + (p -> "Test")
     }
 
     val t2 = new TestTask {
       val name = "Test read"
-      override def inputs = DataSet(p)
+      override def inputs = PrototypeSet(p)
       override def process(context: Context) = {
         context(p) should equal("Test")
         context
@@ -60,19 +61,19 @@ class TransitionSpec extends FlatSpec with Matchers {
 
     val t1 = new TestTask {
       val name = "Test write 1"
-      override def outputs = DataSet(p1)
+      override def outputs = PrototypeSet(p1)
       override def process(context: Context) = context + (p1 -> "Test1")
     }
 
     val t2 = new TestTask {
       val name = "Test write 2"
-      override def outputs = DataSet(p2)
+      override def outputs = PrototypeSet(p2)
       override def process(context: Context) = context + (p2 -> "Test2")
     }
 
     val t3 = new TestTask {
       val name = "Test read"
-      override def inputs = DataSet(p1, p2)
+      override def inputs = PrototypeSet(p1, p2)
       override def process(context: Context) = {
         context(p1) should equal("Test1")
         context(p2) should equal("Test2")
@@ -100,19 +101,19 @@ class TransitionSpec extends FlatSpec with Matchers {
 
     val t1 = new TestTask {
       val name = "Test write 1 conjonctive"
-      override def outputs = DataSet(p1)
+      override def outputs = PrototypeSet(p1)
       override def process(context: Context) = context + (p1 -> "Test1")
     }
 
     val t2 = new TestTask {
       val name = "Test write 2 conjonctive"
-      override def outputs = DataSet(p2)
+      override def outputs = PrototypeSet(p2)
       override def process(context: Context) = context + (p2 -> "Test2")
     }
 
     val t3 = new TestTask {
       val name = "Test read conjonctive"
-      override def inputs = DataSet(p1, p2.toArray)
+      override def inputs = PrototypeSet(p1, p2.toArray)
       override def process(context: Context) = {
         context(p1) should equal("Test1")
         context(p2.toArray).head should equal("Test2")

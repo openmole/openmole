@@ -36,7 +36,7 @@ class HookSpec extends FlatSpec with Matchers {
 
     val t1 = new TestTask {
       val name = "Test"
-      override val outputs = DataSet(p)
+      override val outputs = PrototypeSet(p)
       override def process(context: Context) = context + (p -> "test")
     }
 
@@ -67,7 +67,7 @@ class HookSpec extends FlatSpec with Matchers {
 
     val t1 = new TestTask {
       val name = "Test"
-      override val outputs = DataSet(p)
+      override val outputs = PrototypeSet(p)
       override def process(context: Context) = context + (p -> "test")
 
     }

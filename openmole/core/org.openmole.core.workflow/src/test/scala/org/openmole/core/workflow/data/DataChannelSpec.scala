@@ -18,13 +18,13 @@
 package org.openmole.core.workflow.data
 
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.puzzle._
 
 import org.scalatest._
 import org.scalatest.junit._
@@ -40,7 +40,7 @@ class DataChannelSpec extends FlatSpec with Matchers {
     val t1 =
       new TestTask {
         val name = "Test write"
-        override val outputs = DataSet(p)
+        override val outputs = PrototypeSet(p)
         override def process(context: Context) = context + (p -> "Test")
       }
 
@@ -48,7 +48,7 @@ class DataChannelSpec extends FlatSpec with Matchers {
 
     val t3 = new TestTask {
       val name = "Test read"
-      override val inputs = DataSet(p)
+      override val inputs = PrototypeSet(p)
       override def process(context: Context) = {
         context(p) should equal("Test")
         context
@@ -69,7 +69,7 @@ class DataChannelSpec extends FlatSpec with Matchers {
     val j = Prototype[String]("j")
     val tw = new TestTask {
       val name = "Test write"
-      override def outputs = DataSet(j)
+      override def outputs = PrototypeSet(j)
       override def process(context: Context) = context + (j -> "J")
     }
 
@@ -84,7 +84,7 @@ class DataChannelSpec extends FlatSpec with Matchers {
 
     val t = new TestTask {
       val name = "Test"
-      override val inputs = DataSet(i, j)
+      override val inputs = PrototypeSet(i, j)
       override def process(context: Context) = synchronized {
         context.contains(i) should equal(true)
         context.contains(j) should equal(true)

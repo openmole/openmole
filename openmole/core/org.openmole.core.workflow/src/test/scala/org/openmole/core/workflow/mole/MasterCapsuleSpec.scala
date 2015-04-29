@@ -30,6 +30,7 @@ import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.puzzle._
 
 class MasterCapsuleSpec extends FlatSpec with Matchers {
 
@@ -40,13 +41,13 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val t1 = new TestTask {
       val name = "Test write"
-      override val outputs = DataSet(p)
+      override val outputs = PrototypeSet(p)
       override def process(context: Context) = context + (p -> "Test")
     }
 
     val t2 = new TestTask {
       val name = "Test read"
-      override val inputs = DataSet(p)
+      override val inputs = PrototypeSet(p)
       override def process(context: Context) = {
         context(p) should equal("Test")
         context
@@ -76,8 +77,8 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val select = new TestTask {
       val name = "select"
-      override val inputs = DataSet(n, i)
-      override val outputs = DataSet(n, i)
+      override val inputs = PrototypeSet(n, i)
+      override val outputs = PrototypeSet(n, i)
       override val defaults = DefaultSet(Default(n, 0))
       override def process(context: Context) = {
         val nVal = context(n)
@@ -119,8 +120,8 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val select = new TestTask {
       val name = "select"
-      override val inputs = DataSet(archive, i)
-      override val outputs = DataSet(archive, i)
+      override val inputs = PrototypeSet(archive, i)
+      override val outputs = PrototypeSet(archive, i)
       override val defaults = DefaultSet(Default(archive, Array.empty[Int]))
       override def process(context: Context) = {
         context.contains(archive) should equal(true)
@@ -133,7 +134,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val finalTask = new TestTask {
       val name = "final"
-      override val inputs = DataSet(archive)
+      override val inputs = PrototypeSet(archive)
       override def process(context: Context) = {
         context.contains(archive) should equal(true)
         context(archive).size should equal(1)

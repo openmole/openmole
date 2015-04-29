@@ -28,6 +28,6 @@ object VariableDomain {
 }
 
 sealed class VariableDomain[A](val variable: Prototype[Array[A]]) extends Domain[A] with Discrete[A] with Finite[A] {
-  override def inputs = DataSet(variable)
+  override def inputs = PrototypeSet(variable)
   override def computeValues(context: Context)(implicit rng: Random): Iterable[A] = context(variable)
 }

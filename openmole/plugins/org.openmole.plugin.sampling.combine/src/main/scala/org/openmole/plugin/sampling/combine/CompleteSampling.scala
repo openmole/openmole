@@ -29,7 +29,7 @@ object CompleteSampling {
 
 class CompleteSampling(val samplings: Sampling*) extends Sampling {
 
-  override def inputs = DataSet.empty ++ samplings.flatMap { _.inputs }
+  override def inputs = PrototypeSet.empty ++ samplings.flatMap { _.inputs }
   override def prototypes: Iterable[Prototype[_]] = samplings.flatMap { _.prototypes }
 
   override def build(context: ⇒ Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =

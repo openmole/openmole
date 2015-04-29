@@ -28,12 +28,9 @@ import scala.reflect.runtime.universe._
 
 package data {
 
-  import scala.reflect.ClassTag
-
   trait DataPackage {
 
     implicit def prototypeToStringConverter(p: Prototype[_]) = p.name
-    implicit def dataToStringConverter(d: Data[_]) = d.prototype.name
 
     implicit class PrototypeTypeDecorator[T](p: PrototypeType[T]) {
       def toArray = PrototypeType[Array[T]](p.manifest.toArray)
@@ -65,11 +62,6 @@ package data {
 
     implicit class PrototypeFromArrayDecorator[T](prototype: Prototype[Array[T]]) {
       def fromArray: Prototype[T] = Prototype(prototype.name)(prototype.`type`.fromArray)
-
-    }
-
-    implicit def dataToArrayDecorator[T](data: Data[T]) = new {
-      def toArray: Data[Array[T]] = Data[Array[T]](data.prototype.toArray, data.mode)
     }
 
     implicit def decorateVariableIterable(variables: Traversable[Variable[_]]) = new {

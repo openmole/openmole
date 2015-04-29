@@ -23,6 +23,7 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.EmptyTask
 import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.puzzle._
 import org.scalatest._
 
 class StrainerCapsuleSpec extends FlatSpec with Matchers {
@@ -32,7 +33,7 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
     val t1 = new TestTask {
       val name = "Test write"
-      override def outputs = DataSet(p)
+      override def outputs = PrototypeSet(p)
       override def process(context: Context) = context + (p -> "Test")
     }
 
@@ -40,7 +41,7 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
     val t2 = new TestTask {
       val name = "Test read"
-      override def inputs = DataSet(p)
+      override def inputs = PrototypeSet(p)
       override def process(context: Context) = {
         context(p) should equal("Test")
         context
@@ -62,7 +63,7 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
     val t1 = new TestTask {
       val name = "Test write"
-      override def outputs = DataSet(p)
+      override def outputs = PrototypeSet(p)
       override def process(context: Context) = context + (p -> "Test")
     }
 
@@ -73,7 +74,7 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
     val t2 = new TestTask {
       val name = "Test read"
-      override def inputs = DataSet(p)
+      override def inputs = PrototypeSet(p)
       override def process(context: Context) = {
         context(p) should equal("Test")
         context

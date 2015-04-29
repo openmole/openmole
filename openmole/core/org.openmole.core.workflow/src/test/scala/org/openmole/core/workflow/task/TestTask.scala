@@ -22,8 +22,8 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 
 trait TestTask extends Task {
-  def inputs = DataSet.empty
-  def outputs = DataSet.empty
+  def inputs = PrototypeSet.empty
+  def outputs = PrototypeSet.empty
   def defaults = DefaultSet.empty
   def plugins = PluginSet.empty
 }

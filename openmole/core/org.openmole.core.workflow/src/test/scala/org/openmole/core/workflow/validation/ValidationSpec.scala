@@ -29,6 +29,7 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.puzzle._
 
 import org.scalatest._
 import TopologyProblem.DataChannelNegativeLevelProblem
@@ -51,7 +52,7 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
     errors.headOption match {
-      case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
+      case Some(MissingInput(_, d)) ⇒ assert(d == p)
       case _                        ⇒ sys.error("Error should have been detected")
     }
   }
@@ -90,7 +91,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
     errors.headOption match {
       case Some(WrongType(_, d, t)) ⇒
-        assert(d.prototype == pString)
+        assert(d == pString)
         assert(t == pInt)
       case _ ⇒ sys.error("Error should have been detected")
     }
@@ -130,7 +131,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val t1 =
       new TestTask {
         val name = "t1"
-        override def outputs = DataSet(p)
+        override def outputs = PrototypeSet(p)
         override def process(context: Context) = Context(Variable(p, "test"))
       }
 
@@ -147,7 +148,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
 
     errors.headOption match {
-      case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
+      case Some(MissingInput(_, d)) ⇒ assert(d == p)
       case _                        ⇒ sys.error("Error should have been detected")
     }
   }
@@ -168,7 +169,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val errors = Validation(Mole(mt))
 
     errors.headOption match {
-      case Some(MoleTaskDataFlowProblem(_, MissingInput(_, d))) ⇒ assert(d.prototype == p)
+      case Some(MoleTaskDataFlowProblem(_, MissingInput(_, d))) ⇒ assert(d == p)
       case _ ⇒ sys.error("Error should have been detected")
     }
 
@@ -180,7 +181,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val t1 =
       new TestTask {
         val name = "t1"
-        override def outputs = DataSet(p)
+        override def outputs = PrototypeSet(p)
         override def process(context: Context) = Context(Variable(p, "test"))
       }
 
@@ -206,7 +207,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val t1 =
       new TestTask {
         val name = "t1"
-        override def outputs = DataSet(p)
+        override def outputs = PrototypeSet(p)
         override def process(context: Context) = Context(Variable(p, "test"))
       }
 

@@ -20,9 +20,9 @@ import org.openmole.core.workflow.data._
 
 trait InputBuilder { builder ⇒
 
-  private var _inputs = DataSet.empty
+  private var _inputs = PrototypeSet.empty
 
-  def addInput(d: Data[_]*): this.type = { _inputs ++= d; this }
+  def addInput(d: Prototype[_]*): this.type = { _inputs ++= d; this }
 
   def inputs = _inputs
 

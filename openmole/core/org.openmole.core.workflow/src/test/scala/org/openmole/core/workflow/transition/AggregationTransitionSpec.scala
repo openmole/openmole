@@ -28,6 +28,7 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.puzzle._
 
 import org.scalatest._
 import scala.collection.mutable.ListBuffer
@@ -56,7 +57,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val testT = new TestTask {
       val name = "Test"
-      override def inputs = DataSet(i.toArray)
+      override def inputs = PrototypeSet(i.toArray)
       override def process(context: Context) = {
         context.contains(i.toArray) should equal(true)
         context(i.toArray).sorted.deep should equal(data.toArray.deep)
@@ -93,7 +94,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val testT = new TestTask {
       val name = "Test"
-      override val inputs = DataSet(i.toArray)
+      override val inputs = PrototypeSet(i.toArray)
       override def process(context: Context) = {
         context.contains(i.toArray) should equal(true)
 
@@ -130,7 +131,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val testT = new TestTask {
       val name = "Test"
-      override val inputs = DataSet(i.toArray)
+      override val inputs = PrototypeSet(i.toArray)
       override def process(context: Context) = {
         context.contains(i.toArray) should equal(true)
         context(i.toArray).sorted.deep should equal(data.toArray.deep)
@@ -158,8 +159,8 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val run = new TestTask {
       val name = "Run"
-      override val inputs = DataSet(i)
-      override val outputs = DataSet(i)
+      override val inputs = PrototypeSet(i)
+      override val outputs = PrototypeSet(i)
       override def process(context: Context) = {
         if (context(i) == 42) throw new InternalProcessingError("Some error for test")
         context
@@ -168,7 +169,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val test = new TestTask {
       val name = "Test"
-      override val inputs = DataSet(i.toArray)
+      override val inputs = PrototypeSet(i.toArray)
       override def process(context: Context) = {
         endCapsExecuted.incrementAndGet()
         context

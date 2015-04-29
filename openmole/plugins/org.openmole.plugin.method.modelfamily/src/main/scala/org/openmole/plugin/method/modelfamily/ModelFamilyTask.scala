@@ -51,8 +51,8 @@ abstract class ModelFamilyTask(val modelFamily: ModelFamily) extends Task { t �
 
   @transient lazy val family = new FModelFamily {
     def imports: Seq[String] = modelFamily.imports
-    def inputs = modelFamily.inputs.toSeq.map(d ⇒ d.prototype: TypedValue)
-    def outputs = modelFamily.outputs.toSeq.map(d ⇒ d.prototype: TypedValue)
+    def inputs = modelFamily.inputs.toSeq.map(d ⇒ d: TypedValue)
+    def outputs = modelFamily.outputs.toSeq.map(d ⇒ d: TypedValue)
     def attributes = modelFamily.attributes.map(d ⇒ d.prototype: TypedValue)
     def combination: Combination[Class[_]] = modelFamily.combination
     def compile(code: String): Try[Any] = compilation.compile(code)

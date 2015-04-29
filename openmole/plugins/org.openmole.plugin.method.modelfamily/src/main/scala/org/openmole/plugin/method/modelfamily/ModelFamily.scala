@@ -20,10 +20,10 @@ package org.openmole.plugin.method.modelfamily
 import java.io.File
 
 import org.openmole.core.serializer.plugin.Plugins
-import org.openmole.core.workflow.builder.{ OutputBuilder, InputBuilder, InputOutputBuilder, Builder }
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task.{ Task, PluginSet }
-import org.openmole.core.workflow.tools.{ InputOutputCheck, FromContext, ExpandedString }
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools._
 import org.openmole.plugin.method.evolution.Scalar
 import org.openmole.plugin.task.scala._
 
@@ -91,8 +91,8 @@ class ModelFamilyBuilder(val source: ExpandedString, val combination: Combinatio
 
 trait ModelFamily <: Plugins { f ⇒
 
-  def inputs: DataSet
-  def outputs: DataSet
+  def inputs: PrototypeSet
+  def outputs: PrototypeSet
   def imports: Seq[String]
   def source: ExpandedString
   def traits: Seq[Class[_]] = combination.components

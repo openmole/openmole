@@ -25,8 +25,8 @@ object Hook {
 }
 
 trait Hook <: InputOutputCheck {
-  def inputs: DataSet
-  def outputs: DataSet
+  def inputs: PrototypeSet
+  def outputs: PrototypeSet
   def defaults: DefaultSet
   def perform(context: Context, executionContext: ExecutionContext): Context = perform(context, process(_, executionContext))
   protected def process(context: Context, executionContext: ExecutionContext): Context

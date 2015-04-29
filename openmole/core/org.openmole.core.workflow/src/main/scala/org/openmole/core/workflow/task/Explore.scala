@@ -14,19 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.workflow.builder
+package org.openmole.core.workflow.task
 
-import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.data.Prototype
+import org.openmole.core.workflow.mole.Capsule
 
-trait OutputBuilder { builder ⇒
-  private var _outputs = PrototypeSet.empty
+object Explore {
 
-  def addOutput(d: Prototype[_]*): this.type = { _outputs ++= d; this }
+  def explored(c: Capsule) =
+    (p: Prototype[_]) ⇒ {
+      def souldBeExplored =
+        c.task match {
+          case ex: Explore ⇒ ex.explored.contains(p.name)
+          case _           ⇒ false
+        }
 
-  def outputs = _outputs
+      p.`type`.isArray && souldBeExplored
+    }
+}
 
-  trait Built {
-    def outputs = builder.outputs
-  }
-
+trait Explore {
+  def explored: Set[String]
 }

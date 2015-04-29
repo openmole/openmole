@@ -21,6 +21,7 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.tools.obj.ClassUtils
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.tools.obj._
 
@@ -84,25 +85,26 @@ object TypeUtil {
     val varNames = new HashSet[String]
 
     for (t ← transitions; d ← t.data(mole, sources, hooks)) {
+      def explored = Explore.explored(t.start)
       def setFromArray =
-        if (d.mode is Explore) fromArray.getOrElseUpdate(d.prototype.name, new ListBuffer[PrototypeType[_]]) += d.prototype.`type`
-        else direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+        if (explored(d)) fromArray.getOrElseUpdate(d.name, new ListBuffer[PrototypeType[_]]) += d.`type`
+        else direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
 
-      varNames += d.prototype.name
+      varNames += d.name
 
       t match {
         case _: IAggregationTransition ⇒
-          toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+          toArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
         case _: IExplorationTransition ⇒ setFromArray
         case _: ISlaveTransition       ⇒ setFromArray
-        case _                         ⇒ direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+        case _                         ⇒ direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
       }
     }
 
     for (dc ← dataChannels; d ← dc.data(mole, sources, hooks)) {
-      varNames += d.prototype.name
-      if (DataChannel.levelDelta(mole)(dc) >= 0) direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
-      else toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+      varNames += d.name
+      if (DataChannel.levelDelta(mole)(dc) >= 0) direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
+      else toArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
     }
     (varNames.toSet, direct.toMap, toArray.toMap, fromArray.toMap)
   }

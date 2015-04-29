@@ -105,7 +105,7 @@ class DataChannel(
    * @return the transmitted data
    */
   def data(mole: Mole, sources: Sources, hooks: Hooks) =
-    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.prototype.name))
+    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.name))
 
   def levelDelta(mole: Mole): Int = DataChannel.levelDelta(mole)(this)
 

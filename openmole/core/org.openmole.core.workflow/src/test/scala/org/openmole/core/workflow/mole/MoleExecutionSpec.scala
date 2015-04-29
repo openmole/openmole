@@ -18,8 +18,6 @@
 package org.openmole.core.workflow.mole
 
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.data._
@@ -28,6 +26,7 @@ import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.puzzle._
 
 import org.scalatest._
 import org.scalatest.junit._
@@ -64,7 +63,7 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
 
     val testT = new TestTask {
       val name = "Test"
-      override val inputs = DataSet(i.toArray)
+      override val inputs = PrototypeSet(i.toArray)
       override def process(context: Context) = {
         context.contains(i.toArray) should equal(true)
         context(i.toArray).sorted.deep should equal(data.toArray.deep)

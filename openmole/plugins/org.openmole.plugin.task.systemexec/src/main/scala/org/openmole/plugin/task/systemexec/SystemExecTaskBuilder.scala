@@ -83,7 +83,7 @@ class SystemExecTaskBuilder(commands: String*) extends ExternalTaskBuilder { bui
 
   def toTask =
     new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
-      override val outputs: DataSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
+      override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
     }
 
 }

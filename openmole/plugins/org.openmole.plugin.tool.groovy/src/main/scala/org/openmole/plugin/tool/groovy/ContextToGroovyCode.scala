@@ -19,9 +19,9 @@ package org.openmole.plugin.tool.groovy
 
 import groovy.lang.Binding
 import java.io.File
+import org.apache.commons.lang.ClassUtils
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.tools.script.GroovyProxyPool
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 
@@ -36,25 +36,26 @@ trait ContextToGroovyCode {
 
   def execute(context: Context): Object = editorPool.execute(context.toBinding)
 
-  def execute(context: Context, output: DataSet): Context = {
+  def execute(context: Context, output: PrototypeSet): Context = {
     val binding = context.toBinding
     execute(binding)
     fetchVariables(context, output, binding)
   }
 
-  def fetchVariables(context: Context, output: DataSet, binding: Binding): Context = {
+  def fetchVariables(context: Context, output: PrototypeSet, binding: Binding): Context = {
     val variables = binding.getVariables
-    Context.empty ++ output.flatMap {
+    output.prototypes.flatMap {
       data ⇒
-        val out = data.prototype
-
-        variables.get(out.name) match {
+        variables.get(data.name) match {
           case null ⇒ None
           case value ⇒
-            if (out.accepts(value)) Some(Variable(out.asInstanceOf[Prototype[Any]], value))
-            else throw new InternalProcessingError("Variable " + out.name + " of type " + value.asInstanceOf[AnyRef].getClass.getName + " has been found at the end of the execution of the groovy code but type doesn't match : " + out.`type` + ".")
+            if (data.accepts(value)) Some(Variable(data.asInstanceOf[Prototype[Any]], value))
+            else {
+              def valueType = Option(value).map(_.getClass.getName)
+              throw new InternalProcessingError(s"Variable $data has been found at the end of the execution of the groovy code but type doesn't match : " + valueType.getOrElse(null) + ".")
+            }
         }
-    }
+    }.toContext
   }
 
 }

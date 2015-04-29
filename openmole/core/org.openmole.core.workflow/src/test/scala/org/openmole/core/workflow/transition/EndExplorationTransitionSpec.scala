@@ -26,6 +26,7 @@ import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.scalatest._
 import scala.collection.mutable.ListBuffer
+import org.openmole.core.workflow.puzzle._
 
 class EndExplorationTransitionSpec extends FlatSpec with Matchers {
 
@@ -49,7 +50,7 @@ class EndExplorationTransitionSpec extends FlatSpec with Matchers {
 
     val testT = new TestTask {
       val name = "Test"
-      override def inputs = DataSet(i)
+      override def inputs = PrototypeSet(i)
       override def process(context: Context) = {
         context.contains(i) should equal(true)
         endCapsExecuted += 1
