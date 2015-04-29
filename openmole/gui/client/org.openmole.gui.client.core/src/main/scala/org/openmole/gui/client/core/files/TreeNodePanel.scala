@@ -47,6 +47,7 @@ class TreeNodePanel(rootNode: DirNode) {
 
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode))
   val toBeRefreshed: Var[Option[DirNode]] = Var(Some(rootNode))
+  val toBeEdited: Var[Option[TreeNode]] = Var(None)
 
   Rx {
     toBeRefreshed().map {
@@ -54,8 +55,14 @@ class TreeNodePanel(rootNode: DirNode) {
     }
   }
 
-  val rootDirInput: Input = bs.input("")(
+  val newNodeInput: Input = bs.input("")(
     placeholder := "Folder name",
+    width := "130px",
+    autofocus
+  ).render
+
+  val editNodeInput: Input = bs.input("")(
+    placeholder := "Name",
     width := "130px",
     autofocus
   ).render
@@ -63,7 +70,7 @@ class TreeNodePanel(rootNode: DirNode) {
   val addRootDirButton: Select[TreeNodeType] = {
     val content = Seq(TreeNodeType.folder, TreeNodeType.file)
     Select("fileOrFolder", content, content.headOption, btn_success, glyph_folder_close, () ⇒ {
-      addRootDirButton.content().map { c ⇒ rootDirInput.placeholder = c.name + " name" }
+      addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
     })
   }
 
@@ -81,11 +88,11 @@ class TreeNodePanel(rootNode: DirNode) {
       tags.form(id := "adddir")(
         inputGroup(navbar_left)(
           inputGroupButton(addRootDirButton.selector),
-          rootDirInput
+          newNodeInput
         ),
         onsubmit := { () ⇒
           {
-            val newFile = rootDirInput.value
+            val newFile = newNodeInput.value
             val currentDirNode = dirNodeLine().last
             addRootDirButton.content().map {
               _ match {
@@ -93,7 +100,6 @@ class TreeNodePanel(rootNode: DirNode) {
                   if (b) toBeRefreshed() = Some(currentDirNode)
                 }
                 case ft: FileType ⇒ Post[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
-                  println("finished file")
                   if (b) toBeRefreshed() = Some(currentDirNode)
                 }
               }
@@ -110,7 +116,7 @@ class TreeNodePanel(rootNode: DirNode) {
 
   def refreshAfterTreeChange(dn: DirNode) = {
     computeAllSons(dn)
-    rootDirInput.value = ""
+    newNodeInput.value = ""
   }
 
   def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(onclick := { () ⇒
@@ -135,50 +141,86 @@ class TreeNodePanel(rootNode: DirNode) {
       println(fn.name() + " display the file")
     })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
-      println("dirnode tode")
       dirNodeLine() = dirNodeLine() :+ dn
+      computeSons(dn)
     }
     )
   }
 
   def clickableElement(tn: TreeNode,
                        classType: String,
-                       todo: () ⇒ Unit) =
-    tags.li(
-      tags.span(
-        cursor := "pointer",
-        onclick := { () ⇒
-          println("todo")
-          todo()
-        }, `class` := classType)(
-          tags.i(`class` := {
-            tn.hasSons match {
-              case true  ⇒ "glyphicon glyphicon-plus-sign"
-              case false ⇒ ""
-            }
-          }),
-          tags.i(tn.name())
-        ),
-      glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
-      glyphSpan(glyph_edit, () ⇒ println("edit"))(`class` := "glyphitem")
-    )
-
-  def computeAllSons(dn: DirNode): Unit = {
-    sons(dn).foreach { sons ⇒
-      dn.sons() = sons
-      dn.sons().foreach { tn ⇒
-        tn match {
-          case (d: DirNode) ⇒
-            computeAllSons(d)
-          case _ ⇒
+                       todo: () ⇒ Unit) = Rx {
+    toBeEdited() match {
+      case Some(etn: TreeNode) ⇒
+        if (etn == tn) {
+          editNodeInput.value = tn.name()
+          tags.li(
+            tags.form(id := "editnode")(
+              editNodeInput,
+              onsubmit := { () ⇒
+                {
+                  renameNode(tn, editNodeInput.value)
+                }
+              }
+            )
+          )
         }
-      }
+        else nodeLi(tn, classType, todo)
+      case _ ⇒ nodeLi(tn, classType, todo)
     }
-    toBeRefreshed() = None
   }
 
-  def trashNode(treeNode: TreeNode) = Post[Api].deleteFile(treeNode).call().foreach { d ⇒
-    toBeRefreshed() = Some(dirNodeLine().last)
+  def nodeLi(tn: TreeNode, classType: String, todo: () ⇒ Unit) = tags.li(
+    tags.span(
+      cursor := "pointer",
+      onclick := { () ⇒
+        todo()
+      }, `class` := classType)(
+        tags.i(id := "plusdir", `class` := {
+          tn.hasSons match {
+            case true  ⇒ "glyphicon glyphicon-plus-sign"
+            case false ⇒ ""
+          }
+        }),
+        tags.i(tn.name())
+      ),
+    glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
+    glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem")
+  )
+
+  def computeSons(dn: DirNode): Unit =
+    sons(dn).foreach {
+      sons ⇒
+        dn.sons() = sons
+    }
+
+  def computeAllSons(dn: DirNode): Unit = {
+    sons(dn).foreach {
+      sons ⇒
+        dn.sons() = sons
+        dn.sons().foreach {
+          tn ⇒
+            tn match {
+              case (d: DirNode) ⇒ computeAllSons(d)
+              case _            ⇒
+            }
+        }
+    }
+  }
+
+  def refreshCurrentDirectory = toBeRefreshed() = Some(dirNodeLine().last)
+
+  def trashNode(treeNode: TreeNode) = Post[Api].deleteFile(treeNode).call().foreach {
+    d ⇒
+      refreshCurrentDirectory
+  }
+
+  def renameNode(treeNode: TreeNode, newName: String) = Post[Api].renameFile(treeNode, newName).call().foreach {
+    d ⇒
+      if (d) {
+        refreshCurrentDirectory
+        toBeEdited() = None
+      }
   }
 
 }

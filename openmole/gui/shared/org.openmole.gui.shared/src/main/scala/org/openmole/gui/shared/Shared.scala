@@ -29,5 +29,7 @@ trait Api {
 
   def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean
 
+  def renameFile(treeNode: TreeNodeData, name: String): Boolean
+
   def workspacePath(): String
 }

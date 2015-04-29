@@ -5,6 +5,7 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data.TreeNodeData
 import java.io.File
+import java.nio.file._
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -27,11 +28,19 @@ object ApiImpl extends Api {
 
   def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.canonicalPath)
 
-  def addFile(treeNode: TreeNodeData, fileName: String): Boolean = new File(treeNode.canonicalPath, fileName).createNewFile
+  def addFile(treeNodeData: TreeNodeData, fileName: String): Boolean = new File(treeNodeData.canonicalPath, fileName).createNewFile
 
-  def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean = new File(treeNode.canonicalPath, directoryName).mkdirs
+  def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean = new File(treeNodeData.canonicalPath, directoryName).mkdirs
 
-  def deleteFile(treeNode: TreeNodeData): Unit = new File(treeNode.canonicalPath).recursiveDelete
+  def deleteFile(treeNodeData: TreeNodeData): Unit = new File(treeNodeData.canonicalPath).recursiveDelete
+
+  def renameFile(treeNodeData: TreeNodeData, name: String): Boolean = {
+    val canonicalFile = new File(treeNodeData.canonicalPath)
+    val (source, target) = (canonicalFile, new File(canonicalFile.getParent, name))
+
+    Files.move(source, target, StandardCopyOption.REPLACE_EXISTING)
+    target.exists
+  }
 
   def workspacePath(): String = Utils.workspaceProjectFile.getCanonicalPath()
 }
