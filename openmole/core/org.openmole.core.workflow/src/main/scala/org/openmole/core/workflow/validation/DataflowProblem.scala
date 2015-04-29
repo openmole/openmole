@@ -48,13 +48,6 @@ object DataflowProblem {
     override def toString = "Input " + data + " is missing when reaching the " + slot + "."
   }
 
-  case class OptionalOutput(
-      slot: Slot,
-      data: Data[_]) extends SlotDataflowProblem {
-
-    override def toString = "Input " + data + " is provided by an optional output when reaching the " + slot + " and no default value (parameter) is provided."
-  }
-
   case class DuplicatedName(
       capsule: Capsule,
       name: String,
@@ -97,14 +90,6 @@ object DataflowProblem {
     override def toString = s"Wrong type received for source $source at $slot, data ${data.prototype} is expected but $provided is provided."
   }
 
-  case class OptionalSourceOutput(
-      slot: Slot,
-      source: Source,
-      data: Data[_]) extends SourceProblem {
-
-    override def toString = s"Input $data is provided by an optional output for source $source when reaching the $slot and no default value (parameter) is provided."
-  }
-
   sealed trait HookProblem extends DataflowProblem
 
   case class MissingHookInput(
@@ -121,14 +106,6 @@ object DataflowProblem {
       found: Prototype[_]) extends HookProblem {
 
     override def toString = s"Input has incompatible type $found whereas $input was expected for hook $hook of capsule $capsule"
-  }
-
-  case class OptionalHookOutput(
-      capsule: Capsule,
-      hook: Hook,
-      data: Data[_]) extends HookProblem {
-
-    override def toString = s"Input $data is provided by an optional output for misc $hook of capsule $capsule and no default value (parameter) is provided"
   }
 
   case class MissingMoleTaskImplicit(

@@ -82,25 +82,12 @@ object Validation {
       val defaultNonOverride = defaultsNonOverride.get(inputName)
 
       (defaultOverride, receivedInput, receivedSource, receivedImplicit, defaultNonOverride) match {
-        case (Some(parameter), _, _, _, _) ⇒ checkPrototypeMatch(parameter)
-        case (None, Some(received), impl, source, param) ⇒
-          def providedAfterward = impl.isDefined || source.isDefined || param.isDefined
-
-          checkPrototypeMatch(received.toPrototype) orElse
-            (if (received.isOptional && !providedAfterward) Some(OptionalOutput(s, input))
-            else None)
-
-        case (None, None, Some(source), impl, param) ⇒
-          def providedAfterward = impl.isDefined || param.isDefined
-
-          checkPrototypeMatch(source.prototype) orElse
-            (if ((source.mode is Optional) && !providedAfterward)
-              Some(OptionalOutput(s, input))
-            else None)
-
-        case (None, None, None, Some(impl), _)         ⇒ checkPrototypeMatch(impl)
-        case (None, None, None, None, Some(parameter)) ⇒ checkPrototypeMatch(parameter)
-        case (None, None, None, None, None)            ⇒ if (!(input.mode is Optional)) Some(MissingInput(s, input)) else None
+        case (Some(parameter), _, _, _, _)               ⇒ checkPrototypeMatch(parameter)
+        case (None, Some(received), impl, source, param) ⇒ checkPrototypeMatch(received.toPrototype)
+        case (None, None, Some(source), impl, param)     ⇒ checkPrototypeMatch(source.prototype)
+        case (None, None, None, Some(impl), _)           ⇒ checkPrototypeMatch(impl)
+        case (None, None, None, None, Some(parameter))   ⇒ checkPrototypeMatch(parameter)
+        case (None, None, None, None, None)              ⇒ Some(MissingInput(s, input))
       }
     }).flatten
   }
@@ -128,16 +115,11 @@ object Validation {
       val defaultNonOverride = defaultsNonOverride.get(inputName)
 
       (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
-        case (Some(parameter), _, _, _) ⇒ checkPrototypeMatch(parameter)
-        case (None, Some(received), impl, param) ⇒
-          def providedAfterward = impl.isDefined || param.isDefined
-
-          checkPrototypeMatch(received.toPrototype) orElse
-            (if (received.isOptional && !providedAfterward) Some(OptionalSourceOutput(sl, so, i)) else None)
-        case (None, None, Some(impl), _)     ⇒ checkPrototypeMatch(impl)
-        case (None, None, None, Some(param)) ⇒ checkPrototypeMatch(param)
-        case (None, None, None, None) ⇒
-          if (!(i.mode is Optional)) Some(MissingSourceInput(sl, so, i)) else None
+        case (Some(parameter), _, _, _)          ⇒ checkPrototypeMatch(parameter)
+        case (None, Some(received), impl, param) ⇒ checkPrototypeMatch(received.toPrototype)
+        case (None, None, Some(impl), _)         ⇒ checkPrototypeMatch(impl)
+        case (None, None, None, Some(param))     ⇒ checkPrototypeMatch(param)
+        case (None, None, None, None)            ⇒ Some(MissingSourceInput(sl, so, i))
       }
     })
     x.flatten
@@ -251,16 +233,11 @@ object Validation {
       (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride)
 
       (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
-        case (Some(parameter), _, _, _) ⇒ checkPrototypeMatch(parameter)
-        case (None, Some(received), impl, param) ⇒
-          def providedAfterward = impl.isDefined || param.isDefined
-
-          checkPrototypeMatch(received.prototype) orElse
-            (if ((received.mode is Optional) && !providedAfterward) Some(OptionalHookOutput(c, h, i)) else None)
-        case (None, None, Some(impl), _)     ⇒ checkPrototypeMatch(impl)
-        case (None, None, None, Some(param)) ⇒ checkPrototypeMatch(param)
-        case (None, None, None, None) ⇒
-          if (!(i.mode is Optional)) Some(MissingHookInput(c, h, i)) else None
+        case (Some(parameter), _, _, _)          ⇒ checkPrototypeMatch(parameter)
+        case (None, Some(received), impl, param) ⇒ checkPrototypeMatch(received.prototype)
+        case (None, None, Some(impl), _)         ⇒ checkPrototypeMatch(impl)
+        case (None, None, None, Some(param))     ⇒ checkPrototypeMatch(param)
+        case (None, None, None, None)            ⇒ Some(MissingHookInput(c, h, i))
       }
     }).flatten
   }

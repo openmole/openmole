@@ -26,20 +26,11 @@ object DataModeMask {
   /**
    * All the possible values for the data mode mask.
    */
-  val values = List(Optional, Explore)
+  val values = List(Explore)
 
 }
 
 sealed class DataModeMask(val value: Int)
-
-/**
- * Data is optionnal. If this data is no found at the begining of a task
- * execution no error will be raised and the task should accomodate of it.
- *
- */
-case object Optional extends DataModeMask(0x0001) {
-  override def toString = "optional"
-}
 
 /**
  * The value corresponding to the Data can be used by an exploration

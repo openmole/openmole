@@ -41,7 +41,7 @@ object TypeUtil {
 
   sealed trait ComputedType
   case class InvalidType(name: String, direct: Seq[PrototypeType[_]], toArray: Seq[PrototypeType[_]], fromArray: Seq[PrototypeType[_]]) extends ComputedType
-  case class ValidType(name: String, `type`: PrototypeType[_], toArray: Boolean, isOptional: Boolean) extends ComputedType {
+  case class ValidType(name: String, `type`: PrototypeType[_], toArray: Boolean) extends ComputedType {
     def toPrototype =
       if (toArray) Prototype(name)(`type`.toArray)
       else Prototype(name)(`type`)
@@ -52,7 +52,7 @@ object TypeUtil {
   def computeTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ComputedType] = {
     import ClassUtils._
 
-    val (varNames, direct, toArray, fromArray, optional) =
+    val (varNames, direct, toArray, fromArray) =
       computeTransmissions(mole, sources, hooks)(
         mole.inputTransitions(slot),
         mole.inputDataChannels(slot))
@@ -62,16 +62,16 @@ object TypeUtil {
 
       name ⇒
         (direct.getOrElse(name, empty), toArray.getOrElse(name, empty), fromArray.getOrElse(name, empty)) match {
-          case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ ValidType(name, d, false, optional(name))
-          case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ ValidType(name, t.toArray, false, optional(name))
+          case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ ValidType(name, d, false)
+          case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ ValidType(name, t.toArray, false)
           case (d, t, ListBuffer()) ⇒
             val allTypes = d.toList ++ t.map(_.toArray)
             val types = allTypes.distinct
-            if (types.size == 1) ValidType(name, types.head, true, optional(name))
+            if (types.size == 1) ValidType(name, types.head, true)
             else InvalidType(name, d, t, Seq.empty)
           case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒
-            if (f.isArray) ValidType(name, f.asArray.fromArray, false, optional(name))
-            else ValidType(name, f, false, optional(name))
+            if (f.isArray) ValidType(name, f.asArray.fromArray, false)
+            else ValidType(name, f, false)
           case (d, t, f) ⇒ InvalidType(name, d, t, f)
         }
     }
@@ -81,7 +81,6 @@ object TypeUtil {
     val direct = new HashMap[String, ListBuffer[PrototypeType[_]]] // Direct transmission through transition or data channel
     val toArray = new HashMap[String, ListBuffer[PrototypeType[_]]] // Transmission through exploration transition
     val fromArray = new HashMap[String, ListBuffer[PrototypeType[_]]] // Transmission through aggregation transition
-    val optional = new HashMap[String, ListBuffer[Boolean]]
     val varNames = new HashSet[String]
 
     for (t ← transitions; d ← t.data(mole, sources, hooks)) {
@@ -98,17 +97,13 @@ object TypeUtil {
         case _: ISlaveTransition       ⇒ setFromArray
         case _                         ⇒ direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
       }
-
-      optional.getOrElseUpdate(d.prototype.name, new ListBuffer) += (d.mode is Optional)
     }
 
     for (dc ← dataChannels; d ← dc.data(mole, sources, hooks)) {
       varNames += d.prototype.name
       if (DataChannel.levelDelta(mole)(dc) >= 0) direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
       else toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
-      optional.getOrElseUpdate(d.prototype.name, new ListBuffer) += (d.mode is Optional)
     }
-    val optionalMap = optional.map { case (k, v) ⇒ k -> v.forall(_ == true) }.withDefault(s ⇒ false).toMap
-    (varNames.toSet, direct.toMap, toArray.toMap, fromArray.toMap, optionalMap)
+    (varNames.toSet, direct.toMap, toArray.toMap, fromArray.toMap)
   }
 }
