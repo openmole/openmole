@@ -38,8 +38,8 @@ object Capsule {
     else {
       val capsules = mole.inputTransitions(slot).map { _.start } ++ mole.inputDataChannels(slot).map { _.start }
       val noStrainer =
-        for (c ← capsules; if (isStrainer(c)); s ← mole.slots(c)) yield reachNoStrainer(mole)(s, seen + slot)
-      noStrainer.foldLeft(true)(_ & _)
+        for (c ← capsules; if isStrainer(c); s ← mole.slots(c)) yield reachNoStrainer(mole)(s, seen + slot)
+      noStrainer.forall(_ == true)
     }
   }
 }
@@ -107,16 +107,23 @@ class Capsule(_task: Task, val strainer: Boolean) {
       val bySlot =
         for {
           slot ← noStrainer
-        } yield TypeUtil.validTypes(mole, sources, hooks)(slot).map(_.toPrototype).groupBy(_.name)
+          received = TypeUtil.validTypes(mole, sources, hooks)(slot)
+        } yield received.map(_.toPrototype)
 
-      val allNames = bySlot.toSeq.flatMap(_.map { case (name, _) ⇒ name }.toSeq).distinct
+      val allNames = bySlot.toSeq.flatMap(_.map(_.name)).distinct
+      val byName = bySlot.map(_.groupBy(_.name).withDefaultValue(Seq.empty))
+
+      def haveAllTheSameType(ps: Seq[Prototype[_]]) = ps.map(_.`type`).distinct == 1
+      def inAllSlots(ps: Seq[Prototype[_]]) = ps.size == noStrainer.size
 
       val prototypes =
         for {
           name ← allNames
-          all ← bySlot.map(_(name).toSeq)
-          if all.size == noStrainer.size && all.distinct.size == 1
-        } yield all.head
+          inSlots = byName.map(_(name).toSeq).toSeq
+          if inSlots.forall(haveAllTheSameType)
+          oneBySlot = inSlots.map(_.head)
+          if inAllSlots(oneBySlot) && haveAllTheSameType(oneBySlot)
+        } yield oneBySlot.head
 
       prototypes.map(Data(_))
     }
