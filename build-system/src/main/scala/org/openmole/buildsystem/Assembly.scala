@@ -83,8 +83,6 @@ trait Assembly { self: BuildSystemDefaults ⇒
       } dependsOn (copyResources, (downloads, assemblyPath, target, streams) map urlDownloader),
     Tar.folder <<= assemble,
     bundleProj := false,
-    install := true,
-    installRemote := true,
     dependencyNameMap := Map.empty[Regex, String ⇒ String],
     dependencyFilter := { _ ⇒ true },
     copyResources <<=

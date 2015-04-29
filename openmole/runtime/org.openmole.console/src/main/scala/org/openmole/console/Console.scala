@@ -74,7 +74,8 @@ object Console {
   object ExitCodes {
     def ok = 0
     def incorrectPassword = 1
-    def scriptDoesNotExit = 2
+    def scriptDoesNotExist = 2
+    def compilationError = 3
   }
 
 }
@@ -122,15 +123,21 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
       case true ⇒
         withREPL(args) { loop ⇒
           script match {
-            case Nil ⇒ loop.loopWithExitCode
+            case Nil ⇒
+              loop.storeErrors = false
+              loop.loopWithExitCode
             case scripts ⇒
               scripts.foldLeft(ExitCodes.ok) {
                 (code, s) ⇒
                   val scriptFile = new File(s)
-                  if (scriptFile.exists) loop.interpretAllFromWithExitCode(new SFile(scriptFile))
+                  if (scriptFile.exists) {
+                    val error = loop.interpretAllFromWithExitCode(new SFile(scriptFile))
+                    if (!loop.errorMessage.isEmpty) ExitCodes.compilationError
+                    else error
+                  }
                   else {
                     println("File " + scriptFile + " doesn't exist.")
-                    ExitCodes.scriptDoesNotExit
+                    ExitCodes.scriptDoesNotExist
                   }
               }
           }

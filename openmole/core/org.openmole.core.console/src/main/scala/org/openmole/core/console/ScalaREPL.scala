@@ -36,6 +36,7 @@ import scala.util.Try
 class ScalaREPL(priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
 
   case class ErrorMessage(error: String, line: Int)
+  var storeErrors: Boolean = true
   var errorMessage: List[ErrorMessage] = Nil
   var loopExitCode = 0
 
@@ -93,25 +94,24 @@ class ScalaREPL(priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.emp
 
     override lazy val reporter = new ReplReporter(this) {
 
-      /*override protected def info0(pos: Position, msg: String, severity: Severity, force: Boolean): Unit =
-        if (!storeErrors) super.info0(pos, msg, severity, force)*/
-
       override def error(pos: Position, msg: String): Unit = {
-        val compiled = new String(pos.source.content).split("\n")
-        val linesLength = compiled.take(pos.line - 1).flatten.size + (pos.line - 1)
+        if (storeErrors) {
+          val compiled = new String(pos.source.content).split("\n")
+          val linesLength = compiled.take(pos.line - 1).flatten.size + (pos.line - 1)
 
-        val error = pos match {
-          case NoPosition ⇒ ErrorMessage(msg, pos.line)
-          case _ ⇒
-            val offset = pos.start - linesLength
+          val error = pos match {
+            case NoPosition ⇒ ErrorMessage(msg, pos.line)
+            case _ ⇒
+              val offset = pos.start - linesLength
 
-            ErrorMessage(
-              s"""|$msg
-                  |${compiled(pos.line - 1)}
-                  |${new String((0 until offset).map(_ ⇒ ' ').toArray)}^""".stripMargin, pos.line)
+              ErrorMessage(
+                s"""|$msg
+                    |${compiled(pos.line - 1)}
+                    |${new String((0 until offset).map(_ ⇒ ' ').toArray)}^""".stripMargin, pos.line)
+          }
+
+          errorMessage ::= error
         }
-
-        errorMessage ::= error
         super.error(pos, msg)
       }
 

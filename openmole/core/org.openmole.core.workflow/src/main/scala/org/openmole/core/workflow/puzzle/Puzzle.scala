@@ -26,7 +26,7 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.core.workflow.execution._
 
 object Puzzle {
-
+  implicit def containerToPuzzle(pc: PuzzleContainer) = pc.toPuzzle
   implicit def slotToPuzzleConverter(slot: Slot) = slot.toPuzzle
   implicit def capsuleToPuzzleConverter(capsule: Capsule) = capsule.toPuzzle
   implicit def taskToPuzzleConverter(task: Task) = Capsule(task).toPuzzle
@@ -122,8 +122,6 @@ case class Puzzle(
     executionContext: ExecutionContext = ExecutionContext.local,
     defaultEnvironment: Environment = LocalEnvironment.default): MoleExecution =
     MoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.environments ++ environments, this.grouping ++ grouping, implicits, seed, defaultEnvironment)(executionContext)
-
-  def +(p: Puzzle) = Puzzle.merge(this, p)
 
   def slots: Set[Slot] = (firstSlot :: transitions.map(_.end).toList).toSet
 

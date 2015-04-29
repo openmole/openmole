@@ -18,8 +18,6 @@ name := "openmole-buildsystem-plugin"
 
 organization := "org.openmole"
 
-version := "1.4-SNAPSHOT"
-
 resolvers += Classpaths.sbtPluginSnapshots
 
 resolvers ++= Seq(DefaultMavenRepository,"openmole-public" at "http://maven.openmole.org/public")
