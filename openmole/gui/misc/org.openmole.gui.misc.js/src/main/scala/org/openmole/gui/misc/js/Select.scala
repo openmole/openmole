@@ -49,8 +49,8 @@ class Select[T <: Displayable with Identifiable](autoID: String,
   })
 
   val selector = Forms.buttonGroup()(
-    a(
-      `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", href := "#")(
+    span(
+      `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", cursor := "pointer")(
         bs.glyph(glyphicon),
         Rx {
           content().map {
@@ -62,12 +62,10 @@ class Select[T <: Displayable with Identifiable](autoID: String,
     ul(`class` := "dropdown-menu", id := autoID)(
       Rx {
         for (c ← contents().zipWithIndex) yield {
-          scalatags.JsDom.tags.li(a(
-            href := "#", onclick := { () ⇒
-              content() = Some(contents()(c._2))
-              onclickExtra()
-            })(c._1.name)
-          )
+          scalatags.JsDom.tags.li(cursor := "pointer", onclick := { () ⇒
+            content() = Some(contents()(c._2))
+            onclickExtra()
+          })(c._1.name)
         }
       }
     )
