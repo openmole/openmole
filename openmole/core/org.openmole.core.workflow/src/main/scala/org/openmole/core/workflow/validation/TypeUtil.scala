@@ -58,7 +58,7 @@ object TypeUtil {
         mole.inputTransitions(slot),
         mole.inputDataChannels(slot))
 
-    varNames.map {
+    varNames.toSeq.map {
       import scala.collection.mutable.ListBuffer.empty
 
       name ⇒
@@ -70,9 +70,7 @@ object TypeUtil {
             val types = allTypes.distinct
             if (types.size == 1) ValidType(name, types.head, true)
             else InvalidType(name, d, t, Seq.empty)
-          case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒
-            if (f.isArray) ValidType(name, f.asArray.fromArray, false)
-            else ValidType(name, f, false)
+          case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒ ValidType(name, f.asArray.fromArray, false)
           case (d, t, f) ⇒ InvalidType(name, d, t, f)
         }
     }
@@ -87,7 +85,7 @@ object TypeUtil {
     for (t ← transitions; d ← t.data(mole, sources, hooks)) {
       def explored = Explore.explored(t.start)
       def setFromArray =
-        if (explored(d)) fromArray.getOrElseUpdate(d.name, new ListBuffer[PrototypeType[_]]) += d.`type`
+        if (explored(d)) fromArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
         else direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
 
       varNames += d.name

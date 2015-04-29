@@ -23,16 +23,16 @@ object Explore {
 
   def explored(c: Capsule) =
     (p: Prototype[_]) ⇒ {
-      def souldBeExplored =
+      def isExplored =
         c.task match {
           case ex: Explore ⇒ ex.explored.contains(p.name)
           case _           ⇒ false
         }
 
-      p.`type`.isArray && souldBeExplored
+      p.`type`.isArray && isExplored
     }
 }
 
-trait Explore {
+trait Explore <: Task {
   def explored: Set[String]
 }
