@@ -70,6 +70,7 @@ package puzzle {
 
     implicit def puzzleContainerDecoration(pc: PuzzleContainer) = new PuzzleDecorator(pc.toPuzzle)
     implicit def puzzlePuzzlePieceDecoration(puzzle: PuzzlePiece) = new PuzzlePieceDecorator(puzzle)
+
     implicit def capsulePuzzlePieceDecoration(capsule: Capsule) = new PuzzlePieceDecorator(capsule.toPuzzlePiece)
     implicit def slotPuzzlePieceDecoration(slot: Slot) = new PuzzlePieceDecorator(slot.toPuzzlePiece)
     implicit def taskPuzzlePieceDecoration(task: Task): PuzzlePieceDecorator = new PuzzlePieceDecorator(task.toCapsule.toPuzzlePiece)
@@ -77,9 +78,10 @@ package puzzle {
 
     implicit def puzzlePieceMoleExecutionConverter(puzzle: PuzzlePiece) = puzzle.toPuzzle.toExecution
     implicit def puzzlePieceMoleConverter(puzzle: PuzzlePiece) = puzzle.toPuzzle.toMole
-
     implicit def puzzleMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
     implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole
+    implicit def puzzleContainerMoleExecutionConverter(puzzle: PuzzleContainer) = puzzle.toPuzzle.toExecution
+    implicit def puzzleContainerMoleConverter(puzzle: PuzzleContainer) = puzzle.toPuzzle.toMole
 
     implicit def capsuleToMoleExecutionConverter(capsule: Capsule): MoleExecution = capsule.toPuzzle.toExecution
     implicit def taskToMoleExecutionConverter(task: Task): MoleExecution = task.toCapsule.toPuzzle.toExecution
