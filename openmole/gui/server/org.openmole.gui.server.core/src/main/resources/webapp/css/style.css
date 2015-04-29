@@ -179,6 +179,10 @@ padding-top: 40px;
 width: 100px;
 }
 
+#plusdir{
+	padding-right:3px;
+}
+
 /*dynamic menu*/
 #site-wrapper {
   position: relative;
