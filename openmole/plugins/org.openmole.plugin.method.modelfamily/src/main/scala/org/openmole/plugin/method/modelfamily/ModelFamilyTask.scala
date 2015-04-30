@@ -38,7 +38,7 @@ object ModelFamilyTask {
 
     modelFamily.objectives.foreach { o ⇒ addOutput(o) }
     modelFamily.outputs.foreach { o ⇒ addOutput(o) }
-    override def toTask: Task = new ModelFamilyTask(modelFamily) with Built
+    def toTask = new ModelFamilyTask(modelFamily) with Built
   }
 }
 
