@@ -16,8 +16,11 @@
  */
 package org.openmole.gui.server.core
 
+import javax.servlet.annotation.MultipartConfig
+
 import org.openmole.core.workspace.Workspace
 import org.scalatra._
+import org.scalatra.servlet.FileUploadSupport
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.Api
 import scala.concurrent.duration._
@@ -25,6 +28,7 @@ import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
 import java.io.File
+import org.openmole.tool.file._
 
 object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Writer] {
   def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
@@ -32,7 +36,8 @@ object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Wr
   def write[Result: upickle.Writer](r: Result) = upickle.write(r)
 }
 
-class GUIServlet extends ScalatraServlet {
+@MultipartConfig(fileSizeThreshold = 1024 * 1024)
+class GUIServlet extends ScalatraServlet with FileUploadSupport {
 
   val basePath = "org/openmole/gui/shared"
 
@@ -89,6 +94,11 @@ class GUIServlet extends ScalatraServlet {
         tags.onload := "ScriptClient().run();")
     )
   }
+
+  post("/uploadfiles") {
+    fileParams.map { fp ⇒
+      fp._2.getInputStream.copy(new java.io.File(fp._1))
+    }
 
   post(s"/$basePath/*") {
     Await.result(AutowireServer.route[Api](ApiImpl)(

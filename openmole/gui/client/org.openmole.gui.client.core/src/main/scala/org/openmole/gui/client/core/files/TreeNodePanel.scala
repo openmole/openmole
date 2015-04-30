@@ -4,6 +4,7 @@ import org.openmole.gui.client.core.Post
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.Forms._
 import org.scalajs.dom.html.{ Input, UList }
+import org.scalajs.dom.raw.{ HTMLInputElement, DragEvent, Event }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import org.openmole.gui.misc.js.{ Forms ⇒ bs, Select }
@@ -48,6 +49,7 @@ class TreeNodePanel(rootNode: DirNode) {
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode))
   val toBeRefreshed: Var[Option[DirNode]] = Var(Some(rootNode))
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
+  val dragState: Var[String] = Var("")
 
   Rx {
     toBeRefreshed().map {
@@ -88,7 +90,10 @@ class TreeNodePanel(rootNode: DirNode) {
       tags.form(id := "adddir")(
         inputGroup(navbar_left)(
           inputGroupButton(addRootDirButton.selector),
-          newNodeInput
+          newNodeInput,
+          inputGroupButton(uploadButton(btn_success, (fileInput: HTMLInputElement) ⇒ {
+            FileUploader(fileInput.files, dirNodeLine().last.canonicalPath())
+          }))
         ),
         onsubmit := { () ⇒
           {
@@ -106,12 +111,34 @@ class TreeNodePanel(rootNode: DirNode) {
             }
           }
         })
-    },
-    tags.div(`class` := "tree")(
-      Rx {
-        drawTree(dirNodeLine().last.sons())
-      }
-    )
+    }, Rx {
+      tags.div(`class` := "tree" + dragState(),
+        ondragover := { (e: DragEvent) ⇒
+          e.preventDefault
+          dragState() = " droppable hover"
+          e.dataTransfer.dropEffect = "copy"
+          false
+        },
+        ondragend := { (e: DragEvent) ⇒
+          dragState() = ""
+          println("dragend")
+          false
+        },
+        ondrop := { (e: DragEvent) ⇒
+          println("drop !!")
+          dragState() = ""
+          e.stopPropagation
+          e.preventDefault
+          val files = e.dataTransfer.files
+          println("dropppoo " + files.length)
+          false
+        }
+      )(
+          Rx {
+            drawTree(dirNodeLine().last.sons())
+          }
+        )
+    }
   )
 
   def refreshAfterTreeChange(dn: DirNode) = {

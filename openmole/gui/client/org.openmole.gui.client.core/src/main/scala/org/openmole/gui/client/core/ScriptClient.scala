@@ -5,6 +5,7 @@ import org.openmole.gui.client.core.dataui.EditorPanelUI
 import org.openmole.gui.client.core.files.{ DirNode, TreeNodePanel }
 import org.openmole.gui.client.core.files.TreeNodePanel._
 import org.openmole.gui.shared.Api
+import org.scalajs.dom.raw.DragEvent
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.Forms._
 import scala.scalajs.js.annotation.JSExport
@@ -78,6 +79,16 @@ object ScriptClient {
       )
 
       body.appendChild(maindiv)
+
+      dom.window.ondragover = (e: DragEvent) ⇒ {
+        e.preventDefault()
+        false
+      }
+
+      dom.window.ondrop = (e: DragEvent) ⇒ {
+        e.preventDefault()
+        false
+      }
 
       editor.init
     }

@@ -17,6 +17,7 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw
 import org.scalajs.dom.raw._
 import scala.scalajs.js.annotation.JSExport
@@ -134,6 +135,7 @@ object Forms {
   val glyph_file = "glyphicon-file"
   val glyph_folder_close = "glyphicon-folder-close"
   val glyph_home = "glyphicon-home"
+  val glyph_upload = "glyphicon-cloud-upload"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
@@ -157,6 +159,29 @@ object Forms {
     tags.span(cursor := "pointer")(glyph(glyCA)(onclick := { () ⇒
       todo()
     }))
+
+  def fileInput(todo: HTMLInputElement ⇒ Unit): HTMLInputElement = {
+    lazy val input: HTMLInputElement = tags.input(`type` := "file", multiple := "")(onchange := { () ⇒
+      // println("on change " + input.files.length)
+      //  FileUploader(input.files, )
+      todo(input)
+    }).render
+
+    input
+  }
+
+  def uploadButton(buttonCB: ClassKeyAggregator, todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] = {
+    tags.span(cursor := "pointer", `class` := "btn " + buttonCB.key + " btn-file")(
+      glyph(glyph_upload),
+      fileInput(todo)
+    )
+  }
+
+  def uploadGlyphSpan(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
+    tags.span(cursor := "pointer", `class` := "btn-file")(
+      glyph(glyph_upload),
+      fileInput(todo)
+    )
 
   val btn_default = key("btn-default")
   val btn_primary = key("btn-primary")
