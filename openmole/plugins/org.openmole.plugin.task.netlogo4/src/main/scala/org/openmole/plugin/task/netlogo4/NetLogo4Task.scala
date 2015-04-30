@@ -61,15 +61,6 @@ object NetLogo4Task {
   }
 
   def apply(
-    workspace: Workspace,
-    launchingCommands: Seq[String]): NetLogoTaskBuilder = {
-    workspace.location match {
-      case Left((w: File, s: String)) ⇒ apply(w, s, launchingCommands)
-      case Right(s: File)             ⇒ apply(s, launchingCommands)
-    }
-  }
-
-  def apply(
     script: File,
     launchingCommands: Seq[String],
     embedWorkspace: Boolean): NetLogoTaskBuilder =

@@ -75,7 +75,7 @@ abstract class ModelFamilyTask(val modelFamily: ModelFamily) extends Task { t �
 
   def run(context: Context): Context = {
     lazy val rng = Task.buildRNG(context)
-    val values = family.allInputs.map(a ⇒ context(a.name))
+    val values = family.allInputs.map((a: TypedValue) ⇒ context(a.name))
     val modelId = context(modelFamily.modelIdPrototype)
     val map = family.run(modelId, values: _*)(rng).get
     family.outputs.map(o ⇒ Variable.unsecure(o, map(o.name)))
