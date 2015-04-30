@@ -19,9 +19,9 @@ package org.openmole.core.workflow.builder
 import org.openmole.core.workflow.data._
 
 trait OutputBuilder { builder ⇒
-  private var _outputs = DataSet.empty
+  private var _outputs = PrototypeSet.empty
 
-  def addOutput(d: Data[_]*): this.type = { _outputs ++= d; this }
+  def addOutput(d: Prototype[_]*): this.type = { _outputs ++= d; this }
 
   def outputs = _outputs
 

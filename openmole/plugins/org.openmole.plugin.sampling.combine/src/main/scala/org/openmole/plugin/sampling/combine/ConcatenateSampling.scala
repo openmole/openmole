@@ -29,7 +29,7 @@ object ConcatenateSampling {
 
 class ConcatenateSampling(val samplings: Sampling*) extends Sampling {
 
-  override lazy val inputs = DataSet.empty ++ samplings.flatMap { _.inputs }
+  override lazy val inputs = PrototypeSet.empty ++ samplings.flatMap { _.inputs }
 
   override def prototypes: Iterable[Prototype[_]] = samplings.head.prototypes
 

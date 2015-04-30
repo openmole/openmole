@@ -29,9 +29,12 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.puzzle._
 
 import org.scalatest._
 import TopologyProblem.DataChannelNegativeLevelProblem
+
+import scala.reflect.macros.whitebox
 
 class ValidationSpec extends FlatSpec with Matchers {
 
@@ -51,7 +54,7 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
     errors.headOption match {
-      case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
+      case Some(MissingInput(_, d)) ⇒ assert(d == p)
       case _                        ⇒ sys.error("Error should have been detected")
     }
   }
@@ -90,7 +93,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
     errors.headOption match {
       case Some(WrongType(_, d, t)) ⇒
-        assert(d.prototype == pString)
+        assert(d == pString)
         assert(t == pInt)
       case _ ⇒ sys.error("Error should have been detected")
     }
@@ -127,12 +130,9 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "detect a missing input error due to datachannel filtering" in {
     val p = Prototype[String]("t")
 
-    val t1 =
-      new TestTask {
-        val name = "t1"
-        override def outputs = DataSet(p)
-        override def process(context: Context) = Context(Variable(p, "test"))
-      }
+    val t1 = TestTask { _ + (p, "test") }
+    t1 setName "t1"
+    t1 addOutput p
 
     val t2 = EmptyTask()
     val t3 = EmptyTask()
@@ -147,7 +147,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
 
     errors.headOption match {
-      case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
+      case Some(MissingInput(_, d)) ⇒ assert(d == p)
       case _                        ⇒ sys.error("Error should have been detected")
     }
   }
@@ -168,7 +168,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val errors = Validation(Mole(mt))
 
     errors.headOption match {
-      case Some(MoleTaskDataFlowProblem(_, MissingInput(_, d))) ⇒ assert(d.prototype == p)
+      case Some(MoleTaskDataFlowProblem(_, MissingInput(_, d))) ⇒ assert(d == p)
       case _ ⇒ sys.error("Error should have been detected")
     }
 
@@ -177,12 +177,9 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "not detect a missing input" in {
     val p = Prototype[String]("t")
 
-    val t1 =
-      new TestTask {
-        val name = "t1"
-        override def outputs = DataSet(p)
-        override def process(context: Context) = Context(Variable(p, "test"))
-      }
+    val t1 = TestTask { _ + (p, "test") }
+    t1 setName "t1"
+    t1 addOutput p
 
     val c1 = Capsule(t1)
 
@@ -203,12 +200,9 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "not detect a missing input when provided by the implicits" in {
     val p = Prototype[String]("t")
 
-    val t1 =
-      new TestTask {
-        val name = "t1"
-        override def outputs = DataSet(p)
-        override def process(context: Context) = Context(Variable(p, "test"))
-      }
+    val t1 = TestTask { _ + (p, "test") }
+    t1 setName "t1"
+    t1 addOutput p
 
     val c1 = Capsule(t1)
 
@@ -434,6 +428,24 @@ class ValidationSpec extends FlatSpec with Matchers {
       case Some(IncoherentTypesBetweenSlots(_, _, _)) ⇒
       case _ ⇒ sys.error("Error should have been detected")
     }
+  }
+
+  "Workflow with exploration and strainer" should "be ok" in {
+    val pInt = Prototype[Int]("t")
+
+    val exploration = ExplorationTask(ExplicitSampling(pInt, (0 to 10)))
+
+    val t1 = EmptyTask()
+    t1 addInput pInt
+
+    val t2 = EmptyTask()
+    t2 addInput pInt
+
+    val puzzle = (Capsule(exploration, strainer = true) -< Capsule(t1, strainer = true) -- t2)
+
+    val ex = puzzle start
+
+    ex.waitUntilEnded
   }
 
 }

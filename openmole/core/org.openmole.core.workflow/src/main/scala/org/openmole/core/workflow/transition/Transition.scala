@@ -90,7 +90,7 @@ class Transition(
   override def isConditionTrue(context: Context): Boolean = condition.evaluate(context)
 
   override def data(mole: Mole, sources: Sources, hooks: Hooks) =
-    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.prototype.name))
+    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.name))
 
   protected def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, ticket, subMole)
   protected def filtered(context: Context) = context.filterNot { case (n, _) ⇒ filter(n) }

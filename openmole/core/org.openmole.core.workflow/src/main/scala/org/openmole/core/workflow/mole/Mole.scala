@@ -59,7 +59,7 @@ case class Mole(
     val root: Capsule,
     val transitions: Iterable[ITransition] = Iterable.empty,
     val dataChannels: Iterable[DataChannel] = Iterable.empty,
-    val inputs: DataSet = DataSet.empty) {
+    val inputs: PrototypeSet = PrototypeSet.empty) {
 
   lazy val slots = (Slot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
   lazy val capsules = slots.keys

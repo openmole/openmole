@@ -31,7 +31,7 @@ object ZipSampling {
 
 sealed class ZipSampling(val samplings: Sampling*) extends Sampling {
 
-  override def inputs = DataSet(samplings.flatMap(_.inputs))
+  override def inputs = PrototypeSet(samplings.flatMap(_.inputs))
   override def prototypes = samplings.flatMap(_.prototypes)
 
   override def build(context: ⇒ Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =

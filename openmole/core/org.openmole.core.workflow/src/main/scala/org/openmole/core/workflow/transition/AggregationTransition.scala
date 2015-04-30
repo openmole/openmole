@@ -28,7 +28,7 @@ import scala.collection.mutable.{ HashSet, ListBuffer }
 
 object AggregationTransition {
   def aggregateOutputs(moleExecution: MoleExecution, transition: IAggregationTransition, results: Iterable[Variable[_]]) = {
-    val toArrayTypes = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }.toMap[String, PrototypeType[_]]
+    val toArrayTypes = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.name -> d.`type` }.toMap[String, PrototypeType[_]]
     ContextAggregator.aggregate(transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks), toArrayTypes, results)
   }
 }

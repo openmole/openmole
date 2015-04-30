@@ -47,15 +47,13 @@ object InputOutputCheck {
 
 trait InputOutputCheck {
 
-  def inputs: DataSet
-  def outputs: DataSet
+  def inputs: PrototypeSet
+  def outputs: PrototypeSet
   def defaults: DefaultSet
 
   protected def verifyInput(context: Context): Iterable[InputError] =
     (for {
-      d ← inputs.toList
-      if (!(d.mode is Optional))
-      p = d.prototype
+      p ← inputs.toList
     } yield context.variable(p.name) match {
       case None    ⇒ Some(InputNotFound(p))
       case Some(v) ⇒ if (!p.isAssignableFrom(v.prototype)) Some(InputTypeMismatch(p, v.prototype)) else None
@@ -64,18 +62,17 @@ trait InputOutputCheck {
   protected def verifyOutput(context: Context): Iterable[OutputError] =
     outputs.flatMap {
       d ⇒
-        context.variable(d.prototype) match {
-          case None ⇒
-            if (!(d.mode is Optional)) Some(OutputNotFound(d.prototype)) else None
+        context.variable(d) match {
+          case None ⇒ Some(OutputNotFound(d))
           case Some(v) ⇒
-            if (!d.prototype.accepts(v.value))
-              Some(OutputTypeMismatch(d.prototype, v))
+            if (!d.accepts(v.value))
+              Some(OutputTypeMismatch(d, v))
             else None
         }
     }
 
   protected def filterOutput(context: Context): Context =
-    Context(outputs.toList.flatMap(o ⇒ context.variable(o.prototype): Option[Variable[_]]))
+    Context(outputs.toList.flatMap(o ⇒ context.variable(o): Option[Variable[_]]))
 
   protected def initializeInput(context: Context): Context =
     context ++

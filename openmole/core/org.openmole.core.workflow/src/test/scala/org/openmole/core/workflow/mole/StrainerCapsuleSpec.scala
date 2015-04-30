@@ -23,6 +23,7 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.EmptyTask
 import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.puzzle._
 import org.scalatest._
 
 class StrainerCapsuleSpec extends FlatSpec with Matchers {
@@ -30,22 +31,18 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
   "The strainer capsule" should "let the data pass through" in {
     val p = Prototype[String]("p")
 
-    val t1 = new TestTask {
-      val name = "Test write"
-      override def outputs = DataSet(p)
-      override def process(context: Context) = context + (p -> "Test")
-    }
+    val t1 = TestTask { _ + (p -> "Test") }
+    t1 setName "Test write"
+    t1 addOutput p
 
     val strainer = EmptyTask()
 
-    val t2 = new TestTask {
-      val name = "Test read"
-      override def inputs = DataSet(p)
-      override def process(context: Context) = {
-        context(p) should equal("Test")
-        context
-      }
+    val t2 = TestTask { context ⇒
+      context(p) should equal("Test")
+      context
     }
+    t2 setName "Test read"
+    t2 addInput p
 
     val t1c = Capsule(t1)
     val strainerC = StrainerCapsule(strainer)
@@ -60,25 +57,21 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
     val root = StrainerCapsule(EmptyTask())
 
-    val t1 = new TestTask {
-      val name = "Test write"
-      override def outputs = DataSet(p)
-      override def process(context: Context) = context + (p -> "Test")
-    }
+    val t1 = TestTask { _ + (p -> "Test") }
+    t1 setName "Test write"
+    t1 addOutput p
 
     val tNone = StrainerCapsule(EmptyTask())
     val tNone2 = StrainerCapsule(EmptyTask())
 
     val strainer = EmptyTask()
 
-    val t2 = new TestTask {
-      val name = "Test read"
-      override def inputs = DataSet(p)
-      override def process(context: Context) = {
-        context(p) should equal("Test")
-        context
-      }
+    val t2 = TestTask { context ⇒
+      context(p) should equal("Test")
+      context
     }
+    t2 setName "Test read"
+    t2 addInput p
 
     val strainerC = Slot(StrainerCapsule(strainer))
 

@@ -17,8 +17,8 @@
 
 package org.openmole.core.workflow.domain
 
-import org.openmole.core.workflow.data.DataSet
+import org.openmole.core.workflow.data.PrototypeSet
 
 trait Domain[+T] {
-  def inputs: DataSet = DataSet.empty
+  def inputs: PrototypeSet = PrototypeSet.empty
 }

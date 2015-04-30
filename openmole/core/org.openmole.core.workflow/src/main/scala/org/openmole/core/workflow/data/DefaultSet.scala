@@ -21,6 +21,7 @@ import scala.collection.SetLike
 import scala.collection.immutable.TreeMap
 
 object DefaultSet {
+  implicit def seqToDefaultSet(s: Seq[Default[_]]) = DefaultSet(s: _*)
   val empty = DefaultSet(Iterable.empty)
 
   def apply(p: Traversable[Default[_]]): DefaultSet =

@@ -37,7 +37,7 @@ trait CompiledScala {
 
   def compiled: Compiled
   def prototypes: Seq[Prototype[_]]
-  def outputs: DataSet
+  def outputs: PrototypeSet
 
   def run(context: Context): Context = {
     val args = prototypes.map(i ⇒ context(i))
@@ -45,7 +45,7 @@ trait CompiledScala {
     context ++
       outputs.toSeq.map {
         o ⇒
-          Variable.unsecure(o.prototype, Option(map.get(o.prototype.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
+          Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
       }
   }
 
@@ -60,7 +60,7 @@ import ScalaWrappedCompilation._
 trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
   def source: String
   def imports: Seq[String]
-  def outputs: DataSet
+  def outputs: PrototypeSet
 
   def prefix = "_input_value_"
 
@@ -81,7 +81,6 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
     native getOrElse t
   }
 
-  //FIXME deal with optional outputs
   def script(inputs: Seq[Prototype[_]]) =
     imports.map("import " + _).mkString("\n") + "\n\n" +
       s"""(${inputs.toSeq.map(i ⇒ prefix + i.name + ": " + toScalaNativeType(i.`type`)).mkString(",")}) => {
@@ -100,7 +99,7 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
   def outputMap =
     s"""
        |import scala.collection.JavaConversions.mapAsJavaMap
-       |mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.prototype.name}" -> ${p.prototype.name}""").mkString(",")} ))
+       |mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> ${p.name}""").mkString(",")} ))
     """.stripMargin
 
   @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], Try[(AnyRef, Method)]]()
@@ -125,7 +124,7 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
               val closure = (args: Seq[Any]) ⇒ method.invoke(evaluated, args.toSeq.map(_.asInstanceOf[AnyRef]): _*).asInstanceOf[java.util.Map[String, Any]]
               new CompiledScala {
                 override def compiled = closure
-                override def outputs: DataSet = compilation.outputs
+                override def outputs: PrototypeSet = compilation.outputs
                 override def prototypes: Seq[Prototype[_]] = scriptInputs
               }
           }

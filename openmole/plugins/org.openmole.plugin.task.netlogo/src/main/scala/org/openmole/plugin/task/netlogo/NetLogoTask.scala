@@ -34,9 +34,10 @@ import Prettifier._
 
 object NetLogoTask {
 
-  case class Workspace(location: Either[(File, String), File]) {
-    def this(workspace: File, script: String) = this(Left(workspace, script))
-    def this(script: File) = this(Right(script))
+  case class Workspace(script: String, workspace: Option[String]) {
+    def this(workspace: File, script: String) = this(script, Some(workspace.getName))
+    def this(script: File) = this(script.getName, None)
+    val workDirectory = workspace.getOrElse("")
   }
 
 }
@@ -50,12 +51,6 @@ trait NetLogoTask extends ExternalTask {
   def netLogoArrayOutputs: Iterable[(String, Int, Prototype[_])]
   def netLogoFactory: NetLogoFactory
 
-  val scriptPath =
-    workspace.location match {
-      case Left((f, s)) ⇒ f.getName + "/" + s
-      case Right(s)     ⇒ s.getName
-    }
-
   private def wrapError[T](msg: String)(f: ⇒ T): T =
     try f
     catch {
@@ -64,13 +59,12 @@ trait NetLogoTask extends ExternalTask {
     }
 
   override def process(context: Context): Context = withWorkDir { tmpDir ⇒
-    def workDirPath = ""
-    prepareInputFiles(context, tmpDir, workDirPath)
+    prepareInputFiles(context, tmpDir, workspace.workDirectory)
 
-    val script = new File(tmpDir, scriptPath)
+    val script = tmpDir / workspace.workDirectory / workspace.script
     val netLogo = netLogoFactory()
     try {
-      wrapError(s"Error while opening the file ${script}") { netLogo.open(script.getAbsolutePath) }
+      wrapError(s"Error while opening the file $script") { netLogo.open(script.getAbsolutePath) }
 
       for (inBinding ← netLogoInputs) {
         val v = context(inBinding._1) match {
@@ -85,7 +79,7 @@ trait NetLogoTask extends ExternalTask {
         netLogo.command(VariableExpansion(context, cmd))
       }
 
-      fetchOutputFiles(context, tmpDir, workDirPath) ++ netLogoOutputs.map {
+      fetchOutputFiles(context, tmpDir, workspace.workDirectory) ++ netLogoOutputs.map {
         case (name, prototype) ⇒
           try {
             val outputValue = netLogo.report(name)

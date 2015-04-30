@@ -51,7 +51,7 @@ sealed abstract class BreedSampling(val evolution: Breeding with GType with Arch
   def genome: Prototype[evolution.G]
 
   def prototypes = List(genome)
-  override def inputs = DataSet(population, archive)
+  override def inputs = Seq(population, archive)
 
   override def build(context: ⇒ Context)(implicit rng: Random) = {
     val p = context(population)

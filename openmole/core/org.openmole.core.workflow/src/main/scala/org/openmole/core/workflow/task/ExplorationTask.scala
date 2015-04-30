@@ -20,6 +20,7 @@ package org.openmole.core.workflow.task
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.mole.Capsule
 import org.openmole.core.workflow.sampling._
 
 import scala.collection.immutable.TreeMap
@@ -32,13 +33,22 @@ object ExplorationTask {
     new TaskBuilder { builder ⇒
 
       addInput(sampling.inputs.toSeq: _*)
-      addOutput(sampling.prototypes.map { p ⇒ Data(p, Explore).toArray }.toSeq: _*)
+      addOutput(sampling.prototypes.toSeq.map(_.toArray): _*)
 
       def toTask =
-        new ExplorationTask(sampling) with builder.Built
+        new ExplorationTask(sampling) with builder.Built {
+          val explored = sampling.prototypes.map(_.name).toSet
+          override def outputs = super.outputs.copy(explore = sampling.prototypes.map(_.name).toSet)
+        }
 
     }
   }
+
+  def explored(c: Capsule) =
+    (p: Prototype[_]) ⇒ {
+      def isExplored = c.task.outputs.explore.contains(p.name)
+      p.`type`.isArray && isExplored
+    }
 
 }
 

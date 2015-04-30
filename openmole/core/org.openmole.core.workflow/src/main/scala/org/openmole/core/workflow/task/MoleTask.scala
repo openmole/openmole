@@ -61,13 +61,6 @@ sealed abstract class MoleTask(
     val implicits: Iterable[String]) extends Task {
 
   override protected def process(context: Context) = {
-    val firstTaskContext = inputs.foldLeft(List.empty[Variable[_]]) {
-      (acc, input) ⇒
-        if (!(input.mode is Optional) || ((input.mode is Optional) && context.contains(input.prototype)))
-          context.variable(input.prototype).getOrElse(throw new InternalProcessingError("Bug: variable not found.")) :: acc
-        else acc
-    }.toContext
-
     val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
 
     val execution = MoleExecution(mole, seed = context(Task.openMOLESeed), implicits = implicitsValues)
@@ -80,7 +73,7 @@ sealed abstract class MoleTask(
         lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
     }
 
-    execution.start(firstTaskContext)
+    execution.start(context)
     execution.waitUntilEnded
 
     execution.exception.foreach(throw _)

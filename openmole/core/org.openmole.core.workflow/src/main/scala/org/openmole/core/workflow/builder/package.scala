@@ -27,11 +27,11 @@ import org.openmole.core.workflow.puzzle._
 package builder {
 
   class Inputs {
-    def +=(d: Data[_]*) = (_: InputBuilder).addInput(d: _*)
+    def +=(d: Prototype[_]*) = (_: InputBuilder).addInput(d: _*)
   }
 
   class Outputs {
-    def +=(d: Data[_]*) = (_: OutputBuilder).addOutput(d: _*)
+    def +=(d: Prototype[_]*) = (_: OutputBuilder).addOutput(d: _*)
   }
 
   trait BuilderPackage {

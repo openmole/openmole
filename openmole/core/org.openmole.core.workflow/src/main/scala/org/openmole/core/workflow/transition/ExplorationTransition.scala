@@ -21,6 +21,7 @@ import org.openmole.core.eventdispatcher._
 import org.openmole.core.exception._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.task._
 import org.openmole.tool.lock._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
@@ -37,8 +38,10 @@ class ExplorationTransition(start: Capsule, end: Slot, condition: Condition = Co
   def submitIn(context: Context, ticket: Ticket, subMole: SubMoleExecution) = {
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
-    val (factors, outputs) = start.outputs(mole, moleExecution.sources, moleExecution.hooks).partition(d ⇒ (d.mode is Explore) && d.prototype.`type`.isArray)
-    val typedFactors = factors.map(_.prototype.asInstanceOf[Prototype[Array[Any]]])
+    def explored = ExplorationTask.explored(start)
+    val (factors, outputs) = start.outputs(mole, moleExecution.sources, moleExecution.hooks).partition(explored)
+
+    val typedFactors = factors.map(_.asInstanceOf[Prototype[Array[Any]]])
     val values = typedFactors.toList.map(context(_).toIterable).transpose
 
     for (value ← values) {
@@ -46,7 +49,7 @@ class ExplorationTransition(start: Capsule, end: Slot, condition: Condition = Co
       val variables = new ListBuffer[Variable[_]]
 
       for (in ← outputs)
-        context.variable(in.prototype) match {
+        context.variable(in) match {
           case Some(v) ⇒ variables += v
           case None    ⇒
         }

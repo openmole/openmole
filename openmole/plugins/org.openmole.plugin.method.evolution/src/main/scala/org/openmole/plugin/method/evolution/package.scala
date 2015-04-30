@@ -98,10 +98,6 @@ package object evolution {
     val terminated = Prototype[Boolean](name + "Terminated")
 
     val firstTask = EmptyTask() set (_.setName(name + "First"))
-    firstTask addInput (Data(archive, Optional))
-    firstTask addInput (Data(population, Optional))
-    firstTask addOutput (Data(archive, Optional))
-    firstTask addOutput (Data(population, Optional))
 
     val scalingGenomeTask = ScalingGAGenomeTask(evolution)(genome) set (_.setName(name + "ScalingGenome"))
 

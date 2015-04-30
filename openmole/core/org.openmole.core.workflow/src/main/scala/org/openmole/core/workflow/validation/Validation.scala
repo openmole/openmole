@@ -22,7 +22,7 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation.TopologyProblem._
-import org.openmole.core.workflow.validation.TypeUtil.{ InvalidType, ValidType, computeTypes }
+import org.openmole.core.workflow.validation.TypeUtil._
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.{ HashMap, Queue }
@@ -62,7 +62,7 @@ object Validation {
 
     (for {
       c ← capsules
-      sourcesOutputs = TreeMap(sources(c).flatMap((os: Source) ⇒ os.outputs.toSet).map((o: Data[_]) ⇒ o.prototype.name -> o).toSeq: _*)
+      sourcesOutputs = TreeMap(sources(c).flatMap((os: Source) ⇒ os.outputs.toSet).map(o ⇒ o.name -> o).toSeq: _*)
       s ← mole.slots(c)
       computedTypes = TypeUtil.validTypes(mole, sources, hooks)(s)
       receivedInputs = TreeMap(computedTypes.map { p ⇒ p.name -> p }.toSeq: _*)
@@ -70,10 +70,10 @@ object Validation {
       input ← c.task.inputs
     } yield {
       def checkPrototypeMatch(p: Prototype[_]) =
-        if (!input.prototype.isAssignableFrom(p)) Some(WrongType(s, input, p))
+        if (!input.isAssignableFrom(p)) Some(WrongType(s, input, p))
         else None
 
-      val inputName = input.prototype.name
+      val inputName = input.name
 
       val defaultOverride = defaultsOverride.get(inputName)
       val receivedInput = receivedInputs.get(inputName)
@@ -82,25 +82,12 @@ object Validation {
       val defaultNonOverride = defaultsNonOverride.get(inputName)
 
       (defaultOverride, receivedInput, receivedSource, receivedImplicit, defaultNonOverride) match {
-        case (Some(parameter), _, _, _, _) ⇒ checkPrototypeMatch(parameter)
-        case (None, Some(received), impl, source, param) ⇒
-          def providedAfterward = impl.isDefined || source.isDefined || param.isDefined
-
-          checkPrototypeMatch(received.toPrototype) orElse
-            (if (received.isOptional && !providedAfterward) Some(OptionalOutput(s, input))
-            else None)
-
-        case (None, None, Some(source), impl, param) ⇒
-          def providedAfterward = impl.isDefined || param.isDefined
-
-          checkPrototypeMatch(source.prototype) orElse
-            (if ((source.mode is Optional) && !providedAfterward)
-              Some(OptionalOutput(s, input))
-            else None)
-
-        case (None, None, None, Some(impl), _)         ⇒ checkPrototypeMatch(impl)
-        case (None, None, None, None, Some(parameter)) ⇒ checkPrototypeMatch(parameter)
-        case (None, None, None, None, None)            ⇒ if (!(input.mode is Optional)) Some(MissingInput(s, input)) else None
+        case (Some(parameter), _, _, _, _)               ⇒ checkPrototypeMatch(parameter)
+        case (None, Some(received), impl, source, param) ⇒ checkPrototypeMatch(received.toPrototype)
+        case (None, None, Some(source), impl, param)     ⇒ checkPrototypeMatch(source)
+        case (None, None, None, Some(impl), _)           ⇒ checkPrototypeMatch(impl)
+        case (None, None, None, None, Some(parameter))   ⇒ checkPrototypeMatch(parameter)
+        case (None, None, None, None, None)              ⇒ Some(MissingInput(s, input))
       }
     }).flatten
   }
@@ -117,10 +104,10 @@ object Validation {
       i ← so.inputs
     } yield {
       def checkPrototypeMatch(p: Prototype[_]) =
-        if (!i.prototype.isAssignableFrom(p)) Some(WrongSourceType(sl, so, i, p))
+        if (!i.isAssignableFrom(p)) Some(WrongSourceType(sl, so, i, p))
         else None
 
-      val inputName = i.prototype.name
+      val inputName = i.name
 
       val defaultOverride = defaultsOverride.get(inputName)
       val receivedInput = receivedInputs.get(inputName)
@@ -128,16 +115,11 @@ object Validation {
       val defaultNonOverride = defaultsNonOverride.get(inputName)
 
       (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
-        case (Some(parameter), _, _, _) ⇒ checkPrototypeMatch(parameter)
-        case (None, Some(received), impl, param) ⇒
-          def providedAfterward = impl.isDefined || param.isDefined
-
-          checkPrototypeMatch(received.toPrototype) orElse
-            (if (received.isOptional && !providedAfterward) Some(OptionalSourceOutput(sl, so, i)) else None)
-        case (None, None, Some(impl), _)     ⇒ checkPrototypeMatch(impl)
-        case (None, None, None, Some(param)) ⇒ checkPrototypeMatch(param)
-        case (None, None, None, None) ⇒
-          if (!(i.mode is Optional)) Some(MissingSourceInput(sl, so, i)) else None
+        case (Some(parameter), _, _, _)          ⇒ checkPrototypeMatch(parameter)
+        case (None, Some(received), impl, param) ⇒ checkPrototypeMatch(received.toPrototype)
+        case (None, None, Some(impl), _)         ⇒ checkPrototypeMatch(impl)
+        case (None, None, None, Some(param))     ⇒ checkPrototypeMatch(param)
+        case (None, None, None, None)            ⇒ Some(MissingSourceInput(sl, so, i))
       }
     })
     x.flatten
@@ -184,8 +166,8 @@ object Validation {
     } yield DuplicatedTransition(transitions.unzip._2)
 
   def duplicatedName(mole: Mole, sources: Sources, hooks: Hooks) = {
-    def duplicated(data: DataSet) =
-      data.data.groupBy(_.prototype.name).filter { case (_, d) ⇒ d.size > 1 }
+    def duplicated(data: PrototypeSet) =
+      data.prototypes.groupBy(_.name).filter { case (_, d) ⇒ d.size > 1 }
 
     mole.capsules.flatMap {
       c ⇒
@@ -220,7 +202,7 @@ object Validation {
 
   private def moleTaskInputMaps(moleTask: MoleTask) =
     (moleTask.mole.root.inputs(moleTask.mole, Sources.empty, Hooks.empty).toList ++
-      moleTask.inputs).map(i ⇒ i.prototype.name -> i.prototype).toMap[String, Prototype[_]]
+      moleTask.inputs).map(i ⇒ i.name -> i).toMap[String, Prototype[_]]
 
   def moleTaskImplicitsErrors(moleTask: MoleTask, capsule: Capsule) = {
     val inputs = moleTaskInputMaps(moleTask)
@@ -238,10 +220,10 @@ object Validation {
       i ← h.inputs
     } yield {
       def checkPrototypeMatch(p: Prototype[_]) =
-        if (!i.prototype.isAssignableFrom(p)) Some(WrongHookType(c, h, i, p))
+        if (!i.isAssignableFrom(p)) Some(WrongHookType(c, h, i, p))
         else None
 
-      val inputName = i.prototype.name
+      val inputName = i.name
 
       val defaultOverride = defaultsOverride.get(inputName)
       val receivedInput = outputs.get(inputName)
@@ -251,16 +233,11 @@ object Validation {
       (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride)
 
       (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
-        case (Some(parameter), _, _, _) ⇒ checkPrototypeMatch(parameter)
-        case (None, Some(received), impl, param) ⇒
-          def providedAfterward = impl.isDefined || param.isDefined
-
-          checkPrototypeMatch(received.prototype) orElse
-            (if ((received.mode is Optional) && !providedAfterward) Some(OptionalHookOutput(c, h, i)) else None)
-        case (None, None, Some(impl), _)     ⇒ checkPrototypeMatch(impl)
-        case (None, None, None, Some(param)) ⇒ checkPrototypeMatch(param)
-        case (None, None, None, None) ⇒
-          if (!(i.mode is Optional)) Some(MissingHookInput(c, h, i)) else None
+        case (Some(parameter), _, _, _)          ⇒ checkPrototypeMatch(parameter)
+        case (None, Some(received), impl, param) ⇒ checkPrototypeMatch(received)
+        case (None, None, Some(impl), _)         ⇒ checkPrototypeMatch(impl)
+        case (None, None, None, Some(param))     ⇒ checkPrototypeMatch(param)
+        case (None, None, None, None)            ⇒ Some(MissingHookInput(c, h, i))
       }
     }).flatten
   }

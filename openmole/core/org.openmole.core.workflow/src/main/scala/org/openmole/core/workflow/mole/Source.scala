@@ -25,8 +25,8 @@ object Source {
 }
 
 trait Source <: InputOutputCheck {
-  def inputs: DataSet
-  def outputs: DataSet
+  def inputs: PrototypeSet
+  def outputs: PrototypeSet
   def defaults: DefaultSet
   protected def process(context: Context, executionContext: ExecutionContext): Context
   def perform(context: Context, executionContext: ExecutionContext): Context = perform(context, process(_, executionContext))

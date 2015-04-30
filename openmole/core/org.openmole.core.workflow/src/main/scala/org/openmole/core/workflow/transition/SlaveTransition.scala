@@ -27,6 +27,6 @@ import org.openmole.core.workflow.transition._
 class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: Filter[String] = Filter.empty) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition {
 
   override def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) =
-    submitIn(filtered(context), ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place after an master transition.")), subMole)
+    submitIn(filtered(context), ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place within an exploration.")), subMole)
 
 }

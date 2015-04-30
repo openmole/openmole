@@ -28,6 +28,7 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.puzzle._
 
 import org.scalatest._
 import scala.collection.mutable.ListBuffer
@@ -54,16 +55,14 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val emptyC = Capsule(emptyT)
 
-    val testT = new TestTask {
-      val name = "Test"
-      override def inputs = DataSet(i.toArray)
-      override def process(context: Context) = {
-        context.contains(i.toArray) should equal(true)
-        context(i.toArray).sorted.deep should equal(data.toArray.deep)
-        endCapsExecuted += 1
-        context
-      }
+    val testT = TestTask { context ⇒
+      context.contains(i.toArray) should equal(true)
+      context(i.toArray).sorted.deep should equal(data.toArray.deep)
+      endCapsExecuted += 1
+      context
     }
+    testT setName "Test"
+    testT addInput (i.toArray)
 
     val testC = Capsule(testT)
 
@@ -91,18 +90,15 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val emptyC = Capsule(emptyT)
 
-    val testT = new TestTask {
-      val name = "Test"
-      override val inputs = DataSet(i.toArray)
-      override def process(context: Context) = {
-        context.contains(i.toArray) should equal(true)
-
-        context(i.toArray).getClass should equal(classOf[Array[Int]])
-        context(i.toArray).sorted.deep should equal(data.sorted.toArray.deep)
-        endCapsExecuted += 1
-        context
-      }
+    val testT = TestTask { context ⇒
+      context.contains(i.toArray) should equal(true)
+      context(i.toArray).getClass should equal(classOf[Array[Int]])
+      context(i.toArray).sorted.deep should equal(data.sorted.toArray.deep)
+      endCapsExecuted += 1
+      context
     }
+    testT setName "Test"
+    testT addInput i.toArray
 
     val testC = Capsule(testT)
 
@@ -128,16 +124,14 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val emptyC = Capsule(emptyT)
 
-    val testT = new TestTask {
-      val name = "Test"
-      override val inputs = DataSet(i.toArray)
-      override def process(context: Context) = {
-        context.contains(i.toArray) should equal(true)
-        context(i.toArray).sorted.deep should equal(data.toArray.deep)
-        endCapsExecuted.incrementAndGet()
-        context
-      }
+    val testT = TestTask { context ⇒
+      context.contains(i.toArray) should equal(true)
+      context(i.toArray).sorted.deep should equal(data.toArray.deep)
+      endCapsExecuted.incrementAndGet()
+      context
     }
+    testT setName "Test"
+    testT addInput i.toArray
 
     val testC = Capsule(testT)
 
@@ -156,24 +150,21 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
     val exploration = ExplorationTask(sampling)
     val endCapsExecuted = new AtomicInteger()
 
-    val run = new TestTask {
-      val name = "Run"
-      override val inputs = DataSet(i)
-      override val outputs = DataSet(i)
-      override def process(context: Context) = {
+    val run =
+      TestTask { context ⇒
         if (context(i) == 42) throw new InternalProcessingError("Some error for test")
         context
       }
-    }
+    run setName "Run"
+    run addInput i
+    run addOutput i
 
-    val test = new TestTask {
-      val name = "Test"
-      override val inputs = DataSet(i.toArray)
-      override def process(context: Context) = {
-        endCapsExecuted.incrementAndGet()
-        context
-      }
+    val test = TestTask { context ⇒
+      endCapsExecuted.incrementAndGet()
+      context
     }
+    test setName "Test"
+    test addInput i.toArray
 
     val ex = (exploration -< run >- test).start
     Try { ex.waitUntilEnded }

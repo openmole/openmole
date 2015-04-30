@@ -24,9 +24,7 @@ import org.openmole.core.workflow.tools.FromContext
 import scala.util.Random
 
 object ListDomain {
-
   def apply[T](values: FromContext[T]*) = new ListDomain[T](values: _*)
-
 }
 
 sealed class ListDomain[T](values: FromContext[T]*) extends Domain[T] with Finite[T] {

@@ -38,7 +38,7 @@ object ModelFamilyTask {
 
     modelFamily.objectives.foreach { o ⇒ addOutput(o) }
     modelFamily.outputs.foreach { o ⇒ addOutput(o) }
-    override def toTask: Task = new ModelFamilyTask(modelFamily) with Built
+    def toTask = new ModelFamilyTask(modelFamily) with Built
   }
 }
 
@@ -51,8 +51,8 @@ abstract class ModelFamilyTask(val modelFamily: ModelFamily) extends Task { t �
 
   @transient lazy val family = new FModelFamily {
     def imports: Seq[String] = modelFamily.imports
-    def inputs = modelFamily.inputs.toSeq.map(d ⇒ d.prototype: TypedValue)
-    def outputs = modelFamily.outputs.toSeq.map(d ⇒ d.prototype: TypedValue)
+    def inputs = modelFamily.inputs.toSeq.map(d ⇒ d: TypedValue)
+    def outputs = modelFamily.outputs.toSeq.map(d ⇒ d: TypedValue)
     def attributes = modelFamily.attributes.map(d ⇒ d.prototype: TypedValue)
     def combination: Combination[Class[_]] = modelFamily.combination
     def compile(code: String): Try[Any] = compilation.compile(code)
@@ -75,7 +75,7 @@ abstract class ModelFamilyTask(val modelFamily: ModelFamily) extends Task { t �
 
   def run(context: Context): Context = {
     lazy val rng = Task.buildRNG(context)
-    val values = family.allInputs.map(a ⇒ context(a.name))
+    val values = family.allInputs.map((a: TypedValue) ⇒ context(a.name))
     val modelId = context(modelFamily.modelIdPrototype)
     val map = family.run(modelId, values: _*)(rng).get
     family.outputs.map(o ⇒ Variable.unsecure(o, map(o.name)))

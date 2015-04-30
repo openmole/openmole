@@ -61,7 +61,7 @@ trait Task <: InputOutputCheck {
    *
    * @return the input of the task
    */
-  def inputs: DataSet
+  def inputs: PrototypeSet
 
   /**
    *
@@ -69,7 +69,7 @@ trait Task <: InputOutputCheck {
    *
    * @return the output data of the task
    */
-  def outputs: DataSet
+  def outputs: PrototypeSet
 
   /**
    *

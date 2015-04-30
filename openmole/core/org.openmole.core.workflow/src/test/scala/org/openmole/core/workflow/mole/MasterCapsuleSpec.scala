@@ -30,6 +30,7 @@ import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.puzzle._
 
 class MasterCapsuleSpec extends FlatSpec with Matchers {
 
@@ -38,20 +39,16 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
   "A master capsule" should "execute tasks" in {
     val p = Prototype[String]("p")
 
-    val t1 = new TestTask {
-      val name = "Test write"
-      override val outputs = DataSet(p)
-      override def process(context: Context) = context + (p -> "Test")
-    }
+    val t1 = TestTask { _ + (p -> "Test") }
+    t1 setName "Test write"
+    t1 addOutput p
 
-    val t2 = new TestTask {
-      val name = "Test read"
-      override val inputs = DataSet(p)
-      override def process(context: Context) = {
-        context(p) should equal("Test")
-        context
-      }
+    val t2 = TestTask { context ⇒
+      context(p) should equal("Test")
+      context
     }
+    t2 setName "Test read"
+    t2 addInput p
 
     val t1c = MasterCapsule(t1)
     val t2c = MasterCapsule(t2)
@@ -74,16 +71,14 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
     emptyT.addInput(i)
     emptyT.addOutput(i)
 
-    val select = new TestTask {
-      val name = "select"
-      override val inputs = DataSet(n, i)
-      override val outputs = DataSet(n, i)
-      override val defaults = DefaultSet(Default(n, 0))
-      override def process(context: Context) = {
-        val nVal = context(n)
-        context + Variable(n, nVal + 1) + Variable(i, (nVal + 1).toString)
-      }
+    val select = TestTask { context ⇒
+      val nVal = context(n)
+      context + Variable(n, nVal + 1) + Variable(i, (nVal + 1).toString)
     }
+    select setName "select"
+    select addInput (n, i)
+    select addOutput (n, i)
+    select setDefault (Default(n, 0))
 
     val emptyC = Capsule(emptyT)
     val slot1 = Slot(emptyC)
@@ -117,30 +112,26 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
     val modelSlot1 = Slot(modelCapsule)
     val modelSlot2 = Slot(modelCapsule)
 
-    val select = new TestTask {
-      val name = "select"
-      override val inputs = DataSet(archive, i)
-      override val outputs = DataSet(archive, i)
-      override val defaults = DefaultSet(Default(archive, Array.empty[Int]))
-      override def process(context: Context) = {
-        context.contains(archive) should equal(true)
-        selectTaskExecuted += 1
-        context + Variable(archive, (context(i) :: context(archive).toList) toArray)
-      }
+    val select = TestTask { context ⇒
+      context.contains(archive) should equal(true)
+      selectTaskExecuted += 1
+      context + Variable(archive, (context(i) :: context(archive).toList) toArray)
     }
+    select setName "select"
+    select addInput (archive, i)
+    select addOutput (archive, i)
+    select setDefault (Default(archive, Array.empty[Int]))
 
     val selectCaps = MasterCapsule(select, archive)
 
-    val finalTask = new TestTask {
-      val name = "final"
-      override val inputs = DataSet(archive)
-      override def process(context: Context) = {
-        context.contains(archive) should equal(true)
-        context(archive).size should equal(1)
-        endCapsExecuted += 1
-        context
-      }
+    val finalTask = TestTask { context ⇒
+      context.contains(archive) should equal(true)
+      context(archive).size should equal(1)
+      endCapsExecuted += 1
+      context
     }
+    finalTask setName "final"
+    finalTask addInput (archive)
 
     val skel = exploration -< modelSlot1 -- selectCaps
     val loop = selectCaps -- modelSlot2
@@ -155,10 +146,8 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
   "A master capsule" should "work with mole tasks" in {
 
-    val t1 = new TestTask {
-      val name = "Test write"
-      override def process(context: Context) = context
-    }
+    val t1 = EmptyTask()
+    t1 setName "Test write"
 
     val mole = Mole(t1)
 
