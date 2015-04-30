@@ -300,10 +300,11 @@ package object file { p ⇒
       val linkTarget = Paths.get(target)
       try Files.createSymbolicLink(file, linkTarget)
       catch {
-        case e: IOException ⇒
+        case e: UnsupportedOperationException ⇒
           Logger.getLogger(getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
           val fileTarget = new File(file.getParentFile, target)
           Files.copy(fileTarget, file, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING)
+        case e: IOException ⇒ throw e
       }
     }
 
