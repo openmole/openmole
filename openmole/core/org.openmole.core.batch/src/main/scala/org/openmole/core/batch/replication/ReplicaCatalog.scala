@@ -133,7 +133,7 @@ object ReplicaCatalog extends Logger {
               else true
 
             def getReplica =
-              replicas.filter { r ⇒ r.source === src.getCanonicalPath && r.storage === storage.id && r.hash === hash }
+              replicas.filter { r ⇒ r.source === srcPath.getCanonicalPath && r.storage === storage.id && r.hash === hash }
 
             def assertReplica(r: Replica) = {
               assert(r.path != null)
@@ -208,53 +208,5 @@ object ReplicaCatalog extends Logger {
     if (!matcher.matches) None
     else Try(matcher.group(1).toLong).toOption
   }
-
-  /*def replicas(storage: StorageService)(implicit objectContainer: ObjectContainer): Iterable[Replica] =
-    objectContainer.queryByExample(new Replica(_storage = storage.id, _environment = storage.environment.id)).toList
-
-  private def insert(replica: Replica)(implicit objectContainer: ObjectContainer) = {
-    logger.fine("Insert " + replica)
-    objectContainer.store(replica)
-  }
-
-  def remove(replica: Replica)(implicit session: Session) =
-    replicas.filter { _ === replica }.delete
-    withSemaphore(key(replica), objectContainer) {
-      removeNoLock(replica)
-    }
-
-  private def removeNoLock(replica: Replica)(implicit objectContainer: ObjectContainer) =
-    objectContainer.delete(replica)
-
-  def clean(replica: Replica, storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer) =
-    withSemaphore(key(replica), objectContainer) {
-      removeNoLock(replica)
-      logger.fine("Remove " + replica)
-      if (!contains(replica.storage, replica.path)) {
-        logger.fine("Clean " + replica)
-        if (storage.exists(replica.path)) storage.backgroundRmFile(replica.path)
-      }
-    }
-
-  def rmFileIfNotUsed(storage: StorageService, path: String)(implicit objectContainer: ObjectContainer) = {
-    val name = new File(path).getName
-    val matcher = replicationPattern.matcher(name)
-    if (!matcher.matches) storage.backgroundRmFile(path)
-    else {
-      val hash = matcher.group(1)
-      withSemaphore(key(hash, storage), objectContainer) {
-        if (!contains(storage.id, path)) storage.backgroundRmFile(path)
-      }
-    }
-  }
-
-  private def contains(storage: String, path: String)(implicit objectContainer: ObjectContainer) =
-    !objectContainer.queryByExample(new Replica(_storage = storage, _path = path)).isEmpty
-
-  private def contains(replica: Replica)(implicit objectContainer: ObjectContainer) =
-    !objectContainer.queryByExample(replica).isEmpty*/
-
-  /*def cleanAll(implicit objectContainer: ObjectContainer) =
-    for (rep ← allReplicas) clean(rep)*/
 
 }
