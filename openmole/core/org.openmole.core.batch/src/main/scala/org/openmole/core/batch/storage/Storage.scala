@@ -26,6 +26,12 @@ import org.openmole.tool.file._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.tool.thread._
 
+object TransferOptions {
+  implicit def default = TransferOptions()
+}
+
+case class TransferOptions(raw: Boolean = false)
+
 object Storage {
   val BufferSize = new ConfigurationLocation("Storage", "BufferSize")
   val CopyTimeout = new ConfigurationLocation("Storage", "CopyTimeout")
@@ -56,26 +62,14 @@ trait Storage {
   protected def openOutputStream(path: String): OutputStream = storage.openOutputStream(path)
   protected def mv(from: String, to: String) = storage.mv(from, to)
 
-  protected def upload(src: File, dest: String) = {
-    val os = openOutputStream(dest)
+  protected def upload(src: File, dest: String, options: TransferOptions) = {
+    val os = if (!options.raw) openOutputStream(dest).toGZ else openOutputStream(dest)
     try src.copy(os, bufferSize, copyTimeout)
     finally timeout(os.close)(closeTimeout)
   }
 
-  protected def uploadGZ(src: File, dest: String) = {
-    val os = openOutputStream(dest).toGZ
-    try src.copy(os, bufferSize, copyTimeout)
-    finally timeout(os.close)(closeTimeout)
-  }
-
-  protected def download(src: String, dest: File) = {
-    val is = openInputStream(src)
-    try is.copy(dest, bufferSize, copyTimeout)
-    finally timeout(is.close)(closeTimeout)
-  }
-
-  protected def downloadGZ(src: String, dest: File) = {
-    val is = openInputStream(src).toGZ
+  protected def download(src: String, dest: File, options: TransferOptions) = {
+    val is = if (!options.raw) openInputStream(src).toGZ else openInputStream(src)
     try is.copy(dest, bufferSize, copyTimeout)
     finally timeout(is.close)(closeTimeout)
   }

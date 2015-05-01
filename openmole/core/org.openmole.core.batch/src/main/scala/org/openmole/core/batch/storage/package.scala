@@ -20,14 +20,12 @@ package org.openmole.core.batch
 import java.io.File
 
 package object storage {
-  implicit def simpleToRemoteConverter(s: SimpleStorage) =
-    new RemoteStorage {
-      val storage = s
 
-      override def child(parent: String, child: String): String = storage.child(parent, child)
-      override def uploadGZ(src: File, dest: String): Unit = storage.uploadGZ(src, dest)
-      override def download(src: String, dest: File): Unit = storage.download(src, dest)
-      override def upload(src: File, dest: String): Unit = storage.upload(src, dest)
-      override def downloadGZ(src: String, dest: File): Unit = storage.downloadGZ(src, dest)
-    }
+  implicit class SimpleRemoveStorage(s: SimpleStorage) extends RemoteStorage {
+    val storage = s
+    override def child(parent: String, child: String): String = storage.child(parent, child)
+    override def download(src: String, dest: File, options: TransferOptions) = storage.download(src, dest, options)
+    override def upload(src: File, dest: String, options: TransferOptions) = storage.upload(src, dest, options)
+  }
+
 }

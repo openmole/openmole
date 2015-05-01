@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.batch.storage.{ RemoteStorage, SimpleStorage }
+import org.openmole.core.batch.storage.{ TransferOptions, RemoteStorage, SimpleStorage }
 import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
 import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage }
@@ -48,17 +48,21 @@ class RemoteGliteStorage(val host: String, val port: Int, val voName: String) ex
 
   override def child(parent: String, child: String): String = GSStorage.child(parent, child)
 
-  override def downloadGZ(src: String, dest: File): Unit = Workspace.withTmpFile { tmpFile ⇒
-    download(src, tmpFile)
-    tmpFile.copyUncompressFile(dest)
-  }
+  override def download(src: String, dest: File, options: TransferOptions): Unit =
+    if (options.raw) download(src, dest)
+    else Workspace.withTmpFile { tmpFile ⇒
+      download(src, tmpFile)
+      tmpFile.copyUncompressFile(dest)
+    }
 
-  override def download(src: String, dest: File): Unit = run(lcgCpCmd(url.resolve(src), dest.getAbsolutePath))
+  private def download(src: String, dest: File): Unit = run(lcgCpCmd(url.resolve(src), dest.getAbsolutePath))
 
-  override def uploadGZ(src: File, dest: String): Unit = Workspace.withTmpFile { tmpFile ⇒
-    src.copyCompressFile(tmpFile)
-    upload(tmpFile, dest)
-  }
+  override def upload(src: File, dest: String, options: TransferOptions): Unit =
+    if (options.raw) upload(src, dest)
+    else Workspace.withTmpFile { tmpFile ⇒
+      src.copyCompressFile(tmpFile)
+      upload(tmpFile, dest)
+    }
 
-  override def upload(src: File, dest: String): Unit = run(lcgCpCmd(src.getAbsolutePath, url.resolve(dest)))
+  private def upload(src: File, dest: String): Unit = run(lcgCpCmd(src.getAbsolutePath, url.resolve(dest)))
 }

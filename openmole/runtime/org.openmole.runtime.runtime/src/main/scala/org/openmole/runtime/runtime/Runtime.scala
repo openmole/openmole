@@ -62,7 +62,7 @@ class Runtime {
 
     val executionMessage =
       Workspace.withTmpFile { executionMesageFileCache ⇒
-        retry(storage.downloadGZ(inputMessagePath, executionMesageFileCache))
+        retry(storage.download(inputMessagePath, executionMesageFileCache))
         SerialiserService.deserialise[ExecutionMessage](executionMesageFileCache)
       }
 
@@ -83,7 +83,7 @@ class Runtime {
     def getReplicatedFile(replicatedFile: ReplicatedFile) = {
       val cache = Workspace.newFile
 
-      retry(storage.downloadGZ(replicatedFile.path, cache))
+      retry(storage.download(replicatedFile.path, cache))
       val cacheHash = cache.hash.toString
 
       if (cacheHash != replicatedFile.hash)
@@ -137,7 +137,7 @@ class Runtime {
 
       val jobsFileCache = Workspace.newFile
       logger.fine("Downloading execution message")
-      retry(storage.downloadGZ(executionMessage.jobs.path, jobsFileCache))
+      retry(storage.download(executionMessage.jobs.path, jobsFileCache))
 
       if (jobsFileCache.hash.toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
 
@@ -168,7 +168,7 @@ class Runtime {
       val result = new FileMessage(uploadedcontextResults, contextResultFile.hash.toString)
 
       logger.fine("Upload the results")
-      retry(storage.uploadGZ(contextResultFile, uploadedcontextResults))
+      retry(storage.upload(contextResultFile, uploadedcontextResults))
       contextResultFile.delete
 
       val endTime = System.currentTimeMillis
@@ -192,7 +192,7 @@ class Runtime {
     val outputMessage =
       if (out.length != 0) {
         val output = storage.child(executionMessage.communicationDirPath, Storage.uniqName("output", ".txt"))
-        retry(storage.uploadGZ(out, output))
+        retry(storage.upload(out, output))
         Some(new FileMessage(output, out.hash.toString))
       }
       else None
@@ -202,7 +202,7 @@ class Runtime {
     val errorMessage =
       if (err.length != 0) {
         val errout = storage.child(executionMessage.communicationDirPath, Storage.uniqName("outputError", ".txt"))
-        retry(storage.uploadGZ(err, errout))
+        retry(storage.upload(err, errout))
         Some(new FileMessage(errout, err.hash.toString))
       }
       else None
@@ -214,7 +214,7 @@ class Runtime {
     logger.fine("Upload the result message")
     val outputLocal = Workspace.newFile("output", ".res")
     SerialiserService.serialise(runtimeResult, outputLocal)
-    try retry(storage.uploadGZ(outputLocal, outputMessagePath))
+    try retry(storage.upload(outputLocal, outputMessagePath))
     finally outputLocal.delete
 
     result

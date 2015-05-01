@@ -111,10 +111,8 @@ trait StorageService extends BatchService with Storage {
   def openInputStream(path: String)(implicit token: AccessToken): InputStream = token.synchronized { super.openInputStream(path) }
   def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = token.synchronized { super.openOutputStream(path) }
 
-  def upload(src: File, dest: String)(implicit token: AccessToken) = token.synchronized { super.upload(src, dest) }
-  def uploadGZ(src: File, dest: String)(implicit token: AccessToken) = token.synchronized { super.uploadGZ(src, dest) }
-  def download(src: String, dest: File)(implicit token: AccessToken) = token.synchronized { super.download(src, dest) }
-  def downloadGZ(src: String, dest: File)(implicit token: AccessToken) = token.synchronized { super.downloadGZ(src, dest) }
+  def uploadGZ(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.synchronized { super.upload(src, dest, options) }
+  def downloadGZ(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.synchronized { super.download(src, dest, options) }
 
   def baseDirName = Workspace.preference(Workspace.uniqueID) + '/'
 

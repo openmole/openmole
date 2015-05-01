@@ -173,7 +173,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       val localFile = new File(msg.path)
       val uploadedFile = storage.child(communicationDir, Storage.uniqName("fileMsg", ".bin"))
       logger.info("Uploading " + localFile + " to " + uploadedFile)
-      try storage.upload(localFile, uploadedFile)
+      try storage.upload(localFile, uploadedFile, TransferOptions(raw = true))
       finally localFile.delete
       logger.info("Uploaded " + localFile)
       new FileMessage(uploadedFile, msg.hash)
@@ -208,7 +208,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       logger.info("Uploading job results")
       SerialiserService.serialise(resultToSend, outputLocal)
       val tmpResultFile = storage.child(tmpResultsDirName, Storage.uniqName(job, ".res"))
-      storage.uploadGZ(outputLocal, tmpResultFile)
+      storage.upload(outputLocal, tmpResultFile)
       val resultFile = storage.child(resultsDirName, Storage.uniqName(job, ".res"))
       storage.mv(tmpResultFile, resultFile)
       logger.info("Job results uploaded at " + resultFile)
@@ -255,7 +255,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       val jobMessage =
         Workspace.withTmpFile {
           f ⇒
-            storage.downloadGZ(storage.child(jobsDirName, job), f)
+            storage.download(storage.child(jobsDirName, job), f)
             SerialiserService.deserialise[DesktopGridJobMessage](f)
         }
 
@@ -269,14 +269,14 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
     def getFileUnzipVerifyHash(fileMessage: FileMessage) = {
       val file = Workspace.newFile("cache", ".bin") //cacheUnziped(fileMessage.path)
-      storage.downloadGZ(fileMessage.path, file)
+      storage.download(fileMessage.path, file)
       if (file.hash.toString != fileMessage.hash) throw new InternalProcessingError("Wrong hash for file " + fileMessage.path + ".")
       file -> fileMessage.hash
     }
 
     def getFile(fileMessage: FileMessage) = {
       val file = Workspace.newFile("cache", ".bin")
-      storage.download(fileMessage.path, file)
+      storage.download(fileMessage.path, file, TransferOptions(raw = true))
       file -> fileMessage.hash
     }
 
@@ -306,7 +306,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           }
 
           val executionMessageFileCache = Workspace.newFile("executionMessage", ".xml")
-          storage.downloadGZ(jobMessage.executionMessagePath, executionMessageFileCache)
+          storage.download(jobMessage.executionMessagePath, executionMessageFileCache)
           val executionMessage = SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
           executionMessageFileCache.delete
 
@@ -321,7 +321,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           val plugins = executionMessage.plugins.map(localCachedReplicatedFile)
 
           val jobsFile = Workspace.newFile("jobs", ".xml")
-          storage.download(executionMessage.jobs.path, jobsFile)
+          storage.download(executionMessage.jobs.path, jobsFile, TransferOptions(raw = true))
           val jobs = new FileMessage(jobsFile.getAbsolutePath, executionMessage.jobs.hash)
 
           val localCommunicationDirPath = Workspace.newDir

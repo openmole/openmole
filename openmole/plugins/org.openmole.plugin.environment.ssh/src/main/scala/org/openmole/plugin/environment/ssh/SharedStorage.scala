@@ -74,7 +74,7 @@ trait SharedStorage extends SSHService { js ⇒
             script.content = content
 
             val remoteScript = sharedFS.child(workdir, scriptName)
-            sharedFS.upload(script, remoteScript)
+            sharedFS.uploadGZ(script, remoteScript, options = TransferOptions(raw = true))
             (workdir, scriptName)
           }
           finally script.delete
@@ -118,7 +118,7 @@ trait SharedStorage extends SSHService { js ⇒
       script.content = content
 
       val remoteScript = sharedFS.child(serializedJob.path, Storage.uniqName("run", ".sh"))
-      sharedFS.withToken { sharedFS.upload(script, remoteScript)(_) }
+      sharedFS.withToken { sharedFS.uploadGZ(script, remoteScript, options = TransferOptions(raw = true))(_) }
       remoteScript
     }
     finally script.delete
