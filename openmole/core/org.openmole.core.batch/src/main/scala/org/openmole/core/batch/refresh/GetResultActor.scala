@@ -88,7 +88,7 @@ class GetResultActor(jobManager: JobManager) {
   private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken): RuntimeResult = {
     val resultFile = Workspace.newFile
     try {
-      signalDownload(storage.downloadGZ(outputFilePath, resultFile), outputFilePath, storage)
+      signalDownload(storage.download(outputFilePath, resultFile), outputFilePath, storage)
       SerialiserService.deserialise(resultFile)
     }
     finally resultFile.delete
@@ -100,7 +100,7 @@ class GetResultActor(jobManager: JobManager) {
         try {
           val tmpFile = Workspace.newFile
           try {
-            signalDownload(storage.downloadGZ(message.path, tmpFile), message.path, storage)
+            signalDownload(storage.download(message.path, tmpFile), message.path, storage)
 
             /*val stdOutHash = HashService.computeHash(stdOutFile)
              if (stdOutHash != message.hash)
@@ -129,7 +129,7 @@ class GetResultActor(jobManager: JobManager) {
     if (resultPath == null) throw new InternalProcessingError("Context results path is null")
     val contextResutsFileCache = Workspace.newFile
     try {
-      signalDownload(storage.downloadGZ(resultPath.path, contextResutsFileCache), resultPath.path, storage)
+      signalDownload(storage.download(resultPath.path, contextResutsFileCache), resultPath.path, storage)
       if (contextResutsFileCache.hash != resultPath.hash) throw new InternalProcessingError("Results have been corrupted during the transfer.")
       SerialiserService.deserialiseAndExtractFiles(contextResutsFileCache)
     }

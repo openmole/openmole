@@ -62,7 +62,7 @@ trait EGIStorageService extends PersistentStorageService with QualityControl wit
   override def openInputStream(path: String)(implicit token: AccessToken): InputStream = quality { super.openInputStream(path)(token) }
   override def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = quality { super.openOutputStream(path)(token) }
 
-  override def uploadGZ(src: File, dest: String, options: TransferOptions)(implicit token: AccessToken) = quality { super.uploadGZ(src, dest, options)(token) }
-  override def downloadGZ(src: String, dest: File, options: TransferOptions)(implicit token: AccessToken) = quality { super.downloadGZ(src, dest, options)(token) }
+  override def upload(src: File, dest: String, options: TransferOptions)(implicit token: AccessToken) = quality { super.upload(src, dest, options)(token) }
+  override def download(src: String, dest: File, options: TransferOptions)(implicit token: AccessToken) = quality { super.download(src, dest, options)(token) }
 
 }

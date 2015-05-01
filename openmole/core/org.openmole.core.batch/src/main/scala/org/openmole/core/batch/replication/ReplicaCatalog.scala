@@ -149,7 +149,7 @@ object ReplicaCatalog extends Logger {
                 val name = Storage.uniqName(System.currentTimeMillis.toString, ".rep")
                 val newFile = storage.child(storage.persistentDir, name)
                 logger.fine(s"Upload $src to $newFile on ${storage.id}")
-                signalUpload(storage.uploadGZ(src, newFile), newFile, storage)
+                signalUpload(storage.upload(src, newFile), newFile, storage)
 
                 val replica = session.withTransaction {
                   getReplica.firstOption match {
