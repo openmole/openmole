@@ -30,6 +30,7 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.environment.BatchEnvironment.{ signalUpload }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.tools.service.Logger
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.core.workflow.job._
@@ -39,6 +40,10 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.tool.tar.TarOutputStream
 import scala.collection.immutable.TreeSet
 import scala.slick.driver.H2Driver.simple._
+
+object UploadActor extends Logger
+
+import UploadActor._
 
 class UploadActor(jobManager: JobManager) {
 
@@ -125,7 +130,7 @@ class UploadActor(jobManager: JobManager) {
   }
 
   def toReplicatedFile(job: Job, file: File, storage: StorageService)(implicit token: AccessToken, session: Session): ReplicatedFile = {
-    if (!file.exists) throw new UserBadDataError(s"File/category $file is required but doesn't exist.")
+    if (!file.exists) throw new UserBadDataError(s"File $file is required but doesn't exist.")
 
     val isDir = file.isDirectory
     var toReplicate = file

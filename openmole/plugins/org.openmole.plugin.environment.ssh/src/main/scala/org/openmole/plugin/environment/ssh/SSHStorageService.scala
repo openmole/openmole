@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.ssh
 
-import org.openmole.core.batch.storage.{ RemoteStorage, StorageService }
+import org.openmole.core.batch.storage.{ SimpleStorage, RemoteStorage, StorageService }
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.{ GridScaleStorage, LocalStorage }
@@ -34,6 +34,6 @@ trait SSHStorageService extends StorageService with SSHService with GridScaleSto
 
   lazy val home = storage.home
 
-  lazy val remoteStorage: RemoteStorage = new LocalStorage(root)
+  lazy val remoteStorage: RemoteStorage = new LocalStorage(root) with SimpleStorage
 
 }
