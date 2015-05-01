@@ -49,8 +49,6 @@ object Core extends Defaults {
 
   val fileDeleter = OsgiProject("filedeleter", imports = Seq("*")) settings (includeOsgi) dependsOn (tools)
 
-  val fileCache = OsgiProject("filecache", imports = Seq("*")) settings (includeOsgi) dependsOn (fileDeleter)
-
   val macros = OsgiProject("macros", imports = Seq("*")) settings (libraryDependencies += scalaLang % "provided" /*, provided(scalaCompiler)*/ )
 
   val pluginManager = OsgiProject("pluginmanager",
@@ -59,7 +57,7 @@ object Core extends Defaults {
 
   val updater = OsgiProject("updater", imports = Seq("*")) dependsOn (exception, tools, workspace)
 
-  val fileService = OsgiProject("fileservice", imports = Seq("*")) settings (includeOsgi) dependsOn (tools, fileCache, updater, workspace, openmoleTar % "provided")
+  val fileService = OsgiProject("fileservice", imports = Seq("*")) settings (includeOsgi) dependsOn (tools, updater, workspace, fileDeleter, openmoleTar % "provided")
 
   val logging = OsgiProject(
     "logging",

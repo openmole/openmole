@@ -15,10 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.filecache
+package org.openmole.core.fileservice
 
 import java.io.File
 
-trait IFileCache {
-  def file(persist: Boolean): File
+import org.openmole.core.filedeleter.FileDeleter
+
+object FileCache {
+  def apply(file: File) = new FileCache(file)
+}
+
+class FileCache(val file: File) {
+  override protected def finalize = FileDeleter.assynchonousRemove(file)
 }

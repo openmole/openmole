@@ -28,7 +28,7 @@ object TransferOptions {
   implicit def default = TransferOptions()
 }
 
-case class TransferOptions(raw: Boolean = false)
+case class TransferOptions(raw: Boolean = false, forceCopy: Boolean = false)
 
 object Storage {
   val BufferSize = new ConfigurationLocation("Storage", "BufferSize")

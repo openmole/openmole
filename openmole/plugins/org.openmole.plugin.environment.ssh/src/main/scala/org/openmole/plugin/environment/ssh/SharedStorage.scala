@@ -32,7 +32,8 @@ import SharedStorage._
 import Log._
 
 trait SharedStorage extends SSHService { js ⇒
-  def sharedFS: SSHStorageService
+
+  def sharedFS: StorageService
 
   def installJobService = new fr.iscpif.gridscale.ssh.SSHJobService {
     def credential = js.credential

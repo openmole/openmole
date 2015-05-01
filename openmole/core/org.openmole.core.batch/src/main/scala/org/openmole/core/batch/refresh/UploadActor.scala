@@ -134,15 +134,16 @@ class UploadActor(jobManager: JobManager) {
 
     val isDir = file.isDirectory
     var toReplicate = file
-    val toReplicatePath = file.getAbsoluteFile
+    val toReplicatePath = file.getCanonicalFile
 
     //Hold cache to avoid gc and file deletion
-    val cache = if (isDir) {
-      val cache = FileService.archiveForDir(job.moleExecution, file)
-      toReplicate = cache.file(false)
-      cache
-    }
-    else null
+    val cache =
+      if (isDir) {
+        val cache = FileService.archiveForDir(job.moleExecution, file)
+        toReplicate = cache.file
+        cache
+      }
+      else null
 
     val hash = FileService.hash(job.moleExecution, toReplicate).toString
     val replica = ReplicaCatalog.uploadAndGet(toReplicate, toReplicatePath, hash, storage)
