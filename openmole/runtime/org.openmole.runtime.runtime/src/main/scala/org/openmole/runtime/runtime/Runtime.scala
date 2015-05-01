@@ -61,9 +61,9 @@ class Runtime {
     logger.fine("Downloading input message")
 
     val executionMessage =
-      Workspace.withTmpFile { executionMesageFileCache ⇒
-        retry(storage.download(inputMessagePath, executionMesageFileCache))
-        SerialiserService.deserialise[ExecutionMessage](executionMesageFileCache)
+      Workspace.withTmpFile { executionMessageFileCache ⇒
+        retry(storage.download(inputMessagePath, executionMessageFileCache))
+        SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
       }
 
     val oldOut = System.out
@@ -84,10 +84,10 @@ class Runtime {
       val cache = Workspace.newFile
 
       retry(storage.download(replicatedFile.path, cache))
-      val cacheHash = cache.hash.toString
 
+      /*val cacheHash = cache.hash.toString
       if (cacheHash != replicatedFile.hash)
-        throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.src.toString + " replicated at " + replicatedFile.path)
+        throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.src.toString + " replicated at " + replicatedFile.path)*/
 
       val dl = if (replicatedFile.directory) {
         val local = Workspace.newDir("dirReplica")
@@ -139,14 +139,14 @@ class Runtime {
       logger.fine("Downloading execution message")
       retry(storage.download(executionMessage.jobs.path, jobsFileCache))
 
-      if (jobsFileCache.hash.toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
+      //if (jobsFileCache.hash.toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job doesn't match.")
 
       val tis = new TarInputStream(new FileInputStream(jobsFileCache))
-      val runableTasks = tis.applyAndClose(e ⇒ { SerialiserService.deserialiseReplaceFiles[RunnableTask](tis, usedFiles) })
+      val runnableTasks = tis.applyAndClose(e ⇒ { SerialiserService.deserialiseReplaceFiles[RunnableTask](tis, usedFiles) })
       jobsFileCache.delete
 
-      val saver = new ContextSaver(runableTasks.size)
-      val allMoleJobs = runableTasks.map { _.toMoleJob(saver.save) }
+      val saver = new ContextSaver(runnableTasks.size)
+      val allMoleJobs = runnableTasks.map { _.toMoleJob(saver.save) }
 
       val beginExecutionTime = System.currentTimeMillis
 
@@ -161,19 +161,18 @@ class Runtime {
       logger.fine("Results " + saver.results)
 
       val contextResults = new ContextResults(saver.results)
-      val contextResultFile = Workspace.newFile
+      Workspace.withTmpFile { contextResultFile ⇒
+        SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
+        val uploadedcontextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("uploaded", ".tgz"))
+        val result = new FileMessage(uploadedcontextResults, contextResultFile.hash.toString)
 
-      SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
-      val uploadedcontextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("uplodedTar", ".tgz"))
-      val result = new FileMessage(uploadedcontextResults, contextResultFile.hash.toString)
+        logger.fine("Upload the results")
+        retry(storage.upload(contextResultFile, uploadedcontextResults))
 
-      logger.fine("Upload the results")
-      retry(storage.upload(contextResultFile, uploadedcontextResults))
-      contextResultFile.delete
+        val endTime = System.currentTimeMillis
+        Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime, LocalHostName.localHostName))
+      }
 
-      val endTime = System.currentTimeMillis
-
-      Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime, LocalHostName.localHostName))
     }
     catch {
       case t: Throwable ⇒
@@ -188,7 +187,7 @@ class Runtime {
       System.setErr(oldErr)
     }
 
-    logger.fine("Upload the outputs")
+    logger.fine("Upload the output")
     val outputMessage =
       if (out.length != 0) {
         val output = storage.child(executionMessage.communicationDirPath, Storage.uniqName("output", ".txt"))
