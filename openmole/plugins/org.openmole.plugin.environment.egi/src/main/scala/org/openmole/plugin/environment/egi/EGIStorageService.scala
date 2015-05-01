@@ -25,6 +25,7 @@ import fr.iscpif.gridscale.glite.{ SRMStorage, GlobusAuthentication }
 import java.net.URI
 import java.io.{ File, InputStream, OutputStream }
 import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.gridscale.GridScaleStorage
 
 object EGIStorageService {
 
@@ -50,7 +51,7 @@ object EGIStorageService {
 
 }
 
-trait EGIStorageService extends PersistentStorageService with QualityControl with LimitedAccess with AvailabitityQuality {
+trait EGIStorageService extends PersistentStorageService with QualityControl with LimitedAccess with AvailabitityQuality with GridScaleStorage {
   def hysteresis = Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis)
 
   override def exists(path: String)(implicit token: AccessToken): Boolean = quality { super.exists(path)(token) }

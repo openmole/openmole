@@ -20,10 +20,10 @@ package org.openmole.plugin.environment.ssh
 import org.openmole.core.batch.storage.{ RemoteStorage, StorageService }
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.gridscale.LocalStorage
+import org.openmole.plugin.environment.gridscale.{ GridScaleStorage, LocalStorage }
 import fr.iscpif.gridscale.ssh.SSHConnectionCache
 
-trait SSHStorageService extends StorageService with SSHService { ss ⇒
+trait SSHStorageService extends StorageService with SSHService with GridScaleStorage { ss ⇒
 
   val environment: BatchEnvironment with SSHAccess
 

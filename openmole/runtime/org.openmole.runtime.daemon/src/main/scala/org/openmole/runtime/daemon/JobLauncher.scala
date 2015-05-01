@@ -22,6 +22,7 @@ import java.util.Random
 import java.util.UUID
 import java.util.concurrent.Executors
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.plugin.environment.gridscale._
 import org.openmole.tool.file._
 import org.openmole.tool.thread._
 import org.openmole.core.tools.service.{ Logger, OS, ProcessUtil }
@@ -63,7 +64,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val _port = if (splitHost.size == 2) splitHost(1).toInt else 22
     val _host = splitHost(0)
 
-    val storage = new SimpleStorage {
+    val storage = new SimpleStorage with GridScaleStorage {
       val storage = new SSHStorage with SSHUserPasswordAuthentication {
         val host = _host
         override val port = _port

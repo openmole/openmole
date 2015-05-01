@@ -32,19 +32,19 @@ import org.openmole.core.tools.service.Logger
 import scala.collection.JavaConversions._
 
 trait SimpleStorage extends Storage {
-  override def exists(path: String): Boolean = super.exists(path)
-  override def listNames(path: String): Seq[String] = super.listNames(path)
-  override def list(path: String): Seq[(String, FileType)] = super.list(path)
-  override def makeDir(path: String): Unit = super.makeDir(path)
-  override def rmDir(path: String): Unit = super.rmDir(path)
-  override def rmFile(path: String): Unit = super.rmFile(path)
-  override def mv(from: String, to: String) = super.mv(from, to)
+  def exists(path: String): Boolean = _exists(path)
+  def listNames(path: String): Seq[String] = _listNames(path)
+  def list(path: String): Seq[(String, FileType)] = _list(path)
+  def makeDir(path: String): Unit = _makeDir(path)
+  def rmDir(path: String): Unit = _rmDir(path)
+  def rmFile(path: String): Unit = _rmFile(path)
+  def mv(from: String, to: String) = _mv(from, to)
 
-  override def openInputStream(path: String): InputStream = super.openInputStream(path)
-  override def openOutputStream(path: String): OutputStream = super.openOutputStream(path)
+  def openInputStream(path: String): InputStream = _openInputStream(path)
+  def openOutputStream(path: String): OutputStream = _openOutputStream(path)
 
-  override def upload(src: File, dest: String, options: TransferOptions): Unit = super.upload(src, dest, options)
-  override def download(src: String, dest: File, options: TransferOptions): Unit = super.download(src, dest, options)
+  def upload(src: File, dest: String, options: TransferOptions): Unit = _upload(src, dest, options)
+  def download(src: String, dest: File, options: TransferOptions): Unit = _download(src, dest, options)
 
   def create(dest: String) = {
     val os = openOutputStream(dest)

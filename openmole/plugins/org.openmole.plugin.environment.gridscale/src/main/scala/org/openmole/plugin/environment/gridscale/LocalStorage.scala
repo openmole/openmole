@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.gridscale
 import fr.iscpif.gridscale.storage.{ LocalStorage ⇒ GSLocalStorage }
 import org.openmole.core.batch.storage.SimpleStorage
 
-class LocalStorage(val root: String) extends SimpleStorage {
+class LocalStorage(val root: String) extends SimpleStorage with GridScaleStorage {
   val authentication: Unit = Unit
   val storage = new GSLocalStorage {}
 }
