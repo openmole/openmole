@@ -83,9 +83,15 @@ class UploadActor(jobManager: JobManager) {
 
       val runtime = replicateTheRuntime(job, environment, storage)
 
+      val jobForRuntimePath = storage.child(communicationPath, Storage.uniqName("job", ".tgz"))
+
+      val jobHash = jobFile.hash.toString
+      signalUpload(storage.upload(jobFile, jobForRuntimePath, TransferOptions(forceCopy = true, canMove = true)), jobForRuntimePath, storage)
+      val jobMessage = FileMessage(jobForRuntimePath, jobHash)
+
       val executionMessage = createExecutionMessage(
         job,
-        jobFile,
+        jobMessage,
         serializationFiles,
         serialisationPluginFiles,
         storage,
@@ -94,7 +100,7 @@ class UploadActor(jobManager: JobManager) {
       /* ---- upload the execution message ----*/
       Workspace.withTmpFile("job", ".xml") { executionMessageFile ⇒
         SerialiserService.serialise(executionMessage, executionMessageFile)
-        signalUpload(storage.upload(executionMessageFile, inputPath), inputPath, storage)
+        signalUpload(storage.upload(executionMessageFile, inputPath, TransferOptions(forceCopy = true, canMove = true)), inputPath, storage)
       }
 
       SerializedJob(storage, communicationPath, inputPath, runtime)
@@ -129,24 +135,26 @@ class UploadActor(jobManager: JobManager) {
     (files, plugins)
   }
 
-  def toReplicatedFile(job: Job, file: File, storage: StorageService)(implicit token: AccessToken, session: Session): ReplicatedFile = {
+  def toReplicatedFile(job: Job, file: File, storage: StorageService, transferOptions: TransferOptions)(implicit token: AccessToken, session: Session): ReplicatedFile = {
     if (!file.exists) throw new UserBadDataError(s"File $file is required but doesn't exist.")
 
     val isDir = file.isDirectory
-    var toReplicate = file
     val toReplicatePath = file.getCanonicalFile
 
-    //Hold cache to avoid gc and file deletion
-    val cache =
-      if (isDir) {
-        val cache = FileService.archiveForDir(job.moleExecution, file)
-        toReplicate = cache.file
-        cache
-      }
-      else null
+    val toReplicate =
+      if (isDir) FileService.archiveForDir(job.moleExecution, file).file
+      else file
+
+    def upload = {
+      val name = Storage.uniqName(System.currentTimeMillis.toString, ".rep")
+      val newFile = storage.child(storage.persistentDir, name)
+      Log.logger.fine(s"Upload $toReplicate to $newFile on ${storage.id}")
+      signalUpload(storage.upload(toReplicate, newFile, transferOptions), newFile, storage)
+      newFile
+    }
 
     val hash = FileService.hash(job.moleExecution, toReplicate).toString
-    val replica = ReplicaCatalog.uploadAndGet(toReplicate, toReplicatePath, hash, storage)
+    val replica = ReplicaCatalog.uploadAndGet(upload, toReplicatePath, hash, storage)
     ReplicatedFile(file, isDir, hash, replica.path, file.mode)
   }
 
@@ -155,12 +163,12 @@ class UploadActor(jobManager: JobManager) {
     environment: BatchEnvironment,
     storage: StorageService)(implicit token: AccessToken, session: Session) = {
 
-    val environmentPluginPath = environment.plugins.map { p ⇒ toReplicatedFile(job, p, storage) }.map { FileMessage(_) }
-    val runtimeFileMessage = FileMessage(toReplicatedFile(job, environment.runtime, storage))
-    val jvmLinuxI386FileMessage = FileMessage(toReplicatedFile(job, environment.jvmLinuxI386, storage))
-    val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(job, environment.jvmLinuxX64, storage))
+    val environmentPluginPath = environment.plugins.map { p ⇒ toReplicatedFile(job, p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
+    val runtimeFileMessage = FileMessage(toReplicatedFile(job, environment.runtime, storage, TransferOptions(raw = true)))
+    val jvmLinuxI386FileMessage = FileMessage(toReplicatedFile(job, environment.jvmLinuxI386, storage, TransferOptions(raw = true)))
+    val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(job, environment.jvmLinuxX64, storage, TransferOptions(raw = true)))
 
-    val storageReplication = FileMessage(toReplicatedFile(job, storage.serializedRemoteStorage, storage))
+    val storageReplication = FileMessage(toReplicatedFile(job, storage.serializedRemoteStorage, storage, TransferOptions(raw = true)))
 
     Runtime(
       storageReplication,
@@ -172,24 +180,19 @@ class UploadActor(jobManager: JobManager) {
 
   def createExecutionMessage(
     job: Job,
-    jobFile: File,
+    jobMessage: FileMessage,
     serializationFile: Iterable[File],
     serializationPlugin: Iterable[File],
     storage: StorageService,
     path: String)(implicit token: AccessToken, session: Session): ExecutionMessage = {
-    val jobForRuntimePath = storage.child(path, Storage.uniqName("job", ".tgz"))
 
-    signalUpload(
-      storage.upload(jobFile, jobForRuntimePath), jobForRuntimePath, storage)
-    val jobHash = jobFile.hash.toString
-
-    val pluginReplicas = serializationPlugin.map { toReplicatedFile(job, _, storage) }
-    val files = serializationFile.map { toReplicatedFile(job, _, storage) }
+    val pluginReplicas = serializationPlugin.map { toReplicatedFile(job, _, storage, TransferOptions()) }
+    val files = serializationFile.map { toReplicatedFile(job, _, storage, TransferOptions()) }
 
     ExecutionMessage(
       pluginReplicas,
       files,
-      FileMessage(jobForRuntimePath, jobHash),
+      jobMessage,
       path)
   }
 

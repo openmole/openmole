@@ -87,7 +87,7 @@ class GetResultActor(jobManager: JobManager) {
 
   private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken): RuntimeResult = Workspace.withTmpFile { resultFile ⇒
     signalDownload(storage.download(outputFilePath, resultFile), outputFilePath, storage)
-    SerialiserService.deserialise(resultFile)
+    SerialiserService.deserialise[RuntimeResult](resultFile)
   }
 
   private def display(message: Option[FileMessage], description: String, storage: StorageService)(implicit token: AccessToken) = {
@@ -124,7 +124,7 @@ class GetResultActor(jobManager: JobManager) {
     Workspace.withTmpFile { contextResultsFileCache ⇒
       signalDownload(storage.download(resultPath.path, contextResultsFileCache), resultPath.path, storage)
       if (contextResultsFileCache.hash != resultPath.hash) throw new InternalProcessingError("Results have been corrupted during the transfer.")
-      SerialiserService.deserialiseAndExtractFiles(contextResultsFileCache)
+      SerialiserService.deserialiseAndExtractFiles[ContextResults](contextResultsFileCache)
     }
   }
 

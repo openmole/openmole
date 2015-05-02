@@ -63,7 +63,7 @@ object ReplicaCatalog extends Logger {
     val info = DBServerInfo.load(dbInfoFile)
     val db = Database.forDriver(
       driver = new org.h2.Driver,
-      url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.base}/${DBServerInfo.urlDBPath}",
+      url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.dbDirectory}/${DBServerInfo.urlDBPath}",
       user = info.user,
       password = info.password)
     db.withSession {
@@ -92,7 +92,7 @@ object ReplicaCatalog extends Logger {
     }.withDefaultValue(Set.empty)
 
   def uploadAndGet(
-    src: File,
+    upload: ⇒ String,
     srcPath: File,
     hash: String,
     storage: StorageService)(implicit token: AccessToken, session: Session): Replica = {
@@ -142,15 +142,10 @@ object ReplicaCatalog extends Logger {
               r
             }
 
-            // RQ: Could be improved by reusing files with same hash already on the storage, may be not very generic though
             getReplica.firstOption match {
               case Some(replica) ⇒ assertReplica(replica)
               case None ⇒
-                val name = Storage.uniqName(System.currentTimeMillis.toString, ".rep")
-                val newFile = storage.child(storage.persistentDir, name)
-                logger.fine(s"Upload $src to $newFile on ${storage.id}")
-                signalUpload(storage.upload(src, newFile), newFile, storage)
-
+                val newFile = upload
                 val replica = session.withTransaction {
                   getReplica.firstOption match {
                     case Some(r) ⇒

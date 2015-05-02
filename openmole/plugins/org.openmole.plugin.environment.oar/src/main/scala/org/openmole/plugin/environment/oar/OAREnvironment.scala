@@ -38,8 +38,9 @@ object OAREnvironment {
     wallTime: Option[Duration] = None,
     openMOLEMemory: Option[Int] = None,
     workDirectory: Option[String] = None,
-    threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
-    new OAREnvironment(user, host, port, queue, core, cpu, wallTime, openMOLEMemory, workDirectory, threads)
+    threads: Option[Int] = None,
+    storageSharedLocally: Boolean = false)(implicit authentications: AuthenticationProvider) =
+    new OAREnvironment(user, host, port, queue, core, cpu, wallTime, openMOLEMemory, workDirectory, threads, storageSharedLocally)
 }
 
 class OAREnvironment(
@@ -52,7 +53,8 @@ class OAREnvironment(
     val wallTime: Option[Duration],
     override val openMOLEMemory: Option[Int],
     val workDirectory: Option[String],
-    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage { env ⇒
+    override val threads: Option[Int],
+    val storageSharedLocally: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage { env ⇒
 
   type JS = OARJobService
 
@@ -62,7 +64,7 @@ class OAREnvironment(
     def nbTokens = maxConnections
     def queue = env.queue
     val environment = env
-    def sharedFS = storage
+    def sharedFS = remoteStorage
   }
 
   def allJobServices = List(jobService)

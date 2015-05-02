@@ -62,11 +62,11 @@ trait SharedStorage extends SSHService { js ⇒
 
             val content =
               s"if [ -d $runtimeInstall ]; then exit 0; fi; " +
-                s"mkdir $tmpDirName; cd $tmpDirName; if [ `uname -m` = x86_64 ]; then cp ${runtime.jvmLinuxX64.path} jvm.tar.gz.gz; " +
-                s"else cp ${runtime.jvmLinuxI386.path} jvm.tar.gz.gz; fi;" +
-                "gunzip jvm.tar.gz.gz; gunzip jvm.tar.gz; tar -xf jvm.tar; rm jvm.tar;" +
-                s"cp ${runtime.runtime.path} runtime.tar.gz.gz; gunzip runtime.tar.gz.gz; gunzip runtime.tar.gz; tar -xf runtime.tar; rm runtime.tar; mkdir envplugins; PLUGIN=0;" +
-                runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar.gz; gunzip envplugins/plugin$PLUGIN.jar.gz; PLUGIN=`expr $PLUGIN + 1`;" }.foldLeft("") { case (c, s) ⇒ c + s } +
+                s"mkdir $tmpDirName; cd $tmpDirName; if [ `uname -m` = x86_64 ]; then cp ${runtime.jvmLinuxX64.path} jvm.tar.gz; " +
+                s"else cp ${runtime.jvmLinuxI386.path} jvm.tar.gz; fi;" +
+                "gunzip jvm.tar.gz; tar -xf jvm.tar; rm jvm.tar;" +
+                s"cp ${runtime.runtime.path} runtime.tar.gz; gunzip runtime.tar.gz; tar -xf runtime.tar; rm runtime.tar; mkdir envplugins; PLUGIN=0;" +
+                runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar; PLUGIN=`expr $PLUGIN + 1`;" }.foldLeft("") { case (c, s) ⇒ c + s } +
                 s"cd ..; if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi; " +
                 s"mv $tmpDirName $runtimeInstall ; rm -rf $tmpDirName ; rm $scriptName ; ls $runtimePrefix* | grep -v '^$runtimeInstall' | xargs rm -rf "
 
@@ -101,7 +101,7 @@ trait SharedStorage extends SSHService { js ⇒
 
   protected def buildScript(serializedJob: SerializedJob) = {
     val runtime = preparedRuntime(serializedJob.runtime)
-    val result = sharedFS.child(serializedJob.path, Storage.uniqName("result", ".xml.gz"))
+    val result = sharedFS.child(serializedJob.path, Storage.uniqName("result", ".bin"))
 
     val script = Workspace.newFile("run", ".sh")
     val remoteScript = try {

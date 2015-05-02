@@ -95,12 +95,16 @@ object PluginManager extends Logger {
     def isDirectoryPlugin(file: File) = file.isDirectory && file./("META-INF")./("MANIFEST.MF").exists
 
     if (isDirectoryPlugin(path) || path.isJar) List(path)
-    else
-      path.listFiles(new FileFilter {
-        override def accept(file: File): Boolean =
-          (file.isFile && file.exists && file.isJar) ||
-            isDirectoryPlugin(file)
-      })
+    else if (path.isDirectory)
+      path.listFiles(
+        new FileFilter {
+          override def accept(file: File): Boolean =
+            (file.isFile && file.exists && file.isJar) || isDirectoryPlugin(file)
+        })
+    else {
+      Log.logger.fine("File doesn't seem to be a valid jar or directory: " + path)
+      List.empty
+    }
   }
 
   def tryLoad(files: Iterable[File]) = synchronized {

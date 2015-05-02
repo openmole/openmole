@@ -17,11 +17,27 @@
 
 package org.openmole.plugin.environment.gridscale
 
+import java.io.File
+
 import fr.iscpif.gridscale.storage.{ LocalStorage ⇒ GSLocalStorage }
 import org.openmole.core.batch.storage.SimpleStorage
+import org.openmole.tool.file._
 
-class LocalStorage(val root: String) extends GridScaleStorage {
+object LocalStorage {
+  def apply(root: String) = {
+    val _root = root
+    new LocalStorage {
+      override val root: String = _root
+    }
+  }
+}
+
+trait LocalStorage extends GridScaleStorage {
+  val root: String
   val authentication: Unit = Unit
   val storage = new GSLocalStorage {}
+
+  override protected def _mv(from: String, to: String): Unit = new File(from).move(new File(to))
+  def home = System.getProperty("user.home")
 }
 

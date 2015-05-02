@@ -31,7 +31,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.io.Source
-import scala.util.Try
+import scala.util.{ Success, Failure, Try }
 
 package object file { p ⇒
 
@@ -142,8 +142,14 @@ package object file { p ⇒
 
     //////// modifiers ///////
     def move(to: Path) = wrapError {
-      if (!Files.isDirectory(file)) Files.move(file, to, StandardCopyOption.REPLACE_EXISTING)
-      else DirUtils.move(file, to)
+      def move = Files.move(file, to, StandardCopyOption.REPLACE_EXISTING)
+      if (!Files.isDirectory(file)) move
+      else {
+        Try(move) match {
+          case Success(_) ⇒
+          case Failure(_) ⇒ DirUtils.move(file, to)
+        }
+      }
     }
 
     def recursiveDelete: Unit = wrapError {
@@ -265,29 +271,27 @@ package object file { p ⇒
     }
 
     ///////// creation of new elements ////////
-    // TODO get rid of toFile
     /**
      * Create temporary directory in subdirectory of caller
      *
      * @param prefix String to prefix the generated UUID name.
-     * @return Newly created temporary directory
+     * @return New temporary directory
      */
     def newDir(prefix: String): File = {
       val tempDir = Paths.get(file.toString, prefix + UUID.randomUUID)
-      Files.createDirectories(tempDir).toFile
+      tempDir.toFile
     }
 
-    // TODO get rid of toFile
     /**
      * Create temporary file in directory of caller
      *
      * @param prefix String to prefix the generated UUID name.
      * @param suffix String to suffix the generated UUID name.
-     * @return Newly created temporary file
+     * @return New temporary file
      */
     def newFile(prefix: String, suffix: String): File = {
       val f = Paths.get(file.toString, prefix + UUID.randomUUID + suffix)
-      Files.createFile(f).toFile
+      f.toFile
     }
 
     /**

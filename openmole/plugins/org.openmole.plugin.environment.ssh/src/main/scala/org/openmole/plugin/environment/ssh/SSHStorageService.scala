@@ -34,6 +34,9 @@ trait SSHStorageService extends StorageService with SSHService with GridScaleSto
 
   lazy val home = storage.home
 
-  lazy val remoteStorage: RemoteStorage = new LocalStorage(root) with SimpleStorage
+  lazy val remoteStorage: RemoteStorage =
+    new LocalStorage with SimpleStorage {
+      val root = ss.root
+    }
 
 }
