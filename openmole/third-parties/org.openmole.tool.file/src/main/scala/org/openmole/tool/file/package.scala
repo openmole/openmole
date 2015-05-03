@@ -141,7 +141,7 @@ package object file { p ⇒
     }
 
     //////// modifiers ///////
-    def move(to: Path) = wrapError {
+    def move(to: File) = wrapError {
       def move = Files.move(file, to, StandardCopyOption.REPLACE_EXISTING)
       if (!Files.isDirectory(file)) move
       else {

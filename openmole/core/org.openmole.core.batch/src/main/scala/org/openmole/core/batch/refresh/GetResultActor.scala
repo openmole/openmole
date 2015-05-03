@@ -119,12 +119,18 @@ class GetResultActor(jobManager: JobManager) {
     }
   }
 
-  private def getContextResults(resultPath: FileMessage, storage: StorageService)(implicit token: AccessToken): ContextResults = {
-    if (resultPath == null) throw new InternalProcessingError("Context results path is null")
-    Workspace.withTmpFile { contextResultsFileCache ⇒
-      signalDownload(storage.download(resultPath.path, contextResultsFileCache), resultPath.path, storage)
-      if (contextResultsFileCache.hash != resultPath.hash) throw new InternalProcessingError("Results have been corrupted during the transfer.")
-      SerialiserService.deserialiseAndExtractFiles[ContextResults](contextResultsFileCache)
+  private def getContextResults(serializedResults: SerializedContextResults, storage: StorageService)(implicit token: AccessToken): ContextResults = {
+    Workspace.withTmpFile { serializedResultsFile ⇒
+      val fileReplacement =
+        serializedResults.files.map {
+          replicated ⇒
+            replicated.src -> replicated.download((p, f) ⇒ signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage))
+        }.toMap
+
+      Workspace.withTmpFile { contextResultsFileCache ⇒
+        signalDownload(storage.download(serializedResults.contextResults.path, contextResultsFileCache), serializedResults.contextResults.path, storage)
+        SerialiserService.deserialiseReplaceFiles[ContextResults](contextResultsFileCache, fileReplacement)
+      }
     }
   }
 

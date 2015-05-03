@@ -20,6 +20,7 @@ import java.io.{ File, OutputStream, InputStream }
 import java.util.UUID
 
 import fr.iscpif.gridscale.storage._
+import org.openmole.core.batch.message.ReplicatedFile
 import org.openmole.core.workspace._
 import org.openmole.tool.thread._
 import org.openmole.tool.file._
@@ -40,6 +41,7 @@ object Storage {
   Workspace += (CloseTimeout, "PT1M")
 
   def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
+
 }
 
 trait CompressedTransfer <: Storage {

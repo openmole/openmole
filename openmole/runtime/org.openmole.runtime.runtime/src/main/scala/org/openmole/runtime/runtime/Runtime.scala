@@ -24,13 +24,14 @@ import java.io.PrintStream
 import java.util.UUID
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.tool.tar._
 import org.openmole.core.tools.service.{ Logger, LocalHostName, Retry }
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.tools.service._
-import org.openmole.core.batch.authentication._
+import org.openmole.core.batch.storage._
 import org.openmole.core.batch.storage._
 import org.openmole.core.workflow.execution.local._
 import org.openmole.core.batch.message._
@@ -80,31 +81,10 @@ class Runtime {
       System.setErr(errSt)
     }
 
-    def getReplicatedFile(replicatedFile: ReplicatedFile) = {
-      val cache = Workspace.newFile
-
-      retry(storage.download(replicatedFile.path, cache))
-
-      /*val cacheHash = cache.hash.toString
-      if (cacheHash != replicatedFile.hash)
-        throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.src.toString + " replicated at " + replicatedFile.path)*/
-
-      val dl =
-        if (replicatedFile.directory) {
-          val local = Workspace.newDir("dirReplica")
-          cache.extract(local)
-          local.mode = replicatedFile.mode
-          cache.delete
-          local
-        }
-        else {
-          cache.mode = replicatedFile.mode
-          cache
-        }
-
-      logger.fine("Downloaded file " + replicatedFile + " to " + dl)
-      dl
-    }
+    def getReplicatedFile(replicatedFile: ReplicatedFile) =
+      replicatedFile.download {
+        (path, file) ⇒ retry(storage.download(path, file))
+      }
 
     val beginTime = System.currentTimeMillis
 
@@ -161,14 +141,26 @@ class Runtime {
 
       logger.fine("Results " + saver.results)
 
-      val contextResults = new ContextResults(saver.results)
+      val contextResults = ContextResults(saver.results)
       Workspace.withTmpFile { contextResultFile ⇒
-        SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
-        val uploadedContextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("uploaded", ".tgz"))
-        val result = FileMessage(uploadedContextResults, contextResultFile.hash.toString)
-
         logger.fine("Upload the results")
+        val PluginClassAndFiles(files, _) = SerialiserService.serialiseGetPluginsAndFiles(contextResults, contextResultFile)
+
+        val replicated =
+          files.map {
+            _.upload {
+              f ⇒
+                val name = storage.child(executionMessage.communicationDirPath, Storage.uniqName("resultFile", ".bin"))
+                retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
+                name
+            }
+          }
+
+        val uploadedContextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("contextResult", ".bin"))
+        val contextResultFileHash = contextResultFile.hash.toString
+
         retry(storage.upload(contextResultFile, uploadedContextResults, TransferOptions(forceCopy = true, canMove = true)))
+        val result = SerializedContextResults(FileMessage(uploadedContextResults, contextResultFileHash), replicated)
 
         val endTime = System.currentTimeMillis
         Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime, LocalHostName.localHostName))

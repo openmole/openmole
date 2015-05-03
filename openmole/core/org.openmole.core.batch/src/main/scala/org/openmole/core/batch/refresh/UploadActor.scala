@@ -145,17 +145,19 @@ class UploadActor(jobManager: JobManager) {
       if (isDir) FileService.archiveForDir(job.moleExecution, file).file
       else file
 
+    val fileMode = file.mode
+    val hash = FileService.hash(job.moleExecution, toReplicate).toString
+
     def upload = {
       val name = Storage.uniqName(System.currentTimeMillis.toString, ".rep")
       val newFile = storage.child(storage.persistentDir, name)
-      Log.logger.fine(s"Upload $toReplicate to $newFile on ${storage.id}")
+      Log.logger.fine(s"Upload $toReplicate to $newFile on ${storage.id} mode $fileMode")
       signalUpload(storage.upload(toReplicate, newFile, transferOptions), newFile, storage)
       newFile
     }
 
-    val hash = FileService.hash(job.moleExecution, toReplicate).toString
     val replica = ReplicaCatalog.uploadAndGet(upload, toReplicatePath, hash, storage)
-    ReplicatedFile(file, isDir, hash, replica.path, file.mode)
+    ReplicatedFile(file, isDir, hash, replica.path, fileMode)
   }
 
   def replicateTheRuntime(
