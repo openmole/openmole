@@ -23,6 +23,7 @@ import java.util.UUID
 import java.util.concurrent.TimeoutException
 import java.util.logging.Logger
 import java.util.zip.{ GZIPInputStream, GZIPOutputStream, ZipFile }
+import javax.print.attribute.standard.Destination
 
 import org.openmole.tool.thread._
 import org.openmole.tool.lock._
@@ -45,7 +46,7 @@ package object file { p ⇒
 
   lazy val jvmLevelFileLock = new LockRepository[String]
 
-  def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
+  def copy(source: FileChannel, destination: FileChannel): Unit = source.transferTo(0, source.size, destination)
 
   // glad you were there...
   implicit def file2Path(file: File) = file.toPath
@@ -116,6 +117,16 @@ package object file { p ⇒
   implicit class FileDecorator(file: File) {
 
     /////// copiers ////////
+    def copyContent(destination: File) = {
+      val ic = new FileInputStream(file).getChannel
+      try {
+        val oc = new FileOutputStream(destination).getChannel
+        try p.copy(ic, oc)
+        finally oc.close()
+      }
+      finally ic.close()
+    }
+
     def copy(toF: File) = {
       // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES, REPLACE_EXISTING
       toF.getParentFile.mkdirs()
