@@ -42,6 +42,16 @@ object Storage {
   def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
 }
 
+trait CompressedTransfer <: Storage {
+
+  override protected def uploadOutputStream(dest: String, options: TransferOptions) =
+    if (!options.raw) _openOutputStream(dest).toGZ else super.uploadOutputStream(dest, options)
+
+  override protected def downloadInputStream(src: String, options: TransferOptions) =
+    if (!options.raw) _openInputStream(src).toGZ else super.downloadInputStream(src, options)
+
+}
+
 trait Storage {
   def root: String
   def child(parent: String, child: String): String
@@ -55,19 +65,22 @@ trait Storage {
   protected def _openOutputStream(path: String): OutputStream
   protected def _mv(from: String, to: String)
 
+  protected def uploadOutputStream(dest: String, options: TransferOptions) = _openOutputStream(dest)
+  protected def downloadInputStream(src: String, options: TransferOptions) = _openInputStream(src)
+
   protected def _upload(src: File, dest: String, options: TransferOptions) = {
-    val os = if (!options.raw) _openOutputStream(dest).toGZ else _openOutputStream(dest)
+    val os = uploadOutputStream(dest, options)
     try src.copy(os, bufferSize, copyTimeout)
     finally timeout(os.close)(closeTimeout)
   }
 
   protected def _download(src: String, dest: File, options: TransferOptions) = {
-    val is = if (!options.raw) _openInputStream(src).toGZ else _openInputStream(src)
+    val is = downloadInputStream(src, options)
     try is.copy(dest, bufferSize, copyTimeout)
     finally timeout(is.close)(closeTimeout)
   }
 
-  private def bufferSize = Workspace.preferenceAsInt(Storage.BufferSize)
-  private def copyTimeout = Workspace.preferenceAsDuration(Storage.CopyTimeout)
-  private def closeTimeout = Workspace.preferenceAsDuration(Storage.CloseTimeout)
+  protected def bufferSize = Workspace.preferenceAsInt(Storage.BufferSize)
+  protected def copyTimeout = Workspace.preferenceAsDuration(Storage.CopyTimeout)
+  protected def closeTimeout = Workspace.preferenceAsDuration(Storage.CloseTimeout)
 }

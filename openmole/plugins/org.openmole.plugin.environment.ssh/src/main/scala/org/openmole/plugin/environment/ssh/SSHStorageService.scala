@@ -17,10 +17,13 @@
 
 package org.openmole.plugin.environment.ssh
 
-import org.openmole.core.batch.storage.{ SimpleStorage, RemoteStorage, StorageService }
+import java.io.File
+
+import org.openmole.core.batch.control.AccessToken
+import org.openmole.core.batch.storage.{ TransferOptions, SimpleStorage, RemoteStorage, StorageService }
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.gridscale.{ GridScaleStorage, LocalStorage }
+import org.openmole.plugin.environment.gridscale.{ LogicalLinkStorage, GridScaleStorage, LocalStorage }
 import fr.iscpif.gridscale.ssh.SSHConnectionCache
 
 trait SSHStorageService extends StorageService with SSHService with GridScaleStorage { ss ⇒
@@ -35,7 +38,7 @@ trait SSHStorageService extends StorageService with SSHService with GridScaleSto
   lazy val home = storage.home
 
   lazy val remoteStorage: RemoteStorage =
-    new LocalStorage with SimpleStorage {
+    new LogicalLinkStorage with SimpleStorage {
       val root = ss.root
     }
 
