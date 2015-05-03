@@ -177,12 +177,20 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       try storage.upload(localFile, uploadedFile, TransferOptions(raw = true))
       finally localFile.delete
       logger.info("Uploaded " + localFile)
-      new FileMessage(uploadedFile, msg.hash)
+      FileMessage(uploadedFile, msg.hash)
+    }
+
+    def uploadReplicatedFile(replicated: ReplicatedFile): ReplicatedFile = {
+      val FileMessage(uploaded, _) = uploadFileMessage(replicated)
+      replicated.copy(path = uploaded)
     }
 
     val uploadedResult = runtimeResult.result match {
-      case Success((result, log)) ⇒ Success((uploadFileMessage(result), log))
-      case Failure(e)             ⇒ Failure(e)
+      case Success((SerializedContextResults(contextResults: FileMessage, files: Iterable[ReplicatedFile]), log)) ⇒
+        val uploadedFiles = files.map { uploadReplicatedFile }
+        val uploadedContextResults = uploadFileMessage(contextResults)
+        Success((SerializedContextResults(uploadedContextResults, uploadedFiles), log))
+      case Failure(e) ⇒ Failure(e)
     }
 
     val uploadedStdOut = runtimeResult.stdOut match {
