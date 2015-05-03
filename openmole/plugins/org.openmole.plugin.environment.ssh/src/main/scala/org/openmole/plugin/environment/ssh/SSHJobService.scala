@@ -28,6 +28,8 @@ import org.openmole.plugin.environment.gridscale._
 import fr.iscpif.gridscale.ssh.{ SSHJobService ⇒ GSSSHJobService, SSHConnectionCache, SSHJobDescription }
 import java.util.concurrent.atomic.AtomicInteger
 
+import scala.collection.mutable
+
 object SSHJobService extends Logger
 
 import SSHJobService._
@@ -42,7 +44,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
   }
 
   // replaced mutable.SynchronizedQueue according to recommendation in scala doc
-  val queue = new java.util.concurrent.ConcurrentLinkedQueue[SSHBatchJob]
+  val queue = mutable.Stack[SSHBatchJob]()
   @transient lazy val nbRunning = new AtomicInteger
 
   protected def _submit(serializedJob: SerializedJob) = {
@@ -71,16 +73,13 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
             ev.oldState match {
               case DONE | FAILED | KILLED ⇒
               case _ ⇒
-                // make it atomic
                 queue.synchronized {
-                  import collection.JavaConversions._
-                  val e = queue.find(_ ⇒ true)
-                  // harmless is None is passed
-                  queue.remove(e)
-                  e
+                  if (!queue.isEmpty) Some(queue.pop) else None
                 } match {
                   case Some(j) ⇒ j.submit
-                  case None    ⇒ nbRunning.decrementAndGet
+                  case None ⇒
+                    nbRunning.decrementAndGet
+                    Log.logger.fine(s"SSHJobService: ${nbRunning.get()} on $nbSlots taken")
                 }
             }
           case _ ⇒
@@ -93,7 +92,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
         nbRunning.incrementAndGet
         sshBatchJob.submit
       }
-      else queue.add(sshBatchJob)
+      else queue.push(sshBatchJob)
     }
     sshBatchJob
   }
