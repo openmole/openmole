@@ -64,7 +64,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val _port = if (splitHost.size == 2) splitHost(1).toInt else 22
     val _host = splitHost(0)
 
-    val storage = new SimpleStorage with GridScaleStorage {
+    val storage = new SimpleStorage with GridScaleStorage with CompressedTransfer {
       val storage = new SSHStorage with SSHUserPasswordAuthentication {
         val host = _host
         override val port = _port
@@ -75,16 +75,11 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       val root = ""
     }
 
-    val storageFileGz = Workspace.withTmpFile {
-      storageFile ⇒
-        SerialiserService.serialiseAndArchiveFiles(new LocalSimpleStorage, storageFile)
-        val storageFileGz = Workspace.newFile("storage", ".xml.gz")
-        storageFile.copyCompress(storageFileGz)
-        storageFileGz
-    }
+    val storageFile = Workspace.newFile
+    SerialiserService.serialiseAndArchiveFiles(new LocalSimpleStorage, storageFile)
 
     (0 until nbWorkers).foreach {
-      i ⇒ background { runJobs(storageFileGz, storage) }
+      i ⇒ background { runJobs(storageFile, storage) }
     }
 
     Thread.currentThread.join
@@ -163,7 +158,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
   def uploadResult(localResultFile: File, communicationDir: String, job: String, storage: SimpleStorage) = {
     val runtimeResult = {
-      val is = localResultFile.gzippedBufferedInputStream
+      val is = localResultFile.bufferedInputStream
       try SerialiserService.deserialise[RuntimeResult](is)
       finally is.close
     }
@@ -174,7 +169,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       val localFile = new File(msg.path)
       val uploadedFile = storage.child(communicationDir, Storage.uniqName("fileMsg", ".bin"))
       logger.info("Uploading " + localFile + " to " + uploadedFile)
-      try storage.upload(localFile, uploadedFile, TransferOptions(raw = true))
+      try storage.upload(localFile, uploadedFile)
       finally localFile.delete
       logger.info("Uploaded " + localFile)
       FileMessage(uploadedFile, msg.hash)
@@ -276,16 +271,9 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
   def fetchAJob(id: UUID, storage: SimpleStorage)(implicit rng: Random) = {
 
-    def getFileUnzipVerifyHash(fileMessage: FileMessage) = {
-      val file = Workspace.newFile("cache", ".bin") //cacheUnziped(fileMessage.path)
-      storage.download(fileMessage.path, file)
-      if (file.hash.toString != fileMessage.hash) throw new InternalProcessingError("Wrong hash for file " + fileMessage.path + ".")
-      file -> fileMessage.hash
-    }
-
-    def getFile(fileMessage: FileMessage) = {
+    def download(fileMessage: FileMessage, raw: Boolean) = {
       val file = Workspace.newFile("cache", ".bin")
-      storage.download(fileMessage.path, file, TransferOptions(raw = true))
+      storage.download(fileMessage.path, file, TransferOptions(raw = raw))
       file -> fileMessage.hash
     }
 
@@ -294,33 +282,36 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
         var cached = List.empty[FileMessage]
 
         try {
-          val runtime = localCache.cache(jobMessage.runtime,
-            msg ⇒ {
-              val dir = Workspace.newDir
-              logger.info("Downloading the runtime.")
-              val (archive, hash) = getFileUnzipVerifyHash(msg)
-              logger.info("Extracting runtime.")
-              archive.extractUncompress(dir)
-              dir -> hash
-            })
+          val runtime =
+            localCache.cache(
+              jobMessage.runtime,
+              msg ⇒ {
+                val dir = Workspace.newDir
+                logger.info("Downloading the runtime.")
+                val (archive, hash) = download(msg, true)
+                logger.info("Extracting runtime.")
+                archive.extractUncompress(dir)
+                dir -> hash
+              })
           cached ::= jobMessage.runtime
 
           val pluginDir = Workspace.newDir
+          pluginDir.mkdirs
 
           jobMessage.runtimePlugins.foreach {
             fileMessage ⇒
-              val plugin = localCache.cache(fileMessage, getFileUnzipVerifyHash)
+              val plugin = localCache.cache(fileMessage, download(_, true))
               cached ::= fileMessage
               plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
           }
 
-          val executionMessageFileCache = Workspace.newFile("executionMessage", ".xml")
-          storage.download(jobMessage.executionMessagePath, executionMessageFileCache)
-          val executionMessage = SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
-          executionMessageFileCache.delete
+          val executionMessage = Workspace.withTmpFile { executionMessageFileCache ⇒
+            storage.download(jobMessage.executionMessagePath, executionMessageFileCache)
+            SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
+          }
 
           def localCachedReplicatedFile(replicatedFile: ReplicatedFile) = {
-            val localFile = localCache.cache(replicatedFile, getFile)
+            val localFile = localCache.cache(replicatedFile, download(_, false))
             cached ::= replicatedFile
             import replicatedFile._
             new ReplicatedFile(src, directory, hash, localFile.getAbsolutePath, mode)
@@ -330,15 +321,17 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           val plugins = executionMessage.plugins.map(localCachedReplicatedFile)
 
           val jobsFile = Workspace.newFile("jobs", ".xml")
-          storage.download(executionMessage.jobs.path, jobsFile, TransferOptions(raw = true))
-          val jobs = new FileMessage(jobsFile.getAbsolutePath, executionMessage.jobs.hash)
+          storage.download(executionMessage.jobs.path, jobsFile)
 
+          val jobs = FileMessage(jobsFile.getAbsolutePath, executionMessage.jobs.hash)
           val localCommunicationDirPath = Workspace.newDir
+          localCommunicationDirPath.mkdirs
+
           val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")
 
-          val os = localExecutionMessage.gzippedBufferedOutputStream
-          try SerialiserService.serialise(new ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath), os)
-          finally os.close
+          localExecutionMessage.withOutputStream { os ⇒
+            SerialiserService.serialise(ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath), os)
+          }
 
           Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, jobMessage.memory, executionMessage, job, cached))
         }

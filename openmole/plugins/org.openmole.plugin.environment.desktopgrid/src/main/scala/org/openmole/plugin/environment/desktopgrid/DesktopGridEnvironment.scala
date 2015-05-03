@@ -58,7 +58,7 @@ class DesktopGridEnvironment(
 
   val url = new URI("desktop", login, "localhost", port, null, null, null)
 
-  @transient lazy val batchStorage = new VolatileStorageService with UnlimitedAccess with GridScaleStorage {
+  @transient lazy val batchStorage = new VolatileStorageService with UnlimitedAccess with GridScaleStorage with CompressedTransfer {
     def environment = env
     val remoteStorage: RemoteStorage = new DumyStorage
     def url = env.url

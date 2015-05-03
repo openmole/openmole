@@ -21,9 +21,7 @@ import org.openmole.core.batch.storage.{ RemoteStorage, SimpleStorage }
 import fr.iscpif.gridscale.storage.LocalStorage
 import org.openmole.plugin.environment.gridscale._
 
-class LocalSimpleStorage extends SimpleStorage with RemoteStorage with GridScaleStorage {
-  val storage = new LocalStorage {}
+class LocalSimpleStorage extends LogicalLinkStorage with RemoteStorage with SimpleStorage {
   val root = ""
-  val authentication: Unit = Unit
 }
 
