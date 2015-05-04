@@ -78,7 +78,7 @@ class CondorEnvironment(
     // TODO not available in the GridScale plugin yet
     //def queue = env.queue
     val environment = env
-    def sharedFS = remoteStorage
+    def sharedFS = storage
   }
 
   def allJobServices = List(jobService)

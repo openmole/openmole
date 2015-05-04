@@ -65,7 +65,7 @@ class SGEEnvironment(
     def nbTokens = maxConnections
     def queue = env.queue
     val environment = env
-    def sharedFS = remoteStorage
+    def sharedFS = storage
     val id = url.toString
   }
 
