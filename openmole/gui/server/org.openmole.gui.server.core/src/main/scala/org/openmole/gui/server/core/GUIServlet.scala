@@ -99,6 +99,7 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
     fileParams.map { fp ⇒
       fp._2.getInputStream.copy(new java.io.File(fp._1))
     }
+  }
 
   post(s"/$basePath/*") {
     Await.result(AutowireServer.route[Api](ApiImpl)(

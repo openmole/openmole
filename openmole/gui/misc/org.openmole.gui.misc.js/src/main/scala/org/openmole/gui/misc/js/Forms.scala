@@ -160,25 +160,29 @@ object Forms {
       todo()
     }))
 
-  def fileInput(todo: HTMLInputElement ⇒ Unit): HTMLInputElement = {
-    lazy val input: HTMLInputElement = tags.input(`type` := "file", multiple := "")(onchange := { () ⇒
-      // println("on change " + input.files.length)
-      //  FileUploader(input.files, )
-      todo(input)
+  def fileInput(todo: HTMLInputElement ⇒ Unit): HTMLFormElement = {
+    lazy val form: HTMLFormElement = tags.form({
+      lazy val input: HTMLInputElement = tags.input(id := "fileinput", `type` := "file", multiple := "")(onchange := { () ⇒
+        todo(input)
+      }, onclick := { () ⇒
+        println("form submit")
+        form.submit
+      }).render
+      input
     }).render
 
-    input
+    form
   }
 
-  def uploadButton(buttonCB: ClassKeyAggregator, todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] = {
-    tags.span(cursor := "pointer", `class` := "btn " + buttonCB.key + " btn-file")(
+  def uploadButton(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] = {
+    tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like")(
       glyph(glyph_upload),
       fileInput(todo)
     )
   }
 
   def uploadGlyphSpan(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
-    tags.span(cursor := "pointer", `class` := "btn-file")(
+    tags.span(`class` := "btn-file")(
       glyph(glyph_upload),
       fileInput(todo)
     )
@@ -276,6 +280,8 @@ object Forms {
   def inputGroup(keys: ClassKeyAggregator = emptyCK) = div(key("input-group") + keys.key)
 
   def inputGroupButton = span("input-group-btn")
+
+  def inputGroupAddon = span("input-group-addon")
 
   val input_group_lg = "input-group-lg"
 
