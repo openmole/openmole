@@ -91,7 +91,7 @@ class TreeNodePanel(rootNode: DirNode) {
         inputGroup(navbar_left)(
           inputGroupButton(addRootDirButton.selector),
           newNodeInput,
-          inputGroupButton(uploadButton(btn_success, (fileInput: HTMLInputElement) ⇒ {
+          inputGroupAddon(id := "fileinput-addon")(uploadButton((fileInput: HTMLInputElement) ⇒ {
             FileUploader(fileInput.files, dirNodeLine().last.canonicalPath())
           }))
         ),
