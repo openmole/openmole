@@ -91,14 +91,13 @@ trait ExternalTask extends Task {
     }
   }
 
-  private def copy(f: ToPut, to: File): File = {
+  private def copy(f: ToPut, to: File) = {
     to.createParentDir
 
     if (f.link) to.createLink(f.file.getCanonicalFile)
     else {
       f.file.copy(to)
       to.applyRecursive { _.deleteOnExit }
-      to
     }
   }
 
@@ -111,8 +110,8 @@ trait ExternalTask extends Task {
     val copiedFiles =
       for { (p, f) ← listInputFiles(context) } yield {
         val d = destination(f)
-        val copied = copy(f, d)
-        Variable(p, new File(copied.getPath))
+        copy(f, d)
+        Variable(p, d)
       }
 
     context ++ copiedFiles
