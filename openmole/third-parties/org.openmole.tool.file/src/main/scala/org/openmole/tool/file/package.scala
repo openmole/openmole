@@ -310,15 +310,16 @@ package object file { p ⇒
      * @param target Target of the link
      * @return
      */
-    def createLink(target: String): Unit = createLink(Paths.get(target))
+    def createLink(target: String): Path = createLink(Paths.get(target))
 
-    def createLink(target: Path): Unit = {
+    def createLink(target: Path): Path = {
       try Files.createSymbolicLink(file, target)
       catch {
         case e: UnsupportedOperationException ⇒
           Logger.getLogger(getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
           val fileTarget = if (target.isAbsolute) target else Paths.get(file.getParentFile.getPath, target.getPath)
           Files.copy(fileTarget, file, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING)
+          file
         case e: IOException ⇒ throw e
       }
     }
@@ -386,7 +387,9 @@ package object file { p ⇒
   }
 
   private def block(file: File, stopPath: Iterable[File]) =
-    stopPath.exists(f ⇒ Files.isSameFile(f, file))
+    stopPath.exists {
+      f ⇒ if (f.exists() && file.exists()) Files.isSameFile(f, file) else false
+    }
 
   private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit = if (!block(file, stopPath)) {
     def authorizeLS[T](f: File)(g: ⇒ T): T = {
