@@ -18,6 +18,7 @@
 package org.openmole.runtime.daemon
 
 import org.eclipse.equinox.app._
+import org.openmole.core.logging.LoggerService
 import org.openmole.core.tools.service.Logger
 import scopt._
 

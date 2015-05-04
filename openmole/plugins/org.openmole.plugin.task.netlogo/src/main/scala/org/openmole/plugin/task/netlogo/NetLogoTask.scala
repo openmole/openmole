@@ -59,7 +59,7 @@ trait NetLogoTask extends ExternalTask {
     }
 
   override def process(context: Context): Context = withWorkDir { tmpDir ⇒
-    prepareInputFiles(context, tmpDir, workspace.workDirectory)
+    val preparedContext = prepareInputFiles(context, tmpDir, workspace.workDirectory)
 
     val script = tmpDir / workspace.workDirectory / workspace.script
     val netLogo = netLogoFactory()
@@ -67,7 +67,7 @@ trait NetLogoTask extends ExternalTask {
       wrapError(s"Error while opening the file $script") { netLogo.open(script.getAbsolutePath) }
 
       for (inBinding ← netLogoInputs) {
-        val v = context(inBinding._1) match {
+        val v = preparedContext(inBinding._1) match {
           case x: String ⇒ '"' + x + '"'
           case x         ⇒ x.toString
         }
@@ -76,10 +76,10 @@ trait NetLogoTask extends ExternalTask {
       }
 
       for (cmd ← launchingCommands) wrapError(s"Error while executing command $cmd") {
-        netLogo.command(VariableExpansion(context, cmd))
+        netLogo.command(VariableExpansion(preparedContext, cmd))
       }
 
-      fetchOutputFiles(context, tmpDir, workspace.workDirectory) ++ netLogoOutputs.map {
+      fetchOutputFiles(preparedContext, tmpDir, workspace.workDirectory) ++ netLogoOutputs.map {
         case (name, prototype) ⇒
           try {
             val outputValue = netLogo.report(name)

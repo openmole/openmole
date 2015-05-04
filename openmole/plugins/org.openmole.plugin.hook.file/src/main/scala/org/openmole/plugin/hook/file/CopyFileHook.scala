@@ -83,7 +83,7 @@ abstract class CopyFileHook extends Hook {
 
     to.createParentDir
     if (compress) from.copyCompress(to)
-    else from.copy(to)
+    else from.copyContent(to)
 
     if (remove) from.recursiveDelete
   }

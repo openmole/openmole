@@ -62,11 +62,11 @@ trait JobScript {
 
       script +=
         "if [ `uname -m` = x86_64 ]; then " +
-        lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
-        lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi"
+        lcgCpCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
+        lcgCpCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi"
       script += "tar -xzf jvm.tar.gz >/dev/null"
       script += "rm -f jvm.tar.gz"
-      script += lcgCpGunZipCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
+      script += lcgCpCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
       script += "tar -xzf openmole.tar.gz >/dev/null"
       script += "rm -f openmole.tar.gz"
       script.mkString(" && ")
@@ -77,10 +77,10 @@ trait JobScript {
 
       for { (plugin, index) ← runtime.environmentPlugins.zipWithIndex } {
         assert(plugin.path != null)
-        script += lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
+        script += lcgCpCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
       }
 
-      script += environment.lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz")
+      script += lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml")
 
       "mkdir envplugins && " + script.mkString(" && ")
     }
@@ -90,7 +90,7 @@ trait JobScript {
 
       script += "export PATH=$PWD/jre/bin:$PATH"
       script += "/bin/sh run.sh " + environment.openMOLEMemoryValue + "m " + UUID.randomUUID + " -c " +
-        path + " -s $CUR/storage.xml.gz -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath +
+        path + " -s $CUR/storage.xml -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath +
         " -t " + environment.threadsValue + (if (environment.debug) " -d 2>&1" else "")
       script.mkString(" && ")
     }
@@ -108,8 +108,7 @@ trait JobScript {
     s"echo $name >$name && ${environment.lcgCpCmd(name, dest)}; rm -f $name"
   }
 
-  protected def lcgCpGunZipCmd(from: URI, to: String) =
-    s"( ${environment.lcgCpCmd(from, to + ".gz")} && gunzip $to.gz )"
+  protected def lcgCpCmd(from: URI, to: String) = environment.lcgCpCmd(from, to)
 
   private def background(s: String) = "( " + s + " & )"
 }

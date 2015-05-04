@@ -55,10 +55,10 @@ trait PersistentStorageService extends StorageService {
       }.getOrElse(true)
 
     for {
-      name ← super.listNames(persistentPath)
+      name ← listNames(persistentPath)
       if graceIsOver(name)
     } {
-      val path = super.child(persistentPath, name)
+      val path = child(persistentPath, name)
       if (!ReplicaCatalog.forPath(path).exists.run) backgroundRmFile(path)
     }
     persistentPath
@@ -74,11 +74,11 @@ trait PersistentStorageService extends StorageService {
     val time = System.currentTimeMillis
 
     val tmpNoTime = child(baseDir, tmp)
-    if (!super.exists(tmpNoTime)) super.makeDir(tmpNoTime)
+    if (!exists(tmpNoTime)) makeDir(tmpNoTime)
 
     val removalDate = System.currentTimeMillis - Workspace.preferenceAsDuration(TmpDirRemoval).toMillis
 
-    for ((name, fileType) ← super.list(tmpNoTime)) {
+    for ((name, fileType) ← list(tmpNoTime)) {
       val childPath = child(tmpNoTime, name)
 
       def rmDir =
@@ -102,8 +102,8 @@ trait PersistentStorageService extends StorageService {
       }
     }
 
-    val tmpTimePath = super.child(tmpNoTime, time.toString)
-    if (!super.exists(tmpTimePath)) super.makeDir(tmpTimePath)
+    val tmpTimePath = child(tmpNoTime, time.toString)
+    if (!exists(tmpTimePath)) makeDir(tmpTimePath)
     tmpTimePath
   }
 

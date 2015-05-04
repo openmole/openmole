@@ -15,10 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.message
+package org.openmole.core.fileservice
 
-case class ExecutionMessage(
-  plugins: Iterable[ReplicatedFile],
-  files: Iterable[ReplicatedFile],
-  jobs: FileMessage,
-  communicationDirPath: String)
+import java.io.File
+
+import org.openmole.core.filedeleter.FileDeleter
+
+object FileCache {
+  def apply(file: File) = new FileCache(file)
+}
+
+class FileCache(val file: File) {
+  override protected def finalize = FileDeleter.assynchonousRemove(file)
+}

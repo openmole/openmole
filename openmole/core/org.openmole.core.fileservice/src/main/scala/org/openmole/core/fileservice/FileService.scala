@@ -18,8 +18,7 @@
 package org.openmole.core.fileservice
 
 import java.io.File
-import java.io.FileOutputStream
-import org.openmole.core.filecache.{ FileCacheDeleteOnFinalize, IFileCache }
+import org.openmole.core.filedeleter._
 import org.openmole.core.tools.cache.AssociativeCache
 import org.openmole.tool.hash._
 import org.openmole.core.updater.Updater
@@ -34,28 +33,28 @@ object FileService {
   //class CachedArchiveForDir(file: File, val lastModified: Long) extends FileCacheDeleteOnFinalize(file)
 
   private[fileservice] val hashCache = new AssociativeCache[String, Hash]
-  private[fileservice] val archiveCache = new AssociativeCache[String, IFileCache]
+  private[fileservice] val archiveCache = new AssociativeCache[String, FileCache]
 
   Updater.delay(new FileServiceGC, Workspace.preferenceAsDuration(FileService.GCInterval))
 
   def hash(file: File): Hash =
-    hash(file, if (file.isDirectory) archiveForDir(file).file(false) else file)
+    hash(file, if (file.isDirectory) archiveForDir(file).file else file)
 
   def invalidate(key: Object, file: File) = hashCache.invalidateCache(key, file.getAbsolutePath)
 
-  def archiveForDir(file: File): IFileCache = archiveForDir(file, file)
+  def archiveForDir(file: File): FileCache = archiveForDir(file, file)
 
   def hash(key: Object, file: File): Hash =
     hashCache.cache(
       key,
       file.getAbsolutePath,
-      computeHash(if (file.isDirectory) archiveForDir(key, file).file(false) else file))
+      computeHash(if (file.isDirectory) archiveForDir(key, file).file else file))
 
   def archiveForDir(key: Object, directory: File) = {
     archiveCache.cache(key, directory.getAbsolutePath, {
       val ret = Workspace.newFile("archive", ".tar")
       directory.archive(ret, time = false)
-      new FileCacheDeleteOnFinalize(ret)
+      FileCache(ret)
     })
   }
 

@@ -29,10 +29,9 @@ case class Persistent(baseDir: File) {
 
   baseDir.mkdirs
 
-  private def subDirectory(dir: Option[String]) =
-    dir.map(new File(baseDir, _)).getOrElse(baseDir)
+  private def subDirectory(dir: Option[String]) = dir.map(new File(baseDir, _)).getOrElse(baseDir)
 
-  def size(category: String): Int = subDirectory(Some(category)).listFiles().size
+  def size(category: String): Int = Option(subDirectory(Some(category)).listFiles()).map(_.size).getOrElse(0)
 
   def save(obj: Any, name: String, category: Option[String] = None, xstream: XStream = Persistent.xstream) = synchronized {
     val subDir = subDirectory(category)

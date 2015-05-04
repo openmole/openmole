@@ -20,11 +20,15 @@ package org.openmole.plugin.environment.egi
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 import org.openmole.core.workspace.Workspace
-import fr.iscpif.gridscale.storage.FileType
+import org.openmole.tool.file._
+import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage, FileType }
 import fr.iscpif.gridscale.glite.{ SRMStorage, GlobusAuthentication }
 import java.net.URI
 import java.io.{ File, InputStream, OutputStream }
 import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.plugin.environment.gridscale.GridScaleStorage
+
+import scala.sys.process.{ Process, ProcessLogger }
 
 object EGIStorageService {
 
@@ -40,7 +44,7 @@ object EGIStorageService {
   def apply(s: SRMStorage, _environment: BatchEnvironment { def voName: String }, _authentication: GlobusAuthentication.ProxyCreator, threads: Int) = new EGIStorageService {
     val storage = emptyRoot(s, threads)
     val url = new URI("srm", null, s.host, s.port, null, null, null)
-    val remoteStorage = new RemoteGliteStorage(s.host, s.port, _environment.voName)
+    val remoteStorage = new LCGCpRemoteStorage(s.host, s.port, _environment.voName)
     val environment = _environment
     val root = s.basePath
     override lazy val id = new URI("srm", environment.voName, s.host, s.port, s.basePath, null, null).toString
@@ -50,9 +54,8 @@ object EGIStorageService {
 
 }
 
-trait EGIStorageService extends PersistentStorageService with QualityControl with LimitedAccess with AvailabitityQuality {
+trait EGIStorageService extends PersistentStorageService with QualityControl with LimitedAccess with AvailabitityQuality with GridScaleStorage with CompressedTransfer {
   def hysteresis = Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis)
-
   override def exists(path: String)(implicit token: AccessToken): Boolean = quality { super.exists(path)(token) }
   override def listNames(path: String)(implicit token: AccessToken): Seq[String] = quality { super.listNames(path)(token) }
   override def list(path: String)(implicit token: AccessToken): Seq[(String, FileType)] = quality { super.list(path)(token) }
@@ -61,10 +64,49 @@ trait EGIStorageService extends PersistentStorageService with QualityControl wit
   override def rmFile(path: String)(implicit token: AccessToken): Unit = quality { super.rmFile(path)(token) }
   override def openInputStream(path: String)(implicit token: AccessToken): InputStream = quality { super.openInputStream(path)(token) }
   override def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = quality { super.openOutputStream(path)(token) }
-
-  override def upload(src: File, dest: String)(implicit token: AccessToken) = quality { super.upload(src, dest)(token) }
-  override def uploadGZ(src: File, dest: String)(implicit token: AccessToken) = quality { super.uploadGZ(src, dest)(token) }
-  override def download(src: String, dest: File)(implicit token: AccessToken) = quality { super.download(src, dest)(token) }
-  override def downloadGZ(src: String, dest: File)(implicit token: AccessToken) = quality { super.downloadGZ(src, dest)(token) }
-
+  override def upload(src: File, dest: String, options: TransferOptions)(implicit token: AccessToken) = quality { super.upload(src, dest, options)(token) }
+  override def download(src: String, dest: File, options: TransferOptions)(implicit token: AccessToken) = quality { super.download(src, dest, options)(token) }
 }
+
+class LCGCpRemoteStorage(val host: String, val port: Int, val voName: String) extends RemoteStorage with LCGCp { s ⇒
+
+  val timeout = Workspace.preferenceAsDuration(EGIEnvironment.RemoteTimeout).toSeconds
+
+  @transient lazy val url = new URI("srm", null, host, port, null, null, null)
+
+  protected def run(cmd: String) = {
+    val output = new StringBuilder
+    val error = new StringBuilder
+
+    val logger =
+      ProcessLogger(
+        (o: String) ⇒ output.append("\n" + o),
+        (e: String) ⇒ error.append("\n" + e)
+      )
+
+    val exit = Process(cmd) ! logger
+    if (exit != 0) throw new RuntimeException(s"Command $cmd had a non 0 return value.\n Output: ${output.toString}. Error: ${error.toString}")
+    output.toString
+  }
+
+  override def child(parent: String, child: String): String = GSStorage.child(parent, child)
+
+  override def download(src: String, dest: File, options: TransferOptions): Unit =
+    if (options.raw) download(src, dest)
+    else Workspace.withTmpFile { tmpFile ⇒
+      download(src, tmpFile)
+      tmpFile.copyUncompressFile(dest)
+    }
+
+  private def download(src: String, dest: File): Unit = run(lcgCpCmd(url.resolve(src), dest.getAbsolutePath))
+
+  override def upload(src: File, dest: String, options: TransferOptions): Unit =
+    if (options.raw) upload(src, dest)
+    else Workspace.withTmpFile { tmpFile ⇒
+      src.copyCompressFile(tmpFile)
+      upload(tmpFile, dest)
+    }
+
+  private def upload(src: File, dest: String): Unit = run(lcgCpCmd(src.getAbsolutePath, url.resolve(dest)))
+}
+

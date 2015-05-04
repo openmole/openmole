@@ -47,8 +47,9 @@ object CondorEnvironment {
     coresByNode: Option[Int] = None,
     workDirectory: Option[String] = None,
     requirements: List[CondorRequirement] = List(),
-    threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
-    new CondorEnvironment(user, host, port, openMOLEMemory, memory, nodes, coresByNode, workDirectory, requirements, threads)
+    threads: Option[Int] = None,
+    storageSharedLocally: Boolean = false)(implicit authentications: AuthenticationProvider) =
+    new CondorEnvironment(user, host, port, openMOLEMemory, memory, nodes, coresByNode, workDirectory, requirements, threads, storageSharedLocally)
 }
 
 class CondorEnvironment(
@@ -65,7 +66,8 @@ class CondorEnvironment(
     val coresByNode: Option[Int] = None,
     val workDirectory: Option[String],
     val requirements: List[CondorRequirement],
-    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    override val threads: Option[Int],
+    val storageSharedLocally: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
   type JS = CondorJobService
 
@@ -76,7 +78,7 @@ class CondorEnvironment(
     // TODO not available in the GridScale plugin yet
     //def queue = env.queue
     val environment = env
-    def sharedFS = storage
+    def sharedFS = remoteStorage
   }
 
   def allJobServices = List(jobService)

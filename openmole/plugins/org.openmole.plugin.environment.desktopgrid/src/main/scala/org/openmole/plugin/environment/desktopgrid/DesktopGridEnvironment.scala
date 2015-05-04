@@ -21,6 +21,7 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.gridscale.GridScaleStorage
 
 import org.openmole.plugin.tool.sftpserver.SFTPServer
 import java.net.URI
@@ -57,7 +58,7 @@ class DesktopGridEnvironment(
 
   val url = new URI("desktop", login, "localhost", port, null, null, null)
 
-  @transient lazy val batchStorage = new VolatileStorageService with UnlimitedAccess {
+  @transient lazy val batchStorage = new VolatileStorageService with UnlimitedAccess with GridScaleStorage with CompressedTransfer {
     def environment = env
     val remoteStorage: RemoteStorage = new DumyStorage
     def url = env.url

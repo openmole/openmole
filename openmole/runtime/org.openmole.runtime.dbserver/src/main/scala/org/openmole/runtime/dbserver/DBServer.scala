@@ -31,7 +31,7 @@ import scala.util.{ Success, Failure, Try }
 
 object DBServer extends App {
 
-  val base = DBServerInfo.base
+  val base = DBServerInfo.dbDirectory
 
   val lockFile = DBServerInfo.dbLockFile
   lockFile.createNewFile
@@ -51,10 +51,10 @@ object DBServer extends App {
         }
       })
 
-    val fullDataBaseFile = new File(DBServer.base.getPath, DBServerInfo.dbName + ".h2.db")
+    val fullDataBaseFile = new File(base.getPath, DBServerInfo.dbName + ".h2.db")
 
     def db(user: String, password: String) =
-      Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:file:${DBServerInfo.base}/${DBServerInfo.urlDBPath}", user = user, password = password)
+      Database.forDriver(driver = new org.h2.Driver, url = s"jdbc:h2:file:${base}/${DBServerInfo.urlDBPath}", user = user, password = password)
 
     def createDB(user: String, password: String): Unit = {
       Logger.getLogger(this.getClass.getName).info("Create BDD")

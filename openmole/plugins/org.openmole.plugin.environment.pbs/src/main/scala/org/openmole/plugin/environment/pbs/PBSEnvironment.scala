@@ -43,8 +43,9 @@ object PBSEnvironment {
     nodes: Option[Int] = None,
     coreByNode: Option[Int] = None,
     workDirectory: Option[String] = None,
-    threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
-    new PBSEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, nodes, coreByNode, workDirectory, threads)
+    threads: Option[Int] = None,
+    storageSharedLocally: Boolean = false)(implicit authentications: AuthenticationProvider) =
+    new PBSEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, nodes, coreByNode, workDirectory, threads, storageSharedLocally)
 }
 
 import PBSEnvironment._
@@ -60,7 +61,8 @@ class PBSEnvironment(
     val nodes: Option[Int],
     val coreByNode: Option[Int],
     val workDirectory: Option[String],
-    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    override val threads: Option[Int],
+    val storageSharedLocally: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
   type JS = PBSJobService
 
@@ -70,7 +72,7 @@ class PBSEnvironment(
     def nbTokens = maxConnections
     def queue = env.queue
     val environment = env
-    def sharedFS = storage
+    def sharedFS = remoteStorage
   }
 
   def allJobServices = List(jobService)

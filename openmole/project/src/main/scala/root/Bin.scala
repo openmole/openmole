@@ -28,7 +28,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
   lazy val openmoleStartLevels =
     Seq(
       "org.eclipse.core.runtime" -> 1,
-      "org-openmole-misc-logging" -> 2
+      "org-openmole-core-logging" -> 2
     )
 
   lazy val equinox = Seq(
@@ -229,7 +229,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
   lazy val daemon = Project("daemon", dir / "daemon", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     resourcesAssemble <++=
-    Seq(Runtime.daemon.project, plugin.Environment.desktopgrid.project, plugin.Tool.sftpserver.project) sendTo (assemblyPath / "plugins"),
+    Seq(Runtime.daemon.project, plugin.Environment.gridscale.project, plugin.Environment.desktopgrid.project, plugin.Tool.sftpserver.project) sendTo (assemblyPath / "plugins"),
     resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
     resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
     libraryDependencies ++= Seq(
@@ -247,7 +247,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
       pluginsDirectory := assemblyPath.value / "plugins",
       header :=
       """|eclipse.application=org.openmole.runtime.daemon
-        |osgi.bundles.defaultStartLevel=4""".stripMargin,
+         |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels,
       config := assemblyPath.value / "configuration/config.ini"
   )

@@ -13,7 +13,7 @@ object Environment extends PluginDefaults {
     (libraryDependencies += Libraries.gridscaleOAR)
 
   lazy val desktopgrid = OsgiProject("desktopgrid", imports = Seq("*")) dependsOn (Core.workflow, Core.workspace, Core.tools,
-    Core.batch, Core.serializer, Tool.sftpserver) //settings (bundleType += "daemon")
+    Core.batch, Core.serializer, Tool.sftpserver, gridscale) //settings (bundleType += "daemon")
 
   lazy val egi = OsgiProject("egi", imports = Seq("!org.apache.http.*", "!fr.iscpif.gridscale.libraries.srmstub", "!fr.iscpif.gridscale.libraries.lbstub", "!fr.iscpif.gridscale.libraries.wmsstub", "*")) dependsOn (Core.workflow, Core.exception, Core.updater, Core.batch,
     Core.workspace, Core.fileService, gridscale) settings (

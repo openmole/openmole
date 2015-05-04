@@ -23,7 +23,7 @@ import org.openmole.tool.file._
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.task.Task
+import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workspace.Workspace
 
@@ -58,11 +58,10 @@ trait ExternalTask extends Task {
   def resources: Iterable[Resource]
 
   protected case class ToPut(file: File, name: String, link: Boolean, inWorkDir: Boolean)
-  //protected case class ToGet(name: String, file: File, inWorkDir: Boolean)
 
-  protected def listInputFiles(context: Context): Iterable[ToPut] =
+  protected def listInputFiles(context: Context): Iterable[(Prototype[File], ToPut)] =
     inputFiles.map {
-      case InputFile(prototype, name, link, toWorkDir) ⇒ ToPut(context(prototype), name.from(context), link, toWorkDir)
+      case InputFile(prototype, name, link, toWorkDir) ⇒ prototype -> ToPut(context(prototype), name.from(context), link, toWorkDir)
     }
 
   protected def listResources(context: Context, tmpDir: File): Iterable[ToPut] = {
@@ -102,19 +101,27 @@ trait ExternalTask extends Task {
     }
   }
 
-  def prepareInputFiles(context: Context, tmpDir: File, workDirPath: String) = {
+  def prepareInputFiles(context: Context, tmpDir: File, workDirPath: String): Context = {
     val workDir = new File(tmpDir, workDirPath)
     def destination(f: ToPut) = if (f.inWorkDir) new File(workDir, f.name) else new File(tmpDir, f.name)
 
     for { f ← listResources(context, tmpDir) } copy(f, destination(f))
-    for { f ← listInputFiles(context) } copy(f, destination(f))
+
+    val copiedFiles =
+      for { (p, f) ← listInputFiles(context) } yield {
+        val d = destination(f)
+        copy(f, d)
+        Variable(p, d)
+      }
+
+    context ++ copiedFiles
   }
 
   def fetchOutputFiles(context: Context, tmpDir: File, workDirPath: String): Context = {
     val resultContext = context ++ outputFileVariables(context, tmpDir, workDirPath)
 
     def contextFiles =
-      resultContext.values.map(_.value).collect { case f: File ⇒ f }
+      filterOutput(resultContext).values.map(_.value).collect { case f: File ⇒ f }
 
     for {
       f ← contextFiles

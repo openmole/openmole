@@ -52,9 +52,14 @@ object DBServerInfo {
     finally src.close
   }
 
-  def dbLockFile = new File(base, dbLock)
-  def dbFile = new File(base, dbName)
-  def dbInfoFile = new File(base, dbInfoName)
+  lazy val dbDirectory = {
+    val dir = new File(base, "db")
+    dir.mkdirs()
+    dir
+  }
+  def dbLockFile = new File(dbDirectory, dbLock)
+  def dbFile = new File(dbDirectory, dbName)
+  def dbInfoFile = new File(dbDirectory, dbInfoName)
   def urlDBPath = s"$dbName;MV_STORE=FALSE;MVCC=TRUE;"
 
 }

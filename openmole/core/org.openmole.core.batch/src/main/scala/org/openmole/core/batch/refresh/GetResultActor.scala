@@ -85,22 +85,17 @@ class GetResultActor(jobManager: JobManager) {
     }
   }
 
-  private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken): RuntimeResult = {
-    val resultFile = Workspace.newFile
-    try {
-      signalDownload(storage.downloadGZ(outputFilePath, resultFile), outputFilePath, storage)
-      SerialiserService.deserialise(resultFile)
-    }
-    finally resultFile.delete
+  private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken): RuntimeResult = Workspace.withTmpFile { resultFile ⇒
+    signalDownload(storage.download(outputFilePath, resultFile), outputFilePath, storage)
+    SerialiserService.deserialise[RuntimeResult](resultFile)
   }
 
   private def display(message: Option[FileMessage], description: String, storage: StorageService)(implicit token: AccessToken) = {
     message match {
       case Some(message) ⇒
         try {
-          val tmpFile = Workspace.newFile
-          try {
-            signalDownload(storage.downloadGZ(message.path, tmpFile), message.path, storage)
+          Workspace.withTmpFile { tmpFile ⇒
+            signalDownload(storage.download(message.path, tmpFile), message.path, storage)
 
             /*val stdOutHash = HashService.computeHash(stdOutFile)
              if (stdOutHash != message.hash)
@@ -114,7 +109,6 @@ class GetResultActor(jobManager: JobManager) {
               System.out.println("-------------------------------------------------------")
             }
           }
-          finally tmpFile.delete
         }
         catch {
           case (e: IOException) ⇒
@@ -125,15 +119,19 @@ class GetResultActor(jobManager: JobManager) {
     }
   }
 
-  private def getContextResults(resultPath: FileMessage, storage: StorageService)(implicit token: AccessToken): ContextResults = {
-    if (resultPath == null) throw new InternalProcessingError("Context results path is null")
-    val contextResutsFileCache = Workspace.newFile
-    try {
-      signalDownload(storage.downloadGZ(resultPath.path, contextResutsFileCache), resultPath.path, storage)
-      if (contextResutsFileCache.hash != resultPath.hash) throw new InternalProcessingError("Results have been corrupted during the transfer.")
-      SerialiserService.deserialiseAndExtractFiles(contextResutsFileCache)
+  private def getContextResults(serializedResults: SerializedContextResults, storage: StorageService)(implicit token: AccessToken): ContextResults = {
+    Workspace.withTmpFile { serializedResultsFile ⇒
+      val fileReplacement =
+        serializedResults.files.map {
+          replicated ⇒
+            replicated.src -> replicated.download((p, f) ⇒ signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage))
+        }.toMap
+
+      Workspace.withTmpFile { contextResultsFileCache ⇒
+        signalDownload(storage.download(serializedResults.contextResults.path, contextResultsFileCache), serializedResults.contextResults.path, storage)
+        SerialiserService.deserialiseReplaceFiles[ContextResults](contextResultsFileCache, fileReplacement)
+      }
     }
-    finally contextResutsFileCache.delete
   }
 
 }

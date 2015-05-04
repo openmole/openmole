@@ -23,6 +23,7 @@ import java.util.UUID
 import java.util.concurrent.TimeoutException
 import java.util.logging.Logger
 import java.util.zip.{ GZIPInputStream, GZIPOutputStream, ZipFile }
+import javax.print.attribute.standard.Destination
 
 import org.openmole.tool.thread._
 import org.openmole.tool.lock._
@@ -31,7 +32,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.io.Source
-import scala.util.Try
+import scala.util.{ Success, Failure, Try }
 
 package object file { p ⇒
 
@@ -45,7 +46,7 @@ package object file { p ⇒
 
   lazy val jvmLevelFileLock = new LockRepository[String]
 
-  def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
+  def copy(source: FileChannel, destination: FileChannel): Unit = source.transferTo(0, source.size, destination)
 
   // glad you were there...
   implicit def file2Path(file: File) = file.toPath
@@ -116,6 +117,16 @@ package object file { p ⇒
   implicit class FileDecorator(file: File) {
 
     /////// copiers ////////
+    def copyContent(destination: File) = {
+      val ic = new FileInputStream(file).getChannel
+      try {
+        val oc = new FileOutputStream(destination).getChannel
+        try p.copy(ic, oc)
+        finally oc.close()
+      }
+      finally ic.close()
+    }
+
     def copy(toF: File) = {
       // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES, REPLACE_EXISTING
       toF.getParentFile.mkdirs()
@@ -141,9 +152,15 @@ package object file { p ⇒
     }
 
     //////// modifiers ///////
-    def move(to: Path) = wrapError {
-      if (!Files.isDirectory(file)) Files.move(file, to, StandardCopyOption.REPLACE_EXISTING)
-      else DirUtils.move(file, to)
+    def move(to: File) = wrapError {
+      def move = Files.move(file, to, StandardCopyOption.REPLACE_EXISTING)
+      if (!Files.isDirectory(file)) move
+      else {
+        Try(move) match {
+          case Success(_) ⇒
+          case Failure(_) ⇒ DirUtils.move(file, to)
+        }
+      }
     }
 
     def recursiveDelete: Unit = wrapError {
@@ -265,29 +282,27 @@ package object file { p ⇒
     }
 
     ///////// creation of new elements ////////
-    // TODO get rid of toFile
     /**
      * Create temporary directory in subdirectory of caller
      *
      * @param prefix String to prefix the generated UUID name.
-     * @return Newly created temporary directory
+     * @return New temporary directory
      */
     def newDir(prefix: String): File = {
       val tempDir = Paths.get(file.toString, prefix + UUID.randomUUID)
-      Files.createDirectories(tempDir).toFile
+      tempDir.toFile
     }
 
-    // TODO get rid of toFile
     /**
      * Create temporary file in directory of caller
      *
      * @param prefix String to prefix the generated UUID name.
      * @param suffix String to suffix the generated UUID name.
-     * @return Newly created temporary file
+     * @return New temporary file
      */
     def newFile(prefix: String, suffix: String): File = {
       val f = Paths.get(file.toString, prefix + UUID.randomUUID + suffix)
-      Files.createFile(f).toFile
+      f.toFile
     }
 
     /**
@@ -300,10 +315,11 @@ package object file { p ⇒
       val linkTarget = Paths.get(target)
       try Files.createSymbolicLink(file, linkTarget)
       catch {
-        case e: IOException ⇒
+        case e: UnsupportedOperationException ⇒
           Logger.getLogger(getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
           val fileTarget = new File(file.getParentFile, target)
           Files.copy(fileTarget, file, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING)
+        case e: IOException ⇒ throw e
       }
     }
 

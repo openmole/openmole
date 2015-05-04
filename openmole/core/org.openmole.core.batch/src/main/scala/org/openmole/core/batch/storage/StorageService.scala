@@ -61,7 +61,7 @@ trait StorageService extends BatchService with Storage {
 
   def clean(implicit token: AccessToken, session: Session) = {
     ReplicaCatalog.onStorage(this).delete
-    super.rmDir(baseDir)
+    rmDir(baseDir)
     directoryCache.invalidateAll
   }
 
@@ -101,20 +101,18 @@ trait StorageService extends BatchService with Storage {
 
   override def toString: String = id
 
-  def exists(path: String)(implicit token: AccessToken): Boolean = token.synchronized { super.exists(path) }
-  def listNames(path: String)(implicit token: AccessToken): Seq[String] = token.synchronized { super.listNames(path) }
-  def list(path: String)(implicit token: AccessToken): Seq[(String, FileType)] = token.synchronized { super.list(path) }
-  def makeDir(path: String)(implicit token: AccessToken): Unit = token.synchronized { super.makeDir(path) }
-  def rmDir(path: String)(implicit token: AccessToken): Unit = token.synchronized { super.rmDir(path) }
-  def rmFile(path: String)(implicit token: AccessToken): Unit = token.synchronized { super.rmFile(path) }
-  def mv(from: String, to: String)(implicit token: AccessToken) = token.synchronized { super.mv(from, to) }
-  def openInputStream(path: String)(implicit token: AccessToken): InputStream = token.synchronized { super.openInputStream(path) }
-  def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = token.synchronized { super.openOutputStream(path) }
+  def exists(path: String)(implicit token: AccessToken): Boolean = token.synchronized { _exists(path) }
+  def listNames(path: String)(implicit token: AccessToken): Seq[String] = token.synchronized { _listNames(path) }
+  def list(path: String)(implicit token: AccessToken): Seq[(String, FileType)] = token.synchronized { _list(path) }
+  def makeDir(path: String)(implicit token: AccessToken): Unit = token.synchronized { _makeDir(path) }
+  def rmDir(path: String)(implicit token: AccessToken): Unit = token.synchronized { _rmDir(path) }
+  def rmFile(path: String)(implicit token: AccessToken): Unit = token.synchronized { _rmFile(path) }
+  def mv(from: String, to: String)(implicit token: AccessToken) = token.synchronized { _mv(from, to) }
+  def openInputStream(path: String)(implicit token: AccessToken): InputStream = token.synchronized { _openInputStream(path) }
+  def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = token.synchronized { _openOutputStream(path) }
 
-  def upload(src: File, dest: String)(implicit token: AccessToken) = token.synchronized { super.upload(src, dest) }
-  def uploadGZ(src: File, dest: String)(implicit token: AccessToken) = token.synchronized { super.uploadGZ(src, dest) }
-  def download(src: String, dest: File)(implicit token: AccessToken) = token.synchronized { super.download(src, dest) }
-  def downloadGZ(src: String, dest: File)(implicit token: AccessToken) = token.synchronized { super.downloadGZ(src, dest) }
+  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.synchronized { _upload(src, dest, options) }
+  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.synchronized { _download(src, dest, options) }
 
   def baseDirName = Workspace.preference(Workspace.uniqueID) + '/'
 

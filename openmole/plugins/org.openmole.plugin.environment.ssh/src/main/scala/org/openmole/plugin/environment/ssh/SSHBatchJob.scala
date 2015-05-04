@@ -43,7 +43,8 @@ trait SSHBatchJob extends BatchJob {
 
   def updateState(implicit token: AccessToken) = synchronized {
     id match {
-      case Some(Success(id)) ⇒ super.updateState(id)
+      case Some(Success(id)) ⇒
+        super.updateState(id)
       case Some(Failure(e)) ⇒
         state = FAILED
         throw e

@@ -20,9 +20,7 @@ package org.openmole.core.batch.storage
 import java.io.File
 
 trait RemoteStorage {
-  def upload(src: File, dest: String): Unit
-  def uploadGZ(src: File, dest: String): Unit
-  def download(src: String, dest: File): Unit
-  def downloadGZ(src: String, dest: File): Unit
+  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit
+  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit
   def child(parent: String, child: String): String
 }

@@ -67,7 +67,7 @@ abstract class SystemExecTask(
       }
 
     def workDirPath = directory.getOrElse("")
-    prepareInputFiles(context, tmpDir, workDirPath)
+    val preparedContext = prepareInputFiles(context, tmpDir, workDirPath)
 
     val outBuilder = new StringBuilder
     val errBuilder = new StringBuilder
@@ -82,7 +82,7 @@ abstract class SystemExecTask(
     }
 
     def commandLine(cmd: String): Array[String] =
-      CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context + Variable(ExternalTask.PWD, workDir.getAbsolutePath), cmd)).toStrings
+      CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath), cmd)).toStrings
 
     def execute(command: Array[String], out: PrintStream, err: PrintStream): Int = {
       try {
@@ -92,7 +92,7 @@ abstract class SystemExecTask(
         val process = runtime.synchronized {
           runtime.exec(
             command,
-            variables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
+            variables.map { case (p, v) ⇒ v + "=" + preparedContext(p).toString }.toArray,
             workDir)
         }
 
@@ -121,7 +121,7 @@ abstract class SystemExecTask(
       }
 
     val retCode = execAll(osCommandLines.toList)
-    val retContext: Context = fetchOutputFiles(context, workDir, workDirPath)
+    val retContext: Context = fetchOutputFiles(preparedContext, workDir, workDirPath)
 
     retContext ++
       List(

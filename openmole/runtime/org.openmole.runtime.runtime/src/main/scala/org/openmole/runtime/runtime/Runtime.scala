@@ -24,13 +24,14 @@ import java.io.PrintStream
 import java.util.UUID
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.tool.tar._
 import org.openmole.core.tools.service.{ Logger, LocalHostName, Retry }
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.tools.service._
-import org.openmole.core.batch.authentication._
+import org.openmole.core.batch.storage._
 import org.openmole.core.batch.storage._
 import org.openmole.core.workflow.execution.local._
 import org.openmole.core.batch.message._
@@ -61,9 +62,9 @@ class Runtime {
     logger.fine("Downloading input message")
 
     val executionMessage =
-      Workspace.withTmpFile { executionMesageFileCache ⇒
-        retry(storage.downloadGZ(inputMessagePath, executionMesageFileCache))
-        SerialiserService.deserialise[ExecutionMessage](executionMesageFileCache)
+      Workspace.withTmpFile { executionMessageFileCache ⇒
+        retry(storage.download(inputMessagePath, executionMessageFileCache))
+        SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
       }
 
     val oldOut = System.out
@@ -80,30 +81,10 @@ class Runtime {
       System.setErr(errSt)
     }
 
-    def getReplicatedFile(replicatedFile: ReplicatedFile) = {
-      val cache = Workspace.newFile
-
-      retry(storage.downloadGZ(replicatedFile.path, cache))
-      val cacheHash = cache.hash.toString
-
-      if (cacheHash != replicatedFile.hash)
-        throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.src.toString + " replicated at " + replicatedFile.path)
-
-      val dl = if (replicatedFile.directory) {
-        val local = Workspace.newDir("dirReplica")
-        cache.extract(local)
-        local.mode = replicatedFile.mode
-        cache.delete
-        local
+    def getReplicatedFile(replicatedFile: ReplicatedFile) =
+      replicatedFile.download {
+        (path, file) ⇒ retry(storage.download(path, file))
       }
-      else {
-        cache.mode = replicatedFile.mode
-        cache
-      }
-
-      logger.fine("Downloaded file " + replicatedFile + " to " + dl)
-      dl
-    }
 
     val beginTime = System.currentTimeMillis
 
@@ -135,18 +116,18 @@ class Runtime {
         }
       }
 
-      val jobsFileCache = Workspace.newFile
-      logger.fine("Downloading execution message")
-      retry(storage.downloadGZ(executionMessage.jobs.path, jobsFileCache))
+      val runnableTasks = Workspace.withTmpFile { jobsFileCache ⇒
+        logger.fine("Downloading execution message")
+        retry(storage.download(executionMessage.jobs.path, jobsFileCache))
 
-      if (jobsFileCache.hash.toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
+        //if (jobsFileCache.hash.toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job doesn't match.")
 
-      val tis = new TarInputStream(new FileInputStream(jobsFileCache))
-      val runableTasks = tis.applyAndClose(e ⇒ { SerialiserService.deserialiseReplaceFiles[RunnableTask](tis, usedFiles) })
-      jobsFileCache.delete
+        val tis = new TarInputStream(jobsFileCache.bufferedInputStream)
+        tis.applyAndClose(_ ⇒ SerialiserService.deserialiseReplaceFiles[RunnableTask](tis, usedFiles))
+      }
 
-      val saver = new ContextSaver(runableTasks.size)
-      val allMoleJobs = runableTasks.map { _.toMoleJob(saver.save) }
+      val saver = new ContextSaver(runnableTasks.size)
+      val allMoleJobs = runnableTasks.map { _.toMoleJob(saver.save) }
 
       val beginExecutionTime = System.currentTimeMillis
 
@@ -160,20 +141,31 @@ class Runtime {
 
       logger.fine("Results " + saver.results)
 
-      val contextResults = new ContextResults(saver.results)
-      val contextResultFile = Workspace.newFile
+      val contextResults = ContextResults(saver.results)
+      Workspace.withTmpFile { contextResultFile ⇒
+        logger.fine("Upload the results")
+        val PluginClassAndFiles(files, _) = SerialiserService.serialiseGetPluginsAndFiles(contextResults, contextResultFile)
 
-      SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
-      val uploadedcontextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("uplodedTar", ".tgz"))
-      val result = new FileMessage(uploadedcontextResults, contextResultFile.hash.toString)
+        val replicated =
+          files.map {
+            _.upload {
+              f ⇒
+                val name = storage.child(executionMessage.communicationDirPath, Storage.uniqName("resultFile", ".bin"))
+                retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
+                name
+            }
+          }
 
-      logger.fine("Upload the results")
-      retry(storage.uploadGZ(contextResultFile, uploadedcontextResults))
-      contextResultFile.delete
+        val uploadedContextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("contextResult", ".bin"))
+        val contextResultFileHash = contextResultFile.hash.toString
 
-      val endTime = System.currentTimeMillis
+        retry(storage.upload(contextResultFile, uploadedContextResults, TransferOptions(forceCopy = true, canMove = true)))
+        val result = SerializedContextResults(FileMessage(uploadedContextResults, contextResultFileHash), replicated)
 
-      Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime, LocalHostName.localHostName))
+        val endTime = System.currentTimeMillis
+        Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime, LocalHostName.localHostName))
+      }
+
     }
     catch {
       case t: Throwable ⇒
@@ -188,12 +180,13 @@ class Runtime {
       System.setErr(oldErr)
     }
 
-    logger.fine("Upload the outputs")
+    logger.fine("Upload the output")
     val outputMessage =
       if (out.length != 0) {
         val output = storage.child(executionMessage.communicationDirPath, Storage.uniqName("output", ".txt"))
-        retry(storage.uploadGZ(out, output))
-        Some(new FileMessage(output, out.hash.toString))
+        val outHash = out.hash.toString
+        retry(storage.upload(out, output, TransferOptions(forceCopy = true, canMove = true)))
+        Some(FileMessage(output, outHash))
       }
       else None
 
@@ -202,20 +195,21 @@ class Runtime {
     val errorMessage =
       if (err.length != 0) {
         val errout = storage.child(executionMessage.communicationDirPath, Storage.uniqName("outputError", ".txt"))
-        retry(storage.uploadGZ(err, errout))
-        Some(new FileMessage(errout, err.hash.toString))
+        val errHash = err.hash.toString
+        retry(storage.upload(err, errout, TransferOptions(forceCopy = true, canMove = true)))
+        Some(FileMessage(errout, errHash))
       }
       else None
 
     err.delete
 
-    val runtimeResult = new RuntimeResult(outputMessage, errorMessage, result)
+    val runtimeResult = RuntimeResult(outputMessage, errorMessage, result)
 
     logger.fine("Upload the result message")
-    val outputLocal = Workspace.newFile("output", ".res")
-    SerialiserService.serialise(runtimeResult, outputLocal)
-    try retry(storage.uploadGZ(outputLocal, outputMessagePath))
-    finally outputLocal.delete
+    Workspace.withTmpFile("output", ".res") { outputLocal ⇒
+      SerialiserService.serialise(runtimeResult, outputLocal)
+      retry(storage.upload(outputLocal, outputMessagePath, TransferOptions(forceCopy = true, canMove = true)))
+    }
 
     result
   }

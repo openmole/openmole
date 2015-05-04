@@ -76,16 +76,11 @@ class SimExplorer extends IApplication {
 
       parser.parse(filteredArgs, Config()) foreach { config ⇒
 
+        logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFiles.mkString(","))
         PluginManager.tryLoad(new File(config.pluginPath.get).listFiles)
         PluginManager.startAll
 
-        val storageFile = Workspace.newFile("storage", ".xml")
-        val storage =
-          try {
-            new File(config.storage.get).copyUncompressFile(storageFile)
-            SerialiserService.deserialiseAndExtractFiles[RemoteStorage](storageFile)
-          }
-          finally storageFile.delete
+        val storage = SerialiserService.deserialiseAndExtractFiles[RemoteStorage](new File(config.storage.get))
 
         LocalEnvironment.default = LocalEnvironment(config.nbThread.getOrElse(1))
 

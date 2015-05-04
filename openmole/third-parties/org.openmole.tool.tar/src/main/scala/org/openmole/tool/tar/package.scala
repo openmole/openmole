@@ -55,6 +55,7 @@ package object tar {
 
     // new model using NIO
     def extract(directory: File) = {
+      if (!directory.exists()) directory.mkdirs()
       if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
       Iterator.continually(tis.getNextEntry).takeWhile(_ != null).foreach {
