@@ -23,7 +23,6 @@ import java.util.UUID
 import java.util.concurrent.TimeoutException
 import java.util.logging.Logger
 import java.util.zip.{ GZIPInputStream, GZIPOutputStream, ZipFile }
-import javax.print.attribute.standard.Destination
 
 import org.openmole.tool.thread._
 import org.openmole.tool.lock._
@@ -311,13 +310,14 @@ package object file { p ⇒
      * @param target Target of the link
      * @return
      */
-    def createLink(target: String) = {
-      val linkTarget = Paths.get(target)
-      try Files.createSymbolicLink(file, linkTarget)
+    def createLink(target: String): Unit = createLink(Paths.get(target))
+
+    def createLink(target: Path): Unit = {
+      try Files.createSymbolicLink(file, target)
       catch {
         case e: UnsupportedOperationException ⇒
           Logger.getLogger(getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
-          val fileTarget = new File(file.getParentFile, target)
+          val fileTarget = if (target.isAbsolute) target else Paths.get(file.getParentFile.getPath, target.getPath)
           Files.copy(fileTarget, file, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING)
         case e: IOException ⇒ throw e
       }
@@ -375,7 +375,8 @@ package object file { p ⇒
     ///////// helpers ///////
     def applyRecursive(operation: File ⇒ Unit): Unit =
       applyRecursive(operation, Set.empty)
-    def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File]): Unit = recurse(file)(operation, stopPath.map(_.getCanonicalFile))
+    def applyRecursive(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit =
+      recurse(file)(operation, stopPath)
   }
 
   def withClosable[C <: { def close() }, T](open: ⇒ C)(f: C ⇒ T): T = {
@@ -384,7 +385,10 @@ package object file { p ⇒
     finally c.close()
   }
 
-  private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Set[File]): Unit = if (!stopPath.contains(file.getCanonicalFile)) {
+  private def block(file: File, stopPath: Iterable[File]) =
+    stopPath.exists(f ⇒ Files.isSameFile(f, file))
+
+  private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit = if (!block(file, stopPath)) {
     def authorizeLS[T](f: File)(g: ⇒ T): T = {
       val originalMode = f.mode
       f.setExecutable(true)

@@ -34,7 +34,7 @@ trait LogicalLinkStorage extends LocalStorage {
   override protected def _upload(src: File, dest: String, options: TransferOptions): Unit = {
     if (options.canMove) _mv(src.getPath, dest)
     else if (options.forceCopy) super._upload(src, dest, options)
-    else new File(dest).createLink(src.getPath)
+    else new File(dest).createLink(src)
   }
 
   override protected def _download(src: String, dest: File, options: TransferOptions): Unit = {
