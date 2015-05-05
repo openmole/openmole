@@ -38,7 +38,7 @@ object SSHEnvironment {
     host: String,
     nbSlots: Int,
     port: Int = 22,
-    sharedDirectory: Option[String],
+    sharedDirectory: Option[String] = None,
     workDirectory: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
     threads: Option[Int] = None,
