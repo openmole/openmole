@@ -106,26 +106,25 @@ trait SharedStorage extends SSHService { js ⇒
     val runtime = preparedRuntime(serializedJob.runtime)
     val result = sharedFS.child(serializedJob.path, Storage.uniqName("result", ".bin"))
 
-    val script = Workspace.newFile("run", ".sh")
-    val remoteScript = try {
-      val workspace = serializedJob.storage.child(serializedJob.path, UUID.randomUUID.toString)
-      val osgiWorkDir = serializedJob.storage.child(serializedJob.path, UUID.randomUUID.toString)
+    val remoteScript =
+      Workspace.withTmpFile("run", ".sh") { script ⇒
+        val workspace = serializedJob.storage.child(serializedJob.path, UUID.randomUUID.toString)
+        val osgiWorkDir = serializedJob.storage.child(serializedJob.path, UUID.randomUUID.toString)
 
-      val content =
-        "export PATH=" + runtime + "/jre/bin/" + ":$PATH; cd " + runtime + "; export OPENMOLE_HOME=" + workspace + " ; mkdir -p $OPENMOLE_HOME ; " +
-          "sh run.sh " + environment.openMOLEMemoryValue + "m " + osgiWorkDir + " -s " + serializedJob.runtime.storage.path +
-          " -c " + serializedJob.path + " -p envplugins/ -i " + serializedJob.inputFile + " -o " + result + " -t " + environment.threadsValue +
-          "; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ;"
+        val content =
+          s"""export PATH=$runtime/jre/bin/:$$PATH; cd $runtime; mkdir -p $osgiWorkDir; export OPENMOLE_HOME=$workspace ; mkdir -p $$OPENMOLE_HOME ; """ +
+            "sh run.sh " + environment.openMOLEMemoryValue + "m " + osgiWorkDir + " -s " + serializedJob.runtime.storage.path +
+            " -c " + serializedJob.path + " -p envplugins/ -i " + serializedJob.inputFile + " -o " + result + " -t " + environment.threadsValue +
+            "; RETURNCODE=$?; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ; exit $RETURNCODE;"
 
-      logger.fine("Script: " + content)
+        logger.fine("Script: " + content)
 
-      script.content = content
+        script.content = content
 
-      val remoteScript = sharedFS.child(serializedJob.path, Storage.uniqName("run", ".sh"))
-      sharedFS.withToken { sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true))(_) }
-      remoteScript
-    }
-    finally script.delete
+        val remoteScript = sharedFS.child(serializedJob.path, Storage.uniqName("run", ".sh"))
+        sharedFS.withToken { sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))(_) }
+        remoteScript
+      }
     (remoteScript, result)
   }
 
