@@ -301,7 +301,7 @@ object DocumentationPages { index ⇒
       def helloWorld = new DocumentationPage {
         def name = "Hello World"
         def children = Seq()
-        def content = documentation.console.tutorial.HelloWorld()
+        def content = Pages.gettingStarted.content
       }
 
       def headlessNetLogo = new DocumentationPage {
