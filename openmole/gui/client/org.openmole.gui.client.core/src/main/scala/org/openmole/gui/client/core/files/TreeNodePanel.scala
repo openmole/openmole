@@ -4,7 +4,7 @@ import org.openmole.gui.client.core.Post
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.Forms._
 import org.scalajs.dom.html.{ Input, UList }
-import org.scalajs.dom.raw.{ HTMLInputElement, DragEvent, Event }
+import org.scalajs.dom.raw.{ FileList, HTMLInputElement, DragEvent, Event }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import org.openmole.gui.misc.js.{ Forms ⇒ bs, Select }
@@ -47,15 +47,11 @@ import TreeNodePanel._
 class TreeNodePanel(rootNode: DirNode) {
 
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode))
-  val toBeRefreshed: Var[Option[DirNode]] = Var(Some(rootNode))
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
+  val uploadings: Var[FileUploadState] = Var(Standby())
 
-  Rx {
-    toBeRefreshed().map {
-      refreshAfterTreeChange
-    }
-  }
+  computeAllSons(rootNode)
 
   val newNodeInput: Input = bs.input("")(
     placeholder := "Folder name",
@@ -92,7 +88,7 @@ class TreeNodePanel(rootNode: DirNode) {
           inputGroupButton(addRootDirButton.selector),
           newNodeInput,
           inputGroupAddon(id := "fileinput-addon")(uploadButton((fileInput: HTMLInputElement) ⇒ {
-            FileUploader(fileInput.files, dirNodeLine().last.canonicalPath())
+            uploadFiles(fileInput.files, dirNodeLine().last.canonicalPath())
           }))
         ),
         onsubmit := { () ⇒
@@ -102,10 +98,10 @@ class TreeNodePanel(rootNode: DirNode) {
             addRootDirButton.content().map {
               _ match {
                 case dt: DirType ⇒ Post[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
-                  if (b) toBeRefreshed() = Some(currentDirNode)
+                  if (b) refreshCurrentDirectory
                 }
                 case ft: FileType ⇒ Post[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
-                  if (b) toBeRefreshed() = Some(currentDirNode)
+                  if (b) refreshCurrentDirectory
                 }
               }
             }
@@ -114,37 +110,39 @@ class TreeNodePanel(rootNode: DirNode) {
     }, Rx {
       tags.div(`class` := "tree" + dragState(),
         ondragover := { (e: DragEvent) ⇒
-          e.preventDefault
           dragState() = " droppable hover"
           e.dataTransfer.dropEffect = "copy"
+          e.preventDefault
+          e.stopPropagation
           false
         },
         ondragend := { (e: DragEvent) ⇒
           dragState() = ""
-          println("dragend")
           false
         },
         ondrop := { (e: DragEvent) ⇒
-          println("drop !!")
           dragState() = ""
-          e.stopPropagation
+          uploadFiles(e.dataTransfer.files, dirNodeLine().last.canonicalPath())
           e.preventDefault
-          val files = e.dataTransfer.files
-          println("dropppoo " + files.length)
+          e.stopPropagation
           false
-        }
-      )(
-          Rx {
-            drawTree(dirNodeLine().last.sons())
-          }
+        })(
+          uploadings() match {
+            case _: Standby ⇒
+            case _: Uploaded ⇒
+              refreshCurrentDirectory
+              uploadings() = Standby()
+            case _ ⇒ progressBar(uploadings().display, uploadings().ratio)(id := "treeprogress")
+          },
+          drawTree(dirNodeLine().last.sons())
         )
     }
   )
 
-  def refreshAfterTreeChange(dn: DirNode) = {
-    computeAllSons(dn)
-    newNodeInput.value = ""
-  }
+  def uploadFiles(fileList: FileList, targetPath: String) =
+    FileUploader(fileList, targetPath,
+      (p: FileUploadState) ⇒ uploadings() = p
+    )
 
   def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(onclick := { () ⇒
     goToDirAction(dn)()
@@ -169,7 +167,6 @@ class TreeNodePanel(rootNode: DirNode) {
     })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
       dirNodeLine() = dirNodeLine() :+ dn
-      computeSons(dn)
     }
     )
   }
@@ -215,11 +212,12 @@ class TreeNodePanel(rootNode: DirNode) {
     glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem")
   )
 
-  def computeSons(dn: DirNode): Unit =
+  def computeSons(dn: DirNode): Unit = {
     sons(dn).foreach {
       sons ⇒
         dn.sons() = sons
     }
+  }
 
   def computeAllSons(dn: DirNode): Unit = {
     sons(dn).foreach {
@@ -235,7 +233,10 @@ class TreeNodePanel(rootNode: DirNode) {
     }
   }
 
-  def refreshCurrentDirectory = toBeRefreshed() = Some(dirNodeLine().last)
+  def refreshCurrentDirectory = {
+    computeAllSons(dirNodeLine().last)
+    newNodeInput.value = ""
+  }
 
   def trashNode(treeNode: TreeNode) = Post[Api].deleteFile(treeNode).call().foreach {
     d ⇒

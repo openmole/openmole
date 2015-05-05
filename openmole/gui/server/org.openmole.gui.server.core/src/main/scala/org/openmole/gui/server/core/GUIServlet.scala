@@ -96,8 +96,15 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
   }
 
   post("/uploadfiles") {
-    fileParams.map { fp ⇒
-      fp._2.getInputStream.copy(new java.io.File(fp._1))
+
+    for (file ← fileParams) yield {
+      val stream = file._2.getInputStream
+      try stream.copy(new java.io.File(file._1))
+      finally stream.close
+      Ok(file, Map(
+        "Content-Type" -> ("application/octet-stream"),
+        "Content-Disposition" -> ("form-data; filename=\"" + file._1 + "\"")
+      ))
     }
   }
 

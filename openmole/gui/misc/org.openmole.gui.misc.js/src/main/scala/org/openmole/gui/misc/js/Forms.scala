@@ -30,6 +30,7 @@ import scalatags.JsDom.all._
 import org.scalajs.jquery.jQuery
 import org.scalajs.jquery.JQuery
 import fr.iscpif.scaladget.mapping.BootstrapStatic
+import rx._
 
 @JSExport("Forms")
 object Forms {
@@ -185,6 +186,13 @@ object Forms {
     tags.span(`class` := "btn-file")(
       glyph(glyph_upload),
       fileInput(todo)
+    )
+
+  def progressBar(barMessage: String, ratio: Int): TypedTag[HTMLDivElement] =
+    tags.div(`class` := "progress")(
+      tags.div(`class` := "progress-bar", width := ratio.toString() + "%")(
+        barMessage
+      )
     )
 
   val btn_default = key("btn-default")
