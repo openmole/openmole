@@ -19,6 +19,7 @@ package org.openmole.plugin.hook.file
 
 import java.io.File
 
+import org.openmole.plugin.hook.file.CopyFileHook.CopyOptions
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.core.workflow.data._
@@ -31,8 +32,10 @@ import collection.mutable.ListBuffer
 
 object CopyFileHook {
 
+  case class CopyOptions(remove: Boolean, compress: Boolean, move: Boolean)
+
   trait CopyFileHookBuilder extends HookBuilder {
-    def addCopy(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false)
+    def addCopy(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false)
   }
 
   def apply(
@@ -47,10 +50,10 @@ object CopyFileHook {
 
   def apply(): CopyFileHookBuilder =
     new CopyFileHookBuilder { hook ⇒
-      private val copy = ListBuffer[(Prototype[File], ExpandedString, Boolean, Boolean)]()
+      private val copy = ListBuffer[(Prototype[File], ExpandedString, CopyOptions)]()
 
-      def addCopy(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false) = {
-        copy += ((prototype, destination, remove, compress))
+      def addCopy(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false) = {
+        copy += ((prototype, destination, CopyOptions(remove, compress, move)))
         addInput(prototype)
       }
 
@@ -64,10 +67,10 @@ object CopyFileHook {
 
 abstract class CopyFileHook extends Hook {
 
-  def copy: Iterable[(Prototype[File], ExpandedString, Boolean, Boolean)]
+  def copy: Iterable[(Prototype[File], ExpandedString, CopyOptions)]
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    for ((p, d, r, c) ← copy) copy(context, executionContext, p, d, r, c)
+    for ((p, d, options) ← copy) copy(context, executionContext, p, d, options)
     context
   }
 
@@ -76,16 +79,16 @@ abstract class CopyFileHook extends Hook {
     executionContext: ExecutionContext,
     filePrototype: Prototype[File],
     destination: ExpandedString,
-    remove: Boolean,
-    compress: Boolean) = {
+    options: CopyOptions) = {
     val from = context(filePrototype)
     val to = executionContext.relativise(destination.from(context))
 
     to.createParentDir
-    if (compress) from.copyCompress(to)
+    if (options.move) from.toRealPath().toFile().move(to)
+    else if (options.compress) from.copyCompress(to)
     else from.copyContent(to)
 
-    if (remove) from.recursiveDelete
+    if (options.remove) from.recursiveDelete
   }
 
 }
