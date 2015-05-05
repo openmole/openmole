@@ -26,6 +26,8 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.storage._
 
+import scala.util.Try
+
 object SharedStorage extends Logger
 
 import SharedStorage._
@@ -52,11 +54,13 @@ trait SharedStorage extends SSHService { js ⇒
         val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
         val (workdir, scriptName) = {
-          val workdir = sharedFS.child(sharedFS.root, Workspace.preference(Workspace.uniqueID) + "_install")
+          val installDir = sharedFS.child(sharedFS.root, "install")
+          Try(sharedFS.makeDir(installDir))
+          val workdir = sharedFS.child(installDir, Workspace.preference(Workspace.uniqueID) + "_install")
           if (!sharedFS.exists(workdir)) sharedFS.makeDir(workdir)
 
-          val script = Workspace.newFile("install", ".sh")
-          try {
+          Workspace.withTmpFile("install", ".sh") { script ⇒
+
             val tmpDirName = runtimePrefix + UUID.randomUUID.toString
             val scriptName = Storage.uniqName("install", ".sh")
 
@@ -75,10 +79,9 @@ trait SharedStorage extends SSHService { js ⇒
             script.content = content
 
             val remoteScript = sharedFS.child(workdir, scriptName)
-            sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true))
+            sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))
             (workdir, scriptName)
           }
-          finally script.delete
         }
 
         val jobDescription = new fr.iscpif.gridscale.ssh.SSHJobDescription {
@@ -109,7 +112,7 @@ trait SharedStorage extends SSHService { js ⇒
       val osgiWorkDir = serializedJob.storage.child(serializedJob.path, UUID.randomUUID.toString)
 
       val content =
-        "export PATH=" + runtime + "/jre/bin/" + ":$PATH; cd " + runtime + "; export OPENMOLE_HOME=" + workspace + " ; mkdir $OPENMOLE_HOME ; " +
+        "export PATH=" + runtime + "/jre/bin/" + ":$PATH; cd " + runtime + "; export OPENMOLE_HOME=" + workspace + " ; mkdir -p $OPENMOLE_HOME ; " +
           "sh run.sh " + environment.openMOLEMemoryValue + "m " + osgiWorkDir + " -s " + serializedJob.runtime.storage.path +
           " -c " + serializedJob.path + " -p envplugins/ -i " + serializedJob.inputFile + " -o " + result + " -t " + environment.threadsValue +
           "; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ;"
