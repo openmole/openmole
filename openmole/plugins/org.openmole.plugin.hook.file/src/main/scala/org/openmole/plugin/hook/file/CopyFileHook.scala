@@ -42,9 +42,10 @@ object CopyFileHook {
     prototype: Prototype[File],
     destination: ExpandedString,
     remove: Boolean = false,
-    compress: Boolean = false): CopyFileHookBuilder = {
+    compress: Boolean = false,
+    move: Boolean = false): CopyFileHookBuilder = {
     val builder = apply()
-    builder addCopy (prototype, destination, remove, compress)
+    builder addCopy (prototype, destination, remove, compress, move)
     builder
   }
 
