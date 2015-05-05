@@ -68,7 +68,7 @@ class PBSEnvironment(
 
   type JS = PBSJobService
 
-  @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
+  @transient lazy val credential = SSHAuthentication(user, host, port)(authentications)(authentications)
 
   @transient lazy val jobService = new PBSJobService with ThisHost with LimitedAccess {
     def nbTokens = maxConnections
