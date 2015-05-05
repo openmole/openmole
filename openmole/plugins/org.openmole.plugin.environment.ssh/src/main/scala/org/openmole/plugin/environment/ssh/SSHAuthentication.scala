@@ -31,7 +31,7 @@ object SSHAuthentication {
     val auth = list.reverse.find { e ⇒ target.matches(e.regexp) }
     auth.getOrElse(throw new UserBadDataError("No authentication method found for " + target))
   }
-  def apply(login: String, host: String, port: Int)(implicit authentications: AuthenticationProvider): SSHAuthentication =
+  def apply(login: String, host: String, port: Int = 22)(implicit authentications: AuthenticationProvider): SSHAuthentication =
     apply(address(login, host, port))(authentications)
 
   def +=(a: SSHAuthentication) = update(Workspace.authentications.size[SSHAuthentication], a)
