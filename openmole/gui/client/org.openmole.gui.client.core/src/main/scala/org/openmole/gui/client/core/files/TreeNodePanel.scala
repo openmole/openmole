@@ -148,7 +148,6 @@ class TreeNodePanel(rootNode: DirNode) {
   })
 
   def goToDirAction(dn: DirNode): () ⇒ Unit = () ⇒ {
-    computeSons(dn)
     dirNodeLine() = dirNodeLine().zipWithIndex.filter(_._1 == dn).headOption.map {
       case (dn, index) ⇒ dirNodeLine().take(index + 1)
     }.getOrElse(dirNodeLine())
@@ -167,7 +166,6 @@ class TreeNodePanel(rootNode: DirNode) {
     })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
       dirNodeLine() = dirNodeLine() :+ dn
-      computeSons(dn)
     }
     )
   }
@@ -235,7 +233,7 @@ class TreeNodePanel(rootNode: DirNode) {
   }
 
   def refreshCurrentDirectory = {
-    computeSons(dirNodeLine().last)
+    computeAllSons(dirNodeLine().last)
     newNodeInput.value = ""
   }
 
