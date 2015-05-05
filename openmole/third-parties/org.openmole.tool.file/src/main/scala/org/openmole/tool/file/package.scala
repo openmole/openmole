@@ -115,6 +115,8 @@ package object file { p ⇒
 
   implicit class FileDecorator(file: File) {
 
+    def realFile = file.toPath.toRealPath().toFile
+
     /////// copiers ////////
     def copyContent(destination: File) = {
       val ic = new FileInputStream(file).getChannel
@@ -220,9 +222,9 @@ package object file { p ⇒
       else Files.size(file)
 
     def mode =
-      { if (Files.isReadable(file)) READ_MODE else 0 } |
-        { if (Files.isWritable(file)) WRITE_MODE else 0 } |
-        { if (Files.isExecutable(file)) EXEC_MODE else 0 }
+      { if (Files.isReadable(file.realFile)) READ_MODE else 0 } |
+        { if (Files.isWritable(file.realFile)) WRITE_MODE else 0 } |
+        { if (Files.isExecutable(file.realFile)) EXEC_MODE else 0 }
 
     /** set mode from an integer as retrieved from a Tar archive */
     def mode_=(m: Int) = {
@@ -233,9 +235,9 @@ package object file { p ⇒
 
     /** Copy mode from another file */
     def mode_=(other: File) = {
-      file.setReadable(Files.isReadable(other))
-      file.setWritable(Files.isWritable(other))
-      file.setExecutable(Files.isExecutable(other))
+      file.setReadable(Files.isReadable(other.realFile))
+      file.setWritable(Files.isWritable(other.realFile))
+      file.setExecutable(Files.isExecutable(other.realFile))
     }
 
     def content_=(content: String) = Files.write(file, content.getBytes)
