@@ -13,7 +13,7 @@ import scala.util.{ Success, Failure }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.scalajs.dom
+import org.scalajs.{ jquery, dom }
 import rx._
 import scalatags.JsDom.all._
 
@@ -79,16 +79,6 @@ object ScriptClient {
       )
 
       body.appendChild(maindiv)
-
-      dom.window.ondragover = (e: DragEvent) ⇒ {
-        e.preventDefault()
-        false
-      }
-
-      dom.window.ondrop = (e: DragEvent) ⇒ {
-        e.preventDefault()
-        false
-      }
 
       editor.init
     }

@@ -4,7 +4,7 @@ import org.openmole.gui.client.core.Post
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.Forms._
 import org.scalajs.dom.html.{ Input, UList }
-import org.scalajs.dom.raw.{ HTMLInputElement, DragEvent, Event }
+import org.scalajs.dom.raw.{ FileList, HTMLInputElement, DragEvent, Event }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import org.openmole.gui.misc.js.{ Forms ⇒ bs, Select }
@@ -88,9 +88,7 @@ class TreeNodePanel(rootNode: DirNode) {
           inputGroupButton(addRootDirButton.selector),
           newNodeInput,
           inputGroupAddon(id := "fileinput-addon")(uploadButton((fileInput: HTMLInputElement) ⇒ {
-            FileUploader(fileInput.files, dirNodeLine().last.canonicalPath(),
-              (p: FileUploadState) ⇒ uploadings() = p
-            )
+            uploadFiles(fileInput.files, dirNodeLine().last.canonicalPath())
           }))
         ),
         onsubmit := { () ⇒
@@ -112,23 +110,21 @@ class TreeNodePanel(rootNode: DirNode) {
     }, Rx {
       tags.div(`class` := "tree" + dragState(),
         ondragover := { (e: DragEvent) ⇒
-          e.preventDefault
           dragState() = " droppable hover"
           e.dataTransfer.dropEffect = "copy"
+          e.preventDefault
+          e.stopPropagation
           false
         },
         ondragend := { (e: DragEvent) ⇒
           dragState() = ""
-          println("dragend")
           false
         },
         ondrop := { (e: DragEvent) ⇒
-          println("drop !!")
           dragState() = ""
-          e.stopPropagation
+          uploadFiles(e.dataTransfer.files, dirNodeLine().last.canonicalPath())
           e.preventDefault
-          val files = e.dataTransfer.files
-          println("dropppoo " + files.length)
+          e.stopPropagation
           false
         })(
           uploadings() match {
@@ -142,6 +138,11 @@ class TreeNodePanel(rootNode: DirNode) {
         )
     }
   )
+
+  def uploadFiles(fileList: FileList, targetPath: String) =
+    FileUploader(fileList, targetPath,
+      (p: FileUploadState) ⇒ uploadings() = p
+    )
 
   def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(onclick := { () ⇒
     goToDirAction(dn)()
