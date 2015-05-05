@@ -65,7 +65,7 @@ class SSHEnvironment(
   @transient lazy val jobService = new SSHJobService with LimitedAccess with ThisHost {
     def nbTokens = maxConnections
     def nbSlots = env.nbSlots
-    def sharedFS = remoteStorage
+    def sharedFS = storage
     val environment = env
   }
 

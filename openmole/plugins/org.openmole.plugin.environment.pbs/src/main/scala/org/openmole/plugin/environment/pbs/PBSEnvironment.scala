@@ -72,7 +72,7 @@ class PBSEnvironment(
     def nbTokens = maxConnections
     def queue = env.queue
     val environment = env
-    def sharedFS = remoteStorage
+    def sharedFS = storage
   }
 
   def allJobServices = List(jobService)

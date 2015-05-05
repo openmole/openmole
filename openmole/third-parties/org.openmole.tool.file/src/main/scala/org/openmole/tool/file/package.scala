@@ -23,7 +23,6 @@ import java.util.UUID
 import java.util.concurrent.TimeoutException
 import java.util.logging.Logger
 import java.util.zip.{ GZIPInputStream, GZIPOutputStream, ZipFile }
-import javax.print.attribute.standard.Destination
 
 import org.openmole.tool.thread._
 import org.openmole.tool.lock._
@@ -115,6 +114,8 @@ package object file { p ⇒
   }
 
   implicit class FileDecorator(file: File) {
+
+    def realFile = file.toPath.toRealPath().toFile
 
     /////// copiers ////////
     def copyContent(destination: File) = {
@@ -221,9 +222,9 @@ package object file { p ⇒
       else Files.size(file)
 
     def mode =
-      { if (Files.isReadable(file)) READ_MODE else 0 } |
-        { if (Files.isWritable(file)) WRITE_MODE else 0 } |
-        { if (Files.isExecutable(file)) EXEC_MODE else 0 }
+      { if (Files.isReadable(file.realFile)) READ_MODE else 0 } |
+        { if (Files.isWritable(file.realFile)) WRITE_MODE else 0 } |
+        { if (Files.isExecutable(file.realFile)) EXEC_MODE else 0 }
 
     /** set mode from an integer as retrieved from a Tar archive */
     def mode_=(m: Int) = {
@@ -234,9 +235,9 @@ package object file { p ⇒
 
     /** Copy mode from another file */
     def mode_=(other: File) = {
-      file.setReadable(Files.isReadable(other))
-      file.setWritable(Files.isWritable(other))
-      file.setExecutable(Files.isExecutable(other))
+      file.setReadable(Files.isReadable(other.realFile))
+      file.setWritable(Files.isWritable(other.realFile))
+      file.setExecutable(Files.isExecutable(other.realFile))
     }
 
     def content_=(content: String) = Files.write(file, content.getBytes)
@@ -311,14 +312,16 @@ package object file { p ⇒
      * @param target Target of the link
      * @return
      */
-    def createLink(target: String) = {
-      val linkTarget = Paths.get(target)
-      try Files.createSymbolicLink(file, linkTarget)
+    def createLink(target: String): Path = createLink(Paths.get(target))
+
+    def createLink(target: Path): Path = {
+      try Files.createSymbolicLink(file, target)
       catch {
         case e: UnsupportedOperationException ⇒
           Logger.getLogger(getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
-          val fileTarget = new File(file.getParentFile, target)
+          val fileTarget = if (target.isAbsolute) target else Paths.get(file.getParentFile.getPath, target.getPath)
           Files.copy(fileTarget, file, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING)
+          file
         case e: IOException ⇒ throw e
       }
     }
@@ -375,7 +378,8 @@ package object file { p ⇒
     ///////// helpers ///////
     def applyRecursive(operation: File ⇒ Unit): Unit =
       applyRecursive(operation, Set.empty)
-    def applyRecursive(operation: File ⇒ Unit, stopPath: Set[File]): Unit = recurse(file)(operation, stopPath.map(_.getCanonicalFile))
+    def applyRecursive(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit =
+      recurse(file)(operation, stopPath)
   }
 
   def withClosable[C <: { def close() }, T](open: ⇒ C)(f: C ⇒ T): T = {
@@ -384,7 +388,12 @@ package object file { p ⇒
     finally c.close()
   }
 
-  private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Set[File]): Unit = if (!stopPath.contains(file.getCanonicalFile)) {
+  private def block(file: File, stopPath: Iterable[File]) =
+    stopPath.exists {
+      f ⇒ if (f.exists() && file.exists()) Files.isSameFile(f, file) else false
+    }
+
+  private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit = if (!block(file, stopPath)) {
     def authorizeLS[T](f: File)(g: ⇒ T): T = {
       val originalMode = f.mode
       f.setExecutable(true)

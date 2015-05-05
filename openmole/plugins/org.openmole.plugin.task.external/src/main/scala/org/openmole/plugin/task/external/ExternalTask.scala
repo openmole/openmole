@@ -94,7 +94,7 @@ trait ExternalTask extends Task {
   private def copy(f: ToPut, to: File) = {
     to.createParentDir
 
-    if (f.link) to.createLink(f.file.getAbsolutePath)
+    if (f.link) to.createLink(f.file.getCanonicalFile)
     else {
       f.file.copy(to)
       to.applyRecursive { _.deleteOnExit }

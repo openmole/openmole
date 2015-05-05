@@ -23,7 +23,7 @@ import org.openmole.core.batch.control.{ UnlimitedAccess, LimitedAccess }
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.storage._
 import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.gridscale.LogicalLinkStorage
+import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStorage }
 
 trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
 
@@ -42,20 +42,21 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
   def storageSharedLocally: Boolean
 
   lazy val storage =
-    if (storageSharedLocally)
-      new PersistentStorageService with LogicalLinkStorage with StorageRoot with UnlimitedAccess {
-        def remoteStorage: RemoteStorage = new LogicalLinkStorage with StorageRoot with SimpleStorage
-        val url = new URI("file", env.user, "localhost", -1, workDirectory.orNull, null, null)
-        val id: String = url.toString
-        val environment = env
-      }
-    else remoteStorage
-
-  @transient lazy val remoteStorage = new PersistentStorageService with SSHStorageService with StorageRoot with LimitedAccess with ThisHost {
-    def nbTokens = maxConnections
-    val environment = env
-    val id = new URI("ssh", env.user, env.host, env.port, workDirectory.orNull, null, null).toString
-  }
+    storageSharedLocally match {
+      case true ⇒
+        new PersistentStorageService with LogicalLinkStorage with StorageRoot with UnlimitedAccess {
+          lazy val remoteStorage: RemoteStorage = new RemoteLogicalLinkStorage(root)
+          val url = new URI("file", env.user, "localhost", -1, workDirectory.orNull, null, null)
+          val id: String = url.toString
+          val environment = env
+        }
+      case false ⇒
+        new PersistentStorageService with SSHStorageService with StorageRoot with LimitedAccess with ThisHost {
+          def nbTokens = maxConnections
+          val environment = env
+          val id = new URI("ssh", env.user, env.host, env.port, workDirectory.orNull, null, null).toString
+        }
+    }
 
   def allStorages = List(storage)
 

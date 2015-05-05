@@ -14,23 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.plugin.environment
 
-package org.openmole.plugin.hook
+import org.openmole.core.batch.storage.SimpleStorage
+import org.openmole.plugin.environment.gridscale._
 
-import java.io.File
-import org.openmole.core.workflow.data.Prototype
-import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.plugin.hook.file.CopyFileHook.CopyFileHookBuilder
-import org.openmole.core.macros.Keyword._
-
-package object file {
-
-  def copies = new {
-    def +=(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false) =
-      (_: CopyFileHookBuilder).addCopy(prototype, destination, remove, compress, move)
-  }
-
-  def csvHeader = set[{ def setCSVHeader(h: Option[ExpandedString]) }]
-
-  def singleRow = set[{ def setSingleRow(b: Boolean) }]
+package object ssh {
+  class RemoteLogicalLinkStorage(val root: String) extends LogicalLinkStorage with SimpleStorage
+  class RemoveLocalStorage(val root: String) extends LocalStorage with SimpleStorage
 }

@@ -46,7 +46,7 @@ trait StorageService extends BatchService with Storage {
 
   def url: URI
   val id: String
-  def remoteStorage: RemoteStorage
+  val remoteStorage: RemoteStorage
 
   def persistentDir(implicit token: AccessToken, session: Session): String
   def tmpDir(implicit token: AccessToken): String
