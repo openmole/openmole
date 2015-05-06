@@ -313,8 +313,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           def localCachedReplicatedFile(replicatedFile: ReplicatedFile) = {
             val localFile = localCache.cache(replicatedFile, download(_, false))
             cached ::= replicatedFile
-            import replicatedFile._
-            new ReplicatedFile(src, directory, hash, localFile.getAbsolutePath, mode)
+            replicatedFile.copy(path = localFile.getAbsolutePath)
           }
 
           val files = executionMessage.files.map(localCachedReplicatedFile)
