@@ -113,7 +113,7 @@ class GetResultActor(jobManager: JobManager) {
         catch {
           case (e: IOException) ⇒
             logger.log(WARNING, description + " transfer has failed.")
-            logger.log(FINE, "Stack of the error during tranfert", e)
+            logger.log(FINE, "Stack of the error during transfer", e)
         }
       case None ⇒
     }
