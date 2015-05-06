@@ -71,8 +71,8 @@ abstract class CopyFileHook extends Hook {
   def copy: Iterable[(Prototype[File], ExpandedString, CopyOptions)]
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    for ((p, d, options) ← copy) copy(context, executionContext, p, d, options)
-    context
+    val moved = for ((p, d, options) ← copy) yield copy(context, executionContext, p, d, options)
+    context ++ moved.flatten
   }
 
   private def copy(
@@ -80,16 +80,25 @@ abstract class CopyFileHook extends Hook {
     executionContext: ExecutionContext,
     filePrototype: Prototype[File],
     destination: ExpandedString,
-    options: CopyOptions) = {
+    options: CopyOptions): Option[Variable[File]] = {
     val from = context(filePrototype)
     val to = executionContext.relativise(destination.from(context))
 
     to.createParentDir
-    if (options.move) from.realFile.move(to)
-    else if (options.compress) from.copyCompress(to)
-    else from.copyContent(to)
+    val ret: Option[Variable[File]] =
+      if (options.move) {
+        from.realFile.move(to)
+        Some(Variable(filePrototype, to))
+      } else if (options.compress) {
+        from.copyCompress(to)
+        None
+      } else {
+        from.copyContent(to)
+        None
+      }
 
     if (options.remove) from.recursiveDelete
+    ret
   }
 
 }
