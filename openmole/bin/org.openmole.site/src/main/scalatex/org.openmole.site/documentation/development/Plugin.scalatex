@@ -6,7 +6,9 @@
   This tutorial explains how to write an OpenMOLE plugin using Scala and SBT. OpenMOLE is based on the JVM so you can
   create OpenMOLE plugins using Scala or any other JVM based languages such as Java, Groovy, Clojure, Jython...
 
-  @p The prerequisite for the tutorial is to have @a("git", href := "http://git-scm.com/") and
+  @p The -p option loads plugins in the OpenMOLE console: @hl.highlight("./openmole -c -p /path/to/plugin.jar /path/to/anotherplugin.jar", "plain")
+
+  @p This tutorial exposes how to design a plugin. The prerequisites are to have @a("git", href := "http://git-scm.com/") and
   @a("SBT", href := "http://www.scala-sbt.org/") installed on your system.
 
   @p The first step is to clone the code available @a("here", href := "https://github.com/openmole/myopenmoleplugin"):
