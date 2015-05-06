@@ -36,6 +36,7 @@ import Log._
 trait SharedStorage extends SSHService { js ⇒
 
   def sharedFS: StorageService
+  def workDirectory: Option[String]
 
   def installJobService = new fr.iscpif.gridscale.ssh.SSHJobService {
     def credential = js.credential
@@ -108,8 +109,9 @@ trait SharedStorage extends SSHService { js ⇒
 
     val remoteScript =
       Workspace.withTmpFile("run", ".sh") { script ⇒
-        val workspace = serializedJob.storage.child(serializedJob.path, UUID.randomUUID.toString)
-        val osgiWorkDir = serializedJob.storage.child(serializedJob.path, UUID.randomUUID.toString)
+        val baseWorkspace = workDirectory getOrElse serializedJob.path
+        val workspace = serializedJob.storage.child(baseWorkspace, UUID.randomUUID.toString)
+        val osgiWorkDir = serializedJob.storage.child(baseWorkspace, UUID.randomUUID.toString)
 
         val content =
           s"""export PATH=$runtime/jre/bin/:$$PATH; cd $runtime; mkdir -p $osgiWorkDir; export OPENMOLE_HOME=$workspace ; mkdir -p $$OPENMOLE_HOME ; """ +

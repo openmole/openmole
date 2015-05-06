@@ -45,11 +45,12 @@ object CondorEnvironment {
     memory: Option[Int] = None,
     nodes: Option[Int] = None,
     coresByNode: Option[Int] = None,
+    sharedDirectory: Option[String] = None,
     workDirectory: Option[String] = None,
     requirements: List[CondorRequirement] = List(),
     threads: Option[Int] = None,
     storageSharedLocally: Boolean = false)(implicit authentications: AuthenticationProvider) =
-    new CondorEnvironment(user, host, port, openMOLEMemory, memory, nodes, coresByNode, workDirectory, requirements, threads, storageSharedLocally)
+    new CondorEnvironment(user, host, port, openMOLEMemory, memory, nodes, coresByNode, sharedDirectory, workDirectory, requirements, threads, storageSharedLocally)
 }
 
 class CondorEnvironment(
@@ -64,6 +65,7 @@ class CondorEnvironment(
     val memory: Option[Int],
     val nodes: Option[Int] = None,
     val coresByNode: Option[Int] = None,
+    val sharedDirectory: Option[String],
     val workDirectory: Option[String],
     val requirements: List[CondorRequirement],
     override val threads: Option[Int],
@@ -79,6 +81,7 @@ class CondorEnvironment(
     //def queue = env.queue
     val environment = env
     def sharedFS = storage
+    def workDirectory = env.workDirectory
   }
 
   def allJobServices = List(jobService)

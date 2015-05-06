@@ -38,11 +38,12 @@ object SSHEnvironment {
     host: String,
     nbSlots: Int,
     port: Int = 22,
+    sharedDirectory: Option[String],
     workDirectory: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
     threads: Option[Int] = None,
     storageSharedLocally: Boolean = false)(implicit authentications: AuthenticationProvider) =
-    new SSHEnvironment(user, host, nbSlots, port, workDirectory, openMOLEMemory, threads, storageSharedLocally)
+    new SSHEnvironment(user, host, nbSlots, port, sharedDirectory, workDirectory, openMOLEMemory, threads, storageSharedLocally)
 }
 
 import SSHEnvironment._
@@ -52,6 +53,7 @@ class SSHEnvironment(
     val host: String,
     val nbSlots: Int,
     override val port: Int,
+    val sharedDirectory: Option[String],
     val workDirectory: Option[String],
     override val openMOLEMemory: Option[Int],
     override val threads: Option[Int],
@@ -67,6 +69,7 @@ class SSHEnvironment(
     def nbSlots = env.nbSlots
     def sharedFS = storage
     val environment = env
+    def workDirectory = env.workDirectory
   }
 
   def allJobServices = List(jobService)

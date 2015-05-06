@@ -39,10 +39,11 @@ object SGEEnvironment {
     openMOLEMemory: Option[Int] = None,
     wallTime: Option[Duration] = None,
     memory: Option[Int] = None,
+    sharedDirectory: Option[String] = None,
     workDirectory: Option[String] = None,
     threads: Option[Int] = None,
     storageSharedLocally: Boolean = false)(implicit authentications: AuthenticationProvider) =
-    new SGEEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, workDirectory, threads, storageSharedLocally)
+    new SGEEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, sharedDirectory, workDirectory, threads, storageSharedLocally)
 }
 
 class SGEEnvironment(
@@ -53,6 +54,7 @@ class SGEEnvironment(
     override val openMOLEMemory: Option[Int],
     val wallTime: Option[Duration],
     val memory: Option[Int],
+    val sharedDirectory: Option[String],
     val workDirectory: Option[String],
     override val threads: Option[Int],
     val storageSharedLocally: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
@@ -67,6 +69,7 @@ class SGEEnvironment(
     val environment = env
     def sharedFS = storage
     val id = url.toString
+    def workDirectory = env.workDirectory
   }
 
   def allJobServices = List(jobService)
