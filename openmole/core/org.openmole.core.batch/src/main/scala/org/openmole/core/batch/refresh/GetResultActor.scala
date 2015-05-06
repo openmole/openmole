@@ -124,7 +124,7 @@ class GetResultActor(jobManager: JobManager) {
       val fileReplacement =
         serializedResults.files.map {
           replicated ⇒
-            replicated.src -> replicated.download((p, f) ⇒ signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage))
+            replicated.originalPath -> replicated.download((p, f) ⇒ signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage))
         }.toMap
 
       Workspace.withTmpFile { contextResultsFileCache ⇒

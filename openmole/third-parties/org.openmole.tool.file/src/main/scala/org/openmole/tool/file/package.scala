@@ -51,7 +51,7 @@ package object file { p ⇒
   implicit def file2Path(file: File) = file.toPath
   implicit def path2File(path: Path) = path.toFile
 
-  implicit val fileOrdering = Ordering.by((_: File).getCanonicalPath)
+  implicit val fileOrdering = Ordering.by((_: File).getPath)
   implicit def predicateToFileFilter(predicate: File ⇒ Boolean) = new FileFilter {
     def accept(p1: File) = predicate(p1)
   }

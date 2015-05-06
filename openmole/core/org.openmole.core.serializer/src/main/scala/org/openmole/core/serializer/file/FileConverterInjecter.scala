@@ -24,9 +24,8 @@ import java.io.File
 class FileConverterInjecter(deserializer: FileInjection) extends FileConverter {
 
   override def fromString(str: String): Object = {
-    val file = super.fromString(str).asInstanceOf[File]
-    val ret = deserializer.getMatchingFile(file)
-    if (ret == null) throw new XStreamException("No matching file for " + file.getAbsolutePath)
+    val ret = deserializer.getMatchingFile(str)
+    if (ret == null) throw new XStreamException(s"No matching file for $str")
     ret
   }
 }

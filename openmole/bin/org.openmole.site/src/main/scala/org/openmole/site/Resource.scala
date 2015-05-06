@@ -38,7 +38,6 @@ object Resource {
   def logo = FileResource("openmole.png")
   def openmole = RenameFileResource("openmole.tar.gz", s"openmole-${Objects.version}.tar.gz")
   def openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${Objects.version}.tar.gz")
-  def versionLogo = FileResource("versionLogo.png")
   def api = ArchiveResource("openmole-api.tar.gz", "api")
 
   def all = Seq[Resource](
@@ -57,8 +56,7 @@ object Resource {
     fireNewGlobals,
     fireNewFunction,
     fireOldSetup,
-    fireRemoveClearAll,
-    versionLogo)
+    fireRemoveClearAll)
 }
 
 sealed trait Resource

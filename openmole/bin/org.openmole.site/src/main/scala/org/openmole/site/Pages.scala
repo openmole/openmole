@@ -32,10 +32,7 @@ object Pages {
   def decorate(p: Frag): Frag =
     div(`class` := "container")(
       div(`class` := "header pull-center")(
-        div(`class` := "title")(
-          a(img(id := "logo", src := Resource.logo.file), href := index.file),
-          a(img(id := "logo-version", src := Resource.versionLogo.file), href := Pages.gettingStarted.file)
-        ),
+        div(`class` := "title")(a(img(id := "logo", src := Resource.logo.file), href := index.file)),
         ul(id := "sections", `class` := "nav nav-pills")(
           li(a("Getting Started", `class` := "amenu", id := "section", href := gettingStarted.file)),
           li(a("Documentation", `class` := "amenu", id := "section", href := DocumentationPages.root.file)),
@@ -181,7 +178,7 @@ object DocumentationPages { index ⇒
   def root = new DocumentationPage {
     def name = "Documentation"
     def content = documentation.Documentation()
-    def children = Seq(console, gui, tutorial, development)
+    def children = Seq(console, gui, tutorial, faq, development)
 
     def console =
       new DocumentationPage {
@@ -301,7 +298,7 @@ object DocumentationPages { index ⇒
       def helloWorld = new DocumentationPage {
         def name = "Hello World"
         def children = Seq()
-        def content = documentation.console.tutorial.HelloWorld()
+        def content = Pages.gettingStarted.content
       }
 
       def headlessNetLogo = new DocumentationPage {
@@ -321,6 +318,12 @@ object DocumentationPages { index ⇒
         def children = Seq()
         def content = documentation.console.tutorial.Capsule()
       }
+    }
+
+    def faq = new DocumentationPage {
+      def name = "FAQ"
+      def children = Seq()
+      def content = documentation.FAQ()
     }
 
     def development = new DocumentationPage {
