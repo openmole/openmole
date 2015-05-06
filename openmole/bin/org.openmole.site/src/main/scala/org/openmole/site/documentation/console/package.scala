@@ -25,5 +25,6 @@ package object environment {
   def threads = """threads: the number of threads for concurrent execution of tasks on the worker node, for instance threads = 4"""
   def queue = """queue: the name of the queue on which jobs should be submitted, for instance queue = "longjobs""""
   def port = """port: the number of the port used by the ssh server, by default it is set to 22"""
-  def workDirectory = """workDirectory: the directory in which OpenMOLE will run on the remote server, for instance workDirector = "/home/user/openmole/""""
+  def sharedDirectory = """sharedDirectory: the directory in which OpenMOLE will use to communicate between the head of the cluster and the worker nodes sharedDirectory = "/home/user/openmole/""""
+  def workDirectory = """workDirectory: the directory in which OpenMOLE will run on the remote server, for instance workDirectory = "${TMP}""""
 }

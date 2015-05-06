@@ -1,30 +1,61 @@
 
 @import Resource._
 @import Objects._
+@import org.openmole.site.DocumentationPages._
+@import org.openmole.site.Objects._
 
-@sect{Download}
+
+@def tasks = """
+  // Define the variables that are transmitted between the tasks
+  val i = Val[Double]
+  val res = Val[Double]
+
+  // Define the design of experiment
+  val exploration = ExplorationTask(i in (0.0 to 100.0 by 1.0))
+
+  // Define the model, here it is a simple task executing "res = i * 2", but it can be your model
+  val model =
+    ScalaTask("val res = i * 2") set (
+      inputs += i,
+      outputs += (i, res)
+    )"""
+
+@sect{Launch}
 
   The version @version - @b{@name} - of OpenMOLE is available @a("here", href := openmole.file). It was released on @generationDate.
 
-  @p Optionally the daemon for desktop computing is available @a("here", href := openmoleDaemon.file).
+  @p OpenMOLE requires that Java version 7 or above is installed and available on your computer. Then just extract the archive, and you're done! OpenMOLE is installed and works out of the box!
 
-@sect{Install}
-  Just extract the archive, and you're done! OpenMOLE is installed and works out of the box!
+  @p Once installed you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up the OpenMOLE graphical interface. Instructions to launch the pure console interface (basically @i{openmole -c}) are available in the @a("console documentation", href := DocumentationPages.root.console.file) section.
 
-  @p OpenMOLE requires that Java version 7 or above is installed and available on your computer.
+@sect{First workflow}
+  Let's design a Console workflow that explores one variable multiplies it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
 
-  @p OpenMOLE is fully working under OpenJDK 7 and 8. This is the recommended option. If you use the closed-source
-  Oracle Java virtual machine (which is probably the case if you are working on Mac or Windows), you have to install the
-  Java Cryptography Extension (JCE) available at the bottom of this
-  @a("page", href := "http://www.oracle.com/technetwork/java/javase/downloads/index.html") in order for OpenMOLE to be
-  fully functional. JCE is an archive containing a bunch of files that you should replace in the i{jre/lib/security}
-  directory of your java installation. It enables strong cryptographic algorithms.
+  @br @hl.openmole(s"""
+  $tasks
 
-@sect{Launch}
-  Once installed you can launch OpenMOLE by executing the @i{openmole} file in the installation directory
-  (it is called @i{openmole.bat} for windozers). It will bring up the OpenMOLE graphical interface. Instructions to
-  launch the console interface (basically @i{openmole -c}) are available in the
- @a("console documentation", href := DocumentationPages.root.console.file) section.
+  // Define the execution environment, here it is a local execution environment with 4 threads but
+  // it could be a remote cluster or a grid.
+  // The workflow will work the same way with no installation step required on the execution environment.
+  val env = LocalEnvironment(4)
 
-@sect{Old versions}
-  Old versions of OpenMOLE software and documentation are available @a("here", href := "http://www.openmole.org/all/").
+  // Define and start the workflow
+  val ex = exploration -< (model on env hook ToStringHook()) start
+  """)
+
+  @p Distributing the execution of the exact same code to a remote cluster only requires to switch the environment definition.
+
+  @br @hl.openmole(s"""
+  // All you need is an account on the cluster.
+  // You should also provide your authentication to OpenMOLE as explained in the specific section for each environment.
+  val env = SLURMEnvironment("myLogin", "cluster.iscpif.fr")
+
+  // Define and start the workflow
+  val ex = exploration -< (model on env hook ToStringHook()) start
+  """, header = tasks)
+
+  @p This is just a tiny bit of what OpenMOLE can achieve! Discover how to:
+  @ul
+    @li{define your environment in the @a("environment documentation", href := root.console.environment.file),}
+    @li{include your program in the @a("task documentation", href := root.console.task.file),}
+    @li{describe you design of experiments in the @a("sampling documentation", href := root.console.sampling.file).}

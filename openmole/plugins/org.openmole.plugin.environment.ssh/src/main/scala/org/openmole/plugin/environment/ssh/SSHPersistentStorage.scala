@@ -29,11 +29,11 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
 
   type SS = PersistentStorageService
 
-  def workDirectory: Option[String]
+  def sharedDirectory: Option[String]
 
   trait StorageRoot <: Storage {
     def home: String
-    lazy val root = workDirectory match {
+    lazy val root = sharedDirectory match {
       case Some(p) ⇒ p
       case None    ⇒ child(home, ".openmole/.tmp/ssh/")
     }
@@ -46,7 +46,7 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
       case true ⇒
         new PersistentStorageService with LogicalLinkStorage with StorageRoot with UnlimitedAccess {
           lazy val remoteStorage: RemoteStorage = new RemoteLogicalLinkStorage(root)
-          val url = new URI("file", env.user, "localhost", -1, workDirectory.orNull, null, null)
+          val url = new URI("file", env.user, "localhost", -1, sharedDirectory.orNull, null, null)
           val id: String = url.toString
           val environment = env
         }
@@ -54,7 +54,7 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
         new PersistentStorageService with SSHStorageService with StorageRoot with LimitedAccess with ThisHost {
           def nbTokens = maxConnections
           val environment = env
-          val id = new URI("ssh", env.user, env.host, env.port, workDirectory.orNull, null, null).toString
+          val id = new URI("ssh", env.user, env.host, env.port, sharedDirectory.orNull, null, null).toString
         }
     }
 

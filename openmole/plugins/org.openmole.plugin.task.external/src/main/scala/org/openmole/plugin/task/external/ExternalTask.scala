@@ -86,8 +86,8 @@ trait ExternalTask extends Task {
     outputFiles.map {
       case OutputFile(name, prototype, inWorkDir) ⇒
         val fileName = name.from(context)
-        val file = if (inWorkDir) new File(workDir, fileName) else new File(tmpDir, fileName)
-        Variable(prototype, file)
+        val baseDir = if (inWorkDir) workDir else tmpDir
+        Variable(prototype, baseDir.resolve(fileName).toFile)
     }
   }
 

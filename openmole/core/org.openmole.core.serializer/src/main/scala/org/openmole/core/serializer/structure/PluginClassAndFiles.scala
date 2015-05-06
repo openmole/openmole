@@ -19,4 +19,4 @@ package org.openmole.core.serializer.structure
 
 import java.io.File
 
-case class PluginClassAndFiles(files: Iterable[File], plugins: Iterable[File])
+case class PluginClassAndFiles(files: Seq[File], plugins: Seq[File])

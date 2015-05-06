@@ -131,7 +131,7 @@ object SerialiserService extends Logger {
     val plugins = pluginListingFactory.exec(_.listPlugins(obj))
     serialiserWithFileListingFactory.exec { s ⇒
       s.toXML(obj, os)
-      PluginClassAndFiles(s.listedFiles, plugins)
+      PluginClassAndFiles(s.listedFiles.toSeq, plugins.toSeq)
     }
   }
 
