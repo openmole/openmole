@@ -135,13 +135,13 @@ object SerialiserService extends Logger {
     }
   }
 
-  def deserialiseReplaceFiles[T](file: File, files: PartialFunction[File, File]): T = lock.read {
+  def deserialiseReplaceFiles[T](file: File, files: PartialFunction[String, File]): T = lock.read {
     val is = file.bufferedInputStream
     try deserialiseReplaceFiles[T](is, files)
     finally is.close
   }
 
-  def deserialiseReplaceFiles[T](is: InputStream, files: PartialFunction[File, File]): T =
+  def deserialiseReplaceFiles[T](is: InputStream, files: PartialFunction[String, File]): T =
     lock.read(deserialiserWithFileInjectionFactory.exec {
       serializer ⇒
         serializer.injectedFiles = files

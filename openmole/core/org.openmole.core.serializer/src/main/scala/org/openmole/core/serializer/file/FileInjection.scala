@@ -21,11 +21,11 @@ import org.openmole.core.serializer.converter.Serialiser
 import java.io.{ InputStream, File }
 
 trait FileInjection <: Serialiser {
-  var injectedFiles: PartialFunction[File, File] = Map.empty
+  var injectedFiles: PartialFunction[String, File] = Map.empty
 
   xStream.registerConverter(new FileConverterInjecter(this))
 
-  def getMatchingFile(file: File): File = injectedFiles(file)
+  def getMatchingFile(file: String): File = injectedFiles(file)
 
   def fromXML[T](is: InputStream): T = xStream.fromXML(is).asInstanceOf[T]
 

@@ -45,7 +45,7 @@ package object message {
 
       if (verifyHash) {
         val cacheHash = cache.hash.toString
-        if (cacheHash != replicatedFile.hash) throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.src.toString + " replicated at " + replicatedFile.path)
+        if (cacheHash != replicatedFile.hash) throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.originalPath + " replicated at " + replicatedFile.path)
       }
 
       val dl =
@@ -80,7 +80,7 @@ package object message {
       val mode = file.mode
       val hash = toReplicate.hash.toString
       val newFile = upload(toReplicate)
-      ReplicatedFile(file, isDir, hash, newFile, mode)
+      ReplicatedFile(file.getPath, isDir, hash, newFile, mode)
     }
   }
 
@@ -93,7 +93,7 @@ package object message {
   }
 
   case class FileMessage(path: String, hash: String)
-  case class ReplicatedFile(src: File, directory: Boolean, hash: String, path: String, mode: Int)
+  case class ReplicatedFile(originalPath: String, directory: Boolean, hash: String, path: String, mode: Int)
 
   case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: FileMessage, communicationDirPath: String)
 

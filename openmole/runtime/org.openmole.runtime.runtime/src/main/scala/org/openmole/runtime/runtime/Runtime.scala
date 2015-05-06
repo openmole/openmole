@@ -57,7 +57,7 @@ class Runtime {
   def apply(storage: RemoteStorage, communicationDirPath: String, inputMessagePath: String, outputMessagePath: String, debug: Boolean) = {
 
     /*--- get execution message and job for runtime---*/
-    val usedFiles = new HashMap[File, File]
+    val usedFiles = new HashMap[String, File]
 
     logger.fine("Downloading input message")
 
@@ -102,7 +102,7 @@ class Runtime {
 
       PluginManager.tryLoad(plugins.unzip._2)
 
-      for { (p, f) ← plugins } usedFiles.put(p.src, f)
+      for { (p, f) ← plugins } usedFiles.put(p.originalPath, f)
 
       /* --- Download the files for the local file cache ---*/
       logger.fine("Downloading files")
@@ -110,9 +110,9 @@ class Runtime {
       for (repliURI ← executionMessage.files) {
 
         //To avoid getting twice the same plugin with different path
-        if (!usedFiles.containsKey(repliURI.src)) {
+        if (!usedFiles.containsKey(repliURI.originalPath)) {
           val local = getReplicatedFile(repliURI)
-          usedFiles.put(repliURI.src, local)
+          usedFiles.put(repliURI.originalPath, local)
         }
       }
 

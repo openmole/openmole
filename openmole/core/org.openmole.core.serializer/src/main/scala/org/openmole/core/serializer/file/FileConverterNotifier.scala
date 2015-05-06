@@ -25,7 +25,7 @@ class FileConverterNotifier(serializer: FileListing) extends FileConverter {
   override def toString(obj: Object): String = {
     val file = obj.asInstanceOf[File]
     serializer.fileUsed(file)
-    super.toString(obj)
+    file.getPath
   }
 
 }
