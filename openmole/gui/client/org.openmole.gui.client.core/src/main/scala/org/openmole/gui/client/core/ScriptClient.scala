@@ -40,7 +40,7 @@ object ScriptClient {
   @JSExport
   def run(): Unit = {
 
-    lazy val editor = EditorPanelUI(Seq(
+    val editor = EditorPanelUI(Seq(
       ("Compile", "Enter", () ⇒ println("Compile  !"))
     ),
       ""
@@ -79,8 +79,6 @@ object ScriptClient {
       )
 
       body.appendChild(maindiv)
-
-      editor.init
     }
 
   }
