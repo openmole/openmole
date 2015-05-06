@@ -56,6 +56,7 @@ object CopyFileHook {
       def addCopy(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false) = {
         copy += ((prototype, destination, CopyOptions(remove, compress, move)))
         addInput(prototype)
+        if (move) addOutput(prototype)
       }
 
       def toHook =
@@ -89,10 +90,12 @@ abstract class CopyFileHook extends Hook {
       if (options.move) {
         from.realFile.move(to)
         Some(Variable(filePrototype, to))
-      } else if (options.compress) {
+      }
+      else if (options.compress) {
         from.copyCompress(to)
         None
-      } else {
+      }
+      else {
         from.copyContent(to)
         None
       }
