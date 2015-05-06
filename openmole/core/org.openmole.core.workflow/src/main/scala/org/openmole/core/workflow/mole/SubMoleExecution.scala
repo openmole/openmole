@@ -137,7 +137,8 @@ class SubMoleExecution(
             throw e
         }
 
-      val context = job.context ++ moleExecution.hooks(capsule).flatMap(executeHook).unzip._2
+      val hooksVariables = moleExecution.hooks(capsule).flatMap(executeHook).unzip._2
+      val context = job.context ++ hooksVariables
       mole.outputDataChannels(capsule).foreach { _.provides(context, ticket, moleExecution) }
 
       transitionLock {
