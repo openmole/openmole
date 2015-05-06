@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.dataui
 
 import org.openmole.gui.ext.dataui.PanelUI
-import org.scalajs.dom.raw.Event
+import org.scalajs.dom.raw.{ Element, Node, Event }
 import org.scalajs.jquery.jQuery
 import rx._
 
@@ -11,7 +11,7 @@ import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{ literal ⇒ lit }
 import scala.scalajs.js.{ Dynamic ⇒ Dyn }
 import scalatags.JsDom.all._
-import scalatags.JsDom.tags
+import scalatags.JsDom.{ TypedTag, tags }
 import scala.async.Async.{ async, await }
 import fr.iscpif.scaladget.ace._
 import fr.iscpif.scaladget.mapping.ace._
@@ -37,150 +37,109 @@ import org.scalajs.jquery.jQuery
 
 class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: String) extends PanelUI {
 
-  val editor: Var[Option[Editor]] = Var(init)
-
   lazy val Autocomplete = ace.require("ace/autocomplete").Autocomplete
 
   def save = {}
 
-  override def jQueryCalls = () ⇒ {
-    editor() = init
-
-  }
+  val editorDiv = tags.div(id := "editor")
+  val editor = ace.edit(editorDiv.render)
+  initEditor
 
   val view = {
     tags.div(id := "editorContainer", `class` := "container", width := "95%")(
       tags.div(`class` := "panel panel-default")(
         tags.div(`class` := "panel-body")(
-          tags.div(id := "editor", onclick := { () ⇒
-            println("ON click")
-            init
-          }
-          )
+          editor.container
         )
       )
     )
-  } //EditorPanelUI.tag
-
-  def set(c: String) = {
-    println("SEST")
-    init
-    sess.map {
-      _.setValue(c)
-    }
   }
 
-  def sess = editor().map {
-    _.getSession()
+  def sess = editor.getSession()
+
+  def aceDoc = sess.getDocument()
+
+  def code: String = sess.getValue()
+
+  def complete() = {
+    if (editor.completer == null)
+      editor.completer = fr.iscpif.scaladget.ace.autocomplete
+    js.Dynamic.global.window.ed = editor
+    editor.completer.showPopup(editor)
+
+    // needed for firefox on mac
+    editor.completer.cancelContextMenu()
   }
 
-  def aceDoc = sess.map {
-    _.getDocument()
-  }
+  def initEditor = {
+    editor.getSession().setMode("ace/mode/scala")
+    editor.getSession().setValue(initCode)
+    editor.setTheme("ace/theme/github")
+    editor.renderer.setShowGutter(true)
+    editor.setShowPrintMargin(true)
 
-  def code: String = sess.map {
-    _.getValue().asInstanceOf[String]
-  }.getOrElse("")
+    for ((name, key, func) ← bindings) {
+      val binding = s"Ctrl-$key|Cmd-$key"
 
-  def complete() = editor().map {
-    edit ⇒
-      if (edit.completer == null)
-        edit.completer = fr.iscpif.scaladget.ace.autocomplete
-      js.Dynamic.global.window.ed = edit
-      edit.completer.showPopup(edit)
-
-      // needed for firefox on mac
-      edit.completer.cancelContextMenu()
-  }
-
-  def init: Option[Editor] = {
-    println("--------------------------------- INIT ... ")
-    if (jQuery("#editor").length > 0) {
-      println("------------------------------------ YES ! ")
-      val edit = ace.edit("editor")
-      edit.getSession().setMode("ace/mode/scala")
-      edit.getSession().setValue(initCode)
-      edit.setTheme("ace/theme/github")
-      edit.renderer.setShowGutter(true)
-      edit.setShowPrintMargin(true)
-
-      for ((name, key, func) ← bindings) {
-        val binding = s"Ctrl-$key|Cmd-$key"
-
-        edit.commands.addCommand(
-          lit(
-            "name" -> name,
-            "bindKey" -> lit(
-              "win" -> binding,
-              "mac" -> binding,
-              "sender" -> "editor|cli"
-            ),
-            "exec" -> func
-          )
+      editor.commands.addCommand(
+        lit(
+          "name" -> name,
+          "bindKey" -> lit(
+            "win" -> binding,
+            "mac" -> binding,
+            "sender" -> "editor|cli"
+          ),
+          "exec" -> func
         )
-      }
-
-      def column = edit.getCursorPosition().column.asInstanceOf[Int]
-
-      def row = edit.getCursorPosition().row.asInstanceOf[Int]
-
-      def completions() = async {
-        val code = edit.getSession().getValue().asInstanceOf[String]
-
-        val intOffset = column + code.split("\n")
-          .take(row)
-          .map(_.length + 1)
-          .sum
-
-        val flag = if (code.take(intOffset).endsWith(".")) "member" else "scope"
-
-        //FIXME: CALL FOR COMPILATION AND  COMPLETION
-        val res = await(Future {
-          println("fixme: comeletestuff and completion")
-          List(("ss", "auie"))
-        })
-        //await(Post[Api].completeStuff(code, flag, intOffset).call())
-        //  log("Done")
-        //  logln()
-        res
-      }
-
-      edit.completers = js.Array(lit(
-        "getCompletions" -> { (editor: Editor, session: IEditSession, pos: Dyn, prefix: Dyn, callback: Dyn) ⇒
-          async {
-            val things = await(completions()).map {
-              case (name, value) ⇒
-                lit(
-                  "value" -> value,
-                  "caption" -> (value + name)
-                ).value
-            }
-            callback(null, js.Array(things: _*))
-          }
-        }
-      ).value)
-      edit.getSession().setTabSize(2)
-      Some(edit)
+      )
     }
-    else None
+
+    def column = editor.getCursorPosition().column.asInstanceOf[Int]
+
+    def row = editor.getCursorPosition().row.asInstanceOf[Int]
+
+    def completions() = async {
+      val code = editor.getSession().getValue().asInstanceOf[String]
+
+      val intOffset = column + code.split("\n")
+        .take(row)
+        .map(_.length + 1)
+        .sum
+
+      val flag = if (code.take(intOffset).endsWith(".")) "member" else "scope"
+
+      //FIXME: CALL FOR COMPILATION AND  COMPLETION
+      val res = await(Future {
+        println("fixme: comeletestuff and completion")
+        List(("ss", "auie"))
+      })
+      //await(Post[Api].completeStuff(code, flag, intOffset).call())
+      //  log("Done")
+      //  logln()
+      res
+    }
+
+    editor.completers = js.Array(lit(
+      "getCompletions" -> { (editor: Editor, session: IEditSession, pos: Dyn, prefix: Dyn, callback: Dyn) ⇒
+        async {
+          val things = await(completions()).map {
+            case (name, value) ⇒
+              lit(
+                "value" -> value,
+                "caption" -> (value + name)
+              ).value
+          }
+          callback(null, js.Array(things: _*))
+        }
+      }
+    ).value)
+    editor.getSession().setTabSize(2)
   }
 
 }
 
-import scalatags.JsDom.all._
-
 object EditorPanelUI {
 
   def apply(bindings: Seq[(String, String, () ⇒ Any)], initCode: String = "") = new EditorPanelUI(bindings, initCode)
-
-  def tag = {
-    val t = tags.div(`class` := "container", width := "95%")(
-      tags.div(`class` := "panel panel-default")(
-        tags.div(`class` := "panel-body")(
-          tags.div(id := "editor")
-        )
-      )
-    )
-  }
 
 }
