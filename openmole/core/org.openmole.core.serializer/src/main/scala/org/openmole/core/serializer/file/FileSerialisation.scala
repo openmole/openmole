@@ -28,7 +28,7 @@ import java.io.{ File, FileOutputStream }
 import org.openmole.core.serializer.converter.Serialiser
 
 object FileSerialisation {
-  case class FileInfo(file: File, directory: Boolean, exists: Boolean)
+  case class FileInfo(originalPath: String, directory: Boolean, exists: Boolean)
   type FilesInfo = HashMap[String, FileInfo]
 }
 
@@ -55,7 +55,7 @@ trait FileSerialisation extends Serialiser {
         if (toArchive.exists)
           tos.addFile(toArchive, fileDir + "/" + name.toString)
 
-        (name.toString, FileInfo(file, file.isDirectory, file.exists))
+        (name.toString, FileInfo(file.getPath, file.isDirectory, file.exists))
     }
 
     Workspace.withTmpFile { tmpFile ⇒
@@ -70,7 +70,7 @@ trait FileSerialisation extends Serialiser {
     fileInfoFile.delete
     new File(archiveExtractDir, fileDir).delete
 
-    def toPath(file: File) = {
+    def toPath(path: String): String = {
       lazy val replacement =
         Map(
           ':' -> "colon",
@@ -83,18 +83,18 @@ trait FileSerialisation extends Serialiser {
           '<' -> "inf",
           '|' -> "bar").mapValues("$" + _ + "$")
 
-      file.getAbsolutePath.map(c ⇒ replacement.getOrElse(c, c)).mkString
+      path.map(c ⇒ replacement.getOrElse(c, c)).mkString
     }
 
     HashMap() ++ fi.map {
-      case (name, FileInfo(file, isDirectory, exists)) ⇒
+      case (name, FileInfo(orginalPath, isDirectory, exists)) ⇒
         val fromArchive = new File(archiveExtractDir, fileDir + "/" + name)
 
         def fileContent =
           if (isDirectory) {
             val dest = if (shortNames) extractDir.newDir("extracted")
             else {
-              val f = new File(extractDir, toPath(file))
+              val f = new File(extractDir, toPath(orginalPath))
               f.mkdirs()
               f
             }
@@ -106,7 +106,7 @@ trait FileSerialisation extends Serialiser {
             val dest =
               if (shortNames) extractDir.newFile("extracted", ".bin")
               else {
-                val f = new File(extractDir, toPath(file))
+                val f = new File(extractDir, toPath(orginalPath))
                 f.createParentDir
                 f
               }
@@ -116,7 +116,7 @@ trait FileSerialisation extends Serialiser {
             dest
           }
 
-        file -> fileContent
+        orginalPath -> fileContent
     }
 
   }
