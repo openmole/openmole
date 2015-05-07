@@ -207,12 +207,6 @@ object Forms {
   val btn_test = key("myButton")
   val btn_right = key("pull-right")
 
-  def helpButton(helpTitle: String, helpContent: String): TypedTag[HTMLButtonElement] = //button("Help")
-    //button(glyph(glyph_question))(data("toggle") := "popover", data("content") := helpContent, title := helpTitle, style := "font-size:24px")
-    button("Help", btn_default)(data("toggle") := "popover", data("content") := helpContent, title := helpTitle) /*, style := "font-size:24px"*/
-
-  def helpButton(helpContent: (String, String)): TypedTag[HTMLButtonElement] = helpButton(helpContent._1, helpContent._2)
-
   // Badges
   def badge(content: String, badgeValue: String, keys: ClassKeyAggregator = emptyCK) =
     button(content + " ", keys)(span("badge")(badgeValue))
@@ -310,14 +304,4 @@ object Forms {
   //Misc
   val center = key("text-center")
   val spacer20 = key("spacer20")
-
-  //JQuery calls
-  def jQueryCalls(calls: Seq[() ⇒ Any] = Seq()) = {
-    popoverJQ
-    calls.map {
-      _()
-    }
-  }
-
-  def popoverJQ = jQuery("[data-toggle=\"popover\"]").popover()
 }
