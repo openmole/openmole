@@ -45,9 +45,4 @@ class ExplorationTaskPanelUI(dataUI: ExplorationTaskDataUI) extends PanelUI {
     dataUI.code() = editor.code
   }
 
-  override def jQueryCalls = {
-    editor.jQueryCalls
-  }
-
-
 }

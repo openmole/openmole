@@ -111,28 +111,15 @@ class SettingTabs(tabs: Seq[SettingTab]) {
         }): _*
       )
     },
-    rxMod(
-      Rx {
-        tags.div(id := "tabContent")(currentTab().map { t: SettingTab ⇒
-          for (el ← t.panelUIs) yield {
-            bs.div(spacer20)(el.view)
-          }
-        }.getOrElse(Seq()).toSeq: _*
-        )
-      }, jQueryCalls
-    )
+    Rx {
+      tags.div(id := "tabContent")(currentTab().map { t: SettingTab ⇒
+        for (el ← t.panelUIs) yield {
+          bs.div(spacer20)(el.view)
+        }
+      }.getOrElse(Seq()).toSeq: _*
+      )
+    }
   )
-
-  def popoverJQ = jQuery("[data-toggle=\"popover\"]").popover()
-
-  def jQueryCalls = {
-    popoverJQ
-    currentTab().map {
-      _.panelUIs.map {
-        _.jQueryCalls
-      }
-    }.getOrElse(Seq())
-  }
 
   def set(index: Int) = {
     currentTab() = Some(tabs(index))

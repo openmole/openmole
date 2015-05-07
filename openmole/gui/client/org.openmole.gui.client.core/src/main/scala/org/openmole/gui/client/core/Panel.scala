@@ -89,8 +89,6 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
           f.dataUI.asInstanceOf[db.DATAUI]
         }.get
         resetSettingTabs
-        jQueryCalls
-        //jQueryCalls(db.dataUI().panelUI.jQueryCalls)
       }
     })
 
@@ -118,8 +116,6 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
             bs.td(col_md_6)(tags.a(dataBagUIView(db), cursor := "pointer", onclick := { () ⇒
               setCurrent(db)
               editionState() = true
-              //  jQueryCalls(db.dataUI().panelUI.jQueryCalls)
-              // jQueryCalls
             })),
             bs.td(col_md_5)(bs.label(db.dataUI().dataType, label_primary)),
             bs.td(col_md_1)(bs.button(glyph(glyph_trash))(onclick := { () ⇒
@@ -184,7 +180,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
     currentDataBagUI() = Some(dbUI)
     factorySelector.content() = currentDataBagUI()
     filter() = currentDataBagUI().get
-    inputFilter.focus
+    //inputFilter.focus
   }
 
   def saveHeader = {
@@ -229,7 +225,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
                   tags.span(inputGroup(navbar_right)(
                     currentDataBagUI().map { db ⇒
                       val h = db.dataUI().help
-                      inputGroupButton(bs.helpButton((h.title, h.content)))
+                      inputGroupButton(bs.button("Help", btn_default)) //FIXME
                     },
                     inputGroupButton(saveHeaderButton)
                   )
@@ -265,10 +261,6 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
       )
     )
   }.render
-
-  def jQueryCalls = settingTabs().map {
-    _.jQueryCalls
-  }.getOrElse(Seq())
 
   def prototypeExtraForm: Seq[Modifier] = currentDataBagUI() match {
     case Some(db: DataBagUI) ⇒ db.dataUI() match {
