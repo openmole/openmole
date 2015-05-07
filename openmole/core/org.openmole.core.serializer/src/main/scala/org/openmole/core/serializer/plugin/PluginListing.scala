@@ -20,6 +20,7 @@ package org.openmole.core.serializer.plugin
 import scala.collection.immutable.TreeSet
 import java.io.{ IOException, OutputStream, File }
 import org.openmole.core.serializer.converter.Serialiser
+import org.openmole.tool.file._
 
 trait PluginListing { this: Serialiser ⇒
   private var plugins: TreeSet[File] = null
@@ -36,7 +37,7 @@ trait PluginListing { this: Serialiser ⇒
     }
 
   def listPlugins(obj: Any) = synchronized {
-    plugins = new TreeSet
+    plugins = TreeSet[File]()(fileOrdering)
 
     xStream.toXML(obj, new OutputStream {
       def write(p1: Int) {}

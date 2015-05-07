@@ -108,8 +108,8 @@ class UploadActor(jobManager: JobManager) {
   }
 
   def serializeJob(file: File, job: Job) = {
-    var files = new TreeSet[File]
-    var plugins = new TreeSet[File]
+    var files = new TreeSet[File]()(fileOrdering)
+    var plugins = new TreeSet[File]()(fileOrdering)
 
     val tos = new TarOutputStream(file.bufferedOutputStream())
     try {
@@ -157,7 +157,7 @@ class UploadActor(jobManager: JobManager) {
     }
 
     val replica = ReplicaCatalog.uploadAndGet(upload, toReplicatePath, hash, storage)
-    ReplicatedFile(file, isDir, hash, replica.path, fileMode)
+    ReplicatedFile(file.getPath, isDir, hash, replica.path, fileMode)
   }
 
   def replicateTheRuntime(

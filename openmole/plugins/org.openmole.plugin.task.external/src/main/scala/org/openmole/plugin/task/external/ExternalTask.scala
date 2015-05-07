@@ -103,6 +103,7 @@ trait ExternalTask extends Task {
 
   def prepareInputFiles(context: Context, tmpDir: File, workDirPath: String): Context = {
     val workDir = new File(tmpDir, workDirPath)
+    workDir.mkdirs()
     def destination(f: ToPut) = if (f.inWorkDir) new File(workDir, f.name) else new File(tmpDir, f.name)
 
     for { f ← listResources(context, tmpDir) } copy(f, destination(f))

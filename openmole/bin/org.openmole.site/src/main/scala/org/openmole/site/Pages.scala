@@ -178,7 +178,7 @@ object DocumentationPages { index ⇒
   def root = new DocumentationPage {
     def name = "Documentation"
     def content = documentation.Documentation()
-    def children = Seq(console, gui, tutorial, development)
+    def children = Seq(console, gui, tutorial, faq, development)
 
     def console =
       new DocumentationPage {
@@ -318,6 +318,12 @@ object DocumentationPages { index ⇒
         def children = Seq()
         def content = documentation.console.tutorial.Capsule()
       }
+    }
+
+    def faq = new DocumentationPage {
+      def name = "FAQ"
+      def children = Seq()
+      def content = documentation.FAQ()
     }
 
     def development = new DocumentationPage {
