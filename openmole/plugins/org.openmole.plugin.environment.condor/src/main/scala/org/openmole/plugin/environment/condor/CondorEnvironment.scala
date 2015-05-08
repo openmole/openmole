@@ -73,7 +73,7 @@ class CondorEnvironment(
 
   type JS = CondorJobService
 
-  @transient lazy val credential = SSHAuthentication(user, host, port, authentications)(authentications)
+  @transient lazy val credential = SSHAuthentication(user, host, port)(authentications)(authentications)
 
   @transient lazy val jobService = new CondorJobService with ThisHost with LimitedAccess {
     def nbTokens = maxConnections
