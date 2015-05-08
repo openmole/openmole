@@ -72,9 +72,9 @@ trait SharedStorage extends SSHService { js ⇒
                 "gunzip jvm.tar.gz && tar -xf jvm.tar && rm jvm.tar && " +
                 s"cp ${runtime.runtime.path} runtime.tar.gz && gunzip runtime.tar.gz && tar -xf runtime.tar; rm runtime.tar && " +
                 s"mkdir envplugins && PLUGIN=0 && " +
-                runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && "
-            s"cd .. && (if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi) && " +
-              s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && ( ls $runtimePrefix* | grep -v '^$runtimeInstall' | xargs rm -rf )"
+                runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && " +
+                s"cd .. && (if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi) && " +
+                s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && ( ls $runtimePrefix* | grep -v '^$runtimeInstall' | xargs rm -rf )"
 
             logger.fine(s"Install script: $content")
 
