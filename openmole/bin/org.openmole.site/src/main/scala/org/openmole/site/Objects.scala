@@ -32,11 +32,7 @@ object Objects {
   object hl extends Highlighter {
     def suffixMappings = Map().withDefault(identity)
     def openmole(code: String, test: Boolean = true, header: String = "") = {
-      if (Config.testScript && test)
-        DSLTest.test(code, header) match {
-          case Failure(f) ⇒ throw new UserBadDataError(f, s"Error testing code:\n$code")
-          case _          ⇒
-        }
+      if (Config.testScript && test) DSLTest.test(code, header)
       highlight(code, "scala")
     }
 

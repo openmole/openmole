@@ -137,6 +137,7 @@ object Forms {
   val glyph_folder_close = "glyphicon-folder-close"
   val glyph_home = "glyphicon-home"
   val glyph_upload = "glyphicon-cloud-upload"
+  val glyph_download = "glyphicon-download-alt"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
