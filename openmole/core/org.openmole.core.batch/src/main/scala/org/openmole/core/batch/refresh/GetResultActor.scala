@@ -103,11 +103,10 @@ class GetResultActor(jobManager: JobManager) {
              */
 
             System.out.synchronized {
-              def generateDashes(n: Int) = Iterator.continually('-').take(n).mkString
               val fullLength = 80
-              val dash = fullLength - description.size / 2
-              val header = generateDashes(dash) + description + generateDashes(dash)
-              val footer = generateDashes(header.size)
+              val dashes = fullLength - description.size / 2
+              val header = ("-" * dashes) + description + ("-" * dashes)
+              val footer = "-" * header.size
               System.out.println(header)
               val fis = new FileInputStream(tmpFile)
               try fis.copy(System.out) finally fis.close
