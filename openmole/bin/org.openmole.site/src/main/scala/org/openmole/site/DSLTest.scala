@@ -23,28 +23,35 @@ import org.openmole.core.console.ScalaREPL
 import org.openmole.console.Console
 import org.openmole.core.tools.service.ObjectPool
 
+import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 object DSLTest {
+
+  case class Test(code: String, header: String, number: Int) {
+    def toCode =
+      s"""def test${number}: Unit = {
+$header
+$code
+}"""
+  }
+
+  val toTest = ListBuffer[Test]()
 
   lazy val console = new Console()
 
   def engine = console.newREPL()
 
-  lazy val engines = new ObjectPool[ScalaREPL](engine) {
-    override def release(t: ScalaREPL) = {
-      t.reset
-      console.initialise(t)
-      super.release(t)
-    }
+  def test(code: String, header: String) = toTest.synchronized {
+    toTest += Test(code, header, toTest.size)
   }
 
-  def test(code: String, header: String) = Try {
-    def testCode = s"""
-        |$header
-        |$code
-      """.stripMargin
+  def testCode = toTest.map { _.toCode }.mkString("\n")
 
-    engines.exec(_.compiled(testCode))
+  def runTest = Try {
+    engine.compiled(testCode)
   }
+
+  def clear = toTest.clear
+
 }

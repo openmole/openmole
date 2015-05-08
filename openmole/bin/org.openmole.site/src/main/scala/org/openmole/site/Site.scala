@@ -140,6 +140,8 @@ class Site extends IApplication {
         }
     }
 
+    DSLTest.runTest.get
+
     IApplication.EXIT_OK
   }
 
