@@ -400,17 +400,19 @@ package object file { p ⇒
     }
 
   private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit = if (!block(file, stopPath)) {
-    if (file.isDirectory && !file.isSymbolicLink) {
-      val originalMode = file.mode
-      try {
-        file.setExecutable(true)
-        file.setReadable(true)
-        file.setWritable(true)
-        for (f ← Option(file.listFiles).getOrElse(Array.empty)) {
-          recurse(f)(operation, stopPath)
-        }
+    def authorizeListFiles[T](f: File)(g: ⇒ T): T = {
+      val originalMode = f.mode
+      f.setExecutable(true)
+      f.setReadable(true)
+      f.setWritable(true)
+      try g
+      finally if (f.exists) f.mode = originalMode
+    }
+
+    if (file.isDirectory && !file.isSymbolicLink) authorizeListFiles(file) {
+      for (f ← Option(file.listFiles).getOrElse(Array.empty)) {
+        recurse(f)(operation, stopPath)
       }
-      finally file.mode = originalMode
     }
     operation(file)
   }
