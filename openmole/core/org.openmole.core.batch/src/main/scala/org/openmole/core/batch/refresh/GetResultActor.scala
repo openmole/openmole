@@ -62,15 +62,15 @@ class GetResultActor(jobManager: JobManager) {
     import batchJob.job
     val runtimeResult = getRuntimeResult(outputFilePath, storage)
 
-    display(runtimeResult.stdOut, "Output", storage)
-    display(runtimeResult.stdErr, "Error output", storage)
+    display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", storage)
+    display(runtimeResult.stdErr, s"Error output ${runtimeResult.info.hostName}", storage)
 
     runtimeResult.result match {
       case Failure(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown during the execution of the job execution on the execution node")
       case Success((result, log)) ⇒
         val contextResults = getContextResults(result, storage)
 
-        EventDispatcher.trigger(storage.environment: Environment, Environment.JobCompleted(batchJob, log))
+        EventDispatcher.trigger(storage.environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
 
         //Try to download the results for all the jobs of the group
         for (moleJob ← job.moleJobs) {
@@ -103,17 +103,21 @@ class GetResultActor(jobManager: JobManager) {
              */
 
             System.out.synchronized {
-              System.out.println("-----------------" + description + " on remote host-----------------")
+              val fullLength = 80
+              val dashes = fullLength - description.size / 2
+              val header = ("-" * dashes) + description + ("-" * dashes)
+              val footer = "-" * header.size
+              System.out.println(header)
               val fis = new FileInputStream(tmpFile)
               try fis.copy(System.out) finally fis.close
-              System.out.println("-------------------------------------------------------")
+              System.out.println(footer)
             }
           }
         }
         catch {
           case (e: IOException) ⇒
             logger.log(WARNING, description + " transfer has failed.")
-            logger.log(FINE, "Stack of the error during tranfert", e)
+            logger.log(FINE, "Stack of the error during transfer", e)
         }
       case None ⇒
     }

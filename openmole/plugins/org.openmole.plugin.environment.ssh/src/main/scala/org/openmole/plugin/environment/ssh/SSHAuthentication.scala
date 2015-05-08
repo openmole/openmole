@@ -22,18 +22,20 @@ import org.openmole.core.workspace.{ Workspace, AuthenticationProvider }
 
 object SSHAuthentication {
 
-  def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])
-  def update(i: Int, a: SSHAuthentication) = Workspace.authentications.save(i, a)
-  def apply(i: Int)(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])(i)
-  def apply(target: String, authentications: AuthenticationProvider) = {
-    val list = authentications(classOf[SSHAuthentication])
-    list.reverse.find { e ⇒ target.matches(e.regexp) }.getOrElse(throw new UserBadDataError("No authentication method found for " + target))
-  }
-
-  def apply(login: String, host: String, port: Int, authentications: AuthenticationProvider): SSHAuthentication = apply(address(login, host, port), authentications)
   def address(login: String, host: String, port: Int) = s"$login@$host:$port"
 
+  def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])
+  def apply(i: Int)(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])(i)
+  def apply(target: String)(implicit authentications: AuthenticationProvider): SSHAuthentication = {
+    val list = authentications(classOf[SSHAuthentication])
+    val auth = list.reverse.find { e ⇒ target.matches(e.regexp) }
+    auth.getOrElse(throw new UserBadDataError("No authentication method found for " + target))
+  }
+  def apply(login: String, host: String, port: Int = 22)(implicit authentications: AuthenticationProvider): SSHAuthentication =
+    apply(address(login, host, port))(authentications)
+
   def +=(a: SSHAuthentication) = update(Workspace.authentications.size[SSHAuthentication], a)
+  def update(i: Int, a: SSHAuthentication) = Workspace.authentications.save(i, a)
   def clear() = Workspace.authentications.clean[SSHAuthentication]
 
 }

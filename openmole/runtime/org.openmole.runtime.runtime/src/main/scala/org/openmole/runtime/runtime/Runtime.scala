@@ -163,7 +163,7 @@ class Runtime {
         val result = SerializedContextResults(FileMessage(uploadedContextResults, contextResultFileHash), replicated)
 
         val endTime = System.currentTimeMillis
-        Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime, LocalHostName.localHostName))
+        Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
       }
 
     }
@@ -203,7 +203,7 @@ class Runtime {
 
     err.delete
 
-    val runtimeResult = RuntimeResult(outputMessage, errorMessage, result)
+    val runtimeResult = RuntimeResult(outputMessage, errorMessage, result, localRuntimeInfo)
 
     logger.fine("Upload the result message")
     Workspace.withTmpFile("output", ".res") { outputLocal ⇒
