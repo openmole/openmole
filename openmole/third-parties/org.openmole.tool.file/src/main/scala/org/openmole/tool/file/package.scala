@@ -116,6 +116,7 @@ package object file { p ⇒
   implicit class FileDecorator(file: File) {
 
     def realFile = file.toPath.toRealPath().toFile
+    def realPath = file.toPath.toRealPath()
 
     /////// copiers ////////
     def copyContent(destination: File) = {
@@ -221,23 +222,28 @@ package object file { p ⇒
       if (Files.isDirectory(file)) file.withDirectoryStream(_.foldLeft(0l)((acc: Long, p: Path) ⇒ acc + p.size))
       else Files.size(file)
 
-    def mode =
-      { if (Files.isReadable(file.realFile)) READ_MODE else 0 } |
-        { if (Files.isWritable(file.realFile)) WRITE_MODE else 0 } |
-        { if (Files.isExecutable(file.realFile)) EXEC_MODE else 0 }
+    def mode = {
+      val f = file.realPath;
+      { if (Files.isReadable(f)) READ_MODE else 0 } |
+        { if (Files.isWritable(f)) WRITE_MODE else 0 } |
+        { if (Files.isExecutable(f)) EXEC_MODE else 0 }
+    }
 
     /** set mode from an integer as retrieved from a Tar archive */
     def mode_=(m: Int) = {
-      file.setReadable((m & READ_MODE) != 0)
-      file.setWritable((m & WRITE_MODE) != 0)
-      file.setExecutable((m & EXEC_MODE) != 0)
+      val f = file.realFile
+      f.setReadable((m & READ_MODE) != 0)
+      f.setWritable((m & WRITE_MODE) != 0)
+      f.setExecutable((m & EXEC_MODE) != 0)
     }
 
     /** Copy mode from another file */
     def mode_=(other: File) = {
-      file.setReadable(Files.isReadable(other.realFile))
-      file.setWritable(Files.isWritable(other.realFile))
-      file.setExecutable(Files.isExecutable(other.realFile))
+      val f = file.realFile
+      val o = other.realPath
+      f.setReadable(Files.isReadable(o))
+      f.setWritable(Files.isWritable(o))
+      f.setExecutable(Files.isExecutable(o))
     }
 
     def content_=(content: String) = Files.write(file, content.getBytes)
@@ -394,17 +400,20 @@ package object file { p ⇒
     }
 
   private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit = if (!block(file, stopPath)) {
-    def authorizeLS[T](f: File)(g: ⇒ T): T = {
+    def authorizeListFiles[T](f: File)(g: ⇒ T): T = {
       val originalMode = f.mode
       f.setExecutable(true)
       f.setReadable(true)
       f.setWritable(true)
       try g
-      finally f.mode = originalMode
+      finally if (f.exists) f.mode = originalMode
     }
 
-    if (file.isDirectory && !file.isSymbolicLink)
-      for (f ← Option(file.listFiles).getOrElse(Array.empty)) authorizeLS(f) { recurse(f)(operation, stopPath) }
+    if (file.isDirectory && !file.isSymbolicLink) authorizeListFiles(file) {
+      for (f ← Option(file.listFiles).getOrElse(Array.empty)) {
+        recurse(f)(operation, stopPath)
+      }
+    }
     operation(file)
   }
 
