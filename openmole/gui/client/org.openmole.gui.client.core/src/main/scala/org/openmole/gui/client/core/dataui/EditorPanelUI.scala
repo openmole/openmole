@@ -1,9 +1,6 @@
 package org.openmole.gui.client.core.dataui
 
 import org.openmole.gui.ext.dataui.PanelUI
-import org.scalajs.dom.raw.{ Element, Node, Event }
-import org.scalajs.jquery.jQuery
-import rx._
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -11,12 +8,10 @@ import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{ literal ⇒ lit }
 import scala.scalajs.js.{ Dynamic ⇒ Dyn }
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags }
+import scalatags.JsDom.tags
 import scala.async.Async.{ async, await }
 import fr.iscpif.scaladget.ace._
 import fr.iscpif.scaladget.mapping.ace._
-import org.scalajs.dom
-import org.scalajs.jquery.jQuery
 
 /*
  * Copyright (C) 07/04/15 // mathieu.leclaire@openmole.org

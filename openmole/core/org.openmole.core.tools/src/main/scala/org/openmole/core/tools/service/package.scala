@@ -22,6 +22,9 @@ import concurrent.duration._
 
 package object service {
 
+  def localRuntimeInfo = RuntimeInfo(LocalHostName.localHostName)
+  case class RuntimeInfo(hostName: String)
+
   def localHostName = LocalHostName.localHostName
   def newRNG(seed: Long) = Random.newRNG(seed)
 

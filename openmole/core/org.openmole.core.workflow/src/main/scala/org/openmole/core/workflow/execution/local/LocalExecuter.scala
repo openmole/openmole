@@ -18,6 +18,7 @@
 package org.openmole.core.workflow.execution.local
 
 import org.openmole.core.eventdispatcher.EventDispatcher
+import org.openmole.core.tools.service
 import org.openmole.core.tools.service.{ Logger, LocalHostName }
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.execution._
@@ -73,8 +74,8 @@ class LocalExecuter(environment: WeakReference[LocalEnvironment]) extends Runnab
 
             val endTime = System.currentTimeMillis
 
-            val log = RuntimeLog(beginTime, beginTime, endTime, endTime, LocalHostName.localHostName)
-            EventDispatcher.trigger(environment: Environment, Environment.JobCompleted(executionJob, log))
+            val log = RuntimeLog(beginTime, beginTime, endTime, endTime)
+            EventDispatcher.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.localRuntimeInfo))
 
           }
           catch {
