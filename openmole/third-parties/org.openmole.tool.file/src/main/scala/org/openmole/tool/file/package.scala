@@ -395,7 +395,7 @@ package object file { p ⇒
 
   private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit = if (!block(file, stopPath)) {
     def authorizeLS[T](f: File)(g: ⇒ T): T = {
-      val originalMode = f.mode
+      val originalMode = f.realFile.mode
       f.setExecutable(true)
       f.setReadable(true)
       f.setWritable(true)
