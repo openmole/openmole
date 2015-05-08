@@ -20,6 +20,7 @@ package org.openmole.plugin.environment.ssh
 import java.util.UUID
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.tool.file._
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.Workspace
@@ -93,7 +94,10 @@ trait SharedStorage extends SSHService { js ⇒
         }
 
         logger.fine("Begin install")
-        installJobService.execute(jobDescription)
+        try installJobService.execute(jobDescription)
+        catch {
+          case e: Exception ⇒ throw new InternalProcessingError(e, "There was an error durring the runtime installation process.")
+        }
         logger.fine("End install")
 
         val path = sharedFS.child(workdir, runtimeInstall)
