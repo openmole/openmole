@@ -42,5 +42,7 @@ object ApiImpl extends Api {
     target.exists
   }
 
+  def fileSize(treeNodeData: TreeNodeData): Long = new File(treeNodeData.canonicalPath).length
+
   def workspacePath(): String = Utils.workspaceProjectFile.getCanonicalPath()
 }

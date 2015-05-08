@@ -49,7 +49,8 @@ class TreeNodePanel(rootNode: DirNode) {
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode))
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
-  val uploadings: Var[FileUploadState] = Var(Standby())
+  val transferring: Var[FileTransferState] = Var(Standby())
+  val fileDisplayers: Var[Seq[FileDisplayer]] = Var(Seq())
 
   computeAllSons(rootNode)
 
@@ -127,12 +128,12 @@ class TreeNodePanel(rootNode: DirNode) {
           e.stopPropagation
           false
         })(
-          uploadings() match {
+          transferring() match {
             case _: Standby ⇒
-            case _: Uploaded ⇒
+            case _: Transfered ⇒
               refreshCurrentDirectory
-              uploadings() = Standby()
-            case _ ⇒ progressBar(uploadings().display, uploadings().ratio)(id := "treeprogress")
+              transferring() = Standby()
+            case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
           },
           drawTree(dirNodeLine().last.sons())
         )
@@ -140,9 +141,16 @@ class TreeNodePanel(rootNode: DirNode) {
   )
 
   def uploadFiles(fileList: FileList, targetPath: String) =
-    FileUploader(fileList, targetPath,
-      (p: FileUploadState) ⇒ uploadings() = p
+    FileManager.upload(fileList, targetPath,
+      (p: FileTransferState) ⇒ transferring() = p
     )
+
+  def downloadFile(treeNode: TreeNode, saveFile: Boolean) =
+    Post[Api].fileSize(treeNode).call().foreach { size ⇒
+      FileManager.download(treeNode.canonicalPath(), this, size, saveFile,
+        (p: FileTransferState) ⇒ transferring() = p
+      )
+    }
 
   def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(onclick := { () ⇒
     goToDirAction(dn)()
@@ -162,9 +170,7 @@ class TreeNodePanel(rootNode: DirNode) {
   )
 
   def drawNode(node: TreeNode) = node match {
-    case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ {
-      println(fn.name() + " display the file")
-    })
+    case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ downloadFile(fn, false))
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
       dirNodeLine() = dirNodeLine() :+ dn
     }
@@ -209,7 +215,8 @@ class TreeNodePanel(rootNode: DirNode) {
         tags.i(tn.name())
       ),
     glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
-    glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem")
+    glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
+    glyphSpan(glyph_download, () ⇒ downloadFile(tn, false))(`class` := "glyphitem")
   )
 
   def computeSons(dn: DirNode): Unit = {

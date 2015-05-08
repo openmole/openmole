@@ -1,5 +1,8 @@
+package org.openmole.gui.client.core.files
+
+import java.io.File
 /*
- * Copyright (C) 30/07/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -14,24 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.gui.shared
 
-import org.openmole.gui.ext.data.TreeNodeData
+class FileDisplayer(fileName: String, serverFilePath: String, text: String) {
 
-trait Api {
-  def uuid(): String = java.util.UUID.randomUUID.toString
-
-  def listFiles(path: TreeNodeData): Seq[TreeNodeData]
-
-  def deleteFile(treeNode: TreeNodeData): Unit
-
-  def addFile(treeNode: TreeNodeData, fileName: String): Boolean
-
-  def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean
-
-  def fileSize(treeNodeData: TreeNodeData): Long
-
-  def renameFile(treeNode: TreeNodeData, name: String): Boolean
-
-  def workspacePath(): String
+  def display = {
+    println("disp " + fileName)
+  }
 }

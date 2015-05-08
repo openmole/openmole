@@ -29,6 +29,7 @@ import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
 import java.io.File
 import org.openmole.tool.file._
+import org.openmole.tool.tar._
 
 object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Writer] {
   def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
@@ -96,7 +97,6 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
   }
 
   post("/uploadfiles") {
-
     for (file ← fileParams) yield {
       val stream = file._2.getInputStream
       try stream.copy(new java.io.File(file._1))
@@ -106,6 +106,23 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
         "Content-Disposition" -> ("form-data; filename=\"" + file._1 + "\"")
       ))
     }
+  }
+
+  post("/downloadedfiles") {
+    val path = params("path")
+    println("path " + path + "saveFile " + params("saveFile").toBoolean)
+    val file = new File(path)
+    val dlFile =
+      if (file.isDirectory) file.archiveCompress(new File(file.getName + ".tar.gz"))
+      else file
+
+    contentType = "application/octet-stream"
+    if (params("saveFile").toBoolean) {
+      println("sett attachemnt")
+      response.setHeader("Content-Disposition", "attachment; filename=" + file.getName)
+    }
+    if (file.exists) Ok(dlFile)
+    else NotFound("The file " + path + " does not exist.")
   }
 
   post(s"/$basePath/*") {
