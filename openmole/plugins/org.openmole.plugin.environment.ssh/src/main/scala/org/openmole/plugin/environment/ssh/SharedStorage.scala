@@ -96,7 +96,7 @@ trait SharedStorage extends SSHService { js ⇒
         logger.fine("Begin install")
         try installJobService.execute(jobDescription)
         catch {
-          case e: Exception ⇒ throw new InternalProcessingError(e, "There was an error durring the runtime installation process.")
+          case e: Exception ⇒ throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
         }
         logger.fine("End install")
 
