@@ -50,7 +50,7 @@ trait SharedStorage extends SSHService { js ⇒
   @transient private var installed: Option[String] = None
 
   def preparedRuntime(runtime: Runtime) = synchronized {
-    installed match {
+    try installed match {
       case None ⇒ sharedFS.withToken { implicit token ⇒
         val runtimePrefix = "runtime"
         val runtimeInstall = runtimePrefix + runtime.runtime.hash
@@ -94,10 +94,7 @@ trait SharedStorage extends SSHService { js ⇒
         }
 
         logger.fine("Begin install")
-        try installJobService.execute(jobDescription)
-        catch {
-          case e: Exception ⇒ throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
-        }
+        installJobService.execute(jobDescription)
         logger.fine("End install")
 
         val path = sharedFS.child(workdir, runtimeInstall)
@@ -105,6 +102,8 @@ trait SharedStorage extends SSHService { js ⇒
         path
       }
       case Some(path) ⇒ path
+    } catch {
+      case e: Exception ⇒ throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
     }
   }
 
