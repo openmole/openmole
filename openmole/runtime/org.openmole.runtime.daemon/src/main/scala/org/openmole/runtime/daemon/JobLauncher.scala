@@ -202,10 +202,12 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
     logger.info("Context results uploaded")
 
-    val resultToSend = new RuntimeResult(
-      uploadedStdOut,
-      uploadedStdErr,
-      uploadedResult)
+    val resultToSend =
+      RuntimeResult(
+        uploadedStdOut,
+        uploadedStdErr,
+        uploadedResult,
+        runtimeResult.info)
 
     // Upload the result
     Workspace.withTmpFile { outputLocal ⇒

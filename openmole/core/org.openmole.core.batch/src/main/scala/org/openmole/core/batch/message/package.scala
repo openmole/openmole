@@ -19,9 +19,9 @@ package org.openmole.core.batch
 import java.io.File
 
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.tools.service.Logger
+import org.openmole.core.tools.service._
 import org.openmole.core.workflow.data.Context
-import org.openmole.core.workflow.execution.Environment.RuntimeLog
+import org.openmole.core.workflow.execution.Environment.{ RuntimeLog }
 import org.openmole.core.workflow.job.MoleJob._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.task.Task
@@ -99,6 +99,6 @@ package object message {
 
   case class SerializedContextResults(contextResults: FileMessage, files: Iterable[ReplicatedFile])
   case class ContextResults(results: PartialFunction[MoleJobId, Try[Context]])
-  case class RuntimeResult(stdOut: Option[FileMessage], stdErr: Option[FileMessage], result: Try[(SerializedContextResults, RuntimeLog)])
+  case class RuntimeResult(stdOut: Option[FileMessage], stdErr: Option[FileMessage], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)
 
 }
