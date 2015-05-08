@@ -20,6 +20,7 @@ package org.openmole.plugin.environment.ssh
 import java.util.UUID
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.tool.file._
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.Workspace
@@ -49,7 +50,7 @@ trait SharedStorage extends SSHService { js ⇒
   @transient private var installed: Option[String] = None
 
   def preparedRuntime(runtime: Runtime) = synchronized {
-    installed match {
+    try installed match {
       case None ⇒ sharedFS.withToken { implicit token ⇒
         val runtimePrefix = "runtime"
         val runtimeInstall = runtimePrefix + runtime.runtime.hash
@@ -101,6 +102,8 @@ trait SharedStorage extends SSHService { js ⇒
         path
       }
       case Some(path) ⇒ path
+    } catch {
+      case e: Exception ⇒ throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
     }
   }
 
