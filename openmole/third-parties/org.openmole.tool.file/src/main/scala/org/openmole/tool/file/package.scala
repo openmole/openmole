@@ -232,13 +232,6 @@ package object file { p ⇒
     /** set mode from an integer as retrieved from a Tar archive */
     def mode_=(m: Int) = {
       val f = file.realFile
-      if ((m & EXEC_MODE) != 0) try {
-        println("Setting executable bit of file " + f)
-        throw new Exception()
-      }
-      catch {
-        case e: Exception ⇒ e.printStackTrace()
-      }
       f.setReadable((m & READ_MODE) != 0)
       f.setWritable((m & WRITE_MODE) != 0)
       f.setExecutable((m & EXEC_MODE) != 0)
@@ -248,13 +241,6 @@ package object file { p ⇒
     def mode_=(other: File) = {
       val f = file.realFile
       val o = other.realPath
-      if (Files.isExecutable(o)) try {
-        println("Copy executable bit of file " + f + " from " + o)
-        throw new Exception()
-      }
-      catch {
-        case e: Exception ⇒ e.printStackTrace()
-      }
       f.setReadable(Files.isReadable(o))
       f.setWritable(Files.isWritable(o))
       f.setExecutable(Files.isExecutable(o))
