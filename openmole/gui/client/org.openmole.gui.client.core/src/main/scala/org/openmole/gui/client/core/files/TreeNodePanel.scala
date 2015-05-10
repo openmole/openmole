@@ -179,7 +179,7 @@ class TreeNodePanel(rootNode: DirNode) {
 
   def clickableElement(tn: TreeNode,
                        classType: String,
-                       todo: () ⇒ Unit) = Rx {
+                       todo: () ⇒ Unit) =
     toBeEdited() match {
       case Some(etn: TreeNode) ⇒
         if (etn == tn) {
@@ -195,29 +195,9 @@ class TreeNodePanel(rootNode: DirNode) {
             )
           )
         }
-        else nodeLi(tn, classType, todo)
-      case _ ⇒ nodeLi(tn, classType, todo)
+        else ReactiveLine(tn, classType, todo).render
+      case _ ⇒ ReactiveLine(tn, classType, todo).render
     }
-  }
-
-  def nodeLi(tn: TreeNode, classType: String, todo: () ⇒ Unit) = tags.li(
-    tags.span(
-      cursor := "pointer",
-      onclick := { () ⇒
-        todo()
-      }, `class` := classType)(
-        tags.i(id := "plusdir", `class` := {
-          tn.hasSons match {
-            case true  ⇒ "glyphicon glyphicon-plus-sign"
-            case false ⇒ ""
-          }
-        }),
-        tags.i(tn.name())
-      ),
-    glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
-    glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
-    glyphSpan(glyph_download, () ⇒ downloadFile(tn, false))(`class` := "glyphitem")
-  )
 
   def computeSons(dn: DirNode): Unit = {
     sons(dn).foreach {
@@ -256,6 +236,47 @@ class TreeNodePanel(rootNode: DirNode) {
         refreshCurrentDirectory
         toBeEdited() = None
       }
+  }
+
+  object ReactiveLine {
+    def apply(tn: TreeNode, classType: String, todo: () ⇒ Unit) = new ReactiveLine(tn, classType, todo)
+  }
+
+  class ReactiveLine(tn: TreeNode, classType: String, todo: () ⇒ Unit) {
+
+    val lineHovered: Var[Boolean] = Var(false)
+
+    def render = tags.li(
+      onmouseover := {
+        ()
+        lineHovered() = true
+      },
+      onmouseout := { () ⇒
+        lineHovered() = false
+      }, tags.span(
+        cursor := "pointer",
+        onclick := { () ⇒
+          todo()
+        }, `class` := classType)(
+          tags.i(id := "plusdir", `class` := {
+            tn.hasSons match {
+              case true  ⇒ "glyphicon glyphicon-plus-sign"
+              case false ⇒ ""
+            }
+          }),
+          tags.i(tn.name())
+        ),
+      tags.span(id := Rx {
+        "treeline" + {
+          if (lineHovered()) "-hover" else ""
+        }
+      })(
+        glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
+        glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
+        glyphSpan(glyph_download, () ⇒ downloadFile(tn, false))(`class` := "glyphitem")
+      )
+    )
+
   }
 
 }
