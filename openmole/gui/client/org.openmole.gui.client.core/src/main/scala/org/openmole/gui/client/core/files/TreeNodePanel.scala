@@ -246,9 +246,8 @@ class TreeNodePanel(rootNode: DirNode) {
 
     val lineHovered: Var[Boolean] = Var(false)
 
-    def render = tags.li(
-      onmouseover := {
-        ()
+    val render = tags.li(
+      onmouseover := { () ⇒
         lineHovered() = true
       },
       onmouseout := { () ⇒
