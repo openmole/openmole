@@ -275,3 +275,11 @@ height: 20px;
 	margin-top:20px;
 	width: 95%;
 }
+
+#treeline{
+  opacity: 0;
+}
+
+#treeline-hover{
+opacity: 1;
+}
