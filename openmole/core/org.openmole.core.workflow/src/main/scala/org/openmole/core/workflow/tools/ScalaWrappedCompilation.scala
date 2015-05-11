@@ -15,18 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.scala
+package org.openmole.core.workflow.tools
 
-import java.io.File
 import java.lang.reflect.Method
-import java.util
 
-import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.tools.obj.ClassUtils
+import org.openmole.core.tools.obj.ClassUtils._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.Task
-import ClassUtils._
 import org.openmole.core.workflow.validation.TypeUtil
 
 import scala.util.Try
@@ -55,7 +51,7 @@ object ScalaWrappedCompilation {
   def inputObject = "input"
 }
 
-import ScalaWrappedCompilation._
+import org.openmole.core.workflow.tools.ScalaWrappedCompilation._
 
 trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
   def source: String
