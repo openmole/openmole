@@ -22,11 +22,11 @@ import org.openmole.tool.thread._
 import collection.mutable
 import scala.ref.WeakReference
 
-class ExecuterPool(nbThreads: Int, environment: WeakReference[LocalEnvironment]) {
+class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment]) {
   private val jobs = JobPriorityQueue()
 
   private val executers = {
-    val map = mutable.HashMap[LocalExecuter, Thread]()
+    val map = mutable.HashMap[LocalExecutor, Thread]()
     (0 until nbThreads).foreach { _ ⇒ map += createExecuter }
     map
   }
@@ -36,7 +36,7 @@ class ExecuterPool(nbThreads: Int, environment: WeakReference[LocalEnvironment])
   }
 
   private def createExecuter = {
-    val executer = new LocalExecuter(environment)
+    val executer = new LocalExecutor(environment)
     val thread = daemonThreadFactory.newThread(executer)
     thread.start
     (executer, thread)
@@ -44,7 +44,7 @@ class ExecuterPool(nbThreads: Int, environment: WeakReference[LocalEnvironment])
 
   private[local] def addExecuter() = executers.synchronized { executers += createExecuter }
 
-  private[local] def removeExecuter(ex: LocalExecuter) = executers.synchronized { executers.remove(ex) }
+  private[local] def removeExecuter(ex: LocalExecutor) = executers.synchronized { executers.remove(ex) }
 
   private[local] def takeNextjob: LocalExecutionJob = jobs.dequeue
 

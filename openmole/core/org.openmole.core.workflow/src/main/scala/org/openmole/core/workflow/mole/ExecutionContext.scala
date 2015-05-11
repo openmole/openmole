@@ -18,10 +18,11 @@
 package org.openmole.core.workflow.mole
 
 import java.io.{ PrintStream, File }
+import org.openmole.core.output.OutputManager
 import org.openmole.tool.file._
 
 object ExecutionContext {
-  def apply(out: PrintStream = System.out, directory: Option[File] = None) = {
+  def apply(out: PrintStream = OutputManager.systemOutput, directory: Option[File] = None) = {
     val (_out, _directory) = (out, directory)
     new ExecutionContext {
       def out = _out
