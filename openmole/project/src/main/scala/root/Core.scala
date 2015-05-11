@@ -16,7 +16,7 @@ object Core extends Defaults {
     includeOsgi,
     libraryDependencies ++= Seq(scalaLang, groovy, math, scalatest)
   ) dependsOn
-    (eventDispatcher, exception, tools, updater, workspace, macros, pluginManager, serializer, output, replication % "test")
+    (eventDispatcher, exception, tools, updater, workspace, macros, pluginManager, serializer, output, console, replication % "test")
 
   lazy val serializer = OsgiProject("serializer", imports = Seq("*")) settings
     (includeOsgi,
