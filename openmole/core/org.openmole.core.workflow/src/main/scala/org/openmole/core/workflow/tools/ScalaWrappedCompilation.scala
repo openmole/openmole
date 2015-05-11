@@ -29,19 +29,17 @@ import scala.util.Try
 
 trait CompiledScala {
 
-  type Compiled = Seq[Any] ⇒ java.util.Map[String, Any]
+  type Compiled = Context ⇒ java.util.Map[String, Any]
 
   def compiled: Compiled
   def prototypes: Seq[Prototype[_]]
   def outputs: PrototypeSet
 
   def run(context: Context): Context = {
-    val args = prototypes.map(i ⇒ context(i))
-    val map = compiled(args)
+    val map = compiled(context)
     context ++
       outputs.toSeq.map {
-        o ⇒
-          Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
+        o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
       }
   }
 
@@ -62,7 +60,7 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
   def function(inputs: Seq[Prototype[_]]) =
     compile(script(inputs)).map { evaluated ⇒
-      (evaluated, evaluated.getClass.getMethod("apply", inputs.map(c ⇒ toScalaNativeType(c.`type`).runtimeClass).toSeq: _*))
+      (evaluated, evaluated.getClass.getMethod("apply", classOf[Context]))
     }
 
   def toScalaNativeType(t: PrototypeType[_]): PrototypeType[_] = {
@@ -79,9 +77,9 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
   def script(inputs: Seq[Prototype[_]]) =
     imports.map("import " + _).mkString("\n") + "\n\n" +
-      s"""(${inputs.toSeq.map(i ⇒ prefix + i.name + ": " + toScalaNativeType(i.`type`)).mkString(",")}) => {
+      s"""(${prefix}context: ${classOf[Context].getCanonicalName}) => {
        |    object $inputObject {
-       |      ${inputs.toSeq.map(i ⇒ "var " + i.name + " = " + prefix + i.name).mkString("; ")}
+       |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
        |    }
        |    import input._
        |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(${Task.openMOLESeed.name}).toScala;
@@ -117,7 +115,7 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
           val compiled = cache.getOrElseUpdate(scriptInputs, function(scriptInputs))
           compiled.map {
             case (evaluated, method) ⇒
-              val closure = (args: Seq[Any]) ⇒ method.invoke(evaluated, args.toSeq.map(_.asInstanceOf[AnyRef]): _*).asInstanceOf[java.util.Map[String, Any]]
+              val closure = (context: Context) ⇒ method.invoke(evaluated, context).asInstanceOf[java.util.Map[String, Any]]
               new CompiledScala {
                 override def compiled = closure
                 override def outputs: PrototypeSet = compilation.outputs
