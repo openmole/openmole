@@ -17,14 +17,6 @@
 
 package org.openmole.core.exception
 
-class InternalProcessingError(exception: Throwable, message: String) extends Exception(message, exception) {
-
-  def this(message: String) = {
-    this(null, message)
-  }
-
-  def this(e: Throwable) {
-    this(e, null)
-  }
-
+class InternalProcessingError(message: String, exception: Throwable = null) extends Exception(message, exception) {
+  def this(exception: Throwable, message: String) = this(message, exception)
 }
