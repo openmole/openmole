@@ -19,8 +19,7 @@ package org.openmole.core.batch.refresh
 
 import akka.actor.Actor
 import akka.actor.ActorRef
-import java.io.FileInputStream
-import java.io.IOException
+import java.io.{ PrintStream, FileInputStream, IOException }
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.message._
@@ -31,6 +30,7 @@ import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.execution
 import org.openmole.core.workflow.job._
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.batch.environment.BatchEnvironment._
@@ -62,8 +62,9 @@ class GetResultActor(jobManager: JobManager) {
     import batchJob.job
     val runtimeResult = getRuntimeResult(outputFilePath, storage)
 
-    display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", storage)
-    display(runtimeResult.stdErr, s"Error output ${runtimeResult.info.hostName}", storage)
+    val stream = job.moleExecution.executionContext.out
+    display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", storage, stream)
+    display(runtimeResult.stdErr, s"Error output ${runtimeResult.info.hostName}", storage, stream)
 
     runtimeResult.result match {
       case Failure(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown during the execution of the job execution on the execution node")
@@ -90,7 +91,7 @@ class GetResultActor(jobManager: JobManager) {
     SerialiserService.deserialise[RuntimeResult](resultFile)
   }
 
-  private def display(message: Option[FileMessage], description: String, storage: StorageService)(implicit token: AccessToken) = {
+  private def display(message: Option[FileMessage], description: String, storage: StorageService, stream: PrintStream)(implicit token: AccessToken) = {
     message match {
       case Some(message) ⇒
         try {
@@ -102,16 +103,7 @@ class GetResultActor(jobManager: JobManager) {
              logger.log(WARNING, "The standard output has been corrupted during the transfer.")
              */
 
-            System.out.synchronized {
-              val fullLength = 80
-              val dashes = fullLength - description.size / 2
-              val header = ("-" * dashes) + description + ("-" * dashes)
-              val footer = "-" * header.size
-              System.out.println(header)
-              val fis = new FileInputStream(tmpFile)
-              try fis.copy(System.out) finally fis.close
-              System.out.println(footer)
-            }
+            execution.display(stream, description, tmpFile.content)
           }
         }
         catch {

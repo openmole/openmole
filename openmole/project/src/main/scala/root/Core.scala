@@ -16,7 +16,7 @@ object Core extends Defaults {
     includeOsgi,
     libraryDependencies ++= Seq(scalaLang, groovy, math, scalatest)
   ) dependsOn
-    (eventDispatcher, exception, tools, updater, workspace, macros, pluginManager, serializer, replication % "test")
+    (eventDispatcher, exception, tools, updater, workspace, macros, pluginManager, serializer, output, replication % "test")
 
   lazy val serializer = OsgiProject("serializer", imports = Seq("*")) settings
     (includeOsgi,
@@ -63,6 +63,8 @@ object Core extends Defaults {
     "logging",
     bundleActivator = Some("org.openmole.core.logging.internal.Activator"), imports = Seq("*")) settings (libraryDependencies ++= Seq(log4j, logback, slf4j, equinoxCommon)) dependsOn
     (tools, workspace)
+
+  val output = OsgiProject("output", imports = Seq("*"))
 
   val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), dynamicImports = Seq("*"), imports = Seq("*")) dependsOn
     (pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
