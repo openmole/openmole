@@ -14,12 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.plugin.task.scala
+package org.openmole.core.workflow.tools
 
 import java.io.File
 
-import org.openmole.core.console.ScalaREPL
-import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.console._
+import org.openmole.core.exception._
+
 import scala.util.Try
 
 trait ScalaCompilation {

@@ -23,6 +23,7 @@ import java.io.FileOutputStream
 import java.io.PrintStream
 import java.util.UUID
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.output.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.tool.file._
@@ -77,8 +78,8 @@ class Runtime {
     val errSt = new PrintStream(err)
 
     if (!debug) {
-      System.setOut(outSt)
-      System.setErr(errSt)
+      OutputManager.redirectSystemOutput(outSt)
+      OutputManager.redirectSystemError(errSt)
     }
 
     def getReplicatedFile(replicatedFile: ReplicatedFile) =

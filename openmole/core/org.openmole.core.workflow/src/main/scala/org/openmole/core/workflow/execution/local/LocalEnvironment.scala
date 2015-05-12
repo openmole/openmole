@@ -30,22 +30,22 @@ object LocalEnvironment {
   Workspace += (DefaultNumberOfThreads, "1")
   def numberOfThread = Workspace.preferenceAsInt(DefaultNumberOfThreads)
 
-  def apply(nbThreads: Int = numberOfThread) = new LocalEnvironment(nbThreads)
+  def apply(nbThreads: Int = numberOfThread, deinterleave: Boolean = false) = new LocalEnvironment(nbThreads, deinterleave)
 
   var default = LocalEnvironment()
 }
 
-class LocalEnvironment(val nbThreads: Int) extends Environment {
+class LocalEnvironment(val nbThreads: Int, val deinterleave: Boolean) extends Environment {
 
-  @transient lazy val pool = new ExecuterPool(nbThreads, WeakReference(this))
+  @transient lazy val pool = new ExecutorPool(nbThreads, WeakReference(this))
 
   def nbJobInQueue = pool.waiting
 
   override def submit(job: Job) =
-    submit(new LocalExecutionJob(this, job.moleJobs))
+    submit(new LocalExecutionJob(this, job.moleJobs, Some(job.moleExecution)))
 
   def submit(moleJob: MoleJob): Unit =
-    submit(new LocalExecutionJob(this, List(moleJob)))
+    submit(new LocalExecutionJob(this, List(moleJob), None))
 
   private def submit(ejob: LocalExecutionJob) = {
     EventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))
