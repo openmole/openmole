@@ -20,5 +20,6 @@ package org.openmole.core.workflow.execution.local
 import org.openmole.core.workflow.execution.{ ExecutionJob, ExecutionState }
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.job.MoleJob
+import org.openmole.core.workflow.mole.MoleExecution
 
-class LocalExecutionJob(val environment: LocalEnvironment, val moleJobs: Iterable[MoleJob]) extends ExecutionJob
+class LocalExecutionJob(val environment: LocalEnvironment, val moleJobs: Iterable[MoleJob], val moleExecution: Option[MoleExecution]) extends ExecutionJob

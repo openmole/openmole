@@ -70,7 +70,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
   }
 
   def arguments: RESTLifeCycle.Arguments
-  def baseDirectory = Workspace.newDir("rest")
+  def baseDirectory = Workspace.location / "rest"
 
   def exceptionToHttpError(e: Throwable) = InternalServerError(Error(e).toJson)
 
@@ -101,27 +101,36 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
               try is.extract(directory.inputDirectory) finally is.close
             }
 
+          def error(e: Throwable) = {
+            directory.clean
+            ExpectationFailed(Error(e).toJson)
+          }
+
           def launch: ActionResult = {
             val console = new Console(arguments.plugins)
             val repl = console.newREPL(ConsoleVariables(inputDirectory = directory.inputDirectory, outputDirectory = directory.outputDirectory))
             Try(repl.eval(script)) match {
-              case Failure(e) ⇒
-                directory.clean
-                ExpectationFailed(Error(e).toJson)
+              case Failure(e) ⇒ error(e)
               case Success(o) ⇒
                 o match {
                   case puzzle: Puzzle ⇒
-                    Try(puzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream)).start) match {
+                    Try(puzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream))) match {
                       case Success(ex) ⇒
-                        moles.add(id, Execution(directory, ex))
-                        Ok(id.toJson)
-                      case Failure(error) ⇒
-                        directory.clean
-                        ExpectationFailed(Error(error).toJson)
+                        ex listen {
+                          case ev: MoleExecution.Finished ⇒
+
+                        }
+                        Try(ex.start) match {
+                          case Failure(e) ⇒ error(e)
+                          case Success(ex) ⇒
+                            moles.add(id, Execution(directory, ex))
+                            Ok(id.toJson)
+                        }
+                      case Failure(e) ⇒ error(e)
                     }
                   case _ ⇒
                     directory.clean
-                    ExpectationFailed(Error("The last line of the script should be a puzzle"))
+                    ExpectationFailed(Error("The last line of the script should be a puzzle").toJson)
                 }
             }
           }

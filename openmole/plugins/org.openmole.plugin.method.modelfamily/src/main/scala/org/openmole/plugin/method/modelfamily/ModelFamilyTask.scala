@@ -23,6 +23,7 @@ import fr.iscpif.family.{ Combination, TypedValue, ModelFamily }
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools.ScalaCompilation
 import org.openmole.plugin.task.jvm.JVMLanguageTask
 import org.openmole.plugin.task.scala._
 
