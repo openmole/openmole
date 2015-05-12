@@ -56,7 +56,8 @@ object BootstrapJS {
     copyWebJarResource("ace", "01.08.2014",
       FilePath("src-min/", "ace.js"),
       FilePath("src-min/", "theme-github.js"),
-      FilePath("src-min/", "mode-scala.js")
+      FilePath("src-min/", "mode-scala.js"),
+      FilePath("src-min/", "mode-sh.js")
     )
 
     //All other resources

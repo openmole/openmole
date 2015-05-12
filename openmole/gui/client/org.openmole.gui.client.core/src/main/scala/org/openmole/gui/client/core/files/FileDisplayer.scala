@@ -1,6 +1,12 @@
 package org.openmole.gui.client.core.files
 
 import java.io.File
+import org.openmole.gui.client.core.dataui.EditorPanelUI
+import FileExtension._
+import org.openmole.gui.misc.js.Tabs
+import org.openmole.gui.misc.js.Tabs._
+import rx._
+
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
  *
@@ -18,9 +24,28 @@ import java.io.File
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FileDisplayer(fileName: String, serverFilePath: String, text: String) {
+object FileDisplayer {
+  def editor(fileType: FileExtension, initCode: String): EditorPanelUI = EditorPanelUI(fileType, initCode)
 
-  def display = {
-    println("disp " + fileName)
+}
+
+import FileDisplayer._
+
+class FileDisplayer {
+
+  val tabs = Tabs()
+
+  def alreadyDisplayed(tn: TreeNode) = {
+    tabs.tabs().find {
+      _.id == tn.id
+    }
+  }
+
+  def display(tn: TreeNode, content: String) = {
+    val (_, fileType) = FileExtension(tn)
+    alreadyDisplayed(tn) match {
+      case Some(t: Tab) ⇒ tabs.setActive(t)
+      case _            ⇒ tabs.addTab(Tab(tn.name(), editor(fileType, content).view, tn.id))
+    }
   }
 }

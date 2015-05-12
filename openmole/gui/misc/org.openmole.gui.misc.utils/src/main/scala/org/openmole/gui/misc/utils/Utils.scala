@@ -20,6 +20,7 @@ package org.openmole.gui.misc.utils
 import rx._
 
 object Utils {
-  implicit def stringToVarString(s: String): Var[String] = Var(s)
+  implicit def tToVarT[T](t: T): Var[T] = Var(t)
 
+  def getUUID: String = java.util.UUID.randomUUID.toString
 }
