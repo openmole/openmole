@@ -17,6 +17,7 @@
 
 package org.openmole.core.console
 
+import org.openmole.core.pluginmanager.PluginManager
 import org.osgi.framework.Bundle
 
 import scala.reflect.io.ZipArchive
@@ -44,6 +45,7 @@ class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory
     def bundles: Iterable[AbstractFile] =
       priorityBundles.map(BundleClassPathBuilder.create) ++
         jars.map(f ⇒ ZipArchive.fromFile(f)) ++
+        PluginManager.bundlesForClass(classOf[OSGiScalaCompiler]).map(BundleClassPathBuilder.create) ++
         BundleClassPathBuilder.allBundles
 
     val result = bundles.map { original.context.newClassPath }.toList

@@ -158,7 +158,7 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
   }
 
   def newREPL(args: ConsoleVariables = ConsoleVariables()) = {
-    val loop = new ScalaREPL(priorityBundles = Seq(PluginManager.bundleForClass(this.getClass)))
+    val loop = new ScalaREPL()
     initialise(loop, args)
   }
 
