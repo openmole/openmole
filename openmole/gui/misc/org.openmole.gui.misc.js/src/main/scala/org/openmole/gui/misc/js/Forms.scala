@@ -45,8 +45,6 @@ object Forms {
     def +++(m: Seq[Modifier]) = t.copy(modifiers = t.modifiers :+ m.toSeq)
   }
 
-  def getID: String = java.util.UUID.randomUUID.toString
-
   def emptyCK = ClassKeyAggregator.empty
 
   def key(s: String) = new ClassKeyAggregator(s)

@@ -2,8 +2,7 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.ext.dataui._
-import org.scalajs.dom.raw.Event
-
+import org.openmole.gui.misc.utils.Utils._
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter }
@@ -34,7 +33,7 @@ object SettingTabs {
 
   object SettingTab extends Enumeration {
 
-    case class SettingTab(name: String, panelUIs: Seq[PanelUI], id: String = getID, focusID: Option[String] = None) {
+    case class SettingTab(name: String, panelUIs: Seq[PanelUI], id: String = getUUID, focusID: Option[String] = None) {
       def save = panelUIs.map {
         _.save
       }

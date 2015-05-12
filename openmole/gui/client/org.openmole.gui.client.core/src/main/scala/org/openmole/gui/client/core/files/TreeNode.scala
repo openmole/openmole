@@ -18,12 +18,11 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.ext.data.TreeNodeData
-import org.openmole.gui.misc.js.{ Identifiable, Displayable }
 import org.openmole.gui.misc.utils.Utils._
 import rx._
 
 sealed trait TreeNodeType {
-  val uuid: String = java.util.UUID.randomUUID.toString
+  val uuid: String = getUUID
   val name: String
 }
 
@@ -37,10 +36,13 @@ trait FileType extends TreeNodeType {
 
 object TreeNodeType {
   def file = new FileType {}
+
   def folder = new DirType {}
 }
 
 sealed trait TreeNode {
+  val id = canonicalPath().replace('/', '-').replace('.', '_')
+
   def name: Var[String]
 
   def canonicalPath: Var[String]
@@ -65,9 +67,6 @@ object TreeNode {
 
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
 
-  implicit def oo(s: Seq[(TreeNodeData, Seq[TreeNodeData])]): Seq[(TreeNode, Seq[TreeNode])] = s.map { tu ⇒
-    (treeNodeDataToTreeNode(tu._1), seqTreeNodeDataToSeqTreeNode(tu._2))
-  }
 }
 
 object TreeNodeOrdering extends Ordering[TreeNode] {

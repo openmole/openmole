@@ -1,6 +1,7 @@
 package org.openmole.gui.client.core.files
 
 import org.scalajs.dom.raw._
+import FileExtension._
 
 /*
  * Copyright (C) 29/04/15 // mathieu.leclaire@openmole.org
@@ -38,12 +39,6 @@ case class Standby() extends FileTransferState
 
 object FileManager {
 
-  sealed trait FileType
-
-  case class BinaryFile() extends FileType
-
-  case class DisplayableFile() extends FileType
-
   def fileNames(fileList: FileList): Seq[String] = {
     var nameList = Seq[String]()
     for (i ← 0 to fileList.length - 1) {
@@ -54,7 +49,7 @@ object FileManager {
 
   def upload(fileList: FileList,
              destinationPath: String,
-             fileUploadState: FileTransferState ⇒ Unit) = {
+             fileTransferState: FileTransferState ⇒ Unit) = {
     var formData = new FormData
 
     for (i ← 0 to fileList.length - 1) {
@@ -65,58 +60,49 @@ object FileManager {
     val xhr = new XMLHttpRequest
 
     xhr.upload.onprogress = (e: ProgressEvent) ⇒ {
-      fileUploadState(Transfering((e.loaded.toDouble * 100 / e.total).toInt))
+      fileTransferState(Transfering((e.loaded.toDouble * 100 / e.total).toInt))
     }
 
     xhr.upload.onloadend = (e: ProgressEvent) ⇒ {
-      fileUploadState(Finalizing())
+      fileTransferState(Finalizing())
     }
 
     xhr.onloadend = (e: ProgressEvent) ⇒ {
-      fileUploadState(Transfered())
+      fileTransferState(Transfered())
     }
 
     xhr.open("POST", "uploadfiles", true)
     xhr.send(formData)
   }
 
-  def download(path: String,
-               tnp: TreeNodePanel,
+  def download(treeNode: TreeNode,
                size: Long,
                saveFile: Boolean,
-               fileUploadState: FileTransferState ⇒ Unit) = {
+               fileTransferState: FileTransferState ⇒ Unit,
+               onLoadEnded: String ⇒ Unit) = {
 
-    val last2 = path.split('.').takeRight(2)
-
-    val fileName = last2.mkString(".")
-    val fileType = last2.last match {
-      case "scala" | "nlogo" | "txt" ⇒ DisplayableFile
-      case _                         ⇒ BinaryFile
-    }
+    val (fileName, fileType) = FileExtension(treeNode)
 
     val formData = new FormData
-    formData.append("path", path)
+    formData.append("path", treeNode.canonicalPath())
     formData.append("saveFile", saveFile)
     val xhr = new XMLHttpRequest
 
     xhr.onprogress = (e: ProgressEvent) ⇒ {
-      fileUploadState(Transfering((e.loaded.toDouble * 100 / size).toInt))
+      fileTransferState(Transfering((e.loaded.toDouble * 100 / size).toInt))
     }
 
     xhr.onloadend = (e: ProgressEvent) ⇒ {
-      fileUploadState(Transfered())
+      fileTransferState(Transfered())
       fileType match {
-        case DisplayableFile ⇒
-          val fD = new FileDisplayer(fileName, path, xhr.responseText)
-          tnp.fileDisplayers() = tnp.fileDisplayers() :+ fD
-          fD.display
-        case _ ⇒
+        case df: DisplayableFile ⇒ onLoadEnded(xhr.responseText)
+        case _                   ⇒
       }
     }
 
     xhr.responseType = fileType match {
-      case DisplayableFile ⇒ ""
-      case _               ⇒ "blob"
+      case df: DisplayableFile ⇒ ""
+      case _                   ⇒ "blob"
     }
 
     xhr.open("POST", "downloadedfiles", true)

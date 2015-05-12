@@ -29,10 +29,7 @@ import scalatags.JsDom.tags
 @JSExport("org.openmole.gui.plugin.task.exploration.client.ExplorationTaskPanelUI")
 class ExplorationTaskPanelUI(dataUI: ExplorationTaskDataUI) extends PanelUI {
 
-  lazy val editor = EditorPanelUI(Seq(
-    ("Compile", "Enter", () ⇒ println("Compile  !"))
-  ), dataUI.code()
-  )
+  lazy val editor = EditorPanelUI.scala(dataUI.code())
 
   @JSExport
   lazy val view = {

@@ -3,11 +3,11 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core.Post
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.Forms._
-import org.scalajs.dom.html.{ Input, UList }
-import org.scalajs.dom.raw.{ FileList, HTMLInputElement, DragEvent, Event }
+import org.scalajs.dom.html.Input
+import org.scalajs.dom.raw.{ FileList, HTMLInputElement, DragEvent }
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
-import org.openmole.gui.misc.js.{ Forms ⇒ bs, Select }
+import scalatags.JsDom.{ tags ⇒ tags }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs, Tabs, Select }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -50,7 +50,7 @@ class TreeNodePanel(rootNode: DirNode) {
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
   val transferring: Var[FileTransferState] = Var(Standby())
-  val fileDisplayers: Var[Seq[FileDisplayer]] = Var(Seq())
+  val fileDisplayer = new FileDisplayer
 
   computeAllSons(rootNode)
 
@@ -140,15 +140,18 @@ class TreeNodePanel(rootNode: DirNode) {
     }
   )
 
+  def addTab(treeNode: TreeNode, content: String) = fileDisplayer.display(treeNode, content)
+
   def uploadFiles(fileList: FileList, targetPath: String) =
     FileManager.upload(fileList, targetPath,
       (p: FileTransferState) ⇒ transferring() = p
     )
 
-  def downloadFile(treeNode: TreeNode, saveFile: Boolean) =
+  def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
     Post[Api].fileSize(treeNode).call().foreach { size ⇒
-      FileManager.download(treeNode.canonicalPath(), this, size, saveFile,
-        (p: FileTransferState) ⇒ transferring() = p
+      FileManager.download(treeNode, size, saveFile,
+        (p: FileTransferState) ⇒ transferring() = p,
+        onLoaded
       )
     }
 
@@ -170,7 +173,9 @@ class TreeNodePanel(rootNode: DirNode) {
   )
 
   def drawNode(node: TreeNode) = node match {
-    case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ downloadFile(fn, false))
+    case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ {
+      downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(node, content))
+    })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
       dirNodeLine() = dirNodeLine() :+ dn
     }
@@ -272,7 +277,7 @@ class TreeNodePanel(rootNode: DirNode) {
       })(
         glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
         glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
-        glyphSpan(glyph_download, () ⇒ downloadFile(tn, false))(`class` := "glyphitem")
+        glyphSpan(glyph_download, () ⇒ downloadFile(tn, true))(`class` := "glyphitem")
       )
     )
 
