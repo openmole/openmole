@@ -22,7 +22,8 @@ import java.net.URLClassLoader
 
 import org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader
 import org.openmole.core.exception.{ UserBadDataError, InternalProcessingError }
-import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.pluginmanager._
+import org.osgi.framework.Bundle
 
 import scala.annotation.tailrec
 import scala.reflect.internal.util.{ NoPosition, Position }
@@ -33,7 +34,7 @@ import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
-class ScalaREPL(priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
+class ScalaREPL(priorityBundles: Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
 
   case class ErrorMessage(error: String, line: Int)
   var storeErrors: Boolean = true
@@ -120,13 +121,13 @@ class ScalaREPL(priorityClasses: Seq[Class[_]] = Nil, jars: Seq[JFile] = Seq.emp
     override protected def newCompiler(settings: Settings, reporter: Reporter) = {
       settings.outputDirs setSingleOutput replOutput.dir
       settings.exposeEmptyPackage.value = true
-      new OSGiScalaCompiler(settings, reporter, replOutput.dir, priorityClasses, jars)
+      new OSGiScalaCompiler(settings, reporter, replOutput.dir, priorityBundles, jars)
     }
 
     override lazy val classLoader = new scala.tools.nsc.util.AbstractFileClassLoader(
       replOutput.dir,
       new CompositeClassLoader(
-        priorityClasses.map(_.getClassLoader) ++
+        priorityBundles.map(_.classLoader) ++
           List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
           List(classOf[OSGiScalaCompiler].getClassLoader): _*)
     )

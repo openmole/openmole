@@ -25,6 +25,7 @@ import org.openmole.core.workspace.{ Workspace, ConfigurationLocation, Authentic
 import concurrent.duration._
 
 object SSHEnvironment {
+
   val MaxConnections = new ConfigurationLocation("SSHEnvironment", "MaxConnections")
   val ConnectionsKeepAlive = new ConfigurationLocation("SSHEnvironment", "ConnectionsKeepAlive")
   val UpdateInterval = new ConfigurationLocation("SSHEnvironment", "UpdateInterval")

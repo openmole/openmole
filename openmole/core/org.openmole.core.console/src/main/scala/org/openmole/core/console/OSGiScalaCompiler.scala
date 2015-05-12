@@ -17,6 +17,8 @@
 
 package org.openmole.core.console
 
+import org.osgi.framework.Bundle
+
 import scala.reflect.io.ZipArchive
 import scala.tools.nsc.Global
 import scala.tools.nsc.Settings
@@ -33,14 +35,14 @@ import scala.tools.nsc.backend.JavaPlatform
 import scala.tools.util.PathResolver
 import scala.tools.nsc._
 
-class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory: AbstractFile, priorityClasses: Seq[Class[_]], jars: Seq[File]) extends Global(settings, reporter) with ReplGlobal { g ⇒
+class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory: AbstractFile, priorityBundles: Seq[Bundle], jars: Seq[File]) extends Global(settings, reporter) with ReplGlobal { g ⇒
 
   //settings.bootclasspath.value = ClassPathBuilder.getClassPathFrom(classOf[scala.App].getClassLoader).mkString(":")
 
   lazy val cp = {
     val original = new PathResolver(settings).result
     def bundles: Iterable[AbstractFile] =
-      priorityClasses.flatMap(BundleClassPathBuilder.bundles) ++
+      priorityBundles.map(BundleClassPathBuilder.create) ++
         jars.map(f ⇒ ZipArchive.fromFile(f)) ++
         BundleClassPathBuilder.allBundles
 
