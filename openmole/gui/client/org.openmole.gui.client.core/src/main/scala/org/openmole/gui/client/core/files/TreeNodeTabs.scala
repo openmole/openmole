@@ -52,9 +52,13 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     _.active() = false
   }
 
-  def addTab(tab: TreeNodeTab) = {
+  def ++(tab: TreeNodeTab) = {
     tabs() = tabs() :+ tab
     setActive(tab)
+  }
+
+  def --(tab: TreeNodeTab) = {
+    tabs() = tabs().filterNot { _ == tab }
   }
 
   def rename(tn: TreeNode, newName: String) = {
@@ -79,6 +83,8 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                 aria.controls := t.id,
                 role := "tab",
                 data("toggle") := "tab")(
+                  tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ --(t) }
+                  )("x"),
                   t.tabName()
                 )
             )
