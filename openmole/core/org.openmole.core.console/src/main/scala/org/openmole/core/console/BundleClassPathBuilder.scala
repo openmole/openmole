@@ -44,7 +44,7 @@ object BundleClassPathBuilder {
     def isEmpty(text: String) = text == null || text.length == 0
   }
 
-  def allBundles = Activator.bundleContext.getBundles.filterNot(_.getBundleId == 0).map(create)
+  def allBundles = Activator.bundleContext.get.getBundles.filterNot(_.getBundleId == 0).map(create)
 
   def bundles(c: Class[_]) = PluginManager.bundlesForClass(c).filterNot(_.getBundleId == 0).map(create)
 
