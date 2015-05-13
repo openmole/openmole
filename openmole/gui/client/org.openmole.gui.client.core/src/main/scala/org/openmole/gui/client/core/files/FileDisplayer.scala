@@ -43,7 +43,10 @@ class FileDisplayer {
     val (_, fileType) = FileExtension(tn)
     alreadyDisplayed(tn) match {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
-      case _                    ⇒ tabs.++(TreeNodeTab(tn.name, tn.canonicalPath, editor(fileType, content).view))
+      case _ ⇒ fileType match {
+        case disp: DisplayableFile ⇒ tabs.++(EditableNodeTab(tn.name, tn.canonicalPath, editor(fileType, content)))
+        case _                     ⇒ //FIXME for GUI workflows
+      }
     }
   }
 }

@@ -26,13 +26,15 @@ import java.nio.file._
 
 object ApiImpl extends Api {
 
-  def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.canonicalPath)
+  def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean = new File(treeNodeData.canonicalPath, directoryName).mkdirs
 
   def addFile(treeNodeData: TreeNodeData, fileName: String): Boolean = new File(treeNodeData.canonicalPath, fileName).createNewFile
 
-  def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean = new File(treeNodeData.canonicalPath, directoryName).mkdirs
-
   def deleteFile(treeNodeData: TreeNodeData): Unit = new File(treeNodeData.canonicalPath).recursiveDelete
+
+  def fileSize(treeNodeData: TreeNodeData): Long = new File(treeNodeData.canonicalPath).length
+
+  def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.canonicalPath)
 
   def renameFile(treeNodeData: TreeNodeData, name: String): Boolean = {
     val canonicalFile = new File(treeNodeData.canonicalPath)
@@ -42,7 +44,7 @@ object ApiImpl extends Api {
     target.exists
   }
 
-  def fileSize(treeNodeData: TreeNodeData): Long = new File(treeNodeData.canonicalPath).length
+  def saveFile(path: String, fileContent: String) = new File(path).content = fileContent
 
   def workspacePath(): String = Utils.workspaceProjectFile.getCanonicalPath()
 }

@@ -1,5 +1,10 @@
 package org.openmole.gui.client.core.files
 
+import org.openmole.gui.client.core.Post
+import org.openmole.gui.shared._
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import autowire._
+import org.openmole.gui.client.core.dataui.EditorPanelUI
 import org.openmole.gui.misc.utils.Utils._
 import org.scalajs.dom.raw.HTMLDivElement
 import rx._
@@ -26,13 +31,30 @@ import scalatags.JsDom.{ TypedTag, tags }
 
 object TreeNodeTabs {
 
-  case class TreeNodeTab(tabName: Var[String], serverFilePath: Var[String], divElement: TypedTag[HTMLDivElement]) {
+  sealed trait TreeNodeTab {
+    val tabName: Var[String]
+
+    val serverFilePath: Var[String]
+
     val id: String = getUUID
+
     val active = Var(false)
+
+    val divElement: TypedTag[HTMLDivElement]
+
+    def save(onsaved: () ⇒ Unit = () ⇒ {}): Unit
 
     def setNameAndPath(name: String, path: String) = {
       tabName() = name
       serverFilePath() = path
+    }
+  }
+
+  case class EditableNodeTab(tabName: Var[String], serverFilePath: Var[String], editor: EditorPanelUI) extends TreeNodeTab {
+    val divElement = editor.view
+
+    def save(onsaved: () ⇒ Unit) = Post[Api].saveFile(serverFilePath(), editor.code).call().foreach { d ⇒
+      onsaved()
     }
   }
 
@@ -58,7 +80,10 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   }
 
   def --(tab: TreeNodeTab) = {
-    tabs() = tabs().filterNot { _ == tab }
+    tab.save(() ⇒
+      tabs() = tabs().filterNot {
+        _ == tab
+      })
   }
 
   def rename(tn: TreeNode, newName: String) = {
