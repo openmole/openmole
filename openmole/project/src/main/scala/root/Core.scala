@@ -61,7 +61,7 @@ object Core extends Defaults {
 
   val logging = OsgiProject(
     "logging",
-    bundleActivator = Some("org.openmole.core.logging.internal.Activator"), imports = Seq("*")) settings (libraryDependencies ++= Seq(log4j, logback, slf4j, equinoxCommon)) dependsOn
+    bundleActivator = Some("org.openmole.core.logging.internal.Activator"), imports = Seq("*"), dynamicImports = Seq("*")) settings (libraryDependencies ++= Seq(log4j, logback, slf4j, equinoxCommon)) dependsOn
     (tools, workspace)
 
   val output = OsgiProject("output", imports = Seq("*"))
