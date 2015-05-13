@@ -80,10 +80,12 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   }
 
   def --(tab: TreeNodeTab) = {
+    val isactive = tab.active()
     tab.save(() ⇒
       tabs() = tabs().filterNot {
         _ == tab
       })
+    if (isactive) tabs().lastOption.map { setActive }
   }
 
   def rename(tn: TreeNode, newName: String) = {
