@@ -94,17 +94,31 @@ object VariableExpansion {
   case class UnexpandedElement(string: String) extends ExpansionElement {
     def expand(context: Context): String = string
   }
-  case class ExpandedElement(code: String) extends ExpansionElement {
+
+  object ExpandedElement {
+    def apply(code: String): ExpansionElement = {
+      if (code.isEmpty) ValueElement(code)
+      else
+        Try(code.toDouble).toOption orElse
+          Try(code.toLong).toOption orElse
+          Try(code.toLowerCase.toBoolean).toOption match {
+            case Some(v) ⇒ ValueElement(code)
+            case None    ⇒ CodeElement(code)
+          }
+    }
+  }
+
+  case class ValueElement(v: String) extends ExpansionElement {
+    def expand(context: Context): String = v
+  }
+
+  case class CodeElement(code: String) extends ExpansionElement {
     @transient lazy val proxy = GroovyProxyPool(code)
     def expand(context: Context): String =
-      if (code.isEmpty) code
-      else context.variable(code).map((_: Variable[Any]).value) orElse
-        Try(code.toDouble).toOption orElse
-        Try(code.toLong).toOption orElse
-        Try(code.toLowerCase.toBoolean).toOption match {
-          case Some(value) ⇒ value.toString
-          case None        ⇒ proxy(context.toBinding).toString
-        }
+      context.variable(code) match {
+        case Some(value) ⇒ value.value.toString
+        case None        ⇒ proxy(context.toBinding).toString
+      }
   }
 
 }
