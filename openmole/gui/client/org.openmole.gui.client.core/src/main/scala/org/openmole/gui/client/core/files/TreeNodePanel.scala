@@ -55,7 +55,7 @@ class TreeNodePanel(rootNode: DirNode) {
   computeAllSons(rootNode)
 
   val newNodeInput: Input = bs.input("")(
-    placeholder := "Folder name",
+    placeholder := "File name",
     width := "130px",
     autofocus
   ).render
@@ -67,7 +67,7 @@ class TreeNodePanel(rootNode: DirNode) {
   ).render
 
   val addRootDirButton: Select[TreeNodeType] = {
-    val content = Seq(TreeNodeType.folder, TreeNodeType.file)
+    val content = Seq(TreeNodeType.file, TreeNodeType.folder)
     Select("fileOrFolder", content, content.headOption, btn_success, glyph_folder_close, () ⇒ {
       addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
     })
