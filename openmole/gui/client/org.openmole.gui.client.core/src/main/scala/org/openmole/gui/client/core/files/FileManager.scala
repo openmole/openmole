@@ -99,12 +99,15 @@ object FileManager {
       }
     }
 
-    xhr.responseType = fileType match {
-      case df: DisplayableFile ⇒ ""
-      case _                   ⇒ "blob"
-    }
-
     xhr.open("POST", "downloadedfiles", true)
+
+    fileType match {
+      case df: DisplayableFile ⇒
+      case _ ⇒ {
+        println("blob !!!")
+        xhr.responseType = "blob"
+      }
+    }
 
     xhr.send(formData)
   }

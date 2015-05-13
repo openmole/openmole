@@ -1,6 +1,7 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.Post
+import org.openmole.gui.client.core.files.FileExtension.DisplayableFile
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.Forms._
 import org.scalajs.dom.html.Input
@@ -171,7 +172,11 @@ class TreeNodePanel(rootNode: DirNode) {
 
   def drawNode(node: TreeNode) = node match {
     case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ {
-      downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(node, content))
+      val (_, fileType) = FileExtension(node)
+      fileType match {
+        case d: DisplayableFile ⇒ downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(node, content))
+        case _                  ⇒
+      }
     })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
       dirNodeLine() = dirNodeLine() :+ dn
