@@ -51,8 +51,7 @@ class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with Logger {
       try {
         encoder.doEncode(event)
         Log.logger.fine(byteOutputStream.toString)
-        // FIXME ??? needed ???
-        //        byteOutputStream.reset
+        byteOutputStream.reset
       }
       catch {
         case e: IOException ⇒

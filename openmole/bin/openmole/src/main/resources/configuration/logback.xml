@@ -15,7 +15,7 @@
 
     <appender name="CatchSSH" class="org.openmole.core.logging.OpenMOLEAppender">
         <encoder>
-            <pattern>(ssh) %date %level [%thread] %logger{10} [%file : %line] %msg%n</pattern>
+            <pattern>%date %level [%thread] %logger{10} [%file : %line] %msg%n</pattern>
         </encoder>
     </appender>
 
