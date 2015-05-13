@@ -1,11 +1,11 @@
-package org.openmole.gui.misc.js
+package org.openmole.gui.client.core.files
 
+import org.openmole.gui.misc.utils.Utils._
 import org.scalajs.dom.raw.HTMLDivElement
 import rx._
-import scalatags.JsDom.TypedTag
-import org.openmole.gui.misc.utils.Utils._
-import scalatags.JsDom.{ tags ⇒ tags }
+
 import scalatags.JsDom.all._
+import scalatags.JsDom.{ TypedTag, tags }
 
 /*
  * Copyright (C) 11/05/15 // mathieu.leclaire@openmole.org
@@ -24,29 +24,46 @@ import scalatags.JsDom.all._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object Tabs {
+object TreeNodeTabs {
 
-  case class Tab(tabName: String, divElement: TypedTag[HTMLDivElement], id: String = getUUID) {
+  case class TreeNodeTab(tabName: Var[String], serverFilePath: Var[String], divElement: TypedTag[HTMLDivElement]) {
+    val id: String = getUUID
     val active = Var(false)
+
+    def setNameAndPath(name: String, path: String) = {
+      tabName() = name
+      serverFilePath() = path
+    }
   }
 
-  def apply(tabs: Tab*) = new Tabs(tabs.toSeq)
+  def apply(tabs: TreeNodeTab*) = new TreeNodeTabs(tabs.toSeq)
 }
 
-import Tabs._
+import org.openmole.gui.client.core.files.TreeNodeTabs._
 
-class Tabs(val tabs: Var[Seq[Tab]]) {
+class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
-  def setActive(tab: Tab) = {
+  def setActive(tab: TreeNodeTab) = {
     unActiveAll
     tab.active() = true
   }
 
-  def unActiveAll = tabs().map { _.active() = false }
+  def unActiveAll = tabs().map {
+    _.active() = false
+  }
 
-  def addTab(tab: Tab) = {
+  def addTab(tab: TreeNodeTab) = {
     tabs() = tabs() :+ tab
     setActive(tab)
+  }
+
+  def rename(tn: TreeNode, newName: String) = {
+    tabs().find { t ⇒
+      t.tabName() == tn.name() && t.serverFilePath() == tn.canonicalPath()
+    }.map { tab ⇒
+      tab.tabName() = newName
+      tab.serverFilePath() = (tab.serverFilePath().split('/').dropRight(1) :+ newName).mkString("/")
+    }
   }
 
   val render = Rx {
@@ -62,7 +79,7 @@ class Tabs(val tabs: Var[Seq[Tab]]) {
                 aria.controls := t.id,
                 role := "tab",
                 data("toggle") := "tab")(
-                  t.tabName
+                  t.tabName()
                 )
             )
         }

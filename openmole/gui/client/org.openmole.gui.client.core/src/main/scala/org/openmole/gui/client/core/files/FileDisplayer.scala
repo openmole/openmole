@@ -3,9 +3,7 @@ package org.openmole.gui.client.core.files
 import java.io.File
 import org.openmole.gui.client.core.dataui.EditorPanelUI
 import FileExtension._
-import org.openmole.gui.misc.js.Tabs
-import org.openmole.gui.misc.js.Tabs._
-import rx._
+import TreeNodeTabs._
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
@@ -33,19 +31,19 @@ import FileDisplayer._
 
 class FileDisplayer {
 
-  val tabs = Tabs()
+  val tabs = TreeNodeTabs()
 
   def alreadyDisplayed(tn: TreeNode) = {
     tabs.tabs().find {
-      _.id == tn.id
+      _.serverFilePath() == tn.canonicalPath()
     }
   }
 
   def display(tn: TreeNode, content: String) = {
     val (_, fileType) = FileExtension(tn)
     alreadyDisplayed(tn) match {
-      case Some(t: Tab) ⇒ tabs.setActive(t)
-      case _            ⇒ tabs.addTab(Tab(tn.name(), editor(fileType, content).view, tn.id))
+      case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
+      case _                    ⇒ tabs.addTab(TreeNodeTab(tn.name, tn.canonicalPath, editor(fileType, content).view))
     }
   }
 }

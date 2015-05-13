@@ -7,7 +7,7 @@ import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.{ FileList, HTMLInputElement, DragEvent }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ Forms ⇒ bs, Tabs, Select }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs, Select }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -140,8 +140,6 @@ class TreeNodePanel(rootNode: DirNode) {
     }
   )
 
-  def addTab(treeNode: TreeNode, content: String) = fileDisplayer.display(treeNode, content)
-
   def uploadFiles(fileList: FileList, targetPath: String) =
     FileManager.upload(fileList, targetPath,
       (p: FileTransferState) ⇒ transferring() = p
@@ -238,6 +236,7 @@ class TreeNodePanel(rootNode: DirNode) {
   def renameNode(treeNode: TreeNode, newName: String) = Post[Api].renameFile(treeNode, newName).call().foreach {
     d ⇒
       if (d) {
+        fileDisplayer.tabs.rename(treeNode, newName)
         refreshCurrentDirectory
         toBeEdited() = None
       }

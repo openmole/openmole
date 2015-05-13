@@ -18,6 +18,7 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.ext.data.TreeNodeData
+import TreeNodeTabs.TreeNodeTab
 import org.openmole.gui.misc.utils.Utils._
 import rx._
 
@@ -41,7 +42,7 @@ object TreeNodeType {
 }
 
 sealed trait TreeNode {
-  val id = canonicalPath().replace('/', '-').replace('.', '_')
+  val id = getUUID
 
   def name: Var[String]
 
