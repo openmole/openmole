@@ -26,11 +26,8 @@ import org.openmole.core.tools.service.Logger
 
 class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with Logger {
 
-  import OpenMOLEAppender._
-
-  def setLimit(inLimit: Int) = limit = inLimit
-
-  def getLimit = limit
+  val byteOutputStream = new ByteArrayOutputStream
+  var encoder = new PatternLayoutEncoder
 
   override def start {
     if (encoder != null) {
@@ -46,36 +43,18 @@ class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with Logger {
   }
 
   def append(event: ILoggingEvent) {
-    if (counter < limit) {
-      // output the events as formatted by our layout
-      try {
-        encoder.doEncode(event)
-        Log.logger.fine(byteOutputStream.toString)
-        byteOutputStream.reset
-      }
-      catch {
-        case e: IOException ⇒
-      }
-
-      // prepare for next event
-      counter += 1
+    try {
+      encoder.doEncode(event)
+      Log.logger.fine(byteOutputStream.toString)
+      byteOutputStream.reset
+    }
+    catch {
+      case e: IOException ⇒
     }
   }
 
   def getEncoder = encoder
-
   def setEncoder(inEncoder: PatternLayoutEncoder) {
     encoder = inEncoder
   }
-}
-
-object OpenMOLEAppender {
-
-  val DEFAULT_LIMIT = 10
-
-  val byteOutputStream = new ByteArrayOutputStream
-
-  var counter = 0
-  var limit = DEFAULT_LIMIT
-  var encoder = new PatternLayoutEncoder
 }
