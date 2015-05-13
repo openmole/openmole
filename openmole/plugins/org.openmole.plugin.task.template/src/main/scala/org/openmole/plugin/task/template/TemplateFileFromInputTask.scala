@@ -23,6 +23,9 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools.VariableExpansion
+import org.openmole.core.workspace.Workspace
+import org.openmole.tool.file._
 
 object TemplateFileFromInputTask {
   def apply(
@@ -38,8 +41,15 @@ object TemplateFileFromInputTask {
 
 sealed abstract class TemplateFileFromInputTask(
     val template: Prototype[File],
-    val output: Prototype[File]) extends AbstractTemplateFileTask {
+    val output: Prototype[File]) extends Task {
 
-  override def file(context: Context) = context(template)
+  override def process(context: Context) = {
+    val expanded = context(template).withInputStream { is ⇒
+      VariableExpansion(is).expand(context)
+    }
+    val file = Workspace.newFile("template", ".tmp")
+    file.content = expanded
+    context + (output -> file)
+  }
 
 }

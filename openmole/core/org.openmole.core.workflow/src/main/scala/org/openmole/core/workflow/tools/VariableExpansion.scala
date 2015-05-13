@@ -20,100 +20,91 @@ package org.openmole.core.workflow.tools
 import java.io.{ InputStream, OutputStream, OutputStreamWriter }
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.script.GroovyProxy
+import org.openmole.core.tools.script.{ GroovyProxyPool, GroovyProxy }
 import org.openmole.core.workflow.data.{ Context, Variable }
 import org.openmole.tool.stream.{ StringBuilderOutputStream, StringInputStream }
+import org.openmole.core.workflow.data._
 
-import scala.math.BigDecimal
+import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 object VariableExpansion {
 
-  def expandBigDecimal(context: Context, s: String): BigDecimal =
-    BigDecimal(apply(context, s))
+  def apply(s: String): Expansion = apply(new StringInputStream(s))
 
-  def expandDouble(context: Context, s: String): Double =
-    apply(context, s).toDouble
+  def apply(is: InputStream): Expansion = {
+    val expandedElements = ListBuffer[ExpansionElement]()
 
-  def expandInt(context: Context, s: String): Int =
-    apply(context, s).toInt
+    val it = Iterator.continually(is.read).takeWhile(_ != -1)
 
-  def apply(context: Context, s: String): String =
-    apply(context, Iterable.empty, s)
-
-  def apply(context: Context, tmpVariable: Iterable[Variable[_]], s: String): String =
-    expandDataInternal(context, tmpVariable, s)
-
-  private def expandDataInternal(context: Context, tmpVariable: Iterable[Variable[_]], s: String): String = {
-    val os = new StringBuilder()
-    expandBufferData(context ++ tmpVariable, new StringInputStream(s), new StringBuilderOutputStream(os))
-    os.toString
-  }
-
-  private def getVarName(str: String): String = {
-    str.substring(1, str.length - 1)
-  }
-
-  protected def expandOneData(allVariables: Context, variableExpression: String): String =
-    if (variableExpression.isEmpty) variableExpression
-    else allVariables.variable(variableExpression).map((_: Variable[Any]).value) orElse
-      Try(variableExpression.toDouble).toOption orElse
-      Try(variableExpression.toLong).toOption orElse
-      Try(variableExpression.toLowerCase.toBoolean).toOption match {
-        case Some(value) ⇒ value.toString
-        case None ⇒
-          val shell = new GroovyProxy(variableExpression, Iterable.empty) with GroovyContextAdapter
-          shell.execute(allVariables).toString
-      }
-
-  def expandBufferData(context: Context, is: InputStream, os: OutputStream) = {
-    //val isreader = new InputStreamReader(is, "UTF-8")
-    val oswriter = new OutputStreamWriter(os)
-
-    try {
-      val it = Iterator.continually(is.read).takeWhile(_ != -1)
-
-      def nextToExpand(it: Iterator[Int]) = {
-        var opened = 1
-        val res = new StringBuffer
-        while (it.hasNext && opened > 0) {
-          val c = it.next
-          c match {
-            case '{' ⇒
-              res.append(c.toChar); opened += 1
-            case '}' ⇒
-              opened -= 1; if (opened > 0) res.append(c.toChar)
-            case _ ⇒ res.append(c.toChar)
-          }
-        }
-        if (opened != 0) throw new UserBadDataError("Malformed ${expr} expression, unmatched opened {")
-        res.toString
-      }
-
-      var dollar = false
-
-      while (it.hasNext) {
+    def nextToExpand(it: Iterator[Int]) = {
+      var opened = 1
+      val res = new StringBuffer
+      while (it.hasNext && opened > 0) {
         val c = it.next
         c match {
           case '{' ⇒
-            if (dollar) {
-              val toExpand = nextToExpand(it)
-              oswriter.write(expandOneData(context, toExpand))
-            }
-            else oswriter.write(c)
-            dollar = false
-          case '$' ⇒
-            if (dollar) oswriter.write('$')
-            dollar = true
-          case _ ⇒
-            if (dollar) oswriter.write('$')
-            oswriter.write(c)
-            dollar = false
+            res.append(c.toChar); opened += 1
+          case '}' ⇒
+            opened -= 1; if (opened > 0) res.append(c.toChar)
+          case _ ⇒ res.append(c.toChar)
         }
       }
-      if (dollar) oswriter.write('$')
+      if (opened != 0) throw new UserBadDataError("Malformed ${expr} expression, unmatched opened {")
+      res.toString
     }
-    finally oswriter.close
+
+    var dollar = false
+    val os = new StringBuilderOutputStream()
+
+    while (it.hasNext) {
+      val c = it.next
+      c match {
+        case '{' ⇒
+          if (dollar) {
+            expandedElements += UnexpandedElement(os.builder.toString())
+            os.builder.clear()
+            val toExpand = nextToExpand(it)
+            expandedElements += ExpandedElement(toExpand)
+          }
+          else os.write(c)
+          dollar = false
+        case '$' ⇒
+          if (dollar) os.write('$')
+          dollar = true
+        case _ ⇒
+          if (dollar) os.write('$')
+          os.write(c)
+          dollar = false
+      }
+    }
+    if (dollar) os.write('$')
+    expandedElements += UnexpandedElement(os.builder.toString())
+    Expansion(expandedElements)
+  }
+
+  case class Expansion(elements: Seq[ExpansionElement]) {
+    def expand(context: Context) = elements.map(_.expand(context)).mkString
+  }
+
+  trait ExpansionElement {
+    def expand(context: Context): String
+  }
+
+  case class UnexpandedElement(string: String) extends ExpansionElement {
+    def expand(context: Context): String = string
+  }
+  case class ExpandedElement(code: String) extends ExpansionElement {
+    @transient lazy val proxy = GroovyProxyPool(code)
+    def expand(context: Context): String =
+      if (code.isEmpty) code
+      else context.variable(code).map((_: Variable[Any]).value) orElse
+        Try(code.toDouble).toOption orElse
+        Try(code.toLong).toOption orElse
+        Try(code.toLowerCase.toBoolean).toOption match {
+          case Some(value) ⇒ value.toString
+          case None        ⇒ proxy(context.toBinding).toString
+        }
   }
 
 }
