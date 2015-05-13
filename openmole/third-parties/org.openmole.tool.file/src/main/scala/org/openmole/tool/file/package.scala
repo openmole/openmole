@@ -452,7 +452,7 @@ package object file {
     val doubleBytes = bytes.toDouble
     if (bytes < mo) {
       val ratio = doubleBytes / kb
-      if (ratio < 1) ratio.toString + "Ko"
+      if (ratio < 1) ratio.formatted("%.1f") + "Ko"
       else ratio.toInt.toString() + "Ko"
     }
     else if (bytes < go) (doubleBytes / mo).toInt.toString + "Mo"
