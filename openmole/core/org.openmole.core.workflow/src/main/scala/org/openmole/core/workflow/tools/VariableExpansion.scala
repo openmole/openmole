@@ -116,8 +116,4 @@ object VariableExpansion {
     finally oswriter.close
   }
 
-  implicit def stringExpansionDecorator(s: String) = new {
-    def expand(context: Context) = apply(context, s)
-  }
-
 }
