@@ -33,7 +33,8 @@ import scala.concurrent.duration.Duration
 import scala.io.Source
 import scala.util.{ Success, Failure, Try }
 
-package object file { p ⇒
+package object file {
+  p ⇒
 
   def currentDirectory = new File(".")
 
@@ -49,9 +50,11 @@ package object file { p ⇒
 
   // glad you were there...
   implicit def file2Path(file: File) = file.toPath
+
   implicit def path2File(path: Path) = path.toFile
 
   implicit val fileOrdering = Ordering.by((_: File).getPath)
+
   implicit def predicateToFileFilter(predicate: File ⇒ Boolean) = new FileFilter {
     def accept(p1: File) = predicate(p1)
   }
@@ -65,6 +68,7 @@ package object file { p ⇒
     def toGZ = new GZIPOutputStream(os)
 
     def append(content: String) = new PrintWriter(os).append(content).flush
+
     def appendLine(line: String) = append(line + "\n")
   }
 
@@ -73,11 +77,15 @@ package object file { p ⇒
     // FIXME useful?
     def copy(to: OutputStream): Unit = {
       val buffer = new Array[Byte](DefaultBufferSize)
-      Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach { to.write(buffer, 0, _) }
+      Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach {
+        to.write(buffer, 0, _)
+      }
     }
 
     def copy(to: File, maxRead: Int, timeout: Duration): Unit =
-      withClosable(to.bufferedOutputStream()) { copy(_, maxRead, timeout) }
+      withClosable(to.bufferedOutputStream()) {
+        copy(_, maxRead, timeout)
+      }
 
     def copy(to: OutputStream, maxRead: Int, timeout: Duration) = {
       val buffer = new Array[Byte](maxRead)
@@ -116,6 +124,7 @@ package object file { p ⇒
   implicit class FileDecorator(file: File) {
 
     def realFile = file.toPath.toRealPath().toFile
+
     def realPath = file.toPath.toRealPath()
 
     /////// copiers ////////
@@ -141,7 +150,9 @@ package object file { p ⇒
 
     // TODO replace with NIO
     def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit =
-      withClosable(bufferedInputStream) { _.copy(to, maxRead, timeout) }
+      withClosable(bufferedInputStream) {
+        _.copy(to, maxRead, timeout)
+      }
 
     def copyCompressFile(toF: File): File = withClosable(new GZIPOutputStream(toF.bufferedOutputStream())) { to ⇒
       Files.copy(file, to)
@@ -224,9 +235,13 @@ package object file { p ⇒
 
     def mode = {
       val f = file.realPath;
-      { if (Files.isReadable(f)) READ_MODE else 0 } |
-        { if (Files.isWritable(f)) WRITE_MODE else 0 } |
-        { if (Files.isExecutable(f)) EXEC_MODE else 0 }
+      {
+        if (Files.isReadable(f)) READ_MODE else 0
+      } | {
+        if (Files.isWritable(f)) WRITE_MODE else 0
+      } | {
+        if (Files.isExecutable(f)) EXEC_MODE else 0
+      }
     }
 
     /** set mode from an integer as retrieved from a Tar archive */
@@ -332,7 +347,9 @@ package object file { p ⇒
       }
     }
 
-    def createParentDir = wrapError { file.getCanonicalFile.getParentFile.mkdirs }
+    def createParentDir = wrapError {
+      file.getCanonicalFile.getParentFile.mkdirs
+    }
 
     def withLock[T](f: OutputStream ⇒ T) = jvmLevelFileLock.withLock(file.getCanonicalPath) {
       withClosable(new FileOutputStream(file, true)) { fos ⇒
@@ -345,17 +362,25 @@ package object file { p ⇒
     }
 
     def bufferedInputStream = new BufferedInputStream(new FileInputStream(file))
+
     def bufferedOutputStream(append: Boolean = false) = new BufferedOutputStream(new FileOutputStream(file, append))
 
     def gzippedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
+
     def gzippedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream())
 
     def withGzippedOutputStream[T] = withClosable[GZIPOutputStream, T](gzippedBufferedOutputStream)(_)
+
     def withGzippedInputStream[T] = withClosable[GZIPInputStream, T](gzippedBufferedInputStream)(_)
+
     def withOutputStream[T] = withClosable[OutputStream, T](bufferedOutputStream())(_)
+
     def withInputStream[T] = withClosable[InputStream, T](bufferedInputStream)(_)
+
     def withWriter[T] = withClosable[Writer, T](new OutputStreamWriter(bufferedOutputStream()))(_)
+
     def withDirectoryStream[T] = withClosable[DirectoryStream[Path], T](Files.newDirectoryStream(file))(_)
+
     def withSource[T] = withClosable[Source, T](Source.fromFile(file))(_)
 
     def wrapError[T](f: ⇒ T): T =
@@ -384,6 +409,7 @@ package object file { p ⇒
     ///////// helpers ///////
     def applyRecursive(operation: File ⇒ Unit): Unit =
       applyRecursive(operation, Set.empty)
+
     def applyRecursive(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit =
       recurse(file)(operation, stopPath)
   }
@@ -417,4 +443,23 @@ package object file { p ⇒
     operation(file)
   }
 
+  def readableByteCount(bytes: Long): String = {
+    val kb = 1024
+    val mo = kb * kb
+    val go = mo * kb
+    val to = go * kb
+
+    val doubleBytes = bytes.toDouble
+    if (bytes < mo) {
+      val o: Double
+      val ratio = doubleBytes / kb
+      if (ratio < 1) ratio.toString + "Ko"
+      else ratio.toInt.toString() + "Ko"
+    }
+    else if (bytes < go) (doubleBytes / mo).toInt.toString + "Mo"
+    else if (bytes < to) (doubleBytes / go).toInt.toString + "Go"
+    else (doubleBytes / to).toInt.toString + "To"
+  }
+
 }
+

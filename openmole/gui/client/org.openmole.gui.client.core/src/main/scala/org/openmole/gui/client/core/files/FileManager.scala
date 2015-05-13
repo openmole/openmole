@@ -76,7 +76,6 @@ object FileManager {
   }
 
   def download(treeNode: TreeNode,
-               size: Long,
                saveFile: Boolean,
                fileTransferState: FileTransferState ⇒ Unit,
                onLoadEnded: String ⇒ Unit) = {
@@ -89,7 +88,7 @@ object FileManager {
     val xhr = new XMLHttpRequest
 
     xhr.onprogress = (e: ProgressEvent) ⇒ {
-      fileTransferState(Transfering((e.loaded.toDouble * 100 / size).toInt))
+      fileTransferState(Transfering((e.loaded.toDouble * 100 / treeNode.size).toInt))
     }
 
     xhr.onloadend = (e: ProgressEvent) ⇒ {

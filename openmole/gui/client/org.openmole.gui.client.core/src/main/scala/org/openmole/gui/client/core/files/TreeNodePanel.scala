@@ -11,6 +11,7 @@ import org.openmole.gui.misc.js.{ Forms ⇒ bs, Select }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.async.Async.await
 import TreeNode._
 import autowire._
 import rx._
@@ -146,12 +147,10 @@ class TreeNodePanel(rootNode: DirNode) {
     )
 
   def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
-    Post[Api].fileSize(treeNode).call().foreach { size ⇒
-      FileManager.download(treeNode, size, saveFile,
-        (p: FileTransferState) ⇒ transferring() = p,
-        onLoaded
-      )
-    }
+    FileManager.download(treeNode, saveFile,
+      (p: FileTransferState) ⇒ transferring() = p,
+      onLoaded
+    )
 
   def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(onclick := { () ⇒
     goToDirAction(dn)()
@@ -274,6 +273,7 @@ class TreeNodePanel(rootNode: DirNode) {
           if (lineHovered()) "-hover" else ""
         }
       })(
+        tags.i(`class` := "filesize")(tn.readableSize),
         glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
         glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
         glyphSpan(glyph_download, () ⇒ downloadFile(tn, true))(`class` := "glyphitem")
