@@ -268,15 +268,17 @@ class TreeNodePanel(rootNode: DirNode) {
           }),
           tags.i(tn.name())
         ),
-      tags.span(id := Rx {
-        "treeline" + {
-          if (lineHovered()) "-hover" else ""
-        }
-      })(
-        tags.i(`class` := "filesize")(tn.readableSize),
-        glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
-        glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
-        glyphSpan(glyph_download, () ⇒ downloadFile(tn, true))(`class` := "glyphitem")
+      tags.span(
+        tags.span(`class` := "filesize")(tags.i(tn.readableSize)),
+        tags.span(id := Rx {
+          "treeline" + {
+            if (lineHovered()) "-hover" else ""
+          }
+        })(
+          glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
+          glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
+          glyphSpan(glyph_download, () ⇒ downloadFile(tn, true))(`class` := "glyphitem")
+        )
       )
     )
 
