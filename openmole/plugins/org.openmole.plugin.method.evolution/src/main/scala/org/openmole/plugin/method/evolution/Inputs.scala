@@ -41,16 +41,18 @@ object InputConverter {
     }
 
   def scaled(input: Input, context: ⇒ Context, genomePart: Seq[Double]) = {
-    val min = input.min.from(context)
-    val max = input.max.from(context)
 
     input match {
       case s @ Scalar(p, _, _) ⇒
         val g = genomePart.head
         assert(!g.isNaN)
+        val min = s.min.from(context)
+        val max = s.max.from(context)
         val sc = g.scale(min, max)
         ScaledScalar(s.prototype, sc)
-      case s @ Sequence(p, _, _, size) ⇒ ScaledSequence(s.prototype, genomePart.take(size).toArray.map(_.scale(min, max)))
+      case s @ Sequence(p, _, _) ⇒
+        def scaled = (genomePart zip (s.min zip s.max)) map { case (g, (min, max)) ⇒ g.scale(min.from(context), max.from(context)) }
+        ScaledSequence(s.prototype, scaled.toArray)
     }
   }
 
@@ -71,8 +73,6 @@ trait InputsConverter {
 }
 
 sealed trait Input {
-  def min: FromContext[Double]
-  def max: FromContext[Double]
   def prototype: Prototype[_]
   def size: Int
 }
@@ -81,7 +81,14 @@ case class Scalar(prototype: Prototype[Double], min: FromContext[Double], max: F
   def size = 1
 }
 
-case class Sequence(prototype: Prototype[Array[Double]], min: FromContext[Double], max: FromContext[Double], size: Int) extends Input
+object Sequence {
+  def apply(prototype: Prototype[Array[Double]], min: FromContext[Double], max: FromContext[Double], size: Int): Sequence =
+    Sequence(prototype, Seq.fill(size)(min), Seq.fill(size)(max))
+}
+
+case class Sequence(prototype: Prototype[Array[Double]], min: Seq[FromContext[Double]], max: Seq[FromContext[Double]]) extends Input {
+  def size = math.min(min.size, max.size)
+}
 
 case class Inputs(inputs: Seq[Input]) {
   def size: Int = Try(inputs.map(_.size).sum).getOrElse(0)

@@ -20,15 +20,17 @@ import java.io.File
 
 import org.openmole.core.console._
 import org.openmole.core.exception._
+import org.openmole.core.pluginmanager.PluginManager
+import org.osgi.framework.Bundle
 
 import scala.util.Try
 
 trait ScalaCompilation {
-  def usedClasses: Seq[Class[_]]
+  def usedBundles: Seq[File]
   def libraries: Seq[File]
 
   def compile(code: String) = Try {
-    val interpreter = new ScalaREPL(usedClasses ++ Seq(getClass), libraries)
+    val interpreter = new ScalaREPL(usedBundles.flatMap(PluginManager.bundle) ++ Seq(PluginManager.bundleForClass(this.getClass)), libraries)
 
     val evaluated =
       try interpreter.eval(code)
