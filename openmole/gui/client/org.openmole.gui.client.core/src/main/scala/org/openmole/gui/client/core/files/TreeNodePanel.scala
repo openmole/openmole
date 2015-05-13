@@ -227,9 +227,11 @@ class TreeNodePanel(rootNode: DirNode) {
     newNodeInput.value = ""
   }
 
-  def trashNode(treeNode: TreeNode) = Post[Api].deleteFile(treeNode).call().foreach {
-    d ⇒
+  def trashNode(treeNode: TreeNode) = {
+    fileDisplayer.tabs -- treeNode
+    Post[Api].deleteFile(treeNode).call().foreach { d ⇒
       refreshCurrentDirectory
+    }
   }
 
   def renameNode(treeNode: TreeNode, newName: String) = Post[Api].renameFile(treeNode, newName).call().foreach {
