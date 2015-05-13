@@ -19,19 +19,21 @@ package org.openmole.gui.shared
 import org.openmole.gui.ext.data.TreeNodeData
 
 trait Api {
-  def uuid(): String = java.util.UUID.randomUUID.toString
-
-  def listFiles(path: TreeNodeData): Seq[TreeNodeData]
-
-  def deleteFile(treeNode: TreeNodeData): Unit
+  def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean
 
   def addFile(treeNode: TreeNodeData, fileName: String): Boolean
 
-  def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean
+  def deleteFile(treeNode: TreeNodeData): Unit
 
   def fileSize(treeNodeData: TreeNodeData): Long
 
+  def listFiles(path: TreeNodeData): Seq[TreeNodeData]
+
+  def uuid(): String = java.util.UUID.randomUUID.toString
+
   def renameFile(treeNode: TreeNodeData, name: String): Boolean
+
+  def saveFile(path: String, fileContent: String): Unit
 
   def workspacePath(): String
 }

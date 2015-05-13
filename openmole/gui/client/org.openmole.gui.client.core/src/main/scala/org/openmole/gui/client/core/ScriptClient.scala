@@ -2,7 +2,7 @@ package org.openmole.gui.client.core
 
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.client.core.dataui.EditorPanelUI
-import org.openmole.gui.client.core.files.{ FileNode, DirNode, TreeNodePanel }
+import org.openmole.gui.client.core.files.{ TreeNodeTabs, FileNode, DirNode, TreeNodePanel }
 import org.openmole.gui.client.core.files.TreeNodePanel._
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.DragEvent
@@ -16,8 +16,7 @@ import org.openmole.gui.misc.js.JsRxTags._
 import org.scalajs.{ jquery, dom }
 import rx._
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.Tabs
-import org.openmole.gui.misc.js.Tabs._
+import TreeNodeTabs._
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org

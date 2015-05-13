@@ -7,7 +7,7 @@ import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.{ FileList, HTMLInputElement, DragEvent }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ Forms ⇒ bs, Tabs, Select }
+import org.openmole.gui.misc.js.{ Forms ⇒ bs, Select }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -55,7 +55,7 @@ class TreeNodePanel(rootNode: DirNode) {
   computeAllSons(rootNode)
 
   val newNodeInput: Input = bs.input("")(
-    placeholder := "Folder name",
+    placeholder := "File name",
     width := "130px",
     autofocus
   ).render
@@ -67,7 +67,7 @@ class TreeNodePanel(rootNode: DirNode) {
   ).render
 
   val addRootDirButton: Select[TreeNodeType] = {
-    val content = Seq(TreeNodeType.folder, TreeNodeType.file)
+    val content = Seq(TreeNodeType.file, TreeNodeType.folder)
     Select("fileOrFolder", content, content.headOption, btn_success, glyph_folder_close, () ⇒ {
       addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
     })
@@ -139,8 +139,6 @@ class TreeNodePanel(rootNode: DirNode) {
         )
     }
   )
-
-  def addTab(treeNode: TreeNode, content: String) = fileDisplayer.display(treeNode, content)
 
   def uploadFiles(fileList: FileList, targetPath: String) =
     FileManager.upload(fileList, targetPath,
@@ -238,6 +236,7 @@ class TreeNodePanel(rootNode: DirNode) {
   def renameNode(treeNode: TreeNode, newName: String) = Post[Api].renameFile(treeNode, newName).call().foreach {
     d ⇒
       if (d) {
+        fileDisplayer.tabs.rename(treeNode, newName)
         refreshCurrentDirectory
         toBeEdited() = None
       }
