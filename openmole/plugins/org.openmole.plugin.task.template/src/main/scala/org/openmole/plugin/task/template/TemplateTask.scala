@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Mathieu Mathieu Leclaire <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,34 +9,43 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.plugin.task.template
 
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task.Task
-import org.openmole.core.workflow.tools.VariableExpansion
-import org.openmole.core.workspace.Workspace
-import VariableExpansion._
+import java.io.File
 
-abstract class AbstractTemplateFileTask extends Task {
+import org.openmole.tool.file._
 
-  def output: Prototype[File]
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workspace._
+
+object TemplateTask {
+  def apply(
+    template: String,
+    output: Prototype[File]) = new TaskBuilder { builder ⇒
+
+    addOutput(output)
+
+    def toTask = new TemplateTask(template, output) with builder.Built
+  }
+}
+
+sealed abstract class TemplateTask(
+    val template: String,
+    val output: Prototype[File]) extends Task {
+
+  @transient lazy val expanded = VariableExpansion(template)
 
   override def process(context: Context) = {
     val outputFile = Workspace.newFile("output", "template")
-    expandBufferData(context, new FileInputStream(file(context)), new FileOutputStream(outputFile))
+    outputFile.content = expanded.expand(context)
     Context.empty + (output, outputFile)
   }
-
-  def file(context: Context): File
 }
