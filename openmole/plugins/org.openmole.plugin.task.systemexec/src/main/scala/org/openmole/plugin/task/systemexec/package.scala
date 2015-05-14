@@ -21,9 +21,12 @@ import org.openmole.core.macros.Keyword._
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data.Prototype
 import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.tools.VariableExpansion
 
 package object systemexec extends external.ExternalPackage {
-  case class Commands(os: OS, parts: String*)
+  case class Commands(os: OS, parts: String*) {
+    @transient lazy val expanded = parts.map(VariableExpansion(_))
+  }
 
   implicit def stringToCommands(s: String) = Commands(OS(), s)
   implicit def seqOfStringToCommands(s: Seq[String]) = Commands(OS(), s: _*)

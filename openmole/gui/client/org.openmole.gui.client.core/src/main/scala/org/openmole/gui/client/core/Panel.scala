@@ -9,7 +9,7 @@ import org.scalajs.dom
 import org.scalajs.dom.Event
 import org.scalajs.dom.raw.Event
 import org.scalajs.jquery._
-
+import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.js.annotation.JSExport
 import scala.sys.Prop.DoubleProp
 import scalatags.JsDom.all
@@ -213,7 +213,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
       headerDialog(
         Rx {
           tags.div(
-            nav(getID, navbar_form)(
+            nav(getUUID, navbar_form)(
               bs.form()(
                 inputGroup(navbar_left)(
                   inputFilter.tag,

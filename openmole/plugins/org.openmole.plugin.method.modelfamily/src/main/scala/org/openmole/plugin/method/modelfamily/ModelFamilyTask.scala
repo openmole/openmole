@@ -20,12 +20,14 @@ package org.openmole.plugin.method.modelfamily
 import java.io.File
 
 import fr.iscpif.family.{ Combination, TypedValue, ModelFamily }
+import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.ScalaCompilation
 import org.openmole.plugin.task.jvm.JVMLanguageTask
 import org.openmole.plugin.task.scala._
+import org.osgi.framework.Bundle
 
 import scala.util.Try
 import fr.iscpif.family.{ ModelFamily ⇒ FModelFamily, Combination, TypedValue }
@@ -57,9 +59,10 @@ abstract class ModelFamilyTask(val modelFamily: ModelFamily) extends Task { t �
     def attributes = modelFamily.attributes.map(d ⇒ d.prototype: TypedValue)
     def combination: Combination[Class[_]] = modelFamily.combination
     def compile(code: String): Try[Any] = compilation.compile(code)
-    def compilation = new ScalaCompilation {
+    def compilation = new ScalaCompilation with UsedClasses {
       def libraries: Seq[File] = modelFamily.libraries
-      def usedClasses: Seq[Class[_]] = modelFamily.usedClasses
+      def usedClasses = modelFamily.usedClasses
+      def plugins = modelFamily.plugins
     }
     def source(traits: String, attributes: String) = {
       val context =

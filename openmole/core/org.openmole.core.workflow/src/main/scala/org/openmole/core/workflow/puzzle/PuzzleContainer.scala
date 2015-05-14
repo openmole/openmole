@@ -44,5 +44,9 @@ case class OutputEnvironmentPuzzleContainer(
   def hook(hs: Hook*) = copy(hooks = hooks ++ hs)
 
   def toPuzzle: Puzzle =
-    puzzle.copy(hooks = puzzle.hooks ++ hooks.map(output -> _))
+    puzzle.copy(
+      hooks = puzzle.hooks ++ hooks.map(output -> _),
+      environments = puzzle.environments ++ environment.map(delegate -> _),
+      grouping = puzzle.grouping ++ grouping.map(delegate -> _)
+    )
 }

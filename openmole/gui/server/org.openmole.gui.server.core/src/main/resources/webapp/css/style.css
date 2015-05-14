@@ -283,3 +283,16 @@ height: 20px;
 #treeline-hover{
 opacity: 1;
 }
+
+.nav-tabs > li .close {
+    margin: 3px 0px 0 15px;
+   font-size: 14px;
+}
+
+.filesize{
+	color: grey;
+	padding-right: 7px;
+	padding-left: 3px;
+	float: right;
+	font-size: 12px;
+}

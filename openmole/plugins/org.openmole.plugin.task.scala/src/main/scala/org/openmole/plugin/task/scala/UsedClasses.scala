@@ -1,7 +1,5 @@
-package org.openmole.gui.misc.utils
-
 /*
- * Copyright (C) 22/04/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,16 +9,17 @@ package org.openmole.gui.misc.utils
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.plugin.task.scala
 
-import rx._
+import org.openmole.core.pluginmanager._
+import org.openmole.core.serializer.plugin._
 
-object Utils {
-  implicit def tToVarT[T](t: T): Var[T] = Var(t)
-
-  def getUUID: String = java.util.UUID.randomUUID.toString
+trait UsedClasses <: Plugins {
+  def usedBundles = usedClasses.flatMap(PluginManager.fileProviding) ++ plugins
+  def usedClasses: Seq[Class[_]]
 }

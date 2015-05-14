@@ -43,7 +43,7 @@ object OSGi extends Defaults(Apache) {
     version := "3.2.9"
     )*/
 
-  lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl")) settings
+  lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9")
 
   lazy val h2Version = "1.3.176"

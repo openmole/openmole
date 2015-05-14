@@ -1,16 +1,18 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.Post
+import org.openmole.gui.client.core.files.FileExtension.DisplayableFile
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.Forms._
-import org.scalajs.dom.html.{ Input, UList }
-import org.scalajs.dom.raw.{ FileList, HTMLInputElement, DragEvent, Event }
+import org.scalajs.dom.html.Input
+import org.scalajs.dom.raw.{ FileList, HTMLInputElement, DragEvent }
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
+import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.{ Forms ⇒ bs, Select }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.async.Async.await
 import TreeNode._
 import autowire._
 import rx._
@@ -50,12 +52,12 @@ class TreeNodePanel(rootNode: DirNode) {
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
   val transferring: Var[FileTransferState] = Var(Standby())
-  val fileDisplayers: Var[Seq[FileDisplayer]] = Var(Seq())
+  val fileDisplayer = new FileDisplayer
 
   computeAllSons(rootNode)
 
   val newNodeInput: Input = bs.input("")(
-    placeholder := "Folder name",
+    placeholder := "File name",
     width := "130px",
     autofocus
   ).render
@@ -67,7 +69,7 @@ class TreeNodePanel(rootNode: DirNode) {
   ).render
 
   val addRootDirButton: Select[TreeNodeType] = {
-    val content = Seq(TreeNodeType.folder, TreeNodeType.file)
+    val content = Seq(TreeNodeType.file, TreeNodeType.folder)
     Select("fileOrFolder", content, content.headOption, btn_success, glyph_folder_close, () ⇒ {
       addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
     })
@@ -145,12 +147,11 @@ class TreeNodePanel(rootNode: DirNode) {
       (p: FileTransferState) ⇒ transferring() = p
     )
 
-  def downloadFile(treeNode: TreeNode, saveFile: Boolean) =
-    Post[Api].fileSize(treeNode).call().foreach { size ⇒
-      FileManager.download(treeNode.canonicalPath(), this, size, saveFile,
-        (p: FileTransferState) ⇒ transferring() = p
-      )
-    }
+  def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
+    FileManager.download(treeNode, saveFile,
+      (p: FileTransferState) ⇒ transferring() = p,
+      onLoaded
+    )
 
   def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(onclick := { () ⇒
     goToDirAction(dn)()
@@ -170,7 +171,13 @@ class TreeNodePanel(rootNode: DirNode) {
   )
 
   def drawNode(node: TreeNode) = node match {
-    case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ downloadFile(fn, false))
+    case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ {
+      val (_, fileType) = FileExtension(node)
+      fileType match {
+        case d: DisplayableFile ⇒ downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(node, content))
+        case _                  ⇒
+      }
+    })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
       dirNodeLine() = dirNodeLine() :+ dn
     }
@@ -225,14 +232,17 @@ class TreeNodePanel(rootNode: DirNode) {
     newNodeInput.value = ""
   }
 
-  def trashNode(treeNode: TreeNode) = Post[Api].deleteFile(treeNode).call().foreach {
-    d ⇒
+  def trashNode(treeNode: TreeNode) = {
+    fileDisplayer.tabs -- treeNode
+    Post[Api].deleteFile(treeNode).call().foreach { d ⇒
       refreshCurrentDirectory
+    }
   }
 
   def renameNode(treeNode: TreeNode, newName: String) = Post[Api].renameFile(treeNode, newName).call().foreach {
     d ⇒
       if (d) {
+        fileDisplayer.tabs.rename(treeNode, newName)
         refreshCurrentDirectory
         toBeEdited() = None
       }
@@ -265,14 +275,17 @@ class TreeNodePanel(rootNode: DirNode) {
           }),
           tags.i(tn.name())
         ),
-      tags.span(id := Rx {
-        "treeline" + {
-          if (lineHovered()) "-hover" else ""
-        }
-      })(
-        glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
-        glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
-        glyphSpan(glyph_download, () ⇒ downloadFile(tn, false))(`class` := "glyphitem")
+      tags.span(
+        tags.span(`class` := "filesize")(tags.i(tn.readableSize)),
+        tags.span(id := Rx {
+          "treeline" + {
+            if (lineHovered()) "-hover" else ""
+          }
+        })(
+          glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
+          glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
+          glyphSpan(glyph_download, () ⇒ downloadFile(tn, true))(`class` := "glyphitem")
+        )
       )
     )
 

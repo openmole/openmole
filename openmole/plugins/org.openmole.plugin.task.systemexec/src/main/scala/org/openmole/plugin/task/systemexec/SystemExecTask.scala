@@ -18,6 +18,7 @@
 package org.openmole.plugin.task.systemexec
 
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.workflow.tools.VariableExpansion.Expansion
 import org.openmole.tool.file._
 import org.openmole.core.tools.service.{ Logger, OS, ProcessUtil }
 import org.openmole.core.workflow.task._
@@ -81,8 +82,8 @@ abstract class SystemExecTask(
       case None    ⇒ System.err
     }
 
-    def commandLine(cmd: String): Array[String] =
-      CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath), cmd)).toStrings
+    def commandLine(cmd: Expansion): Array[String] =
+      CommandLine.parse(workDir.getAbsolutePath + File.separator + cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath))).toStrings
 
     def execute(command: Array[String], out: PrintStream, err: PrintStream): Int = {
       try {
@@ -108,9 +109,9 @@ abstract class SystemExecTask(
       }
     }
 
-    val osCommandLines: Seq[String] = command.find { _.os.compatible }.map { _.parts }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
+    val osCommandLines: Seq[Expansion] = command.find { _.os.compatible }.map { _.expanded }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
 
-    def execAll(cmds: List[String]): Int =
+    def execAll(cmds: List[Expansion]): Int =
       cmds match {
         case Nil ⇒ 0
         case cmd :: t ⇒

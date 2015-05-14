@@ -21,13 +21,13 @@ import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
 object Activator {
-  var bundleContext: BundleContext = null
+  var bundleContext: Option[BundleContext] = None
 }
 
 class Activator extends BundleActivator {
 
   override def start(componentContext: BundleContext) = {
-    Activator.bundleContext = componentContext
+    Activator.bundleContext = Some(componentContext)
   }
 
   override def stop(componentContext: BundleContext) = {
