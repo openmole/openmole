@@ -79,22 +79,27 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     setActive(tab)
   }
 
-  def --(tab: TreeNodeTab) = {
+  def removeTab(tab: TreeNodeTab) = tabs() = tabs().filterNot {
+    _ == tab
+  }
+
+  def --(tab: TreeNodeTab): Unit = {
     val isactive = tab.active()
-    tab.save(() ⇒
-      tabs() = tabs().filterNot {
-        _ == tab
-      })
+    tab.save(() ⇒ removeTab(tab))
     if (isactive) tabs().lastOption.map { setActive }
   }
 
+  def --(treeNode: TreeNode): Unit = find(treeNode).map { removeTab }
+
   def rename(tn: TreeNode, newName: String) = {
-    tabs().find { t ⇒
-      t.tabName() == tn.name() && t.serverFilePath() == tn.canonicalPath()
-    }.map { tab ⇒
+    find(tn).map { tab ⇒
       tab.tabName() = newName
       tab.serverFilePath() = (tab.serverFilePath().split('/').dropRight(1) :+ newName).mkString("/")
     }
+  }
+
+  def find(treeNode: TreeNode) = tabs().find { t ⇒
+    t.serverFilePath() == treeNode.canonicalPath()
   }
 
   val render = Rx {

@@ -17,13 +17,14 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
 import java.io.File
 
 object Utils {
 
-  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f.getCanonicalPath, f.isDirectory)
+  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f.getCanonicalPath, f.isDirectory, f.length, readableByteCount(f.length))
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)

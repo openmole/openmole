@@ -76,7 +76,6 @@ object FileManager {
   }
 
   def download(treeNode: TreeNode,
-               size: Long,
                saveFile: Boolean,
                fileTransferState: FileTransferState ⇒ Unit,
                onLoadEnded: String ⇒ Unit) = {
@@ -89,7 +88,7 @@ object FileManager {
     val xhr = new XMLHttpRequest
 
     xhr.onprogress = (e: ProgressEvent) ⇒ {
-      fileTransferState(Transfering((e.loaded.toDouble * 100 / size).toInt))
+      fileTransferState(Transfering((e.loaded.toDouble * 100 / treeNode.size).toInt))
     }
 
     xhr.onloadend = (e: ProgressEvent) ⇒ {
@@ -100,12 +99,15 @@ object FileManager {
       }
     }
 
-    xhr.responseType = fileType match {
-      case df: DisplayableFile ⇒ ""
-      case _                   ⇒ "blob"
-    }
-
     xhr.open("POST", "downloadedfiles", true)
+
+    fileType match {
+      case df: DisplayableFile ⇒
+      case _ ⇒ {
+        println("blob !!!")
+        xhr.responseType = "blob"
+      }
+    }
 
     xhr.send(formData)
   }

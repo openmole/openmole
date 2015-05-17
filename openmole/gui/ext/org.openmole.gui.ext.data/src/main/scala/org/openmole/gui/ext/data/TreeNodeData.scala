@@ -23,4 +23,6 @@ import scala.scalajs.js.annotation.JSExport
 case class TreeNodeData(
   name: String,
   canonicalPath: String,
-  isDirectory: Boolean)
+  isDirectory: Boolean,
+  size: Long,
+  readableSize: String)
