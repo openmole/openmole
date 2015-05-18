@@ -98,13 +98,18 @@ trait OMSTabControl <: TabControl {
     }
   })
 
+  val errorPanel = panel("Error", tags.div("This is my body"))
+
   val controlElement =
     tags.span(
-      tags.div(
-        inputDirectory.render,
-        outputDirectory.render
+      bs.span(col_md_4)(id := "controlform")(
+        tags.div(
+          inputDirectory.render,
+          outputDirectory.render
+        ),
+        runButton
       ),
-      runButton
+      errorPanel
     )
 
 }
@@ -170,7 +175,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   val render = Rx {
     tags.div(
-      tags.div(id := "controlform")(
+      tags.div(id := "uppertab")(
         active.map { tab ⇒
           tab match {
             case oms: TabControl ⇒ oms.controlElement

@@ -303,4 +303,10 @@ object Forms {
   //Misc
   val center = key("text-center")
   val spacer20 = key("spacer20")
+
+  def panel(heading: String, bodyElement: TypedTag[HTMLElement]) = tags.div(
+    `class` := "panel panel-default")(
+      tags.div(`class` := "panel-heading")(heading),
+      tags.div(`class` := "panel-body")(bodyElement.render)
+    )
 }

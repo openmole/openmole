@@ -297,15 +297,22 @@ opacity: 1;
 	font-size: 12px;
 }
 
-#controlform{
-	margin-top: -75px;
-	margin-left: 15px;
+#uppertab{
 	height: 140px;
+	margin-top: -50px;
+	}
+
+#controlform{
 	width: 20%;
 }
 
 #controlform input {
 	margin-top: 5px;
+}
+
+#uppertab .panel {
+	width: 78%;
+	margin-left: 280px;
 }
 
 #controlform button {
