@@ -37,7 +37,7 @@ object ListDirectoriesSource {
 
 abstract class ListDirectoriesSource(path: ExpandedString, prototype: Prototype[Array[File]], regExp: ExpandedString) extends Source {
 
-  override def process(context: Context, executionContext: ExecutionContext) = {
+  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
     val expandedPath = executionContext.relativise(path.from(context))
     val expandedRegExp = regExp.from(context)
     Variable(

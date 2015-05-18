@@ -71,7 +71,7 @@ abstract class CopyFileHook extends Hook {
 
   def copy: Iterable[(Prototype[File], ExpandedString, CopyOptions)]
 
-  override def process(context: Context, executionContext: ExecutionContext) = {
+  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
     val moved = for ((p, d, options) ← copy) yield copy(context, executionContext, p, d, options)
     context ++ moved.flatten
   }
@@ -81,7 +81,7 @@ abstract class CopyFileHook extends Hook {
     executionContext: ExecutionContext,
     filePrototype: Prototype[File],
     destination: ExpandedString,
-    options: CopyOptions): Option[Variable[File]] = {
+    options: CopyOptions)(implicit rng: RandomProvider): Option[Variable[File]] = {
     val from = context(filePrototype)
     val to = executionContext.relativise(destination.from(context))
 

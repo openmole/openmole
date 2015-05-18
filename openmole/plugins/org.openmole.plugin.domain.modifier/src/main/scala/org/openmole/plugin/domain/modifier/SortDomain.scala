@@ -33,7 +33,7 @@ class SortDomain[T](val domain: Domain[T] with Finite[T])(implicit ord: Ordering
 
   override def inputs = domain.inputs
 
-  override def computeValues(context: Context)(implicit rng: Random): Iterable[T] =
+  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] =
     domain.computeValues(context).toList.sorted
 
 }

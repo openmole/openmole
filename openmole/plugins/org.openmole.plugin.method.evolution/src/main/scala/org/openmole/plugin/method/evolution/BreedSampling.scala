@@ -53,10 +53,10 @@ sealed abstract class BreedSampling(val evolution: Breeding with GType with Arch
   def prototypes = List(genome)
   override def inputs = Seq(population, archive)
 
-  override def build(context: ⇒ Context)(implicit rng: Random) = {
+  override def build(context: ⇒ Context)(implicit rng: RandomProvider) = {
     val p = context(population)
     val a = context(archive)
-    val breeded = evolution.breed(p, a, size)(rng)
+    val breeded = evolution.breed(p, a, size)(rng())
     breeded.map(g ⇒ List(Variable(genome, g))).toIterator
   }
 }

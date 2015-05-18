@@ -23,6 +23,8 @@ import org.openmole.core.tools.io.FromString
 import org.openmole.core.workflow.data._
 import org.openmole.core.tools.io._
 
+import scala.util.Random
+
 object FromContext {
 
   implicit def fromTToContext[T](t: T) = FromContext[T](t)
@@ -30,18 +32,18 @@ object FromContext {
   implicit def fromStringToContext[T](code: String)(implicit fromString: FromString[T]) =
     new FromContext[T] {
       @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
-      override def from(context: ⇒ Context): T = fromString.from(proxy.run(context).toString)
+      override def from(context: ⇒ Context)(implicit rng: RandomProvider): T = fromString.from(proxy.run(context).toString)
     }
 
   def apply[T](t: T) =
     new FromContext[T] {
-      def from(context: ⇒ Context): T = t
+      def from(context: ⇒ Context)(implicit rng: RandomProvider): T = t
     }
 
 }
 
 trait FromContext[T] {
-  def from(context: ⇒ Context): T
+  def from(context: ⇒ Context)(implicit rng: RandomProvider): T
 }
 
 object ExpandedString {
@@ -61,6 +63,6 @@ trait ExpandedString <: FromContext[String] {
   @transient lazy val expansion = VariableExpansion(string)
   def +(s: ExpandedString): ExpandedString = string + s.string
   def string: String
-  def from(context: ⇒ Context) = expansion.expand(context)
+  def from(context: ⇒ Context)(implicit rng: RandomProvider) = expansion.expand(context)
 }
 

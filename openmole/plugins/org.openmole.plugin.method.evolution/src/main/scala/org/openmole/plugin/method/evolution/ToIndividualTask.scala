@@ -51,7 +51,7 @@ sealed abstract class ToIndividualTask(val evolution: GAAlgorithm) extends Task 
   def genome: Prototype[evolution.G]
   def individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]]
 
-  override def process(context: Context) = {
+  override def process(context: Context)(implicit rng: RandomProvider) = {
     val scaled: Seq[(Prototype[Double], Double)] = evolution.objectives.map(o ⇒ o -> context(o))
 
     val i: Individual[evolution.G, evolution.P, evolution.F] =

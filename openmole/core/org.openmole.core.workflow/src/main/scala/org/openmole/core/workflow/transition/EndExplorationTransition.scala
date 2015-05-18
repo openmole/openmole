@@ -21,12 +21,12 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.transition.Condition._
-import scala.util.{ Failure, Success, Try }
+import scala.util.{ Random, Failure, Success, Try }
 import org.openmole.tool.lock._
 
 class EndExplorationTransition(start: Capsule, end: Slot, trigger: Condition, filter: Filter[String] = Filter.empty) extends Transition(start, end, True, filter) with IEndExplorationTransition {
 
-  override protected def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) = {
+  override protected def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     def perform() {
       val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))

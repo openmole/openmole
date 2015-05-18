@@ -29,7 +29,7 @@ object StepRange {
 class StepRange[T](val range: Range[T], steps: FromContext[T]) extends SizeStep[T] with Bounded[T] {
   import range._
 
-  def stepAndSize(minValue: T, maxValue: T, context: Context) = {
+  def stepAndSize(minValue: T, maxValue: T, context: Context)(implicit rng: RandomProvider) = {
     import integral._
     val step = steps.from(context)
     val size = (maxValue - minValue).abs / step

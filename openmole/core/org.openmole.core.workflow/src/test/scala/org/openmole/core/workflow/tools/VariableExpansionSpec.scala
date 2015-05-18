@@ -26,6 +26,8 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
+import scala.util.Random
+
 class VariableExpansionSpec extends FlatSpec with Matchers {
 
   "A expandData" should "expand all the ${} top level sequence from an inputStream and return a parsed OuputStream" in {
@@ -37,13 +39,13 @@ ${s"I am ${6*5} year old"}"""
 6
 I am 30 year old"""
 
-    val res = VariableExpansion(template).expand(Context.empty + Variable(Task.openMOLESeed, 0L))
+    val res = VariableExpansion(template).expand(Context.empty)(new Random())
     res should equal(expected)
   }
 
   "A expandData" should "preserve additionnal $ in the string" in {
     val test = "$$$etere{etsaesrn}etasriu$$$$eatsrn$"
-    val res = VariableExpansion(test).expand(Context.empty + Variable(Task.openMOLESeed, 0L))
+    val res = VariableExpansion(test).expand(Context.empty)(new Random())
     test should equal(res)
   }
 

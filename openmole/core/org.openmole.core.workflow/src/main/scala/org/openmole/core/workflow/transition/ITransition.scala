@@ -21,6 +21,8 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 
+import scala.util.Random
+
 trait ITransition {
 
   /**
@@ -54,7 +56,7 @@ trait ITransition {
    *
    * @return the value of the condition under which this transition is performed
    */
-  def isConditionTrue(context: Context): Boolean
+  def isConditionTrue(context: Context)(implicit rng: RandomProvider): Boolean
 
   /**
    *
@@ -80,6 +82,6 @@ trait ITransition {
    * @param ticket    ticket of the previous job
    * @param subMole   current submole
    */
-  def perform(from: Context, ticket: Ticket, subMole: SubMoleExecution)
+  def perform(from: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider)
 
 }

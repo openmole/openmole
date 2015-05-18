@@ -20,7 +20,6 @@ package org.openmole.plugin.task.statistic
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import scala.collection.mutable.ListBuffer
 
@@ -32,7 +31,7 @@ abstract class StatisticTask extends Task {
 
   def statistics: Iterable[(Prototype[Array[Double]], Prototype[Double], StatisticalAggregation[Double])]
 
-  override def process(context: Context) =
+  override def process(context: Context)(implicit rng: RandomProvider) =
     Context(
       statistics.map {
         case (sequence, statProto, agg) ⇒ Variable(statProto, agg(context(sequence)))

@@ -35,7 +35,7 @@ sealed class ShuffleSampling(val sampling: Sampling) extends Sampling {
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: ⇒ Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
-    shuffled(sampling.build(context).toList)(rng).toIterator
+  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
+    shuffled(sampling.build(context).toList)(rng()).toIterator
 
 }

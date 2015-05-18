@@ -36,7 +36,7 @@ sealed class ZipWithNameSampling(val factor: Factor[File, Domain[File] with Disc
   override def inputs = factor.inputs
   override def prototypes = List(factor.prototype, name)
 
-  override def build(context: ⇒ Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
+  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
     factor.domain.iterator(context).map {
       v ⇒ List(Variable(factor.prototype, v), Variable(name, v.getName))
     }

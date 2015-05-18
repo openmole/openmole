@@ -25,6 +25,7 @@ import org.openmole.core.workflow.transition.Condition._
 import org.openmole.tool.lock._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
+import scala.util.Random
 
 object AggregationTransition {
   def aggregateOutputs(moleExecution: MoleExecution, transition: IAggregationTransition, results: Iterable[Variable[_]]) = {
@@ -35,7 +36,7 @@ object AggregationTransition {
 
 class AggregationTransition(start: Capsule, end: Slot, condition: Condition = True, filter: Filter[String] = Filter.empty, trigger: Condition = Condition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
 
-  override def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) = {
+  override def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))

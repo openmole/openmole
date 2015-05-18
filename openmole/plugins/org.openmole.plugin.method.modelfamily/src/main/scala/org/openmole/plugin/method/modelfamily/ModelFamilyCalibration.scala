@@ -53,10 +53,10 @@ object ModelFamilyCalibration {
 
       override def inputsPrototypes = super.inputsPrototypes ++ Seq(modelFamily.modelIdPrototype)
 
-      override def toVariables(genome: G, context: Context): Seq[Variable[_]] =
+      override def toVariables(genome: G, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] =
         super.toVariables(genome, context) ++ Seq(Variable(modelFamily.modelIdPrototype, modelId.get(genome)))
 
-      override def toVariables(population: Population[G, P, F], context: Context): Seq[Variable[_]] =
+      override def toVariables(population: Population[G, P, F], context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] =
         super.toVariables(population, context) ++ Seq(Variable(modelFamily.modelIdPrototype.toArray, population.map(i ⇒ modelId.get(i.genome)).toArray))
 
       def modelFamily = _modelFamily

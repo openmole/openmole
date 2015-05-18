@@ -31,8 +31,8 @@ trait GAAlgorithm extends Archive
   def objectives: Objectives
   def inputsPrototypes = inputs.inputs.map(_.prototype)
   def outputPrototypes = objectives
-  def toVariables(genome: G, context: Context): Seq[Variable[_]] = scaled(values.get(genome), context)
-  def toVariables(population: Population[G, P, F], context: Context): Seq[Variable[_]] = {
+  def toVariables(genome: G, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = scaled(values.get(genome), context)
+  def toVariables(population: Population[G, P, F], context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = {
     val scaledValues = population.map(i ⇒ scaled(values.get(i.genome), context).toIndexedSeq)
 
     inputs.inputs.zipWithIndex.map {

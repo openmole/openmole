@@ -231,6 +231,7 @@ class MoleExecution(
   def nextJobId = UUID.randomUUID
 
   def newSeed = rng.nextLong
+  def newRNG = Random.newRNG(newSeed).toScala
 
   lazy val rng = Random.newRNG(seed)
 

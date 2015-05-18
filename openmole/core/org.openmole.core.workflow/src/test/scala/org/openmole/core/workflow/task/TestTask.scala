@@ -25,7 +25,7 @@ import org.openmole.core.workflow.task._
 object TestTask {
   def apply(f: Context ⇒ Context) = new TaskBuilder {
     override def toTask: Task = new Task with Built {
-      override protected def process(context: Context): Context = f(context)
+      override protected def process(context: Context)(implicit rng: RandomProvider): Context = f(context)
     }
   }
 }

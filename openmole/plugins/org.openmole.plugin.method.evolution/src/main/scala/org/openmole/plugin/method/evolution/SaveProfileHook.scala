@@ -36,7 +36,7 @@ object SaveProfileHook {
 
 abstract class SaveProfileHook(gaParameters: GAParameters[GenomeProfile], path: ExpandedString) extends Hook {
 
-  def process(context: Context, executionContext: ExecutionContext) = {
+  def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
     val file = executionContext.relativise(path.from(context))
     file.createParentDir
     file.withWriter { w ⇒

@@ -35,7 +35,7 @@ sealed class FilteredSampling(sampling: Sampling, filters: SamplingFilter*) exte
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: ⇒ Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
+  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
     sampling.build(context).filter(sample ⇒ !filters.exists(!_(Context(sample))))
 
 }
@@ -46,10 +46,10 @@ object SamplingFilter {
 }
 
 trait SamplingFilter {
-  def apply(factorsValues: Context): Boolean
+  def apply(factorsValues: Context)(implicit rng: RandomProvider): Boolean
 }
 
 class ScalaSamplingFilter(code: String) extends SamplingFilter {
   @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
-  def apply(factorsValues: Context) = proxy.run(factorsValues).asInstanceOf[Boolean]
+  def apply(factorsValues: Context)(implicit rng: RandomProvider) = proxy.run(factorsValues).asInstanceOf[Boolean]
 }

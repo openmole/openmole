@@ -55,10 +55,9 @@ sealed abstract class SamplePopulationTask(
 
   def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
 
-  override def process(context: Context) = {
-    implicit val rng = Task.buildRNG(context)
+  override def process(context: Context)(implicit rng: RandomProvider) = {
     val p = context(population)
-    val newP = Population((0 until size).map { i ⇒ p(rng.nextInt(p.size)) })
+    val newP = Population((0 until size).map { i ⇒ p(rng().nextInt(p.size)) })
     Variable(population, newP)
   }
 

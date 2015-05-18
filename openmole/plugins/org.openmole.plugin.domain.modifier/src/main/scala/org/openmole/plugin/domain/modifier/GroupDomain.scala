@@ -37,7 +37,7 @@ sealed class GroupDomain[T](val domain: Domain[T] with Discrete[T], val size: Fr
 
   override def inputs = domain.inputs
 
-  override def iterator(context: Context)(implicit rng: Random): Iterator[Array[T]] =
+  override def iterator(context: Context)(implicit rng: RandomProvider): Iterator[Array[T]] =
     domain.iterator(context).grouped(size.from(context)).map {
       i ⇒ i.toArray
     }

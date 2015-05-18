@@ -18,7 +18,6 @@
 package org.openmole.plugin.domain.collection
 
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 
 import scala.util.Random
@@ -32,5 +31,5 @@ object IterableVariableDomain {
 
 sealed class IterableVariableDomain[T](variable: Prototype[Iterable[_ <: T]]) extends Domain[T] with Discrete[T] {
   override def inputs = Seq(variable)
-  override def iterator(context: Context)(implicit rng: Random): Iterator[T] = context(variable).iterator
+  override def iterator(context: Context)(implicit rng: RandomProvider): Iterator[T] = context(variable).iterator
 }
