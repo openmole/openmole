@@ -30,7 +30,7 @@ class VariableExpansionSpec extends FlatSpec with Matchers {
   "A expandData" should "expand all the ${} top level sequence from an inputStream and return a parsed OuputStream" in {
     val template = """My first line
 ${2*3}
-${"I am ${6*5} year old"}"""
+${s"I am ${6*5} year old"}"""
 
     val expected = """My first line
 6

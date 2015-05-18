@@ -48,9 +48,9 @@ object Workspace {
   val uniqueID = new ConfigurationLocation(globalGroup, "UniqueID")
 
   private val group = "Workspace"
-  private val fixedPrefix = "file"
-  private val fixedPostfix = ".bin"
-  private val fixedDir = "category"
+  val fixedPrefix = "file"
+  val fixedPostfix = ".bin"
+  val fixedDir = "dir"
 
   private val passwordTest = new ConfigurationLocation(group, "passwordTest", true)
   private val passwordTestString = "test"
@@ -142,9 +142,9 @@ class Workspace(val location: File) {
 
   def clean = tmpDir.recursiveDelete
 
-  def newDir(prefix: String): File = tmpDir.newDir(prefix)
+  def newDir(prefix: String = fixedDir): File = tmpDir.newDir(prefix)
 
-  def newFile(prefix: String, suffix: String): File = tmpDir.newFile(prefix, suffix)
+  def newFile(prefix: String = fixedPrefix, suffix: String = fixedPostfix): File = tmpDir.newFile(prefix, suffix)
 
   def defaultValue(location: ConfigurationLocation): String = {
     configurations.get(location) match {
@@ -213,16 +213,12 @@ class Workspace(val location: File) {
   }
 
   def withTmpFile[T](f: File ⇒ T): T = {
-    val file = newFile
+    val file = newFile()
     try f(file)
     finally file.delete
   }
 
-  def newFile: File = newFile(fixedPrefix, fixedPostfix)
-
-  def newDir: File = newDir(fixedDir)
-
-  def reset = synchronized {
+  def reset() = synchronized {
     persistentDir.recursiveDelete
     val uniqueId = preference(uniqueID)
     configurationFile.content = ""

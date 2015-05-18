@@ -50,6 +50,7 @@ trait ScalaCompilation {
 
     evaluated
   }
+
 }
 
 object ScalaWrappedCompilation {
@@ -117,6 +118,7 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
   type CompiledScala
 
   def source: String
+  def openMOLEImports = Seq(s"${CodeTool.namespace}._")
   def imports: Seq[String]
 
   def prefix = "_input_value_"
@@ -139,14 +141,14 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
   }
 
   def script(inputs: Seq[Prototype[_]]) =
-    imports.map("import " + _).mkString("\n") + "\n\n" +
+    (openMOLEImports ++ imports).map("import " + _).mkString("\n") + "\n\n" +
       s"""(${prefix}context: ${classOf[Context].getCanonicalName}) => {
-                                                                   |    object $inputObject {
-                                                                                             |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
+          |    object $inputObject {
+          |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
           |    }
           |    import input._
           |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(${Task.openMOLESeed.name}).toScala;
-                                                                                                                  |    $source
+          |    $source
           |    ${wrapOutput.getOrElse("")}
           |}
           |""".stripMargin

@@ -19,6 +19,7 @@ package org.openmole.core.console
 
 import java.io.{ PrintStream, PrintWriter, Writer }
 import java.net.URLClassLoader
+import javax.script.ScriptEngineManager
 
 import org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader
 import org.openmole.core.exception.{ UserBadDataError, InternalProcessingError }
@@ -34,7 +35,7 @@ import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
-class ScalaREPL(priorityBundles: Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
+class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
 
   case class ErrorMessage(error: String, line: Int)
   var storeErrors: Boolean = true
@@ -52,7 +53,6 @@ class ScalaREPL(priorityBundles: Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty
   settings = new Settings
   settings.Yreplsync.value = true
   settings.verbose.value = false
-  settings
 
   def eval(code: String) = synchronized {
     errorMessage = Nil
@@ -119,18 +119,30 @@ class ScalaREPL(priorityBundles: Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty
     }
 
     override protected def newCompiler(settings: Settings, reporter: Reporter) = {
-      settings.outputDirs setSingleOutput replOutput.dir
       settings.exposeEmptyPackage.value = true
-      new OSGiScalaCompiler(settings, reporter, replOutput.dir, priorityBundles, jars)
+      if (Activator.osgi) {
+        settings.outputDirs setSingleOutput replOutput.dir
+        new OSGiScalaCompiler(settings, reporter, replOutput.dir, priorityBundles, jars)
+      }
+      else {
+        case class Plop()
+        settings.embeddedDefaults[Plop]
+        //settings.usejavacp.value = true
+        super.newCompiler(settings, reporter)
+      }
     }
 
-    override lazy val classLoader = new scala.tools.nsc.util.AbstractFileClassLoader(
-      replOutput.dir,
-      new CompositeClassLoader(
-        priorityBundles.map(_.classLoader) ++
-          List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
-          List(classOf[OSGiScalaCompiler].getClassLoader): _*)
-    )
+    override lazy val classLoader =
+      if (Activator.osgi) {
+        new scala.tools.nsc.util.AbstractFileClassLoader(
+          replOutput.dir,
+          new CompositeClassLoader(
+            priorityBundles.map(_.classLoader) ++
+              List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
+              List(classOf[OSGiScalaCompiler].getClassLoader): _*)
+        )
+      }
+      else super.classLoader
   }
 
 }

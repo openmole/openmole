@@ -46,7 +46,7 @@ trait FileSerialisation extends Serialiser {
 
         val toArchive =
           if (file.isDirectory) {
-            val toArchive = Workspace.newFile
+            val toArchive = Workspace.newFile()
             file.archive(toArchive)
             toArchive
           }

@@ -112,11 +112,12 @@ object VariableExpansion {
   }
 
   case class CodeElement(code: String) extends ExpansionElement {
-    @transient lazy val proxy = GroovyProxyPool(code)
+    @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
     def expand(context: ⇒ Context): String =
       context.variable(code) match {
         case Some(value) ⇒ value.value.toString
-        case None        ⇒ proxy(context.toBinding).toString
+        case None ⇒
+          proxy.compiled(context).get.run(context).toString
       }
   }
 

@@ -39,7 +39,7 @@ package object message {
   }
   implicit class ReplicatedFileDecorator(replicatedFile: ReplicatedFile) {
     def download(download: (String, File) ⇒ Unit, verifyHash: Boolean = false) = {
-      val cache = Workspace.newFile
+      val cache = Workspace.newFile()
 
       download(replicatedFile.path, cache)
 
