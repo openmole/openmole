@@ -18,7 +18,6 @@
 package org.openmole.plugin.sampling.quasirandom
 
 import org.apache.commons.math3.random.SobolSequenceGenerator
-import org.openmole.core.tools.script.GroovyProxyPool
 import org.openmole.core.tools.service.Scaling._
 import org.openmole.core.workflow.task.Task
 import Task._

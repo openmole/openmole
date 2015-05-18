@@ -1,22 +1,16 @@
 package org.openmole.gui.client.core
 
-import org.openmole.core.workspace.Workspace
-import org.openmole.gui.client.core.dataui.EditorPanelUI
-import org.openmole.gui.client.core.files.{ TreeNodeTabs, FileNode, DirNode, TreeNodePanel }
-import org.openmole.gui.client.core.files.TreeNodePanel._
+import org.openmole.gui.client.core.files.{ TreeNodeTabs, TreeNodePanel }
 import org.openmole.gui.shared.Api
-import org.scalajs.dom.raw.DragEvent
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.Forms._
 import scala.scalajs.js.annotation.JSExport
-import scala.util.{ Success, Failure }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.scalajs.{ jquery, dom }
+import org.scalajs.dom
 import rx._
 import scalatags.JsDom.all._
-import TreeNodeTabs._
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -43,13 +37,12 @@ object ScriptClient {
 
     val body = dom.document.body
     val openFileTree = Var(false)
+    val executions = ExecutionPanel()
 
     dom.document.body.appendChild(
       nav("mainNav",
         Seq(
-          (navItem("executions", "Executions").render, "env", () ⇒ {
-            println("Not yet")
-          }),
+          (navItem("executions", "Executions").render(data("toggle") := "modal", data("target") := "#executionPanelID"), "execs", () ⇒ {}),
           (navItem("files", "Files").render, "files", () ⇒ {
             openFileTree() = !openFileTree()
           })
@@ -58,6 +51,7 @@ object ScriptClient {
     )
 
     val maindiv = dom.document.body.appendChild(tags.div.render)
+    maindiv.appendChild(executions.dialog.render)
 
     Post[Api].workspacePath.call().foreach { projectsPath ⇒
       val treeNodePanel = TreeNodePanel(projectsPath)

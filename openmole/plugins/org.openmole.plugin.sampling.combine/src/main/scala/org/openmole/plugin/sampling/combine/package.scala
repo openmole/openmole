@@ -27,15 +27,13 @@ import org.openmole.core.workflow.tools.FromContext
 
 package object combine {
 
-  implicit def stringToGroovyFilterConversion(s: String) = new GroovyFilter(s)
-
   trait AbstractSamplingCombineDecorator {
     def s: Sampling
     @deprecated("Use x instead", "5")
     def +(s2: Sampling) = x(s2)
     def x(s2: Sampling) = new CompleteSampling(s, s2)
     def ::(s2: Sampling) = new ConcatenateSampling(s, s2)
-    def filter(filters: Filter*) = FilteredSampling(s, filters: _*)
+    def filter(filters: SamplingFilter*) = FilteredSampling(s, filters: _*)
     def zip(s2: Sampling) = ZipSampling(s, s2)
     def zipWithIndex(index: Prototype[Int]) = ZipWithIndexSampling(s, index)
     def take(n: FromContext[Int]) = TakeSampling(s, n)

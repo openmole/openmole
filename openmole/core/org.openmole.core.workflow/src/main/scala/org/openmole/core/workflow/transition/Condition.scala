@@ -17,10 +17,8 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.tools.script.GroovyProxy
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.tools.script._
 
 object Condition {
 
@@ -37,8 +35,8 @@ object Condition {
   }
 
   def apply(code: String) = new Condition {
-    @transient lazy val groovyProxy = new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
-    override def evaluate(context: Context) = groovyProxy.execute(context).asInstanceOf[Boolean]
+    @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
+    override def evaluate(context: Context) = proxy.run(context).asInstanceOf[Boolean]
   }
 
 }

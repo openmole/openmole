@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.task.groovy
 
+import org.openmole.core.workflow.tools.CodeTool
 import org.openmole.plugin.task.jvm._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
@@ -36,9 +37,7 @@ object GroovyTask {
   def apply(source: String)(implicit plugins: PluginSet = PluginSet.empty) =
     new JVMLanguageTaskBuilder { builder ⇒
 
-      addImport("static org.openmole.plugin.task.jvm.JVMLanguageTask.newRNG")
-      addImport("static org.openmole.plugin.task.jvm.JVMLanguageTask.newFile")
-      addImport("static org.openmole.plugin.task.jvm.JVMLanguageTask.newDir")
+      addImport(s"static ${CodeTool.namespace}.*")
 
       def toTask =
         new GroovyTask(source) with Built

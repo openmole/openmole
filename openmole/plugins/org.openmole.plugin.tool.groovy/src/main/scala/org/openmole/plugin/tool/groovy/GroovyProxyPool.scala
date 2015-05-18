@@ -15,11 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.tools.script
+package org.openmole.plugin.tool.groovy
 
-import groovy.lang.Binding
 import java.io.File
 
+import groovy.lang.Binding
 import org.openmole.core.tools.service.ObjectPool
 
 object GroovyProxyPool {

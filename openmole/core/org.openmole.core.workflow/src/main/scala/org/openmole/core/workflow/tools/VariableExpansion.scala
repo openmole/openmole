@@ -20,7 +20,6 @@ package org.openmole.core.workflow.tools
 import java.io.{ InputStream, OutputStream, OutputStreamWriter }
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.script._
 import org.openmole.tool.stream.{ StringBuilderOutputStream, StringInputStream }
 import org.openmole.core.workflow.data._
 
@@ -112,11 +111,12 @@ object VariableExpansion {
   }
 
   case class CodeElement(code: String) extends ExpansionElement {
-    @transient lazy val proxy = GroovyProxyPool(code)
+    @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
     def expand(context: ⇒ Context): String =
       context.variable(code) match {
         case Some(value) ⇒ value.value.toString
-        case None        ⇒ proxy(context.toBinding).toString
+        case None ⇒
+          proxy.run(context).toString
       }
   }
 

@@ -28,7 +28,7 @@ import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.validation.TypeUtil
 import org.osgi.framework.Bundle
 
-import scala.util.Try
+import scala.util.{ Random, Try }
 
 trait ScalaCompilation {
   def usedBundles: Seq[File]
@@ -50,6 +50,7 @@ trait ScalaCompilation {
 
     evaluated
   }
+
 }
 
 object ScalaWrappedCompilation {
@@ -114,9 +115,10 @@ trait ScalaRawOutput <: ScalaCompilation { compilation ⇒
 
 trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
-  type CompiledScala
+  type CompiledScala <: { def run(context: Context): Any }
 
   def source: String
+  def openMOLEImports = Seq(s"${CodeTool.namespace}._")
   def imports: Seq[String]
 
   def prefix = "_input_value_"
@@ -139,14 +141,14 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
   }
 
   def script(inputs: Seq[Prototype[_]]) =
-    imports.map("import " + _).mkString("\n") + "\n\n" +
+    (openMOLEImports ++ imports).map("import " + _).mkString("\n") + "\n\n" +
       s"""(${prefix}context: ${classOf[Context].getCanonicalName}) => {
-                                                                   |    object $inputObject {
-                                                                                             |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
+          |    object $inputObject {
+          |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
           |    }
           |    import input._
           |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(${Task.openMOLESeed.name}).toScala;
-                                                                                                                  |    $source
+          |    $source
           |    ${wrapOutput.getOrElse("")}
           |}
           |""".stripMargin
@@ -157,17 +159,13 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
   def compiled(inputs: Seq[Prototype[_]]): Try[CompiledScala] =
     cache.synchronized {
-
-      val allInputs =
-        if (inputs.exists(_ == Task.openMOLESeed)) inputs else Task.openMOLESeed :: inputs.toList
-
-      val allInputMap = allInputs.groupBy(_.name)
+      val allInputMap = inputs.groupBy(_.name)
 
       val duplicatedInputs = allInputMap.filter { _._2.size > 1 }.map(_._2)
 
       duplicatedInputs match {
         case Nil ⇒
-          def sortedInputNames = allInputs.map(_.name).distinct.sorted
+          def sortedInputNames = inputs.map(_.name).distinct.sorted
           lazy val scriptInputs = sortedInputNames.map(n ⇒ allInputMap(n).head)
           val compiled = cache.getOrElseUpdate(scriptInputs, function(scriptInputs))
           compiled.map {
@@ -183,6 +181,8 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
     val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }
     compiled(contextPrototypes)
   }
+
+  def run(context: Context) = compiled(context).get.run(context)
 
   def compiledScala(closure: Context ⇒ Any): CompiledScala
 

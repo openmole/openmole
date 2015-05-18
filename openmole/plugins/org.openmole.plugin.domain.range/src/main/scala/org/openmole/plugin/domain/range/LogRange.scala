@@ -18,7 +18,6 @@
 package org.openmole.plugin.domain.range
 
 import org.openmole.core.tools.io.FromString
-import org.openmole.core.tools.script.GroovyProxy
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools._

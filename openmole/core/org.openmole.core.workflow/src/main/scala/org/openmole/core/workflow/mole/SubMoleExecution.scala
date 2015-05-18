@@ -126,7 +126,7 @@ class SubMoleExecution(
     val mole = moleExecution.mole
     val (capsule, ticket) = _jobs.single(job)
     try {
-      val ctxForHooks = moleExecution.implicits + job.context
+      def ctxForHooks = implicits + job.context
 
       def executeHook(h: Hook) =
         try h.perform(ctxForHooks, moleExecution.executionContext)
@@ -139,10 +139,10 @@ class SubMoleExecution(
 
       val hooksVariables = moleExecution.hooks(capsule).flatMap(executeHook).unzip._2
       val context = job.context ++ hooksVariables
-      mole.outputDataChannels(capsule).foreach { _.provides(context, ticket, moleExecution) }
+      mole.outputDataChannels(capsule).foreach { _.provides(implicits + context, ticket, moleExecution) }
 
       transitionLock {
-        mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse.foreach { _.perform(context, ticket, this) }
+        mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse.foreach { _.perform(implicits + context, ticket, this) }
       }
     }
     catch {
@@ -170,6 +170,9 @@ class SubMoleExecution(
     parentApply(_.-=(this))
   }
 
+  def implicits =
+    moleExecution.implicits + Variable(Task.openMOLESeed, moleExecution.newSeed)
+
   def submit(capsule: Capsule, context: Context, ticket: Ticket) = {
     if (!canceled) {
       nbJobs_+=(1)
@@ -177,9 +180,6 @@ class SubMoleExecution(
       def addJob(moleJob: MoleJob, capsule: Capsule, ticket: Ticket) = atomic { implicit txn ⇒
         _jobs.put(moleJob, (capsule, ticket))
       }
-
-      def implicits =
-        moleExecution.implicits + Variable(Task.openMOLESeed, moleExecution.newSeed)
 
       val sourced =
         moleExecution.sources(capsule).foldLeft(Context.empty) {

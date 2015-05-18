@@ -135,7 +135,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
 
     val skel = exploration -< modelSlot1 -- selectCaps
     val loop = selectCaps -- modelSlot2
-    val terminate = selectCaps >| (finalTask, "archive.size() >= 1")
+    val terminate = selectCaps >| (finalTask, "archive.size >= 1")
 
     val ex = skel + loop + terminate
 
