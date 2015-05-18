@@ -20,7 +20,6 @@ package org.openmole.core.workflow.tools
 import java.io.{ InputStream, OutputStream, OutputStreamWriter }
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.script._
 import org.openmole.tool.stream.{ StringBuilderOutputStream, StringInputStream }
 import org.openmole.core.workflow.data._
 

@@ -17,10 +17,8 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.tools.script.GroovyProxy
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.tools.script._
 
 object Condition {
 

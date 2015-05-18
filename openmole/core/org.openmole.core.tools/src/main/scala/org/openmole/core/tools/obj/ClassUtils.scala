@@ -19,7 +19,6 @@ package org.openmole.core.tools.obj
 
 import java.util
 
-import _root_.groovy.lang.GroovyShell
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -99,7 +98,7 @@ object ClassUtils {
       case "BigInteger" ⇒ classOf[java.math.BigInteger]
       case "BigDecimal" ⇒ classOf[java.math.BigDecimal]
       case _ ⇒ try {
-        classOf[GroovyShell].getClassLoader.loadClass(s)
+        ClassUtils.getClass.getClassLoader.loadClass(s)
       }
       catch {
         case e: ClassNotFoundException ⇒ throw new UserBadDataError(e, "The class " + s + " has not been found")

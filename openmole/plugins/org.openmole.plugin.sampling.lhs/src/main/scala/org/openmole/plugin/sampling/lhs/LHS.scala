@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.sampling.lhs
 
-import org.openmole.core.tools.script.GroovyProxyPool
 import org.openmole.core.tools.service.Scaling._
 import org.openmole.core.tools.service.Random._
 import org.openmole.core.workflow.task.Task

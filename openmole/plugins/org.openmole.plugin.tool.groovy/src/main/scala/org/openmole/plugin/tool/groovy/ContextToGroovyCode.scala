@@ -19,9 +19,7 @@ package org.openmole.plugin.tool.groovy
 
 import groovy.lang.Binding
 import java.io.File
-import org.apache.commons.lang.ClassUtils
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.tools.script.GroovyProxyPool
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 

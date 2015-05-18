@@ -15,21 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.tools.script
+package org.openmole.plugin.tool.groovy
 
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.io.Prettifier
-
-import scala.collection.JavaConversions._
-import scala.collection.JavaConversions
-import groovy.lang.Binding
-import groovy.lang.GroovyShell
 import java.io.File
-import java.net.URLClassLoader
+
+import groovy.lang.{ Binding, GroovyShell }
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.runtime.InvokerHelper
-import collection.JavaConversions._
-import Prettifier._
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.tools.io.Prettifier._
+
+import scala.collection.JavaConversions._
 
 object GroovyProxy {
 

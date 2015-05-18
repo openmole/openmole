@@ -19,7 +19,6 @@ package org.openmole.plugin.task.scala
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.tools.script._
 import org.openmole.core.workflow.tools._
 import org.openmole.plugin.task.jvm._
 
