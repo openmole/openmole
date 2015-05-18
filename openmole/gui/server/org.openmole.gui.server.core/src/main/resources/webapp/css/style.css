@@ -296,3 +296,21 @@ opacity: 1;
 	float: right;
 	font-size: 12px;
 }
+
+#controlform{
+	margin-top: -75px;
+	margin-left: 15px;
+	height: 140px;
+	width: 20%;
+}
+
+#controlform input {
+	margin-top: 5px;
+}
+
+#controlform button {
+	height: 40px;
+	width: 60px;
+	margin-top: 5px;
+	float: right;
+}
