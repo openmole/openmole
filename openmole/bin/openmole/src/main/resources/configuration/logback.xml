@@ -13,7 +13,17 @@
        <level value="ALL"/>
    </logger>
 
-   <root level="debug">
+    <appender name="CatchSSH" class="org.openmole.core.logging.OpenMOLEAppender">
+        <encoder>
+            <pattern>%date [%thread] %logger{10} [%file : %line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="net.schmizz.concurrent.Promise" additivity="false">
+        <appender-ref ref="CatchSSH" />
+    </logger>
+
+    <root level="debug">
        <appender-ref ref="STDOUT" />
    </root>
 </configuration>

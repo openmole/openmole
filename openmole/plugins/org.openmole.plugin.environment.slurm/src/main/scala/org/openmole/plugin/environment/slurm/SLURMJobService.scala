@@ -61,11 +61,6 @@ trait SLURMJobService extends GridScaleJobService with SSHHost with SharedStorag
       override val qos = environment.qos
       override val gres = environment.gres
       override val constraints = environment.constraints
-      // TODO nodes and coreByNode not supported (yet) by the SLURM plugin in GridScale
-      /// @see threads
-
-      //      override val nodes = environment.nodes orElse environment.threads
-      //      override val coreByNode = environment.coreByNode orElse environment.threads
     }
 
     val job = js.jobService.submit(jobDescription)

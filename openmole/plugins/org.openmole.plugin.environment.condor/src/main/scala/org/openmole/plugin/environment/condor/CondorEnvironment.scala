@@ -18,6 +18,7 @@
 
 package org.openmole.plugin.environment.condor
 
+import fr.iscpif.gridscale.condor.CondorRequirement
 import fr.iscpif.gridscale.ssh.SSHStorage
 import fr.iscpif.gridscale.ssh.SSHHost
 import java.net.URI
@@ -46,7 +47,7 @@ object CondorEnvironment {
     coresByNode: Option[Int] = None,
     sharedDirectory: Option[String] = None,
     workDirectory: Option[String] = None,
-    requirements: Option[String] = None,
+    requirements: Option[CondorRequirement] = None,
     threads: Option[Int] = None,
     storageSharedLocally: Boolean = false)(implicit authentications: AuthenticationProvider) =
     new CondorEnvironment(user, host, port, openMOLEMemory, memory, nodes, coresByNode, sharedDirectory, workDirectory, requirements, threads, storageSharedLocally)
@@ -66,7 +67,7 @@ class CondorEnvironment(
     val coresByNode: Option[Int] = None,
     val sharedDirectory: Option[String],
     val workDirectory: Option[String],
-    val requirements: Option[String],
+    val requirements: Option[CondorRequirement],
     override val threads: Option[Int],
     val storageSharedLocally: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
