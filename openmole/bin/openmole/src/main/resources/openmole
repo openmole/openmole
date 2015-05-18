@@ -56,7 +56,7 @@ done
 mkdir -p "$HOME/.openmole/.tmp/"
 CONFIGDIR=$HOME/.openmole/.tmp/`date +%s`_$RANDOM
 
-java -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -Xmx${MEM} $FLAG -XX:+UseG1GC \
+java -Dlogback.configurationFile=${LOCATION}/configuration/logback.xml -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Dosgi.locking=none -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area="${CONFIGDIR}" -Xmx${MEM} $FLAG -XX:+UseG1GC \
      -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog \
      -cp "$LOCATION/openmole-plugins" -gp "$LOCATION/openmole-plugins-gui" "${ARGS[@]}"
 

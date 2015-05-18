@@ -1,5 +1,6 @@
 package org.openmole.gui.client.core.dataui
 
+import org.openmole.gui.client.core.files.FileExtension._
 import org.openmole.gui.ext.dataui.PanelUI
 
 import scala.concurrent.Future
@@ -30,7 +31,7 @@ import fr.iscpif.scaladget.mapping.ace._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: String) extends PanelUI {
+class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: String, fileType: FileExtension) extends PanelUI {
 
   lazy val Autocomplete = ace.require("ace/autocomplete").Autocomplete
 
@@ -67,7 +68,10 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
   }
 
   def initEditor = {
-    editor.getSession().setMode("ace/mode/scala")
+    fileType match {
+      case NO_EXTENSION ⇒
+      case _            ⇒ editor.getSession().setMode("ace/mode/" + fileType.extension)
+    }
     editor.getSession().setValue(initCode)
     editor.setTheme("ace/theme/github")
     editor.renderer.setShowGutter(true)
@@ -133,8 +137,22 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
 }
 
+import org.openmole.gui.client.core.files.FileExtension._
+
 object EditorPanelUI {
 
-  def apply(bindings: Seq[(String, String, () ⇒ Any)], initCode: String = "") = new EditorPanelUI(bindings, initCode)
+  def apply(fileType: FileExtension, initCode: String) = fileType match {
+    case SCALA ⇒ scala(initCode)
+    case _     ⇒ empty(initCode)
+  }
+
+  def empty(initCode: String) = new EditorPanelUI(Seq(), initCode, NO_EXTENSION)
+
+  def scala(initCode: String = "") = new EditorPanelUI(Seq(
+    ("Compile", "Enter", () ⇒ println("Compile  !"))
+  ), initCode, SCALA
+  )
+
+  def sh(initCode: String = "") = new EditorPanelUI(Seq(), initCode, SH)
 
 }

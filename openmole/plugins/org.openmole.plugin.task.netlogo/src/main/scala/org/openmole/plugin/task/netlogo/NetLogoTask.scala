@@ -58,6 +58,8 @@ trait NetLogoTask extends ExternalTask {
         throw new UserBadDataError(s"$msg:\n" + e.stackStringWithMargin)
     }
 
+  @transient lazy val expandedCommands = launchingCommands.map(VariableExpansion(_))
+
   override def process(context: Context): Context = withWorkDir { tmpDir ⇒
     val preparedContext = prepareInputFiles(context, tmpDir, workspace.workDirectory)
 
@@ -75,8 +77,8 @@ trait NetLogoTask extends ExternalTask {
         wrapError(s"Error while executing command $cmd") { netLogo.command(cmd) }
       }
 
-      for (cmd ← launchingCommands) wrapError(s"Error while executing command $cmd") {
-        netLogo.command(VariableExpansion(preparedContext, cmd))
+      for (cmd ← expandedCommands) wrapError(s"Error while executing command $cmd") {
+        netLogo.command(cmd.expand(context))
       }
 
       fetchOutputFiles(preparedContext, tmpDir, workspace.workDirectory) ++ netLogoOutputs.map {

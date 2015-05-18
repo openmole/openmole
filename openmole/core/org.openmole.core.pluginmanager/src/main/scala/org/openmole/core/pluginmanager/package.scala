@@ -22,6 +22,7 @@ import java.net.URLDecoder
 
 import org.openmole.core.workspace.Workspace
 import org.osgi.framework._
+import org.osgi.framework.wiring.BundleWiring
 
 import scala.collection.JavaConversions._
 
@@ -59,5 +60,6 @@ package object pluginmanager {
       else new File(decodedLocation)
     }
 
+    def classLoader = b.adapt(classOf[BundleWiring]).getClassLoader
   }
 }

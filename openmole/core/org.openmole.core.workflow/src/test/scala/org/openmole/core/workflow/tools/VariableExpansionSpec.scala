@@ -36,13 +36,13 @@ ${"I am ${6*5} year old"}"""
 6
 I am 30 year old"""
 
-    val res = VariableExpansion(Context.empty, template)
+    val res = VariableExpansion(template).expand(Context.empty)
     res should equal(expected)
   }
 
   "A expandData" should "preserve additionnal $ in the string" in {
     val test = "$$$etere{etsaesrn}etasriu$$$$eatsrn$"
-    val res = VariableExpansion(Context.empty, test)
+    val res = VariableExpansion(test).expand(Context.empty)
     test should equal(res)
   }
 

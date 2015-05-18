@@ -18,12 +18,12 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.ext.data.TreeNodeData
-import org.openmole.gui.misc.js.{ Identifiable, Displayable }
+import TreeNodeTabs.TreeNodeTab
 import org.openmole.gui.misc.utils.Utils._
 import rx._
 
 sealed trait TreeNodeType {
-  val uuid: String = java.util.UUID.randomUUID.toString
+  val uuid: String = getUUID
   val name: String
 }
 
@@ -37,27 +37,34 @@ trait FileType extends TreeNodeType {
 
 object TreeNodeType {
   def file = new FileType {}
+
   def folder = new DirType {}
 }
 
 sealed trait TreeNode {
+  val id = getUUID
+
   def name: Var[String]
 
   def canonicalPath: Var[String]
 
   def hasSons: Boolean
+
+  val size: Long
+
+  val readableSize: String
 }
 
 object TreeNode {
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode =
-    if (tnd.isDirectory) DirNode(tnd.name, tnd.canonicalPath, Var(Seq()))
-    else FileNode(tnd.name, tnd.canonicalPath)
+    if (tnd.isDirectory) DirNode(tnd.name, tnd.canonicalPath, tnd.size, tnd.readableSize, Var(Seq()))
+    else FileNode(tnd.name, tnd.canonicalPath, tnd.size, tnd.readableSize)
 
   implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.canonicalPath(), tn match {
-    case DirNode(_, _, _) ⇒ true
-    case _                ⇒ false
-  })
+    case DirNode(_, _, _, _, _) ⇒ true
+    case _                      ⇒ false
+  }, tn.size, tn.readableSize)
 
   implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map {
     treeNodeToTreeNodeData
@@ -65,9 +72,6 @@ object TreeNode {
 
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
 
-  implicit def oo(s: Seq[(TreeNodeData, Seq[TreeNodeData])]): Seq[(TreeNode, Seq[TreeNode])] = s.map { tu ⇒
-    (treeNodeDataToTreeNode(tu._1), seqTreeNodeDataToSeqTreeNode(tu._2))
-  }
 }
 
 object TreeNodeOrdering extends Ordering[TreeNode] {
@@ -84,16 +88,21 @@ object TreeNodeOrdering extends Ordering[TreeNode] {
 }
 
 object DirNode {
-  def apply(path: String): DirNode = DirNode(path.split("/").last, path)
+  def apply(path: String): DirNode = DirNode(path.split("/").last, path, 0, "")
 }
 
 case class DirNode(name: Var[String],
                    canonicalPath: Var[String],
+                   size: Long,
+                   readableSize: String,
                    sons: Var[Seq[TreeNode]] = Var(Seq())) extends TreeNode {
   def hasSons = sons().size > 0
 }
 
 case class FileNode(name: Var[String],
-                    canonicalPath: Var[String]) extends TreeNode {
+                    canonicalPath: Var[String],
+                    size: Long,
+                    readableSize: String) extends TreeNode {
   val hasSons = false
 }
+

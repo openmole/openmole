@@ -67,6 +67,7 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
         tags.script(tags.`type` := "text/javascript", tags.src := "js/d3.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-scala.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-sh.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/theme-github.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
@@ -86,7 +87,8 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
         cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
         tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-scala.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-sh.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-nlogo.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/theme-github.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js")
@@ -110,18 +112,20 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
 
   post("/downloadedfiles") {
     val path = params("path")
-    println("path " + path + "saveFile " + params("saveFile").toBoolean)
     val file = new File(path)
-    val dlFile =
-      if (file.isDirectory) file.archiveCompress(new File(file.getName + ".tar.gz"))
-      else file
+    println("path " + path + " ///  " + file.getName)
+    if (file.isDirectory) file.archiveCompress(new File(file.getName + ".tar.gz"))
 
-    contentType = "application/octet-stream"
     if (params("saveFile").toBoolean) {
-      println("sett attachemnt")
-      response.setHeader("Content-Disposition", "attachment; filename=" + file.getName)
+      Ok(file, Map(
+        "Content-Type" -> ("application/octet-stream"),
+        "Content-Disposition" -> ("attachment; filename=\"" + file.getName + "\"")
+      ))
     }
-    if (file.exists) Ok(dlFile)
+    else if (file.exists) {
+      contentType = "application/octet-stream"
+      Ok(file)
+    }
     else NotFound("The file " + path + " does not exist.")
   }
 

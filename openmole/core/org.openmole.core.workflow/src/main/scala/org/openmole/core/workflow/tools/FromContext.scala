@@ -51,7 +51,6 @@ object ExpandedString {
   implicit def fromStringToExpandedString(s: String) = ExpandedString(s)
   implicit def fromStringToExpandedStringOption(s: String) = Some[ExpandedString](s)
   implicit def fromTraversableOfStringToTraversableOfExpandedString[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
-  implicit def fromPrototypeToExpandedString(p: Prototype[_]) = ExpandedString("${p}")
   implicit def fromFileToExpandedString(f: File) = ExpandedString(f.getPath)
 
   def apply(s: String) =
@@ -61,8 +60,9 @@ object ExpandedString {
 }
 
 trait ExpandedString <: FromContext[String] {
+  @transient lazy val expansion = VariableExpansion(string)
   def +(s: ExpandedString): ExpandedString = string + s.string
   def string: String
-  def from(context: ⇒ Context) = VariableExpansion.apply(context, string)
+  def from(context: ⇒ Context) = expansion.expand(context)
 }
 

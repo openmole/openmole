@@ -1,6 +1,10 @@
 package org.openmole.gui.client.core.files
 
 import java.io.File
+import org.openmole.gui.client.core.dataui.EditorPanelUI
+import FileExtension._
+import TreeNodeTabs._
+
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
  *
@@ -18,9 +22,31 @@ import java.io.File
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FileDisplayer(fileName: String, serverFilePath: String, text: String) {
+object FileDisplayer {
+  def editor(fileType: FileExtension, initCode: String): EditorPanelUI = EditorPanelUI(fileType, initCode)
 
-  def display = {
-    println("disp " + fileName)
+}
+
+import FileDisplayer._
+
+class FileDisplayer {
+
+  val tabs = TreeNodeTabs()
+
+  def alreadyDisplayed(tn: TreeNode) = {
+    tabs.tabs().find {
+      _.serverFilePath() == tn.canonicalPath()
+    }
+  }
+
+  def display(tn: TreeNode, content: String) = {
+    val (_, fileType) = FileExtension(tn)
+    alreadyDisplayed(tn) match {
+      case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
+      case _ ⇒ fileType match {
+        case disp: DisplayableFile ⇒ tabs.++(EditableNodeTab(tn.name, tn.canonicalPath, editor(fileType, content)))
+        case _                     ⇒ //FIXME for GUI workflows
+      }
+    }
   }
 }

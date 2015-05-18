@@ -2,7 +2,7 @@ package org.openmole.gui.client.core
 
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.client.core.dataui.EditorPanelUI
-import org.openmole.gui.client.core.files.{ DirNode, TreeNodePanel }
+import org.openmole.gui.client.core.files.{ TreeNodeTabs, FileNode, DirNode, TreeNodePanel }
 import org.openmole.gui.client.core.files.TreeNodePanel._
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.DragEvent
@@ -16,6 +16,7 @@ import org.openmole.gui.misc.js.JsRxTags._
 import org.scalajs.{ jquery, dom }
 import rx._
 import scalatags.JsDom.all._
+import TreeNodeTabs._
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -40,12 +41,6 @@ object ScriptClient {
   @JSExport
   def run(): Unit = {
 
-    val editor = EditorPanelUI(Seq(
-      ("Compile", "Enter", () ⇒ println("Compile  !"))
-    ),
-      ""
-    )
-
     val body = dom.document.body
     val openFileTree = Var(false)
 
@@ -65,6 +60,7 @@ object ScriptClient {
     val maindiv = dom.document.body.appendChild(tags.div.render)
 
     Post[Api].workspacePath.call().foreach { projectsPath ⇒
+      val treeNodePanel = TreeNodePanel(projectsPath)
       maindiv.appendChild(
         tags.div(`class` := Rx {
           if (openFileTree()) "show-nav"
@@ -72,9 +68,9 @@ object ScriptClient {
         }
         )(tags.div(id := "site-canvas")(
           tags.div(id := "site-menu")(
-            TreeNodePanel(projectsPath).view.render
+            treeNodePanel.view.render
           ),
-          editor.view.render
+          treeNodePanel.fileDisplayer.tabs.render
         ).render)
       )
 

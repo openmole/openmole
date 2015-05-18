@@ -17,8 +17,9 @@
 
 package org.openmole.plugin.task.scala
 
-import org.openmole.core.workflow.task.PluginSet
-import org.openmole.plugin.task.jvm.{ JVMLanguageBuilder, JVMLanguageTaskBuilder }
+import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.workflow.task._
+import org.openmole.plugin.task.jvm._
 
 import scala.collection.mutable.ListBuffer
 
@@ -35,8 +36,8 @@ trait ScalaBuilder <: JVMLanguageBuilder { builder ⇒
   addImport("org.openmole.plugin.task.jvm.JVMLanguageTask.newFile")
   addImport("org.openmole.plugin.task.jvm.JVMLanguageTask.newDir")
 
-  trait Built <: super.Built {
-    def usedClasses = builder.usedClasses.toList
+  trait Built <: super.Built with UsedClasses {
+    def usedClasses = builder.usedClasses
   }
 }
 
