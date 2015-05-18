@@ -79,14 +79,12 @@ class Transition(
   }
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
-    try if (isConditionTrue(context)) _perform(context, ticket, subMole)
+    try if (condition.evaluate(context)) _perform(context, ticket, subMole)
     catch {
       case e: Throwable ⇒
         logger.log(SEVERE, "Error in " + this, e)
         throw e
     }
-
-  override def isConditionTrue(context: Context)(implicit rng: RandomProvider): Boolean = condition.evaluate(context)
 
   override def data(mole: Mole, sources: Sources, hooks: Hooks) =
     start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.name))

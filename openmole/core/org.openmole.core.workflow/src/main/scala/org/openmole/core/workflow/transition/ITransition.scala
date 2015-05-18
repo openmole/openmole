@@ -51,15 +51,6 @@ trait ITransition {
 
   /**
    *
-   * Get the value of the condition under which this transition is performed.
-   * @param context the context in which this condition is evaluated
-   *
-   * @return the value of the condition under which this transition is performed
-   */
-  def isConditionTrue(context: Context)(implicit rng: RandomProvider): Boolean
-
-  /**
-   *
    * Get the filter of the variables which are filtred by this transition.
    *
    * @return filter on the names of the variables which are filtred by this transition

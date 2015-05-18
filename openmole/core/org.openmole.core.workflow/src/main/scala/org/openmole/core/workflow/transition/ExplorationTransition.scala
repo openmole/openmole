@@ -65,7 +65,7 @@ class ExplorationTransition(start: Capsule, end: Slot, condition: Condition = Co
 
   }
 
-  private def registerAggregationTransitions(ticket: Ticket, subMoleExecution: SubMoleExecution) = {
+  private def registerAggregationTransitions(ticket: Ticket, subMoleExecution: SubMoleExecution)(implicit rng: RandomProvider) = {
     val alreadySeen = new HashSet[Capsule]
     val toProcess = new ListBuffer[(Capsule, Int)]
     toProcess += ((end.capsule, 0))
