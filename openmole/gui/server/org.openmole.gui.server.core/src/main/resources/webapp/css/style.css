@@ -296,3 +296,28 @@ opacity: 1;
 	float: right;
 	font-size: 12px;
 }
+
+#uppertab{
+	height: 140px;
+	margin-top: -50px;
+	}
+
+#controlform{
+	width: 20%;
+}
+
+#controlform input {
+	margin-top: 5px;
+}
+
+#uppertab .panel {
+	width: 78%;
+	margin-left: 280px;
+}
+
+#controlform button {
+	height: 40px;
+	width: 60px;
+	margin-top: 5px;
+	float: right;
+}

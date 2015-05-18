@@ -1,11 +1,14 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.Post
+import org.openmole.gui.client.core.files.TreeNodeTabs.EditableNodeTab
 import org.openmole.gui.shared._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.misc.utils.Utils._
-import org.scalajs.dom.raw.HTMLDivElement
+import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import bs._
+import org.scalajs.dom.raw.{ HTMLElement, HTMLDivElement }
 import rx._
 
 import scalatags.JsDom.all._
@@ -47,7 +50,7 @@ object TreeNodeTabs {
       active() = None
     }
 
-    val divElement: TypedTag[HTMLDivElement]
+    val tabElement: TypedTag[HTMLDivElement]
 
     def save(onsaved: () ⇒ Unit = () ⇒ {}): Unit
 
@@ -57,8 +60,8 @@ object TreeNodeTabs {
     }
   }
 
-  case class EditableNodeTab(tabName: Var[String], serverFilePath: Var[String], editor: EditorPanelUI) extends TreeNodeTab {
-    val divElement = editor.view
+  class EditableNodeTab(val tabName: Var[String], val serverFilePath: Var[String], editor: EditorPanelUI) extends TreeNodeTab {
+    val tabElement = editor.view
 
     def save(onsaved: () ⇒ Unit) = Post[Api].saveFile(serverFilePath(), editor.code).call().foreach { d ⇒
       onsaved()
@@ -66,6 +69,49 @@ object TreeNodeTabs {
   }
 
   def apply(tabs: TreeNodeTab*) = new TreeNodeTabs(tabs.toSeq)
+}
+
+/*case class OMSTab(tabName: Var[String], serverFilePath: Var[String], editor: EditorPanelUI) extends EditableNodeTab(tabName, serverFilePath, editor) {
+
+  override val controlElement = tags.div("Control men")
+}*/
+
+trait TabControl {
+  def controlElement: TypedTag[HTMLElement]
+}
+
+trait OMSTabControl <: TabControl {
+
+  val inputDirectory = bs.input("")(
+    placeholder := "Input directory",
+    autofocus
+  )
+
+  val outputDirectory = bs.input("")(
+    placeholder := "Output directory",
+    autofocus
+  )
+
+  val runButton = bs.button("Start", btn_primary)(onclick := { () ⇒
+    {
+      println("Run the WF")
+    }
+  })
+
+  val errorPanel = panel("Error", tags.div("This is my body"))
+
+  val controlElement =
+    tags.span(
+      bs.span(col_md_4)(id := "controlform")(
+        tags.div(
+          inputDirectory.render,
+          outputDirectory.render
+        ),
+        runButton
+      ),
+      errorPanel
+    )
+
 }
 
 import org.openmole.gui.client.core.files.TreeNodeTabs._
@@ -98,12 +144,16 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     tabs() = tabs().filterNot {
       _ == tab
     }
-    if (isactive) tabs().lastOption.map { setActive }
+    if (isactive) tabs().lastOption.map {
+      setActive
+    }
   }
 
   def --(tab: TreeNodeTab): Unit = tab.save(() ⇒ removeTab(tab))
 
-  def --(treeNode: TreeNode): Unit = find(treeNode).map { removeTab }
+  def --(treeNode: TreeNode): Unit = find(treeNode).map {
+    removeTab
+  }
 
   //Autosave the active tab every 15 seconds
   def autosaveActive(tab: TreeNodeTab) = setInterval(15000) {
@@ -121,36 +171,47 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     t.serverFilePath() == treeNode.canonicalPath()
   }
 
+  def active = tabs().find { t ⇒ isActive(t) }
+
   val render = Rx {
-    tags.div(role := "tabpanel")(
-      //Headers
-      tags.ul(`class` := "nav nav-tabs", role := "tablist")(
-        for (t ← tabs()) yield {
-          tags.li(role := "presentation",
-            `class` := {
-              if (isActive(t)) "active" else ""
-            })(
-              tags.a(href := "#" + t.id,
-                aria.controls := t.id,
-                role := "tab",
-                data("toggle") := "tab", onclick := { () ⇒ setActive(t) })(
-                  tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ --(t) }
-                  )("x"),
-                  t.tabName()
-                )
-            )
-        }
-      ),
-      //Panes
-      tags.div(`class` := "tab-content")(
-        for (t ← tabs()) yield {
-          tags.div(
-            role := "tabpanel",
-            `class` := "tab-pane " + {
-              if (isActive(t)) "active" else ""
-            }, id := t.id
-          )(t.divElement.render)
-        }
+    tags.div(
+      tags.div(id := "uppertab")(
+        active.map { tab ⇒
+          tab match {
+            case oms: TabControl ⇒ oms.controlElement
+            case _               ⇒ tags.div()
+          }
+        }),
+      tags.div(role := "tabpanel")(
+        //Headers
+        tags.ul(`class` := "nav nav-tabs", role := "tablist")(
+          for (t ← tabs()) yield {
+            tags.li(role := "presentation",
+              `class` := {
+                if (isActive(t)) "active" else ""
+              })(
+                tags.a(href := "#" + t.id,
+                  aria.controls := t.id,
+                  role := "tab",
+                  data("toggle") := "tab", onclick := { () ⇒ setActive(t) })(
+                    tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ --(t) }
+                    )("x"),
+                    t.tabName()
+                  )
+              )
+          }
+        ),
+        //Panes
+        tags.div(`class` := "tab-content")(
+          for (t ← tabs()) yield {
+            tags.div(
+              role := "tabpanel",
+              `class` := "tab-pane " + {
+                if (isActive(t)) "active" else ""
+              }, id := t.id
+            )(t.tabElement.render)
+          }
+        )
       )
     )
   }

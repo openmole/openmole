@@ -142,8 +142,8 @@ import org.openmole.gui.client.core.files.FileExtension._
 object EditorPanelUI {
 
   def apply(fileType: FileExtension, initCode: String) = fileType match {
-    case SCALA ⇒ scala(initCode)
-    case _     ⇒ empty(initCode)
+    case SCALA | OMS ⇒ scala(initCode)
+    case _           ⇒ empty(initCode)
   }
 
   def empty(initCode: String) = new EditorPanelUI(Seq(), initCode, NO_EXTENSION)
