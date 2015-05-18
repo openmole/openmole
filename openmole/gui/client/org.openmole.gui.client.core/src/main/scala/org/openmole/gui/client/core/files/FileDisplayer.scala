@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core.files
 
 import java.io.File
-import org.openmole.gui.client.core.dataui.EditorPanelUI
 import FileExtension._
 import TreeNodeTabs._
 

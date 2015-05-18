@@ -4,7 +4,6 @@ import org.openmole.gui.client.core.Post
 import org.openmole.gui.shared._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import org.openmole.gui.client.core.dataui.EditorPanelUI
 import org.openmole.gui.misc.utils.Utils._
 import org.scalajs.dom.raw.HTMLDivElement
 import rx._

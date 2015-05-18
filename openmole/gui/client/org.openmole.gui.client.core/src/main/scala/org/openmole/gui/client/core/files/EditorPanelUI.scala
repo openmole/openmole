@@ -1,4 +1,4 @@
-package org.openmole.gui.client.core.dataui
+package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.files.FileExtension._
 import org.openmole.gui.ext.dataui.PanelUI

@@ -38,10 +38,10 @@ object FileExtension {
 
     val fileName = last2.mkString(".")
     val fileType = last2.last match {
-      case "scala"                      ⇒ SCALA
-      case "sh"                         ⇒ SH
-      case "nlogo" | "csv" | "txt" | "" ⇒ NO_EXTENSION
-      case _                            ⇒ BINARY
+      case "scala"                 ⇒ SCALA
+      case "sh"                    ⇒ SH
+      case "nlogo" | "csv" | "txt" ⇒ NO_EXTENSION
+      case _                       ⇒ BINARY
     }
 
     (fileName, fileType)
