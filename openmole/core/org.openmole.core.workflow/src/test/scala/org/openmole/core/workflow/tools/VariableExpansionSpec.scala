@@ -19,6 +19,7 @@ package org.openmole.core.workflow.tools
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.tools._
 import org.scalatest._
 import java.io.File
@@ -36,13 +37,13 @@ ${s"I am ${6*5} year old"}"""
 6
 I am 30 year old"""
 
-    val res = VariableExpansion(template).expand(Context.empty)
+    val res = VariableExpansion(template).expand(Context.empty + Variable(Task.openMOLESeed, 0L))
     res should equal(expected)
   }
 
   "A expandData" should "preserve additionnal $ in the string" in {
     val test = "$$$etere{etsaesrn}etasriu$$$$eatsrn$"
-    val res = VariableExpansion(test).expand(Context.empty)
+    val res = VariableExpansion(test).expand(Context.empty + Variable(Task.openMOLESeed, 0L))
     test should equal(res)
   }
 

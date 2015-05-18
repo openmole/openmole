@@ -37,8 +37,8 @@ object Condition {
   }
 
   def apply(code: String) = new Condition {
-    @transient lazy val groovyProxy = new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
-    override def evaluate(context: Context) = groovyProxy.execute(context).asInstanceOf[Boolean]
+    @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
+    override def evaluate(context: Context) = proxy.run(context).asInstanceOf[Boolean]
   }
 
 }

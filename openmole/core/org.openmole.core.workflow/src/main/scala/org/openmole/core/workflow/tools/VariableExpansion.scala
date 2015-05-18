@@ -117,7 +117,7 @@ object VariableExpansion {
       context.variable(code) match {
         case Some(value) ⇒ value.value.toString
         case None ⇒
-          proxy.compiled(context).get.run(context).toString
+          proxy.run(context).toString
       }
   }
 
