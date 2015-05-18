@@ -11,6 +11,7 @@ import rx._
 
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
+import scala.scalajs.js.timers._
 
 /*
  * Copyright (C) 11/05/15 // mathieu.leclaire@openmole.org
@@ -38,7 +39,14 @@ object TreeNodeTabs {
 
     val id: String = getUUID
 
-    val active = Var(false)
+    val active: Var[Option[SetIntervalHandle]] = Var(None)
+
+    def desactivate = {
+      active().map {
+        clearInterval
+      }
+      active() = None
+    }
 
     val divElement: TypedTag[HTMLDivElement]
 
@@ -67,11 +75,17 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   def setActive(tab: TreeNodeTab) = {
     unActiveAll
-    tab.active() = true
+    tab.active() = Some(autosaveActive(tab))
   }
 
-  def unActiveAll = tabs().map {
-    _.active() = false
+  def unActiveAll = tabs().map { t ⇒
+    t.save()
+    t.desactivate
+  }
+
+  def isActive(tab: TreeNodeTab) = tab.active() match {
+    case Some(handle: SetIntervalHandle) ⇒ true
+    case _                               ⇒ false
   }
 
   def ++(tab: TreeNodeTab) = {
@@ -79,17 +93,23 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     setActive(tab)
   }
 
-  def removeTab(tab: TreeNodeTab) = tabs() = tabs().filterNot {
-    _ == tab
-  }
-
-  def --(tab: TreeNodeTab): Unit = {
-    val isactive = tab.active()
-    tab.save(() ⇒ removeTab(tab))
+  def removeTab(tab: TreeNodeTab) = {
+    val isactive = isActive(tab)
+    tab.desactivate
+    tabs() = tabs().filterNot {
+      _ == tab
+    }
     if (isactive) tabs().lastOption.map { setActive }
   }
 
+  def --(tab: TreeNodeTab): Unit = tab.save(() ⇒ removeTab(tab))
+
   def --(treeNode: TreeNode): Unit = find(treeNode).map { removeTab }
+
+  //Autosave the active tab every 15 seconds
+  def autosaveActive(tab: TreeNodeTab) = setInterval(15000) {
+    tab.save()
+  }
 
   def rename(tn: TreeNode, newName: String) = {
     find(tn).map { tab ⇒
@@ -109,12 +129,12 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
         for (t ← tabs()) yield {
           tags.li(role := "presentation",
             `class` := {
-              if (t.active()) "active" else ""
+              if (isActive(t)) "active" else ""
             })(
               tags.a(href := "#" + t.id,
                 aria.controls := t.id,
                 role := "tab",
-                data("toggle") := "tab")(
+                data("toggle") := "tab", onclick := { () ⇒ setActive(t) })(
                   tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ --(t) }
                   )("x"),
                   t.tabName()
@@ -127,8 +147,8 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
         for (t ← tabs()) yield {
           tags.div(
             role := "tabpanel",
-            `class` := "tab-pane fade " + {
-              if (t.active()) "in active" else ""
+            `class` := "tab-pane " + {
+              if (isActive(t)) "active" else ""
             }, id := t.id
           )(t.divElement.render)
         }
