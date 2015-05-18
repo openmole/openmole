@@ -23,14 +23,15 @@ object FileExtension {
     def extension: String
   }
 
-  case class DisplayableFile(extension: String) extends FileExtension
+  case class DisplayableFile(extension: String, highlighter: String) extends FileExtension
 
   case class BinaryFile(extension: String) extends FileExtension
 
-  val SCALA = DisplayableFile("scala")
-  val NETLOGO = DisplayableFile("nlogo")
-  val SH = DisplayableFile("sh")
-  val NO_EXTENSION = DisplayableFile("")
+  val OMS = DisplayableFile("oms", "scala")
+  val SCALA = DisplayableFile("scala", "scala")
+  val NETLOGO = DisplayableFile("nlogo", "nlogo")
+  val SH = DisplayableFile("sh", "sh")
+  val NO_EXTENSION = DisplayableFile("", "")
   val BINARY = BinaryFile("")
 
   def apply(treeNode: TreeNode) = {
