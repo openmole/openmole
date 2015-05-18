@@ -17,7 +17,7 @@ package org.openmole.gui.plugin.task.exploration.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.dataui.EditorPanelUI
+import org.openmole.gui.client.core.files.EditorPanelUI
 import org.openmole.gui.ext.dataui.PanelUI
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{Forms => bs}
