@@ -24,9 +24,9 @@ package object execution {
     if (!content.isEmpty) {
       stream.synchronized {
         val fullLength = 40
-        val dashes = fullLength - label.size / 2
-        val header = ("-" * dashes) + label + ("-" * dashes)
-        val footer = "-" * header.size
+        val dashes = fullLength - label.length / 2
+        val header = ("-" * dashes) + label + ("-" * (dashes - (label.length % 2)))
+        val footer = "-" * header.length
         stream.println(header)
         stream.print(content)
         stream.println(footer)
