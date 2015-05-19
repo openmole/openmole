@@ -46,7 +46,7 @@ sealed class ListFilesDomain(
     recursive: Boolean = false,
     filter: File ⇒ Boolean = f ⇒ true) extends Domain[File] with Finite[File] {
 
-  override def computeValues(context: Context)(implicit rng: Random): Iterable[File] = {
+  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = {
     val dir = new File(base, subdirectory.from(context))
 
     if (!dir.exists) {

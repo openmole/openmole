@@ -172,5 +172,36 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
     endCapsExecuted.get() should equal(0)
   }
 
+  "Multiple aggregation transition" should "all be executed" in {
+    val v = Prototype[Double]("v")
+    val m = Prototype[Double]("m")
+    val s = Prototype[Double]("s")
+
+    val executed = new AtomicInteger()
+
+    def exploration = ExplorationTask(ExplicitSampling(v, 0.0 until 10.0 by 1.0))
+
+    def main =
+      EmptyTask() set (
+        _ setName "main",
+        _ addInput v,
+        _ addOutput v
+      )
+
+    def test =
+      TestTask { ctx ⇒ executed.incrementAndGet(); ctx } set (
+        _ setName "mean",
+        _ addInput v.toArray
+      )
+
+    val ex = exploration -< main >- (test, test) start
+
+    println(ex.mole.transitions)
+
+    ex.waitUntilEnded
+
+    executed.get should equal(2)
+  }
+
 }
 

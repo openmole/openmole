@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.task.groovy
 
+import org.openmole.core.workflow.tools.CodeTool
 import org.openmole.plugin.task.jvm._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
@@ -36,9 +37,7 @@ object GroovyTask {
   def apply(source: String)(implicit plugins: PluginSet = PluginSet.empty) =
     new JVMLanguageTaskBuilder { builder ⇒
 
-      addImport("static org.openmole.plugin.task.jvm.JVMLanguageTask.newRNG")
-      addImport("static org.openmole.plugin.task.jvm.JVMLanguageTask.newFile")
-      addImport("static org.openmole.plugin.task.jvm.JVMLanguageTask.newDir")
+      addImport(s"static ${CodeTool.namespace}.*")
 
       def toTask =
         new GroovyTask(source) with Built
@@ -48,7 +47,7 @@ object GroovyTask {
 
 sealed abstract class GroovyTask(val userSource: String) extends JVMLanguageTask with ContextToGroovyCode {
 
-  def processCode(context: Context) = execute(context, outputs)
+  def processCode(context: Context)(implicit rng: RandomProvider) = execute(context, outputs)
 
   override def source =
     imports.map("import " + _).mkString("\n") + "\n" + userSource

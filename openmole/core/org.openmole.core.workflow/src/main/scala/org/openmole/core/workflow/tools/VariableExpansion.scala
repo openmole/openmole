@@ -20,12 +20,11 @@ package org.openmole.core.workflow.tools
 import java.io.{ InputStream, OutputStream, OutputStreamWriter }
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.script._
 import org.openmole.tool.stream.{ StringBuilderOutputStream, StringInputStream }
 import org.openmole.core.workflow.data._
 
 import scala.collection.mutable.ListBuffer
-import scala.util.Try
+import scala.util.{ Random, Try }
 
 object VariableExpansion {
 
@@ -83,15 +82,15 @@ object VariableExpansion {
   }
 
   case class Expansion(elements: Seq[ExpansionElement]) {
-    def expand(context: ⇒ Context) = elements.map(_.expand(context)).mkString
+    def expand(context: ⇒ Context)(implicit rng: RandomProvider) = elements.map(_.expand(context)).mkString
   }
 
   trait ExpansionElement {
-    def expand(context: ⇒ Context): String
+    def expand(context: ⇒ Context)(implicit rng: RandomProvider): String
   }
 
   case class UnexpandedElement(string: String) extends ExpansionElement {
-    def expand(context: ⇒ Context): String = string
+    def expand(context: ⇒ Context)(implicit rng: RandomProvider): String = string
   }
 
   object ExpandedElement {
@@ -108,15 +107,16 @@ object VariableExpansion {
   }
 
   case class ValueElement(v: String) extends ExpansionElement {
-    def expand(context: ⇒ Context): String = v
+    def expand(context: ⇒ Context)(implicit rng: RandomProvider): String = v
   }
 
   case class CodeElement(code: String) extends ExpansionElement {
-    @transient lazy val proxy = GroovyProxyPool(code)
-    def expand(context: ⇒ Context): String =
+    @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
+    def expand(context: ⇒ Context)(implicit rng: RandomProvider): String =
       context.variable(code) match {
         case Some(value) ⇒ value.value.toString
-        case None        ⇒ proxy(context.toBinding).toString
+        case None ⇒
+          proxy.run(context).toString
       }
   }
 

@@ -17,7 +17,6 @@
 
 package org.openmole.core.workflow
 
-import groovy.lang.Binding
 import org.openmole.core.workflow.data.Context
 
 import scala.concurrent.stm._
@@ -40,16 +39,6 @@ package tools {
     implicit class RefLongDecorator(r: Ref[Long]) {
       def next = r getUpdate (_ + 1)
     }
-
-    implicit class ContextDecorator(variables: Context) {
-      def toBinding = {
-        val binding = new Binding
-        variables.values.foreach { v ⇒ binding.setVariable(v.prototype.name, v.value) }
-        binding
-      }
-    }
-
-    implicit def ContextToBindingConverter(c: Context) = c.toBinding
 
     implicit class FileSubdirectoryDecorator(f: File) {
       def /(s: String) = new FileDecorator(f) / s

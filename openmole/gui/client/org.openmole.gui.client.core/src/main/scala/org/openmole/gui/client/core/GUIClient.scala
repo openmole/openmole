@@ -25,9 +25,7 @@ import org.openmole.gui.misc.js.Forms._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import org.openmole.gui.misc.js.Forms._
-import scalatags.JsDom.all._
 
 import org.scalajs.{ jquery, dom }
 
@@ -69,16 +67,16 @@ object GUIClient {
       nav("mainNav",
         Seq(
           (navItem("settings", "Settings").render(data("toggle") := "modal", data("target") := "#conceptPanelID"), "task", () ⇒ {}),
-          (navItem("executions", "Executions").render, "env", () ⇒ {
-            println("Not yet")
-          })
+          (navItem("executions", "Executions").render(data("toggle") := "modal", data("target") := "#executionPanelID"), "execs", () ⇒ {})
         ), nav_pills + nav_inverse + nav_staticTop
       )
     )
 
-    val generic = Panel.generic
+    val settings = Panel.generic
+    val executions = ExecutionPanel()
 
-    topdiv.appendChild(generic.dialog.render)
+    topdiv.appendChild(settings.dialog.render)
+    topdiv.appendChild(executions.dialog.render)
 
     dom.document.body.appendChild(topdiv)
 

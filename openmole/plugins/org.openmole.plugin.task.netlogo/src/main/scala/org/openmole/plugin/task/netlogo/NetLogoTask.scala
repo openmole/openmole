@@ -60,7 +60,7 @@ trait NetLogoTask extends ExternalTask {
 
   @transient lazy val expandedCommands = launchingCommands.map(VariableExpansion(_))
 
-  override def process(context: Context): Context = withWorkDir { tmpDir ⇒
+  override def process(context: Context)(implicit rng: RandomProvider): Context = withWorkDir { tmpDir ⇒
     val preparedContext = prepareInputFiles(context, tmpDir, workspace.workDirectory)
 
     val script = tmpDir / workspace.workDirectory / workspace.script

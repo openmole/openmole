@@ -20,7 +20,6 @@ package org.openmole.plugin.domain.range
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.FromContext
-import org.openmole.core.tools.script._
 import org.openmole.core.workflow.tools._
 
 trait Bounded[T] extends Domain[T] with Center[T] with Bounds[T] {
@@ -31,13 +30,13 @@ trait Bounded[T] extends Domain[T] with Center[T] with Bounds[T] {
 
   import integral._
 
-  override def max(context: Context): T = min.from(context)
-  override def min(context: Context): T = max.from(context)
+  override def max(context: Context)(implicit rng: RandomProvider): T = min.from(context)
+  override def min(context: Context)(implicit rng: RandomProvider): T = max.from(context)
 
   def min: FromContext[T]
   def max: FromContext[T]
 
-  override def center(context: Context): T = {
+  override def center(context: Context)(implicit rng: RandomProvider): T = {
     val mi = min(context)
     mi + ((max(context) - mi) / fromInt(2))
   }

@@ -19,30 +19,33 @@ package org.openmole.core.workflow.tools
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.tools._
 import org.scalatest._
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
+import scala.util.Random
+
 class VariableExpansionSpec extends FlatSpec with Matchers {
 
   "A expandData" should "expand all the ${} top level sequence from an inputStream and return a parsed OuputStream" in {
     val template = """My first line
 ${2*3}
-${"I am ${6*5} year old"}"""
+${s"I am ${6*5} year old"}"""
 
     val expected = """My first line
 6
 I am 30 year old"""
 
-    val res = VariableExpansion(template).expand(Context.empty)
+    val res = VariableExpansion(template).expand(Context.empty)(new Random())
     res should equal(expected)
   }
 
   "A expandData" should "preserve additionnal $ in the string" in {
     val test = "$$$etere{etsaesrn}etasriu$$$$eatsrn$"
-    val res = VariableExpansion(test).expand(Context.empty)
+    val res = VariableExpansion(test).expand(Context.empty)(new Random())
     test should equal(res)
   }
 

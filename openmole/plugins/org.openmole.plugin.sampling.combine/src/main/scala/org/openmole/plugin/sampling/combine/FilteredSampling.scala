@@ -19,22 +19,37 @@ package org.openmole.plugin.sampling.combine
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.tools.ScalaWrappedCompilation
 
 import scala.util.Random
 
 object FilteredSampling {
 
-  def apply(sampling: Sampling, filters: Filter*) =
+  def apply(sampling: Sampling, filters: SamplingFilter*) =
     new FilteredSampling(sampling, filters: _*)
 
 }
 
-sealed class FilteredSampling(sampling: Sampling, filters: Filter*) extends Sampling {
+sealed class FilteredSampling(sampling: Sampling, filters: SamplingFilter*) extends Sampling {
 
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: ⇒ Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
+  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
     sampling.build(context).filter(sample ⇒ !filters.exists(!_(Context(sample))))
 
+}
+
+object SamplingFilter {
+  def apply(code: String) = new ScalaSamplingFilter(code)
+  implicit def stringToFilter(code: String) = apply(code)
+}
+
+trait SamplingFilter {
+  def apply(factorsValues: Context)(implicit rng: RandomProvider): Boolean
+}
+
+class ScalaSamplingFilter(code: String) extends SamplingFilter {
+  @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
+  def apply(factorsValues: Context)(implicit rng: RandomProvider) = proxy.run(factorsValues).asInstanceOf[Boolean]
 }

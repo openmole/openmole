@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -14,11 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.core.workflow.mole
 
-package org.openmole.plugin.sampling.combine
+import org.openmole.core.workflow.data.{ RandomProvider, Context }
 
-import org.openmole.core.workflow.data.Context
+object TestHook {
+  def apply() = new HookBuilder {
 
-trait Filter {
-  def apply(factorsValues: Context): Boolean
+    def toHook = new Hook with Built {
+      def process(ctx: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = ctx
+    }
+  }
 }

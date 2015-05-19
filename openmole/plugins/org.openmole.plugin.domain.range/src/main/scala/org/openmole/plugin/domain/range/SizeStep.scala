@@ -30,9 +30,9 @@ trait SizeStep[T] extends Domain[T] with Finite[T] with Center[T] with Bounds[T]
   import range._
   import integral._
 
-  def stepAndSize(maxValue: T, minValue: T, context: Context): (T, Int)
+  def stepAndSize(maxValue: T, minValue: T, context: Context)(implicit rng: RandomProvider): (T, Int)
 
-  override def computeValues(context: Context)(implicit rng: Random): Iterable[T] = {
+  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = {
     val mi = min(context)
     val ma = max(context)
     val (step, size) = stepAndSize(mi, ma, context)

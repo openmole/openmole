@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -14,13 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.core.workflow.tools
 
-package org.openmole.core.workflow.domain
+import org.openmole.core.tools.service.Random
+import org.openmole.core.workspace.Workspace
 
-import org.openmole.core.workflow.data._
+object CodeTool {
+  def namespace = s"${this.getClass.getPackage.getName}.CodeTool"
 
-import scala.util.Random
-
-trait Discrete[+T] extends Domain[T] {
-  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[T]
+  def newRNG(seed: Long) = Random.newRNG(seed)
+  def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix) = Workspace.newFile(prefix, suffix)
+  def newDir(prefix: String = Workspace.fixedDir) = Workspace.newDir(prefix)
 }

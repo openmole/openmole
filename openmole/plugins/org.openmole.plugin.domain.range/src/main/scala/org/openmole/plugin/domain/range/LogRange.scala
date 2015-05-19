@@ -18,7 +18,6 @@
 package org.openmole.plugin.domain.range
 
 import org.openmole.core.tools.io.FromString
-import org.openmole.core.tools.script.GroovyProxy
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools._
@@ -46,7 +45,7 @@ sealed class LogRange[T](val range: Range[T], val steps: FromContext[T])(implici
 
   import range._
 
-  override def computeValues(context: Context)(implicit rng: Random): Iterable[T] = {
+  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = {
     val mi: T = lg.log(min(context))
     val ma: T = lg.log(max(context))
     val nbst: T = nbStep(context)
@@ -64,8 +63,8 @@ sealed class LogRange[T](val range: Range[T], val steps: FromContext[T])(implici
     }
   }
 
-  def nbStep(context: Context): T = steps.from(context)
-  def min(context: Context): T = range.min.from(context)
-  def max(context: Context): T = range.max.from(context)
+  def nbStep(context: Context)(implicit rng: RandomProvider): T = steps.from(context)
+  def min(context: Context)(implicit rng: RandomProvider): T = range.min.from(context)
+  def max(context: Context)(implicit rng: RandomProvider): T = range.max.from(context)
 
 }

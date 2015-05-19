@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.sampling.lhs
 
-import org.openmole.core.tools.script.GroovyProxyPool
 import org.openmole.core.tools.service.Scaling._
 import org.openmole.core.tools.service.Random._
 import org.openmole.core.workflow.task.Task
@@ -41,12 +40,12 @@ sealed class LHS(val samples: FromContext[Int], val factors: Factor[Double, Doma
   override def inputs = PrototypeSet(factors.flatMap(_.inputs))
   override def prototypes = factors.map { _.prototype }
 
-  override def build(context: ⇒ Context)(implicit rng: Random): Iterator[Iterable[Variable[Double]]] = {
+  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[Double]]] = {
     val s = samples.from(context)
     factors.map {
       f ⇒
-        (0 until s).shuffled(rng).map {
-          i ⇒ Variable(f.prototype, ((i + rng.nextDouble) / s).scale(f.domain.min(context), f.domain.max(context)))
+        (0 until s).shuffled(rng()).map {
+          i ⇒ Variable(f.prototype, ((i + rng().nextDouble) / s).scale(f.domain.min(context), f.domain.max(context)))
         }
     }.transpose.toIterator
 

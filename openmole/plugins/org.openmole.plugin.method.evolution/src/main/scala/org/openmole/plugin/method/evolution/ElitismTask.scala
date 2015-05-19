@@ -56,13 +56,12 @@ sealed abstract class ElitismTask[E <: Elitism with Termination with Archive](va
   def offspring: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
   def archive: Prototype[evolution.A]
 
-  override def process(context: Context) = {
+  override def process(context: Context)(implicit rng: RandomProvider) = {
     val a = context(archive)
-    val rng = Task.buildRNG(context)
     val offspringPopulation = Population.fromIndividuals(context(offspring))
 
-    val newArchive = evolution.archive(a, context(population), offspringPopulation)(rng)
-    val newPopulation = evolution.elitism(context(population), offspringPopulation, newArchive)(rng)
+    val newArchive = evolution.archive(a, context(population), offspringPopulation)(rng())
+    val newPopulation = evolution.elitism(context(population), offspringPopulation, newArchive)(rng())
 
     Context(Variable(population, newPopulation), Variable(archive, newArchive))
   }

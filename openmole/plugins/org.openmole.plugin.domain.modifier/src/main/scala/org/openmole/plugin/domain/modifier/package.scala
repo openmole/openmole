@@ -21,10 +21,11 @@ import org.openmole.core.workflow.domain._
 import java.io.File
 
 import org.openmole.core.workflow.tools.FromContext
+import scala.reflect.runtime.universe._
 
 package object modifier {
 
-  implicit def domainModifierDecorator[T](domain: Domain[T] with Discrete[T]) = new {
+  implicit def domainModifierDecorator[T: TypeTag](domain: Domain[T] with Discrete[T]) = new {
     def take(n: FromContext[Int]) = new TakeDomain(domain, n)
     def group(n: FromContext[Int])(implicit m: Manifest[T]) = new GroupDomain(domain, n)
     def sliding(n: FromContext[Int], s: FromContext[Int] = 1)(implicit m: Manifest[T]) = new SlidingDomain(domain, n, s)

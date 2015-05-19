@@ -20,10 +20,10 @@ package org.openmole.core.workflow.tools
 import java.io.File
 
 import org.openmole.core.tools.io.FromString
-import org.openmole.core.tools.script.GroovyProxyPool
 import org.openmole.core.workflow.data._
 import org.openmole.core.tools.io._
-import org.openmole.core.tools.script._
+
+import scala.util.Random
 
 object FromContext {
 
@@ -31,19 +31,19 @@ object FromContext {
 
   implicit def fromStringToContext[T](code: String)(implicit fromString: FromString[T]) =
     new FromContext[T] {
-      @transient lazy val proxy = GroovyProxyPool(code)
-      override def from(context: ⇒ Context): T = fromString.from(proxy(context.toBinding).toString)
+      @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
+      override def from(context: ⇒ Context)(implicit rng: RandomProvider): T = fromString.from(proxy.run(context).toString)
     }
 
   def apply[T](t: T) =
     new FromContext[T] {
-      def from(context: ⇒ Context): T = t
+      def from(context: ⇒ Context)(implicit rng: RandomProvider): T = t
     }
 
 }
 
 trait FromContext[T] {
-  def from(context: ⇒ Context): T
+  def from(context: ⇒ Context)(implicit rng: RandomProvider): T
 }
 
 object ExpandedString {
@@ -63,6 +63,6 @@ trait ExpandedString <: FromContext[String] {
   @transient lazy val expansion = VariableExpansion(string)
   def +(s: ExpandedString): ExpandedString = string + s.string
   def string: String
-  def from(context: ⇒ Context) = expansion.expand(context)
+  def from(context: ⇒ Context)(implicit rng: RandomProvider) = expansion.expand(context)
 }
 

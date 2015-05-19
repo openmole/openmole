@@ -1,4 +1,4 @@
-package org.openmole.gui.client.core.dataui
+package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.files.FileExtension._
 import org.openmole.gui.ext.dataui.PanelUI
@@ -31,7 +31,7 @@ import fr.iscpif.scaladget.mapping.ace._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: String, fileType: FileExtension) extends PanelUI {
+class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: String, fileType: DisplayableFile) extends PanelUI {
 
   lazy val Autocomplete = ace.require("ace/autocomplete").Autocomplete
 
@@ -70,7 +70,7 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
   def initEditor = {
     fileType match {
       case NO_EXTENSION ⇒
-      case _            ⇒ editor.getSession().setMode("ace/mode/" + fileType.extension)
+      case _            ⇒ editor.getSession().setMode("ace/mode/" + fileType.highlighter)
     }
     editor.getSession().setValue(initCode)
     editor.setTheme("ace/theme/github")
@@ -142,8 +142,8 @@ import org.openmole.gui.client.core.files.FileExtension._
 object EditorPanelUI {
 
   def apply(fileType: FileExtension, initCode: String) = fileType match {
-    case SCALA ⇒ scala(initCode)
-    case _     ⇒ empty(initCode)
+    case SCALA | OMS ⇒ scala(initCode)
+    case _           ⇒ empty(initCode)
   }
 
   def empty(initCode: String) = new EditorPanelUI(Seq(), initCode, NO_EXTENSION)

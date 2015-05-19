@@ -32,6 +32,6 @@ object TakeDomain {
 
 sealed class TakeDomain[+T](val domain: Domain[T] with Discrete[T], val size: FromContext[Int]) extends Domain[T] with Finite[T] {
   override def inputs = domain.inputs
-  override def computeValues(context: Context)(implicit rng: Random): Iterable[T] =
+  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] =
     domain.iterator(context).slice(0, size.from(context)).toIterable
 }

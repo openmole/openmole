@@ -29,6 +29,7 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
+import scala.util.Random
 
 object Transition extends Logger
 
@@ -77,22 +78,18 @@ class Transition(
     }
   }
 
-  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) =
-    try {
-      if (isConditionTrue(context)) _perform(context, ticket, subMole)
-    }
+  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
+    try if (condition.evaluate(context)) _perform(context, ticket, subMole)
     catch {
       case e: Throwable ⇒
         logger.log(SEVERE, "Error in " + this, e)
         throw e
     }
 
-  override def isConditionTrue(context: Context): Boolean = condition.evaluate(context)
-
   override def data(mole: Mole, sources: Sources, hooks: Hooks) =
     start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.name))
 
-  protected def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, ticket, subMole)
+  protected def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, ticket, subMole)
   protected def filtered(context: Context) = context.filterNot { case (n, _) ⇒ filter(n) }
 
   override def toString = this.getClass.getSimpleName + " from " + start + " to " + end

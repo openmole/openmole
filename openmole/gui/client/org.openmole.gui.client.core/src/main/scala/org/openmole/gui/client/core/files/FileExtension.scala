@@ -23,14 +23,17 @@ object FileExtension {
     def extension: String
   }
 
-  case class DisplayableFile(extension: String) extends FileExtension
+  trait OpenMOLEScript
+
+  case class DisplayableFile(extension: String, highlighter: String) extends FileExtension
 
   case class BinaryFile(extension: String) extends FileExtension
 
-  val SCALA = DisplayableFile("scala")
-  val NETLOGO = DisplayableFile("nlogo")
-  val SH = DisplayableFile("sh")
-  val NO_EXTENSION = DisplayableFile("")
+  val OMS = new DisplayableFile("oms", "scala") with OpenMOLEScript
+  val SCALA = DisplayableFile("scala", "scala")
+  val NETLOGO = DisplayableFile("nlogo", "nlogo")
+  val SH = DisplayableFile("sh", "sh")
+  val NO_EXTENSION = DisplayableFile("", "")
   val BINARY = BinaryFile("")
 
   def apply(treeNode: TreeNode) = {
@@ -38,10 +41,11 @@ object FileExtension {
 
     val fileName = last2.mkString(".")
     val fileType = last2.last match {
-      case "scala"                      ⇒ SCALA
-      case "sh"                         ⇒ SH
-      case "nlogo" | "csv" | "txt" | "" ⇒ NO_EXTENSION
-      case _                            ⇒ BINARY
+      case "oms"                   ⇒ OMS
+      case "scala"                 ⇒ SCALA
+      case "sh"                    ⇒ SH
+      case "nlogo" | "csv" | "txt" ⇒ NO_EXTENSION
+      case _                       ⇒ BINARY
     }
 
     (fileName, fileType)

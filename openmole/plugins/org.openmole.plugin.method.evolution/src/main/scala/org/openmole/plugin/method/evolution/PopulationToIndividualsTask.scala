@@ -52,6 +52,6 @@ sealed abstract class PopulationToIndividualsTask(val evolution: G with P with F
   def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
   def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
 
-  override def process(context: Context) = Variable(individuals, context(population).toIndividuals.toArray)
+  override def process(context: Context)(implicit rng: RandomProvider) = Variable(individuals, context(population).toIndividuals.toArray)
 
 }

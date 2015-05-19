@@ -46,7 +46,7 @@ sealed abstract class TemplateFileTask(
     VariableExpansion(is)
   }
 
-  override def process(context: Context) = {
+  override def process(context: Context)(implicit rng: RandomProvider) = {
     val file = Workspace.newFile(template.getName, ".tmp")
     file.content = expanded.expand(context)
     context + (output -> file)

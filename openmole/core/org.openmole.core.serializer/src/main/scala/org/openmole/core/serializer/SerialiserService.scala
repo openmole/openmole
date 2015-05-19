@@ -114,7 +114,7 @@ object SerialiserService extends Logger {
   }
 
   def serialiseAndArchiveFiles(obj: Any, tos: TarOutputStream): Unit = lock.read {
-    val objSerial = Workspace.newFile
+    val objSerial = Workspace.newFile()
     val serializationResult = serialiseGetPluginsAndFiles(obj, objSerial)
     tos.addFile(objSerial, content)
     objSerial.delete

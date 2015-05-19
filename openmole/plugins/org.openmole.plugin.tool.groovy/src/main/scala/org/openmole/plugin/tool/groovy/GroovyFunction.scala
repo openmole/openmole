@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 30/05/13 Romain Reuillon
+ * Copyright (C) 26/02/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,22 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.data
+package org.openmole.plugin.tool.groovy
 
-import org.openmole.core.tools.script.GroovyProxyPool
-import org.openmole.core.tools.script._
-import org.openmole.core.workflow.tools._
+import groovy.lang.Binding
 
-object GroovyParameter {
-
-  def apply[T](prototype: Prototype[T], value: String, `override`: Boolean = false) = {
-    val (p, v, o) = (prototype, value, `override`)
-    new Default[T] {
-      @transient lazy val groovyProxy = GroovyProxyPool(v)
-      def prototype = p
-      def value(ctx: Context) = groovyProxy(ctx).asInstanceOf[T]
-      def `override` = o
-    }
-  }
-
+trait GroovyFunction {
+  def apply(binding: Binding): Object
 }

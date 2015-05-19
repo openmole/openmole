@@ -47,7 +47,7 @@ object AppendFileHook {
 
 abstract class AppendFileHook(prototype: Prototype[File], outputFile: ExpandedString) extends Hook {
 
-  override def process(context: Context, executionContext: ExecutionContext) = {
+  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
     context.option(prototype) match {
       case Some(from) ⇒
 

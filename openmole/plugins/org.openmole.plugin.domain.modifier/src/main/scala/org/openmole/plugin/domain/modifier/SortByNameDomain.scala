@@ -32,7 +32,7 @@ class SortByNameDomain(val domain: Domain[File] with Finite[File]) extends Domai
 
   override def inputs = domain.inputs
 
-  override def computeValues(context: Context)(implicit rng: Random): Iterable[File] = {
+  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = {
     def extractNumber(name: String) = {
       val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit).reverse
       if (n.isEmpty) throw new UserBadDataError("File name " + name + " doesn't contains a number")

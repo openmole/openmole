@@ -28,9 +28,10 @@ import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.validation.TypeUtil
 import org.osgi.framework.Bundle
 
-import scala.util.Try
+import scala.util.{ Random, Try }
 
 trait ScalaCompilation {
+
   def usedBundles: Seq[File]
   def libraries: Seq[File]
 
@@ -50,6 +51,7 @@ trait ScalaCompilation {
 
     evaluated
   }
+
 }
 
 object ScalaWrappedCompilation {
@@ -63,24 +65,31 @@ object ScalaWrappedCompilation {
       override def libraries: Seq[File] = Seq.empty
     }
 
+  type ScalaClosure = (Context, RandomProvider) ⇒ Any
+
+  trait CompiledScala {
+    type RETURN
+    def run(context: Context)(implicit rng: RandomProvider): RETURN
+  }
+
 }
 
-import org.openmole.core.workflow.tools.ScalaWrappedCompilation._
+import ScalaWrappedCompilation._
 
 trait ScalaWrappedOutput <: ScalaWrappedCompilation { compilation ⇒
 
-  type CompiledScala = WrappedScala
+  type CS = WrappedScala
 
-  def compiledScala(closure: Context ⇒ Any): CompiledScala =
+  def compiledScala(closure: ScalaClosure) =
     WrappedScala(
-      compiled = closure.asInstanceOf[Context ⇒ java.util.Map[String, Any]],
+      compiled = closure.asInstanceOf[(Context, RandomProvider) ⇒ java.util.Map[String, Any]],
       outputs = compilation.outputs
     )
 
-  case class WrappedScala(outputs: PrototypeSet, compiled: Context ⇒ java.util.Map[String, Any]) {
-
-    def run(context: Context): Context = {
-      val map = compiled(context)
+  case class WrappedScala(outputs: PrototypeSet, compiled: (Context, RandomProvider) ⇒ java.util.Map[String, Any]) extends CompiledScala {
+    type RETURN = Context
+    def run(context: Context)(implicit rng: RandomProvider): Context = {
+      val map = compiled(context, rng)
       context ++
         outputs.toSeq.map {
           o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
@@ -102,28 +111,30 @@ trait ScalaWrappedOutput <: ScalaWrappedCompilation { compilation ⇒
 
 trait ScalaRawOutput <: ScalaCompilation { compilation ⇒
 
-  type CompiledScala = RawScala
+  type CS = RawScala
 
-  def compiledScala(closure: Context ⇒ Any): CompiledScala = RawScala(closure)
+  def compiledScala(closure: ScalaClosure) = RawScala(closure)
 
-  case class RawScala(compiled: Context ⇒ Any) {
-    def run(context: Context): Any = compiled(context)
+  case class RawScala(compiled: ScalaClosure) extends CompiledScala {
+    type RETURN = Any
+    def run(context: Context)(implicit rng: RandomProvider): Any = compiled(context, rng)
   }
 
 }
 
 trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
-  type CompiledScala
+  type CS <: CompiledScala
 
   def source: String
+  def openMOLEImports = Seq(s"${CodeTool.namespace}._")
   def imports: Seq[String]
 
   def prefix = "_input_value_"
 
   def function(inputs: Seq[Prototype[_]]) =
     compile(script(inputs)).map { evaluated ⇒
-      (evaluated, evaluated.getClass.getMethod("apply", classOf[Context]))
+      (evaluated, evaluated.getClass.getMethod("apply", classOf[Context], classOf[RandomProvider]))
     }
 
   def toScalaNativeType(t: PrototypeType[_]): PrototypeType[_] = {
@@ -139,14 +150,14 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
   }
 
   def script(inputs: Seq[Prototype[_]]) =
-    imports.map("import " + _).mkString("\n") + "\n\n" +
-      s"""(${prefix}context: ${classOf[Context].getCanonicalName}) => {
-                                                                   |    object $inputObject {
-                                                                                             |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
+    (openMOLEImports ++ imports).map("import " + _).mkString("\n") + "\n\n" +
+      s"""(${prefix}context: ${classOf[Context].getCanonicalName}, ${prefix}RNGProvider: ${classOf[RandomProvider].getCanonicalName}) => {
+          |    object $inputObject {
+          |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
           |    }
           |    import input._
-          |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(${Task.openMOLESeed.name}).toScala;
-                                                                                                                  |    $source
+          |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = ${prefix}RNGProvider()
+          |    $source
           |    ${wrapOutput.getOrElse("")}
           |}
           |""".stripMargin
@@ -155,35 +166,34 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
   @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], Try[(AnyRef, Method)]]()
 
-  def compiled(inputs: Seq[Prototype[_]]): Try[CompiledScala] =
+  def compiled(inputs: Seq[Prototype[_]]): Try[CS] =
     cache.synchronized {
-
-      val allInputs =
-        if (inputs.exists(_ == Task.openMOLESeed)) inputs else Task.openMOLESeed :: inputs.toList
-
-      val allInputMap = allInputs.groupBy(_.name)
+      val allInputMap = inputs.groupBy(_.name)
 
       val duplicatedInputs = allInputMap.filter { _._2.size > 1 }.map(_._2)
 
       duplicatedInputs match {
         case Nil ⇒
-          def sortedInputNames = allInputs.map(_.name).distinct.sorted
+          def sortedInputNames = inputs.map(_.name).distinct.sorted
           lazy val scriptInputs = sortedInputNames.map(n ⇒ allInputMap(n).head)
           val compiled = cache.getOrElseUpdate(scriptInputs, function(scriptInputs))
           compiled.map {
             case (evaluated, method) ⇒
-              val closure = (context: Context) ⇒ method.invoke(evaluated, context)
+              val closure: ScalaClosure =
+                (context: Context, rng: RandomProvider) ⇒ method.invoke(evaluated, context, rng)
               compiledScala(closure)
           }
         case duplicated ⇒ throw new UserBadDataError("Duplicated inputs: " + duplicated.mkString(", "))
       }
     }
 
-  def compiled(context: Context): Try[CompiledScala] = {
+  def compiled(context: Context): Try[CS] = {
     val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }
     compiled(contextPrototypes)
   }
 
-  def compiledScala(closure: Context ⇒ Any): CompiledScala
+  def run(context: Context)(implicit rng: RandomProvider) = compiled(context).get.run(context)(rng)
+
+  def compiledScala(closure: ScalaClosure): CS
 
 }

@@ -53,7 +53,7 @@ sealed abstract class ScalingGAPopulationTask extends Task {
   val evolution: GAAlgorithm
   val population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
 
-  override def process(context: Context) =
+  override def process(context: Context)(implicit rng: RandomProvider) =
     evolution.toVariables(context(population), context)
 
 }

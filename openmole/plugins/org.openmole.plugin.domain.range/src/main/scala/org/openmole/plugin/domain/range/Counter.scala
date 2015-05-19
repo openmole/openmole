@@ -27,6 +27,6 @@ object Counter {
 }
 
 sealed class Counter(start: Long = 0L, step: Long = 1L) extends Domain[Long] with Discrete[Long] {
-  override def iterator(context: Context)(implicit rng: Random): Iterator[Long] =
+  override def iterator(context: Context)(implicit rng: RandomProvider): Iterator[Long] =
     Iterator.iterate(0L)(_ + 1L)
 }

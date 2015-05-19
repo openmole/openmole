@@ -60,7 +60,7 @@ abstract class SystemExecTask(
     val error: Option[Prototype[String]],
     val variables: Seq[(Prototype[_], String)]) extends ExternalTask {
 
-  override protected def process(context: Context) = withWorkDir { tmpDir ⇒
+  override protected def process(context: Context)(implicit rng: RandomProvider) = withWorkDir { tmpDir ⇒
     val workDir =
       directory match {
         case None    ⇒ tmpDir

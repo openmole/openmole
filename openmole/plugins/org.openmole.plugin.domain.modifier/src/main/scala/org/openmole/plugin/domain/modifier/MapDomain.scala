@@ -19,28 +19,25 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
-import org.openmole.plugin.tool.groovy.ContextToGroovyCode
 import org.openmole.core.workflow.tools._
+import scala.reflect.runtime.universe._
 
 import scala.util.Random
 
 object MapDomain {
 
-  def apply[I, O](domain: Domain[I] with Discrete[I], name: String, source: String) =
-    new MapDomain[I, O](domain, name, source)
+  def apply[I, O](domain: Domain[I] with Discrete[I], source: String)(implicit iTag: TypeTag[I], oTag: TypeTag[O]) =
+    new MapDomain[I, O](domain, s"{$source}: (${iTag.tpe} => ${oTag.tpe})")
 
 }
 
-sealed class MapDomain[-I, +O](domain: Domain[I] with Discrete[I], name: String, val source: String) extends Domain[O] with Discrete[O] with ContextToGroovyCode { d ⇒
+sealed class MapDomain[-I, +O] private (domain: Domain[I] with Discrete[I], val source: String) extends Domain[O] with Discrete[O] { d ⇒
 
   override def inputs = domain.inputs
-  def libraries = Seq.empty
+  @transient lazy val proxy = ScalaWrappedCompilation.raw(source)
 
-  override def iterator(context: Context)(implicit rng: Random): Iterator[O] =
+  override def iterator(context: Context)(implicit rng: RandomProvider): Iterator[O] =
     domain.iterator(context).map {
-      e ⇒
-        val b = context.toBinding
-        b.setVariable(name, e)
-        execute(b).asInstanceOf[O]
+      e ⇒ proxy.run(context).asInstanceOf[I ⇒ O](e)
     }
 }

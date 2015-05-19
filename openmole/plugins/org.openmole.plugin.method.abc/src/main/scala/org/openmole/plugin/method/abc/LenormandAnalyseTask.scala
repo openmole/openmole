@@ -63,7 +63,7 @@ abstract class LenormandAnalyseTask() extends Task {
   def iteration: Prototype[Int]
   def accepted: Prototype[Double]
 
-  override def process(context: Context) = {
+  override def process(context: Context)(implicit rng: RandomProvider) = {
     val thetasValue: Seq[Seq[Double]] = lenormand.priorPrototypes.map { p ⇒ context(p.toArray).toSeq }.transpose
     val summaryStatsValue: Seq[Seq[Double]] = lenormand.targetPrototypes.map { p ⇒ context(p.toArray).toSeq }.transpose
     val stateValue: algorithm.Lenormand#STATE = context(state)

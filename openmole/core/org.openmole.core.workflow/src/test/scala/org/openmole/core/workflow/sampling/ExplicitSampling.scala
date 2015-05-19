@@ -24,5 +24,5 @@ import scala.util.Random
 
 case class ExplicitSampling[T](prototype: Prototype[T], data: Iterable[T]) extends Sampling {
   override def prototypes = List(prototype)
-  override def build(context: ⇒ Context)(implicit rng: Random) = data.map { v ⇒ List(Variable(prototype, v)) }.iterator
+  override def build(context: ⇒ Context)(implicit rng: RandomProvider) = data.map { v ⇒ List(Variable(prototype, v)) }.iterator
 }

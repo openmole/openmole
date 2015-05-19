@@ -5,7 +5,6 @@ import java.util.UUID
 import java.util.zip.{ GZIPOutputStream, GZIPInputStream }
 import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.HttpServletRequest
-import groovy.ui.ConsoleView
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.openmole.console._
