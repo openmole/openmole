@@ -28,7 +28,7 @@ import scala.collection.mutable.{ HashSet, ListBuffer }
 import scala.util.Random
 
 object AggregationTransition {
-  def aggregateOutputs(moleExecution: MoleExecution, transition: IAggregationTransition, results: Iterable[Variable[_]]) = {
+  def aggregateOutputs(moleExecution: MoleExecution, transition: IAggregationTransition, results: Iterable[(Long, Variable[_])]) = {
     val toArrayTypes = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.name -> d.`type` }.toMap[String, PrototypeType[_]]
     ContextAggregator.aggregate(transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks), toArrayTypes, results)
   }
@@ -44,7 +44,7 @@ class AggregationTransition(start: Capsule, end: Slot, condition: Condition = Tr
     if (!subMole.canceled && !hasBeenPerformed(subMole, parentTicket)) {
       subMole.aggregationTransitionRegistry.consult(this, parentTicket) match {
         case Some(results) ⇒
-          results ++= filtered(context).values
+          results ++= filtered(context).values.map(ticket.content -> _)
 
           if (trigger != Condition.False) {
             val context = AggregationTransition.aggregateOutputs(moleExecution, this, results)

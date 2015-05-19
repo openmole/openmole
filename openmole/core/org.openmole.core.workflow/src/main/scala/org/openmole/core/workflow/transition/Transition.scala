@@ -56,14 +56,14 @@ class Transition(
     if (nextTaskReady(ticket, subMole)) {
       val dataChannelVariables = mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) }
 
-      def removeVariables(t: ITransition) = registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable
+      def removeVariables(t: ITransition) = registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registered")).toIterable
 
       val transitionsVariables: Iterable[Variable[_]] =
         mole.inputTransitions(end).toList.flatMap {
           t ⇒ removeVariables(t)
         }
 
-      val combinaison: Iterable[Variable[_]] = dataChannelVariables ++ transitionsVariables
+      val combinasion = (dataChannelVariables ++ transitionsVariables)
 
       val newTicket =
         if (mole.slots(end.capsule).size <= 1) ticket
@@ -72,7 +72,7 @@ class Transition(
       val toArrayManifests =
         validTypes(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.`type`).toMap[String, PrototypeType[_]]
 
-      val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinaison)
+      val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinasion.map(1L -> _))
 
       subMole.submit(end.capsule, newContext, newTicket)
     }
