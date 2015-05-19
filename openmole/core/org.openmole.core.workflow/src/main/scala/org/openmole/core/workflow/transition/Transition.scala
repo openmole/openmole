@@ -72,7 +72,7 @@ class Transition(
       val toArrayManifests =
         validTypes(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.`type`).toMap[String, PrototypeType[_]]
 
-      val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinasion.map(1L -> _))
+      val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinasion.map(ticket.content -> _))
 
       subMole.submit(end.capsule, newContext, newTicket)
     }
