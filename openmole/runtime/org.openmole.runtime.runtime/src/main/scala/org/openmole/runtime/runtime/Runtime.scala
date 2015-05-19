@@ -82,9 +82,13 @@ class Runtime {
       OutputManager.redirectSystemError(errSt)
     }
 
-    def getReplicatedFile(replicatedFile: ReplicatedFile) =
+    def getReplicatedFile(replicatedFile: ReplicatedFile, transferOptions: TransferOptions) =
       replicatedFile.download {
-        (path, file) ⇒ retry(storage.download(path, file))
+        (path, file) ⇒
+          try retry(storage.download(path, file, transferOptions))
+          catch {
+            case e: Exception ⇒ throw new InternalProcessingError(s"Error downloading $replicatedFile", e)
+          }
       }
 
     val beginTime = System.currentTimeMillis
@@ -97,7 +101,7 @@ class Runtime {
       val plugins =
         for {
           plugin ← executionMessage.plugins
-        } yield plugin -> getReplicatedFile(plugin)
+        } yield plugin -> getReplicatedFile(plugin, TransferOptions(raw = true))
 
       logger.fine("Plugins " + plugins.unzip._2)
 
@@ -110,9 +114,9 @@ class Runtime {
 
       for (repliURI ← executionMessage.files) {
 
-        //To avoid getting twice the same plugin with different path
+        // To avoid getting twice the same plugin
         if (!usedFiles.containsKey(repliURI.originalPath)) {
-          val local = getReplicatedFile(repliURI)
+          val local = getReplicatedFile(repliURI, TransferOptions())
           usedFiles.put(repliURI.originalPath, local)
         }
       }

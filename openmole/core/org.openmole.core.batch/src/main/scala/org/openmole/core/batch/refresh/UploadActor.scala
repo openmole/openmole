@@ -132,7 +132,7 @@ class UploadActor(jobManager: JobManager) {
       }
     }
     finally tos.close
-    (files, plugins)
+    (files diff plugins, plugins)
   }
 
   def toReplicatedFile(job: Job, file: File, storage: StorageService, transferOptions: TransferOptions)(implicit token: AccessToken, session: Session): ReplicatedFile = {
@@ -188,7 +188,7 @@ class UploadActor(jobManager: JobManager) {
     storage: StorageService,
     path: String)(implicit token: AccessToken, session: Session): ExecutionMessage = {
 
-    val pluginReplicas = serializationPlugin.map { toReplicatedFile(job, _, storage, TransferOptions()) }
+    val pluginReplicas = serializationPlugin.map { toReplicatedFile(job, _, storage, TransferOptions(raw = true)) }
     val files = serializationFile.map { toReplicatedFile(job, _, storage, TransferOptions()) }
 
     ExecutionMessage(
