@@ -58,7 +58,7 @@ class SubMoleExecution(
   private val _canceled = Ref(false)
 
   val masterCapsuleRegistry = new RegistryWithTicket[MasterCapsule, Context]
-  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[Variable[_]]]
+  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[(Long, Variable[_])]]
   val transitionRegistry = new RegistryWithTicket[ITransition, Iterable[Variable[_]]]
 
   parentApply(_.+=(this))
