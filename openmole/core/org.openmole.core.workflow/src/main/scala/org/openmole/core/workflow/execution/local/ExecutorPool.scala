@@ -17,6 +17,8 @@
 
 package org.openmole.core.workflow.execution.local
 
+import java.util.UUID
+
 import org.openmole.tool.thread._
 
 import collection.mutable
@@ -25,32 +27,34 @@ import scala.ref.WeakReference
 class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment]) {
   private val jobs = JobPriorityQueue()
 
-  private val executers = {
+  private val executors = {
     val map = mutable.HashMap[LocalExecutor, Thread]()
-    (0 until nbThreads).foreach { _ ⇒ map += createExecuter }
+    (0 until nbThreads).foreach { _ ⇒ map += createExecutor }
     map
   }
 
-  override def finalize = executers.foreach {
+  override def finalize = executors.foreach {
     case (exe, thread) ⇒ exe.stop = true; thread.interrupt
   }
 
-  private def createExecuter = {
-    val executer = new LocalExecutor(environment)
-    val thread = daemonThreadFactory.newThread(executer)
-    thread.start
-    (executer, thread)
+  private def createExecutor = {
+    val executor = new LocalExecutor(environment)
+    val group = new ThreadGroup(Thread.currentThread().getThreadGroup, "executor" + UUID.randomUUID().toString)
+    val t = new Thread(group, executor)
+    t.setDaemon(true)
+    t.start
+    (executor, t)
   }
 
-  private[local] def addExecuter() = executers.synchronized { executers += createExecuter }
+  private[local] def addExecuter() = executors.synchronized { executors += createExecutor }
 
-  private[local] def removeExecuter(ex: LocalExecutor) = executers.synchronized { executers.remove(ex) }
+  private[local] def removeExecuter(ex: LocalExecutor) = executors.synchronized { executors.remove(ex) }
 
   private[local] def takeNextjob: LocalExecutionJob = jobs.dequeue
 
   def enqueue(job: LocalExecutionJob) = jobs.enqueue(job)
 
   def waiting: Int = jobs.size
-  def running: Int = executers.synchronized { executers.values.count(_.getState == Thread.State.RUNNABLE) }
+  def running: Int = executors.synchronized { executors.values.count(_.getState == Thread.State.RUNNABLE) }
 
 }
