@@ -156,7 +156,7 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
           |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
           |    }
           |    import $inputObject._
-          |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = newRNG(${Task.openMOLESeed.name}).toScala;
+          |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = ${prefix}RNGProvider()
           |    $source
           |    ${wrapOutput.getOrElse("")}
           |}
