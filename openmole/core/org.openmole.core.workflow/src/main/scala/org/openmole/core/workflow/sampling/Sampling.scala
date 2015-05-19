@@ -43,6 +43,6 @@ trait Sampling {
    * @param context context in which the exploration takes place
    */
   @throws(classOf[Throwable])
-  def build(context: ⇒ Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]]
+  def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]]
 
 }

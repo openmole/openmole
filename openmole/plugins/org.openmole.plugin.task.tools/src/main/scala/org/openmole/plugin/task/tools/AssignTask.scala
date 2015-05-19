@@ -19,7 +19,6 @@ package org.openmole.plugin.task.tools
 
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.task._
@@ -46,7 +45,7 @@ object AssignTask {
 }
 sealed abstract class AssignTask(val assignments: (Prototype[T], Prototype[T]) forSome { type T }*) extends Task {
 
-  override def process(context: Context) =
+  override def process(context: Context)(implicit rng: RandomProvider) =
     assignments.map { case (from, to) ⇒ Variable(to, context(from)) }
 
 }

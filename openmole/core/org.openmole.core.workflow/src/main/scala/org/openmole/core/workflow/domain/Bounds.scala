@@ -20,6 +20,6 @@ package org.openmole.core.workflow.domain
 import org.openmole.core.workflow.data._
 
 trait Bounds[+T] extends Domain[T] {
-  def min(context: Context): T
-  def max(context: Context): T
+  def min(context: Context)(implicit rng: RandomProvider): T
+  def max(context: Context)(implicit rng: RandomProvider): T
 }

@@ -36,7 +36,7 @@ sealed class MapDomain[-I, +O] private (domain: Domain[I] with Discrete[I], val 
   override def inputs = domain.inputs
   @transient lazy val proxy = ScalaWrappedCompilation.raw(source)
 
-  override def iterator(context: Context)(implicit rng: Random): Iterator[O] =
+  override def iterator(context: Context)(implicit rng: RandomProvider): Iterator[O] =
     domain.iterator(context).map {
       e ⇒ proxy.run(context).asInstanceOf[I ⇒ O](e)
     }

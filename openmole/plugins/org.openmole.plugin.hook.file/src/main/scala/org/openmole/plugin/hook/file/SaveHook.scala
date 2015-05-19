@@ -41,7 +41,7 @@ object SaveHook {
 
 abstract class SaveHook(file: ExpandedString, prototypes: Prototype[_]*) extends Hook {
 
-  override def process(context: Context, executionContext: ExecutionContext) = {
+  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
     val saveContext: Context = prototypes.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found")))
     val to = executionContext.relativise(file.from(context))
     to.createParentDir

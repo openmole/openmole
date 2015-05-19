@@ -64,13 +64,11 @@ sealed abstract class TerminationTask[E <: Termination with Archive](val evoluti
   def generation: Prototype[Int]
   def terminated: Prototype[Boolean]
 
-  override def process(context: Context) = {
-    val rng = Task.buildRNG(context)
-
+  override def process(context: Context)(implicit rng: RandomProvider) = {
     val (term, newState) =
       evolution.terminated(
         context(population),
-        context(state))(rng)
+        context(state))(rng())
 
     Context(
       Variable(terminated, term),

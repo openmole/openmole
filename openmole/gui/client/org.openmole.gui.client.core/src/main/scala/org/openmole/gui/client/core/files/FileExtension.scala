@@ -23,11 +23,13 @@ object FileExtension {
     def extension: String
   }
 
+  trait OpenMOLEScript
+
   case class DisplayableFile(extension: String, highlighter: String) extends FileExtension
 
   case class BinaryFile(extension: String) extends FileExtension
 
-  val OMS = DisplayableFile("oms", "scala")
+  val OMS = new DisplayableFile("oms", "scala") with OpenMOLEScript
   val SCALA = DisplayableFile("scala", "scala")
   val NETLOGO = DisplayableFile("nlogo", "nlogo")
   val SH = DisplayableFile("sh", "sh")
@@ -39,7 +41,8 @@ object FileExtension {
 
     val fileName = last2.mkString(".")
     val fileType = last2.last match {
-      case "scala" | "oms"         ⇒ SCALA
+      case "oms"                   ⇒ OMS
+      case "scala"                 ⇒ SCALA
       case "sh"                    ⇒ SH
       case "nlogo" | "csv" | "txt" ⇒ NO_EXTENSION
       case _                       ⇒ BINARY

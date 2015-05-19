@@ -33,7 +33,7 @@ class ConcatenateSampling(val samplings: Sampling*) extends Sampling {
 
   override def prototypes: Iterable[Prototype[_]] = samplings.head.prototypes
 
-  override def build(context: ⇒ Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] =
+  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
     samplings.toIterator.flatMap(_.build(context))
 
 }

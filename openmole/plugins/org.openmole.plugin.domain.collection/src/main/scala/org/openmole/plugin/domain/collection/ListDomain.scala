@@ -28,6 +28,6 @@ object ListDomain {
 }
 
 sealed class ListDomain[T](values: FromContext[T]*) extends Domain[T] with Finite[T] {
-  override def computeValues(context: Context)(implicit rng: Random): Iterable[T] = values.map(_.from(context))
+  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = values.map(_.from(context))
 }
 

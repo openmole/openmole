@@ -37,7 +37,7 @@ object DeleteFileHook {
 
 abstract class DeleteFileHook(toDelete: Prototype[File]*) extends Hook {
 
-  override def process(context: Context, executionContext: ExecutionContext) = {
+  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
     toDelete.foreach {
       prototype ⇒
         context.option(prototype) match {

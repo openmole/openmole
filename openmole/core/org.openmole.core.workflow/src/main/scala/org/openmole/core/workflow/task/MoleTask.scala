@@ -60,10 +60,10 @@ sealed abstract class MoleTask(
     val last: Capsule,
     val implicits: Iterable[String]) extends Task {
 
-  override protected def process(context: Context) = {
+  override protected def process(context: Context)(implicit rng: RandomProvider) = {
     val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
 
-    val execution = MoleExecution(mole, seed = context(Task.openMOLESeed), implicits = implicitsValues)
+    val execution = MoleExecution(mole, seed = rng().nextLong(), implicits = implicitsValues)
 
     @volatile var lastContext: Option[Context] = None
     val lastContextLock = new ReentrantLock()

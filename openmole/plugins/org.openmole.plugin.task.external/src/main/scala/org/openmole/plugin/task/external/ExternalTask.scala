@@ -27,6 +27,8 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workspace.Workspace
 
+import scala.util.Random
+
 object ExternalTask {
   val PWD = Prototype[String]("PWD")
 
@@ -59,12 +61,12 @@ trait ExternalTask extends Task {
 
   protected case class ToPut(file: File, name: String, link: Boolean, inWorkDir: Boolean)
 
-  protected def listInputFiles(context: Context): Iterable[(Prototype[File], ToPut)] =
+  protected def listInputFiles(context: Context)(implicit rng: RandomProvider): Iterable[(Prototype[File], ToPut)] =
     inputFiles.map {
       case InputFile(prototype, name, link, toWorkDir) ⇒ prototype -> ToPut(context(prototype), name.from(context), link, toWorkDir)
     }
 
-  protected def listResources(context: Context, tmpDir: File): Iterable[ToPut] = {
+  protected def listResources(context: Context, tmpDir: File)(implicit rng: RandomProvider): Iterable[ToPut] = {
     val byLocation =
       resources groupBy {
         case Resource(_, name, _, _, _) ⇒ new File(tmpDir, name.from(context)).getCanonicalPath
@@ -80,7 +82,7 @@ trait ExternalTask extends Task {
     }
   }
 
-  protected def outputFileVariables(context: Context, tmpDir: File, workDirPath: String) = {
+  protected def outputFileVariables(context: Context, tmpDir: File, workDirPath: String)(implicit rng: RandomProvider) = {
     val workDir = new File(tmpDir, workDirPath)
 
     outputFiles.map {
@@ -101,7 +103,7 @@ trait ExternalTask extends Task {
     }
   }
 
-  def prepareInputFiles(context: Context, tmpDir: File, workDirPath: String): Context = {
+  def prepareInputFiles(context: Context, tmpDir: File, workDirPath: String)(implicit rng: RandomProvider): Context = {
     val workDir = new File(tmpDir, workDirPath)
     workDir.mkdirs()
     def destination(f: ToPut) = if (f.inWorkDir) new File(workDir, f.name) else new File(tmpDir, f.name)
@@ -118,7 +120,7 @@ trait ExternalTask extends Task {
     context ++ copiedFiles
   }
 
-  def fetchOutputFiles(context: Context, tmpDir: File, workDirPath: String): Context = {
+  def fetchOutputFiles(context: Context, tmpDir: File, workDirPath: String)(implicit rng: RandomProvider): Context = {
     val resultContext = context ++ outputFileVariables(context, tmpDir, workDirPath)
 
     def contextFiles =

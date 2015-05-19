@@ -31,7 +31,7 @@ object SelectFileDomain {
 
 class SelectFileDomain(val base: File, val path: ExpandedString) extends Domain[File] with Finite[File] {
 
-  override def computeValues(context: Context)(implicit rng: Random): Iterable[File] =
+  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] =
     List(new File(base, path.from(context)))
 
 }

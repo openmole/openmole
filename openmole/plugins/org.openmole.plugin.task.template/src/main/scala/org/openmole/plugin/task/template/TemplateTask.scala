@@ -43,7 +43,7 @@ sealed abstract class TemplateTask(
 
   @transient lazy val expanded = VariableExpansion(template)
 
-  override def process(context: Context) = {
+  override def process(context: Context)(implicit rng: RandomProvider) = {
     val outputFile = Workspace.newFile("output", "template")
     outputFile.content = expanded.expand(context)
     Context.empty + (output, outputFile)

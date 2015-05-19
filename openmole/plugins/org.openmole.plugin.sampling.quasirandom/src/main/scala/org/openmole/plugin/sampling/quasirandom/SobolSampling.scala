@@ -40,7 +40,7 @@ sealed class SobolSampling(val samples: FromContext[Int], val factors: Factor[Do
   override def inputs = PrototypeSet(factors.flatMap(_.inputs))
   override def prototypes = factors.map { _.prototype }
 
-  override def build(context: ⇒ Context)(implicit rng: Random): Iterator[Iterable[Variable[Double]]] = {
+  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[Double]]] = {
     val sequence = new SobolSequenceGenerator(factors.size)
     val s = samples.from(context)
 

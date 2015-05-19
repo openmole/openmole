@@ -65,7 +65,7 @@ abstract class CSVSource extends Source with CSVToVariables {
 
   def path: ExpandedString
 
-  override def process(context: Context, executionContext: ExecutionContext): Context = {
+  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider): Context = {
     val file = new File(path.from(context))
     val transposed = toVariables(file, context).toSeq.transpose
 

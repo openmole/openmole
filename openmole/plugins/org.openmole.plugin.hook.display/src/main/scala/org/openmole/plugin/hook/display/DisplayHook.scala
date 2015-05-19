@@ -34,7 +34,7 @@ object DisplayHook {
 
 abstract class DisplayHook(toDisplay: ExpandedString) extends Hook {
 
-  override def process(context: Context, executionContext: ExecutionContext) = {
+  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
     executionContext.out.println(toDisplay.from(context))
     context
   }

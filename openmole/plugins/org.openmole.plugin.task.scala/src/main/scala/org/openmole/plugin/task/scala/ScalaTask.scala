@@ -31,6 +31,6 @@ object ScalaTask {
 }
 
 abstract class ScalaTask(val source: String) extends JVMLanguageTask with ScalaWrappedCompilation with ScalaWrappedOutput {
-  override def processCode(context: Context) = compiled(context).get.run(context)
+  override def processCode(context: Context)(implicit rng: RandomProvider) = run(context)
 }
 

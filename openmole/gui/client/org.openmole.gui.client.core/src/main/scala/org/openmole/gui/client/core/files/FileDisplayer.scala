@@ -43,8 +43,11 @@ class FileDisplayer {
     alreadyDisplayed(tn) match {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileType match {
-        case disp: DisplayableFile ⇒ tabs.++(EditableNodeTab(tn.name, tn.canonicalPath, editor(fileType, content)))
-        case _                     ⇒ //FIXME for GUI workflows
+        case disp: DisplayableFile ⇒ disp match {
+          case oms: OpenMOLEScript ⇒ tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, editor(fileType, content)) with OMSTabControl
+          case _                   ⇒ tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, editor(fileType, content))
+        }
+        case _ ⇒ //FIXME for GUI workflows
       }
     }
   }

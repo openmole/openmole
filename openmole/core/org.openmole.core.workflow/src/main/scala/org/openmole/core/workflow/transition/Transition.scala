@@ -29,6 +29,7 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
+import scala.util.Random
 
 object Transition extends Logger
 
@@ -55,14 +56,14 @@ class Transition(
     if (nextTaskReady(ticket, subMole)) {
       val dataChannelVariables = mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) }
 
-      def removeVariables(t: ITransition) = registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable
+      def removeVariables(t: ITransition) = registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registered")).toIterable
 
       val transitionsVariables: Iterable[Variable[_]] =
         mole.inputTransitions(end).toList.flatMap {
           t ⇒ removeVariables(t)
         }
 
-      val combinaison: Iterable[Variable[_]] = dataChannelVariables ++ transitionsVariables
+      val combinasion = (dataChannelVariables ++ transitionsVariables)
 
       val newTicket =
         if (mole.slots(end.capsule).size <= 1) ticket
@@ -71,28 +72,24 @@ class Transition(
       val toArrayManifests =
         validTypes(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.`type`).toMap[String, PrototypeType[_]]
 
-      val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinaison)
+      val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinasion.map(ticket.content -> _))
 
       subMole.submit(end.capsule, newContext, newTicket)
     }
   }
 
-  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) =
-    try {
-      if (isConditionTrue(context)) _perform(context, ticket, subMole)
-    }
+  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
+    try if (condition.evaluate(context)) _perform(context, ticket, subMole)
     catch {
       case e: Throwable ⇒
         logger.log(SEVERE, "Error in " + this, e)
         throw e
     }
 
-  override def isConditionTrue(context: Context): Boolean = condition.evaluate(context)
-
   override def data(mole: Mole, sources: Sources, hooks: Hooks) =
     start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.name))
 
-  protected def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, ticket, subMole)
+  protected def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, ticket, subMole)
   protected def filtered(context: Context) = context.filterNot { case (n, _) ⇒ filter(n) }
 
   override def toString = this.getClass.getSimpleName + " from " + start + " to " + end

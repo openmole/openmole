@@ -58,7 +58,7 @@ class SubMoleExecution(
   private val _canceled = Ref(false)
 
   val masterCapsuleRegistry = new RegistryWithTicket[MasterCapsule, Context]
-  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[Variable[_]]]
+  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[(Long, Variable[_])]]
   val transitionRegistry = new RegistryWithTicket[ITransition, Iterable[Variable[_]]]
 
   parentApply(_.+=(this))
@@ -129,7 +129,7 @@ class SubMoleExecution(
       def ctxForHooks = implicits + job.context
 
       def executeHook(h: Hook) =
-        try h.perform(ctxForHooks, moleExecution.executionContext)
+        try h.perform(ctxForHooks, moleExecution.executionContext)(moleExecution.newRNG)
         catch {
           case e: Throwable ⇒
             EventDispatcher.trigger(moleExecution, new MoleExecution.HookExceptionRaised(h, job, e, SEVERE))
@@ -142,7 +142,7 @@ class SubMoleExecution(
       mole.outputDataChannels(capsule).foreach { _.provides(implicits + context, ticket, moleExecution) }
 
       transitionLock {
-        mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse.foreach { _.perform(implicits + context, ticket, this) }
+        mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse.foreach { _.perform(implicits + context, ticket, this)(moleExecution.newRNG) }
       }
     }
     catch {
@@ -171,7 +171,7 @@ class SubMoleExecution(
   }
 
   def implicits =
-    moleExecution.implicits + Variable(Task.openMOLESeed, moleExecution.newSeed)
+    moleExecution.implicits
 
   def submit(capsule: Capsule, context: Context, ticket: Ticket) = {
     if (!canceled) {
@@ -184,7 +184,7 @@ class SubMoleExecution(
       val sourced =
         moleExecution.sources(capsule).foldLeft(Context.empty) {
           case (a, s) ⇒
-            val ctx = try s.perform(implicits + context, moleExecution.executionContext)
+            val ctx = try s.perform(implicits + context, moleExecution.executionContext)(moleExecution.newRNG)
             catch {
               case t: Throwable ⇒
                 logger.log(SEVERE, "Error in submole execution", t)
@@ -192,7 +192,7 @@ class SubMoleExecution(
                 throw new InternalProcessingError(t, s"Error in source execution that is plugged to $capsule")
             }
             a + ctx
-        }
+        } + Variable(Task.openMOLESeed, moleExecution.newSeed)
 
       //FIXME: Factorize code
       capsule match {

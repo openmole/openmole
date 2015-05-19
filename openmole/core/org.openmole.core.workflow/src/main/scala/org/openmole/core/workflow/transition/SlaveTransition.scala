@@ -24,9 +24,11 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
 
+import scala.util.Random
+
 class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: Filter[String] = Filter.empty) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition {
 
-  override def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) =
+  override def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
     submitIn(filtered(context), ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place within an exploration.")), subMole)
 
 }

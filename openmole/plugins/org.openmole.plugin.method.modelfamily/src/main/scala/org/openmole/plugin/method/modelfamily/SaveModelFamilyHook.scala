@@ -18,7 +18,7 @@
 package org.openmole.plugin.method.modelfamily
 
 import org.openmole.tool.file._
-import org.openmole.core.workflow.data.Context
+import org.openmole.core.workflow.data.{ RandomProvider, Context }
 import org.openmole.core.workflow.mole.{ HookBuilder, ExecutionContext, Hook }
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.method.evolution._
@@ -41,7 +41,7 @@ abstract class SaveModelFamilyHook(parameters: GAParameters[ModelFamilyCalibrati
   def traitsHeader = mf.modelFamily.traits.map(_.getName).mkString(",")
   def headers = s"${traitsHeader},${mf.inputsPrototypes.map(_.name).mkString(",")},${mf.objectives.map(_.name).mkString(",")}"
 
-  def process(context: Context, executionContext: ExecutionContext) = {
+  def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
 
     def idArray: Array[Int] = context(mf.modelFamily.modelIdPrototype.toArray)
     def inputsArray = parameters.evolution.inputsPrototypes.map(p ⇒ context(p.toArray).toSeq).transpose

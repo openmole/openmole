@@ -30,5 +30,5 @@ object IteratorDomain {
 }
 
 sealed class IteratorDomain[T](iterator: Iterator[T]) extends Domain[T] with Discrete[T] {
-  override def iterator(context: Context)(implicit rng: Random): Iterator[T] = iterator
+  override def iterator(context: Context)(implicit rng: RandomProvider): Iterator[T] = iterator
 }

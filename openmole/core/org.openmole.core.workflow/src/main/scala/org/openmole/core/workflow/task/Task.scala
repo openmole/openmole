@@ -17,12 +17,13 @@
 
 package org.openmole.core.workflow.task
 
-import org.openmole.core.tools.service.{ Logger, Random }
+import org.openmole.core.tools.service
 import org.openmole.core.workflow.data._
 import org.openmole.core.serializer.plugin._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.core.tools.service._
+import scala.util.Random
 
 object Task extends Logger {
   val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")
@@ -33,7 +34,7 @@ object Task extends Logger {
 
   val openMOLESeed = Prototype[Long](prefixedVariable("Seed"))
 
-  def buildRNG(context: Context) = Random.newRNG(context(Task.openMOLESeed))
+  def buildRNG(context: Context): Random = service.Random.newRNG(context(Task.openMOLESeed)).toScala
 }
 
 trait Task <: InputOutputCheck {
@@ -43,9 +44,9 @@ trait Task <: InputOutputCheck {
    *
    * @param context the context in which the task will be executed
    */
-  def perform(context: Context): Context = perform(context, process)
+  def perform(context: Context): Context = perform(context, process(_)())
 
-  protected def process(context: Context): Context
+  protected def process(context: Context)(implicit rng: RandomProvider = Task.buildRNG(context)): Context
 
   /**
    *
