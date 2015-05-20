@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.openmole.console._
-import org.openmole.core.eventdispatcher._
+import org.openmole.core.event._
 import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._

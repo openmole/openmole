@@ -92,7 +92,6 @@ package object message {
     def toMoleJob(stateChangedCallBack: StateChangedCallBack) = MoleJob(task, context, id, stateChangedCallBack)
   }
 
-
   case class FileMessage(path: String, hash: String)
   case class ReplicatedFile(originalPath: String, directory: Boolean, hash: String, path: String, mode: Int)
   case class EnvironmentInfo(archiveResult: Boolean)

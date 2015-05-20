@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.eventdispatcher
+package org.openmole.core.event
 
 import org.scalatest._
 import org.scalatest.junit._

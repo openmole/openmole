@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.execution.local
 
-import org.openmole.core.eventdispatcher.EventDispatcher
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }

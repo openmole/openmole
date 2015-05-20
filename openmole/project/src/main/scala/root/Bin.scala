@@ -58,7 +58,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
       Core.replication,
       Core.exception,
       Core.tools,
-      Core.eventDispatcher,
+      Core.event,
       Core.pluginManager,
       Core.workflow,
       Core.batch,

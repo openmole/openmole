@@ -11,7 +11,7 @@ object Runtime extends Defaults(runtime.REST) {
   val dbserver = OsgiProject("org.openmole.runtime.dbserver", imports = Seq("*")) dependsOn (Core.replication) settings (bundleType += "dbserver",
     libraryDependencies ++= Seq(h2, slf4j, xstream))
 
-  val runtime = OsgiProject("org.openmole.runtime.runtime", singleton = true, imports = Seq("*")) dependsOn (Core.workflow, Core.batch, Core.serializer, Core.logging, Core.eventDispatcher, Core.exception) settings
+  val runtime = OsgiProject("org.openmole.runtime.runtime", singleton = true, imports = Seq("*")) dependsOn (Core.workflow, Core.batch, Core.serializer, Core.logging, Core.event, Core.exception) settings
     (includeOsgi, bundleType += "runtime", libraryDependencies ++= Seq(scalaLang, scopt, equinoxCommon, equinoxApp))
 
   val daemon = OsgiProject("org.openmole.runtime.daemon", singleton = true, imports = Seq("*")) dependsOn (Core.workflow, Core.workflow, Core.batch, Core.workspace,

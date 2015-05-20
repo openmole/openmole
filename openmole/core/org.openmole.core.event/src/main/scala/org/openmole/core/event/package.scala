@@ -16,7 +16,7 @@
  */
 package org.openmole.core
 
-package object eventdispatcher {
+package object event {
   trait Event[-T]
   type Listner[T] = PartialFunction[(T, Event[T]), Unit]
 

@@ -20,7 +20,7 @@ package org.openmole.core.batch.refresh
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.{ TimeUnit, Executors }
 
-import org.openmole.core.eventdispatcher.EventDispatcher
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.tools.collection.PriorityQueue
 import org.openmole.core.tools.service.Logger

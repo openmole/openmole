@@ -18,7 +18,7 @@
 package org.openmole.core.batch.environment
 
 import java.io.File
-import org.openmole.core.eventdispatcher.{ Event, EventDispatcher }
+import org.openmole.core.event.{ Event, EventDispatcher }
 import java.util.concurrent.atomic.AtomicLong
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.storage._

@@ -24,7 +24,7 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.message._
 import org.openmole.core.batch.storage._
-import org.openmole.core.eventdispatcher.EventDispatcher
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.core.workflow.execution.Environment.RuntimeLog

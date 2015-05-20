@@ -18,7 +18,7 @@
 
 package org.openmole.core.batch.jobservice
 
-import org.openmole.core.eventdispatcher.{ Event, EventDispatcher }
+import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.execution.ExecutionState._
