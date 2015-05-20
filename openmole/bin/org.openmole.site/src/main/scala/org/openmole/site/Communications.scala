@@ -21,17 +21,26 @@ object Communication {
     // TODO complete entries
     Seq(
       Article(
-        "Somebody2015",
+        "Reuillon.et.al.2015-1",
+        Authors("Romain Reuillon", "Clara Schmitt", "Ricardo De Aldama", "Jean-Baptiste Mouret"),
         Title("A New Method to Evaluate Simulation Models: The Calibration Profile (CP) Algorithm"),
         Url("http://jasss.soc.surrey.ac.uk/18/1/12.html"),
         Year(2015)
       ),
       Article(
         "Schmitt.etal.2015",
-        Authors("Clara Schmitt"),
+        Authors("Clara Schmitt", "Sébastien Rey-Coyrehourcq", "Romain Reuillon", "Denise Pumain"),
         Title("Half a billion simulations: Evolutionary algorithms and distributed computing for calibrating the SimpopLocal geographical model"),
         Url("https://hal.archives-ouvertes.fr/hal-01118918"),
         Year(2015)
+      ),
+      InProceedings(
+        "Koteska.etal.2014",
+        Authors("Bojana Koteska", "Boro Jakimovski", "Anastas Misev"),
+        Title("Building Scientific Workflows on the Grid: A Comparison between OpenMole and Taverna"),
+        Url(baseURL + "/files/Koteska2014.pdf"),
+        BookTitle("RO-LCG 2014 Conference"),
+        Year(2014)
       ),
       Conference(
         "Passerat-Palmbach.etal.2014",
@@ -43,13 +52,14 @@ object Communication {
       ),
       Article(
         "Lardy.etal.2014",
-        Authors("Romain Lardy"),
+        Authors("R. Lardy", "B. Bachelet", "G. Bellocchic", "D.R.C. Hill"),
         Title("Towards vulnerability minimization of grassland soil organic matter using metamodels"),
         Url(baseURL + "/files/Lardy2014.pdf"),
         Year(2014)
       ),
       Article(
-        "Somebody2014",
+        "Thiele.etal.2014",
+        Authors("Jan C. Thiele", "Winfried Kurth", "Volker Grimm"),
         Title("Facilitating Parameter Estimation and Sensitivity Analysis of Agent-Based Models: A Cookbook Using NetLogo and R"),
         Url("http://jasss.soc.surrey.ac.uk/17/3/11.html"),
         Year(2014)
@@ -125,9 +135,11 @@ object Communication {
         Url(baseURL + "/files/Reuillon2011.pdf"),
         Year(2011)
       ),
-      Article(
+      InProceedings(
         "Mesmoudi2010",
+        Authors("Salma Mesmoudi", "Nathalie Perrot", "Romain Reuillon", "Paul Bourgine", "Evelyne Lutton"),
         Title("Optimal viable path search for a cheese ripening process using a multi-objective ea"),
+        BookTitle(" ICEC 2010, International Conference on Evolutionary Computatio"),
         Url(baseURL + "/files/Mesmoudi2010.pdf"),
         Year(2010)
       ),
