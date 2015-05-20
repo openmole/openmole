@@ -198,5 +198,5 @@ trait BatchEnvironment extends Environment { env ⇒
   def submitted: Long = executionJobs.count { _.state == ExecutionState.SUBMITTED }
   def running: Long = executionJobs.count { _.state == ExecutionState.RUNNING }
 
-  def runtimeInfo = EnvironmentInfo(archiveResult = false)
+  def runtimeSettings = RuntimeSettings(archiveResult = false)
 }

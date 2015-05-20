@@ -94,8 +94,8 @@ package object message {
 
   case class FileMessage(path: String, hash: String)
   case class ReplicatedFile(originalPath: String, directory: Boolean, hash: String, path: String, mode: Int)
-  case class EnvironmentInfo(archiveResult: Boolean)
-  case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: FileMessage, communicationDirPath: String, environmentInfo: EnvironmentInfo)
+  case class RuntimeSettings(archiveResult: Boolean)
+  case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: FileMessage, communicationDirPath: String, runtimeSettings: RuntimeSettings)
 
   sealed trait SerializedContextResults
   case class ArchiveContextResults(contextResults: FileMessage) extends SerializedContextResults

@@ -326,5 +326,5 @@ class EGIEnvironment(
     }
 
   def bdiiServer: BDII = new BDII(bdii)
-  override def runtimeInfo = super.runtimeInfo.copy(archiveResult = true)
+  override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)
 }

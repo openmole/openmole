@@ -196,7 +196,7 @@ class UploadActor(jobManager: JobManager) {
       files,
       jobMessage,
       path,
-      storage.environment.runtimeInfo
+      storage.environment.runtimeSettings
     )
   }
 

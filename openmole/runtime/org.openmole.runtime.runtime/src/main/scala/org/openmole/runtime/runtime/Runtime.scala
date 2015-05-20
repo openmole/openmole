@@ -178,7 +178,7 @@ class Runtime {
         }
 
       val result =
-        if (executionMessage.environmentInfo.archiveResult) uploadArchive else uploadIndividualFiles
+        if (executionMessage.runtimeSettings.archiveResult) uploadArchive else uploadIndividualFiles
 
       val endTime = System.currentTimeMillis
       Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))

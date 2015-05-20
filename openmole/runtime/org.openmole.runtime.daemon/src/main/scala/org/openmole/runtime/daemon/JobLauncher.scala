@@ -333,7 +333,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")
 
           localExecutionMessage.withOutputStream { os ⇒
-            SerialiserService.serialise(ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath, executionMessage.environmentInfo), os)
+            SerialiserService.serialise(ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath, executionMessage.runtimeSettings), os)
           }
 
           Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, jobMessage.memory, executionMessage, job, cached))
