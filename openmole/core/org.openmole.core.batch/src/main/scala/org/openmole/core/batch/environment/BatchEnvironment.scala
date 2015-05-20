@@ -34,6 +34,7 @@ import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.job._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.core.workflow.execution._
+import org.openmole.core.batch.message._
 import org.openmole.tool.hash.Hash
 import ref.WeakReference
 
@@ -196,4 +197,6 @@ trait BatchEnvironment extends Environment { env ⇒
 
   def submitted: Long = executionJobs.count { _.state == ExecutionState.SUBMITTED }
   def running: Long = executionJobs.count { _.state == ExecutionState.RUNNING }
+
+  def runtimeInfo = EnvironmentInfo(archiveResult = false)
 }

@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.environment.egi
 
+import org.eclipse.osgi.service.environment.EnvironmentInfo
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.filedeleter.FileDeleter
 import org.openmole.tool.file._
@@ -325,5 +326,5 @@ class EGIEnvironment(
     }
 
   def bdiiServer: BDII = new BDII(bdii)
-
+  override def runtimeInfo = super.runtimeInfo.copy(archiveResult = true)
 }

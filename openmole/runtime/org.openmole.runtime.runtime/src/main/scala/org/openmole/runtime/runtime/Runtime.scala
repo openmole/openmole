@@ -46,7 +46,6 @@ import org.openmole.core.workflow.execution.Environment.RuntimeLog
 
 object Runtime extends Logger {
   val NbRetry = 3
-
   def retry[T](f: ⇒ T) = Retry.retry(f, NbRetry)
 }
 
@@ -147,29 +146,42 @@ class Runtime {
       logger.fine("Results " + saver.results)
 
       val contextResults = ContextResults(saver.results)
-      Workspace.withTmpFile { contextResultFile ⇒
-        logger.fine("Upload the results")
-        val PluginClassAndFiles(files, _) = SerialiserService.serialiseGetPluginsAndFiles(contextResults, contextResultFile)
 
-        val replicated =
-          files.map {
-            _.upload {
-              f ⇒
-                val name = storage.child(executionMessage.communicationDirPath, Storage.uniqName("resultFile", ".bin"))
-                retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
-                name
+      def uploadArchive =
+        Workspace.withTmpFile { contextResultFile ⇒
+          SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
+          val uploadedContextResults = storage.child(communicationDirPath, Storage.uniqName("contextResult", ".bin"))
+          val contextResultFileHash = contextResultFile.hash.toString
+          retry(storage.upload(contextResultFile, uploadedContextResults, TransferOptions(forceCopy = true, canMove = true)))
+          ArchiveContextResults(FileMessage(uploadedContextResults, contextResultFileHash))
+        }
+
+      def uploadIndividualFiles =
+        Workspace.withTmpFile { contextResultFile ⇒
+          val PluginClassAndFiles(files, _) = SerialiserService.serialiseGetPluginsAndFiles(contextResults, contextResultFile)
+
+          val replicated =
+            files.map {
+              _.upload {
+                f ⇒
+                  val name = storage.child(communicationDirPath, Storage.uniqName("resultFile", ".bin"))
+                  retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
+                  name
+              }
             }
-          }
 
-        val uploadedContextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("contextResult", ".bin"))
-        val contextResultFileHash = contextResultFile.hash.toString
+          val uploadedContextResults = storage.child(communicationDirPath, Storage.uniqName("contextResult", ".bin"))
+          val contextResultFileHash = contextResultFile.hash.toString
 
-        retry(storage.upload(contextResultFile, uploadedContextResults, TransferOptions(forceCopy = true, canMove = true)))
-        val result = SerializedContextResults(FileMessage(uploadedContextResults, contextResultFileHash), replicated)
+          retry(storage.upload(contextResultFile, uploadedContextResults, TransferOptions(forceCopy = true, canMove = true)))
+          IndividualFilesContextResults(FileMessage(uploadedContextResults, contextResultFileHash), replicated)
+        }
 
-        val endTime = System.currentTimeMillis
-        Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
-      }
+      val result =
+        if (executionMessage.environmentInfo.archiveResult) uploadArchive else uploadIndividualFiles
+
+      val endTime = System.currentTimeMillis
+      Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
 
     }
     catch {

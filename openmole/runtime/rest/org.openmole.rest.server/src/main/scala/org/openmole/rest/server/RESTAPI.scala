@@ -25,6 +25,7 @@ import scala.util.{ Try, Failure, Success }
 case class Execution(workDirectory: WorkDirectory, moleExecution: MoleExecution)
 
 case class WorkDirectory(baseDirectory: File) {
+
   lazy val inputDirectory = {
     val f = new File(baseDirectory, "inputs")
     f.mkdirs()
@@ -117,7 +118,6 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
                       case Success(ex) ⇒
                         ex listen {
                           case (ex, ev: MoleExecution.Finished) ⇒
-
                         }
                         Try(ex.start) match {
                           case Failure(e) ⇒ error(e)

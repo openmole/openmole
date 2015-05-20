@@ -195,7 +195,9 @@ class UploadActor(jobManager: JobManager) {
       pluginReplicas,
       files,
       jobMessage,
-      path)
+      path,
+      storage.environment.runtimeInfo
+    )
   }
 
 }
