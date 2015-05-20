@@ -30,7 +30,7 @@ object EventDispatcher {
   def trigger[T](obj: T, event: Event[T]) = {
     for {
       l ← listenerMap.synchronized { listenerMap.get(obj).getOrElse(List.empty) }
-    } l.asInstanceOf[Listner[T]].lift(event)
+    } l.asInstanceOf[Listner[T]].lift(obj, event)
   }
 
 }

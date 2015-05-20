@@ -69,7 +69,7 @@ sealed abstract class MoleTask(
     val lastContextLock = new ReentrantLock()
 
     execution listen {
-      case ev: MoleExecution.JobFinished ⇒
+      case (_, ev: MoleExecution.JobFinished) ⇒
         lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
     }
 

@@ -29,7 +29,7 @@ class UpdaterTask(val updatable: IUpdatableWithVariableDelay) extends Runnable {
       if (resubmit) Updater.delay(this)
     }
     catch {
-      case e ⇒ Logger.getLogger(classOf[UpdaterTask].getName).log(Level.WARNING, null, e)
+      case e: Throwable ⇒ Logger.getLogger(classOf[UpdaterTask].getName).log(Level.WARNING, null, e)
     }
   }
 }
