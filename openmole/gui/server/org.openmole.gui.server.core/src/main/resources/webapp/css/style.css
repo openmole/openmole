@@ -234,14 +234,18 @@ opacity: 1;
 }
 
 .tab-content{
-	margin-left: -40px;
-	margin-right: -40px;
+	position: relative;
+	width: 100%;
 	margin-top: -2px;
 }
 
 #editorContainer{
 padding:0;
+width: 100%;
+}
 
+.nav-tabs {
+	width: 99%;
 }
 
 .nav-tabs > li .close {
