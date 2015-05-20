@@ -175,13 +175,6 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   val render = Rx {
     tags.div(
-      tags.div(id := "uppertab")(
-        active.map { tab ⇒
-          tab match {
-            case oms: TabControl ⇒ oms.controlElement
-            case _               ⇒ tags.div()
-          }
-        }),
       tags.div(role := "tabpanel")(
         //Headers
         tags.ul(`class` := "nav nav-tabs", role := "tablist")(
@@ -212,7 +205,14 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
             )(t.tabElement.render)
           }
         )
-      )
+      ),
+      tags.div(id := "uppertab")(
+        active.map { tab ⇒
+          tab match {
+            case oms: TabControl ⇒ oms.controlElement
+            case _               ⇒ tags.div()
+          }
+        })
     )
   }
 
