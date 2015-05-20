@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -14,13 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package org.openmole.core.workflow.domain
-
-import org.openmole.core.workflow.data._
+package org.openmole.core.workflow.data
 
 import scala.util.Random
 
-trait Discrete[+T] extends Domain[T] {
-  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[T]
+object RandomProvider {
+  implicit def radomFunctionToRandomProvider(rng: ⇒ Random) = apply(rng)
+
+  def apply(_rng: ⇒ Random) = new RandomProvider {
+    override lazy val rng: Random = _rng
+  }
+}
+
+trait RandomProvider <: (() ⇒ Random) {
+  def rng: Random
+  def apply() = rng
 }

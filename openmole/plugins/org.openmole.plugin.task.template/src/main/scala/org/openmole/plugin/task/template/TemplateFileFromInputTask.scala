@@ -41,7 +41,7 @@ sealed abstract class TemplateFileFromInputTask(
     val template: Prototype[File],
     val output: Prototype[File]) extends Task {
 
-  override def process(context: Context) = {
+  override def process(context: Context)(implicit rng: RandomProvider) = {
     val expanded = context(template).withInputStream { is ⇒
       VariableExpansion(is).expand(context)
     }

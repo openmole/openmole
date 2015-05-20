@@ -18,10 +18,7 @@
 package org.openmole.plugin.domain.collection
 
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
-
-import scala.util.Random
 
 object VariableDomain {
   def apply[A](variable: Prototype[Array[A]]) = new VariableDomain[A](variable)
@@ -29,5 +26,5 @@ object VariableDomain {
 
 sealed class VariableDomain[A](val variable: Prototype[Array[A]]) extends Domain[A] with Discrete[A] with Finite[A] {
   override def inputs = Seq(variable)
-  override def computeValues(context: Context)(implicit rng: Random): Iterable[A] = context(variable)
+  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[A] = context(variable)
 }

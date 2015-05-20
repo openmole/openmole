@@ -18,6 +18,7 @@
 package org.openmole.core.workflow.mole
 
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.tools._
 
 object Hook {
@@ -28,6 +29,6 @@ trait Hook <: InputOutputCheck {
   def inputs: PrototypeSet
   def outputs: PrototypeSet
   def defaults: DefaultSet
-  def perform(context: Context, executionContext: ExecutionContext): Context = perform(context, process(_, executionContext))
-  protected def process(context: Context, executionContext: ExecutionContext): Context
+  def perform(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider): Context = perform(context, process(_, executionContext))
+  protected def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider): Context
 }

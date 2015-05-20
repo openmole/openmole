@@ -46,6 +46,6 @@ abstract class CSVSampling(val file: File) extends Sampling with CSVToVariables 
     columns.map { case (_, p) ⇒ p } :::
       fileColumns.map { case (_, _, p) ⇒ p } ::: Nil
 
-  override def build(context: ⇒ Context)(implicit rng: Random): Iterator[Iterable[Variable[_]]] = toVariables(file, context)
+  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] = toVariables(file, context)
 
 }

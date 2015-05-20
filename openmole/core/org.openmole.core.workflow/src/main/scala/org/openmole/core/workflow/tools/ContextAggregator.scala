@@ -22,18 +22,19 @@ import org.openmole.core.workflow.data._
 
 object ContextAggregator {
 
-  def aggregate(aggregate: PrototypeSet, toArray: PartialFunction[String, PrototypeType[_]], toAggregateList: Iterable[Variable[_]]): Context = {
-    val toAggregate = toAggregateList.groupBy(_.prototype.name)
+  def aggregate(prototypes: PrototypeSet, toArray: PartialFunction[String, PrototypeType[_]], toAggregateList: Iterable[(Long, Variable[_])]): Context = {
+    val toAggregate = toAggregateList.groupBy { case (_, v) ⇒ v.prototype.name }
 
-    aggregate.foldLeft(List.empty[Variable[_]]) {
+    prototypes.foldLeft(List.empty[Variable[_]]) {
       case (acc, d) ⇒
-        val merging = if (toAggregate.isDefinedAt(d.name)) toAggregate(d.name) else Iterable.empty
+        val merging = if (toAggregate.isDefinedAt(d.name)) toAggregate(d.name).toSeq.sortBy { case (i, _) ⇒ i }.map(_._2) else Iterable.empty
 
         if (toArray.isDefinedAt(d.name)) {
           val `type` = toArray(d.name)
-
           val array = `type`.manifest.newArray(merging.size)
-          merging.zipWithIndex.foreach { e ⇒ java.lang.reflect.Array.set(array, e._2, e._1.value) }
+          merging.zipWithIndex.foreach {
+            e ⇒ java.lang.reflect.Array.set(array, e._2, e._1.value)
+          }
           Variable(Prototype(d.name)(`type`.toArray).asInstanceOf[Prototype[Any]], array) :: acc
         }
         else if (!merging.isEmpty) {

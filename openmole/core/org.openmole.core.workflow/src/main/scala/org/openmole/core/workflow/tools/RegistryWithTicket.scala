@@ -23,7 +23,7 @@ import scala.collection.mutable
 
 /**
  *
- * Registry to register value in fonction of a key and a ticket. The values are
+ * Registry to register value in function of a key and a ticket. The values are
  * stored in a WeakHashMap and are garbage collected after the ticket is gabage
  * collected.
  *

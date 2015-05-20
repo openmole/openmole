@@ -18,7 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo.double2Scalable
-import org.openmole.core.workflow.data.{ Context, Prototype, Variable }
+import org.openmole.core.workflow.data.{ RandomProvider, Context, Prototype, Variable }
 import org.openmole.core.workflow.tools.FromContext
 import util.Try
 
@@ -26,7 +26,7 @@ import scala.annotation.tailrec
 
 object InputConverter {
 
-  @tailrec def scaled(scales: List[Input], genome: List[Double], context: ⇒ Context, acc: List[Variable[_]] = Nil): List[Variable[_]] =
+  @tailrec def scaled(scales: List[Input], genome: List[Double], context: ⇒ Context, acc: List[Variable[_]] = Nil)(implicit rng: RandomProvider): List[Variable[_]] =
     if (scales.isEmpty || genome.isEmpty) acc.reverse
     else {
       val input = scales.head
@@ -40,7 +40,7 @@ object InputConverter {
       scaled(scales.tail, tail.toList, { context + variable }, variable :: acc)
     }
 
-  def scaled(input: Input, context: ⇒ Context, genomePart: Seq[Double]) = {
+  def scaled(input: Input, context: ⇒ Context, genomePart: Seq[Double])(implicit rng: RandomProvider) = {
 
     input match {
       case s @ Scalar(p, _, _) ⇒
@@ -66,7 +66,7 @@ trait InputsConverter {
 
   def inputs: Inputs
 
-  def scaled(genome: Seq[Double], context: Context): List[Variable[_]] = {
+  def scaled(genome: Seq[Double], context: Context)(implicit rng: RandomProvider): List[Variable[_]] = {
     InputConverter.scaled(inputs.inputs.toList, genome.toList, context)
   }
 

@@ -135,8 +135,8 @@ class StrainerTaskDecorator(val task: Task) extends Task {
   override def inputs = task.inputs
   override def outputs = task.outputs
 
-  override def perform(context: Context) = process(context)
-  override def process(context: Context) = context + task.perform(context)
+  override def perform(context: Context) = process(context)()
+  override def process(context: Context)(implicit rng: RandomProvider) = context + task.perform(context)
   override def defaults = task.defaults
 
   override def name = task.name

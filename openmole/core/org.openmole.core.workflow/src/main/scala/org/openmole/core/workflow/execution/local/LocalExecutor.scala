@@ -41,7 +41,6 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
   var stop: Boolean = false
 
   override def run = {
-
     while (!stop) {
       environment.get match {
         case Some(environment) ⇒
@@ -108,14 +107,14 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
   case class Output(stream: PrintStream, output: ExecutorOutput, error: ExecutorOutput)
 
-  def withRedirectedOutput[T](job: LocalExecutionJob, deinterleave: Boolean)(f: ⇒ T) = {
+  private def withRedirectedOutput[T](job: LocalExecutionJob, deinterleave: Boolean)(f: ⇒ T) = {
     val output = redirectOutput(job, deinterleave)
     val res =
       try f finally OutputManager.unregister(Thread.currentThread.getThreadGroup)
     (res, output)
   }
 
-  def redirectOutput(job: LocalExecutionJob, deinterleave: Boolean): Option[Output] = {
+  private def redirectOutput(job: LocalExecutionJob, deinterleave: Boolean): Option[Output] = {
     job.moleExecution match {
       case None ⇒
         OutputManager.unregister(Thread.currentThread.getThreadGroup)

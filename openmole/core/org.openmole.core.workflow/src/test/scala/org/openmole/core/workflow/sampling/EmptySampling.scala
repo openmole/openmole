@@ -24,5 +24,5 @@ import scala.util.Random
 
 class EmptySampling extends Sampling {
   override def prototypes = List.empty
-  override def build(context: ⇒ Context)(implicit rng: Random) = Iterator.empty
+  override def build(context: ⇒ Context)(implicit rng: RandomProvider) = Iterator.empty
 }

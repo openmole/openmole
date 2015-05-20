@@ -25,17 +25,18 @@ import org.openmole.core.workflow.task._
 import org.openmole.tool.lock._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
+import scala.util.Random
 
 class ExplorationTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: Filter[String] = Filter.empty) extends Transition(start, end, condition, filter) with IExplorationTransition {
 
-  override def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution) = {
+  override def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     val subSubMole = subMole.newChild
 
     registerAggregationTransitions(ticket, subSubMole)
     subSubMole.transitionLock { submitIn(filtered(context), ticket, subSubMole) }
   }
 
-  def submitIn(context: Context, ticket: Ticket, subMole: SubMoleExecution) = {
+  def submitIn(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
     def explored = ExplorationTask.explored(start)
@@ -64,7 +65,7 @@ class ExplorationTransition(start: Capsule, end: Slot, condition: Condition = Co
 
   }
 
-  private def registerAggregationTransitions(ticket: Ticket, subMoleExecution: SubMoleExecution) = {
+  private def registerAggregationTransitions(ticket: Ticket, subMoleExecution: SubMoleExecution)(implicit rng: RandomProvider) = {
     val alreadySeen = new HashSet[Capsule]
     val toProcess = new ListBuffer[(Capsule, Int)]
     toProcess += ((end.capsule, 0))
@@ -83,7 +84,8 @@ class ExplorationTransition(start: Capsule, end: Slot, condition: Condition = Co
             else if (level == 0) {
               subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
               subMoleExecution listen {
-                case ev: SubMoleExecution.Finished ⇒ t.aggregate(subMoleExecution, ev.ticket)
+                case ev: SubMoleExecution.Finished ⇒
+                  t.aggregate(subMoleExecution, ev.ticket)
               }
             }
           case t: IExplorationTransition ⇒ toProcess += t.end.capsule -> (level + 1)

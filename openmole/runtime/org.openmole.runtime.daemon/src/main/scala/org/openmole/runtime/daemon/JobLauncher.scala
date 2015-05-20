@@ -75,7 +75,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       val root = ""
     }
 
-    val storageFile = Workspace.newFile
+    val storageFile = Workspace.newFile()
     SerialiserService.serialiseAndArchiveFiles(new LocalSimpleStorage, storageFile)
 
     (0 until nbWorkers).foreach {
@@ -288,7 +288,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             localCache.cache(
               jobMessage.runtime,
               msg ⇒ {
-                val dir = Workspace.newDir
+                val dir = Workspace.newDir()
                 logger.info("Downloading the runtime.")
                 val (archive, hash) = download(msg, true)
                 logger.info("Extracting runtime.")
@@ -297,7 +297,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               })
           cached ::= jobMessage.runtime
 
-          val pluginDir = Workspace.newDir
+          val pluginDir = Workspace.newDir()
           pluginDir.mkdirs
 
           jobMessage.runtimePlugins.foreach {
@@ -325,7 +325,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           storage.download(executionMessage.jobs.path, jobsFile)
 
           val jobs = FileMessage(jobsFile.getAbsolutePath, executionMessage.jobs.hash)
-          val localCommunicationDirPath = Workspace.newDir
+          val localCommunicationDirPath = Workspace.newDir()
           localCommunicationDirPath.mkdirs
 
           val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")

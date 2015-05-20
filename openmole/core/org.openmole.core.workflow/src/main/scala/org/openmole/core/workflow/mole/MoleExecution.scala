@@ -160,6 +160,8 @@ class MoleExecution(
   def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }
 
   def start(context: Context): this.type = {
+    _started.single() = true
+    _startTime.single() = Some(System.currentTimeMillis)
     EventDispatcher.trigger(this, new MoleExecution.Starting)
     executionContext.directory.foreach(_.mkdirs)
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
@@ -171,7 +173,6 @@ class MoleExecution(
     if (!_started.getUpdate(_ ⇒ true)) {
       val validationErrors = Validation(mole, implicits, sources, hooks)
       if (!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of your mole has failed, several errors have been found: " + validationErrors.mkString("\n"))
-      _startTime.single() = Some(System.currentTimeMillis)
       start(Context.empty)
     }
     this
@@ -195,6 +196,7 @@ class MoleExecution(
   def moleJobs = rootSubMoleExecution.jobs
 
   def waitUntilEnded = {
+    if (!started) throw new UserBadDataError("Execution is not started")
     atomic { implicit txn ⇒
       if (!_finished()) retry
       _exception().foreach { throw _ }
@@ -231,6 +233,7 @@ class MoleExecution(
   def nextJobId = UUID.randomUUID
 
   def newSeed = rng.nextLong
+  def newRNG = Random.newRNG(newSeed).toScala
 
   lazy val rng = Random.newRNG(seed)
 

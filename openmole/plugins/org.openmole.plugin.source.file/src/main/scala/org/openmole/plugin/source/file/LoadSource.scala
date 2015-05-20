@@ -42,7 +42,7 @@ object LoadSource {
 
 abstract class LoadSource(file: ExpandedString, prototypes: Prototype[_]*) extends Source {
 
-  override def process(context: Context, executionContext: ExecutionContext) = {
+  override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) = {
     val from = executionContext.relativise(file.from(context))
     val loadedContext = SerialiserService.deserialiseAndExtractFiles[Context](from)
     context ++ prototypes.map(p ⇒ loadedContext.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found in the loaded context")))

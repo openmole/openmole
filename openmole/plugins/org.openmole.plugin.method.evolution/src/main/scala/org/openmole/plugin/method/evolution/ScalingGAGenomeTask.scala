@@ -49,7 +49,7 @@ object ScalingGAGenomeTask {
 sealed abstract class ScalingGAGenomeTask(val evolution: GAAlgorithm) extends Task {
   val genome: Prototype[evolution.G]
 
-  override def process(context: Context) = {
+  override def process(context: Context)(implicit rng: RandomProvider) = {
     context ++ evolution.toVariables(context(genome), context)
   }
 }

@@ -20,6 +20,7 @@ package org.openmole.plugin.method.modelfamily
 import java.io.File
 
 import fr.iscpif.family.{ Combination, TypedValue, ModelFamily }
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
@@ -70,21 +71,20 @@ abstract class ModelFamilyTask(val modelFamily: ModelFamily) extends Task { t �
           Variable(traitsVariable, traits),
           Variable(attributesVariable, attributes)
         )
-      modelFamily.source.from(context)
+      modelFamily.source.from(context)(throw new InternalProcessingError("RNG not initialised"))
     }
 
   }
 
   family.compiled.get
 
-  def run(context: Context): Context = {
-    lazy val rng = Task.buildRNG(context)
+  def run(context: Context)(implicit rng: RandomProvider): Context = {
     val values = family.allInputs.map((a: TypedValue) ⇒ context(a.name))
     val modelId = context(modelFamily.modelIdPrototype)
-    val map = family.run(modelId, values: _*)(rng).get
+    val map = family.run(modelId, values: _*)(rng()).get
     family.outputs.map(o ⇒ Variable.unsecure(o, map(o.name)))
   }
 
-  override def process(context: Context): Context =
+  override def process(context: Context)(implicit rng: RandomProvider): Context =
     context + run(context)
 }

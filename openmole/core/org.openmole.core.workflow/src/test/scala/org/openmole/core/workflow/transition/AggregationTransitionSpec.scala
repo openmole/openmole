@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.execution.local.LocalEnvironment
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.sampling.ExplicitSampling
@@ -170,6 +171,63 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
     Try { ex.waitUntilEnded }
 
     endCapsExecuted.get() should equal(0)
+  }
+
+  "Multiple aggregation transition" should "all be executed" in {
+    val v = Prototype[Double]("v")
+    val m = Prototype[Double]("m")
+    val s = Prototype[Double]("s")
+
+    val executed = new AtomicInteger()
+
+    def exploration = ExplorationTask(ExplicitSampling(v, 0.0 until 10.0 by 1.0))
+
+    def main =
+      EmptyTask() set (
+        _ setName "main",
+        _ addInput v,
+        _ addOutput v
+      )
+
+    def test =
+      TestTask { ctx ⇒ executed.incrementAndGet(); ctx } set (
+        _ setName "mean",
+        _ addInput v.toArray
+      )
+
+    val ex = exploration -< main >- (test, test) start
+
+    ex.waitUntilEnded
+    executed.get should equal(2)
+  }
+
+  "Order" should "be preserved" in {
+    val v = Prototype[Double]("v")
+    val s = Prototype[Double]("s")
+
+    val executed = new AtomicInteger()
+
+    def exploration = ExplorationTask(ExplicitSampling(v, 0.0 until 100.0 by 1.0))
+
+    def main =
+      EmptyTask() set (
+        _ setName "main",
+        _ addInput v,
+        _ addOutput v
+      )
+
+    def test =
+      TestTask { ctx ⇒ executed.incrementAndGet(); ctx(v.toArray).toSeq.sorted should equal(ctx(v.toArray).toSeq); ctx } set (
+        _ setName "mean",
+        _ addInput v.toArray
+      )
+
+    val env = LocalEnvironment(100)
+
+    val ex = exploration -< (main on env) >- test start
+
+    ex.waitUntilEnded
+    executed.get should equal(1)
   }
 
 }

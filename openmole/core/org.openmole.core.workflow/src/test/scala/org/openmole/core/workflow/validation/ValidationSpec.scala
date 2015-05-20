@@ -249,13 +249,8 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val c1 = Capsule(t1)
 
-    val h = new HookBuilder {
-      addInput(i)
-
-      def toHook = new Hook with Built {
-        def process(ctx: Context, executionContext: ExecutionContext) = ctx
-      }
-    }
+    val h = TestHook()
+    h addInput (i)
 
     val errors = Validation.hookErrors(Mole(c1), Iterable.empty, Sources.empty, Hooks(Map(c1 -> List(h))))
     errors.headOption match {
@@ -273,13 +268,8 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val c1 = Capsule(t1)
 
-    val h = new HookBuilder {
-      addInput(iInt)
-
-      def toHook = new Hook with Built {
-        def process(ctx: Context, executionContext: ExecutionContext) = ctx
-      }
-    }
+    val h = TestHook()
+    h addInput (iInt)
 
     val errors = Validation.hookErrors(Mole(c1), Iterable.empty, Sources.empty, Hooks(Map(c1 -> List(h))))
     errors.headOption match {
@@ -296,13 +286,8 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val c1 = Capsule(t1)
 
-    val s = new SourceBuilder {
-      addOutput(t)
-
-      def toSource = new Source with Built {
-        def process(ctx: Context, executionContext: ExecutionContext) = Context.empty
-      }
-    }.toSource
+    val s = TestSource()
+    s addOutput (t)
 
     val mole = Mole(c1)
 
@@ -317,13 +302,8 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val c1 = Capsule(t1)
 
-    val s = new SourceBuilder {
-      addInput(t)
-
-      def toSource = new Source with Built {
-        def process(ctx: Context, executionContext: ExecutionContext) = Context.empty
-      }
-    }.toSource
+    val s = TestSource()
+    s addInput (t)
 
     val mole = Mole(c1)
 

@@ -20,7 +20,6 @@ package org.openmole.plugin.task.tools
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import reflect.ClassTag
 
@@ -40,7 +39,7 @@ object MergeTask {
 
 sealed abstract class MergeTask[S, T <: Array[S]](val prototypes: Iterable[Prototype[_ <: T]], val result: Prototype[Array[S]]) extends Task {
 
-  override def process(context: Context) = {
+  override def process(context: Context)(implicit rng: RandomProvider) = {
     val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))
     Variable(result, flattened)
   }

@@ -20,5 +20,5 @@ package org.openmole.core.workflow.domain
 import org.openmole.core.workflow.data._
 
 trait Center[+T] extends Domain[T] {
-  def center(context: Context): T
+  def center(context: Context)(implicit rng: RandomProvider): T
 }

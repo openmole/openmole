@@ -17,18 +17,19 @@
 
 package org.openmole.core.eventdispatcher
 
-import scala.collection.mutable.WeakHashMap
+import scala.collection.mutable.{ ListBuffer, WeakHashMap }
 
 object EventDispatcher {
 
-  private lazy val listenerMap = new WeakHashMap[Any, Listner[Any]]
+  private lazy val listenerMap = new WeakHashMap[Any, ListBuffer[Listner[Any]]]
 
-  def listen[T](obj: T)(listener: Listner[T]) =
-    listenerMap.put(obj, listener.asInstanceOf[Listner[Any]])
+  def listen[T](obj: T)(listener: Listner[T]) = listenerMap.synchronized {
+    listenerMap.getOrElseUpdate(obj, ListBuffer()) += listener.asInstanceOf[Listner[Any]]
+  }
 
   def trigger[T](obj: T, event: Event[T]) = {
     for {
-      l ← listenerMap.get(obj)
+      l ← listenerMap.synchronized { listenerMap.get(obj).getOrElse(List.empty) }
     } l.asInstanceOf[Listner[T]].lift(event)
   }
 
