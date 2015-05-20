@@ -42,7 +42,7 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
   initEditor
 
   val view = {
-    tags.div(id := "editorContainer", `class` := "container", width := "95%")(
+    tags.div(id := "editorContainer", `class` := "container")(
       tags.div(`class` := "panel panel-default")(
         tags.div(`class` := "panel-body")(
           editor.container

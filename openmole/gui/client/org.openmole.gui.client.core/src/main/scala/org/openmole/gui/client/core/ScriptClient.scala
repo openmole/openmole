@@ -2,6 +2,7 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files.{ TreeNodeTabs, TreeNodePanel }
 import org.openmole.gui.shared.Api
+import org.scalajs.dom.raw.Event
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.Forms._
 import scala.scalajs.js.annotation.JSExport
@@ -34,7 +35,6 @@ object ScriptClient {
 
   @JSExport
   def run(): Unit = {
-
     val body = dom.document.body
     val openFileTree = Var(false)
     val executions = ExecutionPanel()
@@ -56,16 +56,19 @@ object ScriptClient {
     Post[Api].workspacePath.call().foreach { projectsPath ⇒
       val treeNodePanel = TreeNodePanel(projectsPath)
       maindiv.appendChild(
-        tags.div(`class` := Rx {
-          if (openFileTree()) "show-nav"
-          else ""
-        }
-        )(tags.div(id := "site-canvas")(
-          tags.div(id := "site-menu")(
-            treeNodePanel.view.render
-          ),
-          treeNodePanel.fileDisplayer.tabs.render
-        ).render)
+        tags.div(`class` := "fullpanel")(
+          tags.div(`class` := Rx {
+            "leftpanel " + {
+              if (openFileTree()) "open" else ""
+            }
+          })(treeNodePanel.view.render),
+          tags.div(`class` := Rx {
+            "centerpanel " + {
+              if (openFileTree()) "reduce" else ""
+            }
+          })(treeNodePanel.fileDisplayer.tabs.render)
+
+        ).render
       )
 
       body.appendChild(maindiv)
