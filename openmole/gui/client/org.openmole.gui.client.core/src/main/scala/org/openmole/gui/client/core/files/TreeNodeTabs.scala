@@ -206,7 +206,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
           }
         )
       ),
-      tags.div(id := "uppertab")(
+      tags.div(`class` := "footercontrol")(
         active.map { tab ⇒
           tab match {
             case oms: TabControl ⇒ oms.controlElement
@@ -214,6 +214,6 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
           }
         })
     )
-  }
+    }
 
 }
