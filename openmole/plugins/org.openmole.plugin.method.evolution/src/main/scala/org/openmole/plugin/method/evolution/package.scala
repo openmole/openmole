@@ -199,14 +199,14 @@ package object evolution {
 
   def SteadyGA[ALG <: GAAlgorithm](algorithm: ALG)(
     fitness: Puzzle,
-    lambda: Int = 1)(implicit plugins: PluginSet) = {
+    mu: Int)(implicit plugins: PluginSet) = {
 
     val name = "steadyGA"
 
     val cs = components[ALG](name, algorithm)
     import cs._
 
-    val breedTask = ExplorationTask(BreedSampling(algorithm)(population, archive, genome, lambda)) set (_.setName(name + "Breed"))
+    val breedTask = ExplorationTask(BreedSampling(algorithm)(population, archive, genome, mu)) set (_.setName(name + "Breed"))
     breedTask.setDefault(population, Population.empty[algorithm.G, algorithm.P, algorithm.F])
     breedTask.setDefault(archive, algorithm.initialArchive(Workspace.rng))
 
