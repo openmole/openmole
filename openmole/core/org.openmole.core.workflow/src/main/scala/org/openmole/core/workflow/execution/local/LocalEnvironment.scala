@@ -48,9 +48,9 @@ class LocalEnvironment(val nbThreads: Int, val deinterleave: Boolean) extends En
     submit(new LocalExecutionJob(this, List(moleJob), None))
 
   private def submit(ejob: LocalExecutionJob) = {
+    pool.enqueue(ejob)
     ejob.state = ExecutionState.SUBMITTED
     EventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))
-    pool.enqueue(ejob)
   }
 
   def submitted: Long = pool.waiting
