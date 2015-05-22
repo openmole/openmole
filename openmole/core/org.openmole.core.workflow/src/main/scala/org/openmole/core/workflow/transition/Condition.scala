@@ -58,4 +58,7 @@ trait Condition { c ⇒
     override def evaluate(context: Context)(implicit rng: RandomProvider): Boolean = !c.evaluate(context)
   }
 
+  def &&(d: Condition) = new Condition {
+    override def evaluate(context: Context)(implicit rng: RandomProvider): Boolean = c.evaluate(context) && d.evaluate(context)
+  }
 }
