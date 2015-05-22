@@ -123,11 +123,7 @@ class Runtime {
       val runnableTasks = Workspace.withTmpFile { jobsFileCache ⇒
         logger.fine("Downloading execution message")
         retry(storage.download(executionMessage.jobs.path, jobsFileCache))
-
-        //if (jobsFileCache.hash.toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job doesn't match.")
-
-        val tis = new TarInputStream(jobsFileCache.bufferedInputStream)
-        tis.applyAndClose(_ ⇒ SerialiserService.deserialiseReplaceFiles[RunnableTask](tis, usedFiles))
+        SerialiserService.deserialiseReplaceFiles[Seq[RunnableTask]](jobsFileCache, usedFiles)
       }
 
       val saver = new ContextSaver(runnableTasks.size)
