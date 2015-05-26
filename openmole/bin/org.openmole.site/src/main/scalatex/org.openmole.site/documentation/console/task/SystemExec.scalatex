@@ -1,7 +1,7 @@
 
 @import org.openmole.site.Objects._
 
-@sect{SystemExecTask: Embed external applications (C, C++, Python, R, Scilab...)}
+@sect{Embed external applications (C, C++, Python, R, Scilab...)}
 
   In OpenMOLE, a generic task named @hl.openmole("SystemExecTask") offers to run external applications.
 
