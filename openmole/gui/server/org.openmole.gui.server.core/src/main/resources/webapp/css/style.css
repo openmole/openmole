@@ -108,7 +108,6 @@ select::-moz-focus-inner {
 
 .tree {
 	padding-top: 20px;
-	height: 100%;
 }
 
 .tree.droppable {
@@ -261,28 +260,6 @@ overflow-y : auto;
 	font-size: 12px;
 }
 
-#controlform{
-	width: 20%;
-}
-
-#controlform input {
-	margin-top: 5px;
-}
-
-#uppertab {
-	position: relative;
-	background-color: red;
-	height: 150px;;
-}
-
-#controlform button {
-	height: 40px;
-	width: 60px;
-	margin-top: 5px;
-	float: right;
-}
-
-
 /* -- Manage the file left panel transition*/
 .fullpanel {
     width: 100%;
@@ -295,7 +272,7 @@ overflow-y : auto;
 	padding-right: 15px;
 	top: 30px;
 	width: 100%;
-	height: 100%;
+	height: 89%;
 }
 
 .fullpanel .reduce{
@@ -316,6 +293,7 @@ overflow-y : auto;
 }
 
 .leftpanel {
+overflow-y : auto;
 	position: absolute;
    background: #222222;
     height: 100%;
@@ -332,12 +310,77 @@ overflow-y : auto;
 }
 /*--*/
 
-.footercontrol{
-	position: fixed;
-    bottom: 0;
+/* Loading icon */
+.spinner {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  top: 0px;
+  left: -50px;
+  background-color: white;
+  border-radius: 100%;
+  -webkit-animation: scaleout 1.5s infinite ease-in-out;
+  animation: scaleout 1.5s infinite ease-in-out;
+    transform: translateZ(0);
+}
+
+@-webkit-keyframes scaleout {
+  0% { -webkit-transform: scale(0.0) }
+  100% {
+    -webkit-transform: scale(1.0);
+    opacity: 0;
+  }
+}
+
+@keyframes scaleout {
+  0% {
+    transform: scale(0.0);
+    -webkit-transform: scale(0.0);
+  } 100% {
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
+    opacity: 0;
+  }
+}
+/*---*/
+
+
+.tabOverlay {
+	color: white;
+	position: absolute;
+	left: 0;
+	background: rgba(0, 0, 0,0.6) none repeat scroll 0 0;
+    z-index: 20;
+    height: 100%;
     width: 100%;
-    left:320px;
-    z-index:999;
-    background-color: #222;
-    box-shadow: 0 0 15px #00214B;
+}
+
+
+.overlayElement{
+    position: absolute;
+    top: 200px;
+    margin-left: 40%;
+    width: 400px;
+    color: white;
+    font-size: 25;
+    z-index: 25;
+}
+
+.executionElement{
+    position: fixed;
+    top :150;
+    right:50px;
+    width: 200px;
+}
+
+.executionSettings{
+	padding-left: 10px;
+}
+
+.executionSettingsOff {
+    display: none;
+}
+
+.executionSettingsOn {
+    margin: 10 0 20 0;
 }

@@ -1,5 +1,6 @@
 package org.openmole.gui.ext
 
+import scala.scalajs.js.annotation.JSExport
 /*
  * Copyright (C) 02/02/15 // mathieu.leclaire@openmole.org
  *

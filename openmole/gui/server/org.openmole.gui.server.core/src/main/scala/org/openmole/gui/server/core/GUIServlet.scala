@@ -18,7 +18,11 @@ package org.openmole.gui.server.core
 
 import javax.servlet.annotation.MultipartConfig
 
+import org.openmole.console.ConsoleVariables
+import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
+import org.openmole.core.workflow.puzzle.Puzzle
 import org.openmole.core.workspace.Workspace
+import org.openmole.gui.misc.utils.Utils._
 import org.scalatra._
 import org.scalatra.servlet.FileUploadSupport
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,9 +31,12 @@ import scala.concurrent.duration._
 import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
-import java.io.File
+import java.io.{ File, PrintStream }
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
+import org.openmole.console._
+import scala.util.{ Failure, Success, Try }
+import org.openmole.gui.ext.data._
 
 object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Writer] {
   def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
@@ -128,6 +135,53 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
     }
     else NotFound("The file " + path + " does not exist.")
   }
+  /*
+  post("/runscript") {
+
+    val (parameters, errors) = parseParams(Seq("script", "inputdirectory", "outputdirectory", "baseDirectory"))
+
+    if (errors.isEmpty) {
+      val id = getUUID
+      val projectsPath = Utils.workspaceProjectFile
+      val console = new Console
+      val repl = console.newREPL(ConsoleVariables(
+        inputDirectory = new File(projectsPath, parameters("inputDirectory")),
+        outputDirectory = new File(projectsPath, parameters("outputDirectory")))
+      )
+      Try(repl.eval(parameters("script"))) match {
+        case Failure(e) ⇒ println("Error I, a factoriser avec rest api ? ")
+        case Success(o) ⇒
+          o match {
+            case puzzle: Puzzle ⇒
+              val output = new File(projectsPath, parameters("baseDirectory") + "/output")
+              val outputStream = new PrintStream(output.bufferedOutputStream())
+              Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
+                case Success(ex) ⇒
+                  Try(ex.start) match {
+                    case Failure(e) ⇒ println("Error II, a factoriser avec rest api ? ")
+                    case Success(ex) ⇒
+                      // moles.add(id, Execution(directory, ex))
+                      Ok(id)
+                  }
+                case Failure(e) ⇒ println("Error III, a factoriser avec rest api ?")
+              }
+            case Failure(e) ⇒ println("Error IV, a factoriser avec rest api ?")
+          }
+      }
+    }
+    else println("Y a des erreurs ... FIXME")
+
+    def parseParams(toTest: Seq[String], evaluated: Map[String, String] = Map(), errors: Seq[Throwable] = Seq()): (Map[String, String], Seq[Throwable]) = {
+      if (toTest.isEmpty) (evaluated, errors)
+      else {
+        val testing = toTest.last
+        Try(params(testing)) match {
+          case Success(p) ⇒ parseParams(toTest.dropRight(1), evaluated + (testing -> p), errors)
+          case Failure(e) ⇒ parseParams(toTest.dropRight(1), evaluated, errors :+ e)
+        }
+      }
+    }
+  }*/
 
   post(s"/$basePath/*") {
     Await.result(AutowireServer.route[Api](ApiImpl)(

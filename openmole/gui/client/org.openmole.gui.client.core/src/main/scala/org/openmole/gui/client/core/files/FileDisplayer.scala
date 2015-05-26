@@ -3,6 +3,13 @@ package org.openmole.gui.client.core.files
 import java.io.File
 import FileExtension._
 import TreeNodeTabs._
+import org.openmole.gui.client.core.Post
+import org.openmole.gui.ext.data.ScriptData
+import org.openmole.gui.shared.Api
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import autowire._
+import scalatags.JsDom.tags
+import scalatags.JsDom.all._
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
@@ -44,8 +51,20 @@ class FileDisplayer {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileType match {
         case disp: DisplayableFile ⇒ disp match {
-          case oms: OpenMOLEScript ⇒ tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, editor(fileType, content)) with OMSTabControl
-          case _                   ⇒ tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, editor(fileType, content))
+          case oms: OpenMOLEScript ⇒
+            val ed = editor(fileType, content)
+            tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, ed) with OMSTabControl {
+              val script = ed.code
+
+              def onrun = () ⇒ {
+                overlaying() = true
+                Post[Api].runScript(ScriptData(script, "", "", "output")).call().foreach { id ⇒
+                  overlaying() = false
+                  println("ID " + id)
+                }
+              }
+            }
+          case _ ⇒ tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, editor(fileType, content))
         }
         case _ ⇒ //FIXME for GUI workflows
       }

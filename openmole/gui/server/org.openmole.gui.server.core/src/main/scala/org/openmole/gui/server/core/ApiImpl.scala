@@ -1,11 +1,18 @@
 package org.openmole.gui.server.core
 
+import org.openmole.gui.misc.utils.Utils._
 import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
-import org.openmole.gui.ext.data.TreeNodeData
-import java.io.File
+import org.openmole.gui.ext.data.{ ScriptData, TreeNodeData }
+import java.io.{ File, PrintStream }
 import java.nio.file._
+import org.openmole.console._
+import scala.util.{ Failure, Success, Try }
+import org.openmole.gui.ext.data._
+import org.openmole.console.ConsoleVariables
+import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
+import org.openmole.core.workflow.puzzle.Puzzle
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -42,6 +49,44 @@ object ApiImpl extends Api {
 
     Files.move(source, target, StandardCopyOption.REPLACE_EXISTING)
     target.exists
+  }
+
+  def runScript(scriptData: ScriptData): String = {
+    val id = getUUID
+    val projectsPath = Utils.workspaceProjectFile
+    val console = new Console
+    val repl = console.newREPL(ConsoleVariables(
+      inputDirectory = new File(projectsPath, scriptData.inputDirectory),
+      outputDirectory = new File(projectsPath, scriptData.outputDirectory)
+    ))
+    Try(repl.eval(scriptData.script)) match {
+      case Failure(e) ⇒
+        println("Error I, a factoriser avec rest api ? ")
+        "-1"
+      case Success(o) ⇒
+        o match {
+          case puzzle: Puzzle ⇒
+            val output = new File(projectsPath, scriptData.output)
+            val outputStream = new PrintStream(output.bufferedOutputStream())
+            Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
+              case Success(ex) ⇒
+                Try(ex.start) match {
+                  case Failure(e) ⇒
+                    println("Error II, a factoriser avec rest api ? ")
+                    "-1"
+                  case Success(ex) ⇒
+                    // moles.add(id, Execution(directory, ex))
+                    id
+                }
+              case Failure(e) ⇒
+                println("Error III, a factoriser avec rest api ?")
+                "-1"
+            }
+          case Failure(e) ⇒
+            println("Error IV, a factoriser avec rest api ?")
+            "-1"
+        }
+    }
   }
 
   def saveFile(path: String, fileContent: String) = new File(path).content = fileContent

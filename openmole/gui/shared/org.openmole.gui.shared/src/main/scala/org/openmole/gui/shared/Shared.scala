@@ -16,7 +16,7 @@
  */
 package org.openmole.gui.shared
 
-import org.openmole.gui.ext.data.TreeNodeData
+import org.openmole.gui.ext.data._
 
 trait Api {
   def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean
@@ -32,6 +32,8 @@ trait Api {
   def uuid(): String = java.util.UUID.randomUUID.toString
 
   def renameFile(treeNode: TreeNodeData, name: String): Boolean
+
+  def runScript(scriptData: ScriptData): String
 
   def saveFile(path: String, fileContent: String): Unit
 

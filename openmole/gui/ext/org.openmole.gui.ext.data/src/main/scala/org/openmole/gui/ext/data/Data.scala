@@ -36,6 +36,8 @@ object ProtoTYPE extends Enumeration {
 
 import ProtoTYPE._
 
+import scala.scalajs.js.annotation.JSExport
+
 class PrototypeData(val `type`: ProtoTYPE, val dimension: Int) extends Data
 
 class IntPrototypeData(dimension: Int) extends PrototypeData(INT, dimension)
@@ -87,3 +89,18 @@ trait EnvironmentData extends Data
 trait HookData extends Data with InputData with OutputData
 
 case class ErrorData(data: DataBag, error: String, stack: String)
+
+@JSExport
+case class TreeNodeData(
+  name: String,
+  canonicalPath: String,
+  isDirectory: Boolean,
+  size: Long,
+  readableSize: String)
+
+@JSExport
+case class ScriptData(
+  script: String,
+  inputDirectory: String,
+  outputDirectory: String,
+  output: String)

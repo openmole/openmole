@@ -2,11 +2,13 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.Post
 import org.openmole.gui.client.core.files.TreeNodeTabs.EditableNodeTab
+import org.openmole.gui.ext.data.ScriptData
 import org.openmole.gui.shared._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import org.openmole.gui.misc.js.JsRxTags._
 import bs._
 import org.scalajs.dom.raw.{ HTMLElement, HTMLDivElement }
 import rx._
@@ -43,6 +45,8 @@ object TreeNodeTabs {
 
     val active: Var[Option[SetIntervalHandle]] = Var(None)
 
+    val overlaying: Var[Boolean] = Var(false)
+
     def desactivate = {
       active().map {
         clearInterval
@@ -50,7 +54,19 @@ object TreeNodeTabs {
       active() = None
     }
 
-    val tabElement: TypedTag[HTMLDivElement]
+    val editorElement: TypedTag[HTMLDivElement]
+
+    val overlayElement: TypedTag[HTMLDivElement] = tags.div(`class` := "overlayElement")(
+      tags.div(`class` := "spinner"),
+      "Loading " + tabName()
+    )
+
+    lazy val tabElement = tags.div(Rx {
+      `class` := {
+        if (overlaying()) "tabOverlay"
+        else ""
+      }
+    })(editorElement)
 
     def save(onsaved: () ⇒ Unit = () ⇒ {}): Unit
 
@@ -61,7 +77,8 @@ object TreeNodeTabs {
   }
 
   class EditableNodeTab(val tabName: Var[String], val serverFilePath: Var[String], editor: EditorPanelUI) extends TreeNodeTab {
-    val tabElement = editor.view
+
+    val editorElement = editor.view
 
     def save(onsaved: () ⇒ Unit) = Post[Api].saveFile(serverFilePath(), editor.code).call().foreach { d ⇒
       onsaved()
@@ -80,38 +97,50 @@ trait TabControl {
   def controlElement: TypedTag[HTMLElement]
 }
 
-trait OMSTabControl <: TabControl {
+trait TabError {
+  def errorElement: TypedTag[HTMLElement]
+}
 
-  val inputDirectory = bs.input("")(
+trait OMSTabControl <: TabControl with TabError {
+
+  val settingsVisible = Var(false)
+
+  val settingsButton = glyphSpan(glyph_settings, () ⇒ settingsVisible() = !settingsVisible())(`class` := "executionSettings")
+
+  val inputDirectoryInput = bs.input("")(
     placeholder := "Input directory",
     autofocus
-  )
+  ).render
 
-  val outputDirectory = bs.input("")(
+  val outputDirectoryInput = bs.input("")(
     placeholder := "Output directory",
     autofocus
-  )
+  ).render
 
-  val runButton = bs.button("Start", btn_primary)(onclick := { () ⇒
-    {
-      println("Run the WF")
-    }
+  val runButton = bs.button("Play", btn_primary)(onclick := { () ⇒
+    onrun()
   })
 
-  val errorPanel = panel("Error", tags.div("This is my body"))
+  val errorElement = panel("Error", tags.div("This is my body"))
 
-  val controlElement =
-    tags.span(
-      bs.span(col_md_4)(id := "controlform")(
-        tags.div(
-          inputDirectory.render,
-          outputDirectory.render
-        ),
-        runButton
-      ),
-      errorPanel
-    )
+  val controlElement = tags.div(
+    runButton,
+    settingsButton,
+    tags.div(
+      inputDirectoryInput.render,
+      outputDirectoryInput.render
+    )(`class` := Rx {
+        if (settingsVisible()) "executionSettingsOn" else "executionSettingsOff"
+      })
+  )(`class` := "executionElement")
 
+  def script: String
+
+  def onrun: () ⇒ Unit
+
+  def inputDirectory = inputDirectoryInput.value
+
+  def outputDirectory = outputDirectoryInput.value
 }
 
 import org.openmole.gui.client.core.files.TreeNodeTabs._
@@ -202,18 +231,22 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
               `class` := "tab-pane " + {
                 if (isActive(t)) "active" else ""
               }, id := t.id
-            )(t.tabElement.render)
+            )(t.tabElement.render,
+                active.map { tab ⇒
+                  tab match {
+                    case oms: TabControl ⇒
+                      tags.div(
+                        oms.controlElement,
+                        if (tab.overlaying()) tab.overlayElement else tags.div
+                      )
+                    case _ ⇒ tags.div()
+                  }
+                }
+              )
           }
         )
-      ),
-      tags.div(`class` := "footercontrol")(
-        active.map { tab ⇒
-          tab match {
-            case oms: TabControl ⇒ oms.controlElement
-            case _               ⇒ tags.div()
-          }
-        })
+      )
     )
-    }
+  }
 
 }
