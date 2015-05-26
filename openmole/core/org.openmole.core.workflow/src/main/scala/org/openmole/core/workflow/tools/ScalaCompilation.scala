@@ -164,7 +164,7 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
   def wrapOutput: Option[String] = None
 
-  @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], Try[(AnyRef, Method)]]()
+  @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], Try[CS]]()
 
   def compiled(inputs: Seq[Prototype[_]]): Try[CS] =
     cache.synchronized {
@@ -175,14 +175,16 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
       duplicatedInputs match {
         case Nil ⇒
           def sortedInputNames = inputs.map(_.name).distinct.sorted
-          lazy val scriptInputs = sortedInputNames.map(n ⇒ allInputMap(n).head)
-          val compiled = cache.getOrElseUpdate(scriptInputs, function(scriptInputs))
-          compiled.map {
-            case (evaluated, method) ⇒
-              val closure: ScalaClosure =
-                (context: Context, rng: RandomProvider) ⇒ method.invoke(evaluated, context, rng)
-              compiledScala(closure)
-          }
+          val scriptInputs = sortedInputNames.map(n ⇒ allInputMap(n).head)
+          cache.getOrElseUpdate(
+            scriptInputs,
+            function(scriptInputs).map {
+              case (evaluated, method) ⇒
+                val closure: ScalaClosure =
+                  (context: Context, rng: RandomProvider) ⇒ method.invoke(evaluated, context, rng)
+                compiledScala(closure)
+            }
+          )
         case duplicated ⇒ throw new UserBadDataError("Duplicated inputs: " + duplicated.mkString(", "))
       }
     }

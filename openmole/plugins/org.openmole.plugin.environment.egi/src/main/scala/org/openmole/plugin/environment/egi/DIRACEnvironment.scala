@@ -112,4 +112,5 @@ class DIRACEnvironment(
     }
   }
 
+  override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)
 }

@@ -199,7 +199,7 @@ package object evolution {
 
   def SteadyGA[ALG <: GAAlgorithm](algorithm: ALG)(
     fitness: Puzzle,
-    lambda: Int = 1)(implicit plugins: PluginSet) = {
+    lambda: Int)(implicit plugins: PluginSet) = {
 
     val name = "steadyGA"
 
@@ -272,7 +272,7 @@ package object evolution {
 
     val name = "islandSteadyGA"
 
-    val (gaPuzzle, parameters) = SteadyGA[ALG](algorithm)(fitness)
+    val (gaPuzzle, parameters) = SteadyGA[ALG](algorithm)(fitness, 1)
     val mt = Capsule(MoleTask(gaPuzzle) set (_.setName(s"${name}IslandTask")))
 
     val (puzzle, islandGA) = IslandGA[ALG](parameters)(

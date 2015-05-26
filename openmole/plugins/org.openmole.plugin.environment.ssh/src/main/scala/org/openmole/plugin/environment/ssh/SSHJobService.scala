@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.ssh
 
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice.BatchJob
-import org.openmole.core.eventdispatcher._
+import org.openmole.core.event._
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workspace.Workspace
@@ -67,7 +67,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
     import ExecutionState._
 
     sshBatchJob listen {
-      case ev: BatchJob.StateChanged ⇒
+      case (_, ev: BatchJob.StateChanged) ⇒
         ev.newState match {
           case DONE | FAILED | KILLED ⇒
             ev.oldState match {

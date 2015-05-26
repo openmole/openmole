@@ -19,7 +19,7 @@ package org.openmole.core.workflow.task
 
 import java.util.concurrent.locks.ReentrantLock
 
-import org.openmole.core.eventdispatcher._
+import org.openmole.core.event._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
@@ -69,7 +69,7 @@ sealed abstract class MoleTask(
     val lastContextLock = new ReentrantLock()
 
     execution listen {
-      case ev: MoleExecution.JobFinished ⇒
+      case (_, ev: MoleExecution.JobFinished) ⇒
         lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
     }
 

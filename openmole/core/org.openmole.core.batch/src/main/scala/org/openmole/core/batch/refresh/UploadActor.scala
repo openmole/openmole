@@ -108,30 +108,10 @@ class UploadActor(jobManager: JobManager) {
   }
 
   def serializeJob(file: File, job: Job) = {
-    var files = new TreeSet[File]()(fileOrdering)
-    var plugins = new TreeSet[File]()(fileOrdering)
-
-    val tos = new TarOutputStream(file.bufferedOutputStream())
-    try {
-      for (moleJob ← job.moleJobs) moleJob.synchronized {
-        if (!moleJob.finished) {
-          val moleJobFile = Workspace.newFile("job", ".tar")
-          try {
-            val serializationResult =
-              SerialiserService.serialiseGetPluginsAndFiles(
-                RunnableTask(moleJob),
-                moleJobFile)
-
-            files ++= serializationResult.files
-            plugins ++= serializationResult.plugins
-
-            tos.addFile(moleJobFile, UUID.randomUUID.toString)
-          }
-          finally moleJobFile.delete
-        }
-      }
-    }
-    finally tos.close
+    val runnableTasks = job.moleJobs.map(RunnableTask(_))
+    val serializationResult = SerialiserService.serialiseGetPluginsAndFiles(runnableTasks, file)
+    val files = new TreeSet[File]()(fileOrdering) ++ serializationResult.files
+    val plugins = new TreeSet[File]()(fileOrdering) ++ serializationResult.plugins
     (files diff plugins, plugins)
   }
 
@@ -195,7 +175,9 @@ class UploadActor(jobManager: JobManager) {
       pluginReplicas,
       files,
       jobMessage,
-      path)
+      path,
+      storage.environment.runtimeSettings
+    )
   }
 
 }

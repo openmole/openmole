@@ -16,7 +16,7 @@ object Core extends Defaults {
     includeOsgi,
     libraryDependencies ++= Seq(scalaLang, math, scalatest)
   ) dependsOn
-    (eventDispatcher, exception, tools, updater, workspace, macros, pluginManager, serializer, output, console, replication % "test")
+    (event, exception, tools, updater, workspace, macros, pluginManager, serializer, output, console, replication % "test")
 
   lazy val serializer = OsgiProject("serializer", imports = Seq("*")) settings
     (includeOsgi,
@@ -24,7 +24,7 @@ object Core extends Defaults {
       (workspace, pluginManager, fileService, tools, openmoleTar)
 
   lazy val batch = OsgiProject("batch", imports = Seq("*")) dependsOn (
-    workflow, workspace, tools, eventDispatcher, replication, updater, exception,
+    workflow, workspace, tools, event, replication, updater, exception,
     serializer, fileService, pluginManager, openmoleTar) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick, apacheConfig))
 
   lazy val dsl = OsgiProject("dsl", imports = Seq("*")) dependsOn (workflow, logging)
@@ -36,7 +36,7 @@ object Core extends Defaults {
       libraryDependencies ++= Seq(xstream, exec, math, jodaTime, scalaLang, scalatest)) dependsOn
       (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleStream)
 
-  val eventDispatcher = OsgiProject("eventdispatcher", imports = Seq("*")) dependsOn (tools) settings (
+  val event = OsgiProject("event", imports = Seq("*")) dependsOn (tools) settings (
     libraryDependencies += scalatest
   )
 
@@ -45,7 +45,7 @@ object Core extends Defaults {
 
   val workspace = OsgiProject("workspace", imports = Seq("*")) settings
     (includeOsgi, libraryDependencies ++= Seq(jasypt, xstream, apacheConfig, math)) dependsOn
-    (exception, eventDispatcher, tools, replication)
+    (exception, event, tools, replication)
 
   val fileDeleter = OsgiProject("filedeleter", imports = Seq("*")) settings (includeOsgi) dependsOn (tools)
 

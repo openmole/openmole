@@ -24,8 +24,10 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.message._
 import org.openmole.core.batch.storage._
-import org.openmole.core.eventdispatcher.EventDispatcher
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.serializer.structure.PluginClassAndFiles
+import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.core.tools.service.Logger
@@ -116,17 +118,25 @@ class GetResultActor(jobManager: JobManager) {
   }
 
   private def getContextResults(serializedResults: SerializedContextResults, storage: StorageService)(implicit token: AccessToken): ContextResults = {
-    Workspace.withTmpFile { serializedResultsFile ⇒
-      val fileReplacement =
-        serializedResults.files.map {
-          replicated ⇒
-            replicated.originalPath -> replicated.download((p, f) ⇒ signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage))
-        }.toMap
+    serializedResults match {
+      case serializedResults: IndividualFilesContextResults ⇒
+        Workspace.withTmpFile { serializedResultsFile ⇒
+          val fileReplacement =
+            serializedResults.files.map {
+              replicated ⇒
+                replicated.originalPath -> replicated.download((p, f) ⇒ signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage))
+            }.toMap
 
-      Workspace.withTmpFile { contextResultsFileCache ⇒
-        signalDownload(storage.download(serializedResults.contextResults.path, contextResultsFileCache), serializedResults.contextResults.path, storage)
-        SerialiserService.deserialiseReplaceFiles[ContextResults](contextResultsFileCache, fileReplacement)
-      }
+          Workspace.withTmpFile { contextResultsFileCache ⇒
+            signalDownload(storage.download(serializedResults.contextResults.path, contextResultsFileCache), serializedResults.contextResults.path, storage)
+            SerialiserService.deserialiseReplaceFiles[ContextResults](contextResultsFileCache, fileReplacement)
+          }
+        }
+      case serializedResults: ArchiveContextResults ⇒
+        Workspace.withTmpFile { contextResultsFileCache ⇒
+          signalDownload(storage.download(serializedResults.contextResults.path, contextResultsFileCache), serializedResults.contextResults.path, storage)
+          SerialiserService.deserialiseAndExtractFiles[ContextResults](contextResultsFileCache)
+        }
     }
   }
 

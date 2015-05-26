@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.openmole.console._
-import org.openmole.core.eventdispatcher._
+import org.openmole.core.event._
 import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
@@ -25,6 +25,7 @@ import scala.util.{ Try, Failure, Success }
 case class Execution(workDirectory: WorkDirectory, moleExecution: MoleExecution)
 
 case class WorkDirectory(baseDirectory: File) {
+
   lazy val inputDirectory = {
     val f = new File(baseDirectory, "inputs")
     f.mkdirs()
@@ -116,8 +117,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
                     Try(puzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream))) match {
                       case Success(ex) ⇒
                         ex listen {
-                          case ev: MoleExecution.Finished ⇒
-
+                          case (ex, ev: MoleExecution.Finished) ⇒
                         }
                         Try(ex.start) match {
                           case Failure(e) ⇒ error(e)

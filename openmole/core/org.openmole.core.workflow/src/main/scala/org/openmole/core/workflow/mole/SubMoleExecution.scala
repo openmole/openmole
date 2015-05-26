@@ -19,7 +19,7 @@ package org.openmole.core.workflow.mole
 
 import java.util.concurrent.locks.Lock
 
-import org.openmole.core.eventdispatcher.{ Event, EventDispatcher }
+import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.data._

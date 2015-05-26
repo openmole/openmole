@@ -181,10 +181,12 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     }
 
     val uploadedResult = runtimeResult.result match {
-      case Success((SerializedContextResults(contextResults: FileMessage, files: Iterable[ReplicatedFile]), log)) ⇒
+      case Success((ArchiveContextResults(contextResults), log)) ⇒
+        Success((ArchiveContextResults(uploadFileMessage(contextResults)), log))
+      case Success((IndividualFilesContextResults(contextResults: FileMessage, files: Iterable[ReplicatedFile]), log)) ⇒
         val uploadedFiles = files.map { uploadReplicatedFile }
-        val uploadedContextResults = uploadFileMessage(contextResults)
-        Success((SerializedContextResults(uploadedContextResults, uploadedFiles), log))
+        val uploadedContextResults = uploadFileMessage { contextResults }
+        Success((IndividualFilesContextResults(uploadedContextResults, uploadedFiles), log))
       case Failure(e) ⇒ Failure(e)
     }
 
@@ -331,7 +333,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")
 
           localExecutionMessage.withOutputStream { os ⇒
-            SerialiserService.serialise(ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath), os)
+            SerialiserService.serialise(ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath, executionMessage.runtimeSettings), os)
           }
 
           Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, jobMessage.memory, executionMessage, job, cached))

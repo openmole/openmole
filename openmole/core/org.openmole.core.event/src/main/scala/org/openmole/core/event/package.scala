@@ -16,9 +16,9 @@
  */
 package org.openmole.core
 
-package object eventdispatcher {
+package object event {
   trait Event[-T]
-  type Listner[T] = PartialFunction[Event[T], Unit]
+  type Listner[T] = PartialFunction[(T, Event[T]), Unit]
 
   implicit class EventDispatcherDecorator[T](o: T) {
     def listen(listener: Listner[T]) = EventDispatcher.listen(o)(listener)

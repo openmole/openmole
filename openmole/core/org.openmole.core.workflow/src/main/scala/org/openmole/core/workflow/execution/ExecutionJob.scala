@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.execution
 
-import org.openmole.core.eventdispatcher.EventDispatcher
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.workflow.job.MoleJob
 import ExecutionState._
 

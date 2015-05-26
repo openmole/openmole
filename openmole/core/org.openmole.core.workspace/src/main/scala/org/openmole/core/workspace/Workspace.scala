@@ -24,7 +24,7 @@ import java.util.logging.Logger
 import org.apache.commons.configuration._
 import org.apache.commons.configuration.reloading._
 import org.jasypt.util.text._
-import org.openmole.core.eventdispatcher.{ Event, EventDispatcher }
+import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.replication.DBServerInfo
 import org.openmole.tool.file._

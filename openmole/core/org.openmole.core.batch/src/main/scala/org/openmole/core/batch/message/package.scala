@@ -93,12 +93,16 @@ package object message {
   }
 
   case class FileMessage(path: String, hash: String)
+
   case class ReplicatedFile(originalPath: String, directory: Boolean, hash: String, path: String, mode: Int)
+  case class RuntimeSettings(archiveResult: Boolean)
+  case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: FileMessage, communicationDirPath: String, runtimeSettings: RuntimeSettings)
 
-  case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: FileMessage, communicationDirPath: String)
-
-  case class SerializedContextResults(contextResults: FileMessage, files: Iterable[ReplicatedFile])
+  sealed trait SerializedContextResults
+  case class ArchiveContextResults(contextResults: FileMessage) extends SerializedContextResults
+  case class IndividualFilesContextResults(contextResults: FileMessage, files: Iterable[ReplicatedFile]) extends SerializedContextResults
   case class ContextResults(results: PartialFunction[MoleJobId, Try[Context]])
+
   case class RuntimeResult(stdOut: Option[FileMessage], stdErr: Option[FileMessage], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)
 
 }

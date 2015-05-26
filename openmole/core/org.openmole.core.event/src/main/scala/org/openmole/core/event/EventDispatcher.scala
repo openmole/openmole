@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.eventdispatcher
+package org.openmole.core.event
 
 import scala.collection.mutable.{ ListBuffer, WeakHashMap }
 
@@ -30,7 +30,7 @@ object EventDispatcher {
   def trigger[T](obj: T, event: Event[T]) = {
     for {
       l ← listenerMap.synchronized { listenerMap.get(obj).getOrElse(List.empty) }
-    } l.asInstanceOf[Listner[T]].lift(event)
+    } l.asInstanceOf[Listner[T]].lift(obj, event)
   }
 
 }

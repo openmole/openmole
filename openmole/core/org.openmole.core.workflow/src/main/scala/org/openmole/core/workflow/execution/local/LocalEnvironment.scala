@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.execution.local
 
-import org.openmole.core.eventdispatcher.EventDispatcher
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
@@ -48,9 +48,9 @@ class LocalEnvironment(val nbThreads: Int, val deinterleave: Boolean) extends En
     submit(new LocalExecutionJob(this, List(moleJob), None))
 
   private def submit(ejob: LocalExecutionJob) = {
-    EventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))
-    ejob.state = ExecutionState.SUBMITTED
     pool.enqueue(ejob)
+    ejob.state = ExecutionState.SUBMITTED
+    EventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))
   }
 
   def submitted: Long = pool.waiting

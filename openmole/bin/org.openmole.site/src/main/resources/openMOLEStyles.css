@@ -67,7 +67,7 @@ pre {
   left: 0;
   top: 0;
   margin-right: 20;
-  margin-top: 40;
+  margin-top: 30;
   width: 120%;
 }
 
@@ -89,6 +89,10 @@ pre {
 #documentation-menu-entry-current {
   color: brown;
   line-height: 1em;
+}
+
+#documentation-text {
+  margin-top: 0px;
 }
 
 .scalatex-content *{

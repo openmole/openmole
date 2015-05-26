@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.execution
 
 import java.util.logging.Level
-import org.openmole.core.eventdispatcher.Event
+import org.openmole.core.event.Event
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workflow.job.MoleJob
 import ExecutionState._

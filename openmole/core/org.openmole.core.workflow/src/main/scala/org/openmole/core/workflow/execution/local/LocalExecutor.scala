@@ -19,7 +19,7 @@ package org.openmole.core.workflow.execution.local
 
 import java.io.{ OutputStream, PrintStream }
 
-import org.openmole.core.eventdispatcher.EventDispatcher
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.output.OutputManager
 import org.openmole.core.tools.service
 import org.openmole.core.tools.service.{ Logger, LocalHostName }

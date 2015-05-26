@@ -24,3 +24,4 @@ trait RemoteStorage {
   def download(src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit
   def child(parent: String, child: String): String
 }
+

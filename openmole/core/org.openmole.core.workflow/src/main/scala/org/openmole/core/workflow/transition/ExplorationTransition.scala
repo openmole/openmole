@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.eventdispatcher._
+import org.openmole.core.event._
 import org.openmole.core.exception._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
@@ -84,8 +84,7 @@ class ExplorationTransition(start: Capsule, end: Slot, condition: Condition = Co
             else if (level == 0) {
               subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
               subMoleExecution listen {
-                case ev: SubMoleExecution.Finished ⇒
-                  t.aggregate(subMoleExecution, ev.ticket)
+                case (se, ev: SubMoleExecution.Finished) ⇒ t.aggregate(se, ev.ticket)
               }
             }
           case t: IExplorationTransition ⇒ toProcess += t.end.capsule -> (level + 1)

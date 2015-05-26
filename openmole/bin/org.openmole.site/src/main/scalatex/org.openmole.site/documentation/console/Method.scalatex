@@ -76,8 +76,8 @@
 
   // Construction of the workflow orchestrating the genetic algorithm
   // modelCapsule is the fitness function to optimise
-  // an optional lambda parameter can be set to specify the parallelism level of the workflow
-  val (mole, ga) = SteadyGA(evolution)(modelCapsule)
+  // the last parameter specifies the number of concurrent fitness evaluations
+  val (mole, ga) = SteadyGA(evolution)(modelCapsule, 10)
 
   // Definition of a hook to save the population of solutions to /tmp/evolution on the local machine running OpenMOLE
   val savePopulation = SavePopulationHook(ga, "/tmp/evolution/")

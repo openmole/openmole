@@ -34,7 +34,7 @@ object Environment extends PluginDefaults {
   lazy val slurm = OsgiProject("slurm", imports = Seq("*")) dependsOn (Core.exception, Core.workspace, Core.batch, gridscale, ssh) settings
     (libraryDependencies += Libraries.gridscaleSLURM)
 
-  lazy val ssh = OsgiProject("ssh", imports = Seq("*")) dependsOn (Core.exception, Core.workspace, Core.eventDispatcher, Core.batch, gridscale) settings
+  lazy val ssh = OsgiProject("ssh", imports = Seq("*")) dependsOn (Core.exception, Core.workspace, Core.event, Core.batch, gridscale) settings
     (libraryDependencies += Libraries.gridscaleSSH)
 
 }

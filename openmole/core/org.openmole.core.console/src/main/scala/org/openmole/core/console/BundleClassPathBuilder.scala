@@ -29,6 +29,7 @@ import collection.mutable.ListBuffer
 import org.osgi.framework._
 
 import collection.JavaConversions._
+import scala.util.Try
 
 /**
  * Helper methods to transform OSGi bundles into {@link AbstractFile} models
@@ -71,8 +72,7 @@ object BundleClassPathBuilder {
        * @return last modification time or 0 if not known
        */
       def lastModified: Long =
-        try { url.openConnection.getLastModified }
-        catch { case _ ⇒ 0 }
+        Try { url.openConnection.getLastModified }.getOrElse(0)
 
       @throws(classOf[IOException])
       def container: AbstractFile =

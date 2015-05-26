@@ -107,7 +107,7 @@ object DocumentationPages { index ⇒
       Seq(
         div(id := "documentation-content", `class` := "row")(
           div(`class` := "col-sm-3")(documentationMenu(root, p)),
-          div(`class` := "col-sm-9 main")(div(p.content, if (p != root) bottomLinks(p) else ""))
+          div(`class` := "col-sm-9", id := "documentation-text")(div(p.content, if (p != root) bottomLinks(p) else ""))
         )
       )
     )
