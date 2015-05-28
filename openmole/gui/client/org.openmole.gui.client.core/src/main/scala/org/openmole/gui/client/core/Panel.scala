@@ -163,13 +163,13 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
   val conceptFilter = Rx {
     nav("filterNav", nav_pills, navItem("allfilter", "All", () ⇒ {
       filter() = ALL
-    }, filter() == ALL),
+    }, active = filter() == ALL),
       navItem("valfilter", "Val", () ⇒ {
         filter() = PROTOTYPES
-      }, filter() == PROTOTYPES),
+      }, active = filter() == PROTOTYPES),
       navItem("taskfilter", "Task", () ⇒ {
         filter() = TASKS
-      }, filter() == TASKS),
+      }, active = filter() == TASKS),
       navItem("envfilter", "Env", () ⇒ {
         println("not impl yet")
       })

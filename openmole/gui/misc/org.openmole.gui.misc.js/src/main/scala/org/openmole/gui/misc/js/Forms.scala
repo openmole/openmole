@@ -56,7 +56,7 @@ object Forms {
   def span(keys: ClassKeyAggregator = emptyCK) = tags.span(`class` := keys.key)
 
   // Nav
-  class NavItem(val navid: String, content: String, val todo: () ⇒ Unit = () ⇒ {}, active: Boolean = false) {
+  class NavItem(val navid: String, content: String, val todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) {
     val activeString = {
       if (active) "active" else ""
     }
@@ -65,23 +65,22 @@ object Forms {
 
     def trigger = alink.click
 
-    val render = li(role := "presentation", id := navid, `class` := activeString)(alink)
+    val render = li(role := "presentation", id := navid, `class` := activeString)(alink)(extraRenderPair: _*)
+
   }
 
-  def navItem(id: String, content: String, todo: () ⇒ Unit = () ⇒ {}, active: Boolean = false) = new NavItem(id, content, todo, active)
-
-  def nav(uuid: String, contents: Seq[(TypedTag[HTMLLIElement], NavItem)], keys: ClassKeyAggregator): TypedTag[HTMLElement] =
-    ul(`class` := "nav " + keys.key, id := uuid, role := "tablist")(
-      contents.map { c ⇒
-        c._1(scalatags.JsDom.attrs.onclick := { () ⇒
-          jQuery("#" + uuid + " .active").removeClass("active")
-          jQuery("#mainNavItemID").addClass("active")
-          c._2.todo()
-        })
-      }: _*)
+  def navItem(id: String, content: String, todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) =
+    new NavItem(id, content, todo, extraRenderPair, active)
 
   def nav(uuid: String, keys: ClassKeyAggregator, contents: NavItem*): TypedTag[HTMLElement] =
-    nav(uuid, contents.map { c ⇒ (c.render, c) }, keys)
+    ul(`class` := "nav " + keys.key, id := uuid, role := "tablist")(
+      contents.map { c ⇒
+        c.render(scalatags.JsDom.attrs.onclick := { () ⇒
+          jQuery("#" + uuid + " .active").removeClass("active")
+          jQuery("#mainNavItemID").addClass("active")
+          c.todo()
+        })
+      }: _*)
 
   val nav_default = key("navbar-default")
   val nav_inverse = key("navbar-inverse")

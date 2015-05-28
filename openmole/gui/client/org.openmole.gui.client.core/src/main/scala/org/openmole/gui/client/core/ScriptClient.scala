@@ -38,7 +38,7 @@ object ScriptClient {
     val body = dom.document.body
     val openFileTree = Var(false)
 
-    val execItem = navItem("executions", "Executions")
+    val execItem = navItem("executions", "Executions", extraRenderPair = Seq(data("toggle") := "modal", data("target") := "#executionPanelID"))
     val fileItem = navItem("files", "Files", () ⇒ {
       openFileTree() = !openFileTree()
     })
@@ -47,10 +47,9 @@ object ScriptClient {
 
     dom.document.body.appendChild(
       nav("mainNav",
-        Seq(
-          (execItem.render(data("toggle") := "modal", data("target") := "#executionPanelID"), execItem),
-          (fileItem.render, fileItem)
-        ), nav_pills + nav_inverse + nav_staticTop
+        nav_pills + nav_inverse + nav_staticTop,
+        execItem,
+        fileItem
       )
     )
 

@@ -106,7 +106,7 @@ class SettingTabs(tabs: Seq[SettingTab]) {
         (for (c ← tabs) yield {
           navItem(c.id, c.name, () ⇒ {
             currentTab() = Some(c)
-          }, currentTab() == Some(c))
+          }, active = currentTab() == Some(c))
         }): _*
       )
     },
