@@ -21,11 +21,11 @@ import org.openmole.gui.client.core.dataui.DataBagUI
 import org.openmole.gui.client.core.files.TreeNodePanel
 import org.scalajs.dom.raw.Event
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.misc.js.BootstrapTags._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.misc.js.BootstrapTags._
 
 import org.scalajs.{ jquery, dom }
 

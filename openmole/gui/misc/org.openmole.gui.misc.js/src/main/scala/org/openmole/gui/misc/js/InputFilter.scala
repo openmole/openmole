@@ -20,9 +20,9 @@ package org.openmole.gui.misc.js
 import org.scalajs.dom.Event
 
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.misc.js.BootstrapTags._
 import rx._
 
 object InputFilter {

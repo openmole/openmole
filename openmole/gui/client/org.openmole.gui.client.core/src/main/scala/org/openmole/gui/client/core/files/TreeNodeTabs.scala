@@ -7,7 +7,7 @@ import org.openmole.gui.shared._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.misc.utils.Utils._
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
 import bs._
 import org.scalajs.dom.raw.{ HTMLElement, HTMLDivElement }

@@ -19,9 +19,9 @@ package org.openmole.gui.client.core.dataui
 
 import org.openmole.gui.client.core.{ ClientService, SettingsPanel }
 import org.openmole.gui.ext.dataui.PanelUI
-import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.misc.js.BootstrapTags._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, InputFilter }
 import rx._
 
 import scalatags.JsDom.all._

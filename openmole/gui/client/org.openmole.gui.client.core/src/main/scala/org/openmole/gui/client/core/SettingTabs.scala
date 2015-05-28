@@ -5,8 +5,8 @@ import org.openmole.gui.ext.dataui._
 import org.openmole.gui.misc.utils.Utils._
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter }
-import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, InputFilter }
+import org.openmole.gui.misc.js.BootstrapTags._
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 import org.scalajs.jquery.jQuery

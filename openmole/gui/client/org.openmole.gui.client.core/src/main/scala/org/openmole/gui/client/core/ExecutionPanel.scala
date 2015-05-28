@@ -20,7 +20,7 @@ package org.openmole.gui.client.core
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.misc.utils.Utils
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import bs._

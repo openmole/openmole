@@ -19,7 +19,7 @@ package org.openmole.gui.plugin.task.statistic.client
 
 import org.openmole.gui.ext.dataui.PanelUI
 import scalatags.Text.all._
-import org.openmole.gui.misc.js.{Forms=> bs}
+import org.openmole.gui.misc.js.{BootstrapTags=> bs}
 import scala.scalajs.js.annotation.JSExport
 @JSExport("org.openmole.gui.plugin.task.statistic.clientStatisticPanelUI")
 class StatisticTaskPanelUI(dataUI: StatisticTaskDataUI) extends PanelUI {

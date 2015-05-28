@@ -4,7 +4,7 @@ import org.openmole.gui.client.core.files.{ TreeNodeTabs, TreeNodePanel }
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.Event
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.misc.js.BootstrapTags._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._

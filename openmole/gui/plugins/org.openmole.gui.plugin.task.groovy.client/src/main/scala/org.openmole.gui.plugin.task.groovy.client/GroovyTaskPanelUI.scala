@@ -22,7 +22,7 @@ import org.openmole.gui.ext.dataui.PanelUI
 import scala.scalajs.js.annotation.JSExport
 
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{Forms=> bs}
+import org.openmole.gui.misc.js.{BootstrapTags=> bs}
 import rx._
 
 @JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskPanelUI")

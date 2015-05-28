@@ -19,23 +19,23 @@ package org.openmole.gui.misc.js
 
 import rx._
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
 
 object Select {
   def apply[T <: Displayable with Identifiable](autoID: String,
                                                 contents: Seq[T],
                                                 default: Option[T],
-                                                key: ClassKeyAggregator = Forms.emptyCK,
-                                                glyphicon: ClassKeyAggregator = Forms.emptyCK,
+                                                key: ClassKeyAggregator = BootstrapTags.emptyCK,
+                                                glyphicon: ClassKeyAggregator = BootstrapTags.emptyCK,
                                                 onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, glyphicon, onclickExtra)
 }
 
 class Select[T <: Displayable with Identifiable](autoID: String,
                                                  val contents: Var[Seq[T]],
                                                  default: Option[T] = None,
-                                                 key: ClassKeyAggregator = Forms.emptyCK,
-                                                 glyphicon: ClassKeyAggregator = Forms.emptyCK,
+                                                 key: ClassKeyAggregator = BootstrapTags.emptyCK,
+                                                 glyphicon: ClassKeyAggregator = BootstrapTags.emptyCK,
                                                  onclickExtra: () ⇒ Unit = () ⇒ {}) {
 
   val content: Var[Option[T]] = Var(contents().size match {
@@ -48,7 +48,7 @@ class Select[T <: Displayable with Identifiable](autoID: String,
     }
   })
 
-  val selector = Forms.buttonGroup()(
+  val selector = BootstrapTags.buttonGroup()(
     span(
       `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", cursor := "pointer")(
         bs.glyph(glyphicon),

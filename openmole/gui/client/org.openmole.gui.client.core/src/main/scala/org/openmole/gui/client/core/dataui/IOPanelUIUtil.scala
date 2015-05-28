@@ -1,9 +1,9 @@
 package org.openmole.gui.client.core.dataui
 
 import org.openmole.gui.client.core.{ PrototypeFactoryUI, ClientService }
-import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.misc.js.BootstrapTags._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.{ Forms ⇒ bs }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.js.{ ClassKeyAggregator, InputFilter }
 import org.scalajs.dom.html.TableCell
 

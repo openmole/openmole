@@ -32,8 +32,8 @@ import org.scalajs.jquery.JQuery
 import fr.iscpif.scaladget.mapping.BootstrapStatic
 import rx._
 
-@JSExport("Forms")
-object Forms {
+@JSExport("BootstrapTags")
+object BootstrapTags {
 
   implicit def jq2BootstrapStatic(jq: JQuery): BootstrapStatic = jq.asInstanceOf[BootstrapStatic]
 
@@ -227,9 +227,6 @@ object Forms {
   def buttonToolBar = div("btn-toolbar")(role := "toolbar")
 
   //Modalg Dialog
-  def modalDialog(ID: String, header: TypedTag[HTMLFormElement], body: TypedTag[HTMLDivElement], footer: TypedTag[HTMLElement]) =
-    new ModalDialog(ID, header, body, footer)
-
   def modalDialog(ID: String, typedTag: TypedTag[_]*) =
     div("modal fade")(id := ID,
       div("modal-dialog")(

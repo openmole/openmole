@@ -3,12 +3,12 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core.{ PanelTriggerer, ExecutionPanel, Post }
 import org.openmole.gui.client.core.files.FileExtension.DisplayableFile
 import org.openmole.gui.shared._
-import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.misc.js.BootstrapTags._
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.{ FileList, HTMLInputElement, DragEvent }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ Forms ⇒ bs, Select }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow

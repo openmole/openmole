@@ -4,7 +4,7 @@ import org.openmole.gui.client
 import org.openmole.gui.client.core.PrototypeFactoryUI.DoubleDataUI
 import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.ext.dataui.FactoryUI
-import org.openmole.gui.misc.js.{ Forms ⇒ bs, InputFilter, Select }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, InputFilter, Select }
 import org.scalajs.dom
 import org.scalajs.dom.Event
 import org.scalajs.dom.raw.Event
@@ -15,7 +15,7 @@ import scala.sys.Prop.DoubleProp
 import scalatags.JsDom.all
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.Forms._
+import org.openmole.gui.misc.js.BootstrapTags._
 import org.openmole.gui.ext.data.ProtoTYPE.DOUBLE
 import ClientService._
 import org.openmole.gui.misc.js.JsRxTags._
