@@ -63,17 +63,20 @@ object GUIClient {
 
     val topdiv = dom.document.body.appendChild(tags.div)
 
+    val execItem = navItem("executions", "Executions")
+    val settingsItem = navItem("settings", "Settings")
+
+    val settings = Panel.generic
+    val executions = ExecutionPanel(execItem.alink)
+
     topdiv.appendChild(
       nav("mainNav",
         Seq(
-          (navItem("settings", "Settings").render(data("toggle") := "modal", data("target") := "#conceptPanelID"), "task", () ⇒ {}),
-          (navItem("executions", "Executions").render(data("toggle") := "modal", data("target") := "#executionPanelID"), "execs", () ⇒ {})
+          (settingsItem.render(data("toggle") := "modal", data("target") := "#conceptPanelID"), "task", () ⇒ {}),
+          (execItem.render(data("toggle") := "modal", data("target") := "#executionPanelID"), "execs", () ⇒ {})
         ), nav_pills + nav_inverse + nav_staticTop
       )
     )
-
-    val settings = Panel.generic
-    val executions = ExecutionPanel()
 
     topdiv.appendChild(settings.dialog.render)
     topdiv.appendChild(executions.dialog.render)

@@ -61,7 +61,11 @@ object Forms {
       if (active) "active" else ""
     }
 
-    def render = li(role := "presentation", id := navid, `class` := activeString)(tags.a(href := "#")(content))
+    val alink = tags.a(href := "#")(content).render
+
+    def trigger = alink.click
+
+    val render = li(role := "presentation", id := navid, `class` := activeString)(alink)
   }
 
   def navItem(id: String, content: String, todo: () ⇒ Unit = () ⇒ {}, active: Boolean = false) = new NavItem(id, content, todo, active)

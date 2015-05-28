@@ -18,6 +18,7 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.core.workflow.mole.MoleExecution
+import org.scalajs.dom.html.Anchor
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -25,18 +26,18 @@ import org.openmole.gui.misc.js.JsRxTags._
 import bs._
 import rx._
 
-case class MoleExecutionUI(name: String, moleExecution: MoleExecution)
-
 object ExecutionPanel {
-  def apply() = new ExecutionPanel
+  def apply(triggerLink: Anchor) = new ExecutionPanel(triggerLink)
 }
 
-class ExecutionPanel {
+class ExecutionPanel(private val triggerLink: Anchor) {
 
-  val moleExecutionUIs: Var[Seq[MoleExecutionUI]] = Var(Seq())
-  val currentMoleExecutionUI: Var[Option[MoleExecutionUI]] = Var(None)
+  val moleExecutionUIs: Var[Seq[String]] = Var(Seq())
+  val currentMoleExecutionUI: Var[Option[String]] = Var(None)
 
-  def setCurrent(mE: MoleExecutionUI) = currentMoleExecutionUI() = Some(mE)
+  def ++(id: String) = moleExecutionUIs() = moleExecutionUIs() :+ id
+
+  def setCurrent(id: String) = currentMoleExecutionUI() = Some(id)
 
   val executionTable = bs.table(striped)(
     thead,
@@ -44,12 +45,12 @@ class ExecutionPanel {
       tbody({
         for (mE ← moleExecutionUIs()) yield {
           bs.tr(row)(
-            bs.td(col_md_6)(tags.a(mE.name, cursor := "pointer", onclick := { () ⇒
+            bs.td(col_md_6)(tags.a(mE, cursor := "pointer", onclick := { () ⇒
               setCurrent(mE)
             })),
             bs.td(col_md_1)(bs.button(glyph(glyph_trash))(onclick := { () ⇒
-              moleExecutionUIs() = moleExecutionUIs().filterNot { c ⇒
-                c.moleExecution.id == mE.moleExecution.id
+              moleExecutionUIs() = moleExecutionUIs().filterNot { id ⇒
+                id == mE
               }
             }
             ))
@@ -64,6 +65,8 @@ class ExecutionPanel {
     println("Close")
   }
   )
+
+  def trigger = triggerLink.click
 
   val dialog = modalDialog("executionPanelID",
     headerDialog(

@@ -37,12 +37,15 @@ object ScriptClient {
   def run(): Unit = {
     val body = dom.document.body
     val openFileTree = Var(false)
-    val executions = ExecutionPanel()
+
+    val execItem = navItem("executions", "Executions")
+
+    implicit val executions = ExecutionPanel(execItem.alink)
 
     dom.document.body.appendChild(
       nav("mainNav",
         Seq(
-          (navItem("executions", "Executions").render(data("toggle") := "modal", data("target") := "#executionPanelID"), "execs", () ⇒ {}),
+          (execItem.render(data("toggle") := "modal", data("target") := "#executionPanelID"), "execs", () ⇒ {}),
           (navItem("files", "Files").render, "files", () ⇒ {
             openFileTree() = !openFileTree()
           })

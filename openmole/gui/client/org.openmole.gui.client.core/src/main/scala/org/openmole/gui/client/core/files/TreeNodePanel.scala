@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.Post
+import org.openmole.gui.client.core.{ ExecutionPanel, Post }
 import org.openmole.gui.client.core.files.FileExtension.DisplayableFile
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.Forms._
@@ -36,9 +36,9 @@ import rx._
 
 object TreeNodePanel {
 
-  def apply(path: String): TreeNodePanel = apply(DirNode(path))
+  def apply(path: String)(implicit executionPanel: ExecutionPanel): TreeNodePanel = apply(DirNode(path))
 
-  def apply(dirNode: DirNode): TreeNodePanel = new TreeNodePanel(dirNode)
+  def apply(dirNode: DirNode)(implicit executionPanel: ExecutionPanel): TreeNodePanel = new TreeNodePanel(dirNode)
 
   def sons(dirNode: DirNode) = Post[Api].listFiles(dirNode).call()
 
@@ -46,7 +46,7 @@ object TreeNodePanel {
 
 import TreeNodePanel._
 
-class TreeNodePanel(rootNode: DirNode) {
+class TreeNodePanel(rootNode: DirNode)(implicit executionPanel: ExecutionPanel) {
 
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode))
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
@@ -174,7 +174,7 @@ class TreeNodePanel(rootNode: DirNode) {
     case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ {
       val (_, fileType) = FileExtension(node)
       fileType match {
-        case d: DisplayableFile ⇒ downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(node, content))
+        case d: DisplayableFile ⇒ downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(node, content, executionPanel))
         case _                  ⇒
       }
     })
