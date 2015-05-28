@@ -72,8 +72,8 @@ object GUIClient {
     topdiv.appendChild(
       nav("mainNav",
         Seq(
-          (settingsItem.render(data("toggle") := "modal", data("target") := "#conceptPanelID"), "task", () ⇒ {}),
-          (execItem.render(data("toggle") := "modal", data("target") := "#executionPanelID"), "execs", () ⇒ {})
+          (settingsItem.render(data("toggle") := "modal", data("target") := "#conceptPanelID"), settingsItem),
+          (execItem.render(data("toggle") := "modal", data("target") := "#executionPanelID"), execItem)
         ), nav_pills + nav_inverse + nav_staticTop
       )
     )

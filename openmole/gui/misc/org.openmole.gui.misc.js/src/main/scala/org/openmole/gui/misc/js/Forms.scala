@@ -70,18 +70,18 @@ object Forms {
 
   def navItem(id: String, content: String, todo: () ⇒ Unit = () ⇒ {}, active: Boolean = false) = new NavItem(id, content, todo, active)
 
-  def nav(uuid: String, contents: Seq[(TypedTag[HTMLLIElement], String, () ⇒ Unit)], keys: ClassKeyAggregator): TypedTag[HTMLElement] =
+  def nav(uuid: String, contents: Seq[(TypedTag[HTMLLIElement], NavItem)], keys: ClassKeyAggregator): TypedTag[HTMLElement] =
     ul(`class` := "nav " + keys.key, id := uuid, role := "tablist")(
       contents.map { c ⇒
         c._1(scalatags.JsDom.attrs.onclick := { () ⇒
           jQuery("#" + uuid + " .active").removeClass("active")
-          jQuery("#" + c._2).addClass("active")
-          c._3()
+          jQuery("#mainNavItemID").addClass("active")
+          c._2.todo()
         })
       }: _*)
 
   def nav(uuid: String, keys: ClassKeyAggregator, contents: NavItem*): TypedTag[HTMLElement] =
-    nav(uuid, contents.map { c ⇒ (c.render, c.navid, c.todo) }, keys)
+    nav(uuid, contents.map { c ⇒ (c.render, c) }, keys)
 
   val nav_default = key("navbar-default")
   val nav_inverse = key("navbar-inverse")
