@@ -57,7 +57,7 @@ object SettingTabs {
 
   import SettingTab._
 
-  def apply(panel: GenericPanel, db: DataBagUI): SettingTabs = new SettingTabs(db.dataUI() match {
+  def apply(panel: SettingsPanel, db: DataBagUI): SettingTabs = new SettingTabs(db.dataUI() match {
     case iAo: InAndOutTaskDataUI ⇒ Seq(inAndOutTab(Seq(iAo.inAndOutDataUI().panelUI(panel))))
     case io: IODataUI ⇒
       val name = io match {
@@ -76,7 +76,7 @@ object SettingTabs {
   }
   )
 
-  def apply(panel: GenericPanel, dataUI: CapsuleDataUI): SettingTabs = new SettingTabs(Seq(
+  def apply(panel: SettingsPanel, dataUI: CapsuleDataUI): SettingTabs = new SettingTabs(Seq(
     dataUI.dataUI.map {
       d ⇒ ioTab("Settings", Seq(d.panelUI))
     },

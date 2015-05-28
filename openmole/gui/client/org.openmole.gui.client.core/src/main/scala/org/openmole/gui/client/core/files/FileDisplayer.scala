@@ -3,7 +3,7 @@ package org.openmole.gui.client.core.files
 import java.io.File
 import FileExtension._
 import TreeNodeTabs._
-import org.openmole.gui.client.core.{ ExecutionPanel, Post }
+import org.openmole.gui.client.core.{ PanelTriggerer, ExecutionPanel, Post }
 import org.openmole.gui.ext.data.ScriptData
 import org.openmole.gui.shared.Api
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -45,7 +45,7 @@ class FileDisplayer {
     }
   }
 
-  def display(tn: TreeNode, content: String, extecutionPanel: ExecutionPanel) = {
+  def display(tn: TreeNode, content: String, extecutionPanel: ExecutionPanel with PanelTriggerer) = {
     val (_, fileType) = FileExtension(tn)
     alreadyDisplayed(tn) match {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)

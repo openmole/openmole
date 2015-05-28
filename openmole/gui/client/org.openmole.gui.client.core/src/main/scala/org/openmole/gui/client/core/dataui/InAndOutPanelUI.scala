@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core.dataui
 
-import org.openmole.gui.client.core.{ ClientService, GenericPanel }
+import org.openmole.gui.client.core.{ ClientService, SettingsPanel }
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
 import org.scalajs.jquery._
@@ -30,7 +30,7 @@ import IOPanelUIUtil._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class InAndOutPanelUI(val panel: GenericPanel, dataUI: InAndOutputDataUI) extends PanelUI {
+class InAndOutPanelUI(val panel: SettingsPanel, dataUI: InAndOutputDataUI) extends PanelUI {
 
   val inputFilter = InputFilter(pHolder = "Input prototype", inputID = InputFilter.protoFilterId1, size = "50%")
 

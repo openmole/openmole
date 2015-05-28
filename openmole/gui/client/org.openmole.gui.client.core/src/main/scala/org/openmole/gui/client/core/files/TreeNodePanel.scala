@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{ ExecutionPanel, Post }
+import org.openmole.gui.client.core.{ PanelTriggerer, ExecutionPanel, Post }
 import org.openmole.gui.client.core.files.FileExtension.DisplayableFile
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.Forms._
@@ -36,9 +36,9 @@ import rx._
 
 object TreeNodePanel {
 
-  def apply(path: String)(implicit executionPanel: ExecutionPanel): TreeNodePanel = apply(DirNode(path))
+  def apply(path: String)(implicit executionPanel: ExecutionPanel with PanelTriggerer): TreeNodePanel = apply(DirNode(path))
 
-  def apply(dirNode: DirNode)(implicit executionPanel: ExecutionPanel): TreeNodePanel = new TreeNodePanel(dirNode)
+  def apply(dirNode: DirNode)(implicit executionPanel: ExecutionPanel with PanelTriggerer): TreeNodePanel = new TreeNodePanel(dirNode)
 
   def sons(dirNode: DirNode) = Post[Api].listFiles(dirNode).call()
 
@@ -46,7 +46,7 @@ object TreeNodePanel {
 
 import TreeNodePanel._
 
-class TreeNodePanel(rootNode: DirNode)(implicit executionPanel: ExecutionPanel) {
+class TreeNodePanel(rootNode: DirNode)(implicit executionPanel: ExecutionPanel with PanelTriggerer) {
 
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode))
   val toBeEdited: Var[Option[TreeNode]] = Var(None)

@@ -69,6 +69,9 @@ object Forms {
 
   }
 
+  def dialogNavItem(id: String, content: String, todo: () ⇒ Unit = () ⇒ {}) =
+    navItem(id, content, todo, Seq(data("toggle") := "modal", data("target") := "#" + id + "PanelID"))
+
   def navItem(id: String, content: String, todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) =
     new NavItem(id, content, todo, extraRenderPair, active)
 

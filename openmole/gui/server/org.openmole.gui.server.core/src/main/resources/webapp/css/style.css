@@ -67,7 +67,7 @@ select::-moz-focus-inner {
 	color: black;
 }
 
-#conceptPanelID .modal-dialog {
+#settingsPanelID .modal-dialog {
     width: 60%;
 }
 

@@ -18,7 +18,7 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.core.workflow.mole.MoleExecution
-import org.scalajs.dom.html.Anchor
+import org.openmole.gui.misc.utils.Utils
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ Forms ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -27,10 +27,10 @@ import bs._
 import rx._
 
 object ExecutionPanel {
-  def apply(triggerLink: Anchor) = new ExecutionPanel(triggerLink)
+  def apply = new ExecutionPanel
 }
 
-class ExecutionPanel(private val triggerLink: Anchor) {
+class ExecutionPanel {
 
   val moleExecutionUIs: Var[Seq[String]] = Var(Seq())
   val currentMoleExecutionUI: Var[Option[String]] = Var(None)
@@ -66,9 +66,7 @@ class ExecutionPanel(private val triggerLink: Anchor) {
   }
   )
 
-  def trigger = triggerLink.click
-
-  val dialog = modalDialog("executionPanelID",
+  val dialog = modalDialog("executionsPanelID",
     headerDialog(
       tags.div("Executions"
       ),

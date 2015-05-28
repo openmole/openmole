@@ -17,7 +17,7 @@ package org.openmole.gui.client.core.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.{ ClientService, GenericPanel }
+import org.openmole.gui.client.core.{ ClientService, SettingsPanel }
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.js.Forms._
 import org.openmole.gui.misc.js.JsRxTags._
@@ -28,7 +28,7 @@ import scalatags.JsDom.all._
 import scalatags.JsDom.{ tags }
 import IOPanelUIUtil._
 
-class InOutputPanelUI(val panel: GenericPanel, val dataUI: InOutputDataUI) extends PanelUI {
+class InOutputPanelUI(val panel: SettingsPanel, val dataUI: InOutputDataUI) extends PanelUI {
   val inputFilter = InputFilter(pHolder = "Add a prototype", inputID = InputFilter.filterId)
 
   def filteredInputsUI = filtered(inputFilter, dataUI, dataUI.mappingsFactory)

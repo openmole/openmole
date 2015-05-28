@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core.dataui
 
-import org.openmole.gui.client.core.GenericPanel
+import org.openmole.gui.client.core.SettingsPanel
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.dataui.{ PanelUI, DataUI }
 import rx._
@@ -49,7 +49,7 @@ abstract class InOutputDataUI(val mappingsFactory: IOMappingsFactory) extends Da
 
   def panelUI: PanelUI = PanelUI.empty
 
-  def panelUI(panel: GenericPanel): InOutputPanelUI = new InOutputPanelUI(panel, this)
+  def panelUI(panel: SettingsPanel): InOutputPanelUI = new InOutputPanelUI(panel, this)
 
   def mappingKeys(p: PrototypeDataBagUI) = mappingsFactory.build.fields.filter {
     _.prototypeFilter(p)

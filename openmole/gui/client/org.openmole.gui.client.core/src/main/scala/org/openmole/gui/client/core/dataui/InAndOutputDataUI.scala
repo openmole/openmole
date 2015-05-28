@@ -17,7 +17,7 @@ package org.openmole.gui.client.core.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.GenericPanel
+import org.openmole.gui.client.core.SettingsPanel
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.dataui.{ PanelUI, DataUI }
 import rx._
@@ -61,5 +61,5 @@ class InAndOutputDataUI(val mappingsFactory: IOMappingsFactory) extends DataUI {
 
   def panelUI: PanelUI = PanelUI.empty
 
-  def panelUI(panel: GenericPanel): InAndOutPanelUI = new InAndOutPanelUI(panel, this)
+  def panelUI(panel: SettingsPanel): InAndOutPanelUI = new InAndOutPanelUI(panel, this)
 }

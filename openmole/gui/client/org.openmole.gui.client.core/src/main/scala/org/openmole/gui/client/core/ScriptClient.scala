@@ -38,12 +38,15 @@ object ScriptClient {
     val body = dom.document.body
     val openFileTree = Var(false)
 
-    val execItem = navItem("executions", "Executions", extraRenderPair = Seq(data("toggle") := "modal", data("target") := "#executionPanelID"))
+    val execItem = dialogNavItem("executions", "Executions")
+
     val fileItem = navItem("files", "Files", () ⇒ {
       openFileTree() = !openFileTree()
     })
 
-    implicit val executions = ExecutionPanel(execItem.alink)
+    implicit val executions = new ExecutionPanel with PanelTriggerer {
+      val triggerLink = execItem.alink
+    }
 
     dom.document.body.appendChild(
       nav("mainNav",

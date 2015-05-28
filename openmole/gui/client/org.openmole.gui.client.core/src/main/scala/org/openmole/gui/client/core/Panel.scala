@@ -56,13 +56,11 @@ object Panel {
       PrototypeFactoryUI.doubleFactory +: ClientService.prototypeFactories filterNot (_.dataUI.dataType == DOUBLE)
     )
   }
-
-  def generic = new GenericPanel()
 }
 
 import Panel.ConceptFilter._
 
-class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS)) {
+class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS)) {
   val editionState: Var[Boolean] = Var(false)
   val filter: Var[ConceptState] = Var(defaultDataBagUI.right.toOption.getOrElse(TASKS))
   val rows = Var(0)
@@ -209,7 +207,7 @@ class GenericPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TAS
   })
 
   val dialog = {
-    modalDialog("conceptPanelID",
+    modalDialog("settingsPanelID",
       headerDialog(
         Rx {
           tags.div(
