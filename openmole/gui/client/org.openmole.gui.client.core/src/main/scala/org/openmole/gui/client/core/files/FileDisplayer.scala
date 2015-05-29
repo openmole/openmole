@@ -45,7 +45,7 @@ class FileDisplayer {
     }
   }
 
-  def display(tn: TreeNode, content: String, extecutionPanel: ExecutionPanel with PanelTriggerer) = {
+  def display(rootPath: String, tn: TreeNode, content: String, extecutionPanel: ExecutionPanel with PanelTriggerer) = {
     val (_, fileType) = FileExtension(tn)
     alreadyDisplayed(tn) match {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
@@ -55,10 +55,11 @@ class FileDisplayer {
             val ed = editor(fileType, content)
             tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, ed) with OMSTabControl {
               val script = ed.code
+              val relativePath = tn.canonicalPath().split('/').dropRight(1).mkString("/") diff rootPath
 
               def onrun = () ⇒ {
                 overlaying() = true
-                Post[Api].runScript(ScriptData(script, "", "", "output")).call().foreach { id ⇒
+                Post[Api].runScript(ScriptData(script, inputDirectory, outputDirectory, "output")).call().foreach { id ⇒
                   overlaying() = false
                   extecutionPanel ++ id
                   extecutionPanel.trigger
