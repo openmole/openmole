@@ -58,4 +58,4 @@
   @ul
     @li{define your environment in the @a("environment documentation", href := root.console.environment.file),}
     @li{include your program in the @a("task documentation", href := root.console.task.file),}
-    @li{describe you design of experiments in the @a("sampling documentation", href := root.console.sampling.file).}
+    @li{describe your design of experiments in the @a("sampling documentation", href := root.console.sampling.file).}
