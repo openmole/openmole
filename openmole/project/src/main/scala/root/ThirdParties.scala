@@ -1,9 +1,8 @@
 package root
 
-import com.typesafe.sbt.osgi.OsgiKeys
 import sbt._
-import Keys._
 import org.openmole.buildsystem.OMKeys._
+import sbt.Keys._
 
 object ThirdParties extends Defaults {
 
@@ -15,6 +14,9 @@ object ThirdParties extends Defaults {
   lazy val openmoleThread = OsgiProject("org.openmole.tool.thread", imports = Seq("*")) settings (bundleType := Set("core"))
   lazy val openmoleHash = OsgiProject("org.openmole.tool.hash", imports = Seq("*")) settings (bundleType := Set("core")) dependsOn (openmoleFile, openmoleStream)
   lazy val openmoleStream = OsgiProject("org.openmole.tool.stream", imports = Seq("*")) settings (bundleType := Set("core"))
+  lazy val openmoleData = OsgiProject("org.openmole.tool.data", imports = Seq("*")) settings (bundleType := Set("core")) settings (
+    libraryDependencies += Libraries.scalaLang
+  )
 
   lazy val toolxitBibtexMacros = OsgiProject("toolxit.bibtex.macros", "toolxit.bibtex/macros") settings (
     libraryDependencies += Libraries.scalaLang

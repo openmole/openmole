@@ -174,7 +174,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionPanel: ExecutionPanel w
     case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ {
       val (_, fileType) = FileExtension(node)
       fileType match {
-        case d: DisplayableFile ⇒ downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(node, content, executionPanel))
+        case d: DisplayableFile ⇒ downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.canonicalPath(), node, content, executionPanel))
         case _                  ⇒
       }
     })

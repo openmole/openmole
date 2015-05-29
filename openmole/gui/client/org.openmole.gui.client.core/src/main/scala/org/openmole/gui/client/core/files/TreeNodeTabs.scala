@@ -58,7 +58,7 @@ object TreeNodeTabs {
 
     val overlayElement: TypedTag[HTMLDivElement] = tags.div(`class` := "overlayElement")(
       tags.div(`class` := "spinner"),
-      "Loading " + tabName()
+      "Starting " + tabName()
     )
 
     lazy val tabElement = tags.div(Rx {
@@ -102,7 +102,6 @@ trait TabError {
 }
 
 trait OMSTabControl <: TabControl with TabError {
-
   val settingsVisible = Var(false)
 
   val settingsButton = glyphSpan(glyph_settings, () ⇒ settingsVisible() = !settingsVisible())(`class` := "executionSettings")
@@ -123,20 +122,26 @@ trait OMSTabControl <: TabControl with TabError {
 
   val errorElement = panel("Error", tags.div("This is my body"))
 
-  val controlElement = tags.div(
-    runButton,
-    settingsButton,
+  lazy val controlElement = {
+    inputDirectoryInput.value = relativePath + "/input"
+    outputDirectoryInput.value = relativePath + "/output"
     tags.div(
-      inputDirectoryInput.render,
-      outputDirectoryInput.render
-    )(`class` := Rx {
-        if (settingsVisible()) "executionSettingsOn" else "executionSettingsOff"
-      })
-  )(`class` := "executionElement")
+      runButton,
+      settingsButton,
+      tags.div(
+        inputDirectoryInput.render,
+        outputDirectoryInput.render
+      )(`class` := Rx {
+          if (settingsVisible()) "executionSettingsOn" else "executionSettingsOff"
+        })
+    )(`class` := "executionElement")
+  }
 
   def script: String
 
   def onrun: () ⇒ Unit
+
+  def relativePath: String
 
   def inputDirectory = inputDirectoryInput.value
 
@@ -226,22 +231,26 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
         //Panes
         tags.div(`class` := "tab-content")(
           for (t ← tabs()) yield {
+            val isTabActive = isActive(t)
             tags.div(
               role := "tabpanel",
               `class` := "tab-pane " + {
-                if (isActive(t)) "active" else ""
+                if (isTabActive) "active" else ""
               }, id := t.id
             )(t.tabElement.render,
-                active.map { tab ⇒
-                  tab match {
-                    case oms: TabControl ⇒
-                      tags.div(
-                        oms.controlElement,
-                        if (tab.overlaying()) tab.overlayElement else tags.div
-                      )
-                    case _ ⇒ tags.div()
+                if (isTabActive) {
+                  active.map { tab ⇒
+                    tab match {
+                      case oms: TabControl ⇒
+                        tags.div(
+                          oms.controlElement,
+                          if (tab.overlaying()) tab.overlayElement else tags.div
+                        )
+                      case _ ⇒ tags.div()
+                    }
                   }
                 }
+                else tags.div()
               )
           }
         )
