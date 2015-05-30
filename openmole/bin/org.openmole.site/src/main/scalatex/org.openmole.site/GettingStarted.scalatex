@@ -35,27 +35,24 @@
   $tasks
 
   // Define the execution environment, here it is a local execution environment with 4 threads but
-  // it could be a remote cluster or a grid.
-  // The workflow will work the same way with no installation step required on the execution environment.
+  // it could be a remote cluster or a grid. The workflow will work the same way whatever the environment
+  // and no installation step is required on the execution environment.
   val env = LocalEnvironment(4)
 
   // Define and start the workflow
   val ex = exploration -< (model on env hook ToStringHook()) start
   """)
 
-  @p Distributing the execution of the exact same code to a remote cluster only requires to switch the environment definition.
+  @p To distribute the exact same execution to a remote cluster just switch the environment definition. The only configuration step required for this to work is to have an account on the cluster and to provide your authentication to OpenMOLE. Configuring authentications is explained in the section dedicated to each @a("environment", href := root.console.environment.file).
 
   @br @hl.openmole(s"""
-  // All you need is an account on the cluster.
-  // You should also provide your authentication to OpenMOLE as explained in the specific section for each environment.
   val env = SLURMEnvironment("myLogin", "cluster.iscpif.fr")
 
   // Define and start the workflow
-  val ex = exploration -< (model on env hook ToStringHook()) start
-  """, header = tasks)
+  val ex = exploration -< (model on env hook ToStringHook()) start""", header = tasks)
 
-  @p This is just a tiny bit of what OpenMOLE can achieve! Discover how to:
+  @p This is just a tiny bit of what OpenMOLE can achieve! Now you might want to discover how to:
   @ul
-    @li{define your environment in the @a("environment documentation", href := root.console.environment.file),}
     @li{include your program in the @a("task documentation", href := root.console.task.file),}
+    @li{define your environment in the @a("environment documentation", href := root.console.environment.file),}
     @li{describe your design of experiments in the @a("sampling documentation", href := root.console.sampling.file).}
