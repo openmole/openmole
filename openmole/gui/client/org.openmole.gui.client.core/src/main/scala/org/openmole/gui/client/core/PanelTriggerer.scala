@@ -1,5 +1,11 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.misc.js.BootstrapTags._
+import org.scalajs.jquery
+import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.all._
+import org.scalajs.dom.html.Anchor
+
 /*
  * Copyright (C) 28/05/15 // mathieu.leclaire@openmole.org
  *
@@ -17,10 +23,24 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.scalajs.dom.html.Anchor
-
 trait PanelTriggerer {
-  def triggerLink: Anchor
+  val modalPanel: ModalPanel
 
-  def trigger: Unit = triggerLink.click
+  def trigger: Unit = modalPanel.onOpen()
+
+  def open: Unit = {
+    trigger
+    jquery.jQuery("#" + modalPanel.modalID).modal("show")
+  }
+
+}
+
+trait ModalPanel {
+  def modalID: ModalID
+
+  def dialog: Dialog
+
+  def onOpen: () ⇒ Unit
+
+  def onClose: () ⇒ Unit
 }

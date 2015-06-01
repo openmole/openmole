@@ -35,7 +35,7 @@ object ProtoTYPE extends Enumeration {
 }
 
 import ProtoTYPE._
-
+import java.io.{ StringWriter, PrintWriter }
 import scala.scalajs.js.annotation.JSExport
 
 class PrototypeData(val `type`: ProtoTYPE, val dimension: Int) extends Data
@@ -90,6 +90,12 @@ trait HookData extends Data with InputData with OutputData
 
 case class ErrorData(data: DataBag, error: String, stack: String)
 
+case class IOMappingData[T](key: String, value: T)
+
+case class InOutput(prototype: PrototypeData, mappings: Seq[IOMappingData[_]])
+
+case class InAndOutput(inputPrototype: PrototypeData, outputPrototype: PrototypeData, mapping: IOMappingData[_])
+
 @JSExport
 case class TreeNodeData(
   name: String,
@@ -104,3 +110,39 @@ case class ScriptData(
   inputDirectory: String,
   outputDirectory: String,
   output: String)
+
+object Error {
+  def apply(e: Throwable): Error = {
+    val sw = new StringWriter()
+    e.printStackTrace(new PrintWriter(sw))
+    Error(e.getMessage, Some(sw.toString))
+  }
+}
+
+case class Error(message: String, stackTrace: Option[String] = None)
+
+case class Token(token: String, duration: Long)
+
+@JSExport("message.ExecutionId")
+case class ExecutionId(id: String = java.util.UUID.randomUUID.toString)
+
+case class Output(output: String)
+
+object ExecutionState {
+  type ExecutionState = String
+  val running: ExecutionState = "running"
+  val finished: ExecutionState = "finished"
+  val failed: ExecutionState = "failed"
+}
+
+sealed trait State {
+  def state: ExecutionState.ExecutionState
+}
+
+case class Failed(error: Error, state: ExecutionState.ExecutionState = ExecutionState.failed) extends State
+
+case class Running(ready: Long, running: Long, completed: Long, state: ExecutionState.ExecutionState = ExecutionState.running) extends State
+
+case class Finished(state: ExecutionState.ExecutionState = ExecutionState.finished) extends State
+
+case class States(running: Running, finished: Finished)

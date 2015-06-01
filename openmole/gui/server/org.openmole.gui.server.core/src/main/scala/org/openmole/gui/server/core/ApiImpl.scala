@@ -76,6 +76,7 @@ object ApiImpl extends Api {
                     "-1"
                   case Success(ex) ⇒
                     // moles.add(id, Execution(directory, ex))
+                    Execution.add(ExecutionId(id), ex)
                     id
                 }
               case Failure(e) ⇒
@@ -90,6 +91,10 @@ object ApiImpl extends Api {
   }
 
   def saveFile(path: String, fileContent: String) = new File(path).content = fileContent
+
+  def states(id: ExecutionId): States = Execution.states(id)
+
+  def allStates(): Seq[(ExecutionId, States)] = Execution.allStates
 
   def workspacePath(): String = Utils.workspaceProjectFile.getCanonicalPath()
 }

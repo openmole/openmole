@@ -60,7 +60,8 @@ object Panel {
 
 import Panel.ConceptFilter._
 
-class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS)) {
+class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS)) extends ModalPanel {
+  val modalID = "settingsPanelID"
   val editionState: Var[Boolean] = Var(false)
   val filter: Var[ConceptState] = Var(defaultDataBagUI.right.toOption.getOrElse(TASKS))
   val rows = Var(0)
@@ -206,59 +207,61 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
     } while (!panelSequences.isEmpty)
   })
 
-  val dialog = {
-    modalDialog("settingsPanelID",
-      headerDialog(
-        Rx {
-          tags.div(
-            nav(getUUID, navbar_form)(
-              bs.form()(
-                inputGroup(navbar_left)(
-                  inputFilter.tag,
-                  for (c ← prototypeExtraForm) yield c,
-                  if (editionState()) inputGroupButton(factorySelector.selector)
-                  else inputGroupButton(newGlyph)
-                ),
-                if (editionState()) {
-                  tags.span(inputGroup(navbar_right)(
-                    currentDataBagUI().map { db ⇒
-                      val h = db.dataUI().help
-                      inputGroupButton(bs.button("Help", btn_default)) //FIXME
-                    },
-                    inputGroupButton(saveHeaderButton)
-                  )
-                  )
-                }
-                else bs.span(navbar_right)(conceptFilter),
-                onsubmit := { () ⇒
-                  if (editionState()) save
-                  else if (rows() == 0) add
-                }
-              )
-            ))
+  def onOpen = () ⇒ {}
+
+  def onClose = () ⇒ {}
+
+  val dialog = modalDialog(modalID,
+    headerDialog(
+      Rx {
+        tags.div(
+          nav(getUUID, navbar_form)(
+            bs.form()(
+              inputGroup(navbar_left)(
+                inputFilter.tag,
+                for (c ← prototypeExtraForm) yield c,
+                if (editionState()) inputGroupButton(factorySelector.selector)
+                else inputGroupButton(newGlyph)
+              ),
+              if (editionState()) {
+                tags.span(inputGroup(navbar_right)(
+                  currentDataBagUI().map { db ⇒
+                    val h = db.dataUI().help
+                    inputGroupButton(bs.button("Help", btn_default)) //FIXME
+                  },
+                  inputGroupButton(saveHeaderButton)
+                )
+                )
+              }
+              else bs.span(navbar_right)(conceptFilter),
+              onsubmit := { () ⇒
+                if (editionState()) save
+                else if (rows() == 0) add
+              }
+            )
+          ))
+      }
+    ),
+    bodyDialog(
+      Rx {
+        if (editionState()) {
+          inputFilter.tag.value = currentDataBagUI().map {
+            _.name()
+          }.getOrElse((""))
+          settingTabs() match {
+            case Some(s: SettingTabs) ⇒ s.view
+            case _                    ⇒ tags.div(h1("Create a  first data !"))
+          }
         }
-      ),
-      bodyDialog(
-        Rx {
-          if (editionState()) {
-            inputFilter.tag.value = currentDataBagUI().map {
-              _.name()
-            }.getOrElse((""))
-            settingTabs() match {
-              case Some(s: SettingTabs) ⇒ s.view
-              case _                    ⇒ tags.div(h1("Create a  first data !"))
-            }
-          }
-          else {
-            inputFilter.tag.value = ""
-            tags.div(conceptTable)
-          }
-        }),
-      footerDialog(
-        h2(saveButton)
-      )
+        else {
+          inputFilter.tag.value = ""
+          tags.div(conceptTable)
+        }
+      }),
+    footerDialog(
+      h2(saveButton)
     )
-  }.render
+  )
 
   def prototypeExtraForm: Seq[Modifier] = currentDataBagUI() match {
     case Some(db: DataBagUI) ⇒ db.dataUI() match {

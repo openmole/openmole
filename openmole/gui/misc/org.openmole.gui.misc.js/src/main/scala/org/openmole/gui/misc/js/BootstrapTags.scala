@@ -56,24 +56,26 @@ object BootstrapTags {
   def span(keys: ClassKeyAggregator = emptyCK) = tags.span(`class` := keys.key)
 
   // Nav
-  class NavItem(val navid: String, content: String, val todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) {
+  class NavItem(val navid: String, content: String, ontrigger: () ⇒ Unit, val todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) {
     val activeString = {
       if (active) "active" else ""
     }
 
-    val alink = tags.a(href := "#")(content).render
-
-    def trigger = alink.click
-
-    val render = li(role := "presentation", id := navid, `class` := activeString)(alink)(extraRenderPair: _*)
+    val render = li(role := "presentation", id := navid, `class` := activeString)(tags.a(href := "", onclick := { () ⇒
+      //ontrigger()
+      false
+      //  true
+    }
+    )(content).render)(
+      extraRenderPair: _*)
 
   }
 
-  def dialogNavItem(id: String, content: String, todo: () ⇒ Unit = () ⇒ {}) =
-    navItem(id, content, todo, Seq(data("toggle") := "modal", data("target") := "#" + id + "PanelID"))
+  def dialogNavItem(id: String, content: String, ontrigger: () ⇒ Unit = () ⇒ {}, todo: () ⇒ Unit = () ⇒ {}) =
+    navItem(id, content, ontrigger, todo, Seq(data("toggle") := "modal", data("target") := "#" + id + "PanelID"))
 
-  def navItem(id: String, content: String, todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) =
-    new NavItem(id, content, todo, extraRenderPair, active)
+  def navItem(id: String, content: String, ontrigger: () ⇒ Unit = () ⇒ {}, todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) =
+    new NavItem(id, content, ontrigger, todo, extraRenderPair, active)
 
   def nav(uuid: String, keys: ClassKeyAggregator, contents: NavItem*): TypedTag[HTMLElement] =
     ul(`class` := "nav " + keys.key, id := uuid, role := "tablist")(
@@ -227,7 +229,10 @@ object BootstrapTags {
   def buttonToolBar = div("btn-toolbar")(role := "toolbar")
 
   //Modalg Dialog
-  def modalDialog(ID: String, typedTag: TypedTag[_]*) =
+  type Dialog = TypedTag[HTMLDivElement]
+  type ModalID = String
+
+  def modalDialog(ID: ModalID, typedTag: TypedTag[_]*): Dialog =
     div("modal fade")(id := ID,
       div("modal-dialog")(
         div("modal-content")(

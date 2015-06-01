@@ -19,7 +19,7 @@ package org.openmole.gui.server.core
 import javax.servlet.annotation.MultipartConfig
 
 import org.openmole.console.ConsoleVariables
-import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
+import org.openmole.core.workflow.mole.ExecutionContext
 import org.openmole.core.workflow.puzzle.Puzzle
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.misc.utils.Utils._
@@ -135,13 +135,13 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
     }
     else NotFound("The file " + path + " does not exist.")
   }
-  /*
+
   post("/runscript") {
 
     val (parameters, errors) = parseParams(Seq("script", "inputdirectory", "outputdirectory", "baseDirectory"))
 
     if (errors.isEmpty) {
-      val id = getUUID
+      val id = ExecutionId()
       val projectsPath = Utils.workspaceProjectFile
       val console = new Console
       val repl = console.newREPL(ConsoleVariables(
@@ -160,8 +160,8 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
                   Try(ex.start) match {
                     case Failure(e) ⇒ println("Error II, a factoriser avec rest api ? ")
                     case Success(ex) ⇒
-                      // moles.add(id, Execution(directory, ex))
-                      Ok(id)
+                      Execution.add(id, ex)
+                      Ok(id.id)
                   }
                 case Failure(e) ⇒ println("Error III, a factoriser avec rest api ?")
               }
@@ -171,17 +171,18 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
     }
     else println("Y a des erreurs ... FIXME")
 
-    def parseParams(toTest: Seq[String], evaluated: Map[String, String] = Map(), errors: Seq[Throwable] = Seq()): (Map[String, String], Seq[Throwable]) = {
-      if (toTest.isEmpty) (evaluated, errors)
-      else {
-        val testing = toTest.last
-        Try(params(testing)) match {
-          case Success(p) ⇒ parseParams(toTest.dropRight(1), evaluated + (testing -> p), errors)
-          case Failure(e) ⇒ parseParams(toTest.dropRight(1), evaluated, errors :+ e)
-        }
+  }
+
+  def parseParams(toTest: Seq[String], evaluated: Map[String, String] = Map(), errors: Seq[Throwable] = Seq()): (Map[String, String], Seq[Throwable]) = {
+    if (toTest.isEmpty) (evaluated, errors)
+    else {
+      val testing = toTest.last
+      Try(params(testing)) match {
+        case Success(p) ⇒ parseParams(toTest.dropRight(1), evaluated + (testing -> p), errors)
+        case Failure(e) ⇒ parseParams(toTest.dropRight(1), evaluated, errors :+ e)
       }
     }
-  }*/
+  }
 
   post(s"/$basePath/*") {
     Await.result(AutowireServer.route[Api](ApiImpl)(

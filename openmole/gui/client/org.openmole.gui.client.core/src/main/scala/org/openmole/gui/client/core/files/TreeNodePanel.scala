@@ -36,9 +36,9 @@ import rx._
 
 object TreeNodePanel {
 
-  def apply(path: String)(implicit executionPanel: ExecutionPanel with PanelTriggerer): TreeNodePanel = apply(DirNode(path))
+  def apply(path: String)(implicit executionTriggerer: PanelTriggerer): TreeNodePanel = apply(DirNode(path))
 
-  def apply(dirNode: DirNode)(implicit executionPanel: ExecutionPanel with PanelTriggerer): TreeNodePanel = new TreeNodePanel(dirNode)
+  def apply(dirNode: DirNode)(implicit executionTriggerer: PanelTriggerer): TreeNodePanel = new TreeNodePanel(dirNode)
 
   def sons(dirNode: DirNode) = Post[Api].listFiles(dirNode).call()
 
@@ -46,7 +46,7 @@ object TreeNodePanel {
 
 import TreeNodePanel._
 
-class TreeNodePanel(rootNode: DirNode)(implicit executionPanel: ExecutionPanel with PanelTriggerer) {
+class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTriggerer) {
 
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode))
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
@@ -174,7 +174,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionPanel: ExecutionPanel w
     case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ {
       val (_, fileType) = FileExtension(node)
       fileType match {
-        case d: DisplayableFile ⇒ downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.canonicalPath(), node, content, executionPanel))
+        case d: DisplayableFile ⇒ downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.canonicalPath(), node, content, executionTriggerer))
         case _                  ⇒
       }
     })

@@ -37,5 +37,9 @@ trait Api {
 
   def saveFile(path: String, fileContent: String): Unit
 
+  def states(id: ExecutionId): States
+
+  def allStates(): Seq[(ExecutionId, States)]
+
   def workspacePath(): String
 }

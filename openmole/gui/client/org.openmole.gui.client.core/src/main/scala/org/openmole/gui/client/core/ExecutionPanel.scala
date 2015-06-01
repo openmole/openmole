@@ -19,10 +19,16 @@ package org.openmole.gui.client.core
 
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.misc.utils.Utils
+import org.openmole.gui.shared.Api
+import org.scalajs.jquery
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
+import scala.scalajs.js.timers._
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import org.openmole.gui.ext.data._
+import autowire._
 import bs._
 import rx._
 
@@ -30,14 +36,34 @@ object ExecutionPanel {
   def apply = new ExecutionPanel
 }
 
-class ExecutionPanel {
+class ExecutionPanel extends ModalPanel {
+  val modalID = "executionsPanelID"
 
-  val moleExecutionUIs: Var[Seq[String]] = Var(Seq())
-  val currentMoleExecutionUI: Var[Option[String]] = Var(None)
+  val moleExecutionUIs: Var[Seq[(ExecutionId, States)]] = Var(Seq())
+  val currentMoleExecutionUI: Var[Option[ExecutionId]] = Var(None)
+  val intervalHandler: Var[Option[SetIntervalHandle]] = Var(None)
 
-  def ++(id: String) = moleExecutionUIs() = moleExecutionUIs() :+ id
+  def onOpen = () ⇒ {
+    intervalHandler() = Some(setInterval(3000) {
+      allStates
+    })
+  }
 
-  def setCurrent(id: String) = currentMoleExecutionUI() = Some(id)
+  def onClose = () ⇒ {
+    intervalHandler().map {
+      clearInterval
+    }
+  }
+
+  def allStates = Post[Api].allStates().call().foreach { c ⇒
+    moleExecutionUIs() = c
+    c.foreach {
+      case (id, states) ⇒
+        println("ID " + id + " // " + states.running.running + " // " + states.running.completed)
+    }
+  }
+
+  def setCurrent(id: ExecutionId) = currentMoleExecutionUI() = Some(id)
 
   val executionTable = bs.table(striped)(
     thead,
@@ -45,12 +71,13 @@ class ExecutionPanel {
       tbody({
         for (mE ← moleExecutionUIs()) yield {
           bs.tr(row)(
-            bs.td(col_md_6)(tags.a(mE, cursor := "pointer", onclick := { () ⇒
-              setCurrent(mE)
+            bs.td(col_md_6)(tags.a(mE._1.id, cursor := "pointer", onclick := { () ⇒
+              setCurrent(mE._1)
             })),
             bs.td(col_md_1)(bs.button(glyph(glyph_trash))(onclick := { () ⇒
-              moleExecutionUIs() = moleExecutionUIs().filterNot { id ⇒
-                id == mE
+              moleExecutionUIs() = moleExecutionUIs().filterNot {
+                case (id, _) ⇒
+                  id.id == mE._1.id
               }
             }
             ))
@@ -66,7 +93,7 @@ class ExecutionPanel {
   }
   )
 
-  val dialog = modalDialog("executionsPanelID",
+  val dialog = modalDialog(modalID,
     headerDialog(
       tags.div("Executions"
       ),
@@ -77,6 +104,9 @@ class ExecutionPanel {
         closeButton
       )
     )
-  ).render
+  )
 
+  jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ {
+    onClose()
+  })
 }

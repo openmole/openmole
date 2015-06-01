@@ -30,6 +30,7 @@ import org.openmole.gui.misc.js.BootstrapTags._
 import org.scalajs.{ jquery, dom }
 
 import scalatags.JsDom.all._
+import rx._
 
 @JSExport("GUIClient")
 object GUIClient {
@@ -63,16 +64,16 @@ object GUIClient {
 
     val topdiv = dom.document.body.appendChild(tags.div)
 
-    val execItem = dialogNavItem("executions", "Executions")
-    val settingsItem = dialogNavItem("settings", "Settings")
-
-    val settings = new SettingsPanel with PanelTriggerer {
-      val triggerLink = execItem.alink
+    val settingsTriggerer = new PanelTriggerer {
+      val modalPanel = new SettingsPanel
     }
 
-    val executions = new ExecutionPanel with PanelTriggerer {
-      val triggerLink = execItem.alink
+    val executionTriggerer = new PanelTriggerer {
+      val modalPanel = new ExecutionPanel
     }
+
+    val execItem = dialogNavItem("executions", "Executions", () ⇒ executionTriggerer.trigger)
+    val settingsItem = dialogNavItem("settings", "Settings", () ⇒ settingsTriggerer.trigger)
 
     topdiv.appendChild(
       nav("mainNav",
@@ -82,8 +83,8 @@ object GUIClient {
       )
     )
 
-    topdiv.appendChild(settings.dialog.render)
-    topdiv.appendChild(executions.dialog.render)
+    topdiv.appendChild(executionTriggerer.modalPanel.dialog.render)
+    topdiv.appendChild(settingsTriggerer.modalPanel.dialog.render)
 
     dom.document.body.appendChild(topdiv)
 
@@ -102,4 +103,5 @@ object GUIClient {
     val window = new Window(nodes, edges)
 
   }
+
 }

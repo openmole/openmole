@@ -22,9 +22,7 @@ import scala.scalajs.js.annotation.JSExport
 
 object ID {
   def get: String = UUID.randomUUID.toString
-  type Type = String
 }
 
 @JSExport("ID")
-class ID(val id: String = ID.get)
-
+case class ID(id: String = ID.get)

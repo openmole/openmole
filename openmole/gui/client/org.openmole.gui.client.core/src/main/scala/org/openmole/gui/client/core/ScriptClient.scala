@@ -38,15 +38,15 @@ object ScriptClient {
     val body = dom.document.body
     val openFileTree = Var(false)
 
-    val execItem = dialogNavItem("executions", "Executions")
+    implicit val executionTrigerrer = new PanelTriggerer {
+      val modalPanel = new ExecutionPanel
+    }
 
-    val fileItem = navItem("files", "Files", () ⇒ {
+    val execItem = dialogNavItem("executions", "Executions", () ⇒ executionTrigerrer.trigger)
+
+    val fileItem = navItem("files", "Files", todo = () ⇒ {
       openFileTree() = !openFileTree()
     })
-
-    implicit val executions = new ExecutionPanel with PanelTriggerer {
-      val triggerLink = execItem.alink
-    }
 
     dom.document.body.appendChild(
       nav("mainNav",
@@ -57,7 +57,7 @@ object ScriptClient {
     )
 
     val maindiv = dom.document.body.appendChild(tags.div.render)
-    maindiv.appendChild(executions.dialog.render)
+    maindiv.appendChild(executionTrigerrer.modalPanel.dialog.render)
 
     Post[Api].workspacePath.call().foreach { projectsPath ⇒
       val treeNodePanel = TreeNodePanel(projectsPath)

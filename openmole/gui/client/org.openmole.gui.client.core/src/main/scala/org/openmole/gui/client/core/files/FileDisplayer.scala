@@ -6,6 +6,7 @@ import TreeNodeTabs._
 import org.openmole.gui.client.core.{ PanelTriggerer, ExecutionPanel, Post }
 import org.openmole.gui.ext.data.ScriptData
 import org.openmole.gui.shared.Api
+import org.openmole.gui.ext.data._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import scalatags.JsDom.tags
@@ -45,7 +46,7 @@ class FileDisplayer {
     }
   }
 
-  def display(rootPath: String, tn: TreeNode, content: String, extecutionPanel: ExecutionPanel with PanelTriggerer) = {
+  def display(rootPath: String, tn: TreeNode, content: String, executionTriggerer: PanelTriggerer) = {
     val (_, fileType) = FileExtension(tn)
     alreadyDisplayed(tn) match {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
@@ -61,8 +62,7 @@ class FileDisplayer {
                 overlaying() = true
                 Post[Api].runScript(ScriptData(script, inputDirectory, outputDirectory, "output")).call().foreach { id ⇒
                   overlaying() = false
-                  extecutionPanel ++ id
-                  extecutionPanel.trigger
+                  executionTriggerer.open
                 }
               }
             }
