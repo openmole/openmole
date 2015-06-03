@@ -89,7 +89,7 @@ object Libraries extends Defaults {
   lazy val scalaJSDomVersion = "0.8.0"
   lazy val scalaJQueryVersion = "0.8.0"
   lazy val rxVersion = "0.2.8"
-  lazy val scalaUpickleVersion = "0.2.7"
+  lazy val scalaUpickleVersion = "0.2.6"
   lazy val scalaAutowireVersion = "0.2.5"
 
   lazy val upickle = "org.openmole" %% "upickle" % scalaUpickleVersion
@@ -100,7 +100,7 @@ object Libraries extends Defaults {
 
   lazy val rx = "org.openmole" %% "rx" % rxVersion
 
-  lazy val scalajsVersion = "0.6.2"
+  lazy val scalajsVersion = "0.6.3"
   lazy val scalajsTools = "org.openmole" %% "scalajs-tools" % scalajsVersion
   lazy val scalajsLibrary = "org.openmole" %% "scalajs-library" % scalajsVersion
   lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % scalaJSDomVersion

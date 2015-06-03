@@ -19,6 +19,7 @@ package org.openmole.gui.shared
 import org.openmole.gui.ext.data._
 
 trait Api {
+  //FILES
   def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean
 
   def addFile(treeNode: TreeNodeData, fileName: String): Boolean
@@ -33,13 +34,14 @@ trait Api {
 
   def renameFile(treeNode: TreeNodeData, name: String): Boolean
 
-  def runScript(scriptData: ScriptData): String
-
   def saveFile(path: String, fileContent: String): Unit
 
-  def states(id: ExecutionId): States
-
-  def allStates(): Seq[(ExecutionId, States)]
-
   def workspacePath(): String
+
+  //EXECUTIONS
+  def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)]
+
+  def cancelExecution(id: ExecutionId): Unit
+
+  def runScript(scriptData: ScriptData): String
 }

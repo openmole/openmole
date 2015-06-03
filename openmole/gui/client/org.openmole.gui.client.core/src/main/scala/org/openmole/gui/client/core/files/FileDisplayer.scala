@@ -3,7 +3,7 @@ package org.openmole.gui.client.core.files
 import java.io.File
 import FileExtension._
 import TreeNodeTabs._
-import org.openmole.gui.client.core.{ PanelTriggerer, ExecutionPanel, Post }
+import org.openmole.gui.client.core.{ PanelTriggerer, ExecutionPanel, OMPost }
 import org.openmole.gui.ext.data.ScriptData
 import org.openmole.gui.shared.Api
 import org.openmole.gui.ext.data._
@@ -60,7 +60,7 @@ class FileDisplayer {
 
               def onrun = () ⇒ {
                 overlaying() = true
-                Post[Api].runScript(ScriptData(script, inputDirectory, outputDirectory, "output")).call().foreach { id ⇒
+                OMPost[Api].runScript(ScriptData(tn.name(), script, inputDirectory, outputDirectory, "output")).call().foreach { execInfo ⇒
                   overlaying() = false
                   executionTriggerer.open
                 }

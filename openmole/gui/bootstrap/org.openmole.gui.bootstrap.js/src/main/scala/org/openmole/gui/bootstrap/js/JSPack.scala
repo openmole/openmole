@@ -34,7 +34,7 @@ object JSPack {
   def apply(src: File, target: File, optimized: Boolean = true) = {
 
     //FIXME: get the jar from bundles
-    val scalajsLib = copyJar("scalajs-library_2.11-0.6.2")
+    val scalajsLib = copyJar("scalajs-library_2.11-0.6.3")
 
     val semantics = org.scalajs.core.tools.sem.Semantics.Defaults
 

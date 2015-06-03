@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.Post
+import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.client.core.files.TreeNodeTabs.EditableNodeTab
 import org.openmole.gui.ext.data.ScriptData
 import org.openmole.gui.shared._
@@ -80,7 +80,7 @@ object TreeNodeTabs {
 
     val editorElement = editor.view
 
-    def save(onsaved: () ⇒ Unit) = Post[Api].saveFile(serverFilePath(), editor.code).call().foreach { d ⇒
+    def save(onsaved: () ⇒ Unit) = OMPost[Api].saveFile(serverFilePath(), editor.code).call().foreach { d ⇒
       onsaved()
     }
   }

@@ -17,35 +17,37 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import org.scalajs.jquery
+import scala.scalajs.js.Date
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.ext.data._
 import autowire._
+import org.openmole.gui.ext.data._
 import bs._
 import rx._
-
-object ExecutionPanel {
-  def apply = new ExecutionPanel
-}
 
 class ExecutionPanel extends ModalPanel {
   val modalID = "executionsPanelID"
 
-  val moleExecutionUIs: Var[Seq[(ExecutionId, States)]] = Var(Seq())
-  val currentMoleExecutionUI: Var[Option[ExecutionId]] = Var(None)
+  val moleExecutionUIs: Var[Seq[(ExecutionId, ExecutionInfo)]] = Var(Seq())
   val intervalHandler: Var[Option[SetIntervalHandle]] = Var(None)
 
+  def allExecutionStates = {
+    OMPost[Api].allExecutionStates.call().foreach { c ⇒
+      moleExecutionUIs() = c
+    }
+  }
+
   def onOpen = () ⇒ {
-    intervalHandler() = Some(setInterval(3000) {
-      allStates
+    println("OPPPEn ")
+    intervalHandler() = Some(setInterval(1000) {
+      allExecutionStates
     })
   }
 
@@ -55,30 +57,36 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  def allStates = Post[Api].allStates().call().foreach { c ⇒
-    moleExecutionUIs() = c
-    c.foreach {
-      case (id, states) ⇒
-        println("ID " + id + " // " + states.running.running + " // " + states.running.completed)
-    }
-  }
-
-  def setCurrent(id: ExecutionId) = currentMoleExecutionUI() = Some(id)
-
   val executionTable = bs.table(striped)(
     thead,
     Rx {
       tbody({
-        for (mE ← moleExecutionUIs()) yield {
+        for ((id, info) ← moleExecutionUIs()) yield {
+          val startDate = new Date(id.startDate).toLocaleDateString
+          val duration = new Date(info.duration).toLocaleTimeString
+          val completed = info.completed
+
+          val (ratio, running) = info match {
+            case f: Failed   ⇒ ("0", 0)
+            case f: Finished ⇒ ("100", 0)
+            case r: Running  ⇒ ((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running)
+            case c: Canceled ⇒ ("0", 0)
+            case u: Unknown  ⇒ ("0", 0)
+          }
+
           bs.tr(row)(
-            bs.td(col_md_6)(tags.a(mE._1.id, cursor := "pointer", onclick := { () ⇒
-              setCurrent(mE._1)
+            bs.td(col_md_2)(tags.a(id.name, cursor := "pointer", onclick := { () ⇒
+              println("clicked")
             })),
-            bs.td(col_md_1)(bs.button(glyph(glyph_trash))(onclick := { () ⇒
-              moleExecutionUIs() = moleExecutionUIs().filterNot {
-                case (id, _) ⇒
-                  id.id == mE._1.id
-              }
+            bs.td(col_md_1)(id.name),
+            bs.td(col_md_1)(startDate),
+            bs.td(col_md_2)(bs.glyph(bs.glyph_flash), " " + running),
+            bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + completed),
+            bs.td(col_md_1)(ratio + "%"),
+            bs.td(col_md_1)(duration),
+            bs.td(col_md_1)(info.state),
+            bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
+              allExecutionStates
             }
             ))
           )
@@ -97,7 +105,7 @@ class ExecutionPanel extends ModalPanel {
     headerDialog(
       tags.div("Executions"
       ),
-      bodyDialog(
+      bodyDialog(`class` := "executionTable")(
         executionTable
       ),
       footerDialog(

@@ -59,7 +59,7 @@ object ScriptClient {
     val maindiv = dom.document.body.appendChild(tags.div.render)
     maindiv.appendChild(executionTrigerrer.modalPanel.dialog.render)
 
-    Post[Api].workspacePath.call().foreach { projectsPath ⇒
+    OMPost[Api].workspacePath.call().foreach { projectsPath ⇒
       val treeNodePanel = TreeNodePanel(projectsPath)
       maindiv.appendChild(
         tags.div(`class` := "fullpanel")(

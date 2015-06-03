@@ -1,3 +1,7 @@
+a {
+	color:#5fbcd3;
+}
+
 #mainNav {
 padding-left: 320px;
 }
@@ -67,7 +71,7 @@ select::-moz-focus-inner {
 	color: black;
 }
 
-#settingsPanelID .modal-dialog {
+#settingsPanelID,#executionsPanelID .modal-dialog {
     width: 60%;
 }
 
@@ -85,11 +89,9 @@ select::-moz-focus-inner {
     max-width: 150px;
 }
 
-.modal-info {
-    background-image: linear-gradient(#d9edf7 0%, #b9def0 100%);
-    background-repeat: repeat-x;
-    border-color: #9acfea;
-    border-radius: 6px 6px 0 0;
+.executionTable table td {
+    background-color:#171B22;
+    color: #9CA7BA;
 }
 
 #conceptPanelID .modal-footer {

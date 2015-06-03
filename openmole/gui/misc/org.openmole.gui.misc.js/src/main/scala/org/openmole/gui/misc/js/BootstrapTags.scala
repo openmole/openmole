@@ -145,6 +145,8 @@ object BootstrapTags {
   val glyph_upload = "glyphicon-cloud-upload"
   val glyph_download = "glyphicon-download-alt"
   val glyph_settings = "glyphicon-cog"
+  val glyph_flash = "glyphicon-flash"
+  val glyph_flag = "glyphicon-flag"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =

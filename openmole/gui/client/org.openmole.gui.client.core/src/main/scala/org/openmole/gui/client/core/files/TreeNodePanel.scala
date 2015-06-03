@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{ PanelTriggerer, ExecutionPanel, Post }
+import org.openmole.gui.client.core.{ PanelTriggerer, ExecutionPanel, OMPost }
 import org.openmole.gui.client.core.files.FileExtension.DisplayableFile
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.BootstrapTags._
@@ -40,7 +40,7 @@ object TreeNodePanel {
 
   def apply(dirNode: DirNode)(implicit executionTriggerer: PanelTriggerer): TreeNodePanel = new TreeNodePanel(dirNode)
 
-  def sons(dirNode: DirNode) = Post[Api].listFiles(dirNode).call()
+  def sons(dirNode: DirNode) = OMPost[Api].listFiles(dirNode).call()
 
 }
 
@@ -100,10 +100,10 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
             val currentDirNode = dirNodeLine().last
             addRootDirButton.content().map {
               _ match {
-                case dt: DirType ⇒ Post[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
+                case dt: DirType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
                   if (b) refreshCurrentDirectory
                 }
-                case ft: FileType ⇒ Post[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
+                case ft: FileType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
                   if (b) refreshCurrentDirectory
                 }
               }
@@ -234,12 +234,12 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
 
   def trashNode(treeNode: TreeNode) = {
     fileDisplayer.tabs -- treeNode
-    Post[Api].deleteFile(treeNode).call().foreach { d ⇒
+    OMPost[Api].deleteFile(treeNode).call().foreach { d ⇒
       refreshCurrentDirectory
     }
   }
 
-  def renameNode(treeNode: TreeNode, newName: String) = Post[Api].renameFile(treeNode, newName).call().foreach {
+  def renameNode(treeNode: TreeNode, newName: String) = OMPost[Api].renameFile(treeNode, newName).call().foreach {
     d ⇒
       if (d) {
         fileDisplayer.tabs.rename(treeNode, newName)

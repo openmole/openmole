@@ -33,6 +33,7 @@ import org.openmole.core.workflow.puzzle.Puzzle
 
 object ApiImpl extends Api {
 
+  // FILES
   def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean = new File(treeNodeData.canonicalPath, directoryName).mkdirs
 
   def addFile(treeNodeData: TreeNodeData, fileName: String): Boolean = new File(treeNodeData.canonicalPath, fileName).createNewFile
@@ -50,6 +51,16 @@ object ApiImpl extends Api {
     Files.move(source, target, StandardCopyOption.REPLACE_EXISTING)
     target.exists
   }
+
+  def saveFile(path: String, fileContent: String): Unit = new File(path).content = fileContent
+
+  def workspacePath(): String = Utils.workspaceProjectFile.getCanonicalPath()
+
+  // EXECUTIONS
+
+  def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)] = Execution.allStates
+
+  def cancelExecution(id: ExecutionId): Unit = Execution.cancel(id)
 
   def runScript(scriptData: ScriptData): String = {
     val id = getUUID
@@ -76,7 +87,7 @@ object ApiImpl extends Api {
                     "-1"
                   case Success(ex) ⇒
                     // moles.add(id, Execution(directory, ex))
-                    Execution.add(ExecutionId(id), ex)
+                    Execution.add(ExecutionId(scriptData.scriptName, ex.startTime.get, id), ex)
                     id
                 }
               case Failure(e) ⇒
@@ -89,12 +100,4 @@ object ApiImpl extends Api {
         }
     }
   }
-
-  def saveFile(path: String, fileContent: String) = new File(path).content = fileContent
-
-  def states(id: ExecutionId): States = Execution.states(id)
-
-  def allStates(): Seq[(ExecutionId, States)] = Execution.allStates
-
-  def workspacePath(): String = Utils.workspaceProjectFile.getCanonicalPath()
 }
