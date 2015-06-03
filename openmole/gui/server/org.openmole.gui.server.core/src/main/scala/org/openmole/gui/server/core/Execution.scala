@@ -36,10 +36,11 @@ object Execution {
   }
 
   def executionInfo(key: ExecutionId): ExecutionInfo = get(key) map { moleExecution ⇒
+    println("// " + moleExecution.started + " / " + moleExecution.canceled + " / " + moleExecution.finished)
     val d = moleExecution.duration.getOrElse(0L)
-    if (moleExecution.started) Running(ready = moleExecution.ready, running = moleExecution.running, duration = d, completed = moleExecution.completed)
-    else if (moleExecution.canceled) Canceled()
+    if (moleExecution.canceled) Canceled()
     else if (moleExecution.finished) Finished()
+    else if (moleExecution.started) Running(ready = moleExecution.ready, running = moleExecution.running, duration = d, completed = moleExecution.completed)
     else moleExecution.exception match {
       case Some(t: Throwable) ⇒
         val error = {
