@@ -45,7 +45,6 @@ class ExecutionPanel extends ModalPanel {
   }
 
   def onOpen = () ⇒ {
-    println("OPPPEn ")
     intervalHandler() = Some(setInterval(1000) {
       allExecutionStates
     })
@@ -78,7 +77,6 @@ class ExecutionPanel extends ModalPanel {
             bs.td(col_md_2)(tags.a(id.name, cursor := "pointer", onclick := { () ⇒
               println("clicked")
             })),
-            bs.td(col_md_1)(id.name),
             bs.td(col_md_1)(startDate),
             bs.td(col_md_2)(bs.glyph(bs.glyph_flash), " " + running),
             bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + completed),

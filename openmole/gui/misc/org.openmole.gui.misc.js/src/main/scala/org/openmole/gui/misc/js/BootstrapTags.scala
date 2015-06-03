@@ -62,9 +62,8 @@ object BootstrapTags {
     }
 
     val render = li(role := "presentation", id := navid, `class` := activeString)(tags.a(href := "", onclick := { () ⇒
-      //ontrigger()
+      ontrigger()
       false
-      //  true
     }
     )(content).render)(
       extraRenderPair: _*)
