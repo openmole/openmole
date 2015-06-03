@@ -155,7 +155,7 @@ object OSGi extends Defaults(Apache) {
   lazy val scalaRxVersion = "0.2.8"
   lazy val scalaDomVersion = "0.8.0"
   lazy val scalaJQueryVersion = "0.8.0"
-  lazy val scalaUpickleVersion = "0.2.8"
+  lazy val scalaUpickleVersion = "0.2.6"
   lazy val scalaAutowireVersion = "0.2.5"
   lazy val scalajsVersion = "0.6.3"
   lazy val jsSuffix = "_sjs0.6"
