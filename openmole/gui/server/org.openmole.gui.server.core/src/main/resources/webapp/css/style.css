@@ -89,11 +89,6 @@ select::-moz-focus-inner {
     max-width: 150px;
 }
 
-.executionTable table td {
-    background-color:#171B22;
-    color: #9CA7BA;
-}
-
 #conceptPanelID .modal-footer {
 	padding: 15px;
 	text-align: right;
@@ -147,16 +142,16 @@ select::-moz-focus-inner {
     color: white;
     opacity: 0.4;
     display: inline-block;
-   -webkit-transition: -moz-transform .1s ease-out; 
-   -moz-transition: -webkit-transform .1s ease-out; 
-   -o-transition: -o-transform .1s ease-out; 
-    transition: transform .1s ease-out; 
+   -webkit-transition: -moz-transform .1s ease-out;
+   -moz-transition: -webkit-transform .1s ease-out;
+   -o-transition: -o-transform .1s ease-out;
+    transition: transform .1s ease-out;
 
 }
 
 .filelist li .glyphitem:hover{
 	opacity: 1;
-    display: inline-block; 
+    display: inline-block;
    -moz-transform: scale(1.2);
    -webkit-transform: scale(1.2);
    -o-transform: scale(1.2);
@@ -385,4 +380,31 @@ overflow-y : auto;
 
 .executionSettingsOn {
     margin: 10 0 20 0;
+}
+
+
+
+.executionTable table td {
+    background-color:#171B22;
+    color: #9CA7BA;
+}
+
+.executionTable table td.runningState{
+color: yellow;
+font-weight: bold;
+}
+
+.executionTable table td.finishedState{
+color: #5aa02c;
+font-weight: bold;
+}
+
+.executionTable table td.canceledState{
+color: orange;
+font-weight: bold;
+}
+
+.executionTable table td.failedState{
+color: red;
+font-weight: bold;
 }

@@ -82,7 +82,7 @@ class ExecutionPanel extends ModalPanel {
             bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + completed),
             bs.td(col_md_1)(ratio + "%"),
             bs.td(col_md_1)(duration),
-            bs.td(col_md_1)(info.state),
+            bs.td(col_md_1)(info.state)(`class` := info.state + "State"),
             bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
               allExecutionStates
             }
