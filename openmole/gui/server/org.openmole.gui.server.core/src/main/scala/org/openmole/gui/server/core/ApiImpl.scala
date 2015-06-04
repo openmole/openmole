@@ -62,6 +62,8 @@ object ApiImpl extends Api {
 
   def cancelExecution(id: ExecutionId): Unit = Execution.cancel(id)
 
+  def removeExecution(id: ExecutionId): Unit = Execution.remove(id)
+
   def runScript(scriptData: ScriptData): String = {
     val id = getUUID
     val projectsPath = Utils.workspaceProjectFile

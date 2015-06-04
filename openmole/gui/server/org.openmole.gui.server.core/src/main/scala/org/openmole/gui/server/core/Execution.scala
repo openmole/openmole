@@ -35,8 +35,12 @@ object Execution {
     _.cancel
   }
 
+  def remove(key: ExecutionId) = {
+    cancel(key)
+    moles.remove(key)
+  }
+
   def executionInfo(key: ExecutionId): ExecutionInfo = get(key) map { moleExecution ⇒
-    println("// " + moleExecution.started + " / " + moleExecution.canceled + " / " + moleExecution.finished)
     val d = moleExecution.duration.getOrElse(0L)
     if (moleExecution.canceled) Canceled()
     else if (moleExecution.finished) Finished()

@@ -43,5 +43,7 @@ trait Api {
 
   def cancelExecution(id: ExecutionId): Unit
 
+  def removeExecution(id: ExecutionId): Unit
+
   def runScript(scriptData: ScriptData): String
 }

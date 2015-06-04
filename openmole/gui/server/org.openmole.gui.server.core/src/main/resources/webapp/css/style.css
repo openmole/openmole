@@ -408,3 +408,21 @@ font-weight: bold;
 color: red;
 font-weight: bold;
 }
+
+.removeExecution:hover{
+    color:red;
+    display: inline-block;
+   -moz-transform: scale(1.2);
+   -webkit-transform: scale(1.2);
+   -o-transform: scale(1.2);
+   transform: scale(1.2);
+}
+
+.cancelExecution:hover{
+    color:orange;
+    display: inline-block;
+   -moz-transform: scale(1.2);
+   -webkit-transform: scale(1.2);
+   -o-transform: scale(1.2);
+   transform: scale(1.2);
+}

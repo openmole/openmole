@@ -45,6 +45,7 @@ class ExecutionPanel extends ModalPanel {
   }
 
   def onOpen = () ⇒ {
+    allExecutionStates
     intervalHandler() = Some(setInterval(1000) {
       allExecutionStates
     })
@@ -83,10 +84,12 @@ class ExecutionPanel extends ModalPanel {
             bs.td(col_md_1)(ratio + "%"),
             bs.td(col_md_1)(duration),
             bs.td(col_md_1)(info.state)(`class` := info.state + "State"),
-            bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
+            bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
               allExecutionStates
-            }
-            ))
+            })(`class` := "cancelExecution")),
+            bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].removeExecution(id).call().foreach { r ⇒
+              allExecutionStates
+            })(`class` := "removeExecution"))
           )
         }
       }
