@@ -137,8 +137,6 @@ trait OMSTabControl <: TabControl with TabError {
     )(`class` := "executionElement")
   }
 
-  def script: String
-
   def onrun: () ⇒ Unit
 
   def relativePath: String
