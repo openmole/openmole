@@ -25,18 +25,18 @@ import scala.util.Random
 
 object FilteredSampling {
 
-  def apply(sampling: Sampling, filters: SamplingFilter*) =
-    new FilteredSampling(sampling, filters: _*)
+  def apply(sampling: Sampling, filter: SamplingFilter) =
+    new FilteredSampling(sampling, filter)
 
 }
 
-sealed class FilteredSampling(sampling: Sampling, filters: SamplingFilter*) extends Sampling {
+sealed class FilteredSampling(sampling: Sampling, filter: SamplingFilter) extends Sampling {
 
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
   override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
-    sampling.build(context).filter(sample ⇒ !filters.exists(!_(context ++ sample)))
+    sampling.build(context).filter(sample ⇒ !filter(context ++ sample))
 
 }
 

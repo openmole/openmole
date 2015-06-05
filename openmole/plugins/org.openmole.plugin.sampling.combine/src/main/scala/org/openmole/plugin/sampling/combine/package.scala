@@ -33,7 +33,7 @@ package object combine {
     def +(s2: Sampling) = x(s2)
     def x(s2: Sampling) = new CompleteSampling(s, s2)
     def ::(s2: Sampling) = new ConcatenateSampling(s, s2)
-    def filter(filters: SamplingFilter*) = FilteredSampling(s, filters: _*)
+    def filter(filter: SamplingFilter) = FilteredSampling(s, filter)
     def zip(s2: Sampling) = ZipSampling(s, s2)
     def zipWithIndex(index: Prototype[Int]) = ZipWithIndexSampling(s, index)
     def take(n: FromContext[Int]) = TakeSampling(s, n)
