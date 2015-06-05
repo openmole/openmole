@@ -29,12 +29,12 @@ import scala.util.Random
 
 class ExplorationTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: Filter[String] = Filter.empty) extends Transition(start, end, condition, filter) with IExplorationTransition {
 
-  override def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
-    val subSubMole = subMole.newChild
-
-    registerAggregationTransitions(ticket, subSubMole)
-    subSubMole.transitionLock { submitIn(filtered(context), ticket, subSubMole) }
-  }
+  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
+    if (condition.evaluate(context)) {
+      val subSubMole = subMole.newChild
+      registerAggregationTransitions(ticket, subSubMole)
+      subSubMole.transitionLock { submitIn(filtered(context), ticket, subSubMole) }
+    }
 
   def submitIn(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     val moleExecution = subMole.moleExecution
@@ -60,6 +60,7 @@ class ExplorationTransition(start: Capsule, end: Slot, condition: Condition = Co
         if (fp.accepts(v)) variables += Variable(fp, v)
         else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp)
       }
+
       submitNextJobsIfReady(ListBuffer() ++ variables, newTicket, subMole)
     }
 

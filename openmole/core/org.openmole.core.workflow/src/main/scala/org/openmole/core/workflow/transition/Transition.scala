@@ -79,17 +79,11 @@ class Transition(
   }
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
-    try if (condition.evaluate(context)) _perform(context, ticket, subMole)
-    catch {
-      case e: Throwable ⇒
-        logger.log(SEVERE, "Error in " + this, e)
-        throw e
-    }
+    if (condition.evaluate(context)) submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, ticket, subMole)
 
   override def data(mole: Mole, sources: Sources, hooks: Hooks) =
     start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.name))
 
-  protected def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, ticket, subMole)
   protected def filtered(context: Context) = context.filterNot { case (n, _) ⇒ filter(n) }
 
   override def toString = this.getClass.getSimpleName + " from " + start + " to " + end

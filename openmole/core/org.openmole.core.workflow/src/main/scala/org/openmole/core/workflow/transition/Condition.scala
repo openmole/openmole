@@ -25,20 +25,20 @@ import scala.util.Random
 object Condition {
 
   val True = new Condition {
-    def evaluate(context: Context)(implicit rng: RandomProvider): Boolean = true
+    def evaluate(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = true
   }
 
   val False = new Condition {
-    def evaluate(context: Context)(implicit rng: RandomProvider): Boolean = false
+    def evaluate(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = false
   }
 
   implicit def function2IConditionConverter(f: Context ⇒ Boolean) = new Condition {
-    override def evaluate(context: Context)(implicit rng: RandomProvider) = f(context)
+    override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider) = f(context)
   }
 
   def apply(code: String) = new Condition {
     @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
-    override def evaluate(context: Context)(implicit rng: RandomProvider) = proxy.run(context).asInstanceOf[Boolean]
+    override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider) = proxy.run(context).asInstanceOf[Boolean]
   }
 
 }
@@ -52,17 +52,17 @@ trait Condition { c ⇒
    * @param context the context in which the condition is evaluated
    * @return the value of this condition
    */
-  def evaluate(context: Context)(implicit rng: RandomProvider): Boolean
+  def evaluate(context: ⇒ Context)(implicit rng: RandomProvider): Boolean
 
   def unary_! = new Condition {
-    override def evaluate(context: Context)(implicit rng: RandomProvider): Boolean = !c.evaluate(context)
+    override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = !c.evaluate(context)
   }
 
   def &&(d: Condition) = new Condition {
-    override def evaluate(context: Context)(implicit rng: RandomProvider): Boolean = c.evaluate(context) && d.evaluate(context)
+    override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = c.evaluate(context) && d.evaluate(context)
   }
 
   def ||(d: Condition) = new Condition {
-    override def evaluate(context: Context)(implicit rng: RandomProvider): Boolean = c.evaluate(context) || d.evaluate(context)
+    override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = c.evaluate(context) || d.evaluate(context)
   }
 }

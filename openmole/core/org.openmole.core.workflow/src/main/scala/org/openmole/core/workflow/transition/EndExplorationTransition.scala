@@ -26,11 +26,11 @@ import org.openmole.tool.lock._
 
 class EndExplorationTransition(start: Capsule, end: Slot, trigger: Condition, filter: Filter[String] = Filter.empty) extends Transition(start, end, True, filter) with IEndExplorationTransition {
 
-  override protected def _perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
+  override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     def perform() {
       val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
-      subMoleParent.transitionLock { super._perform(context, parentTicket, subMoleParent) }
+      subMoleParent.transitionLock { super.perform(context, parentTicket, subMoleParent) }
       subMole.cancel
     }
 
