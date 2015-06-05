@@ -48,6 +48,12 @@ class ExecutionPanel extends ModalPanel {
     allExecutionStates
     intervalHandler() = Some(setInterval(1000) {
       allExecutionStates
+      if (moleExecutionUIs().filter {
+        _._2 match {
+          case r: Running ⇒ true
+          case _          ⇒ false
+        }
+      }.isEmpty) onClose()
     })
   }
 
