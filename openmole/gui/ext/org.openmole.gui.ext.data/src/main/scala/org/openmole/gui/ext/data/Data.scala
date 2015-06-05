@@ -17,6 +17,8 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.{ StringWriter, PrintWriter }
+
 case class DataBag(uuid: String, name: String, data: Data)
 
 trait Data
@@ -116,6 +118,14 @@ case class ScriptData(
 case class Error(message: String, stackTrace: Option[String] = None)
 
 case class Token(token: String, duration: Long)
+
+object Error {
+  def error(t: Throwable): Error = {
+    val sw = new StringWriter()
+    t.printStackTrace(new PrintWriter(sw))
+    Error(t.getMessage, Some(sw.toString))
+  }
+}
 
 @JSExport("message.ExecutionId")
 case class ExecutionId(name: String, startDate: Long, id: String = java.util.UUID.randomUUID.toString)

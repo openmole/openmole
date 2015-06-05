@@ -64,7 +64,7 @@ object ApiImpl extends Api {
 
   def removeExecution(id: ExecutionId): Unit = Execution.remove(id)
 
-  def runScript(scriptData: ScriptData): String = {
+  def runScript(scriptData: ScriptData): Unit = {
     val id = getUUID
     val projectsPath = Utils.workspaceProjectFile
     val console = new Console
@@ -72,10 +72,12 @@ object ApiImpl extends Api {
       inputDirectory = new File(projectsPath, scriptData.inputDirectory),
       outputDirectory = new File(projectsPath, scriptData.outputDirectory)
     ))
+
+    val execId = ExecutionId(scriptData.scriptName, System.currentTimeMillis, id)
+    def error(t: Throwable) = Execution.add(execId, Failed(Error.error(t)))
+
     Try(repl.eval(scriptData.script)) match {
-      case Failure(e) ⇒
-        println("Error I, a factoriser avec rest api ? ")
-        "-1"
+      case Failure(e) ⇒ error(e)
       case Success(o) ⇒
         o match {
           case puzzle: Puzzle ⇒
@@ -84,21 +86,12 @@ object ApiImpl extends Api {
             Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
               case Success(ex) ⇒
                 Try(ex.start) match {
-                  case Failure(e) ⇒
-                    println("Error II, a factoriser avec rest api ? ")
-                    "-1"
-                  case Success(ex) ⇒
-                    // moles.add(id, Execution(directory, ex))
-                    Execution.add(ExecutionId(scriptData.scriptName, ex.startTime.get, id), ex)
-                    id
+                  case Failure(e)  ⇒ error(e)
+                  case Success(ex) ⇒ Execution.add(execId.copy(startDate = ex.startTime.get), ex)
                 }
-              case Failure(e) ⇒
-                println("Error III, a factoriser avec rest api ?")
-                "-1"
+              case Failure(e) ⇒ error(e)
             }
-          case Failure(e) ⇒
-            println("Error IV, a factoriser avec rest api ?")
-            "-1"
+          case Failure(e) ⇒ error(e)
         }
     }
   }
