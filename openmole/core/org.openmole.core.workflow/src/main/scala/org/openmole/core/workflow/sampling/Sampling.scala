@@ -38,7 +38,7 @@ trait Sampling {
   def prototypes: Iterable[Prototype[_]]
 
   /**
-   * This method builds the explored plan in the givern {@code context}.
+   * This method builds the explored plan in the given {@code context}.
    *
    * @param context context in which the exploration takes place
    */
