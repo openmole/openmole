@@ -24,6 +24,7 @@ import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.tools.ExpandedString
 
 import scala.util.Random
 
@@ -37,8 +38,8 @@ trait CSVToVariables {
    * Builds the plan.
    *
    */
-  def toVariables(file: File, context: Context): Iterator[Iterable[Variable[_]]] = {
-    val reader = new CSVReader(new FileReader(file), separator)
+  def toVariables(file: ExpandedString, context: Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] = {
+    val reader = new CSVReader(new FileReader(file.from(context)), separator)
     val headers = reader.readNext.toArray
 
     //test wether prototype names belong to header names
