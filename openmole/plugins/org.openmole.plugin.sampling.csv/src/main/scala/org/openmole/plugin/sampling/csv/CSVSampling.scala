@@ -30,6 +30,7 @@ import java.math.BigInteger
 import java.math.BigDecimal
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.tools.ExpandedString
 import au.com.bytecode.opencsv.CSVReader
 import collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
@@ -37,10 +38,10 @@ import scala.util.Random
 
 object CSVSampling {
 
-  def apply(file: File) = new CSVSamplingBuilder(file)
+  def apply(file: ExpandedString) = new CSVSamplingBuilder(file)
 }
 
-abstract class CSVSampling(val file: File) extends Sampling with CSVToVariables {
+abstract class CSVSampling(val file: ExpandedString) extends Sampling with CSVToVariables {
 
   override def prototypes =
     columns.map { case (_, p) ⇒ p } :::
