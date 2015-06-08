@@ -24,13 +24,15 @@ import org.openmole.core.workflow.transition.Condition._
 import scala.util.{ Random, Failure, Success, Try }
 import org.openmole.tool.lock._
 
-class EndExplorationTransition(start: Capsule, end: Slot, trigger: Condition, filter: Filter[String] = Filter.empty) extends Transition(start, end, True, filter) with IEndExplorationTransition {
+class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: Condition, val filter: Filter[String] = Filter.empty) extends IEndExplorationTransition {
+
+  //def condition = Condition.True
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     def perform() {
       val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
-      subMoleParent.transitionLock { super.perform(context, parentTicket, subMoleParent) }
+      subMoleParent.transitionLock { submitNextJobsIfReady(context.values, parentTicket, subMoleParent) }
       subMole.cancel
     }
 

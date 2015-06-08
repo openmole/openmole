@@ -27,7 +27,7 @@ import org.openmole.tool.lock._
 import scala.collection.mutable.{ HashSet, ListBuffer }
 import scala.util.Random
 
-class ExplorationTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: Filter[String] = Filter.empty) extends Transition(start, end, condition, filter) with IExplorationTransition {
+class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: Filter[String] = Filter.empty) extends IExplorationTransition {
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
     if (condition.evaluate(context)) {

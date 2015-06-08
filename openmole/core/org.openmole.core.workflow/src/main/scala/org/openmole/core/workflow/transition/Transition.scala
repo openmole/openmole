@@ -33,58 +33,14 @@ import scala.util.Random
 
 object Transition extends Logger
 
-import Transition.Log._
-
 class Transition(
     val start: Capsule,
     val end: Slot,
     val condition: Condition = Condition.True,
     val filter: Filter[String] = Filter.empty) extends ITransition {
 
-  private def nextTaskReady(ticket: Ticket, subMole: SubMoleExecution): Boolean = {
-    val registry = subMole.transitionRegistry
-    val mole = subMole.moleExecution.mole
-    mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
-  }
-
-  protected def submitNextJobsIfReady(context: Iterable[Variable[_]], ticket: Ticket, subMole: SubMoleExecution) = {
-    val moleExecution = subMole.moleExecution
-    val registry = subMole.transitionRegistry
-    val mole = subMole.moleExecution.mole
-
-    registry.register(this, ticket, context)
-    if (nextTaskReady(ticket, subMole)) {
-      val dataChannelVariables = mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) }
-
-      def removeVariables(t: ITransition) = registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registered")).toIterable
-
-      val transitionsVariables: Iterable[Variable[_]] =
-        mole.inputTransitions(end).toList.flatMap {
-          t ⇒ removeVariables(t)
-        }
-
-      val combinasion = (dataChannelVariables ++ transitionsVariables)
-
-      val newTicket =
-        if (mole.slots(end.capsule).size <= 1) ticket
-        else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
-
-      val toArrayManifests =
-        validTypes(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.`type`).toMap[String, PrototypeType[_]]
-
-      val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinasion.map(ticket.content -> _))
-
-      subMole.submit(end.capsule, newContext, newTicket)
-    }
-  }
-
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
-    if (condition.evaluate(context)) submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, ticket, subMole)
-
-  override def data(mole: Mole, sources: Sources, hooks: Hooks) =
-    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.name))
-
-  protected def filtered(context: Context) = context.filterNot { case (n, _) ⇒ filter(n) }
+    if (condition.evaluate(context)) submitNextJobsIfReady(filtered(context).values, ticket, subMole)
 
   override def toString = this.getClass.getSimpleName + " from " + start + " to " + end
 
