@@ -49,7 +49,7 @@ object Execution {
       else if (moleExecution.finished) Finished()
       else if (moleExecution.started) Running(ready = moleExecution.ready, running = moleExecution.running, duration = d, completed = moleExecution.completed)
       else moleExecution.exception match {
-        case Some(t: Throwable) ⇒ Failed(Error.error(t))
+        case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t))
         case _                  ⇒ Unknown()
       }
     case Some(Right(f: Failed)) ⇒ f

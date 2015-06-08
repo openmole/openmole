@@ -74,7 +74,7 @@ object ApiImpl extends Api {
     ))
 
     val execId = ExecutionId(scriptData.scriptName, System.currentTimeMillis, id)
-    def error(t: Throwable) = Execution.add(execId, Failed(Error.error(t)))
+    def error(t: Throwable) = Execution.add(execId, Failed(ErrorBuilder(t)))
 
     Try(repl.eval(scriptData.script)) match {
       case Failure(e) ⇒ error(e)
