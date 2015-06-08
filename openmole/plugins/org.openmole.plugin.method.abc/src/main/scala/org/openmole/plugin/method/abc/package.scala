@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.method
 
+import org.openmole.core.workflow.tools.Condition
 import org.openmole.plugin.method.abc._
 import fr.iscpif.scalabc.algorithm.Lenormand
 import org.openmole.core.workflow.data._

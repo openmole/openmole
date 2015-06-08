@@ -15,12 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.transition
+package org.openmole.core.workflow.tools
 
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
-
-import scala.util.Random
 
 object Condition {
 
@@ -35,6 +32,8 @@ object Condition {
   implicit def function2IConditionConverter(f: Context ⇒ Boolean) = new Condition {
     override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider) = f(context)
   }
+
+  implicit def conditionStringConverter(condition: String) = Condition(condition)
 
   def apply(code: String) = new Condition {
     @transient lazy val proxy = ScalaWrappedCompilation.raw(code)

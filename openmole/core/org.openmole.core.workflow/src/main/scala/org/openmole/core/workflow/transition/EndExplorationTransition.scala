@@ -20,7 +20,8 @@ package org.openmole.core.workflow.transition
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.transition.Condition._
+import org.openmole.core.workflow.tools.Condition
+import Condition._
 import scala.util.{ Random, Failure, Success, Try }
 import org.openmole.tool.lock._
 

@@ -22,6 +22,7 @@ import org.openmole.core.exception._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools.Condition
 import org.openmole.tool.lock._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }

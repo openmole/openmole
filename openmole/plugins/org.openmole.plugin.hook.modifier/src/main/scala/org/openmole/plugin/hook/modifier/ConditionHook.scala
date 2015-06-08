@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.hook.modifier
 
+import org.openmole.core.workflow.tools.Condition
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._

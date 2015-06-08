@@ -23,7 +23,7 @@ import org.openmole.core.workflow.builder.SamplingBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.tools.FromContext
+import org.openmole.core.workflow.tools.{ Condition, FromContext }
 
 package object combine {
 
@@ -33,7 +33,7 @@ package object combine {
     def +(s2: Sampling) = x(s2)
     def x(s2: Sampling) = new CompleteSampling(s, s2)
     def ::(s2: Sampling) = new ConcatenateSampling(s, s2)
-    def filter(filter: SamplingFilter) = FilteredSampling(s, filter)
+    def filter(keep: Condition) = FilteredSampling(s, keep)
     def zip(s2: Sampling) = ZipSampling(s, s2)
     def zipWithIndex(index: Prototype[Int]) = ZipWithIndexSampling(s, index)
     def take(n: FromContext[Int]) = TakeSampling(s, n)

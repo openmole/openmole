@@ -162,7 +162,6 @@ package transition {
   trait TransitionPackage {
     implicit def taskToSlotConverter(task: Task) = Slot(Capsule(task))
     implicit def transitionToSlotConverter(transition: ITransition) = transition.end
-    implicit def conditionStringConverter(condition: String) = Condition(condition)
   }
 }
 
