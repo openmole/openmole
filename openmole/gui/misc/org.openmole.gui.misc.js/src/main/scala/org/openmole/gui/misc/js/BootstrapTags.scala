@@ -45,6 +45,8 @@ object BootstrapTags {
     def +++(m: Seq[Modifier]) = t.copy(modifiers = t.modifiers :+ m.toSeq)
   }
 
+  def uuID: String = java.util.UUID.randomUUID.toString
+
   def emptyCK = ClassKeyAggregator.empty
 
   def key(s: String) = new ClassKeyAggregator(s)
@@ -320,4 +322,13 @@ object BootstrapTags {
       tags.div(`class` := "panel-heading")(heading),
       tags.div(`class` := "panel-body")(bodyElement.render)
     )
+
+  def hrefCollapse(hrefName: String, hiddenDiv: HTMLDivElement, expanded: Boolean, onExpand: () ⇒ Unit = () ⇒ {}): (TypedTag[HTMLAnchorElement], TypedTag[HTMLDivElement]) = {
+    val collapseID = uuID
+    (tags.a(data("toggle") := "collapse", href := "#" + collapseID, aria.expanded := expanded, aria.controls := "collapseExample", onclick := { () ⇒
+      onExpand()
+      false
+    })(hrefName),
+      tags.div(`class` := "collapse", id := collapseID)(hiddenDiv))
+  }
 }

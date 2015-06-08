@@ -28,6 +28,7 @@ import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
+import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import bs._
 import rx._
@@ -63,45 +64,57 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  val executionTable = bs.table(striped)(
-    thead,
-    Rx {
-      tbody({
-        for ((id, info) ← moleExecutionUIs()) yield {
-          val startDate = new Date(id.startDate).toLocaleDateString
-          val duration = new Date(info.duration).toLocaleTimeString
-          val completed = info.completed
+  case class ExecutionDetails(ratio: String, running: Long, error: Option[ExecError] = None)
 
-          val (ratio, running) = info match {
-            case f: Failed   ⇒ ("0", 0)
-            case f: Finished ⇒ ("100", 0)
-            case r: Running  ⇒ ((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running)
-            case c: Canceled ⇒ ("0", 0)
-            case u: Unknown  ⇒ ("0", 0)
+  lazy val executionTable = {
+    val expanded = Var(Map[String, Var[Boolean]]())
+
+    bs.table(striped)(
+      thead,
+      Rx {
+        tbody({
+          for ((id, info) ← moleExecutionUIs()) yield {
+            if (!expanded().contains(id.id)) expanded() = expanded().updated(id.id, Var(false))
+            val startDate = new Date(id.startDate).toLocaleDateString
+            val duration = new Date(info.duration).toLocaleTimeString
+            val completed = info.completed
+
+            val details = info match {
+              case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error))
+              case f: Finished ⇒ ExecutionDetails("100", 0)
+              case r: Running  ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running)
+              case c: Canceled ⇒ ExecutionDetails("0", 0)
+              case u: Unknown  ⇒ ExecutionDetails("0", 0)
+            }
+            val (execRef, execDiv) = bs.hrefCollapse(id.name, tags.div(details.error match {
+              case Some(e: ExecError) ⇒ e.message
+              case _                  ⇒ "Nothing"
+            }).render, expanded()(id.id)(), () ⇒ expanded()(id.id)() = !expanded()(id.id)())
+
+            Seq(bs.tr(row)(
+              bs.td(col_md_2)(execRef),
+              bs.td(col_md_1)(startDate),
+              bs.td(col_md_2)(bs.glyph(bs.glyph_flash), " " + details.running),
+              bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + completed),
+              bs.td(col_md_1)(details.ratio + "%"),
+              bs.td(col_md_1)(duration),
+              bs.td(col_md_1)(info.state)(`class` := info.state + "State"),
+              bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
+                allExecutionStates
+              })(`class` := "cancelExecution")),
+              bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].removeExecution(id).call().foreach { r ⇒
+                allExecutionStates
+              })(`class` := "removeExecution"))
+            ),
+              tags.tr(
+                tags.td(colspan := 12, display := { if (expanded()(id.id)()) "inline" else "none" })(execDiv)
+              ))
           }
-
-          bs.tr(row)(
-            bs.td(col_md_2)(tags.a(id.name, cursor := "pointer", onclick := { () ⇒
-              println("clicked")
-            })),
-            bs.td(col_md_1)(startDate),
-            bs.td(col_md_2)(bs.glyph(bs.glyph_flash), " " + running),
-            bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + completed),
-            bs.td(col_md_1)(ratio + "%"),
-            bs.td(col_md_1)(duration),
-            bs.td(col_md_1)(info.state)(`class` := info.state + "State"),
-            bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
-              allExecutionStates
-            })(`class` := "cancelExecution")),
-            bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].removeExecution(id).call().foreach { r ⇒
-              allExecutionStates
-            })(`class` := "removeExecution"))
-          )
         }
+        )
       }
-      )
-    }
-  ).render
+    ).render
+  }
 
   val closeButton = bs.button("Close", btn_test)(data("dismiss") := "modal", onclick := { () ⇒
     println("Close")
