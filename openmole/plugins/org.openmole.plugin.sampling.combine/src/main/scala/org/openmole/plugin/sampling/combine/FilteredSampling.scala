@@ -36,7 +36,7 @@ sealed class FilteredSampling(sampling: Sampling, filter: SamplingFilter) extend
   override def prototypes = sampling.prototypes
 
   override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
-    sampling.build(context).filter(sample ⇒ !filter(context ++ sample))
+    sampling.build(context).filter(sample ⇒ filter(context ++ sample))
 
 }
 
