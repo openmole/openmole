@@ -127,7 +127,6 @@ object Error {
   }
 }
 
-@JSExport("message.ExecutionId")
 case class ExecutionId(name: String, startDate: Long, id: String = java.util.UUID.randomUUID.toString)
 
 case class Output(output: String)
