@@ -119,15 +119,14 @@ case class Error(message: String, stackTrace: Option[String] = None)
 
 case class Token(token: String, duration: Long)
 
-object Error {
-  def error(t: Throwable): Error = {
+object ErrorBuilder {
+  def apply(t: Throwable): Error = {
     val sw = new StringWriter()
     t.printStackTrace(new PrintWriter(sw))
     Error(t.getMessage, Some(sw.toString))
   }
 }
 
-@JSExport("message.ExecutionId")
 case class ExecutionId(name: String, startDate: Long, id: String = java.util.UUID.randomUUID.toString)
 
 case class Output(output: String)
