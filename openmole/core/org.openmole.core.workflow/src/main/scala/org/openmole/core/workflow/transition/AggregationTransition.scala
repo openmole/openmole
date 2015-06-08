@@ -21,7 +21,7 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.transition.Condition._
+import Condition._
 import org.openmole.tool.lock._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
@@ -34,7 +34,7 @@ object AggregationTransition {
   }
 }
 
-class AggregationTransition(start: Capsule, end: Slot, condition: Condition = True, filter: Filter[String] = Filter.empty, trigger: Condition = Condition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
+class AggregationTransition(val start: Capsule, val end: Slot, val condition: Condition = True, val filter: Filter[String] = Filter.empty, val trigger: Condition = Condition.False) extends IAggregationTransition {
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     val moleExecution = subMole.moleExecution

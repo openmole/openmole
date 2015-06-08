@@ -17,9 +17,12 @@
 
 package org.openmole.core.workflow.transition
 
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools.ContextAggregator._
 import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.validation.TypeUtil._
 
 import scala.util.Random
 
@@ -47,7 +50,7 @@ trait ITransition {
    *
    * @return the condition under which this transition is performed
    */
-  def condition: Condition
+  //def condition: Condition
 
   /**
    *
@@ -63,7 +66,8 @@ trait ITransition {
    *
    * @return the unfiltred output data of the staring capsule
    */
-  def data(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet
+  def data(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
+    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.name))
 
   /**
    *
@@ -74,5 +78,44 @@ trait ITransition {
    * @param subMole   current submole
    */
   def perform(from: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider)
+
+  private def nextTaskReady(ticket: Ticket, subMole: SubMoleExecution): Boolean = {
+    val registry = subMole.transitionRegistry
+    val mole = subMole.moleExecution.mole
+    mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
+  }
+
+  protected def submitNextJobsIfReady(context: Iterable[Variable[_]], ticket: Ticket, subMole: SubMoleExecution) = {
+    val moleExecution = subMole.moleExecution
+    val registry = subMole.transitionRegistry
+    val mole = subMole.moleExecution.mole
+
+    registry.register(this, ticket, context)
+    if (nextTaskReady(ticket, subMole)) {
+      val dataChannelVariables = mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) }
+
+      def removeVariables(t: ITransition) = registry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registered")).toIterable
+
+      val transitionsVariables: Iterable[Variable[_]] =
+        mole.inputTransitions(end).toList.flatMap {
+          t ⇒ removeVariables(t)
+        }
+
+      val combinasion = (dataChannelVariables ++ transitionsVariables)
+
+      val newTicket =
+        if (mole.slots(end.capsule).size <= 1) ticket
+        else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
+
+      val toArrayManifests =
+        validTypes(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.`type`).toMap[String, PrototypeType[_]]
+
+      val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinasion.map(ticket.content -> _))
+
+      subMole.submit(end.capsule, newContext, newTicket)
+    }
+  }
+
+  protected def filtered(context: Context) = context.filterNot { case (n, _) ⇒ filter(n) }
 
 }

@@ -149,11 +149,11 @@ object Validation {
     }
 
     seen.filter { case (caps, paths) ⇒ paths.map { case (path, level) ⇒ level }.distinct.size > 1 }.map {
-      case (caps, paths) ⇒ new LevelProblem(caps, paths)
+      case (caps, paths) ⇒ LevelProblem(caps, paths)
     } ++
       seen.flatMap {
         case (caps, paths) ⇒
-          paths.filter { case (_, level) ⇒ level < 0 }.map { case (path, level) ⇒ new NegativeLevelProblem(caps, path, level) }
+          paths.filter { case (_, level) ⇒ level < 0 }.map { case (path, level) ⇒ NegativeLevelProblem(caps, path, level) }
       }
   }
 

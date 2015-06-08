@@ -17,10 +17,8 @@
 
 package org.openmole.plugin.hook
 
-import org.openmole.core.workflow.mole.HookBuilder
-import org.openmole.core.workflow.transition.Condition
-import org.openmole.core.workflow.mole.Hook
-import org.openmole.core.workflow.transition.Condition$
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.tools._
 
 package object modifier {
 

@@ -15,30 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.transition
+package org.openmole.core.workflow.tools
 
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
-
-import scala.util.Random
 
 object Condition {
 
   val True = new Condition {
-    def evaluate(context: Context)(implicit rng: RandomProvider): Boolean = true
+    def evaluate(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = true
   }
 
   val False = new Condition {
-    def evaluate(context: Context)(implicit rng: RandomProvider): Boolean = false
+    def evaluate(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = false
   }
 
   implicit def function2IConditionConverter(f: Context ⇒ Boolean) = new Condition {
-    override def evaluate(context: Context)(implicit rng: RandomProvider) = f(context)
+    override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider) = f(context)
   }
+
+  implicit def conditionStringConverter(condition: String) = Condition(condition)
 
   def apply(code: String) = new Condition {
     @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
-    override def evaluate(context: Context)(implicit rng: RandomProvider) = proxy.run(context).asInstanceOf[Boolean]
+    override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider) = proxy.run(context).asInstanceOf[Boolean]
   }
 
 }
@@ -52,17 +51,17 @@ trait Condition { c ⇒
    * @param context the context in which the condition is evaluated
    * @return the value of this condition
    */
-  def evaluate(context: Context)(implicit rng: RandomProvider): Boolean
+  def evaluate(context: ⇒ Context)(implicit rng: RandomProvider): Boolean
 
   def unary_! = new Condition {
-    override def evaluate(context: Context)(implicit rng: RandomProvider): Boolean = !c.evaluate(context)
+    override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = !c.evaluate(context)
   }
 
   def &&(d: Condition) = new Condition {
-    override def evaluate(context: Context)(implicit rng: RandomProvider): Boolean = c.evaluate(context) && d.evaluate(context)
+    override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = c.evaluate(context) && d.evaluate(context)
   }
 
   def ||(d: Condition) = new Condition {
-    override def evaluate(context: Context)(implicit rng: RandomProvider): Boolean = c.evaluate(context) || d.evaluate(context)
+    override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = c.evaluate(context) || d.evaluate(context)
   }
 }

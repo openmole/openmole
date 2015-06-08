@@ -22,6 +22,7 @@ import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools.Condition
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._

@@ -14,23 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.openmole.plugin.tool.pattern
 
-import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.Condition
+import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.transition._
 
-object Skip {
+object Strain {
 
-  def apply(puzzle: Puzzle, condition: Condition) = {
+  def apply(puzzle: Puzzle) = {
     val first = Capsule(EmptyTask(), strainer = true)
-    val firstSlot = Slot(first)
-    val last = Capsule(EmptyTask(), strainer = true)
+    val last = Slot(Capsule(EmptyTask(), strainer = true))
 
-    (firstSlot -- (puzzle, !condition) -- last) +
-      (firstSlot -- (last, condition))
+    (first -- puzzle -- last) + (first -- last)
   }
 
 }
