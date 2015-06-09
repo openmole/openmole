@@ -252,24 +252,11 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
       config := assemblyPath.value / "configuration/config.ini"
   )
 
-  def guiSubProjects =
-    gui.Bootstrap.subProjects ++
-      gui.Client.subProjects ++
-      gui.Ext.subProjects ++
-      gui.Misc.subProjects ++
-      gui.Server.subProjects ++
-      gui.Shared.subProjects ++
-      gui.Plugin.subProjects
-
-  lazy val api = Project("api", dir / "target" / "api") aggregate ((Core.subProjects ++ Gui.subProjects ++ Runtime.subProjects): _*) settings (commonsSettings: _*) settings (
+  lazy val api = Project("api", dir / "target" / "api") aggregate ((Core.subProjects ++ Plugin.subProjects): _*) settings (commonsSettings: _*) settings (
     unidocSettings: _*
   ) settings (tarProject: _*) settings (
-      compile := Analysis.Empty,
-      unidocProjectFilter in (ScalaUnidoc, unidoc) :=
-      inAnyProject --
-      inProjects(Libraries.subProjects: _*) --
-      inProjects(ThirdParties.subProjects: _*) --
-      inProjects(guiSubProjects: _*),
+      // compile := Analysis.Empty,
+      unidocProjectFilter in (ScalaUnidoc, unidoc) := inAnyProject -- inProjects(Libraries.subProjects ++ ThirdParties.subProjects: _*),
       Tar.name := "openmole-api.tar.gz",
       Tar.folder <<= (unidoc in Compile).map(_.head)
     )
