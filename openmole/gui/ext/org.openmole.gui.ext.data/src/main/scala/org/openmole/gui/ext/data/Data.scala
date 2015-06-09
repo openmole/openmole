@@ -127,7 +127,9 @@ object ErrorBuilder {
   }
 }
 
-case class ExecutionId(name: String, startDate: Long, id: String = java.util.UUID.randomUUID.toString)
+case class ExecutionId(id: String = java.util.UUID.randomUUID.toString)
+
+case class StaticExecutionInfo(name: String = "", script: String = "", startDate: Long = 0L)
 
 case class Output(output: String)
 

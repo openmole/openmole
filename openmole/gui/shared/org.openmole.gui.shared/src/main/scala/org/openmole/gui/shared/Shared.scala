@@ -41,9 +41,12 @@ trait Api {
   //EXECUTIONS
   def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)]
 
+  def allSaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
+
   def cancelExecution(id: ExecutionId): Unit
 
   def removeExecution(id: ExecutionId): Unit
 
   def runScript(scriptData: ScriptData): Unit
+
 }

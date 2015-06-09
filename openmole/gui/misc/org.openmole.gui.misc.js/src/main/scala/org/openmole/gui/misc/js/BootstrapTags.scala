@@ -323,12 +323,4 @@ object BootstrapTags {
       tags.div(`class` := "panel-body")(bodyElement.render)
     )
 
-  def hrefCollapse(hrefName: String, hiddenDiv: HTMLDivElement, expanded: Boolean, onExpand: () ⇒ Unit = () ⇒ {}): (TypedTag[HTMLAnchorElement], TypedTag[HTMLDivElement]) = {
-    val collapseID = uuID
-    (tags.a(data("toggle") := "collapse", href := "#" + collapseID, aria.expanded := expanded, aria.controls := "collapseExample", onclick := { () ⇒
-      onExpand()
-      false
-    })(hrefName),
-      tags.div(`class` := "collapse", id := collapseID)(hiddenDiv))
-  }
 }

@@ -26,15 +26,15 @@ object Execution {
 
   //implicit def execIdToMoleExeution(id: ExecutionId): Option[MoleExecution] = moles.get(id)
 
-  private lazy val moles = DataHandler[ExecutionId, Either[MoleExecution, Failed]]()
+  private lazy val moles = DataHandler[ExecutionId, Either[(StaticExecutionInfo, MoleExecution), Failed]]()
 
-  def add(key: ExecutionId, data: MoleExecution) = moles.add(key, Left(data))
+  def add(key: ExecutionId, staticInfo: StaticExecutionInfo, moleExecution: MoleExecution) = moles.add(key, Left((staticInfo, moleExecution)))
 
   def add(key: ExecutionId, error: Failed) = moles.add(key, Right(error))
 
   def cancel(key: ExecutionId) = get(key) match {
-    case Some(Left(mE: MoleExecution)) ⇒ mE.cancel
-    case _                             ⇒
+    case Some(Left((_, mE: MoleExecution))) ⇒ mE.cancel
+    case _                                  ⇒
   }
 
   def remove(key: ExecutionId) = {
@@ -42,8 +42,13 @@ object Execution {
     moles.remove(key)
   }
 
+  def staticInfo(key: ExecutionId): StaticExecutionInfo = get(key) match {
+    case Some(Left((staticInfo, _))) ⇒ staticInfo
+    case _                           ⇒ StaticExecutionInfo()
+  }
+
   def executionInfo(key: ExecutionId): ExecutionInfo = get(key) match {
-    case Some(Left(moleExecution: MoleExecution)) ⇒
+    case Some(Left((_, moleExecution: MoleExecution))) ⇒
       val d = moleExecution.duration.getOrElse(0L)
       if (moleExecution.canceled) Canceled()
       else if (moleExecution.finished) Finished()
@@ -60,5 +65,9 @@ object Execution {
     key -> executionInfo(key)
   }
 
-  def get(key: ExecutionId): Option[Either[MoleExecution, Failed]] = moles.get(key)
+  def allStaticInfos: Seq[(ExecutionId, StaticExecutionInfo)] = moles.getKeys.toSeq.map { key ⇒
+    key -> staticInfo(key)
+  }
+
+  private def get(key: ExecutionId): Option[Either[(StaticExecutionInfo, MoleExecution), Failed]] = moles.get(key)
 }
