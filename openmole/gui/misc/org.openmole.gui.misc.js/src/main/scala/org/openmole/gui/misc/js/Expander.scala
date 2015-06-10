@@ -4,6 +4,7 @@ import org.scalajs.dom.raw.HTMLDivElement
 import rx._
 
 import scalatags.JsDom.{ tags ⇒ tags }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.all._
 import scalatags.JsDom.TypedTag
 
@@ -24,22 +25,55 @@ import scalatags.JsDom.TypedTag
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+object Expander {
+  type VisibleID = String
+  type ExpandID = String
+}
+
+import Expander._
+
 class Expander {
 
-  val hiddenDiv: Var[Map[String, Var[TypedTag[HTMLDivElement]]]] = Var(Map())
-  private val expanded: Var[Map[String, Var[Boolean]]] = Var(Map())
+  private val expanded: Var[Map[ExpandID, Var[Boolean]]] = Var(Map())
+  private val visible: Var[Map[ExpandID, Var[VisibleID]]] = Var(Map())
 
-  def isExpanded(id: String) = expanded().getOrElse(id, Var(false))()
+  def updateMaps(expandId: ExpandID, visibleId: VisibleID) = {
+    if (!expanded().isDefinedAt(expandId)) expanded() = expanded().updated(expandId, Var(false))
+    if (!visible().isDefinedAt(expandId)) visible() = visible().updated(expandId, Var(visibleId))
+  }
 
-  def getLink(linkName: String, id: String, suffixId: String, targetDiv: TypedTag[HTMLDivElement]) = {
-    val linkID = id + suffixId
-    if (!expanded().isDefinedAt(id)) expanded() = expanded().updated(id, Var(false))
-    if (!hiddenDiv().isDefinedAt(id)) hiddenDiv() = hiddenDiv().updated(id, Var(tags.div()))
+  def isExpanded(id: ExpandID) = expanded().getOrElse(id, Var(false))()
 
-    tags.a(data("toggle") := "collapse", href := "#" + linkID, aria.expanded := expanded(), aria.controls := linkID, onclick := { () ⇒
-      hiddenDiv()(id)() = targetDiv
-      expanded()(id)() = !expanded()(id)()
+  def getVisible(expandId: ExpandID): Option[VisibleID] = if (isExpanded(expandId)) {
+    Some(visible()(expandId)())
+  }
+  else None
+
+  def setTarget(expandId: ExpandID, visibleId: VisibleID) = {
+    if (expanded()(expandId)()) {
+      if (visible()(expandId)() == visibleId) {
+        expanded()(expandId)() = false
+      }
+      else {
+        visible()(expandId)() = visibleId
+      }
+    }
+    else {
+      visible()(expandId)() = visibleId
+      expanded()(expandId)() = true
+    }
+  }
+
+  def getLink(linkName: String, expandId: ExpandID, visibleId: VisibleID) = {
+    updateMaps(expandId, visibleId)
+    tags.span(cursor := "pointer", onclick := {
+      () ⇒ setTarget(expandId, visibleId)
     })(linkName)
 
+  }
+
+  def getGlyph(glyph: ClassKeyAggregator, linkName: String, expandId: ExpandID, visibleId: VisibleID) = {
+    updateMaps(expandId, visibleId)
+    bs.glyphSpan(glyph, () ⇒ setTarget(expandId, visibleId), linkName)
   }
 }

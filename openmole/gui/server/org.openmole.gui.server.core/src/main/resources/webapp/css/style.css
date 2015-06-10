@@ -427,6 +427,7 @@ font-weight: bold;
    transform: scale(1.2);
 }
 
-.executionDetails{
-
+.executionTable{
+    border: none;
+    width: 100%;
 }

@@ -24,8 +24,6 @@ import org.openmole.gui.ext.data._
 
 object Execution {
 
-  //implicit def execIdToMoleExeution(id: ExecutionId): Option[MoleExecution] = moles.get(id)
-
   private lazy val moles = DataHandler[ExecutionId, Either[(StaticExecutionInfo, MoleExecution), Failed]]()
 
   def add(key: ExecutionId, staticInfo: StaticExecutionInfo, moleExecution: MoleExecution) = moles.add(key, Left((staticInfo, moleExecution)))
@@ -52,7 +50,15 @@ object Execution {
       val d = moleExecution.duration.getOrElse(0L)
       if (moleExecution.canceled) Canceled()
       else if (moleExecution.finished) Finished()
-      else if (moleExecution.started) Running(ready = moleExecution.ready, running = moleExecution.running, duration = d, completed = moleExecution.completed)
+      else if (moleExecution.started) Running(
+        ready = moleExecution.ready,
+        running = moleExecution.running,
+        duration = d,
+        completed = moleExecution.completed,
+        environmentStates = moleExecution.environments.map {
+          case (c, e) ⇒
+            EnvironmentState(c.task.name, e.running, e.done, e.submitted, e.failed)
+        }.toSeq)
       else moleExecution.exception match {
         case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t))
         case _                  ⇒ Unknown()

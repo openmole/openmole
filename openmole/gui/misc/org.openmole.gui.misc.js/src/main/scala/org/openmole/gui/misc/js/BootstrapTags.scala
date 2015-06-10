@@ -149,6 +149,8 @@ object BootstrapTags {
   val glyph_flash = "glyphicon-flash"
   val glyph_flag = "glyphicon-flag"
   val glyph_remove = "glyphicon-remove-sign"
+  val glyph_list = "glyphicon-list"
+  val glyph_stats = "glyphicon-stats"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
@@ -168,8 +170,8 @@ object BootstrapTags {
 
   def glyphButton(glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLSpanElement] = glyphButton("", emptyCK, glyCA, todo)
 
-  def glyphSpan(glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLSpanElement] =
-    tags.span(cursor := "pointer")(glyph(glyCA)(onclick := { () ⇒
+  def glyphSpan(glyCA: ClassKeyAggregator, todo: () ⇒ Unit, linkName: String = ""): TypedTag[HTMLSpanElement] =
+    tags.span(cursor := "pointer", glyph(glyCA)(linkName)(onclick := { () ⇒
       todo()
     }))
 
