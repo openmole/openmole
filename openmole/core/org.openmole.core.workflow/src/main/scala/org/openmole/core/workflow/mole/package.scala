@@ -17,6 +17,8 @@
 
 package org.openmole.core.workflow
 
+import scala.language.implicitConversions
+
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.execution.local._
@@ -33,17 +35,24 @@ package mole {
 }
 
 package object mole extends MolePackage {
+
   case class Hooks(map: Map[Capsule, Traversable[Hook]])
 
   case class Sources(map: Map[Capsule, Traversable[Source]])
 
-  implicit def hooksToMap(h: Hooks) = h.map.withDefault(_ ⇒ List.empty)
+  implicit def hooksToMap(h: Hooks): Map[Capsule, Traversable[Hook]] = h.map.withDefault(_ ⇒ List.empty)
 
-  implicit def mapToHooks(m: Map[Capsule, Traversable[Hook]]) = new Hooks(m)
+  implicit def mapToHooks(m: Map[Capsule, Traversable[Hook]]): Hooks = new Hooks(m)
 
-  implicit def sourcesToMap(s: Sources) = s.map.withDefault(_ ⇒ List.empty)
+  implicit def iterableTupleToHooks(h: Iterable[(Capsule, Hook)]): Hooks =
+    new Hooks(h.groupBy(_._1).mapValues(_.map(_._2)))
 
-  implicit def mapToSources(m: Map[Capsule, Traversable[Source]]) = new Sources(m)
+  implicit def sourcesToMap(s: Sources): Map[Capsule, Traversable[Source]] = s.map.withDefault(_ ⇒ List.empty)
+
+  implicit def mapToSources(m: Map[Capsule, Traversable[Source]]): Sources = new Sources(m)
+
+  implicit def iterableTupleToSources(s: Iterable[(Capsule, Source)]): Sources =
+    new Sources(s.groupBy(_._1).mapValues(_.map(_._2)))
 
   object Hooks {
     def empty = Map.empty[Capsule, Traversable[Hook]]
@@ -52,4 +61,5 @@ package object mole extends MolePackage {
   object Sources {
     def empty = Map.empty[Capsule, Traversable[Source]]
   }
+
 }
