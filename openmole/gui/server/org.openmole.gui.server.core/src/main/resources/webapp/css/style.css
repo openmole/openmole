@@ -103,6 +103,20 @@ select::-moz-focus-inner {
 
 #editor {
 	height: 95%;
+	font-family: monospace;
+}
+
+.ace_gutter-layer{
+	background-color: white;
+}
+
+
+#editor .ace_marker-layer .ace_active-line {
+    background: #f2f2f2 none repeat scroll 0 0;
+}
+
+#editor .ace_marker-layer .ace_selection {
+    background: #c8c8fa none repeat scroll 0 0;
 }
 
 .tree {
@@ -370,6 +384,7 @@ overflow-y : auto;
     top :150;
     right:50px;
     width: 200px;
+    z-index: 18;
 }
 
 .executionSettings{
