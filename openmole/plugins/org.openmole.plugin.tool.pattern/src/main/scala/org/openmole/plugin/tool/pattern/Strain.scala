@@ -32,9 +32,8 @@ object Strain {
 
     val _puzzle = first -- puzzle -- last
     val outputs = TypeUtil.receivedTypes(_puzzle.toMole, _puzzle.sources, _puzzle.hooks)(last)
-    val strainer = first -- (last, filter = Block(outputs.map(_.name).toSeq: _*))
 
-    _puzzle + strainer
+    _puzzle + (first -- (last, filter = Block(outputs.map(_.name).toSeq: _*)))
   }
 
 }
