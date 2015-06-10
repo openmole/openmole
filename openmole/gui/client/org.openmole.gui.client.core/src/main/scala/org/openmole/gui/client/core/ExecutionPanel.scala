@@ -133,14 +133,14 @@ class ExecutionPanel extends ModalPanel {
             )
 
             Seq(bs.tr(row)(
-              bs.td(col_md_2)(scriptLink),
+              bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink),
               bs.td(col_md_1)(startDate),
               bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + details.running),
               bs.td(col_md_1)(bs.glyph(bs.glyph_flag), " " + completed),
               bs.td(col_md_1)(details.ratio + "%"),
               bs.td(col_md_1)(duration),
               bs.td(col_md_1)(executionInfo.state)(`class` := executionInfo.state + "State"),
-              bs.td(col_md_1)(envLink),
+              bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
               bs.td(col_md_1)(bs.glyphSpan(bs.glyph_list, () ⇒ println("output"))),
               bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
                 allExecutionStates
@@ -161,6 +161,8 @@ class ExecutionPanel extends ModalPanel {
       }
     ).render
   }
+
+  def visibleClass(expandID: ExpandID, visibleID: VisibleID): Modifier = `class` := { if (expander.isVisible(expandID, visibleID)) "executionVisible" else "" }
 
   val closeButton = bs.button("Close", btn_test)(data("dismiss") := "modal", onclick := {
     () ⇒

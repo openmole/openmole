@@ -44,6 +44,8 @@ class Expander {
 
   def isExpanded(id: ExpandID) = expanded().getOrElse(id, Var(false))()
 
+  def isVisible(expandID: ExpandID, visibleID: VisibleID): Boolean = getVisible(expandID).exists { v ⇒ v == visibleID }
+
   def getVisible(expandId: ExpandID): Option[VisibleID] = if (isExpanded(expandId)) {
     Some(visible()(expandId)())
   }

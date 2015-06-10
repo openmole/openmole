@@ -1,9 +1,11 @@
 a {
-	color:#5fbcd3;
+	color:#3086b5;
 }
 
 #mainNav {
+	font-weight: bold;
 padding-left: 320px;
+background-color: #333333;
 }
 
 .right2{
@@ -250,7 +252,7 @@ overflow-y : auto;
 }
 
 .filesize{
-	color: grey;
+	color: lightgray;
 	padding-right: 7px;
 	padding-left: 3px;
 	float: right;
@@ -292,7 +294,7 @@ overflow-y : auto;
 .leftpanel {
 overflow-y : auto;
 	position: absolute;
-   background: #222222;
+   background: #333333;
     height: 100%;
     top: 20px;
     padding-left: 7px;
@@ -385,7 +387,7 @@ overflow-y : auto;
 
 
 .executionTable table td {
-    background-color:#171B22;
+    background-color:#333333;
     color: #9CA7BA;
 }
 
@@ -430,4 +432,9 @@ font-weight: bold;
 .executionTable{
     border: none;
     width: 100%;
+}
+
+.executionTable table td.executionVisible{
+	color:#3086b5;
+	font-weight: bold;
 }
