@@ -17,10 +17,12 @@
 
 package org.openmole.plugin.tool.pattern
 
+import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.validation.TypeUtil
 
 object Strain {
 
@@ -28,7 +30,11 @@ object Strain {
     val first = Capsule(EmptyTask(), strainer = true)
     val last = Slot(Capsule(EmptyTask(), strainer = true))
 
-    (first -- puzzle -- last) + (first -- last)
+    val _puzzle = first -- puzzle -- last
+    val outputs = TypeUtil.receivedTypes(_puzzle.toMole, _puzzle.sources, _puzzle.hooks)(last)
+    val strainer = first -- (last, filter = Block(outputs.map(_.name).toSeq: _*))
+
+    _puzzle + strainer
   }
 
 }
