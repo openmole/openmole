@@ -106,9 +106,14 @@ class ExecutionPanel extends ModalPanel {
 
             val scriptID: VisibleID = "script"
             val envID: VisibleID = "env"
+            val errorID: VisibleID = "error"
 
             val scriptLink = expander.getLink(staticInfo.name, id.id, scriptID)
             val envLink = expander.getGlyph(glyph_stats, "Env", id.id, envID)
+            val stateLink = executionInfo match {
+              case f: Failed ⇒ expander.getLink(executionInfo.state, id.id, errorID)
+              case _         ⇒ tags.span(executionInfo.state)
+            }
 
             val hiddenMap = Map(
               scriptID -> tags.div(bs.textArea(20)(staticInfo.script)),
@@ -129,7 +134,8 @@ class ExecutionPanel extends ModalPanel {
                     )
                   )
                 }
-              )
+              ),
+              errorID -> tags.div(bs.textArea(20)(new String(details.error.map { _.stackTrace.getOrElse("") }.getOrElse(""))))
             )
 
             Seq(bs.tr(row)(
@@ -139,7 +145,7 @@ class ExecutionPanel extends ModalPanel {
               bs.td(col_md_1)(bs.glyph(bs.glyph_flag), " " + completed),
               bs.td(col_md_1)(details.ratio + "%"),
               bs.td(col_md_1)(duration),
-              bs.td(col_md_1)(executionInfo.state)(`class` := executionInfo.state + "State"),
+              bs.td(col_md_1)(stateLink)(`class` := executionInfo.state + "State"),
               bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
               bs.td(col_md_1)(bs.glyphSpan(bs.glyph_list, () ⇒ println("output"))),
               bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒

@@ -51,8 +51,8 @@ object ScriptClient {
     dom.document.body.appendChild(
       nav("mainNav",
         nav_pills + nav_inverse + nav_staticTop,
-        execItem,
-        fileItem
+        fileItem,
+        execItem
       )
     )
 
