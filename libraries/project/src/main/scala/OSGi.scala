@@ -228,7 +228,7 @@ object OSGi extends Defaults(Apache) {
     version := monocleVersion
     )
 
-  lazy val familyVersion = "1.1-SNAPSHOT"
+  lazy val familyVersion = "1.1"
   lazy val family = OsgiProject("fr.iscpif.family") settings(
     libraryDependencies += "fr.iscpif" %% "family" % familyVersion,
     version := familyVersion
