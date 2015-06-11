@@ -1,9 +1,11 @@
 a {
-	color:#5fbcd3;
+	color:#3086b5;
 }
 
 #mainNav {
+	font-weight: bold;
 padding-left: 320px;
+background-color: #333333;
 }
 
 .right2{
@@ -101,6 +103,20 @@ select::-moz-focus-inner {
 
 #editor {
 	height: 95%;
+	font-family: monospace;
+}
+
+.ace_gutter-layer{
+	background-color: white;
+}
+
+
+#editor .ace_marker-layer .ace_active-line {
+    background: #f2f2f2 none repeat scroll 0 0;
+}
+
+#editor .ace_marker-layer .ace_selection {
+    background: #c8c8fa none repeat scroll 0 0;
 }
 
 .tree {
@@ -250,7 +266,7 @@ overflow-y : auto;
 }
 
 .filesize{
-	color: grey;
+	color: lightgray;
 	padding-right: 7px;
 	padding-left: 3px;
 	float: right;
@@ -292,7 +308,7 @@ overflow-y : auto;
 .leftpanel {
 overflow-y : auto;
 	position: absolute;
-   background: #222222;
+   background: #333333;
     height: 100%;
     top: 20px;
     padding-left: 7px;
@@ -368,6 +384,7 @@ overflow-y : auto;
     top :150;
     right:50px;
     width: 200px;
+    z-index: 18;
 }
 
 .executionSettings{
@@ -385,7 +402,7 @@ overflow-y : auto;
 
 
 .executionTable table td {
-    background-color:#171B22;
+    background-color:#333333;
     color: #9CA7BA;
 }
 
@@ -427,6 +444,12 @@ font-weight: bold;
    transform: scale(1.2);
 }
 
-.executionDetails{
+.executionTable{
+    border: none;
+    width: 100%;
+}
 
+.executionTable table td.executionVisible{
+	color:#3086b5;
+	font-weight: bold;
 }

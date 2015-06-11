@@ -127,7 +127,11 @@ object ErrorBuilder {
   }
 }
 
-case class ExecutionId(name: String, startDate: Long, id: String = java.util.UUID.randomUUID.toString)
+case class ExecutionId(id: String = java.util.UUID.randomUUID.toString)
+
+case class StaticExecutionInfo(name: String = "", script: String = "", startDate: Long = 0L)
+
+case class EnvironmentState(taskName: String, running: Long, done: Long, submitted: Long, failed: Long)
 
 case class Output(output: String)
 
@@ -141,7 +145,7 @@ sealed trait ExecutionInfo {
 
 case class Failed(error: Error, state: String = "failed", duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo
 
-case class Running(ready: Long, running: Long, state: String = "running", duration: Long, completed: Long) extends ExecutionInfo
+case class Running(ready: Long, running: Long, state: String = "running", duration: Long, completed: Long, environmentStates: Seq[EnvironmentState]) extends ExecutionInfo
 
 case class Finished(state: String = "finished", duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo
 

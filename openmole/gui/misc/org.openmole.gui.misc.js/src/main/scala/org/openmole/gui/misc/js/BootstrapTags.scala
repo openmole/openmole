@@ -149,6 +149,8 @@ object BootstrapTags {
   val glyph_flash = "glyphicon-flash"
   val glyph_flag = "glyphicon-flag"
   val glyph_remove = "glyphicon-remove-sign"
+  val glyph_list = "glyphicon-list"
+  val glyph_stats = "glyphicon-stats"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
@@ -168,8 +170,8 @@ object BootstrapTags {
 
   def glyphButton(glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLSpanElement] = glyphButton("", emptyCK, glyCA, todo)
 
-  def glyphSpan(glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLSpanElement] =
-    tags.span(cursor := "pointer")(glyph(glyCA)(onclick := { () ⇒
+  def glyphSpan(glyCA: ClassKeyAggregator, todo: () ⇒ Unit, linkName: String = ""): TypedTag[HTMLSpanElement] =
+    tags.span(cursor := "pointer", glyph(glyCA)(linkName)(onclick := { () ⇒
       todo()
     }))
 
@@ -323,12 +325,4 @@ object BootstrapTags {
       tags.div(`class` := "panel-body")(bodyElement.render)
     )
 
-  def hrefCollapse(hrefName: String, hiddenDiv: HTMLDivElement, expanded: Boolean, onExpand: () ⇒ Unit = () ⇒ {}): (TypedTag[HTMLAnchorElement], TypedTag[HTMLDivElement]) = {
-    val collapseID = uuID
-    (tags.a(data("toggle") := "collapse", href := "#" + collapseID, aria.expanded := expanded, aria.controls := "collapseExample", onclick := { () ⇒
-      onExpand()
-      false
-    })(hrefName),
-      tags.div(`class` := "collapse", id := collapseID)(hiddenDiv))
-  }
 }

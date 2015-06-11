@@ -60,6 +60,8 @@ object ApiImpl extends Api {
 
   def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)] = Execution.allStates
 
+  def allSaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = Execution.allStaticInfos
+
   def cancelExecution(id: ExecutionId): Unit = Execution.cancel(id)
 
   def removeExecution(id: ExecutionId): Unit = Execution.remove(id)
@@ -73,7 +75,7 @@ object ApiImpl extends Api {
       outputDirectory = new File(projectsPath, scriptData.outputDirectory)
     ))
 
-    val execId = ExecutionId(scriptData.scriptName, System.currentTimeMillis, id)
+    val execId = ExecutionId(id)
     def error(t: Throwable) = Execution.add(execId, Failed(ErrorBuilder(t)))
 
     Try(repl.eval(scriptData.script)) match {
@@ -87,7 +89,7 @@ object ApiImpl extends Api {
               case Success(ex) ⇒
                 Try(ex.start) match {
                   case Failure(e)  ⇒ error(e)
-                  case Success(ex) ⇒ Execution.add(execId.copy(startDate = ex.startTime.get), ex)
+                  case Success(ex) ⇒ Execution.add(execId, StaticExecutionInfo(scriptData.scriptName, scriptData.script, ex.startTime.get), ex)
                 }
               case Failure(e) ⇒ error(e)
             }
