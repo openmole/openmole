@@ -134,7 +134,7 @@ class ExecutionPanel extends ModalPanel {
                   )
                 }
               ),
-              errorID -> tags.div(bs.textArea(20)(new String(details.error.map { _.stackTrace.getOrElse("") }.getOrElse(""))))
+              errorID -> tags.div(bs.textArea(20)(new String(details.error.map { _.stackTrace }.getOrElse(""))))
             )
 
             Seq(bs.tr(row)(

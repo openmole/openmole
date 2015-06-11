@@ -115,7 +115,7 @@ case class ScriptData(
   outputDirectory: String,
   output: String)
 
-case class Error(message: String, stackTrace: Option[String] = None)
+case class Error(stackTrace: String)
 
 case class Token(token: String, duration: Long)
 
@@ -123,8 +123,10 @@ object ErrorBuilder {
   def apply(t: Throwable): Error = {
     val sw = new StringWriter()
     t.printStackTrace(new PrintWriter(sw))
-    Error(t.getMessage, Some(sw.toString))
+    Error(sw.toString)
   }
+
+  def apply(stackTrace: String) = Error(stackTrace)
 }
 
 case class ExecutionId(id: String = java.util.UUID.randomUUID.toString)
