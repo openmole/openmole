@@ -108,7 +108,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 def quote(s: String) = if (OS.actualOS.isWindows) '"' + s + '"' else s.replace(" ", "\\ ")
                 val ptrFlag = if (OS.actualOS.is64Bit) "-XX:+UseCompressedOops" else ""
 
-                val cmd = s"java -Xmx${memory}m -Dosgi.locking=none -XX:+UseG1GC $ptrFlag -Dosgi.configuration.area=${osgiDir.getName} -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration ${quote(configurationDir.getAbsolutePath)} -s ${quote(storageFile.getAbsolutePath)} -i ${quote(localExecutionMessage.getAbsolutePath)} -o ${quote(localResultFile.getAbsolutePath)} -c / -p ${quote(pluginDir.getAbsolutePath)}" + (if (debug) " -d " else "")
+                val cmd = s"java -Xmx${memory}m -Dosgi.locking=none -XX:+UseG1GC $ptrFlag -Dosgi.configuration.area=${osgiDir.getName} -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration ${quote(configurationDir.getAbsolutePath)} -s ${quote(storageFile.getAbsolutePath)} -i ${quote(localExecutionMessage.getAbsolutePath)} -o ${quote(localResultFile.getAbsolutePath)} -c ${localCommunicationDirPath} -p ${quote(pluginDir.getAbsolutePath)}" + (if (debug) " -d " else "")
 
                 logger.info("Executing runtime: " + cmd)
                 //val commandLine = CommandLine.parse(cmd)
@@ -314,14 +314,14 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
           }
 
-          def localCachedReplicatedFile(replicatedFile: ReplicatedFile) = {
-            val localFile = localCache.cache(replicatedFile, download(_, false))
+          def localCachedReplicatedFile(replicatedFile: ReplicatedFile, raw: Boolean) = {
+            val localFile = localCache.cache(replicatedFile, download(_, raw))
             cached ::= replicatedFile
             replicatedFile.copy(path = localFile.getAbsolutePath)
           }
 
-          val files = executionMessage.files.map(localCachedReplicatedFile)
-          val plugins = executionMessage.plugins.map(localCachedReplicatedFile)
+          val files = executionMessage.files.map(localCachedReplicatedFile(_, raw = false))
+          val plugins = executionMessage.plugins.map(localCachedReplicatedFile(_, raw = true))
 
           val jobsFile = Workspace.newFile("jobs", ".xml")
           storage.download(executionMessage.jobs.path, jobsFile)
