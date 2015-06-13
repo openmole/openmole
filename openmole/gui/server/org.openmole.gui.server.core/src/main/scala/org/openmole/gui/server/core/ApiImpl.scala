@@ -76,7 +76,8 @@ object ApiImpl extends Api {
     ))
 
     val execId = ExecutionId(id)
-    def error(t: Throwable) = Execution.add(execId, Failed(ErrorBuilder(t)))
+    def error(t: Throwable): Unit = Execution.add(execId, Failed(ErrorBuilder(t)))
+    def message(message: String): Unit = Execution.add(execId, Failed(Error(message)))
 
     Try(repl.eval(scriptData.script)) match {
       case Failure(e) ⇒ error(e)
@@ -93,7 +94,7 @@ object ApiImpl extends Api {
                 }
               case Failure(e) ⇒ error(e)
             }
-          case Failure(e) ⇒ error(e)
+          case _ ⇒ message("A puzzle have to be provided, the workflow can not be launched")
         }
     }
   }
