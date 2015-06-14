@@ -64,6 +64,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val _port = if (splitHost.size == 2) splitHost(1).toInt else 22
     val _host = splitHost(0)
 
+    logger.info(s"Looking for jobs on ${_host} port ${_port} with user ${_user}")
+
     val storage = new SimpleStorage with GridScaleStorage with CompressedTransfer {
       val storage = new SSHStorage with SSHUserPasswordAuthentication {
         val host = _host
@@ -163,7 +165,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       finally is.close
     }
 
-    logger.info("Uploading context results")
+    logger.info(s"Uploading context results to communication dir $communicationDir")
 
     def uploadFileMessage(msg: FileMessage) = {
       val localFile = new File(msg.path)

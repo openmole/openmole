@@ -18,9 +18,10 @@
 package org.openmole.plugin.tool.sftpserver
 
 import java.io.File
+import java.util
 import org.apache.sshd.SshServer
 import org.apache.sshd.common.file._
-import org.apache.sshd.common.file.nativefs.NativeFileSystemView
+import org.apache.sshd.common.file.nativefs.{ NativeSshFile, NativeFileSystemView }
 import org.apache.sshd.common.io.IoServiceFactoryFactory
 import org.apache.sshd.server.PasswordAuthenticator
 import org.apache.sshd.server.command.ScpCommandFactory
@@ -28,10 +29,29 @@ import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
 import org.apache.sshd.server.session.ServerSession
 import org.apache.sshd.common.Session
 import org.apache.sshd.server.sftp.SftpSubsystem
+import org.openmole.core.tools.service.Logger
 import org.openmole.tool.thread._
 import collection.JavaConversions._
 
+object SFTPServer extends Logger {
+  {
+    val isJava7 = classOf[NativeFileSystemView].getDeclaredField("isJava7")
+    isJava7.setAccessible(true)
+    isJava7.set(null, false)
+  }
+}
+
+import SFTPServer.Log._
+
 class SFTPServer(path: File, login: String, password: String, port: Int) {
+  logger.fine(s"Starting sftp server on port $port with path $path")
+
+  def fileSystemView = {
+    val roots = new util.LinkedHashMap[String, String]
+    roots.put("/", path.toString)
+    new NativeFileSystemView(login, roots, "/", '/', false)
+  }
+
   val sshd = SshServer.setUpDefaultServer
 
   {
@@ -39,16 +59,7 @@ class SFTPServer(path: File, login: String, password: String, port: Int) {
     sshd.setSubsystemFactories(List(new SftpSubsystem.Factory))
     sshd.setCommandFactory(new ScpCommandFactory)
     sshd.setFileSystemFactory(new FileSystemFactory {
-      override def createFileSystemView(s: Session) = new NativeFileSystemView(login, false) {
-        override def getFile(file: String) = {
-          val sandboxed =
-            if (file.startsWith(path.getCanonicalPath)) new File(file)
-            else new File(path, file)
-
-          if (sandboxed.getCanonicalPath.startsWith(path.getCanonicalPath)) super.getFile(sandboxed.getAbsolutePath)
-          else super.getFile(path.getAbsolutePath)
-        }
-      }
+      override def createFileSystemView(s: Session) = fileSystemView
     })
 
     sshd.setPasswordAuthenticator(new PasswordAuthenticator {
