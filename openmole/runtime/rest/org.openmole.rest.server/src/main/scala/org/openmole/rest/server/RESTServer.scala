@@ -71,11 +71,10 @@ class RESTServer(port: Option[Int], sslPort: Option[Int], hostName: Option[Strin
 
     val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
 
-    val ks = KeyStore.getInstance(KeyStore.getDefaultType)
     val ksLoc = Workspace.file("OMServerKeystore")
     val ksPassword = "openmole"
 
-    Certificate.loadOrGenerate(ksLoc, ks, ksPassword, hostName)
+    val ks = Certificate.loadOrGenerate(ksLoc, ksPassword, hostName)
 
     contextFactory.setKeyStore(ks)
     contextFactory.setKeyStorePassword(ksPassword)

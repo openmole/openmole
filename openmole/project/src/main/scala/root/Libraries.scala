@@ -164,7 +164,7 @@ object Libraries extends Defaults {
 
   lazy val logging = "org.openmole" %% "org-apache-commons-logging" % "1.1.1"
 
-  lazy val sshd = "org.openmole" %% "org-apache-sshd" % "0.13.0"
+  lazy val sshd = "org.openmole" %% "org-apache-sshd" % "0.14.0"
 
   lazy val ant = "org.openmole" %% "org-apache-ant" % "1.8.0"
 

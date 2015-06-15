@@ -20,9 +20,9 @@ package org.openmole.core.workflow.execution.local
 import java.util.concurrent.Semaphore
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.task._
+import org.openmole.tool.collection.PriorityQueue
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.Stack
-import org.openmole.core.tools.collection.PriorityQueue
 
 object JobPriorityQueue {
 

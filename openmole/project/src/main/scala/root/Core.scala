@@ -34,7 +34,7 @@ object Core extends Defaults {
   val tools = OsgiProject("tools", dynamicImports = Seq("*"), imports = Seq("*")) settings
     (includeOsgi,
       libraryDependencies ++= Seq(xstream, exec, math, jodaTime, scalaLang, scalatest)) dependsOn
-      (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleStream)
+      (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleStream, openmoleCollection)
 
   val event = OsgiProject("event", imports = Seq("*")) dependsOn (tools) settings (
     libraryDependencies += scalatest

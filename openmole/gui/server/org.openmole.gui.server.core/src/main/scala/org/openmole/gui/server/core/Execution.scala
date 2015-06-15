@@ -17,7 +17,7 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.tool.data._
+import org.openmole.tool.collection._
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.gui.ext.data._

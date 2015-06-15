@@ -17,6 +17,8 @@
 
 package org.openmole.plugin.environment.desktopgrid
 
+import java.io.File
+
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
@@ -25,7 +27,7 @@ import org.openmole.plugin.environment.gridscale.GridScaleStorage
 
 import org.openmole.plugin.tool.sftpserver.SFTPServer
 import java.net.URI
-import fr.iscpif.gridscale.storage.{ LocalStorage ⇒ GSLocalStorage }
+import fr.iscpif.gridscale.storage.{ LocalStorage ⇒ GSLocalStorage, FileType }
 
 object DesktopGridEnvironment {
   val timeStempsDirName = "timeStemps"
@@ -62,8 +64,8 @@ class DesktopGridEnvironment(
     def environment = env
     val remoteStorage: RemoteStorage = new DumyStorage
     def url = env.url
-    def root = path.getPath
-    val storage = new GSLocalStorage {}
+    def root = "/"
+    val storage = new RelativeStorage(path)
     val id = url.toString
   }
 

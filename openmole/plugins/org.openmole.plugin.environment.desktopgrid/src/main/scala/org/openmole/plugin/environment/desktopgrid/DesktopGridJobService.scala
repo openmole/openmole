@@ -24,6 +24,7 @@ import org.openmole.tool.file._
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workflow.execution.ExecutionState._
+import org.openmole.tool.file._
 
 import DesktopGridEnvironment._
 
@@ -61,7 +62,7 @@ trait DesktopGridJobService extends JobService with UnlimitedAccess { js ⇒
     new BatchJob with BatchJobId {
       val id = jobId
       val jobService = js
-      def resultPath = results(jobId).head.getAbsolutePath
+      def resultPath = s"$resultsDirName/${results(jobId).head.getName}"
     }
   }
 

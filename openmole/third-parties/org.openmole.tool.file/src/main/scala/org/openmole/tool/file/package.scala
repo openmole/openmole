@@ -336,14 +336,18 @@ package object file {
     def createLink(target: String): Path = createLink(Paths.get(target))
 
     def createLink(target: Path): Path = {
+      def unsupported = {
+        Logger.getLogger(getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
+        val fileTarget = if (target.isAbsolute) target else Paths.get(file.getParentFile.getPath, target.getPath)
+        Files.copy(fileTarget, file, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING)
+        file
+      }
+
       try Files.createSymbolicLink(file, target)
       catch {
-        case e: UnsupportedOperationException ⇒
-          Logger.getLogger(getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
-          val fileTarget = if (target.isAbsolute) target else Paths.get(file.getParentFile.getPath, target.getPath)
-          Files.copy(fileTarget, file, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING)
-          file
-        case e: IOException ⇒ throw e
+        case _: UnsupportedOperationException ⇒ unsupported
+        case _: FileSystemException           ⇒ unsupported
+        case e: IOException                   ⇒ throw e
       }
     }
 
