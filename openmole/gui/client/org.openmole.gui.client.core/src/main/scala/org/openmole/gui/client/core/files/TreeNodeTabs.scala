@@ -61,12 +61,9 @@ object TreeNodeTabs {
       "Starting " + tabName()
     )
 
-    lazy val tabElement = tags.div(Rx {
-      `class` := {
-        if (overlaying()) "tabOverlay"
-        else ""
-      }
-    })(editorElement)
+    val tabElement = tags.div()
+
+    val overlayTabElement = tags.div(`class` := "tabOverlay")
 
     def save(onsaved: () ⇒ Unit = () ⇒ {}): Unit
 
@@ -235,20 +232,23 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
               `class` := "tab-pane " + {
                 if (isTabActive) "active" else ""
               }, id := t.id
-            )(t.tabElement.render,
-                if (isTabActive) {
-                  active.map { tab ⇒
-                    tab match {
-                      case oms: TabControl ⇒
+            )(if (isTabActive) {
+                active.map { tab ⇒
+                  tab match {
+                    case oms: TabControl ⇒
+                      tags.div(
+                        if (t.overlaying()) t.overlayTabElement else t.tabElement,
                         tags.div(
+                          t.editorElement,
                           oms.controlElement,
                           if (tab.overlaying()) tab.overlayElement else tags.div
                         )
-                      case _ ⇒ tags.div()
-                    }
+                      )
+                    case _ ⇒ tags.div()
                   }
                 }
-                else tags.div()
+              }
+              else tags.div()
               )
           }
         )
