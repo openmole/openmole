@@ -27,7 +27,6 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.job.State._
 import org.openmole.core.workflow.execution.local._
 import org.openmole.core.workspace.Workspace
-import org.openmole.core.tools.collection._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.tools._
 import scala.collection.mutable.Buffer
