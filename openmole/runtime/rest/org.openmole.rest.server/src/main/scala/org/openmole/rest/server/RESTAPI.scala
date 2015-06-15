@@ -21,7 +21,7 @@ import org.openmole.rest.message._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import scala.util.{ Try, Failure, Success }
-import org.openmole.tool.data._
+import org.openmole.tool.collection._
 
 case class Execution(workDirectory: WorkDirectory, moleExecution: MoleExecution)
 

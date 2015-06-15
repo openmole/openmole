@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.tools.collection
+package org.openmole.tool.collection
 
 import java.util.concurrent.Semaphore
 

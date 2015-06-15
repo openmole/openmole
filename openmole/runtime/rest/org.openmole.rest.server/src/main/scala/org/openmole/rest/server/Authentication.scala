@@ -13,7 +13,7 @@ import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.Workspace
 import org.apache.commons.codec.binary.Base64
 import javax.servlet.http.HttpServletRequest
-import org.openmole.tool.data._
+import org.openmole.tool.collection._
 import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
 

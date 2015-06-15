@@ -22,12 +22,12 @@ import java.util.concurrent.{ TimeUnit, Executors }
 
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.collection.PriorityQueue
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.environment.BatchEnvironment.JobManagementThreads
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.collection.PriorityQueue
 import org.openmole.tool.thread._
 
 object JobManager extends Logger

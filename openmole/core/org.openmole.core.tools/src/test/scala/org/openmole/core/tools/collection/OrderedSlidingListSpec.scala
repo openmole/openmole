@@ -17,6 +17,7 @@
 
 package org.openmole.core.tools.collection
 
+import org.openmole.tool.collection.OrderedSlidingList
 import org.scalatest.FlatSpec
 import org.scalatest._
 import org.scalatest.junit._

@@ -32,7 +32,8 @@ import org.bouncycastle.operator.{ DefaultDigestAlgorithmIdentifierFinder, Defau
 import resource._
 
 object Certificate {
-  def loadOrGenerate(file: File, ks: KeyStore, ksPassword: String, hostName: Option[String]): Unit = {
+  def loadOrGenerate(file: File, ksPassword: String, hostName: Option[String]) = {
+    val ks = KeyStore.getInstance(KeyStore.getDefaultType)
     if (file.exists()) {
       val fis = managed(new FileInputStream(file))
       fis foreach (ks.load(_, ksPassword.toCharArray))
@@ -69,6 +70,6 @@ object Certificate {
       val fos = managed(new FileOutputStream(file))
       fos foreach (ks.store(_, ksPassword.toCharArray))
     }
-
+    ks
   }
 }
