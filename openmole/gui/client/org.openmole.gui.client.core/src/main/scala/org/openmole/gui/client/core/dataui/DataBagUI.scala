@@ -23,9 +23,9 @@ import rx._
 
 object DataBagUI {
 
-  def apply(factory: FactoryUI, name: String = ""): DataBagUI = apply(factory.dataUI, name)
+  def apply(factory: FactoryWithDataUI, name: String = ""): DataBagUI = apply(factory.dataUI, name)
 
-  def prototype(factory: FactoryUI, name: String = ""): PrototypeDataBagUI = factory.dataUI match {
+  def prototype(factory: FactoryWithDataUI, name: String = ""): PrototypeDataBagUI = factory.dataUI match {
     case p: PrototypeDataUI ⇒ apply(p, name).asInstanceOf[PrototypeDataBagUI]
     case _                  ⇒ throw new DataUIError("The factory " + factory.name + " is not a Prototype factory")
   }

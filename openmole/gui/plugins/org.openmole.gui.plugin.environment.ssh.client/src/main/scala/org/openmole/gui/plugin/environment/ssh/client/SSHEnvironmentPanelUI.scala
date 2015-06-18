@@ -1,7 +1,7 @@
-package org.openmole.gui.ext.dataui
+package org.openmole.gui.plugin.environment.ssh.client
 
 /*
- * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 16/06/2015 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,9 +17,20 @@ package org.openmole.gui.ext.dataui
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait FactoryUI {
-  type DATAUI <: DataUI
-  def dataUI: DATAUI
-  val name: String
-  val uuid: String = java.util.UUID.randomUUID.toString
+import org.openmole.gui.ext.dataui.PanelUI
+import scalatags.Text.all._
+import scala.scalajs.js.annotation.JSExport
+import scalatags.JsDom.all._
+import org.openmole.gui.misc.js.{BootstrapTags=> bs}
+import scalatags.JsDom.{ tags ⇒ tags }
+import rx._
+@JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHEnvironmentPanelUI")
+class SSHEnvironmentPanelUI(dataUI: SSHEnvironmentDataUI) extends PanelUI {
+
+@JSExport
+val view = bs.div()
+
+def save = {
+}
+
 }

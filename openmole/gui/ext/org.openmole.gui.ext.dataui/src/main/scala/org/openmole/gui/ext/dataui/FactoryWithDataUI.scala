@@ -1,7 +1,7 @@
-package org.openmole.gui.plugin.task.statistic.client
+package org.openmole.gui.ext.dataui
 
 /*
- * Copyright (C) 24/02/2015 // mathieu.leclaire@openmole.org
+ * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,13 +17,22 @@ package org.openmole.gui.plugin.task.statistic.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.dataui.FactoryWithDataUI
-import org.openmole.gui.client.core.dataui.TaskDataUI
-import scala.scalajs.js.annotation.JSExport
-
-@JSExport("org.openmole.gui.plugin.task.statistic.client.StatisticTaskFactoryUI")
-class StatisticTaskFactoryUI extends FactoryWithDataUI {
-  type DATAUI = TaskDataUI
-  def dataUI = new StatisticTaskDataUI
-  val name = "Statistic"
+trait FactoryUI {
+  val name: String
+  val uuid: String = java.util.UUID.randomUUID.toString
 }
+
+trait FactoryWithDataUI extends FactoryUI with DataUIBuilder
+
+trait FactoryWithPanelUI extends FactoryUI with PanelUIBuilder
+
+trait DataUIBuilder {
+  type DATAUI <: DataUI
+  def dataUI: DATAUI
+}
+
+trait PanelUIBuilder {
+  def panelUI: PanelUI
+}
+
+trait AuthenticationFactoryUI extends FactoryWithPanelUI

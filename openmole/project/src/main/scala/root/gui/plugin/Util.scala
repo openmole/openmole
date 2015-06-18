@@ -33,8 +33,8 @@ object Util {
 
   def subProject(rootDir: sbt.File,
                  suffix: String,
-                 extProjectDependencies: Seq[ClasspathDep[ProjectReference]] = Seq(),
-                 extLibDependencies: Seq[ModuleID] = Seq()) =
-    Project(suffix.replace('.', '-'), new File(rootDir + "." + suffix)) settings (libraryDependencies ++= extLibDependencies) dependsOn (extProjectDependencies: _*)
+                 projectDependencies: Seq[ClasspathDep[ProjectReference]] = Seq(),
+                 libDependencies: Seq[ModuleID] = Seq()) =
+    Project(suffix.replace('.', '-'), new File(rootDir + "." + suffix)) settings (libraryDependencies ++= libDependencies) dependsOn (projectDependencies: _*)
 
 }

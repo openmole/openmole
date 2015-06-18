@@ -20,7 +20,7 @@ package org.openmole.gui.server.core
 import org.openmole.core.workflow.task.PluginSet
 
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.dataui.FactoryUI
+import org.openmole.gui.ext.dataui.FactoryWithDataUI
 
 import scala.collection.mutable
 import scala.util.{ Failure, Try }
@@ -35,7 +35,7 @@ object ServerFactories {
     }
   }
 
-  def add(dataClass: Class[_], factory: Factory, factoryUI: FactoryUI) = instance.factories.synchronized {
+  def add(dataClass: Class[_], factory: Factory, factoryUI: FactoryWithDataUI) = instance.factories.synchronized {
     println("Add server " + dataClass)
     instance.factories += dataClass -> factory
     instance.factoriesUI += dataClass.getName -> factoryUI
@@ -51,5 +51,5 @@ object ServerFactories {
 
 class ServerFactories {
   val factories = new mutable.WeakHashMap[Class[_], Factory]
-  val factoriesUI = new mutable.WeakHashMap[String, FactoryUI]
+  val factoriesUI = new mutable.WeakHashMap[String, FactoryWithDataUI]
 }

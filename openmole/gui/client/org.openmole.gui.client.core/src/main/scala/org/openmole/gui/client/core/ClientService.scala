@@ -2,7 +2,7 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.dataui.{ DataUI, FactoryUI }
+import org.openmole.gui.ext.dataui._
 import rx._
 
 import scala.scalajs._
@@ -30,18 +30,24 @@ import scala.util.{ Failure, Success, Try }
 object UIFactories {
 
   @JSExport
-  val factoryMap = js.Dictionary.empty[FactoryUI]
+  val factoryMap = js.Dictionary.empty[FactoryWithDataUI]
+
+  @JSExport
+  val authenticationMap = js.Dictionary.empty[AuthenticationFactoryUI]
 }
 
 object ClientService {
 
   private val uiFactories = Var(UIFactories.factoryMap.toMap)
+  private val authenticationFactoryMap = Var(UIFactories.authenticationMap.toMap)
   private val uiDataBags: Var[Seq[DataBagUI]] = Var(Seq())
 
   // Factories
   def taskFactories = uiFactories().values.filter { f ⇒ isTaskUI(f.dataUI) }.toSeq
 
-  def prototypeFactories: Seq[FactoryUI] = uiFactories().values.filter { f ⇒ isPrototypeUI(f.dataUI) }.toSeq
+  def prototypeFactories: Seq[FactoryWithDataUI] = uiFactories().values.filter { f ⇒ isPrototypeUI(f.dataUI) }.toSeq
+
+  def authenticationFactories: Seq[AuthenticationFactoryUI] = authenticationFactoryMap().values.toSeq
 
   def factories = uiFactories().values.toSeq
 
@@ -79,8 +85,8 @@ object ClientService {
   def isPrototypeUI(db: DataBagUI): Boolean = isPrototypeUI(db.dataUI())
   def isTaskUI(db: DataBagUI): Boolean = isTaskUI(db.dataUI())
 
-  def isPrototypeUI(f: FactoryUI): Boolean = isPrototypeUI(f.dataUI)
-  def isTaskUI(f: FactoryUI): Boolean = isTaskUI(f.dataUI)
+  def isPrototypeUI(f: FactoryWithDataUI): Boolean = isPrototypeUI(f.dataUI)
+  def isTaskUI(f: FactoryWithDataUI): Boolean = isTaskUI(f.dataUI)
 
   def prototypeUI(db: DataBagUI): Option[PrototypeDataUI] = {
     db.dataUI() match {
@@ -88,7 +94,7 @@ object ClientService {
       case _                  ⇒ None
     }
   }
-  def +=(dataKey: String, factoryUI: FactoryUI) = uiFactories() += dataKey -> factoryUI
+  def +=(dataKey: String, factoryUI: FactoryWithDataUI) = uiFactories() += dataKey -> factoryUI
 
   def +=(dataBagUI: DataBagUI) = {
     if (!exists(dataBagUI))
@@ -101,9 +107,9 @@ object ClientService {
 
   def existsPrototype(name: String) = prototypeDataBagUIs.exists(_.name() == name)
 
-  def exists(dataBagUI: DataBagUI) = uiDataBags().exists(p ⇒ {
+  def exists(dataBagUI: DataBagUI) = uiDataBags().exists(p ⇒
     p.uuid == dataBagUI.uuid
-  })
+  )
 
   def taskData = taskDataBagUIs.map {
     _.dataUI().data
@@ -124,8 +130,8 @@ object ClientService {
 
   private def factoryUI(data: Data) = {
     uiFactories().get(data.getClass.getCanonicalName) match {
-      case Some(f: FactoryUI) ⇒ Try(f.dataUI)
-      case _                  ⇒ failure(data)
+      case Some(f: FactoryWithDataUI) ⇒ Try(f.dataUI)
+      case _                          ⇒ failure(data)
     }
   }
 
@@ -147,7 +153,7 @@ object ClientService {
 
   //Implicit converters for pluging handling convinience
 
-  implicit def stringVarToString(s: Var[String]): String = s()
+  implicit def tVarToT[T](s: Var[T]): T = s()
 
   implicit def taskDataUItoTaskData(dataUI: TaskDataUI): TaskData = dataUI.data
 
@@ -167,17 +173,17 @@ object ClientService {
 
   implicit def libConv(seq: Var[Seq[Var[String]]]): Seq[String] = seq().map { e ⇒ e() }
 
-  implicit def dataUIToFactoryUI(d: DataUI): Option[FactoryUI] = uiFactories().values.find {
+  implicit def dataUIToFactoryUI(d: DataUI): Option[FactoryWithDataUI] = uiFactories().values.find {
     _.dataUI == d
   }
 
-  implicit def dataBagUIToFactoryUI(p: Option[DataBagUI]): Option[FactoryUI] = p flatMap { dataBagUI ⇒
+  implicit def dataBagUIToFactoryUI(p: Option[DataBagUI]): Option[FactoryWithDataUI] = p flatMap { dataBagUI ⇒
     uiFactories().values.find { f ⇒
       f.dataUI.getClass == dataBagUI.dataUI().getClass
     }
   }
 
-  implicit def dataBagsUIFromFactoryUI(f: FactoryUI): Seq[DataBagUI] = f.dataUI match {
+  implicit def dataBagsUIFromFactoryUI(f: FactoryWithDataUI): Seq[DataBagUI] = f.dataUI match {
     case t if isTaskUI(t)      ⇒ taskDataBagUIs
     case p if isPrototypeUI(p) ⇒ prototypeDataBagUIs
     case _                     ⇒ dataBagUIs

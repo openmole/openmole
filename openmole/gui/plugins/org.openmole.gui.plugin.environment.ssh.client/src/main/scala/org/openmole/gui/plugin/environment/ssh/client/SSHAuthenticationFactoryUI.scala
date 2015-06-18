@@ -1,7 +1,11 @@
-package org.openmole.gui.plugin.task.statistic.client
+package org.openmole.gui.plugin.environment.ssh.client
+
+import scala.scalajs.js.annotation.JSExport
+import org.openmole.gui.ext.dataui.{PanelUI, FactoryWithPanelUI}
+
 
 /*
- * Copyright (C) 24/02/2015 // mathieu.leclaire@openmole.org
+ * Copyright (C) 16/06/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,13 +21,11 @@ package org.openmole.gui.plugin.task.statistic.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.dataui.FactoryWithDataUI
-import org.openmole.gui.client.core.dataui.TaskDataUI
-import scala.scalajs.js.annotation.JSExport
+@JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHAuthenticationFactoryUI")
+class SSHAuthenticationFactoryUI extends FactoryWithPanelUI{
 
-@JSExport("org.openmole.gui.plugin.task.statistic.client.StatisticTaskFactoryUI")
-class StatisticTaskFactoryUI extends FactoryWithDataUI {
-  type DATAUI = TaskDataUI
-  def dataUI = new StatisticTaskDataUI
-  val name = "Statistic"
+  val name = "SSH"
+
+  def panelUI: PanelUI = new SSHAuthenticationPanelUI
+
 }

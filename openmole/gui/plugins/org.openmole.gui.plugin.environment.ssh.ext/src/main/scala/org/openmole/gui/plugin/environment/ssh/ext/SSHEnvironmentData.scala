@@ -1,7 +1,7 @@
-package org.openmole.gui.plugin.task.statistic.client
+package org.openmole.gui.plugin.environment.ssh.ext
 
 /*
- * Copyright (C) 24/02/2015 // mathieu.leclaire@openmole.org
+ * Copyright (C) 16/06/2015 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,13 +17,14 @@ package org.openmole.gui.plugin.task.statistic.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.dataui.FactoryWithDataUI
-import org.openmole.gui.client.core.dataui.TaskDataUI
-import scala.scalajs.js.annotation.JSExport
+import org.openmole.gui.ext.data.EnvironmentData
 
-@JSExport("org.openmole.gui.plugin.task.statistic.client.StatisticTaskFactoryUI")
-class StatisticTaskFactoryUI extends FactoryWithDataUI {
-  type DATAUI = TaskDataUI
-  def dataUI = new StatisticTaskDataUI
-  val name = "Statistic"
+case class SSHEnvironmentData(val name: String = "",
+                              val login: String = "",
+                              val host: String = "",
+                              val nbSlots: Int = 1,
+                              val port: Int = 22,
+                              val dir: String = "/tmp/",
+                              val openMOLEMemory: Option[Int] = None,
+                              val threads: Option[Int] = None) extends EnvironmentData {
 }

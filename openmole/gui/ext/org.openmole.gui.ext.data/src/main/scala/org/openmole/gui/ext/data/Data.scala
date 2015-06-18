@@ -89,6 +89,14 @@ trait TaskData extends Data with InputData with OutputData
 
 trait EnvironmentData extends Data
 
+trait AuthenticationData extends Data
+
+sealed trait AuthenticationStyle
+
+case object Login extends AuthenticationStyle
+
+case object SSHKey extends AuthenticationStyle
+
 trait HookData extends Data with InputData with OutputData
 
 case class ErrorData(data: DataBag, error: String, stack: String)

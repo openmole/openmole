@@ -18,12 +18,12 @@ package org.openmole.gui.plugin.task.systemexec.client
  */
 
 import org.openmole.gui.client.core.dataui.TaskDataUI
-import org.openmole.gui.ext.dataui.FactoryUI
+import org.openmole.gui.ext.dataui.FactoryWithDataUI
 
 import scala.scalajs.js.annotation.JSExport
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskFactoryUI")
-sealed class SystemExecTaskFactoryUI extends FactoryUI {
+sealed class SystemExecTaskFactoryUI extends FactoryWithDataUI {
   type DATAUI = TaskDataUI
 
   def dataUI = new SystemExecTaskDataUI

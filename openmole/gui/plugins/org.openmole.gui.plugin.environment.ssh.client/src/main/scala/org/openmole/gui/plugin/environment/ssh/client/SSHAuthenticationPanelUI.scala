@@ -1,13 +1,17 @@
-package org.openmole.gui.plugin.task.groovy.client
+package org.openmole.gui.plugin.environment.ssh.client
 
-import org.openmole.gui.client.core.dataui.TaskDataUI
-import org.openmole.gui.ext.dataui.FactoryWithDataUI
+import org.openmole.gui.ext.dataui.PanelUI
+import org.openmole.gui.plugin.environment.ssh.ext.SSHAuthenticationData
 
 import scala.scalajs.js.annotation.JSExport
+import scalatags.JsDom.all._
+import org.openmole.gui.misc.js.{BootstrapTags=> bs}
+import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.all._
 import rx._
 
 /*
- * Copyright (C) 01/10/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 16/06/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -23,11 +27,15 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskFactoryUI")
-class GroovyTaskFactoryUI extends FactoryWithDataUI {
-  type DATAUI = TaskDataUI
+@JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHAuthenticationPanelUI")
+class SSHAuthenticationPanelUI extends PanelUI {
 
-  def dataUI = new GroovyTaskDataUI
+  @JSExport
+  val view = tags.div()
 
-  val name = "Groovy"
+  def save = {
+    //FIXME Send to the server the SSHenvData to be stored in the workspace
+    //new SSHAuthenticationData
+  }
+
 }
