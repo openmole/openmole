@@ -20,7 +20,9 @@ package org.openmole.plugin.sampling.csv
 import java.io.File
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.builder.SamplingBuilder
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.tool.csv.CSVToVariables
+import org.openmole.plugin.tool.file.{ ExpandedProvider, FileProvider }
 
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeMap
@@ -36,16 +38,16 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
 object CSVSampling {
-
   def apply(file: File) = new CSVSamplingBuilder(file)
+  def apply(directory: File, name: ExpandedString) = new CSVSamplingBuilder(FileProvider(directory, name))
 }
 
-abstract class CSVSampling(val file: File) extends Sampling with CSVToVariables {
+abstract class CSVSampling(val file: FileProvider) extends Sampling with CSVToVariables {
 
   override def prototypes =
     columns.map { case (_, p) ⇒ p } :::
       fileColumns.map { case (_, _, p) ⇒ p } ::: Nil
 
-  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] = toVariables(file, context)
+  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] = toVariables(file(context), context)
 
 }

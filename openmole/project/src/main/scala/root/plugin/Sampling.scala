@@ -10,7 +10,7 @@ object Sampling extends root.PluginDefaults {
 
   lazy val combine = OsgiProject("combine", imports = Seq("*")) dependsOn (Core.exception, Domain.modifier, Core.workflow, Tool.groovy)
 
-  lazy val csv = OsgiProject("csv", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Tool.csv) settings (
+  lazy val csv = OsgiProject("csv", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Tool.csv, Tool.fileTool) settings (
     libraryDependencies += Libraries.scalatest
   )
 
