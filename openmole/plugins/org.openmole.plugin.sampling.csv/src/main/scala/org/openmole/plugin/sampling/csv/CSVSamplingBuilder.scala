@@ -21,10 +21,11 @@ import java.io.File
 
 import org.openmole.core.workflow.builder.SamplingBuilder
 import org.openmole.core.workflow.data.Prototype
+import org.openmole.plugin.tool.file.FileProvider
 
 import scala.collection.mutable.ListBuffer
 
-class CSVSamplingBuilder(file: File) extends SamplingBuilder { builder ⇒
+class CSVSamplingBuilder(file: FileProvider) extends SamplingBuilder { builder ⇒
   private var _columns = new ListBuffer[(String, Prototype[_])]
   private var _fileColumns = new ListBuffer[(String, File, Prototype[File])]
   private var separator: Option[Char] = Some(',')
