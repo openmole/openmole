@@ -34,7 +34,7 @@ object Tool extends PluginDefaults {
 
   lazy val pattern = OsgiProject("pattern", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Core.dsl) settings (defaultActivator)
 
-  lazy val fileTool = OsgiProject("file", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Core.dsl) settings (defaultActivator)
+  lazy val fileTool = OsgiProject("file", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Core.dsl)
 
   val sftpserver = OsgiProject("sftpserver", imports = Seq("*")) dependsOn (Core.tools) settings (libraryDependencies += Libraries.sshd)
 
