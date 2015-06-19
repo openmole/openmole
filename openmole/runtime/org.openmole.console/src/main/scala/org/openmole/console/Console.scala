@@ -147,7 +147,6 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
   }
 
   def initialise(loop: ScalaREPL, variables: ConsoleVariables = ConsoleVariables()) = {
-    variables.inputDirectory.mkdirs()
     variables.outputDirectory.mkdirs()
     loop.beQuietDuring {
       loop.bind(commandsName, new Command)
