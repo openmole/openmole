@@ -89,7 +89,8 @@ object ApiImpl extends Api {
             Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
               case Success(ex) ⇒
                 Try(ex.start) match {
-                  case Failure(e)  ⇒ error(e)
+                  case Failure(e) ⇒
+                    error(e)
                   case Success(ex) ⇒ Execution.add(execId, StaticExecutionInfo(scriptData.scriptName, scriptData.script, ex.startTime.get), ex)
                 }
               case Failure(e) ⇒ error(e)

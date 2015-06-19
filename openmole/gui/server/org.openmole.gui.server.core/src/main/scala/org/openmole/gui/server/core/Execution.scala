@@ -48,20 +48,21 @@ object Execution {
   def executionInfo(key: ExecutionId): ExecutionInfo = get(key) match {
     case Some(Left((_, moleExecution: MoleExecution))) ⇒
       val d = moleExecution.duration.getOrElse(0L)
-      if (moleExecution.canceled) Canceled()
-      else if (moleExecution.finished) Finished()
-      else if (moleExecution.started) Running(
-        ready = moleExecution.ready,
-        running = moleExecution.running,
-        duration = d,
-        completed = moleExecution.completed,
-        environmentStates = moleExecution.environments.map {
-          case (c, e) ⇒
-            EnvironmentState(c.task.name, e.running, e.done, e.submitted, e.failed)
-        }.toSeq)
-      else moleExecution.exception match {
+      moleExecution.exception match {
         case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t))
-        case _                  ⇒ Unknown()
+        case _ ⇒
+          if (moleExecution.canceled) Canceled()
+          else if (moleExecution.finished) Finished()
+          else if (moleExecution.started) Running(
+            ready = moleExecution.ready,
+            running = moleExecution.running,
+            duration = d,
+            completed = moleExecution.completed,
+            environmentStates = moleExecution.environments.map {
+              case (c, e) ⇒
+                EnvironmentState(c.task.name, e.running, e.done, e.submitted, e.failed)
+            }.toSeq)
+          else Unknown()
       }
     case Some(Right(f: Failed)) ⇒ f
     case _                      ⇒ Failed(Error("Not found execution " + key))
