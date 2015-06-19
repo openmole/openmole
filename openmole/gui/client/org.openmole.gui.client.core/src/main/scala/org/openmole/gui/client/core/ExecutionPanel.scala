@@ -80,7 +80,7 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  case class ExecutionDetails(ratio: String, running: Long, error: Option[ExecError] = None, envStates: Seq[EnvironmentState] = Seq())
+  case class ExecutionDetails(ratio: String, running: Long, error: Option[ExecError] = None, envStates: Seq[EnvironmentState] = Seq(), outputs: String = "")
 
   lazy val executionTable = {
 
@@ -99,7 +99,7 @@ class ExecutionPanel extends ModalPanel {
             val details = executionInfo match {
               case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error))
               case f: Finished ⇒ ExecutionDetails("100", 0)
-              case r: Running  ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates)
+              case r: Running  ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates, outputs = r.lastOutputs)
               case c: Canceled ⇒ ExecutionDetails("0", 0)
               case u: Unknown  ⇒ ExecutionDetails("0", 0)
             }
@@ -107,6 +107,7 @@ class ExecutionPanel extends ModalPanel {
             val scriptID: VisibleID = "script"
             val envID: VisibleID = "env"
             val errorID: VisibleID = "error"
+            val outputStreamID: VisibleID = "outputStream"
 
             val scriptLink = expander.getLink(staticInfo.name, id.id, scriptID)
             val envLink = expander.getGlyph(glyph_stats, "Env", id.id, envID)
@@ -114,6 +115,7 @@ class ExecutionPanel extends ModalPanel {
               case f: Failed ⇒ expander.getLink(executionInfo.state, id.id, errorID)
               case _         ⇒ tags.span(executionInfo.state)
             }
+            val outputLink = expander.getGlyph(glyph_list, "", id.id, outputStreamID)
 
             val hiddenMap = Map(
               scriptID -> tags.div(bs.textArea(20)(staticInfo.script)),
@@ -134,7 +136,8 @@ class ExecutionPanel extends ModalPanel {
                   )
                 }
               ),
-              errorID -> tags.div(bs.textArea(20)(new String(details.error.map { _.stackTrace }.getOrElse(""))))
+              errorID -> tags.div(bs.textArea(20)(new String(details.error.map { _.stackTrace }.getOrElse("")))),
+              outputStreamID -> tags.div(bs.textArea(20)(details.outputs))
             )
 
             Seq(bs.tr(row)(
@@ -146,7 +149,7 @@ class ExecutionPanel extends ModalPanel {
               bs.td(col_md_1)(duration),
               bs.td(col_md_1)(stateLink)(`class` := executionInfo.state + "State"),
               bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
-              bs.td(col_md_1)(bs.glyphSpan(bs.glyph_list, () ⇒ println("output"))),
+              bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink),
               bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
                 allExecutionStates
               })(`class` := "cancelExecution")),

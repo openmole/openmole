@@ -13,6 +13,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
 import org.openmole.core.workflow.puzzle.Puzzle
+import org.openmole.tool.stream.StringBuilderOutputStream
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -32,6 +33,8 @@ import org.openmole.core.workflow.puzzle.Puzzle
  */
 
 object ApiImpl extends Api {
+
+  val execution = new Execution
 
   // FILES
   def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean = new File(treeNodeData.canonicalPath, directoryName).mkdirs
@@ -58,13 +61,13 @@ object ApiImpl extends Api {
 
   // EXECUTIONS
 
-  def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)] = Execution.allStates
+  def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)] = execution.allStates
 
-  def allSaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = Execution.allStaticInfos
+  def allSaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = execution.allStaticInfos
 
-  def cancelExecution(id: ExecutionId): Unit = Execution.cancel(id)
+  def cancelExecution(id: ExecutionId): Unit = execution.cancel(id)
 
-  def removeExecution(id: ExecutionId): Unit = Execution.remove(id)
+  def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
   def runScript(scriptData: ScriptData): Unit = {
     val id = getUUID
@@ -76,22 +79,22 @@ object ApiImpl extends Api {
     ))
 
     val execId = ExecutionId(id)
-    def error(t: Throwable): Unit = Execution.add(execId, Failed(ErrorBuilder(t)))
-    def message(message: String): Unit = Execution.add(execId, Failed(Error(message)))
+    def error(t: Throwable): Unit = execution.add(execId, Failed(ErrorBuilder(t)))
+    def message(message: String): Unit = execution.add(execId, Failed(Error(message)))
 
     Try(repl.eval(scriptData.script)) match {
       case Failure(e) ⇒ error(e)
       case Success(o) ⇒
         o match {
           case puzzle: Puzzle ⇒
-            val output = new File(projectsPath, scriptData.output)
-            val outputStream = new PrintStream(output.bufferedOutputStream())
+            val stringBuilder = new StringBuilder
+            val outputStream = new PrintStream(new StringBuilderOutputStream(stringBuilder))
             Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
               case Success(ex) ⇒
                 Try(ex.start) match {
                   case Failure(e) ⇒
                     error(e)
-                  case Success(ex) ⇒ Execution.add(execId, StaticExecutionInfo(scriptData.scriptName, scriptData.script, ex.startTime.get), ex)
+                  case Success(ex) ⇒ execution.add(execId, StaticExecutionInfo(scriptData.scriptName, scriptData.script, ex.startTime.get), ex, stringBuilder)
                 }
               case Failure(e) ⇒ error(e)
             }

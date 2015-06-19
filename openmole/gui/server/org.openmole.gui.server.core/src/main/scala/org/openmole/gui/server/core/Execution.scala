@@ -17,22 +17,24 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.OutputStream
+
 import org.openmole.tool.collection._
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.gui.ext.data._
 
-object Execution {
+class Execution {
 
-  private lazy val moles = DataHandler[ExecutionId, Either[(StaticExecutionInfo, MoleExecution), Failed]]()
+  private lazy val moles = DataHandler[ExecutionId, Either[(StaticExecutionInfo, MoleExecution, StringBuilder), Failed]]()
 
-  def add(key: ExecutionId, staticInfo: StaticExecutionInfo, moleExecution: MoleExecution) = moles.add(key, Left((staticInfo, moleExecution)))
+  def add(key: ExecutionId, staticInfo: StaticExecutionInfo, moleExecution: MoleExecution, stringBuilder: StringBuilder) = moles.add(key, Left((staticInfo, moleExecution, stringBuilder)))
 
   def add(key: ExecutionId, error: Failed) = moles.add(key, Right(error))
 
   def cancel(key: ExecutionId) = get(key) match {
-    case Some(Left((_, mE: MoleExecution))) ⇒ mE.cancel
-    case _                                  ⇒
+    case Some(Left((_, mE: MoleExecution, _))) ⇒ mE.cancel
+    case _                                     ⇒
   }
 
   def remove(key: ExecutionId) = {
@@ -41,12 +43,12 @@ object Execution {
   }
 
   def staticInfo(key: ExecutionId): StaticExecutionInfo = get(key) match {
-    case Some(Left((staticInfo, _))) ⇒ staticInfo
-    case _                           ⇒ StaticExecutionInfo()
+    case Some(Left((staticInfo, _, _))) ⇒ staticInfo
+    case _                              ⇒ StaticExecutionInfo()
   }
 
   def executionInfo(key: ExecutionId): ExecutionInfo = get(key) match {
-    case Some(Left((_, moleExecution: MoleExecution))) ⇒
+    case Some(Left((_, moleExecution: MoleExecution, stringBuilder: StringBuilder))) ⇒
       val d = moleExecution.duration.getOrElse(0L)
       moleExecution.exception match {
         case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t))
@@ -61,7 +63,9 @@ object Execution {
             environmentStates = moleExecution.environments.map {
               case (c, e) ⇒
                 EnvironmentState(c.task.name, e.running, e.done, e.submitted, e.failed)
-            }.toSeq)
+            }.toSeq,
+            lastOutputs = stringBuilder.toString
+          )
           else Unknown()
       }
     case Some(Right(f: Failed)) ⇒ f
@@ -76,5 +80,5 @@ object Execution {
     key -> staticInfo(key)
   }
 
-  private def get(key: ExecutionId): Option[Either[(StaticExecutionInfo, MoleExecution), Failed]] = moles.get(key)
+  private def get(key: ExecutionId): Option[Either[(StaticExecutionInfo, MoleExecution, StringBuilder), Failed]] = moles.get(key)
 }

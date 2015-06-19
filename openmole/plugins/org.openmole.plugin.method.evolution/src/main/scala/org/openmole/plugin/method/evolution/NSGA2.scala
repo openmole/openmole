@@ -35,7 +35,7 @@ object NSGA2 {
     new NSGA2 {
       val inputs = _inputs
       val objectives = _objectives
-      val epsilons = _epsilons.getOrElse(objectives.map(_ => 0.0))
+      val epsilons = _epsilons.getOrElse(objectives.map(_ ⇒ 0.0))
 
       val stateType = termination.stateType
       val populationType = PrototypeType[Population[G, P, F]]
