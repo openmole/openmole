@@ -105,6 +105,12 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
             case _ ⇒
               val offset = pos.start - linesLength
 
+              println("POSstart " + pos.start)
+              println("POSpoint " + pos.point)
+              println("POSend " + pos.end)
+
+              println("XX " + pos.finalPosition.start)
+              println("POS " + new String(pos.source.content))
               ErrorMessage(
                 s"""|$msg
                     |${compiled(pos.line - 1)}
@@ -134,7 +140,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
     override lazy val classLoader =
       if (Activator.osgi) {
-        new scala.tools.nsc.util.AbstractFileClassLoader(
+        new scala.reflect.internal.util.AbstractFileClassLoader(
           replOutput.dir,
           new CompositeClassLoader(
             priorityBundles.map(_.classLoader) ++
