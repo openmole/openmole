@@ -26,11 +26,9 @@ import javax.servlet.ServletContext
 import org.scalatra._
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 
-class GUIServer(port: Option[Int], webapp: File) {
-  val p = port getOrElse 8080
+class GUIServer(port: Int, webapp: File) {
 
-  val server = new Server(p)
-
+  val server = new Server(port)
   val context = new WebAppContext()
 
   context.setContextPath("/")

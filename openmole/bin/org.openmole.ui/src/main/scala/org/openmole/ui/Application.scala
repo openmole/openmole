@@ -175,7 +175,8 @@ class Application extends IApplication {
           Some(console.run(ConsoleVariables(args = config.args)))
         case GUIMode ⇒
           BootstrapJS.init(config.optimizedJS)
-          val server = new GUIServer(config.serverPort, BootstrapJS.webapp)
+          val port = config.serverPort.getOrElse(8080)
+          val server = new GUIServer(port, BootstrapJS.webapp)
           server.start()
           None
       }
