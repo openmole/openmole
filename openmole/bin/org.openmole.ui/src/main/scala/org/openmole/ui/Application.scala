@@ -52,7 +52,6 @@ class Application extends IApplication {
       |_|
 """
 
-  // since CTRL-C is disabled in the Console
   lazy val consoleUsage = "(Type :q or :quit to quit)"
 
   override def start(context: IApplicationContext) = {
