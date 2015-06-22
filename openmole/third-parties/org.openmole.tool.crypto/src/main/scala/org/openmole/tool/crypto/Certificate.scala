@@ -31,7 +31,7 @@ import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder
 import org.bouncycastle.operator.{ DefaultDigestAlgorithmIdentifierFinder, DefaultSignatureAlgorithmIdentifierFinder }
 
 object Certificate {
-  def loadOrGenerate(file: File, ksPassword: String, hostName: Option[String]) = {
+  def loadOrGenerate(file: File, ksPassword: String, hostName: Option[String] = Some("OpenMOLE")) = {
     val ks = KeyStore.getInstance(KeyStore.getDefaultType)
     if (file.exists()) {
       val fis = new FileInputStream(file)

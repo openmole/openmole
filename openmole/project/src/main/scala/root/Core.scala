@@ -45,7 +45,7 @@ object Core extends Defaults {
 
   val workspace = OsgiProject("workspace", imports = Seq("*")) settings
     (includeOsgi, libraryDependencies ++= Seq(jasypt, xstream, apacheConfig, math)) dependsOn
-    (exception, event, tools, replication)
+    (exception, event, tools, replication, openmoleCrypto)
 
   val fileDeleter = OsgiProject("filedeleter", imports = Seq("*")) settings (includeOsgi) dependsOn (tools)
 

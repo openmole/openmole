@@ -27,6 +27,7 @@ import org.jasypt.util.text._
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.replication.DBServerInfo
+import org.openmole.tool.crypto.Certificate
 import org.openmole.tool.file._
 import org.openmole.core.tools.service._
 import Random._
@@ -280,5 +281,9 @@ class Workspace(val location: File) {
     )
 
   lazy val authentications = new Persistent(persistentDir / Workspace.authenticationsLocation) with Authentication
+
+  lazy val keyStoreLocation = file("OMKeystore")
+  lazy val keyStorePassword = "openmole"
+  lazy val keyStore = Certificate.loadOrGenerate(keyStoreLocation, keyStorePassword)
 
 }
