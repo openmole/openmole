@@ -17,7 +17,9 @@
 
 package org.openmole.ui
 
+import java.awt.Desktop
 import java.io.File
+import java.net.URI
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
 import org.openmole.core.exception.UserBadDataError
@@ -178,6 +180,8 @@ class Application extends IApplication {
           val port = config.serverPort.getOrElse(8080)
           val server = new GUIServer(port, BootstrapJS.webapp)
           server.start()
+          if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(s"https://localhost:$port"))
+          server.join()
           None
       }
 

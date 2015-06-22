@@ -53,14 +53,8 @@ class GUIServer(port: Int, webapp: File) {
 
   server.setHandler(context)
 
-  def start() = {
-    server.start
-    server.join
-  }
-
-  def end() {
-    server.stop
-    server.join
-  }
+  def start() = server.start
+  def join() = server.join
+  def end() = server.stop
 
 }
