@@ -17,6 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.misc.js.BootstrapTags.ScrollableTextArea.BottomScroll
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLDivElement
@@ -82,8 +83,9 @@ class ExecutionPanel extends ModalPanel {
 
   case class ExecutionDetails(ratio: String, running: Long, error: Option[ExecError] = None, envStates: Seq[EnvironmentState] = Seq(), outputs: String = "")
 
-  lazy val executionTable = {
+  val outputTextAreas: Var[Map[ExecutionId, BSTextArea]] = Var(Map())
 
+  lazy val executionTable = {
     bs.table(striped)(
       thead,
       Rx {
@@ -137,7 +139,19 @@ class ExecutionPanel extends ModalPanel {
                 }
               ),
               errorID -> tags.div(bs.textArea(20)(new String(details.error.map { _.stackTrace }.getOrElse("")))),
-              outputStreamID -> tags.div(bs.textArea(20)(details.outputs))
+              outputStreamID -> {
+                val tArea = outputTextAreas().get(id) match {
+                  case Some(t: BSTextArea) ⇒
+                    t.append(details.outputs)
+                    t
+                  case None ⇒
+                    println("NONE")
+                    val newTA = new BSTextArea(20, details.outputs, BottomScroll())
+                    outputTextAreas() = outputTextAreas() + (id -> newTA)
+                    newTA
+                }
+                tArea.get
+              }
             )
 
             Seq(bs.tr(row)(

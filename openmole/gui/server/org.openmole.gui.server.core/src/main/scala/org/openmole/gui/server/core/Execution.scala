@@ -55,17 +55,21 @@ class Execution {
         case _ ⇒
           if (moleExecution.canceled) Canceled()
           else if (moleExecution.finished) Finished()
-          else if (moleExecution.started) Running(
-            ready = moleExecution.ready,
-            running = moleExecution.running,
-            duration = d,
-            completed = moleExecution.completed,
-            environmentStates = moleExecution.environments.map {
-              case (c, e) ⇒
-                EnvironmentState(c.task.name, e.running, e.done, e.submitted, e.failed)
-            }.toSeq,
-            lastOutputs = stringBuilder.toString
-          )
+          else if (moleExecution.started) {
+            val out = stringBuilder.toString
+            stringBuilder.clear
+            Running(
+              ready = moleExecution.ready,
+              running = moleExecution.running,
+              duration = d,
+              completed = moleExecution.completed,
+              environmentStates = moleExecution.environments.map {
+                case (c, e) ⇒
+                  EnvironmentState(c.task.name, e.running, e.done, e.submitted, e.failed)
+              }.toSeq,
+              lastOutputs = out
+            )
+          }
           else Unknown()
       }
     case Some(Right(f: Failed)) ⇒ f
