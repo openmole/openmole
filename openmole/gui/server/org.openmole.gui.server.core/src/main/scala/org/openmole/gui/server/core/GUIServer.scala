@@ -20,7 +20,8 @@ package org.openmole.gui.server.core
 import java.io.File
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.DefaultServlet
-import org.eclipse.jetty.webapp.WebAppContext
+import org.eclipse.jetty.webapp._
+import org.openmole.core.workspace.Workspace
 import org.scalatra.servlet.ScalatraListener
 import javax.servlet.ServletContext
 import org.scalatra._
@@ -28,9 +29,23 @@ import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 
 class GUIServer(port: Int, webapp: File) {
 
-  val server = new Server(port)
-  val context = new WebAppContext()
+  val server = new Server()
 
+  val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
+  val ks = Workspace.keyStore
+  contextFactory.setKeyStore(ks)
+  contextFactory.setKeyStorePassword(Workspace.keyStorePassword)
+  contextFactory.setKeyManagerPassword(Workspace.keyStorePassword)
+  contextFactory.setTrustStore(ks)
+  contextFactory.setTrustStorePassword(Workspace.keyStorePassword)
+
+  server.addConnector(
+    new org.eclipse.jetty.server.ssl.SslSelectChannelConnector(contextFactory) {
+      setPort(port)
+    }
+  )
+
+  val context = new WebAppContext()
   context.setContextPath("/")
   context.setResourceBase(webapp.getAbsolutePath)
   context.setClassLoader(classOf[GUIServer].getClassLoader)

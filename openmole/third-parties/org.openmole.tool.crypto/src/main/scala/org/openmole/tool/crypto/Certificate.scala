@@ -29,8 +29,12 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
 import org.bouncycastle.crypto.util.PrivateKeyFactory
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder
 import org.bouncycastle.operator.{ DefaultDigestAlgorithmIdentifierFinder, DefaultSignatureAlgorithmIdentifierFinder }
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 
 object Certificate {
+
+  //Security.addProvider(new BouncyCastleProvider())
+
   def loadOrGenerate(file: File, ksPassword: String, hostName: Option[String] = Some("OpenMOLE")) = {
     val ks = KeyStore.getInstance(KeyStore.getDefaultType)
     if (file.exists()) {
@@ -42,7 +46,7 @@ object Certificate {
       ks.load(null, "".toCharArray)
 
       val kpg = KeyPairGenerator.getInstance("RSA")
-      kpg.initialize(1024, new SecureRandom())
+      kpg.initialize(2048, new SecureRandom())
       val kp = kpg.generateKeyPair()
 
       val serialNumber = BigInteger.valueOf(System.currentTimeMillis())
@@ -58,13 +62,13 @@ object Certificate {
       val subjectAltName = new GeneralNames(new GeneralName(GeneralName.rfc822Name, "127.0.0.1"))
       certificateBuilder.addExtension(altNameExtension, false, subjectAltName)
 
-      val sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA")
+      val sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withRSA")
       val digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId)
       val privateKeyInfo = PrivateKeyInfo.getInstance(kp.getPrivate.getEncoded)
       val signer = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(PrivateKeyFactory.createKey(privateKeyInfo))
       val holder = certificateBuilder.build(signer)
 
-      val cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(holder)
+      val cert = new JcaX509CertificateConverter().setProvider(new BouncyCastleProvider()).getCertificate(holder)
       ks.setKeyEntry(hostName getOrElse "", kp.getPrivate, ksPassword.toCharArray, Array[java.security.cert.Certificate](cert))
 
       val fos = new FileOutputStream(file)
