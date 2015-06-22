@@ -21,13 +21,17 @@ import java.io.File
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp._
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.tools.io.Network
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.scalatra.servlet.ScalatraListener
 import javax.servlet.ServletContext
 import org.scalatra._
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 
 object GUIServer {
+  val port = new ConfigurationLocation("GUIServer", "Port")
+  Workspace += (port, Network.freePort.toString)
+
   lazy val lockFile = {
     val file = Workspace.file("GUI.lock")
     file.createNewFile
