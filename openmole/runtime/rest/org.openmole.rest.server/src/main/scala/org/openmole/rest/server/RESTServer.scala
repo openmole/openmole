@@ -12,6 +12,7 @@ import org.openmole.core.console.ScalaREPL
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.task.PluginSet
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.tool.crypto.Certificate
 import org.scalatra.ScalatraBase
 import java.security.{ Security, SecureRandom, KeyPairGenerator, KeyStore }
 import java.io.{ FileOutputStream, FileInputStream }
@@ -70,17 +71,12 @@ class RESTServer(port: Option[Int], sslPort: Option[Int], hostName: Option[Strin
       else new Server()
 
     val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
-
-    val ksLoc = Workspace.file("OMServerKeystore")
-    val ksPassword = "openmole"
-
-    val ks = Certificate.loadOrGenerate(ksLoc, ksPassword, hostName)
-
+    val ks = Workspace.keyStore
     contextFactory.setKeyStore(ks)
-    contextFactory.setKeyStorePassword(ksPassword)
-    contextFactory.setKeyManagerPassword(ksPassword)
+    contextFactory.setKeyStorePassword(Workspace.keyStorePassword)
+    contextFactory.setKeyManagerPassword(Workspace.keyStorePassword)
     contextFactory.setTrustStore(ks)
-    contextFactory.setTrustStorePassword(ksPassword)
+    contextFactory.setTrustStorePassword(Workspace.keyStorePassword)
 
     logger.info(s"binding https to port $sslP")
 

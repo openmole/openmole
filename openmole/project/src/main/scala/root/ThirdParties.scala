@@ -17,6 +17,9 @@ object ThirdParties extends Defaults {
   lazy val openmoleCollection = OsgiProject("org.openmole.tool.collection", imports = Seq("*")) settings (bundleType := Set("core")) settings (
     libraryDependencies += Libraries.scalaLang
   )
+  lazy val openmoleCrypto = OsgiProject("org.openmole.tool.crypto", imports = Seq("*")) settings (bundleType := Set("core")) settings (
+    libraryDependencies += Libraries.bouncyCastle
+  )
 
   lazy val toolxitBibtexMacros = OsgiProject("toolxit.bibtex.macros", "toolxit.bibtex/macros") settings (
     libraryDependencies += Libraries.scalaLang

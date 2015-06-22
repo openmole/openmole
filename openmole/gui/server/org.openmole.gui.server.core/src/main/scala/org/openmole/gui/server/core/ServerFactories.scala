@@ -36,7 +36,6 @@ object ServerFactories {
   }
 
   def add(dataClass: Class[_], factory: Factory, factoryUI: FactoryWithDataUI) = instance.factories.synchronized {
-    println("Add server " + dataClass)
     instance.factories += dataClass -> factory
     instance.factoriesUI += dataClass.getName -> factoryUI
   }
