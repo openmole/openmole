@@ -18,7 +18,7 @@
 package org.openmole.ui
 
 import java.awt.Desktop
-import java.io.File
+import java.io.{ FileOutputStream, File }
 import java.net.URI
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
@@ -34,6 +34,7 @@ import org.openmole.rest.server.RESTServer
 import annotation.tailrec
 import org.openmole.gui.server.core._
 import org.openmole.console._
+import org.openmole.tool.file._
 
 object Application extends Logger
 
@@ -176,12 +177,23 @@ class Application extends IApplication {
           val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
           Some(console.run(ConsoleVariables(args = config.args)))
         case GUIMode ⇒
-          BootstrapJS.init(config.optimizedJS)
-          val port = config.serverPort.getOrElse(8080)
-          val server = new GUIServer(port, BootstrapJS.webapp)
-          server.start()
-          if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(s"https://localhost:$port"))
-          server.join()
+          def browse(url: String) =
+            if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
+
+          val lock = new FileOutputStream(GUIServer.lockFile).getChannel.tryLock
+          if (lock != null)
+            try {
+              val port = config.serverPort.getOrElse(8080)
+              val url = s"https://localhost:$port"
+              GUIServer.urlFile.content = url
+              BootstrapJS.init(config.optimizedJS)
+              val server = new GUIServer(port, BootstrapJS.webapp)
+              server.start()
+              browse(url)
+              server.join()
+            }
+            finally lock.release()
+          else browse(GUIServer.urlFile.content)
           None
       }
 

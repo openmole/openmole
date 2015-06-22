@@ -27,6 +27,15 @@ import javax.servlet.ServletContext
 import org.scalatra._
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 
+object GUIServer {
+  lazy val lockFile = {
+    val file = Workspace.file("GUI.lock")
+    file.createNewFile
+    file
+  }
+  lazy val urlFile = Workspace.file("GUI.url")
+}
+
 class GUIServer(port: Int, webapp: File) {
 
   val server = new Server()
