@@ -12,6 +12,7 @@ import org.openmole.core.console.ScalaREPL
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.task.PluginSet
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.tool.crypto.Certificate
 import org.scalatra.ScalatraBase
 import java.security.{ Security, SecureRandom, KeyPairGenerator, KeyStore }
 import java.io.{ FileOutputStream, FileInputStream }
