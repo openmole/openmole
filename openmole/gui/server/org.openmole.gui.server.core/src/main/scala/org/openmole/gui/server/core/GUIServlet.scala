@@ -63,7 +63,7 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
     jsSrc
   }
 
-  get("/") {
+  get("/gui") {
     contentType = "text/html"
     tags.html(
       tags.head(
@@ -86,7 +86,7 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
     )
   }
 
-  get("/script") {
+  get("/") {
     contentType = "text/html"
     tags.html(
       tags.head(
