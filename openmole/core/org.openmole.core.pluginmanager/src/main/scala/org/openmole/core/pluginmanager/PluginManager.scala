@@ -24,43 +24,49 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.pluginmanager.internal.Activator
 import org.openmole.tool.file._
 import org.openmole.core.tools.service.Logger
-import org.osgi.framework.Bundle
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
+import org.osgi.framework._
+
+import scala.collection.immutable.{ HashSet, HashMap }
 import scala.collection.mutable.ListBuffer
-import org.osgi.framework.BundleEvent
-import org.osgi.framework.BundleListener
+
 import scala.collection.JavaConversions._
 import util.Try
+import scala.concurrent.stm._
 
 import scala.util.{ Failure, Success, Try }
+
+case class BundlesInfo(
+  files: Map[File, (Long, Long)],
+  resolvedDirectDependencies: Map[Long, Set[Long]],
+  providedDependencies: Set[Long])
 
 object PluginManager extends Logger {
 
   import Log._
 
-  private var files = Map.empty[File, (Long, Long)]
-  private var resolvedDirectDependencies = HashMap.empty[Long, HashSet[Long]]
-  private var resolvedPluginDependenciesCache = HashMap.empty[Long, Iterable[Long]]
-  private var providedDependencies = Set.empty[Long]
+  private val bundlesInfo = Ref(None: Option[BundlesInfo])
+  private val resolvedPluginDependenciesCache = TMap[Long, Iterable[Long]]()
 
-  updateDependencies
-
-  Activator.contextOrException.addBundleListener(new BundleListener {
-    override def bundleChanged(event: BundleEvent) = {
-      val b = event.getBundle
-      if (event.getType == BundleEvent.RESOLVED || event.getType == BundleEvent.UNRESOLVED || event.getType == BundleEvent.UPDATED) updateDependencies
+  Activator.contextOrException.addBundleListener(
+    new BundleListener {
+      override def bundleChanged(event: BundleEvent) = {
+        val b = event.getBundle
+        if (event.getType == BundleEvent.RESOLVED || event.getType == BundleEvent.UNRESOLVED || event.getType == BundleEvent.UPDATED) atomic { implicit ctx ⇒
+          bundlesInfo() = None
+          resolvedPluginDependenciesCache.clear()
+        }
+      }
     }
-  })
+  )
 
   def bundles = Activator.contextOrException.getBundles.filter(!_.isSystem).toSeq
-  def bundleFiles = files.keys
+  def bundleFiles = infos.files.keys
   def dependencies(file: File): Option[Iterable[File]] =
-    files.get(file).map { case (id, _) ⇒ allPluginDependencies(id).map { l ⇒ Activator.contextOrException.getBundle(l).file } }
+    infos.files.get(file).map { case (id, _) ⇒ allPluginDependencies(id).map { l ⇒ Activator.contextOrException.getBundle(l).file } }
 
   def isClassProvidedByAPlugin(c: Class[_]) = {
     val b = Activator.packageAdmin.getBundle(c)
-    if (b != null) !providedDependencies.contains(b.getBundleId)
+    if (b != null) !infos.providedDependencies.contains(b.getBundleId)
     else false
   }
 
@@ -75,13 +81,6 @@ object PluginManager extends Logger {
 
   def pluginsForClass(c: Class[_]): Iterable[File] = synchronized {
     allPluginDependencies(bundleForClass(c).getBundleId).map { l ⇒ Activator.contextOrException.getBundle(l).file }
-  }
-
-  def unload(file: File) = synchronized {
-    bundle(file) match {
-      case Some(b) ⇒ b.uninstall
-      case None    ⇒
-    }
   }
 
   def allDepending(file: File): Iterable[File] = synchronized {
@@ -136,7 +135,7 @@ object PluginManager extends Logger {
   }
 
   def loadIfNotAlreadyLoaded(plugins: Iterable[File]) = synchronized {
-    val bundles = plugins.filterNot(f ⇒ files.contains(f)).map(installBundle).toList
+    val bundles = plugins.filterNot(f ⇒ infos.files.contains(f)).map(installBundle).toList
     bundles.foreach { _.start }
   }
 
@@ -145,9 +144,30 @@ object PluginManager extends Logger {
   def loadDir(path: File): Unit =
     if (path.exists && path.isDirectory) load(plugins(path))
 
-  def bundle(file: File) = files.get(file.getCanonicalFile).map { id ⇒ Activator.contextOrException.getBundle(id._1) }
+  def bundle(file: File) = infos.files.get(file.getCanonicalFile).map { id ⇒ Activator.contextOrException.getBundle(id._1) }
 
-  private def dependencies(bundles: Iterable[Long]): Iterable[Long] = synchronized {
+  private def allDependencies(b: Long) = synchronized { dependencies(List(b)) }
+
+  private def allPluginDependencies(b: Long) = atomic { implicit ctx ⇒
+    resolvedPluginDependenciesCache.getOrElseUpdate(b, dependencies(List(b)).filter(b ⇒ !infos.providedDependencies.contains(b)))
+  }
+
+  private def installBundle(f: File) =
+    try {
+      val bundle = Activator.contextOrException.installBundle(f.toURI.toString)
+      bundlesInfo.single() = None
+      bundle
+    }
+    catch {
+      case t: Throwable ⇒ throw new InternalProcessingError(t, "Installing bundle " + f)
+    }
+
+  def startAll = Activator.contextOrException.getBundles.foreach(_.start)
+
+  private def dependencies(bundles: Iterable[Long]): Iterable[Long] =
+    dependencies(bundles, infos.resolvedDirectDependencies)
+
+  private def dependencies(bundles: Iterable[Long], resolvedDirectDependencies: Map[Long, Set[Long]]): Iterable[Long] = {
     val ret = new ListBuffer[Long]
     var toProceed = new ListBuffer[Long] ++ bundles
 
@@ -160,52 +180,30 @@ object PluginManager extends Logger {
     ret.distinct
   }
 
-  private def allDependencies(b: Long) = synchronized { dependencies(List(b)) }
-
-  private def allPluginDependencies(b: Long) = synchronized {
-    resolvedPluginDependenciesCache.getOrElseUpdate(b, dependencies(List(b)).filter(b ⇒ !providedDependencies.contains(b)))
-  }
-
-  private def installBundle(f: File) = try {
-    logger.fine(s"Install bundle $f")
-
-    if (!f.exists) throw new UserBadDataError("Bundle file " + f + " doesn't exists.")
-    val file = f.getCanonicalFile
-
-    files.get(file) match {
+  private def infos: BundlesInfo = atomic { implicit ctx ⇒
+    bundlesInfo() match {
       case None ⇒
-        val ret = Activator.contextOrException.installBundle(file.toURI.toString)
-        files += file -> ((ret.getBundleId, file.lastModification))
-        ret
-      case Some(bundleId) ⇒
-        val bundle = Activator.contextOrException.getBundle(bundleId._1)
-        //FileService.invalidate(bundle, file)
-        if (file.lastModification != bundleId._2) {
-          val is = new FileInputStream(f)
-          try bundle.update(is)
-          finally is.close
+        val resolvedDirectDependencies: Map[Long, Set[Long]] = {
+          import collection.mutable.{ HashMap ⇒ MHashMap, HashSet ⇒ MHashSet }
+
+          val dependencies = new MHashMap[Long, MHashSet[Long]]
+          bundles.foreach {
+            b ⇒
+              dependingBundles(b).foreach {
+                db ⇒ dependencies.getOrElseUpdate(db.getBundleId, new MHashSet[Long]) += b.getBundleId
+              }
+          }
+          dependencies.map { case (k, v) ⇒ k -> v.toSet }.toMap
         }
-        bundle
+
+        val providedDependencies = dependencies(bundles.filter(b ⇒ b.isProvided).map { _.getBundleId }, resolvedDirectDependencies).toSet
+        val files = bundles.map(b ⇒ b.file.getCanonicalFile -> ((b.getBundleId, b.file.lastModification))).toMap
+
+        val info = BundlesInfo(files, resolvedDirectDependencies, providedDependencies)
+        bundlesInfo() = Some(info)
+        info
+      case Some(bundlesInfo) ⇒ bundlesInfo
     }
-  }
-  catch {
-    case t: Throwable ⇒ throw new InternalProcessingError(t, "Installing bundle " + f)
-  }
-
-  def startAll = Activator.contextOrException.getBundles.foreach(_.start)
-
-  private def updateDependencies = synchronized {
-    resolvedDirectDependencies = new HashMap[Long, HashSet[Long]]
-    bundles.foreach {
-      b ⇒
-        dependingBundles(b).foreach {
-          db ⇒ resolvedDirectDependencies.getOrElseUpdate(db.getBundleId, new HashSet[Long]) += b.getBundleId
-        }
-    }
-
-    resolvedPluginDependenciesCache = new HashMap[Long, Iterable[Long]]
-    providedDependencies = dependencies(bundles.filter(b ⇒ b.isProvided).map { _.getBundleId }).toSet
-    files = bundles.map(b ⇒ b.file.getCanonicalFile -> ((b.getBundleId, b.file.lastModification))).toMap
   }
 
   private def allDependingBundles(b: Bundle): Iterable[Bundle] =
