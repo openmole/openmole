@@ -77,7 +77,7 @@ class Application extends IApplication {
       serverPort: Option[Int] = None,
       serverSSLPort: Option[Int] = None,
       loggerLevel: Option[String] = None,
-      optimizedJS: Boolean = false,
+      unoptimizedJS: Boolean = false,
       args: List[String] = Nil)
 
     def takeArg(args: List[String]) =
@@ -120,7 +120,7 @@ class Application extends IApplication {
         case "-ssp" :: tail                         ⇒ parse(tail.tail, c.copy(serverSSLPort = Some(tail.head.toInt)))
         case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
         case "--logger-level" :: tail               ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
-        case "--optimizedJS" :: tail                ⇒ parse(tail, c.copy(optimizedJS = true))
+        case "--unoptimizedJS" :: tail              ⇒ parse(tail, c.copy(unoptimizedJS = true))
         case "--" :: tail                           ⇒ parse(Nil, c.copy(args = tail))
         case s :: tail                              ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                    ⇒ c
@@ -186,7 +186,7 @@ class Application extends IApplication {
               val port = config.serverPort.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
               val url = s"https://localhost:$port?#"
               GUIServer.urlFile.content = url
-              BootstrapJS.init(config.optimizedJS)
+              BootstrapJS.init(!config.unoptimizedJS)
               val server = new GUIServer(port, BootstrapJS.webapp)
               server.start()
               browse(url)
