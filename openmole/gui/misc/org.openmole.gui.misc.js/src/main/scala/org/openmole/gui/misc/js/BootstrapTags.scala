@@ -17,14 +17,14 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.scalajs.dom.html.{TextArea, Input}
+import org.scalajs.dom.html.{ TextArea, Input }
 import org.scalajs.dom.raw
 import org.scalajs.dom.raw._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js
 import scalatags.JsDom.TypedTag
 
-import scalatags.JsDom.{tags ⇒ tags}
+import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 
 import org.scalajs.jquery.jQuery
@@ -68,7 +68,7 @@ object BootstrapTags {
       false
     }
     )(content).render)(
-        extraRenderPair: _*)
+      extraRenderPair: _*)
 
   }
 
