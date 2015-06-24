@@ -236,6 +236,7 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
               onsubmit := { () ⇒
                 if (editionState()) save
                 else if (rows() == 0) add
+                false
               }
             )
           ))
