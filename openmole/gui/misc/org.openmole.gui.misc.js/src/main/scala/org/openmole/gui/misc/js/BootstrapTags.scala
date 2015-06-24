@@ -176,18 +176,11 @@ object BootstrapTags {
       todo()
     }))
 
-  def fileInput(todo: HTMLInputElement ⇒ Unit): HTMLFormElement = {
-    lazy val form: HTMLFormElement = tags.form({
-      lazy val input: HTMLInputElement = tags.input(id := "fileinput", `type` := "file", multiple := "")(onchange := { () ⇒
-        todo(input)
-      }, onclick := { () ⇒
-        println("form submit")
-        form.submit
-      }).render
-      input
+  def fileInput(todo: HTMLInputElement ⇒ Unit) = {
+    lazy val input: HTMLInputElement = tags.input(id := "fileinput", `type` := "file", multiple := "")(onchange := { () ⇒
+      todo(input)
     }).render
-
-    form
+    input
   }
 
   def uploadButton(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] = {

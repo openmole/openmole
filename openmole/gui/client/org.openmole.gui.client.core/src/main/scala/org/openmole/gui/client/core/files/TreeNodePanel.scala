@@ -5,7 +5,7 @@ import org.openmole.gui.client.core.files.FileExtension.DisplayableFile
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.BootstrapTags._
 import org.scalajs.dom.html.Input
-import org.scalajs.dom.raw.{ FileList, HTMLInputElement, DragEvent }
+import org.scalajs.dom.raw.{ Event, FileList, HTMLInputElement, DragEvent }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select }
@@ -89,31 +89,32 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
       tags.form(id := "adddir")(
         inputGroup(navbar_left)(
           inputGroupButton(addRootDirButton.selector),
-          newNodeInput,
+          inputGroupButton(tags.form(newNodeInput, onsubmit := { () ⇒
+            {
+              val newFile = newNodeInput.value
+              val currentDirNode = dirNodeLine().last
+              addRootDirButton.content().map {
+                _ match {
+                  case dt: DirType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
+                    if (b) refreshCurrentDirectory
+                  }
+                  case ft: FileType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
+                    if (b) refreshCurrentDirectory
+                  }
+                }
+              }
+            }
+            false
+          })),
           inputGroupAddon(id := "fileinput-addon")(uploadButton((fileInput: HTMLInputElement) ⇒ {
-            uploadFiles(fileInput.files, dirNodeLine().last.canonicalPath())
+            FileManager.upload(fileInput.files, dirNodeLine().last.canonicalPath(), (p: FileTransferState) ⇒ transferring() = p)
           })),
           inputGroupAddon(id := "fileinput-addon")(
             tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
               glyph(glyph_refresh)
             ))
-        ),
-        onsubmit := { () ⇒
-          {
-            val newFile = newNodeInput.value
-            val currentDirNode = dirNodeLine().last
-            addRootDirButton.content().map {
-              _ match {
-                case dt: DirType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
-                  if (b) refreshCurrentDirectory
-                }
-                case ft: FileType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
-                  if (b) refreshCurrentDirectory
-                }
-              }
-            }
-          }
-        })
+        )
+      )
     }, Rx {
       tags.div(`class` := "tree" + dragState(),
         ondragover := { (e: DragEvent) ⇒
@@ -129,7 +130,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         },
         ondrop := { (e: DragEvent) ⇒
           dragState() = ""
-          uploadFiles(e.dataTransfer.files, dirNodeLine().last.canonicalPath())
+          FileManager.upload(e.dataTransfer.files, dirNodeLine().last.canonicalPath(), (p: FileTransferState) ⇒ transferring() = p)
           e.preventDefault
           e.stopPropagation
           false
@@ -145,11 +146,6 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         )
     }
   )
-
-  def uploadFiles(fileList: FileList, targetPath: String) =
-    FileManager.upload(fileList, targetPath,
-      (p: FileTransferState) ⇒ transferring() = p
-    )
 
   def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
     FileManager.download(treeNode, saveFile,
