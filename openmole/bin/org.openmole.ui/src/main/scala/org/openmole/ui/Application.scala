@@ -184,7 +184,7 @@ class Application extends IApplication {
           if (lock != null)
             try {
               val port = config.serverPort.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
-              val url = s"https://localhost:$port?#"
+              val url = s"https://localhost:$port#?"
               GUIServer.urlFile.content = url
               BootstrapJS.init(config.optimizedJS)
               val server = new GUIServer(port, BootstrapJS.webapp)
