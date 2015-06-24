@@ -38,10 +38,15 @@ trait ServerOSGiActivator extends BundleActivator {
       case (d, f, fUI) ⇒
         ServerFactories.add(d, f, fUI)
     }
+
+    authenticationFactories.foreach {
+      case (d, fUI) ⇒ ServerFactories.addAuthenticationFactory(d, fUI)
+    }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
     factories.foreach { case (d, _, _) ⇒ ServerFactories.remove(d) }
+    authenticationFactories.foreach { case (d, _) ⇒ ServerFactories.remove(d) }
   }
 }

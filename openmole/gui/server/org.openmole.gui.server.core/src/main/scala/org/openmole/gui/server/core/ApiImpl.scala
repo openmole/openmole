@@ -36,6 +36,9 @@ object ApiImpl extends Api {
 
   val execution = new Execution
 
+  //AUTHENTICATIONS
+  //def authentications: Seq[AuthenticationData] =
+
   // FILES
   def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean = new File(treeNodeData.canonicalPath, directoryName).mkdirs
 
