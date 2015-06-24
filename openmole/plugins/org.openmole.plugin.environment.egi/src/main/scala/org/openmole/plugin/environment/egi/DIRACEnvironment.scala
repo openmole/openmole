@@ -47,7 +47,7 @@ object DIRACEnvironment {
     cpuTime: Option[Duration] = None,
     openMOLEMemory: Option[Int] = None,
     debug: Boolean = false,
-    name: Option[String])(implicit authentications: AuthenticationProvider) =
+    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
     new DIRACEnvironment(
       voName = voName,
       service = service,
