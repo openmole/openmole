@@ -25,10 +25,11 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 object OMPost extends autowire.Client[String, upickle.Reader, upickle.Writer] {
   override def doCall(req: Request): Future[String] = {
     val url = req.path.mkString("/")
-    val port = window.document.location.port
+    //val port = window.document.location.port
+    val host = window.document.location.host
 
     ext.Ajax.post(
-      url = s"https://localhost:$port/" + url,
+      url = s"https://$host/$url",
       data = upickle.write(req.args)
     ).map {
         _.responseText
