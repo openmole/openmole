@@ -231,6 +231,10 @@ height: 20px;
 
 }
 
+#fileinput-addon:hover{
+	color: #222;
+}
+
 #treeprogress{
 	margin-top:20px;
 	width: 95%;

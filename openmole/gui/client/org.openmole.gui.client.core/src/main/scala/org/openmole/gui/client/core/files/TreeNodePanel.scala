@@ -92,7 +92,11 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
           newNodeInput,
           inputGroupAddon(id := "fileinput-addon")(uploadButton((fileInput: HTMLInputElement) ⇒ {
             uploadFiles(fileInput.files, dirNodeLine().last.canonicalPath())
-          }))
+          })),
+          inputGroupAddon(id := "fileinput-addon")(
+            tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
+              glyph(glyph_refresh)
+            ))
         ),
         onsubmit := { () ⇒
           {
