@@ -56,7 +56,7 @@ class GUIServer(port: Int, webapp: File, remote: Boolean) {
 
   val connector = new org.eclipse.jetty.server.ssl.SslSelectChannelConnector(contextFactory)
   connector.setPort(port)
-  if(!remote) connector.setHost("localhost")
+  if (!remote) connector.setHost("localhost")
 
   server.addConnector(connector)
 
