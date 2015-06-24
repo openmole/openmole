@@ -49,8 +49,26 @@ object SLURMEnvironment {
     sharedDirectory: Option[String] = None,
     workDirectory: Option[String] = None,
     threads: Option[Int] = None,
-    storageSharedLocally: Boolean = false)(implicit authentications: AuthenticationProvider) =
-    new SLURMEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, qos, gres, constraints, nodes, coresByNode, sharedDirectory, workDirectory, threads, storageSharedLocally)
+    storageSharedLocally: Boolean = false,
+    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    new SLURMEnvironment(
+      user = user,
+      host = host,
+      port = port,
+      queue = queue,
+      openMOLEMemory = openMOLEMemory,
+      wallTime = wallTime,
+      memory = memory,
+      qos = qos,
+      gres = gres,
+      constraints = constraints,
+      nodes = nodes,
+      coresByNode = coresByNode,
+      sharedDirectory = sharedDirectory,
+      workDirectory = workDirectory,
+      threads = threads,
+      storageSharedLocally = storageSharedLocally,
+      name = name)
 }
 
 import SLURMEnvironment._
@@ -71,7 +89,8 @@ class SLURMEnvironment(
     val sharedDirectory: Option[String],
     val workDirectory: Option[String],
     override val threads: Option[Int],
-    val storageSharedLocally: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    val storageSharedLocally: Boolean,
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
   type JS = SLURMJobService
 

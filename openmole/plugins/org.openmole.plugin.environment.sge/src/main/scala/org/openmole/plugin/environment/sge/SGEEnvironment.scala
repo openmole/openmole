@@ -42,8 +42,21 @@ object SGEEnvironment {
     sharedDirectory: Option[String] = None,
     workDirectory: Option[String] = None,
     threads: Option[Int] = None,
-    storageSharedLocally: Boolean = false)(implicit authentications: AuthenticationProvider) =
-    new SGEEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, sharedDirectory, workDirectory, threads, storageSharedLocally)
+    storageSharedLocally: Boolean = false,
+    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    new SGEEnvironment(
+      user = user,
+      host = host,
+      port = port,
+      queue = queue,
+      openMOLEMemory = openMOLEMemory,
+      wallTime = wallTime,
+      memory = memory,
+      sharedDirectory = sharedDirectory,
+      workDirectory = workDirectory,
+      threads = threads,
+      storageSharedLocally = storageSharedLocally,
+      name = name)
 }
 
 class SGEEnvironment(
@@ -57,7 +70,8 @@ class SGEEnvironment(
     val sharedDirectory: Option[String],
     val workDirectory: Option[String],
     override val threads: Option[Int],
-    val storageSharedLocally: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    val storageSharedLocally: Boolean,
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
   type JS = SGEJobService
 

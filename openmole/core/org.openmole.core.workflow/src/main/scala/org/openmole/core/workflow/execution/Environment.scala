@@ -22,7 +22,7 @@ import org.openmole.core.event.Event
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workflow.job.MoleJob
 import ExecutionState._
-import org.openmole.core.workflow.tools.ExceptionEvent
+import org.openmole.core.workflow.tools.{ Name, ExceptionEvent }
 import scala.concurrent.stm._
 import org.openmole.core.tools.service._
 
@@ -36,7 +36,7 @@ object Environment {
   case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
 }
 
-trait Environment {
+trait Environment <: Name {
   private[execution] val _done = Ref(0L)
   private[execution] val _failed = Ref(0L)
 
