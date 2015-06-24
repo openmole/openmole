@@ -25,7 +25,7 @@ object Hook {
   implicit def hookBuilderToHookConverter(hb: HookBuilder) = hb.toHook
 }
 
-trait Hook <: InputOutputCheck {
+trait Hook <: InputOutputCheck with Name {
   def inputs: PrototypeSet
   def outputs: PrototypeSet
   def defaults: DefaultSet
