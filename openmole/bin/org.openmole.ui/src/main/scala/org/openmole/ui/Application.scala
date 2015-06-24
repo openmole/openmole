@@ -52,7 +52,7 @@ class Application extends IApplication {
       |_|
 """
 
-  lazy val consoleUsage = "(Type :q or :quit to quit)"
+  lazy val consoleUsage = "(Type :q to quit)"
 
   override def start(context: IApplicationContext) = {
 
