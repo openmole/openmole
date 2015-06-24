@@ -46,18 +46,20 @@ object DIRACEnvironment {
     fqan: Option[String] = None,
     cpuTime: Option[Duration] = None,
     openMOLEMemory: Option[Int] = None,
-    debug: Boolean = false)(implicit authentications: AuthenticationProvider) =
+    debug: Boolean = false,
+    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
     new DIRACEnvironment(
-      voName,
-      service,
-      group.getOrElse(voName + "_user"),
-      bdii.getOrElse(Workspace.preference(EGIEnvironment.DefaultBDII)),
-      vomsURL.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
-      setup.getOrElse("Dirac-Production"),
-      fqan,
-      cpuTime,
-      openMOLEMemory,
-      debug
+      voName = voName,
+      service = service,
+      group = group.getOrElse(voName + "_user"),
+      bdii = bdii.getOrElse(Workspace.preference(EGIEnvironment.DefaultBDII)),
+      vomsURL = vomsURL.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
+      setup = setup.getOrElse("Dirac-Production"),
+      fqan = fqan,
+      cpuTime = cpuTime,
+      openMOLEMemory = openMOLEMemory,
+      debug = debug,
+      name = name
     )(authentications)
 
 }
@@ -72,7 +74,8 @@ class DIRACEnvironment(
     val fqan: Option[String],
     val cpuTime: Option[Duration],
     override val openMOLEMemory: Option[Int],
-    val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with EGIEnvironmentId with LCGCp { env ⇒
+    val debug: Boolean,
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with EGIEnvironmentId with LCGCp { env ⇒
 
   type JS = DIRACJobService
 

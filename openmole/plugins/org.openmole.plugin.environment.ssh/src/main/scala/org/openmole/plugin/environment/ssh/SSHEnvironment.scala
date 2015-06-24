@@ -43,8 +43,19 @@ object SSHEnvironment {
     workDirectory: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
     threads: Option[Int] = None,
-    storageSharedLocally: Boolean = false)(implicit authentications: AuthenticationProvider) =
-    new SSHEnvironment(user, host, nbSlots, port, sharedDirectory, workDirectory, openMOLEMemory, threads, storageSharedLocally)
+    storageSharedLocally: Boolean = false,
+    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    new SSHEnvironment(
+      user = user,
+      host = host,
+      nbSlots = nbSlots,
+      port = port,
+      sharedDirectory = sharedDirectory,
+      workDirectory = workDirectory,
+      openMOLEMemory = openMOLEMemory,
+      threads = threads,
+      storageSharedLocally = storageSharedLocally,
+      name = name)
 }
 
 import SSHEnvironment._
@@ -58,7 +69,8 @@ class SSHEnvironment(
     val workDirectory: Option[String],
     override val openMOLEMemory: Option[Int],
     override val threads: Option[Int],
-    val storageSharedLocally: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage { env ⇒
+    val storageSharedLocally: Boolean,
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage { env ⇒
 
   type JS = SSHJobService
 

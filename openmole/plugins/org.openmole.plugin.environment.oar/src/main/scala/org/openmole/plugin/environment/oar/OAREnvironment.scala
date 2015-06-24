@@ -40,8 +40,22 @@ object OAREnvironment {
     sharedDirectory: Option[String] = None,
     workDirectory: Option[String] = None,
     threads: Option[Int] = None,
-    storageSharedLocally: Boolean = false)(implicit authentications: AuthenticationProvider) =
-    new OAREnvironment(user, host, port, queue, core, cpu, wallTime, openMOLEMemory, sharedDirectory, workDirectory, threads, storageSharedLocally)
+    storageSharedLocally: Boolean = false,
+    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    new OAREnvironment(
+      user = user,
+      host = host,
+      port = port,
+      queue = queue,
+      core = core,
+      cpu = cpu,
+      wallTime = wallTime,
+      openMOLEMemory = openMOLEMemory,
+      sharedDirectory = sharedDirectory,
+      workDirectory = workDirectory,
+      threads = threads,
+      storageSharedLocally = storageSharedLocally,
+      name = name)
 }
 
 class OAREnvironment(
@@ -56,7 +70,8 @@ class OAREnvironment(
     val sharedDirectory: Option[String],
     val workDirectory: Option[String],
     override val threads: Option[Int],
-    val storageSharedLocally: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage { env ⇒
+    val storageSharedLocally: Boolean,
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage { env ⇒
 
   type JS = OARJobService
 

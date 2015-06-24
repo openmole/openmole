@@ -86,25 +86,6 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
     )
   }
 
-  get("/") {
-    contentType = "text/html"
-    tags.html(
-      tags.head(
-        tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset = ISO-8859-1"),
-        cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-sh.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-nlogo.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/theme-github.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js")
-      ),
-      tags.body(
-        tags.onload := "ScriptClient().run();")
-    )
-  }
-
   post("/uploadfiles") {
     for (file ← fileParams) yield {
       val stream = file._2.getInputStream
@@ -134,6 +115,25 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
       Ok(file)
     }
     else NotFound("The file " + path + " does not exist.")
+  }
+
+  get("/") {
+    contentType = "text/html"
+    tags.html(
+      tags.head(
+        tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset = ISO-8859-1"),
+        cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/jquery.min.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-sh.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-nlogo.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/theme-github.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap.min.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js")
+      ),
+      tags.body(
+        tags.onload := "ScriptClient().run();")
+    )
   }
 
   def parseParams(toTest: Seq[String], evaluated: Map[String, String] = Map(), errors: Seq[Throwable] = Seq()): (Map[String, String], Seq[Throwable]) = {

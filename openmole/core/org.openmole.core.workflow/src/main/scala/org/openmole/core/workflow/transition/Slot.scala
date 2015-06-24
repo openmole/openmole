@@ -38,6 +38,6 @@ trait Slot {
    */
   def capsule: Capsule
 
-  override def toString = "Slot hash " + hashCode + " of " + capsule
+  override def toString = s"slot@$hashCode:$capsule"
 
 }

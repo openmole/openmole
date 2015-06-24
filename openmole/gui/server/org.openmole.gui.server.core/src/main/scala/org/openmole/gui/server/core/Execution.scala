@@ -65,7 +65,7 @@ class Execution {
               completed = moleExecution.completed,
               environmentStates = moleExecution.environments.map {
                 case (c, e) ⇒
-                  EnvironmentState(c.task.name, e.running, e.done, e.submitted, e.failed)
+                  EnvironmentState(c.task.toString, e.running, e.done, e.submitted, e.failed)
               }.toSeq,
               lastOutputs = out
             )
