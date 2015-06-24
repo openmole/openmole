@@ -88,6 +88,10 @@ object BootstrapJS {
       case (k, v) ⇒
         writer.write("UIFactories().factoryMap[\"" + k + "\" ] = new " + v.getClass.getCanonicalName + "();\n")
     }
+    ServerFactories.authenticationFactoriesUI.foreach {
+      case (k, v) ⇒
+        writer.write("UIFactories().authenticationMap[\"" + k + "\" ] = new " + v.getClass.getCanonicalName + "();\n")
+    }
     writer.write("}")
     writer.close
 

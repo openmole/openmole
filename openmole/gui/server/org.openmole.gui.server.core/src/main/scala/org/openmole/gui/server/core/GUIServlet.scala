@@ -129,10 +129,11 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
         tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-nlogo.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/theme-github.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap.min.js"),
-        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js")
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/pluginMapping.js")
       ),
       tags.body(
-        tags.onload := "ScriptClient().run();")
+        tags.onload := "fillMap();ScriptClient().run();")
     )
   }
 

@@ -20,7 +20,7 @@ package org.openmole.gui.server.core
 import org.openmole.core.workflow.task.PluginSet
 
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.dataui.FactoryWithDataUI
+import org.openmole.gui.ext.dataui.{ FactoryWithPanelUI, FactoryWithDataUI }
 
 import scala.collection.mutable
 import scala.util.{ Failure, Try }
@@ -40,15 +40,26 @@ object ServerFactories {
     instance.factoriesUI += dataClass.getName -> factoryUI
   }
 
+  def addAuthenticationFactory(dataClass: Class[_], factoryUI: FactoryWithPanelUI) = instance.authenticationFactories.synchronized {
+    instance.authenticationFactories += dataClass -> factoryUI
+  }
+
   def remove(dataClass: Class[_]) = instance.factories.synchronized {
     instance.factories -= dataClass
     instance.factoriesUI -= dataClass.getName
   }
 
+  def removeAuthenticationFactory(dataClass: Class[_]) = instance.authenticationFactories.synchronized {
+    instance.authenticationFactories -= dataClass
+  }
+
   def factoriesUI = instance.factoriesUI.toMap
+
+  def authenticationFactoriesUI = instance.authenticationFactories.toMap
 }
 
 class ServerFactories {
   val factories = new mutable.WeakHashMap[Class[_], Factory]
   val factoriesUI = new mutable.WeakHashMap[String, FactoryWithDataUI]
+  val authenticationFactories = new mutable.WeakHashMap[Class[_], FactoryWithPanelUI]
 }

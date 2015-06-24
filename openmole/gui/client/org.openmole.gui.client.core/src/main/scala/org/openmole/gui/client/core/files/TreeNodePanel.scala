@@ -197,6 +197,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
               onsubmit := { () ⇒
                 {
                   renameNode(tn, editNodeInput.value)
+                  false
                 }
               }
             )
