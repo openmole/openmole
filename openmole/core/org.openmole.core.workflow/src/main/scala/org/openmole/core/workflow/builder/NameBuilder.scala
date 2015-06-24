@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -14,13 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.workflow.builder
 
-import org.openmole.core.workflow.task._
+trait NameBuilder { builder ⇒
+  var name: Option[String] = None
 
-trait TaskBuilder extends InputOutputBuilder with NameBuilder with Builder { builder ⇒
-  def toTask: Task
+  def setName(name: String): this.type = {
+    builder.name = Some(name)
+    this
+  }
 
-  trait Built extends super[InputOutputBuilder].Built with super[NameBuilder].Built
+  trait Built {
+    lazy val name = builder.name.orElse(Some(s"${getClass.getSuperclass.getSimpleName}@$hashCode"))
+  }
 }
