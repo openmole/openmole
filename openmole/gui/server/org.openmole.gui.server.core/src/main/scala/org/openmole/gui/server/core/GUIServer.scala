@@ -18,11 +18,13 @@ package org.openmole.gui.server.core
  */
 
 import java.io.File
+import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp._
 import org.openmole.core.tools.io.Network
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.scalatra.auth.strategy.{ BasicAuthStrategy, BasicAuthSupport }
 import org.scalatra.servlet.ScalatraListener
 import javax.servlet.ServletContext
 import org.scalatra._
@@ -40,7 +42,7 @@ object GUIServer {
   lazy val urlFile = Workspace.file("GUI.url")
 }
 
-class GUIServer(port: Int, webapp: File) {
+class GUIServer(port: Int, webapp: File, remote: Boolean) {
 
   val server = new Server()
 
@@ -52,11 +54,11 @@ class GUIServer(port: Int, webapp: File) {
   contextFactory.setTrustStore(ks)
   contextFactory.setTrustStorePassword(Workspace.keyStorePassword)
 
-  server.addConnector(
-    new org.eclipse.jetty.server.ssl.SslSelectChannelConnector(contextFactory) {
-      setPort(port)
-    }
-  )
+  val connector = new org.eclipse.jetty.server.ssl.SslSelectChannelConnector(contextFactory)
+  connector.setPort(port)
+  if(!remote) connector.setHost("localhost")
+
+  server.addConnector(connector)
 
   val context = new WebAppContext()
   context.setContextPath("/")
