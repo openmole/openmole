@@ -187,7 +187,7 @@ class Application extends IApplication {
               val url = s"https://localhost:$port"
               GUIServer.urlFile.content = url
               BootstrapJS.init(!config.unoptimizedJS)
-              val server = new GUIServer(port, BootstrapJS.webapp)
+              val server = new GUIServer(port, BootstrapJS.webapp, false)
               server.start()
               browse(url)
               server.join()
