@@ -31,6 +31,8 @@ trait Authentication <: Persistent {
 
   def category[T](implicit m: Manifest[T]): String = m.runtimeClass.getCanonicalName
 
+  def save[T](obj: T)(implicit m: Manifest[T]): Unit = save[T]("0.key", obj)
+
   def save[T](fileName: String, obj: T)(implicit m: Manifest[T]): Unit =
     save(obj, fileName, Some(category[T]))
 
