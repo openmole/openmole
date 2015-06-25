@@ -1,10 +1,11 @@
 package org.openmole.gui.plugin.environment.ssh.ext
 
+import java.net.URI
+
 import org.openmole.gui.ext.data.AuthenticationData
 
-
 /*
- * Copyright (C) 18/06/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 25/06/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -20,6 +21,15 @@ import org.openmole.gui.ext.data.AuthenticationData
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SSHAuthenticationData extends AuthenticationData {
+sealed trait SSHAuthenticationData extends AuthenticationData
 
-}
+case class LoginPasswordAuthenticationData(
+  login: String = "",
+  cypheredPassword: String = "",
+  target: String= "") extends SSHAuthenticationData
+
+case class PrivateKeyAuthenticationData(
+  privateKey: URI = new URI(""),
+  login: String = "",
+  cypheredPassword: String = "",
+  target: String= "") extends SSHAuthenticationData

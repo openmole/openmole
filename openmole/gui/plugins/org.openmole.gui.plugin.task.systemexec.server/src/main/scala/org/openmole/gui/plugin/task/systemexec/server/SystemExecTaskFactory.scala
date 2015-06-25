@@ -18,14 +18,14 @@ package org.openmole.gui.plugin.task.systemexec.server
  */
 
 import org.openmole.core.workflow.task.PluginSet
-import org.openmole.gui.ext.data.Factory
+import org.openmole.gui.ext.data.{CoreObjectFactory, Factory}
 import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
 import org.openmole.plugin.task.systemexec.SystemExecTask
 
 import scala.util.Try
 
 
-class SystemExecTaskFactory(val data: SystemExecTaskData) extends Factory {
+class SystemExecTaskFactory(val data: SystemExecTaskData) extends CoreObjectFactory {
 
   def coreObject(implicit plugins: PluginSet): Try[Any] =  Try {
       val syset = SystemExecTask("" /*data.name,

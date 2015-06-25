@@ -30,8 +30,8 @@ object ServerFactories {
 
   def coreObject(dataBag: DataBag): Try[Any] = instance.factories.synchronized {
     instance.factories.get(dataBag.data.getClass()) match {
-      case Some(f: Factory) ⇒ f.coreObject(PluginSet.empty) //FIXME AND TAKE THE PLUGINS
-      case _                ⇒ Failure(new Throwable("The data " + dataBag.name + " cannot be recontructed on the server."))
+      case Some(f: CoreObjectFactory) ⇒ f.coreObject(PluginSet.empty) //FIXME AND TAKE THE PLUGINS
+      case _                          ⇒ Failure(new Throwable("The data " + dataBag.name + " cannot be recontructed on the server."))
     }
   }
 
@@ -40,8 +40,9 @@ object ServerFactories {
     instance.factoriesUI += dataClass.getName -> factoryUI
   }
 
-  def addAuthenticationFactory(dataClass: Class[_], factoryUI: FactoryWithPanelUI) = instance.authenticationFactories.synchronized {
-    instance.authenticationFactories += dataClass -> factoryUI
+  def addAuthenticationFactory(dataClass: Class[_], factory: Factory, factoryUI: FactoryWithPanelUI) = instance.authenticationFactoriesUI.synchronized {
+    instance.factories += dataClass -> factory
+    instance.authenticationFactoriesUI += dataClass -> factoryUI
   }
 
   def remove(dataClass: Class[_]) = instance.factories.synchronized {
@@ -49,17 +50,18 @@ object ServerFactories {
     instance.factoriesUI -= dataClass.getName
   }
 
-  def removeAuthenticationFactory(dataClass: Class[_]) = instance.authenticationFactories.synchronized {
-    instance.authenticationFactories -= dataClass
+  def removeAuthenticationFactory(dataClass: Class[_]) = instance.authenticationFactoriesUI.synchronized {
+    instance.factories -= dataClass
+    instance.authenticationFactoriesUI -= dataClass
   }
 
   def factoriesUI = instance.factoriesUI.toMap
 
-  def authenticationFactoriesUI = instance.authenticationFactories.toMap
+  def authenticationFactoriesUI = instance.authenticationFactoriesUI.toMap
 }
 
 class ServerFactories {
   val factories = new mutable.WeakHashMap[Class[_], Factory]
   val factoriesUI = new mutable.WeakHashMap[String, FactoryWithDataUI]
-  val authenticationFactories = new mutable.WeakHashMap[Class[_], FactoryWithPanelUI]
+  val authenticationFactoriesUI = new mutable.WeakHashMap[Class[_], FactoryWithPanelUI]
 }

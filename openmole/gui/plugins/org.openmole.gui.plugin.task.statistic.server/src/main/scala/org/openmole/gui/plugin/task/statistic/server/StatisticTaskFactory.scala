@@ -19,12 +19,12 @@ package org.openmole.gui.plugin.task.statistic.server
 
 import org.openmole.gui.plugin.task.statistic.ext.StatisticTaskData
 import org.openmole.plugin.task.statistic.StatisticTask
-import org.openmole.gui.ext.data.Factory
+import org.openmole.gui.ext.data.{CoreObjectFactory, Factory}
 
 import org.openmole.core.workflow.task.PluginSet
 import scala.util.Try
 
-class StatisticTaskFactory(val data: StatisticTaskData) extends Factory {
+class StatisticTaskFactory(val data: StatisticTaskData) extends CoreObjectFactory {
   def coreObject(implicit plugins: PluginSet): Try[Any] = Try {
   }
 }

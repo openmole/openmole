@@ -18,6 +18,7 @@ package org.openmole.gui.ext.data
  */
 
 import java.io.{ OutputStream, StringWriter, PrintWriter }
+import java.net.URI
 
 case class DataBag(uuid: String, name: String, data: Data)
 
@@ -90,12 +91,6 @@ trait TaskData extends Data with InputData with OutputData
 trait EnvironmentData extends Data
 
 trait AuthenticationData extends Data
-
-sealed trait AuthenticationStyle
-
-case object Login extends AuthenticationStyle
-
-case object SSHKey extends AuthenticationStyle
 
 trait HookData extends Data with InputData with OutputData
 

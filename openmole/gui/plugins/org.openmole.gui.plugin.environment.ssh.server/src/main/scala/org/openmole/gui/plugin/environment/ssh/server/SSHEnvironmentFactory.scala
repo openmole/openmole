@@ -20,12 +20,12 @@ package org.openmole.gui.plugin.environment.ssh.server
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.plugin.environment.ssh.ext.SSHEnvironmentData
 import org.openmole.plugin.environment.ssh.SSHEnvironment
-import org.openmole.gui.ext.data.Factory
+import org.openmole.gui.ext.data.CoreObjectFactory
 
 import org.openmole.core.workflow.task.PluginSet
 import scala.util.Try
 
-class SSHEnvironmentFactory(val data: SSHEnvironmentData) extends Factory {
+class SSHEnvironmentFactory(val data: SSHEnvironmentData) extends CoreObjectFactory{
   def coreObject(implicit plugins: PluginSet): Try[Any] = Try {
     SSHEnvironment(
       data.login,

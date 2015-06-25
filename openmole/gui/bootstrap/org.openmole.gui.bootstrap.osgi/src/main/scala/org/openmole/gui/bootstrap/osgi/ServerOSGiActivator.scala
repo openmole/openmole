@@ -30,7 +30,7 @@ trait ServerOSGiActivator extends BundleActivator {
   // core factories and name of UI factories
   def factories: Seq[(Class[_], Factory, FactoryWithDataUI)] = Seq()
 
-  def authenticationFactories: Seq[(Class[_], FactoryWithPanelUI)] = Seq()
+  def authenticationFactories: Seq[(Class[_], Factory, FactoryWithPanelUI)] = Seq()
 
   abstract override def start(context: BundleContext) = {
     super.start(context)
@@ -40,13 +40,13 @@ trait ServerOSGiActivator extends BundleActivator {
     }
 
     authenticationFactories.foreach {
-      case (d, fUI) ⇒ ServerFactories.addAuthenticationFactory(d, fUI)
+      case (d, f, fUI) ⇒ ServerFactories.addAuthenticationFactory(d, f, fUI)
     }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
     factories.foreach { case (d, _, _) ⇒ ServerFactories.remove(d) }
-    authenticationFactories.foreach { case (d, _) ⇒ ServerFactories.remove(d) }
+    authenticationFactories.foreach { case (d, _, _) ⇒ ServerFactories.remove(d) }
   }
 }

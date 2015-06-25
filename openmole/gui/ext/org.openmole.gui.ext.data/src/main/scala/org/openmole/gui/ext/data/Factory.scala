@@ -22,5 +22,12 @@ import scala.util.Try
 
 trait Factory {
   def data: Data
+}
+
+trait CoreObjectFactory extends Factory {
   def coreObject(implicit plugins: PluginSet): Try[Any]
+}
+
+trait AuthenticationFactory extends Factory {
+  def buildAuthentication: Unit
 }

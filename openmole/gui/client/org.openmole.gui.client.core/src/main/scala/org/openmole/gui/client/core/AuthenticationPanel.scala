@@ -47,6 +47,8 @@ class AuthenticationPanel extends ModalPanel {
     println("close authen")
   }
 
+  println("Autth: " + ClientService.authenticationFactories.map { _.name })
+
   lazy val executionTable = {
 
     bs.table(striped)(
