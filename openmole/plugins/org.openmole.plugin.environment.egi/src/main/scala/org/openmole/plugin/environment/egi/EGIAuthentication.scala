@@ -19,6 +19,7 @@ package org.openmole.plugin.environment.egi
 
 import java.io._
 import java.net.URI
+import java.util.UUID
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import java.nio.file.FileSystems
 import java.util.zip.GZIPInputStream
@@ -126,7 +127,7 @@ object EGIAuthentication extends Logger {
     }
   }
 
-  def update(a: EGIAuthentication) = Workspace.authentications.save(0, a)
+  def update(a: EGIAuthentication) = Workspace.authentications.save("0", a)
   def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[EGIAuthentication]).headOption
 
   def initialise(a: EGIAuthentication)(
