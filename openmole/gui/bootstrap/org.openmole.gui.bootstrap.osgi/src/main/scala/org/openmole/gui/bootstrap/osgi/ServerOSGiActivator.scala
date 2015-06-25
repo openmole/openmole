@@ -1,7 +1,7 @@
 package org.openmole.gui.bootstrap.osgi
 
 import org.openmole.gui.client.core.ClientService
-import org.openmole.gui.ext.dataui.FactoryUI
+import org.openmole.gui.ext.dataui.{ FactoryWithPanelUI, FactoryWithDataUI }
 import org.openmole.gui.ext.data.Factory
 import org.openmole.gui.server.core.ServerFactories
 import org.osgi.framework.BundleActivator
@@ -28,7 +28,9 @@ import org.openmole.gui.ext.data.Data
 trait ServerOSGiActivator extends BundleActivator {
 
   // core factories and name of UI factories
-  def factories: Seq[(Class[_], Factory, FactoryUI)] = Seq()
+  def factories: Seq[(Class[_], Factory, FactoryWithDataUI)] = Seq()
+
+  def authenticationFactories: Seq[(Class[_], Factory, FactoryWithPanelUI)] = Seq()
 
   abstract override def start(context: BundleContext) = {
     super.start(context)
@@ -36,10 +38,15 @@ trait ServerOSGiActivator extends BundleActivator {
       case (d, f, fUI) ⇒
         ServerFactories.add(d, f, fUI)
     }
+
+    authenticationFactories.foreach {
+      case (d, f, fUI) ⇒ ServerFactories.addAuthenticationFactory(d, f, fUI)
+    }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
     factories.foreach { case (d, _, _) ⇒ ServerFactories.remove(d) }
+    authenticationFactories.foreach { case (d, _, _) ⇒ ServerFactories.remove(d) }
   }
 }

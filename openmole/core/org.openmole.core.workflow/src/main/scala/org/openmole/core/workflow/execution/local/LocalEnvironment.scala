@@ -30,12 +30,18 @@ object LocalEnvironment {
   Workspace += (DefaultNumberOfThreads, "1")
   def numberOfThread = Workspace.preferenceAsInt(DefaultNumberOfThreads)
 
-  def apply(nbThreads: Int = numberOfThread, deinterleave: Boolean = false) = new LocalEnvironment(nbThreads, deinterleave)
+  def apply(
+    nbThreads: Int = numberOfThread,
+    deinterleave: Boolean = false,
+    name: Option[String] = None) = new LocalEnvironment(nbThreads, deinterleave, name)
 
-  var default = LocalEnvironment()
+  var default = LocalEnvironment(name = Some("DefaultEnvironment"))
 }
 
-class LocalEnvironment(val nbThreads: Int, val deinterleave: Boolean) extends Environment {
+class LocalEnvironment(
+    val nbThreads: Int,
+    val deinterleave: Boolean,
+    override val name: Option[String]) extends Environment {
 
   @transient lazy val pool = new ExecutorPool(nbThreads, WeakReference(this))
 

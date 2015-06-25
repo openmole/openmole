@@ -42,15 +42,23 @@ object DesktopGridEnvironment {
     login: String,
     password: String,
     openMOLEMemory: Option[Int] = None,
-    threads: Option[Int] = None) =
-    new DesktopGridEnvironment(port, login, password, openMOLEMemory, threads)
+    threads: Option[Int] = None,
+    name: Option[String] = None) =
+    new DesktopGridEnvironment(
+      port = port,
+      login = login,
+      password = password,
+      openMOLEMemory = openMOLEMemory,
+      threads = threads,
+      name = name)
 }
 
 class DesktopGridEnvironment(
     val port: Int,
     val login: String, password: String,
     override val openMOLEMemory: Option[Int],
-    override val threads: Option[Int]) extends BatchEnvironment { env ⇒
+    override val threads: Option[Int],
+    override val name: Option[String]) extends BatchEnvironment { env ⇒
 
   type SS = VolatileStorageService
   type JS = DesktopGridJobService

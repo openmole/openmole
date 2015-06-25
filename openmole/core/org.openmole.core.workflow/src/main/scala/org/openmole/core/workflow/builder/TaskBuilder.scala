@@ -17,32 +17,10 @@
 
 package org.openmole.core.workflow.builder
 
-import java.util.concurrent.atomic.AtomicInteger
-
-import org.openmole.core.workflow.puzzle.PuzzlePiece
 import org.openmole.core.workflow.task._
 
-object TaskBuilder {
-  val nameCounter = new AtomicInteger
-  def generateName(instance: Any) = {
-    val instanceName = instance.getClass.getSuperclass.getSimpleName
-    val name = instanceName.take(1).map(_.toLower) + instanceName.drop(1)
-    name + TaskBuilder.nameCounter.getAndIncrement
-  }
-
-}
-
-trait TaskBuilder extends InputOutputBuilder with Builder { builder ⇒
+trait TaskBuilder extends InputOutputBuilder with NameBuilder with Builder { builder ⇒
   def toTask: Task
 
-  var name: Option[String] = None
-
-  def setName(name: String): this.type = {
-    builder.name = Some(name)
-    this
-  }
-
-  trait Built extends super.Built {
-    lazy val name = builder.name.getOrElse(TaskBuilder.generateName(this))
-  }
+  trait Built extends super[InputOutputBuilder].Built with super[NameBuilder].Built
 }

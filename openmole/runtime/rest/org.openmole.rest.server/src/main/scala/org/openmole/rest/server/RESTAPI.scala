@@ -85,115 +85,116 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
   }
 
   post("/start") {
-    authenticated {
-      (params get "script") match {
-        case None ⇒ ExpectationFailed(Error("Missing mandatory script parameter.").toJson)
-        case Some(script) ⇒
-          logger.info("starting the create operation")
+    authenticate()
+    (params get "script") match {
+      case None ⇒ ExpectationFailed(Error("Missing mandatory script parameter.").toJson)
+      case Some(script) ⇒
+        logger.info("starting the create operation")
 
-          val id = ExecutionId(UUID.randomUUID().toString)
-          val directory = WorkDirectory(baseDirectory / id.id)
+        val id = ExecutionId(UUID.randomUUID().toString)
+        val directory = WorkDirectory(baseDirectory / id.id)
 
-          def extract =
-            for {
-              archive ← fileParams get "inputDirectory"
-            } {
-              val is = new TarInputStream(new GZIPInputStream(archive.getInputStream))
-              try is.extract(directory.inputDirectory) finally is.close
-            }
-
-          def error(e: Throwable) = {
-            directory.clean
-            ExpectationFailed(Error(e).toJson)
+        def extract =
+          for {
+            archive ← fileParams get "inputDirectory"
+          } {
+            val is = new TarInputStream(new GZIPInputStream(archive.getInputStream))
+            try is.extract(directory.inputDirectory) finally is.close
           }
 
-          def launch: ActionResult = {
-            val console = new Console(arguments.plugins)
-            val repl = console.newREPL(ConsoleVariables(inputDirectory = directory.inputDirectory, outputDirectory = directory.outputDirectory))
-            Try(repl.eval(script)) match {
-              case Failure(e) ⇒ error(e)
-              case Success(o) ⇒
-                o match {
-                  case puzzle: Puzzle ⇒
-                    Try(puzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream))) match {
-                      case Success(ex) ⇒
-                        ex listen {
-                          case (ex, ev: MoleExecution.Finished) ⇒
-                        }
-                        Try(ex.start) match {
-                          case Failure(e) ⇒ error(e)
-                          case Success(ex) ⇒
-                            moles.add(id, Execution(directory, ex))
-                            Ok(id.toJson)
-                        }
-                      case Failure(e) ⇒ error(e)
-                    }
-                  case _ ⇒
-                    directory.clean
-                    ExpectationFailed(Error("The last line of the script should be a puzzle").toJson)
-                }
-            }
+        def error(e: Throwable) = {
+          directory.clean
+          ExpectationFailed(Error(e).toJson)
+        }
+
+        def compile = {
+          val console = new Console(arguments.plugins)
+          val repl = console.newREPL(ConsoleVariables(inputDirectory = directory.inputDirectory, outputDirectory = directory.outputDirectory))
+          repl.eval(script)
+        }
+
+        def start(ex: MoleExecution) =
+          Try(ex.start) match {
+            case Failure(e) ⇒ error(e)
+            case Success(ex) ⇒
+              moles.add(id, Execution(directory, ex))
+              Ok(id.toJson)
           }
 
-          extract
-          launch
-      }
+        def launch: ActionResult =
+          Try(compile) match {
+            case Failure(e) ⇒ error(e)
+            case Success(o) ⇒
+              o match {
+                case puzzle: Puzzle ⇒
+                  Try(puzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream))) match {
+                    case Success(ex) ⇒
+                      ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
+                      start(ex)
+                    case Failure(e) ⇒ error(e)
+                  }
+                case _ ⇒
+                  directory.clean
+                  ExpectationFailed(Error("The last line of the script should be a puzzle").toJson)
+              }
+          }
+
+        extract
+        launch
     }
+
   }
 
   post("/outputDirectory") {
-    authenticated {
-      getExecution { ex ⇒
-        val gzOs = response.getOutputStream.toGZ
-        val os = new TarOutputStream(gzOs)
-        contentType = "application/octet-stream"
-        response.setHeader("Content-Disposition", "attachment; filename=" + "outputDirectory.tgz")
-        os.archive(ex.workDirectory.outputDirectory)
-        os.close()
-        Ok()
-      }
+    authenticate()
+    getExecution { ex ⇒
+      val gzOs = response.getOutputStream.toGZ
+      val os = new TarOutputStream(gzOs)
+      contentType = "application/octet-stream"
+      response.setHeader("Content-Disposition", "attachment; filename=" + "outputDirectory.tgz")
+      os.archive(ex.workDirectory.outputDirectory)
+      os.close()
+      Ok()
     }
   }
 
   post("/output") {
-    authenticated {
-      getExecution { ex ⇒ Ok(Output(ex.workDirectory.readOutput).toJson) }
-    }
+    authenticate()
+    getExecution { ex ⇒ Ok(Output(ex.workDirectory.readOutput).toJson) }
   }
 
   post("/state") {
-    authenticated {
-      getExecution { ex ⇒
-        val moleExecution = ex.moleExecution
-        val state = (moleExecution.exception, moleExecution.finished) match {
-          case (Some(t), _) ⇒ Failed(Error(t))
-          case (None, true) ⇒ Finished()
-          case _            ⇒ Running(moleExecution.ready, moleExecution.running, moleExecution.completed)
+    authenticate()
+    getExecution { ex ⇒
+      val moleExecution = ex.moleExecution
+      val state = (moleExecution.exception, moleExecution.finished) match {
+        case (Some(t), _) ⇒ Failed(Error(t))
+        case (None, true) ⇒ Finished()
+        case _            ⇒ Running(moleExecution.ready, moleExecution.running, moleExecution.completed)
 
-        }
-        Ok(state.toJson)
       }
+      Ok(state.toJson)
     }
+
   }
 
   post("/remove") {
-    authenticated {
-      getId {
-        moles.remove(_) match {
-          case None ⇒ ExpectationFailed(Error("Execution not found").toJson)
-          case Some(ex) ⇒
-            ex.moleExecution.cancel
-            ex.workDirectory.clean
-            Ok()
-        }
+    authenticate()
+    getId {
+      moles.remove(_) match {
+        case None ⇒ ExpectationFailed(Error("Execution not found").toJson)
+        case Some(ex) ⇒
+          ex.moleExecution.cancel
+          ex.workDirectory.clean
+          Ok()
       }
     }
+
   }
 
   post("/list") {
-    authenticated {
-      Ok(moles.getKeys.toSeq.toJson)
-    }
+    authenticate()
+    Ok(moles.getKeys.toSeq.toJson)
   }
 
   def getExecution(success: Execution ⇒ ActionResult)(implicit r: HttpServletRequest): ActionResult =
@@ -210,12 +211,12 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
       case Success(id) ⇒ success(ExecutionId(id))
     }
 
-  def authenticated[T](success: ⇒ ActionResult)(implicit r: HttpServletRequest): ActionResult = {
-    def fail = Unauthorized(Error("This service requires a token").toJson)
+  def authenticate()(implicit r: HttpServletRequest) = {
+    def fail = halt(401, Error("This service requires a valid token").toJson)
 
     Try(params("token")(r)) match {
       case Failure(_) ⇒ fail
-      case Success(k) ⇒ if (checkToken(k)) success else fail
+      case Success(k) ⇒ if (!checkToken(k)) fail
     }
   }
 

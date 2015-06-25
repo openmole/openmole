@@ -17,6 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.misc.js.BootstrapTags.ScrollableTextArea.BottomScroll
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLDivElement
@@ -80,10 +81,11 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  case class ExecutionDetails(ratio: String, running: Long, error: Option[ExecError] = None, envStates: Seq[EnvironmentState] = Seq())
+  case class ExecutionDetails(ratio: String, running: Long, error: Option[ExecError] = None, envStates: Seq[EnvironmentState] = Seq(), outputs: String = "")
+
+  val outputTextAreas: Var[Map[ExecutionId, BSTextArea]] = Var(Map())
 
   lazy val executionTable = {
-
     bs.table(striped)(
       thead,
       Rx {
@@ -99,7 +101,7 @@ class ExecutionPanel extends ModalPanel {
             val details = executionInfo match {
               case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error))
               case f: Finished ⇒ ExecutionDetails("100", 0)
-              case r: Running  ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates)
+              case r: Running  ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates, outputs = r.lastOutputs)
               case c: Canceled ⇒ ExecutionDetails("0", 0)
               case u: Unknown  ⇒ ExecutionDetails("0", 0)
             }
@@ -107,6 +109,7 @@ class ExecutionPanel extends ModalPanel {
             val scriptID: VisibleID = "script"
             val envID: VisibleID = "env"
             val errorID: VisibleID = "error"
+            val outputStreamID: VisibleID = "outputStream"
 
             val scriptLink = expander.getLink(staticInfo.name, id.id, scriptID)
             val envLink = expander.getGlyph(glyph_stats, "Env", id.id, envID)
@@ -114,6 +117,7 @@ class ExecutionPanel extends ModalPanel {
               case f: Failed ⇒ expander.getLink(executionInfo.state, id.id, errorID)
               case _         ⇒ tags.span(executionInfo.state)
             }
+            val outputLink = expander.getGlyph(glyph_list, "", id.id, outputStreamID)
 
             val hiddenMap = Map(
               scriptID -> tags.div(bs.textArea(20)(staticInfo.script)),
@@ -134,7 +138,20 @@ class ExecutionPanel extends ModalPanel {
                   )
                 }
               ),
-              errorID -> tags.div(bs.textArea(20)(new String(details.error.map { _.stackTrace }.getOrElse(""))))
+              errorID -> tags.div(bs.textArea(20)(new String(details.error.map { _.stackTrace }.getOrElse("")))),
+              outputStreamID -> {
+                val tArea = outputTextAreas().get(id) match {
+                  case Some(t: BSTextArea) ⇒
+                    t.append(details.outputs)
+                    t
+                  case None ⇒
+                    println("NONE")
+                    val newTA = new BSTextArea(20, details.outputs, BottomScroll())
+                    outputTextAreas() = outputTextAreas() + (id -> newTA)
+                    newTA
+                }
+                tArea.get
+              }
             )
 
             Seq(bs.tr(row)(
@@ -146,7 +163,7 @@ class ExecutionPanel extends ModalPanel {
               bs.td(col_md_1)(duration),
               bs.td(col_md_1)(stateLink)(`class` := executionInfo.state + "State"),
               bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
-              bs.td(col_md_1)(bs.glyphSpan(bs.glyph_list, () ⇒ println("output"))),
+              bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink),
               bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
                 allExecutionStates
               })(`class` := "cancelExecution")),

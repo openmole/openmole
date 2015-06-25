@@ -3,7 +3,7 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client
 import org.openmole.gui.client.core.PrototypeFactoryUI.DoubleDataUI
 import org.openmole.gui.client.core.dataui._
-import org.openmole.gui.ext.dataui.FactoryUI
+import org.openmole.gui.ext.dataui.FactoryWithDataUI
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, InputFilter, Select }
 import org.scalajs.dom
 import org.scalajs.dom.Event
@@ -12,7 +12,6 @@ import org.scalajs.jquery._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.js.annotation.JSExport
 import scala.sys.Prop.DoubleProp
-import scalatags.JsDom.all
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.BootstrapTags._
@@ -48,7 +47,7 @@ object Panel {
       case _                     ⇒ ALL
     }
 
-    case class ConceptState(name: String, factories: Seq[FactoryUI]) extends Val(name)
+    case class ConceptState(name: String, factories: Seq[FactoryWithDataUI]) extends Val(name)
 
     val ALL = ConceptState("All", ClientService.factories)
     val TASKS = ConceptState("Tasks", ClientService.taskFactories)
@@ -78,7 +77,7 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
     _.name()
   }.getOrElse(""))
 
-  val factorySelector: Select[FactoryUI] = Select("factories",
+  val factorySelector: Select[FactoryWithDataUI] = Select("factories",
     filter().factories,
     currentDataBagUI(),
     btn_primary, onclickExtra = () ⇒ {
@@ -237,6 +236,7 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
               onsubmit := { () ⇒
                 if (editionState()) save
                 else if (rows() == 0) add
+                false
               }
             )
           ))

@@ -17,11 +17,16 @@
 
 package org.openmole.plugin.environment.egi
 
+import java.util.UUID
+
 import fr.iscpif.gridscale.dirac.P12HTTPSAuthentication
 import org.openmole.core.workspace.{ Workspace, AuthenticationProvider }
 
 object DIRACAuthentication {
-  def update(a: DIRACAuthentication) = Workspace.authentications.save(0, a)
+  def update(a: DIRACAuthentication)(implicit authentications: AuthenticationProvider) =
+    if (authentications(classOf[DIRACAuthentication]).size > 0) Workspace.authentications.save("0", a)
+    else Workspace.authentications.save("0", a)
+
   def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[DIRACAuthentication]).headOption
 
   def initialise(a: DIRACAuthentication)(implicit authenticationProvider: AuthenticationProvider) =

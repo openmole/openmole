@@ -22,7 +22,7 @@ import scala.util.Try
 import java.io.File
 
 object Authentication {
-  val pattern = "[0-9]+"
+  val pattern = "[-0-9A-z]+\\.key"
 }
 
 trait Authentication <: Persistent {
@@ -31,16 +31,22 @@ trait Authentication <: Persistent {
 
   def category[T](implicit m: Manifest[T]): String = m.runtimeClass.getCanonicalName
 
-  def save[T](i: Int, obj: T)(implicit m: Manifest[T]): Unit =
-    save(obj, i.toString, Some(category[T]))
+  def save[T](obj: T)(implicit m: Manifest[T]): Unit = save[T]("0.key", obj)
+
+  def save[T](fileName: String, obj: T)(implicit m: Manifest[T]): Unit =
+    save(obj, fileName, Some(category[T]))
 
   def clean[T](implicit m: Manifest[T]): Unit = super.clean(Some(m.runtimeClass.getCanonicalName))
 
   def allByCategory = synchronized {
     baseDir.listFiles { f: File ⇒ f.isDirectory }.map {
       d ⇒
-        d.getName -> d.listFiles { f: File ⇒ f.getName.matches(Authentication.pattern) }.sortBy { f ⇒ f.getName.toInt }.flatMap {
-          f ⇒ Try(Persistent.xstream.fromXML(f.content)).toOption
+        d.getName -> d.listFiles { f: File ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
+          f ⇒
+            Try(Persistent.xstream.fromXML(f.content)).toOption match {
+              case Some(t: Any) ⇒ Some(t, f.getName)
+              case _            ⇒ None
+            }
         }.toSeq
     }.toMap
   }

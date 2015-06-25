@@ -44,37 +44,37 @@ object PrototypeFactoryUI {
   class LongDataUI extends GenericPrototypeDataUI(LONG)
   class FileDataUI extends GenericPrototypeDataUI(FILE)
 
-  def intFactory = new FactoryUI {
+  def intFactory = new FactoryWithDataUI {
     type DATAUI = IntDataUI
     def dataUI = new IntDataUI
     val name = "Integer"
   }
 
-  def doubleFactory = new FactoryUI {
+  def doubleFactory = new FactoryWithDataUI {
     type DATAUI = DoubleDataUI
     def dataUI = new DoubleDataUI
     val name = "Double"
   }
 
-  def longFactory = new FactoryUI {
+  def longFactory = new FactoryWithDataUI {
     type DATAUI = LongDataUI
     def dataUI = new LongDataUI
     val name = "Long"
   }
 
-  def booleanFactory = new FactoryUI {
+  def booleanFactory = new FactoryWithDataUI {
     type DATAUI = BooleanDataUI
     def dataUI = new BooleanDataUI
     val name = "Boolean"
   }
 
-  def stringFactory = new FactoryUI {
+  def stringFactory = new FactoryWithDataUI {
     type DATAUI = StringDataUI
     def dataUI = new StringDataUI
     val name = "String"
   }
 
-  def fileFactory = new FactoryUI {
+  def fileFactory = new FactoryWithDataUI {
     type DATAUI = FileDataUI
     def dataUI = new FileDataUI
     val name = "File"

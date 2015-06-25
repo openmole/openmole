@@ -17,12 +17,12 @@ package org.openmole.gui.plugin.task.exploration.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.dataui.FactoryUI
+import org.openmole.gui.ext.dataui.FactoryWithDataUI
 import org.openmole.gui.client.core.dataui.TaskDataUI
 import scala.scalajs.js.annotation.JSExport
 
 @JSExport("org.openmole.gui.plugin.task.exploration.client.ExplorationTaskFactoryUI")
-class ExplorationTaskFactoryUI extends FactoryUI {
+class ExplorationTaskFactoryUI extends FactoryWithDataUI {
 type DATAUI = TaskDataUI
 def dataUI = new ExplorationTaskDataUI
 val name = "Exploration"

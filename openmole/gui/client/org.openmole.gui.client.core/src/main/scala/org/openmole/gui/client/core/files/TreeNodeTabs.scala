@@ -85,20 +85,11 @@ object TreeNodeTabs {
   def apply(tabs: TreeNodeTab*) = new TreeNodeTabs(tabs.toSeq)
 }
 
-/*case class OMSTab(tabName: Var[String], serverFilePath: Var[String], editor: EditorPanelUI) extends EditableNodeTab(tabName, serverFilePath, editor) {
-
-  override val controlElement = tags.div("Control men")
-}*/
-
 trait TabControl {
   def controlElement: TypedTag[HTMLElement]
 }
 
-trait TabError {
-  def errorElement: TypedTag[HTMLElement]
-}
-
-trait OMSTabControl <: TabControl with TabError {
+trait OMSTabControl <: TabControl {
   val settingsVisible = Var(false)
 
   val settingsButton = glyphSpan(glyph_settings, () ⇒ settingsVisible() = !settingsVisible())(`class` := "executionSettings")
@@ -116,8 +107,6 @@ trait OMSTabControl <: TabControl with TabError {
   val runButton = bs.button("Play", btn_primary)(onclick := { () ⇒
     onrun()
   })
-
-  val errorElement = panel("Error", tags.div("This is my body"))
 
   lazy val controlElement = {
     inputDirectoryInput.value = relativePath + "/input"
@@ -244,7 +233,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                           if (tab.overlaying()) tab.overlayElement else tags.div
                         )
                       )
-                    case _ ⇒ tags.div()
+                    case _ ⇒ tags.div(t.editorElement)
                   }
                 }
               }

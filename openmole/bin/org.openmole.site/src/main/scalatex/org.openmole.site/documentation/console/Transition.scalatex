@@ -118,10 +118,10 @@
   @sect{Combining several workflow parts with +}
     In OpenMOLE the representation of the workflow have been designed to be as linear as possible, but actually workflows
     are just as graph of task and transitions. Sometime you cannot express complex workflows in such a linear manner. Therefore you may
-    want to use the @{+} operator to merge different part of a workflow. While the linear representation is more compact, the @{+} notation
+    want to use the + operator to merge different part of a workflow. While the linear representation is more compact, the + notation
     provides you with more freedom in the design of the transition graph (note that you can combine the 2 representations in order to get
     both compactness and flexibility). The following example exposes two exactly equivalent workflows, the first
-    design uses only the linear representation and the second design uses mostly the @{+} operator:
+    design uses only the linear representation and the second design uses mostly the + operator:
     @br @hl.openmole("""
     val d = Val[Double]
 

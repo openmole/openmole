@@ -6,7 +6,7 @@
   any side effects at all. Tasks' role is to compute some output data from their input data. That's what guaranties that
   their execution can be deported to other machines.
 
-@p OpenMOLE introduces a mechanims called @b{Hooks} to save or display results generated on remote environments. Hooks
+@p OpenMOLE introduces a mechanism called @b{Hooks} to save or display results generated on remote environments. Hooks
   are conceived to perform an action upon completion of the task they are attached to.
   @sect{Plug a hook}
      Let's consider this simple workflow:

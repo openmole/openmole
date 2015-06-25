@@ -231,6 +231,10 @@ height: 20px;
 
 }
 
+#fileinput-addon:hover{
+	color: #222;
+}
+
 #treeprogress{
 	margin-top:20px;
 	width: 95%;
@@ -253,7 +257,6 @@ opacity: 1;
 #editorContainer{
 padding:0;
 width: 100%;
-overflow-y : auto;
 }
 
 .nav-tabs {

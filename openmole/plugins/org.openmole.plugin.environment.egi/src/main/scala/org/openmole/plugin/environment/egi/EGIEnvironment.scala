@@ -159,23 +159,26 @@ object EGIEnvironment extends Logger {
     architecture: Option[String] = None,
     threads: Option[Int] = None,
     requirements: Option[String] = None,
-    debug: Boolean = false)(implicit authentications: AuthenticationProvider) =
-    new EGIEnvironment(voName,
-      bdii.getOrElse(Workspace.preference(EGIEnvironment.DefaultBDII)),
-      vomsURL.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
-      fqan,
-      openMOLEMemory,
-      memory,
-      cpuTime,
-      wallTime,
-      cpuNumber,
-      jobType,
-      smpGranularity,
-      myProxy,
-      architecture,
-      threads,
-      requirements,
-      debug)(authentications)
+    debug: Boolean = false,
+    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    new EGIEnvironment(
+      voName = voName,
+      bdii = bdii.getOrElse(Workspace.preference(EGIEnvironment.DefaultBDII)),
+      vomsURL = vomsURL.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
+      fqan = fqan,
+      openMOLEMemory = openMOLEMemory,
+      memory = memory,
+      cpuTime = cpuTime,
+      wallTime = wallTime,
+      cpuNumber = cpuNumber,
+      jobType = jobType,
+      smpGranularity = smpGranularity,
+      myProxy = myProxy,
+      architecture = architecture,
+      threads = threads,
+      requirements = requirements,
+      debug = debug,
+      name = name)(authentications)
 
   def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
 
@@ -210,7 +213,8 @@ class EGIEnvironment(
     val architecture: Option[String],
     override val threads: Option[Int],
     val requirements: Option[String],
-    val debug: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with EGIEnvironmentId with LCGCp { env ⇒
+    val debug: Boolean,
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with EGIEnvironmentId with LCGCp { env ⇒
 
   import EGIEnvironment._
 
@@ -231,7 +235,7 @@ class EGIEnvironment(
   def proxyCreator = authentication
 
   @transient lazy val authentication = authentications(classOf[EGIAuthentication]).headOption match {
-    case Some(a) ⇒
+    case Some((a, _)) ⇒
       EGIAuthentication.initialise(a)(
         vomsURL,
         voName,

@@ -29,11 +29,13 @@ object NSGA2 {
     termination: GATermination { type G >: NSGA2#G; type P >: NSGA2#P; type F >: NSGA2#F },
     inputs: Inputs,
     objectives: Objectives,
-    reevaluate: Double = 0.0) = {
-    val (_mu, _reevaluate, _inputs, _objectives) = (mu, reevaluate, inputs, objectives)
+    reevaluate: Double = 0.0,
+    epsilons: Option[Seq[Double]] = None) = {
+    val (_mu, _reevaluate, _inputs, _objectives, _epsilons) = (mu, reevaluate, inputs, objectives, epsilons)
     new NSGA2 {
       val inputs = _inputs
       val objectives = _objectives
+      val epsilons = _epsilons.getOrElse(objectives.map(_ ⇒ 0.0))
 
       val stateType = termination.stateType
       val populationType = PrototypeType[Population[G, P, F]]
@@ -62,7 +64,7 @@ trait NSGA2 extends GAAlgorithm
   with NonDominatedElitism
   with FitnessCrowdingDiversity
   with ParetoRanking
-  with NonStrictDominance
+  with NonStrictEpsilonDominance
   with NoArchive
   with CloneRemoval
   with GeneticBreeding

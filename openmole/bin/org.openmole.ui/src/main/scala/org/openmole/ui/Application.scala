@@ -17,12 +17,15 @@
 
 package org.openmole.ui
 
-import java.io.File
+import java.awt.Desktop
+import java.io.{ FileOutputStream, File }
+import java.net.URI
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.tools.io.Network
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.bootstrap.js.BootstrapJS
@@ -32,6 +35,7 @@ import org.openmole.rest.server.RESTServer
 import annotation.tailrec
 import org.openmole.gui.server.core._
 import org.openmole.console._
+import org.openmole.tool.file._
 
 object Application extends Logger
 
@@ -48,8 +52,7 @@ class Application extends IApplication {
       |_|
 """
 
-  // since CTRL-C is disabled in the Console
-  lazy val consoleUsage = "(Type :q or :quit to quit)"
+  lazy val consoleUsage = "(Type :q to quit)"
 
   override def start(context: IApplicationContext) = {
 
@@ -74,7 +77,7 @@ class Application extends IApplication {
       serverPort: Option[Int] = None,
       serverSSLPort: Option[Int] = None,
       loggerLevel: Option[String] = None,
-      optimizedJS: Boolean = false,
+      unoptimizedJS: Boolean = false,
       args: List[String] = Nil)
 
     def takeArg(args: List[String]) =
@@ -117,7 +120,7 @@ class Application extends IApplication {
         case "-ssp" :: tail                         ⇒ parse(tail.tail, c.copy(serverSSLPort = Some(tail.head.toInt)))
         case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
         case "--logger-level" :: tail               ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
-        case "--optimizedJS" :: tail                ⇒ parse(tail, c.copy(optimizedJS = true))
+        case "--unoptimizedJS" :: tail              ⇒ parse(tail, c.copy(unoptimizedJS = true))
         case "--" :: tail                           ⇒ parse(Nil, c.copy(args = tail))
         case s :: tail                              ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                    ⇒ c
@@ -174,9 +177,23 @@ class Application extends IApplication {
           val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
           Some(console.run(ConsoleVariables(args = config.args)))
         case GUIMode ⇒
-          BootstrapJS.init(config.optimizedJS)
-          val server = new GUIServer(config.serverPort, BootstrapJS.webapp)
-          server.start()
+          def browse(url: String) =
+            if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
+
+          val lock = new FileOutputStream(GUIServer.lockFile).getChannel.tryLock
+          if (lock != null)
+            try {
+              val port = config.serverPort.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
+              val url = s"https://localhost:$port"
+              GUIServer.urlFile.content = url
+              BootstrapJS.init(!config.unoptimizedJS)
+              val server = new GUIServer(port, BootstrapJS.webapp, false)
+              server.start()
+              browse(url)
+              server.join()
+            }
+            finally lock.release()
+          else browse(GUIServer.urlFile.content)
           None
       }
 

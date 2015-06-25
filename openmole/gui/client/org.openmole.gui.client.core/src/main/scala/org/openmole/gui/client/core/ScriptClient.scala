@@ -38,11 +38,17 @@ object ScriptClient {
     val body = dom.document.body
     val openFileTree = Var(false)
 
-    implicit val executionTrigerrer = new PanelTriggerer {
+    implicit val executionTriggerer = new PanelTriggerer {
       val modalPanel = new ExecutionPanel
     }
 
-    val execItem = dialogNavItem("executions", "Executions", () ⇒ executionTrigerrer.trigger)
+    val authenticationTriggerer = new PanelTriggerer {
+      val modalPanel = new AuthenticationPanel
+    }
+
+    val execItem = dialogNavItem("executions", "Executions", () ⇒ executionTriggerer.trigger)
+
+    val authenticationItem = dialogNavItem("authentications", "Authentications", () ⇒ authenticationTriggerer.trigger)
 
     val fileItem = navItem("files", "Files", todo = () ⇒ {
       openFileTree() = !openFileTree()
@@ -52,15 +58,16 @@ object ScriptClient {
       nav("mainNav",
         nav_pills + nav_inverse + nav_staticTop,
         fileItem,
-        execItem
+        execItem,
+        authenticationItem
       )
     )
 
     val maindiv = dom.document.body.appendChild(tags.div.render)
-    maindiv.appendChild(executionTrigerrer.modalPanel.dialog.render)
+    maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
 
     OMPost[Api].workspacePath.call().foreach { projectsPath ⇒
-      val treeNodePanel = TreeNodePanel(projectsPath)
+      val treeNodePanel = TreeNodePanel(projectsPath)(executionTriggerer)
       maindiv.appendChild(
         tags.div(`class` := "fullpanel")(
           tags.div(`class` := Rx {

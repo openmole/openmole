@@ -37,7 +37,7 @@ object Task extends Logger {
   def buildRNG(context: Context): Random = service.Random.newRNG(context(Task.openMOLESeed)).toScala
 }
 
-trait Task <: InputOutputCheck {
+trait Task <: InputOutputCheck with Name {
   /**
    *
    * Perform this task.
@@ -47,14 +47,6 @@ trait Task <: InputOutputCheck {
   def perform(context: Context): Context = perform(context, process(_)())
 
   protected def process(context: Context)(implicit rng: RandomProvider = Task.buildRNG(context)): Context
-
-  /**
-   *
-   * Get the name of the task.
-   *
-   * @return the name of the task
-   */
-  def name: String
 
   /**
    *
@@ -79,8 +71,6 @@ trait Task <: InputOutputCheck {
    * @return the defaults configured for this task.
    */
   def defaults: DefaultSet
-
-  override def toString: String = name
 
 }
 

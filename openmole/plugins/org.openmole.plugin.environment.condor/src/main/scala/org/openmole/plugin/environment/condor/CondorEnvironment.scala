@@ -49,8 +49,22 @@ object CondorEnvironment {
     workDirectory: Option[String] = None,
     requirements: Option[CondorRequirement] = None,
     threads: Option[Int] = None,
-    storageSharedLocally: Boolean = false)(implicit authentications: AuthenticationProvider) =
-    new CondorEnvironment(user, host, port, openMOLEMemory, memory, nodes, coresByNode, sharedDirectory, workDirectory, requirements, threads, storageSharedLocally)
+    storageSharedLocally: Boolean = false,
+    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    new CondorEnvironment(
+      user = user,
+      host = host,
+      port = port,
+      openMOLEMemory = openMOLEMemory,
+      memory = memory,
+      nodes = nodes,
+      coresByNode = coresByNode,
+      sharedDirectory = sharedDirectory,
+      workDirectory = workDirectory,
+      requirements = requirements,
+      threads = threads,
+      storageSharedLocally = storageSharedLocally,
+      name = name)
 }
 
 class CondorEnvironment(
@@ -69,7 +83,8 @@ class CondorEnvironment(
     val workDirectory: Option[String],
     val requirements: Option[CondorRequirement],
     override val threads: Option[Int],
-    val storageSharedLocally: Boolean)(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    val storageSharedLocally: Boolean,
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
   type JS = CondorJobService
 

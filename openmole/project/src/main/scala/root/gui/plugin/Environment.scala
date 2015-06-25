@@ -2,34 +2,22 @@ package root.gui.plugin
 
 import sbt._
 import root.gui._
+import root._
+
+import root.Libraries
+import Keys._
+import org.openmole.buildsystem.OMKeys._
 
 object Environment extends GUIPluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.gui.plugin.environment")
-  /*
-  lazy val desktopgrid = OsgiProject("desktopgrid") dependsOn ( base.Misc.exception,
-    base.plugin.Environment.desktopgrid)
 
-  lazy val glite = OsgiProject("glite") dependsOn ( base.plugin.Environment.glite,
-    base.Misc.exception, base.Core.batch)
+  val rootDir = dir / artifactPrefix.get
 
-  lazy val local = OsgiProject("local") dependsOn ( base.Misc.exception,
-    base.Core.model, base.Misc.replication % "test")
+  //FIXME: should be constructed with: lazy val groovy = project("groovy", serverProjectDependencies = Seq(base.plugin.Task.groovy))
+  val (ext, client, server) = Util.project(rootDir, "ssh",
+    serverProjectDependencies = Seq(Core.batch, Core.workspace, _root_.plugin.Environment.ssh)
+  )
 
-  lazy val pbs = OsgiProject("pbs") dependsOn ( base.plugin.Environment.pbs,
-    base.Misc.exception, base.Core.batch)
+  lazy val ssh = OsgiProject("ssh") dependsOn (ext, client, server)
 
-  lazy val sge = OsgiProject("sge") dependsOn ( base.plugin.Environment.sge,
-    base.Misc.exception, base.Core.batch)
-
-  lazy val oar = OsgiProject("oar") dependsOn ( base.plugin.Environment.oar,
-    base.Misc.exception, base.Core.batch)
-
-  lazy val condor = OsgiProject("condor") dependsOn ( base.plugin.Environment.condor,
-    base.Misc.exception, base.Core.batch)
-
-  lazy val slurm = OsgiProject("slurm") dependsOn ( base.plugin.Environment.slurm,
-    base.Misc.exception, base.Core.batch)
-
-  lazy val ssh = OsgiProject("ssh") dependsOn ( base.plugin.Environment.ssh,
-    base.Core.batch)*/
 }

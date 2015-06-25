@@ -33,7 +33,7 @@ object FileExtension {
   val SCALA = DisplayableFile("scala", "scala")
   val NETLOGO = DisplayableFile("nlogo", "nlogo")
   val SH = DisplayableFile("sh", "sh")
-  val NO_EXTENSION = DisplayableFile("", "")
+  val NO_EXTENSION = DisplayableFile("text", "text")
   val BINARY = BinaryFile("")
 
   def apply(treeNode: TreeNode) = {

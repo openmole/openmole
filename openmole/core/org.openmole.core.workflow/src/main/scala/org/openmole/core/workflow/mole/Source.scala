@@ -24,7 +24,7 @@ object Source {
   implicit def sourceBuilderToSourceConverter(sb: SourceBuilder) = sb.toSource
 }
 
-trait Source <: InputOutputCheck {
+trait Source <: InputOutputCheck with Name {
   def inputs: PrototypeSet
   def outputs: PrototypeSet
   def defaults: DefaultSet

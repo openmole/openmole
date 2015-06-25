@@ -18,21 +18,49 @@ package org.openmole.gui.server.core
  */
 
 import java.io.File
+import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.DefaultServlet
-import org.eclipse.jetty.webapp.WebAppContext
+import org.eclipse.jetty.webapp._
+import org.openmole.core.tools.io.Network
+import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
+import org.scalatra.auth.strategy.{ BasicAuthStrategy, BasicAuthSupport }
 import org.scalatra.servlet.ScalatraListener
 import javax.servlet.ServletContext
 import org.scalatra._
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 
-class GUIServer(port: Option[Int], webapp: File) {
-  val p = port getOrElse 8080
+object GUIServer {
+  val port = new ConfigurationLocation("GUIServer", "Port")
+  Workspace += (port, Network.freePort.toString)
 
-  val server = new Server(p)
+  lazy val lockFile = {
+    val file = Workspace.file("GUI.lock")
+    file.createNewFile
+    file
+  }
+  lazy val urlFile = Workspace.file("GUI.url")
+}
+
+class GUIServer(port: Int, webapp: File, remote: Boolean) {
+
+  val server = new Server()
+
+  val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
+  val ks = Workspace.keyStore
+  contextFactory.setKeyStore(ks)
+  contextFactory.setKeyStorePassword(Workspace.keyStorePassword)
+  contextFactory.setKeyManagerPassword(Workspace.keyStorePassword)
+  contextFactory.setTrustStore(ks)
+  contextFactory.setTrustStorePassword(Workspace.keyStorePassword)
+
+  val connector = new org.eclipse.jetty.server.ssl.SslSelectChannelConnector(contextFactory)
+  connector.setPort(port)
+  if (!remote) connector.setHost("localhost")
+
+  server.addConnector(connector)
 
   val context = new WebAppContext()
-
   context.setContextPath("/")
   context.setResourceBase(webapp.getAbsolutePath)
   context.setClassLoader(classOf[GUIServer].getClassLoader)
@@ -40,14 +68,8 @@ class GUIServer(port: Option[Int], webapp: File) {
 
   server.setHandler(context)
 
-  def start() = {
-    server.start
-    server.join
-  }
-
-  def end() {
-    server.stop
-    server.join
-  }
+  def start() = server.start
+  def join() = server.join
+  def end() = server.stop
 
 }

@@ -46,16 +46,11 @@ object Network {
     }
   }
 
-  trait IConnectable {
-    @throws(classOf[Throwable])
-    def connect(port: Int)
-  }
-
-  def connectToFreePort(connectable: IConnectable): Int = synchronized {
+  def freePort = {
     val server = new ServerSocket(0)
     val port = server.getLocalPort
     server.close
-    connectable.connect(port)
     port
   }
+
 }

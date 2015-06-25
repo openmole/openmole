@@ -17,7 +17,8 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.{ StringWriter, PrintWriter }
+import java.io.{ OutputStream, StringWriter, PrintWriter }
+import java.net.URI
 
 case class DataBag(uuid: String, name: String, data: Data)
 
@@ -89,6 +90,8 @@ trait TaskData extends Data with InputData with OutputData
 
 trait EnvironmentData extends Data
 
+trait AuthenticationData extends Data
+
 trait HookData extends Data with InputData with OutputData
 
 case class ErrorData(data: DataBag, error: String, stack: String)
@@ -147,7 +150,7 @@ sealed trait ExecutionInfo {
 
 case class Failed(error: Error, state: String = "failed", duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo
 
-case class Running(ready: Long, running: Long, state: String = "running", duration: Long, completed: Long, environmentStates: Seq[EnvironmentState]) extends ExecutionInfo
+case class Running(ready: Long, running: Long, state: String = "running", duration: Long, completed: Long, environmentStates: Seq[EnvironmentState], lastOutputs: String) extends ExecutionInfo
 
 case class Finished(state: String = "finished", duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo
 

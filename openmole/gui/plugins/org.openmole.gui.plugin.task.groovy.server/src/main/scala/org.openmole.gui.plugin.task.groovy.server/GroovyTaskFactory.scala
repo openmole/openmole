@@ -1,6 +1,6 @@
 package org.openmole.gui.plugin.task.groovy.server
 
-import org.openmole.gui.ext.data.Factory
+import org.openmole.gui.ext.data.{CoreObjectFactory, Factory}
 import org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData
 import org.openmole.core.workflow.task.PluginSet
 import org.openmole.plugin.task.groovy.GroovyTask
@@ -23,7 +23,7 @@ import scala.util.Try
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class GroovyTaskFactory(val data: GroovyTaskData) extends Factory {
+class GroovyTaskFactory(val data: GroovyTaskData) extends CoreObjectFactory {
 
   def coreObject(implicit plugins: PluginSet): Try[Any] =
     Try { GroovyTask(data.code)(plugins) //set { _ setName data.name }

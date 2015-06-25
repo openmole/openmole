@@ -18,12 +18,12 @@ package org.openmole.gui.plugin.task.exploration.server
  */
 
 import org.openmole.gui.plugin.task.exploration.ext.ExplorationTaskData
-import org.openmole.gui.ext.data.Factory
+import org.openmole.gui.ext.data.{CoreObjectFactory, Factory}
 
 import org.openmole.core.workflow.task.{ExplorationTask, PluginSet}
 import scala.util.Try
 
-class ExplorationTaskFactory(val data: ExplorationTaskData) extends Factory {
+class ExplorationTaskFactory(val data: ExplorationTaskData) extends CoreObjectFactory {
   def coreObject(implicit plugins: PluginSet): Try[Any] = ??? ///ExplorationTask
 
 }

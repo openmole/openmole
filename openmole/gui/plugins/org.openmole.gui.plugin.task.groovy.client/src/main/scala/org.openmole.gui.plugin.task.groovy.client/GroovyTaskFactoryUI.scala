@@ -1,7 +1,7 @@
 package org.openmole.gui.plugin.task.groovy.client
 
 import org.openmole.gui.client.core.dataui.TaskDataUI
-import org.openmole.gui.ext.dataui.FactoryUI
+import org.openmole.gui.ext.dataui.FactoryWithDataUI
 
 import scala.scalajs.js.annotation.JSExport
 import rx._
@@ -24,7 +24,7 @@ import rx._
  */
 
 @JSExport("org.openmole.gui.plugin.task.groovy.client.GroovyTaskFactoryUI")
-class GroovyTaskFactoryUI extends FactoryUI {
+class GroovyTaskFactoryUI extends FactoryWithDataUI {
   type DATAUI = TaskDataUI
 
   def dataUI = new GroovyTaskDataUI

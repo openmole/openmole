@@ -21,6 +21,7 @@ import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
 import java.io.File
+import java.net.URI
 
 object Utils {
 
@@ -29,6 +30,8 @@ object Utils {
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)
   }
+
+  implicit def uriToFile(uri: URI): File = new File(uri.getPath)
 
   val workspaceProjectFile = Workspace.file("webui/projects")
 

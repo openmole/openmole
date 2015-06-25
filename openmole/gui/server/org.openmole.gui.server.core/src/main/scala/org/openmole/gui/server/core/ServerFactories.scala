@@ -20,7 +20,7 @@ package org.openmole.gui.server.core
 import org.openmole.core.workflow.task.PluginSet
 
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.dataui.FactoryUI
+import org.openmole.gui.ext.dataui.{ FactoryWithPanelUI, FactoryWithDataUI }
 
 import scala.collection.mutable
 import scala.util.{ Failure, Try }
@@ -30,15 +30,19 @@ object ServerFactories {
 
   def coreObject(dataBag: DataBag): Try[Any] = instance.factories.synchronized {
     instance.factories.get(dataBag.data.getClass()) match {
-      case Some(f: Factory) ⇒ f.coreObject(PluginSet.empty) //FIXME AND TAKE THE PLUGINS
-      case _                ⇒ Failure(new Throwable("The data " + dataBag.name + " cannot be recontructed on the server."))
+      case Some(f: CoreObjectFactory) ⇒ f.coreObject(PluginSet.empty) //FIXME AND TAKE THE PLUGINS
+      case _                          ⇒ Failure(new Throwable("The data " + dataBag.name + " cannot be recontructed on the server."))
     }
   }
 
-  def add(dataClass: Class[_], factory: Factory, factoryUI: FactoryUI) = instance.factories.synchronized {
-    println("Add server " + dataClass)
+  def add(dataClass: Class[_], factory: Factory, factoryUI: FactoryWithDataUI) = instance.factories.synchronized {
     instance.factories += dataClass -> factory
     instance.factoriesUI += dataClass.getName -> factoryUI
+  }
+
+  def addAuthenticationFactory(dataClass: Class[_], factory: Factory, factoryUI: FactoryWithPanelUI) = instance.authenticationFactoriesUI.synchronized {
+    instance.factories += dataClass -> factory
+    instance.authenticationFactoriesUI += dataClass -> factoryUI
   }
 
   def remove(dataClass: Class[_]) = instance.factories.synchronized {
@@ -46,10 +50,18 @@ object ServerFactories {
     instance.factoriesUI -= dataClass.getName
   }
 
+  def removeAuthenticationFactory(dataClass: Class[_]) = instance.authenticationFactoriesUI.synchronized {
+    instance.factories -= dataClass
+    instance.authenticationFactoriesUI -= dataClass
+  }
+
   def factoriesUI = instance.factoriesUI.toMap
+
+  def authenticationFactoriesUI = instance.authenticationFactoriesUI.toMap
 }
 
 class ServerFactories {
   val factories = new mutable.WeakHashMap[Class[_], Factory]
-  val factoriesUI = new mutable.WeakHashMap[String, FactoryUI]
+  val factoriesUI = new mutable.WeakHashMap[String, FactoryWithDataUI]
+  val authenticationFactoriesUI = new mutable.WeakHashMap[Class[_], FactoryWithPanelUI]
 }

@@ -17,7 +17,7 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.scalajs.dom.html.Input
+import org.scalajs.dom.html.{ TextArea, Input }
 import org.scalajs.dom.raw
 import org.scalajs.dom.raw._
 import scala.scalajs.js.annotation.JSExport
@@ -151,6 +151,7 @@ object BootstrapTags {
   val glyph_remove = "glyphicon-remove-sign"
   val glyph_list = "glyphicon-list"
   val glyph_stats = "glyphicon-stats"
+  val glyph_refresh = "glyphicon-refresh"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
@@ -175,18 +176,11 @@ object BootstrapTags {
       todo()
     }))
 
-  def fileInput(todo: HTMLInputElement ⇒ Unit): HTMLFormElement = {
-    lazy val form: HTMLFormElement = tags.form({
-      lazy val input: HTMLInputElement = tags.input(id := "fileinput", `type` := "file", multiple := "")(onchange := { () ⇒
-        todo(input)
-      }, onclick := { () ⇒
-        println("form submit")
-        form.submit
-      }).render
-      input
+  def fileInput(todo: HTMLInputElement ⇒ Unit) = {
+    lazy val input: HTMLInputElement = tags.input(id := "fileinput", `type` := "file", multiple := "")(onchange := { () ⇒
+      todo(input)
     }).render
-
-    form
+    input
   }
 
   def uploadButton(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] = {
@@ -264,6 +258,48 @@ object BootstrapTags {
 
   //TextArea
   def textArea(nbRows: Int) = tags.textarea(`class` := "form-control", rows := nbRows)
+
+  object ScrollableTextArea {
+
+    sealed trait AutoScroll
+
+    case class BottomScroll() extends AutoScroll
+
+    case class NoScroll() extends AutoScroll
+
+  }
+
+  import ScrollableTextArea._
+
+  case class BSTextArea(nbRows: Int, initText: String = "", sMode: AutoScroll) {
+    val scrollMode: Var[AutoScroll] = Var(sMode)
+    var content: String = initText
+
+    def append(text: String) = content = content + text
+
+    def get: TypedTag[HTMLTextAreaElement] = {
+
+      val tA = textArea(nbRows)(content)
+      val tARender = tA.render
+
+      tARender.onscroll = (e: Event) ⇒ {
+        //FIXME: NOT WORKING, FIX IT !
+        println("scroll !! " + scrollMode())
+        if (tARender.scrollTop == tARender.scrollHeight.toDouble) scrollMode() = BottomScroll()
+        else scrollMode() = NoScroll()
+      }
+
+      doScroll(tARender)
+      tA
+    }
+
+    def doScroll(tARender: HTMLTextAreaElement) = scrollMode() match {
+      case b: BottomScroll ⇒
+        //FIXME: NOT WORKING, FIX IT !
+        tARender.scrollTop = 999.0
+      case _ ⇒
+    }
+  }
 
   //table
   def table(keys: ClassKeyAggregator) = tags.table(`class` := keys.key)

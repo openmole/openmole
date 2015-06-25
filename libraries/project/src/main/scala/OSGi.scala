@@ -34,7 +34,8 @@ object OSGi extends Defaults {
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "*")) settings(
       libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion,
       libraryDependencies += "org.scalatra" %% "scalatra-json" % scalatraVersion,
-       libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.2.10",
+      libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion,
+      libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.2.10",
       version := scalatraVersion)
 
   /*lazy val jacksonJson = OsgiProject("org.json4s", privatePackages = Seq("com.fasterxml.*",  "com.thoughtworks.paranamer.*")) settings(

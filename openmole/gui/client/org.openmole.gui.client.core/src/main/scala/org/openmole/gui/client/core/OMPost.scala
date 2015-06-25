@@ -17,7 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.scalajs.dom
+import org.scalajs.dom._
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -25,8 +25,10 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 object OMPost extends autowire.Client[String, upickle.Reader, upickle.Writer] {
   override def doCall(req: Request): Future[String] = {
     val url = req.path.mkString("/")
-    dom.ext.Ajax.post(
-      url = "http://localhost:8080/" + url,
+    val host = window.document.location.host
+
+    ext.Ajax.post(
+      url = s"https://$host/$url",
       data = upickle.write(req.args)
     ).map {
         _.responseText

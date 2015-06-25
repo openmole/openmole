@@ -31,6 +31,7 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.validation.{ Validation, DataflowProblem }
 import org.openmole.plugin.task.statistic._
 import DataflowProblem.MissingInput
+import org.openmole.plugin.tool.pattern._
 
 package object stochastic extends StatisticPackage {
 
@@ -53,7 +54,7 @@ package object stochastic extends StatisticPackage {
 
     val explorationCapsule = StrainerCapsule(exploration)
     val aggregationCapsule = Slot(aggregation)
-    explorationCapsule -< model >- aggregationCapsule //+ explorationCapsule oo aggregationCapsule
+    Strain(explorationCapsule -< model >- aggregationCapsule)
   }
 
   def Replicate(
@@ -72,7 +73,7 @@ package object stochastic extends StatisticPackage {
 
     val explorationCapsule = StrainerCapsule(exploration)
     val aggregationCapsule = Slot(Capsule(EmptyTask() set { _.setName(name + "Aggregation") }))
-    explorationCapsule -< model >- aggregationCapsule //+ explorationCapsule oo aggregationCapsule
+    Strain(explorationCapsule -< model >- aggregationCapsule)
   }
 
 }
