@@ -4,6 +4,8 @@ package test
 import renderer._
 import java.io.{ FileInputStream, InputStreamReader, FileOutputStream, OutputStreamWriter, File }
 import scala.util.Properties
+import toolxit.bibtex.machine.BibTeXException
+
 
 object Renderer extends App {
 
@@ -50,7 +52,6 @@ object Renderer extends App {
         bibwriter.flush
         bibwriter.close
 
-      case fail ⇒ println(fail)
+      case res: NoSuccess ⇒ BibTeXException(s"Could not parse ${bibFile}", List(res.msg))
     }
-
 }

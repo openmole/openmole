@@ -17,12 +17,12 @@ package toolxit.bibtex
 package test
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class AuthorsTest extends FlatSpec with ShouldMatchers {
+class AuthorsTest extends FlatSpec with Matchers {
 
   @inline
   def parseAuthor(input: String) =
@@ -82,7 +82,7 @@ class AuthorsTest extends FlatSpec with ShouldMatchers {
   it should "correctly recognize the first level 0 letter in First von Last format" in {
     parseAuthor("Dominique Galouzeau de Villepin") should equal(Author("Dominique Galouzeau", "de", "Villepin", ""))
     parseAuthor("Dominique {G}alouzeau de Villepin") should equal(Author("Dominique", "{G}alouzeau de", "Villepin", ""))
-    "Galouzeau de Villepin, Dominique"
+    parseAuthor("Galouzeau de Villepin, Dominique") should equal(Author("Dominique", "", "Galouzeau de Villepin", ""))
   }
 
   it should "correctly recognize the first level 0 letter in von Last, Jr, First format" in {
