@@ -25,6 +25,15 @@ trait Api {
 
   def addAuthentication(data: AuthenticationData): Unit
 
+  //WORKSPACE
+  def isPasswordCorrect(pass: String): Boolean
+
+  def passwordChosen(): Boolean
+
+  def resetPassword(): Unit
+
+  def setPassword(pass: String): Boolean
+
   //FILES
   def addDirectory(treeNode: TreeNodeData, directoryName: String): Boolean
 

@@ -1,5 +1,6 @@
 package org.openmole.gui.server.core
 
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.tool.file._
 import org.openmole.core.workspace.{ AuthenticationProvider, Workspace }
@@ -40,7 +41,24 @@ object ApiImpl extends Api {
   //AUTHENTICATIONS
   def addAuthentication(data: AuthenticationData): Unit = ServerFactories.authenticationFactories(data.getClass).buildAuthentication(data)
 
-  def authentications(): Seq[AuthenticationData] = ServerFactories.authenticationFactories.values.flatMap { _.allAuthenticationData }.toSeq
+  def authentications(): Seq[AuthenticationData] = ServerFactories.authenticationFactories.values.flatMap {
+    _.allAuthenticationData
+  }.toSeq
+
+  //WORKSPACE
+  def isPasswordCorrect(pass: String): Boolean = Workspace.passwordIsCorrect(pass)
+
+  def passwordChosen(): Boolean = Workspace.passwordChosen
+
+  def resetPassword(): Unit = Workspace.reset
+
+  def setPassword(pass: String): Boolean = try {
+    Workspace.setPassword(pass)
+    true
+  }
+  catch {
+    case e: UserBadDataError ⇒ false
+  }
 
   // FILES
   def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean = new File(treeNodeData.canonicalPath, directoryName).mkdirs
