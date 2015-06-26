@@ -17,12 +17,12 @@ package toolxit.bibtex
 package test
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class NameFormattingTest extends FlatSpec with ShouldMatchers {
+class NameFormattingTest extends FlatSpec with Matchers {
 
   "The formatter" should "format correctly" in {
     val formatter = new NameFormatter("{f. }{vv }{ll}")

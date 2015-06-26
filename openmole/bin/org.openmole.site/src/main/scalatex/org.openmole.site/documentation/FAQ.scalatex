@@ -20,4 +20,74 @@
     Console provides a headless / batch mode for running scripts. You can enable it thanks to the -s option: @hl.highlight("./openmole -c -s /path/to/you/mole/script", "plain")
     @p In that case OpenMOLE still asks for your preferences cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -c -s /path/to/your/mole/script -pw password", "plain")
     @p OpenMOLE will wait until the execution of your mole has ended if you add at the end of your script:
-    @br @hl.openmoleNoTest("""ex.waitUntilEnded // ex is the name of your mole execution variable""")
+    @br @hl.openmoleNoTest("ex.waitUntilEnded // ex is the name of your mole execution variable")
+
+  @sect{OpenMOLE cannot connect to my environment using SSH}
+    @p When your workflow does not start to the remote environment you’re accessing through SSH, you can try these few
+    steps to identify the problems.
+
+    @p First, enable the @i{FINE} level of logging in the console using:
+      @hl.openmole("""logger.level("FINE")""")
+
+    @p A typical SSH connection error will report as:
+      @hl.highlight("""
+      FINE: Error in job refresh
+      net.schmizz.sshj.userauth.UserAuthException: Exhausted available authentication methods
+      """, "bash")
+
+    @p or
+      @hl.highlight("""
+      FINE: Error in job refresh
+      net.schmizz.sshj.transport.TransportException: Incorrect identification: line too long
+      """, "bash")
+
+    @sect{Password Authentication}
+      @p If you are using the @hl.openmole("LoginPassword") authentication you might want to double check the user and
+      password you entered since one of them is more than likely incorrect.
+
+    @sect{SSH Keypair Authentication}
+      @p Here we consider that you have defined your environment to use a public key authentication as follows:
+      @hl.openmole("""
+              SSHAuthentication(0) =
+                PrivateKey(
+                "/home/mylogin/.ssh/id_dsa",
+                "mylogin",
+                encrypted,
+                "the-name-of-the-remote-server"
+            )""")
+
+      @p In such a case, we'll have to investigate multiple options, as SSH public key authentications are senssible to
+        several configuration parameters.
+
+      @p Public key authentication has usually a higher priority than password-based authentication when trying to
+        connect to a remote server. Thus, when you attempt an SSH connection to the the target environment, if your
+        client asks you to enter a password (please note that a passphrase is different from a password), then your
+        public key authentication is not taken into account.
+
+      @p SSH will skip your public key in case of bad configuration. The most common cases of badly configured keypairs
+        are the following:
+      @ul
+        @li{You haven't created an SSH keypair yet (using ssh-keygen). Private keys are usually stored in
+        @i{~/.ssh/id_rsa} or @i{~/.ssh/id_dsa}, and should have a matching ~/.ssh/id_[rd]sa.pub next to them.}
+        @li{Permissions of your ~/.ssh folder @b{must} be set to @i{drwx——} (700 in octal). Also, too permissive home
+        directories (with write access given to the whole group for instance) might show problematic.}
+        @li{A @i{~/.ssh/authorized_keys} file must be present on the remote system. It should at least contain a line
+        matching the content of the ~/.ssh/id_[rd]sa.pub from your base system.}
+        @li{You entered a passphrase when you generated your SSH keys and cannot remember it. In such a case, it might
+        be better to generate another keypair.}
+
+      @p If you still could not solve your SSH authentication problems, another option is to recreate a public/private
+      keypair using the @hl.highlight("ssh-keygen", "bash") shell command. Store it to a different file to avoid
+      overwriting the one already in place. You might also want to try a simple @hl.openmole{LoginPassword}
+      authentication as explained in the @a("SSH section", href := DocumentationPages.root.console.environment.ssh.file).
+
+      @p Adding the @hl.highlight("-vvv", "bash") flag to your @i{ssh} command will give a lot more details on the
+        communication between your client and the remote server. This will allow you to find out which authentication
+      is successful as well as the order in which the authentication modes are tried.
+
+  @sect{My problem is not listed here}
+    @p If you could not resolve your problems, feel free to post your problem on the @a("mailing-list",
+    href := "http://fedex.iscpif.fr/mailman/listinfo/openmole-users").
+
+    @p If you think your problem is induced by a bug in OpenMOLE, please report the issue exhaustively on our @a(
+    "GitHub page", href := "https://github.com/openmole/openmole/issues").
