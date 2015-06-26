@@ -48,13 +48,13 @@
     @sect{SSH Keypair Authentication}
       @p Here we consider that you have defined your environment to use a public key authentication as follows:
       @hl.openmole("""
-              SSHAuthentication(0) =
+              SSHAuthentication +=
                 PrivateKey(
-                "/home/mylogin/.ssh/id_dsa",
-                "mylogin",
-                encrypted,
-                "the-name-of-the-remote-server"
-            )""")
+                  "/home/mylogin/.ssh/id_dsa",
+                  "mylogin",
+                  encrypted,
+                  "the-name-of-the-remote-server"
+                )""")
 
       @p In such a case, we'll have to investigate multiple options, as SSH public key authentications are senssible to
         several configuration parameters.
