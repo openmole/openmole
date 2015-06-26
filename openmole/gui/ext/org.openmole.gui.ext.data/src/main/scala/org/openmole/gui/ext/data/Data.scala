@@ -17,9 +17,6 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.{ OutputStream, StringWriter, PrintWriter }
-import java.net.URI
-
 case class DataBag(uuid: String, name: String, data: Data)
 
 trait Data
@@ -90,7 +87,27 @@ trait TaskData extends Data with InputData with OutputData
 
 trait EnvironmentData extends Data
 
-trait AuthenticationData extends Data
+sealed trait AuthenticationData extends Data {
+  def synthetic: String
+}
+
+object AuthenticationData {
+
+  case class LoginPasswordAuthenticationData(login: String = "",
+                                             cypheredPassword: String = "",
+                                             target: String = "") extends AuthenticationData {
+    def synthetic = s"$login@$target"
+  }
+
+  case class PrivateKeyAuthenticationData(
+      privateKey: String = "",
+      login: String = "",
+      cypheredPassword: String = "",
+      target: String = "") extends AuthenticationData {
+    def synthetic = s"$login@$target"
+  }
+
+}
 
 trait HookData extends Data with InputData with OutputData
 

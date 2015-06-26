@@ -17,6 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.core.workspace.{ AuthenticationProvider, Workspace }
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLDivElement
@@ -31,8 +32,8 @@ import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.AuthenticationData._
 import bs._
 import rx._
 
@@ -47,7 +48,15 @@ class AuthenticationPanel extends ModalPanel {
     println("close authen")
   }
 
-  println("Autth: " + ClientService.authenticationFactories.map { _.name })
+  val auths: Var[Seq[AuthenticationData]] = Var(Seq())
+
+  OMPost[Api].addAuthentication(LoginPasswordAuthenticationData("oooo", "aaaa", "uuuu")).call().foreach { o ⇒
+    println("added " + o)
+  }
+
+  OMPost[Api].authentications.call().foreach { a ⇒
+    auths() = a
+  }
 
   lazy val executionTable = {
 
@@ -55,32 +64,38 @@ class AuthenticationPanel extends ModalPanel {
       thead,
       Rx {
         tbody({
+          for (a ← auths()) {
+            //ClientService.authenticationUI(a)
 
-          Seq(bs.tr(row)( /* bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink),
-              bs.td(col_md_1)(startDate),
-              bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + details.running),
-              bs.td(col_md_1)(bs.glyph(bs.glyph_flag), " " + completed),
-              bs.td(col_md_1)(details.ratio + "%"),
-              bs.td(col_md_1)(duration),
-              bs.td(col_md_1)(stateLink)(`class` := executionInfo.state + "State"),
-              bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
-              bs.td(col_md_1)(bs.glyphSpan(bs.glyph_list, () ⇒ println("output"))),
-              bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
-                allExecutionStates
-              })(`class` := "cancelExecution")),
-              bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].removeExecution(id).call().foreach { r ⇒
-                allExecutionStates
-              })(`class` := "removeExecution"))
-            ), bs.tr(row)(
-              expander.getVisible(id.id) match {
-                case Some(v: VisibleID) ⇒ tags.td(colspan := 12)(hiddenMap(v))
-                case _                  ⇒ tags.div()
+            Seq(bs.tr(row)(
+              a.synthetic
+
+            /* bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink),
+                  bs.td(col_md_1)(startDate),
+                  bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + details.running),
+                  bs.td(col_md_1)(bs.glyph(bs.glyph_flag), " " + completed),
+                  bs.td(col_md_1)(details.ratio + "%"),
+                  bs.td(col_md_1)(duration),
+                  bs.td(col_md_1)(stateLink)(`class` := executionInfo.state + "State"),
+                  bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
+                  bs.td(col_md_1)(bs.glyphSpan(bs.glyph_list, () ⇒ println("output"))),
+                  bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
+                    allExecutionStates
+                  })(`class` := "cancelExecution")),
+                  bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].removeExecution(id).call().foreach { r ⇒
+                    allExecutionStates
+                  })(`class` := "removeExecution"))
+                ), bs.tr(row)(
+                  expander.getVisible(id.id) match {
+                    case Some(v: VisibleID) ⇒ tags.td(colspan := 12)(hiddenMap(v))
+                    case _                  ⇒ tags.div()
+                  }
+                )
+                )
               }
-            )
+            }*/ )
             )
           }
-        }*/ )
-          )
         }
         ).render
       }

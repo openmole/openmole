@@ -1,11 +1,12 @@
 package org.openmole.gui.plugin.environment.ssh.server
 
-import org.openmole.core.workspace.Workspace
-import org.openmole.core.workspace.Workspace._
-import org.openmole.gui.ext.data.AuthenticationFactory
-import org.openmole.gui.plugin.environment.ssh.ext.{PrivateKeyAuthenticationData, LoginPasswordAuthenticationData, SSHAuthenticationData}
+import java.io.File
+
+import org.openmole.core.workspace.{Authentication, Workspace}
+import org.openmole.gui.ext.data.AuthenticationData.{PrivateKeyAuthenticationData, LoginPasswordAuthenticationData}
+import org.openmole.gui.ext.data.{AuthenticationData, AuthenticationFactory}
 import org.openmole.gui.server.core.Utils._
-import org.openmole.plugin.environment.ssh.{LoginPassword, PrivateKey}
+import org.openmole.plugin.environment.ssh.{SSHAuthentication, LoginPassword, PrivateKey}
 
 /*
  * Copyright (C) 25/06/15 // mathieu.leclaire@openmole.org
@@ -24,17 +25,26 @@ import org.openmole.plugin.environment.ssh.{LoginPassword, PrivateKey}
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SSHAuthenticationFactory(val data: SSHAuthenticationData) extends AuthenticationFactory {
+class SSHAuthenticationFactory extends AuthenticationFactory {
 
-  def buildAuthentication = {
+  implicit lazy val authProvider = Workspace.authenticationProvider
 
+  def buildAuthentication(data: AuthenticationData) = {
     val auth = data match {
       case lp: LoginPasswordAuthenticationData => LoginPassword(lp.login, lp.cypheredPassword, lp.target)
-      case key: PrivateKeyAuthenticationData => PrivateKey(key.privateKey, key.login, key.cypheredPassword, key.target)
+      case key: PrivateKeyAuthenticationData => PrivateKey(new File(key.privateKey), key.login, key.cypheredPassword, key.target)
     }
 
-    val authProvider = Workspace.authenticationProvider
-
-  //  SSHAuthentication += auth
+    SSHAuthentication += auth
   }
+
+  def allAuthenticationData: Seq[AuthenticationData] = {
+    Workspace.authenticationProvider(classOf[SSHAuthentication]).map {
+      _._1 match {
+        case lp: LoginPassword => LoginPasswordAuthenticationData(lp.login, lp.cypheredPassword, lp.target)
+        case key: PrivateKey => PrivateKeyAuthenticationData(key.privateKey.getCanonicalPath, key.login, key.cypheredPassword, key.target)
+      }
+    }
+  }
+
 }

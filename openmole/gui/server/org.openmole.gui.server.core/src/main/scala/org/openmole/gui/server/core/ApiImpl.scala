@@ -2,9 +2,10 @@ package org.openmole.gui.server.core
 
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.tool.file._
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ AuthenticationProvider, Workspace }
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data.{ ScriptData, TreeNodeData }
+import org.openmole.gui.ext.data.AuthenticationData._
 import java.io.{ File, PrintStream }
 import java.nio.file._
 import org.openmole.console._
@@ -37,9 +38,9 @@ object ApiImpl extends Api {
   val execution = new Execution
 
   //AUTHENTICATIONS
-  /* def authentications: Seq[AuthenticationData] = ServerFactories.authenticationFactoriesUI.keys.map{
-    Workspace.authenticationProvider(_)
-  }*/
+  def addAuthentication(data: AuthenticationData): Unit = ServerFactories.authenticationFactories(data.getClass).buildAuthentication(data)
+
+  def authentications(): Seq[AuthenticationData] = ServerFactories.authenticationFactories.values.flatMap { _.allAuthenticationData }.toSeq
 
   // FILES
   def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean = new File(treeNodeData.canonicalPath, directoryName).mkdirs

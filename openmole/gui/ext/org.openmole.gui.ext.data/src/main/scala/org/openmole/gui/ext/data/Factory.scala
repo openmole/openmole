@@ -21,7 +21,7 @@ import org.openmole.core.workflow.task.PluginSet
 import scala.util.Try
 
 trait Factory {
-  def data: Data
+  // def data: Data
 }
 
 trait CoreObjectFactory extends Factory {
@@ -29,5 +29,6 @@ trait CoreObjectFactory extends Factory {
 }
 
 trait AuthenticationFactory extends Factory {
-  def buildAuthentication: Unit
+  def buildAuthentication(data: AuthenticationData): Unit
+  def allAuthenticationData: Seq[AuthenticationData]
 }

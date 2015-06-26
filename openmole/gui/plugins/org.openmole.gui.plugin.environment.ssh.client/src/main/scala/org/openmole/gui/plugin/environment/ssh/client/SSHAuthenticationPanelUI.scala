@@ -1,7 +1,11 @@
 package org.openmole.gui.plugin.environment.ssh.client
 
 import org.openmole.gui.client.core.OMPost
+import org.openmole.gui.ext.data.AuthenticationData
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import autowire._
 import org.openmole.gui.ext.dataui.PanelUI
+import org.openmole.gui.shared.Api
 
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
@@ -28,13 +32,12 @@ import rx._
  */
 
 @JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHAuthenticationPanelUI")
-class SSHAuthenticationPanelUI extends PanelUI {
+class SSHAuthenticationPanelUI(data: AuthenticationData) extends PanelUI {
 
   @JSExport
   val view = tags.div()
 
   def save = {
-
 
     //FIXME Send to the server the SSHenvData to be stored in the workspace
   //  new SSHAuthenticationData

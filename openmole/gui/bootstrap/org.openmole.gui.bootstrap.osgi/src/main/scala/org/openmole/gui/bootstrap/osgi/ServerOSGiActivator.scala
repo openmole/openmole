@@ -2,11 +2,10 @@ package org.openmole.gui.bootstrap.osgi
 
 import org.openmole.gui.client.core.ClientService
 import org.openmole.gui.ext.dataui.{ FactoryWithPanelUI, FactoryWithDataUI }
-import org.openmole.gui.ext.data.Factory
+import org.openmole.gui.ext.data.{ AuthenticationFactory, Factory, Data }
 import org.openmole.gui.server.core.ServerFactories
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
-import org.openmole.gui.ext.data.Data
 
 /*
  * Copyright (C) 22/09/14 // mathieu.leclaire@openmole.org
@@ -30,7 +29,7 @@ trait ServerOSGiActivator extends BundleActivator {
   // core factories and name of UI factories
   def factories: Seq[(Class[_], Factory, FactoryWithDataUI)] = Seq()
 
-  def authenticationFactories: Seq[(Class[_], Factory, FactoryWithPanelUI)] = Seq()
+  def authenticationFactories: Seq[(Class[_], AuthenticationFactory, FactoryWithPanelUI)] = Seq()
 
   abstract override def start(context: BundleContext) = {
     super.start(context)

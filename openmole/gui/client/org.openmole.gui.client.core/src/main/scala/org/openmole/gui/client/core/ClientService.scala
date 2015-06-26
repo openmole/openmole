@@ -119,6 +119,8 @@ object ClientService {
     _.dataUI().data
   }
 
+  def authenticationUI(data: AuthenticationData) = authenticationFactoryMap()(data.getClass.getCanonicalName)
+
   implicit def dataToDataClassName(d: Data) = d.getClass.getCanonicalName
 
   implicit def tryToT[T](t: Try[T]): T = t match {

@@ -1,5 +1,7 @@
 package org.openmole.gui.ext.dataui
 
+import org.openmole.gui.ext.data.Data
+
 /*
  * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
  *
@@ -32,7 +34,8 @@ trait DataUIBuilder {
 }
 
 trait PanelUIBuilder {
-  def panelUI: PanelUI
+  type DATA <: Data
+  def panelUI(data: DATA): PanelUI
 }
 
 trait AuthenticationFactoryUI extends FactoryWithPanelUI

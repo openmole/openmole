@@ -17,24 +17,24 @@ package org.openmole.gui.plugin.environment.ssh
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.AuthenticationFactory
-import org.openmole.gui.plugin.environment.ssh.ext.{ PrivateKeyAuthenticationData, LoginPasswordAuthenticationData, SSHEnvironmentData }
+import org.openmole.gui.ext.data.AuthenticationData.{ PrivateKeyAuthenticationData, LoginPasswordAuthenticationData }
 import org.openmole.gui.plugin.environment.ssh.client.{ SSHAuthenticationFactoryUI, SSHEnvironmentFactoryUI }
+import org.openmole.gui.plugin.environment.ssh.ext.SSHEnvironmentData
 import org.openmole.gui.plugin.environment.ssh.server.{ SSHAuthenticationFactory, SSHEnvironmentFactory }
 import org.openmole.gui.bootstrap.osgi._
 
 class Activator extends OSGiActivator with ServerOSGiActivator {
-  val data = new SSHEnvironmentData
-  val lgpData = new LoginPasswordAuthenticationData
-  val pkData = new PrivateKeyAuthenticationData()
+  val data = SSHEnvironmentData()
+  val lgpData = LoginPasswordAuthenticationData()
+  val pkData = PrivateKeyAuthenticationData()
 
   override def factories = Seq(
     (data.getClass, new SSHEnvironmentFactory(data), new SSHEnvironmentFactoryUI)
   )
 
   override def authenticationFactories = Seq(
-    (lgpData.getClass, new SSHAuthenticationFactory(lgpData), new SSHAuthenticationFactoryUI),
-    (pkData.getClass, new SSHAuthenticationFactory(pkData), new SSHAuthenticationFactoryUI)
+    (lgpData.getClass, new SSHAuthenticationFactory, new SSHAuthenticationFactoryUI),
+    (pkData.getClass, new SSHAuthenticationFactory, new SSHAuthenticationFactoryUI)
   )
 
 }

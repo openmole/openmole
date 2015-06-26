@@ -40,8 +40,8 @@ object ServerFactories {
     instance.factoriesUI += dataClass.getName -> factoryUI
   }
 
-  def addAuthenticationFactory(dataClass: Class[_], factory: Factory, factoryUI: FactoryWithPanelUI) = instance.authenticationFactoriesUI.synchronized {
-    instance.factories += dataClass -> factory
+  def addAuthenticationFactory(dataClass: Class[_], factory: AuthenticationFactory, factoryUI: FactoryWithPanelUI) = instance.authenticationFactoriesUI.synchronized {
+    instance.authenticationFactories += dataClass -> factory
     instance.authenticationFactoriesUI += dataClass -> factoryUI
   }
 
@@ -51,11 +51,15 @@ object ServerFactories {
   }
 
   def removeAuthenticationFactory(dataClass: Class[_]) = instance.authenticationFactoriesUI.synchronized {
-    instance.factories -= dataClass
+    instance.authenticationFactories -= dataClass
     instance.authenticationFactoriesUI -= dataClass
   }
 
+  def factories = instance.factories.toMap
+
   def factoriesUI = instance.factoriesUI.toMap
+
+  def authenticationFactories = instance.authenticationFactories.toMap
 
   def authenticationFactoriesUI = instance.authenticationFactoriesUI.toMap
 }
@@ -63,5 +67,6 @@ object ServerFactories {
 class ServerFactories {
   val factories = new mutable.WeakHashMap[Class[_], Factory]
   val factoriesUI = new mutable.WeakHashMap[String, FactoryWithDataUI]
+  val authenticationFactories = new mutable.WeakHashMap[Class[_], AuthenticationFactory]
   val authenticationFactoriesUI = new mutable.WeakHashMap[Class[_], FactoryWithPanelUI]
 }

@@ -1,5 +1,7 @@
 package org.openmole.gui.plugin.environment.ssh.client
 
+import org.openmole.gui.ext.data.AuthenticationData
+
 import scala.scalajs.js.annotation.JSExport
 import org.openmole.gui.ext.dataui.{AuthenticationFactoryUI, PanelUI, FactoryWithPanelUI}
 
@@ -25,7 +27,7 @@ import org.openmole.gui.ext.dataui.{AuthenticationFactoryUI, PanelUI, FactoryWit
 class SSHAuthenticationFactoryUI extends AuthenticationFactoryUI{
 
   val name = "SSH"
+  type DATA = AuthenticationData
 
-  def panelUI: PanelUI = new SSHAuthenticationPanelUI
-
+  def panelUI(data: DATA): PanelUI = new SSHAuthenticationPanelUI(data)
 }
