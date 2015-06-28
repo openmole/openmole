@@ -19,9 +19,8 @@ import org.scalatra.LifeCycle
 import javax.servlet.ServletContext
 
 class ScalatraBootstrap extends LifeCycle {
-  println("In bootstrap ...")
   override def init(context: ServletContext) {
-    println("Init bootstrap ...")
-    context mount (new GUIServlet, "/*")
+    val args = context.get(GUIServer.servletArguments).get.asInstanceOf[GUIServer.ServletArguments]
+    context mount (new GUIServlet(args), "/*")
   }
 }

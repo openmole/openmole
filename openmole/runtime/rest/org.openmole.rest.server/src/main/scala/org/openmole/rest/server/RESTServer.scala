@@ -89,10 +89,8 @@ class RESTServer(port: Option[Int], sslPort: Option[Int], hostName: Option[Strin
 
     val context = new WebAppContext()
 
-    val res = Res.newResource(classOf[RESTServer].getClassLoader.getResource("/"))
-
     context.setContextPath("/")
-    context.setBaseResource(res)
+    context.setBaseResource(Res.newResource(classOf[RESTServer].getClassLoader.getResource("/")))
     context.setClassLoader(classOf[RESTServer].getClassLoader)
     hostName foreach (context.setInitParameter(ScalatraBase.HostNameKey, _))
     context.setInitParameter("org.scalatra.Port", sslP.toString)
