@@ -56,7 +56,7 @@
                 "the-name-of-the-remote-server"
             )""")
 
-      @p In such a case, we'll have to investigate multiple options, as SSH public key authentications are senssible to
+      @p In such a case, we'll have to investigate multiple options, as SSH public key authentications are sensible to
         several configuration parameters.
 
       @p Public key authentication has usually a higher priority than password-based authentication when trying to

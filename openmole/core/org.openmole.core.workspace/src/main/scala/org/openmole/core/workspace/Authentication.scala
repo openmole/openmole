@@ -17,6 +17,8 @@
 
 package org.openmole.core.workspace
 
+import java.util.UUID
+
 import org.openmole.tool.file._
 import scala.util.Try
 import java.io.File
@@ -27,25 +29,31 @@ object Authentication {
 
 trait Authentication <: Persistent {
 
-  def size[T](implicit m: Manifest[T]): Int = size(category[T])
-
   def category[T](implicit m: Manifest[T]): String = m.runtimeClass.getCanonicalName
 
-  def save[T](obj: T)(implicit m: Manifest[T]): Unit = save[T]("0.key", obj)
+  def set[T](obj: T)(implicit m: Manifest[T]): Unit = saveAs[T]("0.key", obj)
 
-  def save[T](fileName: String, obj: T)(implicit m: Manifest[T]): Unit =
+  def save[T: Manifest](t: T, eq: (T, T) ⇒ Boolean) =
+    allByCategory.getOrElse(category[T], Seq.empty).toList.filter {
+      case (_, t1: T) ⇒ eq(t, t1)
+    }.headOption match {
+      case Some((fileName, _)) ⇒ Workspace.authentications.saveAs(fileName, t)
+      case None                ⇒ Workspace.authentications.saveAs(UUID.randomUUID.toString + ".key", t)
+    }
+
+  protected def saveAs[T](fileName: String, obj: T)(implicit m: Manifest[T]): Unit =
     save(obj, fileName, Some(category[T]))
 
   def clean[T](implicit m: Manifest[T]): Unit = super.clean(Some(m.runtimeClass.getCanonicalName))
 
-  def allByCategory = synchronized {
+  def allByCategory: Map[String, Seq[(String, Any)]] = synchronized {
     baseDir.listFiles { f: File ⇒ f.isDirectory }.map {
       d ⇒
         d.getName -> d.listFiles { f: File ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
           f ⇒
-            Try(Persistent.xstream.fromXML(f.content)).toOption match {
-              case Some(t: Any) ⇒ Some(t, f.getName)
-              case _            ⇒ None
+            Try(loadFile(f)).toOption match {
+              case Some(t) ⇒ Some(f.getName, t)
+              case _       ⇒ None
             }
         }.toSeq
     }.toMap
