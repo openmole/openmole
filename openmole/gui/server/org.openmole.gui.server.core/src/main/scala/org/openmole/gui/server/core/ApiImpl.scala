@@ -1,6 +1,8 @@
 package org.openmole.gui.server.core
 
+import org.openmole.core.event.EventAccumulator
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.tool.file._
 import org.openmole.core.workspace.{ AuthenticationProvider, Workspace }
@@ -113,6 +115,9 @@ object ApiImpl extends Api {
         o match {
           case puzzle: Puzzle ⇒
             val outputStream = new StringPrintStream()
+            val accumulator = EventAccumulator(puzzle.environments) {
+              case e @ (env, ex: ExceptionRaised) ⇒ e
+            }
             Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
               case Success(ex) ⇒
                 Try(ex.start) match {

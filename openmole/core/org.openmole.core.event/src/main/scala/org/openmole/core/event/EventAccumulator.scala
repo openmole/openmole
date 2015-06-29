@@ -20,10 +20,10 @@ import scala.concurrent.stm._
 
 object EventAccumulator {
 
-  def apply[T, E](t: T)(f: PartialFunction[(T, Event[T]), E]) = {
+  def apply[T, E](t: T*)(f: PartialFunction[(T, Event[T]), E]) = {
     val accumulator = new EventAccumulator[E]()
     val listner = f andThen accumulator.accumulate
-    t listen listner
+    t.foreach(_ listen listner)
     accumulator
   }
 
