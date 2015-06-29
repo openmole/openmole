@@ -17,8 +17,34 @@
 
 package org.openmole.tool.stream
 
-import java.io.OutputStream
+import java.io.{ PrintStream, OutputStream }
 
-class StringBuilderOutputStream(val builder: StringBuilder = new StringBuilder) extends OutputStream {
+class SynchronizedBuilder {
+  lazy val builder = new StringBuilder
+  def append(c: Char) = builder.synchronized { builder.append(c) }
+  def read: String = builder.synchronized {
+    val content = builder.toString()
+    builder.clear()
+    content
+  }
+  override def toString = builder.toString()
+}
+
+class StringOutputStream extends OutputStream {
+  lazy val builder = new SynchronizedBuilder
   override def write(b: Int) = builder.append(b.toChar)
+
+  def read: String = {
+    flush()
+    builder.read
+  }
+
+  override def toString: String = builder.toString
+}
+
+class StringPrintStream(val os: StringOutputStream = new StringOutputStream) extends PrintStream(os) {
+  def read: String = {
+    flush()
+    os.read
+  }
 }

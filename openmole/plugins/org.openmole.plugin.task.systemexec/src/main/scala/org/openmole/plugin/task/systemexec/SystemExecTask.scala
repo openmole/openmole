@@ -35,7 +35,7 @@ import org.apache.commons.exec.CommandLine
 import org.openmole.core.workflow.data._
 import org.openmole.core.tools.service.Logger
 import org.openmole.plugin.task.external._
-import org.openmole.tool.stream.StringBuilderOutputStream
+import org.openmole.tool.stream.StringOutputStream
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 
@@ -70,15 +70,15 @@ abstract class SystemExecTask(
     def workDirPath = directory.getOrElse("")
     val preparedContext = prepareInputFiles(context, tmpDir, workDirPath)
 
-    val outBuilder = new StringBuilder
-    val errBuilder = new StringBuilder
+    val outBuilder = new StringOutputStream
+    val errBuilder = new StringOutputStream
 
     val out = output match {
-      case Some(_) ⇒ new PrintStream(new StringBuilderOutputStream(outBuilder))
+      case Some(_) ⇒ new PrintStream(outBuilder)
       case None    ⇒ System.out
     }
     val err = error match {
-      case Some(_) ⇒ new PrintStream(new StringBuilderOutputStream(errBuilder))
+      case Some(_) ⇒ new PrintStream(errBuilder)
       case None    ⇒ System.err
     }
 

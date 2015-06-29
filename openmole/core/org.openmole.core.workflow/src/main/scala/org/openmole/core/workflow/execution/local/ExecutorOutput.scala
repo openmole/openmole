@@ -23,20 +23,14 @@ import org.openmole.core.output.OutputManager
 import org.openmole.tool.stream._
 
 object ExecutorOutput {
-  def apply() = {
-    val output = new StringBuilder()
-    val os = new StringBuilderOutputStream(output)
-    new ExecutorOutput(os, output)
-  }
+  def apply() = new ExecutorOutput(new StringOutputStream)
 }
 
-class ExecutorOutput(os: OutputStream, output: StringBuilder) extends PrintStream(os) {
+class ExecutorOutput(output: StringOutputStream) extends PrintStream(output) {
 
   def read = {
     flush()
-    val content = output.toString()
-    output.clear()
-    content
+    output.read
   }
 
 }

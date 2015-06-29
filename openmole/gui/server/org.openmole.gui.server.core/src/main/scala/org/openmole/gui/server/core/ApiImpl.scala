@@ -15,7 +15,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
 import org.openmole.core.workflow.puzzle.Puzzle
-import org.openmole.tool.stream.StringBuilderOutputStream
+import org.openmole.tool.stream.{ StringPrintStream, StringOutputStream }
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -103,6 +103,7 @@ object ApiImpl extends Api {
     ))
 
     val execId = ExecutionId(id)
+
     def error(t: Throwable): Unit = execution.add(execId, Failed(ErrorBuilder(t)))
     def message(message: String): Unit = execution.add(execId, Failed(Error(message)))
 
@@ -111,14 +112,12 @@ object ApiImpl extends Api {
       case Success(o) ⇒
         o match {
           case puzzle: Puzzle ⇒
-            val stringBuilder = new StringBuilder
-            val outputStream = new PrintStream(new StringBuilderOutputStream(stringBuilder))
+            val outputStream = new StringPrintStream()
             Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
               case Success(ex) ⇒
                 Try(ex.start) match {
-                  case Failure(e) ⇒
-                    error(e)
-                  case Success(ex) ⇒ execution.add(execId, StaticExecutionInfo(scriptData.scriptName, scriptData.script, ex.startTime.get), ex, stringBuilder)
+                  case Failure(e)  ⇒ error(e)
+                  case Success(ex) ⇒ execution.add(execId, StaticExecutionInfo(scriptData.scriptName, scriptData.script, ex.startTime.get), ex, outputStream)
                 }
               case Failure(e) ⇒ error(e)
             }
