@@ -19,13 +19,16 @@ package org.openmole.core.workspace
 
 import java.util.UUID
 
+import org.openmole.core.tools.service.Logger
 import org.openmole.tool.file._
-import scala.util.Try
+import scala.util.{ Failure, Success, Try }
 import java.io.File
 
-object Authentication {
+object Authentication extends Logger {
   val pattern = "[-0-9A-z]+\\.key"
 }
+
+import Authentication.Log
 
 trait Authentication <: Persistent {
 
@@ -47,15 +50,16 @@ trait Authentication <: Persistent {
   def clean[T](implicit m: Manifest[T]): Unit = super.clean(Some(m.runtimeClass.getCanonicalName))
 
   def allByCategory: Map[String, Seq[(String, Any)]] = synchronized {
-    baseDir.listFiles { f: File ⇒ f.isDirectory }.map {
-      d ⇒
-        d.getName -> d.listFiles { f: File ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
-          f ⇒
-            Try(loadFile(f)).toOption match {
-              case Some(t) ⇒ Some(f.getName, t)
-              case _       ⇒ None
-            }
-        }.toSeq
+    baseDir.listFiles { f: File ⇒ f.isDirectory }.map { d ⇒
+      d.getName -> d.listFiles { f: File ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
+        f ⇒
+          Try(loadFile[Any](f)) match {
+            case Success(t) ⇒ Some(f.getName, t)
+            case Failure(e) ⇒
+              Log.logger.log(Log.WARNING, "Error while deserialising an authentication", e)
+              None
+          }
+      }.toSeq
     }.toMap
   }
 }
