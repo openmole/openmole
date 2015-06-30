@@ -22,6 +22,7 @@ import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp._
+import org.openmole.console.Console
 import org.openmole.core.tools.io.Network
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.scalatra.auth.strategy.{ BasicAuthStrategy, BasicAuthSupport }
@@ -29,8 +30,18 @@ import org.scalatra.servlet.ScalatraListener
 import javax.servlet.ServletContext
 import org.scalatra._
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
+import org.openmole.tool.hash._
 
 object GUIServer {
+  val passwordHash = new ConfigurationLocation("GUIServer", "PasswordHash", true)
+  def setPassword(p: String) = Workspace.setPreference(passwordHash, p.hash.toString)
+  def isPasswordCorrect(p: String) = Workspace.preference(passwordHash) == p.hash.toString
+
+  def initPassword = {
+    Console.initPassword
+    if (!Workspace.isPreferenceSet(passwordHash)) setPassword(Console.askPassword("Authentication password"))
+  }
+
   val port = new ConfigurationLocation("GUIServer", "Port")
   Workspace += (port, Network.freePort.toString)
 
@@ -40,9 +51,12 @@ object GUIServer {
     file
   }
   lazy val urlFile = Workspace.file("GUI.url")
+
+  val servletArguments = "servletArguments"
+  case class ServletArguments(passwordCorrect: Option[String ⇒ Boolean] = None)
 }
 
-class GUIServer(port: Int, webapp: File, remote: Boolean) {
+class GUIServer(port: Int, webapp: File, authentication: Boolean) {
 
   val server = new Server()
 
@@ -56,14 +70,17 @@ class GUIServer(port: Int, webapp: File, remote: Boolean) {
 
   val connector = new org.eclipse.jetty.server.ssl.SslSelectChannelConnector(contextFactory)
   connector.setPort(port)
-  if (!remote) connector.setHost("localhost")
+  if (!authentication) connector.setHost("localhost")
 
   server.addConnector(connector)
 
   val context = new WebAppContext()
+  val authenticationMethod = if (authentication) Some(GUIServer.isPasswordCorrect _) else None
+  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(authenticationMethod))
   context.setContextPath("/")
   context.setResourceBase(webapp.getAbsolutePath)
   context.setClassLoader(classOf[GUIServer].getClassLoader)
+  context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[ScalatraBootstrap].getCanonicalName)
   context.addEventListener(new ScalatraListener)
 
   server.setHandler(context)

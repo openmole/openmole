@@ -29,6 +29,7 @@ import org.openmole.core.workflow.execution.Environment._
 import org.openmole.core.workflow.job.State
 import org.openmole.core.workflow.task._
 import org.openmole.core.tools.service.Logger
+import org.openmole.tool.stream._
 import ref.WeakReference
 import org.openmole.core.workflow.mole.{ StrainerTaskDecorator, StrainerCapsule }
 
@@ -105,7 +106,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
     }
   }
 
-  case class Output(stream: PrintStream, output: ExecutorOutput, error: ExecutorOutput)
+  case class Output(stream: PrintStream, output: StringPrintStream, error: StringPrintStream)
 
   private def withRedirectedOutput[T](job: LocalExecutionJob, deinterleave: Boolean)(f: ⇒ T) = {
     val output = redirectOutput(job, deinterleave)
@@ -121,8 +122,8 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
         None
       case Some(ex) ⇒
         if (deinterleave) {
-          val output = ExecutorOutput()
-          val error = ExecutorOutput()
+          val output = new StringPrintStream()
+          val error = new StringPrintStream()
           OutputManager.redirectOutput(Thread.currentThread.getThreadGroup, output)
           OutputManager.redirectError(Thread.currentThread.getThreadGroup, error)
           Some(Output(ex.executionContext.out, output, error))

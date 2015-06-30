@@ -78,6 +78,7 @@ class Application extends IApplication {
       serverSSLPort: Option[Int] = None,
       loggerLevel: Option[String] = None,
       unoptimizedJS: Boolean = false,
+      webuiAuthentication: Boolean = false,
       args: List[String] = Nil)
 
     def takeArg(args: List[String]) =
@@ -121,6 +122,7 @@ class Application extends IApplication {
         case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
         case "--logger-level" :: tail               ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
         case "--unoptimizedJS" :: tail              ⇒ parse(tail, c.copy(unoptimizedJS = true))
+        case "--webui-authentication" :: tail       ⇒ parse(tail, c.copy(webuiAuthentication = true))
         case "--" :: tail                           ⇒ parse(Nil, c.copy(args = tail))
         case s :: tail                              ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                    ⇒ c
@@ -187,7 +189,8 @@ class Application extends IApplication {
               val url = s"https://localhost:$port"
               GUIServer.urlFile.content = url
               BootstrapJS.init(!config.unoptimizedJS)
-              val server = new GUIServer(port, BootstrapJS.webapp, false)
+              if (config.webuiAuthentication) GUIServer.initPassword
+              val server = new GUIServer(port, BootstrapJS.webapp, config.webuiAuthentication)
               server.start()
               browse(url)
               server.join()

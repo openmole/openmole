@@ -28,23 +28,19 @@ object SSHAuthentication {
 
   def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])
 
-  // def apply(i: Int)(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])(i)
   def apply(target: String)(implicit authentications: AuthenticationProvider): SSHAuthentication = {
     val list = authentications(classOf[SSHAuthentication])
-    val auth = list.reverse.find { e ⇒ target.matches(e._1.regexp) }.map { _._1 }
+    val auth = list.reverse.find { e ⇒ target.matches(e.regexp) }
     auth.getOrElse(throw new UserBadDataError("No authentication method found for " + target))
   }
 
   def apply(login: String, host: String, port: Int = 22)(implicit authentications: AuthenticationProvider): SSHAuthentication =
     apply(address(login, host, port))(authentications)
 
-  def +=(a: SSHAuthentication)(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication]).filter {
-    case (sshAuth: SSHAuthentication, uuid: String) ⇒
-      sshAuth.login == a.login && sshAuth.target == a.target
-  }.headOption match {
-    case Some((ssh: SSHAuthentication, uuid)) ⇒ Workspace.authentications.save(uuid, ssh)
-    case None                                 ⇒ Workspace.authentications.save(UUID.randomUUID.toString + ".key", a)
-  }
+  def +=(a: SSHAuthentication) =
+    Workspace.authentications.save[SSHAuthentication](
+      a, (a1, a2) ⇒ (a1.login, a1.target) == (a2.login, a2.target)
+    )
 
   def clear() = Workspace.authentications.clean[SSHAuthentication]
 

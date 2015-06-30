@@ -31,30 +31,27 @@ case class Persistent(baseDir: File) {
 
   private def subDirectory(dir: Option[String]) = dir.map(new File(baseDir, _)).getOrElse(baseDir)
 
-  def size(category: String): Int = Option(subDirectory(Some(category)).listFiles()).map(_.size).getOrElse(0)
-
-  def save(obj: Any, name: String, category: Option[String] = None, xstream: XStream = Persistent.xstream) = synchronized {
+  def save(obj: Any, name: String, category: Option[String] = None, xstream: XStream = Persistent.xstream) = {
     val subDir = subDirectory(category)
     subDir.mkdirs()
     val file = new File(subDir, name)
-    file.content = xstream.toXML(obj)
+    file.withLock { _ ⇒ file.content = xstream.toXML(obj) }
   }
 
-  def load(name: String, category: Option[String] = None, xstream: XStream = Persistent.xstream) = synchronized {
+  def load[T](name: String, category: Option[String] = None, xstream: XStream = Persistent.xstream): T = {
     val subDir = subDirectory(category)
     val file = new File(subDir, name)
-    xstream.fromXML(file.content)
+    loadFile(file, xstream)
   }
 
-  def clean(category: Option[String] = None) = synchronized {
+  protected def loadFile[T](file: File, xstream: XStream = Persistent.xstream): T = file.withLock { _ ⇒ xstream.fromXML(file.content).asInstanceOf[T] }
+
+  def clean(category: Option[String] = None) = {
     subDirectory(category).recursiveDelete
   }
 
-  def all(category: Option[String] = None, xstream: XStream = Persistent.xstream) = synchronized {
-    subDirectory(category).listRecursive(_.isFile).map {
-      f ⇒ xstream.fromXML(f.content)
-    }
-  }
+  def all(category: Option[String] = None, xstream: XStream = Persistent.xstream) =
+    subDirectory(category).listRecursive(_.isFile).map { loadFile(_, xstream) }
 
 }
 

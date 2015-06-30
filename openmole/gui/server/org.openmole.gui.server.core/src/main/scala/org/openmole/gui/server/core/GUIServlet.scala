@@ -17,6 +17,7 @@
 package org.openmole.gui.server.core
 
 import javax.servlet.annotation.MultipartConfig
+import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 
 import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.ExecutionContext
@@ -24,6 +25,8 @@ import org.openmole.core.workflow.puzzle.Puzzle
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.misc.utils.Utils._
 import org.scalatra._
+import org.scalatra.auth.{ ScentryConfig, ScentrySupport }
+import org.scalatra.auth.strategy.{ BasicAuthSupport, BasicAuthStrategy }
 import org.scalatra.servlet.FileUploadSupport
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.Api
@@ -45,7 +48,7 @@ object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Wr
 }
 
 @MultipartConfig(fileSizeThreshold = 1024 * 1024)
-class GUIServlet extends ScalatraServlet with FileUploadSupport {
+class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServlet with FileUploadSupport with AuthenticationSupport {
 
   val basePath = "org/openmole/gui/shared"
 
@@ -53,6 +56,10 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
   val cssFiles = new File(Workspace.file("webui"), "webapp/css").listFiles.map {
     _.getName
   }.sorted
+
+  before() {
+    if (arguments.passwordCorrect.isDefined) basicAuth()
+  }
 
   get("/plugins.js.map") {
     contentType = "text/javascript"
@@ -101,7 +108,6 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
   post("/downloadedfiles") {
     val path = params("path")
     val file = new File(path)
-    println("path " + path + " ///  " + file.getName)
     if (file.isDirectory) file.archiveCompress(new File(file.getName + ".tar.gz"))
 
     if (params("saveFile").toBoolean) {
@@ -153,5 +159,35 @@ class GUIServlet extends ScalatraServlet with FileUploadSupport {
       autowire.Core.Request(basePath.split("/").toSeq ++ multiParams("splat").head.split("/"),
         upickle.read[Map[String, String]](request.body))
     ), Duration.Inf)
+  }
+}
+
+case class User(id: String)
+
+trait AuthenticationSupport extends ScentrySupport[User] with BasicAuthSupport[User] { this: GUIServlet ⇒
+
+  val realm = "OpenMOLE (user name doesn't matter)"
+
+  protected def fromSession = { case id: String ⇒ User(id) }
+  protected def toSession = { case usr: User ⇒ usr.id }
+  protected val scentryConfig = (new ScentryConfig {}).asInstanceOf[ScentryConfiguration]
+
+  override protected def configureScentry = {
+    scentry.unauthenticated {
+      scentry.strategies("Basic").unauthenticated()
+    }
+  }
+
+  override protected def registerAuthStrategies = {
+    scentry.register("Basic", app ⇒ new OurBasicAuthStrategy(app, realm))
+  }
+
+  class OurBasicAuthStrategy(protected override val app: ScalatraBase, realm: String)
+      extends BasicAuthStrategy[User](app, realm) {
+
+    override protected def validate(userName: String, password: String)(implicit request: HttpServletRequest, response: HttpServletResponse): Option[User] =
+      if (arguments.passwordCorrect.get(password)) Some(User(userName)) else None
+
+    override protected def getUserId(user: User)(implicit request: HttpServletRequest, response: HttpServletResponse): String = user.id
   }
 }

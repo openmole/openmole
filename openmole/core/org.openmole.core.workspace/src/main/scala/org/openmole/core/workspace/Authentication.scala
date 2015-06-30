@@ -17,37 +17,52 @@
 
 package org.openmole.core.workspace
 
+import java.util.UUID
+
+import org.openmole.core.tools.service.Logger
 import org.openmole.tool.file._
-import scala.util.Try
+import scala.util.{ Failure, Success, Try }
 import java.io.File
 
-object Authentication {
+object Authentication extends Logger {
   val pattern = "[-0-9A-z]+\\.key"
 }
 
-trait Authentication <: Persistent {
+import Authentication.Log
 
-  def size[T](implicit m: Manifest[T]): Int = size(category[T])
+trait Authentication <: Persistent {
 
   def category[T](implicit m: Manifest[T]): String = m.runtimeClass.getCanonicalName
 
-  def save[T](obj: T)(implicit m: Manifest[T]): Unit = save[T]("0.key", obj)
+  def set[T](obj: T)(implicit m: Manifest[T]): Unit = saveAs[T]("0.key", obj)
 
-  def save[T](fileName: String, obj: T)(implicit m: Manifest[T]): Unit =
+  def save[T: Manifest](t: T, eq: (T, T) ⇒ Boolean) =
+    inCategory(category[T]).toList.filter {
+      case (_, t1: Any) ⇒ eq(t, t1.asInstanceOf[T])
+    }.headOption match {
+      case Some((fileName, _)) ⇒ Workspace.authentications.saveAs(fileName, t)
+      case None                ⇒ Workspace.authentications.saveAs(UUID.randomUUID.toString + ".key", t)
+    }
+
+  protected def saveAs[T](fileName: String, obj: T)(implicit m: Manifest[T]): Unit =
     save(obj, fileName, Some(category[T]))
 
   def clean[T](implicit m: Manifest[T]): Unit = super.clean(Some(m.runtimeClass.getCanonicalName))
 
-  def allByCategory = synchronized {
-    baseDir.listFiles { f: File ⇒ f.isDirectory }.map {
-      d ⇒
-        d.getName -> d.listFiles { f: File ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
-          f ⇒
-            Try(Persistent.xstream.fromXML(f.content)).toOption match {
-              case Some(t: Any) ⇒ Some(t, f.getName)
-              case _            ⇒ None
-            }
-        }.toSeq
-    }.toMap
+  protected def inCategory(category: String) = {
+    val d = new File(baseDir, category)
+    d.listFiles { f: File ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
+      f ⇒
+        Try(loadFile[Any](f)) match {
+          case Success(t) ⇒ Some(f.getName -> t)
+          case Failure(e) ⇒
+            Log.logger.log(Log.WARNING, "Error while deserialising an authentication", e)
+            None
+        }
+    }.toSeq
   }
+
+  def allByCategory: Map[String, Seq[Any]] =
+    baseDir.listFiles { f: File ⇒ f.isDirectory }.map { d ⇒ d.getName -> inCategory(d.getName).map(_._2) }.toMap
+
 }

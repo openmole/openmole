@@ -91,7 +91,7 @@ class DIRACEnvironment(
 
   def bdiiServer: BDII = new BDII(bdii)
 
-  def getAuthentication = authentications(classOf[DIRACAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))._1
+  def getAuthentication = authentications(classOf[DIRACAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
 
   @transient lazy val authentication = DIRACAuthentication.initialise(getAuthentication)(authentications)
 

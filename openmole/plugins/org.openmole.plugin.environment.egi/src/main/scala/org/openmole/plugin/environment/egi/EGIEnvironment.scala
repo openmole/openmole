@@ -235,7 +235,7 @@ class EGIEnvironment(
   def proxyCreator = authentication
 
   @transient lazy val authentication = authentications(classOf[EGIAuthentication]).headOption match {
-    case Some((a, _)) ⇒
+    case Some(a) ⇒
       EGIAuthentication.initialise(a)(
         vomsURL,
         voName,

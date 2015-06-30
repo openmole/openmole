@@ -155,7 +155,7 @@ case class StaticExecutionInfo(name: String = "", script: String = "", startDate
 
 case class EnvironmentState(taskName: String, running: Long, done: Long, submitted: Long, failed: Long)
 
-case class Output(output: String)
+//case class Output(output: String)
 
 sealed trait ExecutionInfo {
   def state: String
@@ -165,12 +165,24 @@ sealed trait ExecutionInfo {
   def completed: Long
 }
 
-case class Failed(error: Error, state: String = "failed", duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo
+case class Failed(error: Error, duration: Long = 0L, completed: Long = 0L, lastOutputs: String = "") extends ExecutionInfo {
+  def state: String = "failed"
+}
 
-case class Running(ready: Long, running: Long, state: String = "running", duration: Long, completed: Long, environmentStates: Seq[EnvironmentState], lastOutputs: String) extends ExecutionInfo
+case class Running(ready: Long, running: Long, duration: Long, completed: Long, environmentStates: Seq[EnvironmentState], lastOutputs: String) extends ExecutionInfo {
+  def state: String = "running"
+}
 
-case class Finished(state: String = "finished", duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo
+case class Finished(duration: Long = 0L, completed: Long = 0L, lastOutputs: String) extends ExecutionInfo {
+  def state: String = "finished"
+}
 
-case class Canceled(state: String = "canceled", duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo
+case class Canceled(duration: Long = 0L, completed: Long = 0L, lastOutputs: String) extends ExecutionInfo {
+  def state: String = "canceled"
+}
 
-case class Unknown(state: String = "unknown", duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo
+case class Ready() extends ExecutionInfo {
+  def state: String = "ready"
+  def duration: Long = 0L
+  def completed: Long = 0L
+}

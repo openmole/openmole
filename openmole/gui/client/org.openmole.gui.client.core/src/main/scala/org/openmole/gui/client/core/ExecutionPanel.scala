@@ -99,11 +99,11 @@ class ExecutionPanel extends ModalPanel {
             val completed = executionInfo.completed
 
             val details = executionInfo match {
-              case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error))
-              case f: Finished ⇒ ExecutionDetails("100", 0)
+              case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error), outputs = f.lastOutputs)
+              case f: Finished ⇒ ExecutionDetails("100", 0, outputs = f.lastOutputs)
               case r: Running  ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates, outputs = r.lastOutputs)
-              case c: Canceled ⇒ ExecutionDetails("0", 0)
-              case u: Unknown  ⇒ ExecutionDetails("0", 0)
+              case c: Canceled ⇒ ExecutionDetails("0", 0, outputs = c.lastOutputs)
+              case r: Ready    ⇒ ExecutionDetails("0", 0)
             }
 
             val scriptID: VisibleID = "script"

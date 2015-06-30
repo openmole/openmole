@@ -20,7 +20,7 @@ package org.openmole.core.workflow.tools
 import java.io.{ InputStream, OutputStream, OutputStreamWriter }
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.tool.stream.{ StringBuilderOutputStream, StringInputStream }
+import org.openmole.tool.stream.{ StringOutputStream, StringInputStream }
 import org.openmole.core.workflow.data._
 
 import scala.collection.mutable.ListBuffer
@@ -53,7 +53,7 @@ object VariableExpansion {
     }
 
     var dollar = false
-    val os = new StringBuilderOutputStream()
+    val os = new StringOutputStream()
 
     while (it.hasNext) {
       val c = it.next

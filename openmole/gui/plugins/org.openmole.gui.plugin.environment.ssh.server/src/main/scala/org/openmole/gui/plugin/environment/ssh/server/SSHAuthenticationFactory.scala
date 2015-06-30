@@ -40,7 +40,7 @@ class SSHAuthenticationFactory extends AuthenticationFactory {
 
   def allAuthenticationData: Seq[AuthenticationData] = {
     Workspace.authenticationProvider(classOf[SSHAuthentication]).map {
-      _._1 match {
+      _ match {
         case lp: LoginPassword => LoginPasswordAuthenticationData(lp.login, lp.cypheredPassword, lp.target)
         case key: PrivateKey => PrivateKeyAuthenticationData(key.privateKey.getCanonicalPath, key.login, key.cypheredPassword, key.target)
       }

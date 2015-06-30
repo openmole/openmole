@@ -14,23 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.workflow.execution.local
+package org.openmole.core.event
 
-import java.io.{ PrintStream, OutputStream }
-import java.util.Locale
+import scala.concurrent.stm._
 
-import org.openmole.core.output.OutputManager
-import org.openmole.tool.stream._
+object EventAccumulator {
 
-object ExecutorOutput {
-  def apply() = new ExecutorOutput(new StringOutputStream)
+  def apply[T, E](t: T*)(f: PartialFunction[(T, Event[T]), E]) = {
+    val accumulator = new EventAccumulator[E]()
+    val listener = f andThen accumulator.accumulate
+    t.foreach(_ listen listener)
+    accumulator
+  }
+
 }
 
-class ExecutorOutput(output: StringOutputStream) extends PrintStream(output) {
+class EventAccumulator[E] {
 
-  def read = {
-    flush()
-    output.read
+  def events = _events.single
+  def clear = atomic { implicit ctx ⇒
+    val res = _events()
+    _events() = Nil
+    res
+  }
+
+  private lazy val _events = Ref(List[E]())
+
+  def accumulate(e: E) = atomic { implicit ctx ⇒
+    _events() = e :: _events()
   }
 
 }

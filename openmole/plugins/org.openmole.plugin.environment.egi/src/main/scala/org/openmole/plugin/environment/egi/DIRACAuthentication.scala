@@ -24,8 +24,8 @@ import org.openmole.core.workspace.{ Workspace, AuthenticationProvider }
 
 object DIRACAuthentication {
   def update(a: DIRACAuthentication)(implicit authentications: AuthenticationProvider) =
-    if (authentications(classOf[DIRACAuthentication]).size > 0) Workspace.authentications.save("0", a)
-    else Workspace.authentications.save("0", a)
+    if (authentications(classOf[DIRACAuthentication]).size > 0) Workspace.authentications.set(a)
+    else Workspace.authentications.set(a)
 
   def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[DIRACAuthentication]).headOption
 
