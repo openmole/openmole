@@ -54,7 +54,7 @@ object ScriptClient {
       connection
     }).render
 
-    lazy val connectionForm = tags.form(onsubmit := { () ⇒
+    lazy val connectionForm = tags.form(`class` := Rx { if (passwordOK()) "displayOff" else "" }, onsubmit := { () ⇒
       connection
       false
     })(

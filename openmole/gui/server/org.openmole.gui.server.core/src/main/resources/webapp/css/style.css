@@ -394,7 +394,7 @@ overflow-y : auto;
 	padding-left: 10px;
 }
 
-.executionSettingsOff {
+.displayOff {
     display: none;
 }
 
@@ -455,4 +455,12 @@ font-weight: bold;
 .executionTable table td.executionVisible{
 	color:#3086b5;
 	font-weight: bold;
+}
+
+.centerPage{
+	position: fixed;
+    top:50%;
+    left: 50% ;
+    margin-left: -100px;
+    margin-top: -10px;
 }
