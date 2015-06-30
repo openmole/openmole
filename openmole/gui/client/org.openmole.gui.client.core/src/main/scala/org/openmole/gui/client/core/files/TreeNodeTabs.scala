@@ -118,7 +118,7 @@ trait OMSTabControl <: TabControl {
         inputDirectoryInput.render,
         outputDirectoryInput.render
       )(`class` := Rx {
-          if (settingsVisible()) "executionSettingsOn" else "executionSettingsOff"
+          if (settingsVisible()) "executionSettingsOn" else "displayOff"
         })
     )(`class` := "executionElement")
   }
