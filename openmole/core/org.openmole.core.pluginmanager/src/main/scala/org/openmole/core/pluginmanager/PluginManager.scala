@@ -95,7 +95,7 @@ object PluginManager extends Logger {
 
     if (isDirectoryPlugin(path) || path.isJar) List(path)
     else if (path.isDirectory)
-      path.listFiles(
+      path.listFilesSafe(
         new FileFilter {
           override def accept(file: File): Boolean =
             (file.isFile && file.exists && file.isJar) || isDirectoryPlugin(file)

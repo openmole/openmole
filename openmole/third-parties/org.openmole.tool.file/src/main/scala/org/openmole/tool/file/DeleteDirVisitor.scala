@@ -47,7 +47,7 @@ class DeleteDirVisitor extends SimpleFileVisitor[Path] {
 
   override def postVisitDirectory(dir: Path, exc: IOException) = {
     if (exc == null) {
-      dir.toFile.listFiles().foreach { f ⇒ setAllPermissions(f); f.delete }
+      dir.toFile.listFilesSafe.foreach { f ⇒ setAllPermissions(f); f.delete }
       Files.delete(dir)
       FileVisitResult.CONTINUE
     }
