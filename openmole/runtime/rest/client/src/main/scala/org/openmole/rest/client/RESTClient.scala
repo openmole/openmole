@@ -47,7 +47,7 @@ object RESTClient extends App {
       |
       |val file = inputDirectory / "test.txt"
       |
-      |val exploration = ExplorationTask(i in (0.0 to 100.0 by 1.0))
+      |val exploration = ExplorationTask(i in (0.0 to 10.0 by 1.0))
       |
       |val model =
       |  ScalaTask("val res = i * 2") set (
@@ -58,7 +58,9 @@ object RESTClient extends App {
       |
       |val copyFile = CopyFileHook(test, outputDirectory / "result${i}.txt")
       |
-      |exploration -< (model on LocalEnvironment(4) hook ToStringHook() hook copyFile)
+      |val env = EGIEnvironment("vo.complex-systems.eu", name = "complexsystems")
+      |
+      |exploration -< (model on env hook ToStringHook() hook copyFile)
     """.stripMargin
 
   val id = client.start(token, script, Some(archive))

@@ -30,7 +30,7 @@ object SSHAuthentication {
 
   def apply(target: String)(implicit authentications: AuthenticationProvider): SSHAuthentication = {
     val list = authentications(classOf[SSHAuthentication])
-    val auth = list.reverse.find { e ⇒ target.matches(e._1.regexp) }.map { _._1 }
+    val auth = list.reverse.find { e ⇒ target.matches(e.regexp) }
     auth.getOrElse(throw new UserBadDataError("No authentication method found for " + target))
   }
 
@@ -39,8 +39,7 @@ object SSHAuthentication {
 
   def +=(a: SSHAuthentication) =
     Workspace.authentications.save[SSHAuthentication](
-      a,
-      (a1, a2) ⇒ (a1.login, a1.target) == (a2.login, a2.target)
+      a, (a1, a2) ⇒ (a1.login, a1.target) == (a2.login, a2.target)
     )
 
   def clear() = Workspace.authentications.clean[SSHAuthentication]

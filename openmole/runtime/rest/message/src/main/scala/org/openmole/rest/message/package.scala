@@ -27,7 +27,8 @@ package object message {
       Error(e.getMessage, Some(sw.toString))
     }
   }
-  case class Error(message: String, stackTrace: Option[String] = None)
+  case class Error(message: String, stackTrace: Option[String] = None, level: Option[String] = None)
+
   case class Token(token: String, duration: Long)
   case class ExecutionId(id: String)
   case class Output(output: String)
@@ -43,6 +44,8 @@ package object message {
     def state: ExecutionState.ExecutionState
   }
   case class Failed(error: Error, state: ExecutionState.ExecutionState = ExecutionState.failed) extends State
-  case class Running(ready: Long, running: Long, completed: Long, state: ExecutionState.ExecutionState = ExecutionState.running) extends State
+  case class Running(ready: Long, running: Long, completed: Long, environments: Seq[EnvironmentStatus], state: ExecutionState.ExecutionState = ExecutionState.running) extends State
   case class Finished(state: ExecutionState.ExecutionState = ExecutionState.finished) extends State
+
+  case class EnvironmentStatus(name: Option[String], submitted: Long, running: Long, done: Long, failed: Long, errors: Seq[Error])
 }

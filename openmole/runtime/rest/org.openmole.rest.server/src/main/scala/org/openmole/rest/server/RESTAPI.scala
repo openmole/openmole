@@ -2,6 +2,7 @@ package org.openmole.rest.server
 
 import java.io.{ File, PrintStream }
 import java.util.UUID
+import java.util.logging.Level
 import java.util.zip.{ GZIPOutputStream, GZIPInputStream }
 import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.HttpServletRequest
@@ -9,6 +10,8 @@ import org.json4s.JsonDSL._
 import org.json4s._
 import org.openmole.console._
 import org.openmole.core.event._
+import org.openmole.core.workflow.execution.Environment
+import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
@@ -20,10 +23,16 @@ import org.scalatra.servlet.FileUploadSupport
 import org.openmole.rest.message._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
+import sun.awt.EventListenerAggregate
 import scala.util.{ Try, Failure, Success }
 import org.openmole.tool.collection._
 
-case class Execution(workDirectory: WorkDirectory, moleExecution: MoleExecution)
+case class EnvironmentException(environment: Environment, error: Error)
+
+case class Execution(
+  workDirectory: WorkDirectory,
+  moleExecution: MoleExecution,
+  environmentErrors: EventAccumulator[EnvironmentException])
 
 case class WorkDirectory(baseDirectory: File) {
 
@@ -113,13 +122,19 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
           repl.eval(script)
         }
 
-        def start(ex: MoleExecution) =
+        def start(ex: MoleExecution) = {
+
+          val accumulator =
+            EventAccumulator(ex.environments.values.toSeq: _*) {
+              case (env, ev: ExceptionRaised) ⇒ EnvironmentException(env, Error(ev.exception).copy(level = Some(ev.level.getName)))
+            }
           Try(ex.start) match {
             case Failure(e) ⇒ error(e)
             case Success(ex) ⇒
-              moles.add(id, Execution(directory, ex))
+              moles.add(id, Execution(directory, ex, accumulator))
               Ok(id.toJson)
           }
+        }
 
         def launch: ActionResult =
           Try(compile) match {
@@ -167,15 +182,20 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
     authenticate()
     getExecution { ex ⇒
       val moleExecution = ex.moleExecution
-      val state = (moleExecution.exception, moleExecution.finished) match {
+      val state: State = (moleExecution.exception, moleExecution.finished) match {
         case (Some(t), _) ⇒ Failed(Error(t))
         case (None, true) ⇒ Finished()
-        case _            ⇒ Running(moleExecution.ready, moleExecution.running, moleExecution.completed)
-
+        case _ ⇒
+          def environments = moleExecution.environments.values.toSeq
+          def environmentStatus = environments.map {
+            env ⇒
+              def environmentErrors = ex.environmentErrors.clear.filter(_.environment == env).map(_.error)
+              EnvironmentStatus(name = env.name, submitted = env.submitted, running = env.running, done = env.done, failed = env.failed, environmentErrors)
+          }
+          Running(moleExecution.ready, moleExecution.running, moleExecution.completed, environmentStatus)
       }
       Ok(state.toJson)
     }
-
   }
 
   post("/remove") {

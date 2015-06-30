@@ -22,8 +22,8 @@ object EventAccumulator {
 
   def apply[T, E](t: T*)(f: PartialFunction[(T, Event[T]), E]) = {
     val accumulator = new EventAccumulator[E]()
-    val listner = f andThen accumulator.accumulate
-    t.foreach(_ listen listner)
+    val listener = f andThen accumulator.accumulate
+    t.foreach(_ listen listener)
     accumulator
   }
 

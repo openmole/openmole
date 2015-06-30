@@ -37,8 +37,8 @@ trait Authentication <: Persistent {
   def set[T](obj: T)(implicit m: Manifest[T]): Unit = saveAs[T]("0.key", obj)
 
   def save[T: Manifest](t: T, eq: (T, T) ⇒ Boolean) =
-    allByCategory.getOrElse(category[T], Seq.empty).toList.filter {
-      case (_, t1: T) ⇒ eq(t, t1)
+    inCategory(category[T]).toList.filter {
+      case (_, t1: Any) ⇒ eq(t, t1.asInstanceOf[T])
     }.headOption match {
       case Some((fileName, _)) ⇒ Workspace.authentications.saveAs(fileName, t)
       case None                ⇒ Workspace.authentications.saveAs(UUID.randomUUID.toString + ".key", t)
@@ -49,17 +49,20 @@ trait Authentication <: Persistent {
 
   def clean[T](implicit m: Manifest[T]): Unit = super.clean(Some(m.runtimeClass.getCanonicalName))
 
-  def allByCategory: Map[String, Seq[(String, Any)]] = synchronized {
-    baseDir.listFiles { f: File ⇒ f.isDirectory }.map { d ⇒
-      d.getName -> d.listFiles { f: File ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
-        f ⇒
-          Try(loadFile[Any](f)) match {
-            case Success(t) ⇒ Some(f.getName, t)
-            case Failure(e) ⇒
-              Log.logger.log(Log.WARNING, "Error while deserialising an authentication", e)
-              None
-          }
-      }.toSeq
-    }.toMap
+  protected def inCategory(category: String) = {
+    val d = new File(baseDir, category)
+    d.listFiles { f: File ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
+      f ⇒
+        Try(loadFile[Any](f)) match {
+          case Success(t) ⇒ Some(f.getName -> t)
+          case Failure(e) ⇒
+            Log.logger.log(Log.WARNING, "Error while deserialising an authentication", e)
+            None
+        }
+    }.toSeq
   }
+
+  def allByCategory: Map[String, Seq[Any]] =
+    baseDir.listFiles { f: File ⇒ f.isDirectory }.map { d ⇒ d.getName -> inCategory(d.getName).map(_._2) }.toMap
+
 }
