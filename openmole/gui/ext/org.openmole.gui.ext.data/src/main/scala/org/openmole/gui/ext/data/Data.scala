@@ -91,22 +91,18 @@ sealed trait AuthenticationData extends Data {
   def synthetic: String
 }
 
-object AuthenticationData {
+case class LoginPasswordAuthenticationData(login: String = "",
+                                           cypheredPassword: String = "",
+                                           target: String = "") extends AuthenticationData {
+  def synthetic = s"$login@$target"
+}
 
-  case class LoginPasswordAuthenticationData(login: String = "",
-                                             cypheredPassword: String = "",
-                                             target: String = "") extends AuthenticationData {
-    def synthetic = s"$login@$target"
-  }
-
-  case class PrivateKeyAuthenticationData(
-      privateKey: String = "",
-      login: String = "",
-      cypheredPassword: String = "",
-      target: String = "") extends AuthenticationData {
-    def synthetic = s"$login@$target"
-  }
-
+case class PrivateKeyAuthenticationData(
+    privateKey: String = "",
+    login: String = "",
+    cypheredPassword: String = "",
+    target: String = "") extends AuthenticationData {
+  def synthetic = s"$login@$target"
 }
 
 trait HookData extends Data with InputData with OutputData
@@ -183,6 +179,8 @@ case class Canceled(duration: Long = 0L, completed: Long = 0L, lastOutputs: Stri
 
 case class Ready() extends ExecutionInfo {
   def state: String = "ready"
+
   def duration: Long = 0L
+
   def completed: Long = 0L
 }

@@ -1,9 +1,11 @@
-package org.openmole.gui.ext.dataui
+package org.openmole.gui.plugin.environment.ssh.client
 
-import org.openmole.gui.ext.data.{ AuthenticationData, Data }
+import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
+import org.openmole.gui.ext.dataui.{AuthenticationFactoryUI, PanelUI}
+import scala.scalajs.js.annotation.JSExport
 
 /*
- * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org
+ * Copyright (C) 01/07/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,23 +21,11 @@ import org.openmole.gui.ext.data.{ AuthenticationData, Data }
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait FactoryUI {
-  val name: String
-  val uuid: String = java.util.UUID.randomUUID.toString
+@JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHPrivateKeyAuthenticationFactoryUI")
+class SSHPrivateKeyAuthenticationFactoryUI extends AuthenticationFactoryUI {
+
+  val name = "Private key (SSH)"
+  type DATA = PrivateKeyAuthenticationData
+
+  def panelUI(data: DATA): PanelUI = new SSHPrivateKeyAuthenticationPanelUI(data)
 }
-
-trait FactoryWithDataUI extends FactoryUI with DataUIBuilder
-
-trait FactoryWithPanelUI extends FactoryUI with PanelUIBuilder
-
-trait DataUIBuilder {
-  type DATAUI <: DataUI
-  def dataUI: DATAUI
-}
-
-trait PanelUIBuilder {
-  type DATA <: Data
-  def panelUI(data: DATA): PanelUI
-}
-
-trait AuthenticationFactoryUI extends FactoryWithPanelUI

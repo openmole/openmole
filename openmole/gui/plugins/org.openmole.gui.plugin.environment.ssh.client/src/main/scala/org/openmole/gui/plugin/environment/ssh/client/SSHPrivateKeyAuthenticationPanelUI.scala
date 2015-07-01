@@ -1,13 +1,14 @@
 package org.openmole.gui.plugin.environment.ssh.client
 
-import org.openmole.gui.ext.data.AuthenticationData
-
+import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
+import org.openmole.gui.ext.dataui.PanelUI
 import scala.scalajs.js.annotation.JSExport
-import org.openmole.gui.ext.dataui.{AuthenticationFactoryUI, PanelUI, FactoryWithPanelUI}
-
+import scalatags.JsDom.all._
+import org.openmole.gui.misc.js.{BootstrapTags => bs}
+import scalatags.JsDom.{tags ⇒ tags}
 
 /*
- * Copyright (C) 16/06/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 01/07/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -23,11 +24,16 @@ import org.openmole.gui.ext.dataui.{AuthenticationFactoryUI, PanelUI, FactoryWit
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHAuthenticationFactoryUI")
-class SSHAuthenticationFactoryUI extends AuthenticationFactoryUI{
+@JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHPrivateKeyAuthenticationPanelUI")
+class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) extends PanelUI {
 
-  val name = "SSH"
-  type DATA = AuthenticationData
+  @JSExport
+  val view = tags.div()
 
-  def panelUI(data: DATA): PanelUI = new SSHAuthenticationPanelUI(data)
+  def save = {
+
+    //FIXME Send to the server the SSHenvData to be stored in the workspace
+    //  new SSHAuthenticationData
+  }
+
 }
