@@ -48,25 +48,22 @@ class AuthenticationPanel extends ModalPanel {
     println("close authen")
   }
 
-  val auths: Var[Seq[AuthenticationData]] = Var(Seq())
+  private val auths: Var[Seq[AuthenticationData]] = Var(Seq())
 
-  OMPost[Api].addAuthentication(LoginPasswordAuthenticationData("oooo", "aaaa", "uuuu")).call().foreach { o ⇒
-    println("added " + o)
+  def getAuthentications = {
+    OMPost[Api].authentications.call().foreach { a ⇒
+      auths() = a
+    }
   }
 
-  OMPost[Api].authentications.call().foreach { a ⇒
-    auths() = a
-  }
-
-  lazy val executionTable = {
+  lazy val authenticationTable = {
 
     bs.table(striped)(
       thead,
       Rx {
         tbody({
-          for (a ← auths()) {
+          for (a ← auths()) yield {
             //ClientService.authenticationUI(a)
-
             Seq(bs.tr(row)(
               a.synthetic
 
@@ -110,10 +107,10 @@ class AuthenticationPanel extends ModalPanel {
 
   val dialog = modalDialog(modalID,
     headerDialog(
-      tags.div("Executions"
+      tags.div("Authentications"
       ),
       bodyDialog(`class` := "executionTable")(
-        executionTable
+        authenticationTable
       ),
       footerDialog(
         closeButton

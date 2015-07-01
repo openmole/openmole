@@ -65,8 +65,11 @@ object ScriptClient {
       autofocus
     ).render
 
+    val authenticationPanel = new AuthenticationPanel
+
     def setPassword(s: String) = OMPost[Api].setPassword(s).call().foreach { b ⇒
       passwordOK() = b
+      authenticationPanel.getAuthentications
       cleanInputs
     }
 
@@ -127,7 +130,7 @@ object ScriptClient {
     }
 
     val authenticationTriggerer = new PanelTriggerer {
-      val modalPanel = new AuthenticationPanel
+      val modalPanel = authenticationPanel
     }
 
     val execItem = dialogNavItem("executions", "Executions", () ⇒ executionTriggerer.trigger)
@@ -152,6 +155,7 @@ object ScriptClient {
       )
     )
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
+    maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
 
     OMPost[Api].workspacePath.call().foreach { projectsPath ⇒
       val treeNodePanel = TreeNodePanel(projectsPath)(executionTriggerer)

@@ -1,9 +1,7 @@
 package org.openmole.gui.plugin.environment.ssh.server
 
-import java.io.File
-
-import org.openmole.core.workspace.{Authentication, Workspace}
-import org.openmole.gui.ext.data.AuthenticationData.{PrivateKeyAuthenticationData, LoginPasswordAuthenticationData}
+import org.openmole.core.workspace.Workspace
+import org.openmole.gui.ext.data.AuthenticationData.LoginPasswordAuthenticationData
 import org.openmole.gui.ext.data.{AuthenticationData, AuthenticationFactory}
 import org.openmole.gui.server.core.Utils._
 import org.openmole.plugin.environment.ssh.{SSHAuthentication, LoginPassword, PrivateKey}
@@ -25,24 +23,26 @@ import org.openmole.plugin.environment.ssh.{SSHAuthentication, LoginPassword, Pr
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SSHAuthenticationFactory extends AuthenticationFactory {
+class SSHLoginPasswordAuthenticationFactory extends AuthenticationFactory {
 
   implicit lazy val authProvider = Workspace.authenticationProvider
 
   def buildAuthentication(data: AuthenticationData) = {
     val auth = data match {
-      case lp: LoginPasswordAuthenticationData => LoginPassword(lp.login, lp.cypheredPassword, lp.target)
-      case key: PrivateKeyAuthenticationData => PrivateKey(new File(key.privateKey), key.login, key.cypheredPassword, key.target)
+      case lp: LoginPasswordAuthenticationData => Some(LoginPassword(lp.login, lp.cypheredPassword, lp.target))
+      case _=> None
     }
 
-    SSHAuthentication += auth
+    auth.map{a=> SSHAuthentication += a}
   }
 
   def allAuthenticationData: Seq[AuthenticationData] = {
-    Workspace.authenticationProvider(classOf[SSHAuthentication]).map {
-      _ match {
-        case lp: LoginPassword => LoginPasswordAuthenticationData(lp.login, lp.cypheredPassword, lp.target)
-        case key: PrivateKey => PrivateKeyAuthenticationData(key.privateKey.getCanonicalPath, key.login, key.cypheredPassword, key.target)
+    println("ALLL AuTH " + Workspace.authenticationProvider(classOf[SSHAuthentication]).size)
+    Workspace.authenticationProvider(classOf[SSHAuthentication]).flatMap {
+      e=> println("find " + e)
+      e match {
+        case lp: LoginPassword => Some(LoginPasswordAuthenticationData(lp.login, lp.cypheredPassword, lp.target))
+        case _=> None
       }
     }
   }
