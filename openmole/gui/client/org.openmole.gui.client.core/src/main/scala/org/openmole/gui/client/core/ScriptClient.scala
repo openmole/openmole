@@ -3,7 +3,7 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.files.{ TreeNodeTabs, TreeNodePanel }
 import org.openmole.gui.misc.js.BootstrapTags
 import org.openmole.gui.shared.Api
-import org.scalajs.dom.raw.{ HTMLFormElement, HTMLInputElement, Event }
+import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement, HTMLInputElement, Event }
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import bs._
@@ -55,7 +55,7 @@ object ScriptClient {
       placeholder := "Password",
       `type` := "password",
       width := "130px",
-      autofocus
+      autofocus := true
     ).render
 
     val passwordAgainInput = bs.input("")(
@@ -70,7 +70,7 @@ object ScriptClient {
       passwordInput.value = ""
     }
 
-    lazy val connectButton = bs.button("Connect")(onclick := { () ⇒
+    lazy val connectButton = bs.button("Connect", btn_primary)(onclick := { () ⇒
       connection
     }).render
 
@@ -89,7 +89,7 @@ object ScriptClient {
       passwordAgainInput.value = ""
     }
 
-    def connectionForm(i: HTMLInputElement): HTMLFormElement =
+    def connectionForm(i: HTMLElement): HTMLFormElement =
       tags.form(i, `type` := "submit", onsubmit := { () ⇒
         connection
         false
@@ -103,16 +103,15 @@ object ScriptClient {
         if (!passwordOK()) "centerPage" else ""
       },
         Rx {
-          bs.inputGroup(navbar_left)(
-            connectionForm(passwordInput),
+          tags.div(
+            connectionForm(tags.span(passwordInput,
+              tags.a(onclick := { () ⇒ resetPassword
+              }, cursor := "pointer")("Reset password")
+            ).render),
             if (!passwordChosen()) connectionForm(passwordAgainInput) else tags.div(),
-            inputGroupButton(connectButton)
+            connectButton
           )
-        },
-        tags.div(
-          tags.a(onclick := { () ⇒ resetPassword
-          }, cursor := "pointer")("Reset password")
-        )
+        }
       )
     )
 

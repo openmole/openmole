@@ -152,6 +152,7 @@ object BootstrapTags {
   val glyph_list = "glyphicon-list"
   val glyph_stats = "glyphicon-stats"
   val glyph_refresh = "glyphicon-refresh"
+  val glyph_lock = "glyphicon-lock"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =

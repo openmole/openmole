@@ -470,10 +470,11 @@ font-weight: bold;
 .centerPage{
 	position: absolute;
     z-index: 999;
-    top:50%;
+    top:50px;
     left: 50% ;
     margin-left: -100px;
-    margin-top: -10px;
+    width: 25%;
+    max-width: 350px;
 }
 
 .italicRed{
