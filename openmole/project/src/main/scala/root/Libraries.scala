@@ -19,7 +19,7 @@ object Libraries extends Defaults {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.85-SNAPSHOT"
+  val gridscaleVersion = "1.85"
 
   val bouncyCastleVersion = "1.50"
 
@@ -35,7 +35,7 @@ object Libraries extends Defaults {
 
   lazy val gridscaleSLURM = "fr.iscpif.gridscale.bundle" %% "slurm" % gridscaleVersion
 
-  lazy val gridscaleGlite = "fr.iscpif.gridscale.bundle" %% "glite" % gridscaleVersion
+  lazy val gridscaleGlite = "fr.iscpif.gridscale.bundle" %% "egi" % gridscaleVersion
 
   lazy val gridscaleDirac = "fr.iscpif.gridscale.bundle" %% "dirac" % gridscaleVersion
 

@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.egi
 import org.openmole.tool.file._
 import org.openmole.core.tools.service.{ Scaling, Random }
 import org.openmole.core.batch.environment.BatchEnvironment
-import fr.iscpif.gridscale.glite.{ GlobusAuthentication, BDII }
+import fr.iscpif.gridscale.egi.{ GlobusAuthentication, BDII }
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.batch.storage.StorageService
 import org.openmole.core.batch.control.AccessToken

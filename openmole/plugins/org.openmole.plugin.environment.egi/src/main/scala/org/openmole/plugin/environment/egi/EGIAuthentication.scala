@@ -30,7 +30,7 @@ import EGIEnvironment._
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import org.openmole.tool.tar.TarInputStream
 import scala.collection.JavaConversions._
-import fr.iscpif.gridscale.glite._
+import fr.iscpif.gridscale.egi._
 import fr.iscpif.gridscale.http._
 import fr.iscpif.gridscale._
 import java.io.File

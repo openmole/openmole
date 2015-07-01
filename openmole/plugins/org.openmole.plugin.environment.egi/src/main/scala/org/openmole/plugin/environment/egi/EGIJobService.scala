@@ -25,7 +25,7 @@ import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.batch.storage._
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
-import fr.iscpif.gridscale.glite.{ WMSJobService, WMSJobDescription }
+import fr.iscpif.gridscale.egi.{ WMSJobService, WMSJobDescription }
 import StatusFiles._
 import scalax.io.Resource
 
