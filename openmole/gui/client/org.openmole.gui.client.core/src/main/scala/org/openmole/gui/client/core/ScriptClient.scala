@@ -67,7 +67,7 @@ object ScriptClient {
 
     def setPassword(s: String) = OMPost[Api].setPassword(s).call().foreach { b ⇒
       passwordOK() = b
-      passwordInput.value = ""
+      cleanInputs
     }
 
     lazy val connectButton = bs.button("Connect", btn_primary)(onclick := { () ⇒
@@ -80,11 +80,16 @@ object ScriptClient {
         passwordChosen() = true
         connection
       }
+      else cleanInputs
     }
 
     def resetPassword = OMPost[Api].resetPassword().call().foreach { b ⇒
       passwordChosen() = false
       passwordOK() = false
+      cleanInputs
+    }
+
+    def cleanInputs = {
       passwordInput.value = ""
       passwordAgainInput.value = ""
     }
