@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.egi
 
-import fr.iscpif.gridscale.glite.{ MyProxy ⇒ GSMyProxy }
+import fr.iscpif.gridscale.egi.{ MyProxy ⇒ GSMyProxy }
 
 object MyProxy {
   def apply(time: String, host: String, port: Option[Int] = None) = new MyProxy(time, host, port)

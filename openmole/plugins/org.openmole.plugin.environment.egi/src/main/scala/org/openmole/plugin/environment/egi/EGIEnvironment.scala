@@ -38,7 +38,7 @@ import ref.WeakReference
 import Scaling._
 import Random._
 import org.openmole.core.tools.service._
-import fr.iscpif.gridscale.glite.{ GlobusAuthentication, WMSJobService, BDII }
+import fr.iscpif.gridscale.egi.{ GlobusAuthentication, WMSJobService, BDII }
 import fr.iscpif.gridscale.RenewDecorator
 import java.net.URI
 import concurrent.duration._

@@ -23,7 +23,7 @@ import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workspace.Workspace
-import fr.iscpif.gridscale.glite.WMSJobDescription
+import fr.iscpif.gridscale.egi.WMSJobDescription
 import scala.util.{ Failure, Try }
 
 object EGIJob extends Logger {

@@ -23,7 +23,7 @@ import org.openmole.core.filedeleter.FileDeleter
 import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation, AuthenticationProvider }
-import fr.iscpif.gridscale.glite.BDII
+import fr.iscpif.gridscale.egi.BDII
 import fr.iscpif.gridscale.dirac.{ DIRACJobService ⇒ GSDIRACJobService }
 import concurrent.duration._
 import scala.ref.WeakReference

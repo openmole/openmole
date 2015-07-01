@@ -22,7 +22,7 @@ import org.openmole.core.batch.control._
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.file._
 import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage, FileType }
-import fr.iscpif.gridscale.glite.{ SRMStorage, GlobusAuthentication }
+import fr.iscpif.gridscale.egi.{ SRMStorage, GlobusAuthentication }
 import java.net.URI
 import java.io.{ File, InputStream, OutputStream }
 import org.openmole.core.batch.environment.BatchEnvironment
