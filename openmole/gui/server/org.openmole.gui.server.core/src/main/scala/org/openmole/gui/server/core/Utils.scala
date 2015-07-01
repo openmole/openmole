@@ -35,6 +35,6 @@ object Utils {
 
   val workspaceProjectFile = Workspace.file("webui/projects")
 
-  def listFiles(path: String): Seq[TreeNodeData] = new File(path).listFiles.toSeq
+  def listFiles(path: String): Seq[TreeNodeData] = new File(path).listFilesSafe.toSeq
 
 }

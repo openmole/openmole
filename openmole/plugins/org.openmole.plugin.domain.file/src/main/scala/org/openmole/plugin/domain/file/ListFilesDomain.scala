@@ -54,7 +54,7 @@ sealed class ListFilesDomain(
       Iterable.empty
     }
     else if (recursive) dir.listRecursive(filter)
-    else dir.listFiles(filter)
+    else dir.listFilesSafe(filter)
   }
 
 }

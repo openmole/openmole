@@ -127,6 +127,10 @@ package object file {
 
     def realPath = file.toPath.toRealPath()
 
+    def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty)
+
+    def listFilesSafe(filter: FileFilter) = Option(file.listFiles(filter)).getOrElse(Array.empty)
+
     /////// copiers ////////
     def copyContent(destination: File) = {
       val ic = new FileInputStream(file).getChannel
@@ -185,7 +189,7 @@ package object file {
       setAllPermissions(file)
 
       if (!file.isSymbolicLink && file.isDirectory) {
-        for (s ← Option(file.listFiles).getOrElse(Array.empty)) {
+        for (s ← file.listFilesSafe) {
           setAllPermissions(s)
           s.isDirectory match {
             case true ⇒
@@ -287,7 +291,7 @@ package object file {
           if (f.lastModified > lastModification) lastModification = f.lastModified
 
           if (f.isDirectory) {
-            for (child ← f.listFiles) {
+            for (child ← f.listFilesSafe) {
               toProceed += child
             }
           }
@@ -440,7 +444,7 @@ package object file {
     }
 
     if (file.isDirectory && !file.isSymbolicLink) authorizeListFiles(file) {
-      for (f ← Option(file.listFiles).getOrElse(Array.empty)) {
+      for (f ← file.listFilesSafe) {
         recurse(f)(operation, stopPath)
       }
     }

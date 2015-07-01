@@ -51,7 +51,7 @@ trait Authentication <: Persistent {
 
   protected def inCategory(category: String) = {
     val d = new File(baseDir, category)
-    d.listFiles { f: File ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
+    d.listFilesSafe { f: File ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
       f ⇒
         Try(loadFile[Any](f)) match {
           case Success(t) ⇒ Some(f.getName -> t)
@@ -63,6 +63,6 @@ trait Authentication <: Persistent {
   }
 
   def allByCategory: Map[String, Seq[Any]] =
-    baseDir.listFiles { f: File ⇒ f.isDirectory }.map { d ⇒ d.getName -> inCategory(d.getName).map(_._2) }.toMap
+    baseDir.listFilesSafe { f: File ⇒ f.isDirectory }.map { d ⇒ d.getName -> inCategory(d.getName).map(_._2) }.toMap
 
 }
