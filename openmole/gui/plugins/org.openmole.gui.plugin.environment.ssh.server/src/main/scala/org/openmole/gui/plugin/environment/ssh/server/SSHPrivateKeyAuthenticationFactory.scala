@@ -37,7 +37,6 @@ class SSHPrivateKeyAuthenticationFactory extends AuthenticationFactory{
   }
 
   def allAuthenticationData: Seq[AuthenticationData] = {
-    println("ALLL AuTH " + Workspace.authenticationProvider(classOf[SSHAuthentication]).size)
     Workspace.authenticationProvider(classOf[SSHAuthentication]).flatMap {
       e => println("find " + e)
         e match {

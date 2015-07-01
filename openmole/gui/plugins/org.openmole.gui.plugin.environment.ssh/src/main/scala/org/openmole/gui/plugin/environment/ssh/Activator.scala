@@ -19,7 +19,7 @@ package org.openmole.gui.plugin.environment.ssh
 
 import fr.iscpif.gridscale.ssh.SSHPrivateKeyAuthentication
 import org.openmole.gui.ext.data.AuthenticationData.{ PrivateKeyAuthenticationData, LoginPasswordAuthenticationData }
-import org.openmole.gui.plugin.environment.ssh.client.{ SSHAuthenticationFactoryUI, SSHEnvironmentFactoryUI }
+import org.openmole.gui.plugin.environment.ssh.client.{ SSHPrivateKeyAuthenticationFactoryUI, SSHLoginPasswordAuthenticationFactoryUI, SSHEnvironmentFactoryUI }
 import org.openmole.gui.plugin.environment.ssh.ext.SSHEnvironmentData
 import org.openmole.gui.plugin.environment.ssh.server.{ SSHPrivateKeyAuthenticationFactory, SSHLoginPasswordAuthenticationFactory, SSHEnvironmentFactory }
 import org.openmole.gui.bootstrap.osgi._
@@ -34,8 +34,8 @@ class Activator extends OSGiActivator with ServerOSGiActivator {
   )
 
   override def authenticationFactories = Seq(
-    (lgpData.getClass, new SSHLoginPasswordAuthenticationFactory, new SSHAuthenticationFactoryUI),
-    (pkData.getClass, new SSHPrivateKeyAuthenticationFactory, new SSHAuthenticationFactoryUI)
+    (lgpData.getClass, new SSHLoginPasswordAuthenticationFactory, new SSHLoginPasswordAuthenticationFactoryUI),
+    (pkData.getClass, new SSHPrivateKeyAuthenticationFactory, new SSHPrivateKeyAuthenticationFactoryUI)
   )
 
 }

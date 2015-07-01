@@ -1,6 +1,6 @@
 package org.openmole.gui.ext.dataui
 
-import org.openmole.gui.ext.data.Data
+import org.openmole.gui.ext.data.{ AuthenticationData, Data }
 
 /*
  * Copyright (C) 24/09/14 // mathieu.leclaire@openmole.org

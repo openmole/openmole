@@ -85,11 +85,11 @@ object BootstrapJS {
     writer.write("function fillMap() {\n")
     ServerFactories.factoriesUI.foreach {
       case (k, v) ⇒
-        writer.write("UIFactories().factoryMap[\"" + k + "\" ] = new " + v.getClass.getCanonicalName + "();\n")
+        writer.write("UIFactories().factoryMap[\"" + k + "\" ] = new " + v.getClass.getName + "();\n")
     }
     ServerFactories.authenticationFactoriesUI.foreach {
       case (k, v) ⇒
-        writer.write("UIFactories().authenticationMap[\"" + k + "\" ] = new " + v.getClass.getCanonicalName + "();\n")
+        writer.write("UIFactories().authenticationMap[\"" + k + "\" ] = new " + v.getClass.getName + "();\n")
     }
     writer.write("}")
     writer.close

@@ -1,6 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.dataui._
+import org.openmole.gui.ext.data.AuthenticationData.LoginPasswordAuthenticationData
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.dataui._
 import rx._
@@ -82,10 +83,17 @@ object ClientService {
     }
   }
 
+  def panelUI(d: AuthenticationData): PanelUI = {
+    val f = authenticationUI(d)
+    f.panelUI(d.asInstanceOf[f.DATA])
+  }
+
   def isPrototypeUI(db: DataBagUI): Boolean = isPrototypeUI(db.dataUI())
+
   def isTaskUI(db: DataBagUI): Boolean = isTaskUI(db.dataUI())
 
   def isPrototypeUI(f: FactoryWithDataUI): Boolean = isPrototypeUI(f.dataUI)
+
   def isTaskUI(f: FactoryWithDataUI): Boolean = isTaskUI(f.dataUI)
 
   def prototypeUI(db: DataBagUI): Option[PrototypeDataUI] = {
@@ -94,6 +102,7 @@ object ClientService {
       case _                  ⇒ None
     }
   }
+
   def +=(dataKey: String, factoryUI: FactoryWithDataUI) = uiFactories() += dataKey -> factoryUI
 
   def +=(dataBagUI: DataBagUI) = {
@@ -119,9 +128,9 @@ object ClientService {
     _.dataUI().data
   }
 
-  def authenticationUI(data: AuthenticationData) = authenticationFactoryMap()(data.getClass.getCanonicalName)
+  def authenticationUI(data: AuthenticationData) = authenticationFactoryMap()(data.getClass.getName)
 
-  implicit def dataToDataClassName(d: Data) = d.getClass.getCanonicalName
+  implicit def dataToDataClassName(d: Data) = d.getClass.getName
 
   implicit def tryToT[T](t: Try[T]): T = t match {
     case Success(s) ⇒ s
@@ -130,28 +139,28 @@ object ClientService {
       throw (f)
   }
 
-  private def factoryUI(data: Data) = {
-    uiFactories().get(data.getClass.getCanonicalName) match {
+  private def _dataUI(data: Data) = {
+    uiFactories().get(data.getClass.getName) match {
       case Some(f: FactoryWithDataUI) ⇒ Try(f.dataUI)
       case _                          ⇒ failure(data)
     }
   }
 
   private def dataUI(data: TaskData): TaskDataUI = {
-    factoryUI(data) match {
+    _dataUI(data) match {
       case Success(d: TaskDataUI) ⇒ d
       case _                      ⇒ failure(data)
     }
   }
 
   private def dataUI(data: PrototypeData): PrototypeDataUI = {
-    factoryUI(data) match {
+    _dataUI(data) match {
       case Success(d: PrototypeDataUI) ⇒ d
       case _                           ⇒ failure(data)
     }
   }
 
-  private def failure[T <: Data](data: T) = Failure(new Throwable("The data " + data.getClass.getCanonicalName + " cannot be recontructed on the server."))
+  private def failure[T <: Data](data: T) = Failure(new Throwable("The data " + data.getClass.getName + " cannot be recontructed on the server."))
 
   //Implicit converters for pluging handling convinience
 
