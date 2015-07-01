@@ -38,10 +38,18 @@ object ScriptClient {
   @JSExport
   def run(): Unit = {
 
+    val passwordChosen = Var(true)
     val passwordOK = Var(false)
 
+    def isPasswordChosen(todoIfChosen: () ⇒ Unit = () ⇒ {}) = OMPost[Api].passwordChosen().call().foreach { b ⇒
+      passwordChosen() = b
+      if (b) todoIfChosen()
+    }
+
+    isPasswordChosen()
+
     val body = dom.document.body
-    val maindiv = body.appendChild(tags.div.render)
+    val maindiv = body.appendChild(tags.div())
 
     val passwordInput = bs.input("")(
       placeholder := "Password",
@@ -50,24 +58,59 @@ object ScriptClient {
       autofocus
     ).render
 
+    val passwordAgainInput = bs.input("")(
+      placeholder := "Password again",
+      `type` := "password",
+      width := "130px",
+      autofocus
+    ).render
+
+    def setPassword(s: String) = OMPost[Api].setPassword(s).call().foreach { b ⇒
+      passwordOK() = b
+      passwordInput.value = ""
+    }
+
     lazy val connectButton = bs.button("Connect")(onclick := { () ⇒
       connection
     }).render
 
-    lazy val connectionForm = tags.form(`class` := Rx { if (passwordOK()) "displayOff" else "" }, onsubmit := { () ⇒
-      connection
-      false
+    def connection: Unit = {
+      if (passwordChosen()) setPassword(passwordInput.value)
+      else if (passwordInput.value == passwordAgainInput.value) {
+        passwordChosen() = true
+        connection
+      }
+    }
+
+    def resetPassword = OMPost[Api].resetPassword().call().foreach { b ⇒
+      passwordChosen() = false
+      passwordOK() = false
+      passwordInput.value = ""
+      passwordAgainInput.value = ""
+    }
+
+    val connectionForm = tags.div(`class` := Rx {
+      if (!passwordOK()) "connectionTabOverlay" else "displayOff"
     })(
-      bs.inputGroup(navbar_left)(
-        passwordInput,
-        inputGroupButton("Connect")
+      tags.div(`class` := Rx {
+        if (!passwordOK()) "centerPage" else ""
+      }, tags.form(`type` := "submit", onsubmit := { () ⇒
+        connection
+        false
+      }),
+        Rx {
+          bs.inputGroup(emptyCK) /*(navbar_left)*/ (
+            passwordInput,
+            if (!passwordChosen()) passwordAgainInput else tags.div(),
+            inputGroupButton(connectButton)
+          )
+        },
+        tags.div(
+          tags.a(onclick := { () ⇒ resetPassword
+          }, cursor := "pointer")("Reset password")
+        )
       )
     )
-
-    def connection = OMPost[Api].setPassword(passwordInput.value).call().foreach { b ⇒
-      passwordOK() = b
-      println("connected ? " + b)
-    }
 
     val openFileTree = Var(false)
 
@@ -87,42 +130,42 @@ object ScriptClient {
       openFileTree() = !openFileTree()
     })
 
-    Rx {
-      body.appendChild(
-        if (passwordOK()) {
-          body.appendChild(
-            nav("mainNav",
-              nav_pills + nav_inverse + nav_staticTop,
-              fileItem,
-              execItem,
-              authenticationItem
-            )
-          )
-          maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
+    val passItem = navItem("pass", "Pass", todo = () ⇒ {
+      resetPassword
+    })
 
-          OMPost[Api].workspacePath.call().foreach { projectsPath ⇒
-            val treeNodePanel = TreeNodePanel(projectsPath)(executionTriggerer)
-            maindiv.appendChild(
-              tags.div(`class` := "fullpanel")(
-                tags.div(`class` := Rx {
-                  "leftpanel " + {
-                    if (openFileTree()) "open" else ""
-                  }
-                })(treeNodePanel.view.render),
-                tags.div(`class` := Rx {
-                  "centerpanel " + {
-                    if (openFileTree()) "reduce" else ""
-                  }
-                })(treeNodePanel.fileDisplayer.tabs.render)
+    maindiv.appendChild(
+      nav("mainNav",
+        nav_pills + nav_inverse + nav_staticTop,
+        fileItem,
+        execItem,
+        authenticationItem,
+        passItem
+      )
+    )
+    maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
 
-              ).render
-            )
-          }
-          maindiv
-        }
-        else connectionForm
+    OMPost[Api].workspacePath.call().foreach { projectsPath ⇒
+      val treeNodePanel = TreeNodePanel(projectsPath)(executionTriggerer)
+      maindiv.appendChild(
+        tags.div(`class` := "fullpanel")(
+          tags.div(`class` := Rx {
+            "leftpanel " + {
+              if (openFileTree()) "open" else ""
+            }
+          })(treeNodePanel.view.render),
+          tags.div(`class` := Rx {
+            "centerpanel " + {
+              if (openFileTree()) "reduce" else ""
+            }
+          })(treeNodePanel.fileDisplayer.tabs.render)
+
+        ).render
       )
     }
 
+    body.appendChild(connectionForm)
+    body.appendChild(maindiv)
   }
+
 }

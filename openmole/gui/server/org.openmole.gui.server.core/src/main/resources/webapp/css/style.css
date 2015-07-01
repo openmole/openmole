@@ -457,10 +457,26 @@ font-weight: bold;
 	font-weight: bold;
 }
 
+.connectionTabOverlay {
+	color: white;
+	position: absolute;
+	left: 0;
+	background: white none repeat scroll 0 0;
+    z-index: 998;
+    height: 100%;
+    width: 100%;
+}
+
 .centerPage{
-	position: fixed;
+	position: absolute;
+    z-index: 999;
     top:50%;
     left: 50% ;
     margin-left: -100px;
     margin-top: -10px;
+}
+
+.italicRed{
+    color: red;
+    font-style: italic;
 }
