@@ -1,8 +1,6 @@
 package org.openmole.gui.plugin.environment.ssh.client
 
-import org.openmole.gui.ext.data.AuthenticationData
-import org.openmole.gui.ext.data.AuthenticationData.LoginPasswordAuthenticationData
-
+import org.openmole.gui.ext.data.LoginPasswordAuthenticationData
 import scala.scalajs.js.annotation.JSExport
 import org.openmole.gui.ext.dataui.{AuthenticationFactoryUI, PanelUI}
 

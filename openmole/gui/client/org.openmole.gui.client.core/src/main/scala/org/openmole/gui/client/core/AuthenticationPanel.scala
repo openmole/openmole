@@ -33,7 +33,6 @@ import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.AuthenticationData._
 import bs._
 import rx._
 

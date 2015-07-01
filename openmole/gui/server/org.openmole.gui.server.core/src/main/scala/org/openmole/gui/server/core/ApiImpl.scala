@@ -8,7 +8,6 @@ import org.openmole.tool.file._
 import org.openmole.core.workspace.{ AuthenticationProvider, Workspace }
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data.{ ScriptData, TreeNodeData }
-import org.openmole.gui.ext.data.AuthenticationData._
 import java.io.{ File, PrintStream }
 import java.nio.file._
 import org.openmole.console._

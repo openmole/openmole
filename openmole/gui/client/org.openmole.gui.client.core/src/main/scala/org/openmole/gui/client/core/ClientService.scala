@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.dataui._
-import org.openmole.gui.ext.data.AuthenticationData.LoginPasswordAuthenticationData
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.dataui._
 import rx._

@@ -1,7 +1,6 @@
 package org.openmole.gui.plugin.environment.ssh.client
 
-import org.openmole.gui.ext.data.AuthenticationData
-import org.openmole.gui.ext.data.AuthenticationData.PrivateKeyAuthenticationData
+import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
 import org.openmole.gui.ext.dataui.PanelUI
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._

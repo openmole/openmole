@@ -1,7 +1,7 @@
 package org.openmole.gui.plugin.environment.ssh.server
 
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.data.AuthenticationData.LoginPasswordAuthenticationData
+import org.openmole.gui.ext.data.LoginPasswordAuthenticationData
 import org.openmole.gui.ext.data.{AuthenticationData, AuthenticationFactory}
 import org.openmole.gui.server.core.Utils._
 import org.openmole.plugin.environment.ssh.{SSHAuthentication, LoginPassword, PrivateKey}
@@ -37,7 +37,6 @@ class SSHLoginPasswordAuthenticationFactory extends AuthenticationFactory {
   }
 
   def allAuthenticationData: Seq[AuthenticationData] = {
-    println("ALLL AuTH " + Workspace.authenticationProvider(classOf[SSHAuthentication]).size)
     Workspace.authenticationProvider(classOf[SSHAuthentication]).flatMap {
       e=> println("find " + e)
       e match {

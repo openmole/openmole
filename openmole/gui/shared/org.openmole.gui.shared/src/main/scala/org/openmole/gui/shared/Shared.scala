@@ -17,7 +17,6 @@
 package org.openmole.gui.shared
 
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.AuthenticationData._
 
 trait Api {
   //AUTHENTICATIONS

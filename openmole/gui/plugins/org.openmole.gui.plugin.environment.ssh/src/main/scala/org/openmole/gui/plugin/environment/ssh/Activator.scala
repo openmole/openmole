@@ -18,7 +18,7 @@ package org.openmole.gui.plugin.environment.ssh
  */
 
 import fr.iscpif.gridscale.ssh.SSHPrivateKeyAuthentication
-import org.openmole.gui.ext.data.AuthenticationData.{ PrivateKeyAuthenticationData, LoginPasswordAuthenticationData }
+import org.openmole.gui.ext.data.{ PrivateKeyAuthenticationData, LoginPasswordAuthenticationData }
 import org.openmole.gui.plugin.environment.ssh.client.{ SSHPrivateKeyAuthenticationFactoryUI, SSHLoginPasswordAuthenticationFactoryUI, SSHEnvironmentFactoryUI }
 import org.openmole.gui.plugin.environment.ssh.ext.SSHEnvironmentData
 import org.openmole.gui.plugin.environment.ssh.server.{ SSHPrivateKeyAuthenticationFactory, SSHLoginPasswordAuthenticationFactory, SSHEnvironmentFactory }

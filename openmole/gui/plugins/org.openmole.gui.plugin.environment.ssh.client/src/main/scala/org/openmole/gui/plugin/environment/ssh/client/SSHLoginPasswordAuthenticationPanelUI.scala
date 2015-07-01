@@ -1,8 +1,7 @@
 package org.openmole.gui.plugin.environment.ssh.client
 
 import org.openmole.gui.client.core.OMPost
-import org.openmole.gui.ext.data.AuthenticationData
-import org.openmole.gui.ext.data.AuthenticationData.LoginPasswordAuthenticationData
+import org.openmole.gui.ext.data.LoginPasswordAuthenticationData
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.ext.dataui.PanelUI
