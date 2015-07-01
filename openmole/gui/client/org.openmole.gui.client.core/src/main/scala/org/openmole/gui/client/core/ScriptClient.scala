@@ -3,8 +3,8 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.files.{ TreeNodeTabs, TreeNodePanel }
 import org.openmole.gui.misc.js.BootstrapTags
 import org.openmole.gui.shared.Api
-import org.scalajs.dom.raw.Event
-import scalatags.JsDom.{ tags ⇒ tags }
+import org.scalajs.dom.raw.{ HTMLFormElement, HTMLInputElement, Event }
+import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import bs._
 import scala.scalajs.js.annotation.JSExport
@@ -89,19 +89,23 @@ object ScriptClient {
       passwordAgainInput.value = ""
     }
 
-    val connectionForm = tags.div(`class` := Rx {
+    def connectionForm(i: HTMLInputElement): HTMLFormElement =
+      tags.form(i, `type` := "submit", onsubmit := { () ⇒
+        connection
+        false
+      }
+      ).render
+
+    val connectionDiv = tags.div(`class` := Rx {
       if (!passwordOK()) "connectionTabOverlay" else "displayOff"
     })(
       tags.div(`class` := Rx {
         if (!passwordOK()) "centerPage" else ""
-      }, tags.form(`type` := "submit", onsubmit := { () ⇒
-        connection
-        false
-      }),
+      },
         Rx {
-          bs.inputGroup(emptyCK) /*(navbar_left)*/ (
-            passwordInput,
-            if (!passwordChosen()) passwordAgainInput else tags.div(),
+          bs.inputGroup(navbar_left)(
+            connectionForm(passwordInput),
+            if (!passwordChosen()) connectionForm(passwordAgainInput) else tags.div(),
             inputGroupButton(connectButton)
           )
         },
@@ -164,7 +168,7 @@ object ScriptClient {
       )
     }
 
-    body.appendChild(connectionForm)
+    body.appendChild(connectionDiv)
     body.appendChild(maindiv)
   }
 
