@@ -22,6 +22,8 @@ import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLDivElement
 import org.scalajs.jquery
+import scala.concurrent
+import scala.concurrent.duration.Duration
 import scala.scalajs.js.Date
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.Expander
@@ -36,6 +38,7 @@ import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import bs._
 import rx._
+import concurrent.duration._
 
 class ExecutionPanel extends ModalPanel {
   val modalID = "executionsPanelID"
@@ -95,7 +98,13 @@ class ExecutionPanel extends ModalPanel {
               _._1 == id
             }.headOption.getOrElse((id, StaticExecutionInfo()))._2
             val startDate = new Date(staticInfo.startDate).toLocaleDateString
-            val duration = new Date(executionInfo.duration).toLocaleTimeString
+
+            val duration: Duration = (executionInfo.duration milliseconds)
+            val h = (duration).toHours
+            val s = (duration - (h hours)).toSeconds
+
+            val durationString = s"""${h.formatted("%02d")}:${s.formatted("%02d")}"""
+
             val completed = executionInfo.completed
 
             val details = executionInfo match {
@@ -160,7 +169,7 @@ class ExecutionPanel extends ModalPanel {
               bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + details.running),
               bs.td(col_md_1)(bs.glyph(bs.glyph_flag), " " + completed),
               bs.td(col_md_1)(details.ratio + "%"),
-              bs.td(col_md_1)(duration),
+              bs.td(col_md_1)(durationString),
               bs.td(col_md_1)(stateLink)(`class` := executionInfo.state + "State"),
               bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
               bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink),
