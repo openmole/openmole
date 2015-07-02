@@ -69,7 +69,6 @@ object ScriptClient {
 
     def setPassword(s: String) = OMPost[Api].setPassword(s).call().foreach { b ⇒
       passwordOK() = b
-      authenticationPanel.getAuthentications
       cleanInputs
     }
 

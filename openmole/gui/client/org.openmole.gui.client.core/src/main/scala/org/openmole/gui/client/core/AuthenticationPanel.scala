@@ -39,20 +39,22 @@ import rx._
 class AuthenticationPanel extends ModalPanel {
   val modalID = "authenticationsPanelID"
   val setting: Var[Option[PanelUI]] = Var(None)
+  private val auths: Var[Option[Seq[AuthenticationData]]] = Var(None)
 
   def onOpen = () ⇒ {
-    println("open authen")
+    auths() match {
+      case None ⇒ getAuthentications
+      case _    ⇒
+    }
   }
 
   def onClose = () ⇒ {
     println("close authen")
   }
 
-  private val auths: Var[Seq[AuthenticationData]] = Var(Seq())
-
   def getAuthentications = {
     OMPost[Api].authentications.call().foreach { a ⇒
-      auths() = a
+      auths() = Some(a)
     }
   }
 
@@ -105,9 +107,10 @@ class AuthenticationPanel extends ModalPanel {
               p.view
             )
             case _ ⇒
-              for (a ← auths()) yield {
-                //ClientService.authenticationUI(a)
-                Seq(Reactive(a).render)
+              auths().map { aux ⇒
+                for (a ← aux) yield {
+                  Seq(Reactive(a).render)
+                }
               }
           }
         }
