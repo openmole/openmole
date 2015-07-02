@@ -32,6 +32,8 @@ import Authentication.Log
 
 trait Authentication <: Persistent {
 
+  override def /(name: String) = new Persistent(new File(baseDir, name)) with Authentication
+
   def category[T](implicit m: Manifest[T]): String = m.runtimeClass.getCanonicalName
 
   def set[T](obj: T)(implicit m: Manifest[T]): Unit = saveAs[T]("0.key", obj)
@@ -44,10 +46,16 @@ trait Authentication <: Persistent {
       case None                ⇒ Workspace.authentications.saveAs(UUID.randomUUID.toString + ".key", t)
     }
 
-  protected def saveAs[T](fileName: String, obj: T)(implicit m: Manifest[T]): Unit =
-    save(obj, fileName, Some(category[T]))
+  def remove[T: Manifest](t: T, eq: (T, T) ⇒ Boolean) =
+    inCategory(category[T]).toList.filter {
+      case (_, t1: Any) ⇒ eq(t, t1.asInstanceOf[T])
+    }.foreach {
+      case (fileName, _) ⇒ new File(category[T], fileName).delete()
+    }
 
-  def clean[T](implicit m: Manifest[T]): Unit = super.clean(Some(m.runtimeClass.getCanonicalName))
+  protected def saveAs[T](fileName: String, obj: T)(implicit m: Manifest[T]): Unit = (this / category[T]).save(obj, fileName)
+
+  def clear[T](implicit m: Manifest[T]): Unit = (this / category[T]).delete()
 
   protected def inCategory(category: String) = {
     val d = new File(baseDir, category)

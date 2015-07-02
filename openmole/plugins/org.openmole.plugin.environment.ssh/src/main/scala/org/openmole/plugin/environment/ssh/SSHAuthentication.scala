@@ -38,12 +38,14 @@ object SSHAuthentication {
     apply(address(login, host, port))(authentications)
 
   def +=(a: SSHAuthentication) =
-    Workspace.authentications.save[SSHAuthentication](
-      a, (a1, a2) ⇒ (a1.login, a1.target) == (a2.login, a2.target)
-    )
+    Workspace.authentications.save[SSHAuthentication](a, eq)
 
-  def clear() = Workspace.authentications.clean[SSHAuthentication]
+  def -=(a: SSHAuthentication) =
+    Workspace.authentications.remove[SSHAuthentication](a, eq)
 
+  def clear() = Workspace.authentications.clear[SSHAuthentication]
+
+  private def eq(a1: SSHAuthentication, a2: SSHAuthentication) = (a1.login, a1.target) == (a2.login, a2.target)
 }
 
 trait SSHAuthentication {

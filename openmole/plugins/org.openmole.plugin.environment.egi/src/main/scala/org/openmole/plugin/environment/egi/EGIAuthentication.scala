@@ -129,6 +129,7 @@ object EGIAuthentication extends Logger {
 
   def update(a: EGIAuthentication) = Workspace.authentications.set(a)
   def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[EGIAuthentication]).headOption
+  def clear() = Workspace.authentications.clear[EGIAuthentication]
 
   def initialise(a: EGIAuthentication)(
     serverURL: String,
