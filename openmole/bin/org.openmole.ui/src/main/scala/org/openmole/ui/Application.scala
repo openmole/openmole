@@ -74,8 +74,8 @@ class Application extends IApplication {
       launchMode: LaunchMode = GUIMode,
       ignored: List[String] = Nil,
       allowInsecureConnections: Boolean = false,
-      serverPort: Option[Int] = None,
-      serverSSLPort: Option[Int] = None,
+      webServerPort: Option[Int] = None,
+      webServerSSLPort: Option[Int] = None,
       loggerLevel: Option[String] = None,
       unoptimizedJS: Boolean = false,
       webuiAuthentication: Boolean = false,
@@ -117,8 +117,8 @@ class Application extends IApplication {
         case "-h" :: tail                           ⇒ parse(tail, c.copy(launchMode = HelpMode))
         case "-ws" :: tail                          ⇒ parse(tail, c.copy(launchMode = ServerMode))
         case "--ws-configure" :: tail               ⇒ parse(tail, c.copy(launchMode = ServerConfigMode))
-        case "-sp" :: tail                          ⇒ parse(tail.tail, c.copy(serverPort = Some(tail.head.toInt))) // Server port
-        case "-ssp" :: tail                         ⇒ parse(tail.tail, c.copy(serverSSLPort = Some(tail.head.toInt)))
+        case "--ws-sp" :: tail                      ⇒ parse(tail.tail, c.copy(webServerPort = Some(tail.head.toInt))) // Server port
+        case "--ws-ssp" :: tail                     ⇒ parse(tail.tail, c.copy(webServerSSLPort = Some(tail.head.toInt)))
         case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
         case "--logger-level" :: tail               ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
         case "--unoptimizedJS" :: tail              ⇒ parse(tail, c.copy(unoptimizedJS = true))
@@ -170,7 +170,7 @@ class Application extends IApplication {
           None
         case ServerMode ⇒
           if (!config.password.isDefined) Console.initPassword
-          val server = new RESTServer(config.serverPort, config.serverSSLPort, config.hostName, config.allowInsecureConnections, PluginSet(userPlugins))
+          val server = new RESTServer(config.webServerPort, config.webServerSSLPort, config.hostName, config.allowInsecureConnections, PluginSet(userPlugins))
           server.start()
           None
         case ConsoleMode ⇒
@@ -185,7 +185,7 @@ class Application extends IApplication {
           val lock = new FileOutputStream(GUIServer.lockFile).getChannel.tryLock
           if (lock != null)
             try {
-              val port = config.serverPort.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
+              val port = config.webServerPort.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
               val url = s"https://localhost:$port"
               GUIServer.urlFile.content = url
               BootstrapJS.init(!config.unoptimizedJS)
