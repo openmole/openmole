@@ -50,7 +50,7 @@ object FileManager {
   def upload(fileList: FileList,
              destinationPath: String,
              fileTransferState: FileTransferState ⇒ Unit) = {
-    var formData = new FormData
+    val formData = new FormData
 
     for (i ← 0 to fileList.length - 1) {
       val file = fileList(i)
@@ -76,15 +76,11 @@ object FileManager {
   }
 
   def download(treeNode: TreeNode,
-               saveFile: Boolean,
                fileTransferState: FileTransferState ⇒ Unit,
                onLoadEnded: String ⇒ Unit) = {
 
     val (fileName, fileType) = FileExtension(treeNode)
 
-    val formData = new FormData
-    formData.append("path", treeNode.canonicalPath())
-    formData.append("saveFile", saveFile)
     val xhr = new XMLHttpRequest
 
     xhr.onprogress = (e: ProgressEvent) ⇒ {
@@ -99,17 +95,8 @@ object FileManager {
       }
     }
 
-    xhr.open("POST", "downloadedfiles", true)
-
-    fileType match {
-      case df: DisplayableFile ⇒
-      case _ ⇒ {
-        println("blob !!!")
-        xhr.responseType = "blob"
-      }
-    }
-
-    xhr.send(formData)
+    xhr.open("GET", s"downloadFile?path=${treeNode.canonicalPath()}", true)
+    xhr.send()
   }
 
 }

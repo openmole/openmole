@@ -20,6 +20,7 @@ import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 
 import org.openmole.console.ConsoleVariables
+import org.openmole.core.filedeleter.FileDeleter
 import org.openmole.core.workflow.mole.ExecutionContext
 import org.openmole.core.workflow.puzzle.Puzzle
 import org.openmole.core.workspace.Workspace
@@ -105,21 +106,22 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
-  post("/downloadedfiles") {
-    val path = params("path")
-    val file = new File(path)
-    if (file.isDirectory) file.archiveCompress(new File(file.getName + ".tar.gz"))
+  get("/downloadFile") {
+    case class ToDownload(file: File, name: String)
 
-    if (params("saveFile").toBoolean) {
-      Ok(file, Map(
-        "Content-Type" -> ("application/octet-stream"),
-        "Content-Disposition" -> ("attachment; filename=\"" + file.getName + "\"")
-      ))
+    val path = params("path")
+    val dl = {
+      val f = new File(path)
+      if (f.isDirectory) {
+        val tar = Workspace.newFile()
+        f.archiveCompress(tar)
+        FileDeleter.deleteWhenGarbageCollected(tar)
+        ToDownload(tar, f.getName + ".tgz")
+      }
+      else ToDownload(f, f.getName)
     }
-    else if (file.exists) {
-      contentType = "application/octet-stream"
-      Ok(file)
-    }
+
+    if (dl.file.exists) Ok(dl.file, Map("Content-Disposition" -> s"attachment; filename=${dl.name}"))
     else NotFound("The file " + path + " does not exist.")
   }
 
