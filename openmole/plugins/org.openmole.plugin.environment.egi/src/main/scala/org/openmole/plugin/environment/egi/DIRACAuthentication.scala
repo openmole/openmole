@@ -28,6 +28,7 @@ object DIRACAuthentication {
     else Workspace.authentications.set(a)
 
   def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[DIRACAuthentication]).headOption
+  def clear() = Workspace.authentications.clear[DIRACAuthentication]
 
   def initialise(a: DIRACAuthentication)(implicit authenticationProvider: AuthenticationProvider) =
     a match {
