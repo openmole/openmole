@@ -27,9 +27,10 @@ trait Api {
   def removeAuthentication(data: AuthenticationData): Unit
 
   //WORKSPACE
+
   def isPasswordCorrect(pass: String): Boolean
 
-  def passwordChosen(): Boolean
+  def passwordState(): PasswordState
 
   def resetPassword(): Unit
 

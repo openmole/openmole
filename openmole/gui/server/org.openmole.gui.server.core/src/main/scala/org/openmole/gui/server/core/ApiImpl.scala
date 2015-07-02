@@ -51,7 +51,7 @@ object ApiImpl extends Api {
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean = Workspace.passwordIsCorrect(pass)
 
-  def passwordChosen(): Boolean = Workspace.passwordChosen
+  def passwordState() = PasswordState(chosen = Workspace.passwordChosen, hasBeenSet = Workspace.passwordHasBeenSet)
 
   def resetPassword(): Unit = Workspace.reset
 

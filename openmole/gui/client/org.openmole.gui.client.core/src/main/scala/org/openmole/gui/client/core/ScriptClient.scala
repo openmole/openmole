@@ -41,12 +41,10 @@ object ScriptClient {
     val passwordChosen = Var(true)
     val passwordOK = Var(false)
 
-    def isPasswordChosen(todoIfChosen: () ⇒ Unit = () ⇒ {}) = OMPost[Api].passwordChosen().call().foreach { b ⇒
-      passwordChosen() = b
-      if (b) todoIfChosen()
+    OMPost[Api].passwordState().call().foreach { b ⇒
+      passwordChosen() = b.chosen
+      passwordOK() = b.hasBeenSet
     }
-
-    isPasswordChosen()
 
     val body = dom.document.body
     val maindiv = body.appendChild(tags.div())
@@ -80,7 +78,7 @@ object ScriptClient {
       if (passwordChosen()) setPassword(passwordInput.value)
       else if (passwordInput.value == passwordAgainInput.value) {
         passwordChosen() = true
-        connection
+        setPassword(passwordInput.value)
       }
       else cleanInputs
     }

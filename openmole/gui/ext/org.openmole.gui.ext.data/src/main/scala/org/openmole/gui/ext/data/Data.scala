@@ -184,3 +184,7 @@ case class Ready() extends ExecutionInfo {
 
   def completed: Long = 0L
 }
+
+@JSExport
+case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
+
