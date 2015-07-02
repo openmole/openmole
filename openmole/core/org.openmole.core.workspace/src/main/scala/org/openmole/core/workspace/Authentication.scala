@@ -50,7 +50,9 @@ trait Authentication <: Persistent {
     inCategory(category[T]).toList.filter {
       case (_, t1: Any) ⇒ eq(t, t1.asInstanceOf[T])
     }.foreach {
-      case (fileName, _) ⇒ new File(category[T], fileName).delete()
+      case (fileName, _) ⇒
+        val cat = new File(baseDir, category[T])
+        new File(cat, fileName).delete()
     }
 
   protected def saveAs[T](fileName: String, obj: T)(implicit m: Manifest[T]): Unit = (this / category[T]).save(obj, fileName)

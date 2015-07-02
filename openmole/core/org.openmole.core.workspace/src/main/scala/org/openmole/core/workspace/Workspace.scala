@@ -33,6 +33,7 @@ import org.openmole.core.tools.service._
 import Random._
 import scala.collection.mutable.HashMap
 import scala.concurrent.duration.FiniteDuration
+import scala.util.Try
 
 object Workspace {
 
@@ -265,6 +266,8 @@ class Workspace(val location: File) {
   }
 
   def passwordChosen = isPreferenceSet(passwordTest)
+  def passwordHasBeenSet =
+    passwordChosen && Try(preference(Workspace.passwordTest) == passwordTestString).getOrElse(false)
 
   def preferenceAsDuration(location: ConfigurationLocation): FiniteDuration = preference(location)
 
