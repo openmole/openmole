@@ -24,6 +24,8 @@ trait Api {
 
   def addAuthentication(data: AuthenticationData): Unit
 
+  def removeAuthentication(data: AuthenticationData): Unit
+
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean
 

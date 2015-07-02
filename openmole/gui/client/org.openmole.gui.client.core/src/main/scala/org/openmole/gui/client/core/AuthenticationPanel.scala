@@ -65,30 +65,56 @@ class AuthenticationPanel extends ModalPanel {
       authenticationSelector.content().map { f ⇒ setting() = Some(f.panelUI) }
     })
 
-  lazy val authenticationTable = bs.table(striped)(
-    thead,
-    Rx {
-      tbody({
-        setting() match {
-          case Some(p: PanelUI) ⇒ tags.div(
-            authenticationSelector.selector,
-            p.view
-          )
-          case _ ⇒
-            for (a ← auths()) yield {
-              //ClientService.authenticationUI(a)
-              Seq(bs.tr(row)(
-                tags.a(a.synthetic, cursor := "pointer", onclick := { () ⇒
-                  setting() = Some(ClientService.panelUI(a))
-                })
-              )
-              )
+  lazy val authenticationTable = {
+
+    case class Reactive(a: AuthenticationData) {
+      val lineHovered: Var[Boolean] = Var(false)
+
+      val render = Rx {
+        bs.tr(row)(
+          onmouseover := { () ⇒
+            lineHovered() = true
+          },
+          onmouseout := { () ⇒
+            lineHovered() = false
+          },
+          tags.td(
+            tags.a(a.synthetic, `class` := "left", cursor := "pointer", onclick := { () ⇒
+              setting() = Some(ClientService.panelUI(a))
+            })
+          ),
+          tags.td(bs.label(ClientService.authenticationUI(a).name, label_primary)),
+          tags.td(id := Rx {
+            "treeline" + {
+              if (lineHovered()) "-hover" else ""
             }
-        }
+          })(
+            glyphSpan(glyph_trash, () ⇒ removeAuthentication(a))(id := "glyphtrash", `class` := "glyphitem grey")
+          )
+        )
       }
-      )
     }
-  )
+
+    bs.table(striped)(
+      thead,
+      Rx {
+        tbody({
+          setting() match {
+            case Some(p: PanelUI) ⇒ tags.div(
+              authenticationSelector.selector,
+              p.view
+            )
+            case _ ⇒
+              for (a ← auths()) yield {
+                //ClientService.authenticationUI(a)
+                Seq(Reactive(a).render)
+              }
+          }
+        }
+        )
+      }
+    )
+  }
 
   val newButton = bs.glyphButton(glyph_plus, () ⇒ {
     save
@@ -123,6 +149,10 @@ class AuthenticationPanel extends ModalPanel {
       closeButton
     )
   )
+
+  def removeAuthentication(d: AuthenticationData) = {
+
+  }
 
   def save = {
     setting().map {

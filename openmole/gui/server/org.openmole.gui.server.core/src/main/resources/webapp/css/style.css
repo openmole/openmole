@@ -152,20 +152,19 @@ select::-moz-focus-inner {
 	padding-top: 45px;
 }
 
-.filelist li .glyphitem {
+.glyphitem {
     float: right;
     padding-right: 5px;
     color: white;
-    opacity: 0.4;
+    opacity: 0.2;
     display: inline-block;
    -webkit-transition: -moz-transform .1s ease-out;
    -moz-transition: -webkit-transform .1s ease-out;
    -o-transition: -o-transform .1s ease-out;
     transition: transform .1s ease-out;
-
 }
 
-.filelist li .glyphitem:hover{
+.glyphitem:hover{
 	opacity: 1;
     display: inline-block;
    -moz-transform: scale(1.2);
@@ -174,18 +173,24 @@ select::-moz-focus-inner {
    transform: scale(1.2);
 }
 
+
+.grey{
+	color: grey;
+	opacity: 0.8;
+}
+
 .filelist li {
 	width: 100%;
 	height: 30px;
 }
 
-.filelist li #glyphtrash:hover{
-color: red;
+#glyphtrash:hover{
+    color: red;
 }
 
 #adddir{
-padding-left:7px;
-padding-top: 40px;
+    padding-left:7px;
+    padding-top: 40px;
 }
 
 #adddir .glyphicon {
@@ -193,7 +198,7 @@ padding-top: 40px;
 }
 
 #adddir .btn {
-width: 100px;
+    width: 100px;
 }
 
 #plusdir{
@@ -217,8 +222,8 @@ width: 100px;
 
 
 #success-like{
-float: left;
-height: 20px;
+    float: left;
+    height: 20px;
 }
 
 #fileinput-addon{
@@ -245,7 +250,7 @@ height: 20px;
 }
 
 #treeline-hover{
-opacity: 1;
+    opacity: 1;
 }
 
 .tab-content{
@@ -255,8 +260,8 @@ opacity: 1;
 }
 
 #editorContainer{
-padding:0;
-width: 100%;
+    padding:0;
+    width: 100%;
 }
 
 .nav-tabs {
@@ -264,7 +269,7 @@ width: 100%;
 }
 
 .nav-tabs > li .close {
-    margin: 3px 0px 0 15px;
+   margin: 3px 0px 0 15px;
    font-size: 14px;
 }
 
@@ -410,23 +415,23 @@ overflow-y : auto;
 }
 
 .executionTable table td.runningState{
-color: yellow;
-font-weight: bold;
+    color: yellow;
+    font-weight: bold;
 }
 
 .executionTable table td.finishedState{
-color: #5aa02c;
-font-weight: bold;
+    color: #5aa02c;
+    font-weight: bold;
 }
 
 .executionTable table td.canceledState{
-color: orange;
-font-weight: bold;
+    color: orange;
+    font-weight: bold;
 }
 
 .executionTable table td.failedState{
-color: red;
-font-weight: bold;
+    color: red;
+    font-weight: bold;
 }
 
 .removeExecution:hover{
@@ -482,4 +487,8 @@ font-weight: bold;
 	margin-left: 25px;
 	margin-top: 38px;
     font-style: italic;
+}
+
+.left{
+    float: left;
 }

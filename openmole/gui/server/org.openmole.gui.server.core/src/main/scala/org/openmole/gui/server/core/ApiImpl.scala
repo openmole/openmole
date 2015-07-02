@@ -46,6 +46,8 @@ object ApiImpl extends Api {
     _.allAuthenticationData
   }.toSeq
 
+  def removeAuthentication(data: AuthenticationData) = {}
+
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean = Workspace.passwordIsCorrect(pass)
 
