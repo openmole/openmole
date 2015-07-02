@@ -154,7 +154,8 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   )
 
   def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
-    FileManager.download(treeNode, saveFile,
+    FileManager.download(
+      treeNode,
       (p: FileTransferState) ⇒ transferring() = p,
       onLoaded
     )
@@ -182,7 +183,8 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
       clickableElement(fn, "file", () ⇒ {
         val (_, fileType) = FileExtension(node)
         fileType match {
-          case d: DisplayableFile ⇒ downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.canonicalPath(), node, content, executionTriggerer))
+          case d: DisplayableFile ⇒
+            downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.canonicalPath(), node, content, executionTriggerer))
           case _                  ⇒
         }
       })
@@ -293,7 +295,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         })(
           glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
           glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
-          glyphSpan(glyph_download, () ⇒ downloadFile(tn, true))(`class` := "glyphitem")
+          a(glyphSpan(glyph_download, () ⇒ Unit)(`class` := "glyphitem"), href := s"downloadFile?path=${tn.canonicalPath()}")
         )
       )
     )
