@@ -155,8 +155,8 @@ object BootstrapTags {
   val glyph_lock = "glyphicon-lock"
 
   //Button
-  def button(content: String, keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
-    tags.button(`class` := ("btn " + keys.key), `type` := "button")(content)
+  def button(content: String, keys: ClassKeyAggregator, todo: () ⇒ Unit = () ⇒ {}): TypedTag[HTMLButtonElement] =
+    tags.button(`class` := ("btn " + keys.key), `type` := "button", onclick := { () ⇒ todo() })(content)
 
   def button(content: TypedTag[HTMLElement], keys: ClassKeyAggregator): TypedTag[HTMLButtonElement] =
     tags.button(`class` := ("btn " + keys.key), `type` := "button")(content)

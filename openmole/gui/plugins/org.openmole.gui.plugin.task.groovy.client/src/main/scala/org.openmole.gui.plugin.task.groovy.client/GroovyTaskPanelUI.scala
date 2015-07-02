@@ -38,7 +38,7 @@ class GroovyTaskPanelUI(dataUI: GroovyTaskDataUI) extends PanelUI {
     )
   }
 
-  def save = {
+  def save(onsave: ()=> Unit) = {
     dataUI.code() = codeInput.value
   }
 }

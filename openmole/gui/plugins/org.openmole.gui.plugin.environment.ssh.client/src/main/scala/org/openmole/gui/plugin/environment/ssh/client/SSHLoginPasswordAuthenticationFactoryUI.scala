@@ -29,4 +29,6 @@ class SSHLoginPasswordAuthenticationFactoryUI extends AuthenticationFactoryUI{
   type DATA = LoginPasswordAuthenticationData
 
   def panelUI(data: DATA): PanelUI = new SSHLoginPasswordAuthenticationPanelUI(data)
+
+  def data: DATA = LoginPasswordAuthenticationData()
 }

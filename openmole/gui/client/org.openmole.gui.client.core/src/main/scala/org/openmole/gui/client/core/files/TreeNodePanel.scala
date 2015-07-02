@@ -177,13 +177,15 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   )
 
   def drawNode(node: TreeNode) = node match {
-    case fn: FileNode ⇒ clickableElement(fn, "file", () ⇒ {
-      val (_, fileType) = FileExtension(node)
-      fileType match {
-        case d: DisplayableFile ⇒ downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.canonicalPath(), node, content, executionTriggerer))
-        case _                  ⇒
-      }
-    })
+    case fn: FileNode ⇒
+      println("fn " + fn.canonicalPath())
+      clickableElement(fn, "file", () ⇒ {
+        val (_, fileType) = FileExtension(node)
+        fileType match {
+          case d: DisplayableFile ⇒ downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.canonicalPath(), node, content, executionTriggerer))
+          case _                  ⇒
+        }
+      })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
       dirNodeLine() = dirNodeLine() :+ dn
     }

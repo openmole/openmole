@@ -85,7 +85,7 @@ class PrototypePanelUI(dataUI: PrototypeDataUI) extends PanelUI {
 
   val view = tags.div
 
-  def save = {
+  def save(onsave: () ⇒ Unit) = {
   }
 
 }

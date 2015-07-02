@@ -59,7 +59,7 @@ object IOMappingFactory {
 
         val view: TypedTag[HTMLElement] = span(input)
 
-        def save = value() = input.value
+        def save(onsave: () ⇒ Unit) = value() = input.value
       }
     }
   }
@@ -80,7 +80,7 @@ object IOMappingFactory {
 
         val view: TypedTag[HTMLElement] = span(input)
 
-        def save: Unit = value() = input.checked
+        def save(onsave: () ⇒ Unit): Unit = value() = input.checked
       }
     }
   }
@@ -104,7 +104,7 @@ object IOMappingFactory {
 
         val view: TypedTag[HTMLElement] = span(selectorT.selector)
 
-        def save: Unit = selectorT.content().map { c ⇒ value() = c }
+        def save(onsave: () ⇒ Unit): Unit = selectorT.content().map { c ⇒ value() = c }
       }
     }
   }

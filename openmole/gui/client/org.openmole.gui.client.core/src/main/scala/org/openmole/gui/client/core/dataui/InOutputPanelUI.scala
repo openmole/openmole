@@ -85,7 +85,7 @@ class InOutputPanelUI(val panel: SettingsPanel, val dataUI: InOutputDataUI) exte
   }
 
   def setCurrent(pdb: PrototypeDataBagUI) = {
-    save
+    save()
     panel.currentDataBagUI().map {
       db ⇒
         panel.stack(db, dataUI match {
@@ -96,6 +96,6 @@ class InOutputPanelUI(val panel: SettingsPanel, val dataUI: InOutputDataUI) exte
     panel.setCurrent(pdb)
   }
 
-  def save = saveInOutputsUI(dataUI.inoutputsUI())
+  def save(onsave: () ⇒ Unit) = saveInOutputsUI(dataUI.inoutputsUI())
 
 }

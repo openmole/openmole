@@ -26,11 +26,12 @@ object PanelUI {
   def empty = new PanelUI {
     val view = div
 
-    def save = {}
+    def save(onsave: () ⇒ Unit) = {}
   }
 }
 
 trait PanelUI {
   def view: TypedTag[HTMLElement]
-  def save: Unit
+
+  def save(onsave: () ⇒ Unit = () ⇒ {}): Unit
 }

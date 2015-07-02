@@ -25,7 +25,7 @@ import java.net.URI
 
 object Utils {
 
-  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f.getCanonicalPath, f.isDirectory, f.length, readableByteCount(f.length))
+  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f.toURI.getPath, f.isDirectory, f.length, readableByteCount(f.length))
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)

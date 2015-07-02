@@ -28,4 +28,6 @@ class SSHPrivateKeyAuthenticationFactoryUI extends AuthenticationFactoryUI {
   type DATA = PrivateKeyAuthenticationData
 
   def panelUI(data: DATA): PanelUI = new SSHPrivateKeyAuthenticationPanelUI(data)
+
+  def data: DATA = PrivateKeyAuthenticationData()
 }

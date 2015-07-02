@@ -37,9 +37,7 @@ class SSHLoginPasswordAuthenticationFactory extends AuthenticationFactory {
   }
 
   def allAuthenticationData: Seq[AuthenticationData] = {
-    Workspace.authenticationProvider(classOf[SSHAuthentication]).flatMap {
-      e=> println("find " + e)
-      e match {
+    Workspace.authenticationProvider(classOf[SSHAuthentication]).flatMap {_ match {
         case lp: LoginPassword => Some(LoginPasswordAuthenticationData(lp.login, lp.cypheredPassword, lp.target))
         case _=> None
       }

@@ -106,7 +106,7 @@ object IOPanelUIUtil {
   def saveInOutputsUI(inouts: Seq[InOutputUI]) = {
     inouts.map {
       _.mappings().fields.map {
-        _.panelUI.save
+        _.panelUI.save()
       }
     }
   }

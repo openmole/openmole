@@ -30,7 +30,7 @@ class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) ext
   @JSExport
   val view = tags.div()
 
-  def save = {
+  def save(onsave: ()=> Unit) = {
 
     //FIXME Send to the server the SSHenvData to be stored in the workspace
     //  new SSHAuthenticationData

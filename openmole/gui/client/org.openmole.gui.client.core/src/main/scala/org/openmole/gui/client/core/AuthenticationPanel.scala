@@ -18,15 +18,15 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.core.workspace.{ AuthenticationProvider, Workspace }
+import org.openmole.gui.ext.dataui.{ AuthenticationFactoryUI, PanelUI }
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLDivElement
 import org.scalajs.jquery
 import scala.scalajs.js.Date
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.Expander
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select, Expander }
 import org.openmole.gui.misc.js.Expander._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.timers._
@@ -38,7 +38,7 @@ import rx._
 
 class AuthenticationPanel extends ModalPanel {
   val modalID = "authenticationsPanelID"
-  val setting: Var[Option[_ <: AuthenticationData]] = Var(None)
+  val setting: Var[Option[PanelUI]] = Var(None)
 
   def onOpen = () ⇒ {
     println("open authen")
@@ -56,49 +56,80 @@ class AuthenticationPanel extends ModalPanel {
     }
   }
 
-  lazy val authenticationTable = {
+  val factories = ClientService.authenticationFactories
 
-    bs.table(striped)(
-      thead,
-      Rx {
-        tbody({
-          setting() match {
-            case Some(d: AuthenticationData) ⇒ ClientService.panelUI(d).view
-            case _ ⇒
-              for (a ← auths()) yield {
-                //ClientService.authenticationUI(a)
-                Seq(bs.tr(row)(
-                  tags.span(a.synthetic, cursor := "pointer", onclick := { () ⇒
-                    setting() = Some(a)
-                  })
-                )
-                )
-              }
-          }
+  val authenticationSelector: Select[AuthenticationFactoryUI] = Select("authentications",
+    factories,
+    factories.headOption,
+    btn_primary, onclickExtra = () ⇒ {
+      authenticationSelector.content().map { f ⇒ setting() = Some(f.panelUI) }
+    })
+
+  lazy val authenticationTable = bs.table(striped)(
+    thead,
+    Rx {
+      tbody({
+        setting() match {
+          case Some(p: PanelUI) ⇒ tags.div(
+            authenticationSelector.selector,
+            p.view
+          )
+          case _ ⇒
+            for (a ← auths()) yield {
+              //ClientService.authenticationUI(a)
+              Seq(bs.tr(row)(
+                tags.a(a.synthetic, cursor := "pointer", onclick := { () ⇒
+                  setting() = Some(ClientService.panelUI(a))
+                })
+              )
+              )
+            }
         }
-        )
       }
-    )
-  }
+      )
+    }
+  )
 
-  val closeButton = bs.button("Close", btn_test)(data("dismiss") := "modal", onclick := {
+  val newButton = bs.glyphButton(glyph_plus, () ⇒ {
+    save
+    authenticationSelector.content().map { f ⇒
+      setting() = Some(f.panelUI)
+    }
+  })
+
+  val saveButton = bs.button("Save", btn_primary, () ⇒ {
+    save
+  })
+
+  val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := {
     () ⇒
       println("Close")
   }
   )
 
   val dialog = modalDialog(modalID,
-    headerDialog(
-      tags.div("Authentications"
-      ),
-      bodyDialog(`class` := "executionTable")(
-        authenticationTable
-      ),
-      footerDialog(
-        closeButton
-      )
+    headerDialog(Rx {
+      tags.span("Authentications",
+        inputGroup(navbar_right)(
+          inputGroupButton(newButton),
+          inputGroupButton(setting() match {
+            case Some(_) ⇒ saveButton
+            case _       ⇒ tags.div()
+          }
+          )))
+    }),
+    bodyDialog(authenticationTable),
+    footerDialog(
+      closeButton
     )
   )
+
+  def save = {
+    setting().map {
+      _.save(() ⇒ getAuthentications)
+    }
+    setting() = None
+  }
 
   jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ {
     onClose()

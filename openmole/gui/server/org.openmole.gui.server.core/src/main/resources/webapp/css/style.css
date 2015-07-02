@@ -477,7 +477,9 @@ font-weight: bold;
     max-width: 350px;
 }
 
-.italicRed{
-    color: red;
+.message{
+	color: #999;
+	margin-left: 25px;
+	margin-top: 38px;
     font-style: italic;
 }

@@ -30,7 +30,7 @@ class SSHEnvironmentPanelUI(dataUI: SSHEnvironmentDataUI) extends PanelUI {
 @JSExport
 val view = bs.div()
 
-def save = {
+def save(onsave: ()=> Unit) = {
 }
 
 }

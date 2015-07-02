@@ -35,7 +35,7 @@ object SettingTabs {
 
     case class SettingTab(name: String, panelUIs: Seq[PanelUI], id: String = getUUID, focusID: Option[String] = None) {
       def save = panelUIs.map {
-        _.save
+        _.save()
       }
 
       def focus = focusID.map { f ⇒ jQuery("#" + f).focus }

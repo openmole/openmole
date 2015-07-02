@@ -32,24 +32,35 @@ import scalatags.JsDom.{tags ⇒ tags}
 @JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHLoginPasswordAuthenticationPanelUI")
 class SSHLoginPasswordAuthenticationPanelUI(data: LoginPasswordAuthenticationData) extends PanelUI {
 
+  val login = bs.input(data.login)(
+    placeholder := "Login",
+    width := "130px").render
+
+  val target = bs.input(data.target)(
+    placeholder := "Host",
+    width := "130px").render
+
+  val password = bs.input(data.cypheredPassword)(
+    placeholder := "Password",
+    `type` := "password",
+    width := "130px").render
+
+
+
   @JSExport
-  val view = tags.div(
-    bs.input(data.login)(
-      placeholder := "Login",
-      width := "130px"),
-    bs.input(data.target)(
-      placeholder := "Host",
-      width := "130px"),
-    bs.input(data.cypheredPassword)(
-      placeholder := "Password",
-      `type` := "password",
-      width := "130px")
-  )
+  val view = {
+    println("login " + data.login)
+    tags.div(
+      tags.span("Login", login),
+      tags.span("Host", target),
+      tags.span("Password", password)
+    )
+  }
 
-  def save = {
-
-    //FIXME Send to the server the SSHenvData to be stored in the workspace
-    //  new SSHAuthenticationData
+  def save(onsave: ()=> Unit) = {
+    OMPost[Api].addAuthentication(LoginPasswordAuthenticationData(login.value, password.value, target.value)).call().foreach{b=>
+      onsave()
+    }
   }
 
 }

@@ -35,7 +35,7 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
   lazy val Autocomplete = ace.require("ace/autocomplete").Autocomplete
 
-  def save = {}
+  def save(onsave: () ⇒ Unit) = {}
 
   val editorDiv = tags.div(id := "editor")
   val editor = ace.edit(editorDiv.render)

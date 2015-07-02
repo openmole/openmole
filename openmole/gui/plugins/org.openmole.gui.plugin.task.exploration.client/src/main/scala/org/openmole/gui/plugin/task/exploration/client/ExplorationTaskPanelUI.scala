@@ -38,7 +38,7 @@ class ExplorationTaskPanelUI(dataUI: ExplorationTaskDataUI) extends PanelUI {
     )
   }
 
-  def save = {
+  def save(onsave: ()=> Unit) = {
     dataUI.code() = editor.code
   }
 

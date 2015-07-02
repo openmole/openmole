@@ -34,7 +34,7 @@ class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {
     codeInput
   )
 
-  def save = {
+  def save(onsave: ()=> Unit) = {
     dataUI.code() = codeInput.value
   }
 }

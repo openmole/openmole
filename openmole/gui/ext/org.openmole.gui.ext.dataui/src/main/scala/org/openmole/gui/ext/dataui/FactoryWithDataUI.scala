@@ -35,7 +35,9 @@ trait DataUIBuilder {
 
 trait PanelUIBuilder {
   type DATA <: Data
+  def data: DATA
   def panelUI(data: DATA): PanelUI
+  def panelUI: PanelUI = panelUI(data)
 }
 
 trait AuthenticationFactoryUI extends FactoryWithPanelUI
