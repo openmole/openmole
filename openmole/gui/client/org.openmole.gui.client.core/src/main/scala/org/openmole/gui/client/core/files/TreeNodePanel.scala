@@ -116,34 +116,40 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         )
       )
     }, Rx {
-      tags.div(`class` := "tree" + dragState(),
-        ondragover := { (e: DragEvent) ⇒
-          dragState() = " droppable hover"
-          e.dataTransfer.dropEffect = "copy"
-          e.preventDefault
-          e.stopPropagation
-          false
-        },
-        ondragend := { (e: DragEvent) ⇒
-          dragState() = ""
-          false
-        },
-        ondrop := { (e: DragEvent) ⇒
-          dragState() = ""
-          FileManager.upload(e.dataTransfer.files, dirNodeLine().last.canonicalPath(), (p: FileTransferState) ⇒ transferring() = p)
-          e.preventDefault
-          e.stopPropagation
-          false
-        })(
-          transferring() match {
-            case _: Standby ⇒
-            case _: Transfered ⇒
-              refreshCurrentDirectory
-              transferring() = Standby()
-            case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
+      if (dirNodeLine().flatMap { _.sons() }.size == 0) {
+        tags.div("Create a first OpenMOLE scrpit (.oms)")(`class` := "message")
+      }
+      else {
+        println("else ")
+        tags.div(`class` := "tree" + dragState(),
+          ondragover := { (e: DragEvent) ⇒
+            dragState() = " droppable hover"
+            e.dataTransfer.dropEffect = "copy"
+            e.preventDefault
+            e.stopPropagation
+            false
           },
-          drawTree(dirNodeLine().last.sons())
-        )
+          ondragend := { (e: DragEvent) ⇒
+            dragState() = ""
+            false
+          },
+          ondrop := { (e: DragEvent) ⇒
+            dragState() = ""
+            FileManager.upload(e.dataTransfer.files, dirNodeLine().last.canonicalPath(), (p: FileTransferState) ⇒ transferring() = p)
+            e.preventDefault
+            e.stopPropagation
+            false
+          })(
+            transferring() match {
+              case _: Standby ⇒
+              case _: Transfered ⇒
+                refreshCurrentDirectory
+                transferring() = Standby()
+              case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
+            },
+            drawTree(dirNodeLine().last.sons())
+          )
+      }
     }
   )
 

@@ -100,7 +100,7 @@ object BootstrapTags {
   val dropdown = key("dropdown")
 
   //Inputs
-  def input(content: String = "") = tags.input(content, `class` := "form-control")
+  def input(content: String) = tags.input(`class` := "form-control", value := content)
 
   def checkbox(default: Boolean) = tags.input(`type` := "checkbox", checked := default)
 
