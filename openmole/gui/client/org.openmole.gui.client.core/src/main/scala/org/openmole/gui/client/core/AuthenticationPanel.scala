@@ -126,7 +126,7 @@ class AuthenticationPanel extends ModalPanel {
     }
   })
 
-  val saveButton = bs.button("Save", btn_primary, () ⇒ {
+  val saveButton = bs.button("Save", btn_primary + key("authSave"), () ⇒ {
     save
   })
 
@@ -138,14 +138,13 @@ class AuthenticationPanel extends ModalPanel {
 
   val dialog = modalDialog(modalID,
     headerDialog(Rx {
-      tags.span("Authentications",
+      tags.span(tags.b("Authentications"),
         inputGroup(navbar_right)(
-          inputGroupButton(newButton),
-          inputGroupButton(setting() match {
+          setting() match {
             case Some(_) ⇒ saveButton
-            case _       ⇒ tags.div()
+            case _       ⇒ newButton
           }
-          )))
+        ))
     }),
     bodyDialog(authenticationTable),
     footerDialog(
@@ -154,7 +153,10 @@ class AuthenticationPanel extends ModalPanel {
   )
 
   def removeAuthentication(d: AuthenticationData) = {
-
+    println("remove auth " + d)
+    OMPost[Api].removeAuthentication(d).call().foreach { d ⇒
+      getAuthentications
+    }
   }
 
   def save = {

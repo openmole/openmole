@@ -29,6 +29,8 @@ trait CoreObjectFactory extends Factory {
 }
 
 trait AuthenticationFactory extends Factory {
+  def coreObject(data: AuthenticationData): Option[Any]
   def buildAuthentication(data: AuthenticationData): Unit
   def allAuthenticationData: Seq[AuthenticationData]
+  def removeAuthentication(data: AuthenticationData): Unit
 }

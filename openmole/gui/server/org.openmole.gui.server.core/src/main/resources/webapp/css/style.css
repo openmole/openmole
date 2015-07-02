@@ -492,3 +492,8 @@ overflow-y : auto;
 .left{
     float: left;
 }
+
+.authSave{
+ 	margin-right: 15px;
+ 	margin-top: -7px;
+ }

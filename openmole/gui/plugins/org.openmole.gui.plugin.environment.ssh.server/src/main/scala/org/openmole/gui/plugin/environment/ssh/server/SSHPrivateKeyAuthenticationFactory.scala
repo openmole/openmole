@@ -16,6 +16,7 @@ package org.openmole.gui.plugin.environment.ssh.server
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import java.io.File
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
@@ -23,24 +24,28 @@ import org.openmole.gui.ext.data.{AuthenticationFactory, AuthenticationData}
 import org.openmole.gui.server.core.Utils._
 import org.openmole.plugin.environment.ssh.{SSHAuthentication, LoginPassword, PrivateKey}
 
-class SSHPrivateKeyAuthenticationFactory extends AuthenticationFactory{
+class SSHPrivateKeyAuthenticationFactory extends AuthenticationFactory {
 
   implicit lazy val authProvider = Workspace.authenticationProvider
 
   def buildAuthentication(data: AuthenticationData) = {
-    val auth = data match {
-      case key: PrivateKeyAuthenticationData => Some(PrivateKey(new File(key.privateKey), key.login, key.cypheredPassword, key.target))
-      case _ => None
-    }
-
+    val auth = coreObject(data)
     auth.map { a => SSHAuthentication += a }
   }
 
   def allAuthenticationData: Seq[AuthenticationData] = {
-    Workspace.authenticationProvider(classOf[SSHAuthentication]).flatMap {_ match {
-          case key: PrivateKey => Some(PrivateKeyAuthenticationData(key.privateKey.getCanonicalPath, key.login, key.cypheredPassword, key.target))
-          case _=> None
-        }
+    SSHAuthentication().flatMap {
+      _ match {
+        case key: PrivateKey => Some(PrivateKeyAuthenticationData(key.privateKey.getCanonicalPath, key.login, key.cypheredPassword, key.target))
+        case _ => None
+      }
     }
   }
+
+  def coreObject(data: AuthenticationData): Option[PrivateKey] = data match {
+    case key: PrivateKeyAuthenticationData => Some(PrivateKey(new File(key.privateKey), key.login, key.cypheredPassword, key.target))
+    case _ => None
+  }
+
+  def removeAuthentication(data: AuthenticationData) = coreObject(data).map{e=>  SSHAuthentication -= e}
 }

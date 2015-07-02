@@ -24,7 +24,7 @@ import scala.scalajs.js.annotation.JSExport
 @JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHPrivateKeyAuthenticationFactoryUI")
 class SSHPrivateKeyAuthenticationFactoryUI extends AuthenticationFactoryUI {
 
-  val name = "Private key (SSH)"
+  val name = "SSH key"
   type DATA = PrivateKeyAuthenticationData
 
   def panelUI(data: DATA): PanelUI = new SSHPrivateKeyAuthenticationPanelUI(data)

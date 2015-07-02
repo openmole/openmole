@@ -38,6 +38,7 @@ import org.openmole.tool.stream.{ StringPrintStream, StringOutputStream }
 object ApiImpl extends Api {
 
   val execution = new Execution
+  implicit lazy val authProvider = Workspace.authenticationProvider
 
   //AUTHENTICATIONS
   def addAuthentication(data: AuthenticationData): Unit = ServerFactories.authenticationFactories(data.getClass).buildAuthentication(data)
@@ -46,7 +47,7 @@ object ApiImpl extends Api {
     _.allAuthenticationData
   }.toSeq
 
-  def removeAuthentication(data: AuthenticationData) = {}
+  def removeAuthentication(data: AuthenticationData) = ServerFactories.authenticationFactories(data.getClass).removeAuthentication(data)
 
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean = Workspace.passwordIsCorrect(pass)

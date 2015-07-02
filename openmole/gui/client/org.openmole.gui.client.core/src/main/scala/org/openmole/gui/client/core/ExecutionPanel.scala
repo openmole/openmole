@@ -186,7 +186,7 @@ class ExecutionPanel extends ModalPanel {
 
   def visibleClass(expandID: ExpandID, visibleID: VisibleID): Modifier = `class` := { if (expander.isVisible(expandID, visibleID)) "executionVisible" else "" }
 
-  val closeButton = bs.button("Close", btn_test)(data("dismiss") := "modal", onclick := {
+  val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := {
     () ⇒
       println("Close")
   }
@@ -194,11 +194,9 @@ class ExecutionPanel extends ModalPanel {
 
   val dialog = modalDialog(modalID,
     headerDialog(
-      tags.div("Executions"
-      ),
+      tags.div(tags.b("Executions")),
       bodyDialog(`class` := "executionTable")(
-        executionTable
-      ),
+        executionTable),
       footerDialog(
         closeButton
       )

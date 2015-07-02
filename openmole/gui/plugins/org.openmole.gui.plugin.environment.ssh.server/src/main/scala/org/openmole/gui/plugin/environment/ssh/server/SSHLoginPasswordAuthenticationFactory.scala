@@ -28,20 +28,24 @@ class SSHLoginPasswordAuthenticationFactory extends AuthenticationFactory {
   implicit lazy val authProvider = Workspace.authenticationProvider
 
   def buildAuthentication(data: AuthenticationData) = {
-    val auth = data match {
-      case lp: LoginPasswordAuthenticationData => Some(LoginPassword(lp.login, lp.cypheredPassword, lp.target))
-      case _=> None
-    }
-
-    auth.map{a=> SSHAuthentication += a}
+    val auth = coreObject(data)
+    auth.map { a => SSHAuthentication += a }
   }
 
   def allAuthenticationData: Seq[AuthenticationData] = {
-    Workspace.authenticationProvider(classOf[SSHAuthentication]).flatMap {_ match {
+    Workspace.authenticationProvider(classOf[SSHAuthentication]).flatMap {
+      _ match {
         case lp: LoginPassword => Some(LoginPasswordAuthenticationData(lp.login, lp.cypheredPassword, lp.target))
-        case _=> None
+        case _ => None
       }
     }
   }
 
+  def coreObject(data: AuthenticationData): Option[LoginPassword] = data match {
+    case lp: LoginPasswordAuthenticationData => Some(LoginPassword(lp.login, lp.cypheredPassword, lp.target))
+    case _ => None
+  }
+
+  def removeAuthentication(data: AuthenticationData) = coreObject(data).map{e=>
+    SSHAuthentication -= e}
 }

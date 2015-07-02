@@ -25,7 +25,7 @@ import org.openmole.gui.ext.dataui.{AuthenticationFactoryUI, PanelUI}
 @JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHLoginPasswordAuthenticationFactoryUI")
 class SSHLoginPasswordAuthenticationFactoryUI extends AuthenticationFactoryUI{
 
-  val name = "Login/Password (SSH)"
+  val name = "SSH Password"
   type DATA = LoginPasswordAuthenticationData
 
   def panelUI(data: DATA): PanelUI = new SSHLoginPasswordAuthenticationPanelUI(data)
