@@ -185,7 +185,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         fileType match {
           case d: DisplayableFile ⇒
             downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.canonicalPath(), node, content, executionTriggerer))
-          case _                  ⇒
+          case _ ⇒
         }
       })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
