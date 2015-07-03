@@ -17,6 +17,8 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.net.URI
+
 import org.openmole.gui.ext.data.TreeNodeData
 import TreeNodeTabs.TreeNodeTab
 import org.openmole.gui.misc.utils.Utils._
@@ -58,8 +60,8 @@ sealed trait TreeNode {
 object TreeNode {
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode =
-    if (tnd.isDirectory) DirNode(tnd.name, tnd.canonicalPath, tnd.size, tnd.readableSize, Var(Seq()))
-    else FileNode(tnd.name, tnd.canonicalPath, tnd.size, tnd.readableSize)
+    if (tnd.isDirectory) DirNode(tnd.name, new URI(tnd.canonicalPath).getPath, tnd.size, tnd.readableSize, Var(Seq()))
+    else FileNode(tnd.name, new URI(tnd.canonicalPath).getPath, tnd.size, tnd.readableSize)
 
   implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.canonicalPath(), tn match {
     case DirNode(_, _, _, _, _) ⇒ true

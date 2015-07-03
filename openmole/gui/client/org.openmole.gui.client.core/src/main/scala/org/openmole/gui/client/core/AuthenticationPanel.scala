@@ -82,6 +82,8 @@ class AuthenticationPanel extends ModalPanel {
           },
           tags.td(
             tags.a(a.synthetic, `class` := "left", cursor := "pointer", onclick := { () ⇒
+              removeAuthentication(a)
+              authenticationSelector.content() = Some(ClientService.authenticationUI(a))
               setting() = Some(ClientService.panelUI(a))
             })
           ),
@@ -104,7 +106,7 @@ class AuthenticationPanel extends ModalPanel {
           setting() match {
             case Some(p: PanelUI) ⇒ tags.div(
               authenticationSelector.selector,
-              p.view
+              bs.div(spacer20)(p.view)
             )
             case _ ⇒
               auths().map { aux ⇒
@@ -153,7 +155,6 @@ class AuthenticationPanel extends ModalPanel {
   )
 
   def removeAuthentication(d: AuthenticationData) = {
-    println("remove auth " + d)
     OMPost[Api].removeAuthentication(d).call().foreach { d ⇒
       getAuthentications
     }

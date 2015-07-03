@@ -1,7 +1,7 @@
-package org.openmole.gui.plugin.environment.ssh.client
+package org.openmole.gui.plugin.environment.egi.client
 
 import org.openmole.gui.client.core.OMPost
-import org.openmole.gui.ext.data.LoginPasswordAuthenticationData
+import org.openmole.gui.ext.data.EGIP12AuthenticationData
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.ext.dataui.PanelUI
@@ -11,9 +11,10 @@ import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{BootstrapTags => bs}
 import scalatags.JsDom.{tags ⇒ tags}
+import org.openmole.gui.server.core.Utils._
 
 /*
- * Copyright (C) 16/06/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 02/07/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -29,16 +30,8 @@ import scalatags.JsDom.{tags ⇒ tags}
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHLoginPasswordAuthenticationPanelUI")
-class SSHLoginPasswordAuthenticationPanelUI(data: LoginPasswordAuthenticationData) extends PanelUI {
-
-  val login = bs.input(data.login)(
-    placeholder := "Login",
-    width := "130px").render
-
-  val target = bs.input(data.target)(
-    placeholder := "Host",
-    width := "130px").render
+@JSExport("org.openmole.gui.plugin.environment.egi.client.EGIP12AuthenticationPanelUI")
+class EGIP12AuthenticationPanelUI(data: EGIP12AuthenticationData) extends PanelUI {
 
   val password = bs.input(data.cypheredPassword)(
     placeholder := "Password",
@@ -50,14 +43,12 @@ class SSHLoginPasswordAuthenticationPanelUI(data: LoginPasswordAuthenticationDat
   @JSExport
   val view = {
     tags.div(
-      bs.labeledRow("Login", login),
-      bs.labeledRow("Host", target),
-      bs.labeledRow("Password", password)
+      tags.span("Password", password)
     )
   }
 
   def save(onsave: ()=> Unit) = {
-    OMPost[Api].addAuthentication(LoginPasswordAuthenticationData(login.value, password.value, target.value)).call().foreach{b=>
+    OMPost[Api].addAuthentication(EGIP12AuthenticationData(password.value, data.certificatePath)).call().foreach{b=>
       onsave()
     }
   }

@@ -352,6 +352,18 @@ object BootstrapTags {
   val col_md_offset_3 = key("col-md-offset-3")
   val col_md_offset_2 = key("col-md-offset-2")
 
+  def labeledRow(labelString: String, element: HTMLElement) = {
+    val ID = uuID
+    tags.form(`class` := "form-horizontal")(
+      tags.div(`class` := "control-group")(
+        tags.label(`class` := "control-label", `for` := ID)(labelString),
+        tags.div(`class` := "controls")(
+          tags.div(id := ID)(element)
+        )
+      )
+    )
+  }
+
   //Misc
   val center = key("text-center")
   val spacer20 = key("spacer20")

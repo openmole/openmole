@@ -23,7 +23,6 @@ import org.openmole.gui.client.core.ClientService
 import ClientService._
 import scala.scalajs.js.annotation.JSExport
 import rx._
-import ClientService._
 
 class SSHEnvironmentDataUI(val name: Var[String] = Var(""),
                            val login: Var[String] = Var(""),
