@@ -105,7 +105,7 @@ class AuthenticationPanel extends ModalPanel {
           setting() match {
             case Some(p: PanelUI) ⇒ tags.div(
               authenticationSelector.selector,
-              p.view
+              bs.div(spacer20)(p.view)
             )
             case _ ⇒
               auths().map { aux ⇒
