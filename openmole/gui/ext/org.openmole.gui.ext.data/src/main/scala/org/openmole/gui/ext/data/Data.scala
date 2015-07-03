@@ -105,6 +105,11 @@ case class PrivateKeyAuthenticationData(
   def synthetic = s"$login@$target"
 }
 
+case class EGIP12AuthenticationData(val cypheredPassword: String = "",
+                                    val certificatePath: String = "") extends AuthenticationData {
+  def synthetic = certificatePath
+}
+
 trait HookData extends Data with InputData with OutputData
 
 case class ErrorData(data: DataBag, error: String, stack: String)

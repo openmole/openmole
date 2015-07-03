@@ -20,4 +20,10 @@ object Environment extends GUIPluginDefaults {
 
   lazy val ssh = OsgiProject("ssh") dependsOn (ext, client, server)
 
+  val (ext1, client1, server1) = Util.project(rootDir, "egi",
+    serverProjectDependencies = Seq(Core.batch, Core.workspace, _root_.plugin.Environment.egi)
+  )
+
+  lazy val egi = OsgiProject("egi") dependsOn (ext1, client1, server1)
+
 }

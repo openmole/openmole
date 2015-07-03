@@ -25,13 +25,17 @@ import java.net.URI
 
 object Utils {
 
-  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f.toURI.getPath, f.isDirectory, f.length, readableByteCount(f.length))
+  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f.toURI.toString, f.isDirectory, f.length, readableByteCount(f.length))
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)
   }
 
   implicit def uriToFile(uri: URI): File = new File(uri.getPath)
+
+  implicit def fileToString(f: File): String = f.toURI.toString
+
+  implicit def stringToFile(s: String): File = new File(new URI(s).getPath)
 
   val workspaceProjectFile = Workspace.file("webui/projects")
 
