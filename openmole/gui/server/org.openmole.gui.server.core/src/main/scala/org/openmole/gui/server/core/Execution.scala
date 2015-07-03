@@ -52,10 +52,10 @@ class Execution {
     case Some(Left((_, moleExecution, output))) ⇒
       val d = moleExecution.duration.getOrElse(0L)
       moleExecution.exception match {
-        case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t), lastOutputs = output.read)
+        case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t), lastOutputs = output.read, duration = moleExecution.duration.getOrElse(0))
         case _ ⇒
-          if (moleExecution.canceled) Canceled(lastOutputs = output.read)
-          else if (moleExecution.finished) Finished(lastOutputs = output.read)
+          if (moleExecution.canceled) Canceled(duration = moleExecution.duration.get, lastOutputs = output.read)
+          else if (moleExecution.finished) Finished(duration = moleExecution.duration.get, lastOutputs = output.read)
           else if (moleExecution.started) {
             Running(
               ready = moleExecution.ready,
