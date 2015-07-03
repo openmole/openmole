@@ -55,7 +55,7 @@ class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) ext
   }
 
   def save(onsave: () => Unit) = {
-    OMPost[Api].addAuthentication(PrivateKeyAuthenticationData(login.value, password.value, target.value, "")).call().foreach { b =>
+    OMPost[Api].addAuthentication(PrivateKeyAuthenticationData("file", login.value, password.value, target.value)).call().foreach { b =>
       onsave()
     }
   }

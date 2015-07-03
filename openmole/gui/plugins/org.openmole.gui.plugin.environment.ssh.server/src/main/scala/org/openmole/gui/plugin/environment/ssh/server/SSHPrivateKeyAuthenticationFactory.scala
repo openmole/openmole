@@ -26,22 +26,19 @@ import org.openmole.plugin.environment.ssh.{SSHAuthentication, PrivateKey}
 
 class SSHPrivateKeyAuthenticationFactory extends AuthenticationFactory {
 
-  implicit lazy val authProvider = Workspace.authenticationProvider
+  implicit def authProvider = Workspace.authenticationProvider
 
   def buildAuthentication(data: AuthenticationData) = {
     val auth = coreObject(data)
     auth.map { a => SSHAuthentication += a }
   }
 
-  def allAuthenticationData: Seq[AuthenticationData] = {
-    println("++ALL from PRIVATKe " + SSHAuthentication())
-    SSHAuthentication().flatMap {
+  def allAuthenticationData: Seq[AuthenticationData] = SSHAuthentication().flatMap {
       _ match {
         case key: PrivateKey => Some(PrivateKeyAuthenticationData(key.privateKey.getCanonicalPath, key.login, key.cypheredPassword, key.target))
         case _ => None
       }
     }
-  }
 
   def coreObject(data: AuthenticationData): Option[PrivateKey] = data match {
     case key: PrivateKeyAuthenticationData => Some(PrivateKey(key.privateKey, key.login, key.cypheredPassword, key.target))
