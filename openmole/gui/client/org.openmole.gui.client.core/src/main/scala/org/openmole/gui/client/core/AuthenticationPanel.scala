@@ -83,6 +83,7 @@ class AuthenticationPanel extends ModalPanel {
           tags.td(
             tags.a(a.synthetic, `class` := "left", cursor := "pointer", onclick := { () ⇒
               removeAuthentication(a)
+              authenticationSelector.content() = Some(ClientService.authenticationUI(a))
               setting() = Some(ClientService.panelUI(a))
             })
           ),
