@@ -7,7 +7,7 @@
 
   @p To interact with the OpenMOLE development team, you can post on the OpenMOLE development mailing list: devs 'at' list.openmole.org (you should @a("subscribe", href := "http://devlist.openmole.org/") first).
 
-  @p The development version of the OpenMOLE site and software is compiled and distributed several times an hour at @a( "this url", href := "http://jenkins.iscpif.fr/job/openmole%20documentation/lastSuccessfulBuild/artifact/openmole/bin/site/target/site/Documentation_Development_Web%20Server.html").
+  @p The development version of the OpenMOLE site and software is compiled and distributed several times an hour at @a( "this url", href := "http://next.openmole.org").
 
 @sect{Bug report}
   Please report bugs you may find in OpenMOLE on the @a("bug tracker", href := "https://github.com/openmole/openmole/issues").
