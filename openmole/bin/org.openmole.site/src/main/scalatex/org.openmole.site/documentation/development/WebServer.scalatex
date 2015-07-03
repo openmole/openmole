@@ -2,42 +2,70 @@
 @import org.openmole.site.Objects._
 
 @sect{Web Server}
-  OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution and
-  @b{retrieve} their output data. To start the OpenMOLE web server, run the command: "openmole -ws" in your favourite
-  console.
+  Warning: The REST API of OpenMOLE is still experimental, it might be subject to some backward incompatible changes in the future.
 
-  @p The web server can be accessed from your browser when pointing to
-  @a("http://localhost:8080", href := "http://localhost:8080"). Replace @i{localhost} with the remote machine's hostname
-  or IP address if the web server is not running on your local system.
+  @p OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution and @b{retrieve} their output data. You should first configure your web server by running openmole --ws-configure. Then you may start the OpenMOLE web server, run the command: "openmole -ws --ws-ssp 8843" from the console.
+
+  @p The web server can be accessed at the URL https://localhost:8443. Replace @i{localhost} with the remote machine's hostname or IP address if the web server is not running on your local system.
 
   @sect{API Reference}
-
-    @p The API of the web server is as such:
-    @br @b{GET}:
+    @p The API of the web server uses exclusively the POST method:
     @ul
-      @li{@b{createMole} - return the webpage form for creating a new mole}
-      @li{@b{execs} – return the loaded mole executions}
-      @li{@b{execs/:id} – return the stats of the mole execution identified by @b{id}}
-      @li{@b{start/:id} – start the mole execution identified by @b{id}}
-      @li{@b{remove/:id} – purge the execution identified by @b{id} and any stored data from the database}
-      @li{@b{data/:id/data.tar} – retrieve the TAR archive containing the results of the execution identified by @b{id}}
-
-    @br @b{POST}:
-    @ul
-      @li{@b{createMole} – used to upload new @i{Moles} to the server. It has the following parameters:
+      @li{@b{token} - return a temporary token in order to use the web service. It has the following parameters:
         @ul
-          @li{@b{file} – the mole file. must be a @hl.openmoleNoTest("PartialMoleExecution") serialized to XML.}
-          @li{@b{csv} – a CSV file containing data bindings for free @i{Vals} in your @i{Mole} execution}
-          @li{@b{encapsulate} – pass the value @b{“on”} for the server to create a special working directory for your Mole
-          execution. You can retrieve the working directory as a tar file from @b{GET data/:id/data.tar} upon completion
-          of the Mole.}
-          @li{@b{name} – allows you to name a @hl.openmoleNoTest("PartialMoleExecution") for reuse purposes.}
+          @li{@b{password} - the password of the server}
+        It return a structure containing:
+        @ul
+          @li{@b{token} - the token}
+          @li{@b{duration} - the duration of the token in milliseconds}
+      }
+      @li{@b{start} - start a mole execution. It has the following parameters:
+        @ul
+          @li{@b{token} - the authentication token}
+          @li{@b{script} - the script to execute, the last line should be a puzzle}
+          @li{@b{inputDirectory} - a tar.gz archive containing the input files for the script, they will be unpacked in the @i{inputDirectory}, you should you this variable in your scripts}
+        When successful, it return a structure containing:
+        @ul
+          @li{@b{id} - the id of the execution}
+        When something has failed, it returns a structure containing:
+        @ul
+          @li{@b{message} - the error message}
+          @li{@b{stackTrace} - optionally a stack trace if the error has been caused by an exception}
+      }
+      @li{@b{state} - return the state of a mole execution. It has the following parameters:
+        @ul
+          @li{@b{token} - the authentication token}
+          @li{@b{id} - the id of the mole execution}
+        When successful, it returns a structure the state:
+        @ul
+          @li{@b{state} - the state of the execution, it can be running, finished or failed}
+        When running the other fields are:
+        @ul
+          @li{@b{ready, running, completed} - the number of jobs in each of these states in the execution}
+          @li{@b{environments} - that contains the state for each execution environment on the execution. This is a JSON structure containing, the name of the environment if it has been set (name), the number of jobs in submitted (submitted), running (running), done (done) and failed (failed) state, a list of errors that happened since the last state query (errors) with the message (message), the stack (stackTrace) and the error level (level).}
+        When failed the other field is:
+        @ul
+          @li{@b{error}: a JSON structure containing the message (message) and the stack (stackTrace)}
+      }
+      @li{@b{output} - returns the output of a mole execution as a string. It has the following parameters:
+        @ul
+          @li{@b{token} - the authentication token}
+          @li{@b{id} - the id of the mole execution}
+      }
+      @li{@b{outputDirectory} - returns an archive of the output directory (outputDirectory variable in the script). It has the following parameters:
+        @ul
+          @li{@b{token} - the authentication token}
+          @li{@b{id} - the id of the mole execution}
+      }
+      @li{@b{remove} - cancel and remove an execution from the server. It has the following parameters:
+        @ul
+          @li{@b{token} - the authentication token}
+          @li{@b{id} - the id of the mole execution}
+      }
+      @li{@b{list} - list execution ids on the server. It has the following parameters:
+       @ul
+          @li{@b{token} - the authentication token}
       }
 
-  @sect{RESTful APIs 101}
 
-    @p The API is used like other RESTful APIs. When something like @i{createMole} is written in the API, it suggests a
-    GET or POST request to "http://<serverAddresshere>/createMole".
 
-    @p Requests' results can be returned as JSON strings instead of the HTTP format. To do so, prepend /json/ to the API
-    calls (except in the case of @b{data/:id/data.tar} that only returns data as a TAR archive).
