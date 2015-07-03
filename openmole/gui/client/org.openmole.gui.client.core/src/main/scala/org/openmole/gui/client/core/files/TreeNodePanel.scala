@@ -1,11 +1,11 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{ PanelTriggerer, ExecutionPanel, OMPost }
+import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
 import org.openmole.gui.client.core.files.FileExtension.DisplayableFile
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.BootstrapTags._
 import org.scalajs.dom.html.Input
-import org.scalajs.dom.raw.{ Event, FileList, HTMLInputElement, DragEvent }
+import org.scalajs.dom.raw.{ HTMLInputElement, DragEvent }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select }
@@ -120,7 +120,6 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         tags.div("Create a first OpenMOLE scrpit (.oms)")(`class` := "message")
       }
       else {
-        println("else ")
         tags.div(`class` := "tree" + dragState(),
           ondragover := { (e: DragEvent) ⇒
             dragState() = " droppable hover"
