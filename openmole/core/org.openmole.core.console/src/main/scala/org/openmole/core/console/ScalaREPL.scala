@@ -104,17 +104,10 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
             case NoPosition ⇒ ErrorMessage(msg, pos.line)
             case _ ⇒
               val offset = pos.start - linesLength
-
-              println("POSstart " + pos.start)
-              println("POSpoint " + pos.point)
-              println("POSend " + pos.end)
-
-              println("XX " + pos.finalPosition.start)
-              println("POS " + new String(pos.source.content))
               ErrorMessage(
                 s"""|$msg
                     |${compiled(pos.line - 1)}
-                    |${new String((0 until offset).map(_ ⇒ ' ').toArray)}^""".stripMargin, pos.line)
+                    |${" " * offset}^""".stripMargin, pos.line)
           }
 
           errorMessage ::= error
