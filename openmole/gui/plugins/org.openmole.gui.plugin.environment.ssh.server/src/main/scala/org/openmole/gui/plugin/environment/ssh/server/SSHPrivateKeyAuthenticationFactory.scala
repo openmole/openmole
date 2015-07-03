@@ -22,7 +22,7 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
 import org.openmole.gui.ext.data.{AuthenticationFactory, AuthenticationData}
 import org.openmole.gui.server.core.Utils._
-import org.openmole.plugin.environment.ssh.{SSHAuthentication, LoginPassword, PrivateKey}
+import org.openmole.plugin.environment.ssh.{SSHAuthentication, PrivateKey}
 
 class SSHPrivateKeyAuthenticationFactory extends AuthenticationFactory {
 
@@ -34,6 +34,7 @@ class SSHPrivateKeyAuthenticationFactory extends AuthenticationFactory {
   }
 
   def allAuthenticationData: Seq[AuthenticationData] = {
+    println("++ALL from PRIVATKe " + SSHAuthentication())
     SSHAuthentication().flatMap {
       _ match {
         case key: PrivateKey => Some(PrivateKeyAuthenticationData(key.privateKey.getCanonicalPath, key.login, key.cypheredPassword, key.target))
@@ -43,7 +44,7 @@ class SSHPrivateKeyAuthenticationFactory extends AuthenticationFactory {
   }
 
   def coreObject(data: AuthenticationData): Option[PrivateKey] = data match {
-    case key: PrivateKeyAuthenticationData => Some(PrivateKey(new File(key.privateKey), key.login, key.cypheredPassword, key.target))
+    case key: PrivateKeyAuthenticationData => Some(PrivateKey(key.privateKey, key.login, key.cypheredPassword, key.target))
     case _ => None
   }
 

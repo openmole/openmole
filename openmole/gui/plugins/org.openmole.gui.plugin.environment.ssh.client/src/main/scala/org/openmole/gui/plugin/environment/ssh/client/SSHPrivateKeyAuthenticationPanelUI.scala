@@ -1,9 +1,13 @@
 package org.openmole.gui.plugin.environment.ssh.client
 
+import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
 import org.openmole.gui.ext.dataui.PanelUI
+import org.openmole.gui.shared.Api
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import autowire._
 import org.openmole.gui.misc.js.{BootstrapTags => bs}
 import scalatags.JsDom.{tags ⇒ tags}
 
@@ -27,13 +31,33 @@ import scalatags.JsDom.{tags ⇒ tags}
 @JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHPrivateKeyAuthenticationPanelUI")
 class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) extends PanelUI {
 
+  val login = bs.input(data.login)(
+    placeholder := "Login",
+    width := "130px").render
+
+  val target = bs.input(data.target)(
+    placeholder := "Host",
+    width := "130px").render
+
+  val password = bs.input(data.cypheredPassword)(
+    placeholder := "Password",
+    `type` := "password",
+    width := "130px").render
+
   @JSExport
-  val view = tags.div()
+  val view = {
+    tags.div(
+      bs.labeledRow("Login", login),
+      bs.labeledRow("Host", target),
+      bs.labeledRow("Password", password),
+      tags.div("file !")
+    )
+  }
 
-  def save(onsave: ()=> Unit) = {
-
-    //FIXME Send to the server the SSHenvData to be stored in the workspace
-    //  new SSHAuthenticationData
+  def save(onsave: () => Unit) = {
+    OMPost[Api].addAuthentication(PrivateKeyAuthenticationData(login.value, password.value, target.value, "")).call().foreach { b =>
+      onsave()
+    }
   }
 
 }

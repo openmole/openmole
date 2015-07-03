@@ -42,10 +42,7 @@ class AuthenticationPanel extends ModalPanel {
   private val auths: Var[Option[Seq[AuthenticationData]]] = Var(None)
 
   def onOpen = () ⇒ {
-    auths() match {
-      case None ⇒ getAuthentications
-      case _    ⇒
-    }
+    getAuthentications
   }
 
   def onClose = () ⇒ {
@@ -122,7 +119,6 @@ class AuthenticationPanel extends ModalPanel {
   }
 
   val newButton = bs.glyphButton(glyph_plus, () ⇒ {
-    save
     authenticationSelector.content().map { f ⇒
       setting() = Some(f.panelUI)
     }
