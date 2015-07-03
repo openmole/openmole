@@ -25,7 +25,7 @@ import org.openmole.plugin.environment.ssh.{SSHAuthentication, LoginPassword, Pr
 
 class SSHLoginPasswordAuthenticationFactory extends AuthenticationFactory {
 
-  implicit lazy val authProvider = Workspace.authenticationProvider
+  implicit def authProvider = Workspace.authenticationProvider
 
   def buildAuthentication(data: AuthenticationData) = {
     val auth = coreObject(data)
