@@ -85,7 +85,7 @@ object BatchEnvironment extends Logger {
 
   val NoTokenForServiceRetryInterval = new ConfigurationLocation("BatchEnvironment", "NoTokenForServiceRetryInterval")
 
-  val MemoryMargin = ConfigurationLocation("BatchEnvironment", "MemoryMargin")
+  val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin")
 
   Workspace += (MinUpdateInterval, "PT1M")
   Workspace += (MaxUpdateInterval, "PT10M")
@@ -107,7 +107,7 @@ object BatchEnvironment extends Logger {
   Workspace += (StoragesGCUpdateInterval, "PT1H")
   Workspace += (NoTokenForServiceRetryInterval, "PT2M")
 
-  Workspace += (MemoryMargin, "1024")
+  Workspace += (RuntimeMemoryMargin, "256")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 
