@@ -4,6 +4,7 @@ import org.openmole.gui.client.core.files.{ TreeNodeTabs, TreeNodePanel }
 import org.openmole.gui.misc.js.BootstrapTags
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement, HTMLInputElement, Event }
+import scala.async.Async.{ async, await }
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import bs._
@@ -154,7 +155,7 @@ object ScriptClient {
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
 
-    OMPost[Api].workspacePath.call().foreach { projectsPath ⇒
+    Settings.workspaceProjectPath.foreach { projectsPath ⇒
       val treeNodePanel = TreeNodePanel(projectsPath)(executionTriggerer)
       maindiv.appendChild(
         tags.div(`class` := "fullpanel")(

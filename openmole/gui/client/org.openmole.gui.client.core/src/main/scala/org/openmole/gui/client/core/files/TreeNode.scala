@@ -63,7 +63,7 @@ object TreeNode {
     if (tnd.isDirectory) DirNode(tnd.name, new URI(tnd.canonicalPath).getPath, tnd.size, tnd.readableSize, Var(Seq()))
     else FileNode(tnd.name, new URI(tnd.canonicalPath).getPath, tnd.size, tnd.readableSize)
 
-  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.canonicalPath(), tn match {
+  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), new URI(tn.canonicalPath()).getPath, tn match {
     case DirNode(_, _, _, _, _) ⇒ true
     case _                      ⇒ false
   }, tn.size, tn.readableSize)

@@ -4,6 +4,7 @@ import org.openmole.core.event.EventAccumulator
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.misc.utils.Utils._
+import org.openmole.gui.server.core.Utils._
 import org.openmole.tool.file._
 import org.openmole.core.workspace.{ AuthenticationProvider, Workspace }
 import org.openmole.gui.shared._
@@ -75,17 +76,22 @@ object ApiImpl extends Api {
 
   def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.canonicalPath)
 
-  def renameFile(treeNodeData: TreeNodeData, name: String): Boolean = {
-    val canonicalFile = new File(treeNodeData.canonicalPath)
-    val (source, target) = (canonicalFile, new File(canonicalFile.getParent, name))
+  def renameFile(treeNodeData: TreeNodeData, name: String): Boolean = renameFileFromPath(treeNodeData.canonicalPath, name)
+
+  def renameFileFromPath(filePath: String, newName: String): Boolean = {
+    val canonicalFile = new File(filePath)
+    val (source, target) = (canonicalFile, new File(canonicalFile.getParent, newName))
 
     Files.move(source, target, StandardCopyOption.REPLACE_EXISTING)
     target.exists
+
   }
 
   def saveFile(path: String, fileContent: String): Unit = new File(path).content = fileContent
 
-  def workspacePath(): String = Utils.workspaceProjectFile.getCanonicalPath()
+  def workspaceProjectPath(): String = Utils.workspaceProjectFile
+
+  def authenticationKeysPath(): String = Utils.authenticationKeysFile
 
   // EXECUTIONS
 

@@ -1,8 +1,10 @@
 package org.openmole.gui.plugin.environment.ssh.client
 
-import org.openmole.gui.client.core.OMPost
+import org.openmole.gui.client.core.{Settings, OMPost}
+import org.openmole.gui.client.core.files.AuthFileUploaderUI
 import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
 import org.openmole.gui.ext.dataui.PanelUI
+import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
@@ -10,6 +12,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.misc.js.{BootstrapTags => bs}
 import scalatags.JsDom.{tags ⇒ tags}
+import rx._
 
 /*
  * Copyright (C) 01/07/15 // mathieu.leclaire@openmole.org
@@ -31,6 +34,7 @@ import scalatags.JsDom.{tags ⇒ tags}
 @JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHPrivateKeyAuthenticationPanelUI")
 class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) extends PanelUI {
 
+
   val login = bs.input(data.login)(
     placeholder := "Login",
     width := "130px").render
@@ -44,18 +48,24 @@ class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) ext
     `type` := "password",
     width := "130px").render
 
+  lazy val privateKey = new AuthFileUploaderUI(data.privateKey)
+
   @JSExport
   val view = {
     tags.div(
-      bs.labeledRow("Login", login),
-      bs.labeledRow("Host", target),
-      bs.labeledRow("Password", password),
-      tags.div("file !")
+      bs.labeledField("Login", login),
+      bs.labeledField("Host", target),
+      bs.labeledField("Password", password),
+      bs.labeledField("Key file", privateKey.view)
     )
   }
 
-  def save(onsave: () => Unit) = {
-    OMPost[Api].addAuthentication(PrivateKeyAuthenticationData("file", login.value, password.value, target.value)).call().foreach { b =>
+  def save(onsave: () => Unit) = Settings.authenticationKeysPath.foreach { kp =>
+    OMPost[Api].addAuthentication(
+      PrivateKeyAuthenticationData(kp +"/"+ privateKey.fileView.value+".key",
+        login.value,
+        password.value,
+        target.value)).call().foreach { b =>
       onsave()
     }
   }

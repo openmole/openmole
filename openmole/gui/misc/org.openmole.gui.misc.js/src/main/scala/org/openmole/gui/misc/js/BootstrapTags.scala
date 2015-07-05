@@ -177,8 +177,14 @@ object BootstrapTags {
       todo()
     }))
 
-  def fileInput(todo: HTMLInputElement ⇒ Unit) = {
+  def fileInputMultiple(todo: HTMLInputElement ⇒ Unit) = {
     lazy val input: HTMLInputElement = tags.input(id := "fileinput", `type` := "file", multiple := "")(onchange := { () ⇒
+      todo(input)
+    }).render
+    input
+  }
+  def fileInput(todo: HTMLInputElement ⇒ Unit) = {
+    lazy val input: HTMLInputElement = tags.input(id := "fileinput", `type` := "file")(onchange := { () ⇒
       todo(input)
     }).render
     input
@@ -187,14 +193,18 @@ object BootstrapTags {
   def uploadButton(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] = {
     tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like")(
       glyph(glyph_upload),
-      fileInput(todo)
+      fileInputMultiple(todo)
     )
   }
+  def uploadButton2(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
+    tags.span(`class` := "btn-file")(
+      glyph(glyph_upload)(fileInput(todo))
+    )
 
   def uploadGlyphSpan(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
     tags.span(`class` := "btn-file")(
       glyph(glyph_upload),
-      fileInput(todo)
+      fileInputMultiple(todo)
     )
 
   def progressBar(barMessage: String, ratio: Int): TypedTag[HTMLDivElement] =
@@ -352,7 +362,7 @@ object BootstrapTags {
   val col_md_offset_3 = key("col-md-offset-3")
   val col_md_offset_2 = key("col-md-offset-2")
 
-  def labeledRow(labelString: String, element: HTMLElement) = {
+  def labeledField(labelString: String, element: HTMLElement) = {
     val ID = uuID
     tags.form(`class` := "form-horizontal")(
       tags.div(`class` := "control-group")(
@@ -363,7 +373,6 @@ object BootstrapTags {
       )
     )
   }
-
   //Misc
   val center = key("text-center")
   val spacer20 = key("spacer20")

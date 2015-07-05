@@ -33,11 +33,13 @@ object Utils {
 
   implicit def uriToFile(uri: URI): File = new File(uri.getPath)
 
-  implicit def fileToString(f: File): String = f.toURI.toString
+  implicit def fileToURIString(f: File): String = f.toURI.toString
 
   implicit def stringToFile(s: String): File = new File(new URI(s).getPath)
 
   val workspaceProjectFile = Workspace.file("webui/projects")
+
+  val authenticationKeysFile = Workspace.file("persistent/authentications/keys")
 
   def listFiles(path: String): Seq[TreeNodeData] = new File(path).listFilesSafe.toSeq
 

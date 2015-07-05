@@ -50,9 +50,9 @@ class SSHLoginPasswordAuthenticationPanelUI(data: LoginPasswordAuthenticationDat
   @JSExport
   val view = {
     tags.div(
-      bs.labeledRow("Login", login),
-      bs.labeledRow("Host", target),
-      bs.labeledRow("Password", password)
+      bs.labeledField("Login", login),
+      bs.labeledField("Host", target),
+      bs.labeledField("Password", password)
     )
   }
 

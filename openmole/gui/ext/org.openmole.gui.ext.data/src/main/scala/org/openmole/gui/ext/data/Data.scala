@@ -107,7 +107,7 @@ case class PrivateKeyAuthenticationData(
 
 case class EGIP12AuthenticationData(val cypheredPassword: String = "",
                                     val certificatePath: String = "") extends AuthenticationData {
-  def synthetic = certificatePath
+  def synthetic = "egi.p12"
 }
 
 trait HookData extends Data with InputData with OutputData

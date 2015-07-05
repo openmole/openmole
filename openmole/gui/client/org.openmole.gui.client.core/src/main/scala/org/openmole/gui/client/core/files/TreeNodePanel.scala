@@ -1,5 +1,7 @@
 package org.openmole.gui.client.core.files
 
+import java.net.URI
+
 import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
 import org.openmole.gui.client.core.files.FileExtension.DisplayableFile
 import org.openmole.gui.shared._
@@ -93,6 +95,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
             {
               val newFile = newNodeInput.value
               val currentDirNode = dirNodeLine().last
+              println("current  " + currentDirNode.canonicalPath())
               addRootDirButton.content().map {
                 _ match {
                   case dt: DirType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
@@ -107,7 +110,8 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
             false
           })),
           inputGroupAddon(id := "fileinput-addon")(uploadButton((fileInput: HTMLInputElement) ⇒ {
-            FileManager.upload(fileInput.files, dirNodeLine().last.canonicalPath(), (p: FileTransferState) ⇒ transferring() = p)
+            FileManager.upload(fileInput.files,
+              new URI(dirNodeLine().last.canonicalPath()).getPath, (p: FileTransferState) ⇒ transferring() = p)
           })),
           inputGroupAddon(id := "fileinput-addon")(
             tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
@@ -116,8 +120,10 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         )
       )
     }, Rx {
-      if (dirNodeLine().flatMap { _.sons() }.size == 0) {
-        tags.div("Create a first OpenMOLE scrpit (.oms)")(`class` := "message")
+      if (dirNodeLine().flatMap {
+        _.sons()
+      }.size == 0) {
+        tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
       }
       else {
         tags.div(`class` := "tree" + dragState(),

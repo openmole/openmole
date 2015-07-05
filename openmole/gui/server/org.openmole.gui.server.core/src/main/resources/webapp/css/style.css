@@ -101,6 +101,10 @@ select::-moz-focus-inner {
 	margin-top: 20px;
 }
 
+ .spacer50{
+	margin-top: 50px;
+ }
+
 #editor {
 	height: 95%;
 	font-family: monospace;
@@ -496,4 +500,13 @@ overflow-y : auto;
 .authSave{
  	margin-right: 15px;
  	margin-top: -7px;
+ }
+
+.inrowFirstElement {
+    display:inline-block
+ }
+
+ .inrow{
+       display:inline-block;
+       margin-left:15px;
  }

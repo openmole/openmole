@@ -166,12 +166,19 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
 case class User(id: String)
 
-trait AuthenticationSupport extends ScentrySupport[User] with BasicAuthSupport[User] { this: GUIServlet ⇒
+trait AuthenticationSupport extends ScentrySupport[User] with BasicAuthSupport[User] {
+  this: GUIServlet ⇒
 
   val realm = "OpenMOLE (user name doesn't matter)"
 
-  protected def fromSession = { case id: String ⇒ User(id) }
-  protected def toSession = { case usr: User ⇒ usr.id }
+  protected def fromSession = {
+    case id: String ⇒ User(id)
+  }
+
+  protected def toSession = {
+    case usr: User ⇒ usr.id
+  }
+
   protected val scentryConfig = (new ScentryConfig {}).asInstanceOf[ScentryConfiguration]
 
   override protected def configureScentry = {
@@ -192,4 +199,5 @@ trait AuthenticationSupport extends ScentrySupport[User] with BasicAuthSupport[U
 
     override protected def getUserId(user: User)(implicit request: HttpServletRequest, response: HttpServletResponse): String = user.id
   }
+
 }

@@ -49,11 +49,15 @@ trait Api {
 
   def uuid(): String = java.util.UUID.randomUUID.toString
 
+  def renameFileFromPath(filePath: String, name: String): Boolean
+
   def renameFile(treeNode: TreeNodeData, name: String): Boolean
 
   def saveFile(path: String, fileContent: String): Unit
 
-  def workspacePath(): String
+  def workspaceProjectPath(): String
+
+  def authenticationKeysPath(): String
 
   //EXECUTIONS
   def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)]

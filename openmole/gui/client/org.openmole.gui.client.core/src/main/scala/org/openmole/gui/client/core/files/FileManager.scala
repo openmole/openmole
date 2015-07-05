@@ -49,7 +49,8 @@ object FileManager {
 
   def upload(fileList: FileList,
              destinationPath: String,
-             fileTransferState: FileTransferState ⇒ Unit) = {
+             fileTransferState: FileTransferState ⇒ Unit,
+             onloaded: () ⇒ Unit = () ⇒ {}) = {
     val formData = new FormData
 
     for (i ← 0 to fileList.length - 1) {
@@ -69,6 +70,7 @@ object FileManager {
 
     xhr.onloadend = (e: ProgressEvent) ⇒ {
       fileTransferState(Transfered())
+      onloaded()
     }
 
     xhr.open("POST", "uploadfiles", true)
