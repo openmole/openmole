@@ -19,7 +19,7 @@ object Libraries extends Defaults {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.85"
+  val gridscaleVersion = "1.86-SNAPSHOT"
 
   val bouncyCastleVersion = "1.50"
 

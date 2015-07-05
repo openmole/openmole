@@ -22,11 +22,11 @@ import org.openmole.core.workspace.Workspace
 trait MemoryRequirement extends BatchEnvironment {
 
   // Margin for the thread stack allocations
-  def margin = Workspace.preferenceAsInt(BatchEnvironment.MemoryMargin)
+  def margin = Workspace.preferenceAsInt(BatchEnvironment.RuntimeMemoryMargin)
   def memory: Option[Int]
 
   def requiredMemory = memory match {
-    case Some(m) ⇒ math.max(openMOLEMemoryValue + margin, m)
+    case Some(m) ⇒ m
     case None    ⇒ openMOLEMemoryValue + margin
   }
 }
