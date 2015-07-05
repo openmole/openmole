@@ -31,9 +31,9 @@ import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLInputElement
 import rx._
 
-class AuthFileUploaderUI(keyName: String) {
+class AuthFileUploaderUI(keyName: String, renaming: Option[String] = None) {
 
-  val fileName = if (keyName == "") uuID else keyName
+  val fileName = if (keyName == "") renaming.getOrElse(uuID) else keyName
 
   val fileView = bs.input("")(
     placeholder := "Not set yet",

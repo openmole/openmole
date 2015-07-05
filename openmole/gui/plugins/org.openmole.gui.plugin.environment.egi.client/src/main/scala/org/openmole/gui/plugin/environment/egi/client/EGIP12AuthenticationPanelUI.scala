@@ -1,6 +1,9 @@
 package org.openmole.gui.plugin.environment.egi.client
 
-import org.openmole.gui.client.core.OMPost
+import java.net.URI
+
+import org.openmole.gui.client.core.{Settings, OMPost}
+import org.openmole.gui.client.core.files.AuthFileUploaderUI
 import org.openmole.gui.ext.data.EGIP12AuthenticationData
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
@@ -39,18 +42,20 @@ class EGIP12AuthenticationPanelUI(data: EGIP12AuthenticationData) extends PanelU
     width := "130px").render
 
 
+  lazy val privateKey = new AuthFileUploaderUI(data.certificatePath, Some("egi.p12"))
 
   @JSExport
-  val view = {
-    tags.div(
-      tags.span("Password", password)
-    )
-  }
+  val view = tags.div(
+    bs.labeledField("Key file", privateKey.view),
+    bs.labeledField("Password", password)
+  )
 
-  def save(onsave: ()=> Unit) = {
-    OMPost[Api].addAuthentication(EGIP12AuthenticationData(password.value, data.certificatePath)).call().foreach{b=>
+
+  def save(onsave: () => Unit) = Settings.authenticationKeysPath.foreach { kp => {
+    OMPost[Api].addAuthentication(EGIP12AuthenticationData(password.value, new URI(kp).getPath + "/egi.p12")).call().foreach { b =>
       onsave()
     }
+  }
   }
 
 }

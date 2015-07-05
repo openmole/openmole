@@ -35,7 +35,7 @@ class SSHPrivateKeyAuthenticationFactory extends AuthenticationFactory {
 
   def allAuthenticationData: Seq[AuthenticationData] = SSHAuthentication().flatMap {
       _ match {
-        case key: PrivateKey => Some(PrivateKeyAuthenticationData(key.privateKey.getCanonicalPath, key.login, key.cypheredPassword, key.target))
+        case key: PrivateKey => Some(PrivateKeyAuthenticationData(key.privateKey, key.login, key.cypheredPassword, key.target))
         case _ => None
       }
     }

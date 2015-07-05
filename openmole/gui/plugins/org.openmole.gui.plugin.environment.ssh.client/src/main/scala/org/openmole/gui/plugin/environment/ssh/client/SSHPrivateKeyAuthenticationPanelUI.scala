@@ -1,5 +1,7 @@
 package org.openmole.gui.plugin.environment.ssh.client
 
+import java.net.URI
+
 import org.openmole.gui.client.core.{Settings, OMPost}
 import org.openmole.gui.client.core.files.AuthFileUploaderUI
 import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
@@ -62,7 +64,7 @@ class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) ext
 
   def save(onsave: () => Unit) = Settings.authenticationKeysPath.foreach { kp =>
     OMPost[Api].addAuthentication(
-      PrivateKeyAuthenticationData(kp +"/"+ privateKey.fileView.value+".key",
+      PrivateKeyAuthenticationData(new URI(kp).getPath +"/"+ privateKey.fileView.value+".key",
         login.value,
         password.value,
         target.value)).call().foreach { b =>
