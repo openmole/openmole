@@ -89,9 +89,8 @@ object FileManager {
 
     xhr.onloadend = (e: ProgressEvent) ⇒ {
       fileTransferState(Transfered())
-      treeNode.canonicalPath().extension match {
-        case df: DisplayableFile ⇒ onLoadEnded(xhr.responseText)
-        case _                   ⇒
+      if (treeNode.canonicalPath().extension.displayable) {
+        onLoadEnded(xhr.responseText)
       }
     }
 

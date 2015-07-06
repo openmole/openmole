@@ -101,16 +101,19 @@ case class InAndOutput(inputPrototype: PrototypeData, outputPrototype: Prototype
 
 sealed trait FileExtension {
   def extension: String
+  def displayable: Boolean
 }
 
-trait OpenMOLEScript
+//trait OpenMOLEScript
 
-case class DisplayableFile(extension: String, highlighter: String) extends FileExtension
+case class DisplayableFile(extension: String, highlighter: String, displayable: Boolean = true) extends FileExtension
 
-case class BinaryFile(extension: String) extends FileExtension
+case class OpenMOLEScript(extension: String, highlighter: String, displayable: Boolean = true) extends FileExtension
+
+case class BinaryFile(extension: String, displayable: Boolean = false) extends FileExtension
 
 object FileExtension {
-  val OMS = new DisplayableFile("oms", "scala") with OpenMOLEScript
+  val OMS = OpenMOLEScript("oms", "scala")
   val SCALA = DisplayableFile("scala", "scala")
   val NETLOGO = DisplayableFile("nlogo", "nlogo")
   val SH = DisplayableFile("sh", "sh")

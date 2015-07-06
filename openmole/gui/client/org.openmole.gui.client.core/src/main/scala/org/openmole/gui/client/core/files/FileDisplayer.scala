@@ -47,29 +47,28 @@ class FileDisplayer {
 
   def display(rootPath: SafePath, tn: TreeNode, content: String, executionTriggerer: PanelTriggerer) = {
     val fileType = tn.canonicalPath().extension
-    println("fileTYPE  " + fileType)
     alreadyDisplayed(tn) match {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileType match {
-        case disp: DisplayableFile ⇒ disp match {
-          case oms: OpenMOLEScript ⇒
-            val ed = editor(fileType, content)
+        case oms: OpenMOLEScript ⇒
+          val ed = editor(fileType, content)
+          OMPost[Api].diff(tn.canonicalPath(), rootPath).call().foreach { rp ⇒
             tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, ed) with OMSTabControl {
-              //FIXME !! DEMANDE AU SERVEUR DU DIFF
-              val relativePath = SafePath.empty //tn.canonicalPath().split('/').dropRight(1).mkString("/") diff rootPath
+              val relativePath = SafePath.empty
 
               def onrun = () ⇒ {
                 overlaying() = true
-                OMPost[Api].runScript(ScriptData(tn.name(), ed.code, inputDirectory, outputDirectory, relativePath + "/outstream")).call().foreach { execInfo ⇒
+                OMPost[Api].runScript(ScriptData(tn.name(), ed.code, inputDirectory, outputDirectory, "outstream")).call().foreach { execInfo ⇒
                   overlaying() = false
                   executionTriggerer.open
                 }
               }
             }
-          case _ ⇒ tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, editor(fileType, content))
-        }
-        case _ ⇒ //FIXME for GUI workflows
+          }
+        case disp: DisplayableFile ⇒ tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, editor(fileType, content))
+        case _                     ⇒ //FIXME for GUI workflows
       }
     }
   }
+
 }

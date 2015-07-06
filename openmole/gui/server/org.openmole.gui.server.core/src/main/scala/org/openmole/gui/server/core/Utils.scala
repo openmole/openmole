@@ -28,20 +28,19 @@ import java.net.URI
 object Utils {
 
   implicit def fileToExtension(f: File): FileExtension = f.getName.split('.').last match {
-    case "oms"                   ⇒ OMS
-    case "scala"                 ⇒ SCALA
-    case "sh"                    ⇒ SH
-    case "nlogo" | "csv" | "txt" ⇒ NO_EXTENSION
-    case _                       ⇒ BINARY
-  }
+      case "oms"                   ⇒ OMS
+      case "scala"                 ⇒ SCALA
+      case "sh"                    ⇒ SH
+      case "nlogo" | "csv" | "txt" ⇒ NO_EXTENSION
+      case _                       ⇒ BINARY
+    }
+
 
   implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, SafePath(f.toURI.toString, f.getName, Some(getParent(f)), f), f.isDirectory, f.length, readableByteCount(f.length))
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)
   }
-
-  //implicit def uriToFile(uri: URI): File = new File(uri.getPath)
 
   implicit def fileToSafePath(f: File): SafePath = SafePath(f.toURI.toString, f.getName, Some(getParent(f)), f)
 

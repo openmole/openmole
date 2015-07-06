@@ -74,7 +74,8 @@ object ApiImpl extends Api {
 
   def deleteFile(treeNodeData: TreeNodeData): Unit = new File(treeNodeData.canonicalPath.path).recursiveDelete
 
-  def diff(subPath: SafePath, fullPath: SafePath): SafePath = SafePath.sp(fullPath.path diff subPath.path, subPath.leaf, None)
+  def diff(subPath: SafePath, fullPath: SafePath): SafePath =
+    SafePath.sp(new File(fullPath.path).getCanonicalPath diff new File(subPath.path).getParentFile.getCanonicalPath, subPath.leaf, None)
 
   def fileSize(treeNodeData: TreeNodeData): Long = new File(treeNodeData.canonicalPath.path).length
 

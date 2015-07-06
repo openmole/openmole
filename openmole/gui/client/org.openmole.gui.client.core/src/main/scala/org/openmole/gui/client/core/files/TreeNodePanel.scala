@@ -45,8 +45,6 @@ object TreeNodePanel {
 import TreeNodePanel._
 
 class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTriggerer) {
-
-  println("ROotNode " + rootNode.canonicalPath() + " " + rootNode.canonicalPath().path)
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode))
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
@@ -92,7 +90,6 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
             {
               val newFile = newNodeInput.value
               val currentDirNode = dirNodeLine().last
-              println("current  " + currentDirNode.canonicalPath())
               addRootDirButton.content().map {
                 _ match {
                   case dt: DirType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
@@ -181,12 +178,9 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
 
   def drawNode(node: TreeNode) = node match {
     case fn: FileNode ⇒
-      println("fn " + fn.canonicalPath())
       clickableElement(fn, "file", () ⇒ {
-        node.canonicalPath().extension match {
-          case d: DisplayableFile ⇒
-            downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.canonicalPath(), node, content, executionTriggerer))
-          case _ ⇒
+        if (node.canonicalPath().extension.displayable) {
+          downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.canonicalPath(), node, content, executionTriggerer))
         }
       })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
