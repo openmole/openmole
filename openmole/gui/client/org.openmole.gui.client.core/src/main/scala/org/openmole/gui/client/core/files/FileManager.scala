@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
+import org.openmole.gui.ext.data.{ DisplayableFile, SafePath }
 import org.scalajs.dom.raw._
-import FileExtension._
 
 /*
  * Copyright (C) 29/04/15 // mathieu.leclaire@openmole.org
@@ -48,14 +48,14 @@ object FileManager {
   }
 
   def upload(fileList: FileList,
-             destinationPath: String,
+             destinationPath: SafePath,
              fileTransferState: FileTransferState ⇒ Unit,
              onloaded: () ⇒ Unit = () ⇒ {}) = {
     val formData = new FormData
 
     for (i ← 0 to fileList.length - 1) {
       val file = fileList(i)
-      formData.append(destinationPath + "/" + file.name, file)
+      formData.append(destinationPath.path + "/" + file.name, file)
     }
 
     val xhr = new XMLHttpRequest
@@ -81,8 +81,6 @@ object FileManager {
                fileTransferState: FileTransferState ⇒ Unit,
                onLoadEnded: String ⇒ Unit) = {
 
-    val (fileName, fileType) = FileExtension(treeNode)
-
     val xhr = new XMLHttpRequest
 
     xhr.onprogress = (e: ProgressEvent) ⇒ {
@@ -91,13 +89,13 @@ object FileManager {
 
     xhr.onloadend = (e: ProgressEvent) ⇒ {
       fileTransferState(Transfered())
-      fileType match {
+      treeNode.canonicalPath().extension match {
         case df: DisplayableFile ⇒ onLoadEnded(xhr.responseText)
         case _                   ⇒
       }
     }
 
-    xhr.open("GET", s"downloadFile?path=${treeNode.canonicalPath()}", true)
+    xhr.open("GET", s"downloadFile?path=${treeNode.canonicalPath().path}", true)
     xhr.send()
   }
 

@@ -31,9 +31,12 @@ class EGIP12AuthenticationFactory extends AuthenticationFactory {
     auth.map { a => EGIAuthentication.update(a) }
   }
 
-  def allAuthenticationData: Seq[AuthenticationData] = EGIAuthentication() match {
-      case Some(p12: P12Certificate) => Seq(EGIP12AuthenticationData(p12.cypheredPassword, p12.certificate))
-      case _=> Seq()
+  def allAuthenticationData: Seq[AuthenticationData] =
+    EGIAuthentication() match {
+      case Some(p12: P12Certificate) =>
+        println("p12")
+        Seq(EGIP12AuthenticationData(p12.cypheredPassword, p12.certificate))
+      case _ => Seq()
     }
 
 

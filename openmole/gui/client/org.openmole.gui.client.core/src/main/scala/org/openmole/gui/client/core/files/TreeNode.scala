@@ -17,9 +17,7 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.net.URI
-
-import org.openmole.gui.ext.data.TreeNodeData
+import org.openmole.gui.ext.data.{ SafePath, TreeNodeData }
 import TreeNodeTabs.TreeNodeTab
 import org.openmole.gui.misc.utils.Utils._
 import rx._
@@ -48,7 +46,7 @@ sealed trait TreeNode {
 
   def name: Var[String]
 
-  def canonicalPath: Var[String]
+  def canonicalPath: Var[SafePath]
 
   def hasSons: Boolean
 
@@ -60,10 +58,10 @@ sealed trait TreeNode {
 object TreeNode {
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode =
-    if (tnd.isDirectory) DirNode(tnd.name, new URI(tnd.canonicalPath).getPath, tnd.size, tnd.readableSize, Var(Seq()))
-    else FileNode(tnd.name, new URI(tnd.canonicalPath).getPath, tnd.size, tnd.readableSize)
+    if (tnd.isDirectory) DirNode(tnd.name, tnd.canonicalPath, tnd.size, tnd.readableSize, Var(Seq()))
+    else FileNode(tnd.name, tnd.canonicalPath, tnd.size, tnd.readableSize)
 
-  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), new URI(tn.canonicalPath()).getPath, tn match {
+  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.canonicalPath(), tn match {
     case DirNode(_, _, _, _, _) ⇒ true
     case _                      ⇒ false
   }, tn.size, tn.readableSize)
@@ -90,11 +88,14 @@ object TreeNodeOrdering extends Ordering[TreeNode] {
 }
 
 object DirNode {
-  def apply(path: String): DirNode = DirNode(path.split("/").last, path, 0, "")
+  def apply(path: SafePath): DirNode = {
+    println("dirnode " + path.path)
+    DirNode(path.parent.get, path, 0, "")
+  }
 }
 
 case class DirNode(name: Var[String],
-                   canonicalPath: Var[String],
+                   canonicalPath: Var[SafePath],
                    size: Long,
                    readableSize: String,
                    sons: Var[Seq[TreeNode]] = Var(Seq())) extends TreeNode {
@@ -102,7 +103,7 @@ case class DirNode(name: Var[String],
 }
 
 case class FileNode(name: Var[String],
-                    canonicalPath: Var[String],
+                    canonicalPath: Var[SafePath],
                     size: Long,
                     readableSize: String) extends TreeNode {
   def hasSons = false

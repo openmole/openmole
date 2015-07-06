@@ -16,9 +16,6 @@ package org.openmole.gui.client.core
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import java.net.URI
-
 import org.openmole.gui.client.core.dataui.DataBagUI
 import org.openmole.gui.client.core.files.TreeNodePanel
 import org.scalajs.dom.raw.Event
@@ -84,8 +81,6 @@ object GUIClient {
         execItem
       )
     )
-
-    val o = new URI("oo/aa")
 
     topdiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     topdiv.appendChild(settingsTriggerer.modalPanel.dialog.render)

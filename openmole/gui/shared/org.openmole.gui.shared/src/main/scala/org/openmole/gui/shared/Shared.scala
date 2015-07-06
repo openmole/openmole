@@ -27,7 +27,6 @@ trait Api {
   def removeAuthentication(data: AuthenticationData): Unit
 
   //WORKSPACE
-
   def isPasswordCorrect(pass: String): Boolean
 
   def passwordState(): PasswordState
@@ -43,21 +42,23 @@ trait Api {
 
   def deleteFile(treeNode: TreeNodeData): Unit
 
+  def diff(subPath: SafePath, fullPath: SafePath): SafePath
+
   def fileSize(treeNodeData: TreeNodeData): Long
 
   def listFiles(path: TreeNodeData): Seq[TreeNodeData]
 
   def uuid(): String = java.util.UUID.randomUUID.toString
 
-  def renameFileFromPath(filePath: String, name: String): Boolean
+  def renameFileFromPath(filePath: SafePath, name: String): TreeNodeData
 
-  def renameFile(treeNode: TreeNodeData, name: String): Boolean
+  def renameFile(treeNode: TreeNodeData, name: String): TreeNodeData
 
   def saveFile(path: String, fileContent: String): Unit
 
-  def workspaceProjectPath(): String
+  def workspaceProjectNode(): TreeNodeData
 
-  def authenticationKeysPath(): String
+  def authenticationKeysPath(): SafePath
 
   //EXECUTIONS
   def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)]
