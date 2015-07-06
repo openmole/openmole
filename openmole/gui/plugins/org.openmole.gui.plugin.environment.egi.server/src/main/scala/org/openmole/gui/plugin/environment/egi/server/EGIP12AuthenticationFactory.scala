@@ -34,7 +34,9 @@ class EGIP12AuthenticationFactory extends AuthenticationFactory {
   def allAuthenticationData: Seq[AuthenticationData] = {
     EGIAuthentication() match {
       case Some(p12: P12Certificate) =>
-        Seq(EGIP12AuthenticationData(p12.cypheredPassword, Some(p12.certificate)))
+        Seq(EGIP12AuthenticationData(
+          Workspace.encrypt(p12.cypheredPassword),
+          Some(p12.certificate)))
       case x: Any => Seq()
     }
   }
@@ -42,7 +44,9 @@ class EGIP12AuthenticationFactory extends AuthenticationFactory {
 
 
   def coreObject(data: AuthenticationData): Option[P12Certificate] = data match {
-    case p12: EGIP12AuthenticationData => Some(P12Certificate(p12.cypheredPassword, p12.certificatePath.getOrElse(SafePath.empty): SafePath))
+    case p12: EGIP12AuthenticationData => Some(P12Certificate(
+      Workspace.decrypt(p12.cypheredPassword),
+      p12.certificatePath.getOrElse(SafePath.empty): SafePath))
     case _ => None
   }
 

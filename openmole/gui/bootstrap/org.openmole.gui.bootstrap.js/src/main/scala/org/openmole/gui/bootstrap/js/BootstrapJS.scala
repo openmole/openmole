@@ -35,7 +35,7 @@ object BootstrapJS {
   val jsSrc = new File(webui, "js/src")
   val webapp = new File(webui, "webapp")
   val jsCompiled = new File(webapp, "js")
-  val authKeys = Workspace.file("persistent/authentications/keys")
+  val authKeys = Workspace.file("persistent/keys")
 
   jsSrc.mkdirs
   jsCompiled.mkdirs

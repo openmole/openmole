@@ -53,7 +53,7 @@ object Utils {
 
   val workspaceRoot = workspaceProjectFile.getParentFile
 
-  val authenticationKeysFile = Workspace.file("persistent/authentications/keys")
+  val authenticationKeysFile = Workspace.file("persistent/keys")
 
   def listFiles(path: SafePath): Seq[TreeNodeData] = new File(path.path).listFilesSafe.toSeq
 

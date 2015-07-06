@@ -34,14 +34,20 @@ class SSHLoginPasswordAuthenticationFactory extends AuthenticationFactory {
 
   def allAuthenticationData: Seq[AuthenticationData] = SSHAuthentication().flatMap {
       _ match {
-        case lp: LoginPassword => Some(LoginPasswordAuthenticationData(lp.login, lp.cypheredPassword, lp.target))
+        case lp: LoginPassword => Some(LoginPasswordAuthenticationData(
+          lp.login,
+          Workspace.decrypt(lp.cypheredPassword),
+          lp.target))
         case _ => None
       }
     }
 
 
   def coreObject(data: AuthenticationData): Option[LoginPassword] = data match {
-    case lp: LoginPasswordAuthenticationData => Some(LoginPassword(lp.login, lp.cypheredPassword, lp.target))
+    case lp: LoginPasswordAuthenticationData => Some(LoginPassword(
+      lp.login,
+      Workspace.encrypt(lp.cypheredPassword),
+      lp.target))
     case _ => None
   }
 
