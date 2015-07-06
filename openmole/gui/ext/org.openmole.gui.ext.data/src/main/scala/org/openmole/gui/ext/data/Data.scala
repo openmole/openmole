@@ -17,6 +17,8 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.net.URI
+
 case class DataBag(uuid: String, name: String, data: Data)
 
 trait Data
@@ -87,29 +89,6 @@ trait TaskData extends Data with InputData with OutputData
 
 trait EnvironmentData extends Data
 
-sealed trait AuthenticationData extends Data {
-  def synthetic: String
-}
-
-case class LoginPasswordAuthenticationData(login: String = "",
-                                           cypheredPassword: String = "",
-                                           target: String = "") extends AuthenticationData {
-  def synthetic = s"$login@$target"
-}
-
-case class PrivateKeyAuthenticationData(
-    privateKey: String = "",
-    login: String = "",
-    cypheredPassword: String = "",
-    target: String = "") extends AuthenticationData {
-  def synthetic = s"$login@$target"
-}
-
-case class EGIP12AuthenticationData(val cypheredPassword: String = "",
-                                    val certificatePath: String = "") extends AuthenticationData {
-  def synthetic = "egi.p12"
-}
-
 trait HookData extends Data with InputData with OutputData
 
 case class ErrorData(data: DataBag, error: String, stack: String)
@@ -120,10 +99,73 @@ case class InOutput(prototype: PrototypeData, mappings: Seq[IOMappingData[_]])
 
 case class InAndOutput(inputPrototype: PrototypeData, outputPrototype: PrototypeData, mapping: IOMappingData[_])
 
+sealed trait FileExtension {
+  def extension: String
+}
+
+trait OpenMOLEScript
+
+case class DisplayableFile(extension: String, highlighter: String) extends FileExtension
+
+case class BinaryFile(extension: String) extends FileExtension
+
+object FileExtension {
+  val OMS = new DisplayableFile("oms", "scala") with OpenMOLEScript
+  val SCALA = DisplayableFile("scala", "scala")
+  val NETLOGO = DisplayableFile("nlogo", "nlogo")
+  val SH = DisplayableFile("sh", "sh")
+  val NO_EXTENSION = DisplayableFile("text", "text")
+  val BINARY = BinaryFile("")
+}
+
+object SafePath {
+  def sp(path: String, leaf: String, parent: Option[String], extension: FileExtension = FileExtension.NO_EXTENSION): SafePath =
+    SafePath(new URI(path).toString, leaf, parent, extension)
+
+  def leaf(name: String, extension: FileExtension) = sp(name, name, None, extension)
+
+  def empty = leaf("", FileExtension.NO_EXTENSION)
+}
+
+import SafePath._
+
+case class SafePath(encoded: String, leaf: String, parent: Option[String], extension: FileExtension) {
+  val path = new URI(encoded).getPath
+
+  def /(safePath: SafePath) = sp(this.path + "/" + safePath.path,
+    safePath.leaf,
+    safePath.parent match {
+      case Some(p: String) ⇒ Some(p)
+      case _               ⇒ this.parent
+    }, safePath.extension)
+}
+
+sealed trait AuthenticationData extends Data {
+  def synthetic: String
+}
+
+case class LoginPasswordAuthenticationData(login: String = "",
+                                           cypheredPassword: String = "",
+                                           target: String = "") extends AuthenticationData {
+  def synthetic = s"$login@$target"
+}
+
+case class PrivateKeyAuthenticationData(privateKey: SafePath = SafePath.empty,
+                                        login: String = "",
+                                        cypheredPassword: String = "",
+                                        target: String = "") extends AuthenticationData {
+  def synthetic = s"$login@$target"
+}
+
+case class EGIP12AuthenticationData(val cypheredPassword: String = "",
+                                    val certificatePath: SafePath = SafePath.empty) extends AuthenticationData {
+  def synthetic = "egi.p12"
+}
+
 @JSExport
 case class TreeNodeData(
   name: String,
-  canonicalPath: String,
+  canonicalPath: SafePath,
   isDirectory: Boolean,
   size: Long,
   readableSize: String)

@@ -39,7 +39,7 @@ import org.openmole.tool.stream.{ StringPrintStream, StringOutputStream }
 object ApiImpl extends Api {
 
   val execution = new Execution
-  implicit lazy val authProvider = Workspace.authenticationProvider
+  implicit def authProvider = Workspace.authenticationProvider
 
   //AUTHENTICATIONS
   def addAuthentication(data: AuthenticationData): Unit = ServerFactories.authenticationFactories(data.getClass).buildAuthentication(data)
@@ -66,32 +66,37 @@ object ApiImpl extends Api {
   }
 
   // FILES
-  def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean = new File(treeNodeData.canonicalPath, directoryName).mkdirs
+  def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean =
+    new File(new File(treeNodeData.canonicalPath.path), directoryName).mkdirs
 
-  def addFile(treeNodeData: TreeNodeData, fileName: String): Boolean = new File(treeNodeData.canonicalPath, fileName).createNewFile
+  def addFile(treeNodeData: TreeNodeData, fileName: String): Boolean =
+    new File(new File(treeNodeData.canonicalPath.path), fileName).createNewFile
 
-  def deleteFile(treeNodeData: TreeNodeData): Unit = new File(treeNodeData.canonicalPath).recursiveDelete
+  def deleteFile(treeNodeData: TreeNodeData): Unit = new File(treeNodeData.canonicalPath.path).recursiveDelete
 
-  def fileSize(treeNodeData: TreeNodeData): Long = new File(treeNodeData.canonicalPath).length
+  def diff(subPath: SafePath, fullPath: SafePath): SafePath = SafePath.sp(fullPath.path diff subPath.path, subPath.leaf, None)
+
+  def fileSize(treeNodeData: TreeNodeData): Long = new File(treeNodeData.canonicalPath.path).length
 
   def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.canonicalPath)
 
-  def renameFile(treeNodeData: TreeNodeData, name: String): Boolean = renameFileFromPath(treeNodeData.canonicalPath, name)
+  def renameFile(treeNodeData: TreeNodeData, name: String): TreeNodeData =
+    renameFileFromPath(treeNodeData.canonicalPath, name)
 
-  def renameFileFromPath(filePath: String, newName: String): Boolean = {
-    val canonicalFile = new File(filePath)
-    val (source, target) = (canonicalFile, new File(canonicalFile.getParent, newName))
+  def renameFileFromPath(filePath: SafePath, newName: String): TreeNodeData = {
+    val targetFile = new File(new File(filePath.path).getParentFile, newName)
+    val (source, target) = (new File(filePath.path), targetFile)
 
     Files.move(source, target, StandardCopyOption.REPLACE_EXISTING)
-    target.exists
+    TreeNodeData(newName, targetFile, false, 0L, "")
 
   }
 
   def saveFile(path: String, fileContent: String): Unit = new File(path).content = fileContent
 
-  def workspaceProjectPath(): String = Utils.workspaceProjectFile
+  def workspaceProjectNode(): TreeNodeData = Utils.workspaceProjectFile
 
-  def authenticationKeysPath(): String = Utils.authenticationKeysFile
+  def authenticationKeysPath(): SafePath = Utils.authenticationKeysFile
 
   // EXECUTIONS
 

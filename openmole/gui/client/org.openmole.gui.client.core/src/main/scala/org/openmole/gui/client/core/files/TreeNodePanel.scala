@@ -1,9 +1,7 @@
 package org.openmole.gui.client.core.files
 
-import java.net.URI
-
 import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
-import org.openmole.gui.client.core.files.FileExtension.DisplayableFile
+import org.openmole.gui.ext.data.{ DisplayableFile }
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.BootstrapTags._
 import org.scalajs.dom.html.Input
@@ -38,8 +36,6 @@ import rx._
 
 object TreeNodePanel {
 
-  def apply(path: String)(implicit executionTriggerer: PanelTriggerer): TreeNodePanel = apply(DirNode(path))
-
   def apply(dirNode: DirNode)(implicit executionTriggerer: PanelTriggerer): TreeNodePanel = new TreeNodePanel(dirNode)
 
   def sons(dirNode: DirNode) = OMPost[Api].listFiles(dirNode).call()
@@ -50,6 +46,7 @@ import TreeNodePanel._
 
 class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTriggerer) {
 
+  println("ROotNode " + rootNode.canonicalPath() + " " + rootNode.canonicalPath().path)
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode))
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
@@ -111,7 +108,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
           })),
           inputGroupAddon(id := "fileinput-addon")(uploadButton((fileInput: HTMLInputElement) ⇒ {
             FileManager.upload(fileInput.files,
-              new URI(dirNodeLine().last.canonicalPath()).getPath, (p: FileTransferState) ⇒ transferring() = p)
+              dirNodeLine().last.canonicalPath(), (p: FileTransferState) ⇒ transferring() = p)
           })),
           inputGroupAddon(id := "fileinput-addon")(
             tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
@@ -186,8 +183,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
     case fn: FileNode ⇒
       println("fn " + fn.canonicalPath())
       clickableElement(fn, "file", () ⇒ {
-        val (_, fileType) = FileExtension(node)
-        fileType match {
+        node.canonicalPath().extension match {
           case d: DisplayableFile ⇒
             downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.canonicalPath(), node, content, executionTriggerer))
           case _ ⇒
@@ -256,12 +252,10 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   }
 
   def renameNode(treeNode: TreeNode, newName: String) = OMPost[Api].renameFile(treeNode, newName).call().foreach {
-    d ⇒
-      if (d) {
-        fileDisplayer.tabs.rename(treeNode, newName)
-        refreshCurrentDirectory
-        toBeEdited() = None
-      }
+    newNode ⇒
+      fileDisplayer.tabs.rename(treeNode, newNode)
+      refreshCurrentDirectory
+      toBeEdited() = None
   }
 
   object ReactiveLine {
@@ -300,7 +294,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         })(
           glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
           glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
-          a(glyphSpan(glyph_download, () ⇒ Unit)(`class` := "glyphitem"), href := s"downloadFile?path=${tn.canonicalPath()}")
+          a(glyphSpan(glyph_download, () ⇒ Unit)(`class` := "glyphitem"), href := s"downloadFile?path=${tn.canonicalPath().path}")
         )
       )
     )

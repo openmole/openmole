@@ -4,7 +4,7 @@ import java.net.URI
 
 import org.openmole.gui.client.core.{Settings, OMPost}
 import org.openmole.gui.client.core.files.AuthFileUploaderUI
-import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
+import org.openmole.gui.ext.data.{FileExtension, SafePath, PrivateKeyAuthenticationData}
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
@@ -14,7 +14,6 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.misc.js.{BootstrapTags => bs}
 import scalatags.JsDom.{tags ⇒ tags}
-import rx._
 
 /*
  * Copyright (C) 01/07/15 // mathieu.leclaire@openmole.org
@@ -50,7 +49,7 @@ class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) ext
     `type` := "password",
     width := "130px").render
 
-  lazy val privateKey = new AuthFileUploaderUI(data.privateKey)
+  lazy val privateKey = new AuthFileUploaderUI(data.privateKey.leaf)
 
   @JSExport
   val view = {
@@ -64,7 +63,7 @@ class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) ext
 
   def save(onsave: () => Unit) = Settings.authenticationKeysPath.foreach { kp =>
     OMPost[Api].addAuthentication(
-      PrivateKeyAuthenticationData(new URI(kp).getPath +"/"+ privateKey.fileView.value+".key",
+      PrivateKeyAuthenticationData(kp / SafePath.leaf(privateKey.fileView.value+".key", FileExtension.NO_EXTENSION),
         login.value,
         password.value,
         target.value)).call().foreach { b =>

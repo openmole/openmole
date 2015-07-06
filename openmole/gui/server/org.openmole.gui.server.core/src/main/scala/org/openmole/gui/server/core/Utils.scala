@@ -19,28 +19,42 @@ package org.openmole.gui.server.core
 
 import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
+import org.openmole.gui.ext.data.SafePath._
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.FileExtension._
 import java.io.File
 import java.net.URI
 
 object Utils {
 
-  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f.toURI.toString, f.isDirectory, f.length, readableByteCount(f.length))
+  implicit def fileToExtension(f: File): FileExtension = f.getName.split('.').last match {
+    case "oms"                   ⇒ OMS
+    case "scala"                 ⇒ SCALA
+    case "sh"                    ⇒ SH
+    case "nlogo" | "csv" | "txt" ⇒ NO_EXTENSION
+    case _                       ⇒ BINARY
+  }
+
+  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, SafePath(f.toURI.toString, f.getName, Some(getParent(f)), f), f.isDirectory, f.length, readableByteCount(f.length))
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)
   }
 
-  implicit def uriToFile(uri: URI): File = new File(uri.getPath)
+  //implicit def uriToFile(uri: URI): File = new File(uri.getPath)
 
-  implicit def fileToURIString(f: File): String = f.toURI.toString
+  implicit def fileToSafePath(f: File): SafePath = SafePath(f.toURI.toString, f.getName, Some(getParent(f)), f)
 
-  implicit def stringToFile(s: String): File = new File(new URI(s).getPath)
+  implicit def safePathToFile(s: SafePath): File = new File(s.path)
+
+  def getParent(f: File) = f.getParentFile.getName
 
   val workspaceProjectFile = Workspace.file("webui/projects")
 
+  val workspaceRoot = workspaceProjectFile.getParentFile
+
   val authenticationKeysFile = Workspace.file("persistent/authentications/keys")
 
-  def listFiles(path: String): Seq[TreeNodeData] = new File(path).listFilesSafe.toSeq
+  def listFiles(path: SafePath): Seq[TreeNodeData] = new File(path.path).listFilesSafe.toSeq
 
 }

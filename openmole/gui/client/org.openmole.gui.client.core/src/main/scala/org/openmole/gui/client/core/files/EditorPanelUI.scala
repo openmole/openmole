@@ -1,10 +1,12 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.files.FileExtension._
+import org.openmole.gui.ext
 import org.openmole.gui.ext.dataui.PanelUI
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import org.openmole.gui.ext.data.{ DisplayableFile, FileExtension }
+import org.openmole.gui.ext.data.FileExtension._
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{ literal ⇒ lit }
 import scala.scalajs.js.{ Dynamic ⇒ Dyn }
@@ -136,8 +138,6 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
   }
 
 }
-
-import org.openmole.gui.client.core.files.FileExtension._
 
 object EditorPanelUI {
 

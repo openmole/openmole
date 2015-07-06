@@ -2,7 +2,7 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.client.core.files.TreeNodeTabs.EditableNodeTab
-import org.openmole.gui.ext.data.ScriptData
+import org.openmole.gui.ext.data.{ SafePath, ScriptData }
 import org.openmole.gui.shared._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
@@ -39,7 +39,7 @@ object TreeNodeTabs {
   sealed trait TreeNodeTab {
     val tabName: Var[String]
 
-    val serverFilePath: Var[String]
+    val serverFilePath: Var[SafePath]
 
     val id: String = getUUID
 
@@ -67,17 +67,13 @@ object TreeNodeTabs {
 
     def save(onsaved: () ⇒ Unit = () ⇒ {}): Unit
 
-    def setNameAndPath(name: String, path: String) = {
-      tabName() = name
-      serverFilePath() = path
-    }
   }
 
-  class EditableNodeTab(val tabName: Var[String], val serverFilePath: Var[String], editor: EditorPanelUI) extends TreeNodeTab {
+  class EditableNodeTab(val tabName: Var[String], val serverFilePath: Var[SafePath], editor: EditorPanelUI) extends TreeNodeTab {
 
     val editorElement = editor.view
 
-    def save(onsaved: () ⇒ Unit) = OMPost[Api].saveFile(serverFilePath(), editor.code).call().foreach { d ⇒
+    def save(onsaved: () ⇒ Unit) = OMPost[Api].saveFile(serverFilePath().path, editor.code).call().foreach { d ⇒
       onsaved()
     }
   }
@@ -109,8 +105,8 @@ trait OMSTabControl <: TabControl {
   })
 
   lazy val controlElement = {
-    inputDirectoryInput.value = relativePath + "/input"
-    outputDirectoryInput.value = relativePath + "/output"
+    inputDirectoryInput.value = relativePath.path + "/input"
+    outputDirectoryInput.value = relativePath.path + "/output"
     tags.div(
       runButton,
       settingsButton,
@@ -125,7 +121,7 @@ trait OMSTabControl <: TabControl {
 
   def onrun: () ⇒ Unit
 
-  def relativePath: String
+  def relativePath: SafePath
 
   def inputDirectory = inputDirectoryInput.value
 
@@ -178,10 +174,10 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     tab.save()
   }
 
-  def rename(tn: TreeNode, newName: String) = {
+  def rename(tn: TreeNode, newNode: TreeNode) = {
     find(tn).map { tab ⇒
-      tab.tabName() = newName
-      tab.serverFilePath() = (tab.serverFilePath().split('/').dropRight(1) :+ newName).mkString("/")
+      tab.tabName() = newNode.name()
+      tab.serverFilePath() = newNode.canonicalPath()
     }
   }
 

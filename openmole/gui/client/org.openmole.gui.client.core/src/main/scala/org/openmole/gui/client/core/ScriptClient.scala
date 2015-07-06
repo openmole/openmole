@@ -1,11 +1,9 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{ TreeNodeTabs, TreeNodePanel }
-import org.openmole.gui.misc.js.BootstrapTags
+import org.openmole.gui.client.core.files.{ TreeNode, DirNode, TreeNodePanel }
 import org.openmole.gui.shared.Api
-import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement, HTMLInputElement, Event }
-import scala.async.Async.{ async, await }
-import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
+import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
+import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import bs._
 import scala.scalajs.js.annotation.JSExport
@@ -121,7 +119,7 @@ object ScriptClient {
       )
     )
 
-    val openFileTree = Var(false)
+    val openFileTree = Var(true)
 
     implicit val executionTriggerer = new PanelTriggerer {
       val modalPanel = new ExecutionPanel
@@ -155,23 +153,27 @@ object ScriptClient {
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
 
-    Settings.workspaceProjectPath.foreach { projectsPath ⇒
-      val treeNodePanel = TreeNodePanel(projectsPath)(executionTriggerer)
-      maindiv.appendChild(
-        tags.div(`class` := "fullpanel")(
-          tags.div(`class` := Rx {
-            "leftpanel " + {
-              if (openFileTree()) "open" else ""
-            }
-          })(treeNodePanel.view.render),
-          tags.div(`class` := Rx {
-            "centerpanel " + {
-              if (openFileTree()) "reduce" else ""
-            }
-          })(treeNodePanel.fileDisplayer.tabs.render)
+    Settings.workspaceProjectNode.foreach { projectsPath ⇒
+      TreeNode.treeNodeDataToTreeNode(projectsPath) match {
+        case dn: DirNode ⇒
+          val treeNodePanel = TreeNodePanel(dn)(executionTriggerer)
+          maindiv.appendChild(
+            tags.div(`class` := "fullpanel")(
+              tags.div(`class` := Rx {
+                "leftpanel " + {
+                  if (openFileTree()) "open" else ""
+                }
+              })(treeNodePanel.view.render),
+              tags.div(`class` := Rx {
+                "centerpanel " + {
+                  if (openFileTree()) "reduce" else ""
+                }
+              })(treeNodePanel.fileDisplayer.tabs.render)
 
-        ).render
-      )
+            ).render
+          )
+        case _ ⇒
+      }
     }
 
     body.appendChild(connectionDiv)

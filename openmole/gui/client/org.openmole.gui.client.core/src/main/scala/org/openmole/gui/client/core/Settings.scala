@@ -17,6 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.ext.data.{ TreeNodeData, SafePath }
 import org.openmole.gui.shared.Api
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -24,6 +25,6 @@ import autowire._
 import rx._
 
 object Settings {
-  val workspaceProjectPath: Future[String] = OMPost[Api].workspaceProjectPath.call()
-  val authenticationKeysPath: Future[String] = OMPost[Api].authenticationKeysPath().call()
+  val workspaceProjectNode: Future[TreeNodeData] = OMPost[Api].workspaceProjectNode().call()
+  val authenticationKeysPath: Future[SafePath] = OMPost[Api].authenticationKeysPath().call()
 }

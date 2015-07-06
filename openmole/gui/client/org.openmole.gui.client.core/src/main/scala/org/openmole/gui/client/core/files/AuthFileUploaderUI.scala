@@ -17,13 +17,15 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.net.URI
-
 import org.openmole.gui.client.core.{ Settings, OMPost }
 import scalatags.JsDom.{ tags ⇒ tags }
+import org.openmole.gui.ext.data.SafePath
+import org.openmole.gui.ext.data.SafePath._
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import bs._
 import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.ext.data.FileExtension
+import org.openmole.gui.ext.data.FileExtension._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import scalatags.JsDom.all._
@@ -45,13 +47,13 @@ class AuthFileUploaderUI(keyName: String, renaming: Option[String] = None) {
 
   val upButton = bs.uploadButton2((fileInput: HTMLInputElement) ⇒ {
     val fileList = fileInput.files
-    Settings.authenticationKeysPath.foreach { tg ⇒
-      val targetDirectory = new URI(tg).getPath
+    Settings.authenticationKeysPath.foreach { tg: SafePath ⇒
       FileManager.upload(fileList,
-        targetDirectory,
+        tg,
         (p: FileTransferState) ⇒ {},
         () ⇒ {
-          OMPost[Api].renameFileFromPath(targetDirectory + fileList.item(0).name, fileName).call().foreach { b ⇒
+          val leaf = fileList.item(0).name
+          OMPost[Api].renameFileFromPath(tg / sp(leaf, leaf, None, NO_EXTENSION), fileName).call().foreach { b ⇒
             fileView.value = fileName
           }
         }

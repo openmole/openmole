@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core.files
 
 import java.io.File
-import FileExtension._
 import TreeNodeTabs._
 import org.openmole.gui.client.core.{ PanelTriggerer, ExecutionPanel, OMPost }
 import org.openmole.gui.ext.data.ScriptData
@@ -46,8 +45,9 @@ class FileDisplayer {
     }
   }
 
-  def display(rootPath: String, tn: TreeNode, content: String, executionTriggerer: PanelTriggerer) = {
-    val (_, fileType) = FileExtension(tn)
+  def display(rootPath: SafePath, tn: TreeNode, content: String, executionTriggerer: PanelTriggerer) = {
+    val fileType = tn.canonicalPath().extension
+    println("fileTYPE  " + fileType)
     alreadyDisplayed(tn) match {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileType match {
@@ -55,7 +55,8 @@ class FileDisplayer {
           case oms: OpenMOLEScript ⇒
             val ed = editor(fileType, content)
             tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, ed) with OMSTabControl {
-              val relativePath = tn.canonicalPath().split('/').dropRight(1).mkString("/") diff rootPath
+              //FIXME !! DEMANDE AU SERVEUR DU DIFF
+              val relativePath = SafePath.empty //tn.canonicalPath().split('/').dropRight(1).mkString("/") diff rootPath
 
               def onrun = () ⇒ {
                 overlaying() = true
