@@ -53,7 +53,7 @@ class AuthFileUploaderUI(keyName: String, renaming: Option[String] = None) {
         (p: FileTransferState) ⇒ {},
         () ⇒ {
           val leaf = fileList.item(0).name
-          OMPost[Api].renameFileFromPath(tg / sp(leaf, leaf, None, NO_EXTENSION), fileName).call().foreach { b ⇒
+          OMPost[Api].renameFileFromPath(tg / sp(leaf, leaf, NO_EXTENSION), fileName).call().foreach { b ⇒
             fileView.value = fileName
           }
         }

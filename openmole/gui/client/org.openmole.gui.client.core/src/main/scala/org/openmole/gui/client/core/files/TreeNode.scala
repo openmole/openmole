@@ -87,13 +87,6 @@ object TreeNodeOrdering extends Ordering[TreeNode] {
   }
 }
 
-object DirNode {
-  def apply(path: SafePath): DirNode = {
-    println("dirnode " + path.path)
-    DirNode(path.parent.get, path, 0, "")
-  }
-}
-
 case class DirNode(name: Var[String],
                    canonicalPath: Var[SafePath],
                    size: Long,

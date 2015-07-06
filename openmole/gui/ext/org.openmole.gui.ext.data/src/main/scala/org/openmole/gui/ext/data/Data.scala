@@ -122,25 +122,21 @@ object FileExtension {
 }
 
 object SafePath {
-  def sp(path: String, leaf: String, parent: Option[String], extension: FileExtension = FileExtension.NO_EXTENSION): SafePath =
-    SafePath(new URI(path).toString, leaf, parent, extension)
+  def sp(path: String, leaf: String, extension: FileExtension = FileExtension.NO_EXTENSION): SafePath =
+    SafePath(new URI(path).toString, leaf, extension)
 
-  def leaf(name: String, extension: FileExtension) = sp(name, name, None, extension)
+  def leaf(name: String, extension: FileExtension) = sp(name, name, extension)
 
   def empty = leaf("", FileExtension.NO_EXTENSION)
 }
 
 import SafePath._
 
-case class SafePath(encoded: String, leaf: String, parent: Option[String], extension: FileExtension) {
+case class SafePath(encoded: String, leaf: String, extension: FileExtension) {
   val path = new URI(encoded).getPath
 
   def /(safePath: SafePath) = sp(this.path + "/" + safePath.path,
-    safePath.leaf,
-    safePath.parent match {
-      case Some(p: String) ⇒ Some(p)
-      case _               ⇒ this.parent
-    }, safePath.extension)
+    safePath.leaf, safePath.extension)
 }
 
 sealed trait AuthenticationData extends Data {
