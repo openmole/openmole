@@ -60,8 +60,7 @@ object VariableExpansion {
       c match {
         case '{' ⇒
           if (dollar) {
-            expandedElements += UnexpandedElement(os.builder.toString())
-            os.builder.clear()
+            expandedElements += UnexpandedElement(os.read)
             val toExpand = nextToExpand(it)
             expandedElements += ExpandedElement(toExpand)
           }
@@ -77,7 +76,7 @@ object VariableExpansion {
       }
     }
     if (dollar) os.write('$')
-    expandedElements += UnexpandedElement(os.builder.toString())
+    expandedElements += UnexpandedElement(os.read)
     Expansion(expandedElements)
   }
 
@@ -112,12 +111,12 @@ object VariableExpansion {
 
   case class CodeElement(code: String) extends ExpansionElement {
     @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
-    def expand(context: ⇒ Context)(implicit rng: RandomProvider): String =
+    def expand(context: ⇒ Context)(implicit rng: RandomProvider): String = {
       context.variable(code) match {
         case Some(value) ⇒ value.value.toString
-        case None ⇒
-          proxy.run(context).toString
+        case None        ⇒ proxy.run(context).toString
       }
+    }
   }
 
 }
