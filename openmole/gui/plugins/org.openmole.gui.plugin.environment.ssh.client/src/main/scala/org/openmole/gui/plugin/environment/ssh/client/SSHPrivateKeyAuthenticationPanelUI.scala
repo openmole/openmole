@@ -49,7 +49,7 @@ class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) ext
     `type` := "password",
     width := "130px").render
 
-  lazy val privateKey = new AuthFileUploaderUI(data.privateKey.leaf)
+  lazy val privateKey = new AuthFileUploaderUI(data.privateKey.map{_.leaf}.getOrElse(""), data.privateKey.isDefined)
 
   @JSExport
   val view = {
@@ -63,7 +63,7 @@ class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) ext
 
   def save(onsave: () => Unit) = Settings.authenticationKeysPath.foreach { kp =>
     OMPost[Api].addAuthentication(
-      PrivateKeyAuthenticationData(kp / SafePath.leaf(privateKey.fileView.value+".key", FileExtension.NO_EXTENSION),
+      PrivateKeyAuthenticationData(Some(kp / SafePath.leaf(privateKey.fileName, FileExtension.NO_EXTENSION)),
         login.value,
         password.value,
         target.value)).call().foreach { b =>

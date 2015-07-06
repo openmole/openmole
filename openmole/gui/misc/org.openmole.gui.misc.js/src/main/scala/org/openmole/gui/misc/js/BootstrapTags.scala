@@ -183,6 +183,7 @@ object BootstrapTags {
     }).render
     input
   }
+
   def fileInput(todo: HTMLInputElement ⇒ Unit) = {
     lazy val input: HTMLInputElement = tags.input(id := "fileinput", `type` := "file")(onchange := { () ⇒
       todo(input)

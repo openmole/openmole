@@ -510,3 +510,17 @@ overflow-y : auto;
        display:inline-block;
        margin-left:15px;
  }
+
+ .inputFileStyle {
+ 	background-color: #5cb85c;
+ 	border-radius: 5px;
+ 	color: white;
+ 	margin-top: 8px;
+    padding: 10px 40px;
+    cursor: pointer;
+ }
+
+
+ .inputFileStyle input[type="file"] {
+    display: none;
+}

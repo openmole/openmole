@@ -19,8 +19,7 @@ package org.openmole.gui.plugin.environment.ssh.server
 
 import java.io.File
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
-import org.openmole.gui.ext.data.{AuthenticationFactory, AuthenticationData}
+import org.openmole.gui.ext.data.{SafePath, PrivateKeyAuthenticationData, AuthenticationFactory, AuthenticationData}
 import org.openmole.gui.server.core.Utils._
 import org.openmole.plugin.environment.ssh.{SSHAuthentication, PrivateKey}
 
@@ -41,7 +40,7 @@ class SSHPrivateKeyAuthenticationFactory extends AuthenticationFactory {
     }
 
   def coreObject(data: AuthenticationData): Option[PrivateKey] = data match {
-    case key: PrivateKeyAuthenticationData => Some(PrivateKey(key.privateKey, key.login, key.cypheredPassword, key.target))
+    case key: PrivateKeyAuthenticationData => Some(PrivateKey(key.privateKey.getOrElse(SafePath.empty): SafePath, key.login, key.cypheredPassword, key.target))
     case _ => None
   }
 

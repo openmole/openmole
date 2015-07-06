@@ -19,6 +19,9 @@ package org.openmole.gui.server.core
 
 import java.io.OutputStream
 
+import org.openmole.core.event.EventAccumulator
+import org.openmole.core.workflow.execution.Environment
+import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.tool.collection._
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.execution.ExecutionState._

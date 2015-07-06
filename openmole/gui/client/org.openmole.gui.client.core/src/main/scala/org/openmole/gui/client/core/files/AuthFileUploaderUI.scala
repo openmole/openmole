@@ -33,42 +33,35 @@ import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLInputElement
 import rx._
 
-class AuthFileUploaderUI(keyName: String, renaming: Option[String] = None) {
+class AuthFileUploaderUI(keyName: String, keySet: Boolean, renaming: Option[String] = None) {
 
   val fileName = if (keyName == "") renaming.getOrElse(uuID) else keyName
+  val pathSet: Var[Boolean] = Var(keySet)
 
-  val fileView = bs.input("")(
-    placeholder := "Not set yet",
-    width := "130px",
-    readonly,
-    value := keyName,
-    autofocus
-  ).render
+  lazy val upButton =
+    tags.label(`class` := "inputFileStyle")(
+      bs.fileInput((fInput: HTMLInputElement) ⇒ {
+        val fileList = fInput.files
+        Settings.authenticationKeysPath.foreach { tg: SafePath ⇒
+          FileManager.upload(fileList,
+            tg,
+            (p: FileTransferState) ⇒ {},
+            () ⇒ {
+              val leaf = fileList.item(0).name
+              pathSet() = false
+              OMPost[Api].renameFileFromPath(tg / sp(leaf, leaf, NO_EXTENSION), fileName).call().foreach { b ⇒
+                pathSet() = true
 
-  val upButton = bs.uploadButton2((fileInput: HTMLInputElement) ⇒ {
-    val fileList = fileInput.files
-    Settings.authenticationKeysPath.foreach { tg: SafePath ⇒
-      FileManager.upload(fileList,
-        tg,
-        (p: FileTransferState) ⇒ {},
-        () ⇒ {
-          val leaf = fileList.item(0).name
-          OMPost[Api].renameFileFromPath(tg / sp(leaf, leaf, NO_EXTENSION), fileName).call().foreach { b ⇒
-            fileView.value = fileName
-          }
+              }
+            }
+          )
         }
-      )
-    }
-  }
-  )
+      }
+      ), Rx {
+        if (pathSet()) fileName else "No set yet"
+      }
+    )
 
-  val view = bs.inputGroup(navbar_left)(
-    Rx {
-      inputGroup(navbar_left)(
-        inputGroupButton(fileView),
-        inputGroupAddon(id := "fileinput-addon") /*(`class` := "inrow")*/ (upButton)
-      )
-    }
-  ).render
+  val view = upButton.render
 
 }

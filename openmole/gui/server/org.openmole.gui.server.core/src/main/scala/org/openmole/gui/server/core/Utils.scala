@@ -43,6 +43,8 @@ object Utils {
 
   implicit def fileToSafePath(f: File): SafePath = SafePath(f.toURI.toString, f.getName, f)
 
+  implicit def fileToOptionSafePath(f: File): Option[SafePath] = Some(fileToSafePath(f))
+
   implicit def safePathToFile(s: SafePath): File = new File(s.path)
 
   def getParent(f: File) = f.getParentFile.getName

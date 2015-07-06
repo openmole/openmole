@@ -149,7 +149,7 @@ case class LoginPasswordAuthenticationData(login: String = "",
   def synthetic = s"$login@$target"
 }
 
-case class PrivateKeyAuthenticationData(privateKey: SafePath = SafePath.empty,
+case class PrivateKeyAuthenticationData(privateKey: Option[SafePath] = None,
                                         login: String = "",
                                         cypheredPassword: String = "",
                                         target: String = "") extends AuthenticationData {
@@ -157,7 +157,7 @@ case class PrivateKeyAuthenticationData(privateKey: SafePath = SafePath.empty,
 }
 
 case class EGIP12AuthenticationData(val cypheredPassword: String = "",
-                                    val certificatePath: SafePath = SafePath.empty) extends AuthenticationData {
+                                    val certificatePath: Option[SafePath] = None) extends AuthenticationData {
   def synthetic = "egi.p12"
 }
 
