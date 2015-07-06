@@ -101,9 +101,10 @@ class ExecutionPanel extends ModalPanel {
 
             val duration: Duration = (executionInfo.duration milliseconds)
             val h = (duration).toHours
-            val s = (duration - (h hours)).toSeconds
+            val m = ((duration) - (h hours)).toMinutes
+            val s = (duration - (h hours) - (m minutes)).toSeconds
 
-            val durationString = s"""${h.formatted("%d")}:${s.formatted("%02d")}"""
+            val durationString = s"""${h.formatted("%d")}:${m.formatted("%02d")}:${s.formatted("%02d")}"""
 
             val completed = executionInfo.completed
 

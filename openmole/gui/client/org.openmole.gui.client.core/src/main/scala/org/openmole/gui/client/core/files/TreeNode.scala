@@ -106,6 +106,6 @@ case class FileNode(name: Var[String],
                     canonicalPath: Var[SafePath],
                     size: Long,
                     readableSize: String) extends TreeNode {
-  val hasSons = false
+  def hasSons = false
 }
 

@@ -16,6 +16,7 @@
  */
 package org.openmole.gui.server.core
 
+import java.net.URI
 import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 
@@ -110,6 +111,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     case class ToDownload(file: File, name: String)
 
     val path = params("path")
+
     val dl = {
       val f = new File(path)
       if (f.isDirectory) {
@@ -121,7 +123,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       else ToDownload(f, f.getName)
     }
 
-    if (dl.file.exists) Ok(dl.file, Map("Content-Disposition" -> s"attachment; filename=${dl.name}"))
+    if (dl.file.exists) Ok(dl.file, Map("Content-Disposition" -> s"""attachment; filename="${dl.name}""""))
     else NotFound("The file " + path + " does not exist.")
   }
 
