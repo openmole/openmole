@@ -195,7 +195,7 @@ case class ExecutionId(id: String = java.util.UUID.randomUUID.toString)
 
 case class StaticExecutionInfo(name: String = "", script: String = "", startDate: Long = 0L)
 
-case class EnvironmentState(taskName: String, running: Long, done: Long, submitted: Long, failed: Long)
+case class EnvironmentState(taskName: String, running: Long, done: Long, submitted: Long, failed: Long, errors: Seq[String])
 
 //case class Output(output: String)
 
@@ -211,11 +211,19 @@ case class Failed(error: Error, duration: Long = 0L, completed: Long = 0L, lastO
   def state: String = "failed"
 }
 
-case class Running(ready: Long, running: Long, duration: Long, completed: Long, environmentStates: Seq[EnvironmentState], lastOutputs: String) extends ExecutionInfo {
+case class Running(ready: Long,
+                   running: Long,
+                   duration: Long,
+                   completed: Long,
+                   environmentStates: Seq[EnvironmentState],
+                   lastOutputs: String) extends ExecutionInfo {
   def state: String = "running"
 }
 
-case class Finished(duration: Long = 0L, completed: Long = 0L, lastOutputs: String) extends ExecutionInfo {
+case class Finished(duration: Long = 0L,
+                    completed: Long = 0L,
+                    lastOutputs: String,
+                    environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
   def state: String = "finished"
 }
 

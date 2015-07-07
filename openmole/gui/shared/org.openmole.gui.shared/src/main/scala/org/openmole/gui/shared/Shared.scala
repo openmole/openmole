@@ -63,7 +63,7 @@ trait Api {
   //EXECUTIONS
   def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)]
 
-  def allSaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
+  def allStaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
 
   def cancelExecution(id: ExecutionId): Unit
 

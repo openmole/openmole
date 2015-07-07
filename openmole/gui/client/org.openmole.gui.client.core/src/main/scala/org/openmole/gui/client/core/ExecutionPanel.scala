@@ -28,13 +28,13 @@ import scala.scalajs.js.Date
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.Expander
 import org.openmole.gui.misc.js.Expander._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
-import scalatags.JsDom.{ tags ⇒ tags }
+import org.openmole.gui.misc.js.{BootstrapTags ⇒ bs}
+import scalatags.JsDom.{tags ⇒ tags}
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
+import org.openmole.gui.ext.data.{Error ⇒ ExecError}
 import org.openmole.gui.ext.data._
 import bs._
 import rx._
@@ -58,7 +58,7 @@ class ExecutionPanel extends ModalPanel {
     }.toSet != staticExecutionInfos().map {
       _._1
     }.toSet) {
-      OMPost[Api].allSaticInfos.call().foreach { i ⇒
+      OMPost[Api].allStaticInfos.call().foreach { i ⇒
         staticExecutionInfos() = i
       }
     }
@@ -72,7 +72,7 @@ class ExecutionPanel extends ModalPanel {
       if (executionInfos().filter {
         _._2 match {
           case r: Running ⇒ true
-          case _          ⇒ false
+          case _ ⇒ false
         }
       }.isEmpty) onClose()
     })
@@ -84,7 +84,11 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  case class ExecutionDetails(ratio: String, running: Long, error: Option[ExecError] = None, envStates: Seq[EnvironmentState] = Seq(), outputs: String = "")
+  case class ExecutionDetails(ratio: String,
+                              running: Long,
+                              error: Option[ExecError] = None,
+                              envStates: Seq[EnvironmentState] = Seq(),
+                              outputs: String = "")
 
   val outputTextAreas: Var[Map[ExecutionId, BSTextArea]] = Var(Map())
 
@@ -109,12 +113,14 @@ class ExecutionPanel extends ModalPanel {
             val completed = executionInfo.completed
 
             val details = executionInfo match {
-              case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error), outputs = f.lastOutputs)
-              case f: Finished ⇒ ExecutionDetails("100", 0, outputs = f.lastOutputs)
-              case r: Running  ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates, outputs = r.lastOutputs)
+              case f: Failed ⇒ ExecutionDetails("0", 0, Some(f.error), outputs = f.lastOutputs)
+              case f: Finished ⇒ ExecutionDetails("100", 0, outputs = f.lastOutputs, envStates = f.environmentStates)
+              case r: Running ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates, outputs = r.lastOutputs)
               case c: Canceled ⇒ ExecutionDetails("0", 0, outputs = c.lastOutputs)
-              case r: Ready    ⇒ ExecutionDetails("0", 0)
+              case r: Ready ⇒ ExecutionDetails("0", 0)
             }
+
+            details.envStates.headOption.map { o ⇒ println("EEERR ::::" + o.errors) }
 
             val scriptID: VisibleID = "script"
             val envID: VisibleID = "env"
@@ -125,7 +131,7 @@ class ExecutionPanel extends ModalPanel {
             val envLink = expander.getGlyph(glyph_stats, "Env", id.id, envID)
             val stateLink = executionInfo match {
               case f: Failed ⇒ expander.getLink(executionInfo.state, id.id, errorID)
-              case _         ⇒ tags.span(executionInfo.state)
+              case _ ⇒ tags.span(executionInfo.state)
             }
             val outputLink = expander.getGlyph(glyph_list, "", id.id, outputStreamID)
 
@@ -148,7 +154,9 @@ class ExecutionPanel extends ModalPanel {
                   )
                 }
               ),
-              errorID -> tags.div(bs.textArea(20)(new String(details.error.map { _.stackTrace }.getOrElse("")))),
+              errorID -> tags.div(bs.textArea(20)(new String(details.error.map {
+                _.stackTrace
+              }.getOrElse("")))),
               outputStreamID -> {
                 val tArea = outputTextAreas().get(id) match {
                   case Some(t: BSTextArea) ⇒
@@ -183,7 +191,7 @@ class ExecutionPanel extends ModalPanel {
             ), bs.tr(row)(
               expander.getVisible(id.id) match {
                 case Some(v: VisibleID) ⇒ tags.td(colspan := 12)(hiddenMap(v))
-                case _                  ⇒ tags.div()
+                case _ ⇒ tags.div()
               }
             )
             )
@@ -194,7 +202,9 @@ class ExecutionPanel extends ModalPanel {
     ).render
   }
 
-  def visibleClass(expandID: ExpandID, visibleID: VisibleID): Modifier = `class` := { if (expander.isVisible(expandID, visibleID)) "executionVisible" else "" }
+  def visibleClass(expandID: ExpandID, visibleID: VisibleID): Modifier = `class` := {
+    if (expander.isVisible(expandID, visibleID)) "executionVisible" else ""
+  }
 
   val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := {
     () ⇒

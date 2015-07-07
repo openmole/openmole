@@ -2,22 +2,23 @@ package org.openmole.gui.server.core
 
 import org.openmole.core.event.EventAccumulator
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.server.core.Utils._
 import org.openmole.tool.file._
-import org.openmole.core.workspace.{ AuthenticationProvider, Workspace }
+import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data.{ ScriptData, TreeNodeData }
-import java.io.{ File, PrintStream }
+import java.io.File
 import java.nio.file._
 import org.openmole.console._
 import scala.util.{ Failure, Success, Try }
 import org.openmole.gui.ext.data._
 import org.openmole.console.ConsoleVariables
-import org.openmole.core.workflow.mole.{ MoleExecution, ExecutionContext }
+import org.openmole.core.workflow.mole.ExecutionContext
 import org.openmole.core.workflow.puzzle.Puzzle
-import org.openmole.tool.stream.{ StringPrintStream, StringOutputStream }
+import org.openmole.tool.stream.StringPrintStream
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -103,7 +104,7 @@ object ApiImpl extends Api {
 
   def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)] = execution.allStates
 
-  def allSaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = execution.allStaticInfos
+  def allStaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = execution.allStaticInfos
 
   def cancelExecution(id: ExecutionId): Unit = execution.cancel(id)
 
@@ -129,14 +130,14 @@ object ApiImpl extends Api {
         o match {
           case puzzle: Puzzle ⇒
             val outputStream = new StringPrintStream()
-            val accumulator = EventAccumulator(puzzle.environments) {
-              case e @ (env, ex: ExceptionRaised) ⇒ e
+            val accumulator = EventAccumulator(puzzle.environments.values.toSeq: _*) {
+              case (env, ex: ExceptionRaised) ⇒ (env, ex)
             }
             Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
               case Success(ex) ⇒
                 Try(ex.start) match {
                   case Failure(e)  ⇒ error(e)
-                  case Success(ex) ⇒ execution.add(execId, StaticExecutionInfo(scriptData.scriptName, scriptData.script, ex.startTime.get), ex, outputStream)
+                  case Success(ex) ⇒ execution.add(execId, StaticExecutionInfo(scriptData.scriptName, scriptData.script, ex.startTime.get), DynamicExecutionInfo(ex, outputStream, accumulator))
                 }
               case Failure(e) ⇒ error(e)
             }
