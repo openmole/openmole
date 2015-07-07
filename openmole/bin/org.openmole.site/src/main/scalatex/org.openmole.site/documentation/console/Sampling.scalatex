@@ -292,7 +292,7 @@
       ExplorationTask(
         (i in (0 until 10)) x
         (d is UniformDistribution[Double]().take(10))
-      )"""")
+      )""")
 
 
 
