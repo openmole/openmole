@@ -28,6 +28,7 @@ object ScalaTask {
     new ScalaTaskBuilder {
       def toTask = new ScalaTask(source) with Built
     }
+
 }
 
 abstract class ScalaTask(val source: String) extends JVMLanguageTask with ScalaWrappedCompilation with ScalaWrappedOutput {

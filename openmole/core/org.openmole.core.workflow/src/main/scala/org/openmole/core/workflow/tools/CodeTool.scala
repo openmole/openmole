@@ -18,8 +18,9 @@ package org.openmole.core.workflow.tools
 
 import org.openmole.core.tools.service.Random
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.file.FilePackage
 
-object CodeTool {
+object CodeTool extends FilePackage {
   def namespace = s"${this.getClass.getPackage.getName}.CodeTool"
 
   def newRNG(seed: Long) = Random.newRNG(seed)

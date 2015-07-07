@@ -41,6 +41,7 @@ package dsl {
 
   import org.openmole.core.logging.LoggerService
   import org.openmole.core.workspace.Workspace
+  import org.openmole.tool.file.FilePackage
 
   trait DSLPackage <: Commands
       with Serializer
@@ -52,7 +53,8 @@ package dsl {
       with ToolsPackage
       with TransitionPackage
       with BuilderPackage
-      with Classes {
+      with Classes
+      with FilePackage {
 
     def valImpl[T: c.WeakTypeTag](c: MContext): c.Expr[Prototype[T]] = {
       import c.universe._
@@ -68,9 +70,6 @@ package dsl {
     lazy val logger = LoggerService
 
     implicit def authenticationProvider = workspace.authenticationProvider
-
-    type File = java.io.File
-    def File(s: String): File = new File(s)
 
     implicit def stringToFile(path: String) = File(path)
 
