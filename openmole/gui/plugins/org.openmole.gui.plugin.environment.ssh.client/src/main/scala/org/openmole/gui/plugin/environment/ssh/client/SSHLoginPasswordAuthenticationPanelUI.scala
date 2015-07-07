@@ -46,7 +46,6 @@ class SSHLoginPasswordAuthenticationPanelUI(data: LoginPasswordAuthenticationDat
     width := "130px").render
 
 
-
   @JSExport
   val view = {
     tags.div(
@@ -56,9 +55,11 @@ class SSHLoginPasswordAuthenticationPanelUI(data: LoginPasswordAuthenticationDat
     )
   }
 
-  def save(onsave: ()=> Unit) = {
-    OMPost[Api].addAuthentication(LoginPasswordAuthenticationData(login.value, password.value, target.value)).call().foreach{b=>
-      onsave()
+  def save(onsave: () => Unit) = {
+    OMPost[Api].removeAuthentication(data).call().foreach { d ⇒
+      OMPost[Api].addAuthentication(LoginPasswordAuthenticationData(login.value, password.value, target.value)).call().foreach { b =>
+        onsave()
+      }
     }
   }
 

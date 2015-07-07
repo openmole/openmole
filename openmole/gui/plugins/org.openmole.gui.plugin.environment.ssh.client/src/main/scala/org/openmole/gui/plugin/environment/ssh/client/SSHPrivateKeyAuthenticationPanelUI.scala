@@ -61,14 +61,17 @@ class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) ext
     )
   }
 
-  def save(onsave: () => Unit) = Settings.authenticationKeysPath.foreach { kp =>
-    OMPost[Api].addAuthentication(
-      PrivateKeyAuthenticationData(Some(kp / SafePath.leaf(privateKey.fileName, FileExtension.NO_EXTENSION)),
-        login.value,
-        password.value,
-        target.value)).call().foreach { b =>
-      onsave()
+  def save(onsave: () => Unit) =
+    OMPost[Api].removeAuthentication(data).call().foreach { d ⇒
+      Settings.authenticationKeysPath.foreach { kp =>
+        OMPost[Api].addAuthentication(
+          PrivateKeyAuthenticationData(Some(kp / SafePath.leaf(privateKey.fileName, FileExtension.NO_EXTENSION)),
+            login.value,
+            password.value,
+            target.value)).call().foreach { b =>
+          onsave()
+        }
+      }
     }
-  }
 
 }
