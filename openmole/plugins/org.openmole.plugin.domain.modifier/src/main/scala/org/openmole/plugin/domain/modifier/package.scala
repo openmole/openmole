@@ -33,6 +33,7 @@ package object modifier {
 
   implicit def finiteDomainModifierDecorator[T](domain: Domain[T] with Finite[T]) = new {
     def sort(implicit o: Ordering[T]) = new SortDomain(domain)
+    def shuffle = ShuffleDomain(domain)
   }
 
   implicit class FileDomainDecorator(d: Domain[File] with Finite[File]) {

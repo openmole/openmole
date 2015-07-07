@@ -28,6 +28,10 @@ package sampling {
     implicit def prototypeFactorDecorator[T](p: Prototype[T]) = new {
       def in[D <: Domain[T]](d: D): Factor[T, D] = Factor(p, d)
     }
+
+    implicit def arrayPrototypeFactorDecorator[T: Manifest](p: Prototype[Array[T]]) = new {
+      def is[D <: Domain[T] with Discrete[T]](d: D) = Factor(p, UnrolledDomain(d))
+    }
   }
 }
 

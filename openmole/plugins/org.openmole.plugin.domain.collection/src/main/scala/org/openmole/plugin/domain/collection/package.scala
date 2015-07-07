@@ -45,4 +45,8 @@ package object collection {
     def in(p2: Prototype[Array[T]]): Factor[T, VariableDomain[T]] = p in (p2.toDomain)
   }
 
+  implicit def prototypeCollectionConverterWithManifest[T: Manifest](p: Prototype[Array[T]]) = new {
+    def is(i: Iterable[T]) = Factor(p, UnrolledDomain(i.toDomain))
+  }
+
 }
