@@ -29,6 +29,7 @@ import org.openmole.core.batch.environment.BatchEnvironment.JobManagementThreads
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.collection.PriorityQueue
 import org.openmole.tool.thread._
+import fr.iscpif.gridscale.authentication._
 
 object JobManager extends Logger
 
@@ -122,6 +123,7 @@ class JobManager { self ⇒
 
     case Error(job, exception) ⇒
       val level = exception match {
+        case _: AuthenticationException     ⇒ SEVERE
         case e: UserBadDataError            ⇒ SEVERE
         case e: JobRemoteExecutionException ⇒ WARNING
         case _                              ⇒ FINE
