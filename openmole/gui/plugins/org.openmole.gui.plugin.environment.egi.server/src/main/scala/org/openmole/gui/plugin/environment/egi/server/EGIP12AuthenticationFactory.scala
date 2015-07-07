@@ -24,18 +24,19 @@ import org.openmole.plugin.environment.egi.{EGIAuthentication, P12Certificate}
 
 class EGIP12AuthenticationFactory extends AuthenticationFactory {
 
-  implicit lazy val authProvider = Workspace.authenticationProvider
+  implicit def authProvider = Workspace.authenticationProvider
 
   def buildAuthentication(data: AuthenticationData) = {
     val auth = coreObject(data)
-    auth.map { a => EGIAuthentication.update(a) }
+    auth.foreach { a =>
+      EGIAuthentication.update(a) }
   }
 
   def allAuthenticationData: Seq[AuthenticationData] = {
     EGIAuthentication() match {
       case Some(p12: P12Certificate) =>
         Seq(EGIP12AuthenticationData(
-          Workspace.encrypt(p12.cypheredPassword),
+          Workspace.decrypt(p12.cypheredPassword),
           Some(p12.certificate)))
       case x: Any => Seq()
     }
@@ -45,7 +46,7 @@ class EGIP12AuthenticationFactory extends AuthenticationFactory {
 
   def coreObject(data: AuthenticationData): Option[P12Certificate] = data match {
     case p12: EGIP12AuthenticationData => Some(P12Certificate(
-      Workspace.decrypt(p12.cypheredPassword),
+      Workspace.encrypt(p12.cypheredPassword),
       p12.certificatePath.getOrElse(SafePath.empty): SafePath))
     case _ => None
   }
