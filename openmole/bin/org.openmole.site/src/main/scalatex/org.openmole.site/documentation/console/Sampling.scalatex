@@ -281,3 +281,18 @@
                 j in Range(0.0, 5.0)
               )
             )""")
+
+  @sect{The is keyword}
+    @p Until now with have only used the syntax @i{i in someDomain}, but some time you want to be able to store the full domain in an variable of type array in order to use it as a whole in a subsequent task. On way to achive that it to use the @i{is} keyword. For instance this exploration generates 10 array of 10 random numbers:
+    @br @hl.openmole("""
+    val i = Val[Int]
+    val d = Val[Array[Double]]
+
+    val exploration =
+      ExplorationTask(
+        (i in (0 until 10)) x
+        (d is UniformDistribution[Double]().take(10))
+      )"""")
+
+
+
