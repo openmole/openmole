@@ -7,7 +7,8 @@ import sbt.Keys._
 object ThirdParties extends Defaults {
 
   lazy val dir = file("third-parties")
-  
+
+  lazy val openmoleTar = OsgiProject("org.openmole.tool.tar", imports = Seq("*")) settings (bundleType := Set("core")) dependsOn (openmoleFile)
   lazy val openmoleFile = OsgiProject("org.openmole.tool.file", imports = Seq("*")) settings (
     bundleType := Set("core"),
     libraryDependencies += Libraries.scalatest
