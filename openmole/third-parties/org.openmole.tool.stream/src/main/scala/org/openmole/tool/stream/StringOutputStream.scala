@@ -47,4 +47,6 @@ class StringPrintStream(val os: StringOutputStream = new StringOutputStream) ext
     flush()
     os.read
   }
+
+  override def toString = os.toString
 }
