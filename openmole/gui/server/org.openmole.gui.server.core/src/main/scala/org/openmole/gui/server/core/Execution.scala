@@ -17,18 +17,14 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.event.EventAccumulator
 import org.openmole.core.workflow.execution.Environment
-import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.tool.collection._
-import org.openmole.core.workflow.mole.{ Capsule, MoleExecution }
-import org.openmole.core.workflow.execution.ExecutionState._
+import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.ext.data._
 import org.openmole.tool.stream.StringPrintStream
 
 case class DynamicExecutionInfo(moleExecution: MoleExecution,
-                                outputStream: StringPrintStream,
-                                environmentExceptions: EventAccumulator[(Environment, ExceptionRaised)])
+                                outputStream: StringPrintStream)
 
 class Execution {
 
@@ -54,38 +50,31 @@ class Execution {
     case _                           ⇒ StaticExecutionInfo()
   }
 
-  def environmentState(envException: EventAccumulator[(Environment, ExceptionRaised)],
-                       moleExecution: MoleExecution): Seq[EnvironmentState] = moleExecution.environments.map {
-    case (c, e: Environment) ⇒
+  def environmentState(id: ExecutionId): Seq[EnvironmentState] = Runnings.runningEnvironments(id).map {
+    case (id, e: Environment) ⇒
       EnvironmentState(
-        c.task.toString,
+        id,
+        e.toString,
         e.running,
         e.done,
         e.submitted,
-        e.failed,
-        envException.clear.filter {
-          _._1 == e
-        }.map {
-          _._2.exception.getMessage
-        }
+        e.failed
       )
-  }.toSeq
+  }
 
   def executionInfo(key: ExecutionId): ExecutionInfo = get(key) match {
     case Some(Left((_, dynamic))) ⇒
       val moleExecution = dynamic.moleExecution
       val output = dynamic.outputStream
-      val environmentExceptions = dynamic.environmentExceptions
 
       val d = moleExecution.duration.getOrElse(0L)
       moleExecution.exception match {
-        case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t), lastOutputs = output.read, duration = moleExecution.duration.getOrElse(0))
+        case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t), duration = moleExecution.duration.getOrElse(0))
         case _ ⇒
-          if (moleExecution.canceled) Canceled(duration = moleExecution.duration.get, lastOutputs = output.read)
+          if (moleExecution.canceled) Canceled(duration = moleExecution.duration.get)
           else if (moleExecution.finished)
             Finished(duration = moleExecution.duration.get,
-              lastOutputs = output.read,
-              environmentStates = environmentState(environmentExceptions, moleExecution)
+              environmentStates = environmentState(key)
             )
           else if (moleExecution.started) {
             Running(
@@ -93,8 +82,7 @@ class Execution {
               running = moleExecution.running,
               duration = d,
               completed = moleExecution.completed,
-              environmentStates = environmentState(environmentExceptions, moleExecution),
-              lastOutputs = output.read
+              environmentStates = environmentState(key)
             )
           }
           else Ready()

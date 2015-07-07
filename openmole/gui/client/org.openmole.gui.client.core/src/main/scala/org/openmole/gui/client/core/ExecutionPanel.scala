@@ -45,7 +45,10 @@ class ExecutionPanel extends ModalPanel {
 
   val staticExecutionInfos: Var[Seq[(ExecutionId, StaticExecutionInfo)]] = Var(Seq())
   val executionInfos: Var[Seq[(ExecutionId, ExecutionInfo)]] = Var(Seq())
+  val outputsInfos: Var[Seq[RunningOutputData]] = Var(Seq())
+  val envErrorsInfos: Var[Seq[RunningEnvironmentData]] = Var(Seq())
   val intervalHandler: Var[Option[SetIntervalHandle]] = Var(None)
+  val envAndOutIntervalHandler: Var[Option[SetIntervalHandle]] = Var(None)
   val expander = new Expander
 
   def allExecutionStates = {
@@ -62,24 +65,45 @@ class ExecutionPanel extends ModalPanel {
         staticExecutionInfos() = i
       }
     }
-
   }
+
+  def allEnvStatesAndOutputs = {
+    OMPost[Api].runningErrorEnvironmentAndOutputData.call().foreach { r ⇒
+      envErrorsInfos() = r._1
+      outputsInfos() = r._2
+    }
+  }
+
+  def atLeastOneRunning = executionInfos().filter {
+    _._2 match {
+      case r: Running ⇒ true
+      case _ ⇒ false
+    }
+  }.isEmpty
 
   def onOpen = () ⇒ {
     allExecutionStates
     intervalHandler() = Some(setInterval(1000) {
       allExecutionStates
-      if (executionInfos().filter {
-        _._2 match {
-          case r: Running ⇒ true
-          case _ ⇒ false
+      if (atLeastOneRunning) onClose()
+    })
+
+    envAndOutIntervalHandler() = Some(setInterval(7000) {
+      allEnvStatesAndOutputs
+      println("Env and outputs " + envErrorsInfos().map {
+        _.errors.map {
+          _.errorMessage
         }
-      }.isEmpty) onClose()
+      })
+      if (atLeastOneRunning) onClose()
     })
   }
 
   def onClose = () ⇒ {
     intervalHandler().map {
+      clearInterval
+    }
+    envAndOutIntervalHandler().map {
       clearInterval
     }
   }
@@ -113,14 +137,14 @@ class ExecutionPanel extends ModalPanel {
             val completed = executionInfo.completed
 
             val details = executionInfo match {
-              case f: Failed ⇒ ExecutionDetails("0", 0, Some(f.error), outputs = f.lastOutputs)
-              case f: Finished ⇒ ExecutionDetails("100", 0, outputs = f.lastOutputs, envStates = f.environmentStates)
-              case r: Running ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates, outputs = r.lastOutputs)
-              case c: Canceled ⇒ ExecutionDetails("0", 0, outputs = c.lastOutputs)
+              case f: Failed ⇒ ExecutionDetails("0", 0, Some(f.error))
+              case f: Finished ⇒ {
+                ExecutionDetails("100", 0, envStates = f.environmentStates)
+              }
+              case r: Running ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates)
+              case c: Canceled ⇒ ExecutionDetails("0", 0)
               case r: Ready ⇒ ExecutionDetails("0", 0)
             }
-
-            details.envStates.headOption.map { o ⇒ println("EEERR ::::" + o.errors) }
 
             val scriptID: VisibleID = "script"
             val envID: VisibleID = "env"
@@ -158,17 +182,9 @@ class ExecutionPanel extends ModalPanel {
                 _.stackTrace
               }.getOrElse("")))),
               outputStreamID -> {
-                val tArea = outputTextAreas().get(id) match {
-                  case Some(t: BSTextArea) ⇒
-                    t.append(details.outputs)
-                    t
-                  case None ⇒
-                    println("NONE")
-                    val newTA = new BSTextArea(20, details.outputs, BottomScroll())
-                    outputTextAreas() = outputTextAreas() + (id -> newTA)
-                    newTA
-                }
-                tArea.get
+                new BSTextArea(20, outputsInfos().map {
+                  _.output
+                }.mkString("\n"), BottomScroll()).get
               }
             )
 

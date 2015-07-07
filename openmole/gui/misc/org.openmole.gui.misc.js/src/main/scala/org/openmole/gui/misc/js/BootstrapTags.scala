@@ -283,8 +283,8 @@ object BootstrapTags {
 
   import ScrollableTextArea._
 
-  case class BSTextArea(nbRows: Int, initText: String = "", sMode: AutoScroll) {
-    val scrollMode: Var[AutoScroll] = Var(sMode)
+  case class BSTextArea(nbRows: Int, initText: String = "", _scrollMode: AutoScroll) {
+    val scrollMode: Var[AutoScroll] = Var(_scrollMode)
     var content: String = initText
 
     def append(text: String) = content = content + text

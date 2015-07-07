@@ -1,6 +1,6 @@
 package org.openmole.gui.server.core
 
-import org.openmole.core.event.EventAccumulator
+import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
@@ -40,6 +40,7 @@ import org.openmole.tool.stream.StringPrintStream
 object ApiImpl extends Api {
 
   val execution = new Execution
+
   implicit def authProvider = Workspace.authenticationProvider
 
   //AUTHENTICATIONS
@@ -130,14 +131,18 @@ object ApiImpl extends Api {
         o match {
           case puzzle: Puzzle ⇒
             val outputStream = new StringPrintStream()
-            val accumulator = EventAccumulator(puzzle.environments.values.toSeq: _*) {
-              case (env, ex: ExceptionRaised) ⇒ (env, ex)
+            Runnings.add(execId, outputStream)
+            puzzle.environments.values.foreach { env ⇒
+              val envId = EnvironmentId(getUUID)
+              env.listen {
+                case (env, ex: ExceptionRaised) ⇒ Runnings.append(execId, envId, env, ex)
+              }
             }
             Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
               case Success(ex) ⇒
                 Try(ex.start) match {
                   case Failure(e)  ⇒ error(e)
-                  case Success(ex) ⇒ execution.add(execId, StaticExecutionInfo(scriptData.scriptName, scriptData.script, ex.startTime.get), DynamicExecutionInfo(ex, outputStream, accumulator))
+                  case Success(ex) ⇒ execution.add(execId, StaticExecutionInfo(scriptData.scriptName, scriptData.script, ex.startTime.get), DynamicExecutionInfo(ex, outputStream))
                 }
               case Failure(e) ⇒ error(e)
             }
@@ -145,4 +150,18 @@ object ApiImpl extends Api {
         }
     }
   }
+
+  def runningErrorEnvironmentAndOutputData(): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = {
+    val envIds = Runnings.ids
+    (
+      envIds.map {
+        case (id, envIds) ⇒
+          RunningEnvironmentData(id, Runnings.runningEnvironments(id).flatMap { _._2.environmentError })
+      }.toSeq,
+      envIds.keys.toSeq.map {
+        Runnings.outputsDatas(_)
+      }
+    )
+  }
+
 }
