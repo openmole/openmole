@@ -14,16 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.workflow.tools
+package org.openmole.core.workflow.domain
 
-import org.openmole.core.tools.service.Random
-import org.openmole.core.workspace.Workspace
-import org.openmole.tool.file.FilePackage
+import org.openmole.core.workflow.data.{ RandomProvider, Context }
 
-object CodeTool extends FilePackage {
-  def namespace = s"${this.getClass.getPackage.getName}.CodeTool"
+object UnrolledDomain {
+  def apply[T: Manifest](domain: Domain[T] with Discrete[T]) = new UnrolledDomain[T](domain)
+}
 
-  def newRNG(seed: Long) = Random.newRNG(seed)
-  def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix) = Workspace.newFile(prefix, suffix)
-  def newDir(prefix: String = Workspace.fixedDir) = Workspace.newDir(prefix)
+class UnrolledDomain[T: Manifest](val domain: Domain[T] with Discrete[T]) extends Domain[Array[T]] with Finite[Array[T]] {
+  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[Array[T]] =
+    Seq(domain.iterator(context).toArray)
 }

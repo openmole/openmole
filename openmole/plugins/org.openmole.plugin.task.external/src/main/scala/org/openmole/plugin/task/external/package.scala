@@ -31,6 +31,11 @@ package external {
       def +=(p: Prototype[File], name: String, link: Boolean = false, inWorkDir: Boolean = true) = (_: ExternalTaskBuilder).addInputFile(p, name, link, inWorkDir)
     }
 
+    lazy val inputFileArrays = new {
+      def +=(p: Prototype[Array[File]], prefix: String, suffix: String = "", link: Boolean = false, inWorkDir: Boolean = true) =
+        (_: ExternalTaskBuilder).addInputFileArray(p, prefix, suffix, link, inWorkDir)
+    }
+
     lazy val outputFiles = new {
       def +=(name: String, p: Prototype[File], inWorkDir: Boolean = true) = (_: ExternalTaskBuilder).addOutputFile(name, p, inWorkDir)
     }

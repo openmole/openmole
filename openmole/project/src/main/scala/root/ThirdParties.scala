@@ -9,7 +9,10 @@ object ThirdParties extends Defaults {
   lazy val dir = file("third-parties")
 
   lazy val openmoleTar = OsgiProject("org.openmole.tool.tar", imports = Seq("*")) settings (bundleType := Set("core")) dependsOn (openmoleFile)
-  lazy val openmoleFile = OsgiProject("org.openmole.tool.file", imports = Seq("*")) settings (bundleType := Set("core")) dependsOn (openmoleLock, openmoleThread)
+  lazy val openmoleFile = OsgiProject("org.openmole.tool.file", imports = Seq("*")) settings (
+    bundleType := Set("core"),
+    libraryDependencies += Libraries.scalatest
+  ) dependsOn (openmoleLock, openmoleStream, openmoleThread)
   lazy val openmoleLock = OsgiProject("org.openmole.tool.lock", imports = Seq("*")) settings (bundleType := Set("core"))
   lazy val openmoleThread = OsgiProject("org.openmole.tool.thread", imports = Seq("*")) settings (bundleType := Set("core"))
   lazy val openmoleHash = OsgiProject("org.openmole.tool.hash", imports = Seq("*")) settings (bundleType := Set("core")) dependsOn (openmoleFile, openmoleStream)

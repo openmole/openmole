@@ -20,8 +20,9 @@ package org.openmole.core.batch.storage
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.replication._
 import org.openmole.core.tools.service.Logger
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
+import org.openmole.core.workspace._
 import fr.iscpif.gridscale.storage._
+import org.openmole.core.tools.cache._
 
 import scala.slick.driver.H2Driver.simple._
 
@@ -40,10 +41,7 @@ trait PersistentStorageService extends StorageService {
   import PersistentStorageService._
 
   override def persistentDir(implicit token: AccessToken, session: Session): String =
-    directoryCache.get(
-      "persistentDir",
-      () ⇒ createPersistentDir
-    )
+    unwrap { directoryCache.get("persistentDir", () ⇒ createPersistentDir) }
 
   private def createPersistentDir(implicit token: AccessToken, session: Session) = {
     val persistentPath = child(baseDir, persistent)
@@ -65,10 +63,7 @@ trait PersistentStorageService extends StorageService {
   }
 
   override def tmpDir(implicit token: AccessToken) =
-    directoryCache.get(
-      "tmpDir",
-      () ⇒ createTmpDir
-    )
+    unwrap { directoryCache.get("tmpDir", () ⇒ createTmpDir) }
 
   private def createTmpDir(implicit token: AccessToken) = {
     val time = System.currentTimeMillis

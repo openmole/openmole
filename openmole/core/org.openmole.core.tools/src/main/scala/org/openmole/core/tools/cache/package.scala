@@ -14,16 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.workflow.tools
+package org.openmole.core.tools
 
-import org.openmole.core.tools.service.Random
-import org.openmole.core.workspace.Workspace
-import org.openmole.tool.file.FilePackage
+package object cache {
 
-object CodeTool extends FilePackage {
-  def namespace = s"${this.getClass.getPackage.getName}.CodeTool"
+  def unwrap[T](f: ⇒ T): T =
+    try f
+    catch {
+      case t: Throwable ⇒ throw t.getCause
+    }
 
-  def newRNG(seed: Long) = Random.newRNG(seed)
-  def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix) = Workspace.newFile(prefix, suffix)
-  def newDir(prefix: String = Workspace.fixedDir) = Workspace.newDir(prefix)
 }

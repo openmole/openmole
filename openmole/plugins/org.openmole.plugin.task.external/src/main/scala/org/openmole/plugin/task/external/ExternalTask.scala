@@ -38,6 +38,13 @@ object ExternalTask {
     link: Boolean,
     inWorkDir: Boolean)
 
+  case class InputFileArray(
+    prototype: Prototype[Array[File]],
+    prefix: ExpandedString,
+    suffix: ExpandedString,
+    link: Boolean,
+    inWorkDir: Boolean)
+
   case class OutputFile(
     origin: ExpandedString,
     prototype: Prototype[File],
@@ -55,6 +62,7 @@ import ExternalTask._
 
 trait ExternalTask extends Task {
 
+  def inputFileArrays: Iterable[InputFileArray]
   def inputFiles: Iterable[InputFile]
   def outputFiles: Iterable[OutputFile]
   def resources: Iterable[Resource]
@@ -64,6 +72,13 @@ trait ExternalTask extends Task {
   protected def listInputFiles(context: Context)(implicit rng: RandomProvider): Iterable[(Prototype[File], ToPut)] =
     inputFiles.map {
       case InputFile(prototype, name, link, toWorkDir) ⇒ prototype -> ToPut(context(prototype), name.from(context), link, toWorkDir)
+    }
+
+  protected def listInputFileArray(context: Context)(implicit rng: RandomProvider): Iterable[(Prototype[Array[File]], Seq[ToPut])] =
+    for {
+      InputFileArray(prototype, prefix, suffix, link, toWorkDir) ← inputFileArrays
+    } yield {
+      (prototype, context(prototype).zipWithIndex.map { case (file, i) ⇒ ToPut(file, s"${prefix.from(context)}$i${suffix.from(context)}", link, toWorkDir) }.toSeq)
     }
 
   protected def listResources(context: Context, tmpDir: File)(implicit rng: RandomProvider): Iterable[ToPut] = {
@@ -117,7 +132,18 @@ trait ExternalTask extends Task {
         Variable(p, d)
       }
 
-    context ++ copiedFiles
+    val copiedArrayFiles =
+      for { (p, fs) ← listInputFileArray(context) } yield {
+        val copied =
+          fs.map { f ⇒
+            val d = destination(f)
+            copy(f, d)
+            d
+          }
+        Variable(p, copied.toArray)
+      }
+
+    context ++ copiedFiles ++ copiedArrayFiles
   }
 
   def fetchOutputFiles(context: Context, tmpDir: File, workDirPath: String)(implicit rng: RandomProvider): Context = {

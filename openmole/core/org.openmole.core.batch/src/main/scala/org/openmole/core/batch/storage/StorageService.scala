@@ -21,6 +21,7 @@ import java.net.URI
 import java.nio.file.Paths
 import java.util.concurrent.{ Callable, TimeUnit }
 import com.google.common.cache.CacheBuilder
+import org.openmole.core.tools.cache._
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.refresh._
@@ -73,10 +74,7 @@ trait StorageService extends BatchService with Storage {
   }
 
   def baseDir(implicit token: AccessToken): String =
-    directoryCache.get(
-      "baseDir",
-      () ⇒ createBasePath
-    )
+    unwrap { directoryCache.get("baseDir", () ⇒ createBasePath) }
 
   protected def createBasePath(implicit token: AccessToken) = {
     val rootPath = mkRootDir

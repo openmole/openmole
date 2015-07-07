@@ -14,16 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.workflow.tools
+package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.tools.service.Random
-import org.openmole.core.workspace.Workspace
-import org.openmole.tool.file.FilePackage
+import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.domain._
+import org.openmole.core.tools.service.Random._
 
-object CodeTool extends FilePackage {
-  def namespace = s"${this.getClass.getPackage.getName}.CodeTool"
+object ShuffleDomain {
 
-  def newRNG(seed: Long) = Random.newRNG(seed)
-  def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix) = Workspace.newFile(prefix, suffix)
-  def newDir(prefix: String = Workspace.fixedDir) = Workspace.newDir(prefix)
+  def apply[T](domain: Domain[T] with Discrete[T] with Finite[T]) =
+    new ShuffleDomain[T](domain)
+
+}
+
+sealed class ShuffleDomain[+T](val domain: Domain[T] with Discrete[T] with Finite[T]) extends Domain[T] with Finite[T] {
+  override def inputs = domain.inputs
+  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] =
+    domain.iterator(context).toSeq.shuffled(rng())
 }
