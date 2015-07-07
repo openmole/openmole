@@ -38,10 +38,12 @@ import org.openmole.core.workflow.task.PluginSet
 abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
 
   private val _inputFiles = new ListBuffer[InputFile]
+  private val _inputFileArrays = new ListBuffer[InputFileArray]
   private val _outputFiles = new ListBuffer[OutputFile]
   private val _resources = new ListBuffer[Resource]
 
   def inputFiles = _inputFiles.toList
+  def inputFileArrays = _inputFileArrays.toList
   def outputFiles = _outputFiles.toList
   def resources = _resources.toList
 
@@ -75,6 +77,12 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
     this
   }
 
+  def addInputFileArray(p: Prototype[Array[File]], prefix: ExpandedString, suffix: ExpandedString = "", link: Boolean = false, inWorkDir: Boolean = true): this.type = {
+    _inputFileArrays += InputFileArray(p, prefix, suffix, link, inWorkDir)
+    this addInput p
+    this
+  }
+
   /**
    * Get a file generate by the task and inject it in the dataflow
    *
@@ -90,6 +98,7 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
 
   trait Built extends super.Built {
     def inputFiles = builder.inputFiles.toList
+    def inputFileArrays = builder.inputFileArrays.toList
     def outputFiles = builder.outputFiles.toList
     def resources = builder.resources.toList
   }
