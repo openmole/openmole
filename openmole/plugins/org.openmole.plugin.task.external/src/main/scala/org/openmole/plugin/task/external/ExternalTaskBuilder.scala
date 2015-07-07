@@ -56,6 +56,7 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
    * @param link tels if the entire content of the file should be copied or
    * if a symbolic link is suitable. In the case link is set to true openmole will
    * try to use a symbolic link if available on your system.
+   * @param inWorkDir if true resolve the name of the file relatively to the workdir of the task
    *
    */
   def addResource(file: File, name: Option[ExpandedString] = None, link: Boolean = false, inWorkDir: Boolean = false, os: OS = OS()): ExternalTaskBuilder.this.type = {
@@ -68,7 +69,8 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
    *
    * @param p the prototype of the data containing the file to be copied
    * @param name the destination name of the file in the task workspace
-   * @param link @see addResouce
+   * @param link @see addResource
+   * @param inWorkDir @see addResource
    *
    */
   def addInputFile(p: Prototype[File], name: ExpandedString, link: Boolean = false, inWorkDir: Boolean = true): this.type = {
@@ -77,6 +79,17 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
     this
   }
 
+  /**
+   * Copy an array of files or directory from the dataflow to the task workspace. The files
+   * in the array are named prefix$nSuffix where $n i the index of the file in the array.
+   *
+   * @param p the prototype of the data containing the array of files to be copied
+   * @param prefix the prefix for naming the files
+   * @param suffix the suffix for naming the files
+   * @param link @see addResource
+   * @param inWorkDir @see addResource
+   *                  
+   */
   def addInputFileArray(p: Prototype[Array[File]], prefix: ExpandedString, suffix: ExpandedString = "", link: Boolean = false, inWorkDir: Boolean = true): this.type = {
     _inputFileArrays += InputFileArray(p, prefix, suffix, link, inWorkDir)
     this addInput p
