@@ -29,6 +29,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.{ VariableExpansion, ExpandedString }
 import org.openmole.plugin.task.external.ExternalTask._
 import org.openmole.plugin.task.external._
+import org.openmole.tool.file._
 
 import Prettifier._
 
