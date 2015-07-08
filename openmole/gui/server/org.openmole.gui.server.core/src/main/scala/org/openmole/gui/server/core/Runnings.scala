@@ -65,9 +65,9 @@ object Runnings {
 
   def ids = instance.ids
 
-  def remove(id: ExecutionId) = atomic { implicit ctx =>
-    ids.remove(id).foreach{
-      _.foreach{
+  def remove(id: ExecutionId) = atomic { implicit ctx ⇒
+    ids.remove(id).foreach {
+      _.foreach {
         instance.runningEnvironments.remove
       }
     }

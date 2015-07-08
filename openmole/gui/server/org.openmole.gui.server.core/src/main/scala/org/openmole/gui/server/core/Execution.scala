@@ -39,7 +39,7 @@ class Execution {
     get(key) match {
       case Some(Left((_, dynamic: DynamicExecutionInfo))) ⇒
         dynamic.moleExecution.cancel
-        remove(key)
+        Runnings.remove(key)
       case x: Any ⇒ println("other ....")
     }
   }
