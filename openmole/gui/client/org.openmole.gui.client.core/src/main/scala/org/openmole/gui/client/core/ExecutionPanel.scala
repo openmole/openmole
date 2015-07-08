@@ -205,7 +205,7 @@ class ExecutionPanel extends ModalPanel {
                   _.errors.map {
                     _.errorMessage
                   }.mkString("\n")
-                }.flatten
+                }.mkString("\n")
 
                 val tArea = envErrorTextAreas().get(id) match {
                   case Some(t: BSTextArea) ⇒
