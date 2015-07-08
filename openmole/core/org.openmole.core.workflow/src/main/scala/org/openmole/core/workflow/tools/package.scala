@@ -39,7 +39,7 @@ package tools {
     implicit class RefLongDecorator(r: Ref[Long]) {
       def next = r getUpdate (_ + 1)
     }
-    
+
   }
 }
 

@@ -28,13 +28,13 @@ import scala.scalajs.js.Date
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.Expander
 import org.openmole.gui.misc.js.Expander._
-import org.openmole.gui.misc.js.{BootstrapTags ⇒ bs}
-import scalatags.JsDom.{tags ⇒ tags}
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
+import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import org.openmole.gui.ext.data.{Error ⇒ ExecError}
+import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import bs._
 import rx._
@@ -77,7 +77,7 @@ class ExecutionPanel extends ModalPanel {
   def atLeastOneRunning = executionInfos().filter {
     _._2 match {
       case r: Running ⇒ true
-      case _ ⇒ false
+      case _          ⇒ false
     }
   }.isEmpty
 
@@ -141,9 +141,9 @@ class ExecutionPanel extends ModalPanel {
               case f: Finished ⇒ {
                 ExecutionDetails("100", 0, envStates = f.environmentStates)
               }
-              case r: Running ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates)
+              case r: Running  ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates)
               case c: Canceled ⇒ ExecutionDetails("0", 0)
-              case r: Ready ⇒ ExecutionDetails("0", 0)
+              case r: Ready    ⇒ ExecutionDetails("0", 0)
             }
 
             val scriptID: VisibleID = "script"
@@ -155,7 +155,7 @@ class ExecutionPanel extends ModalPanel {
             val envLink = expander.getGlyph(glyph_stats, "Env", id.id, envID)
             val stateLink = executionInfo match {
               case f: Failed ⇒ expander.getLink(executionInfo.state, id.id, errorID)
-              case _ ⇒ tags.span(executionInfo.state)
+              case _         ⇒ tags.span(executionInfo.state)
             }
             val outputLink = expander.getGlyph(glyph_list, "", id.id, outputStreamID)
 
@@ -207,7 +207,7 @@ class ExecutionPanel extends ModalPanel {
             ), bs.tr(row)(
               expander.getVisible(id.id) match {
                 case Some(v: VisibleID) ⇒ tags.td(colspan := 12)(hiddenMap(v))
-                case _ ⇒ tags.div()
+                case _                  ⇒ tags.div()
               }
             )
             )
