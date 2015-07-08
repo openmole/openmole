@@ -90,11 +90,6 @@ class ExecutionPanel extends ModalPanel {
 
     envAndOutIntervalHandler() = Some(setInterval(7000) {
       allEnvStatesAndOutputs
-      println("Env and outputs " + envErrorsInfos().map {
-        _.errors.map {
-          _.errorMessage
-        }
-      })
       if (atLeastOneRunning) onClose()
     })
   }
@@ -115,11 +110,15 @@ class ExecutionPanel extends ModalPanel {
                               outputs: String = "")
 
   val outputTextAreas: Var[Map[ExecutionId, BSTextArea]] = Var(Map())
+  val envErrorTextAreas: Var[Map[ExecutionId, BSTextArea]] = Var(Map())
 
   lazy val executionTable = {
     bs.table(striped)(
       thead,
       Rx {
+        println("Client IDs " + executionInfos().map {
+          _._1
+        })
         tbody({
           for ((id, executionInfo) ← executionInfos()) yield {
             val staticInfo = staticExecutionInfos().filter {
@@ -185,16 +184,41 @@ class ExecutionPanel extends ModalPanel {
                 _.stackTrace
               }.getOrElse("")))),
               outputStreamID -> {
-                new BSTextArea(20, outputsInfos().map {
+
+                val outputs = outputsInfos().filter { _.id == id }.map {
                   _.output
-                }.mkString("\n"), BottomScroll()).get
+                }.mkString("\n")
+
+                val tArea = outputTextAreas().get(id) match {
+                  case Some(t: BSTextArea) ⇒
+                    t.content = outputs
+                    t
+                  case None ⇒
+                    val newTA = new BSTextArea(20, outputs, BottomScroll())
+                    outputTextAreas() = outputTextAreas() + (id -> newTA)
+                    newTA
+                }
+                tArea.get
               },
               envErrorID -> {
-                new BSTextArea(20, envErrorsInfos().flatMap {
-                  _.errors.map { _.errorMessage }
-                }.mkString("\n"), BottomScroll()).get
-              }
 
+                val outputs = envErrorsInfos().filter {
+                  _.id == id
+                }.map {
+                  _.errors.map { _.errorMessage }
+                }.mkString("\n")
+
+                val tArea = envErrorTextAreas().get(id) match {
+                  case Some(t: BSTextArea) ⇒
+                    t.content = outputs
+                    t
+                  case None ⇒
+                    val newTA = new BSTextArea(20, outputs, BottomScroll())
+                    envErrorTextAreas() = envErrorTextAreas() + (id -> newTA)
+                    newTA
+                }
+                tArea.get
+              }
             )
 
             Seq(bs.tr(row)(

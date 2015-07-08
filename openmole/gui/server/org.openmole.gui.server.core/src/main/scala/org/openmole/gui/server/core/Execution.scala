@@ -35,9 +35,13 @@ class Execution {
 
   def add(key: ExecutionId, error: Failed) = moles.add(key, Right(error))
 
-  def cancel(key: ExecutionId) = get(key) match {
-    case Some(Left((_, dynamic: DynamicExecutionInfo))) ⇒ dynamic.moleExecution.cancel
-    case _ ⇒
+  def cancel(key: ExecutionId) = {
+    get(key) match {
+      case Some(Left((_, dynamic: DynamicExecutionInfo))) ⇒
+        println("cancel mE " + key)
+        dynamic.moleExecution.cancel
+      case x: Any ⇒ println("other ....")
+    }
   }
 
   def remove(key: ExecutionId) = {
@@ -71,7 +75,11 @@ class Execution {
       moleExecution.exception match {
         case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t), duration = moleExecution.duration.getOrElse(0))
         case _ ⇒
-          if (moleExecution.canceled) Canceled(duration = moleExecution.duration.get)
+          println("CAneceled" + key + " " + moleExecution.canceled)
+          if (moleExecution.canceled) {
+            println("canceled !!!")
+            Canceled(duration = moleExecution.duration.get)
+          }
           else if (moleExecution.finished)
             Finished(duration = moleExecution.duration.get,
               environmentStates = environmentState(key)
