@@ -33,7 +33,8 @@ object Runnings {
 
   def append(id: ExecutionId, envId: EnvironmentId, environment: Environment, exception: ExceptionRaised) = atomic { implicit ctx ⇒
     val re = instance.runningEnvironments.getOrElseUpdate(envId, RunningEnvironment(environment, List()))
-    instance.runningEnvironments(envId) = re.copy(environmentError = EnvironmentError(envId, exception.exception.getMessage, ErrorBuilder(exception.exception)) :: re.environmentError)
+    instance.runningEnvironments(envId) = re.copy(environmentError = EnvironmentError(envId, exception.exception.getMessage,
+      ErrorBuilder(exception.exception)) :: re.environmentError.takeRight(50))
   }
 
   def addExecutionId(id: ExecutionId) = atomic { implicit ctx ⇒
