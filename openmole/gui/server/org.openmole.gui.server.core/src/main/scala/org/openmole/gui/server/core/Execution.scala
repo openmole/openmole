@@ -38,8 +38,8 @@ class Execution {
   def cancel(key: ExecutionId) = {
     get(key) match {
       case Some(Left((_, dynamic: DynamicExecutionInfo))) ⇒
-        println("cancel mE " + key)
         dynamic.moleExecution.cancel
+        remove(key)
       case x: Any ⇒ println("other ....")
     }
   }

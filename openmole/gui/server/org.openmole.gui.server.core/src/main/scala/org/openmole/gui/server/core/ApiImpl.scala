@@ -19,6 +19,7 @@ import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.ExecutionContext
 import org.openmole.core.workflow.puzzle.Puzzle
 import org.openmole.tool.stream.StringPrintStream
+import scala.concurrent.stm._
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -151,7 +152,7 @@ object ApiImpl extends Api {
     }
   }
 
-  def runningErrorEnvironmentAndOutputData(): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = {
+  def runningErrorEnvironmentAndOutputData(): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
     val envIds = Runnings.ids
     (
       envIds.map {

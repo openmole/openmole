@@ -6,7 +6,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.tool.stream.StringPrintStream
 
-import scala.collection.mutable
+import scala.concurrent.stm._
 
 /*
  * Copyright (C) 29/05/15 // mathieu.leclaire@openmole.org
@@ -31,43 +31,54 @@ object Runnings {
 
   lazy private val instance = new Runnings
 
-  def append(id: ExecutionId, envId: EnvironmentId, environment: Environment, exception: ExceptionRaised) = instance.runningEnvironments.synchronized {
+  def append(id: ExecutionId, envId: EnvironmentId, environment: Environment, exception: ExceptionRaised) = atomic { implicit ctx ⇒
     val envIds = add(id)
     instance.ids(id) = envIds :+ envId
     val re = instance.runningEnvironments.getOrElseUpdate(envId, RunningEnvironment(environment, List()))
     instance.runningEnvironments(envId) = re.copy(environmentError = EnvironmentError(envId, exception.exception.getMessage, ErrorBuilder(exception.exception)) :: re.environmentError)
   }
 
-  def add(id: ExecutionId) = instance.ids.getOrElseUpdate(id, Seq())
+  def add(id: ExecutionId) = atomic { implicit ctx ⇒
+    instance.ids.getOrElseUpdate(id, Seq())
+  }
 
-  def add(id: ExecutionId, printStream: StringPrintStream) = instance.outputs.synchronized {
+  def add(id: ExecutionId, printStream: StringPrintStream) = atomic { implicit ctx ⇒
     instance.outputs.getOrElseUpdate(id, printStream)
   }
 
-  def runningEnvironments(id: ExecutionId): Seq[(EnvironmentId, RunningEnvironment)] = {
+  def runningEnvironments(id: ExecutionId): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
     add(id)
     runningEnvironments(ids(id))
   }
 
   def runningEnvironments(envIds: Seq[EnvironmentId]): Seq[(EnvironmentId, RunningEnvironment)] =
-    instance.runningEnvironments.synchronized {
+    atomic { implicit ctx ⇒
       envIds.map { id ⇒
         instance.runningEnvironments.getOrElse(id, Seq())
         id -> instance.runningEnvironments(id)
       }
     }
 
-  def outputsDatas(id: ExecutionId) = instance.outputs.synchronized {
+  def outputsDatas(id: ExecutionId) = atomic { implicit ctx ⇒
     RunningOutputData(id, instance.outputs(id).toString)
   }
 
-  def ids = instance.ids.toMap
+  def ids = instance.ids
+
+  def remove(id: ExecutionId) = atomic { implicit ctx =>
+    ids.remove(id).foreach{
+      _.foreach{
+        instance.runningEnvironments.remove
+      }
+    }
+    instance.outputs.remove(id)
+  }
 
 }
 
 class Runnings {
 
-  val ids = new mutable.HashMap[ExecutionId, Seq[EnvironmentId]]
-  val outputs = new mutable.WeakHashMap[ExecutionId, StringPrintStream]
-  val runningEnvironments = new mutable.WeakHashMap[EnvironmentId, RunningEnvironment]
+  val ids = TMap[ExecutionId, Seq[EnvironmentId]]()
+  val outputs = TMap[ExecutionId, StringPrintStream]()
+  val runningEnvironments = TMap[EnvironmentId, RunningEnvironment]()
 }
