@@ -88,7 +88,7 @@ abstract class ExternalTaskBuilder extends TaskBuilder { builder ⇒
    * @param suffix the suffix for naming the files
    * @param link @see addResource
    * @param inWorkDir @see addResource
-   *                  
+   *
    */
   def addInputFileArray(p: Prototype[Array[File]], prefix: ExpandedString, suffix: ExpandedString = "", link: Boolean = false, inWorkDir: Boolean = true): this.type = {
     _inputFileArrays += InputFileArray(p, prefix, suffix, link, inWorkDir)
