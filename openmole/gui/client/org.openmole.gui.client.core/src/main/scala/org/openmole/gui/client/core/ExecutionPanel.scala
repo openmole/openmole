@@ -150,6 +150,7 @@ class ExecutionPanel extends ModalPanel {
             val envID: VisibleID = "env"
             val errorID: VisibleID = "error"
             val outputStreamID: VisibleID = "outputStream"
+            val envErrorID: VisibleID = "envError"
 
             val scriptLink = expander.getLink(staticInfo.name, id.id, scriptID)
             val envLink = expander.getGlyph(glyph_stats, "Env", id.id, envID)
@@ -158,6 +159,8 @@ class ExecutionPanel extends ModalPanel {
               case _         ⇒ tags.span(executionInfo.state)
             }
             val outputLink = expander.getGlyph(glyph_list, "", id.id, outputStreamID)
+
+            val envErrorLink = expander.getLink("EnvErr", id.id, envErrorID)
 
             val hiddenMap = Map(
               scriptID -> tags.div(bs.textArea(20)(staticInfo.script)),
@@ -185,7 +188,13 @@ class ExecutionPanel extends ModalPanel {
                 new BSTextArea(20, outputsInfos().map {
                   _.output
                 }.mkString("\n"), BottomScroll()).get
+              },
+              envErrorID -> {
+                new BSTextArea(20, envErrorsInfos().flatMap {
+                  _.errors.map { _.errorMessage }
+                }.mkString("\n"), BottomScroll()).get
               }
+
             )
 
             Seq(bs.tr(row)(
@@ -197,6 +206,7 @@ class ExecutionPanel extends ModalPanel {
               bs.td(col_md_1)(durationString),
               bs.td(col_md_1)(stateLink)(`class` := executionInfo.state + "State"),
               bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
+              bs.td(col_md_1)(visibleClass(id.id, envErrorID))(envErrorLink),
               bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink),
               bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
                 allExecutionStates
