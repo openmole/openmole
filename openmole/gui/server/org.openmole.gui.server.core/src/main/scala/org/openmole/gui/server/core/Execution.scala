@@ -18,6 +18,7 @@ package org.openmole.gui.server.core
  */
 
 import org.openmole.core.workflow.execution.Environment
+import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.tool.collection._
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.ext.data._
@@ -40,7 +41,7 @@ class Execution {
       case Some(Left((_, dynamic: DynamicExecutionInfo))) ⇒
         dynamic.moleExecution.cancel
         Runnings.remove(key)
-      case x: Any ⇒ println("other ....")
+      case _ ⇒
     }
   }
 
@@ -54,17 +55,19 @@ class Execution {
     case _                           ⇒ StaticExecutionInfo()
   }
 
-  def environmentState(id: ExecutionId): Seq[EnvironmentState] = Runnings.runningEnvironments(id).map {
-    case (id, e: Environment) ⇒
-      EnvironmentState(
-        id,
-        e.toString,
-        e.running,
-        e.done,
-        e.submitted,
-        e.failed
-      )
-  }
+  def environmentState(id: ExecutionId): Seq[EnvironmentState] =
+    Runnings.runningEnvironments(id).map {
+      case (envId, e) ⇒ {
+        EnvironmentState(
+          envId,
+          e.environment.toString,
+          e.environment.running,
+          e.environment.done,
+          e.environment.submitted,
+          e.environment.failed
+        )
+      }
+    }
 
   def executionInfo(key: ExecutionId): ExecutionInfo = get(key) match {
     case Some(Left((_, dynamic))) ⇒
@@ -75,11 +78,7 @@ class Execution {
       moleExecution.exception match {
         case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t), duration = moleExecution.duration.getOrElse(0))
         case _ ⇒
-          println("CAneceled" + key + " " + moleExecution.canceled)
-          if (moleExecution.canceled) {
-            println("canceled !!!")
-            Canceled(duration = moleExecution.duration.get)
-          }
+          if (moleExecution.canceled) Canceled(duration = moleExecution.duration.get)
           else if (moleExecution.finished)
             Finished(duration = moleExecution.duration.get,
               environmentStates = environmentState(key)
@@ -99,9 +98,10 @@ class Execution {
     case _                      ⇒ Failed(Error("Not found execution " + key))
   }
 
-  def allStates: Seq[(ExecutionId, ExecutionInfo)] = moles.getKeys.toSeq.map { key ⇒
-    key -> executionInfo(key)
-  }
+  def allStates: Seq[(ExecutionId, ExecutionInfo)] =
+    moles.getKeys.toSeq.map { key ⇒
+      key -> executionInfo(key)
+    }
 
   def allStaticInfos: Seq[(ExecutionId, StaticExecutionInfo)] = moles.getKeys.toSeq.map { key ⇒
     key -> staticInfo(key)

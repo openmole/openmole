@@ -32,22 +32,25 @@ object Runnings {
   lazy private val instance = new Runnings
 
   def append(id: ExecutionId, envId: EnvironmentId, environment: Environment, exception: ExceptionRaised) = atomic { implicit ctx ⇒
-    val envIds = add(id)
-    instance.ids(id) = envIds :+ envId
     val re = instance.runningEnvironments.getOrElseUpdate(envId, RunningEnvironment(environment, List()))
     instance.runningEnvironments(envId) = re.copy(environmentError = EnvironmentError(envId, exception.exception.getMessage, ErrorBuilder(exception.exception)) :: re.environmentError)
   }
 
-  def add(id: ExecutionId) = atomic { implicit ctx ⇒
-    instance.ids.getOrElseUpdate(id, Seq())
+  def addExecutionId(id: ExecutionId) = atomic { implicit ctx ⇒
+    instance.ids(id) = Seq()
   }
 
-  def add(id: ExecutionId, printStream: StringPrintStream) = atomic { implicit ctx ⇒
-    instance.outputs.getOrElseUpdate(id, printStream)
+  def add(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)], printStream: StringPrintStream) = atomic { implicit ctx ⇒
+    addExecutionId(id)
+    instance.outputs(id) = printStream
+    envIds.foreach {
+      case (envId, env) ⇒
+        instance.ids(id) = instance.ids(id) :+ envId
+        instance.runningEnvironments(envId) = RunningEnvironment(env, List())
+    }
   }
 
   def runningEnvironments(id: ExecutionId): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
-    add(id)
     runningEnvironments(ids(id))
   }
 
