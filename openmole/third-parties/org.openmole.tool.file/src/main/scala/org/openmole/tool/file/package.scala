@@ -127,9 +127,9 @@ package file {
 
     implicit class FileDecorator(file: File) {
 
-      def realFile = file.toPath.toRealPath(LinkOption.NOFOLLOW_LINKS).toFile
+      def realFile = file.toPath.toRealPath().toFile
 
-      def realPath = file.toPath.toRealPath(LinkOption.NOFOLLOW_LINKS)
+      def realPath = file.toPath.toRealPath()
 
       def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty)
 

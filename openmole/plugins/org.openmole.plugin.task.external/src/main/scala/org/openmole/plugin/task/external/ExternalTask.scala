@@ -76,9 +76,13 @@ trait ExternalTask extends Task {
 
   protected def listInputFileArray(context: Context)(implicit rng: RandomProvider): Iterable[(Prototype[Array[File]], Seq[ToPut])] =
     for {
-      InputFileArray(prototype, prefix, suffix, link, toWorkDir) ← inputFileArrays
+      ifa ← inputFileArrays
     } yield {
-      (prototype, context(prototype).zipWithIndex.map { case (file, i) ⇒ ToPut(file, s"${prefix.from(context)}$i${suffix.from(context)}", link, toWorkDir) }.toSeq)
+      (ifa.prototype,
+        context(ifa.prototype).zipWithIndex.map {
+          case (file, i) ⇒
+            ToPut(file, s"${ifa.prefix.from(context)}$i${ifa.suffix.from(context)}", link = ifa.link, inWorkDir = ifa.inWorkDir)
+        }.toSeq)
     }
 
   protected def listResources(context: Context, tmpDir: File)(implicit rng: RandomProvider): Iterable[ToPut] = {
@@ -113,9 +117,10 @@ trait ExternalTask extends Task {
 
     if (f.link) to.createLink(f.file.getCanonicalFile)
     else {
-      f.file.copy(to)
+      f.file.realFile.copy(to)
       to.applyRecursive { _.deleteOnExit }
     }
+
   }
 
   def prepareInputFiles(context: Context, tmpDir: File, workDirPath: String)(implicit rng: RandomProvider): Context = {
