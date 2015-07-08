@@ -116,9 +116,6 @@ class ExecutionPanel extends ModalPanel {
     bs.table(striped)(
       thead,
       Rx {
-        println("Client IDs " + executionInfos().map {
-          _._1
-        })
         tbody({
           for ((id, executionInfo) ← executionInfos()) yield {
             val staticInfo = staticExecutionInfos().filter {
@@ -136,10 +133,8 @@ class ExecutionPanel extends ModalPanel {
             val completed = executionInfo.completed
 
             val details = executionInfo match {
-              case f: Failed ⇒ ExecutionDetails("0", 0, Some(f.error))
-              case f: Finished ⇒ {
-                ExecutionDetails("100", 0, envStates = f.environmentStates)
-              }
+              case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error))
+              case f: Finished ⇒ ExecutionDetails("100", 0, envStates = f.environmentStates)
               case r: Running  ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates)
               case c: Canceled ⇒ ExecutionDetails("0", 0)
               case r: Ready    ⇒ ExecutionDetails("0", 0)
@@ -163,23 +158,25 @@ class ExecutionPanel extends ModalPanel {
 
             val hiddenMap = Map(
               scriptID -> tags.div(bs.textArea(20)(staticInfo.script)),
-              envID -> tags.div(
-                details.envStates.map { e ⇒
-                  bs.table(striped)(`class` := "executionTable")(
-                    thead,
-                    tbody(
-                      Seq(bs.tr(row)(
-                        bs.td(col_md_2)(e.taskName),
-                        bs.td(col_md_3)("Submitted: " + e.submitted),
-                        bs.td(col_md_2)(bs.glyph(bs.glyph_flash), " " + e.running),
-                        bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + e.done),
-                        bs.td(col_md_3)("Failed: " + e.failed)
-                      )
+              envID -> {
+                tags.div(
+                  details.envStates.map { e ⇒
+                    bs.table(striped)(`class` := "executionTable")(
+                      thead,
+                      tbody(
+                        Seq(bs.tr(row)(
+                          bs.td(col_md_2)(e.taskName),
+                          bs.td(col_md_3)("Submitted: " + e.submitted),
+                          bs.td(col_md_2)(bs.glyph(bs.glyph_flash), " " + e.running),
+                          bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + e.done),
+                          bs.td(col_md_3)("Failed: " + e.failed)
+                        )
+                        )
                       )
                     )
-                  )
-                }
-              ),
+                  }
+                )
+              },
               errorID -> tags.div(bs.textArea(20)(new String(details.error.map {
                 _.stackTrace
               }.getOrElse("")))),
@@ -205,7 +202,9 @@ class ExecutionPanel extends ModalPanel {
                 val outputs = envErrorsInfos().filter {
                   _.id == id
                 }.map {
-                  _.errors.map { _.errorMessage }
+                  _.errors.map {
+                    _.errorMessage
+                  }.mkString("\n")
                 }.mkString("\n")
 
                 val tArea = envErrorTextAreas().get(id) match {
@@ -258,7 +257,6 @@ class ExecutionPanel extends ModalPanel {
 
   val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := {
     () ⇒
-      println("Close")
   }
   )
 
