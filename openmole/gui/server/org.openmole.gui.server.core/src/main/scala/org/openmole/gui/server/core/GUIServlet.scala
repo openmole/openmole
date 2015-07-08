@@ -97,8 +97,12 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   post("/uploadfiles") {
     for (file ← fileParams) yield {
+      val destination = new java.io.File(file._1)
       val stream = file._2.getInputStream
-      try stream.copy(new java.io.File(file._1))
+      try {
+        stream.copy(destination)
+        destination.setExecutable(true)
+      }
       finally stream.close
       Ok(file, Map(
         "Content-Type" -> ("application/octet-stream"),

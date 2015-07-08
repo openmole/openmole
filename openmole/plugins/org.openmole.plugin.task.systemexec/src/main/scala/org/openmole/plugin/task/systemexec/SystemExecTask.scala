@@ -116,7 +116,7 @@ abstract class SystemExecTask(
         case Nil ⇒ 0
         case cmd :: t ⇒
           val retCode = execute(commandLine(cmd), out, err)
-          if (errorOnReturnCode && retCode != 0) throw new InternalProcessingError("Error executing: " + commandLine(cmd) + " return code was not 0 but " + retCode)
+          if (errorOnReturnCode && retCode != 0) throw new InternalProcessingError("Error executing: [" + commandLine(cmd).mkString(" ") + "] return code was not 0 but " + retCode)
           if (t.isEmpty || (!errorOnReturnCode && retCode != 0)) retCode
           else execAll(t)
       }
