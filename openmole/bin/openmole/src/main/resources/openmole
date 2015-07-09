@@ -25,8 +25,6 @@ REALPATH=$TARGET_FILE
 LOCATION=$( cd $(dirname $REALPATH) ; pwd -P )
 cd "$CURDIR"
 
-(nohup sh $LOCATION/dbserver/bin/openmole-dbserver >/dev/null &) 2>/dev/null
-
 MEM=${OPENMOLE_MEMORY:-"1G"}
 
 FLAG=""
@@ -40,8 +38,11 @@ esac
 
 JVMVERSION=`echo "$JAVAVERSION" | grep version | rev | cut -d' ' -f1 | rev`
 case "$JVMVERSION" in
+  *1\.6\.*) echo "You java version is too old"; exit 1;;
   *1\.7\.*) FLAG="$FLAG -XX:MaxPermSize=128M";;
 esac
+
+(nohup sh $LOCATION/dbserver/bin/openmole-dbserver >/dev/null &) 2>/dev/null
 
 ARGS=()
 while [[ $# -gt 0 ]]; do
