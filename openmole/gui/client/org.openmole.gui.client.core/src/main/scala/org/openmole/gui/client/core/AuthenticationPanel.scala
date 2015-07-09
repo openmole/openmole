@@ -36,7 +36,7 @@ import org.openmole.gui.ext.data._
 import bs._
 import rx._
 
-class AuthenticationPanel extends ModalPanel {
+class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
   val modalID = "authenticationsPanelID"
   val setting: Var[Option[PanelUI]] = Var(None)
   private val auths: Var[Option[Seq[AuthenticationData]]] = Var(None)
@@ -145,6 +145,16 @@ class AuthenticationPanel extends ModalPanel {
     }),
     bodyDialog(authenticationTable),
     footerDialog(
+      tags.div(
+        tags.div(`class` := "left")(
+          tags.a("Reset password", cursor := "pointer", onclick := { () ⇒
+            close
+            onresetpassword()
+          }
+          )),
+        tags.br,
+        tags.i(`class` := "left", "Caution: all your preferences will be erased!")
+      ),
       closeButton
     )
   )
@@ -160,6 +170,10 @@ class AuthenticationPanel extends ModalPanel {
       _.save(() ⇒ getAuthentications)
     }
     setting() = None
+  }
+
+  def close: Unit = {
+    jquery.jQuery("#" + modalID).modal("hide")
   }
 
   jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ {

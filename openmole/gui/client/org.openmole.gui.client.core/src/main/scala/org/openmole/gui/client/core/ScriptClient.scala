@@ -62,7 +62,21 @@ object ScriptClient {
       autofocus
     ).render
 
-    val authenticationPanel = new AuthenticationPanel
+    def cleanInputs = {
+      passwordInput.value = ""
+      passwordAgainInput.value = ""
+    }
+
+    def resetPassword = OMPost[Api].resetPassword().call().foreach { b ⇒
+      passwordChosen() = false
+      passwordOK() = false
+      cleanInputs
+    }
+
+    val authenticationPanel = new AuthenticationPanel(() ⇒ {
+      resetPassword
+    }
+    )
 
     def setPassword(s: String) = OMPost[Api].setPassword(s).call().foreach { b ⇒
       passwordOK() = b
@@ -80,17 +94,6 @@ object ScriptClient {
         setPassword(passwordInput.value)
       }
       else cleanInputs
-    }
-
-    def resetPassword = OMPost[Api].resetPassword().call().foreach { b ⇒
-      passwordChosen() = false
-      passwordOK() = false
-      cleanInputs
-    }
-
-    def cleanInputs = {
-      passwordInput.value = ""
-      passwordAgainInput.value = ""
     }
 
     def connectionForm(i: HTMLElement): HTMLFormElement =
@@ -129,16 +132,12 @@ object ScriptClient {
       val modalPanel = authenticationPanel
     }
 
-    val execItem = dialogNavItem("executions", "Executions", () ⇒ executionTriggerer.trigger)
+    val execItem = dialogNavItem("executions", "Executions", () ⇒ executionTriggerer.triggerOpen)
 
-    val authenticationItem = dialogNavItem("authentications", "Authentications", () ⇒ authenticationTriggerer.trigger)
+    val authenticationItem = dialogNavItem("authentications", "Authentications", () ⇒ authenticationTriggerer.triggerOpen)
 
     val fileItem = navItem("files", "Files", todo = () ⇒ {
       openFileTree() = !openFileTree()
-    })
-
-    val passItem = navItem("pass", "Pass", todo = () ⇒ {
-      resetPassword
     })
 
     maindiv.appendChild(
@@ -146,8 +145,7 @@ object ScriptClient {
         nav_pills + nav_inverse + nav_staticTop,
         fileItem,
         execItem,
-        authenticationItem,
-        passItem
+        authenticationItem
       )
     )
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)

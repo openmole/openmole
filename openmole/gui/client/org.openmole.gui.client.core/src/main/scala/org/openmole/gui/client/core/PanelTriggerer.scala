@@ -26,13 +26,12 @@ import org.scalajs.dom.html.Anchor
 trait PanelTriggerer {
   val modalPanel: ModalPanel
 
-  def trigger: Unit = modalPanel.onOpen()
+  def triggerOpen: Unit = modalPanel.onOpen()
 
   def open: Unit = {
-    trigger
+    triggerOpen
     jquery.jQuery("#" + modalPanel.modalID).modal("show")
   }
-
 }
 
 trait ModalPanel {

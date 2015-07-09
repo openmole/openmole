@@ -71,8 +71,8 @@ object GUIClient {
       val modalPanel = new ExecutionPanel
     }
 
-    val execItem = dialogNavItem("executions", "Executions", () ⇒ executionTriggerer.trigger)
-    val settingsItem = dialogNavItem("settings", "Settings", () ⇒ settingsTriggerer.trigger)
+    val execItem = dialogNavItem("executions", "Executions", () ⇒ executionTriggerer.triggerOpen)
+    val settingsItem = dialogNavItem("settings", "Settings", () ⇒ settingsTriggerer.triggerOpen)
 
     topdiv.appendChild(
       nav("mainNav",
