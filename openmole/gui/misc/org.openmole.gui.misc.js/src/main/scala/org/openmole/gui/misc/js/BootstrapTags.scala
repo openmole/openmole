@@ -58,7 +58,7 @@ object BootstrapTags {
   def span(keys: ClassKeyAggregator = emptyCK) = tags.span(`class` := keys.key)
 
   // Nav
-  class NavItem(val navid: String, content: String, ontrigger: () ⇒ Unit, val todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) {
+  class NavItem(val navid: String, contentDiv: TypedTag[HTMLElement], ontrigger: () ⇒ Unit, val todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) {
     val activeString = {
       if (active) "active" else ""
     }
@@ -67,7 +67,7 @@ object BootstrapTags {
       ontrigger()
       false
     }
-    )(content).render)(
+    )(contentDiv).render)(
       extraRenderPair: _*)
 
   }
@@ -76,7 +76,10 @@ object BootstrapTags {
     navItem(id, content, ontrigger, todo, Seq(data("toggle") := "modal", data("target") := "#" + id + "PanelID"))
 
   def navItem(id: String, content: String, ontrigger: () ⇒ Unit = () ⇒ {}, todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) =
-    new NavItem(id, content, ontrigger, todo, extraRenderPair, active)
+    new NavItem(id, tags.div(content), ontrigger, todo, extraRenderPair, active)
+
+  def dialogGlyphNavItem(id: String, glyphIcon: ClassKeyAggregator, ontrigger: () ⇒ Unit = () ⇒ {}, todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) =
+    new NavItem(id, glyph(glyphIcon), ontrigger, todo, Seq(data("toggle") := "modal", data("target") := "#" + id + "PanelID"))
 
   def nav(uuid: String, keys: ClassKeyAggregator, contents: NavItem*): TypedTag[HTMLElement] =
     ul(`class` := "nav " + keys.key, id := uuid, role := "tablist")(
@@ -129,8 +132,8 @@ object BootstrapTags {
     )
   )
 
-  def glyph(key: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
-    span("glyphicon " + key.key)(aria.hidden := "true")
+  def glyph(key: ClassKeyAggregator, onclickAction: () ⇒ Unit = () ⇒ {}): TypedTag[HTMLSpanElement] =
+    span("glyphicon " + key.key)(aria.hidden := "true", onclick := { () ⇒ onclickAction() })
 
   val glyph_edit = "glyphicon-pencil"
   val glyph_trash = "glyphicon-trash"

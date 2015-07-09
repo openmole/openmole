@@ -132,11 +132,11 @@ object ScriptClient {
       val modalPanel = authenticationPanel
     }
 
-    val execItem = dialogNavItem("executions", "Executions", () ⇒ executionTriggerer.triggerOpen)
+    val execItem = dialogGlyphNavItem("executions", glyph_settings, () ⇒ executionTriggerer.triggerOpen)
 
-    val authenticationItem = dialogNavItem("authentications", "Authentications", () ⇒ authenticationTriggerer.triggerOpen)
+    val authenticationItem = dialogGlyphNavItem("authentications", glyph_lock, () ⇒ authenticationTriggerer.triggerOpen)
 
-    val fileItem = navItem("files", "Files", todo = () ⇒ {
+    val fileItem = dialogGlyphNavItem("files", glyph_file, todo = () ⇒ {
       openFileTree() = !openFileTree()
     })
 
