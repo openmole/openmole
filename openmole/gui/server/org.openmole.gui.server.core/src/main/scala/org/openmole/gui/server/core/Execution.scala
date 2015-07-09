@@ -24,17 +24,19 @@ import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.ext.data._
 import org.openmole.tool.stream.StringPrintStream
 
+import scala.concurrent.stm._
+
 case class DynamicExecutionInfo(moleExecution: MoleExecution,
                                 outputStream: StringPrintStream)
 
 class Execution {
 
-  private lazy val moles = DataHandler[ExecutionId, Either[(StaticExecutionInfo, DynamicExecutionInfo), Failed]]()
+  private lazy val moles = TMap[ExecutionId, Either[(StaticExecutionInfo, DynamicExecutionInfo), Failed]]()
 
   def add(key: ExecutionId, staticInfo: StaticExecutionInfo, dynamicExecutionInfo: DynamicExecutionInfo) =
-    moles.add(key, Left((staticInfo, dynamicExecutionInfo)))
+    moles.single.put(key, Left((staticInfo, dynamicExecutionInfo)))
 
-  def add(key: ExecutionId, error: Failed) = moles.add(key, Right(error))
+  def add(key: ExecutionId, error: Failed) = moles.single.put(key, Right(error))
 
   def cancel(key: ExecutionId) = {
     get(key) match {
@@ -47,7 +49,7 @@ class Execution {
 
   def remove(key: ExecutionId) = {
     cancel(key)
-    moles.remove(key)
+    moles.single.remove(key)
   }
 
   def staticInfo(key: ExecutionId): StaticExecutionInfo = get(key) match {
@@ -98,14 +100,17 @@ class Execution {
     case _                      ⇒ Failed(Error("Not found execution " + key))
   }
 
-  def allStates: Seq[(ExecutionId, ExecutionInfo)] =
-    moles.getKeys.toSeq.map { key ⇒
+  def allStates: Seq[(ExecutionId, ExecutionInfo)] = atomic { implicit ctx ⇒
+    moles.keys.toSeq.map { key ⇒
       key -> executionInfo(key)
     }
-
-  def allStaticInfos: Seq[(ExecutionId, StaticExecutionInfo)] = moles.getKeys.toSeq.map { key ⇒
-    key -> staticInfo(key)
   }
 
-  private def get(key: ExecutionId) = moles.get(key)
+  def allStaticInfos: Seq[(ExecutionId, StaticExecutionInfo)] = atomic { implicit ctx ⇒
+    moles.keys.toSeq.map { key ⇒
+      key -> staticInfo(key)
+    }
+  }
+
+  private def get(key: ExecutionId) = moles.single.get(key)
 }
