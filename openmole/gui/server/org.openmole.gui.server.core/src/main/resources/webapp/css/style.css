@@ -74,7 +74,7 @@ select::-moz-focus-inner {
 }
 
 #settingsPanelID,#executionsPanelID .modal-dialog {
-    width: 60%;
+    width: 70%;
 }
 
 .table tbody>tr>td.vert-align{

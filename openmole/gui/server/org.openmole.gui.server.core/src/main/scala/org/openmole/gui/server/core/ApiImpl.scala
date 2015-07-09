@@ -136,7 +136,6 @@ object ApiImpl extends Api {
             puzzle.environments.values.foreach { env ⇒
               val envId = EnvironmentId(getUUID)
               Runnings.add(execId, puzzle.environments.values.map { env ⇒ (envId, env) }.toSeq, outputStream)
-              // Runnings.addEnvironment(execId, envId)
               env.listen {
                 case (env, ex: ExceptionRaised) ⇒ Runnings.append(execId, envId, env, ex)
               }

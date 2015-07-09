@@ -121,7 +121,7 @@ class ExecutionPanel extends ModalPanel {
             val staticInfo = staticExecutionInfos().filter {
               _._1 == id
             }.headOption.getOrElse((id, StaticExecutionInfo()))._2
-            val startDate = new Date(staticInfo.startDate).toLocaleDateString
+            val startDate = s"${new Date(staticInfo.startDate).toLocaleDateString} : ${new Date(staticInfo.startDate).toLocaleTimeString}"
 
             val duration: Duration = (executionInfo.duration milliseconds)
             val h = (duration).toHours
@@ -182,7 +182,9 @@ class ExecutionPanel extends ModalPanel {
               }.getOrElse("")))),
               outputStreamID -> {
 
-                val outputs = outputsInfos().filter { _.id == id }.map {
+                val outputs = outputsInfos().filter {
+                  _.id == id
+                }.map {
                   _.output
                 }.mkString("\n")
 
@@ -222,7 +224,7 @@ class ExecutionPanel extends ModalPanel {
 
             Seq(bs.tr(row)(
               bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink),
-              bs.td(col_md_1)(startDate),
+              bs.td(col_md_3 + "small")(startDate),
               bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + details.running),
               bs.td(col_md_1)(bs.glyph(bs.glyph_flag), " " + completed),
               bs.td(col_md_1)(details.ratio + "%"),
