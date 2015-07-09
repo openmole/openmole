@@ -63,6 +63,7 @@ package object tar {
           val dest = Paths.get(directory.toString, e.getName)
           if (e.isDirectory) {
             Files.createDirectories(dest)
+            dest.toFile.mode = e.getMode
           }
           else {
             Files.createDirectories(dest.getParent)
@@ -70,10 +71,11 @@ package object tar {
             // has the entry been marked as a symlink in the archive?
             if (!e.getLinkName.isEmpty) Files.createSymbolicLink(dest, Paths.get(e.getLinkName))
             // file copy from an InputStream does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
-            else Files.copy(tis, dest)
+            else {
+              Files.copy(tis, dest)
+              dest.toFile.mode = e.getMode
+            }
           }
-          // must set permissions explicitly from archive
-          dest.toFile.mode = e.getMode
       }
     }
   }
@@ -123,10 +125,12 @@ package object tar {
     while (!toArchive.isEmpty) {
 
       val (source, entryName) = toArchive.pop
+      val isSymbolicLink = Files.isSymbolicLink(source)
+      val isDirectory = Files.isDirectory(source)
 
       // tar structure distinguishes symlinks
       val e =
-        if (Files.isDirectory(source) && !Files.isSymbolicLink(source)) {
+        if (isDirectory && !isSymbolicLink) {
           // walk the directory tree to add all its entries to stack
           for (f ← Files.newDirectoryStream(source)) {
             val newSource = source.resolve(f.getFileName)
@@ -137,7 +141,7 @@ package object tar {
           new TarEntry(entryName + '/')
         }
         // tar distinguishes symlinks
-        else if (Files.isSymbolicLink(source)) {
+        else if (isSymbolicLink) {
           val e = new TarEntry(entryName, TarConstants.LF_SYMLINK)
           e.setLinkName(Files.readSymbolicLink(source).toString)
           e
@@ -151,7 +155,7 @@ package object tar {
 
       // complete current entry by fixing its modes and writing it to the archive
       if (source != directory) {
-        e.setMode(source.mode)
+        if (!isSymbolicLink) e.setMode(source.mode)
         additionalCommand(e)
         tos.putNextEntry(e)
         if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) try Files.copy(source, tos)
