@@ -3,6 +3,7 @@
 @import Objects._
 @import org.openmole.site.DocumentationPages._
 @import org.openmole.site.Objects._
+@import org.openmole.core.buildinfo._
 
 
 @def tasks = """
@@ -31,7 +32,7 @@ $tasks
 
 @sect{Launch}
 
-  The version @version - @b{@name} - of OpenMOLE is available @a("here", href := openmole.file). It was released on @generationDate.
+  @a(b(s"Download the version $version of OpenMOLE - $name, released on $generationDate"), href := openmole.file).
 
   @p OpenMOLE requires that Java version 7 or above is installed and available on your computer. Then just extract the archive, and you're done! OpenMOLE is installed and works out of the box!
 

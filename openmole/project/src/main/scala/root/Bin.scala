@@ -277,22 +277,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
         resourcesAssemble <+= (Tar.tar in daemon, resourceManaged in Compile) map { case (f, d) ⇒ f -> d },
         resourcesAssemble <+= (Tar.tar in api, resourceManaged in Compile) map { case (doc, d) ⇒ doc -> d },
         dependencyFilter := { _ ⇒ false }
-      ) settings (
-          buildInfoSettings ++
-            Seq(
-              sourceGenerators in Compile <+= buildInfo,
-              buildInfoKeys :=
-                Seq[BuildInfoKey](
-                  name,
-                  version,
-                  scalaVersion,
-                  sbtVersion,
-                  BuildInfoKey.action("buildTime") {
-                    System.currentTimeMillis
-                  }),
-              buildInfoPackage := "org.openmole.site.buildinfo"
-            ): _*
-        ) dependsOn (Runtime.console, ThirdParties.toolxitBibtex)
+      ) dependsOn (Runtime.console, ThirdParties.toolxitBibtex, Core.buildinfo)
 
   lazy val site =
     Project("site", dir / "site", settings = assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (

@@ -82,6 +82,9 @@ object Console {
 
 import Console._
 
+object ConsoleVariables {
+  def empty = ConsoleVariables()()
+}
 case class ConsoleVariables(
   args: Seq[String] = Seq.empty,
   workDirectory: File = currentDirectory)(

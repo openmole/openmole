@@ -43,13 +43,4 @@ object Objects {
     def toRow(p: Parameter) = li(p.name + ": " + p.`type` + ": " + p.description)
     ul(p.map(toRow))
   }
-
-  def name = "Killer King"
-  def version = buildinfo.BuildInfo.version
-  def generationDate = {
-    val d = Calendar.getInstance()
-    d.setTimeInMillis(buildinfo.BuildInfo.buildTime)
-    val format = DateFormat.getDateInstance(DateFormat.LONG, new Locale("EN", "en"))
-    format.format(d.getTime)
-  }
 }

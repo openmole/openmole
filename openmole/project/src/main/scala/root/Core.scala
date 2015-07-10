@@ -6,6 +6,7 @@ import root.Libraries._
 import root.ThirdParties._
 import sbt.Keys._
 import sbt._
+import sbtbuildinfo.Plugin._
 
 object Core extends Defaults {
   override def dir = file("core")
@@ -68,6 +69,23 @@ object Core extends Defaults {
 
   val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), dynamicImports = Seq("*"), imports = Seq("*")) dependsOn
     (pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
+
+  val buildinfo = OsgiProject("buildinfo", imports = Seq("*")) settings (
+    buildInfoSettings ++
+      Seq(
+        sourceGenerators in Compile <+= buildInfo,
+        buildInfoKeys :=
+          Seq[BuildInfoKey](
+            name,
+            version,
+            scalaVersion,
+            sbtVersion,
+            BuildInfoKey.action("buildTime") {
+              System.currentTimeMillis
+            }),
+        buildInfoPackage := s"${artifactPrefix.get}.buildinfo"
+      ): _*
+  )
 
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core", "runtime"), OSGi.openMOLEScope := Some("provided"))
 }
