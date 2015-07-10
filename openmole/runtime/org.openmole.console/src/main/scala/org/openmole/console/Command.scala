@@ -37,6 +37,7 @@ import scala.collection.mutable.HashMap
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.dsl._
 import Console._
+import org.openmole.core.buildinfo
 
 class Command {
 
@@ -71,6 +72,10 @@ class Command {
   def verify(mole: Mole): Unit = Validation(mole).foreach(println)
 
   def encrypted: String = encrypt(askPassword())
+
+  def version =
+    println(s"""You are running OpenMOLE ${buildinfo.version} - ${buildinfo.name}
+       |built on the ${buildinfo.generationDate}.""".stripMargin)
 
 }
 
