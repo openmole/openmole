@@ -25,7 +25,7 @@
     Our first example R script contained in a file @i{myscript.R}. We want to distribute the execution of this R code
     to the grid.
 
-    @p First your script should run headlessly with no user input required during the initialisation. Your script
+    @p First your script should run in headless mode with no input required from the user during the execution. Your script
     should produce files or write its results to the standard output so that OpenMOLE can bring them back from the
     remote execution environment.
 
@@ -33,9 +33,7 @@
     @br @hl.highlight("""
       print(commandArgs(trailingOnly = TRUE))
       data<-read.csv("data.csv",header=T,sep=",")
-      trans<-subset(datab,trials=="Trans")
-      sumTransD<-tapply(trans$bet,list(trans$time,trans$naive2),sum)
-      write.csv(sumTransD,"results.csv")""", "R")
+      write.csv(data,"results.csv")""", "R")
 
     @p This script starts by displaying its command line arguments. Then it reads a file called @i{data.csv} and
     produces an output file called @i{results.csv}. To call this script from the command line you should type:
