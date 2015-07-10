@@ -48,7 +48,7 @@ trait Environment <: Name {
   private[execution] val _done = Ref(0L)
   private[execution] val _failed = Ref(0L)
 
-  private def _errors = Ref(List[ExceptionEvent]())
+  private lazy val _errors = Ref(List[ExceptionEvent]())
 
   def error(e: ExceptionEvent) = atomic { implicit ctx ⇒
     val max = Workspace.preferenceAsInt(maxExceptionsLog)
