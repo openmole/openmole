@@ -17,8 +17,6 @@
 
 package org.openmole.core.batch.refresh
 
-import akka.actor.Actor
-import akka.actor.ActorRef
 import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.batch.environment.BatchEnvironment._

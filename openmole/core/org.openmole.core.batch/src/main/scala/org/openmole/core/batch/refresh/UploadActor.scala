@@ -17,9 +17,6 @@
 
 package org.openmole.core.batch.refresh
 
-import akka.actor.Actor
-
-import akka.actor.ActorRef
 import java.io.File
 import java.util.UUID
 import org.openmole.core.batch.message._

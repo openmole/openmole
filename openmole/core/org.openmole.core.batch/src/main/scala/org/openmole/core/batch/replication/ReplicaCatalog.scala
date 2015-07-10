@@ -17,7 +17,6 @@
 
 package org.openmole.core.batch.replication
 
-import akka.dispatch.sysmsg.Failed
 import com.google.common.cache.CacheBuilder
 import java.io.File
 import org.h2.jdbc.JdbcSQLException

@@ -17,8 +17,6 @@
 
 package org.openmole.core.batch.refresh
 
-import akka.actor.Actor
-import akka.actor.ActorRef
 import java.io.{ PrintStream, FileInputStream, IOException }
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
