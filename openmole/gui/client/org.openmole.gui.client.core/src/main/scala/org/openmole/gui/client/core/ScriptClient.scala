@@ -148,6 +148,7 @@ object ScriptClient {
         authenticationItem
       )
     )
+    maindiv.appendChild(tags.div(`class` := "openMOLETitle", "OpenMOLE - 5.0").render)
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
 

@@ -520,7 +520,21 @@ overflow-y : auto;
     cursor: pointer;
  }
 
-
  .inputFileStyle input[type="file"] {
     display: none;
+}
+
+.openMOLETitle{
+	color: white;
+    position: absolute;
+    top: 5px;
+    right: 0;
+    margin-right: 20px;
+    font-size: 18px;
+    font-style: size;
+}
+
+.nav-pills>li>a{
+	font-size: 20px;
+	margin-top: -3px;
 }
