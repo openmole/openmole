@@ -20,7 +20,7 @@ package org.openmole.site
 import javax.script.ScriptEngineManager
 
 import org.openmole.core.console.ScalaREPL
-import org.openmole.console.Console
+import org.openmole.console.{ ConsoleVariables, Console }
 import org.openmole.core.tools.service.ObjectPool
 
 import scala.collection.mutable.ListBuffer
@@ -40,7 +40,7 @@ $code
 
   lazy val console = new Console()
 
-  def engine = console.newREPL()
+  def engine = console.newREPL(ConsoleVariables.empty)
 
   def test(code: String, header: String) = toTest.synchronized {
     toTest += Test(code, header, toTest.size)

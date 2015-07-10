@@ -82,10 +82,14 @@ object Console {
 
 import Console._
 
+object ConsoleVariables {
+  def empty = ConsoleVariables()()
+}
 case class ConsoleVariables(
   args: Seq[String] = Seq.empty,
-  inputDirectory: File = currentDirectory,
-  outputDirectory: File = currentDirectory)
+  workDirectory: File = currentDirectory)(
+    val inputDirectory: File = workDirectory,
+    val outputDirectory: File = workDirectory)
 
 class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = None, script: List[String] = Nil) { console ⇒
 
@@ -146,7 +150,8 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
 
   }
 
-  def initialise(loop: ScalaREPL, variables: ConsoleVariables = ConsoleVariables()) = {
+  def initialise(loop: ScalaREPL, variables: ConsoleVariables) = {
+    variables.workDirectory.mkdirs()
     variables.outputDirectory.mkdirs()
     loop.beQuietDuring {
       loop.bind(commandsName, new Command)
@@ -158,7 +163,7 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
     loop
   }
 
-  def newREPL(args: ConsoleVariables = ConsoleVariables()) = {
+  def newREPL(args: ConsoleVariables) = {
     val loop = new ScalaREPL()
     initialise(loop, args)
   }

@@ -26,7 +26,8 @@ object Runtime extends Defaults(runtime.REST) {
       Core.workflow,
       Core.console,
       Core.dsl,
-      Core.batch
+      Core.batch,
+      Core.buildinfo
     )
 
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set())

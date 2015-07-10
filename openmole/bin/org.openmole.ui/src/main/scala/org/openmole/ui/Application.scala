@@ -177,7 +177,7 @@ class Application extends IApplication {
           print(consoleSplash)
           println(consoleUsage)
           val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
-          Some(console.run(ConsoleVariables(args = config.args)))
+          Some(console.run(ConsoleVariables(args = config.args)()))
         case GUIMode ⇒
           def browse(url: String) =
             if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))

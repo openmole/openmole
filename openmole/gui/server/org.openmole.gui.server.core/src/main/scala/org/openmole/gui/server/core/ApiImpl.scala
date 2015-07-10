@@ -116,10 +116,8 @@ object ApiImpl extends Api {
     val id = getUUID
     val projectsPath = Utils.workspaceProjectFile
     val console = new Console
-    val repl = console.newREPL(ConsoleVariables(
-      inputDirectory = new File(projectsPath, scriptData.inputDirectory),
-      outputDirectory = new File(projectsPath, scriptData.outputDirectory)
-    ))
+    // FIXME set workdirectory
+    val repl = console.newREPL(ConsoleVariables()())
 
     val execId = ExecutionId(id)
 
