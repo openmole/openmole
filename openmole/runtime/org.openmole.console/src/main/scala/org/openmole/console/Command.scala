@@ -18,7 +18,7 @@
 package org.openmole.console
 
 import jline.console.ConsoleReader
-import java.io.File
+import java.io.{ PrintWriter, StringWriter, File }
 import java.util.concurrent.atomic.{ AtomicLong, AtomicInteger }
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchEnvironment
@@ -67,6 +67,14 @@ class Command {
         case State.CANCELED  ⇒
         case _               ⇒ System.out.println(state.toString + ": " + toDisplay(state.id))
       }
+    moleExecution.exception match {
+      case Some(e) ⇒
+        System.out.println(s"Mole execution failed while execution ${e.capsule}: ${e.exception.getMessage}")
+        val sw = new StringWriter()
+        e.exception.printStackTrace(new PrintWriter(sw))
+        System.out.println(sw.toString)
+      case None ⇒
+    }
   }
 
   def verify(mole: Mole): Unit = Validation(mole).foreach(println)

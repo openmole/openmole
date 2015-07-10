@@ -76,8 +76,6 @@ sealed abstract class MoleTask(
     execution.start(context)
     execution.waitUntilEnded
 
-    execution.exception.foreach(throw _)
-
     context + lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
   }
 

@@ -22,6 +22,7 @@ import java.util.logging.Level
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.{ UserBadDataError, MultipleException }
 import org.openmole.core.tools.service.{ Logger, Priority, Random }
+import org.openmole.core.workflow.mole.MoleExecution.{ JobFailed, ExceptionRaised }
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.job.State._
@@ -100,7 +101,7 @@ class MoleExecution(
 
   val dataChannelRegistry = new RegistryWithTicket[DataChannel, Buffer[Variable[_]]]
 
-  val _exception = Ref(Option.empty[Throwable])
+  val _exception = Ref(Option.empty[JobFailed])
 
   def numberOfJobs = rootSubMoleExecution.numberOfJobs
 
@@ -177,7 +178,7 @@ class MoleExecution(
     this
   }
 
-  def cancel(t: Throwable): this.type = {
+  def cancel(t: JobFailed): this.type = {
     _exception.single() = Some(t)
     cancel
   }
@@ -198,7 +199,7 @@ class MoleExecution(
     if (!started) throw new UserBadDataError("Execution is not started")
     atomic { implicit txn ⇒
       if (!_finished()) retry
-      _exception().foreach { throw _ }
+      _exception().foreach { e ⇒ throw e.exception }
     }
     this
   }
