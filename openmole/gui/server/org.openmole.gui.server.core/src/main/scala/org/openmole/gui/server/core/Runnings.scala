@@ -55,19 +55,20 @@ object Runnings {
     runningEnvironments(ids(id))
   }
 
-  def runningEnvironments(envIds: Seq[EnvironmentId]): Seq[(EnvironmentId, RunningEnvironment)] =
-    atomic { implicit ctx ⇒
-      envIds.map { id ⇒
-        instance.runningEnvironments.getOrElse(id, Seq())
-        id -> instance.runningEnvironments(id)
-      }
+  def runningEnvironments(envIds: Seq[EnvironmentId]): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
+    envIds.map { id ⇒
+      instance.runningEnvironments.getOrElse(id, Seq())
+      id -> instance.runningEnvironments(id)
     }
+  }
 
   def outputsDatas(id: ExecutionId) = atomic { implicit ctx ⇒
     RunningOutputData(id, instance.outputs(id).toString)
   }
 
-  def ids = instance.ids
+  def ids = atomic { implicit ctx ⇒
+    instance.ids
+  }
 
   def remove(id: ExecutionId) = atomic { implicit ctx ⇒
     ids.remove(id).foreach {

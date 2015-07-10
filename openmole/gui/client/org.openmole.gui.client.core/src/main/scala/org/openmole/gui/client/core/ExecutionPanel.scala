@@ -83,6 +83,7 @@ class ExecutionPanel extends ModalPanel {
 
   def onOpen = () ⇒ {
     allExecutionStates
+    allEnvStatesAndOutputs
     intervalHandler() = Some(setInterval(1000) {
       allExecutionStates
       if (atLeastOneRunning) onClose()
