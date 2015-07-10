@@ -23,11 +23,11 @@ class SynchronizedBuilder {
   lazy val builder = new StringBuilder
   def append(c: Char) = builder.synchronized { builder.append(c) }
   def read: String = builder.synchronized {
-    val content = builder.toString()
+    val content = builder.mkString
     builder.clear()
     content
   }
-  override def toString = builder.toString()
+  override def toString = builder.mkString
 }
 
 class StringOutputStream extends OutputStream {
