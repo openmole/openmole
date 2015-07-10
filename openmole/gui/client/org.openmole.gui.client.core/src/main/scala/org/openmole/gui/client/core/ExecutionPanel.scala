@@ -96,6 +96,7 @@ class ExecutionPanel extends ModalPanel {
   }
 
   def onClose = () ⇒ {
+    allEnvStatesAndOutputs
     intervalHandler().map {
       clearInterval
     }
