@@ -1,5 +1,0 @@
-
-@import org.openmole.site.Objects._
-
-@sect{GUI}
-  This section will contain the documentation on the new Graphical User Interface (GUI) of OpenMOLE once it's been released.

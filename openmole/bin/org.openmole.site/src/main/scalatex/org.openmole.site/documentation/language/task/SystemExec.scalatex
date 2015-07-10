@@ -97,8 +97,8 @@
   @hl.openmole("SystemExecTask") builder.
 
   @p Several notions from OpenMOLE are reused in this example. If you're not too familiar with
-  @a("Hooks", href := DocumentationPages.root.console.hook.file) or
-  @a("Samplings", href := DocumentationPages.root.console.sampling.file), check the relevant sections of the
+  @a("Hooks", href := DocumentationPages.root.language.hook.file) or
+  @a("Samplings", href := DocumentationPages.root.language.sampling.file), check the relevant sections of the
   documentation.
 
   @sect{Another example with a Python script}
@@ -144,7 +144,7 @@
     val ex = exploration -< (pythonTask hook copy on env by 2) start""")
 
    @p Again notions from OpenMOLE are reused in this example. If you're not too familiar with
-@a("Environments", href := DocumentationPages.root.console.environment.file) or @i{Groupings}, check the relevant
+@a("Environments", href := DocumentationPages.root.language.environment.file) or @i{Groupings}, check the relevant
   sections of the documentation.
 
   @sect{Advanced features}

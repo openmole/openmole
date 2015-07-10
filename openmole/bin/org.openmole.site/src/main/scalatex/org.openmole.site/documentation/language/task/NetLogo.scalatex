@@ -97,7 +97,7 @@
     OpenMOLE usually delegates the tasks execution to many different computers. To gather the results of these remote
     executions, we use a mechanism called @i{hooks}. Hooks can be assimilated to a listener that saves or display
     results. They are more thoroughly described in a
-    @a("specific section of the documentation", href := DocumentationPages.root.console.hook.file).
+    @a("specific section of the documentation", href := DocumentationPages.root.language.hook.file).
 
     @p Here we will create a hook to listen to the model executions and save the results in a CSV file at the end of
     each of the 70 runs.

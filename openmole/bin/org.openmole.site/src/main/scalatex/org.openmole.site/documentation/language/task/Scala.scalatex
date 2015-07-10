@@ -4,7 +4,7 @@
 @sect{Simple Scala task}
   You can program your data processing tasks using the @hl.openmole("ScalaTask"). For instance the following
   workflow sums all the elements of an array using a @hl.openmole("ScalaTask") and displays the results. To get more
-  details on the hook part you can check the doc on @a("hooks", href := DocumentationPages.root.console.hook.file).
+  details on the hook part you can check the doc on @a("hooks", href := DocumentationPages.root.language.hook.file).
 
   @br @hl.openmole("""
     val array = Val[Array[Double]]
@@ -43,7 +43,7 @@
     val ex = exploration -< expensive >- (sum hook ToStringHook()) start""")
 
   @p The execution of this workflow can be distributed using OpenMOLE's environments. Check the page dedicated to
-  @a("environments", href := DocumentationPages.root.console.environment.file) to learn more on this process.
+  @a("environments", href := DocumentationPages.root.language.environment.file) to learn more on this process.
 
 @sect{Execute your Java code into OpenMOLE}
 

@@ -62,7 +62,7 @@
   This example presents step by step how to explore a NetLogo model with an Evolutionary/Genetic Algorithm (EA/GA) in
   OpenMOLE.
   @br For more generic details regarding the exploitation of Genetic Algorithms using OpenMOLE, you can check the
-  @a("GA section of the methods documentation", href := root.console.method.file + "#Geneticalgorithms").
+  @a("GA section of the methods documentation", href := root.language.method.file + "#Geneticalgorithms").
 
   @sect{The ant model}
     We demonstrate this tutorial using the ants foraging model present in the Netlogo library. This model was created by
@@ -124,7 +124,7 @@
     When building a calibration or optimisation workflow, the first step is to make the model run in
     OpenMOLE. This script simply embeds the NetLogo model and runs one single execution of the model with arbitrary
     parameters. More details about the NetLogo5 task used in this script can be found in
-    @a("this section of the documentation", href := DocumentationPages.root.console.task.netLogo.file).
+    @a("this section of the documentation", href := DocumentationPages.root.language.task.netLogo.file).
 
     @hl.openmole(s"""
     $model

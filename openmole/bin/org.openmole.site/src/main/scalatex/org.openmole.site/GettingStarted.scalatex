@@ -36,27 +36,21 @@ $tasks
 
   @p OpenMOLE requires that Java version 7 or above is installed and available on your computer. Then just extract the archive, and you're done! OpenMOLE is installed and works out of the box!
 
-  @p Once installed you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up the OpenMOLE graphical interface that runs in your navigator (OpenMOLE supports Firefox and Chrome). Instructions to launch the pure console interface (basically @i{openmole -c}) are available in the @a("console documentation", href := DocumentationPages.root.console.file) section.
+  @p Once installed you can launch OpenMOLE by executing the @i{openmole} file in the installation directory (it is called @i{openmole.bat} for windozers). It will bring up the OpenMOLE @a("application", href := root.application.file) that runs in your web browser (OpenMOLE supports Firefox and Chrome).
 
 @sect{First workflow}
   Let's design a workflow that explores one variable multiplies it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
 
-  @p In the graphical interface, first create a file named @i{example.oms} (the file extension is important). Open it and write the following workflow:
+  @p In the OpenMOLE interface, first create a file named @i{example.oms} (the file extension is important). Open it and write the following workflow:
 
   @br @hl.openmole(s"""
   $localScript
   // Define the workflow
   exploration -< (model on env hook ToStringHook())""")
 
-  @p You can run it by clicking on the execution button. If you want to use the console mode of OpenMOLE you should use this last line in order to start the workflow:
+  @p You can run it by clicking on the execution button.
 
-    @br @hl.openmole(s"""
-  // Define and start the workflow
-  val wf = exploration -< (model on env hook ToStringHook()) start""", header = localScript)
-
-
-
-  @p To distribute the exact same execution to a remote cluster just switch the environment definition. The only configuration step required for this to work is to have an account on the cluster and to provide your authentication to OpenMOLE. Configuring authentications is explained in the GUI documenation LINK and in the console documentation in the section dedicated to each @a("environment", href := root.console.environment.file).
+  @p To distribute the exact same execution to a remote cluster just switch the environment definition. The only configuration step required for this to work is to have an account on the cluster and to provide your authentication to OpenMOLE. Configuring authentications is explained in the GUI documenation LINK and in the console documentation in the section dedicated to each @a("environment", href := root.language.environment.file).
 
   @br @hl.openmole(s"""
   val env = SLURMEnvironment("myLogin", "cluster.iscpif.fr")
@@ -66,6 +60,6 @@ $tasks
 
   @p This is just a tiny bit of what OpenMOLE can achieve! Now you might want to discover how to:
   @ul
-    @li{include your program in the @a("task documentation", href := root.console.task.file),}
-    @li{define your environment in the @a("environment documentation", href := root.console.environment.file),}
-    @li{describe your design of experiments in the @a("sampling documentation", href := root.console.sampling.file).}
+    @li{include your program in the @a("task documentation", href := root.language.task.file),}
+    @li{define your environment in the @a("environment documentation", href := root.language.environment.file),}
+    @li{describe your design of experiments in the @a("sampling documentation", href := root.language.sampling.file).}
