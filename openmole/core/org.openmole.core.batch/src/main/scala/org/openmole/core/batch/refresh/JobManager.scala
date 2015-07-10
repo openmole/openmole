@@ -129,11 +129,11 @@ class JobManager { self ⇒
         case _                              ⇒ FINE
       }
       EventDispatcher.trigger(job.environment: Environment, new Environment.ExceptionRaised(job, exception, level))
-      logger.log(level, "Error in job refresh", exception)
+      logger.log(FINE, "Error in job refresh", exception)
 
     case MoleJobError(mj, j, e) ⇒
       EventDispatcher.trigger(j.environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
-      logger.log(WARNING, "Error during job execution, it will be resubmitted.", e)
+      logger.log(FINE, "Error during job execution, it will be resubmitted.", e)
 
   }
 

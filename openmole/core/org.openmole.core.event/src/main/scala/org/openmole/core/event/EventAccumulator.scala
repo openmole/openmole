@@ -20,8 +20,8 @@ import scala.concurrent.stm._
 
 object EventAccumulator {
 
-  def apply[T, E](t: T*)(f: PartialFunction[(T, Event[T]), E]) = {
-    val accumulator = new EventAccumulator[E]()
+  def apply[T, E](t: Seq[T], max: Option[Int] = None)(f: PartialFunction[(T, Event[T]), E]) = {
+    val accumulator = new EventAccumulator[E](max)
     val listener = f andThen accumulator.accumulate
     t.foreach(_ listen listener)
     accumulator
@@ -29,19 +29,24 @@ object EventAccumulator {
 
 }
 
-class EventAccumulator[E] {
+class EventAccumulator[E](val maxEvents: Option[Int] = None) {
 
-  def events = _events.single
-  def clear = atomic { implicit ctx ⇒
+  def events = _events.single().reverse
+  def read = atomic { implicit ctx ⇒
     val res = _events()
     _events() = Nil
+    _number() = 0
     res
   }
 
   private lazy val _events = Ref(List[E]())
+  private lazy val _number = Ref(0)
 
   def accumulate(e: E) = atomic { implicit ctx ⇒
     _events() = e :: _events()
+    maxEvents.foreach {
+      max ⇒ if (_number() > max) _events() = _events().take(max)
+    }
   }
 
 }

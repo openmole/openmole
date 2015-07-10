@@ -31,8 +31,7 @@ case class EnvironmentException(environment: Environment, error: Error)
 
 case class Execution(
   workDirectory: WorkDirectory,
-  moleExecution: MoleExecution,
-  environmentErrors: EventAccumulator[EnvironmentException])
+  moleExecution: MoleExecution)
 
 case class WorkDirectory(baseDirectory: File) {
 
@@ -123,15 +122,10 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
         }
 
         def start(ex: MoleExecution) = {
-
-          val accumulator =
-            EventAccumulator(ex.environments.values.toSeq: _*) {
-              case (env, ev: ExceptionRaised) ⇒ EnvironmentException(env, Error(ev.exception).copy(level = Some(ev.level.getName)))
-            }
           Try(ex.start) match {
             case Failure(e) ⇒ error(e)
             case Success(ex) ⇒
-              moles.add(id, Execution(directory, ex, accumulator))
+              moles.add(id, Execution(directory, ex))
               Ok(id.toJson)
           }
         }
@@ -189,7 +183,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
           def environments = moleExecution.environments.values.toSeq
           def environmentStatus = environments.map {
             env ⇒
-              def environmentErrors = ex.environmentErrors.clear.filter(_.environment == env).map(_.error)
+              def environmentErrors = env.errorAccumulator.read.map(e ⇒ Error(e.exception).copy(level = Some(e.level.toString)))
               EnvironmentStatus(name = env.name, submitted = env.submitted, running = env.running, done = env.done, failed = env.failed, environmentErrors)
           }
           Running(moleExecution.ready, moleExecution.running, moleExecution.completed, environmentStatus)
