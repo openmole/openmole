@@ -92,13 +92,11 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
           }
           catch {
             case e: InterruptedException ⇒
-              if (!stop) {
-                logger.log(WARNING, "Interrupted despite stop is false", e)
-                EventDispatcher.trigger(environment: Environment, ExceptionRaised(executionJob, e, SEVERE))
-              }
             case e: Throwable ⇒
+              val er = ExceptionRaised(executionJob, e, SEVERE)
+              environment.error(er)
               logger.log(SEVERE, "Error in execution", e)
-              EventDispatcher.trigger(environment: Environment, ExceptionRaised(executionJob, e, SEVERE))
+              EventDispatcher.trigger(environment: Environment, er)
           }
           finally executionJob.state = ExecutionState.KILLED
         case None ⇒ stop = true

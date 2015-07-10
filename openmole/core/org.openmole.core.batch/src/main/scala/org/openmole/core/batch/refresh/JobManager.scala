@@ -128,11 +128,15 @@ class JobManager { self ⇒
         case e: JobRemoteExecutionException ⇒ WARNING
         case _                              ⇒ FINE
       }
-      EventDispatcher.trigger(job.environment: Environment, new Environment.ExceptionRaised(job, exception, level))
+      val er = Environment.ExceptionRaised(job, exception, level)
+      job.environment.error(er)
+      EventDispatcher.trigger(job.environment: Environment, er)
       logger.log(FINE, "Error in job refresh", exception)
 
     case MoleJobError(mj, j, e) ⇒
-      EventDispatcher.trigger(j.environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
+      val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
+      j.environment.error(er)
+      EventDispatcher.trigger(j.environment: Environment, er)
       logger.log(FINE, "Error during job execution, it will be resubmitted.", e)
 
   }

@@ -57,7 +57,7 @@ class Command {
     def low = errors.count(_.level.intValue() <= Level.INFO.intValue())
     def warning = errors.count(_.level.intValue() == Level.WARNING.intValue())
     def severe = errors.count(_.level.intValue() == Level.SEVERE.intValue())
-    println(s"$severe critical errors, $warning warning and $low low level error. Use the errors() function to display them.")
+    println(s"$severe critical errors, $warning warning and $low low-importance error. Use the errors() function to display them.")
   }
 
   def print(mole: Mole): Unit = {
@@ -94,7 +94,7 @@ class Command {
   implicit def stringToLevel(s: String) = Level.parse(s.toUpperCase)
 
   def errors(environment: Environment, level: Level = Level.INFO) = {
-    def filtered = environment.errorAccumulator.read.filter {
+    def filtered = environment.readErrors.filter {
       e ⇒ e.level.intValue() >= level.intValue()
     }
 

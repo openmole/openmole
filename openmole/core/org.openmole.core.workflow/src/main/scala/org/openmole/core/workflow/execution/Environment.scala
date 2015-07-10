@@ -35,15 +35,10 @@ object Environment {
   case class JobSubmitted(job: ExecutionJob) extends Event[Environment]
   case class JobStateChanged(job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
   case class ExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
-  case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: MoleJob) extends Event[Environment]
+  case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: MoleJob) extends Event[Environment] with ExceptionEvent
   case class JobCompleted(job: ExecutionJob, log: RuntimeLog, info: RuntimeInfo) extends Event[Environment]
 
   case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
-
-  def accumulator(environment: Environment) =
-    EventAccumulator(Seq(environment), Some(Workspace.preferenceAsInt(maxExceptionsLog))) {
-      case (e, ev: ExceptionRaised) ⇒ ev
-    }
 
 }
 
@@ -53,8 +48,21 @@ trait Environment <: Name {
   private[execution] val _done = Ref(0L)
   private[execution] val _failed = Ref(0L)
 
-  def errorAccumulator = Environment.accumulator(this)
-  def errors = errorAccumulator.events
+  private def _errors = Ref(List[ExceptionEvent]())
+
+  def error(e: ExceptionEvent) = atomic { implicit ctx ⇒
+    val max = Workspace.preferenceAsInt(maxExceptionsLog)
+    _errors() = e :: _errors()
+    if (_errors().size > max) _errors() = _errors().take(max)
+  }
+
+  def errors = _errors.single().reverse
+  def readErrors = atomic { implicit ctx ⇒
+    val errs = errors
+    _errors() = List()
+    errs
+  }
+
   def submitted: Long
   def running: Long
   def done: Long = _done.single()
