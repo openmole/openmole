@@ -73,7 +73,7 @@ class Command {
 
   def encrypted: String = encrypt(askPassword())
 
-  def version =
+  def version() =
     println(s"""You are running OpenMOLE ${buildinfo.version} - ${buildinfo.name}
        |built on the ${buildinfo.generationDate}.""".stripMargin)
 
