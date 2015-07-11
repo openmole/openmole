@@ -38,6 +38,7 @@ object Market extends Logger {
     lazy val R = Tag("R")
     lazy val data = Tag("data")
     lazy val native = Tag("native code")
+    lazy val netlogo = Tag("netlogo")
   }
 
   case class Tag(label: String) extends AnyVal
@@ -52,7 +53,8 @@ object Market extends Logger {
     MarketRepository("https://github.com/openmole/openmole-market.git",
       MarketEntry("pi", "pi", Seq("pi.oms"), Seq(stochastic, simulation)),
       MarketEntry("ramdomforest", "randomforest", Seq("learn.oms"), Seq(stochastic, machineLearning, native, data)),
-      MarketEntry("R", "R", Seq("R.oms"), Seq(R, data, native))
+      MarketEntry("R", "R", Seq("R.oms"), Seq(R, data, native)),
+      MarketEntry("fire", "fire", Seq("exploration.oms"), Seq(netlogo, stochastic, simulation))
     )
   )
 
