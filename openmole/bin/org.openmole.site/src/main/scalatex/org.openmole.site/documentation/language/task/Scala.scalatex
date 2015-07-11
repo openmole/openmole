@@ -16,7 +16,7 @@
         array := Array(8.0, 9.0, 10.0)
       )
 
-    val ex = (sum hook ToStringHook()) start""")
+    (sum hook ToStringHook())""")
 
 
   @p Multiple @i{ScalaTasks} can be joint to compose a workflow. Lets imagine that you want to
@@ -40,7 +40,7 @@
       outputs += result
     )
 
-    val ex = exploration -< expensive >- (sum hook ToStringHook()) start""")
+    exploration -< expensive >- (sum hook ToStringHook())""")
 
   @p The execution of this workflow can be distributed using OpenMOLE's environments. Check the page dedicated to
   @a("environments", href := DocumentationPages.root.language.environment.file) to learn more on this process.
@@ -79,12 +79,12 @@
 
       //Defines the task to perform the hello function
       val javaTask = ScalaTask("Hello.run(proto1)") set (
-        libraries += "/path/to/Hello.jar",
+        libraries += workDirectory / "Hello.jar",
         imports += "hello._",
         inputs += proto1
       )
 
-      val ex = explo -< javaTask start""")
+      explo -< javaTask""")
 
       @p The output should look like that (the order in which the lines are printed might be different in your case):
       @hl.highlight("""
@@ -126,16 +126,16 @@
       )
 
       val javaTask = ScalaTask("Array(out1, out2) = Hello.run(arg1, arg2)") set (
-        libraries += "/path/to/Hello.jar",
+        libraries += workDirectory / "Hello.jar",
         imports += "hello._",
         inputs += (arg1, arg2),
         outputs += (arg1, arg2, out1, out2)
       )
 
       // save the result in a CSV file
-      val csvHook = AppendToCSVFileHook("/tmp/result.csv")
+      val csvHook = AppendToCSVFileHook(workDirectory / "result.csv")
 
-      val ex = explo -< (javaTask hook csvHook) start""")
+      explo -< (javaTask hook csvHook)""")
 
     @p This workflow explores the 2 arguments of the @i{hello} function and saves the results in a CSV file.
 
@@ -185,21 +185,21 @@
       //Defines the scala task as a launcher of the hello executable
       val javaTask =
         ScalaTask("val outputFile = newFile(); Hello.run(proto1, inputFile, outputFile)") set (
-          libraries += "/path/to/my/Hello.jar",
+          libraries += workDirectory / "Hello.jar",
           imports += "hello.Hello",
           inputs += proto1,
           outputs += proto1,
-          inputFile := "/path/to/my/input/file"
+          inputFile := workDirectory / "input.bin"
         )
 
       //Save the output file locally
       val copyHook =
         CopyFileHook(
           outputFile,
-          "/path/to/save/the/output/file/out-${proto1}.txt"
+          workDirectory / "out-${proto1}.txt"
         )
 
-      val ex = explo -< (javaTask hook copyHook) start""")
+      explo -< (javaTask hook copyHook)""")
 
       @p This tutorial works for simple Java programs. For more ambitious developments, you should consider embedding
       your code in an ("OpenMOLE plugin", href=DocumentationPages.root.development.plugin.file).
