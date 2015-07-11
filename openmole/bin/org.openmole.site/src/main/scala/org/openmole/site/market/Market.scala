@@ -18,6 +18,7 @@
 package org.openmole.site.market
 
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.merge.MergeStrategy
 import org.openmole.console._
 import org.openmole.core.tools.service.Logger
 import org.openmole.site.Config
@@ -117,7 +118,9 @@ class Market(entries: Seq[MarketRepository], destination: File) {
     directory / ".git" exists () match {
       case true ⇒
         val repo = Git.open(directory)
-        repo.pull()
+        val cmd = repo.pull()
+        cmd.setStrategy(MergeStrategy.THEIRS)
+        cmd.call()
       case false ⇒
         val command = Git.cloneRepository
         command.setDirectory(directory)
