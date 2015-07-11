@@ -56,8 +56,8 @@ object Market extends Logger {
       MarketEntry("pi", "pi", Seq("pi.oms"), Seq(stochastic, simulation)),
       MarketEntry("ramdomforest", "randomforest", Seq("learn.oms"), Seq(stochastic, machineLearning, native, data)),
       MarketEntry("RHello", "R-hello", Seq("R.oms"), Seq(R, data, native)),
-      MarketEntry("fire", "fire", Seq("exploration.oms"), Seq(netlogo, stochastic, simulation)),
-      MarketEntry("javaHello", "java-hello", Seq("exploration.oms"), Seq(java))
+      MarketEntry("fire", "fire", Seq("explore.oms"), Seq(netlogo, stochastic, simulation)),
+      MarketEntry("javaHello", "java-hello", Seq("explore.oms"), Seq(java))
     )
   )
 
