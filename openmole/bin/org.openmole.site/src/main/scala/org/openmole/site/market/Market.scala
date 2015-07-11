@@ -62,7 +62,7 @@ class Market(entries: Seq[MarketRepository], destination: File) {
 
   lazy val console = new Console()
 
-  def archiveDirectoryName = "archives"
+  def archiveDirectoryName = "all"
   def archiveDirectory = destination / archiveDirectoryName
 
   def generate(cloneDirectory: File, testScript: Boolean = true): Unit = {
