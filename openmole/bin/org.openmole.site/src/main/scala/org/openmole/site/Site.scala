@@ -21,6 +21,8 @@ import java.io.File
 import java.util.zip.GZIPInputStream
 import ammonite.ops.Path
 import org.eclipse.equinox.app._
+import org.openmole.core.workspace.Workspace
+import org.openmole.site.market.Market
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import scalatags.Text.all
@@ -141,6 +143,11 @@ class Site extends IApplication {
     }
 
     DSLTest.runTest.get
+
+    if (args.contains("--market")) {
+      val m = new Market(Market.entries, dest / "market")
+      m.generate(Workspace.persistentDir / "market")
+    }
 
     IApplication.EXIT_OK
   }

@@ -172,4 +172,6 @@ object Libraries extends Defaults {
 
   lazy val async = "org.openmole" %% "scala-async" % "0.9.1"
 
+  lazy val jgit = "org.openmole" %% "org-eclipse-jgit" % "3.7.1"
+
 }
