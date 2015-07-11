@@ -74,9 +74,9 @@
     val rTask = SystemExecTask("care.bin", "care/re-execute.sh R --slave -f myscript.R --args ${i}") set (
       resources += workDirectory / "care.bin",
       inputs += (i, inputName),
-      inputFiles += (input, workDirectory / "care/rootfs/path/on/your/system/data.csv"),
+      inputFiles += (input, "care/rootfs/path/on/your/system/data.csv"),
       outputs += (i, inputName),
-      outputFiles += (workDirectory / "care/rootfs/path/on/your/system/result.csv", output)
+      outputFiles += ("care/rootfs/path/on/your/system/result.csv", output)
     )
 
     val exploration =
