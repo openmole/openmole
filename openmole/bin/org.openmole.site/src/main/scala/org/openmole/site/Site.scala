@@ -35,7 +35,7 @@ class Site extends IApplication {
   override def start(context: IApplicationContext) = {
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]].map(_.trim)
 
-    Config.testScript = !args.contains("-nc")
+    Config.testScript = !args.contains("--no-test")
 
     val dest = new File(args(0))
     dest.recursiveDelete
@@ -144,9 +144,9 @@ class Site extends IApplication {
 
     DSLTest.runTest.get
 
-    if (args.contains("--market")) {
+    if (args.contains("--with-market")) {
       val m = new Market(Market.entries, dest / "market")
-      m.generate(Workspace.persistentDir / "market")
+      m.generate(Workspace.persistentDir / "market", Config.testScript)
     }
 
     IApplication.EXIT_OK

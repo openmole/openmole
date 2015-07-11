@@ -20,6 +20,7 @@ package org.openmole.site.market
 import org.eclipse.jgit.api.Git
 import org.openmole.console._
 import org.openmole.core.tools.service.Logger
+import org.openmole.site.Config
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.tool.tar._
@@ -63,23 +64,41 @@ class Market(entries: Seq[MarketRepository], destination: File) {
 
   def archiveDirectory = destination / "archives"
 
-  def generate(cloneDirectory: File): Unit = {
+  def generate(cloneDirectory: File, testScript: Boolean = true): Unit = {
     archiveDirectory.mkdirs()
     for {
       entry ← entries
       repository = update(entry, cloneDirectory)
       project ← entry.entries
+      if !testScript || test(repository, project, entry.url)
     } {
-      (repository / project.directory) archiveCompress (archiveDirectory / s"${project.name}.tgz")
+      val fileName = s"${project.name}.tgz"
+      val archive = archiveDirectory / fileName
+      (repository / project.directory) archiveCompress archive
+      for {
+        tag ← project.tags
+        link = (destination / tag.label / fileName)
+      } {
+        link.getParentFile.mkdirs()
+        link createLink archive
+      }
     }
   }
 
-  def test(script: File, repository: String, project: MarketEntry): Unit = {
-    def engine = console.newREPL(ConsoleVariables.empty)
-    Try(engine.compiled(script.content)) match {
-      case Failure(e) ⇒
-        Log.logger.log(Log.WARNING, s"Project ${project} of repository $repository has been excluded", e)
-      case Success(_) ⇒
+  def test(clone: File, project: MarketEntry, repository: String): Boolean = {
+    def testScript(script: File): Try[Unit] = {
+      def engine = console.newREPL(ConsoleVariables.empty)
+      Try(engine.compiled(script.content))
+    }
+
+    project.files.forall {
+      file ⇒
+        testScript(clone / project.directory / file) match {
+          case Failure(e) ⇒
+            Log.logger.log(Log.WARNING, s"Project ${project} of repository $repository has been excluded", e)
+            false
+          case Success(_) ⇒ true
+        }
     }
   }
 
