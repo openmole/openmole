@@ -62,7 +62,8 @@ class Market(entries: Seq[MarketRepository], destination: File) {
 
   lazy val console = new Console()
 
-  def archiveDirectory = destination / "archives"
+  def archiveDirectoryName = "archives"
+  def archiveDirectory = destination / archiveDirectoryName
 
   def generate(cloneDirectory: File, testScript: Boolean = true): Unit = {
     archiveDirectory.mkdirs()
@@ -80,7 +81,7 @@ class Market(entries: Seq[MarketRepository], destination: File) {
         link = (destination / tag.label / fileName)
       } {
         link.getParentFile.mkdirs()
-        link createLink archive
+        link createLink File("..") / archiveDirectoryName / fileName
       }
     }
   }
