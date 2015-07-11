@@ -81,7 +81,7 @@ class Market(entries: Seq[MarketRepository], destination: File) {
         link = (destination / tag.label / fileName)
       } {
         link.getParentFile.mkdirs()
-        link createLink File("..") / archiveDirectoryName / fileName
+        link createLink (new File("..") / archiveDirectoryName / fileName)
       }
     }
   }
