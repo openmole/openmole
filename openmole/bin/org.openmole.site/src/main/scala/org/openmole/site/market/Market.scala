@@ -30,7 +30,11 @@ import scala.util.{ Success, Failure, Try }
 
 object Market extends Logger {
 
-  lazy val githubMarket = Repository("https://github.com/openmole/openmole-market.git")
+  lazy val githubMarket =
+    Repository(
+      "https://github.com/openmole/openmole-market.git",
+      Some(s ⇒ s"https://github.com/openmole/openmole-market/tree/master/$s")
+    )
 
   object Tags {
     lazy val stochastic = Tag("Stochastic")
@@ -44,15 +48,15 @@ object Market extends Logger {
   }
 
   case class Tag(label: String)
-  case class Repository(url: String)
+  case class Repository(url: String, viewURL: Option[String ⇒ String] = None)
 
   import Tags._
 
-  case class MarketRepository(url: String, entries: MarketEntry*)
+  case class MarketRepository(repository: Repository, entries: MarketEntry*)
   case class MarketEntry(name: String, directory: String, files: Seq[String], tags: Seq[Tag] = Seq.empty)
 
   def entries = Seq(
-    MarketRepository("https://github.com/openmole/openmole-market.git",
+    MarketRepository(githubMarket,
       MarketEntry("Pi Computation", "pi", Seq("pi.oms"), Seq(stochastic, simulation)),
       MarketEntry("Random Forest", "randomforest", Seq("learn.oms"), Seq(stochastic, machineLearning, native, data)),
       MarketEntry("Hello World in R", "R-hello", Seq("R.oms"), Seq(R, data, native)),
@@ -71,9 +75,10 @@ case class DeployedMarketEntry(
   archive: String,
   entry: MarketEntry,
   readme: Option[String],
-  codes: Seq[String])
+  codes: Seq[String],
+  viewURL: Option[String])
 
-class Market(entries: Seq[MarketRepository], destination: File) {
+class Market(repositories: Seq[MarketRepository], destination: File) {
 
   lazy val console = new Console()
 
@@ -83,10 +88,10 @@ class Market(entries: Seq[MarketRepository], destination: File) {
     val archiveDirectory = destination / archiveDirectoryName
     archiveDirectory.mkdirs()
     for {
-      entry ← entries
-      repository = update(entry, cloneDirectory)
-      project ← entry.entries
-      if !testScript || test(repository, project, entry.url)
+      marketRepository ← repositories
+      repository = update(marketRepository, cloneDirectory)
+      project ← marketRepository.entries
+      if !testScript || test(repository, project, marketRepository.repository.url)
     } yield {
       val fileName = s"${project.name}.tgz".replace(" ", "_")
       val archive = archiveDirectory / fileName
@@ -97,7 +102,8 @@ class Market(entries: Seq[MarketRepository], destination: File) {
         s"$archiveDirectoryName/$fileName",
         project,
         readme.contentOption,
-        project.files.map(f ⇒ projectDirectory / f content)
+        project.files.map(f ⇒ projectDirectory / f content),
+        marketRepository.repository.viewURL.map(_(project.directory))
       )
     }
   }
@@ -120,7 +126,7 @@ class Market(entries: Seq[MarketRepository], destination: File) {
   }
 
   def update(repository: MarketRepository, cloneDirectory: File): File = {
-    val directory = cloneDirectory / repository.url.hash.toString
+    val directory = cloneDirectory / repository.repository.url.hash.toString
 
     directory / ".git" exists () match {
       case true ⇒
@@ -131,7 +137,7 @@ class Market(entries: Seq[MarketRepository], destination: File) {
       case false ⇒
         val command = Git.cloneRepository
         command.setDirectory(directory)
-        command.setURI(repository.url)
+        command.setURI(repository.repository.url)
         command.call()
     }
 

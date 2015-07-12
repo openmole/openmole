@@ -365,7 +365,13 @@ object DocumentationPages { index ⇒
           a(deployedMarketEntry.entry.name, href := deployedMarketEntry.archive),
           p(
             div(id := "market-entry")(
-              RawFrag(deployedMarketEntry.readme.map(txtmark.Processor.process).getOrElse("No README.md available yet."))
+              Seq(
+                deployedMarketEntry.readme.map {
+                  rm ⇒ RawFrag(txtmark.Processor.process(rm))
+                }.getOrElse(p("No README.md available yet."))
+              ) ++ deployedMarketEntry.viewURL.map {
+                  u ⇒ a("source repository", href := u)
+                }: _*
             )
           )
         )
