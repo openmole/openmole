@@ -3,4 +3,4 @@
 
 @sect{The Market Place}
     This is the OpenMOLE Market Place. It gathers working examples of OpenMOLE workflow. You can contribute to the market place by either providing a pull request on the OpenMOLE on the @a("central OpenMOLE market place on github", href := "https://github.com/openmole/openmole-market") or by providing you example on your own git repository and post it to the user mailing list.
-    @p The rules to contribute to the market place is to provide self-contained working examples. All resources needed to execute the workfow are provided in a single directory. One or several @i("oms") files can be provided and a README.md must be written explaining what the workflow computes. A workflow is included only if it compiles within the matching OpenMOLE version.
+    @p The rules to contribute to the market place is to provide self-contained working examples. All resources needed to execute the workfow are provided in a single directory. One or several @i("oms") files can be provided and a README.md must explain what the workflow computes. A workflow is included only if it compiles within the matching OpenMOLE version.
