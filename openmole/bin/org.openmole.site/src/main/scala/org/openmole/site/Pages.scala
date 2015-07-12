@@ -331,25 +331,34 @@ object DocumentationPages { index ⇒
       def content: all.Frag = documentation.Market()
 
       def themes: Seq[Market.Tag] =
-        marketEntries.flatMap(_.entry.tags).distinct.sortBy(_.label)
+        marketEntries.flatMap(_.entry.tags).distinct.sortBy(_.label.toLowerCase)
 
-      def pages = {
-        themes.map {
-          t ⇒
-            new DocumentationPage {
-              def children: Seq[DocumentationPage] = Seq()
-              def name: String = t.label
-              def content: all.Frag = Seq(
-                h1(t.label),
-                ul(
-                  marketEntries.filter(_.entry.tags.contains(t)).sortBy(_.entry.name).map {
-                    de ⇒ li(entryContent(de))
-                  }: _*
-                )
-              )
-            }
+      def allEntries =
+        new DocumentationPage {
+          def children: Seq[DocumentationPage] = Seq()
+          def name: String = "All"
+          def content: all.Frag = tagContent("All", marketEntries)
         }
-      }
+
+      def pages = allEntries :: (themes map documentationPage).toList
+
+      def documentationPage(t: Market.Tag) =
+        new DocumentationPage {
+          def children: Seq[DocumentationPage] = Seq()
+          def name: String = t.label
+          def content: all.Frag =
+            tagContent(t.label, marketEntries.filter(_.entry.tags.contains(t)))
+        }
+
+      def tagContent(label: String, entries: Seq[DeployedMarketEntry]) =
+        Seq(
+          h1(label),
+          ul(
+            entries.sortBy(_.entry.name.toLowerCase).map {
+              de ⇒ li(entryContent(de))
+            }: _*
+          )
+        )
 
       def entryContent(deployedMarketEntry: DeployedMarketEntry) = {
         Seq(

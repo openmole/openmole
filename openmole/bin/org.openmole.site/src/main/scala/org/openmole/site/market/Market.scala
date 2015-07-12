@@ -43,8 +43,8 @@ object Market extends Logger {
     lazy val java = Tag("Java")
   }
 
-  case class Tag(label: String) extends AnyVal
-  case class Repository(url: String) extends AnyVal
+  case class Tag(label: String)
+  case class Repository(url: String)
 
   import Tags._
 
@@ -53,11 +53,11 @@ object Market extends Logger {
 
   def entries = Seq(
     MarketRepository("https://github.com/openmole/openmole-market.git",
-      MarketEntry("pi", "pi", Seq("pi.oms"), Seq(stochastic, simulation)),
-      MarketEntry("ramdomforest", "randomforest", Seq("learn.oms"), Seq(stochastic, machineLearning, native, data)),
-      MarketEntry("RHello", "R-hello", Seq("R.oms"), Seq(R, data, native)),
-      MarketEntry("fire", "fire", Seq("explore.oms"), Seq(netlogo, stochastic, simulation)),
-      MarketEntry("javaHello", "java-hello", Seq("explore.oms"), Seq(java))
+      MarketEntry("Pi Computation", "pi", Seq("pi.oms"), Seq(stochastic, simulation)),
+      MarketEntry("Random Forest", "randomforest", Seq("learn.oms"), Seq(stochastic, machineLearning, native, data)),
+      MarketEntry("Hello World in R", "R-hello", Seq("R.oms"), Seq(R, data, native)),
+      MarketEntry("Fire in NetLogo", "fire", Seq("explore.oms"), Seq(netlogo, stochastic, simulation)),
+      MarketEntry("Hello World in Java", "java-hello", Seq("explore.oms"), Seq(java))
     )
   )
 
@@ -67,7 +67,11 @@ import java.io.File
 
 import Market._
 
-case class DeployedMarketEntry(archive: String, entry: MarketEntry, readme: Option[String])
+case class DeployedMarketEntry(
+  archive: String,
+  entry: MarketEntry,
+  readme: Option[String],
+  codes: Seq[String])
 
 class Market(entries: Seq[MarketRepository], destination: File) {
 
@@ -84,14 +88,16 @@ class Market(entries: Seq[MarketRepository], destination: File) {
       project ← entry.entries
       if !testScript || test(repository, project, entry.url)
     } yield {
-      val fileName = s"${project.name}.tgz"
+      val fileName = s"${project.name}.tgz".replace(" ", "_")
       val archive = archiveDirectory / fileName
-      (repository / project.directory) archiveCompress archive
-      val readme = repository / project.directory / "README.md"
+      val projectDirectory = repository / project.directory
+      projectDirectory archiveCompress archive
+      val readme = projectDirectory / "README.md"
       DeployedMarketEntry(
         s"$archiveDirectoryName/$fileName",
         project,
-        readme.contentOption
+        readme.contentOption,
+        project.files.map(f ⇒ projectDirectory / f content)
       )
     }
   }
