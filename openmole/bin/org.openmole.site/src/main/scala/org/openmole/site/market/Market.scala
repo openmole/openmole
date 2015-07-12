@@ -67,31 +67,27 @@ import java.io.File
 
 import Market._
 
+case class DeployedMarketEntry(archive: String, entry: MarketEntry)
+
 class Market(entries: Seq[MarketRepository], destination: File) {
 
   lazy val console = new Console()
 
-  def archiveDirectoryName = "all"
-  def archiveDirectory = destination / archiveDirectoryName
+  def archiveDirectoryName = "market"
 
-  def generate(cloneDirectory: File, testScript: Boolean = true): Unit = {
+  def generate(cloneDirectory: File, testScript: Boolean = true): Seq[DeployedMarketEntry] = {
+    val archiveDirectory = destination / archiveDirectoryName
     archiveDirectory.mkdirs()
     for {
       entry ← entries
       repository = update(entry, cloneDirectory)
       project ← entry.entries
       if !testScript || test(repository, project, entry.url)
-    } {
+    } yield {
       val fileName = s"${project.name}.tgz"
       val archive = archiveDirectory / fileName
       (repository / project.directory) archiveCompress archive
-      for {
-        tag ← project.tags
-        link = (destination / tag.label / fileName)
-      } {
-        link.getParentFile.mkdirs()
-        link createLink (new File("..") / archiveDirectoryName / fileName)
-      }
+      DeployedMarketEntry(s"$archiveDirectoryName/$fileName", project)
     }
   }
 

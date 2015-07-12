@@ -18,6 +18,8 @@
 
 package org.openmole.site
 
+import org.openmole.site.market._
+
 import scalatags.Text.all
 import scalatags.Text.all._
 
@@ -102,6 +104,8 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
 
 object DocumentationPages { index ⇒
 
+  var marketEntries: Seq[DeployedMarketEntry] = Seq()
+
   def decorate(p: DocumentationPage): Frag =
     Pages.decorate(
       Seq(
@@ -178,7 +182,7 @@ object DocumentationPages { index ⇒
   def root = new DocumentationPage {
     def name = "Documentation"
     def content = documentation.Documentation()
-    def children = Seq(application, language, tutorial, faq, development)
+    def children = Seq(application, language, tutorial, market, faq, development)
 
     def application = new DocumentationPage {
       def name = "Application"
@@ -318,6 +322,34 @@ object DocumentationPages { index ⇒
         def children = Seq()
         def content = documentation.language.tutorial.Capsule()
       }
+    }
+
+    def market = new DocumentationPage {
+      def children: Seq[DocumentationPage] = pages
+      def name: String = "Market"
+      def content: all.Frag = ""
+
+      def themes: Seq[Market.Tag] =
+        marketEntries.flatMap(_.entry.tags).distinct.sortBy(_.label)
+
+      def pages = {
+        themes.map {
+          t ⇒
+            new DocumentationPage {
+              def children: Seq[DocumentationPage] = Seq()
+              def name: String = t.label
+              def content: all.Frag = Seq(
+                h1(t.label),
+                ul(
+                  marketEntries.filter(_.entry.tags.contains(t)).sortBy(_.entry.name).map {
+                    de ⇒ li(a(de.entry.name, href := de.archive))
+                  }: _*
+                )
+              )
+            }
+        }
+      }
+
     }
 
     def faq = new DocumentationPage {

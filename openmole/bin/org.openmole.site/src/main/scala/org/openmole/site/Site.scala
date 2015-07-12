@@ -30,18 +30,21 @@ import scalatags.Text.all._
 import scala.sys.process.BasicIO
 import org.openmole.site.credits._
 
-class Site extends IApplication {
+object Site {
+  def analytics =
+    script(`type` := "text/javascript")(
+      """
+        |	var _gaq = _gaq || [];
+        |	_gaq.push(['_setAccount', 'UA-25912998-1']);_gaq.push(['_trackPageview']);
+        |	(function() {
+        |		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        |		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        |		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        |	})();
+      """.stripMargin)
 
-  override def start(context: IApplicationContext) = {
-    val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]].map(_.trim)
-
-    Config.testScript = !args.contains("--no-test")
-
-    val dest = new File(args(0))
-    dest.recursiveDelete
-
-    def piwik =
-      RawFrag("""
+  def piwik =
+    RawFrag("""
         |<!-- Piwik -->
         |<script type="text/javascript">
         |  var _paq = _paq || [];
@@ -59,6 +62,24 @@ class Site extends IApplication {
         |<noscript><p><img src="//piwik.iscpif.fr/piwik.php?idsite=1" style="border:0;" alt="" /></p></noscript>
         |<!-- End Piwik Code -->
       """.stripMargin)
+}
+
+import Site._
+
+class Site extends IApplication {
+
+  override def start(context: IApplicationContext) = {
+    val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]].map(_.trim)
+
+    Config.testScript = !args.contains("--no-test")
+
+    val dest = new File(args(0))
+    dest.recursiveDelete
+
+    val m = new Market(Market.entries, dest)
+    val marketEntries = m.generate(Workspace.persistentDir / "market", Config.testScript)
+
+    DocumentationPages.marketEntries = marketEntries
 
     val site = new scalatex.site.Site {
       override def siteCss = Set.empty
@@ -86,16 +107,7 @@ class Site extends IApplication {
           link(rel := "stylesheet", href := Resource.css.file),
           meta(charset := "UTF-8"),
           script(src := "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"),
-          script(`type` := "text/javascript")(
-            """
-              |	var _gaq = _gaq || [];
-              |	_gaq.push(['_setAccount', 'UA-25912998-1']);_gaq.push(['_trackPageview']);
-              |	(function() {
-              |		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-              |		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-              |		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-              |	})();
-            """.stripMargin),
+          analytics,
           piwik
         )
 
@@ -143,11 +155,6 @@ class Site extends IApplication {
     }
 
     DSLTest.runTest.get
-
-    if (args.contains("--with-market")) {
-      val m = new Market(Market.entries, dest / "market")
-      m.generate(Workspace.persistentDir / "market", Config.testScript)
-    }
 
     IApplication.EXIT_OK
   }
