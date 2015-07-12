@@ -174,4 +174,6 @@ object Libraries extends Defaults {
 
   lazy val jgit = "org.openmole" %% "org-eclipse-jgit" % "3.7.1"
 
+  lazy val txtmark = "org.openmole" %% "com-github-rjeschke-txtmark" % "0.13"
+
 }

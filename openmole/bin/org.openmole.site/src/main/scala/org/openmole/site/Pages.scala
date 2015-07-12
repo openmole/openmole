@@ -22,6 +22,7 @@ import org.openmole.site.market._
 
 import scalatags.Text.all
 import scalatags.Text.all._
+import com.github.rjeschke._
 
 object Pages {
 
@@ -326,8 +327,8 @@ object DocumentationPages { index ⇒
 
     def market = new DocumentationPage {
       def children: Seq[DocumentationPage] = pages
-      def name: String = "Market"
-      def content: all.Frag = ""
+      def name: String = "Market Place"
+      def content: all.Frag = documentation.Market()
 
       def themes: Seq[Market.Tag] =
         marketEntries.flatMap(_.entry.tags).distinct.sortBy(_.label)
@@ -342,12 +343,23 @@ object DocumentationPages { index ⇒
                 h1(t.label),
                 ul(
                   marketEntries.filter(_.entry.tags.contains(t)).sortBy(_.entry.name).map {
-                    de ⇒ li(a(de.entry.name, href := de.archive))
+                    de ⇒ li(entryContent(de))
                   }: _*
                 )
               )
             }
         }
+      }
+
+      def entryContent(deployedMarketEntry: DeployedMarketEntry) = {
+        Seq(
+          a(deployedMarketEntry.entry.name, href := deployedMarketEntry.archive),
+          p(
+            div(id := "market-entry")(
+              RawFrag(deployedMarketEntry.readme.map(txtmark.Processor.process).getOrElse("No README.md available yet."))
+            )
+          )
+        )
       }
 
     }

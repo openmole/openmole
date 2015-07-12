@@ -33,14 +33,14 @@ object Market extends Logger {
   lazy val githubMarket = Repository("https://github.com/openmole/openmole-market.git")
 
   object Tags {
-    lazy val stochastic = Tag("stochastic")
-    lazy val simulation = Tag("simulation")
-    lazy val machineLearning = Tag("machine learning")
+    lazy val stochastic = Tag("Stochastic")
+    lazy val simulation = Tag("Simulation")
+    lazy val machineLearning = Tag("Machine Learning")
     lazy val R = Tag("R")
-    lazy val data = Tag("data")
-    lazy val native = Tag("native code")
-    lazy val netlogo = Tag("netlogo")
-    lazy val java = Tag("java")
+    lazy val data = Tag("Data")
+    lazy val native = Tag("Native Code")
+    lazy val netlogo = Tag("NetLogo")
+    lazy val java = Tag("Java")
   }
 
   case class Tag(label: String) extends AnyVal
@@ -67,7 +67,7 @@ import java.io.File
 
 import Market._
 
-case class DeployedMarketEntry(archive: String, entry: MarketEntry)
+case class DeployedMarketEntry(archive: String, entry: MarketEntry, readme: Option[String])
 
 class Market(entries: Seq[MarketRepository], destination: File) {
 
@@ -87,7 +87,12 @@ class Market(entries: Seq[MarketRepository], destination: File) {
       val fileName = s"${project.name}.tgz"
       val archive = archiveDirectory / fileName
       (repository / project.directory) archiveCompress archive
-      DeployedMarketEntry(s"$archiveDirectoryName/$fileName", project)
+      val readme = repository / project.directory / "README.md"
+      DeployedMarketEntry(
+        s"$archiveDirectoryName/$fileName",
+        project,
+        readme.contentOption
+      )
     }
   }
 
