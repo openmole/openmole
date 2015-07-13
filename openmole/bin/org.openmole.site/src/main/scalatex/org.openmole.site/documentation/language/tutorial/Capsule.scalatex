@@ -16,7 +16,7 @@
   val t2 = ScalaTask("val j = i * 2") set (outputs += j)
   val c2 = Capsule(t2, strainer = true)
 
-  val ex = t1 -- (c2 hook ToStringHook(i, j)) start
+  t1 -- (c2 hook ToStringHook(i, j))
   """)
 
   @p This workflow displays @hl.highlight("{i=42, j=84}", "plain")
@@ -76,5 +76,4 @@
   val loop = selectCaps -- modelSlot2
   val terminate = selectCaps >| (Capsule(finalTask, strainer = true) hook displayHook, "archive.size() >= 10")
 
-  val ex = skel + loop + terminate
-  ex.start""")
+  skel + loop + terminate""")

@@ -45,6 +45,7 @@ object Market extends Logger {
     lazy val native = Tag("Native Code")
     lazy val netlogo = Tag("NetLogo")
     lazy val java = Tag("Java")
+    lazy val ga = Tag("Genetic Algorithm")
   }
 
   case class Tag(label: String)
@@ -61,7 +62,8 @@ object Market extends Logger {
       MarketEntry("Random Forest", "randomforest", Seq("learn.oms"), Seq(stochastic, machineLearning, native, data)),
       MarketEntry("Hello World in R", "R-hello", Seq("R.oms"), Seq(R, data, native)),
       MarketEntry("Fire in NetLogo", "fire", Seq("explore.oms"), Seq(netlogo, stochastic, simulation)),
-      MarketEntry("Hello World in Java", "java-hello", Seq("explore.oms"), Seq(java))
+      MarketEntry("Hello World in Java", "java-hello", Seq("explore.oms"), Seq(java)),
+      MarketEntry("Calibration of Ants", "ants", Seq("calibrate.oms", "island.oms"), Seq(netlogo, ga, simulation))
     )
   )
 
