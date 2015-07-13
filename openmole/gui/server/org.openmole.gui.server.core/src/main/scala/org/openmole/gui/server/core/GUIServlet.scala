@@ -65,7 +65,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   get("/shutdown") {
     val restart = Try(params("restart").toBoolean).getOrElse(false)
-    if(restart) arguments.applicationControl.restart() else arguments.applicationControl.stop()
+    if (restart) arguments.applicationControl.restart() else arguments.applicationControl.stop()
   }
 
   get("/plugins.js.map") {
