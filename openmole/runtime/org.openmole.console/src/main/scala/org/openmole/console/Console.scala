@@ -24,6 +24,7 @@ import org.openmole.core.dsl.Serializer
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.workflow.puzzle.Puzzle
 import org.openmole.tool.file._
 import org.openmole.core.workflow.tools.PluginInfo
 import org.openmole.core.workspace._
@@ -34,6 +35,9 @@ import org.openmole.core.workflow.task._
 import java.util.concurrent.TimeUnit
 import scala.tools.nsc.io.{ File ⇒ SFile }
 import java.io.File
+import org.openmole.core.tools.io.Prettifier._
+
+import scala.util._
 
 object Console {
 
@@ -73,9 +77,16 @@ object Console {
 
   object ExitCodes {
     def ok = 0
+
     def incorrectPassword = 1
+
     def scriptDoesNotExist = 2
+
     def compilationError = 3
+
+    def notAPuzzle = 4
+
+    def executionError = 5
   }
 
 }
@@ -83,25 +94,39 @@ object Console {
 import Console._
 
 object ConsoleVariables {
-  def empty = ConsoleVariables()()
-}
-case class ConsoleVariables(
-  args: Seq[String] = Seq.empty,
-  workDirectory: File = currentDirectory)(
-    val inputDirectory: File = workDirectory,
-    val outputDirectory: File = workDirectory)
+  def empty = ConsoleVariables()
 
-class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = None, script: List[String] = Nil) { console ⇒
+  def apply(
+    args: Seq[String] = Seq.empty,
+    workDirectory: File = currentDirectory): ConsoleVariables =
+    ConsoleVariables(args, workDirectory, workDirectory, workDirectory)
+}
+
+case class ConsoleVariables(
+  args: Seq[String],
+  workDirectory: File,
+  inputDirectory: File,
+  outputDirectory: File)
+
+class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = None, script: List[String] = Nil) {
+  console ⇒
 
   def workspace = "workspace"
+
   def registry = "registry"
+
   def logger = "logger"
+
   def serializer = "serializer"
+
   def commandsName = "_commands_"
+
   def pluginsName = "_plugins_"
+
   def variablesName = "_variables_"
 
   def autoImports: Seq[String] = PluginInfo.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"$n._")
+
   def imports =
     Seq(
       "org.openmole.core.dsl._",
@@ -114,7 +139,7 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
       imports.map("import " + _).mkString("; ")
     )
 
-  def run(args: ConsoleVariables): Int = {
+  def run(args: ConsoleVariables, workDirectory: Option[File] = None): Int = {
     val correctPassword =
       password match {
         case None ⇒
@@ -125,29 +150,56 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
     correctPassword match {
       case false ⇒ ExitCodes.incorrectPassword
       case true ⇒
-        withREPL(args) { loop ⇒
-          script match {
-            case Nil ⇒
+
+        script match {
+          case Nil ⇒
+            val newArgs = workDirectory.map(f ⇒ args.copy(workDirectory = f)).getOrElse(args)
+            withREPL(newArgs) { loop ⇒
               loop.storeErrors = false
               loop.loopWithExitCode
-            case scripts ⇒
-              scripts.foldLeft(ExitCodes.ok) {
-                (code, s) ⇒
-                  val scriptFile = new File(s)
+            }
+          case scripts ⇒
+            def execute(script: List[File]): Int = {
+              if (script.isEmpty) ExitCodes.ok
+              else {
+                val ret: Int = {
+                  val scriptFile = script.head
                   if (scriptFile.exists) {
-                    val error = loop.interpretAllFromWithExitCode(new SFile(scriptFile))
-                    if (!loop.errorMessage.isEmpty) ExitCodes.compilationError
-                    else error
+                    val wd = workDirectory.getOrElse(scriptFile.getParentFile)
+                    val newArgs: ConsoleVariables =
+                      args.copy(workDirectory = wd)
+                    withREPL(newArgs) { loop ⇒
+                      val compiled = loop.compile(scriptFile.content)
+                      if (!loop.errorMessage.isEmpty) ExitCodes.compilationError
+                      compiled.eval() match {
+                        case res: Puzzle ⇒
+                          val ex = res.toExecution()
+                          ex.start
+                          Try(ex.waitUntilEnded) match {
+                            case Success(_) ⇒ ExitCodes.ok
+                            case Failure(e) ⇒
+                              println("Error during script execution: " + e.getMessage)
+                              print(e.stackString)
+                              ExitCodes.executionError
+                          }
+                        case _ ⇒
+                          println(s"Script $scriptFile doesn't end with a puzzle")
+                          ExitCodes.notAPuzzle
+                      }
+                    }
                   }
                   else {
                     println("File " + scriptFile + " doesn't exist.")
                     ExitCodes.scriptDoesNotExist
                   }
+                }
+                if (ret != ExitCodes.ok) ret else execute(script.tail)
               }
-          }
+            }
+            execute(scripts.map(new File(_)))
         }
-    }
 
+    }
   }
 
   def initialise(loop: ScalaREPL, variables: ConsoleVariables) = {
@@ -156,7 +208,9 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
     loop.beQuietDuring {
       loop.bind(commandsName, new Command)
       loop.bind(pluginsName, plugins)
-      initialisationCommands.foreach { loop.interpret }
+      initialisationCommands.foreach {
+        loop.interpret
+      }
       loop.bind(variablesName, variables)
       loop.eval(s"import $variablesName._")
     }

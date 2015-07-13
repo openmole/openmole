@@ -5,13 +5,12 @@
   To run OpenMOLE, just run the openmole file (or openmole.bat for the windoz users). It will bring up you web browser. OpenMOLE supports Chrome and Firefox. So if you are using another default web browser please copy paste the OpenMOLE url (https://localhost:port) in one of these browser.
 
 @sect{Console}
-  OpenMOLE also proposes a console mode. To launch the console execute openmole -c in a console. The only difference between the script in the console mode and the ones from the editor concerns the way you launch the execution, you cancel it and you follow the execution progress. An console workflow is launched like this:
+  You can also use this console in headless / batch mode for running scripts. You can enable it thanks to the -s option: @hl.highlight("./openmole -c -s /path/to/you/mole/script", "plain")
+  @p In that case OpenMOLE still asks for your preferences cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -c -s /path/to/your/mole/script -pw password", "plain")
+
+  @p OpenMOLE also proposes an interactive console mode. To launch the console execute openmole -c in a console. The only difference between the script in the console mode and the ones from the editor concerns the way you launch the execution, you cancel it and you follow the execution progress. An console workflow is launched like this:
 
   @br @hl.openmole("""val ex = exploration -< (model on env) start""", test = false)
 
   @p Using the ex and the env variables you can follow the progress of the execution by using the commands: print(ex) and print(env). To cancel the execution you should use: ex.cancel.
 
-  @p You can also use this console in headless / batch mode for running scripts. You can enable it thanks to the -s option: @hl.highlight("./openmole -c -s /path/to/you/mole/script", "plain")
-    @p In that case OpenMOLE still asks for your preferences cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -c -s /path/to/your/mole/script -pw password", "plain")
-    @p OpenMOLE will wait until the execution of your mole has ended if you add at the end of your script:
-    @br @hl.openmoleNoTest("ex.waitUntilEnded // ex is the name of your mole execution variable")

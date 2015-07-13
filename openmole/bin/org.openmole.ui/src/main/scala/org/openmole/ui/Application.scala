@@ -69,6 +69,7 @@ class Application extends IApplication {
       userPlugins: List[String] = Nil,
       workspaceDir: Option[String] = None,
       scriptFile: List[String] = Nil,
+      consoleWorkDirectory: Option[File] = None,
       password: Option[String] = None,
       hostName: Option[String] = None,
       launchMode: LaunchMode = GUIMode,
@@ -116,6 +117,7 @@ class Application extends IApplication {
         case "-c" :: tail                           ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
         case "-h" :: tail                           ⇒ parse(tail, c.copy(launchMode = HelpMode))
         case "-ws" :: tail                          ⇒ parse(tail, c.copy(launchMode = ServerMode))
+        case "--console-workDirectory" :: tail      ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
         case "--ws-configure" :: tail               ⇒ parse(tail, c.copy(launchMode = ServerConfigMode))
         case "--ws-sp" :: tail                      ⇒ parse(tail.tail, c.copy(webServerPort = Some(tail.head.toInt))) // Server port
         case "--ws-ssp" :: tail                     ⇒ parse(tail.tail, c.copy(webServerSSLPort = Some(tail.head.toInt)))
@@ -177,7 +179,8 @@ class Application extends IApplication {
           print(consoleSplash)
           println(consoleUsage)
           val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
-          Some(console.run(ConsoleVariables(args = config.args)()))
+          val variables = ConsoleVariables(args = config.args)
+          Some(console.run(variables, config.consoleWorkDirectory))
         case GUIMode ⇒
           def browse(url: String) =
             if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
