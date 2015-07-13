@@ -28,8 +28,8 @@ import org.openmole.core.batch.replication._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.tool.file._
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
-import org.openmole.tool.service.Logger
 import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.job._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }

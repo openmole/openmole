@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.tool.service
+package org.openmole.tool.logger
 
 import java.util.logging.{ Logger ⇒ JLogger, Level }
 

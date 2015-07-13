@@ -19,7 +19,7 @@ package org.openmole.core.tools.io
 
 import java.io.{ PrintWriter, StringWriter }
 
-import org.openmole.tool.service.Logger
+import org.openmole.tool.logger.Logger
 
 import collection.JavaConversions._
 

@@ -33,8 +33,8 @@ import java.io.IOException
 import java.io.PrintStream
 import org.apache.commons.exec.CommandLine
 import org.openmole.core.workflow.data._
-import org.openmole.tool.service.Logger
 import org.openmole.plugin.task.external._
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.stream.StringOutputStream
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer

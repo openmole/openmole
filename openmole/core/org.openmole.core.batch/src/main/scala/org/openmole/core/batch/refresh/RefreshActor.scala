@@ -17,11 +17,11 @@
 
 package org.openmole.core.batch.refresh
 
-import org.openmole.tool.service.Logger
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.batch.environment.{ ResubmitException, BatchEnvironment }
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.logger.Logger
 
 object RefreshActor extends Logger
 

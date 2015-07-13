@@ -27,13 +27,13 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.environment.BatchEnvironment.{ signalUpload }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.FileService
-import org.openmole.tool.service.Logger
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.core.workflow.job._
 
 import org.openmole.core.serializer._
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.tar.TarOutputStream
 import scala.collection.immutable.TreeSet
 import scala.slick.driver.H2Driver.simple._

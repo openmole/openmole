@@ -27,12 +27,12 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.tools.io.Network
-import org.openmole.tool.service.Logger
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.bootstrap.js.BootstrapJS
 import org.openmole.core.workflow.task._
 import org.openmole.console.Console
 import org.openmole.rest.server.RESTServer
+import org.openmole.tool.logger.Logger
 import annotation.tailrec
 import org.openmole.gui.server.core._
 import org.openmole.console._

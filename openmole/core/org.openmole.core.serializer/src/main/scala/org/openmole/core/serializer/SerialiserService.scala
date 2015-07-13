@@ -23,11 +23,11 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
 import org.openmole.tool.file._
-import org.openmole.tool.service.Logger
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.core.serializer.converter._
 import java.util.concurrent.locks.{ ReentrantReadWriteLock, ReadWriteLock }
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.tar._
 import org.openmole.tool.lock._
 import collection.mutable.ListBuffer

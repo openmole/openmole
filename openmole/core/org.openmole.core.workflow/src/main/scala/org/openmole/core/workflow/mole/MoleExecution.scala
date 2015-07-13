@@ -22,7 +22,6 @@ import java.util.logging.Level
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.{ UserBadDataError, MultipleException }
 import org.openmole.core.tools.service.{ Priority, Random }
-import org.openmole.tool.service.Logger
 import org.openmole.core.workflow.mole.MoleExecution.{ JobFailed, ExceptionRaised }
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.data._
@@ -31,6 +30,7 @@ import org.openmole.core.workflow.execution.local._
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.tools._
+import org.openmole.tool.logger.Logger
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
 import org.openmole.core.workflow.execution.Environment

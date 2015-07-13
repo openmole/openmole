@@ -19,9 +19,9 @@ package org.openmole.tool.file
 import java.io.IOException
 import java.nio.file._
 import java.nio.file.attribute.BasicFileAttributes
-import scala.collection.JavaConversions._
+import org.openmole.tool.logger.Logger
 
-import org.openmole.tool.service.Logger
+import scala.collection.JavaConversions._
 
 class CopyDirVisitor(fromPath: Path, toPath: Path, copyOptions: Array[CopyOption]) extends SimpleFileVisitor[Path] with Logger {
 

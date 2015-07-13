@@ -28,10 +28,11 @@ import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.filedeleter.FileDeleter
 import org.openmole.core.serializer._
-import org.openmole.tool.service.Logger
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import fr.iscpif.gridscale.storage.FileType
 import java.io._
+import org.openmole.tool.logger.Logger
+
 import scala.slick.driver.H2Driver.simple._
 
 object StorageService extends Logger {

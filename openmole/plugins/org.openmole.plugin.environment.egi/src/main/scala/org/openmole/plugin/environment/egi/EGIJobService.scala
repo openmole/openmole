@@ -21,12 +21,12 @@ package org.openmole.plugin.environment.egi
 import java.io.File
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.tool.service.Logger
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.batch.storage._
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import fr.iscpif.gridscale.egi.{ WMSJobService, WMSJobDescription }
 import StatusFiles._
+import org.openmole.tool.logger.Logger
 import scalax.io.Resource
 
 object EGIJobService extends Logger

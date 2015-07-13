@@ -21,7 +21,6 @@ import java.util.concurrent.locks.Lock
 
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.tool.service.Logger
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.job._
@@ -33,6 +32,7 @@ import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.job.State._
 import MoleJob._
 import org.openmole.tool.lock._
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
 import scala.collection.mutable.Buffer
 

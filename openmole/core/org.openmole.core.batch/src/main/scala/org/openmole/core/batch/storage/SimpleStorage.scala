@@ -27,7 +27,7 @@ import java.util.UUID
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.tool.file._
-import org.openmole.tool.service.Logger
+import org.openmole.tool.logger.Logger
 
 import scala.collection.JavaConversions._
 

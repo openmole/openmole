@@ -19,10 +19,10 @@ package org.openmole.core.batch.storage
 
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.replication._
-import org.openmole.tool.service.Logger
 import org.openmole.core.workspace._
 import fr.iscpif.gridscale.storage._
 import org.openmole.core.tools.cache._
+import org.openmole.tool.logger.Logger
 
 import scala.slick.driver.H2Driver.simple._
 
