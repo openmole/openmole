@@ -142,7 +142,7 @@ class Application extends IApplication {
     if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
 
     val userPlugins =
-      existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) }
+      existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) } ++ PluginManager.plugins(Workspace.pluginDir)
 
     logger.fine(s"Loading user plugins " + userPlugins)
 
