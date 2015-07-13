@@ -21,7 +21,9 @@ import java.nio.file._
 import java.nio.file.attribute.BasicFileAttributes
 import scala.collection.JavaConversions._
 
-class CopyDirVisitor(fromPath: Path, toPath: Path, copyOptions: Array[CopyOption]) extends SimpleFileVisitor[Path] {
+import org.openmole.tool.service.Logger
+
+class CopyDirVisitor(fromPath: Path, toPath: Path, copyOptions: Array[CopyOption]) extends SimpleFileVisitor[Path] with Logger {
 
   // 1st one just to make it compile...
   def this(fromPath: Path, toPath: Path, copyOptions: CopyOption*) = this(fromPath, toPath, copyOptions.toArray)
@@ -40,9 +42,17 @@ class CopyDirVisitor(fromPath: Path, toPath: Path, copyOptions: Array[CopyOption
   @throws(classOf[IOException])
   override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
 
-    val copyopts = copyOptions.toArray
-
+    // force type inference with _*
     Files.copy(file, toPath.resolve(fromPath.relativize(file)), copyOptions: _*)
+    FileVisitResult.CONTINUE
+  }
+
+  @throws(classOf[IOException])
+  override def visitFileFailed(file: Path, exc: IOException): FileVisitResult = {
+    exc match {
+      case _: java.nio.file.AccessDeniedException ⇒ Log.logger.warning(s"Could not read ${file} (${exc.getMessage}})")
+      case _                                      ⇒ throw exc
+    }
     FileVisitResult.CONTINUE
   }
 }
