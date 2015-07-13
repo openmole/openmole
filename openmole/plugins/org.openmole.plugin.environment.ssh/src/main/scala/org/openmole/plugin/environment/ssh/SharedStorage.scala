@@ -22,7 +22,7 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.tool.file._
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.storage._

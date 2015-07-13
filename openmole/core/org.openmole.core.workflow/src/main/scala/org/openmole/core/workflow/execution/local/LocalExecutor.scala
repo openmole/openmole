@@ -22,13 +22,13 @@ import java.io.{ OutputStream, PrintStream }
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.output.OutputManager
 import org.openmole.core.tools.service
-import org.openmole.core.tools.service.{ Logger, LocalHostName }
+import org.openmole.core.tools.service.LocalHostName
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.execution.Environment._
 import org.openmole.core.workflow.job.State
 import org.openmole.core.workflow.task._
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.tool.stream._
 import ref.WeakReference
 import org.openmole.core.workflow.mole.{ StrainerTaskDecorator, StrainerCapsule }

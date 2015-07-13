@@ -19,6 +19,7 @@ package org.openmole.core.tools.service
 
 import java.net.InetAddress
 import java.util.UUID
+import org.openmole.tool.service.Logger
 
 object LocalHostName extends Logger {
 

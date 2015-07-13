@@ -19,7 +19,7 @@
 package org.openmole.core.batch.jobservice
 
 import org.openmole.core.batch.control._
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.batch.environment._
 import org.openmole.core.workflow.execution.ExecutionState._
 

@@ -21,9 +21,9 @@ import com.google.common.cache.CacheBuilder
 import java.io.File
 import org.h2.jdbc.JdbcSQLException
 import org.openmole.core.replication.{ replicas, Replica, DBServerInfo }
-import org.openmole.core.tools.service.{ Logger, TimeCache }
+import org.openmole.core.tools.service.TimeCache
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import java.util.regex.Pattern
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._

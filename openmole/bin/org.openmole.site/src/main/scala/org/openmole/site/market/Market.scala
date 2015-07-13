@@ -20,7 +20,7 @@ package org.openmole.site.market
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.merge.MergeStrategy
 import org.openmole.console._
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.site.Config
 import org.openmole.tool.file._
 import org.openmole.tool.hash._

@@ -19,7 +19,7 @@ package org.openmole.core.workspace
 
 import java.util.UUID
 
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.tool.file._
 import scala.util.{ Failure, Success, Try }
 import java.io.File

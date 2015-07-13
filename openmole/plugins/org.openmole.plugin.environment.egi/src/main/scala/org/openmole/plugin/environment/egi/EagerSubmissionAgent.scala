@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.environment.{ BatchEnvironment, BatchExecutionJob }
 import org.openmole.core.tools.cache.AssociativeCache
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.updater.IUpdatableWithVariableDelay
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.execution.ExecutionState._

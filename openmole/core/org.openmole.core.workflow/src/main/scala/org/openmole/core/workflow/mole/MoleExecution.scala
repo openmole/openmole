@@ -21,7 +21,8 @@ import java.util.UUID
 import java.util.logging.Level
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.{ UserBadDataError, MultipleException }
-import org.openmole.core.tools.service.{ Logger, Priority, Random }
+import org.openmole.core.tools.service.{ Priority, Random }
+import org.openmole.tool.service.Logger
 import org.openmole.core.workflow.mole.MoleExecution.{ JobFailed, ExceptionRaised }
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.data._

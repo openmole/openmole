@@ -18,7 +18,7 @@
 package org.openmole.runtime.runtime
 
 import java.util.concurrent.Semaphore
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.tools._

@@ -21,7 +21,7 @@ package org.openmole.plugin.environment.egi
 import java.io.File
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.batch.storage._
 import org.openmole.plugin.environment.gridscale.GridScaleJobService

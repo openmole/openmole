@@ -9,7 +9,7 @@ import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 import org.eclipse.jetty.webapp.WebAppContext
 import org.openmole.core.console.ScalaREPL
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.workflow.task.PluginSet
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.openmole.tool.crypto.Certificate

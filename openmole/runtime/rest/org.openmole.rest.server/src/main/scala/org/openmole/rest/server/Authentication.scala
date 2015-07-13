@@ -9,7 +9,7 @@ package org.openmole.rest.server
 
 import javax.crypto.spec.SecretKeySpec
 import javax.crypto.Mac
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.workspace.Workspace
 import org.apache.commons.codec.binary.Base64
 import javax.servlet.http.HttpServletRequest

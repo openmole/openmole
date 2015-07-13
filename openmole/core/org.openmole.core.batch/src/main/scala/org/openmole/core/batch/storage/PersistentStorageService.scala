@@ -19,7 +19,7 @@ package org.openmole.core.batch.storage
 
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.replication._
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.workspace._
 import fr.iscpif.gridscale.storage._
 import org.openmole.core.tools.cache._

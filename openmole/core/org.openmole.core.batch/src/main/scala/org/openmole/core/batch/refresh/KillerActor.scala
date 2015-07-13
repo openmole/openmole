@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.refresh
 
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.workflow.tools.objectToSomeObjectConverter
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.workspace.Workspace

@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.transition
 
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.workflow.validation.TypeUtil
 import org.openmole.core.workflow.tools.ContextAggregator._
 import org.openmole.core.workflow.tools._
