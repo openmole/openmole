@@ -24,6 +24,8 @@ import scalatags.Text.all
 import scalatags.Text.all._
 import com.github.rjeschke._
 
+import scalatags.generic.Attr
+
 object Pages {
 
   def decorate(p: Page): Frag =
@@ -107,6 +109,8 @@ object DocumentationPages { index ⇒
 
   var marketEntries: Seq[DeployedMarketEntry] = Seq()
 
+  def tag(p: DocumentationPage): String = p.name + p.parent.map(pa ⇒ "-" + tag(pa)).getOrElse("")
+
   def decorate(p: DocumentationPage): Frag =
     Pages.decorate(
       Seq(
@@ -121,7 +125,7 @@ object DocumentationPages { index ⇒
     def menuEntry(p: DocumentationPage) = {
       def current = p == currentPage
       def idLabel = "documentation-menu-entry" + (if (current) "-current" else "")
-      a(id := idLabel)(p.name, href := p.file)
+      a(p.name, href := p.file)
     }
 
     def parents(p: DocumentationPage): List[DocumentationPage] =
@@ -133,8 +137,13 @@ object DocumentationPages { index ⇒
     val currentPageParents = parents(currentPage).toSet
 
     def pageLine(p: DocumentationPage): Frag = {
+
       def contracted = li(menuEntry(p))
-      def expanded = li(menuEntry(p), ul(id := "documentation-menu-ul")(p.children.map(pageLine)))
+      def expanded =
+        li(
+          menuEntry(p),
+          div(id := tag(p) + "-menu", ul(id := "documentation-menu-ul")(p.children.map(pageLine)))
+        )
 
       if (p.children.isEmpty) contracted
       else if (p == currentPage) expanded

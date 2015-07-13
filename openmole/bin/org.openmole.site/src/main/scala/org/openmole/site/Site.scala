@@ -91,6 +91,7 @@ class Site extends IApplication {
           meta(name := "viewport", all.content := "width=device-width, initial-scale=1"),
           link(href := stylesName, rel := "stylesheet"),
           script(src := scriptName),
+          script(src := Resource.bootstrapJS.file),
           script(
             """
               |['DOMContentLoaded', 'load'].forEach(function(ev){
