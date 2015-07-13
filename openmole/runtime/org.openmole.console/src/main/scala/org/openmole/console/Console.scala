@@ -76,16 +76,12 @@ object Console {
 
   object ExitCodes {
     def ok = 0
-
     def incorrectPassword = 1
-
     def scriptDoesNotExist = 2
-
     def compilationError = 3
-
     def notAPuzzle = 4
-
     def executionError = 5
+    def restart = 254
   }
 
 }

@@ -22,6 +22,7 @@ import java.io.{ FileOutputStream, File }
 import java.net.URI
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
+import org.openmole.console.Console.ExitCodes
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
@@ -162,25 +163,25 @@ class Application extends IApplication {
 
     if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
 
-    val retCode =
+    val retCode: Int =
       config.launchMode match {
         case HelpMode ⇒
           println(usage)
-          None
+          ExitCodes.ok
         case ServerConfigMode ⇒
           RESTServer.configure
-          None
+          ExitCodes.ok
         case ServerMode ⇒
           if (!config.password.isDefined) Console.initPassword
           val server = new RESTServer(config.webServerPort, config.webServerSSLPort, config.hostName, config.allowInsecureConnections, PluginSet(userPlugins))
           server.start()
-          None
+          ExitCodes.ok
         case ConsoleMode ⇒
           print(consoleSplash)
           println(consoleUsage)
           val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
           val variables = ConsoleVariables(args = config.args)
-          Some(console.run(variables, config.consoleWorkDirectory))
+          console.run(variables, config.consoleWorkDirectory)
         case GUIMode ⇒
           def browse(url: String) =
             if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
@@ -199,11 +200,13 @@ class Application extends IApplication {
               server.join()
             }
             finally lock.release()
-          else browse(GUIServer.urlFile.content)
-          None
+          else {
+            browse(GUIServer.urlFile.content)
+            ExitCodes.ok
+          }
       }
 
-    retCode.map(new Integer(_)).getOrElse(IApplication.EXIT_OK)
+    new Integer(retCode)
   }
 
   override def stop = {}
