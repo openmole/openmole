@@ -28,7 +28,7 @@ import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.execution
 import org.openmole.core.workflow.job._

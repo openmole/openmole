@@ -22,7 +22,7 @@ import java.io.{ ByteArrayOutputStream, IOException }
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 
 class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with Logger {
 

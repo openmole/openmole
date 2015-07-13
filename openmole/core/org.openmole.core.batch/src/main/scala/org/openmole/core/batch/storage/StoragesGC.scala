@@ -21,7 +21,7 @@ import java.io.File
 
 import org.openmole.core.batch.replication._
 import org.openmole.core.replication.replicas
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.updater.IUpdatable
 import org.openmole.core.workspace.Workspace
 import scala.ref.WeakReference

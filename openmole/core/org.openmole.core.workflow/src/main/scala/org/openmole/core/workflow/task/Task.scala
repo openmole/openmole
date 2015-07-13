@@ -23,6 +23,7 @@ import org.openmole.core.serializer.plugin._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.core.tools.service._
+import org.openmole.tool.service.Logger
 import scala.util.Random
 
 object Task extends Logger {

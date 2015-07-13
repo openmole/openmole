@@ -21,7 +21,8 @@ import org.eclipse.osgi.service.environment.EnvironmentInfo
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.filedeleter.FileDeleter
 import org.openmole.tool.file._
-import org.openmole.core.tools.service.{ Logger, Scaling, Random }
+import org.openmole.core.tools.service.{ Scaling, Random }
+import org.openmole.tool.service.Logger
 import java.io.File
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._

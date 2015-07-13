@@ -20,7 +20,7 @@ package org.openmole.plugin.task.systemexec
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.tools.VariableExpansion.Expansion
 import org.openmole.tool.file._
-import org.openmole.core.tools.service.{ Logger, OS, ProcessUtil }
+import org.openmole.core.tools.service.{ OS, ProcessUtil }
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
@@ -33,7 +33,7 @@ import java.io.IOException
 import java.io.PrintStream
 import org.apache.commons.exec.CommandLine
 import org.openmole.core.workflow.data._
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.plugin.task.external._
 import org.openmole.tool.stream.StringOutputStream
 import scala.collection.JavaConversions._

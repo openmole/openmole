@@ -19,7 +19,7 @@ package org.openmole.runtime.daemon
 
 import org.eclipse.equinox.app._
 import org.openmole.core.logging.LoggerService
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import scopt._
 
 object Daemon extends Logger

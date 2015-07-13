@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.environment
 
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.updater.IUpdatableWithVariableDelay
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.job.Job

@@ -19,7 +19,7 @@ package org.openmole.plugin.domain.file
 
 import java.io.File
 import org.openmole.tool.file._
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._

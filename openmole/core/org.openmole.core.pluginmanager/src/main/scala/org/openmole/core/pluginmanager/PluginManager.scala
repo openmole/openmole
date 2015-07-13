@@ -23,7 +23,7 @@ import java.io.FileInputStream
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.pluginmanager.internal.Activator
 import org.openmole.tool.file._
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.osgi.framework._
 
 import scala.collection.immutable.{ HashSet, HashMap }

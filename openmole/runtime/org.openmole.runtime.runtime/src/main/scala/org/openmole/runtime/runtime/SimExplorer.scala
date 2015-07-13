@@ -21,7 +21,7 @@ import org.eclipse.equinox.app._
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.tool.file._
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.workspace.Workspace
 import scopt._
 import java.io.File

@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.tool.file._
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.batch.storage._
 import fr.iscpif.gridscale.dirac.{ DIRACJobService ⇒ GSDIRACJobService, DIRACJobDescription ⇒ GSDIRACJobDescription }
 import org.openmole.core.workspace.Workspace

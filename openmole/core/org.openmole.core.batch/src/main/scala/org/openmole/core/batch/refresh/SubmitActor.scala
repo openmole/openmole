@@ -21,7 +21,7 @@ import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.service.Logger
 import org.openmole.core.workflow.execution.ExecutionState._
 
 object SubmitActor extends Logger
