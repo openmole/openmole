@@ -24,7 +24,7 @@ import org.openmole.core.dsl.Serializer
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.workflow.puzzle.Puzzle
+import org.openmole.core.workflow.puzzle.{ PuzzleBuilder, Puzzle }
 import org.openmole.tool.file._
 import org.openmole.core.workflow.tools.PluginInfo
 import org.openmole.core.workspace._
@@ -33,9 +33,8 @@ import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.{ NamedParam, ILoop, JLineCompletion, JLineReader }
 import org.openmole.core.workflow.task._
 import java.util.concurrent.TimeUnit
-import scala.tools.nsc.io.{ File ⇒ SFile }
-import java.io.File
 import org.openmole.core.tools.io.Prettifier._
+import org.openmole.tool.file._
 
 import scala.util._
 
@@ -165,15 +164,15 @@ class Console(plugins: PluginSet = PluginSet.empty, password: Option[String] = N
                 val ret: Int = {
                   val scriptFile = script.head
                   if (scriptFile.exists) {
-                    val wd = workDirectory.getOrElse(scriptFile.getParentFile)
+                    val wd = workDirectory.getOrElse(scriptFile.getParentFileSafe)
                     val newArgs: ConsoleVariables =
                       args.copy(workDirectory = wd)
                     withREPL(newArgs) { loop ⇒
                       val compiled = loop.compile(scriptFile.content)
                       if (!loop.errorMessage.isEmpty) ExitCodes.compilationError
                       compiled.eval() match {
-                        case res: Puzzle ⇒
-                          val ex = res.toExecution()
+                        case res: PuzzleBuilder ⇒
+                          val ex = res.buildPuzzle.toExecution()
                           ex.start
                           Try(ex.waitUntilEnded) match {
                             case Success(_) ⇒ ExitCodes.ok

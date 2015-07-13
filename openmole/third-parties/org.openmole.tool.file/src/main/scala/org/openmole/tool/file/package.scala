@@ -135,6 +135,13 @@ package file {
 
       def listFilesSafe(filter: FileFilter) = Option(file.listFiles(filter)).getOrElse(Array.empty)
 
+      def getParentFileSafe: File =
+        file.getParentFile() match {
+          case null ⇒
+            if (file.isAbsolute) file else new File(".")
+          case f ⇒ f
+        }
+
       /////// copiers ////////
       def copyContent(destination: File) = {
         val ic = new FileInputStream(file).getChannel
@@ -148,7 +155,7 @@ package file {
 
       def copy(toF: File) = {
         // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES, REPLACE_EXISTING
-        toF.getParentFile.mkdirs()
+        toF.getParentFileSafe.mkdirs()
         if (Files.isDirectory(file)) DirUtils.copy(file, toF)
         else {
           Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
@@ -346,7 +353,7 @@ package file {
       def createLink(target: Path): Path = {
         def unsupported = {
           Logger.getLogger(getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
-          val fileTarget = if (target.isAbsolute) target else Paths.get(file.getParentFile.getPath, target.getPath)
+          val fileTarget = if (target.isAbsolute) target else Paths.get(file.getParentFileSafe.getPath, target.getPath)
           Files.copy(fileTarget, file, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING)
           file
         }
@@ -360,7 +367,7 @@ package file {
       }
 
       def createParentDir = wrapError {
-        file.getCanonicalFile.getParentFile.mkdirs
+        file.getCanonicalFile.getParentFileSafe.mkdirs
       }
 
       def withLock[T](f: OutputStream ⇒ T) = jvmLevelFileLock.withLock(file.getCanonicalPath) {

@@ -19,8 +19,9 @@ package org.openmole.core.workflow.puzzle
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole._
 
-trait PuzzleContainer {
-  def toPuzzle: Puzzle
+trait PuzzleContainer extends PuzzleBuilder {
+  def buildPuzzle: Puzzle
+  def toExecution = buildPuzzle.toExecution
 }
 
 case class OutputPuzzleContainer(
@@ -28,7 +29,7 @@ case class OutputPuzzleContainer(
     output: Capsule,
     hooks: Seq[Hook] = Seq.empty) extends HookDecorator[OutputPuzzleContainer] with PuzzleContainer {
   def hook(hs: Hook*) = copy(hooks = hooks ++ hs)
-  def toPuzzle = puzzle.copy(hooks = puzzle.hooks ++ hooks.map(output -> _))
+  def buildPuzzle = puzzle.copy(hooks = puzzle.hooks ++ hooks.map(output -> _))
 }
 
 case class OutputEnvironmentPuzzleContainer(
@@ -43,7 +44,7 @@ case class OutputEnvironmentPuzzleContainer(
   def by(strategy: Grouping): OutputEnvironmentPuzzleContainer = copy(grouping = Some(strategy))
   def hook(hs: Hook*) = copy(hooks = hooks ++ hs)
 
-  def toPuzzle: Puzzle =
+  def buildPuzzle: Puzzle =
     puzzle.copy(
       hooks = puzzle.hooks ++ hooks.map(output -> _),
       environments = puzzle.environments ++ environment.map(delegate -> _),

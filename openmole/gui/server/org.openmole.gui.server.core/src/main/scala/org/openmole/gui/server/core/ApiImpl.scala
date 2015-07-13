@@ -17,7 +17,7 @@ import scala.util.{ Failure, Success, Try }
 import org.openmole.gui.ext.data._
 import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.ExecutionContext
-import org.openmole.core.workflow.puzzle.Puzzle
+import org.openmole.core.workflow.puzzle.{ PuzzleBuilder, Puzzle }
 import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 
@@ -128,7 +128,8 @@ object ApiImpl extends Api {
       case Failure(e) ⇒ error(e)
       case Success(o) ⇒
         o match {
-          case puzzle: Puzzle ⇒
+          case toPuzzle: PuzzleBuilder ⇒
+            val puzzle = toPuzzle.buildPuzzle
             val outputStream = new StringPrintStream()
 
             puzzle.environments.values.foreach { env ⇒
