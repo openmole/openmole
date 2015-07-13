@@ -4,11 +4,12 @@
 @sect{Editor}
   To run OpenMOLE, just run the openmole file (or openmole.bat for the windoz users). It will bring up you web browser. OpenMOLE supports Chrome and Firefox. So if you are using another default web browser please copy paste the OpenMOLE url (https://localhost:port) in one of these browser.
 
-@sect{Console}
-  You can also use this console in headless / batch mode for running scripts. You can enable it thanks to the -s option: @hl.highlight("./openmole -c -s /path/to/you/mole/script", "plain")
-  @p In that case OpenMOLE still asks for your preferences cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -c -s /path/to/your/mole/script -pw password", "plain")
+@sect{Headless mode}
+  OpenMOLE proposes a headless mode for running scripts. You can enable it thanks to the -s option: @hl.highlight("./openmole -s /path/to/you/mole/script", "plain")
+  @p In that case OpenMOLE still asks for your preferences cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -s /path/to/your/mole/script -pw password", "plain")
 
-  @p OpenMOLE also proposes an interactive console mode. To launch the console execute openmole -c in a console. The only difference between the script in the console mode and the ones from the editor concerns the way you launch the execution, you cancel it and you follow the execution progress. An console workflow is launched like this:
+@sect{Interactive console mode}
+  OpenMOLE also proposes an interactive console mode. To launch the console execute openmole -c in a console. The only difference between the script in the console mode and the ones from the editor concerns the way you launch the execution, you cancel it and you follow the execution progress. An console workflow is launched like this:
 
   @br @hl.openmole("""val ex = exploration -< (model on env) start""", test = false)
 
