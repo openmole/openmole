@@ -101,6 +101,8 @@ pre {
   padding-left: 10px;
   padding-right: 10px;
   border-radius: 2%;
+  height: 200px;
+  overflow: auto;
 }
 
 .scalatex-content *{
