@@ -20,6 +20,7 @@ package org.openmole.site.market
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.merge.MergeStrategy
 import org.openmole.console._
+import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.site.Config
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
@@ -46,6 +47,8 @@ object Market extends Logger {
     lazy val netlogo = Tag("NetLogo")
     lazy val java = Tag("Java")
     lazy val ga = Tag("Genetic Algorithm")
+    lazy val scala = Tag("scala")
+    lazy val plugin = Tag("plugin")
   }
 
   case class Tag(label: String)
@@ -63,7 +66,8 @@ object Market extends Logger {
       MarketEntry("Hello World in R", "R-hello", Seq("R.oms"), Seq(R, data, native)),
       MarketEntry("Fire in NetLogo", "fire", Seq("explore.oms"), Seq(netlogo, stochastic, simulation)),
       MarketEntry("Hello World in Java", "java-hello", Seq("explore.oms"), Seq(java)),
-      MarketEntry("Calibration of Ants", "ants", Seq("calibrate.oms", "island.oms"), Seq(netlogo, ga, simulation))
+      MarketEntry("Calibration of Ants", "ants", Seq("calibrate.oms", "island.oms"), Seq(netlogo, ga, simulation)),
+      MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq("hello.oms"), Seq(scala, java, plugin))
     )
   )
 
@@ -110,22 +114,27 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
     }
   }
 
-  def test(clone: File, project: MarketEntry, repository: String): Boolean = {
-    def testScript(script: File): Try[Unit] = {
-      def engine = console.newREPL(ConsoleVariables.empty)
-      Try(engine.compiled(script.content))
-    }
-
-    project.files.forall {
-      file ⇒
-        testScript(clone / project.directory / file) match {
-          case Failure(e) ⇒
-            Log.logger.log(Log.WARNING, s"Project ${project} of repository $repository has been excluded", e)
-            false
-          case Success(_) ⇒ true
+  def test(clone: File, project: MarketEntry, repository: String): Boolean =
+    Try {
+      PluginManager.synchronized {
+        val projectDirectory = clone / project.directory
+        val pluginsDirectory = projectDirectory / "plugins"
+        val plugins = if (pluginsDirectory.exists()) PluginManager.load(pluginsDirectory.listFilesSafe) else List.empty
+        try {
+          def engine = console.newREPL(ConsoleVariables.empty)
+          for { file ← project.files } engine.compiled(projectDirectory / file content)
+          true
         }
+        finally {
+          plugins.foreach(_.uninstall())
+        }
+      }
+    } match {
+      case Success(b) ⇒ b
+      case Failure(e) ⇒
+        Log.logger.log(Log.WARNING, s"Project ${project} of repository $repository has been excluded", e)
+        false
     }
-  }
 
   def update(repository: MarketRepository, cloneDirectory: File): File = {
     val directory = cloneDirectory / repository.repository.url.hash.toString
