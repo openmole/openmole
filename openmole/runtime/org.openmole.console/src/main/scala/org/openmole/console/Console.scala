@@ -156,22 +156,27 @@ class Console(password: Option[String] = None, script: List[String] = Nil) {
                     val newArgs: ConsoleVariables =
                       args.copy(workDirectory = wd)
                     withREPL(newArgs) { loop ⇒
-                      val compiled = loop.compile(scriptFile.content)
-                      if (!loop.errorMessage.isEmpty) ExitCodes.compilationError
-                      compiled.eval() match {
-                        case res: PuzzleBuilder ⇒
-                          val ex = res.buildPuzzle.toExecution()
-                          ex.start
-                          Try(ex.waitUntilEnded) match {
-                            case Success(_) ⇒ ExitCodes.ok
-                            case Failure(e) ⇒
-                              println("Error during script execution: " + e.getMessage)
-                              print(e.stackString)
-                              ExitCodes.executionError
+                      Try(loop.compile(scriptFile.content)) match {
+                        case Failure(e) ⇒
+                          println(e.getMessage)
+                          println(e.stackString)
+                          ExitCodes.compilationError
+                        case Success(compiled) ⇒
+                          compiled.eval() match {
+                            case res: PuzzleBuilder ⇒
+                              val ex = res.buildPuzzle.toExecution()
+                              ex.start
+                              Try(ex.waitUntilEnded) match {
+                                case Success(_) ⇒ ExitCodes.ok
+                                case Failure(e) ⇒
+                                  println("Error during script execution: " + e.getMessage)
+                                  print(e.stackString)
+                                  ExitCodes.executionError
+                              }
+                            case _ ⇒
+                              println(s"Script $scriptFile doesn't end with a puzzle")
+                              ExitCodes.notAPuzzle
                           }
-                        case _ ⇒
-                          println(s"Script $scriptFile doesn't end with a puzzle")
-                          ExitCodes.notAPuzzle
                       }
                     }
                   }
