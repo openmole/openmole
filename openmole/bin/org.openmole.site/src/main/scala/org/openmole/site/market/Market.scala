@@ -49,6 +49,7 @@ object Market extends Logger {
     lazy val ga = Tag("Genetic Algorithm")
     lazy val scala = Tag("Scala")
     lazy val plugin = Tag("Plugin")
+    lazy val python = Tag("Python")
   }
 
   case class Tag(label: String)
@@ -62,7 +63,7 @@ object Market extends Logger {
   def entries = Seq(
     MarketRepository(githubMarket,
       MarketEntry("Pi Computation", "pi", Seq("pi.oms"), Seq(stochastic, simulation)),
-      MarketEntry("Random Forest", "randomforest", Seq("learn.oms"), Seq(stochastic, machineLearning, native, data)),
+      MarketEntry("Random Forest", "randomforest", Seq("learn.oms"), Seq(stochastic, machineLearning, native, data, python)),
       MarketEntry("Hello World in R", "R-hello", Seq("R.oms"), Seq(R, data, native)),
       MarketEntry("Fire in NetLogo", "fire", Seq("explore.oms"), Seq(netlogo, stochastic, simulation)),
       MarketEntry("Hello World in Java", "java-hello", Seq("explore.oms"), Seq(java)),
