@@ -47,8 +47,8 @@ object Market extends Logger {
     lazy val netlogo = Tag("NetLogo")
     lazy val java = Tag("Java")
     lazy val ga = Tag("Genetic Algorithm")
-    lazy val scala = Tag("scala")
-    lazy val plugin = Tag("plugin")
+    lazy val scala = Tag("Scala")
+    lazy val plugin = Tag("Plugin")
   }
 
   case class Tag(label: String)
