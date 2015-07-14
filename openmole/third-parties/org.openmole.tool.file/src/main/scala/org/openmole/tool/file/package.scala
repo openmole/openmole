@@ -163,6 +163,8 @@ package file {
         }
       }
 
+      def copy(to: OutputStream) = withClosable(bufferedInputStream) { _.copy(to) }
+
       // TODO replace with NIO
       def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit =
         withClosable(bufferedInputStream) {

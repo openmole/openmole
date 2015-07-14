@@ -33,21 +33,9 @@ case class Execution(
   workDirectory: WorkDirectory,
   moleExecution: MoleExecution)
 
-case class WorkDirectory(baseDirectory: File) {
+case class WorkDirectory(workDirectory: File) {
 
-  lazy val inputDirectory = {
-    val f = new File(baseDirectory, "inputs")
-    f.mkdirs()
-    f
-  }
-
-  lazy val outputDirectory = {
-    val f = new File(baseDirectory, "outputs")
-    f.mkdirs()
-    f
-  }
-
-  def output = new File(baseDirectory, "output")
+  def output = new File(workDirectory, "output")
   lazy val outputStream = new PrintStream(output.bufferedOutputStream())
 
   def readOutput = {
@@ -57,7 +45,7 @@ case class WorkDirectory(baseDirectory: File) {
 
   def clean = {
     outputStream.close
-    baseDirectory.recursiveDelete
+    workDirectory.recursiveDelete
   }
 
 }
@@ -104,10 +92,10 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
 
         def extract =
           for {
-            archive ← fileParams get "inputDirectory"
+            archive ← fileParams get "workDirectory"
           } {
             val is = new TarInputStream(new GZIPInputStream(archive.getInputStream))
-            try is.extract(directory.inputDirectory) finally is.close
+            try is.extract(directory.workDirectory) finally is.close
           }
 
         def error(e: Throwable) = {
@@ -117,8 +105,9 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
 
         def compile = {
           val console = new Console()
-          val repl = console.newREPL(ConsoleVariables(args = Seq.empty, workDirectory = baseDirectory, inputDirectory = directory.inputDirectory, outputDirectory = directory.outputDirectory))
-          repl.eval(script)
+          val repl = console.newREPL(ConsoleVariables(args = Seq.empty, workDirectory = baseDirectory))
+          //FIXME use project once implemented
+          repl.eval(directory.workDirectory / script content)
         }
 
         def start(ex: MoleExecution) = {
@@ -154,15 +143,23 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
 
   }
 
-  post("/outputDirectory") {
+  post("/download") {
     authenticate()
     getExecution { ex ⇒
+      val path = (params get "path").getOrElse("")
+      val file = ex.workDirectory.workDirectory / path
       val gzOs = response.getOutputStream.toGZ
-      val os = new TarOutputStream(gzOs)
-      contentType = "application/octet-stream"
-      response.setHeader("Content-Disposition", "attachment; filename=" + "outputDirectory.tgz")
-      os.archive(ex.workDirectory.outputDirectory)
-      os.close()
+
+      if (file.isDirectory) {
+        val os = new TarOutputStream(gzOs)
+        contentType = "application/octet-stream"
+        response.setHeader("Content-Disposition", "attachment; filename=" + "outputDirectory.tgz")
+        os.archive(file)
+        os.close
+      }
+      else {
+        file.copy(gzOs)
+      }
       Ok()
     }
   }
