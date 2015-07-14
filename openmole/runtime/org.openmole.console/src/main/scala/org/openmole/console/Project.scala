@@ -16,43 +16,36 @@
  */
 package org.openmole.console
 
+import javax.script.CompiledScript
+import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.file._
 
 import scala.util.{ Success, Failure, Try }
 
-/*class Project(workDirectory: File, script: String)(
-  pluginsDirectory: File = workDirectory / "plugin") {
+sealed trait CompileResult
+case class ScriptFileDoesNotExists() extends CompileResult
+case class CompilationError(exception: Throwable) extends CompileResult
+case class Compiled(result: CompiledScript) extends CompileResult
+
+class Project(workDirectory: File) {
+
+  def pluginsDirectory: File = workDirectory / "plugins"
+  def plugins = pluginsDirectory.listFilesSafe
 
   lazy val console = new Console()
-  def loadPlugins =  if (pluginsDirectory.exists()) PluginManager.load(pluginsDirectory.listFilesSafe) else List.empty
+  def loadPlugins = PluginManager.load(plugins)
 
-  def run(args: Seq[String] = Seq.empty, pluginSet: PluginSet) = {
-    def engine = console.newREPL(ConsoleVariables(args))
-    Console.withREPL(ConsoleVariables(args, workDirectory)) { loop ⇒
-      Try(loop.compile(scriptFile.content)) match {
-        case Failure(e) ⇒
-          println(e.getMessage)
-          println(e.stackString)
-          ExitCodes.compilationError
-        case Success(compiled) ⇒
-          compiled.eval() match {
-            case res: PuzzleBuilder ⇒
-              val ex = res.buildPuzzle.toExecution()
-              ex.start
-              Try(ex.waitUntilEnded) match {
-                case Success(_) ⇒ ExitCodes.ok
-                case Failure(e) ⇒
-                  println("Error during script execution: " + e.getMessage)
-                  print(e.stackString)
-                  ExitCodes.executionError
-              }
-            case _ ⇒
-              println(s"Script $scriptFile doesn't end with a puzzle")
-              ExitCodes.notAPuzzle
-          }
+  def compile(script: File, args: Seq[String] = Seq.empty): CompileResult = {
+    if (!script.exists) ScriptFileDoesNotExists()
+    else {
+      console.withREPL(ConsoleVariables(args, workDirectory)) { loop ⇒
+        Try(loop.compile(script.content)) match {
+          case Failure(e)        ⇒ CompilationError(e)
+          case Success(compiled) ⇒ Compiled(compiled)
+        }
       }
     }
 
-
   }
-}*/
+}

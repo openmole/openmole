@@ -118,22 +118,33 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
     Try {
       PluginManager.synchronized {
         val projectDirectory = clone / project.directory
-        val pluginsDirectory = projectDirectory / "plugins"
-        val plugins = if (pluginsDirectory.exists()) PluginManager.load(pluginsDirectory.listFilesSafe) else List.empty
+        val consoleProject = new Project(projectDirectory)
+        val plugins = consoleProject.loadPlugins
         try {
-          def engine = console.newREPL(ConsoleVariables.empty)
-          for { file ← project.files } engine.compiled(projectDirectory / file content)
-          true
+          def exclusion = s"Project ${project} of repository $repository has been excluded "
+
+          def compiles = for { file ← project.files } yield {
+            consoleProject.compile(projectDirectory / file) match {
+              case Compiled(puzzle) ⇒ true
+              case CompilationError(e) ⇒
+                Log.logger.log(Log.WARNING, exclusion + " because there was an error during compilation.", e)
+                false
+              case e ⇒
+                Log.logger.log(Log.WARNING, exclusion + s" because the compilation raise the error $e")
+                false
+            }
+          }
+          compiles.exists(_ != true)
         }
         finally {
           plugins.foreach(_.uninstall())
         }
       }
     } match {
-      case Success(b) ⇒ b
       case Failure(e) ⇒
-        Log.logger.log(Log.WARNING, s"Project ${project} of repository $repository has been excluded", e)
+        Log.logger.log(Log.WARNING, s"Error durring $project test.", e)
         false
+      case Success(_) ⇒ true
     }
 
   def update(repository: MarketRepository, cloneDirectory: File): File = {

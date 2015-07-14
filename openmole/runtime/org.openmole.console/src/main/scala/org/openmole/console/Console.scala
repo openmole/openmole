@@ -80,7 +80,8 @@ object Console {
     def scriptDoesNotExist = 2
     def compilationError = 3
     def notAPuzzle = 4
-    def executionError = 5
+    def validationError = 5
+    def executionError = 6
     def restart = 254
   }
 
@@ -96,7 +97,7 @@ case class ConsoleVariables(
   args: Seq[String] = Seq.empty,
   workDirectory: File = currentDirectory)
 
-class Console(password: Option[String] = None, script: List[String] = Nil) {
+class Console(password: Option[String] = None, script: Option[String] = None) {
   console ⇒
 
   def workspace = "workspace"
@@ -139,59 +140,51 @@ class Console(password: Option[String] = None, script: List[String] = Nil) {
       case true ⇒
 
         script match {
-          case Nil ⇒
+          case None ⇒
             val newArgs = workDirectory.map(f ⇒ args.copy(workDirectory = f)).getOrElse(args)
             withREPL(newArgs) { loop ⇒
               loop.storeErrors = false
               loop.loopWithExitCode
             }
-          case scripts ⇒
-            def execute(script: List[File]): Int = {
-              if (script.isEmpty) ExitCodes.ok
-              else {
-                val ret: Int = {
-                  val scriptFile = script.head
-                  if (scriptFile.exists) {
-                    val wd = workDirectory.getOrElse(scriptFile.getParentFileSafe)
-                    val newArgs: ConsoleVariables =
-                      args.copy(workDirectory = wd)
-                    withREPL(newArgs) { loop ⇒
-                      Try(loop.compile(scriptFile.content)) match {
-                        case Failure(e) ⇒
-                          println(e.getMessage)
-                          println(e.stackString)
-                          ExitCodes.compilationError
-                        case Success(compiled) ⇒
-                          compiled.eval() match {
-                            case res: PuzzleBuilder ⇒
-                              val ex = res.buildPuzzle.toExecution()
-                              ex.start
-                              Try(ex.waitUntilEnded) match {
-                                case Success(_) ⇒ ExitCodes.ok
-                                case Failure(e) ⇒
-                                  println("Error during script execution: " + e.getMessage)
-                                  print(e.stackString)
-                                  ExitCodes.executionError
-                              }
-                            case _ ⇒
-                              println(s"Script $scriptFile doesn't end with a puzzle")
-                              ExitCodes.notAPuzzle
-                          }
-                      }
+          case Some(script) ⇒
+            val scriptFile = new File(script)
+            val project = new Project(workDirectory.getOrElse(scriptFile.getParentFileSafe))
+            project.compile(scriptFile, args.args) match {
+              case ScriptFileDoesNotExists() ⇒
+                println("File " + scriptFile + " doesn't exist.")
+                ExitCodes.scriptDoesNotExist
+              case CompilationError(e) ⇒
+                println(e.getMessage)
+                println(e.stackString)
+                ExitCodes.compilationError
+              case Compiled(compiled) ⇒
+                compiled.eval() match {
+                  case res: PuzzleBuilder ⇒
+                    val ex = res.buildPuzzle.toExecution()
+                    Try(ex.start) match {
+                      case Failure(e) ⇒
+                        println(e.getMessage)
+                        println(e.stackString)
+                        ExitCodes.validationError
+                      case Success(_) ⇒
+                        Try(ex.waitUntilEnded) match {
+                          case Success(_) ⇒ ExitCodes.ok
+                          case Failure(e) ⇒
+                            println("Error during script execution: " + e.getMessage)
+                            print(e.stackString)
+                            ExitCodes.executionError
+                        }
                     }
-                  }
-                  else {
-                    println("File " + scriptFile + " doesn't exist.")
-                    ExitCodes.scriptDoesNotExist
-                  }
+                  case _ ⇒
+                    println(s"Script $scriptFile doesn't end with a puzzle")
+                    ExitCodes.notAPuzzle
                 }
-                if (ret != ExitCodes.ok) ret else execute(script.tail)
-              }
+
             }
-            execute(scripts.map(new File(_)))
         }
 
     }
+
   }
 
   def initialise(loop: ScalaREPL, variables: ConsoleVariables) = {

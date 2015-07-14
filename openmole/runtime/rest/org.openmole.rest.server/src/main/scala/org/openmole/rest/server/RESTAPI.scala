@@ -103,13 +103,6 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
           ExpectationFailed(Error(e).toJson)
         }
 
-        def compile = {
-          val console = new Console()
-          val repl = console.newREPL(ConsoleVariables(args = Seq.empty, workDirectory = baseDirectory))
-          //FIXME use project once implemented
-          repl.eval(directory.workDirectory / script content)
-        }
-
         def start(ex: MoleExecution) = {
           Try(ex.start) match {
             case Failure(e) ⇒ error(e)
@@ -119,26 +112,23 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
           }
         }
 
-        def launch: ActionResult =
-          Try(compile) match {
-            case Failure(e) ⇒ error(e)
-            case Success(o) ⇒
-              o match {
-                case p: PuzzleBuilder ⇒
-                  Try(p.buildPuzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream))) match {
-                    case Success(ex) ⇒
-                      ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
-                      start(ex)
-                    case Failure(e) ⇒ error(e)
-                  }
-                case _ ⇒
-                  directory.clean
-                  ExpectationFailed(Error("The last line of the script should be a puzzle").toJson)
-              }
-          }
+        val project = new Project(directory.workDirectory)
+        project.compile(directory.workDirectory / script) match {
+          case ScriptFileDoesNotExists() ⇒ ExpectationFailed(Error("The script doesn't exist").toJson)
+          case CompilationError(e)       ⇒ error(e)
+          case Compiled(compiled) ⇒
+            compiled.eval() match {
+              case res: PuzzleBuilder ⇒
+                Try(res.buildPuzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream))) match {
+                  case Success(ex) ⇒
+                    ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
+                    start(ex)
+                  case Failure(e) ⇒ error(e)
+                }
+              case _ ⇒ ExpectationFailed(Error("The last line of the script should be a puzzle").toJson)
+            }
 
-        extract
-        launch
+        }
     }
 
   }
