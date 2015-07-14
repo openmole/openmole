@@ -202,7 +202,7 @@ object DocumentationPages { index ⇒
 
     def language =
       new DocumentationPage {
-        def name = "Laguage"
+        def name = "Language"
         def children = Seq(task, sampling, transition, hook, environment, source, method)
         def content = documentation.Language()
 
