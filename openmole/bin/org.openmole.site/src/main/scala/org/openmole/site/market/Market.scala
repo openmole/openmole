@@ -67,7 +67,7 @@ object Market extends Logger {
       MarketEntry("Fire in NetLogo", "fire", Seq("explore.oms"), Seq(netlogo, stochastic, simulation)),
       MarketEntry("Hello World in Java", "java-hello", Seq("explore.oms"), Seq(java)),
       MarketEntry("Calibration of Ants", "ants", Seq("calibrate.oms", "island.oms"), Seq(netlogo, ga, simulation)),
-      MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq("hello.oms"), Seq(scala, java, plugin))
+      MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq("hellotask.oms", "hellocode.oms"), Seq(scala, java, plugin))
     )
   )
 
