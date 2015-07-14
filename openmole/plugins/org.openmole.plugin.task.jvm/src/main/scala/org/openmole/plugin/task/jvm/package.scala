@@ -29,8 +29,10 @@ package jvm {
   trait JVMPackage extends external.ExternalPackage {
     lazy val imports = add[{ def addImport(s: String*) }]
     lazy val libraries = add[{ def addLibrary(l: File*) }]
-    lazy val plugins = add[{ def addPlugin(plugins: Seq[File]*) }]
-    def pluginsOf[T: Manifest] = PluginManager.pluginsForClass(manifest[T].runtimeClass)
+    lazy val plugins = add[{ def addPlugins(plugins: Seq[File]*) }]
+    def pluginsOf(o: Any): Seq[File] = pluginsOf(o.getClass)
+    def pluginsOf[T](implicit m: Manifest[T]): Seq[File] = pluginsOf(manifest[T].runtimeClass)
+    def pluginsOf(clazz: Class[_]): Seq[File] = PluginManager.pluginsForClass(clazz).toSeq
   }
 }
 

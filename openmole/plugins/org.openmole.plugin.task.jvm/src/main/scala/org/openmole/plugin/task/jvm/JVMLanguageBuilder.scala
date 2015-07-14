@@ -62,7 +62,7 @@ trait JVMLanguageBuilder { builder ⇒
     this
   }
 
-  def addPlugins(plugin: Seq[File]): this.type = {
+  def addPlugins(plugin: Seq[File]*): this.type = {
     plugins.foreach {
       plugin ⇒
         PluginManager.bundle(plugin) match {
@@ -70,7 +70,7 @@ trait JVMLanguageBuilder { builder ⇒
           case _    ⇒
         }
     }
-    _plugins ++= plugin
+    _plugins ++= plugin.flatten
     this
   }
 
