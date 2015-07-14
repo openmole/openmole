@@ -87,7 +87,7 @@ package object evolution {
 
   private def components[ALG <: GAAlgorithm](
     name: String,
-    evolution: ALG)(implicit plugins: PluginSet) = new { components ⇒
+    evolution: ALG) = new { components ⇒
     import evolution._
 
     val genome = Prototype[evolution.G](name + "Genome")
@@ -145,7 +145,7 @@ package object evolution {
 
   def GenerationalGA[ALG <: GAAlgorithm](algorithm: ALG)(
     fitness: Puzzle,
-    lambda: Int)(implicit plugins: PluginSet) = {
+    lambda: Int) = {
 
     val name = "generationalGA"
 
@@ -200,7 +200,7 @@ package object evolution {
 
   def SteadyGA[ALG <: GAAlgorithm](algorithm: ALG)(
     fitness: Puzzle,
-    lambda: Int)(implicit plugins: PluginSet) = {
+    lambda: Int) = {
 
     val name = "steadyGA"
 
@@ -269,7 +269,7 @@ package object evolution {
     fitness: Puzzle,
     number: Int,
     termination: GATermination { type G >: algorithm.G; type P >: algorithm.P; type F >: algorithm.F },
-    samples: Int)(implicit plugins: PluginSet) = {
+    samples: Int) = {
 
     val name = "islandSteadyGA"
 
@@ -290,7 +290,7 @@ package object evolution {
     fitness: Puzzle,
     number: Int,
     termination: GATermination { type G >: parameters.evolution.G; type P >: parameters.evolution.P; type F >: parameters.evolution.F },
-    samples: Int)(implicit plugins: PluginSet) = {
+    samples: Int) = {
 
     val name = "islandGA"
 

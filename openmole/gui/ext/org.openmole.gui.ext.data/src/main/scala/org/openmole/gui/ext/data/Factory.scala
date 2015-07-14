@@ -17,7 +17,6 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.workflow.task.PluginSet
 import scala.util.Try
 
 trait Factory {
@@ -25,7 +24,7 @@ trait Factory {
 }
 
 trait CoreObjectFactory extends Factory {
-  def coreObject(implicit plugins: PluginSet): Try[Any]
+  def coreObject(): Try[Any]
 }
 
 trait AuthenticationFactory extends Factory {

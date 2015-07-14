@@ -30,7 +30,7 @@ import org.openmole.core.workflow.domain._
 object ScalingGAGenomeTask {
 
   def apply(evolution: GAAlgorithm)(
-    genome: Prototype[evolution.G])(implicit plugins: PluginSet) = {
+    genome: Prototype[evolution.G]) = {
 
     val (_genome) = (genome)
     new TaskBuilder { builder ⇒

@@ -28,7 +28,7 @@ object ToIndividualTask {
 
   def apply(evolution: GAAlgorithm)(
     genome: Prototype[evolution.G],
-    individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]])(implicit plugins: PluginSet) = {
+    individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]]) = {
 
     new TaskBuilder { builder ⇒
       evolution.outputPrototypes.foreach(p ⇒ addInput(p))

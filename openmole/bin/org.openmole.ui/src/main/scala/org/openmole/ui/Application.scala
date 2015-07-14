@@ -173,13 +173,13 @@ class Application extends IApplication {
           ExitCodes.ok
         case ServerMode ⇒
           if (!config.password.isDefined) Console.initPassword
-          val server = new RESTServer(config.webServerPort, config.webServerSSLPort, config.hostName, config.allowInsecureConnections, PluginSet(userPlugins))
+          val server = new RESTServer(config.webServerPort, config.webServerSSLPort, config.hostName, config.allowInsecureConnections)
           server.start()
           ExitCodes.ok
         case ConsoleMode ⇒
           print(consoleSplash)
           println(consoleUsage)
-          val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
+          val console = new Console(config.password, config.scriptFile)
           val variables = ConsoleVariables(args = config.args)
           console.run(variables, config.consoleWorkDirectory)
         case GUIMode ⇒

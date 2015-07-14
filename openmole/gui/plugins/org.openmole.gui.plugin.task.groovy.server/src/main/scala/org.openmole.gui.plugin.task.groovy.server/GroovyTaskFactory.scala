@@ -2,8 +2,8 @@ package org.openmole.gui.plugin.task.groovy.server
 
 import org.openmole.gui.ext.data.{CoreObjectFactory, Factory}
 import org.openmole.gui.plugin.task.groovy.ext.GroovyTaskData
-import org.openmole.core.workflow.task.PluginSet
-import org.openmole.plugin.task.groovy.GroovyTask
+import org.openmole.core.workflow.task._
+import org.openmole.plugin.task.groovy._
 import scala.util.Try
 
 /*
@@ -25,7 +25,7 @@ import scala.util.Try
 
 class GroovyTaskFactory(val data: GroovyTaskData) extends CoreObjectFactory {
 
-  def coreObject(implicit plugins: PluginSet): Try[Any] =
-    Try { GroovyTask(data.code)(plugins) //set { _ setName data.name }
+  def coreObject(): Try[Any] =
+    Try { GroovyTask(data.code) //set { _ setName data.name }
      }
 }

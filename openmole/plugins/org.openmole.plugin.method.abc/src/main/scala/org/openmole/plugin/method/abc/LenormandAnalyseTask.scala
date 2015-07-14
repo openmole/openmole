@@ -31,7 +31,7 @@ object LenormandAnalyseTask {
     state: Prototype[algorithm.Lenormand#STATE],
     terminated: Prototype[Boolean],
     iteration: Prototype[Int],
-    accepted: Prototype[Double])(implicit plugins: PluginSet) = {
+    accepted: Prototype[Double]) = {
     val (_lenormand, _state, _terminated, _iteration, _accepted) = (lenormand, state, terminated, iteration, accepted)
 
     new TaskBuilder() { builder ⇒

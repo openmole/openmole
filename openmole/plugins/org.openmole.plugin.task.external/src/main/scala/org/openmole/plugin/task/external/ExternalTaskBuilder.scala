@@ -25,7 +25,6 @@ import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.data.Prototype
 import org.openmole.plugin.task.external.ExternalTask._
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.workflow.task.PluginSet
 
 /**
  * Builder for task using external files or directories

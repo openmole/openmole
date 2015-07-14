@@ -23,9 +23,14 @@ import org.openmole.core.macros.Keyword._
 import org.openmole.core.workflow.builder._
 
 package jvm {
+
+  import org.openmole.core.pluginmanager.PluginManager
+
   trait JVMPackage extends external.ExternalPackage {
     lazy val imports = add[{ def addImport(s: String*) }]
     lazy val libraries = add[{ def addLibrary(l: File*) }]
+    lazy val plugins = add[{ def addPlugin(plugins: Seq[File]*) }]
+    def pluginsOf[T: Manifest] = PluginManager.pluginsForClass(manifest[T].runtimeClass)
   }
 }
 

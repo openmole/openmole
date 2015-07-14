@@ -19,8 +19,6 @@ package org.openmole.plugin.task.statistic
 
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task.PluginSet
 
 import scala.collection.mutable.ListBuffer
 

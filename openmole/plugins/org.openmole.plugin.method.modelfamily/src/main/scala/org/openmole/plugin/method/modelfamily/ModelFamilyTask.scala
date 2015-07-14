@@ -19,7 +19,6 @@ package org.openmole.plugin.method.modelfamily
 
 import java.io.File
 
-import fr.iscpif.family.{ Combination, TypedValue, ModelFamily }
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.builder.TaskBuilder
@@ -60,9 +59,8 @@ abstract class ModelFamilyTask(val modelFamily: ModelFamily) extends Task { t â‡
     def attributes = modelFamily.attributes.map(d â‡’ d.prototype: TypedValue)
     def combination: Combination[Class[_]] = modelFamily.combination
     def compile(code: String): Try[Any] = compilation.compile(code)
-    def compilation = new ScalaCompilation with UsedClasses {
+    def compilation = new ScalaCompilation {
       def libraries: Seq[File] = modelFamily.libraries
-      def usedClasses = modelFamily.usedClasses
       def plugins = modelFamily.plugins
     }
     def source(traits: String, attributes: String) = {

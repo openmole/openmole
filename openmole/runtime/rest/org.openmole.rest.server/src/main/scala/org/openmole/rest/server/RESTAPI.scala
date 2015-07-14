@@ -116,7 +116,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
         }
 
         def compile = {
-          val console = new Console(arguments.plugins)
+          val console = new Console()
           val repl = console.newREPL(ConsoleVariables(args = Seq.empty, workDirectory = baseDirectory, inputDirectory = directory.inputDirectory, outputDirectory = directory.outputDirectory))
           repl.eval(script)
         }

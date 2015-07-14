@@ -39,7 +39,7 @@ package object abc {
 
   def abc(
     algorithm: Lenormand with ABC,
-    model: Puzzle)(implicit plugins: PluginSet) = {
+    model: Puzzle) = {
     val name = "abc"
     val acceptedPrototype = Prototype[Double](name + "Accepted")
     val iterationPrototype = Prototype[Int](name + "Iteration")

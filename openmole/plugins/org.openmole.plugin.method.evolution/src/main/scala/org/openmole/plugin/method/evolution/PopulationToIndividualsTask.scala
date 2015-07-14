@@ -28,7 +28,7 @@ object PopulationToIndividualsTask {
 
   def apply(evolution: G with P with F)(
     population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
-    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]])(implicit plugins: PluginSet) = {
+    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]) = {
     val _population = population
     val _individuals = individuals
 

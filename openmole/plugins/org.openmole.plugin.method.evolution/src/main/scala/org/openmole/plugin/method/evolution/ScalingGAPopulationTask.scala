@@ -29,7 +29,7 @@ import org.openmole.core.workflow.task._
 object ScalingGAPopulationTask {
 
   def apply(evolution: GAAlgorithm)(
-    population: Prototype[Population[evolution.G, evolution.P, evolution.F]])(implicit plugins: PluginSet) = {
+    population: Prototype[Population[evolution.G, evolution.P, evolution.F]]) = {
 
     val (_evolution, _population) = (evolution, population)
 

@@ -24,7 +24,7 @@ import org.openmole.plugin.task.jvm._
 
 object ScalaTask {
 
-  def apply(source: String)(implicit plugins: PluginSet = PluginSet.empty) =
+  def apply(source: String) =
     new ScalaTaskBuilder {
       def toTask = new ScalaTask(source) with Built
     }

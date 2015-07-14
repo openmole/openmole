@@ -19,7 +19,6 @@ package org.openmole.plugin.task.systemexec
 
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task.PluginSet
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.data._
 

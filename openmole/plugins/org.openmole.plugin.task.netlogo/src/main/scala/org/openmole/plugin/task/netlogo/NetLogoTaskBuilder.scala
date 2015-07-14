@@ -21,7 +21,6 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data.Prototype
 import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.workflow.task.PluginSet
 
 abstract class NetLogoTaskBuilder(private val workspace: NetLogoTask.Workspace, private val launchingCommands: Seq[String], private val netLogoFactory: NetLogoFactory) extends ExternalTaskBuilder { builder ⇒
 
