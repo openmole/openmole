@@ -50,7 +50,7 @@ class CopyDirVisitor(fromPath: Path, toPath: Path, copyOptions: Array[CopyOption
   @throws(classOf[IOException])
   override def visitFileFailed(file: Path, exc: IOException): FileVisitResult = {
     exc match {
-      case _: java.nio.file.AccessDeniedException ⇒ Log.logger.warning(s"Could not read ${file} (${exc.getMessage}})")
+      case _: java.nio.file.AccessDeniedException ⇒ Log.logger.warning(s"Could not read ${file}, skip from archive (Permission Denied).")
       case _                                      ⇒ throw exc
     }
     FileVisitResult.CONTINUE
