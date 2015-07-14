@@ -90,18 +90,11 @@ import Console._
 
 object ConsoleVariables {
   def empty = ConsoleVariables()
-
-  def apply(
-    args: Seq[String] = Seq.empty,
-    workDirectory: File = currentDirectory): ConsoleVariables =
-    ConsoleVariables(args, workDirectory, workDirectory, workDirectory)
 }
 
 case class ConsoleVariables(
-  args: Seq[String],
-  workDirectory: File,
-  inputDirectory: File,
-  outputDirectory: File)
+  args: Seq[String] = Seq.empty,
+  workDirectory: File = currentDirectory)
 
 class Console(password: Option[String] = None, script: List[String] = Nil) {
   console ⇒
@@ -198,7 +191,6 @@ class Console(password: Option[String] = None, script: List[String] = Nil) {
 
   def initialise(loop: ScalaREPL, variables: ConsoleVariables) = {
     variables.workDirectory.mkdirs()
-    variables.outputDirectory.mkdirs()
     loop.beQuietDuring {
       loop.bind(commandsName, new Command)
       initialisationCommands.foreach {
