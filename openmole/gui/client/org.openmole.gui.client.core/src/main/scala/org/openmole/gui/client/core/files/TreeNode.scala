@@ -46,7 +46,7 @@ sealed trait TreeNode {
 
   def name: Var[String]
 
-  def canonicalPath: Var[SafePath]
+  def safePath: Var[SafePath]
 
   def hasSons: Boolean
 
@@ -58,10 +58,10 @@ sealed trait TreeNode {
 object TreeNode {
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode =
-    if (tnd.isDirectory) DirNode(tnd.name, tnd.canonicalPath, tnd.size, tnd.readableSize, Var(Seq()))
-    else FileNode(tnd.name, tnd.canonicalPath, tnd.size, tnd.readableSize)
+    if (tnd.isDirectory) DirNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize, Var(Seq()))
+    else FileNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize)
 
-  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.canonicalPath(), tn match {
+  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.safePath(), tn match {
     case DirNode(_, _, _, _, _) ⇒ true
     case _                      ⇒ false
   }, tn.size, tn.readableSize)
@@ -88,7 +88,7 @@ object TreeNodeOrdering extends Ordering[TreeNode] {
 }
 
 case class DirNode(name: Var[String],
-                   canonicalPath: Var[SafePath],
+                   safePath: Var[SafePath],
                    size: Long,
                    readableSize: String,
                    sons: Var[Seq[TreeNode]] = Var(Seq())) extends TreeNode {
@@ -96,7 +96,7 @@ case class DirNode(name: Var[String],
 }
 
 case class FileNode(name: Var[String],
-                    canonicalPath: Var[SafePath],
+                    safePath: Var[SafePath],
                     size: Long,
                     readableSize: String) extends TreeNode {
   def hasSons = false

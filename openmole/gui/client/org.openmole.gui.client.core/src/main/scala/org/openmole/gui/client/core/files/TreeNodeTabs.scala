@@ -73,7 +73,7 @@ object TreeNodeTabs {
 
     val editorElement = editor.view
 
-    def save(onsaved: () ⇒ Unit) = OMPost[Api].saveFile(serverFilePath().path, editor.code).call().foreach { d ⇒
+    def save(onsaved: () ⇒ Unit) = OMPost[Api].saveFile(serverFilePath(), editor.code).call().foreach { d ⇒
       onsaved()
     }
   }
@@ -177,12 +177,12 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   def rename(tn: TreeNode, newNode: TreeNode) = {
     find(tn).map { tab ⇒
       tab.tabName() = newNode.name()
-      tab.serverFilePath() = newNode.canonicalPath()
+      tab.serverFilePath() = newNode.safePath()
     }
   }
 
   def find(treeNode: TreeNode) = tabs().find { t ⇒
-    t.serverFilePath() == treeNode.canonicalPath()
+    t.serverFilePath() == treeNode.safePath()
   }
 
   def active = tabs().find { t ⇒ isActive(t) }

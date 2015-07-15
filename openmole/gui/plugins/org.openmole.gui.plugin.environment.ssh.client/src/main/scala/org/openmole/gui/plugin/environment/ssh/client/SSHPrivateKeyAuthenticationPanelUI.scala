@@ -49,7 +49,7 @@ class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) ext
     `type` := "password",
     width := "130px").render
 
-  lazy val privateKey = new AuthFileUploaderUI(data.privateKey.map{_.leaf}.getOrElse(""), data.privateKey.isDefined)
+  lazy val privateKey = new AuthFileUploaderUI(data.privateKey.map{_.path.last}.getOrElse(""), data.privateKey.isDefined)
 
   @JSExport
   val view = {

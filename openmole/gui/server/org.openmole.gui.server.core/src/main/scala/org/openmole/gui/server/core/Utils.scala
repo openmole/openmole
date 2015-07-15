@@ -35,26 +35,52 @@ object Utils {
     case _                       ⇒ BINARY
   }
 
-  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, SafePath(f.toURI.toString, f.getName, f), f.isDirectory, f.length, readableByteCount(f.length))
+  val webUIProjectFile = Workspace.file("webui")
 
-  implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
-    fileToTreeNodeData(_)
-  }
-
-  implicit def fileToSafePath(f: File): SafePath = SafePath(f.toURI.toString, f.getName, f)
-
-  implicit def fileToOptionSafePath(f: File): Option[SafePath] = Some(fileToSafePath(f))
-
-  implicit def safePathToFile(s: SafePath): File = new File(s.path)
-
-  def getParent(f: File) = f.getParentFile.getName
-
-  val workspaceProjectFile = Workspace.file("webui/projects")
+  val workspaceProjectFile = new File(Workspace.file("webui"), "projects")
 
   val workspaceRoot = workspaceProjectFile.getParentFile
 
   val authenticationKeysFile = Workspace.file("persistent/keys")
 
-  def listFiles(path: SafePath): Seq[TreeNodeData] = new File(path.path).listFilesSafe.toSeq
+  implicit def fileToSafePath(f: File): SafePath = SafePath(getPathArray(f, workspaceProjectFile), f)
 
+  implicit def safePathToFile(s: SafePath): File = new File(webUIProjectFile, getFile(s.path).getCanonicalPath)
+
+  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, f.length, readableByteCount(f.length))
+
+  implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
+    fileToTreeNodeData(_)
+  }
+
+  implicit def fileToOptionSafePath(f: File): Option[SafePath] = Some(fileToSafePath(f))
+
+  //def relativeSafePathToFile(sp: SafePath): File = Utils.webUIProjectSafePath / sp
+
+  def getPathArray(f: File, until: File): Seq[String] = {
+    def getParentsArray0(f: File, computedParents: Seq[String]): Seq[String] = {
+      val parent = f.getParentFile
+      if (parent != null) {
+        val parentName = parent.getName
+        if (parentName != "") {
+          val computed = parentName +: computedParents
+          if (parent == until) computed
+          else getParentsArray0(parent, computed)
+        }
+        else computedParents
+      }
+      else computedParents
+    }
+    getParentsArray0(f, Seq()) :+ f.getName
+  }
+
+  def getFile(paths: Seq[String]): File = {
+    def getFile0(paths: Seq[String], accFile: File): File = {
+      if (paths.isEmpty) accFile
+      else getFile0(paths.tail, new File(accFile, paths.head))
+    }
+    getFile0(paths, new File(""))
+  }
+
+  def listFiles(path: SafePath): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
 }

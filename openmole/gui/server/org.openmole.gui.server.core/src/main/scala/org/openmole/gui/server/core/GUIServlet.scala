@@ -102,7 +102,25 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   post("/uploadfiles") {
     for (file ← fileParams) yield {
-      val destination = new java.io.File(file._1)
+
+      val destination = new File(Utils.webUIProjectFile, file._1)
+      val stream = file._2.getInputStream
+      try {
+        stream.copy(destination)
+        destination.setExecutable(true)
+      }
+      finally stream.close
+      Ok(file, Map(
+        "Content-Type" -> ("application/octet-stream"),
+        "Content-Disposition" -> ("form-data; filename=\"" + file._1 + "\"")
+      ))
+    }
+  }
+
+  post("/uploadkeys") {
+    for (file ← fileParams) yield {
+
+      val destination = new File(Utils.authenticationKeysFile, file._1)
       val stream = file._2.getInputStream
       try {
         stream.copy(destination)
@@ -119,10 +137,10 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   get("/downloadFile") {
     case class ToDownload(file: File, name: String)
 
-    val path = params("path")
+    val path = new java.net.URI(params("path")).toString
 
     val dl = {
-      val f = new File(path)
+      val f = new File(Utils.webUIProjectFile, path)
       if (f.isDirectory) {
         val tar = Workspace.newFile()
         f.archiveCompress(tar)
