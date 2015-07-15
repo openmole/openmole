@@ -17,14 +17,12 @@
 
 package org.openmole.core.batch.replication
 
-import akka.dispatch.sysmsg.Failed
 import com.google.common.cache.CacheBuilder
 import java.io.File
 import org.h2.jdbc.JdbcSQLException
 import org.openmole.core.replication.{ replicas, Replica, DBServerInfo }
-import org.openmole.core.tools.service.{ Logger, TimeCache }
+import org.openmole.core.tools.service.TimeCache
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
-import org.openmole.core.tools.service.Logger
 import java.util.regex.Pattern
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
@@ -33,6 +31,7 @@ import org.openmole.core.batch.environment.BatchEnvironment._
 import java.util.concurrent.TimeUnit
 
 import org.openmole.tool.lock.LockRepository
+import org.openmole.tool.logger.Logger
 
 import scala.annotation.tailrec
 import scala.concurrent.duration._

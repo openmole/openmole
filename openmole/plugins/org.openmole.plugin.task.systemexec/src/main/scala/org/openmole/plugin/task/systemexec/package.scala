@@ -23,29 +23,33 @@ import org.openmole.core.workflow.data.Prototype
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.tools.VariableExpansion
 
-package object systemexec extends external.ExternalPackage {
-  case class Commands(os: OS, parts: String*) {
-    @transient lazy val expanded = parts.map(VariableExpansion(_))
-  }
-
-  implicit def stringToCommands(s: String) = Commands(OS(), s)
-  implicit def seqOfStringToCommands(s: Seq[String]) = Commands(OS(), s: _*)
-
-  lazy val errorOnReturnCode = set[{ def setErrorOnReturnValue(b: Boolean) }]
-
-  lazy val returnValue = set[{ def setReturnValue(v: Option[Prototype[Int]]) }]
-
-  lazy val stdOut = set[{ def setStdOut(v: Option[Prototype[String]]) }]
-
-  lazy val stdErr = set[{ def setStdErr(v: Option[Prototype[String]]) }]
-
-  lazy val commands = add[{ def addCommand(os: OS, cmd: String*) }]
-
-  lazy val environmentVariable =
-    new {
-      def +=(prototype: Prototype[_], variable: Option[String] = None) =
-        (_: SystemExecTaskBuilder).addEnvironmentVariable(prototype, variable)
+package systemexec {
+  trait SystemExecPackage {
+    case class Commands(os: OS, parts: String*) {
+      @transient lazy val expanded = parts.map(VariableExpansion(_))
     }
 
-  lazy val workDirectory = set[{ def setWorkDirectory(s: Option[String]) }]
+    implicit def stringToCommands(s: String) = Commands(OS(), s)
+    implicit def seqOfStringToCommands(s: Seq[String]) = Commands(OS(), s: _*)
+
+    lazy val errorOnReturnCode = set[{ def setErrorOnReturnValue(b: Boolean) }]
+
+    lazy val returnValue = set[{ def setReturnValue(v: Option[Prototype[Int]]) }]
+
+    lazy val stdOut = set[{ def setStdOut(v: Option[Prototype[String]]) }]
+
+    lazy val stdErr = set[{ def setStdErr(v: Option[Prototype[String]]) }]
+
+    lazy val commands = add[{ def addCommand(os: OS, cmd: String*) }]
+
+    lazy val environmentVariable =
+      new {
+        def +=(prototype: Prototype[_], variable: Option[String] = None) =
+          (_: SystemExecTaskBuilder).addEnvironmentVariable(prototype, variable)
+      }
+
+    lazy val workDirectory = set[{ def setWorkDirectory(s: Option[String]) }]
+  }
 }
+
+package object systemexec extends external.ExternalPackage with SystemExecPackage

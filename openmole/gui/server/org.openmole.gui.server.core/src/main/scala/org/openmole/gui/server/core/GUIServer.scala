@@ -18,11 +18,13 @@ package org.openmole.gui.server.core
  */
 
 import java.io.File
+import java.util.concurrent.Semaphore
 import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp._
 import org.openmole.console.Console
+import org.openmole.console.Console.ExitCodes
 import org.openmole.core.tools.io.Network
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.scalatra.auth.strategy.{ BasicAuthStrategy, BasicAuthSupport }
@@ -53,12 +55,17 @@ object GUIServer {
   lazy val urlFile = Workspace.file("GUI.url")
 
   val servletArguments = "servletArguments"
-  case class ServletArguments(passwordCorrect: Option[String ⇒ Boolean] = None)
+  case class ServletArguments(passwordCorrect: Option[String ⇒ Boolean] = None, applicationControl: ApplicationControl)
+  case class ApplicationControl(restart: () ⇒ Unit, stop: () ⇒ Unit)
 }
+
+import GUIServer._
 
 class GUIServer(port: Int, webapp: File, authentication: Boolean) {
 
   val server = new Server()
+  var exitCode = ExitCodes.ok
+  val semaphore = new Semaphore(0)
 
   val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
   val ks = Workspace.keyStore
@@ -76,7 +83,12 @@ class GUIServer(port: Int, webapp: File, authentication: Boolean) {
 
   val context = new WebAppContext()
   val authenticationMethod = if (authentication) Some(GUIServer.isPasswordCorrect _) else None
-  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(authenticationMethod))
+  val applicationControl =
+    ApplicationControl(
+      () ⇒ { exitCode = ExitCodes.restart; stop() },
+      () ⇒ stop()
+    )
+  context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(authenticationMethod, applicationControl))
   context.setContextPath("/")
   context.setResourceBase(webapp.getAbsolutePath)
   context.setClassLoader(classOf[GUIServer].getClassLoader)
@@ -86,7 +98,15 @@ class GUIServer(port: Int, webapp: File, authentication: Boolean) {
   server.setHandler(context)
 
   def start() = server.start
-  def join() = server.join
-  def end() = server.stop
+  def join(): Int = {
+    semaphore.acquire()
+    semaphore.release()
+    exitCode
+  }
+
+  def stop() = {
+    semaphore.release()
+    server.stop()
+  }
 
 }

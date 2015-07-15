@@ -88,8 +88,7 @@ object OSGi extends Defaults {
         "org.scala-lang" % "scala-reflect" % sV,
         "org.scala-lang" % "scalap" % sV,
         "jline" % "jline" % "2.12.1",
-        "com.typesafe.akka" %% "akka-actor" % "2.3.9",
-        "com.typesafe.akka" %% "akka-transactor" % "2.3.9",
+        "org.scala-stm" %% "scala-stm" % "0.7",
         "com.typesafe" % "config" % "1.2.1",
         "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3",
         "org.scala-lang" % "scala-compiler" % sV
@@ -297,4 +296,11 @@ object OSGi extends Defaults {
 
   lazy val codec = OsgiProject("org.apache.commons.codec") settings
     (libraryDependencies += "commons-codec" % "commons-codec" % "1.10", version := "1.10")
+
+  lazy val jgit =OsgiProject("org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
+    libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit.java7" % "3.7.1.201504261725-r", version := "3.7.1" )
+
+  lazy val txtmark =OsgiProject("com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
+    libraryDependencies += "com.github.rjeschke" % "txtmark" % "0.13", version := "0.13" )
+
 }

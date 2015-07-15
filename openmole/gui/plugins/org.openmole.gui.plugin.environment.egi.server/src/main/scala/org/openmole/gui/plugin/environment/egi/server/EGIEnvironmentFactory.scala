@@ -22,11 +22,10 @@ import org.openmole.gui.plugin.environment.egi.ext.EGIEnvironmentData
 import org.openmole.plugin.environment.egi.EGIEnvironment
 import org.openmole.gui.ext.data.CoreObjectFactory
 
-import org.openmole.core.workflow.task.PluginSet
 import scala.util.Try
 
 class EGIEnvironmentFactory(val data: EGIEnvironmentData) extends CoreObjectFactory{
-  def coreObject(implicit plugins: PluginSet): Try[Any] = Try {
+  def coreObject(): Try[Any] = Try {
     EGIEnvironment(""
     )(Workspace.authenticationProvider)
   }

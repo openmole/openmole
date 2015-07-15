@@ -17,8 +17,6 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.workflow.task.PluginSet
-
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.dataui.{ FactoryWithPanelUI, FactoryWithDataUI }
 
@@ -30,7 +28,7 @@ object ServerFactories {
 
   def coreObject(dataBag: DataBag): Try[Any] = instance.factories.synchronized {
     instance.factories.get(dataBag.data.getClass()) match {
-      case Some(f: CoreObjectFactory) ⇒ f.coreObject(PluginSet.empty) //FIXME AND TAKE THE PLUGINS
+      case Some(f: CoreObjectFactory) ⇒ f.coreObject()
       case _                          ⇒ Failure(new Throwable("The data " + dataBag.name + " cannot be recontructed on the server."))
     }
   }

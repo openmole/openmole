@@ -29,7 +29,7 @@ import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
 import org.apache.sshd.server.session.ServerSession
 import org.apache.sshd.common.Session
 import org.apache.sshd.server.sftp.SftpSubsystem
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
 import collection.JavaConversions._
 

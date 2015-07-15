@@ -28,7 +28,8 @@ object Resource {
   def ants = FileResource("ants.png")
   def antNumbers = FileResource("antnumbers.png")
   def antsNLogo = FileResource("ants.nlogo")
-  def bootstrapCss = FileResource("bootstrap-3.3.2.css")
+  def bootstrapCss = FileResource("bootstrap.min.css")
+  def bootstrapJS = FileResource("bootstrap.min.js")
   def fireNLogo = FileResource("Fire.nlogo")
   def fireScreen = FileResource("firescreen.png")
   def fireGlobals = FileResource("fireGlobals.png")
@@ -45,6 +46,7 @@ object Resource {
   def all = Seq[Resource](
     css,
     bootstrapCss,
+    bootstrapJS,
     logo,
     openmole,
     openmoleDaemon,

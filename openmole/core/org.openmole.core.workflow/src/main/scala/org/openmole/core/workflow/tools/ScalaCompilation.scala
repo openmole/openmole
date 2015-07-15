@@ -32,11 +32,11 @@ import scala.util.{ Random, Try }
 
 trait ScalaCompilation {
 
-  def usedBundles: Seq[File]
+  def plugins: Seq[File]
   def libraries: Seq[File]
 
   def compile(code: String) = Try {
-    val interpreter = new ScalaREPL(usedBundles.flatMap(PluginManager.bundle) ++ Seq(PluginManager.bundleForClass(this.getClass)), libraries)
+    val interpreter = new ScalaREPL(plugins.flatMap(PluginManager.bundle) ++ Seq(PluginManager.bundleForClass(this.getClass)), libraries)
 
     val evaluated =
       try interpreter.eval(code)
@@ -61,7 +61,7 @@ object ScalaWrappedCompilation {
     new ScalaWrappedCompilation with ScalaRawOutput {
       override def source: String = code
       override def imports: Seq[String] = Seq.empty
-      override def usedBundles: Seq[File] = Seq.empty
+      override def plugins: Seq[File] = Seq.empty
       override def libraries: Seq[File] = Seq.empty
     }
 

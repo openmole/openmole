@@ -70,9 +70,9 @@
     imports += "myopenmoleplugin._",
     inputs += i,
     outputs += i,
-    usedClasses += classOf[myopenmoleplugin.Hello]
+    plugins += pluginsOf(myopenmoleplugin.Hello)
   )
 
   val exploration = ExplorationTask(i in (0 to 2))
 
-  val ex = exploration -< (hello hook ToStringHook()) start""", header = "object myopenmoleplugin { class Hello }")
+  val ex = exploration -< (hello hook ToStringHook()) start""", header = "object myopenmoleplugin { object Hello }")

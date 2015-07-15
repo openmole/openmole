@@ -20,5 +20,5 @@ package org.openmole.core.serializer.plugin
 import java.io.File
 
 trait Plugins {
-  def plugins: Set[File]
+  def plugins: Seq[File]
 }

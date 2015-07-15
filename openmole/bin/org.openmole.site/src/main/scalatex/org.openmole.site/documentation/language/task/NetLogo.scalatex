@@ -2,29 +2,30 @@
 @import org.openmole.site.Resource._
 
 @def variables = """
-    val density = Val[Double]
-    val seed = Val[Int]
-    val burned = Val[Double]""".stripMargin
+  val density = Val[Double]
+  val seed = Val[Int]
+  val burned = Val[Double]"""
 
 @def exploration = """
-    val exploration =
-      ExplorationTask(
-        (density in (20.0 to 80.0 by 10.0)) x
-        (seed in (UniformDistribution[Int]() take 10))
-      )""".stripMargin
+  val exploration =
+    ExplorationTask(
+      (density in (20.0 to 80.0 by 10.0)) x
+      (seed in (UniformDistribution[Int]() take 10))
+    )"""
 
 @def netlogo = """
-    val cmds = List(
-      "random-seed ${seed}",
-      "setup",
-      "while [any? turtles] [go]")
+  val cmds = List(
+    "random-seed ${seed}",
+    "setup",
+    "while [any? turtles] [go]")
 
-    val fireTask =
-      NetLogo5Task("/path/to/the/Fire.nlogo", cmds) set (
-        inputs += seed,
-        netLogoInputs += (density, "density"),
-        netLogoOutputs += ("burned-trees", burned)
-      )""".stripMargin
+  val fireTask =
+    NetLogo5Task("/path/to/the/Fire.nlogo", cmds) set (
+      inputs += seed,
+      outputs += (density, seed),
+      netLogoInputs += (density, "density"),
+      netLogoOutputs += ("burned-trees", burned)
+    )"""
 
 @def csvHook = """
   val csvHook = AppendToCSVFileHook("result.csv", density, burned, seed)"""
@@ -97,7 +98,7 @@
     OpenMOLE usually delegates the tasks execution to many different computers. To gather the results of these remote
     executions, we use a mechanism called @i{hooks}. Hooks can be assimilated to a listener that saves or display
     results. They are more thoroughly described in a
-    @a("specific section of the documentation", href := DocumentationPages.root.console.hook.file).
+    @a("specific section of the documentation", href := DocumentationPages.root.language.hook.file).
 
     @p Here we will create a hook to listen to the model executions and save the results in a CSV file at the end of
     each of the 70 runs.
@@ -118,7 +119,7 @@ $exploration
 $netlogo
 $csvHook
 
-    val ex = exploration -< (fireTask hook csvHook) start""")
+  exploration -< (fireTask hook csvHook)""")
 
     @p The progress of the simulation can be monitored by printing the state of the execution variable:
     @hl.openmoleNoTest("print(ex)").

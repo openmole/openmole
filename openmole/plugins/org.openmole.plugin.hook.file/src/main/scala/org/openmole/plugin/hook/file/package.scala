@@ -23,14 +23,17 @@ import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.hook.file.CopyFileHook.CopyFileHookBuilder
 import org.openmole.core.macros.Keyword._
 
-package object file {
+package file {
+  trait FilePackage {
+    def copies = new {
+      def +=(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false) =
+        (_: CopyFileHookBuilder).addCopy(prototype, destination, remove, compress, move)
+    }
 
-  def copies = new {
-    def +=(prototype: Prototype[File], destination: ExpandedString, remove: Boolean = false, compress: Boolean = false, move: Boolean = false) =
-      (_: CopyFileHookBuilder).addCopy(prototype, destination, remove, compress, move)
+    def csvHeader = set[{ def setCSVHeader(h: Option[ExpandedString]) }]
+
+    def singleRow = set[{ def setSingleRow(b: Boolean) }]
   }
-
-  def csvHeader = set[{ def setCSVHeader(h: Option[ExpandedString]) }]
-
-  def singleRow = set[{ def setSingleRow(b: Boolean) }]
 }
+
+package object file extends FilePackage

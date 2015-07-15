@@ -22,16 +22,17 @@ import java.io.{ FileOutputStream, File }
 import java.net.URI
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
+import org.openmole.console.Console.ExitCodes
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.tools.io.Network
-import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.bootstrap.js.BootstrapJS
 import org.openmole.core.workflow.task._
 import org.openmole.console.Console
 import org.openmole.rest.server.RESTServer
+import org.openmole.tool.logger.Logger
 import annotation.tailrec
 import org.openmole.gui.server.core._
 import org.openmole.console._
@@ -68,7 +69,8 @@ class Application extends IApplication {
       guiPluginsDirs: List[String] = Nil,
       userPlugins: List[String] = Nil,
       workspaceDir: Option[String] = None,
-      scriptFile: List[String] = Nil,
+      scriptFile: Option[String] = None,
+      consoleWorkDirectory: Option[File] = None,
       password: Option[String] = None,
       hostName: Option[String] = None,
       launchMode: LaunchMode = GUIMode,
@@ -110,12 +112,13 @@ class Application extends IApplication {
         case "-cp" :: tail                          ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
         case "-gp" :: tail                          ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
         case "-p" :: tail                           ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
-        case "-s" :: tail                           ⇒ parse(dropArgs(tail), c.copy(scriptFile = takeArgs(tail)))
+        case "-s" :: tail                           ⇒ parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
         case "-pw" :: tail                          ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
         case "-hn" :: tail                          ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "-c" :: tail                           ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
         case "-h" :: tail                           ⇒ parse(tail, c.copy(launchMode = HelpMode))
         case "-ws" :: tail                          ⇒ parse(tail, c.copy(launchMode = ServerMode))
+        case "--console-workDirectory" :: tail      ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
         case "--ws-configure" :: tail               ⇒ parse(tail, c.copy(launchMode = ServerConfigMode))
         case "--ws-sp" :: tail                      ⇒ parse(tail.tail, c.copy(webServerPort = Some(tail.head.toInt))) // Server port
         case "--ws-ssp" :: tail                     ⇒ parse(tail.tail, c.copy(webServerSSLPort = Some(tail.head.toInt)))
@@ -139,7 +142,7 @@ class Application extends IApplication {
     if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
 
     val userPlugins =
-      existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) }
+      existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) } ++ PluginManager.plugins(Workspace.pluginDir)
 
     logger.fine(s"Loading user plugins " + userPlugins)
 
@@ -160,24 +163,25 @@ class Application extends IApplication {
 
     if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
 
-    val retCode =
+    val retCode: Int =
       config.launchMode match {
         case HelpMode ⇒
           println(usage)
-          None
+          ExitCodes.ok
         case ServerConfigMode ⇒
           RESTServer.configure
-          None
+          ExitCodes.ok
         case ServerMode ⇒
           if (!config.password.isDefined) Console.initPassword
-          val server = new RESTServer(config.webServerPort, config.webServerSSLPort, config.hostName, config.allowInsecureConnections, PluginSet(userPlugins))
+          val server = new RESTServer(config.webServerPort, config.webServerSSLPort, config.hostName, config.allowInsecureConnections)
           server.start()
-          None
+          ExitCodes.ok
         case ConsoleMode ⇒
           print(consoleSplash)
           println(consoleUsage)
-          val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
-          Some(console.run(ConsoleVariables(args = config.args)()))
+          val console = new Console(config.password, config.scriptFile)
+          val variables = ConsoleVariables(args = config.args)
+          console.run(variables, config.consoleWorkDirectory)
         case GUIMode ⇒
           def browse(url: String) =
             if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
@@ -196,11 +200,13 @@ class Application extends IApplication {
               server.join()
             }
             finally lock.release()
-          else browse(GUIServer.urlFile.content)
-          None
+          else {
+            browse(GUIServer.urlFile.content)
+            ExitCodes.ok
+          }
       }
 
-    retCode.map(new Integer(_)).getOrElse(IApplication.EXIT_OK)
+    new Integer(retCode)
   }
 
   override def stop = {}

@@ -17,11 +17,10 @@
 
 package org.openmole.core.batch.refresh
 
-import akka.actor.{ Actor, ActorRef }
-import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.tools.objectToSomeObjectConverter
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.logger.Logger
 
 object KillerActor extends Logger
 

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.site.documentation.console
+package org.openmole.site.documentation.language
 
 package object environment {
   def provideOptions = """You also can set options by providing additional parameters to the environment (..., option = value, ...): """

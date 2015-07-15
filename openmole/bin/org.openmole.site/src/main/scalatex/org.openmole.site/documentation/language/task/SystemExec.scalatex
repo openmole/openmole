@@ -25,7 +25,7 @@
     Our first example R script contained in a file @i{myscript.R}. We want to distribute the execution of this R code
     to the grid.
 
-    @p First your script should run headlessly with no user input required during the initialisation. Your script
+    @p First your script should run in headless mode with no input required from the user during the execution. Your script
     should produce files or write its results to the standard output so that OpenMOLE can bring them back from the
     remote execution environment.
 
@@ -33,9 +33,7 @@
     @br @hl.highlight("""
       print(commandArgs(trailingOnly = TRUE))
       data<-read.csv("data.csv",header=T,sep=",")
-      trans<-subset(datab,trials=="Trans")
-      sumTransD<-tapply(trans$bet,list(trans$time,trans$naive2),sum)
-      write.csv(sumTransD,"results.csv")""", "R")
+      write.csv(data,"results.csv")""", "R")
 
     @p This script starts by displaying its command line arguments. Then it reads a file called @i{data.csv} and
     produces an output file called @i{results.csv}. To call this script from the command line you should type:
@@ -62,7 +60,7 @@
     package the application multiple times with different input parameters.
 
     @p Let's now use this portable archive to explore a complete combination of data files with OpenMOLE. The input data
-    files are located in @i{/tmp/data/} and the result files are written to @i{/tmp/results} A second input parameter is
+    files are located in @i{data} and the result files are written to @i{results} A second input parameter is
     an integer @i{i} ranging from 1 to 10. The corresponding OpenMOLE script looks like this:
     @p @hl.openmole("""
     // Declare the variable
@@ -74,7 +72,7 @@
     // R task
     // "path/on/your/system" is a path on the original system on which you packaged R
     val rTask = SystemExecTask("care.bin", "care/re-execute.sh R --slave -f myscript.R --args ${i}") set (
-      resources += "/path/to/care.bin",
+      resources += workDirectory / "care.bin",
       inputs += (i, inputName),
       inputFiles += (input, "care/rootfs/path/on/your/system/data.csv"),
       outputs += (i, inputName),
@@ -84,11 +82,11 @@
     val exploration =
       ExplorationTask(
         (i in (1 to 10)) x
-        (input in ListFilesDomain("/tmp/data/") zipWithName inputName)
+        (input in ListFilesDomain(workDirectory / "data") zipWithName inputName)
       )
 
-    val copy = CopyFileHook(output, "/tmp/results/result-${inputName}-${i}.csv")
-    val ex = exploration -< (rTask hook copy hook ToStringHook()) start""")
+    val copy = CopyFileHook(output, workDirectory / "result-${inputName}-${i}.csv")
+    exploration -< (rTask hook copy hook ToStringHook())""")
 
   @p The @hl.openmole("SystemExecTask") performs two calls: it first unarchives the CARE container by running
   @hl.highlight("care.bin", "plain"). Then the actual execution takes place as a second command. It is an important
@@ -97,8 +95,8 @@
   @hl.openmole("SystemExecTask") builder.
 
   @p Several notions from OpenMOLE are reused in this example. If you're not too familiar with
-  @a("Hooks", href := DocumentationPages.root.console.hook.file) or
-  @a("Samplings", href := DocumentationPages.root.console.sampling.file), check the relevant sections of the
+  @a("Hooks", href := DocumentationPages.root.language.hook.file) or
+  @a("Samplings", href := DocumentationPages.root.language.sampling.file), check the relevant sections of the
   documentation.
 
   @sect{Another example with a Python script}
@@ -115,8 +113,8 @@
     f.write(sys.argv[1])
     exit(0)""", "python")
 
-    @p This script is saved to @i{/tmp/hello/hello.py}. We first package it using CARE:
-    @hl.highlight("""care -o hello_archive/ python hello.py 42 test.txt""", "plain")
+    @p This script is saved to @i{hello.py}. We first package it using CARE:
+    @hl.highlight("""care -o hello.bin python hello.py 42 test.txt""", "plain")
 
     @p The trailing @b{'/'} character is extremely important in this case as it indicates CARE to use the plain folder
     format for the archive. With the plain folder archiving format, you can browse and modify the resulting folder
@@ -130,21 +128,21 @@
 
     // R task
     val pythonTask =
-      SystemExecTask("hello_archive/re-execute.sh python hello.py ${arg} output.txt") set (
-        resources += "/tmp/hello/hello_archive",
+      SystemExecTask("hello/re-execute.sh python hello.py ${arg} output.txt") set (
+        resources += workDirectory / "hello.bin",
         inputs += arg,
-        outputFiles += ("hello_archive/rootfs/tmp/hello/output.txt", output),
+        outputFiles += ("hello/rootfs/path/on/your/system/output.txt", output),
         outputs += arg
       )
 
     val exploration = ExplorationTask(arg in (0 to 10))
 
-    val copy = CopyFileHook(output, "/tmp/results/hello${arg}.txt")
+    val copy = CopyFileHook(output, workDirectory / "hello${arg}.txt")
     val env = LocalEnvironment(4)
-    val ex = exploration -< (pythonTask hook copy on env by 2) start""")
+    exploration -< (pythonTask hook copy on env by 2)""")
 
    @p Again notions from OpenMOLE are reused in this example. If you're not too familiar with
-@a("Environments", href := DocumentationPages.root.console.environment.file) or @i{Groupings}, check the relevant
+@a("Environments", href := DocumentationPages.root.language.environment.file) or @i{Groupings}, check the relevant
   sections of the documentation.
 
   @sect{Advanced features}

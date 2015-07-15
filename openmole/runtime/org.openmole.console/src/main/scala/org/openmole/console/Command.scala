@@ -17,9 +17,12 @@
 
 package org.openmole.console
 
+import java.util.logging.Level
+
 import jline.console.ConsoleReader
-import java.io.File
+import java.io.{ PrintWriter, StringWriter, File }
 import java.util.concurrent.atomic.{ AtomicLong, AtomicInteger }
+import org.apache.log4j.lf5.viewer.LogTableColumn
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.pluginmanager.PluginManager
@@ -41,7 +44,7 @@ import org.openmole.core.buildinfo
 
 class Command {
 
-  def print(environment: Environment): Unit =
+  def print(environment: Environment): Unit = {
     for {
       (label, number) ← List(
         "Submitted" -> environment.submitted,
@@ -50,6 +53,12 @@ class Command {
         "Failed" -> environment.failed
       )
     } println(s"$label: $number")
+    val errors = environment.errors
+    def low = errors.count(_.level.intValue() <= Level.INFO.intValue())
+    def warning = errors.count(_.level.intValue() == Level.WARNING.intValue())
+    def severe = errors.count(_.level.intValue() == Level.SEVERE.intValue())
+    println(s"$severe critical errors, $warning warning and $low low-importance errors. Use the errors() function to display them.")
+  }
 
   def print(mole: Mole): Unit = {
     println("root: " + mole.root)
@@ -67,13 +76,38 @@ class Command {
         case State.CANCELED  ⇒
         case _               ⇒ System.out.println(state.toString + ": " + toDisplay(state.id))
       }
+    moleExecution.exception match {
+      case Some(e) ⇒
+        System.out.println(s"Mole execution failed while execution ${e.capsule}:")
+        System.out.println(exceptionToString(e.exception))
+      case None ⇒
+    }
+  }
+
+  private def exceptionToString(e: Throwable) = {
+    val sw = new StringWriter()
+    e.printStackTrace(new PrintWriter(sw))
+    s"""${e.getMessage}
+        |${sw.toString}""".stripMargin
+  }
+
+  implicit def stringToLevel(s: String) = Level.parse(s.toUpperCase)
+
+  def errors(environment: Environment, level: Level = Level.INFO) = {
+    def filtered = environment.readErrors.filter {
+      e ⇒ e.level.intValue() >= level.intValue()
+    }
+
+    for {
+      error ← filtered
+    } println(s"${error.level.toString}: ${exceptionToString(error.exception)}")
   }
 
   def verify(mole: Mole): Unit = Validation(mole).foreach(println)
 
   def encrypted: String = encrypt(askPassword())
 
-  def version =
+  def version() =
     println(s"""You are running OpenMOLE ${buildinfo.version} - ${buildinfo.name}
        |built on the ${buildinfo.generationDate}.""".stripMargin)
 

@@ -22,13 +22,13 @@ import java.io.{ OutputStream, PrintStream }
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.output.OutputManager
 import org.openmole.core.tools.service
-import org.openmole.core.tools.service.{ Logger, LocalHostName }
+import org.openmole.core.tools.service.LocalHostName
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.execution.Environment._
 import org.openmole.core.workflow.job.State
 import org.openmole.core.workflow.task._
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.stream._
 import ref.WeakReference
 import org.openmole.core.workflow.mole.{ StrainerTaskDecorator, StrainerCapsule }
@@ -92,13 +92,11 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
           }
           catch {
             case e: InterruptedException ⇒
-              if (!stop) {
-                logger.log(WARNING, "Interrupted despite stop is false", e)
-                EventDispatcher.trigger(environment: Environment, ExceptionRaised(executionJob, e, SEVERE))
-              }
             case e: Throwable ⇒
+              val er = ExceptionRaised(executionJob, e, SEVERE)
+              environment.error(er)
               logger.log(SEVERE, "Error in execution", e)
-              EventDispatcher.trigger(environment: Environment, ExceptionRaised(executionJob, e, SEVERE))
+              EventDispatcher.trigger(environment: Environment, er)
           }
           finally executionJob.state = ExecutionState.KILLED
         case None ⇒ stop = true

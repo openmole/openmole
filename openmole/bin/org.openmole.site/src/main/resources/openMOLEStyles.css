@@ -95,6 +95,16 @@ pre {
   margin-top: 0px;
 }
 
+#market-entry {
+  border: 1px solid rgba(205, 199, 199, 0.17);
+  padding-top: 0px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 2%;
+  height: 200px;
+  overflow: auto;
+}
+
 .scalatex-content *{
   position: relative;
 }

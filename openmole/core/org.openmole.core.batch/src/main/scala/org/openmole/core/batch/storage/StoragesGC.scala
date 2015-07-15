@@ -21,9 +21,9 @@ import java.io.File
 
 import org.openmole.core.batch.replication._
 import org.openmole.core.replication.replicas
-import org.openmole.core.tools.service.Logger
 import org.openmole.core.updater.IUpdatable
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.logger.Logger
 import scala.ref.WeakReference
 import scala.slick.driver.H2Driver.simple._
 

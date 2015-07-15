@@ -20,10 +20,10 @@ package org.openmole.plugin.environment.ssh
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice.BatchJob
-import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.batch.control._
 import fr.iscpif.gridscale.ssh.SSHJobDescription
+import org.openmole.tool.logger.Logger
 import util.{ Failure, Success, Try }
 
 object SSHBatchJob extends Logger

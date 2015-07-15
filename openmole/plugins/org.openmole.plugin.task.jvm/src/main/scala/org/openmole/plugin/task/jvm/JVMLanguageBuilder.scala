@@ -18,18 +18,20 @@
 package org.openmole.plugin.task.jvm
 
 import java.io.File
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.workflow.task.PluginSet
 
 trait JVMLanguageBuilder { builder ⇒
-  private var _imports = new ListBuffer[String]
-  private var _libraries = new ListBuffer[File]
+  private val _imports = ListBuffer[String]()
+  private val _libraries = ListBuffer[File]()
+  private val _plugins = ListBuffer[File]()
 
   def imports = _imports.toList
   def libraries = _libraries.toList
-  def plugins: PluginSet
+  def plugins = _plugins.toList
 
   /**
    * Add a namespace import and make it available to in the task
@@ -60,19 +62,25 @@ trait JVMLanguageBuilder { builder ⇒
     this
   }
 
+  def addPlugins(plugin: Seq[File]*): this.type = {
+    plugins.foreach {
+      plugin ⇒
+        PluginManager.bundle(plugin) match {
+          case None ⇒ throw new UserBadDataError(s"Plugin $plugin is not loaded")
+          case _    ⇒
+        }
+    }
+    _plugins ++= plugin.flatten
+    this
+  }
+
   trait Built <: Plugins {
     def imports: Seq[String] = builder.imports.toList
     def libraries: Seq[File] = builder.libraries.toList
-    def plugins = builder.plugins
+    def plugins: Seq[File] = builder.plugins
   }
 }
 
-/**
- * Builder for any code task
- *
- * The code task builder is an external task builder, you may want to look
- * at the @see ExternalTaskBuilder for a complement of documentation.
- */
-abstract class JVMLanguageTaskBuilder(implicit val plugins: PluginSet) extends ExternalTaskBuilder with JVMLanguageBuilder {
-  trait Built extends super[ExternalTaskBuilder].Built with super[JVMLanguageBuilder].Built with Plugins
+abstract class JVMLanguageTaskBuilder extends ExternalTaskBuilder with JVMLanguageBuilder {
+  trait Built <: super[ExternalTaskBuilder].Built with super[JVMLanguageBuilder].Built
 }

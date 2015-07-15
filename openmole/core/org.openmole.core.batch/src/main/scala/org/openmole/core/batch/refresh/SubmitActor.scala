@@ -17,15 +17,12 @@
 
 package org.openmole.core.batch.refresh
 
-import akka.actor.Actor
-import akka.actor.ActorRef
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution.ExecutionState._
-import akka.actor.Actor
+import org.openmole.tool.logger.Logger
 
 object SubmitActor extends Logger
 

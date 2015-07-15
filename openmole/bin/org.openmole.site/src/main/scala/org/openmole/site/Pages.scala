@@ -18,8 +18,13 @@
 
 package org.openmole.site
 
+import org.openmole.site.market._
+
 import scalatags.Text.all
 import scalatags.Text.all._
+import com.github.rjeschke._
+
+import scalatags.generic.Attr
 
 object Pages {
 
@@ -102,6 +107,10 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
 
 object DocumentationPages { index ⇒
 
+  var marketEntries: Seq[DeployedMarketEntry] = Seq()
+
+  def tag(p: DocumentationPage): String = p.name + p.parent.map(pa ⇒ "-" + tag(pa)).getOrElse("")
+
   def decorate(p: DocumentationPage): Frag =
     Pages.decorate(
       Seq(
@@ -116,7 +125,7 @@ object DocumentationPages { index ⇒
     def menuEntry(p: DocumentationPage) = {
       def current = p == currentPage
       def idLabel = "documentation-menu-entry" + (if (current) "-current" else "")
-      a(id := idLabel)(p.name, href := p.file)
+      a(p.name, href := p.file)
     }
 
     def parents(p: DocumentationPage): List[DocumentationPage] =
@@ -128,8 +137,13 @@ object DocumentationPages { index ⇒
     val currentPageParents = parents(currentPage).toSet
 
     def pageLine(p: DocumentationPage): Frag = {
+
       def contracted = li(menuEntry(p))
-      def expanded = li(menuEntry(p), ul(id := "documentation-menu-ul")(p.children.map(pageLine)))
+      def expanded =
+        li(
+          menuEntry(p),
+          div(id := tag(p) + "-menu", ul(id := "documentation-menu-ul")(p.children.map(pageLine)))
+        )
 
       if (p.children.isEmpty) contracted
       else if (p == currentPage) expanded
@@ -178,95 +192,101 @@ object DocumentationPages { index ⇒
   def root = new DocumentationPage {
     def name = "Documentation"
     def content = documentation.Documentation()
-    def children = Seq(console, gui, tutorial, faq, development)
+    def children = Seq(application, language, tutorial, market, faq, development)
 
-    def console =
+    def application = new DocumentationPage {
+      def name = "Application"
+      def children = Seq()
+      def content = documentation.Application()
+    }
+
+    def language =
       new DocumentationPage {
-        def name = "Console DSL"
+        def name = "Language"
         def children = Seq(task, sampling, transition, hook, environment, source, method)
-        def content = documentation.Console()
+        def content = documentation.Language()
 
         def task = new DocumentationPage {
           def name = "Tasks"
           def children = Seq(scala, systemExec, netLogo, mole)
-          def content = documentation.console.Task()
+          def content = documentation.language.Task()
 
           def scala = new DocumentationPage {
             def name = "Scala"
             def children = Seq()
-            def content = documentation.console.task.Scala()
+            def content = documentation.language.task.Scala()
           }
 
           def systemExec = new DocumentationPage {
             def name = "SystemExec"
             def children = Seq()
-            def content = documentation.console.task.SystemExec()
+            def content = documentation.language.task.SystemExec()
           }
 
           def netLogo = new DocumentationPage {
             def name = "NetLogo"
             def children = Seq()
-            def content = documentation.console.task.NetLogo()
+            def content = documentation.language.task.NetLogo()
           }
 
           def mole = new DocumentationPage {
             def name = "Mole"
             def children = Seq()
-            def content = documentation.console.task.MoleTask()
+            def content = documentation.language.task.MoleTask()
           }
         }
 
         def sampling = new DocumentationPage {
           def name = "Samplings"
           def children = Seq()
-          def content = documentation.console.Sampling()
+          def content = documentation.language.Sampling()
         }
 
         def transition = new DocumentationPage {
           def name = "Transitions"
           def children = Seq()
-          def content = documentation.console.Transition()
+          def content = documentation.language.Transition()
         }
 
         def hook = new DocumentationPage {
           def name = "Hooks"
           def children = Seq()
-          def content = documentation.console.Hook()
+          def content = documentation.language.Hook()
         }
 
         def environment = new DocumentationPage {
           def name = "Environments"
           def children = Seq(multithread, ssh, egi, cluster, desktopGrid)
-          def content = documentation.console.Environment()
+          def content = documentation.language.Environment()
 
           def multithread = new DocumentationPage {
             def name = "Multi-threads"
             def children = Seq()
-            def content = documentation.console.environment.Multithread()
+            def content = documentation.language.environment.Multithread()
           }
 
           def ssh = new DocumentationPage {
             def name = "SSH"
             def children = Seq()
-            def content = documentation.console.environment.SSH()
+            def content = documentation.language.environment.SSH()
           }
 
           def egi = new DocumentationPage {
             def name = "EGI"
             def children = Seq()
-            def content = documentation.console.environment.EGI()
+            def content = documentation.language.environment.EGI()
           }
 
           def cluster = new DocumentationPage {
             def name = "Clusters"
             def children = Seq()
-            def content = documentation.console.environment.Cluster()
+            def content = documentation.language.environment.Cluster()
           }
 
           def desktopGrid = new DocumentationPage {
             def name = "Desktop Grid"
             def children = Seq()
-            def content = documentation.console.environment.DesktopGrid()
+            def content = documentation.language.environment.DesktopGrid()
           }
 
         }
@@ -274,26 +294,20 @@ object DocumentationPages { index ⇒
         def source = new DocumentationPage {
           def name = "Sources"
           def children = Seq()
-          def content = documentation.console.Source()
+          def content = documentation.language.Source()
         }
 
         def method = new DocumentationPage {
           def name = "Exploration Methods"
           def children = Seq()
-          def content = documentation.console.Method()
+          def content = documentation.language.Method()
         }
       }
-
-    def gui = new DocumentationPage {
-      def name = "GUI"
-      def children = Seq()
-      def content = documentation.GUI()
-    }
 
     def tutorial = new DocumentationPage {
       def name = "Tutorials"
       def children = Seq(helloWorld, headlessNetLogo, netLogoGA, capsule)
-      def content = documentation.console.Tutorial()
+      def content = documentation.language.Tutorial()
 
       def helloWorld = new DocumentationPage {
         def name = "Hello World"
@@ -304,20 +318,74 @@ object DocumentationPages { index ⇒
       def headlessNetLogo = new DocumentationPage {
         def name = "NetLogo Headless"
         def children = Seq()
-        def content = documentation.console.tutorial.HeadlessNetLogo()
+        def content = documentation.language.tutorial.HeadlessNetLogo()
       }
 
       def netLogoGA = new DocumentationPage {
         def name = "GA with NetLogo"
         def children = Seq()
-        def content = documentation.console.tutorial.NetLogoGA()
+        def content = documentation.language.tutorial.NetLogoGA()
       }
 
       def capsule = new DocumentationPage {
         def name = "Capsule"
         def children = Seq()
-        def content = documentation.console.tutorial.Capsule()
+        def content = documentation.language.tutorial.Capsule()
       }
+    }
+
+    def market = new DocumentationPage {
+      def children: Seq[DocumentationPage] = pages
+      def name: String = "Market Place"
+      def content: all.Frag = documentation.Market()
+
+      def themes: Seq[Market.Tag] =
+        marketEntries.flatMap(_.entry.tags).distinct.sortBy(_.label.toLowerCase)
+
+      def allEntries =
+        new DocumentationPage {
+          def children: Seq[DocumentationPage] = Seq()
+          def name: String = "All"
+          def content: all.Frag = tagContent("All", marketEntries)
+        }
+
+      def pages = allEntries :: (themes map documentationPage).toList
+
+      def documentationPage(t: Market.Tag) =
+        new DocumentationPage {
+          def children: Seq[DocumentationPage] = Seq()
+          def name: String = t.label
+          def content: all.Frag =
+            tagContent(t.label, marketEntries.filter(_.entry.tags.contains(t)))
+        }
+
+      def tagContent(label: String, entries: Seq[DeployedMarketEntry]) =
+        Seq(
+          h1(label),
+          ul(
+            entries.sortBy(_.entry.name.toLowerCase).map {
+              de ⇒ li(entryContent(de))
+            }: _*
+          )
+        )
+
+      def entryContent(deployedMarketEntry: DeployedMarketEntry) = {
+        Seq(
+          a(deployedMarketEntry.entry.name, href := deployedMarketEntry.archive),
+          p(
+            div(id := "market-entry")(
+              Seq(
+                deployedMarketEntry.readme.map {
+                  rm ⇒ RawFrag(txtmark.Processor.process(rm))
+                }.getOrElse(p("No README.md available yet."))
+              ) ++ deployedMarketEntry.viewURL.map {
+                  u ⇒ a("source repository", href := u)
+                }: _*
+            )
+          )
+        )
+      }
+
     }
 
     def faq = new DocumentationPage {

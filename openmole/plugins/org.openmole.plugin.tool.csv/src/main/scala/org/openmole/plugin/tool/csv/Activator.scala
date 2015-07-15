@@ -9,17 +9,17 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.plugin.task.scala
 
-import org.openmole.core.pluginmanager._
-import org.openmole.core.serializer.plugin._
+package org.openmole.plugin.tool.csv
 
-trait UsedClasses <: Plugins {
-  def usedBundles = usedClasses.flatMap(PluginManager.fileProviding) ++ plugins
-  def usedClasses: Seq[Class[_]]
+import org.openmole.core.workflow.tools.PluginInfoActivator
+
+class Activator extends PluginInfoActivator {
+  override def keyWordTraits = List(classOf[CSVPackage])
 }
+

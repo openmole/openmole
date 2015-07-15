@@ -22,10 +22,10 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.tool.file._
-import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.storage._
+import org.openmole.tool.logger.Logger
 
 import scala.util.Try
 

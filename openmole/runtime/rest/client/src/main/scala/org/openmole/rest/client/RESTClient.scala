@@ -31,13 +31,6 @@ object RESTClient extends App {
 
   val token = client.requestToken(password).left.get.token
 
-  val file = new File("/tmp/test.txt")
-  file.content = "test"
-
-  val archive = new File("/tmp/archive.tgz")
-  archive.withTarGZOutputStream { tos ⇒
-    tos.addFile(file, file.getName)
-  }
 
   val script =
     """
@@ -45,7 +38,7 @@ object RESTClient extends App {
       |val res = Val[Double]
       |val test = Val[File]
       |
-      |val file = inputDirectory / "test.txt"
+      |val file = workDirectory / "test.txt"
       |
       |val exploration = ExplorationTask(i in (0.0 to 10.0 by 1.0))
       |
@@ -56,14 +49,24 @@ object RESTClient extends App {
       |    test := file
       |  )
       |
-      |val copyFile = CopyFileHook(test, outputDirectory / "result${i}.txt")
+      |val copyFile = CopyFileHook(test, workDirectory / "result${i}.txt")
       |
       |val env = EGIEnvironment("vo.complex-systems.eu", name = "complexsystems")
       |
       |exploration -< (model on env hook ToStringHook() hook copyFile)
     """.stripMargin
 
-  val id = client.start(token, script, Some(archive))
+  val project = File("/tmp/project")
+  project.mkdirs()
+
+  project / "test.txt" content = "test"
+  project / "script.oms" content = script
+
+  val projectArchive = File("/tmp/archive.tgz")
+  project.archive(projectArchive)
+
+
+  val id = client.start(token, projectArchive, "script.oms")
   println(id)
   Iterator.continually(client.state(token, id.left.get.id)).takeWhile(_.left.get.state == ExecutionState.running).foreach { s ⇒
     println(s)
@@ -72,8 +75,9 @@ object RESTClient extends App {
 
   println(client.state(token, id.left.get.id))
   println(client.output(token, id.left.get.id))
+
   val res = new File("/tmp/result.tgz")
-  println(client.outputDirectory(token, id.left.get.id, res))
+  println(client.download(token, id.left.get.id, "/", res))
   println(client.remove(token, id.left.get.id))
 
 }
@@ -95,10 +99,10 @@ trait Client {
     }
   }
 
-  def start(token: String, script: String, inputFiles: Option[File]): Either[ExecutionId, HttpError] = {
+  def start(token: String, workDirectory: File, scriptPath: String): Either[ExecutionId, HttpError] = {
     def files = inputFiles.map { f ⇒
       val builder = MultipartEntityBuilder.create()
-      builder addBinaryBody ("inputDirectory", f)
+      builder addBinaryBody ("workDirectory", f)
       builder.build
     }
 
@@ -142,11 +146,12 @@ trait Client {
     execute(post) { response ⇒ parse(response.content).extract[Output] }
   }
 
-  def outputDirectory(token: String, id: String, file: File): Either[Unit, HttpError] = {
+  def download(token: String, id: String, path: String, file: File): Either[Unit, HttpError] = {
     val uri =
-      new URIBuilder(address + "/outputDirectory").
+      new URIBuilder(address + "/").
         setParameter("token", token).
-        setParameter("id", id).build
+        setParameter("id", id).
+        setParameter("path", path).build
     val post = new HttpPost(uri)
     execute(post) {
       response ⇒

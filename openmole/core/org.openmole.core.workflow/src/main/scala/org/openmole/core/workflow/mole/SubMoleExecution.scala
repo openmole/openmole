@@ -21,7 +21,6 @@ import java.util.concurrent.locks.Lock
 
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.job._
@@ -33,6 +32,7 @@ import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.job.State._
 import MoleJob._
 import org.openmole.tool.lock._
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
 import scala.collection.mutable.Buffer
 
@@ -241,10 +241,11 @@ class SubMoleExecution(
   def finalState(job: MoleJob, state: State) = {
     job.exception match {
       case Some(e) ⇒
-        moleExecution.cancel(e)
         val (capsule, _) = _jobs.single(job)
-        logger.log(SEVERE, s"Error in user job execution for capsule $capsule, job state is FAILED.", e)
-        EventDispatcher.trigger(moleExecution, MoleExecution.JobFailed(job, capsule, e))
+        val error = MoleExecution.JobFailed(job, capsule, e)
+        moleExecution.cancel(error)
+        logger.log(FINE, s"Error in user job execution for capsule $capsule, job state is FAILED.", e)
+        EventDispatcher.trigger(moleExecution, error)
       case _ ⇒
     }
 

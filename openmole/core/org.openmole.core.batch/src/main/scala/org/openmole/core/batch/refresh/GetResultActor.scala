@@ -17,8 +17,6 @@
 
 package org.openmole.core.batch.refresh
 
-import akka.actor.Actor
-import akka.actor.ActorRef
 import java.io.{ PrintStream, FileInputStream, IOException }
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
@@ -30,13 +28,13 @@ import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
-import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.execution
 import org.openmole.core.workflow.job._
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.logger.Logger
 import util.{ Failure, Success }
 
 object GetResultActor extends Logger

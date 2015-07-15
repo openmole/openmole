@@ -30,7 +30,7 @@ object ElitismTask {
   def apply(evolution: Elitism with Termination with Archive)(
     population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
     offspring: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
-    archive: Prototype[evolution.A])(implicit plugins: PluginSet) = {
+    archive: Prototype[evolution.A]) = {
     val (_population, _offspring, _archive) = (population, offspring, archive)
 
     new TaskBuilder { builder ⇒

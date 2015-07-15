@@ -25,8 +25,12 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.workflow.execution._
 
+trait PuzzleBuilder {
+  def buildPuzzle: Puzzle
+}
+
 object Puzzle {
-  implicit def containerToPuzzle(pc: PuzzleContainer) = pc.toPuzzle
+  implicit def containerToPuzzle(pc: PuzzleContainer) = pc.buildPuzzle
   implicit def slotToPuzzleConverter(slot: Slot) = slot.toPuzzle
   implicit def capsuleToPuzzleConverter(capsule: Capsule) = capsule.toPuzzle
   implicit def taskToPuzzleConverter(task: Task) = Capsule(task).toPuzzle
@@ -71,9 +75,10 @@ case class PuzzlePiece(
     sources: Iterable[Source] = Iterable.empty,
     hooks: Iterable[Hook] = Iterable.empty,
     environment: Option[Environment] = None,
-    grouping: Option[Grouping] = None) {
+    grouping: Option[Grouping] = None) extends PuzzleBuilder {
   def capsule = slot.capsule
-  def toPuzzle: Puzzle =
+
+  def buildPuzzle: Puzzle =
     Puzzle(
       slot,
       Seq(capsule),
@@ -84,6 +89,7 @@ case class PuzzlePiece(
       Map() ++ environment.map(capsule -> _),
       Map() ++ grouping.map(capsule -> _)
     )
+
 }
 
 case class Puzzle(
@@ -94,7 +100,7 @@ case class Puzzle(
     sources: Iterable[(Capsule, Source)] = Iterable.empty,
     hooks: Iterable[(Capsule, Hook)] = Iterable.empty,
     environments: Map[Capsule, Environment] = Map.empty,
-    grouping: Map[Capsule, Grouping] = Map.empty) {
+    grouping: Map[Capsule, Grouping] = Map.empty) extends PuzzleBuilder {
 
   def this(p: Puzzle) =
     this(
@@ -113,18 +119,24 @@ case class Puzzle(
     MoleExecution(toMole, sources, hooks, environments, grouping)
 
   def toExecution(
-    sources: Iterable[(Capsule, Source)] = Iterable.empty,
-    hooks: Iterable[(Capsule, Hook)] = Iterable.empty,
-    selection: Map[Capsule, Environment] = Map.empty,
-    grouping: Map[Capsule, Grouping] = Map.empty,
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
     executionContext: ExecutionContext = ExecutionContext.local,
     defaultEnvironment: Environment = LocalEnvironment.default): MoleExecution =
-    MoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.environments ++ environments, this.grouping ++ grouping, implicits, seed, defaultEnvironment)(executionContext)
+    MoleExecution(
+      toMole,
+      sources,
+      hooks,
+      environments,
+      grouping,
+      implicits,
+      seed,
+      defaultEnvironment)(executionContext)
 
   def slots: Set[Slot] = (firstSlot :: transitions.map(_.end).toList).toSet
 
   def first = firstSlot.capsule
+
+  def buildPuzzle = this
 
 }

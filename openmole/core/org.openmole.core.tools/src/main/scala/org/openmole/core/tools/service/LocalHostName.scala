@@ -20,6 +20,8 @@ package org.openmole.core.tools.service
 import java.net.InetAddress
 import java.util.UUID
 
+import org.openmole.tool.logger.Logger
+
 object LocalHostName extends Logger {
 
   import Log._

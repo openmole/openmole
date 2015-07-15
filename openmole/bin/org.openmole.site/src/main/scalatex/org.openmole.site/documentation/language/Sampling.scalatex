@@ -212,7 +212,7 @@
       )""")
 
     @p Files can also be injected in the dataflow through
-    @a("Sources", href := DocumentationPages.root.console.source.file). They provide more powerful file filtering
+    @a("Sources", href := DocumentationPages.root.language.source.file). They provide more powerful file filtering
       possibilities using regular expressions and can also target directories only.
 
     @sect{CSV files Sampling}

@@ -27,7 +27,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import org.openmole.core.pluginmanager.PluginManager
 import java.io.File
 
-import org.openmole.core.tools.service.Logger
+import org.openmole.tool.logger.Logger
 
 object PluginConverter extends Logger
 

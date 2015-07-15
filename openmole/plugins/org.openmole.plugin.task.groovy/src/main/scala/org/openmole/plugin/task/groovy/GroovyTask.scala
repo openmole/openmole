@@ -34,7 +34,7 @@ object GroovyTask {
    *
    * @param source the groovy source code
    */
-  def apply(source: String)(implicit plugins: PluginSet = PluginSet.empty) =
+  def apply(source: String) =
     new JVMLanguageTaskBuilder { builder ⇒
 
       addImport(s"static ${CodeTool.namespace}.*")

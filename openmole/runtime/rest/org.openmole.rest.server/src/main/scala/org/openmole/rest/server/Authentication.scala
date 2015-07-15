@@ -9,11 +9,11 @@ package org.openmole.rest.server
 
 import javax.crypto.spec.SecretKeySpec
 import javax.crypto.Mac
-import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.Workspace
 import org.apache.commons.codec.binary.Base64
 import javax.servlet.http.HttpServletRequest
 import org.openmole.tool.collection._
+import org.openmole.tool.logger.Logger
 import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
 

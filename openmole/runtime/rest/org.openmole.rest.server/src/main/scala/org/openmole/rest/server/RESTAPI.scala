@@ -31,24 +31,11 @@ case class EnvironmentException(environment: Environment, error: Error)
 
 case class Execution(
   workDirectory: WorkDirectory,
-  moleExecution: MoleExecution,
-  environmentErrors: EventAccumulator[EnvironmentException])
+  moleExecution: MoleExecution)
 
-case class WorkDirectory(baseDirectory: File) {
+case class WorkDirectory(workDirectory: File) {
 
-  lazy val inputDirectory = {
-    val f = new File(baseDirectory, "inputs")
-    f.mkdirs()
-    f
-  }
-
-  lazy val outputDirectory = {
-    val f = new File(baseDirectory, "outputs")
-    f.mkdirs()
-    f
-  }
-
-  def output = new File(baseDirectory, "output")
+  def output = new File(workDirectory, "output")
   lazy val outputStream = new PrintStream(output.bufferedOutputStream())
 
   def readOutput = {
@@ -58,7 +45,7 @@ case class WorkDirectory(baseDirectory: File) {
 
   def clean = {
     outputStream.close
-    baseDirectory.recursiveDelete
+    workDirectory.recursiveDelete
   }
 
 }
@@ -105,10 +92,10 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
 
         def extract =
           for {
-            archive ← fileParams get "inputDirectory"
+            archive ← fileParams get "workDirectory"
           } {
             val is = new TarInputStream(new GZIPInputStream(archive.getInputStream))
-            try is.extract(directory.inputDirectory) finally is.close
+            try is.extract(directory.workDirectory) finally is.close
           }
 
         def error(e: Throwable) = {
@@ -116,59 +103,53 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
           ExpectationFailed(Error(e).toJson)
         }
 
-        def compile = {
-          val console = new Console(arguments.plugins)
-          val repl = console.newREPL(ConsoleVariables(workDirectory = baseDirectory)(inputDirectory = directory.inputDirectory, outputDirectory = directory.outputDirectory))
-          repl.eval(script)
-        }
-
         def start(ex: MoleExecution) = {
-
-          val accumulator =
-            EventAccumulator(ex.environments.values.toSeq: _*) {
-              case (env, ev: ExceptionRaised) ⇒ EnvironmentException(env, Error(ev.exception).copy(level = Some(ev.level.getName)))
-            }
           Try(ex.start) match {
             case Failure(e) ⇒ error(e)
             case Success(ex) ⇒
-              moles.add(id, Execution(directory, ex, accumulator))
+              moles.add(id, Execution(directory, ex))
               Ok(id.toJson)
           }
         }
 
-        def launch: ActionResult =
-          Try(compile) match {
-            case Failure(e) ⇒ error(e)
-            case Success(o) ⇒
-              o match {
-                case puzzle: Puzzle ⇒
-                  Try(puzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream))) match {
-                    case Success(ex) ⇒
-                      ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
-                      start(ex)
-                    case Failure(e) ⇒ error(e)
-                  }
-                case _ ⇒
-                  directory.clean
-                  ExpectationFailed(Error("The last line of the script should be a puzzle").toJson)
-              }
-          }
+        val project = new Project(directory.workDirectory)
+        project.compile(directory.workDirectory / script, Seq.empty) match {
+          case ScriptFileDoesNotExists() ⇒ ExpectationFailed(Error("The script doesn't exist").toJson)
+          case CompilationError(e)       ⇒ error(e)
+          case Compiled(compiled) ⇒
+            compiled.eval() match {
+              case res: PuzzleBuilder ⇒
+                Try(res.buildPuzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream))) match {
+                  case Success(ex) ⇒
+                    ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
+                    start(ex)
+                  case Failure(e) ⇒ error(e)
+                }
+              case _ ⇒ ExpectationFailed(Error("The last line of the script should be a puzzle").toJson)
+            }
 
-        extract
-        launch
+        }
     }
 
   }
 
-  post("/outputDirectory") {
+  post("/download") {
     authenticate()
     getExecution { ex ⇒
+      val path = (params get "path").getOrElse("")
+      val file = ex.workDirectory.workDirectory / path
       val gzOs = response.getOutputStream.toGZ
-      val os = new TarOutputStream(gzOs)
-      contentType = "application/octet-stream"
-      response.setHeader("Content-Disposition", "attachment; filename=" + "outputDirectory.tgz")
-      os.archive(ex.workDirectory.outputDirectory)
-      os.close()
+
+      if (file.isDirectory) {
+        val os = new TarOutputStream(gzOs)
+        contentType = "application/octet-stream"
+        response.setHeader("Content-Disposition", "attachment; filename=" + "outputDirectory.tgz")
+        os.archive(file)
+        os.close
+      }
+      else {
+        file.copy(gzOs)
+      }
       Ok()
     }
   }
@@ -183,13 +164,13 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
     getExecution { ex ⇒
       val moleExecution = ex.moleExecution
       val state: State = (moleExecution.exception, moleExecution.finished) match {
-        case (Some(t), _) ⇒ Failed(Error(t))
+        case (Some(t), _) ⇒ Failed(Error(t.exception).copy(message = s"Mole execution failed when execution capsule: ${t.capsule}"))
         case (None, true) ⇒ Finished()
         case _ ⇒
           def environments = moleExecution.environments.values.toSeq
           def environmentStatus = environments.map {
             env ⇒
-              def environmentErrors = ex.environmentErrors.clear.filter(_.environment == env).map(_.error)
+              def environmentErrors = env.readErrors.map(e ⇒ Error(e.exception).copy(level = Some(e.level.toString)))
               EnvironmentStatus(name = env.name, submitted = env.submitted, running = env.running, done = env.done, failed = env.failed, environmentErrors)
           }
           Running(moleExecution.ready, moleExecution.running, moleExecution.completed, environmentStatus)

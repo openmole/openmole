@@ -24,8 +24,9 @@ import java.util.concurrent.Executors
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.tool.file._
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
-import org.openmole.core.tools.service.{ Logger, OS, ProcessUtil }
+import org.openmole.core.tools.service.{ OS, ProcessUtil }
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.plugin.environment.desktopgrid._
 import DesktopGridEnvironment._

@@ -19,12 +19,14 @@ package org.openmole.plugin.method.modelfamily
 
 import java.io.File
 
+import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools._
 import org.openmole.plugin.method.evolution.Scalar
+import org.openmole.plugin.task.jvm.{ JVMLanguageBuilder, JVMLanguageTaskBuilder }
 import org.openmole.plugin.task.scala._
 
 import scala.collection.BitSet
@@ -38,7 +40,7 @@ object ModelFamily {
     def toInput = Scalar(prototype, min, max)
   }
 
-  def apply(source: ExpandedString, combination: Combination[Class[_]])(implicit plugins: PluginSet) = new ModelFamilyBuilder(source, combination)
+  def apply(source: ExpandedString, combination: Combination[Class[_]]) = new ModelFamilyBuilder(source, combination)
 
   def traitsVariable = Prototype[String]("traits")
   def attributesVariable = Prototype[String]("attributes")
@@ -51,9 +53,10 @@ object ModelFamilyBuilder {
   implicit def modelFamilyBuilderToModelFamily(builder: ModelFamilyBuilder) = builder.toModelFamily
 }
 
-class ModelFamilyBuilder(val source: ExpandedString, val combination: Combination[Class[_]])(implicit val plugins: PluginSet) extends Builder with ScalaBuilder with InputBuilder with OutputBuilder { builder ⇒
+class ModelFamilyBuilder(val source: ExpandedString, val combination: Combination[Class[_]]) extends Builder with ScalaBuilder with InputBuilder with OutputBuilder { builder ⇒
 
-  addClassUse(combination.components: _*)
+  def pluginsForTraits = combination.components.flatMap(PluginManager.pluginsForClass).distinct
+  addPlugins(pluginsForTraits)
 
   private val _attributes = ListBuffer[Attribute]()
 
@@ -100,7 +103,6 @@ trait ModelFamily <: Plugins { f ⇒
   def objectives: Seq[Prototype[Double]]
   def libraries: Seq[File]
   def modelIdPrototype: Prototype[Int]
-  def usedClasses: Seq[Class[_]]
   def combination: Combination[Class[_]]
   def traitsCombinations = combination.combinations
   lazy val size = traitsCombinations.size

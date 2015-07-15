@@ -28,8 +28,9 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.tar._
-import org.openmole.core.tools.service.{ Logger, LocalHostName, Retry }
+import org.openmole.core.tools.service.{ LocalHostName, Retry }
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.tools.service._
 import org.openmole.core.batch.storage._

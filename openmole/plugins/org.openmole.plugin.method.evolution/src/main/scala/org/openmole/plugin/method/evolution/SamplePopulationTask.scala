@@ -32,7 +32,7 @@ object SamplePopulationTask {
 
   def apply(evolution: G with P with F)(
     population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
-    size: Int)(implicit plugins: PluginSet) = {
+    size: Int) = {
     val (_population) = (population)
 
     new TaskBuilder { builder ⇒

@@ -22,12 +22,12 @@ import java.util.concurrent.{ TimeUnit, Executors }
 
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.service.Logger
 import org.openmole.core.workflow.execution._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.environment.BatchEnvironment.JobManagementThreads
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.collection.PriorityQueue
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
 import fr.iscpif.gridscale.authentication._
 
@@ -128,12 +128,16 @@ class JobManager { self ⇒
         case e: JobRemoteExecutionException ⇒ WARNING
         case _                              ⇒ FINE
       }
-      EventDispatcher.trigger(job.environment: Environment, new Environment.ExceptionRaised(job, exception, level))
-      logger.log(level, "Error in job refresh", exception)
+      val er = Environment.ExceptionRaised(job, exception, level)
+      job.environment.error(er)
+      EventDispatcher.trigger(job.environment: Environment, er)
+      logger.log(FINE, "Error in job refresh", exception)
 
     case MoleJobError(mj, j, e) ⇒
-      EventDispatcher.trigger(j.environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
-      logger.log(WARNING, "Error during job execution, it will be resubmitted.", e)
+      val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
+      j.environment.error(er)
+      EventDispatcher.trigger(j.environment: Environment, er)
+      logger.log(FINE, "Error during job execution, it will be resubmitted.", e)
 
   }
 

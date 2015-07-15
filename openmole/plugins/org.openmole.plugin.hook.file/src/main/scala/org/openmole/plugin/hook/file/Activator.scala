@@ -19,4 +19,6 @@ package org.openmole.plugin.hook.file
 
 import org.openmole.core.workflow.tools.PluginInfoActivator
 
-class Activator extends PluginInfoActivator
+class Activator extends PluginInfoActivator {
+  override def keyWordTraits = List(classOf[FilePackage])
+}

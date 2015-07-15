@@ -32,7 +32,7 @@ object TerminationTask {
     archive: Prototype[evolution.A],
     generation: Prototype[Int],
     state: Prototype[evolution.STATE],
-    terminated: Prototype[Boolean])(implicit plugins: PluginSet) = {
+    terminated: Prototype[Boolean]) = {
     val (_population, _archive, _generation, _state, _terminated) = (population, archive, generation, state, terminated)
 
     new TaskBuilder { builder ⇒

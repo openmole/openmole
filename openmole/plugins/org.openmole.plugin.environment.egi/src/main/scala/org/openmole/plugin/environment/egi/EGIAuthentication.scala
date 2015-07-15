@@ -24,10 +24,10 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import java.nio.file.FileSystems
 import java.util.zip.GZIPInputStream
 import org.openmole.tool.file._
-import org.openmole.core.tools.service.Logger
 import org.openmole.core.workspace.{ Workspace, AuthenticationProvider }
 import EGIEnvironment._
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.tar.TarInputStream
 import scala.collection.JavaConversions._
 import fr.iscpif.gridscale.egi._

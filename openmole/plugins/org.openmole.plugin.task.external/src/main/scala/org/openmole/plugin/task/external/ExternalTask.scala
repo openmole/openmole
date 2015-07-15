@@ -36,25 +36,25 @@ object ExternalTask {
     prototype: Prototype[File],
     destination: ExpandedString,
     link: Boolean,
-    inWorkDir: Boolean)
+    toWorkDirectory: Boolean)
 
   case class InputFileArray(
     prototype: Prototype[Array[File]],
     prefix: ExpandedString,
     suffix: ExpandedString,
     link: Boolean,
-    inWorkDir: Boolean)
+    toWorkDirectory: Boolean)
 
   case class OutputFile(
     origin: ExpandedString,
     prototype: Prototype[File],
-    inWorkDir: Boolean)
+    fromWorkDirectory: Boolean)
 
   case class Resource(
     file: File,
     destination: ExpandedString,
     link: Boolean,
-    toWorkDir: Boolean,
+    toWorkDirectory: Boolean,
     os: OS)
 }
 
@@ -81,7 +81,7 @@ trait ExternalTask extends Task {
       (ifa.prototype,
         context(ifa.prototype).zipWithIndex.map {
           case (file, i) ⇒
-            ToPut(file, s"${ifa.prefix.from(context)}$i${ifa.suffix.from(context)}", link = ifa.link, inWorkDir = ifa.inWorkDir)
+            ToPut(file, s"${ifa.prefix.from(context)}$i${ifa.suffix.from(context)}", link = ifa.link, inWorkDir = ifa.toWorkDirectory)
         }.toSeq)
     }
 

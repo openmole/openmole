@@ -20,7 +20,7 @@
 
     val cmds = Seq("random-seed ${seed}", "run-to-grid")
     val ants =
-      NetLogo5Task("Ants.nlogo", cmds) set (
+      NetLogo5Task(workDirectory / "Ants.nlogo", cmds) set (
         // Map the OpenMOLE variables to NetLogo variables
         netLogoInputs += (gPopulation, "gpopulation"),
         netLogoInputs += (gDiffusionRate, "gdiffusion-rate"),
@@ -62,7 +62,7 @@
   This example presents step by step how to explore a NetLogo model with an Evolutionary/Genetic Algorithm (EA/GA) in
   OpenMOLE.
   @br For more generic details regarding the exploitation of Genetic Algorithms using OpenMOLE, you can check the
-  @a("GA section of the methods documentation", href := root.console.method.file + "#Geneticalgorithms").
+  @a("GA section of the methods documentation", href := root.language.method.file + "#Geneticalgorithms").
 
   @sect{The ant model}
     We demonstrate this tutorial using the ants foraging model present in the Netlogo library. This model was created by
@@ -124,7 +124,7 @@
     When building a calibration or optimisation workflow, the first step is to make the model run in
     OpenMOLE. This script simply embeds the NetLogo model and runs one single execution of the model with arbitrary
     parameters. More details about the NetLogo5 task used in this script can be found in
-    @a("this section of the documentation", href := DocumentationPages.root.console.task.netLogo.file).
+    @a("this section of the documentation", href := DocumentationPages.root.language.task.netLogo.file).
 
     @hl.openmole(s"""
     $model
@@ -165,7 +165,7 @@
     val displayMedians = ToStringHook(medNumberFood1, medNumberFood2, medNumberFood3)
 
     // Execute the workflow
-    val ex = replicateModel + (modelCapsule hook displayOutputs) + (statisticCapsule hook displayMedians) start
+    replicateModel + (modelCapsule hook displayOutputs) + (statisticCapsule hook displayMedians)
     """, header = model)
 
     @p This execution should display the output values for each model execution and the medians of this values. Note
@@ -210,13 +210,13 @@
       )
 
     // Define a hook to save the Pareto frontier
-    val savePopulationHook = SavePopulationHook(nsga2, "/tmp/ants/")
+    val savePopulationHook = SavePopulationHook(nsga2, workDirectory / "results")
 
     // Define another hook to display the generation in the console
     val display = DisplayHook("Generation ${" + nsga2.generation.name + "}")
 
     // Plug everything together to create the workflow
-    val ex = (puzzle hook savePopulationHook hook display) start""", header = model + replication)
+    (puzzle hook savePopulationHook hook display)""", header = model + replication)
 
   @sect{Scale up}
     If you use distributed computing, it might be a good idea to opt for an Island model. Islands are better suited to
@@ -239,12 +239,11 @@
     // population. The algorithm stops after 200,000 islands evaluations.
     val (puzzle, ga) = IslandSteadyGA(evolution)(replicateModel, 2000, 200000, 50)
 
-    val savePopulationHook = SavePopulationHook(ga, "/tmp/ants/")
+    val savePopulationHook = SavePopulationHook(ga, workDirectory / "results")
     val display = DisplayHook("Generation ${" + ga.generation.name + "}")
 
     // Define the execution environment
     val env = EGIEnvironment("biomed", openMOLEMemory = 1200, wallTime = 4 hours)
 
-    // Define the execution
-    val ex =
-      (puzzle on env hook savePopulationHook hook display) start""", header = model + replication)
+    // Define the workflow
+    (puzzle on env hook savePopulationHook hook display)""", header = model + replication)

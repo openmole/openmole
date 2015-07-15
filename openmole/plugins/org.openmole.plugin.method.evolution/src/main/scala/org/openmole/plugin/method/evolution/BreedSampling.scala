@@ -35,7 +35,7 @@ object BreedSampling {
     population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
     archive: Prototype[evolution.A],
     genome: Prototype[evolution.G],
-    size: Int)(implicit plugins: PluginSet) = {
+    size: Int) = {
     val (_population, _archive, _genome) = (population, archive, genome)
     new BreedSampling(evolution, size) {
       val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]

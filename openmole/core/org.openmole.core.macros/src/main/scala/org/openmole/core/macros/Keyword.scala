@@ -30,14 +30,17 @@ object Keyword {
     val tType = weakTypeOf[T]
     val funcs: List[MethodSymbol] = tType.decls.collect { case s: MethodSymbol ⇒ s }.toList
 
-    def generate(func: MethodSymbol) = {
+    def generate(op: String, func: MethodSymbol) = {
       val params = func.paramLists.map(_.map(ValDef(_)))
       val names = params.map(_.map(p ⇒ if (p.tpt.toString.endsWith("*")) q"${p.name}: _*" else q"${p.name}"))
       val opTerm = TermName(op)
       q"def ${opTerm}[V <: {def ${func.name}(...${params}): Any}](...${params}) = (_: V).${func.name}(...${names})"
     }
 
-    val g = funcs.map(f ⇒ generate(f))
+    val g =
+      for {
+        f ← funcs
+      } yield generate(op, f)
 
     val result =
       q"""new {
