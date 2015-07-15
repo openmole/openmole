@@ -42,15 +42,22 @@ class CopyDirVisitor(fromPath: Path, toPath: Path, copyOptions: Array[CopyOption
   @throws(classOf[IOException])
   override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
 
-    // force type inference with _*
-    Files.copy(file, toPath.resolve(fromPath.relativize(file)), copyOptions: _*)
+    // if this fails, we're in the case of an access denied on a *file*
+    try {
+      // force type inference with _*
+      Files.copy(file, toPath.resolve(fromPath.relativize(file)), copyOptions: _*)
+    }
+    catch {
+      case exc: java.nio.file.AccessDeniedException ⇒ Log.logger.warning(s"Could not read file ${exc.getFile} (Permission Denied), skip from copy")
+    }
     FileVisitResult.CONTINUE
   }
 
   @throws(classOf[IOException])
   override def visitFileFailed(file: Path, exc: IOException): FileVisitResult = {
     exc match {
-      case _: java.nio.file.AccessDeniedException ⇒ Log.logger.warning(s"Could not read ${file}, skip from archive (Permission Denied).")
+      // exception thrown when unable to browse a directory
+      case _: java.nio.file.AccessDeniedException ⇒ Log.logger.warning(s"Could not enter directory ${file} (Permission Denied), content won't be copied")
       case _                                      ⇒ throw exc
     }
     FileVisitResult.CONTINUE
