@@ -178,8 +178,6 @@ case class TreeNodeData(
 case class ScriptData(
   scriptName: String,
   script: String,
-  inputDirectory: String,
-  outputDirectory: String,
   output: String)
 
 case class Error(stackTrace: String)
