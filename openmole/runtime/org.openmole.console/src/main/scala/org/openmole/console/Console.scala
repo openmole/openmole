@@ -165,7 +165,13 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
                 println(e.stackString)
                 ExitCodes.compilationError
               case Compiled(compiled) ⇒
+                def notAPuzzle = {
+                  println(s"Script $scriptFile doesn't end with a puzzle")
+                  ExitCodes.notAPuzzle
+                }
+
                 compiled.eval() match {
+                  case null ⇒ notAPuzzle
                   case res: PuzzleBuilder ⇒
                     val ex = res.buildPuzzle.toExecution()
                     Try(ex.start) match {
@@ -182,9 +188,8 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
                             ExitCodes.executionError
                         }
                     }
-                  case _ ⇒
-                    println(s"Script $scriptFile doesn't end with a puzzle")
-                    ExitCodes.notAPuzzle
+                  case _ ⇒ notAPuzzle
+
                 }
 
             }
