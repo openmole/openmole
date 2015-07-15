@@ -36,16 +36,17 @@ class Project(workDirectory: File) {
   lazy val console = new Console()
   def loadPlugins = PluginManager.load(plugins)
 
-  def compile(script: File, args: Seq[String] = Seq.empty): CompileResult = {
+  def compile(script: File, args: Seq[String]): CompileResult = {
     if (!script.exists) ScriptFileDoesNotExists()
-    else {
-      console.withREPL(ConsoleVariables(args, workDirectory)) { loop ⇒
-        Try(loop.compile(script.content)) match {
-          case Failure(e)        ⇒ CompilationError(e)
-          case Success(compiled) ⇒ Compiled(compiled)
-        }
+    else compile(script.content, args)
+  }
+
+  def compile(content: String, args: Seq[String]): CompileResult = {
+    console.withREPL(ConsoleVariables(args, workDirectory)) { loop ⇒
+      Try(loop.compile(content)) match {
+        case Failure(e)        ⇒ CompilationError(e)
+        case Success(compiled) ⇒ Compiled(compiled)
       }
     }
-
   }
 }

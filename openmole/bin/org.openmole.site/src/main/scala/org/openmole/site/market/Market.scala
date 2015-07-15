@@ -125,7 +125,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
           def exclusion = s"Project ${project} of repository $repository has been excluded "
 
           def compiles = for { file ← project.files } yield {
-            consoleProject.compile(projectDirectory / file) match {
+            consoleProject.compile(projectDirectory / file, Seq.empty) match {
               case Compiled(puzzle) ⇒ true
               case CompilationError(e) ⇒
                 Log.logger.log(Log.WARNING, exclusion + " because there was an error during compilation.", e)
