@@ -95,11 +95,7 @@ object PluginManager extends Logger {
 
     if (isDirectoryPlugin(path) || path.isJar) List(path)
     else if (path.isDirectory)
-      path.listFilesSafe(
-        new FileFilter {
-          override def accept(file: File): Boolean =
-            (file.isFile && file.exists && file.isJar) || isDirectoryPlugin(file)
-        })
+      path.listFilesSafe(file ⇒ (file.isFile && file.exists && file.isJar) || isDirectoryPlugin(file))
     else {
       Log.logger.fine("File doesn't seem to be a valid jar or directory: " + path)
       List.empty

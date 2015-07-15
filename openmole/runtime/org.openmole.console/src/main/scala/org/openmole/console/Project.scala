@@ -38,10 +38,23 @@ class Project(workDirectory: File) {
 
   def compile(script: File, args: Seq[String]): CompileResult = {
     if (!script.exists) ScriptFileDoesNotExists()
-    else compile(script.content, args)
+    else {
+      def compileContent =
+        s"""
+            |object oms {
+            |${scriptsObjects.mkString("\n")}
+            |}
+            |import oms._
+            |def run() = {
+            |${script.content}
+            |}
+            |run()
+       """.stripMargin
+      compile(compileContent, args)
+    }
   }
 
-  def compile(content: String, args: Seq[String]): CompileResult = {
+  private def compile(content: String, args: Seq[String]): CompileResult = {
     console.withREPL(ConsoleVariables(args, workDirectory)) { loop ⇒
       Try(loop.compile(content)) match {
         case Failure(e)        ⇒ CompilationError(e)
@@ -49,4 +62,19 @@ class Project(workDirectory: File) {
       }
     }
   }
+
+  def scriptFiles = workDirectory.listFilesSafe(_.getName.endsWith(".oms"))
+
+  def scriptsObjects =
+    for {
+      script ← scriptFiles
+    } yield makeObject(script)
+
+  def makeObject(script: File) =
+    s"""
+       |object ${script.getName.dropRight(".oms".size)} {
+       |${script.content}
+       |}
+     """.stripMargin
+
 }

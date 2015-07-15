@@ -161,7 +161,6 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
                 println("File " + scriptFile + " doesn't exist.")
                 ExitCodes.scriptDoesNotExist
               case CompilationError(e) ⇒
-                println(e.getMessage)
                 println(e.stackString)
                 ExitCodes.compilationError
               case Compiled(compiled) ⇒
@@ -176,14 +175,13 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
                     val ex = res.buildPuzzle.toExecution()
                     Try(ex.start) match {
                       case Failure(e) ⇒
-                        println(e.getMessage)
                         println(e.stackString)
                         ExitCodes.validationError
                       case Success(_) ⇒
                         Try(ex.waitUntilEnded) match {
                           case Success(_) ⇒ ExitCodes.ok
                           case Failure(e) ⇒
-                            println("Error during script execution: " + e.getMessage)
+                            println("Error during script execution: ")
                             print(e.stackString)
                             ExitCodes.executionError
                         }
