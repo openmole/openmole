@@ -27,10 +27,11 @@ object PluginInfo {
   def pluginsInfo = plugins.values
 }
 
-case class PluginInfo(namespaces: List[String])
+case class PluginInfo(namespaces: List[String], keywordTraits: List[String])
 
 trait PluginInfoActivator extends BundleActivator {
-  def info = PluginInfo(List(this.getClass.getPackage.getName))
+  def keyWordTraits: List[Class[_]] = Nil
+  def info = PluginInfo(List(this.getClass.getPackage.getName), keyWordTraits.map(_.getCanonicalName))
 
   override def start(bundleContext: BundleContext): Unit =
     PluginInfo.plugins += this.getClass -> info

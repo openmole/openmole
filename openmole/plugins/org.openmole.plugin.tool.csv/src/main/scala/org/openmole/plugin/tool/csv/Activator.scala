@@ -15,10 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.hook.file
+package org.openmole.plugin.tool.csv
 
 import org.openmole.core.workflow.tools.PluginInfoActivator
 
 class Activator extends PluginInfoActivator {
-  override def keyWordTraits = List(classOf[FilePackage])
+  override def keyWordTraits = List(classOf[CSVPackage])
 }
+

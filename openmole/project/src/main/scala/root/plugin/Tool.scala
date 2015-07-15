@@ -29,7 +29,8 @@ object Tool extends PluginDefaults {
   )
 
   lazy val csv = OsgiProject("csv", imports = Seq("*")) dependsOn (Core.exception, Core.workflow) settings (
-    libraryDependencies += Libraries.opencsv
+    libraryDependencies += Libraries.opencsv,
+    defaultActivator
   )
 
   lazy val pattern = OsgiProject("pattern", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Core.dsl) settings (defaultActivator)

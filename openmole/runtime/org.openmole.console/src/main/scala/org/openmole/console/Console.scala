@@ -20,7 +20,7 @@ package org.openmole.console
 import jline.console.ConsoleReader
 import java.util.concurrent.Executors
 import org.openmole.core.console.ScalaREPL
-import org.openmole.core.dsl.Serializer
+import org.openmole.core.dsl.{ DSLPackage, Serializer }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
@@ -115,6 +115,12 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
   def variablesName = "_variables_"
 
   def autoImports: Seq[String] = PluginInfo.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"$n._")
+  def keywordNamespace = "om"
+
+  def keywordNamespaceCode =
+    s"""
+       |object $keywordNamespace extends ${classOf[DSLPackage].getCanonicalName} with ${PluginInfo.pluginsInfo.flatMap(_.keywordTraits).mkString(" with ")}
+     """.stripMargin
 
   def imports =
     Seq(
@@ -124,7 +130,8 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
 
   def initialisationCommands =
     Seq(
-      imports.map("import " + _).mkString("; ")
+      imports.map("import " + _).mkString("; "),
+      keywordNamespaceCode
     )
 
   def run(args: ConsoleVariables, workDirectory: Option[File] = None): Int = {

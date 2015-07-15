@@ -20,10 +20,13 @@ package org.openmole.plugin.task
 import org.openmole.core.macros.Keyword
 import org.openmole.core.workflow.data._
 
-package object tools {
+package tools {
 
-  lazy val assignments = new {
-    def +=[T, U <: { def addAssignment[T](from: Prototype[T], to: Prototype[T]): this.type }](from: Prototype[T], to: Prototype[T]) = (_: U).addAssignment(from, to)
+  trait ToolsPackage {
+    lazy val assignments = new {
+      def +=[T, U <: { def addAssignment[T](from: Prototype[T], to: Prototype[T]): this.type }](from: Prototype[T], to: Prototype[T]) = (_: U).addAssignment(from, to)
+    }
   }
-
 }
+
+package object tools extends ToolsPackage

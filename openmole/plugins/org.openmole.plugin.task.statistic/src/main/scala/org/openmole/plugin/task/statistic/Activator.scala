@@ -19,4 +19,6 @@ package org.openmole.plugin.task.statistic
 
 import org.openmole.core.workflow.tools.PluginInfoActivator
 
-class Activator extends PluginInfoActivator
+class Activator extends PluginInfoActivator {
+  override def keyWordTraits = List(classOf[StatisticPackage])
+}
