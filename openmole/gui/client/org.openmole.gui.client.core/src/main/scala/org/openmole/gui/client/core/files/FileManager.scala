@@ -1,6 +1,7 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.ext.data.{ DisplayableFile, SafePath }
+import org.openmole.gui.ext.data._
+import org.openmole.gui.misc.utils.Utils
 import org.scalajs.dom.raw._
 
 /*
@@ -50,12 +51,13 @@ object FileManager {
   def upload(fileList: FileList,
              destinationPath: SafePath,
              fileTransferState: FileTransferState ⇒ Unit,
+             uploadType: UploadType,
              onloaded: () ⇒ Unit = () ⇒ {}) = {
     val formData = new FormData
 
     for (i ← 0 to fileList.length - 1) {
       val file = fileList(i)
-      formData.append(destinationPath.path + "/" + file.name, file)
+      formData.append(Utils.toURI(destinationPath.path) + "/" + file.name, file)
     }
 
     val xhr = new XMLHttpRequest
@@ -73,7 +75,11 @@ object FileManager {
       onloaded()
     }
 
-    xhr.open("POST", "uploadfiles", true)
+    uploadType match {
+      case p: UploadProject ⇒ xhr.open("POST", "uploadfiles", true)
+      case k: UploadKey     ⇒ xhr.open("POST", "uploadkeys", true)
+    }
+
     xhr.send(formData)
   }
 
@@ -89,12 +95,12 @@ object FileManager {
 
     xhr.onloadend = (e: ProgressEvent) ⇒ {
       fileTransferState(Transfered())
-      if (treeNode.canonicalPath().extension.displayable) {
+      if (treeNode.safePath().extension.displayable) {
         onLoadEnded(xhr.responseText)
       }
     }
 
-    xhr.open("GET", s"downloadFile?path=${treeNode.canonicalPath().path}", true)
+    xhr.open("GET", s"downloadFile?path=${Utils.toURI(treeNode.safePath().path)}", true)
     xhr.send()
   }
 

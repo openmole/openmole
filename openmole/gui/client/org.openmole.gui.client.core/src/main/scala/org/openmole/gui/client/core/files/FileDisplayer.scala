@@ -41,31 +41,31 @@ class FileDisplayer {
 
   def alreadyDisplayed(tn: TreeNode) = {
     tabs.tabs().find {
-      _.serverFilePath() == tn.canonicalPath()
+      _.serverFilePath() == tn.safePath()
     }
   }
 
   def display(rootPath: SafePath, tn: TreeNode, content: String, executionTriggerer: PanelTriggerer) = {
-    val fileType = tn.canonicalPath().extension
+    val fileType = tn.safePath().extension
     alreadyDisplayed(tn) match {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileType match {
         case oms: OpenMOLEScript ⇒
-          val ed = editor(fileType, content)
-          OMPost[Api].diff(tn.canonicalPath(), rootPath).call().foreach { rp ⇒
-            tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, ed) with OMSTabControl {
-              val relativePath = SafePath.empty
+          val ed = editor(fileType, content) // OMPost[Api].diff(tn.canonicalPath(), rootPath).call().foreach { rp ⇒
 
-              def onrun = () ⇒ {
-                overlaying() = true
-                OMPost[Api].runScript(ScriptData(tn.name(), ed.code, inputDirectory, outputDirectory, "outstream")).call().foreach { execInfo ⇒
-                  overlaying() = false
-                  executionTriggerer.open
-                }
+          tabs ++ new EditableNodeTab(tn.name, tn.safePath, ed) with OMSTabControl {
+            val relativePath = SafePath.empty
+
+            def onrun = () ⇒ {
+              overlaying() = true
+              OMPost[Api].runScript(ScriptData(tn.name(), ed.code, inputDirectory, outputDirectory, "outstream")).call().foreach { execInfo ⇒
+                overlaying() = false
+                executionTriggerer.open
               }
             }
           }
-        case disp: DisplayableFile ⇒ tabs ++ new EditableNodeTab(tn.name, tn.canonicalPath, editor(fileType, content))
+
+        case disp: DisplayableFile ⇒ tabs ++ new EditableNodeTab(tn.name, tn.safePath, editor(fileType, content))
         case _                     ⇒ //FIXME for GUI workflows
       }
     }

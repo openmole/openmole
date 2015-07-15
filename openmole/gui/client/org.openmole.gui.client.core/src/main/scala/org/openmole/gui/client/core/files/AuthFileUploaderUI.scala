@@ -19,12 +19,11 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.{ Settings, OMPost }
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.ext.data.SafePath
+import org.openmole.gui.ext.data.{ UploadKey, SafePath, FileExtension }
 import org.openmole.gui.ext.data.SafePath._
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import bs._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.ext.data.FileExtension
 import org.openmole.gui.ext.data.FileExtension._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
@@ -42,20 +41,18 @@ class AuthFileUploaderUI(keyName: String, keySet: Boolean, renaming: Option[Stri
     tags.label(`class` := "inputFileStyle")(
       bs.fileInput((fInput: HTMLInputElement) ⇒ {
         val fileList = fInput.files
-        Settings.authenticationKeysPath.foreach { tg: SafePath ⇒
-          FileManager.upload(fileList,
-            tg,
-            (p: FileTransferState) ⇒ {},
-            () ⇒ {
-              val leaf = fileList.item(0).name
-              pathSet() = false
-              OMPost[Api].renameFileFromPath(tg / sp(leaf, leaf, NO_EXTENSION), fileName).call().foreach { b ⇒
-                pathSet() = true
-
-              }
+        FileManager.upload(fileList,
+          SafePath.empty,
+          (p: FileTransferState) ⇒ {},
+          UploadKey(),
+          () ⇒ {
+            val leaf = fileList.item(0).name
+            pathSet() = false
+            OMPost[Api].renameKey(leaf, fileName).call().foreach { b ⇒
+              pathSet() = true
             }
-          )
-        }
+          }
+        )
       }
       ), Rx {
         if (pathSet()) fileName else "No set yet"

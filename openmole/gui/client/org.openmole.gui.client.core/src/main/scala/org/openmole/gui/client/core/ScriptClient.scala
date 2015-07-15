@@ -1,6 +1,8 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{ TreeNode, DirNode, TreeNodePanel }
+import org.openmole.gui.client.core.files.{ DirNode, TreeNodePanel }
+import org.openmole.gui.client.core.files.TreeNode._
+import org.openmole.gui.ext.data.SafePath
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -153,26 +155,22 @@ object ScriptClient {
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
 
     Settings.workspaceProjectNode.foreach { projectsPath ⇒
-      TreeNode.treeNodeDataToTreeNode(projectsPath) match {
-        case dn: DirNode ⇒
-          val treeNodePanel = TreeNodePanel(dn)(executionTriggerer)
-          maindiv.appendChild(
-            tags.div(`class` := "fullpanel")(
-              tags.div(`class` := Rx {
-                "leftpanel " + {
-                  if (openFileTree()) "open" else ""
-                }
-              })(treeNodePanel.view.render),
-              tags.div(`class` := Rx {
-                "centerpanel " + {
-                  if (openFileTree()) "reduce" else ""
-                }
-              })(treeNodePanel.fileDisplayer.tabs.render)
+      val treeNodePanel = TreeNodePanel(DirNode(Var("projects"), Var(SafePath.sp(Seq("projects"))), 0L, ""))(executionTriggerer)
+      maindiv.appendChild(
+        tags.div(`class` := "fullpanel")(
+          tags.div(`class` := Rx {
+            "leftpanel " + {
+              if (openFileTree()) "open" else ""
+            }
+          })(treeNodePanel.view.render),
+          tags.div(`class` := Rx {
+            "centerpanel " + {
+              if (openFileTree()) "reduce" else ""
+            }
+          })(treeNodePanel.fileDisplayer.tabs.render)
 
-            ).render
-          )
-        case _ ⇒
-      }
+        ).render
+      )
     }
 
     body.appendChild(connectionDiv)

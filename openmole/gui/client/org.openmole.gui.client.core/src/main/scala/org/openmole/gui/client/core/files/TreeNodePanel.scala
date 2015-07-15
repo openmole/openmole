@@ -1,7 +1,8 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
-import org.openmole.gui.ext.data.{ DisplayableFile }
+import org.openmole.gui.client.core.{ Settings, PanelTriggerer, OMPost }
+import org.openmole.gui.ext.data.{ UploadProject, DisplayableFile }
+import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.BootstrapTags._
 import org.scalajs.dom.html.Input
@@ -104,8 +105,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
             false
           })),
           inputGroupAddon(id := "fileinput-addon")(uploadButton((fileInput: HTMLInputElement) ⇒ {
-            FileManager.upload(fileInput.files,
-              dirNodeLine().last.canonicalPath(), (p: FileTransferState) ⇒ transferring() = p)
+            FileManager.upload(fileInput.files, dirNodeLine().last.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
           })),
           inputGroupAddon(id := "fileinput-addon")(
             tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
@@ -134,7 +134,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
           },
           ondrop := { (e: DragEvent) ⇒
             dragState() = ""
-            FileManager.upload(e.dataTransfer.files, dirNodeLine().last.canonicalPath(), (p: FileTransferState) ⇒ transferring() = p)
+            FileManager.upload(e.dataTransfer.files, dirNodeLine().last.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
             e.preventDefault
             e.stopPropagation
             false
@@ -179,8 +179,8 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   def drawNode(node: TreeNode) = node match {
     case fn: FileNode ⇒
       clickableElement(fn, "file", () ⇒ {
-        if (node.canonicalPath().extension.displayable) {
-          downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.canonicalPath(), node, content, executionTriggerer))
+        if (node.safePath().extension.displayable) {
+          downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.safePath(), node, content, executionTriggerer))
         }
       })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
@@ -288,7 +288,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         })(
           glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
           glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
-          a(glyphSpan(glyph_download, () ⇒ Unit)(`class` := "glyphitem"), href := s"downloadFile?path=${tn.canonicalPath().path}")
+          a(glyphSpan(glyph_download, () ⇒ Unit)(`class` := "glyphitem"), href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}")
         )
       )
     )

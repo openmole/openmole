@@ -69,36 +69,36 @@ object ApiImpl extends Api {
   }
 
   // FILES
-  def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean =
-    new File(new File(treeNodeData.canonicalPath.path), directoryName).mkdirs
+  def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean = new File(treeNodeData.safePath, directoryName).mkdirs
 
-  def addFile(treeNodeData: TreeNodeData, fileName: String): Boolean =
-    new File(new File(treeNodeData.canonicalPath.path), fileName).createNewFile
+  def addFile(treeNodeData: TreeNodeData, fileName: String): Boolean = new File(treeNodeData.safePath, fileName).createNewFile
 
-  def deleteFile(treeNodeData: TreeNodeData): Unit = new File(treeNodeData.canonicalPath.path).recursiveDelete
+  def deleteFile(treeNodeData: TreeNodeData): Unit = safePathToFile(treeNodeData.safePath).recursiveDelete
 
-  def diff(subPath: SafePath, fullPath: SafePath): SafePath =
-    SafePath.sp(new File(fullPath.path).getCanonicalPath diff new File(subPath.path).getParentFile.getCanonicalPath, subPath.leaf)
+  //def diff(subPath: SafePath, fullPath: SafePath): SafePath =
+  // SafePath.sp(safePathToFile(fullPath).getCanonicalPath diff safePathToFile(subPath.parent).getCanonicalPath)
 
-  def fileSize(treeNodeData: TreeNodeData): Long = new File(treeNodeData.canonicalPath.path).length
+  def fileSize(treeNodeData: TreeNodeData): Long = safePathToFile(treeNodeData.safePath).length
 
-  def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.canonicalPath)
+  def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.safePath)
 
   def renameFile(treeNodeData: TreeNodeData, name: String): TreeNodeData =
-    renameFileFromPath(treeNodeData.canonicalPath, name)
+    renameFileFromPath(safePathToFile(treeNodeData.safePath), name)
+
+  def renameKey(keyName: String, newName: String): Unit =
+    Files.move(new File(Utils.authenticationKeysFile, keyName), new File(Utils.authenticationKeysFile, newName))
 
   def renameFileFromPath(filePath: SafePath, newName: String): TreeNodeData = {
-    val targetFile = new File(new File(filePath.path).getParentFile, newName)
-    val (source, target) = (new File(filePath.path), targetFile)
+    val targetFile = new File(filePath.parent, newName)
 
-    Files.move(source, target, StandardCopyOption.REPLACE_EXISTING)
+    Files.move(safePathToFile(filePath), targetFile, StandardCopyOption.REPLACE_EXISTING)
     TreeNodeData(newName, targetFile, false, 0L, "")
 
   }
 
-  def saveFile(path: String, fileContent: String): Unit = new File(path).content = fileContent
+  def saveFile(path: SafePath, fileContent: String): Unit = safePathToFile(path).content = fileContent
 
-  def workspaceProjectNode(): TreeNodeData = Utils.workspaceProjectFile
+  def workspaceProjectNode(): SafePath = Utils.workspaceProjectFile
 
   def authenticationKeysPath(): SafePath = Utils.authenticationKeysFile
 

@@ -122,21 +122,22 @@ object FileExtension {
 }
 
 object SafePath {
-  def sp(path: String, leaf: String, extension: FileExtension = FileExtension.NO_EXTENSION): SafePath =
-    SafePath(new URI(path).toString, leaf, extension)
+  def sp(path: Seq[String], extension: FileExtension = FileExtension.NO_EXTENSION): SafePath =
+    SafePath(path, extension)
 
-  def leaf(name: String, extension: FileExtension) = sp(name, name, extension)
+  def leaf(name: String, extension: FileExtension) = sp(Seq(name), extension)
 
   def empty = leaf("", FileExtension.NO_EXTENSION)
 }
 
 import SafePath._
 
-case class SafePath(encoded: String, leaf: String, extension: FileExtension) {
-  val path = new URI(encoded).getPath
+//The path it relative to the project root directory
+case class SafePath(path: Seq[String], extension: FileExtension) {
 
-  def /(safePath: SafePath) = sp(this.path + "/" + safePath.path,
-    safePath.leaf, safePath.extension)
+  def /(safePath: SafePath) = sp(this.path ++ safePath.path, safePath.extension)
+
+  def parent: SafePath = SafePath(path.dropRight(1), extension)
 }
 
 sealed trait AuthenticationData extends Data {
@@ -161,10 +162,14 @@ case class EGIP12AuthenticationData(val cypheredPassword: String = "",
   def synthetic = "egi.p12"
 }
 
+sealed trait UploadType
+case class UploadProject() extends UploadType
+case class UploadKey() extends UploadType
+
 @JSExport
 case class TreeNodeData(
   name: String,
-  canonicalPath: SafePath,
+  safePath: SafePath,
   isDirectory: Boolean,
   size: Long,
   readableSize: String)

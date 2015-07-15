@@ -41,7 +41,7 @@ class EGIP12AuthenticationPanelUI(data: EGIP12AuthenticationData) extends PanelU
 
 
   lazy val privateKey = new AuthFileUploaderUI(data.certificatePath.map {
-    _.leaf
+    _.path.last
   }.getOrElse(""), data.certificatePath.isDefined, Some("egi.p12"))
 
   @JSExport
