@@ -143,7 +143,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
     d3,
     bootstrap,
     jquery,
-    ace
+    ace,
+    txtmark
   )
 
   //FIXME separate web plugins from core ones

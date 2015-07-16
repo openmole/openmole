@@ -78,6 +78,14 @@ object TreeNodeTabs {
     }
   }
 
+  class HTMLTab(val tabName: Var[String], val serverFilePath: Var[SafePath], htmlContent: String) extends TreeNodeTab {
+    val editorElement = tags.div(
+      RawFrag(htmlContent)
+    )
+
+    def save(onsaved: () ⇒ Unit) = onsaved()
+  }
+
   def apply(tabs: TreeNodeTab*) = new TreeNodeTabs(tabs.toSeq)
 }
 
@@ -127,9 +135,11 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   def removeTab(tab: TreeNodeTab) = {
     val isactive = isActive(tab)
     tab.desactivate
+    println("Tabs " + tabs().map { _.tabName() })
     tabs() = tabs().filterNot {
       _ == tab
     }
+    println("TabsII " + tabs().map { _.tabName() })
     if (isactive) tabs().lastOption.map {
       setActive
     }
@@ -173,7 +183,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                   aria.controls := t.id,
                   role := "tab",
                   data("toggle") := "tab", onclick := { () ⇒ setActive(t) })(
-                    tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ --(t) }
+                    tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ println("clicked close"); --(t) }
                     )("x"),
                     t.tabName()
                   )
@@ -201,10 +211,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                           if (tab.overlaying()) tab.overlayElement else tags.div
                         )
                       )
-                    case x: Any ⇒
-
-                      println("Any " + x)
-                      tags.div(t.editorElement)
+                    case _ ⇒ tags.div(t.editorElement)
                   }
                 }
               }

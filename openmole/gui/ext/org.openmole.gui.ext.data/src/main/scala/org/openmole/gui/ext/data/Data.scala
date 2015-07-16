@@ -110,12 +110,15 @@ case class DisplayableFile(extension: String, highlighter: String, displayable: 
 
 case class OpenMOLEScript(extension: String, highlighter: String, displayable: Boolean = true) extends FileExtension
 
+case class MDScript(extension: String, displayable: Boolean = true) extends FileExtension
+
 case class BinaryFile(extension: String, displayable: Boolean = false) extends FileExtension
 
 object FileExtension {
   val OMS = OpenMOLEScript("oms", "scala")
   val SCALA = DisplayableFile("scala", "scala")
   val NETLOGO = DisplayableFile("nlogo", "nlogo")
+  val MD = MDScript("md")
   val SH = DisplayableFile("sh", "sh")
   val NO_EXTENSION = DisplayableFile("text", "text")
   val TGZ = BinaryFile("tgz")

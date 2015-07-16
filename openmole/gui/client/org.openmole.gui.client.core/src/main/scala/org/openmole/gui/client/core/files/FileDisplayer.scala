@@ -2,7 +2,8 @@ package org.openmole.gui.client.core.files
 
 import java.io.File
 import TreeNodeTabs._
-import org.openmole.gui.client.core.{ PanelTriggerer, ExecutionPanel, OMPost }
+import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
+import org.openmole.gui.ext.data.FileExtension._
 import org.openmole.gui.ext.data.ScriptData
 import org.openmole.gui.shared.Api
 import org.openmole.gui.ext.data._
@@ -63,7 +64,9 @@ class FileDisplayer {
               }
             }
           }
-
+        case md: MDScript ⇒ OMPost[Api].mdToHtml(tn.safePath()).call.foreach { htmlString ⇒
+          tabs ++ new HTMLTab(tn.name, tn.safePath, htmlString)
+        }
         case disp: DisplayableFile ⇒ tabs ++ new EditableNodeTab(tn.name, tn.safePath, editor(fileType, content))
         case _                     ⇒ //FIXME for GUI workflows
       }

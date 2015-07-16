@@ -17,11 +17,12 @@ import scala.util.{ Failure, Success, Try }
 import org.openmole.gui.ext.data._
 import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.ExecutionContext
-import org.openmole.core.workflow.puzzle.{ PuzzleBuilder, Puzzle }
+import org.openmole.core.workflow.puzzle.PuzzleBuilder
 import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
+import com.github.rjeschke._
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -95,6 +96,11 @@ object ApiImpl extends Api {
     if (fromFile.exists && toFile.exists) {
       fromFile.move(new File(toFile, from.path.last))
     }
+  }
+
+  def mdToHtml(safePath: SafePath): String = safePath.extension match {
+    case FileExtension.MD ⇒ MarkDownProcessor(safePathToFile(safePath).content)
+    case _                ⇒ ""
   }
 
   def renameFile(treeNodeData: TreeNodeData, name: String): TreeNodeData =

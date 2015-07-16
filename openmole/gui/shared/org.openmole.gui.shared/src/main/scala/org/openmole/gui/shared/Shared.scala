@@ -48,6 +48,8 @@ trait Api {
 
   def listFiles(path: TreeNodeData): Seq[TreeNodeData]
 
+  def mdToHtml(safePath: SafePath): String
+
   def move(from: SafePath, to: SafePath): Unit
 
   def uuid(): String = java.util.UUID.randomUUID.toString
