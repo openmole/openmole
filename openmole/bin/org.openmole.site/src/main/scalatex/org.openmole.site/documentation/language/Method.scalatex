@@ -57,8 +57,7 @@
 
   // Construction of the complete mole with the execution environment, and the hook.
   // Here the generated workflow will run using 4 threads of the local machine.
-  val ex = (mole hook savePopulation) + (modelCapsule on LocalEnvironment(4))
-  ex.start""")
+  (mole hook savePopulation) + (modelCapsule on LocalEnvironment(4))""")
 
   @p In order to use a steady state algorithm individuals are merged into the archive immediately after the evaluation
   and a new evaluation is generated. Note how the end how this modifies the end of the script:
@@ -80,12 +79,11 @@
   val (mole, ga) = SteadyGA(evolution)(modelCapsule, 10)
 
   // Definition of a hook to save the population of solutions to /tmp/evolution on the local machine running OpenMOLE
-  val savePopulation = SavePopulationHook(ga, "/tmp/evolution/")
+  val savePopulation = SavePopulationHook(ga, workDirectory / "evolution")
 
   // Construction of the complete mole with the execution environment, and the hook.
   // Here the generated workflow will run using 4 threads of the local machine.
-  val ex = (mole hook savePopulation) + (modelCapsule on LocalEnvironment(4))
-  ex.start""", header = model)
+  (mole hook savePopulation) + (modelCapsule on LocalEnvironment(4))""", header = model)
 
   @p For distributed environments the island distribution scheme is well adapted. Islands of population evolve for a
   while on a remote node. When an island is finished, its final population is merged back into a global archive.
@@ -106,12 +104,12 @@
   // Each island is initialised with a random sampling of 50 individuals among the global population.
   val (island, ga) = IslandSteadyGA(evolution)(
     modelCapsule,
-    number = 100,
+    island = 100,
     termination = 10000,
-    samples = 50)
+    sample = 50)
 
-  // Definition of a hook to save the population of solutions to /tmp/evolution on the local machine running OpenMOLE
-  val savePopulation = SavePopulationHook(ga, "/tmp/evolution/")
+  // Definition of a hook to save the population of solutions on the local machine running OpenMOLE
+  val savePopulation = SavePopulationHook(ga, workDirectory / "evolution")
 
   // Construction of the complete mole with the execution environment, and the hook.
   // Here the generated workflow will run using 4 threads of the local machine.
