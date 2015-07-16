@@ -158,12 +158,14 @@ object ApiImpl extends Api {
                 val puzzle = toPuzzle.buildPuzzle
                 val outputStream = new StringPrintStream()
 
-                puzzle.environments.values.foreach { env ⇒
-                  val envId = EnvironmentId(getUUID)
-                  Runnings.add(execId, puzzle.environments.values.map { env ⇒ (envId, env) }.toSeq, outputStream)
-                  env.listen {
-                    case (env, ex: ExceptionRaised) ⇒ Runnings.append(execId, envId, env, ex)
-                  }
+                val envIds = puzzle.environments.values.toSeq.map { env ⇒ EnvironmentId(getUUID) -> env }
+                Runnings.add(execId, envIds, outputStream)
+
+                envIds.foreach {
+                  case (id, env) ⇒
+                    env.listen {
+                      case (env, ex: ExceptionRaised) ⇒ Runnings.append(execId, id, env, ex)
+                    }
                 }
                 Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
                   case Success(ex) ⇒
