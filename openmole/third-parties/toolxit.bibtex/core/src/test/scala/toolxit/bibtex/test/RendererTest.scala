@@ -6,7 +6,6 @@ import java.io.{ FileInputStream, InputStreamReader, FileOutputStream, OutputStr
 import scala.util.Properties
 import toolxit.bibtex.machine.BibTeXException
 
-
 object Renderer extends App {
 
   import BibTeXParsers._

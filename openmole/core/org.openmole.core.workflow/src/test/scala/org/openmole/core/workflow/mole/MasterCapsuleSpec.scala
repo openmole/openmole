@@ -34,8 +34,6 @@ import org.openmole.core.workflow.puzzle._
 
 class MasterCapsuleSpec extends FlatSpec with Matchers {
 
-  implicit val plugins = PluginSet.empty
-
   "A master capsule" should "execute tasks" in {
     val p = Prototype[String]("p")
 

@@ -34,8 +34,6 @@ import scala.collection.mutable.ListBuffer
 
 class MoleExecutionSpec extends FlatSpec with Matchers {
 
-  implicit val plugins = PluginSet.empty
-
   class JobGroupingBy2Test extends Grouping {
 
     def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup = {
