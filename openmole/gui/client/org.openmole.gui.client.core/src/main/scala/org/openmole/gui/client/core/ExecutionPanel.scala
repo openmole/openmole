@@ -43,45 +43,32 @@ import concurrent.duration._
 class ExecutionPanel extends ModalPanel {
   val modalID = "executionsPanelID"
 
-  val executionInfos: Var[Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)]] = Var(Seq())
+  case class PanelInfo(
+    executionInfos: Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)],
+    outputsInfos: Seq[RunningOutputData],
+    envErrorsInfos: Seq[RunningEnvironmentData])
 
-  val outputsInfos: Var[Seq[RunningOutputData]] = Var(Seq())
-  val envErrorsInfos: Var[Seq[RunningEnvironmentData]] = Var(Seq())
+  val panelInfo = Var(PanelInfo(Seq(), Seq(), Seq()))
+
   val intervalHandler: Var[Option[SetIntervalHandle]] = Var(None)
-  val envAndOutIntervalHandler: Var[Option[SetIntervalHandle]] = Var(None)
   val expander = new Expander
 
-  def updateExecutionStates = {
-    OMPost[Api].allStates.call().foreach { i ⇒
-      executionInfos() = i
-    }
-  }
-
-  def allEnvStatesAndOutputs = {
-    OMPost[Api].runningErrorEnvironmentAndOutputData.call().foreach { r ⇒
-      envErrorsInfos() = r._1
-      outputsInfos() = r._2
-    }
+  def updatePanelInfo = {
+    for {
+      executionInfos ← OMPost[Api].allStates.call()
+      (envErrorsInfos, outputsInfos) ← OMPost[Api].runningErrorEnvironmentAndOutputData.call()
+    } panelInfo() = PanelInfo(executionInfos, outputsInfos, envErrorsInfos)
   }
 
   def onOpen = () ⇒ {
-    updateExecutionStates
-    allEnvStatesAndOutputs
-    intervalHandler() = Some(setInterval(1000) {
-      updateExecutionStates
-    })
-
-    envAndOutIntervalHandler() = Some(setInterval(7000) {
-      allEnvStatesAndOutputs
+    updatePanelInfo
+    intervalHandler() = Some(setInterval(10000) {
+      updatePanelInfo
     })
   }
 
   def onClose = () ⇒ {
-    allEnvStatesAndOutputs
     intervalHandler().map {
-      clearInterval
-    }
-    envAndOutIntervalHandler().map {
       clearInterval
     }
   }
@@ -100,8 +87,9 @@ class ExecutionPanel extends ModalPanel {
       thead,
       Rx {
         tbody({
+
           for {
-            (id, staticInfo, executionInfo) ← executionInfos()
+            (id, staticInfo, executionInfo) ← panelInfo().executionInfos
           } yield {
             val startDate = s"${new Date(staticInfo.startDate).toLocaleDateString}, ${new Date(staticInfo.startDate).toLocaleTimeString}"
 
@@ -164,7 +152,7 @@ class ExecutionPanel extends ModalPanel {
               }.getOrElse("")))),
               outputStreamID -> {
 
-                val outputs = outputsInfos().filter {
+                val outputs = panelInfo().outputsInfos.filter {
                   _.id == id
                 }.map {
                   _.output
@@ -183,7 +171,7 @@ class ExecutionPanel extends ModalPanel {
               },
               envErrorID -> {
 
-                val outputs = envErrorsInfos().filter {
+                val outputs = panelInfo().envErrorsInfos.filter {
                   _.id == id
                 }.map {
                   _.errors.map {
@@ -216,10 +204,10 @@ class ExecutionPanel extends ModalPanel {
               bs.td(col_md_1)(visibleClass(id.id, envErrorID))(envErrorLink),
               bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink),
               bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
-                updateExecutionStates
+                updatePanelInfo
               })(`class` := "cancelExecution")),
               bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].removeExecution(id).call().foreach { r ⇒
-                updateExecutionStates
+                updatePanelInfo
               })(`class` := "removeExecution"))
             ), bs.tr(row)(
               expander.getVisible(id.id) match {

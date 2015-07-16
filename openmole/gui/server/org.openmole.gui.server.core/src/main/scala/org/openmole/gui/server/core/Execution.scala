@@ -49,15 +49,14 @@ class Execution {
 
   def cancel(key: ExecutionId) =
     dynamicExecutionInfo.single.get(key) match {
-      case Some(dynamic) ⇒
-        dynamic.moleExecution.cancel
-        Runnings.remove(key)
-      case _ ⇒
+      case Some(dynamic) ⇒ dynamic.moleExecution.cancel
+      case _             ⇒
     }
 
   def remove(key: ExecutionId) = {
     cancel(key)
     atomic { implicit ctx ⇒
+      Runnings.remove(key)
       staticExecutionInfo.remove(key)
       dynamicExecutionInfo.remove(key)
       errors.remove(key)

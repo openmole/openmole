@@ -124,7 +124,6 @@ object ApiImpl extends Api {
   def authenticationKeysPath(): SafePath = Utils.authenticationKeysFile
 
   // EXECUTIONS
-  def allStates() = execution.allStates
 
   //def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)] = execution.allStates
 
@@ -181,18 +180,19 @@ object ApiImpl extends Api {
     }
   }
 
+  def allStates() = execution.allStates
+
   def runningErrorEnvironmentAndOutputData(): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
     val envIds = Runnings.ids
     (
       envIds.map {
         case (id, envIds) ⇒
-          RunningEnvironmentData(id, Runnings.runningEnvironments(id).flatMap {
-            _._2.environmentError
-          })
+          RunningEnvironmentData(
+            id,
+            Runnings.runningEnvironments(id).flatMap { _._2.environmentError }
+          )
       }.toSeq,
-      envIds.keys.toSeq.map {
-        Runnings.outputsDatas(_)
-      }
+      envIds.keys.toSeq.map { Runnings.outputsDatas(_) }
     )
   }
 
