@@ -43,7 +43,6 @@ import concurrent.duration._
 class ExecutionPanel extends ModalPanel {
   val modalID = "executionsPanelID"
 
-  //val staticExecutionInfos: Var[Seq[(ExecutionId, StaticExecutionInfo)]] = Var(Seq())
   val executionInfos: Var[Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)]] = Var(Seq())
 
   val outputsInfos: Var[Seq[RunningOutputData]] = Var(Seq())
@@ -65,24 +64,15 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  def atLeastOneRunning = true /*executionInfos().filter {
-    _._2 match {
-      case r: Running ⇒ true
-      case _          ⇒ false
-    }
-  }.isEmpty*/
-
   def onOpen = () ⇒ {
     updateExecutionStates
     allEnvStatesAndOutputs
     intervalHandler() = Some(setInterval(1000) {
       updateExecutionStates
-      if (atLeastOneRunning) onClose()
     })
 
     envAndOutIntervalHandler() = Some(setInterval(7000) {
       allEnvStatesAndOutputs
-      if (atLeastOneRunning) onClose()
     })
   }
 

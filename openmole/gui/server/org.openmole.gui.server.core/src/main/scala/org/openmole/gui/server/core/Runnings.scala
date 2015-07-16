@@ -52,13 +52,12 @@ object Runnings {
   }
 
   def runningEnvironments(id: ExecutionId): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
-    runningEnvironments(ids(id))
+    runningEnvironments(ids.getOrElse(id, Seq()))
   }
 
   def runningEnvironments(envIds: Seq[EnvironmentId]): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
-    envIds.map { id ⇒
-      instance.runningEnvironments.getOrElse(id, Seq())
-      id -> instance.runningEnvironments(id)
+    envIds.flatMap {
+      id ⇒ instance.runningEnvironments.get(id).map(id -> _)
     }
   }
 
