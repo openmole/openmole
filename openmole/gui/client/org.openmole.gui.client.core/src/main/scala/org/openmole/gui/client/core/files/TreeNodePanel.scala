@@ -50,6 +50,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
   val transferring: Var[FileTransferState] = Var(Standby())
+  val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
 
   computeAllSons(rootNode)
@@ -120,7 +121,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
       }
       else {
-        tags.div(`class` := "tree" + dragState(),
+        tags.div(`class` := "tree" + dragState() /*,
           ondragover := { (e: DragEvent) ⇒
             dragState() = " droppable hover"
             e.dataTransfer.dropEffect = "copy"
@@ -138,16 +139,16 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
             e.preventDefault
             e.stopPropagation
             false
-          })(
-            transferring() match {
-              case _: Standby ⇒
-              case _: Transfered ⇒
-                refreshCurrentDirectory
-                transferring() = Standby()
-              case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
-            },
-            drawTree(dirNodeLine().last.sons())
-          )
+          }*/ )(
+          transferring() match {
+            case _: Standby ⇒
+            case _: Transfered ⇒
+              refreshCurrentDirectory
+              transferring() = Standby()
+            case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
+          },
+          drawTree(dirNodeLine().last.sons())
+        )
       }
     }
   )
@@ -266,11 +267,43 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
       },
       onmouseout := { () ⇒
         lineHovered() = false
+      }, ondragstart := { (e: DragEvent) ⇒
+        e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
+        draggedNode() match {
+          case Some(t: TreeNode) ⇒
+          case _ ⇒
+            draggedNode() = Some(tn)
+        }
+        true
+      }, ondragenter := { (e: DragEvent) ⇒
+        false
+      }, ondragover := { (e: DragEvent) ⇒
+        e.dataTransfer.dropEffect = "copy"
+        e.preventDefault
+        false
+      },
+      ondrop := { (e: DragEvent) ⇒
+        e.preventDefault
+        draggedNode().map { sp ⇒
+          tn match {
+            case d: DirNode ⇒
+              if (sp.safePath().path != tn.safePath().path) {
+                OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach { b ⇒
+                  refreshCurrentDirectory
+                }
+              }
+            case _ ⇒
+          }
+        }
+        draggedNode() = None
+        false
       }, tags.span(
         cursor := "pointer",
+        draggable := true,
         onclick := { () ⇒
           todo()
-        }, `class` := classType)(
+        },
+        `class` := classType)(
           tags.i(id := "plusdir", `class` := {
             tn.hasSons match {
               case true  ⇒ "glyphicon glyphicon-plus-sign"

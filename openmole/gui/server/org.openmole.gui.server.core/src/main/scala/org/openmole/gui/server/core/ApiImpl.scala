@@ -20,6 +20,7 @@ import org.openmole.core.workflow.mole.ExecutionContext
 import org.openmole.core.workflow.puzzle.{ PuzzleBuilder, Puzzle }
 import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
+import org.openmole.tool.file._
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -75,12 +76,17 @@ object ApiImpl extends Api {
 
   def deleteFile(treeNodeData: TreeNodeData): Unit = safePathToFile(treeNodeData.safePath).recursiveDelete
 
-  //def diff(subPath: SafePath, fullPath: SafePath): SafePath =
-  // SafePath.sp(safePathToFile(fullPath).getCanonicalPath diff safePathToFile(subPath.parent).getCanonicalPath)
-
   def fileSize(treeNodeData: TreeNodeData): Long = safePathToFile(treeNodeData.safePath).length
 
   def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.safePath)
+
+  def move(from: SafePath, to: SafePath): Unit = {
+    val fromFile = safePathToFile(from)
+    val toFile = safePathToFile(to)
+    if (fromFile.exists && toFile.exists) {
+      fromFile.move(new File(toFile, from.path.last))
+    }
+  }
 
   def renameFile(treeNodeData: TreeNodeData, name: String): TreeNodeData =
     renameFileFromPath(safePathToFile(treeNodeData.safePath), name)
@@ -157,7 +163,9 @@ object ApiImpl extends Api {
     (
       envIds.map {
         case (id, envIds) ⇒
-          RunningEnvironmentData(id, Runnings.runningEnvironments(id).flatMap { _._2.environmentError })
+          RunningEnvironmentData(id, Runnings.runningEnvironments(id).flatMap {
+            _._2.environmentError
+          })
       }.toSeq,
       envIds.keys.toSeq.map {
         Runnings.outputsDatas(_)

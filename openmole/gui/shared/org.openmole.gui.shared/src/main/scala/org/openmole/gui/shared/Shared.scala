@@ -42,11 +42,11 @@ trait Api {
 
   def deleteFile(treeNode: TreeNodeData): Unit
 
-  //def diff(subPath: SafePath, fullPath: SafePath): SafePath
-
   def fileSize(treeNodeData: TreeNodeData): Long
 
   def listFiles(path: TreeNodeData): Seq[TreeNodeData]
+
+  def move(from: SafePath, to: SafePath): Unit
 
   def uuid(): String = java.util.UUID.randomUUID.toString
 

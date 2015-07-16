@@ -51,8 +51,7 @@ class FileDisplayer {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileType match {
         case oms: OpenMOLEScript ⇒
-          val ed = editor(fileType, content) // OMPost[Api].diff(tn.canonicalPath(), rootPath).call().foreach { rp ⇒
-
+          val ed = editor(fileType, content)
           tabs ++ new EditableNodeTab(tn.name, tn.safePath, ed) with OMSTabControl {
             val relativePath = SafePath.empty
 
