@@ -87,7 +87,7 @@ class GetResultActor(jobManager: JobManager) {
   }
 
   private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken): RuntimeResult = Workspace.withTmpFile { resultFile ⇒
-    signalDownload(storage.download(outputFilePath, resultFile), outputFilePath, storage)
+    signalDownload(storage.download(outputFilePath, resultFile), outputFilePath, storage, resultFile)
     SerialiserService.deserialise[RuntimeResult](resultFile)
   }
 
@@ -96,7 +96,7 @@ class GetResultActor(jobManager: JobManager) {
       case Some(message) ⇒
         try {
           Workspace.withTmpFile { tmpFile ⇒
-            signalDownload(storage.download(message.path, tmpFile), message.path, storage)
+            signalDownload(storage.download(message.path, tmpFile), message.path, storage, tmpFile)
 
             /*val stdOutHash = HashService.computeHash(stdOutFile)
              if (stdOutHash != message.hash)
@@ -122,17 +122,17 @@ class GetResultActor(jobManager: JobManager) {
           val fileReplacement =
             serializedResults.files.map {
               replicated ⇒
-                replicated.originalPath -> replicated.download((p, f) ⇒ signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage))
+                replicated.originalPath -> replicated.download((p, f) ⇒ signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage, f))
             }.toMap
 
           Workspace.withTmpFile { contextResultsFileCache ⇒
-            signalDownload(storage.download(serializedResults.contextResults.path, contextResultsFileCache), serializedResults.contextResults.path, storage)
+            signalDownload(storage.download(serializedResults.contextResults.path, contextResultsFileCache), serializedResults.contextResults.path, storage, contextResultsFileCache)
             SerialiserService.deserialiseReplaceFiles[ContextResults](contextResultsFileCache, fileReplacement)
           }
         }
       case serializedResults: ArchiveContextResults ⇒
         Workspace.withTmpFile { contextResultsFileCache ⇒
-          signalDownload(storage.download(serializedResults.contextResults.path, contextResultsFileCache), serializedResults.contextResults.path, storage)
+          signalDownload(storage.download(serializedResults.contextResults.path, contextResultsFileCache), serializedResults.contextResults.path, storage, contextResultsFileCache)
           SerialiserService.deserialiseAndExtractFiles[ContextResults](contextResultsFileCache)
         }
     }
