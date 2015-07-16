@@ -102,7 +102,7 @@
   // Generate a workflow that orchestrates 100 concurrent islands.
   // The workflow stops when 10,000 islands have completed.
   // Each island is initialised with a random sampling of 50 individuals among the global population.
-  val (island, ga) = IslandSteadyGA(evolution)(
+  val (is, ga) = IslandSteadyGA(evolution)(
     modelCapsule,
     island = 100,
     termination = 10000,
@@ -113,7 +113,7 @@
 
   // Construction of the complete mole with the execution environment, and the hook.
   // Here the generated workflow will run using 4 threads of the local machine.
-  val ex = (island on LocalEnvironment(4) hook savePopulation)
+  val ex = (is on LocalEnvironment(4) hook savePopulation)
   ex.start""", header = model)
 
   @p Calibration of stochastic models leads to noisy fitness functions. To deal with such fitness functions, one
