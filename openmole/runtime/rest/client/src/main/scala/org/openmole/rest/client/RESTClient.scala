@@ -31,7 +31,6 @@ object RESTClient extends App {
 
   val token = client.requestToken(password).left.get.token
 
-
   val script =
     """
       |val i = Val[Double]
@@ -56,15 +55,14 @@ object RESTClient extends App {
       |exploration -< (model on env hook ToStringHook() hook copyFile)
     """.stripMargin
 
-  val project = File("/tmp/project")
+  val project = new File("/tmp/project")
   project.mkdirs()
 
   project / "test.txt" content = "test"
   project / "script.oms" content = script
 
-  val projectArchive = File("/tmp/archive.tgz")
+  val projectArchive = new File("/tmp/archive.tgz")
   project.archive(projectArchive)
-
 
   val id = client.start(token, projectArchive, "script.oms")
   println(id)
@@ -100,19 +98,19 @@ trait Client {
   }
 
   def start(token: String, workDirectory: File, scriptPath: String): Either[ExecutionId, HttpError] = {
-    def files = inputFiles.map { f ⇒
+    def file = {
       val builder = MultipartEntityBuilder.create()
-      builder addBinaryBody ("workDirectory", f)
+      builder addBinaryBody ("workDirectory", workDirectory)
       builder.build
     }
 
     val uri =
       new URIBuilder(address + "/start").
         setParameter("token", token).
-        setParameter("script", script).build
+        setParameter("script", scriptPath).build
 
     val post = new HttpPost(uri)
-    files.foreach(post.setEntity)
+    post.setEntity(file)
     execute(post) { response ⇒
       parse(response.content).extract[ExecutionId]
     }

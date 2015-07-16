@@ -17,6 +17,7 @@
 package org.openmole.console
 
 import javax.script.CompiledScript
+import org.openmole.core.console.ScalaREPL
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.file._
@@ -28,25 +29,54 @@ case class ScriptFileDoesNotExists() extends CompileResult
 case class CompilationError(exception: Throwable) extends CompileResult
 case class Compiled(result: CompiledScript) extends CompileResult
 
-class Project(workDirectory: File) {
+object Project {
+  def newREPL(variables: ConsoleVariables) = new Console().newREPL(variables)
+}
+
+class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = Project.newREPL) {
 
   def pluginsDirectory: File = workDirectory / "plugins"
   def plugins = pluginsDirectory.listFilesSafe
 
-  lazy val console = new Console()
   def loadPlugins = PluginManager.load(plugins)
 
   def compile(script: File, args: Seq[String]): CompileResult = {
     if (!script.exists) ScriptFileDoesNotExists()
-    else compile(script.content, args)
+    else {
+      def compileContent =
+        s"""${scriptsObjects(script.getParentFileSafe).mkString("\n")}
+            |def runOMSScript() = {
+            |${script.content}
+            |}
+            |runOMSScript()
+       """.stripMargin
+      compile(compileContent, args)
+    }
   }
 
-  def compile(content: String, args: Seq[String]): CompileResult = {
-    console.withREPL(ConsoleVariables(args, workDirectory)) { loop ⇒
+  private def compile(content: String, args: Seq[String]): CompileResult = {
+    val loop = newREPL(ConsoleVariables(args, workDirectory))
+    try {
       Try(loop.compile(content)) match {
         case Failure(e)        ⇒ CompilationError(e)
         case Success(compiled) ⇒ Compiled(compiled)
       }
     }
+    finally loop.close()
   }
+
+  def scriptFiles(dir: File) = dir.listFilesSafe(_.getName.endsWith(".oms"))
+
+  def scriptsObjects(dir: File) =
+    for {
+      script ← scriptFiles(dir)
+    } yield makeObject(script)
+
+  def makeObject(script: File) =
+    s"""
+       |lazy val ${script.getName.dropRight(".oms".size)} = new {
+       |${script.content}
+       |}
+     """.stripMargin
+
 }

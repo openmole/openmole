@@ -267,9 +267,9 @@ package object evolution {
 
   def IslandSteadyGA[ALG <: GAAlgorithm](algorithm: ALG)(
     fitness: Puzzle,
-    number: Int,
+    island: Int,
     termination: GATermination { type G >: algorithm.G; type P >: algorithm.P; type F >: algorithm.F },
-    samples: Int) = {
+    sample: Int) = {
 
     val name = "islandSteadyGA"
 
@@ -278,9 +278,9 @@ package object evolution {
 
     val (puzzle, islandGA) = IslandGA[ALG](parameters)(
       mt,
-      number = number,
+      island = island,
       termination = termination.asInstanceOf[GATermination { type G = parameters.evolution.G; type P = parameters.evolution.P; type F = parameters.evolution.F }],
-      samples = samples)
+      sample = sample)
 
     val islandSteadyPuzzle = OutputEnvironmentPuzzleContainer(puzzle, puzzle.output, mt)
     (islandSteadyPuzzle, islandGA)
@@ -288,9 +288,9 @@ package object evolution {
 
   def IslandGA[AG <: GAAlgorithm](parameters: GAParameters[AG])(
     fitness: Puzzle,
-    number: Int,
+    island: Int,
     termination: GATermination { type G >: parameters.evolution.G; type P >: parameters.evolution.P; type F >: parameters.evolution.F },
-    samples: Int) = {
+    sample: Int) = {
 
     val name = "islandGA"
 
@@ -379,14 +379,14 @@ package object evolution {
     val selectIndividualsTask =
       SamplePopulationTask(evolution)(
         population,
-        samples) set { _.setName(name + "Breeding") }
+        sample) set { _.setName(name + "Breeding") }
 
     selectIndividualsTask addInput archive
     selectIndividualsTask addOutput archive
 
     val skel =
       firstCapsule -<
-        (preIslandCapsule, size = Some(number.toString)) --
+        (preIslandCapsule, size = Some(island.toString)) --
         fitness -- toInidividualsTask --
         elitismCaps --
         terminationSlot --

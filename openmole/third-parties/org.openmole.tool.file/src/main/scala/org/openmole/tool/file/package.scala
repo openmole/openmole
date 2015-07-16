@@ -133,7 +133,7 @@ package file {
 
       def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty)
 
-      def listFilesSafe(filter: FileFilter) = Option(file.listFiles(filter)).getOrElse(Array.empty)
+      def listFilesSafe(filter: File ⇒ Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty)
 
       def getParentFileSafe: File =
         file.getParentFile() match {
