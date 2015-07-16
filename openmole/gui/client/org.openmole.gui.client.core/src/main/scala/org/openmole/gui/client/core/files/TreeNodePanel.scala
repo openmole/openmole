@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.{ Settings, PanelTriggerer, OMPost }
-import org.openmole.gui.ext.data.{ UploadProject, DisplayableFile }
+import org.openmole.gui.ext.data.{ SafePath, UploadProject, DisplayableFile }
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.BootstrapTags._
@@ -50,6 +50,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
   val transferring: Var[FileTransferState] = Var(Standby())
+  val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
 
   computeAllSons(rootNode)
@@ -120,7 +121,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
       }
       else {
-        tags.div(`class` := "tree" + dragState(),
+        tags.div(`class` := "tree" + dragState() /*,
           ondragover := { (e: DragEvent) ⇒
             dragState() = " droppable hover"
             e.dataTransfer.dropEffect = "copy"
@@ -138,16 +139,16 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
             e.preventDefault
             e.stopPropagation
             false
-          })(
-            transferring() match {
-              case _: Standby ⇒
-              case _: Transfered ⇒
-                refreshCurrentDirectory
-                transferring() = Standby()
-              case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
-            },
-            drawTree(dirNodeLine().last.sons())
-          )
+          }*/ )(
+          transferring() match {
+            case _: Standby ⇒
+            case _: Transfered ⇒
+              refreshCurrentDirectory
+              transferring() = Standby()
+            case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
+          },
+          drawTree(dirNodeLine().last.sons())
+        )
       }
     }
   )
@@ -159,9 +160,19 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
       onLoaded
     )
 
-  def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(onclick := { () ⇒
-    goToDirAction(dn)()
-  })
+  def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(
+    onclick := { () ⇒
+      goToDirAction(dn)()
+    }, draggable := true, ondrop := {
+      dropAction(dn)
+    }, ondragenter := { (e: DragEvent) ⇒
+      false
+    }, ondragover := { (e: DragEvent) ⇒
+      e.dataTransfer.dropEffect = "move"
+      e.preventDefault
+      false
+    }
+  )
 
   def goToDirAction(dn: DirNode): () ⇒ Unit = () ⇒ {
     dirNodeLine() = dirNodeLine().zipWithIndex.filter(_._1 == dn).headOption.map {
@@ -234,7 +245,11 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   }
 
   def refreshCurrentDirectory = {
-    computeAllSons(dirNodeLine().last)
+    refresh(dirNodeLine().last)
+  }
+
+  def refresh(dn: DirNode) = {
+    computeAllSons(dn)
     newNodeInput.value = ""
   }
 
@@ -252,6 +267,25 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
       toBeEdited() = None
   }
 
+  def dropAction(tn: TreeNode) = {
+    (e: DragEvent) ⇒
+      e.preventDefault
+      draggedNode().map { sp ⇒
+        tn match {
+          case d: DirNode ⇒
+            if (sp.safePath().path != d.safePath().path) {
+              OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach { b ⇒
+                refresh(dirNodeLine().last)
+                refresh(d)
+              }
+            }
+          case _ ⇒
+        }
+      }
+      draggedNode() = None
+      false
+  }
+
   object ReactiveLine {
     def apply(tn: TreeNode, classType: String, todo: () ⇒ Unit) = new ReactiveLine(tn, classType, todo)
   }
@@ -266,11 +300,30 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
       },
       onmouseout := { () ⇒
         lineHovered() = false
+      }, ondragstart := { (e: DragEvent) ⇒
+        e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
+        draggedNode() match {
+          case Some(t: TreeNode) ⇒
+          case _ ⇒
+            draggedNode() = Some(tn)
+        }
+        true
+      }, ondragenter := { (e: DragEvent) ⇒
+        false
+      }, ondragover := { (e: DragEvent) ⇒
+        e.dataTransfer.dropEffect = "move"
+        e.preventDefault
+        false
+      },
+      ondrop := {
+        dropAction(tn)
       }, tags.span(
         cursor := "pointer",
+        draggable := true,
         onclick := { () ⇒
           todo()
-        }, `class` := classType)(
+        },
+        `class` := classType)(
           tags.i(id := "plusdir", `class` := {
             tn.hasSons match {
               case true  ⇒ "glyphicon glyphicon-plus-sign"

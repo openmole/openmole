@@ -51,14 +51,13 @@ class FileDisplayer {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileType match {
         case oms: OpenMOLEScript ⇒
-          val ed = editor(fileType, content) // OMPost[Api].diff(tn.canonicalPath(), rootPath).call().foreach { rp ⇒
-
+          val ed = editor(fileType, content)
           tabs ++ new EditableNodeTab(tn.name, tn.safePath, ed) with OMSTabControl {
             val relativePath = SafePath.empty
 
             def onrun = () ⇒ {
               overlaying() = true
-              OMPost[Api].runScript(ScriptData(tn.name(), ed.code, inputDirectory, outputDirectory, "outstream")).call().foreach { execInfo ⇒
+              OMPost[Api].runScript(ScriptData(tn.name(), ed.code, "outstream")).call().foreach { execInfo ⇒
                 overlaying() = false
                 executionTriggerer.open
               }

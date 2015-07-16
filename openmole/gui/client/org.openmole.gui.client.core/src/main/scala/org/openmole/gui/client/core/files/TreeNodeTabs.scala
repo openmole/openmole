@@ -86,46 +86,18 @@ trait TabControl {
 }
 
 trait OMSTabControl <: TabControl {
-  val settingsVisible = Var(false)
-
-  val settingsButton = glyphSpan(glyph_settings, () ⇒ settingsVisible() = !settingsVisible())(`class` := "executionSettings")
-
-  val inputDirectoryInput = bs.input("")(
-    placeholder := "Input directory",
-    autofocus
-  ).render
-
-  val outputDirectoryInput = bs.input("")(
-    placeholder := "Output directory",
-    autofocus
-  ).render
 
   val runButton = bs.button("Play", btn_primary)(onclick := { () ⇒
     onrun()
   })
 
-  lazy val controlElement = {
-    inputDirectoryInput.value = relativePath.path + "/input"
-    outputDirectoryInput.value = relativePath.path + "/output"
-    tags.div(
-      runButton,
-      settingsButton,
-      tags.div(
-        inputDirectoryInput.render,
-        outputDirectoryInput.render
-      )(`class` := Rx {
-          if (settingsVisible()) "executionSettingsOn" else "displayOff"
-        })
-    )(`class` := "executionElement")
-  }
+  lazy val controlElement = tags.div(`class` := "executionElement")(
+    runButton
+  )
 
   def onrun: () ⇒ Unit
 
   def relativePath: SafePath
-
-  def inputDirectory = inputDirectoryInput.value
-
-  def outputDirectory = outputDirectoryInput.value
 }
 
 import org.openmole.gui.client.core.files.TreeNodeTabs._
@@ -221,6 +193,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                 active.map { tab ⇒
                   tab match {
                     case oms: TabControl ⇒
+                      println("TAPCONTROL ")
                       tags.div(
                         if (t.overlaying()) t.overlayTabElement else t.tabElement,
                         tags.div(
@@ -229,7 +202,10 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                           if (tab.overlaying()) tab.overlayElement else tags.div
                         )
                       )
-                    case _ ⇒ tags.div(t.editorElement)
+                    case x: Any ⇒
+
+                      println("Any " + x)
+                      tags.div(t.editorElement)
                   }
                 }
               }

@@ -394,8 +394,8 @@ overflow-y : auto;
 .executionElement{
     position: fixed;
     top :150;
-    right:50px;
-    width: 200px;
+    right: 80px;
+    width: 50px;
     z-index: 18;
 }
 
