@@ -178,7 +178,7 @@ object ApiImpl extends Api {
 
   def allStates() = execution.allStates
 
-  def runningErrorEnvironmentAndOutputData(): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
+  def runningErrorEnvironmentAndOutputData(lines: Int): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
     val envIds = Runnings.ids
     (
       envIds.map {
@@ -188,7 +188,7 @@ object ApiImpl extends Api {
             Runnings.runningEnvironments(id).flatMap { _._2.environmentError }
           )
       }.toSeq,
-      envIds.keys.toSeq.map { Runnings.outputsDatas(_) }
+      envIds.keys.toSeq.map { Runnings.outputsDatas(_, lines) }
     )
   }
 

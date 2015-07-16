@@ -75,6 +75,6 @@ trait Api {
 
   def runScript(scriptData: ScriptData): Unit
 
-  def runningErrorEnvironmentAndOutputData(): (Seq[RunningEnvironmentData], Seq[RunningOutputData])
+  def runningErrorEnvironmentAndOutputData(lines: Int): (Seq[RunningEnvironmentData], Seq[RunningOutputData])
 
 }

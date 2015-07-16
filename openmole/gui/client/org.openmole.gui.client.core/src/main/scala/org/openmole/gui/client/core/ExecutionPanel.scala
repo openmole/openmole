@@ -56,7 +56,8 @@ class ExecutionPanel extends ModalPanel {
   def updatePanelInfo = {
     for {
       executionInfos ← OMPost[Api].allStates.call()
-      (envErrorsInfos, outputsInfos) ← OMPost[Api].runningErrorEnvironmentAndOutputData.call()
+      //FIXME select the number of lines from the panel
+      (envErrorsInfos, outputsInfos) ← OMPost[Api].runningErrorEnvironmentAndOutputData(lines = 500).call()
     } panelInfo() = PanelInfo(executionInfos, outputsInfos, envErrorsInfos)
   }
 

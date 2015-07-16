@@ -61,8 +61,8 @@ object Runnings {
     }
   }
 
-  def outputsDatas(id: ExecutionId) = atomic { implicit ctx ⇒
-    RunningOutputData(id, instance.outputs(id).toString)
+  def outputsDatas(id: ExecutionId, lines: Int) = atomic { implicit ctx ⇒
+    RunningOutputData(id, instance.outputs(id).toString.lines.toSeq.takeRight(lines).mkString("\n"))
   }
 
   def ids = atomic { implicit ctx ⇒
