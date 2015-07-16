@@ -343,11 +343,11 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
           a(glyphSpan(glyph_download, () ⇒ Unit)(`class` := "glyphitem"), href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
           tn.safePath().extension match {
             case FileExtension.TGZ ⇒ glyphSpan(glyph_archive, () ⇒ {
-              OMPost[Api].extractTGZ(tn).call().foreach{ r=>
+              OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
                 refreshCurrentDirectory
               }
             })(`class` := "glyphitem")
-            case _                 ⇒
+            case _ ⇒
           }
 
         )

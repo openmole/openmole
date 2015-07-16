@@ -20,6 +20,7 @@ package org.openmole.tool
 import java.util.concurrent._
 
 import scala.concurrent.duration.Duration
+import scala.util.{ Failure, Success, Try }
 
 package object thread {
   val daemonThreadFactory = new ThreadFactory {
@@ -35,7 +36,7 @@ package object thread {
   val defaultExecutor = Executors.newCachedThreadPool(daemonThreadFactory)
 
   implicit def future2Function[A](f: Future[A]) = () ⇒ f.get
-  implicit def function2Runnable[F](f: ⇒ F) = new Callable[F] { def call = f }
+  implicit def function2Callable[F](f: ⇒ F) = new Callable[F] { def call = f }
 
   def fixedThreadPool(n: Int) = Executors.newFixedThreadPool(n, daemonThreadFactory)
 

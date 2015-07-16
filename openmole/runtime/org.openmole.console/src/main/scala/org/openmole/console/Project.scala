@@ -18,9 +18,12 @@ package org.openmole.console
 
 import javax.script.CompiledScript
 import org.openmole.core.console.ScalaREPL
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.tool.file._
+import org.openmole.tool.thread._
 
 import scala.util.{ Success, Failure, Try }
 
@@ -56,11 +59,9 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
 
   private def compile(content: String, args: Seq[String]): CompileResult = {
     val loop = newREPL(ConsoleVariables(args, workDirectory))
-    try {
-      Try(loop.compile(content)) match {
-        case Failure(e)        ⇒ CompilationError(e)
-        case Success(compiled) ⇒ Compiled(compiled)
-      }
+    try Compiled(loop.compile(content))
+    catch {
+      case e: Throwable ⇒ CompilationError(e)
     }
     finally loop.close()
   }
@@ -74,9 +75,10 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
 
   def makeObject(script: File) =
     s"""
-       |lazy val ${script.getName.dropRight(".oms".size)} = new {
+       |class ${script.getName.dropRight(".oms".size)}Class {
        |${script.content}
        |}
+       |lazy val ${script.getName.dropRight(".oms".size)} = new ${script.getName.dropRight(".oms".size)}Class
      """.stripMargin
 
 }
