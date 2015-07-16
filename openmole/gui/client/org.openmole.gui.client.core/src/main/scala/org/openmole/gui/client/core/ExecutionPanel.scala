@@ -123,7 +123,7 @@ class ExecutionPanel extends ModalPanel {
             val staticInfo = staticExecutionInfos().filter {
               _._1 == id
             }.headOption.getOrElse((id, StaticExecutionInfo()))._2
-            val startDate = s"${new Date(staticInfo.startDate).toLocaleDateString} : ${new Date(staticInfo.startDate).toLocaleTimeString}"
+            val startDate = s"${new Date(staticInfo.startDate).toLocaleDateString}, ${new Date(staticInfo.startDate).toLocaleTimeString}"
 
             val duration: Duration = (executionInfo.duration milliseconds)
             val h = (duration).toHours
