@@ -72,7 +72,7 @@ class Project(workDirectory: File) {
 
   def makeObject(script: File) =
     s"""
-       |object ${script.getName.dropRight(".oms".size)} {
+       |lazy val ${script.getName.dropRight(".oms".size)} = new {
        |${script.content}
        |}
      """.stripMargin
