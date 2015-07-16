@@ -138,10 +138,9 @@ import SafePath._
 
 //The path it relative to the project root directory
 case class SafePath(path: Seq[String], extension: FileExtension) {
-
   def /(safePath: SafePath) = sp(this.path ++ safePath.path, safePath.extension)
-
   def parent: SafePath = SafePath(path.dropRight(1), extension)
+  def name = path.last
 }
 
 sealed trait AuthenticationData extends Data {
@@ -179,10 +178,7 @@ case class TreeNodeData(
   readableSize: String)
 
 @JSExport
-case class ScriptData(
-  scriptName: String,
-  script: String,
-  output: String)
+case class ScriptData(scriptPath: SafePath)
 
 case class Error(stackTrace: String)
 
@@ -208,7 +204,7 @@ case class RunningEnvironmentData(id: ExecutionId, errors: Seq[EnvironmentError]
 
 case class RunningOutputData(id: ExecutionId, output: String)
 
-case class StaticExecutionInfo(name: String = "", script: String = "", startDate: Long = 0L)
+case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long = 0L)
 
 case class EnvironmentState(envId: EnvironmentId, taskName: String, running: Long, done: Long, submitted: Long, failed: Long)
 
@@ -216,9 +212,7 @@ case class EnvironmentState(envId: EnvironmentId, taskName: String, running: Lon
 
 sealed trait ExecutionInfo {
   def state: String
-
   def duration: Long
-
   def completed: Long
 }
 

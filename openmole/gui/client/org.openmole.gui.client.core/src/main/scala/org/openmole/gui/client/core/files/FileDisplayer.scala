@@ -58,7 +58,7 @@ class FileDisplayer {
 
             def onrun = () ⇒ {
               overlaying() = true
-              OMPost[Api].runScript(ScriptData(tn.name(), ed.code, "outstream")).call().foreach { execInfo ⇒
+              OMPost[Api].runScript(ScriptData(tn.safePath())).call().foreach { execInfo ⇒
                 overlaying() = false
                 executionTriggerer.open
               }

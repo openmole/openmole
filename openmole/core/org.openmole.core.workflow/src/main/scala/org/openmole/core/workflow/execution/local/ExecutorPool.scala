@@ -20,6 +20,7 @@ package org.openmole.core.workflow.execution.local
 import java.util.UUID
 
 import org.openmole.tool.thread._
+import org.osgi.framework.Bundle
 
 import collection.mutable
 import scala.ref.WeakReference
