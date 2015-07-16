@@ -42,7 +42,7 @@ class Project(workDirectory: File) {
       def compileContent =
         s"""
             |object oms {
-            |${scriptsObjects.mkString("\n")}
+            |${scriptsObjects(script.getParentFileSafe).mkString("\n")}
             |}
             |import oms._
             |def run() = {
@@ -63,11 +63,11 @@ class Project(workDirectory: File) {
     }
   }
 
-  def scriptFiles = workDirectory.listFilesSafe(_.getName.endsWith(".oms"))
+  def scriptFiles(dir: File) = dir.listFilesSafe(_.getName.endsWith(".oms"))
 
-  def scriptsObjects =
+  def scriptsObjects(dir: File) =
     for {
-      script ← scriptFiles
+      script ← scriptFiles(dir)
     } yield makeObject(script)
 
   def makeObject(script: File) =
