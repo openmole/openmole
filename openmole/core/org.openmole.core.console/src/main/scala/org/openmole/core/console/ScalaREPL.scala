@@ -66,7 +66,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
         def messages =
           s"""Compiling code:
              |${code}
-             |""".stripMargin + l.map(readableErrorMessages).mkString("\n")
+             |""".stripMargin + l.reverse.map(readableErrorMessages).mkString("\n")
         new UserBadDataError(messages)
     }
   }
