@@ -24,6 +24,7 @@ import org.openmole.core.workflow.job.MoleJob
 import ExecutionState._
 import org.openmole.core.workflow.tools.{ Name, ExceptionEvent }
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
+import org.openmole.tool.collection.OrderedSlidingList
 import scala.concurrent.stm._
 import org.openmole.core.tools.service._
 
@@ -48,20 +49,13 @@ trait Environment <: Name {
   private[execution] val _done = Ref(0L)
   private[execution] val _failed = Ref(0L)
 
-  private lazy val _errors = Ref(List[ExceptionEvent]())
+  private lazy val _errors =
+    new OrderedSlidingList[ExceptionEvent](
+      Workspace.preferenceAsInt(maxExceptionsLog))(Ordering.by[ExceptionEvent, Int](_.level.intValue()))
 
-  def error(e: ExceptionEvent) = atomic { implicit ctx ⇒
-    val max = Workspace.preferenceAsInt(maxExceptionsLog)
-    _errors() = e :: _errors()
-    if (_errors().size > max) _errors() = _errors().take(max)
-  }
-
-  def errors = _errors.single().reverse
-  def readErrors = atomic { implicit ctx ⇒
-    val errs = errors
-    _errors() = List()
-    errs
-  }
+  def error(e: ExceptionEvent) = _errors += e
+  def errors: List[ExceptionEvent] = _errors.values
+  def readErrors: List[ExceptionEvent] = _errors.read()
 
   def submitted: Long
   def running: Long
