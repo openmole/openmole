@@ -116,7 +116,7 @@ object BatchEnvironment extends Logger {
 
 import BatchEnvironment._
 
-trait BatchEnvironment extends Environment { env ⇒
+trait BatchEnvironment extends Environment with JobList { env ⇒
 
   type SS <: StorageService
   type JS <: JobService
@@ -194,6 +194,7 @@ trait BatchEnvironment extends Environment { env ⇒
   def incrementUpdateInterval = Workspace.preferenceAsDuration(IncrementUpdateInterval)
 
   def executionJobs: Iterable[BatchExecutionJob] = batchJobWatcher.executionJobs
+  def jobs = executionJobs
 
   def submitted: Long = executionJobs.count { _.state == ExecutionState.SUBMITTED }
   def running: Long = executionJobs.count { _.state == ExecutionState.RUNNING }

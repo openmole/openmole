@@ -125,10 +125,6 @@ object ApiImpl extends Api {
 
   // EXECUTIONS
 
-  //def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)] = execution.allStates
-
-  //def allStaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = execution.allStaticInfos
-
   def cancelExecution(id: ExecutionId): Unit = execution.cancel(id)
 
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)

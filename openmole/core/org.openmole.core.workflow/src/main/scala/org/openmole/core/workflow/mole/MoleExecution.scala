@@ -33,7 +33,7 @@ import org.openmole.core.workflow.tools._
 import org.openmole.tool.logger.Logger
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
-import org.openmole.core.workflow.execution.Environment
+import org.openmole.core.workflow.execution.{ ExecutionState, JobList, Environment }
 
 object MoleExecution extends Logger {
 
@@ -206,7 +206,26 @@ class MoleExecution(
   }
 
   def ready: Long = moleJobs.count(_.state == READY)
-  def running: Long = moleJobs.count(_.state == RUNNING)
+
+  def running: Long = {
+    val executionJobsGroup = {
+      val executionJobs =
+        environments.values.toSeq.collect {
+          case e: JobList ⇒ e
+        }.flatMap(_.jobs).distinct
+
+      executionJobs.flatMap {
+        ej ⇒ ej.moleJobs.map { _ -> ej }
+      }.groupBy(_._1).mapValues(_.map { _._2 })
+    }
+
+    def isRunningOnEnvironment(moleJob: MoleJob) =
+      executionJobsGroup.get(moleJob).map { _.exists(_.state == ExecutionState.RUNNING) }.getOrElse(false)
+
+    moleJobs.count {
+      moleJob ⇒ moleJob.state == RUNNING || isRunningOnEnvironment(moleJob)
+    }
+  }
   def completed: Long = _completed.single()
 
   private[mole] def jobFailedOrCanceled(moleJob: MoleJob, capsule: Capsule) = jobOutputTransitionsPerformed(moleJob, capsule)

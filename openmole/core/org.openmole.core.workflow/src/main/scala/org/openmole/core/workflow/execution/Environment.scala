@@ -64,3 +64,7 @@ trait Environment <: Name {
 
   def submit(job: Job)
 }
+
+trait JobList <: Environment {
+  def jobs: Iterable[ExecutionJob]
+}
