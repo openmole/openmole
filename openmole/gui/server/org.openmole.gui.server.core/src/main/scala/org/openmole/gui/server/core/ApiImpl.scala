@@ -128,7 +128,7 @@ object ApiImpl extends Api {
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
   def runScript(scriptData: ScriptData): Unit = {
-    val id = getUUID
+    /*val id = getUUID
     val projectsPath = Utils.workspaceProjectFile
     val console = new Console
     // FIXME set workdirectory
@@ -164,7 +164,7 @@ object ApiImpl extends Api {
             }
           case _ ⇒ message("A puzzle have to be provided, the workflow can not be launched")
         }
-    }
+    }*/
   }
 
   def runningErrorEnvironmentAndOutputData(): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = atomic { implicit ctx ⇒

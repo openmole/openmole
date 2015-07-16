@@ -177,8 +177,7 @@ case class TreeNodeData(
 
 @JSExport
 case class ScriptData(
-  scriptName: String,
-  script: String,
+  scriptPath: SafePath,
   output: String)
 
 case class Error(stackTrace: String)
