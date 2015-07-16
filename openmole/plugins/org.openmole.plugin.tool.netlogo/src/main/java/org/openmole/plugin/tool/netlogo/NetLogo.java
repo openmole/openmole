@@ -25,4 +25,5 @@ public interface NetLogo {
   void command(String cmd) throws Exception;
   Object report(String variable) throws Exception;
   void dispose() throws Exception;
+  ClassLoader getNetLogoClassLoader();
 }

@@ -20,6 +20,7 @@ package org.openmole.plugin.task.netlogo
 import java.io.File
 import java.util.AbstractCollection
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.output.OutputManager
 import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data._
@@ -62,56 +63,69 @@ trait NetLogoTask extends ExternalTask {
   @transient lazy val expandedCommands = launchingCommands.map(VariableExpansion(_))
 
   override def process(context: Context)(implicit rng: RandomProvider): Context = withWorkDir { tmpDir ⇒
+
     val preparedContext = prepareInputFiles(context, tmpDir, workspace.workDirectory)
 
     val script = tmpDir / workspace.workDirectory / workspace.script
     val netLogo = netLogoFactory()
-    try {
-      wrapError(s"Error while opening the file $script") { netLogo.open(script.getAbsolutePath) }
-
-      for (inBinding ← netLogoInputs) {
-        val v = preparedContext(inBinding._1) match {
-          case x: String ⇒ '"' + x + '"'
-          case x         ⇒ x.toString
+    withClassLoader(netLogo.getNetLogoClassLoader) {
+      try {
+        wrapError(s"Error while opening the file $script") {
+          netLogo.open(script.getAbsolutePath)
         }
-        val cmd = "set " + inBinding._2 + " " + v
-        wrapError(s"Error while executing command $cmd") { netLogo.command(cmd) }
-      }
 
-      for (cmd ← expandedCommands) wrapError(s"Error while executing command $cmd") {
-        netLogo.command(cmd.expand(context))
-      }
+        for (inBinding ← netLogoInputs) {
+          val v = preparedContext(inBinding._1) match {
+            case x: String ⇒ '"' + x + '"'
+            case x         ⇒ x.toString
+          }
+          val cmd = "set " + inBinding._2 + " " + v
+          wrapError(s"Error while executing command $cmd") {
+            netLogo.command(cmd)
+          }
+        }
 
-      fetchOutputFiles(preparedContext, tmpDir, workspace.workDirectory) ++ netLogoOutputs.map {
-        case (name, prototype) ⇒
-          try {
-            val outputValue = netLogo.report(name)
-            if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
-            else {
-              val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
-              netLogoArrayToVariable(netLogoCollection, prototype)
+        for (cmd ← expandedCommands) wrapError(s"Error while executing command $cmd") {
+          netLogo.command(cmd.expand(context))
+        }
+
+        fetchOutputFiles(preparedContext, tmpDir, workspace.workDirectory) ++ netLogoOutputs.map {
+          case (name, prototype) ⇒
+            try {
+              val outputValue = netLogo.report(name)
+              if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
+              else {
+                val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
+                netLogoArrayToVariable(netLogoCollection, prototype)
+              }
             }
-          }
-          catch {
-            case e: Throwable ⇒
-              throw new UserBadDataError(
-                s"Error when fetching netlogo output $name in variable $prototype:\n" + e.stackStringWithMargin)
-          }
-      } ++ netLogoArrayOutputs.map {
-        case (name, column, prototype) ⇒
-          try {
-            val netLogoCollection = netLogo.report(name)
-            val outputValue = netLogoCollection.asInstanceOf[AbstractCollection[Any]].toArray()(column)
-            if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
-            else netLogoArrayToVariable(outputValue.asInstanceOf[AbstractCollection[Any]], prototype)
-          }
-          catch {
-            case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when fetching column $column of netlogo output $name in variable $prototype")
-          }
+            catch {
+              case e: Throwable ⇒
+                throw new UserBadDataError(
+                  s"Error when fetching netlogo output $name in variable $prototype:\n" + e.stackStringWithMargin)
+            }
+        } ++ netLogoArrayOutputs.map {
+          case (name, column, prototype) ⇒
+            try {
+              val netLogoCollection = netLogo.report(name)
+              val outputValue = netLogoCollection.asInstanceOf[AbstractCollection[Any]].toArray()(column)
+              if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
+              else netLogoArrayToVariable(outputValue.asInstanceOf[AbstractCollection[Any]], prototype)
+            }
+            catch {
+              case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when fetching column $column of netlogo output $name in variable $prototype")
+            }
+        }
       }
+      finally netLogo.dispose
     }
-    finally netLogo.dispose
+  }
 
+  private def withClassLoader[T](classLoader: ClassLoader)(f: ⇒ T): T = {
+    val threadClassLoader = Thread.currentThread().getContextClassLoader
+    Thread.currentThread().setContextClassLoader(netLogoFactory().getNetLogoClassLoader)
+    try f
+    finally Thread.currentThread().setContextClassLoader(threadClassLoader)
   }
 
   def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Prototype[_]) = {
