@@ -30,8 +30,6 @@ import org.openmole.core.workflow.puzzle._
 
 class ExplorationTransitionSpec extends FlatSpec with Matchers {
 
-  implicit val plugins = PluginSet.empty
-
   "Exploration transition" should "submit one MoleJob for each value in the sampling" in {
 
     val data = List("A", "B", "C")

@@ -34,8 +34,6 @@ import scala.collection.mutable.ListBuffer
 
 class DataChannelSpec extends FlatSpec with Matchers {
 
-  implicit val plugins = PluginSet.empty
-
   "A datachannel" should "enable variable values to be transmitted from a task to another" in {
     val p = Prototype[String]("p")
 

@@ -32,8 +32,6 @@ import org.openmole.core.workflow.puzzle._
 
 class TypeUtilSpec extends FlatSpec with Matchers {
 
-  implicit val plugins = PluginSet.empty
-
   "To array finder" should "not detect a toArray case" in {
     val p = Prototype[Int]("p")
 

@@ -38,8 +38,6 @@ import scala.util.Try
 
 class AggregationTransitionSpec extends FlatSpec with Matchers {
 
-  implicit val plugins = PluginSet.empty
-
   "Aggregation transition" should "turn results of exploration into a array of values" in {
     @volatile var endCapsExecuted = 0
 
