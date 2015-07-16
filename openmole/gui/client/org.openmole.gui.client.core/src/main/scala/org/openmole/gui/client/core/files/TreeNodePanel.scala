@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.{ Settings, PanelTriggerer, OMPost }
-import org.openmole.gui.ext.data.{ UploadProject, DisplayableFile }
+import org.openmole.gui.ext.data.{ SafePath, UploadProject, DisplayableFile }
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.BootstrapTags._
@@ -160,9 +160,19 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
       onLoaded
     )
 
-  def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(onclick := { () ⇒
-    goToDirAction(dn)()
-  })
+  def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(
+    onclick := { () ⇒
+      goToDirAction(dn)()
+    }, draggable := true, ondrop := {
+      dropAction(dn)
+    }, ondragenter := { (e: DragEvent) ⇒
+      false
+    }, ondragover := { (e: DragEvent) ⇒
+      e.dataTransfer.dropEffect = "move"
+      e.preventDefault
+      false
+    }
+  )
 
   def goToDirAction(dn: DirNode): () ⇒ Unit = () ⇒ {
     dirNodeLine() = dirNodeLine().zipWithIndex.filter(_._1 == dn).headOption.map {
@@ -235,7 +245,11 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   }
 
   def refreshCurrentDirectory = {
-    computeAllSons(dirNodeLine().last)
+    refresh(dirNodeLine().last)
+  }
+
+  def refresh(dn: DirNode) = {
+    computeAllSons(dn)
     newNodeInput.value = ""
   }
 
@@ -251,6 +265,25 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
       fileDisplayer.tabs.rename(treeNode, newNode)
       refreshCurrentDirectory
       toBeEdited() = None
+  }
+
+  def dropAction(tn: TreeNode) = {
+    (e: DragEvent) ⇒
+      e.preventDefault
+      draggedNode().map { sp ⇒
+        tn match {
+          case d: DirNode ⇒
+            if (sp.safePath().path != d.safePath().path) {
+              OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach { b ⇒
+                refresh(dirNodeLine().last)
+                refresh(d)
+              }
+            }
+          case _ ⇒
+        }
+      }
+      draggedNode() = None
+      false
   }
 
   object ReactiveLine {
@@ -278,25 +311,12 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
       }, ondragenter := { (e: DragEvent) ⇒
         false
       }, ondragover := { (e: DragEvent) ⇒
-        e.dataTransfer.dropEffect = "copy"
+        e.dataTransfer.dropEffect = "move"
         e.preventDefault
         false
       },
-      ondrop := { (e: DragEvent) ⇒
-        e.preventDefault
-        draggedNode().map { sp ⇒
-          tn match {
-            case d: DirNode ⇒
-              if (sp.safePath().path != tn.safePath().path) {
-                OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach { b ⇒
-                  refreshCurrentDirectory
-                }
-              }
-            case _ ⇒
-          }
-        }
-        draggedNode() = None
-        false
+      ondrop := {
+        dropAction(tn)
       }, tags.span(
         cursor := "pointer",
         draggable := true,
