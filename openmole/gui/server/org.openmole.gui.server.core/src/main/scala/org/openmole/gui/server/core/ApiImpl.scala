@@ -128,43 +128,48 @@ object ApiImpl extends Api {
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
   def runScript(scriptData: ScriptData): Unit = {
-    /*val id = getUUID
-    val projectsPath = Utils.workspaceProjectFile
-    val console = new Console
-    // FIXME set workdirectory
-    val repl = console.newREPL(ConsoleVariables()())
 
-    val execId = ExecutionId(id)
+    val execId = ExecutionId(getUUID)
+    val script = safePathToFile(scriptData.scriptPath)
+    val content = script.content
 
-    def error(t: Throwable): Unit = execution.add(execId, Failed(ErrorBuilder(t)))
-    def message(message: String): Unit = execution.add(execId, Failed(Error(message)))
+    execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
 
-    Try(repl.eval(scriptData.script)) match {
-      case Failure(e) ⇒ error(e)
-      case Success(o) ⇒
-        o match {
-          case toPuzzle: PuzzleBuilder ⇒
-            val puzzle = toPuzzle.buildPuzzle
-            val outputStream = new StringPrintStream()
+    def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t)))
+    def message(message: String): Unit = execution.addError(execId, Failed(Error(message)))
 
-            puzzle.environments.values.foreach { env ⇒
-              val envId = EnvironmentId(getUUID)
-              Runnings.add(execId, puzzle.environments.values.map { env ⇒ (envId, env) }.toSeq, outputStream)
-              env.listen {
-                case (env, ex: ExceptionRaised) ⇒ Runnings.append(execId, envId, env, ex)
-              }
-            }
-            Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
-              case Success(ex) ⇒
-                Try(ex.start) match {
-                  case Failure(e)  ⇒ error(e)
-                  case Success(ex) ⇒ execution.add(execId, StaticExecutionInfo(scriptData.scriptName, scriptData.script, ex.startTime.get), DynamicExecutionInfo(ex, outputStream))
+    val project = new Project(script.getParentFileSafe)
+    project.compile(script, Seq.empty) match {
+      case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
+      case CompilationError(e)       ⇒ error(e)
+      case Compiled(compiled) ⇒
+        Try(compiled.eval()) match {
+          case Failure(e) ⇒ error(e)
+          case Success(o) ⇒
+            o match {
+              case toPuzzle: PuzzleBuilder ⇒
+                val puzzle = toPuzzle.buildPuzzle
+                val outputStream = new StringPrintStream()
+
+                puzzle.environments.values.foreach { env ⇒
+                  val envId = EnvironmentId(getUUID)
+                  Runnings.add(execId, puzzle.environments.values.map { env ⇒ (envId, env) }.toSeq, outputStream)
+                  env.listen {
+                    case (env, ex: ExceptionRaised) ⇒ Runnings.append(execId, envId, env, ex)
+                  }
                 }
-              case Failure(e) ⇒ error(e)
+                Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
+                  case Success(ex) ⇒
+                    Try(ex.start) match {
+                      case Failure(e)  ⇒ error(e)
+                      case Success(ex) ⇒ execution.addDynamicInfo(execId, DynamicExecutionInfo(ex, outputStream))
+                    }
+                  case Failure(e) ⇒ error(e)
+                }
+              case _ ⇒ message("A puzzle have to be provided, the workflow can not be launched")
             }
-          case _ ⇒ message("A puzzle have to be provided, the workflow can not be launched")
         }
-    }*/
+    }
   }
 
   def runningErrorEnvironmentAndOutputData(): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = atomic { implicit ctx ⇒

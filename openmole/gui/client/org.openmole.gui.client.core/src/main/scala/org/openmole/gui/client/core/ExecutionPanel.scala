@@ -120,9 +120,10 @@ class ExecutionPanel extends ModalPanel {
       Rx {
         tbody({
           for ((id, executionInfo) ← executionInfos()) yield {
-            val staticInfo = staticExecutionInfos().filter {
-              _._1 == id
-            }.headOption.getOrElse((id, StaticExecutionInfo()))._2
+            val staticInfo =
+              staticExecutionInfos().find {
+                _._1 == id
+              }.get._2
             val startDate = s"${new Date(staticInfo.startDate).toLocaleDateString} : ${new Date(staticInfo.startDate).toLocaleTimeString}"
 
             val duration: Duration = (executionInfo.duration milliseconds)
@@ -148,7 +149,7 @@ class ExecutionPanel extends ModalPanel {
             val outputStreamID: VisibleID = "outputStream"
             val envErrorID: VisibleID = "envError"
 
-            val scriptLink = expander.getLink(staticInfo.name, id.id, scriptID)
+            val scriptLink = expander.getLink(staticInfo.path.name, id.id, scriptID)
             val envLink = expander.getGlyph(glyph_stats, "Env", id.id, envID)
             val stateLink = executionInfo match {
               case f: Failed ⇒ expander.getLink(executionInfo.state, id.id, errorID)

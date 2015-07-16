@@ -31,31 +31,40 @@ case class DynamicExecutionInfo(moleExecution: MoleExecution,
 
 class Execution {
 
-  private lazy val moles = TMap[ExecutionId, Either[(StaticExecutionInfo, DynamicExecutionInfo), Failed]]()
+  private lazy val staticExecutionInfo = TMap[ExecutionId, StaticExecutionInfo]()
+  private lazy val dynamicExecutionInfo = TMap[ExecutionId, DynamicExecutionInfo]()
+  private lazy val errors = TMap[ExecutionId, Failed]()
 
-  def add(key: ExecutionId, staticInfo: StaticExecutionInfo, dynamicExecutionInfo: DynamicExecutionInfo) =
-    moles.single.put(key, Left((staticInfo, dynamicExecutionInfo)))
+  def addStaticInfo(key: ExecutionId, staticInfo: StaticExecutionInfo) = atomic { implicit ctx ⇒
+    staticExecutionInfo(key) = staticInfo
+  }
 
-  def add(key: ExecutionId, error: Failed) = moles.single.put(key, Right(error))
+  def addDynamicInfo(key: ExecutionId, info: DynamicExecutionInfo) = atomic { implicit ctx ⇒
+    dynamicExecutionInfo(key) = info
+  }
 
-  def cancel(key: ExecutionId) = {
-    get(key) match {
-      case Some(Left((_, dynamic: DynamicExecutionInfo))) ⇒
+  def addError(key: ExecutionId, error: Failed) = atomic { implicit ctx ⇒
+    errors(key) = error
+  }
+
+  def cancel(key: ExecutionId) =
+    dynamicExecutionInfo.single.get(key) match {
+      case Some(dynamic) ⇒
         dynamic.moleExecution.cancel
         Runnings.remove(key)
       case _ ⇒
     }
-  }
 
   def remove(key: ExecutionId) = {
     cancel(key)
-    moles.single.remove(key)
+    atomic { implicit ctx ⇒
+      staticExecutionInfo.remove(key)
+      dynamicExecutionInfo.remove(key)
+      errors.remove(key)
+    }
   }
 
-  def staticInfo(key: ExecutionId): StaticExecutionInfo = get(key) match {
-    case Some(Left((staticInfo, _))) ⇒ staticInfo
-    case _                           ⇒ StaticExecutionInfo()
-  }
+  //def staticInfo(key: ExecutionId): Option[StaticExecutionInfo] = staticExecutionInfo.get(key)
 
   def environmentState(id: ExecutionId): Seq[EnvironmentState] =
     Runnings.runningEnvironments(id).map {
@@ -71,46 +80,43 @@ class Execution {
       }
     }
 
-  def executionInfo(key: ExecutionId): ExecutionInfo = get(key) match {
-    case Some(Left((_, dynamic))) ⇒
-      val moleExecution = dynamic.moleExecution
-      val output = dynamic.outputStream
+  def executionInfo(key: ExecutionId): ExecutionInfo = atomic { implicit ctx ⇒
+    (errors.get(key), dynamicExecutionInfo.get(key)) match {
+      case (Some(error), _) ⇒ error
+      case (_, Some(dynamic)) ⇒
+        val moleExecution = dynamic.moleExecution
+        val output = dynamic.outputStream
 
-      val d = moleExecution.duration.getOrElse(0L)
-      moleExecution.exception match {
-        case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t), duration = moleExecution.duration.getOrElse(0))
-        case _ ⇒
-          if (moleExecution.canceled) Canceled(duration = moleExecution.duration.get)
-          else if (moleExecution.finished)
-            Finished(duration = moleExecution.duration.get,
-              environmentStates = environmentState(key)
-            )
-          else if (moleExecution.started) {
-            Running(
-              ready = moleExecution.ready,
-              running = moleExecution.running,
-              duration = d,
-              completed = moleExecution.completed,
-              environmentStates = environmentState(key)
-            )
-          }
-          else Ready()
-      }
-    case Some(Right(f: Failed)) ⇒ f
-    case _                      ⇒ Failed(Error("Not found execution " + key))
+        val d = moleExecution.duration.getOrElse(0L)
+        moleExecution.exception match {
+          case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t), duration = moleExecution.duration.getOrElse(0))
+          case _ ⇒
+            if (moleExecution.canceled) Canceled(duration = moleExecution.duration.get)
+            else if (moleExecution.finished)
+              Finished(duration = moleExecution.duration.get,
+                environmentStates = environmentState(key)
+              )
+            else if (moleExecution.started) {
+              Running(
+                ready = moleExecution.ready,
+                running = moleExecution.running,
+                duration = d,
+                completed = moleExecution.completed,
+                environmentStates = environmentState(key)
+              )
+            }
+            else Ready()
+        }
+      case _ ⇒ Failed(Error("Not found execution " + key))
+    }
   }
 
   def allStates: Seq[(ExecutionId, ExecutionInfo)] = atomic { implicit ctx ⇒
-    moles.keys.toSeq.map { key ⇒
-      key -> executionInfo(key)
-    }
+    staticExecutionInfo.keys.map(k ⇒ k -> executionInfo(k)).toSeq
   }
 
   def allStaticInfos: Seq[(ExecutionId, StaticExecutionInfo)] = atomic { implicit ctx ⇒
-    moles.keys.toSeq.map { key ⇒
-      key -> staticInfo(key)
-    }
+    staticExecutionInfo.toSeq
   }
 
-  private def get(key: ExecutionId) = moles.single.get(key)
 }
