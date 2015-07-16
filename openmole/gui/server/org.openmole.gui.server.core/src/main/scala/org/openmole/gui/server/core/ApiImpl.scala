@@ -118,10 +118,11 @@ object ApiImpl extends Api {
   def authenticationKeysPath(): SafePath = Utils.authenticationKeysFile
 
   // EXECUTIONS
+  def allStates() = execution.allStates
 
-  def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)] = execution.allStates
+  //def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)] = execution.allStates
 
-  def allStaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = execution.allStaticInfos
+  //def allStaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = execution.allStaticInfos
 
   def cancelExecution(id: ExecutionId): Unit = execution.cancel(id)
 

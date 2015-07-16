@@ -65,9 +65,7 @@ trait Api {
   def authenticationKeysPath(): SafePath
 
   //EXECUTIONS
-  def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)]
-
-  def allStaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
+  def allStates(): Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)]
 
   def cancelExecution(id: ExecutionId): Unit
 

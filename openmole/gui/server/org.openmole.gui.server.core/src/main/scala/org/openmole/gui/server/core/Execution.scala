@@ -64,8 +64,6 @@ class Execution {
     }
   }
 
-  //def staticInfo(key: ExecutionId): Option[StaticExecutionInfo] = staticExecutionInfo.get(key)
-
   def environmentState(id: ExecutionId): Seq[EnvironmentState] =
     Runnings.runningEnvironments(id).map {
       case (envId, e) ⇒ {
@@ -89,7 +87,7 @@ class Execution {
 
         val d = moleExecution.duration.getOrElse(0L)
         moleExecution.exception match {
-          case Some(t: Throwable) ⇒ Failed(ErrorBuilder(t), duration = moleExecution.duration.getOrElse(0))
+          case Some(t) ⇒ Failed(ErrorBuilder(t.exception), duration = moleExecution.duration.getOrElse(0))
           case _ ⇒
             if (moleExecution.canceled) Canceled(duration = moleExecution.duration.get)
             else if (moleExecution.finished)
@@ -107,16 +105,14 @@ class Execution {
             }
             else Ready()
         }
-      case _ ⇒ Failed(Error("Not found execution " + key))
+      case _ ⇒ Ready()
     }
   }
 
-  def allStates: Seq[(ExecutionId, ExecutionInfo)] = atomic { implicit ctx ⇒
-    staticExecutionInfo.keys.map(k ⇒ k -> executionInfo(k)).toSeq
-  }
-
-  def allStaticInfos: Seq[(ExecutionId, StaticExecutionInfo)] = atomic { implicit ctx ⇒
-    staticExecutionInfo.toSeq
+  def allStates: Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)] = atomic { implicit ctx ⇒
+    for {
+      (k, s) ← staticExecutionInfo.toSeq
+    } yield (k, s, executionInfo(k))
   }
 
 }

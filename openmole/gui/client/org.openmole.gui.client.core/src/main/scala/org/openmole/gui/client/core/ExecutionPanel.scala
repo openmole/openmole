@@ -43,27 +43,18 @@ import concurrent.duration._
 class ExecutionPanel extends ModalPanel {
   val modalID = "executionsPanelID"
 
-  val staticExecutionInfos: Var[Seq[(ExecutionId, StaticExecutionInfo)]] = Var(Seq())
-  val executionInfos: Var[Seq[(ExecutionId, ExecutionInfo)]] = Var(Seq())
+  //val staticExecutionInfos: Var[Seq[(ExecutionId, StaticExecutionInfo)]] = Var(Seq())
+  val executionInfos: Var[Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)]] = Var(Seq())
+
   val outputsInfos: Var[Seq[RunningOutputData]] = Var(Seq())
   val envErrorsInfos: Var[Seq[RunningEnvironmentData]] = Var(Seq())
   val intervalHandler: Var[Option[SetIntervalHandle]] = Var(None)
   val envAndOutIntervalHandler: Var[Option[SetIntervalHandle]] = Var(None)
   val expander = new Expander
 
-  def allExecutionStates = {
-    OMPost[Api].allExecutionStates.call().foreach { c ⇒
-      executionInfos() = c
-    }
-
-    if (executionInfos().map {
-      _._1
-    }.toSet != staticExecutionInfos().map {
-      _._1
-    }.toSet) {
-      OMPost[Api].allStaticInfos.call().foreach { i ⇒
-        staticExecutionInfos() = i
-      }
+  def updateExecutionStates = {
+    OMPost[Api].allStates.call().foreach { i ⇒
+      executionInfos() = i
     }
   }
 
@@ -74,18 +65,18 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  def atLeastOneRunning = executionInfos().filter {
+  def atLeastOneRunning = true /*executionInfos().filter {
     _._2 match {
       case r: Running ⇒ true
       case _          ⇒ false
     }
-  }.isEmpty
+  }.isEmpty*/
 
   def onOpen = () ⇒ {
-    allExecutionStates
+    updateExecutionStates
     allEnvStatesAndOutputs
     intervalHandler() = Some(setInterval(1000) {
-      allExecutionStates
+      updateExecutionStates
       if (atLeastOneRunning) onClose()
     })
 
@@ -119,11 +110,9 @@ class ExecutionPanel extends ModalPanel {
       thead,
       Rx {
         tbody({
-          for ((id, executionInfo) ← executionInfos()) yield {
-            val staticInfo =
-              staticExecutionInfos().find {
-                _._1 == id
-              }.get._2
+          for {
+            (id, staticInfo, executionInfo) ← executionInfos()
+          } yield {
             val startDate = s"${new Date(staticInfo.startDate).toLocaleDateString} : ${new Date(staticInfo.startDate).toLocaleTimeString}"
 
             val duration: Duration = (executionInfo.duration milliseconds)
@@ -237,10 +226,10 @@ class ExecutionPanel extends ModalPanel {
               bs.td(col_md_1)(visibleClass(id.id, envErrorID))(envErrorLink),
               bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink),
               bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
-                allExecutionStates
+                updateExecutionStates
               })(`class` := "cancelExecution")),
               bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].removeExecution(id).call().foreach { r ⇒
-                allExecutionStates
+                updateExecutionStates
               })(`class` := "removeExecution"))
             ), bs.tr(row)(
               expander.getVisible(id.id) match {
