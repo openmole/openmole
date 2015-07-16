@@ -210,9 +210,7 @@ class MoleExecution(
   def running: Long = {
     val executionJobsGroup = {
       val executionJobs =
-        environments.values.toSeq.collect {
-          case e: JobList ⇒ e
-        }.flatMap(_.jobs).distinct
+        environments.values.toSeq.collect { case e: JobList ⇒ e }.flatMap(_.jobs)
 
       executionJobs.flatMap {
         ej ⇒ ej.moleJobs.map { _ -> ej }
