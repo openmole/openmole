@@ -118,6 +118,7 @@ object FileExtension {
   val NETLOGO = DisplayableFile("nlogo", "nlogo")
   val SH = DisplayableFile("sh", "sh")
   val NO_EXTENSION = DisplayableFile("text", "text")
+  val TGZ = BinaryFile("tgz")
   val BINARY = BinaryFile("")
 }
 

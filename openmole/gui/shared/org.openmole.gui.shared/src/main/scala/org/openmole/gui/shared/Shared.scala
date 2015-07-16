@@ -40,6 +40,8 @@ trait Api {
 
   def addFile(treeNode: TreeNodeData, fileName: String): Boolean
 
+  def extractTGZ(treeNodeData: TreeNodeData): Unit
+
   def deleteFile(treeNode: TreeNodeData): Unit
 
   def fileSize(treeNodeData: TreeNodeData): Long

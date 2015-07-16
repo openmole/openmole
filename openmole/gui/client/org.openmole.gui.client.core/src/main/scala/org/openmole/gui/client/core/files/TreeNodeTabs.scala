@@ -193,7 +193,6 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                 active.map { tab ⇒
                   tab match {
                     case oms: TabControl ⇒
-                      println("TAPCONTROL ")
                       tags.div(
                         if (t.overlaying()) t.overlayTabElement else t.tabElement,
                         tags.div(

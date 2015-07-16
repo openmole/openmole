@@ -21,6 +21,7 @@ import org.openmole.core.workflow.puzzle.{ PuzzleBuilder, Puzzle }
 import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
+import org.openmole.tool.tar._
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -75,6 +76,14 @@ object ApiImpl extends Api {
   def addFile(treeNodeData: TreeNodeData, fileName: String): Boolean = new File(treeNodeData.safePath, fileName).createNewFile
 
   def deleteFile(treeNodeData: TreeNodeData): Unit = safePathToFile(treeNodeData.safePath).recursiveDelete
+
+  def extractTGZ(treeNodeData: TreeNodeData): Unit = treeNodeData.safePath.extension match {
+    case FileExtension.TGZ ⇒
+      val archiveFile = safePathToFile(treeNodeData.safePath)
+      val parentFile = archiveFile.getParentFile
+      archiveFile.extractUncompress(parentFile)
+    case _ ⇒
+  }
 
   def fileSize(treeNodeData: TreeNodeData): Long = safePathToFile(treeNodeData.safePath).length
 

@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{ Settings, PanelTriggerer, OMPost }
-import org.openmole.gui.ext.data.{ SafePath, UploadProject, DisplayableFile }
+import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
+import org.openmole.gui.ext.data.{ FileExtension, UploadProject }
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
 import org.openmole.gui.misc.js.BootstrapTags._
@@ -13,7 +13,6 @@ import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import scala.async.Async.await
 import TreeNode._
 import autowire._
 import rx._
@@ -275,7 +274,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
           case d: DirNode ⇒
             if (sp.safePath().path != d.safePath().path) {
               OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach { b ⇒
-                refresh(dirNodeLine().last)
+                refreshCurrentDirectory
                 refresh(d)
               }
             }
@@ -341,7 +340,16 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         })(
           glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
           glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
-          a(glyphSpan(glyph_download, () ⇒ Unit)(`class` := "glyphitem"), href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}")
+          a(glyphSpan(glyph_download, () ⇒ Unit)(`class` := "glyphitem"), href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
+          tn.safePath().extension match {
+            case FileExtension.TGZ ⇒ glyphSpan(glyph_archive, () ⇒ {
+              OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
+                refreshCurrentDirectory
+              }
+            })(`class` := "glyphitem")
+            case _ ⇒
+          }
+
         )
       )
     )
