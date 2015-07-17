@@ -538,3 +538,7 @@ overflow-y : auto;
 	font-size: 20px;
 	margin-top: -3px;
 }
+
+.mdRendering p{
+    text-align: left;
+}
