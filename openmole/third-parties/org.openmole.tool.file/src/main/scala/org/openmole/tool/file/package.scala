@@ -465,7 +465,7 @@ package file {
     }
 
     def readableByteCount(bytes: Long): String = {
-      val kb = 1024
+      val kb = 1024L
       val mB = kb * kb
       val gB = mB * kb
       val tB = gB * kb
