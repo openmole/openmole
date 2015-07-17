@@ -42,7 +42,7 @@ class FileDisplayer {
 
   def alreadyDisplayed(tn: TreeNode) = {
     tabs.tabs().find {
-      _.serverFilePath() == tn.safePath()
+      _.serverFilePath().path == tn.safePath().path
     }
   }
 

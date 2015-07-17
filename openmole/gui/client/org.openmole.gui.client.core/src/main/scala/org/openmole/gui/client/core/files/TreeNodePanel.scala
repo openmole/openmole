@@ -68,7 +68,9 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
 
   val addRootDirButton: Select[TreeNodeType] = {
     val content = Seq((TreeNodeType.file, key(glyph_file)), (TreeNodeType.folder, key(glyph_folder_close)))
-    Select("fileOrFolder", content, content.map { _._1 }.headOption, btn_success, () ⇒ {
+    Select("fileOrFolder", content, content.map {
+      _._1
+    }.headOption, btn_success, () ⇒ {
       addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
     })
   }
@@ -259,12 +261,16 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
     }
   }
 
-  def renameNode(treeNode: TreeNode, newName: String) = OMPost[Api].renameFile(treeNode, newName).call().foreach {
-    newNode ⇒
-      fileDisplayer.tabs.rename(treeNode, newNode)
-      refreshCurrentDirectory
-      toBeEdited() = None
-  }
+  def renameNode(treeNode: TreeNode, newName: String) =
+    fileDisplayer.tabs.saveAllTabs(() ⇒
+      OMPost[Api].renameFile(treeNode, newName).call().foreach {
+        newNode ⇒
+          fileDisplayer.tabs.rename(treeNode, newNode)
+          refreshCurrentDirectory
+          toBeEdited() = None
+          fileDisplayer.tabs.checkTabs
+      }
+    )
 
   def dropAction(tn: TreeNode) = {
     (e: DragEvent) ⇒
@@ -273,10 +279,13 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         tn match {
           case d: DirNode ⇒
             if (sp.safePath().path != d.safePath().path) {
-              OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach { b ⇒
-                refreshCurrentDirectory
-                refresh(d)
-              }
+              fileDisplayer.tabs.saveAllTabs(() ⇒
+                OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach { b ⇒
+                  refreshCurrentDirectory
+                  refresh(d)
+                  fileDisplayer.tabs.checkTabs
+                }
+              )
             }
           case _ ⇒
         }

@@ -86,6 +86,8 @@ object ApiImpl extends Api {
     case _ ⇒
   }
 
+  def exists(safePath: SafePath): Boolean = safePathToFile(safePath).exists
+
   def fileSize(treeNodeData: TreeNodeData): Long = safePathToFile(treeNodeData.safePath).length
 
   def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.safePath)
@@ -118,6 +120,10 @@ object ApiImpl extends Api {
   }
 
   def saveFile(path: SafePath, fileContent: String): Unit = safePathToFile(path).content = fileContent
+
+  def saveFiles(fileContents: Seq[AlterableFileContent]): Unit = fileContents.foreach { fc ⇒
+    saveFile(fc.path, fc.content)
+  }
 
   def workspaceProjectNode(): SafePath = Utils.workspaceProjectFile
 
@@ -185,10 +191,14 @@ object ApiImpl extends Api {
         case (id, envIds) ⇒
           RunningEnvironmentData(
             id,
-            Runnings.runningEnvironments(id).flatMap { _._2.environmentError }
+            Runnings.runningEnvironments(id).flatMap {
+              _._2.environmentError
+            }
           )
       }.toSeq,
-      envIds.keys.toSeq.map { Runnings.outputsDatas(_, lines) }
+      envIds.keys.toSeq.map {
+        Runnings.outputsDatas(_, lines)
+      }
     )
   }
 
