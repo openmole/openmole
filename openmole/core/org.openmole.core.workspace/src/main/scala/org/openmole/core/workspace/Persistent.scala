@@ -33,7 +33,7 @@ case class Persistent(baseDir: File) {
 
   def save(obj: Any, name: String, xstream: XStream = Persistent.xstream) = {
     val file = new File(baseDir, name)
-    file.withLock { _ ⇒ file.content = xstream.toXML(obj) }
+    file.content = xstream.toXML(obj)
   }
 
   def load[T](name: String, xstream: XStream = Persistent.xstream): T = {
@@ -41,7 +41,8 @@ case class Persistent(baseDir: File) {
     loadFile(file, xstream)
   }
 
-  protected def loadFile[T](file: File, xstream: XStream = Persistent.xstream): T = file.withLock { _ ⇒ xstream.fromXML(file.content).asInstanceOf[T] }
+  protected def loadFile[T](file: File, xstream: XStream = Persistent.xstream): T =
+    xstream.fromXML(file.content).asInstanceOf[T]
 
   def delete() = {
     baseDir.recursiveDelete
