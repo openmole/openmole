@@ -86,9 +86,6 @@ object Utils {
     getFile0(paths, root)
   }
 
-  def listFiles(path: SafePath): Seq[TreeNodeData] = {
-    println("LIST FILE, safe path " + path)
-    println("LIST FILE OUT : " + safePathToFile(path).listFilesSafe.toSeq)
-    safePathToFile(path).listFilesSafe.toSeq
-  }
+  def listFiles(path: SafePath): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
+
 }

@@ -57,7 +57,7 @@ object FileManager {
 
     for (i ← 0 to fileList.length - 1) {
       val file = fileList(i)
-      formData.append(Utils.toURI(destinationPath.path) + "/" + file.name, file)
+      formData.append(Utils.toURI(destinationPath.path ++ Seq(file.name)), file)
     }
 
     val xhr = new XMLHttpRequest

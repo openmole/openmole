@@ -21,8 +21,6 @@ import rx._
 
 object Utils {
   implicit def tToVarT[T](t: T): Var[T] = Var(t)
-
   def getUUID: String = java.util.UUID.randomUUID.toString
-
-  def toURI(path: Seq[String]): String = new java.net.URI(path.mkString("/")).getPath
+  def toURI(path: Seq[String]): String = new java.net.URI(null, null, path.mkString("/"), null).toString
 }
