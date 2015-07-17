@@ -68,7 +68,9 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
 
   val addRootDirButton: Select[TreeNodeType] = {
     val content = Seq((TreeNodeType.file, key(glyph_file)), (TreeNodeType.folder, key(glyph_folder_close)))
-    Select("fileOrFolder", content, content.map { _._1 }.headOption, btn_success, () ⇒ {
+    Select("fileOrFolder", content, content.map {
+      _._1
+    }.headOption, btn_success, () ⇒ {
       addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
     })
   }
@@ -77,8 +79,9 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
     Rx {
       val toDraw = dirNodeLine().drop(1)
       val dirNodeLineSize = toDraw.size
+      var head = dirNodeLine().head
       buttonGroup()(
-        glyphButton(" Home", btn_primary, glyph_home, goToDirAction(dirNodeLine().head)),
+        glyphButton(" Home", btn_primary, glyph_home, goToDirAction(head))(dropPairs(head)),
         if (dirNodeLineSize > 2) goToDirButton(toDraw(dirNodeLineSize - 3), Some("...")),
         toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
       )
@@ -162,11 +165,17 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(
     onclick := { () ⇒
       goToDirAction(dn)()
-    }, draggable := true, ondrop := {
+    }, dropPairs(dn)
+  )
+
+  def dropPairs(dn: DirNode) = Seq(
+    draggable := true, ondrop := {
       dropAction(dn)
-    }, ondragenter := { (e: DragEvent) ⇒
+    },
+    ondragenter := { (e: DragEvent) ⇒
       false
-    }, ondragover := { (e: DragEvent) ⇒
+    },
+    ondragover := { (e: DragEvent) ⇒
       e.dataTransfer.dropEffect = "move"
       e.preventDefault
       false
@@ -259,12 +268,16 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
     }
   }
 
-  def renameNode(treeNode: TreeNode, newName: String) = OMPost[Api].renameFile(treeNode, newName).call().foreach {
-    newNode ⇒
-      fileDisplayer.tabs.rename(treeNode, newNode)
-      refreshCurrentDirectory
-      toBeEdited() = None
-  }
+  def renameNode(treeNode: TreeNode, newName: String) =
+    fileDisplayer.tabs.saveAllTabs(() ⇒
+      OMPost[Api].renameFile(treeNode, newName).call().foreach {
+        newNode ⇒
+          fileDisplayer.tabs.rename(treeNode, newNode)
+          refreshCurrentDirectory
+          toBeEdited() = None
+          fileDisplayer.tabs.checkTabs
+      }
+    )
 
   def dropAction(tn: TreeNode) = {
     (e: DragEvent) ⇒
@@ -273,10 +286,13 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         tn match {
           case d: DirNode ⇒
             if (sp.safePath().path != d.safePath().path) {
-              OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach { b ⇒
-                refreshCurrentDirectory
-                refresh(d)
-              }
+              fileDisplayer.tabs.saveAllTabs(() ⇒
+                OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach { b ⇒
+                  refreshCurrentDirectory
+                  refresh(d)
+                  fileDisplayer.tabs.checkTabs
+                }
+              )
             }
           case _ ⇒
         }

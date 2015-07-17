@@ -2,7 +2,7 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.client.core.files.TreeNodeTabs.EditableNodeTab
-import org.openmole.gui.ext.data.{ SafePath, ScriptData }
+import org.openmole.gui.ext.data._
 import org.openmole.gui.shared._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
@@ -65,6 +65,8 @@ object TreeNodeTabs {
 
     val overlayTabElement = tags.div(`class` := "tabOverlay")
 
+    def fileContent: FileContent
+
     def save(onsaved: () ⇒ Unit = () ⇒ {}): Unit
 
   }
@@ -72,6 +74,8 @@ object TreeNodeTabs {
   class EditableNodeTab(val tabName: Var[String], val serverFilePath: Var[SafePath], editor: EditorPanelUI) extends TreeNodeTab {
 
     val editorElement = editor.view
+
+    def fileContent = AlterableFileContent(serverFilePath(), editor.code)
 
     def save(onsaved: () ⇒ Unit) = OMPost[Api].saveFile(serverFilePath(), editor.code).call().foreach { d ⇒
       onsaved()
@@ -82,6 +86,8 @@ object TreeNodeTabs {
     val editorElement = tags.div(`class` := "mdRendering",
       RawFrag(htmlContent)
     )
+
+    def fileContent = ReadOnlyFileContent()
 
     def save(onsaved: () ⇒ Unit) = onsaved()
   }
@@ -135,11 +141,9 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   def removeTab(tab: TreeNodeTab) = {
     val isactive = isActive(tab)
     tab.desactivate
-    println("Tabs " + tabs().map { _.tabName() })
     tabs() = tabs().filterNot {
       _ == tab
     }
-    println("TabsII " + tabs().map { _.tabName() })
     if (isactive) tabs().lastOption.map {
       setActive
     }
@@ -154,6 +158,22 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   //Autosave the active tab every 15 seconds
   def autosaveActive(tab: TreeNodeTab) = setInterval(15000) {
     tab.save()
+  }
+
+  def alterables: Seq[AlterableFileContent] = tabs().map { _.fileContent }.collect {
+    case a: AlterableFileContent ⇒ a
+  }
+
+  def saveAllTabs(onsave: () ⇒ Unit) = {
+    OMPost[Api].saveFiles(alterables).call().foreach { s ⇒
+      onsave()
+    }
+  }
+
+  def checkTabs = tabs().foreach { t: TreeNodeTab ⇒
+    OMPost[Api].exists(t.serverFilePath()).call().foreach { e ⇒
+      if (!e) removeTab(t)
+    }
   }
 
   def rename(tn: TreeNode, newNode: TreeNode) = {

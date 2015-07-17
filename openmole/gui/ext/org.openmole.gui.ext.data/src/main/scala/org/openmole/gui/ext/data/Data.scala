@@ -101,6 +101,7 @@ case class InAndOutput(inputPrototype: PrototypeData, outputPrototype: Prototype
 
 sealed trait FileExtension {
   def extension: String
+
   def displayable: Boolean
 }
 
@@ -125,6 +126,12 @@ object FileExtension {
   val BINARY = BinaryFile("")
 }
 
+sealed trait FileContent
+
+case class AlterableFileContent(path: SafePath, content: String) extends FileContent
+
+case class ReadOnlyFileContent() extends FileContent
+
 object SafePath {
   def sp(path: Seq[String], extension: FileExtension = FileExtension.NO_EXTENSION): SafePath =
     SafePath(path, extension)
@@ -139,7 +146,9 @@ import SafePath._
 //The path it relative to the project root directory
 case class SafePath(path: Seq[String], extension: FileExtension) {
   def /(safePath: SafePath) = sp(this.path ++ safePath.path, safePath.extension)
+
   def parent: SafePath = SafePath(path.dropRight(1), extension)
+
   def name = path.last
 }
 
@@ -166,7 +175,9 @@ case class EGIP12AuthenticationData(val cypheredPassword: String = "",
 }
 
 sealed trait UploadType
+
 case class UploadProject() extends UploadType
+
 case class UploadKey() extends UploadType
 
 @JSExport
@@ -212,7 +223,9 @@ case class EnvironmentState(envId: EnvironmentId, taskName: String, running: Lon
 
 sealed trait ExecutionInfo {
   def state: String
+
   def duration: Long
+
   def completed: Long
 }
 

@@ -44,6 +44,8 @@ trait Api {
 
   def deleteFile(treeNode: TreeNodeData): Unit
 
+  def exists(safePath: SafePath): Boolean
+
   def fileSize(treeNodeData: TreeNodeData): Long
 
   def listFiles(path: TreeNodeData): Seq[TreeNodeData]
@@ -61,6 +63,8 @@ trait Api {
   def renameKey(keyName: String, newName: String): Unit
 
   def saveFile(path: SafePath, fileContent: String): Unit
+
+  def saveFiles(fileContents: Seq[AlterableFileContent]): Unit
 
   def workspaceProjectNode(): SafePath
 
