@@ -35,7 +35,7 @@ case class Execution(
 
 case class WorkDirectory(workDirectory: File) {
 
-  def output = new File(workDirectory, "output")
+  val output = workDirectory.newFile("output", ".txt")
   lazy val outputStream = new PrintStream(output.bufferedOutputStream())
 
   def readOutput = {
