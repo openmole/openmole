@@ -152,6 +152,8 @@ object BootstrapTags {
   val glyph_flash = "glyphicon-flash"
   val glyph_flag = "glyphicon-flag"
   val glyph_remove = "glyphicon-remove-sign"
+  val glyph_road = "glyphicon-road"
+  val glyph_fire = "glyphicon-fire"
   val glyph_list = "glyphicon-list"
   val glyph_stats = "glyphicon-stats"
   val glyph_refresh = "glyphicon-refresh"

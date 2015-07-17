@@ -108,7 +108,7 @@ class ExecutionPanel extends ModalPanel {
               case f: Finished ⇒ ExecutionDetails("100", 0, envStates = f.environmentStates)
               case r: Running ⇒
                 def runningRatio = {
-                  val ratio = (100 * completed.toDouble / (completed + r.ready))
+                  val ratio = (100 * r.completed.toDouble / (r.completed + r.running + r.ready))
                   if (ratio.isNaN) 0.0 else ratio
                 }
                 ExecutionDetails(runningRatio.formatted("%.0f"), r.running, envStates = r.environmentStates)
@@ -142,10 +142,10 @@ class ExecutionPanel extends ModalPanel {
                       tbody(
                         Seq(bs.tr(row)(
                           bs.td(col_md_2)(e.taskName),
-                          bs.td(col_md_3)("Submitted: " + e.submitted),
+                          bs.td(col_md_3)(bs.glyph(bs.glyph_road), " " + e.submitted),
                           bs.td(col_md_2)(bs.glyph(bs.glyph_flash), " " + e.running),
                           bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + e.done),
-                          bs.td(col_md_3)("Failed: " + e.failed)
+                          bs.td(col_md_3)(bs.glyph(bs.glyph_fire), " " + e.failed)
                         )
                         )
                       )

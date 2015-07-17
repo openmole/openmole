@@ -71,15 +71,10 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
   }
 
   def print(moleExecution: MoleExecution): Unit = {
-    val toDisplay = Array.fill(State.values.size)(new AtomicLong)
-    for (job ← moleExecution.moleJobs) toDisplay(job.state.id).incrementAndGet
-    for (state ← State.values)
-      state match {
-        case State.COMPLETED ⇒ System.out.println(state.toString + ": " + moleExecution.completed)
-        case State.FAILED    ⇒
-        case State.CANCELED  ⇒
-        case _               ⇒ System.out.println(state.toString + ": " + toDisplay(state.id))
-      }
+    val statuses = moleExecution.jobStatuses
+    println(s"Ready: ${statuses.ready}")
+    println(s"Running: ${statuses.running}")
+    println(s"Completed: ${statuses.completed}")
     moleExecution.exception match {
       case Some(e) ⇒
         System.out.println(s"Mole execution failed while execution ${e.capsule}:")

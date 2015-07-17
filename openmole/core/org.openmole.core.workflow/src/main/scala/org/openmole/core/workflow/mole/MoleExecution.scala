@@ -72,6 +72,8 @@ object MoleExecution extends Logger {
 
 }
 
+case class JobStatuses(ready: Long, running: Long, completed: Long)
+
 class MoleExecution(
     val mole: Mole,
     val sources: Sources,
@@ -205,9 +207,7 @@ class MoleExecution(
     this
   }
 
-  def ready: Long = moleJobs.count(_.state == READY)
-
-  def running: Long = {
+  def jobStatuses: JobStatuses = {
     val executionJobsGroup = {
       val executionJobs =
         environments.values.toSeq.collect { case e: JobList ⇒ e }.flatMap(_.jobs)
@@ -220,11 +220,23 @@ class MoleExecution(
     def isRunningOnEnvironment(moleJob: MoleJob) =
       executionJobsGroup.get(moleJob).map { _.exists(_.state == ExecutionState.RUNNING) }.getOrElse(false)
 
-    moleJobs.count {
-      moleJob ⇒ moleJob.state == RUNNING || isRunningOnEnvironment(moleJob)
+    var ready = 0L
+    var running = 0L
+
+    for {
+      moleJob ← moleJobs
+    } {
+      if (isRunningOnEnvironment(moleJob)) running += 1
+      else
+        moleJob.state match {
+          case READY   ⇒ ready += 1
+          case RUNNING ⇒ running += 1
+        }
     }
+
+    val completed = _completed.single()
+    JobStatuses(ready, running, completed)
   }
-  def completed: Long = _completed.single()
 
   private[mole] def jobFailedOrCanceled(moleJob: MoleJob, capsule: Capsule) = jobOutputTransitionsPerformed(moleJob, capsule)
   private[mole] def jobFinished(moleJob: MoleJob, capsule: Capsule) = {
