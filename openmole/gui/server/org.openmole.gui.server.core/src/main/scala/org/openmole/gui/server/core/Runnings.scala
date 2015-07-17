@@ -34,8 +34,8 @@ object Runnings {
   lazy private val instance = new Runnings
 
   def append(envId: EnvironmentId,
-             environment: Environment,
-             todo: (RunningEnvironment) ⇒ RunningEnvironment) = atomic { implicit ctx ⇒
+             environment: Environment)(
+               todo: (RunningEnvironment) ⇒ RunningEnvironment) = atomic { implicit ctx ⇒
     val re = instance.runningEnvironments.getOrElse(envId, emptyRunningEnvironment(environment))
     instance.runningEnvironments(envId) = todo(re)
   }
