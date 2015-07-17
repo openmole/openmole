@@ -91,6 +91,7 @@ class Execution {
             if (moleExecution.canceled) Canceled(duration = moleExecution.duration.get)
             else if (moleExecution.finished)
               Finished(duration = moleExecution.duration.get,
+                completed = moleExecution.jobStatuses.completed,
                 environmentStates = environmentState(key)
               )
             else if (moleExecution.started) {
