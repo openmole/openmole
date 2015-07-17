@@ -58,10 +58,12 @@ class FileDisplayer {
 
             def onrun = () ⇒ {
               overlaying() = true
-              OMPost[Api].runScript(ScriptData(tn.safePath())).call().foreach { execInfo ⇒
-                overlaying() = false
-                executionTriggerer.open
-              }
+              save(() ⇒
+                OMPost[Api].runScript(ScriptData(tn.safePath())).call().foreach { execInfo ⇒
+                  overlaying() = false
+                  executionTriggerer.open
+                }
+              )
             }
           }
         case md: MDScript ⇒ OMPost[Api].mdToHtml(tn.safePath()).call.foreach { htmlString ⇒

@@ -79,7 +79,7 @@ object TreeNodeTabs {
   }
 
   class HTMLTab(val tabName: Var[String], val serverFilePath: Var[SafePath], htmlContent: String) extends TreeNodeTab {
-    val editorElement = tags.div(
+    val editorElement = tags.div(`class` := "mdRendering",
       RawFrag(htmlContent)
     )
 

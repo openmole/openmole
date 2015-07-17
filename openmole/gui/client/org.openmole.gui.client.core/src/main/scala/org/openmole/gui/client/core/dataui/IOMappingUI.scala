@@ -2,8 +2,7 @@ package org.openmole.gui.client.core.dataui
 
 import org.openmole.gui.client.core.PrototypeFactoryUI.GenericPrototypeDataUI
 import org.openmole.gui.ext.dataui.PanelUI
-import org.openmole.gui.misc.js.{ Select, Displayable, Identifiable }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select, Displayable, Identifiable }
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom.TypedTag
@@ -99,7 +98,7 @@ object IOMappingFactory {
 
       val panelUI = new PanelUI {
         val selectorT = Select("selectField",
-          options,
+          options.map { o ⇒ (o, bs.emptyCK) },
           Some(default))
 
         val view: TypedTag[HTMLElement] = span(selectorT.selector)

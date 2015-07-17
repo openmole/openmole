@@ -58,7 +58,7 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
   val factories = ClientService.authenticationFactories
 
   val authenticationSelector: Select[AuthenticationFactoryUI] = Select("authentications",
-    factories,
+    factories.map { f ⇒ (f, emptyCK) },
     factories.headOption,
     btn_primary, onclickExtra = () ⇒ {
       authenticationSelector.content().map { f ⇒ setting() = Some(f.panelUI) }
