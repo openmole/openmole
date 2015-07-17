@@ -1,20 +1,21 @@
 package org.openmole.gui.server.core
 
+import org.openmole.core.batch.environment.BatchEnvironment.{ EndUpload, BeginUpload, EndDownload, BeginDownload }
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.misc.utils.Utils._
+import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.gui.server.core.Utils._
 import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
-import org.openmole.gui.ext.data.{ ScriptData, TreeNodeData }
+import org.openmole.gui.ext.data._
 import java.io.File
 import java.nio.file._
 import org.openmole.console._
 import scala.util.{ Failure, Success, Try }
-import org.openmole.gui.ext.data._
 import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.ExecutionContext
 import org.openmole.core.workflow.puzzle.PuzzleBuilder
@@ -163,10 +164,33 @@ object ApiImpl extends Api {
                 Runnings.add(execId, envIds, outputStream)
 
                 envIds.foreach {
-                  case (id, env) ⇒
+                  case (envId, env) ⇒
                     env.listen {
-                      case (env, ex: ExceptionRaised) ⇒ Runnings.append(execId, id, env, ex)
+                      case (env, ex: ExceptionRaised) ⇒ Runnings.append(envId, env,
+                        (re: RunningEnvironment) ⇒ re.copy(environmentError = EnvironmentError(envId, ex.exception.getMessage,
+                          ErrorBuilder(ex.exception)) :: re.environmentError.takeRight(50)))
+                      case (env, bdl: BeginDownload) ⇒ Runnings.append(envId, env,
+                        (re: RunningEnvironment) ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1)))
+                      case (env, edl: EndDownload) ⇒ Runnings.append(envId, env,
+                        (re: RunningEnvironment) ⇒ {
+                          val size = re.networkActivity.downloadedSize + edl.file.length
+                          re.copy(networkActivity = re.networkActivity.copy(
+                            downloadingFiles = re.networkActivity.downloadingFiles - 1,
+                            downloadedSize = size,
+                            readableDownloadedSize = readableByteCount(size)))
+                        })
+                      case (env, bul: BeginUpload) ⇒ Runnings.append(envId, env,
+                        (re: RunningEnvironment) ⇒ re.copy(networkActivity = re.networkActivity.copy(uploadingFiles = re.networkActivity.uploadingFiles + 1)))
+                      case (env, eul: EndUpload) ⇒ Runnings.append(envId, env,
+                        (re: RunningEnvironment) ⇒ {
+                          val size = re.networkActivity.uploadedSize + eul.file.length
+                          re.copy(networkActivity = re.networkActivity.copy(
+                            uploadedSize = size,
+                            readableUploadedSize = readableByteCount(size),
+                            uploadingFiles = re.networkActivity.uploadingFiles - 1))
+                        })
                     }
+
                 }
                 Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
                   case Success(ex) ⇒

@@ -72,7 +72,8 @@ class Execution {
           e.environment.running,
           e.environment.done,
           e.environment.submitted,
-          e.environment.failed
+          e.environment.failed,
+          e.networkActivity
         )
       }
     }

@@ -211,13 +211,20 @@ case class EnvironmentId(id: String = java.util.UUID.randomUUID.toString)
 
 case class EnvironmentError(id: EnvironmentId, errorMessage: String, stack: Error)
 
+case class NetworkActivity(downloadingFiles: Int = 0,
+                           downloadedSize: Long = 0L,
+                           readableDownloadedSize: String = "",
+                           uploadingFiles: Int = 0,
+                           uploadedSize: Long = 0L,
+                           readableUploadedSize: String = "")
+
 case class RunningEnvironmentData(id: ExecutionId, errors: Seq[EnvironmentError])
 
 case class RunningOutputData(id: ExecutionId, output: String)
 
 case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long = 0L)
 
-case class EnvironmentState(envId: EnvironmentId, taskName: String, running: Long, done: Long, submitted: Long, failed: Long)
+case class EnvironmentState(envId: EnvironmentId, taskName: String, running: Long, done: Long, submitted: Long, failed: Long, networkActivity: NetworkActivity)
 
 //case class Output(output: String)
 

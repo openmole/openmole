@@ -142,10 +142,12 @@ class ExecutionPanel extends ModalPanel {
                       tbody(
                         Seq(bs.tr(row)(
                           bs.td(col_md_2)(e.taskName),
-                          bs.td(col_md_3)(bs.glyph(bs.glyph_road), " " + e.submitted),
-                          bs.td(col_md_2)(bs.glyph(bs.glyph_flash), " " + e.running),
+                          bs.td(col_md_2)(bs.glyph(bs.glyph_upload), s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}"),
+                          bs.td(col_md_2)(bs.glyph(bs.glyph_download), s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}"),
+                          bs.td(col_md_2)(bs.glyph(bs.glyph_road), " " + e.submitted),
+                          bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + e.running),
                           bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + e.done),
-                          bs.td(col_md_3)(bs.glyph(bs.glyph_fire), " " + e.failed)
+                          bs.td(col_md_1)(bs.glyph(bs.glyph_fire), " " + e.failed)
                         )
                         )
                       )
@@ -228,6 +230,10 @@ class ExecutionPanel extends ModalPanel {
       }
     ).render
   }
+
+  def displaySize(size: Long, readable: String) =
+    if (size == 0L) ""
+    else s"($readable)"
 
   def visibleClass(expandID: ExpandID, visibleID: VisibleID): Modifier = `class` := {
     if (expander.isVisible(expandID, visibleID)) "executionVisible" else ""
