@@ -247,7 +247,7 @@ package file {
 
       //////// general operations ///////
       def size: Long =
-        if (Files.isDirectory(file)) file.withDirectoryStream(_.foldLeft(0l)((acc: Long, p: Path) ⇒ acc + p.size))
+        if (file.isDirectory) file.listFilesSafe(f ⇒ !f.isSymbolicLink).map(_.size).sum
         else Files.size(file)
 
       def mode = {
@@ -465,20 +465,16 @@ package file {
     }
 
     def readableByteCount(bytes: Long): String = {
-      val kb = 1024
-      val mo = kb * kb
-      val go = mo * kb
-      val to = go * kb
+      val kb = 1024L
+      val mB = kb * kb
+      val gB = mB * kb
+      val tB = gB * kb
 
       val doubleBytes = bytes.toDouble
-      if (bytes < mo) {
-        val ratio = doubleBytes / kb
-        if (ratio < 1) ratio.formatted("%.1f") + "Ko"
-        else ratio.toInt.toString() + "Ko"
-      }
-      else if (bytes < go) (doubleBytes / mo).toInt.toString + "Mo"
-      else if (bytes < to) (doubleBytes / go).toInt.toString + "Go"
-      else (doubleBytes / to).toInt.toString + "To"
+      if (bytes < mB) (doubleBytes / kb).formatted("%.2f").toString() + "KB"
+      else if (bytes < gB) (doubleBytes / mB).formatted("%.2f").toString + "MB"
+      else if (bytes < tB) (doubleBytes / gB).formatted("%.2f").toString + "GB"
+      else (doubleBytes / tB).formatted("%.2f").toString + "TB"
     }
 
   }
