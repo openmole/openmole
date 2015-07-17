@@ -167,7 +167,7 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
             getAuthentications
           }
         }
-        case _ ⇒
+        case _ ⇒ getAuthentications
       }
     }
   }
