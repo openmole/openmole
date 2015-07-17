@@ -47,7 +47,7 @@ object Utils {
 
   implicit def fileToSafePath(f: File): SafePath = SafePath(getPathArray(f, workspaceProjectFile), f)
 
-  implicit def safePathToFile(s: SafePath): File = new File(webUIProjectFile, getFile(s.path).getCanonicalPath)
+  implicit def safePathToFile(s: SafePath): File = getFile(webUIProjectFile, s.path)
 
   implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, f.length, readableByteCount(FileDecorator(f).size))
 
@@ -78,13 +78,17 @@ object Utils {
     getParentsArray0(f, Seq()) :+ f.getName
   }
 
-  def getFile(paths: Seq[String]): File = {
+  def getFile(root: File, paths: Seq[String]): File = {
     def getFile0(paths: Seq[String], accFile: File): File = {
       if (paths.isEmpty) accFile
       else getFile0(paths.tail, new File(accFile, paths.head))
     }
-    getFile0(paths, new File(""))
+    getFile0(paths, root)
   }
 
-  def listFiles(path: SafePath): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
+  def listFiles(path: SafePath): Seq[TreeNodeData] = {
+    println("LIST FILE, safe path " + path)
+    println("LIST FILE OUT : " + safePathToFile(path).listFilesSafe.toSeq)
+    safePathToFile(path).listFilesSafe.toSeq
+  }
 }
