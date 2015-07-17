@@ -231,6 +231,7 @@ class MoleExecution(
         moleJob.state match {
           case READY   ⇒ ready += 1
           case RUNNING ⇒ running += 1
+          case _       ⇒
         }
     }
 
