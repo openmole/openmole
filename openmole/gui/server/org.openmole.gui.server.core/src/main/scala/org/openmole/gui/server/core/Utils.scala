@@ -59,6 +59,8 @@ object Utils {
 
   //def relativeSafePathToFile(sp: SafePath): File = Utils.webUIProjectSafePath / sp
 
+  def authenticationFile(keyFileName: String): File = new File(authenticationKeysFile, keyFileName)
+
   def getPathArray(f: File, until: File): Seq[String] = {
     def getParentsArray0(f: File, computedParents: Seq[String]): Seq[String] = {
       val parent = f.getParentFile

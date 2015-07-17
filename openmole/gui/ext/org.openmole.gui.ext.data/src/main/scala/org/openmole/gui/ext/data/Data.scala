@@ -156,21 +156,25 @@ sealed trait AuthenticationData extends Data {
   def synthetic: String
 }
 
+trait PrivateKey {
+  def privateKey: Option[String]
+}
+
 case class LoginPasswordAuthenticationData(login: String = "",
                                            cypheredPassword: String = "",
                                            target: String = "") extends AuthenticationData {
   def synthetic = s"$login@$target"
 }
 
-case class PrivateKeyAuthenticationData(privateKey: Option[SafePath] = None,
+case class PrivateKeyAuthenticationData(privateKey: Option[String] = None,
                                         login: String = "",
                                         cypheredPassword: String = "",
-                                        target: String = "") extends AuthenticationData {
+                                        target: String = "") extends AuthenticationData with PrivateKey {
   def synthetic = s"$login@$target"
 }
 
 case class EGIP12AuthenticationData(val cypheredPassword: String = "",
-                                    val certificatePath: Option[SafePath] = None) extends AuthenticationData {
+                                    val privateKey: Option[String] = None) extends AuthenticationData with PrivateKey {
   def synthetic = "egi.p12"
 }
 

@@ -263,7 +263,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
 
   def trashNode(treeNode: TreeNode) = {
     fileDisplayer.tabs -- treeNode
-    OMPost[Api].deleteFile(treeNode).call().foreach { d ⇒
+    OMPost[Api].deleteFile(treeNode.safePath()).call().foreach { d ⇒
       refreshCurrentDirectory
     }
   }

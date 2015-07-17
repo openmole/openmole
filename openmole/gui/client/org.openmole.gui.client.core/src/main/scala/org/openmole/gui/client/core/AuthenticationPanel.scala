@@ -159,9 +159,16 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
     )
   )
 
-  def removeAuthentication(d: AuthenticationData) = {
-    OMPost[Api].removeAuthentication(d).call().foreach { d ⇒
-      getAuthentications
+  def removeAuthentication(ad: AuthenticationData) = {
+    OMPost[Api].removeAuthentication(ad).call().foreach { r ⇒
+      ad match {
+        case pk: PrivateKey ⇒ pk.privateKey.map { k ⇒
+          OMPost[Api].deleteAuthenticationKey(k).call().foreach { df ⇒
+            getAuthentications
+          }
+        }
+        case _ ⇒
+      }
     }
   }
 

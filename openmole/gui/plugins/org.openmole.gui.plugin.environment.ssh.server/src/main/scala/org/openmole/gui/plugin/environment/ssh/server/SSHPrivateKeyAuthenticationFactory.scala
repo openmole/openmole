@@ -33,23 +33,27 @@ class SSHPrivateKeyAuthenticationFactory extends AuthenticationFactory {
   }
 
   def allAuthenticationData: Seq[AuthenticationData] = SSHAuthentication().flatMap {
-      _ match {
-        case key: PrivateKey => Some(PrivateKeyAuthenticationData(
-          key.privateKey,
-          key.login,
-          Workspace.decrypt(key.cypheredPassword),
-          key.target))
-        case _ => None
-      }
+    _ match {
+      case key: PrivateKey => Some(PrivateKeyAuthenticationData(
+        Some(key.privateKey.getName),
+        key.login,
+        Workspace.decrypt(key.cypheredPassword),
+        key.target))
+      case _ => None
     }
+  }
 
   def coreObject(data: AuthenticationData): Option[PrivateKey] = data match {
-    case key: PrivateKeyAuthenticationData => Some(PrivateKey(key.privateKey.getOrElse(SafePath.empty): SafePath,
-      key.login,
-      Workspace.encrypt(key.cypheredPassword),
-      key.target))
+    case keyData: PrivateKeyAuthenticationData =>
+      keyData.privateKey match {
+        case Some(pk: String) => Some(PrivateKey(authenticationFile(pk),
+          keyData.login,
+          Workspace.encrypt(keyData.cypheredPassword),
+          keyData.target))
+        case _ => None
+      }
     case _ => None
   }
 
-  def removeAuthentication(data: AuthenticationData) = coreObject(data).map{e=>  SSHAuthentication -= e}
+  def removeAuthentication(data: AuthenticationData) = coreObject(data).map { e => SSHAuthentication -= e }
 }

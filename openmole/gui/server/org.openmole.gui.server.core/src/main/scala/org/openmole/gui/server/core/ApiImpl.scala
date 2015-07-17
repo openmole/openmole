@@ -77,7 +77,9 @@ object ApiImpl extends Api {
 
   def addFile(treeNodeData: TreeNodeData, fileName: String): Boolean = new File(treeNodeData.safePath, fileName).createNewFile
 
-  def deleteFile(treeNodeData: TreeNodeData): Unit = safePathToFile(treeNodeData.safePath).recursiveDelete
+  def deleteAuthenticationKey(keyName: String): Unit = authenticationFile(keyName).delete
+
+  def deleteFile(safePath: SafePath): Unit = safePathToFile(safePath).recursiveDelete
 
   def extractTGZ(treeNodeData: TreeNodeData): Unit = treeNodeData.safePath.extension match {
     case FileExtension.TGZ ⇒
@@ -110,7 +112,7 @@ object ApiImpl extends Api {
     renameFileFromPath(safePathToFile(treeNodeData.safePath), name)
 
   def renameKey(keyName: String, newName: String): Unit =
-    Files.move(new File(Utils.authenticationKeysFile, keyName), new File(Utils.authenticationKeysFile, newName))
+    Files.move(authenticationFile(keyName), authenticationFile(newName), StandardCopyOption.REPLACE_EXISTING)
 
   def renameFileFromPath(filePath: SafePath, newName: String): TreeNodeData = {
     val targetFile = new File(filePath.parent, newName)
