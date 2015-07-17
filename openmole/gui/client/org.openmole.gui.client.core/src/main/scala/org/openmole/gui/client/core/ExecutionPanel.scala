@@ -142,10 +142,10 @@ class ExecutionPanel extends ModalPanel {
                       tbody(
                         Seq(bs.tr(row)(
                           bs.td(col_md_2)(e.taskName),
-                          bs.td(col_md_3)("Submitted: " + e.submitted),
+                          bs.td(col_md_3)(bs.glyph(bs.glyph_road), " " + e.submitted),
                           bs.td(col_md_2)(bs.glyph(bs.glyph_flash), " " + e.running),
                           bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + e.done),
-                          bs.td(col_md_3)("Failed: " + e.failed)
+                          bs.td(col_md_3)(bs.glyph(bs.glyph_fire), " " + e.failed)
                         )
                         )
                       )
