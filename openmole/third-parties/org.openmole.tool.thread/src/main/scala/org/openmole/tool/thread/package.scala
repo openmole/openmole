@@ -25,9 +25,8 @@ import scala.concurrent.duration.Duration
 import scala.util.{ Failure, Success, Try }
 
 package object thread {
-  object Thread extends Logger
-
-  import Thread._
+  object L extends Logger
+  import L._
 
   val daemonThreadFactory = new ThreadFactory {
 
