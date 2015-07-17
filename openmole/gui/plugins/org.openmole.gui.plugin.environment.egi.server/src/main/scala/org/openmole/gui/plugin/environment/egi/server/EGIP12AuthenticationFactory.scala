@@ -29,7 +29,8 @@ class EGIP12AuthenticationFactory extends AuthenticationFactory {
   def buildAuthentication(data: AuthenticationData) = {
     val auth = coreObject(data)
     auth.foreach { a =>
-      EGIAuthentication.update(a) }
+      EGIAuthentication.update(a)
+    }
   }
 
   def allAuthenticationData: Seq[AuthenticationData] = {
@@ -37,17 +38,20 @@ class EGIP12AuthenticationFactory extends AuthenticationFactory {
       case Some(p12: P12Certificate) =>
         Seq(EGIP12AuthenticationData(
           Workspace.decrypt(p12.cypheredPassword),
-          Some(p12.certificate)))
+          Some(p12.certificate.getName)))
       case x: Any => Seq()
     }
   }
 
 
-
   def coreObject(data: AuthenticationData): Option[P12Certificate] = data match {
-    case p12: EGIP12AuthenticationData => Some(P12Certificate(
-      Workspace.encrypt(p12.cypheredPassword),
-      p12.certificatePath.getOrElse(SafePath.empty): SafePath))
+    case p12: EGIP12AuthenticationData =>
+      p12.privateKey match {
+        case Some(pk: String) => Some(P12Certificate(
+          Workspace.encrypt(p12.cypheredPassword),
+          authenticationFile(pk)))
+        case _ => None
+      }
     case _ => None
   }
 

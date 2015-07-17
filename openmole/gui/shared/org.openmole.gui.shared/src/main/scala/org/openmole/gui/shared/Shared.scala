@@ -42,7 +42,9 @@ trait Api {
 
   def extractTGZ(treeNodeData: TreeNodeData): Unit
 
-  def deleteFile(treeNode: TreeNodeData): Unit
+  def deleteAuthenticationKey(keyName: String): Unit
+
+  def deleteFile(safePath: SafePath): Unit
 
   def exists(safePath: SafePath): Boolean
 

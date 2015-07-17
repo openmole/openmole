@@ -40,9 +40,7 @@ class EGIP12AuthenticationPanelUI(data: EGIP12AuthenticationData) extends PanelU
     width := "130px").render
 
 
-  lazy val privateKey = new AuthFileUploaderUI(data.certificatePath.map {
-    _.path.last
-  }.getOrElse(""), data.certificatePath.isDefined, Some("egi.p12"))
+  lazy val privateKey = new AuthFileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
 
   @JSExport
   val view = tags.div(
@@ -53,12 +51,9 @@ class EGIP12AuthenticationPanelUI(data: EGIP12AuthenticationData) extends PanelU
 
   def save(onsave: () => Unit) =
     OMPost[Api].removeAuthentication(data).call().foreach { d ⇒
-      Settings.authenticationKeysPath.foreach { kp => {
-        OMPost[Api].addAuthentication(EGIP12AuthenticationData(password.value,
-          Some(kp / SafePath.leaf("egi.p12", FileExtension.NO_EXTENSION)))).call().foreach { b =>
-          onsave()
-        }
-      }
+      OMPost[Api].addAuthentication(EGIP12AuthenticationData(password.value,
+        Some("egi.p12"))).call().foreach { b =>
+        onsave()
       }
     }
 
