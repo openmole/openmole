@@ -78,7 +78,7 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
   }.getOrElse(""))
 
   val factorySelector: Select[FactoryWithDataUI] = Select("factories",
-    filter().factories,
+    filter().factories.map { f ⇒ (f, emptyCK) },
     currentDataBagUI(),
     btn_primary, onclickExtra = () ⇒ {
       currentDataBagUI().map { db ⇒
@@ -98,9 +98,9 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
 
   Obs(filter) {
     filter() match {
-      case TASKS      ⇒ factorySelector.contents() = ClientService.taskFactories
-      case PROTOTYPES ⇒ factorySelector.contents() = ClientService.prototypeFactories
-      case _          ⇒ factorySelector.contents() = ClientService.factories
+      case TASKS      ⇒ factorySelector.contents() = ClientService.taskFactories.map { f ⇒ (f, emptyCK) }
+      case PROTOTYPES ⇒ factorySelector.contents() = ClientService.prototypeFactories.map { f ⇒ (f, emptyCK) }
+      case _          ⇒ factorySelector.contents() = ClientService.factories.map { f ⇒ (f, emptyCK) }
     }
   }
 

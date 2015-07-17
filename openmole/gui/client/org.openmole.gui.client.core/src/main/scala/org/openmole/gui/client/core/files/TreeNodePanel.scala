@@ -67,8 +67,8 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   ).render
 
   val addRootDirButton: Select[TreeNodeType] = {
-    val content = Seq(TreeNodeType.file, TreeNodeType.folder)
-    Select("fileOrFolder", content, content.headOption, btn_success, glyph_folder_close, () ⇒ {
+    val content = Seq((TreeNodeType.file, key(glyph_file)), (TreeNodeType.folder, key(glyph_folder_close)))
+    Select("fileOrFolder", content, content.map { _._1 }.headOption, btn_success, () ⇒ {
       addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
     })
   }
