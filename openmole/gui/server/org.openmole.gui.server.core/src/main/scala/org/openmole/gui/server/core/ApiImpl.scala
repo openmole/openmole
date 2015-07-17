@@ -173,7 +173,7 @@ object ApiImpl extends Api {
                         (re: RunningEnvironment) ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1)))
                       case (env, edl: EndDownload) ⇒ Runnings.append(envId, env,
                         (re: RunningEnvironment) ⇒ {
-                          val size = re.networkActivity.downloadedSize + edl.file.length
+                          val size = re.networkActivity.downloadedSize + FileDecorator(edl.file).size
                           re.copy(networkActivity = re.networkActivity.copy(
                             downloadingFiles = re.networkActivity.downloadingFiles - 1,
                             downloadedSize = size,
@@ -183,7 +183,7 @@ object ApiImpl extends Api {
                         (re: RunningEnvironment) ⇒ re.copy(networkActivity = re.networkActivity.copy(uploadingFiles = re.networkActivity.uploadingFiles + 1)))
                       case (env, eul: EndUpload) ⇒ Runnings.append(envId, env,
                         (re: RunningEnvironment) ⇒ {
-                          val size = re.networkActivity.uploadedSize + eul.file.length
+                          val size = re.networkActivity.uploadedSize + FileDecorator(eul.file).size
                           re.copy(networkActivity = re.networkActivity.copy(
                             uploadedSize = size,
                             readableUploadedSize = readableByteCount(size),

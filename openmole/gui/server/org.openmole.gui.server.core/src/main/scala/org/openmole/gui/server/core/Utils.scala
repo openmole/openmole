@@ -49,7 +49,7 @@ object Utils {
 
   implicit def safePathToFile(s: SafePath): File = new File(webUIProjectFile, getFile(s.path).getCanonicalPath)
 
-  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, f.length, readableByteCount(f.length))
+  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, f.length, readableByteCount(FileDecorator(f).size))
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)
