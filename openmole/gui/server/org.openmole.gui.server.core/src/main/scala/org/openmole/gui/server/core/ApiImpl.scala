@@ -112,7 +112,7 @@ object ApiImpl extends Api {
     renameFileFromPath(safePathToFile(treeNodeData.safePath), name)
 
   def renameKey(keyName: String, newName: String): Unit =
-    Files.move(authenticationFile(keyName), authenticationFile(newName))
+    Files.move(authenticationFile(keyName), authenticationFile(newName), StandardCopyOption.REPLACE_EXISTING)
 
   def renameFileFromPath(filePath: SafePath, newName: String): TreeNodeData = {
     val targetFile = new File(filePath.parent, newName)
