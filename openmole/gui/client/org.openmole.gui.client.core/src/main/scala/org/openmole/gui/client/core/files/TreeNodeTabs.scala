@@ -157,7 +157,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   //Autosave the active tab every 15 seconds
   def autosaveActive(tab: TreeNodeTab) = setInterval(15000) {
-     tab.save()
+    tab.save()
   }
 
   def alterables: Seq[AlterableFileContent] = tabs().map { _.fileContent }.collect {

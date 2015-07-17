@@ -79,8 +79,9 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
     Rx {
       val toDraw = dirNodeLine().drop(1)
       val dirNodeLineSize = toDraw.size
+      var head = dirNodeLine().head
       buttonGroup()(
-        glyphButton(" Home", btn_primary, glyph_home, goToDirAction(dirNodeLine().head)),
+        glyphButton(" Home", btn_primary, glyph_home, goToDirAction(head))(dropPairs(head)),
         if (dirNodeLineSize > 2) goToDirButton(toDraw(dirNodeLineSize - 3), Some("...")),
         toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
       )
@@ -164,11 +165,17 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(
     onclick := { () ⇒
       goToDirAction(dn)()
-    }, draggable := true, ondrop := {
+    }, dropPairs(dn)
+  )
+
+  def dropPairs(dn: DirNode) = Seq(
+    draggable := true, ondrop := {
       dropAction(dn)
-    }, ondragenter := { (e: DragEvent) ⇒
+    },
+    ondragenter := { (e: DragEvent) ⇒
       false
-    }, ondragover := { (e: DragEvent) ⇒
+    },
+    ondragover := { (e: DragEvent) ⇒
       e.dataTransfer.dropEffect = "move"
       e.preventDefault
       false
