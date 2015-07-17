@@ -108,7 +108,7 @@ class ExecutionPanel extends ModalPanel {
               case f: Finished ⇒ ExecutionDetails("100", 0, envStates = f.environmentStates)
               case r: Running ⇒
                 def runningRatio = {
-                  val ratio = (100 * completed.toDouble / (completed + r.ready))
+                  val ratio = (100 * r.completed.toDouble / (r.completed + r.running + r.ready))
                   if (ratio.isNaN) 0.0 else ratio
                 }
                 ExecutionDetails(runningRatio.formatted("%.0f"), r.running, envStates = r.environmentStates)
