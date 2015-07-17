@@ -39,11 +39,19 @@ object Utils {
 
   val webUIProjectFile = Workspace.file("webui")
 
-  val workspaceProjectFile = new File(Workspace.file("webui"), "projects")
+  def workspaceProjectFile = {
+    val ws = new File(Workspace.file("webui"), "projects")
+    ws.mkdirs()
+    ws
+  }
 
-  val workspaceRoot = workspaceProjectFile.getParentFile
+  def workspaceRoot = workspaceProjectFile.getParentFile
 
-  val authenticationKeysFile = Workspace.file("persistent/keys")
+  def authenticationKeysFile = {
+    val ak = Workspace.location / Workspace.persistentLocation / "keys"
+    ak.mkdirs()
+    ak
+  }
 
   implicit def fileToSafePath(f: File): SafePath = SafePath(getPathArray(f, workspaceProjectFile), f)
 
