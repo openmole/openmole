@@ -94,11 +94,12 @@ class Execution {
                 environmentStates = environmentState(key)
               )
             else if (moleExecution.started) {
+              val statuses = moleExecution.jobStatuses
               Running(
-                ready = moleExecution.ready,
-                running = moleExecution.running,
+                ready = statuses.ready,
+                running = statuses.running,
                 duration = d,
-                completed = moleExecution.completed,
+                completed = statuses.completed,
                 environmentStates = environmentState(key)
               )
             }

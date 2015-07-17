@@ -173,7 +173,8 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
               def environmentErrors = env.readErrors.map(e ⇒ Error(e.exception).copy(level = Some(e.level.toString)))
               EnvironmentStatus(name = env.name, submitted = env.submitted, running = env.running, done = env.done, failed = env.failed, environmentErrors)
           }
-          Running(moleExecution.ready, moleExecution.running, moleExecution.completed, environmentStatus)
+          val statuses = moleExecution.jobStatuses
+          Running(statuses.ready, statuses.running, statuses.completed, environmentStatus)
       }
       Ok(state.toJson)
     }
