@@ -247,7 +247,7 @@ package file {
 
       //////// general operations ///////
       def size: Long =
-        if (Files.isDirectory(file)) file.withDirectoryStream(_.foldLeft(0l)((acc: Long, p: Path) ⇒ acc + p.size))
+        if (file.isDirectory) file.listFilesSafe(f ⇒ !f.isSymbolicLink).map(_.size).sum
         else Files.size(file)
 
       def mode = {
