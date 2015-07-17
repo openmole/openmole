@@ -162,7 +162,7 @@ object Libraries extends Defaults {
 
   lazy val log4j = "org.openmole" %% "org-apache-log4j" % "1.2.17"
 
-  lazy val logging = "org.openmole" %% "org-apache-commons-logging" % "1.1.1"
+  lazy val logging = "org.openmole" %% "org-apache-commons-logging" % "1.2"
 
   lazy val sshd = "org.openmole" %% "org-apache-sshd" % "0.14.0"
 
