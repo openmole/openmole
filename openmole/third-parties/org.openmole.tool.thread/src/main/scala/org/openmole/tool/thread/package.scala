@@ -19,10 +19,16 @@ package org.openmole.tool
 
 import java.util.concurrent._
 
+import org.openmole.tool.logger.Logger
+
 import scala.concurrent.duration.Duration
 import scala.util.{ Failure, Success, Try }
 
 package object thread {
+  object Thread extends Logger
+
+  import Thread._
+
   val daemonThreadFactory = new ThreadFactory {
 
     override def newThread(r: Runnable): Thread = {
@@ -42,12 +48,17 @@ package object thread {
 
   def background[F](f: ⇒ F)(implicit executor: ExecutorService = defaultExecutor): Future[F] = executor.submit(f)
 
-  def timeout[F](f: ⇒ F)(duration: Duration)(implicit executor: ExecutorService = Executors.newSingleThreadExecutor(daemonThreadFactory)): F = {
+  def timeout[F](f: ⇒ F)(duration: Duration)(implicit executor: ExecutorService = defaultExecutor): F = try {
     val r = executor.submit(f)
     try r.get(duration.toMillis, TimeUnit.MILLISECONDS)
     catch {
       case e: TimeoutException ⇒ r.cancel(true); throw e
     }
+  }
+  catch {
+    case e: RejectedExecutionException ⇒
+      Log.logger.log(Log.WARNING, "Execution rejected, operation executed in the caller thread with no timeout", e)
+      f
   }
 
 }
