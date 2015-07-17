@@ -19,6 +19,7 @@ object Server extends GuiDefaults {
       Ext.dataui,
       Ext.data,
       Core.workflow,
+      Core.buildinfo,
       openmoleFile,
       openmoleTar,
       openmoleCollection,

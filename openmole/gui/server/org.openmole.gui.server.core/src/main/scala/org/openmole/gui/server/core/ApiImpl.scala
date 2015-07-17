@@ -192,4 +192,8 @@ object ApiImpl extends Api {
     )
   }
 
+  def buildInfo() = {
+    import org.openmole.core._
+    BuildInfo(buildinfo.version, buildinfo.name, buildinfo.generationDate)
+  }
 }

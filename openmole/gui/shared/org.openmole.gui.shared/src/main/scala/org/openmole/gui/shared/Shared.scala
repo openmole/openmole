@@ -77,4 +77,7 @@ trait Api {
 
   def runningErrorEnvironmentAndOutputData(lines: Int): (Seq[RunningEnvironmentData], Seq[RunningOutputData])
 
+  //INFO
+  def buildInfo(): BuildInfo
+
 }
