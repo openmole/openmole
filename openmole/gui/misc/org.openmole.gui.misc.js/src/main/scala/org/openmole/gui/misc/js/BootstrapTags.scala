@@ -150,6 +150,7 @@ object BootstrapTags {
   val glyph_download = "glyphicon-cloud-download"
   val glyph_download_alt = "glyphicon-download-alt"
   val glyph_settings = "glyphicon-cog"
+  val glyph_off = "glyphicon-off"
   val glyph_flash = "glyphicon-flash"
   val glyph_flag = "glyphicon-flag"
   val glyph_remove = "glyphicon-remove-sign"
