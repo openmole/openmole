@@ -147,15 +147,19 @@ object BootstrapTags {
   val glyph_folder_close = "glyphicon-folder-close"
   val glyph_home = "glyphicon-home"
   val glyph_upload = "glyphicon-cloud-upload"
-  val glyph_download = "glyphicon-download-alt"
+  val glyph_download = "glyphicon-cloud-download"
+  val glyph_download_alt = "glyphicon-download-alt"
   val glyph_settings = "glyphicon-cog"
   val glyph_flash = "glyphicon-flash"
   val glyph_flag = "glyphicon-flag"
   val glyph_remove = "glyphicon-remove-sign"
+  val glyph_road = "glyphicon-road"
+  val glyph_fire = "glyphicon-fire"
   val glyph_list = "glyphicon-list"
   val glyph_stats = "glyphicon-stats"
   val glyph_refresh = "glyphicon-refresh"
   val glyph_lock = "glyphicon-lock"
+  val glyph_archive = "glyphicon-compressed"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator, todo: () ⇒ Unit = () ⇒ {}): TypedTag[HTMLButtonElement] =

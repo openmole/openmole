@@ -394,8 +394,8 @@ overflow-y : auto;
 .executionElement{
     position: fixed;
     top :150;
-    right:50px;
-    width: 200px;
+    right: 80px;
+    width: 50px;
     z-index: 18;
 }
 
@@ -537,4 +537,8 @@ overflow-y : auto;
 .nav-pills>li>a{
 	font-size: 20px;
 	margin-top: -3px;
+}
+
+.mdRendering p{
+    text-align: left;
 }

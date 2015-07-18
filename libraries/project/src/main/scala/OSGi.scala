@@ -211,7 +211,7 @@ object OSGi extends Defaults {
   lazy val closureCompiler = OsgiProject("closure-compiler", exports = Seq("com.google.javascript.*")) settings(
     libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion)
 
-  lazy val mgoVersion = "1.79"
+  lazy val mgoVersion = "1.80"
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings(
     libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
@@ -275,7 +275,7 @@ object OSGi extends Defaults {
   lazy val config = OsgiProject("org.apache.commons.configuration", privatePackages = Seq("org.apache.commons.*")) settings
     (libraryDependencies += "commons-configuration" % "commons-configuration" % "1.10", version := "1.10")
 
-  lazy val mathVersion = "3.4.1"
+  lazy val mathVersion = "3.5"
   lazy val math = OsgiProject("org.apache.commons.math", exports = Seq("org.apache.commons.math3.*"), privatePackages = Seq("assets.*")) settings
     (libraryDependencies += "org.apache.commons" % "commons-math3" % mathVersion, version := mathVersion)
 
@@ -286,7 +286,7 @@ object OSGi extends Defaults {
     (libraryDependencies += "log4j" % "log4j" % "1.2.17", version := "1.2.17")
 
   lazy val logging = OsgiProject("org.apache.commons.logging") settings
-    (libraryDependencies += "commons-logging" % "commons-logging" % "1.1.1", version := "1.1.1")
+    (libraryDependencies += "commons-logging" % "commons-logging" % "1.2", version := "1.2")
 
   lazy val sshd = OsgiProject("org.apache.sshd", exports = Seq("org.apache.sshd.*", "org.apache.mina.*"), dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
     (libraryDependencies += "org.apache.sshd" % "sshd-core" % "0.14.0", version := "0.14.0")

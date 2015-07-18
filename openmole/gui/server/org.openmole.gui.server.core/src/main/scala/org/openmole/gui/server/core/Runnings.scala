@@ -1,5 +1,6 @@
 package org.openmole.gui.server.core
 
+import org.openmole.core.batch.environment.BatchEnvironment.BeginDownload
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.ext.data._
@@ -27,14 +28,16 @@ import scala.concurrent.stm._
 
 object Runnings {
 
-  case class RunningEnvironment(environment: Environment, environmentError: List[EnvironmentError])
+  case class RunningEnvironment(environment: Environment, environmentError: List[EnvironmentError], networkActivity: NetworkActivity)
+  def emptyRunningEnvironment(environment: Environment) = RunningEnvironment(environment, List(), NetworkActivity())
 
   lazy private val instance = new Runnings
 
-  def append(id: ExecutionId, envId: EnvironmentId, environment: Environment, exception: ExceptionRaised) = atomic { implicit ctx ⇒
-    val re = instance.runningEnvironments.getOrElseUpdate(envId, RunningEnvironment(environment, List()))
-    instance.runningEnvironments(envId) = re.copy(environmentError = EnvironmentError(envId, exception.exception.getMessage,
-      ErrorBuilder(exception.exception)) :: re.environmentError.takeRight(50))
+  def append(envId: EnvironmentId,
+             environment: Environment)(
+               todo: (RunningEnvironment) ⇒ RunningEnvironment) = atomic { implicit ctx ⇒
+    val re = instance.runningEnvironments.getOrElse(envId, emptyRunningEnvironment(environment))
+    instance.runningEnvironments(envId) = todo(re)
   }
 
   def addExecutionId(id: ExecutionId) = atomic { implicit ctx ⇒
@@ -47,23 +50,22 @@ object Runnings {
     envIds.foreach {
       case (envId, env) ⇒
         instance.ids(id) = instance.ids(id) :+ envId
-        instance.runningEnvironments(envId) = RunningEnvironment(env, List())
+        instance.runningEnvironments(envId) = RunningEnvironment(env, List(), NetworkActivity())
     }
   }
 
   def runningEnvironments(id: ExecutionId): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
-    runningEnvironments(ids(id))
+    runningEnvironments(ids.getOrElse(id, Seq()))
   }
 
   def runningEnvironments(envIds: Seq[EnvironmentId]): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
-    envIds.map { id ⇒
-      instance.runningEnvironments.getOrElse(id, Seq())
-      id -> instance.runningEnvironments(id)
+    envIds.flatMap {
+      id ⇒ instance.runningEnvironments.get(id).map(id -> _)
     }
   }
 
-  def outputsDatas(id: ExecutionId) = atomic { implicit ctx ⇒
-    RunningOutputData(id, instance.outputs(id).toString)
+  def outputsDatas(id: ExecutionId, lines: Int) = atomic { implicit ctx ⇒
+    RunningOutputData(id, instance.outputs(id).toString.lines.toSeq.takeRight(lines).mkString("\n"))
   }
 
   def ids = atomic { implicit ctx ⇒

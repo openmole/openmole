@@ -58,7 +58,7 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
   val factories = ClientService.authenticationFactories
 
   val authenticationSelector: Select[AuthenticationFactoryUI] = Select("authentications",
-    factories,
+    factories.map { f ⇒ (f, emptyCK) },
     factories.headOption,
     btn_primary, onclickExtra = () ⇒ {
       authenticationSelector.content().map { f ⇒ setting() = Some(f.panelUI) }
@@ -159,9 +159,16 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
     )
   )
 
-  def removeAuthentication(d: AuthenticationData) = {
-    OMPost[Api].removeAuthentication(d).call().foreach { d ⇒
-      getAuthentications
+  def removeAuthentication(ad: AuthenticationData) = {
+    OMPost[Api].removeAuthentication(ad).call().foreach { r ⇒
+      ad match {
+        case pk: PrivateKey ⇒ pk.privateKey.map { k ⇒
+          OMPost[Api].deleteAuthenticationKey(k).call().foreach { df ⇒
+            getAuthentications
+          }
+        }
+        case _ ⇒ getAuthentications
+      }
     }
   }
 

@@ -33,7 +33,7 @@ import org.openmole.core.workflow.tools._
 import org.openmole.tool.logger.Logger
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
-import org.openmole.core.workflow.execution.Environment
+import org.openmole.core.workflow.execution.{ ExecutionState, JobList, Environment }
 
 object MoleExecution extends Logger {
 
@@ -71,6 +71,8 @@ object MoleExecution extends Logger {
       defaultEnvironment)(implicits, executionContext)
 
 }
+
+case class JobStatuses(ready: Long, running: Long, completed: Long)
 
 class MoleExecution(
     val mole: Mole,
@@ -205,9 +207,37 @@ class MoleExecution(
     this
   }
 
-  def ready: Long = moleJobs.count(_.state == READY)
-  def running: Long = moleJobs.count(_.state == RUNNING)
-  def completed: Long = _completed.single()
+  def jobStatuses: JobStatuses = {
+    val executionJobsGroup = {
+      val executionJobs =
+        environments.values.toSeq.collect { case e: JobList ⇒ e }.flatMap(_.jobs)
+
+      executionJobs.flatMap {
+        ej ⇒ ej.moleJobs.map { _ -> ej }
+      }.groupBy(_._1).mapValues(_.map { _._2 })
+    }
+
+    def isRunningOnEnvironment(moleJob: MoleJob) =
+      executionJobsGroup.get(moleJob).map { _.exists(_.state == ExecutionState.RUNNING) }.getOrElse(false)
+
+    var ready = 0L
+    var running = 0L
+
+    for {
+      moleJob ← moleJobs
+    } {
+      if (isRunningOnEnvironment(moleJob)) running += 1
+      else
+        moleJob.state match {
+          case READY   ⇒ ready += 1
+          case RUNNING ⇒ running += 1
+          case _       ⇒
+        }
+    }
+
+    val completed = _completed.single()
+    JobStatuses(ready, running, completed)
+  }
 
   private[mole] def jobFailedOrCanceled(moleJob: MoleJob, capsule: Capsule) = jobOutputTransitionsPerformed(moleJob, capsule)
   private[mole] def jobFinished(moleJob: MoleJob, capsule: Capsule) = {

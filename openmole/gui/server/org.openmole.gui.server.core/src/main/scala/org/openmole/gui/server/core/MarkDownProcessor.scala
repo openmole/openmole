@@ -1,7 +1,10 @@
-package org.openmole.gui.misc.utils
+package org.openmole.gui.server.core
+
+import com.github.rjeschke._
+import com.github.rjeschke.txtmark._
 
 /*
- * Copyright (C) 22/04/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 16/07/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,10 +20,19 @@ package org.openmole.gui.misc.utils
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import rx._
+object MarkDownProcessor {
 
-object Utils {
-  implicit def tToVarT[T](t: T): Var[T] = Var(t)
-  def getUUID: String = java.util.UUID.randomUUID.toString
-  def toURI(path: Seq[String]): String = new java.net.URI(null, null, path.mkString("/"), null).toString
+  class MyDecorator extends DefaultDecorator {
+    override def openLink(out: java.lang.StringBuilder) = out.append("<a target=\"_blank\"")
+  }
+
+  def apply(mdContent: String): String = {
+    val conf = Configuration.builder
+    conf.setDecorator(new MyDecorator)
+    txtmark.Processor.process(
+      mdContent,
+      conf.build
+    )
+  }
+
 }

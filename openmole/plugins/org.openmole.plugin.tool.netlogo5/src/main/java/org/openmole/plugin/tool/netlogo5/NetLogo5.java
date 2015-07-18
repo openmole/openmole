@@ -70,4 +70,9 @@ public class NetLogo5 implements NetLogo {
         }
         return reporters.toArray(new String[0]);
     }
+
+    @Override
+    public ClassLoader getNetLogoClassLoader() {
+        return HeadlessWorkspace.class.getClassLoader();
+    }
 }

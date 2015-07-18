@@ -40,13 +40,21 @@ trait Api {
 
   def addFile(treeNode: TreeNodeData, fileName: String): Boolean
 
-  def deleteFile(treeNode: TreeNodeData): Unit
+  def extractTGZ(treeNodeData: TreeNodeData): Unit
 
-  //def diff(subPath: SafePath, fullPath: SafePath): SafePath
+  def deleteAuthenticationKey(keyName: String): Unit
+
+  def deleteFile(safePath: SafePath): Unit
+
+  def exists(safePath: SafePath): Boolean
 
   def fileSize(treeNodeData: TreeNodeData): Long
 
   def listFiles(path: TreeNodeData): Seq[TreeNodeData]
+
+  def mdToHtml(safePath: SafePath): String
+
+  def move(from: SafePath, to: SafePath): Unit
 
   def uuid(): String = java.util.UUID.randomUUID.toString
 
@@ -58,14 +66,14 @@ trait Api {
 
   def saveFile(path: SafePath, fileContent: String): Unit
 
+  def saveFiles(fileContents: Seq[AlterableFileContent]): Unit
+
   def workspaceProjectNode(): SafePath
 
   def authenticationKeysPath(): SafePath
 
   //EXECUTIONS
-  def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)]
-
-  def allStaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
+  def allStates(): Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)]
 
   def cancelExecution(id: ExecutionId): Unit
 
@@ -73,6 +81,9 @@ trait Api {
 
   def runScript(scriptData: ScriptData): Unit
 
-  def runningErrorEnvironmentAndOutputData(): (Seq[RunningEnvironmentData], Seq[RunningOutputData])
+  def runningErrorEnvironmentAndOutputData(lines: Int): (Seq[RunningEnvironmentData], Seq[RunningOutputData])
+
+  //INFO
+  def buildInfo(): BuildInfo
 
 }

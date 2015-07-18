@@ -24,38 +24,40 @@ import org.openmole.gui.misc.js.JsRxTags._
 
 object Select {
   def apply[T <: Displayable with Identifiable](autoID: String,
-                                                contents: Seq[T],
+                                                contents: Seq[(T, ClassKeyAggregator)],
                                                 default: Option[T],
                                                 key: ClassKeyAggregator = BootstrapTags.emptyCK,
-                                                glyphicon: ClassKeyAggregator = BootstrapTags.emptyCK,
-                                                onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, glyphicon, onclickExtra)
+                                                onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, onclickExtra)
 }
 
 class Select[T <: Displayable with Identifiable](autoID: String,
-                                                 val contents: Var[Seq[T]],
+                                                 val contents: Var[Seq[(T, ClassKeyAggregator)]],
                                                  default: Option[T] = None,
                                                  key: ClassKeyAggregator = BootstrapTags.emptyCK,
-                                                 glyphicon: ClassKeyAggregator = BootstrapTags.emptyCK,
                                                  onclickExtra: () ⇒ Unit = () ⇒ {}) {
 
   val content: Var[Option[T]] = Var(contents().size match {
     case 0 ⇒ None
     case _ ⇒ default match {
-      case None ⇒ Some(contents()(0))
+      case None ⇒ Some(contents()(0)._1)
       case _ ⇒
         val ind = contents().indexOf(default.get)
-        if (ind != -1) Some(contents()(ind)) else Some(contents()(0))
+        if (ind != -1) Some(contents()(ind)._1) else Some(contents()(0)._1)
     }
   })
+
+  val glyphMap = contents().toMap
 
   val selector = BootstrapTags.buttonGroup()(
     span(
       `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", cursor := "pointer")(
-        bs.glyph(glyphicon),
+        Rx {
+          content().map { c ⇒ bs.glyph(glyphMap(c)) }
+        },
         Rx {
           content().map {
             _.name
-          }.getOrElse(contents()(0).name) + " "
+          }.getOrElse(contents()(0)._1.name) + " "
         },
         span(`class` := "caret")
       ).render,
@@ -63,9 +65,9 @@ class Select[T <: Displayable with Identifiable](autoID: String,
       Rx {
         for (c ← contents().zipWithIndex) yield {
           scalatags.JsDom.tags.li(cursor := "pointer", onclick := { () ⇒
-            content() = Some(contents()(c._2))
+            content() = Some(contents()(c._2)._1)
             onclickExtra()
-          })(c._1.name)
+          })(c._1._1.name)
         }
       }
     )

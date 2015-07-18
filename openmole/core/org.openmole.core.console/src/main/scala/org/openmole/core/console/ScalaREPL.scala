@@ -54,15 +54,19 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
   settings.Yreplsync.value = true
   settings.verbose.value = false
 
-  private def messageToException(e: Throwable, messages: List[ErrorMessage]): Throwable = {
+  private def messageToException(e: Throwable, messages: List[ErrorMessage], code: String): Throwable = {
     def readableErrorMessages(error: ErrorMessage) =
-      s"""Error while compiling:
+      s"""Raised error:
             |${error.error}
             |on line ${error.line}""".stripMargin
+
     errorMessage match {
       case Nil ⇒ e
       case l ⇒
-        def messages = l.map(readableErrorMessages).mkString("\n")
+        def messages =
+          s"""Compiling code:
+             |${code}
+             |""".stripMargin + l.reverse.map(readableErrorMessages).mkString("\n")
         new UserBadDataError(messages)
     }
   }
@@ -72,7 +76,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
     try intp.eval(code)
     catch {
       case e: Throwable ⇒
-        throw messageToException(e, errorMessage)
+        throw messageToException(e, errorMessage, code)
     }
   }
 
@@ -81,7 +85,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
     try intp.compile(code)
     catch {
       case e: Throwable ⇒
-        throw messageToException(e, errorMessage)
+        throw messageToException(e, errorMessage, code)
     }
   }
 

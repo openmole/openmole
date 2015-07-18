@@ -30,8 +30,6 @@ import org.openmole.core.workflow.puzzle._
 
 class EndExplorationTransitionSpec extends FlatSpec with Matchers {
 
-  implicit val plugins = PluginSet.empty
-
   "EndExploration transition" should "kill the submole when triggered" in {
     @volatile var endCapsExecuted = 0
 

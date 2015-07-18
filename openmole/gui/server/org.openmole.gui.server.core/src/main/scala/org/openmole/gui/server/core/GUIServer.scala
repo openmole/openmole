@@ -97,7 +97,10 @@ class GUIServer(port: Int, webapp: File, authentication: Boolean) {
 
   server.setHandler(context)
 
-  def start() = server.start
+  def start() = {
+    server.start
+  }
+
   def join(): Int = {
     semaphore.acquire()
     semaphore.release()

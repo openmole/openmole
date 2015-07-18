@@ -17,30 +17,32 @@
 
 package org.openmole.tool.collection
 
-import java.util.{ Collections, LinkedList }
+import scala.concurrent.stm._
 
-import scala.collection.JavaConversions._
+class OrderedSlidingList[T](size: Int)(implicit o: Ordering[T]) {
 
-class OrderedSlidingList[T](size: Int)(implicit o: Ordering[T]) extends Iterable[T] {
-  val averages = Collections.synchronizedList(new LinkedList[T])
+  private val _values = Ref(List[T]())
 
-  def iterator: Iterator[T] = averages.iterator
+  def values = _values.single()
 
-  def +=(sample: T) = averages.synchronized {
+  def +=(e: T) = atomic { implicit ctx ⇒
     import o._
-    if (averages.size >= size) averages.remove(0)
+    if (_values().size >= size) _values() = _values().drop(1)
 
-    val it = averages.listIterator(averages.size)
-    var inserted = false
-
-    while (it.hasPrevious && !inserted) {
-      val elt = it.previous
-      if (elt <= sample) {
-        it.add(sample)
-        inserted = true
+    def insertValue(reversedHead: List[T], tail: List[T]): List[T] = {
+      tail match {
+        case Nil                    ⇒ (e :: reversedHead).reverse
+        case l @ (h :: _) if h >= e ⇒ reversedHead.reverse ::: (e :: tail)
+        case h :: t                 ⇒ insertValue(h :: reversedHead, t)
       }
     }
 
-    if (!inserted) it.add(sample)
+    _values() = insertValue(List.empty, _values())
+  }
+
+  def read() = atomic { implicit ctx ⇒
+    val res = _values()
+    _values() = List.empty
+    res
   }
 }

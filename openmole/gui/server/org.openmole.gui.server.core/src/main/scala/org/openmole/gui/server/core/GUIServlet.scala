@@ -102,8 +102,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   post("/uploadfiles") {
     for (file ← fileParams) yield {
-
-      val destination = new File(Utils.webUIProjectFile, file._1)
+      val path = new java.net.URI(file._1).getPath
+      val destination = new File(Utils.webUIProjectFile, path)
       val stream = file._2.getInputStream
       try {
         stream.copy(destination)
@@ -137,8 +137,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   get("/downloadFile") {
     case class ToDownload(file: File, name: String)
 
-    val path = new java.net.URI(params("path")).toString
-
+    val path = new java.net.URI(null, null, params("path"), null).getPath
     val dl = {
       val f = new File(Utils.webUIProjectFile, path)
       if (f.isDirectory) {

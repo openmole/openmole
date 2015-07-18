@@ -2,7 +2,7 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.client.core.files.TreeNodeTabs.EditableNodeTab
-import org.openmole.gui.ext.data.{ SafePath, ScriptData }
+import org.openmole.gui.ext.data._
 import org.openmole.gui.shared._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
@@ -65,6 +65,8 @@ object TreeNodeTabs {
 
     val overlayTabElement = tags.div(`class` := "tabOverlay")
 
+    def fileContent: FileContent
+
     def save(onsaved: () ⇒ Unit = () ⇒ {}): Unit
 
   }
@@ -73,9 +75,21 @@ object TreeNodeTabs {
 
     val editorElement = editor.view
 
+    def fileContent = AlterableFileContent(serverFilePath(), editor.code)
+
     def save(onsaved: () ⇒ Unit) = OMPost[Api].saveFile(serverFilePath(), editor.code).call().foreach { d ⇒
       onsaved()
     }
+  }
+
+  class HTMLTab(val tabName: Var[String], val serverFilePath: Var[SafePath], htmlContent: String) extends TreeNodeTab {
+    val editorElement = tags.div(`class` := "mdRendering",
+      RawFrag(htmlContent)
+    )
+
+    def fileContent = ReadOnlyFileContent()
+
+    def save(onsaved: () ⇒ Unit) = onsaved()
   }
 
   def apply(tabs: TreeNodeTab*) = new TreeNodeTabs(tabs.toSeq)
@@ -86,46 +100,18 @@ trait TabControl {
 }
 
 trait OMSTabControl <: TabControl {
-  val settingsVisible = Var(false)
-
-  val settingsButton = glyphSpan(glyph_settings, () ⇒ settingsVisible() = !settingsVisible())(`class` := "executionSettings")
-
-  val inputDirectoryInput = bs.input("")(
-    placeholder := "Input directory",
-    autofocus
-  ).render
-
-  val outputDirectoryInput = bs.input("")(
-    placeholder := "Output directory",
-    autofocus
-  ).render
 
   val runButton = bs.button("Play", btn_primary)(onclick := { () ⇒
     onrun()
   })
 
-  lazy val controlElement = {
-    inputDirectoryInput.value = relativePath.path + "/input"
-    outputDirectoryInput.value = relativePath.path + "/output"
-    tags.div(
-      runButton,
-      settingsButton,
-      tags.div(
-        inputDirectoryInput.render,
-        outputDirectoryInput.render
-      )(`class` := Rx {
-          if (settingsVisible()) "executionSettingsOn" else "displayOff"
-        })
-    )(`class` := "executionElement")
-  }
+  lazy val controlElement = tags.div(`class` := "executionElement")(
+    runButton
+  )
 
   def onrun: () ⇒ Unit
 
   def relativePath: SafePath
-
-  def inputDirectory = inputDirectoryInput.value
-
-  def outputDirectory = outputDirectoryInput.value
 }
 
 import org.openmole.gui.client.core.files.TreeNodeTabs._
@@ -174,6 +160,22 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     tab.save()
   }
 
+  def alterables: Seq[AlterableFileContent] = tabs().map { _.fileContent }.collect {
+    case a: AlterableFileContent ⇒ a
+  }
+
+  def saveAllTabs(onsave: () ⇒ Unit) = {
+    OMPost[Api].saveFiles(alterables).call().foreach { s ⇒
+      onsave()
+    }
+  }
+
+  def checkTabs = tabs().foreach { t: TreeNodeTab ⇒
+    OMPost[Api].exists(t.serverFilePath()).call().foreach { e ⇒
+      if (!e) removeTab(t)
+    }
+  }
+
   def rename(tn: TreeNode, newNode: TreeNode) = {
     find(tn).map { tab ⇒
       tab.tabName() = newNode.name()
@@ -201,7 +203,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                   aria.controls := t.id,
                   role := "tab",
                   data("toggle") := "tab", onclick := { () ⇒ setActive(t) })(
-                    tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ --(t) }
+                    tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ println("clicked close"); --(t) }
                     )("x"),
                     t.tabName()
                   )

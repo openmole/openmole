@@ -1,25 +1,29 @@
 package org.openmole.gui.server.core
 
+import org.openmole.core.batch.environment.BatchEnvironment.{ EndUpload, BeginUpload, EndDownload, BeginDownload }
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.misc.utils.Utils._
+import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.gui.server.core.Utils._
 import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
-import org.openmole.gui.ext.data.{ ScriptData, TreeNodeData }
+import org.openmole.gui.ext.data._
 import java.io.File
 import java.nio.file._
 import org.openmole.console._
 import scala.util.{ Failure, Success, Try }
-import org.openmole.gui.ext.data._
 import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.ExecutionContext
-import org.openmole.core.workflow.puzzle.{ PuzzleBuilder, Puzzle }
+import org.openmole.core.workflow.puzzle.PuzzleBuilder
 import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
+import org.openmole.tool.file._
+import org.openmole.tool.tar._
+import com.github.rjeschke._
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -73,20 +77,42 @@ object ApiImpl extends Api {
 
   def addFile(treeNodeData: TreeNodeData, fileName: String): Boolean = new File(treeNodeData.safePath, fileName).createNewFile
 
-  def deleteFile(treeNodeData: TreeNodeData): Unit = safePathToFile(treeNodeData.safePath).recursiveDelete
+  def deleteAuthenticationKey(keyName: String): Unit = authenticationFile(keyName).delete
 
-  //def diff(subPath: SafePath, fullPath: SafePath): SafePath =
-  // SafePath.sp(safePathToFile(fullPath).getCanonicalPath diff safePathToFile(subPath.parent).getCanonicalPath)
+  def deleteFile(safePath: SafePath): Unit = safePathToFile(safePath).recursiveDelete
+
+  def extractTGZ(treeNodeData: TreeNodeData): Unit = treeNodeData.safePath.extension match {
+    case FileExtension.TGZ ⇒
+      val archiveFile = safePathToFile(treeNodeData.safePath)
+      val parentFile = archiveFile.getParentFile
+      archiveFile.extractUncompress(parentFile)
+    case _ ⇒
+  }
+
+  def exists(safePath: SafePath): Boolean = safePathToFile(safePath).exists
 
   def fileSize(treeNodeData: TreeNodeData): Long = safePathToFile(treeNodeData.safePath).length
 
   def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.safePath)
 
+  def move(from: SafePath, to: SafePath): Unit = {
+    val fromFile = safePathToFile(from)
+    val toFile = safePathToFile(to)
+    if (fromFile.exists && toFile.exists) {
+      fromFile.move(new File(toFile, from.path.last))
+    }
+  }
+
+  def mdToHtml(safePath: SafePath): String = safePath.extension match {
+    case FileExtension.MD ⇒ MarkDownProcessor(safePathToFile(safePath).content)
+    case _                ⇒ ""
+  }
+
   def renameFile(treeNodeData: TreeNodeData, name: String): TreeNodeData =
     renameFileFromPath(safePathToFile(treeNodeData.safePath), name)
 
   def renameKey(keyName: String, newName: String): Unit =
-    Files.move(new File(Utils.authenticationKeysFile, keyName), new File(Utils.authenticationKeysFile, newName))
+    Files.move(authenticationFile(keyName), authenticationFile(newName), StandardCopyOption.REPLACE_EXISTING)
 
   def renameFileFromPath(filePath: SafePath, newName: String): TreeNodeData = {
     val targetFile = new File(filePath.parent, newName)
@@ -98,71 +124,118 @@ object ApiImpl extends Api {
 
   def saveFile(path: SafePath, fileContent: String): Unit = safePathToFile(path).content = fileContent
 
+  def saveFiles(fileContents: Seq[AlterableFileContent]): Unit = fileContents.foreach { fc ⇒
+    saveFile(fc.path, fc.content)
+  }
+
   def workspaceProjectNode(): SafePath = Utils.workspaceProjectFile
 
   def authenticationKeysPath(): SafePath = Utils.authenticationKeysFile
 
   // EXECUTIONS
 
-  def allExecutionStates(): Seq[(ExecutionId, ExecutionInfo)] = execution.allStates
-
-  def allStaticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = execution.allStaticInfos
-
   def cancelExecution(id: ExecutionId): Unit = execution.cancel(id)
 
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
   def runScript(scriptData: ScriptData): Unit = {
-    val id = getUUID
-    val projectsPath = Utils.workspaceProjectFile
-    val console = new Console
-    // FIXME set workdirectory
-    val repl = console.newREPL(ConsoleVariables()())
 
-    val execId = ExecutionId(id)
+    val execId = ExecutionId(getUUID)
+    val script = safePathToFile(scriptData.scriptPath)
+    val content = script.content
 
-    def error(t: Throwable): Unit = execution.add(execId, Failed(ErrorBuilder(t)))
-    def message(message: String): Unit = execution.add(execId, Failed(Error(message)))
+    execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
 
-    Try(repl.eval(scriptData.script)) match {
-      case Failure(e) ⇒ error(e)
-      case Success(o) ⇒
-        o match {
-          case toPuzzle: PuzzleBuilder ⇒
-            val puzzle = toPuzzle.buildPuzzle
-            val outputStream = new StringPrintStream()
+    def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t)))
+    def message(message: String): Unit = execution.addError(execId, Failed(Error(message)))
 
-            puzzle.environments.values.foreach { env ⇒
-              val envId = EnvironmentId(getUUID)
-              Runnings.add(execId, puzzle.environments.values.map { env ⇒ (envId, env) }.toSeq, outputStream)
-              env.listen {
-                case (env, ex: ExceptionRaised) ⇒ Runnings.append(execId, envId, env, ex)
-              }
-            }
-            Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
-              case Success(ex) ⇒
-                Try(ex.start) match {
-                  case Failure(e)  ⇒ error(e)
-                  case Success(ex) ⇒ execution.add(execId, StaticExecutionInfo(scriptData.scriptName, scriptData.script, ex.startTime.get), DynamicExecutionInfo(ex, outputStream))
+    val project = new Project(script.getParentFileSafe)
+    project.compile(script, Seq.empty) match {
+      case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
+      case CompilationError(e)       ⇒ error(e)
+      case Compiled(compiled) ⇒
+        Try(compiled.eval()) match {
+          case Failure(e) ⇒ error(e)
+          case Success(o) ⇒
+            o match {
+              case toPuzzle: PuzzleBuilder ⇒
+                val puzzle = toPuzzle.buildPuzzle
+                val outputStream = new StringPrintStream()
+
+                val envIds = puzzle.environments.values.toSeq.map { env ⇒ EnvironmentId(getUUID) -> env }
+                Runnings.add(execId, envIds, outputStream)
+
+                envIds.foreach {
+                  case (envId, env) ⇒
+                    env.listen {
+                      case (env, ex: ExceptionRaised) ⇒
+                        Runnings.append(envId, env) {
+                          re ⇒
+                            re.copy(environmentError = EnvironmentError(envId, ex.exception.getMessage,
+                              ErrorBuilder(ex.exception)) :: re.environmentError.takeRight(50))
+                        }
+                      case (env, bdl: BeginDownload) ⇒ Runnings.append(envId, env) {
+                        re ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1))
+                      }
+                      case (env, edl: EndDownload) ⇒ Runnings.append(envId, env) {
+                        re ⇒
+                          val size = re.networkActivity.downloadedSize + FileDecorator(edl.file).size
+                          re.copy(networkActivity = re.networkActivity.copy(
+                            downloadingFiles = re.networkActivity.downloadingFiles - 1,
+                            downloadedSize = size,
+                            readableDownloadedSize = readableByteCount(size)))
+                      }
+                      case (env, bul: BeginUpload) ⇒ Runnings.append(envId, env) {
+                        re ⇒ re.copy(networkActivity = re.networkActivity.copy(uploadingFiles = re.networkActivity.uploadingFiles + 1))
+                      }
+                      case (env, eul: EndUpload) ⇒ Runnings.append(envId, env) {
+                        (re: RunningEnvironment) ⇒
+                          {
+                            val size = re.networkActivity.uploadedSize + FileDecorator(eul.file).size
+                            re.copy(networkActivity = re.networkActivity.copy(
+                              uploadedSize = size,
+                              readableUploadedSize = readableByteCount(size),
+                              uploadingFiles = re.networkActivity.uploadingFiles - 1))
+                          }
+                      }
+                    }
                 }
-              case Failure(e) ⇒ error(e)
+                Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
+                  case Success(ex) ⇒
+                    Try(ex.start) match {
+                      case Failure(e)  ⇒ error(e)
+                      case Success(ex) ⇒ execution.addDynamicInfo(execId, DynamicExecutionInfo(ex, outputStream))
+                    }
+                  case Failure(e) ⇒ error(e)
+                }
+              case _ ⇒ message("A puzzle have to be provided, the workflow can not be launched")
             }
-          case _ ⇒ message("A puzzle have to be provided, the workflow can not be launched")
         }
     }
   }
 
-  def runningErrorEnvironmentAndOutputData(): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
+  def allStates() = execution.allStates
+
+  def runningErrorEnvironmentAndOutputData(lines: Int): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
     val envIds = Runnings.ids
     (
       envIds.map {
         case (id, envIds) ⇒
-          RunningEnvironmentData(id, Runnings.runningEnvironments(id).flatMap { _._2.environmentError })
+          RunningEnvironmentData(
+            id,
+            Runnings.runningEnvironments(id).flatMap {
+              _._2.environmentError
+            }
+          )
       }.toSeq,
       envIds.keys.toSeq.map {
-        Runnings.outputsDatas(_)
+        Runnings.outputsDatas(_, lines)
       }
     )
   }
 
+  def buildInfo() = {
+    import org.openmole.core._
+    BuildInfo(buildinfo.version, buildinfo.name, buildinfo.generationDate)
+  }
 }

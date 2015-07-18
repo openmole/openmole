@@ -43,64 +43,33 @@ import concurrent.duration._
 class ExecutionPanel extends ModalPanel {
   val modalID = "executionsPanelID"
 
-  val staticExecutionInfos: Var[Seq[(ExecutionId, StaticExecutionInfo)]] = Var(Seq())
-  val executionInfos: Var[Seq[(ExecutionId, ExecutionInfo)]] = Var(Seq())
-  val outputsInfos: Var[Seq[RunningOutputData]] = Var(Seq())
-  val envErrorsInfos: Var[Seq[RunningEnvironmentData]] = Var(Seq())
+  case class PanelInfo(
+    executionInfos: Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)],
+    outputsInfos: Seq[RunningOutputData],
+    envErrorsInfos: Seq[RunningEnvironmentData])
+
+  val panelInfo = Var(PanelInfo(Seq(), Seq(), Seq()))
+
   val intervalHandler: Var[Option[SetIntervalHandle]] = Var(None)
-  val envAndOutIntervalHandler: Var[Option[SetIntervalHandle]] = Var(None)
   val expander = new Expander
 
-  def allExecutionStates = {
-    OMPost[Api].allExecutionStates.call().foreach { c ⇒
-      executionInfos() = c
-    }
-
-    if (executionInfos().map {
-      _._1
-    }.toSet != staticExecutionInfos().map {
-      _._1
-    }.toSet) {
-      OMPost[Api].allStaticInfos.call().foreach { i ⇒
-        staticExecutionInfos() = i
-      }
-    }
+  def updatePanelInfo = {
+    for {
+      executionInfos ← OMPost[Api].allStates.call()
+      //FIXME select the number of lines from the panel
+      (envErrorsInfos, outputsInfos) ← OMPost[Api].runningErrorEnvironmentAndOutputData(lines = 500).call()
+    } panelInfo() = PanelInfo(executionInfos, outputsInfos, envErrorsInfos)
   }
-
-  def allEnvStatesAndOutputs = {
-    OMPost[Api].runningErrorEnvironmentAndOutputData.call().foreach { r ⇒
-      envErrorsInfos() = r._1
-      outputsInfos() = r._2
-    }
-  }
-
-  def atLeastOneRunning = executionInfos().filter {
-    _._2 match {
-      case r: Running ⇒ true
-      case _          ⇒ false
-    }
-  }.isEmpty
 
   def onOpen = () ⇒ {
-    allExecutionStates
-    allEnvStatesAndOutputs
-    intervalHandler() = Some(setInterval(1000) {
-      allExecutionStates
-      if (atLeastOneRunning) onClose()
-    })
-
-    envAndOutIntervalHandler() = Some(setInterval(7000) {
-      allEnvStatesAndOutputs
-      if (atLeastOneRunning) onClose()
+    updatePanelInfo
+    intervalHandler() = Some(setInterval(10000) {
+      updatePanelInfo
     })
   }
 
   def onClose = () ⇒ {
-    allEnvStatesAndOutputs
     intervalHandler().map {
-      clearInterval
-    }
-    envAndOutIntervalHandler().map {
       clearInterval
     }
   }
@@ -119,11 +88,11 @@ class ExecutionPanel extends ModalPanel {
       thead,
       Rx {
         tbody({
-          for ((id, executionInfo) ← executionInfos()) yield {
-            val staticInfo = staticExecutionInfos().filter {
-              _._1 == id
-            }.headOption.getOrElse((id, StaticExecutionInfo()))._2
-            val startDate = s"${new Date(staticInfo.startDate).toLocaleDateString} : ${new Date(staticInfo.startDate).toLocaleTimeString}"
+
+          for {
+            (id, staticInfo, executionInfo) ← panelInfo().executionInfos
+          } yield {
+            val startDate = s"${new Date(staticInfo.startDate).toLocaleDateString}, ${new Date(staticInfo.startDate).toLocaleTimeString}"
 
             val duration: Duration = (executionInfo.duration milliseconds)
             val h = (duration).toHours
@@ -136,8 +105,13 @@ class ExecutionPanel extends ModalPanel {
 
             val details = executionInfo match {
               case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error))
-              case f: Finished ⇒ ExecutionDetails("100", 0, envStates = f.environmentStates)
-              case r: Running  ⇒ ExecutionDetails((100 * completed.toDouble / (completed + r.ready)).formatted("%.0f"), r.running, envStates = r.environmentStates)
+              case f: Finished ⇒ ExecutionDetails("100", f.completed, envStates = f.environmentStates)
+              case r: Running ⇒
+                def runningRatio = {
+                  val ratio = (100 * r.completed.toDouble / (r.completed + r.running + r.ready))
+                  if (ratio.isNaN) 0.0 else ratio
+                }
+                ExecutionDetails(runningRatio.formatted("%.0f"), r.running, envStates = r.environmentStates)
               case c: Canceled ⇒ ExecutionDetails("0", 0)
               case r: Ready    ⇒ ExecutionDetails("0", 0)
             }
@@ -148,7 +122,7 @@ class ExecutionPanel extends ModalPanel {
             val outputStreamID: VisibleID = "outputStream"
             val envErrorID: VisibleID = "envError"
 
-            val scriptLink = expander.getLink(staticInfo.name, id.id, scriptID)
+            val scriptLink = expander.getLink(staticInfo.path.name, id.id, scriptID)
             val envLink = expander.getGlyph(glyph_stats, "Env", id.id, envID)
             val stateLink = executionInfo match {
               case f: Failed ⇒ expander.getLink(executionInfo.state, id.id, errorID)
@@ -168,10 +142,12 @@ class ExecutionPanel extends ModalPanel {
                       tbody(
                         Seq(bs.tr(row)(
                           bs.td(col_md_2)(e.taskName),
-                          bs.td(col_md_3)("Submitted: " + e.submitted),
-                          bs.td(col_md_2)(bs.glyph(bs.glyph_flash), " " + e.running),
+                          bs.td(col_md_2)(bs.glyph(bs.glyph_upload), s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}"),
+                          bs.td(col_md_2)(bs.glyph(bs.glyph_download), s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}"),
+                          bs.td(col_md_2)(bs.glyph(bs.glyph_road), " " + e.submitted),
+                          bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + e.running),
                           bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + e.done),
-                          bs.td(col_md_3)("Failed: " + e.failed)
+                          bs.td(col_md_1)(bs.glyph(bs.glyph_fire), " " + e.failed)
                         )
                         )
                       )
@@ -184,7 +160,7 @@ class ExecutionPanel extends ModalPanel {
               }.getOrElse("")))),
               outputStreamID -> {
 
-                val outputs = outputsInfos().filter {
+                val outputs = panelInfo().outputsInfos.filter {
                   _.id == id
                 }.map {
                   _.output
@@ -203,7 +179,7 @@ class ExecutionPanel extends ModalPanel {
               },
               envErrorID -> {
 
-                val outputs = envErrorsInfos().filter {
+                val outputs = panelInfo().envErrorsInfos.filter {
                   _.id == id
                 }.map {
                   _.errors.map {
@@ -236,10 +212,10 @@ class ExecutionPanel extends ModalPanel {
               bs.td(col_md_1)(visibleClass(id.id, envErrorID))(envErrorLink),
               bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink),
               bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
-                allExecutionStates
+                updatePanelInfo
               })(`class` := "cancelExecution")),
               bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].removeExecution(id).call().foreach { r ⇒
-                allExecutionStates
+                updatePanelInfo
               })(`class` := "removeExecution"))
             ), bs.tr(row)(
               expander.getVisible(id.id) match {
@@ -254,6 +230,10 @@ class ExecutionPanel extends ModalPanel {
       }
     ).render
   }
+
+  def displaySize(size: Long, readable: String) =
+    if (size == 0L) ""
+    else s"($readable)"
 
   def visibleClass(expandID: ExpandID, visibleID: VisibleID): Modifier = `class` := {
     if (expander.isVisible(expandID, visibleID)) "executionVisible" else ""

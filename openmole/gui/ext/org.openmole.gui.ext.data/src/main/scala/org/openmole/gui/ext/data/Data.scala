@@ -101,6 +101,7 @@ case class InAndOutput(inputPrototype: PrototypeData, outputPrototype: Prototype
 
 sealed trait FileExtension {
   def extension: String
+
   def displayable: Boolean
 }
 
@@ -110,16 +111,26 @@ case class DisplayableFile(extension: String, highlighter: String, displayable: 
 
 case class OpenMOLEScript(extension: String, highlighter: String, displayable: Boolean = true) extends FileExtension
 
+case class MDScript(extension: String, displayable: Boolean = true) extends FileExtension
+
 case class BinaryFile(extension: String, displayable: Boolean = false) extends FileExtension
 
 object FileExtension {
   val OMS = OpenMOLEScript("oms", "scala")
   val SCALA = DisplayableFile("scala", "scala")
   val NETLOGO = DisplayableFile("nlogo", "nlogo")
+  val MD = MDScript("md")
   val SH = DisplayableFile("sh", "sh")
   val NO_EXTENSION = DisplayableFile("text", "text")
+  val TGZ = BinaryFile("tgz")
   val BINARY = BinaryFile("")
 }
+
+sealed trait FileContent
+
+case class AlterableFileContent(path: SafePath, content: String) extends FileContent
+
+case class ReadOnlyFileContent() extends FileContent
 
 object SafePath {
   def sp(path: Seq[String], extension: FileExtension = FileExtension.NO_EXTENSION): SafePath =
@@ -134,14 +145,19 @@ import SafePath._
 
 //The path it relative to the project root directory
 case class SafePath(path: Seq[String], extension: FileExtension) {
-
   def /(safePath: SafePath) = sp(this.path ++ safePath.path, safePath.extension)
 
   def parent: SafePath = SafePath(path.dropRight(1), extension)
+
+  def name = path.last
 }
 
 sealed trait AuthenticationData extends Data {
   def synthetic: String
+}
+
+trait PrivateKey {
+  def privateKey: Option[String]
 }
 
 case class LoginPasswordAuthenticationData(login: String = "",
@@ -150,20 +166,22 @@ case class LoginPasswordAuthenticationData(login: String = "",
   def synthetic = s"$login@$target"
 }
 
-case class PrivateKeyAuthenticationData(privateKey: Option[SafePath] = None,
+case class PrivateKeyAuthenticationData(privateKey: Option[String] = None,
                                         login: String = "",
                                         cypheredPassword: String = "",
-                                        target: String = "") extends AuthenticationData {
+                                        target: String = "") extends AuthenticationData with PrivateKey {
   def synthetic = s"$login@$target"
 }
 
 case class EGIP12AuthenticationData(val cypheredPassword: String = "",
-                                    val certificatePath: Option[SafePath] = None) extends AuthenticationData {
+                                    val privateKey: Option[String] = None) extends AuthenticationData with PrivateKey {
   def synthetic = "egi.p12"
 }
 
 sealed trait UploadType
+
 case class UploadProject() extends UploadType
+
 case class UploadKey() extends UploadType
 
 @JSExport
@@ -175,12 +193,7 @@ case class TreeNodeData(
   readableSize: String)
 
 @JSExport
-case class ScriptData(
-  scriptName: String,
-  script: String,
-  inputDirectory: String,
-  outputDirectory: String,
-  output: String)
+case class ScriptData(scriptPath: SafePath)
 
 case class Error(stackTrace: String)
 
@@ -202,13 +215,20 @@ case class EnvironmentId(id: String = java.util.UUID.randomUUID.toString)
 
 case class EnvironmentError(id: EnvironmentId, errorMessage: String, stack: Error)
 
+case class NetworkActivity(downloadingFiles: Int = 0,
+                           downloadedSize: Long = 0L,
+                           readableDownloadedSize: String = "",
+                           uploadingFiles: Int = 0,
+                           uploadedSize: Long = 0L,
+                           readableUploadedSize: String = "")
+
 case class RunningEnvironmentData(id: ExecutionId, errors: Seq[EnvironmentError])
 
 case class RunningOutputData(id: ExecutionId, output: String)
 
-case class StaticExecutionInfo(name: String = "", script: String = "", startDate: Long = 0L)
+case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long = 0L)
 
-case class EnvironmentState(envId: EnvironmentId, taskName: String, running: Long, done: Long, submitted: Long, failed: Long)
+case class EnvironmentState(envId: EnvironmentId, taskName: String, running: Long, done: Long, submitted: Long, failed: Long, networkActivity: NetworkActivity)
 
 //case class Output(output: String)
 

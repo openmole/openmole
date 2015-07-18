@@ -2,7 +2,8 @@ package org.openmole.gui.client.core.files
 
 import java.io.File
 import TreeNodeTabs._
-import org.openmole.gui.client.core.{ PanelTriggerer, ExecutionPanel, OMPost }
+import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
+import org.openmole.gui.ext.data.FileExtension._
 import org.openmole.gui.ext.data.ScriptData
 import org.openmole.gui.shared.Api
 import org.openmole.gui.ext.data._
@@ -41,7 +42,7 @@ class FileDisplayer {
 
   def alreadyDisplayed(tn: TreeNode) = {
     tabs.tabs().find {
-      _.serverFilePath() == tn.safePath()
+      _.serverFilePath().path == tn.safePath().path
     }
   }
 
@@ -51,20 +52,23 @@ class FileDisplayer {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileType match {
         case oms: OpenMOLEScript ⇒
-          val ed = editor(fileType, content) // OMPost[Api].diff(tn.canonicalPath(), rootPath).call().foreach { rp ⇒
-
+          val ed = editor(fileType, content)
           tabs ++ new EditableNodeTab(tn.name, tn.safePath, ed) with OMSTabControl {
             val relativePath = SafePath.empty
 
             def onrun = () ⇒ {
               overlaying() = true
-              OMPost[Api].runScript(ScriptData(tn.name(), ed.code, inputDirectory, outputDirectory, "outstream")).call().foreach { execInfo ⇒
-                overlaying() = false
-                executionTriggerer.open
-              }
+              save(() ⇒
+                OMPost[Api].runScript(ScriptData(tn.safePath())).call().foreach { execInfo ⇒
+                  overlaying() = false
+                  executionTriggerer.open
+                }
+              )
             }
           }
-
+        case md: MDScript ⇒ OMPost[Api].mdToHtml(tn.safePath()).call.foreach { htmlString ⇒
+          tabs ++ new HTMLTab(tn.name, tn.safePath, htmlString)
+        }
         case disp: DisplayableFile ⇒ tabs ++ new EditableNodeTab(tn.name, tn.safePath, editor(fileType, content))
         case _                     ⇒ //FIXME for GUI workflows
       }

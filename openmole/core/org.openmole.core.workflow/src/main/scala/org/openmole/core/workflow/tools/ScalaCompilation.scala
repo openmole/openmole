@@ -38,11 +38,7 @@ trait ScalaCompilation {
   def compile(code: String) = Try {
     val interpreter = new ScalaREPL(plugins.flatMap(PluginManager.bundle) ++ Seq(PluginManager.bundleForClass(this.getClass)), libraries)
 
-    val evaluated =
-      try interpreter.eval(code)
-      catch {
-        case e: Throwable ⇒ throw new InternalProcessingError(e, s"Error compiling $code")
-      }
+    val evaluated = interpreter.eval(code)
 
     if (evaluated == null) throw new InternalProcessingError(
       s"""The return value of the script was null:

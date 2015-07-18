@@ -106,7 +106,7 @@ object Libraries extends Defaults {
   lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % scalaJSDomVersion
   lazy val scalajsJQuery = "org.openmole" %% "scalajs-jquery" % scalaJQueryVersion
 
-  lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "1.79"
+  lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "1.80"
 
   lazy val family = "org.openmole" %% "fr-iscpif-family" % "1.1"
 
@@ -156,13 +156,13 @@ object Libraries extends Defaults {
 
   lazy val apacheConfig = "org.openmole" %% "org-apache-commons-configuration" % "1.10"
 
-  lazy val math = "org.openmole" %% "org-apache-commons-math" % "3.4.1"
+  lazy val math = "org.openmole" %% "org-apache-commons-math" % "3.5"
 
   lazy val exec = "org.openmole" %% "org-apache-commons-exec" % "1.1"
 
   lazy val log4j = "org.openmole" %% "org-apache-log4j" % "1.2.17"
 
-  lazy val logging = "org.openmole" %% "org-apache-commons-logging" % "1.1.1"
+  lazy val logging = "org.openmole" %% "org-apache-commons-logging" % "1.2"
 
   lazy val sshd = "org.openmole" %% "org-apache-sshd" % "0.14.0"
 

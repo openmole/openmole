@@ -31,23 +31,33 @@ object Utils {
     case "oms"                   ⇒ OMS
     case "scala"                 ⇒ SCALA
     case "sh"                    ⇒ SH
+    case "tgz"                   ⇒ TGZ
+    case "md"                    ⇒ MD
     case "nlogo" | "csv" | "txt" ⇒ NO_EXTENSION
     case _                       ⇒ BINARY
   }
 
   val webUIProjectFile = Workspace.file("webui")
 
-  val workspaceProjectFile = new File(Workspace.file("webui"), "projects")
+  def workspaceProjectFile = {
+    val ws = new File(Workspace.file("webui"), "projects")
+    ws.mkdirs()
+    ws
+  }
 
-  val workspaceRoot = workspaceProjectFile.getParentFile
+  def workspaceRoot = workspaceProjectFile.getParentFile
 
-  val authenticationKeysFile = Workspace.file("persistent/keys")
+  def authenticationKeysFile = {
+    val ak = Workspace.location / Workspace.persistentLocation / "keys"
+    ak.mkdirs()
+    ak
+  }
 
   implicit def fileToSafePath(f: File): SafePath = SafePath(getPathArray(f, workspaceProjectFile), f)
 
-  implicit def safePathToFile(s: SafePath): File = new File(webUIProjectFile, getFile(s.path).getCanonicalPath)
+  implicit def safePathToFile(s: SafePath): File = getFile(webUIProjectFile, s.path)
 
-  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, f.length, readableByteCount(f.length))
+  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, f.length, readableByteCount(FileDecorator(f).size))
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)
@@ -56,6 +66,8 @@ object Utils {
   implicit def fileToOptionSafePath(f: File): Option[SafePath] = Some(fileToSafePath(f))
 
   //def relativeSafePathToFile(sp: SafePath): File = Utils.webUIProjectSafePath / sp
+
+  def authenticationFile(keyFileName: String): File = new File(authenticationKeysFile, keyFileName)
 
   def getPathArray(f: File, until: File): Seq[String] = {
     def getParentsArray0(f: File, computedParents: Seq[String]): Seq[String] = {
@@ -74,13 +86,14 @@ object Utils {
     getParentsArray0(f, Seq()) :+ f.getName
   }
 
-  def getFile(paths: Seq[String]): File = {
+  def getFile(root: File, paths: Seq[String]): File = {
     def getFile0(paths: Seq[String], accFile: File): File = {
       if (paths.isEmpty) accFile
       else getFile0(paths.tail, new File(accFile, paths.head))
     }
-    getFile0(paths, new File(""))
+    getFile0(paths, root)
   }
 
   def listFiles(path: SafePath): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
+
 }

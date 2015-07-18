@@ -38,8 +38,6 @@ import scala.reflect.macros.whitebox
 
 class ValidationSpec extends FlatSpec with Matchers {
 
-  implicit val plugins = PluginSet.empty
-
   "Validation" should "detect a missing input error" in {
     val p = Prototype[String]("t")
 

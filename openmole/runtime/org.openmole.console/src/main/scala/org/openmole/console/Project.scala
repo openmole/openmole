@@ -17,9 +17,13 @@
 package org.openmole.console
 
 import javax.script.CompiledScript
+import org.openmole.core.console.ScalaREPL
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.tool.file._
+import org.openmole.tool.thread._
 
 import scala.util.{ Success, Failure, Try }
 
@@ -28,25 +32,53 @@ case class ScriptFileDoesNotExists() extends CompileResult
 case class CompilationError(exception: Throwable) extends CompileResult
 case class Compiled(result: CompiledScript) extends CompileResult
 
-class Project(workDirectory: File) {
+object Project {
+  def newREPL(variables: ConsoleVariables) = new Console().newREPL(variables)
+}
+
+class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = Project.newREPL) {
 
   def pluginsDirectory: File = workDirectory / "plugins"
   def plugins = pluginsDirectory.listFilesSafe
 
-  lazy val console = new Console()
   def loadPlugins = PluginManager.load(plugins)
 
   def compile(script: File, args: Seq[String]): CompileResult = {
     if (!script.exists) ScriptFileDoesNotExists()
-    else compile(script.content, args)
-  }
-
-  def compile(content: String, args: Seq[String]): CompileResult = {
-    console.withREPL(ConsoleVariables(args, workDirectory)) { loop ⇒
-      Try(loop.compile(content)) match {
-        case Failure(e)        ⇒ CompilationError(e)
-        case Success(compiled) ⇒ Compiled(compiled)
-      }
+    else {
+      def compileContent =
+        s"""${scriptsObjects(script.getParentFileSafe).mkString("\n")}
+            |def runOMSScript() = {
+            |${script.content}
+            |}
+            |runOMSScript()
+       """.stripMargin
+      compile(compileContent, args)
     }
   }
+
+  private def compile(content: String, args: Seq[String]): CompileResult = {
+    val loop = newREPL(ConsoleVariables(args, workDirectory))
+    try Compiled(loop.compile(content))
+    catch {
+      case e: Throwable ⇒ CompilationError(e)
+    }
+    finally loop.close()
+  }
+
+  def scriptFiles(dir: File) = dir.listFilesSafe(_.getName.endsWith(".oms"))
+
+  def scriptsObjects(dir: File) =
+    for {
+      script ← scriptFiles(dir)
+    } yield makeObject(script)
+
+  def makeObject(script: File) =
+    s"""
+       |class ${script.getName.dropRight(".oms".size)}Class {
+       |${script.content}
+       |}
+       |lazy val ${script.getName.dropRight(".oms".size)} = new ${script.getName.dropRight(".oms".size)}Class
+     """.stripMargin
+
 }

@@ -91,6 +91,13 @@ import Console._
 
 object ConsoleVariables {
   def empty = ConsoleVariables()
+
+  def bindVariables(loop: ScalaREPL, variables: ConsoleVariables, variablesName: String = "_variables_") =
+    loop.beQuietDuring {
+      loop.bind(variablesName, variables)
+      loop.eval(s"import $variablesName._")
+    }
+
 }
 
 case class ConsoleVariables(
@@ -101,18 +108,11 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
   console ⇒
 
   def workspace = "workspace"
-
   def registry = "registry"
-
   def logger = "logger"
-
   def serializer = "serializer"
-
   def commandsName = "_commands_"
-
   def pluginsName = "_plugins_"
-
-  def variablesName = "_variables_"
 
   def autoImports: Seq[String] = PluginInfo.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"$n._")
   def keywordNamespace = "om"
@@ -134,7 +134,7 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
       keywordNamespaceCode
     )
 
-  def run(args: ConsoleVariables, workDirectory: Option[File] = None): Int = {
+  def run(args: ConsoleVariables, workDirectory: Option[File]): Int = {
     val correctPassword =
       password match {
         case None ⇒
@@ -161,35 +161,28 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
                 println("File " + scriptFile + " doesn't exist.")
                 ExitCodes.scriptDoesNotExist
               case CompilationError(e) ⇒
-                println(e.getMessage)
                 println(e.stackString)
                 ExitCodes.compilationError
               case Compiled(compiled) ⇒
-                def notAPuzzle = {
-                  println(s"Script $scriptFile doesn't end with a puzzle")
-                  ExitCodes.notAPuzzle
-                }
-
                 compiled.eval() match {
-                  case null ⇒ notAPuzzle
                   case res: PuzzleBuilder ⇒
                     val ex = res.buildPuzzle.toExecution()
                     Try(ex.start) match {
                       case Failure(e) ⇒
-                        println(e.getMessage)
                         println(e.stackString)
                         ExitCodes.validationError
                       case Success(_) ⇒
                         Try(ex.waitUntilEnded) match {
                           case Success(_) ⇒ ExitCodes.ok
                           case Failure(e) ⇒
-                            println("Error during script execution: " + e.getMessage)
+                            println("Error during script execution: ")
                             print(e.stackString)
                             ExitCodes.executionError
                         }
                     }
-                  case _ ⇒ notAPuzzle
-
+                  case _ ⇒
+                    println(s"Script $scriptFile doesn't end with a puzzle")
+                    ExitCodes.notAPuzzle
                 }
 
             }
@@ -202,12 +195,11 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
   def initialise(loop: ScalaREPL, variables: ConsoleVariables) = {
     variables.workDirectory.mkdirs()
     loop.beQuietDuring {
-      loop.bind(commandsName, new Command)
+      loop.bind(commandsName, new Command(loop, variables))
       initialisationCommands.foreach {
         loop.interpret
       }
-      loop.bind(variablesName, variables)
-      loop.eval(s"import $variablesName._")
+      ConsoleVariables.bindVariables(loop, variables)
     }
     loop
   }
