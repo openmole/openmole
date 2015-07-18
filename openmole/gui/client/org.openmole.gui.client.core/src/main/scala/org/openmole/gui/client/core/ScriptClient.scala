@@ -39,7 +39,7 @@ object ScriptClient {
   @JSExport
   def run(): Unit = {
 
-    val shutdownButton = a(`class` := ".shutdownButton", bs.glyph(glyph_off), href := "shutdown")
+    val shutdownButton = a(`class` := "shutdownButton", bs.glyph(glyph_off), href := "shutdown")
 
     val passwordChosen = Var(true)
     val passwordOK = Var(false)
@@ -112,7 +112,9 @@ object ScriptClient {
     })(
       tags.div(
         shutdownButton,
-        tags.div(`class` := Rx { if (!passwordOK()) "centerPage" else "" },
+        tags.div(`class` := Rx {
+          if (!passwordOK()) "centerPage" else ""
+        },
           Rx {
             tags.div(
               connectionForm(
@@ -152,7 +154,10 @@ object ScriptClient {
         authenticationItem
       )
     )
-    maindiv.appendChild(tags.div(tags.div(`class` := "openMOLETitle", "OpenMOLE - 5.0").render))
+    maindiv.appendChild(tags.div(
+      tags.div(`class` := "openMOLETitle", "OpenMOLE - 5.0"),
+      shutdownButton
+    ))
     maindiv.appendChild(shutdownButton)
 
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
