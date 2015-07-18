@@ -18,7 +18,7 @@
 package org.openmole.core.batch.storage
 
 import java.net.URI
-import java.nio.file.Paths
+import java.nio.file._
 import java.util.concurrent.{ Callable, TimeUnit }
 import com.google.common.cache.CacheBuilder
 import org.openmole.core.tools.cache._
@@ -85,11 +85,11 @@ trait StorageService extends BatchService with Storage {
   }
 
   protected def mkRootDir(implicit token: AccessToken): String = synchronized {
-    val paths = Iterator.iterate(Paths.get(root))(_.getParent).takeWhile(_ != null).toSeq.reverse
+    val paths = Iterator.iterate[Option[String]](Some(root))(p ⇒ p.flatMap(parent)).takeWhile(_.isDefined).toSeq.reverse.flatten
 
     paths.tail.foldLeft(paths.head.toString) {
       (path, file) ⇒
-        val childPath = child(path, file.getFileName.toString)
+        val childPath = child(path, name(file))
         try makeDir(childPath)
         catch {
           case e: Throwable ⇒ logger.log(FINEST, "Error creating base directory " + root + e)
@@ -109,6 +109,9 @@ trait StorageService extends BatchService with Storage {
   def mv(from: String, to: String)(implicit token: AccessToken) = token.synchronized { _mv(from, to) }
   def openInputStream(path: String)(implicit token: AccessToken): InputStream = token.synchronized { _openInputStream(path) }
   def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = token.synchronized { _openOutputStream(path) }
+
+  def parent(path: String): Option[String] = _parent(path)
+  def name(path: String) = _name(path)
 
   def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.synchronized { _upload(src, dest, options) }
   def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.synchronized { _download(src, dest, options) }

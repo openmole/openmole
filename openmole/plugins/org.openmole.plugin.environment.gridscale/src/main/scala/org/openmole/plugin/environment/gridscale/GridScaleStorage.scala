@@ -35,4 +35,6 @@ trait GridScaleStorage <: Storage {
   protected def _openInputStream(path: String): InputStream = storage.openInputStream(path)
   protected def _openOutputStream(path: String): OutputStream = storage.openOutputStream(path)
   protected def _mv(from: String, to: String) = storage.mv(from, to)
+  protected def _parent(path: String) = storage.parent(path)
+  protected def _name(path: String) = storage.name(path)
 }

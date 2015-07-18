@@ -83,12 +83,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     }
   }
 
-  private def exceptionToString(e: Throwable) = {
-    val sw = new StringWriter()
-    e.printStackTrace(new PrintWriter(sw))
-    s"""${e.getMessage}
-        |${sw.toString}""".stripMargin
-  }
+  private def exceptionToString(e: Throwable) = e.stackString
 
   implicit def stringToLevel(s: String) = Level.parse(s.toUpperCase)
 

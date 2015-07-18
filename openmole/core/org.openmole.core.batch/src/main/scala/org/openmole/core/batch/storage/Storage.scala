@@ -66,6 +66,8 @@ trait Storage {
   protected def _openInputStream(path: String): InputStream
   protected def _openOutputStream(path: String): OutputStream
   protected def _mv(from: String, to: String)
+  protected def _parent(path: String): Option[String]
+  protected def _name(path: String): String
 
   protected def uploadOutputStream(dest: String, options: TransferOptions) = _openOutputStream(dest)
   protected def downloadInputStream(src: String, options: TransferOptions) = _openInputStream(src)
