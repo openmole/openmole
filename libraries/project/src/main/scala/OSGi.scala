@@ -211,7 +211,7 @@ object OSGi extends Defaults {
   lazy val closureCompiler = OsgiProject("closure-compiler", exports = Seq("com.google.javascript.*")) settings(
     libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion)
 
-  lazy val mgoVersion = "1.79"
+  lazy val mgoVersion = "1.80"
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings(
     libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
