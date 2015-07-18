@@ -18,6 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
+import elitism._
 import org.openmole.core.workflow.data._
 
 trait GAAlgorithm extends Archive
@@ -27,6 +28,7 @@ trait GAAlgorithm extends Archive
     with Termination
     with Breeding
     with CloneRemoval
+    with NaNRemoval
     with InputsConverter {
   def objectives: Objectives
   def inputsPrototypes = inputs.inputs.map(_.prototype)
