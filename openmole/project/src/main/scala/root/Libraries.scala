@@ -156,7 +156,7 @@ object Libraries extends Defaults {
 
   lazy val apacheConfig = "org.openmole" %% "org-apache-commons-configuration" % "1.10"
 
-  lazy val math = "org.openmole" %% "org-apache-commons-math" % "3.4.1"
+  lazy val math = "org.openmole" %% "org-apache-commons-math" % "3.5"
 
   lazy val exec = "org.openmole" %% "org-apache-commons-exec" % "1.1"
 
