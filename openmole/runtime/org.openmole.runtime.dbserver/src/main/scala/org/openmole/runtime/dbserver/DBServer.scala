@@ -25,11 +25,14 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.UUID
 import org.h2.tools.Server
-import org.openmole.core.replication.{ replicas, DBServerInfo }
+import org.openmole.core.replication.{ DBServerRunning, replicas, DBServerInfo }
 import scala.slick.driver.H2Driver.simple._
 import scala.util.{ Success, Failure, Try }
 
 object DBServer extends App {
+
+  def checkInterval = 30000
+  def maxAllDead = 5
 
   val base = DBServerInfo.dbDirectory
 
@@ -93,7 +96,21 @@ object DBServer extends App {
     val out = new FileOutputStream(dbInfoFile)
     try new XStream().toXML(info, out) finally out.close
 
-    Thread.sleep(Long.MaxValue)
+    def waitAllDead(count: Int): Unit = {
+      Logger.getLogger(getClass.getName).info(s"Waiting $count times for all OpenMOLE to be dead.")
+      val allDead = !DBServerRunning.oneLocked
+      if (!allDead) {
+        Thread.sleep(checkInterval)
+        waitAllDead(maxAllDead)
+      }
+      else if (count > 0) {
+        Thread.sleep(checkInterval)
+        waitAllDead(count - 1)
+      }
+      else lock.release()
+    }
+
+    waitAllDead(maxAllDead)
   }
   else println("Server is already running")
 
