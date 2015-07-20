@@ -35,6 +35,10 @@ import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
+object ScalaREPL {
+  def warmup = new ScalaREPL().eval("def warmup() = {}")
+}
+
 class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
 
   case class ErrorMessage(error: String, line: Int)

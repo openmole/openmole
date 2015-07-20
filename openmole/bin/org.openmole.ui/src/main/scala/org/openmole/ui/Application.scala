@@ -23,6 +23,7 @@ import java.net.URI
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
 import org.openmole.console.Console.ExitCodes
+import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
@@ -197,6 +198,7 @@ class Application extends IApplication {
               val server = new GUIServer(port, BootstrapJS.webapp, config.webuiAuthentication)
               server.start()
               browse(url)
+              ScalaREPL.warmup
               server.join()
             }
             finally lock.release()
