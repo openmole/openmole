@@ -139,22 +139,20 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
     if (!f.exists()) NotFound("The file " + path + " does not exist.")
     else {
-      val os = new BufferedOutputStream(response.getOutputStream())
-      try {
-        if (f.isDirectory) {
-          response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName + ".tgz"}"""")
-          val tos = new TarOutputStream(os.toGZ)
-          try tos.archive(f)
-          finally tos.close
-        }
-        else {
-          response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName}"""")
-          f.copy(os)
-        }
+      if (f.isDirectory) {
+        response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName + ".tgz"}"""")
+        val os = new BufferedOutputStream(response.getOutputStream())
+        val tos = new TarOutputStream(os.toGZ)
+        try tos.archive(f)
+        finally tos.close
       }
-      finally os.close
+      else {
+        response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName}"""")
+        val os = new BufferedOutputStream(response.getOutputStream())
+        try f.copy(os)
+        finally os.close
+      }
     }
-
   }
 
   get("/") {
