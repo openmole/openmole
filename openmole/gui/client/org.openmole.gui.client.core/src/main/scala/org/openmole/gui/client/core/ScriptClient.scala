@@ -3,6 +3,7 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.files.{ DirNode, TreeNodePanel }
 import org.openmole.gui.client.core.files.TreeNode._
 import org.openmole.gui.ext.data.SafePath
+import org.openmole.gui.misc.js.BootstrapTags.ScrollableTextArea.BottomScroll
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -159,6 +160,11 @@ object ScriptClient {
       shutdownButton
     ))
     maindiv.appendChild(shutdownButton)
+    /*val bst = new BSTextArea(10,
+      "sraiuters\nnarsitenrsati\nrsateinerst\nestiernsit\nnarsitenrsati\nrsateinerst\nestiernsit\nnarsitenrsati\nrsateinerst\nestiernsit\nnarsitenrsati\nrsateinerst\nestiernsit\nnarsitenrsati\nrsateinerst\nestiernsit\nnarsitenrsati\nrsateinerst\nestiernsit",
+      BottomScroll())
+    maindiv.appendChild(bst.get.render)*/
+    //bst.
 
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)

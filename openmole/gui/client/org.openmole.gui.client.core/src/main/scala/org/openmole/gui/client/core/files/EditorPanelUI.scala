@@ -5,7 +5,7 @@ import org.openmole.gui.ext.dataui.PanelUI
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import org.openmole.gui.ext.data.{ DisplayableFile, FileExtension }
+import org.openmole.gui.ext.data.{ DisplayableOnDemandFile, DisplayableFile, FileExtension }
 import org.openmole.gui.ext.data.FileExtension._
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{ literal ⇒ lit }
@@ -33,7 +33,7 @@ import fr.iscpif.scaladget.mapping.ace._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: String, fileType: DisplayableFile) extends PanelUI {
+class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: String, fileType: FileExtension) extends PanelUI {
 
   lazy val Autocomplete = ace.require("ace/autocomplete").Autocomplete
 
@@ -59,6 +59,8 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
   def code: String = sess.getValue()
 
+  def setCode(content: String) = editor.getSession().setValue(content)
+
   def complete() = {
     if (editor.completer == null)
       editor.completer = fr.iscpif.scaladget.ace.autocomplete
@@ -71,10 +73,13 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
   def initEditor = {
     fileType match {
-      case NO_EXTENSION ⇒
-      case _            ⇒ editor.getSession().setMode("ace/mode/" + fileType.highlighter)
+      //case disp @ (DisplayableFile(_, _, _) | DisplayableOnDemandFile(_, _, _)) ⇒ editor.getSession().setMode("ace/mode/" + disp.highlighter)
+      case disp: DisplayableFile         ⇒ editor.getSession().setMode("ace/mode/" + disp.highlighter)
+      case disp: DisplayableOnDemandFile ⇒ editor.getSession().setMode("ace/mode/" + disp.highlighter)
+      case _                             ⇒
     }
-    editor.getSession().setValue(initCode)
+
+    setCode(initCode)
     editor.setTheme("ace/theme/github")
     editor.renderer.setShowGutter(true)
     editor.setShowPrintMargin(true)

@@ -42,7 +42,7 @@ class FileDisplayer {
 
   def alreadyDisplayed(tn: TreeNode) = {
     tabs.tabs().find {
-      _.serverFilePath().path == tn.safePath().path
+      _.treeNode.safePath().path == tn.safePath().path
     }
   }
 
@@ -53,7 +53,7 @@ class FileDisplayer {
       case _ ⇒ fileType match {
         case oms: OpenMOLEScript ⇒
           val ed = editor(fileType, content)
-          tabs ++ new EditableNodeTab(tn.name, tn.safePath, ed) with OMSTabControl {
+          tabs ++ new EditableNodeTab(tn, ed) with OMSTabControl {
             val relativePath = SafePath.empty
 
             def onrun = () ⇒ {
@@ -67,10 +67,12 @@ class FileDisplayer {
             }
           }
         case md: MDScript ⇒ OMPost[Api].mdToHtml(tn.safePath()).call.foreach { htmlString ⇒
-          tabs ++ new HTMLTab(tn.name, tn.safePath, htmlString)
+          tabs ++ new HTMLTab(tn, htmlString)
         }
-        case disp: DisplayableFile ⇒ tabs ++ new EditableNodeTab(tn.name, tn.safePath, editor(fileType, content))
-        case _                     ⇒ //FIXME for GUI workflows
+        case dod: DisplayableOnDemandFile ⇒
+          tabs ++ new LockedEditionNodeTab(tn, editor(fileType, content))
+        //case disp: DisplayableFile ⇒ tabs ++ new EditableNodeTab(tn, editor(fileType, content))
+        case _ ⇒ //FIXME for GUI workflows
       }
     }
   }

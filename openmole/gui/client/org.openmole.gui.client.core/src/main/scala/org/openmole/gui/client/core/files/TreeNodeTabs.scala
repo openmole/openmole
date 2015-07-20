@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.OMPost
-import org.openmole.gui.client.core.files.TreeNodeTabs.EditableNodeTab
 import org.openmole.gui.ext.data._
 import org.openmole.gui.shared._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -37,15 +36,13 @@ import scala.scalajs.js.timers._
 object TreeNodeTabs {
 
   sealed trait TreeNodeTab {
-    val tabName: Var[String]
+    val treeNode: TreeNode
 
-    val serverFilePath: Var[SafePath]
+    val tabName: Var[String] = treeNode.name()
 
     val id: String = getUUID
 
     val active: Var[Option[SetIntervalHandle]] = Var(None)
-
-    val overlaying: Var[Boolean] = Var(false)
 
     def desactivate = {
       active().map {
@@ -56,14 +53,7 @@ object TreeNodeTabs {
 
     val editorElement: TypedTag[HTMLDivElement]
 
-    val overlayElement: TypedTag[HTMLDivElement] = tags.div(`class` := "overlayElement")(
-      tags.div(`class` := "spinner"),
-      "Starting " + tabName()
-    )
-
     val tabElement = tags.div()
-
-    val overlayTabElement = tags.div(`class` := "tabOverlay")
 
     def fileContent: FileContent
 
@@ -71,18 +61,57 @@ object TreeNodeTabs {
 
   }
 
-  class EditableNodeTab(val tabName: Var[String], val serverFilePath: Var[SafePath], editor: EditorPanelUI) extends TreeNodeTab {
+  class EditableNodeTab(val treeNode: TreeNode, editor: EditorPanelUI) extends TreeNodeTab {
 
     val editorElement = editor.view
 
-    def fileContent = AlterableFileContent(serverFilePath(), editor.code)
+    def fileContent = AlterableFileContent(treeNode.safePath(), editor.code)
 
-    def save(onsaved: () ⇒ Unit) = OMPost[Api].saveFile(serverFilePath(), editor.code).call().foreach { d ⇒
+    def save(onsaved: () ⇒ Unit) = OMPost[Api].saveFile(treeNode.safePath(), editor.code).call().foreach { d ⇒
       onsaved()
     }
   }
 
-  class HTMLTab(val tabName: Var[String], val serverFilePath: Var[SafePath], htmlContent: String) extends TreeNodeTab {
+  class LockedEditionNodeTab(val treeNode: TreeNode,
+                             editor: EditorPanelUI,
+                             _editable: Boolean = false) extends TreeNodeTab {
+    val editorElement = editor.view
+    val editable = Var(_editable)
+
+    val editButton = bs.glyphBorderButton("", btn_primary + "editingElement", glyph_edit, () ⇒ {
+      //onedit()
+      editable() = !editable()
+    })
+
+    lazy val controlElement = tags.div(
+      Rx {
+        if (editable()) tags.div else editButton
+      }
+    )
+
+    lazy val overlayElement = tags.div(
+      Rx {
+        `class` := {
+          if (editable()) "" else "editTabOverlay"
+        }
+      }
+    )
+
+    def fileContent = AlterableOnDemandFileContent(treeNode.safePath(), editor.code, () ⇒ editable())
+
+    def save(onsaved: () ⇒ Unit) =
+      if (editable())
+        OMPost[Api].saveFile(treeNode.safePath(), editor.code).call().foreach { d ⇒
+          onsaved()
+        }
+      else FileManager.download(
+        treeNode,
+        (p: FileTransferState) ⇒ {},
+        (content: String) ⇒ editor.setCode(content)
+      )
+  }
+
+  class HTMLTab(val treeNode: TreeNode, htmlContent: String) extends TreeNodeTab {
     val editorElement = tags.div(`class` := "mdRendering",
       RawFrag(htmlContent)
     )
@@ -108,6 +137,14 @@ trait OMSTabControl <: TabControl {
   lazy val controlElement = tags.div(`class` := "executionElement")(
     runButton
   )
+
+  val overlayTabElement = tags.div(`class` := "playTabOverlay")
+
+  val overlayElement: TypedTag[HTMLDivElement] = tags.div(`class` := "overlayElement")(
+    "Starting workflow, please wait ..."
+  )
+
+  val overlaying: Var[Boolean] = Var(false)
 
   def onrun: () ⇒ Unit
 
@@ -160,8 +197,11 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     tab.save()
   }
 
-  def alterables: Seq[AlterableFileContent] = tabs().map { _.fileContent }.collect {
-    case a: AlterableFileContent ⇒ a
+  def alterables: Seq[AlterableFileContent] = tabs().map {
+    _.fileContent
+  }.collect {
+    case a: AlterableFileContent                               ⇒ a
+    case aod: AlterableOnDemandFileContent if (aod.editable()) ⇒ AlterableFileContent(aod.path, aod.content)
   }
 
   def saveAllTabs(onsave: () ⇒ Unit) = {
@@ -171,7 +211,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   }
 
   def checkTabs = tabs().foreach { t: TreeNodeTab ⇒
-    OMPost[Api].exists(t.serverFilePath()).call().foreach { e ⇒
+    OMPost[Api].exists(t.treeNode.safePath()).call().foreach { e ⇒
       if (!e) removeTab(t)
     }
   }
@@ -179,12 +219,12 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
   def rename(tn: TreeNode, newNode: TreeNode) = {
     find(tn).map { tab ⇒
       tab.tabName() = newNode.name()
-      tab.serverFilePath() = newNode.safePath()
+      tab.treeNode.safePath() = newNode.safePath()
     }
   }
 
   def find(treeNode: TreeNode) = tabs().find { t ⇒
-    t.serverFilePath() == treeNode.safePath()
+    t.treeNode.safePath() == treeNode.safePath()
   }
 
   def active = tabs().find { t ⇒ isActive(t) }
@@ -222,16 +262,25 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
             )(if (isTabActive) {
                 active.map { tab ⇒
                   tab match {
-                    case oms: TabControl ⇒
+                    case oms: OMSTabControl ⇒
                       tags.div(
-                        if (t.overlaying()) t.overlayTabElement else t.tabElement,
+                        if (oms.overlaying()) oms.overlayTabElement else oms.tabElement,
                         tags.div(
-                          t.editorElement,
+                          oms.editorElement,
                           oms.controlElement,
-                          if (tab.overlaying()) tab.overlayElement else tags.div
+                          if (oms.overlaying()) oms.overlayElement else tags.div
                         )
                       )
-                    case _ ⇒ tags.div(t.editorElement)
+                    case etc: LockedEditionNodeTab ⇒
+                      tags.div(
+                        etc.tabElement,
+                        tags.div(
+                          etc.overlayElement,
+                          etc.editorElement,
+                          etc.controlElement
+                        )
+                      )
+                    case _ ⇒ tags.div(tab.editorElement)
                   }
                 }
               }

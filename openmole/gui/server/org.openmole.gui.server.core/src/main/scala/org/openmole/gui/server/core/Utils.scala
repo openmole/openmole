@@ -31,7 +31,8 @@ object Utils {
     case "oms"                   ⇒ OMS
     case "scala"                 ⇒ SCALA
     case "sh"                    ⇒ SH
-    case "tgz"                   ⇒ TGZ
+    case "tgz" | "tar.gz"        ⇒ TGZ
+    case "csv"                   ⇒ CSV
     case "md"                    ⇒ MD
     case "nlogo" | "csv" | "txt" ⇒ NO_EXTENSION
     case _                       ⇒ BINARY

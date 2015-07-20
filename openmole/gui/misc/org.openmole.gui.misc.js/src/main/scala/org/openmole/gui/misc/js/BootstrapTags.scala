@@ -178,6 +178,14 @@ object BootstrapTags {
       () ⇒ todo()
     })
 
+  def glyphBorderButton(text: String,
+                        buttonCB: ClassKeyAggregator,
+                        glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLButtonElement] = {
+    tags.button(`type` := "button", `class` := "btn " + buttonCB.key, onclick := { () ⇒ todo() })(
+      tags.span(aria.hidden := true)(glyph(glyCA))
+    )
+  }
+
   def glyphButton(glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLSpanElement] = glyphButton("", emptyCK, glyCA, todo)
 
   def glyphSpan(glyCA: ClassKeyAggregator, todo: () ⇒ Unit, linkName: String = ""): TypedTag[HTMLSpanElement] =
@@ -205,6 +213,7 @@ object BootstrapTags {
       fileInputMultiple(todo)
     )
   }
+
   def uploadButton2(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
     tags.span(`class` := "btn-file")(
       glyph(glyph_upload)(fileInput(todo))
@@ -382,6 +391,7 @@ object BootstrapTags {
       )
     )
   }
+
   //Misc
   val center = key("text-center")
   val spacer20 = key("spacer20")

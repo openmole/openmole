@@ -105,30 +105,43 @@ sealed trait FileExtension {
   def displayable: Boolean
 }
 
-//trait OpenMOLEScript
-
 case class DisplayableFile(extension: String, highlighter: String, displayable: Boolean = true) extends FileExtension
 
 case class OpenMOLEScript(extension: String, highlighter: String, displayable: Boolean = true) extends FileExtension
 
 case class MDScript(extension: String, displayable: Boolean = true) extends FileExtension
 
+case class DisplayableOnDemandFile(extension: String, highlighter: String, displayable: Boolean = true) extends FileExtension
+
 case class BinaryFile(extension: String, displayable: Boolean = false) extends FileExtension
 
 object FileExtension {
   val OMS = OpenMOLEScript("oms", "scala")
-  val SCALA = DisplayableFile("scala", "scala")
-  val NETLOGO = DisplayableFile("nlogo", "nlogo")
+  val SCALA = DisplayableOnDemandFile("scala", "scala")
+  val NETLOGO = DisplayableOnDemandFile("nlogo", "nlogo")
   val MD = MDScript("md")
-  val SH = DisplayableFile("sh", "sh")
+  val SH = DisplayableOnDemandFile("sh", "sh")
+  val CSV = DisplayableOnDemandFile("csv", "text")
   val NO_EXTENSION = DisplayableFile("text", "text")
   val TGZ = BinaryFile("tgz")
+  val TARGZ = BinaryFile("tar.gz")
   val BINARY = BinaryFile("")
 }
 
 sealed trait FileContent
 
+// def alterability: Alterability
+
+/*
+sealed trait Alterability
+
+case class Alterable() extends Alterability
+
+case class ReadOnly() extends Alterability*/
+
 case class AlterableFileContent(path: SafePath, content: String) extends FileContent
+
+case class AlterableOnDemandFileContent(path: SafePath, content: String, editable: () ⇒ Boolean) extends FileContent
 
 case class ReadOnlyFileContent() extends FileContent
 
@@ -234,15 +247,21 @@ case class EnvironmentState(envId: EnvironmentId, taskName: String, running: Lon
 
 sealed trait ExecutionInfo {
   def state: String
+
   def duration: Long
+
   def ready: Long
+
   def running: Long
+
   def completed: Long
 }
 
 case class Failed(error: Error, duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo {
   def state: String = "failed"
+
   def running = 0L
+
   def ready: Long = 0L
 }
 
@@ -258,21 +277,29 @@ case class Finished(duration: Long = 0L,
                     completed: Long = 0L,
                     environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
   def ready: Long = 0L
+
   def running: Long = 0L
+
   def state: String = "finished"
 }
 
 case class Canceled(duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo {
   def state: String = "canceled"
+
   def running = 0L
+
   def ready: Long = 0L
 }
 
 case class Ready() extends ExecutionInfo {
   def state: String = "ready"
+
   def duration: Long = 0L
+
   def completed: Long = 0L
+
   def ready: Long = 0L
+
   def running = 0L
 }
 

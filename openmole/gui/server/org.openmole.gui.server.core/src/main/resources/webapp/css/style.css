@@ -370,7 +370,7 @@ overflow-y : auto;
 /*---*/
 
 
-.tabOverlay {
+.playTabOverlay {
 	color: white;
 	position: absolute;
 	left: 0;
@@ -380,6 +380,15 @@ overflow-y : auto;
     width: 100%;
 }
 
+.editTabOverlay{
+	color: white;
+	position: absolute;
+	left: 0;
+    z-index: 800;
+    height: 100%;
+    width: 100%;
+	background: rgba(0, 0, 0,0.1) none repeat scroll 0 0;
+}
 
 .overlayElement{
     position: absolute;
@@ -397,6 +406,16 @@ overflow-y : auto;
     right: 80px;
     width: 50px;
     z-index: 18;
+}
+
+.editingElement{
+    position: fixed;
+    top :150;
+    right: 80px;
+    width: 30px;
+    padding-left: 5px;
+    z-index: 800;
+    font-size: 18px;
 }
 
 .executionSettings{
