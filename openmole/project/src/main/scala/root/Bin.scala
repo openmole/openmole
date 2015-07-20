@@ -276,7 +276,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
         libraryDependencies += Libraries.equinoxApp,
         libraryDependencies += Libraries.jgit,
         libraryDependencies += Libraries.txtmark,
-        libraryDependencies += Libraries.toolxitBibtex,
+        libraryDependencies += Libraries.toolxitBibtex intransitive (),
         resourcesAssemble <+= (Tar.tar in openmole, resourceManaged in Compile) map { case (f, d) ⇒ f -> d },
         resourcesAssemble <+= (Tar.tar in daemon, resourceManaged in Compile) map { case (f, d) ⇒ f -> d },
         resourcesAssemble <+= (Tar.tar in api, resourceManaged in Compile) map { case (doc, d) ⇒ doc -> d },
