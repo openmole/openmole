@@ -303,7 +303,4 @@ object OSGi extends Defaults {
   lazy val txtmark = OsgiProject("com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
     libraryDependencies += "com.github.rjeschke" % "txtmark" % "0.13", version := "0.13" )
 
-  lazy val toolxitBibtex = OsgiProject("org.openmole.toolxit-bibtex", privatePackages = Seq("*"))  settings (
-    libraryDependencies += "org.openmole" %% "toolxit-bibtex" % "0.1-SNAPSHOT", version := "0.1-SNAPSHOT" )
-
 }
