@@ -14,17 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.workflow.tools
+package org.openmole.tool
 
-import org.openmole.core.tools.service.Random
-import org.openmole.core.workspace.Workspace
-import org.openmole.tool.file.FilePackage
-import org.openmole.tool.statistics.StatisticsPackage
+package statistics {
 
-object CodeTool extends FilePackage with StatisticsPackage {
-  def namespace = s"${this.getClass.getPackage.getName}.CodeTool"
+  trait StatisticsPackage {
+    implicit class StatisticIterableOfDoubleDecorator(s: Iterable[Double]) {
+      def median: Double = Stat.median(s)
+      def medianAbsoluteDeviation = Stat.medianAbsoluteDeviation(s)
+      def average = Stat.average(s)
+      def meanSquaredError = Stat.meanSquaredError(s)
+      def rootMeanSquaredError = Stat.rootMeanSquaredError(s)
+    }
 
-  def newRNG(seed: Long) = Random.newRNG(seed)
-  def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix) = Workspace.newFile(prefix, suffix)
-  def newDir(prefix: String = Workspace.fixedDir) = Workspace.newDir(prefix)
+    implicit def statisticArrayOfDoubleDecorator(s: Array[Double]) = new StatisticIterableOfDoubleDecorator(s)
+  }
+
 }
+
+package object statistics extends StatisticsPackage

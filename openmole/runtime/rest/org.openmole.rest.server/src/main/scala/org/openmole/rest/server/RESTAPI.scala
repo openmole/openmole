@@ -143,7 +143,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
       if (file.isDirectory) {
         val os = new TarOutputStream(gzOs)
         contentType = "application/octet-stream"
-        response.setHeader("Content-Disposition", "attachment; filename=" + "outputDirectory.tgz")
+        response.setHeader("Content-Disposition", "attachment; filename=" + "archive.tgz")
         os.archive(file)
         os.close
       }

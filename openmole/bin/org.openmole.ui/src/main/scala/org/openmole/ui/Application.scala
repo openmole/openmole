@@ -23,9 +23,11 @@ import java.net.URI
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
 import org.openmole.console.Console.ExitCodes
+import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logging.LoggerService
 import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.replication.DBServerRunning
 import org.openmole.core.tools.io.Network
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.bootstrap.js.BootstrapJS
@@ -55,7 +57,7 @@ class Application extends IApplication {
 
   lazy val consoleUsage = "(Type :q to quit)"
 
-  override def start(context: IApplicationContext) = {
+  override def start(context: IApplicationContext) = DBServerRunning.useDB {
 
     sealed trait LaunchMode
     object ConsoleMode extends LaunchMode
@@ -196,6 +198,7 @@ class Application extends IApplication {
               val server = new GUIServer(port, BootstrapJS.webapp, config.webuiAuthentication)
               server.start()
               browse(url)
+              ScalaREPL.warmup
               server.join()
             }
             finally lock.release()

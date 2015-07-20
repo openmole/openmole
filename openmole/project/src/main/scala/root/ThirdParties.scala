@@ -25,16 +25,5 @@ object ThirdParties extends Defaults {
     libraryDependencies += Libraries.bouncyCastle
   )
 
-  lazy val toolxitBibtexMacros = OsgiProject("toolxit.bibtex.macros", "toolxit.bibtex/macros") settings (
-    libraryDependencies += Libraries.scalaLang
-  )
-
-  lazy val toolxitBibtex = OsgiProject("toolxit.bibtex.core", "toolxit.bibtex/core", exports = Seq("toolxit.bibtex.*", "freemarker.*")) dependsOn (toolxitBibtexMacros) settings (
-    libraryDependencies ++= Seq(
-      Libraries.scalaLang,
-      "org.freemarker" % "freemarker" % "2.3.19",
-      Libraries.slf4j
-    )
-  )
-
+  lazy val openmoleStatistics = OsgiProject("org.openmole.tool.statistics", imports = Seq("*")) settings (bundleType := Set("core")) dependsOn (openmoleLogger)
 }

@@ -297,10 +297,10 @@ object OSGi extends Defaults {
   lazy val codec = OsgiProject("org.apache.commons.codec") settings
     (libraryDependencies += "commons-codec" % "commons-codec" % "1.10", version := "1.10")
 
-  lazy val jgit =OsgiProject("org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
+  lazy val jgit = OsgiProject("org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
     libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit.java7" % "3.7.1.201504261725-r", version := "3.7.1" )
 
-  lazy val txtmark =OsgiProject("com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
+  lazy val txtmark = OsgiProject("com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
     libraryDependencies += "com.github.rjeschke" % "txtmark" % "0.13", version := "0.13" )
 
 }

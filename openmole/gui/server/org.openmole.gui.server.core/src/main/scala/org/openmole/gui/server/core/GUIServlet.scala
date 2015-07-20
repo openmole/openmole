@@ -36,7 +36,7 @@ import scala.concurrent.duration._
 import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
-import java.io.{ File, PrintStream }
+import java.io.{ BufferedInputStream, BufferedOutputStream, File, PrintStream }
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.console._
@@ -104,7 +104,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     for (file ← fileParams) yield {
       val path = new java.net.URI(file._1).getPath
       val destination = new File(Utils.webUIProjectFile, path)
-      val stream = file._2.getInputStream
+      val stream = new BufferedInputStream(file._2.getInputStream)
       try {
         stream.copy(destination)
         destination.setExecutable(true)
@@ -119,7 +119,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
   post("/uploadkeys") {
     for (file ← fileParams) yield {
-
       val destination = new File(Utils.authenticationKeysFile, file._1)
       val stream = file._2.getInputStream
       try {
@@ -135,22 +134,25 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   get("/downloadFile") {
-    case class ToDownload(file: File, name: String)
-
     val path = new java.net.URI(null, null, params("path"), null).getPath
-    val dl = {
-      val f = new File(Utils.webUIProjectFile, path)
-      if (f.isDirectory) {
-        val tar = Workspace.newFile()
-        f.archiveCompress(tar)
-        FileDeleter.deleteWhenGarbageCollected(tar)
-        ToDownload(tar, f.getName + ".tgz")
-      }
-      else ToDownload(f, f.getName)
-    }
+    val f = new File(Utils.webUIProjectFile, path)
 
-    if (dl.file.exists) Ok(dl.file, Map("Content-Disposition" -> s"""attachment; filename="${dl.name}""""))
-    else NotFound("The file " + path + " does not exist.")
+    if (!f.exists()) NotFound("The file " + path + " does not exist.")
+    else {
+      if (f.isDirectory) {
+        response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName + ".tgz"}"""")
+        val os = new BufferedOutputStream(response.getOutputStream())
+        val tos = new TarOutputStream(os.toGZ)
+        try tos.archive(f)
+        finally tos.close
+      }
+      else {
+        response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName}"""")
+        val os = new BufferedOutputStream(response.getOutputStream())
+        try f.copy(os)
+        finally os.close
+      }
+    }
   }
 
   get("/") {
