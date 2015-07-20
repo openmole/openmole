@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task.statistic
 
-import org.openmole.core.tools.math.Stat
+import org.openmole.tool.statistics.Stat
 
 trait StatisticMethods {
   lazy val average = new StatisticalAggregation[Double] {
@@ -29,7 +29,7 @@ trait StatisticMethods {
   }
 
   lazy val meanSquareError = new StatisticalAggregation[Double] {
-    override def apply(s: Seq[Double]): Double = Stat.meanSquareError(s)
+    override def apply(s: Seq[Double]): Double = Stat.meanSquaredError(s)
   }
 
   lazy val medianAbsoluteDeviation = new StatisticalAggregation[Double] {
