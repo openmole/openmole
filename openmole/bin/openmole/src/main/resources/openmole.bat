@@ -16,6 +16,6 @@ java -Dlogback.configurationFile="%PWD%/configuration/logback.xml" -Xss1M -Dfile
 set ret=%errorlevel%
 rmdir /s /q %ran%
 
-if ret 254 goto run
+if %ret% EQU 254 goto run
 
 EXIT /B %ret%

@@ -265,6 +265,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
     fileDisplayer.tabs -- treeNode
     OMPost[Api].deleteFile(treeNode.safePath()).call().foreach { d ⇒
       refreshCurrentDirectory
+      fileDisplayer.tabs.checkTabs
     }
   }
 

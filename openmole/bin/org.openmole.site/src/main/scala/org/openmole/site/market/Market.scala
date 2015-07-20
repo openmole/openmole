@@ -76,7 +76,8 @@ object Market extends Logger {
       MarketEntry("Hello World in Java", "java-hello", Seq(java)),
       MarketEntry("Calibration of Ants", "ants", Seq(netlogo, ga, simulation, calibration)),
       MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq(scala, java, plugin)),
-      MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration))
+      MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
+      MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo))
     )
   )
 

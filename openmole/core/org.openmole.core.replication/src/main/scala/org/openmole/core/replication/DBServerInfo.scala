@@ -17,6 +17,8 @@
 
 package org.openmole.core.replication
 
+import java.util.UUID
+
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import scala.io.Source
@@ -52,11 +54,12 @@ object DBServerInfo {
     finally src.close
   }
 
-  lazy val dbDirectory = {
+  def dbDirectory = {
     val dir = new File(base, "db")
     dir.mkdirs()
     dir
   }
+
   def dbLockFile = new File(dbDirectory, dbLock)
   def dbFile = new File(dbDirectory, dbName)
   def dbInfoFile = new File(dbDirectory, dbInfoName)

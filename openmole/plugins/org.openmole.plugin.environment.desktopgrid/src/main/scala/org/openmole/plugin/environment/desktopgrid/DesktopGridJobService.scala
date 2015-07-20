@@ -43,8 +43,8 @@ trait DesktopGridJobService extends JobService with UnlimitedAccess { js ⇒
   def jobSubmissionFile(jobId: String) = new File(jobsDir, jobId)
   def tmpJobSubmissionFile(jobId: String) = new File(tmpJobsDir, jobId)
   def timeStemps(jobId: String) = timeStempsDir.listFilesSafe.filter { _.getName.startsWith(jobId) }
-  def timeStempsExists(jobId: String) = timeStempsDir.listFilesSafe.exists { _.startsWith(jobId) }
-  def resultExists(jobId: String) = resultsDir.listFilesSafe.exists { _.startsWith(jobId) }
+  def timeStempsExists(jobId: String) = timeStempsDir.listFilesSafe.exists { _.getName.startsWith(jobId) }
+  def resultExists(jobId: String) = resultsDir.listFilesSafe.exists { _.getName.startsWith(jobId) }
   def results(jobId: String) = resultsDir.listFilesSafe.filter { _.getName.startsWith(jobId) }
 
   protected def _submit(serializedJob: SerializedJob): BatchJob = {

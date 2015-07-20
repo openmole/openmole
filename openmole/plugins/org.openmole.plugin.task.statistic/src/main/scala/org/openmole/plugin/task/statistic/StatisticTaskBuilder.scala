@@ -28,7 +28,7 @@ class StatisticTaskBuilder extends TaskBuilder { builder ⇒
   def sequences = _sequences.toList
 
   def addStatistic(sequence: Prototype[Array[Double]], stat: Prototype[Double], agg: StatisticalAggregation[Double]): this.type = {
-    this addInput sequence
+    if (!sequences.exists(_._1 == sequence)) this addInput sequence
     this addOutput stat
     _sequences += ((sequence, stat, agg))
     this

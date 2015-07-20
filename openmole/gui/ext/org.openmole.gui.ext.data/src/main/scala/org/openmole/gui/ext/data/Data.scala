@@ -234,14 +234,16 @@ case class EnvironmentState(envId: EnvironmentId, taskName: String, running: Lon
 
 sealed trait ExecutionInfo {
   def state: String
-
   def duration: Long
-
+  def ready: Long
+  def running: Long
   def completed: Long
 }
 
 case class Failed(error: Error, duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo {
   def state: String = "failed"
+  def running = 0L
+  def ready: Long = 0L
 }
 
 case class Running(ready: Long,
@@ -255,19 +257,23 @@ case class Running(ready: Long,
 case class Finished(duration: Long = 0L,
                     completed: Long = 0L,
                     environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
+  def ready: Long = 0L
+  def running: Long = 0L
   def state: String = "finished"
 }
 
 case class Canceled(duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo {
   def state: String = "canceled"
+  def running = 0L
+  def ready: Long = 0L
 }
 
 case class Ready() extends ExecutionInfo {
   def state: String = "ready"
-
   def duration: Long = 0L
-
   def completed: Long = 0L
+  def ready: Long = 0L
+  def running = 0L
 }
 
 @JSExport

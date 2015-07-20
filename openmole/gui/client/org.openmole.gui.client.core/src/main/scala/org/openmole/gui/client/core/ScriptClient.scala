@@ -39,6 +39,8 @@ object ScriptClient {
   @JSExport
   def run(): Unit = {
 
+    val shutdownButton = a(`class` := "shutdownButton", bs.glyph(glyph_off), href := "shutdown")
+
     val passwordChosen = Var(true)
     val passwordOK = Var(false)
 
@@ -108,19 +110,21 @@ object ScriptClient {
     val connectionDiv = tags.div(`class` := Rx {
       if (!passwordOK()) "connectionTabOverlay" else "displayOff"
     })(
-      tags.div(`class` := Rx {
-        if (!passwordOK()) "centerPage" else ""
-      },
-        Rx {
-          tags.div(
-            connectionForm(tags.span(passwordInput,
-              tags.a(onclick := { () ⇒ resetPassword
-              }, cursor := "pointer")("Reset password")
-            ).render),
-            if (!passwordChosen()) connectionForm(passwordAgainInput) else tags.div(),
-            connectButton
-          )
-        }
+      tags.div(
+        shutdownButton,
+        tags.div(`class` := Rx {
+          if (!passwordOK()) "centerPage" else ""
+        },
+          Rx {
+            tags.div(
+              connectionForm(
+                tags.span(passwordInput,
+                  tags.a(onclick := { () ⇒ resetPassword }, cursor := "pointer")("Reset password")).render),
+              if (!passwordChosen()) connectionForm(passwordAgainInput) else tags.div(),
+              connectButton
+            )
+          }
+        )
       )
     )
 
@@ -150,7 +154,12 @@ object ScriptClient {
         authenticationItem
       )
     )
-    maindiv.appendChild(tags.div(`class` := "openMOLETitle", "OpenMOLE - 5.0").render)
+    maindiv.appendChild(tags.div(
+      tags.div(`class` := "openMOLETitle", "OpenMOLE - 5.0"),
+      shutdownButton
+    ))
+    maindiv.appendChild(shutdownButton)
+
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
 

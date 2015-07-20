@@ -51,7 +51,8 @@ object Prettifier extends Logger {
     }
 
   implicit class ExceptionPretiffier(t: Throwable) {
-    def stackString = {
+
+    def stackString: String = {
       val sw = new StringWriter()
       val pw = new PrintWriter(sw)
       t.printStackTrace(pw)
