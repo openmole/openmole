@@ -22,11 +22,26 @@ import java.util.{ Locale, Calendar }
 package object buildinfo {
 
   def name = "L... L..."
-  def version = buildinfo.BuildInfo.version
+
+  def version: String = buildinfo.BuildInfo.version
+  def versionNumber: String = version.takeWhile(_ != "-")
+
   def generationDate = {
     val d = Calendar.getInstance()
     d.setTimeInMillis(buildinfo.BuildInfo.buildTime)
     val format = DateFormat.getDateInstance(DateFormat.LONG, new Locale("EN", "en"))
     format.format(d.getTime)
   }
+
+  def development = version.toLowerCase.endsWith("snapshot")
+
+  def siteURL =
+    development match {
+      case true  ⇒ "next.openmole.org"
+      case false ⇒ s"openmole.org/all/$versionNumber"
+    }
+
+  def marketName = "market.xml"
+  def marketAddress = s"http://$siteURL/$marketName"
+
 }

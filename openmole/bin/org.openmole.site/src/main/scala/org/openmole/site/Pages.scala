@@ -107,7 +107,7 @@ abstract class DocumentationPage(implicit p: Parent[DocumentationPage] = Parent(
 
 object DocumentationPages { index ⇒
 
-  var marketEntries: Seq[DeployedMarketEntry] = Seq()
+  var marketEntries: Seq[GeneratedMarketEntry] = Seq()
 
   def tag(p: DocumentationPage): String = p.name + p.parent.map(pa ⇒ "-" + tag(pa)).getOrElse("")
 
@@ -359,7 +359,7 @@ object DocumentationPages { index ⇒
             tagContent(t.label, marketEntries.filter(_.entry.tags.contains(t)))
         }
 
-      def tagContent(label: String, entries: Seq[DeployedMarketEntry]) =
+      def tagContent(label: String, entries: Seq[GeneratedMarketEntry]) =
         Seq(
           h1(label),
           ul(
@@ -369,7 +369,7 @@ object DocumentationPages { index ⇒
           )
         )
 
-      def entryContent(deployedMarketEntry: DeployedMarketEntry) = {
+      def entryContent(deployedMarketEntry: GeneratedMarketEntry) = {
         Seq(
           a(deployedMarketEntry.entry.name, href := deployedMarketEntry.archive),
           p(

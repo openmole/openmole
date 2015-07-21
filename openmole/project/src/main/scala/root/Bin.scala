@@ -271,6 +271,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
     ) settings (
         OsgiKeys.bundle <<= OsgiKeys.bundle dependsOn (assemble),
         organization := "org.openmole.site",
+        libraryDependencies += Libraries.xstream,
         libraryDependencies += Libraries.scalatexSite,
         libraryDependencies += Libraries.scalaLang,
         libraryDependencies += Libraries.equinoxApp,
