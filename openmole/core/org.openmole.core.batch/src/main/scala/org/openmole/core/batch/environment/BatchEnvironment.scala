@@ -107,7 +107,7 @@ object BatchEnvironment extends Logger {
   Workspace += (StoragesGCUpdateInterval, "PT1H")
   Workspace += (NoTokenForServiceRetryInterval, "PT2M")
 
-  Workspace += (RuntimeMemoryMargin, "256")
+  Workspace += (RuntimeMemoryMargin, "400")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 
