@@ -333,42 +333,6 @@ overflow-y : auto;
          -o-transition: all 0.1s ease-out;
             transition: all 0.1s ease-out;
 }
-/*--*/
-
-/* Loading icon */
-.spinner {
-  width: 40px;
-  height: 40px;
-  position: absolute;
-  top: 0px;
-  left: -50px;
-  background-color: white;
-  border-radius: 100%;
-  -webkit-animation: scaleout 1.5s infinite ease-in-out;
-  animation: scaleout 1.5s infinite ease-in-out;
-    transform: translateZ(0);
-}
-
-@-webkit-keyframes scaleout {
-  0% { -webkit-transform: scale(0.0) }
-  100% {
-    -webkit-transform: scale(1.0);
-    opacity: 0;
-  }
-}
-
-@keyframes scaleout {
-  0% {
-    transform: scale(0.0);
-    -webkit-transform: scale(0.0);
-  } 100% {
-    transform: scale(1.0);
-    -webkit-transform: scale(1.0);
-    opacity: 0;
-  }
-}
-/*---*/
-
 
 .playTabOverlay {
 	color: white;
@@ -393,7 +357,7 @@ overflow-y : auto;
 .overlayElement{
     position: absolute;
     top: 200px;
-    margin-left: 40%;
+    margin-left: 32%;
     width: 400px;
     color: white;
     font-size: 25;

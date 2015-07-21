@@ -56,6 +56,8 @@ class FileDisplayer {
           tabs ++ new EditableNodeTab(tn, ed) with OMSTabControl {
             val relativePath = SafePath.empty
 
+            lazy val node = tn
+
             def onrun = () ⇒ {
               overlaying() = true
               save(() ⇒
@@ -71,7 +73,6 @@ class FileDisplayer {
         }
         case dod: DisplayableOnDemandFile ⇒
           tabs ++ new LockedEditionNodeTab(tn, editor(fileType, content))
-        //case disp: DisplayableFile ⇒ tabs ++ new EditableNodeTab(tn, editor(fileType, content))
         case _ ⇒ //FIXME for GUI workflows
       }
     }

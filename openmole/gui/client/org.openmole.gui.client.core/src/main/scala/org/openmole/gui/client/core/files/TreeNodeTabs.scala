@@ -130,6 +130,8 @@ trait TabControl {
 
 trait OMSTabControl <: TabControl {
 
+  def node: TreeNode
+
   val runButton = bs.button("Play", btn_primary)(onclick := { () ⇒
     onrun()
   })
@@ -141,7 +143,7 @@ trait OMSTabControl <: TabControl {
   val overlayTabElement = tags.div(`class` := "playTabOverlay")
 
   val overlayElement: TypedTag[HTMLDivElement] = tags.div(`class` := "overlayElement")(
-    "Starting workflow, please wait ..."
+    s"Starting ${node.name()}, please wait ..."
   )
 
   val overlaying: Var[Boolean] = Var(false)
