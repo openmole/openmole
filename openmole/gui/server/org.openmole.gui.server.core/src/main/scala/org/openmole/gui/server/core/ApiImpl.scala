@@ -1,8 +1,11 @@
 package org.openmole.gui.server.core
 
+import java.net.URL
+
 import org.openmole.core.batch.environment.BatchEnvironment.{ EndUpload, BeginUpload, EndDownload, BeginDownload }
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.misc.utils.Utils._
@@ -24,6 +27,7 @@ import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import com.github.rjeschke._
+import org.openmole.core.buildinfo
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -236,8 +240,23 @@ object ApiImpl extends Api {
     )
   }
 
-  def buildInfo() = {
-    import org.openmole.core._
-    BuildInfo(buildinfo.version, buildinfo.name, buildinfo.generationDate)
+  def buildInfo = buildinfo.info
+
+  lazy val marketIndex = {
+    val url = new URL(buildinfo.marketAddress)
+    val is = url.openStream()
+    try SerialiserService.deserialise[buildinfo.MarketIndex](is)
+    finally is.close
   }
+
+  def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
+    val url = new URL(entry.url)
+    val is = url.openStream()
+    Workspace.withTmpFile { tmp ⇒
+      try is.copy(tmp)
+      finally is.close
+      tmp.extractUncompress(safePathToFile(path))
+    }
+  }
+
 }

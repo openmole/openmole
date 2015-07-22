@@ -16,6 +16,7 @@
  */
 package org.openmole.gui.shared
 
+import org.openmole.core.buildinfo._
 import org.openmole.gui.ext.data._
 
 trait Api {
@@ -84,6 +85,10 @@ trait Api {
   def runningErrorEnvironmentAndOutputData(lines: Int): (Seq[RunningEnvironmentData], Seq[RunningOutputData])
 
   //INFO
-  def buildInfo(): BuildInfo
+  def buildInfo: OpenMOLEBuildInfo
+
+  //MARKET
+  def marketIndex: MarketIndex
+  def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
 
 }
