@@ -107,7 +107,10 @@ object TreeNodeTabs {
       else FileManager.download(
         treeNode,
         (p: FileTransferState) ⇒ {},
-        (content: String) ⇒ editor.setCode(content)
+        (content: String) ⇒ {
+          editor.setCode(content)
+          onsaved()
+        }
       )
   }
 
@@ -245,7 +248,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                   aria.controls := t.id,
                   role := "tab",
                   data("toggle") := "tab", onclick := { () ⇒ setActive(t) })(
-                    tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ println("clicked close"); --(t) }
+                    tags.button(`class` := "close", `type` := "button", onclick := { () ⇒ --(t) }
                     )("x"),
                     t.tabName()
                   )
