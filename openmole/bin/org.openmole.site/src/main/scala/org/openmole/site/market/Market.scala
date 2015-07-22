@@ -20,6 +20,7 @@ package org.openmole.site.market
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.merge.MergeStrategy
 import org.openmole.console._
+import org.openmole.core.buildinfo.MarketIndexEntry
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.site.Config
 import org.openmole.tool.file._
@@ -87,12 +88,20 @@ import java.io.File
 
 import Market._
 
-case class DeployedMarketEntry(
-  archive: String,
-  entry: MarketEntry,
-  readme: Option[String],
-  codes: Seq[String],
-  viewURL: Option[String])
+case class GeneratedMarketEntry(
+    archive: String,
+    entry: MarketEntry,
+    readme: Option[String],
+    codes: Seq[String],
+    viewURL: Option[String]) {
+  def toDeployedMarketEntry =
+    MarketIndexEntry(
+      name = entry.name,
+      archive = archive,
+      readme = readme,
+      tags = entry.tags.map(_.label)
+    )
+}
 
 class Market(repositories: Seq[MarketRepository], destination: File) {
 
@@ -100,7 +109,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
 
   def archiveDirectoryName = "market"
 
-  def generate(cloneDirectory: File, testScript: Boolean = true): Seq[DeployedMarketEntry] = {
+  def generate(cloneDirectory: File, testScript: Boolean = true): Seq[GeneratedMarketEntry] = {
     val archiveDirectory = destination / archiveDirectoryName
     archiveDirectory.mkdirs()
     for {
@@ -115,7 +124,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
       projectDirectory archiveCompress archive
       val readme = projectDirectory / "README.md"
 
-      DeployedMarketEntry(
+      GeneratedMarketEntry(
         s"$archiveDirectoryName/$fileName",
         project,
         readme.contentOption,

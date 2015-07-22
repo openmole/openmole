@@ -99,7 +99,10 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
           |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels,
       config := assemblyPath.value / "configuration/config.ini",
-      cleanFiles <+= baseDirectory { base ⇒ dir / "target" }
+      cleanFiles <++= cleanFiles in openmoleCore,
+      cleanFiles <++= cleanFiles in openmoleGUI,
+      cleanFiles <++= cleanFiles in consolePlugins,
+      cleanFiles <++= cleanFiles in guiPlugins
     )
 
   lazy val webServerDependencies = Seq(
@@ -271,6 +274,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
     ) settings (
         OsgiKeys.bundle <<= OsgiKeys.bundle dependsOn (assemble),
         organization := "org.openmole.site",
+        libraryDependencies += Libraries.xstream,
         libraryDependencies += Libraries.scalatexSite,
         libraryDependencies += Libraries.scalaLang,
         libraryDependencies += Libraries.equinoxApp,

@@ -20,7 +20,9 @@ package org.openmole.site
 import java.io.File
 import java.util.zip.GZIPInputStream
 import ammonite.ops.Path
+import com.thoughtworks.xstream.XStream
 import org.eclipse.equinox.app._
+import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.workspace.Workspace
 import org.openmole.site.market.Market
 import org.openmole.tool.file._
@@ -29,6 +31,7 @@ import scalatags.Text.all
 import scalatags.Text.all._
 import scala.sys.process.BasicIO
 import org.openmole.site.credits._
+import org.openmole.core.buildinfo
 
 object Site {
   def analytics =
@@ -78,6 +81,12 @@ class Site extends IApplication {
 
     val m = new Market(Market.entries, dest)
     val marketEntries = m.generate(Workspace.persistentDir / "market", Config.testScript)
+
+    (dest / buildinfo.marketName).withOutputStream {
+      os ⇒
+        val xstream = new XStream()
+        xstream.toXML(MarketIndex(marketEntries.map(_.toDeployedMarketEntry)), os)
+    }
 
     DocumentationPages.marketEntries = marketEntries
 

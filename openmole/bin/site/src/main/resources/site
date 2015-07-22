@@ -27,7 +27,7 @@ cd "$CURDIR"
 
 CONFIGDIR=/tmp/site_`date +%s`_$RANDOM
 
-java -Dfile.encoding=UTF-8 -Xmx3G -Xss1m -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog $@
+java -Dosgi.configuration.area="${CONFIGDIR}" -Dfile.encoding=UTF-8 -Xmx3G -Xss1m -jar "$LOCATION/plugins/org.eclipse.equinox.launcher.jar" -consoleLog $@
 
 RETURNCODE=$?
 
