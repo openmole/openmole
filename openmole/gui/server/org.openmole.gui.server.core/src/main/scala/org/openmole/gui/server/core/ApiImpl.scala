@@ -203,8 +203,10 @@ object ApiImpl extends Api {
                 Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
                   case Success(ex) ⇒
                     Try(ex.start) match {
-                      case Failure(e)  ⇒ error(e)
-                      case Success(ex) ⇒ execution.addDynamicInfo(execId, DynamicExecutionInfo(ex, outputStream))
+                      case Failure(e) ⇒ error(e)
+                      case Success(ex) ⇒
+                        val inserted = execution.addDynamicInfo(execId, DynamicExecutionInfo(ex, outputStream))
+                        if (!inserted) ex.cancel
                     }
                   case Failure(e) ⇒ error(e)
                 }

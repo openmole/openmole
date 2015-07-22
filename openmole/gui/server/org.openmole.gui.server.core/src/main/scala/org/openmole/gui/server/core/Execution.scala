@@ -40,7 +40,11 @@ class Execution {
   }
 
   def addDynamicInfo(key: ExecutionId, info: DynamicExecutionInfo) = atomic { implicit ctx ⇒
-    dynamicExecutionInfo(key) = info
+    if (staticExecutionInfo.contains(key)) {
+      dynamicExecutionInfo(key) = info
+      true
+    }
+    else false
   }
 
   def addError(key: ExecutionId, error: Failed) = atomic { implicit ctx ⇒
