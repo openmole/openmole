@@ -1,6 +1,7 @@
 package org.openmole.gui.server.core
 
 import java.net.URL
+import java.util.zip.GZIPInputStream
 
 import org.openmole.core.batch.environment.BatchEnvironment.{ EndUpload, BeginUpload, EndDownload, BeginDownload }
 import org.openmole.core.event._
@@ -251,12 +252,9 @@ object ApiImpl extends Api {
 
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
     val url = new URL(entry.url)
-    val is = url.openStream()
-    Workspace.withTmpFile { tmp ⇒
-      try is.copy(tmp)
-      finally is.close
-      tmp.extractUncompress(safePathToFile(path))
-    }
+    val is = new TarInputStream(new GZIPInputStream(url.openStream()))
+    try is.extract(safePathToFile(path))
+    finally is.close
   }
 
 }
