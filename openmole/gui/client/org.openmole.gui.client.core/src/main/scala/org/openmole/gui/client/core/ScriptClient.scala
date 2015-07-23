@@ -5,6 +5,7 @@ import org.openmole.gui.client.core.files.TreeNode._
 import org.openmole.gui.ext.data.SafePath
 import org.openmole.gui.misc.js.BootstrapTags.ScrollableTextArea.BottomScroll
 import org.openmole.gui.shared.Api
+import org.scalajs
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
@@ -40,7 +41,13 @@ object ScriptClient {
   @JSExport
   def run(): Unit = {
 
-    val shutdownButton = a(`class` := "shutdownButton", bs.glyph(glyph_off), href := "shutdown")
+    val shutdownButton = a(`class` := "shutdownButton",
+      bs.glyph(glyph_off),
+      href := "shutdown",
+      onclick := { () ⇒
+        println("close")
+        dom.window.close()
+      })
 
     val passwordChosen = Var(true)
     val passwordOK = Var(false)
@@ -160,12 +167,6 @@ object ScriptClient {
       shutdownButton
     ))
     maindiv.appendChild(shutdownButton)
-    /*val bst = new BSTextArea(10,
-      "sraiuters\nnarsitenrsati\nrsateinerst\nestiernsit\nnarsitenrsati\nrsateinerst\nestiernsit\nnarsitenrsati\nrsateinerst\nestiernsit\nnarsitenrsati\nrsateinerst\nestiernsit\nnarsitenrsati\nrsateinerst\nestiernsit\nnarsitenrsati\nrsateinerst\nestiernsit",
-      BottomScroll())
-    maindiv.appendChild(bst.get.render)*/
-    //bst.
-
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
 

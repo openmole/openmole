@@ -66,16 +66,21 @@ class Expander {
     }
   }
 
-  def getLink(linkName: String, expandId: ExpandID, visibleId: VisibleID) = {
+  def getLink(linkName: String, expandId: ExpandID, visibleId: VisibleID, todo: () ⇒ Unit = () ⇒ {}) = {
     updateMaps(expandId, visibleId)
-    tags.span(cursor := "pointer", onclick := {
-      () ⇒ setTarget(expandId, visibleId)
+    tags.span(cursor := "pointer", onclick := { () ⇒
+      setTarget(expandId, visibleId)
+      todo()
     })(linkName)
 
   }
 
-  def getGlyph(glyph: ClassKeyAggregator, linkName: String, expandId: ExpandID, visibleId: VisibleID) = {
+  def getGlyph(glyph: ClassKeyAggregator, linkName: String, expandId: ExpandID, visibleId: VisibleID, todo: () ⇒ Unit = () ⇒ {}) = {
     updateMaps(expandId, visibleId)
-    bs.glyphSpan(glyph, () ⇒ setTarget(expandId, visibleId), linkName)
+    bs.glyphSpan(glyph, () ⇒ {
+      setTarget(expandId, visibleId)
+      todo()
+    },
+      linkName)
   }
 }

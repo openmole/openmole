@@ -54,11 +54,13 @@ class ExecutionPanel extends ModalPanel {
   val expander = new Expander
 
   def updatePanelInfo = {
-    for {
-      executionInfos ← OMPost[Api].allStates.call()
+    OMPost[Api].allStates.call().foreach { executionInfos ⇒
       //FIXME select the number of lines from the panel
-      (envErrorsInfos, outputsInfos) ← OMPost[Api].runningErrorEnvironmentAndOutputData(lines = 500).call()
-    } panelInfo() = PanelInfo(executionInfos, outputsInfos, envErrorsInfos)
+      OMPost[Api].runningErrorEnvironmentAndOutputData(lines = 500).call().foreach { err ⇒
+        panelInfo() = PanelInfo(executionInfos, err._2, err._1)
+        doScrolls
+      }
+    }
   }
 
   def onOpen = () ⇒ {
@@ -71,6 +73,15 @@ class ExecutionPanel extends ModalPanel {
   def onClose = () ⇒ {
     intervalHandler().map {
       clearInterval
+    }
+  }
+
+  def doScrolls = {
+    outputTextAreas().values.foreach {
+      _.doScroll
+    }
+    envErrorTextAreas().values.foreach {
+      _.doScroll
     }
   }
 
@@ -128,9 +139,9 @@ class ExecutionPanel extends ModalPanel {
               case f: Failed ⇒ expander.getLink(executionInfo.state, id.id, errorID)
               case _         ⇒ tags.span(executionInfo.state)
             }
-            val outputLink = expander.getGlyph(glyph_list, "", id.id, outputStreamID)
+            val outputLink = expander.getGlyph(glyph_list, "", id.id, outputStreamID, () ⇒ doScrolls)
 
-            val envErrorLink = expander.getLink("EnvErr", id.id, envErrorID)
+            val envErrorLink = expander.getLink("EnvErr", id.id, envErrorID, () ⇒ doScrolls)
 
             val hiddenMap = Map(
               scriptID -> tags.div(bs.textArea(20)(staticInfo.script)),
@@ -167,15 +178,14 @@ class ExecutionPanel extends ModalPanel {
                 }.mkString("\n")
 
                 val tArea = outputTextAreas().get(id) match {
-                  case Some(t: BSTextArea) ⇒
-                    t.content = outputs
-                    t
+                  case Some(t: BSTextArea) ⇒ t
                   case None ⇒
                     val newTA = new BSTextArea(20, outputs, BottomScroll())
                     outputTextAreas() = outputTextAreas() + (id -> newTA)
                     newTA
                 }
-                tArea.get
+                tArea.setContent(outputs)
+                tArea.view
               },
               envErrorID -> {
 
@@ -188,15 +198,14 @@ class ExecutionPanel extends ModalPanel {
                 }.mkString("\n")
 
                 val tArea = envErrorTextAreas().get(id) match {
-                  case Some(t: BSTextArea) ⇒
-                    t.content = outputs
-                    t
+                  case Some(t: BSTextArea) ⇒ t
                   case None ⇒
                     val newTA = new BSTextArea(20, outputs, BottomScroll())
                     envErrorTextAreas() = envErrorTextAreas() + (id -> newTA)
                     newTA
                 }
-                tArea.get
+                tArea.setContent(outputs)
+                tArea.view
               }
             )
 
