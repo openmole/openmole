@@ -261,11 +261,8 @@ object ApiImpl extends Api {
   def listPlugins: Iterable[Plugin] =
     Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName))
 
-  def isPlugin(path: SafePath): Boolean = {
-    val file = safePathToFile(path)
-    def containsPlugin = if (file.isDirectory) file.listFilesSafe.exists(PluginManager.isPlugin) else false
-    PluginManager.isPlugin(file) || containsPlugin
-  }
+  def isPlugin(path: SafePath): Boolean =
+    !PluginManager.plugins(safePathToFile(path)).isEmpty
 
   def addPlugin(path: SafePath): Unit = {
     val file = safePathToFile(path)
