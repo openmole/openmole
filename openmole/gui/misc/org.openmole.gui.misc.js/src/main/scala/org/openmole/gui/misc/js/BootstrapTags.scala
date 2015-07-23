@@ -27,6 +27,7 @@ import scalatags.JsDom.TypedTag
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 
+import org.openmole.gui.misc.js.JsRxTags._
 import org.scalajs.jquery.jQuery
 import org.scalajs.jquery.JQuery
 import fr.iscpif.scaladget.mapping.BootstrapStatic
@@ -292,6 +293,8 @@ object BootstrapTags {
 
     sealed trait AutoScroll
 
+    case class TopScroll() extends AutoScroll
+
     case class BottomScroll() extends AutoScroll
 
     case class NoScroll() extends AutoScroll
@@ -300,33 +303,26 @@ object BootstrapTags {
 
   import ScrollableTextArea._
 
+  import scala.scalajs.js.timers._
+
   case class BSTextArea(nbRows: Int, initText: String = "", _scrollMode: AutoScroll) {
     val scrollMode: Var[AutoScroll] = Var(_scrollMode)
-    var content: String = initText
+    val tA = textArea(nbRows)(initText)
+    private val tARender: HTMLTextAreaElement = tA.render
 
-    def append(text: String) = content = content + text
-
-    def get: TypedTag[HTMLTextAreaElement] = {
-
-      val tA = textArea(nbRows)(content)
-      val tARender = tA.render
-
-      tARender.onscroll = (e: Event) ⇒ {
-        //FIXME: NOT WORKING, FIX IT !
-        println("scroll !! " + scrollMode())
-        if (tARender.scrollTop == tARender.scrollHeight.toDouble) scrollMode() = BottomScroll()
-        else scrollMode() = NoScroll()
-      }
-
-      doScroll(tARender)
-      tA
+    def view = {
+      //tARender = tA.render
+      tags.div(tARender)
     }
 
-    def doScroll(tARender: HTMLTextAreaElement) = scrollMode() match {
-      case b: BottomScroll ⇒
-        //FIXME: NOT WORKING, FIX IT !
-        tARender.scrollTop = 999.0
-      case _ ⇒
+    def setContent(out: String) = {
+      tARender.value = out
+      doScroll
+    }
+
+    def doScroll = scrollMode() match {
+      case b: BottomScroll ⇒ tARender.scrollTop = tARender.scrollHeight
+      case _               ⇒
     }
   }
 
