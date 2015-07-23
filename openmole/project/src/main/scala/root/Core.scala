@@ -2,6 +2,7 @@ package root
 
 import org.openmole.buildsystem.OMKeys._
 import com.typesafe.sbt.osgi.OsgiKeys
+import org.scalajs.sbtplugin.ScalaJSPlugin
 import root.Libraries._
 import root.ThirdParties._
 import sbt.Keys._
@@ -70,7 +71,7 @@ object Core extends Defaults {
   val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), dynamicImports = Seq("*"), imports = Seq("*")) dependsOn
     (pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
 
-  val buildinfo = OsgiProject("buildinfo", imports = Seq("*")) settings (
+  val buildinfo = OsgiProject("buildinfo", imports = Seq("*")) enablePlugins (ScalaJSPlugin) settings (
     buildInfoSettings ++
       Seq(
         sourceGenerators in Compile <+= buildInfo,

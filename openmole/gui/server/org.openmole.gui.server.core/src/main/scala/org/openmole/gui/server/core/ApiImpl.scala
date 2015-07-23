@@ -1,8 +1,13 @@
 package org.openmole.gui.server.core
 
+import java.net.URL
+import java.util.zip.GZIPInputStream
+
 import org.openmole.core.batch.environment.BatchEnvironment.{ EndUpload, BeginUpload, EndDownload, BeginDownload }
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.misc.utils.Utils._
@@ -24,6 +29,7 @@ import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import com.github.rjeschke._
+import org.openmole.core.buildinfo
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -203,8 +209,10 @@ object ApiImpl extends Api {
                 Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
                   case Success(ex) ⇒
                     Try(ex.start) match {
-                      case Failure(e)  ⇒ error(e)
-                      case Success(ex) ⇒ execution.addDynamicInfo(execId, DynamicExecutionInfo(ex, outputStream))
+                      case Failure(e) ⇒ error(e)
+                      case Success(ex) ⇒
+                        val inserted = execution.addDynamicInfo(execId, DynamicExecutionInfo(ex, outputStream))
+                        if (!inserted) ex.cancel
                     }
                   case Failure(e) ⇒ error(e)
                 }
@@ -234,8 +242,43 @@ object ApiImpl extends Api {
     )
   }
 
-  def buildInfo() = {
-    import org.openmole.core._
-    BuildInfo(buildinfo.version, buildinfo.name, buildinfo.generationDate)
+  def buildInfo = buildinfo.info
+
+  lazy val marketIndex = {
+    val url = new URL(buildinfo.marketAddress)
+    val is = url.openStream()
+    try SerialiserService.deserialise[buildinfo.MarketIndex](is)
+    finally is.close
   }
+
+  def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
+    val url = new URL(entry.url)
+    val is = new TarInputStream(new GZIPInputStream(url.openStream()))
+    try is.extract(safePathToFile(path))
+    finally is.close
+  }
+
+  def listPlugins: Iterable[Plugin] =
+    Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName))
+
+  def isPlugin(path: SafePath): Boolean = {
+    val file = safePathToFile(path)
+    def containsPlugin = if (file.isDirectory) file.listFilesSafe.exists(PluginManager.isPlugin) else false
+    PluginManager.isPlugin(file) || containsPlugin
+  }
+
+  def addPlugin(path: SafePath): Unit = {
+    val file = safePathToFile(path)
+    val plugins = PluginManager.plugins(file)
+    PluginManager.load(plugins)
+    file copy (Workspace.pluginDir / file.getName)
+  }
+
+  def removePlugin(plugin: Plugin): Unit = {
+    val file = Workspace.pluginDir / plugin.name
+    val plugins = PluginManager.plugins(file)
+    plugins.flatMap(PluginManager.bundle).foreach(_.uninstall())
+    file.recursiveDelete
+  }
+
 }

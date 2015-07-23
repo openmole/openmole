@@ -16,5 +16,9 @@
  */
 package org.openmole.core.buildinfo
 
-case class MarketIndexEntry(name: String, archive: String, readme: Option[String], tags: Seq[String])
+import org.openmole.core.buildinfo
+
+case class MarketIndexEntry(name: String, archive: String, readme: Option[String], tags: Seq[String]) {
+  def url: String = buildinfo.url(archive)
+}
 case class MarketIndex(entries: Seq[MarketIndexEntry])

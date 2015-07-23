@@ -24,7 +24,7 @@ package object buildinfo {
   def name = "L... L..."
 
   def version: String = buildinfo.BuildInfo.version
-  def versionNumber: String = version.takeWhile(_ != "-")
+  def versionNumber: String = version.takeWhile(_ != '-')
 
   def generationDate = {
     val d = Calendar.getInstance()
@@ -37,11 +37,14 @@ package object buildinfo {
 
   def siteURL =
     development match {
-      case true  ⇒ "next.openmole.org"
-      case false ⇒ s"openmole.org/all/$versionNumber"
+      case true  ⇒ "http://next.openmole.org"
+      case false ⇒ s"http://openmole.org/all/$versionNumber"
     }
 
   def marketName = "market.xml"
   def marketAddress = s"http://$siteURL/$marketName"
+  def url(entry: String): String = siteURL + "/" + entry
+
+  def info = OpenMOLEBuildInfo(version, name, generationDate)
 
 }
