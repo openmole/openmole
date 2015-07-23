@@ -6,6 +6,7 @@ import java.util.zip.GZIPInputStream
 import org.openmole.core.batch.environment.BatchEnvironment.{ EndUpload, BeginUpload, EndDownload, BeginDownload }
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
@@ -255,6 +256,29 @@ object ApiImpl extends Api {
     val is = new TarInputStream(new GZIPInputStream(url.openStream()))
     try is.extract(safePathToFile(path))
     finally is.close
+  }
+
+  def listPlugins: Iterable[Plugin] =
+    Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName))
+
+  def isPlugin(path: SafePath): Boolean = {
+    val file = safePathToFile(path)
+    def containsPlugin = if (file.isDirectory) file.listFilesSafe.exists(PluginManager.isPlugin) else false
+    PluginManager.isPlugin(file) || containsPlugin
+  }
+
+  def addPlugin(path: SafePath): Unit = {
+    val file = safePathToFile(path)
+    val plugins = PluginManager.plugins(file)
+    PluginManager.load(plugins)
+    file copy (Workspace.pluginDir / file.getName)
+  }
+
+  def removePlugin(plugin: Plugin): Unit = {
+    val file = Workspace.pluginDir / plugin.name
+    val plugins = PluginManager.plugins(file)
+    plugins.flatMap(PluginManager.bundle).foreach(_.uninstall())
+    file.recursiveDelete
   }
 
 }

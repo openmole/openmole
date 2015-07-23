@@ -303,6 +303,6 @@ case class Ready() extends ExecutionInfo {
   def running = 0L
 }
 
-@JSExport
 case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
 
+case class Plugin(name: String)
