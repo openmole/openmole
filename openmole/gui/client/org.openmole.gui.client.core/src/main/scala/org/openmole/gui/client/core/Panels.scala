@@ -1,7 +1,9 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.client.core.files.TreeNodePanel
+
 /*
- * Copyright (C) 04/07/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 24/07/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,17 +19,17 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.files.DirNode
-import org.openmole.gui.ext.data.{ TreeNodeData, SafePath }
-import org.openmole.gui.shared.Api
-import scala.concurrent.Future
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import autowire._
-import rx._
+package object panels {
 
-object Settings {
+  val marketPanel = new MarketPanel
 
-  val workspaceProjectNode: Future[SafePath] = OMPost[Api].workspaceProjectNode().call()
+  implicit val executionTriggerer = new PanelTriggerer {
+    val modalPanel = new ExecutionPanel
+  }
 
-  val authenticationKeysPath: Future[SafePath] = OMPost[Api].authenticationKeysPath().call()
+  val marketTriggerer = new PanelTriggerer {
+    val modalPanel = marketPanel
+  }
+
+  val treeNodePanel = new TreeNodePanel()(executionTriggerer)
 }

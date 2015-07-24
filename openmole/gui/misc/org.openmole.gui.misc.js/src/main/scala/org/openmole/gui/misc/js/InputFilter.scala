@@ -28,7 +28,7 @@ import rx._
 object InputFilter {
   def apply(initValue: String = "", pHolder: String = "Filter", inputID: String = filterId, size: String = "100%") = new InputFilter(initValue, pHolder, inputID, size)
 
-  val filterId: String = "inputFilter"
+  val filterId: String = uuID
 
   val protoFilterId1: String = "protoInputFilter1"
 
@@ -50,7 +50,9 @@ class InputFilter(initValue: String, pHolder: String, inputID: String, size: Str
 
   tag.oninput = (e: Event) ⇒ nameFilter() = tag.value
 
-  def contains(st: String) = st.contains(nameFilter())
+  def contains(st: String) = st.toUpperCase.contains(nameFilter().toUpperCase)
+
+  def exists(seqString: Seq[String]) = seqString.exists(contains)
 
   def clear = {
     tag.value = ""

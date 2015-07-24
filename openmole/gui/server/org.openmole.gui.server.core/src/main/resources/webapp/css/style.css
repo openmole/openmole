@@ -77,6 +77,10 @@ select::-moz-focus-inner {
     width: 70%;
 }
 
+#marketPanelID .modal-dialog {
+    width: 60%;
+}
+
 .table tbody>tr>td.vert-align{
     vertical-align: middle;
 }
@@ -532,4 +536,12 @@ overflow-y : auto;
 
 .mdRendering p{
     text-align: left;
+}
+
+.mdgrey{
+    background-color: #d2d2d2;
+}
+
+.marketTag{
+    margin-left: 3px;
 }

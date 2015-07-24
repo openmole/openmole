@@ -1,12 +1,10 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{ DirNode, TreeNodePanel }
-import org.openmole.gui.client.core.files.TreeNode._
-import org.openmole.gui.ext.data.SafePath
-import org.openmole.gui.misc.js.BootstrapTags.ScrollableTextArea.BottomScroll
+import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.shared.Api
 import org.scalajs
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
+import org.openmole.gui.client.core.panels._
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import bs._
@@ -138,10 +136,6 @@ object ScriptClient {
 
     val openFileTree = Var(true)
 
-    implicit val executionTriggerer = new PanelTriggerer {
-      val modalPanel = new ExecutionPanel
-    }
-
     val authenticationTriggerer = new PanelTriggerer {
       val modalPanel = authenticationPanel
     }
@@ -149,6 +143,8 @@ object ScriptClient {
     val execItem = dialogGlyphNavItem("executions", glyph_settings, () ⇒ executionTriggerer.triggerOpen)
 
     val authenticationItem = dialogGlyphNavItem("authentications", glyph_lock, () ⇒ authenticationTriggerer.triggerOpen)
+
+    val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen)
 
     val fileItem = dialogGlyphNavItem("files", glyph_file, todo = () ⇒ {
       openFileTree() = !openFileTree()
@@ -159,7 +155,8 @@ object ScriptClient {
         nav_pills + nav_inverse + nav_staticTop,
         fileItem,
         execItem,
-        authenticationItem
+        authenticationItem,
+        marketItem
       )
     )
     maindiv.appendChild(tags.div(
@@ -169,9 +166,9 @@ object ScriptClient {
     maindiv.appendChild(shutdownButton)
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
+    maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)
 
     Settings.workspaceProjectNode.foreach { projectsPath ⇒
-      val treeNodePanel = TreeNodePanel(DirNode(Var("projects"), Var(SafePath.sp(Seq("projects"))), 0L, ""))(executionTriggerer)
       maindiv.appendChild(
         tags.div(`class` := "fullpanel")(
           tags.div(`class` := Rx {

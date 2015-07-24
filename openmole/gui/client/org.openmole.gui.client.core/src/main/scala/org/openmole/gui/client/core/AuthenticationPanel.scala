@@ -17,19 +17,14 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.workspace.{ AuthenticationProvider, Workspace }
 import org.openmole.gui.ext.dataui.{ AuthenticationFactoryUI, PanelUI }
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
-import org.scalajs.dom.raw.HTMLDivElement
 import org.scalajs.jquery
-import scala.scalajs.js.Date
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select, Expander }
-import org.openmole.gui.misc.js.Expander._
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
-import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.ext.data._

@@ -160,6 +160,8 @@ import SafePath._
 case class SafePath(path: Seq[String], extension: FileExtension) {
   def /(safePath: SafePath) = sp(this.path ++ safePath.path, safePath.extension)
 
+  def ++(s: String) = sp(this.path :+ s, this.extension)
+
   def parent: SafePath = SafePath(path.dropRight(1), extension)
 
   def name = path.last

@@ -12,6 +12,8 @@ import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
+import org.openmole.gui.client.core.Settings._
+import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import TreeNode._
 import autowire._
@@ -36,23 +38,20 @@ import rx._
 
 object TreeNodePanel {
 
-  def apply(dirNode: DirNode)(implicit executionTriggerer: PanelTriggerer): TreeNodePanel = new TreeNodePanel(dirNode)
-
   def sons(dirNode: DirNode) = OMPost[Api].listFiles(dirNode).call()
 
 }
 
 import TreeNodePanel._
 
-class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTriggerer) {
-  val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(rootNode))
+class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
   val transferring: Var[FileTransferState] = Var(Standby())
   val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
 
-  computeAllSons(rootNode)
+  computeAllSons(manager.current)
 
   val newNodeInput: Input = bs.input("")(
     placeholder := "File name",
@@ -77,11 +76,10 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
 
   val view = tags.div(
     Rx {
-      val toDraw = dirNodeLine().drop(1)
+      val toDraw = manager.drop(1)
       val dirNodeLineSize = toDraw.size
-      var head = dirNodeLine().head
       buttonGroup()(
-        glyphButton(" Home", btn_primary, glyph_home, goToDirAction(head))(dropPairs(head)),
+        glyphButton(" Home", btn_primary, glyph_home, goToDirAction(manager.head))(dropPairs(manager.head)),
         if (dirNodeLineSize > 2) goToDirButton(toDraw(dirNodeLineSize - 3), Some("...")),
         toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
       )
@@ -93,7 +91,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
           inputGroupButton(tags.form(newNodeInput, onsubmit := { () ⇒
             {
               val newFile = newNodeInput.value
-              val currentDirNode = dirNodeLine().last
+              val currentDirNode = manager.current
               addRootDirButton.content().map {
                 _ match {
                   case dt: DirType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
@@ -108,7 +106,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
             false
           })),
           inputGroupAddon(id := "fileinput-addon")(uploadButton((fileInput: HTMLInputElement) ⇒ {
-            FileManager.upload(fileInput.files, dirNodeLine().last.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
+            FileManager.upload(fileInput.files, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
           })),
           inputGroupAddon(id := "fileinput-addon")(
             tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
@@ -117,9 +115,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
         )
       )
     }, Rx {
-      if (dirNodeLine().flatMap {
-        _.sons()
-      }.size == 0) {
+      if (manager.allNodes.size == 0) {
         tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
       }
       else {
@@ -149,7 +145,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
               transferring() = Standby()
             case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
           },
-          drawTree(dirNodeLine().last.sons())
+          drawTree(manager.current.sons())
         )
       }
     }
@@ -183,10 +179,8 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   )
 
   def goToDirAction(dn: DirNode): () ⇒ Unit = () ⇒ {
-    dirNodeLine() = dirNodeLine().zipWithIndex.filter(_._1 == dn).headOption.map {
-      case (dn, index) ⇒ dirNodeLine().take(index + 1)
-    }.getOrElse(dirNodeLine())
-    drawTree(dirNodeLine().last.sons())
+    manager.switch(dn)
+    drawTree(manager.current.sons())
   }
 
   def drawTree(tns: Seq[TreeNode]) = tags.ul(`class` := "filelist")(
@@ -199,11 +193,11 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
     case fn: FileNode ⇒
       clickableElement(fn, "file", () ⇒ {
         if (node.safePath().extension.displayable) {
-          downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(rootNode.safePath(), node, content, executionTriggerer))
+          downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(manager.root.safePath(), node, content, executionTriggerer))
         }
       })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
-      dirNodeLine() = dirNodeLine() :+ dn
+      manager + dn
     }
     )
   }
@@ -253,7 +247,7 @@ class TreeNodePanel(rootNode: DirNode)(implicit executionTriggerer: PanelTrigger
   }
 
   def refreshCurrentDirectory = {
-    refresh(dirNodeLine().last)
+    refresh(manager.current)
   }
 
   def refresh(dn: DirNode) = {

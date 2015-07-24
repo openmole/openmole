@@ -164,7 +164,7 @@ object BootstrapTags {
   val glyph_refresh = "glyphicon-refresh"
   val glyph_lock = "glyphicon-lock"
   val glyph_archive = "glyphicon-compressed"
-  val glyph_market = "glyphicon-shopping-car"
+  val glyph_market = "glyphicon-shopping-cart"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator, todo: () ⇒ Unit = () ⇒ {}): TypedTag[HTMLButtonElement] =
@@ -379,6 +379,7 @@ object BootstrapTags {
   val col_md_4 = key("col-md-4")
   val col_md_5 = key("col-md-5")
   val col_md_6 = key("col-md-6")
+  val col_md_7 = key("col-md-7")
   val col_md_8 = key("col-md-8")
   val col_md_12 = key("col-md-12")
 

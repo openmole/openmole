@@ -79,7 +79,6 @@ object TreeNodeTabs {
     val editable = Var(_editable)
 
     val editButton = bs.glyphBorderButton("", btn_primary + "editingElement", glyph_edit, () ⇒ {
-      //onedit()
       editable() = !editable()
     })
 

@@ -4,6 +4,7 @@ import java.net.URL
 import java.util.zip.GZIPInputStream
 
 import org.openmole.core.batch.environment.BatchEnvironment.{ EndUpload, BeginUpload, EndDownload, BeginDownload }
+import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager.PluginManager
@@ -253,12 +254,20 @@ object ApiImpl extends Api {
       finally is.close
     }
 
+    def mapToMd(marketIndex: MarketIndex) =
+      marketIndex.copy(entries = marketIndex.entries.map {
+        e ⇒
+          e.copy(readme = e.readme.map {
+            MarkDownProcessor(_)
+          })
+      })
+
     if (!buildinfo.development) {
       val marketFile = (webUIProjectFile / s"market${buildinfo.version}.xml")
       marketFile.cache(f ⇒ download(_.copy(f)))
-      SerialiserService.deserialise[buildinfo.MarketIndex](marketFile)
+      mapToMd(SerialiserService.deserialise[buildinfo.MarketIndex](marketFile))
     }
-    else download(SerialiserService.deserialise[buildinfo.MarketIndex](_))
+    else mapToMd(download(SerialiserService.deserialise[buildinfo.MarketIndex](_)))
   }
 
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
