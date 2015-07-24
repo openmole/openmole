@@ -88,7 +88,7 @@ trait Api {
   def buildInfo: OpenMOLEBuildInfo
 
   //MARKET
-  def marketIndex: MarketIndex
+  def marketIndex(): MarketIndex
   def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
 
   //PLUGINS
