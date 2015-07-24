@@ -539,7 +539,8 @@ overflow-y : auto;
 }
 
 .mdgrey{
-    background-color: #d2d2d2;
+    background-color: #222;
+    color: white;
 }
 
 .marketTag{
