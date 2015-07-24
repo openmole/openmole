@@ -65,7 +65,7 @@ class ExecutionPanel extends ModalPanel {
 
   def onOpen = () ⇒ {
     updatePanelInfo
-    intervalHandler() = Some(setInterval(10000) {
+    intervalHandler() = Some(setInterval(5000) {
       updatePanelInfo
     })
   }
@@ -101,7 +101,7 @@ class ExecutionPanel extends ModalPanel {
         tbody({
 
           for {
-            (id, staticInfo, executionInfo) ← panelInfo().executionInfos
+            (id, staticInfo, executionInfo) ← panelInfo().executionInfos.sortBy(_._2.startDate).reverse
           } yield {
             val startDate = s"${new Date(staticInfo.startDate).toLocaleDateString}, ${new Date(staticInfo.startDate).toLocaleTimeString}"
 

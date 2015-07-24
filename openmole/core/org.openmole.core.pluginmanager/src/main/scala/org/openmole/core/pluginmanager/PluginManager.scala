@@ -97,7 +97,7 @@ object PluginManager extends Logger {
 
   def plugins(path: File): Iterable[File] = {
     if (isPlugin(path)) List(path)
-    else if (path.isDirectory) path.listFilesSafe.flatMap(plugins)
+    else if (path.isDirectory) path.listFilesSafe.filter(isPlugin)
     else {
       Log.logger.fine("File doesn't seem to be a valid jar or directory: " + path)
       List.empty
