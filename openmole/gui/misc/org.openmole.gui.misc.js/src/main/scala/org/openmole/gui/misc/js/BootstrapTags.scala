@@ -17,6 +17,8 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.awt.dnd.Autoscroll
+
 import org.scalajs.dom.html.{ TextArea, Input }
 import org.scalajs.dom.raw
 import org.scalajs.dom.raw._
@@ -162,6 +164,7 @@ object BootstrapTags {
   val glyph_refresh = "glyphicon-refresh"
   val glyph_lock = "glyphicon-lock"
   val glyph_archive = "glyphicon-compressed"
+  val glyph_market = "glyphicon-shopping-car"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator, todo: () ⇒ Unit = () ⇒ {}): TypedTag[HTMLButtonElement] =
@@ -297,7 +300,7 @@ object BootstrapTags {
 
     case class BottomScroll() extends AutoScroll
 
-    case class NoScroll() extends AutoScroll
+    case class NoScroll(scrollHeight: Int) extends AutoScroll
 
   }
 
@@ -306,22 +309,31 @@ object BootstrapTags {
   import scala.scalajs.js.timers._
 
   case class BSTextArea(nbRows: Int, initText: String = "", _scrollMode: AutoScroll) {
+    //FIXME: ADD FEATURE: SET THE NUMBER OF LINES IN VIEW (DEFAULT IS 500)
     val scrollMode: Var[AutoScroll] = Var(_scrollMode)
-    val tA = textArea(nbRows)(initText)
+    val tA = textArea(nbRows)(initText, onscroll := { (e: Event) ⇒ setScrollMode })
     private val tARender: HTMLTextAreaElement = tA.render
 
-    def view = {
-      //tARender = tA.render
-      tags.div(tARender)
+    def view = tags.div(tARender)
+
+    def setScrollMode = {
+      val scrollHeight = tARender.scrollHeight
+      val scrollTop = tARender.scrollTop.toInt
+      scrollMode() =
+        if (scrollTop == 0) TopScroll()
+        if (scrollHeight == scrollTop) BottomScroll()
+        else NoScroll(scrollTop)
+
+      println("scrollMode " + scrollMode())
     }
 
     def setContent(out: String) = {
       tARender.value = out
-      doScroll
     }
 
     def doScroll = scrollMode() match {
       case b: BottomScroll ⇒ tARender.scrollTop = tARender.scrollHeight
+      case n: NoScroll     ⇒ tARender.scrollTop = n.scrollHeight
       case _               ⇒
     }
   }
