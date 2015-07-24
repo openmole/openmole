@@ -17,7 +17,7 @@ import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data._
-import java.io.File
+import java.io.{ InputStream, File }
 import java.nio.file._
 import org.openmole.console._
 import scala.util.{ Failure, Success, Try }
@@ -29,6 +29,7 @@ import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import com.github.rjeschke._
+import org.openmole.core.fileservice._
 import org.openmole.core.buildinfo
 
 /*
@@ -244,11 +245,20 @@ object ApiImpl extends Api {
 
   def buildInfo = buildinfo.info
 
-  lazy val marketIndex = {
-    val url = new URL(buildinfo.marketAddress)
-    val is = url.openStream()
-    try SerialiserService.deserialise[buildinfo.MarketIndex](is)
-    finally is.close
+  def marketIndex() = {
+    def download[T](action: InputStream ⇒ T): T = {
+      val url = new URL(buildinfo.marketAddress)
+      val is = url.openStream()
+      try action(is)
+      finally is.close
+    }
+
+    if (!buildinfo.development) {
+      val marketFile = (webUIProjectFile / s"market${buildinfo.version}.xml")
+      marketFile.cache(f ⇒ download(_.copy(f)))
+      SerialiserService.deserialise[buildinfo.MarketIndex](marketFile)
+    }
+    else download(SerialiserService.deserialise[buildinfo.MarketIndex](_))
   }
 
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
@@ -258,7 +268,7 @@ object ApiImpl extends Api {
     finally is.close
   }
 
-  def listPlugins: Iterable[Plugin] =
+  def listPlugins(): Iterable[Plugin] =
     Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName))
 
   def isPlugin(path: SafePath): Boolean =

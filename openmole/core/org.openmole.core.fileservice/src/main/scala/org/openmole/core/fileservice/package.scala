@@ -27,14 +27,27 @@ import scala.util.{ Failure, Success, Try }
 
 package object fileservice {
   implicit class FileServiceDecorator(file: File) {
+    private def lock(f: File) = {
+      val lock = new File(f.getPath + "-lock")
+      lock.createNewFile()
+      lock
+    }
+
+    def cache(get: File ⇒ Unit): File = {
+      lock(file).withLock { _ ⇒
+        if (!file.exists())
+          try get(file)
+          catch {
+            case t: Throwable ⇒
+              file.delete()
+              throw t
+          }
+      }
+      file
+    }
+
     def updateIfTooOld(tooOld: Duration)(update: File ⇒ Unit) = {
-
       def timeStamp(f: File) = new File(f.getPath + "-timestamp")
-      def lock(f: File) = new File(f.getPath + "-lock")
-
-      val lockFile = lock(file)
-      lockFile.createNewFile()
-
       lock(file).withLock { _ ⇒
         val ts = timeStamp(file)
         val upToDate =
@@ -55,11 +68,6 @@ package object fileservice {
 
     def updateIfChanged(update: File ⇒ Unit) = {
       def hash(f: File) = new File(f + "-hash")
-      def lock(f: File) = new File(f.getPath + "-lock")
-
-      val lockFile = lock(file)
-      lockFile.createNewFile()
-
       lock(file).withLock { _ ⇒
         val hashFile = hash(file)
         lazy val currentHash = FileService.hash(file).toString
