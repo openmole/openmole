@@ -28,14 +28,14 @@ import java.net.URI
 object Utils {
 
   implicit def fileToExtension(f: File): FileExtension = f.getName.split('.').last match {
-    case "oms"                   ⇒ OMS
-    case "scala"                 ⇒ SCALA
-    case "sh"                    ⇒ SH
-    case "tgz" | "tar.gz"        ⇒ TGZ
-    case "csv"                   ⇒ CSV
-    case "md"                    ⇒ MD
-    case "nlogo" | "csv" | "txt" ⇒ NO_EXTENSION
-    case _                       ⇒ BINARY
+    case "oms"                                ⇒ OMS
+    case "scala"                              ⇒ SCALA
+    case "sh"                                 ⇒ SH
+    case "tgz" | "tar.gz"                     ⇒ TGZ
+    case "csv"                                ⇒ CSV
+    case "md"                                 ⇒ MD
+    case "nlogo" | "csv" | "txt" | "py" | "R" ⇒ NO_EXTENSION
+    case _                                    ⇒ BINARY
   }
 
   val webUIProjectFile = Workspace.file("webui")
