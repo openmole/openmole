@@ -46,12 +46,16 @@ class MarketPanel extends ModalPanel {
           for {
             entry ← mindex.entries if tagFilter.exists(entry.tags)
           } yield {
+            val isSelected = Some(entry) == selectedEntry()
             Seq(
               bs.tr(row)(
-                bs.td(col_md_5)(tags.a(entry.name, cursor := "pointer", onclick := { () ⇒
-                  selectedEntry() = Some(entry)
+                bs.td(col_md_5 + { if (isSelected) "mdgrey" else "" })(tags.a(entry.name, cursor := "pointer", onclick := { () ⇒
+                  selectedEntry() = {
+                    if (isSelected) None
+                    else Some(entry)
+                  }
                 })),
-                bs.td(col_md_1)(tags.div(
+                bs.td(col_md_1 + { if (isSelected) "mdgrey" else "" })(tags.div(
                   selectedEntry().map { se ⇒
                     if (se == entry) {
                       bs.glyphButton(" Download", btn_primary, glyph_download_alt, () ⇒ {
@@ -64,14 +68,14 @@ class MarketPanel extends ModalPanel {
                     else tags.div
                   }
                 )),
-                bs.td(col_md_6)(tags.div(
-                  entry.tags.map { e ⇒ bs.label(e, label_default + "marketTag") }
+                bs.td(col_md_6 + { if (isSelected) "mdgrey" else "" })(tags.div(
+                  entry.tags.map { e ⇒ bs.label(e, label_primary + "marketTag") }
                 ))
               ),
-              bs.tr(row)(
+              bs.tr(row + "mdgrey")(
                 selectedEntry().map { se ⇒
-                  if (se == entry) tags.td(tags.div(`class` := "mdRendering")(
-                    RawFrag(entry.readme.getOrElse(""))))(`class` := "mdgrey", colspan := 12)
+                  if (isSelected) tags.td(tags.div(`class` := "mdRendering")(
+                    RawFrag(entry.readme.getOrElse(""))))(colspan := 12)
                   else tags.div()
                 }
               )
