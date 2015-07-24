@@ -88,11 +88,11 @@ trait Api {
   def buildInfo: OpenMOLEBuildInfo
 
   //MARKET
-  def marketIndex: MarketIndex
+  def marketIndex(): MarketIndex
   def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
 
   //PLUGINS
-  def listPlugins: Iterable[Plugin]
+  def listPlugins(): Iterable[Plugin]
   def isPlugin(path: SafePath): Boolean
   def addPlugin(path: SafePath): Unit
   def removePlugin(plugin: Plugin): Unit

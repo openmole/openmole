@@ -186,7 +186,6 @@ class Application extends IApplication {
           val variables = ConsoleVariables(args = config.args)
           console.run(variables, config.consoleWorkDirectory)
         case GUIMode ⇒
-          ApiImpl.marketIndex
           def browse(url: String) =
             if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
           val lock = new FileOutputStream(GUIServer.lockFile).getChannel.tryLock

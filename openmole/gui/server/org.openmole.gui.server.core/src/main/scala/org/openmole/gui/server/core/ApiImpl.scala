@@ -29,6 +29,7 @@ import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import com.github.rjeschke._
+import org.openmole.core.fileservice._
 import org.openmole.core.buildinfo
 
 /*
@@ -244,11 +245,15 @@ object ApiImpl extends Api {
 
   def buildInfo = buildinfo.info
 
-  lazy val marketIndex = {
-    val url = new URL(buildinfo.marketAddress)
-    val is = url.openStream()
-    try SerialiserService.deserialise[buildinfo.MarketIndex](is)
-    finally is.close
+  def marketIndex() = {
+    def download(file: File): Unit = {
+      val url = new URL(buildinfo.marketAddress)
+      val is = url.openStream()
+      try is.copy(file)
+      finally is.close
+    }
+    val marketFile = (webUIProjectFile / s"market${buildinfo.version}.xml").cache(download)
+    SerialiserService.deserialise[buildinfo.MarketIndex](marketFile)
   }
 
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
@@ -258,7 +263,7 @@ object ApiImpl extends Api {
     finally is.close
   }
 
-  def listPlugins: Iterable[Plugin] =
+  def listPlugins(): Iterable[Plugin] =
     Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName))
 
   def isPlugin(path: SafePath): Boolean =
