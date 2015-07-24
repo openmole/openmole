@@ -320,11 +320,8 @@ object BootstrapTags {
       val scrollHeight = tARender.scrollHeight
       val scrollTop = tARender.scrollTop.toInt
       scrollMode() =
-        if (scrollTop == 0) TopScroll()
-        if (scrollHeight == scrollTop) BottomScroll()
+        if ((scrollTop + tARender.offsetHeight.toInt) > scrollHeight) BottomScroll()
         else NoScroll(scrollTop)
-
-      println("scrollMode " + scrollMode())
     }
 
     def setContent(out: String) = {
