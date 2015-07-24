@@ -42,7 +42,7 @@ package object buildinfo {
     }
 
   def marketName = "market.xml"
-  def marketAddress = s"http://$siteURL/$marketName"
+  def marketAddress = url(marketName)
   def url(entry: String): String = siteURL + "/" + entry
 
   def info = OpenMOLEBuildInfo(version, name, generationDate)
