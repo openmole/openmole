@@ -100,32 +100,35 @@ case class InOutput(prototype: PrototypeData, mappings: Seq[IOMappingData[_]])
 case class InAndOutput(inputPrototype: PrototypeData, outputPrototype: PrototypeData, mapping: IOMappingData[_])
 
 sealed trait FileExtension {
-  def extension: String
-
   def displayable: Boolean
 }
 
-case class DisplayableFile(extension: String, highlighter: String, displayable: Boolean = true) extends FileExtension
+case class DisplayableFile(highlighter: String, displayable: Boolean = true) extends FileExtension
 
-case class OpenMOLEScript(extension: String, highlighter: String, displayable: Boolean = true) extends FileExtension
+case class OpenMOLEScript(highlighter: String, displayable: Boolean = true) extends FileExtension
 
-case class MDScript(extension: String, displayable: Boolean = true) extends FileExtension
+case class MDScript(displayable: Boolean = true) extends FileExtension
 
-case class DisplayableOnDemandFile(extension: String, highlighter: String, displayable: Boolean = true) extends FileExtension
+case class DisplayableOnDemandFile(highlighter: String, displayable: Boolean = true) extends FileExtension
 
-case class BinaryFile(extension: String, displayable: Boolean = false) extends FileExtension
+case class BinaryFile() extends FileExtension {
+  def displayable = false
+}
+
+case class TarGz() extends FileExtension {
+  def displayable = false
+}
 
 object FileExtension {
-  val OMS = OpenMOLEScript("oms", "scala")
-  val SCALA = DisplayableOnDemandFile("scala", "scala")
-  val NETLOGO = DisplayableOnDemandFile("nlogo", "nlogo")
-  val MD = MDScript("md")
-  val SH = DisplayableOnDemandFile("sh", "sh")
-  val CSV = DisplayableOnDemandFile("csv", "text")
-  val NO_EXTENSION = DisplayableFile("text", "text")
-  val TGZ = BinaryFile("tgz")
-  val TARGZ = BinaryFile("tar.gz")
-  val BINARY = BinaryFile("")
+  val OMS = OpenMOLEScript("scala")
+  val SCALA = DisplayableOnDemandFile("scala")
+  val NETLOGO = DisplayableOnDemandFile("nlogo")
+  val MD = MDScript()
+  val SH = DisplayableOnDemandFile("sh")
+  val CSV = DisplayableOnDemandFile("text")
+  val NO_EXTENSION = DisplayableFile("text")
+  val TGZ = TarGz()
+  val BINARY = BinaryFile()
 }
 
 sealed trait FileContent
