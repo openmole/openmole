@@ -178,16 +178,14 @@ object BootstrapTags {
   def button(content: TypedTag[HTMLElement]): TypedTag[HTMLButtonElement] = button(content, btn_default)(span(" "))
 
   def glyphButton(text: String, buttonCB: ClassKeyAggregator, glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLSpanElement] =
-    tags.span(cursor := "pointer", `class` := "btn " + buttonCB.key, `type` := "button")(glyph(glyCA))(text)(onclick := {
+    span("btn " + buttonCB.key)(cursor := "pointer", `type` := "button")(glyph(glyCA))(text)(onclick := {
       () ⇒ todo()
     })
 
   def waitingSpan(text: String, buttonCB: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
     //<a href="#" class="btn btn-info btn-lg"><span class="glyphicon glyphicon-search"></span> Search</a>
-    tags.span(`class` := "btn " + buttonCB.key)(
-      tags.span(
-        `class` := "loading"
-      )(text)
+    span("btn " + buttonCB.key)(
+      span("loading")(text)
     )
 
   def glyphBorderButton(text: String,
@@ -220,26 +218,26 @@ object BootstrapTags {
   }
 
   def uploadButton(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] = {
-    tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like")(
+    span(" btn-file")(cursor := "pointer", id := "success-like")(
       glyph(glyph_upload),
       fileInputMultiple(todo)
     )
   }
 
   def uploadButton2(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
-    tags.span(`class` := "btn-file")(
+    span("btn-file")(
       glyph(glyph_upload)(fileInput(todo))
     )
 
   def uploadGlyphSpan(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
-    tags.span(`class` := "btn-file")(
+    span("btn-file")(
       glyph(glyph_upload),
       fileInputMultiple(todo)
     )
 
   def progressBar(barMessage: String, ratio: Int): TypedTag[HTMLDivElement] =
-    tags.div(`class` := "progress")(
-      tags.div(`class` := "progress-bar", width := ratio.toString() + "%")(
+    div("progress")(
+      div("progress-bar")(width := ratio.toString() + "%")(
         barMessage
       )
     )
@@ -396,10 +394,10 @@ object BootstrapTags {
 
   def labeledField(labelString: String, element: HTMLElement) = {
     val ID = uuID
-    tags.form(`class` := "form-horizontal")(
-      tags.div(`class` := "control-group")(
-        tags.label(`class` := "control-label", `for` := ID)(labelString),
-        tags.div(`class` := "controls")(
+    form("form-horizontal")(
+      div("control-group")(
+        label(labelString, "control-label")(`for` := ID),
+        div("controls")(
           tags.div(id := ID)(element)
         )
       )
@@ -410,10 +408,10 @@ object BootstrapTags {
   val center = key("text-center")
   val spacer20 = key("spacer20")
 
-  def panel(heading: String, bodyElement: TypedTag[HTMLElement]) = tags.div(
-    `class` := "panel panel-default")(
-      tags.div(`class` := "panel-heading")(heading),
-      tags.div(`class` := "panel-body")(bodyElement.render)
+  def panel(heading: String, bodyElement: TypedTag[HTMLElement]) =
+    div("panel panel-default")(
+      div("panel-heading")(heading),
+      div("panel-body")(bodyElement.render)
     )
 
   val alert_warning = key("alert-warning")
