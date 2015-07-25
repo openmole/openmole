@@ -18,7 +18,7 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.core.buildinfo.{ MarketIndex, MarketIndexEntry }
-import org.openmole.gui.misc.js.InputFilter
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, InputFilter }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.shared.Api
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -28,7 +28,6 @@ import rx._
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 import org.scalajs.jquery
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import bs._
 
 class MarketPanel extends ModalPanel {
@@ -37,6 +36,7 @@ class MarketPanel extends ModalPanel {
   private val marketIndex: Var[Option[MarketIndex]] = Var(None)
   val tagFilter = InputFilter(pHolder = "Filter")
   val selectedEntry: Var[Option[MarketIndexEntry]] = Var(None)
+  val downloading: Var[Seq[MarketIndexEntry]] = Var(Seq())
 
   val marketTable = bs.table(striped + spacer20)(
     thead,
@@ -49,26 +49,29 @@ class MarketPanel extends ModalPanel {
             val isSelected = Some(entry) == selectedEntry()
             Seq(
               bs.tr(row)(
-                bs.td(col_md_5 + { if (isSelected) "mdgrey" else "" })(tags.a(entry.name, cursor := "pointer", onclick := { () ⇒
+                bs.td(col_md_5 + {
+                  if (isSelected) "mdgrey" else ""
+                })(tags.a(entry.name, cursor := "pointer", onclick := { () ⇒
                   selectedEntry() = {
                     if (isSelected) None
                     else Some(entry)
                   }
                 })),
-                bs.td(col_md_1 + { if (isSelected) "mdgrey" else "" })(tags.div(
-                  selectedEntry().map { se ⇒
-                    if (se == entry) {
-                      bs.glyphButton(" Download", btn_primary, glyph_download_alt, () ⇒ {
-                        OMPost[Api].getMarketEntry(se, manager.current.safePath() ++ se.name).call().foreach { d ⇒
-                          close
-                          panels.treeNodePanel.refreshCurrentDirectory
-                        }
-                      })
+                bs.td(col_md_1 + {
+                  if (isSelected) "mdgrey" else ""
+                })(tags.div(
+                  downloadButton(entry, () ⇒ {
+                    downloading() = downloading() :+ entry
+                    OMPost[Api].getMarketEntry(entry, manager.current.safePath() ++ entry.name).call().foreach { d ⇒
+                      downloading() = downloading().filterNot(_ == entry)
+                      if (downloading().isEmpty) close
+                      panels.treeNodePanel.refreshCurrentDirectory
                     }
-                    else tags.div
-                  }
+                  })
                 )),
-                bs.td(col_md_6 + { if (isSelected) "mdgrey" else "" })(tags.div(
+                bs.td(col_md_6 + {
+                  if (isSelected) "mdgrey" else ""
+                })(tags.div(
                   entry.tags.map { e ⇒ bs.label(e, label_primary + "marketTag") }
                 ))
               ),
@@ -86,6 +89,15 @@ class MarketPanel extends ModalPanel {
       )
     }
   )
+
+  def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) =
+    if (downloading().contains(entry)) {
+      bs.waitingSpan(" Downloading", btn_danger)
+    }
+    else if (Some(entry) == selectedEntry()) {
+      bs.glyphButton(" Download", btn_primary, glyph_download_alt, todo)
+    }
+    else tags.div
 
   def onOpen = () ⇒ marketIndex() match {
     case None ⇒ OMPost[Api].marketIndex.call().foreach { m ⇒

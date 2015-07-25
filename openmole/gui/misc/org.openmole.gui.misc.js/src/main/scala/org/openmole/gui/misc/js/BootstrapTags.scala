@@ -182,6 +182,14 @@ object BootstrapTags {
       () ⇒ todo()
     })
 
+  def waitingSpan(text: String, buttonCB: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
+    //<a href="#" class="btn btn-info btn-lg"><span class="glyphicon glyphicon-search"></span> Search</a>
+    tags.span(`class` := "btn " + buttonCB.key)(
+      tags.span(
+        `class` := "loading"
+      )(text)
+    )
+
   def glyphBorderButton(text: String,
                         buttonCB: ClassKeyAggregator,
                         glyCA: ClassKeyAggregator, todo: () ⇒ Unit): TypedTag[HTMLButtonElement] = {
