@@ -416,4 +416,17 @@ object BootstrapTags {
       tags.div(`class` := "panel-body")(bodyElement.render)
     )
 
+  val alert_warning = key("alert-warning")
+
+  def alert(alertType: ClassKeyAggregator, content: String, todook: () ⇒ Unit, todocancel: () ⇒ Unit) =
+    div("alertSettings alert " + alertType.key)(role := "alert")(
+      content,
+      div("spacer20")(
+        buttonGroup("left")(
+          button("OK", btn_danger, todook),
+          button("Cancel", btn_default, todocancel)
+        )
+      )
+    )
+
 }

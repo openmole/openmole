@@ -113,6 +113,8 @@ object ScriptClient {
       }
       ).render
 
+    val alert: Var[Boolean] = Var(false)
+
     val connectionDiv = tags.div(`class` := Rx {
       if (!passwordOK()) "connectionTabOverlay" else "displayOff"
     })(
@@ -123,11 +125,26 @@ object ScriptClient {
         },
           Rx {
             tags.div(
-              connectionForm(
-                tags.span(passwordInput,
-                  tags.a(onclick := { () ⇒ resetPassword }, cursor := "pointer")("Reset password")).render),
-              if (!passwordChosen()) connectionForm(passwordAgainInput) else tags.div(),
-              connectButton
+              if (alert())
+                bs.alert(alert_warning,
+                "Warning ! Reseting your password will wipe out all your preferences ! Reset anyway ?",
+                () ⇒ {
+                  alert() = false
+                  resetPassword
+                }, () ⇒ {
+                  alert() = false
+                })
+              else {
+                tags.div(
+                  connectionForm(
+                    tags.span(passwordInput,
+                      tags.a(onclick := { () ⇒
+                        alert() = true
+                      }, cursor := "pointer")("Reset password")).render),
+                  if (!passwordChosen()) connectionForm(passwordAgainInput) else tags.div(),
+                  connectButton
+                )
+              }
             )
           }
         )

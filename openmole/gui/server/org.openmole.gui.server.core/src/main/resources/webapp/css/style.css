@@ -596,3 +596,9 @@ overflow-y : auto;
     50% { opacity: 0.4; }
     100% { opacity: 1.0; }
 }
+
+.alertSettings{
+	position: relative;
+	min-width: 600px;
+	right: 50%;
+}
