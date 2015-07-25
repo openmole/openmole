@@ -510,6 +510,21 @@ overflow-y : auto;
  .inputFileStyle input[type="file"] {
     display: none;
 }
+ .inputFileStyleSmall {
+ 	background-color: #5cb85c;
+ 	color: white;
+ 	margin-top: -6px;
+ 	margin-left: -16px;
+    padding: 7px 16px;
+    cursor: pointer;
+ } 
+ .inputFileStyleSmall:hover {
+ color: black;
+ }
+
+ .inputFileStyleSmall input[type="file"] {
+    display: none;
+}
 
 .openMOLETitle{
 	color: white;

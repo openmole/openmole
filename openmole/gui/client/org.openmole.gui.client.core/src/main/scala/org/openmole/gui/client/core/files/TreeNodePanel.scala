@@ -105,9 +105,11 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             }
             false
           })),
-          inputGroupAddon(id := "fileinput-addon")(uploadButton((fileInput: HTMLInputElement) ⇒ {
-            FileManager.upload(fileInput.files, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
-          })),
+          inputGroupAddon(id := "fileinput-addon")(
+            tags.label(`class` := "inputFileStyleSmall",
+              uploadButton((fileInput: HTMLInputElement) ⇒ {
+                FileManager.upload(fileInput.files, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
+              }))),
           inputGroupAddon(id := "fileinput-addon")(
             tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
               glyph(glyph_refresh)
