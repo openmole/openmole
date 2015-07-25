@@ -122,10 +122,9 @@ case class TarGz() extends FileExtension {
 object FileExtension {
   val OMS = OpenMOLEScript("scala")
   val SCALA = DisplayableOnDemandFile("scala")
-  val NETLOGO = DisplayableOnDemandFile("nlogo")
   val MD = MDScript()
   val SH = DisplayableOnDemandFile("sh")
-  val CSV = DisplayableOnDemandFile("text")
+  val TEXT = DisplayableOnDemandFile("text")
   val NO_EXTENSION = DisplayableFile("text")
   val TGZ = TarGz()
   val BINARY = BinaryFile()

@@ -32,9 +32,8 @@ object Utils {
     case "scala"                              ⇒ SCALA
     case "sh"                                 ⇒ SH
     case "tgz" | "tar.gz"                     ⇒ TGZ
-    case "csv"                                ⇒ CSV
+    case "csv" | "nlogo" | "py" | "R" | "txt" ⇒ TEXT
     case "md"                                 ⇒ MD
-    case "nlogo" | "csv" | "txt" | "py" | "R" ⇒ NO_EXTENSION
     case _                                    ⇒ BINARY
   }
 
