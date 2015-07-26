@@ -78,42 +78,46 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     Rx {
       val toDraw = manager.drop(1)
       val dirNodeLineSize = toDraw.size
-      buttonGroup()(
-        glyphButton(" Home", btn_primary, glyph_home, goToDirAction(manager.head))(dropPairs(manager.head)),
-        if (dirNodeLineSize > 2) goToDirButton(toDraw(dirNodeLineSize - 3), Some("...")),
-        toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
+      tags.div(`class` := "tree-path",
+        buttonGroup()(
+          glyphButton(" Home", btn_primary, glyph_home, goToDirAction(manager.head))(dropPairs(manager.head)),
+          if (dirNodeLineSize > 2) goToDirButton(toDraw(dirNodeLineSize - 3), Some("...")),
+          toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
+        )
       )
     },
     Rx {
       tags.form(id := "adddir")(
-        inputGroup(navbar_left)(
-          inputGroupButton(addRootDirButton.selector),
-          inputGroupButton(tags.form(newNodeInput, onsubmit := { () ⇒
-            {
-              val newFile = newNodeInput.value
-              val currentDirNode = manager.current
-              addRootDirButton.content().map {
-                _ match {
-                  case dt: DirType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
-                    if (b) refreshCurrentDirectory
-                  }
-                  case ft: FileType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
-                    if (b) refreshCurrentDirectory
+        tags.div(`class` := "tree-header",
+          inputGroup(navbar_left)(
+            inputGroupButton(addRootDirButton.selector),
+            inputGroupButton(tags.form(newNodeInput, onsubmit := { () ⇒
+              {
+                val newFile = newNodeInput.value
+                val currentDirNode = manager.current
+                addRootDirButton.content().map {
+                  _ match {
+                    case dt: DirType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
+                      if (b) refreshCurrentDirectory
+                    }
+                    case ft: FileType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
+                      if (b) refreshCurrentDirectory
+                    }
                   }
                 }
               }
-            }
-            false
-          })),
-          inputGroupAddon(id := "fileinput-addon")(
-            tags.label(`class` := "inputFileStyleSmall",
-              uploadButton((fileInput: HTMLInputElement) ⇒ {
-                FileManager.upload(fileInput.files, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
-              }))),
-          inputGroupAddon(id := "fileinput-addon")(
-            tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
-              glyph(glyph_refresh)
-            ))
+              false
+            })),
+            inputGroupAddon(id := "fileinput-addon")(
+              tags.label(`class` := "inputFileStyleSmall",
+                uploadButton((fileInput: HTMLInputElement) ⇒ {
+                  FileManager.upload(fileInput.files, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
+                }))),
+            inputGroupAddon(id := "fileinput-addon")(
+              tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
+                glyph(glyph_refresh)
+              ))
+          )
         )
       )
     }, Rx {

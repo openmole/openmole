@@ -127,8 +127,17 @@ select::-moz-focus-inner {
     background: #c8c8fa none repeat scroll 0 0;
 }
 
+.tree-path {
+    margin-left: 5px;
+}
+
+.tree-header {
+    margin-left: -3px;
+}
+
 .tree {
-	padding-top: 20px;
+	margin-top: 20px;
+	margin-right: 15px;
 }
 
 .tree.droppable {
@@ -538,7 +547,7 @@ overflow-y : auto;
 
 .shutdownButton{
     position: absolute;
-    top: 5px;
+    top: 7px;
     right: 0;
     margin-right: 10px;
     font-size: 20px;
