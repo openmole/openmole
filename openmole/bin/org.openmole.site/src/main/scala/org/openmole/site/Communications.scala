@@ -20,6 +20,15 @@ object Communication {
   def papers: Seq[Publication] = {
     // TODO complete entries
     Seq(
+      InProceedings(
+        "Reuillon.et.al.2015-2",
+        Authors("Romain Reuillon", "Mathieu Leclaire", "Jonathan Passerat-Palmbach"),
+        Title("Model Exploration Using OpenMOLE-a workflow engine for large scale distributed design of experiments and parameter tuning"),
+        BibtexPages("1-8"),
+        BookTitle("Proceedings of the 13th International Conference on High Performance Computing & Simulation (HPCS 2015)"),
+        Url("https://hal.inria.fr/hal-01163457/document"),
+        Year(2015)
+      ),
       Article(
         "Reuillon.et.al.2015-1",
         Authors("Romain Reuillon", "Clara Schmitt", "Ricardo De Aldama", "Jean-Baptiste Mouret"),
@@ -164,6 +173,7 @@ object Communication {
     )
 
     val slides = Seq(
+      Media("OpenMOLE tutorial HPCS", "openmole-com/slides/2015/hpcs", "2015"),
       Media("OpenMOLE overview", "slides2014", "2014"),
       Media("The OpenMOLE platform (Complex-systems numerical campus)", "openmole-com/slides/2013/campus/pres.html", "2013"),
       Media("The calibration of complex-system models with OpenMOLE (ECQTG)", "openmole-com/slides/2013/ectqg/pres.html", "2013"),

@@ -37,7 +37,10 @@ trait ExecutionJob {
         case _      ⇒
       }
 
-      EventDispatcher.trigger(environment, new Environment.JobStateChanged(this, state, this.state))
+      if (state != this.state) {
+        EventDispatcher.trigger(environment, new Environment.JobStateChanged(this, state, this.state))
+      }
+
       _state = state
     }
   }
