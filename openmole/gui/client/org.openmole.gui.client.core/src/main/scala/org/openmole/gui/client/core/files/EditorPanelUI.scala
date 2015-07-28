@@ -61,6 +61,8 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
   def setCode(content: String) = editor.getSession().setValue(content)
 
+  def setReadOnly(b: Boolean) = editor.setReadOnly(b)
+
   def complete() = {
     if (editor.completer == null)
       editor.completer = fr.iscpif.scaladget.ace.autocomplete

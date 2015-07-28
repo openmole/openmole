@@ -77,6 +77,12 @@ object TreeNodeTabs {
                              _editable: Boolean = false) extends TreeNodeTab {
     val editorElement = editor.view
     val editable = Var(_editable)
+    //editor.setReadOnly(true)
+
+    Obs(editable) {
+      println("setEDITAB")
+      editor.setReadOnly(!editable())
+    }
 
     val editButton = bs.glyphBorderButton("", btn_primary + "editingElement", glyph_edit, () ⇒ {
       editable() = !editable()
@@ -88,13 +94,7 @@ object TreeNodeTabs {
       }
     )
 
-    lazy val overlayElement = tags.div(
-      Rx {
-        `class` := {
-          if (editable()) "" else "editTabOverlay"
-        }
-      }
-    )
+    lazy val overlayElement = tags.div
 
     def fileContent = AlterableOnDemandFileContent(treeNode.safePath(), editor.code, () ⇒ editable())
 
