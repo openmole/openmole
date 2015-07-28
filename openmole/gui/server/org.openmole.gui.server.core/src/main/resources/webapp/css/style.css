@@ -128,11 +128,11 @@ select::-moz-focus-inner {
 }
 
 .tree-path {
-    margin-left: 5px;
+    margin-left: 3px;
 }
 
 .tree-header {
-    margin-left: -3px;
+    margin-left: -4px;
 }
 
 .tree {
@@ -156,22 +156,26 @@ select::-moz-focus-inner {
 
 .file-info {
     float: right;
-    margin-top: 6px;
+    margin-top: 1px;
 }
+
 .dir {
     background-color: #337ab7;
     color: white;
-    border-radius:5px;
-    display:inline-block;
-    padding:2px 8px;
-    text-decoration:none
+    border-radius: 5px;
+    display: inline-block;
+    padding: 0px 8px;
+    padding-right: 8px;
+    text-decoration: none
     float: left;
+    margin-bottom: 4px;
 }
 
 
 .file-list{
 	list-style-type: none;
 	width: 100%;
+	font-size: 14px;
 }
 
 .glyphitem {
@@ -299,12 +303,16 @@ select::-moz-focus-inner {
    font-size: 14px;
 }
 
-.filesize{
+.file-size {
 	color: lightgray;
 	padding-right: 7px;
 	padding-left: 3px;
 	float: right;
 	font-size: 12px;
+}
+
+.file-glyph {
+    margin-top: 2px;
 }
 
 /* -- Manage the file left panel transition*/

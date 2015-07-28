@@ -323,21 +323,19 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           tags.i(tn.name())
         ),
       tags.div(`class` := "file-info",
-        tags.span(`class` := "filesize")(tags.i(tn.readableSize)),
+        tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
         tags.span(id := Rx {
-          "treeline" + {
-            if (lineHovered()) "-hover" else ""
-          }
+          "treeline" + { if (lineHovered()) "-hover" else "" }
         })(
-          glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem"),
-          glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem"),
-          a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem"), href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
+          glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem file-glyph"),
+          glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem file-glyph"),
+          a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"), href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
           tn.safePath().extension match {
             case FileExtension.TGZ ⇒ glyphSpan(glyph_archive, () ⇒ {
               OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
                 refreshCurrentDirectory
               }
-            })(`class` := "glyphitem")
+            })(`class` := "glyphitem file-glyph")
             case _ ⇒
           }
 
