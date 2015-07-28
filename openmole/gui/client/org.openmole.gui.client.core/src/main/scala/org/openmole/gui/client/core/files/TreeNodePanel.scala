@@ -125,33 +125,18 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
       }
       else {
-        tags.div(`class` := "tree" + dragState() /*,
-          ondragover := { (e: DragEvent) ⇒
-            dragState() = " droppable hover"
-            e.dataTransfer.dropEffect = "copy"
-            e.preventDefault
-            e.stopPropagation
-            false
-          },
-          ondragend := { (e: DragEvent) ⇒
-            dragState() = ""
-            false
-          },
-          ondrop := { (e: DragEvent) ⇒
-            dragState() = ""
-            FileManager.upload(e.dataTransfer.files, dirNodeLine().last.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
-            e.preventDefault
-            e.stopPropagation
-            false
-          }*/ )(
-          transferring() match {
-            case _: Standby ⇒
-            case _: Transfered ⇒
-              refreshCurrentDirectory
-              transferring() = Standby()
-            case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
-          },
-          drawTree(manager.current.sons())
+        tags.table(`class` := "tree" + dragState())(
+          tags.tr(
+            tags.td(style := "height:60px",
+              transferring() match {
+                case _: Standby ⇒
+                case _: Transfered ⇒
+                  refreshCurrentDirectory
+                  transferring() = Standby()
+                case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
+              })
+          ),
+          tags.tr(drawTree(manager.current.sons()))
         )
       }
     }
@@ -189,10 +174,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     drawTree(manager.current.sons())
   }
 
-  def drawTree(tns: Seq[TreeNode]) = tags.ul(`class` := "filelist")(
-    for (tn ← tns.sorted(TreeNodeOrdering)) yield {
-      drawNode(tn)
-    }
+  def drawTree(tns: Seq[TreeNode]) = tags.table(`class` := "file-list")(
+    for (tn ← tns.sorted(TreeNodeOrdering)) yield { drawNode(tn) }
   )
 
   def drawNode(node: TreeNode) = node match {
@@ -202,10 +185,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(manager.root.safePath(), node, content, executionTriggerer))
         }
       })
-    case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
-      manager + dn
-    }
-    )
+    case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ manager + dn)
   }
 
   def clickableElement(tn: TreeNode,
@@ -215,7 +195,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       case Some(etn: TreeNode) ⇒
         if (etn == tn) {
           editNodeInput.value = tn.name()
-          tags.li(
+          tags.tr(
             tags.form(id := "editnode")(
               editNodeInput,
               onsubmit := { () ⇒
@@ -310,18 +290,13 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
     val lineHovered: Var[Boolean] = Var(false)
 
-    val render = tags.li(
-      onmouseover := { () ⇒
-        lineHovered() = true
-      },
-      onmouseout := { () ⇒
-        lineHovered() = false
-      }, ondragstart := { (e: DragEvent) ⇒
+    val render = tags.tr(
+      onmouseover := { () ⇒ lineHovered() = true },
+      onmouseout := { () ⇒ lineHovered() = false }, ondragstart := { (e: DragEvent) ⇒
         e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
         draggedNode() match {
           case Some(t: TreeNode) ⇒
-          case _ ⇒
-            draggedNode() = Some(tn)
+          case _                 ⇒ draggedNode() = Some(tn)
         }
         true
       }, ondragenter := { (e: DragEvent) ⇒
@@ -333,12 +308,11 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       },
       ondrop := {
         dropAction(tn)
-      }, tags.span(
+      },
+      tags.div(style := "float:left",
         cursor := "pointer",
         draggable := true,
-        onclick := { () ⇒
-          todo()
-        },
+        onclick := { () ⇒ todo() },
         `class` := classType)(
           tags.i(id := "plusdir", `class` := {
             tn.hasSons match {
@@ -348,7 +322,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           }),
           tags.i(tn.name())
         ),
-      tags.span(
+      tags.div(`class` := "file-info",
         tags.span(`class` := "filesize")(tags.i(tn.readableSize)),
         tags.span(id := Rx {
           "treeline" + {
