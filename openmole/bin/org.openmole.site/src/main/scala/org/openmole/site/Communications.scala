@@ -20,6 +20,15 @@ object Communication {
   def papers: Seq[Publication] = {
     // TODO complete entries
     Seq(
+      Article("Delay.et.al.2015",
+        Authors("Etienne Delay", "Cyril Piou", "Hervé Quénol"),
+        Title("The mountain environment, a driver for adaptation to climate change"),
+        BookTitle("Land Use Policy"),
+        Year(2015),
+        Volume(48),
+        BibtexPages("51-62"),
+        Url("https://halshs.archives-ouvertes.fr/halshs-01155674v1")
+      ),
       InProceedings(
         "Reuillon.et.al.2015-2",
         Authors("Romain Reuillon", "Mathieu Leclaire", "Jonathan Passerat-Palmbach"),
