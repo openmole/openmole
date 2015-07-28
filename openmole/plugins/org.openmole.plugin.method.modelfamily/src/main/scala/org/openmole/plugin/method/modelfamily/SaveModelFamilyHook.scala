@@ -51,7 +51,7 @@ abstract class SaveModelFamilyHook(parameters: GAParameters[ModelFamilyCalibrati
 
     val file = executionContext.relativise(path.from(context))
     file.createParentDir
-    file.withWriter { w ⇒
+    file.withWriter() { w ⇒
       w.write(headers + "\n")
       for {
         ((id, inputs), outputs) ← idArray zip inputsArray zip outputsArray
