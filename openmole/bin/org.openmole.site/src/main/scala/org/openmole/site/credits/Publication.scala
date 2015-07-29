@@ -47,7 +47,7 @@ class Publication(val publication: BibtexEntry) {
 
     val f = new File(dest, bibfile)
 
-    f.withWriter { writer ⇒
+    f.withWriter() { writer ⇒
       writer.write(publication.toBibTeX)
     }
   }

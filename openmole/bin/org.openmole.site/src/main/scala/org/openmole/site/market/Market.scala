@@ -70,7 +70,7 @@ object Market extends Logger {
 
   def entries = Seq(
     MarketRepository(githubMarket,
-      MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation)),
+      MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation, scala)),
       MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
       MarketEntry("Hello World in R", "R-hello", Seq(R, data, native)),
       MarketEntry("Fire in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
