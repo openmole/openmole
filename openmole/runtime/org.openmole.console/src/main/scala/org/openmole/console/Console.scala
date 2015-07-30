@@ -154,6 +154,7 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
               loop.loopWithExitCode
             }
           case Some(script) ⇒
+            ScalaREPL.warmup
             val scriptFile = new File(script)
             val project = new Project(workDirectory.getOrElse(scriptFile.getParentFileSafe))
             project.compile(scriptFile, args.args) match {

@@ -196,14 +196,16 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         if (etn == tn) {
           editNodeInput.value = tn.name()
           tags.tr(
-            tags.form(id := "editnode")(
-              editNodeInput,
-              onsubmit := { () ⇒
-                {
-                  renameNode(tn, editNodeInput.value)
-                  false
+            tags.div(
+              tags.form(id := "editnode")(
+                editNodeInput,
+                onsubmit := { () ⇒
+                  {
+                    renameNode(tn, editNodeInput.value)
+                    false
+                  }
                 }
-              }
+              )
             )
           )
         }
