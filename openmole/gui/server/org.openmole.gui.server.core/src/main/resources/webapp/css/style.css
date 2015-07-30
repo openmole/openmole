@@ -150,7 +150,7 @@ select::-moz-focus-inner {
 .file {
     display:inline-block;
     text-decoration:none;
-    float: left;
+    margin-bottom: 2px;
     color: white;
 }
 
@@ -168,7 +168,7 @@ select::-moz-focus-inner {
     padding-right: 8px;
     text-decoration: none
     float: left;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
 }
 
 
@@ -312,7 +312,11 @@ select::-moz-focus-inner {
 }
 
 .file-glyph {
-    margin-top: 2px;
+    margin-top: 0px;
+}
+
+.edit-node {
+    height: 26px;
 }
 
 /* -- Manage the file left panel transition*/

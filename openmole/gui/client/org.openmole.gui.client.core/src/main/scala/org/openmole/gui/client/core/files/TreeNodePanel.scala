@@ -62,6 +62,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val editNodeInput: Input = bs.input("")(
     placeholder := "Name",
     width := "130px",
+    height := "26px",
     autofocus
   ).render
 
@@ -196,8 +197,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         if (etn == tn) {
           editNodeInput.value = tn.name()
           tags.tr(
-            tags.div(
-              tags.form(id := "editnode")(
+            tags.div(`class` := "edit-node",
+              tags.form(
                 editNodeInput,
                 onsubmit := { () ⇒
                   {
