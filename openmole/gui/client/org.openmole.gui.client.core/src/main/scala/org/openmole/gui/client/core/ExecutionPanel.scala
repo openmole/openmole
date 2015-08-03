@@ -238,10 +238,10 @@ class ExecutionPanel extends ModalPanel {
             )
 
             Seq(bs.tr(row)(
-              bs.td(col_md_3)(visibleClass(id.id, scriptID))(scriptLink),
+              bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink),
               bs.td(col_md_2 + "small")(Utils.longToDate(staticInfo.startDate)),
               bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + details.running),
-              bs.td(col_md_1)(bs.glyph(bs.glyph_flag), " " + details.ratio),
+              bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + details.ratio),
               bs.td(col_md_1)(durationString),
               bs.td(col_md_1)(stateLink)(`class` := executionInfo.state + "State"),
               bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
