@@ -61,7 +61,7 @@ class ExecutionPanel extends ModalPanel {
 
   def onOpen = () ⇒ {
     updatePanelInfo
-    intervalHandler() = Some(setInterval(45000) {
+    intervalHandler() = Some(setInterval(5000) {
       updatePanelInfo
     })
   }
