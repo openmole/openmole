@@ -14,7 +14,6 @@ import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.gui.server.core.Utils._
-import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data._
@@ -94,6 +93,7 @@ object ApiImpl extends Api {
       val archiveFile = safePathToFile(treeNodeData.safePath)
       val parentFile = archiveFile.getParentFile
       archiveFile.extractUncompress(parentFile)
+      parentFile.applyRecursive((f: File) ⇒ f.setWritable(true))
     case _ ⇒
   }
 
