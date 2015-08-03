@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.Utils
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
@@ -49,12 +49,14 @@ class EnvironmentErrorPanel {
         tags.tr(
           tags.a(s"${error.errorMessage} ($nb, ${Utils.longToDate(error.date)})", cursor := "pointer", onclick := {
             () ⇒
+              panels.environmentStackPanel.content() = error.stack.stackTrace
+              panels.environmentStackTriggerer.open
               expandedError() = expandedError() match {
                 case None ⇒ Some(error)
                 case _    ⇒ None
               }
           })
-        ),
+        ) /*,
         tags.tr(
           expandedError().map { expanded ⇒
             tags.div(
@@ -62,7 +64,7 @@ class EnvironmentErrorPanel {
               else ""
             )
           }
-        )
+        )*/
       )
     }).flatten: _*
   )

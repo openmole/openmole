@@ -21,7 +21,6 @@ import org.openmole.gui.client.core.EnvironmentErrorPanel.SelectableLevel
 import org.openmole.gui.misc.js.BootstrapTags.ScrollableTextArea.BottomScroll
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
-import org.scalajs.jquery
 import scala.concurrent.duration.Duration
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select, Expander }
@@ -62,7 +61,7 @@ class ExecutionPanel extends ModalPanel {
 
   def onOpen = () ⇒ {
     updatePanelInfo
-    intervalHandler() = Some(setInterval(5000) {
+    intervalHandler() = Some(setInterval(45000) {
       updatePanelInfo
     })
   }
@@ -183,19 +182,22 @@ class ExecutionPanel extends ModalPanel {
                           bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + e.running),
                           bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + e.done),
                           bs.td(col_md_1)(bs.glyph(bs.glyph_fire), " " + e.failed),
-                          bs.td(col_md_1)(bs.glyphSpan(bs.glyph_exclamation + {
-                            if (envErrorVisible().contains(e.envId)) " executionVisible" else ""
-                          }, () ⇒ {
-                            if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot {
-                              _ == e.envId
-                            }
-                            else envErrorVisible() = envErrorVisible() :+ e.envId
-                          })
+                          bs.td(col_md_1)(bs.span({
+                            "blue" + { if (envErrorVisible().contains(e.envId)) " executionVisible" else "" }
+                          })(cursor := "pointer", onclick := {
+                            () ⇒
+                              {
+                                if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot {
+                                  _ == e.envId
+                                }
+                                else envErrorVisible() = envErrorVisible() :+ e.envId
+                              }
+                          }
+                          )("details")
                           )),
                           bs.tr(row)(
                             bs.td(col_md_12)(
                               `class` := {
-                                println("contains ? " + e.envId + " " + envErrorVisible().contains(e.envId))
                                 if (envErrorVisible().contains(e.envId)) "displayNone" else ""
                               },
                               colspan := 12,
@@ -275,7 +277,7 @@ class ExecutionPanel extends ModalPanel {
   }
 
   val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := {
-    () ⇒
+    () ⇒ close
   }
   )
 
@@ -299,7 +301,7 @@ class ExecutionPanel extends ModalPanel {
     )
   )
 
-  jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ {
+  /*jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ {
     onClose()
-  })
+  })*/
 }

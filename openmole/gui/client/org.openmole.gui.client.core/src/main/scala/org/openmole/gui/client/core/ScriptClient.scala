@@ -163,6 +163,8 @@ object ScriptClient {
 
     val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen)
 
+    val envItem = dialogGlyphNavItem("eee", glyph_exclamation, () ⇒ environmentStackTriggerer.open)
+
     val fileItem = dialogGlyphNavItem("files", glyph_file, todo = () ⇒ {
       openFileTree() = !openFileTree()
     })
@@ -184,6 +186,8 @@ object ScriptClient {
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)
+    maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)
+    maindiv.appendChild(environmentStackTriggerer.modalPanel.dialog.render)
 
     Settings.workspaceProjectNode.foreach { projectsPath ⇒
       maindiv.appendChild(

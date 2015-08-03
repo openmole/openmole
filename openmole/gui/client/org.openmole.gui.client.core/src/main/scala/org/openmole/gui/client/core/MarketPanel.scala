@@ -27,7 +27,6 @@ import autowire._
 import rx._
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
-import org.scalajs.jquery
 import bs._
 
 class MarketPanel extends ModalPanel {
@@ -126,11 +125,4 @@ class MarketPanel extends ModalPanel {
     footerDialog(closeButton)
   )
 
-  def close: Unit = {
-    jquery.jQuery("#" + modalID).modal("hide")
-  }
-
-  jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ {
-    onClose()
-  })
 }

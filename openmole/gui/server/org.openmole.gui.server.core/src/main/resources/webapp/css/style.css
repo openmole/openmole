@@ -77,12 +77,13 @@ select::-moz-focus-inner {
     width: 70%;
 }
 
-#marketPanelID .modal-dialog {
+#marketPanelID,#envStackID .modal-dialog {
     width: 60%;
 }
 
 .table tbody>tr>td.vert-align{
     vertical-align: middle;
+    padding-top: 20px;
 }
 
 .table th,tr{
@@ -645,7 +646,6 @@ textarea.form-control {
 
 .environmentPanelError{
     background-color: white;
-    height: 400px;
 	margin: 10 10 0 10;
 	padding: 10 10;   
 }
@@ -655,7 +655,7 @@ div table tr {
 }
 
 .scrollable{
-    height: 400px;
+    height: 100%;
 }
 
 .displayNone{
@@ -665,4 +665,13 @@ div table tr {
 .width40{
 	width: 200px;
 	float: right;
+}
+
+.blue {
+	color:#3086b5;
+}
+
+.table tbody>tr>td.vert-align {
+    padding-top: 10px;
+	
 }
