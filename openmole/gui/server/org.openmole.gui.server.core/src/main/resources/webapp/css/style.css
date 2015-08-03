@@ -386,9 +386,9 @@ overflow-y : auto;
 
 .overlayElement{
     position: absolute;
-    top: 200px;
-    margin-left: 32%;
-    width: 400px;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
     color: white;
     font-size: 25;
     z-index: 25;
@@ -510,6 +510,10 @@ overflow-y : auto;
     float: left;
 }
 
+.right{
+    float: right;
+}
+
 .authSave{
  	margin-right: 15px;
  	margin-top: -7px;
@@ -627,4 +631,32 @@ overflow-y : auto;
 	position: relative;
 	min-width: 600px;
 	right: 50%;
+}
+
+textarea.form-control {
+  height: 98%;
+}
+
+.environmentPanelError{
+    background-color: white;
+    height: 400px;
+	margin: 10 10 0 10;
+	padding: 10 10;   
+}
+
+div table tr {
+	text-align: left;
+}
+
+.scrollable{
+    height: 400px;
+}
+
+.displayNone{
+    display: none;
+}
+
+.width40{
+	width: 200px;
+	float: right;
 }

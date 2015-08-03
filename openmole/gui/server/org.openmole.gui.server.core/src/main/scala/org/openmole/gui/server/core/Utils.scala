@@ -17,6 +17,8 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.logging.Level
+
 import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data.SafePath._
@@ -24,6 +26,8 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileExtension._
 import java.io.File
 import java.net.URI
+
+import scala.concurrent.duration.Duration
 
 object Utils {
 
@@ -65,7 +69,10 @@ object Utils {
 
   implicit def fileToOptionSafePath(f: File): Option[SafePath] = Some(fileToSafePath(f))
 
-  //def relativeSafePathToFile(sp: SafePath): File = Utils.webUIProjectSafePath / sp
+  implicit def javaLeveltoErrorLevel(level: Level): ErrorStateLevel = {
+    if (level.intValue >= java.util.logging.Level.WARNING.intValue) ErrorLevel()
+    else DebugLevel()
+  }
 
   def authenticationFile(keyFileName: String): File = new File(authenticationKeysFile, keyFileName)
 

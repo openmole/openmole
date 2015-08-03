@@ -180,7 +180,7 @@ object ApiImpl extends Api {
                         Runnings.append(envId, env) {
                           re ⇒
                             re.copy(environmentError = EnvironmentError(envId, ex.exception.getMessage,
-                              ErrorBuilder(ex.exception)) :: re.environmentError.takeRight(50))
+                              ErrorBuilder(ex.exception), ex.creationTime) :: re.environmentError.take(50))
                         }
                       case (env, bdl: BeginDownload) ⇒ Runnings.append(envId, env) {
                         re ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1))
