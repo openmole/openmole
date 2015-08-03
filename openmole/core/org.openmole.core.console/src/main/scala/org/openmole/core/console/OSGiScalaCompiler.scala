@@ -50,7 +50,7 @@ class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory
 
     val result = bundles.map { original.context.newClassPath }.toList
     val vdcp = original.context.newClassPath(virtualDirectory)
-    new MergedClassPath(result ::: original :: vdcp :: Nil, original.context) {
+    new MergedClassPath(vdcp :: result ::: original :: Nil, original.context) {
       override def asURLs = List.empty
     }
   }
