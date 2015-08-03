@@ -52,7 +52,9 @@ class ExecutionPanel extends ModalPanel {
   def updatePanelInfo = {
     OMPost[Api].allStates.call().foreach { executionInfos ⇒
       //FIXME select the number of lines from the panel
-      OMPost[Api].runningErrorEnvironmentAndOutputData(lines = nbOutLineInput.value.toInt).call().foreach { err ⇒
+      OMPost[Api].runningErrorEnvironmentAndOutputData(lines = nbOutLineInput.value.toInt, errorLevelSelector.content().map {
+        _.level
+      }.getOrElse(ErrorLevel())).call().foreach { err ⇒
         panelInfo() = PanelInfo(executionInfos, err._2, err._1)
         doScrolls
       }
@@ -113,7 +115,7 @@ class ExecutionPanel extends ModalPanel {
     (SelectableLevel(level, level.name), emptyCK)
   }, Some(envLevel()), btn_primary, () ⇒ errorLevelSelector.content().map { l ⇒ envLevel() = l.level })
 
-  val nbOutLineInput = bs.input(50.toString).render
+  val nbOutLineInput = bs.input("500")(width := "60px").render
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${completed} / ${completed + running + ready}"
 
@@ -181,7 +183,9 @@ class ExecutionPanel extends ModalPanel {
                           bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + e.done),
                           bs.td(col_md_1)(bs.glyph(bs.glyph_fire), " " + e.failed),
                           bs.td(col_md_1)(bs.span({
-                            "blue" + { if (envErrorVisible().contains(e.envId)) " executionVisible" else "" }
+                            "blue" + {
+                              if (envErrorVisible().contains(e.envId)) " executionVisible" else ""
+                            }
                           })(cursor := "pointer", onclick := {
                             () ⇒
                               {
@@ -283,23 +287,22 @@ class ExecutionPanel extends ModalPanel {
     headerDialog(
       tags.div(
         tags.b("Executions"),
-        bs.div("width40")(
-          tags.div("Error level and history lenght"),
-          inputGroupButton(
-            errorLevelSelector.selector,
+        tags.div(
+          bs.div("width40")(
+            tags.label("Output history "),
             nbOutLineInput
+          ),
+          bs.div("width40")(
+            tags.label("Environment error level "),
+            errorLevelSelector.selector
           )
         )
-      ),
-      bodyDialog(`class` := "executionTable")(
-        executionTable),
-      footerDialog(
-        closeButton
-      )
+      )),
+    bodyDialog(`class` := "executionTable")(
+      executionTable),
+    footerDialog(
+      closeButton
     )
   )
 
-  /*jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ {
-    onClose()
-  })*/
 }

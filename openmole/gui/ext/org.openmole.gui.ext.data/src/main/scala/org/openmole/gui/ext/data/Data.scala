@@ -244,7 +244,7 @@ case class ErrorLevel() extends ErrorStateLevel {
   val name = "ERROR"
 }
 
-case class EnvironmentError(id: EnvironmentId, errorMessage: String, stack: Error, date: Long)
+case class EnvironmentError(id: EnvironmentId, errorMessage: String, stack: Error, date: Long, level: ErrorStateLevel)
 
 case class NetworkActivity(downloadingFiles: Int = 0,
                            downloadedSize: Long = 0L,

@@ -663,8 +663,11 @@ div table tr {
 }
 
 .width40{
-	width: 200px;
+	position: relative;
 	float: right;
+	width: 200px;
+	padding-top: 25px;
+	padding-bottom: 5px;
 }
 
 .blue {
@@ -674,4 +677,10 @@ div table tr {
 .table tbody>tr>td.vert-align {
     padding-top: 10px;
 	
+}
+
+label{
+	display: block;
+    width: 250px;
+    text-align: left;
 }
