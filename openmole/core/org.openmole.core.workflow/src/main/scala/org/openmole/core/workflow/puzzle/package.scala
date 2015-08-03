@@ -28,12 +28,6 @@ package puzzle {
 
   trait PuzzlePackage {
 
-    implicit class PuzzleDecorator(puzzle: Puzzle) extends TransitionDecorator {
-      def from = puzzle
-      def last = puzzle.lasts.head
-      def +(p: Puzzle) = Puzzle.merge(puzzle, p)
-    }
-
     class PuzzlePieceDecorator(puzzle: PuzzlePiece) extends HookDecorator[PuzzlePiece] with EnvironmentDecorator[PuzzlePiece] with SourceDecorator[PuzzlePiece] with TransitionDecorator {
       def from = puzzle.buildPuzzle
 
@@ -50,8 +44,6 @@ package puzzle {
         puzzle.copy(grouping = Some(strategy))
     }
 
-    implicit def pieceOfPuzzleToPuzzleDecorator(piece: PuzzlePiece) = piece.buildPuzzle
-
     implicit def capsuleToPuzzlePieceDecorator(capsule: Capsule) = new {
       def toPuzzlePiece = PuzzlePiece(Slot(capsule))
     }
@@ -59,6 +51,15 @@ package puzzle {
     implicit def slotToPuzzlePieceDecorator(slot: Slot) = new {
       def toPuzzlePiece = PuzzlePiece(slot)
     }
+
+    implicit def puzzlePuzzlePieceDecoration(puzzle: PuzzlePiece) = new PuzzlePieceDecorator(puzzle)
+    implicit def capsulePuzzlePieceDecoration(capsule: Capsule) = new PuzzlePieceDecorator(capsule.toPuzzlePiece)
+    implicit def slotPuzzlePieceDecoration(slot: Slot) = new PuzzlePieceDecorator(slot.toPuzzlePiece)
+    implicit def taskPuzzlePieceDecoration(task: Task): PuzzlePieceDecorator = new PuzzlePieceDecorator(task.toCapsule.toPuzzlePiece)
+    implicit def taskMoleBuilderPuzzlePieceDecoration(taskBuilder: TaskBuilder) = new PuzzlePieceDecorator(taskBuilder.toTask.toCapsule.toPuzzlePiece)
+    implicit def puzzlePieceMoleExecutionConverter(puzzle: PuzzlePiece) = puzzle.buildPuzzle.toExecution
+    implicit def puzzlePieceMoleConverter(puzzle: PuzzlePiece) = puzzle.buildPuzzle.toMole
+    implicit def pieceOfPuzzleToPuzzleDecorator(piece: PuzzlePiece) = piece.buildPuzzle
 
     implicit def capsulePuzzleDecorator(capsule: Capsule) = new {
       def toPuzzle: Puzzle = Puzzle(Slot(capsule), List(capsule))
@@ -68,16 +69,23 @@ package puzzle {
       def toPuzzle = Puzzle(slot, List(slot.capsule))
     }
 
+    implicit class PuzzleDecorator(puzzle: Puzzle) extends TransitionDecorator {
+      def from = puzzle
+      def last = puzzle.lasts.head
+      def +(p: Puzzle) = Puzzle.merge(puzzle, p)
+
+      def hook(hooks: Hook*) = {
+        def pieces = puzzle.lasts.map(_.hook(hooks: _*))
+        pieces.foldLeft(puzzle)((puzzle, piece) ⇒ puzzle + piece)
+      }
+
+      def source(sources: Source*) = {
+        def piece: PuzzlePiece = puzzle.first.source(sources: _*)
+        puzzle + piece
+      }
+    }
+
     implicit def puzzleContainerDecoration(pc: PuzzleContainer) = new PuzzleDecorator(pc.buildPuzzle)
-    implicit def puzzlePuzzlePieceDecoration(puzzle: PuzzlePiece) = new PuzzlePieceDecorator(puzzle)
-
-    implicit def capsulePuzzlePieceDecoration(capsule: Capsule) = new PuzzlePieceDecorator(capsule.toPuzzlePiece)
-    implicit def slotPuzzlePieceDecoration(slot: Slot) = new PuzzlePieceDecorator(slot.toPuzzlePiece)
-    implicit def taskPuzzlePieceDecoration(task: Task): PuzzlePieceDecorator = new PuzzlePieceDecorator(task.toCapsule.toPuzzlePiece)
-    implicit def taskMoleBuilderPuzzlePieceDecoration(taskBuilder: TaskBuilder) = new PuzzlePieceDecorator(taskBuilder.toTask.toCapsule.toPuzzlePiece)
-
-    implicit def puzzlePieceMoleExecutionConverter(puzzle: PuzzlePiece) = puzzle.buildPuzzle.toExecution
-    implicit def puzzlePieceMoleConverter(puzzle: PuzzlePiece) = puzzle.buildPuzzle.toMole
     implicit def puzzleMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
     implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole
     implicit def puzzleContainerMoleExecutionConverter(puzzle: PuzzleContainer) = puzzle.buildPuzzle.toExecution
