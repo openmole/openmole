@@ -52,7 +52,7 @@ class ExecutionPanel extends ModalPanel {
   def updatePanelInfo = {
     OMPost[Api].allStates.call().foreach { executionInfos ⇒
       //FIXME select the number of lines from the panel
-      OMPost[Api].runningErrorEnvironmentAndOutputData(lines = 500).call().foreach { err ⇒
+      OMPost[Api].runningErrorEnvironmentAndOutputData(lines = nbOutLineInput.value.toInt).call().foreach { err ⇒
         panelInfo() = PanelInfo(executionInfos, err._2, err._1)
         doScrolls
       }
@@ -113,9 +113,7 @@ class ExecutionPanel extends ModalPanel {
     (SelectableLevel(level, level.name), emptyCK)
   }, Some(envLevel()), btn_primary, () ⇒ errorLevelSelector.content().map { l ⇒ envLevel() = l.level })
 
-  val nbEnvErrorLines: Var[Int] = Var(500)
-
-  val nbEnvLineInput = bs.input(nbEnvErrorLines().toString)
+  val nbOutLineInput = bs.input(50.toString).render
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${completed} / ${completed + running + ready}"
 
@@ -289,7 +287,7 @@ class ExecutionPanel extends ModalPanel {
           tags.div("Error level and history lenght"),
           inputGroupButton(
             errorLevelSelector.selector,
-            nbEnvLineInput
+            nbOutLineInput
           )
         )
       ),
