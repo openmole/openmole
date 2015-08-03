@@ -285,7 +285,7 @@ class ExecutionPanel extends ModalPanel {
 
   val dialog = modalDialog(modalID,
     headerDialog(
-      tags.div(
+      bs.div("executionHeader")(
         tags.b("Executions"),
         tags.div(
           bs.div("width40")(
