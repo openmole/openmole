@@ -164,11 +164,12 @@ select::-moz-focus-inner {
     color: white;
     border-radius: 5px;
     display: inline-block;
-    padding: 0px 8px;
+    padding: 2px 8px;
     padding-right: 8px;
     text-decoration: none
     float: left;
     margin-bottom: 5px;
+    height: 22px;
 }
 
 
@@ -307,12 +308,13 @@ select::-moz-focus-inner {
 	color: lightgray;
 	padding-right: 7px;
 	padding-left: 3px;
+	padding-top: 3px;
 	float: right;
 	font-size: 12px;
 }
 
 .file-glyph {
-    margin-top: 0px;
+    margin-top: 2px;
 }
 
 .edit-node {
