@@ -45,7 +45,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 #settingsPanelID, #executionsPanelID .modal-dialog {
     width: 70%;
 }
-#marketPanelID, #envStackID .modal-dialog {
+#marketPanelID .modal-dialog, #envStackID .modal-dialog {
     width: 60%;
 }
 .table tbody > tr > td.vert-align {
