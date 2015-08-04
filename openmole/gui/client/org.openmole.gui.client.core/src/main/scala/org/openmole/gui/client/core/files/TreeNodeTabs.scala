@@ -77,10 +77,8 @@ object TreeNodeTabs {
                              _editable: Boolean = false) extends TreeNodeTab {
     val editorElement = editor.view
     val editable = Var(_editable)
-    //editor.setReadOnly(true)
 
     Obs(editable) {
-      println("setEDITAB")
       editor.setReadOnly(!editable())
     }
 
@@ -88,10 +86,8 @@ object TreeNodeTabs {
       editable() = !editable()
     })
 
-    lazy val controlElement = tags.div(
-      Rx {
+    def controlElement = tags.div(
         if (editable()) tags.div else editButton
-      }
     )
 
     lazy val overlayElement = tags.div
@@ -276,6 +272,7 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
                         )
                       )
                     case etc: LockedEditionNodeTab ⇒
+                      println("ETC " + etc.editable() + " " + etc.controlElement.toString)
                       tags.div(
                         etc.tabElement,
                         tags.div(
