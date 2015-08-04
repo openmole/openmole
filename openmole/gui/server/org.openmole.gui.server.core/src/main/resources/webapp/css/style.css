@@ -17,28 +17,6 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     border: medium none;
     outline: medium none;
 }
-.myButton {
-    background: #77b55a linear-gradient(to bottom, #77b55a 5%, #72b352 100%) repeat scroll 0 0;
-    border: 1px solid #4b8f29;
-    border-radius: 4px;
-    box-shadow: 0 10px 14px -7px #3e7327;
-    color: #ffffff;
-    cursor: pointer;
-    display: inline-block;
-    font-family: arial;
-    font-size: 13px;
-    font-weight: bold;
-    padding: 6px 12px;
-    text-decoration: none;
-    text-shadow: 0 1px 0 #5b8a3c;
-}
-.myButton:hover {
-    background: #72b352 linear-gradient(to bottom, #72b352 5%, #77b55a 100%) repeat scroll 0 0;
-}
-.myButton:active {
-    position: relative;
-    top: 1px;
-}
 .black-label {
     color: black;
 }
