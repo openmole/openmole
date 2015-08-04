@@ -17,6 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.AbsolutePositioning.Transform
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
 import org.scalajs.dom.html.Div
 import scalatags.JsDom.all._
@@ -30,17 +31,12 @@ object AlertPanel {
 
   val div = panel.alertDiv
 
-  val center = "transform: translateX(-50%) translateY(-50%);"
-
-
-  
   def popup(message: String,
             okaction: () ⇒ Unit,
             cancelaction: () ⇒ Unit,
-            xpos: Int,
-            ypos: Int,
+            transform: Transform,
             alertType: ClassKeyAggregator = warning) = {
-    panel.popup(message, okaction, cancelaction, xpos, ypos, alertType)
+    panel.popup(message, okaction, cancelaction, transform, alertType)
   }
 }
 
@@ -62,13 +58,10 @@ class AlertPanel {
   def popup(message: String,
             okaction: () ⇒ Unit,
             cancelaction: () ⇒ Unit,
-            xpos: Int,
-            ypos: Int,
+            transform: Transform,
             alertType: ClassKeyAggregator = warning) = {
     alertElement() = bs.alert(alertType, message, actionWrapper(okaction), actionWrapper(cancelaction))
-    elementDiv.style.position = "absolute"
-    elementDiv.style.left = xpos.toString
-    elementDiv.style.top = ypos.toString
+    transform(elementDiv)
     visible() = true
   }
 

@@ -344,15 +344,15 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     width: 100%;
     z-index: 998;
 }
+
 .centerPage {
+    position: fixed;
+    top: 50%;
     left: 50%;
-    margin-left: -100px;
-    max-width: 350px;
-    position: absolute;
-    top: 50px;
-    width: 25%;
-    z-index: 999;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
+
 .message {
     color: #999;
     font-style: italic;

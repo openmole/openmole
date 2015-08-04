@@ -1,5 +1,6 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.client.core.AbsolutePositioning.CenterTransform
 import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.shared.Api
 import org.scalajs
@@ -132,7 +133,7 @@ object ScriptClient {
                   resetPassword
                 }, () ⇒ {
                   alert() = false
-                }, 250, 300)
+                }, CenterTransform())
               else {
                 tags.div(
                   connectionForm(
