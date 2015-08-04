@@ -461,7 +461,6 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .alertSettings {
     min-width: 600px;
     position: relative;
-    right: 50%;
 }
 textarea.form-control {
     height: 98%;
@@ -500,4 +499,13 @@ label {
 }
 .executionHeader {
     height: 70px;
+}
+
+.alertOverlay{
+    background: rgba(0, 0, 0, 0.8) none repeat scroll 0 0;
+    color: white;
+    height: 100%;
+    position: absolute;
+    width: 100%;
+    z-index: 999;
 }

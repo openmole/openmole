@@ -87,7 +87,7 @@ object TreeNodeTabs {
     })
 
     def controlElement = tags.div(
-        if (editable()) tags.div else editButton
+      if (editable()) tags.div else editButton
     )
 
     lazy val overlayElement = tags.div

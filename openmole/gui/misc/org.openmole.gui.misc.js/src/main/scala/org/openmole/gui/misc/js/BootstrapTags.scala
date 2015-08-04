@@ -440,7 +440,7 @@ object BootstrapTags {
   val alert_warning = key("alert-warning")
 
   def alert(alertType: ClassKeyAggregator, content: String, todook: () ⇒ Unit, todocancel: () ⇒ Unit) =
-    div("alertSettings alert " + alertType.key)(role := "alert")(
+    tags.div(role := "alert")(
       content,
       div("spacer20")(
         buttonGroup("left")(

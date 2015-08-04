@@ -126,14 +126,13 @@ object ScriptClient {
           Rx {
             tags.div(
               if (alert())
-                bs.alert(alert_warning,
-                "Warning ! Reseting your password will wipe out all your preferences ! Reset anyway ?",
+                AlertPanel.popup("Warning ! Reseting your password will wipe out all your preferences ! Reset anyway ?",
                 () ⇒ {
                   alert() = false
                   resetPassword
                 }, () ⇒ {
                   alert() = false
-                })
+                }, 250, 300)
               else {
                 tags.div(
                   connectionForm(
@@ -187,6 +186,7 @@ object ScriptClient {
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(environmentStackTriggerer.modalPanel.dialog.render)
+    maindiv.appendChild(AlertPanel.div)
 
     Settings.workspaceProjectNode.foreach { projectsPath ⇒
       maindiv.appendChild(
