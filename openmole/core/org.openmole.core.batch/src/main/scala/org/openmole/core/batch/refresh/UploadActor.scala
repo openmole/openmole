@@ -60,11 +60,12 @@ class UploadActor(jobManager: JobManager) {
   }
 
   private def initCommunication(job: BatchExecutionJob): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
+    SerialiserService.serialise(job.runnableTasks, jobFile)
 
-    serializeJob(jobFile, job.job)
+    val pluginAndFiles = job.pluginsAndFiles
 
-    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
-    val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
+    val plugins = new TreeSet[File]()(fileOrdering) ++ pluginAndFiles.plugins
+    val files = (new TreeSet[File]()(fileOrdering) ++ pluginAndFiles.files) diff plugins
 
     val (storage, token) = job.selectStorage()
 
@@ -99,11 +100,6 @@ class UploadActor(jobManager: JobManager) {
 
       SerializedJob(storage, communicationPath, inputPath, runtime)
     } finally storage.releaseToken(token)
-  }
-
-  def serializeJob(file: File, job: Job) = {
-    val runnableTasks = job.moleJobs.map(RunnableTask(_))
-    SerialiserService.serialise(runnableTasks, file)
   }
 
   def toReplicatedFile(job: Job, file: File, storage: StorageService, transferOptions: TransferOptions)(implicit token: AccessToken, session: Session): ReplicatedFile = {

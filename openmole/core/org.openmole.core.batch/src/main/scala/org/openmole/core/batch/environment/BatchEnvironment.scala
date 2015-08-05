@@ -123,12 +123,13 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
   var batchJob: Option[BatchJob] = None
 
   def moleJobs = job.moleJobs
+  def runnableTasks = job.moleJobs.map(RunnableTask(_))
 
-  lazy val pluginsAndFiles = SerialiserService.pluginsAndFiles(job)
-  def files = pluginsAndFiles.files
-  def plugins = pluginsAndFiles.plugins
+  def pluginsAndFiles = SerialiserService.pluginsAndFiles(runnableTasks)
 
   def usedFiles: Iterable[File] = {
+    val pf = pluginsAndFiles
+    import pf._
     files ++
       Seq(environment.runtime, environment.jvmLinuxI386, environment.jvmLinuxX64) ++
       environment.plugins ++
