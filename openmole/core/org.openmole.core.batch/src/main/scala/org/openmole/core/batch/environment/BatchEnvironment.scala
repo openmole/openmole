@@ -121,14 +121,18 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
   def job: Job
   var serializedJob: Option[SerializedJob] = None
   var batchJob: Option[BatchJob] = None
+
   def moleJobs = job.moleJobs
 
+  lazy val pluginsAndFiles = SerialiserService.pluginsAndFiles(job)
+  def files = pluginsAndFiles.files
+  def plugins = pluginsAndFiles.plugins
+
   def usedFiles: Iterable[File] = {
-    val referencedFiles = SerialiserService.getPluginAndFile(job)
-    referencedFiles.files ++
+    files ++
       Seq(environment.runtime, environment.jvmLinuxI386, environment.jvmLinuxX64) ++
       environment.plugins ++
-      referencedFiles.plugins
+      plugins
   }
 
   def usedFileHashes = usedFiles.map(f ⇒ (f, FileService.hash(job.moleExecution, f)))

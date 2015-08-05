@@ -17,27 +17,9 @@
 
 package org.openmole.core.serializer.file
 
-import scala.collection.immutable.TreeSet
 import java.io.File
-import java.io.OutputStream
 import org.openmole.core.serializer.converter.Serialiser
-import org.openmole.tool.file._
 
-trait FileListing <: Serialiser {
-  var listedFiles = TreeSet[File]()(fileOrdering)
-
-  xStream.registerConverter(new FileConverterNotifier(this))
-
-  def fileUsed(file: File) =
-    listedFiles += file
-
-  def toXML(obj: Any, outputStream: OutputStream) = synchronized {
-    xStream.toXML(obj, outputStream)
-  }
-
-  override def clean = {
-    super.clean
-    listedFiles = TreeSet[File]()(fileOrdering)
-  }
-
+trait FileListing {
+  def fileUsed(file: File): Unit
 }
