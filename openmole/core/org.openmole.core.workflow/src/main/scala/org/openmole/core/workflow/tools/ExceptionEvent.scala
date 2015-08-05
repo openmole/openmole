@@ -22,4 +22,5 @@ import java.util.logging.Level
 trait ExceptionEvent {
   def exception: Throwable
   def level: Level
+  def creationTime: Long
 }

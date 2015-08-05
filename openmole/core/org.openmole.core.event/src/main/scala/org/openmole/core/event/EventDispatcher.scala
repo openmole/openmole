@@ -27,9 +27,11 @@ object EventDispatcher {
     listenerMap.getOrElseUpdate(obj, ListBuffer()) += listener.asInstanceOf[Listner[Any]]
   }
 
-  def trigger[T](obj: T, event: Event[T]) =
+  def trigger[T](obj: T, event: Event[T]) = {
+    val listeners = listenerMap.synchronized { listenerMap.get(obj).getOrElse(List.empty) }
     for {
-      l ← listenerMap.synchronized { listenerMap.get(obj).getOrElse(List.empty) }
+      l ← listeners
     } l.asInstanceOf[Listner[T]].lift(obj, event)
+  }
 
 }
