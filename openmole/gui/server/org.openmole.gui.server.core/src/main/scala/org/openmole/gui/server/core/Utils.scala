@@ -69,7 +69,7 @@ object Utils {
 
   implicit def fileToOptionSafePath(f: File): Option[SafePath] = Some(fileToSafePath(f))
 
-  implicit def javaLeveltoErrorLevel(level: Level): ErrorStateLevel = {
+  implicit def javaLevelToErrorLevel(level: Level): ErrorStateLevel = {
     if (level.intValue >= java.util.logging.Level.WARNING.intValue) ErrorLevel()
     else DebugLevel()
   }

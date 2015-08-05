@@ -209,7 +209,7 @@ class ExecutionPanel extends ModalPanel {
                                   ep.setErrors(panelInfo().envErrorsInfos.flatMap {
                                     _.errors
                                   }.filter {
-                                    _.id == e.envId
+                                    _.environmentId == e.envId
                                   })
                                 }).view
                             )

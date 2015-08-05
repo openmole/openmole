@@ -28,20 +28,28 @@ import scala.concurrent.stm._
 
 object Runnings {
 
-  case class RunningEnvironment(environment: Environment, environmentError: List[EnvironmentError], networkActivity: NetworkActivity)
-  def emptyRunningEnvironment(environment: Environment) = RunningEnvironment(environment, List(), NetworkActivity())
+  object RunningEnvironment {
+    def empty(environment: Environment) = RunningEnvironment(environment, NetworkActivity())
+
+  }
+
+  case class RunningEnvironment(environment: Environment, networkActivity: NetworkActivity) {
+    def environmentErrors(id: EnvironmentId) = environment.errors.map {
+      ex ⇒
+        EnvironmentError(id, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+    }
+  }
 
   lazy private val instance = new Runnings
 
   def append(envId: EnvironmentId,
-             environment: Environment)(
-               todo: (RunningEnvironment) ⇒ RunningEnvironment) = atomic { implicit ctx ⇒
-    val re = instance.runningEnvironments.getOrElse(envId, emptyRunningEnvironment(environment))
+             environment: Environment)(todo: (RunningEnvironment) ⇒ RunningEnvironment) = atomic { implicit ctx ⇒
+    val re = instance.runningEnvironments.getOrElse(envId, RunningEnvironment.empty(environment))
     instance.runningEnvironments(envId) = todo(re)
   }
 
   def addExecutionId(id: ExecutionId) = atomic { implicit ctx ⇒
-    instance.ids(id) = Seq()
+    instance.environmentIds(id) = Seq()
   }
 
   def add(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)], printStream: StringPrintStream) = atomic { implicit ctx ⇒
@@ -49,13 +57,13 @@ object Runnings {
     instance.outputs(id) = printStream
     envIds.foreach {
       case (envId, env) ⇒
-        instance.ids(id) = instance.ids(id) :+ envId
-        instance.runningEnvironments(envId) = RunningEnvironment(env, List(), NetworkActivity())
+        instance.environmentIds(id) = instance.environmentIds(id) :+ envId
+        instance.runningEnvironments(envId) = RunningEnvironment.empty(env)
     }
   }
 
   def runningEnvironments(id: ExecutionId): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
-    runningEnvironments(ids.getOrElse(id, Seq()))
+    runningEnvironments(environmentIds.getOrElse(id, Seq.empty))
   }
 
   def runningEnvironments(envIds: Seq[EnvironmentId]): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
@@ -68,12 +76,12 @@ object Runnings {
     RunningOutputData(id, instance.outputs(id).toString.lines.toSeq.takeRight(lines).mkString("\n"))
   }
 
-  def ids = atomic { implicit ctx ⇒
-    instance.ids
+  def environmentIds = atomic { implicit ctx ⇒
+    instance.environmentIds
   }
 
   def remove(id: ExecutionId) = atomic { implicit ctx ⇒
-    ids.remove(id).foreach {
+    environmentIds.remove(id).foreach {
       _.foreach {
         instance.runningEnvironments.remove
       }
@@ -84,8 +92,7 @@ object Runnings {
 }
 
 class Runnings {
-
-  val ids = TMap[ExecutionId, Seq[EnvironmentId]]()
+  val environmentIds = TMap[ExecutionId, Seq[EnvironmentId]]()
   val outputs = TMap[ExecutionId, StringPrintStream]()
   val runningEnvironments = TMap[EnvironmentId, RunningEnvironment]()
 }
