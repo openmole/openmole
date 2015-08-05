@@ -18,9 +18,7 @@
 package org.openmole.core.batch.refresh
 
 import org.openmole.core.batch.control.UsageControl
-import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.batch.environment.BatchEnvironment._
-import org.openmole.core.batch.environment.SerializedJob
+import org.openmole.core.batch.environment.{ BatchExecutionJob, BatchEnvironment, SerializedJob }
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.tool.logger.Logger
 
@@ -34,7 +32,7 @@ class SubmitActor(jobManager: JobManager) {
     val Submit(job, sj) = submit
     if (!job.state.isFinal) {
       try {
-        val bj = trySubmit(sj, job.environment)
+        val bj = trySubmit(job, sj, job.environment)
         job.state = SUBMITTED
         jobManager ! Submitted(job, sj, bj)
       }
@@ -46,9 +44,9 @@ class SubmitActor(jobManager: JobManager) {
     }
   }
 
-  private def trySubmit(serializedJob: SerializedJob, environment: BatchEnvironment) = {
-    val (js, token) = environment.selectAJobService
-    try js.submit(serializedJob)(token)
+  private def trySubmit(job: BatchExecutionJob, sj: SerializedJob, environment: BatchEnvironment) = {
+    val (js, token) = job.selectJobService()
+    try js.submit(sj)(token)
     finally js.releaseToken(token)
   }
 

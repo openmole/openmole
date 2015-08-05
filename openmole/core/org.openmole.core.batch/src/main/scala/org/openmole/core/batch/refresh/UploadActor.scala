@@ -48,7 +48,7 @@ class UploadActor(jobManager: JobManager) {
     val job = msg.job
     if (!job.state.isFinal) {
       try {
-        val sj = initCommunication(job.environment, job.job)
+        val sj = initCommunication(job)
         jobManager ! Uploaded(job, sj)
       }
       catch {
@@ -59,17 +59,17 @@ class UploadActor(jobManager: JobManager) {
     }
   }
 
-  private def initCommunication(environment: BatchEnvironment, job: Job): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
+  private def initCommunication(job: BatchExecutionJob): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
 
-    val (serializationFiles, serialisationPluginFiles) = serializeJob(jobFile, job)
+    val (serializationFiles, serialisationPluginFiles) = serializeJob(jobFile, job.job)
 
-    val (storage, token) = environment.selectAStorage(
-      (serializationFiles +
+    val (storage, token) = job.selectStorage()
+    /*  (serializationFiles +
         environment.runtime +
         environment.jvmLinuxI386 +
         environment.jvmLinuxX64 ++
         environment.plugins ++
-        serialisationPluginFiles).map(f ⇒ f -> FileService.hash(job.moleExecution, f)))
+        serialisationPluginFiles).map(f ⇒ f -> FileService.hash(job.moleExecution, f)))*/
 
     implicit val t = token
     try ReplicaCatalog.withSession { implicit session ⇒
@@ -78,7 +78,7 @@ class UploadActor(jobManager: JobManager) {
 
       val inputPath = storage.child(communicationPath, Storage.uniqName("job", ".in"))
 
-      val runtime = replicateTheRuntime(job, environment, storage)
+      val runtime = replicateTheRuntime(job.job, job.environment, storage)
 
       val jobForRuntimePath = storage.child(communicationPath, Storage.uniqName("job", ".tgz"))
 
@@ -87,7 +87,7 @@ class UploadActor(jobManager: JobManager) {
       val jobMessage = FileMessage(jobForRuntimePath, jobHash)
 
       val executionMessage = createExecutionMessage(
-        job,
+        job.job,
         jobMessage,
         serializationFiles,
         serialisationPluginFiles,

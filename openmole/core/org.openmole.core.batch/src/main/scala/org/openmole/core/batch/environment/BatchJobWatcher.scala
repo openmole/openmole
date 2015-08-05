@@ -27,23 +27,15 @@ import org.openmole.core.batch.refresh.{ Kill, Manage }
 import scala.ref.WeakReference
 
 object BatchJobWatcher extends Logger {
-  case object Watch
 
   class ExecutionJobRegistry {
     val jobs = new HashMap[Job, Set[BatchExecutionJob]] with MultiMap[Job, BatchExecutionJob]
-
     def allJobs = jobs.keySet
-
     def executionJobs(job: Job) = jobs.getOrElse(job, Set.empty)
-
     def remove(ejob: BatchExecutionJob) = jobs.removeBinding(ejob.job, ejob)
-
     def isEmpty: Boolean = jobs.isEmpty
-
     def register(ejob: BatchExecutionJob) = jobs.addBinding(ejob.job, ejob)
-
     def removeJob(job: Job) = jobs -= job
-
     def allExecutionJobs = jobs.values.flatMap(_.toSeq)
   }
 
@@ -74,12 +66,11 @@ class BatchJobWatcher(environment: WeakReference[BatchEnvironment]) extends IUpd
         jobGroupsToRemove += job
       }
       else {
-        val executionJobsToRemove = new ListBuffer[BatchExecutionJob]
-
-        for {
-          ej ← registry.executionJobs(job)
-          if ej.state.isFinal
-        } executionJobsToRemove += ej
+        val executionJobsToRemove =
+          for {
+            ej ← registry.executionJobs(job)
+            if ej.state.isFinal
+          } yield ej
 
         for (ej ← executionJobsToRemove) registry.remove(ej)
         if (registry.executionJobs(job).isEmpty) env.submit(job)

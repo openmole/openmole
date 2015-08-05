@@ -90,7 +90,7 @@ class SLURMEnvironment(
     val workDirectory: Option[String],
     override val threads: Option[Int],
     val storageSharedLocally: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends SimpleBatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
 
   type JS = SLURMJobService
 
@@ -103,7 +103,5 @@ class SLURMEnvironment(
     def sharedFS = storage
     def workDirectory = env.workDirectory
   }
-
-  def allJobServices = List(jobService)
 
 }

@@ -1,8 +1,6 @@
 package org.openmole.gui.server.core
 
-import org.openmole.core.batch.environment.BatchEnvironment.BeginDownload
 import org.openmole.core.workflow.execution.Environment
-import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.ext.data._
 import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.tool.stream.StringPrintStream

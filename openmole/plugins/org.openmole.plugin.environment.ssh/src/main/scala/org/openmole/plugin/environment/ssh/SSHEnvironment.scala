@@ -70,7 +70,7 @@ class SSHEnvironment(
     override val openMOLEMemory: Option[Int],
     override val threads: Option[Int],
     val storageSharedLocally: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage { env ⇒
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends SimpleBatchEnvironment with SSHPersistentStorage { env ⇒
 
   type JS = SSHJobService
 
@@ -84,8 +84,6 @@ class SSHEnvironment(
     val environment = env
     def workDirectory = env.workDirectory
   }
-
-  def allJobServices = List(jobService)
 
   override def minUpdateInterval = Workspace.preferenceAsDuration(UpdateInterval)
   override def maxUpdateInterval = Workspace.preferenceAsDuration(UpdateInterval)

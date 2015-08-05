@@ -17,6 +17,8 @@
 
 package org.openmole.core.serializer
 
+import java.lang.ProcessBuilder.NullOutputStream
+
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import java.io.FileInputStream
@@ -28,6 +30,7 @@ import org.openmole.core.serializer.converter._
 import java.util.concurrent.locks.{ ReentrantReadWriteLock, ReadWriteLock }
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.logger.Logger
+import org.openmole.tool.stream
 import org.openmole.tool.tar._
 import org.openmole.tool.lock._
 import collection.mutable.ListBuffer
@@ -134,6 +137,9 @@ object SerialiserService extends Logger {
       PluginClassAndFiles(s.listedFiles.toSeq, plugins.toSeq)
     }
   }
+
+  def getPluginAndFile(obj: Any) =
+    serialiseGetPluginsAndFiles(obj, new stream.NullOutputStream())
 
   def deserialiseReplaceFiles[T](file: File, files: PartialFunction[String, File]): T = lock.read {
     val is = file.bufferedInputStream

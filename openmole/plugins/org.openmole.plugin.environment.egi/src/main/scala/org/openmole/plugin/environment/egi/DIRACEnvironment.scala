@@ -17,10 +17,12 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.batch.environment.{ BatchExecutionJob, BatchEnvironment }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.filedeleter.FileDeleter
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.updater.Updater
+import org.openmole.core.workflow.execution.ExecutionJob
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation, AuthenticationProvider }
 import fr.iscpif.gridscale.egi.BDII
@@ -64,6 +66,17 @@ object DIRACEnvironment {
 
 }
 
+class DiracBatchExecutionJob(val job: Job, val environment: DIRACEnvironment) extends BatchExecutionJob {
+
+  def selectStorage() = environment.selectAStorage(usedFileHashes)
+
+  def selectJobService() = {
+    val js = environment.jobService
+    (js, js.waitAToken)
+  }
+
+}
+
 class DIRACEnvironment(
     val voName: String,
     val service: String,
@@ -91,6 +104,8 @@ class DIRACEnvironment(
 
   def bdiiServer: BDII = new BDII(bdii)
 
+  def executionJob(job: Job) = new DiracBatchExecutionJob(job, this)
+
   def getAuthentication = authentications(classOf[DIRACAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
 
   @transient lazy val authentication = DIRACAuthentication.initialise(getAuthentication)(authentications)
@@ -102,8 +117,6 @@ class DIRACEnvironment(
       EGIEnvironment.proxyTime,
       fqan)(authentications).cache(EGIEnvironment.proxyRenewalDelay)
   }
-
-  def allJobServices = List(jobService)
 
   @transient lazy val jobService = new DIRACJobService {
     val environment = env

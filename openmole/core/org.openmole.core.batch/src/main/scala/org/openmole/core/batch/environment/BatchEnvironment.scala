@@ -26,7 +26,9 @@ import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication._
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
@@ -37,6 +39,8 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.batch.message._
 import org.openmole.tool.hash.Hash
 import ref.WeakReference
+import scala.Predef.Set
+import scala.collection.mutable.{ MultiMap, Set, HashMap }
 
 object BatchEnvironment extends Logger {
 
@@ -79,8 +83,6 @@ object BatchEnvironment extends Logger {
 
   val JobManagementThreads = new ConfigurationLocation("BatchEnvironment", "JobManagementThreads")
 
-  val EnvironmentCleaningThreads = new ConfigurationLocation("BatchEnvironment", "EnvironmentCleaningThreads")
-
   val StoragesGCUpdateInterval = new ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval")
 
   val NoTokenForServiceRetryInterval = new ConfigurationLocation("BatchEnvironment", "NoTokenForServiceRetryInterval")
@@ -102,7 +104,6 @@ object BatchEnvironment extends Logger {
   Workspace += (CheckInterval, "PT1M")
   Workspace += (CheckFileExistsInterval, "PT1H")
   Workspace += (JobManagementThreads, "200")
-  Workspace += (EnvironmentCleaningThreads, "20")
 
   Workspace += (StoragesGCUpdateInterval, "PT1H")
   Workspace += (NoTokenForServiceRetryInterval, "PT2M")
@@ -116,13 +117,35 @@ object BatchEnvironment extends Logger {
 
 import BatchEnvironment._
 
-trait BatchEnvironment extends Environment with JobList { env ⇒
+trait BatchExecutionJob extends ExecutionJob { bej ⇒
+  def job: Job
+  var serializedJob: Option[SerializedJob] = None
+  var batchJob: Option[BatchJob] = None
+  def moleJobs = job.moleJobs
 
+  def usedFiles: Iterable[File] = {
+    val referencedFiles = SerialiserService.getPluginAndFile(job)
+    referencedFiles.files ++
+      Seq(environment.runtime, environment.jvmLinuxI386, environment.jvmLinuxX64) ++
+      environment.plugins ++
+      referencedFiles.plugins
+  }
+
+  def usedFileHashes = usedFiles.map(f ⇒ (f, FileService.hash(job.moleExecution, f)))
+
+  val environment: BatchEnvironment
+
+  def selectStorage(): (StorageService, AccessToken)
+  def selectJobService(): (JobService, AccessToken)
+}
+
+trait BatchEnvironment extends Environment with JobList { env ⇒
   type SS <: StorageService
   type JS <: JobService
 
-  def allStorages: Iterable[SS]
-  def allJobServices: Iterable[JS]
+  def jobs = batchJobWatcher.executionJobs
+
+  def executionJob(job: Job): BatchExecutionJob
 
   def openMOLEMemory: Option[Int] = None
   def openMOLEMemoryValue = openMOLEMemory match {
@@ -146,46 +169,11 @@ trait BatchEnvironment extends Environment with JobList { env ⇒
     jobManager ! Manage(bej)
   }
 
-  def clean = ReplicaCatalog.withSession { implicit c ⇒
-    val cleaningThreadPool = fixedThreadPool(Workspace.preferenceAsInt(EnvironmentCleaningThreads))
-    allStorages.foreach {
-      s ⇒
-        background {
-          s.withToken { implicit t ⇒
-            s.clean
-          }
-        }(cleaningThreadPool)
-    }
-  }
-
-  def executionJob(job: Job) = new BatchExecutionJob(this, job)
+  def clean: Unit
 
   def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxI386 = BatchEnvironment.JVMLinuxI386Location
   def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
-
-  @transient lazy val jobServices = {
-    val jobServices = allJobServices
-    if (jobServices.isEmpty) throw new InternalProcessingError("No job service available for the environment.")
-    jobServices
-  }
-
-  @transient lazy val storages = {
-    val storages = allStorages
-    if (storages.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
-    Updater.registerForUpdate(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDuration(StoragesGCUpdateInterval))
-    storages
-  }
-
-  def selectAJobService: (JobService, AccessToken) = {
-    val r = jobServices.head
-    (r, r.waitAToken)
-  }
-
-  def selectAStorage(usedFileHashes: Iterable[(File, Hash)]): (StorageService, AccessToken) = {
-    val r = storages.head
-    (r, r.waitAToken)
-  }
 
   @transient lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
@@ -193,11 +181,32 @@ trait BatchEnvironment extends Environment with JobList { env ⇒
   def maxUpdateInterval = Workspace.preferenceAsDuration(MaxUpdateInterval)
   def incrementUpdateInterval = Workspace.preferenceAsDuration(IncrementUpdateInterval)
 
-  def executionJobs: Iterable[BatchExecutionJob] = batchJobWatcher.executionJobs
-  def jobs = executionJobs
-
-  def submitted: Long = executionJobs.count { _.state == ExecutionState.SUBMITTED }
-  def running: Long = executionJobs.count { _.state == ExecutionState.RUNNING }
+  def submitted: Long = jobs.count { _.state == ExecutionState.SUBMITTED }
+  def running: Long = jobs.count { _.state == ExecutionState.RUNNING }
 
   def runtimeSettings = RuntimeSettings(archiveResult = false)
+}
+
+class SimpleBatchExecutionJob(val job: Job, val environment: SimpleBatchEnvironment) extends ExecutionJob with BatchExecutionJob { bej ⇒
+
+  def selectStorage() = {
+    val s = environment.storage
+    (s, s.waitAToken)
+  }
+  def selectJobService() = {
+    val js = environment.jobService
+    (js, js.waitAToken)
+  }
+
+}
+
+trait SimpleBatchEnvironment <: BatchEnvironment { env ⇒
+  type BEJ = SimpleBatchExecutionJob
+
+  def executionJob(job: Job): BEJ = new SimpleBatchExecutionJob(job, this)
+
+  def storage: SS
+  def jobService: JS
+
+  def clean = ReplicaCatalog.withSession { session ⇒ storage.withToken(storage.clean(_, session)) }
 }
