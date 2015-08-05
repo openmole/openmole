@@ -41,11 +41,12 @@ trait PluginAndFilesListing <: PluginListing with FileListing { this: Serialiser
 
   def list(obj: Any) = synchronized {
     plugins = TreeSet[File]()(fileOrdering)
+    listedFiles = TreeSet[File]()(fileOrdering)
     xStream.toXML(obj, new NullOutputStream())
     val retPlugins = plugins
     val retFile = listedFiles
     plugins = null
-    listedFiles = TreeSet[File]()(fileOrdering)
+    listedFiles = null
     PluginClassAndFiles(retFile.toSeq, retPlugins.toSeq)
   }
 
