@@ -1,9 +1,9 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.TreeNodePanel
+import org.scalajs.dom.html.Div
 
 /*
- * Copyright (C) 24/07/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 04/08/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,21 +19,34 @@ import org.openmole.gui.client.core.files.TreeNodePanel
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package object panels {
-  val marketPanel = new MarketPanel
-  val environmentStackPanel = new TextPanel("envStackID", "Environment error stack")
+object AbsolutePositioning {
 
-  implicit val executionTriggerer = new PanelTriggerer {
-    val modalPanel = new ExecutionPanel
+  trait Transform {
+    def apply(d: Div) = {
+      d.style.position = "absolute"
+      transform(d)
+    }
+
+    protected def transform: Div ⇒ Div
   }
 
-  def marketTriggerer = new PanelTriggerer {
-    val modalPanel = marketPanel
+  case class CustomTransform(d: Div, t: Div ⇒ Div) extends Transform {
+    def transform = t
   }
 
-  def environmentStackTriggerer = new PanelTriggerer {
-    val modalPanel: ModalPanel = environmentStackPanel
+  case class CenterTransform() extends Transform {
+    def transform = (d: Div) ⇒ {
+      d.className = "centerPage"
+      d
+    }
   }
 
-  val treeNodePanel = new TreeNodePanel()(executionTriggerer)
+  case class XYTransform(x: Int, y: Int) extends Transform {
+    def transform = (d: Div) ⇒ {
+      d.style.left = x.toString
+      d.style.top = y.toString
+      d
+    }
+  }
+
 }

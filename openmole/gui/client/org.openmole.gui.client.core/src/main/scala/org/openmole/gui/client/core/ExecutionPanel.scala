@@ -17,18 +17,14 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.EnvironmentErrorPanel.SelectableLevel
 import org.openmole.gui.misc.js.BootstrapTags.ScrollableTextArea.BottomScroll
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
-import org.scalajs.dom.raw.HTMLDivElement
-import org.scalajs.jquery
-import scala.concurrent
 import scala.concurrent.duration.Duration
-import scala.scalajs.js.Date
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.Expander
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select, Expander }
 import org.openmole.gui.misc.js.Expander._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.timers._
@@ -56,7 +52,9 @@ class ExecutionPanel extends ModalPanel {
   def updatePanelInfo = {
     OMPost[Api].allStates.call().foreach { executionInfos ⇒
       //FIXME select the number of lines from the panel
-      OMPost[Api].runningErrorEnvironmentAndOutputData(lines = 500).call().foreach { err ⇒
+      OMPost[Api].runningErrorEnvironmentAndOutputData(lines = nbOutLineInput.value.toInt, errorLevelSelector.content().map {
+        _.level
+      }.getOrElse(ErrorLevel())).call().foreach { err ⇒
         panelInfo() = PanelInfo(executionInfos, err._2, err._1)
         doScrolls
       }
@@ -77,11 +75,13 @@ class ExecutionPanel extends ModalPanel {
   }
 
   def doScrolls = {
-    outputTextAreas().values.foreach {
-      _.doScroll
+    Seq(outputTextAreas(), scriptTextAreas(), errorTextAreas()).map {
+      _.values.foreach {
+        _.doScroll
+      }
     }
-    envErrorTextAreas().values.foreach {
-      _.doScroll
+    envErrorPanels().values.foreach {
+      _.scrollable.doScroll
     }
   }
 
@@ -91,8 +91,35 @@ class ExecutionPanel extends ModalPanel {
                               envStates: Seq[EnvironmentState] = Seq(),
                               outputs: String = "")
 
-  val outputTextAreas: Var[Map[ExecutionId, BSTextArea]] = Var(Map())
-  val envErrorTextAreas: Var[Map[ExecutionId, BSTextArea]] = Var(Map())
+  val scriptTextAreas: Var[Map[ExecutionId, ScrollableText]] = Var(Map())
+  val errorTextAreas: Var[Map[ExecutionId, ScrollableText]] = Var(Map())
+  val outputTextAreas: Var[Map[ExecutionId, ScrollableText]] = Var(Map())
+  val envErrorPanels: Var[Map[EnvironmentId, EnvironmentErrorPanel]] = Var(Map())
+
+  def staticPanel[T, I <: ID](id: I, panelMap: Var[Map[I, T]], builder: () ⇒ T, appender: T ⇒ Unit = (t: T) ⇒ {}): T = {
+    if (panelMap().isDefinedAt(id)) {
+      val t = panelMap()(id)
+      appender(t)
+      t
+    }
+    else {
+      val toBeAdded = builder()
+      panelMap() = panelMap() + (id -> toBeAdded)
+      toBeAdded
+    }
+  }
+
+  val envLevel: Var[ErrorStateLevel] = Var(ErrorLevel())
+
+  val errorLevelSelector: Select[SelectableLevel] = Select("errorLevel", Seq(ErrorLevel(), DebugLevel()).map { level ⇒
+    (SelectableLevel(level, level.name), emptyCK)
+  }, Some(envLevel()), btn_primary, () ⇒ errorLevelSelector.content().map { l ⇒ envLevel() = l.level })
+
+  val nbOutLineInput = bs.input("500")(width := "60px").render
+
+  def ratio(completed: Long, running: Long, ready: Long) = s"${completed} / ${completed + running + ready}"
+
+  val envErrorVisible: Var[Seq[EnvironmentId]] = Var(Seq())
 
   lazy val executionTable = {
     bs.table(striped)(
@@ -103,7 +130,6 @@ class ExecutionPanel extends ModalPanel {
           for {
             (id, staticInfo, executionInfo) ← panelInfo().executionInfos.sortBy(_._2.startDate).reverse
           } yield {
-            val startDate = s"${new Date(staticInfo.startDate).toLocaleDateString}, ${new Date(staticInfo.startDate).toLocaleTimeString}"
 
             val duration: Duration = (executionInfo.duration milliseconds)
             val h = (duration).toHours
@@ -116,13 +142,8 @@ class ExecutionPanel extends ModalPanel {
 
             val details = executionInfo match {
               case f: Failed   ⇒ ExecutionDetails("0", 0, Some(f.error))
-              case f: Finished ⇒ ExecutionDetails("100", f.running, envStates = f.environmentStates)
-              case r: Running ⇒
-                def runningRatio = {
-                  val ratio = (100 * r.completed.toDouble / (r.completed + r.running + r.ready))
-                  if (ratio.isNaN) 0.0 else ratio
-                }
-                ExecutionDetails(runningRatio.formatted("%.0f"), r.running, envStates = r.environmentStates)
+              case f: Finished ⇒ ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates)
+              case r: Running  ⇒ ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates)
               case c: Canceled ⇒ ExecutionDetails("0", 0)
               case r: Ready    ⇒ ExecutionDetails("0", 0)
             }
@@ -141,10 +162,12 @@ class ExecutionPanel extends ModalPanel {
             }
             val outputLink = expander.getGlyph(glyph_list, "", id.id, outputStreamID, () ⇒ doScrolls)
 
-            val envErrorLink = expander.getLink("EnvErr", id.id, envErrorID, () ⇒ doScrolls)
-
-            val hiddenMap = Map(
-              scriptID -> tags.div(bs.textArea(20)(staticInfo.script)),
+            lazy val hiddenMap: Map[VisibleID, Modifier] = Map(
+              scriptID -> staticPanel(id, scriptTextAreas,
+                () ⇒ {
+                  scrollableText(staticInfo.script)
+                }
+              ).view,
               envID -> {
                 tags.div(
                   details.envStates.map { e ⇒
@@ -155,70 +178,77 @@ class ExecutionPanel extends ModalPanel {
                           bs.td(col_md_2)(e.taskName),
                           bs.td(col_md_2)(bs.glyph(bs.glyph_upload), s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}"),
                           bs.td(col_md_2)(bs.glyph(bs.glyph_download), s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}"),
-                          bs.td(col_md_2)(bs.glyph(bs.glyph_road), " " + e.submitted),
+                          bs.td(col_md_1)(bs.glyph(bs.glyph_road), " " + e.submitted),
                           bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + e.running),
                           bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + e.done),
-                          bs.td(col_md_1)(bs.glyph(bs.glyph_fire), " " + e.failed)
-                        )
+                          bs.td(col_md_1)(bs.glyph(bs.glyph_fire), " " + e.failed),
+                          bs.td(col_md_1)(bs.span({
+                            "blue" + {
+                              if (envErrorVisible().contains(e.envId)) " executionVisible" else ""
+                            }
+                          })(cursor := "pointer", onclick := {
+                            () ⇒
+                              {
+                                if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot {
+                                  _ == e.envId
+                                }
+                                else envErrorVisible() = envErrorVisible() :+ e.envId
+                              }
+                          }
+                          )("details")
+                          )),
+                          bs.tr(row)(
+                            bs.td(col_md_12)(
+                              `class` := {
+                                if (envErrorVisible().contains(e.envId)) "displayNone" else ""
+                              },
+                              colspan := 12,
+                              staticPanel(e.envId, envErrorPanels,
+                                () ⇒ new EnvironmentErrorPanel,
+                                (ep: EnvironmentErrorPanel) ⇒ {
+                                  ep.setErrors(panelInfo().envErrorsInfos.flatMap {
+                                    _.errors
+                                  }.filter {
+                                    _.id == e.envId
+                                  })
+                                }).view
+                            )
+                          )
                         )
                       )
                     )
                   }
                 )
               },
-              errorID -> tags.div(bs.textArea(20)(new String(details.error.map {
-                _.stackTrace
-              }.getOrElse("")))),
-              outputStreamID -> {
-
-                val outputs = panelInfo().outputsInfos.filter {
-                  _.id == id
-                }.map {
-                  _.output
-                }.mkString("\n")
-
-                val tArea = outputTextAreas().get(id) match {
-                  case Some(t: BSTextArea) ⇒ t
-                  case None ⇒
-                    val newTA = new BSTextArea(20, outputs, BottomScroll())
-                    outputTextAreas() = outputTextAreas() + (id -> newTA)
-                    newTA
-                }
-                tArea.setContent(outputs)
-                tArea.view
-              },
-              envErrorID -> {
-
-                val outputs = panelInfo().envErrorsInfos.filter {
-                  _.id == id
-                }.map {
-                  _.errors.map {
-                    _.errorMessage
-                  }.mkString("\n")
-                }.mkString("\n")
-
-                val tArea = envErrorTextAreas().get(id) match {
-                  case Some(t: BSTextArea) ⇒ t
-                  case None ⇒
-                    val newTA = new BSTextArea(20, outputs, BottomScroll())
-                    envErrorTextAreas() = envErrorTextAreas() + (id -> newTA)
-                    newTA
-                }
-                tArea.setContent(outputs)
-                tArea.view
-              }
+              errorID -> staticPanel(id, errorTextAreas,
+                () ⇒ scrollableText(),
+                (sT: ScrollableText) ⇒ sT.setContent(new String(details.error.map {
+                  _.stackTrace
+                }.getOrElse("")))
+              ).view,
+              outputStreamID -> staticPanel(
+                id,
+                outputTextAreas,
+                () ⇒ {
+                  scrollableText("", BottomScroll())
+                },
+                (sT: ScrollableText) ⇒ sT.setContent(
+                  panelInfo().outputsInfos.filter {
+                    _.id == id
+                  }.map {
+                    _.output
+                  }.mkString("\n"))
+              ).view
             )
 
             Seq(bs.tr(row)(
               bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink),
-              bs.td(col_md_3 + "small")(startDate),
+              bs.td(col_md_2 + "small")(Utils.longToDate(staticInfo.startDate)),
               bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + details.running),
-              bs.td(col_md_1)(bs.glyph(bs.glyph_flag), " " + completed),
-              bs.td(col_md_1)(details.ratio + "%"),
+              bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + details.ratio),
               bs.td(col_md_1)(durationString),
               bs.td(col_md_1)(stateLink)(`class` := executionInfo.state + "State"),
               bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
-              bs.td(col_md_1)(visibleClass(id.id, envErrorID))(envErrorLink),
               bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink),
               bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
                 updatePanelInfo
@@ -249,22 +279,30 @@ class ExecutionPanel extends ModalPanel {
   }
 
   val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := {
-    () ⇒
+    () ⇒ close
   }
   )
 
   val dialog = modalDialog(modalID,
     headerDialog(
-      tags.div(tags.b("Executions")),
-      bodyDialog(`class` := "executionTable")(
-        executionTable),
-      footerDialog(
-        closeButton
-      )
+      bs.div("executionHeader")(
+        tags.b("Executions"),
+        tags.div(
+          bs.div("width40")(
+            tags.label("Output history "),
+            nbOutLineInput
+          ),
+          bs.div("width40")(
+            tags.label("Environment error level "),
+            errorLevelSelector.selector
+          )
+        )
+      )),
+    bodyDialog(`class` := "executionTable")(
+      executionTable),
+    footerDialog(
+      closeButton
     )
   )
 
-  jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ {
-    onClose()
-  })
 }

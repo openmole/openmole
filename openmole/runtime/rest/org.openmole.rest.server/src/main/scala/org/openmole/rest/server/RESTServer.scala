@@ -50,18 +50,12 @@ class RESTLifeCycle extends LifeCycle {
 
 }
 
-class RESTServer(port: Option[Int], sslPort: Option[Int], hostName: Option[String], allowInsecureConnections: Boolean) {
+class RESTServer(sslPort: Option[Int], hostName: Option[String]) {
 
   private lazy val server = {
-    val p = port getOrElse 8080
     val sslP = sslPort getOrElse 8443
 
-    val server =
-      if (allowInsecureConnections) {
-        logger.info(s"Binding http to port $p")
-        new Server(p)
-      }
-      else new Server()
+    val server = new Server()
 
     val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
     val ks = Workspace.keyStore
@@ -87,7 +81,7 @@ class RESTServer(port: Option[Int], sslPort: Option[Int], hostName: Option[Strin
     context.setClassLoader(classOf[RESTServer].getClassLoader)
     hostName foreach (context.setInitParameter(ScalatraBase.HostNameKey, _))
     context.setInitParameter("org.scalatra.Port", sslP.toString)
-    context.setInitParameter(ScalatraBase.ForceHttpsKey, allowInsecureConnections.toString)
+    context.setInitParameter(ScalatraBase.ForceHttpsKey, true.toString)
 
     context.setAttribute(RESTLifeCycle.arguments, RESTLifeCycle.Arguments())
     context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[RESTLifeCycle].getCanonicalName)
@@ -101,7 +95,7 @@ class RESTServer(port: Option[Int], sslPort: Option[Int], hostName: Option[Strin
     })
     constraintHandler.addConstraintMapping(constraintMapping)
 
-    if (!allowInsecureConnections) context.setSecurityHandler(constraintHandler)
+    context.setSecurityHandler(constraintHandler)
     server.setHandler(context)
     server
   }

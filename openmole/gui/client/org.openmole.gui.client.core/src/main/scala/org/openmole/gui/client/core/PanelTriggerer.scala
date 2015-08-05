@@ -2,9 +2,6 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.misc.js.BootstrapTags._
 import org.scalajs.jquery
-import scalatags.JsDom.{ tags ⇒ tags }
-import scalatags.JsDom.all._
-import org.scalajs.dom.html.Anchor
 
 /*
  * Copyright (C) 28/05/15 // mathieu.leclaire@openmole.org
@@ -42,4 +39,12 @@ trait ModalPanel {
   def onOpen: () ⇒ Unit
 
   def onClose: () ⇒ Unit
+
+  def close: Unit = {
+    jquery.jQuery("#" + modalID).modal("hide")
+  }
+
+  jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ {
+    onClose()
+  })
 }

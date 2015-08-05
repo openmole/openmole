@@ -104,6 +104,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     for (file ← fileParams) yield {
       val path = new java.net.URI(file._1).getPath
       val destination = new File(Utils.webUIProjectFile, path)
+      destination.setWritable(true)
       val stream = new BufferedInputStream(file._2.getInputStream)
       try {
         stream.copy(destination)

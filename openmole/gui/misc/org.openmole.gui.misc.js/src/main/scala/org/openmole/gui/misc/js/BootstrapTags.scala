@@ -17,13 +17,10 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.awt.dnd.Autoscroll
-
-import org.scalajs.dom.html.{ TextArea, Input }
+import org.scalajs.dom.html.Div
 import org.scalajs.dom.raw
 import org.scalajs.dom.raw._
 import scala.scalajs.js.annotation.JSExport
-import scala.scalajs.js
 import scalatags.JsDom.TypedTag
 
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -165,6 +162,9 @@ object BootstrapTags {
   val glyph_lock = "glyphicon-lock"
   val glyph_archive = "glyphicon-compressed"
   val glyph_market = "glyphicon-shopping-cart"
+  val glyph_info = "glyphicon-info-sign"
+  val glyph_plug = "icon-plug"
+  val glyph_exclamation = "glyphicon-exclamation-sign"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator, todo: () ⇒ Unit = () ⇒ {}): TypedTag[HTMLButtonElement] =
@@ -295,9 +295,6 @@ object BootstrapTags {
       )
     )
 
-  //TextArea
-  def textArea(nbRows: Int) = tags.textarea(`class` := "form-control", rows := nbRows)
-
   object ScrollableTextArea {
 
     sealed trait AutoScroll
@@ -312,33 +309,59 @@ object BootstrapTags {
 
   import ScrollableTextArea._
 
-  import scala.scalajs.js.timers._
+  //TextArea
+  def textArea(nbRow: Int) = tags.textarea(`class` := "form-control", rows := nbRow)
 
-  case class BSTextArea(nbRows: Int, initText: String = "", _scrollMode: AutoScroll) {
-    //FIXME: ADD FEATURE: SET THE NUMBER OF LINES IN VIEW (DEFAULT IS 500)
-    val scrollMode: Var[AutoScroll] = Var(_scrollMode)
-    val tA = textArea(nbRows)(initText, onscroll := { (e: Event) ⇒ setScrollMode })
-    private val tARender: HTMLTextAreaElement = tA.render
+  def scrollableText(text: String = "", scrollMode: AutoScroll = TopScroll()): ScrollableText = ScrollableText(text, scrollMode)
 
-    def view = tags.div(tARender)
+  def scrollableDiv(element: Div = tags.div.render, scrollMode: AutoScroll = BottomScroll()): ScrollableDiv = ScrollableDiv(element, scrollMode)
+
+  trait Scrollable {
+
+    def scrollMode: Var[AutoScroll]
+
+    def sRender: HTMLElement
+
+    def view: HTMLElement = tags.div(sRender).render
 
     def setScrollMode = {
-      val scrollHeight = tARender.scrollHeight
-      val scrollTop = tARender.scrollTop.toInt
+      val scrollHeight = sRender.scrollHeight
+      val scrollTop = sRender.scrollTop.toInt
       scrollMode() =
-        if ((scrollTop + tARender.offsetHeight.toInt) > scrollHeight) BottomScroll()
+        if ((scrollTop + sRender.offsetHeight.toInt) > scrollHeight) BottomScroll()
         else NoScroll(scrollTop)
     }
 
-    def setContent(out: String) = {
-      tARender.value = out
-    }
-
     def doScroll = scrollMode() match {
-      case b: BottomScroll ⇒ tARender.scrollTop = tARender.scrollHeight
-      case n: NoScroll     ⇒ tARender.scrollTop = n.scrollHeight
+      case b: BottomScroll ⇒ sRender.scrollTop = sRender.scrollHeight
+      case n: NoScroll     ⇒ sRender.scrollTop = n.scrollHeight
       case _               ⇒
     }
+  }
+
+  case class ScrollableText(initText: String, _scrollMode: AutoScroll) extends Scrollable {
+    //FIXME: ADD FEATURE: SET THE NUMBER OF LINES IN VIEW (DEFAULT IS 500)
+    val scrollMode: Var[AutoScroll] = Var(_scrollMode)
+    val tA = textArea(20)(initText, onscroll := { (e: Event) ⇒ setScrollMode })
+    val sRender = tA.render
+
+    def setContent(out: String) = {
+      sRender.value = out
+    }
+  }
+
+  case class ScrollableDiv(_element: Div, _scrollMode: AutoScroll) extends Scrollable {
+    //FIXME: ADD FEATURE: SET THE NUMBER OF LINES IN VIEW (DEFAULT IS 500)
+    val scrollMode: Var[AutoScroll] = Var(_scrollMode)
+    val child: Var[Node] = Var(tags.div)
+    val tA = div("scrollable")(Rx {
+      child()
+    }, onscroll := { (e: Event) ⇒ setScrollMode })
+
+    def setChild(d: Div) = child() = d
+
+    val sRender = tA.render
+
   }
 
   //table
@@ -417,7 +440,7 @@ object BootstrapTags {
   val alert_warning = key("alert-warning")
 
   def alert(alertType: ClassKeyAggregator, content: String, todook: () ⇒ Unit, todocancel: () ⇒ Unit) =
-    div("alertSettings alert " + alertType.key)(role := "alert")(
+    tags.div(role := "alert")(
       content,
       div("spacer20")(
         buttonGroup("left")(
