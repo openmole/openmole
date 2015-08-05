@@ -176,10 +176,10 @@ object ApiImpl extends Api {
                 envIds.foreach {
                   case (envId, env) ⇒
                     env.listen {
-                      case (env, bdl: BeginDownload) ⇒ Runnings.append(envId, env) {
+                      case (env, bdl: BeginDownload) ⇒ Runnings.update(envId) {
                         re ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1))
                       }
-                      case (env, edl: EndDownload) ⇒ Runnings.append(envId, env) {
+                      case (env, edl: EndDownload) ⇒ Runnings.update(envId) {
                         re ⇒
                           val size = re.networkActivity.downloadedSize + FileDecorator(edl.file).size
                           re.copy(networkActivity = re.networkActivity.copy(
@@ -188,10 +188,10 @@ object ApiImpl extends Api {
                             readableDownloadedSize = readableByteCount(size))
                           )
                       }
-                      case (env, bul: BeginUpload) ⇒ Runnings.append(envId, env) {
+                      case (env, bul: BeginUpload) ⇒ Runnings.update(envId) {
                         re ⇒ re.copy(networkActivity = re.networkActivity.copy(uploadingFiles = re.networkActivity.uploadingFiles + 1))
                       }
-                      case (env, eul: EndUpload) ⇒ Runnings.append(envId, env) {
+                      case (env, eul: EndUpload) ⇒ Runnings.update(envId) {
                         (re: RunningEnvironment) ⇒
                           val size = re.networkActivity.uploadedSize + FileDecorator(eul.file).size
                           re.copy(
