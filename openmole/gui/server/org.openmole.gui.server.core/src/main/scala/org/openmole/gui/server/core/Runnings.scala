@@ -40,10 +40,10 @@ object Runnings {
 
   lazy private val instance = new Runnings
 
-  def append(envId: EnvironmentId,
-             environment: Environment)(todo: (RunningEnvironment) ⇒ RunningEnvironment) = atomic { implicit ctx ⇒
-    val re = instance.runningEnvironments.getOrElse(envId, RunningEnvironment.empty(environment))
-    instance.runningEnvironments(envId) = todo(re)
+  def update(envId: EnvironmentId)(todo: (RunningEnvironment) ⇒ RunningEnvironment) = atomic { implicit ctx ⇒
+    instance.runningEnvironments.get(envId).foreach {
+      re ⇒ instance.runningEnvironments(envId) = todo(re)
+    }
   }
 
   def addExecutionId(id: ExecutionId) = atomic { implicit ctx ⇒
