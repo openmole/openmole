@@ -37,7 +37,7 @@ class MarketPanel extends ModalPanel {
   val selectedEntry: Var[Option[MarketIndexEntry]] = Var(None)
   val downloading: Var[Seq[MarketIndexEntry]] = Var(Seq())
 
-  val marketTable = bs.table(striped + spacer20)(
+  lazy val marketTable = bs.table(striped + spacer20)(
     thead,
     Rx {
       tbody({

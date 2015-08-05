@@ -17,35 +17,13 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     border: medium none;
     outline: medium none;
 }
-.myButton {
-    background: #77b55a linear-gradient(to bottom, #77b55a 5%, #72b352 100%) repeat scroll 0 0;
-    border: 1px solid #4b8f29;
-    border-radius: 4px;
-    box-shadow: 0 10px 14px -7px #3e7327;
-    color: #ffffff;
-    cursor: pointer;
-    display: inline-block;
-    font-family: arial;
-    font-size: 13px;
-    font-weight: bold;
-    padding: 6px 12px;
-    text-decoration: none;
-    text-shadow: 0 1px 0 #5b8a3c;
-}
-.myButton:hover {
-    background: #72b352 linear-gradient(to bottom, #72b352 5%, #77b55a 100%) repeat scroll 0 0;
-}
-.myButton:active {
-    position: relative;
-    top: 1px;
-}
 .black-label {
     color: black;
 }
 #settingsPanelID, #executionsPanelID .modal-dialog {
     width: 70%;
 }
-#marketPanelID, #envStackID .modal-dialog {
+#marketPanelID .modal-dialog, #envStackID .modal-dialog {
     width: 60%;
 }
 .table tbody > tr > td.vert-align {
@@ -103,7 +81,8 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .file {
     color: white;
     display: inline-block;
-    margin-bottom: 2px;
+    margin-top: 2px;
+    margin-bottom: 3px;
     text-decoration: none;
 }
 .file-info {
@@ -365,15 +344,15 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     width: 100%;
     z-index: 998;
 }
+
 .centerPage {
+    position: fixed;
+    top: 50%;
     left: 50%;
-    margin-left: -100px;
-    max-width: 350px;
-    position: absolute;
-    top: 50px;
-    width: 25%;
-    z-index: 999;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
+
 .message {
     color: #999;
     font-style: italic;
@@ -482,7 +461,6 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .alertSettings {
     min-width: 600px;
     position: relative;
-    right: 50%;
 }
 textarea.form-control {
     height: 98%;
@@ -521,4 +499,13 @@ label {
 }
 .executionHeader {
     height: 70px;
+}
+
+.alertOverlay{
+    background: rgba(0, 0, 0, 0.8) none repeat scroll 0 0;
+    color: white;
+    height: 100%;
+    position: absolute;
+    width: 100%;
+    z-index: 999;
 }
