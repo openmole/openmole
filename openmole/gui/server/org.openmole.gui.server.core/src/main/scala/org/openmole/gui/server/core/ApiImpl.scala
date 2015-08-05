@@ -176,12 +176,6 @@ object ApiImpl extends Api {
                 envIds.foreach {
                   case (envId, env) ⇒
                     env.listen {
-                      case (env, ex: ExceptionRaised) ⇒
-                        Runnings.append(envId, env) {
-                          re ⇒
-                            re.copy(environmentError = EnvironmentError(envId, ex.exception.getMessage,
-                              ErrorBuilder(ex.exception), ex.creationTime, ex.level) :: re.environmentError.take(50))
-                        }
                       case (env, bdl: BeginDownload) ⇒ Runnings.append(envId, env) {
                         re ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1))
                       }
@@ -191,20 +185,21 @@ object ApiImpl extends Api {
                           re.copy(networkActivity = re.networkActivity.copy(
                             downloadingFiles = re.networkActivity.downloadingFiles - 1,
                             downloadedSize = size,
-                            readableDownloadedSize = readableByteCount(size)))
+                            readableDownloadedSize = readableByteCount(size))
+                          )
                       }
                       case (env, bul: BeginUpload) ⇒ Runnings.append(envId, env) {
                         re ⇒ re.copy(networkActivity = re.networkActivity.copy(uploadingFiles = re.networkActivity.uploadingFiles + 1))
                       }
                       case (env, eul: EndUpload) ⇒ Runnings.append(envId, env) {
                         (re: RunningEnvironment) ⇒
-                          {
-                            val size = re.networkActivity.uploadedSize + FileDecorator(eul.file).size
-                            re.copy(networkActivity = re.networkActivity.copy(
+                          val size = re.networkActivity.uploadedSize + FileDecorator(eul.file).size
+                          re.copy(
+                            networkActivity = re.networkActivity.copy(
                               uploadedSize = size,
                               readableUploadedSize = readableByteCount(size),
-                              uploadingFiles = re.networkActivity.uploadingFiles - 1))
-                          }
+                              uploadingFiles = re.networkActivity.uploadingFiles - 1)
+                          )
                       }
                     }
                 }
@@ -227,14 +222,14 @@ object ApiImpl extends Api {
   def allStates() = execution.allStates
 
   def runningErrorEnvironmentAndOutputData(lines: Int, level: ErrorStateLevel): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
-    val envIds = Runnings.ids
+    val envIds = Runnings.environmentIds
     (
       envIds.map {
         case (id, envIds) ⇒
           RunningEnvironmentData(
             id,
-            Runnings.runningEnvironments(id).flatMap {
-              _._2.environmentError
+            Runnings.runningEnvironments(envIds).flatMap {
+              case (envId, info) ⇒ info.environmentErrors(envId)
             }.filter { _.level == level }
           )
       }.toSeq,

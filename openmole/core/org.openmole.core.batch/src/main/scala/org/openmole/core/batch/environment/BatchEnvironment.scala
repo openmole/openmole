@@ -56,14 +56,14 @@ object BatchEnvironment extends Logger {
   case class BeginDownload(id: Long, file: File, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
   case class EndDownload(id: Long, file: File, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
 
-  def signalUpload[T](upload: ⇒ T, file: File, path: String, storage: StorageService) = {
+  def signalUpload[T](upload: ⇒ T, file: File, path: String, storage: StorageService): T = {
     val id = transferId.getAndIncrement
     EventDispatcher.trigger(storage.environment, new BeginUpload(id, file, path, storage))
     try upload
     finally EventDispatcher.trigger(storage.environment, new EndUpload(id, file, path, storage))
   }
 
-  def signalDownload[T](download: ⇒ T, path: String, storage: StorageService, file: File) = {
+  def signalDownload[T](download: ⇒ T, path: String, storage: StorageService, file: File): T = {
     val id = transferId.getAndIncrement
     EventDispatcher.trigger(storage.environment, new BeginDownload(id, file, path, storage))
     try download
