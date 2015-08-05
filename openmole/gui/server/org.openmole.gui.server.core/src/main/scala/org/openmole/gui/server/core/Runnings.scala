@@ -48,12 +48,8 @@ object Runnings {
     }
   }
 
-  def addExecutionId(id: ExecutionId) = atomic { implicit ctx ⇒
-    instance.environmentIds(id) = Seq()
-  }
-
   def add(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)], printStream: StringPrintStream) = atomic { implicit ctx ⇒
-    addExecutionId(id)
+    instance.environmentIds(id) = Seq()
     instance.outputs(id) = printStream
     envIds.foreach {
       case (envId, env) ⇒
