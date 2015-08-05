@@ -22,8 +22,7 @@ import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.logger.Logger
-import collection.mutable._
-import org.openmole.core.batch.refresh.{ Kill, Manage }
+import org.openmole.core.batch.refresh.{ Kill }
 import scala.concurrent.stm._
 import scala.ref._
 
@@ -63,6 +62,7 @@ class BatchJobWatcher(environment: WeakReference[BatchEnvironment]) extends IUpd
     environment.get match {
       case None ⇒ false
       case Some(env) ⇒
+        Log.logger.fine("Watch jobs " + registry.allJobs.size)
 
         val (toKill, toSubmit) =
           atomic { implicit ctx ⇒
@@ -71,7 +71,6 @@ class BatchJobWatcher(environment: WeakReference[BatchEnvironment]) extends IUpd
             val toKill = remove.flatMap(j ⇒ registry.executionJobs(j).filter(_.state != KILLED))
             for (j ← remove) registry.removeJob(j)
 
-            Log.logger.fine("Watch jobs " + registry.allJobs.size)
             val toSubmit =
               for (job ← registry.allJobs) yield {
                 val runningJobs = registry.executionJobs(job).filter(!_.state.isFinal)
