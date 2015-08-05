@@ -14,7 +14,6 @@ import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.gui.server.core.Utils._
-import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data._
@@ -94,6 +93,7 @@ object ApiImpl extends Api {
       val archiveFile = safePathToFile(treeNodeData.safePath)
       val parentFile = archiveFile.getParentFile
       archiveFile.extractUncompress(parentFile)
+      parentFile.applyRecursive((f: File) ⇒ f.setWritable(true))
     case _ ⇒
   }
 
@@ -180,7 +180,7 @@ object ApiImpl extends Api {
                         Runnings.append(envId, env) {
                           re ⇒
                             re.copy(environmentError = EnvironmentError(envId, ex.exception.getMessage,
-                              ErrorBuilder(ex.exception)) :: re.environmentError.takeRight(50))
+                              ErrorBuilder(ex.exception), ex.creationTime, ex.level) :: re.environmentError.take(50))
                         }
                       case (env, bdl: BeginDownload) ⇒ Runnings.append(envId, env) {
                         re ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1))
@@ -226,7 +226,7 @@ object ApiImpl extends Api {
 
   def allStates() = execution.allStates
 
-  def runningErrorEnvironmentAndOutputData(lines: Int): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
+  def runningErrorEnvironmentAndOutputData(lines: Int, level: ErrorStateLevel): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
     val envIds = Runnings.ids
     (
       envIds.map {
@@ -235,7 +235,7 @@ object ApiImpl extends Api {
             id,
             Runnings.runningEnvironments(id).flatMap {
               _._2.environmentError
-            }
+            }.filter { _.level == level }
           )
       }.toSeq,
       envIds.keys.toSeq.map {

@@ -174,11 +174,11 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
     setting() = None
   }
 
-  def close: Unit = {
+  /* def close: Unit = {
     jquery.jQuery("#" + modalID).modal("hide")
   }
 
   jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ {
     onClose()
-  })
+  })*/
 }

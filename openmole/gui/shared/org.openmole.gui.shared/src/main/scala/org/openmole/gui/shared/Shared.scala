@@ -82,7 +82,7 @@ trait Api {
 
   def runScript(scriptData: ScriptData): Unit
 
-  def runningErrorEnvironmentAndOutputData(lines: Int): (Seq[RunningEnvironmentData], Seq[RunningOutputData])
+  def runningErrorEnvironmentAndOutputData(lines: Int, level: ErrorStateLevel): (Seq[RunningEnvironmentData], Seq[RunningOutputData])
 
   //INFO
   def buildInfo: OpenMOLEBuildInfo

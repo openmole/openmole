@@ -27,7 +27,7 @@ import org.openmole.gui.misc.js.{BootstrapTags => bs}
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskPanelUI")
 class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {
 
-  val codeInput = bs.textArea(7)(placeholder := "Code").render
+  val codeInput = bs.textArea(20)(placeholder := "Code").render
 
   @JSExport
   val view = bs.div()(

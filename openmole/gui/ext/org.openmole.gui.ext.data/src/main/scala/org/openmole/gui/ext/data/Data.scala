@@ -17,8 +17,6 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.net.URI
-
 case class DataBag(uuid: String, name: String, data: Data)
 
 trait Data
@@ -226,11 +224,27 @@ object ErrorBuilder {
   def apply(stackTrace: String) = Error(stackTrace)
 }
 
-case class ExecutionId(id: String = java.util.UUID.randomUUID.toString)
+sealed trait ID {
+  def id: String
+}
 
-case class EnvironmentId(id: String = java.util.UUID.randomUUID.toString)
+case class ExecutionId(id: String = java.util.UUID.randomUUID.toString) extends ID
 
-case class EnvironmentError(id: EnvironmentId, errorMessage: String, stack: Error)
+case class EnvironmentId(id: String = java.util.UUID.randomUUID.toString) extends ID
+
+sealed trait ErrorStateLevel {
+  def name: String
+}
+
+case class DebugLevel() extends ErrorStateLevel {
+  val name = "DEBUG"
+}
+
+case class ErrorLevel() extends ErrorStateLevel {
+  val name = "ERROR"
+}
+
+case class EnvironmentError(id: EnvironmentId, errorMessage: String, stack: Error, date: Long, level: ErrorStateLevel)
 
 case class NetworkActivity(downloadingFiles: Int = 0,
                            downloadedSize: Long = 0L,
