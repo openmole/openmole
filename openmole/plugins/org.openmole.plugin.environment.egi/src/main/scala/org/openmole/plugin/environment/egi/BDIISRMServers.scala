@@ -53,7 +53,7 @@ trait BDIISRMServers extends BatchEnvironment {
       s ⇒ EGIStorageService(s, this, proxyCreator, threadsBySE)
     }
 
-  def selectAStorage(usedFileHashes: ⇒ Iterable[(File, Hash)]) =
+  def selectAStorage(usedFileHashes: Iterable[(File, Hash)]) =
     storages match {
       case Nil      ⇒ throw new InternalProcessingError("No storage service available for the environment.")
       case s :: Nil ⇒ (s, s.waitAToken)
