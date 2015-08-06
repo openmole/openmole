@@ -51,23 +51,41 @@ object BatchEnvironment extends Logger {
   val transferId = new AtomicLong
 
   case class BeginUpload(id: Long, file: File, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
-  case class EndUpload(id: Long, file: File, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
+  case class EndUpload(id: Long, file: File, path: String, storage: StorageService, exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
+    def success = !exception.isDefined
+  }
 
   case class BeginDownload(id: Long, file: File, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
-  case class EndDownload(id: Long, file: File, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfer
+  case class EndDownload(id: Long, file: File, path: String, storage: StorageService, exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
+    def success = !exception.isDefined
+  }
 
   def signalUpload[T](upload: ⇒ T, file: File, path: String, storage: StorageService): T = {
     val id = transferId.getAndIncrement
-    EventDispatcher.trigger(storage.environment, new BeginUpload(id, file, path, storage))
-    try upload
-    finally EventDispatcher.trigger(storage.environment, new EndUpload(id, file, path, storage))
+    EventDispatcher.trigger(storage.environment, BeginUpload(id, file, path, storage))
+    val res =
+      try upload
+      catch {
+        case e: Throwable ⇒
+          EventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, Some(e)))
+          throw e
+      }
+    EventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, None))
+    res
   }
 
   def signalDownload[T](download: ⇒ T, path: String, storage: StorageService, file: File): T = {
     val id = transferId.getAndIncrement
-    EventDispatcher.trigger(storage.environment, new BeginDownload(id, file, path, storage))
-    try download
-    finally EventDispatcher.trigger(storage.environment, new EndDownload(id, file, path, storage))
+    EventDispatcher.trigger(storage.environment, BeginDownload(id, file, path, storage))
+    val res =
+      try download
+      catch {
+        case e: Throwable ⇒
+          EventDispatcher.trigger(storage.environment, EndDownload(id, file, path, storage, Some(e)))
+          throw e
+      }
+    EventDispatcher.trigger(storage.environment, EndDownload(id, file, path, storage, None))
+    res
   }
 
   val MemorySizeForRuntime = new ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime")

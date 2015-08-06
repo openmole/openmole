@@ -42,7 +42,7 @@ class EnvironmentErrorPanel {
     (for {
       error ← errors.groupBy(e ⇒ (e.errorMessage, e.stack)).values.map {
         _.sortBy(_.date).last
-      }.toSeq
+      }.toSeq.sortBy(_.date).reverse
       nb = errors.count(_.copy(date = 0L) == error.copy(date = 0L))
     } yield {
       Seq(

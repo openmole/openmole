@@ -181,7 +181,7 @@ object ApiImpl extends Api {
                       }
                       case (env, edl: EndDownload) ⇒ Runnings.update(envId) {
                         re ⇒
-                          val size = re.networkActivity.downloadedSize + FileDecorator(edl.file).size
+                          val size = re.networkActivity.downloadedSize + (if (edl.success) FileDecorator(edl.file).size else 0)
                           re.copy(networkActivity = re.networkActivity.copy(
                             downloadingFiles = re.networkActivity.downloadingFiles - 1,
                             downloadedSize = size,
@@ -193,7 +193,7 @@ object ApiImpl extends Api {
                       }
                       case (env, eul: EndUpload) ⇒ Runnings.update(envId) {
                         (re: RunningEnvironment) ⇒
-                          val size = re.networkActivity.uploadedSize + FileDecorator(eul.file).size
+                          val size = re.networkActivity.uploadedSize + (if (eul.success) FileDecorator(eul.file).size else 0)
                           re.copy(
                             networkActivity = re.networkActivity.copy(
                               uploadedSize = size,

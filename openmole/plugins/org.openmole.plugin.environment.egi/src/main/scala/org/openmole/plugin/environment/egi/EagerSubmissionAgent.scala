@@ -81,11 +81,12 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment], thresho
 
       val minOversub = Workspace.preferenceAsInt(EGIEnvironment.EagerSubmissionMinNumberOfJob)
 
+      val jobSize = jobs.size
       var nbRessub =
-        if (jobs.size > minOversub) {
-          if (maxRunning < minOversub) minOversub - jobs.size else maxRunning - (stillRunning + stillReady)
+        if (jobSize > minOversub) {
+          if (maxRunning < minOversub) minOversub - jobSize else maxRunning - (stillRunning + stillReady)
         }
-        else Workspace.preferenceAsInt(EGIEnvironment.EagerSubmissionMinNumberOfJob) - jobs.size
+        else Workspace.preferenceAsInt(EGIEnvironment.EagerSubmissionMinNumberOfJob) - jobSize
 
       val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(EGIEnvironment.EagerSubmissionNumberOfJobUnderMin)
 
