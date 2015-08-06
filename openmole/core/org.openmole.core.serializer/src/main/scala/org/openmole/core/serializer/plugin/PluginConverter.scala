@@ -33,7 +33,7 @@ object PluginConverter extends Logger
 
 import PluginConverter._
 
-class PluginConverter[A <: { def pluginUsed(f: File) }](serializer: A, reflectionConverter: ReflectionConverter) extends Converter {
+class PluginConverter(serializer: PluginListing, reflectionConverter: ReflectionConverter) extends Converter {
 
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
     if (PluginManager.isClassProvidedByAPlugin(o.getClass)) PluginManager.pluginsForClass(o.getClass).foreach(serializer.pluginUsed)

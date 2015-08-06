@@ -17,6 +17,9 @@
 
 package org.openmole.plugin.environment.egi
 
+import java.util.concurrent.TimeUnit
+
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.tool.file._
 import org.openmole.core.tools.service.{ Scaling, Random }
 import org.openmole.core.batch.environment.BatchEnvironment
@@ -26,6 +29,7 @@ import org.openmole.core.batch.storage.StorageService
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.workspace._
 import org.openmole.tool.hash.Hash
+import org.openmole.tool.thread._
 import concurrent.stm._
 import java.io.File
 import Random._
@@ -44,72 +48,86 @@ trait BDIISRMServers extends BatchEnvironment {
   lazy val bdiiStorarges =
     bdiiServer.querySRMs(voName, Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut))(proxyCreator)
 
-  override def allStorages =
+  def storages =
     bdiiStorarges.map {
       s ⇒ EGIStorageService(s, this, proxyCreator, threadsBySE)
     }
 
-  override def selectAStorage(usedFileHashes: Iterable[(File, Hash)]) =
-    if (storages.size == 1) super.selectAStorage(usedFileHashes)
-    else {
-      val sizes = usedFileHashes.map { case (f, _) ⇒ f -> f.size }.toMap
-      val totalFileSize = sizes.values.sum
-      val onStorage = ReplicaCatalog.withSession(ReplicaCatalog.inCatalog(_))
-      val maxTime = storages.map(_.time).max
-      val minTime = storages.map(_.time).min
+  def selectAStorage(usedFileHashes: Iterable[(File, Hash)]) =
+    storages match {
+      case Nil      ⇒ throw new InternalProcessingError("No storage service available for the environment.")
+      case s :: Nil ⇒ (s, s.waitAToken)
+      case _ ⇒
+        val sizes = usedFileHashes.map { case (f, _) ⇒ f -> f.size }.toMap
+        val totalFileSize = sizes.values.sum
+        val onStorage = ReplicaCatalog.withSession(ReplicaCatalog.inCatalog(_))
+        val maxTime = storages.map(_.time).max
+        val minTime = storages.map(_.time).min
 
-      def fitness =
-        for {
-          cur ← storages
-          token ← cur.tryGetToken
-        } yield {
-          val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(cur.id, Set.empty).contains(h.toString) }.map { case (f, _) ⇒ sizes(f) }.sum
-
-          val sizeFactor =
-            if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
-
-          val time = cur.time
-          val timeFactor =
-            if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
-            else 1 - time.normalize(minTime, maxTime)
-
-          import EGIEnvironment._
-
-          val fitness = math.pow(
-            Workspace.preferenceAsDouble(StorageSizeFactor) * sizeFactor +
-              Workspace.preferenceAsDouble(StorageTimeFactor) * timeFactor +
-              Workspace.preferenceAsDouble(StorageAvailabilityFactor) * cur.availability +
-              Workspace.preferenceAsDouble(StorageSuccessRateFactor) * cur.successRate,
-            Workspace.preferenceAsDouble(StorageFitnessPower))
-
-          (cur, token, fitness)
-        }
-
-      @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): (StorageService, AccessToken) = {
-        storages match {
-          case (storage, token, _) :: Nil ⇒ (storage, token)
-          case (storage, token, fitness) :: tail ⇒
-            if (value <= fitness) (storage, token)
-            else selected(value - fitness, tail)
-        }
-      }
-
-      atomic { implicit txn ⇒
-        val fitenesses = fitness
-        if (!fitenesses.isEmpty) {
-          val notLoaded = EGIEnvironment.normalizedFitness(fitenesses).shuffled(Random.default)
-          val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
-          val drawn = Random.default.nextDouble * fitnessSum
-          val (storage, token) = selected(drawn, notLoaded.toList)
+        def fitness =
           for {
-            (s, t, _) ← notLoaded
-            if s.id != storage.id
-          } s.releaseToken(t)
-          storage -> token
-        }
-        else retry
-      }
+            cur ← storages
+            token ← cur.tryGetToken
+          } yield {
+            val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(cur.id, Set.empty).contains(h.toString) }.map { case (f, _) ⇒ sizes(f) }.sum
 
+            val sizeFactor =
+              if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
+
+            val time = cur.time
+            val timeFactor =
+              if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
+              else 1 - time.normalize(minTime, maxTime)
+
+            import EGIEnvironment._
+
+            val fitness = math.pow(
+              Workspace.preferenceAsDouble(StorageSizeFactor) * sizeFactor +
+                Workspace.preferenceAsDouble(StorageTimeFactor) * timeFactor +
+                Workspace.preferenceAsDouble(StorageAvailabilityFactor) * cur.availability +
+                Workspace.preferenceAsDouble(StorageSuccessRateFactor) * cur.successRate,
+              Workspace.preferenceAsDouble(StorageFitnessPower))
+
+            (cur, token, fitness)
+          }
+
+        @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): (StorageService, AccessToken) = {
+          storages match {
+            case Nil                        ⇒ throw new InternalProcessingError("The list should never be empty")
+            case (storage, token, _) :: Nil ⇒ (storage, token)
+            case (storage, token, fitness) :: tail ⇒
+              if (value <= fitness) (storage, token)
+              else selected(value - fitness, tail)
+          }
+        }
+
+        atomic { implicit txn ⇒
+          val fitenesses = fitness
+          if (!fitenesses.isEmpty) {
+            val notLoaded = EGIEnvironment.normalizedFitness(fitenesses).shuffled(Random.default)
+            val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
+            val drawn = Random.default.nextDouble * fitnessSum
+            val (storage, token) = selected(drawn, notLoaded.toList)
+            for {
+              (s, t, _) ← notLoaded
+              if s.id != storage.id
+            } s.releaseToken(t)
+            storage -> token
+          }
+          else retry
+        }
     }
+
+  def clean = ReplicaCatalog.withSession { implicit c ⇒
+    val cleaningThreadPool = fixedThreadPool(Workspace.preferenceAsInt(EGIEnvironment.EnvironmentCleaningThreads))
+    storages.foreach {
+      s ⇒
+        background {
+          s.withToken { implicit t ⇒ s.clean }
+        }(cleaningThreadPool)
+    }
+    cleaningThreadPool.shutdown()
+    cleaningThreadPool.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
+  }
 
 }

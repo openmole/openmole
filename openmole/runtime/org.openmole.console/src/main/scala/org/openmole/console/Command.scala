@@ -24,7 +24,7 @@ import java.io.{ IOException, PrintWriter, StringWriter, File }
 import java.util.concurrent.atomic.{ AtomicLong, AtomicInteger }
 import org.apache.log4j.lf5.viewer.LogTableColumn
 import org.openmole.core.batch.authentication._
-import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.batch.environment.SimpleBatchEnvironment$
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager.PluginManager

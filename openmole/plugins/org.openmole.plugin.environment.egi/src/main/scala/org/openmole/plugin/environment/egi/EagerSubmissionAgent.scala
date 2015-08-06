@@ -64,7 +64,7 @@ class EagerSubmissionAgent(environment: WeakReference[BatchEnvironment], thresho
         case Some(env) ⇒ env
       }
 
-      val jobs = env.executionJobs
+      val jobs = env.jobs
 
       val executionJobs = jobs.groupBy(_.job)
 

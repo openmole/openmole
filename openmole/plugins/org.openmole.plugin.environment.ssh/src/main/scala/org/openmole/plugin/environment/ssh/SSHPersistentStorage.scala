@@ -58,6 +58,4 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
         }
     }
 
-  def allStorages = List(storage)
-
 }

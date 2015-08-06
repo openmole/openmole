@@ -71,7 +71,7 @@ class OAREnvironment(
     val workDirectory: Option[String],
     override val threads: Option[Int],
     val storageSharedLocally: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with SSHPersistentStorage { env ⇒
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends SimpleBatchEnvironment with SSHPersistentStorage { env ⇒
 
   type JS = OARJobService
 
@@ -84,7 +84,5 @@ class OAREnvironment(
     def sharedFS = storage
     def workDirectory = env.workDirectory
   }
-
-  def allJobServices = List(jobService)
 
 }

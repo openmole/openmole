@@ -58,7 +58,7 @@ class DesktopGridEnvironment(
     val login: String, password: String,
     override val openMOLEMemory: Option[Int],
     override val threads: Option[Int],
-    override val name: Option[String]) extends BatchEnvironment { env ⇒
+    override val name: Option[String]) extends SimpleBatchEnvironment { env ⇒
 
   type SS = VolatileStorageService
   type JS = DesktopGridJobService
@@ -68,7 +68,7 @@ class DesktopGridEnvironment(
 
   val url = new URI("desktop", login, "localhost", port, null, null, null)
 
-  @transient lazy val batchStorage = new VolatileStorageService with UnlimitedAccess with GridScaleStorage with CompressedTransfer {
+  @transient override lazy val storage = new VolatileStorageService with UnlimitedAccess with GridScaleStorage with CompressedTransfer {
     def environment = env
     val remoteStorage: RemoteStorage = new DumyStorage
     def url = env.url
@@ -77,11 +77,9 @@ class DesktopGridEnvironment(
     val id = url.toString
   }
 
-  @transient override lazy val allStorages = List(batchStorage)
-
-  @transient override lazy val allJobServices = List(
+  @transient override lazy val jobService =
     new DesktopGridJobService {
       def environment = env
-    })
+    }
 
 }

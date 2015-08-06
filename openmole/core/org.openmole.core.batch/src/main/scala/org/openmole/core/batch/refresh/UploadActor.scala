@@ -48,7 +48,7 @@ class UploadActor(jobManager: JobManager) {
     val job = msg.job
     if (!job.state.isFinal) {
       try {
-        val sj = initCommunication(job.environment, job.job)
+        val sj = initCommunication(job)
         jobManager ! Uploaded(job, sj)
       }
       catch {
@@ -59,17 +59,15 @@ class UploadActor(jobManager: JobManager) {
     }
   }
 
-  private def initCommunication(environment: BatchEnvironment, job: Job): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
+  private def initCommunication(job: BatchExecutionJob): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
+    SerialiserService.serialise(job.runnableTasks, jobFile)
 
-    val (serializationFiles, serialisationPluginFiles) = serializeJob(jobFile, job)
+    val pluginAndFiles = job.pluginsAndFiles
 
-    val (storage, token) = environment.selectAStorage(
-      (serializationFiles +
-        environment.runtime +
-        environment.jvmLinuxI386 +
-        environment.jvmLinuxX64 ++
-        environment.plugins ++
-        serialisationPluginFiles).map(f ⇒ f -> FileService.hash(job.moleExecution, f)))
+    val plugins = new TreeSet[File]()(fileOrdering) ++ pluginAndFiles.plugins
+    val files = (new TreeSet[File]()(fileOrdering) ++ pluginAndFiles.files) diff plugins
+
+    val (storage, token) = job.selectStorage()
 
     implicit val t = token
     try ReplicaCatalog.withSession { implicit session ⇒
@@ -78,7 +76,7 @@ class UploadActor(jobManager: JobManager) {
 
       val inputPath = storage.child(communicationPath, Storage.uniqName("job", ".in"))
 
-      val runtime = replicateTheRuntime(job, environment, storage)
+      val runtime = replicateTheRuntime(job.job, job.environment, storage)
 
       val jobForRuntimePath = storage.child(communicationPath, Storage.uniqName("job", ".tgz"))
 
@@ -87,10 +85,10 @@ class UploadActor(jobManager: JobManager) {
       val jobMessage = FileMessage(jobForRuntimePath, jobHash)
 
       val executionMessage = createExecutionMessage(
-        job,
+        job.job,
         jobMessage,
-        serializationFiles,
-        serialisationPluginFiles,
+        files,
+        plugins,
         storage,
         communicationPath)
 
@@ -102,14 +100,6 @@ class UploadActor(jobManager: JobManager) {
 
       SerializedJob(storage, communicationPath, inputPath, runtime)
     } finally storage.releaseToken(token)
-  }
-
-  def serializeJob(file: File, job: Job) = {
-    val runnableTasks = job.moleJobs.map(RunnableTask(_))
-    val serializationResult = SerialiserService.serialiseGetPluginsAndFiles(runnableTasks, file)
-    val files = new TreeSet[File]()(fileOrdering) ++ serializationResult.files
-    val plugins = new TreeSet[File]()(fileOrdering) ++ serializationResult.plugins
-    (files diff plugins, plugins)
   }
 
   def toReplicatedFile(job: Job, file: File, storage: StorageService, transferOptions: TransferOptions)(implicit token: AccessToken, session: Session): ReplicatedFile = {

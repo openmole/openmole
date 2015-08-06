@@ -22,29 +22,30 @@ import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.logger.Logger
-import collection.mutable._
-import org.openmole.core.batch.refresh.{ Kill, Manage }
-import scala.ref.WeakReference
+import org.openmole.core.batch.refresh.{ Kill }
+import scala.concurrent.stm._
+import scala.ref._
 
 object BatchJobWatcher extends Logger {
-  case object Watch
 
   class ExecutionJobRegistry {
-    val jobs = new HashMap[Job, Set[BatchExecutionJob]] with MultiMap[Job, BatchExecutionJob]
+    val jobs = TMap[Job, List[BatchExecutionJob]]()
+    def allJobs = jobs.single.keys
+    def executionJobs(job: Job): List[BatchExecutionJob] = jobs.single.getOrElse(job, List.empty)
 
-    def allJobs = jobs.keySet
+    def update(job: Job, ejobs: List[BatchExecutionJob]) = atomic { implicit ctx ⇒
+      jobs(job) = ejobs
+    }
+    def isEmpty: Boolean = jobs.single.isEmpty
 
-    def executionJobs(job: Job) = jobs.getOrElse(job, Set.empty)
+    def register(ejob: BatchExecutionJob) = atomic { implicit ctx ⇒
+      val newJobs = ejob :: jobs.getOrElse(ejob.job, List.empty)
+      jobs(ejob.job) = newJobs
+    }
 
-    def remove(ejob: BatchExecutionJob) = jobs.removeBinding(ejob.job, ejob)
+    def removeJob(job: Job) = jobs.single -= job
 
-    def isEmpty: Boolean = jobs.isEmpty
-
-    def register(ejob: BatchExecutionJob) = jobs.addBinding(ejob.job, ejob)
-
-    def removeJob(job: Job) = jobs -= job
-
-    def allExecutionJobs = jobs.values.flatMap(_.toSeq)
+    def allExecutionJobs = jobs.single.values.flatten
   }
 
 }
@@ -55,42 +56,36 @@ class BatchJobWatcher(environment: WeakReference[BatchEnvironment]) extends IUpd
 
   import BatchJobWatcher._
 
-  def register(job: BatchExecutionJob) = synchronized { registry.register(job) }
+  def register(job: BatchExecutionJob) = registry.register(job)
 
-  override def update: Boolean = synchronized {
-    val env = environment.get match {
-      case None ⇒
-        for (ej ← registry.allExecutionJobs) if (ej.state != KILLED) BatchEnvironment.jobManager ! Kill(ej)
-        return false
-      case Some(env) ⇒ env
+  override def update: Boolean =
+    environment.get match {
+      case None ⇒ false
+      case Some(env) ⇒
+        Log.logger.fine("Watch jobs " + registry.allJobs.size)
+
+        val (toKill, toSubmit) =
+          atomic { implicit ctx ⇒
+
+            val remove = registry.allJobs.filter(_.finished)
+            val toKill = remove.flatMap(j ⇒ registry.executionJobs(j).filter(_.state != KILLED))
+            for (j ← remove) registry.removeJob(j)
+
+            val toSubmit =
+              for (job ← registry.allJobs) yield {
+                val runningJobs = registry.executionJobs(job).filter(!_.state.isFinal)
+                registry(job) = runningJobs
+                if (registry.executionJobs(job).isEmpty) Some(job) else None
+              }
+            (toKill, toSubmit.flatten)
+          }
+
+        toSubmit.foreach(env.submit)
+        toKill.foreach(ej ⇒ BatchEnvironment.jobManager ! Kill(ej))
+        true
     }
 
-    val jobGroupsToRemove = new ListBuffer[Job]
-
-    Log.logger.fine("Watch jobs " + registry.allJobs.size)
-    for (job ← registry.allJobs) {
-      if (job.finished) {
-        for (ej ← registry.executionJobs(job)) if (ej.state != KILLED) BatchEnvironment.jobManager ! Kill(ej)
-        jobGroupsToRemove += job
-      }
-      else {
-        val executionJobsToRemove = new ListBuffer[BatchExecutionJob]
-
-        for {
-          ej ← registry.executionJobs(job)
-          if ej.state.isFinal
-        } executionJobsToRemove += ej
-
-        for (ej ← executionJobsToRemove) registry.remove(ej)
-        if (registry.executionJobs(job).isEmpty) env.submit(job)
-      }
-    }
-
-    for (j ← jobGroupsToRemove) registry.removeJob(j)
-    true
-  }
-
-  def executionJobs = synchronized { registry.allExecutionJobs }
+  def executionJobs = registry.allExecutionJobs
 
   def delay = Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval)
 }
