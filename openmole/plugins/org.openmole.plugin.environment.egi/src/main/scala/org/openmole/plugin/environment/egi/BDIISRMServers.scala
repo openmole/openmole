@@ -48,7 +48,7 @@ trait BDIISRMServers extends BatchEnvironment {
   lazy val bdiiStorarges =
     bdiiServer.querySRMs(voName, Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut))(proxyCreator)
 
-  def storages =
+  lazy val storages =
     bdiiStorarges.map {
       s ⇒ EGIStorageService(s, this, proxyCreator, threadsBySE)
     }
