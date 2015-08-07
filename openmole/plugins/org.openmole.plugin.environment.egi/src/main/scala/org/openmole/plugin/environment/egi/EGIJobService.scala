@@ -102,5 +102,6 @@ trait EGIJobService extends GridScaleJobService with JobServiceQualityControl wi
       override val fuzzy = true
       override val requirements =
         environment.requirements.map(super.requirements + " && (" + _ + ")").getOrElse(super.requirements)
+      override val rank = Workspace.preference(EGIEnvironment.WMSRank)
     }
 }
