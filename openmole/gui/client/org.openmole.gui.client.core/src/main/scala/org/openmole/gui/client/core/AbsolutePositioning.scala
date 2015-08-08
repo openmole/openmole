@@ -49,4 +49,16 @@ object AbsolutePositioning {
     }
   }
 
+  trait Zone {
+    def zoneClass: String
+  }
+
+  case class FullPage() extends Zone {
+    def zoneClass = "fullPageZone"
+  }
+
+  case class FileZone() extends Zone {
+    def zoneClass = "fileZone"
+  }
+
 }

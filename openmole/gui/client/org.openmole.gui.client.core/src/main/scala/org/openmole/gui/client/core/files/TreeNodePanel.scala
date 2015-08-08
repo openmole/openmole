@@ -1,6 +1,7 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{ PanelTriggerer, OMPost }
+import org.openmole.gui.client.core.AbsolutePositioning.{ FileZone, CenterTransform }
+import org.openmole.gui.client.core.{ AlertPanel, PanelTriggerer, OMPost }
 import org.openmole.gui.ext.data.{ FileExtension, UploadProject }
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
@@ -176,7 +177,9 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   }
 
   def drawTree(tns: Seq[TreeNode]) = tags.table(`class` := "file-list")(
-    for (tn ← tns.sorted(TreeNodeOrdering)) yield { drawNode(tn) }
+    for (tn ← tns.sorted(TreeNodeOrdering)) yield {
+      drawNode(tn)
+    }
   )
 
   def drawNode(node: TreeNode) = node match {
@@ -246,10 +249,14 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def trashNode(treeNode: TreeNode) = {
     fileDisplayer.tabs -- treeNode
-    OMPost[Api].deleteFile(treeNode.safePath()).call().foreach { d ⇒
-      refreshCurrentDirectory
-      fileDisplayer.tabs.checkTabs
-    }
+    AlertPanel.popup(s"Do you realy want to trash ${treeNode.name()} ?",
+      () ⇒ {
+        OMPost[Api].deleteFile(treeNode.safePath()).call().foreach { d ⇒
+          refreshCurrentDirectory
+          fileDisplayer.tabs.checkTabs
+        }
+      }, zone = FileZone()
+    )
   }
 
   def renameNode(treeNode: TreeNode, newName: String) =
@@ -328,7 +335,9 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       tags.div(`class` := "file-info",
         tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
         tags.span(id := Rx {
-          "treeline" + { if (lineHovered()) "-hover" else "" }
+          "treeline" + {
+            if (lineHovered()) "-hover" else ""
+          }
         })(
           glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem file-glyph"),
           glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem file-glyph"),
