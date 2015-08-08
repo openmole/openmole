@@ -17,4 +17,5 @@
 
 package org.openmole.core.batch.control
 
+object AccessToken extends AccessToken
 sealed class AccessToken

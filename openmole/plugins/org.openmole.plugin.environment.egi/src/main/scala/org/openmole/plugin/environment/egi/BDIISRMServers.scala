@@ -45,7 +45,7 @@ trait BDIISRMServers extends BatchEnvironment {
 
   @transient lazy val threadsBySE = Workspace.preferenceAsInt(EGIEnvironment.LocalThreadsBySE)
 
-  lazy val storages = {
+  @transient lazy val storages = {
     val bdiiStorarges =
       bdiiServer.querySRMs(voName, Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut))(proxyCreator)
 

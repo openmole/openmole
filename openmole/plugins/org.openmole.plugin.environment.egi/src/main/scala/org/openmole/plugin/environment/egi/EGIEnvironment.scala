@@ -213,7 +213,6 @@ object EGIEnvironment extends Logger {
 class EGIBatchExecutionJob(val job: Job, val environment: EGIEnvironment) extends BatchExecutionJob {
   def selectStorage() = environment.selectAStorage(usedFileHashes)
   def selectJobService() = environment.selectAJobService
-
 }
 
 class EGIEnvironment(
@@ -265,9 +264,8 @@ class EGIEnvironment(
     case None ⇒ throw new UserBadDataError("No authentication has been initialized for EGI.")
   }
 
-  @transient lazy val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut))(authentication)
-
-  def jobServices =
+  @transient lazy val jobServices = {
+    val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut))(authentication)
     bdiiWMS.map {
       js ⇒
         new EGIJobService {
@@ -281,6 +279,7 @@ class EGIEnvironment(
           val nbTokens = threadsByWMS
         }
     }
+  }
 
   def selectAJobService: (JobService, AccessToken) =
     jobServices match {
