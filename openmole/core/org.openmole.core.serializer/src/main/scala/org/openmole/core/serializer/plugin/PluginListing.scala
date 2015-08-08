@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 02/10/13 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,43 +9,15 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.core.serializer.plugin
 
-import scala.collection.immutable.TreeSet
-import java.io.{ IOException, OutputStream, File }
-import org.openmole.core.serializer.converter.Serialiser
-import org.openmole.tool.file._
+import java.io.File
 
-trait PluginListing { this: Serialiser ⇒
-  private var plugins: TreeSet[File] = null
-
-  xStream.registerConverter(new PluginConverter(this, reflectionConverter))
-  xStream.registerConverter(new PluginClassConverter(this))
-
-  def pluginUsed(f: File): Unit =
-    try {
-      plugins += f
-    }
-    catch {
-      case e: IOException ⇒ throw new IOException(f.toString, e)
-    }
-
-  def listPlugins(obj: Any) = synchronized {
-    plugins = TreeSet[File]()(fileOrdering)
-
-    xStream.toXML(obj, new OutputStream {
-      def write(p1: Int) {}
-    })
-
-    val retPlugins = plugins
-    plugins = null
-    retPlugins
-  }
-
+trait PluginListing {
+  def pluginUsed(f: File): Unit
 }

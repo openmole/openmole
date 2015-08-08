@@ -17,22 +17,24 @@
 
 package org.openmole.core.serializer
 
+import java.lang.ProcessBuilder.NullOutputStream
+
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
+import org.openmole.core.serializer.PluginAndFilesListing
 import org.openmole.tool.file._
-import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.core.serializer.converter._
 import java.util.concurrent.locks.{ ReentrantReadWriteLock, ReadWriteLock }
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.logger.Logger
+import org.openmole.tool.stream
 import org.openmole.tool.tar._
 import org.openmole.tool.lock._
 import collection.mutable.ListBuffer
 import org.openmole.core.serializer.file.{ FileInjection, FileListing, FileSerialisation }
-import org.openmole.core.serializer.plugin.PluginListing
 
 object SerialiserService extends Logger {
 
@@ -56,14 +58,9 @@ object SerialiserService extends Logger {
     def make = new Serialiser with FileSerialisation
   }
 
-  private val serialiserWithFileListingFactory = new Factory with Initialized {
-    type T = Serialiser with FileListing
-    def make = new Serialiser with FileListing
-  }
-
-  private val pluginListingFactory = new Factory with Initialized {
-    type T = Serialiser with PluginListing
-    def make = new Serialiser with PluginListing
+  private val pluginAndFileListingFactory = new Factory with Initialized {
+    type T = Serialiser with PluginAndFilesListing
+    def make = new Serialiser with PluginAndFilesListing
   }
 
   private val deserialiserWithFileInjectionFactory = new Factory with Initialized {
@@ -73,8 +70,7 @@ object SerialiserService extends Logger {
 
   private def xStreams =
     xstream ::
-      serialiserWithFileListingFactory.instantiated.map(_.xStream) :::
-      pluginListingFactory.instantiated.map(_.xStream) :::
+      pluginAndFileListingFactory.instantiated.map(_.xStream) :::
       deserialiserWithFileInjectionFactory.instantiated.map(_.xStream)
 
   def register(op: XStream ⇒ Unit) = lock.write {
@@ -114,26 +110,15 @@ object SerialiserService extends Logger {
   }
 
   def serialiseAndArchiveFiles(obj: Any, tos: TarOutputStream): Unit = lock.read {
-    val objSerial = Workspace.newFile()
-    val serializationResult = serialiseGetPluginsAndFiles(obj, objSerial)
-    tos.addFile(objSerial, content)
-    objSerial.delete
+    Workspace.withTmpFile { objSerial ⇒
+      serialise(obj, objSerial)
+      tos.addFile(objSerial, content)
+    }
+    val serializationResult = pluginsAndFiles(obj)
     fileSerialisation.exec(_.serialiseFiles(serializationResult.files, tos))
   }
 
-  def serialiseGetPluginsAndFiles(obj: Any, file: File): PluginClassAndFiles = lock.read {
-    val os = file.bufferedOutputStream()
-    try serialiseGetPluginsAndFiles(obj, os)
-    finally os.close
-  }
-
-  def serialiseGetPluginsAndFiles(obj: Any, os: OutputStream): PluginClassAndFiles = lock.read {
-    val plugins = pluginListingFactory.exec(_.listPlugins(obj))
-    serialiserWithFileListingFactory.exec { s ⇒
-      s.toXML(obj, os)
-      PluginClassAndFiles(s.listedFiles.toSeq, plugins.toSeq)
-    }
-  }
+  def pluginsAndFiles(obj: Any) = pluginAndFileListingFactory.exec(_.list(obj))
 
   def deserialiseReplaceFiles[T](file: File, files: PartialFunction[String, File]): T = lock.read {
     val is = file.bufferedInputStream

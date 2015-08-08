@@ -34,11 +34,11 @@ trait LimitedAccess extends UsageControl {
       case head :: tail ⇒
         tokens() = tail
         Some(head)
-      case _ ⇒ None
+      case Nil ⇒ None
     }
   }
 
-  def waitAToken = atomic { implicit txn ⇒
+  def waitAToken: AccessToken = atomic { implicit txn ⇒
     tryGetToken.getOrElse(retry)
   }
 

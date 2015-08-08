@@ -17,9 +17,12 @@
 
 package org.openmole.plugin.environment.egi
 
+import java.util.concurrent.TimeUnit
+
 import org.eclipse.osgi.service.environment.EnvironmentInfo
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.filedeleter.FileDeleter
+import org.openmole.core.fileservice.FileService
 import org.openmole.tool.file._
 import org.openmole.core.tools.service.{ Scaling, Random }
 import java.io.File
@@ -33,6 +36,7 @@ import org.openmole.core.workspace._
 import org.openmole.core.tools.service._
 import org.openmole.core.batch.replication._
 import org.openmole.tool.logger.Logger
+import org.openmole.tool.thread._
 import concurrent.stm._
 import annotation.tailrec
 import ref.WeakReference
@@ -92,6 +96,10 @@ object EGIEnvironment extends Logger {
 
   val DefaultBDII = ConfigurationLocation("EGIEnvironment", "DefaultBDII")
 
+  val EnvironmentCleaningThreads = ConfigurationLocation("EGIEnvironment", "EnvironmentCleaningThreads")
+
+  val WMSRank = ConfigurationLocation("EGIEnvironment", "WMSRank")
+
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
 
@@ -143,6 +151,10 @@ object EGIEnvironment extends Logger {
   Workspace += (EagerSubmissionThreshold, "0.5")
 
   Workspace += (DefaultBDII, "ldap://cclcgtopbdii02.in2p3.fr:2170")
+
+  Workspace += (EnvironmentCleaningThreads, "20")
+
+  Workspace += (WMSRank, """( other.GlueCEStateWaitingJobs == 0 ) ? other.GlueCEStateFreeJobSlots : -other.GlueCEStateWaitingJobs""")
 
   def apply(
     voName: String,
@@ -198,6 +210,11 @@ object EGIEnvironment extends Logger {
 
 }
 
+class EGIBatchExecutionJob(val job: Job, val environment: EGIEnvironment) extends BatchExecutionJob {
+  def selectStorage() = environment.selectAStorage(usedFileHashes)
+  def selectJobService() = environment.selectAJobService
+}
+
 class EGIEnvironment(
     val voName: String,
     val bdii: String,
@@ -228,6 +245,8 @@ class EGIEnvironment(
     None
   }
 
+  def executionJob(job: Job) = new EGIBatchExecutionJob(job, this)
+
   override def submit(job: Job) = {
     registerAgents
     super.submit(job)
@@ -245,9 +264,8 @@ class EGIEnvironment(
     case None ⇒ throw new UserBadDataError("No authentication has been initialized for EGI.")
   }
 
-  @transient lazy val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut))(authentication)
-
-  override def allJobServices =
+  @transient lazy val jobServices = {
+    val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut))(authentication)
     bdiiWMS.map {
       js ⇒
         new EGIJobService {
@@ -261,73 +279,77 @@ class EGIEnvironment(
           val nbTokens = threadsByWMS
         }
     }
+  }
 
-  override def selectAJobService =
-    if (jobServices.size == 1) super.selectAJobService
-    else {
-      def jobFactor(j: EGIJobService) = (j.runnig.toDouble / j.submitted) * (j.totalDone.toDouble / j.totalSubmitted)
+  def selectAJobService: (JobService, AccessToken) =
+    jobServices match {
+      case Nil       ⇒ throw new InternalProcessingError("No job service available for the environment.")
+      case js :: Nil ⇒ (js, js.waitAToken)
+      case _ ⇒
+        def jobFactor(j: EGIJobService) = (j.runnig.toDouble / j.submitted) * (j.totalDone.toDouble / j.totalSubmitted)
 
-      val times = jobServices.map(_.time)
-      val maxTime = times.max
-      val minTime = times.min
+        val times = jobServices.map(_.time)
+        val maxTime = times.max
+        val minTime = times.min
 
-      val jobFactors = jobServices.map(jobFactor)
-      val maxJobFactor = jobFactors.max
-      val minJobFactor = jobFactors.min
+        val jobFactors = jobServices.map(jobFactor)
+        val maxJobFactor = jobFactors.max
+        val minJobFactor = jobFactors.min
 
-      def fitness =
-        jobServices.flatMap {
-          cur ⇒
-            cur.tryGetToken match {
-              case None ⇒ None
-              case Some(token) ⇒
-                val time = cur.time
+        def fitness =
+          jobServices.flatMap {
+            cur ⇒
+              cur.tryGetToken match {
+                case None ⇒ None
+                case Some(token) ⇒
+                  val time = cur.time
 
-                val timeFactor =
-                  if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
-                  else 1 - time.normalize(minTime, maxTime)
+                  val timeFactor =
+                    if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
+                    else 1 - time.normalize(minTime, maxTime)
 
-                val jobFactor =
-                  if (cur.submitted > 0 && cur.totalSubmitted > 0) ((cur.runnig.toDouble / cur.submitted) * (cur.totalDone / cur.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
-                  else 0.0
+                  val jobFactor =
+                    if (cur.submitted > 0 && cur.totalSubmitted > 0) ((cur.runnig.toDouble / cur.submitted) * (cur.totalDone / cur.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
+                    else 0.0
 
-                import EGIEnvironment._
+                  import EGIEnvironment._
 
-                val fitness = math.pow(
-                  Workspace.preferenceAsDouble(JobServiceJobFactor) * jobFactor +
-                    Workspace.preferenceAsDouble(JobServiceTimeFactor) * timeFactor +
-                    Workspace.preferenceAsDouble(JobServiceAvailabilityFactor) * cur.availability +
-                    Workspace.preferenceAsDouble(JobServiceSuccessRateFactor) * cur.successRate,
-                  Workspace.preferenceAsDouble(JobServiceFitnessPower))
-                Some((cur, token, fitness))
-            }
+                  val fitness = math.pow(
+                    Workspace.preferenceAsDouble(JobServiceJobFactor) * jobFactor +
+                      Workspace.preferenceAsDouble(JobServiceTimeFactor) * timeFactor +
+                      Workspace.preferenceAsDouble(JobServiceAvailabilityFactor) * cur.availability +
+                      Workspace.preferenceAsDouble(JobServiceSuccessRateFactor) * cur.successRate,
+                    Workspace.preferenceAsDouble(JobServiceFitnessPower))
+                  Some((cur, token, fitness))
+              }
+          }
+
+        @tailrec def selected(value: Double, jobServices: List[(EGIJobService, AccessToken, Double)]): (EGIJobService, AccessToken) =
+          jobServices match {
+            case Nil                         ⇒ throw new InternalProcessingError("List should never be empty.")
+            case (js, token, fitness) :: Nil ⇒ (js, token)
+            case (js, token, fitness) :: tail ⇒
+              if (value <= fitness) (js, token)
+              else selected(value - fitness, tail)
+          }
+
+        atomic { implicit txn ⇒
+          val fitnesses = fitness
+
+          if (!fitnesses.isEmpty) {
+            val notLoaded = normalizedFitness(fitnesses).shuffled(Random.default)
+            val totalFitness = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
+
+            val (jobService, token) = selected(Random.default.nextDouble * totalFitness, notLoaded.toList)
+            for {
+              (s, t, _) ← notLoaded
+              if (s.id != jobService.id)
+            } s.releaseToken(t)
+            jobService -> token
+          }
+          else retry
+
         }
-
-      @tailrec def selected(value: Double, jobServices: List[(EGIJobService, AccessToken, Double)]): (EGIJobService, AccessToken) =
-        jobServices match {
-          case (js, token, fitness) :: Nil ⇒ (js, token)
-          case (js, token, fitness) :: tail ⇒
-            if (value <= fitness) (js, token)
-            else selected(value - fitness, tail)
-        }
-
-      atomic { implicit txn ⇒
-        val fitnesses = fitness
-
-        if (!fitnesses.isEmpty) {
-          val notLoaded = normalizedFitness(fitnesses).shuffled(Random.default)
-          val totalFitness = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
-
-          val (jobService, token) = selected(Random.default.nextDouble * totalFitness, notLoaded.toList)
-          for {
-            (s, t, _) ← notLoaded
-            if (s.id != jobService.id)
-          } s.releaseToken(t)
-          jobService -> token
-        }
-        else retry
-
-      }
     }
 
   def bdiiServer: BDII = new BDII(bdii)

@@ -75,7 +75,7 @@ trait EGIJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
     if (state == SUBMITTED) {
       val maxNbReady = Workspace.preferenceAsInt(EGIEnvironment.JobShakingMaxReady)
 
-      def nbReady = jobService.environment.executionJobs.count(_.state == READY)
+      def nbReady = jobService.environment.jobs.count(_.state == READY)
 
       if (nbReady < maxNbReady) {
         val jobShakingAverageTime = Workspace.preferenceAsDuration(EGIEnvironment.JobShakingHalfLife)

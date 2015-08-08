@@ -77,9 +77,7 @@ class Application extends IApplication {
       hostName: Option[String] = None,
       launchMode: LaunchMode = GUIMode,
       ignored: List[String] = Nil,
-      allowInsecureConnections: Boolean = false,
-      webServerPort: Option[Int] = None,
-      webServerSSLPort: Option[Int] = None,
+      port: Option[Int] = None,
       loggerLevel: Option[String] = None,
       unoptimizedJS: Boolean = false,
       webuiAuthentication: Boolean = false,
@@ -111,26 +109,24 @@ class Application extends IApplication {
 
     @tailrec def parse(args: List[String], c: Config = Config()): Config =
       args match {
-        case "-cp" :: tail                          ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
-        case "-gp" :: tail                          ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
-        case "-p" :: tail                           ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
-        case "-s" :: tail                           ⇒ parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
-        case "-pw" :: tail                          ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
-        case "-hn" :: tail                          ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
-        case "-c" :: tail                           ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
-        case "-h" :: tail                           ⇒ parse(tail, c.copy(launchMode = HelpMode))
-        case "-ws" :: tail                          ⇒ parse(tail, c.copy(launchMode = ServerMode))
-        case "--console-workDirectory" :: tail      ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
-        case "--ws-configure" :: tail               ⇒ parse(tail, c.copy(launchMode = ServerConfigMode))
-        case "--ws-sp" :: tail                      ⇒ parse(tail.tail, c.copy(webServerPort = Some(tail.head.toInt))) // Server port
-        case "--ws-ssp" :: tail                     ⇒ parse(tail.tail, c.copy(webServerSSLPort = Some(tail.head.toInt)))
-        case "--allow-insecure-connections" :: tail ⇒ parse(tail, c.copy(allowInsecureConnections = true))
-        case "--logger-level" :: tail               ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
-        case "--unoptimizedJS" :: tail              ⇒ parse(tail, c.copy(unoptimizedJS = true))
-        case "--webui-authentication" :: tail       ⇒ parse(tail, c.copy(webuiAuthentication = true))
-        case "--" :: tail                           ⇒ parse(Nil, c.copy(args = tail))
-        case s :: tail                              ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-        case Nil                                    ⇒ c
+        case "-cp" :: tail                     ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
+        case "-gp" :: tail                     ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
+        case "-p" :: tail                      ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
+        case "-s" :: tail                      ⇒ parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
+        case "-pw" :: tail                     ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
+        case "-hn" :: tail                     ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
+        case "-c" :: tail                      ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
+        case "-h" :: tail                      ⇒ parse(tail, c.copy(launchMode = HelpMode))
+        case "-ws" :: tail                     ⇒ parse(tail, c.copy(launchMode = ServerMode))
+        case "--console-workDirectory" :: tail ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
+        case "--ws-configure" :: tail          ⇒ parse(tail, c.copy(launchMode = ServerConfigMode))
+        case "--port" :: tail                  ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt))) // Server port
+        case "--logger-level" :: tail          ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
+        case "--unoptimizedJS" :: tail         ⇒ parse(tail, c.copy(unoptimizedJS = true))
+        case "--webui-authentication" :: tail  ⇒ parse(tail, c.copy(webuiAuthentication = true))
+        case "--" :: tail                      ⇒ parse(Nil, c.copy(args = tail))
+        case s :: tail                         ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+        case Nil                               ⇒ c
       }
 
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]].map(_.trim)
@@ -176,7 +172,7 @@ class Application extends IApplication {
           ExitCodes.ok
         case ServerMode ⇒
           if (!config.password.isDefined) Console.initPassword
-          val server = new RESTServer(config.webServerPort, config.webServerSSLPort, config.hostName, config.allowInsecureConnections)
+          val server = new RESTServer(config.port, config.hostName)
           server.start()
           ExitCodes.ok
         case ConsoleMode ⇒
@@ -191,7 +187,7 @@ class Application extends IApplication {
           val lock = new FileOutputStream(GUIServer.lockFile).getChannel.tryLock
           if (lock != null)
             try {
-              val port = config.webServerPort.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
+              val port = config.port.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
               val url = s"https://localhost:$port"
               GUIServer.urlFile.content = url
               BootstrapJS.init(!config.unoptimizedJS)

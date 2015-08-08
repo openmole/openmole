@@ -19,7 +19,7 @@ package org.openmole.core.batch.control
 
 trait UnlimitedAccess extends UsageControl {
   def releaseToken(token: AccessToken) = {}
-  def tryGetToken: Option[AccessToken] = Some(new AccessToken)
-  def waitAToken = new AccessToken
+  def tryGetToken: Option[AccessToken] = Some(AccessToken)
+  def waitAToken: AccessToken = AccessToken
   def available = Int.MaxValue
 }
