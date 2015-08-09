@@ -41,6 +41,13 @@ object AbsolutePositioning {
     }
   }
 
+  case class RightTransform() extends Transform {
+    def transform = (d: Div) ⇒ {
+      d.className = "rightPage"
+      d
+    }
+  }
+
   case class XYTransform(x: Int, y: Int) extends Transform {
     def transform = (d: Div) ⇒ {
       d.style.left = x.toString
@@ -59,6 +66,10 @@ object AbsolutePositioning {
 
   case class FileZone() extends Zone {
     def zoneClass = "fileZone"
+  }
+
+  case class TopZone() extends Zone {
+    def zoneClass = "topZone"
   }
 
 }

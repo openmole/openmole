@@ -353,6 +353,11 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     transform: translate(-50%, -50%);
 }
 
+.rightPage{
+    right: 0;
+    margin: 10 20;
+}
+
 .message {
     color: #999;
     font-style: italic;
@@ -509,6 +514,7 @@ label {
     position: absolute;
     width: 100%;
     z-index: 999;
+    text-align: right;
 }
 
 .fullPageZone{
@@ -520,4 +526,10 @@ label {
     top: 10px;
     height: 100%;
     width: 320px;
+}
+
+.topZone{
+    top: 0;
+    height: 100px;
+    width: 100%;
 }

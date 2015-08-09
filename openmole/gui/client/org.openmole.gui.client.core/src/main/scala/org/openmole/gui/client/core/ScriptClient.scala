@@ -1,9 +1,7 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.AbsolutePositioning.CenterTransform
-import org.openmole.gui.client.core.files.TreeNodePanel
+import org.openmole.gui.client.core.AbsolutePositioning.{ RightTransform, TopZone, CenterTransform }
 import org.openmole.gui.shared.Api
-import org.scalajs
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
 import org.openmole.gui.client.core.panels._
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -42,10 +40,15 @@ object ScriptClient {
 
     val shutdownButton = a(`class` := "shutdownButton",
       bs.glyph(glyph_off),
-      href := "shutdown",
+      cursor := "pointer",
       onclick := { () ⇒
-        println("close")
-        dom.window.close()
+        AlertPanel.popup("This will halt the server, so that the application will no longer be usable. Halt anyway ?",
+          () ⇒ {
+            val a = tags.a(href := "shutdown").render
+            a.click()
+          },
+          transform = RightTransform(),
+          zone = TopZone())
       })
 
     val passwordChosen = Var(true)
