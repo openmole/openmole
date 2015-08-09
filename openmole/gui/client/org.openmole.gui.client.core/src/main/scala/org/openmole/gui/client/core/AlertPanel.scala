@@ -17,7 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.AbsolutePositioning.Transform
+import org.openmole.gui.client.core.AbsolutePositioning.{ Zone, FullPage, CenterTransform, Transform }
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
 import org.scalajs.dom.html.Div
 import scalatags.JsDom.all._
@@ -33,16 +33,18 @@ object AlertPanel {
 
   def popup(message: String,
             okaction: () ⇒ Unit,
-            cancelaction: () ⇒ Unit,
-            transform: Transform,
+            cancelaction: () ⇒ Unit = () ⇒ {},
+            transform: Transform = CenterTransform(),
+            zone: Zone = FullPage(),
             alertType: ClassKeyAggregator = warning) = {
-    panel.popup(message, okaction, cancelaction, transform, alertType)
+    panel.popup(message, okaction, cancelaction, transform, zone, alertType)
   }
 }
 
 class AlertPanel {
 
   val visible: Var[Boolean] = Var(false)
+  val overlayZone: Var[Zone] = Var(FullPage())
   val alertElement: Var[TypedTag[Div]] = Var(tags.div)
 
   val elementDiv = tags.div(
@@ -52,16 +54,18 @@ class AlertPanel {
   ).render
 
   val alertDiv = tags.div(`class` := Rx {
-    if (visible()) "alertOverlay" else "displayNone"
+    if (visible()) s"alertOverlay ${overlayZone().zoneClass}" else "displayNone"
   })(elementDiv)
 
   def popup(message: String,
             okaction: () ⇒ Unit,
             cancelaction: () ⇒ Unit,
             transform: Transform,
+            zone: Zone = FullPage(),
             alertType: ClassKeyAggregator = warning) = {
     alertElement() = bs.alert(alertType, message, actionWrapper(okaction), actionWrapper(cancelaction))
     transform(elementDiv)
+    overlayZone() = zone
     visible() = true
   }
 

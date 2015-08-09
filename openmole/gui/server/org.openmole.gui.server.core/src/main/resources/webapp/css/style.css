@@ -502,10 +502,22 @@ label {
 }
 
 .alertOverlay{
-    background: rgba(0, 0, 0, 0.8) none repeat scroll 0 0;
+    background: #333 none repeat scroll 0 0;
+    opacity: 0.95;
     color: white;
     height: 100%;
     position: absolute;
     width: 100%;
     z-index: 999;
+}
+
+.fullPageZone{
+    height: 100%;
+    width: 100%;
+}
+
+.fileZone{
+    top: 10px;
+    height: 100%;
+    width: 320px;
 }

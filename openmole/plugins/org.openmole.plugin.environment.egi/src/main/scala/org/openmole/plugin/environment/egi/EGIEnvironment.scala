@@ -96,7 +96,9 @@ object EGIEnvironment extends Logger {
 
   val DefaultBDII = ConfigurationLocation("EGIEnvironment", "DefaultBDII")
 
-  val EnvironmentCleaningThreads = new ConfigurationLocation("EGIEnvironment", "EnvironmentCleaningThreads")
+  val EnvironmentCleaningThreads = ConfigurationLocation("EGIEnvironment", "EnvironmentCleaningThreads")
+
+  val WMSRank = ConfigurationLocation("EGIEnvironment", "WMSRank")
 
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
@@ -151,6 +153,8 @@ object EGIEnvironment extends Logger {
   Workspace += (DefaultBDII, "ldap://cclcgtopbdii02.in2p3.fr:2170")
 
   Workspace += (EnvironmentCleaningThreads, "20")
+
+  Workspace += (WMSRank, """( other.GlueCEStateWaitingJobs == 0 ) ? other.GlueCEStateFreeJobSlots : -other.GlueCEStateWaitingJobs""")
 
   def apply(
     voName: String,
@@ -209,7 +213,6 @@ object EGIEnvironment extends Logger {
 class EGIBatchExecutionJob(val job: Job, val environment: EGIEnvironment) extends BatchExecutionJob {
   def selectStorage() = environment.selectAStorage(usedFileHashes)
   def selectJobService() = environment.selectAJobService
-
 }
 
 class EGIEnvironment(
@@ -261,9 +264,8 @@ class EGIEnvironment(
     case None ⇒ throw new UserBadDataError("No authentication has been initialized for EGI.")
   }
 
-  @transient lazy val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut))(authentication)
-
-  def jobServices =
+  @transient lazy val jobServices = {
+    val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut))(authentication)
     bdiiWMS.map {
       js ⇒
         new EGIJobService {
@@ -277,6 +279,7 @@ class EGIEnvironment(
           val nbTokens = threadsByWMS
         }
     }
+  }
 
   def selectAJobService: (JobService, AccessToken) =
     jobServices match {
