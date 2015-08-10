@@ -382,12 +382,12 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     margin-left: 15px;
 }
 .inputFileStyle {
+    position: absolute;
     background-color: #5cb85c;
-    border-radius: 5px;
+    border-radius: 4px;
     color: white;
     cursor: pointer;
-    margin-top: 8px;
-    padding: 10px 40px;
+    padding: 8px 25px 8px 20px;
 }
 .inputFileStyle input[type="file"] {
     display: none;
@@ -400,7 +400,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     margin-top: -6px;
     padding: 7px 16px;
 }
-.inputFileStyleSmall:hover {
+.inputFileStyle:hover,.inputFileStyleSmall:hover {
     color: black;
 }
 .inputFileStyleSmall input[type="file"] {
@@ -500,7 +500,7 @@ div table tr {
 label {
     display: block;
     text-align: left;
-    width: 250px;
+    width: 150px;
 }
 .executionHeader {
     height: 70px;
@@ -532,4 +532,13 @@ label {
     top: 0;
     height: 100px;
     width: 100%;
+}
+
+.pluginRight{
+    right: 20px;
+    margin-top: -8px;
+}
+
+.marginTop-20{
+    margin-top: -20px;
 }

@@ -21,6 +21,7 @@ import org.openmole.gui.client.core.files.TreeNodePanel
 
 package object panels {
   val marketPanel = new MarketPanel
+  val pluginPanel = new PluginPanel
   val environmentStackPanel = new TextPanel("envStackID", "Environment error stack")
 
   implicit val executionTriggerer = new PanelTriggerer {
@@ -29,6 +30,10 @@ package object panels {
 
   def marketTriggerer = new PanelTriggerer {
     val modalPanel = marketPanel
+  }
+
+  def pluginTriggerer = new PanelTriggerer {
+    val modalPanel = pluginPanel
   }
 
   def environmentStackTriggerer = new PanelTriggerer {

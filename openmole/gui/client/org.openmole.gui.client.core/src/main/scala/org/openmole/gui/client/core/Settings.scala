@@ -26,8 +26,5 @@ import autowire._
 import rx._
 
 object Settings {
-
-  val workspaceProjectNode: Future[SafePath] = OMPost[Api].workspaceProjectNode().call()
-
-  val authenticationKeysPath: Future[SafePath] = OMPost[Api].authenticationKeysPath().call()
+  val workspacePath: Future[SafePath] = OMPost[Api].workspacePath().call()
 }

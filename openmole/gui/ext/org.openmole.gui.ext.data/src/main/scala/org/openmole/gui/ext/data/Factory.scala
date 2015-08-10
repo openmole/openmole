@@ -19,9 +19,7 @@ package org.openmole.gui.ext.data
 
 import scala.util.Try
 
-trait Factory {
-  // def data: Data
-}
+trait Factory
 
 trait CoreObjectFactory extends Factory {
   def coreObject(): Try[Any]

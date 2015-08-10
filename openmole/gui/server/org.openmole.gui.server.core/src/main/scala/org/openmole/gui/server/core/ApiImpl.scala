@@ -136,9 +136,7 @@ object ApiImpl extends Api {
     saveFile(fc.path, fc.content)
   }
 
-  def workspaceProjectNode(): SafePath = Utils.workspaceProjectFile
-
-  def authenticationKeysPath(): SafePath = Utils.authenticationKeysFile
+  def workspacePath(): SafePath = Utils.workspaceProjectFile
 
   // EXECUTIONS
 
@@ -272,18 +270,23 @@ object ApiImpl extends Api {
     finally is.close
   }
 
-  def listPlugins(): Iterable[Plugin] =
-    Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName))
+  //PLUGINS
+  def addPlugin(path: SafePath): Unit = {
+    val file = safePathToFile(path)
+    if (Workspace.pluginDir.contains(file)) {
+      val plugins = PluginManager.plugins(file)
+      PluginManager.load(plugins)
+    }
+    // file copy (Workspace.pluginDir / file.getName)
+  }
 
   def isPlugin(path: SafePath): Boolean =
     !PluginManager.plugins(safePathToFile(path)).isEmpty
 
-  def addPlugin(path: SafePath): Unit = {
-    val file = safePathToFile(path)
-    val plugins = PluginManager.plugins(file)
-    PluginManager.load(plugins)
-    file copy (Workspace.pluginDir / file.getName)
-  }
+  def listPlugins(): Iterable[Plugin] =
+    Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName))
+
+  def pluginPath(): SafePath = Workspace.pluginDir
 
   def removePlugin(plugin: Plugin): Unit = {
     val file = Workspace.pluginDir / plugin.name

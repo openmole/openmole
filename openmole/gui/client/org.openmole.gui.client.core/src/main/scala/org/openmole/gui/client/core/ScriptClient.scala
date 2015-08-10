@@ -166,6 +166,8 @@ object ScriptClient {
 
     val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen)
 
+    val pluginItem = dialogGlyphNavItem("plugin", glyph_plus, () ⇒ pluginTriggerer.triggerOpen)
+
     val envItem = dialogGlyphNavItem("envError", glyph_exclamation, () ⇒ environmentStackTriggerer.open)
 
     val fileItem = dialogGlyphNavItem("files", glyph_file, todo = () ⇒ {
@@ -178,7 +180,8 @@ object ScriptClient {
         fileItem,
         execItem,
         authenticationItem,
-        marketItem
+        marketItem,
+        pluginItem
       )
     )
     maindiv.appendChild(tags.div(
@@ -189,10 +192,11 @@ object ScriptClient {
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)
+    maindiv.appendChild(pluginTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(environmentStackTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(AlertPanel.div)
 
-    Settings.workspaceProjectNode.foreach { projectsPath ⇒
+    Settings.workspacePath.foreach { projectsPath ⇒
       maindiv.appendChild(
         tags.div(`class` := "fullpanel")(
           tags.div(`class` := Rx {

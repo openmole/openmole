@@ -19,7 +19,7 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.{ Settings, OMPost }
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.ext.data.{ UploadKey, SafePath, FileExtension }
+import org.openmole.gui.ext.data.{ UploadAuthentication, SafePath, FileExtension }
 import org.openmole.gui.ext.data.SafePath._
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import bs._
@@ -38,15 +38,14 @@ class AuthFileUploaderUI(keyName: String, keySet: Boolean, renaming: Option[Stri
   val pathSet: Var[Boolean] = Var(keySet)
 
   lazy val upButton =
-    tags.label(`class` := "inputFileStyle")(
+    tags.label(`class` := "inputFileStyle marginTop-20")(
       bs.fileInput((fInput: HTMLInputElement) ⇒ {
-        val fileList = fInput.files
-        FileManager.upload(fileList,
+        FileManager.upload(fInput,
           SafePath.empty,
           (p: FileTransferState) ⇒ {},
-          UploadKey(),
+          UploadAuthentication(),
           () ⇒ {
-            val leaf = fileList.item(0).name
+            val leaf = fInput.files.item(0).name
             pathSet() = false
             OMPost[Api].renameKey(leaf, fileName).call().foreach { b ⇒
               pathSet() = true
@@ -55,7 +54,7 @@ class AuthFileUploaderUI(keyName: String, keySet: Boolean, renaming: Option[Stri
         )
       }
       ), Rx {
-        if (pathSet()) fileName else "No set yet"
+        if (pathSet()) fileName else "No certificate"
       }
     )
 

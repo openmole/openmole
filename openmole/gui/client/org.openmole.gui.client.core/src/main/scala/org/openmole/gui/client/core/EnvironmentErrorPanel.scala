@@ -56,15 +56,7 @@ class EnvironmentErrorPanel {
                 case _    ⇒ None
               }
           })
-        ) /*,
-        tags.tr(
-          expandedError().map { expanded ⇒
-            tags.div(
-              if (expanded == error) expanded.stack.stackTrace
-              else ""
-            )
-          }
-        )*/
+        )
       )
     }).flatten: _*
   )

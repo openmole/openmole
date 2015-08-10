@@ -193,11 +193,21 @@ case class EGIP12AuthenticationData(val cypheredPassword: String = "",
   def synthetic = "egi.p12"
 }
 
-sealed trait UploadType
+sealed trait UploadType {
+  def typeName: String
+}
 
-case class UploadProject() extends UploadType
+case class UploadProject() extends UploadType {
+  def typeName = "project"
+}
 
-case class UploadKey() extends UploadType
+case class UploadAuthentication() extends UploadType {
+  def typeName = "authentication"
+}
+
+case class UploadPlugin() extends UploadType {
+  def typeName = "plugin"
+}
 
 @JSExport
 case class TreeNodeData(

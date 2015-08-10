@@ -113,7 +113,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             inputGroupAddon(id := "fileinput-addon")(
               tags.label(`class` := "inputFileStyleSmall",
                 uploadButton((fileInput: HTMLInputElement) ⇒ {
-                  FileManager.upload(fileInput.files, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
+                  println("file list " + fileInput.files)
+                  FileManager.upload(fileInput, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
                 }))),
             inputGroupAddon(id := "fileinput-addon")(
               tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
@@ -129,7 +130,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       else {
         tags.table(`class` := "tree" + dragState())(
           tags.tr(
-            tags.td(style := "height:60px",
+            tags.td(height := "60px",
               transferring() match {
                 case _: Standby ⇒
                 case _: Transfered ⇒

@@ -18,9 +18,7 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.gui.ext.dataui.{ AuthenticationFactoryUI, PanelUI }
-import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
-import org.scalajs.jquery
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select }
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -122,12 +120,6 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
     save
   })
 
-  val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := {
-    () ⇒
-      println("Close")
-  }
-  )
-
   val dialog = modalDialog(modalID,
     headerDialog(Rx {
       tags.span(tags.b("Authentications"),
@@ -173,12 +165,4 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
     }
     setting() = None
   }
-
-  /* def close: Unit = {
-    jquery.jQuery("#" + modalID).modal("hide")
-  }
-
-  jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ {
-    onClose()
-  })*/
 }

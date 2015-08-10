@@ -1,6 +1,8 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.misc.js.BootstrapTags._
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
+import scalatags.JsDom.all._
 import org.scalajs.jquery
 
 /*
@@ -39,6 +41,8 @@ trait ModalPanel {
   def onOpen: () ⇒ Unit
 
   def onClose: () ⇒ Unit
+
+  val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := { () ⇒ close })
 
   def close: Unit = {
     jquery.jQuery("#" + modalID).modal("hide")
