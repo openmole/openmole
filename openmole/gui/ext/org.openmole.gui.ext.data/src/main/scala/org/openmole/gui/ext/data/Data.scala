@@ -130,15 +130,6 @@ object FileExtension {
 
 sealed trait FileContent
 
-// def alterability: Alterability
-
-/*
-sealed trait Alterability
-
-case class Alterable() extends Alterability
-
-case class ReadOnly() extends Alterability*/
-
 case class AlterableFileContent(path: SafePath, content: String) extends FileContent
 
 case class AlterableOnDemandFileContent(path: SafePath, content: String, editable: () ⇒ Boolean) extends FileContent
