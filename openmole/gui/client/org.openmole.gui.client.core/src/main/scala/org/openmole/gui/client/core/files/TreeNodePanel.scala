@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.AbsolutePositioning.{ FileZone, CenterTransform }
-import org.openmole.gui.client.core.{ AlertPanel, PanelTriggerer, OMPost }
+import org.openmole.gui.client.core.{ panels, AlertPanel, PanelTriggerer, OMPost }
 import org.openmole.gui.ext.data.{ FileExtension, UploadProject }
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
@@ -113,7 +113,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             inputGroupAddon(id := "fileinput-addon")(
               tags.label(`class` := "inputFileStyleSmall",
                 uploadButton((fileInput: HTMLInputElement) ⇒ {
-                  println("file list " + fileInput.files)
                   FileManager.upload(fileInput, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
                 }))),
             inputGroupAddon(id := "fileinput-addon")(
@@ -350,8 +349,11 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               }
             })(`class` := "glyphitem file-glyph")
             case _ ⇒
-          }
-
+          },
+          if (tn.isPlugin) glyphSpan(glyph_plus, () ⇒
+            OMPost[Api].copyAndAddPlugin(tn.safePath()).call().foreach { p ⇒
+              panels.pluginTriggerer.open
+            })(`class` := "glyphitem file-glyph")
         )
       )
     )

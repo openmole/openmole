@@ -66,8 +66,8 @@ trait Api {
 
   //PLUGINS
   def addPlugin(path: SafePath): Unit
+  def copyAndAddPlugin(path: SafePath): Unit
   def isPlugin(path: SafePath): Boolean
   def listPlugins(): Iterable[Plugin]
-  def pluginPath(): SafePath
   def removePlugin(plugin: Plugin): Unit
 }

@@ -549,6 +549,6 @@ label {
     color: white;
     white-space: nowrap; 
     overflow: hidden;
-    width: 13em;
+    width: 12em;
     text-overflow: ellipsis; 
 }

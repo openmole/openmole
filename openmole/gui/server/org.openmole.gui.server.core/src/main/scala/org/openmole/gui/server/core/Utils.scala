@@ -19,6 +19,7 @@ package org.openmole.gui.server.core
 
 import java.util.logging.Level
 
+import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data.SafePath._
@@ -56,12 +57,13 @@ object Utils {
     ak.mkdirs()
     ak
   }
+  def isPlugin(path: SafePath): Boolean = !PluginManager.plugins(safePathToFile(path)).isEmpty
 
   implicit def fileToSafePath(f: File): SafePath = SafePath(getPathArray(f, workspaceProjectFile), f)
 
   implicit def safePathToFile(s: SafePath): File = getFile(webUIProjectFile, s.path)
 
-  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, f.length, readableByteCount(FileDecorator(f).size))
+  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, isPlugin(f), f.length, readableByteCount(FileDecorator(f).size))
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)

@@ -94,7 +94,7 @@ class MarketPanel extends ModalPanel {
       bs.waitingSpan(" Downloading", btn_danger)
     }
     else if (Some(entry) == selectedEntry()) {
-      bs.glyphButton(" Download", btn_primary, glyph_download_alt, todo)
+      bs.glyphButton(" Download", btn_success, glyph_download_alt, todo)
     }
     else tags.div
 

@@ -35,9 +35,11 @@ import scala.util.{ Success, Failure, Try }
 
 package file {
 
-  trait FilePackage { p ⇒
+  trait FilePackage {
+    p ⇒
 
     type File = java.io.File
+
     def File(s: String): File = new File(s)
 
     def currentDirectory = new File(".")
@@ -153,17 +155,32 @@ package file {
         finally ic.close()
       }
 
+      private def copyFile(toF: File) = {
+        println("CCopy " + file.getAbsolutePath + " to " + toF.getAbsolutePath)
+        Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
+        toF.mode = file
+      }
+
       def copy(toF: File) = {
         // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES, REPLACE_EXISTING
         toF.getParentFileSafe.mkdirs()
         if (Files.isDirectory(file)) DirUtils.copy(file, toF)
-        else {
-          Files.copy(file, toF, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
-          toF.mode = file
-        }
+        else copyFile(toF)
       }
 
-      def copy(to: OutputStream) = withClosable(bufferedInputStream) { _.copy(to) }
+      def copyFilesIf(toF: File, condition: (File) ⇒ Boolean): Unit = {
+        toF.getParentFileSafe.mkdirs()
+        if (Files.isDirectory(file))
+          for (s ← file.listFilesSafe if condition(s)) yield {
+            s.copyFilesIf(toF.getParentFile / s.getName, condition)
+          }
+        else if (condition(file)) copyFile(toF)
+
+      }
+
+      def copy(to: OutputStream) = withClosable(bufferedInputStream) {
+        _.copy(to)
+      }
 
       // TODO replace with NIO
       def copy(to: OutputStream, maxRead: Int, timeout: Duration): Unit =

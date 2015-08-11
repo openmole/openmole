@@ -126,7 +126,7 @@ object ApiImpl extends Api {
     val targetFile = new File(filePath.parent, newName)
 
     Files.move(safePathToFile(filePath), targetFile, StandardCopyOption.REPLACE_EXISTING)
-    TreeNodeData(newName, targetFile, false, 0L, "")
+    TreeNodeData(newName, targetFile, false, false, 0L, "")
 
   }
 
@@ -228,7 +228,9 @@ object ApiImpl extends Api {
             id,
             Runnings.runningEnvironments(envIds).flatMap {
               case (envId, info) ⇒ info.environmentErrors(envId)
-            }.filter { _.level == level }
+            }.filter {
+              _.level == level
+            }
           )
       }.toSeq,
       envIds.keys.toSeq.map {
@@ -266,7 +268,10 @@ object ApiImpl extends Api {
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
     val url = new URL(entry.url)
     val is = new TarInputStream(new GZIPInputStream(url.openStream()))
-    try is.extract(safePathToFile(path))
+    try {
+      is.extract(safePathToFile(path))
+      copyAndAddPlugin(path)
+    }
     finally is.close
   }
 
@@ -277,16 +282,17 @@ object ApiImpl extends Api {
       val plugins = PluginManager.plugins(file)
       PluginManager.load(plugins)
     }
-    // file copy (Workspace.pluginDir / file.getName)
   }
 
-  def isPlugin(path: SafePath): Boolean =
-    !PluginManager.plugins(safePathToFile(path)).isEmpty
+  def copyAndAddPlugin(path: SafePath) = {
+    safePathToFile(path) copyFilesIf (Workspace.pluginDir / path.name, (path) ⇒ { isPlugin(path) })
+    addPlugin(path)
+  }
+
+  def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)
 
   def listPlugins(): Iterable[Plugin] =
     Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName))
-
-  def pluginPath(): SafePath = Workspace.pluginDir
 
   def removePlugin(plugin: Plugin): Unit = {
     val file = Workspace.pluginDir / plugin.name
