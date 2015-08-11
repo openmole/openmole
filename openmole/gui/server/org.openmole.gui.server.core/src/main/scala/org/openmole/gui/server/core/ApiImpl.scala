@@ -276,24 +276,25 @@ object ApiImpl extends Api {
   }
 
   //PLUGINS
-  def addPlugin(path: SafePath): Unit = {
-    val file: File = safePathToFile(path)
-    val dest: File = Workspace.pluginDir / file.getName
-    file copy dest
-    val plugins = PluginManager.plugins(dest)
-    PluginManager.load(plugins)
-  }
+  def addPlugin(path: SafePath): Unit = addPlugin(safePathToFile(path))
 
   def copyAndAddPlugin(path: SafePath) = {
     val file = safePathToFile(path)
 
     def recurse(f: File): Unit = {
       if (f.isDirectory)
-        if (isPlugin(f)) addPlugin(path)
-        else recurse(f)
+        if (isPlugin(f)) addPlugin(f)
+        else f.listFilesSafe.foreach(recurse)
     }
 
     recurse(file)
+  }
+
+  private def addPlugin(file: File): Unit = {
+    val dest: File = Workspace.pluginDir / file.getName
+    file copy dest
+    val plugins = PluginManager.plugins(dest)
+    PluginManager.load(plugins)
   }
 
   def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)
