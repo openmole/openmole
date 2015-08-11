@@ -282,9 +282,8 @@ object ApiImpl extends Api {
     val file = safePathToFile(path)
 
     def recurse(f: File): Unit = {
-      if (f.isDirectory)
-        if (isPlugin(f)) addPlugin(f)
-        else f.listFilesSafe.foreach(recurse)
+      if (isPlugin(f)) addPlugin(f)
+      else if (f.isDirectory) f.listFilesSafe.foreach(recurse)
     }
 
     recurse(file)
