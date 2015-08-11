@@ -324,7 +324,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         cursor := "pointer",
         draggable := true,
         onclick := { () ⇒ todo() },
-        `class` := classType)(
+        `class` := classType + " fileNameOverflow")(
           tags.i(id := "plusdir", `class` := {
             tn.hasSons match {
               case true  ⇒ "glyphicon glyphicon-plus-sign"

@@ -87,6 +87,8 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .file-info {
     float: right;
+    position: absolute;
+    right: 2px;
     margin-top: 1px;
 }
 .dir {
@@ -541,4 +543,12 @@ label {
 
 .marginTop-20{
     margin-top: -20px;
+}
+
+.fileNameOverflow{
+    color: white;
+    white-space: nowrap; 
+    overflow: hidden;
+    width: 13em;
+    text-overflow: ellipsis; 
 }
