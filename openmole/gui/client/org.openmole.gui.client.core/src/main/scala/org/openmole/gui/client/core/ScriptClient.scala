@@ -166,7 +166,7 @@ object ScriptClient {
 
     val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen)
 
-    val pluginItem = dialogGlyphNavItem("plugin", glyph_plus, () ⇒ pluginTriggerer.triggerOpen)
+    val pluginItem = dialogGlyphNavItem("plugin", glyph_plug, () ⇒ pluginTriggerer.triggerOpen)
 
     val envItem = dialogGlyphNavItem("envError", glyph_exclamation, () ⇒ environmentStackTriggerer.open)
 

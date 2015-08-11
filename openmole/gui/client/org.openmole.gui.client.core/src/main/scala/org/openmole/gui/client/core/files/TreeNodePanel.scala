@@ -350,7 +350,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             })(`class` := "glyphitem file-glyph")
             case _ ⇒
           },
-          if (tn.isPlugin) glyphSpan(glyph_plus, () ⇒
+          if (tn.isPlugin) glyphSpan(glyph_plug, () ⇒
             OMPost[Api].copyAndAddPlugin(tn.safePath()).call().foreach { p ⇒
               panels.pluginTriggerer.open
             })(`class` := "glyphitem file-glyph")
