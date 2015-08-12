@@ -83,9 +83,9 @@ object PluginManager extends Logger {
     allPluginDependencies(bundleForClass(c).getBundleId).map { l ⇒ Activator.contextOrException.getBundle(l).file }
   }
 
-  def allDepending(file: File): Iterable[File] = synchronized {
+  def allDepending(file: File, filter: Bundle ⇒ Boolean): Iterable[File] = synchronized {
     bundle(file) match {
-      case Some(b) ⇒ allDependingBundles(b).map { _.file }
+      case Some(b) ⇒ allDependingBundles(b, filter).map { _.file }
       case None    ⇒ Iterable.empty
     }
   }
@@ -95,14 +95,10 @@ object PluginManager extends Logger {
     isDirectoryPlugin(file) || file.isJar
   }
 
-  def plugins(path: File): Iterable[File] = {
+  def plugins(path: File): Iterable[File] =
     if (isPlugin(path)) List(path)
     else if (path.isDirectory) path.listFilesSafe.filter(isPlugin)
-    else {
-      Log.logger.fine("File doesn't seem to be a valid jar or directory: " + path)
-      List.empty
-    }
-  }
+    else Nil
 
   def tryLoad(files: Iterable[File]) = synchronized {
     val bundles =
@@ -204,8 +200,8 @@ object PluginManager extends Logger {
     }
   }
 
-  private def allDependingBundles(b: Bundle): Iterable[Bundle] =
-    b :: dependingBundles(b).flatMap(allDependingBundles).toList
+  private def allDependingBundles(b: Bundle, filter: Bundle ⇒ Boolean): Iterable[Bundle] =
+    (b :: dependingBundles(b).filter(filter).flatMap(allDependingBundles(_, filter)).toList).distinct
 
   private def dependingBundles(b: Bundle): Iterable[Bundle] = {
     val exportedPackages = Activator.packageAdmin.getExportedPackages(b)

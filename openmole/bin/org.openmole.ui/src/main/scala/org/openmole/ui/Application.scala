@@ -145,12 +145,12 @@ class Application extends IApplication {
 
     logger.fine(s"Loading user plugins " + userPlugins)
 
-    val plugins: List[String] =
-      config.pluginsDirs ++
-        existingUserPlugins ++
-        (if (config.launchMode == GUIMode) config.guiPluginsDirs else List.empty)
+    val plugins: List[File] =
+      config.pluginsDirs.map(new File(_)) ++
+        userPlugins ++
+        (if (config.launchMode == GUIMode) config.guiPluginsDirs.map(new File(_)) else List.empty)
 
-    val bundles = PluginManager.load(plugins.map(new File(_)))
+    val bundles = PluginManager.load(plugins)
     PluginManager.startAll
 
     try config.password foreach Workspace.setPassword

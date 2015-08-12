@@ -7,7 +7,7 @@ import org.openmole.core.batch.environment.BatchEnvironment.{ EndUpload, BeginUp
 import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.pluginmanager._
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
@@ -20,6 +20,7 @@ import org.openmole.gui.ext.data._
 import java.io.{ InputStream, File }
 import java.nio.file._
 import org.openmole.console._
+import org.osgi.framework.Bundle
 import scala.util.{ Failure, Success, Try }
 import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.ExecutionContext
@@ -270,29 +271,35 @@ object ApiImpl extends Api {
     val is = new TarInputStream(new GZIPInputStream(url.openStream()))
     try {
       is.extract(safePathToFile(path))
-      copyAndAddPlugin(path)
+      autoAddPlugins(path)
     }
     finally is.close
   }
 
   //PLUGINS
-  def addPlugin(path: SafePath): Unit = addPlugin(safePathToFile(path))
-
-  def copyAndAddPlugin(path: SafePath) = {
+  def addPlugin(path: SafePath): Unit = {
     val file = safePathToFile(path)
-
-    def recurse(f: File): Unit = {
-      if (isPlugin(f)) addPlugin(f)
-      else if (f.isDirectory) f.listFilesSafe.foreach(recurse)
-    }
-
-    recurse(file)
+    addPlugins(PluginManager.plugins(file))
   }
 
-  private def addPlugin(file: File): Unit = {
-    val dest: File = Workspace.pluginDir / file.getName
-    file copy dest
-    val plugins = PluginManager.plugins(dest)
+  def autoAddPlugins(path: SafePath) = {
+    val file = safePathToFile(path)
+
+    def recurse(f: File): List[File] = {
+      val subPlugins: List[File] = if (f.isDirectory) f.listFilesSafe.toList.flatMap(recurse) else Nil
+      PluginManager.plugins(f).toList ::: subPlugins
+    }
+
+    addPlugins(recurse(file))
+  }
+
+  private def addPlugins(files: Iterable[File]): Unit = {
+    val plugins =
+      files.map { file ⇒
+        val dest: File = Workspace.pluginDir / file.getName
+        file copy dest
+        dest
+      }
     PluginManager.load(plugins)
   }
 
@@ -301,10 +308,14 @@ object ApiImpl extends Api {
   def listPlugins(): Iterable[Plugin] =
     Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName))
 
-  def removePlugin(plugin: Plugin): Unit = {
+  def removePlugin(plugin: Plugin): Unit = synchronized {
     val file = Workspace.pluginDir / plugin.name
-    val plugins = PluginManager.plugins(file)
-    plugins.flatMap(PluginManager.bundle).foreach(_.uninstall())
+    val allFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
+    for {
+      b ← (file :: allFiles.toList).flatMap(PluginManager.bundle)
+      if (b.getState == Bundle.ACTIVE)
+    } b.uninstall()
+    allFiles.foreach(_.recursiveDelete)
     file.recursiveDelete
   }
 

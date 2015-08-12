@@ -205,20 +205,23 @@ package file {
           f.setWritable(true)
           f.setExecutable(true)
         }
-        setAllPermissions(file)
 
-        if (!file.isSymbolicLink && file.isDirectory) {
-          for (s ← file.listFilesSafe) {
-            setAllPermissions(s)
-            s.isDirectory match {
-              case true ⇒
-                s.recursiveDelete
-                s.delete()
-              case false ⇒ s.delete
+        if (file.exists()) {
+          setAllPermissions(file)
+
+          if (!file.isSymbolicLink && file.isDirectory) {
+            for (s ← file.listFilesSafe) {
+              setAllPermissions(s)
+              s.isDirectory match {
+                case true ⇒
+                  s.recursiveDelete
+                  s.delete()
+                case false ⇒ s.delete
+              }
             }
           }
+          file.delete()
         }
-        file.delete()
       }
 
       def isJar = Try {
