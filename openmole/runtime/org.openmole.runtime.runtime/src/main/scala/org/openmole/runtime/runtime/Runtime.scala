@@ -156,7 +156,7 @@ class Runtime {
       def uploadIndividualFiles =
         Workspace.withTmpFile { contextResultFile ⇒
           SerialiserService.serialise(contextResults, contextResultFile)
-          val PluginClassAndFiles(files, _) = SerialiserService.pluginsAndFiles(contextResults, contextResultFile)
+          val PluginClassAndFiles(files, _) = SerialiserService.pluginsAndFiles(contextResults)
 
           val replicated =
             files.map {
