@@ -248,7 +248,7 @@ class ExecutionPanel extends ModalPanel {
               bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_flag), " " + details.ratio).tooltip("Jobs progression")),
               bs.td(col_md_1)(tags.div(durationString).tooltip("Execution duration")),
               bs.td(col_md_1)(stateLink.tooltip("Execution state"))(`class` := executionInfo.state + "State vert-align"),
-              bs.td(col_md_1)(visibleClass(id.id, envID))(envLink.tooltip("Observe execution on the environments")),
+              bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
               bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink.tooltip("Execution outputs")),
               bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
                 updatePanelInfo
