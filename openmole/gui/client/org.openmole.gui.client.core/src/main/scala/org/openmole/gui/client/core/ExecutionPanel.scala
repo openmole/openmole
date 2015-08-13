@@ -200,7 +200,7 @@ class ExecutionPanel extends ModalPanel {
                           bs.tr(row)(
                             bs.td(col_md_12)(
                               `class` := {
-                                if (envErrorVisible().contains(e.envId)) "displayNone" else ""
+                                if (envErrorVisible().contains(e.envId)) "" else "displayNone"
                               },
                               colspan := 12,
                               staticPanel(e.envId, envErrorPanels,
