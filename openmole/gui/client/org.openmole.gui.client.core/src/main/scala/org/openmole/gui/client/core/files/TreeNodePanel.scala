@@ -118,7 +118,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             inputGroupAddon(id := "fileinput-addon")(
               tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
                 glyph(glyph_refresh)
-              ).tooltip("Refresh the file tree"))
+              ).tooltip("Refresh the file tree", RightDirection()))
           )
         )
       )

@@ -60,7 +60,7 @@ trait Help {
     ttdiv.appendChild(h)
     val options = TooltipsterOptions.
       position(placement.direction).
-      speed(300).
+      delay(400).
       theme(level.level)
 
     jquery.jQuery(ttdiv).tooltipster(options)

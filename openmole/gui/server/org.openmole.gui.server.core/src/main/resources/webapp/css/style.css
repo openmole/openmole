@@ -29,6 +29,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .table tbody > tr > td.vert-align {
     padding-top: 20px;
     vertical-align: middle;
+    text-align: center;
 }
 .table th, tr {
     text-align: center;
@@ -127,7 +128,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     width: 100%;
 }
 #glyphtrash:hover {
-    color: red;
+    color: #CC3A36;
 }
 #adddir {
     padding-left: 7px;
@@ -316,11 +317,11 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     font-weight: bold;
 }
 .executionTable table td.failedState {
-    color: red;
+    color: #CC3A36;
     font-weight: bold;
 }
 .removeExecution:hover {
-    color: red;
+    color: #CC3A36;
     display: inline-block;
     transform: scale(1.2);
 }
@@ -553,111 +554,6 @@ label {
     text-overflow: ellipsis; 
 }
 
-
-
-/**
- * Tooltip Styles
- */
-/* Add this attribute to the element that needs a tooltip */
-[data-tooltip] {
-  position: relative;
-  z-index: 2;
-  cursor: pointer;
-}
-
-/* Hide the tooltip content by default */
-[data-tooltip]:before,
-[data-tooltip]:after {
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Position tooltip above the element */
-[data-tooltip]:before {
-  position: absolute;
-  margin-bottom: 5px;
-  margin-left: -80px;
-  padding: 7px;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
-  background-color: #000;
-  background-color: hsla(0, 0%, 0%, 0.9);
-  color: #fff;
-  content: attr(data-tooltip);
-  text-align: center;
-  font-size: 16px;
-  line-height: 1;
-}
-
-/*data-tooltip-width for top and bottom only*/
-[data-tooltip-width="large"]:before{
-width: 300px;
-}
-
-[data-tooltip-width="xlarge"]:before{
-width: 400px;
-}
-
-/*Tooltip directions*/
-[data-tooltip][data-tooltip-dir="bottom"]:before{
-  bottom: -45px;
-  left: 50%;
-}
-
-[data-tooltip][data-tooltip-dir="top"]:before{
-  top: -42px;
-  left: 50%;
-}
-
-[data-tooltip][data-tooltip-dir="right"]:before{
-  top: calc(20% - 10px);
-  right: -172px;
-  width: 160px;
-}
-
-/* Triangle hack to make tooltip look like a speech bubble */
-[data-tooltip]:after {
-  position: absolute;
-  margin-left: -5px;
-  width: 0;
-  content: " ";
-  font-size: 0;
-  line-height: 0;
-}
-
-[data-tooltip][dir="bottom"]:after{
-  bottom: -10px;
-  border-bottom: 5px solid #500;
-  border-bottom: 5px solid hsla(0, 0%, 0%, 0.9);
-  border-right: 5px solid transparent;
-  border-left: 5px solid transparent;
-  left: 50%;
-}
-
-[data-tooltip][dir="top"]:after{
-  top: -12px;
-  border-top: 5px solid #500;
-  border-top: 5px solid hsla(0, 0%, 0%, 0.9);
-  border-right: 5px solid transparent;
-  border-left: 5px solid transparent;
-  left: 50%;
-}
-
-[data-tooltip][dir="right"]:after{
-  top: 20%;
-  right: -12px;
-  border-right: 5px solid #500;
-  border-right: 5px solid hsla(0, 0%, 0%, 0.9);
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-}
-
-
-/* Show tooltip content on hover */
-[data-tooltip]:hover:before,
-[data-tooltip]:hover:after {
-  visibility: visible;
-  opacity: 1;
+.paddingBottom7{
+    padding-bottom: 7px;
 }
