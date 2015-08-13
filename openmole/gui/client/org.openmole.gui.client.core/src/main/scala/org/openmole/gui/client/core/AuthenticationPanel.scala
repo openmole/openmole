@@ -93,9 +93,16 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
       Rx {
         tbody({
           setting() match {
-            case Some(p: PanelUI) ⇒ tags.div(
+            case Some(p: PanelUI) ⇒ tags.form(
               authenticationSelector.selector,
-              bs.div(spacer20)(p.view)
+              bs.div(spacer20)(p.view),
+              onsubmit := { () ⇒
+                {
+                  println("submit")
+                  save
+                  false
+                }
+              }
             )
             case _ ⇒
               auths().map { aux ⇒

@@ -60,7 +60,7 @@ object JSPack {
     else {
       optimizer.optimizeCP(
         completeClasspath,
-        ScalaJSOptimizer.Config(out, checkIR = false, wantSourceMap = !optimized),
+        ScalaJSOptimizer.Config(out, checkIR = false),
         logger
       )
 

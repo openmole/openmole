@@ -10,7 +10,7 @@ import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.{ HTMLInputElement, DragEvent }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, RightDirection, BottomDirection, ToolTip, Select }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.client.core.Settings._
@@ -111,14 +111,16 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               false
             })),
             inputGroupAddon(id := "fileinput-addon")(
-              tags.label(`class` := "inputFileStyleSmall",
-                uploadButton((fileInput: HTMLInputElement) ⇒ {
-                  FileManager.upload(fileInput, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
-                }))),
+              ToolTip(BottomDirection(), "Upload files")(
+                tags.label(`class` := "inputFileStyleSmall",
+                  uploadButton((fileInput: HTMLInputElement) ⇒ {
+                    FileManager.upload(fileInput, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
+                  })))),
             inputGroupAddon(id := "fileinput-addon")(
-              tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
-                glyph(glyph_refresh)
-              ))
+              ToolTip(RightDirection(), "Refresh file tree")(
+                tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
+                  glyph(glyph_refresh)
+                )))
           )
         )
       )
@@ -319,19 +321,20 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       ondrop := {
         dropAction(tn)
       },
-      tags.div(style := "float:left",
-        cursor := "pointer",
-        draggable := true,
-        onclick := { () ⇒ todo() },
-        `class` := classType + " fileNameOverflow")(
-          tags.i(id := "plusdir", `class` := {
-            tn.hasSons match {
-              case true  ⇒ "glyphicon glyphicon-plus-sign"
-              case false ⇒ ""
-            }
-          }),
-          tags.i(tn.name())
-        ),
+      ToolTip(BottomDirection(), tn.name())(
+        tags.div(style := "float:left",
+          cursor := "pointer",
+          draggable := true,
+          onclick := { () ⇒ todo() },
+          `class` := classType + " fileNameOverflow")(
+            tags.i(id := "plusdir", `class` := {
+              tn.hasSons match {
+                case true  ⇒ "glyphicon glyphicon-plus-sign"
+                case false ⇒ ""
+              }
+            }),
+            tags.i(tn.name())
+          )),
       tags.div(`class` := "file-info",
         tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
         tags.span(id := Rx {

@@ -66,6 +66,7 @@ object BootstrapJS {
 
     //All other resources
     copyURL(thisBundle.findEntries("/", "*.css", true).asScala)
+    copyURL(thisBundle.findEntries("/", "*.js", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.ttf", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.woff", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.woff2", true).asScala)

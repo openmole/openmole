@@ -112,7 +112,7 @@ object Libraries extends Defaults {
 
   lazy val monocle = "org.openmole" %% "monocle" % "1.0.1"
 
-  lazy val scaladget = "org.openmole" %% "scaladget" % "0.5.0"
+  lazy val scaladget = "org.openmole" %% "scaladget" % "0.6.0"
 
   lazy val d3 = "org.webjars.bower" % "d3" % "3.5.5"
 

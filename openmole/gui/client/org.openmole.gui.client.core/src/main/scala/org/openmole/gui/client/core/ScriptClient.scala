@@ -1,11 +1,12 @@
 package org.openmole.gui.client.core
 
+import fr.iscpif.scaladget.mapping.tooltipster.TooltipsterOptions
 import org.openmole.gui.client.core.AbsolutePositioning.{ RightTransform, TopZone, CenterTransform }
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
 import org.openmole.gui.client.core.panels._
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, LeftDirection, WarningTooltipLevel, BottomDirection, ToolTip }
 import bs._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -14,6 +15,7 @@ import org.openmole.gui.misc.js.JsRxTags._
 import org.scalajs.dom
 import rx._
 import scalatags.JsDom.all._
+import org.scalajs.jquery
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -38,18 +40,19 @@ object ScriptClient {
   @JSExport
   def run(): Unit = {
 
-    val shutdownButton = a(`class` := "shutdownButton",
-      bs.glyph(glyph_off),
-      cursor := "pointer",
-      onclick := { () ⇒
-        AlertPanel.popup("This will halt the server, so that the application will no longer be usable. Halt anyway ?",
-          () ⇒ {
-            val a = tags.a(href := "shutdown").render
-            a.click()
-          },
-          transform = RightTransform(),
-          zone = TopZone())
-      })
+    val shutdownButton =
+      a(`class` := "shutdownButton",
+        bs.glyph(glyph_off),
+        cursor := "pointer",
+        onclick := { () ⇒
+          AlertPanel.popup("This will halt the server, so that the application will no longer be usable. Halt anyway ?",
+            () ⇒ {
+              val a = tags.a(href := "shutdown").render
+              a.click()
+            },
+            transform = RightTransform(),
+            zone = TopZone())
+        })
 
     val passwordChosen = Var(true)
     val passwordOK = Var(false)
@@ -160,19 +163,19 @@ object ScriptClient {
       val modalPanel = authenticationPanel
     }
 
-    val execItem = dialogGlyphNavItem("executions", glyph_settings, () ⇒ executionTriggerer.triggerOpen)
+    val execItem = dialogGlyphNavItem("executions", glyph_settings, () ⇒ executionTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Executions"))
 
-    val authenticationItem = dialogGlyphNavItem("authentications", glyph_lock, () ⇒ authenticationTriggerer.triggerOpen)
+    val authenticationItem = dialogGlyphNavItem("authentications", glyph_lock, () ⇒ authenticationTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Authentications"))
 
-    val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen)
+    val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Market place"))
 
-    val pluginItem = dialogGlyphNavItem("plugin", glyph_plug, () ⇒ pluginTriggerer.triggerOpen)
+    val pluginItem = dialogGlyphNavItem("plugin", glyph_plug, () ⇒ pluginTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Plugins"))
 
     val envItem = dialogGlyphNavItem("envError", glyph_exclamation, () ⇒ environmentStackTriggerer.open)
 
     val fileItem = dialogGlyphNavItem("files", glyph_file, todo = () ⇒ {
       openFileTree() = !openFileTree()
-    })
+    }, help = ToolTip(BottomDirection(), "Files"))
 
     maindiv.appendChild(
       nav("mainNav",
@@ -188,7 +191,6 @@ object ScriptClient {
       tags.div(`class` := "openMOLETitle", "OpenMOLE - 5.0"),
       shutdownButton
     ))
-    maindiv.appendChild(shutdownButton)
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)

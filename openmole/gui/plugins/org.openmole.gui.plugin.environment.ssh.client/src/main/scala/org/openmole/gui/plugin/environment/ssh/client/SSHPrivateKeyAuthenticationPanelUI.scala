@@ -54,6 +54,7 @@ class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) ext
   @JSExport
   val view = {
     tags.div(
+      onsubmit := {()=> {println("submit in private key " ); false}},
       bs.labeledField("Login", login),
       bs.labeledField("Host", target),
       bs.labeledField("Password", password),
