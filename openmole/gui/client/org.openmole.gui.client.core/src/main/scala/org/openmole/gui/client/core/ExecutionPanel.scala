@@ -23,7 +23,7 @@ import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import scala.concurrent.duration.Duration
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select, Expander }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, _ }
 import org.openmole.gui.misc.js.Expander._
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
@@ -242,20 +242,20 @@ class ExecutionPanel extends ModalPanel {
             )
 
             Seq(bs.tr(row)(
-              bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink),
-              bs.td(col_md_2 + "small")(Utils.longToDate(staticInfo.startDate)),
-              bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + details.running),
-              bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + details.ratio),
-              bs.td(col_md_1)(durationString),
-              bs.td(col_md_1)(stateLink)(`class` := executionInfo.state + "State"),
-              bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
-              bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink),
+              bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink.tooltip("Script sources")),
+              bs.td(col_md_2 + "small")(tags.div(Utils.longToDate(staticInfo.startDate)).tooltip("Starting time")),
+              bs.td(col_md_1)(bs.glyph(bs.glyph_flash).tooltip("Running jobs"), " " + details.running),
+              bs.td(col_md_2)(bs.glyph(bs.glyph_flag).tooltip("Jobs progression"), " " + details.ratio),
+              bs.td(col_md_1)(tags.div(durationString).tooltip("Execution duration")),
+              bs.td(col_md_1)(stateLink.tooltip("Execution state"))(`class` := executionInfo.state + "State"),
+              bs.td(col_md_1)(visibleClass(id.id, envID))(envLink.tooltip("Observe execution on the environments")),
+              bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink.tooltip("Execution outputs")),
               bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
                 updatePanelInfo
-              })(`class` := "cancelExecution")),
+              })(`class` := "cancelExecution").tooltip("Cancel execution", level = WarningTooltipLevel())),
               bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].removeExecution(id).call().foreach { r ⇒
                 updatePanelInfo
-              })(`class` := "removeExecution"))
+              })(`class` := "removeExecution").tooltip("Remove execution", level = WarningTooltipLevel()))
             ), bs.tr(row)(
               expander.getVisible(id.id) match {
                 case Some(v: VisibleID) ⇒ tags.td(colspan := 12)(hiddenMap(v))

@@ -1,7 +1,7 @@
 package org.openmole.gui.misc.js
 
 import org.openmole.gui.misc.js.BootstrapTags._
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
 import org.scalajs.jquery
 import scalatags.JsDom.{ tags, TypedTag }
 import scalatags.JsDom.all._
@@ -52,7 +52,7 @@ trait Help {
 
   def level: TooltipLevel
 
-  def apply(h: TypedTag[HTMLElement]): HTMLElement = {
+  def apply[T <: HTMLElement](h: TypedTag[T]): HTMLDivElement = {
     val ttdiv = tags.div(
       title := message
     ).render
@@ -60,7 +60,7 @@ trait Help {
     ttdiv.appendChild(h)
     val options = TooltipsterOptions.
       position(placement.direction).
-      speed(50).
+      speed(300).
       theme(level.level)
 
     jquery.jQuery(ttdiv).tooltipster(options)

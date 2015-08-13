@@ -10,7 +10,7 @@ import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.{ HTMLInputElement, DragEvent }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, RightDirection, BottomDirection, ToolTip, Select }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, _ }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.client.core.Settings._
@@ -111,16 +111,14 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               false
             })),
             inputGroupAddon(id := "fileinput-addon")(
-              ToolTip(BottomDirection(), "Upload files")(
-                tags.label(`class` := "inputFileStyleSmall",
-                  uploadButton((fileInput: HTMLInputElement) ⇒ {
-                    FileManager.upload(fileInput, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
-                  })))),
+              tags.label(`class` := "inputFileStyleSmall",
+                uploadButton((fileInput: HTMLInputElement) ⇒ {
+                  FileManager.upload(fileInput, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
+                })).tooltip("Edit the file name")),
             inputGroupAddon(id := "fileinput-addon")(
-              ToolTip(RightDirection(), "Refresh file tree")(
-                tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
-                  glyph(glyph_refresh)
-                )))
+              tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
+                glyph(glyph_refresh)
+              ).tooltip("Refresh the file tree"))
           )
         )
       )
@@ -321,20 +319,19 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       ondrop := {
         dropAction(tn)
       },
-      ToolTip(BottomDirection(), tn.name())(
-        tags.div(style := "float:left",
-          cursor := "pointer",
-          draggable := true,
-          onclick := { () ⇒ todo() },
-          `class` := classType + " fileNameOverflow")(
-            tags.i(id := "plusdir", `class` := {
-              tn.hasSons match {
-                case true  ⇒ "glyphicon glyphicon-plus-sign"
-                case false ⇒ ""
-              }
-            }),
-            tags.i(tn.name())
-          )),
+      tags.div(style := "float:left",
+        cursor := "pointer",
+        draggable := true,
+        onclick := { () ⇒ todo() },
+        `class` := classType + " fileNameOverflow")(
+          tags.i(id := "plusdir", `class` := {
+            tn.hasSons match {
+              case true  ⇒ "glyphicon glyphicon-plus-sign"
+              case false ⇒ ""
+            }
+          }),
+          tags.i(tn.name())
+        ).tooltip(tn.name()),
       tags.div(`class` := "file-info",
         tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
         tags.span(id := Rx {
@@ -344,7 +341,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         })(
           glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem file-glyph"),
           glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem file-glyph"),
-          a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"), href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
+          a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"),
+            href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
           tn.safePath().extension match {
             case FileExtension.TGZ ⇒ glyphSpan(glyph_archive, () ⇒ {
               OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
@@ -358,6 +356,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               panels.pluginTriggerer.open
             })(`class` := "glyphitem file-glyph")
         )
+
       )
     )
 

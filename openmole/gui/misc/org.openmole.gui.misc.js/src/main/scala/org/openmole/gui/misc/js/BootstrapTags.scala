@@ -41,6 +41,14 @@ object BootstrapTags {
 
   implicit def formTagToNode(tt: HtmlTag): org.scalajs.dom.Node = tt.render
 
+  implicit class TypedTagDecorator[T <: HTMLElement](typedTag: TypedTag[T]) {
+
+    def tooltip(message: String,
+                direction: Direction = BottomDirection(),
+                level: TooltipLevel = DefaultTooltipLevel()): HTMLDivElement =
+      ToolTip(direction, message, level)(typedTag)
+  }
+
   implicit class BootstrapTypedTag[+Output <: raw.Element](t: TypedTag[Output]) {
     def +++(m: Seq[Modifier]) = t.copy(modifiers = t.modifiers :+ m.toSeq)
   }
