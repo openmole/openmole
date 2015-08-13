@@ -244,8 +244,8 @@ class ExecutionPanel extends ModalPanel {
             Seq(bs.tr(row)(
               bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink.tooltip("Script sources")),
               bs.td(col_md_2 + "small")(tags.div(Utils.longToDate(staticInfo.startDate)).tooltip("Starting time")),
-              bs.td(col_md_1)(bs.glyph(bs.glyph_flash).tooltip("Running jobs"), " " + details.running),
-              bs.td(col_md_2)(bs.glyph(bs.glyph_flag).tooltip("Jobs progression"), " " + details.ratio),
+              bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_flash), " " + details.running).tooltip("Running jobs")),
+              bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_flag), " " + details.ratio).tooltip("Jobs progression")),
               bs.td(col_md_1)(tags.div(durationString).tooltip("Execution duration")),
               bs.td(col_md_1)(stateLink.tooltip("Execution state"))(`class` := executionInfo.state + "State"),
               bs.td(col_md_1)(visibleClass(id.id, envID))(envLink.tooltip("Observe execution on the environments")),
