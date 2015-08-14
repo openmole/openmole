@@ -47,8 +47,7 @@ object ScriptClient {
         onclick := { () ⇒
           AlertPanel.popup("This will halt the server, so that the application will no longer be usable. Halt anyway ?",
             () ⇒ {
-              val a = tags.a(href := "shutdown").render
-              a.click()
+              dom.window.location.href = "shutdown"
             },
             transform = RightTransform(),
             zone = TopZone())
