@@ -121,13 +121,17 @@ object ScriptClient {
 
     val alert: Var[Boolean] = Var(false)
 
+    val openmoleText = tags.div(
+      tags.h1(`class` := "openmole-connection openmole-pen")("pen"),
+      tags.h1(`class` := "openmole-connection openmole-mole")("MOLE")
+    )
+
     val connectionDiv = tags.div(`class` := Rx {
       if (!passwordOK()) "connectionTabOverlay" else "displayOff"
     })(
       tags.div(
-        tags.h1(`class` := "openmole-pen")("pen"),
-        tags.h1(`class` := "openmole-mole")("MOLE"),
-        tags.img(src := "img/openmole.svg", `class` := "openmole-logo"),
+        tags.img(src := "img/openmole.png", `class` := "openmole-logo"),
+        openmoleText,
         shutdownButton,
         tags.div(`class` := Rx {
           if (!passwordOK()) "centerPage" else ""

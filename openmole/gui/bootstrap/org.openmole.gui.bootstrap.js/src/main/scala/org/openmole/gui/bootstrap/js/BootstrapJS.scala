@@ -72,6 +72,7 @@ object BootstrapJS {
     copyURL(thisBundle.findEntries("/", "*.woff", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.woff2", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.svg", true).asScala)
+    copyURL(thisBundle.findEntries("/", "*.png", true).asScala)
     copyURL(thisBundle.findEntries("/", "*.eot", true).asScala)
 
     // Extract and copy all the .sjsir files from bundles to src
