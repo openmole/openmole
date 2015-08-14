@@ -36,7 +36,7 @@ class AuthFileUploaderUI(keyName: String, keySet: Boolean, renaming: Option[Stri
   val pathSet: Var[Boolean] = Var(keySet)
 
   lazy val upButton =
-    tags.label(`class` := "inputFileStyle marginTop-20")(
+    tags.label(`class` := "inputFileStyle spacer5 certificate")(
       bs.fileInput((fInput: HTMLInputElement) ⇒ {
         FileManager.upload(fInput,
           SafePath.empty,

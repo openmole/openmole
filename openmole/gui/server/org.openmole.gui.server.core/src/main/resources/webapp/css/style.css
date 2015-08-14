@@ -50,6 +50,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer50 {
     margin-top: 50px;
 }
+.spacer5 {
+    margin-top: 5px;
+}
 #editor {
     font-family: monospace;
     height: 95%;
@@ -540,6 +543,11 @@ label {
 .pluginRight{
     right: 20px;
     margin-top: -8px;
+}
+
+.certificate{
+    width: 360px;
+    text-align: center;
 }
 
 .marginTop-20{

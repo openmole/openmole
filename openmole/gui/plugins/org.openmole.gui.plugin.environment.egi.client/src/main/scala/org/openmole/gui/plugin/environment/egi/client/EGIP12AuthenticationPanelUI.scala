@@ -1,18 +1,17 @@
 package org.openmole.gui.plugin.environment.egi.client
 
-import org.openmole.gui.client.core.{Settings, OMPost}
+import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.client.core.files.AuthFileUploaderUI
-import org.openmole.gui.ext.data.{FileExtension, SafePath, EGIP12AuthenticationData}
+import org.openmole.gui.ext.data.EGIP12AuthenticationData
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.shared.Api
-
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{BootstrapTags => bs}
 import scalatags.JsDom.{tags ⇒ tags}
-import org.openmole.gui.server.core.Utils._
+import bs._
 
 /*
  * Copyright (C) 02/07/15 // mathieu.leclaire@openmole.org
@@ -34,7 +33,7 @@ import org.openmole.gui.server.core.Utils._
 @JSExport("org.openmole.gui.plugin.environment.egi.client.EGIP12AuthenticationPanelUI")
 class EGIP12AuthenticationPanelUI(data: EGIP12AuthenticationData) extends PanelUI {
 
-  val password = bs.input(data.cypheredPassword)(
+  val password = bs.input(data.cypheredPassword, key("spacer5"))(
     placeholder := "Password",
     `type` := "password",
     width := "130px").render
@@ -44,8 +43,8 @@ class EGIP12AuthenticationPanelUI(data: EGIP12AuthenticationData) extends PanelU
 
   @JSExport
   val view = tags.div(
-    bs.labeledField("Key file", privateKey.view),
-    bs.labeledField("Password", password)
+    bs.labeledField("Password", password),
+    bs.labeledField("Key file", privateKey.view)
   )
 
 
