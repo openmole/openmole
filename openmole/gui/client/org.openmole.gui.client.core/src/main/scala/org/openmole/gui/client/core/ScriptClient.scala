@@ -125,6 +125,9 @@ object ScriptClient {
       if (!passwordOK()) "connectionTabOverlay" else "displayOff"
     })(
       tags.div(
+        tags.h1(`class` := "openmole-pen")("pen"),
+        tags.h1(`class` := "openmole-mole")("MOLE"),
+        tags.img(src := "img/openmole.svg", `class` := "openmole-logo"),
         shutdownButton,
         tags.div(`class` := Rx {
           if (!passwordOK()) "centerPage" else ""

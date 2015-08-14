@@ -569,3 +569,34 @@ label {
 span.label.control-label{
     color: black;
 }
+
+.openmole-logo{
+    background: url(img/openmole.svg) no-repeat;
+    position: fixed;
+    width: 400px;
+    top: -30px;
+    right: calc(50% - 55px) ;
+}
+
+.openmole-pen{
+    font-family: Bevan;
+    font-size: 5em;
+    color: #808080;
+    position: fixed;
+    width: 200px;
+    top: 120px;
+    right: calc(50% - 55px);
+    z-index: 10;
+}
+
+
+.openmole-mole{
+    font-family: Bevan;
+    font-size: 5em;
+    color: #a6bf26;
+    position: fixed;
+    width: 200px;
+    top: 120px;
+    right: calc(50% - 195px);
+    z-index: 10;
+}

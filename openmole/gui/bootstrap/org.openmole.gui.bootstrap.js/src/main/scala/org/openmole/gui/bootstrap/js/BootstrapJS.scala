@@ -45,6 +45,7 @@ object BootstrapJS {
 
   new File(webapp, "css").mkdirs
   new File(webapp, "fonts").mkdirs
+  new File(webapp, "img").mkdirs
   new File(webapp, "WEB-INF").mkdirs
 
   def init(optimized: Boolean = true) = {
