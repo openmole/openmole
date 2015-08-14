@@ -94,7 +94,7 @@ class MarketPanel extends ModalPanel {
       bs.waitingSpan(" Downloading", btn_danger)
     }
     else if (Some(entry) == selectedEntry()) {
-      bs.glyphButton(" Download", btn_primary, glyph_download_alt, todo)
+      bs.glyphButton(" Download", btn_success, glyph_download_alt, todo)
     }
     else tags.div
 
@@ -107,11 +107,6 @@ class MarketPanel extends ModalPanel {
 
   def onClose = () ⇒ {
   }
-
-  val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := {
-    () ⇒ close
-  }
-  )
 
   val dialog = bs.modalDialog(modalID,
     headerDialog(

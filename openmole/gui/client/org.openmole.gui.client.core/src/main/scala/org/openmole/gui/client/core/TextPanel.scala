@@ -34,11 +34,6 @@ class TextPanel(val modalID: ModalID, title: String) extends ModalPanel {
 
   def onClose: () ⇒ Unit = () ⇒ {}
 
-  val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := {
-    () ⇒ close
-  }
-  )
-
   val dialog = bs.modalDialog(modalID,
     headerDialog(
       tags.span(tags.b(title))

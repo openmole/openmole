@@ -199,8 +199,8 @@ object OSGi extends Defaults {
   lazy val jawn = OsgiProject("jawn", exports = Seq("jawn.*", "utf8.json")) settings(
     libraryDependencies += "org.spire-math" %% "jawn-parser" % jawnVersion, version := jawnVersion)
 
-  lazy val scaladgetVersion = "0.5.0"
-  lazy val scaladget = OsgiProject("scaladget", exports = Seq("fr.iscpif.scaladget.*", "*.sjsir")) settings(
+  lazy val scaladgetVersion = "0.6.0"
+  lazy val scaladget = OsgiProject("scaladget", exports = Seq("fr.iscpif.scaladget.*", "org.querki.jsext.*","*.sjsir")) settings(
     libraryDependencies += "fr.iscpif" %%% ("scaladget" + jsSuffix) % scaladgetVersion, version := scaladgetVersion)
 
   lazy val jsonSimpleVersion = "1.1.1"

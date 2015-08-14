@@ -7,7 +7,7 @@ import org.openmole.core.batch.environment.BatchEnvironment.{ EndUpload, BeginUp
 import org.openmole.core.buildinfo.MarketIndex
 import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.pluginmanager._
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
@@ -20,6 +20,7 @@ import org.openmole.gui.ext.data._
 import java.io.{ InputStream, File }
 import java.nio.file._
 import org.openmole.console._
+import org.osgi.framework.Bundle
 import scala.util.{ Failure, Success, Try }
 import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.ExecutionContext
@@ -126,7 +127,7 @@ object ApiImpl extends Api {
     val targetFile = new File(filePath.parent, newName)
 
     Files.move(safePathToFile(filePath), targetFile, StandardCopyOption.REPLACE_EXISTING)
-    TreeNodeData(newName, targetFile, false, 0L, "")
+    TreeNodeData(newName, targetFile, false, false, 0L, "")
 
   }
 
@@ -136,9 +137,7 @@ object ApiImpl extends Api {
     saveFile(fc.path, fc.content)
   }
 
-  def workspaceProjectNode(): SafePath = Utils.workspaceProjectFile
-
-  def authenticationKeysPath(): SafePath = Utils.authenticationKeysFile
+  def workspacePath(): SafePath = Utils.workspaceProjectFile
 
   // EXECUTIONS
 
@@ -230,7 +229,9 @@ object ApiImpl extends Api {
             id,
             Runnings.runningEnvironments(envIds).flatMap {
               case (envId, info) ⇒ info.environmentErrors(envId)
-            }.filter { _.level == level }
+            }.filter {
+              _.level == level
+            }
           )
       }.toSeq,
       envIds.keys.toSeq.map {
@@ -268,28 +269,58 @@ object ApiImpl extends Api {
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
     val url = new URL(entry.url)
     val is = new TarInputStream(new GZIPInputStream(url.openStream()))
-    try is.extract(safePathToFile(path))
+    try {
+      is.extract(safePathToFile(path))
+      autoAddPlugins(path)
+    }
     finally is.close
   }
+
+  //PLUGINS
+  def addPlugin(path: SafePath): Unit = {
+    val file = safePathToFile(path)
+    addPlugins(PluginManager.plugins(file))
+  }
+
+  def autoAddPlugins(path: SafePath) = {
+    val file = safePathToFile(path)
+
+    def recurse(f: File): List[File] = {
+      val subPlugins: List[File] = if (f.isDirectory) f.listFilesSafe.toList.flatMap(recurse) else Nil
+      PluginManager.plugins(f).toList ::: subPlugins
+    }
+
+    addPlugins(recurse(file))
+  }
+
+  private def addPlugins(files: Iterable[File]): Unit = {
+    val plugins =
+      files.map { file ⇒
+        val dest: File = Workspace.pluginDir / file.getName
+        file copy dest
+        dest
+      }
+    PluginManager.load(plugins)
+  }
+
+  def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)
 
   def listPlugins(): Iterable[Plugin] =
     Workspace.pluginDir.listFilesSafe.map(p ⇒ Plugin(p.getName))
 
-  def isPlugin(path: SafePath): Boolean =
-    !PluginManager.plugins(safePathToFile(path)).isEmpty
-
-  def addPlugin(path: SafePath): Unit = {
-    val file = safePathToFile(path)
-    val plugins = PluginManager.plugins(file)
-    PluginManager.load(plugins)
-    file copy (Workspace.pluginDir / file.getName)
-  }
-
-  def removePlugin(plugin: Plugin): Unit = {
+  def removePlugin(plugin: Plugin): Unit = synchronized {
     val file = Workspace.pluginDir / plugin.name
-    val plugins = PluginManager.plugins(file)
-    plugins.flatMap(PluginManager.bundle).foreach(_.uninstall())
+
+    val allFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
+    for {
+      b ← (file :: allFiles.toList).flatMap(PluginManager.bundle)
+      if (b.getState == Bundle.ACTIVE)
+    } b.uninstall()
+
+    allFiles.foreach(_.recursiveDelete)
     file.recursiveDelete
+
+    // FIXME: the bundles might not be fully unloaded, they might be dynamically imported by core.console
   }
 
 }

@@ -48,12 +48,15 @@ object FileManager {
     nameList
   }
 
-  def upload(fileList: FileList,
+  def upload(inputElement: HTMLInputElement,
              destinationPath: SafePath,
              fileTransferState: FileTransferState ⇒ Unit,
              uploadType: UploadType,
              onloaded: () ⇒ Unit = () ⇒ {}) = {
+    val fileList = inputElement.files
     val formData = new FormData
+
+    formData.append("fileType", uploadType.typeName)
 
     for (i ← 0 to fileList.length - 1) {
       val file = fileList(i)
@@ -73,13 +76,10 @@ object FileManager {
     xhr.onloadend = (e: ProgressEvent) ⇒ {
       fileTransferState(Transfered())
       onloaded()
+      inputElement.value = ""
     }
 
-    uploadType match {
-      case p: UploadProject ⇒ xhr.open("POST", "uploadfiles", true)
-      case k: UploadKey     ⇒ xhr.open("POST", "uploadkeys", true)
-    }
-
+    xhr.open("POST", "uploadfiles", true)
     xhr.send(formData)
   }
 

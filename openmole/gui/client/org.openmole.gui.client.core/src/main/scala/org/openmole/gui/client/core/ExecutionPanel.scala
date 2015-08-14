@@ -23,7 +23,7 @@ import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import scala.concurrent.duration.Duration
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select, Expander }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, _ }
 import org.openmole.gui.misc.js.Expander._
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
@@ -175,14 +175,14 @@ class ExecutionPanel extends ModalPanel {
                       thead,
                       tbody(
                         Seq(bs.tr(row)(
-                          bs.td(col_md_2)(e.taskName),
-                          bs.td(col_md_2)(bs.glyph(bs.glyph_upload), s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}"),
-                          bs.td(col_md_2)(bs.glyph(bs.glyph_download), s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}"),
-                          bs.td(col_md_1)(bs.glyph(bs.glyph_road), " " + e.submitted),
-                          bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + e.running),
-                          bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + e.done),
-                          bs.td(col_md_1)(bs.glyph(bs.glyph_fire), " " + e.failed),
-                          bs.td(col_md_1)(bs.span({
+                          bs.td(col_md_3)(tags.span(e.taskName).tooltip("Environment name")),
+                          bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_upload), s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}").tooltip("Uploading files")),
+                          bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_download), s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}").tooltip("Downloading files")),
+                          bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_road + " paddingBottom7"), " " + e.submitted).tooltip("Submitted jobs")),
+                          bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_flash + " paddingBottom7"), " " + e.running).tooltip("Running jobs")),
+                          bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_flag + " paddingBottom7"), " " + e.done).tooltip("Completed jobs")),
+                          bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_fire + " paddingBottom7"), " " + e.failed).tooltip("Failed jobs")),
+                          bs.td(col_md_3)(bs.span({
                             "blue" + {
                               if (envErrorVisible().contains(e.envId)) " executionVisible" else ""
                             }
@@ -200,7 +200,7 @@ class ExecutionPanel extends ModalPanel {
                           bs.tr(row)(
                             bs.td(col_md_12)(
                               `class` := {
-                                if (envErrorVisible().contains(e.envId)) "displayNone" else ""
+                                if (envErrorVisible().contains(e.envId)) "" else "displayNone"
                               },
                               colspan := 12,
                               staticPanel(e.envId, envErrorPanels,
@@ -242,20 +242,20 @@ class ExecutionPanel extends ModalPanel {
             )
 
             Seq(bs.tr(row)(
-              bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink),
-              bs.td(col_md_2 + "small")(Utils.longToDate(staticInfo.startDate)),
-              bs.td(col_md_1)(bs.glyph(bs.glyph_flash), " " + details.running),
-              bs.td(col_md_2)(bs.glyph(bs.glyph_flag), " " + details.ratio),
-              bs.td(col_md_1)(durationString),
-              bs.td(col_md_1)(stateLink)(`class` := executionInfo.state + "State"),
+              bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink.tooltip("Script sources")),
+              bs.td(col_md_2 + "small")(tags.div(Utils.longToDate(staticInfo.startDate)).tooltip("Starting time")),
+              bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_flash), " " + details.running).tooltip("Running jobs")),
+              bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_flag), " " + details.ratio).tooltip("Jobs progression")),
+              bs.td(col_md_1)(tags.div(durationString).tooltip("Execution duration")),
+              bs.td(col_md_1)(stateLink.tooltip("Execution state"))(`class` := executionInfo.state + "State vert-align"),
               bs.td(col_md_1)(visibleClass(id.id, envID))(envLink),
-              bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink),
+              bs.td(col_md_1)(visibleClass(id.id, outputStreamID))(outputLink.tooltip("Execution outputs")),
               bs.td(col_md_1)(bs.glyphSpan(glyph_remove, () ⇒ OMPost[Api].cancelExecution(id).call().foreach { r ⇒
                 updatePanelInfo
-              })(`class` := "cancelExecution")),
+              })(`class` := "removeExecution").tooltip("Cancel execution", level = WarningTooltipLevel())),
               bs.td(col_md_1)(bs.glyphSpan(glyph_trash, () ⇒ OMPost[Api].removeExecution(id).call().foreach { r ⇒
                 updatePanelInfo
-              })(`class` := "removeExecution"))
+              })(`class` := "removeExecution").tooltip("Remove execution", level = WarningTooltipLevel()))
             ), bs.tr(row)(
               expander.getVisible(id.id) match {
                 case Some(v: VisibleID) ⇒ tags.td(colspan := 12)(hiddenMap(v))
@@ -275,13 +275,8 @@ class ExecutionPanel extends ModalPanel {
     else s"($readable)"
 
   def visibleClass(expandID: ExpandID, visibleID: VisibleID): Modifier = `class` := {
-    if (expander.isVisible(expandID, visibleID)) "executionVisible" else ""
+    "vert-align " + { if (expander.isVisible(expandID, visibleID)) "executionVisible" }
   }
-
-  val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := {
-    () ⇒ close
-  }
-  )
 
   val dialog = modalDialog(modalID,
     headerDialog(

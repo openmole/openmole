@@ -1,12 +1,9 @@
 package org.openmole.gui.plugin.environment.ssh.client
 
-import java.net.URI
-
-import org.openmole.gui.client.core.{Settings, OMPost}
+import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.client.core.files.AuthFileUploaderUI
-import org.openmole.gui.ext.data.{FileExtension, SafePath, PrivateKeyAuthenticationData}
+import org.openmole.gui.ext.data.PrivateKeyAuthenticationData
 import org.openmole.gui.ext.dataui.PanelUI
-import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
@@ -14,6 +11,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.misc.js.{BootstrapTags => bs}
 import scalatags.JsDom.{tags ⇒ tags}
+import bs._
 
 /*
  * Copyright (C) 01/07/15 // mathieu.leclaire@openmole.org
@@ -36,15 +34,15 @@ import scalatags.JsDom.{tags ⇒ tags}
 class SSHPrivateKeyAuthenticationPanelUI(data: PrivateKeyAuthenticationData) extends PanelUI {
 
 
-  val login = bs.input(data.login)(
+  val login = bs.input(data.login, key("spacer5"))(
     placeholder := "Login",
     width := "130px").render
 
-  val target = bs.input(data.target)(
+  val target = bs.input(data.target, key("spacer5"))(
     placeholder := "Host",
     width := "130px").render
 
-  val password = bs.input(data.cypheredPassword)(
+  val password = bs.input(data.cypheredPassword, key("spacer5"))(
     placeholder := "Password",
     `type` := "password",
     width := "130px").render

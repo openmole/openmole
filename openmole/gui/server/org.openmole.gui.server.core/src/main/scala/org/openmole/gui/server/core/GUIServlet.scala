@@ -16,32 +16,26 @@
  */
 package org.openmole.gui.server.core
 
-import java.net.URI
 import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 
-import org.openmole.console.ConsoleVariables
-import org.openmole.core.filedeleter.FileDeleter
-import org.openmole.core.workflow.mole.ExecutionContext
-import org.openmole.core.workflow.puzzle.Puzzle
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.misc.utils.Utils._
 import org.scalatra._
 import org.scalatra.auth.{ ScentryConfig, ScentrySupport }
 import org.scalatra.auth.strategy.{ BasicAuthSupport, BasicAuthStrategy }
-import org.scalatra.servlet.FileUploadSupport
+import org.scalatra.servlet.{ FileItem, FileUploadSupport }
+import org.scalatra.util.MultiMapHeadView
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.Api
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
-import java.io.{ BufferedInputStream, BufferedOutputStream, File, PrintStream }
+import java.io.{ BufferedOutputStream, File }
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import org.openmole.console._
 import scala.util.{ Failure, Success, Try }
-import org.openmole.gui.ext.data._
 
 object AutowireServer extends autowire.Server[String, upickle.Reader, upickle.Writer] {
   def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
@@ -101,26 +95,20 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   post("/uploadfiles") {
-    for (file ← fileParams) yield {
-      val path = new java.net.URI(file._1).getPath
-      val destination = new File(Utils.webUIProjectFile, path)
-      destination.setWritable(true)
-      val stream = new BufferedInputStream(file._2.getInputStream)
-      try {
-        stream.copy(destination)
-        destination.setExecutable(true)
-      }
-      finally stream.close
-      Ok(file, Map(
-        "Content-Type" -> ("application/octet-stream"),
-        "Content-Disposition" -> ("form-data; filename=\"" + file._1 + "\"")
-      ))
-    }
+    move(fileParams, params("fileType"))
   }
 
-  post("/uploadkeys") {
+  def move(fileParems: MultiMapHeadView[String, FileItem], fileType: String) = {
+    val rootFile = fileType match {
+      case "project"        ⇒ Utils.webUIProjectFile
+      case "authentication" ⇒ Utils.authenticationKeysFile
+      case "plugin"         ⇒ Workspace.pluginDir
+    }
+
     for (file ← fileParams) yield {
-      val destination = new File(Utils.authenticationKeysFile, file._1)
+      val path = new java.net.URI(file._1).getPath
+      val destination = new File(rootFile, path)
+      destination.setWritable(true)
       val stream = file._2.getInputStream
       try {
         stream.copy(destination)
@@ -168,6 +156,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
         tags.script(tags.`type` := "text/javascript", tags.src := "js/mode-nlogo.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/theme-github.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/bootstrap.min.js"),
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/tooltipster.min.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/plugins.js"),
         tags.script(tags.`type` := "text/javascript", tags.src := "js/pluginMapping.js")
       ),

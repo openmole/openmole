@@ -1,13 +1,12 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.AbsolutePositioning.CenterTransform
-import org.openmole.gui.client.core.files.TreeNodePanel
+import fr.iscpif.scaladget.mapping.tooltipster.TooltipsterOptions
+import org.openmole.gui.client.core.AbsolutePositioning.{ RightTransform, TopZone, CenterTransform }
 import org.openmole.gui.shared.Api
-import org.scalajs
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
 import org.openmole.gui.client.core.panels._
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, LeftDirection, WarningTooltipLevel, BottomDirection, ToolTip }
 import bs._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -16,6 +15,7 @@ import org.openmole.gui.misc.js.JsRxTags._
 import org.scalajs.dom
 import rx._
 import scalatags.JsDom.all._
+import org.scalajs.jquery
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -40,13 +40,18 @@ object ScriptClient {
   @JSExport
   def run(): Unit = {
 
-    val shutdownButton = a(`class` := "shutdownButton",
-      bs.glyph(glyph_off),
-      href := "shutdown",
-      onclick := { () ⇒
-        println("close")
-        dom.window.close()
-      })
+    val shutdownButton =
+      a(`class` := "shutdownButton",
+        bs.glyph(glyph_off),
+        cursor := "pointer",
+        onclick := { () ⇒
+          AlertPanel.popup("This will halt the server, so that the application will no longer be usable. Halt anyway ?",
+            () ⇒ {
+              dom.window.location.href = "shutdown"
+            },
+            transform = RightTransform(),
+            zone = TopZone())
+        })
 
     val passwordChosen = Var(true)
     val passwordOK = Var(false)
@@ -116,10 +121,17 @@ object ScriptClient {
 
     val alert: Var[Boolean] = Var(false)
 
+    val openmoleText = tags.div(
+      tags.h1(`class` := "openmole-connection openmole-pen openmole-pen-connection-position")("pen"),
+      tags.h1(`class` := "openmole-connection openmole-mole openmole-mole-connection-position")("MOLE")
+    )
+
     val connectionDiv = tags.div(`class` := Rx {
       if (!passwordOK()) "connectionTabOverlay" else "displayOff"
     })(
       tags.div(
+        tags.img(src := "img/openmole.png", `class` := "openmole-logo"),
+        openmoleText,
         shutdownButton,
         tags.div(`class` := Rx {
           if (!passwordOK()) "centerPage" else ""
@@ -157,17 +169,19 @@ object ScriptClient {
       val modalPanel = authenticationPanel
     }
 
-    val execItem = dialogGlyphNavItem("executions", glyph_settings, () ⇒ executionTriggerer.triggerOpen)
+    val execItem = dialogGlyphNavItem("executions", glyph_settings, () ⇒ executionTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Executions"))
 
-    val authenticationItem = dialogGlyphNavItem("authentications", glyph_lock, () ⇒ authenticationTriggerer.triggerOpen)
+    val authenticationItem = dialogGlyphNavItem("authentications", glyph_lock, () ⇒ authenticationTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Authentications"))
 
-    val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen)
+    val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Market place"))
+
+    val pluginItem = dialogGlyphNavItem("plugin", glyph_plug, () ⇒ pluginTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Plugins"))
 
     val envItem = dialogGlyphNavItem("envError", glyph_exclamation, () ⇒ environmentStackTriggerer.open)
 
     val fileItem = dialogGlyphNavItem("files", glyph_file, todo = () ⇒ {
       openFileTree() = !openFileTree()
-    })
+    }, help = ToolTip(BottomDirection(), "Files"))
 
     maindiv.appendChild(
       nav("mainNav",
@@ -175,21 +189,24 @@ object ScriptClient {
         fileItem,
         execItem,
         authenticationItem,
-        marketItem
+        marketItem,
+        pluginItem
       )
     )
     maindiv.appendChild(tags.div(
-      tags.div(`class` := "openMOLETitle", "OpenMOLE - 5.0"),
+      tags.h1(`class` := "openmole-pen openmole-small openmole-pen-small-position")("Open"),
+      tags.h1(`class` := "openmole-mole openmole-small openmole-mole-small-position")("MOLE"),
+      tags.h1(`class` := "openmole-small openmole-version")("5"),
       shutdownButton
     ))
-    maindiv.appendChild(shutdownButton)
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)
+    maindiv.appendChild(pluginTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(environmentStackTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(AlertPanel.div)
 
-    Settings.workspaceProjectNode.foreach { projectsPath ⇒
+    Settings.workspacePath.foreach { projectsPath ⇒
       maindiv.appendChild(
         tags.div(`class` := "fullpanel")(
           tags.div(`class` := Rx {

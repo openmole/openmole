@@ -4,7 +4,7 @@ import org.openmole.gui.client
 import org.openmole.gui.client.core.PrototypeFactoryUI.DoubleDataUI
 import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.ext.dataui.FactoryWithDataUI
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, InputFilter, Select }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, RightDirection, InputFilter, Select }
 import org.scalajs.dom
 import org.scalajs.dom.Event
 import org.scalajs.dom.raw.Event

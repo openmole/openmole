@@ -41,6 +41,14 @@ object BootstrapTags {
 
   implicit def formTagToNode(tt: HtmlTag): org.scalajs.dom.Node = tt.render
 
+  implicit class TypedTagDecorator[T <: HTMLElement](typedTag: TypedTag[T]) {
+
+    def tooltip(message: String,
+                direction: Direction = BottomDirection(),
+                level: TooltipLevel = DefaultTooltipLevel()): HTMLDivElement =
+      ToolTip(direction, message, level)(typedTag)
+  }
+
   implicit class BootstrapTypedTag[+Output <: raw.Element](t: TypedTag[Output]) {
     def +++(m: Seq[Modifier]) = t.copy(modifiers = t.modifiers :+ m.toSeq)
   }
@@ -58,7 +66,13 @@ object BootstrapTags {
   def span(keys: ClassKeyAggregator = emptyCK) = tags.span(`class` := keys.key)
 
   // Nav
-  class NavItem(val navid: String, contentDiv: TypedTag[HTMLElement], ontrigger: () ⇒ Unit, val todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) {
+  class NavItem(val navid: String,
+                contentDiv: TypedTag[HTMLElement],
+                ontrigger: () ⇒ Unit,
+                val todo: () ⇒ Unit = () ⇒ {},
+                extraRenderPair: Seq[Modifier] = Seq(),
+                active: Boolean = false,
+                help: Help = NoHelp()) {
     val activeString = {
       if (active) "active" else ""
     }
@@ -67,7 +81,7 @@ object BootstrapTags {
       ontrigger()
       false
     }
-    )(contentDiv).render)(
+    )(help(contentDiv)))(
       extraRenderPair: _*)
 
   }
@@ -78,8 +92,14 @@ object BootstrapTags {
   def navItem(id: String, content: String, ontrigger: () ⇒ Unit = () ⇒ {}, todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) =
     new NavItem(id, tags.div(content), ontrigger, todo, extraRenderPair, active)
 
-  def dialogGlyphNavItem(id: String, glyphIcon: ClassKeyAggregator, ontrigger: () ⇒ Unit = () ⇒ {}, todo: () ⇒ Unit = () ⇒ {}, extraRenderPair: Seq[Modifier] = Seq(), active: Boolean = false) =
-    new NavItem(id, glyph(glyphIcon), ontrigger, todo, Seq(data("toggle") := "modal", data("target") := "#" + id + "PanelID"))
+  def dialogGlyphNavItem(id: String,
+                         glyphIcon: ClassKeyAggregator,
+                         ontrigger: () ⇒ Unit = () ⇒ {},
+                         todo: () ⇒ Unit = () ⇒ {},
+                         extraRenderPair: Seq[Modifier] = Seq(),
+                         active: Boolean = false,
+                         help: Help = NoHelp()) =
+    new NavItem(id, glyph(glyphIcon), ontrigger, todo, Seq(data("toggle") := "modal", data("target") := "#" + id + "PanelID"), help = help)
 
   def nav(uuid: String, keys: ClassKeyAggregator, contents: NavItem*): TypedTag[HTMLElement] =
     ul(`class` := "nav " + keys.key, id := uuid, role := "tablist")(
@@ -103,7 +123,7 @@ object BootstrapTags {
   val dropdown = key("dropdown")
 
   //Inputs
-  def input(content: String) = tags.input(`class` := "form-control", value := content)
+  def input(content: String, key: ClassKeyAggregator = emptyCK) = tags.input(`class` := "form-control " + key.key, value := content)
 
   def checkbox(default: Boolean) = tags.input(`type` := "checkbox", checked := default)
 

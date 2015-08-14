@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.AbsolutePositioning.{ FileZone, CenterTransform }
-import org.openmole.gui.client.core.{ AlertPanel, PanelTriggerer, OMPost }
+import org.openmole.gui.client.core.{ panels, AlertPanel, PanelTriggerer, OMPost }
 import org.openmole.gui.ext.data.{ FileExtension, UploadProject }
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
@@ -10,7 +10,7 @@ import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.{ HTMLInputElement, DragEvent }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, _ }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.client.core.Settings._
@@ -113,12 +113,12 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             inputGroupAddon(id := "fileinput-addon")(
               tags.label(`class` := "inputFileStyleSmall",
                 uploadButton((fileInput: HTMLInputElement) ⇒ {
-                  FileManager.upload(fileInput.files, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
-                }))),
+                  FileManager.upload(fileInput, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
+                })).tooltip("Edit the file name")),
             inputGroupAddon(id := "fileinput-addon")(
               tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
                 glyph(glyph_refresh)
-              ))
+              ).tooltip("Refresh the file tree", RightDirection()))
           )
         )
       )
@@ -129,7 +129,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       else {
         tags.table(`class` := "tree" + dragState())(
           tags.tr(
-            tags.td(style := "height:60px",
+            tags.td(height := "60px",
               transferring() match {
                 case _: Standby ⇒
                 case _: Transfered ⇒
@@ -323,7 +323,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         cursor := "pointer",
         draggable := true,
         onclick := { () ⇒ todo() },
-        `class` := classType)(
+        `class` := classType + " fileNameOverflow")(
           tags.i(id := "plusdir", `class` := {
             tn.hasSons match {
               case true  ⇒ "glyphicon glyphicon-plus-sign"
@@ -331,7 +331,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             }
           }),
           tags.i(tn.name())
-        ),
+        ).tooltip(tn.name()),
       tags.div(`class` := "file-info",
         tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
         tags.span(id := Rx {
@@ -341,7 +341,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         })(
           glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem file-glyph"),
           glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem file-glyph"),
-          a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"), href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
+          a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"),
+            href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
           tn.safePath().extension match {
             case FileExtension.TGZ ⇒ glyphSpan(glyph_archive, () ⇒ {
               OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
@@ -349,9 +350,13 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               }
             })(`class` := "glyphitem file-glyph")
             case _ ⇒
-          }
-
+          },
+          if (tn.isPlugin) glyphSpan(glyph_plug, () ⇒
+            OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+              panels.pluginTriggerer.open
+            })(`class` := "glyphitem file-glyph")
         )
+
       )
     )
 
