@@ -310,13 +310,17 @@ object ApiImpl extends Api {
 
   def removePlugin(plugin: Plugin): Unit = synchronized {
     val file = Workspace.pluginDir / plugin.name
+
     val allFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
     for {
       b ← (file :: allFiles.toList).flatMap(PluginManager.bundle)
       if (b.getState == Bundle.ACTIVE)
     } b.uninstall()
+
     allFiles.foreach(_.recursiveDelete)
     file.recursiveDelete
+
+    // FIXME: the bundles might not be fully unloaded, they might be dynamically imported by core.console
   }
 
 }
