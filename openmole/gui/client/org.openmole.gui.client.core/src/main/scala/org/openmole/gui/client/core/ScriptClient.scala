@@ -122,8 +122,8 @@ object ScriptClient {
     val alert: Var[Boolean] = Var(false)
 
     val openmoleText = tags.div(
-      tags.h1(`class` := "openmole-connection openmole-pen")("pen"),
-      tags.h1(`class` := "openmole-connection openmole-mole")("MOLE")
+      tags.h1(`class` := "openmole-connection openmole-pen openmole-pen-connection-position")("pen"),
+      tags.h1(`class` := "openmole-connection openmole-mole openmole-mole-connection-position")("MOLE")
     )
 
     val connectionDiv = tags.div(`class` := Rx {
@@ -194,7 +194,9 @@ object ScriptClient {
       )
     )
     maindiv.appendChild(tags.div(
-      tags.div(`class` := "openMOLETitle", "OpenMOLE - 5.0"),
+      tags.h1(`class` := "openmole-pen openmole-small openmole-pen-small-position")("Open"),
+      tags.h1(`class` := "openmole-mole openmole-small openmole-mole-small-position")("MOLE"),
+      tags.h1(`class` := "openmole-small openmole-version")("5"),
       shutdownButton
     ))
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)

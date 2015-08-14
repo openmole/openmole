@@ -573,13 +573,18 @@ span.label.control-label{
 .openmole-logo{
     background: url(img/openmole.svg) no-repeat;
     position: fixed;
-    width: 400px;
-    top: -30px;
-    right: calc(50% - 55px) ;
+    width: 300px;
+    top: -10px;
+    right: calc(50% - 25px) ;
 }
 
 .openmole-small{
-
+    font-family: Bevan;
+    position: fixed;
+    font-size: 2em;
+    width: 100px;
+    top: -15px;
+    z-index: 10;
 }
 
 .openmole-connection{
@@ -591,13 +596,33 @@ span.label.control-label{
     z-index: 10;
 }
 
-.openmole-pen{
-    color: #808080;
-    right: calc(50% - 55px);
+.openmole-pen-connection-position{
+    right: calc(50% - 70px);
 }
 
+.openmole-pen{
+    color: #808080;
+}
+
+.openmole-version{
+    color: white;
+    right: 40px;
+    top: -20px;
+    font-size: 2.5em;
+}
+
+.openmole-mole-connection-position{
+    right: calc(50% - 210px);
+}
+
+.openmole-mole-small-position{
+    right: 150px;
+}
+
+.openmole-pen-small-position{
+    right: 234px;
+}
 
 .openmole-mole{
     color: #a6bf26;
-    right: calc(50% - 195px);
 }
