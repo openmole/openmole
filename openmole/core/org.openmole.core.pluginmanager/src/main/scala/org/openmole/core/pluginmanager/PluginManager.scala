@@ -51,13 +51,17 @@ object PluginManager extends Logger {
     new BundleListener {
       override def bundleChanged(event: BundleEvent) = {
         val b = event.getBundle
-        if (event.getType == BundleEvent.RESOLVED || event.getType == BundleEvent.UNRESOLVED || event.getType == BundleEvent.UPDATED) atomic { implicit ctx ⇒
-          bundlesInfo() = None
-          resolvedPluginDependenciesCache.clear()
-        }
+        if (event.getType == BundleEvent.RESOLVED || event.getType == BundleEvent.UNRESOLVED || event.getType == BundleEvent.UPDATED) clearCaches()
       }
     }
   )
+
+  private def clearCaches() = atomic { implicit ctx ⇒
+    bundlesInfo() = None
+    resolvedPluginDependenciesCache.clear()
+  }
+
+  def refresh(bundles: Seq[Bundle]) = Activator.packageAdmin.refreshPackages(bundles.toArray)
 
   def bundles = Activator.contextOrException.getBundles.filter(!_.isSystem).toSeq
   def bundleFiles = infos.files.keys
@@ -200,7 +204,7 @@ object PluginManager extends Logger {
     }
   }
 
-  private def allDependingBundles(b: Bundle, filter: Bundle ⇒ Boolean): Iterable[Bundle] =
+  def allDependingBundles(b: Bundle, filter: Bundle ⇒ Boolean): Iterable[Bundle] =
     (b :: dependingBundles(b).filter(filter).flatMap(allDependingBundles(_, filter)).toList).distinct
 
   private def dependingBundles(b: Bundle): Iterable[Bundle] = {
