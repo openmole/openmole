@@ -175,7 +175,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 #treeprogress {
     margin-top: 20px;
-    width: 95%;
+    width: 100%;
 }
 #treeline {
     opacity: 0;
@@ -556,4 +556,8 @@ label {
 
 .paddingBottom7{
     padding-bottom: 7px;
+}
+
+span.label.control-label{
+    color: black;
 }

@@ -91,26 +91,25 @@ class PluginPanel extends ModalPanel {
     }
 
     Rx {
-      bs.table(striped)(
-        thead(tags.tr(
-          tags.td(height := "60px",
-            transferring() match {
-              case _: Standby ⇒
-              case _: Transfered ⇒
-                getPlugins
-                transferring() = Standby()
-              case _ ⇒
-                println("transferring " + transferring())
-                progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
-            })
-        )
-        ),
-        tbody(
-          plugins().map { aux ⇒
-            for (a ← aux) yield {
-              Seq(Reactive(a).render)
+      tags.div(
+        transferring() match {
+          case _: Standby ⇒
+          case _: Transfered ⇒
+            getPlugins
+            transferring() = Standby()
+          case _ ⇒
+            println("transferring " + transferring())
+            progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
+        },
+        bs.table(striped)(
+          thead,
+          tbody(
+            plugins().map { aux ⇒
+              for (a ← aux) yield {
+                Seq(Reactive(a).render)
+              }
             }
-          }
+          )
         )
       )
     }

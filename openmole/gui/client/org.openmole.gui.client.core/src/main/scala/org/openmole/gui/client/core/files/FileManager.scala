@@ -76,11 +76,11 @@ object FileManager {
     xhr.onloadend = (e: ProgressEvent) ⇒ {
       fileTransferState(Transfered())
       onloaded()
+      inputElement.value = ""
     }
 
     xhr.open("POST", "uploadfiles", true)
     xhr.send(formData)
-    inputElement.value = ""
   }
 
   def download(treeNode: TreeNode,
