@@ -46,10 +46,9 @@ class ExecutionPanel extends ModalPanel {
 
   val panelInfo = Var(PanelInfo(Seq(), Seq(), Seq()))
 
-  val intervalHandler: Var[Option[SetIntervalHandle]] = Var(None)
   val expander = new Expander
 
-  def updatePanelInfo = {
+  def updatePanelInfo: Unit = {
     OMPost[Api].allStates.call().foreach { executionInfos ⇒
       //FIXME select the number of lines from the panel
       OMPost[Api].runningErrorEnvironmentAndOutputData(lines = nbOutLineInput.value.toInt, errorLevelSelector.content().map {
@@ -59,20 +58,15 @@ class ExecutionPanel extends ModalPanel {
         doScrolls
       }
     }
+
+    setTimeout(5000) {  if(isShown) updatePanelInfo }
   }
 
   override def onOpen() =  {
     updatePanelInfo
-    intervalHandler.synchronized {
-      if(!intervalHandler().isDefined)
-        intervalHandler() = Some(setInterval(5000) {  updatePanelInfo })
-    }
   }
 
-  override def onClose() = intervalHandler.synchronized {
-    intervalHandler().foreach { clearInterval }
-    intervalHandler() = None
-  }
+  def onClose() = {}
 
   def doScrolls = {
     Seq(outputTextAreas(), scriptTextAreas(), errorTextAreas()).map {
