@@ -61,17 +61,17 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  def onOpen = () ⇒ {
+  override def onOpen() =  {
     updatePanelInfo
-    intervalHandler() = Some(setInterval(5000) {
-      updatePanelInfo
-    })
+    intervalHandler.synchronized {
+      if(!intervalHandler().isDefined)
+        intervalHandler() = Some(setInterval(5000) {  updatePanelInfo })
+    }
   }
 
-  def onClose = () ⇒ {
-    intervalHandler().map {
-      clearInterval
-    }
+  override def onClose() = intervalHandler.synchronized {
+    intervalHandler().foreach { clearInterval }
+    intervalHandler() = None
   }
 
   def doScrolls = {

@@ -36,11 +36,11 @@ class PluginPanel extends ModalPanel {
   private val plugins: Var[Option[Seq[Plugin]]] = Var(None)
   val transferring: Var[FileTransferState] = Var(Standby())
 
-  def onOpen = () ⇒ {
+  def onOpen() = {
     getPlugins
   }
 
-  def onClose = () ⇒ {
+  def onClose() = {
   }
 
   def getPlugins = {
