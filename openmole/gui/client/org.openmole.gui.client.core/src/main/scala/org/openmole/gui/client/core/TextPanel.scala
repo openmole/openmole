@@ -30,9 +30,9 @@ class TextPanel(val modalID: ModalID, title: String) extends ModalPanel {
 
   val content: Var[String] = Var("")
 
-  def onOpen: () ⇒ Unit = () ⇒ {}
+  def onOpen() = {}
 
-  def onClose: () ⇒ Unit = () ⇒ {}
+  def onClose() = {}
 
   val dialog = bs.modalDialog(modalID,
     headerDialog(

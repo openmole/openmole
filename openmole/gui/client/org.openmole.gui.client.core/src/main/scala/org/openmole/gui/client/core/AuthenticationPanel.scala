@@ -34,11 +34,11 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
   val setting: Var[Option[PanelUI]] = Var(None)
   private val auths: Var[Option[Seq[AuthenticationData]]] = Var(None)
 
-  def onOpen = () ⇒ {
+  def onOpen() = {
     getAuthentications
   }
 
-  def onClose = () ⇒ {
+  def onClose() = {
     setting() = None
   }
 

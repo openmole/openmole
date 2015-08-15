@@ -98,15 +98,14 @@ class MarketPanel extends ModalPanel {
     }
     else tags.div
 
-  def onOpen = () ⇒ marketIndex() match {
+  def onOpen() = marketIndex() match {
     case None ⇒ OMPost[Api].marketIndex.call().foreach { m ⇒
       marketIndex() = Some(m)
     }
     case _ ⇒
   }
 
-  def onClose = () ⇒ {
-  }
+  def onClose() = {}
 
   val dialog = bs.modalDialog(modalID,
     headerDialog(

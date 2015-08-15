@@ -206,9 +206,9 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
     } while (!panelSequences.isEmpty)
   })
 
-  def onOpen = () ⇒ {}
+  def onOpen() = {}
 
-  def onClose = () ⇒ {}
+  def onClose() = {}
 
   val dialog = modalDialog(modalID,
     headerDialog(

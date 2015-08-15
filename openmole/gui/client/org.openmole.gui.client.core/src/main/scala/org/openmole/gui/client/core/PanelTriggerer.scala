@@ -38,17 +38,16 @@ trait ModalPanel {
 
   def dialog: Dialog
 
-  def onOpen: () ⇒ Unit
-
-  def onClose: () ⇒ Unit
+  def onOpen(): Unit
+  def onClose(): Unit
 
   val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := { () ⇒ close })
 
   def close: Unit = {
+    onClose()
     jquery.jQuery("#" + modalID).modal("hide")
   }
 
-  jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ {
-    onClose()
-  })
+  //FIXME this doesn't work
+  jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ onClose())
 }
