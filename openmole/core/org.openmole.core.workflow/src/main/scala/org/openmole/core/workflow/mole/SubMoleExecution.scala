@@ -105,9 +105,11 @@ class SubMoleExecution(
     _children.single -= submoleExecution
 
   def jobs: Seq[MoleJob] =
-    atomic {
-      implicit txn ⇒
-        (_jobs.keys ++ TSet.asSet(_children).toSeq.flatMap(_.jobs)).toSeq
+    atomic { implicit txn ⇒
+      def allChildren(subMoleExecution: SubMoleExecution): Seq[SubMoleExecution] =
+        subMoleExecution.children.toSeq ++ subMoleExecution.children.toSeq.flatMap(allChildren)
+
+      (Seq(this) ++ allChildren(this)).flatMap(_._jobs.keys.toSeq)
     }
 
   private def jobFailedOrCanceled(job: MoleJob) = {
