@@ -52,16 +52,16 @@ class ExecutionPanel extends ModalPanel {
   val updating = new AtomicBoolean(false)
 
   def updatePanelInfo: Unit = {
-    if(!updating.getAndSet(true)) {
+    if(updating.compareAndSet(false, true)) {
       try OMPost[Api].allStates.call().foreach { executionInfos ⇒
-          OMPost[Api].runningErrorEnvironmentAndOutputData(lines = nbOutLineInput.value.toInt, errorLevelSelector.content().map {
-            _.level
-          }.getOrElse(ErrorLevel())).call().foreach { err ⇒
-            panelInfo() = PanelInfo(executionInfos, err._2, err._1)
-            doScrolls
-          }
-        } finally updating.set(false)
-        if (isShown) setTimeout(5000) {  if (isShown) updatePanelInfo }
+        OMPost[Api].runningErrorEnvironmentAndOutputData(lines = nbOutLineInput.value.toInt, errorLevelSelector.content().map {
+          _.level
+        }.getOrElse(ErrorLevel())).call().foreach { err ⇒
+          panelInfo() = PanelInfo(executionInfos, err._2, err._1)
+          doScrolls
+        }
+      } finally updating.set(false)
+      setTimeout(5000) {  if (isShown) updatePanelInfo }
     }
   }
 
