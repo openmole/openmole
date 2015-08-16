@@ -17,6 +17,8 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.concurrent.atomic.AtomicBoolean
+
 import org.openmole.gui.client.core.EnvironmentErrorPanel.SelectableLevel
 import org.openmole.gui.misc.js.BootstrapTags.ScrollableTextArea.BottomScroll
 import org.openmole.gui.misc.utils.Utils
@@ -47,24 +49,25 @@ class ExecutionPanel extends ModalPanel {
   val panelInfo = Var(PanelInfo(Seq(), Seq(), Seq()))
   val expander = new Expander
 
-  val updateLock = ""
-  def updatePanelInfo: Unit = updateLock.synchronized {
-    if(isShown) {
-      OMPost[Api].allStates.call().foreach { executionInfos ⇒
+  val updating = new AtomicBoolean(false)
+
+  def updatePanelInfo: Unit = {
+    if(updating.compareAndSet(false, true)) {
+      try OMPost[Api].allStates.call().foreach { executionInfos ⇒
         OMPost[Api].runningErrorEnvironmentAndOutputData(lines = nbOutLineInput.value.toInt, errorLevelSelector.content().map {
           _.level
         }.getOrElse(ErrorLevel())).call().foreach { err ⇒
           panelInfo() = PanelInfo(executionInfos, err._2, err._1)
           doScrolls
         }
-      }
-
-      if (isShown) setTimeout(5000) { updatePanelInfo }
+      } finally updating.set(false)
+      setTimeout(5000) {  if (isShown) updatePanelInfo }
     }
   }
 
-  override def onOpen() = setTimeout(0) { updatePanelInfo }
+  override def opened() = setTimeout(0) { updatePanelInfo }
 
+  def onOpen() = {}
   def onClose() = {}
 
   def doScrolls = {
