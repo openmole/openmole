@@ -45,26 +45,24 @@ class ExecutionPanel extends ModalPanel {
     envErrorsInfos: Seq[RunningEnvironmentData])
 
   val panelInfo = Var(PanelInfo(Seq(), Seq(), Seq()))
-
   val expander = new Expander
 
-  def updatePanelInfo: Unit = {
-    OMPost[Api].allStates.call().foreach { executionInfos ⇒
-      //FIXME select the number of lines from the panel
-      OMPost[Api].runningErrorEnvironmentAndOutputData(lines = nbOutLineInput.value.toInt, errorLevelSelector.content().map {
-        _.level
-      }.getOrElse(ErrorLevel())).call().foreach { err ⇒
-        panelInfo() = PanelInfo(executionInfos, err._2, err._1)
-        doScrolls
+  def updatePanelInfo: Unit = panelInfo.synchronized {
+    if(isShown) {
+      OMPost[Api].allStates.call().foreach { executionInfos ⇒
+        OMPost[Api].runningErrorEnvironmentAndOutputData(lines = nbOutLineInput.value.toInt, errorLevelSelector.content().map {
+          _.level
+        }.getOrElse(ErrorLevel())).call().foreach { err ⇒
+          panelInfo() = PanelInfo(executionInfos, err._2, err._1)
+          doScrolls
+        }
       }
+
+      if (isShown) setTimeout(5000) { updatePanelInfo }
     }
-
-    setTimeout(5000) {  if(isShown) updatePanelInfo }
   }
 
-  override def onOpen() =  {
-    updatePanelInfo
-  }
+  override def onOpen() = setTimeout(0) { updatePanelInfo }
 
   def onClose() = {}
 
