@@ -31,9 +31,11 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.tools._
 import org.openmole.tool.logger.Logger
-import scala.collection.mutable.Buffer
+import scala.collection.mutable.{ ListBuffer, Buffer }
 import scala.concurrent.stm._
-import org.openmole.core.workflow.execution.{ ExecutionState, JobList, Environment }
+import org.openmole.core.workflow.execution.{ ExecutionJob, ExecutionState, JobList, Environment }
+import java.util.{ TreeMap ⇒ JTreeMap }
+import collection.JavaConversions._
 
 object MoleExecution extends Logger {
 
@@ -212,13 +214,18 @@ class MoleExecution(
       val executionJobs =
         environments.values.toSeq.collect { case e: JobList ⇒ e }.flatMap(_.jobs)
 
-      executionJobs.flatMap {
-        ej ⇒ ej.moleJobs.map { _ -> ej }
-      }.groupBy(_._1).mapValues(_.map { _._2 })
+      val treeMap = new JTreeMap[UUID, ListBuffer[ExecutionJob]]()
+
+      for {
+        ej ← executionJobs
+        mj ← ej.moleJobs
+      } treeMap.getOrElseUpdate(mj.id, ListBuffer()) += ej
+
+      treeMap
     }
 
-    def isRunningOnEnvironment(moleJob: MoleJob) =
-      executionJobsGroup.get(moleJob).map { _.exists(_.state == ExecutionState.RUNNING) }.getOrElse(false)
+    def isRunningOnEnvironment(moleJob: MoleJob): Boolean =
+      executionJobsGroup.getOrElse(moleJob.id, Nil).exists(_.state == ExecutionState.RUNNING)
 
     var ready = 0L
     var running = 0L
