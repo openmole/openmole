@@ -24,6 +24,7 @@ import org.openmole.gui.misc.js.BootstrapTags.ScrollableTextArea.BottomScroll
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import scala.concurrent.duration.Duration
+import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, _ }
 import org.openmole.gui.misc.js.Expander._
@@ -52,16 +53,25 @@ class ExecutionPanel extends ModalPanel {
   val updating = new AtomicBoolean(false)
 
   def updatePanelInfo: Unit = {
+    def delay = {
+      updating.set(false)
+      setTimeout(5000) { if (isShown) updatePanelInfo }
+    }
+
     if(updating.compareAndSet(false, true)) {
-      try OMPost[Api].allStates.call().foreach { executionInfos ⇒
-        OMPost[Api].runningErrorEnvironmentAndOutputData(lines = nbOutLineInput.value.toInt, errorLevelSelector.content().map {
-          _.level
-        }.getOrElse(ErrorLevel())).call().foreach { err ⇒
-          panelInfo() = PanelInfo(executionInfos, err._2, err._1)
-          doScrolls
-        }
-      } finally updating.set(false)
-      setTimeout(5000) {  if (isShown) updatePanelInfo }
+      OMPost[Api].allStates.call().andThen {
+        case Success(executionInfos) ⇒
+          OMPost[Api].runningErrorEnvironmentAndOutputData (lines = nbOutLineInput.value.toInt, errorLevelSelector.content ().map {
+            _.level
+          }.getOrElse (ErrorLevel () ) ).call ().andThen {
+            case Success(err) ⇒
+              panelInfo () = PanelInfo (executionInfos, err._2, err._1)
+              doScrolls
+              delay
+            case Failure(_) => delay
+          }
+        case Failure(_) => delay
+      }
     }
   }
 
