@@ -65,8 +65,9 @@ class ExecutionPanel extends ModalPanel {
     }
   }
 
-  override def onOpen() = setTimeout(0) { updatePanelInfo }
+  override def opened() = setTimeout(0) { updatePanelInfo }
 
+  def onOpen() = {}
   def onClose() = {}
 
   def doScrolls = {

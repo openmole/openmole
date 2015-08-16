@@ -30,6 +30,7 @@ trait PanelTriggerer {
   def open: Unit = {
     triggerOpen
     jquery.jQuery("#" + modalPanel.modalID).modal("show")
+    modalPanel.opened
   }
 }
 
@@ -39,6 +40,7 @@ trait ModalPanel {
 
   def onOpen(): Unit
   def onClose(): Unit
+  def opened(): Unit = {}
 
   val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := { () ⇒ close })
 
