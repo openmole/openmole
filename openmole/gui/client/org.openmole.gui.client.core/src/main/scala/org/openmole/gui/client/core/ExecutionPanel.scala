@@ -47,7 +47,8 @@ class ExecutionPanel extends ModalPanel {
   val panelInfo = Var(PanelInfo(Seq(), Seq(), Seq()))
   val expander = new Expander
 
-  def updatePanelInfo: Unit = panelInfo.synchronized {
+  val updateLock = ""
+  def updatePanelInfo: Unit = updateLock.synchronized {
     if(isShown) {
       OMPost[Api].allStates.call().foreach { executionInfos ⇒
         OMPost[Api].runningErrorEnvironmentAndOutputData(lines = nbOutLineInput.value.toInt, errorLevelSelector.content().map {
