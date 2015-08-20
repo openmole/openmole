@@ -19,7 +19,7 @@ object Libraries extends Defaults {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.86-SNAPSHOT"
+  val gridscaleVersion = "1.86"
 
   val bouncyCastleVersion = "1.50"
 
@@ -176,6 +176,6 @@ object Libraries extends Defaults {
 
   lazy val txtmark = "org.openmole" %% "com-github-rjeschke-txtmark" % "0.13"
 
-  lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.1-SNAPSHOT"
+  lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.1"
 
 }
