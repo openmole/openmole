@@ -182,8 +182,8 @@ class ExecutionPanel extends ModalPanel {
                       tbody(
                         Seq(bs.tr(row)(
                           bs.td(col_md_3)(tags.span(e.taskName).tooltip("Environment name")),
-                          bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_upload), s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}").tooltip("Uploading files")),
-                          bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_download), s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}").tooltip("Downloading files")),
+                          bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_upload), s" ${e.networkActivity.uploadingFiles} ${displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)}").tooltip("Uploaded")),
+                          bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_download), s" ${e.networkActivity.downloadingFiles} ${displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)}").tooltip("Downloaded")),
                           bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_road + " paddingBottom7"), " " + e.submitted).tooltip("Submitted jobs")),
                           bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_flash + " paddingBottom7"), " " + e.running).tooltip("Running jobs")),
                           bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_flag + " paddingBottom7"), " " + e.done).tooltip("Completed jobs")),
@@ -248,8 +248,8 @@ class ExecutionPanel extends ModalPanel {
             )
 
             Seq(bs.tr(row)(
-              bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink.tooltip("Script sources")),
-              bs.td(col_md_2 + "small")(tags.div(Utils.longToDate(staticInfo.startDate)).tooltip("Starting time")),
+              bs.td(col_md_2)(visibleClass(id.id, scriptID))(scriptLink.tooltip("Show script")),
+              bs.td(col_md_2 + "small")(tags.div(Utils.longToDate(staticInfo.startDate)).tooltip("Start time")),
               bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_flash), " " + details.running).tooltip("Running jobs")),
               bs.td(col_md_2)(tags.span(bs.glyph(bs.glyph_flag), " " + details.ratio).tooltip("Jobs progression")),
               bs.td(col_md_1)(tags.div(durationString).tooltip("Execution duration")),

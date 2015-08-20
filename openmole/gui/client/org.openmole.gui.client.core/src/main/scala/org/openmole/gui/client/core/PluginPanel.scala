@@ -61,7 +61,7 @@ class PluginPanel extends ModalPanel {
         UploadPlugin(),
         () ⇒ getPlugins
       )
-    }))
+    })).tooltip("Upload plugin")
 
   lazy val pluginTable = {
 
