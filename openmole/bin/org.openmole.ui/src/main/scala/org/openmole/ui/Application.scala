@@ -70,6 +70,7 @@ class Application extends IApplication {
       pluginsDirs: List[String] = Nil,
       guiPluginsDirs: List[String] = Nil,
       userPlugins: List[String] = Nil,
+      loadHomePlugins: Boolean = true,
       workspaceDir: Option[String] = None,
       scriptFile: Option[String] = None,
       consoleWorkDirectory: Option[File] = None,
@@ -115,7 +116,7 @@ class Application extends IApplication {
         case "-s" :: tail                      ⇒ parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
         case "-pw" :: tail                     ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
         case "-hn" :: tail                     ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
-        case "-c" :: tail                      ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
+        case "-c" :: tail                      ⇒ parse(tail, c.copy(launchMode = ConsoleMode, loadHomePlugins = false))
         case "-h" :: tail                      ⇒ parse(tail, c.copy(launchMode = HelpMode))
         case "-ws" :: tail                     ⇒ parse(tail, c.copy(launchMode = ServerMode))
         case "--console-workDirectory" :: tail ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
@@ -141,7 +142,7 @@ class Application extends IApplication {
 
     val userPlugins =
       existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) } ++
-        Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.plugins)
+        (if(config.loadHomePlugins) Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.plugins) else Nil)
 
     logger.fine(s"Loading user plugins " + userPlugins)
 
