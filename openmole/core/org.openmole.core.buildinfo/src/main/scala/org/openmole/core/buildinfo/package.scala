@@ -24,7 +24,6 @@ package object buildinfo {
   def name = "Loving Lobster"
 
   def version: String = buildinfo.BuildInfo.version
-  def versionNumber: String = version.takeWhile(_ != '-')
 
   def generationDate = {
     val d = Calendar.getInstance()
@@ -38,7 +37,7 @@ package object buildinfo {
   def siteURL =
     development match {
       case true  ⇒ "http://next.openmole.org"
-      case false ⇒ s"http://openmole.org/all/$versionNumber"
+      case false ⇒ s"http://openmole.org/all/$version"
     }
 
   def marketName = "market.xml"
