@@ -211,8 +211,8 @@ class MoleExecution(
 
   def jobStatuses: JobStatuses = {
     val executionJobsGroup = {
-      val executionJobs =
-        environments.values.toSeq.collect { case e: JobList ⇒ e }.flatMap(_.jobs)
+      def executionJobs =
+        environments.values.toSeq.collect { case e: JobList ⇒ e }.toIterator.flatMap(_.jobs.toIterator)
 
       val treeMap = new JTreeMap[UUID, ListBuffer[ExecutionJob]]()
 
