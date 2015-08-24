@@ -34,10 +34,11 @@ object ProtoTYPE extends Enumeration {
   val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE)
 }
 
-import ProtoTYPE._
-import java.io.{ StringWriter, PrintWriter }
+import java.io.{PrintWriter, StringWriter}
+
+import org.openmole.gui.ext.data.ProtoTYPE._
+
 import scala.scalajs.js.annotation.JSExport
-import upickle._
 
 class PrototypeData(val `type`: ProtoTYPE, val dimension: Int) extends Data
 
@@ -145,7 +146,7 @@ object SafePath {
   def empty = leaf("", FileExtension.NO_EXTENSION)
 }
 
-import SafePath._
+import org.openmole.gui.ext.data.SafePath._
 
 //The path it relative to the project root directory
 case class SafePath(path: Seq[String], extension: FileExtension) {
@@ -304,7 +305,7 @@ case class Finished(duration: Long = 0L,
 }
 
 case class Canceled(duration: Long = 0L, completed: Long = 0L) extends ExecutionInfo {
-  def state: String = "canceled"
+  def state: String = "cancelled"
 
   def running = 0L
 

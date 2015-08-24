@@ -114,11 +114,11 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               tags.label(`class` := "inputFileStyleSmall",
                 uploadButton((fileInput: HTMLInputElement) ⇒ {
                   FileManager.upload(fileInput, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
-                })).tooltip("Edit the file name")),
+                })).tooltip("Upload file")),
             inputGroupAddon(id := "fileinput-addon")(
               tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
                 glyph(glyph_refresh)
-              ).tooltip("Refresh the file tree", RightDirection()))
+              ).tooltip("Refresh file tree", RightDirection()))
           )
         )
       )
@@ -249,7 +249,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def trashNode(treeNode: TreeNode) = {
     fileDisplayer.tabs -- treeNode
-    AlertPanel.popup(s"Do you realy want to trash ${treeNode.name()} ?",
+    AlertPanel.popup(s"Do you really want to delete ${treeNode.name()}?",
       () ⇒ {
         OMPost[Api].deleteFile(treeNode.safePath()).call().foreach { d ⇒
           refreshCurrentDirectory

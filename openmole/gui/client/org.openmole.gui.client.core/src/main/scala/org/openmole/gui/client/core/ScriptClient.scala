@@ -45,7 +45,7 @@ object ScriptClient {
         bs.glyph(glyph_off),
         cursor := "pointer",
         onclick := { () ⇒
-          AlertPanel.popup("This will halt the server, so that the application will no longer be usable. Halt anyway ?",
+          AlertPanel.popup("This will stop the server, the application will no longer be usable. Halt anyway?",
             () ⇒ {
               dom.window.location.href = "shutdown"
             },
@@ -139,7 +139,7 @@ object ScriptClient {
           Rx {
             tags.div(
               if (alert())
-                AlertPanel.popup("Warning ! Reseting your password will wipe out all your preferences ! Reset anyway ?",
+                AlertPanel.popup("Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
                 () ⇒ {
                   alert() = false
                   resetPassword
