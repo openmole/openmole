@@ -152,8 +152,7 @@ class Application extends IApplication {
         userPlugins ++
         (if (config.launchMode == GUIMode) config.guiPluginsDirs.map(new File(_)) else List.empty)
 
-    val bundles = PluginManager.load(plugins)
-    PluginManager.startAll
+    PluginManager.tryLoad(plugins)
 
     try config.password foreach Workspace.setPassword
     catch {
