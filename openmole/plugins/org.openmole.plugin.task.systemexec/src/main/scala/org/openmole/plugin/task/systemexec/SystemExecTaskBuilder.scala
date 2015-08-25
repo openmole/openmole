@@ -29,6 +29,7 @@ class SystemExecTaskBuilder(commands: String*) extends ExternalTaskBuilder { bui
   private val variables = new ListBuffer[(Prototype[_], String)]
   private val _commands = new ListBuffer[Commands]
   private var errorOnReturnValue = true
+  private var isRemote = false
   private var returnValue: Option[Prototype[Int]] = None
   private var stdOut: Option[Prototype[String]] = None
   private var stdErr: Option[Prototype[String]] = None
@@ -60,6 +61,11 @@ class SystemExecTaskBuilder(commands: String*) extends ExternalTaskBuilder { bui
     this
   }
 
+  def setIsRemote(inIsRemote: Boolean): this.type = {
+    isRemote = inIsRemote
+    this
+  }
+
   def setReturnValue(p: Option[Prototype[Int]]): this.type = {
     returnValue = p
     this
@@ -81,7 +87,7 @@ class SystemExecTaskBuilder(commands: String*) extends ExternalTaskBuilder { bui
   }
 
   def toTask =
-    new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
+    new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList, isRemote) with builder.Built {
       override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
     }
 

@@ -118,7 +118,10 @@ object PluginManager extends Logger {
     bundles.foreach {
       b ⇒
         logger.fine(s"Stating bundle ${b.getLocation}")
-        b.start
+        Try(b.start) match {
+          case Success(_) ⇒
+          case Failure(e) ⇒ logger.log(WARNING, s"Error installing bundle $b", e)
+        }
     }
   }
 

@@ -85,10 +85,21 @@
 
     val t1 = ScalaTask("d = d * 2") set ( inputs += d, outputs += d )
     val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
-    val aggregate = ScalaTask("val d = input.d.sum") set ( inputs += d.toArray, outputs += d )
+    val aggregate = ScalaTask("val d = input.d.sum") set (
+      inputs  += d.toArray,
+      outputs += d
+    )
 
     val ex = exploration -< t1 >- (aggregate hook ToStringHook()) start""")
-    @p The aggregation is performed using the @b{Aggregation transition} noted @hl.openmoleNoTest("-<").
+    @p The aggregation is performed using the @b{Aggregation transition} noted @hl.openmoleNoTest(">-").
+
+    @p It is very important to understand that this transition @b{gathers} input data from the dataflow. This task has
+    a @b{single instance} that is fed with a @b{collection of inputs} stored in the variable @i{d}. In order for
+    OpenMOLE to match the input data to this aggregation, we explicitly note the inputs as being arrays using the
+    @hl.openmoleNoTest("toArray") conversion. Subsequent parallelism is preserved by treating the same @i{d} collection
+    as a regular output to be split among multiple instances of the next task in the workflow.
+
+
   @sect{Advanced concepts: Capsules and Slots}
     Tasks are not directly linked to each-other by transitions. This has been made as transparent as possible, but two
     other notions are involved behind the scenes. Tasks are encapsulated in a so called
