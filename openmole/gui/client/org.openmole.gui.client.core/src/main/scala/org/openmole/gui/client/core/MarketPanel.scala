@@ -30,7 +30,7 @@ import scalatags.JsDom.all._
 import bs._
 
 class MarketPanel extends ModalPanel {
-  val modalID = "marketPanelID"
+  lazy val modalID = "marketPanelID"
 
   private val marketIndex: Var[Option[MarketIndex]] = Var(None)
   val tagFilter = InputFilter(pHolder = "Filter")

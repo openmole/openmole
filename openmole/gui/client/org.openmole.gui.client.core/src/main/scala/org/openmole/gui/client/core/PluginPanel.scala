@@ -31,7 +31,7 @@ import rx._
  */
 
 class PluginPanel extends ModalPanel {
-  val modalID = "pluginPanelID"
+  lazy val modalID = "pluginPanelID"
 
   private val plugins: Var[Option[Seq[Plugin]]] = Var(None)
   val transferring: Var[FileTransferState] = Var(Standby())
@@ -41,6 +41,7 @@ class PluginPanel extends ModalPanel {
   }
 
   def onClose() = {
+    println("clossssssse")
   }
 
   def getPlugins = {
