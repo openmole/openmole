@@ -331,7 +331,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             }
           }),
           tags.i(tn.name())
-        ).tooltip(tn.name()),
+        ).tooltip(tn.name(), condition = () ⇒ tn.name().length > 24),
       tags.div(`class` := "file-info",
         tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
         tags.span(id := Rx {
