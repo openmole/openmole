@@ -20,7 +20,6 @@ package org.openmole.plugin.task
 import org.openmole.core.macros.Keyword._
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data.Prototype
-import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.tools.VariableExpansion
 
 package systemexec {
@@ -41,6 +40,8 @@ package systemexec {
     lazy val stdErr = set[{ def setStdErr(v: Option[Prototype[String]]) }]
 
     lazy val commands = add[{ def addCommand(os: OS, cmd: String*) }]
+
+    lazy val isRemote = set[{ def setIsRemote(inIsRemote: Boolean) }]
 
     lazy val environmentVariable =
       new {
