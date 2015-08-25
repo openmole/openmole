@@ -25,12 +25,13 @@ import org.scalajs.jquery
 trait PanelTriggerer {
   val modalPanel: ModalPanel
 
-  def triggerOpen: Unit = modalPanel.onOpen()
+  def triggerOpen: Unit = {
+    modalPanel.onOpen()
+  }
 
   def open: Unit = {
-    triggerOpen
     jquery.jQuery("#" + modalPanel.modalID).modal("show")
-    modalPanel.opened
+    triggerOpen
   }
 }
 
@@ -40,13 +41,11 @@ trait ModalPanel {
 
   def onOpen(): Unit
   def onClose(): Unit
-  def opened(): Unit = {}
 
   val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := { () ⇒ close })
 
   def isShown: Boolean = jquery.jQuery("#" + modalID).hasClass("in")
   def close: Unit = jquery.jQuery("#" + modalID).modal("hide")
 
-  //FIXME this doesn't work
   jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ onClose())
 }
