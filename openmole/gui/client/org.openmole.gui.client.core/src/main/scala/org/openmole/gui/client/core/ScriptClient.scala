@@ -47,7 +47,9 @@ object ScriptClient {
         onclick := { () ⇒
           AlertPanel.popup("This will stop the server, the application will no longer be usable. Halt anyway?",
             () ⇒ {
-              dom.window.location.href = "shutdown"
+              treeNodePanel.fileDisplayer.tabs.saveAllTabs(() ⇒
+                dom.window.location.href = "shutdown"
+              )
             },
             transform = RightTransform(),
             zone = TopZone())
