@@ -623,7 +623,7 @@ span.label.control-label{
 }
 
 .openmole-version{
-    color: white;
+    color: #ff5555;
     right: 40px;
     top: -20px;
     font-size: 2.5em;
