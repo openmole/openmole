@@ -300,6 +300,15 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
     val lineHovered: Var[Boolean] = Var(false)
 
+    def clickablePair(classType: String, todo: () ⇒ Unit) = Seq(
+      style := "float:left",
+      cursor := "pointer",
+      fontWeight := "bold",
+      draggable := true,
+      onclick := { () ⇒ todo() },
+      `class` := classType
+    )
+
     val render = tags.tr(
       onmouseover := { () ⇒ lineHovered() = true },
       onmouseout := { () ⇒ lineHovered() = false }, ondragstart := { (e: DragEvent) ⇒
@@ -319,19 +328,18 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       ondrop := {
         dropAction(tn)
       },
-      tags.div(style := "float:left",
-        cursor := "pointer",
-        draggable := true,
-        onclick := { () ⇒ todo() },
-        `class` := classType + " fileNameOverflow")(
-          tags.i(id := "plusdir", `class` := {
-            tn.hasSons match {
-              case true  ⇒ "glyphicon glyphicon-plus-sign"
-              case false ⇒ ""
-            }
-          }),
-          tags.i(tn.name())
-        ).tooltip(tn.name(), condition = () ⇒ tn.name().length > 24),
+      tags.div(clickablePair(classType, todo))(
+        tags.i(id := "plusdir", `class` := {
+          tn.hasSons match {
+            case true  ⇒ "glyphicon glyphicon-plus-sign"
+            case false ⇒ ""
+          }
+        })),
+      tags.div(
+        clickablePair(classType, todo),
+        `class` := "fileNameOverflow",
+        tn.name()
+      ).tooltip(tn.name(), condition = () ⇒ tn.name().length > 24),
       tags.div(`class` := "file-info",
         tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
         tags.span(id := Rx {
