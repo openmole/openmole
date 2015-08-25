@@ -323,7 +323,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     color: #a6bf26;
     font-weight: bold;
 }
-.executionTable table td.canceledState {
+.executionTable table td.cancelledState {
     color: orange;
     font-weight: bold;
 }
