@@ -30,7 +30,7 @@ import bs._
 import rx._
 
 class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
-  val modalID = "authenticationsPanelID"
+  lazy val modalID = "authenticationsPanelID"
   val setting: Var[Option[PanelUI]] = Var(None)
   private val auths: Var[Option[Seq[AuthenticationData]]] = Var(None)
 

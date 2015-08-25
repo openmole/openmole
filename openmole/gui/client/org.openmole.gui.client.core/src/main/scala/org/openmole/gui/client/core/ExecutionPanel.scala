@@ -40,7 +40,7 @@ import rx._
 import concurrent.duration._
 
 class ExecutionPanel extends ModalPanel {
-  val modalID = "executionsPanelID"
+  lazy val modalID = "executionsPanelID"
 
   case class PanelInfo(
     executionInfos: Seq[(ExecutionId, StaticExecutionInfo, ExecutionInfo)],

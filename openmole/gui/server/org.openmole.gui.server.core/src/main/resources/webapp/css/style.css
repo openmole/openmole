@@ -1,7 +1,13 @@
 
 a {
+    font-weight: bold;
     color: #3086b5;
 }
+
+.colorGrey{
+    color: #333;
+}
+
 #mainNav {
     background-color: #333333;
     font-weight: bold;
@@ -96,13 +102,14 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     margin-top: 1px;
 }
 .dir {
-    background-color: #337ab7;
+    background-color: #a6bf26;
     border-radius: 5px;
-    color: white;
+    color: ;
     display: inline-block;
     height: 22px;
     margin-bottom: 5px;
-    padding: 2px 8px;
+    padding: 3px 4px;
+    width: 22px;
 }
 .file-list {
     font-size: 14px;
@@ -110,6 +117,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     width: 100%;
 }
 .glyphitem {
+    top: 0;
     color: white;
     display: inline-block;
     float: right;
@@ -131,7 +139,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     width: 100%;
 }
 #glyphtrash:hover {
-    color: #CC3A36;
+    color: #3086b5;
 }
 #adddir {
     padding-left: 7px;
@@ -163,8 +171,8 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     height: 20px;
 }
 #fileinput-addon {
-    background-color: #56b156;
-    border: medium none #56b156;
+    background-color: #3086b5;
+    border: medium none #3086b5;
     color: white;
     float: left;
     height: 34px;
@@ -312,7 +320,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     font-weight: bold;
 }
 .executionTable table td.finishedState {
-    color: #5aa02c;
+    color: #a6bf26;
     font-weight: bold;
 }
 .executionTable table td.canceledState {
@@ -389,7 +397,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .inputFileStyle {
     position: absolute;
-    background-color: #5cb85c;
+    background-color: #3086b5;
     border-radius: 4px;
     color: white;
     cursor: pointer;
@@ -399,7 +407,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     display: none;
 }
 .inputFileStyleSmall {
-    background-color: #5cb85c;
+    background-color: #3086b5;
     color: white;
     cursor: pointer;
     margin-left: -16px;
@@ -430,6 +438,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .nav-pills > li > a {
     font-size: 20px;
     margin-top: -3px;
+    color: #a6bf26;
 }
 .mdRendering p {
     text-align: left;
@@ -440,6 +449,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .marketTag {
     margin-left: 3px;
+    background-color: #CC3A36;
 }
 .loading {
     animation-duration: 4s;
@@ -556,10 +566,18 @@ label {
 
 .fileNameOverflow{
     color: white;
-    white-space: nowrap; 
+    white-space: nowrap;
     overflow: hidden;
-    width: 12em;
-    text-overflow: ellipsis; 
+    width: 13em;
+    padding-top: 2px;
+    padding-left: 0.4em;
+    position: absolute;
+    text-overflow: ellipsis;
+    padding-left: 27px;
+}
+
+.bold{
+    font-weight: bold;
 }
 
 .paddingBottom7{
@@ -605,7 +623,7 @@ span.label.control-label{
 }
 
 .openmole-version{
-    color: white;
+    color: #ff5555;
     right: 40px;
     top: -20px;
     font-size: 2.5em;
@@ -625,4 +643,24 @@ span.label.control-label{
 
 .openmole-mole{
     color: #a6bf26;
+}
+
+.btn.btn-primary{
+    background-color: #a6bf26;
+    border: #a6bf26 solid 1px;
+    color: #333;
+    font-weight: bold;
+}
+
+.btn.btn-success{
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
+    color: white;
+    font-weight: bold;
+}
+
+.btn.btn-default{
+    background-color: white;
+    color: #808080;
+    font-weight: bold;
 }
