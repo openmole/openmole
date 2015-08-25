@@ -48,5 +48,5 @@ trait ModalPanel {
   def close: Unit = jquery.jQuery("#" + modalID).modal("hide")
 
   //FIXME this doesn't work
-  jquery.jQuery(org.scalajs.dom.document).on("hide.bs.modal", "#" + modalID, () ⇒ onClose())
+  jquery.jQuery(org.scalajs.dom.document).on("hidden.bs.modal", "#" + modalID, () ⇒ onClose())
 }

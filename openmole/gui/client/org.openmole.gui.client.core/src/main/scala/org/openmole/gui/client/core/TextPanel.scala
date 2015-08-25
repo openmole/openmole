@@ -26,7 +26,7 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TextPanel(val modalID: ModalID, title: String) extends ModalPanel {
+class TextPanel(lazy val modalID: ModalID, title: String) extends ModalPanel {
 
   val content: Var[String] = Var("")
 
