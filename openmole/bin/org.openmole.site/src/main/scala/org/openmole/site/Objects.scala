@@ -30,7 +30,7 @@ import scalatags.Text.all._
 object Objects {
   object sect extends Section()
   object hl extends Highlighter {
-    def suffixMappings = Map().withDefault(identity)
+    override def suffixMappings = Map().withDefault(identity)
     def openmole(code: String, test: Boolean = true, header: String = "") = {
       if (Config.testScript && test) DSLTest.test(code, header)
       highlight(code, "scala")

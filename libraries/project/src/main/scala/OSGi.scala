@@ -150,7 +150,7 @@ object OSGi extends Defaults {
     version := "18.0"
     )
 
-  lazy val scalaTagsVersion = "0.4.6"
+  lazy val scalaTagsVersion = "0.5.2"
   lazy val scalaRxVersion = "0.2.8"
   lazy val scalaDomVersion = "0.8.0"
   lazy val scalaJQueryVersion = "0.8.0"
@@ -176,6 +176,12 @@ object OSGi extends Defaults {
       "com.lihaoyi" %%% ("scalatags" + jsSuffix) % scalaTagsVersion),
     version := scalaTagsVersion
     )
+
+  lazy val scalatexSite =
+    OsgiProject("com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*"), privatePackages = Seq("!scala.*", "!scalatags.*", "*"), imports = Seq("*")) settings (
+      libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.1",
+      version := "0.3.1"
+      )
 
   lazy val rx = OsgiProject("rx", exports = Seq("rx.*", "*.sjsir")) settings(
     libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion,
@@ -259,11 +265,7 @@ object OSGi extends Defaults {
     version := "0.4"
     )
 
-   lazy val scalatexSite =
-     OsgiProject("com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "scalatags.*"), privatePackages = Seq("!scala.*", "*")) settings (
-       libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.1.1",
-       version := "0.3.0"
-       )
+
 
    lazy val async =
      OsgiProject("scala-async") settings (

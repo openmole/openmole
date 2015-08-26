@@ -72,7 +72,7 @@
       @ul
         @li{You haven't created an SSH keypair yet (using ssh-keygen). Private keys are usually stored in
         @i{~/.ssh/id_rsa} or @i{~/.ssh/id_dsa}, and should have a matching ~/.ssh/id_[rd]sa.pub next to them.}
-        @li{Permissions of your ~/.ssh folder @b{must} be set to @i{drwx——} (700 in octal). Also, too permissive home
+        @li{Permissions of your ~/.ssh folder @b{must} be set to @i{drwx——} @("(700 in octal)"). Also, too permissive home
         directories (with write access given to the whole group for instance) might show problematic.}
         @li{A @i{~/.ssh/authorized_keys} file must be present on the remote system. It should at least contain a line
         matching the content of the ~/.ssh/id_[rd]sa.pub from your base system.}

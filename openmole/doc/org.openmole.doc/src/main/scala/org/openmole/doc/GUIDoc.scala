@@ -4,9 +4,8 @@ import org.scalajs.dom.raw.HTMLDivElement
 
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.all._
-import bs._
+
 /*
  * Copyright (C) 26/08/15 // mathieu.leclaire@openmole.org
  *

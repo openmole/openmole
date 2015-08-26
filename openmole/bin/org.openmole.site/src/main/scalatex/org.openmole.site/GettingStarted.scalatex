@@ -41,7 +41,7 @@ $tasks
 @sect{First workflow}
   Let's design a workflow that explores one variable multiplies it by 2 and then displays each result. The computation is executed in a multi-threaded environment on the local machine.
 
-  @p In the OpenMOLE interface, first create a file named @i{example.oms} (the file extension is important). Open it and write the following workflow:
+  @p In the OpenMOLE interface, first create a file named @i{example.oms} @("(the file extension is important")). Open it and write the following workflow:
 
   @br @hl.openmole(s"""
   $localScript

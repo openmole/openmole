@@ -10,7 +10,7 @@ import sbt._
 object Doc extends Defaults {
   override def dir = file("doc")
 
-  lazy val doc = OsgiProject("org.openmole.doc") dependsOn (Misc.js) enablePlugins (ScalaJSPlugin) settings (
+  lazy val doc = OsgiProject("org.openmole.doc") enablePlugins (ScalaJSPlugin) settings (
     libraryDependencies ++= Seq(scalajsDom, scalaTags, scaladget, rx)
   )
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("doc"))

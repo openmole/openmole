@@ -85,7 +85,7 @@ object Libraries extends Defaults {
 
   lazy val jawn = "org.openmole" %% "jawn" % "0.6.0"
 
-  lazy val scalaTagsVersion = "0.4.6"
+  lazy val scalaTagsVersion = "0.5.2"
   lazy val scalaJSDomVersion = "0.8.0"
   lazy val scalaJQueryVersion = "0.8.0"
   lazy val rxVersion = "0.2.8"
@@ -152,7 +152,7 @@ object Libraries extends Defaults {
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 
-  lazy val scalatexSite = "org.openmole" %% "com-lihaoyi-scalatex-site" % "0.3.0"
+  lazy val scalatexSite = "org.openmole" %% "com-lihaoyi-scalatex-site" % "0.3.1"
 
   lazy val apacheConfig = "org.openmole" %% "org-apache-commons-configuration" % "1.10"
 
