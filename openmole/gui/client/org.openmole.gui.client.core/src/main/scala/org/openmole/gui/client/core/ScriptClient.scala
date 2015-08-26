@@ -1,6 +1,7 @@
 package org.openmole.gui.client.core
 
 import fr.iscpif.scaladget.mapping.tooltipster.TooltipsterOptions
+import org.openmole.doc.GUIDoc
 import org.openmole.gui.client.core.AbsolutePositioning.{ RightTransform, TopZone, CenterTransform }
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
@@ -171,19 +172,21 @@ object ScriptClient {
       val modalPanel = authenticationPanel
     }
 
-    val execItem = dialogGlyphNavItem("executions", glyph_settings, () ⇒ executionTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Executions"))
+    val execItem = dialogGlyphNavItem("executions", glyph_settings, () ⇒ executionTriggerer.triggerOpen, help = ToolTip("Executions"))
 
-    val authenticationItem = dialogGlyphNavItem("authentications", glyph_lock, () ⇒ authenticationTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Authentications"))
+    val authenticationItem = dialogGlyphNavItem("authentications", glyph_lock, () ⇒ authenticationTriggerer.triggerOpen, help = ToolTip("Authentications"))
 
-    val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Market place"))
+    val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen, help = ToolTip("Market place"))
 
-    val pluginItem = dialogGlyphNavItem("plugin", glyph_plug, () ⇒ pluginTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Plugins"))
+    val pluginItem = dialogGlyphNavItem("plugin", glyph_plug, () ⇒ pluginTriggerer.triggerOpen, help = ToolTip("Plugins"))
 
     val envItem = dialogGlyphNavItem("envError", glyph_exclamation, () ⇒ environmentStackTriggerer.open)
 
+    val docItem = dialogGlyphNavItem("doc", glyph_comment, () ⇒ docTriggerer.open, help = ToolTip("Documentation"))
+
     val fileItem = dialogGlyphNavItem("files", glyph_file, todo = () ⇒ {
       openFileTree() = !openFileTree()
-    }, help = ToolTip(BottomDirection(), "Files"))
+    }, help = ToolTip("Files"))
 
     maindiv.appendChild(
       nav("mainNav",
@@ -192,7 +195,8 @@ object ScriptClient {
         execItem,
         authenticationItem,
         marketItem,
-        pluginItem
+        pluginItem,
+        docItem
       )
     )
     maindiv.appendChild(tags.div(
@@ -206,6 +210,7 @@ object ScriptClient {
     maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(pluginTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(environmentStackTriggerer.modalPanel.dialog.render)
+    maindiv.appendChild(docTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(AlertPanel.div)
 
     Settings.workspacePath.foreach { projectsPath ⇒

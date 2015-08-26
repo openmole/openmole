@@ -15,7 +15,7 @@ import UnidocKeys._
 import scala.util.matching.Regex
 import sbtbuildinfo.Plugin._
 
-object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties) {
+object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties, root.Doc) {
   val dir = file("bin")
 
   def filter(m: ModuleID) = {
@@ -69,7 +69,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
       Core.logging,
       runtime.REST.server,
       Core.console,
-      Core.dsl)
+      Core.dsl,
+      Doc.doc)
 
   lazy val java368URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-386/8-u45/java-jre-linux-386-8-u45.tgz")
   lazy val javax64URL = new URL("http://maven.iscpif.fr/thirdparty/com/oracle/java-jre-linux-x64/8-u45/java-jre-linux-x64-8-u45.tgz")
@@ -80,9 +81,12 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
     Project("openmole", dir / "openmole", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
       setExecutable ++= Seq("openmole", "openmole.bat"),
       resourcesAssemble <+= (resourceDirectory in Compile, assemblyPath) map { case (r, p) ⇒ r -> p },
-      resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo { assemblyPath / "plugins" },
+      resourcesAssemble <++= Seq(openmoleUI.project, Runtime.console.project, REST.server.project) sendTo {
+        assemblyPath / "plugins"
+      },
       resourcesAssemble <+= (assemble in openmoleCore, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       resourcesAssemble <+= (assemble in openmoleGUI, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
+      resourcesAssemble <+= (assemble in doc, assemblyPath) map { case (r, p) ⇒ r -> p / "doc" },
       resourcesAssemble <+= (assemble in dbServer, assemblyPath) map { case (r, p) ⇒ r -> p / "dbserver" },
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r -> p / "openmole-plugins" },
       resourcesAssemble <+= (assemble in guiPlugins, assemblyPath) map { case (r, p) ⇒ r -> p / "openmole-plugins-gui" },
@@ -165,6 +169,18 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "gui") sendTo assemblyPath,
     libraryDependencies ++= guiCoreDependencies,
     dependencyFilter := filter
+  )
+
+  lazy val doc = Project("doc", dir / "target" / "doc", settings = assemblySettings) settings (commonsSettings: _*) settings (
+    resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "doc") sendTo assemblyPath,
+    libraryDependencies ++= Seq(
+      scalajsDom,
+      scalaTags,
+      rx,
+      bootstrap,
+      scaladget
+    ),
+      dependencyFilter := filter
   )
 
   lazy val consolePlugins = Project("consoleplugins", dir / "target" / "consoleplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
@@ -252,7 +268,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
       pluginsDirectory := assemblyPath.value / "plugins",
       header :=
       """|eclipse.application=org.openmole.runtime.daemon
-         |osgi.bundles.defaultStartLevel=4""".stripMargin,
+        |osgi.bundles.defaultStartLevel=4""".stripMargin,
       startLevels := openmoleStartLevels,
       config := assemblyPath.value / "configuration/config.ini"
   )
@@ -286,7 +302,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties)
         resourcesAssemble <+= (Tar.tar in daemon, resourceManaged in Compile) map { case (f, d) ⇒ f -> d },
         resourcesAssemble <+= (Tar.tar in api, resourceManaged in Compile) map { case (doc, d) ⇒ doc -> d },
         dependencyFilter := { _ ⇒ false }
-      ) dependsOn (Runtime.console, Core.buildinfo)
+      ) dependsOn (Runtime.console, Core.buildinfo, root.Doc.doc)
 
   lazy val site =
     Project("site", dir / "site", settings = assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
