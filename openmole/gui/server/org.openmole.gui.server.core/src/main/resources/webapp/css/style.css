@@ -1,4 +1,10 @@
-
+@font-face {
+    font-family: 'Bevan';
+    src: url('../fonts/Bevan.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+ 
 a {
     font-weight: bold;
     color: #3086b5;
