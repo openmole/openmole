@@ -428,7 +428,7 @@ package file {
           val channelO = new FileOutputStream(file, true).getChannel
           try {
             val lock = channelO.lock
-            try p.copy(channelO, channelI)
+            try p.copy(channelI, channelO)
             finally lock.release
           }
           finally channelO.close
