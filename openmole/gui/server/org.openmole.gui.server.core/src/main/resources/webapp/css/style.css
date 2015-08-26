@@ -4,7 +4,6 @@
     font-weight: normal;
     font-style: normal;
 }
-
 a {
     font-weight: bold;
     color: #3086b5;
@@ -145,7 +144,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     width: 100%;
 }
 #glyphtrash:hover {
-    color: #CC3A36;
+    color: #3086b5;
 }
 #adddir {
     padding-left: 7px;
@@ -177,8 +176,8 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     height: 20px;
 }
 #fileinput-addon {
-    background-color: #CC3A36;
-    border: medium none #CC3A36;
+    background-color: #3086b5;
+    border: medium none #3086b5;
     color: white;
     float: left;
     height: 34px;
@@ -329,7 +328,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     color: #a6bf26;
     font-weight: bold;
 }
-.executionTable table td.canceledState {
+.executionTable table td.cancelledState {
     color: orange;
     font-weight: bold;
 }
@@ -403,7 +402,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .inputFileStyle {
     position: absolute;
-    background-color: #CC3A36;
+    background-color: #3086b5;
     border-radius: 4px;
     color: white;
     cursor: pointer;
@@ -413,7 +412,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     display: none;
 }
 .inputFileStyleSmall {
-    background-color: #CC3A36;
+    background-color: #3086b5;
     color: white;
     cursor: pointer;
     margin-left: -16px;
@@ -628,7 +627,7 @@ span.label.control-label{
 }
 
 .openmole-version{
-    color: white;
+    color: #ff5555;
     right: 40px;
     top: -20px;
     font-size: 2.5em;
@@ -658,8 +657,8 @@ span.label.control-label{
 }
 
 .btn.btn-success{
-    background-color: #CC3A36;
-    border: #CC3A36 solid 1px;
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
     color: white;
     font-weight: bold;
 }

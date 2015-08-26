@@ -30,7 +30,7 @@ import org.openmole.core.workflow.mole.ExecutionContext
 /**
  * Appends a variable content to an existing file.
  * The content of toBeDumpedPrototype file is appended to the outputFile safely(
- * concurent accesses are treated).
+ * concurrent accesses are treated).
  * In the case of directories, all the files of the original directory are append to the
  * files of the target one.
  */
