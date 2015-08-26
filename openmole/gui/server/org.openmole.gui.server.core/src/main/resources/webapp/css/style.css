@@ -1,3 +1,9 @@
+@font-face {
+    font-family: 'Bevan';
+    src: url('../fonts/Bevan.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
 
 a {
     font-weight: bold;
@@ -449,7 +455,6 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .marketTag {
     margin-left: 3px;
-    background-color: #CC3A36;
 }
 .loading {
     animation-duration: 4s;
