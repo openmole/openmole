@@ -40,20 +40,21 @@ object SystemExecTask extends Logger {
    * To communicate with the dataflow the result should be either a file / category or the return
    * value of the process.
    */
-  def apply(commands: String*) =
+  def apply(commands: Command*) =
     new SystemExecTaskBuilder(commands: _*)
 
 }
 
+case class ExpandedSystemExecCommand(expandedCommand: Expansion, isRemote: Boolean = false)
+
 abstract class SystemExecTask(
-    val command: Seq[Commands],
+    val commands: Seq[OSCommands],
     val directory: Option[String],
     val errorOnReturnCode: Boolean,
     val returnValue: Option[Prototype[Int]],
     val output: Option[Prototype[String]],
     val error: Option[Prototype[String]],
-    val variables: Seq[(Prototype[_], String)],
-    val isRemote: Boolean = false) extends ExternalTask {
+    val variables: Seq[(Prototype[_], String)]) extends ExternalTask {
 
   override protected def process(context: Context)(implicit rng: RandomProvider) = withWorkDir { tmpDir ⇒
     val workDir =
@@ -104,26 +105,31 @@ abstract class SystemExecTask(
       }
     }
 
-    val osCommandLines: Seq[Expansion] = command.find { _.os.compatible }.map { _.expanded }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
+    // find the sequence of command lines corresponding to the host system
+    // unused
+    val osCommandLines: Seq[ExpandedSystemExecCommand] = commands.find { _.os.compatible }.map {
+      cmd ⇒ cmd.expanded map { case (expansion, remote) ⇒ ExpandedSystemExecCommand(expansion, remote) }
+    }.getOrElse(
+      throw new UserBadDataError("No command line found for " + OS.actualOS))
 
     @tailrec
-    def execAll(cmds: List[Expansion]): Int =
+    def execAll(cmds: Seq[ExpandedSystemExecCommand]): Int =
       cmds match {
         case Nil ⇒ 0
         case cmd :: t ⇒
 
           // commands in a task marked as remote are not executed from the working directory
           val commandline = {
-            if (isRemote) {
-              commandLine(cmd, basePath = "", separator = "")
+            if (cmd.isRemote) {
+              commandLine(cmd.expandedCommand, basePath = "", separator = "")
             }
-            else commandLine(cmd)
+            else commandLine(cmd.expandedCommand)
           }
 
           val retCode = execute(commandline, out, err)
           if (errorOnReturnCode && retCode != 0) {
             throw new InternalProcessingError(s"""
-                                              Error executing ${if (isRemote) "remote command"}:
+                                              Error executing ${if (cmd.isRemote) "remote command"}:
                                               [${commandline.mkString(" ")}] return code was not 0 but ${retCode}
                                               """)
           }
