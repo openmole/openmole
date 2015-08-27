@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
-import org.openmole.doc.GUIDoc
 import org.openmole.gui.client.core.files.TreeNodePanel
+import scalatags.JsDom.{ tags ⇒ tags }
 
 /*
  * Copyright (C) 24/07/15 // mathieu.leclaire@openmole.org
@@ -24,7 +24,7 @@ package object panels {
   val marketPanel = new MarketPanel
   val pluginPanel = new PluginPanel
   val environmentStackPanel = new TextPanel("envStackID", "Environment error stack")
-  val docPanel = new DivPanel("documentationID", "Documentation", GUIDoc.doc.render)
+  val docPanel = new DivPanel("documentationID", "Documentation", tags.div.render)
 
   implicit val executionTriggerer = new PanelTriggerer {
     val modalPanel = new ExecutionPanel

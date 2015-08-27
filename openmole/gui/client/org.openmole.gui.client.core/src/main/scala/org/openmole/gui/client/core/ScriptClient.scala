@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core
 
 import fr.iscpif.scaladget.mapping.tooltipster.TooltipsterOptions
-import org.openmole.doc.GUIDoc
 import org.openmole.gui.client.core.AbsolutePositioning.{ RightTransform, TopZone, CenterTransform }
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
@@ -16,7 +15,6 @@ import org.openmole.gui.misc.js.JsRxTags._
 import org.scalajs.dom
 import rx._
 import scalatags.JsDom.all._
-import org.scalajs.jquery
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
