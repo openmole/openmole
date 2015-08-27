@@ -31,10 +31,10 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .black-label {
     color: black;
 }
-#settingsPanelID, #executionsPanelID .modal-dialog {
+#settingsPanelID, #executionsPanelID .modal-dialog{
     width: 70%;
 }
-#marketPanelID .modal-dialog, #envStackID .modal-dialog {
+#marketPanelID .modal-dialog, #envStackID .modal-dialog, #documentationID .modal-dialog {
     width: 60%;
 }
 .table tbody > tr > td.vert-align {
@@ -79,6 +79,13 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .tree-path {
     margin-left: 3px;
+    position: relative;
+    top: 17px;
+    margin-bottom: 20px;
+}
+.tree-path .btn-group .btn.btn-primary{
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
 }
 .tree-header {
     margin-left: -4px;
@@ -107,9 +114,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     margin-top: 1px;
 }
 .dir {
-    background-color: #a6bf26;
+    background-color: #3086b5;
+    color: white;
     border-radius: 5px;
-    color: ;
     display: inline-block;
     height: 22px;
     margin-bottom: 5px;
@@ -593,7 +600,6 @@ span.label.control-label{
 }
 
 .openmole-logo{
-    background: url(img/openmole.svg) no-repeat;
     position: fixed;
     width: 300px;
     top: -10px;
@@ -650,9 +656,8 @@ span.label.control-label{
 }
 
 .btn.btn-primary{
-    background-color: #a6bf26;
-    border: #a6bf26 solid 1px;
-    color: #333;
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
     font-weight: bold;
 }
 
@@ -667,4 +672,33 @@ span.label.control-label{
     background-color: white;
     color: #808080;
     font-weight: bold;
+}
+
+.docText{
+    color: #444;
+}
+
+.glyphText{
+    color: #a6bf26;
+    font-size: 22px;
+    padding: 4 5;
+}
+
+.docTitleEntry{
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.docEntry{
+    color: white;
+    background-color: #333;
+    border-radius: 3px;
+    margin-top: 3px;
+    padding-top: 4px;
+    padding-bottom:4px;
+}
+
+.docContent{
+    opacity: 0.75;
+    padding: 5 50;
 }
