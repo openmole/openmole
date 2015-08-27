@@ -47,7 +47,7 @@ object BootstrapTags {
                 direction: Direction = BottomDirection(),
                 level: TooltipLevel = DefaultTooltipLevel(),
                 condition: () => Boolean = () => true): HTMLDivElement =
-      if (condition()) ToolTip(message, direction, level)(typedTag)
+      if (condition()) ToolTip(direction, message, level)(typedTag)
       else tags.div(typedTag).render
   }
 
@@ -187,7 +187,6 @@ object BootstrapTags {
   val glyph_info = "glyphicon-info-sign"
   val glyph_plug = "icon-plug"
   val glyph_exclamation = "glyphicon-exclamation-sign"
-  val glyph_comment = "glyphicon-comment"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator, todo: () ⇒ Unit = () ⇒ {}): TypedTag[HTMLButtonElement] =
