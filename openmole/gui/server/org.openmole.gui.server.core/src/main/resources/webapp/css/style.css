@@ -4,14 +4,13 @@
     font-weight: normal;
     font-style: normal;
 }
-
 a {
     font-weight: bold;
     color: #3086b5;
 }
 
 .colorGrey{
-    color: #333;
+    color: #333;
 }
 
 #mainNav {
@@ -32,10 +31,10 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .black-label {
     color: black;
 }
-#settingsPanelID, #executionsPanelID .modal-dialog {
+#settingsPanelID, #executionsPanelID .modal-dialog{
     width: 70%;
 }
-#marketPanelID .modal-dialog, #envStackID .modal-dialog {
+#marketPanelID .modal-dialog, #envStackID .modal-dialog, #documentationID .modal-dialog {
     width: 60%;
 }
 .table tbody > tr > td.vert-align {
@@ -83,6 +82,13 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .tree-path {
     margin-left: 3px;
+    position: relative;
+    top: 17px;
+    margin-bottom: 20px;
+}
+.tree-path .btn-group .btn.btn-primary{
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
 }
 .tree-header {
     margin-left: -4px;
@@ -111,9 +117,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     margin-top: 1px;
 }
 .dir {
-    background-color: #a6bf26;
+    background-color: #3086b5;
+    color: white;
     border-radius: 5px;
-    color: ;
     display: inline-block;
     height: 22px;
     margin-bottom: 5px;
@@ -542,13 +548,13 @@ label {
 }
 
 .fullPageZone{
-    height: 100%;
+    height: 100%;
     width: 100%;
 }
 
 .fileZone{
     top: 10px;
-    height: 100%;
+    height: 100%;
     width: 320px;
 }
 
@@ -585,7 +591,7 @@ label {
 }
 
 .bold{
-    font-weight: bold;
+    font-weight: bold;
 }
 
 .paddingBottom7{
@@ -597,7 +603,6 @@ span.label.control-label{
 }
 
 .openmole-logo{
-    background: url(img/openmole.svg) no-repeat;
     position: fixed;
     width: 300px;
     top: -10px;
@@ -654,9 +659,8 @@ span.label.control-label{
 }
 
 .btn.btn-primary{
-    background-color: #a6bf26;
-    border: #a6bf26 solid 1px;
-    color: #333;
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
     font-weight: bold;
 }
 
