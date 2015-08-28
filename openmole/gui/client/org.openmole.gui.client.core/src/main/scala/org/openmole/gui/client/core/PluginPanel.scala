@@ -70,24 +70,24 @@ class PluginPanel extends ModalPanel {
       val lineHovered: Var[Boolean] = Var(false)
 
       val render = Rx {
-        bs.tr(row)(
+        tags.div(
+          `class` := "docEntry",
           onmouseover := { () ⇒
             lineHovered() = true
           },
           onmouseout := { () ⇒
             lineHovered() = false
-          },
-          tags.td(
-            tags.i(p.name, `class` := "left", cursor := "pointer")
-          ),
-          tags.td(id := Rx {
-            "treeline" + {
-              if (lineHovered()) "-hover" else ""
-            }
           })(
-            glyphSpan(glyph_trash, () ⇒ removePlugin(p))(id := "glyphtrash", `class` := "glyphitem grey")
+            tags.span(p.name, `class` := "left docTitleEntry"),
+            tags.span(
+              id := Rx {
+                "treeline" + {
+                  if (lineHovered()) "-hover" else ""
+                }
+              },
+              glyphSpan(glyph_trash, () ⇒ removePlugin(p))(id := "glyphtrash", `class` := "glyphitem grey spacer4")
+            )
           )
-        )
       }
     }
 
@@ -102,15 +102,12 @@ class PluginPanel extends ModalPanel {
             println("transferring " + transferring())
             progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
         },
-        bs.table(striped)(
-          thead,
-          tbody(
-            plugins().map { aux ⇒
-              for (a ← aux) yield {
-                Seq(Reactive(a).render)
-              }
+        tags.div(
+          plugins().map { aux ⇒
+            for (a ← aux) yield {
+              Seq(Reactive(a).render)
             }
-          )
+          }
         )
       )
     }

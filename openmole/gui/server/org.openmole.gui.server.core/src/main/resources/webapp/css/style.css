@@ -65,6 +65,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer5 {
     margin-top: 5px;
 }
+.spacer4 {
+    margin-top: 4px;
+}
 #editor {
     font-family: monospace;
     height: 95%;
@@ -667,5 +670,49 @@ span.label.control-label{
 .btn.btn-default{
     background-color: white;
     color: #808080;
+    font-weight: bold;
+}
+
+.docText{
+    color: #444;
+}
+
+.glyphText{
+    color: #a6bf26;
+    font-size: 22px;
+    padding: 4 5;
+}
+
+.docTitleEntry{
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.docEntry{
+    color: white;
+    background-color: #333;
+    border-radius: 3px;
+    margin-top: 3px;
+    padding-top: 4px;
+    padding-bottom:4px;
+    padding-left: 5px;
+    min-height: 30px;
+}
+
+.docContent{
+    opacity: 0.95;
+    padding: 5 50;
+}
+
+.centerImg{
+    text-align: center;
+}
+
+.bottom-5{
+    margin-bottom: -5;
+}
+
+.greenBold{
+    color: #a6bf26;
     font-weight: bold;
 }
