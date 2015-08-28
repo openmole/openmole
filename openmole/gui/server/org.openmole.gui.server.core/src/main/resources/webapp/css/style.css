@@ -64,6 +64,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer5 {
     margin-top: 5px;
 }
+.spacer4 {
+    margin-top: 4px;
+}
 #editor {
     font-family: monospace;
     height: 95%;
@@ -696,6 +699,8 @@ span.label.control-label{
     margin-top: 3px;
     padding-top: 4px;
     padding-bottom:4px;
+    padding-left: 5px;
+    min-height: 30px;
 }
 
 .docContent{
