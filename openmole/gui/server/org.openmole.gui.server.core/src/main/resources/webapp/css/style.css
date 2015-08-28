@@ -699,6 +699,19 @@ span.label.control-label{
 }
 
 .docContent{
-    opacity: 0.75;
+    opacity: 0.95;
     padding: 5 50;
+}
+
+.centerImg{
+    text-align: center;
+}
+
+.bottom-5{
+    margin-bottom: -5;
+}
+
+.greenBold{
+    color: #a6bf26;
+    font-weight: bold;
 }

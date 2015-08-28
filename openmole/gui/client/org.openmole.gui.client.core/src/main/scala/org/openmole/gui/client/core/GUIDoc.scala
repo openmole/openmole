@@ -1,6 +1,7 @@
 package org.openmole.gui.client.core
 
-import org.scalajs.dom.raw.HTMLDivElement
+import org.openmole.gui.client.core.files.TreeNodePanel
+import org.scalajs.dom.raw.{ HTMLInputElement, HTMLDivElement }
 
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -33,8 +34,45 @@ object GUIDoc {
 
   val selectedEntry: Var[Option[GUIDocEntry]] = Var(None)
 
+  val omLangageLink = a(href := "http://www.openmole.org/current/Documentation_Language.html", target := "_blank")("OpenMOLE language")
+  val rLink = a(href := "https://www.r-project.org/", target := "_blank")("R")
+  val netlogoLink = a(href := "https://ccl.northwestern.edu/netlogo/", target := "_blank")("Netlogo")
+  val pythonLink = a(href := "https://www.python.org/", target := "_blank")("Python")
+  val javaLink = a(href := "http://openjdk.java.net/", target := "_blank")("Java")
+  val scalaLink = a(href := "http://www.scala-lang.org/", target := "_blank")("Scala")
+  val csvLink = a(href := "https://en.wikipedia.org/wiki/Comma-separated_values", target := "_blank")("CSV")
+
+  val resourcesContent = tags.div(
+    "The resources are files, that can be used in OpenMOLE simulations:",
+    ul(
+      li(b(".oms for Open Mole Script"), "is a file describing an OpenMOLE workflow according the its ", omLangageLink),
+      li(b("external code"), " run used in OpenMOLE scripts: editable in the application (", javaLink, ", ", scalaLink, ", ", netlogoLink, ", ", rLink, ", ", pythonLink, ", ...) or not (C, C++, or any binary code)"),
+      li(b("Any external resources"), " used as input for a model editable in the application (", csvLink, " files, text files, ...) or not (pictures, or any binary files)")
+    ),
+    "These files are managed in a file system located in left hand side and that can be showed or hidden thanks to the ", glyph(bs.glyph_file + " glyphText"), " icon",
+    bs.div("centerImg")(img(src := "img/fileManagement.png", alt := "fileManagement")),
+    "The ", bs.span("greenBold")("current directory"), " path is stacked in the top. The current directory is on the right of the stack. Clicking on one folder of the stack set this folder as current. On the image above, the current directory is for example ", tags.em("SimpopLocal"),
+    ".",
+    bs.div("spacer20")("The content of the current directory is listed in the bottom. Each row gives the name and the size of each file or folder. A folder is preceded by a ", tags.div(`class` := "dir bottom-5"), ". A ", glyph(bs.glyph_plus), " inside means that the folder is not empty.",
+      "In between, a file managment tool enable to: ",
+      ul(
+        li("create a new file or folder in the current directory. To do so, select ", tags.em("file"), " or ", tags.em("folder"), " thanks to the ", bs.span("greenBold")("file or folder selector"), ". Then, type the required name in the ",
+          bs.span("greenBold")("file or folder name input"), " and press enter. The freshly created file or folder appears in the list."),
+        li(bs.span("greenBold")("upload a file"), " in the current directory"),
+        li(bs.span("greenBold")("Refresh"), " the content of the current directory.")
+      )),
+    bs.div("spacer20")("When a file or a folder row is hovered, new options appear:",
+      ul(
+        li(glyph(bs.glyph_download + " right2"), " for downloading the current file or directory (as an archive for the latter)."),
+        li(glyph(bs.glyph_edit + " right2"), " for renaming the current file or directory. An input field appears; just input the new name and press " + tags.em("enter") + " to validate."),
+        li(glyph(bs.glyph_trash + " right2"), " for deleting the current file or direcotry."),
+        li(glyph(bs.glyph_archive + " right2"), " for uncompressing the current file (appears only in case of archive files (", tags.em(".tgz"), " or ", tags.em("tar.gz"), ").")
+      )),
+    bs.div("spacer20")("The editable files can be modified in the central editor. To do so, simply click on the file to be edited.")
+  )
+
   val entries = Seq(
-    GUIDocEntry(bs.glyph_file, "Manage the resources", tags.div("manage file")),
+    GUIDocEntry(bs.glyph_file, "Manage the resources", resourcesContent),
     GUIDocEntry(bs.glyph_settings, "Execute scripts", tags.div("Execute")),
     GUIDocEntry(bs.glyph_lock, "Manage authentications", tags.div("authentications")),
     GUIDocEntry(bs.glyph_market, "The Market place", tags.div("market place")),
@@ -43,18 +81,19 @@ object GUIDoc {
 
   val doc: TypedTag[HTMLDivElement] = {
     tags.div(`class` := "docText",
-      "This help provides informations to use the OpenMOLE web application. ",
+      "This help provides informations to use the OpenMOLE web application.  It looks very much to a web application even if, for now, both server and client run locally.",
       tags.div(
         "This application enables to manage OpenMOLE scripts, to edit them and to run them." +
           " It does not explain how to build a workflow by means of the ",
-        tags.a(href := "http://www.openmole.org/current/Documentation_Language.html", target := "_blank")(
-          "OpenMOLE language"),
+        omLangageLink,
         ", which is explained in detail on the OpenMOLE website."),
       for (entry ← entries) yield {
         Rx {
           val isSelected = selectedEntry() == Some(entry)
           tags.div(
-            `class` := "docEntry" + { if (isSelected) " docEntrySelected" else "" },
+            `class` := "docEntry" + {
+              if (isSelected) " docEntrySelected" else ""
+            },
             tags.span(
               `class` := "docTitleEntry",
               onclick := { () ⇒
