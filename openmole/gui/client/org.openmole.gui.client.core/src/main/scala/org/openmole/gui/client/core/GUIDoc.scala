@@ -35,6 +35,8 @@ object GUIDoc {
   val selectedEntry: Var[Option[GUIDocEntry]] = Var(None)
 
   val omLangageLink = a(href := "http://www.openmole.org/current/Documentation_Language.html", target := "_blank")("OpenMOLE language")
+  val omPluginLink = a(href := "http://www.openmole.org/current/Documentation_Development_Plugins.html", target := "_blank")("OpenMOLE plugin")
+
   val rLink = a(href := "https://www.r-project.org/", target := "_blank")("R")
   val netlogoLink = a(href := "https://ccl.northwestern.edu/netlogo/", target := "_blank")("Netlogo")
   val pythonLink = a(href := "https://www.python.org/", target := "_blank")("Python")
@@ -71,12 +73,21 @@ object GUIDoc {
     bs.div("spacer20")("The editable files can be modified in the central editor. To do so, simply click on the file to be edited.")
   )
 
+  val pluginContent = tags.div(
+    "The OpenMOLE platform is pluggable, meaning that you can build your own extension for any concept. It is however an advanced way of using the platform, so that you probably do not need it.",
+    bs.div("spacer20")("All the documentation about plugins can be found on the ",
+      omPluginLink, " section on the website. Nethertheless, the ", glyph(bs.glyph_plug + " glyphText"), " section enable to provide your plugins as ", tags.em(" jar"), " file, so that they can be found at execution time if it is used in an OpenMOLE script."
+    ), bs.div("spacer20")("To do so, simply click on the ", bs.glyph(bs.glyph_upload + " right2"), " in the plugin panel and navigate to your jar file. " +
+      "Once uploaded, the file appears in the list above. Hovering a row in this list makes appear the ", glyph(bs.glyph_trash + " right2"), " icon to remove this plugin from your selection."
+    )
+  )
+
   val entries = Seq(
     GUIDocEntry(bs.glyph_file, "Manage the resources", resourcesContent),
     GUIDocEntry(bs.glyph_settings, "Execute scripts", tags.div("Execute")),
     GUIDocEntry(bs.glyph_lock, "Manage authentications", tags.div("authentications")),
     GUIDocEntry(bs.glyph_market, "The Market place", tags.div("market place")),
-    GUIDocEntry(bs.glyph_plug, "Plugins", tags.div("plugins"))
+    GUIDocEntry(bs.glyph_plug, "Plugins", pluginContent)
   )
 
   val doc: TypedTag[HTMLDivElement] = {
