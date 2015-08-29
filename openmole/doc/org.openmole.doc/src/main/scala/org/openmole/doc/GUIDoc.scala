@@ -1,7 +1,13 @@
-package org.openmole.gui.plugin.task.systemexec.server
+package org.openmole.doc
+
+import org.scalajs.dom.raw.HTMLDivElement
+
+import scalatags.JsDom.TypedTag
+import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.all._
 
 /*
- * Copyright (C) 19/10/2014 // mathieu.leclaire@openmole.org
+ * Copyright (C) 26/08/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,22 +23,10 @@ package org.openmole.gui.plugin.task.systemexec.server
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.CoreObjectFactory
-import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
-import org.openmole.plugin.task.systemexec._
+object GUIDoc {
 
-import scala.util.Try
-
-
-class SystemExecTaskFactory(val data: SystemExecTaskData) extends CoreObjectFactory {
-
-  def coreObject(): Try[Any] =  Try {
-      val syset = SystemExecTask("" /*data.name,
-        data.directory ,
-        data.returnValue.map{p=>ServerFactories.coreObject(p).flatten},
-         data.output*/
-      )
-      //syset command data.command.filterNot(_ == '\n')
-    }
+  val doc: TypedTag[HTMLDivElement] = {
+    tags.div("Doc !")
+  }
 
 }

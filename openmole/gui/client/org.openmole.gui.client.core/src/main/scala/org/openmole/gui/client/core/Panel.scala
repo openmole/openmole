@@ -60,7 +60,7 @@ object Panel {
 import Panel.ConceptFilter._
 
 class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TASKS)) extends ModalPanel {
-  val modalID = "settingsPanelID"
+  lazy val modalID = "settingsPanelID"
   val editionState: Var[Boolean] = Var(false)
   val filter: Var[ConceptState] = Var(defaultDataBagUI.right.toOption.getOrElse(TASKS))
   val rows = Var(0)

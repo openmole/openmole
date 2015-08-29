@@ -1,9 +1,9 @@
 package org.openmole.gui.misc.js
 
 import org.openmole.gui.misc.js.BootstrapTags._
-import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
+import org.scalajs.dom.raw.{HTMLDivElement, HTMLElement}
 import org.scalajs.jquery
-import scalatags.JsDom.{ tags, TypedTag }
+import scalatags.JsDom.{tags, TypedTag}
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.mapping.tooltipster._
 import fr.iscpif.scaladget.tooltipster._
@@ -68,10 +68,10 @@ trait Help {
   }
 }
 
-case class ToolTip(placement: Direction,
-                   message: String,
+case class ToolTip(message: String,
+                   placement: Direction = BottomDirection(),
                    level: TooltipLevel = DefaultTooltipLevel()) extends Help
 
-case class NoHelp(placement: Direction = TopDirection(),
-                  message: String = "",
+case class NoHelp(message: String = "",
+                  placement: Direction = TopDirection(),
                   level: TooltipLevel = DefaultTooltipLevel()) extends Help

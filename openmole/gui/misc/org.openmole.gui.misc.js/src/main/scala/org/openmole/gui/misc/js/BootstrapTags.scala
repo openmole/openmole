@@ -23,7 +23,7 @@ import org.scalajs.dom.raw._
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.TypedTag
 
-import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.{tags ⇒ tags}
 import scalatags.JsDom.all._
 
 import org.openmole.gui.misc.js.JsRxTags._
@@ -45,8 +45,10 @@ object BootstrapTags {
 
     def tooltip(message: String,
                 direction: Direction = BottomDirection(),
-                level: TooltipLevel = DefaultTooltipLevel()): HTMLDivElement =
-      ToolTip(direction, message, level)(typedTag)
+                level: TooltipLevel = DefaultTooltipLevel(),
+                condition: () => Boolean = () => true): HTMLDivElement =
+      if (condition()) ToolTip(message, direction, level)(typedTag)
+      else tags.div(typedTag).render
   }
 
   implicit class BootstrapTypedTag[+Output <: raw.Element](t: TypedTag[Output]) {
@@ -82,7 +84,7 @@ object BootstrapTags {
       false
     }
     )(help(contentDiv)))(
-      extraRenderPair: _*)
+        extraRenderPair: _*)
 
   }
 
@@ -185,6 +187,7 @@ object BootstrapTags {
   val glyph_info = "glyphicon-info-sign"
   val glyph_plug = "icon-plug"
   val glyph_exclamation = "glyphicon-exclamation-sign"
+  val glyph_comment = "glyphicon-comment"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator, todo: () ⇒ Unit = () ⇒ {}): TypedTag[HTMLButtonElement] =
@@ -203,7 +206,7 @@ object BootstrapTags {
     })
 
   def waitingSpan(text: String, buttonCB: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
-    //<a href="#" class="btn btn-info btn-lg"><span class="glyphicon glyphicon-search"></span> Search</a>
+  //<a href="#" class="btn btn-info btn-lg"><span class="glyphicon glyphicon-search"></span> Search</a>
     span("btn " + buttonCB.key)(
       span("loading")(text)
     )
@@ -354,8 +357,8 @@ object BootstrapTags {
 
     def doScroll = scrollMode() match {
       case b: BottomScroll ⇒ sRender.scrollTop = sRender.scrollHeight
-      case n: NoScroll     ⇒ sRender.scrollTop = n.scrollHeight
-      case _               ⇒
+      case n: NoScroll ⇒ sRender.scrollTop = n.scrollHeight
+      case _ ⇒
     }
   }
 

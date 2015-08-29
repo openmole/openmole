@@ -70,6 +70,7 @@ class Application extends IApplication {
       pluginsDirs: List[String] = Nil,
       guiPluginsDirs: List[String] = Nil,
       userPlugins: List[String] = Nil,
+      loadHomePlugins: Option[Boolean] = None,
       workspaceDir: Option[String] = None,
       scriptFile: Option[String] = None,
       consoleWorkDirectory: Option[File] = None,
@@ -118,6 +119,7 @@ class Application extends IApplication {
         case "-c" :: tail                      ⇒ parse(tail, c.copy(launchMode = ConsoleMode))
         case "-h" :: tail                      ⇒ parse(tail, c.copy(launchMode = HelpMode))
         case "-ws" :: tail                     ⇒ parse(tail, c.copy(launchMode = ServerMode))
+        case "--load-homePlugins" :: tail      ⇒ parse(tail, c.copy(loadHomePlugins = Some(true)))
         case "--console-workDirectory" :: tail ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
         case "--ws-configure" :: tail          ⇒ parse(tail, c.copy(launchMode = ServerConfigMode))
         case "--port" :: tail                  ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt))) // Server port
@@ -141,7 +143,7 @@ class Application extends IApplication {
 
     val userPlugins =
       existingUserPlugins.flatMap { p ⇒ PluginManager.plugins(new File(p)) } ++
-        Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.plugins)
+        (if (config.loadHomePlugins.getOrElse(config.launchMode != ConsoleMode)) Workspace.pluginDir.listFilesSafe.flatMap(PluginManager.plugins) else Nil)
 
     logger.fine(s"Loading user plugins " + userPlugins)
 
@@ -150,8 +152,7 @@ class Application extends IApplication {
         userPlugins ++
         (if (config.launchMode == GUIMode) config.guiPluginsDirs.map(new File(_)) else List.empty)
 
-    val bundles = PluginManager.load(plugins)
-    PluginManager.startAll
+    PluginManager.tryLoad(plugins)
 
     try config.password foreach Workspace.setPassword
     catch {

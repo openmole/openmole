@@ -1,6 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.misc.js.BootstrapTags.ModalID
+import org.scalajs.dom.raw.HTMLDivElement
 import rx.core.Var
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
@@ -8,9 +9,8 @@ import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import bs._
 import rx._
-
 /*
- * Copyright (C) 03/08/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 26/08/15 // mathieu.leclaire@openmole.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -26,10 +26,9 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TextPanel(_modalID: ModalID, title: String) extends ModalPanel {
+class DivPanel(_modalID: ModalID, title: String, div: HTMLDivElement) extends ModalPanel {
 
   lazy val modalID = _modalID
-  val content: Var[String] = Var("")
 
   def onOpen() = {}
 
@@ -39,11 +38,7 @@ class TextPanel(_modalID: ModalID, title: String) extends ModalPanel {
     headerDialog(
       tags.span(tags.b(title))
     ),
-    bodyDialog(
-      tags.div(Rx {
-        bs.textArea(30)(content())
-      }
-      )),
+    bodyDialog(div),
     footerDialog(closeButton)
   )
 

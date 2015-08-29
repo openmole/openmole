@@ -20,17 +20,39 @@ package org.openmole.plugin.task
 import org.openmole.core.macros.Keyword._
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data.Prototype
-import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.tools.VariableExpansion
 
 package systemexec {
   trait SystemExecPackage {
-    case class Commands(os: OS, parts: String*) {
-      @transient lazy val expanded = parts.map(VariableExpansion(_))
+
+    /**
+     * Command line representation
+     *
+     * @param command the actual command line to be executed
+     * @param isRemote whether the command is passed as a resource to the task or is present on the remote environment
+     */
+    case class Command(command: String, isRemote: Boolean)
+
+    /**
+     * Sequence of commands for a particular OS
+     *
+     * @param os target Operating System
+     * @param parts Sequence of commands to be executed
+     * @see Command
+     */
+    case class OSCommands(os: OS, parts: Command*) {
+      @transient lazy val expanded = parts.map(c ⇒ (VariableExpansion(c.command), c.isRemote))
     }
 
-    implicit def stringToCommands(s: String) = Commands(OS(), s)
-    implicit def seqOfStringToCommands(s: Seq[String]) = Commands(OS(), s: _*)
+    /** Make commands non-remote by default */
+    implicit def stringToCommand(s: String) = Command(s, false)
+    /** A single command can be a sequence  */
+    implicit def stringToCommands(s: String) = OSCommands(OS(), s)
+    /** A sequence of command lines is considered local (non-remote) by default */
+    implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s, false)): _*)
+
+    /** Make a command line remote from the DSL */
+    def remote(s: String) = Command(s, true)
 
     lazy val errorOnReturnCode = set[{ def setErrorOnReturnValue(b: Boolean) }]
 
@@ -40,7 +62,7 @@ package systemexec {
 
     lazy val stdErr = set[{ def setStdErr(v: Option[Prototype[String]]) }]
 
-    lazy val commands = add[{ def addCommand(os: OS, cmd: String*) }]
+    lazy val commands = add[{ def addCommand(os: OS, cmd: OSCommands*) }]
 
     lazy val environmentVariable =
       new {

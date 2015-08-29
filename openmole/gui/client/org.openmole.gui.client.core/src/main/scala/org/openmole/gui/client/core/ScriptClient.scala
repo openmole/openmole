@@ -15,7 +15,6 @@ import org.openmole.gui.misc.js.JsRxTags._
 import org.scalajs.dom
 import rx._
 import scalatags.JsDom.all._
-import org.scalajs.jquery
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -45,9 +44,11 @@ object ScriptClient {
         bs.glyph(glyph_off),
         cursor := "pointer",
         onclick := { () ⇒
-          AlertPanel.popup("This will halt the server, so that the application will no longer be usable. Halt anyway ?",
+          AlertPanel.popup("This will stop the server, the application will no longer be usable. Halt anyway?",
             () ⇒ {
-              dom.window.location.href = "shutdown"
+              treeNodePanel.fileDisplayer.tabs.saveAllTabs(() ⇒
+                dom.window.location.href = "shutdown"
+              )
             },
             transform = RightTransform(),
             zone = TopZone())
@@ -139,7 +140,7 @@ object ScriptClient {
           Rx {
             tags.div(
               if (alert())
-                AlertPanel.popup("Warning ! Reseting your password will wipe out all your preferences ! Reset anyway ?",
+                AlertPanel.popup("Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
                 () ⇒ {
                   alert() = false
                   resetPassword
@@ -169,19 +170,21 @@ object ScriptClient {
       val modalPanel = authenticationPanel
     }
 
-    val execItem = dialogGlyphNavItem("executions", glyph_settings, () ⇒ executionTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Executions"))
+    val execItem = dialogGlyphNavItem("executions", glyph_settings, () ⇒ executionTriggerer.triggerOpen, help = ToolTip("Executions"))
 
-    val authenticationItem = dialogGlyphNavItem("authentications", glyph_lock, () ⇒ authenticationTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Authentications"))
+    val authenticationItem = dialogGlyphNavItem("authentications", glyph_lock, () ⇒ authenticationTriggerer.triggerOpen, help = ToolTip("Authentications"))
 
-    val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Market place"))
+    val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen, help = ToolTip("Market place"))
 
-    val pluginItem = dialogGlyphNavItem("plugin", glyph_plug, () ⇒ pluginTriggerer.triggerOpen, help = ToolTip(BottomDirection(), "Plugins"))
+    val pluginItem = dialogGlyphNavItem("plugin", glyph_plug, () ⇒ pluginTriggerer.triggerOpen, help = ToolTip("Plugins"))
 
     val envItem = dialogGlyphNavItem("envError", glyph_exclamation, () ⇒ environmentStackTriggerer.open)
 
+    val docItem = dialogGlyphNavItem("doc", glyph_comment, () ⇒ docTriggerer.open, help = ToolTip("Documentation"))
+
     val fileItem = dialogGlyphNavItem("files", glyph_file, todo = () ⇒ {
       openFileTree() = !openFileTree()
-    }, help = ToolTip(BottomDirection(), "Files"))
+    }, help = ToolTip("Files"))
 
     maindiv.appendChild(
       nav("mainNav",
@@ -190,7 +193,8 @@ object ScriptClient {
         execItem,
         authenticationItem,
         marketItem,
-        pluginItem
+        pluginItem,
+        docItem
       )
     )
     maindiv.appendChild(tags.div(
@@ -204,6 +208,7 @@ object ScriptClient {
     maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(pluginTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(environmentStackTriggerer.modalPanel.dialog.render)
+    maindiv.appendChild(docTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(AlertPanel.div)
 
     Settings.workspacePath.foreach { projectsPath ⇒

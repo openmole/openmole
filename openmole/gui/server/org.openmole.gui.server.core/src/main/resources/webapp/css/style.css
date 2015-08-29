@@ -1,7 +1,18 @@
-
+@font-face {
+    font-family: 'Bevan';
+    src: url('../fonts/Bevan.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
 a {
+    font-weight: bold;
     color: #3086b5;
 }
+
+.colorGrey{
+    color: #333;
+}
+
 #mainNav {
     background-color: #333333;
     font-weight: bold;
@@ -20,10 +31,10 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .black-label {
     color: black;
 }
-#settingsPanelID, #executionsPanelID .modal-dialog {
+#settingsPanelID, #executionsPanelID .modal-dialog{
     width: 70%;
 }
-#marketPanelID .modal-dialog, #envStackID .modal-dialog {
+#marketPanelID .modal-dialog, #envStackID .modal-dialog, #documentationID .modal-dialog {
     width: 60%;
 }
 .table tbody > tr > td.vert-align {
@@ -53,6 +64,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer5 {
     margin-top: 5px;
 }
+.spacer4 {
+    margin-top: 4px;
+}
 #editor {
     font-family: monospace;
     height: 95%;
@@ -68,6 +82,13 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .tree-path {
     margin-left: 3px;
+    position: relative;
+    top: 17px;
+    margin-bottom: 20px;
+}
+.tree-path .btn-group .btn.btn-primary{
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
 }
 .tree-header {
     margin-left: -4px;
@@ -96,13 +117,14 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     margin-top: 1px;
 }
 .dir {
-    background-color: #337ab7;
-    border-radius: 5px;
+    background-color: #3086b5;
     color: white;
+    border-radius: 5px;
     display: inline-block;
     height: 22px;
     margin-bottom: 5px;
-    padding: 2px 8px;
+    padding: 3px 4px;
+    width: 22px;
 }
 .file-list {
     font-size: 14px;
@@ -110,6 +132,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     width: 100%;
 }
 .glyphitem {
+    top: 0;
     color: white;
     display: inline-block;
     float: right;
@@ -163,8 +186,8 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     height: 20px;
 }
 #fileinput-addon {
-    background-color: #56b156;
-    border: medium none #56b156;
+    background-color: #3086b5;
+    border: medium none #3086b5;
     color: white;
     float: left;
     height: 34px;
@@ -312,10 +335,10 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     font-weight: bold;
 }
 .executionTable table td.finishedState {
-    color: #5aa02c;
+    color: #a6bf26;
     font-weight: bold;
 }
-.executionTable table td.canceledState {
+.executionTable table td.cancelledState {
     color: orange;
     font-weight: bold;
 }
@@ -389,7 +412,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .inputFileStyle {
     position: absolute;
-    background-color: #5cb85c;
+    background-color: #3086b5;
     border-radius: 4px;
     color: white;
     cursor: pointer;
@@ -399,7 +422,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     display: none;
 }
 .inputFileStyleSmall {
-    background-color: #5cb85c;
+    background-color: #3086b5;
     color: white;
     cursor: pointer;
     margin-left: -16px;
@@ -430,6 +453,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .nav-pills > li > a {
     font-size: 20px;
     margin-top: -3px;
+    color: #a6bf26;
 }
 .mdRendering p {
     text-align: left;
@@ -524,13 +548,13 @@ label {
 }
 
 .fullPageZone{
-    height: 100%;
+    height: 100%;
     width: 100%;
 }
 
 .fileZone{
     top: 10px;
-    height: 100%;
+    height: 100%;
     width: 320px;
 }
 
@@ -556,10 +580,18 @@ label {
 
 .fileNameOverflow{
     color: white;
-    white-space: nowrap; 
+    white-space: nowrap;
     overflow: hidden;
-    width: 12em;
-    text-overflow: ellipsis; 
+    width: 13em;
+    padding-top: 2px;
+    padding-left: 0.4em;
+    position: absolute;
+    text-overflow: ellipsis;
+    padding-left: 27px;
+}
+
+.bold{
+    font-weight: bold;
 }
 
 .paddingBottom7{
@@ -571,7 +603,6 @@ span.label.control-label{
 }
 
 .openmole-logo{
-    background: url(img/openmole.svg) no-repeat;
     position: fixed;
     width: 300px;
     top: -10px;
@@ -605,7 +636,7 @@ span.label.control-label{
 }
 
 .openmole-version{
-    color: white;
+    color: #ff5555;
     right: 40px;
     top: -20px;
     font-size: 2.5em;
@@ -625,4 +656,67 @@ span.label.control-label{
 
 .openmole-mole{
     color: #a6bf26;
+}
+
+.btn.btn-primary{
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
+    font-weight: bold;
+}
+
+.btn.btn-success{
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
+    color: white;
+    font-weight: bold;
+}
+
+.btn.btn-default{
+    background-color: white;
+    color: #808080;
+    font-weight: bold;
+}
+
+.docText{
+    color: #444;
+}
+
+.glyphText{
+    color: #a6bf26;
+    font-size: 22px;
+    padding: 4 5;
+}
+
+.docTitleEntry{
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.docEntry{
+    color: white;
+    background-color: #333;
+    border-radius: 3px;
+    margin-top: 3px;
+    padding-top: 4px;
+    padding-bottom:4px;
+    padding-left: 5px;
+    min-height: 30px;
+}
+
+.docContent{
+    opacity: 0.95;
+    padding: 5 50;
+}
+
+.centerImg{
+    text-align: center;
+}
+
+.bottom-5{
+    margin-bottom: -5;
+}
+
+.greenBold{
+    color: #a6bf26;
+    font-weight: bold;
 }

@@ -52,8 +52,7 @@
   ScalaTask through the @hl.openmoleNoTest("libraries") parameter.
 
   @sect{Hello world}
-      Let us consider the simple code @em{Hello.java} in a directory named @i{hello} (to respect Java's package
-      structure):
+      Let us consider the simple code @em{Hello.java} in a directory named @i{hello} @("(to respect Java's package structure)"):
       @hl.highlight("""
       package hello;
 

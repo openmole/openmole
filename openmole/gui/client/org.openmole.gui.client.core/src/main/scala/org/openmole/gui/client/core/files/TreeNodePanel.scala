@@ -114,11 +114,11 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               tags.label(`class` := "inputFileStyleSmall",
                 uploadButton((fileInput: HTMLInputElement) ⇒ {
                   FileManager.upload(fileInput, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
-                })).tooltip("Edit the file name")),
+                })).tooltip("Upload file")),
             inputGroupAddon(id := "fileinput-addon")(
               tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
                 glyph(glyph_refresh)
-              ).tooltip("Refresh the file tree", RightDirection()))
+              ).tooltip("Refresh file tree", RightDirection()))
           )
         )
       )
@@ -249,7 +249,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def trashNode(treeNode: TreeNode) = {
     fileDisplayer.tabs -- treeNode
-    AlertPanel.popup(s"Do you realy want to trash ${treeNode.name()} ?",
+    AlertPanel.popup(s"Do you really want to delete ${treeNode.name()}?",
       () ⇒ {
         OMPost[Api].deleteFile(treeNode.safePath()).call().foreach { d ⇒
           refreshCurrentDirectory
@@ -300,6 +300,15 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
     val lineHovered: Var[Boolean] = Var(false)
 
+    def clickablePair(classType: String, todo: () ⇒ Unit) = Seq(
+      style := "float:left",
+      cursor := "pointer",
+      fontWeight := "bold",
+      draggable := true,
+      onclick := { () ⇒ todo() },
+      `class` := classType
+    )
+
     val render = tags.tr(
       onmouseover := { () ⇒ lineHovered() = true },
       onmouseout := { () ⇒ lineHovered() = false }, ondragstart := { (e: DragEvent) ⇒
@@ -319,19 +328,18 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       ondrop := {
         dropAction(tn)
       },
-      tags.div(style := "float:left",
-        cursor := "pointer",
-        draggable := true,
-        onclick := { () ⇒ todo() },
-        `class` := classType + " fileNameOverflow")(
-          tags.i(id := "plusdir", `class` := {
-            tn.hasSons match {
-              case true  ⇒ "glyphicon glyphicon-plus-sign"
-              case false ⇒ ""
-            }
-          }),
-          tags.i(tn.name())
-        ).tooltip(tn.name()),
+      tags.div(clickablePair(classType, todo))(
+        tags.i(id := "plusdir", `class` := {
+          tn.hasSons match {
+            case true  ⇒ "glyphicon glyphicon-plus-sign"
+            case false ⇒ ""
+          }
+        })),
+      tags.div(
+        clickablePair(classType, todo),
+        `class` := "fileNameOverflow",
+        tn.name()
+      ).tooltip(tn.name(), condition = () ⇒ tn.name().length > 24),
       tags.div(`class` := "file-info",
         tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
         tags.span(id := Rx {

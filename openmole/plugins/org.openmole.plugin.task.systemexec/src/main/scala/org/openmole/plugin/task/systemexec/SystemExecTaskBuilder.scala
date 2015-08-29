@@ -18,16 +18,15 @@
 package org.openmole.plugin.task.systemexec
 
 import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.data._
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.data._
 
 import scala.collection.mutable.ListBuffer
 
-class SystemExecTaskBuilder(commands: String*) extends ExternalTaskBuilder { builder ⇒
+class SystemExecTaskBuilder(commands: Command*) extends ExternalTaskBuilder { builder ⇒
 
   private val variables = new ListBuffer[(Prototype[_], String)]
-  private val _commands = new ListBuffer[Commands]
+  private val _commands = new ListBuffer[OSCommands]
   private var errorOnReturnValue = true
   private var returnValue: Option[Prototype[Int]] = None
   private var stdOut: Option[Prototype[String]] = None
@@ -50,8 +49,8 @@ class SystemExecTaskBuilder(commands: String*) extends ExternalTaskBuilder { bui
     this
   }
 
-  def addCommand(os: OS, cmd: String*): this.type = {
-    _commands += Commands(os, cmd: _*)
+  def addCommand(os: OS, cmd: Command*): this.type = {
+    _commands += OSCommands(os, cmd: _*)
     this
   }
 
