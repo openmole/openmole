@@ -17,9 +17,9 @@ package org.openmole.gui.plugin.task.systemexec.server
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.{CoreObjectFactory, Factory}
+import org.openmole.gui.ext.data.CoreObjectFactory
 import org.openmole.gui.plugin.task.systemexec.ext.SystemExecTaskData
-import org.openmole.plugin.task.systemexec.SystemExecTask
+import org.openmole.plugin.task.systemexec._
 
 import scala.util.Try
 

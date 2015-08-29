@@ -18,18 +18,16 @@
 package org.openmole.plugin.task.systemexec
 
 import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.data._
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.data._
 
 import scala.collection.mutable.ListBuffer
 
-class SystemExecTaskBuilder(commands: String*) extends ExternalTaskBuilder { builder ⇒
+class SystemExecTaskBuilder(commands: Command*) extends ExternalTaskBuilder { builder ⇒
 
   private val variables = new ListBuffer[(Prototype[_], String)]
-  private val _commands = new ListBuffer[Commands]
+  private val _commands = new ListBuffer[OSCommands]
   private var errorOnReturnValue = true
-  private var isRemote = false
   private var returnValue: Option[Prototype[Int]] = None
   private var stdOut: Option[Prototype[String]] = None
   private var stdErr: Option[Prototype[String]] = None
@@ -51,18 +49,13 @@ class SystemExecTaskBuilder(commands: String*) extends ExternalTaskBuilder { bui
     this
   }
 
-  def addCommand(os: OS, cmd: String*): this.type = {
-    _commands += Commands(os, cmd: _*)
+  def addCommand(os: OS, cmd: Command*): this.type = {
+    _commands += OSCommands(os, cmd: _*)
     this
   }
 
   def setErrorOnReturnValue(b: Boolean): this.type = {
     errorOnReturnValue = b
-    this
-  }
-
-  def setIsRemote(inIsRemote: Boolean): this.type = {
-    isRemote = inIsRemote
     this
   }
 
@@ -87,7 +80,7 @@ class SystemExecTaskBuilder(commands: String*) extends ExternalTaskBuilder { bui
   }
 
   def toTask =
-    new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList, isRemote) with builder.Built {
+    new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
       override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
     }
 
