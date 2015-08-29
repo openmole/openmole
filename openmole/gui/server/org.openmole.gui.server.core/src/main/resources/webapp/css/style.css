@@ -1,4 +1,9 @@
-
+@font-face {
+    font-family: 'Bevan';
+    src: url('../fonts/Bevan.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
 a {
     font-weight: bold;
     color: #3086b5;
@@ -26,10 +31,10 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .black-label {
     color: black;
 }
-#settingsPanelID, #executionsPanelID .modal-dialog {
+#settingsPanelID, #executionsPanelID .modal-dialog{
     width: 70%;
 }
-#marketPanelID .modal-dialog, #envStackID .modal-dialog {
+#marketPanelID .modal-dialog, #envStackID .modal-dialog, #documentationID .modal-dialog {
     width: 60%;
 }
 .table tbody > tr > td.vert-align {
@@ -59,6 +64,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer5 {
     margin-top: 5px;
 }
+.spacer4 {
+    margin-top: 4px;
+}
 #editor {
     font-family: monospace;
     height: 95%;
@@ -74,6 +82,13 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .tree-path {
     margin-left: 3px;
+    position: relative;
+    top: 17px;
+    margin-bottom: 20px;
+}
+.tree-path .btn-group .btn.btn-primary{
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
 }
 .tree-header {
     margin-left: -4px;
@@ -102,9 +117,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     margin-top: 1px;
 }
 .dir {
-    background-color: #a6bf26;
+    background-color: #3086b5;
+    color: white;
     border-radius: 5px;
-    color: ;
     display: inline-block;
     height: 22px;
     margin-bottom: 5px;
@@ -139,7 +154,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     width: 100%;
 }
 #glyphtrash:hover {
-    color: #3086b5;
+    color: #CC3A36;
 }
 #adddir {
     padding-left: 7px;
@@ -323,7 +338,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     color: #a6bf26;
     font-weight: bold;
 }
-.executionTable table td.canceledState {
+.executionTable table td.cancelledState {
     color: orange;
     font-weight: bold;
 }
@@ -449,7 +464,6 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .marketTag {
     margin-left: 3px;
-    background-color: #CC3A36;
 }
 .loading {
     animation-duration: 4s;
@@ -589,7 +603,6 @@ span.label.control-label{
 }
 
 .openmole-logo{
-    background: url(img/openmole.svg) no-repeat;
     position: fixed;
     width: 300px;
     top: -10px;
@@ -646,9 +659,8 @@ span.label.control-label{
 }
 
 .btn.btn-primary{
-    background-color: #a6bf26;
-    border: #a6bf26 solid 1px;
-    color: #333;
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
     font-weight: bold;
 }
 
@@ -662,5 +674,49 @@ span.label.control-label{
 .btn.btn-default{
     background-color: white;
     color: #808080;
+    font-weight: bold;
+}
+
+.docText{
+    color: #444;
+}
+
+.glyphText{
+    color: #a6bf26;
+    font-size: 22px;
+    padding: 4 5;
+}
+
+.docTitleEntry{
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.docEntry{
+    color: white;
+    background-color: #333;
+    border-radius: 3px;
+    margin-top: 3px;
+    padding-top: 4px;
+    padding-bottom:4px;
+    padding-left: 5px;
+    min-height: 30px;
+}
+
+.docContent{
+    opacity: 0.95;
+    padding: 5 50;
+}
+
+.centerImg{
+    text-align: center;
+}
+
+.bottom-5{
+    margin-bottom: -5;
+}
+
+.greenBold{
+    color: #a6bf26;
     font-weight: bold;
 }

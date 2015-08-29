@@ -47,7 +47,7 @@ object BootstrapTags {
                 direction: Direction = BottomDirection(),
                 level: TooltipLevel = DefaultTooltipLevel(),
                 condition: () => Boolean = () => true): HTMLDivElement =
-      if (condition()) ToolTip(direction, message, level)(typedTag)
+      if (condition()) ToolTip(message, direction, level)(typedTag)
       else tags.div(typedTag).render
   }
 
@@ -187,6 +187,7 @@ object BootstrapTags {
   val glyph_info = "glyphicon-info-sign"
   val glyph_plug = "icon-plug"
   val glyph_exclamation = "glyphicon-exclamation-sign"
+  val glyph_comment = "glyphicon-comment"
 
   //Button
   def button(content: String, keys: ClassKeyAggregator, todo: () ⇒ Unit = () ⇒ {}): TypedTag[HTMLButtonElement] =
@@ -362,7 +363,7 @@ object BootstrapTags {
   }
 
   case class ScrollableText(initText: String, _scrollMode: AutoScroll) extends Scrollable {
-    //FIXME: ADD FEATURE: SET THE NUMBER OF LINES IN VIEW (DEFAULT IS 500)
+    //FIXME: ADD FEATURE: SET THE NUMBER OF LINES IN VIEW (DEFAULT IS 500)
     val scrollMode: Var[AutoScroll] = Var(_scrollMode)
     val tA = textArea(20)(initText, onscroll := { (e: Event) ⇒ setScrollMode })
     val sRender = tA.render
@@ -373,7 +374,7 @@ object BootstrapTags {
   }
 
   case class ScrollableDiv(_element: Div, _scrollMode: AutoScroll) extends Scrollable {
-    //FIXME: ADD FEATURE: SET THE NUMBER OF LINES IN VIEW (DEFAULT IS 500)
+    //FIXME: ADD FEATURE: SET THE NUMBER OF LINES IN VIEW (DEFAULT IS 500)
     val scrollMode: Var[AutoScroll] = Var(_scrollMode)
     val child: Var[Node] = Var(tags.div)
     val tA = div("scrollable")(Rx {
