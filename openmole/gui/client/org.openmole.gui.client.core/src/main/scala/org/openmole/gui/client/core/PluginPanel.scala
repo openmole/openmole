@@ -97,7 +97,6 @@ class PluginPanel extends ModalPanel {
             getPlugins
             transferring() = Standby()
           case _ ⇒
-            println("transferring " + transferring())
             progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
         },
         tags.div(
