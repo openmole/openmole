@@ -6,7 +6,7 @@ import org.scalajs.dom.raw.{ HTMLInputElement, HTMLDivElement }
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select, ClassKeyAggregator }
 import scalatags.JsDom.all._
 import bs._
 import rx._
@@ -37,6 +37,7 @@ object GUIDoc {
   val omLangageLink = a(href := "http://www.openmole.org/current/Documentation_Language.html", target := "_blank")("OpenMOLE language")
   val omPluginLink = a(href := "http://www.openmole.org/current/Documentation_Development_Plugins.html", target := "_blank")("OpenMOLE plugin")
   val omMarketLink = a(href := "http://www.openmole.org/current/Documentation_Market%20Place.html", target := "_blank")("Market Place")
+  val omEnvironmentLink = a(href := "http://www.openmole.org/current/Documentation_Language_Environments.html", target := "_blank")("Environment page")
   val githubMarketLink = a(href := "https://github.com/openmole/openmole-market/", target := "_blank")("Github page")
 
   val rLink = a(href := "https://www.r-project.org/", target := "_blank")("R")
@@ -75,6 +76,50 @@ object GUIDoc {
     bs.div("spacer20")("The editable files can be modified in the central editor. To do so, simply click on the file to be edited.")
   )
 
+  val authenticationContent = {
+    val factories = ClientService.authenticationFactories
+
+    tags.div(
+      "In OpenMOLE, the computation load can be delegated to remote environments (SSH machine, Cluster, Grid) as explained on the ",
+      omEnvironmentLink, ". It is previously necessary to save the connection settings on these different environments (like login/password or ssh key). When clicking on the ",
+      glyph(bs.glyph_lock + " glyphText"), " a panel appears with the list of all the defined authentications (initially, no one is defined).",
+      bs.div("spacer20")(
+        "The supported authentications are:",
+        tags.ul(
+          tags.li("SSH authentication with login and password (any environment accessed by means of SSH)"),
+          tags.li("SSH authentiaction with SSH private key (any environment accessed by means of SSH)"),
+          tags.li("Grid certificate (.p12) for Grid computing")
+        )
+      ),
+      bs.div("spacer20")(
+        "To add one authentication, click on the ", glyph(bs.glyph_plus + " right2"),
+        " icon. A new panel is displayed. First select the authentication category you need: ",
+        Select("authentications",
+          factories.map { f ⇒ (f, emptyCK) },
+          factories.headOption,
+          btn_primary
+        ).selector
+      ), "Depending on your selection, the settings change. Let see them in details:",
+      bs.div("spacer20")(tags.b("SSH Password:"),
+        tags.div("Set your host and your login on it (for example john on blueberry.org), as well as your password. Once you saved it, the authentication will be added to your list (by example: john@blueberry.org)")
+      ),
+      bs.div("spacer20")(tags.b("SSH Key:"),
+        tags.div("The same three settings as the ones for the SSH Password are required as well as your private SSH key. To add it, click on ",
+          tags.label(`class` := "inputFileStyle labelInline")("No certificate"),
+          " and navigate to your private SSH key. A random name will be associated to your key. ",
+          "Once you saved it, the authentication will be added to your list (by example: john@blueberry.org)")
+      ),
+      bs.div("spacer20")(tags.b("EGI P12 Certificate:"),
+        tags.div("It only requires your EGI certificate file and the associated password. To add it, click on ",
+          tags.label(`class` := "inputFileStyle labelInline")("No certificate"),
+          " and navigate to your certificate file. It will be renamed by egi.p12. Note that only one EGI certificate is required (you will not need any other one !)"
+        ),
+        bs.div("spacer20")("An authentication can be remove by clicking on the ", glyph(bs.glyph_trash + " right2"), " (visible when hovering an row of the authentication list), or edited by clicking on the name of an authentication from the authentications list."
+        )
+      )
+    )
+  }
+
   val marketContent = tags.div(
     "It gathers working examples of OpenMOLE workflow. They are excellent starting points for building your own project. All the examples in the market place provide:",
     tags.ul(
@@ -103,7 +148,7 @@ object GUIDoc {
   val entries = Seq(
     GUIDocEntry(bs.glyph_file, "Manage the resources", resourcesContent),
     GUIDocEntry(bs.glyph_settings, "Execute scripts", tags.div("Execute")),
-    GUIDocEntry(bs.glyph_lock, "Manage authentications", tags.div("authentications")),
+    GUIDocEntry(bs.glyph_lock, "Manage authentications", authenticationContent),
     GUIDocEntry(bs.glyph_market, "The Market place", marketContent),
     GUIDocEntry(bs.glyph_plug, "Plugins", pluginContent)
   )

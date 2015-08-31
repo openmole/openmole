@@ -758,3 +758,8 @@ span.label.control-label{
     background-color: #CC3A36;
     border: 1px solid #CC3A36;
 }
+.labelInline{
+position: relative;
+display: inline;
+top: -6px;
+}
