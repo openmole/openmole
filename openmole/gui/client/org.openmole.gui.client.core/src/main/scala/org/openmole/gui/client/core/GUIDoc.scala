@@ -36,6 +36,8 @@ object GUIDoc {
 
   val omLangageLink = a(href := "http://www.openmole.org/current/Documentation_Language.html", target := "_blank")("OpenMOLE language")
   val omPluginLink = a(href := "http://www.openmole.org/current/Documentation_Development_Plugins.html", target := "_blank")("OpenMOLE plugin")
+  val omMarketLink = a(href := "http://www.openmole.org/current/Documentation_Market%20Place.html", target := "_blank")("Market Place")
+  val githubMarketLink = a(href := "https://github.com/openmole/openmole-market/", target := "_blank")("Github page")
 
   val rLink = a(href := "https://www.r-project.org/", target := "_blank")("R")
   val netlogoLink = a(href := "https://ccl.northwestern.edu/netlogo/", target := "_blank")("Netlogo")
@@ -73,6 +75,22 @@ object GUIDoc {
     bs.div("spacer20")("The editable files can be modified in the central editor. To do so, simply click on the file to be edited.")
   )
 
+  val marketContent = tags.div(
+    "It gathers working examples of OpenMOLE workflow. They are excellent starting points for building your own project. All the examples in the market place provide:",
+    tags.ul(
+      tags.li("At least a .oms file containing an executable workflow script,"),
+      tags.li("The model executable (except for a small Scala code, which can be contained in an Scala Task),"),
+      tags.li("A README.md giving informations about the model or the method used in the example.")
+    ),
+    bs.div("spacer20")(
+      "All the examples of the market can be found in the ", omMarketLink, " of the website and in the application by clicking the ", glyph(bs.glyph_market + " glyphText"),
+      " icon. The list of all the entries of the Market will appear. You can read the README.md by clicking on the name of the example and then downloading it in the current directory by pressing the ",
+      tags.em("Download"), " button. Once the download is over, the dialog is closed and the file manager refreshed. You just need to open its .oms file and press play to start its execution.",
+      bs.div("spacer20")("The sources and proposal for new entries can be found on a ", githubMarketLink, ".")
+    )
+
+  )
+
   val pluginContent = tags.div(
     "The OpenMOLE platform is pluggable, meaning that you can build your own extension for any concept. It is however an advanced way of using the platform, so that you probably do not need it.",
     bs.div("spacer20")("All the documentation about plugins can be found on the ",
@@ -86,7 +104,7 @@ object GUIDoc {
     GUIDocEntry(bs.glyph_file, "Manage the resources", resourcesContent),
     GUIDocEntry(bs.glyph_settings, "Execute scripts", tags.div("Execute")),
     GUIDocEntry(bs.glyph_lock, "Manage authentications", tags.div("authentications")),
-    GUIDocEntry(bs.glyph_market, "The Market place", tags.div("market place")),
+    GUIDocEntry(bs.glyph_market, "The Market place", marketContent),
     GUIDocEntry(bs.glyph_plug, "Plugins", pluginContent)
   )
 
