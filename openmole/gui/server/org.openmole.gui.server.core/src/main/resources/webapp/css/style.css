@@ -709,6 +709,7 @@ span.label.control-label{
 .docTitleEntry{
     font-weight: bold;
     cursor: pointer;
+    padding-top: 6px;
 }
 
 .docEntry{
