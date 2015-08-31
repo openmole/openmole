@@ -38,7 +38,8 @@ object DBServerInfo {
   }
 
   def hostName =
-    Try { InetAddress.getLocalHost().getHostName() }.getOrElse("localhost")
+    if (System.getProperty("os.name").toLowerCase.contains("mac")) "localhost"
+    else Try { InetAddress.getLocalHost().getHostName() }.getOrElse("localhost")
 
   val dbName = s"replica"
   val dbInfoName = s"$dbName.info"
