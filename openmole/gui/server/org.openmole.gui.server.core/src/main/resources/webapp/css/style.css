@@ -31,10 +31,10 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .black-label {
     color: black;
 }
-#settingsPanelID, #executionsPanelID .modal-dialog{
+#marketPanelID .modal-dialog, #settingsPanelID, #executionsPanelID .modal-dialog{
     width: 70%;
 }
-#marketPanelID .modal-dialog, #envStackID .modal-dialog, #documentationID .modal-dialog {
+ #envStackID .modal-dialog, #documentationID .modal-dialog {
     width: 60%;
 }
 .table tbody > tr > td.vert-align {

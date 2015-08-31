@@ -49,20 +49,20 @@ class MarketPanel extends ModalPanel {
           val isSelected = Some(entry) == selectedEntry()
           Seq(
             bs.div("docEntry")(
-              bs.div(bs.col_md_4 + " spacer7")(
+              bs.div(bs.col_md_3 + " spacer7")(
                 tags.a(entry.name, cursor := "pointer", `class` := "whiteBold", onclick := { () ⇒
                   selectedEntry() = {
                     if (isSelected) None
                     else Some(entry)
                   }
                 })),
-              bs.div(bs.col_md_2)(downloadButton(entry, () ⇒ {
+              bs.div(bs.col_md_1)(downloadButton(entry, () ⇒ {
                 OMPost[Api].exists(manager.current.safePath() ++ entry.name).call().foreach { b ⇒
                   if (b) overwriteAlert() = Some(entry)
                   else download(entry)
                 }
               })),
-              bs.div(bs.col_md_6 + " spacer7")(
+              bs.div(bs.col_md_8 + " spacer7")(
                 entry.tags.map { e ⇒ bs.label(e, label_primary + "marketTag") }
               ), tags.div(
                 `class` := {
