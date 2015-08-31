@@ -37,55 +37,46 @@ class MarketPanel extends ModalPanel {
   val selectedEntry: Var[Option[MarketIndexEntry]] = Var(None)
   val downloading: Var[Seq[MarketIndexEntry]] = Var(Seq())
 
-  lazy val marketTable = bs.table(striped + spacer20)(
-    thead,
+  lazy val marketTable = tags.div(`class` := "spacer20",
     Rx {
-      tbody({
-        marketIndex().map { mindex ⇒
-          for {
-            entry ← mindex.entries if tagFilter.exists(entry.tags)
-          } yield {
-            val isSelected = Some(entry) == selectedEntry()
-            Seq(
-              bs.tr(row)(
-                bs.td(col_md_5 + {
-                  if (isSelected) "mdgrey" else ""
-                })(tags.a(entry.name, cursor := "pointer", onclick := { () ⇒
+      marketIndex().map { mindex ⇒
+        for {
+          entry ← mindex.entries if tagFilter.exists(entry.tags)
+        } yield {
+          val isSelected = Some(entry) == selectedEntry()
+          Seq(
+            bs.div("docEntry")(
+              bs.div(bs.col_md_4 + " spacer7")(
+                tags.a(entry.name, cursor := "pointer", `class` := "whiteBold", onclick := { () ⇒
                   selectedEntry() = {
                     if (isSelected) None
                     else Some(entry)
                   }
                 })),
-                bs.td(col_md_1 + {
-                  if (isSelected) "mdgrey" else ""
-                })(tags.div(
-                  downloadButton(entry, () ⇒ {
-                    downloading() = downloading() :+ entry
-                    OMPost[Api].getMarketEntry(entry, manager.current.safePath() ++ entry.name).call().foreach { d ⇒
-                      downloading() = downloading().filterNot(_ == entry)
-                      if (downloading().isEmpty) close
-                      panels.treeNodePanel.refreshCurrentDirectory
-                    }
-                  })
-                )),
-                bs.td(col_md_6 + {
-                  if (isSelected) "mdgrey" else ""
-                })(tags.div(
-                  entry.tags.map { e ⇒ bs.label(e, label_primary + "marketTag") }
-                ))
-              ),
-              bs.tr(row + "mdgrey")(
+              bs.div(bs.col_md_2)(downloadButton(entry, () ⇒ {
+                downloading() = downloading() :+ entry
+                OMPost[Api].getMarketEntry(entry, manager.current.safePath() ++ entry.name).call().foreach { d ⇒
+                  downloading() = downloading().filterNot(_ == entry)
+                  if (downloading().isEmpty) close
+                  panels.treeNodePanel.refreshCurrentDirectory
+                }
+              })),
+              bs.div(bs.col_md_6 + " spacer7")(
+                entry.tags.map { e ⇒ bs.label(e, label_primary + "marketTag") }
+              ), tags.div(
+                `class` := {
+                  if (isSelected) "docEntry" else ""
+                },
                 selectedEntry().map { se ⇒
-                  if (isSelected) tags.td(tags.div(`class` := "mdRendering")(
-                    RawFrag(entry.readme.getOrElse(""))))(colspan := 12)
+                  if (isSelected) tags.div(`class` := "mdRendering paddingTop40")(
+                    RawFrag(entry.readme.getOrElse("")))(colspan := 12)
                   else tags.div()
                 }
               )
             )
-          }.render
-        }
+          )
+        }.render
       }
-      )
     }
   )
 

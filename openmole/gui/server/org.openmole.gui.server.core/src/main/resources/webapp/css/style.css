@@ -64,6 +64,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer5 {
     margin-top: 5px;
 }
+.spacer7 {
+    margin-top: 7px;
+}
 .spacer4 {
     margin-top: 4px;
 }
@@ -464,8 +467,13 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .marketTag {
     margin-left: 3px;
+    font-size: 14px;
+    position: relative;
+    top: 4px;
 }
+
 .loading {
+    font-weight: bold;
     animation-duration: 4s;
     animation-iteration-count: infinite;
     animation-name: blinker;
@@ -598,6 +606,10 @@ label {
     padding-bottom: 7px;
 }
 
+.paddingTop40{
+    padding-top: 40px;
+}
+
 span.label.control-label{
     color: black;
 }
@@ -671,6 +683,13 @@ span.label.control-label{
     font-weight: bold;
 }
 
+.label.label-primary{
+    background-color: #3086b5;
+    border: #3086b5 solid 1px;
+    color: white;
+    font-weight: bold;
+}
+
 .btn.btn-default{
     background-color: white;
     color: #808080;
@@ -684,7 +703,7 @@ span.label.control-label{
 .glyphText{
     color: #a6bf26;
     font-size: 22px;
-    padding: 4 5;
+    padding-right: 5px;
 }
 
 .docTitleEntry{
@@ -697,10 +716,11 @@ span.label.control-label{
     background-color: #333;
     border-radius: 3px;
     margin-top: 3px;
-    padding-top: 4px;
+    padding-top: 6px;
+    vertical-align: middle;
     padding-bottom:4px;
     padding-left: 5px;
-    min-height: 30px;
+    min-height: 46px;
 }
 
 .docContent{
@@ -718,5 +738,15 @@ span.label.control-label{
 
 .greenBold{
     color: #a6bf26;
+    font-weight: bold;
+}
+
+.whiteBold{
+    color: white;
+    font-weight: bold;
+}
+
+.whiteBold:hover{
+    color: white;
     font-weight: bold;
 }
