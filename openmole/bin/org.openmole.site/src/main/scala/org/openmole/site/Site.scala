@@ -34,17 +34,6 @@ import org.openmole.site.credits._
 import org.openmole.core.buildinfo
 
 object Site {
-  def analytics =
-    script(`type` := "text/javascript")(
-      """
-        |	var _gaq = _gaq || [];
-        |	_gaq.push(['_setAccount', 'UA-25912998-1']);_gaq.push(['_trackPageview']);
-        |	(function() {
-        |		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        |		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        |		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-        |	})();
-      """.stripMargin)
 
   def piwik =
     RawFrag("""
@@ -117,7 +106,6 @@ class Site extends IApplication {
           link(rel := "stylesheet", href := Resource.css.file),
           meta(charset := "UTF-8"),
           script(src := "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"),
-          analytics,
           piwik
         )
 
