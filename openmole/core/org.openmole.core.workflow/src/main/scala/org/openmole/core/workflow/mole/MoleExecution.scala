@@ -34,8 +34,7 @@ import org.openmole.tool.logger.Logger
 import scala.collection.mutable.{ ListBuffer, Buffer }
 import scala.concurrent.stm._
 import org.openmole.core.workflow.execution.{ ExecutionJob, ExecutionState, JobList, Environment }
-import java.util.{ TreeMap ⇒ JTreeMap }
-import collection.JavaConversions._
+import java.util.{ HashSet ⇒ JHashSet }
 
 object MoleExecution extends Logger {
 
@@ -210,28 +209,30 @@ class MoleExecution(
   }
 
   def jobStatuses: JobStatuses = {
-    val executionJobsGroup = {
+    val jobs = moleJobs
+
+    val runningSet: JHashSet[UUID] = {
       def executionJobs =
         environments.values.toSeq.collect { case e: JobList ⇒ e }.toIterator.flatMap(_.jobs.toIterator)
 
-      val treeMap = new JTreeMap[UUID, ListBuffer[ExecutionJob]]()
+      val set = new JHashSet[UUID](jobs.size + 1, 1.0f)
 
       for {
         ej ← executionJobs
+        if (ej.state == ExecutionState.RUNNING)
         mj ← ej.moleJobs
-      } treeMap.getOrElseUpdate(mj.id, ListBuffer()) += ej
+      } set.add(mj.id)
 
-      treeMap
+      set
     }
 
-    def isRunningOnEnvironment(moleJob: MoleJob): Boolean =
-      executionJobsGroup.getOrElse(moleJob.id, Nil).exists(_.state == ExecutionState.RUNNING)
+    def isRunningOnEnvironment(moleJob: MoleJob): Boolean = runningSet.contains(moleJob.id)
 
     var ready = 0L
     var running = 0L
 
     for {
-      moleJob ← moleJobs
+      moleJob ← jobs
     } {
       if (isRunningOnEnvironment(moleJob)) running += 1
       else
