@@ -56,13 +56,13 @@ class MarketPanel extends ModalPanel {
                     else Some(entry)
                   }
                 })),
-              bs.div(bs.col_md_1)(downloadButton(entry, () ⇒ {
+              bs.div(bs.col_md_2)(downloadButton(entry, () ⇒ {
                 OMPost[Api].exists(manager.current.safePath() ++ entry.name).call().foreach { b ⇒
                   if (b) overwriteAlert() = Some(entry)
                   else download(entry)
                 }
               })),
-              bs.div(bs.col_md_8 + " spacer7")(
+              bs.div(bs.col_md_7 + " spacer7")(
                 entry.tags.map { e ⇒ bs.label(e, label_primary + "marketTag") }
               ), tags.div(
                 `class` := {
