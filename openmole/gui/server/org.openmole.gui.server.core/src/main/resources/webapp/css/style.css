@@ -67,6 +67,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer7 {
     margin-top: 7px;
 }
+.spacer9 {
+    margin-top: 9px;
+}
 .spacer4 {
     margin-top: 4px;
 }
@@ -709,6 +712,7 @@ span.label.control-label{
 .docTitleEntry{
     font-weight: bold;
     cursor: pointer;
+    padding-top: 6px;
 }
 
 .docEntry{
