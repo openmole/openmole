@@ -18,6 +18,8 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.core.buildinfo.{ MarketIndex, MarketIndexEntry }
+import org.openmole.gui.client.core.AbsolutePositioning.CenterTransform
+import org.openmole.gui.ext.data.SafePath
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, InputFilter }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.shared.Api
@@ -36,6 +38,7 @@ class MarketPanel extends ModalPanel {
   val tagFilter = InputFilter(pHolder = "Filter")
   val selectedEntry: Var[Option[MarketIndexEntry]] = Var(None)
   val downloading: Var[Seq[MarketIndexEntry]] = Var(Seq())
+  val overwriteAlert: Var[Option[MarketIndexEntry]] = Var(None)
 
   lazy val marketTable = tags.div(`class` := "spacer20",
     Rx {
@@ -54,11 +57,9 @@ class MarketPanel extends ModalPanel {
                   }
                 })),
               bs.div(bs.col_md_2)(downloadButton(entry, () ⇒ {
-                downloading() = downloading() :+ entry
-                OMPost[Api].getMarketEntry(entry, manager.current.safePath() ++ entry.name).call().foreach { d ⇒
-                  downloading() = downloading().filterNot(_ == entry)
-                  if (downloading().isEmpty) close
-                  panels.treeNodePanel.refreshCurrentDirectory
+                OMPost[Api].exists(manager.current.safePath() ++ entry.name).call().foreach { b ⇒
+                  if (b) overwriteAlert() = Some(entry)
+                  else download(entry)
                 }
               })),
               bs.div(bs.col_md_6 + " spacer7")(
@@ -80,12 +81,22 @@ class MarketPanel extends ModalPanel {
     }
   )
 
+  def download(entry: MarketIndexEntry) = {
+    val path = manager.current.safePath() ++ entry.name
+    downloading() = downloading() :+ entry
+    OMPost[Api].getMarketEntry(entry, path).call().foreach { d ⇒
+      downloading() = downloading().filterNot(_ == entry)
+      if (downloading().isEmpty) close
+      panels.treeNodePanel.refreshCurrentDirectory
+    }
+  }
+
   def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) =
     if (downloading().contains(entry)) {
       bs.waitingSpan(" Downloading", btn_danger)
     }
     else if (Some(entry) == selectedEntry()) {
-      bs.glyphButton(" Download", btn_success, glyph_download_alt, todo)
+      bs.glyphButton(" Download", btn_success + " redBackground", glyph_download_alt, todo)
     }
     else tags.div
 
@@ -102,11 +113,29 @@ class MarketPanel extends ModalPanel {
     headerDialog(
       tags.span(tags.b("Market place"))
     ),
-    bodyDialog(
+    bodyDialog({
+      Rx {
+        overwriteAlert() match {
+          case Some(e: MarketIndexEntry) ⇒
+            AlertPanel.popup(e.name + " already exists. Overwrite ? ",
+              () ⇒ {
+                overwriteAlert() = None
+                OMPost[Api].deleteFile(manager.current.safePath() ++ e.name).call().foreach { d ⇒
+                  download(e)
+                }
+              }, () ⇒ {
+                overwriteAlert() = None
+              }, CenterTransform())
+            tags.div
+          case _ ⇒
+        }
+      }
       tags.div(
         tagFilter.tag,
         marketTable
-      )),
+      )
+    }
+    ),
     footerDialog(closeButton)
   )
 

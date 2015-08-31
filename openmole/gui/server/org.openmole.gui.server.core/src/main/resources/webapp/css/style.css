@@ -551,7 +551,7 @@ label {
     height: 100%;
     position: absolute;
     width: 100%;
-    z-index: 999;
+    z-index: 1200;
     text-align: right;
 }
 
@@ -749,4 +749,8 @@ span.label.control-label{
 .whiteBold:hover{
     color: white;
     font-weight: bold;
+}
+.redBackground.btn{
+    background-color: #CC3A36;
+    border: 1px solid #CC3A36;
 }
