@@ -135,6 +135,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .dirText{
     padding-left: 27px;
 }
+.fileText{
+    padding-left: 0px;
+}
 .file-list {
     font-size: 14px;
     list-style-type: none;

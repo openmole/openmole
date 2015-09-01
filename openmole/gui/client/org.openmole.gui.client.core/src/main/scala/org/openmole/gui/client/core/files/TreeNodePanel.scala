@@ -337,7 +337,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         })),
       tags.div(
         clickablePair(classType, todo),
-        `class` := "fileNameOverflow",
+        `class` := "fileNameOverflow " + classType + "Text",
         tn.name()
       ).tooltip(tn.name(), condition = () ⇒ tn.name().length > 24),
       tags.div(`class` := "file-info",
