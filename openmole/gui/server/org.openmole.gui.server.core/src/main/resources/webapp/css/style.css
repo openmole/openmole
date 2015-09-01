@@ -527,10 +527,18 @@ div table tr {
 }
 .width40 {
     float: right;
-    padding-bottom: 5px;
-    position: relative;
-    top: -20px;
-    width: 180px;
+    width: 250px;
+    margin-right: -40px;
+    margin-top: -5px;
+}
+
+.execLevel{
+margin-right:-25px;
+margin-top: -3px;
+}
+.execOutput{
+margin-right:-10px;
+margin-top: -5px;
 }
 .blue {
     color: #3086b5;
@@ -544,7 +552,7 @@ label {
     width: 150px;
 }
 .executionHeader {
-    height: 70px;
+    height: 55px;
 }
 
 .alertOverlay{
@@ -757,4 +765,9 @@ span.label.control-label{
 .redBackground.btn{
     background-color: #CC3A36;
     border: 1px solid #CC3A36;
+}
+.labelInline{
+position: relative;
+display: inline;
+top: -6px;
 }
