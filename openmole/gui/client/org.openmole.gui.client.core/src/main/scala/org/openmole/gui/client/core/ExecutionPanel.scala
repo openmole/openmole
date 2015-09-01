@@ -123,7 +123,7 @@ class ExecutionPanel extends ModalPanel {
     (SelectableLevel(level, level.name), emptyCK)
   }, Some(envLevel()), btn_primary, () ⇒ errorLevelSelector.content().map { l ⇒ envLevel() = l.level })
 
-  val nbOutLineInput = bs.input("500")(`class` := "col-md-1", width := "60px").render
+  val nbOutLineInput = bs.input("500", "col-md-1")(width := "60px").render
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${completed} / ${completed + running + ready}"
 
