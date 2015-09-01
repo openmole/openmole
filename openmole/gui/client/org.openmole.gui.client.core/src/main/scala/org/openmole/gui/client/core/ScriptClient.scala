@@ -223,7 +223,10 @@ object ScriptClient {
             "centerpanel " + {
               if (openFileTree()) "reduce" else ""
             }
-          })(treeNodePanel.fileDisplayer.tabs.render)
+          })(treeNodePanel.fileDisplayer.tabs.render,
+            tags.img(src := "img/version.svg", `class` := "logoVersion"),
+            tags.div("Loving Lobster", `class` := "textVersion")
+          )
 
         ).render
       )
