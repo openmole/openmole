@@ -197,12 +197,7 @@ object ScriptClient {
         docItem
       )
     )
-    maindiv.appendChild(tags.div(
-      tags.h1(`class` := "openmole-pen openmole-small openmole-pen-small-position")("Open"),
-      tags.h1(`class` := "openmole-mole openmole-small openmole-mole-small-position")("MOLE"),
-      tags.h1(`class` := "openmole-small openmole-version")("5"),
-      shutdownButton
-    ))
+    maindiv.appendChild(tags.div(shutdownButton))
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)
@@ -223,7 +218,10 @@ object ScriptClient {
             "centerpanel " + {
               if (openFileTree()) "reduce" else ""
             }
-          })(treeNodePanel.fileDisplayer.tabs.render)
+          })(treeNodePanel.fileDisplayer.tabs.render,
+            tags.img(src := "img/version.svg", `class` := "logoVersion"),
+            tags.div("Loving Lobster", `class` := "textVersion")
+          )
 
         ).render
       )

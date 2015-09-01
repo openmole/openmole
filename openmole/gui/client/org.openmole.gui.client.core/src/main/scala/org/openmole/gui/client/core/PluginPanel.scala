@@ -83,7 +83,7 @@ class PluginPanel extends ModalPanel {
                   if (lineHovered()) "-hover" else ""
                 }
               },
-              glyphSpan(glyph_trash, () ⇒ removePlugin(p))(id := "glyphtrash", `class` := "glyphitem grey spacer4")
+              glyphSpan(glyph_trash, () ⇒ removePlugin(p))(id := "glyphtrash", `class` := "glyphitem grey spacer9")
             )
           )
       }

@@ -123,7 +123,7 @@ class ExecutionPanel extends ModalPanel {
     (SelectableLevel(level, level.name), emptyCK)
   }, Some(envLevel()), btn_primary, () ⇒ errorLevelSelector.content().map { l ⇒ envLevel() = l.level })
 
-  val nbOutLineInput = bs.input("500")(width := "60px").render
+  val nbOutLineInput = bs.input("500", "col-md-1")(width := "60px").render
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${completed} / ${completed + running + ready}"
 
@@ -292,12 +292,12 @@ class ExecutionPanel extends ModalPanel {
         tags.b("Executions"),
         tags.div(
           bs.div("width40")(
-            tags.label("Output history "),
+            tags.label(`class` := "col-md-4 execOutput", "Output history"),
             nbOutLineInput
           ),
           bs.div("width40")(
-            tags.label("Environment error level "),
-            errorLevelSelector.selector
+            tags.label(`class` := "col-md-6 execLevel","Environment error level "),
+            bs.div( "col-md-1")(errorLevelSelector.selector)
           )
         )
       )),

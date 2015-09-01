@@ -31,10 +31,10 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .black-label {
     color: black;
 }
-#settingsPanelID, #executionsPanelID .modal-dialog{
+#marketPanelID .modal-dialog, #settingsPanelID, #executionsPanelID .modal-dialog{
     width: 70%;
 }
-#marketPanelID .modal-dialog, #envStackID .modal-dialog, #documentationID .modal-dialog {
+ #envStackID .modal-dialog, #documentationID .modal-dialog {
     width: 60%;
 }
 .table tbody > tr > td.vert-align {
@@ -66,6 +66,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .spacer7 {
     margin-top: 7px;
+}
+.spacer9 {
+    margin-top: 9px;
 }
 .spacer4 {
     margin-top: 4px;
@@ -128,6 +131,12 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     margin-bottom: 5px;
     padding: 3px 4px;
     width: 22px;
+}
+.dirText{
+    padding-left: 27px;
+}
+.fileText{
+    padding-left: 0px;
 }
 .file-list {
     font-size: 14px;
@@ -257,10 +266,12 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .fullpanel .reduce {
     left: 330px;
     padding-right: 340px;
-    position: relative;
-    top: 30px;
+    position: fixed;
+    top: 60px;
     transition: all 0.1s ease-out 0s;
     width: 99%;
+    height: calc(100% - 140px);
+  
 }
 .fullpanel .open {
     left: 0;
@@ -524,10 +535,18 @@ div table tr {
 }
 .width40 {
     float: right;
-    padding-bottom: 5px;
-    position: relative;
-    top: -20px;
-    width: 180px;
+    width: 250px;
+    margin-right: -40px;
+    margin-top: -5px;
+}
+
+.execLevel{
+margin-right:-25px;
+margin-top: -3px;
+}
+.execOutput{
+margin-right:-10px;
+margin-top: -5px;
 }
 .blue {
     color: #3086b5;
@@ -541,7 +560,7 @@ label {
     width: 150px;
 }
 .executionHeader {
-    height: 70px;
+    height: 55px;
 }
 
 .alertOverlay{
@@ -592,10 +611,8 @@ label {
     overflow: hidden;
     width: 13em;
     padding-top: 2px;
-    padding-left: 0.4em;
     position: absolute;
     text-overflow: ellipsis;
-    padding-left: 27px;
 }
 
 .bold{
@@ -612,6 +629,7 @@ label {
 
 span.label.control-label{
     color: black;
+    font-size: 0.9em;
 }
 
 .openmole-logo{
@@ -619,15 +637,6 @@ span.label.control-label{
     width: 300px;
     top: -10px;
     right: calc(50% - 25px) ;
-}
-
-.openmole-small{
-    font-family: Bevan;
-    position: fixed;
-    font-size: 2em;
-    width: 100px;
-    top: -15px;
-    z-index: 10;
 }
 
 .openmole-connection{
@@ -647,23 +656,8 @@ span.label.control-label{
     color: #808080;
 }
 
-.openmole-version{
-    color: #ff5555;
-    right: 40px;
-    top: -20px;
-    font-size: 2.5em;
-}
-
 .openmole-mole-connection-position{
     right: calc(50% - 210px);
-}
-
-.openmole-mole-small-position{
-    right: 150px;
-}
-
-.openmole-pen-small-position{
-    right: 234px;
 }
 
 .openmole-mole{
@@ -709,6 +703,7 @@ span.label.control-label{
 .docTitleEntry{
     font-weight: bold;
     cursor: pointer;
+    padding-top: 6px;
 }
 
 .docEntry{
@@ -753,4 +748,31 @@ span.label.control-label{
 .redBackground.btn{
     background-color: #CC3A36;
     border: 1px solid #CC3A36;
+}
+
+.labelInline{
+position: relative;
+display: inline;
+top: -6px;
+}
+
+.logoVersion{
+    width: 200px;
+    position: fixed;
+    bottom: 0;
+    right: 50;
+    z-index: -2;
+}
+
+.textVersion{
+    font-family: Bevan;
+    color: #ff5555;
+    position: fixed;
+    right: -40;
+    bottom: 0;
+    font-size: 2em;
+    width: 300px;
+    z-index: -1;
+    bottom: 7px;
+    height:30px;
 }

@@ -49,7 +49,7 @@ class MarketPanel extends ModalPanel {
           val isSelected = Some(entry) == selectedEntry()
           Seq(
             bs.div("docEntry")(
-              bs.div(bs.col_md_4 + " spacer7")(
+              bs.div(bs.col_md_3 + " spacer7")(
                 tags.a(entry.name, cursor := "pointer", `class` := "whiteBold", onclick := { () ⇒
                   selectedEntry() = {
                     if (isSelected) None
@@ -62,7 +62,7 @@ class MarketPanel extends ModalPanel {
                   else download(entry)
                 }
               })),
-              bs.div(bs.col_md_6 + " spacer7")(
+              bs.div(bs.col_md_7 + " spacer7")(
                 entry.tags.map { e ⇒ bs.label(e, label_primary + "marketTag") }
               ), tags.div(
                 `class` := {
