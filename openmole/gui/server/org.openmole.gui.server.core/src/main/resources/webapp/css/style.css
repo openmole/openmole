@@ -638,15 +638,6 @@ span.label.control-label{
     right: calc(50% - 25px) ;
 }
 
-.openmole-small{
-    font-family: Bevan;
-    position: fixed;
-    font-size: 2em;
-    width: 100px;
-    top: -15px;
-    z-index: 10;
-}
-
 .openmole-connection{
     font-family: Bevan;
     position: fixed;
@@ -664,23 +655,8 @@ span.label.control-label{
     color: #808080;
 }
 
-.openmole-version{
-    color: #ff5555;
-    right: 40px;
-    top: -20px;
-    font-size: 2.5em;
-}
-
 .openmole-mole-connection-position{
     right: calc(50% - 210px);
-}
-
-.openmole-mole-small-position{
-    right: 150px;
-}
-
-.openmole-pen-small-position{
-    right: 234px;
 }
 
 .openmole-mole{
