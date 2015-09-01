@@ -64,7 +64,7 @@ class Select[T <: Displayable with Identifiable](autoID: String,
     ul(`class` := "dropdown-menu", id := autoID)(
       Rx {
         for (c ← contents().zipWithIndex) yield {
-          scalatags.JsDom.tags.li(cursor := "pointer", onclick := { () ⇒
+          scalatags.JsDom.tags.li(cursor := "pointer", color := "black", onclick := { () ⇒
             content() = Some(contents()(c._2)._1)
             onclickExtra()
           })(c._1._1.name)

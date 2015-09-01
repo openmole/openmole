@@ -6,6 +6,9 @@
   GUIDoc.doc.render
   To run OpenMOLE, just run the openmole file (or openmole.bat for the windoz users). It will bring up you web browser. OpenMOLE supports Chrome and Firefox. So if you are using another default web browser please copy paste the OpenMOLE url (https://localhost:port) in one of these browser.
 
+@sect{Remote Editor}
+  To run OpenMOLE on a remote machine and connect to using a web browser you should run: @hl.highlight("openmole --webui-authentication --port portnumber", "plain"). The first time you launch it, it asks you for a password. Then you can remotely connect to OpenMOLE using the url https://remotemachine:portnumber. When you connect it asks you for the password you've entered previously.
+
 @sect{Headless mode}
   OpenMOLE proposes a headless mode for running scripts. You can enable it thanks to the -s option: @hl.highlight("./openmole -s /path/to/you/mole/script", "plain")
   @p In that case OpenMOLE still asks for your preferences cyphering password. To provide it at launch time use the -pw option: @hl.highlight("./openmole -s /path/to/your/mole/script -pw password", "plain")

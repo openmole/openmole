@@ -41,7 +41,6 @@ class PluginPanel extends ModalPanel {
   }
 
   def onClose() = {
-    println("clossssssse")
   }
 
   def getPlugins = {
@@ -56,7 +55,6 @@ class PluginPanel extends ModalPanel {
       FileManager.upload(fileInput,
         SafePath.empty,
         (p: FileTransferState) ⇒ {
-          println("Transfer: " + p.ratio + " " + p.display)
           transferring() = p
         },
         UploadPlugin(),
@@ -85,7 +83,7 @@ class PluginPanel extends ModalPanel {
                   if (lineHovered()) "-hover" else ""
                 }
               },
-              glyphSpan(glyph_trash, () ⇒ removePlugin(p))(id := "glyphtrash", `class` := "glyphitem grey spacer4")
+              glyphSpan(glyph_trash, () ⇒ removePlugin(p))(id := "glyphtrash", `class` := "glyphitem grey spacer9")
             )
           )
       }
@@ -99,7 +97,6 @@ class PluginPanel extends ModalPanel {
             getPlugins
             transferring() = Standby()
           case _ ⇒
-            println("transferring " + transferring())
             progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
         },
         tags.div(

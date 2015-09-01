@@ -63,51 +63,48 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
       val lineHovered: Var[Boolean] = Var(false)
 
       val render = Rx {
-        bs.tr(row)(
+        bs.div("docEntry")(
           onmouseover := { () ⇒
             lineHovered() = true
           },
           onmouseout := { () ⇒
             lineHovered() = false
-          },
-          tags.td(
-            tags.a(a.synthetic, `class` := "left", cursor := "pointer", onclick := { () ⇒
-              authenticationSelector.content() = Some(ClientService.authenticationUI(a))
-              setting() = Some(ClientService.panelUI(a))
-            })
-          ),
-          tags.td(bs.label(ClientService.authenticationUI(a).name, label_primary)),
-          tags.td(id := Rx {
-            "treeline" + {
-              if (lineHovered()) "-hover" else ""
-            }
           })(
-            glyphSpan(glyph_trash, () ⇒ removeAuthentication(a))(id := "glyphtrash", `class` := "glyphitem grey")
+            bs.div(bs.col_md_7)(
+              tags.a(a.synthetic, `class` := "left docTitleEntry whiteBold", cursor := "pointer", onclick := { () ⇒
+                authenticationSelector.content() = Some(ClientService.authenticationUI(a))
+                setting() = Some(ClientService.panelUI(a))
+              })
+            ),
+            bs.div(bs.col_md_4 + " spacer5")(bs.label(ClientService.authenticationUI(a).name, label_primary + " marketTag")),
+            tags.span(
+              id := Rx {
+                "treeline" + {
+                  if (lineHovered()) "-hover" else ""
+                }
+              },
+              glyphSpan(glyph_trash, () ⇒ removeAuthentication(a))(id := "glyphtrash", `class` := "glyphitem grey spacer9")
+            )
           )
-        )
       }
     }
 
-    bs.table(striped)(
-      thead,
-      Rx {
-        tbody({
-          setting() match {
-            case Some(p: PanelUI) ⇒ tags.div(
-              authenticationSelector.selector,
-              bs.div(spacer20)(p.view)
-            )
-            case _ ⇒
-              auths().map { aux ⇒
-                for (a ← aux) yield {
-                  Seq(Reactive(a).render)
-                }
+    Rx {
+      tags.div(
+        setting() match {
+          case Some(p: PanelUI) ⇒ tags.div(
+            authenticationSelector.selector,
+            bs.div(spacer20)(p.view)
+          )
+          case _ ⇒
+            auths().map { aux ⇒
+              for (a ← aux) yield {
+                Seq(Reactive(a).render)
               }
-          }
+            }
         }
-        )
-      }
-    )
+      )
+    }
   }
 
   val newButton = bs.glyphButton(glyph_plus, () ⇒ {
