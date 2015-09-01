@@ -629,6 +629,7 @@ label {
 
 span.label.control-label{
     color: black;
+    font-size: 0.9em;
 }
 
 .openmole-logo{
