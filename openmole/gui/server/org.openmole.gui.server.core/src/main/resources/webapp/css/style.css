@@ -260,10 +260,12 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .fullpanel .reduce {
     left: 330px;
     padding-right: 340px;
-    position: relative;
-    top: 30px;
+    position: fixed;
+    top: 60px;
     transition: all 0.1s ease-out 0s;
     width: 99%;
+    height: calc(100% - 140px);
+  
 }
 .fullpanel .open {
     left: 0;
@@ -766,8 +768,30 @@ span.label.control-label{
     background-color: #CC3A36;
     border: 1px solid #CC3A36;
 }
+
 .labelInline{
 position: relative;
 display: inline;
 top: -6px;
+}
+
+.logoVersion{
+    width: 200px;
+    position: fixed;
+    bottom: 0;
+    right: 50;
+    z-index: -2;
+}
+
+.textVersion{
+    font-family: Bevan;
+    color: #ff5555;
+    position: fixed;
+    right: -40;
+    bottom: 0;
+    font-size: 2em;
+    width: 300px;
+    z-index: -1;
+    bottom: 5px;
+     height:30px; 
 }
