@@ -132,6 +132,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     padding: 3px 4px;
     width: 22px;
 }
+.dirText{
+    padding-left: 27px;
+}
 .file-list {
     font-size: 14px;
     list-style-type: none;
@@ -605,10 +608,8 @@ label {
     overflow: hidden;
     width: 13em;
     padding-top: 2px;
-    padding-left: 0.4em;
     position: absolute;
     text-overflow: ellipsis;
-    padding-left: 27px;
 }
 
 .bold{
