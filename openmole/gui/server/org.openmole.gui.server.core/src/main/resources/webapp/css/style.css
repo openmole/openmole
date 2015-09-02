@@ -342,7 +342,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .executionTable table td {
     background-color: #333333;
-    color: #9ca7ba;
+    color: #ddd;
 }
 .executionTable table td.runningState {
     color: yellow;
