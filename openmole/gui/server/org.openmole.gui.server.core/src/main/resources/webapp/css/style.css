@@ -648,19 +648,13 @@ span.label.control-label{
     z-index: 10;
 }
 
-.openmole-pen-connection-position{
+.openmole-pen{
+    color: #808080;
     right: calc(50% - 70px);
 }
 
-.openmole-pen{
-    color: #808080;
-}
-
-.openmole-mole-connection-position{
-    right: calc(50% - 210px);
-}
-
 .openmole-mole{
+    right: calc(50% - 210px);
     color: #a6bf26;
 }
 

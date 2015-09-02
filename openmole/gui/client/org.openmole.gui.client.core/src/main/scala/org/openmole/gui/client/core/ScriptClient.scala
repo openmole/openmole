@@ -123,8 +123,8 @@ object ScriptClient {
     val alert: Var[Boolean] = Var(false)
 
     val openmoleText = tags.div(
-      tags.h1(`class` := "openmole-connection openmole-pen openmole-pen-connection-position")("pen"),
-      tags.h1(`class` := "openmole-connection openmole-mole openmole-mole-connection-position")("MOLE")
+      tags.h1(`class` := "openmole-connection openmole-pen")("pen"),
+      tags.h1(`class` := "openmole-connection openmole-mole")("MOLE")
     )
 
     val connectionDiv = tags.div(`class` := Rx {
