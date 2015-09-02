@@ -1,6 +1,6 @@
 package org.openmole.gui.misc.js
 
-import org.openmole.gui.misc.js.BootstrapTags._
+import fr.iscpif.scaladget.api.BootstrapTags._
 import org.scalajs.dom.raw.{HTMLDivElement, HTMLElement}
 import org.scalajs.jquery
 import scalatags.JsDom.{tags, TypedTag}
@@ -24,6 +24,19 @@ import fr.iscpif.scaladget.tooltipster._
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+object Tooltip {
+
+  implicit class TypedTagDecorator[T <: HTMLElement](typedTag: TypedTag[T]) {
+
+    def tooltip(message: String,
+                direction: Direction = BottomDirection(),
+                level: TooltipLevel = DefaultTooltipLevel(),
+                condition: () => Boolean = () => true): HTMLDivElement =
+      if (condition()) ToolTipHelp(message, direction, level)(typedTag)
+      else tags.div(typedTag).render
+  }
+
+}
 
 trait Direction {
   def direction: String
@@ -68,7 +81,7 @@ trait Help {
   }
 }
 
-case class ToolTip(message: String,
+case class ToolTipHelp(message: String,
                    placement: Direction = BottomDirection(),
                    level: TooltipLevel = DefaultTooltipLevel()) extends Help
 

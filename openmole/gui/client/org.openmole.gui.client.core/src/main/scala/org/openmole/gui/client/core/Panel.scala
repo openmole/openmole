@@ -1,21 +1,14 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client
-import org.openmole.gui.client.core.PrototypeFactoryUI.DoubleDataUI
 import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.ext.dataui.FactoryWithDataUI
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, RightDirection, InputFilter, Select }
-import org.scalajs.dom
-import org.scalajs.dom.Event
-import org.scalajs.dom.raw.Event
-import org.scalajs.jquery._
+import org.openmole.gui.misc.js.{ InputFilter, Select }
 import org.openmole.gui.misc.utils.Utils._
-import scala.scalajs.js.annotation.JSExport
-import scala.sys.Prop.DoubleProp
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.BootstrapTags._
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.ext.data.ProtoTYPE.DOUBLE
+import bs._
 import ClientService._
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._

@@ -17,23 +17,25 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import fr.iscpif.scaladget.api.{BootstrapTags=> bs, ClassKeyAggregator}
+import bs._
 import rx._
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
+import scalatags.JsDom.{ tags ⇒ tags }
 
 object Select {
   def apply[T <: Displayable with Identifiable](autoID: String,
                                                 contents: Seq[(T, ClassKeyAggregator)],
                                                 default: Option[T],
-                                                key: ClassKeyAggregator = BootstrapTags.emptyCK,
+                                                key: ClassKeyAggregator = emptyCK,
                                                 onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, onclickExtra)
 }
 
 class Select[T <: Displayable with Identifiable](autoID: String,
                                                  val contents: Var[Seq[(T, ClassKeyAggregator)]],
                                                  default: Option[T] = None,
-                                                 key: ClassKeyAggregator = BootstrapTags.emptyCK,
+                                                 key: ClassKeyAggregator = emptyCK,
                                                  onclickExtra: () ⇒ Unit = () ⇒ {}) {
 
   val content: Var[Option[T]] = Var(contents().size match {
@@ -48,8 +50,8 @@ class Select[T <: Displayable with Identifiable](autoID: String,
 
   val glyphMap = contents().toMap
 
-  val selector = BootstrapTags.buttonGroup()(
-    span(
+  val selector = buttonGroup()(
+    tags.span(
       `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", cursor := "pointer")(
         Rx {
           content().map { c ⇒ bs.glyph(glyphMap(c)) }
@@ -59,7 +61,7 @@ class Select[T <: Displayable with Identifiable](autoID: String,
             _.name
           }.getOrElse(contents()(0)._1.name) + " "
         },
-        span(`class` := "caret")
+        bs.span("caret")
       ).render,
     ul(`class` := "dropdown-menu", id := autoID)(
       Rx {

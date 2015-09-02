@@ -19,12 +19,8 @@ package org.openmole.gui.plugin.task.exploration.client
 
 import org.openmole.gui.client.core.files.EditorPanelUI
 import org.openmole.gui.ext.dataui.PanelUI
-import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{BootstrapTags => bs}
-import scalatags.JsDom.{tags ⇒ tags}
+import fr.iscpif.scaladget.api.{BootstrapTags => bs}
 import scala.scalajs.js.annotation.JSExport
-import scalatags.JsDom.all._
-import scalatags.JsDom.tags
 
 @JSExport("org.openmole.gui.plugin.task.exploration.client.ExplorationTaskPanelUI")
 class ExplorationTaskPanelUI(dataUI: ExplorationTaskDataUI) extends PanelUI {

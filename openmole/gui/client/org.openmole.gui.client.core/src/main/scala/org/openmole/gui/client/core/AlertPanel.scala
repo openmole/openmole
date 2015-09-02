@@ -18,7 +18,7 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.gui.client.core.AbsolutePositioning.{ Zone, FullPage, CenterTransform, Transform }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
 import org.scalajs.dom.html.Div
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }

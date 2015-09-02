@@ -18,12 +18,8 @@ package org.openmole.gui.plugin.environment.egi.client
  */
 
 import org.openmole.gui.ext.dataui.PanelUI
-import scalatags.Text.all._
 import scala.scalajs.js.annotation.JSExport
-import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{BootstrapTags=> bs}
-import scalatags.JsDom.{ tags ⇒ tags }
-import rx._
+import fr.iscpif.scaladget.api.{BootstrapTags => bs}
 
 @JSExport("org.openmole.gui.plugin.environment.egi.client.EGIEnvironmentPanelUI")
 class EGIEnvironmentPanelUI(dataUI: EGIEnvironmentDataUI) extends PanelUI {

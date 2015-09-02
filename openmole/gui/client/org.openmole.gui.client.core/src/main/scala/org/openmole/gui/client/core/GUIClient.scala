@@ -20,11 +20,11 @@ import org.openmole.gui.client.core.dataui.DataBagUI
 import org.openmole.gui.client.core.files.TreeNodePanel
 import org.scalajs.dom.raw.Event
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.BootstrapTags._
+import fr.iscpif.scaladget.api.BootstrapTags._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.BootstrapTags._
+import fr.iscpif.scaladget.api.BootstrapTags._
 
 import org.scalajs.{ jquery, dom }
 
@@ -71,14 +71,14 @@ object GUIClient {
       val modalPanel = new ExecutionPanel
     }
 
-    val execItem = dialogNavItem("executions", "Executions", () ⇒ executionTriggerer.triggerOpen)
-    val settingsItem = dialogNavItem("settings", "Settings", () ⇒ settingsTriggerer.triggerOpen)
+    // val execItem = dialogNavItem("executions", "Executions", () ⇒ executionTriggerer.triggerOpen)
+    // val settingsItem = dialogNavItem("settings", "Settings", () ⇒ settingsTriggerer.triggerOpen)
 
     topdiv.appendChild(
       nav("mainNav",
-        nav_pills + nav_inverse + nav_staticTop,
-        settingsItem,
-        execItem
+        nav_pills + nav_inverse + nav_staticTop
+      //   settingsItem,
+      //   execItem
       )
     )
 

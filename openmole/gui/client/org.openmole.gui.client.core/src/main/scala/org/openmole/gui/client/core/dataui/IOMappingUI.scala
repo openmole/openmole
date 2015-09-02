@@ -1,8 +1,8 @@
 package org.openmole.gui.client.core.dataui
 
-import org.openmole.gui.client.core.PrototypeFactoryUI.GenericPrototypeDataUI
 import org.openmole.gui.ext.dataui.PanelUI
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select, Displayable, Identifiable }
+import org.openmole.gui.misc.js.{Select, Displayable, Identifiable }
+import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom.TypedTag

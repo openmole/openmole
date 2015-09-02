@@ -20,7 +20,8 @@ package org.openmole.gui.client.core
 import org.openmole.gui.ext.dataui.{ AuthenticationFactoryUI, PanelUI }
 import org.openmole.gui.shared.Api
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select }
+import org.openmole.gui.misc.js.Select
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow

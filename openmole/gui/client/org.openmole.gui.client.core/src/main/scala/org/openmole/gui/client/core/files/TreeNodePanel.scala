@@ -1,24 +1,24 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.AbsolutePositioning.{ FileZone, CenterTransform }
+import org.openmole.gui.client.core.AbsolutePositioning.FileZone
 import org.openmole.gui.client.core.{ panels, AlertPanel, PanelTriggerer, OMPost }
 import org.openmole.gui.ext.data.{ FileExtension, UploadProject }
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
-import org.openmole.gui.misc.js.BootstrapTags._
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.{ HTMLInputElement, DragEvent }
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, _ }
+import org.openmole.gui.misc.js.{ _ }
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.utils.Utils._
-import org.openmole.gui.client.core.Settings._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import org.openmole.gui.misc.js.Tooltip._
 import TreeNode._
 import autowire._
 import rx._
+import bs._
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
