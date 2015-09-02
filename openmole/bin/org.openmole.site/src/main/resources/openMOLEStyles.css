@@ -126,10 +126,12 @@ pre {
 /* Custom Stuff */
 .scalatex-content a:link {
   color: #6A7224;
+  font-weight: bold;
   text-decoration: none;
 }
 .scalatex-content a:visited {
   color: #6A7224;
+  font-weight: bold;
   text-decoration: none;
 }
 .scalatex-content a:hover {
