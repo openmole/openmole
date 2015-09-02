@@ -63,3 +63,6 @@ $tasks
     @li{include your program in the @a("task documentation", href := root.language.task.file),}
     @li{define your environment in the @a("environment documentation", href := root.language.environment.file),}
     @li{describe your design of experiments in the @a("sampling documentation", href := root.language.sampling.file).}
+
+@sect{Get help}
+  To get help you are more than welcome to contact the OpenMOLE user mailing list. To do so, you should @a("subscribe here", href := "http://list.openmole.org/"), and then you can post your question to the list users 'at' list.openmole.org.
