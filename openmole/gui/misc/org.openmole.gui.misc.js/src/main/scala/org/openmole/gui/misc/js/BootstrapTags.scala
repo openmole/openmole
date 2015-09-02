@@ -247,11 +247,6 @@ object BootstrapTags {
     )
   }
 
-  def uploadButton2(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
-    span("btn-file")(
-      glyph(glyph_upload)(fileInput(todo))
-    )
-
   def uploadGlyphSpan(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
     span("btn-file")(
       glyph(glyph_upload),
