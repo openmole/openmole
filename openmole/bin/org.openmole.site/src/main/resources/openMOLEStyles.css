@@ -115,7 +115,7 @@ pre {
 .scalatex-content {
   margin: 0 auto;
   padding-bottom: 50px;
-  color: #777;
+  color: #555;
 }
 
 .amenu {
@@ -161,4 +161,10 @@ pre {
 /*Workaround for bug in highlight.js IDEA theme*/
 span.hljs-tag, span.hljs-symbol{
   background: none;
+}
+
+.uiScreenshot{
+  width: 950px;
+  padding-top: 20px;
+  margin-left: -150px;
 }

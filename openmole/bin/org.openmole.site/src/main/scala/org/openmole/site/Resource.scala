@@ -39,6 +39,7 @@ object Resource {
   def fireOldSetup = FileResource("fireOldSetup.png")
   def fireRemoveClearAll = FileResource("fireRemoveClearAll.png")
   def logo = FileResource("openmole.png")
+  def uiScreenshot = FileResource("openmoleUI.png")
   def openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfo.version}.tar.gz")
   def openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfo.version}.tar.gz")
   def api = ArchiveResource("openmole-api.tar.gz", "api")
@@ -60,7 +61,8 @@ object Resource {
     fireNewGlobals,
     fireNewFunction,
     fireOldSetup,
-    fireRemoveClearAll)
+    fireRemoveClearAll,
+    uiScreenshot)
 }
 
 sealed trait Resource
