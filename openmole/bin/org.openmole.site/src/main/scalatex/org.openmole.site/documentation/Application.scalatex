@@ -3,6 +3,9 @@
 
 @sect{Editor}
   To run OpenMOLE, just run the openmole file (or openmole.bat for the windoz users). It will bring up you web browser. OpenMOLE supports Chrome and Firefox. So if you are using another default web browser please copy paste the OpenMOLE url (https://localhost:port) in one of these browser.
+  @p At the first connection, you might get some messages from your browser like "Your connection is not private". Just accept to continue on the site localhost, as it should be proposed.
+  Then, you should see something like this (all the documentation concerning the application is provided in the application itself (the last green icon in the top bar)):
+  @img(src := Resource.uiScreenshot.file, `class` := "uiScreenshot")
 
 @sect{Remote Editor}
   To run OpenMOLE on a remote machine and connect to using a web browser you should run: @hl.highlight("openmole --webui-authentication --port portnumber", "plain"). The first time you launch it, it asks you for a password. Then you can remotely connect to OpenMOLE using the url https://remotemachine:portnumber. When you connect it asks you for the password you've entered previously.

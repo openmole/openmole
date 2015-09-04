@@ -70,13 +70,13 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
           onmouseout := { () ⇒
             lineHovered() = false
           })(
-            bs.div(bs.col_md_7)(
+            bs.div(col_md_7)(
               tags.a(a.synthetic, `class` := "left docTitleEntry whiteBold", cursor := "pointer", onclick := { () ⇒
                 authenticationSelector.content() = Some(ClientService.authenticationUI(a))
                 setting() = Some(ClientService.panelUI(a))
               })
             ),
-            bs.div(bs.col_md_4 + " spacer5")(bs.label(ClientService.authenticationUI(a).name, label_primary + " marketTag")),
+            bs.div(col_md_4 + " spacer5")(bs.label(ClientService.authenticationUI(a).name, label_primary + " marketTag")),
             tags.span(
               id := Rx {
                 "treeline" + {
