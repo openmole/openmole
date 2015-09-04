@@ -124,7 +124,9 @@ abstract class SystemExecTask(
 
           val retCode = execute(commandline, out, err)
           if (errorOnReturnCode && retCode != 0)
-            throw new InternalProcessingError(s"""Error executing ${if (cmd.isRemote) "remote command"}: [${commandline.mkString(" ")}] return code was not 0 but ${retCode}""")
+            throw new InternalProcessingError(
+              s"""Error executing ${if (cmd.isRemote) "remote command"}:
+                 |[${commandline.mkString(" ")}] return code was not 0 but ${retCode}""".stripMargin)
 
           if (t.isEmpty || retCode != 0) retCode
           else execAll(t)
