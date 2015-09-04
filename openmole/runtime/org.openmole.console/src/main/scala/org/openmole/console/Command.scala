@@ -77,7 +77,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     println(s"Completed: ${statuses.completed}")
     moleExecution.exception match {
       case Some(e) ⇒
-        System.out.println(s"Mole execution failed while execution ${e.capsule}:")
+        System.out.println(s"Mole execution failed while executing ${e.capsule}:")
         System.out.println(exceptionToString(e.exception))
       case None ⇒
     }
