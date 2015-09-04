@@ -96,7 +96,7 @@ abstract class CopyFileHook extends Hook {
         None
       }
       else {
-        from.copyContent(to)
+        from.copy(to)
         None
       }
 
