@@ -117,24 +117,16 @@ abstract class SystemExecTask(
       cmds match {
         case Nil ⇒ 0
         case cmd :: t ⇒
-
           // commands in a task marked as remote are not executed from the working directory
-          val commandline = {
-            if (cmd.isRemote) {
-              commandLine(cmd.expandedCommand, basePath = "", separator = "")
-            }
+          val commandline =
+            if (cmd.isRemote) commandLine(cmd.expandedCommand, basePath = "", separator = "")
             else commandLine(cmd.expandedCommand)
-          }
 
           val retCode = execute(commandline, out, err)
-          if (errorOnReturnCode && retCode != 0) {
-            throw new InternalProcessingError(s"""
-                                              Error executing ${if (cmd.isRemote) "remote command"}:
-                                              [${commandline.mkString(" ")}] return code was not 0 but ${retCode}
-                                              """)
-          }
+          if (errorOnReturnCode && retCode != 0)
+            throw new InternalProcessingError(s"""Error executing ${if (cmd.isRemote) "remote command"}: [${commandline.mkString(" ")}] return code was not 0 but ${retCode}""")
 
-          if (t.isEmpty || (!errorOnReturnCode && retCode != 0)) retCode
+          if (t.isEmpty || retCode != 0) retCode
           else execAll(t)
       }
 
