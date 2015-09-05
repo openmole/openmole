@@ -22,7 +22,7 @@ import java.util.logging.Level
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.{ UserBadDataError, MultipleException }
 import org.openmole.core.tools.service.{ Priority, Random }
-import org.openmole.core.workflow.mole.MoleExecution.{ JobFailed, ExceptionRaised }
+import org.openmole.core.workflow.mole.MoleExecution.{ MoleExecutionFailed, JobFailed, ExceptionRaised }
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.job.State._
@@ -44,12 +44,16 @@ object MoleExecution extends Logger {
   case class JobCreated(moleJob: MoleJob, capsule: Capsule) extends Event[MoleExecution]
   case class JobSubmitted(moleJob: Job, capsule: Capsule, environment: Environment) extends Event[MoleExecution]
   case class JobFinished(moleJob: MoleJob, capsule: Capsule) extends Event[MoleExecution]
-  case class JobFailed(moleJob: MoleJob, capsule: Capsule, exception: Throwable) extends Event[MoleExecution] with ExceptionEvent {
+
+  sealed trait MoleExecutionFailed extends ExceptionEvent {
+    def capsule: Capsule
+  }
+  case class JobFailed(moleJob: MoleJob, capsule: Capsule, exception: Throwable) extends Event[MoleExecution] with MoleExecutionFailed {
     def level = Level.SEVERE
   }
-  case class ExceptionRaised(moleJob: MoleJob, exception: Throwable, level: Level) extends Event[MoleExecution] with ExceptionEvent
-  case class SourceExceptionRaised(source: Source, capsule: Capsule, exception: Throwable, level: Level) extends Event[MoleExecution] with ExceptionEvent
-  case class HookExceptionRaised(hook: Hook, moleJob: MoleJob, exception: Throwable, level: Level) extends Event[MoleExecution] with ExceptionEvent
+  case class ExceptionRaised(moleJob: MoleJob, capsule: Capsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
+  case class SourceExceptionRaised(source: Source, capsule: Capsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
+  case class HookExceptionRaised(hook: Hook, capsule: Capsule, moleJob: MoleJob, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
 
   private def listOfTupleToMap[K, V](l: Traversable[(K, V)]): Map[K, Traversable[V]] = l.groupBy(_._1).mapValues(_.map(_._2))
 
@@ -105,7 +109,7 @@ class MoleExecution(
 
   val dataChannelRegistry = new RegistryWithTicket[DataChannel, Buffer[Variable[_]]]
 
-  val _exception = Ref(Option.empty[JobFailed])
+  val _exception = Ref(Option.empty[MoleExecutionFailed])
 
   def numberOfJobs = rootSubMoleExecution.numberOfJobs
 
@@ -182,7 +186,7 @@ class MoleExecution(
     this
   }
 
-  def cancel(t: JobFailed): this.type = {
+  def cancel(t: MoleExecutionFailed): this.type = {
     _exception.single() = Some(t)
     cancel
   }

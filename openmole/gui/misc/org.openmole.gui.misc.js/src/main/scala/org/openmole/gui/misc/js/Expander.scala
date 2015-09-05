@@ -1,11 +1,11 @@
 package org.openmole.gui.misc.js
 
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
+import bs._
 import rx._
 
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.all._
-import bs._
 
 /*
  * Copyright (C) 09/06/15 // mathieu.leclaire@openmole.org

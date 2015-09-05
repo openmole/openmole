@@ -9,7 +9,7 @@ import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
-import org.openmole.gui.misc.js.{BootstrapTags => bs}
+import fr.iscpif.scaladget.api.{BootstrapTags => bs}
 import scalatags.JsDom.{tags ⇒ tags}
 import bs._
 

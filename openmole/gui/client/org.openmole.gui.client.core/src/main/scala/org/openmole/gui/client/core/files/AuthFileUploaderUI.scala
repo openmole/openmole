@@ -18,10 +18,10 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.client.core.OMPost
+import org.openmole.gui.misc.utils.Utils
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.ext.data.{ UploadAuthentication, SafePath }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
-import bs._
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
@@ -32,7 +32,7 @@ import rx._
 
 class AuthFileUploaderUI(keyName: String, keySet: Boolean, renaming: Option[String] = None) {
 
-  val fileName = if (keyName == "") renaming.getOrElse(uuID) else keyName
+  val fileName = if (keyName == "") renaming.getOrElse(Utils.getUUID) else keyName
   val pathSet: Var[Boolean] = Var(keySet)
 
   lazy val upButton =

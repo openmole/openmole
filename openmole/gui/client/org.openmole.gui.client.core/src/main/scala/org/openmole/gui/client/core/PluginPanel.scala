@@ -5,9 +5,10 @@ import org.openmole.gui.ext.data.{ UploadPlugin, SafePath, Plugin }
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLInputElement
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.misc.js.Tooltip._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import bs._

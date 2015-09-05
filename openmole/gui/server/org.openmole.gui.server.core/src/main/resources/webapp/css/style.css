@@ -132,6 +132,12 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     padding: 3px 4px;
     width: 22px;
 }
+.dirText{
+    padding-left: 27px;
+}
+.fileText{
+    padding-left: 0px;
+}
 .file-list {
     font-size: 14px;
     list-style-type: none;
@@ -336,7 +342,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 .executionTable table td {
     background-color: #333333;
-    color: #9ca7ba;
+    color: #ddd;
 }
 .executionTable table td.runningState {
     color: yellow;
@@ -605,10 +611,8 @@ label {
     overflow: hidden;
     width: 13em;
     padding-top: 2px;
-    padding-left: 0.4em;
     position: absolute;
     text-overflow: ellipsis;
-    padding-left: 27px;
 }
 
 .bold{
@@ -625,6 +629,7 @@ label {
 
 span.label.control-label{
     color: black;
+    font-size: 0.9em;
 }
 
 .openmole-logo{
@@ -632,15 +637,6 @@ span.label.control-label{
     width: 300px;
     top: -10px;
     right: calc(50% - 25px) ;
-}
-
-.openmole-small{
-    font-family: Bevan;
-    position: fixed;
-    font-size: 2em;
-    width: 100px;
-    top: -15px;
-    z-index: 10;
 }
 
 .openmole-connection{
@@ -652,34 +648,13 @@ span.label.control-label{
     z-index: 10;
 }
 
-.openmole-pen-connection-position{
+.openmole-pen{
+    color: #808080;
     right: calc(50% - 70px);
 }
 
-.openmole-pen{
-    color: #808080;
-}
-
-.openmole-version{
-    color: #ff5555;
-    right: 40px;
-    top: -20px;
-    font-size: 2.5em;
-}
-
-.openmole-mole-connection-position{
-    right: calc(50% - 210px);
-}
-
-.openmole-mole-small-position{
-    right: 150px;
-}
-
-.openmole-pen-small-position{
-    right: 234px;
-}
-
 .openmole-mole{
+    right: calc(50% - 210px);
     color: #a6bf26;
 }
 
@@ -792,6 +767,6 @@ top: -6px;
     font-size: 2em;
     width: 300px;
     z-index: -1;
-    bottom: 5px;
-     height:30px; 
+    bottom: 7px;
+    height:30px;
 }

@@ -17,25 +17,23 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.misc.utils.Utils
 import org.scalajs.dom.Event
 
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.BootstrapTags._
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import rx._
 
 object InputFilter {
   def apply(initValue: String = "", pHolder: String = "Filter", inputID: String = filterId, size: String = "100%") = new InputFilter(initValue, pHolder, inputID, size)
 
-  val filterId: String = uuID
+  val filterId: String = Utils.getUUID
 
   val protoFilterId1: String = "protoInputFilter1"
 
   val protoFilterId2: String = "protoInputFilter2"
 }
 
-import InputFilter._
 class InputFilter(initValue: String, pHolder: String, inputID: String, size: String = "100%") {
   val nameFilter: Var[String] = Var("")
 

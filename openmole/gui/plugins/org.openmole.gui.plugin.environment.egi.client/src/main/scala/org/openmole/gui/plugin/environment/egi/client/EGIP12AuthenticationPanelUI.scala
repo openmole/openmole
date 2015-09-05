@@ -9,7 +9,7 @@ import org.openmole.gui.ext.dataui.PanelUI
 import org.openmole.gui.shared.Api
 import scala.scalajs.js.annotation.JSExport
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{BootstrapTags => bs}
+import fr.iscpif.scaladget.api.{BootstrapTags => bs}
 import scalatags.JsDom.{tags ⇒ tags}
 import bs._
 

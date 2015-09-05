@@ -18,11 +18,9 @@ package org.openmole.gui.plugin.task.systemexec.client
  */
 
 import org.openmole.gui.ext.dataui.PanelUI
-
 import scala.scalajs.js.annotation.JSExport
-
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{BootstrapTags => bs}
+import fr.iscpif.scaladget.api.{BootstrapTags => bs}
 
 @JSExport("org.openmole.gui.plugin.task.systemexec.client.SystemExecTaskPanelUI")
 class SystemExecTaskPanelUI(dataUI: SystemExecTaskDataUI) extends PanelUI {

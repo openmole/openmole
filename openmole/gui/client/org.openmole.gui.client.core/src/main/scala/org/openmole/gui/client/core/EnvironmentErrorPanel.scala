@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.Utils
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
@@ -27,7 +27,7 @@ import rx._
 
 object EnvironmentErrorPanel {
 
-  case class SelectableLevel(level: ErrorStateLevel, name: String, uuid: String = uuID)
+  case class SelectableLevel(level: ErrorStateLevel, name: String, uuid: String = Utils.getUUID)
 
   implicit def errorStateLevelToSelectableLevel(level: ErrorStateLevel): SelectableLevel = SelectableLevel(level, level.name)
 

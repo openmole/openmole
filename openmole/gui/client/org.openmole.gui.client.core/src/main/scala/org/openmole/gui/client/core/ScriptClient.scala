@@ -1,12 +1,13 @@
 package org.openmole.gui.client.core
 
-import fr.iscpif.scaladget.mapping.tooltipster.TooltipsterOptions
 import org.openmole.gui.client.core.AbsolutePositioning.{ RightTransform, TopZone, CenterTransform }
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
 import org.openmole.gui.client.core.panels._
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, LeftDirection, WarningTooltipLevel, BottomDirection, ToolTip }
+import org.openmole.gui.misc.js.{ OMTags, ToolTipHelp }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.js.Tooltip._
 import bs._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -123,8 +124,8 @@ object ScriptClient {
     val alert: Var[Boolean] = Var(false)
 
     val openmoleText = tags.div(
-      tags.h1(`class` := "openmole-connection openmole-pen openmole-pen-connection-position")("pen"),
-      tags.h1(`class` := "openmole-connection openmole-mole openmole-mole-connection-position")("MOLE")
+      tags.h1(`class` := "openmole-connection openmole-pen")("pen"),
+      tags.h1(`class` := "openmole-connection openmole-mole")("MOLE")
     )
 
     val connectionDiv = tags.div(`class` := Rx {
@@ -170,21 +171,21 @@ object ScriptClient {
       val modalPanel = authenticationPanel
     }
 
-    val execItem = dialogGlyphNavItem("executions", glyph_settings, () ⇒ executionTriggerer.triggerOpen, help = ToolTip("Executions"))
+    val execItem = dialogNavItem("executions", glyph(glyph_settings).tooltip("Executions"), () ⇒ executionTriggerer.triggerOpen)
 
-    val authenticationItem = dialogGlyphNavItem("authentications", glyph_lock, () ⇒ authenticationTriggerer.triggerOpen, help = ToolTip("Authentications"))
+    val authenticationItem = dialogNavItem("authentications", glyph(glyph_lock).tooltip("Authentications"), () ⇒ authenticationTriggerer.triggerOpen)
 
-    val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen, help = ToolTip("Market place"))
+    val marketItem = dialogNavItem("market", glyph(glyph_market).tooltip("Market place"), () ⇒ marketTriggerer.triggerOpen)
 
-    val pluginItem = dialogGlyphNavItem("plugin", glyph_plug, () ⇒ pluginTriggerer.triggerOpen, help = ToolTip("Plugins"))
+    val pluginItem = dialogNavItem("plugin", glyph(glyph_plug).tooltip("Plugins"), () ⇒ pluginTriggerer.triggerOpen)
 
-    val envItem = dialogGlyphNavItem("envError", glyph_exclamation, () ⇒ environmentStackTriggerer.open)
+    val envItem = dialogNavItem("envError", glyph(glyph_exclamation).render, () ⇒ environmentStackTriggerer.open)
 
-    val docItem = dialogGlyphNavItem("doc", glyph_comment, () ⇒ docTriggerer.open, help = ToolTip("Documentation"))
+    val docItem = dialogNavItem("doc", glyph(glyph_comment).tooltip("Documentation"), () ⇒ docTriggerer.open)
 
-    val fileItem = dialogGlyphNavItem("files", glyph_file, todo = () ⇒ {
+    val fileItem = dialogNavItem("files", glyph(glyph_file).tooltip("Files"), todo = () ⇒ {
       openFileTree() = !openFileTree()
-    }, help = ToolTip("Files"))
+    })
 
     maindiv.appendChild(
       nav("mainNav",
@@ -197,12 +198,7 @@ object ScriptClient {
         docItem
       )
     )
-    maindiv.appendChild(tags.div(
-      tags.h1(`class` := "openmole-pen openmole-small openmole-pen-small-position")("Open"),
-      tags.h1(`class` := "openmole-mole openmole-small openmole-mole-small-position")("MOLE"),
-      tags.h1(`class` := "openmole-small openmole-version")("5"),
-      shutdownButton
-    ))
+    maindiv.appendChild(tags.div(shutdownButton))
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)

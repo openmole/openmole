@@ -1,9 +1,9 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.misc.js.BootstrapTags._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.all._
 import org.scalajs.jquery
+import bs._
 
 /*
  * Copyright (C) 28/05/15 // mathieu.leclaire@openmole.org

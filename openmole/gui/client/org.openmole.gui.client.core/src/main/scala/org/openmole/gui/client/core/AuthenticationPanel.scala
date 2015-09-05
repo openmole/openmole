@@ -20,7 +20,8 @@ package org.openmole.gui.client.core
 import org.openmole.gui.ext.dataui.{ AuthenticationFactoryUI, PanelUI }
 import org.openmole.gui.shared.Api
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select }
+import org.openmole.gui.misc.js.Select
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -70,13 +71,13 @@ class AuthenticationPanel(onresetpassword: () ⇒ Unit) extends ModalPanel {
           onmouseout := { () ⇒
             lineHovered() = false
           })(
-            bs.div(bs.col_md_7)(
+            bs.div(col_md_7)(
               tags.a(a.synthetic, `class` := "left docTitleEntry whiteBold", cursor := "pointer", onclick := { () ⇒
                 authenticationSelector.content() = Some(ClientService.authenticationUI(a))
                 setting() = Some(ClientService.panelUI(a))
               })
             ),
-            bs.div(bs.col_md_4 + " spacer5")(bs.label(ClientService.authenticationUI(a).name, label_primary + " marketTag")),
+            bs.div(col_md_4 + " spacer5")(bs.label(ClientService.authenticationUI(a).name, label_primary + " marketTag")),
             tags.span(
               id := Rx {
                 "treeline" + {

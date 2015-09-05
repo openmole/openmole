@@ -29,9 +29,8 @@ package systemexec {
      * Command line representation
      *
      * @param command the actual command line to be executed
-     * @param isRemote whether the command is passed as a resource to the task or is present on the remote environment
      */
-    case class Command(command: String, isRemote: Boolean)
+    case class Command(command: String)
 
     /**
      * Sequence of commands for a particular OS
@@ -41,18 +40,15 @@ package systemexec {
      * @see Command
      */
     case class OSCommands(os: OS, parts: Command*) {
-      @transient lazy val expanded = parts.map(c ⇒ (VariableExpansion(c.command), c.isRemote))
+      @transient lazy val expanded = parts.map(c ⇒ (VariableExpansion(c.command)))
     }
 
     /** Make commands non-remote by default */
-    implicit def stringToCommand(s: String) = Command(s, false)
+    implicit def stringToCommand(s: String) = Command(s)
     /** A single command can be a sequence  */
     implicit def stringToCommands(s: String) = OSCommands(OS(), s)
     /** A sequence of command lines is considered local (non-remote) by default */
-    implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s, false)): _*)
-
-    /** Make a command line remote from the DSL */
-    def remote(s: String) = Command(s, true)
+    implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)): _*)
 
     lazy val errorOnReturnCode = set[{ def setErrorOnReturnValue(b: Boolean) }]
 

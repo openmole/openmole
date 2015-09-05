@@ -2,15 +2,16 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.ext.data._
+import org.openmole.gui.misc.js.OMTags
 import org.openmole.gui.shared._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import org.openmole.gui.misc.utils.Utils._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
-import bs._
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.scalajs.dom.raw.{ HTMLElement, HTMLDivElement }
 import rx._
+import bs._
 
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
@@ -82,7 +83,7 @@ object TreeNodeTabs {
       editor.setReadOnly(!editable())
     }
 
-    val editButton = bs.glyphBorderButton("", btn_primary + "editingElement", glyph_edit, () ⇒ {
+    val editButton = OMTags.glyphBorderButton("", btn_primary + "editingElement", glyph_edit, () ⇒ {
       editable() = !editable()
     })
 

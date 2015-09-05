@@ -19,8 +19,8 @@ package org.openmole.gui.client.core
 
 import org.openmole.core.buildinfo.{ MarketIndex, MarketIndexEntry }
 import org.openmole.gui.client.core.AbsolutePositioning.CenterTransform
-import org.openmole.gui.ext.data.SafePath
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, InputFilter }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.js.{ OMTags, InputFilter }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.shared.Api
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -93,7 +93,7 @@ class MarketPanel extends ModalPanel {
 
   def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) =
     if (downloading().contains(entry)) {
-      bs.waitingSpan(" Downloading", btn_danger)
+      OMTags.waitingSpan(" Downloading", btn_danger)
     }
     else if (Some(entry) == selectedEntry()) {
       bs.glyphButton(" Download", btn_success + " redBackground", glyph_download_alt, todo)

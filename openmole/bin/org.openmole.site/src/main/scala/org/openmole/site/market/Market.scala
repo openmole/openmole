@@ -17,7 +17,7 @@
 
 package org.openmole.site.market
 
-import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.{ ResetCommand, CreateBranchCommand, Git }
 import org.eclipse.jgit.merge.MergeStrategy
 import org.openmole.console._
 import org.openmole.core.buildinfo.MarketIndexEntry
@@ -27,6 +27,8 @@ import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.tar._
+import org.openmole.core.buildinfo
+import collection.JavaConversions._
 
 import scala.util.{ Success, Failure, Try }
 
@@ -43,6 +45,7 @@ object Market extends Logger {
     lazy val simulation = Tag("Simulation")
     lazy val machineLearning = Tag("Machine Learning")
     lazy val R = Tag("R")
+    lazy val fsl = Tag("FSL")
     lazy val data = Tag("Data")
     lazy val native = Tag("Native Code")
     lazy val netlogo = Tag("NetLogo")
@@ -78,7 +81,8 @@ object Market extends Logger {
       MarketEntry("Calibration of Ants", "ants", Seq(netlogo, ga, simulation, calibration)),
       MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq(scala, java, plugin)),
       MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
-      MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo))
+      MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
+      MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native))
     )
   )
 
@@ -170,18 +174,34 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
   def update(repository: MarketRepository, cloneDirectory: File): File = {
     val directory = cloneDirectory / repository.repository.url.hash.toString
 
-    directory / ".git" exists () match {
-      case true ⇒
-        val repo = Git.open(directory)
-        val cmd = repo.pull()
-        cmd.setStrategy(MergeStrategy.THEIRS)
-        cmd.call()
-      case false ⇒
-        val command = Git.cloneRepository
-        command.setDirectory(directory)
-        command.setURI(repository.repository.url)
-        command.call()
+    if (!(directory / ".git" exists)) {
+      val command = Git.cloneRepository
+      command.setDirectory(directory)
+      command.setURI(repository.repository.url)
+      command.call()
     }
+
+    val branchName = buildinfo.version.takeWhile(_.isDigit) + "-dev"
+
+    val repo = Git.open(directory)
+    repo.reset().setMode(ResetCommand.ResetType.HARD).call()
+    repo.fetch().call()
+
+    def branchingCommand = {
+      val exists = repo.branchList().call().exists(_.getName == s"refs/heads/$branchName")
+      repo.checkout().
+        setCreateBranch(!exists).
+        setName(branchName).
+        setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
+        setStartPoint("origin/" + branchName).
+        setForce(true)
+    }
+
+    branchingCommand.call()
+
+    val cmd = repo.pull()
+    cmd.setStrategy(MergeStrategy.THEIRS)
+    cmd.call()
 
     directory
   }

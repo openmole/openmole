@@ -18,11 +18,8 @@ package org.openmole.gui.plugin.environment.ssh.client
  */
 
 import org.openmole.gui.ext.dataui.PanelUI
-import scalatags.Text.all._
 import scala.scalajs.js.annotation.JSExport
-import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{BootstrapTags=> bs}
-import scalatags.JsDom.{ tags ⇒ tags }
+import fr.iscpif.scaladget.api.{BootstrapTags => bs}
 import rx._
 @JSExport("org.openmole.gui.plugin.environment.ssh.client.SSHEnvironmentPanelUI")
 class SSHEnvironmentPanelUI(dataUI: SSHEnvironmentDataUI) extends PanelUI {

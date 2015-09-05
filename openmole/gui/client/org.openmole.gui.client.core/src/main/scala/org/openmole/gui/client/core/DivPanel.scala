@@ -1,12 +1,11 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.misc.js.BootstrapTags.ModalID
 import org.scalajs.dom.raw.HTMLDivElement
 import rx.core.Var
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
 import rx._
 /*

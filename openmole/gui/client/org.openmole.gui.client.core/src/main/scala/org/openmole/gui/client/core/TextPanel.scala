@@ -1,11 +1,10 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.misc.js.BootstrapTags.ModalID
 import rx.core.Var
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import bs._
 import rx._
 
@@ -26,7 +25,7 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TextPanel(_modalID: ModalID, title: String) extends ModalPanel {
+class TextPanel(_modalID: bs.ModalID, title: String) extends ModalPanel {
 
   lazy val modalID = _modalID
   val content: Var[String] = Var("")

@@ -20,15 +20,17 @@ package org.openmole.gui.client.core
 import java.util.concurrent.atomic.AtomicBoolean
 
 import org.openmole.gui.client.core.EnvironmentErrorPanel.SelectableLevel
-import org.openmole.gui.misc.js.BootstrapTags.ScrollableTextArea.BottomScroll
+import fr.iscpif.scaladget.api.BootstrapTags.ScrollableTextArea.BottomScroll
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared.Api
 import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, _ }
+import org.openmole.gui.misc.js.{ _ }
 import org.openmole.gui.misc.js.Expander._
 import scalatags.JsDom.{ tags ⇒ tags }
+import org.openmole.gui.misc.js.Tooltip._
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow

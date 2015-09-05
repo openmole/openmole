@@ -19,10 +19,11 @@ package org.openmole.gui.client.core.dataui
 
 import org.openmole.gui.client.core.{ ClientService, SettingsPanel }
 import org.openmole.gui.ext.dataui.PanelUI
-import org.openmole.gui.misc.js.BootstrapTags._
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, InputFilter }
+import org.openmole.gui.misc.js.InputFilter
 import rx._
+import bs._
 
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ tags }
