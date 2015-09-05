@@ -170,7 +170,7 @@
       // Any task
       val pythonTask =
         SystemExecTask("python hello.py") set (
-          resource += workDirectory / "hello.py",
+          resources += workDirectory / "hello.py",
           stdOut := output,
           stdErr := error,
           errorOnReturnCode := false
