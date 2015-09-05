@@ -71,7 +71,7 @@
 
     // R task
     // "path/on/your/system" is a path on the original system on which you packaged R
-    val rTask = SystemExecTask("care.bin", "care/re-execute.sh R --slave -f myscript.R --args ${i}") set (
+    val rTask = SystemExecTask("./care.bin", "./care/re-execute.sh R --slave -f myscript.R --args ${i}") set (
       resources += workDirectory / "care.bin",
       inputs += (i, inputName),
       inputFiles += (input, "care/rootfs/path/on/your/system/data.csv"),
@@ -93,6 +93,8 @@
   feature of the @hl.openmole("SystemExecTask") that can run several commands sequentially
   @hl.openmole("SystemExecTask") when they have been passed as successive parameters to the
   @hl.openmole("SystemExecTask") builder.
+
+  @p Note that for each execution of the @i("SystemExecTask"), OpenMOLE creates a separate work directory in which it copies the resources and the inputs files. On Linux, all commands starting with @i("./") relate to an executable deployed in the work directory and simple commands such as @("mkdir directory") uses the mkdir command already present on the execution node.
 
   @p Several notions from OpenMOLE are reused in this example. If you're not too familiar with
   @a("Hooks", href := DocumentationPages.root.language.hook.file) or
@@ -128,7 +130,7 @@
 
     // R task
     val pythonTask =
-      SystemExecTask("hello/re-execute.sh python hello.py ${arg} output.txt") set (
+      SystemExecTask("./hello/re-execute.sh python hello.py ${arg} output.txt") set (
         resources += workDirectory / "hello.bin",
         inputs += arg,
         outputFiles += ("hello/rootfs/path/on/your/system/output.txt", output),
@@ -168,7 +170,7 @@
       // Any task
       val pythonTask =
         SystemExecTask("python hello.py") set (
-          resources += "/usr/bin/python",
+          resource += workDirectory / "hello.py",
           stdOut := output,
           stdErr := error,
           errorOnReturnCode := false
