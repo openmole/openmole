@@ -17,7 +17,7 @@
 
 package org.openmole.site.market
 
-import org.eclipse.jgit.api.{ CreateBranchCommand, Git }
+import org.eclipse.jgit.api.{ResetCommand, CreateBranchCommand, Git}
 import org.eclipse.jgit.merge.MergeStrategy
 import org.openmole.console._
 import org.openmole.core.buildinfo.MarketIndexEntry
@@ -183,7 +183,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
     val branchName = buildinfo.version.takeWhile(_.isDigit) + "-dev"
 
     val repo = Git.open(directory)
-
+    repo.reset().setMode(ResetCommand.ResetType.HARD).call()
     repo.fetch().call()
 
     val branch = repo.checkout().
@@ -191,7 +191,9 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
       setName(branchName).
       setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
       setStartPoint("origin/" + branchName).
+      setForce(true).
       call()
+
     val cmd = repo.pull()
     cmd.setStrategy(MergeStrategy.THEIRS)
     cmd.call()
