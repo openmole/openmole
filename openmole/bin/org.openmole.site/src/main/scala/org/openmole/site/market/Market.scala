@@ -188,7 +188,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
     repo.fetch().call()
 
     def branchingCommand = {
-      val exists = repo.branchList().call().exists(_.getName == branchName)
+      val exists = repo.branchList().call().exists(_.getName == s"refs/heads/$branchName")
       repo.checkout().
         setCreateBranch(!exists).
         setName(branchName).
