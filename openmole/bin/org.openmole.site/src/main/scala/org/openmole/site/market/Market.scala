@@ -17,7 +17,7 @@
 
 package org.openmole.site.market
 
-import org.eclipse.jgit.api.{ResetCommand, CreateBranchCommand, Git}
+import org.eclipse.jgit.api.{ ResetCommand, CreateBranchCommand, Git }
 import org.eclipse.jgit.merge.MergeStrategy
 import org.openmole.console._
 import org.openmole.core.buildinfo.MarketIndexEntry
@@ -28,6 +28,7 @@ import org.openmole.tool.hash._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.tar._
 import org.openmole.core.buildinfo
+import collection.JavaConversions._
 
 import scala.util.{ Success, Failure, Try }
 
@@ -186,13 +187,17 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
     repo.reset().setMode(ResetCommand.ResetType.HARD).call()
     repo.fetch().call()
 
-    val branch = repo.checkout().
-      setCreateBranch(true).
-      setName(branchName).
-      setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
-      setStartPoint("origin/" + branchName).
-      setForce(true).
-      call()
+    def branchingCommand = {
+      val exists = repo.branchList().call().exists(_.getName == branchName)
+      repo.checkout().
+        setCreateBranch(!exists).
+        setName(branchName).
+        setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
+        setStartPoint("origin/" + branchName).
+        setForce(true)
+    }
+
+    branchingCommand.call()
 
     val cmd = repo.pull()
     cmd.setStrategy(MergeStrategy.THEIRS)
