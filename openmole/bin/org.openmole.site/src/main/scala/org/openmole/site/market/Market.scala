@@ -186,7 +186,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
 
     val branch = repo.checkout().
       setCreateBranch(true).
-      setName("branchName").
+      setName(branchName).
       setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
       setStartPoint("origin/" + branchName).
       call()
