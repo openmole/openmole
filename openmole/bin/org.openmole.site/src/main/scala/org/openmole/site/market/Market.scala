@@ -17,7 +17,7 @@
 
 package org.openmole.site.market
 
-import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.{ CreateBranchCommand, Git }
 import org.eclipse.jgit.merge.MergeStrategy
 import org.openmole.console._
 import org.openmole.core.buildinfo.MarketIndexEntry
@@ -27,6 +27,7 @@ import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.tar._
+import org.openmole.core.buildinfo
 
 import scala.util.{ Success, Failure, Try }
 
@@ -170,18 +171,28 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
   def update(repository: MarketRepository, cloneDirectory: File): File = {
     val directory = cloneDirectory / repository.repository.url.hash.toString
 
-    directory / ".git" exists () match {
-      case true ⇒
-        val repo = Git.open(directory)
-        val cmd = repo.pull()
-        cmd.setStrategy(MergeStrategy.THEIRS)
-        cmd.call()
-      case false ⇒
-        val command = Git.cloneRepository
-        command.setDirectory(directory)
-        command.setURI(repository.repository.url)
-        command.call()
+    if (!(directory / ".git" exists)) {
+      val command = Git.cloneRepository
+      command.setDirectory(directory)
+      command.setURI(repository.repository.url)
+      command.call()
     }
+
+    val branchName = buildinfo.version.takeWhile(_.isDigit) + "-dev"
+
+    val repo = Git.open(directory)
+
+    repo.fetch().call()
+
+    val branch = repo.checkout().
+      setCreateBranch(true).
+      setName("branchName").
+      setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
+      setStartPoint("origin/" + branchName).
+      call()
+    val cmd = repo.pull()
+    cmd.setStrategy(MergeStrategy.THEIRS)
+    cmd.call()
 
     directory
   }
