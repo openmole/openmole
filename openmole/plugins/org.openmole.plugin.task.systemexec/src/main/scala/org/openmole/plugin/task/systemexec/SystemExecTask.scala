@@ -45,7 +45,7 @@ object SystemExecTask extends Logger {
 
 }
 
-case class ExpandedSystemExecCommand(expandedCommand: Expansion, isRemote: Boolean = false)
+case class ExpandedSystemExecCommand(expandedCommand: Expansion)
 
 abstract class SystemExecTask(
     val commands: Seq[OSCommands],
@@ -78,8 +78,8 @@ abstract class SystemExecTask(
       case None    ⇒ System.err
     }
 
-    def commandLine(cmd: Expansion, basePath: String = workDir.getAbsolutePath, separator: String = File.separator): Array[String] =
-      CommandLine.parse(basePath + separator + cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath))).toStrings
+    def commandLine(cmd: Expansion): Array[String] =
+      CommandLine.parse(cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath))).toStrings
 
     def execute(command: Array[String], out: PrintStream, err: PrintStream): Int = {
       try {
@@ -108,7 +108,7 @@ abstract class SystemExecTask(
     // find the sequence of command lines corresponding to the host system
     // unused
     val osCommandLines: Seq[ExpandedSystemExecCommand] = commands.find { _.os.compatible }.map {
-      cmd ⇒ cmd.expanded map { case (expansion, remote) ⇒ ExpandedSystemExecCommand(expansion, remote) }
+      cmd ⇒ cmd.expanded map { expansion ⇒ ExpandedSystemExecCommand(expansion) }
     }.getOrElse(
       throw new UserBadDataError("No command line found for " + OS.actualOS))
 
@@ -117,15 +117,12 @@ abstract class SystemExecTask(
       cmds match {
         case Nil ⇒ 0
         case cmd :: t ⇒
-          // commands in a task marked as remote are not executed from the working directory
-          val commandline =
-            if (cmd.isRemote) commandLine(cmd.expandedCommand, basePath = "", separator = "")
-            else commandLine(cmd.expandedCommand)
+          val commandline = commandLine(cmd.expandedCommand)
 
           val retCode = execute(commandline, out, err)
           if (errorOnReturnCode && retCode != 0)
             throw new InternalProcessingError(
-              s"""Error executing ${if (cmd.isRemote) "remote command"}:
+              s"""Error executing command"}:
                  |[${commandline.mkString(" ")}] return code was not 0 but ${retCode}""".stripMargin)
 
           if (t.isEmpty || retCode != 0) retCode

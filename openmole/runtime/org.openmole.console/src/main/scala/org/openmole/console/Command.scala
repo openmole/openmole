@@ -24,7 +24,6 @@ import java.io.{ IOException, PrintWriter, StringWriter, File }
 import java.util.concurrent.atomic.{ AtomicLong, AtomicInteger }
 import org.apache.log4j.lf5.viewer.LogTableColumn
 import org.openmole.core.batch.authentication._
-import org.openmole.core.batch.environment.SimpleBatchEnvironment$
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager.PluginManager
@@ -33,8 +32,6 @@ import org.openmole.core.workflow.execution.{ Environment, ExecutionState }
 import org.openmole.core.workflow.job.State
 import org.openmole.core.workflow.mole.{ ExecutionContext, Mole, MoleExecution }
 import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.transition.IAggregationTransition
-import org.openmole.core.workflow.transition.IExplorationTransition
 import org.openmole.core.workflow.validation.Validation
 import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workspace.Workspace
