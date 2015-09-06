@@ -31,10 +31,11 @@ $tasks
   """
 
   @div(`class` := "text-center")(
-      a(`class` := "btn btn-default btn-sm", id := "download-button", href := openmole.file)(s"Download OpenMOLE $version")
+      a(`class` := "btn btn-default btn-sm", id := "download-button", href := openmole.file)(s"Download OpenMOLE $version"),
+      br,
+      hr(style := "width:200px; height:1px;"),
+      i(s"${name} (version ${version}) was released on ${generationDate}.")
     )
-
-  @p OpenMOLE version @{version} named @{name} was released on @{generationDate}.
 
 @sect{Launch}
 
