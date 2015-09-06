@@ -29,6 +29,10 @@ pre {
   border: 0px;
 }
 
+code {
+  background-color: transparent;
+}
+
 #logo {
  height: 180px;
  margin-left: -30px;
