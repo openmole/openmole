@@ -30,7 +30,9 @@ import scala.util.{ Success, Failure, Try }
 sealed trait CompileResult
 case class ScriptFileDoesNotExists() extends CompileResult
 case class CompilationError(exception: Throwable) extends CompileResult
-case class Compiled(result: CompiledScript) extends CompileResult
+case class Compiled(result: CompiledScript) extends CompileResult {
+  def eval = result.eval().asInstanceOf[PuzzleBuilder]
+}
 
 object Project {
   def newREPL(variables: ConsoleVariables) = new Console().newREPL(variables)
@@ -48,7 +50,7 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
     else {
       def compileContent =
         s"""${scriptsObjects(script.getParentFileSafe).mkString("\n")}
-            |def runOMSScript() = {
+            |def runOMSScript(): ${classOf[PuzzleBuilder].getCanonicalName} = {
             |${script.content}
             |}
             |runOMSScript()
