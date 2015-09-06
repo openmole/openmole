@@ -101,7 +101,6 @@ class Site extends IApplication {
               |  })
               |})
             """.stripMargin),
-          link(rel := "stylesheet", href := "style.css"),
           link(rel := "stylesheet", href := Resource.bootstrapCss.file),
           link(rel := "stylesheet", href := Resource.css.file),
           meta(charset := "UTF-8"),
