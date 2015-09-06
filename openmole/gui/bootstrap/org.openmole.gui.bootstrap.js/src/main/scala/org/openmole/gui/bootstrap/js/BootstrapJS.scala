@@ -37,92 +37,91 @@ object BootstrapJS {
   val jsCompiled = new File(webapp, "js")
   val authKeys = Workspace.file("persistent/keys")
 
-  jsSrc.mkdirs
-  jsCompiled.mkdirs
-  webapp.mkdirs
+  webui.mkdirs
   projects.mkdirs
   authKeys.mkdirs
 
-  new File(webapp, "css").mkdirs
-  new File(webapp, "fonts").mkdirs
-  new File(webapp, "img").mkdirs
-  new File(webapp, "WEB-INF").mkdirs
-
   def init(optimized: Boolean = true) = {
+    jsSrc.recursiveDelete
+    jsSrc.mkdirs
 
-    //Copy all the fixed resources in the workspace if required
-    val thisBundle = PluginManager.bundleForClass(classOf[GUIServer])
+    def update() = {
+      webapp.recursiveDelete
+      webapp.mkdirs
+      jsCompiled.mkdirs
 
-    //Add lib js files from webjars
-    copyWebJarResource("d3", "3.5.5", "d3.min.js")
-    copyWebJarResource("jquery", "2.1.3", "jquery.min.js")
-    copyWebJarResource("bootstrap", "3.3.4", FilePath("dist/js/", "bootstrap.min.js"))
-    copyWebJarResource("ace", "01.08.2014",
-      FilePath("src-min/", "ace.js"),
-      FilePath("src-min/", "theme-github.js"),
-      FilePath("src-min/", "mode-scala.js"),
-      FilePath("src-min/", "mode-sh.js"),
-      FilePath("src-min/", "mode-text.js")
-    )
+      new File(webapp, "css").mkdirs
+      new File(webapp, "fonts").mkdirs
+      new File(webapp, "img").mkdirs
+      new File(webapp, "WEB-INF").mkdirs
 
-    //All other resources
-    copyURL(thisBundle.findEntries("/", "*.css", true).asScala)
-    copyURL(thisBundle.findEntries("/", "*.js", true).asScala)
-    copyURL(thisBundle.findEntries("/", "*.ttf", true).asScala)
-    copyURL(thisBundle.findEntries("/", "*.woff", true).asScala)
-    copyURL(thisBundle.findEntries("/", "*.woff2", true).asScala)
-    copyURL(thisBundle.findEntries("/", "*.svg", true).asScala)
-    copyURL(thisBundle.findEntries("/", "*.png", true).asScala)
-    copyURL(thisBundle.findEntries("/", "*.eot", true).asScala)
+      //Copy all the fixed resources in the workspace if required
+      val thisBundle = PluginManager.bundleForClass(classOf[GUIServer])
+
+      //Add lib js files from webjars
+      copyWebJarResource("d3", "3.5.5", "d3.min.js")
+      copyWebJarResource("jquery", "2.1.3", "jquery.min.js")
+      copyWebJarResource("bootstrap", "3.3.4", FilePath("dist/js/", "bootstrap.min.js"))
+      copyWebJarResource("ace", "01.08.2014",
+        FilePath("src-min/", "ace.js"),
+        FilePath("src-min/", "theme-github.js"),
+        FilePath("src-min/", "mode-scala.js"),
+        FilePath("src-min/", "mode-sh.js"),
+        FilePath("src-min/", "mode-text.js")
+      )
+
+      //All other resources
+      copyURL(thisBundle.findEntries("/", "*.css", true).asScala)
+      copyURL(thisBundle.findEntries("/", "*.js", true).asScala)
+      copyURL(thisBundle.findEntries("/", "*.ttf", true).asScala)
+      copyURL(thisBundle.findEntries("/", "*.woff", true).asScala)
+      copyURL(thisBundle.findEntries("/", "*.woff2", true).asScala)
+      copyURL(thisBundle.findEntries("/", "*.svg", true).asScala)
+      copyURL(thisBundle.findEntries("/", "*.png", true).asScala)
+      copyURL(thisBundle.findEntries("/", "*.eot", true).asScala)
+
+      //Generates the pluginMapping js file
+      new java.io.File(jsCompiled, "pluginMapping.js").withWriter() { writer ⇒
+        writer.write("function fillMap() {\n")
+        ServerFactories.factoriesUI.foreach {
+          case (k, v) ⇒
+            writer.write("UIFactories().factoryMap[\"" + k + "\" ] = new " + v.getClass.getName + "();\n")
+        }
+        ServerFactories.authenticationFactoriesUI.foreach {
+          case (k, v) ⇒
+            writer.write("UIFactories().authenticationMap[\"" + k + "\" ] = new " + v.getClass.getName + "();\n")
+        }
+        writer.write("}")
+      }
+
+      JSPack(jsSrc, jsCompiled, optimized)
+    }
 
     // Extract and copy all the .sjsir files from bundles to src
-    PluginManager.bundles.map { b ⇒
-      b.findEntries("/", "*.sjsir", true)
-    }.filterNot {
-      _ == null
-    }.flatMap {
-      _.asScala
-    }.map { u ⇒
-      u.openStream.copy(new java.io.File(jsSrc, u.getFile.split("/").tail.mkString("-")))
-    }
-
-    //Generates the pluginMapping js file
-    val writer = new java.io.FileWriter(new java.io.File(jsCompiled, "pluginMapping.js"))
-    writer.write("function fillMap() {\n")
-    ServerFactories.factoriesUI.foreach {
-      case (k, v) ⇒
-        writer.write("UIFactories().factoryMap[\"" + k + "\" ] = new " + v.getClass.getName + "();\n")
-    }
-    ServerFactories.authenticationFactoriesUI.foreach {
-      case (k, v) ⇒
-        writer.write("UIFactories().authenticationMap[\"" + k + "\" ] = new " + v.getClass.getName + "();\n")
-    }
-    writer.write("}")
-    writer.close
+    for {
+      b ← PluginManager.bundles
+      entries ← Option(b.findEntries("/", "*.sjsir", true))
+      entry ← entries.asScala
+    } entry.openStream.copy(new java.io.File(jsSrc, entry.getFile.split("/").tail.mkString("-")))
 
     //Generates js files if
     // - the sources changed or
     // - the optimized js does not exists in optimized mode or
     // - the not optimized js does not exists in not optimized mode
-    jsSrc.updateIfChanged(JSPack(_, jsCompiled, optimized))
-    if (!new File(jsCompiled, JSPack.JS_FILE).exists)
-      JSPack(jsSrc, jsCompiled, optimized)
+    jsSrc.updateIfChanged(_ ⇒ update())
+    if (!new File(jsCompiled, JSPack.JS_FILE).exists) update()
 
   }
 
-  def copyWebJarResource(resourceName: String, version: String, file: String): Unit = copyWebJarResource(resourceName, version, FilePath("", file))
+  private def copyWebJarResource(resourceName: String, version: String, file: String): Unit = copyWebJarResource(resourceName, version, FilePath("", file))
 
-  def copyWebJarResource(resourceName: String, version: String, filePaths: FilePath*): Unit = for (filePath ← filePaths) {
-    val fileStream = new FileOutputStream(new File(webui, "webapp/js/" + filePath.file))
-    getClass.getClassLoader.getResourceAsStream("/META-INF/resources/webjars/" + resourceName + "/" + version + "/" + filePath.path + filePath.file).copy(fileStream)
-    fileStream.close
-  }
+  private def copyWebJarResource(resourceName: String, version: String, filePaths: FilePath*): Unit =
+    for (filePath ← filePaths)
+      new File(jsCompiled, filePath.file).withOutputStream { fileStream ⇒
+        getClass.getClassLoader.getResourceAsStream("/META-INF/resources/webjars/" + resourceName + "/" + version + "/" + filePath.path + filePath.file).copy(fileStream)
+      }
 
-  def copyURL(url: Iterator[URL]) = {
-    url.foreach { u ⇒
-      u.openStream.copy(new File(webui, u.getFile))
-    }
-  }
+  private def copyURL(url: Iterator[URL]) = url.foreach { u ⇒ u.openStream.copy(new File(webui, u.getFile)) }
 
   case class FilePath(path: String, file: String)
 
