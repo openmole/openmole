@@ -149,7 +149,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
 
           def compiles = for { file ← project.files(projectDirectory) } yield {
             consoleProject.compile(file, Seq.empty) match {
-              case Compiled(puzzle) ⇒ true
+              case Compiled(_) ⇒ true
               case CompilationError(e) ⇒
                 Log.logger.log(Log.WARNING, exclusion + " because there was an error during compilation.", e)
                 false
