@@ -35,47 +35,47 @@ pre {
 }
 
 #sections {
-  padding-top: 20;
-  padding-bottom: 5;
+  padding-top: 20px;
+  padding-bottom: 5px;
 }
 
 #section {
-  padding-right: 15;
+  padding-right: 15px;
   font-size: 16px;
 }
 
 #documentation-bottom-link-unavailable {
-  padding-left: 5;
-  padding-right: 5;
+  padding-left: 5px;
+  padding-right: 5px;
   text-decoration: line-through;
 }
 
 #documentation-bottom-link {
-  padding-left: 5;
-  padding-right: 5;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
 #documentation-bottom-links {
   text-decoration: underline;
-  top: 10;
+  top: 10px;
   left: 40%;
 }
 
 #documentation-menu {
-  padding-left: 20;
-  padding-right: 0;
-  left: 0;
-  top: 0;
-  margin-right: 20;
-  margin-top: 30;
+  padding-left: 20px;
+  padding-right: 0px;
+  left: 0px;
+  top: 0px;
+  margin-right: 20px;
+  margin-top: 30px;
   width: 120%;
 }
 
 #documentation-menu-ul {
-  margin-bottom: 0;
-  margin-top: 0;
-  margin-left: 15;
-  padding-left: 5;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  margin-left: 15px;
+  padding-left: 5px;
 }
 
 #documentation-menu-entry {
@@ -113,7 +113,7 @@ pre {
 }
 
 .scalatex-content {
-  margin: 0 auto;
+  margin: 0px auto;
   padding-bottom: 50px;
   color: #555;
 }
