@@ -172,7 +172,6 @@ span.hljs-tag, span.hljs-symbol{
 }
 
 .uiScreenshot{
-  width: 950px;
-  padding-top: 20px;
-  margin-left: -150px;
+  width: 580px;
+  padding-top: 10px;
 }
