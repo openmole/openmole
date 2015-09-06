@@ -92,6 +92,7 @@ class Site extends IApplication {
           link(rel := "stylesheet", href := Resource.bootstrapCss.file),
           link(rel := "stylesheet", href := Resource.css.file),
           link(rel := "stylesheet", href := Resource.github.file),
+          link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"),
 
           script(src := scriptName),
           script(src := Resource.bootstrapJS.file),
