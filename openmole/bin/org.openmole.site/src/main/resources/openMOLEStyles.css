@@ -105,6 +105,14 @@ pre {
   overflow: auto;
 }
 
+#download-button {
+  background-color: #6A7224;
+  color: white;
+  margin-top: 25px;
+  font-size: medium;
+  border-radius: 10px;
+}
+
 .scalatex-content *{
   position: relative;
 }
