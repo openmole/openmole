@@ -87,24 +87,19 @@ class Site extends IApplication {
           meta(name := "description", all.content := "OpenMOLE, a workflow system for distributed computing and parameter tuning"),
           meta(name := "keywords", all.content := "Scientific Workflow Engine, Distributed Computing, Cluster, Grid, Parameter Tuning, Model Exploration, Design of Experiment, Sensitivity Analysis, Data Parallelism"),
           meta(name := "viewport", all.content := "width=device-width, initial-scale=1"),
-          link(href := stylesName, rel := "stylesheet"),
-          script(src := scriptName),
-          script(src := Resource.bootstrapJS.file),
-          script(
-            """
-              |['DOMContentLoaded', 'load'].forEach(function(ev){
-              |  addEventListener(ev, function(){
-              |    Array.prototype.forEach.call(
-              |      document.querySelectorAll('code.scalatex-highlight-js'),
-              |      hljs.highlightBlock
-              |  );
-              |  })
-              |})
-            """.stripMargin),
+
+          link(rel := "stylesheet", href := stylesName),
           link(rel := "stylesheet", href := Resource.bootstrapCss.file),
           link(rel := "stylesheet", href := Resource.css.file),
+          link(rel := "stylesheet", href := Resource.github.file),
+
+          script(src := scriptName),
+          script(src := Resource.bootstrapJS.file),
+          script(src := Resource.highlightJS.file),
+          script("hljs.initHighlightingOnLoad();"),
+
           meta(charset := "UTF-8"),
-          script(src := "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"),
+          //script(src := "https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"),
           piwik
         )
 
