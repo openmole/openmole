@@ -79,7 +79,6 @@ object Console {
     def incorrectPassword = 1
     def scriptDoesNotExist = 2
     def compilationError = 3
-    def notAPuzzle = 4
     def validationError = 5
     def executionError = 6
     def restart = 254
@@ -164,9 +163,9 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
               case CompilationError(e) ⇒
                 println(e.stackString)
                 ExitCodes.compilationError
-              case Compiled(compiled) ⇒
-                compiled.eval() match {
-                  case res: PuzzleBuilder ⇒
+              case compiled: Compiled ⇒
+                Try(compiled.eval) match {
+                  case Success(res) ⇒
                     val ex = res.buildPuzzle.toExecution()
                     Try(ex.start) match {
                       case Failure(e) ⇒
@@ -181,9 +180,10 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
                             ExitCodes.executionError
                         }
                     }
-                  case _ ⇒
-                    println(s"Script $scriptFile doesn't end with a puzzle")
-                    ExitCodes.notAPuzzle
+                  case Failure(e) ⇒
+                    println(s"Error during script evaluation: ")
+                    print(e.stackString)
+                    ExitCodes.compilationError
                 }
 
             }

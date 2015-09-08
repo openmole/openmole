@@ -30,9 +30,14 @@ $tasks
   val env = LocalEnvironment(4)
   """
 
-@sect{Launch}
+  @div(`class` := "text-center")(
+      a(`class` := "btn btn-default btn-sm", id := "download-button", href := openmole.file)(s"Download OpenMOLE $version"),
+      br,
+      hr(style := "width:200px; height:1px;"),
+      i(s"${name} (version ${version}) was released on ${generationDate}.")
+    )
 
-  @a(b(s"Download the version $version of OpenMOLE - $name, released on $generationDate"), href := openmole.file).
+@sect{Launch}
 
   @p OpenMOLE requires that Java version 7 or above is installed and available on your computer. Then just extract the archive, and you're done! OpenMOLE is installed and works out of the box!
 

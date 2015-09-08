@@ -35,8 +35,8 @@ package object tar {
       try Files.copy(f, tos) finally tos.closeEntry
     }
 
-    def archive(directory: File, time: Boolean = true) =
-      createDirArchiveWithRelativePathWithAdditionalCommand(tos, directory, if (time) identity(_) else _.setModTime(0))
+    def archive(directory: File, time: Boolean = true, includeTopDirectoryName: Boolean = false) =
+      createDirArchiveWithRelativePathWithAdditionalCommand(tos, directory, if (time) identity(_) else _.setModTime(0), includeTopDirectoryName)
   }
 
   implicit class TarInputStreamDecorator(tis: TarInputStream) {
@@ -115,12 +115,12 @@ package object tar {
     def withTarGZOutputStream[T] = withClosable[TarOutputStream, T](new TarOutputStream(file.bufferedOutputStream().toGZ))(_)
   }
 
-  private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, directory: File, additionalCommand: TarEntry ⇒ Unit) = {
+  private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, directory: File, additionalCommand: TarEntry ⇒ Unit, includeDirectoryName: Boolean) = {
 
     if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
     val toArchive = new Stack[(File, String)]
-    toArchive.push(directory -> "")
+    if (!includeDirectoryName) toArchive.push(directory -> "") else toArchive.push(directory -> directory.getName)
 
     while (!toArchive.isEmpty) {
 

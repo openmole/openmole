@@ -127,18 +127,20 @@ class SubMoleExecution(
   private def jobFinished(job: MoleJob) = {
     val mole = moleExecution.mole
     val (capsule, ticket) = _jobs.single(job)
+    def ctxForHooks = implicits + job.context
+
+    def executeHook(h: Hook) =
+      try h.perform(ctxForHooks, moleExecution.executionContext)(moleExecution.newRNG)
+      catch {
+        case e: Throwable ⇒
+          val event = MoleExecution.HookExceptionRaised(h, capsule, job, e, SEVERE)
+          EventDispatcher.trigger(moleExecution, event)
+          moleExecution.cancel(event)
+          logger.log(FINE, "Error in execution of misc " + h + "at the end of task " + job.task, e)
+          throw e
+      }
+
     try {
-      def ctxForHooks = implicits + job.context
-
-      def executeHook(h: Hook) =
-        try h.perform(ctxForHooks, moleExecution.executionContext)(moleExecution.newRNG)
-        catch {
-          case e: Throwable ⇒
-            EventDispatcher.trigger(moleExecution, new MoleExecution.HookExceptionRaised(h, job, e, SEVERE))
-            logger.log(SEVERE, "Error in execution of misc " + h + "at the end of task " + job.task, e)
-            throw e
-        }
-
       val hooksVariables = moleExecution.hooks(capsule).flatMap(executeHook).unzip._2
       val context = job.context ++ hooksVariables
       mole.outputDataChannels(capsule).foreach { _.provides(implicits + context, ticket, moleExecution) }
@@ -149,8 +151,10 @@ class SubMoleExecution(
     }
     catch {
       case t: Throwable ⇒
-        logger.log(SEVERE, "Error in submole execution", t)
-        EventDispatcher.trigger(moleExecution, new MoleExecution.ExceptionRaised(job, t, SEVERE))
+        logger.log(FINE, "Error in submole execution", t)
+        val event = MoleExecution.ExceptionRaised(job, capsule, t, SEVERE)
+        EventDispatcher.trigger(moleExecution, event)
+        moleExecution.cancel(event)
         throw t
     }
     finally {
@@ -189,8 +193,10 @@ class SubMoleExecution(
             val ctx = try s.perform(implicits + context, moleExecution.executionContext)(moleExecution.newRNG)
             catch {
               case t: Throwable ⇒
-                logger.log(SEVERE, "Error in submole execution", t)
-                EventDispatcher.trigger(moleExecution, new MoleExecution.SourceExceptionRaised(s, capsule, t, SEVERE))
+                logger.log(FINE, "Error in submole execution", t)
+                val event = MoleExecution.SourceExceptionRaised(s, capsule, t, SEVERE)
+                EventDispatcher.trigger(moleExecution, event)
+                moleExecution.cancel(event)
                 throw new InternalProcessingError(t, s"Error in source execution that is plugged to $capsule")
             }
             a + ctx

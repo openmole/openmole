@@ -21,12 +21,6 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.tools.VariableExpansion.Expansion
 import org.openmole.tool.file._
 import org.openmole.core.tools.service.{ OS, ProcessUtil }
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.VariableExpansion
 import ProcessUtil._
 import java.io.File
 import java.io.IOException
@@ -36,8 +30,8 @@ import org.openmole.core.workflow.data._
 import org.openmole.plugin.task.external._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.stream.StringOutputStream
-import scala.collection.JavaConversions._
-import scala.collection.mutable.ListBuffer
+
+import scala.annotation.tailrec
 
 object SystemExecTask extends Logger {
 
@@ -46,13 +40,15 @@ object SystemExecTask extends Logger {
    * To communicate with the dataflow the result should be either a file / category or the return
    * value of the process.
    */
-  def apply(commands: String*) =
+  def apply(commands: Command*) =
     new SystemExecTaskBuilder(commands: _*)
 
 }
 
+case class ExpandedSystemExecCommand(expandedCommand: Expansion)
+
 abstract class SystemExecTask(
-    val command: Seq[Commands],
+    val commands: Seq[OSCommands],
     val directory: Option[String],
     val errorOnReturnCode: Boolean,
     val returnValue: Option[Prototype[Int]],
@@ -83,7 +79,7 @@ abstract class SystemExecTask(
     }
 
     def commandLine(cmd: Expansion): Array[String] =
-      CommandLine.parse(workDir.getAbsolutePath + File.separator + cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath))).toStrings
+      CommandLine.parse(cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath))).toStrings
 
     def execute(command: Array[String], out: PrintStream, err: PrintStream): Int = {
       try {
@@ -109,15 +105,27 @@ abstract class SystemExecTask(
       }
     }
 
-    val osCommandLines: Seq[Expansion] = command.find { _.os.compatible }.map { _.expanded }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
+    // find the sequence of command lines corresponding to the host system
+    // unused
+    val osCommandLines: Seq[ExpandedSystemExecCommand] = commands.find { _.os.compatible }.map {
+      cmd ⇒ cmd.expanded map { expansion ⇒ ExpandedSystemExecCommand(expansion) }
+    }.getOrElse(
+      throw new UserBadDataError("No command line found for " + OS.actualOS))
 
-    def execAll(cmds: List[Expansion]): Int =
+    @tailrec
+    def execAll(cmds: Seq[ExpandedSystemExecCommand]): Int =
       cmds match {
         case Nil ⇒ 0
         case cmd :: t ⇒
-          val retCode = execute(commandLine(cmd), out, err)
-          if (errorOnReturnCode && retCode != 0) throw new InternalProcessingError("Error executing: [" + commandLine(cmd).mkString(" ") + "] return code was not 0 but " + retCode)
-          if (t.isEmpty || (!errorOnReturnCode && retCode != 0)) retCode
+          val commandline = commandLine(cmd.expandedCommand)
+
+          val retCode = execute(commandline, out, err)
+          if (errorOnReturnCode && retCode != 0)
+            throw new InternalProcessingError(
+              s"""Error executing command"}:
+                 |[${commandline.mkString(" ")}] return code was not 0 but ${retCode}""".stripMargin)
+
+          if (t.isEmpty || retCode != 0) retCode
           else execAll(t)
       }
 

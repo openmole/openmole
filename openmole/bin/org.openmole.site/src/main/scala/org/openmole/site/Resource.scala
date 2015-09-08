@@ -38,6 +38,8 @@ object Resource {
   def fireNewFunction = FileResource("fireNewFunction.png")
   def fireOldSetup = FileResource("fireOldSetup.png")
   def fireRemoveClearAll = FileResource("fireRemoveClearAll.png")
+  def github = FileResource("github.css")
+  def highlightJS = FileResource("highlight.pack.js")
   def logo = FileResource("openmole.png")
   def uiScreenshot = FileResource("openmoleUI.png")
   def openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfo.version}.tar.gz")
@@ -46,6 +48,8 @@ object Resource {
 
   def all = Seq[Resource](
     css,
+    github,
+    highlightJS,
     bootstrapCss,
     bootstrapJS,
     logo,
