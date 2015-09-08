@@ -113,8 +113,7 @@
 
   // Construction of the complete mole with the execution environment, and the hook.
   // Here the generated workflow will run using 4 threads of the local machine.
-  val ex = (is on LocalEnvironment(4) hook savePopulation)
-  ex.start""", header = model)
+  (is on LocalEnvironment(4) hook savePopulation)""", header = model)
 
   @p Calibration of stochastic models leads to noisy fitness functions. To deal with such fitness functions, one
   strategy consists in allocating a small amount of computation time to reevaluate already evaluated solutions.
