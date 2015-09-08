@@ -78,6 +78,7 @@ package object fileservice {
               case Success(v) ⇒ currentHash == v
               case Failure(_) ⇒ hashFile.delete; false
             }
+
         if (!upToDate) {
           update(file)
           hashFile.content = currentHash

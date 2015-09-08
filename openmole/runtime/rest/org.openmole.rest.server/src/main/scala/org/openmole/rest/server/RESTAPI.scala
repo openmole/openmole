@@ -116,16 +116,16 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
         project.compile(directory.workDirectory / script, Seq.empty) match {
           case ScriptFileDoesNotExists() ⇒ ExpectationFailed(Error("The script doesn't exist").toJson)
           case CompilationError(e)       ⇒ error(e)
-          case Compiled(compiled) ⇒
-            compiled.eval() match {
-              case res: PuzzleBuilder ⇒
+          case compiled: Compiled ⇒
+            Try(compiled.eval) match {
+              case Success(res) ⇒
                 Try(res.buildPuzzle.toExecution(executionContext = ExecutionContext(out = directory.outputStream))) match {
                   case Success(ex) ⇒
                     ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
                     start(ex)
                   case Failure(e) ⇒ error(e)
                 }
-              case _ ⇒ ExpectationFailed(Error("The last line of the script should be a puzzle").toJson)
+              case Failure(e) ⇒ error(e)
             }
 
         }
