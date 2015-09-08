@@ -81,6 +81,9 @@ object Workspace {
     configurations(location) = () ⇒ defaultValue
   }
 
+  def allTmpDir(location: File) = new File(location, tmpLocation)
+  def lock(location: File) = new File(allTmpDir(location), s"${sessionUUID.toString}-lock")
+
   object NoneTextEncryptor extends TextEncryptor {
     def decrypt(encryptedMessage: String) = encryptedMessage
     def encrypt(message: String) = message
@@ -113,7 +116,7 @@ class Workspace(val location: File) {
 
   location.mkdirs
 
-  val tmpDir = new File(new File(location, tmpLocation), sessionUUID.toString)
+  val tmpDir = new File(Workspace.allTmpDir(location), sessionUUID.toString)
   tmpDir.mkdirs
 
   val pluginDir = new File(location, pluginLocation)
@@ -142,7 +145,9 @@ class Workspace(val location: File) {
 
   lazy val overridden = collection.mutable.HashMap[String, String]()
 
-  def clean = tmpDir.recursiveDelete
+  def clean = {
+    tmpDir.recursiveDelete
+  }
 
   def newDir(prefix: String = fixedDir): File = tmpDir.newDir(prefix)
 
