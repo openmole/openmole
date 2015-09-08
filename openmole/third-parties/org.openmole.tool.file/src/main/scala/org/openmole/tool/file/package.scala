@@ -405,6 +405,8 @@ package file {
 
       def withOutputStream[T] = withClosable[OutputStream, T](bufferedOutputStream())(_)
 
+      def withFileOutputStream[T] = withClosable[FileOutputStream, T](new FileOutputStream(file))(_)
+
       def withInputStream[T] = withClosable[InputStream, T](bufferedInputStream)(_)
 
       def withWriter[T](append: Boolean = false) = withClosable[Writer, T](new OutputStreamWriter(bufferedOutputStream(append)))(_)
