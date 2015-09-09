@@ -154,7 +154,7 @@ object EGIEnvironment extends Logger {
 
   Workspace += (EnvironmentCleaningThreads, "20")
 
-  Workspace += (WMSRank, """( other.GlueCEStateWaitingJobs == 0 ) ? other.GlueCEStateFreeJobSlots : -other.GlueCEStateWaitingJobs""")
+  Workspace += (WMSRank, """( other.GlueCEStateFreeJobSlots > 0 ? other.GlueCEStateFreeJobSlots : (-other.GlueCEStateWaitingJobs * 4 / ( other.GlueCEStateRunningJobs + 1 )) - 1 )""")
 
   def apply(
     voName: String,
