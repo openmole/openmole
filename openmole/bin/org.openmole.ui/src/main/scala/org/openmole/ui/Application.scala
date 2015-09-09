@@ -185,9 +185,9 @@ class Application extends IApplication {
         case GUIMode ⇒
           def browse(url: String) =
             if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
-          val lock = new FileOutputStream(GUIServer.lockFile).getChannel.tryLock
-          if (lock != null)
-            try {
+          GUIServer.lockFile.withFileOutputStream { fos ⇒
+            val lock = fos.getChannel.tryLock
+            if (lock != null) {
               val port = config.port.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
               val url = s"https://localhost:$port"
               GUIServer.urlFile.content = url
@@ -199,10 +199,10 @@ class Application extends IApplication {
               ScalaREPL.warmup
               server.join()
             }
-            finally lock.release()
-          else {
-            browse(GUIServer.urlFile.content)
-            ExitCodes.ok
+            else {
+              browse(GUIServer.urlFile.content)
+              ExitCodes.ok
+            }
           }
       }
 

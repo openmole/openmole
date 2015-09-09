@@ -5,7 +5,9 @@
   @a("EGI", href := "http://www.egi.eu/") is a grid infrastructure gathering computing resources from all over the world. It is a very powerful computing environment, but shows technically challenging to use. OpenMOLE makes it very simple to benefit from the grid.
 
  @sect{Setup your grid credentials}
-   To delegate a task to EGI you need to register your certificate in OpenMOLE. In the console execute:
+   Note: The following instructions explain how to setup the EGI authentication in console mode. If you are using the script editor you can configure it directly in the authentication panel.
+
+   @p To delegate a task to EGI you need to register your certificate in OpenMOLE. In the console execute:
    @br @hl.openmole("""
    EGIAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")""", header = """def encrypted = "" """)
 
