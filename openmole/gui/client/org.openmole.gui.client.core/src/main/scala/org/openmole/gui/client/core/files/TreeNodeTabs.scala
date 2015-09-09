@@ -120,7 +120,13 @@ object TreeNodeTabs {
 
     def refresh(afterRefresh: () ⇒ Unit) =
       if (editable()) save(afterRefresh)
-      else update(afterRefresh)
+      else {
+        val scrollPosition = editor.getScrollPostion
+        update( () => {
+          afterRefresh()
+          editor.setScrollPosition(scrollPosition)
+        })
+      }
   }
 
   class HTMLTab(val treeNode: TreeNode, htmlContent: String) extends TreeNodeTab {

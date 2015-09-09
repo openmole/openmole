@@ -63,6 +63,10 @@ class EditorPanelUI(bindings: Seq[(String, String, () ⇒ Any)], initCode: Strin
 
   def setReadOnly(b: Boolean) = editor.setReadOnly(b)
 
+  def getScrollPostion = sess.getScrollTop
+
+  def setScrollPosition(pos: Double) = sess.setScrollTop(pos)
+
   def complete() = {
     if (editor.completer == null)
       editor.completer = fr.iscpif.scaladget.ace.autocomplete
