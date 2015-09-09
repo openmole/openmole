@@ -12,6 +12,7 @@ import bs._
 import org.scalajs.dom.raw.{ HTMLElement, HTMLDivElement }
 import rx._
 
+import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 import scala.scalajs.js.timers._
@@ -36,19 +37,20 @@ import scala.scalajs.js.timers._
 object TreeNodeTabs {
 
   sealed trait TreeNodeTab {
+
     val treeNode: TreeNode
 
     val tabName: Var[String] = treeNode.name()
-
     val id: String = getUUID
-
     val active: Var[Option[SetIntervalHandle]] = Var(None)
 
     def desactivate = {
-      active().map {
-        clearInterval
-      }
+      active().foreach { clearInterval }
       active() = None
+    }
+
+    def activate = {
+      active() = Some(setInterval(15000) { refresh() })
     }
 
     val editorElement: TypedTag[HTMLDivElement]
@@ -57,24 +59,45 @@ object TreeNodeTabs {
 
     def fileContent: FileContent
 
-    def save(onsaved: () ⇒ Unit = () ⇒ {}): Unit
+    def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
 
   }
 
-  class EditableNodeTab(val treeNode: TreeNode, editor: EditorPanelUI) extends TreeNodeTab {
+  trait Save <: TreeNodeTab{
+    val editor: EditorPanelUI
+
+    def save(afterSave: () => Unit) = editor.synchronized {
+      OMPost[Api].saveFile(treeNode.safePath(), editor.code).call().foreach(_ => afterSave())
+    }
+  }
+  
+  trait Update <: TreeNodeTab {
+    val editor: EditorPanelUI
+    
+    def update(afterUpdate: () ⇒ Unit) = editor.synchronized {
+      FileManager.download(
+        treeNode,
+        (p: FileTransferState) ⇒ {},
+        (content: String) ⇒ {
+          editor.setCode(content)
+          afterUpdate()
+        }
+      )
+    }
+  }
+
+  class EditableNodeTab(val treeNode: TreeNode, val editor: EditorPanelUI) extends TreeNodeTab with Save {
 
     val editorElement = editor.view
 
     def fileContent = AlterableFileContent(treeNode.safePath(), editor.code)
 
-    def save(onsaved: () ⇒ Unit) = OMPost[Api].saveFile(treeNode.safePath(), editor.code).call().foreach { d ⇒
-      onsaved()
-    }
+    def refresh(onsaved: () ⇒ Unit) = save(onsaved)
   }
 
   class LockedEditionNodeTab(val treeNode: TreeNode,
-                             editor: EditorPanelUI,
-                             _editable: Boolean = false) extends TreeNodeTab {
+                             val editor: EditorPanelUI,
+                             _editable: Boolean = false) extends TreeNodeTab with Save with Update {
     val editorElement = editor.view
     val editable = Var(_editable)
 
@@ -94,19 +117,9 @@ object TreeNodeTabs {
 
     def fileContent = AlterableOnDemandFileContent(treeNode.safePath(), editor.code, () ⇒ editable())
 
-    def save(onsaved: () ⇒ Unit) =
-      if (editable())
-        OMPost[Api].saveFile(treeNode.safePath(), editor.code).call().foreach { d ⇒
-          onsaved()
-        }
-      else FileManager.download(
-        treeNode,
-        (p: FileTransferState) ⇒ {},
-        (content: String) ⇒ {
-          editor.setCode(content)
-          onsaved()
-        }
-      )
+    def refresh(afterRefresh: () ⇒ Unit) =
+      if (editable()) save(afterRefresh)
+      else update(afterRefresh)
   }
 
   class HTMLTab(val treeNode: TreeNode, htmlContent: String) extends TreeNodeTab {
@@ -116,7 +129,7 @@ object TreeNodeTabs {
 
     def fileContent = ReadOnlyFileContent()
 
-    def save(onsaved: () ⇒ Unit) = onsaved()
+    def refresh(onsaved: () ⇒ Unit) = onsaved()
   }
 
   def apply(tabs: TreeNodeTab*) = new TreeNodeTabs(tabs.toSeq)
@@ -157,11 +170,11 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
 
   def setActive(tab: TreeNodeTab) = {
     unActiveAll
-    tab.active() = Some(autosaveActive(tab))
+    tab.activate
   }
 
   def unActiveAll = tabs().map { t ⇒
-    t.save()
+    t.refresh()
     t.desactivate
   }
 
@@ -186,16 +199,12 @@ class TreeNodeTabs(val tabs: Var[Seq[TreeNodeTab]]) {
     }
   }
 
-  def --(tab: TreeNodeTab): Unit = tab.save(() ⇒ removeTab(tab))
+  def --(tab: TreeNodeTab): Unit = tab.refresh(() ⇒ removeTab(tab))
 
   def --(treeNode: TreeNode): Unit = find(treeNode).map {
     removeTab
   }
 
-  //Autosave the active tab every 15 seconds
-  def autosaveActive(tab: TreeNodeTab) = setInterval(15000) {
-    tab.save()
-  }
 
   def alterables: Seq[AlterableFileContent] = tabs().map {
     _.fileContent
