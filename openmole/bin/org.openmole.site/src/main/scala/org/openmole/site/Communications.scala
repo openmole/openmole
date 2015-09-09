@@ -167,6 +167,7 @@ object Communication {
         Authors("Romain Reuillon", "Florent Chuffart", "Mathieu Leclaire", "Thierry Faure", "Nicolas Dumoulin", "David R.C. Hill"),
         BibtexPages("55-62"),
         BookTitle("High Performance Computing and Simulation (HPCS), 2010 international conference on"),
+        Url(baseURL + "/files/Reuillon2010.pdf"),
         Year(2010)
       )
     )
