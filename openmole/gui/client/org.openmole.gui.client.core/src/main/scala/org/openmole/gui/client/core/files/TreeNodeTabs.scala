@@ -93,20 +93,16 @@ object TreeNodeTabs {
     lazy val overlayElement = tags.div
 
     def fileContent = AlterableOnDemandFileContent(treeNode.safePath(), editor.code, () ⇒ editable())
-
-    def save(onsaved: () ⇒ Unit) =
-      if (editable())
-        OMPost[Api].saveFile(treeNode.safePath(), editor.code).call().foreach { d ⇒
-          onsaved()
-        }
-      else FileManager.download(
-        treeNode,
-        (p: FileTransferState) ⇒ {},
-        (content: String) ⇒ {
-          editor.setCode(content)
-          onsaved()
-        }
-      )
+    
+    def refresh(afterRefresh: () ⇒ Unit) =
+      if (editable()) save(afterRefresh)
+      else {
+        val scrollPosition = editor.getScrollPostion
+        update( () => {
+          afterRefresh()
+          editor.setScrollPosition(scrollPosition)
+        })
+      }
   }
 
   class HTMLTab(val treeNode: TreeNode, htmlContent: String) extends TreeNodeTab {
