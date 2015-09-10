@@ -94,14 +94,17 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     margin-left: 3px;
     position: relative;
     top: 17px;
-    margin-bottom: 20px;
 }
 .tree-path .btn-group .btn.btn-primary{
     background-color: #3086b5;
     border: #3086b5 solid 1px;
 }
+.tree-path .btn-group {
+    margin-top: 10px;
+}
 .tree-header {
     margin-left: -4px;
+    margin-top: -23px;
 }
 .tree {
     margin-left: 3px;
@@ -174,7 +177,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 #adddir {
     padding-left: 7px;
-    padding-top: 40px;
+    padding-top: 23px;
 }
 #adddir .glyphicon {
     padding-right: 5px;
@@ -288,7 +291,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     overflow-y: auto;
     padding-left: 7px;
     position: absolute;
-    top: 20px;
+    top: 37px;
     transition: all 0.1s ease-out 0s;
     width: 320px;
 }
