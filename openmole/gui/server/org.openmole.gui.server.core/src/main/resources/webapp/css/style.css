@@ -33,6 +33,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 #marketPanelID .modal-dialog {
     width: 90%;
+    max-width: 1100px;
 }
 
 #settingsPanelID, #executionsPanelID .modal-dialog {
