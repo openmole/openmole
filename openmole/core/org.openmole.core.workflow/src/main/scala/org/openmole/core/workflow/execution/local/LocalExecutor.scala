@@ -32,6 +32,7 @@ import org.openmole.tool.logger.Logger
 import org.openmole.tool.stream._
 import ref.WeakReference
 import org.openmole.core.workflow.mole.{ StrainerTaskDecorator, StrainerCapsule }
+import org.openmole.core.event._
 
 object LocalExecutor extends Logger
 
@@ -68,6 +69,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                         if (classOf[MoleTask].isAssignableFrom(t.task.getClass)) jobGoneIdle()
                       case _ ⇒
                     }
+
                     moleJob.perform
                     moleJob.exception match {
                       case Some(e) ⇒ EventDispatcher.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))

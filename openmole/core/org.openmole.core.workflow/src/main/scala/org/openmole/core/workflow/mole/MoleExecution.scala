@@ -65,7 +65,7 @@ object MoleExecution extends Logger {
     grouping: Map[Capsule, Grouping] = Map.empty,
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
-    defaultEnvironment: Environment = LocalEnvironment.default)(implicit executionContext: ExecutionContext) =
+    defaultEnvironment: Environment = LocalEnvironment())(implicit executionContext: ExecutionContext) =
     new MoleExecution(
       mole,
       listOfTupleToMap(sources),
