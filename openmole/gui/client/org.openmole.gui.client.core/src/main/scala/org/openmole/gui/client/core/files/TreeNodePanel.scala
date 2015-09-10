@@ -78,17 +78,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   val view = tags.div(
     Rx {
-      val toDraw = manager.drop(1)
-      val dirNodeLineSize = toDraw.size
-      tags.div(`class` := "tree-path",
-        buttonGroup()(
-          glyphButton(" Home", btn_primary, glyph_home, goToDirAction(manager.head))(dropPairs(manager.head)),
-          if (dirNodeLineSize > 2) goToDirButton(toDraw(dirNodeLineSize - 3), Some("...")),
-          toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
-        )
-      )
-    },
-    Rx {
       tags.form(id := "adddir")(
         tags.div(`class` := "tree-header",
           inputGroup(navbar_left)(
@@ -122,6 +111,17 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           )
         )
       )
+    },
+    Rx {
+      val toDraw = manager.drop(1)
+      val dirNodeLineSize = toDraw.size
+      tags.div(`class` := "tree-path",
+        buttonGroup()(
+          glyphButton(" Home", btn_primary, glyph_home, goToDirAction(manager.head))(dropPairs(manager.head)),
+          if (dirNodeLineSize > 2) goToDirButton(toDraw(dirNodeLineSize - 3), Some("...")),
+          toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
+        )
+      )
     }, Rx {
       if (manager.allNodes.size == 0) {
         tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
@@ -129,7 +129,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       else {
         tags.table(`class` := "tree" + dragState())(
           tags.tr(
-            tags.td(height := "60px",
+            tags.td(height := "40px",
               transferring() match {
                 case _: Standby ⇒
                 case _: Transfered ⇒
