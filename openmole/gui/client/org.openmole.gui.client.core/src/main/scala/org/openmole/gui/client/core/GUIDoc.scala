@@ -1,17 +1,15 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.EnvironmentErrorPanel.SelectableLevel
-import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.ext.data.{ DebugLevel, ErrorLevel }
-import org.scalajs.dom.raw.{ HTMLInputElement, HTMLDivElement }
-
-import scalatags.JsDom.TypedTag
-import scalatags.JsDom.{ tags ⇒ tags }
+import org.openmole.gui.misc.js.BootstrapTags._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, Select, ClassKeyAggregator }
-import scalatags.JsDom.all._
-import bs._
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, ClassKeyAggregator, Select }
+import org.scalajs.dom.raw.HTMLDivElement
 import rx._
+
+import scalatags.JsDom.all._
+import scalatags.JsDom.{ TypedTag, tags }
 
 /*
  * Copyright (C) 27/08/15 // mathieu.leclaire@openmole.org
@@ -36,11 +34,11 @@ object GUIDoc {
 
   val selectedEntry: Var[Option[GUIDocEntry]] = Var(None)
 
-  val omLangageLink = a(href := "http://www.openmole.org/current/Documentation_Language.html", target := "_blank")("OpenMOLE language")
+  val omLanguageLink = a(href := "http://www.openmole.org/current/Documentation_Language.html", target := "_blank")("OpenMOLE language")
   val omPluginLink = a(href := "http://www.openmole.org/current/Documentation_Development_Plugins.html", target := "_blank")("OpenMOLE plugin")
   val omMarketLink = a(href := "http://www.openmole.org/current/Documentation_Market%20Place.html", target := "_blank")("Market Place")
   val omEnvironmentLink = a(href := "http://www.openmole.org/current/Documentation_Language_Environments.html", target := "_blank")("Environment page")
-  val githubMarketLink = a(href := "https://github.com/openmole/openmole-market/", target := "_blank")("Github page")
+  val githubMarketLink = a(href := "https://github.com/openmole/openmole-market/", target := "_blank")("GitHub page")
   val toStringHookLink = a(href := "http://www.openmole.org/current/Documentation_Language_Hooks.html", target := "_blank")("ToString Hook")
 
   val rLink = a(href := "https://www.r-project.org/", target := "_blank")("R")
@@ -51,31 +49,37 @@ object GUIDoc {
   val csvLink = a(href := "https://en.wikipedia.org/wiki/Comma-separated_values", target := "_blank")("CSV")
 
   val resourcesContent = tags.div(
-    "The resources are files, that can be used in OpenMOLE simulations:",
+    "Resources are files, which can be used in OpenMOLE workflows. We distinguish multiple kinds of resources:",
     ul(
-      li(b(".oms for Open Mole Script"), "is a file describing an OpenMOLE workflow according the its ", omLangageLink),
-      li(b("external code"), " run used in OpenMOLE scripts: editable in the application (", javaLink, ", ", scalaLink, ", ", netlogoLink, ", ", rLink, ", ", pythonLink, ", ...) or not (C, C++, or any binary code)"),
-      li(b("Any external resources"), " used as input for a model editable in the application (", csvLink, " files, text files, ...) or not (pictures, or any binary files)")
+      li(b(".oms (for Open Mole Script)"), " is a file describing an OpenMOLE workflow according to the ", omLanguageLink),
+      li(b("external code"), " used in OpenMOLE scripts. Codes written with some specific programming languages (", javaLink, ", ", scalaLink, ", ", netlogoLink, ", ", rLink, ", ", pythonLink, ", ...) can be editer in the application. " +
+        "Any other types of external codes is also supported but as an immutable binary (C, C++, ...)."),
+      li(b("Other external resources"), " used as input for a model are editable in the application (", csvLink, " files, text files, ...), while binary files like images cannot be modified.")
     ),
-    "These files are managed in a file system located in left hand side and that can be showed or hidden thanks to the ", glyph(bs.glyph_file + " glyphText"), " icon",
+    "These files are managed in a file system located in the left sidebar. The filesystem can be shown or hidden using the ", glyph(bs.glyph_file + " glyphText"), " button.",
     bs.div("centerImg")(img(src := "img/fileManagement.png", alt := "fileManagement")),
-    "The ", bs.span("greenBold")("current directory"), " path is stacked in the top. The current directory is on the right of the stack. Clicking on one folder of the stack set this folder as current. On the image above, the current directory is for example ", tags.em("SimpopLocal"),
+    "The ", bs.span("greenBold")("current directory"), " shown at the top, on the right of the stack. A folder hierarchy too deep to fit in the bar will be replaced by \"...\". " +
+      "Clicking on one folder of the stack sets it as the current folder. On the image above, the current directory is for example ", tags.em("SimpopLocal"),
     ".",
-    bs.div("spacer20")("The content of the current directory is listed in the bottom. Each row gives the name and the size of each file or folder. A folder is preceded by a ", tags.div(`class` := "dir bottom-5"), ". A ", glyph(bs.glyph_plus), " inside means that the folder is not empty.",
-      "In between, a file managment tool enable to: ",
+
+    bs.div("spacer20")("Second from the top if a File management utility box. It enables: "),
+    ul(
+      li("creating a new file or folder in the current directory. To do so, select ", tags.em("file"), " or ", tags.em("folder"), " thanks to the ", bs.span("greenBold")("file or folder selector"), ". Then, type the new name in the ",
+        bs.span("greenBold")("file or folder name input"), " and press enter. The freshly created file or folder appears in the list."),
+      li(bs.span("greenBold")("uploading a file"), " from your local machine to the current directory"),
+      li(bs.span("greenBold")("refreshing"), " the content of the current directory.")
+    ),
+
+    bs.div("spacer20")("The content of the current directory is listed at the bottom. Each row gives the name and size of each file or folder. Folders are marked by a ", tags.div(`class` := "dir bottom-5"), ". A ", glyph(bs.glyph_plus), " symbol indicates that the folder is not empty."
+    ),
+    bs.div("spacer20")("Hovering a file or a folder with the mouse pointer triggers new actions:",
       ul(
-        li("create a new file or folder in the current directory. To do so, select ", tags.em("file"), " or ", tags.em("folder"), " thanks to the ", bs.span("greenBold")("file or folder selector"), ". Then, type the required name in the ",
-          bs.span("greenBold")("file or folder name input"), " and press enter. The freshly created file or folder appears in the list."),
-        li(bs.span("greenBold")("upload a file"), " in the current directory"),
-        li(bs.span("greenBold")("Refresh"), " the content of the current directory.")
+        li(glyph(bs.glyph_download + " right2"), " download the hovered file or directory (as an archive for the latter) to the local machine."),
+        li(glyph(bs.glyph_edit + " right2"), " rename the hovered file or directory. An input field appears: just type the new name and press " + tags.em("enter") + " to validate."),
+        li(glyph(bs.glyph_trash + " right2"), " delete the hovered file or directory."),
+        li(glyph(bs.glyph_archive + " right2"), " uncompress the hovered file (appears only in case of archive files (", tags.em(".tgz"), " or ", tags.em("tar.gz"), ").")
       )),
-    bs.div("spacer20")("When a file or a folder row is hovered, new options appear:",
-      ul(
-        li(glyph(bs.glyph_download + " right2"), " for downloading the current file or directory (as an archive for the latter)."),
-        li(glyph(bs.glyph_edit + " right2"), " for renaming the current file or directory. An input field appears; just input the new name and press " + tags.em("enter") + " to validate."),
-        li(glyph(bs.glyph_trash + " right2"), " for deleting the current file or direcotry."),
-        li(glyph(bs.glyph_archive + " right2"), " for uncompressing the current file (appears only in case of archive files (", tags.em(".tgz"), " or ", tags.em("tar.gz"), ").")
-      )),
+    // FIXME add new section about editor panel
     bs.div("spacer20")("The editable files can be modified in the central editor. To do so, simply click on the file to be edited.")
   )
 
@@ -83,44 +87,45 @@ object GUIDoc {
     val logLevels = Seq(ErrorLevel(), DebugLevel())
 
     tags.div(
-      "An .oms script file can be run and monitor thanks to the execution section ", glyph(bs.glyph_settings + " glyphText"),
+      "An .oms script file can be run and monitored via the execution panel ", glyph(bs.glyph_settings + " glyphText"),
       bs.div("spacer20")(tags.b("Monitor an execution:"),
-        tags.div("When a .oms file is edited, a ", bs.button("Play", btn_primary + " labelInline"), " in top right hand corner permits to start a workflow execution." +
-          " Once the workflow has been started, the execution panel appears giving the following information for each execution and from left to right:",
+        tags.div("When a .oms file is edited, a ", bs.button("Play", btn_primary + " labelInline"), " appears in the top right corner to start the execution of the workflow." +
+          " Once the workflow has been started, the execution panel appears, listing information for each execution on a separate row. " +
+          "From left to right, the entries are:",
           tags.ul(
             tags.li("The script name (Ex: explore.oms)"),
             tags.li("The start time of the execution (Ex: 1/9/2015, 15:07:20 )"),
             tags.li(glyph(bs.glyph_flash + " right2"), " the number of running jobs (Ex: ", glyph(bs.glyph_fire + " right2"), " 227)"),
-            tags.li(glyph(bs.glyph_flag + " right2"), " the jobs progression with (#finished jobs / # jobs) (Ex: ", glyph(bs.glyph_flag + " right2"), " 17/2345)"),
+            tags.li(glyph(bs.glyph_flag + " right2"), " the jobs progression with (#finished jobs / # jobs) (Ex: ", glyph(bs.glyph_flag + " right2"), " 17 / 2345)"),
             tags.li("The execution duration (Ex: 1:17:44)"),
             tags.li("The execution state with:",
               tags.ul(
-                tags.li(tags.span(style := "color: yellow; font-weight: bold;", "running"), " : the jobs are running"),
-                tags.li(tags.span(style := "color: #a6bf26; font-weight: bold;", "success"), " : the execution has successfully finished",
-                  tags.li(tags.span(style := "color: #CC3A36; font-weight: bold;", "failed"), " : the execution has failed: click on this state to see the errors"),
-                  tags.li(tags.span(style := "color: orange; font-weight: bold;", "canceled"), ": the execution has been canceled (by means of the ", glyph(bs.glyph_remove + " right2"), ")")
+                tags.li(tags.span(style := "color: yellow; font-weight: bold;", "running"), ": some jobs are running"),
+                tags.li(tags.span(style := "color: #a6bf26; font-weight: bold;", "success"), ": the execution has successfully finished",
+                  tags.li(tags.span(style := "color: #CC3A36; font-weight: bold;", "failed"), ": the execution has failed: click on this state to see the errors"),
+                  tags.li(tags.span(style := "color: orange; font-weight: bold;", "canceled"), ": the execution has been canceled (by means of the ", glyph(bs.glyph_remove + " right2"), " button)")
                 ))
             ),
-            tags.li(glyph(bs.glyph_stats), "Env give informations about the execution monitoring on the environments defined in the workflow (See below)"),
-            tags.li(glyph(bs.glyph_list + " right2"), " display the standard output stream. You will see here the results of your ", toStringHookLink, " if you defined one in your script"),
-            tags.li(glyph(bs.glyph_remove + " right2"), " cancel the execution"),
-            tags.li(glyph(bs.glyph_trash + " right2"), " remove the execution from the list.")
+            tags.li(glyph(bs.glyph_stats), "Env gives information about the execution on the remote environments defined in the workflow (See below)"),
+            tags.li(glyph(bs.glyph_list + " right2"), " collects the standard output stream. You will find the results of your ", toStringHookLink, "  in this panel, if you defined one in your script"),
+            tags.li(glyph(bs.glyph_remove + " right2"), " cancels the execution"),
+            tags.li(glyph(bs.glyph_trash + " right2"), " removes the execution from the list.")
           )
         ),
         bs.div("spacer20")(
-          "The output history ", bs.input("500", "right2 labelInline")(style := "color:#333; width : 60px;"), " permits to set the number of entries in the standard outputs of the executions ( ",
+          "The output history ", bs.input("500", "right2 labelInline")(style := "color:#333; width : 60px;"), " sets the number of entries from the standard outputs of the executions to be displayed  ( ",
           glyph(bs.glyph_list + " right2"), " ). It is set by default to 500."
         )
       ),
       bs.div("spacer20")(tags.b("Monitor the environments of an execution:"),
-        tags.div("When clicking on ", glyph(bs.glyph_stats), "Env, and at least one environment has been defined in the running script, a new line about environment statuses appear with the following informations:",
+        tags.div("When clicking on ", glyph(bs.glyph_stats), "Env, and at least one environment has been defined in the running script, a new line about environment statuses appear with the following information:",
           tags.ul(
-            tags.li("The name of the environment. If it has not been named explicitely in the script, it will appear like: LocalEnvironment@1371838186 or GridEnvironment@5718318899"),
-            tags.li(glyph(bs.glyph_upload + " right2"), "The number of files and the amount of uploaded data on the remote environment (Ex: 27(14Mo))"),
-            tags.li(glyph(bs.glyph_download + " right2"), "The number of files and the amount of downloaded data from the remote environment (Ex: 144(221Ko))"),
-            tags.li(glyph(bs.glyph_road + " right2"), "The number of submitted jobs on the remote environment (Ex: ", glyph(bs.glyph_road + " right2"), " 1225)"),
-            tags.li(glyph(bs.glyph_flash + " right2"), " the number of running jobs on the remote environment (Ex: ", glyph(bs.glyph_fire + " right2"), " 447)"),
-            tags.li(glyph(bs.glyph_flag + " right2"), " the number of finished jobs on the remote environment (Ex: ", glyph(bs.glyph_flag + " right2"), " 127)"),
+            tags.li("The name of the environment. If it has not been named explicitly in the script, it will appear like: LocalEnvironment@1371838186 or GridEnvironment@5718318899"),
+            tags.li(glyph(bs.glyph_upload + " right2"), "The number of files and the amount of data uploaded to the remote environment (Ex: 27 (14MB))"),
+            tags.li(glyph(bs.glyph_download + " right2"), "The number of files and the amount of data downloaded from the remote environment (Ex: 144 (221KB))"),
+            tags.li(glyph(bs.glyph_road + " right2"), "The number of jobs submitted to the remote environment (Ex: ", glyph(bs.glyph_road + " right2"), " 1225)"),
+            tags.li(glyph(bs.glyph_flash + " right2"), " the number of jobs running on the remote environment (Ex: ", glyph(bs.glyph_fire + " right2"), " 447)"),
+            tags.li(glyph(bs.glyph_flag + " right2"), " the number of jobs finished on the remote environment (Ex: ", glyph(bs.glyph_flag + " right2"), " 127)"),
             tags.li(glyph(bs.glyph_fire + " right2"), " the number of failed jobs on the remote environment (Ex: ", glyph(bs.glyph_fire + " right2"), " 4)"),
             tags.li(tags.a("details"), " is a link to monitor the environment logs. It is useful to diagnose a problem on the environment.")
           )
@@ -129,7 +134,7 @@ object GUIDoc {
           Select[SelectableLevel]("errorLevelDoc", logLevels.map { level ⇒
             (SelectableLevel(level, level.name), emptyCK)
           }, Some(logLevels.head), btn_primary
-          ).selector, " switches from fine logging (DEBUG) to minimal logging (ERROR) for all the environments."
+          ).selector, " switches the logging verbosity from fine (DEBUG) to minimal (ERROR) for all the environments."
         )
       )
     )
@@ -139,87 +144,84 @@ object GUIDoc {
     val factories = ClientService.authenticationFactories
 
     tags.div(
-      "In OpenMOLE, the computation load can be delegated to remote environments (SSH machine, Cluster, Grid) as explained on the ",
-      omEnvironmentLink, ". It is previously necessary to save the connection settings on these different environments (like login/password or ssh key). When clicking on the ",
-      glyph(bs.glyph_lock + " glyphText"), " a panel appears with the list of all the defined authentications (initially, no one is defined).",
+      "In OpenMOLE, the computation load can be delegated to remote environments (remote server through SSH, Cluster, Grid, ...) as explained on the ",
+      omEnvironmentLink, ". It is previously necessary to save the connection settings for these different environments (like login/password or ssh key). When clicking on ",
+      glyph(bs.glyph_lock + " glyphText"), " a panel appears with the list (initially empty) of all the defined authentications.",
       bs.div("spacer20")(
-        "The supported authentications are:",
+        "The currently supported authentications are:",
         tags.ul(
           tags.li("SSH authentication with login and password (any environment accessed by means of SSH)"),
-          tags.li("SSH authentiaction with SSH private key (any environment accessed by means of SSH)"),
-          tags.li("Grid certificate (.p12) for Grid computing")
+          tags.li("SSH authentication with SSH private key (any environment accessed by means of SSH)"),
+          tags.li("Grid certificate (.p12) for Grid Computing")
         )
       ),
       bs.div("spacer20")(
         "To add one authentication, click on the ", glyph(bs.glyph_plus + " right2"),
-        " icon. A new panel is displayed. First select the authentication category you need: ",
+        " icon. In the new panel, select the authentication category: ",
         Select("authentications",
           factories.map { f ⇒ (f, emptyCK) },
           factories.headOption,
           btn_primary
         ).selector
-      ), "Depending on your selection, the settings change. Let see them in details:",
+      ), "Your selection updates the available settings. Let's see them in details:",
       bs.div("spacer20")(tags.b("SSH Password:"),
-        tags.div("Set your host and your login on it (for example john on blueberry.org), as well as your password. Once you saved it, the authentication will be added to your list (by example: john@blueberry.org)")
+        tags.div("Set the remote host name and your login on this machine (for example john on blueberry.org), as well as your password. Once saved, the authentication will be added to your list (by example: john@blueberry.org)")
       ),
       bs.div("spacer20")(tags.b("SSH Key:"),
-        tags.div("The same three settings as the ones for the SSH Password are required as well as your private SSH key. To add it, click on ",
+        tags.div("Enter the same three settings as for the SSH Password. Now add your SSH private key by clicking on ",
           tags.label(`class` := "inputFileStyle labelInline")("No certificate"),
-          " and navigate to your private SSH key. A random name will be associated to your key. ",
-          "Once you saved it, the authentication will be added to your list (by example: john@blueberry.org)")
+          ". A random name will be associated to your key. ",
+          "Once saved, the authentication will be added to your list (by example: john@blueberry.org)")
       ),
       bs.div("spacer20")(tags.b("EGI P12 Certificate:"),
-        tags.div("It only requires your EGI certificate file and the associated password. To add it, click on ",
+        tags.div("It only requires your EGI certificate file and the associated password. Click on ",
           tags.label(`class` := "inputFileStyle labelInline")("No certificate"),
-          " and navigate to your certificate file. It will be renamed by egi.p12. Note that only one EGI certificate is required (you will not need any other one !)"
+          " to select your certificate file. It will be renamed to egi.p12. Note that only one EGI certificate is required (you will not need any other one!)"
         ),
-        bs.div("spacer20")("An authentication can be remove by clicking on the ", glyph(bs.glyph_trash + " right2"), " (visible when hovering an row of the authentication list), or edited by clicking on the name of an authentication from the authentications list."
+        bs.div("spacer20")("Remove an existing authentication by clicking on the ", glyph(bs.glyph_trash + " right2"), " (visible when hovering an  authentication in the list). An existing authentication can also be edited by clicking on the name of an authentication in the list."
         )
       )
     )
   }
 
   val marketContent = tags.div(
-    "It gathers working examples of OpenMOLE workflow. They are excellent starting points for building your own project. All the examples in the market place provide:",
+    "The Market Place gathers turnkey working examples of OpenMOLE workflow. They are excellent starting points for building your own project. All the examples in the market place provide:",
     tags.ul(
       tags.li("At least a .oms file containing an executable workflow script,"),
-      tags.li("The model executable (except for a small Scala code, which can be contained in an Scala Task),"),
-      tags.li("A README.md giving informations about the model or the method used in the example.")
+      tags.li("The embedded application (except for a small Scala code, which can be contained in an Scala Task),"),
+      tags.li("A README.md describing the model or the method used in the example.")
     ),
     bs.div("spacer20")(
-      "All the examples of the market can be found in the ", omMarketLink, " of the website and in the application by clicking the ", glyph(bs.glyph_market + " glyphText"),
-      " icon. The list of all the entries of the Market will appear. You can read the README.md by clicking on the name of the example and then downloading it in the current directory by pressing the ",
-      tags.em("Download"), " button. Once the download is over, the dialog is closed and the file manager refreshed. You just need to open its .oms file and press play to start its execution.",
-      bs.div("spacer20")("The sources and proposal for new entries can be found on a ", githubMarketLink, ".")
+      "All the examples from the market can be found in the ", omMarketLink, " of the website and in the application by clicking ", glyph(bs.glyph_market + " glyphText"),
+      ". From the list of market entries, you can read the README.md by clicking on the name of the example. Download the whole project to your current working directory by pressing the ",
+      tags.em("Download"), " button. You can now open the project's .oms file and press play to start its execution.",
+      bs.div("spacer20")("Browse the sources and propose your own project on the dedicated ", githubMarketLink, ".")
     )
 
   )
 
   val pluginContent = tags.div(
-    "The OpenMOLE platform is pluggable, meaning that you can build your own extension for any concept. It is however an advanced way of using the platform, so that you probably do not need it.",
-    bs.div("spacer20")("All the documentation about plugins can be found on the ",
-      omPluginLink, " section on the website. Nethertheless, the ", glyph(bs.glyph_plug + " glyphText"), " section enable to provide your plugins as ", tags.em(" jar"), " file, so that they can be found at execution time if it is used in an OpenMOLE script."
-    ), bs.div("spacer20")("To do so, simply click on the ", bs.glyph(bs.glyph_upload + " right2"), " in the plugin panel and navigate to your jar file. " +
-      "Once uploaded, the file appears in the list above. Hovering a row in this list makes appear the ", glyph(bs.glyph_trash + " right2"), " icon to remove this plugin from your selection."
+    "New features can be dynamically inserted in The OpenMOLE platform through plugins. Advanced users build their own" +
+      "plugins to express concepts that might not be present (yet) in OpenMOLE. In OpenMOLE, plugins take the form of ", tags.em(" jar"),
+    " files.",
+    bs.div("spacer20")("Open the plugin management panel by clicking on ", glyph(bs.glyph_plug + " glyphText"), ". You can upload a new plugin by clicking on ", bs.glyph(bs.glyph_upload + " right2"), " and selecting the corresponding jar file. "),
+    bs.div("spacer20")("Once uploaded, the plugin appears in the list. Hover a plugin in the list to display  the ", glyph(bs.glyph_trash) + " right2", " icon and remove the selected plugin from your selection."),
+    bs.div("spacer20")("More information about plugins can be found in the ", omPluginLink, " section of the website. Plugins are added, the "
     )
   )
 
   val entries = Seq(
-    GUIDocEntry(bs.glyph_file, "Manage the resources", resourcesContent),
+    GUIDocEntry(bs.glyph_file, "Manage resources", resourcesContent),
     GUIDocEntry(bs.glyph_settings, "Execute scripts", executionContent),
     GUIDocEntry(bs.glyph_lock, "Manage authentications", authenticationContent),
-    GUIDocEntry(bs.glyph_market, "The Market place", marketContent),
+    GUIDocEntry(bs.glyph_market, "Market place", marketContent),
     GUIDocEntry(bs.glyph_plug, "Plugins", pluginContent)
   )
 
   val doc: TypedTag[HTMLDivElement] = {
     tags.div(`class` := "docText",
-      "This help provides informations to use the OpenMOLE web application.  It looks very much to a web application even if, for now, both server and client run locally.",
-      tags.div(
-        "This application enables to manage OpenMOLE scripts, to edit them and to run them." +
-          " It does not explain how to build a workflow by means of the ",
-        omLangageLink,
-        ", which is explained in detail on the OpenMOLE website."),
+      "This application is an advanced editor for OpenMOLE scripts. It allows editing, managing and running them." +
+        " The description of the ", omLanguageLink, " and concepts can be found on the OpenMOLE website.",
       for (entry ← entries) yield {
         Rx {
           val isSelected = selectedEntry() == Some(entry)
