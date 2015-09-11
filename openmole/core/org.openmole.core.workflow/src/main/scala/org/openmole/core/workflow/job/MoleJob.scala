@@ -52,7 +52,7 @@ class MoleJob(
     private var prototypes: Array[Prototype[Any]],
     private var values: Array[Any],
     mostSignificantBits: Long, leastSignificantBits: Long,
-    val stateChangedCallBack: MoleJob.StateChangedCallBack) {
+    private[workflow] var stateChangedCallBack: MoleJob.StateChangedCallBack) {
 
   var exception: Option[Throwable] = None
 

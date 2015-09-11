@@ -55,7 +55,13 @@ class Runtime {
   import Runtime._
   import Log._
 
-  def apply(storage: RemoteStorage, communicationDirPath: String, inputMessagePath: String, outputMessagePath: String, debug: Boolean) = {
+  def apply(
+    storage: RemoteStorage,
+    communicationDirPath: String,
+    inputMessagePath: String,
+    outputMessagePath: String,
+    threads: Int,
+    debug: Boolean) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -134,7 +140,8 @@ class Runtime {
 
       /* --- Submit all jobs to the local environment --*/
       logger.fine("Run the jobs")
-      for (toProcess ← allMoleJobs) LocalEnvironment.default.submit(toProcess)
+      val environment = LocalEnvironment(nbThreads = threads)
+      for (toProcess ← allMoleJobs) environment.submit(toProcess)
 
       saver.waitAllFinished
 
