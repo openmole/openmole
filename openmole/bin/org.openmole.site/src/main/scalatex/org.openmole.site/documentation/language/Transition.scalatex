@@ -96,8 +96,9 @@
     @p It is very important to understand that this transition @b{gathers} input data from the dataflow. This task has
     a @b{single instance} that is fed with a @b{collection of inputs} stored in the variable @i{d}. In order for
     OpenMOLE to match the input data to this aggregation, we explicitly note the inputs as being arrays using the
-    @hl.openmoleNoTest("toArray") conversion. Subsequent parallelism is preserved by treating the same @i{d} collection
-    as a regular output to be split among multiple instances of the next task in the workflow.
+    @hl.openmoleNoTest("toArray") conversion. Subsequent parallelism is preserved by marking the same @i{d} collection
+    again as an array. This restores any subsequent parallelism by splitting the data among multiple instances of the
+    next task in the workflow.
 
 
   @sect{Advanced concepts: Capsules and Slots}
