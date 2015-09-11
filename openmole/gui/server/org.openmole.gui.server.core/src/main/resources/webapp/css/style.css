@@ -31,11 +31,11 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .black-label {
     color: black;
 }
-#marketPanelID .modal-dialog {
+#marketPanelID, #executionsPanelID .modal-dialog {
     width: 90%;
 }
 
-#settingsPanelID, #executionsPanelID .modal-dialog {
+#settingsPanelID .modal-dialog {
     width: 70%;
 }
  #envStackID .modal-dialog, #documentationID .modal-dialog {
