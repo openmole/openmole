@@ -176,11 +176,11 @@ object ScriptClient {
 
     val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen, help = ToolTip("Market place"))
 
-    val pluginItem = dialogGlyphNavItem("plugin", glyph_plug, () ⇒ pluginTriggerer.triggerOpen, help = ToolTip("Plugins"))
+    val pluginItem = dialogNavItem("plugin", bs.div(OMTags.glyph_plug).tooltip("Plugins"), () ⇒ pluginTriggerer.triggerOpen)
 
     val envItem = dialogGlyphNavItem("envError", glyph_exclamation, () ⇒ environmentStackTriggerer.open)
 
-    val docItem = dialogGlyphNavItem("doc", glyph_comment, () ⇒ docTriggerer.open, help = ToolTip("Documentation"))
+    val docItem = dialogNavItem("doc", bs.div(OMTags.glyph_book).tooltip("Documentation"), () ⇒ docTriggerer.open)
 
     val fileItem = dialogGlyphNavItem("files", glyph_file, todo = () ⇒ {
       openFileTree() = !openFileTree()
