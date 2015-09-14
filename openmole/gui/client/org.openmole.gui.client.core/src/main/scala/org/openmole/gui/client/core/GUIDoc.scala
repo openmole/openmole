@@ -77,10 +77,21 @@ object GUIDoc {
         li(glyph(bs.glyph_download + " right2"), " download the hovered file or directory (as an archive for the latter) to the local machine."),
         li(glyph(bs.glyph_edit + " right2"), " rename the hovered file or directory. An input field appears: just type the new name and press ", tags.em("enter"), " to validate."),
         li(glyph(bs.glyph_trash + " right2"), " delete the hovered file or directory."),
-        li(glyph(bs.glyph_archive + " right2"), " uncompress the hovered file (appears only in case of archive files (", tags.em(".tgz"), " or ", tags.em("tar.gz"), ").")
+        li(glyph(bs.glyph_archive + " right2"), " uncompress the hovered file (appears only in case of archive files (", tags.em(".tgz"), " or ", tags.em(".tar.gz"), ").")
       )),
-    // FIXME add new section about editor panel
     bs.div("spacer20")("The editable files can be modified in the central editor. To do so, simply click on the file to be edited.")
+  )
+
+  val editionPanelContent = tags.div(
+    "The edition panel shows up when you click on a editable file from the resource management panel. Files that can be " +
+      "edited or visualised in OpenMOLE are text-based files like OpenMOLE scripts ", tags.em("(.oms)"), " and data sources ", tags.em("(.csv)"),
+
+    bs.div("spacer20")("By default, only OpenMOLE scripts open in editable mode. Other editable files require the edition mode " +
+      "to be enabled by clicking on the ", glyph(bs.glyph_edit + " Edit"), " icon. Once a file has been switched to edition mode, it will remain " +
+      "in this mode until closed."),
+    bs.div("spacer20")("OpenMOLE automatically saves the modifications made to the files opened in the edition panel every 5 seconds. " +
+      "It is therefore extremely important not to enable the edition mode of a file that is currently updated. Typically, " +
+      "a CSV gathering results from the workflow execution would be overwritten by the editor and lose the precious accumulated results.")
   )
 
   val executionContent = {
@@ -204,7 +215,7 @@ object GUIDoc {
     "New features can be dynamically inserted in The OpenMOLE platform through plugins. Advanced users build their own" +
       "plugins to express concepts that might not be present (yet) in OpenMOLE. In OpenMOLE, plugins take the form of ", tags.em(" jar"),
     " files.",
-    bs.div("spacer20")("Open the plugin management panel by clicking on ", glyph(bs.glyph_plug + " glyphText"), ". You can upload a new plugin by clicking on ", bs.glyph(bs.glyph_upload + " right2"), " and selecting the corresponding jar file. "),
+    bs.div("spacer20")("Open the plugin management panel by clicking on ", glyph(OMTags.glyph_plug + " glyphText"), ". You can upload a new plugin by clicking on ", bs.glyph(bs.glyph_upload + " right2"), " and selecting the corresponding jar file. "),
     bs.div("spacer20")("Once uploaded, the plugin appears in the list. Hover a plugin in the list to display  the ", glyph(bs.glyph_trash + " right2"), " icon and remove the selected plugin from your selection."),
     bs.div("spacer20")("More information about plugins can be found in the ", omPluginLink, " section of the website. Plugins are added, the "
     )
@@ -212,6 +223,7 @@ object GUIDoc {
 
   val entries = Seq(
     GUIDocEntry(bs.glyph_file, "Manage resources", resourcesContent),
+    GUIDocEntry(bs.glyph_edit, "Edition panel", editionPanelContent),
     GUIDocEntry(bs.glyph_settings, "Execute scripts", executionContent),
     GUIDocEntry(bs.glyph_lock, "Manage authentications", authenticationContent),
     GUIDocEntry(bs.glyph_market, "Market place", marketContent),
