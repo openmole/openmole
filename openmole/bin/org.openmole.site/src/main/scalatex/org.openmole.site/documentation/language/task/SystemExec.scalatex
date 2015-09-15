@@ -128,9 +128,9 @@
     val arg = Val[Int]
     val output = Val[File]
 
-    // R task
+    // python task
     val pythonTask =
-      SystemExecTask("./hello/re-execute.sh python hello.py ${arg} output.txt") set (
+      SystemExecTask("./hello.bin", "./hello/re-execute.sh python hello.py ${arg} output.txt") set (
         resources += workDirectory / "hello.bin",
         inputs += arg,
         outputFiles += ("hello/rootfs/path/on/your/system/output.txt", output),
@@ -146,6 +146,32 @@
    @p Again notions from OpenMOLE are reused in this example. If you're not too familiar with
 @a("Environments", href := DocumentationPages.root.language.environment.file) or @i{Groupings}, check the relevant
   sections of the documentation.
+
+  @sect{Executing remote commands}
+    @p The typical behaviour of OpenMOLE is to embed all it needs to run an application on a remote enviromment. However,
+    some use cases might benefit from running commands present on the remote host. Typically, a task might want to list the
+    content of a directory using the classic @hl.highlight("ls", "plain"). It is quite standard for such tools to be
+    installed remote hosts and we don't want to embed our own version along with the OpenMOLE runtime.
+
+    @p By default, the @hl.openmoleNoTest("SystemExecTask") will look up commands in the default path of the execution host.
+    A call to @hl.highlight("ls", "plain") will thus call the @hl.highlight("ls", "plain") binary installed on the
+    execution, typically @hl.highlight("/bin/ls", "plain").
+
+    @p In the case of resources, embedded binaries are copied to the task's work directory by default. In order to make
+    sure OpenMOLE finds the content of a @hl.openmoleNoTest("SystemExecTask")'s resource,
+    you should always prefix such calls with @hl.highlight("./", "plain").
+
+    @p Building on top of the previous example, we can insert a call to a remote @hl.highlight("/bin/ls", "plain") in
+    between the calls to the embedded resource:
+    @br @hl.openmole("""
+    val pythonTask =
+      SystemExecTask("./hello.bin", "ls ./hello", "./hello/re-execute.sh python hello.py ${arg} output.txt") set (
+        resources += workDirectory / "hello.bin",
+        inputs += arg,
+        outputFiles += ("hello/rootfs/path/on/your/system/output.txt", output),
+        outputs += arg
+      )
+    """)
 
   @sect{Advanced features}
     @p The SystemExecTask can be customised to fit the needs of an specific application. Some applications disregarding
