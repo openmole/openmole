@@ -4,7 +4,7 @@ import org.openmole.gui.client.core.EnvironmentErrorPanel.SelectableLevel
 import org.openmole.gui.ext.data.{ DebugLevel, ErrorLevel }
 import org.openmole.gui.misc.js.BootstrapTags._
 import org.openmole.gui.misc.js.JsRxTags._
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, ClassKeyAggregator, Select }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, OMTags, ClassKeyAggregator, Select }
 import org.scalajs.dom.raw.HTMLDivElement
 import rx._
 
@@ -75,7 +75,7 @@ object GUIDoc {
     bs.div("spacer20")("Hovering a file or a folder with the mouse pointer triggers new actions:",
       ul(
         li(glyph(bs.glyph_download + " right2"), " download the hovered file or directory (as an archive for the latter) to the local machine."),
-        li(glyph(bs.glyph_edit + " right2"), " rename the hovered file or directory. An input field appears: just type the new name and press " + tags.em("enter") + " to validate."),
+        li(glyph(bs.glyph_edit + " right2"), " rename the hovered file or directory. An input field appears: just type the new name and press ", tags.em("enter"), " to validate."),
         li(glyph(bs.glyph_trash + " right2"), " delete the hovered file or directory."),
         li(glyph(bs.glyph_archive + " right2"), " uncompress the hovered file (appears only in case of archive files (", tags.em(".tgz"), " or ", tags.em("tar.gz"), ").")
       )),
@@ -205,7 +205,7 @@ object GUIDoc {
       "plugins to express concepts that might not be present (yet) in OpenMOLE. In OpenMOLE, plugins take the form of ", tags.em(" jar"),
     " files.",
     bs.div("spacer20")("Open the plugin management panel by clicking on ", glyph(bs.glyph_plug + " glyphText"), ". You can upload a new plugin by clicking on ", bs.glyph(bs.glyph_upload + " right2"), " and selecting the corresponding jar file. "),
-    bs.div("spacer20")("Once uploaded, the plugin appears in the list. Hover a plugin in the list to display  the ", glyph(bs.glyph_trash) + " right2", " icon and remove the selected plugin from your selection."),
+    bs.div("spacer20")("Once uploaded, the plugin appears in the list. Hover a plugin in the list to display  the ", glyph(bs.glyph_trash + " right2"), " icon and remove the selected plugin from your selection."),
     bs.div("spacer20")("More information about plugins can be found in the ", omPluginLink, " section of the website. Plugins are added, the "
     )
   )
@@ -215,7 +215,7 @@ object GUIDoc {
     GUIDocEntry(bs.glyph_settings, "Execute scripts", executionContent),
     GUIDocEntry(bs.glyph_lock, "Manage authentications", authenticationContent),
     GUIDocEntry(bs.glyph_market, "Market place", marketContent),
-    GUIDocEntry(bs.glyph_plug, "Plugins", pluginContent)
+    GUIDocEntry(OMTags.glyph_plug, "Plugins", pluginContent)
   )
 
   val doc: TypedTag[HTMLDivElement] = {
