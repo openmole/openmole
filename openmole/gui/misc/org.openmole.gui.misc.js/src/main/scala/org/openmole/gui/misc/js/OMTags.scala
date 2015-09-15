@@ -1,6 +1,6 @@
 package org.openmole.gui.misc.js
 
-import fr.iscpif.scaladget.api.ClassKeyAggregator
+//import fr.iscpif.scaladget.api.ClassKeyAggregator
 import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLElement, HTMLSpanElement }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -26,6 +26,9 @@ import bs._
  */
 
 object OMTags {
+
+  implicit def omClassKeyAggregatorToScladgetClassKeyAggregator(ck: ClassKeyAggregator): fr.iscpif.scaladget.api.ClassKeyAggregator =
+    fr.iscpif.scaladget.api.BootstrapTags.key(ck.key)
 
   def waitingSpan(text: String, buttonCB: ClassKeyAggregator): TypedTag[HTMLSpanElement] =
     bs.span("btn " + buttonCB.key)(

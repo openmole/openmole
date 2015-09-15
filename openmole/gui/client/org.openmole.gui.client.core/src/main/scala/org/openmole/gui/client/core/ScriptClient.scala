@@ -5,7 +5,7 @@ import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.{ HTMLElement, HTMLFormElement }
 import org.openmole.gui.client.core.panels._
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, ToolTip }
+import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, OMTags, ToolTip }
 import bs._
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -176,11 +176,11 @@ object ScriptClient {
 
     val marketItem = dialogGlyphNavItem("market", glyph_market, () ⇒ marketTriggerer.triggerOpen, help = ToolTip("Market place"))
 
-    val pluginItem = dialogNavItem("plugin", bs.div(OMTags.glyph_plug).tooltip("Plugins"), () ⇒ pluginTriggerer.triggerOpen)
+    val pluginItem = dialogGlyphNavItem("plugin", OMTags.glyph_plug, () ⇒ pluginTriggerer.triggerOpen, help = ToolTip("Plugins"))
 
     val envItem = dialogGlyphNavItem("envError", glyph_exclamation, () ⇒ environmentStackTriggerer.open)
 
-    val docItem = dialogNavItem("doc", bs.div(OMTags.glyph_book).tooltip("Documentation"), () ⇒ docTriggerer.open)
+    val docItem = dialogGlyphNavItem("doc", OMTags.glyph_book, () ⇒ docTriggerer.open, help = ToolTip("Documentation"))
 
     val fileItem = dialogGlyphNavItem("files", glyph_file, todo = () ⇒ {
       openFileTree() = !openFileTree()
