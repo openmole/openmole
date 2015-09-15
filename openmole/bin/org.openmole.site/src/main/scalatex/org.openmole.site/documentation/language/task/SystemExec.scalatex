@@ -171,7 +171,7 @@
         outputFiles += ("hello/rootfs/path/on/your/system/output.txt", output),
         outputs += arg
       )
-    """)
+    """, header = "val arg = Val[Int]; val output = Val[File]")
 
   @sect{Advanced features}
     @p The SystemExecTask can be customised to fit the needs of an specific application. Some applications disregarding
