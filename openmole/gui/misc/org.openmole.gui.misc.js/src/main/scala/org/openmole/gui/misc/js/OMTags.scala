@@ -39,4 +39,7 @@ object OMTags {
       tags.span(aria.hidden := true)(glyph(glyCA))
     )
   }
+
+  val glyph_plug = "icon-power-cord"
+  val glyph_book = "icon-book"
 }

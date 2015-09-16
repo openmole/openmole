@@ -28,14 +28,13 @@ object LocalEnvironment {
   val DefaultNumberOfThreads = new ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber")
 
   Workspace += (DefaultNumberOfThreads, "1")
-  def numberOfThread = Workspace.preferenceAsInt(DefaultNumberOfThreads)
+  var defaultNumberOfThreads = Workspace.preferenceAsInt(DefaultNumberOfThreads)
 
   def apply(
-    nbThreads: Int = numberOfThread,
+    nbThreads: Int = defaultNumberOfThreads,
     deinterleave: Boolean = false,
     name: Option[String] = None) = new LocalEnvironment(nbThreads, deinterleave, name)
 
-  var default = LocalEnvironment(name = Some("DefaultEnvironment"))
 }
 
 class LocalEnvironment(

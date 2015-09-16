@@ -82,13 +82,12 @@ class SimExplorer extends IApplication {
 
         val storage = SerialiserService.deserialiseAndExtractFiles[RemoteStorage](new File(config.storage.get))
 
-        LocalEnvironment.default = LocalEnvironment(config.nbThread.getOrElse(1))
-
         new Runtime().apply(
           storage,
           config.path.get,
           config.inputMessage.get,
           config.outputMessage.get,
+          config.nbThread.getOrElse(1),
           debug)
 
       }

@@ -26,12 +26,13 @@ import org.openmole.core.tools.service.LocalHostName
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.execution.Environment._
-import org.openmole.core.workflow.job.State
+import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.task._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.stream._
 import ref.WeakReference
 import org.openmole.core.workflow.mole.{ StrainerTaskDecorator, StrainerCapsule }
+import org.openmole.core.event._
 
 object LocalExecutor extends Logger
 
@@ -68,7 +69,19 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                         if (classOf[MoleTask].isAssignableFrom(t.task.getClass)) jobGoneIdle()
                       case _ ⇒
                     }
-                    moleJob.perform
+
+                    val executionThread = Thread.currentThread()
+                    val originalCallBack = moleJob.stateChangedCallBack
+
+                    moleJob.stateChangedCallBack =
+                      (job: MoleJob, oldState: State.State, newState) ⇒ {
+                        if (newState == State.CANCELED) executionThread.interrupt()
+                        originalCallBack(job, oldState, newState)
+                      }
+
+                    try moleJob.perform
+                    finally moleJob.stateChangedCallBack = originalCallBack
+
                     moleJob.exception match {
                       case Some(e) ⇒ EventDispatcher.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
                       case _       ⇒
