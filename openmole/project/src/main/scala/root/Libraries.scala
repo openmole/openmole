@@ -132,23 +132,23 @@ object Libraries extends Defaults {
 
   lazy val scalabc = "org.openmole" %% "fr-iscpif-scalabc" % "0.4"
 
-  lazy val equinoxApp = "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841"
+  lazy val equinoxApp = "org.eclipse.equinox" % "app" % "1.3.200-v20130910-1609"
 
-  lazy val equinoxCommon = "org.eclipse.core" % "org.eclipse.equinox.common" % "3.6.100.v20120522-1841"
+  lazy val equinoxCommon = "org.eclipse.equinox" % "common" % "3.6.200-v20130402-1505"
 
   lazy val equinoxLauncher = "org.eclipse.core" % "org.eclipse.equinox.launcher" % "1.3.0.v20120522-1813"
 
-  lazy val equinoxRegistry = "org.eclipse.core" % "org.eclipse.equinox.registry" % "3.5.200.v20120522-1841"
+  lazy val equinoxRegistry = "org.eclipse.equinox" % "registry" % "3.5.400-v20140428-1507"
 
-  lazy val equinoxPreferences = "org.eclipse.core" % "org.eclipse.equinox.preferences" % "3.5.1.v20121031-182809"
+  lazy val equinoxPreferences = "org.eclipse.equinox" % "preferences" % "3.5.200-v20140224-1527"
 
-  lazy val equinoxContenttype = "org.eclipse.core" % "org.eclipse.core.contenttype" % "3.4.200.v20120523-2004"
+  lazy val equinoxContenttype = "org.eclipse.core" % "contenttype" % "3.4.200-v20140207-1251"
 
-  lazy val equinoxJobs = "org.eclipse.core" % "org.eclipse.core.jobs" % "3.5.300.v20120912-155018"
+  lazy val equinoxJobs = "org.eclipse.core" % "jobs" % "3.6.0-v20140424-0053"
 
-  lazy val equinoxRuntime = "org.eclipse.core" % "org.eclipse.core.runtime" % "3.8.0.v20120912-155025"
+  lazy val equinoxRuntime = "org.eclipse.core" % "runtime" % "3.10.0-v20140318-2214"
 
-  lazy val equinoxOSGi = "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944"
+  lazy val equinoxOSGi = "org.eclipse" % "osgi" % "3.10.0-v20140606-1445"
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 

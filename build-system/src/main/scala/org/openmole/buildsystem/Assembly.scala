@@ -53,19 +53,19 @@ trait Assembly { self: BuildSystemDefaults ⇒
   private def copyLibraryDependencies(
     cp: Seq[Attributed[File]],
     out: File,
-    depMap: Map[Regex, String ⇒ String],
+    rename: ModuleID ⇒ String,
     depFilter: ModuleID ⇒ Boolean,
     streams: TaskStreams) = {
 
     cp.flatMap { attributed ⇒
       attributed.get(Keys.moduleID.key) match {
-        case Some(moduleId) ⇒
-          if (depFilter(moduleId)) Some(attributed.data) else None
-        case None ⇒ None
+        case Some(moduleId) ⇒ if (depFilter(moduleId)) Some(moduleId -> attributed.data) else None
+        case None           ⇒ None
       }
-    }.map { srcPath ⇒
-      val name = rename(srcPath, depMap)
-      copyFileTask(srcPath, out, streams, name = Some(name))
+    }.map {
+      case (module, srcPath) ⇒
+        val name = rename(module)
+        copyFileTask(srcPath, out, streams, name = Some(name))
     }
   }
 
@@ -83,14 +83,14 @@ trait Assembly { self: BuildSystemDefaults ⇒
       } dependsOn (copyResources, (downloads, assemblyPath, target, streams) map urlDownloader),
     Tar.folder <<= assemble,
     bundleProj := false,
-    dependencyNameMap := Map.empty[Regex, String ⇒ String],
+    dependencyName := { (_: ModuleID).name + ".jar" },
     dependencyFilter := { _ ⇒ true },
     copyResources <<=
       (resourcesAssemble, streams) map {
         case (resources, s) ⇒
           resources.toSeq.map { case (from, to) ⇒ copyFileTask(from, to, s) }
       },
-    copyResources <++= (externalDependencyClasspath in Compile, assemblyDependenciesPath, dependencyNameMap, dependencyFilter, streams) map copyLibraryDependencies
+    copyResources <++= (externalDependencyClasspath in Compile, assemblyDependenciesPath, dependencyName, dependencyFilter, streams) map copyLibraryDependencies
   )
 
   def generateConfigImpl(plugins: File, header: String, config: File, startLevels: Seq[(String, Int)]): File = {
