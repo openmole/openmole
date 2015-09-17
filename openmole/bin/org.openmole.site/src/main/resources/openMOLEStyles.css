@@ -189,8 +189,10 @@ span.hljs-tag, span.hljs-symbol{
 .logoGeocite {
     width: 140px;
     top: 35px;
-    margin: 0 10 0 -180;
+    margin-left: -180px;
+    margin-right: 10px;
 }
+
 
 .logoBiomedia {
     width: 240px;
