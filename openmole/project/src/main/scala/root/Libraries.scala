@@ -67,7 +67,7 @@ object Libraries extends Defaults {
 
   lazy val groovy = "org.openmole" %% "org-codehaus-groovy" % "2.4.1"
 
-  lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.6"
+  lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.7"
 
   lazy val jodaTime = "org.openmole" %% "org-joda-time" % "1.6"
 
