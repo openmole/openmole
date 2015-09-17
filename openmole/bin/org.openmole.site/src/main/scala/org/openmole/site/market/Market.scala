@@ -46,6 +46,7 @@ object Market extends Logger {
     lazy val machineLearning = Tag("Machine Learning")
     lazy val R = Tag("R")
     lazy val fsl = Tag("FSL")
+    lazy val neuroscience = Tag("Neuro Science")
     lazy val data = Tag("Data")
     lazy val native = Tag("Native Code")
     lazy val netlogo = Tag("NetLogo")
@@ -82,7 +83,7 @@ object Market extends Logger {
       MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq(scala, java, plugin)),
       MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
-      MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native))
+      MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience))
     )
   )
 
