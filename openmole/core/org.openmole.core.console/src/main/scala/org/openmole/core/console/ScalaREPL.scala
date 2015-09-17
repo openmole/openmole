@@ -50,7 +50,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
   System.setProperty("jline.shutdownhook", "true")
   override val prompt = "OpenMOLE>"
-  
+
   super.getClass.getMethods.find(_.getName.contains("globalFuture_$eq")).get.invoke(this, Future { true }.asInstanceOf[AnyRef])
 
   settings = new Settings
