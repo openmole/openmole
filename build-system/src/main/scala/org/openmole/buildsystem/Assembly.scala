@@ -53,19 +53,19 @@ trait Assembly { self: BuildSystemDefaults ⇒
   private def copyLibraryDependencies(
     cp: Seq[Attributed[File]],
     out: File,
-    depMap: Map[Regex, String ⇒ String],
+    rename: ModuleID ⇒ String,
     depFilter: ModuleID ⇒ Boolean,
     streams: TaskStreams) = {
 
     cp.flatMap { attributed ⇒
       attributed.get(Keys.moduleID.key) match {
-        case Some(moduleId) ⇒
-          if (depFilter(moduleId)) Some(attributed.data) else None
-        case None ⇒ None
+        case Some(moduleId) ⇒ if (depFilter(moduleId)) Some(moduleId -> attributed.data) else None
+        case None           ⇒ None
       }
-    }.map { srcPath ⇒
-      val name = rename(srcPath, depMap)
-      copyFileTask(srcPath, out, streams, name = Some(name))
+    }.map {
+      case (module, srcPath) ⇒
+        val name = rename(module)
+        copyFileTask(srcPath, out, streams, name = Some(name))
     }
   }
 
@@ -80,17 +80,17 @@ trait Assembly { self: BuildSystemDefaults ⇒
         (path, files) ⇒
           files.foreach(f ⇒ new File(path, f).setExecutable(true))
           path
-      } dependsOn (copyResources, (downloads, assemblyPath, target, streams) map urlDownloader),
+      } dependsOn (copyResources, (downloads, assemblyPath, ivyPaths, streams) map urlDownloader),
     Tar.folder <<= assemble,
     bundleProj := false,
-    dependencyNameMap := Map.empty[Regex, String ⇒ String],
+    dependencyName := { (_: ModuleID).name + ".jar" },
     dependencyFilter := { _ ⇒ true },
     copyResources <<=
       (resourcesAssemble, streams) map {
         case (resources, s) ⇒
           resources.toSeq.map { case (from, to) ⇒ copyFileTask(from, to, s) }
       },
-    copyResources <++= (externalDependencyClasspath in Compile, assemblyDependenciesPath, dependencyNameMap, dependencyFilter, streams) map copyLibraryDependencies
+    copyResources <++= (externalDependencyClasspath in Compile, assemblyDependenciesPath, dependencyName, dependencyFilter, streams) map copyLibraryDependencies
   )
 
   def generateConfigImpl(plugins: File, header: String, config: File, startLevels: Seq[(String, Int)]): File = {
@@ -168,23 +168,30 @@ trait Assembly { self: BuildSystemDefaults ⇒
     fn(files).head
   }
 
-  def urlDownloader(urls: Seq[(URL, String)], assembleDir: File, targetDir: File, s: TaskStreams) = {
-    def cache(url: URL) = targetDir / s"url-cache-${Hash.toHex(Hash(url.toString))}"
+  def urlDownloader(urls: Seq[(URL, String)], assembleDir: File, ivyPaths: IvyPaths, s: TaskStreams) = {
+    val targetDir = ivyPaths.ivyHome.get / "cache" / "url"
+
+    def hash(url: URL) = Hash.toHex(Hash(url.toString))
 
     targetDir.mkdirs
 
     for {
       (url, file) ← urls
     } yield {
-      val cacheFile = cache(url)
-      val destFile = new File(assembleDir, file)
-      destFile.getParentFile.mkdirs
+      val tmpFile = new File(targetDir, hash(url) + "-tmp")
+      val cacheFile = new File(targetDir, "url-cache-" + hash(url))
+
       if (!cacheFile.exists) {
-        s.log.info("Downloading " + url + " to " + destFile)
-        val os = managed(new BufferedOutputStream(new FileOutputStream(destFile)))
+        s.log.info("Downloading " + url + " to " + tmpFile)
+        val os = managed(new BufferedOutputStream(new FileOutputStream(tmpFile)))
         os.foreach(BasicIO.transferFully(url.openStream, _))
-        cacheFile.createNewFile()
+        tmpFile.renameTo(cacheFile)
       }
+
+      val destFile = new File(targetDir, file)
+      s.log.info(s"Copy $cacheFile to $destFile")
+      IO.copyFile(cacheFile, destFile)
+
       file
     }
   }

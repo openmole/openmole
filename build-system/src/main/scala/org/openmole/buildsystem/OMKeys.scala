@@ -39,7 +39,7 @@ object OMKeys {
 
   val dependencyFilter = SettingKey[ModuleID ⇒ Boolean]("dependency-filter", "Tells copyDependencies to ignore certain dependencies.")
 
-  val dependencyNameMap = SettingKey[Map[Regex, String ⇒ String]]("dependency-map", "A map that is run against dependencies to be copied.")
+  val dependencyName = SettingKey[ModuleID ⇒ String]("dependency-map", "A map that is run against dependencies to be copied.")
 
   val scalatestVersion = SettingKey[String]("scalatest-version", "Version of scalatest.")
 

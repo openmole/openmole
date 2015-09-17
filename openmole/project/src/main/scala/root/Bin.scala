@@ -19,7 +19,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
   val dir = file("bin")
 
   def filter(m: ModuleID) = {
-    m.organization == "org.eclipse.core" ||
+    m.organization.startsWith("org.eclipse") ||
       m.organization == "fr.iscpif.gridscale.bundle" ||
       m.organization == "org.bouncycastle" ||
       m.organization.contains("org.openmole")
@@ -43,11 +43,10 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     equinoxOSGi intransitive ()
   )
 
-  lazy val renameEquinox =
-    Map[Regex, String ⇒ String](
-      """org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
-      """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }
-    )
+  def rename(m: ModuleID): String =
+    if (m.name.startsWith("org.eclipse.equinox.launcher")) "org.eclipse.equinox.launcher.jar"
+    else if (m.organization.startsWith("org.eclipse")) s"${m.organization}.${m.name}_${m.revision}.jar"
+    else s"${m.name}.jar"
 
   lazy val openmoleUI = OsgiProject("org.openmole.ui", singleton = true, imports = Seq("*")) settings (
     organization := "org.openmole.ui",
@@ -160,7 +159,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     libraryDependencies ++= coreDependencies,
     libraryDependencies ++= equinox,
     dependencyFilter := filter,
-    dependencyNameMap := renameEquinox
+    dependencyName := rename
   )
 
   lazy val openmoleGUI = Project("openmoleGUI", dir / "target" / "openmoleGUI", settings = assemblySettings) settings (commonsSettings: _*) settings (
@@ -225,7 +224,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Tar.name := "runtime.tar.gz",
     libraryDependencies ++= coreDependencies ++ equinox,
     dependencyFilter := filter,
-    dependencyNameMap := renameEquinox,
+    dependencyName := rename,
     pluginsDirectory := assemblyPath.value / "plugins",
     header :=
     """ |eclipse.application=org.openmole.runtime.runtime
@@ -249,7 +248,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       assemblyDependenciesPath := assemblyPath.value / "plugins",
       dependencyFilter := filter,
       setExecutable ++= Seq("openmole-daemon", "openmole-daemon.bat"),
-      dependencyNameMap := renameEquinox,
+      dependencyName := rename,
       Tar.name := "openmole-daemon.tar.gz",
       Tar.innerFolder := "openmole-daemon",
       pluginsDirectory := assemblyPath.value / "plugins",
@@ -282,7 +281,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
         libraryDependencies += Libraries.scalatexSite,
         libraryDependencies += Libraries.scalaLang,
         libraryDependencies += Libraries.equinoxApp,
-        libraryDependencies += Libraries.jgit,
+        libraryDependencies += Libraries.jgit intransitive (),
         libraryDependencies += Libraries.txtmark,
         libraryDependencies += Libraries.toolxitBibtex intransitive (),
         resourcesAssemble <+= (Tar.tar in openmole, resourceManaged in Compile) map { case (f, d) ⇒ f -> d },
@@ -301,7 +300,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       resourcesAssemble <+= (assemble in consolePlugins, assemblyPath) map { case (r, p) ⇒ r -> p / "plugins" },
       dependencyFilter := filter,
       assemblyDependenciesPath := assemblyPath.value / "plugins",
-      dependencyNameMap := renameEquinox,
+      dependencyName := rename,
       header :=
       """|eclipse.application=org.openmole.site
           |osgi.bundles.defaultStartLevel=4""".stripMargin,
