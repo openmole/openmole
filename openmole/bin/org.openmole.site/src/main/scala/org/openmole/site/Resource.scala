@@ -25,25 +25,51 @@ object Resource {
   def FileResource(name: String) = RenameFileResource(name, name)
 
   def css = FileResource("openMOLEStyles.css")
+
   def ants = FileResource("ants.png")
+
   def antNumbers = FileResource("antnumbers.png")
+
   def antsNLogo = FileResource("ants.nlogo")
+
   def bootstrapCss = FileResource("bootstrap.min.css")
+
   def bootstrapJS = FileResource("bootstrap.min.js")
+
   def fireNLogo = FileResource("Fire.nlogo")
+
   def fireScreen = FileResource("firescreen.png")
+
   def fireGlobals = FileResource("fireGlobals.png")
+
   def fireNewGlobals = FileResource("fireNewGlobals.png")
+
   def fireMyDensity = FileResource("fireMyDensity.png")
+
   def fireNewFunction = FileResource("fireNewFunction.png")
+
   def fireOldSetup = FileResource("fireOldSetup.png")
+
   def fireRemoveClearAll = FileResource("fireRemoveClearAll.png")
+
   def github = FileResource("github.css")
+
   def highlightJS = FileResource("highlight.pack.js")
+
   def logo = FileResource("openmole.png")
+
   def uiScreenshot = FileResource("openmoleUI.png")
+
+  def iscpif = FileResource("iscpif.svg")
+
+  def geocite = FileResource("geocite.png")
+
+  def biomedia = FileResource("biomedia.png")
+
   def openmole = RenameFileResource("openmole.tar.gz", s"openmole-${buildinfo.version}.tar.gz")
+
   def openmoleDaemon = RenameFileResource("openmole-daemon.tar.gz", s"openmole-daemon-${buildinfo.version}.tar.gz")
+
   def api = ArchiveResource("openmole-api.tar.gz", "api")
 
   def all = Seq[Resource](
@@ -66,10 +92,15 @@ object Resource {
     fireNewFunction,
     fireOldSetup,
     fireRemoveClearAll,
-    uiScreenshot)
+    uiScreenshot,
+    iscpif,
+    geocite,
+    biomedia)
 }
 
 sealed trait Resource
+
 case class RenameFileResource(source: String, file: String) extends Resource
+
 case class ArchiveResource(source: String, file: String) extends Resource
 
