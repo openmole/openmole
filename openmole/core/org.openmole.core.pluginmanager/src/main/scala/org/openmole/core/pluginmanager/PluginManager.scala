@@ -27,6 +27,7 @@ import org.openmole.tool.logger.Logger
 import org.osgi.framework._
 
 import scala.collection.immutable.{ HashSet, HashMap }
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 import scala.collection.JavaConversions._
@@ -207,8 +208,25 @@ object PluginManager extends Logger {
     }
   }
 
-  def allDependingBundles(b: Bundle, filter: Bundle ⇒ Boolean): Iterable[Bundle] =
-    (b :: dependingBundles(b).filter(filter).flatMap(allDependingBundles(_, filter)).toList).distinct
+  def allDependingBundles(b: Bundle, filter: Bundle ⇒ Boolean): Iterable[Bundle] = {
+    val seen = mutable.Set[Bundle]()
+    val toProcess = ListBuffer[Bundle]()
+
+    toProcess += b
+    seen += b
+
+    while (!toProcess.isEmpty) {
+      val current = toProcess.remove(0)
+      for {
+        b ← dependingBundles(current).filter(filter)
+      } if (!seen(b)) {
+        seen += b
+        toProcess += b
+      }
+    }
+
+    seen.toList
+  }
 
   private def dependingBundles(b: Bundle): Iterable[Bundle] = {
     val exportedPackages = Activator.packageAdmin.getExportedPackages(b)
