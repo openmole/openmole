@@ -179,3 +179,24 @@ span.hljs-tag, span.hljs-symbol{
   width: 580px;
   padding-top: 10px;
 }
+
+.logoISC{
+    width: 180px;
+    top: 25px;
+    left: 70%;
+}
+
+.logoGeocite {
+    width: 140px;
+    top: 35px;
+    margin-left: -180px;
+    margin-right: 10px;
+}
+
+
+.logoBiomedia {
+    width: 240px;
+    top: 35px;
+    margin-left: 105px;
+
+}
