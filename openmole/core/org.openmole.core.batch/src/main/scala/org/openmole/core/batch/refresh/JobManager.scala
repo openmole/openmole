@@ -124,8 +124,11 @@ class JobManager { self ⇒
 
     case Error(job, exception) ⇒
       val level = exception match {
+        case _: AuthenticationException     ⇒ SEVERE
+        case _: UserBadDataError            ⇒ SEVERE
+        case _: FileNotFoundException       ⇒ SEVERE
         case _: JobRemoteExecutionException ⇒ WARNING
-        case _                              ⇒ SEVERE
+        case _                              ⇒ FINE
       }
       val er = Environment.ExceptionRaised(job, exception, level)
       job.environment.error(er)
