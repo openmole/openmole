@@ -65,10 +65,22 @@ object OSGi extends Defaults {
   lazy val xstream = OsgiProject(
     "com.thoughtworks.xstream",
     dynamicImports = Seq("*"),
+    imports = Seq(
+      "!com.bea.xml.stream.*",
+      "!com.ctc.wstx.stax.*",
+      "!net.sf.cglib.*",
+      "!nu.xom.*",
+      "!org.codehaus.jettison.*",
+      "!org.dom4j.*",
+      "!org.jdom.*",
+      "!org.jdom2.*",
+      "!org.w3c.*",
+      "!org.xml.sax.*",
+      "!sun.misc.*",
+      "*"),
     privatePackages = Seq("!scala.*", "*")) settings(
     libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.8", "net.sf.kxml" % "kxml2" % "2.3.0"),
-    version := "1.4.8",
-    bundleType += "dbserver")
+    version := "1.4.8")
 
   lazy val groovy = OsgiProject(
     "org.codehaus.groovy",
