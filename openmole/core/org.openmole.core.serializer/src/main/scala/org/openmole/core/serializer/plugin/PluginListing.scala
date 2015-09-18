@@ -20,4 +20,5 @@ import java.io.File
 
 trait PluginListing {
   def pluginUsed(f: File): Unit
+  def classUsed(c: Class[_]): Unit
 }

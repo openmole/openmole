@@ -36,7 +36,7 @@ import PluginConverter._
 class PluginConverter(serializer: PluginListing, reflectionConverter: ReflectionConverter) extends Converter {
 
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
-    if (PluginManager.isClassProvidedByAPlugin(o.getClass)) PluginManager.pluginsForClass(o.getClass).foreach(serializer.pluginUsed)
+    if (PluginManager.isClassProvidedByAPlugin(o.getClass)) serializer.classUsed(o.getClass)
     if (classOf[Plugins].isAssignableFrom(o.getClass)) o.asInstanceOf[Plugins].plugins.foreach(serializer.pluginUsed)
     reflectionConverter.marshal(o, writer, mc)
   }
@@ -45,7 +45,8 @@ class PluginConverter(serializer: PluginListing, reflectionConverter: Reflection
     throw new UnsupportedOperationException("Bug: Should never be called.")
   }
 
-  override def canConvert(c: Class[_]): Boolean =
+  override def canConvert(c: Class[_]): Boolean = {
     classOf[Plugins].isAssignableFrom(c) || PluginManager.isClassProvidedByAPlugin(c)
+  }
 
 }
