@@ -190,6 +190,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
       val destFile = new File(projectTarget, file)
       s.log.info(s"Copy $cacheFile to $destFile")
+      destFile.getParentFile.mkdirs
       IO.copyFile(cacheFile, destFile)
 
       file
