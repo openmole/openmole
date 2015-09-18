@@ -20,7 +20,7 @@ object Core extends Defaults {
   ) dependsOn
     (event, exception, tools, updater, workspace, macros, pluginManager, serializer, output, console, replication % "test")
 
-  lazy val serializer = OsgiProject("serializer", imports = Seq("*")) settings
+  lazy val serializer = OsgiProject("serializer", dynamicImports = Seq("*"), imports = Seq("*")) settings
     (includeOsgi,
       libraryDependencies += xstream) dependsOn
       (workspace, pluginManager, fileService, tools, openmoleTar)
