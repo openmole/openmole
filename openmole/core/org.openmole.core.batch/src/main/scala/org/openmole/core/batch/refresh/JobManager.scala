@@ -17,6 +17,7 @@
 
 package org.openmole.core.batch.refresh
 
+import java.io.FileNotFoundException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.{ TimeUnit, Executors }
 
@@ -123,10 +124,8 @@ class JobManager { self ⇒
 
     case Error(job, exception) ⇒
       val level = exception match {
-        case _: AuthenticationException     ⇒ SEVERE
-        case e: UserBadDataError            ⇒ SEVERE
-        case e: JobRemoteExecutionException ⇒ WARNING
-        case _                              ⇒ FINE
+        case _: JobRemoteExecutionException ⇒ WARNING
+        case _                              ⇒ SEVERE
       }
       val er = Environment.ExceptionRaised(job, exception, level)
       job.environment.error(er)
