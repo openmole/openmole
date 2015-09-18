@@ -11,7 +11,7 @@ addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.5.1")
 
 addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.3.2")
 
-addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.4-SNAPSHOT")
+addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.4")
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.2")
 
