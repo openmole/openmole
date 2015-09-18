@@ -78,7 +78,6 @@ class SimExplorer extends IApplication {
 
         logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
         PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe)
-        PluginManager.startAll
 
         val storage = SerialiserService.deserialiseAndExtractFiles[RemoteStorage](new File(config.storage.get))
 
