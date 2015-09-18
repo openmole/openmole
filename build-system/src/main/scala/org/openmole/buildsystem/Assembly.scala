@@ -80,7 +80,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
         (path, files) ⇒
           files.foreach(f ⇒ new File(path, f).setExecutable(true))
           path
-      } dependsOn (copyResources, (downloads, assemblyPath, ivyPaths, streams) map urlDownloader),
+      } dependsOn (copyResources, (downloads, assemblyPath, ivyPaths, target, streams) map urlDownloader),
     Tar.folder <<= assemble,
     bundleProj := false,
     dependencyName := { (_: ModuleID).name + ".jar" },
@@ -168,7 +168,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
     fn(files).head
   }
 
-  def urlDownloader(urls: Seq[(URL, String)], assembleDir: File, ivyPaths: IvyPaths, s: TaskStreams) = {
+  def urlDownloader(urls: Seq[(URL, String)], assembleDir: File, ivyPaths: IvyPaths, projectTarget: File, s: TaskStreams) = {
     val targetDir = ivyPaths.ivyHome.get / "cache" / "url"
 
     def hash(url: URL) = Hash.toHex(Hash(url.toString))
@@ -188,8 +188,9 @@ trait Assembly { self: BuildSystemDefaults ⇒
         tmpFile.renameTo(cacheFile)
       }
 
-      val destFile = new File(targetDir, file)
+      val destFile = new File(projectTarget, file)
       s.log.info(s"Copy $cacheFile to $destFile")
+      destFile.getParentFile.mkdirs
       IO.copyFile(cacheFile, destFile)
 
       file

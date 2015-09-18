@@ -18,9 +18,8 @@
 package org.openmole.core.serializer.converter
 
 import com.thoughtworks.xstream.XStream
-import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 
-class Serialiser(val xStream: XStream = new XStream()) {
-  lazy val reflectionConverter = new ReflectionConverter(xStream.getMapper, xStream.getReflectionProvider)
+class Serialiser {
+  val xStream: XStream = new XStream()
   def clean = {}
 }
