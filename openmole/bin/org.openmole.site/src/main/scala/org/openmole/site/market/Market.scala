@@ -35,10 +35,11 @@ import scala.util.{ Success, Failure, Try }
 object Market extends Logger {
 
   lazy val githubMarket =
-    Repository(
-      "https://github.com/openmole/openmole-market.git",
-      Some(s ⇒ s"https://github.com/openmole/openmole-market/tree/master/$s")
-    )
+    new Repository {
+      def url = "https://github.com/openmole/openmole-market.git"
+      def viewURL(name: String, branch: String) =
+        Some(s"https://github.com/openmole/openmole-market/$branch/master/$name")
+    }
 
   object Tags {
     lazy val stochastic = Tag("Stochastic")
@@ -58,7 +59,10 @@ object Market extends Logger {
   }
 
   case class Tag(label: String)
-  case class Repository(url: String, viewURL: Option[String ⇒ String] = None)
+  trait Repository {
+    def url: String
+    def viewURL(name: String, branch: String): Option[String]
+  }
 
   import Tags._
 
@@ -111,6 +115,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
 
   lazy val console = new Console()
 
+  def branchName = buildinfo.version.takeWhile(_.isDigit) + "-dev"
   def archiveDirectoryName = "market"
 
   def generate(cloneDirectory: File, testScript: Boolean = true): Seq[GeneratedMarketEntry] = {
@@ -133,7 +138,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
         project,
         readme.contentOption,
         project.files(projectDirectory).map(_.content),
-        marketRepository.repository.viewURL.map(_(project.directory))
+        marketRepository.repository.viewURL(project.directory, branchName)
       )
     }
   }
@@ -180,8 +185,6 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
       command.setURI(repository.repository.url)
       command.call()
     }
-
-    val branchName = buildinfo.version.takeWhile(_.isDigit) + "-dev"
 
     val repo = Git.open(directory)
     repo.reset().setMode(ResetCommand.ResetType.HARD).call()
