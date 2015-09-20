@@ -38,7 +38,7 @@ object Market extends Logger {
     new Repository {
       def url = "https://github.com/openmole/openmole-market.git"
       def viewURL(name: String, branch: String) =
-        Some(s"https://github.com/openmole/openmole-market/$branch/master/$name")
+        Some(s"https://github.com/openmole/openmole-market/tree/$branch/$name")
     }
 
   object Tags {
