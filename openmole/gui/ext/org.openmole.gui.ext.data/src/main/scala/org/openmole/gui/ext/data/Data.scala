@@ -256,7 +256,7 @@ case class NetworkActivity(downloadingFiles: Int = 0,
                            uploadedSize: Long = 0L,
                            readableUploadedSize: String = "")
 
-case class RunningEnvironmentData(id: ExecutionId, errors: Seq[EnvironmentError])
+case class RunningEnvironmentData(id: ExecutionId, errors: Seq[(EnvironmentError, Int)])
 
 case class RunningOutputData(id: ExecutionId, output: String)
 

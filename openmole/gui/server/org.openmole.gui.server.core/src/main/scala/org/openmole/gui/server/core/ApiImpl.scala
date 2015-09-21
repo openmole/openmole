@@ -217,17 +217,28 @@ object ApiImpl extends Api {
   def allStates() = execution.allStates
 
   def runningErrorEnvironmentAndOutputData(lines: Int, level: ErrorStateLevel): (Seq[RunningEnvironmentData], Seq[RunningOutputData]) = atomic { implicit ctx ⇒
+
+    def group(errors: Seq[EnvironmentError]) =
+      for {
+        error ← errors.groupBy(_.copy(date = 0L)).values.map {
+          _.sortBy(_.date).last
+        }.toSeq.sortBy(_.date).reverse
+        count = errors.count(_.copy(date = 0L) == error.copy(date = 0L))
+      } yield error -> count
+
     val envIds = Runnings.environmentIds
     (
       envIds.map {
         case (id, envIds) ⇒
           RunningEnvironmentData(
             id,
-            Runnings.runningEnvironments(envIds).flatMap {
-              case (envId, info) ⇒ info.environmentErrors(envId)
-            }.filter {
-              _.level == level
-            }
+            group(
+              Runnings.runningEnvironments(envIds).flatMap {
+                case (envId, info) ⇒ info.environmentErrors(envId)
+              }.filter {
+                _.level == level
+              }
+            )
           )
       }.toSeq,
       envIds.keys.toSeq.map {
