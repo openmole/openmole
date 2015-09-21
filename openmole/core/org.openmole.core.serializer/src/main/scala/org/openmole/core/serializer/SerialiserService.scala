@@ -23,8 +23,7 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
 import com.thoughtworks.xstream.core.ClassLoaderReference
-import com.thoughtworks.xstream.io.xml.Xpp3Driver
-import org.openmole.core.serializer.PluginAndFilesListing
+import com.thoughtworks.xstream.io.binary.BinaryStreamDriver
 import org.openmole.tool.file._
 import org.openmole.core.serializer.converter._
 import java.util.concurrent.locks.{ ReentrantReadWriteLock, ReadWriteLock }
@@ -39,7 +38,7 @@ import org.openmole.core.serializer.file.{ FileInjection, FileListing, FileSeria
 object SerialiserService extends Logger {
 
   private[serializer] def buildXStream =
-    new XStream(null, new Xpp3Driver(), new ClassLoaderReference(SerialiserService.getClass.getClassLoader))
+    new XStream(null, new BinaryStreamDriver(), new ClassLoaderReference(SerialiserService.getClass.getClassLoader))
 
   private val lock = new ReentrantReadWriteLock
   private val xStreamOperations = ListBuffer.empty[(XStream ⇒ _)]

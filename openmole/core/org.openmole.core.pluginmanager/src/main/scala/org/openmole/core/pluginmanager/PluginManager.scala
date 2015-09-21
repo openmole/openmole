@@ -164,8 +164,6 @@ object PluginManager extends Logger {
       case t: Throwable ⇒ throw new InternalProcessingError(t, "Installing bundle " + f)
     }
 
-  def startAll = Activator.contextOrException.getBundles.foreach(_.start)
-
   private def dependencies(bundles: Iterable[Long]): Iterable[Long] =
     dependencies(bundles, infos.resolvedDirectDependencies)
 
