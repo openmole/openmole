@@ -227,24 +227,25 @@ object ApiImpl extends Api {
       } yield error -> count
 
     val envIds = Runnings.environmentIds
-    (
+
+    val envData =
       envIds.map {
         case (id, envIds) ⇒
-          RunningEnvironmentData(
-            id,
-            group(
-              Runnings.runningEnvironments(envIds).flatMap {
-                case (envId, info) ⇒ info.environmentErrors(envId)
-              }.filter {
-                _.level == level
-              }
-            )
-          )
-      }.toSeq,
-      envIds.keys.toSeq.map {
-        Runnings.outputsDatas(_, lines)
-      }
-    )
+          val errors =
+            for {
+              (envId, info) ← Runnings.runningEnvironments(envIds)
+              error ← info.environmentErrors(envId)
+              if error.level == level
+            } yield error
+
+          RunningEnvironmentData(id, group(errors))
+      }.toSeq
+
+    val outputs = envIds.keys.toSeq.map { Runnings.outputsDatas(_, lines) }
+
+    println("env data " + envData.mkString(", "))
+
+    (envData, outputs)
   }
 
   def buildInfo = buildinfo.info
