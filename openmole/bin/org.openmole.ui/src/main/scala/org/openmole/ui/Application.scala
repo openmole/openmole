@@ -153,8 +153,8 @@ class Application extends IApplication {
         userPlugins ++
         (if (config.launchMode == GUIMode) config.guiPluginsDirs.map(new File(_)) else List.empty)
 
-    PluginManager.startAll
-    PluginManager.tryLoad(plugins)
+    PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
+    PluginManager.tryLoad(plugins).foreach { case (b, e) ⇒ logger.log(WARNING, s"Error loading bundle $b", e) }
 
     try config.password foreach Workspace.setPassword
     catch {

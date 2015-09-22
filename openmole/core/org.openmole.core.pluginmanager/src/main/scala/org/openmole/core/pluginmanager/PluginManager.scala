@@ -115,7 +115,7 @@ object PluginManager extends Logger {
     else if (path.isDirectory) path.listFilesSafe.filter(isPlugin)
     else Nil
 
-  def tryLoad(files: Iterable[File]) = synchronized {
+  def tryLoad(files: Iterable[File]): Seq[(Bundle, Throwable)] = synchronized {
     val bundles =
       files.flatMap { plugins }.flatMap {
         b ⇒
@@ -126,14 +126,11 @@ object PluginManager extends Logger {
               None
           }
       }.toList
-    bundles.foreach {
+    bundles.map {
       b ⇒
         logger.fine(s"Stating bundle ${b.getLocation}")
-        Try(b.start) match {
-          case Success(_) ⇒
-          case Failure(e) ⇒ logger.log(WARNING, s"Error installing bundle $b", e)
-        }
-    }
+        b -> Try(b.start)
+    }.collect { case (b: Bundle, Failure(e)) ⇒ b -> e }
   }
 
   def load(files: Iterable[File]) = synchronized {
@@ -257,12 +254,14 @@ object PluginManager extends Logger {
     (fromPackages ++ requiering).distinct
   }
 
-  def startAll =
+  def startAll: Seq[(Bundle, Throwable)] =
     Activator.contextOrException.getBundles.filter {
       _.getState match {
         case Bundle.INSTALLED | Bundle.RESOLVED ⇒ true
         case _                                  ⇒ false
       }
-    }.foreach(_.start)
+    }.map {
+      b ⇒ b -> Try(b.start)
+    }.collect { case (b: Bundle, Failure(e)) ⇒ b -> e }
 
 }
