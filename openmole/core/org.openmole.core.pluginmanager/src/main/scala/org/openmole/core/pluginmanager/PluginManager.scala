@@ -134,7 +134,6 @@ object PluginManager extends Logger {
           case Failure(e) ⇒ logger.log(WARNING, s"Error installing bundle $b", e)
         }
     }
-    PluginManager.startAll
   }
 
   def load(files: Iterable[File]) = synchronized {

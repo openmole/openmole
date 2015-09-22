@@ -153,6 +153,7 @@ class Application extends IApplication {
         userPlugins ++
         (if (config.launchMode == GUIMode) config.guiPluginsDirs.map(new File(_)) else List.empty)
 
+    PluginManager.startAll
     PluginManager.tryLoad(plugins)
 
     try config.password foreach Workspace.setPassword

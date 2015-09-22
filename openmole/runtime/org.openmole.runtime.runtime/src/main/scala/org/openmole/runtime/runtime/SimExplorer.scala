@@ -76,6 +76,7 @@ class SimExplorer extends IApplication {
 
       parser.parse(filteredArgs, Config()) foreach { config ⇒
 
+        PluginManager.startAll
         logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
         PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe)
 
