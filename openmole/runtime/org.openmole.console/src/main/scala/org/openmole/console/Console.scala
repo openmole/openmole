@@ -29,10 +29,7 @@ import org.openmole.tool.file._
 import org.openmole.core.workflow.tools.PluginInfo
 import org.openmole.core.workspace._
 import scala.annotation.tailrec
-import scala.tools.nsc.Settings
-import scala.tools.nsc.interpreter.{ NamedParam, ILoop, JLineCompletion, JLineReader }
 import org.openmole.core.workflow.task._
-import java.util.concurrent.TimeUnit
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.tool.file._
 

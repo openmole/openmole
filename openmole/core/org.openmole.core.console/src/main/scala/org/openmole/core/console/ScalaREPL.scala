@@ -19,6 +19,7 @@ package org.openmole.core.console
 
 import java.io.{ PrintStream, PrintWriter, Writer }
 import java.net.URLClassLoader
+import javax.management.remote.JMXPrincipal
 import javax.script.ScriptEngineManager
 
 import org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader
@@ -28,12 +29,13 @@ import org.osgi.framework.Bundle
 
 import scala.annotation.tailrec
 import scala.reflect.internal.util.{ NoPosition, Position }
-import scala.tools.nsc.interpreter._
 import scala.tools.nsc._
 import scala.tools.nsc.reporters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
+import java.io.PrintWriter
+import scala.tools.nsc.interpreter._
 
 object ScalaREPL {
   def warmup = new ScalaREPL().eval("def warmup() = {}")
@@ -47,16 +49,15 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
   var loopExitCode = 0
 
   System.setProperty("jline.shutdownhook", "true")
-  //System.setProperty("scala.repl.debug", "true")
   override val prompt = "OpenMOLE>"
-
-  in = new JLineReader(new JLineCompletion(this))
 
   super.getClass.getMethods.find(_.getName.contains("globalFuture_$eq")).get.invoke(this, Future { true }.asInstanceOf[AnyRef])
 
   settings = new Settings
   settings.Yreplsync.value = true
   settings.verbose.value = false
+
+  in = chooseReader(settings)
 
   private def messageToException(e: Throwable, messages: List[ErrorMessage], code: String): Throwable = {
     def readableErrorMessages(error: ErrorMessage) =

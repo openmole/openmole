@@ -35,10 +35,11 @@ import scala.util.{ Success, Failure, Try }
 object Market extends Logger {
 
   lazy val githubMarket =
-    Repository(
-      "https://github.com/openmole/openmole-market.git",
-      Some(s ⇒ s"https://github.com/openmole/openmole-market/tree/master/$s")
-    )
+    new Repository {
+      def url = "https://github.com/openmole/openmole-market.git"
+      def viewURL(name: String, branch: String) =
+        Some(s"https://github.com/openmole/openmole-market/tree/$branch/$name")
+    }
 
   object Tags {
     lazy val stochastic = Tag("Stochastic")
@@ -47,6 +48,7 @@ object Market extends Logger {
     lazy val R = Tag("R")
     lazy val fsl = Tag("FSL")
     lazy val neuroscience = Tag("Neuro Science")
+    lazy val gama = Tag("GAMA")
     lazy val data = Tag("Data")
     lazy val native = Tag("Native Code")
     lazy val netlogo = Tag("NetLogo")
@@ -59,7 +61,10 @@ object Market extends Logger {
   }
 
   case class Tag(label: String)
-  case class Repository(url: String, viewURL: Option[String ⇒ String] = None)
+  trait Repository {
+    def url: String
+    def viewURL(name: String, branch: String): Option[String]
+  }
 
   import Tags._
 
@@ -83,7 +88,8 @@ object Market extends Logger {
       MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq(scala, java, plugin)),
       MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
-      MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience))
+      MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
+      MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation))
     )
   )
 
@@ -112,6 +118,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
 
   lazy val console = new Console()
 
+  def branchName = buildinfo.version.takeWhile(_.isDigit) + "-dev"
   def archiveDirectoryName = "market"
 
   def generate(cloneDirectory: File, testScript: Boolean = true): Seq[GeneratedMarketEntry] = {
@@ -134,7 +141,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
         project,
         readme.contentOption,
         project.files(projectDirectory).map(_.content),
-        marketRepository.repository.viewURL.map(_(project.directory))
+        marketRepository.repository.viewURL(project.directory, branchName)
       )
     }
   }
@@ -181,8 +188,6 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
       command.setURI(repository.repository.url)
       command.call()
     }
-
-    val branchName = buildinfo.version.takeWhile(_.isDigit) + "-dev"
 
     val repo = Git.open(directory)
     repo.reset().setMode(ResetCommand.ResetType.HARD).call()

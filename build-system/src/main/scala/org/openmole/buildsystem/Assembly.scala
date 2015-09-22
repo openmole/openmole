@@ -188,8 +188,9 @@ trait Assembly { self: BuildSystemDefaults ⇒
         tmpFile.renameTo(cacheFile)
       }
 
-      val destFile = new File(targetDir, file)
+      val destFile = new File(assembleDir, file)
       s.log.info(s"Copy $cacheFile to $destFile")
+      destFile.getParentFile.mkdirs
       IO.copyFile(cacheFile, destFile)
 
       file

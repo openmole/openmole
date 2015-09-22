@@ -27,6 +27,7 @@ import org.openmole.tool.logger.Logger
 import org.osgi.framework._
 
 import scala.collection.immutable.{ HashSet, HashMap }
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 import scala.collection.JavaConversions._
@@ -43,6 +44,16 @@ case class BundlesInfo(
 object PluginManager extends Logger {
 
   import Log._
+
+  def ecliseBundles = Set(
+    "org.eclipse.equinox.common",
+    "org.eclipse.core.contenttype",
+    "org.eclipse.core.jobs",
+    "org.eclipse.core.runtime",
+    "org.eclipse.equinox.app",
+    "org.eclipse.equinox.registry",
+    "org.eclipse.equinox.preferences"
+  )
 
   private val bundlesInfo = Ref(None: Option[BundlesInfo])
   private val resolvedPluginDependenciesCache = TMap[Long, Iterable[Long]]()
@@ -104,7 +115,7 @@ object PluginManager extends Logger {
     else if (path.isDirectory) path.listFilesSafe.filter(isPlugin)
     else Nil
 
-  def tryLoad(files: Iterable[File]) = synchronized {
+  def tryLoad(files: Iterable[File]): Seq[(Bundle, Throwable)] = synchronized {
     val bundles =
       files.flatMap { plugins }.flatMap {
         b ⇒
@@ -115,14 +126,11 @@ object PluginManager extends Logger {
               None
           }
       }.toList
-    bundles.foreach {
+    bundles.map {
       b ⇒
         logger.fine(s"Stating bundle ${b.getLocation}")
-        Try(b.start) match {
-          case Success(_) ⇒
-          case Failure(e) ⇒ logger.log(WARNING, s"Error installing bundle $b", e)
-        }
-    }
+        b -> Try(b.start)
+    }.collect { case (b: Bundle, Failure(e)) ⇒ b -> e }
   }
 
   def load(files: Iterable[File]) = synchronized {
@@ -163,8 +171,6 @@ object PluginManager extends Logger {
       case t: Throwable ⇒ throw new InternalProcessingError(t, "Installing bundle " + f)
     }
 
-  def startAll = Activator.contextOrException.getBundles.foreach(_.start)
-
   private def dependencies(bundles: Iterable[Long]): Iterable[Long] =
     dependencies(bundles, infos.resolvedDirectDependencies)
 
@@ -184,11 +190,13 @@ object PluginManager extends Logger {
   private def infos: BundlesInfo = atomic { implicit ctx ⇒
     bundlesInfo() match {
       case None ⇒
+        val bs = bundles
+
         val resolvedDirectDependencies: Map[Long, Set[Long]] = {
           import collection.mutable.{ HashMap ⇒ MHashMap, HashSet ⇒ MHashSet }
 
           val dependencies = new MHashMap[Long, MHashSet[Long]]
-          bundles.foreach {
+          bs.foreach {
             b ⇒
               dependingBundles(b).foreach {
                 db ⇒ dependencies.getOrElseUpdate(db.getBundleId, new MHashSet[Long]) += b.getBundleId
@@ -197,7 +205,10 @@ object PluginManager extends Logger {
           dependencies.map { case (k, v) ⇒ k -> v.toSet }.toMap
         }
 
-        val providedDependencies = dependencies(bundles.filter(b ⇒ b.isProvided).map { _.getBundleId }, resolvedDirectDependencies).toSet
+        val providedDependencies =
+          dependencies(bs.filter(b ⇒ b.isProvided).map { _.getBundleId }, resolvedDirectDependencies).toSet ++
+            dependencies(bs.filter(b ⇒ ecliseBundles.contains(b.getSymbolicName)).map(_.getBundleId), resolvedDirectDependencies)
+
         val files = bundles.map(b ⇒ b.file.getCanonicalFile -> ((b.getBundleId, b.file.lastModification))).toMap
 
         val info = BundlesInfo(files, resolvedDirectDependencies, providedDependencies)
@@ -207,16 +218,50 @@ object PluginManager extends Logger {
     }
   }
 
-  def allDependingBundles(b: Bundle, filter: Bundle ⇒ Boolean): Iterable[Bundle] =
-    (b :: dependingBundles(b).filter(filter).flatMap(allDependingBundles(_, filter)).toList).distinct
+  def allDependingBundles(b: Bundle, filter: Bundle ⇒ Boolean): Iterable[Bundle] = {
+    val seen = mutable.Set[Bundle]()
+    val toProcess = ListBuffer[Bundle]()
+
+    toProcess += b
+    seen += b
+
+    while (!toProcess.isEmpty) {
+      val current = toProcess.remove(0)
+      for {
+        b ← dependingBundles(current).filter(filter)
+      } if (!seen(b)) {
+        seen += b
+        toProcess += b
+      }
+    }
+
+    seen.toList
+  }
 
   private def dependingBundles(b: Bundle): Iterable[Bundle] = {
     val exportedPackages = Activator.packageAdmin.getExportedPackages(b)
 
-    if (exportedPackages != null) {
-      for (exportedPackage ← exportedPackages; ib ← exportedPackage.getImportingBundles) yield ib
-    }
-    else Iterable.empty
+    def requiredBundles = Activator.packageAdmin.getRequiredBundles(null).toSeq
+
+    val requiering = requiredBundles.find(_.getBundle.getBundleId == b.getBundleId).map(_.getRequiringBundles.toSeq).getOrElse(Seq.empty)
+
+    val fromPackages: Seq[Bundle] =
+      if (exportedPackages != null) {
+        for (exportedPackage ← exportedPackages; ib ← exportedPackage.getImportingBundles) yield ib
+      }
+      else Seq.empty
+
+    (fromPackages ++ requiering).distinct
   }
+
+  def startAll: Seq[(Bundle, Throwable)] =
+    Activator.contextOrException.getBundles.filter {
+      _.getState match {
+        case Bundle.INSTALLED | Bundle.RESOLVED ⇒ true
+        case _                                  ⇒ false
+      }
+    }.map {
+      b ⇒ b -> Try(b.start)
+    }.collect { case (b: Bundle, Failure(e)) ⇒ b -> e }
 
 }

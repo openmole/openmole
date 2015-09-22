@@ -19,18 +19,31 @@ package org.openmole.core.serializer
 
 import java.io.File
 
+import com.thoughtworks.xstream.converters.Converter
+import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
+import com.thoughtworks.xstream.core.{JVM, ClassLoaderReference}
+import com.thoughtworks.xstream.core.util.CompositeClassLoader
+import com.thoughtworks.xstream.io.xml.XppDriver
+import com.thoughtworks.xstream.{XStream, mapper}
+import com.thoughtworks.xstream.mapper.{DefaultMapper, MapperWrapper, Mapper}
+import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.converter.Serialiser
 import org.openmole.core.serializer.file.{ FileListing, FileConverterNotifier }
-import org.openmole.core.serializer.plugin.{ PluginListing, PluginClassConverter, PluginConverter }
+import org.openmole.core.serializer.plugin.{Plugins, PluginListing, PluginClassConverter, PluginConverter}
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.tool.file._
 import org.openmole.tool.stream.NullOutputStream
 
 import scala.collection.immutable.TreeSet
 
+
 trait PluginAndFilesListing <: PluginListing with FileListing { this: Serialiser ⇒
+
+  lazy val reflectionConverter: ReflectionConverter =
+    new ReflectionConverter(xStream.getMapper, xStream.getReflectionProvider)
+
   private var plugins: TreeSet[File] = null
-  private var listedFiles = TreeSet[File]()(fileOrdering)
+  private var listedFiles: TreeSet[File] = null
 
   xStream.registerConverter(new FileConverterNotifier(this))
   xStream.registerConverter(new PluginConverter(this, reflectionConverter))
@@ -38,6 +51,8 @@ trait PluginAndFilesListing <: PluginListing with FileListing { this: Serialiser
 
   def pluginUsed(f: File): Unit = plugins += f
   def fileUsed(file: File) = listedFiles += file
+
+  def classUsed(c: Class[_]) = PluginManager.pluginsForClass(c).foreach(pluginUsed)
 
   def list(obj: Any) = synchronized {
     plugins = TreeSet[File]()(fileOrdering)

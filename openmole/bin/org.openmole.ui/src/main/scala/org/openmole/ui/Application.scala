@@ -81,7 +81,7 @@ class Application extends IApplication {
       port: Option[Int] = None,
       loggerLevel: Option[String] = None,
       unoptimizedJS: Boolean = false,
-      webuiAuthentication: Boolean = false,
+      remote: Boolean = false,
       args: List[String] = Nil)
 
     def takeArg(args: List[String]) =
@@ -125,7 +125,8 @@ class Application extends IApplication {
         case "--port" :: tail                  ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt))) // Server port
         case "--logger-level" :: tail          ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
         case "--unoptimizedJS" :: tail         ⇒ parse(tail, c.copy(unoptimizedJS = true))
-        case "--webui-authentication" :: tail  ⇒ parse(tail, c.copy(webuiAuthentication = true))
+        case "--webui-authentication" :: tail  ⇒ parse(tail, c.copy(remote = true))
+        case "--remote" :: tail                ⇒ parse(tail, c.copy(remote = true))
         case "--" :: tail                      ⇒ parse(Nil, c.copy(args = tail))
         case s :: tail                         ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                               ⇒ c
@@ -152,7 +153,8 @@ class Application extends IApplication {
         userPlugins ++
         (if (config.launchMode == GUIMode) config.guiPluginsDirs.map(new File(_)) else List.empty)
 
-    PluginManager.tryLoad(plugins)
+    PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
+    PluginManager.tryLoad(plugins).foreach { case (b, e) ⇒ logger.log(WARNING, s"Error loading bundle $b", e) }
 
     try config.password foreach Workspace.setPassword
     catch {
@@ -186,14 +188,14 @@ class Application extends IApplication {
           def browse(url: String) =
             if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
           GUIServer.lockFile.withFileOutputStream { fos ⇒
-            val lock = fos.getChannel.tryLock
-            if (lock != null) {
+            val launch = (config.remote || fos.getChannel.tryLock != null)
+            if (launch) {
               val port = config.port.getOrElse(Workspace.preferenceAsInt(GUIServer.port))
               val url = s"https://localhost:$port"
               GUIServer.urlFile.content = url
               BootstrapJS.init(!config.unoptimizedJS)
-              if (config.webuiAuthentication) GUIServer.initPassword
-              val server = new GUIServer(port, BootstrapJS.webapp, config.webuiAuthentication)
+              if (config.remote) GUIServer.initPassword
+              val server = new GUIServer(port, BootstrapJS.webapp, config.remote)
               server.start()
               browse(url)
               ScalaREPL.warmup

@@ -35,33 +35,21 @@ object EnvironmentErrorPanel {
 
 class EnvironmentErrorPanel {
 
-  val expandedError: Var[Option[EnvironmentError]] = Var(None)
   val scrollable = scrollableDiv()
 
-  def entries(errors: Seq[EnvironmentError]) = tags.table(
-    (for {
-      error ← errors.groupBy(e ⇒ (e.errorMessage, e.stack)).values.map {
-        _.sortBy(_.date).last
-      }.toSeq.sortBy(_.date).reverse
-      nb = errors.count(_.copy(date = 0L) == error.copy(date = 0L))
-    } yield {
-      Seq(
-        tags.tr(
-          tags.a(s"${error.errorMessage} ($nb, ${Utils.longToDate(error.date)})", cursor := "pointer", onclick := {
-            () ⇒
-              panels.environmentStackPanel.content() = error.stack.stackTrace
-              panels.environmentStackTriggerer.open
-              expandedError() = expandedError() match {
-                case None ⇒ Some(error)
-                case _    ⇒ None
-              }
-          })
-        )
+  def entries(errors: Seq[(EnvironmentError, Int)]) = tags.table(
+    for { (error, nb) ← errors } {
+      tags.tr(
+        tags.a(s"${error.errorMessage} ($nb, ${Utils.longToDate(error.date)})", cursor := "pointer", onclick := {
+          () ⇒
+            panels.environmentStackPanel.content() = error.stack.stackTrace
+            panels.environmentStackTriggerer.open
+        })
       )
-    }).flatten: _*
+    }
   )
 
-  def setErrors(ers: Seq[EnvironmentError]) = scrollable.setChild(bs.div("environmentPanelError")(entries(ers)).render)
+  def setErrors(ers: Seq[(EnvironmentError, Int)]) = scrollable.setChild(bs.div("environmentPanelError")(entries(ers)).render)
 
   val view = scrollable.sRender
 

@@ -17,14 +17,13 @@
 
 package org.openmole.core.serializer
 
-import java.lang.ProcessBuilder.NullOutputStream
-
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
-import org.openmole.core.serializer.PluginAndFilesListing
+import com.thoughtworks.xstream.core.ClassLoaderReference
+import com.thoughtworks.xstream.io.binary.BinaryStreamDriver
 import org.openmole.tool.file._
 import org.openmole.core.serializer.converter._
 import java.util.concurrent.locks.{ ReentrantReadWriteLock, ReadWriteLock }
@@ -38,10 +37,13 @@ import org.openmole.core.serializer.file.{ FileInjection, FileListing, FileSeria
 
 object SerialiserService extends Logger {
 
+  private[serializer] def buildXStream =
+    new XStream(null, new BinaryStreamDriver(), new ClassLoaderReference(SerialiserService.getClass.getClassLoader))
+
   private val lock = new ReentrantReadWriteLock
   private val xStreamOperations = ListBuffer.empty[(XStream ⇒ _)]
 
-  private val xstream = new XStream
+  private val xstream = buildXStream
   private val content = "content.xml"
 
   private trait Initialized extends Factory {

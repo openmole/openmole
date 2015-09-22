@@ -35,7 +35,8 @@ trait OsgiBundler {
                   settings: Seq[Setting[_]] = Nil,
                   bundleActivator: Option[String] = None,
                   dynamicImports: Seq[String] = Seq(),
-                  imports: Seq[String] = Seq("*;resolution:=optional"))(implicit artifactPrefix: Option[String] = None) = {
+                  imports: Seq[String] = Seq("*;resolution:=optional"),
+                  global: Boolean = false)(implicit artifactPrefix: Option[String] = None) = {
 
     require(artifactPrefix.forall(!_.endsWith(".")), "Do not end your artifact prefix with ., it will be added automatically.")
 
@@ -53,7 +54,8 @@ trait OsgiBundler {
           omScope ⇒
             Map[String, String]() +
               ("Bundle-ActivationPolicy" -> "lazy") ++
-              omScope.map(os ⇒ "OpenMOLE-Scope" -> os)
+              omScope.map(os ⇒ "OpenMOLE-Scope" -> os) ++
+              (if (global) Some("Eclipse-BuddyPolicy" -> "global") else None)
         },
       OsgiKeys.privatePackage := privatePackages,
       OsgiKeys.dynamicImportPackage := dynamicImports,
