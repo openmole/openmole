@@ -17,6 +17,7 @@
 
 package org.openmole.core.serializer
 
+import com.thoughtworks
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import java.io.FileInputStream

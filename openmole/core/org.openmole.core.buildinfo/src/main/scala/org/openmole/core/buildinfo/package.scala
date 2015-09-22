@@ -40,7 +40,7 @@ package object buildinfo {
       case false ⇒ s"http://openmole.org/all/$version"
     }
 
-  def marketName = "market.xml"
+  def marketName = "market.bin"
   def marketAddress = url(marketName)
   def url(entry: String): String = siteURL + "/" + entry
 

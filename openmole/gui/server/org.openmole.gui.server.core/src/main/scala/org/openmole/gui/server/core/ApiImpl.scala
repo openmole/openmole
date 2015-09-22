@@ -243,8 +243,6 @@ object ApiImpl extends Api {
 
     val outputs = envIds.keys.toSeq.map { Runnings.outputsDatas(_, lines) }
 
-    println("env data " + envData.mkString(", "))
-
     (envData, outputs)
   }
 
@@ -265,13 +263,9 @@ object ApiImpl extends Api {
             MarkDownProcessor(_)
           })
       })
+    println()
 
-    if (!buildinfo.development) {
-      val marketFile = (webUIProjectFile / s"market${buildinfo.version}.xml")
-      marketFile.cache(f ⇒ download(_.copy(f)))
-      mapToMd(SerialiserService.deserialise[buildinfo.MarketIndex](marketFile))
-    }
-    else mapToMd(download(SerialiserService.deserialise[buildinfo.MarketIndex](_)))
+    mapToMd(download(SerialiserService.deserialise[buildinfo.MarketIndex](_)))
   }
 
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
