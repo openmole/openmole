@@ -34,7 +34,8 @@ object REST extends Defaults {
   lazy val server = OsgiProject(
     "server",
     privatePackages = Seq("org.openmole.rest.message.*"),
-    imports = Seq("org.h2", "!com.sun.*", "*")) dependsOn
+    imports = Seq("org.h2", "!com.sun.*", "*")
+  ) dependsOn
     (Core.workflow, openmoleTar, openmoleCollection, root.Runtime.console, message, openmoleCrypto) settings
     (libraryDependencies ++= Seq(bouncyCastle, jetty, logback, scalatra, scalaLang, arm, codec))
 

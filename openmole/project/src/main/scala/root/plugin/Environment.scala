@@ -17,7 +17,8 @@ object Environment extends PluginDefaults {
 
   lazy val egi = OsgiProject("egi", imports = Seq("!org.apache.http.*", "!fr.iscpif.gridscale.libraries.srmstub", "!fr.iscpif.gridscale.libraries.lbstub", "!fr.iscpif.gridscale.libraries.wmsstub", "*")) dependsOn (Core.workflow, Core.exception, Core.updater, Core.batch,
     Core.workspace, Core.fileService, gridscale) settings (
-      libraryDependencies ++= Seq(Libraries.gridscaleGlite, Libraries.gridscaleDirac, Libraries.gridscaleHTTP, Libraries.scalaLang))
+      libraryDependencies ++= Seq(Libraries.gridscaleGlite, Libraries.gridscaleDirac, Libraries.gridscaleHTTP, Libraries.scalaLang)
+    )
 
   lazy val gridscale = OsgiProject("gridscale", imports = Seq("*")) dependsOn (Core.workflow, Core.workspace, Core.tools, Core.workflow,
     Core.batch, Core.exception)

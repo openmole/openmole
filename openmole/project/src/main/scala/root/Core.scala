@@ -27,7 +27,8 @@ object Core extends Defaults {
 
   lazy val batch = OsgiProject("batch", imports = Seq("*")) dependsOn (
     workflow, workspace, tools, event, replication, updater, exception,
-    serializer, fileService, pluginManager, openmoleTar) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick, apacheConfig))
+    serializer, fileService, pluginManager, openmoleTar
+  ) settings (libraryDependencies ++= Seq(gridscale, h2, guava, jasypt, slick, apacheConfig))
 
   lazy val dsl = OsgiProject("dsl", imports = Seq("*")) dependsOn (workflow, logging)
 
@@ -53,8 +54,10 @@ object Core extends Defaults {
 
   val macros = OsgiProject("macros", imports = Seq("*")) settings (libraryDependencies += scalaLang % "provided" /*, provided(scalaCompiler)*/ )
 
-  val pluginManager = OsgiProject("pluginmanager",
-    bundleActivator = Some("org.openmole.core.pluginmanager.internal.Activator"), imports = Seq("*")) settings
+  val pluginManager = OsgiProject(
+    "pluginmanager",
+    bundleActivator = Some("org.openmole.core.pluginmanager.internal.Activator"), imports = Seq("*")
+  ) settings
     (includeOsgi) dependsOn (exception, tools, workspace)
 
   val updater = OsgiProject("updater", imports = Seq("*")) dependsOn (exception, tools, workspace)
@@ -63,7 +66,8 @@ object Core extends Defaults {
 
   val logging = OsgiProject(
     "logging",
-    bundleActivator = Some("org.openmole.core.logging.internal.Activator"), imports = Seq("*")) settings (libraryDependencies ++= Seq(log4j, logback, slf4j, equinoxCommon)) dependsOn
+    bundleActivator = Some("org.openmole.core.logging.internal.Activator"), imports = Seq("*")
+  ) settings (libraryDependencies ++= Seq(log4j, logback, slf4j, equinoxCommon)) dependsOn
     (tools, workspace)
 
   val output = OsgiProject("output", imports = Seq("*"))
@@ -83,7 +87,8 @@ object Core extends Defaults {
             sbtVersion,
             BuildInfoKey.action("buildTime") {
               System.currentTimeMillis
-            }),
+            }
+          ),
         buildInfoPackage := s"${artifactPrefix.get}.buildinfo"
       ): _*
   )
