@@ -53,11 +53,10 @@ class PluginPanel extends ModalPanel {
   val uploadPluginButton = tags.label(`class` := "inputFileStyle pluginRight",
     uploadButton((fileInput: HTMLInputElement) ⇒ {
       fileInput.accept = ".jar"
-      FileManager.upload(fileInput,
+      FileManager.upload(
+        fileInput,
         SafePath.empty,
-        (p: FileTransferState) ⇒ {
-          transferring() = p
-        },
+        (p: FileTransferState) ⇒ { transferring() = p },
         UploadPlugin(),
         () ⇒ getPlugins
       )
