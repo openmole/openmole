@@ -37,8 +37,8 @@ class EnvironmentErrorPanel {
 
   val scrollable = scrollableDiv()
 
-  def entries(errors: Seq[(EnvironmentError, Int)]) = tags.table(
-    for { (error, nb) ← errors } {
+  private def entries(errors: Seq[(EnvironmentError, Int)]) = tags.table(
+    for { (error, nb) ← errors } yield {
       tags.tr(
         tags.a(s"${error.errorMessage} ($nb, ${Utils.longToDate(error.date)})", cursor := "pointer", onclick := {
           () ⇒
