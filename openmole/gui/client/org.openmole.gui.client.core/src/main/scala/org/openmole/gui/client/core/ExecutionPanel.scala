@@ -64,14 +64,15 @@ class ExecutionPanel extends ModalPanel {
     if(updating.compareAndSet(false, true)) {
       OMPost[Api].allStates.call().andThen {
         case Success(executionInfos) ⇒
-          OMPost[Api].runningErrorEnvironmentAndOutputData (lines = nbOutLineInput.value.toInt, errorLevelSelector.content ().map {
-            _.level
-          }.getOrElse (ErrorLevel () ) ).call ().andThen {
+          OMPost[Api].runningErrorEnvironmentAndOutputData (
+            lines = nbOutLineInput.value.toInt,
+            errorLevelSelector.content ().map { _.level }.getOrElse ( ErrorLevel () ) ).call ().andThen {
             case Success(err) ⇒
               panelInfo () = PanelInfo (executionInfos, err._2, err._1)
               doScrolls
               delay
-            case Failure(_) => delay
+            case Failure(_) =>
+              delay
           }
         case Failure(_) => delay
       }
@@ -86,9 +87,7 @@ class ExecutionPanel extends ModalPanel {
 
   def doScrolls = {
     Seq(outputTextAreas(), scriptTextAreas(), errorTextAreas()).map {
-      _.values.foreach {
-        _.doScroll
-      }
+      _.values.foreach { _.doScroll }
     }
     envErrorPanels().values.foreach {
       _.scrollable.doScroll
@@ -136,7 +135,6 @@ class ExecutionPanel extends ModalPanel {
       thead,
       Rx {
         tbody({
-
           for {
             (id, staticInfo, executionInfo) ← panelInfo().executionInfos.sortBy(_._2.startDate).reverse
           } yield {
@@ -193,34 +191,24 @@ class ExecutionPanel extends ModalPanel {
                           bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_flag + " paddingBottom7"), " " + e.done).tooltip("Completed jobs")),
                           bs.td(col_md_1)(tags.span(bs.glyph(bs.glyph_fire + " paddingBottom7"), " " + e.failed).tooltip("Failed jobs")),
                           bs.td(col_md_3)(bs.span({
-                            "blue" + {
-                              if (envErrorVisible().contains(e.envId)) " executionVisible" else ""
-                            }
+                            "blue" + { if (envErrorVisible().contains(e.envId)) " executionVisible" else "" }
                           })(cursor := "pointer", onclick := {
                             () ⇒
-                              {
-                                if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot {
-                                  _ == e.envId
-                                }
-                                else envErrorVisible() = envErrorVisible() :+ e.envId
-                              }
+                              if (envErrorVisible().contains(e.envId)) envErrorVisible() = envErrorVisible().filterNot { _ == e.envId }
+                              else envErrorVisible() = envErrorVisible() :+ e.envId
                           }
                           )("details")
                           )),
                           bs.tr(row)(
                             bs.td(col_md_12)(
-                              `class` := {
-                                if (envErrorVisible().contains(e.envId)) "" else "displayNone"
-                              },
+                              `class` := { if (envErrorVisible().contains(e.envId)) "" else "displayNone" },
                               colspan := 12,
                               staticPanel(e.envId, envErrorPanels,
                                 () ⇒ new EnvironmentErrorPanel,
                                 (ep: EnvironmentErrorPanel) ⇒ {
                                   ep.setErrors(panelInfo().envErrorsInfos.flatMap {
                                     _.errors
-                                  }.filter {
-                                    _._1.environmentId == e.envId
-                                  })
+                                  }.filter { _._1.environmentId == e.envId })
                                 }).view
                             )
                           )

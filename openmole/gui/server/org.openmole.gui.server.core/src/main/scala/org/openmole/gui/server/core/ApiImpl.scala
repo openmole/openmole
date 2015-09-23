@@ -227,24 +227,23 @@ object ApiImpl extends Api {
       } yield error -> count
 
     val envIds = Runnings.environmentIds
-    (
+
+    val envData =
       envIds.map {
         case (id, envIds) ⇒
-          RunningEnvironmentData(
-            id,
-            group(
-              Runnings.runningEnvironments(envIds).flatMap {
-                case (envId, info) ⇒ info.environmentErrors(envId)
-              }.filter {
-                _.level == level
-              }
-            )
-          )
-      }.toSeq,
-      envIds.keys.toSeq.map {
-        Runnings.outputsDatas(_, lines)
-      }
-    )
+          val errors =
+            for {
+              (envId, info) ← Runnings.runningEnvironments(envIds)
+              error ← info.environmentErrors(envId)
+              if error.level == level
+            } yield error
+
+          RunningEnvironmentData(id, group(errors))
+      }.toSeq
+
+    val outputs = envIds.keys.toSeq.map { Runnings.outputsDatas(_, lines) }
+
+    (envData, outputs)
   }
 
   def buildInfo = buildinfo.info
@@ -264,13 +263,9 @@ object ApiImpl extends Api {
             MarkDownProcessor(_)
           })
       })
+    println()
 
-    if (!buildinfo.development) {
-      val marketFile = (webUIProjectFile / s"market${buildinfo.version}.xml")
-      marketFile.cache(f ⇒ download(_.copy(f)))
-      mapToMd(SerialiserService.deserialise[buildinfo.MarketIndex](marketFile))
-    }
-    else mapToMd(download(SerialiserService.deserialise[buildinfo.MarketIndex](_)))
+    mapToMd(download(SerialiserService.deserialise[buildinfo.MarketIndex](_)))
   }
 
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
