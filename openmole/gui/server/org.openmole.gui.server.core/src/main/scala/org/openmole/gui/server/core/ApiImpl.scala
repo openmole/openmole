@@ -289,14 +289,14 @@ object ApiImpl extends Api {
     addPlugins(recurse(file))
   }
 
-  private def addPlugins(files: Iterable[File]): Unit = {
+  def addPlugins(files: Iterable[File]): Unit = {
     val plugins =
       files.map { file ⇒
         val dest: File = Workspace.pluginDir / file.getName
         file copy dest
         dest
       }
-    PluginManager.load(plugins)
+    PluginManager.tryLoad(plugins)
   }
 
   def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)

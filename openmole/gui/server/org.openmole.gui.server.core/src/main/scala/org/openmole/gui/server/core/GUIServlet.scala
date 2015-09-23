@@ -98,28 +98,27 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     move(fileParams, params("fileType"))
   }
 
-  def move(fileParems: MultiMapHeadView[String, FileItem], fileType: String) = {
-    val rootFile = fileType match {
-      case "project"        ⇒ Utils.webUIProjectFile
-      case "authentication" ⇒ Utils.authenticationKeysFile
-      case "plugin"         ⇒ Workspace.pluginDir
+  def move(fileParams: MultiMapHeadView[String, FileItem], fileType: String) = {
+    def moveTo(rootFile: File) =
+      for (file ← fileParams) yield {
+        val path = new java.net.URI(file._1).getPath
+        val destination = new File(rootFile, path)
+        destination.setWritable(true)
+        val stream = file._2.getInputStream
+        try {
+          stream.copy(destination)
+          destination.setExecutable(true)
+        }
+        finally stream.close
+        destination
+      }
+
+    fileType match {
+      case "project"        ⇒ moveTo(Utils.webUIProjectFile)
+      case "authentication" ⇒ moveTo(Utils.authenticationKeysFile)
+      case "plugin"         ⇒ ApiImpl.addPlugins(moveTo(Workspace.pluginDir))
     }
 
-    for (file ← fileParams) yield {
-      val path = new java.net.URI(file._1).getPath
-      val destination = new File(rootFile, path)
-      destination.setWritable(true)
-      val stream = file._2.getInputStream
-      try {
-        stream.copy(destination)
-        destination.setExecutable(true)
-      }
-      finally stream.close
-      Ok(file, Map(
-        "Content-Type" -> ("application/octet-stream"),
-        "Content-Disposition" -> ("form-data; filename=\"" + file._1 + "\"")
-      ))
-    }
   }
 
   get("/downloadFile") {
