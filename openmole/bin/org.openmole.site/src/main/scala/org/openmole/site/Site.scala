@@ -23,6 +23,7 @@ import ammonite.ops.Path
 import com.thoughtworks.xstream.XStream
 import org.eclipse.equinox.app._
 import org.openmole.core.buildinfo.MarketIndex
+import org.openmole.core.serializer.SerialiserService
 import org.openmole.core.workspace.Workspace
 import org.openmole.site.market.Market
 import org.openmole.tool.file._
@@ -70,12 +71,7 @@ class Site extends IApplication {
 
     val m = new Market(Market.entries, dest)
     val marketEntries = m.generate(Workspace.persistentDir / "market", Config.testScript)
-
-    (dest / buildinfo.marketName).withOutputStream {
-      os ⇒
-        val xstream = new XStream()
-        xstream.toXML(MarketIndex(marketEntries.map(_.toDeployedMarketEntry)), os)
-    }
+    SerialiserService.serialise(MarketIndex(marketEntries.map(_.toDeployedMarketEntry)), (dest / buildinfo.marketName))
 
     DocumentationPages.marketEntries = marketEntries
 
