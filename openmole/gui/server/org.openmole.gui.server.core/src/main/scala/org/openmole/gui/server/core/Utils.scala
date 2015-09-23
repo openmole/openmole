@@ -57,7 +57,7 @@ object Utils {
     ak.mkdirs()
     ak
   }
-  
+
   def isPlugin(path: SafePath): Boolean = !PluginManager.plugins(safePathToFile(path)).isEmpty
 
   implicit def fileToSafePath(f: File): SafePath = SafePath(getPathArray(f, workspaceProjectFile), f)

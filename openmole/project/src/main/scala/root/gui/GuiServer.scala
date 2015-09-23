@@ -15,7 +15,8 @@ object Server extends GuiDefaults {
 
   lazy val core = OsgiProject("org.openmole.gui.server.core") settings
     (libraryDependencies ++= Seq(autowire, upickle, scalaTags, jetty, logback, scalatra, txtmark)) dependsOn
-    (Shared.shared,
+    (
+      Shared.shared,
       Ext.dataui,
       Ext.data,
       Core.workflow,
@@ -26,7 +27,8 @@ object Server extends GuiDefaults {
       root.Runtime.console,
       Misc.utils,
       root.ThirdParties.openmoleStream,
-      openmoleCrypto)
+      openmoleCrypto
+    )
 
   lazy val state = OsgiProject("org.openmole.gui.server.state") settings
     (libraryDependencies ++= Seq(slick)) dependsOn

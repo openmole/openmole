@@ -17,8 +17,7 @@ object Runtime extends Defaults(runtime.REST) {
   val daemon = OsgiProject("org.openmole.runtime.daemon", singleton = true, imports = Seq("*")) dependsOn (Core.workflow, Core.workflow, Core.batch, Core.workspace,
     Core.fileService, Core.exception, Core.tools, Core.logging, plugin.Environment.desktopgrid) settings
     (includeOsgi, bundleType += "daemon",
-      libraryDependencies ++= Seq(scalaLang, logging, jodaTime, scopt, equinoxCommon, equinoxApp, gridscaleSSH)
-    )
+      libraryDependencies ++= Seq(scalaLang, logging, jodaTime, scopt, equinoxCommon, equinoxApp, gridscaleSSH))
 
   lazy val console = OsgiProject("org.openmole.console", imports = Seq("*")) settings (
     organization := "org.openmole.console"
