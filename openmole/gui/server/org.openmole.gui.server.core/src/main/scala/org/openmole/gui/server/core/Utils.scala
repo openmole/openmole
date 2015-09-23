@@ -33,13 +33,19 @@ import scala.concurrent.duration.Duration
 object Utils {
 
   implicit def fileToExtension(f: File): FileExtension = f.getName match {
-    case x if x.endsWith(".oms") ⇒ OMS
-    case x if x.endsWith(".scala") ⇒ SCALA
-    case x if x.endsWith(".sh") ⇒ SH
+    case x if x.endsWith(".oms")                         ⇒ OMS
+    case x if x.endsWith(".scala")                       ⇒ SCALA
+    case x if x.endsWith(".sh")                          ⇒ SH
     case x if x.endsWith(".tgz") | x.endsWith(".tar.gz") ⇒ TGZ
-    case x if x.endsWith(".csv") | x.endsWith(".nlogo") | x.endsWith(".py") | x.endsWith(".R") | x.endsWith(".txt") ⇒ TEXT
-    case x if x.endsWith(".md") ⇒ MD
-    case _ ⇒ BINARY
+    case x if x.endsWith(".csv") |
+      x.endsWith(".nlogo") |
+      x.endsWith(".gaml") |
+      x.endsWith(".nls") |
+      x.endsWith(".py") |
+      x.endsWith(".R") |
+      x.endsWith(".txt")                                ⇒ TEXT
+    case x if x.endsWith(".md")                         ⇒ MD
+    case _                                              ⇒ BINARY
   }
 
   val webUIProjectFile = Workspace.file("webui")
@@ -57,7 +63,7 @@ object Utils {
     ak.mkdirs()
     ak
   }
-  
+
   def isPlugin(path: SafePath): Boolean = !PluginManager.plugins(safePathToFile(path)).isEmpty
 
   implicit def fileToSafePath(f: File): SafePath = SafePath(getPathArray(f, workspaceProjectFile), f)
