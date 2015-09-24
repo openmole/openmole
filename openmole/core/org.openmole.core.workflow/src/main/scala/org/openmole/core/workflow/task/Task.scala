@@ -20,6 +20,7 @@ package org.openmole.core.workflow.task
 import org.openmole.core.tools.service
 import org.openmole.core.workflow.data._
 import org.openmole.core.serializer.plugin._
+import org.openmole.core.workflow.execution.local.LocalEnvironment
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.core.tools.service._
@@ -39,15 +40,16 @@ object Task extends Logger {
 }
 
 trait Task <: InputOutputCheck with Name {
+
   /**
    *
    * Perform this task.
    *
    * @param context the context in which the task will be executed
    */
-  def perform(context: Context): Context = perform(context, process(_)())
+  def perform(context: Context, localEnvironment: LocalEnvironment)(rng: RandomProvider = Task.buildRNG(context)): Context = perform(context, process(_)(rng))
 
-  protected def process(context: Context)(implicit rng: RandomProvider = Task.buildRNG(context)): Context
+  protected def process(context: Context)(implicit rng: RandomProvider): Context
 
   /**
    *
