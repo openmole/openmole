@@ -65,7 +65,7 @@ object MoleExecution extends Logger {
     grouping: Map[Capsule, Grouping] = Map.empty,
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
-    defaultEnvironment: Environment = LocalEnvironment())(implicit executionContext: ExecutionContext) =
+    defaultEnvironment: LocalEnvironment = LocalEnvironment())(implicit executionContext: ExecutionContext) =
     new MoleExecution(
       mole,
       listOfTupleToMap(sources),
@@ -86,7 +86,7 @@ class MoleExecution(
     val environments: Map[Capsule, Environment],
     val grouping: Map[Capsule, Grouping],
     val seed: Long,
-    val defaultEnvironment: Environment,
+    val defaultEnvironment: LocalEnvironment,
     val id: String = UUID.randomUUID().toString)(val implicits: Context, val executionContext: ExecutionContext) {
 
   private val _started = Ref(false)

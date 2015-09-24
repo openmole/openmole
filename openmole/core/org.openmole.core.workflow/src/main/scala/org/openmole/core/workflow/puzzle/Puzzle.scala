@@ -122,7 +122,7 @@ case class Puzzle(
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
     executionContext: ExecutionContext = ExecutionContext.local,
-    defaultEnvironment: Environment = LocalEnvironment()): MoleExecution =
+    defaultEnvironment: LocalEnvironment = LocalEnvironment()): MoleExecution =
     MoleExecution(
       toMole,
       sources,
