@@ -43,9 +43,9 @@ object Utils {
       x.endsWith(".nls") |
       x.endsWith(".py") |
       x.endsWith(".R") |
-      x.endsWith(".txt")                                ⇒ TEXT
-    case x if x.endsWith(".md")                         ⇒ MD
-    case _                                              ⇒ BINARY
+      x.endsWith(".txt") ⇒ TEXT
+    case x if x.endsWith(".md") ⇒ MD
+    case _                      ⇒ BINARY
   }
 
   val webUIProjectFile = Workspace.file("webui")

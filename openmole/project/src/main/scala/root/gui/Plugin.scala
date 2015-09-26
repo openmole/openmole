@@ -10,9 +10,11 @@ import org.openmole.buildsystem.OMKeys._
 abstract class GUIPluginDefaults(subBuilds: Defaults*) extends GuiDefaults(subBuilds: _*) {
   override def dir = super.dir / "plugins"
 
-  override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("guiPlugin"),
+  override def osgiSettings = super.osgiSettings ++ Seq(
+    bundleType := Set("guiPlugin"),
     bundleActivator <<= (name) { n ⇒ Some(n + ".Activator") },
-    libraryDependencies ++= Seq(root.Libraries.rx, root.Libraries.scalaTags, root.Libraries.scalajsDom, root.Libraries.scaladget))
+    libraryDependencies ++= Seq(root.Libraries.rx, root.Libraries.scalaTags, root.Libraries.scalajsDom, root.Libraries.scaladget)
+  )
 }
 
 object Plugin extends GUIPluginDefaults(plugin.Task, Domain, Environment, Sampling, Hook, Method, Source) {

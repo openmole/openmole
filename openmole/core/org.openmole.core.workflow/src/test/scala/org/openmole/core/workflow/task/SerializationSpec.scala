@@ -17,9 +17,10 @@
 
 package org.openmole.core.workflow.task
 
+import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
+
 import org.openmole.core.workflow.data._
 import org.openmole.core.serializer.SerialiserService
-import org.openmole.tool.stream.{ BufferInputStream, BufferOutputStream }
 import org.scalatest._
 
 class SerializationSpec extends FlatSpec with Matchers {
@@ -30,10 +31,10 @@ class SerializationSpec extends FlatSpec with Matchers {
     t.addInput(p)
     t.addOutput(p)
 
-    val builder = new BufferOutputStream
+    val builder = new ByteArrayOutputStream()
 
     SerialiserService.serialise(t.toTask, builder)
-    val t2 = SerialiserService.deserialise[EmptyTask](new BufferInputStream(builder.buffer))
+    val t2 = SerialiserService.deserialise[EmptyTask](new ByteArrayInputStream(builder.toByteArray))
 
     t2.inputs.contains(p.name) should equal(true)
     t2.outputs.contains(p.name) should equal(true)
