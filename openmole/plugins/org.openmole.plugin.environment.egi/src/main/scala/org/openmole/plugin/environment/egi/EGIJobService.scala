@@ -99,6 +99,7 @@ trait EGIJobService extends GridScaleJobService with JobServiceQualityControl wi
       override val shallowRetryCount = Some(Workspace.preferenceAsInt(EGIEnvironment.ShallowWMSRetryCount))
       override val myProxyServer = environment.myProxy.map(_.url)
       override val architecture = environment.architecture
+      override val fuzzy = true
       override val requirements =
         environment.requirements.map(super.requirements + " && (" + _ + ")").getOrElse(super.requirements)
       override val rank = Workspace.preference(EGIEnvironment.WMSRank)
