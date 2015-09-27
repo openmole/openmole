@@ -123,24 +123,22 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         )
       )
     }, Rx {
-      if (manager.allNodes.size == 0) {
-        tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
-      }
-      else {
-        tags.table(`class` := "tree" + dragState())(
-          tags.tr(
-            tags.td(height := "40px",
-              transferring() match {
-                case _: Standby ⇒
-                case _: Transfered ⇒
-                  refreshCurrentDirectory
-                  transferring() = Standby()
-                case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
-              })
-          ),
-          tags.tr(drawTree(manager.current.sons()))
+      tags.table(`class` := "tree" + dragState())(
+        tags.tr(
+          tags.td(height := "40px",
+            transferring() match {
+              case _: Standby ⇒
+              case _: Transfered ⇒
+                refreshCurrentDirectory
+                transferring() = Standby()
+              case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
+            })
+        ),
+        tags.tr(
+          if (manager.allNodes.size == 0) tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
+          else drawTree(manager.current.sons())
         )
-      }
+      )
     }
   )
 
