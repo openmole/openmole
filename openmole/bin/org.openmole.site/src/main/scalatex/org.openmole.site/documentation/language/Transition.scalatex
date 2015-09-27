@@ -17,7 +17,7 @@
     val t1 = ScalaTask("val d = 42.0") set ( outputs += d )
     val t2 = ScalaTask("val e = d / 42") set ( inputs += d, outputs += e)
 
-    val ex = t1 -- (t2 hook ToStringHook()) start""")
+    t1 -- (t2 hook ToStringHook())""")
   @sect{Exploration transition}
     The @b{Exploration} transition links an @hl.openmole("ExplorationTask") to another task. It creates one new
     execution stream by sample point in the design of experiment of the @hl.openmole("ExplorationTask"). For instance,
@@ -33,7 +33,7 @@
     //Define the exploration strategy
     val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
-    val ex = exploration -< (t1 hook ToStringHook()) start""")
+    exploration -< (t1 hook ToStringHook())""")
 
     @p You can read more about @a("Explorations and Samplings", href := DocumentationPages.root.language.sampling.file)
     in the relevant section of the documentation.
@@ -48,7 +48,7 @@
     val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
     val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
-    val ex = exploration -< t1 -- (t2 hook ToStringHook()) start""")
+    exploration -< t1 -- (t2 hook ToStringHook())""")
   @sect{Conditions}
     When needed, it is possible to set a condition on the transition so that the task after the transition is executed
     under this condition only. Conditional transitions are specified after the @hl.openmoleNoTest("when"). For instance we can
@@ -60,7 +60,7 @@
     val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
     val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
-    val ex = exploration -< t1 -- (t2 hook ToStringHook() when "d < 1000") start""")
+    exploration -< t1 -- (t2 hook ToStringHook() when "d < 1000")""")
     @p In this case the task @i{t2} is executed only if the variable "d" is greater than 1,000.
   @sect{Tasks in parallel}
     In OpenMOLE you can also define task as being independent from each other so they can be executed concurrently.
@@ -73,7 +73,7 @@
     val t3 = ScalaTask("d = d - 100") set ( inputs += d, outputs += d)
     val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
-    val ex = exploration -< t1 -- (t2 hook ToStringHook(), (t3 hook ToStringHook())) start""")
+    exploration -< t1 -- (t2 hook ToStringHook(), (t3 hook ToStringHook()))""")
 
   @sect{Aggregating results from an exploration}
     We have seen how we can execute tasks for a set of values with the Exploration transition @hl.openmoleNoTest("-<"). It is
@@ -90,7 +90,7 @@
       outputs += d
     )
 
-    val ex = exploration -< t1 >- (aggregate hook ToStringHook()) start""")
+    exploration -< t1 >- (aggregate hook ToStringHook())""")
     @p The aggregation is performed using the @b{Aggregation transition} noted @hl.openmoleNoTest(">-").
 
     @p It is very important to understand that this transition @b{gathers} input data from the dataflow. This task has
@@ -142,19 +142,18 @@
     val t3 = ScalaTask("d = d - 100") set ( inputs += d, outputs += d)
     val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
-    val ex1 = exploration -< t1 -- (t2 hook ToStringHook(), (t3 hook ToStringHook())) start
+    exploration -< t1 -- (t2 hook ToStringHook(), (t3 hook ToStringHook()))
 
     val explorationCapsule = Capsule(exploration)
     val t1Capsule = Capsule(t1)
     val t2Capsule = Capsule(t2)
     val t3Capsule = Capsule(t3)
 
-    val ex2 =
-      ((explorationCapsule -< t1Capsule) +
-        (t1Capsule -- t2Capsule) +
-        (t1Capsule -- t3Capsule) +
-        (t2Capsule hook ToStringHook()) +
-        (t3Capsule hook ToStringHook())) start""")
+    ((explorationCapsule -< t1Capsule) +
+      (t1Capsule -- t2Capsule) +
+      (t1Capsule -- t3Capsule) +
+      (t2Capsule hook ToStringHook()) +
+      (t3Capsule hook ToStringHook()))""")
 
   @sect{Loops}
     Loops are a direct application of the explicit definition of Capsules and Slots to wrap tasks. A task may possess
@@ -169,7 +168,4 @@
       val s1 = Slot(c1)
       val s2 = Slot(c1)
 
-      val ex = (
-          t0 -- s1 -- (s2, "i < 100") +
-          (c1 hook ToStringHook())
-        ) start""")
+      (t0 -- s1 -- (s2, "i < 100") + (c1 hook ToStringHook()))""")
