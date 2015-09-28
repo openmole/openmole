@@ -645,6 +645,7 @@ span.label.control-label{
     position: fixed;
     width: 300px;
     top: -10px;
+    z-index: -1;
     right: calc(50% - 25px) ;
 }
 
@@ -659,11 +660,13 @@ span.label.control-label{
 
 .openmole-pen{
     color: #808080;
+    z-index: -1;
     right: calc(50% - 70px);
 }
 
 .openmole-mole{
     right: calc(50% - 210px);
+    z-index: -1;
     color: #a6bf26;
 }
 
