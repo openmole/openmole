@@ -167,7 +167,7 @@ object ApiImpl extends Api {
             val puzzle = o.buildPuzzle
             val outputStream = new StringPrintStream()
 
-            val envIds = puzzle.environments.values.toSeq.map { env ⇒ EnvironmentId(getUUID) -> env }
+            val envIds = puzzle.environments.values.toSeq.distinct.map { env ⇒ EnvironmentId(getUUID) -> env }
             Runnings.add(execId, envIds, outputStream)
 
             envIds.foreach {
