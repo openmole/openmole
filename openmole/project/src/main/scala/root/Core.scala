@@ -20,7 +20,7 @@ object Core extends Defaults {
   ) dependsOn
     (event, exception, tools, updater, workspace, macros, pluginManager, serializer, output, console, replication % "test")
 
-  lazy val serializer = OsgiProject("serializer", dynamicImports = Seq("*"), imports = Seq("*")) settings
+  lazy val serializer = OsgiProject("serializer", global = true, imports = Seq("*")) settings
     (includeOsgi,
       libraryDependencies += xstream) dependsOn
       (workspace, pluginManager, fileService, tools, openmoleTar)
@@ -34,7 +34,7 @@ object Core extends Defaults {
 
   val exception = OsgiProject("exception", imports = Seq("*"))
 
-  val tools = OsgiProject("tools", dynamicImports = Seq("*"), imports = Seq("*")) settings
+  val tools = OsgiProject("tools", global = true, imports = Seq("*")) settings
     (includeOsgi,
       libraryDependencies ++= Seq(xstream, exec, math, jodaTime, scalaLang, scalatest)) dependsOn
       (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleLogger, openmoleStream, openmoleCollection, openmoleStatistics)
@@ -72,7 +72,7 @@ object Core extends Defaults {
 
   val output = OsgiProject("output", imports = Seq("*"))
 
-  val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), dynamicImports = Seq("*"), imports = Seq("*")) dependsOn
+  val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), global = true, imports = Seq("*")) dependsOn
     (pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
 
   val buildinfo = OsgiProject("buildinfo", imports = Seq("*")) enablePlugins (ScalaJSPlugin) settings (
