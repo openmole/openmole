@@ -17,6 +17,8 @@
 
 package org.openmole.plugin.domain
 
+import java.io.File
+
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
@@ -45,4 +47,7 @@ package object collection {
     def in(p2: Prototype[Array[T]]): Factor[T, VariableDomain[T]] = p in (p2.toDomain)
   }
 
+  implicit def prototypeOfFileDecorator(p: Prototype[File]) = new {
+    def in(i: Array[File]): Factor[File, IterableDomain[File]] = p in new IterableDomain[File](i.toSeq)
+  }
 }
