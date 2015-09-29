@@ -32,9 +32,9 @@ object ListFilesDomain extends Logger {
 
   def apply(
     base: File,
-    subdirectory: ExpandedString = "",
+    directory: Option[ExpandedString] = None,
     recursive: Boolean = false,
-    filter: File ⇒ Boolean = f ⇒ true) = new ListFilesDomain(base, subdirectory, recursive, filter)
+    filter: Option[ExpandedString] = None) = new ListFilesDomain(base, directory, recursive, filter)
 
 }
 
@@ -42,19 +42,22 @@ import ListFilesDomain.Log._
 
 sealed class ListFilesDomain(
     base: File,
-    subdirectory: ExpandedString = "",
+    directory: Option[ExpandedString] = None,
     recursive: Boolean = false,
-    filter: File ⇒ Boolean = f ⇒ true) extends Domain[File] with Finite[File] {
+    filter: Option[ExpandedString] = None) extends Domain[File] with Finite[File] {
 
   override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = {
-    val dir = new File(base, subdirectory.from(context))
+    def toFilter(f: File) =
+      filter.map(e ⇒ f.getName.matches(e.from(context))).getOrElse(true)
+
+    val dir = directory.map(s ⇒ new File(base, s.from(context))).getOrElse(base)
 
     if (!dir.exists) {
       logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
       Iterable.empty
     }
-    else if (recursive) dir.listRecursive(filter)
-    else dir.listFilesSafe(filter)
+    else if (recursive) dir.listRecursive(toFilter _)
+    else dir.listFilesSafe(toFilter _)
   }
 
 }

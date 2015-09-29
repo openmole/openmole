@@ -82,7 +82,7 @@
     val exploration =
       ExplorationTask(
         (i in (1 to 10)) x
-        (input in ListFilesDomain(workDirectory / "data") zipWithName inputName)
+        (input in (workDirectory / "data").files withName inputName)
       )
 
     val copy = CopyFileHook(output, workDirectory / "result-${inputName}-${i}.csv")
