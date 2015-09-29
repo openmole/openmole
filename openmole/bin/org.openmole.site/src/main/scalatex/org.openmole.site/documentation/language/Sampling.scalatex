@@ -61,7 +61,7 @@
       @hl.openmole("List(('A',0), ('B',1), ('C',2))"). @hl.openmole("ZipWithIndexSampling") performs a
       similar operation in the dataflow. An integer variable from the dataflow is filled with the index instead of
       generating a new pair. OpenMOLE implements the @hl.openmole("ZipWithIndexSampling") through the keyword
-      @hl.openmoleNoTest("zipWithIndex").
+      @hl.openmoleNoTest("withIndex").
 
       @p The following code snippet gives an example of how to use these two first Zip samplings.
 
@@ -77,7 +77,7 @@
 
         // Create a sampling containing an id for each experiment in a variable called id
         val id = Val[Int]
-        val s4 = s2 zipWithIndex id""")
+        val s4 = s2 withIndex id""")
 
         @p The third and last sampling from the Zip family is the @hl.openmole("ZipWithNameSampling"). It maps the name
         the files from a @i{FileDomain} @("(see the next section for more details about exploring files)") to a String variable
@@ -97,7 +97,7 @@
             outputs += (name, size)
           )
 
-          val ex = ExplorationTask((file in ListFilesDomain("/tmp/dir/")) zipWithName name) -< (t hook ToStringHook()) start
+          ExplorationTask((file in (workDirectory / "dir").files) withName name) -< (t hook ToStringHook())
          """)
 
   @sect{Shrink the initial Sampling with Take, Filter, Sample}
@@ -189,7 +189,7 @@
     program over a set of files in a subdirectory you may use:
     @br @hl.openmole("""
     val f = Val[File]
-    val explo = ExplorationTask (f in ListFilesDomain("/path/to/a/dir"))""")
+    val explo = ExplorationTask (f in (workDirectory / "dir").files)""")
     @p To explore files located in several directories:
     @br @hl.openmole("""
     val i = Val[Int]
@@ -198,7 +198,7 @@
     val explo =
       ExplorationTask (
         (i in (0 to 10)) x
-        (f in ListFilesDomain("/path/to/a/dir", "subdir${i}"))
+        (f in (workDirectory / "dir").files(directory = "subdir${i}"))
       )""")
     @p If you wish to select one single file for each value of @i{i} you may use SelectFileDomain:
     @br @hl.openmole("""
@@ -238,8 +238,7 @@
           separator := ','
         )
 
-        val exploration = ExplorationTask(s)
-                       """)
+        val exploration = ExplorationTask(s)""")
 
         @p In this example the column name @i{i} in the CSV file is mapped to the variable @i{i} of OpenMOLE.
         The column name @i{colD} is mapped to the variable @i{d}. The column named @i{colFileName} is appended to the

@@ -35,7 +35,9 @@ package object combine {
     def ::(s2: Sampling) = new ConcatenateSampling(s, s2)
     def filter(keep: Condition) = FilteredSampling(s, keep)
     def zip(s2: Sampling) = ZipSampling(s, s2)
-    def zipWithIndex(index: Prototype[Int]) = ZipWithIndexSampling(s, index)
+    @deprecated("Use withIndex", "5")
+    def zipWithIndex(index: Prototype[Int]) = withIndex(index)
+    def withIndex(index: Prototype[Int]) = ZipWithIndexSampling(s, index)
     def take(n: FromContext[Int]) = TakeSampling(s, n)
     def shuffle = ShuffleSampling(s)
     def sample(n: FromContext[Int]) = SampleSampling(s, n)
@@ -50,7 +52,9 @@ package object combine {
   }
 
   implicit def zipWithNameFactorDecorator(factor: Factor[File, Domain[File] with Discrete[File]]) = new {
-    def zipWithName(name: Prototype[String]) = ZipWithNameSampling(factor, name)
+    @deprecated("Use withName", "5")
+    def zipWithName(name: Prototype[String]) = withName(name)
+    def withName(name: Prototype[String]) = ZipWithNameSampling(factor, name)
   }
 
 }

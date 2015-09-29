@@ -18,9 +18,18 @@
 package org.openmole.plugin.domain
 
 import java.io.File
+import org.openmole.core.workflow.tools._
+import org.openmole.tool.file._
 
 package object file {
 
-  implicit def stringToFilter(pattern: String) = (_: File).getName.matches(pattern)
+  implicit def domainFileDecorator(f: File) = new {
+    def files: ListFilesDomain = files()
+    def files(
+      directory: Option[ExpandedString] = None,
+      recursive: Boolean = false,
+      filter: Option[ExpandedString] = None): ListFilesDomain = ListFilesDomain(f, directory, recursive, filter)
+    def select(path: ExpandedString) = SelectFileDomain(f, path)
+  }
 
 }
