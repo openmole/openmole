@@ -19,6 +19,7 @@ package org.openmole.gui.bootstrap.js
 
 import org.openmole.tool.file._
 import org.scalajs.core.tools.io._
+import org.scalajs.core.tools.javascript.OutputMode
 import org.scalajs.core.tools.logging._
 import org.scalajs.core.tools.classpath._
 import org.scalajs.core.tools.classpath.builder._
@@ -42,7 +43,7 @@ object JSPack {
 
     val completeClasspath = partialClasspath.resolve()
 
-    val optimizer = new ScalaJSOptimizer(semantics)
+    val optimizer = new ScalaJSOptimizer(semantics, OutputMode.ECMAScript51Global, IncOptimizer.factory)
 
     val logger = new ScalaConsoleLogger
 
@@ -50,8 +51,8 @@ object JSPack {
     if (optimized) {
       val sems = semantics.optimized
 
-      new ScalaJSClosureOptimizer(sems).optimizeCP(
-        new ScalaJSOptimizer(sems),
+      new ScalaJSClosureOptimizer().optimizeCP(
+        optimizer,
         completeClasspath,
         ScalaJSClosureOptimizer.Config(out),
         logger
@@ -60,7 +61,7 @@ object JSPack {
     else {
       optimizer.optimizeCP(
         completeClasspath,
-        ScalaJSOptimizer.Config(out, checkIR = false, wantSourceMap = !optimized),
+        ScalaJSOptimizer.Config(out).withCheckIR(false).withWantSourceMap(!optimized),
         logger
       )
 

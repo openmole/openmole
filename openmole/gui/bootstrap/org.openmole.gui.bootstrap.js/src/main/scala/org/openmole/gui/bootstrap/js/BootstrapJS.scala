@@ -32,9 +32,9 @@ object BootstrapJS {
   // Copy web resources and generate js file
   val webui = Workspace.file("webui")
   val projects = new File(webui, "projects")
-  val jsSrc = new File(webui, "js/src")
   val webapp = new File(webui, "webapp")
   val jsCompiled = new File(webapp, "js")
+  val jsSrc = new File(webui, "js/src")
   val authKeys = Workspace.file("persistent/keys")
 
   webui.mkdirs
@@ -42,8 +42,6 @@ object BootstrapJS {
   authKeys.mkdirs
 
   def init(optimized: Boolean = true) = {
-    jsSrc.recursiveDelete
-    jsSrc.mkdirs
 
     def update() = {
       webapp.recursiveDelete
@@ -96,6 +94,9 @@ object BootstrapJS {
 
       JSPack(jsSrc, jsCompiled, optimized)
     }
+
+    jsSrc.recursiveDelete
+    jsSrc.mkdirs
 
     // Extract and copy all the .sjsir files from bundles to src
     for {
