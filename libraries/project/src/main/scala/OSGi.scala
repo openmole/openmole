@@ -29,7 +29,7 @@ object OSGi extends Defaults {
   lazy val scalatraVersion = "2.3.0"
 
   lazy val scalatra = OsgiProject("org.scalatra",
-    dynamicImports = Seq("*"),
+    global = true,
     exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "com.fasterxml.jackson.*", "org.json4s.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "*")) settings(
       libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion,
@@ -64,7 +64,7 @@ object OSGi extends Defaults {
 
   lazy val xstream = OsgiProject(
     "com.thoughtworks.xstream",
-    dynamicImports = Seq("*"),
+    global = true,
     imports = Seq(
       "!com.bea.xml.stream.*",
       "!com.ctc.wstx.stax.*",
@@ -84,7 +84,7 @@ object OSGi extends Defaults {
 
   lazy val groovy = OsgiProject(
     "org.codehaus.groovy",
-    dynamicImports = Seq("*"),
+    global = true,
     exports = Seq("groovy.*", "org.codehaus.*"),
     privatePackages = Seq("!scala.*,*")) settings(
     libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.4.1", "org.fusesource.jansi" % "jansi" % "1.11"),
@@ -94,7 +94,7 @@ object OSGi extends Defaults {
   lazy val scalaLang = OsgiProject(
     "org.scala-lang.scala-library",
     exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
-    privatePackages = Seq("*"), dynamicImports = Seq("*"), imports = Seq("!org.apache.tools.ant.*", "!sun.misc.*" ,"*")) settings
+    privatePackages = Seq("*"), global = true, imports = Seq("!org.apache.tools.ant.*", "!sun.misc.*" ,"*")) settings
     (libraryDependencies <++= (scalaVersion) { sV ⇒
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,
