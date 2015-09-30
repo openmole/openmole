@@ -102,7 +102,11 @@ object BootstrapJS {
       b ← PluginManager.bundles
       entries ← Option(b.findEntries("/", "*.sjsir", true))
       entry ← entries.asScala
-    } entry.openStream.copy(new java.io.File(jsSrc, entry.getFile.split("/").tail.mkString("-")))
+    } {
+      val inputStream = entry.openStream
+      try inputStream.copy(new java.io.File(jsSrc, entry.getFile.split("/").tail.mkString("-")))
+      finally inputStream.close
+    }
 
     //Generates js files if
     // - the sources changed or
@@ -110,7 +114,6 @@ object BootstrapJS {
     // - the not optimized js does not exists in not optimized mode
     jsSrc.updateIfChanged(_ ⇒ update())
     if (!new File(jsCompiled, JSPack.JS_FILE).exists) update()
-
   }
 
   private def copyWebJarResource(resourceName: String, version: String, file: String): Unit = copyWebJarResource(resourceName, version, FilePath("", file))
