@@ -58,7 +58,7 @@ object Market extends Logger {
     lazy val plugin = Tag("Plugin")
     lazy val python = Tag("Python")
     lazy val calibration = Tag("Calibration")
-    lazy val tutorial = Tag("tutorial")
+    lazy val tutorial = Tag("Tutorial")
   }
 
   case class Tag(label: String)
