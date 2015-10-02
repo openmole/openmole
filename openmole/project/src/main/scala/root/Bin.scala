@@ -108,7 +108,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     )
 
   lazy val webServerDependencies = Seq(
-    scalatra,
+    scalatra intransitive (),
     bouncyCastle
   )
 
@@ -142,7 +142,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     autowire,
     upickle,
     rx,
-    scalatra,
+    scalatra intransitive (),
     scalajHttp,
     d3,
     bootstrap,
