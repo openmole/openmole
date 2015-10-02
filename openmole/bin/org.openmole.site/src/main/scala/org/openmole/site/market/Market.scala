@@ -56,6 +56,7 @@ object Market extends Logger {
     lazy val plugin = Tag("Plugin")
     lazy val python = Tag("Python")
     lazy val calibration = Tag("Calibration")
+    lazy val tutorial = Tag("tutorial")
   }
 
   case class Tag(label: String)
@@ -86,7 +87,10 @@ object Market extends Logger {
       MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq(scala, java, plugin)),
       MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
-      MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native))
+      MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
+      MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
+      MarketEntry("Introduction tutorial", "tutorials/introduction", Seq(tutorial, scala, stochastic)),
+      MarketEntry("Native application tutorial", "tutorials/native", Seq(tutorial, native, data, python))
     )
   )
 
