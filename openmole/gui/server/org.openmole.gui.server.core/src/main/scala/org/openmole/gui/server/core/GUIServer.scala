@@ -20,7 +20,7 @@ package org.openmole.gui.server.core
 import java.io.File
 import java.util.concurrent.Semaphore
 import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
-import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server.{ ServerConnector, Server }
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp._
 import org.openmole.console.Console
@@ -75,7 +75,7 @@ class GUIServer(port: Int, webapp: File, authentication: Boolean) {
   contextFactory.setTrustStore(ks)
   contextFactory.setTrustStorePassword(Workspace.keyStorePassword)
 
-  val connector = new org.eclipse.jetty.server.ssl.SslSelectChannelConnector(contextFactory)
+  val connector = new ServerConnector(server, contextFactory)
   connector.setPort(port)
   if (!authentication) connector.setHost("localhost")
 

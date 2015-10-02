@@ -19,29 +19,32 @@ object OSGi extends Defaults {
 
   val dir = file("target/libraries")
 
-  lazy val jetty = OsgiProject(
+  /*lazy val jetty = OsgiProject(
     "org.eclipse.jetty",
     exports = Seq("org.eclipse.jetty.*", "javax.*")) settings(
-    libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106", "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016"),
+    libraryDependencies ++= Seq(
+      "org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106",
+      "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016"),
     version := "8.1.8.v20121106"
-    )
+    )*/
 
-  lazy val scalatraVersion = "2.3.0"
+  lazy val scalatraVersion = "2.3.1"
+  lazy val jettyVersion = "9.2.10.v20150310"
 
   lazy val scalatra = OsgiProject("org.scalatra",
     global = true,
-    exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "com.fasterxml.jackson.*", "org.json4s.*"),
+    exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "com.fasterxml.jackson.*", "org.json4s.*", "org.eclipse.jetty.*", "javax.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "*")) settings(
       libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion,
       libraryDependencies += "org.scalatra" %% "scalatra-json" % scalatraVersion,
       libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion,
-      libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.2.10",
+      libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % jettyVersion,
+      libraryDependencies += "org.eclipse.jetty" % "jetty-server" % jettyVersion,
+      //libraryDependencies += "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016",
+     // libraryDependencies += "javax.servlet" % "javax.servlet-api" % "3.1.0",
+      libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.2.11",
       version := scalatraVersion)
 
-  /*lazy val jacksonJson = OsgiProject("org.json4s", privatePackages = Seq("com.fasterxml.*",  "com.thoughtworks.paranamer.*")) settings(
-    libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.9",
-    version := "3.2.9"
-    )*/
 
   lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9")

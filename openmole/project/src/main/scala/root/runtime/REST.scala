@@ -37,7 +37,7 @@ object REST extends Defaults {
     imports = Seq("org.h2", "!com.sun.*", "*")
   ) dependsOn
     (Core.workflow, openmoleTar, openmoleCollection, root.Runtime.console, message, openmoleCrypto) settings
-    (libraryDependencies ++= Seq(bouncyCastle, jetty, logback, scalatra, scalaLang, arm, codec))
+    (libraryDependencies ++= Seq(bouncyCastle, logback, scalatra, scalaLang, arm, codec))
 
   lazy val client = Project("org-openmole-rest-client", dir / "client") settings (
     libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.3.5",
