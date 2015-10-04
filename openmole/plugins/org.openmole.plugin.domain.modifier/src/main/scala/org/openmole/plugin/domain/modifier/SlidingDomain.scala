@@ -25,16 +25,21 @@ import scala.util.Random
 
 object SlidingDomain {
 
-  def apply[T](domain: Domain[T] with Discrete[T], size: FromContext[Int], step: FromContext[Int] = 1)(implicit m: Manifest[T]) =
-    new SlidingDomain[T](domain, size, step)
+  implicit def isDiscrete[T, D] = new Discrete[Array[T], SlidingDomain[T, D]] {
+    override def iterator(domain: SlidingDomain[T, D], context: Context)(implicit rng: RandomProvider) = domain.iterator(context)
+    override def inputs(domain: SlidingDomain[T, D]) = domain.inputs
+  }
+
+  def apply[T: Manifest, D](domain: D, size: FromContext[Int], step: FromContext[Int] = 1)(implicit discrete: Discrete[T, D]) =
+    new SlidingDomain[T, D](domain, size, step)
 
 }
 
-class SlidingDomain[T](val domain: Domain[T] with Discrete[T], val size: FromContext[Int], val step: FromContext[Int] = 1)(implicit m: Manifest[T]) extends Domain[Array[T]] with Discrete[Array[T]] {
+class SlidingDomain[T: Manifest, D](val domain: D, val size: FromContext[Int], val step: FromContext[Int] = 1)(implicit discrete: Discrete[T, D]) {
 
-  override def inputs = domain.inputs
+  def inputs = discrete.inputs(domain)
 
-  override def iterator(context: Context)(implicit rng: RandomProvider): Iterator[Array[T]] =
-    domain.iterator(context).sliding(size.from(context), step.from(context)).map(_.toArray)
+  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[Array[T]] =
+    discrete.iterator(domain, context).sliding(size.from(context), step.from(context)).map(_.toArray)
 
 }

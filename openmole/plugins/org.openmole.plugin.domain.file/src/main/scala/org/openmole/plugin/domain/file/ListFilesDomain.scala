@@ -30,6 +30,11 @@ import scala.util.Random
 
 object ListFilesDomain extends Logger {
 
+  implicit def isFinite = new Finite[File, ListFilesDomain] {
+    override def computeValues(domain: ListFilesDomain, context: Context)(implicit rng: RandomProvider): Iterable[File] =
+      domain.computeValues(context)
+  }
+
   def apply(
     base: File,
     directory: Option[ExpandedString] = None,
@@ -44,9 +49,9 @@ sealed class ListFilesDomain(
     base: File,
     directory: Option[ExpandedString] = None,
     recursive: Boolean = false,
-    filter: Option[ExpandedString] = None) extends Domain[File] with Finite[File] {
+    filter: Option[ExpandedString] = None) {
 
-  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = {
+  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = {
     def toFilter(f: File) =
       filter.map(e ⇒ f.getName.matches(e.from(context))).getOrElse(true)
 

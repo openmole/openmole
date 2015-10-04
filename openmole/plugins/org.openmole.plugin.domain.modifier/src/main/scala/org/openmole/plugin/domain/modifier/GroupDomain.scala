@@ -28,17 +28,23 @@ import scala.util.Random
 
 object GroupDomain {
 
-  def apply[T](domain: Domain[T] with Discrete[T], size: FromContext[Int])(implicit m: Manifest[T]) =
-    new GroupDomain(domain, size)
+  implicit def isDiscrete[T: Manifest, D] = new Discrete[Array[T], GroupDomain[T, D]] {
+    override def iterator(domain: GroupDomain[T, D], context: Context)(implicit rng: RandomProvider): Iterator[Array[T]] =
+      domain.iterator(context)
+    override def inputs(domain: GroupDomain[T, D]) = domain.inputs
+  }
+
+  def apply[T: Manifest, D](d: D, size: FromContext[Int])(implicit discrete: Discrete[T, D]) =
+    new GroupDomain(d, size)
 
 }
 
-sealed class GroupDomain[T](val domain: Domain[T] with Discrete[T], val size: FromContext[Int])(implicit m: Manifest[T]) extends Domain[Array[T]] with Discrete[Array[T]] {
+sealed class GroupDomain[T: Manifest, D](val d: D, val size: FromContext[Int])(implicit val discrete: Discrete[T, D]) {
 
-  override def inputs = domain.inputs
+  def inputs = discrete.inputs(d)
 
-  override def iterator(context: Context)(implicit rng: RandomProvider): Iterator[Array[T]] =
-    domain.iterator(context).grouped(size.from(context)).map {
+  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[Array[T]] =
+    discrete.iterator(d, context).grouped(size.from(context)).map {
       i ⇒ i.toArray
     }
 

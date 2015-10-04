@@ -22,18 +22,18 @@ import org.openmole.core.workflow.data._
 
 object Factor {
 
-  def apply[T, D <: Domain[T]](prototype: Prototype[T], domain: D) = {
-    val (_domain, _prototype) = (domain, prototype)
+  def apply[T, D](prototype: Prototype[T], d: D)(implicit _domain: Domain[T, D]): Factor[T, D] = {
+    val (_prototype) = (prototype)
     new Factor[T, D] {
-      val domain = _domain
+      val domain = d
       val prototype = _prototype
+      val inputs = _domain.inputs(d)
     }
   }
 
 }
 
-trait Factor[T, +D <: Domain[T]] {
-  def inputs = domain.inputs
+trait Factor[T, D] {
   def domain: D
   def prototype: Prototype[T]
 }

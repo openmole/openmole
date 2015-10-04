@@ -30,14 +30,14 @@ import util.Random
 
 object SobolSampling {
 
-  def apply(samples: FromContext[Int], factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
+  def apply[D](samples: FromContext[Int], factors: Factor[Double, D]*)(implicit bounds: Bounds[Double, D]) =
     new SobolSampling(samples, factors: _*)
 
 }
 
-sealed class SobolSampling(val samples: FromContext[Int], val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
+sealed class SobolSampling[D](val samples: FromContext[Int], val factors: Factor[Double, D]*)(implicit bounds: Bounds[Double, D]) extends Sampling {
 
-  override def inputs = PrototypeSet(factors.flatMap(_.inputs))
+  override def inputs = PrototypeSet(factors.flatMap(f ⇒ bounds.inputs(f.domain)))
   override def prototypes = factors.map { _.prototype }
 
   override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[Double]]] = {
@@ -47,7 +47,7 @@ sealed class SobolSampling(val samples: FromContext[Int], val factors: Factor[Do
     for {
       v ← Iterator.continually(sequence.nextVector()).take(s)
     } yield (factors zip v).map {
-      case (f, v) ⇒ Variable(f.prototype, v.scale(f.domain.min(context), f.domain.max(context)))
+      case (f, v) ⇒ Variable(f.prototype, v.scale(bounds.min(f.domain, context), bounds.max(f.domain, context)))
     }
   }
 }

@@ -21,6 +21,6 @@ import org.openmole.core.workflow.data._
 
 import scala.util.Random
 
-trait Discrete[+T] extends Domain[T] {
-  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[T]
+trait Discrete[+T, -D] extends Domain[T, D] {
+  def iterator(domain: D, context: Context)(implicit rng: RandomProvider): Iterator[T]
 }

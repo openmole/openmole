@@ -24,25 +24,15 @@ import org.openmole.core.workflow.sampling._
 
 package object collection {
 
-  implicit class ScalaIterableDomainDecorator[T](iterable: Iterable[T]) {
-    def toDomain = new IterableDomain[T](iterable)
+  implicit def iterableIsDiscrete[T] = new Discrete[T, Iterable[T]] {
+    override def iterator(domain: Iterable[T], context: Context)(implicit rng: RandomProvider): Iterator[T] = domain.iterator
   }
 
-  implicit class PrototypeDomainDecorator[T](p: Prototype[Array[T]]) {
-    def toDomain = new VariableDomain[T](p)
-    def toFactor = Factor(p.fromArray, new VariableDomain[T](p))
-  }
+  implicit def booleanPrototypeIsFactor(p: Prototype[Boolean]) = Factor(p, List(true, false))
 
-  implicit class BooleanPrototypeDecorator(p: Prototype[Boolean]) {
-    def toFactor = Factor(p, List(true, false).toDomain)
-  }
-
-  //implicit def iterableToDomain[T](i: Iterable[T]) = i.toDomain
-  //implicit def prototypeArrayToDomain[T](p: Prototype[Array[T]]) = p.toDomain
-
-  implicit def prototypeCollectionConverter[T](p: Prototype[T]) = new {
-    def in(i: Iterable[T]): Factor[T, IterableDomain[T]] = p in (i.toDomain)
-    def in(p2: Prototype[Array[T]]): Factor[T, VariableDomain[T]] = p in (p2.toDomain)
+  implicit def arrayPrototypeIsFinite[T] = new Finite[T, Prototype[Array[T]]] {
+    override def computeValues(domain: Prototype[Array[T]], context: Context)(implicit rng: RandomProvider): Iterable[T] =
+      context(domain)
   }
 
 }
