@@ -61,7 +61,8 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
   private def messageToException(e: Throwable, messages: List[ErrorMessage], code: String): Throwable = {
     def readableErrorMessages(error: ErrorMessage) =
-      s"""${error.error}on line ${error.line}""".stripMargin
+      s"""${error.error}
+         |on line ${error.line}""".stripMargin
 
     errorMessage match {
       case Nil ⇒ e
