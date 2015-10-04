@@ -28,17 +28,13 @@ object DiscreteFactor {
     new DiscreteFactor[T, D] {
       val prototype = f.prototype
       val domain = f.domain
+
       override def inputs = discrete.inputs(f.domain)
+      override def prototypes = List(prototype)
       override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[collection.Iterable[Variable[T]]] =
         discrete.iterator(f.domain, context).map { v ⇒ List(Variable(prototype, v)) }
     }
 
 }
 
-trait DiscreteFactor[T, D] extends Factor[T, D] with Sampling {
-
-  //override def inputs:  = implicitly[Discrete[T, D]].inputs
-
-  override def prototypes = List(prototype)
-
-}
+trait DiscreteFactor[T, D] extends Factor[T, D] with Sampling
