@@ -28,9 +28,14 @@ package object collection {
     override def iterator(domain: Iterable[T], context: Context)(implicit rng: RandomProvider): Iterator[T] = domain.iterator
   }
 
+  implicit def arrayIsFinite[T] = new Finite[T, Array[T]] {
+    override def computeValues(domain: Array[T], context: Context)(implicit rng: RandomProvider): Iterable[T] = domain
+  }
+
   implicit def booleanPrototypeIsFactor(p: Prototype[Boolean]) = Factor(p, List(true, false))
 
   implicit def arrayPrototypeIsFinite[T] = new Finite[T, Prototype[Array[T]]] {
+    override def inputs(domain: Prototype[Array[T]]): PrototypeSet = Seq(domain)
     override def computeValues(domain: Prototype[Array[T]], context: Context)(implicit rng: RandomProvider): Iterable[T] =
       context(domain)
   }
