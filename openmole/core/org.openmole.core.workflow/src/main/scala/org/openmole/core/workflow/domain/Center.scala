@@ -19,6 +19,9 @@ package org.openmole.core.workflow.domain
 
 import org.openmole.core.workflow.data._
 
+import scala.annotation.implicitNotFound
+
+@implicitNotFound("${D} is not a variation domain with a center of type ${T}")
 trait Center[+T, -D] extends Domain[T, D] {
   def center(domain: D, context: Context)(implicit rng: RandomProvider): T
 }

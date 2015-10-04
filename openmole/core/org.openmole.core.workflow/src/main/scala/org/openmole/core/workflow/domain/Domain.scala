@@ -19,6 +19,9 @@ package org.openmole.core.workflow.domain
 
 import org.openmole.core.workflow.data.PrototypeSet
 
+import scala.annotation.implicitNotFound
+
+@implicitNotFound("${D} is not a variation domain of type ${T}")
 trait Domain[+T, -D] {
   def inputs(domain: D): PrototypeSet = PrototypeSet.empty
 }
