@@ -369,6 +369,11 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     color: #CC3A36;
     font-weight: bold;
 }
+
+.monospace {
+    font-family: monospace;
+}
+
 .removeExecution:hover {
     color: #CC3A36;
     display: inline-block;

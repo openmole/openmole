@@ -28,7 +28,9 @@ import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, _ }
 import org.openmole.gui.misc.js.Expander._
-import scalatags.JsDom.{ tags ⇒ tags }
+
+import scalatags.JsDom._
+import org.openmole.gui.misc.js.Tooltip._
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -38,6 +40,7 @@ import org.openmole.gui.ext.data._
 import bs._
 import rx._
 import concurrent.duration._
+import style._
 
 class ExecutionPanel extends ModalPanel {
   lazy val modalID = "executionsPanelID"
@@ -172,9 +175,7 @@ class ExecutionPanel extends ModalPanel {
 
             lazy val hiddenMap: Map[VisibleID, Modifier] = Map(
               scriptID -> staticPanel(id, scriptTextAreas,
-                () ⇒ {
-                  scrollableText(staticInfo.script)
-                }
+                () ⇒ scrollableText(staticInfo.script)
               ).view,
               envID -> {
                 tags.div(
@@ -228,18 +229,19 @@ class ExecutionPanel extends ModalPanel {
                   }
                 )
               },
-              errorID -> staticPanel(id, errorTextAreas,
-                () ⇒ scrollableText(),
-                (sT: ScrollableText) ⇒ sT.setContent(new String(details.error.map {
-                  _.stackTrace
-                }.getOrElse("")))
-              ).view,
+              errorID ->
+                monospace(
+                  staticPanel(
+                    id,
+                    errorTextAreas,
+                    () ⇒ scrollableText(),
+                    (sT: ScrollableText) ⇒ sT.setContent(new String(details.error.map { _.stackTrace }.getOrElse("")))
+                  ).view
+                ),
               outputStreamID -> staticPanel(
                 id,
                 outputTextAreas,
-                () ⇒ {
-                  scrollableText("", BottomScroll())
-                },
+                () ⇒ scrollableText("", BottomScroll()),
                 (sT: ScrollableText) ⇒ sT.setContent(
                   panelInfo().outputsInfos.filter {
                     _.id == id
