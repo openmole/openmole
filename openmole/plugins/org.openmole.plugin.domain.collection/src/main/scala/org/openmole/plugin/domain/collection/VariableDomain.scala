@@ -21,10 +21,13 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 
 object VariableDomain {
+  implicit def isFinite[T] = new Finite[T, VariableDomain[T]] {
+    override def inputs(domain: VariableDomain[T]) = Seq(domain.variable)
+    override def computeValues(domain: VariableDomain[T], context: Context)(implicit rng: RandomProvider): Iterable[T] =
+      context(domain.variable)
+  }
+
   def apply[A](variable: Prototype[Array[A]]) = new VariableDomain[A](variable)
 }
 
-sealed class VariableDomain[A](val variable: Prototype[Array[A]]) extends Domain[A] with Discrete[A] with Finite[A] {
-  override def inputs = Seq(variable)
-  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[A] = context(variable)
-}
+sealed class VariableDomain[A](val variable: Prototype[Array[A]])

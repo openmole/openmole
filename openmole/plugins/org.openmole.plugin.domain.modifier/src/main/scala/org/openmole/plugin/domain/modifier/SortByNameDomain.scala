@@ -25,20 +25,27 @@ import org.openmole.core.workflow.data._
 import scala.util.Random
 
 object SortByNameDomain {
-  def apply(domain: Domain[File] with Finite[File]) = new SortByNameDomain(domain)
+  implicit def isFinite[D] = new Finite[File, SortByNameDomain[D]] {
+    override def computeValues(domain: SortByNameDomain[D], context: Context)(implicit rng: RandomProvider): Iterable[File] =
+      domain.computeValues(context)
+
+    override def inputs(domain: SortByNameDomain[D]): PrototypeSet = domain.inputs
+  }
+
+  def apply[D](d: D)(implicit finite: Finite[File, D]) = new SortByNameDomain(d)
 }
 
-class SortByNameDomain(val domain: Domain[File] with Finite[File]) extends Domain[File] with Finite[File] {
+class SortByNameDomain[D](val domain: D)(implicit val finite: Finite[File, D]) {
 
-  override def inputs = domain.inputs
+  def inputs = finite.inputs(domain)
 
-  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = {
+  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = {
     def extractNumber(name: String) = {
       val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit).reverse
       if (n.isEmpty) throw new UserBadDataError("File name " + name + " doesn't contains a number")
       else n.toInt
     }
-    domain.computeValues(context).toList.sortBy(f ⇒ extractNumber(f.getName))
+    finite.computeValues(domain, context).toList.sortBy(f ⇒ extractNumber(f.getName))
   }
 
 }

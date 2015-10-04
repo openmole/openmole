@@ -18,9 +18,17 @@
 package org.openmole.plugin.domain.range
 
 import org.openmole.core.tools.io.FromString
+import org.openmole.core.workflow.data.{ RandomProvider, Context }
+import org.openmole.core.workflow.domain.{ Center, Bounds }
 import org.openmole.core.workflow.tools.FromContext
 
 object Range {
+
+  implicit def isBounded[T] = new Bounds[T, Range[T]] with Center[T, Range[T]] {
+    override def min(domain: Range[T], context: Context)(implicit rng: RandomProvider): T = domain.min(context)
+    override def max(domain: Range[T], context: Context)(implicit rng: RandomProvider): T = domain.max(context)
+    override def center(domain: Range[T], context: Context)(implicit rng: RandomProvider): T = domain.center(context)
+  }
 
   def apply[T](
     min: FromContext[T],

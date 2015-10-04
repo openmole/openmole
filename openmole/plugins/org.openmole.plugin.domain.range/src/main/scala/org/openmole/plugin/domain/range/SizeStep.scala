@@ -23,7 +23,8 @@ import org.openmole.core.workflow.tools._
 
 import scala.util.Random
 
-trait SizeStep[T] extends Domain[T] with Finite[T] with Center[T] with Bounds[T] {
+//Finite Ceneter Bounds
+trait SizeStep[T] {
 
   val range: Range[T]
 
@@ -32,9 +33,9 @@ trait SizeStep[T] extends Domain[T] with Finite[T] with Center[T] with Bounds[T]
 
   def stepAndSize(maxValue: T, minValue: T, context: Context)(implicit rng: RandomProvider): (T, Int)
 
-  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = {
-    val mi = min(context)
-    val ma = max(context)
+  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = {
+    val mi = range.min(context)
+    val ma = range.max(context)
     val (step, size) = stepAndSize(mi, ma, context)
     for (i ← 0 to size) yield { mi + fromInt(i) * step }
   }

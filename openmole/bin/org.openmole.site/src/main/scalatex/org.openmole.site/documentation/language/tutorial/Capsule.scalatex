@@ -51,7 +51,7 @@
   val i = Val[Int]
   val archive = Val[Array[Int]]
 
-  val exploration = ExplorationTask(i in (0 until 10 toDomain))
+  val exploration = ExplorationTask(i in (0 until 10))
 
   val model = ScalaTask("i = i + 7") set (inputs += i, outputs += i)
 

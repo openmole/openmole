@@ -24,11 +24,4 @@ import scala.util.Random
 
 object IterableDomain {
 
-  def apply[T](iterable: Iterable[_ <: T]) =
-    new IterableDomain[T](iterable)
-
-}
-
-sealed class IterableDomain[T](iterable: Iterable[_ <: T]) extends Domain[T] with Discrete[T] {
-  override def iterator(context: Context)(implicit rng: RandomProvider): Iterator[T] = iterable.iterator
 }

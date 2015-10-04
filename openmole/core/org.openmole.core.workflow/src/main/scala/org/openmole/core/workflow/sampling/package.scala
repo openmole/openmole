@@ -23,14 +23,15 @@ import org.openmole.core.workflow.domain._
 package sampling {
   trait SamplingPackage {
 
-    implicit def factorWithIterableToDiscreteFactor[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) = DiscreteFactor(f)
+    implicit def factorWithIterableToDiscreteFactor[T, D](f: Factor[T, D])(implicit discrete: Discrete[T, D]): DiscreteFactor[T, D] =
+      DiscreteFactor(f)
 
     implicit def prototypeFactorDecorator[T](p: Prototype[T]) = new {
-      def in[D <: Domain[T]](d: D): Factor[T, D] = Factor(p, d)
+      def in[D](d: D)(implicit domain: Domain[T, D]): Factor[T, D] = Factor(p, d)(domain)
     }
 
     implicit def arrayPrototypeFactorDecorator[T: Manifest](p: Prototype[Array[T]]) = new {
-      def is[D <: Domain[T] with Discrete[T]](d: D) = Factor(p, UnrolledDomain(d))
+      def is[D](d: D)(implicit discrete: Discrete[T, D]) = Factor(p, UnrolledDomain(d))
     }
   }
 }

@@ -27,6 +27,14 @@ import scala.util.Random
 
 object LogRange {
 
+  implicit def isFinite[T] =
+    new Finite[T, LogRange[T]] with Center[T, LogRange[T]] with Bounds[T, LogRange[T]] {
+      override def computeValues(domain: LogRange[T], context: Context)(implicit rng: RandomProvider): Iterable[T] = domain.computeValues(context)
+      override def center(domain: LogRange[T], context: Context)(implicit rng: RandomProvider): T = domain.center(context)
+      override def max(domain: LogRange[T], context: Context)(implicit rng: RandomProvider): T = domain.max(context)
+      override def min(domain: LogRange[T], context: Context)(implicit rng: RandomProvider): T = domain.min(context)
+    }
+
   def apply[T](range: Range[T], steps: FromContext[T])(implicit lg: Log[T]) =
     new LogRange[T](range, steps)
 
@@ -41,11 +49,11 @@ object LogRange {
 
 }
 
-sealed class LogRange[T](val range: Range[T], val steps: FromContext[T])(implicit lg: Log[T]) extends Domain[T] with Finite[T] with Bounds[T] {
+sealed class LogRange[T](val range: Range[T], val steps: FromContext[T])(implicit lg: Log[T]) extends Bounded[T] {
 
   import range._
 
-  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = {
+  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = {
     val mi: T = lg.log(min(context))
     val ma: T = lg.log(max(context))
     val nbst: T = nbStep(context)
@@ -64,7 +72,8 @@ sealed class LogRange[T](val range: Range[T], val steps: FromContext[T])(implici
   }
 
   def nbStep(context: Context)(implicit rng: RandomProvider): T = steps.from(context)
-  def min(context: Context)(implicit rng: RandomProvider): T = range.min.from(context)
-  def max(context: Context)(implicit rng: RandomProvider): T = range.max.from(context)
+
+  def max = range.max
+  def min = range.min
 
 }

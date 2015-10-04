@@ -22,13 +22,17 @@ import org.openmole.core.tools.service.Random._
 
 object ShuffleDomain {
 
-  def apply[T](domain: Domain[T] with Discrete[T] with Finite[T]) =
-    new ShuffleDomain[T](domain)
+  implicit def isFinite[T, D] = new Finite[T, ShuffleDomain[T, D]] {
+    override def computeValues(domain: ShuffleDomain[T, D], context: Context)(implicit rng: RandomProvider): Iterable[T] = domain.computeValues(context)
+    override def inputs(domain: ShuffleDomain[T, D]) = domain.inputs
+  }
+
+  def apply[T, D](domain: D)(implicit finite: Finite[T, D]) = new ShuffleDomain[T, D](domain)
 
 }
 
-sealed class ShuffleDomain[+T](val domain: Domain[T] with Discrete[T] with Finite[T]) extends Domain[T] with Finite[T] {
-  override def inputs = domain.inputs
-  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] =
-    domain.iterator(context).toSeq.shuffled(rng())
+sealed class ShuffleDomain[+T, D](domain: D)(implicit finite: Finite[T, D]) {
+  def inputs = finite.inputs(domain)
+  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] =
+    finite.iterator(domain, context).toSeq.shuffled(rng())
 }
