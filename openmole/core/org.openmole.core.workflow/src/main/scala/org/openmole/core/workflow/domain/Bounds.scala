@@ -19,6 +19,9 @@ package org.openmole.core.workflow.domain
 
 import org.openmole.core.workflow.data._
 
+import scala.annotation.implicitNotFound
+
+@implicitNotFound("${D} is not a bounded variation domain of type ${T}")
 trait Bounds[+T, -D] extends Domain[T, D] {
   def min(domain: D, context: Context)(implicit rng: RandomProvider): T
   def max(domain: D, context: Context)(implicit rng: RandomProvider): T
