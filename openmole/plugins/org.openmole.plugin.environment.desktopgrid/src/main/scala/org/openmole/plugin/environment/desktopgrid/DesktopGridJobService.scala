@@ -28,11 +28,13 @@ import org.openmole.tool.file._
 
 import DesktopGridEnvironment._
 
-trait DesktopGridJobService extends JobService with UnlimitedAccess { js ⇒
+trait DesktopGridJobService extends JobService { js ⇒
 
   type J = String
 
   def environment: DesktopGridEnvironment
+
+  val usageControl = new UnlimitedAccess
 
   val timeStempsDir = new File(environment.path, timeStempsDirName) { mkdirs }
   val jobsDir = new File(environment.path, jobsDirName) { mkdirs }

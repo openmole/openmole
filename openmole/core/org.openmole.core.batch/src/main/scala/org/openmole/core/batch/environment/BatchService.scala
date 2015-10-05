@@ -19,6 +19,14 @@ package org.openmole.core.batch.environment
 
 import org.openmole.core.batch.control._
 
-trait BatchService extends UsageControl {
+trait BatchService {
+  def usageControl: UsageControl
   def environment: BatchEnvironment
+
+  def withToken[B](f: (AccessToken) ⇒ B): B = usageControl.withToken(f)
+  def tryGetToken: Option[AccessToken] = usageControl.tryGetToken
+  def waitAToken: AccessToken = usageControl.waitAToken
+  def available: Int = usageControl.available
+  def releaseToken(token: AccessToken): Unit = usageControl.releaseToken(token)
+  def tryWithToken[B](f: (Option[AccessToken]) ⇒ B): B = usageControl.tryWithToken(f)
 }

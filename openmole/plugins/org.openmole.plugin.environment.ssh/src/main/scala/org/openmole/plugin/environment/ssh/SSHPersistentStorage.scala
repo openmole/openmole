@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.ssh
 
 import java.net.URI
 
-import org.openmole.core.batch.control.{ UnlimitedAccess, LimitedAccess }
+import org.openmole.core.batch.control.{UsageControl, UnlimitedAccess, LimitedAccess}
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.storage._
 import org.openmole.core.workspace.Workspace
@@ -29,6 +29,7 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
 
   type SS = PersistentStorageService
 
+  def usageControl: UsageControl
   def sharedDirectory: Option[String]
 
   trait StorageRoot <: Storage {
@@ -44,15 +45,16 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
   lazy val storage =
     storageSharedLocally match {
       case true ⇒
-        new PersistentStorageService with LogicalLinkStorage with StorageRoot with UnlimitedAccess {
+        new PersistentStorageService with LogicalLinkStorage with StorageRoot {
+          val usageControl = new UnlimitedAccess
           lazy val remoteStorage: RemoteStorage = new RemoteLogicalLinkStorage(root)
           val url = new URI("file", env.user, "localhost", -1, sharedDirectory.orNull, null, null)
           val id: String = url.toString
           val environment = env
         }
       case false ⇒
-        new PersistentStorageService with SSHStorageService with StorageRoot with LimitedAccess with ThisHost {
-          def nbTokens = maxConnections
+        new PersistentStorageService with SSHStorageService with StorageRoot with ThisHost {
+          val usageControl = env.usageControl
           val environment = env
           val id = new URI("ssh", env.user, env.host, env.port, sharedDirectory.orNull, null, null).toString
         }

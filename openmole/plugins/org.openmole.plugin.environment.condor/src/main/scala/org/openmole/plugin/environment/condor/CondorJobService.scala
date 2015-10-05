@@ -38,6 +38,7 @@ import CondorJobService._
 trait CondorJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
 
   def environment: CondorEnvironment
+  def usageControl = environment.usageControl
 
   val jobService = new GSCondorJobService with SSHConnectionCache {
     def host = js.host

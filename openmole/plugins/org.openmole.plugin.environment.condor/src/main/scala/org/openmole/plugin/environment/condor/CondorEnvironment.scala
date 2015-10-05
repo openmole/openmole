@@ -84,14 +84,13 @@ class CondorEnvironment(
     val requirements: Option[CondorRequirement],
     override val threads: Option[Int],
     val storageSharedLocally: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends SimpleBatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends ClusterEnvironment with MemoryRequirement { env ⇒
 
   type JS = CondorJobService
 
   @transient lazy val credential = SSHAuthentication(user, host, port)(authentications)(authentications)
 
-  @transient lazy val jobService = new CondorJobService with ThisHost with LimitedAccess {
-    def nbTokens = maxConnections
+  @transient lazy val jobService = new CondorJobService with ThisHost {
     // TODO not available in the GridScale plugin yet
     //def queue = env.queue
     val environment = env

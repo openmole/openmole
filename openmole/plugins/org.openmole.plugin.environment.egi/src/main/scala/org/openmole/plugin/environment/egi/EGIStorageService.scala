@@ -41,21 +41,25 @@ object EGIStorageService {
       override val connections = threads
     }
 
-  def apply(s: SRMStorage, _environment: BatchEnvironment { def voName: String }, _authentication: GlobusAuthentication.ProxyCreator, threads: Int) = new EGIStorageService {
+  def apply(s: SRMStorage, _environment: BatchEnvironment { def voName: String }, _authentication: GlobusAuthentication.ProxyCreator) = new EGIStorageService {
+    def threads = Workspace.preferenceAsInt(EGIEnvironment.LocalThreadsBySE)
+    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Workspace.preferenceAsInt(EGIEnvironment.MaxAccessesByMinuteSE)), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
     val storage = emptyRoot(s, threads)
     val url = new URI("srm", null, s.host, s.port, null, null, null)
     val remoteStorage = new LCGCpRemoteStorage(s.host, s.port, _environment.voName)
     val environment = _environment
     val root = s.basePath
     override lazy val id = new URI("srm", environment.voName, s.host, s.port, s.basePath, null, null).toString
-    def nbTokens = threads
     def authentication = _authentication
   }
 
 }
 
-trait EGIStorageService extends PersistentStorageService with QualityControl with LimitedAccess with AvailabitityQuality with GridScaleStorage with CompressedTransfer {
-  def hysteresis = Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis)
+trait EGIStorageService extends PersistentStorageService with GridScaleStorage with CompressedTransfer {
+
+  val usageControl: AvailabilityQuality
+  import usageControl.quality
+
   override def exists(path: String)(implicit token: AccessToken): Boolean = quality { super.exists(path)(token) }
   override def listNames(path: String)(implicit token: AccessToken): Seq[String] = quality { super.listNames(path)(token) }
   override def list(path: String)(implicit token: AccessToken): Seq[(String, FileType)] = quality { super.list(path)(token) }

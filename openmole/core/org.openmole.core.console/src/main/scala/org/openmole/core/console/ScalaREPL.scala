@@ -19,6 +19,7 @@ package org.openmole.core.console
 
 import java.io.{ PrintStream, PrintWriter, Writer }
 import java.net.URLClassLoader
+import java.util.UUID
 import javax.management.remote.JMXPrincipal
 import javax.script.ScriptEngineManager
 
@@ -39,6 +40,10 @@ import scala.tools.nsc.interpreter._
 
 object ScalaREPL {
   def warmup = new ScalaREPL().eval("def warmup() = {}")
+  case class HeaderInfo(file: String)
+  def firstLine(file: String) = HeaderInfo(file)
+  lazy val firstLinePrefix = "##header"
+
 }
 
 class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
@@ -50,6 +55,8 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
   System.setProperty("jline.shutdownhook", "true")
   override val prompt = "OpenMOLE>"
+
+  lazy val firstLine = "/*" + UUID.randomUUID().toString + "*/"
 
   super.getClass.getMethods.find(_.getName.contains("globalFuture_$eq")).get.invoke(this, Future { true }.asInstanceOf[AnyRef])
 
@@ -78,7 +85,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
   def eval(code: String) = synchronized {
     errorMessage = Nil
-    try intp.eval(code)
+    try intp.eval(firstLine + "\n" + code)
     catch {
       case e: Throwable ⇒
         throw messageToException(e, errorMessage, code)
@@ -87,7 +94,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
   def compile(code: String) = synchronized {
     errorMessage = Nil
-    try intp.compile(code)
+    try intp.compile(firstLine + "\n" + code)
     catch {
       case e: Throwable ⇒
         throw messageToException(e, errorMessage, code)
@@ -120,16 +127,12 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
       override def error(pos: Position, msg: String): Unit = {
         if (storeErrors) {
           val compiled = new String(pos.source.content).split("\n")
-          val linesLength = compiled.take(pos.line - 1).flatten.size + (pos.line - 1)
-
+          compiled.foreach(println)
+          val first = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLine) }.get._2
           val error = pos match {
-            case NoPosition ⇒ ErrorMessage(msg, pos.line)
+            case NoPosition ⇒ ErrorMessage(msg, pos.line - first)
             case _ ⇒
-              val offset = pos.start - linesLength
-              ErrorMessage(Position.formatMessage(pos, msg, true), pos.line)
-            /*  s"""|$msg
-                    |${compiled(pos.line - 1)}
-                    |${" " * offset}^""".stripMargin, pos.line)*/
+              ErrorMessage(Position.formatMessage(pos, msg, true), pos.line - first)
           }
 
           errorMessage ::= error
