@@ -9,7 +9,7 @@ import org.scalajs.dom.raw.HTMLDivElement
 import rx._
 
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags }
+import scalatags.JsDom._
 
 /*
  * Copyright (C) 27/08/15 // mathieu.leclaire@openmole.org
@@ -111,10 +111,10 @@ object GUIDoc {
             tags.li("The execution duration (Ex: 1:17:44)"),
             tags.li("The execution state with:",
               tags.ul(
-                tags.li(tags.span(style := "color: yellow; font-weight: bold;", "running"), ": some jobs are running"),
-                tags.li(tags.span(style := "color: #a6bf26; font-weight: bold;", "success"), ": the execution has successfully finished",
-                  tags.li(tags.span(style := "color: #CC3A36; font-weight: bold;", "failed"), ": the execution has failed: click on this state to see the errors"),
-                  tags.li(tags.span(style := "color: orange; font-weight: bold;", "canceled"), ": the execution has been canceled (by means of the ", glyph(bs.glyph_remove + " right2"), " button)")
+                tags.li(tags.span(attrs.style := "color: yellow; font-weight: bold;", "running"), ": some jobs are running"),
+                tags.li(tags.span(attrs.style := "color: #a6bf26; font-weight: bold;", "success"), ": the execution has successfully finished",
+                  tags.li(tags.span(attrs.style := "color: #CC3A36; font-weight: bold;", "failed"), ": the execution has failed: click on this state to see the errors"),
+                  tags.li(tags.span(attrs.style := "color: orange; font-weight: bold;", "canceled"), ": the execution has been canceled (by means of the ", glyph(bs.glyph_remove + " right2"), " button)")
                 ))
             ),
             tags.li(glyph(bs.glyph_stats), "Env gives information about the execution on the remote environments defined in the workflow (See below)"),
@@ -124,7 +124,7 @@ object GUIDoc {
           )
         ),
         bs.div("spacer20")(
-          "The output history ", bs.input("500", "right2 labelInline")(style := "color:#333; width : 60px;"), " sets the number of entries from the standard outputs of the executions to be displayed  ( ",
+          "The output history ", bs.input("500", "right2 labelInline")(attrs.style := "color:#333; width : 60px;"), " sets the number of entries from the standard outputs of the executions to be displayed  ( ",
           glyph(bs.glyph_list + " right2"), " ). It is set by default to 500."
         )
       ),

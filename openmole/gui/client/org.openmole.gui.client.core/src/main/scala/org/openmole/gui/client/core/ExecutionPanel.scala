@@ -30,7 +30,6 @@ import org.openmole.gui.misc.js.{ BootstrapTags ⇒ bs, _ }
 import org.openmole.gui.misc.js.Expander._
 
 import scalatags.JsDom._
-import org.openmole.gui.misc.js.Tooltip._
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.js.timers._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
