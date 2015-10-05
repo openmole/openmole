@@ -80,14 +80,13 @@ class PBSEnvironment(
     val workDirectory: Option[String],
     override val threads: Option[Int],
     val storageSharedLocally: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends SimpleBatchEnvironment with SSHPersistentStorage with MemoryRequirement { env ⇒
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends ClusterEnvironment with MemoryRequirement { env ⇒
 
   type JS = PBSJobService
 
   @transient lazy val credential = SSHAuthentication(user, host, port)(authentications)(authentications)
 
-  @transient lazy val jobService = new PBSJobService with ThisHost with LimitedAccess {
-    def nbTokens = maxConnections
+  @transient lazy val jobService = new PBSJobService with ThisHost {
     def queue = env.queue
     val environment = env
     def sharedFS = storage

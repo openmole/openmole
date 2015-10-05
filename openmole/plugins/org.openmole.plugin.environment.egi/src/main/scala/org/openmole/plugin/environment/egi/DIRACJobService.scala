@@ -36,10 +36,11 @@ object DIRACJobService extends Logger
 
 import DIRACJobService._
 
-trait DIRACJobService extends GridScaleJobService with JobScript with UnlimitedAccess { js ⇒
+trait DIRACJobService extends GridScaleJobService with JobScript { js ⇒
 
   def environment: DIRACEnvironment
   val jobService: GSDIRACJobService
+  val usageControl = new UnlimitedAccess
 
   lazy val id = jobService.service
 

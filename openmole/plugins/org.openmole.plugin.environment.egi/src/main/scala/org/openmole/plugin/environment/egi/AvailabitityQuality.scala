@@ -19,9 +19,24 @@ package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.control._
 
-trait AvailabitityQuality extends QualityControl with LimitedAccess {
+object AvailabilityQuality {
+  def apply(_usageControl: UsageControl, _hysteresis: Int) =
+    new AvailabilityQuality {
+      val usageControl = _usageControl
+      val hysteresis = _hysteresis
+    }
+}
+
+trait AvailabilityQuality extends QualityControl with UsageControl {
+
+  val usageControl: UsageControl
+
+  def available: Int = usageControl.available
+  def releaseToken(token: AccessToken): Unit = usageControl.releaseToken(token)
+  def waitAToken: AccessToken = usageControl.waitAToken
+
   override def tryGetToken = {
-    val ret = super.tryGetToken
+    val ret = usageControl.tryGetToken
     if (ret.isEmpty) wasNotAvailable
     else wasAvailable
     ret

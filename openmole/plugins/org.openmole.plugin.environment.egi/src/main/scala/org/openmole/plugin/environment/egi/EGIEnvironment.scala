@@ -68,6 +68,9 @@ object EGIEnvironment extends Logger {
 
   val LocalThreadsBySE = new ConfigurationLocation("EGIEnvironment", "LocalThreadsBySE")
   val LocalThreadsByWMS = new ConfigurationLocation("EGIEnvironment", "LocalThreadsByWMS")
+  val MaxAccessesByMinuteWMS = new ConfigurationLocation("EGIEnvironment", "MaxAccessesByMinuteWMS")
+  val MaxAccessesByMinuteSE = new ConfigurationLocation("EGIEnvironment", "MaxAccessesByMinuteSE")
+
   val ProxyRenewalRatio = new ConfigurationLocation("EGIEnvironment", "ProxyRenewalRatio")
   val MinProxyRenewal = new ConfigurationLocation("EGIEnvironment", "MinProxyRenewal")
   val JobShakingHalfLife = new ConfigurationLocation("EGIEnvironment", "JobShakingHalfLife")
@@ -112,6 +115,8 @@ object EGIEnvironment extends Logger {
 
   Workspace += (LocalThreadsBySE, "10")
   Workspace += (LocalThreadsByWMS, "10")
+  Workspace += (MaxAccessesByMinuteWMS, "100")
+  Workspace += (MaxAccessesByMinuteSE, "100")
 
   Workspace += (ProxyRenewalRatio, "0.2")
   Workspace += (MinProxyRenewal, "PT5M")
@@ -269,6 +274,10 @@ class EGIEnvironment(
     bdiiWMS.map {
       js ⇒
         new EGIJobService {
+          val usageControl = new AvailabilityQuality with JobServiceQualityControl {
+            override val usageControl: UsageControl = new LimitedAccess(threadsByWMS, Workspace.preferenceAsInt(MaxAccessesByMinuteWMS))
+            override val hysteresis: Int = Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis)
+          }
           val jobService = new WMSJobService {
             val url = js.url
             val credential = js.credential
@@ -276,7 +285,6 @@ class EGIEnvironment(
             override def delegationRenewal = proxyRenewalDelay
           }
           val environment = env
-          val nbTokens = threadsByWMS
         }
     }
   }
@@ -286,9 +294,9 @@ class EGIEnvironment(
       case Nil       ⇒ throw new InternalProcessingError("No job service available for the environment.")
       case js :: Nil ⇒ (js, js.waitAToken)
       case _ ⇒
-        def jobFactor(j: EGIJobService) = (j.runnig.toDouble / j.submitted) * (j.totalDone.toDouble / j.totalSubmitted)
+        def jobFactor(j: EGIJobService) = (j.usageControl.running.toDouble / j.usageControl.submitted) * (j.usageControl.totalDone.toDouble / j.usageControl.totalSubmitted)
 
-        val times = jobServices.map(_.time)
+        val times = jobServices.map(_.usageControl.time)
         val maxTime = times.max
         val minTime = times.min
 
@@ -302,14 +310,14 @@ class EGIEnvironment(
               cur.tryGetToken match {
                 case None ⇒ None
                 case Some(token) ⇒
-                  val time = cur.time
+                  val time = cur.usageControl.time
 
                   val timeFactor =
                     if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
                     else 1 - time.normalize(minTime, maxTime)
 
                   val jobFactor =
-                    if (cur.submitted > 0 && cur.totalSubmitted > 0) ((cur.runnig.toDouble / cur.submitted) * (cur.totalDone / cur.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
+                    if (cur.usageControl.submitted > 0 && cur.usageControl.totalSubmitted > 0) ((cur.usageControl.running.toDouble / cur.usageControl.submitted) * (cur.usageControl.totalDone / cur.usageControl.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
                     else 0.0
 
                   import EGIEnvironment._
@@ -317,8 +325,8 @@ class EGIEnvironment(
                   val fitness = math.pow(
                     Workspace.preferenceAsDouble(JobServiceJobFactor) * jobFactor +
                       Workspace.preferenceAsDouble(JobServiceTimeFactor) * timeFactor +
-                      Workspace.preferenceAsDouble(JobServiceAvailabilityFactor) * cur.availability +
-                      Workspace.preferenceAsDouble(JobServiceSuccessRateFactor) * cur.successRate,
+                      Workspace.preferenceAsDouble(JobServiceAvailabilityFactor) * cur.usageControl.availability +
+                      Workspace.preferenceAsDouble(JobServiceSuccessRateFactor) * cur.usageControl.successRate,
                     Workspace.preferenceAsDouble(JobServiceFitnessPower))
                   Some((cur, token, fitness))
               }

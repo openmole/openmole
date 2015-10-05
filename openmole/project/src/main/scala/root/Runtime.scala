@@ -21,7 +21,8 @@ object Runtime extends Defaults(runtime.REST) {
     )
 
   lazy val console = OsgiProject("org.openmole.console", imports = Seq("*")) settings (
-    organization := "org.openmole.console"
+    organization := "org.openmole.console",
+    libraryDependencies += upickle
   ) dependsOn (
       Core.workflow,
       Core.console,

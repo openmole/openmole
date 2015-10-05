@@ -43,14 +43,12 @@ trait BDIISRMServers extends BatchEnvironment {
   def voName: String
   def proxyCreator: GlobusAuthentication.ProxyCreator
 
-  @transient lazy val threadsBySE = Workspace.preferenceAsInt(EGIEnvironment.LocalThreadsBySE)
-
   @transient lazy val storages = {
     val bdiiStorarges =
       bdiiServer.querySRMs(voName, Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut))(proxyCreator)
 
     bdiiStorarges.map {
-      s ⇒ EGIStorageService(s, this, proxyCreator, threadsBySE)
+      s ⇒ EGIStorageService(s, this, proxyCreator)
     }
   }
 
@@ -62,8 +60,8 @@ trait BDIISRMServers extends BatchEnvironment {
         val sizes = usedFileHashes.map { case (f, _) ⇒ f -> f.size }.toMap
         val totalFileSize = sizes.values.sum
         val onStorage = ReplicaCatalog.withSession(ReplicaCatalog.inCatalog(_))
-        val maxTime = storages.map(_.time).max
-        val minTime = storages.map(_.time).min
+        val maxTime = storages.map(_.usageControl.time).max
+        val minTime = storages.map(_.usageControl.time).min
 
         def fitness =
           for {
@@ -75,7 +73,7 @@ trait BDIISRMServers extends BatchEnvironment {
             val sizeFactor =
               if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
 
-            val time = cur.time
+            val time = cur.usageControl.time
             val timeFactor =
               if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
               else 1 - time.normalize(minTime, maxTime)
@@ -85,8 +83,8 @@ trait BDIISRMServers extends BatchEnvironment {
             val fitness = math.pow(
               Workspace.preferenceAsDouble(StorageSizeFactor) * sizeFactor +
                 Workspace.preferenceAsDouble(StorageTimeFactor) * timeFactor +
-                Workspace.preferenceAsDouble(StorageAvailabilityFactor) * cur.availability +
-                Workspace.preferenceAsDouble(StorageSuccessRateFactor) * cur.successRate,
+                Workspace.preferenceAsDouble(StorageAvailabilityFactor) * cur.usageControl.availability +
+                Workspace.preferenceAsDouble(StorageSuccessRateFactor) * cur.usageControl.successRate,
               Workspace.preferenceAsDouble(StorageFitnessPower))
 
             (cur, token, fitness)

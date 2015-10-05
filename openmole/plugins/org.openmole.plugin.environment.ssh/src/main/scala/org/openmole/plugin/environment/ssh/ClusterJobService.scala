@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,17 +9,17 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.plugin.environment.ssh
 
-package org.openmole.core.batch.control
+import fr.iscpif.gridscale.ssh.SSHHost
+import org.openmole.plugin.environment.gridscale.GridScaleJobService
 
-class UnlimitedAccess extends UsageControl {
-  def releaseToken(token: AccessToken) = {}
-  def tryGetToken: Option[AccessToken] = Some(AccessToken())
-  def waitAToken: AccessToken = AccessToken()
-  def available = Int.MaxValue
+trait ClusterJobService extends GridScaleJobService with SSHHost with SharedStorage {
+  def environment: ClusterEnvironment
+  def usageControl = environment.usageControl
 }
