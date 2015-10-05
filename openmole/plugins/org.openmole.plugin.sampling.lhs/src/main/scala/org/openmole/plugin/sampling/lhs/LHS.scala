@@ -30,14 +30,14 @@ import org.openmole.core.workflow.tools._
 
 object LHS {
 
-  def apply(samples: FromContext[Int], factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
-    new LHS(samples, factors: _*)
+  def apply[D](samples: FromContext[Int], factors: Factor[Double, D]*)(implicit bounds: Bounds[Double, D]) =
+    new LHS[D](samples, factors: _*)
 
 }
 
-sealed class LHS(val samples: FromContext[Int], val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
+sealed class LHS[D](val samples: FromContext[Int], val factors: Factor[Double, D]*)(implicit bounds: Bounds[Double, D]) extends Sampling {
 
-  override def inputs = PrototypeSet(factors.flatMap(_.inputs))
+  override def inputs = PrototypeSet(factors.flatMap(f ⇒ bounds.inputs(f.domain)))
   override def prototypes = factors.map { _.prototype }
 
   override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[Double]]] = {
@@ -45,7 +45,7 @@ sealed class LHS(val samples: FromContext[Int], val factors: Factor[Double, Doma
     factors.map {
       f ⇒
         (0 until s).shuffled(rng()).map {
-          i ⇒ Variable(f.prototype, ((i + rng().nextDouble) / s).scale(f.domain.min(context), f.domain.max(context)))
+          i ⇒ Variable(f.prototype, ((i + rng().nextDouble) / s).scale(bounds.min(f.domain, context), bounds.max(f.domain, context)))
         }
     }.transpose.toIterator
 

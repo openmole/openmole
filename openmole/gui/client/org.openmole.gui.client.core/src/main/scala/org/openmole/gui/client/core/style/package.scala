@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,19 +9,23 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.gui.client.core
 
-package org.openmole.core.workflow.domain
+import org.scalajs.dom.raw._
+import scalatags.JsDom._
+import scalatags.JsDom.all._
 
-import org.openmole.core.workflow.data._
+package object style {
 
-import scala.annotation.implicitNotFound
+  def monospace(tag: HTMLElement) =
+    tags.div(
+      attrs.`class` := "monospace",
+      tag
+    )
 
-@implicitNotFound("${D} is not a variation domain with a center of type ${T}")
-trait Center[+T, -D] extends Domain[T, D] {
-  def center(domain: D, context: Context)(implicit rng: RandomProvider): T
 }

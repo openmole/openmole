@@ -47,11 +47,7 @@ object Libraries extends Defaults {
 
   lazy val includeOsgi = libraryDependencies += "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944"
 
-  lazy val jetty = "org.openmole" %% "org-eclipse-jetty" % "8.1.8.v20121106"
-
-  lazy val scalatraVersion = "2.3.0"
-
-  lazy val scalatra = "org.openmole" %% "org-scalatra" % scalatraVersion
+  lazy val scalatra = "org.openmole" %% "org-scalatra" % "2.3.1"
 
   lazy val logback = "org.openmole" %% "ch-qos-logback" % "1.0.9"
 

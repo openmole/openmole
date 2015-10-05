@@ -51,7 +51,7 @@ package transition {
       to: Puzzle,
       condition: Condition = Condition.True,
       filter: Filter[String] = Filter.empty,
-      size: Option[String] = None): Puzzle = {
+      size: Option[FromContext[Int]] = None): Puzzle = {
 
       val transitions = from.lasts.map {
         c ⇒

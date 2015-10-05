@@ -26,18 +26,18 @@ import scala.util.Random
 
 object ZipWithNameSampling {
 
-  def apply(factor: Factor[File, Domain[File] with Discrete[File]], name: Prototype[String]) =
+  def apply[D](factor: Factor[File, D], name: Prototype[String])(implicit discrete: Discrete[File, D]) =
     new ZipWithNameSampling(factor, name)
 
 }
 
-sealed class ZipWithNameSampling(val factor: Factor[File, Domain[File] with Discrete[File]], val name: Prototype[String]) extends Sampling {
+sealed class ZipWithNameSampling[D](val factor: Factor[File, D], val name: Prototype[String])(implicit discrete: Discrete[File, D]) extends Sampling {
 
   override def inputs = factor.inputs
   override def prototypes = List(factor.prototype, name)
 
   override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
-    factor.domain.iterator(context).map {
+    discrete.iterator(factor.domain, context).map {
       v ⇒ List(Variable(factor.prototype, v), Variable(name, v.getName))
     }
 }

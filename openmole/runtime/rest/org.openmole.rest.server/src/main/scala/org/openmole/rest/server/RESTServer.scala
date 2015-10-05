@@ -67,12 +67,9 @@ class RESTServer(sslPort: Option[Int], hostName: Option[String]) {
 
     logger.info(s"binding https to port $sslP")
 
-    server.addConnector(
-      new org.eclipse.jetty.server.ssl.SslSelectChannelConnector(contextFactory) {
-        setPort(sslP)
-        //setMaxIdleTime(30000)
-      }
-    )
+    val connector = new org.eclipse.jetty.server.ServerConnector(server, contextFactory)
+    connector.setPort(sslP)
+    server.addConnector(connector)
 
     val context = new WebAppContext()
 

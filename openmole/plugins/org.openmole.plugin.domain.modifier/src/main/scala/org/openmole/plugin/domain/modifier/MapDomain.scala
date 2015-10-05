@@ -26,18 +26,24 @@ import scala.util.Random
 
 object MapDomain {
 
-  def apply[I, O](domain: Domain[I] with Discrete[I], source: String)(implicit iTag: TypeTag[I], oTag: TypeTag[O]) =
-    new MapDomain[I, O](domain, s"{$source}: (${iTag.tpe} => ${oTag.tpe})")
+  implicit def isDiscrete[I, O, D] = new Discrete[O, MapDomain[I, O, D]] {
+    override def iterator(domain: MapDomain[I, O, D], context: Context)(implicit rng: RandomProvider): Iterator[O] =
+      domain.iterator(context)
+    override def inputs(domain: MapDomain[I, O, D]) = domain.inputs
+  }
+
+  def apply[I: TypeTag, O: TypeTag, D](d: D, source: String)(implicit discrete: Discrete[I, D]) =
+    new MapDomain[I, O, D](d, s"{$source}: (${implicitly[TypeTag[I]].tpe} => ${implicitly[TypeTag[O]].tpe})")
 
 }
 
-sealed class MapDomain[-I, +O] private (domain: Domain[I] with Discrete[I], val source: String) extends Domain[O] with Discrete[O] { d ⇒
+sealed class MapDomain[-I, +O, D](val domain: D, val source: String)(implicit discrete: Discrete[I, D]) { d ⇒
 
-  override def inputs = domain.inputs
+  def inputs = discrete.inputs(domain)
   @transient lazy val proxy = ScalaWrappedCompilation.raw(source)
 
-  override def iterator(context: Context)(implicit rng: RandomProvider): Iterator[O] =
-    domain.iterator(context).map {
+  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[O] =
+    discrete.iterator(domain, context).map {
       e ⇒ proxy.run(context).asInstanceOf[I ⇒ O](e)
     }
 }

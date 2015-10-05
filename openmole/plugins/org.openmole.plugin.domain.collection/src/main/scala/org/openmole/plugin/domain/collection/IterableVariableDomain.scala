@@ -24,12 +24,15 @@ import scala.util.Random
 
 object IterableVariableDomain {
 
+  implicit def isDiscrete[T] = new Discrete[T, IterableVariableDomain[T]] {
+    override def inputs(domain: IterableVariableDomain[T]) = Seq(domain.variable)
+    override def iterator(domain: IterableVariableDomain[T], context: Context)(implicit rng: RandomProvider): Iterator[T] =
+      context(domain.variable).iterator
+  }
+
   def apply[T](variable: Prototype[Iterable[_ <: T]]) =
     new IterableVariableDomain[T](variable)
 
 }
 
-sealed class IterableVariableDomain[T](variable: Prototype[Iterable[_ <: T]]) extends Domain[T] with Discrete[T] {
-  override def inputs = Seq(variable)
-  override def iterator(context: Context)(implicit rng: RandomProvider): Iterator[T] = context(variable).iterator
-}
+sealed class IterableVariableDomain[T](val variable: Prototype[Iterable[_ <: T]])

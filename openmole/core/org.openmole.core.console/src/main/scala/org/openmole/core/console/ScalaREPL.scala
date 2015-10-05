@@ -61,17 +61,17 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
   private def messageToException(e: Throwable, messages: List[ErrorMessage], code: String): Throwable = {
     def readableErrorMessages(error: ErrorMessage) =
-      s"""Raised error:
-            |${error.error}
-            |on line ${error.line}""".stripMargin
+      s"""${error.error}
+         |on line ${error.line}""".stripMargin
 
     errorMessage match {
       case Nil ⇒ e
       case l ⇒
         def messages =
-          s"""Compiling code:
-             |${code}
-             |""".stripMargin + l.reverse.map(readableErrorMessages).mkString("\n")
+          l.reverse.map(readableErrorMessages).mkString("\n") + "\n" +
+            s"""Compiling code:
+                |${code}
+                |""".stripMargin
         new UserBadDataError(messages)
     }
   }
@@ -126,16 +126,18 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
             case NoPosition ⇒ ErrorMessage(msg, pos.line)
             case _ ⇒
               val offset = pos.start - linesLength
-              ErrorMessage(
-                s"""|$msg
+              ErrorMessage(Position.formatMessage(pos, msg, true), pos.line)
+            /*  s"""|$msg
                     |${compiled(pos.line - 1)}
-                    |${" " * offset}^""".stripMargin, pos.line)
+                    |${" " * offset}^""".stripMargin, pos.line)*/
           }
 
           errorMessage ::= error
         }
         super.error(pos, msg)
       }
+
+      override def printMessage(msg: String) = {}
 
     }
 

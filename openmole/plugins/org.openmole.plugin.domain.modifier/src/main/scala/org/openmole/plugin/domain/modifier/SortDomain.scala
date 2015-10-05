@@ -24,17 +24,22 @@ import scala.util.Random
 
 object SortDomain {
 
-  def apply[T](domain: Domain[T] with Finite[T])(implicit ord: Ordering[T]) =
-    new SortDomain[T](domain)
+  implicit def isFinite[T, D] = new Finite[T, SortDomain[T, D]] {
+    override def computeValues(domain: SortDomain[T, D], context: Context)(implicit rng: RandomProvider): Iterable[T] = domain.computeValues(context)
+    override def inputs(domain: SortDomain[T, D]): PrototypeSet = domain.inputs
+  }
+
+  def apply[T: Ordering, D](domain: D)(implicit finite: Finite[T, D]) =
+    new SortDomain[T, D](domain)
 
 }
 
-class SortDomain[T](val domain: Domain[T] with Finite[T])(implicit ord: Ordering[T]) extends Domain[T] with Finite[T] {
+class SortDomain[T: Ordering, D](val domain: D)(implicit finite: Finite[T, D]) {
 
-  override def inputs = domain.inputs
+  def inputs = finite.inputs(domain)
 
-  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] =
-    domain.computeValues(context).toList.sorted
+  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] =
+    finite.computeValues(domain, context).toList.sorted
 
 }
 

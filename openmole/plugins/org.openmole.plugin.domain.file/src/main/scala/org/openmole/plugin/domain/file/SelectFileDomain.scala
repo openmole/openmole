@@ -27,11 +27,16 @@ import org.openmole.plugin.tool.file.FileProvider
 import scala.util.Random
 
 object SelectFileDomain {
+
+  implicit def isFinite = new Finite[File, SelectFileDomain] {
+    override def computeValues(domain: SelectFileDomain, context: Context)(implicit rng: RandomProvider): Iterable[File] =
+      domain.computeValues(context)
+
+  }
+
   def apply(base: File, path: ExpandedString) = new SelectFileDomain(FileProvider(base, path))
 }
 
-class SelectFileDomain(val provider: FileProvider) extends Domain[File] with Finite[File] {
-
-  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = List(provider(context))
-
+class SelectFileDomain(val provider: FileProvider) {
+  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = List(provider(context))
 }

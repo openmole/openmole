@@ -24,10 +24,12 @@ import org.openmole.core.workflow.tools.FromContext
 import scala.util.Random
 
 object ListDomain {
+  implicit def isFinite[T] = new Finite[T, ListDomain[T]] {
+    override def computeValues(domain: ListDomain[T], context: Context)(implicit rng: RandomProvider): Iterable[T] =
+      domain.values.map(_.from(context))
+  }
+
   def apply[T](values: FromContext[T]*) = new ListDomain[T](values: _*)
 }
 
-sealed class ListDomain[T](values: FromContext[T]*) extends Domain[T] with Finite[T] {
-  override def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] = values.map(_.from(context))
-}
-
+sealed class ListDomain[T](val values: FromContext[T]*)

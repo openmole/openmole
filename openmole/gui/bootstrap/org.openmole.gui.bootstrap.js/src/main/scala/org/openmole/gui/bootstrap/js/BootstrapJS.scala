@@ -32,9 +32,9 @@ object BootstrapJS {
   // Copy web resources and generate js file
   val webui = Workspace.file("webui")
   val projects = new File(webui, "projects")
-  val jsSrc = new File(webui, "js/src")
   val webapp = new File(webui, "webapp")
   val jsCompiled = new File(webapp, "js")
+  val jsSrc = new File(webui, "js/src")
   val authKeys = Workspace.file("persistent/keys")
 
   webui.mkdirs
@@ -42,8 +42,6 @@ object BootstrapJS {
   authKeys.mkdirs
 
   def init(optimized: Boolean = true) = {
-    jsSrc.recursiveDelete
-    jsSrc.mkdirs
 
     def update() = {
       webapp.recursiveDelete
@@ -97,12 +95,19 @@ object BootstrapJS {
       JSPack(jsSrc, jsCompiled, optimized)
     }
 
+    jsSrc.recursiveDelete
+    jsSrc.mkdirs
+
     // Extract and copy all the .sjsir files from bundles to src
     for {
       b ← PluginManager.bundles
       entries ← Option(b.findEntries("/", "*.sjsir", true))
       entry ← entries.asScala
-    } entry.openStream.copy(new java.io.File(jsSrc, entry.getFile.split("/").tail.mkString("-")))
+    } {
+      val inputStream = entry.openStream
+      try inputStream.copy(new java.io.File(jsSrc, entry.getFile.split("/").tail.mkString("-")))
+      finally inputStream.close
+    }
 
     //Generates js files if
     // - the sources changed or
@@ -110,7 +115,6 @@ object BootstrapJS {
     // - the not optimized js does not exists in not optimized mode
     jsSrc.updateIfChanged(_ ⇒ update())
     if (!new File(jsCompiled, JSPack.JS_FILE).exists) update()
-
   }
 
   private def copyWebJarResource(resourceName: String, version: String, file: String): Unit = copyWebJarResource(resourceName, version, FilePath("", file))

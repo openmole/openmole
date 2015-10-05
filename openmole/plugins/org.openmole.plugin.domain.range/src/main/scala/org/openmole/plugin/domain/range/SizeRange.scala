@@ -18,11 +18,19 @@
 package org.openmole.plugin.domain.range
 
 import org.openmole.core.tools.io.FromString
+import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools.FromContext
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 
 object SizeRange {
+  implicit def isFinite[T] = new Finite[T, SizeRange[T]] with Bounds[T, SizeRange[T]] with Center[T, SizeRange[T]] {
+    override def computeValues(domain: SizeRange[T], context: Context)(implicit rng: RandomProvider): Iterable[T] = domain.computeValues(context)
+    override def max(domain: SizeRange[T], context: Context)(implicit rng: RandomProvider): T = domain.max(context)
+    override def min(domain: SizeRange[T], context: Context)(implicit rng: RandomProvider): T = domain.min(context)
+    override def center(domain: SizeRange[T], context: Context)(implicit rng: RandomProvider): T = domain.center(context)
+  }
+
   def apply[T](min: FromContext[T], max: FromContext[T], size: FromContext[Int])(implicit integral: Integral[T]): SizeRange[T] =
     apply(Range(min, max), size)
 
