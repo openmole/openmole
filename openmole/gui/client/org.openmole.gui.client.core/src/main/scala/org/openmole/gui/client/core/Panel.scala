@@ -4,7 +4,7 @@ import org.openmole.gui.client.core.dataui._
 import org.openmole.gui.ext.dataui.FactoryWithDataUI
 import org.openmole.gui.misc.js.{ InputFilter, Select }
 import org.openmole.gui.misc.utils.Utils._
-import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom._
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.ext.data.ProtoTYPE.DOUBLE
@@ -261,7 +261,7 @@ class SettingsPanel(defaultDataBagUI: Either[DataBagUI, ConceptState] = Right(TA
       case p: PrototypeDataUI ⇒
         if (editionState()) {
           dimInput.value = p.dimension().toString
-          Seq(inputGroupButton(style := "width:0px;"),
+          Seq(inputGroupButton(attrs.style := "width:0px;"),
             dimInput)
         }
         else Seq()
