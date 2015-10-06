@@ -55,9 +55,7 @@
         openMOLEMemory = 200
       )""")
   @sect{DIRAC}
-    To use EGI through DIRAC you first need to set up you DIRAC authentication with a P12Certificate:
-    @br @hl.openmole("""
-    DIRACAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")""", header = """def encrypted = "" """)
+    To use EGI through DIRAC you should setup and EGIAuthentication as explained above using a P12Certificates. Other methods are not supported by DIRAC.
 
     @p Then you can declare a DIRAC environment by providing the VO name and the URL of the DIRAC REST endpoint:
     @br @hl.openmole("""
