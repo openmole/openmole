@@ -203,7 +203,7 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
   }
 
   def newREPL(args: ConsoleVariables) = {
-    val loop = new ScalaREPL()
+    val loop = new ScalaREPL(quiet = false)
     initialise(loop, args)
   }
 

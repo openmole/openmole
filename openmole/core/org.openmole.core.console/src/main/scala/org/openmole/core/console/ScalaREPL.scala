@@ -46,7 +46,7 @@ object ScalaREPL {
 
 }
 
-class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty) extends ILoop {
+class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true) extends ILoop {
 
   case class ErrorMessage(error: String, line: Int)
   var storeErrors: Boolean = true
@@ -140,7 +140,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
         super.error(pos, msg)
       }
 
-      override def printMessage(msg: String) = {}
+      override def printMessage(msg: String) = if (!quiet) super.printMessage(msg)
 
     }
 
