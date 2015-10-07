@@ -60,7 +60,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
 
   private def messageToException(e: Throwable, messages: List[ErrorMessage], code: String): Throwable = {
     def readableErrorMessages(error: ErrorMessage) =
-      s"""Raised error:
+      s"""Compilation error:
             |${error.error}
             |on line ${error.line}""".stripMargin
 
@@ -68,9 +68,9 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
       case Nil ⇒ e
       case l ⇒
         def messages =
-          s"""Compiling code:
-             |${code}
-             |""".stripMargin + l.reverse.map(readableErrorMessages).mkString("\n")
+          l.reverse.map(readableErrorMessages).mkString("\n") + "\n"
+        s"""Compiling code:
+             |${code}""".stripMargin
         new UserBadDataError(messages)
     }
   }
