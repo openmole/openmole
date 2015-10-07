@@ -20,9 +20,4 @@ package org.openmole.plugin.environment.egi
 import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }
 import org.openmole.core.batch.control.AccessToken
 
-trait DIRACJob extends BatchJob with BatchJobId with StatusFiles {
-  override def updateState(implicit token: AccessToken) = {
-    state = testStatusFile(super.updateState)
-    state
-  }
-}
+trait DIRACJob extends BatchJob with BatchJobId
