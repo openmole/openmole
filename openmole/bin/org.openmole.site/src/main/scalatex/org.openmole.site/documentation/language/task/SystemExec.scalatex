@@ -203,7 +203,7 @@
         )""")
 
     @p You will note that these options are set using the @hl.openmoleNoTest(":=") operator. Also, the OpenMOLE
-    variables containing the standard and output errors are automatically marked as outputs of the tasks. As a
+    variables containing the standard and error outputs are automatically marked as outputs of the tasks. As a
     consequence, manually adding these variables to the outputs of the task would generate an error would when the
     workflow was built.
 
