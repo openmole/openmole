@@ -27,12 +27,15 @@ import concurrent.duration._
 object SSHEnvironment {
 
   val MaxConnections = new ConfigurationLocation("SSHEnvironment", "MaxConnections")
+  val MaxOperationsByMinute = new ConfigurationLocation("SSHEnvironment", "MaxOperationByMinute")
+
   val ConnectionsKeepAlive = new ConfigurationLocation("SSHEnvironment", "ConnectionsKeepAlive")
   val UpdateInterval = new ConfigurationLocation("SSHEnvironment", "UpdateInterval")
 
   Workspace += (UpdateInterval, "PT10S")
   Workspace += (ConnectionsKeepAlive, "PT2M")
   Workspace += (MaxConnections, "10")
+  Workspace += (MaxOperationsByMinute, "500")
 
   def apply(
     user: String,
@@ -77,8 +80,13 @@ class SSHEnvironment(
   @transient lazy val credential = SSHAuthentication(user, host, port)(authentications)(authentications)
   def id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
 
-  @transient lazy val jobService = new SSHJobService with LimitedAccess with ThisHost {
-    def nbTokens = maxConnections
+  val usageControl =
+    new LimitedAccess(
+      Workspace.preferenceAsInt(SSHEnvironment.MaxConnections),
+      Workspace.preferenceAsInt(SSHEnvironment.MaxOperationsByMinute)
+    )
+
+  @transient lazy val jobService = new SSHJobService with ThisHost {
     def nbSlots = env.nbSlots
     def sharedFS = storage
     val environment = env

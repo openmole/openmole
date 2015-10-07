@@ -17,5 +17,13 @@
 
 package org.openmole.core.batch.control
 
-object AccessToken extends AccessToken
-sealed class AccessToken
+trait AccessToken {
+  def access[T](op: ⇒ T): T
+}
+
+object AccessToken {
+  def apply() = new AccessToken {
+    override def access[T](op: ⇒ T): T = op
+  }
+}
+

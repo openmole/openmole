@@ -31,21 +31,21 @@ trait JobService extends BatchService { js ⇒
 
   type J
 
-  def submit(serializedJob: SerializedJob)(implicit token: AccessToken): BatchJob = token.synchronized {
+  def submit(serializedJob: SerializedJob)(implicit token: AccessToken): BatchJob = token.access {
     val job = _submit(serializedJob)
     job.state = SUBMITTED
     Log.logger.fine(s"Successful submission: ${job}")
     job
   }
 
-  def state(j: J)(implicit token: AccessToken) = token.synchronized { _state(j) }
+  def state(j: J)(implicit token: AccessToken) = token.access { _state(j) }
 
   def cancel(j: J)(implicit token: AccessToken) = {
     token.synchronized { _cancel(j) }
     Log.logger.fine(s"Cancelled job: ${j}")
   }
 
-  def purge(j: J)(implicit token: AccessToken) = token.synchronized { _purge(j) }
+  def purge(j: J)(implicit token: AccessToken) = token.access { _purge(j) }
 
   protected def _submit(serializedJob: SerializedJob): BatchJob
   protected def _state(j: J): ExecutionState

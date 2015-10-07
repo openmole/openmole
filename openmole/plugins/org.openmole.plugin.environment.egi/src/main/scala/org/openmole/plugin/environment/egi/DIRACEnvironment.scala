@@ -106,7 +106,7 @@ class DIRACEnvironment(
 
   def executionJob(job: Job) = new DiracBatchExecutionJob(job, this)
 
-  def getAuthentication = authentications(classOf[DIRACAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
+  def getAuthentication = authentications(classOf[EGIAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
 
   @transient lazy val authentication = DIRACAuthentication.initialise(getAuthentication)(authentications)
 

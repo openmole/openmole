@@ -18,6 +18,7 @@
 
 package org.openmole.plugin.environment.ssh
 
+import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice.BatchJob
 import org.openmole.core.event._
@@ -37,8 +38,10 @@ import SSHJobService._
 
 trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 
-  val environment: BatchEnvironment with SSHAccess
+  val environment: SSHEnvironment
+
   def nbSlots: Int
+  override def usageControl = environment.usageControl
 
   val jobService = new GSSSHJobService with environment.ThisHost with SSHConnectionCache {
     override def timeout = Workspace.preferenceAsDuration(SSHService.timeout)

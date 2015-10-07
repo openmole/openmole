@@ -93,15 +93,15 @@ trait EGIJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
   override def state_=(state: ExecutionState) = synchronized {
     if (_state != state) {
       _state match {
-        case SUBMITTED ⇒ jobService.decrementSubmitted
-        case RUNNING   ⇒ jobService.decrementRunning
+        case SUBMITTED ⇒ jobService.usageControl.decrementSubmitted
+        case RUNNING   ⇒ jobService.usageControl.decrementRunning
         case _         ⇒
       }
 
       state match {
-        case SUBMITTED ⇒ jobService.incrementSubmitted
-        case RUNNING   ⇒ jobService.incrementRunning
-        case DONE      ⇒ jobService.incrementDone
+        case SUBMITTED ⇒ jobService.usageControl.incrementSubmitted
+        case RUNNING   ⇒ jobService.usageControl.incrementRunning
+        case DONE      ⇒ jobService.usageControl.incrementDone
         case _         ⇒
       }
     }

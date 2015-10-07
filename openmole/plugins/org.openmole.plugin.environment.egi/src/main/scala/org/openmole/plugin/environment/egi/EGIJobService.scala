@@ -33,11 +33,13 @@ object EGIJobService extends Logger
 
 import EGIJobService._
 
-trait EGIJobService extends GridScaleJobService with JobServiceQualityControl with LimitedAccess with AvailabitityQuality with JobScript { js ⇒
+trait EGIJobService extends GridScaleJobService with JobScript { js ⇒
 
   val jobService: WMSJobService
   def environment: EGIEnvironment
 
+  val usageControl: AvailabilityQuality with JobServiceQualityControl
+  import usageControl._
   def authentication = environment.authentication
 
   lazy val id = jobService.url.toString

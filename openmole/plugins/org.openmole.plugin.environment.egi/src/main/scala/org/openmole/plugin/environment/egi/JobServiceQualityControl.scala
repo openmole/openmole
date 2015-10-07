@@ -27,7 +27,7 @@ trait JobServiceQualityControl extends QualityControl {
   private val _totalSubmitted = new AtomicLong
 
   def submitted = _nbSubmitted.get
-  def runnig = _nbRunning.get
+  def running = _nbRunning.get
   def totalDone = _totalDone.get
   def totalSubmitted = _totalSubmitted.get
 

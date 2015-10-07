@@ -17,24 +17,49 @@
 
 package org.openmole.core.batch.control
 
+import scala.concurrent.duration._
 import scala.concurrent.stm._
 
-trait LimitedAccess extends UsageControl {
+class LimitedAccess(val nbTokens: Int, val maxByPeriod: Int) extends UsageControl { la ⇒
 
-  def nbTokens: Int
+  class LimitedAccessToken extends AccessToken {
+    override def access[T](op: ⇒ T): T = synchronized {
+      la.accessed()
+      op
+    }
+  }
 
-  private lazy val tokens: Ref[List[AccessToken]] = Ref((0 until nbTokens).map { i ⇒ new AccessToken }.toList)
+  def period = 1 minute
+
+  private lazy val tokens: Ref[List[AccessToken]] = Ref((0 until nbTokens).map { i ⇒ new LimitedAccessToken }.toList)
+  private lazy val accesses: Ref[List[Long]] = Ref(List())
 
   def add(token: AccessToken) = atomic { implicit txn ⇒ tokens() = token :: tokens() }
 
   def releaseToken(token: AccessToken) = add(token)
 
+  private def checkAccessRate() = atomic { implicit txn ⇒
+    clearOldAccesses()
+    if (accesses().size < maxByPeriod) true
+    else false
+  }
+
+  private def accessed() = atomic { implicit txn ⇒
+    clearOldAccesses()
+    accesses() = System.currentTimeMillis() :: accesses()
+  }
+
+  private def clearOldAccesses() = atomic { implicit txn ⇒
+    val now = System.currentTimeMillis()
+    accesses() = accesses().takeWhile(_ > now - period.toMillis)
+  }
+
   def tryGetToken: Option[AccessToken] = atomic { implicit txn ⇒
-    tokens() match {
-      case head :: tail ⇒
+    (checkAccessRate(), tokens()) match {
+      case (true, head :: tail) ⇒
         tokens() = tail
         Some(head)
-      case Nil ⇒ None
+      case _ ⇒ None
     }
   }
 
