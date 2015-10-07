@@ -32,9 +32,13 @@ class LimitedAccess(val nbTokens: Int, val maxByPeriod: Int) extends UsageContro
   def period = 1 minute
 
   private lazy val tokens: Ref[List[AccessToken]] = Ref((0 until nbTokens).map { i ⇒ new LimitedAccessToken }.toList)
+  private lazy val taken: TSet[AccessToken] = TSet()
   private lazy val accesses: Ref[List[Long]] = Ref(List())
 
-  def add(token: AccessToken) = atomic { implicit txn ⇒ tokens() = token :: tokens() }
+  private def add(token: AccessToken) = atomic { implicit txn ⇒
+    tokens() = token :: tokens()
+    taken -= token
+  }
 
   def releaseToken(token: AccessToken) = add(token)
 
@@ -55,12 +59,15 @@ class LimitedAccess(val nbTokens: Int, val maxByPeriod: Int) extends UsageContro
   }
 
   def tryGetToken: Option[AccessToken] = atomic { implicit txn ⇒
-    (checkAccessRate(), tokens()) match {
+    def allReadyHasAToken = taken.find(Thread.holdsLock)
+    def tryGet = (checkAccessRate(), tokens()) match {
       case (true, head :: tail) ⇒
+        taken += head
         tokens() = tail
         Some(head)
       case _ ⇒ None
     }
+    allReadyHasAToken orElse tryGet
   }
 
   def waitAToken: AccessToken = atomic { implicit txn ⇒
