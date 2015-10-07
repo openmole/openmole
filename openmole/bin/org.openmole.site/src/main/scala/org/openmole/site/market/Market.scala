@@ -47,6 +47,7 @@ object Market extends Logger {
     lazy val machineLearning = Tag("Machine Learning")
     lazy val R = Tag("R")
     lazy val fsl = Tag("FSL")
+    lazy val neuroscience = Tag("Neuro Science")
     lazy val data = Tag("Data")
     lazy val native = Tag("Native Code")
     lazy val netlogo = Tag("NetLogo")
@@ -88,7 +89,6 @@ object Market extends Logger {
       MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
       MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
-      MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
       MarketEntry("Introduction tutorial", "tutorials/introduction", Seq(tutorial, scala, stochastic)),
       MarketEntry("Native application tutorial", "tutorials/native", Seq(tutorial, native, data, python))
     )
