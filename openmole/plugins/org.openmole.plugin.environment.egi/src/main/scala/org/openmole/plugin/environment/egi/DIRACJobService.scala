@@ -50,10 +50,8 @@ trait DIRACJobService extends GridScaleJobService with JobScript { js ⇒
     val script = Workspace.newFile("script", ".sh")
     try {
       val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
-      val _runningPath = storage.child(path, runningFile)
-      val _finishedPath = storage.child(path, finishedFile)
 
-      Resource.fromFile(script).write(generateScript(serializedJob, outputFilePath, Some(_runningPath), Some(_finishedPath)))
+      Resource.fromFile(script).write(generateScript(serializedJob, outputFilePath, None, None))
 
       val jobDescription = new GSDIRACJobDescription {
         override def stdOut = if (environment.debug) Some("out") else None
@@ -71,8 +69,6 @@ trait DIRACJobService extends GridScaleJobService with JobScript { js ⇒
       new DIRACJob {
         val jobService = js
         val storage = serializedJob.storage
-        val finishedPath = _finishedPath
-        val runningPath = _runningPath
         def resultPath = outputFilePath
         def id = jid
       }
