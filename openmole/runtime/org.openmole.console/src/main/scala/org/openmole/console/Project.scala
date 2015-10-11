@@ -35,7 +35,7 @@ case class Compiled(result: CompiledScript) extends CompileResult {
 }
 
 object Project {
-  def newREPL(variables: ConsoleVariables) = new Console().newREPL(variables)
+  def newREPL(variables: ConsoleVariables) = new Console().newREPL(variables, quiet = true)
 }
 
 class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = Project.newREPL) {

@@ -202,8 +202,8 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
     loop
   }
 
-  def newREPL(args: ConsoleVariables) = {
-    val loop = new ScalaREPL(quiet = false)
+  def newREPL(args: ConsoleVariables, quiet: Boolean = false) = {
+    val loop = new ScalaREPL(quiet = quiet)
     initialise(loop, args)
   }
 
