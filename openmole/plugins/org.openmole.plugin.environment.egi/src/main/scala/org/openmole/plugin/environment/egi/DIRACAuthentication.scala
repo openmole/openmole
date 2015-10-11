@@ -32,9 +32,8 @@ object DIRACAuthentication {
           val certificate = a.certificate
           val password = a.password(authenticationProvider)
         }
-      case _ => throw new UserBadDataError(s"Wrong authentication type ${a.getClass.getName} DIRAC only supports P12 authentication")
+      case _ ⇒ throw new UserBadDataError(s"Wrong authentication type ${a.getClass.getName} DIRAC only supports P12 authentication")
     }
 
 }
-
 
