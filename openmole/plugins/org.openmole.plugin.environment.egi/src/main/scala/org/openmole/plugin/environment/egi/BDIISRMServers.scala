@@ -29,12 +29,15 @@ import org.openmole.core.batch.storage.StorageService
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.workspace._
 import org.openmole.tool.hash.Hash
+import org.openmole.tool.logger.Logger
 import org.openmole.tool.thread._
 import concurrent.stm._
 import java.io.File
 import Random._
 import Scaling._
 import scala.annotation.tailrec
+
+object BDIISRMServers extends Logger
 
 trait BDIISRMServers extends BatchEnvironment {
   type SS = EGIStorageService
@@ -63,7 +66,7 @@ trait BDIISRMServers extends BatchEnvironment {
         val maxTime = storages.map(_.usageControl.time).max
         val minTime = storages.map(_.usageControl.time).min
 
-        def fitness =
+        lazy val fitnesses =
           for {
             cur ← storages
             token ← cur.tryGetToken
@@ -90,6 +93,12 @@ trait BDIISRMServers extends BatchEnvironment {
             (cur, token, fitness)
           }
 
+        BDIISRMServers.Log.logger.fine(
+          s"""
+            |Considered SRM servers:
+            |${fitnesses.map { s ⇒ s._1.toString + " -> " + s._3 }.mkString("\n")}
+          """.stripMargin)
+
         @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): (StorageService, AccessToken) = {
           storages match {
             case Nil                        ⇒ throw new InternalProcessingError("The list should never be empty")
@@ -101,9 +110,8 @@ trait BDIISRMServers extends BatchEnvironment {
         }
 
         atomic { implicit txn ⇒
-          val fitenesses = fitness
-          if (!fitenesses.isEmpty) {
-            val notLoaded = EGIEnvironment.normalizedFitness(fitenesses).shuffled(Random.default)
+          if (!fitnesses.isEmpty) {
+            val notLoaded = EGIEnvironment.normalizedFitness(fitnesses).shuffled(Random.default)
             val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
             val drawn = Random.default.nextDouble * fitnessSum
             val (storage, token) = selected(drawn, notLoaded.toList)
