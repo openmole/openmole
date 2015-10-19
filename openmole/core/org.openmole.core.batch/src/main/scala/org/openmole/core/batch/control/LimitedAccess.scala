@@ -17,30 +17,42 @@
 
 package org.openmole.core.batch.control
 
+import java.util.concurrent.locks.ReentrantLock
+
 import scala.concurrent.duration._
 import scala.concurrent.stm._
 
 class LimitedAccess(val nbTokens: Int, val maxByPeriod: Int) extends UsageControl { la ⇒
 
-  class LimitedAccessToken extends AccessToken {
-    override def access[T](op: ⇒ T): T = synchronized {
-      la.accessed()
-      op
+  case class LimitedAccessToken(number: Int) extends AccessToken {
+    lazy val lock = new ReentrantLock {
+      def thread = Option(super.getOwner)
+    }
+
+    override def access[T](op: ⇒ T): T = {
+      lock.lock()
+      try {
+        la.accessed()
+        op
+      }
+      finally lock.unlock()
     }
   }
 
   def period = 1 minute
 
-  private lazy val tokens: Ref[List[AccessToken]] = Ref((0 until nbTokens).map { i ⇒ new LimitedAccessToken }.toList)
-  private lazy val taken: TSet[AccessToken] = TSet()
+  private lazy val tokens: TSet[LimitedAccessToken] =
+    TSet((0 until nbTokens).map { i ⇒ new LimitedAccessToken(i) }: _*)
+
+  private lazy val taken: TSet[LimitedAccessToken] = TSet()
   private lazy val accesses: Ref[List[Long]] = Ref(List())
 
-  private def add(token: AccessToken) = atomic { implicit txn ⇒
-    tokens() = token :: tokens()
+  private def add(token: LimitedAccessToken) = atomic { implicit txn ⇒
+    tokens += token
     taken -= token
   }
 
-  def releaseToken(token: AccessToken) = add(token)
+  def releaseToken(token: AccessToken) = add(token.asInstanceOf[LimitedAccessToken])
 
   private def checkAccessRate() = atomic { implicit txn ⇒
     clearOldAccesses()
@@ -58,21 +70,26 @@ class LimitedAccess(val nbTokens: Int, val maxByPeriod: Int) extends UsageContro
     accesses() = accesses().takeWhile(_ > now - period.toMillis)
   }
 
-  def tryGetToken: Option[AccessToken] = atomic { implicit txn ⇒
-    def allReadyHasAToken = taken.find(Thread.holdsLock)
-    def tryGet = (checkAccessRate(), tokens()) match {
-      case (true, head :: tail) ⇒
-        taken += head
-        tokens() = tail
+  def tryGetToken: Option[AccessToken] = tryGetToken(Thread.currentThread())
+
+  def tryGetToken(thread: Thread): Option[AccessToken] = atomic { implicit txn ⇒
+    val allReadyHasAToken = taken.find { t ⇒ t.lock.thread.map(_ == thread).getOrElse(false) }
+    def tryGet = (checkAccessRate(), tokens.headOption) match {
+      case (true, Some(head)) ⇒
+        tokens -= head
         Some(head)
       case _ ⇒ None
     }
-    allReadyHasAToken orElse tryGet
+
+    val token = allReadyHasAToken orElse tryGet
+    token.foreach(taken += _)
+    token
   }
 
-  def waitAToken: AccessToken = atomic { implicit txn ⇒
-    tryGetToken.getOrElse(retry)
+  def waitAToken: AccessToken = {
+    val thread = Thread.currentThread()
+    atomic { implicit txn ⇒ tryGetToken(thread).getOrElse(retry) }
   }
 
-  def available = tokens.single().size
+  def available = tokens.single.size
 }
