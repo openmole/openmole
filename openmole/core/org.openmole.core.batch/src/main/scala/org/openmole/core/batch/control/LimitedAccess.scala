@@ -25,10 +25,11 @@ import scala.concurrent.stm._
 class LimitedAccess(val nbTokens: Int, val maxByPeriod: Int) extends UsageControl { la ⇒
 
   case class LimitedAccessToken(number: Int) extends AccessToken {
-    lazy val lock = new ReentrantLock {
+    val lock = new ReentrantLock {
       def thread = Option(super.getOwner)
     }
 
+    val from = la
     override def access[T](op: ⇒ T): T = {
       lock.lock()
       try {
@@ -52,7 +53,9 @@ class LimitedAccess(val nbTokens: Int, val maxByPeriod: Int) extends UsageContro
     taken -= token
   }
 
-  def releaseToken(token: AccessToken) = add(token.asInstanceOf[LimitedAccessToken])
+  def releaseToken(token: AccessToken) = {
+    add(token.asInstanceOf[LimitedAccessToken])
+  }
 
   private def checkAccessRate() = atomic { implicit txn ⇒
     clearOldAccesses()
