@@ -52,12 +52,15 @@ trait PersistentStorageService extends StorageService {
         _ + Workspace.preferenceAsDuration(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
       }.getOrElse(true)
 
+    val names = listNames(persistentPath)
+    val inReplica = ReplicaCatalog.forPaths(names).run.map(_.path).toSet
+
     for {
-      name ← listNames(persistentPath)
+      name ← names
       if graceIsOver(name)
     } {
       val path = child(persistentPath, name)
-      if (!ReplicaCatalog.forPath(path).exists.run) backgroundRmFile(path)
+      if (!inReplica.contains(path)) backgroundRmFile(path)
     }
     persistentPath
   }
