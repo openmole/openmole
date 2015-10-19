@@ -78,7 +78,7 @@ trait BDIISRMServers extends BatchEnvironment {
 
             val time = cur.usageControl.time
             val timeFactor =
-              if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
+              if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0 || minTime == maxTime) 0.0
               else 1 - time.normalize(minTime, maxTime)
 
             import EGIEnvironment._
