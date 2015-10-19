@@ -55,7 +55,7 @@ trait BDIISRMServers extends BatchEnvironment {
     }
   }
 
-  def selectAStorage(usedFileHashes: Iterable[(File, Hash)]) =
+  def selectAStorage(usedFileHashes: Iterable[(File, Hash)]): (StorageService, AccessToken) =
     storages match {
       case Nil      ⇒ throw new InternalProcessingError("No storage service available for the environment.")
       case s :: Nil ⇒ (s, s.waitAToken)
@@ -66,64 +66,62 @@ trait BDIISRMServers extends BatchEnvironment {
         val maxTime = storages.map(_.usageControl.time).max
         val minTime = storages.map(_.usageControl.time).min
 
-        lazy val fitnesses =
-          for {
-            cur ← storages
-            token ← cur.tryGetToken
-          } yield {
-            val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(cur.id, Set.empty).contains(h.toString) }.map { case (f, _) ⇒ sizes(f) }.sum
-
-            val sizeFactor =
-              if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
-
-            val time = cur.usageControl.time
-            val timeFactor =
-              if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0 || minTime == maxTime) 0.0
-              else 1 - time.normalize(minTime, maxTime)
-
-            import EGIEnvironment._
-
-            val fitness = math.pow(
-              Workspace.preferenceAsDouble(StorageSizeFactor) * sizeFactor +
-                Workspace.preferenceAsDouble(StorageTimeFactor) * timeFactor +
-                Workspace.preferenceAsDouble(StorageAvailabilityFactor) * cur.usageControl.availability +
-                Workspace.preferenceAsDouble(StorageSuccessRateFactor) * cur.usageControl.successRate,
-              Workspace.preferenceAsDouble(StorageFitnessPower))
-
-            (cur, token, fitness)
-          }
-
-        @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): (StorageService, AccessToken) = {
-          storages match {
-            case Nil                        ⇒ throw new InternalProcessingError("The list should never be empty")
-            case (storage, token, _) :: Nil ⇒ (storage, token)
-            case (storage, token, fitness) :: tail ⇒
-              if (value <= fitness) (storage, token)
-              else selected(value - fitness, tail)
-          }
-        }
-
-        atomic { implicit txn ⇒
-          if (!fitnesses.isEmpty) {
-            val notLoaded = EGIEnvironment.normalizedFitness(fitnesses).shuffled(Random.default)
-            val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
-            val drawn = Random.default.nextDouble * fitnessSum
-            val (storage, token) = selected(drawn, notLoaded.toList)
+        @tailrec def select: (StorageService, AccessToken) = {
+          def fitnesses =
             for {
-              (s, t, _) ← notLoaded
-              if s.id != storage.id
-            } s.releaseToken(t)
+              cur ← storages
+              if cur.available > 0
+            } yield {
+              val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(cur.id, Set.empty).contains(h.toString) }.map { case (f, _) ⇒ sizes(f) }.sum
 
-            BDIISRMServers.Log.logger.fine(
-              s"""Considered SRM servers:
-                 |${fitnesses.map { s ⇒ s._1.toString + " -> " + s._3 }.mkString("\n")}
-                 |Selected: $storage
-              """.stripMargin)
+              val sizeFactor =
+                if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
 
-            storage -> token
+              val time = cur.usageControl.time
+              val timeFactor =
+                if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0 || minTime == maxTime) 0.0
+                else 1 - time.normalize(minTime, maxTime)
+
+              import EGIEnvironment._
+
+              val fitness = math.pow(
+                Workspace.preferenceAsDouble(StorageSizeFactor) * sizeFactor +
+                  Workspace.preferenceAsDouble(StorageTimeFactor) * timeFactor +
+                  Workspace.preferenceAsDouble(StorageAvailabilityFactor) * cur.usageControl.availability +
+                  Workspace.preferenceAsDouble(StorageSuccessRateFactor) * cur.usageControl.successRate,
+                Workspace.preferenceAsDouble(StorageFitnessPower))
+
+              (cur, fitness)
+            }
+
+          val fs = atomic { implicit txn ⇒
+            fitnesses match {
+              case Nil ⇒ retry
+              case x   ⇒ x
+            }
           }
-          else retry
+
+          @tailrec def selected(value: Double, storages: List[(StorageService, Double)]): StorageService = {
+            storages match {
+              case Nil                 ⇒ throw new InternalProcessingError("The list should never be empty")
+              case (storage, _) :: Nil ⇒ storage
+              case (storage, fitness) :: tail ⇒
+                if (value <= fitness) storage
+                else selected(value - fitness, tail)
+            }
+          }
+
+          val notLoaded = EGIEnvironment.normalizedFitness(fs).shuffled(Random.default)
+          val fitnessSum = notLoaded.map { case (_, fitness) ⇒ fitness }.sum
+          val drawn = Random.default.nextDouble * fitnessSum
+          val storage = selected(drawn, notLoaded.toList)
+
+          storage.tryGetToken match {
+            case Some(token) ⇒ storage -> token
+            case _           ⇒ select
+          }
         }
+        select
     }
 
   def clean = ReplicaCatalog.withSession { implicit c ⇒
