@@ -29,7 +29,6 @@ class LimitedAccess(val nbTokens: Int, val maxByPeriod: Int) extends UsageContro
       def thread = Option(super.getOwner)
     }
 
-    val from = la
     override def access[T](op: ⇒ T): T = {
       lock.lock()
       try {
@@ -45,12 +44,16 @@ class LimitedAccess(val nbTokens: Int, val maxByPeriod: Int) extends UsageContro
   private lazy val tokens: TSet[LimitedAccessToken] =
     TSet((0 until nbTokens).map { i ⇒ new LimitedAccessToken(i) }: _*)
 
-  private lazy val taken: TSet[LimitedAccessToken] = TSet()
+  private lazy val taken: TMap[LimitedAccessToken, Int] = TMap()
   private lazy val accesses: Ref[List[Long]] = Ref(List())
 
   private def add(token: LimitedAccessToken) = atomic { implicit txn ⇒
-    tokens += token
-    taken -= token
+    val n = taken(token)
+    if (n < 1) {
+      taken -= token
+      tokens += token
+    }
+    else taken(token) = n - 1
   }
 
   def releaseToken(token: AccessToken) = {
@@ -76,17 +79,26 @@ class LimitedAccess(val nbTokens: Int, val maxByPeriod: Int) extends UsageContro
   def tryGetToken: Option[AccessToken] = tryGetToken(Thread.currentThread())
 
   def tryGetToken(thread: Thread): Option[AccessToken] = atomic { implicit txn ⇒
-    val allReadyHasAToken = taken.find { t ⇒ t.lock.thread.map(_ == thread).getOrElse(false) }
+    val allReadyHasAToken = taken.find { case (k, v) ⇒ k.lock.thread.map(_ == thread).getOrElse(false) }
+
     def tryGet = (checkAccessRate(), tokens.headOption) match {
-      case (true, Some(head)) ⇒
-        tokens -= head
-        Some(head)
-      case _ ⇒ None
+      case (true, Some(head)) ⇒ Some(head)
+      case _                  ⇒ None
     }
 
-    val token = allReadyHasAToken orElse tryGet
-    token.foreach(taken += _)
-    token
+    allReadyHasAToken match {
+      case Some((t, n)) ⇒
+        taken += (t -> (n + 1))
+        Some(t)
+      case None ⇒
+        val token = tryGet
+        token.foreach {
+          t ⇒
+            tokens -= t
+            taken += (t -> 0)
+        }
+        token
+    }
   }
 
   def waitAToken: AccessToken = {
