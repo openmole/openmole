@@ -93,12 +93,6 @@ trait BDIISRMServers extends BatchEnvironment {
             (cur, token, fitness)
           }
 
-        BDIISRMServers.Log.logger.fine(
-          s"""
-            |Considered SRM servers:
-            |${fitnesses.map { s ⇒ s._1.toString + " -> " + s._3 }.mkString("\n")}
-          """.stripMargin)
-
         @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): (StorageService, AccessToken) = {
           storages match {
             case Nil                        ⇒ throw new InternalProcessingError("The list should never be empty")
@@ -119,6 +113,13 @@ trait BDIISRMServers extends BatchEnvironment {
               (s, t, _) ← notLoaded
               if s.id != storage.id
             } s.releaseToken(t)
+
+            BDIISRMServers.Log.logger.fine(
+              s"""Considered SRM servers:
+                 |${fitnesses.map { s ⇒ s._1.toString + " -> " + s._3 }.mkString("\n")}
+                 |Selected: $storage
+              """.stripMargin)
+
             storage -> token
           }
           else retry
