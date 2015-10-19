@@ -53,7 +53,7 @@ trait StorageService extends BatchService with Storage {
   def persistentDir(implicit token: AccessToken, session: Session): String
   def tmpDir(implicit token: AccessToken): String
 
-  @transient lazy val directoryCache =
+  @transient @volatile lazy val directoryCache =
     CacheBuilder.
       newBuilder().
       expireAfterWrite(Workspace.preferenceAsDuration(StorageService.DirRegenerate).toMillis, TimeUnit.MILLISECONDS).
@@ -67,7 +67,7 @@ trait StorageService extends BatchService with Storage {
     directoryCache.invalidateAll
   }
 
-  @transient lazy val serializedRemoteStorage = {
+  @transient @volatile lazy val serializedRemoteStorage = {
     val file = Workspace.newFile("remoteStorage", ".xml")
     FileDeleter.deleteWhenGarbageCollected(file)
     SerialiserService.serialiseAndArchiveFiles(remoteStorage, file)
