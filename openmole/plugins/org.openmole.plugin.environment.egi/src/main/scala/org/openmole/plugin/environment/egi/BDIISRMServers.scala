@@ -95,10 +95,14 @@ trait BDIISRMServers extends BatchEnvironment {
             }
 
           val fs = atomic { implicit txn ⇒
-            fitnesses match {
-              case Nil ⇒ retry
-              case x   ⇒ x
-            }
+            @tailrec def fit: Seq[(StorageService, Double)] =
+              fitnesses match {
+                case Nil ⇒
+                  retryFor(10000)
+                  fit
+                case x ⇒ x
+              }
+            fit
           }
 
           @tailrec def selected(value: Double, storages: List[(StorageService, Double)]): StorageService = {
