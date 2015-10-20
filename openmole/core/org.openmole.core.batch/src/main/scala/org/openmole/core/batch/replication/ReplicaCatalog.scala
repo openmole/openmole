@@ -191,11 +191,10 @@ object ReplicaCatalog extends Logger {
 
   def forPaths(paths: Seq[String])(implicit session: Session) =
     for {
-      r <- replicas
+      r ← replicas
       if r.path inSetBind paths
     } yield r
 
-    //replicas.filter { p => path.(p) }
   def onStorage(storage: StorageService)(implicit session: Session) = replicas.filter { _.storage === storage.id }
 
   def remove(id: Long)(implicit session: Session) = {

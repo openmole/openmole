@@ -19,6 +19,7 @@ package org.openmole.core.batch.control
 
 import java.util.concurrent.locks.ReentrantLock
 
+import scala.annotation.tailrec
 import scala.concurrent.duration._
 import scala.concurrent.stm._
 
@@ -103,7 +104,16 @@ class LimitedAccess(val nbTokens: Int, val maxByPeriod: Int) extends UsageContro
 
   def waitAToken: AccessToken = {
     val thread = Thread.currentThread()
-    atomic { implicit txn ⇒ tryGetToken(thread).getOrElse(retry) }
+    atomic { implicit txn ⇒
+      @tailrec def getToken: AccessToken =
+        tryGetToken(thread) match {
+          case None ⇒
+            retryFor(1000)
+            getToken
+          case Some(token) ⇒ token
+        }
+      getToken
+    }
   }
 
   def available = tokens.single.size

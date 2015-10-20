@@ -343,10 +343,14 @@ class EGIEnvironment(
 
           val fs =
             atomic { implicit txn ⇒
-              fitness match {
-                case Nil ⇒ retry
-                case x   ⇒ x
-              }
+              @tailrec def fit: Seq[(EGIJobService, Double)] =
+                fitness match {
+                  case Nil ⇒
+                    retryFor(10000)
+                    fit
+                  case x ⇒ x
+                }
+              fit
             }
 
           val notLoaded = normalizedFitness(fs).shuffled(Random.default)
