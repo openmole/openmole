@@ -17,18 +17,17 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.File
+import java.nio.channels.FileChannel
+import java.nio.file.Files
 import java.util.logging.Level
-
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.data.SafePath._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileExtension._
-import java.io.File
-import java.net.URI
-
-import scala.concurrent.duration.Duration
+import java.io._
+import org.openmole.tool.file._
+import org.openmole.tool.tar._
 
 object Utils {
 
@@ -112,4 +111,27 @@ object Utils {
 
   def listFiles(path: SafePath): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
 
+  def getCareBinInfos(careArchive: SafePath) = {
+    val fileChannel = new RandomAccessFile(careArchive, "r").getChannel
+    val out = Files.createTempFile("careArchive", "").toFile
+    val fos = new FileOutputStream(out)
+
+    try {
+      //Get the tar.gz from the bin archive
+      val endMinus8Bytes = fileChannel.size - 8L
+      val archiveSize = fileChannel.map(FileChannel.MapMode.READ_ONLY, endMinus8Bytes, 8L).getLong.toInt
+      fileChannel.position(0L)
+      val srcArray = new Array[Byte](archiveSize)
+      fileChannel.map(FileChannel.MapMode.READ_ONLY, endMinus8Bytes - 13L - archiveSize, archiveSize).get(srcArray, 0, archiveSize)
+
+      //Extract and uncompress the tar.gz
+      new ByteArrayInputStream(srcArray) copy fos
+      out extractUncompress Files.createTempDirectory("careDir")
+
+    }
+    finally {
+      fileChannel.close
+      fos.close
+    }
+  }
 }

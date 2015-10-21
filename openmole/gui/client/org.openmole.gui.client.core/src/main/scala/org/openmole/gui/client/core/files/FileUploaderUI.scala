@@ -27,37 +27,39 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import autowire._
 import scalatags.JsDom.all._
 import org.openmole.gui.shared.Api
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw.{ HTMLInputElement }
 import rx._
 
-class AuthFileUploaderUI(keyName: String, keySet: Boolean, renaming: Option[String] = None) {
+class AuthFileUploaderUI(keyName: String,
+                         keySet: Boolean,
+                         renaming: Option[String] = None) {
 
   val fileName = if (keyName == "") renaming.getOrElse(Utils.getUUID) else keyName
   val pathSet: Var[Boolean] = Var(keySet)
 
-  lazy val upButton =
-    tags.label(`class` := "inputFileStyle spacer5 certificate")(
-      bs.fileInput((fInput: HTMLInputElement) ⇒ {
-        FileManager.upload(fInput,
-          SafePath.empty,
-          (p: FileTransferState) ⇒ {},
-          UploadAuthentication(),
-          () ⇒ {
-            if (fInput.files.length > 0) {
-              val leaf = fInput.files.item(0).name
-              pathSet() = false
-              OMPost[Api].renameKey(leaf, fileName).call().foreach { b ⇒
-                pathSet() = true
-              }
-            }
-          }
-        )
-      }
-      ), Rx {
-        if (pathSet()) fileName else "No certificate"
-      }
-    )
-
   val view = upButton.render
 
+  lazy val upButton = tags.label(`class` := "inputFileStyle spacer5 certificate")(
+    bs.fileInput((fInput: HTMLInputElement) ⇒ {
+      FileManager.upload(fInput,
+        SafePath.empty,
+        (p: FileTransferState) ⇒ {
+        },
+        UploadAuthentication(),
+        () ⇒ {
+          if (fInput.files.length > 0) {
+            val leaf = fInput.files.item(0).name
+            pathSet() = false
+            OMPost[Api].renameKey(leaf, fileName).call().foreach {
+              b ⇒
+                pathSet() = true
+            }
+          }
+        }
+      )
+    }
+    ), Rx {
+      if (pathSet()) fileName else "No certificate"
+    }
+  )
 }

@@ -42,4 +42,7 @@ object OMTags {
 
   val glyph_plug = "icon-power-cord"
   val glyph_book = "icon-book"
+
+  // TO PORT IN SCALADGET
+  val glyph_upload_alt = "glyphicon-upload"
 }

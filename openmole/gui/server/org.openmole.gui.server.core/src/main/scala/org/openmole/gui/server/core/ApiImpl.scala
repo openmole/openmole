@@ -324,4 +324,7 @@ object ApiImpl extends Api {
     // FIXME: the bundles might not be fully unloaded, they might be dynamically imported by core.console
   }
 
+  //MODEL WIZARDS
+  def getCareBinInfos(careArchive: SafePath): Unit = Utils.getCareBinInfos(careArchive)
+
 }

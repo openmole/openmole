@@ -70,4 +70,7 @@ trait Api {
   def isPlugin(path: SafePath): Boolean
   def listPlugins(): Iterable[Plugin]
   def removePlugin(plugin: Plugin): Unit
+
+  //MODEL WIZARDS
+  def getCareBinInfos(careArchive: SafePath): Unit
 }
