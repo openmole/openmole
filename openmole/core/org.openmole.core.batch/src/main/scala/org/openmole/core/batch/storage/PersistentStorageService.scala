@@ -53,7 +53,7 @@ trait PersistentStorageService extends StorageService {
       }.getOrElse(true)
 
     val names = listNames(persistentPath)
-    val inReplica = ReplicaCatalog.forPaths(names).run.map(_.path).toSet
+    val inReplica = ReplicaCatalog.forPaths(names.map { child(persistentPath, _) }).run.map(_.path).toSet
 
     for {
       name ← names
