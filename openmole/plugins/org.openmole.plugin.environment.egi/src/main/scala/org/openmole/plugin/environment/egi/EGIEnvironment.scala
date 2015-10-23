@@ -111,7 +111,7 @@ object EGIEnvironment extends Logger {
   Workspace += (CACertificatesCacheTime, "P7D")
   Workspace += (VOInformationSite, "http://operations-portal.egi.eu/xml/voIDCard/public/all/true")
   Workspace += (VOCardDownloadTimeOut, "PT2M")
-  Workspace += (VOCardCacheTime, "P6H")
+  Workspace += (VOCardCacheTime, "PT6H")
 
   Workspace += (LocalThreadsBySE, "10")
   Workspace += (LocalThreadsByWMS, "10")
