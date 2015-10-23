@@ -1,0 +1,5 @@
+
+ScalaTask
+
+change: "workDir" variable become "workDirectory"
+new: mkDir() function create a new directory

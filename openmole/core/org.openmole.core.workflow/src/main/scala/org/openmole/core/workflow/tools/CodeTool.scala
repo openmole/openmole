@@ -27,4 +27,9 @@ object CodeTool extends FilePackage with StatisticsPackage {
   def newRNG(seed: Long) = Random.newRNG(seed)
   def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix) = Workspace.newFile(prefix, suffix)
   def newDir(prefix: String = Workspace.fixedDir) = Workspace.newDir(prefix)
+  def mkDir(prefix: String = Workspace.fixedDir) = {
+    val dir = Workspace.newDir(prefix)
+    dir.mkdirs
+    dir
+  }
 }
