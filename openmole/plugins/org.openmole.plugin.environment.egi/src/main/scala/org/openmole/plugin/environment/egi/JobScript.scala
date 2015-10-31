@@ -33,8 +33,8 @@ trait JobScript {
   protected def generateScript(
     serializedJob: SerializedJob,
     resultPath: String,
-    runningPath: Option[String],
-    finishedPath: Option[String]) = {
+    runningPath: Option[String] = None,
+    finishedPath: Option[String] = None) = {
     import serializedJob._
 
     assert(runtime.runtime.path != null)

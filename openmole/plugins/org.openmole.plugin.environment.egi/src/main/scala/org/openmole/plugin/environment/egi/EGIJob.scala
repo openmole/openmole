@@ -53,23 +53,20 @@ object EGIJob extends Logger {
 
   def debug(gliteJob: EGIJob, _description: WMSJobDescription) =
     new EGIDebugJob {
-      val storage = gliteJob.storage
-      val finishedPath = gliteJob.finishedPath
       val jobService = gliteJob.jobService
       val description = _description
-      val runningPath: String = gliteJob.runningPath
       val id = gliteJob.id
       val resultPath: String = gliteJob.resultPath
     }
 
 }
 
-trait EGIJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
+trait EGIJob extends BatchJob with BatchJobId { self ⇒
   var lastShacked = System.currentTimeMillis
   val jobService: EGIJobService
 
   override def updateState(implicit token: AccessToken) = {
-    state = if (!jobService.environment.debug) testStatusFile(super.updateState) else super.updateState
+    state = super.updateState
 
     //if (!state.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
     if (state == SUBMITTED) {

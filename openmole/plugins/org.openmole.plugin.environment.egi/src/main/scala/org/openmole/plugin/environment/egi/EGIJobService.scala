@@ -60,7 +60,7 @@ trait EGIJobService extends GridScaleJobService with JobScript { js ⇒
       val _runningPath = storage.child(path, runningFile)
       val _finishedPath = storage.child(path, finishedFile)
 
-      val scriptContent = generateScript(serializedJob, outputFilePath, Some(_runningPath), Some(_finishedPath))
+      val scriptContent = generateScript(serializedJob, outputFilePath)
 
       Resource.fromFile(script).write(scriptContent)
 
