@@ -53,6 +53,7 @@ class GetResultActor(jobManager: JobManager) {
         jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
     } catch {
       case e: Throwable ⇒
+        job.state = ExecutionState.FAILED
         jobManager ! Error(job, e)
         jobManager ! Kill(job)
     }
@@ -67,9 +68,7 @@ class GetResultActor(jobManager: JobManager) {
     display(runtimeResult.stdErr, s"Error output ${runtimeResult.info.hostName}", storage, stream)
 
     runtimeResult.result match {
-      case Failure(exception) ⇒
-        batchJob.state = ExecutionState.FAILED
-        throw new JobRemoteExecutionException(exception, "Fatal exception thrown during the execution of the job execution on the execution node")
+      case Failure(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown during the execution of the job execution on the execution node")
       case Success((result, log)) ⇒
         val contextResults = getContextResults(result, storage)
 
