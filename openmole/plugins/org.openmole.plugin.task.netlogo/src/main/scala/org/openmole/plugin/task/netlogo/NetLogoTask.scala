@@ -123,7 +123,7 @@ trait NetLogoTask extends ExternalTask {
 
   private def withClassLoader[T](classLoader: ClassLoader)(f: ⇒ T): T = {
     val threadClassLoader = Thread.currentThread().getContextClassLoader
-    Thread.currentThread().setContextClassLoader(netLogoFactory().getNetLogoClassLoader)
+    Thread.currentThread().setContextClassLoader(classLoader)
     try f
     finally Thread.currentThread().setContextClassLoader(threadClassLoader)
   }
