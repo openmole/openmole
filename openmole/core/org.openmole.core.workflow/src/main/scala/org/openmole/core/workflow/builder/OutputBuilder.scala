@@ -22,7 +22,7 @@ trait OutputBuilder { builder ⇒
   private var _outputs = PrototypeSet.empty
 
   def addOutput(d: Prototype[_]*): this.type = { _outputs ++= d; this }
-  def addExploredOutput(d: Prototype[Array[_]]*): this.type = { _outputs = _outputs.explore(d); this }
+  def addExploredOutput(d: Prototype[_]*): this.type = { _outputs = _outputs.explore(d); this }
 
   def outputs = _outputs
 

@@ -35,7 +35,7 @@ package builder {
   }
 
   class ExploredOutputs {
-    def +=(d: Prototype[Array[_]]*) = (_: OutputBuilder).addExploredOutput(d: _*)
+    def +=(d: Prototype[_]*) = (_: OutputBuilder).addExploredOutput(d: _*)
   }
 
   trait BuilderPackage {
