@@ -25,7 +25,7 @@ import Condition._
 import scala.util.{ Random, Failure, Success, Try }
 import org.openmole.tool.lock._
 
-class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: Condition, val filter: Filter[String] = Filter.empty) extends IEndExplorationTransition {
+class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: Condition, val filter: BlockList[String] = BlockList.empty) extends IEndExplorationTransition {
 
   //def condition = Condition.True
 

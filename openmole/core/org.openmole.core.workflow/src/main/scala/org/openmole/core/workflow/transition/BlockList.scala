@@ -17,24 +17,22 @@
 
 package org.openmole.core.workflow.transition
 
-trait Filter[T] extends (T ⇒ Boolean)
+trait BlockList[T] extends (T ⇒ Boolean)
 
-trait Block[T] extends Filter[T] {
+trait Block[T] extends BlockList[T] {
   def filtered: Set[T]
   def apply(t: T) = filtered.contains(t)
 }
 
-trait Keep[T] extends Filter[T] {
+trait Keep[T] extends BlockList[T] {
   def kept: Set[T]
   def apply(t: T) = !kept.contains(t)
 }
 
-class EmptyFilter[T] extends Filter[T] {
-  def apply(t: T) = false
-}
-
-object Filter {
-  def empty[T] = new EmptyFilter[T]
+object BlockList {
+  def empty[T] = new BlockList[T] {
+    def apply(t: T) = false
+  }
 }
 
 object Block {

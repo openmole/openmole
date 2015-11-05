@@ -29,7 +29,7 @@ object DataChannel {
   def levelDelta(mole: Mole)(dataChannel: DataChannel): Int =
     mole.level(dataChannel.end.capsule) - mole.level(dataChannel.start)
 
-  def apply(start: Capsule, end: Slot, filter: Filter[String]) = new DataChannel(start, end, filter)
+  def apply(start: Capsule, end: Slot, filter: BlockList[String]) = new DataChannel(start, end, filter)
 }
 
 /**
@@ -46,7 +46,7 @@ object DataChannel {
 class DataChannel(
     val start: Capsule,
     val end: Slot,
-    val filter: Filter[String]) {
+    val filter: BlockList[String]) {
 
   /**
    * Consums the provided variables and construct a context for them.

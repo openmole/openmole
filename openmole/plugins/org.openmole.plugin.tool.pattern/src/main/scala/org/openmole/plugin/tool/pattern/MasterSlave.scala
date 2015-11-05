@@ -14,20 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.workflow.builder
+package org.openmole.plugin.tool.pattern
 
+import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.puzzle._
+import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.data._
 
-trait OutputBuilder { builder ⇒
-  private var _outputs = PrototypeSet.empty
+object MasterSlave {
 
-  def addOutput(d: Prototype[_]*): this.type = { _outputs ++= d; this }
-  def addExploredOutput(d: Prototype[Array[_]]*): this.type = { _outputs = _outputs.explore(d); this }
+  def apply(
+    bootstrap: Task,
+    master: Task,
+    state: Prototype[_]*)(slave: Puzzle) = {
 
-  def outputs = _outputs
+    val masterCapsule = MasterCapsule(master, state: _*)
+    val masterSlot = Slot(masterCapsule)
+    val bootstrapCapsule = Capsule(bootstrap)
+    val slaveSlot2 = Slot(slave.first)
 
-  trait Built {
-    def outputs = builder.outputs
+    (bootstrapCapsule -< slave -- masterSlot) + (masterCapsule -<- slaveSlot2) + (bootstrapCapsule oo (masterSlot, state: _*))
   }
 
 }
