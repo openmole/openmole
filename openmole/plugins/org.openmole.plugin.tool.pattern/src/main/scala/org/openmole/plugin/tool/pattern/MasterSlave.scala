@@ -26,16 +26,15 @@ import org.openmole.core.workflow.data._
 object MasterSlave {
 
   def apply(
-    bootstrap: Task,
+    bootstrap: Puzzle,
     master: Task,
     state: Prototype[_]*)(slave: Puzzle) = {
 
     val masterCapsule = MasterCapsule(master, state: _*)
     val masterSlot = Slot(masterCapsule)
-    val bootstrapCapsule = Capsule(bootstrap)
     val slaveSlot2 = Slot(slave.first)
 
-    (bootstrapCapsule -< slave -- masterSlot) + (masterCapsule -<- slaveSlot2) + (bootstrapCapsule oo (masterSlot, state: _*))
+    (bootstrap -< slave -- masterSlot) + (masterCapsule -<- slaveSlot2) + (bootstrap oo (masterSlot, state: _*))
   }
 
 }
