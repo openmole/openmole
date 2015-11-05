@@ -24,14 +24,12 @@ import org.openmole.core.workflow.transition.ITransition
 object TopologyProblem {
 
   case class DuplicatedTransition(transitions: Iterable[ITransition]) extends TopologyProblem {
-
     override def toString = "DuplicatedTransition: from " + transitions.head.start + " to " + transitions.head.end.capsule + " has been found " + transitions.size + " times."
   }
 
   case class LevelProblem(
       capsule: Capsule,
       paths: List[(List[Capsule], Int)]) extends TopologyProblem {
-
     override def toString = "LevelProblem: " + capsule + ", " + paths.map { case (p, l) ⇒ "Folowing the path (" + p.mkString(", ") + " has level " + l + ")" }.mkString(", ")
   }
 
@@ -44,8 +42,11 @@ object TopologyProblem {
   }
 
   case class DataChannelNegativeLevelProblem(dataChannel: DataChannel) extends TopologyProblem {
-
     override def toString = "DataChannelNegativeLevelProblem: " + dataChannel + ", links a capsule of upper level to lower level, this is not supported, use aggregation transitions."
+  }
+
+  case class NoTransitionToCapsuleProblem(capsule: Capsule, dataChannel: DataChannel) extends TopologyProblem {
+    override def toString = s"NoTransitionToCapsuleProblem: $capsule is linked with $dataChannel but not with any transition"
   }
 }
 

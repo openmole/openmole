@@ -26,6 +26,7 @@ import org.openmole.core.workflow.validation.TypeUtil._
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.{ HashMap, Queue }
+import scala.util.{ Failure, Success, Try }
 
 object Validation {
 
@@ -242,10 +243,25 @@ object Validation {
     }).flatten
   }
 
-  def dataChannelErrors(mole: Mole) =
-    mole.dataChannels.filter {
-      dc ⇒ mole.level(dc.end) < mole.level(dc.start)
-    }.map(DataChannelNegativeLevelProblem(_))
+  def dataChannelErrors(mole: Mole) = {
+    val noTransitionProblems =
+      mole.dataChannels.flatMap { dc ⇒ List(dc -> dc.start, dc -> dc.end.capsule) }.flatMap {
+        case (dc, capsule) ⇒
+          Try(mole.level(capsule)) match {
+            case Success(_) ⇒ None
+            case Failure(_) ⇒ Some(NoTransitionToCapsuleProblem(capsule, dc))
+          }
+      }
+
+    val dataChannelWithProblem = noTransitionProblems.map(_.dataChannel).toSet
+
+    val negativeLevelProblem =
+      mole.dataChannels.filter(dc ⇒ dataChannelWithProblem.contains(dc)).filter {
+        dc ⇒ mole.level(dc.end) < mole.level(dc.start)
+      }.map(DataChannelNegativeLevelProblem(_))
+
+    noTransitionProblems ++ negativeLevelProblem
+  }
 
   def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty) = {
     allMoles(mole).flatMap {
