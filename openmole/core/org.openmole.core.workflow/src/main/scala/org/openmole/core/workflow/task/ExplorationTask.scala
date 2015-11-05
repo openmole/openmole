@@ -44,11 +44,7 @@ object ExplorationTask {
     }
   }
 
-  def explored(c: Capsule) =
-    (p: Prototype[_]) ⇒ {
-      def isExplored = c.task.outputs.explore.contains(p.name)
-      p.`type`.isArray && isExplored
-    }
+  def explored(c: Capsule) = (p: Prototype[_]) ⇒ c.task.outputs.explored(p)
 
 }
 
