@@ -28,32 +28,30 @@ import org.openmole.core.workflow.task._
 
 object ScalingGAPopulationTask {
 
-  def apply(evolution: GAAlgorithm)(
-    population: Prototype[Population[evolution.G, evolution.P, evolution.F]]) = {
+  def apply(algorithm: GAAlgorithm)(
+    population: Prototype[algorithm.Pop]) = {
 
-    val (_evolution, _population) = (evolution, population)
+    val (_population) = (population)
 
     new TaskBuilder { builder ⇒
 
       addInput(population)
-      evolution.inputsPrototypes foreach { i ⇒ addOutput(i.toArray) }
-      evolution.outputPrototypes foreach { o ⇒ addOutput(o.toArray) }
+      algorithm.inputsPrototypes foreach { i ⇒ addOutput(i.toArray) }
+      algorithm.outputPrototypes foreach { o ⇒ addOutput(o.toArray) }
 
-      def toTask = new ScalingGAPopulationTask with Built {
-        val evolution = _evolution
-        val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
+      def toTask = new ScalingGAPopulationTask(algorithm) with Built {
+        val population = _population.asInstanceOf[Prototype[algorithm.Pop]]
       }
     }
   }
 
 }
 
-sealed abstract class ScalingGAPopulationTask extends Task {
+abstract class ScalingGAPopulationTask(val algorithm: GAAlgorithm) extends Task {
 
-  val evolution: GAAlgorithm
-  val population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
+  val population: Prototype[algorithm.Pop]
 
   override def process(context: Context)(implicit rng: RandomProvider) =
-    evolution.toVariables(context(population), context)
+    algorithm.toVariables(context(population), context)
 
 }

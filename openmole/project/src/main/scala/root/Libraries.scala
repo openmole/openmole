@@ -102,7 +102,7 @@ object Libraries extends Defaults {
   lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % scalaJSDomVersion
   lazy val scalajsJQuery = "org.openmole" %% "scalajs-jquery" % scalaJQueryVersion
 
-  lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "1.80"
+  lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "2.0-SNAPSHOT"
 
   lazy val family = "org.openmole" %% "fr-iscpif-family" % "1.3"
 

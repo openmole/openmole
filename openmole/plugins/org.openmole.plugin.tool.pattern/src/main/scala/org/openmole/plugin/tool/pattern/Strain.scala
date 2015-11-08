@@ -26,11 +26,11 @@ import org.openmole.core.workflow.validation.TypeUtil
 
 object Strain {
 
-  def apply(task: Task) = Capsule(task, strainer = true)
+  def apply(task: Task) = Capsule(task, strain = true)
 
   def apply(puzzle: Puzzle): Puzzle = {
-    val first = Capsule(EmptyTask(), strainer = true)
-    val last = Slot(Capsule(EmptyTask(), strainer = true))
+    val first = Capsule(EmptyTask(), strain = true)
+    val last = Slot(Capsule(EmptyTask(), strain = true))
 
     val _puzzle = first -- puzzle -- last
     val outputs = TypeUtil.receivedTypes(_puzzle.toMole, _puzzle.sources, _puzzle.hooks)(last)

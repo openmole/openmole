@@ -419,7 +419,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val t2 = EmptyTask()
     t2 addInput pInt
 
-    val puzzle = (Capsule(exploration, strainer = true) -< Capsule(t1, strainer = true) -- t2)
+    val puzzle = (Capsule(exploration, strain = true) -< Capsule(t1, strain = true) -- t2)
 
     val ex = puzzle start
 

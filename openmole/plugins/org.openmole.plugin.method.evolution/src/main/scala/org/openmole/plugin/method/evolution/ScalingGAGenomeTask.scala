@@ -29,27 +29,27 @@ import org.openmole.core.workflow.domain._
 
 object ScalingGAGenomeTask {
 
-  def apply(evolution: GAAlgorithm)(
-    genome: Prototype[evolution.G]) = {
+  def apply(algorithm: GAAlgorithm)(
+    genome: Prototype[algorithm.G]) = {
 
     val (_genome) = (genome)
     new TaskBuilder { builder ⇒
-      evolution.inputsPrototypes foreach { p ⇒ addOutput(p) }
+      algorithm.inputsPrototypes foreach { p ⇒ addOutput(p) }
       addInput(genome)
       addOutput(genome)
 
-      def toTask = new ScalingGAGenomeTask(evolution) with Built {
-        val genome = _genome.asInstanceOf[Prototype[evolution.G]]
+      def toTask = new ScalingGAGenomeTask(algorithm) with Built {
+        val genome = _genome.asInstanceOf[Prototype[algorithm.G]]
       }
     }
   }
 
 }
 
-sealed abstract class ScalingGAGenomeTask(val evolution: GAAlgorithm) extends Task {
-  val genome: Prototype[evolution.G]
+abstract class ScalingGAGenomeTask(val algorithm: GAAlgorithm) extends Task {
+  val genome: Prototype[algorithm.G]
 
   override def process(context: Context)(implicit rng: RandomProvider) = {
-    context ++ evolution.toVariables(context(genome), context)
+    context ++ algorithm.toVariables(context(genome), context)
   }
 }

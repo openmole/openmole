@@ -18,13 +18,14 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
+import fr.iscpif.mgo.algorithm._
 import org.openmole.core.workflow.data.PrototypeType
 
 import scala.util.Random
 
 object NSGA2 {
 
-  def apply(
+  /*def apply(
     mu: Int,
     termination: GATermination { type G >: NSGA2#G; type P >: NSGA2#P; type F >: NSGA2#F },
     inputs: Inputs,
@@ -53,10 +54,33 @@ object NSGA2 {
       def initialState: STATE = termination.initialState
       def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
     }
+  }*/
+
+  def apply(
+    mu: Int,
+    inputs: Inputs,
+    objectives: Objectives,
+    epsilons: Option[Seq[Double]] = None) = {
+
+    val (_mu, _inputs, _objectives) = (mu, inputs, objectives)
+
+    new NSGAII with GAAlgorithm {
+      val stateType = PrototypeType[STATE]
+      val populationType = PrototypeType[Pop]
+      val individualType = PrototypeType[Ind]
+      val gType = PrototypeType[G]
+
+      val objectives = _objectives
+      val inputs = _inputs
+
+      override implicit def fitness: Fitness[Seq[Double]] = Fitness(_.phenotype)
+      override def mu: Int = _mu
+    }
   }
+
 }
 
-trait NSGA2 extends GAAlgorithm
+/*trait NSGA2 extends GAAlgorithm
   with DynamicGACrossover
   with DynamicGAMutation
   with BinaryTournamentSelection
@@ -70,5 +94,5 @@ trait NSGA2 extends GAAlgorithm
   with GeneticBreeding
   with MGFitness
   with ClampedGenome
-  with GAGenomeWithSigma
+  with GAGenomeWithSigma*/
 

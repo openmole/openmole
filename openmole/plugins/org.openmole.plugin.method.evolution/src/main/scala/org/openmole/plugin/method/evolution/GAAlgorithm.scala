@@ -18,24 +18,20 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import elitism._
+import fr.iscpif.mgo.algorithm._
 import org.openmole.core.workflow.data._
 
-trait GAAlgorithm extends Archive
-    with EvolutionType
-    with G with P with F with GA with DoubleSeqPhenotype with MGFitness
-    with Elitism
-    with Termination
-    with Breeding
-    with CloneRemoval
-    with NaNRemoval
-    with InputsConverter {
+trait GAAlgorithm extends Algorithm with GeneticAlgorithm with InputsConverter {
+
+  final type P = Seq[Double]
+
   def objectives: Objectives
   def inputsPrototypes = inputs.inputs.map(_.prototype)
   def outputPrototypes = objectives
-  def toVariables(genome: G, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = scaled(values.get(genome), context)
-  def toVariables(population: Population[G, P, F], context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = {
-    val scaledValues = population.map(i ⇒ scaled(values.get(i.genome), context).toIndexedSeq)
+
+  def toVariables(genome: G, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = scaled(genomeValues.get(genome), context)
+  def toVariables(population: Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = {
+    val scaledValues = population.map(i ⇒ scaled(genomeValues.get(i.genome), context))
 
     inputs.inputs.zipWithIndex.map {
       case (input, i) ⇒
@@ -48,7 +44,7 @@ trait GAAlgorithm extends Archive
         case (p, i) ⇒
           Variable(
             p.toArray,
-            population.map { iv ⇒ fitness(iv.toIndividual)(i) }.toArray)
+            population.map { iv ⇒ iv.phenotype(i) }.toArray)
       }
   }
 }

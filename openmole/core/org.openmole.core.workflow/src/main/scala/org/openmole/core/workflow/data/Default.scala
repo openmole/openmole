@@ -18,22 +18,16 @@
 package org.openmole.core.workflow.data
 
 object Default {
-  implicit def tuple2IterableToParameters(values: Iterable[(Prototype[T], T) forSome { type T }]) = values.map { case (p, v) ⇒ Default(p, v) }
+  //implicit def tuple2IterableToParameters(values: Iterable[(Prototype[T], T) forSome { type T }]) = values.map { case (p, v) ⇒ Default(p, v) }
 
-  def apply[T](prototype: Prototype[T], value: T, `override`: Boolean = false) = {
+  def value[T](prototype: Prototype[T], value: T, `override`: Boolean = false): Default[T] = apply(prototype, _ ⇒ value, `override`)
+  def delayed[T](prototype: Prototype[T], value: ⇒ T, `override`: Boolean = false): Default[T] = apply(prototype, _ ⇒ value, `override`)
+
+  def apply[T](prototype: Prototype[T], value: Context ⇒ T, `override`: Boolean = false): Default[T] = {
     val (o, p, v) = (`override`, prototype, value)
     new Default[T] {
       val prototype = p
-      def value(ctx: Context) = v
-      val `override` = o
-    }
-  }
-
-  def delayed[T](_prototype: Prototype[T], _value: ⇒ T, `override`: Boolean = false) = {
-    val o = `override`
-    new Default[T] {
-      val prototype = _prototype
-      def value(ctx: Context) = _value
+      def value(ctx: Context) = v(ctx)
       val `override` = o
     }
   }

@@ -39,6 +39,7 @@ package transition {
       filterParameter: BlockList[String] = BlockList.empty) {
     def when(condition: Condition) = copy(conditionParameter = condition)
     def filter(filter: BlockList[String]) = copy(filterParameter = filter)
+    def keep(prototypes: Prototype[_]*) = filter(Keep(prototypes.map(_.name): _*))
   }
 
   trait TransitionDecorator {
@@ -46,6 +47,7 @@ package transition {
 
     def when(condition: Condition) = TransitionParameter(from, condition)
     def filter(filter: BlockList[String]) = TransitionParameter(from, filterParameter = filter)
+    def keep(prototypes: Prototype[_]*) = filter(Keep(prototypes.map(_.name): _*))
 
     def -<(
       to: Puzzle,

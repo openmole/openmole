@@ -232,21 +232,12 @@ object OSGi extends Defaults {
   lazy val closureCompiler = OsgiProject("closure-compiler", exports = Seq("com.google.javascript.*")) settings(
     libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion)
 
-  lazy val mgoVersion = "1.80"
+  lazy val mgoVersion = "2.0-SNAPSHOT"
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings(
     libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
     version := mgoVersion
-    )
-
-  val monocleVersion = "1.0.1"
-
-  lazy val monocle = OsgiProject("monocle", privatePackages = Seq("!scala.*", "*")) settings(
-    libraryDependencies += "com.github.julien-truffaut" %% "monocle-core" % monocleVersion,
-    libraryDependencies += "com.github.julien-truffaut" %% "monocle-generic" % monocleVersion,
-    libraryDependencies += "com.github.julien-truffaut" %% "monocle-macro" % monocleVersion,
-    version := monocleVersion
-    )
+    ) dependsOn(monocle, scalaz)
 
   lazy val familyVersion = "1.3"
   lazy val family = OsgiProject("fr.iscpif.family") settings(
@@ -319,5 +310,27 @@ object OSGi extends Defaults {
 
   lazy val txtmark = OsgiProject("com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
     libraryDependencies += "com.github.rjeschke" % "txtmark" % "0.13", version := "0.13" )
+
+
+  val monocleVersion = "1.0.1"
+
+  lazy val monocle = OsgiProject("monocle", privatePackages = Seq("!scala.*", "!scalaz.*", "*")) settings(
+    libraryDependencies += "com.github.julien-truffaut" %% "monocle-core" % monocleVersion,
+    libraryDependencies += "com.github.julien-truffaut" %% "monocle-generic" % monocleVersion,
+    libraryDependencies += "com.github.julien-truffaut" %% "monocle-macro" % monocleVersion,
+    version := monocleVersion
+    ) dependsOn(scalaz)
+
+  val scalazVersion = "7.1.3"
+
+  lazy val scalaz = OsgiProject("scalaz", privatePackages = Seq("!scala.*", "*")) settings (
+    libraryDependencies ++= Seq(
+      "org.scalaz" %% "scalaz-core" % scalazVersion,
+      "org.scalaz" %% "scalaz-effect" % scalazVersion,
+      "org.scalaz" %% "scalaz-typelevel" % scalazVersion,
+      "org.scalaz" %% "scalaz-iteratee" % scalazVersion
+    )
+    )
+
 
 }

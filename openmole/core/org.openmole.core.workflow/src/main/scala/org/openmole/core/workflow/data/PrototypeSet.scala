@@ -53,7 +53,7 @@ case class PrototypeSet(prototypes: Seq[Prototype[_]], explore: Set[String] = Se
 
   override def iterator: Iterator[Prototype[_]] = prototypes.iterator
 
-  def explore(d: Seq[Prototype[_]]) = copy(prototypes = d.toList ::: prototypes.toList, explore = explore ++ d.map(_.name))
+  def explore(d: String*) = copy(explore = explore ++ d)
 
   def ++(d: Traversable[Prototype[_]]) = copy(prototypes = d.toList ::: prototypes.toList)
 

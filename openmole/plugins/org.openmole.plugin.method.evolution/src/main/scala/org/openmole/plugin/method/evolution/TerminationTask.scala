@@ -22,58 +22,49 @@ import org.openmole.core.workflow.builder.TaskBuilder
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
+
+import scalaz.Tag
 
 object TerminationTask {
 
-  def apply(evolution: Termination with Archive)(
-    population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
-    archive: Prototype[evolution.A],
-    generation: Prototype[Int],
-    state: Prototype[evolution.STATE],
+  def apply(algorithm: Algorithm)(
+    termination: Termination[algorithm.AlgorithmState],
+    state: Prototype[algorithm.AlgorithmState],
+    generation: Prototype[Long],
     terminated: Prototype[Boolean]) = {
-    val (_population, _archive, _generation, _state, _terminated) = (population, archive, generation, state, terminated)
+    val (_state, _generation, _termination, _terminated) = (state, generation, termination, terminated)
 
     new TaskBuilder { builder ⇒
-      addInput(archive)
-      addInput(population)
-      addInput(generation)
       addInput(state)
-      addOutput(generation)
       addOutput(state)
       addOutput(terminated)
+      addOutput(generation)
 
-      def toTask = new TerminationTask(evolution) with Built {
-        val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
-        val archive = _archive.asInstanceOf[Prototype[evolution.A]]
+      def toTask = new TerminationTask(algorithm) with Built {
+        val state = _state.asInstanceOf[Prototype[algorithm.AlgorithmState]]
         val generation = _generation
-        val state = _state.asInstanceOf[Prototype[evolution.STATE]]
+        val termination = _termination.asInstanceOf[Termination[algorithm.AlgorithmState]]
         val terminated = _terminated
       }
     }
   }
 }
 
-sealed abstract class TerminationTask[E <: Termination with Archive](val evolution: E) extends Task {
+abstract class TerminationTask(val algorithm: Algorithm) extends Task {
 
-  def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
-  def archive: Prototype[evolution.A]
-
-  def state: Prototype[evolution.STATE]
-  def generation: Prototype[Int]
+  def generation: Prototype[Long]
+  def state: Prototype[algorithm.AlgorithmState]
+  def termination: Termination[algorithm.AlgorithmState]
   def terminated: Prototype[Boolean]
 
   override def process(context: Context)(implicit rng: RandomProvider) = {
-    val (term, newState) =
-      evolution.terminated(
-        context(population),
-        context(state))(rng())
+    val (newState, t) = termination.run(context(state))
 
     Context(
-      Variable(terminated, term),
+      Variable(terminated, t),
       Variable(state, newState),
-      Variable(generation, context(generation) + 1))
+      Variable(generation, Tag.unwrap(algorithm.generation.get(newState)))
+    )
   }
 
 }

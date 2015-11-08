@@ -25,9 +25,9 @@ import org.openmole.core.workflow.transition._
 object Skip {
 
   def apply(puzzle: Puzzle, condition: Condition) = {
-    val first = Capsule(EmptyTask(), strainer = true)
+    val first = Capsule(EmptyTask(), strain = true)
     val firstSlot = Slot(first)
-    val last = Capsule(EmptyTask(), strainer = true)
+    val last = Capsule(EmptyTask(), strain = true)
 
     (firstSlot -- (puzzle, !condition) -- last) +
       (firstSlot -- (last, condition))

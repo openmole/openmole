@@ -27,43 +27,43 @@ import org.openmole.core.workflow.task._
 
 object ElitismTask {
 
-  def apply(evolution: Elitism with Termination with Archive)(
-    population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
-    offspring: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
-    archive: Prototype[evolution.A]) = {
-    val (_population, _offspring, _archive) = (population, offspring, archive)
+  def apply(algorithm: Algorithm)(
+    population: Prototype[algorithm.Pop],
+    offspring: Prototype[algorithm.Pop],
+    state: Prototype[algorithm.AlgorithmState]) = {
+    val (_population, _offspring, _state) = (population, offspring, state)
 
     new TaskBuilder { builder ⇒
-      addInput(archive)
+      addInput(state)
       addInput(population)
       addInput(offspring)
       addOutput(population)
-      addOutput(archive)
+      addOutput(state)
 
-      def toTask = new ElitismTask(evolution) with builder.Built {
-        val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
-        val offspring = _offspring.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
-
-        val archive = _archive.asInstanceOf[Prototype[evolution.A]]
+      def toTask = new ElitismTask(algorithm) with builder.Built {
+        val population = _population.asInstanceOf[Prototype[algorithm.Pop]]
+        val offspring = _offspring.asInstanceOf[Prototype[algorithm.Pop]]
+        val state = _state.asInstanceOf[Prototype[algorithm.AlgorithmState]]
       }
     }
   }
 }
 
-sealed abstract class ElitismTask[E <: Elitism with Termination with Archive](val evolution: E) extends Task {
+abstract class ElitismTask(val algorithm: Algorithm) extends Task {
 
-  def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
-  def offspring: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
-  def archive: Prototype[evolution.A]
+  def population: Prototype[algorithm.Pop]
+  def offspring: Prototype[algorithm.Pop]
+  def state: Prototype[algorithm.AlgorithmState]
 
   override def process(context: Context)(implicit rng: RandomProvider) = {
-    val a = context(archive)
-    val offspringPopulation = Population.fromIndividuals(context(offspring))
+    val (newState, newPopulation) =
+      algorithm.elitism(context(population),
+        context(offspring)).run(context(state))
 
-    val newArchive = evolution.archive(a, context(population), offspringPopulation)(rng())
-    val newPopulation = evolution.elitism(context(population), offspringPopulation, newArchive)(rng())
-
-    Context(Variable(population, newPopulation), Variable(archive, newArchive))
+    Context(
+      Variable(population, newPopulation),
+      Variable(state, newState)
+    )
   }
 
 }

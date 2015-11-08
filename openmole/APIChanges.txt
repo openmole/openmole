@@ -3,3 +3,8 @@ ScalaTask
 
 change: "workDir" variable become "workDirectory"
 new: mkDir() function create a new directory
+
+Capsule
+
+change: strainer = true becomes strain = true
+
