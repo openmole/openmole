@@ -34,6 +34,8 @@ object ToOffspringTask {
     new TaskBuilder { builder ⇒
       algorithm.outputPrototypes.foreach(p ⇒ addInput(p))
       addInput(genome)
+      addInput(state)
+      addOutput(state)
       addOutput(offspring)
 
       val (_genome, _offspring, _state) = (genome, offspring, state)

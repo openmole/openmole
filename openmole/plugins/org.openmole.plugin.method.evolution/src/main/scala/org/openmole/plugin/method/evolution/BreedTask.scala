@@ -17,30 +17,33 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.tools.service.Random._
 import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import fr.iscpif.mgo._
-import org.openmole.core.workflow.sampling.Sampling
+
+import scala.util.Random
+import scalaz._
 
 object BreedTask {
 
   def apply(algorithm: Algorithm)(
     size: Int,
+    randomGenome: State[Random, algorithm.G],
     population: Prototype[algorithm.Pop],
     state: Prototype[algorithm.AlgorithmState],
     genome: Prototype[algorithm.G]) = {
 
-    val (_population, _state, _genome) = (population, state, genome)
+    val (_randomGenome, _population, _state, _genome) = (randomGenome, population, state, genome)
 
     new TaskBuilder {
       addInput(population)
       addInput(state)
       addOutput(state)
-      addExploredOutput(genome)
+      addExploredOutput(genome.toArray)
 
       override def toTask: Task = new BreedTask(algorithm, size) with Built {
+        val randomGenome = _randomGenome.asInstanceOf[State[Random, algorithm.G]]
         val population = _population.asInstanceOf[Prototype[algorithm.Pop]]
         val state = _state.asInstanceOf[Prototype[algorithm.AlgorithmState]]
         val genome = _genome.asInstanceOf[Prototype[algorithm.G]]
@@ -52,18 +55,32 @@ object BreedTask {
 }
 
 abstract class BreedTask(val algorithm: Algorithm, val size: Int) extends Task {
+  def randomGenome: State[Random, algorithm.G]
   def population: Prototype[algorithm.Pop]
   def state: Prototype[algorithm.AlgorithmState]
   def genome: Prototype[algorithm.G]
 
   override def process(context: Context)(implicit rng: RandomProvider) = {
     val p = context(population)
-    val s = context(state)
-    val (newState, breeded) = algorithm.breeding(p, size).run(s)
 
-    Context(
-      Variable(genome.toArray, breeded.toArray(genome.`type`.manifest)),
-      Variable(state, newState)
-    )
+    if (p.isEmpty) {
+      val s = context(state)
+      val (news, gs) = (algorithm.random lifts randomGenomes(randomGenome, size)).run(s)
+
+      Context(
+        Variable(genome.toArray, gs.toArray(genome.`type`.manifest)),
+        Variable(state, news)
+      )
+    }
+    else {
+
+      val s = context(state)
+      val (newState, breeded) = algorithm.breeding(p, size).run(s)
+
+      Context(
+        Variable(genome.toArray, breeded.toArray(genome.`type`.manifest)),
+        Variable(state, newState)
+      )
+    }
   }
 }

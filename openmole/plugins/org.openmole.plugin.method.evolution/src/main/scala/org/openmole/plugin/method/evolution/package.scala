@@ -96,7 +96,6 @@ package object evolution {
   }
 
   def SteadyGA[ALG <: GAAlgorithm](algorithm: ALG, evaluation: Puzzle, parallelism: Int, termination: OMTermination) = {
-
     val genome = Prototype[algorithm.G]("genome")
     val individual = Prototype[algorithm.Ind]("individual")
     val population = Prototype[algorithm.Pop]("population")
@@ -105,13 +104,19 @@ package object evolution {
     val generation = Prototype[Long]("generation")
     val terminated = Prototype[Boolean]("terminated")
 
-    val randomGenomes = RandomGenomesTask(algorithm)(
-      parallelism,
-      genome,
-      state,
-      algorithm.randomGenome(algorithm.inputs.size)
-    ) set( name := "randomGenome" )
+    def randomGenomeGenerator = algorithm.randomGenome(algorithm.inputs.size)
 
+    val randomGenomes = BreedTask(algorithm)(
+      parallelism,
+      randomGenomeGenerator,
+      population,
+      state,
+      genome) set (
+        name := "randomGenome",
+        _.setDefault(Default(state, ctx ⇒ algorithm.algorithmState(Task.buildRNG(ctx)))),
+        population := Population.empty,
+        outputs += population
+      )
 
     val scalingGenomeTask = ScalingGAGenomeTask(algorithm)(genome) set (
       name := "scalingGenome")
@@ -132,19 +137,24 @@ package object evolution {
       generation,
       terminated) set ( name := "termination")
 
-    val breed = BreedTask(algorithm)(1, population, state, genome) set ( name := "breed")
+    val breed = BreedTask(algorithm)(1, randomGenomeGenerator, population, state, genome) set ( name := "breed" )
 
-    val scalingIndividualsTask = ScalingGAPopulationTask(algorithm)(population) set ( name := "scalingIndividuals" )
+    val scalingIndividualsTask = ScalingGAPopulationTask(algorithm)(population) set ( name := "scalingIndividuals" ) set (
+        (inputs, outputs) += (generation, terminated)
+      )
 
     val masterFirst =
       EmptyTask() set (
+        name := "masterFirst",
         (inputs, outputs) += (population, genome, state),
         (inputs, outputs) += (algorithm.outputPrototypes: _*)
       )
 
-    val masterLast = EmptyTask() set (
-      name := "masterLast",
-      (inputs, outputs) += (population, state, genome.toArray, terminated))
+    val masterLast =
+      EmptyTask() set (
+        name := "masterLast",
+        (inputs, outputs) += (population, state, genome.toArray, terminated, generation)
+      )
 
     val masterFirstCapsule = Capsule(masterFirst)
     val elitismSlot = Slot(elitismTask)
@@ -159,15 +169,12 @@ package object evolution {
         terminationCapsule --
         breedSlot --
         masterLastSlot) +
-          (masterFirstCapsule -- (elitismSlot keep (population, state))) +
+          (masterFirstCapsule -- (elitismSlot keep population)) +
           (elitismSlot -- (breedSlot keep population)) +
           (elitismSlot -- (masterLastSlot keep population)) +
           (terminationCapsule -- (masterLastSlot keep (terminated, generation)))
 
-    val masterTask = MoleTask(master) set (
-      population := Population.empty,
-      exploredOutputs += genome.toArray
-      )
+    val masterTask = MoleTask(master) set ( exploredOutputs += genome.toArray )
 
     val masterSlave = MasterSlave(randomGenomes, masterTask, population, state)(scalingGenomeTask -- evaluation)
 
@@ -191,30 +198,7 @@ package object evolution {
 
     val gaPuzzle = OutputPuzzleContainer(puzzle, scalingIndividualsSlot.capsule)
     (gaPuzzle, parameters)
-
-//      scalingIndividualsTask addInput state
-//      scalingIndividualsTask addInput generation
-//      scalingIndividualsTask addInput terminated
-//      scalingIndividualsTask addInput archive
-//
-//      scalingIndividualsTask addOutput state
-//      scalingIndividualsTask addOutput generation
-//      scalingIndividualsTask addOutput terminated
-//      scalingIndividualsTask addOutput population
-//      scalingIndividualsTask addOutput archive
-//
-//      val terminatedCondition = Condition(terminated.name + " == true")
-//
-//      def gaParameters =
-//        GAParameters[ALG](evolution)(
-//          archive.asInstanceOf[Prototype[evolution.A]],
-//          genome.asInstanceOf[Prototype[evolution.G]],
-//          individual.asInstanceOf[Prototype[Individual[evolution.G, evolution.P, evolution.F]]],
-//          population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]],
-//          components.generation
-//        )
-
-    }
+  }
 
   def IslandGA[ALG <: Algorithm](parameters: Parameters[ALG]) = {
 
