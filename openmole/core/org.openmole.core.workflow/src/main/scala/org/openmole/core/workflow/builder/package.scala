@@ -50,9 +50,9 @@ package builder {
     final lazy val exploredOutputs: ExploredOutputs = new ExploredOutputs
 
     implicit class InputsOutputsDecorator(io: (Inputs, Outputs)) {
-      def +=(ps: Prototype[_]*) = {
-        io._1 += (ps: _*)
-        io._2 += (ps: _*)
+      def +=(ps: Prototype[_]*) = (b: InputBuilder with OutputBuilder) => {
+        (io._1 += (ps: _*)) (b)
+        (io._2 += (ps: _*)) (b)
       }
     }
 
