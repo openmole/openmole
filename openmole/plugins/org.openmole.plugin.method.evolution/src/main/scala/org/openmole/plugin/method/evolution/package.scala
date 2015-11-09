@@ -30,7 +30,6 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.task.tools._
-import org.openmole.plugin.domain.collection._
 import org.openmole.plugin.tool.pattern._
 
 import scala.concurrent.duration.Duration
@@ -139,17 +138,13 @@ package object evolution {
 
     val masterFirst =
       EmptyTask() set (
-        inputs += (population, genome, state),
-        inputs += (algorithm.outputPrototypes: _*),
-        outputs += (population, genome, state),
-        outputs += (algorithm.outputPrototypes: _*)
+        (inputs, outputs) += (population, genome, state),
+        (inputs, outputs) += (algorithm.outputPrototypes: _*)
       )
 
     val masterLast = EmptyTask() set (
       name := "masterLast",
-      inputs += (population, state, genome.toArray, terminated),
-      outputs += (population, state, genome.toArray, terminated)
-      )
+      (inputs, outputs) += (population, state, genome.toArray, terminated))
 
     val masterFirstCapsule = Capsule(masterFirst)
     val elitismSlot = Slot(elitismTask)

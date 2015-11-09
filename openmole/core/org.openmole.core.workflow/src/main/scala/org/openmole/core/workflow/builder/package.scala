@@ -49,6 +49,13 @@ package builder {
     final lazy val outputs: Outputs = new Outputs
     final lazy val exploredOutputs: ExploredOutputs = new ExploredOutputs
 
+    implicit class InputsOutputsDecorator(io: (Inputs, Outputs)) {
+      def +=(ps: Prototype[_]*) = {
+        io._1 += (ps: _*)
+        io._2 += (ps: _*)
+      }
+    }
+
     class AssignDefault[T](p: Prototype[T]) {
       def :=[U <: DefaultBuilder](v: T, `override`: Boolean = false) =
         (_: U).setDefault(p, v, `override`)
