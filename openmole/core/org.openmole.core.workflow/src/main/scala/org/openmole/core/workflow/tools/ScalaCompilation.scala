@@ -53,7 +53,7 @@ trait ScalaCompilation {
 object ScalaWrappedCompilation {
   def inputObject = "input"
 
-  def static[R](code: String, _inputs: Seq[Prototype[_]], output: CompilationOutput[R] = ScalaRawOutput()) = {
+  def static[R](code: String, _inputs: Seq[Prototype[_]], output: CompilationOutput[R] = ScalaRawOutput[R]()) = {
     val compilation =
       new ScalaWrappedCompilation with StaticHeader {
         type RETURN = R
@@ -71,7 +71,7 @@ object ScalaWrappedCompilation {
   }
 
 
-  def dynamic[R](code: String, output: CompilationOutput[R] = ScalaRawOutput()) =
+  def dynamic[R](code: String, output: CompilationOutput[R] = ScalaRawOutput[R]()) =
     new ScalaWrappedCompilation with DynamicHeader {
       type RETURN = R
 
@@ -112,8 +112,8 @@ object CompilationOutput {
     def wrapOutput = ""
   }
 
-  case class RawScala(compiled: ScalaClosure) extends CompiledScala[Any] {
-    def run(context: Context)(implicit rng: RandomProvider): Any = compiled(context, rng)
+  case class RawScala[T](compiled: ScalaClosure) extends CompiledScala[T] {
+    def run(context: Context)(implicit rng: RandomProvider): T = compiled(context, rng).asInstanceOf[T]
   }
 
 }
@@ -134,8 +134,8 @@ case class ScalaWrappedOutput(outputs: PrototypeSet) extends CompilationOutput[C
 
 }
 
-case class ScalaRawOutput() extends CompilationOutput[Any] { compilation ⇒
-  def apply(closure: ScalaClosure) = CompilationOutput.RawScala(closure)
+case class ScalaRawOutput[T]() extends CompilationOutput[T] { compilation ⇒
+  def apply(closure: ScalaClosure) = CompilationOutput.RawScala[T](closure)
   def wrapOutput = ""
 }
 

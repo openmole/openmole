@@ -33,7 +33,7 @@ object ScalaTask {
 
 abstract class ScalaTask(val source: String) extends JVMLanguageTask {
 
-  @transient lazy val scalaCompilation = ScalaWrappedCompilation.static[Context](source, inputs.toSeq, ScalaWrappedOutput(outputs))
+  @transient lazy val scalaCompilation = ScalaWrappedCompilation.static(source, inputs.toSeq, ScalaWrappedOutput(outputs))
   scalaCompilation
 
   override def processCode(context: Context)(implicit rng: RandomProvider) = scalaCompilation.run(context)
