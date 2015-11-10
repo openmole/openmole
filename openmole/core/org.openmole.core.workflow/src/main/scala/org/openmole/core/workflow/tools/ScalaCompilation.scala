@@ -53,8 +53,29 @@ trait ScalaCompilation {
 object ScalaWrappedCompilation {
   def inputObject = "input"
 
-  def raw(code: String) =
-    new ScalaWrappedCompilation with ScalaRawOutput {
+  def static[R](code: String, _inputs: Seq[Prototype[_]], output: CompilationOutput[R] = ScalaRawOutput()) = {
+    val compilation =
+      new ScalaWrappedCompilation with StaticHeader {
+        type RETURN = R
+
+        override def inputs = _inputs
+        override val compilationOutput = output
+        override def source: String = code
+        override def imports: Seq[String] = Seq.empty
+        override def plugins: Seq[File] = Seq.empty
+        override def libraries: Seq[File] = Seq.empty
+      }
+
+    compilation.functionCode.get
+    compilation
+  }
+
+
+  def dynamic[R](code: String, output: CompilationOutput[R] = ScalaRawOutput()) =
+    new ScalaWrappedCompilation with DynamicHeader {
+      type RETURN = R
+
+      override val compilationOutput = output
       override def source: String = code
       override def imports: Seq[String] = Seq.empty
       override def plugins: Seq[File] = Seq.empty
@@ -63,8 +84,7 @@ object ScalaWrappedCompilation {
 
   type ScalaClosure = (Context, RandomProvider) ⇒ Any
 
-  trait CompiledScala {
-    type RETURN
+  trait CompiledScala[RETURN] {
     def run(context: Context)(implicit rng: RandomProvider): RETURN
   }
 
@@ -72,18 +92,15 @@ object ScalaWrappedCompilation {
 
 import ScalaWrappedCompilation._
 
-trait ScalaWrappedOutput <: ScalaWrappedCompilation { compilation ⇒
 
-  type CS = WrappedScala
+trait CompilationOutput[RETURN] {
+  def apply(closure: ScalaClosure): CompiledScala[RETURN]
+  def wrapOutput: String
+}
 
-  def compiledScala(closure: ScalaClosure) =
-    WrappedScala(
-      compiled = closure.asInstanceOf[(Context, RandomProvider) ⇒ java.util.Map[String, Any]],
-      outputs = compilation.outputs
-    )
+object CompilationOutput {
 
-  case class WrappedScala(outputs: PrototypeSet, compiled: (Context, RandomProvider) ⇒ java.util.Map[String, Any]) extends CompiledScala {
-    type RETURN = Context
+  case class WrappedScala(outputs: PrototypeSet, compiled: (Context, RandomProvider) ⇒ java.util.Map[String, Any]) extends CompiledScala[Context] {
     def run(context: Context)(implicit rng: RandomProvider): Context = {
       val map = compiled(context, rng)
       context ++
@@ -92,36 +109,41 @@ trait ScalaWrappedOutput <: ScalaWrappedCompilation { compilation ⇒
         }
     }
 
+    def wrapOutput = ""
   }
 
-  def outputs: PrototypeSet
-  override def wrapOutput =
-    Some(
-      s"""
-         |import scala.collection.JavaConversions.mapAsJavaMap
-         |mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> ${p.name}""").mkString(",")} ))
-    """.stripMargin
-    )
-
-}
-
-trait ScalaRawOutput <: ScalaCompilation { compilation ⇒
-
-  type CS = RawScala
-
-  def compiledScala(closure: ScalaClosure) = RawScala(closure)
-
-  case class RawScala(compiled: ScalaClosure) extends CompiledScala {
-    type RETURN = Any
+  case class RawScala(compiled: ScalaClosure) extends CompiledScala[Any] {
     def run(context: Context)(implicit rng: RandomProvider): Any = compiled(context, rng)
   }
 
 }
 
+case class ScalaWrappedOutput(outputs: PrototypeSet) extends CompilationOutput[Context] { compilation ⇒
+
+  def apply(closure: ScalaClosure) =
+    CompilationOutput.WrappedScala(
+      compiled = closure.asInstanceOf[(Context, RandomProvider) ⇒ java.util.Map[String, Any]],
+      outputs = compilation.outputs
+    )
+
+  def wrapOutput =
+    s"""
+       |import scala.collection.JavaConversions.mapAsJavaMap
+       |mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> ${p.name}""").mkString(",")} ))
+       |""".stripMargin
+
+}
+
+case class ScalaRawOutput() extends CompilationOutput[Any] { compilation ⇒
+  def apply(closure: ScalaClosure) = CompilationOutput.RawScala(closure)
+  def wrapOutput = ""
+}
+
 trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
-  type CS <: CompiledScala
+  type RETURN
 
+  def compilationOutput: CompilationOutput[RETURN]
   def source: String
   def openMOLEImports = Seq(s"${CodeTool.namespace}._")
   def imports: Seq[String]
@@ -131,6 +153,13 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
   def function(inputs: Seq[Prototype[_]]) =
     compile(script(inputs)).map { evaluated ⇒
       (evaluated, evaluated.getClass.getMethod("apply", classOf[Context], classOf[RandomProvider]))
+    }
+
+  def closure(inputs: Seq[Prototype[_]]) =
+    function(inputs).map {
+      case (evaluated, method) ⇒
+        val closure: ScalaClosure = (context: Context, rng: RandomProvider) ⇒ method.invoke(evaluated, context, rng)
+        compilationOutput(closure)
     }
 
   def toScalaNativeType(t: PrototypeType[_]): PrototypeType[_] = {
@@ -154,15 +183,27 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
           |    import ${inputObject}._
           |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = ${prefix}RNGProvider()
           |    $source
-          |    ${wrapOutput.getOrElse("")}
+          |    ${compilationOutput.wrapOutput}
           |}
           |""".stripMargin
 
-  def wrapOutput: Option[String] = None
 
-  @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], Try[CS]]()
+  def run(context: Context)(implicit rng: RandomProvider) = compiled(context).get.run(context)(rng)
 
-  def compiled(inputs: Seq[Prototype[_]]): Try[CS] =
+  def compiled(context: Context): Try[CompiledScala[RETURN]]
+}
+
+
+trait DynamicHeader { this: ScalaWrappedCompilation =>
+
+  @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], Try[CompiledScala[RETURN]]]()
+
+  def compiled(context: Context): Try[CompiledScala[RETURN]] = {
+    val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }
+    compiled(contextPrototypes)
+  }
+
+  def compiled(inputs: Seq[Prototype[_]]): Try[CompiledScala[RETURN]] =
     cache.synchronized {
       val allInputMap = inputs.groupBy(_.name)
 
@@ -174,24 +215,15 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
           val scriptInputs = sortedInputNames.map(n ⇒ allInputMap(n).head)
           cache.getOrElseUpdate(
             scriptInputs,
-            function(scriptInputs).map {
-              case (evaluated, method) ⇒
-                val closure: ScalaClosure =
-                  (context: Context, rng: RandomProvider) ⇒ method.invoke(evaluated, context, rng)
-                compiledScala(closure)
-            }
+            closure(scriptInputs)
           )
         case duplicated ⇒ throw new UserBadDataError("Duplicated inputs: " + duplicated.mkString(", "))
       }
     }
+}
 
-  def compiled(context: Context): Try[CS] = {
-    val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }
-    compiled(contextPrototypes)
-  }
-
-  def run(context: Context)(implicit rng: RandomProvider) = compiled(context).get.run(context)(rng)
-
-  def compiledScala(closure: ScalaClosure): CS
-
+trait StaticHeader { this: ScalaWrappedCompilation =>
+  def inputs: Seq[Prototype[_]]
+  @transient lazy val functionCode = closure(inputs)
+  def compiled(context: Context): Try[CompiledScala[RETURN]] = functionCode
 }

@@ -31,7 +31,7 @@ object FromContext {
 
   implicit def fromStringToContext[T](code: String)(implicit fromString: FromString[T]) =
     new FromContext[T] {
-      @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
+      @transient lazy val proxy = ScalaWrappedCompilation.dynamic(code)
       override def from(context: ⇒ Context)(implicit rng: RandomProvider): T = fromString.from(proxy.run(context).toString)
     }
 

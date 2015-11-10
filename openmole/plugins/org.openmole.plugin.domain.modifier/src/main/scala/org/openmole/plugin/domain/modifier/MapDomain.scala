@@ -40,7 +40,8 @@ object MapDomain {
 sealed class MapDomain[-I, +O, D](val domain: D, val source: String)(implicit discrete: Discrete[I, D]) { d ⇒
 
   def inputs = discrete.inputs(domain)
-  @transient lazy val proxy = ScalaWrappedCompilation.raw(source)
+  @transient lazy val proxy = ScalaWrappedCompilation.static(source, inputs.toSeq)
+  proxy
 
   def iterator(context: Context)(implicit rng: RandomProvider): Iterator[O] =
     discrete.iterator(domain, context).map {

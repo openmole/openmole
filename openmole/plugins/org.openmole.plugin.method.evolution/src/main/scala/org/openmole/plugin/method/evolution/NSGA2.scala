@@ -25,37 +25,6 @@ import scala.util.Random
 
 object NSGA2 {
 
-  /*def apply(
-    mu: Int,
-    termination: GATermination { type G >: NSGA2#G; type P >: NSGA2#P; type F >: NSGA2#F },
-    inputs: Inputs,
-    objectives: Objectives,
-    reevaluate: Double = 0.0,
-    epsilons: Option[Seq[Double]] = None) = {
-    val (_mu, _reevaluate, _inputs, _objectives, _epsilons) = (mu, reevaluate, inputs, objectives, epsilons)
-    new NSGA2 {
-      val inputs = _inputs
-      val objectives = _objectives
-      val epsilons = _epsilons.getOrElse(objectives.map(_ ⇒ 0.0))
-
-      val stateType = termination.stateType
-      val populationType = PrototypeType[Population[G, P, F]]
-      val individualType = PrototypeType[Individual[G, P, F]]
-      val aType = PrototypeType[A]
-      val fType = PrototypeType[F]
-      val gType = PrototypeType[G]
-
-      val genomeSize = inputs.size
-
-      override val cloneProbability: Double = _reevaluate
-
-      val mu = _mu
-      type STATE = termination.STATE
-      def initialState: STATE = termination.initialState
-      def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
-    }
-  }*/
-
   def apply(
     mu: Int,
     inputs: Inputs,
@@ -79,20 +48,4 @@ object NSGA2 {
   }
 
 }
-
-/*trait NSGA2 extends GAAlgorithm
-  with DynamicGACrossover
-  with DynamicGAMutation
-  with BinaryTournamentSelection
-  with TournamentOnRankAndDiversity
-  with NonDominatedElitism
-  with FitnessCrowdingDiversity
-  with ParetoRanking
-  with NonStrictEpsilonDominance
-  with NoArchive
-  with CloneRemoval
-  with GeneticBreeding
-  with MGFitness
-  with ClampedGenome
-  with GAGenomeWithSigma*/
 
