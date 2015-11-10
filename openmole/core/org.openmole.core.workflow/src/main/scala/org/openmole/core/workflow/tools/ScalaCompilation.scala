@@ -27,7 +27,6 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.validation.TypeUtil
 import org.osgi.framework.Bundle
-
 import scala.util.{ Random, Try }
 
 trait ScalaCompilation {
@@ -53,10 +52,11 @@ trait ScalaCompilation {
 object ScalaWrappedCompilation {
   def inputObject = "input"
 
-  def static[R](code: String, _inputs: Seq[Prototype[_]], output: CompilationOutput[R] = ScalaRawOutput[R]()) = {
+  def static[R: Manifest](code: String, _inputs: Seq[Prototype[_]], output: CompilationOutput[R] = ScalaRawOutput[R]()) = {
     val compilation =
       new ScalaWrappedCompilation with StaticHeader {
         type RETURN = R
+        def returnType = PrototypeType.apply[R]
 
         override def inputs = _inputs
         override val compilationOutput = output
@@ -71,9 +71,10 @@ object ScalaWrappedCompilation {
   }
 
 
-  def dynamic[R](code: String, output: CompilationOutput[R] = ScalaRawOutput[R]()) =
+  def dynamic[R: Manifest](code: String, output: CompilationOutput[R] = ScalaRawOutput[R]()) =
     new ScalaWrappedCompilation with DynamicHeader {
       type RETURN = R
+      def returnType = PrototypeType.apply[R]
 
       override val compilationOutput = output
       override def source: String = code
@@ -84,8 +85,8 @@ object ScalaWrappedCompilation {
 
   type ScalaClosure = (Context, RandomProvider) ⇒ Any
 
-  trait CompiledScala[RETURN] {
-    def run(context: Context)(implicit rng: RandomProvider): RETURN
+  case class CompiledScala[RETURN](compiled: ScalaClosure) {
+    def run(context: Context)(implicit rng: RandomProvider): RETURN = compiled(context, rng).asInstanceOf[RETURN]
   }
 
 }
@@ -98,33 +99,9 @@ trait CompilationOutput[RETURN] {
   def wrapOutput: String
 }
 
-object CompilationOutput {
+case class ScalaWrappedOutput(outputs: PrototypeSet) extends CompilationOutput[java.util.Map[String, Any]] { compilation ⇒
 
-  case class WrappedScala(outputs: PrototypeSet, compiled: (Context, RandomProvider) ⇒ java.util.Map[String, Any]) extends CompiledScala[Context] {
-    def run(context: Context)(implicit rng: RandomProvider): Context = {
-      val map = compiled(context, rng)
-      context ++
-        outputs.toSeq.map {
-          o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
-        }
-    }
-
-    def wrapOutput = ""
-  }
-
-  case class RawScala[T](compiled: ScalaClosure) extends CompiledScala[T] {
-    def run(context: Context)(implicit rng: RandomProvider): T = compiled(context, rng).asInstanceOf[T]
-  }
-
-}
-
-case class ScalaWrappedOutput(outputs: PrototypeSet) extends CompilationOutput[Context] { compilation ⇒
-
-  def apply(closure: ScalaClosure) =
-    CompilationOutput.WrappedScala(
-      compiled = closure.asInstanceOf[(Context, RandomProvider) ⇒ java.util.Map[String, Any]],
-      outputs = compilation.outputs
-    )
+  def apply(closure: ScalaClosure) = CompiledScala[java.util.Map[String, Any]](closure)
 
   def wrapOutput =
     s"""
@@ -135,13 +112,14 @@ case class ScalaWrappedOutput(outputs: PrototypeSet) extends CompilationOutput[C
 }
 
 case class ScalaRawOutput[T]() extends CompilationOutput[T] { compilation ⇒
-  def apply(closure: ScalaClosure) = CompilationOutput.RawScala[T](closure)
+  def apply(closure: ScalaClosure) = CompiledScala[T](closure)
   def wrapOutput = ""
 }
 
 trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
   type RETURN
+  def returnType: PrototypeType[RETURN]
 
   def compilationOutput: CompilationOutput[RETURN]
   def source: String
@@ -177,14 +155,14 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
   def script(inputs: Seq[Prototype[_]]) =
     (openMOLEImports ++ imports).map("import " + _).mkString("\n") + "\n\n" +
       s"""(${prefix}context: ${classOf[Context].getCanonicalName}, ${prefix}RNGProvider: ${classOf[RandomProvider].getCanonicalName}) => {
-          |    object $inputObject {
-          |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
-          |    }
-          |    import ${inputObject}._
-          |    implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = ${prefix}RNGProvider()
-          |    $source
-          |    ${compilationOutput.wrapOutput}
-          |}
+          |  object $inputObject {
+          |    ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
+          |  }
+          |  import ${inputObject}._
+          |  implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = ${prefix}RNGProvider()
+          |  $source
+          |  ${compilationOutput.wrapOutput}
+          |}: ${toScalaNativeType(returnType)}
           |""".stripMargin
 
 
