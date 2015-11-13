@@ -110,7 +110,7 @@ object VariableExpansion {
   }
 
   case class CodeElement(code: String) extends ExpansionElement {
-    @transient lazy val proxy = ScalaWrappedCompilation.dynamic(code)
+    @transient lazy val proxy = ScalaWrappedCompilation.dynamic[Any](code)
     def expand(context: ⇒ Context)(implicit rng: RandomProvider): String = {
       context.variable(code) match {
         case Some(value) ⇒ value.value.toString

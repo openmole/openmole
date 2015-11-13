@@ -97,9 +97,9 @@ package object evolution {
 
   def SteadyGA[ALG <: GAAlgorithm](algorithm: ALG, evaluation: Puzzle, parallelism: Int, termination: OMTermination) = {
     val genome = Prototype[algorithm.G]("genome")
-    val individual = Prototype[algorithm.Ind]("individual")
-    val population = Prototype[algorithm.Pop]("population")
-    val offspring = Prototype[algorithm.Pop]("offspring")
+    val individual = Prototype[algorithm.Ind]("individual")(algorithm.individualType)
+    val population = Prototype[algorithm.Pop]("population")(algorithm.populationType)
+    val offspring = Prototype[algorithm.Pop]("offspring")(algorithm.populationType)
     val state = Prototype[algorithm.AlgorithmState]("state")
     val generation = Prototype[Long]("generation")
     val terminated = Prototype[Boolean]("terminated")
@@ -147,7 +147,7 @@ package object evolution {
       EmptyTask() set (
         name := "masterFirst",
         (inputs, outputs) += (population, genome, state),
-        (inputs, outputs) += (algorithm.outputPrototypes: _*)
+        (inputs, outputs) += (algorithm.objectives: _*)
       )
 
     val masterLast =
@@ -164,7 +164,7 @@ package object evolution {
 
     val master =
       (masterFirstCapsule --
-        (toOffspring keep (Seq(state, genome) ++ algorithm.outputPrototypes: _*)) --
+        (toOffspring keep (Seq(state, genome) ++ algorithm.objectives: _*)) --
         elitismSlot --
         terminationCapsule --
         breedSlot --
@@ -176,7 +176,7 @@ package object evolution {
 
     val masterTask = MoleTask(master) set ( exploredOutputs += genome.toArray )
 
-    val masterSlave = MasterSlave(randomGenomes, masterTask, population, state)(scalingGenomeTask -- evaluation)
+    val masterSlave = MasterSlave(randomGenomes, masterTask, population, state)(scalingGenomeTask -- Strain(evaluation))
 
     val firstTask = EmptyTask() set ( name := "first" )
     val firstCapsule = Capsule(firstTask, strain = true)

@@ -36,8 +36,8 @@ object Condition {
   implicit def conditionStringConverter(condition: String) = Condition(condition)
 
   def apply(code: String) = new Condition {
-    @transient lazy val proxy = ScalaWrappedCompilation.dynamic(code)
-    override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider) = proxy.run(context).asInstanceOf[Boolean]
+    @transient lazy val proxy = ScalaWrappedCompilation.dynamic[Boolean](code)
+    override def evaluate(context: ⇒ Context)(implicit rng: RandomProvider) = proxy.run(context)
   }
 
 }

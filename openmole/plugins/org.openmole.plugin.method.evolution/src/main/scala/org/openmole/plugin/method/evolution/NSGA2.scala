@@ -20,8 +20,8 @@ package org.openmole.plugin.method.evolution
 import fr.iscpif.mgo._
 import fr.iscpif.mgo.algorithm._
 import org.openmole.core.workflow.data.PrototypeType
-
-import scala.util.Random
+import org.openmole.core.workflow.tools.TextClosure
+import org.openmole.tool.statistics._
 
 object NSGA2 {
 
@@ -29,23 +29,40 @@ object NSGA2 {
     mu: Int,
     inputs: Inputs,
     objectives: Objectives,
-    epsilons: Option[Seq[Double]] = None) = {
+    replication: Option[Replication]) = {
 
     val (_mu, _inputs, _objectives) = (mu, inputs, objectives)
 
-    new NSGAII with GAAlgorithm {
+    trait OMNSGA2 <: NSGAII with GAAlgorithm {
       val stateType = PrototypeType[STATE]
-      val populationType = PrototypeType[Pop]
-      val individualType = PrototypeType[Ind]
       val gType = PrototypeType[G]
-
       val objectives = _objectives
       val inputs = _inputs
-
-      override implicit def fitness: Fitness[Seq[Double]] = Fitness(_.phenotype)
       override def mu: Int = _mu
     }
+
+    replication match {
+      case None =>
+        new OMNSGA2 with DeterministicGAAlgorithm {
+          val populationType = PrototypeType[Pop]
+          val individualType = PrototypeType[Ind]
+          val fitness = Fitness(_.phenotype)
+        }
+      case Some(replication) =>
+        new OMNSGA2 with StochasticGAAlgorithm {
+          override def cloneStrategy = queue(replication.max, replication.reevaluate)
+
+          val populationType = PrototypeType[Pop]
+          val individualType = PrototypeType[Ind]
+          override def aggregation: Option[Seq[TextClosure[Seq[Double], Double]]] = replication.aggregation
+          override implicit def fitness: Fitness[Seq[Double]] = Fitness(i => aggregate(i) ++ Seq(-i.phenotype.history.size.toDouble))
+        }
+    }
+
   }
+
+
+
 
 }
 

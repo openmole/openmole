@@ -28,7 +28,7 @@ object SavePopulationHook {
     val prototypes =
       Seq[Prototype[_]](puzzle.generation) ++
         puzzle.algorithm.inputsPrototypes.map(_.toArray) ++
-        puzzle.algorithm.objectives.map(_.toArray)
+        puzzle.algorithm.outputPrototypes.map(_.toArray)
     new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
   }
 

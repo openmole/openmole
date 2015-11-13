@@ -26,6 +26,7 @@ import org.openmole.core.tools.obj.ClassUtils._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workflow.validation.TypeUtil
+import org.openmole.core.workspace.Workspace
 import org.osgi.framework.Bundle
 import scala.util.{ Random, Try }
 
@@ -34,7 +35,7 @@ trait ScalaCompilation {
   def plugins: Seq[File]
   def libraries: Seq[File]
 
-  def compile(code: String) = Try {
+  def compile(code: String) = Try[Any] {
     val interpreter = new ScalaREPL(plugins.flatMap(PluginManager.bundle) ++ Seq(PluginManager.bundleForClass(this.getClass)), libraries)
 
     val evaluated = interpreter.eval(code)
@@ -47,19 +48,39 @@ trait ScalaCompilation {
     evaluated
   }
 
+  def toScalaNativeType(t: PrototypeType[_]): PrototypeType[_] = {
+    def native = {
+      val (contentType, level) = TypeUtil.unArrayify(t)
+      for {
+        m ← classEquivalence(contentType.runtimeClass).map(_.manifest)
+      } yield (0 until level).foldLeft(PrototypeType.unsecure(m)) {
+        (c, _) ⇒ c.toArray.asInstanceOf[PrototypeType[Any]]
+      }
+    }
+    native getOrElse t
+  }
+
+}
+
+case class TextClosure[I: Manifest, O: Manifest](code: String, val plugins: Seq[File] = Seq.empty, val libraries: Seq[File] = Seq.empty) extends ScalaCompilation {
+  def returnType = toScalaNativeType(PrototypeType(implicitly[Manifest[I => O]]))
+  @transient lazy val compiled = compile(s"{$code}: $returnType")
+  compiled.get
+  def apply(i: I) = compiled.get.asInstanceOf[I => O](i)
 }
 
 object ScalaWrappedCompilation {
   def inputObject = "input"
 
-  def static[R: Manifest](code: String, _inputs: Seq[Prototype[_]], output: CompilationOutput[R] = ScalaRawOutput[R]()) = {
+  def static[R](code: String, _inputs: Seq[Prototype[_]], wrapping: OutputWrapping[R] = RawOutput())(implicit m: Manifest[_ <: R]) = {
+    val _wrapping = wrapping
+
     val compilation =
       new ScalaWrappedCompilation with StaticHeader {
         type RETURN = R
-        def returnType = PrototypeType.apply[R]
-
+        def returnType: PrototypeType[_ <: R] = PrototypeType(m)
         override def inputs = _inputs
-        override val compilationOutput = output
+        override val wrapping = _wrapping
         override def source: String = code
         override def imports: Seq[String] = Seq.empty
         override def plugins: Seq[File] = Seq.empty
@@ -71,57 +92,50 @@ object ScalaWrappedCompilation {
   }
 
 
-  def dynamic[R: Manifest](code: String, output: CompilationOutput[R] = ScalaRawOutput[R]()) =
+  def dynamic[R: Manifest](code: String, wrapping: OutputWrapping[R] = RawOutput[R]()) = {
+    val _wrapping = wrapping
+
     new ScalaWrappedCompilation with DynamicHeader {
       type RETURN = R
       def returnType = PrototypeType.apply[R]
-
-      override val compilationOutput = output
+      override val wrapping = _wrapping
       override def source: String = code
       override def imports: Seq[String] = Seq.empty
       override def plugins: Seq[File] = Seq.empty
       override def libraries: Seq[File] = Seq.empty
     }
+  }
 
-  type ScalaClosure = (Context, RandomProvider) ⇒ Any
+  type ContextClosure[+R] = (Context, RandomProvider) ⇒ R
 
-  case class CompiledScala[RETURN](compiled: ScalaClosure) {
-    def run(context: Context)(implicit rng: RandomProvider): RETURN = compiled(context, rng).asInstanceOf[RETURN]
+  trait OutputWrapping[+R] {
+    def wrapOutput: String
+  }
+
+  case class WrappedOutput(outputs: PrototypeSet) extends OutputWrapping[java.util.Map[String, Any]] {
+
+    def wrapOutput =
+      s"""
+         |import scala.collection.JavaConversions.mapAsJavaMap
+         |mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> ${p.name}""").mkString(",")} ))
+         |""".stripMargin
+
+  }
+
+  case class RawOutput[T]() extends OutputWrapping[T] { compilation ⇒
+    def wrapOutput = ""
   }
 
 }
 
 import ScalaWrappedCompilation._
 
-
-trait CompilationOutput[RETURN] {
-  def apply(closure: ScalaClosure): CompiledScala[RETURN]
-  def wrapOutput: String
-}
-
-case class ScalaWrappedOutput(outputs: PrototypeSet) extends CompilationOutput[java.util.Map[String, Any]] { compilation ⇒
-
-  def apply(closure: ScalaClosure) = CompiledScala[java.util.Map[String, Any]](closure)
-
-  def wrapOutput =
-    s"""
-       |import scala.collection.JavaConversions.mapAsJavaMap
-       |mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> ${p.name}""").mkString(",")} ))
-       |""".stripMargin
-
-}
-
-case class ScalaRawOutput[T]() extends CompilationOutput[T] { compilation ⇒
-  def apply(closure: ScalaClosure) = CompiledScala[T](closure)
-  def wrapOutput = ""
-}
-
 trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
   type RETURN
-  def returnType: PrototypeType[RETURN]
+  def returnType: PrototypeType[_ <: RETURN]
 
-  def compilationOutput: CompilationOutput[RETURN]
+  def wrapping: OutputWrapping[RETURN]
   def source: String
   def openMOLEImports = Seq(s"${CodeTool.namespace}._")
   def imports: Seq[String]
@@ -136,21 +150,9 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
   def closure(inputs: Seq[Prototype[_]]) =
     function(inputs).map {
       case (evaluated, method) ⇒
-        val closure: ScalaClosure = (context: Context, rng: RandomProvider) ⇒ method.invoke(evaluated, context, rng)
-        compilationOutput(closure)
+        val closure: ContextClosure[RETURN] = (context: Context, rng: RandomProvider) ⇒ method.invoke(evaluated, context, rng).asInstanceOf[RETURN]
+        closure
     }
-
-  def toScalaNativeType(t: PrototypeType[_]): PrototypeType[_] = {
-    def native = {
-      val (contentType, level) = TypeUtil.unArrayify(t)
-      for {
-        m ← classEquivalence(contentType.runtimeClass).map(_.manifest)
-      } yield (0 until level).foldLeft(PrototypeType.unsecure(m)) {
-        (c, _) ⇒ c.toArray.asInstanceOf[PrototypeType[Any]]
-      }
-    }
-    native getOrElse t
-  }
 
   def script(inputs: Seq[Prototype[_]]) =
     (openMOLEImports ++ imports).map("import " + _).mkString("\n") + "\n\n" +
@@ -161,27 +163,27 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
           |  import ${inputObject}._
           |  implicit lazy val ${Task.prefixedVariable("RNG")}: util.Random = ${prefix}RNGProvider()
           |  $source
-          |  ${compilationOutput.wrapOutput}
+          |  ${wrapping.wrapOutput}
           |}: ${toScalaNativeType(returnType)}
           |""".stripMargin
 
 
-  def run(context: Context)(implicit rng: RandomProvider) = compiled(context).get.run(context)(rng)
+  def run(context: Context)(implicit rng: RandomProvider) = compiled(context).get(context, rng)
 
-  def compiled(context: Context): Try[CompiledScala[RETURN]]
+  def compiled(context: Context): Try[ContextClosure[RETURN]]
 }
 
 
 trait DynamicHeader { this: ScalaWrappedCompilation =>
 
-  @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], Try[CompiledScala[RETURN]]]()
+  @transient lazy val cache = collection.mutable.HashMap[Seq[Prototype[_]], Try[ContextClosure[RETURN]]]()
 
-  def compiled(context: Context): Try[CompiledScala[RETURN]] = {
+  def compiled(context: Context): Try[ContextClosure[RETURN]] = {
     val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }
     compiled(contextPrototypes)
   }
 
-  def compiled(inputs: Seq[Prototype[_]]): Try[CompiledScala[RETURN]] =
+  def compiled(inputs: Seq[Prototype[_]]): Try[ContextClosure[RETURN]] =
     cache.synchronized {
       val allInputMap = inputs.groupBy(_.name)
 
@@ -203,5 +205,5 @@ trait DynamicHeader { this: ScalaWrappedCompilation =>
 trait StaticHeader { this: ScalaWrappedCompilation =>
   def inputs: Seq[Prototype[_]]
   @transient lazy val functionCode = closure(inputs)
-  def compiled(context: Context): Try[CompiledScala[RETURN]] = functionCode
+  def compiled(context: Context): Try[ContextClosure[RETURN]] = functionCode
 }

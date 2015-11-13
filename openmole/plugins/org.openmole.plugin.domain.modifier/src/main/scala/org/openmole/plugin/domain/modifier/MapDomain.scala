@@ -32,19 +32,18 @@ object MapDomain {
     override def inputs(domain: MapDomain[I, O, D]) = domain.inputs
   }
 
-  def apply[I: TypeTag, O: TypeTag, D](d: D, source: String)(implicit discrete: Discrete[I, D]) =
-    new MapDomain[I, O, D](d, s"{$source}: (${implicitly[TypeTag[I]].tpe} => ${implicitly[TypeTag[O]].tpe})")
+  def apply[I: Manifest, O: Manifest, D](d: D, source: String)(implicit discrete: Discrete[I, D]) = new MapDomain[I, O, D](d, source)
 
 }
 
-sealed class MapDomain[-I, +O, D](val domain: D, val source: String)(implicit discrete: Discrete[I, D]) { d ⇒
+sealed class MapDomain[-I: Manifest, +O: Manifest, D](val domain: D, val source: String)(implicit discrete: Discrete[I, D]) { d ⇒
 
   def inputs = discrete.inputs(domain)
-  @transient lazy val proxy = ScalaWrappedCompilation.static(source, inputs.toSeq)
+  @transient lazy val proxy = ScalaWrappedCompilation.static[Any](source, inputs.toSeq)(implicitly[Manifest[I ⇒ O]])
   proxy
 
   def iterator(context: Context)(implicit rng: RandomProvider): Iterator[O] =
     discrete.iterator(domain, context).map {
-      e ⇒ proxy.run(context).asInstanceOf[I ⇒ O](e)
+      e ⇒ proxy.run(context)(rng).asInstanceOf[I ⇒ O](e)
     }
 }

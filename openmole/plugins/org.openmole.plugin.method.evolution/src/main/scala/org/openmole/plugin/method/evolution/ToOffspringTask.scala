@@ -32,7 +32,7 @@ object ToOffspringTask {
     state: Prototype[algorithm.AlgorithmState]) = {
 
     new TaskBuilder { builder ⇒
-      algorithm.outputPrototypes.foreach(p ⇒ addInput(p))
+      algorithm.objectives.foreach(p ⇒ addInput(p))
       addInput(genome)
       addInput(state)
       addOutput(state)
@@ -62,7 +62,7 @@ abstract class ToOffspringTask(val algorithm: GAAlgorithm) extends Task { task �
     val i: algorithm.Ind =
       new Individual[algorithm.G, algorithm.P](
         context(task.genome),
-        phenotype,
+        algorithm.toPhenotype(phenotype),
         born = algorithm.generation.get(context(state))
       )
 
