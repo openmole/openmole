@@ -26,7 +26,7 @@ import org.openmole.core.workflow.transition._
 
 import scala.util.Random
 
-class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: BlockList[String] = BlockList.empty) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition {
+class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: BlockList = BlockList.empty) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition {
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
     if (condition.evaluate(context))

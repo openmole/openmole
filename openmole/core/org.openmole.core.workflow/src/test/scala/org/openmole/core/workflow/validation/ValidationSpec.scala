@@ -119,7 +119,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val c1 = Capsule(t1)
     val c2 = Slot(t2)
 
-    val mole = (c1 -- c2) + (c1 -- c2)
+    val mole = (c1 -- c2) & (c1 -- c2)
 
     val errors = Validation.duplicatedTransitions(mole)
     errors.isEmpty should equal(false)
@@ -140,7 +140,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val c2 = Capsule(t2)
     val c3 = Slot(t3)
 
-    val mole = (c1 -- c2 -- c3) + (c1 oo (c3, Block(p)))
+    val mole = (c1 -- c2 -- c3) & (c1 oo (c3, Block(p)))
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
 
@@ -327,9 +327,10 @@ class ValidationSpec extends FlatSpec with Matchers {
     val noOPC = Capsule(noOP)
     val aggC = Slot(aggT)
 
-    val mole = (exc -< testC -- noOPC >- aggC) + (testC oo aggC)
+    val mole = (exc -< testC -- noOPC >- aggC) & (testC oo aggC)
 
     val errors = Validation.dataChannelErrors(mole)
+
     errors.headOption match {
       case Some(DataChannelNegativeLevelProblem(_)) ⇒
       case _                                        ⇒ sys.error("Error should have been detected")
@@ -356,7 +357,7 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val aggSlot = Slot(agg)
 
-    val mole = (explorationCaps -< t1Caps >- aggSlot) + (explorationCaps -- aggSlot)
+    val mole = (explorationCaps -< t1Caps >- aggSlot) & (explorationCaps -- aggSlot)
     Validation(mole).isEmpty should equal(true)
   }
 

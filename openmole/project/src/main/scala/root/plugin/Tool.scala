@@ -19,13 +19,15 @@ object Tool extends PluginDefaults {
   lazy val netLogo4API = OsgiProject("netlogo4", imports = Seq("*")) dependsOn (netLogoAPI) settings (
     scalaVersion := "2.8.0",
     crossPaths := false,
-    libraryDependencies += Libraries.netlogo4_noscala
+    libraryDependencies += Libraries.netlogo4_noscala,
+    libraryDependencies -= Libraries.scalatest
   )
 
   lazy val netLogo5API = OsgiProject("netlogo5", imports = Seq("*")) dependsOn (netLogoAPI) settings (
     scalaVersion := "2.9.2",
     crossPaths := false,
-    libraryDependencies += Libraries.netlogo5_noscala
+    libraryDependencies += Libraries.netlogo5_noscala,
+    libraryDependencies -= Libraries.scalatest
   )
 
   lazy val csv = OsgiProject("csv", imports = Seq("*")) dependsOn (Core.exception, Core.workflow) settings (

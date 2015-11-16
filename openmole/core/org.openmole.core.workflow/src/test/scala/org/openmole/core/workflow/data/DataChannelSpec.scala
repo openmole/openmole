@@ -55,7 +55,7 @@ class DataChannelSpec extends FlatSpec with Matchers {
     val t2c = Capsule(t2)
     val t3c = Slot(Capsule(t3))
 
-    val ex = (t1c -- t2c -- t3c) + (t1c oo t3c)
+    val ex = (t1c -- t2c -- t3c) & (t1c oo t3c)
 
     ex.start.waitUntilEnded
   }
@@ -90,7 +90,7 @@ class DataChannelSpec extends FlatSpec with Matchers {
     val twc = Capsule(tw)
     val tc = Slot(t)
 
-    val ex = (twc -- exc -< tc) + (twc oo tc)
+    val ex = (twc -- exc -< tc) & (twc oo tc)
     ex.start.waitUntilEnded
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }

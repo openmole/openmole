@@ -76,7 +76,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
     select setName "select"
     select addInput (n, i)
     select addOutput (n, i)
-    select setDefault (Default(n, 0))
+    select setDefault Default.value(n, 0)
 
     val emptyC = Capsule(emptyT)
     val slot1 = Slot(emptyC)
@@ -118,7 +118,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
     select setName "select"
     select addInput (archive, i)
     select addOutput (archive, i)
-    select setDefault (Default(archive, Array.empty[Int]))
+    select setDefault Default.value(archive, Array.empty[Int])
 
     val selectCaps = MasterCapsule(select, archive)
 
@@ -135,7 +135,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
     val loop = selectCaps -- modelSlot2
     val terminate = selectCaps >| (finalTask, "archive.size >= 1")
 
-    val ex = skel + loop + terminate
+    val ex = skel & loop & terminate
 
     ex.toExecution(defaultEnvironment = LocalEnvironment(1)).start.waitUntilEnded
     (selectTaskExecuted < 10) should equal(true)

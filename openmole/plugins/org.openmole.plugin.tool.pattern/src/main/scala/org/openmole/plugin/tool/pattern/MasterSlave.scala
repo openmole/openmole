@@ -34,7 +34,7 @@ object MasterSlave {
     val masterSlot = Slot(masterCapsule)
     val slaveSlot2 = Slot(slave.first)
 
-    (bootstrap -< slave -- masterSlot) + (masterCapsule -<- slaveSlot2) + (bootstrap oo (masterSlot, state: _*))
+    (bootstrap -< slave -- masterSlot) & (masterCapsule -<- slaveSlot2) & (bootstrap oo (masterSlot, state: _*))
   }
 
 }

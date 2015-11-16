@@ -17,36 +17,38 @@
 
 package org.openmole.core.workflow.transition
 
-trait BlockList[T] extends (T ⇒ Boolean)
-
-trait Block[T] extends BlockList[T] {
-  def filtered: Set[T]
-  def apply(t: T) = filtered.contains(t)
-}
-
-trait Keep[T] extends BlockList[T] {
-  def kept: Set[T]
-  def apply(t: T) = !kept.contains(t)
-}
+import org.openmole.core.workflow.data._
 
 object BlockList {
-  def empty[T] = new BlockList[T] {
-    def apply(t: T) = false
+  def empty = new BlockList {
+    override def apply(t: Prototype[_]) = false
   }
 }
 
+trait BlockList <: (Prototype[_] ⇒ Boolean)
+
+trait Block extends BlockList {
+  def filtered: Set[String]
+  override def apply(t: Prototype[_]) = filtered.contains(t.name)
+}
+
+trait Keep extends BlockList {
+  def kept: Set[String]
+  override def apply(t: Prototype[_]) = !kept.contains(t.name)
+}
+
+
 object Block {
 
-  def apply[T](ts: T*) = new Block[T] {
-    val filtered = ts.toSet
+  def apply(ts: Prototype[_]*): Block = new Block {
+    val filtered: Set[String] = ts.map(_.name).toSet
   }
 
 }
 
 object Keep {
 
-  def apply[T](ts: T*) = new Keep[T] {
-    val kept = ts.toSet
+  def apply(ts: Prototype[_]*): Keep = new Keep {
+    val kept = ts.map(_.name).toSet
   }
-
 }

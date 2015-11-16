@@ -22,12 +22,13 @@ import org.openmole.core.workflow.data.Context
 import scala.concurrent.stm._
 import scala.ref.WeakReference
 import org.openmole.tool.file._
+import scalaz._
 
 package tools {
 
-  import java.io.File
 
-  trait ToolsPackage {
+
+trait ToolsPackage {
 
     implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
     implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
@@ -39,6 +40,9 @@ package tools {
     implicit class RefLongDecorator(r: Ref[Long]) {
       def next = r getUpdate (_ + 1)
     }
+
+    implicit def bothToA[A](t: \&/[A, _]): A = t.a.get
+    implicit def bothToB[B](t: \&/[_, B]): B = t.b.get
 
   }
 }

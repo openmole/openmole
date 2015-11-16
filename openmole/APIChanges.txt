@@ -1,10 +1,14 @@
 
-ScalaTask
+== DSL ==
+
+Appening workflow task is no longer done using the '+' symbol but the '&' symbol.
+
+== ScalaTask ==
 
 change: "workDir" variable become "workDirectory"
 new: mkDir() function create a new directory
 
-Capsule
+== Capsule ==
 
 change: strainer = true becomes strain = true
 
