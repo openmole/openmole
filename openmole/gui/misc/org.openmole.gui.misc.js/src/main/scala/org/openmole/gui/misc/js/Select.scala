@@ -17,12 +17,12 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.api.{BootstrapTags=> bs, ClassKeyAggregator}
+import fr.iscpif.scaladget.api.{BootstrapTags => bs, ClassKeyAggregator}
 import bs._
 import rx._
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.JsRxTags._
-import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.{tags ⇒ tags}
 
 object Select {
   def apply[T <: Displayable with Identifiable](autoID: String,

@@ -1,5 +1,6 @@
 package org.openmole.gui.server.core
 
+import java.io.File
 import java.net.URL
 import java.util.zip.GZIPInputStream
 
@@ -17,7 +18,7 @@ import org.openmole.gui.server.core.Utils._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data._
-import java.io.{ InputStream, File }
+import java.io._
 import java.nio.file._
 import org.openmole.console._
 import org.osgi.framework.Bundle
@@ -241,7 +242,9 @@ object ApiImpl extends Api {
           RunningEnvironmentData(id, group(errors))
       }.toSeq
 
-    val outputs = envIds.keys.toSeq.map { Runnings.outputsDatas(_, lines) }
+    val outputs = envIds.keys.toSeq.map {
+      Runnings.outputsDatas(_, lines)
+    }
 
     (envData, outputs)
   }
@@ -325,6 +328,48 @@ object ApiImpl extends Api {
   }
 
   //MODEL WIZARDS
-  def getCareBinInfos(careArchive: SafePath): Unit = Utils.getCareBinInfos(careArchive)
+  def getCareBinInfos(careArchive: SafePath): Option[LaunchingCommand] = Utils.getCareBinInfos(careArchive)
+
+  def buildModelTask(executableName: String,
+                     command: String,
+                     language: Language,
+                     inputs: Seq[ProtoTypePair],
+                     outputs: Seq[ProtoTypePair],
+                     path: SafePath) = {
+    val modelTaskFile = new File(path, command.split(" ").head + ".oms")
+
+    val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))
+    try {
+      for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
+        os.write("val " + p._1 + " = Val[" + p._2 + "]\n")
+      }
+      language.taskType match {
+        case ctt: CareTaskType ⇒
+          os.write(
+            s"""\nval task = CareTask(workDirectory / "$executableName", "$command") set(\n""" + {
+              val (imappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
+              val (omappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
+
+              println(imappings, " " + ins)
+              println(omappings, " " + ous)
+
+              val imString = if (imappings.nonEmpty) Seq("  fileInputs += (", ")\n").mkString(imappings.map { i ⇒ s"""(${i.name}, ${i.mapping.get})""" }.mkString(", ")) else ""
+              val inString = if (ins.nonEmpty) Seq("  inputs += (", ")\n").mkString(ins.map { i ⇒ s"${i.name}" }.mkString(", ")) else ""
+              val omString = if (omappings.nonEmpty) Seq("  fileOutputs += (", ")\n").mkString(omappings.map { o ⇒ s"(${o.name}, ${o.mapping.get})" }.mkString(", ")) else ""
+              val ouString = if (ous.nonEmpty) Seq("  outputs += (", ")\n").mkString(ous.map { o ⇒ s"${o.name}" }.mkString(", ")) else ""
+
+              imString + inString + omString + ouString
+            } + "  )"
+          )
+        case _ ⇒ ""
+      }
+    }
+
+    finally {
+      os.close
+    }
+    modelTaskFile.createNewFile
+
+  }
 
 }

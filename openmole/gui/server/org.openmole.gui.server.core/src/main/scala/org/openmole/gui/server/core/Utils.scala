@@ -21,12 +21,14 @@ import java.io.File
 import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.util.logging.Level
+import java.util.zip.GZIPInputStream
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileExtension._
 import java.io._
 import org.openmole.tool.file._
+import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar._
 
 object Utils {
@@ -111,10 +113,8 @@ object Utils {
 
   def listFiles(path: SafePath): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
 
-  def getCareBinInfos(careArchive: SafePath) = {
+  def getCareBinInfos(careArchive: SafePath): Option[LaunchingCommand] = {
     val fileChannel = new RandomAccessFile(careArchive, "r").getChannel
-    val out = Files.createTempFile("careArchive", "").toFile
-    val fos = new FileOutputStream(out)
 
     try {
       //Get the tar.gz from the bin archive
@@ -125,13 +125,28 @@ object Utils {
       fileChannel.map(FileChannel.MapMode.READ_ONLY, endMinus8Bytes - 13L - archiveSize, archiveSize).get(srcArray, 0, archiveSize)
 
       //Extract and uncompress the tar.gz
-      new ByteArrayInputStream(srcArray) copy fos
-      out extractUncompress Files.createTempDirectory("careDir")
+      val stream = new TarInputStream(new GZIPInputStream(new ByteArrayInputStream(srcArray)))
 
+      Iterator.continually(stream.getNextEntry).dropWhile { te ⇒
+        val pathString = te.getName.split("/")
+        pathString.last != "re-execute.sh" || pathString.contains("rootfs")
+      }.toSeq.headOption.flatMap { e ⇒
+        val stringW = new StringOutputStream
+        stream copy stringW
+        val lines = stringW.toString.split("\n")
+        val prootLine = lines.indexWhere(s ⇒ s.startsWith("PROOT="))
+        if (prootLine != -1) {
+          val command = lines.slice(7, prootLine - 1).map { l ⇒ l.dropRight(2) }.map { _.drop(1) }.map { _.dropRight(1) }.toSeq
+         
+          CodeArgParsing(command)
+        }
+        else None
+      }
     }
     finally {
       fileChannel.close
-      fos.close
     }
+
   }
+
 }

@@ -23,14 +23,14 @@ trait Data
 
 object ProtoTYPE extends Enumeration {
 
-  case class ProtoTYPE(uuid: String, name: String) extends Val(name)
+  case class ProtoTYPE(uuid: String, name: String, scalaString: String) extends Val(name)
 
-  val INT = new ProtoTYPE("Integer", "Integer")
-  val DOUBLE = new ProtoTYPE("Double", "Double")
-  val LONG = new ProtoTYPE("Long", "Long")
-  val BOOLEAN = new ProtoTYPE("Boolean", "Boolean")
-  val STRING = new ProtoTYPE("String", "String")
-  val FILE = new ProtoTYPE("File", "File")
+  val INT = new ProtoTYPE("Integer", "Integer", "Int")
+  val DOUBLE = new ProtoTYPE("Double", "Double", "Double")
+  val LONG = new ProtoTYPE("Long", "Long", "Long")
+  val BOOLEAN = new ProtoTYPE("Boolean", "Boolean", "Boolean")
+  val STRING = new ProtoTYPE("String", "String", "String")
+  val FILE = new ProtoTYPE("File", "File", "File")
   val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE)
 }
 
@@ -327,3 +327,42 @@ case class Ready() extends ExecutionInfo {
 case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
 
 case class Plugin(name: String)
+
+sealed trait Language {
+  def name: String
+  def extension: String
+  def taskType: TaskType
+}
+
+sealed trait TaskType
+
+case class CareTaskType() extends TaskType
+
+case class ScalaTaskType() extends TaskType
+
+case class PythonLanguage() extends Language {
+  val name: String = "python"
+  val extension = "py"
+  val taskType = CareTaskType()
+}
+
+case class RLanguage() extends Language {
+  val name: String = "R"
+  val extension = "R"
+  val taskType = CareTaskType()
+}
+
+
+case class CommandArgument(key: Option[String], value: Option[String]){
+  val argString = Seq(key, value).flatten.mkString(" ")
+  val isFile = value match {
+    case Some(s: String)=> s matches ("""(.*)[.]([^.]{3})""")
+    case _=> false
+  }
+}
+
+case class LaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandArgument] = Seq()) {
+  val fullCommand: String = (Seq(language.map{_.name}, Some(codeName)).flatten.toList ++ arguments.map{_.argString}).mkString(" ")
+}
+
+case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, mapping: Option[String] = None)
