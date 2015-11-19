@@ -72,7 +72,7 @@ class TypeUtilSpec extends FlatSpec with Matchers {
     val t2c = Capsule(t2)
     val t3c = Slot(t3)
 
-    val mole = (t1c -- t3c) + (t2c -- t3c)
+    val mole = (t1c -- t3c) & (t2c -- t3c)
 
     val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(t3c)
 

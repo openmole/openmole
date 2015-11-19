@@ -56,9 +56,13 @@ abstract class ElitismTask(val algorithm: Algorithm) extends Task {
   def state: Prototype[algorithm.AlgorithmState]
 
   override def process(context: Context)(implicit rng: RandomProvider) = {
-    val (newState, newPopulation) =
-      algorithm.elitism(context(population),
-        context(offspring)).run(context(state))
+    val step =
+      for {
+        np ← algorithm.elitism(context(population), context(offspring))
+        _ ← algorithm.updateGeneration
+      } yield np
+
+    val (newState, newPopulation) = step.run(context(state))
 
     Context(
       Variable(population, newPopulation),

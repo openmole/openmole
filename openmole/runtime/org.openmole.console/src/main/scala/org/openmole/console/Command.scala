@@ -122,8 +122,8 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
 
   def load(file: File, args: Seq[String] = Seq.empty): Puzzle =
     loadAny(file) match {
-      case res: PuzzleBuilder ⇒ res.buildPuzzle
-      case x                  ⇒ throw new UserBadDataError("The result is not a puzzle")
+      case res: Puzzle ⇒ res
+      case x           ⇒ throw new UserBadDataError("The result is not a puzzle")
     }
 
 }

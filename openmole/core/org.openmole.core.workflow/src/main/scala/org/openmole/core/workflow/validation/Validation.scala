@@ -256,7 +256,7 @@ object Validation {
     val dataChannelWithProblem = noTransitionProblems.map(_.dataChannel).toSet
 
     val negativeLevelProblem =
-      mole.dataChannels.filter(dc ⇒ dataChannelWithProblem.contains(dc)).filter {
+      mole.dataChannels.filter(dc ⇒ !dataChannelWithProblem.contains(dc)).filter {
         dc ⇒ mole.level(dc.end) < mole.level(dc.start)
       }.map(DataChannelNegativeLevelProblem(_))
 

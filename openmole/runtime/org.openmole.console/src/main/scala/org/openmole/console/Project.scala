@@ -31,7 +31,7 @@ sealed trait CompileResult
 case class ScriptFileDoesNotExists() extends CompileResult
 case class CompilationError(exception: Throwable) extends CompileResult
 case class Compiled(result: CompiledScript) extends CompileResult {
-  def eval = result.eval().asInstanceOf[PuzzleBuilder]
+  def eval = result.eval().asInstanceOf[Puzzle]
 }
 
 object Project {
@@ -50,7 +50,7 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
     else {
       def compileContent =
         s"""${scriptsObjects(script.getParentFileSafe).mkString("\n")}
-            |def runOMSScript(): ${classOf[PuzzleBuilder].getCanonicalName} = {
+            |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {
             |${script.content}
             |}
             |runOMSScript()

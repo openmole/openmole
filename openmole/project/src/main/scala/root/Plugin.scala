@@ -11,6 +11,8 @@ abstract class PluginDefaults(subBuilds: Defaults*) extends Defaults(subBuilds: 
 
   lazy val defaultActivator = bundleActivator <<= (name) { n ⇒ Some(n + ".Activator") }
 
+  override def settings = super.settings ++ Seq(libraryDependencies += Libraries.scalatest)
+
   override def osgiSettings = super.osgiSettings ++
     Seq(
       bundleType := Set("plugin"),

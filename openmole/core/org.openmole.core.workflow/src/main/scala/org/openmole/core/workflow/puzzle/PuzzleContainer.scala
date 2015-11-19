@@ -19,7 +19,7 @@ package org.openmole.core.workflow.puzzle
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole._
 
-trait PuzzleContainer extends PuzzleBuilder {
+trait PuzzleContainer {
   def buildPuzzle: Puzzle
   def toExecution = buildPuzzle.toExecution
 }

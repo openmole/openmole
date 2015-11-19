@@ -75,7 +75,7 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
     val strainerC = Slot(StrainerCapsule(strainer))
 
-    val ex = (root -- tNone -- (t1, tNone2) -- strainerC -- t2) + (root oo strainerC)
+    val ex = (root -- tNone -- (t1, tNone2) -- strainerC -- t2) & (root oo strainerC)
     ex.start.waitUntilEnded
   }
 

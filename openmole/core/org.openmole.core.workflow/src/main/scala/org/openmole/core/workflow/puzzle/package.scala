@@ -27,6 +27,7 @@ package puzzle {
   import org.openmole.core.workflow.execution.Environment
 
   trait PuzzlePackage {
+    implicit def toPuzzle[P: ToPuzzle](p: P): Puzzle = implicitly[ToPuzzle[P]].toPuzzle(p)
 
     class PuzzlePieceDecorator(puzzle: PuzzlePiece) extends HookDecorator[PuzzlePiece] with EnvironmentDecorator[PuzzlePiece] with SourceDecorator[PuzzlePiece] with TransitionDecorator {
       def from = puzzle.buildPuzzle
@@ -69,19 +70,22 @@ package puzzle {
       def toPuzzle = Puzzle(slot, List(slot.capsule))
     }
 
-    implicit class PuzzleDecorator(puzzle: Puzzle) extends TransitionDecorator {
+    implicit def puzzleDecoratorConverter[P: ToPuzzle](p: P): PuzzleDecorator[P] = new PuzzleDecorator(p)
+
+    class PuzzleDecorator[P: ToPuzzle](val puzzle: P) extends TransitionDecorator {
       def from = puzzle
       def last = puzzle.lasts.head
-      def +(p: Puzzle) = Puzzle.merge(puzzle, p)
 
-      def hook(hooks: Hook*) = {
-        def pieces = puzzle.lasts.map(_.hook(hooks: _*))
-        pieces.foldLeft(puzzle)((puzzle, piece) ⇒ puzzle + piece)
+      def &[P2: ToPuzzle](p2: P2): Puzzle = Puzzle.merge[P, P2](puzzle, p2)
+
+      def hook(hooks: Hook*): Puzzle = {
+        def pieces = puzzle.lasts.map(_ hook (hooks: _*))
+        pieces.foldLeft(puzzle: Puzzle)((puzzle, piece) ⇒ puzzle & piece)
       }
 
-      def source(sources: Source*) = {
+      def source(sources: Source*): Puzzle = {
         def piece: PuzzlePiece = puzzle.first.source(sources: _*)
-        puzzle + piece
+        puzzle & piece
       }
     }
 

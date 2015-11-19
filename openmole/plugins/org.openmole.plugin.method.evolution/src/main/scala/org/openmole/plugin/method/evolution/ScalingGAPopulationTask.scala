@@ -34,10 +34,8 @@ object ScalingGAPopulationTask {
     val (_population) = (population)
 
     new TaskBuilder { builder ⇒
-
       addInput(population)
-      algorithm.inputsPrototypes foreach { i ⇒ addOutput(i.toArray) }
-      algorithm.outputPrototypes foreach { o ⇒ addOutput(o.toArray) }
+      (algorithm.inputsPrototypes ++ algorithm.outputPrototypes).distinct foreach { i ⇒ addOutput(i.toArray) }
 
       def toTask = new ScalingGAPopulationTask(algorithm) with Built {
         val population = _population.asInstanceOf[Prototype[algorithm.Pop]]

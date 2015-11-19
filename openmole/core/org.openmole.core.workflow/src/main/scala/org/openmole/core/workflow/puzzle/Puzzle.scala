@@ -24,18 +24,50 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workspace.Workspace
 import org.openmole.core.workflow.execution._
+import scalaz._
+import Scalaz._
 
-trait PuzzleBuilder {
-  def buildPuzzle: Puzzle
+object ToPuzzle {
+
+  implicit val puzzleToPuzzle = new ToPuzzle[Puzzle] {
+    def toPuzzle(p: Puzzle) = p
+  }
+
+  implicit val puzzlePieceToPuzzle = new ToPuzzle[PuzzlePiece] {
+    def toPuzzle(p: PuzzlePiece) = p.buildPuzzle
+  }
+
+  implicit val puzzleContainerToPuzzle = new ToPuzzle[PuzzleContainer] {
+    def toPuzzle(p: PuzzleContainer) = p.buildPuzzle
+  }
+
+  implicit val slotToPuzzle = new ToPuzzle[Slot] {
+    def toPuzzle(p: Slot) = p.toPuzzle
+  }
+
+  implicit val capsuleToPuzzle = new ToPuzzle[Capsule] {
+    def toPuzzle(p: Capsule) = p.toPuzzle
+  }
+
+  implicit val taskToPuzzle = new ToPuzzle[Task] {
+    def toPuzzle(p: Task) = Capsule(p).toPuzzle
+  }
+
+  implicit def bothToPuzzleIsToPuzzle[P: ToPuzzle] = new ToPuzzle[\&/[P, _]] {
+    def toPuzzle(p: \&/[P, _]) = implicitly[ToPuzzle[P]].toPuzzle(p.a.get)
+  }
+
+}
+
+trait ToPuzzle[-T] {
+  def toPuzzle(t: T): Puzzle
 }
 
 object Puzzle {
-  implicit def containerToPuzzle(pc: PuzzleContainer) = pc.buildPuzzle
-  implicit def slotToPuzzleConverter(slot: Slot) = slot.toPuzzle
-  implicit def capsuleToPuzzleConverter(capsule: Capsule) = capsule.toPuzzle
-  implicit def taskToPuzzleConverter(task: Task) = Capsule(task).toPuzzle
 
-  def merge(p1: Puzzle, p2: Puzzle) =
+  implicit def toPuzzle[P: ToPuzzle](p: P): Puzzle = implicitly[ToPuzzle[P]].toPuzzle(p)
+
+  def merge[P1: ToPuzzle, P2: ToPuzzle](p1: P1, p2: P2) =
     new Puzzle(
       p1.firstSlot,
       p1.lasts,
@@ -75,7 +107,7 @@ case class PuzzlePiece(
     sources: Iterable[Source] = Iterable.empty,
     hooks: Iterable[Hook] = Iterable.empty,
     environment: Option[Environment] = None,
-    grouping: Option[Grouping] = None) extends PuzzleBuilder {
+    grouping: Option[Grouping] = None) {
   def capsule = slot.capsule
 
   def buildPuzzle: Puzzle =
@@ -100,7 +132,7 @@ case class Puzzle(
     sources: Iterable[(Capsule, Source)] = Iterable.empty,
     hooks: Iterable[(Capsule, Hook)] = Iterable.empty,
     environments: Map[Capsule, Environment] = Map.empty,
-    grouping: Map[Capsule, Grouping] = Map.empty) extends PuzzleBuilder {
+    grouping: Map[Capsule, Grouping] = Map.empty) {
 
   def this(p: Puzzle) =
     this(

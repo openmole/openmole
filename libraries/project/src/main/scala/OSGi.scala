@@ -271,8 +271,6 @@ object OSGi extends Defaults {
     version := "0.4"
     )
 
-
-
    lazy val async =
      OsgiProject("scala-async") settings (
        libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.1",
@@ -329,7 +327,8 @@ object OSGi extends Defaults {
       "org.scalaz" %% "scalaz-effect" % scalazVersion,
       "org.scalaz" %% "scalaz-typelevel" % scalazVersion,
       "org.scalaz" %% "scalaz-iteratee" % scalazVersion
-    )
+    ),
+    version := scalazVersion
     )
 
 

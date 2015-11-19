@@ -16,7 +16,7 @@ object Core extends Defaults {
 
   lazy val workflow = OsgiProject("workflow", imports = Seq("*")) settings (
     includeOsgi,
-    libraryDependencies ++= Seq(scalaLang, math, scalatest)
+    libraryDependencies ++= Seq(scalaLang, math, scalatest, scalaz)
   ) dependsOn
     (event, exception, tools, updater, workspace, macros, pluginManager, serializer, output, console, replication % "test")
 
@@ -93,5 +93,6 @@ object Core extends Defaults {
       ): _*
   )
 
+  override def settings = super.settings ++ Seq(libraryDependencies += Libraries.scalatest)
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core", "runtime"), OSGi.openMOLEScope := Some("provided"))
 }

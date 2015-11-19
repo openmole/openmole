@@ -26,6 +26,7 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
+import ToPuzzle._
 
 import org.openmole.core.workflow.puzzle._
 import task._
@@ -36,23 +37,25 @@ package transition {
   case class TransitionParameter(
       puzzleParameter: Puzzle,
       conditionParameter: Condition = Condition.True,
-      filterParameter: BlockList[String] = BlockList.empty) {
+      filterParameter: BlockList = BlockList.empty) {
     def when(condition: Condition) = copy(conditionParameter = condition)
-    def filter(filter: BlockList[String]) = copy(filterParameter = filter)
-    def keep(prototypes: Prototype[_]*) = filter(Keep(prototypes.map(_.name): _*))
+    def filter(filter: BlockList) = copy(filterParameter = filter)
+    def keep(prototypes: Prototype[_]*) = filter(Keep(prototypes: _*))
+    def block(prototypes: Prototype[_]*) = filter(Block(prototypes: _*))
   }
 
   trait TransitionDecorator {
     def from: Puzzle
 
     def when(condition: Condition) = TransitionParameter(from, condition)
-    def filter(filter: BlockList[String]) = TransitionParameter(from, filterParameter = filter)
-    def keep(prototypes: Prototype[_]*) = filter(Keep(prototypes.map(_.name): _*))
+    def filter(filter: BlockList) = TransitionParameter(from, filterParameter = filter)
+    def keep(prototypes: Prototype[_]*) = filter(Keep(prototypes: _*))
+    def block(prototypes: Prototype[_]*) = filter(Block(prototypes: _*))
 
     def -<(
       to: Puzzle,
       condition: Condition = Condition.True,
-      filter: BlockList[String] = BlockList.empty,
+      filter: BlockList = BlockList.empty,
       size: Option[FromContext[Int]] = None): Puzzle = {
 
       val transitions = from.lasts.map {
@@ -78,7 +81,7 @@ package transition {
     def -<-(
       to: Puzzle,
       condition: Condition = Condition.True,
-      filter: BlockList[String] = BlockList.empty) = {
+      filter: BlockList = BlockList.empty) = {
 
       val transitions = from.lasts.map {
         c ⇒ new SlaveTransition(c, to.firstSlot, condition, filter)
@@ -99,7 +102,7 @@ package transition {
     def >-(
       to: Puzzle,
       condition: Condition = Condition.True,
-      filter: BlockList[String] = BlockList.empty,
+      filter: BlockList = BlockList.empty,
       trigger: Condition = Condition.False): Puzzle = {
       val transitions = from.lasts.map { c ⇒ new AggregationTransition(c, to.firstSlot, condition, filter, trigger) }
       Puzzle.merge(from.firstSlot, to.lasts, from :: to :: Nil, transitions)
@@ -117,7 +120,7 @@ package transition {
     def >|(
       to: Puzzle,
       trigger: Condition,
-      filter: BlockList[String] = BlockList.empty) = {
+      filter: BlockList = BlockList.empty) = {
       val transitions = from.lasts.map { c ⇒ new EndExplorationTransition(c, to.firstSlot, trigger, filter) }
       Puzzle.merge(from.firstSlot, to.lasts, from :: to :: Nil, transitions)
     }
@@ -125,7 +128,7 @@ package transition {
     private def buildTransitions(parameter: TransitionParameter) =
       from.lasts.map { c ⇒ new Transition(c, parameter.puzzleParameter.firstSlot, parameter.conditionParameter, parameter.filterParameter) }
 
-    def --(to: Puzzle, condition: Condition = Condition.True, filter: BlockList[String] = BlockList.empty): Puzzle = {
+    def --(to: Puzzle, condition: Condition = Condition.True, filter: BlockList = BlockList.empty): Puzzle = {
       val transitions = buildTransitions(TransitionParameter(to, condition, filter))
       Puzzle.merge(from.firstSlot, to.lasts, from :: to :: Nil, transitions)
     }
@@ -137,7 +140,7 @@ package transition {
       Puzzle.merge(from.firstSlot, parameters.flatMap(_.puzzleParameter.lasts), from :: parameters.map(_.puzzleParameter).toList, transitions)
     }
 
-    def --=(to: Puzzle, condition: Condition = Condition.True, filter: BlockList[String] = BlockList.empty): Puzzle = {
+    def --=(to: Puzzle, condition: Condition = Condition.True, filter: BlockList = BlockList.empty): Puzzle = {
       val transitions =
         from.lasts.map {
           c ⇒ new Transition(c, Slot(to.first), condition, filter)
@@ -153,11 +156,11 @@ package transition {
     }
 
     def oo(to: Puzzle, prototypes: Prototype[_]*): Puzzle = {
-      def blockList: BlockList[String] = if (prototypes.isEmpty) BlockList.empty else Keep(prototypes.map(_.name): _*)
+      def blockList: BlockList = if (prototypes.isEmpty) BlockList.empty else Keep(prototypes: _*)
       oo(to, filter = blockList)
     }
 
-    def oo(to: Puzzle, filter: BlockList[String] = BlockList.empty): Puzzle = {
+    def oo(to: Puzzle, filter: BlockList = BlockList.empty): Puzzle = {
       val channels = from.lasts.map {
         c ⇒ new DataChannel(c, to.firstSlot, filter)
       }

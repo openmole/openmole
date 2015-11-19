@@ -174,4 +174,6 @@ object Libraries extends Defaults {
 
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.1"
 
+  lazy val scalaz = "org.openmole" %% "scalaz" % "7.1.3"
+
 }

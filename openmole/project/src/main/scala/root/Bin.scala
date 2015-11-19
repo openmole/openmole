@@ -131,7 +131,9 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Libraries.jasypt,
     Libraries.jodaTime,
     Libraries.scalaLang,
-    Libraries.slf4j
+    Libraries.slf4j,
+    Libraries.scalaz,
+    Libraries.monocle
   ) ++ webServerDependencies
 
   lazy val guiCoreDependencies = Seq(
@@ -179,8 +181,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       opencsv,
       netlogo4,
       netlogo5,
-      mgo,
-      monocle,
+      mgo intransitive (),
       scalabc,
       groovy,
       gridscaleHTTP intransitive (),

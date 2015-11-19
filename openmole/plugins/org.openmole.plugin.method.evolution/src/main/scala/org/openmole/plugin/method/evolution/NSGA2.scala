@@ -20,79 +20,49 @@ package org.openmole.plugin.method.evolution
 import fr.iscpif.mgo._
 import fr.iscpif.mgo.algorithm._
 import org.openmole.core.workflow.data.PrototypeType
-
-import scala.util.Random
+import org.openmole.core.workflow.tools.TextClosure
+import org.openmole.tool.statistics._
 
 object NSGA2 {
-
-  /*def apply(
-    mu: Int,
-    termination: GATermination { type G >: NSGA2#G; type P >: NSGA2#P; type F >: NSGA2#F },
-    inputs: Inputs,
-    objectives: Objectives,
-    reevaluate: Double = 0.0,
-    epsilons: Option[Seq[Double]] = None) = {
-    val (_mu, _reevaluate, _inputs, _objectives, _epsilons) = (mu, reevaluate, inputs, objectives, epsilons)
-    new NSGA2 {
-      val inputs = _inputs
-      val objectives = _objectives
-      val epsilons = _epsilons.getOrElse(objectives.map(_ ⇒ 0.0))
-
-      val stateType = termination.stateType
-      val populationType = PrototypeType[Population[G, P, F]]
-      val individualType = PrototypeType[Individual[G, P, F]]
-      val aType = PrototypeType[A]
-      val fType = PrototypeType[F]
-      val gType = PrototypeType[G]
-
-      val genomeSize = inputs.size
-
-      override val cloneProbability: Double = _reevaluate
-
-      val mu = _mu
-      type STATE = termination.STATE
-      def initialState: STATE = termination.initialState
-      def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
-    }
-  }*/
 
   def apply(
     mu: Int,
     inputs: Inputs,
     objectives: Objectives,
-    epsilons: Option[Seq[Double]] = None) = {
+    replication: Option[Replication]) = {
 
     val (_mu, _inputs, _objectives) = (mu, inputs, objectives)
 
-    new NSGAII with GAAlgorithm {
+    trait OMNSGA2 <: NSGAII with GAAlgorithm {
       val stateType = PrototypeType[STATE]
-      val populationType = PrototypeType[Pop]
-      val individualType = PrototypeType[Ind]
       val gType = PrototypeType[G]
-
       val objectives = _objectives
       val inputs = _inputs
-
-      override implicit def fitness: Fitness[Seq[Double]] = Fitness(_.phenotype)
       override def mu: Int = _mu
     }
+
+    replication match {
+      case None =>
+        new OMNSGA2 with DeterministicGAAlgorithm {
+          val populationType = PrototypeType[Pop]
+          val individualType = PrototypeType[Ind]
+          val fitness = Fitness(_.phenotype)
+        }
+      case Some(replication) =>
+        new OMNSGA2 with StochasticGAAlgorithm {
+          override def cloneStrategy = queue(replication.max, replication.reevaluate)
+
+          val populationType = PrototypeType[Pop]
+          val individualType = PrototypeType[Ind]
+          override def aggregation: Option[Seq[TextClosure[Seq[Double], Double]]] = replication.aggregation
+          override implicit def fitness: Fitness[Seq[Double]] = Fitness(i => aggregate(i) ++ Seq(-i.phenotype.history.size.toDouble))
+        }
+    }
+
   }
 
-}
 
-/*trait NSGA2 extends GAAlgorithm
-  with DynamicGACrossover
-  with DynamicGAMutation
-  with BinaryTournamentSelection
-  with TournamentOnRankAndDiversity
-  with NonDominatedElitism
-  with FitnessCrowdingDiversity
-  with ParetoRanking
-  with NonStrictEpsilonDominance
-  with NoArchive
-  with CloneRemoval
-  with GeneticBreeding
-  with MGFitness
-  with ClampedGenome
-  with GAGenomeWithSigma*/
+
+
+}
 

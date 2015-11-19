@@ -25,21 +25,16 @@ import org.openmole.core.workflow.task._
 
 object AssignTask {
 
-  def apply() =
+  def apply(assignments: (Prototype[T], Prototype[T]) forSome { type T }*) =
     new TaskBuilder { builder ⇒
-
-      val assignments = ListBuffer[(Prototype[T], Prototype[T]) forSome { type T }]()
-
-      def addAssignment[T](from: Prototype[T], to: Prototype[T]) = {
-        addInput(from)
-        addOutput(to)
-        assignments += ((from, to))
-        this
+      assignments.foreach {
+        case (i, o) ⇒
+          addInput(i)
+          addOutput(o)
       }
 
       def toTask =
-        new AssignTask(assignments.toList: _*) with builder.Built
-
+        new AssignTask(assignments: _*) with builder.Built
     }
 
 }

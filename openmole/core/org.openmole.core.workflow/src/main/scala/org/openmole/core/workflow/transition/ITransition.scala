@@ -58,7 +58,7 @@ trait ITransition {
    *
    * @return filter on the names of the variables which are filtred by this transition
    */
-  def filter: BlockList[String]
+  def filter: BlockList
 
   /**
    * Get the unfiltred user output data of the starting capsule going through
@@ -67,7 +67,7 @@ trait ITransition {
    * @return the unfiltred output data of the staring capsule
    */
   def data(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.name))
+    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d))
 
   /**
    *
@@ -116,6 +116,6 @@ trait ITransition {
     }
   }
 
-  protected def filtered(context: Context) = context.filterNot { case (n, _) ⇒ filter(n) }
+  protected def filtered(context: Context) = context.filterNot { case (_, v) ⇒ filter(v.prototype) }
 
 }

@@ -25,7 +25,7 @@ import org.osgi.framework.Bundle
 import scala.util.{ Failure, Success, Try }
 import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.ExecutionContext
-import org.openmole.core.workflow.puzzle.PuzzleBuilder
+import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
