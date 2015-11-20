@@ -137,8 +137,6 @@ object Utils {
         val prootLine = lines.indexWhere(s ⇒ s.startsWith("PROOT="))
         if (prootLine != -1) {
           val command = lines.slice(7, prootLine - 1).map { l ⇒ l.dropRight(2) }.map { _.drop(1) }.map { _.dropRight(1) }.toSeq
-
-          
           CodeArgParsing(command)
         }
         else None

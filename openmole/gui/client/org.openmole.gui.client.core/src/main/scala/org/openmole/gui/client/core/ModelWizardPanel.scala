@@ -104,7 +104,7 @@ class ModelWizardPanel extends ModalPanel {
             OMPost[Api].getCareBinInfos(manager.current.safePath() ++ fileName).call().foreach { b ⇒
               launchingCommand() = b
               labelName() = Some(fileName)
-              buildPrototypePairs
+              launchingCommand().foreach { lc ⇒ currentReactives() = lc.arguments.map { pp ⇒ Reactive(Input(pp)) } }
             }
           }
         }
@@ -143,34 +143,6 @@ class ModelWizardPanel extends ModalPanel {
       _.save
     }
   }
-
-  def buildPrototypePairs: Unit =
-    currentReactives() = launchingCommand() match {
-      case Some(lc: LaunchingCommand) ⇒
-        lc.arguments.filter {
-          _.value.isDefined
-        }.zipWithIndex map {
-          case (arg, index) ⇒
-            val isFile = arg.isFile
-            Reactive(Input(ProtoTypePair(arg.key match {
-              case Some(k: String) ⇒ k
-              case _ ⇒ if (isFile) {
-                arg.value match {
-                  case Some(v: String) ⇒ v.dropRight(4)
-                  case _               ⇒ "input" + index
-                }
-              }
-              else "input" + index
-            },
-              arg.value match {
-                case Some(a: String) ⇒ if (isFile) ProtoTYPE.FILE else ProtoTYPE.DOUBLE
-                case _               ⇒ ProtoTYPE.DOUBLE
-              },
-              if (isFile) arg.value else None
-            )))
-        }
-      case _ ⇒ Seq()
-    }
 
   def addPrototypePair(p: Role[ProtoTypePair]) = {
     save
@@ -212,7 +184,7 @@ class ModelWizardPanel extends ModalPanel {
       currentReactives() = currentReactives().filterNot(_.role == role)
     }
 
-    val typeSelector: Select[ProtoTYPE.ProtoTYPE] = Select("modelProtos",
+    lazy val typeSelector: Select[ProtoTYPE.ProtoTYPE] = Select("modelProtos",
       ProtoTYPE.ALL.map {
         (_, emptyCK)
       }, Some(role.content.`type`),
@@ -225,7 +197,7 @@ class ModelWizardPanel extends ModalPanel {
       save
     }).render
 
-    val line = {
+    lazy val line = {
       typeSelector.content() = Some(role.content.`type`)
       tags.tr(
         onmouseover := { () ⇒
@@ -237,16 +209,22 @@ class ModelWizardPanel extends ModalPanel {
         bs.td(bs.col_md_3 + "spacer7 greyBold")(role.content.name),
         bs.td(bs.col_md_2)(typeSelector.selector),
         bs.td(bs.col_md_3)(if (role.content.`type` == ProtoTYPE.FILE) mappingInput else tags.div()),
-        bs.td(bs.col_md_3 + "right")(
+        bs.td(bs.col_md_1 + "right")(
+          id := Rx {
+            "treeline" + {
+              if (lineHovered()) "-hover" else ""
+            }
+          }, glyphSpan(switchGlyph, () ⇒ switchPrototypePair(role))(id := "glyphtrash", `class` := "glyphitem grey spacer2"),
+          glyphSpan(OMTags.glyph_arrow_right_and_left, () ⇒ addSwitchedPrototypePair(role))(id := "glyphtrash", `class` := "glyphitem grey spacer2")
+        ), bs.td(bs.col_md_1 + "right")(
           id := Rx {
             "treeline" + {
               if (lineHovered()) "-hover" else ""
             }
           },
-          glyphSpan(glyph_trash, () ⇒ removePrototypePair)(id := "glyphtrash", `class` := "glyphitem grey spacer9"),
-          glyphSpan(switchGlyph, () ⇒ switchPrototypePair(role))(id := "glyphtrash", `class` := "glyphitem grey spacer9"),
-          glyphSpan(OMTags.glyph_arrow_right_and_left, () ⇒ addSwitchedPrototypePair(role))(id := "glyphtrash", `class` := "glyphitem grey spacer9")
+          glyphSpan(glyph_trash, () ⇒ removePrototypePair)(id := "glyphtrash", `class` := "glyphitem grey spacer2")
         )
+
       )
     }
 

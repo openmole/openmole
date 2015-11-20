@@ -81,6 +81,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer4 {
     margin-top: 4px;
 }
+.spacer2 {
+    margin-top: 2px;
+}
 #editor {
     font-family: monospace;
     height: 95%;

@@ -21,9 +21,8 @@ case class DataBag(uuid: String, name: String, data: Data)
 
 trait Data
 
-object ProtoTYPE extends Enumeration {
-
-  case class ProtoTYPE(uuid: String, name: String, scalaString: String) extends Val(name)
+object ProtoTYPE {
+  case class ProtoTYPE(uuid: String, name: String, scalaString: String)
 
   val INT = new ProtoTYPE("Integer", "Integer", "Int")
   val DOUBLE = new ProtoTYPE("Double", "Double", "Double")
@@ -32,6 +31,7 @@ object ProtoTYPE extends Enumeration {
   val STRING = new ProtoTYPE("String", "String", "String")
   val FILE = new ProtoTYPE("File", "File", "File")
   val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE)
+
 }
 
 import java.io.{PrintWriter, StringWriter}
@@ -203,12 +203,12 @@ case class UploadPlugin() extends UploadType {
 
 @JSExport
 case class TreeNodeData(
-  name: String,
-  safePath: SafePath,
-  isDirectory: Boolean,
-  isPlugin: Boolean,
-  size: Long,
-  readableSize: String)
+                         name: String,
+                         safePath: SafePath,
+                         isDirectory: Boolean,
+                         isPlugin: Boolean,
+                         size: Long,
+                         readableSize: String)
 
 @JSExport
 case class ScriptData(scriptPath: SafePath)
@@ -330,13 +330,22 @@ case class Plugin(name: String)
 
 sealed trait Language {
   def name: String
+
   def extension: String
+
   def taskType: TaskType
 }
 
-sealed trait TaskType
+sealed trait TaskType {
+  def preVariable: String = ""
 
-case class CareTaskType() extends TaskType
+  def postVariable: String = ""
+}
+
+case class CareTaskType() extends TaskType {
+  override val preVariable = """${"""
+  override val postVariable = "}"
+}
 
 case class ScalaTaskType() extends TaskType
 
@@ -353,16 +362,16 @@ case class RLanguage() extends Language {
 }
 
 
-case class CommandArgument(key: Option[String], value: Option[String]){
+case class CommandArgument(key: Option[String], value: Option[String]) {
   val argString = Seq(key, value).flatten.mkString(" ")
   val isFile = value match {
-    case Some(s: String)=> s matches ("""(.*)[.]([^.]{3})""")
-    case _=> false
+    case Some(s: String) => s matches ("""(.*)[.]([^.]{1,3})""")
+    case _ => false
   }
 }
 
-case class LaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandArgument] = Seq()) {
-  val fullCommand: String = (Seq(language.map{_.name}, Some(codeName)).flatten.toList ++ arguments.map{_.argString}).mkString(" ")
+case class LaunchingCommand(language: Option[Language], codeName: String, fullCommand: String, arguments: Seq[ProtoTypePair] = Seq()) {
+  // val fullCommand: String = (Seq(language.map{_.name}, Some(codeName)).flatten.toList ++ arguments.map{_.argString}).mkString(" ")
 }
 
 case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, mapping: Option[String] = None)
