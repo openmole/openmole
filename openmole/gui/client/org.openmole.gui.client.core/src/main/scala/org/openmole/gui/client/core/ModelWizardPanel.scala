@@ -177,7 +177,7 @@ class ModelWizardPanel extends ModalPanel {
       case _           ⇒ OMTags.glyph_arrow_left
     }
 
-    def save = updatePrototypePair(role, role.content.copy(`type` = typeSelector.content().get, mapping = mappingInput.value))
+    def save = updatePrototypePair(role, role.content.copy(name = nameInput.value, `type` = typeSelector.content().get, mapping = mappingInput.value))
 
     def removePrototypePair = {
       ModelWizardPanel.this.save
@@ -197,6 +197,10 @@ class ModelWizardPanel extends ModalPanel {
       save
     }).render
 
+    val nameInput: HTMLInputElement = bs.input(role.content.name)(onblur := { () ⇒
+      save
+    }).render
+
     lazy val line = {
       typeSelector.content() = Some(role.content.`type`)
       tags.tr(
@@ -206,7 +210,7 @@ class ModelWizardPanel extends ModalPanel {
         onmouseout := { () ⇒
           lineHovered() = false
         },
-        bs.td(bs.col_md_3 + "spacer7 greyBold")(role.content.name),
+        bs.td(bs.col_md_3 + "spacer7")(nameInput),
         bs.td(bs.col_md_2)(typeSelector.selector),
         bs.td(bs.col_md_3)(if (role.content.`type` == ProtoTYPE.FILE) mappingInput else tags.div()),
         bs.td(bs.col_md_1 + "right")(
