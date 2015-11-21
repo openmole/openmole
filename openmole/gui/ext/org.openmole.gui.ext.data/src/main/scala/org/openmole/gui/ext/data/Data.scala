@@ -21,17 +21,17 @@ case class DataBag(uuid: String, name: String, data: Data)
 
 trait Data
 
-object ProtoTYPE extends Enumeration {
+object ProtoTYPE {
+  case class ProtoTYPE(uuid: String, name: String, scalaString: String)
 
-  case class ProtoTYPE(uuid: String, name: String) extends Val(name)
-
-  val INT = new ProtoTYPE("Integer", "Integer")
-  val DOUBLE = new ProtoTYPE("Double", "Double")
-  val LONG = new ProtoTYPE("Long", "Long")
-  val BOOLEAN = new ProtoTYPE("Boolean", "Boolean")
-  val STRING = new ProtoTYPE("String", "String")
-  val FILE = new ProtoTYPE("File", "File")
+  val INT = new ProtoTYPE("Integer", "Integer", "Int")
+  val DOUBLE = new ProtoTYPE("Double", "Double", "Double")
+  val LONG = new ProtoTYPE("Long", "Long", "Long")
+  val BOOLEAN = new ProtoTYPE("Boolean", "Boolean", "Boolean")
+  val STRING = new ProtoTYPE("String", "String", "String")
+  val FILE = new ProtoTYPE("File", "File", "File")
   val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE)
+
 }
 
 import java.io.{PrintWriter, StringWriter}
@@ -203,12 +203,12 @@ case class UploadPlugin() extends UploadType {
 
 @JSExport
 case class TreeNodeData(
-  name: String,
-  safePath: SafePath,
-  isDirectory: Boolean,
-  isPlugin: Boolean,
-  size: Long,
-  readableSize: String)
+                         name: String,
+                         safePath: SafePath,
+                         isDirectory: Boolean,
+                         isPlugin: Boolean,
+                         size: Long,
+                         readableSize: String)
 
 @JSExport
 case class ScriptData(scriptPath: SafePath)
@@ -327,3 +327,51 @@ case class Ready() extends ExecutionInfo {
 case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
 
 case class Plugin(name: String)
+
+sealed trait Language {
+  def name: String
+
+  def extension: String
+
+  def taskType: TaskType
+}
+
+sealed trait TaskType {
+  def preVariable: String = ""
+
+  def postVariable: String = ""
+}
+
+case class CareTaskType() extends TaskType {
+  override val preVariable = """${"""
+  override val postVariable = "}"
+}
+
+case class ScalaTaskType() extends TaskType
+
+case class PythonLanguage() extends Language {
+  val name: String = "python"
+  val extension = "py"
+  val taskType = CareTaskType()
+}
+
+case class RLanguage() extends Language {
+  val name: String = "R"
+  val extension = "R"
+  val taskType = CareTaskType()
+}
+
+
+case class CommandArgument(key: Option[String], value: Option[String]) {
+  val argString = Seq(key, value).flatten.mkString(" ")
+  val isFile = value match {
+    case Some(s: String) => s matches ("""(.*)[.]([^.]{1,3})""")
+    case _ => false
+  }
+}
+
+case class LaunchingCommand(language: Option[Language], codeName: String, fullCommand: String, arguments: Seq[ProtoTypePair] = Seq()) {
+  // val fullCommand: String = (Seq(language.map{_.name}, Some(codeName)).flatten.toList ++ arguments.map{_.argString}).mkString(" ")
+}
+
+case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, mapping: Option[String] = None)
