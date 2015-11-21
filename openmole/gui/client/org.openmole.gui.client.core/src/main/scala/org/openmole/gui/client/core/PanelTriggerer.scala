@@ -42,7 +42,7 @@ trait ModalPanel {
   def onOpen(): Unit
   def onClose(): Unit
 
-  val closeButton = bs.button("Close", btn_primary)(data("dismiss") := "modal", onclick := { () ⇒ close })
+  val closeButton = bs.button("Close", btn_default)(data("dismiss") := "modal", onclick := { () ⇒ close })
 
   def isShown: Boolean = jquery.jQuery("#" + modalID).hasClass("in")
   def close: Unit = jquery.jQuery("#" + modalID).modal("hide")

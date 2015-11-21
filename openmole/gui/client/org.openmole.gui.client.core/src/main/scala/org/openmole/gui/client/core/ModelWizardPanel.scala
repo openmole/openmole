@@ -90,31 +90,33 @@ class ModelWizardPanel extends ModalPanel {
       _.role
     }.collect { case x: Output[ProtoTypePair] ⇒ x }
 
-  lazy val upButton = tags.label(`class` := "inputFileStyle spacer5 certificate marginLeft100")(
-    bs.fileInput((fInput: HTMLInputElement) ⇒ {
-      FileManager.upload(fInput,
-        manager.current.safePath(),
-        (p: FileTransferState) ⇒ {
-          transferring() = p
-        },
-        UploadProject(),
-        () ⇒ {
-          if (fInput.files.length > 0) {
-            val fileName = fInput.files.item(0).name
-            OMPost[Api].getCareBinInfos(manager.current.safePath() ++ fileName).call().foreach { b ⇒
-              launchingCommand() = b
-              labelName() = Some(fileName)
-              launchingCommand().foreach { lc ⇒ currentReactives() = lc.arguments.map { pp ⇒ Reactive(Input(pp)) } }
+  lazy val upButton = bs.div("centerWidth250")(
+    tags.label(`class` := "inputFileStyle spacer5 certificate")(
+      bs.fileInput((fInput: HTMLInputElement) ⇒ {
+        FileManager.upload(fInput,
+          manager.current.safePath(),
+          (p: FileTransferState) ⇒ {
+            transferring() = p
+          },
+          UploadProject(),
+          () ⇒ {
+            if (fInput.files.length > 0) {
+              val fileName = fInput.files.item(0).name
+              OMPost[Api].getCareBinInfos(manager.current.safePath() ++ fileName).call().foreach { b ⇒
+                launchingCommand() = b
+                labelName() = Some(fileName)
+                launchingCommand().foreach { lc ⇒ currentReactives() = lc.arguments.map { pp ⇒ Reactive(Input(pp)) } }
+              }
             }
           }
+        )
+      }), Rx {
+        labelName() match {
+          case Some(s: String) ⇒ s
+          case _               ⇒ "Your Model"
         }
-      )
-    }), Rx {
-      labelName() match {
-        case Some(s: String) ⇒ s
-        case _               ⇒ "Your Model"
       }
-    }
+    )
   )
 
   val buildModelTaskButton = bs.button(
@@ -152,7 +154,7 @@ class ModelWizardPanel extends ModalPanel {
   def applyOnPrototypePair(p: Role[ProtoTypePair], todo: (Role[ProtoTypePair], Int) ⇒ Unit) =
     currentReactives().map {
       _.role
-    }.zipWithIndex.filter { case (ptp, index) ⇒ ptp.content.name == p.content.name }.foreach {
+    }.zipWithIndex.filter { case (ptp, index) ⇒ ptp == p }.foreach {
       case (role, index) ⇒ todo(role, index)
     }
 
@@ -177,7 +179,14 @@ class ModelWizardPanel extends ModalPanel {
       case _           ⇒ OMTags.glyph_arrow_left
     }
 
-    def save = updatePrototypePair(role, role.content.copy(name = nameInput.value, `type` = typeSelector.content().get, mapping = mappingInput.value))
+    def save = {
+      val oldname = role.content.name
+      updatePrototypePair(role, role.content.copy(name = nameInput.value, `type` = typeSelector.content().get, mapping = mappingInput.value))
+      /* launchingCommand() = launchingCommand().map { lc ⇒
+        val fCommand = lc.fullCommand
+        lc.copy(fullCommand = fCommand.replace(oldname, role.content.name))
+      }*/
+    }
 
     def removePrototypePair = {
       ModelWizardPanel.this.save
@@ -238,29 +247,37 @@ class ModelWizardPanel extends ModalPanel {
 
   lazy val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
 
-  lazy val prototypeTable = bs.div("spacer7")(
+  lazy val prototypeTable = bs.div("spacer7")({
+    val head = thead(tags.tr(
+      for (h ← Seq("Name", "Type", "File mapping", "", "")) yield {
+        tags.th(h)
+      }))
+
     Rx {
       tags.div(
         tags.div(`class` := "twocolumns right10")(
-          tags.form(iinput, onsubmit := {
-            () ⇒
-              addPrototypePair(Input(ProtoTypePair(iinput.value, ProtoTYPE.DOUBLE)))
-              iinput.value = ""
-              false
-          }),
+          bs.form("paddingLeftRight50")(iinput,
+            onsubmit := {
+              () ⇒
+                addPrototypePair(Input(ProtoTypePair(iinput.value, ProtoTYPE.DOUBLE)))
+                iinput.value = ""
+                false
+            }),
           bs.table(striped)(
+            head,
             tbody(
               for (ip ← inputs) yield {
                 ip.line
               }))),
         tags.div(`class` := "twocolumns")(
-          tags.form(oinput, onsubmit := {
+          bs.form("paddingLeftRight50")(oinput, onsubmit := {
             () ⇒
               addPrototypePair(Output(ProtoTypePair(oinput.value, ProtoTYPE.DOUBLE)))
               oinput.value = ""
               false
           }),
           bs.table(striped)(
+            head,
             tbody(
               for (op ← outputs) yield {
                 op.line
@@ -270,6 +287,7 @@ class ModelWizardPanel extends ModalPanel {
         )
       )
     }
+  }
   )
 
   val dialog = bs.modalDialog(modalID,
@@ -284,16 +302,19 @@ class ModelWizardPanel extends ModalPanel {
             panels.treeNodePanel.refreshCurrentDirectory
             upButton
           case _ ⇒ upButton
-        }, prototypeTable,
-        commandArea() match {
-          case Some(t: TextArea) ⇒ t
-          case _                 ⇒ tags.div()
         },
-        buildModelTaskButton
+        commandArea() match {
+          case Some(t: TextArea) ⇒ tags.div(prototypeTable, t)
+          case _                 ⇒ tags.div()
+        }
       )
     }
     ),
-    footerDialog(closeButton)
+    footerDialog(bs.buttonGroup()(
+      closeButton,
+      buildModelTaskButton
+    )
+    )
   )
 
 }

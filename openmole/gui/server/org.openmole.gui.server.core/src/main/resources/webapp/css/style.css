@@ -39,10 +39,15 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     max-width: 1100px;
 }
 
-#settingsPanelID .modal-dialog {
+#modelWizardPanelID .modal-dialog {
+    width: 75%;
+    max-width: 1100px;
+}
+
+#settingsPanelID .modal-dialog{
     width: 70%;
 }
- #envStackID .modal-dialog, #documentationID .modal-dialog, #modelWizardPanelID .modal-dialog{
+ #envStackID .modal-dialog, #documentationID .modal-dialog{
     width: 60%;
 }
 .table tbody > tr > td.vert-align {
@@ -801,4 +806,16 @@ top: -6px;
 .twocolumns{
     float:left;
     width:50%;
+}
+
+.paddingLeftRight50{
+    padding-right: 50px;
+    padding-left: 50px;
+}
+
+.centerWidth250{
+    position: relative;
+    width: 250px;
+    left: calc(50% - 125px);
+    right: 50%;
 }
