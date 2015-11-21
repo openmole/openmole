@@ -29,7 +29,7 @@ import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.filedeleter.FileDeleter
 import org.openmole.core.serializer._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
-import fr.iscpif.gridscale.storage.FileType
+import fr.iscpif.gridscale.storage.{ ListEntry, FileType }
 import java.io._
 import org.openmole.tool.logger.Logger
 
@@ -105,7 +105,7 @@ trait StorageService extends BatchService with Storage {
 
   def exists(path: String)(implicit token: AccessToken): Boolean = token.access { _exists(path) }
   def listNames(path: String)(implicit token: AccessToken): Seq[String] = token.access { _listNames(path) }
-  def list(path: String)(implicit token: AccessToken): Seq[(String, FileType)] = token.access { _list(path) }
+  def list(path: String)(implicit token: AccessToken): Seq[ListEntry] = token.access { _list(path) }
   def makeDir(path: String)(implicit token: AccessToken): Unit = token.access { _makeDir(path) }
   def rmDir(path: String)(implicit token: AccessToken): Unit = token.access { _rmDir(path) }
   def rmFile(path: String)(implicit token: AccessToken): Unit = token.access { _rmFile(path) }

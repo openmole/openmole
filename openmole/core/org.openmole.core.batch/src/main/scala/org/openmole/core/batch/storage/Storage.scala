@@ -20,7 +20,6 @@ import java.io.{ File, OutputStream, InputStream }
 import java.util.UUID
 
 import fr.iscpif.gridscale.storage._
-import org.openmole.core.batch.message.ReplicatedFile
 import org.openmole.core.workspace._
 import org.openmole.tool.thread._
 import org.openmole.tool.file._
@@ -59,7 +58,7 @@ trait Storage {
   def child(parent: String, child: String): String
   protected def _exists(path: String): Boolean
   protected def _listNames(path: String): Seq[String]
-  protected def _list(path: String): Seq[(String, FileType)]
+  protected def _list(path: String): Seq[ListEntry]
   protected def _makeDir(path: String): Unit
   protected def _rmDir(path: String): Unit
   protected def _rmFile(path: String): Unit

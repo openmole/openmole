@@ -18,7 +18,7 @@
 package org.openmole.core.batch.storage
 
 import fr.iscpif.gridscale
-import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage, FileType }
+import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage, ListEntry, FileType }
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -34,7 +34,7 @@ import scala.collection.JavaConversions._
 trait SimpleStorage extends Storage {
   def exists(path: String): Boolean = _exists(path)
   def listNames(path: String): Seq[String] = _listNames(path)
-  def list(path: String): Seq[(String, FileType)] = _list(path)
+  def list(path: String): Seq[ListEntry] = _list(path)
   def makeDir(path: String): Unit = _makeDir(path)
   def rmDir(path: String): Unit = _rmDir(path)
   def rmFile(path: String): Unit = _rmFile(path)
