@@ -22,21 +22,62 @@ import fr.iscpif.mgo.algorithm._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.TextClosure
 import org.openmole.tool.statistics._
+import scalaz._
+import scala.util.Random
 
 case class Replication(
   max: Int = 100,
   reevaluate: Double = 0.2,
   aggregation: Option[Seq[TextClosure[Seq[Double], Double]]] = None)
 
+object WorkflowIntegration {
+
+  implicit val gaWorkflowIntegration = new WorkflowIntegration[GAAlgorithm] {
+    override def resultPrototypes(algorithm: GAAlgorithm): Seq[Prototype[_]] = algorithm.resultPrototypes
+    override def inputsPrototypes(algorithm: GAAlgorithm): Seq[Prototype[_]] = algorithm.inputsPrototypes
+    override def outputPrototypes(algorithm: GAAlgorithm): Seq[Prototype[_]] = algorithm.outputPrototypes
+    override def variablesToPhenotype(algorithm: GAAlgorithm)(context: Context): algorithm.P = algorithm.toPhenotype(context)
+    override def populationToVariables(algorithm: GAAlgorithm)(population: algorithm.Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = algorithm.populationToVariables(population, context)
+    override def genomeToVariables(algorithm: GAAlgorithm)(genome: algorithm.GAGenome, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = algorithm.genomeToVariables(genome, context)
+    override def populationType(algorithm: GAAlgorithm): PrototypeType[algorithm.Pop] = algorithm.populationType
+    override def individualType(algorithm: GAAlgorithm): PrototypeType[algorithm.Ind] = algorithm.individualType
+    override def genomeType(algorithm: GAAlgorithm): PrototypeType[algorithm.G] = algorithm.genomeType
+    override def randomGenome(algorithm: GAAlgorithm): State[Random, algorithm.G] = algorithm.randomGenome(algorithm.inputs.size)
+  }
+
+}
+
+trait WorkflowIntegration[-T <: Algorithm] {
+  def resultPrototypes(algorithm: T): Seq[Prototype[_]]
+  def inputsPrototypes(algorithm: T): Seq[Prototype[_]]
+  def outputPrototypes(algorithm: T): Seq[Prototype[_]]
+  def genomeToVariables(algorithm: T)(genome: algorithm.G, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]]
+  def populationToVariables(algorithm: T)(population: algorithm.Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]]
+  def variablesToPhenotype(algorithm: T)(context: Context): algorithm.P
+  def populationType(algorithm: T): PrototypeType[algorithm.Pop]
+  def individualType(algorithm: T): PrototypeType[algorithm.Ind]
+  def genomeType(algorithm: T): PrototypeType[algorithm.G]
+  def randomGenome(algorithm: T): State[Random, algorithm.G]
+}
+
+
 trait GAAlgorithm extends Algorithm with GeneticAlgorithm with InputsConverter {
+  def toPhenotype(context: Context): P = {
+    val scaled: Seq[(Prototype[Double], Double)] = objectives.map(o ⇒ o -> context(o))
+    val phenotype: Seq[Double] = scaled.map(_._2)
+    toPhenotype(phenotype)
+  }
+
+  def resultPrototypes: Seq[Prototype[_]]
+  def genomeType = PrototypeType[G]
   def toPhenotype(s: Seq[Double]): P
   def populationType: PrototypeType[Pop]
   def individualType: PrototypeType[Ind]
   def objectives: Objectives
   def inputsPrototypes = inputs.inputs.map(_.prototype)
   def outputPrototypes: Seq[Prototype[_]] = objectives
-  def toVariables(genome: G, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = scaled(genomeValues.get(genome), context)
-  def toVariables(population: Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]]
+  def genomeToVariables(genome: G, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = scaled(genomeValues.get(genome), context)
+  def populationToVariables(population: Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]]
 }
 
 trait DeterministicGAAlgorithm extends GAAlgorithm {
@@ -45,7 +86,9 @@ trait DeterministicGAAlgorithm extends GAAlgorithm {
 
   def toPhenotype(s: Seq[Double]) = s
 
-  def toVariables(population: Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = {
+  override def resultPrototypes = (inputsPrototypes ++ outputPrototypes).distinct
+
+  def populationToVariables(population: Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = {
     val scaledValues = population.map(i ⇒ scaled(genomeValues.get(i.genome), context))
 
     inputs.inputs.zipWithIndex.map {
@@ -69,7 +112,7 @@ trait StochasticGAAlgorithm extends GAAlgorithm {
   type P = History[Seq[Double]]
 
   def replications = Prototype[Int]("replications")
-  override def outputPrototypes = Seq(replications) ++ objectives
+  override def resultPrototypes = (inputsPrototypes ++ outputPrototypes ++ Seq(replications)).distinct
 
   def toPhenotype(s: Seq[Double]) = History(List(s))
 
@@ -81,7 +124,7 @@ trait StochasticGAAlgorithm extends GAAlgorithm {
       case None       ⇒ individual.phenotype.history.transpose.map(_.median)
     }
 
-  def toVariables(population: Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = {
+  def populationToVariables(population: Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = {
     val scaledValues = population.map(i ⇒ scaled(genomeValues.get(i.genome), context))
 
     inputs.inputs.zipWithIndex.map {

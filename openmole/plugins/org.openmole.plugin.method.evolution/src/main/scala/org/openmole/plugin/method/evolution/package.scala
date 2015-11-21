@@ -89,16 +89,16 @@ package object evolution {
     def generation: Prototype[Long]
   }
 
-  def SteadyGA[ALG <: GAAlgorithm](algorithm: ALG, evaluation: Puzzle, parallelism: Int, termination: OMTermination) = {
-    val genome = Prototype[algorithm.G]("genome")
-    val individual = Prototype[algorithm.Ind]("individual")(algorithm.individualType)
-    val population = Prototype[algorithm.Pop]("population")(algorithm.populationType)
-    val offspring = Prototype[algorithm.Pop]("offspring")(algorithm.populationType)
+  def SteadyStateEvolution[ALG <: Algorithm](algorithm: ALG, evaluation: Puzzle, parallelism: Int, termination: OMTermination)(implicit toVariable: WorkflowIntegration[ALG]) = {
+    val genome = Prototype[algorithm.G]("genome")(toVariable.genomeType(algorithm))
+    val individual = Prototype[algorithm.Ind]("individual")(toVariable.individualType(algorithm))
+    val population = Prototype[algorithm.Pop]("population")(toVariable.populationType(algorithm))
+    val offspring = Prototype[algorithm.Pop]("offspring")(toVariable.populationType(algorithm))
     val state = Prototype[algorithm.AlgorithmState]("state")
     val generation = Prototype[Long]("generation")
     val terminated = Prototype[Boolean]("terminated")
 
-    def randomGenomeGenerator = algorithm.randomGenome(algorithm.inputs.size)
+    def randomGenomeGenerator = toVariable.randomGenome(algorithm)
 
     val randomGenomes = BreedTask(algorithm)(
       parallelism,
@@ -110,7 +110,7 @@ package object evolution {
         outputs += population
       )
 
-    val scalingGenomeTask = ScalingGAGenomeTask(algorithm)(genome) set (
+    val scalingGenomeTask = ScalingGenomeTask(algorithm)(genome) set (
       name := "scalingGenome")
 
     val toOffspring =
@@ -131,7 +131,7 @@ package object evolution {
 
     val breed = BreedTask(algorithm)(1, randomGenomeGenerator, population, state, genome) set ( name := "breed" )
 
-    val scalingIndividualsTask = ScalingGAPopulationTask(algorithm)(population) set ( name := "scalingIndividuals" ) set (
+    val scalingIndividualsTask = ScalingPopulationTask(algorithm)(population) set ( name := "scalingIndividuals" ) set (
         (inputs, outputs) += (generation, terminated, state),
         outputs += population
       )
@@ -142,7 +142,7 @@ package object evolution {
       EmptyTask() set (
         name := "masterFirst",
         (inputs, outputs) += (population, genome, state),
-        (inputs, outputs) += (algorithm.objectives: _*)
+        (inputs, outputs) += (toVariable.outputPrototypes(algorithm): _*)
       )
 
     val masterLast =
@@ -159,7 +159,7 @@ package object evolution {
 
     val master =
       (masterFirstCapsule --
-        (toOffspring keep (Seq(state, genome) ++ algorithm.objectives: _*)) --
+        (toOffspring keep (Seq(state, genome) ++ toVariable.outputPrototypes(algorithm): _*)) --
         elitismSlot --
         terminationCapsule --
         breedSlot --
@@ -200,11 +200,11 @@ package object evolution {
     \&/(gaPuzzle, parameters)
   }
 
-  def IslandGA[ALG <: GAAlgorithm](island: PuzzleContainer \&/ Parameters[ALG], parallelism: Int, sample: Int, termination: OMTermination) = {
+  def IslandEvolution[ALG <: Algorithm](island: PuzzleContainer \&/ Parameters[ALG], parallelism: Int, sample: Int, termination: OMTermination)(implicit toVariable: WorkflowIntegration[ALG]) = {
     val algorithm = island.algorithm
 
-    val islandPopulation = Prototype[algorithm.Pop]("islandPopulation")(algorithm.populationType)
-    val population = Prototype[algorithm.Pop]("population")(algorithm.populationType)
+    val islandPopulation = Prototype[algorithm.Pop]("islandPopulation")(toVariable.populationType(algorithm))
+    val population = Prototype[algorithm.Pop]("population")(toVariable.populationType(algorithm))
     val state = Prototype[algorithm.AlgorithmState]("state")
 
     val terminated = Prototype[Boolean]("terminated")
@@ -279,7 +279,7 @@ package object evolution {
 
     val masterSlave = MasterSlave(initialIslands, masterTask, population, state)(preIslandIslandPopulationToPopulation -- islandCapsule -- populationToIslandPopulation)
 
-    val scalingIndividualsTask = ScalingGAPopulationTask(algorithm)(population) set ( name := "scalingIndividuals" ) set (
+    val scalingIndividualsTask = ScalingPopulationTask(algorithm)(population) set ( name := "scalingIndividuals" ) set (
       (inputs, outputs) += (generation, terminated, state),
       outputs += population
     )

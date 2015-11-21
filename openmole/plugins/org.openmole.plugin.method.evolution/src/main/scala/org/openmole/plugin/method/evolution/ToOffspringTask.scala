@@ -26,13 +26,13 @@ import org.openmole.core.workflow.task._
 
 object ToOffspringTask {
 
-  def apply(algorithm: GAAlgorithm)(
+  def apply[T <: Algorithm](algorithm: T)(
     genome: Prototype[algorithm.G],
     offspring: Prototype[algorithm.Pop],
-    state: Prototype[algorithm.AlgorithmState]) = {
+    state: Prototype[algorithm.AlgorithmState])(implicit toVariable: WorkflowIntegration[T]) = {
 
     new TaskBuilder { builder ⇒
-      algorithm.objectives.foreach(p ⇒ addInput(p))
+      toVariable.outputPrototypes(algorithm).foreach(p ⇒ addInput(p))
       addInput(genome)
       addInput(state)
       addOutput(state)
@@ -50,19 +50,16 @@ object ToOffspringTask {
 
 }
 
-abstract class ToOffspringTask(val algorithm: GAAlgorithm) extends Task { task ⇒
+abstract class ToOffspringTask[T <: Algorithm](val algorithm: T)(implicit toVariable: WorkflowIntegration[T]) extends Task { task ⇒
   def genome: Prototype[algorithm.G]
   def offspring: Prototype[algorithm.Pop]
   def state: Prototype[algorithm.AlgorithmState]
 
   override def process(context: Context)(implicit rng: RandomProvider) = {
-    val scaled: Seq[(Prototype[Double], Double)] = algorithm.objectives.map(o ⇒ o -> context(o))
-    val phenotype: Seq[Double] = scaled.map(_._2)
-
     val i: algorithm.Ind =
       new Individual[algorithm.G, algorithm.P](
         context(task.genome),
-        algorithm.toPhenotype(phenotype),
+        toVariable.variablesToPhenotype(algorithm)(context),
         born = algorithm.generation.get(context(state))
       )
 

@@ -18,38 +18,37 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.core.workflow.builder.TaskBuilder
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.task._
 
-object ScalingGAPopulationTask {
+object ScalingGenomeTask {
 
-  def apply(algorithm: GAAlgorithm)(
-    population: Prototype[algorithm.Pop]) = {
+  def apply[T <: Algorithm](algorithm: T)(genome: Prototype[algorithm.G])(implicit toVariable: WorkflowIntegration[T]) = {
 
-    val (_population) = (population)
-
+    val (_genome) = (genome)
     new TaskBuilder { builder ⇒
-      addInput(population)
-      (algorithm.inputsPrototypes ++ algorithm.outputPrototypes).distinct foreach { i ⇒ addOutput(i.toArray) }
+      toVariable.inputsPrototypes(algorithm) foreach { p ⇒ addOutput(p) }
+      addInput(genome)
+      addOutput(genome)
 
-      def toTask = new ScalingGAPopulationTask(algorithm) with Built {
-        val population = _population.asInstanceOf[Prototype[algorithm.Pop]]
+      def toTask = new ScalingGenomeTask(algorithm) with Built {
+        val genome = _genome.asInstanceOf[Prototype[algorithm.G]]
       }
     }
   }
 
 }
 
-abstract class ScalingGAPopulationTask(val algorithm: GAAlgorithm) extends Task {
-
-  val population: Prototype[algorithm.Pop]
+abstract class ScalingGenomeTask[T <: Algorithm](val algorithm: T)(implicit toVariable: WorkflowIntegration[T]) extends Task {
+  val genome: Prototype[algorithm.G]
 
   override def process(context: Context)(implicit rng: RandomProvider) =
-    algorithm.toVariables(context(population), context)
+    context ++ toVariable.genomeToVariables(algorithm)(context(genome), context)
 
 }

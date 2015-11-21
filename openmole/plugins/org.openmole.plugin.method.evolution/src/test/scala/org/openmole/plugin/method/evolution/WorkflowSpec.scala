@@ -42,7 +42,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     // Define a builder to use NSGA2 generational EA algorithm.
     // replicateModel is the fitness function to optimise.
     // lambda is the size of the offspring (and the parallelism level).
-    SteadyGA(
+    SteadyStateEvolution(
       algorithm = evolution,
       evaluation = puzzle,
       parallelism = 10,
@@ -61,7 +61,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
   "Island workflow" should "have no validation error" in {
     val puzzle = nsga2
-    val islandPuzzle = IslandGA(puzzle, 10, 50, 100)
+    val islandPuzzle = IslandEvolution(puzzle, 10, 50, 100)
 
     Validation(islandPuzzle.toMole).toList match {
       case Nil ⇒

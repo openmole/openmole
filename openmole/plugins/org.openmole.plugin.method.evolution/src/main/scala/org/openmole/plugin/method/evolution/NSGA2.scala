@@ -29,7 +29,7 @@ object NSGA2 {
     mu: Int,
     inputs: Inputs,
     objectives: Objectives,
-    replication: Option[Replication]) = {
+    replication: Option[Replication] = None) = {
 
     val (_mu, _inputs, _objectives) = (mu, inputs, objectives)
 
