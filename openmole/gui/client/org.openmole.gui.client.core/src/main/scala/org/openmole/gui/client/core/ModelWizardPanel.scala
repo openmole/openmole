@@ -124,6 +124,23 @@ class ModelWizardPanel extends ModalPanel {
     )
   )
 
+  val step1 = tags.div(
+    tags.h3("Step 1: Code import"),
+    tags.div("Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++ " +
+      "R, etc). In the case of a Care archive, the packaging has to be done with the",
+      tags.b("-o yourmodel.tar.gz.bin."),
+      " option."
+    )
+  )
+
+  val step2 = tags.div(
+    tags.h3("Step 2: Code I/O settings"),
+    tags.div("The systems detects automatically the launching command and propose you the creation of some OpenMOLE Variables so that" +
+      " your model will be able to be feeded with variable values coming from the workflow you will build afterwards. In the case of Java, Scala, Netlogo" +
+      "(ie codes working on the JVM) the OpenMOLE variables can be set directly in the command line. Otherwise, they have to be set inside ${} statements." +
+      " By default he systems detects automatically your Variable changes and update the launching command. However, this option can be desactivated."
+    )
+  )
   val buildModelTaskButton = bs.button(
     "Build",
     btn_primary)(onclick := { () ⇒
@@ -304,6 +321,7 @@ class ModelWizardPanel extends ModalPanel {
     ),
     bodyDialog(Rx {
       tags.div(
+        step1,
         transferring() match {
           case _: Transfering ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
           case _: Transfered ⇒
@@ -312,7 +330,7 @@ class ModelWizardPanel extends ModalPanel {
           case _ ⇒ upButton
         },
         commandArea() match {
-          case Some(t: TextArea) ⇒ tags.div(prototypeTable, t)
+          case Some(t: TextArea) ⇒ tags.div(step2, prototypeTable, t)
           case _                 ⇒ tags.div()
         }
       )
