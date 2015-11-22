@@ -80,10 +80,11 @@ class ModelWizardPanel extends ModalPanel {
     }
   }
 
-  def inputs: Seq[Input[ProtoTypePair]] =
+  def inputs: Seq[Input[ProtoTypePair]] = {
     currentReactives().map {
       _.role
     }.collect { case x: Input[ProtoTypePair] ⇒ x }
+  }
 
   def outputs: Seq[Output[ProtoTypePair]] =
     currentReactives().map {
@@ -105,7 +106,11 @@ class ModelWizardPanel extends ModalPanel {
               OMPost[Api].getCareBinInfos(manager.current.safePath() ++ fileName).call().foreach { b ⇒
                 launchingCommand() = b
                 labelName() = Some(fileName)
-                launchingCommand().foreach { lc ⇒ currentReactives() = lc.arguments.map { pp ⇒ Reactive(Input(pp)) } }
+                launchingCommand().foreach { lc ⇒
+                  currentReactives() = lc.arguments.map { pp ⇒
+                    Reactive(Input(pp))
+                  }
+                }
               }
             }
           }
@@ -210,7 +215,7 @@ class ModelWizardPanel extends ModalPanel {
       save
     }).render
 
-    lazy val line = {
+    val line = {
       typeSelector.content() = Some(role.content.`type`)
       tags.tr(
         onmouseover := { () ⇒
@@ -247,7 +252,7 @@ class ModelWizardPanel extends ModalPanel {
 
   lazy val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
 
-  lazy val prototypeTable = bs.div("spacer7")({
+  val prototypeTable = bs.div("spacer7")({
     val head = thead(tags.tr(
       for (h ← Seq("Name", "Type", "File mapping", "", "")) yield {
         tags.th(h)
