@@ -91,7 +91,7 @@ class ModelWizardPanel extends ModalPanel {
       _.role
     }.collect { case x: Output[ProtoTypePair] ⇒ x }
 
-  lazy val upButton = bs.div("centerWidth250")(
+  def upButton = bs.div("centerWidth250")(
     tags.label(`class` := "inputFileStyle spacer5 certificate")(
       bs.fileInput((fInput: HTMLInputElement) ⇒ {
         FileManager.upload(fInput,
@@ -250,11 +250,12 @@ class ModelWizardPanel extends ModalPanel {
 
   }
 
-  lazy val iinput: HTMLInputElement = bs.input("")(placeholder := "Add Input").render
+  def prototypeTable = bs.div("spacer7")({
 
-  lazy val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
+    val iinput: HTMLInputElement = bs.input("")(placeholder := "Add Input").render
 
-  val prototypeTable = bs.div("spacer7")({
+    val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
+
     val head = thead(tags.tr(
       for (h ← Seq("Name", "Type", "File mapping", "", "")) yield {
         tags.th(h)
