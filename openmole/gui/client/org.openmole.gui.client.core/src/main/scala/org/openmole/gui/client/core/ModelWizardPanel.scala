@@ -24,7 +24,7 @@ import autowire._
 import org.scalajs.dom.html.TextArea
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw.{ FocusEvent, HTMLInputElement }
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 import org.openmole.gui.shared.Api
@@ -220,9 +220,11 @@ class ModelWizardPanel extends ModalPanel {
       tags.tr(
         onmouseover := { () ⇒
           lineHovered() = true
+          typeSelector.selector.focus()
         },
         onmouseout := { () ⇒
           lineHovered() = false
+          typeSelector.selector.focus()
         },
         bs.td(bs.col_md_3 + "spacer7")(nameInput),
         bs.td(bs.col_md_2)(typeSelector.selector),
