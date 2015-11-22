@@ -20,6 +20,7 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.tools.FromContext
 
 import scala.util.Random
 
@@ -32,14 +33,15 @@ class CompleteSampling(val samplings: Sampling*) extends Sampling {
   override def inputs = PrototypeSet.empty ++ samplings.flatMap { _.inputs }
   override def prototypes: Iterable[Prototype[_]] = samplings.flatMap { _.prototypes }
 
-  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
+  override def apply() = FromContext.apply { (context, rng) ⇒
     if (samplings.isEmpty) Iterator.empty
     else
-      samplings.tail.foldLeft(samplings.head.build(context)) {
-        (a, b) ⇒ combine(a, b, context)
+      samplings.tail.foldLeft(samplings.head().from(context)(rng)) {
+        (a, b) ⇒ combine(a, b, context)(rng)
       }
+  }
 
   def combine(s1: Iterator[Iterable[Variable[_]]], s2: Sampling, context: ⇒ Context)(implicit rng: RandomProvider) =
-    for (x ← s1; y ← s2.build(context ++ x)) yield x ++ y
+    for (x ← s1; y ← s2().from(context ++ x)(rng)) yield x ++ y
 
 }

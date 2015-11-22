@@ -29,17 +29,13 @@ object LogRange {
 
   implicit def isFinite[T] =
     new Finite[T, LogRange[T]] with Center[T, LogRange[T]] with Bounds[T, LogRange[T]] {
-      override def computeValues(domain: LogRange[T], context: Context)(implicit rng: RandomProvider): Iterable[T] = domain.computeValues(context)
-      override def center(domain: LogRange[T], context: Context)(implicit rng: RandomProvider): T = domain.center(context)
-      override def max(domain: LogRange[T], context: Context)(implicit rng: RandomProvider): T = domain.max(context)
-      override def min(domain: LogRange[T], context: Context)(implicit rng: RandomProvider): T = domain.min(context)
+      override def computeValues(domain: LogRange[T]) = FromContext.apply((context, rng) ⇒ domain.computeValues(context)(rng))
+      override def center(domain: LogRange[T]) = FromContext.apply((context, rng) ⇒ domain.center(context)(rng))
+      override def max(domain: LogRange[T]) = FromContext.apply((context, rng) ⇒ domain.max(context)(rng))
+      override def min(domain: LogRange[T]) = FromContext.apply((context, rng) ⇒ domain.min(context)(rng))
     }
 
-  def apply[T](range: Range[T], steps: FromContext[T])(implicit lg: Log[T]) =
-    new LogRange[T](range, steps)
-
-  def apply[T](range: Range[T], steps: T)(implicit lg: Log[T]) =
-    new LogRange[T](range, FromContext(steps))
+  def apply[T](range: Range[T], steps: FromContext[T])(implicit lg: Log[T]) = new LogRange[T](range, steps)
 
   def apply[T](
     min: FromContext[T],

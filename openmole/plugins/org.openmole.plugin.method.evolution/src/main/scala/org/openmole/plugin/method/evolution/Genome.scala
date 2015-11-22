@@ -19,6 +19,8 @@ package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo.double2Scalable
 import org.openmole.core.workflow.data.{ RandomProvider, Context, Prototype, Variable }
+import org.openmole.core.workflow.domain.Bounds
+import org.openmole.core.workflow.sampling.Factor
 import org.openmole.core.workflow.tools.FromContext
 import util.Try
 
@@ -40,8 +42,7 @@ object InputConverter {
       scaled(scales.tail, tail.toList, { context + variable }, variable :: acc)
     }
 
-  def scaled(input: Input, context: ⇒ Context, genomePart: Seq[Double])(implicit rng: RandomProvider) = {
-
+  def scaled(input: Input, context: ⇒ Context, genomePart: Seq[Double])(implicit rng: RandomProvider) =
     input match {
       case s @ Scalar(p, _, _) ⇒
         val g = genomePart.head
@@ -54,7 +55,6 @@ object InputConverter {
         def scaled = (genomePart zip (s.min zip s.max)) map { case (g, (min, max)) ⇒ g.scale(min.from(context), max.from(context)) }
         ScaledSequence(s.prototype, scaled.toArray)
     }
-  }
 
   sealed trait Scaled
   case class ScaledSequence(prototype: Prototype[Array[Double]], s: Array[Double]) extends Scaled
@@ -62,13 +62,10 @@ object InputConverter {
 
 }
 
-trait InputsConverter {
+object Input {
 
-  def inputs: Inputs
-
-  def scaled(genome: Seq[Double], context: Context)(implicit rng: RandomProvider): List[Variable[_]] = {
-    InputConverter.scaled(inputs.inputs.toList, genome.toList, context)
-  }
+  implicit def doubleBoundsToInput[D](f: Factor[Double, D])(implicit bounded: Bounds[Double, D]) =
+    Scalar(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
 
 }
 
@@ -90,6 +87,6 @@ case class Sequence(prototype: Prototype[Array[Double]], min: Seq[FromContext[Do
   def size = math.min(min.size, max.size)
 }
 
-case class Inputs(inputs: Seq[Input]) {
+case class Genome(inputs: Input*) {
   def size: Int = Try(inputs.map(_.size).sum).getOrElse(0)
 }

@@ -55,7 +55,7 @@ abstract class ExplorationTask(val sampling: Sampling) extends Task {
     val variablesValues = TreeMap.empty[Prototype[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p -> ArrayBuffer[Any]() }
 
     for {
-      sample ← sampling.build(context)
+      sample ← sampling().from(context)
       v ← sample
     } {
       variablesValues.get(v.prototype) match {

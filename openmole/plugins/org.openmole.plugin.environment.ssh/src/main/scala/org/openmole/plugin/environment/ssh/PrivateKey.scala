@@ -36,11 +36,8 @@ class PrivateKey(
     val cypheredPassword: String,
     val target: String) extends SSHAuthentication with CypheredPassword { a ⇒
 
-  override def apply(implicit authenticationProvider: AuthenticationProvider) = new fr.iscpif.gridscale.ssh.SSHPrivateKeyAuthentication {
-    val privateKey = a.privateKey
-    val password = a.password
-    val user = a.login
-  }
+  override def apply(implicit authenticationProvider: AuthenticationProvider) =
+    fr.iscpif.gridscale.authentication.PrivateKey(a.login, a.privateKey, a.password)
 
   override def toString =
     super.toString +

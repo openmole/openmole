@@ -22,66 +22,63 @@ import java.math.{ BigDecimal ⇒ JBigDecimal }
 import java.math.{ BigInteger ⇒ JBigInteger }
 import java.io.File
 
-trait From[F, T] {
-  def from(f: F): T
-}
-
 object FromString {
 
-  implicit val doubleFromString =
+  implicit val doubleFromString: FromString[Double] =
     new FromString[Double] {
-      def from(s: String) = s.toDouble
+      def apply(s: String) = s.toDouble
     }
 
-  implicit object FileFromString extends FromString[File] {
-    def from(s: String) = new File(s)
-  }
+  implicit val fileFromString: FromString[File] =
+    new FromString[File] {
+      def apply(s: String) = new File(s)
+    }
 
-  implicit val intFromString =
+  implicit val intFromString: FromString[Int] =
     new FromString[Int] {
-      def from(s: String) = s.toInt
+      def apply(s: String) = s.toInt
     }
 
-  implicit val longFromString =
+  implicit val longFromString: FromString[Long] =
     new FromString[Long] {
-      def from(s: String) = s.toLong
+      def apply(s: String) = s.toLong
     }
 
-  implicit val floatFromString =
+  implicit val floatFromString: FromString[Float] =
     new FromString[Float] {
-      def from(s: String) = s.toFloat
+      def apply(s: String) = s.toFloat
     }
 
-  implicit val bigDecimalFromString =
+  implicit val bigDecimalFromString: FromString[BigDecimal] =
     new FromString[BigDecimal] {
-      def from(s: String) = BigDecimal(s, MathContext.DECIMAL128)
+      def apply(s: String) = BigDecimal(s, MathContext.DECIMAL128)
     }
 
-  implicit val bigIntFromString =
+  implicit val bigIntFromString: FromString[BigInt] =
     new FromString[BigInt] {
-      def from(s: String) = BigInt(s)
+      def apply(s: String) = BigInt(s)
     }
 
-  implicit val javaBigDecimalFromString =
+  implicit val javaBigDecimalFromString: FromString[java.math.BigDecimal] =
     new FromString[java.math.BigDecimal] {
-      def from(s: String) = BigDecimal(s, MathContext.DECIMAL128).bigDecimal
+      def apply(s: String) = BigDecimal(s, MathContext.DECIMAL128).bigDecimal
     }
 
-  implicit val javaBigIntegerFromString =
+  implicit val javaBigIntegerFromString: FromString[java.math.BigInteger] =
     new FromString[java.math.BigInteger] {
-      def from(s: String) = BigInt(s).underlying
+      def apply(s: String) = BigInt(s).underlying
     }
 
-  implicit val stringFromString =
+  implicit val stringFromString: FromString[String] =
     new FromString[String] {
-      def from(s: String) = s
+      def apply(s: String) = s
     }
 
   implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
   implicit val bigDecimalAsIfIntegral = Numeric.BigDecimalAsIfIntegral
   implicit val floatAsIfIntegral = Numeric.FloatAsIfIntegral
 
-  implicit val bigJavaBigDecimalAsIfIntegral = new Integral[JBigDecimal] {
+  implicit val bigJavaBigDecimalAsIfIntegral: Integral[JBigDecimal] = new Integral[JBigDecimal] {
     def plus(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x add y
     def minus(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x subtract y
     def times(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x multiply y
@@ -96,7 +93,7 @@ object FromString {
     def compare(x: JBigDecimal, y: JBigDecimal): Int = x compareTo y
   }
 
-  implicit val bigJavaBigIntegerAsIfIntegral = new Integral[JBigInteger] {
+  implicit val bigJavaBigIntegerAsIfIntegral: Integral[JBigInteger] = new Integral[JBigInteger] {
     def plus(x: JBigInteger, y: JBigInteger): JBigInteger = x add y
     def minus(x: JBigInteger, y: JBigInteger): JBigInteger = x subtract y
     def times(x: JBigInteger, y: JBigInteger): JBigInteger = x multiply y
@@ -113,6 +110,6 @@ object FromString {
 
 }
 
-trait FromString[T] <: From[String, T] {
-  def from(s: String): T
+trait FromString[+T] {
+  def apply(s: String): T
 }

@@ -44,15 +44,11 @@ trait BDIISRMServers extends BatchEnvironment {
 
   def bdiiServer: BDII
   def voName: String
-  def proxyCreator: GlobusAuthentication.ProxyCreator
+  def proxyCreator: () ⇒ GlobusAuthentication.Proxy
 
   @transient lazy val storages = {
-    val bdiiStorarges =
-      bdiiServer.querySRMs(voName, Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut))(proxyCreator)
-
-    bdiiStorarges.map {
-      s ⇒ EGIStorageService(s, this, proxyCreator)
-    }
+    val bdiiStorarges = bdiiServer.querySRMLocations(voName, Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut))
+    bdiiStorarges.map { s ⇒ EGIStorageService(s, this, proxyCreator) }
   }
 
   def selectAStorage(usedFileHashes: Iterable[(File, Hash)]): (StorageService, AccessToken) =

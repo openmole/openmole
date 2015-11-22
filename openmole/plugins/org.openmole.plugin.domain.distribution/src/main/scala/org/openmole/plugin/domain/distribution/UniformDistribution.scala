@@ -18,6 +18,7 @@
 package org.openmole.plugin.domain.distribution
 
 import org.openmole.core.tools.service.Random._
+import org.openmole.core.workflow.tools.FromContext
 import util.Random
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
@@ -26,8 +27,8 @@ import scala.util.Random
 
 object UniformDistribution {
   implicit def isDiscrete[T] = new Discrete[T, UniformDistribution[T]] {
-    override def iterator(domain: UniformDistribution[T], context: Context)(implicit rng: RandomProvider): Iterator[T] =
-      domain.iterator(context)
+    override def iterator(domain: UniformDistribution[T]) =
+      FromContext((context, rng) ⇒ domain.iterator(context)(rng))
   }
 
   def apply[T](seed: Option[Long] = None, max: Option[T] = None)(implicit distribution: Distribution[T]) = new UniformDistribution(seed, max)

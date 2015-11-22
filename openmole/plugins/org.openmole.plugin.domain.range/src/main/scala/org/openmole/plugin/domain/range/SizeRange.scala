@@ -25,10 +25,10 @@ import org.openmole.core.workflow.tools._
 
 object SizeRange {
   implicit def isFinite[T] = new Finite[T, SizeRange[T]] with Bounds[T, SizeRange[T]] with Center[T, SizeRange[T]] {
-    override def computeValues(domain: SizeRange[T], context: Context)(implicit rng: RandomProvider): Iterable[T] = domain.computeValues(context)
-    override def max(domain: SizeRange[T], context: Context)(implicit rng: RandomProvider): T = domain.max(context)
-    override def min(domain: SizeRange[T], context: Context)(implicit rng: RandomProvider): T = domain.min(context)
-    override def center(domain: SizeRange[T], context: Context)(implicit rng: RandomProvider): T = domain.center(context)
+    override def computeValues(domain: SizeRange[T]) = FromContext.apply((context, rng) ⇒ domain.computeValues(context)(rng))
+    override def max(domain: SizeRange[T]) = FromContext.apply((context, rng) ⇒ domain.max(context)(rng))
+    override def min(domain: SizeRange[T]) = FromContext.apply((context, rng) ⇒ domain.min(context)(rng))
+    override def center(domain: SizeRange[T]) = FromContext.apply((context, rng) ⇒ domain.center(context)(rng))
   }
 
   def apply[T](min: FromContext[T], max: FromContext[T], size: FromContext[Int])(implicit integral: Integral[T]): SizeRange[T] =

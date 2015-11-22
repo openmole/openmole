@@ -18,6 +18,7 @@
 package org.openmole.core.workflow.sampling
 
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools.FromContext
 
 import scala.util.Random
 
@@ -43,6 +44,6 @@ trait Sampling {
    * @param context context in which the exploration takes place
    */
   @throws(classOf[Throwable])
-  def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]]
+  def apply(): FromContext[Iterator[Iterable[Variable[_]]]]
 
 }

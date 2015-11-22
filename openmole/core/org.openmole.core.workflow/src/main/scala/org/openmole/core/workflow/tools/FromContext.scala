@@ -21,28 +21,36 @@ import java.io.File
 
 import org.openmole.core.tools.io.FromString
 import org.openmole.core.workflow.data._
-import org.openmole.core.tools.io._
-
-import scala.util.Random
 
 object FromContext {
 
-  implicit def fromTToContext[T](t: T) = FromContext[T](t)
+  implicit def fromTToContext[T](t: T): FromContext[T] = FromContext.value[T](t)
 
-  implicit def fromStringToContext[T](code: String)(implicit fromString: FromString[T]) =
+  implicit def fromStringToContext[T: FromString](code: String): FromContext[T] =
     new FromContext[T] {
       @transient lazy val proxy = ScalaWrappedCompilation.dynamic(code)
-      override def from(context: ⇒ Context)(implicit rng: RandomProvider): T = fromString.from(proxy.run(context).toString)
+      override def from(context: ⇒ Context)(implicit rng: RandomProvider): T =
+        implicitly[FromString[T]].apply(proxy.run(context).toString)
     }
 
-  def apply[T](t: T) =
+  def value[T](t: T): FromContext[T] =
     new FromContext[T] {
       def from(context: ⇒ Context)(implicit rng: RandomProvider): T = t
     }
 
+  def apply[T](f: (Context, RandomProvider) => T) =
+    new FromContext[T] {
+      def from(context: ⇒ Context)(implicit rng: RandomProvider) = f(context, rng)
+    }
+
 }
 
-trait FromContext[T] {
+trait FromContext[+T] {
+  def flatMap[U](f: T => FromContext[U]) =  FromContext { (context, rng) =>
+    val res = from(context)(rng)
+    f(res).from(context)(rng)
+  }
+  def map[U](f: T => U) = FromContext((context, rng) => f(from(context)(rng)))
   def from(context: ⇒ Context)(implicit rng: RandomProvider): T
 }
 

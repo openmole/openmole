@@ -25,8 +25,8 @@ import scala.util.Random
 
 object ListDomain {
   implicit def isFinite[T] = new Finite[T, ListDomain[T]] {
-    override def computeValues(domain: ListDomain[T], context: Context)(implicit rng: RandomProvider): Iterable[T] =
-      domain.values.map(_.from(context))
+    override def computeValues(domain: ListDomain[T]) =
+      FromContext((context, rng) ⇒ domain.values.map(_.from(context)(rng)))
   }
 
   def apply[T](values: FromContext[T]*) = new ListDomain[T](values: _*)

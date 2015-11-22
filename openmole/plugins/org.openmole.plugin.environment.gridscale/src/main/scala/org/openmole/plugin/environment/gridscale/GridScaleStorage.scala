@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.gridscale
 
 import java.io.{ InputStream, OutputStream }
 
-import fr.iscpif.gridscale.storage.{ FileType, Storage ⇒ GSStorage }
+import fr.iscpif.gridscale.storage.{Storage ⇒ GSStorage, ListEntry}
 import org.openmole.core.batch.storage.Storage
 
 trait GridScaleStorage <: Storage {
@@ -28,7 +28,7 @@ trait GridScaleStorage <: Storage {
   def child(parent: String, child: String): String = storage.child(parent, child)
   protected def _exists(path: String): Boolean = storage.exists(path)
   protected def _listNames(path: String): Seq[String] = storage.listNames(path)
-  protected def _list(path: String): Seq[(String, FileType)] = storage.list(path)
+  protected def _list(path: String): Seq[ListEntry] = storage.list(path)
   protected def _makeDir(path: String): Unit = storage.makeDir(path)
   protected def _rmDir(path: String): Unit = storage.rmDir(path)
   protected def _rmFile(path: String): Unit = storage.rmFile(path)

@@ -26,25 +26,23 @@ import scalaz._
 
 package tools {
 
+  trait ToolsPackage {
 
+      implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
+      implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
 
-trait ToolsPackage {
+      implicit class RefDecorator[T](r: Ref[T]) {
+        def getUpdate(t: T ⇒ T): T = atomic { implicit txn ⇒ val v = r(); r() = t(v); v }
+      }
 
-    implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
-    implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
+      implicit class RefLongDecorator(r: Ref[Long]) {
+        def next = r getUpdate (_ + 1)
+      }
 
-    implicit class RefDecorator[T](r: Ref[T]) {
-      def getUpdate(t: T ⇒ T): T = atomic { implicit txn ⇒ val v = r(); r() = t(v); v }
+      implicit def bothToA[A](t: \&/[A, _]): A = t.a.get
+      implicit def bothToB[B](t: \&/[_, B]): B = t.b.get
+
     }
-
-    implicit class RefLongDecorator(r: Ref[Long]) {
-      def next = r getUpdate (_ + 1)
-    }
-
-    implicit def bothToA[A](t: \&/[A, _]): A = t.a.get
-    implicit def bothToB[B](t: \&/[_, B]): B = t.b.get
-
-  }
 }
 
 package object tools extends ToolsPackage

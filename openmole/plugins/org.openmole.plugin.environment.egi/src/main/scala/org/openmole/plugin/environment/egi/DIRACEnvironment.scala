@@ -25,8 +25,8 @@ import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.execution.ExecutionJob
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation, AuthenticationProvider }
-import fr.iscpif.gridscale.egi.BDII
-import fr.iscpif.gridscale.dirac.{ DIRACJobService ⇒ GSDIRACJobService }
+import fr.iscpif.gridscale.egi._
+import fr.iscpif.gridscale.egi.{ DIRACJobService ⇒ GSDIRACJobService }
 import concurrent.duration._
 import scala.ref.WeakReference
 
@@ -114,18 +114,16 @@ class DIRACEnvironment(
     EGIAuthentication.initialise(getAuthentication)(
       vomsURL,
       voName,
-      EGIEnvironment.proxyTime,
-      fqan)(authentications).cache(EGIEnvironment.proxyRenewalDelay)
+      fqan)(authentications)
   }
 
   @transient lazy val jobService = new DIRACJobService {
     val environment = env
-    val jobService = new GSDIRACJobService {
-      def group = env.group
-      def service = env.service
-      def credential = env.authentication
-      override def maxConnections = Workspace.preferenceAsInt(DIRACEnvironment.LocalThreads)
-    }
+    val jobService =
+      GSDIRACJobService(
+        env.service,
+        env.group,
+        connections = Workspace.preferenceAsInt(DIRACEnvironment.LocalThreads))(env.authentication)
   }
 
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)

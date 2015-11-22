@@ -18,38 +18,37 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.builder.TaskBuilder
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.task._
 
-object ScalingGAGenomeTask {
+object ScalingPopulationTask {
 
-  def apply(algorithm: GAAlgorithm)(
-    genome: Prototype[algorithm.G]) = {
+  def apply[T <: Algorithm](algorithm: T)(population: Prototype[algorithm.Pop])(implicit toVariable: WorkflowIntegration[T]) = {
 
-    val (_genome) = (genome)
+    val (_population) = (population)
+
     new TaskBuilder { builder ⇒
-      algorithm.inputsPrototypes foreach { p ⇒ addOutput(p) }
-      addInput(genome)
-      addOutput(genome)
+      addInput(population)
+      toVariable.resultPrototypes(algorithm) foreach { i ⇒ addOutput(i.toArray) }
 
-      def toTask = new ScalingGAGenomeTask(algorithm) with Built {
-        val genome = _genome.asInstanceOf[Prototype[algorithm.G]]
+      def toTask = new ScalingPopulationTask(algorithm) with Built {
+        val population = _population.asInstanceOf[Prototype[algorithm.Pop]]
       }
     }
   }
 
 }
 
-abstract class ScalingGAGenomeTask(val algorithm: GAAlgorithm) extends Task {
-  val genome: Prototype[algorithm.G]
+abstract class ScalingPopulationTask[T <: Algorithm](val algorithm: T)(implicit toVariable: WorkflowIntegration[T]) extends Task {
 
-  override def process(context: Context)(implicit rng: RandomProvider) = {
-    context ++ algorithm.toVariables(context(genome), context)
-  }
+  val population: Prototype[algorithm.Pop]
+
+  override def process(context: Context)(implicit rng: RandomProvider) =
+    toVariable.populationToVariables(algorithm)(context(population), context)
+
 }

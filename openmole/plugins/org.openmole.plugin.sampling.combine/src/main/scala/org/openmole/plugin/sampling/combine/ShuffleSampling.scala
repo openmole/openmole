@@ -20,6 +20,7 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.tools.service.Random._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.tools.FromContext
 import util.Random
 import org.openmole.core.workflow.task._
 
@@ -35,7 +36,8 @@ sealed class ShuffleSampling(val sampling: Sampling) extends Sampling {
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
-    shuffled(sampling.build(context).toList)(rng()).toIterator
+  override def apply() = FromContext.apply { (context, rng) ⇒
+    shuffled(sampling().from(context)(rng).toList)(rng()).toIterator
+  }
 
 }

@@ -21,8 +21,8 @@ import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.file._
-import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage, FileType }
-import fr.iscpif.gridscale.egi.{ SRMStorage, GlobusAuthentication }
+import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage, ListEntry, FileType }
+import fr.iscpif.gridscale.egi.{ SRMLocation, GlobusAuthenticationProvider, SRMStorage, GlobusAuthentication }
 import java.net.URI
 import java.io.{ File, InputStream, OutputStream }
 import org.openmole.core.batch.environment.BatchEnvironment
@@ -32,25 +32,15 @@ import scala.sys.process.{ Process, ProcessLogger }
 
 object EGIStorageService {
 
-  def emptyRoot(s: SRMStorage, threads: Int) =
-    new SRMStorage {
-      val host: String = s.host
-      val port: Int = s.port
-      val basePath: String = ""
-      val credential = s.credential
-      override val connections = threads
-    }
-
-  def apply(s: SRMStorage, _environment: BatchEnvironment { def voName: String }, _authentication: GlobusAuthentication.ProxyCreator) = new EGIStorageService {
+  def apply[A: GlobusAuthenticationProvider](s: SRMLocation, _environment: BatchEnvironment { def voName: String }, authentication: A) = new EGIStorageService {
     def threads = Workspace.preferenceAsInt(EGIEnvironment.LocalThreadsBySE)
     val usageControl = AvailabilityQuality(new LimitedAccess(threads, Workspace.preferenceAsInt(EGIEnvironment.MaxAccessesByMinuteSE)), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
-    val storage = emptyRoot(s, threads)
+    val storage = SRMStorage(s.copy(basePath = ""), threads)(authentication)
     val url = new URI("srm", null, s.host, s.port, null, null, null)
     val remoteStorage = new LCGCpRemoteStorage(s.host, s.port, _environment.voName)
     val environment = _environment
     val root = s.basePath
     override lazy val id = new URI("srm", environment.voName, s.host, s.port, s.basePath, null, null).toString
-    def authentication = _authentication
   }
 
 }
@@ -62,7 +52,7 @@ trait EGIStorageService extends PersistentStorageService with GridScaleStorage w
 
   override def exists(path: String)(implicit token: AccessToken): Boolean = quality { super.exists(path)(token) }
   override def listNames(path: String)(implicit token: AccessToken): Seq[String] = quality { super.listNames(path)(token) }
-  override def list(path: String)(implicit token: AccessToken): Seq[(String, FileType)] = quality { super.list(path)(token) }
+  override def list(path: String)(implicit token: AccessToken): Seq[ListEntry] = quality { super.list(path)(token) }
   override def makeDir(path: String)(implicit token: AccessToken): Unit = quality { super.makeDir(path)(token) }
   override def rmDir(path: String)(implicit token: AccessToken): Unit = quality { super.rmDir(path)(token) }
   override def rmFile(path: String)(implicit token: AccessToken): Unit = quality { super.rmFile(path)(token) }

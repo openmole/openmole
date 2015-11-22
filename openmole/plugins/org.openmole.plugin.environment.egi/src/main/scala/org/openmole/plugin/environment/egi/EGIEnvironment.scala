@@ -56,6 +56,7 @@ object EGIEnvironment extends Logger {
   val FetchResourcesTimeOut = new ConfigurationLocation("EGIEnvironment", "FetchResourcesTimeOut")
   val CACertificatesSite = new ConfigurationLocation("EGIEnvironment", "CACertificatesSite")
   val CACertificatesCacheTime = new ConfigurationLocation("EGIEnvironment", "CACertificatesCacheTime")
+  val CACertificatesDownloadTimeOut = new ConfigurationLocation("EGIEnvironment", "CACertificatesDownloadTimeOut")
   val VOInformationSite = new ConfigurationLocation("EGIEnvironment", "VOInformationSite")
   val VOCardDownloadTimeOut = new ConfigurationLocation("EGIEnvironment", "VOCardDownloadTimeOut")
   val VOCardCacheTime = new ConfigurationLocation("EGIEnvironment", "VOCardCacheTime")
@@ -109,6 +110,7 @@ object EGIEnvironment extends Logger {
   Workspace += (FetchResourcesTimeOut, "PT2M")
   Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
   Workspace += (CACertificatesCacheTime, "P7D")
+  Workspace += (CACertificatesDownloadTimeOut, "PT2M")
   Workspace += (VOInformationSite, "http://operations-portal.egi.eu/xml/voIDCard/public/all/true")
   Workspace += (VOCardDownloadTimeOut, "PT2M")
   Workspace += (VOCardCacheTime, "PT6H")
@@ -199,9 +201,8 @@ object EGIEnvironment extends Logger {
       name = name)(authentications)
 
   def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
-
-  def proxyRenewalDelay =
-    (proxyTime * Workspace.preferenceAsDouble(EGIEnvironment.ProxyRenewalRatio)) max Workspace.preferenceAsDuration(EGIEnvironment.MinProxyRenewal)
+  def proxyRenewalRatio = Workspace.preferenceAsDouble(EGIEnvironment.ProxyRenewalRatio)
+  def proxyRenewalDelay = (proxyTime * proxyRenewalRatio) max Workspace.preferenceAsDuration(EGIEnvironment.MinProxyRenewal)
 
   def normalizedFitness[T](fitness: ⇒ Iterable[(T, Double)]): Iterable[(T, Double)] = {
     def orMinForExploration(v: Double) = {
@@ -264,13 +265,12 @@ class EGIEnvironment(
       EGIAuthentication.initialise(a)(
         vomsURL,
         voName,
-        proxyTime,
-        fqan)(authentications).cache(proxyRenewalDelay)
+        fqan)(authentications)
     case None ⇒ throw new UserBadDataError("No authentication has been initialized for EGI.")
   }
 
   @transient lazy val jobServices = {
-    val bdiiWMS = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut))(authentication)
+    val bdiiWMS = bdiiServer.queryWMSLocations(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut))
     bdiiWMS.map {
       js ⇒
         new EGIJobService {
@@ -278,12 +278,8 @@ class EGIEnvironment(
             override val usageControl: UsageControl = new LimitedAccess(threadsByWMS, Workspace.preferenceAsInt(MaxAccessesByMinuteWMS))
             override val hysteresis: Int = Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis)
           }
-          val jobService = new WMSJobService {
-            val url = js.url
-            val credential = js.credential
-            override def connections = threadsByWMS
-            override def delegationRenewal = proxyRenewalDelay
-          }
+
+          val jobService = WMSJobService(js, threadsByWMS, proxyRenewalDelay)(authentication)
           val environment = env
         }
     }

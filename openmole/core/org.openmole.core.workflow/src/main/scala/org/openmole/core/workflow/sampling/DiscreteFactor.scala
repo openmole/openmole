@@ -19,6 +19,7 @@ package org.openmole.core.workflow.sampling
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.tools.FromContext
 
 import scala.util.Random
 
@@ -31,8 +32,8 @@ object DiscreteFactor {
 
       override def inputs = discrete.inputs(f.domain)
       override def prototypes = List(prototype)
-      override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[collection.Iterable[Variable[T]]] =
-        discrete.iterator(f.domain, context).map { v ⇒ List(Variable(prototype, v)) }
+      override def apply(): FromContext[Iterator[collection.Iterable[Variable[T]]]] =
+        discrete.iterator(f.domain).map(_.map { v ⇒ List(Variable(prototype, v)) })
     }
 
 }

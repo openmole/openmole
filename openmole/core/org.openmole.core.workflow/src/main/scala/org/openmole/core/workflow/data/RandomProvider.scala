@@ -19,8 +19,6 @@ package org.openmole.core.workflow.data
 import scala.util.Random
 
 object RandomProvider {
-  implicit def radomFunctionToRandomProvider(rng: ⇒ Random) = apply(rng)
-
   def apply(_rng: ⇒ Random) = new RandomProvider {
     override lazy val rng: Random = _rng
   }

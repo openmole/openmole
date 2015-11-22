@@ -25,9 +25,13 @@ import org.openmole.core.batch.storage._
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStorage }
 
-trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
+trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { st ⇒
 
   type SS = PersistentStorageService
+
+  def user: String
+  def host: String
+  def port: Int
 
   def usageControl: UsageControl
   def sharedDirectory: Option[String]
@@ -48,15 +52,15 @@ trait SSHPersistentStorage <: BatchEnvironment with SSHAccess { env ⇒
         new PersistentStorageService with LogicalLinkStorage with StorageRoot {
           val usageControl = new UnlimitedAccess
           lazy val remoteStorage: RemoteStorage = new RemoteLogicalLinkStorage(root)
-          val url = new URI("file", env.user, "localhost", -1, sharedDirectory.orNull, null, null)
+          val url = new URI("file", st.user, "localhost", -1, sharedDirectory.orNull, null, null)
           val id: String = url.toString
-          val environment = env
+          val environment = st
         }
       case false ⇒
         new PersistentStorageService with SSHStorageService with StorageRoot with ThisHost {
-          val usageControl = env.usageControl
-          val environment = env
-          val id = new URI("ssh", env.user, env.host, env.port, sharedDirectory.orNull, null, null).toString
+          val usageControl = st.usageControl
+          val environment = st
+          val id = new URI("ssh", st.user, st.host, st.port, sharedDirectory.orNull, null, null).toString
         }
     }
 
