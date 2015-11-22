@@ -25,10 +25,10 @@ import org.openmole.core.workflow.tools.FromContext
 
 object StepRange {
   implicit def isFinite[T] = new Finite[T, StepRange[T]] with Bounds[T, StepRange[T]] with Center[T, StepRange[T]] {
-    override def computeValues(domain: StepRange[T], context: Context)(implicit rng: RandomProvider): Iterable[T] = domain.computeValues(context)
-    override def max(domain: StepRange[T], context: Context)(implicit rng: RandomProvider): T = domain.max(context)
-    override def min(domain: StepRange[T], context: Context)(implicit rng: RandomProvider): T = domain.min(context)
-    override def center(domain: StepRange[T], context: Context)(implicit rng: RandomProvider): T = domain.center(context)
+    override def computeValues(domain: StepRange[T]) = FromContext.apply((context, rng) ⇒ domain.computeValues(context)(rng))
+    override def max(domain: StepRange[T]) = FromContext.apply((context, rng) ⇒ domain.max(context)(rng))
+    override def min(domain: StepRange[T]) = FromContext.apply((context, rng) ⇒ domain.min(context)(rng))
+    override def center(domain: StepRange[T]) = FromContext.apply((context, rng) ⇒ domain.center(context)(rng))
   }
 
   def apply[T](range: Range[T], step: FromContext[T]) = new StepRange[T](range, step)

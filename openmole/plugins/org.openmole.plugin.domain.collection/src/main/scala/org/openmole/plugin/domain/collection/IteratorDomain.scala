@@ -19,14 +19,14 @@ package org.openmole.plugin.domain.collection
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.tools.FromContext
 
 import scala.util.Random
 
 object IteratorDomain {
 
   implicit def isDiscrete[T] = new Discrete[T, IteratorDomain[T]] {
-    override def iterator(domain: IteratorDomain[T], context: Context)(implicit rng: RandomProvider): Iterator[T] =
-      domain.iterator
+    override def iterator(domain: IteratorDomain[T]) = domain.iterator
   }
 
   def apply[T](iterator: Iterator[T]) =

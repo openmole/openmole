@@ -37,9 +37,11 @@ object Task extends Logger {
   val openMOLESeed = Prototype[Long](prefixedVariable("Seed"))
 
   def buildRNG(context: Context): Random = service.Random.newRNG(context(Task.openMOLESeed)).toScala
+
 }
 
 trait Task <: InputOutputCheck with Name {
+
 
   /**
    *
@@ -47,7 +49,7 @@ trait Task <: InputOutputCheck with Name {
    *
    * @param context the context in which the task will be executed
    */
-  def perform(context: Context, localEnvironment: LocalEnvironment)(rng: RandomProvider = Task.buildRNG(context)): Context = perform(context, process(_)(rng))
+  def perform(context: Context, localEnvironment: LocalEnvironment)(rng: RandomProvider = RandomProvider(Task.buildRNG(context))): Context = perform(context, process(_)(rng))
 
   protected def process(context: Context)(implicit rng: RandomProvider): Context
 

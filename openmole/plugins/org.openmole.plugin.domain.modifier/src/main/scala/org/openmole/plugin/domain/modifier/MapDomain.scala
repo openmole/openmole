@@ -27,8 +27,7 @@ import scala.util.Random
 object MapDomain {
 
   implicit def isDiscrete[I, O, D] = new Discrete[O, MapDomain[I, O, D]] {
-    override def iterator(domain: MapDomain[I, O, D], context: Context)(implicit rng: RandomProvider): Iterator[O] =
-      domain.iterator(context)
+    override def iterator(domain: MapDomain[I, O, D]) = FromContext((context, rng) ⇒ domain.iterator(context)(rng))
     override def inputs(domain: MapDomain[I, O, D]) = domain.inputs
   }
 
@@ -43,7 +42,7 @@ sealed class MapDomain[-I: Manifest, +O: Manifest, D](val domain: D, val source:
   proxy
 
   def iterator(context: Context)(implicit rng: RandomProvider): Iterator[O] =
-    discrete.iterator(domain, context).map {
+    discrete.iterator(domain).from(context).map {
       e ⇒ proxy.run(context)(rng).asInstanceOf[I ⇒ O](e)
     }
 }

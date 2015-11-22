@@ -21,23 +21,25 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.tools.FromContext
 
 package object collection {
 
   implicit def iterableIsDiscrete[T] = new Discrete[T, Iterable[T]] {
-    override def iterator(domain: Iterable[T], context: Context)(implicit rng: RandomProvider): Iterator[T] = domain.iterator
+    override def iterator(domain: Iterable[T]) = domain.iterator
   }
 
   implicit def arrayIsFinite[T] = new Finite[T, Array[T]] {
-    override def computeValues(domain: Array[T], context: Context)(implicit rng: RandomProvider): Iterable[T] = domain
+    override def computeValues(domain: Array[T]) = domain.toIterable
   }
 
   implicit def booleanPrototypeIsFactor(p: Prototype[Boolean]) = Factor(p, List(true, false))
 
   implicit def arrayPrototypeIsFinite[T] = new Finite[T, Prototype[Array[T]]] {
     override def inputs(domain: Prototype[Array[T]]): PrototypeSet = Seq(domain)
-    override def computeValues(domain: Prototype[Array[T]], context: Context)(implicit rng: RandomProvider): Iterable[T] =
-      context(domain)
+    override def computeValues(domain: Prototype[Array[T]]) = FromContext.apply { (context, rng) ⇒
+      context(domain).toIterable
+    }
   }
 
 }

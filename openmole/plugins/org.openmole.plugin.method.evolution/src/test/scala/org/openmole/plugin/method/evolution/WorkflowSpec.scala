@@ -27,23 +27,20 @@ class WorkflowSpec extends FlatSpec with Matchers {
     val y = Val[Double]
 
     val puzzle = EmptyTask() set (
-      inputs += (x, y),
-      outputs += (x, y)
+      (inputs, outputs) += (x, y)
     )
-
-    val evolution =
-      NSGA2(
-        mu = 100,
-        inputs = Seq(x -> (0.0, 1.0), y -> (0.0, 1.0)),
-        objectives = Seq(x, y),
-        replication = Replication()
-      )
 
     // Define a builder to use NSGA2 generational EA algorithm.
     // replicateModel is the fitness function to optimise.
     // lambda is the size of the offspring (and the parallelism level).
     SteadyStateEvolution(
-      algorithm = evolution,
+      algorithm =
+        NSGA2(
+          mu = 100,
+          gemome = Genome(x in (0.0, 1.0), y in ("0.0", "1.0")),
+          objectives = Seq(x, y),
+          replication = Replication()
+        ),
       evaluation = puzzle,
       parallelism = 10,
       termination = 10

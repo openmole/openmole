@@ -26,7 +26,7 @@ import scala.util.Random
 object TakeDomain {
 
   implicit def isFinite[T, D] = new Finite[T, TakeDomain[T, D]] {
-    override def computeValues(domain: TakeDomain[T, D], context: Context)(implicit rng: RandomProvider): Iterable[T] = domain.computeValues(context)
+    override def computeValues(domain: TakeDomain[T, D]) = domain.computeValues()
     override def inputs(domain: TakeDomain[T, D]): PrototypeSet = domain.inputs
   }
 
@@ -37,6 +37,9 @@ object TakeDomain {
 
 sealed class TakeDomain[+T, D](val domain: D, val size: FromContext[Int])(implicit discrete: Discrete[T, D]) {
   def inputs = discrete.inputs(domain)
-  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] =
-    discrete.iterator(domain, context).slice(0, size.from(context)).toIterable
+  def computeValues() =
+    for {
+      d ← discrete.iterator(domain)
+      s ← size
+    } yield d.slice(0, s).toIterable
 }

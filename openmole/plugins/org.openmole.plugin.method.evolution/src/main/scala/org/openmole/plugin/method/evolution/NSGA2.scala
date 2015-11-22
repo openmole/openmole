@@ -27,17 +27,17 @@ object NSGA2 {
 
   def apply(
     mu: Int,
-    inputs: Inputs,
+    genome: Genome,
     objectives: Objectives,
     replication: Option[Replication] = None) = {
 
-    val (_mu, _inputs, _objectives) = (mu, inputs, objectives)
+    val (_mu, _genome, _objectives) = (mu, genome, objectives)
 
     trait OMNSGA2 <: NSGAII with GAAlgorithm {
       val stateType = PrototypeType[STATE]
       val gType = PrototypeType[G]
       val objectives = _objectives
-      val inputs = _inputs
+      val genome = _genome
       override def mu: Int = _mu
     }
 

@@ -41,16 +41,7 @@ package object evolution {
   type Objective = Prototype[Double]
   type Objectives = Seq[Objective]
 
-  //  implicit def durationToTerminationConverter(d: Duration) = Timed(d)
   implicit def intToCounterTerminationConverter(n: Long) = AfterGeneration(n)
-
-  implicit def seqOfDoubleTuplesToInputsConversion(s: Seq[(Prototype[Double], (Double, Double))]) =
-    Inputs(s.map { case (p, (min, max)) ⇒ Scalar(p, min, max) })
-
-  implicit def seqOfStringTuplesToInputsConversion(s: Seq[(Prototype[Double], (String, String))]) =
-    Inputs(s.map { case (p, (min, max)) ⇒ Scalar(p, min, max) })
-
-  implicit def seqToInputsConversion[T](s: Seq[Input]) = Inputs(s)
 
   object OMTermination {
     def toTermination(algorithm: Algorithm)(oMTermination: OMTermination) =

@@ -19,11 +19,12 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.tools.service.Random._
+import org.openmole.core.workflow.tools.FromContext
 
 object ShuffleDomain {
 
   implicit def isFinite[T, D] = new Finite[T, ShuffleDomain[T, D]] {
-    override def computeValues(domain: ShuffleDomain[T, D], context: Context)(implicit rng: RandomProvider): Iterable[T] = domain.computeValues(context)
+    override def computeValues(domain: ShuffleDomain[T, D]) = FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
     override def inputs(domain: ShuffleDomain[T, D]) = domain.inputs
   }
 
@@ -34,5 +35,5 @@ object ShuffleDomain {
 sealed class ShuffleDomain[+T, D](domain: D)(implicit finite: Finite[T, D]) {
   def inputs = finite.inputs(domain)
   def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] =
-    finite.iterator(domain, context).toSeq.shuffled(rng())
+    finite.iterator(domain).from(context).toSeq.shuffled(rng())
 }

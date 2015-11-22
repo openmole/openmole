@@ -61,7 +61,7 @@ sealed abstract class MoleTask(
     val last: Capsule,
     val implicits: Iterable[String]) extends Task {
 
-  override def perform(context: Context, localEnvironment: LocalEnvironment)(rng: RandomProvider = Task.buildRNG(context)): Context = perform(context, executeMole(_, localEnvironment, rng))
+  override def perform(context: Context, localEnvironment: LocalEnvironment)(rng: RandomProvider): Context = perform(context, executeMole(_, localEnvironment, rng))
 
   def executeMole(context: Context, localEnvironment: LocalEnvironment, rng: RandomProvider) = {
     val implicitsValues = implicits.flatMap(i ⇒ context.get(i))

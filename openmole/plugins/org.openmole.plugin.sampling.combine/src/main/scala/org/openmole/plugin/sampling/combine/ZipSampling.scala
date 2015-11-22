@@ -19,6 +19,7 @@ package org.openmole.plugin.sampling.combine
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.tools.FromContext
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
@@ -34,16 +35,20 @@ sealed class ZipSampling(val samplings: Sampling*) extends Sampling {
   override def inputs = PrototypeSet(samplings.flatMap(_.inputs))
   override def prototypes = samplings.flatMap(_.prototypes)
 
-  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
+  override def apply() = FromContext.apply { (context, rng) ⇒
+    implicit val random = rng
+
     samplings.headOption match {
       case Some(reference) ⇒
         /* Compute plans */
-        val cachedSample = samplings.tail.map { _.build(context) }.toArray
+        val cachedSample = samplings.tail.map {
+          _().from(context)
+        }.toArray
 
         /* Compose plans */
         val factorValuesCollection = new ListBuffer[Iterable[Variable[_]]]
 
-        val valuesIterator = reference.build(context)
+        val valuesIterator = reference().from(context)
         var oneFinished = false
 
         while (valuesIterator.hasNext && !oneFinished) {
@@ -64,5 +69,6 @@ sealed class ZipSampling(val samplings: Sampling*) extends Sampling {
 
       case None ⇒ Iterator.empty
     }
+  }
 
 }

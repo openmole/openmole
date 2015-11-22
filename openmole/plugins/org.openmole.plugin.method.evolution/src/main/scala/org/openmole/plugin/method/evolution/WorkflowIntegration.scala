@@ -32,7 +32,7 @@ case class Replication(
 
 object WorkflowIntegration {
 
-  implicit val gaWorkflowIntegration = new WorkflowIntegration[GAAlgorithm] {
+  implicit val gaWorkflowIntegration: WorkflowIntegration[GAAlgorithm] = new WorkflowIntegration[GAAlgorithm] {
     override def resultPrototypes(algorithm: GAAlgorithm): Seq[Prototype[_]] = algorithm.resultPrototypes
     override def inputsPrototypes(algorithm: GAAlgorithm): Seq[Prototype[_]] = algorithm.inputsPrototypes
     override def outputPrototypes(algorithm: GAAlgorithm): Seq[Prototype[_]] = algorithm.outputPrototypes
@@ -42,7 +42,7 @@ object WorkflowIntegration {
     override def populationType(algorithm: GAAlgorithm): PrototypeType[algorithm.Pop] = algorithm.populationType
     override def individualType(algorithm: GAAlgorithm): PrototypeType[algorithm.Ind] = algorithm.individualType
     override def genomeType(algorithm: GAAlgorithm): PrototypeType[algorithm.G] = algorithm.genomeType
-    override def randomGenome(algorithm: GAAlgorithm): State[Random, algorithm.G] = algorithm.randomGenome(algorithm.inputs.size)
+    override def randomGenome(algorithm: GAAlgorithm): State[Random, algorithm.G] = algorithm.randomGenome(algorithm.genome.size)
   }
 
 }
@@ -61,12 +61,17 @@ trait WorkflowIntegration[-T <: Algorithm] {
 }
 
 
-trait GAAlgorithm extends Algorithm with GeneticAlgorithm with InputsConverter {
+trait GAAlgorithm extends Algorithm with GeneticAlgorithm { ga =>
   def toPhenotype(context: Context): P = {
     val scaled: Seq[(Prototype[Double], Double)] = objectives.map(o ⇒ o -> context(o))
     val phenotype: Seq[Double] = scaled.map(_._2)
     toPhenotype(phenotype)
   }
+
+  def genome: Genome
+
+  def scaled(genome: Seq[Double], context: Context)(implicit rng: RandomProvider): List[Variable[_]] =
+    InputConverter.scaled(ga.genome.inputs.toList, genome.toList, context)
 
   def resultPrototypes: Seq[Prototype[_]]
   def genomeType = PrototypeType[G]
@@ -74,7 +79,7 @@ trait GAAlgorithm extends Algorithm with GeneticAlgorithm with InputsConverter {
   def populationType: PrototypeType[Pop]
   def individualType: PrototypeType[Ind]
   def objectives: Objectives
-  def inputsPrototypes = inputs.inputs.map(_.prototype)
+  def inputsPrototypes = genome.inputs.map(_.prototype)
   def outputPrototypes: Seq[Prototype[_]] = objectives
   def genomeToVariables(genome: G, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = scaled(genomeValues.get(genome), context)
   def populationToVariables(population: Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]]
@@ -91,7 +96,7 @@ trait DeterministicGAAlgorithm extends GAAlgorithm {
   def populationToVariables(population: Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = {
     val scaledValues = population.map(i ⇒ scaled(genomeValues.get(i.genome), context))
 
-    inputs.inputs.zipWithIndex.map {
+    genome.inputs.zipWithIndex.map {
       case (input, i) ⇒
         input match {
           case Scalar(prototype, _, _)   ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Double]).toArray[Double])
@@ -127,7 +132,7 @@ trait StochasticGAAlgorithm extends GAAlgorithm {
   def populationToVariables(population: Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = {
     val scaledValues = population.map(i ⇒ scaled(genomeValues.get(i.genome), context))
 
-    inputs.inputs.zipWithIndex.map {
+    genome.inputs.zipWithIndex.map {
       case (input, i) ⇒
         input match {
           case Scalar(prototype, _, _)   ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Double]).toArray[Double])
