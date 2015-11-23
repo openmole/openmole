@@ -36,11 +36,19 @@ object DIRACJobService extends Logger
 
 import DIRACJobService._
 
-trait DIRACJobService extends GridScaleJobService with JobScript { js ⇒
+trait DIRACJobService extends GridScaleJobService { js ⇒
 
   def environment: DIRACEnvironment
   val jobService: GSDIRACJobService
   val usageControl = new UnlimitedAccess
+
+  def jobScript =
+    JobScript(
+      voName = environment.voName,
+      memory = environment.openMOLEMemoryValue,
+      threads = environment.threadsValue,
+      debug = environment.debug
+    )
 
   lazy val id = jobService.service
 
@@ -51,7 +59,7 @@ trait DIRACJobService extends GridScaleJobService with JobScript { js ⇒
     try {
       val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
 
-      Resource.fromFile(script).write(generateScript(serializedJob, outputFilePath, None, None))
+      Resource.fromFile(script).write(jobScript(serializedJob, outputFilePath, None, None))
 
       val jobDescription = new GSDIRACJobDescription {
         override def stdOut = if (environment.debug) Some("out") else None

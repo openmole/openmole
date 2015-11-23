@@ -33,10 +33,18 @@ object EGIJobService extends Logger
 
 import EGIJobService._
 
-trait EGIJobService extends GridScaleJobService with JobScript { js ⇒
+trait EGIJobService extends GridScaleJobService { js ⇒
 
   val jobService: WMSJobService
   def environment: EGIEnvironment
+
+  def jobScript =
+    JobScript(
+      voName = environment.voName,
+      memory = environment.openMOLEMemoryValue,
+      threads = environment.threadsValue,
+      debug = environment.debug
+    )
 
   val usageControl: AvailabilityQuality with JobServiceQualityControl
   import usageControl._
@@ -60,7 +68,7 @@ trait EGIJobService extends GridScaleJobService with JobScript { js ⇒
       val _runningPath = storage.child(path, runningFile)
       val _finishedPath = storage.child(path, finishedFile)
 
-      val scriptContent = generateScript(serializedJob, outputFilePath)
+      val scriptContent = jobScript(serializedJob, outputFilePath)
 
       Resource.fromFile(script).write(scriptContent)
 

@@ -24,13 +24,11 @@ import org.openmole.core.workspace.Workspace
 
 import scala.collection.mutable.ListBuffer
 
-trait JobScript {
+case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) {
 
-  def environment: BatchEnvironment with LCGCp {
-    def debug: Boolean
-  }
+  def lcgCp = LCGCp(voName = voName)
 
-  protected def generateScript(
+  def apply(
     serializedJob: SerializedJob,
     resultPath: String,
     runningPath: Option[String] = None,
@@ -40,7 +38,7 @@ trait JobScript {
     assert(runtime.runtime.path != null)
 
     val debugInfo =
-      if (environment.debug) s"echo ${serializedJob.storage.url} ; cat /proc/meminfo ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; cat $X509_USER_PROXY ; "
+      if (debug) s"echo ${serializedJob.storage.url} ; cat /proc/meminfo ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; cat $X509_USER_PROXY ; "
       else ""
 
     val init = {
@@ -66,7 +64,7 @@ trait JobScript {
         lcgCpCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi"
       script += "tar -xzf jvm.tar.gz >/dev/null"
       script += "rm -f jvm.tar.gz"
-      script += lcgCpCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
+      script += lcgCp.download(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
       script += "tar -xzf openmole.tar.gz >/dev/null"
       script += "rm -f openmole.tar.gz"
       script.mkString(" && ")
@@ -77,10 +75,10 @@ trait JobScript {
 
       for { (plugin, index) ← runtime.environmentPlugins.zipWithIndex } {
         assert(plugin.path != null)
-        script += lcgCpCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
+        script += lcgCp.download(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
       }
 
-      script += lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml")
+      script += lcgCp.download(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml")
 
       "mkdir envplugins && " + script.mkString(" && ")
     }
@@ -89,13 +87,13 @@ trait JobScript {
       val script = ListBuffer[String]()
 
       script += "export PATH=$PWD/jre/bin:$PATH"
-      script += "/bin/sh run.sh " + environment.openMOLEMemoryValue + "m " + UUID.randomUUID + " -c " +
+      script += "/bin/sh run.sh " + memory + "m " + UUID.randomUUID + " -c " +
         path + " -s $CUR/storage.xml -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath +
-        " -t " + environment.threadsValue + (if (environment.debug) " -d 2>&1" else "")
+        " -t " + threads + (if (debug) " -d 2>&1" else "")
       script.mkString(" && ")
     }
 
-    val postDebugInfo = if (environment.debug) "cat *.log ; " else ""
+    val postDebugInfo = if (debug) "cat *.log ; " else ""
 
     val finish =
       finishedPath.map { p ⇒ touch(storage.url.resolve(p)) + "; " }.getOrElse("") + "cd .. &&  rm -rf $CUR"
@@ -105,10 +103,10 @@ trait JobScript {
 
   protected def touch(dest: URI) = {
     val name = UUID.randomUUID.toString
-    s"echo $name >$name && ${environment.lcgCpCmd(name, dest)}; rm -f $name"
+    s"echo $name >$name && ${lcgCp.upload(name, dest)}; rm -f $name"
   }
 
-  protected def lcgCpCmd(from: URI, to: String) = environment.lcgCpCmd(from, to)
+  protected def lcgCpCmd(from: URI, to: String) = lcgCp.download(from, to)
 
   private def background(s: String) = "( " + s + " & )"
 }

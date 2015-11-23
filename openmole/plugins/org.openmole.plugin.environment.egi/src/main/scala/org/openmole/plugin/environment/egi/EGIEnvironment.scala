@@ -77,7 +77,7 @@ object EGIEnvironment extends Logger {
   val JobShakingHalfLife = new ConfigurationLocation("EGIEnvironment", "JobShakingHalfLife")
   val JobShakingMaxReady = new ConfigurationLocation("EGIEnvironment", "JobShakingMaxReady")
 
-  val RemoteTimeout = new ConfigurationLocation("EGIEnvironment", "RemoteTimeout")
+  val RemoteCopyTimeout = new ConfigurationLocation("EGIEnvironment", "RemoteCopyTimeout")
   val QualityHysteresis = new ConfigurationLocation("EGIEnvironment", "QualityHysteresis")
   val MinValueForSelectionExploration = new ConfigurationLocation("EGIEnvironment", "MinValueForSelectionExploration")
   val ShallowWMSRetryCount = new ConfigurationLocation("EGIEnvironment", "ShallowWMSRetryCount")
@@ -134,7 +134,7 @@ object EGIEnvironment extends Logger {
   Workspace += (JobShakingHalfLife, "PT30M")
   Workspace += (JobShakingMaxReady, "100")
 
-  Workspace += (RemoteTimeout, "PT5M")
+  Workspace += (RemoteCopyTimeout, "PT10M")
 
   Workspace += (MinValueForSelectionExploration, "0.001")
   Workspace += (QualityHysteresis, "100")
@@ -238,7 +238,7 @@ class EGIEnvironment(
     override val threads: Option[Int],
     val requirements: Option[String],
     val debug: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with EGIEnvironmentId with LCGCp { env ⇒
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIIStorageServers with EGIEnvironmentId { env ⇒
 
   import EGIEnvironment._
 

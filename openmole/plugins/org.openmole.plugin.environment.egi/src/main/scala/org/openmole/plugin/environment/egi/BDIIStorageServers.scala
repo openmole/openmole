@@ -37,9 +37,9 @@ import Random._
 import Scaling._
 import scala.annotation.tailrec
 
-object BDIISRMServers extends Logger
+object BDIIStorageServers extends Logger
 
-trait BDIISRMServers extends BatchEnvironment {
+trait BDIIStorageServers extends BatchEnvironment {
   type SS = EGIStorageService
 
   def bdiiServer: BDII
@@ -48,7 +48,7 @@ trait BDIISRMServers extends BatchEnvironment {
 
   @transient lazy val storages = {
     val bdiiStorarges = bdiiServer.querySRMLocations(voName, Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut))
-    bdiiStorarges.map { s ⇒ EGIStorageService(s, this, proxyCreator) }
+    bdiiStorarges.map { s ⇒ EGISRMStorageService(s, this, proxyCreator) }
   }
 
   def selectAStorage(usedFileHashes: Iterable[(File, Hash)]): (StorageService, AccessToken) =
