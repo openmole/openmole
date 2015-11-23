@@ -24,7 +24,7 @@ import autowire._
 import org.scalajs.dom.html.TextArea
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw.{ FocusEvent, HTMLInputElement }
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 import org.openmole.gui.shared.Api
@@ -80,43 +80,67 @@ class ModelWizardPanel extends ModalPanel {
     }
   }
 
-  def inputs: Seq[Input[ProtoTypePair]] =
+  def inputs: Seq[Input[ProtoTypePair]] = {
     currentReactives().map {
       _.role
     }.collect { case x: Input[ProtoTypePair] ⇒ x }
+  }
 
   def outputs: Seq[Output[ProtoTypePair]] =
     currentReactives().map {
       _.role
     }.collect { case x: Output[ProtoTypePair] ⇒ x }
 
-  lazy val upButton = tags.label(`class` := "inputFileStyle spacer5 certificate marginLeft100")(
-    bs.fileInput((fInput: HTMLInputElement) ⇒ {
-      FileManager.upload(fInput,
-        manager.current.safePath(),
-        (p: FileTransferState) ⇒ {
-          transferring() = p
-        },
-        UploadProject(),
-        () ⇒ {
-          if (fInput.files.length > 0) {
-            val fileName = fInput.files.item(0).name
-            OMPost[Api].getCareBinInfos(manager.current.safePath() ++ fileName).call().foreach { b ⇒
-              launchingCommand() = b
-              labelName() = Some(fileName)
-              launchingCommand().foreach { lc ⇒ currentReactives() = lc.arguments.map { pp ⇒ Reactive(Input(pp)) } }
+  def upButton = bs.div("centerWidth250")(
+    tags.label(`class` := "inputFileStyle spacer5 certificate")(
+      bs.fileInput((fInput: HTMLInputElement) ⇒ {
+        FileManager.upload(fInput,
+          manager.current.safePath(),
+          (p: FileTransferState) ⇒ {
+            transferring() = p
+          },
+          UploadProject(),
+          () ⇒ {
+            if (fInput.files.length > 0) {
+              val fileName = fInput.files.item(0).name
+              OMPost[Api].getCareBinInfos(manager.current.safePath() ++ fileName).call().foreach { b ⇒
+                launchingCommand() = b
+                labelName() = Some(fileName)
+                launchingCommand().foreach { lc ⇒
+                  currentReactives() = lc.arguments.map { pp ⇒
+                    Reactive(Input(pp))
+                  }
+                }
+              }
             }
           }
+        )
+      }), Rx {
+        labelName() match {
+          case Some(s: String) ⇒ s
+          case _               ⇒ "Your Model"
         }
-      )
-    }), Rx {
-      labelName() match {
-        case Some(s: String) ⇒ s
-        case _               ⇒ "Your Model"
       }
-    }
+    )
   )
 
+  val step1 = tags.div(
+    tags.h3("Step 1: Code import"),
+    tags.div("Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++ " +
+      "R, etc). In the case of a Care archive, the packaging has to be done with the",
+      tags.b("-o yourmodel.tar.gz.bin."),
+      " option."
+    )
+  )
+
+  val step2 = tags.div(
+    tags.h3("Step 2: Code I/O settings"),
+    tags.div("The systems detects automatically the launching command and propose you the creation of some OpenMOLE Variables so that" +
+      " your model will be able to be feeded with variable values coming from the workflow you will build afterwards. In the case of Java, Scala, Netlogo" +
+      "(ie codes working on the JVM) the OpenMOLE variables can be set directly in the command line. Otherwise, they have to be set inside ${} statements." +
+      " By default he systems detects automatically your Variable changes and update the launching command. However, this option can be desactivated."
+    )
+  )
   val buildModelTaskButton = bs.button(
     "Build",
     btn_primary)(onclick := { () ⇒
@@ -152,7 +176,7 @@ class ModelWizardPanel extends ModalPanel {
   def applyOnPrototypePair(p: Role[ProtoTypePair], todo: (Role[ProtoTypePair], Int) ⇒ Unit) =
     currentReactives().map {
       _.role
-    }.zipWithIndex.filter { case (ptp, index) ⇒ ptp.content.name == p.content.name }.foreach {
+    }.zipWithIndex.filter { case (ptp, index) ⇒ ptp == p }.foreach {
       case (role, index) ⇒ todo(role, index)
     }
 
@@ -177,7 +201,14 @@ class ModelWizardPanel extends ModalPanel {
       case _           ⇒ OMTags.glyph_arrow_left
     }
 
-    def save = updatePrototypePair(role, role.content.copy(name = nameInput.value, `type` = typeSelector.content().get, mapping = mappingInput.value))
+    def save = {
+      val oldname = role.content.name
+      updatePrototypePair(role, role.content.copy(name = nameInput.value, `type` = typeSelector.content().get, mapping = mappingInput.value))
+      /* launchingCommand() = launchingCommand().map { lc ⇒
+        val fCommand = lc.fullCommand
+        lc.copy(fullCommand = fCommand.replace(oldname, role.content.name))
+      }*/
+    }
 
     def removePrototypePair = {
       ModelWizardPanel.this.save
@@ -201,14 +232,16 @@ class ModelWizardPanel extends ModalPanel {
       save
     }).render
 
-    lazy val line = {
+    val line = {
       typeSelector.content() = Some(role.content.`type`)
       tags.tr(
         onmouseover := { () ⇒
           lineHovered() = true
+          typeSelector.selector.focus()
         },
         onmouseout := { () ⇒
           lineHovered() = false
+          typeSelector.selector.focus()
         },
         bs.td(bs.col_md_3 + "spacer7")(nameInput),
         bs.td(bs.col_md_2)(typeSelector.selector),
@@ -234,33 +267,42 @@ class ModelWizardPanel extends ModalPanel {
 
   }
 
-  lazy val iinput: HTMLInputElement = bs.input("")(placeholder := "Add Input").render
+  def prototypeTable = bs.div("spacer7")({
 
-  lazy val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
+    val iinput: HTMLInputElement = bs.input("")(placeholder := "Add Input").render
 
-  lazy val prototypeTable = bs.div("spacer7")(
+    val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
+
+    val head = thead(tags.tr(
+      for (h ← Seq("Name", "Type", "File mapping", "", "")) yield {
+        tags.th(h)
+      }))
+
     Rx {
       tags.div(
         tags.div(`class` := "twocolumns right10")(
-          tags.form(iinput, onsubmit := {
-            () ⇒
-              addPrototypePair(Input(ProtoTypePair(iinput.value, ProtoTYPE.DOUBLE)))
-              iinput.value = ""
-              false
-          }),
+          bs.form("paddingLeftRight50")(iinput,
+            onsubmit := {
+              () ⇒
+                addPrototypePair(Input(ProtoTypePair(iinput.value, ProtoTYPE.DOUBLE)))
+                iinput.value = ""
+                false
+            }),
           bs.table(striped)(
+            head,
             tbody(
               for (ip ← inputs) yield {
                 ip.line
               }))),
         tags.div(`class` := "twocolumns")(
-          tags.form(oinput, onsubmit := {
+          bs.form("paddingLeftRight50")(oinput, onsubmit := {
             () ⇒
               addPrototypePair(Output(ProtoTypePair(oinput.value, ProtoTYPE.DOUBLE)))
               oinput.value = ""
               false
           }),
           bs.table(striped)(
+            head,
             tbody(
               for (op ← outputs) yield {
                 op.line
@@ -270,6 +312,7 @@ class ModelWizardPanel extends ModalPanel {
         )
       )
     }
+  }
   )
 
   val dialog = bs.modalDialog(modalID,
@@ -278,22 +321,26 @@ class ModelWizardPanel extends ModalPanel {
     ),
     bodyDialog(Rx {
       tags.div(
+        step1,
         transferring() match {
           case _: Transfering ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
           case _: Transfered ⇒
             panels.treeNodePanel.refreshCurrentDirectory
             upButton
           case _ ⇒ upButton
-        }, prototypeTable,
-        commandArea() match {
-          case Some(t: TextArea) ⇒ t
-          case _                 ⇒ tags.div()
         },
-        buildModelTaskButton
+        commandArea() match {
+          case Some(t: TextArea) ⇒ tags.div(step2, prototypeTable, t)
+          case _                 ⇒ tags.div()
+        }
       )
     }
     ),
-    footerDialog(closeButton)
+    footerDialog(bs.buttonGroup()(
+      closeButton,
+      buildModelTaskButton
+    )
+    )
   )
 
 }

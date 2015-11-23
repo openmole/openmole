@@ -43,10 +43,6 @@ class Select[T <: Displayable with Identifiable](autoID: String,
     case _ ⇒ default match {
       case None ⇒ Some(contents()(0)._1)
       case _ ⇒
-        println("XXX " + contents().map{_._1})
-        println("TO FIND " + default.get)
-        println("XX " + contents().map{_._1}.indexOf(default.get))
-        println("YY " + contents().filter{_._1 == default.get})
         val ind = contents().map{_._1}.indexOf(default.get)
         if (ind != -1) Some(contents()(ind)._1) else Some(contents()(0)._1)
     }
