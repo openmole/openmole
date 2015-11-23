@@ -6,7 +6,7 @@ import Keys._
 
 import org.openmole.buildsystem.OMKeys._
 import org.openmole.buildsystem._, Assembly._
-import Libraries._
+import root.Libraries._
 import com.typesafe.sbt.osgi.OsgiKeys
 import sbt.inc.Analysis
 import sbtunidoc.Plugin._
@@ -187,7 +187,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       mgo intransitive (),
       scalabc intransitive (),
       groovy intransitive (),
-      apacheHTTP intransitive (),
       gridscaleHTTP intransitive (),
       gridscalePBS intransitive (),
       gridscaleSLURM intransitive (),
@@ -197,7 +196,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       gridscalePBS intransitive (),
       gridscaleOAR intransitive (),
       gridscaleSSH intransitive ()
-    ),
+    ) ++ apacheHTTP map (_ intransitive ()),
       dependencyFilter := { m ⇒ m.name != "scala-library" },
       dependencyName := rename
   )

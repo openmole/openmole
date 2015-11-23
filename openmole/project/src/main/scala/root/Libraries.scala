@@ -39,7 +39,11 @@ object Libraries extends Defaults {
 
   lazy val gridscaleHTTP = "fr.iscpif.gridscale.bundle" %% "http" % gridscaleVersion
 
-  lazy val apacheHTTP = "fr.iscpif.gridscale" %% "apachehttp" % "4.5"
+  lazy val apacheHTTP = Seq(
+    "org.apache.httpcomponents" % "httpclient-osgi" % "4.5.1",
+    "org.apache.httpcomponents" % "httpcore-osgi" % "4.4.4",
+    "org.osgi" % "org.osgi.compendium" % "4.2.0"
+  )
 
   lazy val gridscaleOAR = "fr.iscpif.gridscale.bundle" %% "oar" % gridscaleVersion
 
