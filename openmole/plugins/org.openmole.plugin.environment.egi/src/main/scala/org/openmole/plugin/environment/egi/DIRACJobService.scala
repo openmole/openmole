@@ -64,7 +64,7 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
       val jobDescription = new GSDIRACJobDescription {
         override def stdOut = if (environment.debug) Some("out") else None
         override def stdErr = if (environment.debug) Some("err") else None
-        override def outputSandbox = if (environment.debug) Seq("out" -> new File("out"), "err" -> new File("err")) else Seq.empty
+        override def outputSandbox = if (environment.debug) Seq("out" -> Workspace.newFile("job", ".out"), "err" -> Workspace.newFile("job", ".err")) else Seq.empty
         override def inputSandbox = Seq(script)
         def arguments = script.getName
         def executable = "/bin/bash"

@@ -26,14 +26,18 @@ import scala.collection.mutable.ListBuffer
 
 case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) {
 
-  def lcgCp = LCGCp(voName = voName)
-
   def apply(
     serializedJob: SerializedJob,
     resultPath: String,
     runningPath: Option[String] = None,
     finishedPath: Option[String] = None) = {
     import serializedJob._
+
+    def cpCommand =
+      serializedJob.storage match {
+        case _: EGIWebDAVStorageService ⇒ Curl(voName)
+        case _                          ⇒ LCGCp(voName)
+      }
 
     assert(runtime.runtime.path != null)
 
@@ -52,7 +56,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
       script += "cd $CUR"
       script += "export OPENMOLE_HOME=$CUR"
 
-      runningPath.map(p ⇒ touch(storage.url.resolve(p)) + "; ").getOrElse("") + script.mkString(" && ")
+      runningPath.map(p ⇒ touch(storage.url.resolve(p), cpCommand) + "; ").getOrElse("") + script.mkString(" && ")
     }
 
     val install = {
@@ -60,11 +64,11 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
 
       script +=
         "if [ `uname -m` = x86_64 ]; then " +
-        lcgCpCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
-        lcgCpCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi"
+        cpCommand.download(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
+        cpCommand.download(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi"
       script += "tar -xzf jvm.tar.gz >/dev/null"
       script += "rm -f jvm.tar.gz"
-      script += lcgCp.download(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
+      script += cpCommand.download(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
       script += "tar -xzf openmole.tar.gz >/dev/null"
       script += "rm -f openmole.tar.gz"
       script.mkString(" && ")
@@ -75,10 +79,10 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
 
       for { (plugin, index) ← runtime.environmentPlugins.zipWithIndex } {
         assert(plugin.path != null)
-        script += lcgCp.download(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
+        script += cpCommand.download(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
       }
 
-      script += lcgCp.download(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml")
+      script += cpCommand.download(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml")
 
       "mkdir envplugins && " + script.mkString(" && ")
     }
@@ -96,17 +100,15 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
     val postDebugInfo = if (debug) "cat *.log ; " else ""
 
     val finish =
-      finishedPath.map { p ⇒ touch(storage.url.resolve(p)) + "; " }.getOrElse("") + "cd .. &&  rm -rf $CUR"
+      finishedPath.map { p ⇒ touch(storage.url.resolve(p), cpCommand) + "; " }.getOrElse("") + "cd .. &&  rm -rf $CUR"
 
-    debugInfo + init + " && " + install + " && " + dl + " && " + run + "; RETURNCODE=$?;" + postDebugInfo + finish + "; exit $RETURNCODE;"
+    debugInfo + init + " && " + install + " && " + dl + " && " + run + s"; RETURNCODE=${if (debug) "0" else "$?"};" + postDebugInfo + finish + "; exit $RETURNCODE;"
   }
 
-  protected def touch(dest: URI) = {
+  protected def touch(dest: URI, cpCommand: CpCommands) = {
     val name = UUID.randomUUID.toString
-    s"echo $name >$name && ${lcgCp.upload(name, dest)}; rm -f $name"
+    s"echo $name >$name && ${cpCommand.upload(name, dest)}; rm -f $name"
   }
-
-  protected def lcgCpCmd(from: URI, to: String) = lcgCp.download(from, to)
 
   private def background(s: String) = "( " + s + " & )"
 }

@@ -37,7 +37,7 @@ case class LCGCp(voName: String) extends CpCommands {
 
 case class Curl(voName: String) extends CpCommands {
   @transient lazy val curl =
-    s"curl --connect-timeout $getTimeOut --max-time $getTimeOut --cert $$X509_USER_PROXY --key $$X509_USER_PROXY --cacert $$X509_USER_PROXY --capath $$X509_CERT_DIR -f "
+    s"curl -v --insecure --connect-timeout $getTimeOut --max-time $getTimeOut --cert $$X509_USER_PROXY --key $$X509_USER_PROXY --cacert $$X509_USER_PROXY --capath $$X509_CERT_DIR -f "
 
   def upload(from: String, to: URI) = s"$curl -T $from -L $to"
   def download(from: URI, to: String) = s"$curl -L $from -o $to"

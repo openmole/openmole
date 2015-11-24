@@ -70,7 +70,8 @@ object EGIEnvironment extends Logger {
   val LocalThreadsBySE = new ConfigurationLocation("EGIEnvironment", "LocalThreadsBySE")
   val LocalThreadsByWMS = new ConfigurationLocation("EGIEnvironment", "LocalThreadsByWMS")
   val MaxAccessesByMinuteWMS = new ConfigurationLocation("EGIEnvironment", "MaxAccessesByMinuteWMS")
-  val MaxAccessesByMinuteSE = new ConfigurationLocation("EGIEnvironment", "MaxAccessesByMinuteSE")
+  val MaxAccessesByMinuteSRM = new ConfigurationLocation("EGIEnvironment", "MaxAccessesByMinuteSRM")
+  val MaxAccessesByMinuteWebDAV = new ConfigurationLocation("EGIEnvironment", "MaxAccessesByMinuteWebDAV")
 
   val ProxyRenewalRatio = new ConfigurationLocation("EGIEnvironment", "ProxyRenewalRatio")
   val MinProxyRenewal = new ConfigurationLocation("EGIEnvironment", "MinProxyRenewal")
@@ -118,7 +119,8 @@ object EGIEnvironment extends Logger {
   Workspace += (LocalThreadsBySE, "10")
   Workspace += (LocalThreadsByWMS, "10")
   Workspace += (MaxAccessesByMinuteWMS, "100")
-  Workspace += (MaxAccessesByMinuteSE, "100")
+  Workspace += (MaxAccessesByMinuteSRM, "100")
+  Workspace += (MaxAccessesByMinuteWebDAV, "10000")
 
   Workspace += (ProxyRenewalRatio, "0.2")
   Workspace += (MinProxyRenewal, "PT5M")
@@ -280,7 +282,7 @@ class EGIEnvironment(
           }
 
           val jobService = WMSJobService(js, threadsByWMS, proxyRenewalDelay)(authentication)
-          val environment = env
+          def environment = env
         }
     }
   }

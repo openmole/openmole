@@ -52,7 +52,7 @@ object EGISRMStorageService {
 
   def apply[A: GlobusAuthenticationProvider](s: SRMLocation, _environment: BatchEnvironment { def voName: String }, authentication: A) = new EGISRMStorageService {
     def threads = Workspace.preferenceAsInt(EGIEnvironment.LocalThreadsBySE)
-    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Workspace.preferenceAsInt(EGIEnvironment.MaxAccessesByMinuteSE)), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
+    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Workspace.preferenceAsInt(EGIEnvironment.MaxAccessesByMinuteSRM)), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
     val storage = SRMStorage(s.copy(basePath = ""), threads)(authentication)
     val url = new URI("srm", null, s.host, s.port, null, null, null)
     val remoteStorage = new LCGCpRemoteStorage(s.host, s.port, _environment.voName)
@@ -64,7 +64,6 @@ object EGISRMStorageService {
 }
 
 trait EGISRMStorageService <: EGIStorageService
-
 
 trait NativeCommandCopy {
 
@@ -122,10 +121,10 @@ object EGIWebDAVStorageService {
 
   def apply[A: HTTPSAuthentication](s: WebDAVLocation, _environment: BatchEnvironment { def voName: String }, authentication: A) = new EGIWebDAVStorageService {
     def threads = Workspace.preferenceAsInt(EGIEnvironment.LocalThreadsBySE)
-    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Workspace.preferenceAsInt(EGIEnvironment.MaxAccessesByMinuteSE)), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
+    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Workspace.preferenceAsInt(EGIEnvironment.MaxAccessesByMinuteWebDAV)), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
     val storage = WebDAVS(s.copy(basePath = ""), threads)(authentication)
     val url = new URI("https", null, s.host, s.port, null, null, null)
-    val remoteStorage = new LCGCpRemoteStorage(s.host, s.port, _environment.voName)
+    val remoteStorage = new CurlRemoteStorage(s.host, s.port, _environment.voName)
     val environment = _environment
     val root = s.basePath
     override lazy val id = new URI("webdavs", environment.voName, s.host, s.port, s.basePath, null, null).toString
@@ -134,3 +133,10 @@ object EGIWebDAVStorageService {
 }
 
 trait EGIWebDAVStorageService <: EGIStorageService
+
+class CurlRemoteStorage(val host: String, val port: Int, val voName: String) extends RemoteStorage with NativeCommandCopy { s ⇒
+  lazy val curl = new Curl(voName)
+  @transient lazy val url = new URI("https", null, host, port, null, null, null)
+  def downloadCommand(from: URI, to: String): String = curl.download(from, to)
+  def uploadCommand(from: String, to: URI): String = curl.upload(from, to)
+}
