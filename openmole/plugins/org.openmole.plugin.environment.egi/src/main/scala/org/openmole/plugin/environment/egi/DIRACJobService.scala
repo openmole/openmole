@@ -36,11 +36,19 @@ object DIRACJobService extends Logger
 
 import DIRACJobService._
 
-trait DIRACJobService extends GridScaleJobService with JobScript { js ⇒
+trait DIRACJobService extends GridScaleJobService { js ⇒
 
   def environment: DIRACEnvironment
   val jobService: GSDIRACJobService
   val usageControl = new UnlimitedAccess
+
+  def jobScript =
+    JobScript(
+      voName = environment.voName,
+      memory = environment.openMOLEMemoryValue,
+      threads = environment.threadsValue,
+      debug = environment.debug
+    )
 
   lazy val id = jobService.service
 
@@ -51,12 +59,12 @@ trait DIRACJobService extends GridScaleJobService with JobScript { js ⇒
     try {
       val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
 
-      Resource.fromFile(script).write(generateScript(serializedJob, outputFilePath, None, None))
+      Resource.fromFile(script).write(jobScript(serializedJob, outputFilePath, None, None))
 
       val jobDescription = new GSDIRACJobDescription {
         override def stdOut = if (environment.debug) Some("out") else None
         override def stdErr = if (environment.debug) Some("err") else None
-        override def outputSandbox = if (environment.debug) Seq("out" -> new File("out"), "err" -> new File("err")) else Seq.empty
+        override def outputSandbox = if (environment.debug) Seq("out" -> Workspace.newFile("job", ".out"), "err" -> Workspace.newFile("job", ".err")) else Seq.empty
         override def inputSandbox = Seq(script)
         def arguments = script.getName
         def executable = "/bin/bash"

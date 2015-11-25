@@ -37,9 +37,11 @@ import Random._
 import Scaling._
 import scala.annotation.tailrec
 
-object BDIISRMServers extends Logger
+object BDIIStorageServers extends Logger
 
-trait BDIISRMServers extends BatchEnvironment {
+import BDIIStorageServers.Log._
+
+trait BDIIStorageServers extends BatchEnvironment { env ⇒
   type SS = EGIStorageService
 
   def bdiiServer: BDII
@@ -47,8 +49,16 @@ trait BDIISRMServers extends BatchEnvironment {
   def proxyCreator: () ⇒ GlobusAuthentication.Proxy
 
   @transient lazy val storages = {
-    val bdiiStorarges = bdiiServer.querySRMLocations(voName, Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut))
-    bdiiStorarges.map { s ⇒ EGIStorageService(s, this, proxyCreator) }
+    def timeout = Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut)
+//    val webdavStorages = bdiiServer.queryWebDAVLocations(voName, timeout)
+//    if (!webdavStorages.isEmpty) {
+//      logger.fine("Use webdav storages:" + webdavStorages.mkString(","))
+//      webdavStorages.map { s ⇒ EGIWebDAVStorageService(s, env, proxyCreator) }
+//    } else {
+      val srmStorages = bdiiServer.querySRMLocations(voName, timeout)
+      logger.fine("Use srm storages:" + srmStorages.mkString(","))
+      srmStorages.map { s ⇒ EGISRMStorageService(s, env, proxyCreator) }
+//    }
   }
 
   def selectAStorage(usedFileHashes: Iterable[(File, Hash)]): (StorageService, AccessToken) =

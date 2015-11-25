@@ -21,16 +21,24 @@ import java.net.URI
 import fr.iscpif.gridscale.egi.SRMStorage
 import org.openmole.core.workspace.Workspace
 
-trait LCGCp {
+trait CpCommands {
+  def upload(from: String, to: URI): String
+  def download(from: URI, to: String): String
+  def getTimeOut = Workspace.preferenceAsDuration(EGIEnvironment.RemoteCopyTimeout).toSeconds.toString
+}
 
-  def voName: String
-
+case class LCGCp(voName: String) extends CpCommands {
   @transient lazy val lcgCp =
     s"lcg-cp --vo ${voName} --nobdii --defaultsetype srmv2 --connect-timeout $getTimeOut --sendreceive-timeout $getTimeOut --srm-timeout $getTimeOut "
 
-  def lcgCpCmd(from: String, to: URI) = s"$lcgCp file:$from ${SRMStorage.fullEndpoint(to.getHost, to.getPort, to.getPath)}"
-  def lcgCpCmd(from: URI, to: String) = s"$lcgCp ${SRMStorage.fullEndpoint(from.getHost, from.getPort, from.getPath)} file:$to"
+  def upload(from: String, to: URI) = s"$lcgCp file:$from ${SRMStorage.fullEndpoint(to.getHost, to.getPort, to.getPath)}"
+  def download(from: URI, to: String) = s"$lcgCp ${SRMStorage.fullEndpoint(from.getHost, from.getPort, from.getPath)} file:$to"
+}
 
-  private def getTimeOut = Workspace.preferenceAsDuration(EGIEnvironment.RemoteTimeout).toSeconds.toString
+case class Curl(voName: String) extends CpCommands {
+  @transient lazy val curl =
+    s"curl -v --insecure --connect-timeout $getTimeOut --max-time $getTimeOut --cert $$X509_USER_PROXY --key $$X509_USER_PROXY --cacert $$X509_USER_PROXY --capath $$X509_CERT_DIR -f "
 
+  def upload(from: String, to: URI) = s"$curl -T $from -L $to"
+  def download(from: URI, to: String) = s"$curl -L $from -o $to"
 }

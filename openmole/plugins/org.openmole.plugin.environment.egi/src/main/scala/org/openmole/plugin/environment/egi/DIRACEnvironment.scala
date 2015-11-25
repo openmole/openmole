@@ -88,7 +88,7 @@ class DIRACEnvironment(
     val cpuTime: Option[Duration],
     override val openMOLEMemory: Option[Int],
     val debug: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with EGIEnvironmentId with LCGCp { env ⇒
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIIStorageServers with EGIEnvironmentId { env ⇒
 
   type JS = DIRACJobService
 
