@@ -23,12 +23,15 @@ import org.openmole.plugin.hook.file.AppendToCSVFileHookBuilder
 
 object SavePopulationHook {
 
-  def apply(puzzle: Parameters[GAAlgorithm], dir: ExpandedString) = {
-    val fileName = dir + "/population${" + puzzle.generation.name + "}.csv"
+  def apply[T](t: T, dir: ExpandedString)(implicit integration: WorkflowIntegration[T]) = {
+    val wfi = integration(t)
+    import wfi._
+
+    val fileName = dir + "/population${" + generationPrototype.name + "}.csv"
     val prototypes =
-      Seq[Prototype[_]](puzzle.generation) ++
-        puzzle.algorithm.inputsPrototypes.map(_.toArray) ++
-        puzzle.algorithm.outputPrototypes.map(_.toArray)
+      Seq[Prototype[_]](generationPrototype) ++
+        inputsPrototypes.map(_.toArray) ++
+        outputPrototypes.map(_.toArray)
     new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
   }
 

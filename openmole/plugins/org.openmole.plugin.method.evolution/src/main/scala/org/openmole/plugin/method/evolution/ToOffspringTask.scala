@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.method.evolution
 
+import fr.iscpif.mgo
 import fr.iscpif.mgo._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
@@ -26,43 +27,35 @@ import org.openmole.core.workflow.task._
 
 object ToOffspringTask {
 
-  def apply[T <: Algorithm](algorithm: T)(
-    genome: Prototype[algorithm.G],
-    offspring: Prototype[algorithm.Pop],
-    state: Prototype[algorithm.AlgorithmState])(implicit toVariable: WorkflowIntegration[T]) = {
+  def apply[T](t: T)(implicit integration: WorkflowIntegration[T]) = {
+    val wfi = integration(t)
+    import wfi._
 
-    new TaskBuilder { builder ⇒
-      toVariable.outputPrototypes(algorithm).foreach(p ⇒ addInput(p))
-      addInput(genome)
-      addInput(state)
-      addOutput(state)
-      addOutput(offspring)
+    new TaskBuilder {
+      builder ⇒
+      outputPrototypes.foreach(p ⇒ addInput(p))
+      addInput(genomePrototype)
+      addInput(statePrototype)
+      addOutput(statePrototype)
+      addOutput(offspringPrototype)
 
-      val (_genome, _offspring, _state) = (genome, offspring, state)
+      abstract class ToOffspringTask extends Task {
 
-      def toTask = new ToOffspringTask(algorithm) with Built {
-        val genome = _genome.asInstanceOf[Prototype[algorithm.G]]
-        val offspring = _offspring.asInstanceOf[Prototype[algorithm.Pop]]
-        val state = _state.asInstanceOf[Prototype[algorithm.AlgorithmState]]
+        override def process(context: Context)(implicit rng: RandomProvider) = {
+          val i: Ind =
+            new Individual[G, P](
+              context(genomePrototype),
+              variablesToPhenotype(context),
+              born = mgo.generation.get(context(statePrototype))
+            )
+
+          Context(Variable(offspringPrototype, Vector(i)))
+        }
       }
+
+      def toTask = new ToOffspringTask with Built
+
     }
   }
-
 }
 
-abstract class ToOffspringTask[T <: Algorithm](val algorithm: T)(implicit toVariable: WorkflowIntegration[T]) extends Task { task ⇒
-  def genome: Prototype[algorithm.G]
-  def offspring: Prototype[algorithm.Pop]
-  def state: Prototype[algorithm.AlgorithmState]
-
-  override def process(context: Context)(implicit rng: RandomProvider) = {
-    val i: algorithm.Ind =
-      new Individual[algorithm.G, algorithm.P](
-        context(task.genome),
-        toVariable.variablesToPhenotype(algorithm)(context),
-        born = algorithm.generation.get(context(state))
-      )
-
-    Context(Variable(offspring, Vector(i)))
-  }
-}

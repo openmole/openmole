@@ -24,42 +24,32 @@ import org.openmole.core.workflow.builder._
 
 object SamplePopulationTask {
 
-  def apply(algorithm: Algorithm)(
-    population: Prototype[algorithm.Pop],
-    sample: Int,
-    size: Int) = {
-    val (_population) = (population)
+  def apply[T](t: T, sample: Int, size: Int)(implicit integration: WorkflowIntegration[T]) = {
+    val wfi = integration(t)
+    import wfi._
 
     new TaskBuilder {
       builder ⇒
-      addInput(population)
-      addExploredOutput(population.toArray)
+      addInput(populationPrototype)
+      addExploredOutput(populationPrototype.toArray)
 
-      def toTask =
-        new SamplePopulationTask(algorithm, sample, size) with Built {
-          val population = _population.asInstanceOf[Prototype[algorithm.Pop]]
+      abstract class SamplePopulationTask extends Task {
+
+        override def process(context: Context)(implicit rng: RandomProvider) = {
+          val p = context(populationPrototype)
+
+          def samples =
+            if (p.isEmpty) Vector.empty
+            else Vector.fill(sample) { p(rng().nextInt(p.size)) }
+
+          def populations = Array.fill(size)(samples)
+          Variable(populationPrototype.toArray, populations)
         }
+
+      }
+
+      def toTask = new SamplePopulationTask with Built
     }
-  }
-
-}
-
-abstract class SamplePopulationTask(
-    val algorithm: Algorithm,
-    val sample: Int,
-    val size: Int) extends Task {
-
-  def population: Prototype[algorithm.Pop]
-
-  override def process(context: Context)(implicit rng: RandomProvider) = {
-    val p = context(population)
-
-    def samples =
-      if (p.isEmpty) Vector.empty
-      else Vector.fill(sample) { p(rng().nextInt(p.size)) }
-
-    def populations = Array.fill(size)(samples)
-    Variable(population.toArray, populations)
   }
 
 }
