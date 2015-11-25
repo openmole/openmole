@@ -33,6 +33,13 @@ object ServerFactories {
     }
   }
 
+  def coreObject(className: String): Try[Any] = instance.factories.synchronized {
+    instance.factories.filterKeys(_ == Class.forName(className)).headOption.map { _._2 } match {
+      case Some(f: CoreObjectFactory) ⇒ f.coreObject()
+      case _                          ⇒ Failure(new Throwable("The data " + className + " cannot be recontructed on the server."))
+    }
+  }
+
   def add(dataClass: Class[_], factory: Factory, factoryUI: FactoryWithDataUI) = instance.factories.synchronized {
     instance.factories += dataClass -> factory
     instance.factoriesUI += dataClass.getName -> factoryUI
