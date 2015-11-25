@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.method.evolution
 
+import fr.iscpif.mgo
 import fr.iscpif.mgo._
 import org.openmole.core.workflow.builder.TaskBuilder
 
@@ -27,44 +28,36 @@ import scalaz.Tag
 
 object TerminationTask {
 
-  def apply(algorithm: Algorithm)(
-    termination: Termination[algorithm.AlgorithmState],
-    state: Prototype[algorithm.AlgorithmState],
-    generation: Prototype[Long],
-    terminated: Prototype[Boolean]) = {
-    val (_state, _generation, _termination, _terminated) = (state, generation, termination, terminated)
+  def apply[T](t: T, termination: OMTermination)(implicit integration: WorkflowIntegration[T]) = {
+    val wfi = integration(t)
+    import wfi._
 
-    new TaskBuilder { builder ⇒
-      addInput(state)
-      addOutput(state)
-      addOutput(terminated)
-      addOutput(generation)
+    val term = OMTermination.toTermination(termination, wfi)
 
-      def toTask = new TerminationTask(algorithm) with Built {
-        val state = _state.asInstanceOf[Prototype[algorithm.AlgorithmState]]
-        val generation = _generation
-        val termination = _termination.asInstanceOf[Termination[algorithm.AlgorithmState]]
-        val terminated = _terminated
+    new TaskBuilder {
+      builder ⇒
+      addInput(statePrototype)
+      addOutput(statePrototype)
+      addOutput(terminatedPrototype)
+      addOutput(generationPrototype)
+
+      abstract class TerminationTask extends Task {
+
+        override def process(context: Context)(implicit rng: RandomProvider) = {
+          val (newState, t) = term.run(context(statePrototype))
+
+          Context(
+            Variable(terminatedPrototype, t),
+            Variable(statePrototype, newState),
+            Variable(generationPrototype, Tag.unwrap(mgo.generation.get(newState)))
+          )
+        }
+
       }
+
+      def toTask = new TerminationTask with Built
     }
   }
-}
-
-abstract class TerminationTask(val algorithm: Algorithm) extends Task {
-
-  def generation: Prototype[Long]
-  def state: Prototype[algorithm.AlgorithmState]
-  def termination: Termination[algorithm.AlgorithmState]
-  def terminated: Prototype[Boolean]
-
-  override def process(context: Context)(implicit rng: RandomProvider) = {
-    val (newState, t) = termination.run(context(state))
-
-    Context(
-      Variable(terminated, t),
-      Variable(state, newState),
-      Variable(generation, Tag.unwrap(algorithm.generation.get(newState)))
-    )
-  }
 
 }
+

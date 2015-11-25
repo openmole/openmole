@@ -27,47 +27,39 @@ import org.openmole.core.workflow.task._
 
 object ElitismTask {
 
-  def apply(algorithm: Algorithm)(
-    population: Prototype[algorithm.Pop],
-    offspring: Prototype[algorithm.Pop],
-    state: Prototype[algorithm.AlgorithmState]) = {
-    val (_population, _offspring, _state) = (population, offspring, state)
+  def apply[T](t: T)(implicit integration: WorkflowIntegration[T]) = {
+    val wfi = integration(t)
+    import wfi._
 
-    new TaskBuilder { builder ⇒
-      addInput(state)
-      addInput(population)
-      addInput(offspring)
-      addOutput(population)
-      addOutput(state)
+    new TaskBuilder {
+      addInput(statePrototype)
+      addInput(populationPrototype)
+      addInput(offspringPrototype)
+      addOutput(populationPrototype)
+      addOutput(statePrototype)
 
-      def toTask = new ElitismTask(algorithm) with builder.Built {
-        val population = _population.asInstanceOf[Prototype[algorithm.Pop]]
-        val offspring = _offspring.asInstanceOf[Prototype[algorithm.Pop]]
-        val state = _state.asInstanceOf[Prototype[algorithm.AlgorithmState]]
+      abstract class ElitismTask extends Task {
+
+        override def process(context: Context)(implicit rng: RandomProvider) = {
+          val step =
+            for {
+              np ← algorithm.elitism(context(populationPrototype), context(offspringPrototype))
+              _ ← updateGeneration[S]
+            } yield np
+
+          val (newState, newPopulation) = step.run(context(statePrototype))
+
+          Context(
+            Variable(populationPrototype, newPopulation),
+            Variable(statePrototype, newState)
+          )
+        }
+
       }
+
+      def toTask = new ElitismTask with Built
     }
   }
-}
-
-abstract class ElitismTask(val algorithm: Algorithm) extends Task {
-
-  def population: Prototype[algorithm.Pop]
-  def offspring: Prototype[algorithm.Pop]
-  def state: Prototype[algorithm.AlgorithmState]
-
-  override def process(context: Context)(implicit rng: RandomProvider) = {
-    val step =
-      for {
-        np ← algorithm.elitism(context(population), context(offspring))
-        _ ← algorithm.updateGeneration
-      } yield np
-
-    val (newState, newPopulation) = step.run(context(state))
-
-    Context(
-      Variable(population, newPopulation),
-      Variable(state, newState)
-    )
-  }
 
 }
+

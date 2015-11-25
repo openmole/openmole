@@ -18,7 +18,9 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import fr.iscpif.mgo.algorithm._
+import algorithm._
+import fitness._
+import fr.iscpif.mgo.clone.History
 import org.openmole.core.workflow.data.PrototypeType
 import org.openmole.core.workflow.tools.TextClosure
 import org.openmole.tool.statistics._
@@ -28,41 +30,28 @@ object NSGA2 {
   def apply(
     mu: Int,
     genome: Genome,
+    objectives: Objectives) = OMNSGA2(ga.NSGA2[Seq[Double]](mu, Fitness(_.phenotype)), genome, objectives)
+
+  def apply(
+    mu: Int,
+    genome: Genome,
     objectives: Objectives,
-    replication: Option[Replication] = None) = {
-
-    val (_mu, _genome, _objectives) = (mu, genome, objectives)
-
-    trait OMNSGA2 <: NSGAII with GAAlgorithm {
-      val stateType = PrototypeType[STATE]
-      val gType = PrototypeType[G]
-      val objectives = _objectives
-      val genome = _genome
-      override def mu: Int = _mu
-    }
-
-    replication match {
-      case None =>
-        new OMNSGA2 with DeterministicGAAlgorithm {
-          val populationType = PrototypeType[Pop]
-          val individualType = PrototypeType[Ind]
-          val fitness = Fitness(_.phenotype)
-        }
-      case Some(replication) =>
-        new OMNSGA2 with StochasticGAAlgorithm {
-          override def cloneStrategy = queue(replication.max, replication.reevaluate)
-
-          val populationType = PrototypeType[Pop]
-          val individualType = PrototypeType[Ind]
-          override def aggregation: Option[Seq[TextClosure[Seq[Double], Double]]] = replication.aggregation
-          override implicit def fitness: Fitness[Seq[Double]] = Fitness(i => aggregate(i) ++ Seq(-i.phenotype.history.size.toDouble))
-        }
-    }
-
+    replication: Replication) = {
+    def fit = Fitness(StochasticGAAlgorithm.aggregate(replication.aggregation))
+    OMStochasticNSGA2(ga.noisyNSGA2[Seq[Double]](mu, fit, replication.max, cloneRate = replication.reevaluate), genome, objectives, replication)
   }
 
+  case class OMNSGA2(algo: Algorithm[ga.GAGenome, Seq[Double], Unit], genome: Genome, objectives: Objectives)
 
+  implicit def OMNSGA2Integration = new WorkflowIntegration[OMNSGA2] {
+    def apply(algo: OMNSGA2) = WorkflowIntegration.deterministicGAIntegration[Unit](algo.algo, algo.genome, algo.objectives)
+  }
 
+  case class OMStochasticNSGA2(algo: Algorithm[ga.GAGenome, History[Seq[Double]], Unit], genome: Genome, objectives: Objectives, replication: Replication)
+
+  implicit def OMStochasticNSGA2Integration = new WorkflowIntegration[OMStochasticNSGA2] {
+    override def apply(t: OMStochasticNSGA2): EvolutionWorkflow = WorkflowIntegration.stochasticGAIntegration(t.algo, t.genome, t.objectives, t.replication)
+  }
 
 }
 
