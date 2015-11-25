@@ -362,16 +362,21 @@ case class RLanguage() extends Language {
 }
 
 
-case class CommandArgument(key: Option[String], value: Option[String]) {
-  val argString = Seq(key, value).flatten.mkString(" ")
-  val isFile = value match {
-    case Some(s: String) => s matches ("""(.*)[.]([^.]{1,3})""")
-    case _ => false
-  }
+sealed trait CommandElement {
+  def expand: String
+  def index: Int
+}
+case class StaticElement(index: Int, expand: String) extends CommandElement
+
+case class VariableElement(index: Int, prototype: ProtoTypePair, taskType: TaskType) extends CommandElement{
+  def expand = taskType.preVariable + prototype.name + taskType.postVariable
+  def clone(newPrototypePair: ProtoTypePair): VariableElement = copy(prototype = newPrototypePair)
+  def clone(newName: String, newType: ProtoTYPE, newMapping: Option[String]): VariableElement = clone(prototype.copy(name = newName, `type` = newType, mapping = newMapping))
 }
 
-case class LaunchingCommand(language: Option[Language], codeName: String, fullCommand: String, arguments: Seq[ProtoTypePair] = Seq()) {
-  // val fullCommand: String = (Seq(language.map{_.name}, Some(codeName)).flatten.toList ++ arguments.map{_.argString}).mkString(" ")
+case class LaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq()) {
+  def fullCommand: String = (Seq(language.map{_.name}.getOrElse(""), codeName) ++ arguments.sortBy{_.index}.map{_.expand}).mkString(" ")
+  def statics: Seq[StaticElement] = arguments.collect{case a: StaticElement=> a}
 }
 
 case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, mapping: Option[String] = None)
