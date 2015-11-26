@@ -79,7 +79,7 @@ trait NativeCommandCopy {
         (e: String) ⇒ error.append("\n" + e)
       )
 
-    val exit = Process(cmd) ! logger
+    val exit = Process(Seq("bash", "-c", cmd)) ! logger
     if (exit != 0) throw new RuntimeException(s"Command $cmd had a non 0 return value.\n Output: ${output.toString}. Error: ${error.toString}")
     output.toString
   }
@@ -139,4 +139,12 @@ class CurlRemoteStorage(val host: String, val port: Int, val voName: String) ext
   @transient lazy val url = new URI("https", null, host, port, null, null, null)
   def downloadCommand(from: URI, to: String): String = curl.download(from, to)
   def uploadCommand(from: String, to: URI): String = curl.upload(from, to)
+
+  override def upload(src: File, dest: String, options: TransferOptions): Unit =
+    try super.upload(src, dest, options)
+    catch {
+      case t: Throwable =>
+        run(s"${curl.curl} -X DELETE ${url.resolve(dest)}")
+        throw t
+    }
 }
