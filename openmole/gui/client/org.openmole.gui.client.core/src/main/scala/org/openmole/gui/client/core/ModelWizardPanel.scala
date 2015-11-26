@@ -24,11 +24,11 @@ import autowire._
 import org.scalajs.dom.html.TextArea
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-import org.scalajs.dom.raw.{ FocusEvent, HTMLInputElement }
+import org.scalajs.dom.raw.{ HTMLDivElement, FocusEvent, HTMLInputElement }
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 import org.openmole.gui.shared.Api
-import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
@@ -73,25 +73,28 @@ class ModelWizardPanel extends ModalPanel {
     def switch = CommandInput(content)
   }
 
-  implicit def pairToLine(variableElement: Role[VariableElement]): Reactive = Reactive(variableElement)
+  implicit def pairToLine(variableElement: Role[VariableElement]): Reactive = buildReactive(variableElement)
 
   implicit def stringToOptionString(s: String): Option[String] = if (s.isEmpty) None else Some(s)
 
   val transferring: Var[FileTransferState] = Var(Standby())
   val labelName: Var[Option[String]] = Var(None)
   val launchingCommand: Var[Option[LaunchingCommand]] = Var(None)
-
   val currentReactives: Var[Seq[Reactive]] = Var(Seq())
-  val commandArea: Var[Option[TextArea]] = Var(None)
+  val updatableTable: Var[Boolean] = Var(true)
+  val hasStep2: Var[Boolean] = Var(false)
+  val bodyContent: Var[Option[TypedTag[HTMLDivElement]]] = Var(None)
 
-  Obs(launchingCommand) {
-    launchingCommand() match {
-      case Some(lc: LaunchingCommand) ⇒
-        println("LC " + lc.arguments)
-        commandArea() = Some(bs.textArea(5)(lc.fullCommand).render)
-        commandArea().get
-      case _ ⇒ tags.div()
-    }
+  val commandArea: TextArea = bs.textArea(5)("").render
+
+  Obs(launchingCommand, skipInitial = true) {
+    commandArea.value = launchingCommand().map {
+      _.fullCommand
+    }.getOrElse("")
+  }
+
+  Obs(currentReactives, skipInitial = true) {
+    if (updatableTable()) setBodyContent
   }
 
   def inputs(reactives: Seq[Reactive]): Seq[Role[VariableElement]] = {
@@ -111,6 +114,8 @@ class ModelWizardPanel extends ModalPanel {
       case x: CommandOutput[VariableElement] ⇒ x
     }
 
+  def getReactive(index: Int): Option[Reactive] = currentReactives().filter { _.index == index }.headOption
+
   def upButton = bs.div("centerWidth250")(
     tags.label(`class` := "inputFileStyle spacer5 certificate")(
       bs.fileInput((fInput: HTMLInputElement) ⇒ {
@@ -126,11 +131,12 @@ class ModelWizardPanel extends ModalPanel {
               OMPost[Api].getCareBinInfos(manager.current.safePath() ++ fileName).call().foreach { b ⇒
                 panels.treeNodePanel.refreshCurrentDirectory
                 launchingCommand() = b
+                hasStep2() = true
                 labelName() = Some(fileName)
                 launchingCommand().foreach { lc ⇒
                   currentReactives() = lc.arguments.flatMap { pp ⇒
                     pp match {
-                      case ve: VariableElement ⇒ Some(Reactive(CommandInput(ve)))
+                      case ve: VariableElement ⇒ Some(buildReactive(CommandInput(ve)))
                       case _                   ⇒ None
                     }
                   }
@@ -172,9 +178,7 @@ class ModelWizardPanel extends ModalPanel {
       launchingCommand().foreach { lc ⇒
         OMPost[Api].buildModelTask(
           labelName().getOrElse(""),
-          commandArea().map {
-            _.value
-          }.getOrElse(""),
+          commandArea.value,
           RLanguage(),
           inputs(currentReactives()).map {
             _.content.prototype
@@ -194,9 +198,13 @@ class ModelWizardPanel extends ModalPanel {
     }
   }
 
+  def buildReactive(role: Role[VariableElement], index: Int): Reactive = Reactive(role, index)
+
+  def buildReactive(role: Role[VariableElement]): Reactive = currentReactives().filter { _.role == role }.headOption.getOrElse(buildReactive(role, currentReactives().size))
+
   def addVariableElement(p: Role[VariableElement]) = {
     save
-    currentReactives() = currentReactives() :+ Reactive(p)
+    currentReactives() = currentReactives() :+ buildReactive(p)
   }
 
   def applyOnPrototypePair(p: Role[VariableElement], todo: (Role[VariableElement], Int) ⇒ Unit) =
@@ -207,19 +215,19 @@ class ModelWizardPanel extends ModalPanel {
     }
 
   def updatePrototypePair(p: Role[VariableElement], variableElement: VariableElement) =
-    applyOnPrototypePair(p, (role: Role[VariableElement], index: Int) ⇒ currentReactives() = currentReactives().updated(index, Reactive(role.clone(variableElement))))
+    applyOnPrototypePair(p, (role: Role[VariableElement], index: Int) ⇒ currentReactives() = currentReactives().updated(index, buildReactive(role.clone(variableElement), index)))
 
   def switchPrototypePair(p: Role[VariableElement]) = {
     save
-    applyOnPrototypePair(p, (role: Role[VariableElement], index: Int) ⇒ currentReactives() = currentReactives().updated(index, Reactive(role.switch)))
+    applyOnPrototypePair(p, (role: Role[VariableElement], index: Int) ⇒ currentReactives() = currentReactives().updated(index, buildReactive(role.switch, index)))
   }
 
   def addSwitchedPrototypePair(p: Role[VariableElement]) = {
     save
-    currentReactives() = (currentReactives() :+ Reactive(p.switch)) distinct
+    currentReactives() = (currentReactives() :+ buildReactive(p.switch)) distinct
   }
 
-  case class Reactive(role: Role[VariableElement]) {
+  case class Reactive(role: Role[VariableElement], index: Int) {
     val lineHovered: Var[Boolean] = Var(false)
 
     val switchGlyph = role match {
@@ -227,24 +235,27 @@ class ModelWizardPanel extends ModalPanel {
       case _           ⇒ OMTags.glyph_arrow_left
     }
 
-    def save = {
-      println("SAVE")
-      updatePrototypePair(role, role.content.clone(nameInput.value, typeSelector.content().get, mappingInput.value))
-      launchingCommand() = launchingCommand().map { lc ⇒
-        val statics = lc.statics
-        lc.copy(arguments = statics ++
-          currentReactives().map {
-            _.role
-          }.collect {
-            case x: CommandInput[_]  ⇒ x
-            case y: CommandOutput[_] ⇒ y
-          }.map {
-            _.content
+    def updateLaunchingCommand = role match {
+        case CommandInput(_) | CommandOutput(_) ⇒
+          launchingCommand() = launchingCommand().map { lc ⇒
+            val statics = lc.statics
+            lc.copy(arguments = statics ++
+              currentReactives().map { aaa ⇒
+                aaa.role
+              }.collect {
+                case x: CommandInput[_]  ⇒ x
+                case y: CommandOutput[_] ⇒ y
+              }.map {
+                _.content
+              }
+            )
           }
-        )
+        case _ ⇒
       }
-      println("END SAVE")
-    }
+
+
+    def save = getReactive(index).map { reactive ⇒ updatePrototypePair(reactive.role, reactive.role.content.clone(nameInput.value, typeSelector.content().get, mappingInput.value)) }
+
 
     def removePrototypePair = {
       currentReactives() = currentReactives().filterNot(_.role == role)
@@ -260,25 +271,30 @@ class ModelWizardPanel extends ModalPanel {
       }
     )
 
-    val mappingInput: HTMLInputElement = bs.input(role.content.prototype.mapping.getOrElse(""))(onblur := { () ⇒
+    def saveWithoutTableUpdate = {
+      updatableTable() = false
       save
+      updatableTable() = true
+    }
+
+    val mappingInput: HTMLInputElement = bs.input(role.content.prototype.mapping.getOrElse(""))(oninput := { () ⇒
+      saveWithoutTableUpdate
     }).render
 
-    val nameInput: HTMLInputElement = bs.input(role.content.prototype.name)(onblur := { () ⇒
-      save
-    }).render
+    val nameInput: HTMLInputElement = bs.input(role.content.prototype.name)(oninput := { () ⇒
+      saveWithoutTableUpdate
+      updateLaunchingCommand
+    }
+    ).render
 
     val line = {
-      println("DISPLAY " + role.content.prototype.name)
       typeSelector.content() = Some(role.content.prototype.`type`)
       tags.tr(
         onmouseover := { () ⇒
           lineHovered() = true
-          typeSelector.selector.focus()
         },
         onmouseout := { () ⇒
           lineHovered() = false
-          typeSelector.selector.focus()
         },
         bs.td(bs.col_md_3 + "spacer7")(nameInput),
         bs.td(bs.col_md_2)(typeSelector.selector),
@@ -302,79 +318,80 @@ class ModelWizardPanel extends ModalPanel {
     }
   }
 
-  val dialog = {
+  def setBodyContent = bodyContent() = Some({
+    val reactives = currentReactives()
+    tags.div(
+      hasStep2() match {
+        case true ⇒ tags.div()
+        case _    ⇒ step1
+      },
+      transferring() match {
+        case _: Transfering ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
+        case _: Transfered  ⇒ upButton
+        case _              ⇒ upButton
+      },
+      hasStep2() match {
+        case true ⇒
+          tags.div(step2, bs.div("spacer7")({
+
+            val iinput: HTMLInputElement = bs.input("")(placeholder := "Add Input").render
+
+            val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
+
+            val head = thead(tags.tr(
+              for (h ← Seq("Name", "Type", "File mapping", "", "")) yield {
+                tags.th(h)
+              }))
+
+            // Rx {
+            tags.div(
+              tags.div(`class` := "twocolumns right10")(
+                bs.form("paddingLeftRight50")(iinput,
+                  onsubmit := {
+                    () ⇒
+                      addVariableElement(Input(VariableElement(-1, ProtoTypePair(iinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
+                      iinput.value = ""
+                      false
+                  }),
+                bs.table(striped)(
+                  head,
+                  tbody(
+                    for (ip ← inputs(reactives)) yield {
+                      ip.line
+                    }))),
+              tags.div(`class` := "twocolumns")(
+                bs.form("paddingLeftRight50")(oinput, onsubmit := {
+                  () ⇒
+                    addVariableElement(Output(VariableElement(-1, ProtoTypePair(oinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
+                    oinput.value = ""
+                    false
+                }),
+                bs.table(striped)(
+                  head,
+                  tbody(
+                    for (op ← outputs(reactives)) yield {
+                      op.line
+                    }
+                  )
+                )
+              )
+            )
+          }
+          ), commandArea)
+        case _ ⇒ tags.div()
+      }
+    )
+  })
+
+  lazy val dialog = {
+    setBodyContent
     bs.modalDialog(modalID,
       headerDialog(
         tags.span(tags.b("Model import"))
       ),
       bodyDialog(Rx {
-        println("RX0")
-        tags.div(
-          commandArea() match {
-
-            case Some(t: TextArea) ⇒ tags.div()
-            case _                 ⇒ step1
-          },
-          transferring() match {
-            case _: Transfering ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
-            case _: Transfered  ⇒ upButton
-            case _              ⇒ upButton
-          },
-          commandArea() match {
-            case Some(t: TextArea) ⇒
-              println("          TABLE !!")
-              tags.div(step2, bs.div("spacer7")({
-
-                val iinput: HTMLInputElement = bs.input("")(placeholder := "Add Input").render
-
-                val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
-
-                val head = thead(tags.tr(
-                  for (h ← Seq("Name", "Type", "File mapping", "", "")) yield {
-                    tags.th(h)
-                  }))
-
-                // Rx {
-                tags.div(
-                  tags.div(`class` := "twocolumns right10")(
-                    bs.form("paddingLeftRight50")(iinput,
-                      onsubmit := {
-                        () ⇒
-                          addVariableElement(Input(VariableElement(-1, ProtoTypePair(iinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
-                          iinput.value = ""
-                          false
-                      }),
-                    bs.table(striped)(
-                      head,
-                      tbody(
-                        for (ip ← inputs(currentReactives())) yield {
-                          ip.line
-                        }))),
-                  tags.div(`class` := "twocolumns")(
-                    bs.form("paddingLeftRight50")(oinput, onsubmit := {
-                      () ⇒
-                        addVariableElement(Output(VariableElement(-1, ProtoTypePair(oinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
-                        oinput.value = ""
-                        false
-                    }),
-                    bs.table(striped)(
-                      head,
-                      tbody(
-                        for (op ← outputs(currentReactives())) yield {
-                          op.line
-                        }
-                      )
-                    )
-                  )
-                )
-              }
-              // }
-              ), t)
-            case _ ⇒ tags.div()
-          }
-        )
-      }
-      ),
+        bodyContent().getOrElse(tags.div())
+      }),
       footerDialog(bs.buttonGroup()(
         closeButton,
         buildModelTaskButton
