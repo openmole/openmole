@@ -30,7 +30,8 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
     serializedJob: SerializedJob,
     resultPath: String,
     runningPath: Option[String] = None,
-    finishedPath: Option[String] = None) = {
+    finishedPath: Option[String] = None,
+    proxy: Option[String] = None) = {
     import serializedJob._
 
     def cpCommand =
@@ -47,6 +48,8 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
 
     val init = {
       val script = ListBuffer[String]()
+
+      proxy.foreach { p ⇒ script += s"export X509_USER_PROXY=$$PWD/$p" }
 
       script += "BASEPATH=$PWD"
       script += "CUR=$PWD/ws$RANDOM"

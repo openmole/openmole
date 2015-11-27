@@ -50,15 +50,16 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
 
   @transient lazy val storages = {
     def timeout = Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut)
-    //    val webdavStorages = bdiiServer.queryWebDAVLocations(voName, timeout)
-    //    if (!webdavStorages.isEmpty) {
-    //      logger.fine("Use webdav storages:" + webdavStorages.mkString(","))
-    //      webdavStorages.map { s ⇒ EGIWebDAVStorageService(s, env, proxyCreator) }
-    //    } else {
-    val srmStorages = bdiiServer.querySRMLocations(voName, timeout)
-    logger.fine("Use srm storages:" + srmStorages.mkString(","))
-    srmStorages.map { s ⇒ EGISRMStorageService(s, env, proxyCreator) }
-    //    }
+    val webdavStorages = bdiiServer.queryWebDAVLocations(voName, timeout)
+    if (!webdavStorages.isEmpty) {
+      logger.fine("Use webdav storages:" + webdavStorages.mkString(","))
+      webdavStorages.map { s ⇒ EGIWebDAVStorageService(s, env, proxyCreator) }
+    }
+    else {
+      val srmStorages = bdiiServer.querySRMLocations(voName, timeout)
+      logger.fine("Use srm storages:" + srmStorages.mkString(","))
+      srmStorages.map { s ⇒ EGISRMStorageService(s, env, proxyCreator) }
+    }
   }
 
   def selectAStorage(usedFileHashes: Iterable[(File, Hash)]): (StorageService, AccessToken) =
