@@ -351,9 +351,9 @@ object ApiImpl extends Api {
               val (omappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
 
               val inString = if (ins.nonEmpty) Seq("  inputs += (", ")\n").mkString(ins.map { i ⇒ s"${i.name}" }.mkString(", ")) else ""
-              val imString = if (imappings.nonEmpty) Seq("  fileInputs += (", ")\n").mkString(imappings.map { i ⇒ s"""(${i.name}, ${i.mapping.get})""" }.mkString(", ")) else ""
+              val imString = if (imappings.nonEmpty) Seq("  fileInputs += (", ")\n").mkString(imappings.map { i ⇒ s"""(${i.name}, "${i.mapping.get}")""" }.mkString(", ")) else ""
               val ouString = if (ous.nonEmpty) Seq("  outputs += (", ")\n").mkString(ous.map { o ⇒ s"${o.name}" }.mkString(", ")) else ""
-              val omString = if (omappings.nonEmpty) Seq("  fileOutputs += (", ")\n").mkString(omappings.map { o ⇒ s"${o.mapping.get}, (${o.name})" }.mkString(", ")) else ""
+              val omString = if (omappings.nonEmpty) Seq("  fileOutputs += (", ")\n").mkString(omappings.map { o ⇒ s""""${o.mapping.get}", (${o.name})""" }.mkString(", ")) else ""
 
               imString + inString + omString + ouString
             } + "  )"
