@@ -24,7 +24,7 @@ import autowire._
 import org.scalajs.dom.html.TextArea
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-import org.scalajs.dom.raw.{ HTMLDivElement, FocusEvent, HTMLInputElement }
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 import org.openmole.gui.shared.Api
@@ -235,7 +235,8 @@ class ModelWizardPanel extends ModalPanel {
       case _           ⇒ OMTags.glyph_arrow_left
     }
 
-    def updateLaunchingCommand = role match {
+    def updateLaunchingCommand =
+      role match {
         case CommandInput(_) | CommandOutput(_) ⇒
           launchingCommand() = launchingCommand().map { lc ⇒
             val statics = lc.statics
@@ -253,9 +254,7 @@ class ModelWizardPanel extends ModalPanel {
         case _ ⇒
       }
 
-
     def save = getReactive(index).map { reactive ⇒ updatePrototypePair(reactive.role, reactive.role.content.clone(nameInput.value, typeSelector.content().get, mappingInput.value)) }
-
 
     def removePrototypePair = {
       currentReactives() = currentReactives().filterNot(_.role == role)
@@ -343,7 +342,6 @@ class ModelWizardPanel extends ModalPanel {
                 tags.th(h)
               }))
 
-            // Rx {
             tags.div(
               tags.div(`class` := "twocolumns right10")(
                 bs.form("paddingLeftRight50")(iinput,
