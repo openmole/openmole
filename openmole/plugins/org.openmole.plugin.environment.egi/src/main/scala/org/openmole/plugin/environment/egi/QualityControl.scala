@@ -19,20 +19,29 @@ package org.openmole.plugin.environment.egi
 
 import org.openmole.core.tools.service.MovingAverage
 import org.openmole.core.tools.service._
+import org.openmole.tool.logger.Logger
+
+object QualityControl extends Logger
+
+import QualityControl.Log._
 
 trait QualityControl {
   def hysteresis: Int
 
-  private lazy val _successRate = new MovingAverage(hysteresis, 0.0)
-  private lazy val operationTime = new MovingAverage(hysteresis)
-  private lazy val _availability = new MovingAverage(hysteresis, 1.0)
+  def isEmpty = _successRate.isEmpty || operationTime.isEmpty || _availability.isEmpty
 
-  def wasAvailable = _availability(1.0)
-  def wasNotAvailable = _availability(0.0)
-  def failed = _successRate(0)
-  def success = _successRate(1)
+  private lazy val _successRate = new MovingAverage(hysteresis)
+  private lazy val operationTime = new MovingAverage(hysteresis)
+  private lazy val _availability = new MovingAverage(hysteresis)
+
+  def wasAvailable = _availability.put(1.0)
+  def wasNotAvailable = _availability.put(0.0)
+
+  def failed = _successRate.put(0)
+  def success = _successRate.put(1)
   def successRate = _successRate.get
-  def timed(t: Double) = operationTime(t)
+  def timed(t: Double) = operationTime.put(t)
+
   def time = operationTime.get
   def availability = _availability.get
 

@@ -34,7 +34,6 @@ object Storage {
   val BufferSize = new ConfigurationLocation("Storage", "BufferSize")
   val CopyTimeout = new ConfigurationLocation("Storage", "CopyTimeout")
   val CloseTimeout = new ConfigurationLocation("Storage", "CloseTimeout")
-
   Workspace += (BufferSize, "65535")
   Workspace += (CopyTimeout, "PT1M")
   Workspace += (CloseTimeout, "PT1M")

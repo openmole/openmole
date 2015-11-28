@@ -51,6 +51,8 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
 
       proxy.foreach { p ⇒ script += s"export X509_USER_PROXY=$$PWD/$p" }
 
+      if (debug) script += "voms-proxy-info -all"
+
       script += "BASEPATH=$PWD"
       script += "CUR=$PWD/ws$RANDOM"
       script += "while test -e $CUR; do export CUR=$PWD/ws$RANDOM; done"

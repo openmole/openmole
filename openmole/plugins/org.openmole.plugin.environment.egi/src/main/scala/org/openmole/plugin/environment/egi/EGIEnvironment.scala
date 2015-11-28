@@ -67,11 +67,9 @@ object EGIEnvironment extends Logger {
   val EagerSubmissionNbSampling = new ConfigurationLocation("EGIEnvironment", "EagerSubmissionNbSampling")
   val EagerSubmissionSamplingWindowFactor = new ConfigurationLocation("EGIEnvironment", "EagerSubmissionSamplingWindowFactor")
 
-  val LocalThreadsBySE = new ConfigurationLocation("EGIEnvironment", "LocalThreadsBySE")
-  val LocalThreadsByWMS = new ConfigurationLocation("EGIEnvironment", "LocalThreadsByWMS")
-  val MaxAccessesByMinuteWMS = new ConfigurationLocation("EGIEnvironment", "MaxAccessesByMinuteWMS")
-  val MaxAccessesByMinuteSRM = new ConfigurationLocation("EGIEnvironment", "MaxAccessesByMinuteSRM")
-  val MaxAccessesByMinuteWebDAV = new ConfigurationLocation("EGIEnvironment", "MaxAccessesByMinuteWebDAV")
+  val ConnectionsBySRMSE = new ConfigurationLocation("EGIEnvironment", "ConnectionsSRMSE")
+  val ConnectionsByWebDAVSE = new ConfigurationLocation("EGIEnvironment", "ConnectionsByWebDAVSE")
+  val ConnectionsByWMS = new ConfigurationLocation("EGIEnvironment", "ConnectionsByWMS")
 
   val ProxyRenewalRatio = new ConfigurationLocation("EGIEnvironment", "ProxyRenewalRatio")
   val MinProxyRenewal = new ConfigurationLocation("EGIEnvironment", "MinProxyRenewal")
@@ -116,11 +114,9 @@ object EGIEnvironment extends Logger {
   Workspace += (VOCardDownloadTimeOut, "PT2M")
   Workspace += (VOCardCacheTime, "PT6H")
 
-  Workspace += (LocalThreadsBySE, "10")
-  Workspace += (LocalThreadsByWMS, "10")
-  Workspace += (MaxAccessesByMinuteWMS, "100")
-  Workspace += (MaxAccessesByMinuteSRM, "100")
-  Workspace += (MaxAccessesByMinuteWebDAV, "10000")
+  Workspace += (ConnectionsBySRMSE, "10")
+  Workspace += (ConnectionsByWMS, "10")
+  Workspace += (ConnectionsByWebDAVSE, "20")
 
   Workspace += (ProxyRenewalRatio, "0.2")
   Workspace += (MinProxyRenewal, "PT5M")
@@ -206,15 +202,67 @@ object EGIEnvironment extends Logger {
   def proxyRenewalRatio = Workspace.preferenceAsDouble(EGIEnvironment.ProxyRenewalRatio)
   def proxyRenewalDelay = (proxyTime * proxyRenewalRatio) max Workspace.preferenceAsDuration(EGIEnvironment.MinProxyRenewal)
 
-  def normalizedFitness[T](fitness: ⇒ Iterable[(T, Double)]): Iterable[(T, Double)] = {
-    def orMinForExploration(v: Double) = {
-      val min = Workspace.preferenceAsDouble(EGIEnvironment.MinValueForSelectionExploration)
-      if (v < min) min else v
-    }
+  def normalizedFitness[T](fitness: ⇒ Iterable[(T, Double)], min: Double = Workspace.preferenceAsDouble(EGIEnvironment.MinValueForSelectionExploration)): Iterable[(T, Double)] = {
+    def orMinForExploration(v: Double) = math.max(v, min)
     val fit = fitness
     val maxFit = fit.map(_._2).max
-    fit.map { case (c, f) ⇒ (c, orMinForExploration(f / maxFit)) }
+    if(maxFit < min) fit.map{ case(c, _) => c -> min  }
+    else fit.map { case (c, f) ⇒ c -> orMinForExploration(f / maxFit) }
   }
+
+
+  def select[BS <: BatchService { def usageControl: AvailabilityQuality}](bss: List[BS], rate: BS => Double): (BS, AccessToken) =
+    bss match {
+      case Nil       ⇒ throw new InternalProcessingError("Cannot accept empty list.")
+      case bs :: Nil ⇒ (bs, bs.waitAToken)
+      case _ ⇒
+        val (empty, nonEmpty) = bss.partition(_.usageControl.isEmpty)
+
+        @tailrec def select: (BS, AccessToken) = {
+          def fitness = nonEmptyFitness ++  emptyFitness
+          def emptyFitness = empty.filter(_.available > 0).map { _ -> 0.0 }
+
+          def nonEmptyFitness =
+            for {
+              cur ← nonEmpty
+              if cur.available > 0
+            } yield cur -> rate(cur)
+
+          @tailrec def selected(value: Double, jobServices: List[(BS, Double)]): BS =
+            jobServices match {
+              case Nil                  ⇒ throw new InternalProcessingError("List should never be empty.")
+              case (bs, fitness) :: Nil ⇒ bs
+              case (bs, fitness) :: tail ⇒
+                if (value <= fitness) bs
+                else selected(value - fitness, tail)
+            }
+
+          val fs =
+            atomic { implicit txn ⇒
+              @tailrec def fit: Seq[(BS, Double)] =
+                fitness match {
+                  case Nil ⇒
+                    retryFor(10000)
+                    fit
+                  case x ⇒ x
+                }
+              fit
+            }
+
+          val notLoaded = normalizedFitness(fs).shuffled(Random.default)
+          val totalFitness = notLoaded.map { case (_, fitness) ⇒ fitness }.sum
+
+          val selectedBS = selected(Random.default.nextDouble * totalFitness, notLoaded.toList)
+
+          selectedBS.tryGetToken match {
+            case Some(token) ⇒ selectedBS -> token
+            case _           ⇒ select
+          }
+
+        }
+        select
+    }
+
 
 }
 
@@ -244,7 +292,7 @@ class EGIEnvironment(
 
   import EGIEnvironment._
 
-  @transient lazy val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMS)
+  @transient lazy val connectionsByWMS = Workspace.preferenceAsInt(ConnectionsByWMS)
 
   type JS = EGIJobService
 
@@ -277,93 +325,48 @@ class EGIEnvironment(
       js ⇒
         new EGIJobService {
           val usageControl = new AvailabilityQuality with JobServiceQualityControl {
-            override val usageControl: UsageControl = new LimitedAccess(threadsByWMS, Workspace.preferenceAsInt(MaxAccessesByMinuteWMS))
+            override val usageControl: UsageControl = new UnlimitedAccess
             override val hysteresis: Int = Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis)
           }
 
-          val jobService = WMSJobService(js, threadsByWMS, proxyRenewalDelay)(authentication)
+          val jobService = WMSJobService(js, connectionsByWMS, proxyRenewalDelay)(authentication)
           def environment = env
         }
     }
   }
 
-  def selectAJobService: (JobService, AccessToken) =
-    jobServices match {
-      case Nil       ⇒ throw new InternalProcessingError("No job service available for the environment.")
-      case js :: Nil ⇒ (js, js.waitAToken)
-      case _ ⇒
-        def jobFactor(j: EGIJobService) = (j.usageControl.running.toDouble / j.usageControl.submitted) * (j.usageControl.totalDone.toDouble / j.usageControl.totalSubmitted)
+  def selectAJobService: (JobService, AccessToken) = {
+    val jss = jobServices
+    if(jss.isEmpty) throw new InternalProcessingError("No job service available for the environment.")
 
-        val times = jobServices.map(_.usageControl.time)
-        val maxTime = times.max
-        val minTime = times.min
+    val nonEmpty = jss.filter(!_.usageControl.isEmpty)
+    def jobFactor(j: EGIJobService) = (j.usageControl.running.toDouble / j.usageControl.submitted) * (j.usageControl.totalDone.toDouble / j.usageControl.totalSubmitted)
 
-        val jobFactors = jobServices.map(jobFactor)
-        val maxJobFactor = jobFactors.max
-        val minJobFactor = jobFactors.min
+    lazy val times = nonEmpty.map(_.usageControl.time)
+    lazy val maxTime = times.max
+    lazy val minTime = times.min
+    lazy val jobFactors = nonEmpty.map(jobFactor)
+    lazy val maxJobFactor = jobFactors.max
+    lazy val minJobFactor = jobFactors.min
 
-        @tailrec def select: (JobService, AccessToken) = {
+    def rate(js: EGIJobService) = {
+      val time = js.usageControl.time
+      val timeFactor = if(minTime == maxTime) 1.0 else 1.0 - time.normalize(minTime, maxTime)
 
-          def fitness =
-            for {
-              cur ← jobServices
-              if cur.available > 0
-            } yield {
-              val time = cur.usageControl.time
+      val jobFactor =
+        if (js.usageControl.submitted > 0 && js.usageControl.totalSubmitted > 0) ((js.usageControl.running.toDouble / js.usageControl.submitted) * (js.usageControl.totalDone / js.usageControl.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
+        else 0.0
 
-              val timeFactor =
-                if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
-                else 1 - time.normalize(minTime, maxTime)
-
-              val jobFactor =
-                if (cur.usageControl.submitted > 0 && cur.usageControl.totalSubmitted > 0) ((cur.usageControl.running.toDouble / cur.usageControl.submitted) * (cur.usageControl.totalDone / cur.usageControl.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
-                else 0.0
-
-              import EGIEnvironment._
-
-              val fitness = math.pow(
-                Workspace.preferenceAsDouble(JobServiceJobFactor) * jobFactor +
-                  Workspace.preferenceAsDouble(JobServiceTimeFactor) * timeFactor +
-                  Workspace.preferenceAsDouble(JobServiceAvailabilityFactor) * cur.usageControl.availability +
-                  Workspace.preferenceAsDouble(JobServiceSuccessRateFactor) * cur.usageControl.successRate,
-                Workspace.preferenceAsDouble(JobServiceFitnessPower))
-              (cur, fitness)
-            }
-
-          @tailrec def selected(value: Double, jobServices: List[(EGIJobService, Double)]): EGIJobService =
-            jobServices match {
-              case Nil                  ⇒ throw new InternalProcessingError("List should never be empty.")
-              case (js, fitness) :: Nil ⇒ js
-              case (js, fitness) :: tail ⇒
-                if (value <= fitness) js
-                else selected(value - fitness, tail)
-            }
-
-          val fs =
-            atomic { implicit txn ⇒
-              @tailrec def fit: Seq[(EGIJobService, Double)] =
-                fitness match {
-                  case Nil ⇒
-                    retryFor(10000)
-                    fit
-                  case x ⇒ x
-                }
-              fit
-            }
-
-          val notLoaded = normalizedFitness(fs).shuffled(Random.default)
-          val totalFitness = notLoaded.map { case (_, fitness) ⇒ fitness }.sum
-
-          val jobService = selected(Random.default.nextDouble * totalFitness, notLoaded.toList)
-
-          jobService.tryGetToken match {
-            case Some(token) ⇒ jobService -> token
-            case _           ⇒ select
-          }
-
-        }
-        select
+      math.pow(
+        Workspace.preferenceAsDouble(JobServiceJobFactor) * jobFactor +
+        Workspace.preferenceAsDouble(JobServiceTimeFactor) * timeFactor +
+        Workspace.preferenceAsDouble(JobServiceAvailabilityFactor) * js.usageControl.availability +
+        Workspace.preferenceAsDouble(JobServiceSuccessRateFactor) * js.usageControl.successRate,
+        Workspace.preferenceAsDouble(JobServiceFitnessPower))
     }
+
+    select(jss.toList, rate)
+  }
 
   def bdiiServer: BDII = new BDII(bdii)
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)

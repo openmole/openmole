@@ -30,6 +30,7 @@ import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.plugin.environment.gridscale.GridScaleStorage
 
 import scala.sys.process.{ Process, ProcessLogger }
+import scala.util.Try
 
 trait EGIStorageService extends PersistentStorageService with GridScaleStorage with CompressedTransfer {
 
@@ -51,8 +52,8 @@ trait EGIStorageService extends PersistentStorageService with GridScaleStorage w
 object EGISRMStorageService {
 
   def apply[A: GlobusAuthenticationProvider](s: SRMLocation, _environment: BatchEnvironment { def voName: String }, authentication: A) = new EGISRMStorageService {
-    def threads = Workspace.preferenceAsInt(EGIEnvironment.LocalThreadsBySE)
-    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Workspace.preferenceAsInt(EGIEnvironment.MaxAccessesByMinuteSRM)), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
+    def threads = Workspace.preferenceAsInt(EGIEnvironment.ConnectionsBySRMSE)
+    val usageControl = AvailabilityQuality(new UnlimitedAccess, Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
     val storage = SRMStorage(s.copy(basePath = ""), threads)(authentication)
     val url = new URI("srm", null, s.host, s.port, null, null, null)
     val remoteStorage = new LCGCpRemoteStorage(s.host, s.port, _environment.voName)
@@ -120,8 +121,8 @@ class LCGCpRemoteStorage(val host: String, val port: Int, val voName: String) ex
 object EGIWebDAVStorageService {
 
   def apply[A: HTTPSAuthentication](s: WebDAVLocation, _environment: BatchEnvironment { def voName: String }, authentication: A) = new EGIWebDAVStorageService {
-    def threads = Workspace.preferenceAsInt(EGIEnvironment.LocalThreadsBySE)
-    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Workspace.preferenceAsInt(EGIEnvironment.MaxAccessesByMinuteWebDAV)), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
+    def threads = Workspace.preferenceAsInt(EGIEnvironment.ConnectionsByWebDAVSE)
+    val usageControl = AvailabilityQuality(new UnlimitedAccess, Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
     val storage = WebDAVS(s.copy(basePath = ""), threads)(authentication)
     val url = new URI("https", null, s.host, s.port, null, null, null)
     val remoteStorage = new CurlRemoteStorage(s.host, s.port, _environment.voName)
