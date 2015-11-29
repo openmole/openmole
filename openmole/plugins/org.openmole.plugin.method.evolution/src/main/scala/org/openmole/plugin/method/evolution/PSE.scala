@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -14,37 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo._
-import algorithm._
-import fitness._
-import fr.iscpif.mgo.clone.History
-import org.openmole.core.workflow.data.PrototypeType
-import org.openmole.core.workflow.tools.TextClosure
-import org.openmole.tool.statistics._
+import fr.iscpif.mgo.algorithm.ga
+import fr.iscpif.mgo.fitness._
+import fr.iscpif.mgo.niche._
+import fr.iscpif.mgo.clone._
 
-object NSGA2 {
+object PSE {
 
   def apply(
-    mu: Int,
-    genome: Genome,
-    objectives: Objectives) =
-    WorkflowIntegration.DeterministicGA(
-      ga.NSGA2[Seq[Double]](mu, Fitness(_.phenotype)),
-      genome,
-      objectives)
-
-  def apply(
-    mu: Int,
     genome: Genome,
     objectives: Objectives,
+    gridSize: Seq[Double]) = {
+    WorkflowIntegration.DeterministicGA(
+      ga.PSE[Seq[Double], Seq[Int]](grid(gridSize, _.phenotype)),
+      genome,
+      objectives)
+  }
+
+  def apply(
+    genome: Genome,
+    objectives: Objectives,
+    gridSize: Seq[Double],
     replication: Replication) = {
-    def fit = Fitness(StochasticGAAlgorithm.aggregate(replication.aggregation))
+    def niche = grid(gridSize, StochasticGAAlgorithm.aggregate(replication.aggregation))
 
     WorkflowIntegration.StochasticGA(
-      ga.noisyNSGA2[Seq[Double]](mu, fit, replication.max, cloneRate = replication.reevaluate),
+      ga.noisyPSE[History[Seq[Double]], Seq[Int]](niche, replication.max, replication.reevaluate),
       genome,
       objectives,
       replication)
