@@ -26,6 +26,7 @@ import org.openmole.tool.statistics._
 import scalaz._
 import scala.util.Random
 import ga._
+import org.openmole.core.workflow.tools._
 
 case class Replication(
   max: Int = 100,
@@ -33,6 +34,10 @@ case class Replication(
   aggregation: Option[FitnessAggregation] = None)
 
 object WorkflowIntegration {
+
+  implicit def unionContainingIntegrationRight[T, U](implicit wi: WorkflowIntegration[U]) = new WorkflowIntegration[\&/[T, U]] {
+    def apply(t: \&/[T, U]) = wi(t)
+  }
 
   def deterministicGAIntegration[STATE: Manifest](a: Algorithm[GAGenome, Seq[Double], STATE], genome: Genome, objective: Objectives) = {
     val _objective = objective

@@ -140,125 +140,97 @@ package object evolution {
     \&/(gaPuzzle, argAlgo)
   }
 
-  //  def IslandEvolution[T](island: PuzzleContainer \&/ T, parallelism: Int, sample: Int, termination: OMTermination)(implicit workflowIntegration: WorkflowIntegration[T]) = {
-  //    val integration = workflowIntegration(island)
-  //    import integration._
-  //
-  //    val islandPopulationPrototype = Prototype[Pop]("islandPopulation")(integration.populationType)
-  //    //val population = Prototype[integration.algorithm.Pop]("population")(integration.populationType)
-  //   // val state = Prototype[integration.algorithm.AlgorithmState]("state")
-  //
-  //    //val terminated = Prototype[Boolean]("terminated")
-  //    //val generation = Prototype[Long]("generation")
-  //
-  //    val masterFirst =
-  //      EmptyTask() set (
-  //        name := "masterFirst",
-  //        (inputs, outputs) += (populationPrototype, offspringPrototype, statePrototype)
-  //      )
-  //
-  //    val masterLast =
-  //      EmptyTask() set (
-  //        name := "masterLast",
-  //        (inputs, outputs) += (populationPrototype, statePrototype, islandPopulationPrototype.toArray, terminatedPrototype, generationPrototype)
-  //      )
-  //
-  //    val elitismTask =
-  //      ElitismTask(island)(
-  //        population,
-  //        islandPopulation,
-  //        state) set (name := "elitism")
-  //
-  //    val generateIsland = SamplePopulationTask(algorithm)(islandPopulation, sample, 1)
-  //
-  //    val terminationTask = TerminationTask(algorithm)(
-  //      OMTermination.toTermination(algorithm)(termination),
-  //      state,
-  //      generation,
-  //      terminated) set (name := "termination")
-  //
-  //    val populationToIslandPopulation =
-  //      AssignTask(island.population.asInstanceOf[Prototype[algorithm.Pop]] -> islandPopulation) set (
-  //        name := "populationToIslandPopulation"
-  //      )
-  //
-  //    val preIslandIslandPopulationToPopulation =
-  //      AssignTask(islandPopulation -> island.population.asInstanceOf[Prototype[algorithm.Pop]]) set (
-  //        name := "preIslandIslandPopulationToPopulation",
-  //        (inputs, outputs) += state
-  //      )
-  //
-  //    val elitismSlot = Slot(elitismTask)
-  //    val terminationCapsule = Capsule(terminationTask)
-  //    val masterLastSlot = Slot(masterLast)
-  //    val generateIslandSlot = Slot(generateIsland)
-  //
-  //    val master =
-  //      (masterFirst --
-  //        (elitismSlot keep (state, population, islandPopulation)) --
-  //        terminationCapsule --
-  //        generateIslandSlot --
-  //        masterLastSlot) &
-  //        (elitismSlot -- populationToIslandPopulation -- (generateIslandSlot keep islandPopulation)) &
-  //        (elitismSlot -- (masterLastSlot keep population)) &
-  //        (terminationCapsule -- (masterLastSlot keep (terminated, generation, state)))
-  //
-  //    val masterTask = MoleTask(master) set (
-  //      name := "islandMaster",
-  //      exploredOutputs += islandPopulation.toArray
-  //    )
-  //
-  //    val initialIslands =
-  //      Slot(
-  //        SamplePopulationTask(algorithm)(islandPopulation, sample, parallelism) set (
-  //          name := "initialIslands",
-  //          (inputs, outputs) += (state, population)
-  //        )
-  //      )
-  //
-  //    val islandCapsule = Slot(MoleTask(island))
-  //
-  //    val masterSlave = MasterSlave(initialIslands, masterTask, population, state)(preIslandIslandPopulationToPopulation -- islandCapsule -- populationToIslandPopulation)
-  //
-  //    val scalingIndividualsTask = ScalingPopulationTask(algorithm)(population) set (name := "scalingIndividuals") set (
-  //      (inputs, outputs) += (generation, terminated, state),
-  //      outputs += population
-  //    )
-  //
-  //    val firstTask = EmptyTask() set (
-  //      name := "first",
-  //      (inputs, outputs) += (population, state),
-  //      population := Population.empty,
-  //      _.setDefault(Default(state, ctx ⇒ algorithm.algorithmState(Task.buildRNG(ctx))))
-  //    )
-  //    val firstCapsule = Capsule(firstTask, strain = true)
-  //    val last = EmptyTask() set (
-  //      name := "last",
-  //      (inputs, outputs) += (population, state)
-  //    )
-  //
-  //    val scalingIndividualsSlot = Slot(scalingIndividualsTask)
-  //
-  //    val initialPopulationToIslandPopulation =
-  //      AssignTask(island.population.asInstanceOf[Prototype[algorithm.Pop]] -> islandPopulation) set (
-  //        name := "initialPopulationToIslandPopulation",
-  //        (inputs, outputs) += state
-  //      )
-  //
-  //    val puzzle =
-  //      ((firstCapsule -- initialPopulationToIslandPopulation -- masterSlave -- scalingIndividualsSlot) >| (Capsule(last, strain = true), trigger = terminated)) &
-  //        (firstCapsule -- (initialIslands keep population)) &
-  //        (firstCapsule oo (islandCapsule, Block(population, state)))
-  //
-  //    val parameters =
-  //      Parameters(algorithm)(
-  //        state,
-  //        population,
-  //        generation
-  //      )
-  //
-  //    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, scalingIndividualsSlot.capsule, islandCapsule)
-  //    \&/(gaPuzzle, parameters)
-  //  }
+  def IslandEvolution[T](island: PuzzleContainer \&/ T, parallelism: Int, sample: Int, termination: OMTermination)(implicit workflowIntegration: WorkflowIntegration[T]) = {
+    val argAlgo: T = island
+    val integration = workflowIntegration(island)
+    import integration._
+
+    val islandPopulationPrototype = populationPrototype.withName("islandPopulation")
+
+    val masterFirst =
+      EmptyTask() set (
+        name := "masterFirst",
+        (inputs, outputs) += (populationPrototype, offspringPrototype, statePrototype)
+      )
+
+    val masterLast =
+      EmptyTask() set (
+        name := "masterLast",
+        (inputs, outputs) += (populationPrototype, statePrototype, islandPopulationPrototype.toArray, terminatedPrototype, generationPrototype)
+      )
+
+    val elitismTask = ElitismTask(argAlgo) set (name := "elitism")
+
+    val generateIsland = SamplePopulationTask(argAlgo, sample, 1, islandPopulationPrototype.name)
+
+    val terminationTask = TerminationTask(argAlgo, termination) set (name := "termination")
+
+    val islandPopulationToPopulation =
+      AssignTask(islandPopulationPrototype -> populationPrototype) set (
+        name := "islandPopulationToPopulation",
+        (inputs, outputs) += statePrototype
+      )
+
+    val populationToOffspring =
+      AssignTask(populationPrototype -> offspringPrototype) set (
+        name := "populationToOffspring"
+      )
+
+    val elitismSlot = Slot(elitismTask)
+    val terminationCapsule = Capsule(terminationTask)
+    val masterLastSlot = Slot(masterLast)
+
+    val master =
+      (
+        masterFirst --
+        (elitismSlot keep (statePrototype, populationPrototype, offspringPrototype)) --
+        terminationCapsule --
+        (masterLastSlot keep (terminatedPrototype, generationPrototype, statePrototype))
+      ) &
+        (elitismSlot -- generateIsland -- masterLastSlot) &
+        (elitismSlot -- (masterLastSlot keep populationPrototype))
+
+    val masterTask = MoleTask(master) set (
+      name := "islandMaster",
+      exploredOutputs += islandPopulationPrototype.toArray
+    )
+
+    val generateInitialIslands =
+      SamplePopulationTask(argAlgo, sample, parallelism, islandPopulationPrototype.name) set (
+        name := "generateInitialIslands",
+        (inputs, outputs) += statePrototype,
+        outputs += populationPrototype
+      )
+
+    val islandCapsule = Slot(MoleTask(island))
+
+    val masterSlave = MasterSlave(generateInitialIslands, masterTask, populationPrototype, statePrototype)(islandPopulationToPopulation -- islandCapsule -- populationToOffspring)
+
+    val scalingIndividualsTask = ScalingPopulationTask(argAlgo) set (name := "scalingIndividuals") set (
+      (inputs, outputs) += (generationPrototype, terminatedPrototype, statePrototype),
+      outputs += populationPrototype
+    )
+
+    val firstTask = EmptyTask() set (
+      name := "first",
+      (inputs, outputs) += (populationPrototype, statePrototype),
+      populationPrototype := Population.empty,
+      _.setDefault(Default(statePrototype, ctx ⇒ algorithm.algorithmState(Task.buildRNG(ctx))))
+    )
+    val firstCapsule = Capsule(firstTask, strain = true)
+    val last = EmptyTask() set (
+      name := "last",
+      (inputs, outputs) += (populationPrototype, statePrototype)
+    )
+
+    val scalingIndividualsSlot = Slot(scalingIndividualsTask)
+
+    val puzzle =
+      ((firstCapsule -- masterSlave -- scalingIndividualsSlot) >| (Capsule(last, strain = true), trigger = terminatedPrototype)) &
+        (firstCapsule oo (islandCapsule, Block(populationPrototype, statePrototype)))
+
+    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, scalingIndividualsSlot.capsule, islandCapsule)
+    \&/(gaPuzzle, argAlgo)
+  }
 
 }

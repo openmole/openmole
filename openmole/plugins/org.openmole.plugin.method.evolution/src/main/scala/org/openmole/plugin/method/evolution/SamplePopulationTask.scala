@@ -24,14 +24,15 @@ import org.openmole.core.workflow.builder._
 
 object SamplePopulationTask {
 
-  def apply[T](t: T, sample: Int, size: Int)(implicit integration: WorkflowIntegration[T]) = {
+  def apply[T](t: T, sample: Int, size: Int, outputPopulationName: String)(implicit integration: WorkflowIntegration[T]) = {
     val wfi = integration(t)
     import wfi._
 
+    val outputPopulation = populationPrototype.withName(outputPopulationName)
     new TaskBuilder {
       builder ⇒
       addInput(populationPrototype)
-      addExploredOutput(populationPrototype.toArray)
+      addExploredOutput(outputPopulation.toArray)
 
       abstract class SamplePopulationTask extends Task {
 
@@ -40,10 +41,12 @@ object SamplePopulationTask {
 
           def samples =
             if (p.isEmpty) Vector.empty
-            else Vector.fill(sample) { p(rng().nextInt(p.size)) }
+            else Vector.fill(sample) {
+              p(rng().nextInt(p.size))
+            }
 
           def populations = Array.fill(size)(samples)
-          Variable(populationPrototype.toArray, populations)
+          Variable(outputPopulation.toArray, populations)
         }
 
       }

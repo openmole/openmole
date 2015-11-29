@@ -31,7 +31,7 @@ object SavePopulationHook {
     val prototypes =
       Seq[Prototype[_]](generationPrototype) ++
         inputsPrototypes.map(_.toArray) ++
-        outputPrototypes.map(_.toArray)
+        resultPrototypes.map(_.toArray)
     new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
   }
 

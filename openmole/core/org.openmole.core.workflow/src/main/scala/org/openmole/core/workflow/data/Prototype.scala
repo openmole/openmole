@@ -97,6 +97,8 @@ trait Prototype[T] extends Id {
   def accepts(obj: Any): Boolean =
     obj == null || classAssignable(obj.getClass, `type`.runtimeClass)
 
+  def withName(name: String) = Prototype[T](name)(`type`)
+
   override def id = (name, `type`)
   override def toString = name + ": " + `type`.toString
 
