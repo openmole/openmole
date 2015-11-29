@@ -15,10 +15,7 @@
    @p PEM certificates and X509 proxy files are the two other certificate types available:
    @br @hl.openmole("""
    //For pem
-   EGIAuthentication() = PEMCertificate(encrypted, "/path/to/the/cert", "/path/to/the/key")
-
-   //For proxy file
-   EGIAuthentication() = ProxyFile("/path/to/the/proxy")""", header = """def encrypted = "" """)
+   EGIAuthentication() = PEMCertificate(encrypted, "/path/to/the/cert", "/path/to/the/key")""", header = """def encrypted = "" """)
 
   @sect{Delegate tasks to EGI}
     To use EGI you must be registered in a Virtual Organisation (VO). The VO is the only compulsory parameter when creating an EGI environment:

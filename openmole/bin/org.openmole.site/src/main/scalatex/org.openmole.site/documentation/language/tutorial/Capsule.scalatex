@@ -12,7 +12,7 @@
   val t1 = ScalaTask("val i = 42") set (outputs += i)
 
   val t2 = ScalaTask("val j = i * 2") set (outputs += j)
-  val c2 = Capsule(t2, strainer = true)
+  val c2 = Capsule(t2, strain = true)
 
   t1 -- (c2 hook ToStringHook(i, j))
   """)
@@ -47,8 +47,7 @@
 
   val select =
     ScalaTask("archive = archive ++ (if(i % 3 == 0) Seq(i) else Seq())") set (
-      inputs += (i, archive),
-      outputs += (i, archive),
+      (inputs, outputs) += (i, archive),
       archive := Array[Int]()
     )
 
@@ -60,6 +59,6 @@
 
   val skel = exploration -< modelSlot1 -- (selectCaps hook displayHook)
   val loop = selectCaps -- modelSlot2
-  val terminate = selectCaps >| (Capsule(finalTask, strainer = true) hook displayHook, "archive.size() >= 10")
+  val terminate = selectCaps >| (Capsule(finalTask, strain = true) hook displayHook, "archive.size() >= 10")
 
-  skel + loop + terminate""")
+  skel & loop & terminate""")

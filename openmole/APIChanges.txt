@@ -1,4 +1,3 @@
-
 == DSL ==
 
 Appening workflow task is no longer done using the '+' symbol but the '&' symbol.
@@ -11,4 +10,12 @@ new: mkDir() function create a new directory
 == Capsule ==
 
 change: strainer = true becomes strain = true
+
+== Genetic algorithms ==
+
+Full API change, see the doc.
+
+== EGI ==
+
+No more ProxyFile authentication, authentication is made through P12 or PEM
 

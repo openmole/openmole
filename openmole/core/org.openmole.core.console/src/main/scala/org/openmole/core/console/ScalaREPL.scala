@@ -127,7 +127,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.e
       override def error(pos: Position, msg: String): Unit = {
         if (storeErrors) {
           val compiled = new String(pos.source.content).split("\n")
-          val first = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLine) }.get._2
+          val first = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLine) }.map(_._2).getOrElse(0)
           val error = pos match {
             case NoPosition ⇒ ErrorMessage(msg, pos.line - first)
             case _ ⇒

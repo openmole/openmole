@@ -19,19 +19,26 @@ package org.openmole.core.workflow.tools
 
 import java.io.File
 
-import org.openmole.core.tools.io.FromString
+import org.openmole.core.tools.io._
 import org.openmole.core.workflow.data._
+
 
 object FromContext {
 
   implicit def fromTToContext[T](t: T): FromContext[T] = FromContext.value[T](t)
 
-  implicit def fromStringToContext[T: FromString](code: String): FromContext[T] =
+  def codeToFromContext[T](code: String)(implicit fromString: FromString[T]): FromContext[T] =
     new FromContext[T] {
       @transient lazy val proxy = ScalaWrappedCompilation.dynamic(code)
-      override def from(context: ⇒ Context)(implicit rng: RandomProvider): T =
-        implicitly[FromString[T]].apply(proxy.run(context).toString)
+      override def from(context: ⇒ Context)(implicit rng: RandomProvider): T = fromString(proxy.run(context).toString)
     }
+
+  implicit def codeToFromContextFloat(code: String) = codeToFromContext[Float](code)
+  implicit def codeToFromContextDouble(code: String) = codeToFromContext[Double](code)
+  implicit def codeToFromContextLong(code: String) = codeToFromContext[Long](code)
+  implicit def codeToFromContextInt(code: String) = codeToFromContext[Int](code)
+  implicit def codeToFromContextBigDecimal(code: String) = codeToFromContext[BigDecimal](code)
+  implicit def codeToFromContextBigInt(code: String) = codeToFromContext[BigInt](code)
 
   def value[T](t: T): FromContext[T] =
     new FromContext[T] {
@@ -44,6 +51,7 @@ object FromContext {
     }
 
 }
+
 
 trait FromContext[+T] {
   def flatMap[U](f: T => FromContext[U]) =  FromContext { (context, rng) =>

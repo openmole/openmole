@@ -44,18 +44,21 @@ package object evolution {
   type FitnessAggregation = Seq[TextClosure[Seq[Double], Double]]
 
   implicit def intToCounterTerminationConverter(n: Long) = AfterGeneration(n)
+  implicit def durationToDurationTerminationConverter(d: Duration) = AfterDuration(d)
 
   object OMTermination {
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
       oMTermination match {
         case AfterGeneration(s) ⇒ afterGeneration[integration.AlgoState](s)(generation[integration.S])
+        case AfterDuration(d)   ⇒ afterTime[integration.AlgoState](d)(startTime[integration.S])
       }
   }
 
   sealed trait OMTermination
   case class AfterGeneration(steps: Long) extends OMTermination
+  case class AfterDuration(duration: Duration) extends OMTermination
 
-  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, parallelism: Int, termination: OMTermination)(implicit integration: WorkflowIntegration[T]) = {
+  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1)(implicit integration: WorkflowIntegration[T]) = {
     val argAlgo = algorithm
     val wfi = integration(algorithm)
     import wfi._

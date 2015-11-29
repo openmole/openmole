@@ -149,10 +149,10 @@
     val t2Capsule = Capsule(t2)
     val t3Capsule = Capsule(t3)
 
-    ((explorationCapsule -< t1Capsule) +
-      (t1Capsule -- t2Capsule) +
-      (t1Capsule -- t3Capsule) +
-      (t2Capsule hook ToStringHook()) +
+    ((explorationCapsule -< t1Capsule) &
+      (t1Capsule -- t2Capsule) &
+      (t1Capsule -- t3Capsule) &
+      (t2Capsule hook ToStringHook()) &
       (t3Capsule hook ToStringHook()))""")
 
   @sect{Loops}
@@ -168,4 +168,4 @@
       val s1 = Slot(c1)
       val s2 = Slot(c1)
 
-      (t0 -- s1 -- (s2, "i < 100") + (c1 hook ToStringHook()))""")
+      (t0 -- s1 -- (s2, "i < 100") & (c1 hook ToStringHook()))""")

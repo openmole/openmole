@@ -39,8 +39,8 @@ package sampling {
     }
 
     implicit def tupleOfStringToBoundOfDouble[T: FromString] = new Bounds[T, (String, String)] {
-      override def min(domain: (String, String)): FromContext[T] = FromContext.fromStringToContext[T](domain._1)
-      override def max(domain: (String, String)): FromContext[T] = FromContext.fromStringToContext[T](domain._2)
+      override def min(domain: (String, String)): FromContext[T] = FromContext.codeToFromContext[T](domain._1)
+      override def max(domain: (String, String)): FromContext[T] = FromContext.codeToFromContext[T](domain._2)
     }
 
     implicit def tupleIsBounds[T] = new Bounds[T, (T, T)] {
