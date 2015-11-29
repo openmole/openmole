@@ -23,8 +23,7 @@ import org.openmole.site.market._
 import scalatags.Text.all
 import scalatags.Text.all._
 import com.github.rjeschke._
-
-import scalatags.generic.Attr
+import scalatex._
 
 object Pages {
 
@@ -191,18 +190,18 @@ object DocumentationPages { index ⇒
 
   def root = new DocumentationPage {
     def name = "Documentation"
-    def content = documentation.Documentation()
+    def content = scalatex.documentation.Documentation()
     def children = Seq(application, language, tutorial, market, faq, development)
 
     def application = new DocumentationPage {
       def name = "Application"
       def children = Seq(migration)
-      def content = documentation.Application()
+      def content = scalatex.documentation.Application()
 
       def migration = new DocumentationPage() {
         def children: Seq[DocumentationPage] = Seq()
         def name: String = "Migration"
-        def content: all.Frag = documentation.application.Migration()
+        def content: all.Frag = scalatex.documentation.application.Migration()
       }
     }
 
@@ -210,89 +209,89 @@ object DocumentationPages { index ⇒
       new DocumentationPage {
         def name = "Language"
         def children = Seq(task, sampling, transition, hook, environment, source, method)
-        def content = documentation.Language()
+        def content = scalatex.documentation.Language()
 
         def task = new DocumentationPage {
           def name = "Tasks"
           def children = Seq(scala, systemExec, netLogo, mole)
-          def content = documentation.language.Task()
+          def content = scalatex.documentation.language.Task()
 
           def scala = new DocumentationPage {
             def name = "Scala"
             def children = Seq()
-            def content = documentation.language.task.Scala()
+            def content = scalatex.documentation.language.task.Scala()
           }
 
           def systemExec = new DocumentationPage {
             def name = "SystemExec"
             def children = Seq()
-            def content = documentation.language.task.SystemExec()
+            def content = scalatex.documentation.language.task.SystemExec()
           }
 
           def netLogo = new DocumentationPage {
             def name = "NetLogo"
             def children = Seq()
-            def content = documentation.language.task.NetLogo()
+            def content = scalatex.documentation.language.task.NetLogo()
           }
 
           def mole = new DocumentationPage {
             def name = "Mole"
             def children = Seq()
-            def content = documentation.language.task.MoleTask()
+            def content = scalatex.documentation.language.task.MoleTask()
           }
         }
 
         def sampling = new DocumentationPage {
           def name = "Samplings"
           def children = Seq()
-          def content = documentation.language.Sampling()
+          def content = scalatex.documentation.language.Sampling()
         }
 
         def transition = new DocumentationPage {
           def name = "Transitions"
           def children = Seq()
-          def content = documentation.language.Transition()
+          def content = scalatex.documentation.language.Transition()
         }
 
         def hook = new DocumentationPage {
           def name = "Hooks"
           def children = Seq()
-          def content = documentation.language.Hook()
+          def content = scalatex.documentation.language.Hook()
         }
 
         def environment = new DocumentationPage {
           def name = "Environments"
           def children = Seq(multithread, ssh, egi, cluster, desktopGrid)
-          def content = documentation.language.Environment()
+          def content = scalatex.documentation.language.Environment()
 
           def multithread = new DocumentationPage {
             def name = "Multi-threads"
             def children = Seq()
-            def content = documentation.language.environment.Multithread()
+            def content = scalatex.documentation.language.environment.Multithread()
           }
 
           def ssh = new DocumentationPage {
             def name = "SSH"
             def children = Seq()
-            def content = documentation.language.environment.SSH()
+            def content = scalatex.documentation.language.environment.SSH()
           }
 
           def egi = new DocumentationPage {
             def name = "EGI"
             def children = Seq()
-            def content = documentation.language.environment.EGI()
+            def content = scalatex.documentation.language.environment.EGI()
           }
 
           def cluster = new DocumentationPage {
             def name = "Clusters"
             def children = Seq()
-            def content = documentation.language.environment.Cluster()
+            def content = scalatex.documentation.language.environment.Cluster()
           }
 
           def desktopGrid = new DocumentationPage {
             def name = "Desktop Grid"
             def children = Seq()
-            def content = documentation.language.environment.DesktopGrid()
+            def content = scalatex.documentation.language.environment.DesktopGrid()
           }
 
         }
@@ -300,20 +299,20 @@ object DocumentationPages { index ⇒
         def source = new DocumentationPage {
           def name = "Sources"
           def children = Seq()
-          def content = documentation.language.Source()
+          def content = scalatex.documentation.language.Source()
         }
 
         def method = new DocumentationPage {
           def name = "Exploration Methods"
           def children = Seq()
-          def content = documentation.language.Method()
+          def content = scalatex.documentation.language.Method()
         }
       }
 
     def tutorial = new DocumentationPage {
       def name = "Tutorials"
       def children = Seq(helloWorld, headlessNetLogo, netLogoGA, capsule)
-      def content = documentation.language.Tutorial()
+      def content = scalatex.documentation.language.Tutorial()
 
       def helloWorld = new DocumentationPage {
         def name = "Hello World"
@@ -324,26 +323,26 @@ object DocumentationPages { index ⇒
       def headlessNetLogo = new DocumentationPage {
         def name = "NetLogo Headless"
         def children = Seq()
-        def content = documentation.language.tutorial.HeadlessNetLogo()
+        def content = scalatex.documentation.language.tutorial.HeadlessNetLogo()
       }
 
       def netLogoGA = new DocumentationPage {
         def name = "GA with NetLogo"
         def children = Seq()
-        def content = documentation.language.tutorial.NetLogoGA()
+        def content = scalatex.documentation.language.tutorial.NetLogoGA()
       }
 
       def capsule = new DocumentationPage {
         def name = "Capsule"
         def children = Seq()
-        def content = documentation.language.tutorial.Capsule()
+        def content = scalatex.documentation.language.tutorial.Capsule()
       }
     }
 
     def market = new DocumentationPage {
       def children: Seq[DocumentationPage] = pages
       def name: String = "Market Place"
-      def content: all.Frag = documentation.Market()
+      def content: all.Frag = scalatex.documentation.Market()
 
       def themes: Seq[Market.Tag] =
         marketEntries.flatMap(_.entry.tags).distinct.sortBy(_.label.toLowerCase)
@@ -397,36 +396,36 @@ object DocumentationPages { index ⇒
     def faq = new DocumentationPage {
       def name = "FAQ"
       def children = Seq()
-      def content = documentation.FAQ()
+      def content = scalatex.documentation.FAQ()
     }
 
     def development = new DocumentationPage {
       def name = "Development"
       def children = Seq(compilation, plugin, branching, webserver)
-      def content = documentation.Development()
+      def content = scalatex.documentation.Development()
 
       def compilation = new DocumentationPage {
         def name = "Compilation"
         def children = Seq()
-        def content = documentation.development.Compilation()
+        def content = scalatex.documentation.development.Compilation()
       }
 
       def plugin = new DocumentationPage {
         def name = "Plugins"
         def children = Seq()
-        def content = documentation.development.Plugin()
+        def content = scalatex.documentation.development.Plugin()
       }
 
       def branching = new DocumentationPage {
         def name = "Branching model"
         def children = Seq()
-        def content = documentation.development.Branching()
+        def content = scalatex.documentation.development.Branching()
       }
 
       def webserver = new DocumentationPage {
         def name = "Web Server"
         def children = Seq()
-        def content = documentation.development.WebServer()
+        def content = scalatex.documentation.development.WebServer()
       }
     }
   }
