@@ -64,19 +64,16 @@ trait EGIJobService extends GridScaleJobService { js ⇒
     import serializedJob._
 
     val script = Workspace.newFile("script", ".sh")
-    val proxy = Workspace.newFile("proxy", ".x509")
     try {
-      proxy.withOutputStream { environment.authentication().credential.getX509Credential.save }
-
       val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
       val _runningPath = storage.child(path, runningFile)
       val _finishedPath = storage.child(path, finishedFile)
 
-      val scriptContent = jobScript(serializedJob, outputFilePath, proxy = Some(proxy.getName))
+      val scriptContent = jobScript(serializedJob, outputFilePath)
 
       Resource.fromFile(script).write(scriptContent)
 
-      val jobDescription = buildJobDescription(script, proxy)
+      val jobDescription = buildJobDescription(script)
 
       val jid = jobService.submit(jobDescription)
       Log.logger.fine(s"""GLite job [${jid.id}], description: \n${jobDescription.toJDL}\n with script ${scriptContent}""")
@@ -91,17 +88,14 @@ trait EGIJobService extends GridScaleJobService { js ⇒
       }
       if (!environment.debug) job else EGIJob.debug(job, jobDescription)
     }
-    finally {
-      proxy.delete
-      script.delete
-    }
+    finally script.delete
   }
 
-  protected def buildJobDescription(script: File, proxy: File) =
+  protected def buildJobDescription(script: File, proxy: Option[File] = None) =
     new WMSJobDescription {
       val executable = "/bin/bash"
       val arguments = (if (environment.debug) " -x " else "") + script.getName
-      val inputSandbox = List(script, proxy)
+      val inputSandbox = List(script) ++ proxy
       override def stdOutput = if (environment.debug) "out" else ""
       override def stdError = if (environment.debug) "err" else ""
       def outputSandbox = if (environment.debug) Seq("out" -> Workspace.newFile("job", ".out"), "err" -> Workspace.newFile("job", ".err")) else Seq.empty

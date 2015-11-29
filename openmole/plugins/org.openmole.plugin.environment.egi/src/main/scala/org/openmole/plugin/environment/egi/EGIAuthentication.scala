@@ -159,9 +159,9 @@ object EGIAuthentication extends Logger {
         )
 
         () ⇒ implicitly[GlobusAuthenticationProvider[PEMVOMSAuthentication]].apply(pem)
-        case a: ProxyFile ⇒
+      /*case a: ProxyFile ⇒
         val proxy = ProxyFileAuthentication(a.proxy)
-        () ⇒ implicitly[GlobusAuthenticationProvider[ProxyFileAuthentication]].apply(proxy)
+        () ⇒ implicitly[GlobusAuthenticationProvider[ProxyFileAuthentication]].apply(proxy)*/
     }
 
 }
