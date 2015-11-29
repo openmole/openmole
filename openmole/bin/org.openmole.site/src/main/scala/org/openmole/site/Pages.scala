@@ -196,8 +196,14 @@ object DocumentationPages { index ⇒
 
     def application = new DocumentationPage {
       def name = "Application"
-      def children = Seq()
+      def children = Seq(migration)
       def content = documentation.Application()
+
+      def migration = new DocumentationPage() {
+        def children: Seq[DocumentationPage] = Seq()
+        def name: String = "Migration"
+        def content: all.Frag = documentation.application.Migration()
+      }
     }
 
     def language =
