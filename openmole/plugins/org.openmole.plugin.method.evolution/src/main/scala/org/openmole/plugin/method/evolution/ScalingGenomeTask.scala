@@ -35,7 +35,7 @@ object ScalingGenomeTask {
 
     new TaskBuilder {
       builder ⇒
-      inputsPrototypes foreach { p ⇒ addOutput(p) }
+      inputPrototypes foreach { p ⇒ addOutput(p) }
       addInput(genomePrototype)
       addOutput(genomePrototype)
 

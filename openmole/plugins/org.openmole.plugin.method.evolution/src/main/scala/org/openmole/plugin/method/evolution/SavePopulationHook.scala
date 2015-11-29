@@ -30,7 +30,7 @@ object SavePopulationHook {
     val fileName = dir + "/population${" + generationPrototype.name + "}.csv"
     val prototypes =
       Seq[Prototype[_]](generationPrototype) ++
-        inputsPrototypes.map(_.toArray) ++
+        inputPrototypes.map(_.toArray) ++
         resultPrototypes.map(_.toArray)
     new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
   }

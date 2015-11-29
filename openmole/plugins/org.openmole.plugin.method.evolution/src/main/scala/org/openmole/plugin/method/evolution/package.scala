@@ -31,6 +31,7 @@ import org.openmole.core.workspace.Workspace
 
 import org.openmole.plugin.task.tools._
 import org.openmole.plugin.tool.pattern._
+import org.openmole.tool.types._
 
 import scala.concurrent.duration.Duration
 import scala.util.Random

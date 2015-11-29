@@ -39,9 +39,6 @@ package tools {
         def next = r getUpdate (_ + 1)
       }
 
-      implicit def bothToA[A](t: \&/[A, _]): A = t.a.get
-      implicit def bothToB[B](t: \&/[_, B]): B = t.b.get
-
     }
 }
 
