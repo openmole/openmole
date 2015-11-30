@@ -20,9 +20,7 @@ package org.openmole.plugin.method.evolution
 import fr.iscpif.mgo._
 import fr.iscpif.mgo.algorithm._
 import fr.iscpif.mgo.clone.History
-import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.tools.TextClosure
 import org.openmole.tool.statistics._
 import scalaz._
 import scala.util.Random
@@ -236,7 +234,7 @@ trait StochasticGAAlgorithm extends GAAlgorithmIntegration {
   def replication: Replication
 
   override def inputPrototypes = genome.inputs.map(_.prototype) ++ replication.seed.prototype
-  override def resultPrototypes = (inputPrototypes ++ outputPrototypes ++ Seq(replications)).distinct
+  override def resultPrototypes = (genome.inputs.map(_.prototype) ++ outputPrototypes ++ Seq(replications)).distinct
 
   def toPhenotype(s: Seq[Double]) = History(List(s))
 

@@ -28,10 +28,7 @@ object SavePopulationHook {
     import wfi._
 
     val fileName = dir + "/population${" + generationPrototype.name + "}.csv"
-    val prototypes =
-      Seq[Prototype[_]](generationPrototype) ++
-        inputPrototypes.map(_.toArray) ++
-        resultPrototypes.map(_.toArray)
+    val prototypes = Seq[Prototype[_]](generationPrototype) ++ resultPrototypes.map(_.toArray)
     new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
   }
 
