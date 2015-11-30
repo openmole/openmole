@@ -77,7 +77,7 @@ object GenomeProfile {
 
           override def populationToVariables(population: Population[Individual[G, P]], context: Context)(implicit rng: RandomProvider) = {
             val profile = for { (_, is) ← population.groupBy(t.niche.apply).toVector } yield is.maxBy(_.phenotype.age: Int)
-            populationToVariables(profile, context)
+            super.populationToVariables(profile, context)
           }
         }
     }
