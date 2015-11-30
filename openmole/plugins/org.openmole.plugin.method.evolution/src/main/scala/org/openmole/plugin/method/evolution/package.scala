@@ -140,7 +140,13 @@ package object evolution {
       ((firstCapsule -- masterSlave -- scalingIndividualsSlot) >| (Capsule(last, strain = true), trigger = terminatedPrototype)) &
         (firstCapsule oo evaluation)
 
-    val gaPuzzle = OutputPuzzleContainer(puzzle, scalingIndividualsSlot.capsule)
+    val gaPuzzle =
+      new OutputPuzzleContainer(puzzle, scalingIndividualsSlot.capsule) {
+        def generation = wfi.generationPrototype
+        def population = wfi.populationPrototype
+        def state = wfi.statePrototype
+      }
+
     \&/(gaPuzzle, argAlgo)
   }
 
@@ -242,7 +248,13 @@ package object evolution {
       ((firstCapsule -- masterSlave -- scalingIndividualsSlot) >| (Capsule(last, strain = true), trigger = terminatedPrototype)) &
         (firstCapsule oo (islandCapsule, Block(populationPrototype, statePrototype)))
 
-    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, scalingIndividualsSlot.capsule, islandCapsule)
+    val gaPuzzle =
+      new OutputEnvironmentPuzzleContainer(puzzle, scalingIndividualsSlot.capsule, islandCapsule) {
+        def generation = integration.generationPrototype
+        def population = integration.populationPrototype
+        def state = integration.statePrototype
+      }
+
     \&/(gaPuzzle, argAlgo)
   }
 

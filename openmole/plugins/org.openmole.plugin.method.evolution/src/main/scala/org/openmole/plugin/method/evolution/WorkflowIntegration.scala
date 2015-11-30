@@ -147,13 +147,14 @@ trait EvolutionWorkflow {
 
   def randomGenome: State[Random, G]
 
-  def genomePrototype = Prototype[G]("genome")(genomeType)
-  def individualPrototype = Prototype[Ind]("individual")(individualType)
-  def populationPrototype = Prototype[Pop]("population")(populationType)
-  def offspringPrototype = Prototype[Pop]("offspring")(populationType)
-  def statePrototype = Prototype[AlgoState]("state")(algoType)
-  def generationPrototype = Prototype[Long]("generation")
-  def terminatedPrototype = Prototype[Boolean]("terminated")
+  def namespace = Namespace("evolution")
+  def genomePrototype = Prototype[G]("genome", namespace)(genomeType)
+  def individualPrototype = Prototype[Ind]("individual", namespace)(individualType)
+  def populationPrototype = Prototype[Pop]("population", namespace)(populationType)
+  def offspringPrototype = Prototype[Pop]("offspring", namespace)(populationType)
+  def statePrototype = Prototype[AlgoState]("state", namespace)(algoType)
+  def generationPrototype = Prototype[Long]("generation", namespace)
+  def terminatedPrototype = Prototype[Boolean]("terminated", namespace)
 }
 
 trait GAAlgorithmIntegration extends EvolutionWorkflow { wfi ⇒
@@ -230,7 +231,7 @@ trait StochasticGAAlgorithm extends GAAlgorithmIntegration {
   type P = History[Seq[Double]]
   def phenotypeType: PrototypeType[P] = PrototypeType[P]
 
-  def replications = Prototype[Int]("replications")
+  def replications = Prototype[Int]("replications", namespace)
   def replication: Replication
 
   override def inputPrototypes = genome.inputs.map(_.prototype) ++ replication.seed.prototype

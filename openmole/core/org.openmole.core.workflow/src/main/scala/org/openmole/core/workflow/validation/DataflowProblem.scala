@@ -30,8 +30,12 @@ object DataflowProblem {
   }
 
   sealed trait SlotType
-  case object Input extends SlotType
-  case object Output extends SlotType
+  case object Input extends SlotType {
+    override def toString = "input"
+  }
+  case object Output extends SlotType {
+    override def toString = "output"
+  }
 
   case class WrongType(
       slot: Slot,
@@ -54,7 +58,7 @@ object DataflowProblem {
       prototype: Iterable[Prototype[_]],
       slotType: SlotType) extends DataflowProblem {
 
-    override def toString = name + " has been found several time in capsule in " + slotType + " of capsule " + capsule + ": " + prototype.mkString(", ") + "."
+    override def toString = name + " has been found several time in " + slotType + " of capsule " + capsule + ": " + prototype.mkString(", ") + "."
   }
 
   case class IncoherentTypesBetweenSlots(
