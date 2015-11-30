@@ -123,7 +123,7 @@ object EGIWebDAVStorageService {
   def apply[A: HTTPSAuthentication](s: WebDAVLocation, _environment: BatchEnvironment { def voName: String }, authentication: A) = new EGIWebDAVStorageService {
     def threads = Workspace.preferenceAsInt(EGIEnvironment.ConnectionsByWebDAVSE)
     val usageControl = AvailabilityQuality(new UnlimitedAccess, Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
-    val storage = WebDAVS(s.copy(basePath = ""), threads)(authentication)
+    val storage = WebDAVS(s.copy(basePath = ""), Some(threads))(authentication)
     val url = new URI("https", null, s.host, s.port, null, null, null)
     val remoteStorage = new CurlRemoteStorage(s.host, s.port, _environment.voName)
     val environment = _environment

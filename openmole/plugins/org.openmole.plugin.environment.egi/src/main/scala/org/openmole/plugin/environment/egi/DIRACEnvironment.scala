@@ -123,7 +123,7 @@ class DIRACEnvironment(
       GSDIRACJobService(
         env.service,
         env.group,
-        connections = Workspace.preferenceAsInt(DIRACEnvironment.LocalThreads))(env.authentication)
+        connections = Some(Workspace.preferenceAsInt(DIRACEnvironment.LocalThreads)))(env.authentication)
   }
 
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)
