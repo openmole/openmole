@@ -171,9 +171,10 @@ package object evolution {
 
     val islandPopulationToPopulation =
       AssignTask(islandPopulationPrototype -> populationPrototype) set (
-        name := "islandPopulationToPopulation",
-        (inputs, outputs) += statePrototype
+        name := "islandPopulationToPopulation"
       )
+
+    val reassingRNGTask = ReassignStateRNGTask(argAlgo)
 
     val populationToOffspring =
       AssignTask(populationPrototype -> offspringPrototype) set (
@@ -208,7 +209,13 @@ package object evolution {
 
     val islandCapsule = Slot(MoleTask(island))
 
-    val masterSlave = MasterSlave(generateInitialIslands, masterTask, populationPrototype, statePrototype)(islandPopulationToPopulation -- islandCapsule -- populationToOffspring)
+    val slaveFist = EmptyTask() set (
+      (inputs, outputs) += (statePrototype, islandPopulationPrototype)
+    )
+
+    val slave = slaveFist -- (islandPopulationToPopulation, reassingRNGTask) -- islandCapsule -- populationToOffspring
+
+    val masterSlave = MasterSlave(generateInitialIslands, masterTask, populationPrototype, statePrototype)(slave)
 
     val scalingIndividualsTask = ScalingPopulationTask(argAlgo) set (name := "scalingIndividuals") set (
       (inputs, outputs) += (generationPrototype, terminatedPrototype, statePrototype),
@@ -221,7 +228,9 @@ package object evolution {
       populationPrototype := Population.empty,
       _.setDefault(Default(statePrototype, ctx ⇒ algorithm.algorithmState(Task.buildRNG(ctx))))
     )
+
     val firstCapsule = Capsule(firstTask, strain = true)
+
     val last = EmptyTask() set (
       name := "last",
       (inputs, outputs) += (populationPrototype, statePrototype)
