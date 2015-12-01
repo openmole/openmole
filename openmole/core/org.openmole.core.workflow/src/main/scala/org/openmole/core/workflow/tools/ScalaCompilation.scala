@@ -167,7 +167,6 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
           |}: ${toScalaNativeType(returnType)}
           |""".stripMargin
 
-
   def run(context: Context)(implicit rng: RandomProvider) = compiled(context).get(context, rng)
 
   def compiled(context: Context): Try[ContextClosure[RETURN]]

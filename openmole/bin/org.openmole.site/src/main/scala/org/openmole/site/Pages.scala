@@ -23,7 +23,7 @@ import org.openmole.site.market._
 import scalatags.Text.all
 import scalatags.Text.all._
 import com.github.rjeschke._
-import scalatex._
+import scalatex.{ openmole ⇒ scalatex }
 
 object Pages {
 
@@ -46,10 +46,10 @@ object Pages {
       div(`class` := "row")(p)
     )
 
-  def index = Page("index", Index())
-  def gettingStarted = Page("getting_started", GettingStarted())
-  def whoAreWe = Page("who_are_we", WhoAreWe())
-  def communications = Page("communications", Communications())
+  def index = Page("index", scalatex.Index())
+  def gettingStarted = Page("getting_started", scalatex.GettingStarted())
+  def whoAreWe = Page("who_are_we", scalatex.WhoAreWe())
+  def communications = Page("communications", scalatex.Communications())
 
   def all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, gettingStarted, whoAreWe, communications)
 

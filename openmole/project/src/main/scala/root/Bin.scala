@@ -7,7 +7,7 @@ import Keys._
 import org.openmole.buildsystem.OMKeys._
 import org.openmole.buildsystem._, Assembly._
 import root.Libraries._
-import com.typesafe.sbt.osgi.OsgiKeys
+import com.typesafe.sbt.osgi.{ SbtOsgi, OsgiKeys }
 import sbt.inc.Analysis
 import sbtunidoc.Plugin._
 import UnidocKeys._
@@ -282,6 +282,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     ) settings (
         OsgiKeys.bundle <<= OsgiKeys.bundle dependsOn (assemble),
         organization := "org.openmole.site",
+        SbtOsgi.OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ SbtOsgi.OsgiKeys.exportPackage.value,
         libraryDependencies += Libraries.xstream,
         libraryDependencies += Libraries.scalatexSite,
         libraryDependencies += Libraries.scalaLang,

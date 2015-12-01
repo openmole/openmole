@@ -47,20 +47,50 @@ class WorkflowSpec extends FlatSpec with Matchers {
     )
   }
 
-  "Steady state workflow" should "have no validation error" in {
-    val puzzle = nsga2
+  def conflict = {
+    val population = Val[Double]
+    val state = Val[Double]
 
-    Validation(puzzle.toMole).toList match {
+    val puzzle = EmptyTask() set (
+      (inputs, outputs) += (population, state)
+    )
+
+    // Define a builder to use NSGA2 generational EA algorithm.
+    // replicateModel is the fitness function to optimise.
+    // lambda is the size of the offspring (and the parallelism level).
+    SteadyStateEvolution(
+      algorithm =
+        PSE(
+          genome = Genome(population in (0.0, 1.0), state in ("0.0", "1.0")),
+          gridSize = Seq(0.1, 0.1),
+          objectives = Seq(population, state),
+          replication = Replication()
+        ),
+      evaluation = puzzle,
+      parallelism = 10,
+      termination = 10
+    )
+  }
+
+  "Steady state workflow" should "have no validation error" in {
+    Validation(nsga2.toMole).toList match {
+      case Nil ⇒
+      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+    }
+
+    Validation(conflict.toMole).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
   }
 
   "Island workflow" should "have no validation error" in {
-    val puzzle = nsga2
-    val islandPuzzle = IslandEvolution(puzzle, 10, 50, 100)
+    Validation(IslandEvolution(nsga2, 10, 50, 100).toMole).toList match {
+      case Nil ⇒
+      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+    }
 
-    Validation(islandPuzzle.toMole).toList match {
+    Validation(IslandEvolution(conflict, 10, 50, 100).toMole).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }

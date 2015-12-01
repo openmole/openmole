@@ -70,13 +70,7 @@ object Market extends Logger {
   import Tags._
 
   case class MarketRepository(repository: Repository, entries: MarketEntry*)
-  case class MarketEntry(name: String, directory: String, tags: Seq[Tag] = Seq.empty, directories: Seq[String] = Seq("")) {
-    def files(baseDirectory: File) =
-      for {
-        dir ← directories
-        f ← baseDirectory / dir listFilesSafe (_.endsWith(".oms"))
-      } yield f
-  }
+  case class MarketEntry(name: String, directory: String, tags: Seq[Tag] = Seq.empty)
 
   def entries = Seq(
     MarketRepository(githubMarket,
@@ -106,7 +100,6 @@ case class GeneratedMarketEntry(
     archive: String,
     entry: MarketEntry,
     readme: Option[String],
-    codes: Seq[String],
     viewURL: Option[String]) {
   def toDeployedMarketEntry =
     MarketIndexEntry(
@@ -143,7 +136,6 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
         s"$archiveDirectoryName/$fileName",
         project,
         readme.contentOption,
-        project.files(projectDirectory).map(_.content),
         marketRepository.repository.viewURL(project.directory, branchName)
       )
     }
@@ -156,16 +148,20 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
         val consoleProject = new Project(projectDirectory)
         val plugins = consoleProject.loadPlugins
         try {
+
+          def files = projectDirectory listRecursive (_.getName.endsWith(".oms"))
+          Log.logger.info(s"Test ${project.name} containing ${files.map(_.getName).mkString(",")}")
+
           def exclusion = s"Project ${project} of repository $repository has been excluded "
 
-          def compiles = for { file ← project.files(projectDirectory) } yield {
+          def compiles = for { file ← files } yield {
             consoleProject.compile(file, Seq.empty) match {
               case Compiled(_) ⇒ true
               case CompilationError(e) ⇒
-                Log.logger.log(Log.WARNING, exclusion + " because there was an error during compilation.", e)
+                Log.logger.log(Log.WARNING, exclusion + s" because there was an error during compilation of file ${file.getName}.", e)
                 false
               case e ⇒
-                Log.logger.log(Log.WARNING, exclusion + s" because the compilation raise the error $e")
+                Log.logger.log(Log.WARNING, exclusion + s" because the compilation of file ${file.getName} raise the error $e")
                 false
             }
           }
@@ -183,6 +179,7 @@ class Market(repositories: Seq[MarketRepository], destination: File) {
     }
 
   def update(repository: MarketRepository, cloneDirectory: File): File = {
+    Log.logger.info(s"Update repository ${repository.repository.url}")
     val directory = cloneDirectory / repository.repository.url.hash.toString
 
     if (!(directory / ".git" exists)) {
