@@ -154,7 +154,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     jquery,
     ace,
     txtmark,
-    scaladget
+    scaladget,
+    clapper
   )
 
   //FIXME separate web plugins from core ones

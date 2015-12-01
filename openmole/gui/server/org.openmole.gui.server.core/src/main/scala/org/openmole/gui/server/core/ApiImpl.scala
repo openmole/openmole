@@ -328,7 +328,7 @@ object ApiImpl extends Api {
   }
 
   //MODEL WIZARDS
-  def getCareBinInfos(careArchive: SafePath): Option[LaunchingCommand] = Utils.getCareBinInfos(careArchive)
+  def launchingCommand(careArchive: SafePath): Option[LaunchingCommand] = Utils.launchinCommand(careArchive)
 
   def buildModelTask(executableName: String,
                      command: String,
@@ -343,20 +343,28 @@ object ApiImpl extends Api {
       for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
         os.write("val " + p._1 + " = Val[" + p._2 + "]\n")
       }
+
+      val (imappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
+      val (omappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
+
+      val inString = if (ins.nonEmpty) Seq("  inputs += (", ")\n").mkString(ins.map { i ⇒ s"${i.name}" }.mkString(", ")) else ""
+      val imString = if (imappings.nonEmpty) Seq("  fileInputs += (", ")\n").mkString(imappings.map { i ⇒ s"""(${i.name}, "${i.mapping.get}")""" }.mkString(", ")) else ""
+      val ouString = if (ous.nonEmpty) Seq("  outputs += (", ")\n").mkString(ous.map { o ⇒ s"${o.name}" }.mkString(", ")) else ""
+      val omString = if (omappings.nonEmpty) Seq("  fileOutputs += (", ")\n").mkString(omappings.map { o ⇒ s""""${o.mapping.get}", (${o.name})""" }.mkString(", ")) else ""
+      val defaults = inputs.filterNot {
+        _.default == ""
+      }.map { p ⇒ "  " + p.name + " := " + p.default }.mkString(",\n") + "  )"
+
       language.taskType match {
         case ctt: CareTaskType ⇒
           os.write(
-            s"""\nval task = CareTask(workDirectory / "$executableName", "$command") set(\n""" + {
-              val (imappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
-              val (omappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
-
-              val inString = if (ins.nonEmpty) Seq("  inputs += (", ")\n").mkString(ins.map { i ⇒ s"${i.name}" }.mkString(", ")) else ""
-              val imString = if (imappings.nonEmpty) Seq("  fileInputs += (", ")\n").mkString(imappings.map { i ⇒ s"""(${i.name}, "${i.mapping.get}")""" }.mkString(", ")) else ""
-              val ouString = if (ous.nonEmpty) Seq("  outputs += (", ")\n").mkString(ous.map { o ⇒ s"${o.name}" }.mkString(", ")) else ""
-              val omString = if (omappings.nonEmpty) Seq("  fileOutputs += (", ")\n").mkString(omappings.map { o ⇒ s""""${o.mapping.get}", (${o.name})""" }.mkString(", ")) else ""
-
-              imString + inString + omString + ouString
-            } + "  )"
+            s"""\nval task = CareTask(workDirectory / "$executableName", "$command") set(\n""" +
+              imString + inString + omString + ouString + defaults
+          )
+        case ntt: NetLogoTaskType ⇒
+          os.write(
+            s"""\nval task = NetLogoTask5(workDirectory / "$executableName", "$command") set(\n""" +
+              imString + inString + omString + ouString + defaults
           )
         case _ ⇒ ""
       }

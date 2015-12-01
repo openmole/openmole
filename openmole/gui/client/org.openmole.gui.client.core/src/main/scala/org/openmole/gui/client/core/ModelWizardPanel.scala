@@ -41,39 +41,39 @@ class ModelWizardPanel extends ModalPanel {
 
   def onClose() = {}
 
-  sealed trait Role[T] {
+  sealed trait VariableRole[T] {
     def content: T
 
-    def clone(t: T): Role[T]
+    def clone(t: T): VariableRole[T]
 
-    def switch: Role[T]
+    def switch: VariableRole[T]
   }
 
-  case class Input[T](content: T) extends Role[T] {
+  case class Input[T](content: T) extends VariableRole[T] {
     def clone(otherT: T) = Input(otherT)
 
     def switch = Output(content)
   }
 
-  case class Output[T](content: T) extends Role[T] {
-    def clone(otherT: T): Role[T] = Output(otherT)
+  case class Output[T](content: T) extends VariableRole[T] {
+    def clone(otherT: T): VariableRole[T] = Output(otherT)
 
     def switch = Input(content)
   }
 
-  case class CommandInput[T](content: T) extends Role[T] {
+  case class CommandInput[T](content: T) extends VariableRole[T] {
     def clone(otherT: T) = CommandInput(otherT)
 
     def switch = CommandOutput(content)
   }
 
-  case class CommandOutput[T](content: T) extends Role[T] {
-    def clone(otherT: T): Role[T] = CommandOutput(otherT)
+  case class CommandOutput[T](content: T) extends VariableRole[T] {
+    def clone(otherT: T): VariableRole[T] = CommandOutput(otherT)
 
     def switch = CommandInput(content)
   }
 
-  implicit def pairToLine(variableElement: Role[VariableElement]): Reactive = buildReactive(variableElement)
+  implicit def pairToLine(variableElement: VariableRole[VariableElement]): Reactive = buildReactive(variableElement)
 
   implicit def stringToOptionString(s: String): Option[String] = if (s.isEmpty) None else Some(s)
 
@@ -97,7 +97,7 @@ class ModelWizardPanel extends ModalPanel {
     if (updatableTable()) setBodyContent
   }
 
-  def inputs(reactives: Seq[Reactive]): Seq[Role[VariableElement]] = {
+  def inputs(reactives: Seq[Reactive]): Seq[VariableRole[VariableElement]] = {
     reactives.map {
       _.role
     }.collect {
@@ -106,7 +106,7 @@ class ModelWizardPanel extends ModalPanel {
     }
   }
 
-  def outputs(reactives: Seq[Reactive]): Seq[Role[VariableElement]] =
+  def outputs(reactives: Seq[Reactive]): Seq[VariableRole[VariableElement]] =
     reactives.map {
       _.role
     }.collect {
@@ -128,15 +128,20 @@ class ModelWizardPanel extends ModalPanel {
           () ⇒ {
             if (fInput.files.length > 0) {
               val fileName = fInput.files.item(0).name
-              OMPost[Api].getCareBinInfos(manager.current.safePath() ++ fileName).call().foreach { b ⇒
+              OMPost[Api].launchingCommand(manager.current.safePath() ++ fileName).call().foreach { b ⇒
                 panels.treeNodePanel.refreshCurrentDirectory
                 launchingCommand() = b
                 hasStep2() = true
                 labelName() = Some(fileName)
                 launchingCommand().foreach { lc ⇒
-                  currentReactives() = lc.arguments.flatMap { pp ⇒
-                    pp match {
+                  currentReactives() = lc.arguments.flatMap {
+                    _ match {
                       case ve: VariableElement ⇒ Some(buildReactive(CommandInput(ve)))
+                      case _                   ⇒ None
+                    }
+                  } ++ lc.outputs.flatMap {
+                    _ match {
+                      case ve: VariableElement ⇒ Some(buildReactive(CommandOutput(ve)))
                       case _                   ⇒ None
                     }
                   }
@@ -179,7 +184,7 @@ class ModelWizardPanel extends ModalPanel {
         OMPost[Api].buildModelTask(
           labelName().getOrElse(""),
           commandArea.value,
-          RLanguage(),
+          NetLogoLanguage(),
           inputs(currentReactives()).map {
             _.content.prototype
           },
@@ -198,36 +203,36 @@ class ModelWizardPanel extends ModalPanel {
     }
   }
 
-  def buildReactive(role: Role[VariableElement], index: Int): Reactive = Reactive(role, index)
+  def buildReactive(role: VariableRole[VariableElement], index: Int): Reactive = Reactive(role, index)
 
-  def buildReactive(role: Role[VariableElement]): Reactive = currentReactives().filter { _.role == role }.headOption.getOrElse(buildReactive(role, currentReactives().size))
+  def buildReactive(role: VariableRole[VariableElement]): Reactive = currentReactives().filter { _.role == role }.headOption.getOrElse(buildReactive(role, currentReactives().size))
 
-  def addVariableElement(p: Role[VariableElement]) = {
+  def addVariableElement(p: VariableRole[VariableElement]) = {
     save
     currentReactives() = currentReactives() :+ buildReactive(p)
   }
 
-  def applyOnPrototypePair(p: Role[VariableElement], todo: (Role[VariableElement], Int) ⇒ Unit) =
+  def applyOnPrototypePair(p: VariableRole[VariableElement], todo: (VariableRole[VariableElement], Int) ⇒ Unit) =
     currentReactives().map {
       _.role
     }.zipWithIndex.filter { case (ptp, index) ⇒ ptp == p }.foreach {
       case (role, index) ⇒ todo(role, index)
     }
 
-  def updatePrototypePair(p: Role[VariableElement], variableElement: VariableElement) =
-    applyOnPrototypePair(p, (role: Role[VariableElement], index: Int) ⇒ currentReactives() = currentReactives().updated(index, buildReactive(role.clone(variableElement), index)))
+  def updatePrototypePair(p: VariableRole[VariableElement], variableElement: VariableElement) =
+    applyOnPrototypePair(p, (role: VariableRole[VariableElement], index: Int) ⇒ currentReactives() = currentReactives().updated(index, buildReactive(role.clone(variableElement), index)))
 
-  def switchPrototypePair(p: Role[VariableElement]) = {
+  def switchPrototypePair(p: VariableRole[VariableElement]) = {
     save
-    applyOnPrototypePair(p, (role: Role[VariableElement], index: Int) ⇒ currentReactives() = currentReactives().updated(index, buildReactive(role.switch, index)))
+    applyOnPrototypePair(p, (role: VariableRole[VariableElement], index: Int) ⇒ currentReactives() = currentReactives().updated(index, buildReactive(role.switch, index)))
   }
 
-  def addSwitchedPrototypePair(p: Role[VariableElement]) = {
+  def addSwitchedPrototypePair(p: VariableRole[VariableElement]) = {
     save
     currentReactives() = (currentReactives() :+ buildReactive(p.switch)) distinct
   }
 
-  case class Reactive(role: Role[VariableElement], index: Int) {
+  case class Reactive(role: VariableRole[VariableElement], index: Int) {
     val lineHovered: Var[Boolean] = Var(false)
 
     val switchGlyph = role match {
