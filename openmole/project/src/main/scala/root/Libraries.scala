@@ -180,4 +180,6 @@ object Libraries extends Defaults {
 
   lazy val scalaz = "org.openmole" %% "scalaz" % "7.1.3"
 
+  lazy val clapper = "org.openmole" %% "org-clapper" % "1.0.5"
+
 }

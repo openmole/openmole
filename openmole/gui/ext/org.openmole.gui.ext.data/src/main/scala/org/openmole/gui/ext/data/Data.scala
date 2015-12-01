@@ -349,6 +349,8 @@ case class CareTaskType() extends TaskType {
 
 case class ScalaTaskType() extends TaskType
 
+case class NetLogoTaskType() extends TaskType
+
 case class PythonLanguage() extends Language {
   val name: String = "python"
   val extension = "py"
@@ -361,6 +363,11 @@ case class RLanguage() extends Language {
   val taskType = CareTaskType()
 }
 
+case class NetLogoLanguage() extends Language {
+  val name: String = "NetLogo"
+  val extension = "nlogo"
+  val taskType = NetLogoTaskType()
+}
 
 sealed trait CommandElement {
   def expand: String
@@ -374,9 +381,12 @@ case class VariableElement(index: Int, prototype: ProtoTypePair, taskType: TaskT
   def clone(newName: String, newType: ProtoTYPE, newMapping: Option[String]): VariableElement = clone(prototype.copy(name = newName, `type` = newType, mapping = newMapping))
 }
 
-case class LaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq()) {
-  def fullCommand: String = (Seq(language.map{_.name}.getOrElse(""), codeName) ++ arguments.sortBy{_.index}.map{_.expand}).mkString(" ")
+case class LaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) {
+  def fullCommand: String = language match {
+    case Some(NetLogoLanguage())=> "setup\ngo"
+    case _=> (Seq(language.map{_.name}.getOrElse(""), codeName) ++ arguments.sortBy{_.index}.map{_.expand}).mkString(" ")
+  }
   def statics: Seq[StaticElement] = arguments.collect{case a: StaticElement=> a}
 }
 
-case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, mapping: Option[String] = None)
+case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, default: String = "", mapping: Option[String] = None)

@@ -309,6 +309,9 @@ object OSGi extends Defaults {
   lazy val txtmark = OsgiProject("com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
     libraryDependencies += "com.github.rjeschke" % "txtmark" % "0.13", version := "0.13" )
 
+ lazy val clapperVersion = "1.0.5"
+ lazy val clapper = OsgiProject("org.clapper", exports = Seq("!scala.*","!grizzled.*","!jline.*","!org.fusesource.*","!org.slf4j.*","*")) settings (
+   libraryDependencies += "org.clapper" % "classutil_2.11" % clapperVersion, version := clapperVersion)
 
   val monocleVersion = "1.0.1"
 

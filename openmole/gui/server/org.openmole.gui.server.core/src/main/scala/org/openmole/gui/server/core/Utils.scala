@@ -71,6 +71,8 @@ object Utils {
 
   implicit def safePathToFile(s: SafePath): File = getFile(webUIProjectFile, s.path)
 
+  implicit def seqOfSafePathToSeqOfFile(s: Seq[SafePath]): Seq[File] = s.map { safePathToFile }
+
   implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, isPlugin(f), f.length, readableByteCount(FileDecorator(f).size))
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
@@ -113,7 +115,14 @@ object Utils {
 
   def listFiles(path: SafePath): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
 
-  def getCareBinInfos(careArchive: SafePath): Option[LaunchingCommand] = {
+  def launchinCommand(model: SafePath): Option[LaunchingCommand] =
+    model.name.split('.').last match {
+      case "nlogo" ⇒ Some(CodeParsing.netlogoParsing(model))
+      case "jar"   ⇒ Some(CodeParsing.jarParsing(model))
+      case _       ⇒ getCareBinInfos(model)
+    }
+
+  private def getCareBinInfos(careArchive: SafePath): Option[LaunchingCommand] = {
     val fileChannel = new RandomAccessFile(careArchive, "r").getChannel
 
     try {

@@ -1,6 +1,11 @@
 package org.openmole.gui.server.core
 
 import org.openmole.gui.ext.data._
+import org.clapper.classutil.ClassFinder
+import scala.io.Source
+import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+import scala.reflect.runtime.{ universe ⇒ ru }
+import org.openmole.gui.server.core.Utils._
 
 /*
  * Copyright (C) 10/11/15 // mathieu.leclaire@openmole.org
@@ -20,8 +25,6 @@ import org.openmole.gui.ext.data._
  */
 
 object CodeParsing {
-
-  //implicit def stringsToCommandArguments(seqS: Seq[String]): Seq[CommandArgument] = defaultParseArgs(seqS, Seq())
 
   def fromCommand(command: Seq[String]) = {
     val (language, codeName, commandElements: Seq[CommandElement]) = command.headOption match {
@@ -56,7 +59,9 @@ object CodeParsing {
     if (args.isEmpty) indexed
     else {
       val head = args.head
-      val nextIndex = indexed.lastOption.map { _._3 }.getOrElse(-1) + 1
+      val nextIndex = indexed.lastOption.map {
+        _._3
+      }.getOrElse(-1) + 1
       if (head.startsWith("-")) {
         indexArgs(args.drop(2), indexed :+ (
           Some(head), {
@@ -87,7 +92,7 @@ object CodeParsing {
         case Some(a: String) ⇒ if (isFile) ProtoTYPE.FILE else ProtoTYPE.DOUBLE
         case _               ⇒ ProtoTYPE.DOUBLE
       },
-      if (isFile) value else None
+      mapping = if (isFile) value else None
     ),
       taskType
     )
@@ -108,9 +113,82 @@ object CodeParsing {
     } ++ others.map { case (k, _, i) ⇒ k.map { kk ⇒ StaticElement(i, kk) } }.flatten ++ f.map { x ⇒ StaticElement(x._3, "-f " + x._2.getOrElse("")) }
   }
 
-  private def netlogoParsing(safePath: SafePath): LaunchingCommand = {
-    val netlogoCoreObject = ServerFactories.coreObject("NetLogo")
+  def netlogoParsing(safePath: SafePath): LaunchingCommand = {
+
+    val lines = Source.fromFile(safePath).getLines.toArray
+
+    def parse(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {
+      if (lines.isEmpty) (args, outputs)
+      else {
+        val (line, index) = lines.head
+        val tail = lines.tail
+        if (line.startsWith("SLIDER")) parse(tail, args :+ parseSlider(index), outputs)
+        else if (line.startsWith("SWITCH")) parse(tail, args :+ parseSwitch(index), outputs)
+        else if (line.startsWith("INPUTBOX")) parse(tail, args :+ parseInputBox(index), outputs)
+        else if (line.startsWith("MONITOR")) parse(tail, args, outputs ++ Seq(parseMonitor(index)).flatten)
+        else parse(tail, args, outputs)
+      }
+    }
+
+    def parseSlider(start: Int): ProtoTypePair =
+      ProtoTypePair(lines(start + 5), ProtoTYPE.DOUBLE, lines(start + 9))
+
+    def parseSwitch(start: Int): ProtoTypePair =
+      ProtoTypePair(lines(start + 5).filterNot(_ == '?'), ProtoTYPE.BOOLEAN, lines(start + 7))
+
+    def parseInputBox(start: Int): ProtoTypePair =
+      ProtoTypePair(lines(start + 5), ProtoTYPE.DOUBLE, lines(start + 6))
+
+    def parseMonitor(start: Int): Option[ProtoTypePair] = {
+      val name = lines(start + 6).split(' ')
+      if (name.size == 1) Some(ProtoTypePair(name.head, ProtoTYPE.DOUBLE))
+      else None
+    }
+
+    val (args, outputs) = parse(lines.toSeq.zipWithIndex, Seq(), Seq())
+
+    LaunchingCommand(
+      Some(NetLogoLanguage()), "",
+      args.zipWithIndex.map { case (a, i) ⇒ VariableElement(i, a, NetLogoTaskType()) },
+      outputs.zipWithIndex.map { case (o, i) ⇒ VariableElement(i, o, NetLogoTaskType()) }
+    )
+  }
+
+  def jarParsing(safePath: SafePath): LaunchingCommand = {
+    println("JAR PARSING")
+    val classLoader = new URLClassLoader(Seq(safePath.toURI.toURL), this.getClass.getClassLoader)
+    val mirror = ru.runtimeMirror(classLoader)
+    // val urls = classLoader.getURLs
+
+    //println("URLs " + urls)
+
+    val classes = ClassFinder(Seq(safePath)).getClasses.toSeq.filterNot {
+      c ⇒
+        Seq("scala", "java").exists {
+          ex ⇒ c.name.startsWith(ex)
+        }
+    }
+
+    println("Methods " + classes.size + " // " + classes.map { c ⇒
+      c.name + " // " + c.methods.map { m ⇒
+        println("METH " + m.toString())
+        println("Modifiers: " + m.modifiers.map {
+          _.toString
+        })
+      }
+    })
+
+    classes.map { c ⇒
+      println("NAME " + c.name)
+      val oo = mirror.staticClass(c.name).typeSignature.baseClasses.map {
+        bc ⇒ bc.fullName
+
+      }
+      println("OO " + oo)
+    }
+
     LaunchingCommand(None, "")
+
   }
 
 }
