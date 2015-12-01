@@ -41,7 +41,7 @@ import Scalaz._
 package object evolution {
   type Objective = Prototype[Double]
   type Objectives = Seq[Objective]
-  type FitnessAggregation = Seq[TextClosure[Seq[Double], Double]]
+  type FitnessAggregation = TextClosure[Seq[Double], Double]
 
   implicit def intToCounterTerminationConverter(n: Long) = AfterGeneration(n)
   implicit def durationToDurationTerminationConverter(d: Duration) = AfterDuration(d)

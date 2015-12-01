@@ -40,8 +40,9 @@ object NSGA2 {
     mu: Int,
     genome: Genome,
     objectives: Objectives,
-    replication: Replication) = {
-    def fit = Fitness(StochasticGAAlgorithm.aggregate(replication.aggregation))
+    replication: Replication[Seq[FitnessAggregation]]) = {
+
+    def fit = Fitness((i: Individual[Any, History[Seq[Double]]]) ⇒ StochasticGAAlgorithm.aggregateSeq(replication.aggregation, i.phenotype.history))
 
     WorkflowIntegration.StochasticGA(
       ga.noisyNSGA2[Seq[Double]](mu, fit, replication.max, cloneRate = replication.reevaluate),
