@@ -153,6 +153,7 @@ trait EvolutionWorkflow {
 
   def genomeToVariables(genome: G, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]]
   def populationToVariables(population: Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]]
+  def prepareIndividualForIsland(i: Ind) = i
 
   def randomGenome: State[Random, G]
 
@@ -267,4 +268,6 @@ trait StochasticGAAlgorithm extends GAAlgorithmIntegration {
     genomesOfPopulationToVariables(population, context) ++
       objectivesOfPopulationToVariables(population) ++
       Seq(Variable(replications.toArray, population.map(_.phenotype.history.size).toArray))
+
+  override def prepareIndividualForIsland(i: Ind) = i.copy(phenotype = i.phenotype.copy(age = 0))
 }

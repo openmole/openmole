@@ -17,9 +17,9 @@
     // Define the NetlogoTask
 
 
-    val cmds = Seq("random-seed ${seed}", "run-to-grid")
+    val cmds = Seq("run-to-grid")
     val ants =
-      NetLogo5Task(workDirectory / "Ants.nlogo", cmds) set (
+      NetLogo5Task(workDirectory / "Ants.nlogo", cmds, seed = seed) set (
         // Map the OpenMOLE variables to NetLogo variables
         netLogoInputs += (gPopulation, "gpopulation"),
         netLogoInputs += (gDiffusionRate, "gdiffusion-rate"),
@@ -27,8 +27,6 @@
         netLogoOutputs += ("final-ticks-food1", food1),
         netLogoOutputs += ("final-ticks-food2", food2),
         netLogoOutputs += ("final-ticks-food3", food3),
-        // The seed is used to control the initialisation of the random number generator of NetLogo
-        inputs += seed,
         // Define default values for inputs of the model
         seed := 42,
         gPopulation := 125.0,
@@ -177,7 +175,6 @@
     IslandEvolution(
       evolution,
       parallelism = 1000,
-      sample = 50,
       termination = 100000
     )
 

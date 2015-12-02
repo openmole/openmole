@@ -83,12 +83,10 @@
 
   // Generate a workflow that orchestrates 100 concurrent islands.
   // The workflow stops when 10,000 islands have completed.
-  // Each island is initialised with a random sampling of 50 individuals among the global population.
-   val island =
+  val island =
     IslandEvolution(
       evolution,
       parallelism = 100,
-      sample = 50,
       termination = 10000
     )
 
@@ -105,22 +103,22 @@
   val seed = Val[Long]
 
   val evolution =
-      SteadyStateEvolution(
-        // Definition of the optimisation algorithm
-        // mu is the size of the population
-        // genome is the inputs prototype and their variation ranges
-        // objectives are the objectives to minimise
-        algorithm =
-          NSGA2(
-            mu = 100,
-            genome = Genome(x in (0.0, 1.0), y in (0.0, 1.0)),
-            objectives = Seq(o1, o2),
-            // OpenMOLE provide a seed for your stochastic model to use (it is optional)
-            // 20% of the evaluations are used for replicating existing solutions
-            // 100 replication are stored at max for each individual
-            replication = Replication(seed = seed, reevaluate = 0.2, max = 100)
-          ),
-        evaluation = model,
-        termination = 100
-      )""", header = model)
+    SteadyStateEvolution(
+      // Definition of the optimisation algorithm
+      // mu is the size of the population
+      // genome is the inputs prototype and their variation ranges
+      // objectives are the objectives to minimise
+      algorithm =
+        NSGA2(
+          mu = 100,
+          genome = Genome(x in (0.0, 1.0), y in (0.0, 1.0)),
+          objectives = Seq(o1, o2),
+          // OpenMOLE provide a seed for your stochastic model to use (it is optional)
+          // 20% of the evaluations are used for replicating existing solutions
+          // 100 replication are stored at max for each individual
+          replication = Replication(seed = seed, reevaluate = 0.2, max = 100)
+        ),
+      evaluation = model,
+      termination = 100
+    )""", header = model)
 
