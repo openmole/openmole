@@ -16,6 +16,7 @@
  */
 package org.openmole.plugin.method.evolution
 
+import fr.iscpif.mgo.Individual
 import fr.iscpif.mgo.algorithm.ga
 import fr.iscpif.mgo.fitness._
 import fr.iscpif.mgo.niche._
@@ -37,8 +38,8 @@ object PSE {
     genome: Genome,
     objectives: Objectives,
     gridSize: Seq[Double],
-    replication: Replication) = {
-    def niche = grid(gridSize, StochasticGAAlgorithm.aggregate(replication.aggregation))
+    replication: Replication[Seq[FitnessAggregation]]) = {
+    def niche = grid(gridSize, (i: Individual[_, History[Seq[Double]]]) ⇒ StochasticGAAlgorithm.aggregateSeq(replication.aggregation, i.phenotype.history))
 
     WorkflowIntegration.StochasticGA(
       ga.noisyPSE[History[Seq[Double]], Seq[Int]](niche, replication.max, replication.reevaluate),

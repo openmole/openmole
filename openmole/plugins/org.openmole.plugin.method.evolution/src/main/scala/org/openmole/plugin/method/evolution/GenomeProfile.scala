@@ -32,48 +32,72 @@ object GenomeProfile {
     nX: Int,
     genome: Genome,
     objective: Objective) =
-    WorkflowIntegration.DeterministicGA(
-      ga.profile[Seq[Double]](
-        fitness = Fitness(_.phenotype.head),
+    DeterministicGenomeProfile(
+      ga.profile[Double](
+        fitness = Fitness(_.phenotype),
         niche = genomeProfile[ga.GAGenome](x, nX)
       ),
       genome,
-      Seq(objective)
+      objective
     )
+
+  object DeterministicGenomeProfile {
+    implicit val workflowIntegration = new WorkflowIntegration[DeterministicGenomeProfile] {
+      override def apply(t: DeterministicGenomeProfile): EvolutionWorkflow = new DeterministicGAAlgorithmIntegration {
+        override type S = Unit
+        override type P = Double
+        override def objectives: Objectives = Seq(t.objective)
+        override def genome: Genome = t.genome
+        override def valuesToPhenotype(s: Seq[Double]): P = s.head
+        override def phenotypeToValues(p: P): Seq[Double] = Seq(p)
+        override def phenotypeType: PrototypeType[P] = PrototypeType[P]
+        override def algorithm: Algorithm[G, P, S] = t.algo
+        override def stateType: PrototypeType[S] = PrototypeType[S]
+      }
+    }
+  }
+
+  case class DeterministicGenomeProfile(algo: Algorithm[ga.GAGenome, Double, Unit], genome: Genome, objective: Objective)
 
   def apply(
     x: Int,
     nX: Int,
     genome: Genome,
     objective: Objective,
-    replication: Replication,
+    replication: Replication[FitnessAggregation],
     paretoSize: Int = 20) = {
     val niche = genomeProfile[ga.GAGenome](x, nX)
 
-    StochasticProfile(
-      ga.noisyProfile[Seq[Double]](
-        fitness = Fitness(i ⇒ StochasticGAAlgorithm.aggregate(replication.aggregation)(i).head),
+    StochasticGenomeProfile(
+      ga.noisyProfile[Double](
+        fitness = Fitness(i ⇒ StochasticGAAlgorithm.aggregate(replication.aggregation, i.phenotype.history)),
         niche = niche,
         nicheSize = paretoSize,
         history = replication.max,
         cloneRate = replication.reevaluate
       ),
       genome,
-      Seq(objective),
+      objective,
       replication,
       niche
     )
   }
-  object StochasticProfile {
-    implicit def OMStochasticProfile = new WorkflowIntegration[StochasticProfile] {
-      override def apply(t: StochasticProfile): EvolutionWorkflow =
+
+  object StochasticGenomeProfile {
+    implicit def OMStochasticProfile = new WorkflowIntegration[StochasticGenomeProfile] {
+      override def apply(t: StochasticGenomeProfile): EvolutionWorkflow =
         new StochasticGAAlgorithm {
-          override def replication = t.replication
+          override def seed = t.replication.seed
           override def stateType = PrototypeType[Unit]
           override def genome: Genome = t.genome
-          override def objectives: Objectives = t.objectives
+          override def objectives: Objectives = Seq(t.objective)
           override def algorithm: Algorithm[G, P, S] = t.algo
           override type S = Unit
+          override type PC = Double
+
+          override def phenotypeType = PrototypeType[P]
+          override def valuesToPhenotype(s: Seq[Double]): P = History(s.head)
+          override def phenotypeToValues(p: P): Seq[Double] = Seq(StochasticGAAlgorithm.aggregate(t.replication.aggregation, p.history))
 
           override def populationToVariables(population: Population[Individual[G, P]], context: Context)(implicit rng: RandomProvider) = {
             val profile = for { (_, is) ← population.groupBy(t.niche.apply).toVector } yield is.maxBy(_.phenotype.age: Int)
@@ -83,6 +107,6 @@ object GenomeProfile {
     }
   }
 
-  case class StochasticProfile(algo: Algorithm[ga.GAGenome, History[Seq[Double]], Unit], genome: Genome, objectives: Objectives, replication: Replication, niche: Niche[GAGenome, History[Seq[Double]], Int])
+  case class StochasticGenomeProfile(algo: Algorithm[ga.GAGenome, History[Double], Unit], genome: Genome, objective: Objective, replication: Replication[FitnessAggregation], niche: Niche[GAGenome, History[Double], Int])
 
 }
