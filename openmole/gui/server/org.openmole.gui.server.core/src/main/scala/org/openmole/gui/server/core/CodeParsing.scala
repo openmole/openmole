@@ -125,7 +125,8 @@ object CodeParsing {
         if (line.startsWith("SLIDER")) parse(tail, args :+ parseSlider(index), outputs)
         else if (line.startsWith("SWITCH")) parse(tail, args :+ parseSwitch(index), outputs)
         else if (line.startsWith("INPUTBOX")) parse(tail, args :+ parseInputBox(index), outputs)
-        else if (line.startsWith("MONITOR")) parse(tail, args, outputs ++ Seq(parseMonitor(index)).flatten)
+        else if (line.startsWith("MONITOR")) parse(tail, args, outputs ++ parseMonitor(index))
+        else if (line.startsWith("PLOT")) parse(tail, args, outputs ++ parsePlot(index))
         else parse(tail, args, outputs)
       }
     }
@@ -139,18 +140,26 @@ object CodeParsing {
     def parseInputBox(start: Int): ProtoTypePair =
       ProtoTypePair(lines(start + 5), ProtoTYPE.DOUBLE, lines(start + 6))
 
-    def parseMonitor(start: Int): Option[ProtoTypePair] = {
+    def parseMonitor(start: Int): Seq[ProtoTypePair] = {
       val name = lines(start + 6).split(' ')
-      if (name.size == 1) Some(ProtoTypePair(name.head, ProtoTYPE.DOUBLE))
-      else None
+      if (name.size == 1) Seq(ProtoTypePair(name.head, ProtoTYPE.DOUBLE))
+      else Seq()
+    }
+
+    def parsePlot(start: Int): Seq[ProtoTypePair] = (lines(start + 6).split(',') ++ lines(start + 7).split(' ')).map {
+      _.replaceAll(" ", "")
+    }.filterNot { v ⇒
+      Seq("ticks", "time").contains(v)
+    }.map {
+      n ⇒ ProtoTypePair(n, ProtoTYPE.DOUBLE)
     }
 
     val (args, outputs) = parse(lines.toSeq.zipWithIndex, Seq(), Seq())
 
     LaunchingCommand(
       Some(NetLogoLanguage()), "",
-      args.zipWithIndex.map { case (a, i) ⇒ VariableElement(i, a, NetLogoTaskType()) },
-      outputs.zipWithIndex.map { case (o, i) ⇒ VariableElement(i, o, NetLogoTaskType()) }
+      args.distinct.zipWithIndex.map { case (a, i) ⇒ VariableElement(i, a, NetLogoTaskType()) },
+      outputs.distinct.zipWithIndex.map { case (o, i) ⇒ VariableElement(i, o, NetLogoTaskType()) }
     )
   }
 

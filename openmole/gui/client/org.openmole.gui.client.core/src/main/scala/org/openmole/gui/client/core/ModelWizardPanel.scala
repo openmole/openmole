@@ -114,7 +114,9 @@ class ModelWizardPanel extends ModalPanel {
       case x: CommandOutput[VariableElement] ⇒ x
     }
 
-  def getReactive(index: Int): Option[Reactive] = currentReactives().filter { _.index == index }.headOption
+  def getReactive(index: Int): Option[Reactive] = currentReactives().filter {
+    _.index == index
+  }.headOption
 
   def upButton = bs.div("centerWidth250")(
     tags.label(`class` := "inputFileStyle spacer5 certificate")(
@@ -134,17 +136,14 @@ class ModelWizardPanel extends ModalPanel {
                 hasStep2() = true
                 labelName() = Some(fileName)
                 launchingCommand().foreach { lc ⇒
-                  currentReactives() = lc.arguments.flatMap {
-                    _ match {
-                      case ve: VariableElement ⇒ Some(buildReactive(CommandInput(ve)))
-                      case _                   ⇒ None
-                    }
-                  } ++ lc.outputs.flatMap {
-                    _ match {
-                      case ve: VariableElement ⇒ Some(buildReactive(CommandOutput(ve)))
-                      case _                   ⇒ None
-                    }
+                  val nbArgs = lc.arguments.size
+                  val iReactives = lc.arguments.zipWithIndex.collect {
+                    case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandInput(ve), id)
                   }
+                  val oReactives = lc.outputs.zipWithIndex collect {
+                    case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandOutput(ve), id + nbArgs)
+                  }
+                  currentReactives() = iReactives ++ oReactives
                 }
               }
             }
@@ -176,26 +175,28 @@ class ModelWizardPanel extends ModalPanel {
       " By default he systems detects automatically your Variable changes and update the launching command. However, this option can be desactivated."
     )
   )
-  val buildModelTaskButton = bs.button(
-    "Build",
-    btn_primary)(onclick := { () ⇒
-      save
-      launchingCommand().foreach { lc ⇒
-        OMPost[Api].buildModelTask(
-          labelName().getOrElse(""),
-          commandArea.value,
-          NetLogoLanguage(),
-          inputs(currentReactives()).map {
-            _.content.prototype
-          },
-          outputs(currentReactives()).map {
-            _.content.prototype
-          },
-          manager.current.safePath()).call().foreach { b ⇒
-            close
-          }
-      }
-    })
+  val buildModelTaskButton = {
+    bs.button(
+      "Build",
+      btn_primary)(onclick := { () ⇒
+        save
+        launchingCommand().foreach { lc ⇒
+          OMPost[Api].buildModelTask(
+            labelName().getOrElse(""),
+            commandArea.value,
+            NetLogoLanguage(),
+            inputs(currentReactives()).map {
+              _.content.prototype
+            },
+            outputs(currentReactives()).map {
+              _.content.prototype
+            },
+            manager.current.safePath()).call().foreach { b ⇒
+              close
+            }
+        }
+      })
+  }
 
   def save = {
     currentReactives().map {
@@ -205,11 +206,14 @@ class ModelWizardPanel extends ModalPanel {
 
   def buildReactive(role: VariableRole[VariableElement], index: Int): Reactive = Reactive(role, index)
 
-  def buildReactive(role: VariableRole[VariableElement]): Reactive = currentReactives().filter { _.role == role }.headOption.getOrElse(buildReactive(role, currentReactives().size))
+  def buildReactive(role: VariableRole[VariableElement]): Reactive =
+    currentReactives().filter {
+      _.role == role
+    }.headOption.getOrElse(buildReactive(role, role.content.index))
 
   def addVariableElement(p: VariableRole[VariableElement]) = {
     save
-    currentReactives() = currentReactives() :+ buildReactive(p)
+    currentReactives() = currentReactives() :+ buildReactive(p, -1)
   }
 
   def applyOnPrototypePair(p: VariableRole[VariableElement], todo: (VariableRole[VariableElement], Int) ⇒ Unit) =
@@ -229,7 +233,7 @@ class ModelWizardPanel extends ModalPanel {
 
   def addSwitchedPrototypePair(p: VariableRole[VariableElement]) = {
     save
-    currentReactives() = (currentReactives() :+ buildReactive(p.switch)) distinct
+    currentReactives() = (currentReactives() :+ buildReactive(p.switch, -1)) distinct
   }
 
   case class Reactive(role: VariableRole[VariableElement], index: Int) {
