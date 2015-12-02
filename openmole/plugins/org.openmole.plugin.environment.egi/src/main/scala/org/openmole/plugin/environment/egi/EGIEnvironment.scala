@@ -68,7 +68,6 @@ object EGIEnvironment extends Logger {
   val EagerSubmissionSamplingWindowFactor = new ConfigurationLocation("EGIEnvironment", "EagerSubmissionSamplingWindowFactor")
 
   val ConnectionsBySRMSE = new ConfigurationLocation("EGIEnvironment", "ConnectionsSRMSE")
-  val ConnectionsByWebDAVSE = new ConfigurationLocation("EGIEnvironment", "ConnectionsByWebDAVSE")
   val ConnectionsByWMS = new ConfigurationLocation("EGIEnvironment", "ConnectionsByWMS")
 
   val ProxyRenewalRatio = new ConfigurationLocation("EGIEnvironment", "ProxyRenewalRatio")
@@ -116,7 +115,6 @@ object EGIEnvironment extends Logger {
 
   Workspace += (ConnectionsBySRMSE, "10")
   Workspace += (ConnectionsByWMS, "10")
-  Workspace += (ConnectionsByWebDAVSE, "20")
 
   Workspace += (ProxyRenewalRatio, "0.2")
   Workspace += (MinProxyRenewal, "PT5M")
