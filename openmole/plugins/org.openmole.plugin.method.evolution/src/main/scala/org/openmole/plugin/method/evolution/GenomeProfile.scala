@@ -83,7 +83,7 @@ object GenomeProfile {
     )
   }
 
-  object StochasticProfile {
+  object StochasticGenomeProfile {
     implicit def OMStochasticProfile = new WorkflowIntegration[StochasticGenomeProfile] {
       override def apply(t: StochasticGenomeProfile): EvolutionWorkflow =
         new StochasticGAAlgorithm {
