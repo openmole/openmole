@@ -12,6 +12,7 @@
     @p @b{Tasks:}
     @ul
       @li{ScalaTask: the "workDir" variable as been renamed "workDirectory"}
+      @li{NetLogoTask: the syntax NetLogo5Task(workspace, "script.oms") is no longer valid, you should use NetLogo5Task.workspace(workspace, "script.oms")}
     @p @b{Environments:}
     @ul
       @li{EGI: No more ProxyFile authentication, authentication is made through P12 or PEM}
