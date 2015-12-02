@@ -82,7 +82,7 @@ object CodeParsing {
       case Some(k: String) ⇒ k
       case _ ⇒ if (isFile) {
         value match {
-          case Some(v: String) ⇒ v.split('.').dropRight(1).mkString(".")
+          case Some(v: String) ⇒ v.split('/').last.split('.').dropRight(1).mkString(".")
           case _               ⇒ "i" + index
         }
       }
@@ -131,27 +131,37 @@ object CodeParsing {
       }
     }
 
-    def parseSlider(start: Int): ProtoTypePair =
-      ProtoTypePair(lines(start + 5), ProtoTYPE.DOUBLE, lines(start + 9))
+    implicit class CleanName(s: String) {
+      def clean = s.split('-').reduce(_ + _.capitalize).filterNot(Seq('?').contains)
+    }
 
-    def parseSwitch(start: Int): ProtoTypePair =
-      ProtoTypePair(lines(start + 5).filterNot(_ == '?'), ProtoTYPE.BOOLEAN, lines(start + 7))
+    def parseSlider(start: Int): ProtoTypePair = {
+      val name = lines(start + 5)
+      ProtoTypePair(name.clean, ProtoTYPE.DOUBLE, lines(start + 9), Some(name))
+    }
 
-    def parseInputBox(start: Int): ProtoTypePair =
-      ProtoTypePair(lines(start + 5), ProtoTYPE.DOUBLE, lines(start + 6))
+    def parseSwitch(start: Int): ProtoTypePair = {
+      val name = lines(start + 5)
+      ProtoTypePair(name.clean, ProtoTYPE.BOOLEAN, lines(start + 7), Some(name))
+    }
+
+    def parseInputBox(start: Int): ProtoTypePair = {
+      val name = lines(start + 5)
+      ProtoTypePair(name.clean, ProtoTYPE.DOUBLE, lines(start + 6), Some(name))
+    }
 
     def parseMonitor(start: Int): Seq[ProtoTypePair] = {
-      val name = lines(start + 6).split(' ')
-      if (name.size == 1) Seq(ProtoTypePair(name.head, ProtoTYPE.DOUBLE))
+      val name = lines(start + 6).clean.split(' ')
+      if (name.size == 1) Seq(ProtoTypePair(name.head.clean, ProtoTYPE.DOUBLE, mapping = Some(name.head)))
       else Seq()
     }
 
-    def parsePlot(start: Int): Seq[ProtoTypePair] = (lines(start + 6).split(',') ++ lines(start + 7).split(' ')).map {
+    def parsePlot(start: Int): Seq[ProtoTypePair] = (lines(start + 6).split(',') ++ lines(start + 7).split(',')).map {
       _.replaceAll(" ", "")
     }.filterNot { v ⇒
       Seq("ticks", "time").contains(v)
     }.map {
-      n ⇒ ProtoTypePair(n, ProtoTYPE.DOUBLE)
+      n ⇒ ProtoTypePair(n.clean, ProtoTYPE.DOUBLE, mapping = Some(n))
     }
 
     val (args, outputs) = parse(lines.toSeq.zipWithIndex, Seq(), Seq())
