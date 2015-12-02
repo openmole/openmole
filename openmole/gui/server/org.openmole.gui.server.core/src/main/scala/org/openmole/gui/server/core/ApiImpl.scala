@@ -331,43 +331,55 @@ object ApiImpl extends Api {
   def launchingCommand(careArchive: SafePath): Option[LaunchingCommand] = Utils.launchinCommand(careArchive)
 
   def buildModelTask(executableName: String,
+                     scriptName: String,
                      command: String,
                      language: Language,
                      inputs: Seq[ProtoTypePair],
                      outputs: Seq[ProtoTypePair],
                      path: SafePath) = {
-    val modelTaskFile = new File(path, command.split(" ").head + ".oms")
+    val modelTaskFile = new File(path, scriptName + ".oms")
 
     val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))
+
+    def ioString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) Seq(s"  $keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")) + ",\n" else ""
+    def imapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { i ⇒ s"""  $keyString += (${i.name}, "${i.mapping.get}")""" }.mkString(",\n") + ",\n" else ""
+    def omapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { o ⇒ s"""  $keyString += ("${o.mapping.get}", ${o.name})""" }.mkString(",\n") + ",\n" else ""
+
     try {
       for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
         os.write("val " + p._1 + " = Val[" + p._2 + "]\n")
       }
 
-      val (imappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
-      val (omappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
+      val (rawimappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
+      val (rawomappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
+      val (ifilemappings, imappings) = rawimappings.partition(_.`type` == ProtoTYPE.FILE)
+      val (ofilemappings, omappings) = rawomappings.partition(_.`type` == ProtoTYPE.FILE)
 
-      val inString = if (ins.nonEmpty) Seq("  inputs += (", ")\n").mkString(ins.map { i ⇒ s"${i.name}" }.mkString(", ")) else ""
-      val imString = if (imappings.nonEmpty) Seq("  fileInputs += (", ")\n").mkString(imappings.map { i ⇒ s"""(${i.name}, "${i.mapping.get}")""" }.mkString(", ")) else ""
-      val ouString = if (ous.nonEmpty) Seq("  outputs += (", ")\n").mkString(ous.map { o ⇒ s"${o.name}" }.mkString(", ")) else ""
-      val omString = if (omappings.nonEmpty) Seq("  fileOutputs += (", ")\n").mkString(omappings.map { o ⇒ s""""${o.mapping.get}", (${o.name})""" }.mkString(", ")) else ""
+      val inString = ioString(ins, "inputs")
+      val imFileString = imapString(ifilemappings, "fileInputs")
+      val ouString = ioString(ous, "outputs")
+      val omFileString = omapString(ofilemappings, "fileOutputs")
       val defaults = inputs.filterNot {
         _.default == ""
-      }.map { p ⇒ "  " + p.name + " := " + p.default }.mkString(",\n") + "  )"
+      }.map { p ⇒ "  " + p.name + " := " + p.default }.mkString(",\n")
 
       language.taskType match {
         case ctt: CareTaskType ⇒
           os.write(
             s"""\nval task = CareTask(workDirectory / "$executableName", "$command") set(\n""" +
-              imString + inString + omString + ouString + defaults
+              inString + ouString + imFileString + omFileString + defaults
           )
         case ntt: NetLogoTaskType ⇒
+
+          val imString = imapString(imappings, "netLogoInputs")
+          val omString = omapString(omappings, "netLogoOutputs")
           os.write(
-            s"""\nval task = NetLogoTask5(workDirectory / "$executableName", "$command") set(\n""" +
-              imString + inString + omString + ouString + defaults
+            s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}")) set(\n""" +
+              inString + ouString + imString + omString + imFileString + omFileString + defaults
           )
         case _ ⇒ ""
       }
+      os.write("\n  )\n\ntask")
     }
 
     finally {

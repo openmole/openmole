@@ -73,5 +73,5 @@ trait Api {
 
   //MODEL WIZARDS
   def launchingCommand(careArchive: SafePath): Option[LaunchingCommand]
-  def buildModelTask(executableName: String, command: String, language: Language, inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], path: SafePath): Unit
+  def buildModelTask(executableName: String, scriptName: String, command: String, language: Language, inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], path: SafePath): Unit
 }
