@@ -61,7 +61,7 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
     }
   }
 
-  def selectAStorage(usedFileHashes: Iterable[(File, Hash)]): (StorageService, AccessToken) = {
+  def trySelectAStorage(usedFileHashes: Iterable[(File, Hash)]) = {
     import EGIEnvironment._
 
     val sss = storages
@@ -75,9 +75,9 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
     lazy val maxTime = nonEmpty.map(_.usageControl.time).max
     lazy val minTime = nonEmpty.map(_.usageControl.time).min
 
-    lazy val waitTimes = nonEmpty.map(_.usageControl.waitTime)
-    lazy val waitMaxTime = waitTimes.max
-    lazy val waitMinTime = waitTimes.min
+    lazy val availablities = nonEmpty.map(_.usageControl.availability)
+    lazy val maxAvailability = availablities.max
+    lazy val minAvailability = availablities.min
 
     def rate(ss: EGIStorageService) = {
       val sizesOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(ss.id, Set.empty).contains(h.toString) }.map { case (f, _) ⇒ sizes(f) }
@@ -88,30 +88,18 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
       val time = ss.usageControl.time
       val timeFactor = if (minTime == maxTime) 1.0 else 1.0 - time.normalize(minTime, maxTime)
 
-      val waitTime = ss.usageControl.waitTime
-      val waitTimeFactor = if (waitMinTime == waitMaxTime) 1.0 else 1.0 - waitTime.normalize(minTime, maxTime)
+      val availability = ss.usageControl.availability
+      val availabilityFactor = if (minAvailability == maxAvailability) 1.0 else 1.0 - availability.normalize(minTime, maxTime)
 
       math.pow(
         Workspace.preferenceAsDouble(StorageSizeFactor) * sizeFactor +
           Workspace.preferenceAsDouble(StorageTimeFactor) * timeFactor +
-          Workspace.preferenceAsDouble(StorageWaitTimeFactor) * waitTimeFactor +
+          Workspace.preferenceAsDouble(StorageAvailabilityFactor) * availabilityFactor +
           Workspace.preferenceAsDouble(StorageSuccessRateFactor) * ss.usageControl.successRate,
         Workspace.preferenceAsDouble(StorageFitnessPower))
     }
 
     select(sss.toList, rate)
-  }
-
-  def clean = ReplicaCatalog.withSession { implicit c ⇒
-    val cleaningThreadPool = fixedThreadPool(Workspace.preferenceAsInt(EGIEnvironment.EnvironmentCleaningThreads))
-    storages.foreach {
-      s ⇒
-        background {
-          s.withToken { implicit t ⇒ s.clean }
-        }(cleaningThreadPool)
-    }
-    cleaningThreadPool.shutdown()
-    cleaningThreadPool.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
   }
 
 }

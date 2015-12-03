@@ -69,11 +69,11 @@ object DIRACEnvironment {
 
 class DiracBatchExecutionJob(val job: Job, val environment: DIRACEnvironment) extends BatchExecutionJob {
 
-  def selectStorage() = environment.selectAStorage(usedFileHashes)
+  def trySelectStorage() = environment.trySelectAStorage(usedFileHashes)
 
-  def selectJobService() = {
+  def trySelectJobService() = {
     val js = environment.jobService
-    (js, js.waitAToken)
+    js.tryGetToken.map(js -> _)
   }
 
 }

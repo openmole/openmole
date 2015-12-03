@@ -86,12 +86,12 @@ object EGIEnvironment extends Logger {
 
   val StorageSizeFactor = ConfigurationLocation("EGIEnvironment", "StorageSizeFactor")
   val StorageTimeFactor = ConfigurationLocation("EGIEnvironment", "StorageTimeFactor")
-  val StorageWaitTimeFactor = ConfigurationLocation("EGIEnvironment", "StorageWaitTimeFactor")
+  val StorageAvailabilityFactor = ConfigurationLocation("EGIEnvironment", "StorageAvailabilityFactor")
   val StorageSuccessRateFactor = ConfigurationLocation("EGIEnvironment", "StorageSuccessRateFactor")
 
   val JobServiceJobFactor = ConfigurationLocation("EGIEnvironment", "JobServiceSizeFactor")
   val JobServiceTimeFactor = ConfigurationLocation("EGIEnvironment", "JobServiceTimeFactor")
-  val JobServiceWaitTimeFactor = ConfigurationLocation("EGIEnvironment", "JobServiceWaitTimeFactor")
+  val JobServiceAvailabilityFactor = ConfigurationLocation("EGIEnvironment", "JobServiceAvailabilityFactor")
   val JobServiceSuccessRateFactor = ConfigurationLocation("EGIEnvironment", "JobServiceSuccessRateFactor")
 
   val RunningHistoryDuration = ConfigurationLocation("EGIEnvironment", "RunningHistoryDuration")
@@ -144,12 +144,12 @@ object EGIEnvironment extends Logger {
 
   Workspace += (StorageSizeFactor, "5")
   Workspace += (StorageTimeFactor, "1")
-  Workspace += (StorageWaitTimeFactor, "10")
+  Workspace += (StorageAvailabilityFactor, "10")
   Workspace += (StorageSuccessRateFactor, "10")
 
   Workspace += (JobServiceJobFactor, "1")
   Workspace += (JobServiceTimeFactor, "10")
-  Workspace += (JobServiceWaitTimeFactor, "10")
+  Workspace += (JobServiceAvailabilityFactor, "10")
   Workspace += (JobServiceSuccessRateFactor, "1")
 
   Workspace += (RunningHistoryDuration, "PT12H")
@@ -211,10 +211,10 @@ object EGIEnvironment extends Logger {
   }
 
 
-  def select[BS <: BatchService { def usageControl: AvailabilityQuality}](bss: List[BS], rate: BS => Double): (BS, AccessToken) =
+  def select[BS <: BatchService { def usageControl: AvailabilityQuality}](bss: List[BS], rate: BS => Double): Option[(BS, AccessToken)] =
     bss match {
       case Nil       ⇒ throw new InternalProcessingError("Cannot accept empty list.")
-      case bs :: Nil ⇒ (bs, bs.waitAToken)
+      case bs :: Nil ⇒ bs.tryGetToken.map(bs -> _)
       case bss ⇒
         val (empty, nonEmpty) = bss.partition(_.usageControl.isEmpty)
 
@@ -238,14 +238,14 @@ object EGIEnvironment extends Logger {
 
         val selectedBS = selected(Random.default.nextDouble * totalFitness, notLoaded.toList)
 
-        selectedBS -> selectedBS.waitAToken
+        selectedBS.tryGetToken.map(selectedBS -> _)
     }
 
 }
 
 class EGIBatchExecutionJob(val job: Job, val environment: EGIEnvironment) extends BatchExecutionJob {
-  def selectStorage() = environment.selectAStorage(usedFileHashes)
-  def selectJobService() = environment.selectAJobService
+  def trySelectStorage() = environment.trySelectAStorage(usedFileHashes)
+  def trySelectJobService() = environment.trySelectAJobService
 }
 
 class EGIEnvironment(
@@ -312,7 +312,7 @@ class EGIEnvironment(
     }
   }
 
-  def selectAJobService: (JobService, AccessToken) = {
+  def trySelectAJobService = {
     val jss = jobServices
     if(jss.isEmpty) throw new InternalProcessingError("No job service available for the environment.")
 
@@ -323,9 +323,9 @@ class EGIEnvironment(
     lazy val maxTime = times.max
     lazy val minTime = times.min
 
-    lazy val waitTimes = nonEmpty.map(_.usageControl.waitTime)
-    lazy val waitMaxTime = waitTimes.max
-    lazy val waitMinTime = waitTimes.min
+    lazy val availablities = nonEmpty.map(_.usageControl.availability)
+    lazy val maxAvailability = availablities.max
+    lazy val minAvailability = availablities.min
 
     lazy val jobFactors = nonEmpty.map(jobFactor)
     lazy val maxJobFactor = jobFactors.max
@@ -335,8 +335,8 @@ class EGIEnvironment(
       val time = js.usageControl.time
       val timeFactor = if (minTime == maxTime) 1.0 else 1.0 - time.normalize(minTime, maxTime)
 
-      val waitTime = js.usageControl.waitTime
-      val waitTimeFactor = if(waitMinTime == waitMaxTime) 1.0 else   1.0 - waitTime.normalize(minTime, maxTime)
+      val availability = js.usageControl.availability
+      val availabilityFactor = if(minAvailability == maxAvailability) 1.0 else 1.0 - availability.normalize(minTime, maxTime)
 
       val jobFactor =
         if (js.usageControl.submitted > 0 && js.usageControl.totalSubmitted > 0) ((js.usageControl.running.toDouble / js.usageControl.submitted) * (js.usageControl.totalDone / js.usageControl.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
@@ -345,7 +345,7 @@ class EGIEnvironment(
       math.pow(
         Workspace.preferenceAsDouble(JobServiceJobFactor) * jobFactor +
         Workspace.preferenceAsDouble(JobServiceTimeFactor) * timeFactor +
-        Workspace.preferenceAsDouble(JobServiceWaitTimeFactor) * waitTimeFactor +
+        Workspace.preferenceAsDouble(JobServiceAvailabilityFactor) * availability +
         Workspace.preferenceAsDouble(JobServiceSuccessRateFactor) * js.usageControl.successRate,
         Workspace.preferenceAsDouble(JobServiceFitnessPower))
     }

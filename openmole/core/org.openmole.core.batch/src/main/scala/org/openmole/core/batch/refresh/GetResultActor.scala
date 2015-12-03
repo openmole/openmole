@@ -50,7 +50,7 @@ class GetResultActor(jobManager: JobManager) {
         getResult(sj.storage, resultPath, job)(token)
         jobManager ! Kill(job)
       case None ⇒
-        jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
+        jobManager ! Delay(msg, getTokenInterval)
     } catch {
       case e: Throwable ⇒
         job.state = ExecutionState.FAILED

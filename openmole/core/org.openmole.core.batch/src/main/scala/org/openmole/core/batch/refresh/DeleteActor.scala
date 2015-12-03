@@ -32,7 +32,7 @@ class DeleteActor(jobManager: JobManager) {
       case Some(t) ⇒
         if (directory) storage.rmDir(path)(t) else storage.rmFile(path)(t)
       case None ⇒
-        jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForServiceRetryInterval))
+        jobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
     }
     catch {
       case t: Throwable ⇒

@@ -18,6 +18,7 @@
 package org.openmole.plugin.environment.egi
 
 import org.openmole.core.batch.control._
+import org.openmole.core.tools.service.MovingAverage
 
 object AvailabilityQuality {
   def apply(_usageControl: UsageControl, _hysteresis: Int) =
@@ -28,12 +29,60 @@ object AvailabilityQuality {
 }
 
 trait AvailabilityQuality extends QualityControl with UsageControl {
-
   val usageControl: UsageControl
-
   def available: Int = usageControl.available
   def releaseToken(token: AccessToken): Unit = usageControl.releaseToken(token)
-  def waitAToken: AccessToken = timedWait(usageControl.waitAToken)
-  def tryGetToken = usageControl.tryGetToken
+
+  def tryGetToken = {
+    val token = usageControl.tryGetToken
+    token match {
+      case Some(_) ⇒ wasAvailable
+      case None    ⇒ wasNotAvailable
+    }
+    token
+  }
+
+  def waitAToken = usageControl.waitAToken
+}
+
+trait QualityControl {
+  def hysteresis: Int
+
+  def isEmpty = _successRate.isEmpty || operationTime.isEmpty
+
+  private lazy val _successRate = new MovingAverage(hysteresis)
+  private lazy val operationTime = new MovingAverage(hysteresis)
+  private lazy val _availability = new MovingAverage(hysteresis, 1.0)
+
+  def wasAvailable = _availability.put(1.0)
+  def wasNotAvailable = _availability.put(0.0)
+
+  def failed = _successRate.put(0.0)
+  def success = _successRate.put(1.0)
+
+  def successRate = _successRate.get
+
+  def time = operationTime.get
+  def availability = _availability.get
+
+  def quality[A](op: ⇒ A): A = timed {
+    try {
+      val ret = op
+      success
+      ret
+    }
+    catch {
+      case e: Throwable ⇒
+        failed
+        throw e
+    }
+  }
+
+  def timed[A](op: ⇒ A): A = {
+    val begin = System.currentTimeMillis
+    val a = op
+    operationTime.put(System.currentTimeMillis - begin)
+    a
+  }
 
 }
