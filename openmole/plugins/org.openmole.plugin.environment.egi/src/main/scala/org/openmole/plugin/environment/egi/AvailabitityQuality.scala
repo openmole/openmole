@@ -33,12 +33,7 @@ trait AvailabilityQuality extends QualityControl with UsageControl {
 
   def available: Int = usageControl.available
   def releaseToken(token: AccessToken): Unit = usageControl.releaseToken(token)
-  def waitAToken: AccessToken = usageControl.waitAToken
+  def waitAToken: AccessToken = timedWait(usageControl.waitAToken)
+  def tryGetToken = usageControl.tryGetToken
 
-  override def tryGetToken = {
-    val ret = usageControl.tryGetToken
-    if (ret.isEmpty) wasNotAvailable
-    else wasAvailable
-    ret
-  }
 }

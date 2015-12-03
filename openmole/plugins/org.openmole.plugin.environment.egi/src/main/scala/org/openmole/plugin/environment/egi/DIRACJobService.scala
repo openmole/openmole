@@ -31,6 +31,7 @@ import org.openmole.tool.logger.Logger
 import scalax.io.Resource
 import java.io.File
 import org.openmole.core.tools._
+import fr.iscpif.gridscale.egi._
 
 object DIRACJobService extends Logger
 
@@ -38,9 +39,16 @@ import DIRACJobService._
 
 trait DIRACJobService extends GridScaleJobService { js ⇒
 
+  def connections: Int
   def environment: DIRACEnvironment
-  val jobService: GSDIRACJobService
-  val usageControl = new UnlimitedAccess
+
+  @transient lazy val jobService: GSDIRACJobService =
+    GSDIRACJobService(
+      environment.service,
+      environment.group,
+      connections = Some(connections))(environment.authentication)
+
+  @transient lazy val usageControl = new UnlimitedAccess //new LimitedAccess(connections, Int.MaxValue)
 
   def jobScript =
     JobScript(
@@ -50,7 +58,7 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
       debug = environment.debug
     )
 
-  lazy val id = jobService.service
+  @transient lazy val id = jobService.service
 
   protected def _submit(serializedJob: SerializedJob) = {
     import serializedJob._

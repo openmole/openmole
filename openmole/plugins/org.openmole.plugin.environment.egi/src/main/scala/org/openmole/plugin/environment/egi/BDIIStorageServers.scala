@@ -70,9 +70,14 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
     val nonEmpty = sss.filter(!_.usageControl.isEmpty)
     lazy val sizes = usedFileHashes.map { case (f, _) ⇒ f -> f.size }.toMap
     lazy val totalFileSize = sizes.values.sum
+
     lazy val onStorage = ReplicaCatalog.withSession(ReplicaCatalog.inCatalog(_))
     lazy val maxTime = nonEmpty.map(_.usageControl.time).max
     lazy val minTime = nonEmpty.map(_.usageControl.time).min
+
+    lazy val waitTimes = nonEmpty.map(_.usageControl.waitTime)
+    lazy val waitMaxTime = waitTimes.max
+    lazy val waitMinTime = waitTimes.min
 
     def rate(ss: EGIStorageService) = {
       val sizesOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(ss.id, Set.empty).contains(h.toString) }.map { case (f, _) ⇒ sizes(f) }
@@ -83,10 +88,13 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
       val time = ss.usageControl.time
       val timeFactor = if (minTime == maxTime) 1.0 else 1.0 - time.normalize(minTime, maxTime)
 
+      val waitTime = ss.usageControl.waitTime
+      val waitTimeFactor = if (waitMinTime == waitMaxTime) 1.0 else 1.0 - waitTime.normalize(minTime, maxTime)
+
       math.pow(
         Workspace.preferenceAsDouble(StorageSizeFactor) * sizeFactor +
           Workspace.preferenceAsDouble(StorageTimeFactor) * timeFactor +
-          Workspace.preferenceAsDouble(StorageAvailabilityFactor) * ss.usageControl.availability +
+          Workspace.preferenceAsDouble(StorageWaitTimeFactor) * waitTimeFactor +
           Workspace.preferenceAsDouble(StorageSuccessRateFactor) * ss.usageControl.successRate,
         Workspace.preferenceAsDouble(StorageFitnessPower))
     }

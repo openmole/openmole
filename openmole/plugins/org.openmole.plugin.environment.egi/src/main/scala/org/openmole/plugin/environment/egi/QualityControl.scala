@@ -23,27 +23,30 @@ import org.openmole.tool.logger.Logger
 
 object QualityControl extends Logger
 
-import QualityControl.Log._
-
 trait QualityControl {
   def hysteresis: Int
 
-  def isEmpty = _successRate.isEmpty || operationTime.isEmpty || _availability.isEmpty
+  def isEmpty = _successRate.isEmpty || operationTime.isEmpty || _waitTime.isEmpty
 
   private lazy val _successRate = new MovingAverage(hysteresis)
   private lazy val operationTime = new MovingAverage(hysteresis)
-  private lazy val _availability = new MovingAverage(hysteresis)
-
-  def wasAvailable = _availability.put(1.0)
-  def wasNotAvailable = _availability.put(0.0)
+  private lazy val _waitTime = new MovingAverage(hysteresis)
 
   def failed = _successRate.put(0)
   def success = _successRate.put(1)
   def successRate = _successRate.get
+
   def timed(t: Double) = operationTime.put(t)
 
   def time = operationTime.get
-  def availability = _availability.get
+  def waitTime = _waitTime.get
+
+  def timedWait[A](op: ⇒ A): A = {
+    val begin = System.currentTimeMillis
+    val a = op
+    _waitTime.put(System.currentTimeMillis - begin)
+    a
+  }
 
   def quality[A](op: ⇒ A): A = timed {
     try {
@@ -61,7 +64,7 @@ trait QualityControl {
   def timed[A](op: ⇒ A): A = {
     val begin = System.currentTimeMillis
     val a = op
-    timed(System.currentTimeMillis - begin)
+    operationTime.put(System.currentTimeMillis - begin)
     a
   }
 
