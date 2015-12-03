@@ -308,6 +308,7 @@ class ModelWizardPanel extends ModalPanel {
         },
         bs.td(bs.col_md_3 + "spacer7")(nameInput),
         bs.td(bs.col_md_2)(typeSelector.selector),
+        bs.td(bs.col_md_1 + "grey")(role.content.prototype.default),
         bs.td(bs.col_md_3)(if (role.content.prototype.mapping.isDefined) mappingInput else tags.div()),
         bs.td(bs.col_md_1 + "right")(
           id := Rx {
@@ -349,7 +350,7 @@ class ModelWizardPanel extends ModalPanel {
             val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
 
             val head = thead(tags.tr(
-              for (h ← Seq("Name", "Type", "Mapped with", "", "")) yield {
+              for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
                 tags.th(h)
               }))
 

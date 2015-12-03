@@ -51,7 +51,7 @@ object CodeParsing {
   }
 
   private def isFileString(fs: Option[String]) = fs match {
-    case Some(s: String) ⇒ s matches ("""(.*)[.]([^.]{1,3})""")
+    case Some(s: String) ⇒ s matches ("""((.*)[.]([^.]+))|(.*/.*)""")
     case _               ⇒ false
   }
 
@@ -82,7 +82,7 @@ object CodeParsing {
       case Some(k: String) ⇒ k
       case _ ⇒ if (isFile) {
         value match {
-          case Some(v: String) ⇒ v.split('/').last.split('.').dropRight(1).mkString(".")
+          case Some(v: String) ⇒ v.split('/').last.split('.').head
           case _               ⇒ "i" + index
         }
       }
@@ -92,7 +92,8 @@ object CodeParsing {
         case Some(a: String) ⇒ if (isFile) ProtoTYPE.FILE else ProtoTYPE.DOUBLE
         case _               ⇒ ProtoTYPE.DOUBLE
       },
-      mapping = if (isFile) value else None
+      if (isFile) "" else value.getOrElse(""),
+      if (isFile) value else None
     ),
       taskType
     )
