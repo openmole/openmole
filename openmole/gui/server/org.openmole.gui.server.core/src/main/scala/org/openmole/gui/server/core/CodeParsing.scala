@@ -51,7 +51,7 @@ object CodeParsing {
   }
 
   private def isFileString(fs: Option[String]) = fs match {
-    case Some(s: String) ⇒ s matches ("""(.*)[.]([^.]{1,3})""")
+    case Some(s: String) ⇒ s matches ("""((.*)[.]([^.]+))|(.*/.*)""")
     case _               ⇒ false
   }
 
@@ -82,7 +82,7 @@ object CodeParsing {
       case Some(k: String) ⇒ k
       case _ ⇒ if (isFile) {
         value match {
-          case Some(v: String) ⇒ v.split('/').last.split('.').dropRight(1).mkString(".")
+          case Some(v: String) ⇒ v.split('/').last.split('.').head
           case _               ⇒ "i" + index
         }
       }
@@ -92,7 +92,8 @@ object CodeParsing {
         case Some(a: String) ⇒ if (isFile) ProtoTYPE.FILE else ProtoTYPE.DOUBLE
         case _               ⇒ ProtoTYPE.DOUBLE
       },
-      mapping = if (isFile) value else None
+      if (isFile) "" else value.getOrElse(""),
+      if (isFile) value else None
     ),
       taskType
     )
@@ -125,6 +126,7 @@ object CodeParsing {
         if (line.startsWith("SLIDER")) parse(tail, args :+ parseSlider(index), outputs)
         else if (line.startsWith("SWITCH")) parse(tail, args :+ parseSwitch(index), outputs)
         else if (line.startsWith("INPUTBOX")) parse(tail, args :+ parseInputBox(index), outputs)
+        else if (line.startsWith("CHOOSER")) parse(tail, args :+ parseChooser(index), outputs)
         else if (line.startsWith("MONITOR")) parse(tail, args, outputs ++ parseMonitor(index))
         else if (line.startsWith("PLOT")) parse(tail, args, outputs ++ parsePlot(index))
         else parse(tail, args, outputs)
@@ -162,6 +164,11 @@ object CodeParsing {
       Seq("ticks", "time").contains(v)
     }.map {
       n ⇒ ProtoTypePair(n.clean, ProtoTYPE.DOUBLE, mapping = Some(n))
+    }
+
+    def parseChooser(start: Int): ProtoTypePair = {
+      val name = lines(start + 5)
+      ProtoTypePair(name.clean, ProtoTYPE.STRING, lines(start + 7).split(' ').head, Some(name))
     }
 
     val (args, outputs) = parse(lines.toSeq.zipWithIndex, Seq(), Seq())
