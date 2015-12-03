@@ -128,7 +128,7 @@ object BatchEnvironment extends Logger {
   Workspace += (RuntimeMemoryMargin, "400")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
-  def getTokenInterval = Workspace.preferenceAsDuration(GetTokenInterval)
+  def getTokenInterval = Workspace.preferenceAsDuration(GetTokenInterval) * Workspace.rng.nextDouble
 
   lazy val jobManager = new JobManager
 }
