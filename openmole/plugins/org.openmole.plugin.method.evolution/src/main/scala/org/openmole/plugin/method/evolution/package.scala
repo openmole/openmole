@@ -150,7 +150,7 @@ package object evolution {
     \&/(gaPuzzle, argAlgo)
   }
 
-  def IslandEvolution[T](island: PuzzleContainer \&/ T, parallelism: Int, sample: Int, termination: OMTermination)(implicit workflowIntegration: WorkflowIntegration[T]) = {
+  def IslandEvolution[T](island: PuzzleContainer \&/ T, parallelism: Int, termination: OMTermination, sample: Option[Int] = None)(implicit workflowIntegration: WorkflowIntegration[T]) = {
     val argAlgo: T = island
     val integration = workflowIntegration(island)
     import integration._
@@ -171,7 +171,7 @@ package object evolution {
 
     val elitismTask = ElitismTask(argAlgo) set (name := "elitism")
 
-    val generateIsland = SamplePopulationTask(argAlgo, sample, 1, islandPopulationPrototype.name)
+    val generateIsland = GenerateIslandTask(argAlgo, sample, 1, islandPopulationPrototype.name)
 
     val terminationTask = TerminationTask(argAlgo, termination) set (name := "termination")
 
@@ -207,7 +207,7 @@ package object evolution {
     )
 
     val generateInitialIslands =
-      SamplePopulationTask(argAlgo, sample, parallelism, islandPopulationPrototype.name) set (
+      GenerateIslandTask(argAlgo, sample, parallelism, islandPopulationPrototype.name) set (
         name := "generateInitialIslands",
         (inputs, outputs) += statePrototype,
         outputs += populationPrototype
