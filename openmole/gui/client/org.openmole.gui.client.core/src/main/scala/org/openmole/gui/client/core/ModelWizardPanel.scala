@@ -243,8 +243,9 @@ class ModelWizardPanel extends ModalPanel {
     val lineHovered: Var[Boolean] = Var(false)
 
     val switchGlyph = role match {
-      case x: Input[_] ⇒ OMTags.glyph_arrow_right
-      case _           ⇒ OMTags.glyph_arrow_left
+      case i: Input[_]         ⇒ OMTags.glyph_arrow_right
+      case ci: CommandInput[_] ⇒ OMTags.glyph_arrow_right
+      case _                   ⇒ OMTags.glyph_arrow_left
     }
 
     def updateLaunchingCommand =
@@ -253,9 +254,7 @@ class ModelWizardPanel extends ModalPanel {
           launchingCommand() = launchingCommand().map { lc ⇒
             val statics = lc.statics
             lc.copy(arguments = statics ++
-              currentReactives().map { aaa ⇒
-                aaa.role
-              }.collect {
+              currentReactives().map { _.role }.collect {
                 case x: CommandInput[_]  ⇒ x
                 case y: CommandOutput[_] ⇒ y
               }.map {
