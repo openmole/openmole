@@ -180,6 +180,7 @@ class ModelWizardPanel extends ModalPanel {
       "Build",
       btn_primary)(onclick := { () ⇒
         save
+        close
         launchingCommand().foreach { lc ⇒
           OMPost[Api].buildModelTask(
             labelName().getOrElse(""),
@@ -195,7 +196,6 @@ class ModelWizardPanel extends ModalPanel {
             manager.current.safePath()).call().foreach { b ⇒
               panels.treeNodePanel.refreshCurrentDirectory
               // panels.treeNodePanel.fileDisplayer
-              close
             }
         }
       })
@@ -254,7 +254,9 @@ class ModelWizardPanel extends ModalPanel {
           launchingCommand() = launchingCommand().map { lc ⇒
             val statics = lc.statics
             lc.copy(arguments = statics ++
-              currentReactives().map { _.role }.collect {
+              currentReactives().map {
+                _.role
+              }.collect {
                 case x: CommandInput[_]  ⇒ x
                 case y: CommandOutput[_] ⇒ y
               }.map {
