@@ -344,6 +344,7 @@ object ApiImpl extends Api {
     def ioString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) Seq(s"  $keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")) + ",\n" else ""
     def imapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { i ⇒ s"""  $keyString += (${i.name}, "${i.mapping.get}")""" }.mkString(",\n") + ",\n" else ""
     def omapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { o ⇒ s"""  $keyString += ("${o.mapping.get}", ${o.name})""" }.mkString(",\n") + ",\n" else ""
+    def default(key: String, value: String) = s"  $key :=  $value"
 
     try {
       for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
@@ -359,9 +360,13 @@ object ApiImpl extends Api {
       val imFileString = imapString(ifilemappings, "fileInputs")
       val ouString = ioString(ous, "outputs")
       val omFileString = omapString(ofilemappings, "fileOutputs")
-      val defaults = inputs.filterNot {
-        _.default == ""
-      }.map { p ⇒ "  " + p.name + " := " + p.default }.mkString(",\n")
+      val defaults =
+        "Default values. Can be removed if OpenMOLE Vals are set by a value coming from the workflow"
+        (inputs.map { p ⇒ (p.name, p.default) } ++
+        ifilemappings.map { p ⇒ (p.name, "\"" + p.mapping.getOrElse("") + "\"") } ++
+        ofilemappings.map { p ⇒ (p.name, "\"" + p.mapping.getOrElse("") + "\"") }).filterNot {
+          _._2.isEmpty
+        }.map { p ⇒ default(p._1, p._2) }.mkString(",\n")
 
       language.taskType match {
         case ctt: CareTaskType ⇒
