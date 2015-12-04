@@ -53,7 +53,7 @@ object EGISRMStorageService {
 
   def apply[A: GlobusAuthenticationProvider](s: SRMLocation, _environment: BatchEnvironment { def voName: String }, authentication: A) = new EGISRMStorageService {
     def threads = Workspace.preferenceAsInt(EGIEnvironment.ConnectionsBySRMSE)
-    val usageControl = AvailabilityQuality(new UnlimitedAccess, Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
+    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
     val storage = SRMStorage(s.copy(basePath = ""), threads)(authentication)
     val url = new URI("srm", null, s.host, s.port, null, null, null)
     val remoteStorage = new LCGCpRemoteStorage(s.host, s.port, _environment.voName)
@@ -122,7 +122,7 @@ object EGIWebDAVStorageService {
 
   def apply[A: HTTPSAuthentication](s: WebDAVLocation, _environment: BatchEnvironment { def voName: String }, authentication: A) = new EGIWebDAVStorageService {
     def threads = Workspace.preferenceAsInt(EGIEnvironment.ConnectionsByWebDAVSE)
-    val usageControl = AvailabilityQuality(new UnlimitedAccess, Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
+    val usageControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
     val storage = WebDAVS(s.copy(basePath = ""), Some(threads))(authentication)
     val url = new URI("https", null, s.host, s.port, null, null, null)
     val remoteStorage = new CurlRemoteStorage(s.host, s.port, _environment.voName)

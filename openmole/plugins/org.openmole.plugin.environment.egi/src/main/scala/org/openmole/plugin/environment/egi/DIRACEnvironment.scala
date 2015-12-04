@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.environment.egi
 
+import fr.iscpif.gridscale.authentication.P12Authentication
 import org.openmole.core.batch.environment.{ BatchExecutionJob, BatchEnvironment }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.filedeleter.FileDeleter
@@ -32,10 +33,10 @@ import scala.ref.WeakReference
 
 object DIRACEnvironment {
 
-  val LocalThreads = new ConfigurationLocation("DIRACEnvironment", "LocalThreads")
+  val Connections = new ConfigurationLocation("DIRACEnvironment", "Connections")
   val EagerSubmissionThreshold = ConfigurationLocation("DIRACEnvironment", "EagerSubmissionThreshold")
 
-  Workspace += (LocalThreads, "100")
+  Workspace += (Connections, "100")
   Workspace += (EagerSubmissionThreshold, "0.2")
 
   def apply(
@@ -68,11 +69,11 @@ object DIRACEnvironment {
 
 class DiracBatchExecutionJob(val job: Job, val environment: DIRACEnvironment) extends BatchExecutionJob {
 
-  def selectStorage() = environment.selectAStorage(usedFileHashes)
+  def trySelectStorage() = environment.trySelectAStorage(usedFileHashes)
 
-  def selectJobService() = {
+  def trySelectJobService() = {
     val js = environment.jobService
-    (js, js.waitAToken)
+    js.tryGetToken.map(js -> _)
   }
 
 }
@@ -108,7 +109,7 @@ class DIRACEnvironment(
 
   def getAuthentication = authentications(classOf[EGIAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
 
-  @transient lazy val authentication = DIRACAuthentication.initialise(getAuthentication)(authentications)
+  @transient lazy val authentication: P12Authentication = DIRACAuthentication.initialise(getAuthentication)(authentications)
 
   @transient lazy val proxyCreator = {
     EGIAuthentication.initialise(getAuthentication)(
@@ -118,12 +119,8 @@ class DIRACEnvironment(
   }
 
   @transient lazy val jobService = new DIRACJobService {
+    val connections = Workspace.preferenceAsInt(DIRACEnvironment.Connections)
     val environment = env
-    val jobService =
-      GSDIRACJobService(
-        env.service,
-        env.group,
-        connections = Some(Workspace.preferenceAsInt(DIRACEnvironment.LocalThreads)))(env.authentication)
   }
 
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)

@@ -47,9 +47,14 @@ class UploadActor(jobManager: JobManager) {
   def receive(msg: Upload) = withRunFinalization {
     val job = msg.job
     if (!job.state.isFinal) {
-      try {
-        val sj = initCommunication(job)
-        jobManager ! Uploaded(job, sj)
+      try job.trySelectStorage match {
+        case Some((storage, token)) ⇒
+          try {
+            val sj = initCommunication(job, storage)(token)
+            jobManager ! Uploaded(job, sj)
+          }
+          finally storage.releaseToken(token)
+        case None ⇒ jobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
       }
       catch {
         case e: Throwable ⇒
@@ -59,7 +64,7 @@ class UploadActor(jobManager: JobManager) {
     }
   }
 
-  private def initCommunication(job: BatchExecutionJob): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
+  private def initCommunication(job: BatchExecutionJob, storage: StorageService)(implicit token: AccessToken): SerializedJob = Workspace.withTmpFile("job", ".tar") { jobFile ⇒
     SerialiserService.serialise(job.runnableTasks, jobFile)
 
     val pluginAndFiles = job.pluginsAndFiles
@@ -67,10 +72,7 @@ class UploadActor(jobManager: JobManager) {
     val plugins = new TreeSet[File]()(fileOrdering) ++ pluginAndFiles.plugins
     val files = (new TreeSet[File]()(fileOrdering) ++ pluginAndFiles.files) diff plugins
 
-    val (storage, token) = job.selectStorage()
-
-    implicit val t = token
-    try ReplicaCatalog.withSession { implicit session ⇒
+    ReplicaCatalog.withSession { implicit session ⇒
       val communicationPath = storage.child(storage.tmpDir, UUID.randomUUID.toString)
       storage.makeDir(communicationPath)
 
@@ -99,7 +101,7 @@ class UploadActor(jobManager: JobManager) {
       }
 
       SerializedJob(storage, communicationPath, inputPath, runtime)
-    } finally storage.releaseToken(token)
+    }
   }
 
   def toReplicatedFile(job: Job, file: File, storage: StorageService, transferOptions: TransferOptions)(implicit token: AccessToken, session: Session): ReplicatedFile = {

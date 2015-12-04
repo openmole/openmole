@@ -94,6 +94,8 @@ object BatchEnvironment extends Logger {
 
   val CheckFileExistsInterval = new ConfigurationLocation("BatchEnvironment", "CheckFileExistsInterval")
 
+  val GetTokenInterval = new ConfigurationLocation("BatchEnvironment", "GetTokenInterval")
+
   val MinUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MinUpdateInterval")
   val MaxUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval")
   val IncrementUpdateInterval = new ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval")
@@ -102,15 +104,13 @@ object BatchEnvironment extends Logger {
   val JobManagementThreads = new ConfigurationLocation("BatchEnvironment", "JobManagementThreads")
 
   val StoragesGCUpdateInterval = new ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval")
-
-  val NoTokenForServiceRetryInterval = new ConfigurationLocation("BatchEnvironment", "NoTokenForServiceRetryInterval")
-
   val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin")
 
   Workspace += (MinUpdateInterval, "PT1M")
   Workspace += (MaxUpdateInterval, "PT10M")
   Workspace += (IncrementUpdateInterval, "PT1M")
   Workspace += (MaxUpdateErrorsInARow, "3")
+  Workspace += (GetTokenInterval, "PT1M")
 
   private def runtimeDirLocation = Workspace.openMOLELocation.getOrElse(throw new InternalProcessingError("openmole.location not set"))./("runtime")
 
@@ -124,11 +124,11 @@ object BatchEnvironment extends Logger {
   Workspace += (JobManagementThreads, "200")
 
   Workspace += (StoragesGCUpdateInterval, "PT1H")
-  Workspace += (NoTokenForServiceRetryInterval, "PT2M")
 
   Workspace += (RuntimeMemoryMargin, "400")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
+  def getTokenInterval = Workspace.preferenceAsDuration(GetTokenInterval) * Workspace.rng.nextDouble
 
   lazy val jobManager = new JobManager
 }
@@ -158,8 +158,8 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
 
   val environment: BatchEnvironment
 
-  def selectStorage(): (StorageService, AccessToken)
-  def selectJobService(): (JobService, AccessToken)
+  def trySelectStorage(): Option[(StorageService, AccessToken)]
+  def trySelectJobService(): Option[(JobService, AccessToken)]
 }
 
 trait BatchEnvironment extends Environment with JobList { env ⇒
@@ -192,8 +192,6 @@ trait BatchEnvironment extends Environment with JobList { env ⇒
     jobManager ! Manage(bej)
   }
 
-  def clean: Unit
-
   def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxI386 = BatchEnvironment.JVMLinuxI386Location
   def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
@@ -212,13 +210,13 @@ trait BatchEnvironment extends Environment with JobList { env ⇒
 
 class SimpleBatchExecutionJob(val job: Job, val environment: SimpleBatchEnvironment) extends ExecutionJob with BatchExecutionJob { bej ⇒
 
-  def selectStorage() = {
+  def trySelectStorage() = {
     val s = environment.storage
-    (s, s.waitAToken)
+    s.tryGetToken.map(t => (s, t))
   }
-  def selectJobService() = {
+  def trySelectJobService() = {
     val js = environment.jobService
-    (js, js.waitAToken)
+    js.tryGetToken.map(t => (js, t))
   }
 
 }
@@ -230,6 +228,4 @@ trait SimpleBatchEnvironment <: BatchEnvironment { env ⇒
 
   def storage: SS
   def jobService: JS
-
-  def clean = ReplicaCatalog.withSession { session ⇒ storage.withToken(storage.clean(_, session)) }
 }

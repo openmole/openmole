@@ -31,10 +31,14 @@ class SubmitActor(jobManager: JobManager) {
   def receive(submit: Submit) = withRunFinalization {
     val Submit(job, sj) = submit
     if (!job.state.isFinal) {
-      try {
-        val bj = trySubmit(job, sj, job.environment)
-        job.state = SUBMITTED
-        jobManager ! Submitted(job, sj, bj)
+      try job.trySelectJobService match {
+        case Some((js, token)) ⇒
+          val bj =
+            try js.submit(sj)(token)
+            finally js.releaseToken(token)
+          job.state = SUBMITTED
+          jobManager ! Submitted(job, sj, bj)
+        case None ⇒ jobManager ! Delay(submit, BatchEnvironment.getTokenInterval)
       }
       catch {
         case e: Throwable ⇒
@@ -42,12 +46,6 @@ class SubmitActor(jobManager: JobManager) {
           jobManager ! Submit(job, sj)
       }
     }
-  }
-
-  private def trySubmit(job: BatchExecutionJob, sj: SerializedJob, environment: BatchEnvironment) = {
-    val (js, token) = job.selectJobService()
-    try js.submit(sj)(token)
-    finally js.releaseToken(token)
   }
 
 }
