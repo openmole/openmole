@@ -362,7 +362,7 @@ object ApiImpl extends Api {
       val omFileString = omapString(ofilemappings, "fileOutputs")
       val defaults =
         "Default values. Can be removed if OpenMOLE Vals are set by a value coming from the workflow"
-        (inputs.map { p ⇒ (p.name, p.default) } ++
+      (inputs.map { p ⇒ (p.name, p.default) } ++
         ifilemappings.map { p ⇒ (p.name, "\"" + p.mapping.getOrElse("") + "\"") } ++
         ofilemappings.map { p ⇒ (p.name, "\"" + p.mapping.getOrElse("") + "\"") }).filterNot {
           _._2.isEmpty
