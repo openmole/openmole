@@ -41,7 +41,8 @@ object OAREnvironment {
     workDirectory: Option[String] = None,
     threads: Option[Int] = None,
     storageSharedLocally: Boolean = false,
-    name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
+    name: Option[String] = None,
+    bestEffort: Boolean = true)(implicit authentications: AuthenticationProvider) =
     new OAREnvironment(
       user = user,
       host = host,
@@ -55,7 +56,8 @@ object OAREnvironment {
       workDirectory = workDirectory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      name = name)
+      name = name,
+      bestEffort = bestEffort)
 }
 
 class OAREnvironment(
@@ -71,7 +73,8 @@ class OAREnvironment(
     val workDirectory: Option[String],
     override val threads: Option[Int],
     val storageSharedLocally: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends ClusterEnvironment { env ⇒
+    override val name: Option[String],
+    val bestEffort: Boolean)(implicit authentications: AuthenticationProvider) extends ClusterEnvironment { env ⇒
 
   type JS = OARJobService
 

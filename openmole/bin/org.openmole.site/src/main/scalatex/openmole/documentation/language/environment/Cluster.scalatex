@@ -109,4 +109,5 @@
       @li{@openMOLEMemory,}
       @li{@threads,}
       @li{core: number of cores allocated for each job,}
-      @li{cpu: number of CPUs allocated for each job.}
+      @li{cpu: number of CPUs allocated for each job,}
+      @li{bestEffort: a boolean for setting the best effort mode (true by default).}
