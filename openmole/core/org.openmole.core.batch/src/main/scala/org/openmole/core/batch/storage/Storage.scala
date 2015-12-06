@@ -73,13 +73,13 @@ trait Storage {
   protected def _upload(src: File, dest: String, options: TransferOptions) = {
     val os = uploadOutputStream(dest, options)
     try src.copy(os, bufferSize, copyTimeout)
-    finally timeout(os.close)(closeTimeout)
+    finally os.close
   }
 
   protected def _download(src: String, dest: File, options: TransferOptions) = {
     val is = downloadInputStream(src, options)
     try is.copy(dest, bufferSize, copyTimeout)
-    finally timeout(is.close)(closeTimeout)
+    finally is.close
   }
 
   protected def bufferSize = Workspace.preferenceAsInt(Storage.BufferSize)

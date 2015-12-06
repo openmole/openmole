@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.egi
 
-import fr.iscpif.gridscale.http.{HTTPSAuthentication, WebDAVLocation, WebDAVS}
+import fr.iscpif.gridscale.http.{HTTPSAuthentication, WebDAVLocation, DPMWebDAVStorage}
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 import org.openmole.core.workspace.Workspace
@@ -123,7 +123,7 @@ object EGIWebDAVStorageService {
   def apply[A: HTTPSAuthentication](s: WebDAVLocation, _environment: BatchEnvironment { def voName: String }, authentication: A) = new EGIWebDAVStorageService {
     def threads = Workspace.preferenceAsInt(EGIEnvironment.ConnectionsByWebDAVSE)
     val usageControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), Workspace.preferenceAsInt(EGIEnvironment.QualityHysteresis))
-    val storage = WebDAVS(s.copy(basePath = ""), Some(threads))(authentication)
+    val storage = DPMWebDAVStorage(s.copy(basePath = ""), Some(threads))(authentication)
     val url = new URI("https", null, s.host, s.port, null, null, null)
     val remoteStorage = new CurlRemoteStorage(s.host, s.port, _environment.voName)
     val environment = _environment
