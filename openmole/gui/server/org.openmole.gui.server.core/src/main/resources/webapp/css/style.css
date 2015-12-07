@@ -39,11 +39,6 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     max-width: 1200px;
 }
 
-#modelWizardPanelID .modal-dialog {
-    width: 75%;
-    max-width: 1200px;
-}
-
 #settingsPanelID .modal-dialog{
     max-width: 1200px;
     width: 70%;
@@ -808,6 +803,11 @@ top: -6px;
 .twocolumns{
     float:left;
     width:50%;
+}
+
+.onecolumn{
+    float: left;
+    width: 100%;
 }
 
 .paddingLeftRight50{
