@@ -91,6 +91,13 @@ class ModelWizardPanel extends ModalPanel {
     autoMode() = !autoMode()
   })
 
+  lazy val codeSelector: Select[Language] = Select("selectLanguages",
+    Seq(Binary(), PythonLanguage(), NetLogoLanguage(), RLanguage()).map {
+      (_, emptyCK)
+    }, Some(Binary()),
+    btn_primary
+  )
+
   Obs(launchingCommand, skipInitial = true) {
     if (autoMode()) {
       commandArea.value = launchingCommand().map {
@@ -142,6 +149,7 @@ class ModelWizardPanel extends ModalPanel {
                 hasStep2() = true
                 labelName() = Some(fileName)
                 launchingCommand().foreach { lc ⇒
+                  codeSelector.content() = lc.language
                   val nbArgs = lc.arguments.size
                   val iReactives = lc.arguments.zipWithIndex.collect {
                     case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandInput(ve), id)
@@ -175,14 +183,15 @@ class ModelWizardPanel extends ModalPanel {
 
   val step2 = tags.div(
     tags.h4("Step 2: Code I/O settings"),
-    tags.div("The systems detects automatically the launching command and propose you the creation of some OpenMOLE Variables so that" +
+    bs.div("spacer20")("The detected code is ", codeSelector.selector),
+    bs.div("grey")("The systems detects automatically the launching command and propose you the creation of some OpenMOLE Variables so that" +
       " your model will be able to be feeded with variable values coming from the workflow you will build afterwards. In the case of Java, Scala, Netlogo" +
       "(ie codes working on the JVM) the OpenMOLE variables can be set directly in the command line. Otherwise, they have to be set inside ${} statements." +
       " By default he systems detects automatically your Variable changes and update the launching command. However, this option can be desactivated."
     )
   )
 
-  val autoModeTag = bs.div("onecolumn")(
+  val autoModeTag = bs.div("onecolumn spacer20")(
     tags.b("Launching Command"),
     bs.div("spacer4 right")(
       "Automatic ",
@@ -202,7 +211,7 @@ class ModelWizardPanel extends ModalPanel {
             labelName().getOrElse(""),
             "script",
             commandArea.value,
-            NetLogoLanguage(),
+            codeSelector.content().getOrElse(Binary()),
             inputs(currentReactives()).map {
               _.content.prototype
             },
@@ -372,8 +381,8 @@ class ModelWizardPanel extends ModalPanel {
                 tags.th(h)
               }))
 
-            tags.div(
-              tags.div(`class` := "twocolumns right10")(
+            bs.div("spacer30")(
+              bs.div("twocolumns right10")(
                 bs.form("paddingLeftRight50")(iinput,
                   onsubmit := {
                     () ⇒
