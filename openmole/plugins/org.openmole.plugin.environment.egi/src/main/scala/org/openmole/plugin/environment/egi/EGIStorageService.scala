@@ -101,13 +101,13 @@ trait NativeCommandCopy {
   private def download(src: String, dest: File): Unit = run(downloadCommand(url.resolve(src), dest.getAbsolutePath))
 
   def upload(src: File, dest: String, options: TransferOptions): Unit =
-  try {
-    if (options.raw) upload(src, dest)
-    else Workspace.withTmpFile { tmpFile ⇒
-      src.copyCompressFile(tmpFile)
-      upload(tmpFile, dest)
-    }
-  }  catch {
+    try {
+      if (options.raw) upload(src, dest)
+      else Workspace.withTmpFile { tmpFile ⇒
+        src.copyCompressFile(tmpFile)
+        upload(tmpFile, dest)
+      }
+    } catch {
       case e: Throwable => throw new IOException(s"Error uploading $src to $dest from $url with option $options", e)
     }
 
