@@ -25,7 +25,7 @@ import org.openmole.tool.file._
 import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage, ListEntry, FileType }
 import fr.iscpif.gridscale.egi.{ SRMLocation, GlobusAuthenticationProvider, SRMStorage }
 import java.net.URI
-import java.io.{ File, InputStream, OutputStream }
+import java.io.{IOException, File, InputStream, OutputStream}
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.plugin.environment.gridscale.GridScaleStorage
 
@@ -88,19 +88,27 @@ trait NativeCommandCopy {
   def child(parent: String, child: String): String = GSStorage.child(parent, child)
 
   def download(src: String, dest: File, options: TransferOptions): Unit =
-    if (options.raw) download(src, dest)
-    else Workspace.withTmpFile { tmpFile ⇒
-      download(src, tmpFile)
-      tmpFile.copyUncompressFile(dest)
+    try {
+      if (options.raw) download(src, dest)
+      else Workspace.withTmpFile { tmpFile ⇒
+        download(src, tmpFile)
+        tmpFile.copyUncompressFile(dest)
+      }
+    } catch {
+      case e: Throwable => throw new IOException(s"Error downloading $src to $dest from $url with option $options", e)
     }
 
   private def download(src: String, dest: File): Unit = run(downloadCommand(url.resolve(src), dest.getAbsolutePath))
 
   def upload(src: File, dest: String, options: TransferOptions): Unit =
-    if (options.raw) upload(src, dest)
-    else Workspace.withTmpFile { tmpFile ⇒
-      src.copyCompressFile(tmpFile)
-      upload(tmpFile, dest)
+    try {
+      if (options.raw) upload(src, dest)
+      else Workspace.withTmpFile { tmpFile ⇒
+        src.copyCompressFile(tmpFile)
+        upload(tmpFile, dest)
+      }
+    } catch {
+      case e: Throwable => throw new IOException(s"Error uploading $src to $dest from $url with option $options", e)
     }
 
 
