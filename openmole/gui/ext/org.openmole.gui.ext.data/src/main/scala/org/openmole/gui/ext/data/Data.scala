@@ -329,6 +329,8 @@ case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
 case class Plugin(name: String)
 
 sealed trait Language {
+  val uuid: String = java.util.UUID.randomUUID.toString
+
   def name: String
 
   def extension: String
@@ -350,6 +352,12 @@ case class CareTaskType() extends TaskType {
 case class ScalaTaskType() extends TaskType
 
 case class NetLogoTaskType() extends TaskType
+
+case class Binary() extends Language {
+  val name: String = "Binary"
+  val extension = ""
+  val taskType = CareTaskType()
+}
 
 case class PythonLanguage() extends Language {
   val name: String = "python"

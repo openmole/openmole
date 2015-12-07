@@ -68,6 +68,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer20 {
     margin-top: 20px;
 }
+.spacer30 {
+    margin-top: 30px;
+}
 .spacer50 {
     margin-top: 50px;
 }
