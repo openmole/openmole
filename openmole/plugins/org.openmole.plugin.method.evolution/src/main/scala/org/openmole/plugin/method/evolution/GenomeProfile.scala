@@ -70,10 +70,7 @@ object GenomeProfile {
 
     StochasticGenomeProfile(
       ga.noisyProfile[Double](
-        fitness = Fitness { i ⇒
-          assert(!i.phenotype.history.isEmpty, s"$i has an empty history")
-          StochasticGAAlgorithm.aggregate(replication.aggregation, i.phenotype.history)
-        },
+        fitness = Fitness { i ⇒ StochasticGAAlgorithm.aggregate(replication.aggregation, i.phenotype.history) },
         niche = niche,
         nicheSize = paretoSize,
         history = replication.max,

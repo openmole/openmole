@@ -22,12 +22,13 @@ import com.thoughtworks.xstream.converters.extended.JavaClassConverter
 import java.io.File
 import com.thoughtworks.xstream.core.ClassLoaderReference
 import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.serializer.PluginAndFilesListing
 
-class PluginClassConverter[A <: { def pluginUsed(f: File) }](serializer: A) extends JavaClassConverter(new ClassLoaderReference(classOf[XStream].getClassLoader)) {
+class PluginClassConverter(serializer: PluginAndFilesListing) extends JavaClassConverter(new ClassLoaderReference(classOf[XStream].getClassLoader)) {
 
   override def toString(obj: Object) = {
     val c = obj.asInstanceOf[Class[_]]
-    if (PluginManager.isClassProvidedByAPlugin(c)) PluginManager.pluginsForClass(c).foreach(serializer.pluginUsed)
+    serializer.classUsed(c)
     super.toString(obj)
   }
 
