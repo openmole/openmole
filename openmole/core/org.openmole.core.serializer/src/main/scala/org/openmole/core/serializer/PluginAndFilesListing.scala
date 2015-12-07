@@ -71,7 +71,7 @@ trait PluginAndFilesListing { this: Serialiser ⇒
     seenClasses = null
     plugins = null
     listedFiles = null
-    PluginClassAndFiles(retFile.toSeq, retPlugins.toSeq)
+    PluginClassAndFiles(retFile.toVector, retPlugins.toVector)
   }
 
 }

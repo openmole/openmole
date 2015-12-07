@@ -143,7 +143,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
   def moleJobs = job.moleJobs
   def runnableTasks = job.moleJobs.map(RunnableTask(_))
 
-  def pluginsAndFiles = SerialiserService.pluginsAndFiles(runnableTasks)
+  @transient lazy val pluginsAndFiles = SerialiserService.pluginsAndFiles(runnableTasks)
 
   def usedFiles: Iterable[File] = {
     val pf = pluginsAndFiles
@@ -156,7 +156,7 @@ trait BatchExecutionJob extends ExecutionJob { bej ⇒
 
   def usedFileHashes = usedFiles.map(f ⇒ (f, FileService.hash(job.moleExecution, f)))
 
-  val environment: BatchEnvironment
+  def environment: BatchEnvironment
 
   def trySelectStorage(): Option[(StorageService, AccessToken)]
   def trySelectJobService(): Option[(JobService, AccessToken)]
