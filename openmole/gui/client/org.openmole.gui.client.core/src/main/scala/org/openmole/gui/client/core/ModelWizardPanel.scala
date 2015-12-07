@@ -84,13 +84,19 @@ class ModelWizardPanel extends ModalPanel {
   val updatableTable: Var[Boolean] = Var(true)
   val hasStep2: Var[Boolean] = Var(false)
   val bodyContent: Var[Option[TypedTag[HTMLDivElement]]] = Var(None)
+  val autoMode = Var(true)
 
   val commandArea: TextArea = bs.textArea(5)("").render
+  val autoModeCheckBox = bs.checkbox(autoMode())(onchange := { () ⇒
+    autoMode() = !autoMode()
+  })
 
   Obs(launchingCommand, skipInitial = true) {
-    commandArea.value = launchingCommand().map {
-      _.fullCommand
-    }.getOrElse("")
+    if (autoMode()) {
+      commandArea.value = launchingCommand().map {
+        _.fullCommand
+      }.getOrElse("")
+    }
   }
 
   Obs(currentReactives, skipInitial = true) {
@@ -175,6 +181,16 @@ class ModelWizardPanel extends ModalPanel {
       " By default he systems detects automatically your Variable changes and update the launching command. However, this option can be desactivated."
     )
   )
+
+  val autoModeTag = bs.div("onecolumn")(
+    tags.b("Launching Command"),
+    bs.div("spacer4 right")(
+      "Automatic ",
+      autoModeCheckBox,
+      bs.span("grey")(" It is automatically updated (default), or it can be set manually")
+    )
+  )
+
   val buildModelTaskButton = {
     bs.button(
       "Build",
@@ -389,7 +405,7 @@ class ModelWizardPanel extends ModalPanel {
               )
             )
           }
-          ), commandArea)
+          ), autoModeTag, commandArea)
         case _ ⇒ tags.div()
       }
     )
