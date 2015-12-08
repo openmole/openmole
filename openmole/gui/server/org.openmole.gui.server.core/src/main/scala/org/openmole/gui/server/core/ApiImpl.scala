@@ -10,8 +10,6 @@ import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
 import org.openmole.core.serializer.SerialiserService
-import org.openmole.core.workflow.execution.Environment
-import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.gui.server.core.Utils._
@@ -23,15 +21,11 @@ import java.nio.file._
 import org.openmole.console._
 import org.osgi.framework.Bundle
 import scala.util.{ Failure, Success, Try }
-import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.ExecutionContext
-import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import com.github.rjeschke._
-import org.openmole.core.fileservice._
 import org.openmole.core.buildinfo
 
 /*
@@ -344,7 +338,7 @@ object ApiImpl extends Api {
     def ioString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) Seq(s"  $keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")) + ",\n" else ""
     def imapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { i ⇒ s"""  $keyString += (${i.name}, "${i.mapping.get}")""" }.mkString(",\n") + ",\n" else ""
     def omapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { o ⇒ s"""  $keyString += ("${o.mapping.get}", ${o.name})""" }.mkString(",\n") + ",\n" else ""
-    def default(key: String, value: String) = s"  $key :=  $value"
+    def default(key: String, value: String) = s"  $key := $value"
 
     try {
       for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
@@ -362,7 +356,7 @@ object ApiImpl extends Api {
       val omFileString = omapString(ofilemappings, "fileOutputs")
       val defaults =
         "  //Default values. Can be removed if OpenMOLE Vals are set by a value coming from the workflow\n" +
-          (inputs.map { p ⇒ (p.name, p.default) } ++
+          (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
             ifilemappings.map { p ⇒ (p.name, "\"" + p.mapping.getOrElse("") + "\"") } ++
             ofilemappings.map { p ⇒ (p.name, "\"" + p.mapping.getOrElse("") + "\"") }).filterNot {
               _._2.isEmpty
@@ -394,4 +388,8 @@ object ApiImpl extends Api {
 
   }
 
+  def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {
+    case ProtoTYPE.BOOLEAN ⇒ if (protoType.default == "1") "true" else "false"
+    case _                 ⇒ protoType.default
+  }
 }
