@@ -21,7 +21,8 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools.FromContext
 
-import scala.util.Random
+import scalaz._
+import Scalaz._
 
 object ZipWithIndexSampling {
 

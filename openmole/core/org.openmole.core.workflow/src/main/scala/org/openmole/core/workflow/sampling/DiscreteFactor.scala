@@ -20,8 +20,7 @@ package org.openmole.core.workflow.sampling
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools.FromContext
-
-import scala.util.Random
+import scalaz.Scalaz._
 
 object DiscreteFactor {
 

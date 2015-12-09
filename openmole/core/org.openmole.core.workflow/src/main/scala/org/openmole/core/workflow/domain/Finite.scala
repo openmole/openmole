@@ -21,7 +21,7 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.FromContext
 
 import scala.annotation.implicitNotFound
-import scala.util.Random
+import scalaz.Scalaz._
 
 @implicitNotFound("${D} is not a finite variation domain of type ${T}")
 trait Finite[+T, -D] extends Domain[T, D] with Discrete[T, D] {

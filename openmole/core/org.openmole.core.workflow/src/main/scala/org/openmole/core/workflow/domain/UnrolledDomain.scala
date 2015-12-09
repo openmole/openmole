@@ -16,6 +16,8 @@
  */
 package org.openmole.core.workflow.domain
 
+import scalaz.Scalaz._
+
 object UnrolledDomain {
   implicit def isDiscrete[T: Manifest, D] =
     new Finite[Array[T], UnrolledDomain[T, D]] {

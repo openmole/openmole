@@ -23,6 +23,8 @@ import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools.FromContext
 import collection.JavaConversions._
 import ClassUtils._
+import scalaz._
+import Scalaz._
 
 import scala.util.Random
 
