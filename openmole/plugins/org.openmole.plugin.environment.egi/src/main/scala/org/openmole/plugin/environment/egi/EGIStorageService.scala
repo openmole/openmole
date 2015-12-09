@@ -141,7 +141,17 @@ object EGIWebDAVStorageService {
 
 }
 
-trait EGIWebDAVStorageService <: EGIStorageService
+trait EGIWebDAVStorageService <: EGIStorageService /*{
+  override def upload(src: File, dest: String, options: TransferOptions)(implicit token: AccessToken): Unit = {
+    super.upload(src, dest, options)
+    val is =
+      try openInputStream(dest)
+      catch {
+        case e: Throwable => throw new IOException(s"File upload failed from $src to $dest")
+      }
+    is.close
+  }
+}*/
 
 class CurlRemoteStorage(val host: String, val port: Int, val voName: String) extends RemoteStorage with NativeCommandCopy { s ⇒
   lazy val curl = new Curl(voName)

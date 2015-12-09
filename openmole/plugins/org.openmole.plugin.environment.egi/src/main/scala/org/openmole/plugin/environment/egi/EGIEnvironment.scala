@@ -234,8 +234,6 @@ object EGIEnvironment extends Logger {
         val notLoaded = normalizedFitness(fitness).shuffled(Random.default)
         val totalFitness = notLoaded.map { case (_, fitness) ⇒ fitness }.sum
 
-        Log.logger.fine(s"""Fitnesses: ${notLoaded.mkString(",")}""")
-
         val selectedBS = selected(Random.default.nextDouble * totalFitness, notLoaded.toList)
 
         selectedBS.tryGetToken.map(selectedBS -> _)
