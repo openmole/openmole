@@ -95,7 +95,7 @@ trait StorageService extends BatchService with Storage {
         val childPath = child(path, name(file))
         try makeDir(childPath)
         catch {
-          case e: Throwable ⇒ logger.log(FINE, "Error creating base directory " + root + e)
+          case e: Throwable ⇒ logger.log(FINE, "Error creating base directory " + root, e)
         }
         childPath
     }

@@ -35,8 +35,8 @@ sealed class FilteredSampling(sampling: Sampling, keep: Condition) extends Sampl
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def apply() = FromContext.apply { (context, rng) ⇒
-    sampling().from(context)(rng).filter(sample ⇒ keep.evaluate(context ++ sample)(rng))
+  override def apply() = FromContext { (context, rng) ⇒
+    sampling().from(context)(rng).filter(sample ⇒ keep.from(context ++ sample)(rng))
   }
 
 }

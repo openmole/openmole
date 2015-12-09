@@ -38,7 +38,7 @@ abstract class ScalaTask(val source: String) extends JVMLanguageTask {
   scalaCompilation
 
   override def processCode(context: Context)(implicit rng: RandomProvider) = {
-    val map = scalaCompilation.run(context)(rng)
+    val map = scalaCompilation().from(context)(rng)
     outputs.toSeq.map {
       o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
     }

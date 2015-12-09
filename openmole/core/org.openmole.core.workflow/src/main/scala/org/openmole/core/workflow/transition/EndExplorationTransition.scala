@@ -37,7 +37,7 @@ class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: C
       subMole.cancel
     }
 
-    Try(!subMole.canceled && trigger.evaluate(context)) match {
+    Try(!subMole.canceled && trigger.from(context)) match {
       case Success(true) ⇒ perform()
       case Failure(t) ⇒
         subMole.cancel; throw t

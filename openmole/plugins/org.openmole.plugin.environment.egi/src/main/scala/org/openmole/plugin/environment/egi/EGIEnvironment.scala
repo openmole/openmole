@@ -116,7 +116,7 @@ object EGIEnvironment extends Logger {
 
   Workspace += (ConnectionsBySRMSE, "10")
   Workspace += (ConnectionsByWMS, "10")
-  Workspace += (ConnectionsByWebDAVSE, "20")
+  Workspace += (ConnectionsByWebDAVSE, "50")
 
   Workspace += (ProxyRenewalRatio, "0.2")
   Workspace += (MinProxyRenewal, "PT5M")
@@ -233,8 +233,6 @@ object EGIEnvironment extends Logger {
 
         val notLoaded = normalizedFitness(fitness).shuffled(Random.default)
         val totalFitness = notLoaded.map { case (_, fitness) ⇒ fitness }.sum
-
-        Log.logger.fine(s"""Fitnesses: ${notLoaded.mkString(",")}""")
 
         val selectedBS = selected(Random.default.nextDouble * totalFitness, notLoaded.toList)
 

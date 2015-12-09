@@ -23,6 +23,8 @@ import org.openmole.core.workflow.tools._
 import scala.reflect.runtime.universe._
 
 import scala.util.Random
+import scalaz._
+import Scalaz._
 
 object MapDomain {
 
@@ -43,6 +45,6 @@ sealed class MapDomain[-I: Manifest, +O: Manifest, D](val domain: D, val source:
 
   def iterator(context: Context)(implicit rng: RandomProvider): Iterator[O] =
     discrete.iterator(domain).from(context).map {
-      e ⇒ proxy.run(context)(rng).asInstanceOf[I ⇒ O](e)
+      e ⇒ proxy().from(context).asInstanceOf[I ⇒ O](e)
     }
 }

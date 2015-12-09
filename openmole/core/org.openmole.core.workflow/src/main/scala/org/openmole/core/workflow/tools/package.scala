@@ -26,7 +26,9 @@ import scalaz._
 
 package tools {
 
-  trait ToolsPackage {
+import org.openmole.core.workflow.data.Prototype
+
+    trait ToolsPackage {
 
       implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
       implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
@@ -38,6 +40,8 @@ package tools {
       implicit class RefLongDecorator(r: Ref[Long]) {
         def next = r getUpdate (_ + 1)
       }
+
+      type Condition = FromContext[Boolean]
 
     }
 }
