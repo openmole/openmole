@@ -42,6 +42,7 @@ object FromContext {
   implicit def codeToFromContextInt(code: String) = codeToFromContext[Int](code)
   implicit def codeToFromContextBigDecimal(code: String) = codeToFromContext[BigDecimal](code)
   implicit def codeToFromContextBigInt(code: String) = codeToFromContext[BigInt](code)
+  implicit def codeToFromContextBoolean(condition: String) = codeToFromContext[Boolean](condition)
 
   def value[T](t: T): FromContext[T] =
     new FromContext[T] {

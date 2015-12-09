@@ -24,7 +24,7 @@ package object modifier {
 
   implicit class HookModifierDecorator(h: Hook) {
     def when(condition: Condition) = ConditionHook(h, condition)
-    def when(condition: String) = ConditionHook(h, Condition(condition))
+    def when(condition: String) = ConditionHook(h, condition)
     def condition(condition: Condition) = when(condition)
     def condition(condition: String) = when(condition)
   }
