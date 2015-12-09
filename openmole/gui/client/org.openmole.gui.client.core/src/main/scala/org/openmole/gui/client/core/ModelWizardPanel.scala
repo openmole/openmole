@@ -86,12 +86,13 @@ class ModelWizardPanel extends ModalPanel {
   val bodyContent: Var[Option[TypedTag[HTMLDivElement]]] = Var(None)
   val autoMode = Var(true)
 
-  val commandArea: TextArea = bs.textArea(5)("").render
+  val commandArea: TextArea = bs.textArea(3)("").render
   val autoModeCheckBox = bs.checkbox(autoMode())(onchange := { () ⇒
     autoMode() = !autoMode()
   })
 
-  lazy val codeSelector: Select[Language] = Select("selectLanguages",
+  val scriptNameInput = bs.input("", "modelNameInput")(placeholder := "Script name").render
+  val codeSelector: Select[Language] = Select("selectLanguages",
     Seq(Binary(), PythonLanguage(), NetLogoLanguage(), RLanguage()).map {
       (_, emptyCK)
     }, Some(Binary()),
@@ -150,6 +151,7 @@ class ModelWizardPanel extends ModalPanel {
                 labelName() = Some(fileName)
                 launchingCommand().foreach { lc ⇒
                   codeSelector.content() = lc.language
+                  scriptNameInput.value = fileName.split('.').head
                   val nbArgs = lc.arguments.size
                   val iReactives = lc.arguments.zipWithIndex.collect {
                     case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandInput(ve), id)
@@ -209,7 +211,7 @@ class ModelWizardPanel extends ModalPanel {
         launchingCommand().foreach { lc ⇒
           OMPost[Api].buildModelTask(
             labelName().getOrElse(""),
-            "script",
+            scriptNameInput.value,
             commandArea.value,
             codeSelector.content().getOrElse(Binary()),
             inputs(currentReactives()).map {
@@ -429,9 +431,10 @@ class ModelWizardPanel extends ModalPanel {
       bodyDialog(Rx {
         bodyContent().getOrElse(tags.div())
       }),
-      footerDialog(bs.buttonGroup()(
-        closeButton,
-        buildModelTaskButton
+      footerDialog(OMTags.buttonGroup("width200Right100")(
+        inputGroupButton(closeButton),
+        inputGroupButton(scriptNameInput),
+        inputGroupButton(buildModelTaskButton)
       )
       )
     )

@@ -824,3 +824,13 @@ top: -6px;
     left: calc(50% - 125px);
     right: 50%;
 }
+.modelNameInput{
+    height: 34px;
+    width: 150px;
+    border-radius: 1px;
+}
+
+.width200Right100{
+    width: 200px;
+    right: 100px;
+}
