@@ -86,7 +86,7 @@ class ModelWizardPanel extends ModalPanel {
   val bodyContent: Var[Option[TypedTag[HTMLDivElement]]] = Var(None)
   val autoMode = Var(true)
 
-  val commandArea: TextArea = bs.textArea(5)("").render
+  val commandArea: TextArea = bs.textArea(3)("").render
   val autoModeCheckBox = bs.checkbox(autoMode())(onchange := { () ⇒
     autoMode() = !autoMode()
   })
