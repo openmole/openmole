@@ -29,12 +29,5 @@ object Condition {
     override def from(context: ⇒ Context)(implicit rng: RandomProvider): Boolean = false
   }
 
-  implicit def conditionStringConverter(condition: String) = Condition(condition)
-
-  def apply(code: String): Condition = new Condition {
-    @transient lazy val proxy = ScalaWrappedCompilation.dynamic[Boolean](code)
-    override def from(context: ⇒ Context)(implicit rng: RandomProvider) = proxy().from(context)
-  }
-
 }
 

@@ -74,6 +74,11 @@ object FromString {
       def apply(s: String) = s
     }
 
+  implicit val booleanFromString: FromString[Boolean] =
+    new FromString[Boolean] {
+      override def apply(s: String): Boolean = s.toBoolean
+    }
+
   implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
   implicit val bigDecimalAsIfIntegral = Numeric.BigDecimalAsIfIntegral
   implicit val floatAsIfIntegral = Numeric.FloatAsIfIntegral

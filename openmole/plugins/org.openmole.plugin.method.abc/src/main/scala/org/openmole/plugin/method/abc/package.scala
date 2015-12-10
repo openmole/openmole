@@ -67,7 +67,7 @@ package object abc {
 
     val analyse = Slot(StrainerCapsule(analyseTask))
 
-    val terminated = Condition(terminatedPrototype.name + " == true")
+    val terminated: Condition = terminatedPrototype
 
     val modelVariables = algorithm.priorPrototypes ++ algorithm.targetPrototypes
 
