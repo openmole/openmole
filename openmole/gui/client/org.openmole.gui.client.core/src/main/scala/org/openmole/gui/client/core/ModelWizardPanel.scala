@@ -31,7 +31,7 @@ import org.openmole.gui.shared.Api
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
 import bs._
 
 class ModelWizardPanel extends ModalPanel {
@@ -84,6 +84,7 @@ class ModelWizardPanel extends ModalPanel {
   val updatableTable: Var[Boolean] = Var(true)
   val hasStep2: Var[Boolean] = Var(false)
   val bodyContent: Var[Option[TypedTag[HTMLDivElement]]] = Var(None)
+  val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
 
   val commandArea: TextArea = bs.textArea(3)("").render
@@ -96,7 +97,7 @@ class ModelWizardPanel extends ModalPanel {
     Seq(Binary(), PythonLanguage(), NetLogoLanguage(), RLanguage()).map {
       (_, emptyCK)
     }, Some(Binary()),
-    btn_primary
+    btn_default
   )
 
   Obs(launchingCommand, skipInitial = true) {
@@ -110,6 +111,14 @@ class ModelWizardPanel extends ModalPanel {
   Obs(currentReactives, skipInitial = true) {
     if (updatableTable()) setBodyContent
   }
+
+  def buttonStyle(i: Int): ClassKeyAggregator = {
+    if (i == currentTab()) btn_primary
+    else btn_default
+  } + "marginRight20"
+
+  def nbInputs = inputs(currentReactives()).size
+  def nbOutputs = currentReactives().size - nbInputs
 
   def inputs(reactives: Seq[Reactive]): Seq[VariableRole[VariableElement]] = {
     reactives.map {
@@ -176,7 +185,7 @@ class ModelWizardPanel extends ModalPanel {
 
   val step1 = tags.div(
     tags.h4("Step 1: Code import"),
-    tags.div("Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++ " +
+    bs.div("grey")("Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++ " +
       "R, etc). In the case of a Care archive, the packaging has to be done with the",
       tags.b(" -o yourmodel.tar.gz.bin."),
       " option."
@@ -184,8 +193,6 @@ class ModelWizardPanel extends ModalPanel {
   )
 
   val step2 = tags.div(
-    tags.h4("Step 2: Code I/O settings"),
-    bs.div("spacer20")("The detected code is ", codeSelector.selector),
     bs.div("grey")("The systems detects automatically the launching command and propose you the creation of some OpenMOLE Variables so that" +
       " your model will be able to be feeded with variable values coming from the workflow you will build afterwards. In the case of Java, Scala, Netlogo" +
       "(ie codes working on the JVM) the OpenMOLE variables can be set directly in the command line. Otherwise, they have to be set inside ${} statements." +
@@ -358,8 +365,26 @@ class ModelWizardPanel extends ModalPanel {
     }
   }
 
-  def setBodyContent = bodyContent() = Some({
+  def setBodyContent: Unit = bodyContent() = Some({
+    println("redraw")
     val reactives = currentReactives()
+    val topButtons = bs.div("spacer20")(
+      Rx {
+        bs.badge("I/O", s"$nbInputs/$nbOutputs",
+          buttonStyle(0)
+        )(onclick := { () ⇒
+            currentTab() = 0
+            setBodyContent
+          })
+      }, Rx {
+        bs.badge("Resources", "0", buttonStyle(1))(onclick := { () ⇒
+          currentTab() = 1
+          setBodyContent
+        })
+      },
+      bs.span("grey")(codeSelector.selector, " (detected code)")
+    )
+
     tags.div(
       hasStep2() match {
         case true ⇒ tags.div()
@@ -372,51 +397,57 @@ class ModelWizardPanel extends ModalPanel {
       },
       hasStep2() match {
         case true ⇒
-          tags.div(step2, bs.div("spacer7")({
+          tags.div(
+            tags.h4("Step2: Task configuration"), step2,
+            topButtons,
+            if (currentTab() == 0) {
+              tags.div({
 
-            val iinput: HTMLInputElement = bs.input("")(placeholder := "Add Input").render
+                val iinput: HTMLInputElement = bs.input("")(placeholder := "Add Input").render
 
-            val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
+                val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
 
-            val head = thead(tags.tr(
-              for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
-                tags.th(h)
-              }))
+                val head = thead(tags.tr(
+                  for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
+                    tags.th(h)
+                  }))
 
-            bs.div("spacer30")(
-              bs.div("twocolumns right10")(
-                bs.form("paddingLeftRight50")(iinput,
-                  onsubmit := {
-                    () ⇒
-                      addVariableElement(Input(VariableElement(-1, ProtoTypePair(iinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
-                      iinput.value = ""
-                      false
-                  }),
-                bs.table(striped)(
-                  head,
-                  tbody(
-                    for (ip ← inputs(reactives)) yield {
-                      ip.line
-                    }))),
-              tags.div(`class` := "twocolumns")(
-                bs.form("paddingLeftRight50")(oinput, onsubmit := {
-                  () ⇒
-                    addVariableElement(Output(VariableElement(-1, ProtoTypePair(oinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
-                    oinput.value = ""
-                    false
-                }),
-                bs.table(striped)(
-                  head,
-                  tbody(
-                    for (op ← outputs(reactives)) yield {
-                      op.line
-                    }
+                bs.div("spacer50")(
+                  bs.div("twocolumns right10")(
+                    bs.form("paddingLeftRight50")(iinput,
+                      onsubmit := {
+                        () ⇒
+                          addVariableElement(Input(VariableElement(-1, ProtoTypePair(iinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
+                          iinput.value = ""
+                          false
+                      }),
+                    bs.table(striped)(
+                      head,
+                      tbody(
+                        for (ip ← inputs(reactives)) yield {
+                          ip.line
+                        }))),
+                  tags.div(`class` := "twocolumns")(
+                    bs.form("paddingLeftRight50")(oinput, onsubmit := {
+                      () ⇒
+                        addVariableElement(Output(VariableElement(-1, ProtoTypePair(oinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
+                        oinput.value = ""
+                        false
+                    }),
+                    bs.table(striped)(
+                      head,
+                      tbody(
+                        for (op ← outputs(reactives)) yield {
+                          op.line
+                        }
+                      )
+                    )
                   )
                 )
-              )
-            )
-          }
-          ), autoModeTag, commandArea)
+              }, autoModeTag, commandArea)
+            }
+            else tags.div("resources")
+          )
         case _ ⇒ tags.div()
       }
     )
