@@ -18,61 +18,95 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.core.workflow.data.PrototypeType
-
-import scala.util.Random
+import algorithm.ga
+import fr.iscpif.mgo.algorithm.ga._
+import fr.iscpif.mgo.clone.History
+import niche._
+import fr.iscpif.mgo.fitness._
+import org.openmole.core.workflow.data._
 
 object GenomeProfile {
 
   def apply(
     x: Int,
     nX: Int,
-    termination: GATermination { type G >: GenomeProfile#G; type P >: GenomeProfile#P; type F >: GenomeProfile#F },
-    inputs: Inputs,
-    objective: Objective,
-    reevaluate: Double = 0.0) = {
-    val (_x, _nX, _reevaluate, _inputs) = (x, nX, reevaluate, inputs)
-    new GenomeProfile {
-      val inputs = _inputs
-      val objectives = Seq(objective)
+    genome: Genome,
+    objective: Objective) =
+    DeterministicGenomeProfile(
+      ga.profile[Double](
+        fitness = Fitness(_.phenotype),
+        niche = genomeProfile[ga.GAGenome](x, nX)
+      ),
+      genome,
+      objective
+    )
 
-      val stateType = termination.stateType
-      val populationType = PrototypeType[Population[G, P, F]]
-      val individualType = PrototypeType[Individual[G, P, F]]
-      val aType = PrototypeType[A]
-      val fType = PrototypeType[F]
-      val gType = PrototypeType[G]
-
-      val genomeSize = inputs.size
-      override val cloneProbability: Double = _reevaluate
-
-      val x = _x
-      val nX = _nX
-      type STATE = termination.STATE
-      def initialState: STATE = termination.initialState
-      def terminated(population: Population[G, P, F], terminationState: STATE)(implicit rng: Random): (Boolean, STATE) = termination.terminated(population, terminationState)
+  object DeterministicGenomeProfile {
+    implicit val workflowIntegration = new WorkflowIntegration[DeterministicGenomeProfile] {
+      override def apply(t: DeterministicGenomeProfile): EvolutionWorkflow = new DeterministicGAAlgorithmIntegration {
+        override type S = Unit
+        override type P = Double
+        override def objectives: Objectives = Seq(t.objective)
+        override def genome: Genome = t.genome
+        override def valuesToPhenotype(s: Seq[Double]): P = s.head
+        override def phenotypeToValues(p: P): Seq[Double] = Seq(p)
+        override def phenotypeType: PrototypeType[P] = PrototypeType[P]
+        override def algorithm: Algorithm[G, P, S] = t.algo
+        override def stateType: PrototypeType[S] = PrototypeType[S]
+      }
     }
-
   }
 
-}
+  case class DeterministicGenomeProfile(algo: Algorithm[ga.GAGenome, Double, Unit], genome: Genome, objective: Objective)
 
-trait GenomeProfile extends GAAlgorithm
-    with DynamicGACrossover
-    with DynamicGAMutation
-    with ProfileRanking
-    with BestAggregatedNicheElitism
-    with ProfileNiche
-    with NoArchive
-    with NoDiversity
-    with ProfileGenomePlotter
-    with BinaryTournamentSelection
-    with selection.ProportionalNumberOfRound
-    with TournamentOnRank
-    with GeneticBreeding
-    with MGFitness
-    with MaxAggregation
-    with ClampedGenome
-    with GAGenomeWithSigma {
-  def x: Int
+  def apply(
+    x: Int,
+    nX: Int,
+    genome: Genome,
+    objective: Objective,
+    replication: Replication[FitnessAggregation],
+    paretoSize: Int = 20) = {
+    val niche = genomeProfile[ga.GAGenome](x, nX)
+
+    StochasticGenomeProfile(
+      ga.noisyProfile[Double](
+        fitness = Fitness { i ⇒ StochasticGAAlgorithm.aggregate(replication.aggregation, i.phenotype.history) },
+        niche = niche,
+        nicheSize = paretoSize,
+        history = replication.max,
+        cloneRate = replication.reevaluate
+      ),
+      genome,
+      objective,
+      replication,
+      niche
+    )
+  }
+
+  object StochasticGenomeProfile {
+    implicit def OMStochasticProfile = new WorkflowIntegration[StochasticGenomeProfile] {
+      override def apply(t: StochasticGenomeProfile): EvolutionWorkflow =
+        new StochasticGAAlgorithm {
+          override def seed = t.replication.seed
+          override def stateType = PrototypeType[Unit]
+          override def genome: Genome = t.genome
+          override def objectives: Objectives = Seq(t.objective)
+          override def algorithm: Algorithm[G, P, S] = t.algo
+          override type S = Unit
+          override type PC = Double
+
+          override def phenotypeType = PrototypeType[P]
+          override def valuesToPhenotype(s: Seq[Double]): P = History(s.head)
+          override def phenotypeToValues(p: P): Seq[Double] = Seq(StochasticGAAlgorithm.aggregate(t.replication.aggregation, p.history))
+
+          override def populationToVariables(population: Population[Individual[G, P]], context: Context)(implicit rng: RandomProvider) = {
+            val profile = for { (_, is) ← population.groupBy(t.niche.apply).toVector } yield is.maxBy(_.phenotype.age: Int)
+            super.populationToVariables(profile, context)
+          }
+        }
+    }
+  }
+
+  case class StochasticGenomeProfile(algo: Algorithm[ga.GAGenome, History[Double], Unit], genome: Genome, objective: Objective, replication: Replication[FitnessAggregation], niche: Niche[GAGenome, History[Double], Int])
+
 }

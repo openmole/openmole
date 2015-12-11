@@ -29,7 +29,7 @@ import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.filedeleter.FileDeleter
 import org.openmole.core.serializer._
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
-import fr.iscpif.gridscale.storage.FileType
+import fr.iscpif.gridscale.storage.{ ListEntry, FileType }
 import java.io._
 import org.openmole.tool.logger.Logger
 
@@ -53,11 +53,21 @@ trait StorageService extends BatchService with Storage {
   def persistentDir(implicit token: AccessToken, session: Session): String
   def tmpDir(implicit token: AccessToken): String
 
-  @transient lazy val directoryCache =
+  @transient private lazy val _directoryCache =
     CacheBuilder.
       newBuilder().
       expireAfterWrite(Workspace.preferenceAsDuration(StorageService.DirRegenerate).toMillis, TimeUnit.MILLISECONDS).
       build[String, String]()
+
+  @transient private lazy val _serializedRemoteStorage = {
+    val file = Workspace.newFile("remoteStorage", ".xml")
+    FileDeleter.deleteWhenGarbageCollected(file)
+    SerialiserService.serialiseAndArchiveFiles(remoteStorage, file)
+    file
+  }
+
+  def serializedRemoteStorage = synchronized { _serializedRemoteStorage }
+  def directoryCache = synchronized { _directoryCache }
 
   protected implicit def callable[T](f: () ⇒ T): Callable[T] = new Callable[T]() { def call() = f() }
 
@@ -65,13 +75,6 @@ trait StorageService extends BatchService with Storage {
     ReplicaCatalog.onStorage(this).delete
     rmDir(baseDir)
     directoryCache.invalidateAll
-  }
-
-  @transient lazy val serializedRemoteStorage = {
-    val file = Workspace.newFile("remoteStorage", ".xml")
-    FileDeleter.deleteWhenGarbageCollected(file)
-    SerialiserService.serialiseAndArchiveFiles(remoteStorage, file)
-    file
   }
 
   def baseDir(implicit token: AccessToken): String =
@@ -92,7 +95,7 @@ trait StorageService extends BatchService with Storage {
         val childPath = child(path, name(file))
         try makeDir(childPath)
         catch {
-          case e: Throwable ⇒ logger.log(FINEST, "Error creating base directory " + root + e)
+          case e: Throwable ⇒ logger.log(FINE, "Error creating base directory " + root, e)
         }
         childPath
     }
@@ -102,7 +105,7 @@ trait StorageService extends BatchService with Storage {
 
   def exists(path: String)(implicit token: AccessToken): Boolean = token.access { _exists(path) }
   def listNames(path: String)(implicit token: AccessToken): Seq[String] = token.access { _listNames(path) }
-  def list(path: String)(implicit token: AccessToken): Seq[(String, FileType)] = token.access { _list(path) }
+  def list(path: String)(implicit token: AccessToken): Seq[ListEntry] = token.access { _list(path) }
   def makeDir(path: String)(implicit token: AccessToken): Unit = token.access { _makeDir(path) }
   def rmDir(path: String)(implicit token: AccessToken): Unit = token.access { _rmDir(path) }
   def rmFile(path: String)(implicit token: AccessToken): Unit = token.access { _rmFile(path) }

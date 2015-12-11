@@ -47,9 +47,13 @@ case class PrototypeSet(prototypes: Seq[Prototype[_]], explore: Set[String] = Se
    */
   def contains(name: String): Boolean = prototypeMap.contains(name)
 
-  //override def empty = PrototypeSet.empty
+  def explored: Seq[Prototype[_]] = prototypes.filter(explored)
+
+  def explored(p: Prototype[_]): Boolean = p.`type`.isArray && explore.contains(p.name)
 
   override def iterator: Iterator[Prototype[_]] = prototypes.iterator
+
+  def explore(d: String*) = copy(explore = explore ++ d)
 
   def ++(d: Traversable[Prototype[_]]) = copy(prototypes = d.toList ::: prototypes.toList)
 

@@ -21,6 +21,7 @@ import java.io.File
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.Executors
+import fr.iscpif.gridscale.authentication.UserPassword
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.tool.file._
@@ -36,7 +37,7 @@ import org.openmole.core.serializer._
 import org.openmole.tool.tar._
 import org.openmole.tool.hash._
 import ProcessUtil._
-import fr.iscpif.gridscale.ssh.{ SSHStorage, SSHUserPasswordAuthentication }
+import fr.iscpif.gridscale.ssh._
 
 import org.openmole.core.batch.message.FileMessage._
 import scala.annotation.tailrec
@@ -44,7 +45,10 @@ import util.{ Failure, Success }
 
 object JobLauncher extends Logger {
   val jobCheckInterval = new ConfigurationLocation("JobLauncher", "jobCheckInterval")
+  val connectionTimeout = new ConfigurationLocation("JobLauncher", "connectionTimeout")
+
   Workspace += (jobCheckInterval, "PT1M")
+  Workspace += (connectionTimeout, "PT1M")
 }
 
 class JobLauncher(cacheSize: Long, debug: Boolean) {
@@ -57,22 +61,23 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
   val resultUploader = Executors.newSingleThreadScheduledExecutor(daemonThreadFactory)
 
-  def launch(userHostPort: String, _password: String, nbWorkers: Int) = {
+  def launch(userHostPort: String, password: String, nbWorkers: Int) = {
     val splitUser = userHostPort.split("@")
     if (splitUser.size != 2) throw new UserBadDataError("Host must be formated as user@hostname")
-    val _user = splitUser(0)
+    val user = splitUser(0)
     val splitHost = splitUser(1).split(":")
     val _port = if (splitHost.size == 2) splitHost(1).toInt else 22
     val _host = splitHost(0)
 
-    logger.info(s"Looking for jobs on ${_host} port ${_port} with user ${_user}")
+    logger.info(s"Looking for jobs on ${_host} port ${_port} with user ${user}")
 
     val storage = new SimpleStorage with GridScaleStorage with CompressedTransfer {
-      val storage = new SSHStorage with SSHUserPasswordAuthentication {
+
+      val storage = new SSHStorage {
         val host = _host
         override val port = _port
-        val user = _user
-        val password = _password
+        def credential = UserPassword(user, password)
+        def timeout = Workspace.preferenceAsDuration(connectionTimeout)
       }
 
       val root = ""

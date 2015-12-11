@@ -21,9 +21,8 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 
 object MasterCapsule {
-  def apply(task: Task, persist: Seq[String] = Seq.empty, strainer: Boolean = false) = new MasterCapsule(task, persist, strainer)
-  def apply(t: Task, persist: String*): MasterCapsule = apply(t, persist)
-  def apply(t: Task, head: Prototype[_], persist: Prototype[_]*): MasterCapsule = apply(t, (head :: persist.toList).map { _.name })
+  def apply(task: Task, persist: Seq[Prototype[_]], strainer: Boolean) = new MasterCapsule(task, persist.map(_.name), strainer)
+  def apply(t: Task, persist: Prototype[_]*): MasterCapsule = apply(t, persist, false)
 }
 
 class MasterCapsule(task: Task, val persist: Seq[String] = Seq.empty, strainer: Boolean) extends Capsule(task, strainer) {

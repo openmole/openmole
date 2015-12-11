@@ -20,7 +20,6 @@ import java.io.{ File, OutputStream, InputStream }
 import java.util.UUID
 
 import fr.iscpif.gridscale.storage._
-import org.openmole.core.batch.message.ReplicatedFile
 import org.openmole.core.workspace._
 import org.openmole.tool.thread._
 import org.openmole.tool.file._
@@ -35,7 +34,6 @@ object Storage {
   val BufferSize = new ConfigurationLocation("Storage", "BufferSize")
   val CopyTimeout = new ConfigurationLocation("Storage", "CopyTimeout")
   val CloseTimeout = new ConfigurationLocation("Storage", "CloseTimeout")
-
   Workspace += (BufferSize, "65535")
   Workspace += (CopyTimeout, "PT1M")
   Workspace += (CloseTimeout, "PT1M")
@@ -59,7 +57,7 @@ trait Storage {
   def child(parent: String, child: String): String
   protected def _exists(path: String): Boolean
   protected def _listNames(path: String): Seq[String]
-  protected def _list(path: String): Seq[(String, FileType)]
+  protected def _list(path: String): Seq[ListEntry]
   protected def _makeDir(path: String): Unit
   protected def _rmDir(path: String): Unit
   protected def _rmFile(path: String): Unit
@@ -75,13 +73,13 @@ trait Storage {
   protected def _upload(src: File, dest: String, options: TransferOptions) = {
     val os = uploadOutputStream(dest, options)
     try src.copy(os, bufferSize, copyTimeout)
-    finally timeout(os.close)(closeTimeout)
+    finally os.close
   }
 
   protected def _download(src: String, dest: File, options: TransferOptions) = {
     val is = downloadInputStream(src, options)
     try is.copy(dest, bufferSize, copyTimeout)
-    finally timeout(is.close)(closeTimeout)
+    finally is.close
   }
 
   protected def bufferSize = Workspace.preferenceAsInt(Storage.BufferSize)

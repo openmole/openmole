@@ -19,12 +19,13 @@ package org.openmole.plugin.domain.collection
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.tools.FromContext
 
 object VariableDomain {
   implicit def isFinite[T] = new Finite[T, VariableDomain[T]] {
     override def inputs(domain: VariableDomain[T]) = Seq(domain.variable)
-    override def computeValues(domain: VariableDomain[T], context: Context)(implicit rng: RandomProvider): Iterable[T] =
-      context(domain.variable)
+    override def computeValues(domain: VariableDomain[T]) =
+      FromContext((context, rng) ⇒ context(domain.variable))
   }
 
   def apply[A](variable: Prototype[Array[A]]) = new VariableDomain[A](variable)

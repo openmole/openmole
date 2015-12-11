@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.environment.egi
 
+import fr.iscpif.gridscale.authentication.P12Authentication
 import org.openmole.core.batch.environment.{ BatchExecutionJob, BatchEnvironment }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.filedeleter.FileDeleter
@@ -25,17 +26,17 @@ import org.openmole.core.updater.Updater
 import org.openmole.core.workflow.execution.ExecutionJob
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.{ Workspace, ConfigurationLocation, AuthenticationProvider }
-import fr.iscpif.gridscale.egi.BDII
-import fr.iscpif.gridscale.dirac.{ DIRACJobService ⇒ GSDIRACJobService }
+import fr.iscpif.gridscale.egi._
+import fr.iscpif.gridscale.egi.{ DIRACJobService ⇒ GSDIRACJobService }
 import concurrent.duration._
 import scala.ref.WeakReference
 
 object DIRACEnvironment {
 
-  val LocalThreads = new ConfigurationLocation("DIRACEnvironment", "LocalThreads")
+  val Connections = new ConfigurationLocation("DIRACEnvironment", "Connections")
   val EagerSubmissionThreshold = ConfigurationLocation("DIRACEnvironment", "EagerSubmissionThreshold")
 
-  Workspace += (LocalThreads, "100")
+  Workspace += (Connections, "100")
   Workspace += (EagerSubmissionThreshold, "0.2")
 
   def apply(
@@ -68,11 +69,11 @@ object DIRACEnvironment {
 
 class DiracBatchExecutionJob(val job: Job, val environment: DIRACEnvironment) extends BatchExecutionJob {
 
-  def selectStorage() = environment.selectAStorage(usedFileHashes)
+  def trySelectStorage() = environment.trySelectAStorage(usedFileHashes)
 
-  def selectJobService() = {
+  def trySelectJobService() = {
     val js = environment.jobService
-    (js, js.waitAToken)
+    js.tryGetToken.map(js -> _)
   }
 
 }
@@ -88,7 +89,7 @@ class DIRACEnvironment(
     val cpuTime: Option[Duration],
     override val openMOLEMemory: Option[Int],
     val debug: Boolean,
-    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with EGIEnvironmentId with LCGCp { env ⇒
+    override val name: Option[String])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIIStorageServers with EGIEnvironmentId { env ⇒
 
   type JS = DIRACJobService
 
@@ -108,24 +109,18 @@ class DIRACEnvironment(
 
   def getAuthentication = authentications(classOf[EGIAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
 
-  @transient lazy val authentication = DIRACAuthentication.initialise(getAuthentication)(authentications)
+  @transient lazy val authentication: P12Authentication = DIRACAuthentication.initialise(getAuthentication)(authentications)
 
   @transient lazy val proxyCreator = {
     EGIAuthentication.initialise(getAuthentication)(
       vomsURL,
       voName,
-      EGIEnvironment.proxyTime,
-      fqan)(authentications).cache(EGIEnvironment.proxyRenewalDelay)
+      fqan)(authentications)
   }
 
   @transient lazy val jobService = new DIRACJobService {
+    val connections = Workspace.preferenceAsInt(DIRACEnvironment.Connections)
     val environment = env
-    val jobService = new GSDIRACJobService {
-      def group = env.group
-      def service = env.service
-      def credential = env.authentication
-      override def maxConnections = Workspace.preferenceAsInt(DIRACEnvironment.LocalThreads)
-    }
   }
 
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)

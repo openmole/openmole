@@ -21,12 +21,13 @@ import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.FromContext
 
-import scala.util.Random
+import scalaz._
+import Scalaz._
 
 object SlidingDomain {
 
   implicit def isDiscrete[T, D] = new Discrete[Array[T], SlidingDomain[T, D]] {
-    override def iterator(domain: SlidingDomain[T, D], context: Context)(implicit rng: RandomProvider) = domain.iterator(context)
+    override def iterator(domain: SlidingDomain[T, D]) = domain.iterator()
     override def inputs(domain: SlidingDomain[T, D]) = domain.inputs
   }
 
@@ -39,7 +40,11 @@ class SlidingDomain[T: Manifest, D](val domain: D, val size: FromContext[Int], v
 
   def inputs = discrete.inputs(domain)
 
-  def iterator(context: Context)(implicit rng: RandomProvider): Iterator[Array[T]] =
-    discrete.iterator(domain, context).sliding(size.from(context), step.from(context)).map(_.toArray)
+  def iterator() =
+    for {
+      it ← discrete.iterator(domain)
+      si ← size
+      st ← step
+    } yield it.sliding(si, st).map(_.toArray)
 
 }

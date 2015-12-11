@@ -46,12 +46,9 @@ object Prototype {
 
   implicit def prototypeToArrayConverter[T](p: Prototype[T]) = p.toArray
 
-  def apply[T](n: String)(implicit t: PrototypeType[T]): Prototype[T] = {
+  def apply[T](name: String, namespace: Namespace = Namespace.empty)(implicit t: PrototypeType[T]): Prototype[T] = {
     assert(t != null)
-    new Prototype[T] {
-      val name = n
-      val `type` = t
-    }
+    new Prototype[T](name, t, namespace)
   }
 
   implicit lazy val prototypeOrderingOnName = new Ordering[Prototype[_]] {
@@ -61,29 +58,31 @@ object Prototype {
 
 }
 
+object Namespace {
+  def empty = Namespace()
+}
+
+case class Namespace(names: String*) {
+  override def toString =
+    if (names.isEmpty) ""
+    else names.mkString("$") + "$"
+}
+
 /**
  * {@link Prototype} is a prototype in the sens of C language prototypes. It is
  * composed of a type and a name. It allows specifying typed data transfert in
  * OpenMOLE.
  *
- * @type T the type of the prototype. Values associated to this prototype should
+ * @tparam T the type of the prototype. Values associated to this prototype should
  * always be a subtype of T.
  */
-trait Prototype[T] extends Id {
-
+class Prototype[T](val simpleName: String, val `type`: PrototypeType[T], val namespace: Namespace) extends Id {
   /**
    * Get the name of the prototype.
    *
    * @return the name of the prototype
    */
-  def name: String
-
-  /**
-   * Get the type of the prototype.
-   *
-   * @return the type of the prototype
-   */
-  def `type`: PrototypeType[T]
+  def name: String = namespace.toString + simpleName
 
   /**
    * Test if this prototype can be assigned from another prototype. This work
@@ -97,8 +96,9 @@ trait Prototype[T] extends Id {
   def accepts(obj: Any): Boolean =
     obj == null || classAssignable(obj.getClass, `type`.runtimeClass)
 
-  override def id = (name, `type`)
-  override def toString = name + ": " + `type`.toString
+  def withName(name: String) = Prototype[T](name)(`type`)
 
+  override def id = (name, `type`)
+  override def toString = s"($name: ${`type`.toString})"
 }
 

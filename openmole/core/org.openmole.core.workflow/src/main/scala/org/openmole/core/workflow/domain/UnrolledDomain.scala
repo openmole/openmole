@@ -16,19 +16,18 @@
  */
 package org.openmole.core.workflow.domain
 
-import org.openmole.core.workflow.data.{ RandomProvider, Context }
+import scalaz.Scalaz._
 
 object UnrolledDomain {
   implicit def isDiscrete[T: Manifest, D] =
     new Finite[Array[T], UnrolledDomain[T, D]] {
-      override def computeValues(domain: UnrolledDomain[T, D], context: Context)(implicit rng: RandomProvider): Iterable[Array[T]] =
-        domain.computeValues(domain, context)
+      override def computeValues(domain: UnrolledDomain[T, D]) =
+        domain.computeValues(domain)
     }
 
   def apply[T: Manifest, D](d: D)(implicit discrete: Discrete[T, D]) = new UnrolledDomain[T, D](d)
 }
 
 class UnrolledDomain[T: Manifest, D](d: D)(implicit val discrete: Discrete[T, D]) {
-  def computeValues(domain: UnrolledDomain[T, D], context: Context)(implicit rng: RandomProvider): Iterable[Array[T]] =
-    Seq(domain.discrete.iterator(d, context).toArray)
+  def computeValues(domain: UnrolledDomain[T, D]) = domain.discrete.iterator(d).map(d ⇒ Seq(d.toArray))
 }

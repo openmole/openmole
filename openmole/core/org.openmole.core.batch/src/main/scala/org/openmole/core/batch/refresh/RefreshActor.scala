@@ -44,7 +44,7 @@ class RefreshActor(jobManager: JobManager) {
             jobManager ! Delay(Refresh(job, sj, bj, newDelay, 0), newDelay)
           }
           else jobManager ! Kill(job)
-        case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow), delay)
+        case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow), getTokenInterval)
       } catch {
         case _: ResubmitException ⇒
           jobManager ! Resubmit(job, sj.storage)

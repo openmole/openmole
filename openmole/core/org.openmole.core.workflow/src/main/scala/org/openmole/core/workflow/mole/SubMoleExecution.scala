@@ -130,7 +130,7 @@ class SubMoleExecution(
     def ctxForHooks = implicits + job.context
 
     def executeHook(h: Hook) =
-      try h.perform(ctxForHooks, moleExecution.executionContext)(moleExecution.newRNG)
+      try h.perform(ctxForHooks, moleExecution.executionContext)(RandomProvider(moleExecution.newRNG))
       catch {
         case e: Throwable ⇒
           val event = MoleExecution.HookExceptionRaised(h, capsule, job, e, SEVERE)
@@ -146,7 +146,9 @@ class SubMoleExecution(
       mole.outputDataChannels(capsule).foreach { _.provides(implicits + context, ticket, moleExecution) }
 
       transitionLock {
-        mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse.foreach { _.perform(implicits + context, ticket, this)(moleExecution.newRNG) }
+        for {
+          transition ← mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse
+        } transition.perform(implicits + context, ticket, this)(RandomProvider(moleExecution.newRNG))
       }
     }
     catch {
@@ -190,7 +192,7 @@ class SubMoleExecution(
       val sourced =
         moleExecution.sources(capsule).foldLeft(Context.empty) {
           case (a, s) ⇒
-            val ctx = try s.perform(implicits + context, moleExecution.executionContext)(moleExecution.newRNG)
+            val ctx = try s.perform(implicits + context, moleExecution.executionContext)(RandomProvider(moleExecution.newRNG))
             catch {
               case t: Throwable ⇒
                 logger.log(FINE, "Error in submole execution", t)

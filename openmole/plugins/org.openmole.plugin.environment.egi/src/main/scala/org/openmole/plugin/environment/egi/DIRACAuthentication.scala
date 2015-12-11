@@ -19,20 +19,16 @@ package org.openmole.plugin.environment.egi
 
 import java.util.UUID
 
-import fr.iscpif.gridscale.dirac.P12HTTPSAuthentication
+import fr.iscpif.gridscale.authentication._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workspace.{ Workspace, AuthenticationProvider }
+import org.openmole.core.workspace.{ AuthenticationProvider }
 
 object DIRACAuthentication {
 
-  def initialise(a: EGIAuthentication)(implicit authenticationProvider: AuthenticationProvider) =
+  def initialise(a: EGIAuthentication)(implicit authenticationProvider: AuthenticationProvider): P12Authentication =
     a match {
-      case a: P12Certificate ⇒
-        new P12HTTPSAuthentication {
-          val certificate = a.certificate
-          val password = a.password(authenticationProvider)
-        }
-      case _ ⇒ throw new UserBadDataError(s"Wrong authentication type ${a.getClass.getName} DIRAC only supports P12 authentication")
+      case a: P12Certificate ⇒ P12Authentication(a.certificate, password = a.password(authenticationProvider))
+      case _                 ⇒ throw new UserBadDataError(s"Wrong authentication type ${a.getClass.getName} DIRAC only supports P12 authentication")
     }
 
 }

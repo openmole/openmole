@@ -23,7 +23,7 @@ class MovingAverage(period: Int, queue: Queue[Double]) {
 
   def this(period: Int, values: Double*) = this(period, Queue(values.slice(values.size - period, values.size): _*))
 
-  def apply(n: Double) = synchronized {
+  def put(n: Double) = synchronized {
     queue.enqueue(n)
     if (queue.size > period) queue.dequeue
   }
@@ -31,6 +31,8 @@ class MovingAverage(period: Int, queue: Queue[Double]) {
   def get = synchronized {
     queue.sum / queue.size
   }
+
+  def isEmpty = queue.isEmpty
 
   def size = queue.size
 

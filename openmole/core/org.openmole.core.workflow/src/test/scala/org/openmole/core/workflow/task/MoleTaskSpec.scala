@@ -59,7 +59,7 @@ class MoleTaskSpec extends FlatSpec with Matchers {
   }
 
   "MoleTask" should "provide its inputs to the first capsule if it is a strainer" in {
-    val tm1 = Capsule(EmptyTask(), strainer = true)
+    val tm1 = Capsule(EmptyTask(), strain = true)
 
     val i = Prototype[String]("i")
 

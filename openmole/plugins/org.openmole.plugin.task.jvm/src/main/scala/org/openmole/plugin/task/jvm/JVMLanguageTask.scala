@@ -26,7 +26,7 @@ import org.openmole.plugin.task.external.ExternalTask
 import java.io.File
 
 object JVMLanguageTask {
-  lazy val workDir = Prototype[File]("workDir")
+  lazy val workDirectory = Prototype[File]("workDirectory")
 }
 
 trait JVMLanguageTask extends ExternalTask with Plugins {
@@ -37,7 +37,7 @@ trait JVMLanguageTask extends ExternalTask with Plugins {
   override def process(context: Context)(implicit rng: RandomProvider) = {
     val pwd = Workspace.newDir()
     val workDir = ""
-    val preparedContext = prepareInputFiles(context, pwd.getCanonicalFile, workDir) + Variable(JVMLanguageTask.workDir, pwd)
+    val preparedContext = prepareInputFiles(context, pwd.getCanonicalFile, workDir) + Variable(JVMLanguageTask.workDirectory, pwd)
     val resultContext = processCode(preparedContext)
     fetchOutputFiles(resultContext, pwd.getCanonicalFile, workDir)
   }

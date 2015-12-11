@@ -51,7 +51,7 @@ package object abc {
 
     val sampling = LenormandSampling(algorithm, statePrototype)
     val explorationTask = ExplorationTask(sampling) set (_.setName(name + "Exploration"))
-    explorationTask setDefault Default(statePrototype, algorithm.initialState)
+    explorationTask setDefault Default.delayed(statePrototype, algorithm.initialState)
     explorationTask addOutput statePrototype
 
     val exploration = StrainerCapsule(explorationTask)
@@ -67,15 +67,15 @@ package object abc {
 
     val analyse = Slot(StrainerCapsule(analyseTask))
 
-    val terminated = Condition(terminatedPrototype.name + " == true")
+    val terminated: Condition = terminatedPrototype
 
-    val modelVariables = algorithm.priorPrototypes.map(_.name) ++ algorithm.targetPrototypes.map(_.name)
+    val modelVariables = algorithm.priorPrototypes ++ algorithm.targetPrototypes
 
     val puzzle =
-      (exploration -< (preModel, filter = Block(statePrototype.name)) -- model -- postModel >- analyse -- (last, terminated)) +
-        (exploration -- (analyse, filter = Block(modelVariables: _*))) +
-        (preModel -- postModel) +
-        (exploration oo (model.firstSlot, filter = Block(modelVariables: _*))) +
+      (exploration -< (preModel, filter = Block(statePrototype)) -- model -- postModel >- analyse -- (last, terminated)) &
+        (exploration -- (analyse, filter = Block(modelVariables: _*))) &
+        (preModel -- postModel) &
+        (exploration oo (model.firstSlot, filter = Block(modelVariables: _*))) &
         (analyse -- (exploration, !terminated, filter = Block(modelVariables: _*)))
 
     val _algorithm = algorithm

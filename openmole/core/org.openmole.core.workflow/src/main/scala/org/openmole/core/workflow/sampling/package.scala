@@ -19,8 +19,12 @@ package org.openmole.core.workflow
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.tools.FromContext
 
 package sampling {
+
+  import org.openmole.core.tools.io.FromString
+
   trait SamplingPackage {
 
     implicit def factorWithIterableToDiscreteFactor[T, D](f: Factor[T, D])(implicit discrete: Discrete[T, D]): DiscreteFactor[T, D] =
@@ -32,6 +36,16 @@ package sampling {
 
     implicit def arrayPrototypeFactorDecorator[T: Manifest](p: Prototype[Array[T]]) = new {
       def is[D](d: D)(implicit discrete: Discrete[T, D]) = Factor(p, UnrolledDomain(d))
+    }
+
+    implicit def tupleOfStringToBoundOfDouble[T: FromString] = new Bounds[T, (String, String)] {
+      override def min(domain: (String, String)): FromContext[T] = FromContext.codeToFromContext[T](domain._1)
+      override def max(domain: (String, String)): FromContext[T] = FromContext.codeToFromContext[T](domain._2)
+    }
+
+    implicit def tupleIsBounds[T] = new Bounds[T, (T, T)] {
+      override def min(domain: (T, T)) = domain._1
+      override def max(domain: (T, T)) = domain._2
     }
   }
 }

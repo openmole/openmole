@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.task.scala
 
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools._
@@ -31,7 +32,16 @@ object ScalaTask {
 
 }
 
-abstract class ScalaTask(val source: String) extends JVMLanguageTask with ScalaWrappedCompilation with ScalaWrappedOutput {
-  override def processCode(context: Context)(implicit rng: RandomProvider) = run(context)
+abstract class ScalaTask(val source: String) extends JVMLanguageTask {
+
+  @transient lazy val scalaCompilation = ScalaWrappedCompilation.static(source, inputs.toSeq, ScalaWrappedCompilation.WrappedOutput(outputs))(manifest[java.util.Map[String, Any]])
+  scalaCompilation
+
+  override def processCode(context: Context)(implicit rng: RandomProvider) = {
+    val map = scalaCompilation().from(context)(rng)
+    outputs.toSeq.map {
+      o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
+    }
+  }
 }
 

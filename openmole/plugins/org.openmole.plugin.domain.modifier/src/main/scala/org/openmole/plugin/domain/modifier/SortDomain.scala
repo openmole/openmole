@@ -19,27 +19,28 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools.FromContext
 
-import scala.util.Random
+import scalaz._
+import Scalaz._
 
 object SortDomain {
 
   implicit def isFinite[T, D] = new Finite[T, SortDomain[T, D]] {
-    override def computeValues(domain: SortDomain[T, D], context: Context)(implicit rng: RandomProvider): Iterable[T] = domain.computeValues(context)
+    override def computeValues(domain: SortDomain[T, D]) = domain.computeValues()
     override def inputs(domain: SortDomain[T, D]): PrototypeSet = domain.inputs
   }
 
-  def apply[T: Ordering, D](domain: D)(implicit finite: Finite[T, D]) =
+  def apply[T: scala.Ordering, D](domain: D)(implicit finite: Finite[T, D]) =
     new SortDomain[T, D](domain)
 
 }
 
-class SortDomain[T: Ordering, D](val domain: D)(implicit finite: Finite[T, D]) {
-
+class SortDomain[T: scala.Ordering, D](val domain: D)(implicit finite: Finite[T, D]) {
   def inputs = finite.inputs(domain)
-
-  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] =
-    finite.computeValues(domain, context).toList.sorted
-
+  def computeValues() =
+    for {
+      f ← finite.computeValues(domain)
+    } yield f.toList.sorted
 }
 

@@ -123,17 +123,17 @@ object ScriptClient {
 
     val alert: Var[Boolean] = Var(false)
 
-    val openmoleText = tags.div(
+    /* val openmoleText = tags.div(
       tags.h1(`class` := "openmole-connection openmole-pen")("pen"),
       tags.h1(`class` := "openmole-connection openmole-mole")("MOLE")
-    )
+    )*/
 
     val connectionDiv = tags.div(`class` := Rx {
       if (!passwordOK()) "connectionTabOverlay" else "displayOff"
     })(
       tags.div(
         tags.img(src := "img/openmole.png", `class` := "openmole-logo"),
-        openmoleText,
+        // openmoleText,
         shutdownButton,
         tags.div(`class` := Rx {
           if (!passwordOK()) "centerPage" else ""
@@ -183,6 +183,8 @@ object ScriptClient {
 
     val docItem = dialogNavItem("doc", bs.div(OMTags.glyph_book).tooltip("Documentation"), () ⇒ docTriggerer.open)
 
+    val modelWizardItem = dialogNavItem("modelWizard", glyph(OMTags.glyph_upload_alt).tooltip("Model import"), () ⇒ modelWizardTriggerer.triggerOpen)
+
     val fileItem = dialogNavItem("files", glyph(glyph_file).tooltip("Files"), todo = () ⇒ {
       openFileTree() = !openFileTree()
     })
@@ -191,6 +193,7 @@ object ScriptClient {
       nav("mainNav",
         nav_pills + nav_inverse + nav_staticTop,
         fileItem,
+        modelWizardItem,
         execItem,
         authenticationItem,
         marketItem,
@@ -200,6 +203,7 @@ object ScriptClient {
     )
     maindiv.appendChild(tags.div(shutdownButton))
     maindiv.appendChild(executionTriggerer.modalPanel.dialog.render)
+    maindiv.appendChild(modelWizardTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(authenticationTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(marketTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(pluginTriggerer.modalPanel.dialog.render)

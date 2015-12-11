@@ -21,17 +21,17 @@ case class DataBag(uuid: String, name: String, data: Data)
 
 trait Data
 
-object ProtoTYPE extends Enumeration {
+object ProtoTYPE {
+  case class ProtoTYPE(uuid: String, name: String, scalaString: String)
 
-  case class ProtoTYPE(uuid: String, name: String) extends Val(name)
-
-  val INT = new ProtoTYPE("Integer", "Integer")
-  val DOUBLE = new ProtoTYPE("Double", "Double")
-  val LONG = new ProtoTYPE("Long", "Long")
-  val BOOLEAN = new ProtoTYPE("Boolean", "Boolean")
-  val STRING = new ProtoTYPE("String", "String")
-  val FILE = new ProtoTYPE("File", "File")
+  val INT = new ProtoTYPE("Integer", "Integer", "Int")
+  val DOUBLE = new ProtoTYPE("Double", "Double", "Double")
+  val LONG = new ProtoTYPE("Long", "Long", "Long")
+  val BOOLEAN = new ProtoTYPE("Boolean", "Boolean", "Boolean")
+  val STRING = new ProtoTYPE("String", "String", "String")
+  val FILE = new ProtoTYPE("File", "File", "File")
   val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE)
+
 }
 
 import java.io.{PrintWriter, StringWriter}
@@ -203,12 +203,12 @@ case class UploadPlugin() extends UploadType {
 
 @JSExport
 case class TreeNodeData(
-  name: String,
-  safePath: SafePath,
-  isDirectory: Boolean,
-  isPlugin: Boolean,
-  size: Long,
-  readableSize: String)
+                         name: String,
+                         safePath: SafePath,
+                         isDirectory: Boolean,
+                         isPlugin: Boolean,
+                         size: Long,
+                         readableSize: String)
 
 @JSExport
 case class ScriptData(scriptPath: SafePath)
@@ -327,3 +327,74 @@ case class Ready() extends ExecutionInfo {
 case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
 
 case class Plugin(name: String)
+
+sealed trait Language {
+  val uuid: String = java.util.UUID.randomUUID.toString
+
+  def name: String
+
+  def extension: String
+
+  def taskType: TaskType
+}
+
+sealed trait TaskType {
+  def preVariable: String = ""
+
+  def postVariable: String = ""
+}
+
+case class CareTaskType() extends TaskType {
+  override val preVariable = """${"""
+  override val postVariable = "}"
+}
+
+case class ScalaTaskType() extends TaskType
+
+case class NetLogoTaskType() extends TaskType
+
+case class Binary() extends Language {
+  val name: String = "Binary"
+  val extension = ""
+  val taskType = CareTaskType()
+}
+
+case class PythonLanguage() extends Language {
+  val name: String = "python"
+  val extension = "py"
+  val taskType = CareTaskType()
+}
+
+case class RLanguage() extends Language {
+  val name: String = "R"
+  val extension = "R"
+  val taskType = CareTaskType()
+}
+
+case class NetLogoLanguage() extends Language {
+  val name: String = "NetLogo"
+  val extension = "nlogo"
+  val taskType = NetLogoTaskType()
+}
+
+sealed trait CommandElement {
+  def expand: String
+  def index: Int
+}
+case class StaticElement(index: Int, expand: String) extends CommandElement
+
+case class VariableElement(index: Int, prototype: ProtoTypePair, taskType: TaskType) extends CommandElement{
+  def expand = taskType.preVariable + prototype.name + taskType.postVariable
+  def clone(newPrototypePair: ProtoTypePair): VariableElement = copy(prototype = newPrototypePair)
+  def clone(newName: String, newType: ProtoTYPE, newMapping: Option[String]): VariableElement = clone(prototype.copy(name = newName, `type` = newType, mapping = newMapping))
+}
+
+case class LaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) {
+  def fullCommand: String = language match {
+    case Some(NetLogoLanguage())=> "setup\ngo"
+    case _=> (Seq(language.map{_.name}.getOrElse(""), codeName) ++ arguments.sortBy{_.index}.map{_.expand}).mkString(" ")
+  }
+  def statics: Seq[StaticElement] = arguments.collect{case a: StaticElement=> a}
+}
+
+case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, default: String = "", mapping: Option[String] = None)

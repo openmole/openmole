@@ -18,13 +18,10 @@
 package org.openmole.console
 
 import jline.console.ConsoleReader
-import java.util.concurrent.Executors
 import org.openmole.core.console.ScalaREPL
 import org.openmole.core.dsl.{ DSLPackage, Serializer }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.logging.LoggerService
-import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.workflow.puzzle.{ PuzzleBuilder, Puzzle }
+import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.file._
 import org.openmole.core.workflow.tools.PluginInfo
 import org.openmole.core.workspace._
@@ -163,7 +160,7 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
               case compiled: Compiled ⇒
                 Try(compiled.eval) match {
                   case Success(res) ⇒
-                    val ex = res.buildPuzzle.toExecution()
+                    val ex = res.toExecution()
                     Try(ex.start) match {
                       case Failure(e) ⇒
                         println(e.stackString)
@@ -202,8 +199,8 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
     loop
   }
 
-  def newREPL(args: ConsoleVariables) = {
-    val loop = new ScalaREPL(quiet = false)
+  def newREPL(args: ConsoleVariables, quiet: Boolean = false) = {
+    val loop = new ScalaREPL(quiet = quiet)
     initialise(loop, args)
   }
 

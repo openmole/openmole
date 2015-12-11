@@ -27,16 +27,17 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import org.openmole.core.pluginmanager.PluginManager
 import java.io.File
 
+import org.openmole.core.serializer.PluginAndFilesListing
 import org.openmole.tool.logger.Logger
 
 object PluginConverter extends Logger
 
 import PluginConverter._
 
-class PluginConverter(serializer: PluginListing, reflectionConverter: ReflectionConverter) extends Converter {
+class PluginConverter(serializer: PluginAndFilesListing, reflectionConverter: ReflectionConverter) extends Converter {
 
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
-    if (PluginManager.isClassProvidedByAPlugin(o.getClass)) serializer.classUsed(o.getClass)
+    serializer.classUsed(o.getClass)
     if (classOf[Plugins].isAssignableFrom(o.getClass)) o.asInstanceOf[Plugins].plugins.foreach(serializer.pluginUsed)
     reflectionConverter.marshal(o, writer, mc)
   }

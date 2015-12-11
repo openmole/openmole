@@ -21,8 +21,10 @@ import java.io.File
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.tools.FromContext
 
-import scala.util.Random
+import scalaz._
+import Scalaz._
 
 object ZipWithNameSampling {
 
@@ -36,8 +38,9 @@ sealed class ZipWithNameSampling[D](val factor: Factor[File, D], val name: Proto
   override def inputs = factor.inputs
   override def prototypes = List(factor.prototype, name)
 
-  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
-    discrete.iterator(factor.domain, context).map {
-      v ⇒ List(Variable(factor.prototype, v), Variable(name, v.getName))
-    }
+  override def apply() =
+    for {
+      d ← discrete.iterator(factor.domain)
+    } yield d.map { v ⇒ List(Variable(factor.prototype, v), Variable(name, v.getName)) }
+
 }

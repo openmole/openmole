@@ -31,9 +31,9 @@ case class Case(condition: Condition, puzzle: Puzzle)
 object Switch {
 
   def apply(cases: Case*) = {
-    val first = Capsule(EmptyTask(), strainer = true)
+    val first = Capsule(EmptyTask(), strain = true)
     val firstSlot = Slot(first)
-    val last = Capsule(EmptyTask(), strainer = true)
+    val last = Capsule(EmptyTask(), strain = true)
 
     val alternatives: Seq[Puzzle] =
       cases.map {

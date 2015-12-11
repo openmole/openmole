@@ -20,6 +20,7 @@ package org.openmole.plugin.environment.egi
 import java.io._
 import java.net.URI
 import java.util.UUID
+import fr.iscpif.gridscale.authentication.{ PEMAuthentication, P12Authentication }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import java.nio.file.FileSystems
 import java.util.zip.GZIPInputStream
@@ -54,9 +55,7 @@ object EGIAuthentication extends Logger {
   def downloadCACertificates(address: String, dir: File) = {
     val fs = FileSystems.getDefault
 
-    val site = new HTTPStorage {
-      val url = address
-    }
+    val site = HTTPStorage(url = address, Workspace.preferenceAsDuration(EGIEnvironment.CACertificatesDownloadTimeOut))
     for (tarUrl ← site.listNames("/")) {
       try {
         //val child = site.child(tarUrl)
@@ -98,7 +97,7 @@ object EGIAuthentication extends Logger {
       voCards ⇒
         HTTPStorage.withConnection(
           new URI(Workspace.preference(EGIEnvironment.VOInformationSite)),
-          Workspace.preferenceAsDuration(EGIEnvironment.VOCardDownloadTimeOut).toSeconds -> SECONDS) { http ⇒
+          Workspace.preferenceAsDuration(EGIEnvironment.VOCardDownloadTimeOut)) { http ⇒
             val is: InputStream = http.getInputStream
             try is.copy(voCards)
             finally is.close
@@ -134,36 +133,35 @@ object EGIAuthentication extends Logger {
   def initialise(a: EGIAuthentication)(
     serverURL: String,
     voName: String,
-    lifeTime: FiniteDuration,
-    fqan: Option[String])(implicit authenticationProvider: AuthenticationProvider) =
+    fqan: Option[String])(implicit authenticationProvider: AuthenticationProvider): () ⇒ GlobusAuthentication.Proxy =
     a match {
       case a: P12Certificate ⇒
         VOMSAuthentication.setCARepository(EGIAuthentication.CACertificatesDir)
-        val (_serverURL, _voName, _lifeTime, _fqan) = (serverURL, voName, lifeTime, fqan)
-        new P12VOMSAuthentication {
-          val certificate = a.certificate
-          val serverURL = _serverURL
-          val voName = _voName
-          val lifeTime = _lifeTime
-          val password = a.password(authenticationProvider)
-          override val fqan = _fqan
-        }
-      case a: PEMCertificate ⇒
+        val p12 =
+          P12VOMSAuthentication(
+            P12Authentication(a.certificate, a.password(authenticationProvider)),
+            EGIEnvironment.proxyTime,
+            serverURL,
+            voName,
+            EGIEnvironment.proxyRenewalRatio,
+            fqan)
+
+        () ⇒ implicitly[GlobusAuthenticationProvider[P12VOMSAuthentication]].apply(p12)
+        case a: PEMCertificate ⇒
         VOMSAuthentication.setCARepository(EGIAuthentication.CACertificatesDir)
-        val (_serverURL, _voName, _lifeTime, _fqan) = (serverURL, voName, lifeTime, fqan)
-        new PEMVOMSAuthentication {
-          val certificate = a.certificate
-          val key = a.key
-          val serverURL = _serverURL
-          val voName = _voName
-          val lifeTime = _lifeTime
-          val password = a.password(authenticationProvider)
-          override val fqan = _fqan
-        }
-      case a: ProxyFile ⇒
-        new ProxyFileAuthentication {
-          val proxy = a.proxy
-        }
+        val pem = PEMVOMSAuthentication(
+          PEMAuthentication(a.certificate, a.key, a.password(authenticationProvider)),
+          EGIEnvironment.proxyTime,
+          serverURL,
+          voName,
+          EGIEnvironment.proxyRenewalRatio,
+          fqan
+        )
+
+        () ⇒ implicitly[GlobusAuthenticationProvider[PEMVOMSAuthentication]].apply(pem)
+      /*case a: ProxyFile ⇒
+        val proxy = ProxyFileAuthentication(a.proxy)
+        () ⇒ implicitly[GlobusAuthenticationProvider[ProxyFileAuthentication]].apply(proxy)*/
     }
 
 }

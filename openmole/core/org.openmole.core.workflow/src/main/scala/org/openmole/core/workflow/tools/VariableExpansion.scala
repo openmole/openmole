@@ -24,7 +24,8 @@ import org.openmole.tool.stream.{ StringOutputStream, StringInputStream }
 import org.openmole.core.workflow.data._
 
 import scala.collection.mutable.ListBuffer
-import scala.util.{ Random, Try }
+import scala.util.{ Try }
+import scalaz.Scalaz._
 
 object VariableExpansion {
 
@@ -110,11 +111,11 @@ object VariableExpansion {
   }
 
   case class CodeElement(code: String) extends ExpansionElement {
-    @transient lazy val proxy = ScalaWrappedCompilation.raw(code)
+    @transient lazy val proxy = ScalaWrappedCompilation.dynamic[Any](code)
     def expand(context: ⇒ Context)(implicit rng: RandomProvider): String = {
       context.variable(code) match {
         case Some(value) ⇒ value.value.toString
-        case None        ⇒ proxy.run(context).toString
+        case None        ⇒ proxy().from(context).toString
       }
     }
   }

@@ -22,21 +22,18 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.plugin.tool.file.FileProvider
-
-import scala.util.Random
 
 object SelectFileDomain {
 
   implicit def isFinite = new Finite[File, SelectFileDomain] {
-    override def computeValues(domain: SelectFileDomain, context: Context)(implicit rng: RandomProvider): Iterable[File] =
-      domain.computeValues(context)
+    override def computeValues(domain: SelectFileDomain) =
+      FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
 
   }
 
-  def apply(base: File, path: ExpandedString) = new SelectFileDomain(FileProvider(base, path))
+  def apply(base: File, path: ExpandedString) = new SelectFileDomain(FileList(base, path))
 }
 
-class SelectFileDomain(val provider: FileProvider) {
-  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = List(provider(context))
+class SelectFileDomain(val provider: FromContext[File]) {
+  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = List(provider.from(context))
 }

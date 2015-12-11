@@ -21,7 +21,7 @@ package org.openmole.plugin.environment.egi
 import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.tool.file._
 import org.openmole.core.batch.storage._
-import fr.iscpif.gridscale.dirac.{ DIRACJobService ⇒ GSDIRACJobService, DIRACJobDescription ⇒ GSDIRACJobDescription }
+import fr.iscpif.gridscale.egi.{ DIRACJobService ⇒ GSDIRACJobService, DIRACJobDescription ⇒ GSDIRACJobDescription }
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }
@@ -31,18 +31,34 @@ import org.openmole.tool.logger.Logger
 import scalax.io.Resource
 import java.io.File
 import org.openmole.core.tools._
+import fr.iscpif.gridscale.egi._
 
 object DIRACJobService extends Logger
 
 import DIRACJobService._
 
-trait DIRACJobService extends GridScaleJobService with JobScript { js ⇒
+trait DIRACJobService extends GridScaleJobService { js ⇒
 
+  def connections: Int
   def environment: DIRACEnvironment
-  val jobService: GSDIRACJobService
-  val usageControl = new UnlimitedAccess
 
-  lazy val id = jobService.service
+  @transient lazy val jobService: GSDIRACJobService =
+    GSDIRACJobService(
+      environment.service,
+      environment.group,
+      connections = Some(connections))(environment.authentication)
+
+  @transient lazy val usageControl = new UnlimitedAccess //new LimitedAccess(connections, Int.MaxValue)
+
+  def jobScript =
+    JobScript(
+      voName = environment.voName,
+      memory = environment.openMOLEMemoryValue,
+      threads = environment.threadsValue,
+      debug = environment.debug
+    )
+
+  @transient lazy val id = jobService.service
 
   protected def _submit(serializedJob: SerializedJob) = {
     import serializedJob._
@@ -51,12 +67,12 @@ trait DIRACJobService extends GridScaleJobService with JobScript { js ⇒
     try {
       val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
 
-      Resource.fromFile(script).write(generateScript(serializedJob, outputFilePath, None, None))
+      Resource.fromFile(script).write(jobScript(serializedJob, outputFilePath, None, None))
 
       val jobDescription = new GSDIRACJobDescription {
         override def stdOut = if (environment.debug) Some("out") else None
         override def stdErr = if (environment.debug) Some("err") else None
-        override def outputSandbox = if (environment.debug) Seq("out" -> new File("out"), "err" -> new File("err")) else Seq.empty
+        override def outputSandbox = if (environment.debug) Seq("out" -> Workspace.newFile("job", ".out"), "err" -> Workspace.newFile("job", ".err")) else Seq.empty
         override def inputSandbox = Seq(script)
         def arguments = script.getName
         def executable = "/bin/bash"

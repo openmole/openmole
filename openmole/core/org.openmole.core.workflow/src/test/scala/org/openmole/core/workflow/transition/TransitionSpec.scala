@@ -76,7 +76,7 @@ class TransitionSpec extends FlatSpec with Matchers {
     val t2c = Capsule(t2)
     val t3c = Slot(Capsule(t3))
 
-    val ex = (initc -- t1c -- t3c) + (initc -- t2c -- t3c)
+    val ex = (initc -- t1c -- t3c) & (initc -- t2c -- t3c)
 
     ex.start.waitUntilEnded
 
@@ -112,9 +112,9 @@ class TransitionSpec extends FlatSpec with Matchers {
 
     val t3c = Slot(t3)
 
-    val mole = initc -- t1c -- t3c + (0 until 100).map {
+    val mole = initc -- t1c -- t3c & (0 until 100).map {
       i ⇒ initc -- t2 -- t3c
-    }.reduce(_ + _)
+    }.reduce(_ & _)
 
     mole.toExecution(defaultEnvironment = LocalEnvironment(20)).start.waitUntilEnded
     executed should equal(1)

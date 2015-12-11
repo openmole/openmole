@@ -34,6 +34,10 @@ package builder {
     def +=(d: Prototype[_]*) = (_: OutputBuilder).addOutput(d: _*)
   }
 
+  class ExploredOutputs {
+    def +=(d: Prototype[_ <: Array[_]]*) = (_: OutputBuilder).addExploredOutput(d: _*)
+  }
+
   trait BuilderPackage {
     implicit def samplingBuilderToSampling(s: SamplingBuilder) = s.toSampling
     implicit def taskBuilderToTask[TB <: TaskBuilder](builder: TB) = builder.toTask
@@ -43,6 +47,14 @@ package builder {
 
     final lazy val inputs: Inputs = new Inputs
     final lazy val outputs: Outputs = new Outputs
+    final lazy val exploredOutputs: ExploredOutputs = new ExploredOutputs
+
+    implicit class InputsOutputsDecorator(io: (Inputs, Outputs)) {
+      def +=(ps: Prototype[_]*) = (b: InputBuilder with OutputBuilder) => {
+        (io._1 += (ps: _*)) (b)
+        (io._2 += (ps: _*)) (b)
+      }
+    }
 
     class AssignDefault[T](p: Prototype[T]) {
       def :=[U <: DefaultBuilder](v: T, `override`: Boolean = false) =

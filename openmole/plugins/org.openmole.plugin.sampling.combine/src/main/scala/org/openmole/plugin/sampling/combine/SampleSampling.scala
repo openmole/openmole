@@ -37,10 +37,10 @@ sealed class SampleSampling(val sampling: Sampling, val size: FromContext[Int]) 
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] = {
-    val sampled = sampling.build(context).toVector
+  override def apply() = FromContext.apply { (context, rng) ⇒
+    val sampled = sampling().from(context)(rng).toVector
     val sampledSize = sampled.size
-    val s = size.from(context)
+    val s = size.from(context)(rng)
     Iterator.continually(rng().nextInt(sampledSize)).take(s).map(i ⇒ sampled(i))
   }
 

@@ -38,6 +38,6 @@ abstract class ConditionHook(
     val condition: Condition) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext)(implicit rng: RandomProvider) =
-    if (condition.evaluate(context)) hook.perform(context, executionContext) else context
+    if (condition.from(context)) hook.perform(context, executionContext) else context
 
 }

@@ -17,12 +17,12 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.api.{BootstrapTags=> bs, ClassKeyAggregator}
+import fr.iscpif.scaladget.api.{BootstrapTags => bs, ClassKeyAggregator}
 import bs._
 import rx._
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.JsRxTags._
-import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.{tags ⇒ tags}
 
 object Select {
   def apply[T <: Displayable with Identifiable](autoID: String,
@@ -43,7 +43,7 @@ class Select[T <: Displayable with Identifiable](autoID: String,
     case _ ⇒ default match {
       case None ⇒ Some(contents()(0)._1)
       case _ ⇒
-        val ind = contents().indexOf(default.get)
+        val ind = contents().map{_._1}.indexOf(default.get)
         if (ind != -1) Some(contents()(ind)._1) else Some(contents()(0)._1)
     }
   })

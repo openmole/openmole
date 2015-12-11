@@ -42,4 +42,13 @@ object OMTags {
 
   val glyph_plug = "icon-power-cord"
   val glyph_book = "icon-book"
+
+  // TO PORT IN SCALADGET
+  val glyph_upload_alt = "glyphicon-upload"
+  val glyph_arrow_right = "glyphicon-arrow-right"
+  val glyph_arrow_left = "glyphicon-arrow-left"
+  val glyph_arrow_right_and_left = "glyphicon-resize-horizontal"
+
+  def buttonGroup(keys: ClassKeyAggregator = emptyCK) = bs.div("btn-group " + keys.key)
+
 }

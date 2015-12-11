@@ -21,6 +21,7 @@ import scalatags.JsDom.{ tags ⇒ tags }
  */
 
 package object panels {
+  val modelWizardPanel = new ModelWizardPanel
   val marketPanel = new MarketPanel
   val pluginPanel = new PluginPanel
   val environmentStackPanel = new TextPanel("envStackID", "Environment error stack")
@@ -28,6 +29,10 @@ package object panels {
 
   implicit val executionTriggerer = new PanelTriggerer {
     val modalPanel = new ExecutionPanel
+  }
+
+  def modelWizardTriggerer = new PanelTriggerer {
+    val modalPanel = modelWizardPanel
   }
 
   def marketTriggerer = new PanelTriggerer {

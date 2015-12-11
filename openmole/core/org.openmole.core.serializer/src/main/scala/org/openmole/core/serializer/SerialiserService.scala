@@ -34,7 +34,7 @@ import org.openmole.tool.stream
 import org.openmole.tool.tar._
 import org.openmole.tool.lock._
 import collection.mutable.ListBuffer
-import org.openmole.core.serializer.file.{ FileInjection, FileListing, FileSerialisation }
+import org.openmole.core.serializer.file.{ FileInjection, FileSerialisation }
 
 object SerialiserService extends Logger {
 

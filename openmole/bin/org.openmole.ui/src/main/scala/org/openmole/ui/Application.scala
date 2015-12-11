@@ -199,6 +199,7 @@ class Application extends IApplication {
               server.start()
               browse(url)
               ScalaREPL.warmup
+              logger.info(s"Server listening on port $port.")
               server.join()
             }
             else {

@@ -36,36 +36,38 @@ object NetLogo4Task {
     def apply = new NetLogo4
   }
 
-  def apply(
+  def workspace(
     workspace: File,
     script: String,
-    launchingCommands: Seq[String]): NetLogoTaskBuilder = {
+    launchingCommands: Seq[String],
+    seed: Option[Prototype[Int]]): NetLogoTaskBuilder = {
 
-    new NetLogoTaskBuilder(new Workspace(workspace, script), launchingCommands, factory) { builder ⇒
+    new NetLogoTaskBuilder(new Workspace(workspace, script), launchingCommands, seed, factory) { builder ⇒
       addResource(workspace)
       def toTask = new NetLogo4Task with Built
     }
   }
 
-  def apply(
+  def file(
     script: File,
-    launchingCommands: Seq[String]): NetLogoTaskBuilder = {
-    new NetLogoTaskBuilder(new Workspace(script), launchingCommands, factory) {
+    launchingCommands: Seq[String],
+    seed: Option[Prototype[Int]] = None): NetLogoTaskBuilder = {
+    new NetLogoTaskBuilder(new Workspace(script), launchingCommands, seed, factory) {
       builder ⇒
 
       addResource(script)
 
       def toTask = new NetLogo4Task with Built
     }
-
   }
 
   def apply(
     script: File,
     launchingCommands: Seq[String],
-    embedWorkspace: Boolean): NetLogoTaskBuilder =
-    if (embedWorkspace) apply(script.getCanonicalFile.getParentFile, script.getName, launchingCommands)
-    else apply(script, launchingCommands)
+    embedWorkspace: Boolean = false,
+    seed: Option[Prototype[Int]] = None): NetLogoTaskBuilder =
+    if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed)
+    else file(script, launchingCommands, seed)
 
 }
 

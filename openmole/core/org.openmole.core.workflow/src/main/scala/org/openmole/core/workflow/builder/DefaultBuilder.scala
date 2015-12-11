@@ -20,7 +20,7 @@ import org.openmole.core.workflow.data.{ Default, Prototype, DefaultSet }
 
 trait DefaultBuilder <: Builder { builder ⇒
   private var _defaults = DefaultSet.empty
-  def setDefault[T](p: Prototype[T], v: T, `override`: Boolean = false): this.type = setDefault(Default(p, v, `override`))
+  def setDefault[T](p: Prototype[T], v: T, `override`: Boolean = false): this.type = setDefault(Default.value(p, v, `override`))
   def setDefault(p: Default[_]*): this.type = { _defaults ++= p; this }
 
   @deprecated("use setDefault instead", "4.0")

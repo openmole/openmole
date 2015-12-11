@@ -1,5 +1,6 @@
 package org.openmole.gui.server.core
 
+import java.io.File
 import java.net.URL
 import java.util.zip.GZIPInputStream
 
@@ -9,28 +10,22 @@ import org.openmole.core.event._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.pluginmanager._
 import org.openmole.core.serializer.SerialiserService
-import org.openmole.core.workflow.execution.Environment
-import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.gui.misc.utils.Utils._
 import org.openmole.gui.server.core.Runnings.RunningEnvironment
 import org.openmole.gui.server.core.Utils._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared._
 import org.openmole.gui.ext.data._
-import java.io.{ InputStream, File }
+import java.io._
 import java.nio.file._
 import org.openmole.console._
 import org.osgi.framework.Bundle
 import scala.util.{ Failure, Success, Try }
-import org.openmole.console.ConsoleVariables
 import org.openmole.core.workflow.mole.ExecutionContext
-import org.openmole.core.workflow.puzzle.PuzzleBuilder
 import org.openmole.tool.stream.StringPrintStream
 import scala.concurrent.stm._
 import org.openmole.tool.file._
 import org.openmole.tool.tar._
-import com.github.rjeschke._
-import org.openmole.core.fileservice._
 import org.openmole.core.buildinfo
 
 /*
@@ -241,7 +236,9 @@ object ApiImpl extends Api {
           RunningEnvironmentData(id, group(errors))
       }.toSeq
 
-    val outputs = envIds.keys.toSeq.map { Runnings.outputsDatas(_, lines) }
+    val outputs = envIds.keys.toSeq.map {
+      Runnings.outputsDatas(_, lines)
+    }
 
     (envData, outputs)
   }
@@ -324,4 +321,75 @@ object ApiImpl extends Api {
     // FIXME: the bundles might not be fully unloaded, they might be dynamically imported by core.console
   }
 
+  //MODEL WIZARDS
+  def launchingCommand(careArchive: SafePath): Option[LaunchingCommand] = Utils.launchinCommand(careArchive)
+
+  def buildModelTask(executableName: String,
+                     scriptName: String,
+                     command: String,
+                     language: Language,
+                     inputs: Seq[ProtoTypePair],
+                     outputs: Seq[ProtoTypePair],
+                     path: SafePath) = {
+    val modelTaskFile = new File(path, scriptName + ".oms")
+
+    val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))
+
+    def ioString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) Seq(s"  $keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")) + ",\n" else ""
+    def imapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { i ⇒ s"""  $keyString += (${i.name}, "${i.mapping.get}")""" }.mkString(",\n") + ",\n" else ""
+    def omapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { o ⇒ s"""  $keyString += ("${o.mapping.get}", ${o.name})""" }.mkString(",\n") + ",\n" else ""
+    def default(key: String, value: String) = s"  $key := $value"
+
+    try {
+      for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
+        os.write("val " + p._1 + " = Val[" + p._2 + "]\n")
+      }
+
+      val (rawimappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
+      val (rawomappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
+      val (ifilemappings, imappings) = rawimappings.partition(_.`type` == ProtoTYPE.FILE)
+      val (ofilemappings, omappings) = rawomappings.partition(_.`type` == ProtoTYPE.FILE)
+
+      val inString = ioString(ins, "inputs")
+      val imFileString = imapString(ifilemappings, "fileInputs")
+      val ouString = ioString(ous, "outputs")
+      val omFileString = omapString(ofilemappings, "fileOutputs")
+      val defaults =
+        "  //Default values. Can be removed if OpenMOLE Vals are set by a value coming from the workflow\n" +
+          (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
+            ifilemappings.map { p ⇒ (p.name, "\"" + p.mapping.getOrElse("") + "\"") } ++
+            ofilemappings.map { p ⇒ (p.name, "\"" + p.mapping.getOrElse("") + "\"") }).filterNot {
+              _._2.isEmpty
+            }.map { p ⇒ default(p._1, p._2) }.mkString(",\n")
+
+      language.taskType match {
+        case ctt: CareTaskType ⇒
+          os.write(
+            s"""\nval task = CareTask(workDirectory / "$executableName", "$command") set(\n""" +
+              inString + ouString + imFileString + omFileString + defaults
+          )
+        case ntt: NetLogoTaskType ⇒
+
+          val imString = imapString(imappings, "netLogoInputs")
+          val omString = omapString(omappings, "netLogoOutputs")
+          os.write(
+            s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}")) set(\n""" +
+              inString + ouString + imString + omString + imFileString + omFileString + defaults
+          )
+        case _ ⇒ ""
+      }
+      os.write("\n  )\n\ntask")
+    }
+
+    finally {
+      os.close
+    }
+    modelTaskFile.createNewFile
+
+  }
+
+  def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {
+    case ProtoTYPE.BOOLEAN ⇒ if (protoType.default == "1") "true" else "false"
+    case _                 ⇒ protoType.default
+  }
 }

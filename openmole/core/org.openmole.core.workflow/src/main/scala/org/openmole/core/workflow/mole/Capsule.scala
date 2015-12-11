@@ -30,7 +30,7 @@ object Capsule {
   implicit def taskToCapsuleConverter(task: Task) = Capsule(task)
   implicit def slotToCapsuleConverter(slot: Slot) = slot.capsule
 
-  def apply(task: Task, strainer: Boolean = false) = new Capsule(task, strainer)
+  def apply(task: Task, strain: Boolean = false) = new Capsule(task, strain)
 
   def isStrainer(c: Capsule) = c.strainer
 
@@ -64,7 +64,7 @@ class Capsule(_task: Task, val strainer: Boolean) {
    * Get the inputs data taken by this capsule, generally it is empty if the capsule
    * is empty or the input of the task inside the capsule. It can be different
    * in some cases.
-   * 
+   *
    * @return the input of the capsule
    */
   def inputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
@@ -146,5 +146,5 @@ class StrainerTaskDecorator(val task: Task) extends Task {
 }
 
 object StrainerCapsule {
-  def apply(task: Task) = Capsule(task, strainer = true)
+  def apply(task: Task) = Capsule(task, strain = true)
 }

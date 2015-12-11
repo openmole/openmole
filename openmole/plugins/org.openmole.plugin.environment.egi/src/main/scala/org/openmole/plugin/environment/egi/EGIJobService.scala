@@ -28,15 +28,24 @@ import fr.iscpif.gridscale.egi.{ WMSJobService, WMSJobDescription }
 import StatusFiles._
 import org.openmole.tool.logger.Logger
 import scalax.io.Resource
+import org.openmole.tool.file._
 
 object EGIJobService extends Logger
 
 import EGIJobService._
 
-trait EGIJobService extends GridScaleJobService with JobScript { js ⇒
+trait EGIJobService extends GridScaleJobService { js ⇒
 
   val jobService: WMSJobService
   def environment: EGIEnvironment
+
+  def jobScript =
+    JobScript(
+      voName = environment.voName,
+      memory = environment.openMOLEMemoryValue,
+      threads = environment.threadsValue,
+      debug = environment.debug
+    )
 
   val usageControl: AvailabilityQuality with JobServiceQualityControl
   import usageControl._
@@ -60,7 +69,7 @@ trait EGIJobService extends GridScaleJobService with JobScript { js ⇒
       val _runningPath = storage.child(path, runningFile)
       val _finishedPath = storage.child(path, finishedFile)
 
-      val scriptContent = generateScript(serializedJob, outputFilePath, Some(_runningPath), Some(_finishedPath))
+      val scriptContent = jobScript(serializedJob, outputFilePath)
 
       Resource.fromFile(script).write(scriptContent)
 
@@ -82,11 +91,11 @@ trait EGIJobService extends GridScaleJobService with JobScript { js ⇒
     finally script.delete
   }
 
-  protected def buildJobDescription(script: File) =
+  protected def buildJobDescription(script: File, proxy: Option[File] = None) =
     new WMSJobDescription {
       val executable = "/bin/bash"
       val arguments = (if (environment.debug) " -x " else "") + script.getName
-      val inputSandbox = List(script)
+      val inputSandbox = List(script) ++ proxy
       override def stdOutput = if (environment.debug) "out" else ""
       override def stdError = if (environment.debug) "err" else ""
       def outputSandbox = if (environment.debug) Seq("out" -> Workspace.newFile("job", ".out"), "err" -> Workspace.newFile("job", ".err")) else Seq.empty

@@ -22,6 +22,7 @@ import org.openmole.core.workflow.sampling._
 import fr.iscpif.scalabc.algorithm._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools.FromContext
 import util.Random
 
 object LenormandSampling {
@@ -45,7 +46,7 @@ abstract class LenormandSampling extends Sampling {
   def prototypes = lenormand.priorPrototypes
   override def inputs = Seq(state)
 
-  override def build(context: ⇒ Context)(implicit rng: RandomProvider) = {
+  override def apply() = FromContext.apply { (context, rng) ⇒
     lenormand.sample(context(state))(rng()).map {
       sampled ⇒
         (lenormand.priorPrototypes zip sampled).map {

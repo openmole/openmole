@@ -24,6 +24,7 @@ object Scaling {
       Scaling.scale(d, originalMin, originalMax, min, max)
 
     def normalize(min: Double, max: Double) = Scaling.scale(d, min, max, 0, 1)
+
   }
 
   def scale(v: Double, min: Double, max: Double, boundaryMin: Double, boundaryMax: Double) = {

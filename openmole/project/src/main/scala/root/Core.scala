@@ -16,7 +16,7 @@ object Core extends Defaults {
 
   lazy val workflow = OsgiProject("workflow", imports = Seq("*")) settings (
     includeOsgi,
-    libraryDependencies ++= Seq(scalaLang, math, scalatest)
+    libraryDependencies ++= Seq(scalaLang, math, scalatest, scalaz)
   ) dependsOn
     (event, exception, tools, updater, workspace, macros, pluginManager, serializer, output, console, replication % "test")
 
@@ -37,7 +37,7 @@ object Core extends Defaults {
   val tools = OsgiProject("tools", global = true, imports = Seq("*")) settings
     (includeOsgi,
       libraryDependencies ++= Seq(xstream, exec, math, jodaTime, scalaLang, scalatest)) dependsOn
-      (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleLogger, openmoleStream, openmoleCollection, openmoleStatistics)
+      (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleLogger, openmoleStream, openmoleCollection, openmoleStatistics, openmoleTypes)
 
   val event = OsgiProject("event", imports = Seq("*")) dependsOn (tools) settings (
     libraryDependencies += scalatest
@@ -93,5 +93,6 @@ object Core extends Defaults {
       ): _*
   )
 
+  override def settings = super.settings ++ Seq(libraryDependencies += Libraries.scalatest)
   override def osgiSettings = super.osgiSettings ++ Seq(bundleType := Set("core", "runtime"), OSGi.openMOLEScope := Some("provided"))
 }

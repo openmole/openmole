@@ -17,18 +17,19 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.File
+import java.nio.channels.FileChannel
+import java.nio.file.Files
 import java.util.logging.Level
-
+import java.util.zip.GZIPInputStream
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.tool.file._
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.data.SafePath._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileExtension._
-import java.io.File
-import java.net.URI
-
-import scala.concurrent.duration.Duration
+import java.io._
+import org.openmole.tool.file._
+import org.openmole.tool.stream.StringOutputStream
+import org.openmole.tool.tar._
 
 object Utils {
 
@@ -69,6 +70,8 @@ object Utils {
   implicit def fileToSafePath(f: File): SafePath = SafePath(getPathArray(f, workspaceProjectFile), f)
 
   implicit def safePathToFile(s: SafePath): File = getFile(webUIProjectFile, s.path)
+
+  implicit def seqOfSafePathToSeqOfFile(s: Seq[SafePath]): Seq[File] = s.map { safePathToFile }
 
   implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, isPlugin(f), f.length, readableByteCount(FileDecorator(f).size))
 
@@ -111,5 +114,47 @@ object Utils {
   }
 
   def listFiles(path: SafePath): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
+
+  def launchinCommand(model: SafePath): Option[LaunchingCommand] =
+    model.name.split('.').last match {
+      case "nlogo" ⇒ Some(CodeParsing.netlogoParsing(model))
+      case "jar"   ⇒ Some(CodeParsing.jarParsing(model))
+      case _       ⇒ getCareBinInfos(model)
+    }
+
+  private def getCareBinInfos(careArchive: SafePath): Option[LaunchingCommand] = {
+    val fileChannel = new RandomAccessFile(careArchive, "r").getChannel
+
+    try {
+      //Get the tar.gz from the bin archive
+      val endMinus8Bytes = fileChannel.size - 8L
+      val archiveSize = fileChannel.map(FileChannel.MapMode.READ_ONLY, endMinus8Bytes, 8L).getLong.toInt
+      fileChannel.position(0L)
+      val srcArray = new Array[Byte](archiveSize)
+      fileChannel.map(FileChannel.MapMode.READ_ONLY, endMinus8Bytes - 13L - archiveSize, archiveSize).get(srcArray, 0, archiveSize)
+
+      //Extract and uncompress the tar.gz
+      val stream = new TarInputStream(new GZIPInputStream(new ByteArrayInputStream(srcArray)))
+
+      Iterator.continually(stream.getNextEntry).dropWhile { te ⇒
+        val pathString = te.getName.split("/")
+        pathString.last != "re-execute.sh" || pathString.contains("rootfs")
+      }.toSeq.headOption.flatMap { e ⇒
+        val stringW = new StringOutputStream
+        stream copy stringW
+        val lines = stringW.toString.split("\n")
+        val prootLine = lines.indexWhere(s ⇒ s.startsWith("PROOT="))
+        if (prootLine != -1) {
+          val command = lines.slice(7, prootLine - 1).map { l ⇒ l.dropRight(2) }.map { _.drop(1) }.map { _.dropRight(1) }.toSeq
+          CodeParsing.fromCommand(command)
+        }
+        else None
+      }
+    }
+    finally {
+      fileChannel.close
+    }
+
+  }
 
 }

@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.egi
-
-import java.io.File
-
-object ProxyFile {
-  def apply(proxy: File) = new ProxyFile(proxy)
-}
-
-class ProxyFile(val proxy: File) extends EGIAuthentication
+//package org.openmole.plugin.environment.egi
+//
+//import java.io.File
+//
+//object ProxyFile {
+//  def apply(proxy: File) = new ProxyFile(proxy)
+//}
+//
+//class ProxyFile(val proxy: File) extends EGIAuthentication

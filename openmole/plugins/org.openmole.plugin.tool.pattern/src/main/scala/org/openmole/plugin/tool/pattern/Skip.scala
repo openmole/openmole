@@ -19,17 +19,17 @@ package org.openmole.plugin.tool.pattern
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.Condition
+import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.transition._
 
 object Skip {
 
   def apply(puzzle: Puzzle, condition: Condition) = {
-    val first = Capsule(EmptyTask(), strainer = true)
+    val first = Capsule(EmptyTask(), strain = true)
     val firstSlot = Slot(first)
-    val last = Capsule(EmptyTask(), strainer = true)
+    val last = Capsule(EmptyTask(), strain = true)
 
-    (firstSlot -- (puzzle, !condition) -- last) +
+    (firstSlot -- (puzzle, !condition) -- last) &
       (firstSlot -- (last, condition))
   }
 

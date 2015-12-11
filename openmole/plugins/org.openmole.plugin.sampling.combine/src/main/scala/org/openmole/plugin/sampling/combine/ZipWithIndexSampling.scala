@@ -19,8 +19,10 @@ package org.openmole.plugin.sampling.combine
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.tools.FromContext
 
-import scala.util.Random
+import scalaz._
+import Scalaz._
 
 object ZipWithIndexSampling {
 
@@ -34,9 +36,10 @@ sealed class ZipWithIndexSampling(val sampling: Sampling, val index: Prototype[I
   override def inputs = sampling.inputs
   override def prototypes = index :: sampling.prototypes.toList
 
-  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
-    sampling.build(context).zipWithIndex.map {
+  override def apply() = FromContext.apply { (context, rng) ⇒
+    sampling().from(context)(rng).zipWithIndex.map {
       case (line, i) ⇒ line ++ List(Variable(index, i))
     }
+  }
 
 }

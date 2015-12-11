@@ -34,7 +34,7 @@ object AggregationTransition {
   }
 }
 
-class AggregationTransition(val start: Capsule, val end: Slot, val condition: Condition = True, val filter: Filter[String] = Filter.empty, val trigger: Condition = Condition.False) extends IAggregationTransition {
+class AggregationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val trigger: Condition = Condition.False) extends IAggregationTransition {
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) = {
     val moleExecution = subMole.moleExecution
@@ -48,7 +48,7 @@ class AggregationTransition(val start: Capsule, val end: Slot, val condition: Co
 
           if (trigger != Condition.False) {
             val context = AggregationTransition.aggregateOutputs(moleExecution, this, results)
-            if (trigger.evaluate(context)) {
+            if (trigger.from(context)) {
               aggregate(subMole, ticket)
               if (allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel
             }
@@ -66,7 +66,7 @@ class AggregationTransition(val start: Capsule, val end: Slot, val condition: Co
       val results = subMole.aggregationTransitionRegistry.remove(this, parentTicket).getOrElse(throw new InternalProcessingError("No context registred for the aggregation transition"))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
       val aggregated = AggregationTransition.aggregateOutputs(subMole.moleExecution, this, results)
-      if (condition.evaluate(aggregated)) subMoleParent.transitionLock { submitNextJobsIfReady(aggregated.values, parentTicket, subMoleParent) }
+      if (condition.from(aggregated)) subMoleParent.transitionLock { submitNextJobsIfReady(aggregated.values, parentTicket, subMoleParent) }
     }
   }
 

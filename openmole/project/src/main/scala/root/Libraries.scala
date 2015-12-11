@@ -19,7 +19,7 @@ object Libraries extends Defaults {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.86"
+  val gridscaleVersion = "1.87-SNAPSHOT"
 
   val bouncyCastleVersion = "1.50"
 
@@ -37,9 +37,13 @@ object Libraries extends Defaults {
 
   lazy val gridscaleGlite = "fr.iscpif.gridscale.bundle" %% "egi" % gridscaleVersion
 
-  lazy val gridscaleDirac = "fr.iscpif.gridscale.bundle" %% "dirac" % gridscaleVersion
-
   lazy val gridscaleHTTP = "fr.iscpif.gridscale.bundle" %% "http" % gridscaleVersion
+
+  lazy val apacheHTTP = Seq(
+    "org.apache.httpcomponents" % "httpclient-osgi" % "4.5.1",
+    "org.apache.httpcomponents" % "httpcore-osgi" % "4.4.4",
+    "org.osgi" % "org.osgi.compendium" % "4.2.0"
+  )
 
   lazy val gridscaleOAR = "fr.iscpif.gridscale.bundle" %% "oar" % gridscaleVersion
 
@@ -102,7 +106,7 @@ object Libraries extends Defaults {
   lazy val scalajsDom = "org.openmole" %% "scalajs-dom" % scalaJSDomVersion
   lazy val scalajsJQuery = "org.openmole" %% "scalajs-jquery" % scalaJQueryVersion
 
-  lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "1.80"
+  lazy val mgo = "org.openmole" %% "fr-iscpif-mgo" % "2.0-SNAPSHOT"
 
   lazy val family = "org.openmole" %% "fr-iscpif-family" % "1.3"
 
@@ -173,5 +177,9 @@ object Libraries extends Defaults {
   lazy val txtmark = "org.openmole" %% "com-github-rjeschke-txtmark" % "0.13"
 
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.1"
+
+  lazy val scalaz = "org.openmole" %% "scalaz" % "7.1.3"
+
+  lazy val clapper = "org.openmole" %% "org-clapper" % "1.0.5"
 
 }

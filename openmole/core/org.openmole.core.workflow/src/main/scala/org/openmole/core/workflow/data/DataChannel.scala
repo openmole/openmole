@@ -29,7 +29,7 @@ object DataChannel {
   def levelDelta(mole: Mole)(dataChannel: DataChannel): Int =
     mole.level(dataChannel.end.capsule) - mole.level(dataChannel.start)
 
-  def apply(start: Capsule, end: Slot, filter: Filter[String]) = new DataChannel(start, end, filter)
+  def apply(start: Capsule, end: Slot, filter: BlockList) = new DataChannel(start, end, filter)
 }
 
 /**
@@ -46,7 +46,7 @@ object DataChannel {
 class DataChannel(
     val start: Capsule,
     val end: Slot,
-    val filter: Filter[String]) {
+    val filter: BlockList) {
 
   /**
    * Consums the provided variables and construct a context for them.
@@ -83,7 +83,7 @@ class DataChannel(
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 
     if (delta >= 0) {
-      val toContext = ListBuffer() ++ fromContext.values.filterNot(v ⇒ filter(v.prototype.name))
+      val toContext = ListBuffer() ++ fromContext.values.filterNot(v ⇒ filter(v.prototype))
       dataChannelRegistry.register(this, ticket, toContext)
     }
     else {
@@ -91,7 +91,7 @@ class DataChannel(
         (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
       }
       val toContext = dataChannelRegistry.getOrElseUpdate(this, workingOnTicket, new ListBuffer[Variable[_]])
-      toContext ++= fromContext.values.filterNot(v ⇒ filter(v.prototype.name))
+      toContext ++= fromContext.values.filterNot(v ⇒ filter(v.prototype))
     }
   }
 
@@ -105,7 +105,7 @@ class DataChannel(
    * @return the transmitted data
    */
   def data(mole: Mole, sources: Sources, hooks: Hooks) =
-    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.name))
+    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d))
 
   def levelDelta(mole: Mole): Int = DataChannel.levelDelta(mole)(this)
 

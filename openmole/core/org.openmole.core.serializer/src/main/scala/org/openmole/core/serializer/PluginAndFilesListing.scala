@@ -21,48 +21,57 @@ import java.io.File
 
 import com.thoughtworks.xstream.converters.Converter
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
-import com.thoughtworks.xstream.core.{JVM, ClassLoaderReference}
+import com.thoughtworks.xstream.core.{ JVM, ClassLoaderReference }
 import com.thoughtworks.xstream.core.util.CompositeClassLoader
 import com.thoughtworks.xstream.io.xml.XppDriver
-import com.thoughtworks.xstream.{XStream, mapper}
-import com.thoughtworks.xstream.mapper.{DefaultMapper, MapperWrapper, Mapper}
+import com.thoughtworks.xstream.{ XStream, mapper }
+import com.thoughtworks.xstream.mapper.{ DefaultMapper, MapperWrapper, Mapper }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.converter.Serialiser
-import org.openmole.core.serializer.file.{ FileListing, FileConverterNotifier }
-import org.openmole.core.serializer.plugin.{Plugins, PluginListing, PluginClassConverter, PluginConverter}
+import org.openmole.core.serializer.file.FileConverterNotifier
+import org.openmole.core.serializer.plugin.{ Plugins, PluginClassConverter, PluginConverter }
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.tool.file._
 import org.openmole.tool.stream.NullOutputStream
 
-import scala.collection.immutable.TreeSet
+import scala.collection.immutable.{ HashSet, TreeSet }
+import scala.collection.mutable
 
-
-trait PluginAndFilesListing <: PluginListing with FileListing { this: Serialiser ⇒
+trait PluginAndFilesListing { this: Serialiser ⇒
 
   lazy val reflectionConverter: ReflectionConverter =
     new ReflectionConverter(xStream.getMapper, xStream.getReflectionProvider)
 
   private var plugins: TreeSet[File] = null
   private var listedFiles: TreeSet[File] = null
+  private var seenClasses: HashSet[Class[_]] = null
 
   xStream.registerConverter(new FileConverterNotifier(this))
   xStream.registerConverter(new PluginConverter(this, reflectionConverter))
   xStream.registerConverter(new PluginClassConverter(this))
 
-  def pluginUsed(f: File): Unit = plugins += f
-  def fileUsed(file: File) = listedFiles += file
+  def classUsed(c: Class[_]) = {
+    if (!seenClasses.contains(c) && PluginManager.isClassProvidedByAPlugin(c)) {
+      PluginManager.pluginsForClass(c).foreach(pluginUsed)
+      seenClasses += c
+    }
+  }
 
-  def classUsed(c: Class[_]) = PluginManager.pluginsForClass(c).foreach(pluginUsed)
+  def pluginUsed(f: File) = plugins += f
+
+  def fileUsed(file: File) = listedFiles += file
 
   def list(obj: Any) = synchronized {
     plugins = TreeSet[File]()(fileOrdering)
     listedFiles = TreeSet[File]()(fileOrdering)
+    seenClasses = HashSet()
     xStream.toXML(obj, new NullOutputStream())
     val retPlugins = plugins
     val retFile = listedFiles
+    seenClasses = null
     plugins = null
     listedFiles = null
-    PluginClassAndFiles(retFile.toSeq, retPlugins.toSeq)
+    PluginClassAndFiles(retFile.toVector, retPlugins.toVector)
   }
 
 }

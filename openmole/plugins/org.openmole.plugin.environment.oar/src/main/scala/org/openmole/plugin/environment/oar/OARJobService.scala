@@ -58,6 +58,7 @@ trait OARJobService extends ClusterJobService { js ⇒
       override val cpu = environment.cpu
       override val core = environment.core
       override val wallTime = environment.wallTime
+      override def bestEffort = environment.bestEffort
     }
 
     val jid = js.jobService.submit(jobDescription)

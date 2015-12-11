@@ -21,7 +21,8 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools.FromContext
 
-import scala.util.Random
+import scalaz._
+import Scalaz._
 
 object TakeSampling {
 
@@ -35,7 +36,10 @@ sealed class TakeSampling(val sampling: Sampling, val n: FromContext[Int]) exten
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
-    sampling.build(context).take(n.from(context))
+  override def apply() =
+    for {
+      s ← sampling()
+      t ← n
+    } yield s.take(t)
 
 }

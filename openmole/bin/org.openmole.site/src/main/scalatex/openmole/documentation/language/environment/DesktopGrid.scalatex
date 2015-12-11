@@ -1,0 +1,14 @@
+
+@import org.openmole.site._
+@import Resource._
+
+@sect{Desktop grid}
+  OpenMOLE provides an ad hoc desktop grid server and client. To use it with your workflow, define the following environment:
+  @br @hl.openmole("""
+  val env = DesktopGridEnvironment(10000, "test", "test")""")
+  @p The first parameter is the port on which the desktop grid server is listening. The two other parameters are a login and a password to connect to the desktop grid server.
+
+  @p Once your workflow has been started you @a(b("download the OpenMOLE daemon"), href := openmoleDaemon.file), and run it to execute job on other computers. Extract the daemon from the archive and run it with the following command:
+
+  @br @hl.highlight("""./openmole-daemon -h test@hostname.of.the.server:port -p test -w nbWorker""", "plain")
+  @p Windows users shall use the @i{run.bat} script with the same arguments.

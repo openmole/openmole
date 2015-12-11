@@ -17,12 +17,11 @@
 
 package org.openmole.core.workflow.domain
 
-import org.openmole.core.workflow.data._
-
+import org.openmole.core.workflow.tools._
 import scala.annotation.implicitNotFound
 import scala.util.Random
 
 @implicitNotFound("${D} is not a discrete variation domain of type ${T}")
 trait Discrete[+T, -D] extends Domain[T, D] {
-  def iterator(domain: D, context: Context)(implicit rng: RandomProvider): Iterator[T]
+  def iterator(domain: D): FromContext[Iterator[T]]
 }

@@ -52,12 +52,15 @@ trait PersistentStorageService extends StorageService {
         _ + Workspace.preferenceAsDuration(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
       }.getOrElse(true)
 
+    val names = listNames(persistentPath)
+    val inReplica = ReplicaCatalog.forPaths(names.map { child(persistentPath, _) }).run.map(_.path).toSet
+
     for {
-      name ← listNames(persistentPath)
+      name ← names
       if graceIsOver(name)
     } {
       val path = child(persistentPath, name)
-      if (!ReplicaCatalog.forPath(path).exists.run) backgroundRmFile(path)
+      if (!inReplica.contains(path)) backgroundRmFile(path)
     }
     persistentPath
   }
@@ -73,19 +76,19 @@ trait PersistentStorageService extends StorageService {
 
     val removalDate = System.currentTimeMillis - Workspace.preferenceAsDuration(TmpDirRemoval).toMillis
 
-    for ((name, fileType) ← list(tmpNoTime)) {
-      val childPath = child(tmpNoTime, name)
+    for (entry ← list(tmpNoTime)) {
+      val childPath = child(tmpNoTime, entry.name)
 
       def rmDir =
         try {
-          val timeOfDir = (if (name.endsWith("/")) name.substring(0, name.length - 1) else name).toLong
+          val timeOfDir = (if (entry.name.endsWith("/")) entry.name.substring(0, entry.name.length - 1) else entry.name).toLong
           if (timeOfDir < removalDate) backgroundRmDir(childPath)
         }
         catch {
           case (ex: NumberFormatException) ⇒ backgroundRmDir(childPath)
         }
 
-      fileType match {
+      entry.`type` match {
         case DirectoryType ⇒ rmDir
         case FileType      ⇒ backgroundRmFile(childPath)
         case LinkType      ⇒ backgroundRmFile(childPath)

@@ -52,6 +52,7 @@ trait NetLogoTask extends ExternalTask {
   def netLogoOutputs: Iterable[(String, Prototype[_])]
   def netLogoArrayOutputs: Iterable[(String, Int, Prototype[_])]
   def netLogoFactory: NetLogoFactory
+  def seed: Option[Prototype[Int]]
 
   private def wrapError[T](msg: String)(f: ⇒ T): T =
     try f
@@ -74,20 +75,21 @@ trait NetLogoTask extends ExternalTask {
           netLogo.open(script.getAbsolutePath)
         }
 
+        def executeNetLogo(cmd: String) = wrapError(s"Error while executing command $cmd") {
+          netLogo.command(cmd)
+        }
+
+        seed.foreach { s ⇒ executeNetLogo(s"random-seed ${context(s)}") }
+
         for (inBinding ← netLogoInputs) {
           val v = preparedContext(inBinding._1) match {
             case x: String ⇒ '"' + x + '"'
             case x         ⇒ x.toString
           }
-          val cmd = "set " + inBinding._2 + " " + v
-          wrapError(s"Error while executing command $cmd") {
-            netLogo.command(cmd)
-          }
+          executeNetLogo("set " + inBinding._2 + " " + v)
         }
 
-        for (cmd ← expandedCommands) wrapError(s"Error while executing command $cmd") {
-          netLogo.command(cmd.expand(context))
-        }
+        for (cmd ← expandedCommands) executeNetLogo(cmd.expand(context))
 
         fetchOutputFiles(preparedContext, tmpDir, workspace.workDirectory) ++ netLogoOutputs.map {
           case (name, prototype) ⇒
@@ -123,15 +125,22 @@ trait NetLogoTask extends ExternalTask {
 
   private def withClassLoader[T](classLoader: ClassLoader)(f: ⇒ T): T = {
     val threadClassLoader = Thread.currentThread().getContextClassLoader
-    Thread.currentThread().setContextClassLoader(netLogoFactory().getNetLogoClassLoader)
+    Thread.currentThread().setContextClassLoader(classLoader)
     try f
     finally Thread.currentThread().setContextClassLoader(threadClassLoader)
   }
 
   def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Prototype[_]) = {
-    val array = java.lang.reflect.Array.newInstance(prototype.`type`.runtimeClass.getComponentType, netlogoCollection.size)
+    val arrayType = prototype.`type`.runtimeClass.getComponentType
+    val array = java.lang.reflect.Array.newInstance(arrayType, netlogoCollection.size)
     val it = netlogoCollection.iterator
-    for (i ← 0 until netlogoCollection.size) java.lang.reflect.Array.set(array, i, it.next)
+    for (i ← 0 until netlogoCollection.size) {
+      val v = it.next
+      try java.lang.reflect.Array.set(array, i, v)
+      catch {
+        case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of ${arrayType}")
+      }
+    }
     Variable(prototype.asInstanceOf[Prototype[Any]], array)
   }
 

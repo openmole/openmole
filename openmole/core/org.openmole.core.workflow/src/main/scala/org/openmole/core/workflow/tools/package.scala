@@ -22,25 +22,28 @@ import org.openmole.core.workflow.data.Context
 import scala.concurrent.stm._
 import scala.ref.WeakReference
 import org.openmole.tool.file._
+import scalaz._
 
 package tools {
 
-  import java.io.File
+import org.openmole.core.workflow.data.Prototype
 
-  trait ToolsPackage {
+    trait ToolsPackage {
 
-    implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
-    implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
+      implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
+      implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
 
-    implicit class RefDecorator[T](r: Ref[T]) {
-      def getUpdate(t: T ⇒ T): T = atomic { implicit txn ⇒ val v = r(); r() = t(v); v }
+      implicit class RefDecorator[T](r: Ref[T]) {
+        def getUpdate(t: T ⇒ T): T = atomic { implicit txn ⇒ val v = r(); r() = t(v); v }
+      }
+
+      implicit class RefLongDecorator(r: Ref[Long]) {
+        def next = r getUpdate (_ + 1)
+      }
+
+      type Condition = FromContext[Boolean]
+
     }
-
-    implicit class RefLongDecorator(r: Ref[Long]) {
-      def next = r getUpdate (_ + 1)
-    }
-
-  }
 }
 
 package object tools extends ToolsPackage

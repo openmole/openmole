@@ -6,8 +6,8 @@ import Keys._
 
 import org.openmole.buildsystem.OMKeys._
 import org.openmole.buildsystem._, Assembly._
-import Libraries._
-import com.typesafe.sbt.osgi.OsgiKeys
+import root.Libraries._
+import com.typesafe.sbt.osgi.{ SbtOsgi, OsgiKeys }
 import sbt.inc.Analysis
 import sbtunidoc.Plugin._
 import UnidocKeys._
@@ -46,7 +46,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
   def rename(m: ModuleID): String =
     if (m.name.startsWith("org.eclipse.equinox.launcher")) "org.eclipse.equinox.launcher.jar"
     else if (m.organization.startsWith("org.eclipse")) s"${m.organization}.${m.name}_${m.revision}.jar"
-    else s"${m.name}.jar"
+    else if (m.name.exists(_ == '-') == false) s"${m.organization.replaceAllLiterally(".", "-")}-${m.name}_${m.revision}.jar"
+    else s"${m.name}_${m.revision}.jar"
 
   lazy val openmoleUI = OsgiProject("org.openmole.ui", singleton = true, imports = Seq("*")) settings (
     organization := "org.openmole.ui",
@@ -104,7 +105,9 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       cleanFiles <++= cleanFiles in openmoleCore,
       cleanFiles <++= cleanFiles in openmoleGUI,
       cleanFiles <++= cleanFiles in consolePlugins,
-      cleanFiles <++= cleanFiles in guiPlugins
+      cleanFiles <++= cleanFiles in guiPlugins,
+      cleanFiles <++= cleanFiles in dbServer,
+      cleanFiles <++= cleanFiles in openmoleRuntime
     )
 
   lazy val webServerDependencies = Seq(
@@ -131,7 +134,9 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Libraries.jasypt,
     Libraries.jodaTime,
     Libraries.scalaLang,
-    Libraries.slf4j
+    Libraries.slf4j,
+    Libraries.scalaz,
+    Libraries.monocle
   ) ++ webServerDependencies
 
   lazy val guiCoreDependencies = Seq(
@@ -149,7 +154,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     jquery,
     ace,
     txtmark,
-    scaladget
+    scaladget,
+    clapper
   )
 
   //FIXME separate web plugins from core ones
@@ -173,28 +179,27 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo assemblyPath,
     libraryDependencies ++=
     Seq(
-      sshd,
-      family,
-      logging,
-      opencsv,
-      netlogo4,
-      netlogo5,
-      mgo,
-      monocle,
-      scalabc,
-      groovy,
+      sshd intransitive (),
+      family intransitive (),
+      logging intransitive (),
+      opencsv intransitive (),
+      netlogo4 intransitive (),
+      netlogo5 intransitive (),
+      mgo intransitive (),
+      scalabc intransitive (),
+      groovy intransitive (),
       gridscaleHTTP intransitive (),
       gridscalePBS intransitive (),
       gridscaleSLURM intransitive (),
-      gridscaleDirac intransitive (),
       gridscaleGlite intransitive (),
       gridscaleSGE intransitive (),
       gridscaleCondor intransitive (),
       gridscalePBS intransitive (),
       gridscaleOAR intransitive (),
       gridscaleSSH intransitive ()
-    ),
-      dependencyFilter := filter
+    ) ++ apacheHTTP map (_ intransitive ()),
+      dependencyFilter := { m ⇒ m.name != "scala-library" },
+      dependencyName := rename
   )
 
   lazy val guiPlugins = Project("guiplugins", dir / "target" / "guiplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
@@ -277,6 +282,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     ) settings (
         OsgiKeys.bundle <<= OsgiKeys.bundle dependsOn (assemble),
         organization := "org.openmole.site",
+        SbtOsgi.OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ SbtOsgi.OsgiKeys.exportPackage.value,
         libraryDependencies += Libraries.xstream,
         libraryDependencies += Libraries.scalatexSite,
         libraryDependencies += Libraries.scalaLang,

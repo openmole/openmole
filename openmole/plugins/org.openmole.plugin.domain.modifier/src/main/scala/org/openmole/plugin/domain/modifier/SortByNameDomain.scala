@@ -21,14 +21,14 @@ import java.io.File
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools.FromContext
 
-import scala.util.Random
+import scalaz._
+import Scalaz._
 
 object SortByNameDomain {
   implicit def isFinite[D] = new Finite[File, SortByNameDomain[D]] {
-    override def computeValues(domain: SortByNameDomain[D], context: Context)(implicit rng: RandomProvider): Iterable[File] =
-      domain.computeValues(context)
-
+    override def computeValues(domain: SortByNameDomain[D]) = domain.computeValues()
     override def inputs(domain: SortByNameDomain[D]): PrototypeSet = domain.inputs
   }
 
@@ -39,13 +39,16 @@ class SortByNameDomain[D](val domain: D)(implicit val finite: Finite[File, D]) {
 
   def inputs = finite.inputs(domain)
 
-  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[File] = {
+  def computeValues() = {
     def extractNumber(name: String) = {
       val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit).reverse
       if (n.isEmpty) throw new UserBadDataError("File name " + name + " doesn't contains a number")
       else n.toInt
     }
-    finite.computeValues(domain, context).toList.sortBy(f ⇒ extractNumber(f.getName))
+
+    for {
+      f ← finite.computeValues(domain)
+    } yield f.toList.sortBy(f ⇒ extractNumber(f.getName))
   }
 
 }

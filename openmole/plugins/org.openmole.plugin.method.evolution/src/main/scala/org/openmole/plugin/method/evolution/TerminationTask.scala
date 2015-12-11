@@ -17,63 +17,47 @@
 
 package org.openmole.plugin.method.evolution
 
+import fr.iscpif.mgo
 import fr.iscpif.mgo._
 import org.openmole.core.workflow.builder.TaskBuilder
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
+
+import scalaz.Tag
 
 object TerminationTask {
 
-  def apply(evolution: Termination with Archive)(
-    population: Prototype[Population[evolution.G, evolution.P, evolution.F]],
-    archive: Prototype[evolution.A],
-    generation: Prototype[Int],
-    state: Prototype[evolution.STATE],
-    terminated: Prototype[Boolean]) = {
-    val (_population, _archive, _generation, _state, _terminated) = (population, archive, generation, state, terminated)
+  def apply[T](t: T, termination: OMTermination)(implicit integration: WorkflowIntegration[T]) = {
+    val wfi = integration(t)
+    import wfi._
 
-    new TaskBuilder { builder ⇒
-      addInput(archive)
-      addInput(population)
-      addInput(generation)
-      addInput(state)
-      addOutput(generation)
-      addOutput(state)
-      addOutput(terminated)
+    val term = OMTermination.toTermination(termination, wfi)
 
-      def toTask = new TerminationTask(evolution) with Built {
-        val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.P, evolution.F]]]
-        val archive = _archive.asInstanceOf[Prototype[evolution.A]]
-        val generation = _generation
-        val state = _state.asInstanceOf[Prototype[evolution.STATE]]
-        val terminated = _terminated
+    new TaskBuilder {
+      builder ⇒
+      addInput(statePrototype)
+      addOutput(statePrototype)
+      addOutput(terminatedPrototype)
+      addOutput(generationPrototype)
+
+      abstract class TerminationTask extends Task {
+
+        override def process(context: Context)(implicit rng: RandomProvider) = {
+          val (newState, t) = term.run(context(statePrototype))
+
+          Context(
+            Variable(terminatedPrototype, t),
+            Variable(statePrototype, newState),
+            Variable(generationPrototype, Tag.unwrap(mgo.generation.get(newState)))
+          )
+        }
+
       }
+
+      def toTask = new TerminationTask with Built
     }
   }
-}
-
-sealed abstract class TerminationTask[E <: Termination with Archive](val evolution: E) extends Task {
-
-  def population: Prototype[Population[evolution.G, evolution.P, evolution.F]]
-  def archive: Prototype[evolution.A]
-
-  def state: Prototype[evolution.STATE]
-  def generation: Prototype[Int]
-  def terminated: Prototype[Boolean]
-
-  override def process(context: Context)(implicit rng: RandomProvider) = {
-    val (term, newState) =
-      evolution.terminated(
-        context(population),
-        context(state))(rng())
-
-    Context(
-      Variable(terminated, term),
-      Variable(state, newState),
-      Variable(generation, context(generation) + 1))
-  }
 
 }
+

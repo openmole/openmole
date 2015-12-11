@@ -19,7 +19,7 @@ package org.openmole.plugin.sampling.combine
 
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.tools.{ Condition, ScalaWrappedCompilation }
+import org.openmole.core.workflow.tools.{ FromContext, Condition, ScalaWrappedCompilation }
 
 import scala.util.Random
 
@@ -35,8 +35,9 @@ sealed class FilteredSampling(sampling: Sampling, keep: Condition) extends Sampl
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] =
-    sampling.build(context).filter(sample ⇒ keep.evaluate(context ++ sample))
+  override def apply() = FromContext { (context, rng) ⇒
+    sampling().from(context)(rng).filter(sample ⇒ keep.from(context ++ sample)(rng))
+  }
 
 }
 

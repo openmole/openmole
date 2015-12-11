@@ -23,6 +23,16 @@ trait OutputBuilder { builder ⇒
 
   def addOutput(d: Prototype[_]*): this.type = { _outputs ++= d; this }
 
+  def addExploredOutput(ds: Prototype[_ <: Array[_]]*): this.type = {
+    for {
+      d <- ds
+    } {
+      if(!_outputs.contains(d)) addOutput(d)
+      _outputs = _outputs.explore(d.name)
+    }
+    this
+  }
+
   def outputs = _outputs
 
   trait Built {

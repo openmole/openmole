@@ -37,10 +37,10 @@ class Transition(
     val start: Capsule,
     val end: Slot,
     val condition: Condition = Condition.True,
-    val filter: Filter[String] = Filter.empty) extends ITransition {
+    val filter: BlockList = BlockList.empty) extends ITransition {
 
   override def perform(context: Context, ticket: Ticket, subMole: SubMoleExecution)(implicit rng: RandomProvider) =
-    if (condition.evaluate(context)) submitNextJobsIfReady(filtered(context).values, ticket, subMole)
+    if (condition().from(context)) submitNextJobsIfReady(filtered(context).values, ticket, subMole)
 
   override def toString = this.getClass.getSimpleName + " from " + start + " to " + end
 

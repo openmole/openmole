@@ -25,7 +25,7 @@ import Condition._
 import scala.util.{ Random, Failure, Success, Try }
 import org.openmole.tool.lock._
 
-class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: Condition, val filter: Filter[String] = Filter.empty) extends IEndExplorationTransition {
+class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends IEndExplorationTransition {
 
   //def condition = Condition.True
 
@@ -37,7 +37,7 @@ class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: C
       subMole.cancel
     }
 
-    Try(!subMole.canceled && trigger.evaluate(context)) match {
+    Try(!subMole.canceled && trigger.from(context)) match {
       case Success(true) ⇒ perform()
       case Failure(t) ⇒
         subMole.cancel; throw t

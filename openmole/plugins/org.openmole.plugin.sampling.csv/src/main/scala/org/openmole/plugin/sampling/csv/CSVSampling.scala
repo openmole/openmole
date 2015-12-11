@@ -18,36 +18,22 @@
 package org.openmole.plugin.sampling.csv
 
 import java.io.File
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.builder.SamplingBuilder
-import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.plugin.tool.csv.CSVToVariables
-import org.openmole.plugin.tool.file.{ ExpandedProvider, FileProvider }
 
-import scala.collection.mutable.HashMap
-import scala.collection.immutable.TreeMap
-import org.openmole.core.workflow.data._
-import java.io.FileReader
-import java.math.BigInteger
-import java.math.BigDecimal
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.sampling._
-import au.com.bytecode.opencsv.CSVReader
-import collection.JavaConversions._
-import scala.collection.mutable.ListBuffer
-import scala.util.Random
+import org.openmole.core.workflow.tools._
+import org.openmole.plugin.tool.csv.CSVToVariables
 
 object CSVSampling {
   def apply(file: File) = new CSVSamplingBuilder(file)
-  def apply(directory: File, name: ExpandedString) = new CSVSamplingBuilder(FileProvider(directory, name))
+  def apply(directory: File, name: ExpandedString) = new CSVSamplingBuilder(FileList(directory, name))
 }
 
-abstract class CSVSampling(val file: FileProvider) extends Sampling with CSVToVariables {
+abstract class CSVSampling(val file: FromContext[File]) extends Sampling with CSVToVariables {
 
   override def prototypes =
     columns.map { case (_, p) ⇒ p } :::
       fileColumns.map { case (_, _, p) ⇒ p } ::: Nil
 
-  override def build(context: ⇒ Context)(implicit rng: RandomProvider): Iterator[Iterable[Variable[_]]] = toVariables(file(context), context)
+  override def apply() = FromContext { (context, rng) ⇒ toVariables(file.from(context)(rng), context) }
 
 }
