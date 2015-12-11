@@ -1,12 +1,9 @@
 package plugin
 
-import root.Libraries
-import sbt._
-
 import root.Libraries._
+import root.{ Libraries, _ }
 import sbt.Keys._
-import scala.Some
-import root._
+import sbt._
 
 //The task plugins for openmole go in here.
 
@@ -43,6 +40,11 @@ object Task extends PluginDefaults {
   lazy val systemexec = OsgiProject("systemexec", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, external,
     Core.workspace) settings (
       libraryDependencies ++= Seq(exec)
+    )
+
+  lazy val care = OsgiProject("care", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, systemexec,
+    Core.workspace) settings (
+      libraryDependencies += Libraries.scalatest
     )
 
   lazy val statistic = OsgiProject("statistic", imports = Seq("*")) dependsOn (Core.workflow)

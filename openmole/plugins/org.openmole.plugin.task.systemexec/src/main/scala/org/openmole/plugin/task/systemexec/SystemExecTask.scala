@@ -17,17 +17,15 @@
 
 package org.openmole.plugin.task.systemexec
 
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.workflow.tools.VariableExpansion.Expansion
-import org.openmole.tool.file._
-import org.openmole.core.tools.service.{ OS, ProcessUtil }
-import ProcessUtil._
-import java.io.File
-import java.io.IOException
-import java.io.PrintStream
+import java.io.{ File, IOException, PrintStream }
+
 import org.apache.commons.exec.CommandLine
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.tools.VariableExpansion.Expansion
 import org.openmole.plugin.task.external._
+import org.openmole.tool.file._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.stream.StringOutputStream
 
@@ -78,22 +76,52 @@ abstract class SystemExecTask(
       case None    ⇒ System.err
     }
 
-    def commandLine(cmd: Expansion): Array[String] =
-      CommandLine.parse(cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath))).toStrings
+    def commandLine(cmd: Expansion): Array[String] = {
+      // old
+      //      CommandLine.parse(cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath))).toStrings
+
+      // no CommandLine
+      val cmds = cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath))
+        .split("""["|' ]^\" """).map(token ⇒ token.replaceAll("\\\\", ""))
+
+      println(s"\n>>>split command line = [${cmds.mkString(",")}]")
+
+      cmds
+
+      // modified CommandLine
+      //      val commandTokens = cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath)).split(' ')
+      //
+      //      // CommandLine insists on being created with an "executable" -> might not be the case here
+      //      val executable = new CommandLine(commandTokens.head)
+      //      // only way (?) to prevent commons-exec from stripping quotes in the original command
+      //      // typical problem fixed -> specifying delimiters as in `cut -d "'"`
+      //
+      //      println(s"exec = ${executable.toString}, args = ${commandTokens.tail.foreach(println)}")
+      //
+      //      executable.addArguments(commandTokens.tail, false).toStrings
+    }
 
     def execute(command: Array[String], out: PrintStream, err: PrintStream): Int = {
       try {
-        val runtime = Runtime.getRuntime
+        //        val runtime = Runtime.getRuntime
+        //
+        //        //FIXES java.io.IOException: error=26
+        //        val process = runtime.synchronized {
+        //          runtime.exec(
+        //            command,
+        //            variables.map { case (p, v) ⇒ v + "=" + preparedContext(p).toString }.toArray,
+        //            workDir)
+        //        }
+        //
+        //        // FIXME switch to Scala sys.Process
+        //        executeProcess(process, out, err)
 
-        //FIXES java.io.IOException: error=26
-        val process = runtime.synchronized {
-          runtime.exec(
-            command,
-            variables.map { case (p, v) ⇒ v + "=" + preparedContext(p).toString }.toArray,
-            workDir)
-        }
+        import scala.sys.process._
 
-        executeProcess(process, out, err)
+        Process(s"ls -lh ${workDir}") !!
+
+        Process(command.toSeq, workDir, variables.map { case (p, v) ⇒ v -> preparedContext(p).toString }: _*) ! ProcessLogger(out append _ append "\n", err append _ append "\n")
+
       }
       catch {
         case e: IOException ⇒ throw new InternalProcessingError(e,
