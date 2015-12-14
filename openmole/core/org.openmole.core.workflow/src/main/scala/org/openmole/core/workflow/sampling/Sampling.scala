@@ -40,8 +40,6 @@ trait Sampling {
 
   /**
    * This method builds the explored plan in the given {@code context}.
-   *
-   * @param context context in which the exploration takes place
    */
   @throws(classOf[Throwable])
   def apply(): FromContext[Iterator[Iterable[Variable[_]]]]
