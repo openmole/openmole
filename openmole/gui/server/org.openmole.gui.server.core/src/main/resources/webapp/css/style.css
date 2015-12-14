@@ -74,6 +74,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer50 {
     margin-top: 50px;
 }
+.spacer80 {
+    margin-top: 80px;
+}
 .spacer5 {
     margin-top: 5px;
 }
@@ -89,6 +92,8 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer2 {
     margin-top: 2px;
 }
+
+
 #editor {
     font-family: monospace;
     height: 95%;
@@ -837,4 +842,18 @@ top: -6px;
 .width200Right100{
     width: 200px;
     right: 100px;
+}
+
+.selectFilter{
+margin-top: -6px;
+font-size: 14px;
+padding-left: 5px;
+border-bottom-right-radius: 0px;
+border-bottom-left-radius: 0px;
+}
+
+li.selectElement{
+font-size: 14px;
+color: grey;
+margin-left: 15px;
 }

@@ -82,8 +82,9 @@ class ModelWizardPanel extends ModalPanel {
   val launchingCommand: Var[Option[LaunchingCommand]] = Var(None)
   val currentReactives: Var[Seq[Reactive]] = Var(Seq())
   val updatableTable: Var[Boolean] = Var(true)
-  val hasStep2: Var[Boolean] = Var(false)
+  val hasModel: Var[Boolean] = Var(false)
   val bodyContent: Var[Option[TypedTag[HTMLDivElement]]] = Var(None)
+  val resources: Var[Seq[TreeNodeData]] = Var(Seq())
   val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
 
@@ -156,7 +157,7 @@ class ModelWizardPanel extends ModalPanel {
               OMPost[Api].launchingCommand(manager.current.safePath() ++ fileName).call().foreach { b ⇒
                 panels.treeNodePanel.refreshCurrentDirectory
                 launchingCommand() = b
-                hasStep2() = true
+                hasModel() = true
                 labelName() = Some(fileName)
                 launchingCommand().foreach { lc ⇒
                   codeSelector.content() = lc.language
@@ -171,6 +172,9 @@ class ModelWizardPanel extends ModalPanel {
                   currentReactives() = iReactives ++ oReactives
                 }
               }
+              OMPost[Api].listFiles(manager.current).call().foreach { lf ⇒
+                resources() = lf
+              }
             }
           }
         )
@@ -180,7 +184,8 @@ class ModelWizardPanel extends ModalPanel {
           case _               ⇒ "Your Model"
         }
       }
-    )
+    ),
+    Rx { if (hasModel()) bs.span("right grey")(codeSelector.selectorWithFilter, " (detected code)") else tags.div() }
   )
 
   val step1 = tags.div(
@@ -377,16 +382,15 @@ class ModelWizardPanel extends ModalPanel {
             setBodyContent
           })
       }, Rx {
-        bs.badge("Resources", "0", buttonStyle(1))(onclick := { () ⇒
+        bs.badge("Resources", s"${resources().size}", buttonStyle(1))(onclick := { () ⇒
           currentTab() = 1
           setBodyContent
         })
-      },
-      bs.span("grey")(codeSelector.selector, " (detected code)")
+      }
     )
 
     tags.div(
-      hasStep2() match {
+      hasModel() match {
         case true ⇒ tags.div()
         case _    ⇒ step1
       },
@@ -395,9 +399,9 @@ class ModelWizardPanel extends ModalPanel {
         case _: Transfered  ⇒ upButton
         case _              ⇒ upButton
       },
-      hasStep2() match {
+      hasModel() match {
         case true ⇒
-          tags.div(
+          bs.div("spacer80")(
             tags.h4("Step2: Task configuration"), step2,
             topButtons,
             if (currentTab() == 0) {
@@ -446,7 +450,9 @@ class ModelWizardPanel extends ModalPanel {
                 )
               }, autoModeTag, commandArea)
             }
-            else tags.div("resources")
+            else {
+              tags.div("resources")
+            }
           )
         case _ ⇒ tags.div()
       }
