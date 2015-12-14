@@ -19,6 +19,7 @@ package org.openmole.gui.misc.js
 
 import fr.iscpif.scaladget.api.{BootstrapTags => bs, ClassKeyAggregator}
 import bs._
+import org.scalajs.dom.raw.{HTMLDivElement, HTMLInputElement}
 import rx._
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.JsRxTags._
@@ -43,35 +44,66 @@ class Select[T <: Displayable with Identifiable](autoID: String,
     case _ ⇒ default match {
       case None ⇒ Some(contents()(0)._1)
       case _ ⇒
-        val ind = contents().map{_._1}.indexOf(default.get)
+        val ind = contents().map {
+          _._1
+        }.indexOf(default.get)
         if (ind != -1) Some(contents()(ind)._1) else Some(contents()(0)._1)
     }
   })
 
+  val hasFilter = Var(false)
+  val filtered: Var[Seq[T]] = Var(contents().map {
+    _._1
+  })
+
+  lazy val inputFilter: HTMLInputElement = bs.input("", "selectFilter")(placeholder := "Filter", oninput := { () =>
+    filtered() = contents().filter {
+      _._1.name.toUpperCase.contains(inputFilter.value.toUpperCase)
+    }.map {
+      _._1
+    }
+  }).render
+
   val glyphMap = contents().toMap
 
-  val selector = buttonGroup()(
-    tags.span(
-      `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", cursor := "pointer")(
+  lazy val selector = {
+    lazy val bg: HTMLDivElement = bs.div("dropdown")(
+      tags.span(
+        `class` := "btn " + key.key + " dropdown-toggle", `type` := "button","data-toggle".attr := "dropdown", cursor := "pointer")(
+          Rx {
+            content().map { c ⇒ bs.glyph(glyphMap(c)) }
+          },
+          Rx {
+            content().map {
+              _.name
+            }.getOrElse(contents()(0)._1.name) + " "
+          },
+          bs.span("caret")
+        ).render,
+      ul(`class` := "dropdown-menu", id := autoID)(
+        if (hasFilter())
+          scalatags.JsDom.tags.li(
+            tags.form(inputFilter)(`type` := "submit", onsubmit := { () =>
+              content() = filtered().headOption
+              bg.click()
+              false
+            }))
+        else tags.div,
         Rx {
-          content().map { c ⇒ bs.glyph(glyphMap(c)) }
-        },
-        Rx {
-          content().map {
-            _.name
-          }.getOrElse(contents()(0)._1.name) + " "
-        },
-        bs.span("caret")
-      ).render,
-    ul(`class` := "dropdown-menu", id := autoID)(
-      Rx {
-        for (c ← contents().zipWithIndex) yield {
-          scalatags.JsDom.tags.li(cursor := "pointer", color := "black", onclick := { () ⇒
-            content() = Some(contents()(c._2)._1)
-            onclickExtra()
-          })(c._1._1.name)
+          for (c ← filtered().zipWithIndex) yield {
+            scalatags.JsDom.tags.li(`class` := "selectElement", cursor := "pointer", role := "presentation", onclick := { () ⇒
+              content() = Some(contents()(c._2)._1)
+              onclickExtra()
+            })(c._1.name)
+          }
         }
-      }
-    )
-  ).render
+      )
+    ).render
+    bg
+  }
+
+  lazy val selectorWithFilter = {
+    hasFilter() = true
+    selector
+  }
 }

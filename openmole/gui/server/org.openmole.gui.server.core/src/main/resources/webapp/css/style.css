@@ -36,15 +36,15 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 #marketPanelID .modal-dialog, #executionsPanelID .modal-dialog, #modelWizardPanelID .modal-dialog  {
     width: 90%;
-    max-width: 1200px;
+    max-width: 1250px;
 }
 
 #settingsPanelID .modal-dialog{
-    max-width: 1200px;
+    max-width: 1250px;
     width: 70%;
 }
  #envStackID .modal-dialog, #documentationID .modal-dialog{
-    max-width: 1200px;
+    max-width: 1250px;
     width: 60%;
 }
 .table tbody > tr > td.vert-align {
@@ -801,6 +801,10 @@ top: -6px;
 
 .marginLeft100{
     margin-left: 100px;
+}
+
+.marginRight20{
+    margin-right: 20px;
 }
 
 .twocolumns{
