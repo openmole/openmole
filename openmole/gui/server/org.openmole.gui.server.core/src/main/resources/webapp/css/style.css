@@ -857,3 +857,8 @@ font-size: 14px;
 color: grey;
 margin-left: 15px;
 }
+
+.borderRightFlat{
+border-bottom-right-radius: 0px;
+border-top-right-radius: 0px;
+}
