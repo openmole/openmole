@@ -26,14 +26,14 @@ import org.openmole.gui.misc.js.JsRxTags._
 import scalatags.JsDom.{tags ⇒ tags}
 
 object Select {
-  def apply[T <: Displayable with Identifiable](autoID: String,
+  def apply[T <: Displayable](autoID: String,
                                                 contents: Seq[(T, ClassKeyAggregator)],
                                                 default: Option[T],
                                                 key: ClassKeyAggregator = emptyCK,
                                                 onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, onclickExtra)
 }
 
-class Select[T <: Displayable with Identifiable](autoID: String,
+class Select[T <: Displayable](autoID: String,
                                                  val contents: Var[Seq[(T, ClassKeyAggregator)]],
                                                  default: Option[T] = None,
                                                  key: ClassKeyAggregator = emptyCK,
