@@ -8,7 +8,7 @@ import root._
 import root.Libraries._
 import sbt.Keys._
 import com.typesafe.sbt.osgi.OsgiKeys._
-import root.gui.plugin.Task
+import _root_.plugin.Task
 import ThirdParties._
 
 object Server extends GuiDefaults {
@@ -28,7 +28,8 @@ object Server extends GuiDefaults {
       root.Runtime.console,
       Misc.utils,
       root.ThirdParties.openmoleStream,
-      openmoleCrypto
+      openmoleCrypto,
+      Task.care
     )
 
   lazy val state = OsgiProject("org.openmole.gui.server.state") settings

@@ -30,6 +30,7 @@ import java.io._
 import org.openmole.tool.file._
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar._
+import org.openmole.plugin.task.care._
 
 object Utils {
 
@@ -119,42 +120,7 @@ object Utils {
     model.name.split('.').last match {
       case "nlogo" ⇒ Some(CodeParsing.netlogoParsing(model))
       case "jar"   ⇒ Some(CodeParsing.jarParsing(model))
-      case _       ⇒ getCareBinInfos(model)
+      case _       ⇒ CodeParsing.fromCommand(getCareBinInfos(model).commandLine.get)
     }
-
-  private def getCareBinInfos(careArchive: SafePath): Option[LaunchingCommand] = {
-    val fileChannel = new RandomAccessFile(careArchive, "r").getChannel
-
-    try {
-      //Get the tar.gz from the bin archive
-      val endMinus8Bytes = fileChannel.size - 8L
-      val archiveSize = fileChannel.map(FileChannel.MapMode.READ_ONLY, endMinus8Bytes, 8L).getLong.toInt
-      fileChannel.position(0L)
-      val srcArray = new Array[Byte](archiveSize)
-      fileChannel.map(FileChannel.MapMode.READ_ONLY, endMinus8Bytes - 13L - archiveSize, archiveSize).get(srcArray, 0, archiveSize)
-
-      //Extract and uncompress the tar.gz
-      val stream = new TarInputStream(new GZIPInputStream(new ByteArrayInputStream(srcArray)))
-
-      Iterator.continually(stream.getNextEntry).dropWhile { te ⇒
-        val pathString = te.getName.split("/")
-        pathString.last != "re-execute.sh" || pathString.contains("rootfs")
-      }.toSeq.headOption.flatMap { e ⇒
-        val stringW = new StringOutputStream
-        stream copy stringW
-        val lines = stringW.toString.split("\n")
-        val prootLine = lines.indexWhere(s ⇒ s.startsWith("PROOT="))
-        if (prootLine != -1) {
-          val command = lines.slice(7, prootLine - 1).map { l ⇒ l.dropRight(2) }.map { _.drop(1) }.map { _.dropRight(1) }.toSeq
-          CodeParsing.fromCommand(command)
-        }
-        else None
-      }
-    }
-    finally {
-      fileChannel.close
-    }
-
-  }
 
 }
