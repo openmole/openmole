@@ -1,7 +1,6 @@
 package org.openmole.gui.server.core
 
 import org.openmole.gui.ext.data._
-import org.clapper.classutil.ClassFinder
 import scala.io.Source
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 import scala.reflect.runtime.{ universe ⇒ ru }
@@ -193,40 +192,86 @@ object CodeParsing {
     )
   }
 
-  def jarParsing(safePath: SafePath): LaunchingCommand = {
+  def jarParsing(safePath: SafePath, filter: String): LaunchingCommand = {
     println("JAR PARSING")
-    val classLoader = new URLClassLoader(Seq(safePath.toURI.toURL), this.getClass.getClassLoader)
-    val mirror = ru.runtimeMirror(classLoader)
+    //  val _filter = filter.toUpperCase
+    //  val classLoader = new URLClassLoader(Seq(safePath.toURI.toURL), this.getClass.getClassLoader)
+    //   val mirror = ru.runtimeMirror(classLoader)
     // val urls = classLoader.getURLs
 
     //println("URLs " + urls)
 
-    val classes = ClassFinder(Seq(safePath)).getClasses.toSeq.filterNot {
+    /* val classes = ClassFinder(Seq(safePath)).getClasses.toSeq.filterNot {
       c ⇒
-        Seq("scala", "java").exists {
-          ex ⇒ c.name.startsWith(ex)
+        Seq("scala", "java", "apache").exists {
+          ex ⇒ c.name.contains(ex)
         }
-    }
+    }.filter {
+      c ⇒ c.name.toUpperCase.contains(_filter)
+    }*/
 
-    println("Methods " + classes.size + " // " + classes.map { c ⇒
-      c.name + " // " + c.methods.map { m ⇒
+    //val classes = Utils.jarClasses(safePath, filter)
+    // println("classes: " + classes)
+
+    /*classes.map { c ⇒
+      c.name + " // " + c.getClass.getMethods.map { m ⇒ println("MEEEEEEET " + m.getParameters.map { p ⇒ p.getName }.mkString(" - ")) }.mkString("\n") + c.methods.map { m ⇒
+        println(" ---- METHOD")
         println("METH " + m.toString())
-        println("Modifiers: " + m.modifiers.map {
-          _.toString
-        })
+        println("METH descritor" + m.descriptor)
+        val descriptor = m.descriptor.drop(1)
+        println("TO BE PARSED: " + descriptor.split('L').flatMap { _.split(';') })
       }
-    })
+    }*/
 
-    classes.map { c ⇒
-      println("NAME " + c.name)
-      val oo = mirror.staticClass(c.name).typeSignature.baseClasses.map {
-        bc ⇒ bc.fullName
+    // println("MMEETT: " + classes.map { c ⇒ c.getClass.getMethods })
 
+    def parseDecriptor(descriptor: String, commandElements: Seq[CommandElement]): Seq[CommandElement] = {
+      if (descriptor.isEmpty) commandElements
+      else {
+        commandElements
       }
-      println("OO " + oo)
+
+      def parse(c: Char) = c match {
+        case 'D' ⇒ println("DOuble")
+        case _   ⇒ println("somehing else")
+      }
+      Seq()
     }
 
-    LaunchingCommand(None, "")
+    /*
+      println("---- CLASS" + classes.map { c ⇒
+        println("CLASS signature" + c.name + ": " + c.signature)
+      })
+
+      println("Methods " + classes.size + " // " + classes.map { c ⇒
+        c.name + " // " + c.methods.map { m ⇒
+          println(" ---- METHOD")
+          println("METH " + m.toString())
+          println("METH signature" + m.signature)
+          println("METH descritor" + m.descriptor)
+          println("Modifiers: " + m.modifiers.map {
+            _.toString
+          })
+        }
+        c.fields.map { f ⇒
+          println("--- FIELD")
+          println("FIELD  signature" + f.signature)
+          println("FILED descritor" + f.descriptor)
+          println("FILED value" + f.value)
+        }
+
+      })
+
+      classes.map { c ⇒
+        println("NAME " + c.name)
+        val oo = mirror.staticClass(c.name).typeSignature.baseClasses.map {
+          bc ⇒ bc.fullName
+
+        }
+        println("OO " + oo)
+      }*/
+
+    LaunchingCommand(Some(JavaLikeLanguage()), "")
 
   }
 

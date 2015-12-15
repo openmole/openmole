@@ -322,7 +322,9 @@ object ApiImpl extends Api {
   }
 
   //MODEL WIZARDS
-  def launchingCommand(careArchive: SafePath): Option[LaunchingCommand] = Utils.launchinCommand(careArchive)
+  def launchingCommands(path: SafePath, filter: String = ""): Seq[LaunchingCommand] = Utils.launchinCommands(path, filter)
+
+  def classes(jarPath: SafePath): Seq[ClassTree] = Utils.jarClasses(jarPath)
 
   def buildModelTask(executableName: String,
                      scriptName: String,

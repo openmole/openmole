@@ -329,8 +329,6 @@ case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
 case class Plugin(name: String)
 
 sealed trait Language {
-  val uuid: String = java.util.UUID.randomUUID.toString
-
   def name: String
 
   def extension: String
@@ -377,6 +375,12 @@ case class NetLogoLanguage() extends Language {
   val taskType = NetLogoTaskType()
 }
 
+case class JavaLikeLanguage() extends Language {
+  val name: String = "Java/Scala"
+  val extension = "jar"
+  val taskType = ScalaTaskType()
+}
+
 sealed trait CommandElement {
   def expand: String
   def index: Int
@@ -398,3 +402,5 @@ case class LaunchingCommand(language: Option[Language], codeName: String, argume
 }
 
 case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, default: String = "", mapping: Option[String] = None)
+
+case class ClassTree(name: String, classes: Seq[String])
