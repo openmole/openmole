@@ -17,37 +17,110 @@
 
 package org.openmole.plugin.task.care
 
+import java.io.File
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.workflow.builder.CanBuildTask
+import org.openmole.core.workflow.data.{ Context, Variable }
+import org.openmole.core.workflow.tools.VariableExpansion
+import org.openmole.plugin.task.external.ExternalTask
 import org.openmole.tool.file._
 
 import org.openmole.tool.logger.Logger
-import org.openmole.plugin.task.systemexec
+import org.openmole.plugin.task.systemexec._
+import org.openmole.core.workflow.data._
+
+import org.openmole.plugin.task.care._
 
 object CARETask extends Logger {
 
-  /**
-   * Systemexec task execute an external process.
-   * To communicate with the dataflow the result should be either a file / category or the return
-   * value of the process.
-   */
-  def apply(archiveLocation: String, command: String) = {
+  def apply(archiveLocation: String, command: String, archiveWorkDirectory: String) = {
 
     val archive = archiveLocation.split('/').last
 
-    val extract = s"./${archive} -x"
-    val reExecute = s"./${archive}/re-execute.sh"
-    val workDirectory = s"grep '-w' ${archive}/re-execute.sh" // | cut \\-d \' \' \\-f 2 | tr \\-d \\'"
-    //    val linkInOutputs =
-    //      s"""bash -c '${workDirectory}; cd ${archive}/rootfs/\\$$taskdir && ln -s -t . \\`readlink -f \\$$OLDPWD/${archive}/rootfs/inputs\\`/\\*; cd \\$$OLDPWD/${archive}/rootfs && ln -s \\$$taskdir ./outputs'
-    //       """.stripMargin
+    def reExecuteCommand(commandline: String) = s"./re-execute.sh/${commandline}"
 
-    // ; cd ${archive}/rootfs/\\$$taskdir && ln \\-s \\-t . \\`readlink \\-f \\$$OLDPWD/${archive}/rootfs/inputs\\`/\\*; cd \\$$OLDPWD/${archive}/rootfs && ln \\-s \\$$taskdir ./outputs
-    val linkInOutputs = raw"""bash -c \"ls -lh ./toto.raw\" """
-
-    //      "bash -xc " + "'ls'"  //${workDirectory}" """
-
-    new CARETaskBuilder(Seq(extract, linkInOutputs, reExecute + " " + command).map(
-      strCommand ⇒ systemexec.Command(strCommand)
-    )).addResource(File(archiveLocation))
+    // TODO does it actually need archiveLocation?
+    new CARETaskBuilder(archiveLocation, Command(reExecuteCommand(command)), archiveWorkDirectory) with CanBuildTask[CARETask] {
+      def toTask: CARETask = new CARETask(
+        archiveLocation, command, archiveWorkDirectory,
+        workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with this.Built {
+        override val outputs: PrototypeSet = this.outputs + List(stdOut, stdErr, returnValue).flatten
+      }
+    }.addResource(new File(archiveLocation))
 
   }
+}
+
+abstract class CARETask(
+    val archiveLocation: String,
+    val command: Command,
+    val archiveWorkDirectory: String,
+    val directory: Option[String],
+    val errorOnReturnCode: Boolean,
+    val returnValue: Option[Prototype[Int]],
+    val output: Option[Prototype[String]],
+    val error: Option[Prototype[String]],
+    val variables: Seq[(Prototype[_], String)]) extends ExternalTask with SystemExecutor[RandomProvider] {
+
+  override protected def process(context: Context)(implicit rng: RandomProvider) = withWorkDir { tmpDir ⇒
+
+    extract
+    linkInputsOutputs
+
+    val workDir =
+      directory match {
+        case None    ⇒ tmpDir
+        case Some(d) ⇒ new File(tmpDir, d)
+      }
+
+    val preparedContext = prepareInputFiles(context, tmpDir, workDirPath)
+
+    //    val osCommandLines: Seq[ExpandedSystemExecCommand] = command.find { _.os.compatible }.map {
+    //      cmd ⇒ cmd.expanded map { expansion ⇒ ExpandedSystemExecCommand(expansion) }
+    //    }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
+
+    val expandedCommand = VariableExpansion(command.toString)
+    val commandline = commandLine(expandedCommand, workDir, preparedContext)
+
+    // FIXME duplicated from SystemExecTask
+    val retCode = execute(commandline, out, err, workDir, preparedContext)
+    if (errorOnReturnCode && retCode != 0)
+      throw new InternalProcessingError(
+        s"""Error executing command"}:
+                 |[${commandline.mkString(" ")}] return code was not 0 but ${retCode}""".stripMargin)
+
+    //    val retCode = execAll(osCommandLines.toList, workDir, preparedContext)
+    val retContext: Context = fetchOutputFiles(preparedContext, workDir, workDirPath)
+
+    retContext ++
+      List(
+        output.map { o ⇒ Variable(o, outBuilder.toString) },
+        error.map { e ⇒ Variable(e, errBuilder.toString) },
+        returnValue.map { r ⇒ Variable(r, retCode) }
+      ).flatten
+  }
+
+  val archiveName = archiveLocation.split("/").last
+
+  def extract = {
+    extractArchive(managedArchive(new File(".") / archiveName))
+  }
+
+  def linkInputsOutputs = {
+
+    // cd ${archive}/rootfs/\\$$taskdir && ln \\-s \\-t . \\`readlink \\-f \\$$OLDPWD/${archive}/rootfs/inputs\\`/\\*;
+    // cd \\$$OLDPWD/${archive}/rootfs && ln \\-s \\$$taskdir ./outputs
+
+    val inputSource = new File(s"./${archiveName}/rootfs/${archiveWorkDirectory}/inputs")
+    val inputTarget = new File("./inputs")
+
+    val outputSource = new File(s"./${archiveName}/rootfs/outputs")
+    val outputTarget = new File(s"./${archiveName}/rootfs/${archiveWorkDirectory}/outputs")
+
+    inputSource.createLink(inputTarget)
+    outputSource.createLink(outputTarget)
+
+    (inputSource, outputSource)
+  }
+
 }
