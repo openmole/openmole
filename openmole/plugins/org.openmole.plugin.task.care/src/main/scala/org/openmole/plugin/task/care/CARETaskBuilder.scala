@@ -19,13 +19,13 @@ package org.openmole.plugin.task.care
 
 import java.io.File
 
+import org.openmole.core.workflow.builder.CanBuildTask
 import org.openmole.core.workflow.tools.ExpandedString
-import org.openmole.plugin.task.systemexec
 import org.openmole.plugin.task.systemexec._
 import org.openmole.core.workflow.data._
 
 // arguments to SystemExecTask not really matching the actual one -> set in toTask
-class CARETaskBuilder(commands: Seq[systemexec.Command]) extends SystemExecTaskBuilder(commands: _*) { builder ⇒
+abstract class CARETaskBuilder(archiveLocation: String, command: Command, archiveWorkDirectory: String) extends SystemExecTaskBuilder(Seq.empty: _*) { builder ⇒
 
   /**
    * Input files injection into the archive
@@ -53,4 +53,8 @@ class CARETaskBuilder(commands: Seq[systemexec.Command]) extends SystemExecTaskB
 
   // TODO handle shallow copies (bind to archive)
   // one option would be to replace call line by bind + call line
+  //
+
+  //  def toTask2: CARETask = canBuildTask2.toTask
+
 }
