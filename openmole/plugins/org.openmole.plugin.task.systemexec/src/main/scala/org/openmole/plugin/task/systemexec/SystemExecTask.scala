@@ -17,15 +17,19 @@
 
 package org.openmole.plugin.task.systemexec
 
-import java.io.{ File, IOException, PrintStream }
-
-import org.apache.commons.exec.CommandLine
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.builder.CanBuildTask
+import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.core.workflow.tools.VariableExpansion.Expansion
-import org.openmole.plugin.task.external._
 import org.openmole.tool.file._
+import org.openmole.core.tools.service.{ OS, ProcessUtil }
+import ProcessUtil._
+import java.io.File
+import java.io.IOException
+import java.io.PrintStream
+import org.apache.commons.exec.CommandLine
+import org.openmole.core.workflow.data._
+import org.openmole.plugin.task.external._
 import org.openmole.tool.logger.Logger
 import org.openmole.tool.stream.StringOutputStream
 
@@ -39,20 +43,42 @@ object SystemExecTask extends Logger {
    * value of the process.
    */
   def apply(commands: Command*) =
-    new SystemExecTaskBuilder(commands: _*)
+    new SystemExecTaskBuilder(commands: _*) with CanBuildTask[SystemExecTask] {
+      def toTask: SystemExecTask = new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with this.Built {
+        override val outputs: PrototypeSet = this.outputs + List(stdOut, stdErr, returnValue).flatten
+      }
+    }
 
 }
 
 case class ExpandedSystemExecCommand(expandedCommand: Expansion)
 
 abstract class SystemExecTask(
-    val commands: Seq[OSCommands],
+    val command: Seq[OSCommands],
     val directory: Option[String],
     val errorOnReturnCode: Boolean,
     val returnValue: Option[Prototype[Int]],
     val output: Option[Prototype[String]],
     val error: Option[Prototype[String]],
-    val variables: Seq[(Prototype[_], String)]) extends ExternalTask {
+    val variables: Seq[(Prototype[_], String)],
+    val isRemote: Boolean = false) extends ExternalTask with SystemExecutor[RandomProvider] {
+
+  @tailrec
+  protected[systemexec] final def execAll(cmds: List[ExpandedSystemExecCommand], workDir: File, preparedContext: Context)(implicit rng: RandomProvider): Int =
+    cmds match {
+      case Nil ⇒ 0
+      case cmd :: t ⇒
+        val commandline = commandLine(cmd.expandedCommand, workDir, preparedContext)
+
+        val retCode = execute(commandline, out, err, workDir, preparedContext)
+        if (errorOnReturnCode && retCode != 0)
+          throw new InternalProcessingError(
+            s"""Error executing command"}:
+                 |[${commandline.mkString(" ")}] return code was not 0 but ${retCode}""".stripMargin)
+
+        if (t.isEmpty || retCode != 0) retCode
+        else execAll(t, workDir, preparedContext)
+    }
 
   override protected def process(context: Context)(implicit rng: RandomProvider) = withWorkDir { tmpDir ⇒
     val workDir =
@@ -61,103 +87,13 @@ abstract class SystemExecTask(
         case Some(d) ⇒ new File(tmpDir, d)
       }
 
-    def workDirPath = directory.getOrElse("")
     val preparedContext = prepareInputFiles(context, tmpDir, workDirPath)
 
-    val outBuilder = new StringOutputStream
-    val errBuilder = new StringOutputStream
-
-    val out = output match {
-      case Some(_) ⇒ new PrintStream(outBuilder)
-      case None    ⇒ System.out
-    }
-    val err = error match {
-      case Some(_) ⇒ new PrintStream(errBuilder)
-      case None    ⇒ System.err
-    }
-
-    def commandLine(cmd: Expansion): Array[String] = {
-      // old
-      //      CommandLine.parse(cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath))).toStrings
-
-      // no CommandLine
-      val cmds = cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath))
-        .split("""["|' ]^\" """).map(token ⇒ token.replaceAll("\\\\", ""))
-
-      println(s"\n>>>split command line = [${cmds.mkString(",")}]")
-
-      cmds
-
-      // modified CommandLine
-      //      val commandTokens = cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath)).split(' ')
-      //
-      //      // CommandLine insists on being created with an "executable" -> might not be the case here
-      //      val executable = new CommandLine(commandTokens.head)
-      //      // only way (?) to prevent commons-exec from stripping quotes in the original command
-      //      // typical problem fixed -> specifying delimiters as in `cut -d "'"`
-      //
-      //      println(s"exec = ${executable.toString}, args = ${commandTokens.tail.foreach(println)}")
-      //
-      //      executable.addArguments(commandTokens.tail, false).toStrings
-    }
-
-    def execute(command: Array[String], out: PrintStream, err: PrintStream): Int = {
-      try {
-        //        val runtime = Runtime.getRuntime
-        //
-        //        //FIXES java.io.IOException: error=26
-        //        val process = runtime.synchronized {
-        //          runtime.exec(
-        //            command,
-        //            variables.map { case (p, v) ⇒ v + "=" + preparedContext(p).toString }.toArray,
-        //            workDir)
-        //        }
-        //
-        //        // FIXME switch to Scala sys.Process
-        //        executeProcess(process, out, err)
-
-        import scala.sys.process._
-
-        Process(s"ls -lh ${workDir}") !!
-
-        Process(command.toSeq, workDir, variables.map { case (p, v) ⇒ v -> preparedContext(p).toString }: _*) ! ProcessLogger(out append _ append "\n", err append _ append "\n")
-
-      }
-      catch {
-        case e: IOException ⇒ throw new InternalProcessingError(e,
-          s"""Error executing: ${command}
-            |The content of the working directory was:
-            |${workDir.listRecursive(_ ⇒ true).map(_.getPath).mkString("\n")}
-          """.stripMargin
-        )
-      }
-    }
-
-    // find the sequence of command lines corresponding to the host system
-    // unused
-    val osCommandLines: Seq[ExpandedSystemExecCommand] = commands.find { _.os.compatible }.map {
+    val osCommandLines: Seq[ExpandedSystemExecCommand] = command.find { _.os.compatible }.map {
       cmd ⇒ cmd.expanded map { expansion ⇒ ExpandedSystemExecCommand(expansion) }
-    }.getOrElse(
-      throw new UserBadDataError("No command line found for " + OS.actualOS))
+    }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
 
-    @tailrec
-    def execAll(cmds: Seq[ExpandedSystemExecCommand]): Int =
-      cmds match {
-        case Nil ⇒ 0
-        case cmd :: t ⇒
-          val commandline = commandLine(cmd.expandedCommand)
-
-          val retCode = execute(commandline, out, err)
-          if (errorOnReturnCode && retCode != 0)
-            throw new InternalProcessingError(
-              s"""Error executing command"}:
-                 |[${commandline.mkString(" ")}] return code was not 0 but ${retCode}""".stripMargin)
-
-          if (t.isEmpty || retCode != 0) retCode
-          else execAll(t)
-      }
-
-    val retCode = execAll(osCommandLines.toList)
+    val retCode = execAll(osCommandLines.toList, workDir, preparedContext)
     val retContext: Context = fetchOutputFiles(preparedContext, workDir, workDirPath)
 
     retContext ++
@@ -166,7 +102,6 @@ abstract class SystemExecTask(
         error.map { e ⇒ Variable(e, errBuilder.toString) },
         returnValue.map { r ⇒ Variable(r, retCode) }
       ).flatten
-
   }
 
 }

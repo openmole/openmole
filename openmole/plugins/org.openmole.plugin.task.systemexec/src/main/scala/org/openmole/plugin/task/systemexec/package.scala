@@ -23,6 +23,18 @@ import org.openmole.core.workflow.data.Prototype
 import org.openmole.core.workflow.tools.VariableExpansion
 
 package systemexec {
+
+  import java.io.{ IOException, PrintStream, File }
+
+  import org.apache.commons.exec.CommandLine
+  import org.openmole.core.exception.{ UserBadDataError, InternalProcessingError }
+  import org.openmole.core.tools.service.ProcessUtil._
+  import org.openmole.core.workflow.data.{ RandomProvider, Context, Variable }
+  import org.openmole.core.workflow.tools.VariableExpansion.Expansion
+  import org.openmole.plugin.task.external.ExternalTask
+  import org.openmole.tool.stream.StringOutputStream
+  import org.openmole.tool.file._
+
   trait SystemExecPackage {
 
     /**
@@ -67,6 +79,62 @@ package systemexec {
       }
 
     lazy val workDirectory = set[{ def setWorkDirectory(s: Option[String]) }]
+  }
+
+  // FIXME keep on factorising and insert in CARETask/SystemExecTask
+  trait SystemExecutor[T] {
+
+    def directory: Option[String]
+    def output: Option[Prototype[String]]
+    def error: Option[Prototype[String]]
+    def variables: Seq[(Prototype[_], String)]
+
+    val outBuilder = new StringOutputStream
+    val errBuilder = new StringOutputStream
+
+    val out = output match {
+      case Some(_) ⇒ new PrintStream(outBuilder)
+      case None    ⇒ System.out
+    }
+    val err = error match {
+      case Some(_) ⇒ new PrintStream(errBuilder)
+      case None    ⇒ System.err
+    }
+
+    protected[systemexec] def workDirPath: String = directory.getOrElse("")
+
+    protected[systemexec] def commandLine(cmd: Expansion,
+                                          workDir: File,
+                                          preparedContext: Context)(implicit rng: RandomProvider): Array[String] =
+      CommandLine.parse(cmd.expand(preparedContext + Variable(ExternalTask.PWD, workDir.getAbsolutePath))).toStrings
+
+    protected[systemexec] def execute(command: Array[String],
+                                      out: PrintStream,
+                                      err: PrintStream,
+                                      workDir: File,
+                                      preparedContext: Context): Int = {
+      try {
+        val runtime = Runtime.getRuntime
+
+        //FIXES java.io.IOException: error=26
+        val process = runtime.synchronized {
+          runtime.exec(
+            command,
+            variables.map { case (p, v) ⇒ v + "=" + preparedContext(p).toString }.toArray,
+            workDir)
+        }
+
+        executeProcess(process, out, err)
+      }
+      catch {
+        case e: IOException ⇒ throw new InternalProcessingError(e,
+          s"""Error executing: ${command}
+            |The content of the working directory was:
+            |${workDir.listRecursive(_ ⇒ true).map(_.getPath).mkString("\n")}
+          """.stripMargin
+        )
+      }
+    }
   }
 }
 
