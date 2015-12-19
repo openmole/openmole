@@ -20,18 +20,19 @@ package org.openmole.plugin.task.systemexec
 import org.openmole.core.tools.service.OS
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.data._
+import org.openmole.core.workflow.builder.CanBuildTask
 
 import scala.collection.mutable.ListBuffer
 
-class SystemExecTaskBuilder(commands: Command*) extends ExternalTaskBuilder { builder ⇒
+abstract class SystemExecTaskBuilder(commands: Command*) extends ExternalTaskBuilder { builder ⇒
 
-  private val variables = new ListBuffer[(Prototype[_], String)]
-  private val _commands = new ListBuffer[OSCommands]
-  private var errorOnReturnValue = true
-  private var returnValue: Option[Prototype[Int]] = None
-  private var stdOut: Option[Prototype[String]] = None
-  private var stdErr: Option[Prototype[String]] = None
-  private var workDirectory: Option[String] = None
+  protected val variables = new ListBuffer[(Prototype[_], String)]
+  protected val _commands = new ListBuffer[OSCommands]
+  protected var errorOnReturnValue = true
+  protected var returnValue: Option[Prototype[Int]] = None
+  protected var stdOut: Option[Prototype[String]] = None
+  protected var stdErr: Option[Prototype[String]] = None
+  protected var workDirectory: Option[String] = None
 
   addCommand(OS(), commands: _*)
 
@@ -79,9 +80,10 @@ class SystemExecTaskBuilder(commands: Command*) extends ExternalTaskBuilder { bu
     this
   }
 
-  def toTask =
-    new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
-      override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
-    }
+  //  implicit object canBuildTask extends CanBuildTask[SystemExecTask] {
+  //    def toTask: SystemExecTask = new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
+  //      override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
+  //    }
+  //  }
 
 }
