@@ -101,11 +101,11 @@ class Select[T <: Displayable](autoID: String,
             }))
         else tags.div,
         Rx {
-          for (c ← filtered().zipWithIndex) yield {
+          for (c ← filtered()) yield {
             scalatags.JsDom.tags.li(`class` := "selectElement", cursor := "pointer", role := "presentation", onclick := { () ⇒
-              content() = Some(contents()(c._2)._1)
+              content() = contents().filter{_._1 == c}.headOption.map{_._1}
               onclickExtra()
-            })(c._1.name)
+            })(c.name)
           }
         }
       )
