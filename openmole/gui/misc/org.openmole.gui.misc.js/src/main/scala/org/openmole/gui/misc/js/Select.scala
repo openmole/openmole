@@ -27,17 +27,17 @@ import scalatags.JsDom.{tags ⇒ tags}
 
 object Select {
   def apply[T <: Displayable](autoID: String,
-                                                contents: Seq[(T, ClassKeyAggregator)],
-                                                default: Option[T],
-                                                key: ClassKeyAggregator = emptyCK,
-                                                onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, onclickExtra)
+                              contents: Seq[(T, ClassKeyAggregator)],
+                              default: Option[T],
+                              key: ClassKeyAggregator = emptyCK,
+                              onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, onclickExtra)
 }
 
 class Select[T <: Displayable](autoID: String,
-                                                 val contents: Var[Seq[(T, ClassKeyAggregator)]],
-                                                 default: Option[T] = None,
-                                                 key: ClassKeyAggregator = emptyCK,
-                                                 onclickExtra: () ⇒ Unit = () ⇒ {}) {
+                               private val contents: Var[Seq[(T, ClassKeyAggregator)]],
+                               default: Option[T] = None,
+                               key: ClassKeyAggregator = emptyCK,
+                               onclickExtra: () ⇒ Unit = () ⇒ {}) {
 
   val content: Var[Option[T]] = Var(contents().size match {
     case 0 ⇒ None
@@ -64,14 +64,25 @@ class Select[T <: Displayable](autoID: String,
     }
   }).render
 
-  val glyphMap = contents().toMap
+  val glyphMap = Var(contents().toMap)
+
+  def resetFilter = filtered() = Seq()
+
+  def setContents(cts: Seq[(T, ClassKeyAggregator)]) = {
+    contents() = cts
+    glyphMap() = contents().toMap
+    filtered() = Seq()
+    inputFilter.value = ""
+  }
 
   lazy val selector = {
     lazy val bg: HTMLDivElement = bs.div("dropdown")(
       tags.span(
-        `class` := "btn " + key.key + " dropdown-toggle", `type` := "button","data-toggle".attr := "dropdown", cursor := "pointer")(
+        `class` := "btn " + key.key + " dropdown-toggle", `type` := "button", "data-toggle".attr := "dropdown", cursor := "pointer")(
           Rx {
-            content().map { c ⇒ bs.glyph(glyphMap(c)) }
+            content().map { c ⇒
+              bs.glyph(glyphMap()(c))
+            }
           },
           Rx {
             content().map {

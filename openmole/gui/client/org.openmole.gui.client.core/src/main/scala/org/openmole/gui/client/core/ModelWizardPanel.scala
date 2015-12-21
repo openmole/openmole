@@ -19,19 +19,19 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.js.{Select, OMTags}
+import org.openmole.gui.misc.js.{ Select, OMTags }
 import autowire._
 import org.scalajs.dom.html.TextArea
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.client.core.files.treenodemanager.{instance ⇒ manager}
-import org.scalajs.dom.raw.{HTMLDivElement, HTMLInputElement}
+import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
 import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 import org.openmole.gui.shared.Api
-import scalatags.JsDom.{TypedTag, tags ⇒ tags}
+import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 
 import scalatags.JsDom.all._
-import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs, ClassKeyAggregator}
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
 import bs._
 
 class ModelWizardPanel extends ModalPanel {
@@ -89,10 +89,9 @@ class ModelWizardPanel extends ModalPanel {
   val autoMode = Var(true)
   val upButton: Var[HTMLDivElement] = Var(tags.div().render)
   // val filters: Var[Seq[ClassTree]] = Var(Seq())
-  val launchingCommandFilter = Var("")
   // Usefull for jar namespaces
   val javaLikeLanguage = Var(false)
-  val classSelector: Select[ClassTree] = Select("classSelector", Seq[(ClassTree, ClassKeyAggregator)](), None, btn_default)
+  val classSelector: Select[FullClass] = Select("classSelector", Seq[(FullClass, ClassKeyAggregator)](), None, btn_default)
 
   val commandArea: TextArea = bs.textArea(3)("").render
   val autoModeCheckBox = bs.checkbox(autoMode())(onchange := { () ⇒
@@ -132,7 +131,7 @@ class ModelWizardPanel extends ModalPanel {
     reactives.map {
       _.role
     }.collect {
-      case x: Input[VariableElement] ⇒ x
+      case x: Input[VariableElement]        ⇒ x
       case x: CommandInput[VariableElement] ⇒ x
     }
   }
@@ -141,7 +140,7 @@ class ModelWizardPanel extends ModalPanel {
     reactives.map {
       _.role
     }.collect {
-      case x: Output[VariableElement] ⇒ x
+      case x: Output[VariableElement]        ⇒ x
       case x: CommandOutput[VariableElement] ⇒ x
     }
 
@@ -151,63 +150,64 @@ class ModelWizardPanel extends ModalPanel {
 
   def setUpButton = upButton() =
     bs.div("centerWidth250")(
-    tags.label(`class` := "inputFileStyle spacer5 certificate")(
-      bs.fileInput((fInput: HTMLInputElement) ⇒ {
-        FileManager.upload(fInput,
-          manager.current.safePath(),
-          (p: FileTransferState) ⇒ {
-            transferring() = p
-          },
-          UploadProject(),
-          () ⇒ {
-            if (fInput.files.length > 0) {
-              val fileName = fInput.files.item(0).name
-              OMPost[Api].launchingCommands(manager.current.safePath() ++ fileName, launchingCommandFilter()).call().foreach { b ⇒
-                panels.treeNodePanel.refreshCurrentDirectory
-                launchingCommand() = b.headOption
-                hasModel() = true
-                labelName() = Some(fileName)
-                launchingCommand().foreach { lc ⇒
-                  codeSelector.content() = lc.language
-                  scriptNameInput.value = fileName.split('.').head
-                  lc.language match {
-                    case Some(j: JavaLikeLanguage) ⇒ OMPost[Api].classes(manager.current.safePath() ++ fileName).call().foreach { b ⇒
-                      println("javaLIKE")
-                      javaLikeLanguage() = true
-                      classSelector.contents() = b.map {
-                        (_, emptyCK)
+      tags.label(`class` := "inputFileStyle spacer5 certificate")(
+        bs.fileInput((fInput: HTMLInputElement) ⇒ {
+          FileManager.upload(fInput,
+            manager.current.safePath(),
+            (p: FileTransferState) ⇒ {
+              transferring() = p
+            },
+            UploadProject(),
+            () ⇒ {
+              if (fInput.files.length > 0) {
+                val fileName = fInput.files.item(0).name
+                OMPost[Api].launchingCommands(manager.current.safePath() ++ fileName).call().foreach { b ⇒
+                  panels.treeNodePanel.refreshCurrentDirectory
+                  launchingCommand() = b.headOption
+                  hasModel() = true
+                  labelName() = Some(fileName)
+                  launchingCommand().foreach { lc ⇒
+                    codeSelector.content() = lc.language
+                    scriptNameInput.value = fileName.split('.').head
+                    lc.language match {
+                      case Some(j: JavaLikeLanguage) ⇒ OMPost[Api].classes(manager.current.safePath() ++ fileName).call().foreach { b ⇒
+                        javaLikeLanguage() = true
+                        classSelector.setContents(b.flatMap {
+                          _.flatten
+                        }.map {
+                          (_, emptyCK)
+                        })
                       }
+                      case _ ⇒ javaLikeLanguage() = false
                     }
-                    case _ ⇒ javaLikeLanguage() = false
-                  }
 
-                  val nbArgs = lc.arguments.size
-                  val iReactives = lc.arguments.zipWithIndex.collect {
-                    case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandInput(ve), id)
+                    val nbArgs = lc.arguments.size
+                    val iReactives = lc.arguments.zipWithIndex.collect {
+                      case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandInput(ve), id)
+                    }
+                    val oReactives = lc.outputs.zipWithIndex collect {
+                      case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandOutput(ve), id + nbArgs)
+                    }
+                    currentReactives() = iReactives ++ oReactives
                   }
-                  val oReactives = lc.outputs.zipWithIndex collect {
-                    case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandOutput(ve), id + nbArgs)
-                  }
-                  currentReactives() = iReactives ++ oReactives
+                }
+                OMPost[Api].listFiles(manager.current).call().foreach { lf ⇒
+                  resources() = lf
                 }
               }
-              OMPost[Api].listFiles(manager.current).call().foreach { lf ⇒
-                resources() = lf
-              }
             }
-          }
-        )
-      }), labelName() match {
-        case Some(s: String) ⇒ s
-        case _ ⇒ "Your Model"
+          )
+        }), labelName() match {
+          case Some(s: String) ⇒ s
+          case _               ⇒ "Your Model"
+        }
+      ), {
+        if (javaLikeLanguage()) bs.span("grey")(classSelector.selectorWithFilter)
+        else tags.div()
+      }, {
+        if (hasModel()) bs.span("right grey")(codeSelector.selector)
+        else tags.div()
       }
-    ), {
-      if (javaLikeLanguage()) bs.span("grey")(classSelector.selectorWithFilter)
-      else tags.div()
-    }, {
-      if (hasModel()) bs.span("right grey")(codeSelector.selector)
-      else tags.div()
-    }
     ).render
 
   val step1 = tags.div(
@@ -240,29 +240,29 @@ class ModelWizardPanel extends ModalPanel {
     bs.button(
       "Build",
       btn_primary)(onclick := {
-      () ⇒
-        save
-        close
-        launchingCommand().foreach {
-          lc ⇒
-            OMPost[Api].buildModelTask(
-              labelName().getOrElse(""),
-              scriptNameInput.value,
-              commandArea.value,
-              codeSelector.content().getOrElse(Binary()),
-              inputs(currentReactives()).map {
-                _.content.prototype
-              },
-              outputs(currentReactives()).map {
-                _.content.prototype
-              },
-              manager.current.safePath()).call().foreach {
-              b ⇒
-                panels.treeNodePanel.refreshCurrentDirectory
-              // panels.treeNodePanel.fileDisplayer
-            }
-        }
-    })
+        () ⇒
+          save
+          close
+          launchingCommand().foreach {
+            lc ⇒
+              OMPost[Api].buildModelTask(
+                labelName().getOrElse(""),
+                scriptNameInput.value,
+                commandArea.value,
+                codeSelector.content().getOrElse(Binary()),
+                inputs(currentReactives()).map {
+                  _.content.prototype
+                },
+                outputs(currentReactives()).map {
+                  _.content.prototype
+                },
+                manager.current.safePath()).call().foreach {
+                  b ⇒
+                    panels.treeNodePanel.refreshCurrentDirectory
+                  // panels.treeNodePanel.fileDisplayer
+                }
+          }
+      })
   }
 
   def save = {
@@ -309,9 +309,9 @@ class ModelWizardPanel extends ModalPanel {
     val lineHovered: Var[Boolean] = Var(false)
 
     val switchGlyph = role match {
-      case i: Input[_] ⇒ OMTags.glyph_arrow_right
+      case i: Input[_]         ⇒ OMTags.glyph_arrow_right
       case ci: CommandInput[_] ⇒ OMTags.glyph_arrow_right
-      case _ ⇒ OMTags.glyph_arrow_left
+      case _                   ⇒ OMTags.glyph_arrow_left
     }
 
     def updateLaunchingCommand =
@@ -323,7 +323,7 @@ class ModelWizardPanel extends ModalPanel {
               currentReactives().map {
                 _.role
               }.collect {
-                case x: CommandInput[_] ⇒ x
+                case x: CommandInput[_]  ⇒ x
                 case y: CommandOutput[_] ⇒ y
               }.map {
                 _.content
@@ -404,10 +404,10 @@ class ModelWizardPanel extends ModalPanel {
         bs.badge("I/O", s"$nbInputs/$nbOutputs",
           buttonStyle(0)
         )(onclick := {
-          () ⇒
-            currentTab() = 0
-            setBodyContent
-        })
+            () ⇒
+              currentTab() = 0
+              setBodyContent
+          })
       }, Rx {
         bs.badge("Resources", s"${
           resources().size
@@ -423,12 +423,12 @@ class ModelWizardPanel extends ModalPanel {
     tags.div(
       hasModel() match {
         case true ⇒ tags.div()
-        case _ ⇒ step1
+        case _    ⇒ step1
       },
       transferring() match {
         case _: Transfering ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
-        case _: Transfered ⇒ upButton()
-        case _ ⇒ upButton()
+        case _: Transfered  ⇒ upButton()
+        case _              ⇒ upButton()
       },
       hasModel() match {
         case true ⇒

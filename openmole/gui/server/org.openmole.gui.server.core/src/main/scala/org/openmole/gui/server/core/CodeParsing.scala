@@ -192,8 +192,7 @@ object CodeParsing {
     )
   }
 
-  def jarParsing(safePath: SafePath, filter: String): LaunchingCommand = {
-    println("JAR PARSING")
+  def jarParsing(safePath: SafePath): LaunchingCommand = {
     //  val _filter = filter.toUpperCase
     //  val classLoader = new URLClassLoader(Seq(safePath.toURI.toURL), this.getClass.getClassLoader)
     //   val mirror = ru.runtimeMirror(classLoader)

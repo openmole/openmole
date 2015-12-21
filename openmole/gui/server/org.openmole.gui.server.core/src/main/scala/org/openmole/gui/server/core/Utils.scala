@@ -117,10 +117,10 @@ object Utils {
 
   def listFiles(path: SafePath): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
 
-  def launchinCommands(model: SafePath, filter: String): Seq[LaunchingCommand] =
+  def launchinCommands(model: SafePath): Seq[LaunchingCommand] =
     model.name.split('.').last match {
       case "nlogo" ⇒ Seq(CodeParsing.netlogoParsing(model))
-      case "jar"   ⇒ Seq(CodeParsing.jarParsing(model, filter))
+      case "jar"   ⇒ Seq(CodeParsing.jarParsing(model))
       case _       ⇒ Seq(getCareBinInfos(model)).flatten
     }
 
@@ -172,17 +172,30 @@ object Utils {
         Seq("scala", "java").exists {
           ex ⇒ e.getName.startsWith(ex)
         }
-      }.map { s ⇒
-        val splitted = s.getName.split("/")
-        (splitted.dropRight(1).mkString("."), splitted.last.dropRight(6))
-      }.groupBy(_._1).map {
-        case (k, v) ⇒ ClassTree(k, v.map {
-          _._2
-        })
-      }.toSeq
+      }.map { _.getName.dropRight(6).split("/").toSeq }
 
     zip.close
-    classes
+    buildClassTrees(classes)
+  }
+
+  private def buildClassTrees(classes: Seq[Seq[String]]): Seq[ClassTree] = {
+
+    def build(classes: Seq[Seq[String]], classTrees: Seq[ClassTree]): Seq[ClassTree] = {
+      val grouped = classes.groupBy {
+        _.head
+      }
+
+      grouped.flatMap {
+        case (k, v) ⇒
+          val flatV = v.flatten
+          if (flatV.size == 1) classTrees :+ ClassLeaf(flatV.head)
+          else classTrees :+ ClassNode(k,
+            build(v.map(_.tail), classTrees)
+          )
+      }.toSeq
+    }
+
+    build(classes, Seq())
   }
 
 }

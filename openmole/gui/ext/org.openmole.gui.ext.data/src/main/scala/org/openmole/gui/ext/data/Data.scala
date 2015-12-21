@@ -22,6 +22,7 @@ case class DataBag(uuid: String, name: String, data: Data)
 trait Data
 
 object ProtoTYPE {
+
   case class ProtoTYPE(uuid: String, name: String, scalaString: String)
 
   val INT = new ProtoTYPE("Integer", "Integer", "Int")
@@ -383,24 +384,56 @@ case class JavaLikeLanguage() extends Language {
 
 sealed trait CommandElement {
   def expand: String
+
   def index: Int
 }
+
 case class StaticElement(index: Int, expand: String) extends CommandElement
 
-case class VariableElement(index: Int, prototype: ProtoTypePair, taskType: TaskType) extends CommandElement{
+case class VariableElement(index: Int, prototype: ProtoTypePair, taskType: TaskType) extends CommandElement {
   def expand = taskType.preVariable + prototype.name + taskType.postVariable
+
   def clone(newPrototypePair: ProtoTypePair): VariableElement = copy(prototype = newPrototypePair)
+
   def clone(newName: String, newType: ProtoTYPE, newMapping: Option[String]): VariableElement = clone(prototype.copy(name = newName, `type` = newType, mapping = newMapping))
 }
 
 case class LaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) {
   def fullCommand: String = language match {
-    case Some(NetLogoLanguage())=> "setup\ngo"
-    case _=> (Seq(language.map{_.name}.getOrElse(""), codeName) ++ arguments.sortBy{_.index}.map{_.expand}).mkString(" ")
+    case Some(NetLogoLanguage()) => "setup\ngo"
+    case _ => (Seq(language.map {
+      _.name
+    }.getOrElse(""), codeName) ++ arguments.sortBy {
+      _.index
+    }.map {
+      _.expand
+    }).mkString(" ")
   }
-  def statics: Seq[StaticElement] = arguments.collect{case a: StaticElement=> a}
+
+  def statics: Seq[StaticElement] = arguments.collect { case a: StaticElement => a }
 }
 
 case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, default: String = "", mapping: Option[String] = None)
 
-case class ClassTree(name: String, classes: Seq[String])
+
+sealed trait ClassTree {
+  def name: String
+
+  def flatten(prefix: Seq[String]): Seq[FullClass]
+
+  def flatten: Seq[FullClass]
+}
+
+case class ClassNode(name: String, childs: Seq[ClassTree]) extends ClassTree {
+  def flatten(prefix: Seq[String]) = childs.flatMap { c => c.flatten(prefix :+ name) }
+
+  def flatten = flatten(Seq())
+}
+
+case class ClassLeaf(name: String) extends ClassTree {
+  def flatten = Seq(FullClass(name))
+
+  def flatten(prefix: Seq[String]) = Seq(FullClass((prefix :+ name).mkString(".")))
+}
+
+case class FullClass(name: String)
