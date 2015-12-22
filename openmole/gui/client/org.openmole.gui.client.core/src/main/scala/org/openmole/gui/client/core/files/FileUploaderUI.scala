@@ -20,7 +20,7 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core.OMPost
 import org.openmole.gui.misc.utils.Utils
 import scalatags.JsDom.{ tags ⇒ tags }
-import org.openmole.gui.ext.data.{ UploadAuthentication, SafePath }
+import org.openmole.gui.ext.data.{ ProcessState, UploadAuthentication, SafePath }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -43,7 +43,7 @@ class AuthFileUploaderUI(keyName: String,
     bs.fileInput((fInput: HTMLInputElement) ⇒ {
       FileManager.upload(fInput,
         SafePath.empty,
-        (p: FileTransferState) ⇒ {
+        (p: ProcessState) ⇒ {
         },
         UploadAuthentication(),
         () ⇒ {

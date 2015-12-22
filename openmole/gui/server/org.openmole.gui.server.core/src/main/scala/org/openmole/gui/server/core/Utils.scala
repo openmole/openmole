@@ -21,7 +21,7 @@ import java.io.File
 import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.util.logging.Level
-import java.util.zip.GZIPInputStream
+import java.util.zip.{ ZipEntry, ZipInputStream, GZIPInputStream }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
@@ -71,7 +71,9 @@ object Utils {
 
   implicit def safePathToFile(s: SafePath): File = getFile(webUIProjectFile, s.path)
 
-  implicit def seqOfSafePathToSeqOfFile(s: Seq[SafePath]): Seq[File] = s.map { safePathToFile }
+  implicit def seqOfSafePathToSeqOfFile(s: Seq[SafePath]): Seq[File] = s.map {
+    safePathToFile
+  }
 
   implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, isPlugin(f), f.length, readableByteCount(FileDecorator(f).size))
 
@@ -115,11 +117,11 @@ object Utils {
 
   def listFiles(path: SafePath): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
 
-  def launchinCommand(model: SafePath): Option[LaunchingCommand] =
+  def launchinCommands(model: SafePath): Seq[LaunchingCommand] =
     model.name.split('.').last match {
-      case "nlogo" ⇒ Some(CodeParsing.netlogoParsing(model))
-      case "jar"   ⇒ Some(CodeParsing.jarParsing(model))
-      case _       ⇒ getCareBinInfos(model)
+      case "nlogo" ⇒ Seq(CodeParsing.netlogoParsing(model))
+      case "jar"   ⇒ Seq(CodeParsing.jarParsing(model))
+      case _       ⇒ Seq(getCareBinInfos(model)).flatten
     }
 
   private def getCareBinInfos(careArchive: SafePath): Option[LaunchingCommand] = {
@@ -145,7 +147,11 @@ object Utils {
         val lines = stringW.toString.split("\n")
         val prootLine = lines.indexWhere(s ⇒ s.startsWith("PROOT="))
         if (prootLine != -1) {
-          val command = lines.slice(7, prootLine - 1).map { l ⇒ l.dropRight(2) }.map { _.drop(1) }.map { _.dropRight(1) }.toSeq
+          val command = lines.slice(7, prootLine - 1).map { l ⇒ l.dropRight(2) }.map {
+            _.drop(1)
+          }.map {
+            _.dropRight(1)
+          }.toSeq
           CodeParsing.fromCommand(command)
         }
         else None
@@ -155,6 +161,41 @@ object Utils {
       fileChannel.close
     }
 
+  }
+
+  def jarClasses(jarPath: SafePath): Seq[ClassTree] = {
+    val zip = new ZipInputStream(new FileInputStream(jarPath))
+    val classes = Stream.continually(zip.getNextEntry).
+      takeWhile(_ != null).filter { e ⇒
+        e.getName.endsWith(".class")
+      }.filterNot { e ⇒
+        Seq("scala", "java").exists {
+          ex ⇒ e.getName.startsWith(ex)
+        }
+      }.map { _.getName.dropRight(6).split("/").toSeq }
+
+    zip.close
+    buildClassTrees(classes)
+  }
+
+  private def buildClassTrees(classes: Seq[Seq[String]]): Seq[ClassTree] = {
+
+    def build(classes: Seq[Seq[String]], classTrees: Seq[ClassTree]): Seq[ClassTree] = {
+      val grouped = classes.groupBy {
+        _.head
+      }
+
+      grouped.flatMap {
+        case (k, v) ⇒
+          val flatV = v.flatten
+          if (flatV.size == 1) classTrees :+ ClassLeaf(flatV.head)
+          else classTrees :+ ClassNode(k,
+            build(v.map(_.tail), classTrees)
+          )
+      }.toSeq
+    }
+
+    build(classes, Seq())
   }
 
 }

@@ -74,6 +74,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer50 {
     margin-top: 50px;
 }
+.spacer80 {
+    margin-top: 80px;
+}
 .spacer5 {
     margin-top: 5px;
 }
@@ -89,6 +92,8 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .spacer2 {
     margin-top: 2px;
 }
+
+
 #editor {
     font-family: monospace;
     height: 95%;
@@ -837,4 +842,64 @@ top: -6px;
 .width200Right100{
     width: 200px;
     right: 100px;
+}
+
+.selectFilter{
+margin-top: -6px;
+font-size: 14px;
+padding-left: 5px;
+border-bottom-right-radius: 0px;
+border-bottom-left-radius: 0px;
+}
+
+li.selectElement{
+font-size: 14px;
+color: grey;
+margin-left: 15px;
+}
+
+.borderRightFlat{
+border-bottom-right-radius: 0px;
+border-top-right-radius: 0px;
+}
+
+.spinner-wave {
+    height: 30px;
+    margin: 0 auto;
+    text-align: center;
+    width: 50px;
+    display: inline-block;
+    vertical-align: middle;
+}
+.spinner-wave > div {
+    animation: 1.2s ease-in-out 0s normal none infinite running wave;
+    display: inline-block;
+    height: 100%;
+    margin-left: 5px;
+    width: 6px;
+    background-color: #fff;
+}
+.spinner-wave div:nth-child(2) {
+    animation-delay: -1.1s;
+}
+.spinner-wave div:nth-child(3) {
+    animation-delay: -1s;
+}
+.spinner-wave div:nth-child(4) {
+    animation-delay: -0.9s;
+}
+.spinner-wave div:nth-child(5) {
+    animation-delay: -0.8s;
+}
+@keyframes wave {
+0%, 40%, 100% {
+    transform: scaleY(0.4);
+}
+20% {
+    transform: scaleY(1);
+}
+}
+
+.spinner-wave-ratio{
+	color: white;
 }

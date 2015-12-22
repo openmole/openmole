@@ -72,6 +72,7 @@ trait Api {
   def removePlugin(plugin: Plugin): Unit
 
   //MODEL WIZARDS
-  def launchingCommand(careArchive: SafePath): Option[LaunchingCommand]
+  def launchingCommands(path: SafePath): Seq[LaunchingCommand]
+  def classes(jarPath: SafePath): Seq[ClassTree]
   def buildModelTask(executableName: String, scriptName: String, command: String, language: Language, inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], path: SafePath): Unit
 }

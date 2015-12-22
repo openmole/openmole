@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{ Transfered, Standby, FileTransferState, FileManager }
-import org.openmole.gui.ext.data.{ UploadPlugin, SafePath, Plugin }
+import org.openmole.gui.client.core.files.FileManager
+import org.openmole.gui.ext.data._
 import org.openmole.gui.shared.Api
 import org.scalajs.dom.raw.HTMLInputElement
 import scalatags.JsDom.all._
@@ -35,7 +35,7 @@ class PluginPanel extends ModalPanel {
   lazy val modalID = "pluginPanelID"
 
   private val plugins: Var[Option[Seq[Plugin]]] = Var(None)
-  val transferring: Var[FileTransferState] = Var(Standby())
+  val transferring: Var[ProcessState] = Var(Standby())
 
   def onOpen() = {
     getPlugins
@@ -56,7 +56,7 @@ class PluginPanel extends ModalPanel {
       FileManager.upload(
         fileInput,
         SafePath.empty,
-        (p: FileTransferState) ⇒ { transferring() = p },
+        (p: ProcessState) ⇒ { transferring() = p },
         UploadPlugin(),
         () ⇒ getPlugins
       )
@@ -93,7 +93,7 @@ class PluginPanel extends ModalPanel {
       tags.div(
         transferring() match {
           case _: Standby ⇒
-          case _: Transfered ⇒
+          case _: Processed ⇒
             getPlugins
             transferring() = Standby()
           case _ ⇒
