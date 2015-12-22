@@ -78,7 +78,7 @@ object TreeNodeTabs {
     def update(afterUpdate: () ⇒ Unit) = editor.synchronized {
       FileManager.download(
         treeNode,
-        (p: FileTransferState) ⇒ {},
+        (p: ProcessState) ⇒ {},
         (content: String) ⇒ {
           editor.setCode(content)
           afterUpdate()

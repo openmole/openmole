@@ -2,7 +2,7 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.AbsolutePositioning.FileZone
 import org.openmole.gui.client.core.{ panels, AlertPanel, PanelTriggerer, OMPost }
-import org.openmole.gui.ext.data.{ FileExtension, UploadProject }
+import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
@@ -48,7 +48,7 @@ import TreeNodePanel._
 class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
-  val transferring: Var[FileTransferState] = Var(Standby())
+  val transferring: Var[ProcessState] = Var(Standby())
   val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
 
@@ -102,7 +102,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             inputGroupAddon(id := "fileinput-addon")(
               tags.label(`class` := "inputFileStyleSmall",
                 uploadButton((fileInput: HTMLInputElement) ⇒ {
-                  FileManager.upload(fileInput, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
+                  FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject())
                 })).tooltip("Upload file")),
             inputGroupAddon(id := "fileinput-addon")(
               tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
@@ -128,7 +128,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           tags.td(height := "40px",
             transferring() match {
               case _: Standby ⇒
-              case _: Transfered ⇒
+              case _: Processed ⇒
                 refreshCurrentDirectory
                 transferring() = Standby()
               case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
@@ -145,7 +145,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
     FileManager.download(
       treeNode,
-      (p: FileTransferState) ⇒ transferring() = p,
+      (p: ProcessState) ⇒ transferring() = p,
       onLoaded
     )
 

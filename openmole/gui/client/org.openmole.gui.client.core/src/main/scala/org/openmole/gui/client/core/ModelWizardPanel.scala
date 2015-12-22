@@ -29,9 +29,9 @@ import org.openmole.gui.misc.js.JsRxTags._
 import rx._
 import org.openmole.gui.shared.Api
 import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
-
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
+import ClientProcessState._
 import bs._
 
 class ModelWizardPanel extends ModalPanel {
@@ -77,7 +77,7 @@ class ModelWizardPanel extends ModalPanel {
 
   implicit def stringToOptionString(s: String): Option[String] = if (s.isEmpty) None else Some(s)
 
-  val transferring: Var[FileTransferState] = Var(Standby())
+  val transferring: Var[ProcessState] = Var(Standby())
   val labelName: Var[Option[String]] = Var(None)
   val launchingCommand: Var[Option[LaunchingCommand]] = Var(None)
   val currentReactives: Var[Seq[Reactive]] = Var(Seq())
@@ -88,7 +88,7 @@ class ModelWizardPanel extends ModalPanel {
   val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
   val upButton: Var[HTMLDivElement] = Var(tags.div().render)
-  // val filters: Var[Seq[ClassTree]] = Var(Seq())
+
   // Usefull for jar namespaces
   val javaLikeLanguage = Var(false)
   val classSelector: Select[FullClass] = Select("classSelector", Seq[(FullClass, ClassKeyAggregator)](), None, btn_default)
@@ -151,55 +151,59 @@ class ModelWizardPanel extends ModalPanel {
   def setUpButton = upButton() =
     bs.div("centerWidth250")(
       tags.label(`class` := "inputFileStyle spacer5 certificate")(
-        bs.fileInput((fInput: HTMLInputElement) ⇒ {
-          FileManager.upload(fInput,
-            manager.current.safePath(),
-            (p: FileTransferState) ⇒ {
-              transferring() = p
-            },
-            UploadProject(),
-            () ⇒ {
-              if (fInput.files.length > 0) {
-                val fileName = fInput.files.item(0).name
-                OMPost[Api].launchingCommands(manager.current.safePath() ++ fileName).call().foreach { b ⇒
-                  panels.treeNodePanel.refreshCurrentDirectory
-                  launchingCommand() = b.headOption
-                  hasModel() = true
-                  labelName() = Some(fileName)
-                  launchingCommand().foreach { lc ⇒
-                    codeSelector.content() = lc.language
-                    scriptNameInput.value = fileName.split('.').head
-                    lc.language match {
-                      case Some(j: JavaLikeLanguage) ⇒ OMPost[Api].classes(manager.current.safePath() ++ fileName).call().foreach { b ⇒
-                        javaLikeLanguage() = true
-                        classSelector.setContents(b.flatMap {
-                          _.flatten
-                        }.map {
-                          (_, emptyCK)
-                        })
-                      }
-                      case _ ⇒ javaLikeLanguage() = false
-                    }
+        transferring.withWaiter { _ ⇒
+          tags.div(
+            bs.fileInput((fInput: HTMLInputElement) ⇒ {
+              FileManager.upload(fInput,
+                manager.current.safePath(),
+                (p: ProcessState) ⇒ {
+                  transferring() = p
+                },
+                UploadProject(),
+                () ⇒ {
+                  if (fInput.files.length > 0) {
+                    val fileName = fInput.files.item(0).name
+                    OMPost[Api].launchingCommands(manager.current.safePath() ++ fileName).call().foreach { b ⇒
+                      panels.treeNodePanel.refreshCurrentDirectory
+                      launchingCommand() = b.headOption
+                      hasModel() = true
+                      labelName() = Some(fileName)
+                      launchingCommand().foreach { lc ⇒
+                        codeSelector.content() = lc.language
+                        scriptNameInput.value = fileName.split('.').head
+                        lc.language match {
+                          case Some(j: JavaLikeLanguage) ⇒ OMPost[Api].classes(manager.current.safePath() ++ fileName).call().foreach { b ⇒
+                            javaLikeLanguage() = true
+                            classSelector.setContents(b.flatMap {
+                              _.flatten
+                            }.map {
+                              (_, emptyCK)
+                            })
+                          }
+                          case _ ⇒ javaLikeLanguage() = false
+                        }
 
-                    val nbArgs = lc.arguments.size
-                    val iReactives = lc.arguments.zipWithIndex.collect {
-                      case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandInput(ve), id)
+                        val nbArgs = lc.arguments.size
+                        val iReactives = lc.arguments.zipWithIndex.collect {
+                          case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandInput(ve), id)
+                        }
+                        val oReactives = lc.outputs.zipWithIndex collect {
+                          case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandOutput(ve), id + nbArgs)
+                        }
+                        currentReactives() = iReactives ++ oReactives
+                      }
                     }
-                    val oReactives = lc.outputs.zipWithIndex collect {
-                      case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandOutput(ve), id + nbArgs)
+                    OMPost[Api].listFiles(manager.current).call().foreach { lf ⇒
+                      resources() = lf
                     }
-                    currentReactives() = iReactives ++ oReactives
                   }
                 }
-                OMPost[Api].listFiles(manager.current).call().foreach { lf ⇒
-                  resources() = lf
-                }
-              }
+              )
+            }), labelName() match {
+              case Some(s: String) ⇒ s
+              case _               ⇒ "Your Model"
             }
           )
-        }), labelName() match {
-          case Some(s: String) ⇒ s
-          case _               ⇒ "Your Model"
         }
       ), {
         if (javaLikeLanguage()) bs.span("grey")(classSelector.selectorWithFilter)
@@ -426,9 +430,9 @@ class ModelWizardPanel extends ModalPanel {
         case _    ⇒ step1
       },
       transferring() match {
-        case _: Transfering ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
-        case _: Transfered  ⇒ upButton()
-        case _              ⇒ upButton()
+        case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
+        case _: Processed  ⇒ upButton()
+        case _             ⇒ upButton()
       },
       hasModel() match {
         case true ⇒

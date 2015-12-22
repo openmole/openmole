@@ -437,3 +437,21 @@ case class ClassLeaf(name: String) extends ClassTree {
 }
 
 case class FullClass(name: String)
+
+//Processes
+sealed trait ProcessState {
+  def ratio: Int = 0
+
+  def display: String = ""
+}
+
+case class Standby() extends ProcessState
+
+case class Processing(override val ratio: Int) extends ProcessState {
+  override def display: String = "Transferring... " + ratio + " %"
+}
+
+case class Finalizing(override val ratio: Int = 100,
+                      override val display: String = "Finalizing...") extends ProcessState
+
+case class Processed(override val ratio: Int = 100) extends ProcessState
