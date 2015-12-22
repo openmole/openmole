@@ -1,6 +1,7 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.AbsolutePositioning.FileZone
+import org.openmole.gui.client.core.ClientProcessState._
 import org.openmole.gui.client.core.{ panels, AlertPanel, PanelTriggerer, OMPost }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.Utils
@@ -122,27 +123,28 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
         )
       )
-    }, Rx {
-      tags.table(`class` := "tree" + dragState())(
-        tags.tr(
-          tags.td(height := "40px",
-            transferring() match {
-              case _: Standby ⇒
-              case _: Processed ⇒
-                refreshCurrentDirectory
-                transferring() = Standby()
-              case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
-            })
-        ),
-        tags.tr(
+    },
+    tags.table(`class` := "tree" + dragState())(
+      tags.tr(
+        tags.td(height := "40px",
+          textAlign := "center",
+          transferring.withWaiter { _ ⇒
+            refreshCurrentDirectory
+            tags.div()
+          }
+        )
+      ),
+      tags.tr(
+        Rx {
           if (manager.allNodes.size == 0) tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
           else drawTree(manager.current.sons())
-        )
+        }
       )
-    }
+    )
   )
 
-  def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
+  def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {
+  }) =
     FileManager.download(
       treeNode,
       (p: ProcessState) ⇒ transferring() = p,
@@ -150,8 +152,9 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     )
 
   def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(
-    onclick := { () ⇒
-      goToDirAction(dn)()
+    onclick := {
+      () ⇒
+        goToDirAction(dn)()
     }, dropPairs(dn)
   )
 
@@ -159,13 +162,15 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     draggable := true, ondrop := {
       dropAction(dn)
     },
-    ondragenter := { (e: DragEvent) ⇒
-      false
+    ondragenter := {
+      (e: DragEvent) ⇒
+        false
     },
-    ondragover := { (e: DragEvent) ⇒
-      e.dataTransfer.dropEffect = "move"
-      e.preventDefault
-      false
+    ondragover := {
+      (e: DragEvent) ⇒
+        e.dataTransfer.dropEffect = "move"
+        e.preventDefault
+        false
     }
   )
 
@@ -201,11 +206,12 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             tags.div(`class` := "edit-node",
               tags.form(
                 editNodeInput,
-                onsubmit := { () ⇒
-                  {
-                    renameNode(tn, editNodeInput.value)
-                    false
-                  }
+                onsubmit := {
+                  () ⇒
+                    {
+                      renameNode(tn, editNodeInput.value)
+                      false
+                    }
                 }
               )
             )
@@ -247,11 +253,14 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def trashNode(treeNode: TreeNode) = {
     fileDisplayer.tabs -- treeNode
-    AlertPanel.popup(s"Do you really want to delete ${treeNode.name()}?",
+    AlertPanel.popup(s"Do you really want to delete ${
+      treeNode.name()
+    }?",
       () ⇒ {
-        OMPost[Api].deleteFile(treeNode.safePath()).call().foreach { d ⇒
-          refreshCurrentDirectory
-          fileDisplayer.tabs.checkTabs
+        OMPost[Api].deleteFile(treeNode.safePath()).call().foreach {
+          d ⇒
+            refreshCurrentDirectory
+            fileDisplayer.tabs.checkTabs
         }
       }, zone = FileZone()
     )
@@ -271,20 +280,22 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   def dropAction(tn: TreeNode) = {
     (e: DragEvent) ⇒
       e.preventDefault
-      draggedNode().map { sp ⇒
-        tn match {
-          case d: DirNode ⇒
-            if (sp.safePath().path != d.safePath().path) {
-              fileDisplayer.tabs.saveAllTabs(() ⇒
-                OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach { b ⇒
-                  refreshCurrentDirectory
-                  refresh(d)
-                  fileDisplayer.tabs.checkTabs
-                }
-              )
-            }
-          case _ ⇒
-        }
+      draggedNode().map {
+        sp ⇒
+          tn match {
+            case d: DirNode ⇒
+              if (sp.safePath().path != d.safePath().path) {
+                fileDisplayer.tabs.saveAllTabs(() ⇒
+                  OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach {
+                    b ⇒
+                      refreshCurrentDirectory
+                      refresh(d)
+                      fileDisplayer.tabs.checkTabs
+                  }
+                )
+              }
+            case _ ⇒
+          }
       }
       draggedNode() = None
       false
