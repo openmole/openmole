@@ -25,35 +25,49 @@ import org.openmole.core.workflow.tools.FromContext
 import util.Try
 
 import scala.annotation.tailrec
+import scalaz._
+import Scalaz._
 
 object InputConverter {
 
-  @tailrec def scaled(scales: List[Input], genome: List[Double], context: ⇒ Context, acc: List[Variable[_]] = Nil)(implicit rng: RandomProvider): List[Variable[_]] =
+  @tailrec def scaled(scales: List[Input], genome: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider): List[Variable[_]] =
     if (scales.isEmpty || genome.isEmpty) acc.reverse
     else {
       val input = scales.head
       val (variable, tail) =
-        scaled(input, context, genome) match {
+        scaled(input, genome).map {
           case ScaledScalar(p, v) ⇒
             assert(!v.isNaN); Variable(p, v) -> genome.tail
           case ScaledSequence(p, v) ⇒ Variable(p, v) -> genome.drop(input.size)
-        }
+        }.from(context)(rng)
 
-      scaled(scales.tail, tail.toList, { context + variable }, variable :: acc)
+      scaled(scales.tail, tail.toList, variable :: acc)({ context + variable }, rng)
     }
 
-  def scaled(input: Input, context: ⇒ Context, genomePart: Seq[Double])(implicit rng: RandomProvider) =
+  def scaled(input: Input, genomePart: Seq[Double]): FromContext[Scaled] =
     input match {
       case s @ Scalar(p, _, _) ⇒
         val g = genomePart.head
         assert(!g.isNaN)
-        val min = s.min.from(context)
-        val max = s.max.from(context)
-        val sc = g.scale(min, max)
-        ScaledScalar(s.prototype, sc)
+
+        for {
+          min ← s.min
+          max ← s.max
+        } yield {
+          val sc = g.scale(min, max)
+          ScaledScalar(s.prototype, sc)
+        }
       case s @ Sequence(p, _, _) ⇒
-        def scaled = (genomePart zip (s.min zip s.max)) map { case (g, (min, max)) ⇒ g.scale(min.from(context), max.from(context)) }
-        ScaledSequence(s.prototype, scaled.toArray)
+        def scaled =
+          (genomePart zip (s.min zip s.max)).toVector traverseU {
+            case (g, (min, max)) ⇒
+              for {
+                mi ← min
+                ma ← max
+              } yield g.scale(mi, ma)
+          }
+
+        scaled.map { sc ⇒ ScaledSequence(s.prototype, sc.toArray) }
     }
 
   sealed trait Scaled

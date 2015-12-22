@@ -99,9 +99,9 @@ object GenomeProfile {
           override def valuesToPhenotype(s: Seq[Double]): P = History(s.head)
           override def phenotypeToValues(p: P): Seq[Double] = Seq(StochasticGAAlgorithm.aggregate(t.replication.aggregation, p.history))
 
-          override def populationToVariables(population: Population[Individual[G, P]], context: Context)(implicit rng: RandomProvider) = {
+          override def populationToVariables(population: Population[Individual[G, P]]) = {
             val profile = for { (_, is) ← population.groupBy(t.niche.apply).toVector } yield is.maxBy(_.phenotype.age: Int)
-            super.populationToVariables(profile, context)
+            super.populationToVariables(profile)
           }
         }
     }

@@ -27,6 +27,8 @@ import scala.util.Random
 import ga._
 import org.openmole.core.workflow.tools._
 import org.openmole.tool.types._
+import scalaz._
+import Scalaz._
 
 case class Replication[A](
   seed: WorkflowIntegration.Seeder = WorkflowIntegration.Seeder.empty,
@@ -151,12 +153,13 @@ trait EvolutionWorkflow {
   def resultPrototypes: Seq[Prototype[_]]
   def outputPrototypes: Seq[Prototype[_]]
 
-  def genomeToVariables(genome: G, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]]
-  def populationToVariables(population: Pop, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]]
+  def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]]
+  def populationToVariables(population: Pop): FromContext[Seq[Variable[_]]]
   def prepareIndividualForIsland(i: Ind) = i
 
   def randomGenome: State[Random, G]
 
+  // Variables
   def namespace = Namespace("evolution")
   def genomePrototype = Prototype[G]("genome", namespace)(genomeType)
   def individualPrototype = Prototype[Ind]("individual", namespace)(individualType)
@@ -184,25 +187,28 @@ trait GAAlgorithmIntegration extends EvolutionWorkflow { wfi ⇒
 
   def inputPrototypes: Seq[Prototype[_]]
   def outputPrototypes: Seq[Prototype[_]] = objectives
-  def genomeToVariables(genome: G, context: Context)(implicit rng: RandomProvider): Seq[Variable[_]]
-  def scaled(genome: Seq[Double], context: Context)(implicit rng: RandomProvider): List[Variable[_]] = InputConverter.scaled(wfi.genome.inputs.toList, genome.toList, context)
+
+  def scaled(genome: Seq[Double]) = FromContext { (context, rng) ⇒
+    InputConverter.scaled(wfi.genome.inputs.toList, genome.toList)(context, rng)
+  }
 
   def randomGenome: State[Random, G] = ga.randomGenome(genome.size)
 
   def valuesToPhenotype(s: Seq[Double]): P
   def phenotypeToValues(p: P): Seq[Double]
 
-  def genomesOfPopulationToVariables(population: Population[Individual[G, P]], context: Context)(implicit rng: RandomProvider) = {
-    val scaledValues = population.map(i ⇒ scaled(genomeValues.get(i.genome), context))
-
-    genome.inputs.zipWithIndex.map {
-      case (input, i) ⇒
-        input match {
-          case Scalar(prototype, _, _)   ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Double]).toArray[Double])
-          case Sequence(prototype, _, _) ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Array[Double]]).toArray[Array[Double]])
-        }
-    }.toList
-  }
+  def genomesOfPopulationToVariables(population: Population[Individual[G, P]]) =
+    for {
+      scaledValues ← population.traverse[FromContext, List[Variable[_]]](i ⇒ scaled(genomeValues.get(i.genome)))
+    } yield {
+      genome.inputs.zipWithIndex.map {
+        case (input, i) ⇒
+          input match {
+            case Scalar(prototype, _, _)   ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Double]).toArray[Double])
+            case Sequence(prototype, _, _) ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Array[Double]]).toArray[Array[Double]])
+          }
+      }.toList
+    }
 
 }
 
@@ -213,17 +219,19 @@ trait DeterministicGAAlgorithmIntegration extends GAAlgorithmIntegration {
   override def inputPrototypes = genome.inputs.map(_.prototype)
   override def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
-  def genomeToVariables(genome: G, context: Context)(implicit rng: RandomProvider) = scaled(genomeValues.get(genome), context)
+  def genomeToVariables(genome: G) = scaled(genomeValues.get(genome))
 
-  def populationToVariables(population: Population[Individual[G, P]], context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] = {
-    genomesOfPopulationToVariables(population, context) ++
-      objectives.zipWithIndex.map {
-        case (p, i) ⇒
-          Variable(
-            p.toArray,
-            population.map(ind ⇒ phenotypeToValues(ind.phenotype)(i)).toArray)
-      }
-  }
+  def populationToVariables(population: Population[Individual[G, P]]) =
+    genomesOfPopulationToVariables(population).map {
+      _ ++
+        objectives.zipWithIndex.map {
+          case (p, i) ⇒
+            Variable(
+              p.toArray,
+              population.map(ind ⇒ phenotypeToValues(ind.phenotype)(i)).toArray)
+        }
+    }
+
 }
 
 object StochasticGAAlgorithm {
@@ -252,8 +260,11 @@ trait StochasticGAAlgorithm extends GAAlgorithmIntegration {
 
   def toPhenotype(s: PC): P = History(s)
 
-  def genomeToVariables(genome: G, context: Context)(implicit rng: RandomProvider) =
-    scaled(genomeValues.get(genome), context) ++ seed(rng())
+  def genomeToVariables(genome: G) =
+    for {
+      variables ← scaled(genomeValues.get(genome))
+      s ← FromContext { (_, rng) ⇒ seed(rng()) }
+    } yield variables ++ s
 
   def objectivesOfPopulationToVariables(population: Population[Individual[G, P]]) =
     objectives.zipWithIndex.map {
@@ -264,10 +275,12 @@ trait StochasticGAAlgorithm extends GAAlgorithmIntegration {
         )
     }
 
-  def populationToVariables(population: Population[Individual[G, P]], context: Context)(implicit rng: RandomProvider): Seq[Variable[_]] =
-    genomesOfPopulationToVariables(population, context) ++
-      objectivesOfPopulationToVariables(population) ++
-      Seq(Variable(replications.toArray, population.map(_.phenotype.history.size).toArray))
+  def populationToVariables(population: Population[Individual[G, P]]) =
+    genomesOfPopulationToVariables(population).map {
+      _ ++
+        objectivesOfPopulationToVariables(population) ++
+        Seq(Variable(replications.toArray, population.map(_.phenotype.history.size).toArray))
+    }
 
   override def prepareIndividualForIsland(i: Ind) = i.copy(phenotype = i.phenotype.copy(age = 0))
 }

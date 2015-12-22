@@ -40,7 +40,7 @@ object ScalingPopulationTask {
       abstract class ScalingPopulationTask extends Task {
 
         override def process(context: Context)(implicit rng: RandomProvider) =
-          populationToVariables(context(populationPrototype), context)
+          populationToVariables(context(populationPrototype)).from(context)
 
       }
 
