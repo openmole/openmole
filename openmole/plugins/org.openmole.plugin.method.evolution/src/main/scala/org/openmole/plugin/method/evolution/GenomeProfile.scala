@@ -62,10 +62,10 @@ object GenomeProfile {
         def outputPrototypes = Seq(a.objective)
         def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
-        def genomeToVariables(genome: G) = GAAlgorithmIntegration.scaled(a.genome, genomeValues.get(genome))
+        def genomeToVariables(genome: G) = GAIntegration.scaled(a.genome, genomeValues.get(genome))
 
         def populationToVariables(population: Population[Individual[G, P]]) =
-          GAAlgorithmIntegration.populationToVariables[P](a.genome, Seq(a.objective), p ⇒ Seq(p))(population)
+          GAIntegration.populationToVariables[P](a.genome, Seq(a.objective), p ⇒ Seq(p))(population)
 
         def variablesToPhenotype(context: Context): P = context(a.objective)
 
@@ -89,7 +89,7 @@ object GenomeProfile {
 
     StochasticGenomeProfile(
       ga.noisyProfile[Double](
-        fitness = Fitness { i ⇒ StochasticGAAlgorithm.aggregate(replication.aggregation, i.phenotype.history) },
+        fitness = Fitness { i ⇒ StochasticGAIntegration.aggregate(replication.aggregation, i.phenotype.history) },
         niche = niche,
         nicheSize = paretoSize,
         history = replication.max,
@@ -127,18 +127,15 @@ object GenomeProfile {
           def variablesToPhenotype(context: Context): P = History(context(a.objective))
 
           def phenotypeToValues(p: P): Double =
-            StochasticGAAlgorithm.aggregate(a.replication.aggregation, p.history)
+            StochasticGAIntegration.aggregate(a.replication.aggregation, p.history)
 
           def populationToVariables(population: Population[Individual[G, P]]) = {
             val profile = for { (_, is) ← population.groupBy(a.niche.apply).toVector } yield is.maxBy(_.phenotype.age: Int)
-            StochasticGAAlgorithm.populationToVariables[Double](a.genome, Seq(a.objective), replications, p ⇒ Seq(phenotypeToValues(p)))(profile)
+            StochasticGAIntegration.populationToVariables[Double](a.genome, Seq(a.objective), replications, p ⇒ Seq(phenotypeToValues(p)))(profile)
           }
 
           def genomeToVariables(genome: G) =
-            for {
-              variables ← GAAlgorithmIntegration.scaled(a.genome, genomeValues.get(genome))
-              s ← FromContext { (_, rng) ⇒ a.replication.seed(rng()) }
-            } yield variables ++ s
+            StochasticGAIntegration.genomeToVariables(a.genome, genomeValues.get(genome), a.replication.seed)
 
           def prepareIndividualForIsland(i: Ind) = i.copy(phenotype = i.phenotype.copy(age = 0))
         }

@@ -60,10 +60,11 @@ object WorkflowIntegration {
       def outputPrototypes = a.objectives
       def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
-      def genomeToVariables(genome: G) = GAAlgorithmIntegration.scaled(a.genome, genomeValues.get(genome))
+      def genomeToVariables(genome: G) =
+        GAIntegration.scaled(a.genome, genomeValues.get(genome))
 
       def populationToVariables(population: Population[Individual[G, P]]) =
-        GAAlgorithmIntegration.populationToVariables[P](a.genome, a.objectives, identity)(population)
+        GAIntegration.populationToVariables[P](a.genome, a.objectives, identity)(population)
 
       def variablesToPhenotype(context: Context): P = a.objectives.map(o ⇒ context(o))
 
@@ -93,16 +94,13 @@ object WorkflowIntegration {
       def variablesToPhenotype(context: Context): P = History(a.objectives.map(o ⇒ context(o)))
 
       def phenotypeToValues(p: P): Seq[Double] =
-        StochasticGAAlgorithm.aggregateSeq(a.replication.aggregation, p.history)
+        StochasticGAIntegration.aggregateSeq(a.replication.aggregation, p.history)
 
       def populationToVariables(population: Population[Individual[G, P]]) =
-        StochasticGAAlgorithm.populationToVariables(a.genome, a.objectives, replications, phenotypeToValues)(population)
+        StochasticGAIntegration.populationToVariables(a.genome, a.objectives, replications, phenotypeToValues)(population)
 
       def genomeToVariables(genome: G) =
-        for {
-          variables ← GAAlgorithmIntegration.scaled(a.genome, genomeValues.get(genome))
-          s ← FromContext { (_, rng) ⇒ a.replication.seed(rng()) }
-        } yield variables ++ s
+        StochasticGAIntegration.genomeToVariables(a.genome, genomeValues.get(genome), a.replication.seed)
 
       def prepareIndividualForIsland(i: Ind) = i.copy(phenotype = i.phenotype.copy(age = 0))
     }
@@ -174,7 +172,7 @@ trait EvolutionWorkflow {
   def terminatedPrototype = Prototype[Boolean]("terminated", namespace)
 }
 
-object GAAlgorithmIntegration {
+object GAIntegration {
 
   def variablesToPhenotype[P](objectives: Objectives, context: Context, valuesToPhenotype: Seq[Double] ⇒ P): P = {
     val scaled: Seq[(Prototype[Double], Double)] = objectives.map(o ⇒ o -> context(o))
@@ -212,8 +210,8 @@ object GAAlgorithmIntegration {
     genome: Genome,
     objectives: Objectives,
     phenotypeToValues: P ⇒ Seq[Double])(population: Population[Individual[GAGenome, P]]) =
-    GAAlgorithmIntegration.genomesOfPopulationToVariables(genome, population).map {
-      _ ++ GAAlgorithmIntegration.objectivesOfPopulationToVariables(objectives, phenotypeToValues, population)
+    GAIntegration.genomesOfPopulationToVariables(genome, population).map {
+      _ ++ GAIntegration.objectivesOfPopulationToVariables(objectives, phenotypeToValues, population)
     }
 }
 
@@ -251,7 +249,7 @@ trait Seeder {
   def prototype: Option[Prototype[_]]
 }
 
-object StochasticGAAlgorithm {
+object StochasticGAIntegration {
 
   def aggregateSeq(aggregation: Option[Seq[FitnessAggregation]], values: Seq[Seq[Double]]): Seq[Double] =
     aggregation match {
@@ -261,12 +259,18 @@ object StochasticGAAlgorithm {
 
   def aggregate(aggregation: Option[FitnessAggregation], values: Seq[Double]): Double = aggregation.map(_(values)).getOrElse(values.median)
 
+  def genomeToVariables(g: Genome, v: Seq[Double], seed: Seeder) =
+    for {
+      variables ← GAIntegration.scaled(g, v)
+      s ← FromContext { (_, rng) ⇒ seed(rng()) }
+    } yield variables ++ s
+
   def populationToVariables[PC](
     genome: Genome,
     objectives: Objectives,
     replications: Prototype[Int],
     phenotypeToValues: History[PC] ⇒ Seq[Double])(population: Population[Individual[GAGenome, History[PC]]]) =
-    GAAlgorithmIntegration.populationToVariables[History[PC]](genome, objectives, phenotypeToValues)(population).map {
+    GAIntegration.populationToVariables[History[PC]](genome, objectives, phenotypeToValues)(population).map {
       _ ++ Seq(Variable(replications.toArray, population.map(_.phenotype.history.size).toArray))
     }
 
