@@ -101,12 +101,20 @@ class Select[T <: Displayable](autoID: String,
             }))
         else tags.div,
         Rx {
-          for (c ← filtered()) yield {
-            scalatags.JsDom.tags.li(`class` := "selectElement", cursor := "pointer", role := "presentation", onclick := { () ⇒
-              content() = contents().filter{_._1 == c}.headOption.map{_._1}
-              onclickExtra()
-            })(c.name)
-          }
+          tags.div(
+            if (filtered().size < 500) {
+              for (c ← filtered()) yield {
+                scalatags.JsDom.tags.li(`class` := "selectElement", cursor := "pointer", role := "presentation", onclick := { () ⇒
+                  content() = contents().filter {
+                    _._1 == c
+                  }.headOption.map {
+                    _._1
+                  }
+                  onclickExtra()
+                })(c.name)
+              }
+            } else scalatags.JsDom.tags.li("To many results, filter more !")
+          )
         }
       )
     ).render
