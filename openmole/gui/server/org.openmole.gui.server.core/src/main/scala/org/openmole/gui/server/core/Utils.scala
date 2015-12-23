@@ -31,6 +31,8 @@ import org.openmole.tool.file._
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar._
 
+import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+
 object Utils {
 
   implicit def fileToExtension(f: File): FileExtension = f.getName match {
@@ -172,10 +174,13 @@ object Utils {
         Seq("scala", "java").exists {
           ex ⇒ e.getName.startsWith(ex)
         }
-      }.map { _.getName.dropRight(6).split("/").toSeq }
+      }.map {
+        _.getName.dropRight(6).split("/").toSeq
+      }
 
+    val trees = buildClassTrees(classes)
     zip.close
-    buildClassTrees(classes)
+    trees
   }
 
   private def buildClassTrees(classes: Seq[Seq[String]]): Seq[ClassTree] = {
@@ -196,6 +201,17 @@ object Utils {
     }
 
     build(classes, Seq())
+  }
+
+  def jarMethods(jarPath: SafePath, classString: String): Seq[JarMethod] = {
+    val classLoader = new URLClassLoader(Seq(jarPath.toURI.toURL), this.getClass.getClassLoader)
+    val clazz = Class.forName(classString, true, classLoader)
+
+    clazz.getDeclaredMethods.map { m ⇒
+      JarMethod(m.getName, m.getGenericParameterTypes.map {
+        _.toString
+      }.toSeq, m.getReturnType.getCanonicalName)
+    }
   }
 
 }
