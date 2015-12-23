@@ -48,9 +48,8 @@ class ClientProcessState(processingState: Var[ProcessState]) {
         )
 
         processingState() match {
-          case Processing(_) ⇒ waiterSpan
-          case Finalizing(_, _) ⇒ waiterSpan
-          case _ ⇒ f(processingState())
+          case x @ (Processing(_) | Finalizing(_, _)) ⇒ waiterSpan
+          case y @ (Processed(_) | Standby()) ⇒ f(processingState())
         }
       }
     )

@@ -447,7 +447,7 @@ sealed trait ProcessState {
 
 case class Standby() extends ProcessState
 
-case class Processing(override val ratio: Int) extends ProcessState {
+case class Processing(override val ratio: Int = 0) extends ProcessState {
   override def display: String = "Transferring... " + ratio + " %"
 }
 
