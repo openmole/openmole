@@ -39,7 +39,7 @@ object PSE {
     objectives: Objectives,
     gridSize: Seq[Double],
     replication: Replication[Seq[FitnessAggregation]]) = {
-    def niche = grid(gridSize, (i: Individual[_, History[Seq[Double]]]) ⇒ StochasticGAAlgorithm.aggregateSeq(replication.aggregation, i.phenotype.history))
+    def niche = grid(gridSize, (i: Individual[_, History[Seq[Double]]]) ⇒ StochasticGAIntegration.aggregateSeq(replication.aggregation, i.phenotype.history))
 
     WorkflowIntegration.StochasticGA(
       ga.noisyPSE[History[Seq[Double]], Seq[Int]](niche, replication.max, replication.reevaluate),
