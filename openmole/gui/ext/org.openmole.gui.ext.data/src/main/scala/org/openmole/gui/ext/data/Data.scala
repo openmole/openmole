@@ -455,3 +455,5 @@ case class Finalizing(override val ratio: Int = 100,
                       override val display: String = "Finalizing...") extends ProcessState
 
 case class Processed(override val ratio: Int = 100) extends ProcessState
+
+case class JarMethod(name: String, argumentTypes: Seq[String], returnType: String)
