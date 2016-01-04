@@ -149,74 +149,74 @@ class ModelWizardPanel extends ModalPanel {
   }.headOption
 
   def setUpButton = upButton() =
-    bs.div("centerWidth250")(
-      tags.label(`class` := "inputFileStyle spacer5 certificate")(
-        transferring.withWaiter { _ ⇒
-          tags.div(
-            bs.fileInput((fInput: HTMLInputElement) ⇒ {
-              FileManager.upload(fInput,
-                manager.current.safePath(),
-                (p: ProcessState) ⇒ {
-                  transferring() = p
-                },
-                UploadProject(),
-                () ⇒ {
-                  if (fInput.files.length > 0) {
-                    val fileName = fInput.files.item(0).name
-                    OMPost[Api].launchingCommands(manager.current.safePath() ++ fileName).call().foreach { b ⇒
-                      panels.treeNodePanel.refreshCurrentDirectory
-                      launchingCommand() = b.headOption
-                      hasModel() = true
-                      labelName() = Some(fileName)
-                      launchingCommand().foreach { lc ⇒
-                        codeSelector.content() = lc.language
-                        scriptNameInput.value = fileName.split('.').head
-                        lc.language match {
-                          case Some(j: JavaLikeLanguage) ⇒ OMPost[Api].classes(manager.current.safePath() ++ fileName).call().foreach { b ⇒
-                            javaLikeLanguage() = true
-                            classSelector.setContents(b.flatMap {
-                              _.flatten
-                            }.map {
-                              (_, emptyCK)
-                            })
+    bs.div("modelWizardDivs")(
+      bs.div("centerWidth250")(
+        tags.label(`class` := "inputFileStyle spacer5 certificate leftBlock")(
+          transferring.withWaiter { _ ⇒
+            tags.div(
+              bs.fileInput((fInput: HTMLInputElement) ⇒ {
+                FileManager.upload(fInput,
+                  manager.current.safePath(),
+                  (p: ProcessState) ⇒ {
+                    transferring() = p
+                  },
+                  UploadProject(),
+                  () ⇒ {
+                    if (fInput.files.length > 0) {
+                      val fileName = fInput.files.item(0).name
+                      OMPost[Api].launchingCommands(manager.current.safePath() ++ fileName).call().foreach { b ⇒
+                        panels.treeNodePanel.refreshCurrentDirectory
+                        launchingCommand() = b.headOption
+                        hasModel() = true
+                        labelName() = Some(fileName)
+                        launchingCommand().foreach { lc ⇒
+                          codeSelector.content() = lc.language
+                          scriptNameInput.value = fileName.split('.').head
+                          lc.language match {
+                            case Some(j: JavaLikeLanguage) ⇒ OMPost[Api].classes(manager.current.safePath() ++ fileName).call().foreach { b ⇒
+                              javaLikeLanguage() = true
+                              classSelector.setContents(b.flatMap {
+                                _.flatten
+                              }.map {
+                                (_, emptyCK)
+                              })
+                            }
+                            case _ ⇒ javaLikeLanguage() = false
                           }
-                          case _ ⇒ javaLikeLanguage() = false
-                        }
 
-                        val nbArgs = lc.arguments.size
-                        val iReactives = lc.arguments.zipWithIndex.collect {
-                          case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandInput(ve), id)
+                          val nbArgs = lc.arguments.size
+                          val iReactives = lc.arguments.zipWithIndex.collect {
+                            case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandInput(ve), id)
+                          }
+                          val oReactives = lc.outputs.zipWithIndex collect {
+                            case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandOutput(ve), id + nbArgs)
+                          }
+                          currentReactives() = iReactives ++ oReactives
                         }
-                        val oReactives = lc.outputs.zipWithIndex collect {
-                          case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandOutput(ve), id + nbArgs)
-                        }
-                        currentReactives() = iReactives ++ oReactives
+                      }
+                      OMPost[Api].listFiles(manager.current).call().foreach { lf ⇒
+                        resources() = lf
                       }
                     }
-                    OMPost[Api].listFiles(manager.current).call().foreach { lf ⇒
-                      resources() = lf
-                    }
                   }
-                }
-              )
-            }), labelName() match {
-              case Some(s: String) ⇒ s
-              case _               ⇒ "Your Model"
-            }
-          )
-        }
-      ), {
+                )
+              }), labelName() match {
+                case Some(s: String) ⇒ s
+                case _               ⇒ "Your Model"
+              }
+            )
+          }
+        ), {
+          if (hasModel()) bs.span("right grey")(codeSelector.selector)
+          else tags.div()
+        }), {
         if (javaLikeLanguage()) bs.span("grey")(classSelector.selectorWithFilter)
         else tags.div()
-      }, {
-        if (hasModel()) bs.span("right grey")(codeSelector.selector)
-        else tags.div()
-      }
-    ).render
+      }).render
 
   val step1 = tags.div(
     tags.h4("Step 1: Code import"),
-    bs.div("grey")("Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++ " +
+    bs.div("grey rightBlock")("Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++ " +
       "R, etc). In the case of a Care archive, the packaging has to be done with the",
       tags.b(" -o yourmodel.tar.gz.bin."),
       " option."

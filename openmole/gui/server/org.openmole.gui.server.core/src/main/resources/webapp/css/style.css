@@ -828,10 +828,7 @@ top: -6px;
 }
 
 .centerWidth250{
-    position: relative;
-    width: 250px;
-    left: calc(50% - 125px);
-    right: 50%;
+    max-width: 250px;
 }
 .modelNameInput{
     height: 34px;
@@ -902,4 +899,29 @@ border-top-right-radius: 0px;
 
 .spinner-wave-ratio{
 	color: white;
+}
+
+.modelWizardDivs{
+    display: inline-block;
+}
+
+.modelWizardDivs div{
+    margin-top: -1px;
+    padding-left: 5px;
+    display: inline-block;
+}
+
+.rightBlock{
+    position: relative;
+    display: block;
+    width: 90%;
+    top: 10px;
+    padding-left: 300px;
+    text-align: justify;
+}
+
+.leftBlock{
+    position: relative;
+    display: block;
+    top:-30px;
 }
