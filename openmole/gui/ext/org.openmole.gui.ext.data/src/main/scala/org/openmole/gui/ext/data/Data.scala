@@ -17,6 +17,8 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import DataUtils._
+
 case class DataBag(uuid: String, name: String, data: Data)
 
 trait Data
@@ -31,7 +33,10 @@ object ProtoTYPE {
   val BOOLEAN = new ProtoTYPE("Boolean", "Boolean", "Boolean")
   val STRING = new ProtoTYPE("String", "String", "String")
   val FILE = new ProtoTYPE("File", "File", "File")
-  val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE)
+  val CHAR = new ProtoTYPE("Char", "Char", "Char")
+  val SHORT = new ProtoTYPE("Short", "Short", "Short")
+  val BYTE = new ProtoTYPE("Byte", "Byte", "Byte")
+  val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE, CHAR, SHORT, BYTE )
 
 }
 
@@ -398,7 +403,21 @@ case class VariableElement(index: Int, prototype: ProtoTypePair, taskType: TaskT
   def clone(newName: String, newType: ProtoTYPE, newMapping: Option[String]): VariableElement = clone(prototype.copy(name = newName, `type` = newType, mapping = newMapping))
 }
 
-case class LaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) {
+sealed trait LaunchingCommand {
+  def language: Option[Language]
+
+  def arguments: Seq[CommandElement]
+
+  def outputs: Seq[VariableElement]
+
+  def fullCommand: String
+
+  def statics: Seq[StaticElement] = arguments.collect { case a: StaticElement => a }
+
+  def updateVariables(variableArgs: Seq[VariableElement]): LaunchingCommand
+}
+
+case class BasicLaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) extends LaunchingCommand {
   def fullCommand: String = language match {
     case Some(NetLogoLanguage()) => "setup\ngo"
     case _ => (Seq(language.map {
@@ -410,7 +429,20 @@ case class LaunchingCommand(language: Option[Language], codeName: String, argume
     }).mkString(" ")
   }
 
-  def statics: Seq[StaticElement] = arguments.collect { case a: StaticElement => a }
+  def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
+}
+
+case class JavaLaunchingCommand(jarMethod: JarMethod, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement]) extends LaunchingCommand {
+
+  val language = Some(JavaLikeLanguage())
+
+  def fullCommand: String = jarMethod.methodName + "(" + arguments.sortBy {
+      _.index
+    }.map {
+      _.expand
+    }.mkString(", ") + ")"
+
+  def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
 }
 
 case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, default: String = "", mapping: Option[String] = None)
@@ -456,4 +488,6 @@ case class Finalizing(override val ratio: Int = 100,
 
 case class Processed(override val ratio: Int = 100) extends ProcessState
 
-case class JarMethod(name: String, argumentTypes: Seq[String], returnType: String)
+case class JarMethod(methodName: String, argumentTypes: Seq[String], returnType: String){
+  val name = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
+}

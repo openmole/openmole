@@ -122,7 +122,7 @@ object Utils {
   def launchinCommands(model: SafePath): Seq[LaunchingCommand] =
     model.name.split('.').last match {
       case "nlogo" ⇒ Seq(CodeParsing.netlogoParsing(model))
-      case "jar"   ⇒ Seq(CodeParsing.jarParsing(model))
+      case "jar"   ⇒ Seq(JavaLaunchingCommand(JarMethod("", Seq(), ""), Seq(), Seq()))
       case _       ⇒ Seq(getCareBinInfos(model)).flatten
     }
 
@@ -209,7 +209,7 @@ object Utils {
 
     clazz.getDeclaredMethods.map { m ⇒
       JarMethod(m.getName, m.getGenericParameterTypes.map {
-        _.toString
+        _.toString.split("class ").last
       }.toSeq, m.getReturnType.getCanonicalName)
     }
   }

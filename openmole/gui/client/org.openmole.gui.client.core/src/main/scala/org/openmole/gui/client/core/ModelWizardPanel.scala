@@ -20,6 +20,7 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.js.{ Select, OMTags }
+import Select._
 import autowire._
 import org.scalajs.dom.html.TextArea
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -32,6 +33,7 @@ import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
 import ClientProcessState._
+import org.openmole.gui.ext.data.DataUtils._
 import bs._
 
 class ModelWizardPanel extends ModalPanel {
@@ -77,6 +79,7 @@ class ModelWizardPanel extends ModalPanel {
 
   implicit def stringToOptionString(s: String): Option[String] = if (s.isEmpty) None else Some(s)
 
+  val filePath: Var[Option[SafePath]] = Var(None)
   val transferring: Var[ProcessState] = Var(Standby())
   val labelName: Var[Option[String]] = Var(None)
   val launchingCommand: Var[Option[LaunchingCommand]] = Var(None)
@@ -90,8 +93,29 @@ class ModelWizardPanel extends ModalPanel {
   val upButton: Var[HTMLDivElement] = Var(tags.div().render)
 
   // Usefull for jar namespaces
-  val javaLikeLanguage = Var(false)
-  val classSelector: Select[FullClass] = Select("classSelector", Seq[(FullClass, ClassKeyAggregator)](), None, btn_default)
+
+  val methodSelector: Select[JarMethod] = Select("methodSelector", Seq[(JarMethod, ClassKeyAggregator)](), None, btn_default, () ⇒ {
+    setMethodSelector
+  })
+
+  val classSelector: Select[FullClass] = Select("classSelector", Seq[(FullClass, ClassKeyAggregator)](), None, btn_default, () ⇒ {
+    classSelector.content().map { c ⇒
+      filePath().map { fn ⇒
+        OMPost[Api].methods(fn, c.name).call().foreach { b ⇒
+          methodSelector.setContents(b)
+          setMethodSelector
+        }
+      }
+    }
+  })
+
+  def setMethodSelector = {
+    methodSelector.content().foreach { c ⇒
+      val lc = JavaLaunchingCommand(c, c.args, c.ret.map { Seq(_) }.getOrElse(Seq()))
+      setReactives(lc)
+      launchingCommand() = Some(lc)
+    }
+  }
 
   val commandArea: TextArea = bs.textArea(3)("").render
   val autoModeCheckBox = bs.checkbox(autoMode())(onchange := { () ⇒
@@ -99,12 +123,8 @@ class ModelWizardPanel extends ModalPanel {
   })
 
   val scriptNameInput = bs.input("", "modelNameInput")(placeholder := "Script name").render
-  val codeSelector: Select[Language] = Select("selectLanguages",
-    Seq(Binary(), JavaLikeLanguage(), PythonLanguage(), NetLogoLanguage(), RLanguage()).map {
-      (_, emptyCK)
-    }, Some(Binary()),
-    btn_default
-  )
+  val languages = Seq(Binary(), JavaLikeLanguage(), PythonLanguage(), NetLogoLanguage(), RLanguage())
+  val codeSelector: Select[Language] = Select("selectLanguages", languages, Some(Binary()), btn_default)
 
   Obs(launchingCommand, skipInitial = true) {
     if (autoMode()) {
@@ -148,7 +168,7 @@ class ModelWizardPanel extends ModalPanel {
     _.index == index
   }.headOption
 
-  def setUpButton = upButton() =
+  val setUpButton = upButton() =
     bs.div("modelWizardDivs")(
       bs.div("centerWidth250")(
         tags.label(`class` := "inputFileStyle spacer5 certificate leftBlock")(
@@ -164,7 +184,8 @@ class ModelWizardPanel extends ModalPanel {
                   () ⇒ {
                     if (fInput.files.length > 0) {
                       val fileName = fInput.files.item(0).name
-                      OMPost[Api].launchingCommands(manager.current.safePath() ++ fileName).call().foreach { b ⇒
+                      filePath() = Some(manager.current.safePath() ++ fileName)
+                      OMPost[Api].launchingCommands(filePath().get).call().foreach { b ⇒
                         panels.treeNodePanel.refreshCurrentDirectory
                         launchingCommand() = b.headOption
                         hasModel() = true
@@ -173,25 +194,19 @@ class ModelWizardPanel extends ModalPanel {
                           codeSelector.content() = lc.language
                           scriptNameInput.value = fileName.split('.').head
                           lc.language match {
-                            case Some(j: JavaLikeLanguage) ⇒ OMPost[Api].classes(manager.current.safePath() ++ fileName).call().foreach { b ⇒
-                              javaLikeLanguage() = true
-                              classSelector.setContents(b.flatMap {
-                                _.flatten
-                              }.map {
-                                (_, emptyCK)
-                              })
-                            }
-                            case _ ⇒ javaLikeLanguage() = false
+                            case Some(j: JavaLikeLanguage) ⇒
+                              OMPost[Api].classes(filePath().get).call().foreach { b ⇒
+                                methodSelector.emptyContents
+                                classSelector.setContents(b.flatMap {
+                                  _.flatten
+                                })
+                                setMethodSelector
+                              }
+                            case _ ⇒
+                              classSelector.emptyContents
+                              methodSelector.emptyContents
                           }
-
-                          val nbArgs = lc.arguments.size
-                          val iReactives = lc.arguments.zipWithIndex.collect {
-                            case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandInput(ve), id)
-                          }
-                          val oReactives = lc.outputs.zipWithIndex collect {
-                            case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandOutput(ve), id + nbArgs)
-                          }
-                          currentReactives() = iReactives ++ oReactives
+                          setReactives(lc)
                         }
                       }
                       OMPost[Api].listFiles(manager.current).call().foreach { lf ⇒
@@ -209,10 +224,23 @@ class ModelWizardPanel extends ModalPanel {
         ), {
           if (hasModel()) bs.span("right grey")(codeSelector.selector)
           else tags.div()
-        }), {
-        if (javaLikeLanguage()) bs.span("grey")(classSelector.selectorWithFilter)
-        else tags.div()
+        }), Rx {
+        bs.span("grey")(
+          if (classSelector.isContentsEmpty) tags.div() else classSelector.selectorWithFilter,
+          if (methodSelector.isContentsEmpty) tags.div() else methodSelector.selectorWithFilter
+        )
       }).render
+
+  def setReactives(lc: LaunchingCommand) = {
+    val nbArgs = lc.arguments.size
+    val iReactives = lc.arguments.zipWithIndex.collect {
+      case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandInput(ve), id)
+    }
+    val oReactives = lc.outputs.zipWithIndex collect {
+      case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandOutput(ve), id + nbArgs)
+    }
+    currentReactives() = iReactives ++ oReactives
+  }
 
   val step1 = tags.div(
     tags.h4("Step 1: Code import"),
@@ -322,17 +350,14 @@ class ModelWizardPanel extends ModalPanel {
       role match {
         case CommandInput(_) | CommandOutput(_) ⇒
           launchingCommand() = launchingCommand().map { lc ⇒
-            val statics = lc.statics
-            lc.copy(arguments = statics ++
-              currentReactives().map {
-                _.role
-              }.collect {
-                case x: CommandInput[_]  ⇒ x
-                case y: CommandOutput[_] ⇒ y
-              }.map {
-                _.content
-              }
-            )
+            lc.updateVariables(currentReactives().map {
+              _.role
+            }.collect {
+              case x: CommandInput[_]  ⇒ x
+              case y: CommandOutput[_] ⇒ y
+            }.map {
+              _.content
+            })
           }
         case _ ⇒
       }

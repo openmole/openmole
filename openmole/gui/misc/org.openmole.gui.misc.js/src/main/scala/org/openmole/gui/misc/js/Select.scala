@@ -26,12 +26,22 @@ import org.openmole.gui.misc.js.JsRxTags._
 import scalatags.JsDom.{tags ⇒ tags}
 
 object Select {
+  implicit def seqToSeqOfEmptyPairs[T <: Displayable](s: Seq[T]): Seq[(T, ClassKeyAggregator)] = s.map {
+    (_, emptyCK)
+  }
+
+  implicit def seqOfTupleToSeqOfT[T <: Displayable](s: Seq[(T, _)]): Seq[T] = s.map {
+    _._1
+  }
+
   def apply[T <: Displayable](autoID: String,
                               contents: Seq[(T, ClassKeyAggregator)],
                               default: Option[T],
                               key: ClassKeyAggregator = emptyCK,
                               onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, onclickExtra)
 }
+
+import Select._
 
 class Select[T <: Displayable](autoID: String,
                                private val contents: Var[Seq[(T, ClassKeyAggregator)]],
@@ -52,28 +62,35 @@ class Select[T <: Displayable](autoID: String,
   })
 
   val hasFilter = Var(false)
-  val filtered: Var[Seq[T]] = Var(contents().map {
-    _._1
-  })
+  val filtered: Var[Seq[T]] = Var(contents())
+  resetFilter
 
   lazy val inputFilter: HTMLInputElement = bs.input("", "selectFilter")(placeholder := "Filter", oninput := { () =>
     filtered() = contents().filter {
       _._1.name.toUpperCase.contains(inputFilter.value.toUpperCase)
-    }.map {
-      _._1
     }
   }).render
 
   val glyphMap = Var(contents().toMap)
 
-  def resetFilter = filtered() = Seq()
+  def resetFilter = {
+    filtered() = contents().take(100)
+    content() = None
+  }
 
-  def setContents(cts: Seq[(T, ClassKeyAggregator)]) = {
+  def setContents(cts: Seq[T]) = {
     contents() = cts
+    resetFilter
     glyphMap() = contents().toMap
-    filtered() = Seq()
     inputFilter.value = ""
   }
+
+  def emptyContents = {
+    contents() = Seq()
+    content() = None
+  }
+
+  def isContentsEmpty = contents().isEmpty
 
   lazy val selector = {
     lazy val bg: HTMLDivElement = bs.div("dropdown")(
@@ -102,7 +119,7 @@ class Select[T <: Displayable](autoID: String,
         else tags.div,
         Rx {
           tags.div(
-            if (filtered().size < 500) {
+            if (filtered().size < 100) {
               for (c ← filtered()) yield {
                 scalatags.JsDom.tags.li(`class` := "selectElement", cursor := "pointer", role := "presentation", onclick := { () ⇒
                   content() = contents().filter {
@@ -122,6 +139,7 @@ class Select[T <: Displayable](autoID: String,
   }
 
   lazy val selectorWithFilter = {
+    // hasFilter() = if(contents().size > 9) true else false
     hasFilter() = true
     selector
   }

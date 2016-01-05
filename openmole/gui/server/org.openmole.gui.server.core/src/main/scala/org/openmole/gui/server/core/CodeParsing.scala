@@ -35,7 +35,7 @@ object CodeParsing {
     //Parse the arguments and return the LaunchingCommand
 
     Some(
-      LaunchingCommand(
+      BasicLaunchingCommand(
         language,
         codeName,
         commandElements)
@@ -185,93 +185,11 @@ object CodeParsing {
 
     val (args, outputs) = parse(lines.toSeq.zipWithIndex, Seq(), Seq())
 
-    LaunchingCommand(
+    BasicLaunchingCommand(
       Some(NetLogoLanguage()), "",
       args.distinct.zipWithIndex.map { case (a, i) ⇒ VariableElement(i, a, NetLogoTaskType()) },
       outputs.distinct.zipWithIndex.map { case (o, i) ⇒ VariableElement(i, o, NetLogoTaskType()) }
     )
-  }
-
-  def jarParsing(safePath: SafePath): LaunchingCommand = {
-    //  val _filter = filter.toUpperCase
-    //  val classLoader = new URLClassLoader(Seq(safePath.toURI.toURL), this.getClass.getClassLoader)
-    //   val mirror = ru.runtimeMirror(classLoader)
-    // val urls = classLoader.getURLs
-
-    //println("URLs " + urls)
-
-    /* val classes = ClassFinder(Seq(safePath)).getClasses.toSeq.filterNot {
-      c ⇒
-        Seq("scala", "java", "apache").exists {
-          ex ⇒ c.name.contains(ex)
-        }
-    }.filter {
-      c ⇒ c.name.toUpperCase.contains(_filter)
-    }*/
-
-    //val classes = Utils.jarClasses(safePath, filter)
-    // println("classes: " + classes)
-
-    /*classes.map { c ⇒
-      c.name + " // " + c.getClass.getMethods.map { m ⇒ println("MEEEEEEET " + m.getParameters.map { p ⇒ p.getName }.mkString(" - ")) }.mkString("\n") + c.methods.map { m ⇒
-        println(" ---- METHOD")
-        println("METH " + m.toString())
-        println("METH descritor" + m.descriptor)
-        val descriptor = m.descriptor.drop(1)
-        println("TO BE PARSED: " + descriptor.split('L').flatMap { _.split(';') })
-      }
-    }*/
-
-    // println("MMEETT: " + classes.map { c ⇒ c.getClass.getMethods })
-
-    def parseDecriptor(descriptor: String, commandElements: Seq[CommandElement]): Seq[CommandElement] = {
-      if (descriptor.isEmpty) commandElements
-      else {
-        commandElements
-      }
-
-      def parse(c: Char) = c match {
-        case 'D' ⇒ println("DOuble")
-        case _   ⇒ println("somehing else")
-      }
-      Seq()
-    }
-
-    /*
-      println("---- CLASS" + classes.map { c ⇒
-        println("CLASS signature" + c.name + ": " + c.signature)
-      })
-
-      println("Methods " + classes.size + " // " + classes.map { c ⇒
-        c.name + " // " + c.methods.map { m ⇒
-          println(" ---- METHOD")
-          println("METH " + m.toString())
-          println("METH signature" + m.signature)
-          println("METH descritor" + m.descriptor)
-          println("Modifiers: " + m.modifiers.map {
-            _.toString
-          })
-        }
-        c.fields.map { f ⇒
-          println("--- FIELD")
-          println("FIELD  signature" + f.signature)
-          println("FILED descritor" + f.descriptor)
-          println("FILED value" + f.value)
-        }
-
-      })
-
-      classes.map { c ⇒
-        println("NAME " + c.name)
-        val oo = mirror.staticClass(c.name).typeSignature.baseClasses.map {
-          bc ⇒ bc.fullName
-
-        }
-        println("OO " + oo)
-      }*/
-
-    LaunchingCommand(Some(JavaLikeLanguage()), "")
-
   }
 
 }

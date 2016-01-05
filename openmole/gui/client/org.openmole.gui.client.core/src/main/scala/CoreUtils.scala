@@ -1,4 +1,7 @@
 package org.openmole.gui.client.core
+
+import org.openmole.gui.ext.data._
+
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org
  *

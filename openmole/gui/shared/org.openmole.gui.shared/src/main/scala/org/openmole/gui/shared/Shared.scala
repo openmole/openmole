@@ -74,5 +74,6 @@ trait Api {
   //MODEL WIZARDS
   def launchingCommands(path: SafePath): Seq[LaunchingCommand]
   def classes(jarPath: SafePath): Seq[ClassTree]
+  def methods(jarPath: SafePath, className: String): Seq[JarMethod]
   def buildModelTask(executableName: String, scriptName: String, command: String, language: Language, inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], path: SafePath): Unit
 }
