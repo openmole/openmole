@@ -36,7 +36,7 @@ object ProtoTYPE {
   val CHAR = new ProtoTYPE("Char", "Char", "Char")
   val SHORT = new ProtoTYPE("Short", "Short", "Short")
   val BYTE = new ProtoTYPE("Byte", "Byte", "Byte")
-  val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE, CHAR, SHORT, BYTE )
+  val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE, CHAR, SHORT, BYTE)
 
 }
 
@@ -436,11 +436,17 @@ case class JavaLaunchingCommand(jarMethod: JarMethod, arguments: Seq[CommandElem
 
   val language = Some(JavaLikeLanguage())
 
-  def fullCommand: String = jarMethod.methodName + "(" + arguments.sortBy {
+  def fullCommand: String = {
+    if (jarMethod.methodName.isEmpty) ""
+    else {
+      if (jarMethod.isStatic) jarMethod.clazz + "." else s"val constr = new ${jarMethod.clazz} () // You should initialize this constructor\nconstr."
+    } +
+      jarMethod.methodName + "(" + arguments.sortBy {
       _.index
     }.map {
       _.expand
     }.mkString(", ") + ")"
+  }
 
   def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
 }
@@ -488,6 +494,6 @@ case class Finalizing(override val ratio: Int = 100,
 
 case class Processed(override val ratio: Int = 100) extends ProcessState
 
-case class JarMethod(methodName: String, argumentTypes: Seq[String], returnType: String){
+case class JarMethod(methodName: String, argumentTypes: Seq[String], returnType: String, isStatic: Boolean, clazz: String) {
   val name = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
 }

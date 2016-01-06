@@ -18,6 +18,7 @@ package org.openmole.gui.server.core
  */
 
 import java.io.File
+import java.lang.reflect.Modifier
 import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.util.logging.Level
@@ -122,7 +123,7 @@ object Utils {
   def launchinCommands(model: SafePath): Seq[LaunchingCommand] =
     model.name.split('.').last match {
       case "nlogo" ⇒ Seq(CodeParsing.netlogoParsing(model))
-      case "jar"   ⇒ Seq(JavaLaunchingCommand(JarMethod("", Seq(), ""), Seq(), Seq()))
+      case "jar"   ⇒ Seq(JavaLaunchingCommand(JarMethod("", Seq(), "", true, ""), Seq(), Seq()))
       case _       ⇒ Seq(getCareBinInfos(model)).flatten
     }
 
@@ -210,7 +211,7 @@ object Utils {
     clazz.getDeclaredMethods.map { m ⇒
       JarMethod(m.getName, m.getGenericParameterTypes.map {
         _.toString.split("class ").last
-      }.toSeq, m.getReturnType.getCanonicalName)
+      }.toSeq, m.getReturnType.getCanonicalName, Modifier.isStatic(m.getModifiers), classString)
     }
   }
 
