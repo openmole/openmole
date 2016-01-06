@@ -7,7 +7,7 @@ import sbt._
 
 //The task plugins for openmole go in here.
 
-//TODO: Consider making the package hierarchy for this match it's artifactID.
+//TODO: Consider making the package hierarchy for this match its artifactID.
 object Task extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.task")
 
@@ -42,10 +42,9 @@ object Task extends PluginDefaults {
       libraryDependencies ++= Seq(exec)
     )
 
-  lazy val care = OsgiProject("care", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, systemexec,
-    Core.workspace) settings (
-      libraryDependencies += Libraries.scalatest
-    )
+  lazy val care = OsgiProject("care", imports = Seq("*")) dependsOn (systemexec) settings (
+    libraryDependencies += Libraries.scalatest
+  )
 
   lazy val statistic = OsgiProject("statistic", imports = Seq("*")) dependsOn (Core.workflow)
 
