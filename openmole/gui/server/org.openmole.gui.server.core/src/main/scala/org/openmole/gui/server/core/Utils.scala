@@ -30,7 +30,6 @@ import java.io._
 import org.openmole.tool.file._
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar._
-import org.openmole.plugin.task.care._
 
 object Utils {
 
@@ -120,7 +119,7 @@ object Utils {
     model.name.split('.').last match {
       case "nlogo" ⇒ Some(CodeParsing.netlogoParsing(model))
       case "jar"   ⇒ Some(CodeParsing.jarParsing(model))
-      case _       ⇒ CodeParsing.fromCommand(getCareBinInfos(model).commandLine.get)
+      //      case _       ⇒ CodeParsing.fromCommand(getCareBinInfos(model).commandLine.get)
     }
 
 }
