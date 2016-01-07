@@ -336,7 +336,7 @@ object ApiImpl extends Api {
                      outputs: Seq[ProtoTypePair],
                      path: SafePath,
                      imports: Option[String],
-                     libraries: Option[String]) = {
+                     libraries: Option[String]): TreeNodeData = {
     val modelTaskFile = new File(path, scriptName + ".oms")
 
     val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))
@@ -399,7 +399,7 @@ object ApiImpl extends Api {
       os.close
     }
     modelTaskFile.createNewFile
-
+    modelTaskFile
   }
 
   def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {

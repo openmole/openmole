@@ -23,6 +23,7 @@ import org.openmole.gui.misc.js.{ Select, OMTags }
 import Select._
 import autowire._
 import org.scalajs.dom.html.TextArea
+import org.openmole.gui.client.core.files.TreeNode._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
@@ -110,7 +111,9 @@ class ModelWizardPanel extends ModalPanel {
     filePath().map { fn ⇒
       OMPost[Api].methods(fn, classContent.name).call().foreach { b ⇒
         methodSelector.setContents(b)
-        b.headOption.map { setJavaLaunchingCommand }
+        b.headOption.map {
+          setJavaLaunchingCommand
+        }
       }
     }
   }
@@ -174,7 +177,7 @@ class ModelWizardPanel extends ModalPanel {
     _.index == index
   }.headOption
 
-  val setUpButton = upButton() =
+  def setUpButton = upButton() =
     bs.div("modelWizardDivs")(
       bs.div("centerWidth250")(
         tags.label(`class` := "inputFileStyle spacer5 certificate leftBlock")(
@@ -286,9 +289,11 @@ class ModelWizardPanel extends ModalPanel {
           close
           launchingCommand().foreach {
             lc ⇒
+              val path = manager.current.safePath()
+              val scriptName = scriptNameInput.value
               OMPost[Api].buildModelTask(
                 labelName().getOrElse(""),
-                scriptNameInput.value,
+                scriptName,
                 commandArea.value,
                 codeSelector.content().getOrElse(Binary()),
                 inputs(currentReactives()).map {
@@ -297,14 +302,15 @@ class ModelWizardPanel extends ModalPanel {
                 outputs(currentReactives()).map {
                   _.content.prototype
                 },
-                manager.current.safePath(), classSelector.content().map {
+                path, classSelector.content().map {
                   _.name
                 }, filePath().map {
                   _.name
                 }).call().foreach {
                   b ⇒
+                    panels.treeNodePanel.fileDisplayer.tabs -- b
+                    panels.treeNodePanel.displayNode(b)
                     panels.treeNodePanel.refreshCurrentDirectory
-                  // panels.treeNodePanel.fileDisplayer
                 }
           }
       })
