@@ -375,21 +375,12 @@ class ModelWizardPanel extends ModalPanel {
         case _ ⇒
       }
 
-    def save = getReactive(index).map { reactive ⇒ updatePrototypePair(reactive.role, reactive.role.content.clone(nameInput.value, typeSelector.content().get, mappingInput.value)) }
+    def save = getReactive(index).map { reactive ⇒ updatePrototypePair(reactive.role, reactive.role.content.clone(nameInput.value, role.content.prototype.`type`, mappingInput.value)) }
 
     def removePrototypePair = {
       currentReactives() = currentReactives().filterNot(_.role == role)
       ModelWizardPanel.this.save
     }
-
-    lazy val typeSelector: Select[ProtoTYPE.ProtoTYPE] = Select("modelProtos",
-      ProtoTYPE.ALL.map {
-        (_, emptyCK)
-      }, Some(role.content.prototype.`type`),
-      btn_primary, onclickExtra = () ⇒ {
-        save
-      }
-    )
 
     def saveWithoutTableUpdate = {
       updatableTable() = false
@@ -408,7 +399,6 @@ class ModelWizardPanel extends ModalPanel {
     ).render
 
     val line = {
-      typeSelector.content() = Some(role.content.prototype.`type`)
       tags.tr(
         onmouseover := { () ⇒
           lineHovered() = true
@@ -417,7 +407,7 @@ class ModelWizardPanel extends ModalPanel {
           lineHovered() = false
         },
         bs.td(bs.col_md_3 + "spacer7")(nameInput),
-        bs.td(bs.col_md_2)(typeSelector.selector),
+        bs.td(bs.col_md_2)(bs.label(role.content.prototype.`type`.name.split('.').last, label_primary)),
         bs.td(bs.col_md_1 + "grey")(role.content.prototype.default),
         bs.td(bs.col_md_3)(if (role.content.prototype.mapping.isDefined) mappingInput else tags.div()),
         bs.td(bs.col_md_1 + "right")(

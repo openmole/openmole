@@ -326,12 +326,7 @@ object ApiImpl extends Api {
 
   def classes(jarPath: SafePath): Seq[ClassTree] = Utils.jarClasses(jarPath)
 
-  def methods(jarPath: SafePath, className: String): Seq[JarMethod] = {
-
-    val oo = Utils.jarMethods(jarPath, className)
-    println("jar methods " + oo)
-    oo
-  }
+  def methods(jarPath: SafePath, className: String): Seq[JarMethod] = Utils.jarMethods(jarPath, className)
 
   def buildModelTask(executableName: String,
                      scriptName: String,
