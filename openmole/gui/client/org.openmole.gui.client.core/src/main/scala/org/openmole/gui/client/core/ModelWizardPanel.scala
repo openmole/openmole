@@ -180,7 +180,7 @@ class ModelWizardPanel extends ModalPanel {
   def setUpButton = upButton() =
     bs.div("modelWizardDivs")(
       bs.div("centerWidth250")(
-        tags.label(`class` := "inputFileStyle spacer5 certificate leftBlock")(
+        tags.label(`class` := "inputFileStyle spacer5 certificate")(
           transferring.withWaiter { _ ⇒
             tags.div(
               bs.fileInput((fInput: HTMLInputElement) ⇒ {
@@ -470,7 +470,7 @@ class ModelWizardPanel extends ModalPanel {
       },
       hasModel() match {
         case true ⇒
-          bs.div("spacer80")(
+          bs.div("spacer50")(
             tags.h4("Step2: Task configuration"), step2,
             topButtons,
             if (currentTab() == 0) {
