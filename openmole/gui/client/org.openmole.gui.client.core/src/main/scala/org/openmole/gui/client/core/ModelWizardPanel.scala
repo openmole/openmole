@@ -95,26 +95,32 @@ class ModelWizardPanel extends ModalPanel {
   // Usefull for jar namespaces
 
   val methodSelector: Select[JarMethod] = Select("methodSelector", Seq[(JarMethod, ClassKeyAggregator)](), None, btn_default, () ⇒ {
-    setMethodSelector
+    methodSelector.content().foreach {
+      setJavaLaunchingCommand(_)
+    }
   })
 
   val classSelector: Select[FullClass] = Select("classSelector", Seq[(FullClass, ClassKeyAggregator)](), None, btn_default, () ⇒ {
-    classSelector.content().map { c ⇒
-      filePath().map { fn ⇒
-        OMPost[Api].methods(fn, c.name).call().foreach { b ⇒
-          methodSelector.setContents(b)
-          setMethodSelector
-        }
-      }
+    classSelector.content().foreach {
+      setMethodSelector(_)
     }
   })
 
-  def setMethodSelector = {
-    methodSelector.content().foreach { c ⇒
-      val lc = JavaLaunchingCommand(c, c.args, c.ret.map { Seq(_) }.getOrElse(Seq()))
-      setReactives(lc)
-      launchingCommand() = Some(lc)
+  def setMethodSelector(classContent: FullClass) = {
+    filePath().map { fn ⇒
+      OMPost[Api].methods(fn, classContent.name).call().foreach { b ⇒
+        methodSelector.setContents(b)
+        b.headOption.map { setJavaLaunchingCommand }
+      }
     }
+  }
+
+  def setJavaLaunchingCommand(method: JarMethod) = {
+    val lc = JavaLaunchingCommand(method, method.args, method.ret.map {
+      Seq(_)
+    }.getOrElse(Seq()))
+    setReactives(lc)
+    launchingCommand() = Some(lc)
   }
 
   val commandArea: TextArea = bs.textArea(3)("").render
@@ -196,11 +202,14 @@ class ModelWizardPanel extends ModalPanel {
                           lc.language match {
                             case Some(j: JavaLikeLanguage) ⇒
                               OMPost[Api].classes(filePath().get).call().foreach { b ⇒
-                                methodSelector.emptyContents
-                                classSelector.setContents(b.flatMap {
+                                val classContents = b.flatMap {
                                   _.flatten
-                                })
-                                setMethodSelector
+                                }
+                                methodSelector.emptyContents
+                                classSelector.setContents(classContents)
+                                classContents.headOption.foreach {
+                                  setMethodSelector(_)
+                                }
                               }
                             case _ ⇒
                               classSelector.emptyContents
@@ -288,7 +297,11 @@ class ModelWizardPanel extends ModalPanel {
                 outputs(currentReactives()).map {
                   _.content.prototype
                 },
-                manager.current.safePath()).call().foreach {
+                manager.current.safePath(), classSelector.content().map {
+                  _.name
+                }, filePath().map {
+                  _.name
+                }).call().foreach {
                   b ⇒
                     panels.treeNodePanel.refreshCurrentDirectory
                   // panels.treeNodePanel.fileDisplayer

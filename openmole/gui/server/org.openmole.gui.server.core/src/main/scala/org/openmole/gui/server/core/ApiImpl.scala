@@ -339,7 +339,9 @@ object ApiImpl extends Api {
                      language: Language,
                      inputs: Seq[ProtoTypePair],
                      outputs: Seq[ProtoTypePair],
-                     path: SafePath) = {
+                     path: SafePath,
+                     imports: Option[String],
+                     libraries: Option[String]) = {
     val modelTaskFile = new File(path, scriptName + ".oms")
 
     val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))
@@ -385,6 +387,14 @@ object ApiImpl extends Api {
             s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}")) set(\n""" +
               inString + ouString + imString + omString + imFileString + omFileString + defaults
           )
+        case st: ScalaTaskType ⇒
+          os.write(
+            s"""\nval task = ScalaTask(\n\"\"\"$command\"\"\") set(\n""" +
+              s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n" +
+              s"${imports.map { i ⇒ s"  imports += ${imports.map { i ⇒ s"$i._" }}," }.getOrElse("")}\n" +
+              inString + ouString + imFileString + omFileString + defaults
+          )
+
         case _ ⇒ ""
       }
       os.write("\n  )\n\ntask")

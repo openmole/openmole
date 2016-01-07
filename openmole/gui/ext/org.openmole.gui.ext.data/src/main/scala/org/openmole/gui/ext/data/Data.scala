@@ -439,7 +439,7 @@ case class JavaLaunchingCommand(jarMethod: JarMethod, arguments: Seq[CommandElem
   def fullCommand: String = {
     if (jarMethod.methodName.isEmpty) ""
     else {
-      if (jarMethod.isStatic) jarMethod.clazz + "." else s"val constr = new ${jarMethod.clazz} () // You should initialize this constructor\nconstr."
+      if (jarMethod.isStatic) jarMethod.clazz + "." else s"val constr = new ${jarMethod.clazz}() // You should initialize this constructor first\nconstr."
     } +
       jarMethod.methodName + "(" + arguments.sortBy {
       _.index

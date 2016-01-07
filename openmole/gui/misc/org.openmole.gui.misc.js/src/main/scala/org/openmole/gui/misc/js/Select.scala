@@ -80,6 +80,7 @@ class Select[T <: Displayable](autoID: String,
 
   def setContents(cts: Seq[T]) = {
     contents() = cts
+    content() = cts.headOption
     resetFilter
     glyphMap() = contents().toMap
     inputFilter.value = ""
