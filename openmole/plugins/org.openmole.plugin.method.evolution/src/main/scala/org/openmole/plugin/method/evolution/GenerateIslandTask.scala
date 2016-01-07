@@ -46,7 +46,7 @@ object GenerateIslandTask {
               case None    ⇒ p
             }
 
-          def populations = Array.fill(size)(samples.map(prepareIndividualForIsland))
+          def populations = Array.fill(size)(samples.map(operations.migrateToIsland))
           Variable(outputPopulation.toArray, populations)
         }
 

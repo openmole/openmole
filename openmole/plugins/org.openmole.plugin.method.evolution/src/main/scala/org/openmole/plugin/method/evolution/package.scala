@@ -39,6 +39,9 @@ import scalaz._
 import Scalaz._
 
 package object evolution {
+
+  val operatorExploration = 0.1
+
   type Objective = Prototype[Double]
   type Objectives = Seq[Objective]
   type FitnessAggregation = TextClosure[Seq[Double], Double]
@@ -49,8 +52,8 @@ package object evolution {
   object OMTermination {
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
       oMTermination match {
-        case AfterGeneration(s) ⇒ afterGeneration[integration.AlgoState](s)(generation[integration.S])
-        case AfterDuration(d)   ⇒ afterTime[integration.AlgoState](d)(startTime[integration.S])
+        case AfterGeneration(s) ⇒ integration.algorithm.afterGeneration(s)
+        case AfterDuration(d)   ⇒ integration.algorithm.afterDuration(d)
       }
   }
 
@@ -127,8 +130,8 @@ package object evolution {
     val firstTask = EmptyTask() set (
       name := "first",
       (inputs, outputs) += (populationPrototype, statePrototype),
-      _.setDefault(Default(statePrototype, ctx ⇒ wfi.algorithm.algorithmState(Task.buildRNG(ctx)))),
-      populationPrototype := Population.empty)
+      _.setDefault(Default(statePrototype, ctx ⇒ wfi.operations.initialState(Task.buildRNG(ctx)))),
+      populationPrototype := Vector.empty)
 
     val firstCapsule = Capsule(firstTask, strain = true)
     val last = EmptyTask() set (
@@ -231,8 +234,8 @@ package object evolution {
     val firstTask = EmptyTask() set (
       name := "first",
       (inputs, outputs) += (populationPrototype, statePrototype),
-      populationPrototype := Population.empty,
-      _.setDefault(Default(statePrototype, ctx ⇒ algorithm.algorithmState(Task.buildRNG(ctx))))
+      populationPrototype := Vector.empty,
+      _.setDefault(Default(statePrototype, ctx ⇒ operations.initialState(Task.buildRNG(ctx))))
     )
 
     val firstCapsule = Capsule(firstTask, strain = true)

@@ -40,21 +40,13 @@ object ToOffspringTask {
       addOutput(offspringPrototype)
 
       abstract class ToOffspringTask extends Task {
-
         override def process(context: Context)(implicit rng: RandomProvider) = {
-          val i: Ind =
-            new Individual[G, P](
-              context(genomePrototype),
-              variablesToPhenotype(context),
-              born = mgo.generation.get(context(statePrototype))
-            )
-
+          val i = buildIndividual(context(genomePrototype), context)
           Context(Variable(offspringPrototype, Vector(i)))
         }
       }
 
       def toTask = new ToOffspringTask with Built
-
     }
   }
 }

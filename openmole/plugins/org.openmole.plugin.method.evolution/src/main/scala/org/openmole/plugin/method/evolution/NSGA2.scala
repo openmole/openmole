@@ -17,10 +17,7 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo._
-import algorithm._
-import fitness._
-import fr.iscpif.mgo.clone.History
+import fr.iscpif.mgo
 import org.openmole.core.workflow.data.PrototypeType
 import org.openmole.core.workflow.tools.TextClosure
 import org.openmole.tool.statistics._
@@ -30,11 +27,14 @@ object NSGA2 {
   def apply(
     mu: Int,
     genome: Genome,
-    objectives: Objectives) =
-    WorkflowIntegration.DeterministicGA(
-      ga.NSGA2[Seq[Double]](mu, Fitness(_.phenotype)),
+    objectives: Objectives) = {
+
+    new WorkflowIntegration.DeterministicGA(
+      mgo.algorithm.NSGA2.OpenMOLE(mu, genome.size, operatorExploration),
       genome,
-      objectives)
+      objectives
+    )
+  }
 
   def apply(
     mu: Int,
@@ -42,10 +42,10 @@ object NSGA2 {
     objectives: Objectives,
     replication: Replication[Seq[FitnessAggregation]]) = {
 
-    def fit = Fitness((i: Individual[Any, History[Seq[Double]]]) ⇒ StochasticGAIntegration.aggregateSeq(replication.aggregation, i.phenotype.history))
+    def aggregation(h: Vector[Vector[Double]]) = StochasticGAIntegration.aggregateVector(replication.aggregation, h)
 
     WorkflowIntegration.StochasticGA(
-      ga.noisyNSGA2[Seq[Double]](mu, fit, replication.max, cloneRate = replication.reevaluate),
+      mgo.algorithm.NoisyNSGA2.OpenMOLE(mu, operatorExploration, genome.size, replication.max, replication.reevaluate, aggregation),
       genome,
       objectives,
       replication)

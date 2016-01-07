@@ -44,7 +44,7 @@ object BreedTask {
 
           if (p.isEmpty) {
             val s = context(statePrototype)
-            val (news, gs) = (random[S] lifts randomGenomes(randomGenome, size)).run(s)
+            val (news, gs) = algorithm.run(s, operations.initialGenomes(size))
 
             Context(
               Variable(genomePrototype.toArray, gs.toArray(genomePrototype.`type`.manifest)),
@@ -53,7 +53,7 @@ object BreedTask {
           }
           else {
             val s = context(statePrototype)
-            val (newState, breeded) = algorithm.breeding(p, size).run(s)
+            val (newState, breeded) = algorithm.run(s, operations.breeding(size).run(p))
 
             Context(
               Variable(genomePrototype.toArray, breeded.toArray(genomePrototype.`type`.manifest)),

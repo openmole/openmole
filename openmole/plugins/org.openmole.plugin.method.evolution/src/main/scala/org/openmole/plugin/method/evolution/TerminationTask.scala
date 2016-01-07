@@ -37,6 +37,7 @@ object TerminationTask {
     new TaskBuilder {
       builder ⇒
       addInput(statePrototype)
+      addInput(populationPrototype)
       addOutput(statePrototype)
       addOutput(terminatedPrototype)
       addOutput(generationPrototype)
@@ -44,12 +45,12 @@ object TerminationTask {
       abstract class TerminationTask extends Task {
 
         override def process(context: Context)(implicit rng: RandomProvider) = {
-          val (newState, t) = term.run(context(statePrototype))
+          val (newState, t) = algorithm.run(context(statePrototype), term.run(context(populationPrototype)))
 
           Context(
             Variable(terminatedPrototype, t),
             Variable(statePrototype, newState),
-            Variable(generationPrototype, Tag.unwrap(mgo.generation.get(newState)))
+            Variable(generationPrototype, operations.generation(newState))
           )
         }
 
