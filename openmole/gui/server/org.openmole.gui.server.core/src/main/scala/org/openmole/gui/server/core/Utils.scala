@@ -20,13 +20,11 @@ package org.openmole.gui.server.core
 import java.io.File
 import java.lang.reflect.Modifier
 import java.nio.channels.FileChannel
-import java.nio.file.Files
 import java.util.logging.Level
-import java.util.zip.{ ZipEntry, ZipInputStream, GZIPInputStream }
+import java.util.zip.{ ZipInputStream, GZIPInputStream }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.FileExtension._
 import java.io._
 import org.openmole.tool.file._
 import org.openmole.tool.stream.StringOutputStream
@@ -36,21 +34,7 @@ import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 object Utils {
 
-  implicit def fileToExtension(f: File): FileExtension = f.getName match {
-    case x if x.endsWith(".oms")                         ⇒ OMS
-    case x if x.endsWith(".scala")                       ⇒ SCALA
-    case x if x.endsWith(".sh")                          ⇒ SH
-    case x if x.endsWith(".tgz") | x.endsWith(".tar.gz") ⇒ TGZ
-    case x if x.endsWith(".csv") |
-      x.endsWith(".nlogo") |
-      x.endsWith(".gaml") |
-      x.endsWith(".nls") |
-      x.endsWith(".py") |
-      x.endsWith(".R") |
-      x.endsWith(".txt") ⇒ TEXT
-    case x if x.endsWith(".md") ⇒ MD
-    case _                      ⇒ BINARY
-  }
+  implicit def fileToExtension(f: File): FileExtension = DataUtils.fileToExtension(f.getName)
 
   val webUIProjectFile = Workspace.file("webui")
 
@@ -76,6 +60,10 @@ object Utils {
 
   implicit def seqOfSafePathToSeqOfFile(s: Seq[SafePath]): Seq[File] = s.map {
     safePathToFile
+  }
+
+  implicit def seqOfFileToSeqOfSafePath(s: Seq[File]): Seq[SafePath] = s.map {
+    fileToSafePath
   }
 
   implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, isPlugin(f), f.length, readableByteCount(FileDecorator(f).size))

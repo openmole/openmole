@@ -84,20 +84,26 @@ object ApiImpl extends Api {
 
   def deleteFile(safePath: SafePath): Unit = safePathToFile(safePath).recursiveDelete
 
-  def extractTGZ(treeNodeData: TreeNodeData): Unit = treeNodeData.safePath.extension match {
-    case FileExtension.TGZ ⇒
-      val archiveFile = safePathToFile(treeNodeData.safePath)
-      val parentFile = archiveFile.getParentFile
-      archiveFile.extractUncompress(parentFile)
-      parentFile.applyRecursive((f: File) ⇒ f.setWritable(true))
-    case _ ⇒
+  def extractTGZ(safePath: SafePath): Unit = {
+    safePath.extension match {
+      case FileExtension.TGZ ⇒
+        val archiveFile = safePathToFile(safePath)
+        val parentFile = archiveFile.getParentFile
+        archiveFile.extractUncompress(parentFile)
+        parentFile.applyRecursive((f: File) ⇒ f.setWritable(true))
+      case _ ⇒
+    }
   }
+
+  def extractTGZ(treeNodeData: TreeNodeData): Unit = extractTGZ(treeNodeData.safePath)
 
   def exists(safePath: SafePath): Boolean = safePathToFile(safePath).exists
 
   def fileSize(treeNodeData: TreeNodeData): Long = safePathToFile(treeNodeData.safePath).length
 
   def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.safePath)
+
+  def listFiles(sp: SafePath): Seq[TreeNodeData] = Utils.listFiles(sp)
 
   def move(from: SafePath, to: SafePath): Unit = {
     val fromFile = safePathToFile(from)
@@ -324,6 +330,15 @@ object ApiImpl extends Api {
   //MODEL WIZARDS
   def launchingCommands(path: SafePath): Seq[LaunchingCommand] = Utils.launchinCommands(path)
 
+  //Extract models from an archive
+  def models(archivePath: SafePath): Seq[SafePath] = {
+    extractTGZ(archivePath)
+    deleteFile(archivePath)
+    for {
+      tnd ← listFiles(archivePath.parent) if FileType.isSupportedLanguage(tnd.safePath)
+    } yield tnd.safePath
+  }
+
   def classes(jarPath: SafePath): Seq[ClassTree] = Utils.jarClasses(jarPath)
 
   def methods(jarPath: SafePath, className: String): Seq[JarMethod] = Utils.jarMethods(jarPath, className)
@@ -380,6 +395,7 @@ object ApiImpl extends Api {
           val omString = omapString(omappings, "netLogoOutputs")
           os.write(
             s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}")) set(\n""" +
+              // embeddWorkspace.map { b ⇒ s"  embeddWorkspace := ${b.toString},\n" }.getOrElse("") +
               inString + ouString + imString + omString + imFileString + omFileString + defaults
           )
         case st: ScalaTaskType ⇒

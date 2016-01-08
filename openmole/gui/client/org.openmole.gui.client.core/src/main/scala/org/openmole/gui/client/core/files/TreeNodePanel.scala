@@ -89,10 +89,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 val currentDirNode = manager.current
                 addRootDirButton.content().map {
                   _ match {
-                    case dt: DirType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
+                    case dt: DirNodeType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
                       if (b) refreshCurrentDirectory
                     }
-                    case ft: FileType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
+                    case ft: FileNodeType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
                       if (b) refreshCurrentDirectory
                     }
                   }

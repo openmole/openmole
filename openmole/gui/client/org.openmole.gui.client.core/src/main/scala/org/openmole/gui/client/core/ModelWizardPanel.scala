@@ -194,33 +194,38 @@ class ModelWizardPanel extends ModalPanel {
                     if (fInput.files.length > 0) {
                       val fileName = fInput.files.item(0).name
                       filePath() = Some(manager.current.safePath() ++ fileName)
-                      OMPost[Api].launchingCommands(filePath().get).call().foreach { b ⇒
-                        panels.treeNodePanel.refreshCurrentDirectory
-                        launchingCommand() = b.headOption
-                        hasModel() = true
-                        labelName() = Some(fileName)
-                        launchingCommand().foreach { lc ⇒
-                          codeSelector.content() = lc.language
-                          scriptNameInput.value = fileName.split('.').head
-                          lc.language match {
-                            case Some(j: JavaLikeLanguage) ⇒
+
+                      //get the language
+                      val fileType: FileType = filePath().get
+                      fileType match {
+                        case archive: Archive ⇒
+                          archive.language match {
+                            //Java case
+                            case JavaLikeLanguage() ⇒
                               OMPost[Api].classes(filePath().get).call().foreach { b ⇒
                                 val classContents = b.flatMap {
                                   _.flatten
                                 }
-                                methodSelector.emptyContents
                                 classSelector.setContents(classContents)
                                 classContents.headOption.foreach {
                                   setMethodSelector(_)
                                 }
                               }
+
+                            // Other archive: tgz, tar.gz
+                            case UndefinedLanguage ⇒ OMPost[Api].models(filePath().get).call().foreach { models ⇒
+                              println("MODELS " + models)
+                              panels.treeNodePanel.refreshCurrentDirectory
+                            }
+
                             case _ ⇒
-                              classSelector.emptyContents
-                              methodSelector.emptyContents
+
                           }
-                          setReactives(lc)
-                        }
+                        case codeFile: CodeFile ⇒ setLaunchingCommand(filePath().get)
+                        case _                  ⇒
                       }
+
+                      //Resources
                       OMPost[Api].listFiles(manager.current).call().foreach { lf ⇒
                         resources() = lf
                       }
@@ -239,9 +244,28 @@ class ModelWizardPanel extends ModalPanel {
         }), Rx {
         bs.span("grey")(
           if (classSelector.isContentsEmpty) tags.div() else classSelector.selectorWithFilter,
-          if (methodSelector.isContentsEmpty) tags.div() else methodSelector.selectorWithFilter
+          if (methodSelector.isContentsEmpty) tags.div() else methodSelector.selectorWithFilter,
+          codeSelector.content() match {
+            case Some(NetLogoLanguage()) ⇒ tags.div("If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
+            case _                       ⇒ tags.div()
+          }
         )
       }).render
+
+  def setLaunchingCommand(filePath: SafePath) =
+    OMPost[Api].launchingCommands(filePath).call().foreach { b ⇒
+      panels.treeNodePanel.refreshCurrentDirectory
+      launchingCommand() = b.headOption
+      hasModel() = true
+      labelName() = Some(filePath.name)
+      launchingCommand().foreach { lc ⇒
+        codeSelector.content() = lc.language
+        scriptNameInput.value = filePath.name.split('.').head
+        classSelector.emptyContents
+        methodSelector.emptyContents
+        setReactives(lc)
+      }
+    }
 
   def setReactives(lc: LaunchingCommand) = {
     val nbArgs = lc.arguments.size
