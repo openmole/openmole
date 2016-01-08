@@ -81,7 +81,7 @@ object WorkflowIntegration {
       type V = Vector[Double]
       type P = Vector[Double]
 
-      lazy val algorithm = a.algorithm
+      lazy val integration = a.algorithm
 
       def buildIndividual(genome: G, context: Context): I =
         operations.buildIndividual(genome, variablesToPhenotype(context))
@@ -112,7 +112,7 @@ object WorkflowIntegration {
       type V = Vector[Double]
       type P = Vector[Double]
 
-      lazy val algorithm = a.algorithm
+      lazy val integration = a.algorithm
 
       def samples = Prototype[Long]("samples", namespace)
 
@@ -133,7 +133,7 @@ object WorkflowIntegration {
           operations.genomeValues,
           operations.phenotype,
           samples,
-          algorithm.samples
+          integration.samples
         )(population)
 
       def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ context(o)).toVector
@@ -174,14 +174,14 @@ trait EvolutionWorkflow {
   type MGOAG
   def mgoAG: MGOAG
 
-  val algorithm: mgo.openmole.Integration[MGOAG, V, P]
-  def operations = algorithm.operations(mgoAG)
+  val integration: mgo.openmole.Integration[MGOAG, V, P]
+  def operations = integration.operations(mgoAG)
 
-  import algorithm._
+  import integration._
 
-  type G = algorithm.G
-  type I = algorithm.I
-  type S = algorithm.S
+  type G = integration.G
+  type I = integration.I
+  type S = integration.S
   type V
   type P
 

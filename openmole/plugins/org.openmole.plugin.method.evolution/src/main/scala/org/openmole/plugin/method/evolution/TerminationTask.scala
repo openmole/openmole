@@ -28,29 +28,28 @@ import scalaz.Tag
 
 object TerminationTask {
 
-  def apply[T](t: T, termination: OMTermination)(implicit integration: WorkflowIntegration[T]) = {
-    val wfi = integration(t)
-    import wfi._
+  def apply[T](algorithm: T, termination: OMTermination)(implicit wfi: WorkflowIntegration[T]) = {
+    val t = wfi(algorithm)
 
-    val term = OMTermination.toTermination(termination, wfi)
+    val term = OMTermination.toTermination(termination, t)
 
     new TaskBuilder {
       builder ⇒
-      addInput(statePrototype)
-      addInput(populationPrototype)
-      addOutput(statePrototype)
-      addOutput(terminatedPrototype)
-      addOutput(generationPrototype)
+      addInput(t.statePrototype)
+      addInput(t.populationPrototype)
+      addOutput(t.statePrototype)
+      addOutput(t.terminatedPrototype)
+      addOutput(t.generationPrototype)
 
       abstract class TerminationTask extends Task {
 
         override def process(context: Context)(implicit rng: RandomProvider) = {
-          val (newState, t) = algorithm.run(context(statePrototype), term.run(context(populationPrototype)))
+          val (newState, te) = t.integration.run(context(t.statePrototype), term.run(context(t.populationPrototype)))
 
           Context(
-            Variable(terminatedPrototype, t),
-            Variable(statePrototype, newState),
-            Variable(generationPrototype, operations.generation(newState))
+            Variable(t.terminatedPrototype, te),
+            Variable(t.statePrototype, newState),
+            Variable(t.generationPrototype, t.operations.generation(newState))
           )
         }
 

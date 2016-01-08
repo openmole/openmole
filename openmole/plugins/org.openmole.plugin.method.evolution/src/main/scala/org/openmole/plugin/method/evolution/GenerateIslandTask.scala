@@ -24,20 +24,19 @@ import org.openmole.core.workflow.builder._
 
 object GenerateIslandTask {
 
-  def apply[T](t: T, sample: Option[Int], size: Int, outputPopulationName: String)(implicit integration: WorkflowIntegration[T]) = {
-    val wfi = integration(t)
-    import wfi._
+  def apply[T](algorithm: T, sample: Option[Int], size: Int, outputPopulationName: String)(implicit wfi: WorkflowIntegration[T]) = {
+    val t = wfi(algorithm)
 
-    val outputPopulation = populationPrototype.withName(outputPopulationName)
+    val outputPopulation = t.populationPrototype.withName(outputPopulationName)
     new TaskBuilder {
       builder ⇒
-      addInput(populationPrototype)
+      addInput(t.populationPrototype)
       addExploredOutput(outputPopulation.toArray)
 
       abstract class GenerateIslandTask extends Task {
 
         override def process(context: Context)(implicit rng: RandomProvider) = {
-          val p = context(populationPrototype)
+          val p = context(t.populationPrototype)
 
           def samples =
             if (p.isEmpty) Vector.empty
@@ -46,7 +45,7 @@ object GenerateIslandTask {
               case None    ⇒ p
             }
 
-          def populations = Array.fill(size)(samples.map(operations.migrateToIsland))
+          def populations = Array.fill(size)(samples.map(t.operations.migrateToIsland))
           Variable(outputPopulation.toArray, populations)
         }
 

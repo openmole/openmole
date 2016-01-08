@@ -60,7 +60,7 @@ object GenomeProfile {
         type V = Vector[Double]
         type P = Double
 
-        lazy val algorithm = implicitly[mgo.openmole.Integration[MGOAG, V, P]]
+        lazy val integration = implicitly[mgo.openmole.Integration[MGOAG, V, P]]
 
         def buildIndividual(genome: G, context: Context): I =
           operations.buildIndividual(genome, variablesToPhenotype(context))
@@ -86,6 +86,7 @@ object GenomeProfile {
   }
 
   case class DeterministicGenomeProfile(algo: mgo.algorithm.Profile.OpenMOLE, genome: Genome, objective: Objective)
+
   //
   //  def apply(
   //    x: Int,
@@ -150,7 +151,12 @@ object GenomeProfile {
   //        }
   //    }
   //  }
-  //
-  //  case class StochasticGenomeProfile(algo: Algorithm[ga.GAGenome, History[Double], Unit], genome: Genome, objective: Objective, replication: Replication[FitnessAggregation], niche: Niche[GAGenome, History[Double], Int])
-  //
+
+  //  case class StochasticGenomeProfile(
+  //    algo: mgo.algorithm.NoisyProfile.OpenMOLE,
+  //    genome: Genome,
+  //    objective: Objective,
+  //    replication: Replication[FitnessAggregation],
+  //    niche: mgo.niche.Niche[mgo.algorithm.NoisyProfile.Algorithm.Individual, History[Double], Int])
+
 }

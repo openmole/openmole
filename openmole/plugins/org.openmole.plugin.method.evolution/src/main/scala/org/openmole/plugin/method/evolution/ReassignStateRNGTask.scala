@@ -23,18 +23,17 @@ import fr.iscpif.mgo._
 
 object ReassignStateRNGTask {
 
-  def apply[T](t: T)(implicit integration: WorkflowIntegration[T]) = {
-    val wfi = integration(t)
-    import wfi._
+  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
+    val t = wfi(algorithm)
 
     new TaskBuilder {
       builder ⇒
-      addInput(statePrototype)
-      addOutput(statePrototype)
+      addInput(t.statePrototype)
+      addOutput(t.statePrototype)
 
       abstract class ReassignStateRNGTask extends Task {
         override def process(context: Context)(implicit rng: RandomProvider) =
-          Context(Variable(statePrototype, operations.randomLens.set(Task.buildRNG(context))(context(statePrototype))))
+          Context(Variable(t.statePrototype, t.operations.randomLens.set(Task.buildRNG(context))(context(t.statePrototype))))
       }
 
       def toTask = new ReassignStateRNGTask with Built

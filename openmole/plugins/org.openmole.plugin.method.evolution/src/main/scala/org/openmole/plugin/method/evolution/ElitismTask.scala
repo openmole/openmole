@@ -27,25 +27,24 @@ import org.openmole.core.workflow.task._
 
 object ElitismTask {
 
-  def apply[T](t: T)(implicit integration: WorkflowIntegration[T]) = {
-    val wfi = integration(t)
-    import wfi._
+  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
+    val t = wfi(algorithm)
 
     new TaskBuilder {
-      addInput(statePrototype)
-      addInput(populationPrototype)
-      addInput(offspringPrototype)
-      addOutput(populationPrototype)
-      addOutput(statePrototype)
+      addInput(t.statePrototype)
+      addInput(t.populationPrototype)
+      addInput(t.offspringPrototype)
+      addOutput(t.populationPrototype)
+      addOutput(t.statePrototype)
 
       abstract class ElitismTask extends Task {
 
         override def process(context: Context)(implicit rng: RandomProvider) = {
-          val (newState, newPopulation) = algorithm.run(context(statePrototype), operations.elitism.run(context(populationPrototype) ++ context(offspringPrototype)))
+          val (newState, newPopulation) = t.integration.run(context(t.statePrototype), t.operations.elitism.run(context(t.populationPrototype) ++ context(t.offspringPrototype)))
 
           Context(
-            Variable(populationPrototype, newPopulation),
-            Variable(statePrototype, newState)
+            Variable(t.populationPrototype, newPopulation),
+            Variable(t.statePrototype, newState)
           )
         }
 
