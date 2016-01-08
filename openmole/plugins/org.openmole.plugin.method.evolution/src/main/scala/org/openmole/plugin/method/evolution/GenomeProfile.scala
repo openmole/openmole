@@ -18,6 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo
+import fr.iscpif.mgo.openmole.Integration
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.FromContext
 
@@ -42,6 +43,32 @@ object GenomeProfile {
       objective
     )
 
+  def apply(
+    x: Int,
+    nX: Int,
+    genome: Genome,
+    objective: Objective,
+    replication: Replication[FitnessAggregation],
+    paretoSize: Int = 20) = {
+
+    def aggregation(h: Vector[Double]) = StochasticGAIntegration.aggregate(replication.aggregation, h)
+
+    StochasticGenomeProfile(
+      mgo.algorithm.NoisyProfile.OpenMOLE(
+        mu = paretoSize,
+        niche = StochasticGenomeProfile.niche(x, nX),
+        operatorExploration = operatorExploration,
+        genomeSize = genome.size,
+        historySize = replication.max,
+        cloneProbability = replication.reevaluate,
+        aggregation = aggregation
+      ),
+      genome,
+      objective,
+      replication
+    )
+  }
+
   object DeterministicGenomeProfile {
 
     import mgo.algorithm.Profile.Algorithm._
@@ -49,8 +76,8 @@ object GenomeProfile {
     def niche(x: Int, nX: Int) =
       mgo.niche.genomeProfile[Individual](
         values = (Individual.genome composeLens Genome.values).get,
-        x = 0,
-        nX = 10)
+        x = x,
+        nX = nX)
 
     implicit def workflowIntegration = new WorkflowIntegration[DeterministicGenomeProfile] {
       override def apply(a: DeterministicGenomeProfile): EvolutionWorkflow = new EvolutionWorkflow {
@@ -60,7 +87,7 @@ object GenomeProfile {
         type V = Vector[Double]
         type P = Double
 
-        lazy val integration = implicitly[mgo.openmole.Integration[MGOAG, V, P]]
+        lazy val integration = implicitly[mgo.openmole.Integration[MGOAG, V, P] with mgo.openmole.Profile[MGOAG]]
 
         def buildIndividual(genome: G, context: Context): I =
           operations.buildIndividual(genome, variablesToPhenotype(context))
@@ -78,7 +105,7 @@ object GenomeProfile {
             Seq(a.objective),
             operations.genomeValues,
             i ⇒ Vector(operations.phenotype(i))
-          )(population)
+          )(integration.profile(mgoAG)(population))
 
         def variablesToPhenotype(context: Context) = context(a.objective)
       }
@@ -87,76 +114,57 @@ object GenomeProfile {
 
   case class DeterministicGenomeProfile(algo: mgo.algorithm.Profile.OpenMOLE, genome: Genome, objective: Objective)
 
-  //
-  //  def apply(
-  //    x: Int,
-  //    nX: Int,
-  //    genome: Genome,
-  //    objective: Objective,
-  //    replication: Replication[FitnessAggregation],
-  //    paretoSize: Int = 20) = {
-  //    val niche = genomeProfile[ga.GAGenome](x, nX)
-  //
-  //    StochasticGenomeProfile(
-  //      ga.noisyProfile[Double](
-  //        fitness = Fitness { i ⇒ StochasticGAIntegration.aggregate(replication.aggregation, i.phenotype.history) },
-  //        niche = niche,
-  //        nicheSize = paretoSize,
-  //        history = replication.max,
-  //        cloneRate = replication.reevaluate
-  //      ),
-  //      genome,
-  //      objective,
-  //      replication,
-  //      niche
-  //    )
-  //  }
-  //
-  //  object StochasticGenomeProfile {
-  //    implicit def OMStochasticProfile = new WorkflowIntegration[StochasticGenomeProfile] {
-  //      override def apply(a: StochasticGenomeProfile): EvolutionWorkflow =
-  //        new EvolutionWorkflow {
-  //          type G = GAGenome
-  //          def genomeType: PrototypeType[G] = PrototypeType[G]
-  //          def randomGenome = ga.randomGenome(a.genome.size)
-  //
-  //          type P = History[Double]
-  //          override def phenotypeType: PrototypeType[P] = PrototypeType[P]
-  //
-  //          override type S = Unit
-  //          override def stateType = PrototypeType[Unit]
-  //
-  //          def replications = Prototype[Int]("replications", namespace)
-  //
-  //          def inputPrototypes = a.genome.inputs.map(_.prototype) ++ a.replication.seed.prototype
-  //          def outputPrototypes: Seq[Prototype[_]] = Seq(a.objective)
-  //          def resultPrototypes = (a.genome.inputs.map(_.prototype) ++ outputPrototypes ++ Seq(replications)).distinct
-  //
-  //          override def algorithm: Algorithm[G, P, S] = a.algo
-  //
-  //          def variablesToPhenotype(context: Context): P = History(context(a.objective))
-  //
-  //          def phenotypeToValues(p: P): Double =
-  //            StochasticGAIntegration.aggregate(a.replication.aggregation, p.history)
-  //
-  //          def populationToVariables(population: Population[Individual[G, P]]) = {
-  //            val profile = for { (_, is) ← population.groupBy(a.niche.apply).toVector } yield is.maxBy(_.phenotype.age: Int)
-  //            StochasticGAIntegration.populationToVariables[Double](a.genome, Seq(a.objective), replications, p ⇒ Seq(phenotypeToValues(p)))(profile)
-  //          }
-  //
-  //          def genomeToVariables(genome: G) =
-  //            StochasticGAIntegration.genomeToVariables(a.genome, genomeValues.get(genome), a.replication.seed)
-  //
-  //          def prepareIndividualForIsland(i: Ind) = i.copy(phenotype = i.phenotype.copy(age = 0))
-  //        }
-  //    }
-  //  }
+  object StochasticGenomeProfile {
+    import mgo.algorithm.NoisyProfile.Algorithm._
 
-  //  case class StochasticGenomeProfile(
-  //    algo: mgo.algorithm.NoisyProfile.OpenMOLE,
-  //    genome: Genome,
-  //    objective: Objective,
-  //    replication: Replication[FitnessAggregation],
-  //    niche: mgo.niche.Niche[mgo.algorithm.NoisyProfile.Algorithm.Individual, History[Double], Int])
+    def niche(x: Int, nX: Int) =
+      mgo.niche.genomeProfile[Individual](
+        values = (Individual.genome composeLens Genome.values).get,
+        x = x,
+        nX = nX)
+
+    implicit def workflowIntegration = new WorkflowIntegration[StochasticGenomeProfile] {
+      override def apply(a: StochasticGenomeProfile): EvolutionWorkflow = new EvolutionWorkflow {
+        type MGOAG = mgo.algorithm.NoisyProfile.OpenMOLE
+        def mgoAG = a.algo
+
+        type V = Vector[Double]
+        type P = Double
+
+        lazy val integration = implicitly[mgo.openmole.Integration[MGOAG, V, P] with mgo.openmole.Stochastic with mgo.openmole.Profile[MGOAG]]
+
+        def samples = Prototype[Long]("samples", namespace)
+
+        def buildIndividual(genome: G, context: Context): I =
+          operations.buildIndividual(genome, variablesToPhenotype(context))
+
+        def inputPrototypes = a.genome.inputs.map(_.prototype) ++ a.replication.seed.prototype
+        def outputPrototypes = Vector(a.objective)
+        def resultPrototypes = (a.genome.inputs.map(_.prototype) ++ outputPrototypes ++ Seq(samples)).distinct
+
+        def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
+          StochasticGAIntegration.genomeToVariables(a.genome, operations.values(genome), a.replication.seed)
+
+        def populationToVariables(population: Pop): FromContext[Seq[Variable[_]]] =
+          StochasticGAIntegration.populationToVariables[I](
+            a.genome,
+            Vector(a.objective),
+            operations.genomeValues,
+            i ⇒ Vector(operations.phenotype(i)),
+            samples,
+            integration.samples
+          )(integration.profile(mgoAG)(population))
+
+        def variablesToPhenotype(context: Context) = context(a.objective)
+      }
+    }
+
+  }
+
+  case class StochasticGenomeProfile(
+    algo: mgo.algorithm.NoisyProfile.OpenMOLE,
+    genome: Genome,
+    objective: Objective,
+    replication: Replication[FitnessAggregation])
 
 }
