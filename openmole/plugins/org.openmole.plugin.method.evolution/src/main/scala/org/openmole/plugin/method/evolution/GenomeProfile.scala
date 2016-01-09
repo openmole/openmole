@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo
+import fr.iscpif.mgo.algorithm.{ profile, noisyprofile }
 import fr.iscpif.mgo.openmole.Integration
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.FromContext
@@ -33,8 +33,7 @@ object GenomeProfile {
     genome: Genome,
     objective: Objective) =
     DeterministicGenomeProfile(
-      mgo.algorithm.Profile.OpenMOLE(
-        mu = 1,
+      profile.OpenMOLE(
         genomeSize = genome.size,
         niche = DeterministicGenomeProfile.niche(x, nX),
         operatorExploration = operatorExploration
@@ -54,7 +53,7 @@ object GenomeProfile {
     def aggregation(h: Vector[Double]) = StochasticGAIntegration.aggregate(replication.aggregation, h)
 
     StochasticGenomeProfile(
-      mgo.algorithm.NoisyProfile.OpenMOLE(
+      noisyprofile.OpenMOLE(
         mu = paretoSize,
         niche = StochasticGenomeProfile.niche(x, nX),
         operatorExploration = operatorExploration,
@@ -71,7 +70,8 @@ object GenomeProfile {
 
   object DeterministicGenomeProfile {
 
-    import mgo.algorithm.Profile.Algorithm._
+    import fr.iscpif.mgo
+    import mgo.algorithm.profile._
 
     def niche(x: Int, nX: Int) =
       mgo.niche.genomeProfile[Individual](
@@ -81,7 +81,7 @@ object GenomeProfile {
 
     implicit def workflowIntegration = new WorkflowIntegration[DeterministicGenomeProfile] {
       override def apply(a: DeterministicGenomeProfile): EvolutionWorkflow = new EvolutionWorkflow {
-        type MGOAG = mgo.algorithm.Profile.OpenMOLE
+        type MGOAG = profile.OpenMOLE
         def mgoAG = a.algo
 
         type V = Vector[Double]
@@ -112,10 +112,11 @@ object GenomeProfile {
     }
   }
 
-  case class DeterministicGenomeProfile(algo: mgo.algorithm.Profile.OpenMOLE, genome: Genome, objective: Objective)
+  case class DeterministicGenomeProfile(algo: profile.OpenMOLE, genome: Genome, objective: Objective)
 
   object StochasticGenomeProfile {
-    import mgo.algorithm.NoisyProfile.Algorithm._
+    import fr.iscpif.mgo
+    import mgo.algorithm.noisyprofile._
 
     def niche(x: Int, nX: Int) =
       mgo.niche.genomeProfile[Individual](
@@ -125,7 +126,7 @@ object GenomeProfile {
 
     implicit def workflowIntegration = new WorkflowIntegration[StochasticGenomeProfile] {
       override def apply(a: StochasticGenomeProfile): EvolutionWorkflow = new EvolutionWorkflow {
-        type MGOAG = mgo.algorithm.NoisyProfile.OpenMOLE
+        type MGOAG = noisyprofile.OpenMOLE
         def mgoAG = a.algo
 
         type V = Vector[Double]
@@ -162,7 +163,7 @@ object GenomeProfile {
   }
 
   case class StochasticGenomeProfile(
-    algo: mgo.algorithm.NoisyProfile.OpenMOLE,
+    algo: noisyprofile.OpenMOLE,
     genome: Genome,
     objective: Objective,
     replication: Replication[FitnessAggregation])

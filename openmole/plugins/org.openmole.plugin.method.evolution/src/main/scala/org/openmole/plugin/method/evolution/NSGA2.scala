@@ -17,10 +17,7 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo
-import org.openmole.core.workflow.data.PrototypeType
-import org.openmole.core.workflow.tools.TextClosure
-import org.openmole.tool.statistics._
+import fr.iscpif.mgo.algorithm.{ nsga2, noisynsga2 }
 
 object NSGA2 {
 
@@ -30,7 +27,7 @@ object NSGA2 {
     objectives: Objectives) = {
 
     new WorkflowIntegration.DeterministicGA(
-      mgo.algorithm.NSGA2.OpenMOLE(mu, genome.size, operatorExploration),
+      nsga2.OpenMOLE(mu, genome.size, operatorExploration),
       genome,
       objectives
     )
@@ -45,7 +42,7 @@ object NSGA2 {
     def aggregation(h: Vector[Vector[Double]]) = StochasticGAIntegration.aggregateVector(replication.aggregation, h)
 
     WorkflowIntegration.StochasticGA(
-      mgo.algorithm.NoisyNSGA2.OpenMOLE(mu, operatorExploration, genome.size, replication.max, replication.reevaluate, aggregation),
+      noisynsga2.OpenMOLE(mu, operatorExploration, genome.size, replication.max, replication.reevaluate, aggregation),
       genome,
       objectives,
       replication)
