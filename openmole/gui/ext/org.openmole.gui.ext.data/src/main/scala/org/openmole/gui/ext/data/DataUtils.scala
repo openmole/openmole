@@ -17,6 +17,8 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import FileExtension._
+
 object DataUtils {
 
   case class IOArgs(args: Seq[VariableElement], ret: Option[VariableElement])
@@ -47,6 +49,22 @@ object DataUtils {
 
   implicit def jarMethodToSeqVariableElements(jarMethod: JarMethod): IOArgs = {
     IOArgs(jarMethod.argumentTypes, typeStringToVariableElement(jarMethod.returnType, jarMethod.argumentTypes.size))
+  }
+
+  implicit def fileToExtension(fileName: String): FileExtension = fileName match {
+    case x if x.endsWith(".oms")                         ⇒ OMS
+    case x if x.endsWith(".scala")                       ⇒ SCALA
+    case x if x.endsWith(".sh")                          ⇒ SH
+    case x if x.endsWith(".tgz") | x.endsWith(".tar.gz") ⇒ TGZ
+    case x if x.endsWith(".csv") |
+      x.endsWith(".nlogo") |
+      x.endsWith(".gaml") |
+      x.endsWith(".nls") |
+      x.endsWith(".py") |
+      x.endsWith(".R") |
+      x.endsWith(".txt") ⇒ TEXT
+    case x if x.endsWith(".md") ⇒ MD
+    case _                      ⇒ BINARY
   }
 
 }

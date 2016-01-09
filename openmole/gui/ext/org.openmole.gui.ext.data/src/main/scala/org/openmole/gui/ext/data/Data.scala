@@ -158,7 +158,7 @@ import org.openmole.gui.ext.data.SafePath._
 case class SafePath(path: Seq[String], extension: FileExtension) {
   def /(safePath: SafePath) = sp(this.path ++ safePath.path, safePath.extension)
 
-  def ++(s: String) = sp(this.path :+ s, this.extension)
+  def ++(s: String) = sp(this.path :+ s, s)
 
   def parent: SafePath = SafePath(path.dropRight(1), extension)
 
@@ -357,6 +357,42 @@ case class ScalaTaskType() extends TaskType
 
 case class NetLogoTaskType() extends TaskType
 
+case class UndefinedTaskType() extends TaskType
+
+sealed trait FileType
+
+case class CodeFile(language: Language) extends FileType
+
+case class Archive(language: Language) extends FileType
+
+object UndefinedFileType extends FileType
+
+object FileType {
+  implicit def safePathToFileType(sp: SafePath): FileType = apply(sp)
+
+  private def extension(safePath: SafePath) = safePath.name.split('.').drop(1).mkString(".")
+
+  def apply(safePath: SafePath): FileType = {
+    extension(safePath) match {
+      case "tar.gz.bin" ⇒ CodeFile(UndefinedLanguage)
+      case "nlogo" => CodeFile(NetLogoLanguage())
+      case "jar" ⇒ Archive(JavaLikeLanguage())
+      case "tgz" | "tar.gz" => Archive(UndefinedLanguage)
+      case _ => UndefinedFileType
+    }
+  }
+
+  def isSupportedLanguage(safePath: SafePath): Boolean = apply(safePath) match {
+    case CodeFile(_)=> true
+    case a: Archive=> a.language match {
+      case UndefinedLanguage=> false
+      case _=> true
+    }
+    case _=> false
+  }
+}
+
+
 case class Binary() extends Language {
   val name: String = "Binary"
   val extension = ""
@@ -385,6 +421,12 @@ case class JavaLikeLanguage() extends Language {
   val name: String = "Java/Scala"
   val extension = "jar"
   val taskType = ScalaTaskType()
+}
+
+object UndefinedLanguage extends Language {
+  val name = ""
+  val extension = ""
+  val taskType = UndefinedTaskType()
 }
 
 sealed trait CommandElement {
@@ -439,7 +481,7 @@ case class JavaLaunchingCommand(jarMethod: JarMethod, arguments: Seq[CommandElem
   def fullCommand: String = {
     if (jarMethod.methodName.isEmpty) ""
     else {
-      if (jarMethod.isStatic) jarMethod.clazz + "." else s"val constr = new ${jarMethod.clazz} () // You should initialize this constructor\nconstr."
+      if (jarMethod.isStatic) jarMethod.clazz + "." else s"val constr = new ${jarMethod.clazz}() // You should initialize this constructor first\nconstr."
     } +
       jarMethod.methodName + "(" + arguments.sortBy {
       _.index

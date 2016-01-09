@@ -89,10 +89,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 val currentDirNode = manager.current
                 addRootDirButton.content().map {
                   _ match {
-                    case dt: DirType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
+                    case dt: DirNodeType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
                       if (b) refreshCurrentDirectory
                     }
-                    case ft: FileType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
+                    case ft: FileNodeType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
                       if (b) refreshCurrentDirectory
                     }
                   }
@@ -188,11 +188,17 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   def drawNode(node: TreeNode) = node match {
     case fn: FileNode ⇒
       clickableElement(fn, "file", () ⇒ {
-        if (node.safePath().extension.displayable) {
-          downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(manager.root.safePath(), node, content, executionTriggerer))
-        }
+        displayNode(fn)
       })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ manager + dn)
+  }
+
+  def displayNode(tn: TreeNode) = tn match {
+    case fn: FileNode ⇒
+      if (fn.safePath().extension.displayable) {
+        downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(fn, content))
+      }
+    case _ ⇒
   }
 
   def clickableElement(tn: TreeNode,
@@ -251,17 +257,22 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     newNodeInput.value = ""
   }
 
-  def trashNode(treeNode: TreeNode) = {
+  def trashNode(path: SafePath): Unit = {
+    println("Trash " + path)
+    OMPost[Api].deleteFile(path).call().foreach {
+      d ⇒
+        refreshCurrentDirectory
+        fileDisplayer.tabs.checkTabs
+    }
+  }
+
+  def trashNode(treeNode: TreeNode): Unit = {
     fileDisplayer.tabs -- treeNode
     AlertPanel.popup(s"Do you really want to delete ${
       treeNode.name()
     }?",
       () ⇒ {
-        OMPost[Api].deleteFile(treeNode.safePath()).call().foreach {
-          d ⇒
-            refreshCurrentDirectory
-            fileDisplayer.tabs.checkTabs
-        }
+        trashNode(treeNode.safePath())
       }, zone = FileZone()
     )
   }

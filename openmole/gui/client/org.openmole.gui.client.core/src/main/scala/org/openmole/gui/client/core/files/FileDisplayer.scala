@@ -36,7 +36,7 @@ object FileDisplayer {
 
 import FileDisplayer._
 
-class FileDisplayer {
+class FileDisplayer(implicit executionTriggerer: PanelTriggerer) {
 
   val tabs = TreeNodeTabs()
 
@@ -46,28 +46,32 @@ class FileDisplayer {
     }
   }
 
-  def display(rootPath: SafePath, tn: TreeNode, content: String, executionTriggerer: PanelTriggerer) = {
+  def displayOMS(tn: TreeNode, content: String) = {
+    val ed = editor(FileExtension.OMS, content)
+    tabs ++ new EditableNodeTab(tn, ed) with OMSTabControl {
+      val relativePath = SafePath.empty
+
+      lazy val node = tn
+
+      def onrun = () ⇒ {
+        overlaying() = true
+        refresh(() ⇒
+          OMPost[Api].runScript(ScriptData(tn.safePath())).call().foreach { execInfo ⇒
+            overlaying() = false
+            executionTriggerer.open
+          }
+        )
+      }
+    }
+
+  }
+
+  def display(tn: TreeNode, content: String) = {
     val fileType = tn.safePath().extension
     alreadyDisplayed(tn) match {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileType match {
-        case oms: OpenMOLEScript ⇒
-          val ed = editor(fileType, content)
-          tabs ++ new EditableNodeTab(tn, ed) with OMSTabControl {
-            val relativePath = SafePath.empty
-
-            lazy val node = tn
-
-            def onrun = () ⇒ {
-              overlaying() = true
-              refresh(() ⇒
-                OMPost[Api].runScript(ScriptData(tn.safePath())).call().foreach { execInfo ⇒
-                  overlaying() = false
-                  executionTriggerer.open
-                }
-              )
-            }
-          }
+        case oms: OpenMOLEScript ⇒ displayOMS(tn, content)
         case md: MDScript ⇒ OMPost[Api].mdToHtml(tn.safePath()).call.foreach { htmlString ⇒
           tabs ++ new HTMLTab(tn, htmlString)
         }

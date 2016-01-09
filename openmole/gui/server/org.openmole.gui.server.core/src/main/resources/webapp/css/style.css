@@ -912,15 +912,6 @@ border-top-right-radius: 0px;
 }
 
 .rightBlock{
-    position: relative;
-    display: block;
-    width: 90%;
-    top: 10px;
-    padding-left: 300px;
-    text-align: justify;
-}
-
-.leftBlock{
-    position: relative;
-    display: block;
+    width: 70%;
+    float: right;
 }

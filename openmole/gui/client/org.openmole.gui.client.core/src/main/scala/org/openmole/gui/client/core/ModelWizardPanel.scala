@@ -23,6 +23,7 @@ import org.openmole.gui.misc.js.{ Select, OMTags }
 import Select._
 import autowire._
 import org.scalajs.dom.html.TextArea
+import org.openmole.gui.client.core.files.TreeNode._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
@@ -95,26 +96,34 @@ class ModelWizardPanel extends ModalPanel {
   // Usefull for jar namespaces
 
   val methodSelector: Select[JarMethod] = Select("methodSelector", Seq[(JarMethod, ClassKeyAggregator)](), None, btn_default, () ⇒ {
-    setMethodSelector
+    methodSelector.content().foreach {
+      setJavaLaunchingCommand(_)
+    }
   })
 
   val classSelector: Select[FullClass] = Select("classSelector", Seq[(FullClass, ClassKeyAggregator)](), None, btn_default, () ⇒ {
-    classSelector.content().map { c ⇒
-      filePath().map { fn ⇒
-        OMPost[Api].methods(fn, c.name).call().foreach { b ⇒
-          methodSelector.setContents(b)
-          setMethodSelector
-        }
-      }
+    classSelector.content().foreach {
+      setMethodSelector(_)
     }
   })
 
-  def setMethodSelector = {
-    methodSelector.content().foreach { c ⇒
-      val lc = JavaLaunchingCommand(c, c.args, c.ret.map { Seq(_) }.getOrElse(Seq()))
-      setReactives(lc)
-      launchingCommand() = Some(lc)
+  def setMethodSelector(classContent: FullClass) = {
+    filePath().map { fn ⇒
+      OMPost[Api].methods(fn, classContent.name).call().foreach { b ⇒
+        methodSelector.setContents(b)
+        b.headOption.map {
+          setJavaLaunchingCommand
+        }
+      }
     }
+  }
+
+  def setJavaLaunchingCommand(method: JarMethod) = {
+    val lc = JavaLaunchingCommand(method, method.args, method.ret.map {
+      Seq(_)
+    }.getOrElse(Seq()))
+    setReactives(lc)
+    launchingCommand() = Some(lc)
   }
 
   val commandArea: TextArea = bs.textArea(3)("").render
@@ -168,10 +177,10 @@ class ModelWizardPanel extends ModalPanel {
     _.index == index
   }.headOption
 
-  val setUpButton = upButton() =
+  def setUpButton = upButton() =
     bs.div("modelWizardDivs")(
       bs.div("centerWidth250")(
-        tags.label(`class` := "inputFileStyle spacer5 certificate leftBlock")(
+        tags.label(`class` := "inputFileStyle spacer5 certificate")(
           transferring.withWaiter { _ ⇒
             tags.div(
               bs.fileInput((fInput: HTMLInputElement) ⇒ {
@@ -185,30 +194,38 @@ class ModelWizardPanel extends ModalPanel {
                     if (fInput.files.length > 0) {
                       val fileName = fInput.files.item(0).name
                       filePath() = Some(manager.current.safePath() ++ fileName)
-                      OMPost[Api].launchingCommands(filePath().get).call().foreach { b ⇒
-                        panels.treeNodePanel.refreshCurrentDirectory
-                        launchingCommand() = b.headOption
-                        hasModel() = true
-                        labelName() = Some(fileName)
-                        launchingCommand().foreach { lc ⇒
-                          codeSelector.content() = lc.language
-                          scriptNameInput.value = fileName.split('.').head
-                          lc.language match {
-                            case Some(j: JavaLikeLanguage) ⇒
+
+                      //get the language
+                      val fileType: FileType = filePath().get
+                      fileType match {
+                        case archive: Archive ⇒
+                          archive.language match {
+                            //Java case
+                            case JavaLikeLanguage() ⇒
                               OMPost[Api].classes(filePath().get).call().foreach { b ⇒
-                                methodSelector.emptyContents
-                                classSelector.setContents(b.flatMap {
+                                val classContents = b.flatMap {
                                   _.flatten
-                                })
-                                setMethodSelector
+                                }
+                                classSelector.setContents(classContents)
+                                classContents.headOption.foreach {
+                                  setMethodSelector(_)
+                                }
                               }
+
+                            // Other archive: tgz, tar.gz
+                            case UndefinedLanguage ⇒ OMPost[Api].models(filePath().get).call().foreach { models ⇒
+                              println("MODELS " + models)
+                              panels.treeNodePanel.refreshCurrentDirectory
+                            }
+
                             case _ ⇒
-                              classSelector.emptyContents
-                              methodSelector.emptyContents
+
                           }
-                          setReactives(lc)
-                        }
+                        case codeFile: CodeFile ⇒ setLaunchingCommand(filePath().get)
+                        case _                  ⇒
                       }
+
+                      //Resources
                       OMPost[Api].listFiles(manager.current).call().foreach { lf ⇒
                         resources() = lf
                       }
@@ -227,9 +244,28 @@ class ModelWizardPanel extends ModalPanel {
         }), Rx {
         bs.span("grey")(
           if (classSelector.isContentsEmpty) tags.div() else classSelector.selectorWithFilter,
-          if (methodSelector.isContentsEmpty) tags.div() else methodSelector.selectorWithFilter
+          if (methodSelector.isContentsEmpty) tags.div() else methodSelector.selectorWithFilter,
+          codeSelector.content() match {
+            case Some(NetLogoLanguage()) ⇒ tags.div("If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
+            case _                       ⇒ tags.div()
+          }
         )
       }).render
+
+  def setLaunchingCommand(filePath: SafePath) =
+    OMPost[Api].launchingCommands(filePath).call().foreach { b ⇒
+      panels.treeNodePanel.refreshCurrentDirectory
+      launchingCommand() = b.headOption
+      hasModel() = true
+      labelName() = Some(filePath.name)
+      launchingCommand().foreach { lc ⇒
+        codeSelector.content() = lc.language
+        scriptNameInput.value = filePath.name.split('.').head
+        classSelector.emptyContents
+        methodSelector.emptyContents
+        setReactives(lc)
+      }
+    }
 
   def setReactives(lc: LaunchingCommand) = {
     val nbArgs = lc.arguments.size
@@ -277,9 +313,11 @@ class ModelWizardPanel extends ModalPanel {
           close
           launchingCommand().foreach {
             lc ⇒
+              val path = manager.current.safePath()
+              val scriptName = scriptNameInput.value
               OMPost[Api].buildModelTask(
                 labelName().getOrElse(""),
-                scriptNameInput.value,
+                scriptName,
                 commandArea.value,
                 codeSelector.content().getOrElse(Binary()),
                 inputs(currentReactives()).map {
@@ -288,10 +326,15 @@ class ModelWizardPanel extends ModalPanel {
                 outputs(currentReactives()).map {
                   _.content.prototype
                 },
-                manager.current.safePath()).call().foreach {
+                path, classSelector.content().map {
+                  _.name
+                }, filePath().map {
+                  _.name
+                }).call().foreach {
                   b ⇒
+                    panels.treeNodePanel.fileDisplayer.tabs -- b
+                    panels.treeNodePanel.displayNode(b)
                     panels.treeNodePanel.refreshCurrentDirectory
-                  // panels.treeNodePanel.fileDisplayer
                 }
           }
       })
@@ -362,21 +405,12 @@ class ModelWizardPanel extends ModalPanel {
         case _ ⇒
       }
 
-    def save = getReactive(index).map { reactive ⇒ updatePrototypePair(reactive.role, reactive.role.content.clone(nameInput.value, typeSelector.content().get, mappingInput.value)) }
+    def save = getReactive(index).map { reactive ⇒ updatePrototypePair(reactive.role, reactive.role.content.clone(nameInput.value, role.content.prototype.`type`, mappingInput.value)) }
 
     def removePrototypePair = {
       currentReactives() = currentReactives().filterNot(_.role == role)
       ModelWizardPanel.this.save
     }
-
-    lazy val typeSelector: Select[ProtoTYPE.ProtoTYPE] = Select("modelProtos",
-      ProtoTYPE.ALL.map {
-        (_, emptyCK)
-      }, Some(role.content.prototype.`type`),
-      btn_primary, onclickExtra = () ⇒ {
-        save
-      }
-    )
 
     def saveWithoutTableUpdate = {
       updatableTable() = false
@@ -395,7 +429,6 @@ class ModelWizardPanel extends ModalPanel {
     ).render
 
     val line = {
-      typeSelector.content() = Some(role.content.prototype.`type`)
       tags.tr(
         onmouseover := { () ⇒
           lineHovered() = true
@@ -404,7 +437,7 @@ class ModelWizardPanel extends ModalPanel {
           lineHovered() = false
         },
         bs.td(bs.col_md_3 + "spacer7")(nameInput),
-        bs.td(bs.col_md_2)(typeSelector.selector),
+        bs.td(bs.col_md_2)(bs.label(role.content.prototype.`type`.name.split('.').last, label_primary)),
         bs.td(bs.col_md_1 + "grey")(role.content.prototype.default),
         bs.td(bs.col_md_3)(if (role.content.prototype.mapping.isDefined) mappingInput else tags.div()),
         bs.td(bs.col_md_1 + "right")(
@@ -461,7 +494,7 @@ class ModelWizardPanel extends ModalPanel {
       },
       hasModel() match {
         case true ⇒
-          bs.div("spacer80")(
+          bs.div("spacer50")(
             tags.h4("Step2: Task configuration"), step2,
             topButtons,
             if (currentTab() == 0) {
