@@ -18,7 +18,8 @@
 package org.openmole.plugin.task.care
 
 import java.io.File
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import java.nio.file.Files
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.builder.CanBuildTask
 import org.openmole.core.workflow.data.{ Context, Variable }
 import org.openmole.core.workflow.tools.VariableExpansion
@@ -27,25 +28,24 @@ import org.openmole.tool.file._
 
 import org.openmole.tool.logger.Logger
 import org.openmole.plugin.task.systemexec._
+import org.openmole.plugin.task.systemexec
 import org.openmole.core.workflow.data._
-
-import org.openmole.plugin.task.care._
 
 object CARETask extends Logger {
 
+  // FIXME remove this duplicate somehow
+  implicit def stringToCommand(s: String) = systemexec.Command(s)
+
+  // TODO command and archiveWorkDirectory should be optional now that we have the utilities to dig into the archive
   def apply(archiveLocation: String, command: String, archiveWorkDirectory: String) = {
 
-    val archive = archiveLocation.split('/').last
+    val archive = archiveLocation.split('/').last.split('.').head
 
-    def reExecuteCommand(commandline: String) = s"./re-execute.sh/${commandline}"
+    def reExecuteCommand(commandline: String) = s"./${archive}/re-execute.sh ${commandline}"
 
-    // TODO does it actually need archiveLocation?
-    new CARETaskBuilder(archiveLocation, Command(reExecuteCommand(command)), archiveWorkDirectory) with CanBuildTask[CARETask] {
-      def toTask: CARETask = new CARETask(
-        archiveLocation, command, archiveWorkDirectory,
-        workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with this.Built {
-        override val outputs: PrototypeSet = this.outputs + List(stdOut, stdErr, returnValue).flatten
-      }
+    // FIXME does it actually need archiveLocation => reuse archive / archive name?
+    new CARETaskBuilder(archiveLocation, reExecuteCommand(command), archiveWorkDirectory) with CanBuildTask[CARETask] {
+      def toTask = canBuildTask2.toTask
     }.addResource(new File(archiveLocation))
 
   }
@@ -53,7 +53,7 @@ object CARETask extends Logger {
 
 abstract class CARETask(
     val archiveLocation: String,
-    val command: Command,
+    val command: systemexec.Command,
     val archiveWorkDirectory: String,
     val directory: Option[String],
     val errorOnReturnCode: Boolean,
@@ -64,9 +64,7 @@ abstract class CARETask(
 
   override protected def process(context: Context)(implicit rng: RandomProvider) = withWorkDir { tmpDir ⇒
 
-    extract
-    linkInputsOutputs
-
+    // FIXME this can be factorised between tasks
     val workDir =
       directory match {
         case None    ⇒ tmpDir
@@ -75,12 +73,12 @@ abstract class CARETask(
 
     val preparedContext = prepareInputFiles(context, tmpDir, workDirPath)
 
-    //    val osCommandLines: Seq[ExpandedSystemExecCommand] = command.find { _.os.compatible }.map {
-    //      cmd ⇒ cmd.expanded map { expansion ⇒ ExpandedSystemExecCommand(expansion) }
-    //    }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
-
-    val expandedCommand = VariableExpansion(command.toString)
+    val expandedCommand = VariableExpansion(command.command)
     val commandline = commandLine(expandedCommand, workDir, preparedContext)
+
+    // prepare CARE archive and working environment
+    extract(workDir)
+    linkInputsOutputs(workDir)
 
     // FIXME duplicated from SystemExecTask
     val retCode = execute(commandline, out, err, workDir, preparedContext)
@@ -102,23 +100,35 @@ abstract class CARETask(
 
   val archiveName = archiveLocation.split("/").last
 
-  def extract = {
-    extractArchive(managedArchive(new File(".") / archiveName))
+  /**
+   * Extract the CARE archive passed to the constructor to the task's working directory.
+   *
+   * @param workDir Task's working directory as defined in the context.
+   */
+  def extract(workDir: File) = {
+    val careArchive = workDir / archiveName
+    extractArchive(careArchive, workDir)
   }
 
-  def linkInputsOutputs = {
+  /** Create exchange directories between the task's work directory and the archive chrooted environment */
+  def linkInputsOutputs(workDir: File) = {
 
     // cd ${archive}/rootfs/\\$$taskdir && ln \\-s \\-t . \\`readlink \\-f \\$$OLDPWD/${archive}/rootfs/inputs\\`/\\*;
     // cd \\$$OLDPWD/${archive}/rootfs && ln \\-s \\$$taskdir ./outputs
 
-    val inputSource = new File(s"./${archiveName}/rootfs/${archiveWorkDirectory}/inputs")
-    val inputTarget = new File("./inputs")
+    // TODO factorise
+    val archiveFolder = archiveName.split('.').head
 
-    val outputSource = new File(s"./${archiveName}/rootfs/outputs")
-    val outputTarget = new File(s"./${archiveName}/rootfs/${archiveWorkDirectory}/outputs")
+    val inputSource = workDir / s"./${archiveFolder}/rootfs/${archiveWorkDirectory}/inputs"
+    val inputTarget = workDir / "./inputs"
 
-    inputSource.createLink(inputTarget)
-    outputSource.createLink(outputTarget)
+    val outputSource = workDir / s"./${archiveFolder}/rootfs/outputs"
+    val outputTarget = workDir / s"./${archiveFolder}/rootfs/${archiveWorkDirectory}/outputs"
+
+    Files.createDirectory(inputSource)
+    inputTarget.createLink(inputSource)
+    Files.createDirectory(outputSource)
+    outputTarget.createLink(outputSource)
 
     (inputSource, outputSource)
   }
