@@ -17,8 +17,6 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.tools.io.FromString
-import org.openmole.core.workflow.data.{ RandomProvider, Context }
 import org.openmole.core.workflow.domain.{ Center, Bounds }
 import org.openmole.core.workflow.tools.FromContext
 

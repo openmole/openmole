@@ -27,8 +27,7 @@ package sampling {
 
   trait SamplingPackage {
 
-    implicit def factorWithIterableToDiscreteFactor[T, D](f: Factor[T, D])(implicit discrete: Discrete[T, D]): DiscreteFactor[T, D] =
-      DiscreteFactor(f)
+    implicit def factorWithIterableToDiscreteFactor[T, D](f: Factor[T, D])(implicit discrete: Discrete[T, D]): DiscreteFactor[T, D] = DiscreteFactor(f)
 
     implicit def prototypeFactorDecorator[T](p: Prototype[T]) = new {
       def in[D](d: D)(implicit domain: Domain[T, D]): Factor[T, D] = Factor(p, d)(domain)
@@ -43,10 +42,12 @@ package sampling {
       override def max(domain: (String, String)): FromContext[T] = FromContext.codeToFromContext[T](domain._2)
     }
 
-    implicit def tupleIsBounds[T] = new Bounds[T, (T, T)] {
+    implicit def tupleIsStaticBounds[T] = new StaticBounds[T, (T, T)] {
       override def min(domain: (T, T)) = domain._1
       override def max(domain: (T, T)) = domain._2
     }
+
+    implicit def tupleIsBounds[T] = tupleIsStaticBounds[T]
   }
 }
 

@@ -23,8 +23,22 @@ import org.openmole.core.workflow.tools.FromContext
 import scala.annotation.implicitNotFound
 import scalaz.Scalaz._
 
+object Finite {
+
+  implicit def fromStatic[T, D](staticFinite: StaticFinite[T, D]) = new Finite[T, D] {
+    override def computeValues(domain: D): FromContext[Iterable[T]] = staticFinite.computeValues(domain)
+  }
+
+}
+
 @implicitNotFound("${D} is not a finite variation domain of type ${T}")
 trait Finite[+T, -D] extends Domain[T, D] with Discrete[T, D] {
   def computeValues(domain: D): FromContext[collection.Iterable[T]]
   override def iterator(domain: D) = computeValues(domain).map(_.iterator)
+}
+
+@implicitNotFound("${D} is not a static finite variation domain of type ${T}")
+trait StaticFinite[+T, -D] extends Domain[T, D] with StaticDiscrete[T, D] {
+  def computeValues(domain: D): collection.Iterable[T]
+  override def iterator(domain: D) = computeValues(domain).iterator
 }
