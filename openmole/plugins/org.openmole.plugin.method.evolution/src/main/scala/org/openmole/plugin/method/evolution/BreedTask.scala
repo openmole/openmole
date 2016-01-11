@@ -27,37 +27,36 @@ import scalaz._
 
 object BreedTask {
 
-  def apply[T: WorkflowIntegration](t: T, size: Int)(implicit integration: WorkflowIntegration[T]) = {
-    val wfi = integration(t)
-    import wfi._
+  def apply[T: WorkflowIntegration](algorithm: T, size: Int)(implicit wfi: WorkflowIntegration[T]) = {
+    val t = wfi(algorithm)
 
     new TaskBuilder {
-      addInput(populationPrototype)
-      addInput(statePrototype)
-      addOutput(statePrototype)
-      addExploredOutput(genomePrototype.toArray)
+      addInput(t.populationPrototype)
+      addInput(t.statePrototype)
+      addOutput(t.statePrototype)
+      addExploredOutput(t.genomePrototype.toArray)
 
       abstract class BreedTask extends Task {
 
         override def process(context: Context)(implicit rng: RandomProvider) = {
-          val p = context(populationPrototype)
+          val p = context(t.populationPrototype)
 
           if (p.isEmpty) {
-            val s = context(statePrototype)
-            val (news, gs) = (random[S] lifts randomGenomes(randomGenome, size)).run(s)
+            val s = context(t.statePrototype)
+            val (news, gs) = t.integration.run(s, t.operations.initialGenomes(size))
 
             Context(
-              Variable(genomePrototype.toArray, gs.toArray(genomePrototype.`type`.manifest)),
-              Variable(statePrototype, news)
+              Variable(t.genomePrototype.toArray, gs.toArray(t.genomePrototype.`type`.manifest)),
+              Variable(t.statePrototype, news)
             )
           }
           else {
-            val s = context(statePrototype)
-            val (newState, breeded) = algorithm.breeding(p, size).run(s)
+            val s = context(t.statePrototype)
+            val (newState, breeded) = t.integration.run(s, t.operations.breeding(size).run(p))
 
             Context(
-              Variable(genomePrototype.toArray, breeded.toArray(genomePrototype.`type`.manifest)),
-              Variable(statePrototype, newState)
+              Variable(t.genomePrototype.toArray, breeded.toArray(t.genomePrototype.`type`.manifest)),
+              Variable(t.statePrototype, newState)
             )
           }
         }

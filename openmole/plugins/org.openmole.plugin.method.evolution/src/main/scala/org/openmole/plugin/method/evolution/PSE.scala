@@ -16,11 +16,8 @@
  */
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.Individual
-import fr.iscpif.mgo.algorithm.ga
-import fr.iscpif.mgo.fitness._
-import fr.iscpif.mgo.niche._
-import fr.iscpif.mgo.clone._
+import fr.iscpif.mgo
+import fr.iscpif.mgo.algorithm.{ pse, noisypse }
 
 object PSE {
 
@@ -29,7 +26,7 @@ object PSE {
     objectives: Objectives,
     gridSize: Seq[Double]) = {
     WorkflowIntegration.DeterministicGA(
-      ga.PSE[Seq[Double], Seq[Int]](grid(gridSize, _.phenotype)),
+      pse.OpenMOLE(mgo.niche.grid(gridSize), Genome.size(genome), operatorExploration),
       genome,
       objectives)
   }
@@ -39,10 +36,15 @@ object PSE {
     objectives: Objectives,
     gridSize: Seq[Double],
     replication: Replication[Seq[FitnessAggregation]]) = {
-    def niche = grid(gridSize, (i: Individual[_, History[Seq[Double]]]) ⇒ StochasticGAAlgorithm.aggregateSeq(replication.aggregation, i.phenotype.history))
 
     WorkflowIntegration.StochasticGA(
-      ga.noisyPSE[History[Seq[Double]], Seq[Int]](niche, replication.max, replication.reevaluate),
+      noisypse.OpenMOLE(
+        pattern = mgo.niche.grid(gridSize),
+        aggregation = StochasticGAIntegration.aggregateVector(replication.aggregation, _),
+        genomeSize = Genome.size(genome),
+        historySize = replication.max,
+        cloneProbability = replication.reevaluate,
+        operatorExploration = operatorExploration),
       genome,
       objectives,
       replication)

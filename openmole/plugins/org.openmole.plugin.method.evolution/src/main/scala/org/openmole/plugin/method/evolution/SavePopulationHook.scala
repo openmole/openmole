@@ -23,12 +23,11 @@ import org.openmole.plugin.hook.file.AppendToCSVFileHookBuilder
 
 object SavePopulationHook {
 
-  def apply[T](t: T, dir: ExpandedString)(implicit integration: WorkflowIntegration[T]) = {
-    val wfi = integration(t)
-    import wfi._
+  def apply[T](algorithm: T, dir: ExpandedString)(implicit wfi: WorkflowIntegration[T]) = {
+    val t = wfi(algorithm)
 
-    val fileName = dir + "/population${" + generationPrototype.name + "}.csv"
-    val prototypes = Seq[Prototype[_]](generationPrototype) ++ resultPrototypes.map(_.toArray)
+    val fileName = dir + "/population${" + t.generationPrototype.name + "}.csv"
+    val prototypes = Seq[Prototype[_]](t.generationPrototype) ++ t.resultPrototypes.map(_.toArray)
     new AppendToCSVFileHookBuilder(fileName, prototypes: _*)
   }
 

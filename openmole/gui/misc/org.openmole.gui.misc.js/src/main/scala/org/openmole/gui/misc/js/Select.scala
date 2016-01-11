@@ -19,59 +19,130 @@ package org.openmole.gui.misc.js
 
 import fr.iscpif.scaladget.api.{BootstrapTags => bs, ClassKeyAggregator}
 import bs._
+import org.scalajs.dom.raw.{HTMLDivElement, HTMLInputElement}
 import rx._
 import scalatags.JsDom.all._
 import org.openmole.gui.misc.js.JsRxTags._
 import scalatags.JsDom.{tags ⇒ tags}
 
 object Select {
-  def apply[T <: Displayable with Identifiable](autoID: String,
-                                                contents: Seq[(T, ClassKeyAggregator)],
-                                                default: Option[T],
-                                                key: ClassKeyAggregator = emptyCK,
-                                                onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, onclickExtra)
+  implicit def seqToSeqOfEmptyPairs[T <: Displayable](s: Seq[T]): Seq[(T, ClassKeyAggregator)] = s.map {
+    (_, emptyCK)
+  }
+
+  implicit def seqOfTupleToSeqOfT[T <: Displayable](s: Seq[(T, _)]): Seq[T] = s.map {
+    _._1
+  }
+
+  def apply[T <: Displayable](autoID: String,
+                              contents: Seq[(T, ClassKeyAggregator)],
+                              default: Option[T],
+                              key: ClassKeyAggregator = emptyCK,
+                              onclickExtra: () ⇒ Unit = () ⇒ {}) = new Select(autoID, Var(contents), default, key, onclickExtra)
 }
 
-class Select[T <: Displayable with Identifiable](autoID: String,
-                                                 val contents: Var[Seq[(T, ClassKeyAggregator)]],
-                                                 default: Option[T] = None,
-                                                 key: ClassKeyAggregator = emptyCK,
-                                                 onclickExtra: () ⇒ Unit = () ⇒ {}) {
+import Select._
+
+class Select[T <: Displayable](autoID: String,
+                               private val contents: Var[Seq[(T, ClassKeyAggregator)]],
+                               default: Option[T] = None,
+                               key: ClassKeyAggregator = emptyCK,
+                               onclickExtra: () ⇒ Unit = () ⇒ {}) {
 
   val content: Var[Option[T]] = Var(contents().size match {
     case 0 ⇒ None
     case _ ⇒ default match {
       case None ⇒ Some(contents()(0)._1)
       case _ ⇒
-        val ind = contents().map{_._1}.indexOf(default.get)
+        val ind = contents().map {
+          _._1
+        }.indexOf(default.get)
         if (ind != -1) Some(contents()(ind)._1) else Some(contents()(0)._1)
     }
   })
 
-  val glyphMap = contents().toMap
+  val hasFilter = Var(false)
+  val filtered: Var[Seq[T]] = Var(contents())
+  resetFilter
 
-  val selector = buttonGroup()(
-    tags.span(
-      `class` := "btn " + key.key + " dropdown-toggle", "data-toggle".attr := "dropdown", cursor := "pointer")(
+  lazy val inputFilter: HTMLInputElement = bs.input("", "selectFilter")(placeholder := "Filter", oninput := { () =>
+    filtered() = contents().filter {
+      _._1.name.toUpperCase.contains(inputFilter.value.toUpperCase)
+    }
+  }).render
+
+  val glyphMap = Var(contents().toMap)
+
+  def resetFilter = {
+    filtered() = contents().take(100)
+    content() = None
+  }
+
+  def setContents(cts: Seq[T], onset: ()=> Unit = ()=> {}) = {
+    contents() = cts
+    content() = cts.headOption
+    resetFilter
+    glyphMap() = contents().toMap
+    inputFilter.value = ""
+    onset()
+  }
+
+  def emptyContents = {
+    contents() = Seq()
+    content() = None
+  }
+
+  def isContentsEmpty = contents().isEmpty
+
+  lazy val selector = {
+    lazy val bg: HTMLDivElement = bs.div("dropdown")(
+      tags.span(
+        `class` := "btn " + key.key + " dropdown-toggle", `type` := "button", "data-toggle".attr := "dropdown", cursor := "pointer")(
+          Rx {
+            content().map { c ⇒
+              bs.glyph(glyphMap()(c))
+            }
+          },
+          Rx {
+            content().map {
+              _.name
+            }.getOrElse(contents()(0)._1.name) + " "
+          },
+          bs.span("caret")
+        ).render,
+      ul(`class` := "dropdown-menu", id := autoID)(
+        if (hasFilter())
+          scalatags.JsDom.tags.li(
+            tags.form(inputFilter)(`type` := "submit", onsubmit := { () =>
+              content() = filtered().headOption
+              bg.click()
+              false
+            }))
+        else tags.div,
         Rx {
-          content().map { c ⇒ bs.glyph(glyphMap(c)) }
-        },
-        Rx {
-          content().map {
-            _.name
-          }.getOrElse(contents()(0)._1.name) + " "
-        },
-        bs.span("caret")
-      ).render,
-    ul(`class` := "dropdown-menu", id := autoID)(
-      Rx {
-        for (c ← contents().zipWithIndex) yield {
-          scalatags.JsDom.tags.li(cursor := "pointer", color := "black", onclick := { () ⇒
-            content() = Some(contents()(c._2)._1)
-            onclickExtra()
-          })(c._1._1.name)
+          tags.div(
+            if (filtered().size < 100) {
+              for (c ← filtered()) yield {
+                scalatags.JsDom.tags.li(`class` := "selectElement", cursor := "pointer", role := "presentation", onclick := { () ⇒
+                  content() = contents().filter {
+                    _._1 == c
+                  }.headOption.map {
+                    _._1
+                  }
+                  onclickExtra()
+                })(c.name)
+              }
+            } else scalatags.JsDom.tags.li("To many results, filter more !")
+          )
         }
-      }
-    )
-  ).render
+      )
+    ).render
+    bg
+  }
+
+  lazy val selectorWithFilter = {
+    // hasFilter() = if(contents().size > 9) true else false
+    hasFilter() = true
+    selector
+  }
 }

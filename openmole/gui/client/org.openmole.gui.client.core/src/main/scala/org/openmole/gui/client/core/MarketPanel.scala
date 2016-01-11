@@ -17,17 +17,21 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.buildinfo.{ MarketIndex, MarketIndexEntry }
+import org.openmole.core.buildinfo.{MarketIndex, MarketIndexEntry}
 import org.openmole.gui.client.core.AbsolutePositioning.CenterTransform
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
-import org.openmole.gui.misc.js.{ OMTags, InputFilter }
+import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
+import org.openmole.gui.ext.data.{Standby, Processing, ProcessState}
+import org.openmole.gui.misc.js.{OMTags, InputFilter}
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.shared.Api
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import org.openmole.gui.client.core.files.treenodemanager.{instance ⇒ manager}
+import org.openmole.gui.client.core.CoreUtils._
+import org.openmole.gui.ext.data._
+import ClientProcessState._
 import autowire._
 import rx._
-import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.{tags ⇒ tags}
 import scalatags.JsDom.all._
 import bs._
 
@@ -37,7 +41,11 @@ class MarketPanel extends ModalPanel {
   private val marketIndex: Var[Option[MarketIndex]] = Var(None)
   val tagFilter = InputFilter(pHolder = "Filter")
   val selectedEntry: Var[Option[MarketIndexEntry]] = Var(None)
-  val downloading: Var[Seq[MarketIndexEntry]] = Var(Seq())
+  lazy val downloading: Var[Seq[(MarketIndexEntry, Var[_ <: ProcessState])]] = Var(marketIndex().map {
+    _.entries.map {
+      (_, Var(Standby()))
+    }
+  }.getOrElse(Seq()))
   val overwriteAlert: Var[Option[MarketIndexEntry]] = Var(None)
 
   lazy val marketTable = tags.div(`class` := "spacer20",
@@ -83,22 +91,24 @@ class MarketPanel extends ModalPanel {
 
   def download(entry: MarketIndexEntry) = {
     val path = manager.current.safePath() ++ entry.name
-    downloading() = downloading() :+ entry
+    downloading() = downloading().updatedFirst(_._1 == entry, (entry, Var(Processing())))
     OMPost[Api].getMarketEntry(entry, path).call().foreach { d ⇒
-      downloading() = downloading().filterNot(_ == entry)
-      if (downloading().isEmpty) close
+      downloading() = downloading().updatedFirst(_._1 == entry, (entry, Var(Processed())))
+      downloading().headOption.foreach(_ ⇒ close)
       panels.treeNodePanel.refreshCurrentDirectory
     }
   }
 
   def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) =
-    if (downloading().contains(entry)) {
-      OMTags.waitingSpan(" Downloading", btn_danger)
-    }
-    else if (Some(entry) == selectedEntry()) {
-      bs.glyphButton(" Download", btn_success + " redBackground", glyph_download_alt, todo)
-    }
-    else tags.div
+    downloading().find {
+      _._1 == entry
+    }.map {
+      case (e, state: Var[ProcessState]) ⇒
+        state.withWaiter { _ ⇒
+          if (selectedEntry() == Some(e)) bs.glyphButton(" Download", btn_success + " redBackground", glyph_download_alt, todo) else tags.div()
+        }
+    }.getOrElse(tags.div())
+
 
   def onOpen() = marketIndex() match {
     case None ⇒ OMPost[Api].marketIndex.call().foreach { m ⇒

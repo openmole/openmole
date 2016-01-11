@@ -313,7 +313,7 @@ object OSGi extends Defaults {
  lazy val clapper = OsgiProject("org.clapper", exports = Seq("!scala.*","!grizzled.*","!jline.*","!org.fusesource.*","!org.slf4j.*","*")) settings (
    libraryDependencies += "org.clapper" % "classutil_2.11" % clapperVersion, version := clapperVersion)
 
-  val monocleVersion = "1.0.1"
+  val monocleVersion = "1.2.0"
 
   lazy val monocle = OsgiProject("monocle", privatePackages = Seq("!scala.*", "!scalaz.*", "*")) settings(
     libraryDependencies += "com.github.julien-truffaut" %% "monocle-core" % monocleVersion,
@@ -322,14 +322,12 @@ object OSGi extends Defaults {
     version := monocleVersion
     ) dependsOn(scalaz)
 
-  val scalazVersion = "7.1.3"
+  val scalazVersion = "7.2.0"
 
   lazy val scalaz = OsgiProject("scalaz", privatePackages = Seq("!scala.*", "*")) settings (
     libraryDependencies ++= Seq(
       "org.scalaz" %% "scalaz-core" % scalazVersion,
-      "org.scalaz" %% "scalaz-effect" % scalazVersion,
-      "org.scalaz" %% "scalaz-typelevel" % scalazVersion,
-      "org.scalaz" %% "scalaz-iteratee" % scalazVersion
+      "org.scalaz" %% "scalaz-effect" % scalazVersion
     ),
     version := scalazVersion
     )

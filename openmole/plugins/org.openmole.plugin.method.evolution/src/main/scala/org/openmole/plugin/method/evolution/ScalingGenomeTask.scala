@@ -29,19 +29,18 @@ import org.openmole.core.workflow.domain._
 
 object ScalingGenomeTask {
 
-  def apply[T](t: T)(implicit integration: WorkflowIntegration[T]) = {
-    val wfi = integration(t)
-    import wfi._
+  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
+    val t = wfi(algorithm)
 
     new TaskBuilder {
       builder ⇒
-      inputPrototypes foreach { p ⇒ addOutput(p) }
-      addInput(genomePrototype)
-      addOutput(genomePrototype)
+      t.inputPrototypes foreach { p ⇒ addOutput(p) }
+      addInput(t.genomePrototype)
+      addOutput(t.genomePrototype)
 
       abstract class ScalingGenomeTask extends Task {
         override def process(context: Context)(implicit rng: RandomProvider) =
-          context ++ genomeToVariables(context(genomePrototype), context)
+          context ++ t.genomeToVariables(context(t.genomePrototype)).from(context)
       }
 
       def toTask = new ScalingGenomeTask with Built

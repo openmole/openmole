@@ -1,8 +1,9 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.AbsolutePositioning.FileZone
+import org.openmole.gui.client.core.ClientProcessState._
 import org.openmole.gui.client.core.{ panels, AlertPanel, PanelTriggerer, OMPost }
-import org.openmole.gui.ext.data.{ FileExtension, UploadProject }
+import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
@@ -48,7 +49,7 @@ import TreeNodePanel._
 class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
-  val transferring: Var[FileTransferState] = Var(Standby())
+  val transferring: Var[ProcessState] = Var(Standby())
   val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
 
@@ -71,7 +72,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     val content = Seq((TreeNodeType.file, key(glyph_file)), (TreeNodeType.folder, key(glyph_folder_close)))
     Select("fileOrFolder", content, content.map {
       _._1
-    }.headOption, btn_success, () ⇒ {
+    }.headOption, btn_success + "borderRightFlat", () ⇒ {
       addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
     })
   }
@@ -88,10 +89,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 val currentDirNode = manager.current
                 addRootDirButton.content().map {
                   _ match {
-                    case dt: DirType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
+                    case dt: DirNodeType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
                       if (b) refreshCurrentDirectory
                     }
-                    case ft: FileType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
+                    case ft: FileNodeType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
                       if (b) refreshCurrentDirectory
                     }
                   }
@@ -102,7 +103,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             inputGroupAddon(id := "fileinput-addon")(
               tags.label(`class` := "inputFileStyleSmall",
                 uploadButton((fileInput: HTMLInputElement) ⇒ {
-                  FileManager.upload(fileInput, manager.current.safePath(), (p: FileTransferState) ⇒ transferring() = p, UploadProject())
+                  FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject())
                 })).tooltip("Upload file")),
             inputGroupAddon(id := "fileinput-addon")(
               tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
@@ -122,36 +123,38 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
         )
       )
-    }, Rx {
-      tags.table(`class` := "tree" + dragState())(
-        tags.tr(
-          tags.td(height := "40px",
-            transferring() match {
-              case _: Standby ⇒
-              case _: Transfered ⇒
-                refreshCurrentDirectory
-                transferring() = Standby()
-              case _ ⇒ progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
-            })
-        ),
-        tags.tr(
+    },
+    tags.table(`class` := "tree" + dragState())(
+      tags.tr(
+        tags.td(height := "40px",
+          textAlign := "center",
+          transferring.withWaiter { _ ⇒
+            refreshCurrentDirectory
+            tags.div()
+          }
+        )
+      ),
+      tags.tr(
+        Rx {
           if (manager.allNodes.size == 0) tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
           else drawTree(manager.current.sons())
-        )
+        }
       )
-    }
+    )
   )
 
-  def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
+  def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {
+  }) =
     FileManager.download(
       treeNode,
-      (p: FileTransferState) ⇒ transferring() = p,
+      (p: ProcessState) ⇒ transferring() = p,
       onLoaded
     )
 
   def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(
-    onclick := { () ⇒
-      goToDirAction(dn)()
+    onclick := {
+      () ⇒
+        goToDirAction(dn)()
     }, dropPairs(dn)
   )
 
@@ -159,13 +162,15 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     draggable := true, ondrop := {
       dropAction(dn)
     },
-    ondragenter := { (e: DragEvent) ⇒
-      false
+    ondragenter := {
+      (e: DragEvent) ⇒
+        false
     },
-    ondragover := { (e: DragEvent) ⇒
-      e.dataTransfer.dropEffect = "move"
-      e.preventDefault
-      false
+    ondragover := {
+      (e: DragEvent) ⇒
+        e.dataTransfer.dropEffect = "move"
+        e.preventDefault
+        false
     }
   )
 
@@ -183,11 +188,17 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   def drawNode(node: TreeNode) = node match {
     case fn: FileNode ⇒
       clickableElement(fn, "file", () ⇒ {
-        if (node.safePath().extension.displayable) {
-          downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(manager.root.safePath(), node, content, executionTriggerer))
-        }
+        displayNode(fn)
       })
     case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ manager + dn)
+  }
+
+  def displayNode(tn: TreeNode) = tn match {
+    case fn: FileNode ⇒
+      if (fn.safePath().extension.displayable) {
+        downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(fn, content))
+      }
+    case _ ⇒
   }
 
   def clickableElement(tn: TreeNode,
@@ -201,11 +212,12 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
             tags.div(`class` := "edit-node",
               tags.form(
                 editNodeInput,
-                onsubmit := { () ⇒
-                  {
-                    renameNode(tn, editNodeInput.value)
-                    false
-                  }
+                onsubmit := {
+                  () ⇒
+                    {
+                      renameNode(tn, editNodeInput.value)
+                      false
+                    }
                 }
               )
             )
@@ -245,14 +257,21 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     newNodeInput.value = ""
   }
 
-  def trashNode(treeNode: TreeNode) = {
+  def trashNode(path: SafePath): Unit = {
+    OMPost[Api].deleteFile(path).call().foreach {
+      d ⇒
+        refreshCurrentDirectory
+        fileDisplayer.tabs.checkTabs
+    }
+  }
+
+  def trashNode(treeNode: TreeNode): Unit = {
     fileDisplayer.tabs -- treeNode
-    AlertPanel.popup(s"Do you really want to delete ${treeNode.name()}?",
+    AlertPanel.popup(s"Do you really want to delete ${
+      treeNode.name()
+    }?",
       () ⇒ {
-        OMPost[Api].deleteFile(treeNode.safePath()).call().foreach { d ⇒
-          refreshCurrentDirectory
-          fileDisplayer.tabs.checkTabs
-        }
+        trashNode(treeNode.safePath())
       }, zone = FileZone()
     )
   }
@@ -271,20 +290,22 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   def dropAction(tn: TreeNode) = {
     (e: DragEvent) ⇒
       e.preventDefault
-      draggedNode().map { sp ⇒
-        tn match {
-          case d: DirNode ⇒
-            if (sp.safePath().path != d.safePath().path) {
-              fileDisplayer.tabs.saveAllTabs(() ⇒
-                OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach { b ⇒
-                  refreshCurrentDirectory
-                  refresh(d)
-                  fileDisplayer.tabs.checkTabs
-                }
-              )
-            }
-          case _ ⇒
-        }
+      draggedNode().map {
+        sp ⇒
+          tn match {
+            case d: DirNode ⇒
+              if (sp.safePath().path != d.safePath().path) {
+                fileDisplayer.tabs.saveAllTabs(() ⇒
+                  OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach {
+                    b ⇒
+                      refreshCurrentDirectory
+                      refresh(d)
+                      fileDisplayer.tabs.checkTabs
+                  }
+                )
+              }
+            case _ ⇒
+          }
       }
       draggedNode() = None
       false

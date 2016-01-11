@@ -18,36 +18,23 @@ package org.openmole.gui.server.core
  */
 
 import java.io.File
+import java.lang.reflect.Modifier
 import java.nio.channels.FileChannel
-import java.nio.file.Files
 import java.util.logging.Level
-import java.util.zip.GZIPInputStream
+import java.util.zip.{ ZipInputStream, GZIPInputStream }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.FileExtension._
 import java.io._
 import org.openmole.tool.file._
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar._
 
+import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+
 object Utils {
 
-  implicit def fileToExtension(f: File): FileExtension = f.getName match {
-    case x if x.endsWith(".oms")                         ⇒ OMS
-    case x if x.endsWith(".scala")                       ⇒ SCALA
-    case x if x.endsWith(".sh")                          ⇒ SH
-    case x if x.endsWith(".tgz") | x.endsWith(".tar.gz") ⇒ TGZ
-    case x if x.endsWith(".csv") |
-      x.endsWith(".nlogo") |
-      x.endsWith(".gaml") |
-      x.endsWith(".nls") |
-      x.endsWith(".py") |
-      x.endsWith(".R") |
-      x.endsWith(".txt") ⇒ TEXT
-    case x if x.endsWith(".md") ⇒ MD
-    case _                      ⇒ BINARY
-  }
+  implicit def fileToExtension(f: File): FileExtension = DataUtils.fileToExtension(f.getName)
 
   val webUIProjectFile = Workspace.file("webui")
 
@@ -71,7 +58,13 @@ object Utils {
 
   implicit def safePathToFile(s: SafePath): File = getFile(webUIProjectFile, s.path)
 
-  implicit def seqOfSafePathToSeqOfFile(s: Seq[SafePath]): Seq[File] = s.map { safePathToFile }
+  implicit def seqOfSafePathToSeqOfFile(s: Seq[SafePath]): Seq[File] = s.map {
+    safePathToFile
+  }
+
+  implicit def seqOfFileToSeqOfSafePath(s: Seq[File]): Seq[SafePath] = s.map {
+    fileToSafePath
+  }
 
   implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, isPlugin(f), f.length, readableByteCount(FileDecorator(f).size))
 
@@ -115,11 +108,60 @@ object Utils {
 
   def listFiles(path: SafePath): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
 
-  def launchinCommand(model: SafePath): Option[LaunchingCommand] =
+  def launchinCommands(model: SafePath): Seq[LaunchingCommand] =
     model.name.split('.').last match {
-      case "nlogo" ⇒ Some(CodeParsing.netlogoParsing(model))
-      case "jar"   ⇒ Some(CodeParsing.jarParsing(model))
+      case "nlogo" ⇒ Seq(CodeParsing.netlogoParsing(model))
+      case "jar"   ⇒ Seq(JavaLaunchingCommand(JarMethod("", Seq(), "", true, ""), Seq(), Seq()))
       //      case _       ⇒ CodeParsing.fromCommand(getCareBinInfos(model).commandLine.get)
     }
+
+  def jarClasses(jarPath: SafePath): Seq[ClassTree] = {
+    val zip = new ZipInputStream(new FileInputStream(jarPath))
+    val classes = Stream.continually(zip.getNextEntry).
+      takeWhile(_ != null).filter { e ⇒
+        e.getName.endsWith(".class")
+      }.filterNot { e ⇒
+        Seq("scala", "java").exists {
+          ex ⇒ e.getName.startsWith(ex)
+        }
+      }.map {
+        _.getName.dropRight(6).split("/").toSeq
+      }
+
+    val trees = buildClassTrees(classes)
+    zip.close
+    trees
+  }
+
+  private def buildClassTrees(classes: Seq[Seq[String]]): Seq[ClassTree] = {
+
+    def build(classes: Seq[Seq[String]], classTrees: Seq[ClassTree]): Seq[ClassTree] = {
+      val grouped = classes.groupBy {
+        _.head
+      }
+
+      grouped.flatMap {
+        case (k, v) ⇒
+          val flatV = v.flatten
+          if (flatV.size == 1) classTrees :+ ClassLeaf(flatV.head)
+          else classTrees :+ ClassNode(k,
+            build(v.map(_.tail), classTrees)
+          )
+      }.toSeq
+    }
+
+    build(classes, Seq())
+  }
+
+  def jarMethods(jarPath: SafePath, classString: String): Seq[JarMethod] = {
+    val classLoader = new URLClassLoader(Seq(jarPath.toURI.toURL), this.getClass.getClassLoader)
+    val clazz = Class.forName(classString, true, classLoader)
+
+    clazz.getDeclaredMethods.map { m ⇒
+      JarMethod(m.getName, m.getGenericParameterTypes.map {
+        _.toString.split("class ").last
+      }.toSeq, m.getReturnType.getCanonicalName, Modifier.isStatic(m.getModifiers), classString)
+    }
+  }
 
 }

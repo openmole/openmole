@@ -1,7 +1,6 @@
 package org.openmole.gui.server.core
 
 import org.openmole.gui.ext.data._
-import org.clapper.classutil.ClassFinder
 import scala.io.Source
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 import scala.reflect.runtime.{ universe ⇒ ru }
@@ -36,7 +35,7 @@ object CodeParsing {
     //Parse the arguments and return the LaunchingCommand
 
     Some(
-      LaunchingCommand(
+      BasicLaunchingCommand(
         language,
         codeName,
         commandElements)
@@ -186,48 +185,11 @@ object CodeParsing {
 
     val (args, outputs) = parse(lines.toSeq.zipWithIndex, Seq(), Seq())
 
-    LaunchingCommand(
+    BasicLaunchingCommand(
       Some(NetLogoLanguage()), "",
       args.distinct.zipWithIndex.map { case (a, i) ⇒ VariableElement(i, a, NetLogoTaskType()) },
       outputs.distinct.zipWithIndex.map { case (o, i) ⇒ VariableElement(i, o, NetLogoTaskType()) }
     )
-  }
-
-  def jarParsing(safePath: SafePath): LaunchingCommand = {
-    println("JAR PARSING")
-    val classLoader = new URLClassLoader(Seq(safePath.toURI.toURL), this.getClass.getClassLoader)
-    val mirror = ru.runtimeMirror(classLoader)
-    // val urls = classLoader.getURLs
-
-    //println("URLs " + urls)
-
-    val classes = ClassFinder(Seq(safePath)).getClasses.toSeq.filterNot {
-      c ⇒
-        Seq("scala", "java").exists {
-          ex ⇒ c.name.startsWith(ex)
-        }
-    }
-
-    println("Methods " + classes.size + " // " + classes.map { c ⇒
-      c.name + " // " + c.methods.map { m ⇒
-        println("METH " + m.toString())
-        println("Modifiers: " + m.modifiers.map {
-          _.toString
-        })
-      }
-    })
-
-    classes.map { c ⇒
-      println("NAME " + c.name)
-      val oo = mirror.staticClass(c.name).typeSignature.baseClasses.map {
-        bc ⇒ bc.fullName
-
-      }
-      println("OO " + oo)
-    }
-
-    LaunchingCommand(None, "")
-
   }
 
 }

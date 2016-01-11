@@ -21,23 +21,6 @@ import org.scalajs.dom.raw._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-sealed trait FileTransferState {
-  def ratio: Int = 0
-
-  def display: String = ""
-}
-
-case class Transfering(override val ratio: Int) extends FileTransferState {
-  override def display: String = "Transferring... " + ratio + " %"
-}
-
-case class Finalizing(override val ratio: Int = 100,
-                      override val display: String = "Finalizing...") extends FileTransferState
-
-case class Transfered(override val ratio: Int = 100) extends FileTransferState
-
-case class Standby() extends FileTransferState
-
 object FileManager {
 
   def fileNames(fileList: FileList): Seq[String] = {
@@ -50,7 +33,7 @@ object FileManager {
 
   def upload(inputElement: HTMLInputElement,
              destinationPath: SafePath,
-             fileTransferState: FileTransferState ⇒ Unit,
+             fileTransferState: ProcessState ⇒ Unit,
              uploadType: UploadType,
              onloaded: () ⇒ Unit = () ⇒ {}) = {
     val fileList = inputElement.files
@@ -66,7 +49,7 @@ object FileManager {
     val xhr = new XMLHttpRequest
 
     xhr.upload.onprogress = (e: ProgressEvent) ⇒ {
-      fileTransferState(Transfering((e.loaded.toDouble * 100 / e.total).toInt))
+      fileTransferState(Processing((e.loaded.toDouble * 100 / e.total).toInt))
     }
 
     xhr.upload.onloadend = (e: ProgressEvent) ⇒ {
@@ -74,7 +57,7 @@ object FileManager {
     }
 
     xhr.onloadend = (e: ProgressEvent) ⇒ {
-      fileTransferState(Transfered())
+      fileTransferState(Processed())
       onloaded()
       inputElement.value = ""
     }
@@ -84,17 +67,17 @@ object FileManager {
   }
 
   def download(treeNode: TreeNode,
-               fileTransferState: FileTransferState ⇒ Unit,
+               fileTransferState: ProcessState ⇒ Unit,
                onLoadEnded: String ⇒ Unit) = {
 
     val xhr = new XMLHttpRequest
 
     xhr.onprogress = (e: ProgressEvent) ⇒ {
-      fileTransferState(Transfering((e.loaded.toDouble * 100 / treeNode.size).toInt))
+      fileTransferState(Processing((e.loaded.toDouble * 100 / treeNode.size).toInt))
     }
 
     xhr.onloadend = (e: ProgressEvent) ⇒ {
-      fileTransferState(Transfered())
+      fileTransferState(Processed())
       if (treeNode.safePath().extension.displayable) {
         onLoadEnded(xhr.responseText)
       }

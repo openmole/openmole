@@ -43,7 +43,7 @@
       algorithm =
         NSGA2(
           mu = 100,
-          genome = Genome(x in (0.0, 1.0), y in (0.0, 1.0)),
+          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
           objectives = Seq(o1, o2)
         ),
         evaluation = modelCapsule,
@@ -74,7 +74,7 @@
       algorithm =
         NSGA2(
           mu = 100,
-          genome = Genome(x in (0.0, 1.0), y in (0.0, 1.0)),
+          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
           objectives = Seq(o1, o2)
         ),
       evaluation = modelCapsule,
@@ -111,7 +111,7 @@
       algorithm =
         NSGA2(
           mu = 100,
-          genome = Genome(x in (0.0, 1.0), y in (0.0, 1.0)),
+          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
           objectives = Seq(o1, o2),
           // OpenMOLE provide a seed for your stochastic model to use (it is optional)
           // 20% of the evaluations are used for replicating existing solutions

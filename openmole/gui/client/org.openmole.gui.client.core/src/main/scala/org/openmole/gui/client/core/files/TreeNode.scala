@@ -27,18 +27,18 @@ sealed trait TreeNodeType {
   val name: String
 }
 
-trait DirType extends TreeNodeType {
+trait DirNodeType extends TreeNodeType {
   val name: String = "Folder"
 }
 
-trait FileType extends TreeNodeType {
+trait FileNodeType extends TreeNodeType {
   val name: String = "File"
 }
 
 object TreeNodeType {
-  def file = new FileType {}
+  def file = new FileNodeType {}
 
-  def folder = new DirType {}
+  def folder = new DirNodeType {}
 }
 
 sealed trait TreeNode {
