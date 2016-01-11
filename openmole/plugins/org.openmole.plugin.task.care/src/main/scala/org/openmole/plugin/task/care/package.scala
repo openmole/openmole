@@ -33,7 +33,7 @@ package care {
 
     def managedArchive(careArchive: File) = managed(new RandomAccessFile(careArchive, "r")) map (_.getChannel)
 
-    def extractArchive(archive: ManagedResource[FileChannel]) = archive.map { fileChannel ⇒
+    def extractArchiveStream(archive: ManagedResource[FileChannel]) = archive.map { fileChannel ⇒
 
       //Get the tar.gz from the bin archive
       val endMinus8Bytes = fileChannel.size - 8L
@@ -47,9 +47,14 @@ package care {
       stream
     }.opt.get
 
+    def extractArchive(archive: File, destination: File) = {
+      val extractedStream = extractArchiveStream(managedArchive(archive))
+      extractedStream.map(_.extract(destination))
+    }.opt
+
     case class CAREInfo(commandLine: Option[Seq[String]], workDirectory: Option[String])
 
-    def getCareBinInfos(careArchive: File): CAREInfo = getCareBinInfos(extractArchive(managedArchive(careArchive)))
+    def getCareBinInfos(careArchive: File): CAREInfo = getCareBinInfos(extractArchiveStream(managedArchive(careArchive)))
 
     /** The .opt.get at the end will force all operations to happen and close the managed resources */
     def getCareBinInfos(extractedArchiveStream: ManagedResource[TarInputStream]) =
