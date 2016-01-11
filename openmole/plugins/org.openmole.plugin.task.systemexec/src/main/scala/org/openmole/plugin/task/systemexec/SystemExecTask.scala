@@ -44,11 +44,8 @@ object SystemExecTask extends Logger {
    */
   def apply(commands: Command*) =
     new SystemExecTaskBuilder(commands: _*) with CanBuildTask[SystemExecTask] {
-      def toTask: SystemExecTask = new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with this.Built {
-        override val outputs: PrototypeSet = this.outputs + List(stdOut, stdErr, returnValue).flatten
-      }
+      def toTask = canBuildTask.toTask
     }
-
 }
 
 case class ExpandedSystemExecCommand(expandedCommand: Expansion)

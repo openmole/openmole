@@ -22,10 +22,11 @@ import java.io.File
 import org.openmole.core.workflow.builder.CanBuildTask
 import org.openmole.core.workflow.tools.ExpandedString
 import org.openmole.plugin.task.systemexec._
+import org.openmole.plugin.task.systemexec
 import org.openmole.core.workflow.data._
 
 // arguments to SystemExecTask not really matching the actual one -> set in toTask
-abstract class CARETaskBuilder(archiveLocation: String, command: Command, archiveWorkDirectory: String) extends SystemExecTaskBuilder(Seq.empty: _*) { builder ⇒
+abstract class CARETaskBuilder(archiveLocation: String, command: systemexec.Command, archiveWorkDirectory: String) extends SystemExecTaskBuilder(Seq.empty: _*) { builder ⇒
 
   /**
    * Input files injection into the archive
@@ -55,6 +56,14 @@ abstract class CARETaskBuilder(archiveLocation: String, command: Command, archiv
   // one option would be to replace call line by bind + call line
   //
 
-  //  def toTask2: CARETask = canBuildTask2.toTask
+  // FIXME refactor
+  implicit object canBuildTask2 extends CanBuildTask[CARETask] {
+    override def toTask: CARETask = new CARETask(
+      archiveLocation, command, archiveWorkDirectory,
+      workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
+
+      override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
+    }
+  }
 
 }

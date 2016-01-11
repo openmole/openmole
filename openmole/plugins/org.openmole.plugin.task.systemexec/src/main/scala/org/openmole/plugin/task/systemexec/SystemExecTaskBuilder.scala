@@ -80,9 +80,15 @@ abstract class SystemExecTaskBuilder(commands: Command*) extends ExternalTaskBui
     this
   }
 
-  //  implicit object canBuildTask extends CanBuildTask[SystemExecTask] {
+  implicit object canBuildTask extends CanBuildTask[SystemExecTask] {
+    def toTask: SystemExecTask = new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
+      override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
+    }
+  }
+
+  //  implicit val systemExecMakeItTask = new MakeItTask[SystemExecTask] {
   //    def toTask: SystemExecTask = new SystemExecTask(_commands.toList, workDirectory, errorOnReturnValue, returnValue, stdOut, stdErr, variables.toList) with builder.Built {
-  //      override val outputs: PrototypeSet = builder.outputs + List(stdOut, stdErr, returnValue).flatten
+  //      override val outputs: PrototypeSet = this.outputs + List(stdOut, stdErr, returnValue).flatten
   //    }
   //  }
 
