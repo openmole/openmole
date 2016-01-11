@@ -101,6 +101,6 @@ case class Sequence(prototype: Prototype[Array[Double]], min: Seq[FromContext[Do
   def size = math.min(min.size, max.size)
 }
 
-case class Genome(inputs: Input*) {
-  def size: Int = Try(inputs.map(_.size).sum).getOrElse(0)
+object Genome {
+  def size(inputs: Seq[Input]) = Try(inputs.map(_.size).sum).getOrElse(0)
 }

@@ -27,7 +27,7 @@ object NSGA2 {
     objectives: Objectives) = {
 
     new WorkflowIntegration.DeterministicGA(
-      nsga2.OpenMOLE(mu, genome.size, operatorExploration),
+      nsga2.OpenMOLE(mu, Genome.size(genome), operatorExploration),
       genome,
       objectives
     )
@@ -42,7 +42,7 @@ object NSGA2 {
     def aggregation(h: Vector[Vector[Double]]) = StochasticGAIntegration.aggregateVector(replication.aggregation, h)
 
     WorkflowIntegration.StochasticGA(
-      noisynsga2.OpenMOLE(mu, operatorExploration, genome.size, replication.max, replication.reevaluate, aggregation),
+      noisynsga2.OpenMOLE(mu, operatorExploration, Genome.size(genome), replication.max, replication.reevaluate, aggregation),
       genome,
       objectives,
       replication)

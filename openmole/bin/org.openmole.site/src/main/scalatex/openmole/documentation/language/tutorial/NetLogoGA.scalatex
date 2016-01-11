@@ -135,7 +135,7 @@
         algorithm =
           NSGA2(
             mu = 100,
-            genome = Genome(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
+            genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
             objectives = Seq(food1, food2, food3),
             replication = Replication(seed = seed)
           ),
@@ -161,7 +161,7 @@
       algorithm =
         NSGA2(
           mu = 100,
-          genome = Genome(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
+          genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
           objectives = Seq(food1, food2, food3),
           replication = Replication(seed = seed)
         ),
