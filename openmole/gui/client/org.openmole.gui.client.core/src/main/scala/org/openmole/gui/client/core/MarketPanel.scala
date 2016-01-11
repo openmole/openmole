@@ -104,7 +104,6 @@ class MarketPanel extends ModalPanel {
       _._1 == entry
     }.map {
       case (e, state: Var[ProcessState]) ⇒
-        println("In case " + state())
         state.withWaiter { _ ⇒
           if (selectedEntry() == Some(e)) bs.glyphButton(" Download", btn_success + " redBackground", glyph_download_alt, todo) else tags.div()
         }
