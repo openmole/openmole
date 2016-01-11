@@ -28,19 +28,18 @@ import org.openmole.core.workflow.task._
 
 object ScalingPopulationTask {
 
-  def apply[T](t: T)(implicit integration: WorkflowIntegration[T]) = {
-    val wfi = integration(t)
-    import wfi._
+  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
+    val t = wfi(algorithm)
 
     new TaskBuilder {
       builder ⇒
-      addInput(populationPrototype)
-      resultPrototypes foreach { i ⇒ addOutput(i.toArray) }
+      addInput(t.populationPrototype)
+      t.resultPrototypes foreach { i ⇒ addOutput(i.toArray) }
 
       abstract class ScalingPopulationTask extends Task {
 
         override def process(context: Context)(implicit rng: RandomProvider) =
-          populationToVariables(context(populationPrototype)).from(context)
+          t.populationToVariables(context(t.populationPrototype)).from(context)
 
       }
 

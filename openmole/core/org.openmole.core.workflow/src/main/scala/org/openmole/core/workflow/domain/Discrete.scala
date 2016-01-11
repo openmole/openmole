@@ -21,7 +21,18 @@ import org.openmole.core.workflow.tools._
 import scala.annotation.implicitNotFound
 import scala.util.Random
 
+object Discrete {
+  implicit def fromStatic[T, D](d: StaticDiscrete[T, D]) = new Discrete[T, D] {
+    def iterator(domain: D): FromContext[Iterator[T]] = d.iterator(domain)
+  }
+}
+
 @implicitNotFound("${D} is not a discrete variation domain of type ${T}")
 trait Discrete[+T, -D] extends Domain[T, D] {
   def iterator(domain: D): FromContext[Iterator[T]]
+}
+
+@implicitNotFound("${D} is not a static discrete variation domain of type ${T}")
+trait StaticDiscrete[+T, -D] extends Domain[T, D] {
+  def iterator(domain: D): Iterator[T]
 }

@@ -110,7 +110,7 @@ object Libraries extends Defaults {
 
   lazy val family = "org.openmole" %% "fr-iscpif-family" % "1.3"
 
-  lazy val monocle = "org.openmole" %% "monocle" % "1.0.1"
+  lazy val monocle = "org.openmole" %% "monocle" % "1.2.0"
 
   lazy val scaladget = "org.openmole" %% "scaladget" % "0.8.0-SNAPSHOT"
 
@@ -178,7 +178,7 @@ object Libraries extends Defaults {
 
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.1"
 
-  lazy val scalaz = "org.openmole" %% "scalaz" % "7.1.3"
+  lazy val scalaz = "org.openmole" %% "scalaz" % "7.2.0"
 
   lazy val clapper = "org.openmole" %% "org-clapper" % "1.0.5"
 

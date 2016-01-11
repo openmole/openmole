@@ -25,13 +25,17 @@ import org.openmole.core.workflow.tools.FromContext
 
 package object collection {
 
-  implicit def iterableIsDiscrete[T] = new Discrete[T, Iterable[T]] {
+  implicit def iterableIsStaticDiscrete[T] = new StaticDiscrete[T, Iterable[T]] {
     override def iterator(domain: Iterable[T]) = domain.iterator
   }
 
-  implicit def arrayIsFinite[T] = new Finite[T, Array[T]] {
+  implicit def iterableIsDiscrete[T]: Discrete[T, Iterable[T]] = iterableIsStaticDiscrete[T]
+
+  implicit def arrayIsStaticFinite[T] = new StaticFinite[T, Array[T]] {
     override def computeValues(domain: Array[T]) = domain.toIterable
   }
+
+  implicit def arrayIsStaticFinite[T]: Finite[T, Iterable[T]] = arrayIsStaticFinite[T]
 
   implicit def booleanPrototypeIsFactor(p: Prototype[Boolean]) = Factor(p, List(true, false))
 

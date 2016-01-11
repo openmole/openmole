@@ -27,34 +27,25 @@ import org.openmole.core.workflow.task._
 
 object ToOffspringTask {
 
-  def apply[T](t: T)(implicit integration: WorkflowIntegration[T]) = {
-    val wfi = integration(t)
-    import wfi._
+  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
+    val t = wfi(algorithm)
 
     new TaskBuilder {
       builder ⇒
-      outputPrototypes.foreach(p ⇒ addInput(p))
-      addInput(genomePrototype)
-      addInput(statePrototype)
-      addOutput(statePrototype)
-      addOutput(offspringPrototype)
+      t.outputPrototypes.foreach(p ⇒ addInput(p))
+      addInput(t.genomePrototype)
+      addInput(t.statePrototype)
+      addOutput(t.statePrototype)
+      addOutput(t.offspringPrototype)
 
       abstract class ToOffspringTask extends Task {
-
         override def process(context: Context)(implicit rng: RandomProvider) = {
-          val i: Ind =
-            new Individual[G, P](
-              context(genomePrototype),
-              variablesToPhenotype(context),
-              born = mgo.generation.get(context(statePrototype))
-            )
-
-          Context(Variable(offspringPrototype, Vector(i)))
+          val i = t.buildIndividual(context(t.genomePrototype), context)
+          Context(Variable(t.offspringPrototype, Vector(i)))
         }
       }
 
       def toTask = new ToOffspringTask with Built
-
     }
   }
 }
