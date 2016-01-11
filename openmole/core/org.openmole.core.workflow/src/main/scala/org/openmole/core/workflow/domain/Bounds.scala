@@ -22,24 +22,8 @@ import org.openmole.core.workflow.tools.FromContext
 
 import scala.annotation.implicitNotFound
 
-object Bounds {
-
-  implicit def staticBondsIsBounds[T, D](implicit staticBounds: StaticBounds[T, D]) = new Bounds[T, D] {
-    override def min(domain: D): FromContext[T] = staticBounds.min(domain)
-    override def max(domain: D): FromContext[T] = staticBounds.max(domain)
-  }
-
-}
-
 @implicitNotFound("${D} is not a bounded variation domain of type ${T}")
 trait Bounds[+T, -D] extends Domain[T, D] {
   def min(domain: D): FromContext[T]
   def max(domain: D): FromContext[T]
-}
-
-
-@implicitNotFound("${D} is not a static bounded variation domain of type ${T}")
-trait StaticBounds[+T, -D] extends Domain[T, D] {
-  def min(domain: D): T
-  def max(domain: D): T
 }
