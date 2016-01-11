@@ -86,14 +86,18 @@ class ModelWizardPanel extends ModalPanel {
   val launchingCommand: Var[Option[LaunchingCommand]] = Var(None)
   val currentReactives: Var[Seq[Reactive]] = Var(Seq())
   val updatableTable: Var[Boolean] = Var(true)
-  val hasModel: Var[Boolean] = Var(false)
   val bodyContent: Var[Option[TypedTag[HTMLDivElement]]] = Var(None)
   val resources: Var[Seq[TreeNodeData]] = Var(Seq())
   val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
   val upButton: Var[HTMLDivElement] = Var(tags.div().render)
+  val modelPath: Var[Option[SafePath]] = Var(None)
 
-  // Usefull for jar namespaces
+  val modelSelector: Select[SafePath] = Select("modelSelector", Seq[(SafePath, ClassKeyAggregator)](), None, btn_default, () ⇒ {
+    emptySelectors
+    modelPath() = modelSelector.content()
+    onModelChange
+  })
 
   val methodSelector: Select[JarMethod] = Select("methodSelector", Seq[(JarMethod, ClassKeyAggregator)](), None, btn_default, () ⇒ {
     methodSelector.content().foreach {
@@ -107,8 +111,19 @@ class ModelWizardPanel extends ModalPanel {
     }
   })
 
+  def onModelChange = {
+    modelPath().foreach { m ⇒
+      val fileType: FileType = m
+      fileType match {
+        case _: CodeFile ⇒ setLaunchingCommand(m)
+        case _: Archive  ⇒ getJarClasses(m)
+        case _           ⇒
+      }
+    }
+  }
+
   def setMethodSelector(classContent: FullClass) = {
-    filePath().map { fn ⇒
+    modelPath().map { fn ⇒
       OMPost[Api].methods(fn, classContent.name).call().foreach { b ⇒
         methodSelector.setContents(b)
         b.headOption.map {
@@ -192,7 +207,9 @@ class ModelWizardPanel extends ModalPanel {
                   UploadProject(),
                   () ⇒ {
                     if (fInput.files.length > 0) {
+                      emptySelectors
                       val fileName = fInput.files.item(0).name
+                      labelName() = Some(fileName)
                       filePath() = Some(manager.current.safePath() ++ fileName)
 
                       //get the language
@@ -202,20 +219,18 @@ class ModelWizardPanel extends ModalPanel {
                           archive.language match {
                             //Java case
                             case JavaLikeLanguage() ⇒
-                              OMPost[Api].classes(filePath().get).call().foreach { b ⇒
-                                val classContents = b.flatMap {
-                                  _.flatten
-                                }
-                                classSelector.setContents(classContents)
-                                classContents.headOption.foreach {
-                                  setMethodSelector(_)
-                                }
+                              modelPath() = filePath()
+                              modelPath().foreach {
+                                getJarClasses
                               }
 
                             // Other archive: tgz, tar.gz
                             case UndefinedLanguage ⇒ OMPost[Api].models(filePath().get).call().foreach { models ⇒
-                              println("MODELS " + models)
-                              panels.treeNodePanel.refreshCurrentDirectory
+                              modelPath() = models.headOption
+                              modelSelector.setContents(models, () ⇒ {
+                                panels.treeNodePanel.refreshCurrentDirectory
+                                onModelChange
+                              })
                             }
 
                             case _ ⇒
@@ -239,10 +254,10 @@ class ModelWizardPanel extends ModalPanel {
             )
           }
         ), {
-          if (hasModel()) bs.span("right grey")(codeSelector.selector)
-          else tags.div()
+          modelPath().map { _ ⇒ bs.span("right grey")(codeSelector.selector) }.getOrElse(tags.div())
         }), Rx {
         bs.span("grey")(
+          if (modelSelector.isContentsEmpty) tags.div() else modelSelector.selector,
           if (classSelector.isContentsEmpty) tags.div() else classSelector.selectorWithFilter,
           if (methodSelector.isContentsEmpty) tags.div() else methodSelector.selectorWithFilter,
           codeSelector.content() match {
@@ -252,20 +267,37 @@ class ModelWizardPanel extends ModalPanel {
         )
       }).render
 
-  def setLaunchingCommand(filePath: SafePath) =
+  def getJarClasses(jarPath: SafePath) = {
+    codeSelector.content() = Some(JavaLikeLanguage())
+    OMPost[Api].classes(jarPath).call().foreach { b ⇒
+      val classContents = b.flatMap {
+        _.flatten
+      }
+      classSelector.setContents(classContents)
+      classContents.headOption.foreach {
+        setMethodSelector(_)
+      }
+    }
+  }
+
+  def setLaunchingCommand(filePath: SafePath) = {
     OMPost[Api].launchingCommands(filePath).call().foreach { b ⇒
       panels.treeNodePanel.refreshCurrentDirectory
       launchingCommand() = b.headOption
-      hasModel() = true
-      labelName() = Some(filePath.name)
+      modelPath() = Some(filePath)
       launchingCommand().foreach { lc ⇒
         codeSelector.content() = lc.language
         scriptNameInput.value = filePath.name.split('.').head
-        classSelector.emptyContents
-        methodSelector.emptyContents
         setReactives(lc)
       }
     }
+  }
+
+  def emptySelectors = {
+    classSelector.emptyContents
+    methodSelector.emptyContents
+
+  }
 
   def setReactives(lc: LaunchingCommand) = {
     val nbArgs = lc.arguments.size
@@ -483,72 +515,73 @@ class ModelWizardPanel extends ModalPanel {
     setUpButton
 
     tags.div(
-      hasModel() match {
+      modelPath().map { _ ⇒ tags.div() }.getOrElse(step1) /* hasModel() match {
         case true ⇒ tags.div()
-        case _    ⇒ step1
-      },
+        case _ ⇒ step1
+      }*/ ,
       transferring() match {
         case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
         case _: Processed  ⇒ upButton()
         case _             ⇒ upButton()
       },
-      hasModel() match {
-        case true ⇒
-          bs.div("spacer50")(
-            tags.h4("Step2: Task configuration"), step2,
-            topButtons,
-            if (currentTab() == 0) {
-              tags.div({
+      //hasModel() match {
+      modelPath().map { _ ⇒
+        //case true ⇒
+        bs.div("spacer50")(
+          tags.h4("Step2: Task configuration"), step2,
+          topButtons,
+          if (currentTab() == 0) {
+            tags.div({
 
-                val iinput: HTMLInputElement = bs.input("")(placeholder := "Add Input").render
+              val iinput: HTMLInputElement = bs.input("")(placeholder := "Add Input").render
 
-                val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
+              val oinput: HTMLInputElement = bs.input("")(placeholder := "Add Output").render
 
-                val head = thead(tags.tr(
-                  for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
-                    tags.th(h)
-                  }))
+              val head = thead(tags.tr(
+                for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
+                  tags.th(h)
+                }))
 
-                bs.div("spacer50")(
-                  bs.div("twocolumns right10")(
-                    bs.form("paddingLeftRight50")(iinput,
-                      onsubmit := {
-                        () ⇒
-                          addVariableElement(Input(VariableElement(-1, ProtoTypePair(iinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
-                          iinput.value = ""
-                          false
-                      }),
-                    bs.table(striped)(
-                      head,
-                      tbody(
-                        for (ip ← inputs(reactives)) yield {
-                          ip.line
-                        }))),
-                  tags.div(`class` := "twocolumns")(
-                    bs.form("paddingLeftRight50")(oinput, onsubmit := {
+              bs.div("spacer50")(
+                bs.div("twocolumns right10")(
+                  bs.form("paddingLeftRight50")(iinput,
+                    onsubmit := {
                       () ⇒
-                        addVariableElement(Output(VariableElement(-1, ProtoTypePair(oinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
-                        oinput.value = ""
+                        addVariableElement(Input(VariableElement(-1, ProtoTypePair(iinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
+                        iinput.value = ""
                         false
                     }),
-                    bs.table(striped)(
-                      head,
-                      tbody(
-                        for (op ← outputs(reactives)) yield {
-                          op.line
-                        }
-                      )
+                  bs.table(striped)(
+                    head,
+                    tbody(
+                      for (ip ← inputs(reactives)) yield {
+                        ip.line
+                      }))),
+                tags.div(`class` := "twocolumns")(
+                  bs.form("paddingLeftRight50")(oinput, onsubmit := {
+                    () ⇒
+                      addVariableElement(Output(VariableElement(-1, ProtoTypePair(oinput.value, ProtoTYPE.DOUBLE), CareTaskType())))
+                      oinput.value = ""
+                      false
+                  }),
+                  bs.table(striped)(
+                    head,
+                    tbody(
+                      for (op ← outputs(reactives)) yield {
+                        op.line
+                      }
                     )
                   )
                 )
-              }, autoModeTag, commandArea)
-            }
-            else {
-              tags.div("resources")
-            }
-          )
-        case _ ⇒ tags.div()
-      }
+              )
+            }, autoModeTag, commandArea)
+          }
+          else {
+            tags.div("resources")
+          }
+        )
+        // case _ ⇒ tags.div()
+      }.getOrElse(tags.div())
     )
   })
 

@@ -73,23 +73,18 @@ class Select[T <: Displayable](autoID: String,
 
   val glyphMap = Var(contents().toMap)
 
-  def isInContents(t: T) = {
-    val oo = contents().map{c=> Some(c._1)}.contains(t)
-    println(content() + " ? " + oo)
-    oo
-  }
-
   def resetFilter = {
     filtered() = contents().take(100)
     content() = None
   }
 
-  def setContents(cts: Seq[T]) = {
+  def setContents(cts: Seq[T], onset: ()=> Unit = ()=> {}) = {
     contents() = cts
     content() = cts.headOption
     resetFilter
     glyphMap() = contents().toMap
     inputFilter.value = ""
+    onset()
   }
 
   def emptyContents = {
