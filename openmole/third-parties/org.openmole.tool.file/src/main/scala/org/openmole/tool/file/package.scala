@@ -331,7 +331,8 @@ package file {
 
       ///////// creation of new elements ////////
       /**
-       * Create temporary directory in subdirectory of caller
+       * Create instance of temporary directory in subdirectory of caller.
+       * Actual directory is NOT created yet.
        *
        * @param prefix String to prefix the generated UUID name.
        * @return New temporary directory
@@ -342,7 +343,8 @@ package file {
       }
 
       /**
-       * Create temporary file in directory of caller
+       * Create instance of temporary file in directory of caller.
+       * Actual file is NOT created yet.
        *
        * @param prefix String to prefix the generated UUID name.
        * @param suffix String to suffix the generated UUID name.
@@ -363,6 +365,7 @@ package file {
 
       def createLink(target: Path): Path = {
         def unsupported = {
+          // FIXME this block can throw an exception too
           Logger.getLogger(getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
           val fileTarget = if (target.isAbsolute) target else Paths.get(file.getParentFileSafe.getPath, target.getPath)
           Files.copy(fileTarget, file, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING)
