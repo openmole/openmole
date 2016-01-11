@@ -86,7 +86,7 @@ object WorkflowIntegration {
       def buildIndividual(genome: G, context: Context): I =
         operations.buildIndividual(genome, variablesToPhenotype(context))
 
-      def inputPrototypes = a.genome.inputs.map(_.prototype)
+      def inputPrototypes = a.genome.map(_.prototype)
       def outputPrototypes = a.objectives
       def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
@@ -119,9 +119,9 @@ object WorkflowIntegration {
       def buildIndividual(genome: G, context: Context): I =
         operations.buildIndividual(genome, variablesToPhenotype(context))
 
-      def inputPrototypes = a.genome.inputs.map(_.prototype) ++ a.replication.seed.prototype
+      def inputPrototypes = a.genome.map(_.prototype) ++ a.replication.seed.prototype
       def outputPrototypes = a.objectives
-      def resultPrototypes = (a.genome.inputs.map(_.prototype) ++ outputPrototypes ++ Seq(samples)).distinct
+      def resultPrototypes = (a.genome.map(_.prototype) ++ outputPrototypes ++ Seq(samples)).distinct
 
       def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
         StochasticGAIntegration.genomeToVariables(a.genome, operations.values(genome), a.replication.seed)
@@ -216,14 +216,14 @@ trait EvolutionWorkflow {
 object GAIntegration {
 
   def scaled(inputs: Genome, values: Seq[Double]) = FromContext { (context, rng) ⇒
-    InputConverter.scaled(inputs.inputs.toList, values.toList)(context, rng)
+    InputConverter.scaled(inputs.toList, values.toList)(context, rng)
   }
 
   def genomesOfPopulationToVariables[I](inputs: Genome, population: Vector[I], genomeValues: I ⇒ Vector[Double]) =
     for {
       scaledValues ← population.traverse[FromContext, List[Variable[_]]](i ⇒ scaled(inputs, genomeValues(i)))
     } yield {
-      inputs.inputs.zipWithIndex.map {
+      inputs.zipWithIndex.map {
         case (input, i) ⇒
           input match {
             case Scalar(prototype, _, _)   ⇒ Variable(prototype.toArray, scaledValues.map(_(i).value.asInstanceOf[Double]).toArray[Double])

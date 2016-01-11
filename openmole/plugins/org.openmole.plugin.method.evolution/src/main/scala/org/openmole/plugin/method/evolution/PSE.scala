@@ -26,7 +26,7 @@ object PSE {
     objectives: Objectives,
     gridSize: Seq[Double]) = {
     WorkflowIntegration.DeterministicGA(
-      pse.OpenMOLE(mgo.niche.grid(gridSize), genome.size, operatorExploration),
+      pse.OpenMOLE(mgo.niche.grid(gridSize), Genome.size(genome), operatorExploration),
       genome,
       objectives)
   }
@@ -41,7 +41,7 @@ object PSE {
       noisypse.OpenMOLE(
         pattern = mgo.niche.grid(gridSize),
         aggregation = StochasticGAIntegration.aggregateVector(replication.aggregation, _),
-        genomeSize = genome.size,
+        genomeSize = Genome.size(genome),
         historySize = replication.max,
         cloneProbability = replication.reevaluate,
         operatorExploration = operatorExploration),

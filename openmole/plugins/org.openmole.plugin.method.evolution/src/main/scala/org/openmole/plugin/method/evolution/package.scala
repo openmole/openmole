@@ -45,6 +45,7 @@ package object evolution {
   type Objective = Prototype[Double]
   type Objectives = Seq[Objective]
   type FitnessAggregation = TextClosure[Seq[Double], Double]
+  type Genome = Seq[Input]
 
   implicit def intToCounterTerminationConverter(n: Long) = AfterGeneration(n)
   implicit def durationToDurationTerminationConverter(d: Duration) = AfterDuration(d)

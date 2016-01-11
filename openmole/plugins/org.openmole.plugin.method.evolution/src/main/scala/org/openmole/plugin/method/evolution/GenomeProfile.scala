@@ -18,7 +18,6 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo.algorithm.{ profile, noisyprofile }
-import fr.iscpif.mgo.openmole.Integration
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.FromContext
 
@@ -34,7 +33,7 @@ object GenomeProfile {
     objective: Objective) =
     DeterministicGenomeProfile(
       profile.OpenMOLE(
-        genomeSize = genome.size,
+        genomeSize = Genome.size(genome),
         niche = DeterministicGenomeProfile.niche(x, nX),
         operatorExploration = operatorExploration
       ),
@@ -57,7 +56,7 @@ object GenomeProfile {
         mu = paretoSize,
         niche = StochasticGenomeProfile.niche(x, nX),
         operatorExploration = operatorExploration,
-        genomeSize = genome.size,
+        genomeSize = Genome.size(genome),
         historySize = replication.max,
         cloneProbability = replication.reevaluate,
         aggregation = aggregation
@@ -71,11 +70,10 @@ object GenomeProfile {
   object DeterministicGenomeProfile {
 
     import fr.iscpif.mgo
-    import mgo.algorithm.profile._
 
     def niche(x: Int, nX: Int) =
-      mgo.niche.genomeProfile[Individual](
-        values = (Individual.genome composeLens Genome.values).get,
+      mgo.niche.genomeProfile[profile.Individual](
+        values = (profile.Individual.genome composeLens profile.Genome.values).get,
         x = x,
         nX = nX)
 
@@ -92,7 +90,7 @@ object GenomeProfile {
         def buildIndividual(genome: G, context: Context): I =
           operations.buildIndividual(genome, variablesToPhenotype(context))
 
-        def inputPrototypes = a.genome.inputs.map(_.prototype)
+        def inputPrototypes = a.genome.map(_.prototype)
         def outputPrototypes = Seq(a.objective)
         def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
@@ -120,7 +118,7 @@ object GenomeProfile {
 
     def niche(x: Int, nX: Int) =
       mgo.niche.genomeProfile[Individual](
-        values = (Individual.genome composeLens Genome.values).get,
+        values = (Individual.genome composeLens noisyprofile.Genome.values).get,
         x = x,
         nX = nX)
 
@@ -139,9 +137,9 @@ object GenomeProfile {
         def buildIndividual(genome: G, context: Context): I =
           operations.buildIndividual(genome, variablesToPhenotype(context))
 
-        def inputPrototypes = a.genome.inputs.map(_.prototype) ++ a.replication.seed.prototype
+        def inputPrototypes = a.genome.map(_.prototype) ++ a.replication.seed.prototype
         def outputPrototypes = Vector(a.objective)
-        def resultPrototypes = (a.genome.inputs.map(_.prototype) ++ outputPrototypes ++ Seq(samples)).distinct
+        def resultPrototypes = (a.genome.map(_.prototype) ++ outputPrototypes ++ Seq(samples)).distinct
 
         def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
           StochasticGAIntegration.genomeToVariables(a.genome, operations.values(genome), a.replication.seed)
