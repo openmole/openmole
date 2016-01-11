@@ -54,7 +54,8 @@ package object tar {
     finally tis.close
 
     // new model using NIO
-    def extract(directory: File) = {
+    def extract(directory: File, overwrite: Boolean = false) = {
+
       if (!directory.exists()) directory.mkdirs()
       if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
@@ -72,7 +73,7 @@ package object tar {
             if (!e.getLinkName.isEmpty) Files.createSymbolicLink(dest, Paths.get(e.getLinkName))
             // file copy from an InputStream does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
             else {
-              Files.copy(tis, dest)
+              Files.copy(tis, dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ ⇒ overwrite }: _*)
               dest.toFile.mode = e.getMode
             }
           }
@@ -98,9 +99,9 @@ package object tar {
         _.extract(dest)
       }
 
-    def extractUncompress(dest: File) =
+    def extractUncompress(dest: File, overwrite: Boolean = false) =
       withClosable(new TarInputStream(file.gzippedBufferedInputStream)) {
-        _.extract(dest)
+        _.extract(dest, overwrite)
       }
 
     def copyCompress(toF: File): File = {
