@@ -258,7 +258,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   }
 
   def trashNode(path: SafePath): Unit = {
-    println("Trash " + path)
     OMPost[Api].deleteFile(path).call().foreach {
       d ⇒
         refreshCurrentDirectory

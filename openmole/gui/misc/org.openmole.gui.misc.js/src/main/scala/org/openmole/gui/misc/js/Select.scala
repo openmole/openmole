@@ -84,12 +84,13 @@ class Select[T <: Displayable](autoID: String,
     content() = None
   }
 
-  def setContents(cts: Seq[T]) = {
+  def setContents(cts: Seq[T], onset: ()=> Unit = ()=> {}) = {
     contents() = cts
     content() = cts.headOption
     resetFilter
     glyphMap() = contents().toMap
     inputFilter.value = ""
+    onset()
   }
 
   def emptyContents = {
