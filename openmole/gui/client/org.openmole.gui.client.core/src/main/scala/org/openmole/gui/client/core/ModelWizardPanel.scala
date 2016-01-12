@@ -94,7 +94,7 @@ class ModelWizardPanel extends ModalPanel {
   val modelPath: Var[Option[SafePath]] = Var(None)
 
   val modelSelector: Select[SafePath] = Select("modelSelector", Seq[(SafePath, ClassKeyAggregator)](), None, btn_default, () ⇒ {
-    emptySelectors
+    //emptySelectors
     modelPath() = modelSelector.content()
     onModelChange
   })
@@ -207,7 +207,7 @@ class ModelWizardPanel extends ModalPanel {
                   UploadProject(),
                   () ⇒ {
                     if (fInput.files.length > 0) {
-                      emptySelectors
+                      emptyJARSelectors
                       val fileName = fInput.files.item(0).name
                       labelName() = Some(fileName)
                       filePath() = Some(manager.current.safePath() ++ fileName)
@@ -281,6 +281,7 @@ class ModelWizardPanel extends ModalPanel {
   }
 
   def setLaunchingCommand(filePath: SafePath) = {
+    emptyJARSelectors
     OMPost[Api].launchingCommands(filePath).call().foreach { b ⇒
       panels.treeNodePanel.refreshCurrentDirectory
       launchingCommand() = b.headOption
@@ -293,10 +294,9 @@ class ModelWizardPanel extends ModalPanel {
     }
   }
 
-  def emptySelectors = {
+  def emptyJARSelectors = {
     classSelector.emptyContents
     methodSelector.emptyContents
-
   }
 
   def setReactives(lc: LaunchingCommand) = {

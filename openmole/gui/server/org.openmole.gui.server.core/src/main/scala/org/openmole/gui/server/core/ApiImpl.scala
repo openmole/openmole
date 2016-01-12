@@ -89,7 +89,8 @@ object ApiImpl extends Api {
       case FileExtension.TGZ ⇒
         val archiveFile = safePathToFile(safePath)
         val parentFile = archiveFile.getParentFile
-        archiveFile.extractUncompress(parentFile)
+        //TODO: ask the question: overwrite or not ?
+        archiveFile.extractUncompress(parentFile, true)
         parentFile.applyRecursive((f: File) ⇒ f.setWritable(true))
       case _ ⇒
     }
