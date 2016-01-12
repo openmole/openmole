@@ -18,5 +18,3 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.5")
 addSbtPlugin("com.lihaoyi" % "scalatex-sbt-plugin" % "0.3.4")
 
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.3.2")
-
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.7.1")

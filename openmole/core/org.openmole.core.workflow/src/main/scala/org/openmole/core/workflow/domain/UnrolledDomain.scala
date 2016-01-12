@@ -16,18 +16,25 @@
  */
 package org.openmole.core.workflow.domain
 
-import scalaz.Scalaz._
+import org.openmole.core.workflow.data.PrototypeSet
+import org.openmole.core.workflow.tools.FromContext
+
+import scalaz._
+import Scalaz._
 
 object UnrolledDomain {
-  implicit def isDiscrete[T: Manifest, D] =
-    new Finite[Array[T], UnrolledDomain[T, D]] {
-      override def computeValues(domain: UnrolledDomain[T, D]) =
-        domain.computeValues(domain)
+
+  implicit def isFinite[D, T: Manifest] =
+    new Finite[UnrolledDomain[D, T], Array[T]] with DomainInputs[UnrolledDomain[D, T]] {
+      override def computeValues(domain: UnrolledDomain[D, T]): FromContext[collection.Iterable[Array[T]]] =
+        domain.discrete.iterator(domain.d).map { d ⇒ Seq(d.toArray).toIterable }
+
+      override def inputs(domain: UnrolledDomain[D, T]): PrototypeSet = domain.inputs.inputs(domain.d)
     }
 
-  def apply[T: Manifest, D](d: D)(implicit discrete: Discrete[T, D]) = new UnrolledDomain[T, D](d)
+  def apply[D[_], T: Manifest](domain: D[T])(implicit discrete: Discrete[D[T], T], inputs: DomainInputs[D[T]] = DomainInputs.empty) =
+    new UnrolledDomain[D[T], T](domain)
+
 }
 
-class UnrolledDomain[T: Manifest, D](d: D)(implicit val discrete: Discrete[T, D]) {
-  def computeValues(domain: UnrolledDomain[T, D]) = domain.discrete.iterator(d).map(d ⇒ Seq(d.toArray))
-}
+class UnrolledDomain[D, T: Manifest](val d: D)(implicit val discrete: Discrete[D, T], val inputs: DomainInputs[D])

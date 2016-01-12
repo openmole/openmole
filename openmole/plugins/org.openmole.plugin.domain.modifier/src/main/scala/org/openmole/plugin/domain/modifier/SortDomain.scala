@@ -26,18 +26,18 @@ import Scalaz._
 
 object SortDomain {
 
-  implicit def isFinite[T, D] = new Finite[T, SortDomain[T, D]] {
-    override def computeValues(domain: SortDomain[T, D]) = domain.computeValues()
-    override def inputs(domain: SortDomain[T, D]): PrototypeSet = domain.inputs
+  implicit def isFinite[D, T] = new Finite[SortDomain[D, T], T] with DomainInputs[SortDomain[D, T]] {
+    override def computeValues(domain: SortDomain[D, T]) = domain.computeValues()
+    override def inputs(domain: SortDomain[D, T]): PrototypeSet = domain.inputs
   }
 
-  def apply[T: scala.Ordering, D](domain: D)(implicit finite: Finite[T, D]) =
-    new SortDomain[T, D](domain)
+  def apply[D[_], T: scala.Ordering](domain: D[T])(implicit finite: Finite[D[T], T], domainInputs: DomainInputs[D[T]]) =
+    new SortDomain[D[T], T](domain)
 
 }
 
-class SortDomain[T: scala.Ordering, D](val domain: D)(implicit finite: Finite[T, D]) {
-  def inputs = finite.inputs(domain)
+class SortDomain[D, T: scala.Ordering](val domain: D)(implicit finite: Finite[D, T], domainInputs: DomainInputs[D]) {
+  def inputs = domainInputs.inputs(domain)
   def computeValues() =
     for {
       f ← finite.computeValues(domain)

@@ -17,23 +17,22 @@
 
 package org.openmole.core.workflow.sampling
 
-import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.data._
+import scala.language.higherKinds
 
 object Factor {
 
-  def apply[T, D](prototype: Prototype[T], d: D)(implicit _domain: Domain[T, D]): Factor[T, D] = {
+  def apply[D, T](prototype: Prototype[T], d: D): Factor[D, T] = {
     val (_prototype) = (prototype)
-    new Factor[T, D] {
+    new Factor[D, T] {
       val domain = d
       val prototype = _prototype
-      val inputs = _domain.inputs(d)
     }
   }
 
 }
 
-trait Factor[T, D] {
+trait Factor[D, T] {
   def domain: D
   def prototype: Prototype[T]
 }

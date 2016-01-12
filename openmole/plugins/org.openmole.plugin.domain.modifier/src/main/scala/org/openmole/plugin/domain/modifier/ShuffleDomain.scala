@@ -23,17 +23,16 @@ import org.openmole.core.workflow.tools.FromContext
 
 object ShuffleDomain {
 
-  implicit def isFinite[T, D] = new Finite[T, ShuffleDomain[T, D]] {
-    override def computeValues(domain: ShuffleDomain[T, D]) = FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
-    override def inputs(domain: ShuffleDomain[T, D]) = domain.inputs
+  implicit def isFinite[D, T] = new Finite[ShuffleDomain[D, T], T] with DomainInputs[ShuffleDomain[D, T]] {
+    override def computeValues(domain: ShuffleDomain[D, T]) = FromContext { (context, rng) ⇒
+      domain.finite.iterator(domain.domain).from(context)(rng).toSeq.shuffled(rng())
+    }
+    override def inputs(domain: ShuffleDomain[D, T]) = domain.inputs.inputs(domain.domain)
   }
 
-  def apply[T, D](domain: D)(implicit finite: Finite[T, D]) = new ShuffleDomain[T, D](domain)
+  def apply[D[_], T](domain: D[T])(implicit finite: Finite[D[T], T], inputs: DomainInputs[D[T]]) =
+    new ShuffleDomain[D[T], T](domain)
 
 }
 
-sealed class ShuffleDomain[+T, D](domain: D)(implicit finite: Finite[T, D]) {
-  def inputs = finite.inputs(domain)
-  def computeValues(context: Context)(implicit rng: RandomProvider): Iterable[T] =
-    finite.iterator(domain).from(context).toSeq.shuffled(rng())
-}
+class ShuffleDomain[D, +T](val domain: D)(implicit val finite: Finite[D, T], val inputs: DomainInputs[D])

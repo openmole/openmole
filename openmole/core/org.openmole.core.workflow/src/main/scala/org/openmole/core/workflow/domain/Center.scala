@@ -23,6 +23,6 @@ import org.openmole.core.workflow.tools.FromContext
 import scala.annotation.implicitNotFound
 
 @implicitNotFound("${D} is not a variation domain with a center of type ${T}")
-trait Center[+T, -D] extends Domain[T, D] {
+trait Center[-D, +T] {
   def center(domain: D): FromContext[T]
 }

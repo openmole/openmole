@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2010 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 12/01/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,19 +9,18 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
+package org.openmole.plugin.domain
 
-package org.openmole.core.workflow.domain
+import org.openmole.core.workflow.domain.{ Finite }
 
-import org.openmole.core.workflow.data.PrototypeSet
-
-import scala.annotation.implicitNotFound
-
-@implicitNotFound("${D} is not a variation domain of type ${T}")
-trait Domain[+T, -D] {
-  def inputs(domain: D): PrototypeSet = PrototypeSet.empty
+package object modifier {
+  implicit def iterableIsFinite[T] = new Finite[Iterable[T], T] {
+    override def computeValues(domain: Iterable[T]) = domain
+  }
 }

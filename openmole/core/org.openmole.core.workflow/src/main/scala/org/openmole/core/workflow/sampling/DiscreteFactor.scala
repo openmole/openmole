@@ -24,12 +24,12 @@ import scalaz.Scalaz._
 
 object DiscreteFactor {
 
-  def apply[T, D](f: Factor[T, D])(implicit discrete: Discrete[T, D]) =
-    new DiscreteFactor[T, D] {
+  def apply[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T], domainInputs: DomainInputs[D] = DomainInputs.empty) =
+    new DiscreteFactor[D, T] {
       val prototype = f.prototype
       val domain = f.domain
 
-      override def inputs = discrete.inputs(f.domain)
+      override def inputs = domainInputs.inputs(domain)
       override def prototypes = List(prototype)
       override def apply(): FromContext[Iterator[collection.Iterable[Variable[T]]]] =
         discrete.iterator(f.domain).map(_.map { v ⇒ List(Variable(prototype, v)) })
@@ -37,4 +37,4 @@ object DiscreteFactor {
 
 }
 
-trait DiscreteFactor[T, D] extends Factor[T, D] with Sampling
+trait DiscreteFactor[D, T] extends Factor[D, T] with Sampling
