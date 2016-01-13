@@ -132,12 +132,15 @@ class ModelWizardPanel extends ModalPanel {
     }
   }
 
+  def setScritpName = scriptNameInput.value = filePath().map { _.name.split('.').head }.getOrElse("model")
+
   def setJavaLaunchingCommand(method: JarMethod) = {
     val lc = JavaLaunchingCommand(method, method.args, method.ret.map {
       Seq(_)
     }.getOrElse(Seq()))
     setReactives(lc)
     launchingCommand() = Some(lc)
+    setScritpName
   }
 
   val commandArea: TextArea = bs.textArea(3)("").render
@@ -219,7 +222,6 @@ class ModelWizardPanel extends ModalPanel {
                           archive.language match {
                             //Java case
                             case JavaLikeLanguage() ⇒
-                              println("zava !")
                               modelSelector.emptyContents
                               modelPath() = filePath()
                               modelPath().foreach {
@@ -295,7 +297,7 @@ class ModelWizardPanel extends ModalPanel {
       modelPath() = Some(filePath)
       launchingCommand().foreach { lc ⇒
         codeSelector.content() = lc.language
-        scriptNameInput.value = filePath.name.split('.').head
+        setScritpName
         setReactives(lc)
       }
     }
