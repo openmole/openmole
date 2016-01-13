@@ -84,14 +84,23 @@ object ApiImpl extends Api {
 
   def deleteFile(safePath: SafePath): Unit = safePathToFile(safePath).recursiveDelete
 
-  def extractTGZ(safePath: SafePath): Unit = {
+  def extractTGZ(safePath: SafePath): Unit =
     safePath.extension match {
       case FileExtension.TGZ ⇒
         val archiveFile = safePathToFile(safePath)
-        val parentFile = archiveFile.getParentFile
-        //TODO: ask the question: overwrite or not ?
-        archiveFile.extractUncompress(parentFile, true)
-        parentFile.applyRecursive((f: File) ⇒ f.setWritable(true))
+        val parent: SafePath = archiveFile
+        extractTGZTo(safePath, parent)
+      case _ ⇒
+    }
+
+  def extractTGZTo(safePath: SafePath, to: SafePath): Unit = {
+    safePath.extension match {
+      case FileExtension.TGZ ⇒
+        val archiveFile = safePathToFile(safePath)
+        val toFile: File = to
+        //TODO: ask whetehr overwrite or not ?
+        archiveFile.extractUncompress(toFile, true)
+        toFile.applyRecursive((f: File) ⇒ f.setWritable(true))
       case _ ⇒
     }
   }
@@ -100,7 +109,14 @@ object ApiImpl extends Api {
 
   def exists(safePath: SafePath): Boolean = safePathToFile(safePath).exists
 
-  def fileSize(treeNodeData: TreeNodeData): Long = safePathToFile(treeNodeData.safePath).length
+  private def treeNodeData(treeNodeData: TreeNodeData): TreeNodeData = {
+    val tnd: TreeNodeData = safePathToFile(treeNodeData.safePath)
+    tnd.copy(safePath = treeNodeData.safePath)
+  }
+
+  def treeNodeData(treeNodeDatas: Seq[TreeNodeData]): Seq[TreeNodeData] = treeNodeDatas.map {
+    treeNodeData
+  }
 
   def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.safePath)
 
@@ -333,10 +349,11 @@ object ApiImpl extends Api {
 
   //Extract models from an archive
   def models(archivePath: SafePath): Seq[SafePath] = {
-    extractTGZ(archivePath)
+    val toDir = archivePath.toNoExtention
+    extractTGZTo(archivePath, toDir)
     deleteFile(archivePath)
     for {
-      tnd ← listFiles(archivePath.parent) if FileType.isSupportedLanguage(tnd.safePath)
+      tnd ← listFiles(toDir) if FileType.isSupportedLanguage(tnd.safePath)
     } yield tnd.safePath
   }
 
@@ -417,6 +434,18 @@ object ApiImpl extends Api {
     }
     modelTaskFile.createNewFile
     modelTaskFile
+  }
+
+  def expandResources(resources: Resources): Resources = {
+    val paths = treeNodeData(resources.paths).distinct
+    val implicitResource = resources.implicitPath.map {
+      treeNodeData
+    }
+
+    Resources(
+      paths,
+      implicitResource,
+      paths.size + implicitResource.map { listFiles(_).size }.getOrElse(0))
   }
 
   def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {

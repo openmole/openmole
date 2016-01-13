@@ -160,9 +160,11 @@ case class SafePath(path: Seq[String], extension: FileExtension) {
 
   def ++(s: String) = sp(this.path :+ s, s)
 
-  def parent: SafePath = SafePath(path.dropRight(1), extension)
+  def parent: SafePath = SafePath.sp(path.dropRight(1))
 
   def name = path.last
+
+  def toNoExtention = copy(path = path.dropRight(1) :+ path.last.split('.').head)
 }
 
 sealed trait AuthenticationData extends Data {
@@ -538,4 +540,12 @@ case class Processed(override val ratio: Int = 100) extends ProcessState
 
 case class JarMethod(methodName: String, argumentTypes: Seq[String], returnType: String, isStatic: Boolean, clazz: String) {
   val name = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
+}
+
+case class Resources(paths: Seq[TreeNodeData], implicitPath: Option[TreeNodeData], number: Int){
+  def withNoImplicit = copy(implicitPath = None)
+  def withEmptyPaths = copy(paths = Seq())
+  def withPaths(p: Seq[TreeNodeData]) = copy(paths = paths ++ p)
+  def withPath(p: TreeNodeData) = copy(paths = paths :+ p)
+  def size = paths.size + Seq(implicitPath).flatten.size
 }

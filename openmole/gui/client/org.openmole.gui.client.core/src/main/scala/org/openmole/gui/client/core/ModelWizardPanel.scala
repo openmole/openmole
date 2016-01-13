@@ -87,14 +87,13 @@ class ModelWizardPanel extends ModalPanel {
   val currentReactives: Var[Seq[Reactive]] = Var(Seq())
   val updatableTable: Var[Boolean] = Var(true)
   val bodyContent: Var[Option[TypedTag[HTMLDivElement]]] = Var(None)
-  val resources: Var[Seq[TreeNodeData]] = Var(Seq())
+  val resources: Var[Resources] = Var(Resources(Seq(), None, 0))
   val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
   val upButton: Var[HTMLDivElement] = Var(tags.div().render)
   val modelPath: Var[Option[SafePath]] = Var(None)
 
   val modelSelector: Select[SafePath] = Select("modelSelector", Seq[(SafePath, ClassKeyAggregator)](), None, btn_default, () ⇒ {
-    //emptySelectors
     modelPath() = modelSelector.content()
     onModelChange
   })
@@ -208,6 +207,7 @@ class ModelWizardPanel extends ModalPanel {
                   () ⇒ {
                     if (fInput.files.length > 0) {
                       emptyJARSelectors
+                      modelPath() = None
                       val fileName = fInput.files.item(0).name
                       labelName() = Some(fileName)
                       filePath() = Some(manager.current.safePath() ++ fileName)
@@ -219,30 +219,32 @@ class ModelWizardPanel extends ModalPanel {
                           archive.language match {
                             //Java case
                             case JavaLikeLanguage() ⇒
+                              modelSelector.emptyContents
                               modelPath() = filePath()
                               modelPath().foreach {
                                 getJarClasses
                               }
 
                             // Other archive: tgz, tar.gz
-                            case UndefinedLanguage ⇒ OMPost[Api].models(filePath().get).call().foreach { models ⇒
-                              modelPath() = models.headOption
-                              modelSelector.setContents(models, () ⇒ {
-                                panels.treeNodePanel.refreshCurrentDirectory
-                                onModelChange
-                              })
-                            }
+                            case UndefinedLanguage ⇒
+                              OMPost[Api].models(filePath().get).call().foreach { models ⇒
+                                modelPath() = models.headOption
+                                modelSelector.setContents(models, () ⇒ {
+                                  panels.treeNodePanel.refreshCurrentDirectory
+                                  onModelChange
+                                })
+                                resources() = resources().copy(implicitPath = Some(treeNodeDataToTreeNode(modelPath().get)))
+                                getResourceInfo
+                              }
 
                             case _ ⇒
 
                           }
-                        case codeFile: CodeFile ⇒ setLaunchingCommand(filePath().get)
-                        case _                  ⇒
-                      }
-
-                      //Resources
-                      OMPost[Api].listFiles(manager.current).call().foreach { lf ⇒
-                        resources() = lf
+                        case codeFile: CodeFile ⇒
+                          modelSelector.emptyContents
+                          resources() = resources().withNoImplicit
+                          setLaunchingCommand(filePath().get)
+                        case _ ⇒
                       }
                     }
                   }
@@ -255,7 +257,7 @@ class ModelWizardPanel extends ModalPanel {
           }
         ), {
           modelPath().map { _ ⇒ bs.span("right grey")(codeSelector.selector) }.getOrElse(tags.div())
-        }), Rx {
+        }), {
         bs.span("grey")(
           if (modelSelector.isContentsEmpty) tags.div() else modelSelector.selector,
           if (classSelector.isContentsEmpty) tags.div() else classSelector.selectorWithFilter,
@@ -266,6 +268,10 @@ class ModelWizardPanel extends ModalPanel {
           }
         )
       }).render
+
+  def getResourceInfo = OMPost[Api].expandResources(resources()).call().foreach { lf ⇒
+    resources() = lf
+  }
 
   def getJarClasses(jarPath: SafePath) = {
     codeSelector.content() = Some(JavaLikeLanguage())
@@ -504,7 +510,7 @@ class ModelWizardPanel extends ModalPanel {
           })
       }, Rx {
         bs.badge("Resources", s"${
-          resources().size
+          resources().number
         }", buttonStyle(1))(onclick := {
           () ⇒
             currentTab() = 1
@@ -515,18 +521,13 @@ class ModelWizardPanel extends ModalPanel {
     setUpButton
 
     tags.div(
-      modelPath().map { _ ⇒ tags.div() }.getOrElse(step1) /* hasModel() match {
-        case true ⇒ tags.div()
-        case _ ⇒ step1
-      }*/ ,
+      modelPath().map { _ ⇒ tags.div() }.getOrElse(step1),
       transferring() match {
         case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
         case _: Processed  ⇒ upButton()
         case _             ⇒ upButton()
       },
-      //hasModel() match {
       modelPath().map { _ ⇒
-        //case true ⇒
         bs.div("spacer50")(
           tags.h4("Step2: Task configuration"), step2,
           topButtons,
@@ -577,10 +578,23 @@ class ModelWizardPanel extends ModalPanel {
             }, autoModeTag, commandArea)
           }
           else {
-            tags.div("resources")
+            val tag = tags.div().render
+            for {
+              i ← resources().implicitPath
+            } yield {
+              val t = tags.div()
+              val modelName = modelPath().map { _.name }.getOrElse("")
+              OMPost[Api].listFiles(i).call().foreach { b ⇒
+                val l = b.filterNot { _.name == modelName }
+                resources() = resources().copy(number = l.size)
+                l.foreach { sp ⇒
+                  tag.appendChild(tags.div(sp.name + " " + sp.readableSize))
+                }
+              }
+            }
+            tag
           }
         )
-        // case _ ⇒ tags.div()
       }.getOrElse(tags.div())
     )
   })

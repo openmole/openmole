@@ -74,6 +74,10 @@ object TreeNode {
 
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
 
+  implicit def safePathToPartialTreeNodeData(sPath: SafePath): TreeNodeData = TreeNodeData(sPath.name, sPath.parent, false, false, 0L, "")
+
+  def fromFilePath(path: SafePath) = FileNode()
+
 }
 
 object TreeNodeOrdering extends Ordering[TreeNode] {
