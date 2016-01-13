@@ -132,7 +132,9 @@ class ModelWizardPanel extends ModalPanel {
     }
   }
 
-  def setScritpName = scriptNameInput.value = filePath().map { _.name.split('.').head }.getOrElse("model")
+  def setScritpName = scriptNameInput.value = filePath().map {
+    _.name.split('.').head
+  }.getOrElse("model")
 
   def setJavaLaunchingCommand(method: JarMethod) = {
     val lc = JavaLaunchingCommand(method, method.args, method.ret.map {
@@ -581,11 +583,10 @@ class ModelWizardPanel extends ModalPanel {
             }, autoModeTag, commandArea)
           }
           else {
-            val tag = tags.div().render
+            val body = tbody.render
             for {
               i ← resources().implicitPath
             } yield {
-              val t = tags.div()
               val modelName = modelPath().map {
                 _.name
               }.getOrElse("")
@@ -595,11 +596,16 @@ class ModelWizardPanel extends ModalPanel {
                 }
                 resources() = resources().copy(number = l.size)
                 l.foreach { sp ⇒
-                  tag.appendChild(tags.div(sp.name + " " + sp.readableSize))
+                  body.appendChild(
+                    tags.tr(
+                      bs.td(bs.col_md_3)(sp.name),
+                      bs.td(bs.col_md_2)(sp.readableSize)
+                    )
+                  )
                 }
               }
             }
-            tag
+            bs.table(striped + spacer20)(body)
           }
         )
       }.getOrElse(tags.div())
