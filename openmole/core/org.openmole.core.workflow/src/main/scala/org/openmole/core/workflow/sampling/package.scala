@@ -27,23 +27,24 @@ package sampling {
 
   trait SamplingPackage {
 
-    implicit def factorWithIterableToDiscreteFactor[T, D](f: Factor[T, D])(implicit discrete: Discrete[T, D]): DiscreteFactor[T, D] =
+    implicit def factorToDiscreteFactor[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T], domain: DomainInputs[D] = DomainInputs.empty): DiscreteFactor[D, T] =
       DiscreteFactor(f)
 
-    implicit def prototypeFactorDecorator[T](p: Prototype[T]) = new {
-      def in[D](d: D)(implicit domain: Domain[T, D]): Factor[T, D] = Factor(p, d)(domain)
+    implicit class PrototypeFactorDecorator[T](p: Prototype[T]) {
+      def in[D](d: D): Factor[D, T] = Factor(p, d)
     }
 
     implicit def arrayPrototypeFactorDecorator[T: Manifest](p: Prototype[Array[T]]) = new {
-      def is[D](d: D)(implicit discrete: Discrete[T, D]) = Factor(p, UnrolledDomain(d))
+      def is[D](d: D)(implicit discrete: Discrete[D, T], inputs: DomainInputs[D] = DomainInputs.empty) =
+        Factor[UnrolledDomain[D, T], Array[T]](p, new UnrolledDomain[D, T](d))
     }
 
-    implicit def tupleOfStringToBoundOfDouble[T: FromString] = new Bounds[T, (String, String)] {
+    implicit def tupleOfStringToBoundOfDouble[T: FromString: Manifest] = new Bounds[(String, String), T] {
       override def min(domain: (String, String)): FromContext[T] = FromContext.codeToFromContext[T](domain._1)
       override def max(domain: (String, String)): FromContext[T] = FromContext.codeToFromContext[T](domain._2)
     }
 
-    implicit def tupleIsBounds[T] = new Bounds[T, (T, T)] {
+    implicit def tupleIsBounds[T] = new Bounds[(T, T), T] {
       override def min(domain: (T, T)) = domain._1
       override def max(domain: (T, T)) = domain._2
     }

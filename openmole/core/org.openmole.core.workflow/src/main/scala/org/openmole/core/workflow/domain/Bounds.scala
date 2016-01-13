@@ -23,7 +23,7 @@ import org.openmole.core.workflow.tools.FromContext
 import scala.annotation.implicitNotFound
 
 @implicitNotFound("${D} is not a bounded variation domain of type ${T}")
-trait Bounds[+T, -D] extends Domain[T, D] {
+trait Bounds[-D, T] {
   def min(domain: D): FromContext[T]
   def max(domain: D): FromContext[T]
 }

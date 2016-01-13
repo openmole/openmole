@@ -17,14 +17,13 @@
 
 package org.openmole.core.workflow.domain
 
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.FromContext
-
 import scala.annotation.implicitNotFound
 import scalaz.Scalaz._
+import scala.language.higherKinds
 
 @implicitNotFound("${D} is not a finite variation domain of type ${T}")
-trait Finite[+T, -D] extends Domain[T, D] with Discrete[T, D] {
+trait Finite[-D, +T] extends Discrete[D, T] {
   def computeValues(domain: D): FromContext[collection.Iterable[T]]
   override def iterator(domain: D) = computeValues(domain).map(_.iterator)
 }

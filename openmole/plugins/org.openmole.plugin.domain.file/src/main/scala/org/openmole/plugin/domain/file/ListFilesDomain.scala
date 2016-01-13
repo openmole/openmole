@@ -30,7 +30,7 @@ import scala.util.Random
 
 object ListFilesDomain extends Logger {
 
-  implicit def isFinite = new Finite[File, ListFilesDomain] {
+  implicit def isFinite = new Finite[ListFilesDomain, File] {
     override def computeValues(domain: ListFilesDomain) =
       FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
   }

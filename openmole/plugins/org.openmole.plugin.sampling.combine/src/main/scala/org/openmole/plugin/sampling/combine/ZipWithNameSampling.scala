@@ -28,12 +28,12 @@ import Scalaz._
 
 object ZipWithNameSampling {
 
-  def apply[D](factor: Factor[File, D], name: Prototype[String])(implicit discrete: Discrete[File, D]) =
+  def apply[D](factor: Factor[D, File], name: Prototype[String])(implicit discrete: Discrete[D, File]) =
     new ZipWithNameSampling(factor, name)
 
 }
 
-sealed class ZipWithNameSampling[D](val factor: Factor[File, D], val name: Prototype[String])(implicit discrete: Discrete[File, D]) extends Sampling {
+class ZipWithNameSampling[D](val factor: Factor[D, File], val name: Prototype[String])(implicit discrete: Discrete[D, File]) extends Sampling {
 
   override def inputs = factor.inputs
   override def prototypes = List(factor.prototype, name)

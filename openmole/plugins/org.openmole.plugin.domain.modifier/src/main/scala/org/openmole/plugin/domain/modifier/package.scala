@@ -25,18 +25,18 @@ import scala.reflect.runtime.universe._
 
 package object modifier {
 
-  implicit def domainModifierDecorator[T: TypeTag, D](domain: D)(implicit discrete: Discrete[T, D]) = new {
-    def take(n: FromContext[Int]) = new TakeDomain(domain, n)
-    def group(n: FromContext[Int])(implicit m: Manifest[T]) = new GroupDomain(domain, n)
-    def sliding(n: FromContext[Int], s: FromContext[Int] = 1)(implicit m: Manifest[T]) = new SlidingDomain(domain, n, s)
+  implicit def domainModifierDecorator[D[_], T: TypeTag](domain: D[T])(implicit discrete: Discrete[D[T], T], inputs: DomainInputs[D[T]]) = new {
+    def take(n: FromContext[Int]) = TakeDomain(domain, n)
+    def group(n: FromContext[Int])(implicit m: Manifest[T]) = GroupDomain(domain, n)
+    def sliding(n: FromContext[Int], s: FromContext[Int] = 1)(implicit m: Manifest[T]) = SlidingDomain(domain, n, s)
   }
 
-  implicit def finiteDomainModifierDecorator[T, D](domain: D)(implicit finite: Finite[T, D]) = new {
-    def sort(implicit o: Ordering[T]) = new SortDomain(domain)
+  implicit def finiteDomainModifierDecorator[D[_], T](domain: D[T])(implicit finite: Finite[D[T], T], inputs: DomainInputs[D[T]]) = new {
+    def sort(implicit o: Ordering[T]) = SortDomain(domain)
     def shuffle = ShuffleDomain(domain)
   }
 
-  implicit class FileDomainDecorator[D](d: D)(implicit finite: Finite[File, D]) {
+  implicit class FileDomainDecorator[D](d: D)(implicit finite: Finite[D, File], inputs: DomainInputs[D]) {
     def sortByName = new SortByNameDomain(d)
   }
 

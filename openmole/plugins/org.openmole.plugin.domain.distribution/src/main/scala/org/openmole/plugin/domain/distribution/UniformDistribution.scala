@@ -26,7 +26,7 @@ import org.openmole.core.workflow.domain._
 import scala.util.Random
 
 object UniformDistribution {
-  implicit def isDiscrete[T] = new Discrete[T, UniformDistribution[T]] {
+  implicit def isDiscrete[T] = new Discrete[UniformDistribution[T], T] {
     override def iterator(domain: UniformDistribution[T]) =
       FromContext((context, rng) ⇒ domain.iterator(context)(rng))
   }

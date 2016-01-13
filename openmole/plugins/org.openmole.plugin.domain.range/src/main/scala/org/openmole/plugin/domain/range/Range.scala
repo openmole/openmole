@@ -24,7 +24,7 @@ import org.openmole.core.workflow.tools.FromContext
 
 object Range {
 
-  implicit def isBounded[T] = new Bounds[T, Range[T]] with Center[T, Range[T]] {
+  implicit def isBounded[T] = new Bounds[Range[T], T] with Center[Range[T], T] {
     override def min(domain: Range[T]) = FromContext.apply((context, rng) ⇒ domain.min(context)(rng))
     override def max(domain: Range[T]) = FromContext.apply((context, rng) ⇒ domain.max(context)(rng))
     override def center(domain: Range[T]) = FromContext.apply((context, rng) ⇒ domain.center(context)(rng))

@@ -24,7 +24,7 @@ import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools._
 
 object SizeRange {
-  implicit def isFinite[T] = new Finite[T, SizeRange[T]] with Bounds[T, SizeRange[T]] with Center[T, SizeRange[T]] {
+  implicit def isFinite[T] = new Finite[SizeRange[T], T] with Bounds[SizeRange[T], T] with Center[SizeRange[T], T] {
     override def computeValues(domain: SizeRange[T]) = FromContext.apply((context, rng) ⇒ domain.computeValues(context)(rng))
     override def max(domain: SizeRange[T]) = FromContext.apply((context, rng) ⇒ domain.max(context)(rng))
     override def min(domain: SizeRange[T]) = FromContext.apply((context, rng) ⇒ domain.min(context)(rng))

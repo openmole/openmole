@@ -16,12 +16,16 @@
  */
 package org.openmole.core.workflow.data
 
+import org.openmole.core.exception.InternalProcessingError
+
 import scala.util.Random
 
 object RandomProvider {
   def apply(_rng: ⇒ Random) = new RandomProvider {
     override lazy val rng: Random = _rng
   }
+
+  def empty = RandomProvider(throw new InternalProcessingError("No random number generator is available"))
 }
 
 trait RandomProvider <: (() ⇒ Random) {

@@ -24,7 +24,7 @@ import org.openmole.core.workflow.tools.FromContext
 import scala.util.Random
 
 object ListDomain {
-  implicit def isFinite[T] = new Finite[T, ListDomain[T]] {
+  implicit def isFinite[T] = new Finite[ListDomain[T], T] {
     override def computeValues(domain: ListDomain[T]) =
       FromContext((context, rng) ⇒ domain.values.map(_.from(context)(rng)))
   }

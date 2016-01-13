@@ -26,18 +26,18 @@ import Scalaz._
 
 object TakeDomain {
 
-  implicit def isFinite[T, D] = new Finite[T, TakeDomain[T, D]] {
-    override def computeValues(domain: TakeDomain[T, D]) = domain.computeValues()
-    override def inputs(domain: TakeDomain[T, D]): PrototypeSet = domain.inputs
+  implicit def isFinite[D, T] = new Finite[TakeDomain[D, T], T] with DomainInputs[TakeDomain[D, T]] {
+    override def computeValues(domain: TakeDomain[D, T]) = domain.computeValues()
+    override def inputs(domain: TakeDomain[D, T]): PrototypeSet = domain.inputs
   }
 
-  def apply[T, D](domain: D, size: FromContext[Int])(implicit discrete: Discrete[T, D]) =
-    new TakeDomain[T, D](domain, size)
+  def apply[D[_], T](domain: D[T], size: FromContext[Int])(implicit discrete: Discrete[D[T], T], domainInputs: DomainInputs[D[T]]) =
+    new TakeDomain[D[T], T](domain, size)
 
 }
 
-sealed class TakeDomain[+T, D](val domain: D, val size: FromContext[Int])(implicit discrete: Discrete[T, D]) {
-  def inputs = discrete.inputs(domain)
+class TakeDomain[D, +T](val domain: D, val size: FromContext[Int])(implicit discrete: Discrete[D, T], domainInputs: DomainInputs[D]) {
+  def inputs = domainInputs.inputs(domain)
   def computeValues() =
     for {
       d ← discrete.iterator(domain)

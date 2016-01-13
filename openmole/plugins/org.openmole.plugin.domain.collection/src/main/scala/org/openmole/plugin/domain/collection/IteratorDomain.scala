@@ -25,7 +25,7 @@ import scala.util.Random
 
 object IteratorDomain {
 
-  implicit def isDiscrete[T] = new Discrete[T, IteratorDomain[T]] {
+  implicit def isDiscrete[T] = new Discrete[IteratorDomain[T], T] {
     override def iterator(domain: IteratorDomain[T]) = domain.iterator
   }
 
