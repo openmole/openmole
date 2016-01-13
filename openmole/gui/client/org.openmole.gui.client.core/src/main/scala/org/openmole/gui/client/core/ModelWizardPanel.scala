@@ -219,6 +219,7 @@ class ModelWizardPanel extends ModalPanel {
                           archive.language match {
                             //Java case
                             case JavaLikeLanguage() ⇒
+                              println("zava !")
                               modelSelector.emptyContents
                               modelPath() = filePath()
                               modelPath().foreach {
@@ -583,9 +584,13 @@ class ModelWizardPanel extends ModalPanel {
               i ← resources().implicitPath
             } yield {
               val t = tags.div()
-              val modelName = modelPath().map { _.name }.getOrElse("")
+              val modelName = modelPath().map {
+                _.name
+              }.getOrElse("")
               OMPost[Api].listFiles(i).call().foreach { b ⇒
-                val l = b.filterNot { _.name == modelName }
+                val l = b.filterNot {
+                  _.name == modelName
+                }
                 resources() = resources().copy(number = l.size)
                 l.foreach { sp ⇒
                   tag.appendChild(tags.div(sp.name + " " + sp.readableSize))

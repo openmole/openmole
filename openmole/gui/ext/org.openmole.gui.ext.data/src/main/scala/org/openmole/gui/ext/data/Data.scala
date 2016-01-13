@@ -375,22 +375,21 @@ object FileType {
   private def extension(safePath: SafePath) = safePath.name.split('.').drop(1).mkString(".")
 
   def apply(safePath: SafePath): FileType = {
-    extension(safePath) match {
-      case "tar.gz.bin" ⇒ CodeFile(UndefinedLanguage)
-      case "nlogo" => CodeFile(NetLogoLanguage())
-      case "jar" ⇒ Archive(JavaLikeLanguage())
-      case "tgz" | "tar.gz" => Archive(UndefinedLanguage)
-      case _ => UndefinedFileType
-    }
+    val name = safePath.name
+    if (name.endsWith("tar.gz.bin")) CodeFile(UndefinedLanguage)
+    else if (name.endsWith("nlogo")) CodeFile(NetLogoLanguage())
+    else if (name.endsWith("jar")) Archive(JavaLikeLanguage())
+    else if (name.endsWith("tgz") || name.endsWith("tar.gz")) Archive(UndefinedLanguage)
+    else UndefinedFileType
   }
 
   def isSupportedLanguage(safePath: SafePath): Boolean = apply(safePath) match {
-    case CodeFile(_)=> true
-    case a: Archive=> a.language match {
-      case UndefinedLanguage=> false
-      case _=> true
+    case CodeFile(_) => true
+    case a: Archive => a.language match {
+      case UndefinedLanguage => false
+      case _ => true
     }
-    case _=> false
+    case _ => false
   }
 }
 
@@ -542,10 +541,14 @@ case class JarMethod(methodName: String, argumentTypes: Seq[String], returnType:
   val name = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
 }
 
-case class Resources(paths: Seq[TreeNodeData], implicitPath: Option[TreeNodeData], number: Int){
+case class Resources(paths: Seq[TreeNodeData], implicitPath: Option[TreeNodeData], number: Int) {
   def withNoImplicit = copy(implicitPath = None)
+
   def withEmptyPaths = copy(paths = Seq())
+
   def withPaths(p: Seq[TreeNodeData]) = copy(paths = paths ++ p)
+
   def withPath(p: TreeNodeData) = copy(paths = paths :+ p)
+
   def size = paths.size + Seq(implicitPath).flatten.size
 }
