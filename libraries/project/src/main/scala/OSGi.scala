@@ -63,7 +63,7 @@ object OSGi extends Defaults {
       "!org.xml.sax.*",
       "!sun.misc.*",
       "*"),
-    privatePackages = Seq("!scala.*", "*")) settings(
+    privatePackages = Seq("!scala.*", "META-INF.*", "*")) settings(
     libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.8", "net.sf.kxml" % "kxml2" % "2.3.0"),
     version := "1.4.8")
 
