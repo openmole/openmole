@@ -233,9 +233,7 @@ object ApiImpl extends Api {
       }
     }
     catch {
-      case t: Throwable ⇒
-        error(t)
-        throw t
+      case t: Throwable ⇒ error(t)
     }
   }
 
