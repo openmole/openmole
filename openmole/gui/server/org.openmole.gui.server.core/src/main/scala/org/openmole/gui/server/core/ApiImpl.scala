@@ -158,61 +158,68 @@ object ApiImpl extends Api {
     def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t)))
     def message(message: String): Unit = execution.addError(execId, Failed(Error(message)))
 
-    val project = new Project(script.getParentFileSafe)
-    project.compile(script, Seq.empty) match {
-      case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
-      case CompilationError(e)       ⇒ error(e)
-      case compiled: Compiled ⇒
-        Try(compiled.eval()) match {
-          case Failure(e) ⇒ error(e)
-          case Success(o) ⇒
-            val puzzle = o.buildPuzzle
-            val outputStream = new StringPrintStream()
+    try {
+      val project = new Project(script.getParentFileSafe)
+      project.compile(script, Seq.empty) match {
+        case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
+        case CompilationError(e)       ⇒ error(e)
+        case compiled: Compiled ⇒
+          Try(compiled.eval()) match {
+            case Failure(e) ⇒ error(e)
+            case Success(o) ⇒
+              val puzzle = o.buildPuzzle
+              val outputStream = new StringPrintStream()
 
-            val envIds = puzzle.environments.values.toSeq.distinct.map { env ⇒ EnvironmentId(getUUID) -> env }
-            Runnings.add(execId, envIds, outputStream)
+              val envIds = puzzle.environments.values.toSeq.distinct.map { env ⇒ EnvironmentId(getUUID) -> env }
+              Runnings.add(execId, envIds, outputStream)
 
-            envIds.foreach {
-              case (envId, env) ⇒
-                env.listen {
-                  case (env, bdl: BeginDownload) ⇒ Runnings.update(envId) {
-                    re ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1))
+              envIds.foreach {
+                case (envId, env) ⇒
+                  env.listen {
+                    case (env, bdl: BeginDownload) ⇒ Runnings.update(envId) {
+                      re ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1))
+                    }
+                    case (env, edl: EndDownload) ⇒ Runnings.update(envId) {
+                      re ⇒
+                        val size = re.networkActivity.downloadedSize + (if (edl.success) FileDecorator(edl.file).size else 0)
+                        re.copy(networkActivity = re.networkActivity.copy(
+                          downloadingFiles = re.networkActivity.downloadingFiles - 1,
+                          downloadedSize = size,
+                          readableDownloadedSize = readableByteCount(size))
+                        )
+                    }
+                    case (env, bul: BeginUpload) ⇒ Runnings.update(envId) {
+                      re ⇒ re.copy(networkActivity = re.networkActivity.copy(uploadingFiles = re.networkActivity.uploadingFiles + 1))
+                    }
+                    case (env, eul: EndUpload) ⇒ Runnings.update(envId) {
+                      (re: RunningEnvironment) ⇒
+                        val size = re.networkActivity.uploadedSize + (if (eul.success) FileDecorator(eul.file).size else 0)
+                        re.copy(
+                          networkActivity = re.networkActivity.copy(
+                            uploadedSize = size,
+                            readableUploadedSize = readableByteCount(size),
+                            uploadingFiles = re.networkActivity.uploadingFiles - 1)
+                        )
+                    }
                   }
-                  case (env, edl: EndDownload) ⇒ Runnings.update(envId) {
-                    re ⇒
-                      val size = re.networkActivity.downloadedSize + (if (edl.success) FileDecorator(edl.file).size else 0)
-                      re.copy(networkActivity = re.networkActivity.copy(
-                        downloadingFiles = re.networkActivity.downloadingFiles - 1,
-                        downloadedSize = size,
-                        readableDownloadedSize = readableByteCount(size))
-                      )
+              }
+              Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
+                case Success(ex) ⇒
+                  Try(ex.start) match {
+                    case Failure(e) ⇒ error(e)
+                    case Success(ex) ⇒
+                      val inserted = execution.addDynamicInfo(execId, DynamicExecutionInfo(ex, outputStream))
+                      if (!inserted) ex.cancel
                   }
-                  case (env, bul: BeginUpload) ⇒ Runnings.update(envId) {
-                    re ⇒ re.copy(networkActivity = re.networkActivity.copy(uploadingFiles = re.networkActivity.uploadingFiles + 1))
-                  }
-                  case (env, eul: EndUpload) ⇒ Runnings.update(envId) {
-                    (re: RunningEnvironment) ⇒
-                      val size = re.networkActivity.uploadedSize + (if (eul.success) FileDecorator(eul.file).size else 0)
-                      re.copy(
-                        networkActivity = re.networkActivity.copy(
-                          uploadedSize = size,
-                          readableUploadedSize = readableByteCount(size),
-                          uploadingFiles = re.networkActivity.uploadingFiles - 1)
-                      )
-                  }
-                }
-            }
-            Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
-              case Success(ex) ⇒
-                Try(ex.start) match {
-                  case Failure(e) ⇒ error(e)
-                  case Success(ex) ⇒
-                    val inserted = execution.addDynamicInfo(execId, DynamicExecutionInfo(ex, outputStream))
-                    if (!inserted) ex.cancel
-                }
-              case Failure(e) ⇒ error(e)
-            }
-        }
+                case Failure(e) ⇒ error(e)
+              }
+          }
+      }
+    }
+    catch {
+      case t: Throwable ⇒
+        error(t)
+        throw t
     }
   }
 
