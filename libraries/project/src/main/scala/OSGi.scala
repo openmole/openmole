@@ -8,25 +8,9 @@ import org.openmole.buildsystem.OMKeys._
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
-/**
- * Created with IntelliJ IDEA.
- * User: luft
- * Date: 3/17/13
- * Time: 6:50 PM
- * To change this template use File | Settings | File Templates.
- */
 object OSGi extends Defaults {
 
   val dir = file("target/libraries")
-
-  /*lazy val jetty = OsgiProject(
-    "org.eclipse.jetty",
-    exports = Seq("org.eclipse.jetty.*", "javax.*")) settings(
-    libraryDependencies ++= Seq(
-      "org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106",
-      "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016"),
-    version := "8.1.8.v20121106"
-    )*/
 
   lazy val scalatraVersion = "2.3.1"
   lazy val jettyVersion = "9.2.10.v20150310"
@@ -40,8 +24,6 @@ object OSGi extends Defaults {
       libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion,
       libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % jettyVersion,
       libraryDependencies += "org.eclipse.jetty" % "jetty-server" % jettyVersion,
-      //libraryDependencies += "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016",
-     // libraryDependencies += "javax.servlet" % "javax.servlet-api" % "3.1.0",
       libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.2.11",
       version := scalatraVersion)
 

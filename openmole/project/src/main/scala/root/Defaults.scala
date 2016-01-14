@@ -20,8 +20,6 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
       scalacOptions ++= Seq("-target:jvm-1.7", "-language:higherKinds"),
       javacOptions in (Compile, compile) ++= Seq("-source", "1.7", "-target", "1.7"),
       publishArtifact in (packageDoc in install) := false,
-      publishArtifact in (packageSrc in install) := false,
-      resolvers += Resolver.defaultLocal,
-      resolvers += Resolver.sonatypeRepo("snapshots")
+      publishArtifact in (packageSrc in install) := false
     )
 }

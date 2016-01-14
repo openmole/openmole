@@ -10,7 +10,7 @@ trait OsgiBundler {
 
   protected val bundleMap = Map("Bundle-ActivationPolicy" -> "lazy")
 
-  protected def osgiSettings = SbtOsgi.osgiSettings ++ Seq(
+  protected def osgiSettings = SbtOsgi.autoImport.osgiSettings ++ Seq(
     OsgiKeys.bundleSymbolicName <<= (name, OSGi.singleton) { case (name, singleton) ⇒ name + ";singleton:=" + singleton },
     autoAPIMappings := true,
     bundleProj := true,
@@ -18,6 +18,7 @@ trait OsgiBundler {
     OsgiKeys.bundleVersion <<= version,
     OsgiKeys.exportPackage <<= name { n ⇒ Seq(n + ".*") },
     OsgiKeys.bundleActivator := None,
+    OsgiKeys.requireCapability := """osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.7))""",
     install in Compile <<= publishLocal in Compile,
     installRemote in Compile <<= publish in Compile,
     OsgiKeys.bundle <<= OsgiKeys.bundle tag Tags.Disk,
@@ -44,7 +45,7 @@ trait OsgiBundler {
     val base = dir / (if (pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
 
-    Project(artifactId.replace('.', '-'), base, settings = settings).settings(commonsSettings ++ osgiSettings: _*).settings(
+    Project(artifactId.replace('.', '-'), base, settings = settings).enablePlugins(SbtOsgi).settings(commonsSettings ++ osgiSettings: _*).settings(
       name := artifactId,
       organization := org,
       OSGi.singleton := singleton,

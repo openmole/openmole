@@ -281,7 +281,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     ) settings (
         OsgiKeys.bundle <<= OsgiKeys.bundle dependsOn (assemble),
         organization := "org.openmole.site",
-        SbtOsgi.OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ SbtOsgi.OsgiKeys.exportPackage.value,
+        OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ OsgiKeys.exportPackage.value,
         libraryDependencies += Libraries.xstream,
         libraryDependencies += Libraries.scalatexSite,
         libraryDependencies += Libraries.scalaLang,

@@ -10,7 +10,6 @@ object Root extends Defaults(Core, Libraries, Gui, ThirdParties, Bin, root.Doc) 
 
 
   override def settings = super.settings ++ Seq(
-    resolvers += DefaultMavenRepository,
     resolvers += "openmole-public" at "http://maven.openmole.org/public",
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("releases"),
