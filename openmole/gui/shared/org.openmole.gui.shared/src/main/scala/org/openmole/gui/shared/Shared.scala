@@ -39,7 +39,7 @@ trait Api {
   def deleteAuthenticationKey(keyName: String): Unit
   def deleteFile(safePath: SafePath): Unit
   def exists(safePath: SafePath): Boolean
-  def fileSize(treeNodeData: TreeNodeData): Long
+  def treeNodeData(safePaths: Seq[TreeNodeData]): Seq[TreeNodeData]
   def listFiles(path: TreeNodeData): Seq[TreeNodeData]
   def mdToHtml(safePath: SafePath): String
   def move(from: SafePath, to: SafePath): Unit
@@ -77,4 +77,5 @@ trait Api {
   def classes(jarPath: SafePath): Seq[ClassTree]
   def methods(jarPath: SafePath, className: String): Seq[JarMethod]
   def buildModelTask(executableName: String, scriptName: String, command: String, language: Language, inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], path: SafePath, imports: Option[String], libraries: Option[String]): TreeNodeData
+  def expandResources(resources: Resources): Resources
 }

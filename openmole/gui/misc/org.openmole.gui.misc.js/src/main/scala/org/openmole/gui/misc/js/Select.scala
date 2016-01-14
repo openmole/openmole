@@ -63,7 +63,7 @@ class Select[T <: Displayable](autoID: String,
 
   val hasFilter = Var(false)
   val filtered: Var[Seq[T]] = Var(contents())
-  resetFilter
+  filtered() = contents().take(100)
 
   lazy val inputFilter: HTMLInputElement = bs.input("", "selectFilter")(placeholder := "Filter", oninput := { () =>
     filtered() = contents().filter {
@@ -78,7 +78,7 @@ class Select[T <: Displayable](autoID: String,
     content() = None
   }
 
-  def setContents(cts: Seq[T], onset: ()=> Unit = ()=> {}) = {
+  def setContents(cts: Seq[T], onset: () => Unit = () => {}) = {
     contents() = cts
     content() = cts.headOption
     resetFilter
