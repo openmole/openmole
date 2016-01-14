@@ -31,7 +31,6 @@ object JVMLanguageTask {
 
 trait JVMLanguageTask extends ExternalTask with Plugins {
 
-  def imports: Seq[String]
   def libraries: Seq[File]
 
   override def process(context: Context)(implicit rng: RandomProvider) = {

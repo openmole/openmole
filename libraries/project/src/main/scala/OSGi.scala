@@ -85,15 +85,6 @@ object OSGi extends Defaults {
     libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.8", "net.sf.kxml" % "kxml2" % "2.3.0"),
     version := "1.4.8")
 
-  lazy val groovy = OsgiProject(
-    "org.codehaus.groovy",
-    global = true,
-    exports = Seq("groovy.*", "org.codehaus.*"),
-    privatePackages = Seq("!scala.*,*")) settings(
-    libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.4.1", "org.fusesource.jansi" % "jansi" % "1.11"),
-    version := "2.4.1"
-    )
-
   lazy val scalaLang = OsgiProject(
     "org.scala-lang.scala-library",
     exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
