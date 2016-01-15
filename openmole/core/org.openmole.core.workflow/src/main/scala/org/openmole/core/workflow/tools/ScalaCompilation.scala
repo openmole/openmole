@@ -34,11 +34,18 @@ trait ScalaCompilation {
 
   def plugins: Seq[File]
   def libraries: Seq[File]
+  def openMOLEImports = Seq(s"${CodeTool.namespace}._")
+
+  def addImports(code: String) =
+  s"""
+    |${openMOLEImports.map("import " + _).mkString("\n")}
+    |
+    |$code""".stripMargin
 
   def compile(code: String) = Try[Any] {
     val interpreter = new ScalaREPL(plugins.flatMap(PluginManager.bundle) ++ Seq(PluginManager.bundleForClass(this.getClass)), libraries)
 
-    val evaluated = interpreter.eval(code)
+    val evaluated = interpreter.eval(addImports(code))
 
     if (evaluated == null) throw new InternalProcessingError(
       s"""The return value of the script was null:
@@ -62,7 +69,7 @@ trait ScalaCompilation {
 
 }
 
-case class TextClosure[I: Manifest, O: Manifest](code: String, val plugins: Seq[File] = Seq.empty, val libraries: Seq[File] = Seq.empty) extends ScalaCompilation {
+case class TextClosure[I: Manifest, O: Manifest](code: String, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty) extends ScalaCompilation {
   def returnType = toScalaNativeType(PrototypeType(implicitly[Manifest[I => O]]))
   @transient lazy val compiled = compile(s"{$code}: $returnType")
   compiled.get
@@ -82,7 +89,6 @@ object ScalaWrappedCompilation {
         override def inputs = _inputs
         override val wrapping = _wrapping
         override def source: String = code
-        override def imports: Seq[String] = Seq.empty
         override def plugins: Seq[File] = Seq.empty
         override def libraries: Seq[File] = Seq.empty
       }
@@ -100,7 +106,6 @@ object ScalaWrappedCompilation {
       def returnType = PrototypeType.apply[R]
       override val wrapping = _wrapping
       override def source: String = code
-      override def imports: Seq[String] = Seq.empty
       override def plugins: Seq[File] = Seq.empty
       override def libraries: Seq[File] = Seq.empty
     }
@@ -137,8 +142,6 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
 
   def wrapping: OutputWrapping[RETURN]
   def source: String
-  def openMOLEImports = Seq(s"${CodeTool.namespace}._")
-  def imports: Seq[String]
 
   def prefix = "_input_value_"
 
@@ -155,7 +158,6 @@ trait ScalaWrappedCompilation <: ScalaCompilation { compilation ⇒
     }
 
   def script(inputs: Seq[Prototype[_]]) =
-    (openMOLEImports ++ imports).map("import " + _).mkString("\n") + "\n\n" +
       s"""(${prefix}context: ${classOf[Context].getCanonicalName}, ${prefix}RNGProvider: ${classOf[RandomProvider].getCanonicalName}) => {
           |  object $inputObject {
           |    ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}

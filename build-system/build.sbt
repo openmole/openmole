@@ -20,16 +20,14 @@ organization := "org.openmole"
 
 resolvers += Classpaths.sbtPluginSnapshots
 
-resolvers ++= Seq(DefaultMavenRepository,"openmole-public" at "http://maven.openmole.org/public")
-
-
-addSbtPlugin("fr.iscpif" % "sbt-osgi" % "0.5.4-SNAPSHOT") //TODO: Get these changes mainlined
+addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.8.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.2.0")
 
+
 libraryDependencies ++= Seq(
   "com.jsuereth" %% "scala-arm" % "1.3",
-  "org.apache.commons" % "commons-compress" % "1.8.1")
+  "org.apache.commons" % "commons-compress" % "1.10")
 
 
 publishTo <<= isSnapshot(if(_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases"))

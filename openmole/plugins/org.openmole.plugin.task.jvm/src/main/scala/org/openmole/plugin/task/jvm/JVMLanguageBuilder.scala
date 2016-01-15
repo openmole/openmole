@@ -25,26 +25,11 @@ import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
 
 trait JVMLanguageBuilder { builder ⇒
-  private val _imports = ListBuffer[String]()
   private val _libraries = ListBuffer[File]()
   private val _plugins = ListBuffer[File]()
 
-  def imports = _imports.toList
   def libraries = _libraries.toList
   def plugins = _plugins.toList
-
-  /**
-   * Add a namespace import and make it available to in the task
-   *
-   * For instance addImport("java.io.*") in a groovy task make the content of the
-   * java.io package available in the groovy code.
-   *
-   * @param s a namespace
-   */
-  def addImport(s: String*): this.type = {
-    _imports ++= s
-    this
-  }
 
   /**
    * Add a library and make it available to the task
@@ -75,7 +60,6 @@ trait JVMLanguageBuilder { builder ⇒
   }
 
   trait Built <: Plugins {
-    def imports: Seq[String] = builder.imports.toList
     def libraries: Seq[File] = builder.libraries.toList
     def plugins: Seq[File] = builder.plugins
   }

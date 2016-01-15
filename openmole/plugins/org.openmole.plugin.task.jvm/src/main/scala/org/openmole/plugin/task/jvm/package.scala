@@ -27,7 +27,6 @@ package jvm {
   import org.openmole.core.pluginmanager.PluginManager
 
   trait JVMPackage extends external.ExternalPackage {
-    lazy val imports = add[{ def addImport(s: String*) }]
     lazy val libraries = add[{ def addLibrary(l: File*) }]
     lazy val plugins = add[{ def addPlugins(plugins: Seq[File]*) }]
     def pluginsOf(o: Any): Seq[File] = pluginsOf(o.getClass)

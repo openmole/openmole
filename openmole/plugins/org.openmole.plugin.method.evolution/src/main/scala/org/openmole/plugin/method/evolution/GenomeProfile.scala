@@ -46,10 +46,10 @@ object GenomeProfile {
     nX: Int,
     genome: Genome,
     objective: Objective,
-    replication: Replication[FitnessAggregation],
+    replication: Replication[Id],
     paretoSize: Int = 20) = {
 
-    def aggregation(h: Vector[Double]) = StochasticGAIntegration.aggregate(replication.aggregation, h)
+    def aggregation(h: Vector[Double]) = StochasticGAIntegration.aggregate(replication.aggregationClosures, h)
 
     StochasticGenomeProfile(
       noisyprofile.OpenMOLE(
@@ -164,6 +164,6 @@ object GenomeProfile {
     algo: noisyprofile.OpenMOLE,
     genome: Genome,
     objective: Objective,
-    replication: Replication[FitnessAggregation])
+    replication: Replication[Id])
 
 }

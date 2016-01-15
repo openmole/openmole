@@ -55,19 +55,11 @@
   @br @hl.highlight("""openmole -p target/scala-2.11/myopenmoleplugin_2.11-1.0.jar -c""", "plain")
   @p You can now use the @i{Hello} object in your workflows:
   @br @hl.openmole("""
-  import org.openmole.plugin.domain.collection._
-  import org.openmole.plugin.domain.distribution._
-  import org.openmole.plugin.domain.modifier._
-  import org.openmole.plugin.sampling.combine._
-  import org.openmole.plugin.task.scala._
-  import org.openmole.plugin.hook.display._
-
   // Declare the variable
   val i = Val[Int]
 
   // Hello task
-  val hello = ScalaTask("i = Hello.world(i)") set (
-    imports += "myopenmoleplugin._",
+  val hello = ScalaTask("i = myopenmoleplugin.Hello.world(i)") set (
     inputs += i,
     outputs += i,
     plugins += pluginsOf(myopenmoleplugin.Hello)

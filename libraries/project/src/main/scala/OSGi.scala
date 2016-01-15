@@ -8,25 +8,9 @@ import org.openmole.buildsystem.OMKeys._
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
-/**
- * Created with IntelliJ IDEA.
- * User: luft
- * Date: 3/17/13
- * Time: 6:50 PM
- * To change this template use File | Settings | File Templates.
- */
 object OSGi extends Defaults {
 
   val dir = file("target/libraries")
-
-  /*lazy val jetty = OsgiProject(
-    "org.eclipse.jetty",
-    exports = Seq("org.eclipse.jetty.*", "javax.*")) settings(
-    libraryDependencies ++= Seq(
-      "org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106",
-      "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016"),
-    version := "8.1.8.v20121106"
-    )*/
 
   lazy val scalatraVersion = "2.3.1"
   lazy val jettyVersion = "9.2.10.v20150310"
@@ -40,8 +24,6 @@ object OSGi extends Defaults {
       libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion,
       libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % jettyVersion,
       libraryDependencies += "org.eclipse.jetty" % "jetty-server" % jettyVersion,
-      //libraryDependencies += "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016",
-     // libraryDependencies += "javax.servlet" % "javax.servlet-api" % "3.1.0",
       libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.2.11",
       version := scalatraVersion)
 
@@ -81,18 +63,9 @@ object OSGi extends Defaults {
       "!org.xml.sax.*",
       "!sun.misc.*",
       "*"),
-    privatePackages = Seq("!scala.*", "*")) settings(
+    privatePackages = Seq("!scala.*", "META-INF.*", "*")) settings(
     libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.8", "net.sf.kxml" % "kxml2" % "2.3.0"),
     version := "1.4.8")
-
-  lazy val groovy = OsgiProject(
-    "org.codehaus.groovy",
-    global = true,
-    exports = Seq("groovy.*", "org.codehaus.*"),
-    privatePackages = Seq("!scala.*,*")) settings(
-    libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.4.1", "org.fusesource.jansi" % "jansi" % "1.11"),
-    version := "2.4.1"
-    )
 
   lazy val scalaLang = OsgiProject(
     "org.scala-lang.scala-library",
@@ -295,7 +268,7 @@ object OSGi extends Defaults {
     (libraryDependencies += "commons-logging" % "commons-logging" % "1.2", version := "1.2")
 
   lazy val sshd = OsgiProject("org.apache.sshd", exports = Seq("org.apache.sshd.*", "org.apache.mina.*"), dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
-    (libraryDependencies += "org.apache.sshd" % "sshd-core" % "0.14.0", version := "0.14.0")
+    (libraryDependencies += "org.apache.sshd" % "sshd-core" % "1.0.0", version := "1.0.0")
 
   lazy val ant = OsgiProject("org.apache.ant") settings
     (libraryDependencies += "org.apache.ant" % "ant" % "1.8.0", version := "1.8.0")

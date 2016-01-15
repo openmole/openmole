@@ -46,12 +46,12 @@ object PSE {
   def apply(
     genome: Genome,
     objectives: Seq[PatternAxe],
-    replication: Replication[Seq[FitnessAggregation]]) = {
+    replication: Replication[Seq]) = {
 
     WorkflowIntegration.StochasticGA(
       noisypse.OpenMOLE(
         pattern = mgo.niche.irregularGrid(objectives.map(_.scale).toVector),
-        aggregation = StochasticGAIntegration.aggregateVector(replication.aggregation, _),
+        aggregation = StochasticGAIntegration.aggregateVector(replication.aggregationClosures, _),
         genomeSize = Genome.size(genome),
         historySize = replication.max,
         cloneProbability = replication.reevaluate,

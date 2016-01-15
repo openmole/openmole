@@ -65,8 +65,6 @@ object Libraries extends Defaults {
 
   lazy val xstream = "org.openmole" %% "com-thoughtworks-xstream" % "1.4.8"
 
-  lazy val groovy = "org.openmole" %% "org-codehaus-groovy" % "2.4.1"
-
   lazy val scalaLang = "org.openmole" %% "org-scala-lang-scala-library" % "2.11.7"
 
   lazy val jodaTime = "org.openmole" %% "org-joda-time" % "1.6"
@@ -164,7 +162,7 @@ object Libraries extends Defaults {
 
   lazy val logging = "org.openmole" %% "org-apache-commons-logging" % "1.2"
 
-  lazy val sshd = "org.openmole" %% "org-apache-sshd" % "0.14.0"
+  lazy val sshd = "org.openmole" %% "org-apache-sshd" % "1.0.0"
 
   lazy val ant = "org.openmole" %% "org-apache-ant" % "1.8.0"
 

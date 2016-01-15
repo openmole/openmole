@@ -76,9 +76,8 @@
       val explo = ExplorationTask(proto1 in (0 until 10))
 
       //Defines the task to perform the hello function
-      val javaTask = ScalaTask("Hello.run(proto1)") set (
+      val javaTask = ScalaTask("hello.Hello.run(proto1)") set (
         libraries += workDirectory / "Hello.jar",
-        imports += "hello._",
         inputs += proto1
       )
 
@@ -123,9 +122,8 @@
         (arg2 in (0.0 until 10.0 by 1.0))
       )
 
-      val javaTask = ScalaTask("Array(out1, out2) = Hello.run(arg1, arg2)") set (
+      val javaTask = ScalaTask("hello.Array(out1, out2) = Hello.run(arg1, arg2)") set (
         libraries += workDirectory / "Hello.jar",
-        imports += "hello._",
         inputs += (arg1, arg2),
         outputs += (arg1, arg2, out1, out2)
       )
@@ -182,9 +180,8 @@
 
       //Defines the scala task as a launcher of the hello executable
       val javaTask =
-        ScalaTask("val outputFile = newFile(); Hello.run(proto1, inputFile, outputFile)") set (
+        ScalaTask("val outputFile = newFile(); hello.Hello.run(proto1, inputFile, outputFile)") set (
           libraries += workDirectory / "Hello.jar",
-          imports += "hello.Hello",
           inputs += proto1,
           outputs += proto1,
           inputFile := workDirectory / "input.bin"
