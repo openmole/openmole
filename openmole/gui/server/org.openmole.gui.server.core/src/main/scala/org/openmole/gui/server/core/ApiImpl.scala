@@ -84,7 +84,17 @@ object ApiImpl extends Api {
 
   def deleteFile(safePath: SafePath): Unit = safePathToFile(safePath).recursiveDelete
 
-  def extractTGZ(safePath: SafePath): Unit =
+  private def getExtractedTGZTo(from: File, to: File): Seq[SafePath] = {
+    extractTGZToFromFiles(from, to)
+    to.listFiles.toSeq
+  }
+
+  private def extractTGZToFromFiles(from: File, to: File): Unit = {
+    from.extractUncompress(to, true)
+    to.applyRecursive((f: File) ⇒ f.setWritable(true))
+  }
+
+  private def extractTGZ(safePath: SafePath): Unit =
     safePath.extension match {
       case FileExtension.TGZ ⇒
         val archiveFile = safePathToFile(safePath)
@@ -93,21 +103,55 @@ object ApiImpl extends Api {
       case _ ⇒
     }
 
-  def extractTGZTo(safePath: SafePath, to: SafePath): Unit = {
+  private def extractTGZTo(safePath: SafePath, to: SafePath): Unit = {
     safePath.extension match {
       case FileExtension.TGZ ⇒
         val archiveFile = safePathToFile(safePath)
         val toFile: File = to
-        //TODO: ask whetehr overwrite or not ?
-        archiveFile.extractUncompress(toFile, true)
-        toFile.applyRecursive((f: File) ⇒ f.setWritable(true))
+        extractTGZTo(archiveFile, to)
       case _ ⇒
     }
   }
 
   def extractTGZ(treeNodeData: TreeNodeData): Unit = extractTGZ(treeNodeData.safePath)
 
+  def temporaryFile: SafePath = Files.createTempDirectory("openmoleGUI").toFile
+
   def exists(safePath: SafePath): Boolean = safePathToFile(safePath).exists
+
+  def moveFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = Utils.moveFromTmp(tmpSafePath, filesToBeMovedTo)
+
+  def moveAllTo(tmpSafePath: SafePath, to: SafePath): Unit = Utils.moveAllTo(tmpSafePath, to)
+
+  // Test whether safePathToTest exists in "in"
+  def existsIn(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {
+
+    def test(sps: Seq[SafePath], inDir: SafePath = in) = {
+
+      sps.filter { sp ⇒
+        exists(inDir ++ sp.name)
+      }.map { sp ⇒ inDir ++ sp.name }
+    }
+
+    val fileType: FileType = safePathToTest
+    fileType match {
+      case a: Archive ⇒ a.language match {
+        case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
+        case _ ⇒
+          val emptyFile = new File("")
+          val from = getFile(emptyFile, safePathToTest.path)
+          val to = getFile(emptyFile, safePathToTest.parent.path)
+          val toTest = in ++ safePathToTest.nameWithNoExtension
+          val extracted = getExtractedTGZTo(from, to)
+          deleteFile(from)
+          if (toTest.exists) {
+            test(extracted, toTest)
+          }
+          else Seq()
+      }
+      case _ ⇒ test(Seq(safePathToTest))
+    }
+  }
 
   private def treeNodeData(treeNodeData: TreeNodeData): TreeNodeData = {
     val tnd: TreeNodeData = safePathToFile(treeNodeData.safePath)
@@ -125,9 +169,7 @@ object ApiImpl extends Api {
   def move(from: SafePath, to: SafePath): Unit = {
     val fromFile = safePathToFile(from)
     val toFile = safePathToFile(to)
-    if (fromFile.exists && toFile.exists) {
-      fromFile.move(new File(toFile, from.path.last))
-    }
+    Utils.move(fromFile, toFile)
   }
 
   def mdToHtml(safePath: SafePath): String = safePath.extension match {
@@ -266,8 +308,6 @@ object ApiImpl extends Api {
     (envData, outputs)
   }
 
-  def buildInfo = buildinfo.info
-
   def marketIndex() = {
     def download[T](action: InputStream ⇒ T): T = {
       val url = new URL(buildinfo.marketAddress)
@@ -350,8 +390,7 @@ object ApiImpl extends Api {
   //Extract models from an archive
   def models(archivePath: SafePath): Seq[SafePath] = {
     val toDir = archivePath.toNoExtention
-    extractTGZTo(archivePath, toDir)
-    deleteFile(archivePath)
+    // extractTGZToAndDeleteArchive(archivePath, toDir)
     for {
       tnd ← listFiles(toDir) if FileType.isSupportedLanguage(tnd.safePath)
     } yield tnd.safePath
@@ -445,7 +484,9 @@ object ApiImpl extends Api {
     Resources(
       paths,
       implicitResource,
-      paths.size + implicitResource.map { listFiles(_).size }.getOrElse(0))
+      paths.size + implicitResource.map {
+        listFiles(_).size
+      }.getOrElse(0))
   }
 
   def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {

@@ -601,6 +601,7 @@ label {
 }
 
 .fullPageZone{
+    top:0;
     height: 100%;
     width: 100%;
 }
@@ -914,4 +915,15 @@ border-top-right-radius: 0px;
 .rightBlock{
     width: 70%;
     float: right;
+}
+
+.options{
+    position: relative;
+    margin-right:10px;
+    top: -3px;
+}
+
+.uploadPlugin {
+    margin-right: -110px;
+    padding-bottom: 30px;
 }

@@ -164,7 +164,9 @@ case class SafePath(path: Seq[String], extension: FileExtension) {
 
   def name = path.last
 
-  def toNoExtention = copy(path = path.dropRight(1) :+ path.last.split('.').head)
+  def toNoExtention = copy(path = path.dropRight(1) :+ nameWithNoExtension)
+
+  def nameWithNoExtension = name.split('.').head
 }
 
 sealed trait AuthenticationData extends Data {
@@ -207,6 +209,10 @@ case class UploadAuthentication() extends UploadType {
 
 case class UploadPlugin() extends UploadType {
   def typeName = "plugin"
+}
+
+case class UploadAbsolute() extends UploadType {
+  def typeName = "absolute"
 }
 
 @JSExport

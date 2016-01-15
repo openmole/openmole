@@ -267,7 +267,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def trashNode(treeNode: TreeNode): Unit = {
     fileDisplayer.tabs -- treeNode
-    AlertPanel.popup(s"Do you really want to delete ${
+    AlertPanel.string(s"Do you really want to delete ${
       treeNode.name()
     }?",
       () ⇒ {

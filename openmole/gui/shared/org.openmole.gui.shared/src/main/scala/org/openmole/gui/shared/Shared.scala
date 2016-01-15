@@ -38,11 +38,15 @@ trait Api {
   def extractTGZ(treeNodeData: TreeNodeData): Unit
   def deleteAuthenticationKey(keyName: String): Unit
   def deleteFile(safePath: SafePath): Unit
+  def temporaryFile(): SafePath
   def exists(safePath: SafePath): Boolean
+  def existsIn(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
   def treeNodeData(safePaths: Seq[TreeNodeData]): Seq[TreeNodeData]
   def listFiles(path: TreeNodeData): Seq[TreeNodeData]
   def mdToHtml(safePath: SafePath): String
   def move(from: SafePath, to: SafePath): Unit
+  def moveAllTo(tmpSafePath: SafePath, to: SafePath): Unit
+  def moveFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
   def uuid(): String = java.util.UUID.randomUUID.toString
   def renameFileFromPath(filePath: SafePath, name: String): TreeNodeData
   def renameFile(treeNode: TreeNodeData, name: String): TreeNodeData
@@ -56,9 +60,6 @@ trait Api {
   def removeExecution(id: ExecutionId): Unit
   def runScript(scriptData: ScriptData): Unit
   def runningErrorEnvironmentAndOutputData(lines: Int, level: ErrorStateLevel): (Seq[RunningEnvironmentData], Seq[RunningOutputData])
-
-  //INFO
-  def buildInfo: OpenMOLEBuildInfo
 
   //MARKET
   def marketIndex(): MarketIndex

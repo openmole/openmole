@@ -19,11 +19,12 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.misc.js.{ Select, OMTags }
+import org.openmole.gui.misc.js.{ OptionsDiv, Select, OMTags }
 import Select._
 import autowire._
 import org.scalajs.dom.html.TextArea
 import org.openmole.gui.client.core.files.TreeNode._
+import org.scalajs.dom.raw.HTMLInputElement
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
@@ -203,57 +204,16 @@ class ModelWizardPanel extends ModalPanel {
           transferring.withWaiter { _ ⇒
             tags.div(
               bs.fileInput((fInput: HTMLInputElement) ⇒ {
-                FileManager.upload(fInput,
-                  manager.current.safePath(),
-                  (p: ProcessState) ⇒ {
-                    transferring() = p
-                  },
-                  UploadProject(),
-                  () ⇒ {
-                    if (fInput.files.length > 0) {
-                      emptyJARSelectors
-                      modelPath() = None
-                      val fileName = fInput.files.item(0).name
-                      labelName() = Some(fileName)
-                      filePath() = Some(manager.current.safePath() ++ fileName)
-
-                      //get the language
-                      val fileType: FileType = filePath().get
-                      fileType match {
-                        case archive: Archive ⇒
-                          archive.language match {
-                            //Java case
-                            case JavaLikeLanguage() ⇒
-                              modelSelector.emptyContents
-                              modelPath() = filePath()
-                              modelPath().foreach {
-                                getJarClasses
-                              }
-
-                            // Other archive: tgz, tar.gz
-                            case UndefinedLanguage ⇒
-                              OMPost[Api].models(filePath().get).call().foreach { models ⇒
-                                modelPath() = models.headOption
-                                modelSelector.setContents(models, () ⇒ {
-                                  panels.treeNodePanel.refreshCurrentDirectory
-                                  onModelChange
-                                })
-                                resources() = resources().copy(implicitPath = Some(treeNodeDataToTreeNode(modelPath().get)))
-                                getResourceInfo
-                              }
-
-                            case _ ⇒
-
-                          }
-                        case codeFile: CodeFile ⇒
-                          modelSelector.emptyContents
-                          resources() = resources().withNoImplicit
-                          setLaunchingCommand(filePath().get)
-                        case _ ⇒
-                      }
-                    }
+                if (fInput.files.length > 0) {
+                  emptyJARSelectors
+                  modelPath() = None
+                  val fileName = fInput.files.item(0).name
+                  labelName() = Some(fileName)
+                  filePath() = Some(manager.current.safePath() ++ fileName)
+                  filePath().map { fp ⇒
+                    moveFilesAndBuildForm(fInput, fileName, fp)
                   }
-                )
+                }
               }), labelName() match {
                 case Some(s: String) ⇒ s
                 case _               ⇒ "Your Model"
@@ -273,6 +233,87 @@ class ModelWizardPanel extends ModalPanel {
           }
         )
       }).render
+
+  def moveFilesAndBuildForm(fInput: HTMLInputElement, fileName: String, uploadPath: SafePath) =
+    OMPost[Api].temporaryFile.call().foreach { tempFile ⇒
+      FileManager.upload(fInput,
+        tempFile,
+        (p: ProcessState) ⇒ {
+          transferring() = p
+        },
+        UploadAbsolute(),
+        () ⇒ {
+          OMPost[Api].existsIn(tempFile ++ fileName, uploadPath.parent).call().foreach { existing ⇒
+            val fileType: FileType = uploadPath
+
+            val (targetPath, language) = fileType match {
+              case a: Archive ⇒
+                a.language match {
+                  case j: JavaLikeLanguage ⇒ (uploadPath, j)
+                  case _                   ⇒ (uploadPath.toNoExtention, UndefinedLanguage)
+                }
+              case codeFile: CodeFile ⇒ (uploadPath, codeFile.language)
+            }
+
+            // Move files from tmp to target path
+            if (existing.isEmpty) {
+              OMPost[Api].moveAllTo(tempFile, targetPath).call().foreach { b ⇒
+                buildForm(uploadPath, fileType)
+              }
+            }
+            else {
+              val optionsDiv = OptionsDiv(existing)
+              AlertPanel.div(tags.div(
+                "Some files already exist, overwrite ?",
+                optionsDiv.div),
+                () ⇒ {
+                  OMPost[Api].moveFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach { b ⇒
+                    buildForm(uploadPath, fileType)
+                  }
+                }, () ⇒ {}, buttonGroupClass = "right")
+            }
+
+          }
+        })
+    }
+
+  def buildForm(uploadPath: SafePath, fileType: FileType) = {
+
+    fileType match {
+      case archive: Archive ⇒
+        archive.language match {
+          //Java case
+          case JavaLikeLanguage() ⇒
+            modelSelector.emptyContents
+            modelPath() = Some(uploadPath)
+            modelPath().foreach {
+              getJarClasses
+            }
+
+          // Other archive: tgz, tar.gz
+          case UndefinedLanguage ⇒
+            OMPost[Api].models(uploadPath).call().foreach { models ⇒
+              modelPath() = models.headOption
+              modelSelector.setContents(models, () ⇒ {
+                panels.treeNodePanel.refreshCurrentDirectory
+                onModelChange
+              })
+              modelPath() map { mp ⇒
+                resources() = resources().copy(implicitPath = Some(treeNodeDataToTreeNode(mp)))
+              }
+              getResourceInfo
+            }
+
+          case _ ⇒
+
+        }
+      case codeFile: CodeFile ⇒
+        modelSelector.emptyContents
+        resources() = resources().withNoImplicit
+        setLaunchingCommand(uploadPath)
+      case _ ⇒
+    }
+  }
 
   def getResourceInfo = OMPost[Api].expandResources(resources()).call().foreach { lf ⇒
     resources() = lf

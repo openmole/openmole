@@ -203,4 +203,29 @@ object Utils {
     }
   }
 
+  def move(from: File, to: File): Unit =
+    if (from.exists && to.exists) {
+      from.move(new File(to, from.getName))
+    }
+
+  def moveFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = {
+    val tmp: File = getFile(new File(""), tmpSafePath.path)
+
+    filesToBeMovedTo.foreach { f ⇒
+      val from = getFile(tmp, Seq(f.name))
+      val toFile: File = f.parent
+      move(from, toFile)
+    }
+
+  }
+
+  def moveAllTo(tmpSafePath: SafePath, to: SafePath): Unit = {
+    val f: File = getFile(new File(""), tmpSafePath.path)
+    val childs = f.listFiles.toSeq
+    to.mkdir
+    childs.foreach { c ⇒
+      move(c, to)
+    }
+  }
+
 }

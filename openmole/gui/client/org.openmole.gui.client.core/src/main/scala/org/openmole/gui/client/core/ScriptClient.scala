@@ -45,7 +45,7 @@ object ScriptClient {
         bs.glyph(glyph_off),
         cursor := "pointer",
         onclick := { () ⇒
-          AlertPanel.popup("This will stop the server, the application will no longer be usable. Halt anyway?",
+          AlertPanel.string("This will stop the server, the application will no longer be usable. Halt anyway?",
             () ⇒ {
               treeNodePanel.fileDisplayer.tabs.saveAllTabs(() ⇒
                 dom.window.location.href = "shutdown"
@@ -141,7 +141,7 @@ object ScriptClient {
           Rx {
             tags.div(
               if (alert())
-                AlertPanel.popup("Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
+                AlertPanel.string("Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
                 () ⇒ {
                   alert() = false
                   resetPassword
@@ -209,7 +209,7 @@ object ScriptClient {
     maindiv.appendChild(pluginTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(environmentStackTriggerer.modalPanel.dialog.render)
     maindiv.appendChild(docTriggerer.modalPanel.dialog.render)
-    maindiv.appendChild(AlertPanel.div)
+    maindiv.appendChild(AlertPanel.alertDiv)
 
     Settings.workspacePath.foreach { projectsPath ⇒
       maindiv.appendChild(
