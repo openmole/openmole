@@ -135,8 +135,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Libraries.jodaTime,
     Libraries.scalaLang,
     Libraries.slf4j,
-    Libraries.scalaz,
-    Libraries.monocle
+    Libraries.scalaz
   ) ++ webServerDependencies
 
   lazy val guiCoreDependencies = Seq(
@@ -179,6 +178,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo assemblyPath,
     libraryDependencies ++=
     Seq(
+      monocle intransitive (),
       sshd intransitive (),
       family intransitive (),
       logging intransitive (),
