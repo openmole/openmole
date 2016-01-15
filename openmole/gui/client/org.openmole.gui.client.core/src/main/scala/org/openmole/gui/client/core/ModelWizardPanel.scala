@@ -417,7 +417,7 @@ class ModelWizardPanel extends ModalPanel {
                 },
                 path, classSelector.content().map {
                   _.name
-                }, filePath().map {
+                }, modelPath().map {
                   _.name
                 }).call().foreach {
                   b ⇒

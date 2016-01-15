@@ -424,6 +424,7 @@ object ApiImpl extends Api {
     def default(key: String, value: String) = s"  $key := $value"
 
     try {
+      imports.foreach { i ⇒ os.write(s"import $i._\n") }
       for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
         os.write("val " + p._1 + " = Val[" + p._2 + "]\n")
       }
@@ -463,8 +464,7 @@ object ApiImpl extends Api {
         case st: ScalaTaskType ⇒
           os.write(
             s"""\nval task = ScalaTask(\n\"\"\"$command\"\"\") set(\n""" +
-              s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n" +
-              s"${imports.map { i ⇒ s"  imports += ${imports.map { i ⇒ s"$i._" }}," }.getOrElse("")}\n" +
+              s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n\n" +
               inString + ouString + imFileString + omFileString + defaults
           )
 
