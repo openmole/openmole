@@ -116,8 +116,9 @@ class ModelWizardPanel extends ModalPanel {
       val fileType: FileType = m
       fileType match {
         case _: CodeFile ⇒ setLaunchingCommand(m)
-        case _: Archive  ⇒ getJarClasses(m)
-        case _           ⇒
+        case a: Archive ⇒
+          if (a.language == JavaLikeLanguage()) getJarClasses(m)
+        case _ ⇒
       }
     }
   }
@@ -253,6 +254,7 @@ class ModelWizardPanel extends ModalPanel {
                   case _                   ⇒ (uploadPath.toNoExtention, UndefinedLanguage)
                 }
               case codeFile: CodeFile ⇒ (uploadPath, codeFile.language)
+              case _                  ⇒ (uploadPath, UndefinedLanguage)
             }
 
             // Move files from tmp to target path
@@ -298,7 +300,7 @@ class ModelWizardPanel extends ModalPanel {
                 panels.treeNodePanel.refreshCurrentDirectory
                 onModelChange
               })
-              modelPath() map { mp ⇒
+              modelPath() foreach { mp ⇒
                 resources() = resources().copy(implicitPath = Some(treeNodeDataToTreeNode(mp)))
               }
               getResourceInfo
@@ -320,8 +322,11 @@ class ModelWizardPanel extends ModalPanel {
   }
 
   def getJarClasses(jarPath: SafePath) = {
+    println("GET JAR CLASSES")
     codeSelector.content() = Some(JavaLikeLanguage())
+    println("code selector  " + codeSelector.content())
     OMPost[Api].classes(jarPath).call().foreach { b ⇒
+      println("Classes " + b)
       val classContents = b.flatMap {
         _.flatten
       }
