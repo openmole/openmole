@@ -51,6 +51,7 @@ abstract class CARETaskBuilder(archiveLocation: String, command: systemexec.Comm
     else super.addOutputFile(s"rootfs/${location}", p, true)
 
   // TODO override resources
+  // same mechanism as inputFiles
 
   // TODO handle shallow copies (bind to archive)
   // one option would be to replace call line by bind + call line

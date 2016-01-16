@@ -33,9 +33,6 @@ import org.openmole.core.workflow.data._
 
 object CARETask extends Logger {
 
-  // FIXME remove this duplicate somehow
-  implicit def stringToCommand(s: String) = systemexec.Command(s)
-
   // TODO command and archiveWorkDirectory should be optional now that we have the utilities to dig into the archive
   def apply(archiveLocation: String, command: String, archiveWorkDirectory: String) = {
 
