@@ -78,7 +78,7 @@ object InputConverter {
 
 object Input {
 
-  implicit def doubleBoundsToInput[D](f: Factor[Double, D])(implicit bounded: Bounds[Double, D]) =
+  implicit def doubleBoundsToInput[D](f: Factor[D, Double])(implicit bounded: Bounds[D, Double]) =
     Scalar(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
 
 }

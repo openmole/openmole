@@ -25,17 +25,17 @@ import org.openmole.core.workflow.tools.FromContext
 
 package object collection {
 
-  implicit def iterableIsDiscrete[T] = new Discrete[T, Iterable[T]] {
-    override def iterator(domain: Iterable[T]) = domain.iterator
+  implicit def iterableIsDiscrete[T] = new Finite[Iterable[T], T] {
+    override def computeValues(domain: Iterable[T]) = domain
   }
 
-  implicit def arrayIsFinite[T] = new Finite[T, Array[T]] {
+  implicit def arrayIsFinite[T] = new Finite[Array[T], T] {
     override def computeValues(domain: Array[T]) = domain.toIterable
   }
 
   implicit def booleanPrototypeIsFactor(p: Prototype[Boolean]) = Factor(p, List(true, false))
 
-  implicit def arrayPrototypeIsFinite[T] = new Finite[T, Prototype[Array[T]]] {
+  implicit def arrayPrototypeIsFinite[T] = new Finite[Prototype[Array[T]], T] with DomainInputs[Prototype[Array[T]]] {
     override def inputs(domain: Prototype[Array[T]]): PrototypeSet = Seq(domain)
     override def computeValues(domain: Prototype[Array[T]]) = FromContext.apply { (context, rng) ⇒
       context(domain).toIterable

@@ -1,7 +1,5 @@
-package org.openmole.gui.plugin.task.groovy.ext
-
-/*
- * Copyright (C) 25/09/14 // mathieu.leclaire@openmole.org
+/**
+ * Created by Romain Reuillon on 12/01/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,15 +9,18 @@ package org.openmole.gui.plugin.task.groovy.ext
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
+package org.openmole.plugin.domain
 
-import org.openmole.gui.ext.data.{InOutput, TaskData}
+import org.openmole.core.workflow.domain.{ Finite }
 
-case class GroovyTaskData(inputs: Seq[InOutput] = Seq(),
-                          outputs: Seq[InOutput] = Seq(),
-                          code: String = "",
-                          libs: Seq[String] = Seq()) extends TaskData
+package object modifier {
+  implicit def iterableIsFinite[T] = new Finite[Iterable[T], T] {
+    override def computeValues(domain: Iterable[T]) = domain
+  }
+}

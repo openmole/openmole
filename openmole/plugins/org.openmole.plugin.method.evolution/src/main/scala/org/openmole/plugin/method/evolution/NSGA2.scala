@@ -37,9 +37,9 @@ object NSGA2 {
     mu: Int,
     genome: Genome,
     objectives: Objectives,
-    replication: Replication[Seq[FitnessAggregation]]) = {
+    replication: Replication[Seq]) = {
 
-    def aggregation(h: Vector[Vector[Double]]) = StochasticGAIntegration.aggregateVector(replication.aggregation, h)
+    def aggregation(h: Vector[Vector[Double]]) = StochasticGAIntegration.aggregateVector(replication.aggregationClosures, h)
 
     WorkflowIntegration.StochasticGA(
       noisynsga2.OpenMOLE(mu, operatorExploration, Genome.size(genome), replication.max, replication.reevaluate, aggregation),

@@ -135,8 +135,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     Libraries.jodaTime,
     Libraries.scalaLang,
     Libraries.slf4j,
-    Libraries.scalaz,
-    Libraries.monocle
+    Libraries.scalaz
   ) ++ webServerDependencies
 
   lazy val guiCoreDependencies = Seq(
@@ -179,6 +178,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin", true) sendTo assemblyPath,
     libraryDependencies ++=
     Seq(
+      monocle intransitive (),
       sshd intransitive (),
       family intransitive (),
       logging intransitive (),
@@ -187,7 +187,6 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       netlogo5 intransitive (),
       mgo intransitive (),
       scalabc intransitive (),
-      groovy intransitive (),
       gridscaleHTTP intransitive (),
       gridscalePBS intransitive (),
       gridscaleSLURM intransitive (),
@@ -282,7 +281,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     ) settings (
         OsgiKeys.bundle <<= OsgiKeys.bundle dependsOn (assemble),
         organization := "org.openmole.site",
-        SbtOsgi.OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ SbtOsgi.OsgiKeys.exportPackage.value,
+        OsgiKeys.exportPackage := Seq("scalatex.openmole.*") ++ OsgiKeys.exportPackage.value,
         libraryDependencies += Libraries.xstream,
         libraryDependencies += Libraries.scalatexSite,
         libraryDependencies += Libraries.scalaLang,

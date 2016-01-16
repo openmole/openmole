@@ -28,18 +28,21 @@ import Scalaz._
 
 object MapDomain {
 
-  implicit def isDiscrete[I, O, D] = new Discrete[O, MapDomain[I, O, D]] {
-    override def iterator(domain: MapDomain[I, O, D]) = FromContext((context, rng) ⇒ domain.iterator(context)(rng))
-    override def inputs(domain: MapDomain[I, O, D]) = domain.inputs
+  implicit def isDiscrete[D, I, O] = new Discrete[MapDomain[D, I, O], O] with DomainInputs[MapDomain[D, I, O]] {
+    override def iterator(domain: MapDomain[D, I, O]) = FromContext((context, rng) ⇒ domain.iterator(context)(rng))
+    override def inputs(domain: MapDomain[D, I, O]) = domain.inputs
   }
 
-  def apply[I: Manifest, O: Manifest, D](d: D, source: String)(implicit discrete: Discrete[I, D]) = new MapDomain[I, O, D](d, source)
+  def apply[D[_], I: Manifest](domain: D[I])(implicit discrete: Discrete[D[I], I], domainInputs: DomainInputs[D[I]]) = new {
+    def to[O: Manifest](source: String) = new MapDomain[D[I], I, O](domain, source)
+  }
 
 }
 
-sealed class MapDomain[-I: Manifest, +O: Manifest, D](val domain: D, val source: String)(implicit discrete: Discrete[I, D]) { d ⇒
+class MapDomain[D, -I: Manifest, +O: Manifest](domain: D, source: String)(implicit discrete: Discrete[D, I], domainInputs: DomainInputs[D]) { d ⇒
 
-  def inputs = discrete.inputs(domain)
+  def inputs = domainInputs.inputs(domain)
+
   @transient lazy val proxy = ScalaWrappedCompilation.static[Any](source, inputs.toSeq)(implicitly[Manifest[I ⇒ O]])
   proxy
 

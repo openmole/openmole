@@ -14,7 +14,7 @@ object Domain extends PluginDefaults {
 
   lazy val fileDomain = OsgiProject("file", imports = Seq("*")) dependsOn (Core.exception, Core.workflow)
 
-  lazy val modifier = OsgiProject("modifier", imports = Seq("*")) dependsOn (Core.exception, Core.workflow, Tool.groovy) settings (
+  lazy val modifier = OsgiProject("modifier", imports = Seq("*")) dependsOn (Core.exception, Core.workflow) settings (
     libraryDependencies += Libraries.scalatest
   )
 

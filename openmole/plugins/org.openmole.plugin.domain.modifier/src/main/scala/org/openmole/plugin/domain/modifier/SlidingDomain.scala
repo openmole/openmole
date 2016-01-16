@@ -26,19 +26,19 @@ import Scalaz._
 
 object SlidingDomain {
 
-  implicit def isDiscrete[T, D] = new Discrete[Array[T], SlidingDomain[T, D]] {
-    override def iterator(domain: SlidingDomain[T, D]) = domain.iterator()
-    override def inputs(domain: SlidingDomain[T, D]) = domain.inputs
+  implicit def isDiscrete[D, T] = new Discrete[SlidingDomain[D, T], Array[T]] with DomainInputs[SlidingDomain[D, T]] {
+    override def iterator(domain: SlidingDomain[D, T]) = domain.iterator()
+    override def inputs(domain: SlidingDomain[D, T]) = domain.inputs
   }
 
-  def apply[T: Manifest, D](domain: D, size: FromContext[Int], step: FromContext[Int] = 1)(implicit discrete: Discrete[T, D]) =
-    new SlidingDomain[T, D](domain, size, step)
+  def apply[D[_], T: Manifest](domain: D[T], size: FromContext[Int], step: FromContext[Int] = 1)(implicit discrete: Discrete[D[T], T], domainInputs: DomainInputs[D[T]]) =
+    new SlidingDomain[D[T], T](domain, size, step)
 
 }
 
-class SlidingDomain[T: Manifest, D](val domain: D, val size: FromContext[Int], val step: FromContext[Int] = 1)(implicit discrete: Discrete[T, D]) {
+class SlidingDomain[D, T: Manifest](domain: D, size: FromContext[Int], step: FromContext[Int] = 1)(implicit discrete: Discrete[D, T], domainInputs: DomainInputs[D]) {
 
-  def inputs = discrete.inputs(domain)
+  def inputs = domainInputs.inputs(domain)
 
   def iterator() =
     for {

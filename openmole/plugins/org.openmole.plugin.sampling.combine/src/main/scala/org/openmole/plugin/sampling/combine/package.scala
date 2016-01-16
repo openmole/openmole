@@ -48,14 +48,14 @@ package object combine {
   implicit class SamplingCombineDecorator(val s: Sampling) extends AbstractSamplingCombineDecorator
   implicit def samplingBuilderCombineDecorator(s: SamplingBuilder) = SamplingCombineDecorator(s.toSampling)
 
-  implicit class DiscreteFactorDecorator[T, D](f: Factor[T, D])(implicit discrete: Discrete[T, D]) extends AbstractSamplingCombineDecorator {
+  implicit class DiscreteFactorDecorator[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T]) extends AbstractSamplingCombineDecorator {
     def s: Sampling = f
   }
 
-  implicit def zipWithNameFactorDecorator[D](factor: Factor[File, D])(implicit discrete: Discrete[File, D]) = new {
+  implicit def zipWithNameFactorDecorator[D](factor: Factor[D, File])(implicit discrete: Discrete[D, File]) = new {
     @deprecated("Use withName", "5")
     def zipWithName(name: Prototype[String]): ZipWithNameSampling[D] = withName(name)
-    def withName(name: Prototype[String]): ZipWithNameSampling[D] = new ZipWithNameSampling(factor, name)(discrete)
+    def withName(name: Prototype[String]): ZipWithNameSampling[D] = new ZipWithNameSampling(factor, name)
   }
 
 }

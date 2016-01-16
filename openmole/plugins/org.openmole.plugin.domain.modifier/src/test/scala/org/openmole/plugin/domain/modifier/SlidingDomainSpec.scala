@@ -31,12 +31,7 @@ class SlidingDomainSpec extends FlatSpec with Matchers {
     implicit val rng = new Random(42)
 
     val r1 = (1 to 10)
-
-    val d1 = new Domain[Int] with Discrete[Int] {
-      override def iterator(context: Context)(implicit rng: Random) = r1.iterator
-    }
-
-    val md = SlidingDomain(d1, 2, 1).iterator(Context.empty)
+    val md = SlidingDomain(r1, 2, 1).iterator.from(Context.empty)(RandomProvider(???))
 
     md.toList.size should equal(9)
   }

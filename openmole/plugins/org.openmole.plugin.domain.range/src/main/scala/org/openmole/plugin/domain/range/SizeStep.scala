@@ -23,7 +23,6 @@ import org.openmole.core.workflow.tools._
 
 import scala.util.Random
 
-//Finite Ceneter Bounds
 trait SizeStep[T] {
 
   val range: Range[T]

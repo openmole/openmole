@@ -32,13 +32,11 @@ class GroupDomainSpec extends FlatSpec with Matchers {
 
     val r1 = (1 to 10)
 
-    val d1 = new Domain[Int] with Discrete[Int] {
-      override def iterator(context: Context)(implicit rng: Random) = r1.iterator
-    }
+    val md = GroupDomain(r1, 3)
 
-    val md = GroupDomain(d1, 3).iterator(Context.empty)
+    def it[D](d: D)(implicit domain: Discrete[D, Array[Int]]) = domain.iterator(d).from(Context.empty)(RandomProvider(???))
 
-    md.toList.size should equal(4)
+    it(md).toList.size should equal(4)
   }
 
 }

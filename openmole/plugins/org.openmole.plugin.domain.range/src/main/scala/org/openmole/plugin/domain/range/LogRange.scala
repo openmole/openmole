@@ -28,7 +28,7 @@ import scala.util.Random
 object LogRange {
 
   implicit def isFinite[T] =
-    new Finite[T, LogRange[T]] with Center[T, LogRange[T]] with Bounds[T, LogRange[T]] {
+    new Finite[LogRange[T], T] with Center[LogRange[T], T] with Bounds[LogRange[T], T] {
       override def computeValues(domain: LogRange[T]) = FromContext.apply((context, rng) ⇒ domain.computeValues(context)(rng))
       override def center(domain: LogRange[T]) = FromContext.apply((context, rng) ⇒ domain.center(context)(rng))
       override def max(domain: LogRange[T]) = FromContext.apply((context, rng) ⇒ domain.max(context)(rng))

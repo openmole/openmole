@@ -84,23 +84,83 @@ object ApiImpl extends Api {
 
   def deleteFile(safePath: SafePath): Unit = safePathToFile(safePath).recursiveDelete
 
-  def extractTGZ(safePath: SafePath): Unit = {
+  private def getExtractedTGZTo(from: File, to: File): Seq[SafePath] = {
+    extractTGZToFromFiles(from, to)
+    to.listFiles.toSeq
+  }
+
+  private def extractTGZToFromFiles(from: File, to: File): Unit = {
+    from.extractUncompress(to, true)
+    to.applyRecursive((f: File) ⇒ f.setWritable(true))
+  }
+
+  private def extractTGZ(safePath: SafePath): Unit =
     safePath.extension match {
       case FileExtension.TGZ ⇒
         val archiveFile = safePathToFile(safePath)
-        val parentFile = archiveFile.getParentFile
-        //TODO: ask the question: overwrite or not ?
-        archiveFile.extractUncompress(parentFile, true)
-        parentFile.applyRecursive((f: File) ⇒ f.setWritable(true))
+        val parent: SafePath = archiveFile
+        extractTGZTo(safePath, parent)
+      case _ ⇒
+    }
+
+  private def extractTGZTo(safePath: SafePath, to: SafePath): Unit = {
+    safePath.extension match {
+      case FileExtension.TGZ ⇒
+        val archiveFile = safePathToFile(safePath)
+        val toFile: File = to
+        extractTGZTo(archiveFile, to)
       case _ ⇒
     }
   }
 
   def extractTGZ(treeNodeData: TreeNodeData): Unit = extractTGZ(treeNodeData.safePath)
 
+  def temporaryFile: SafePath = Files.createTempDirectory("openmoleGUI").toFile
+
   def exists(safePath: SafePath): Boolean = safePathToFile(safePath).exists
 
-  def fileSize(treeNodeData: TreeNodeData): Long = safePathToFile(treeNodeData.safePath).length
+  def moveFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = Utils.moveFromTmp(tmpSafePath, filesToBeMovedTo)
+
+  def moveAllTo(tmpSafePath: SafePath, to: SafePath): Unit = Utils.moveAllTo(tmpSafePath, to)
+
+  // Test whether safePathToTest exists in "in"
+  def existsIn(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {
+
+    def test(sps: Seq[SafePath], inDir: SafePath = in) = {
+
+      sps.filter { sp ⇒
+        exists(inDir ++ sp.name)
+      }.map { sp ⇒ inDir ++ sp.name }
+    }
+
+    val fileType: FileType = safePathToTest
+    fileType match {
+      case a: Archive ⇒ a.language match {
+        case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
+        case _ ⇒
+          val emptyFile = new File("")
+          val from = getFile(emptyFile, safePathToTest.path)
+          val to = getFile(emptyFile, safePathToTest.parent.path)
+          val toTest = in ++ safePathToTest.nameWithNoExtension
+          val extracted = getExtractedTGZTo(from, to)
+          deleteFile(from)
+          if (toTest.exists) {
+            test(extracted, toTest)
+          }
+          else Seq()
+      }
+      case _ ⇒ test(Seq(safePathToTest))
+    }
+  }
+
+  private def treeNodeData(treeNodeData: TreeNodeData): TreeNodeData = {
+    val tnd: TreeNodeData = safePathToFile(treeNodeData.safePath)
+    tnd.copy(safePath = treeNodeData.safePath)
+  }
+
+  def treeNodeData(treeNodeDatas: Seq[TreeNodeData]): Seq[TreeNodeData] = treeNodeDatas.map {
+    treeNodeData
+  }
 
   def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.safePath)
 
@@ -109,9 +169,7 @@ object ApiImpl extends Api {
   def move(from: SafePath, to: SafePath): Unit = {
     val fromFile = safePathToFile(from)
     val toFile = safePathToFile(to)
-    if (fromFile.exists && toFile.exists) {
-      fromFile.move(new File(toFile, from.path.last))
-    }
+    Utils.move(fromFile, toFile)
   }
 
   def mdToHtml(safePath: SafePath): String = safePath.extension match {
@@ -158,61 +216,66 @@ object ApiImpl extends Api {
     def error(t: Throwable): Unit = execution.addError(execId, Failed(ErrorBuilder(t)))
     def message(message: String): Unit = execution.addError(execId, Failed(Error(message)))
 
-    val project = new Project(script.getParentFileSafe)
-    project.compile(script, Seq.empty) match {
-      case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
-      case CompilationError(e)       ⇒ error(e)
-      case compiled: Compiled ⇒
-        Try(compiled.eval()) match {
-          case Failure(e) ⇒ error(e)
-          case Success(o) ⇒
-            val puzzle = o.buildPuzzle
-            val outputStream = new StringPrintStream()
+    try {
+      val project = new Project(script.getParentFileSafe)
+      project.compile(script, Seq.empty) match {
+        case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
+        case CompilationError(e)       ⇒ error(e)
+        case compiled: Compiled ⇒
+          Try(compiled.eval()) match {
+            case Failure(e) ⇒ error(e)
+            case Success(o) ⇒
+              val puzzle = o.buildPuzzle
+              val outputStream = new StringPrintStream()
 
-            val envIds = puzzle.environments.values.toSeq.distinct.map { env ⇒ EnvironmentId(getUUID) -> env }
-            Runnings.add(execId, envIds, outputStream)
+              val envIds = puzzle.environments.values.toSeq.distinct.map { env ⇒ EnvironmentId(getUUID) -> env }
+              Runnings.add(execId, envIds, outputStream)
 
-            envIds.foreach {
-              case (envId, env) ⇒
-                env.listen {
-                  case (env, bdl: BeginDownload) ⇒ Runnings.update(envId) {
-                    re ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1))
+              envIds.foreach {
+                case (envId, env) ⇒
+                  env.listen {
+                    case (env, bdl: BeginDownload) ⇒ Runnings.update(envId) {
+                      re ⇒ re.copy(networkActivity = re.networkActivity.copy(downloadingFiles = re.networkActivity.downloadingFiles + 1))
+                    }
+                    case (env, edl: EndDownload) ⇒ Runnings.update(envId) {
+                      re ⇒
+                        val size = re.networkActivity.downloadedSize + (if (edl.success) FileDecorator(edl.file).size else 0)
+                        re.copy(networkActivity = re.networkActivity.copy(
+                          downloadingFiles = re.networkActivity.downloadingFiles - 1,
+                          downloadedSize = size,
+                          readableDownloadedSize = readableByteCount(size))
+                        )
+                    }
+                    case (env, bul: BeginUpload) ⇒ Runnings.update(envId) {
+                      re ⇒ re.copy(networkActivity = re.networkActivity.copy(uploadingFiles = re.networkActivity.uploadingFiles + 1))
+                    }
+                    case (env, eul: EndUpload) ⇒ Runnings.update(envId) {
+                      (re: RunningEnvironment) ⇒
+                        val size = re.networkActivity.uploadedSize + (if (eul.success) FileDecorator(eul.file).size else 0)
+                        re.copy(
+                          networkActivity = re.networkActivity.copy(
+                            uploadedSize = size,
+                            readableUploadedSize = readableByteCount(size),
+                            uploadingFiles = re.networkActivity.uploadingFiles - 1)
+                        )
+                    }
                   }
-                  case (env, edl: EndDownload) ⇒ Runnings.update(envId) {
-                    re ⇒
-                      val size = re.networkActivity.downloadedSize + (if (edl.success) FileDecorator(edl.file).size else 0)
-                      re.copy(networkActivity = re.networkActivity.copy(
-                        downloadingFiles = re.networkActivity.downloadingFiles - 1,
-                        downloadedSize = size,
-                        readableDownloadedSize = readableByteCount(size))
-                      )
+              }
+              Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
+                case Success(ex) ⇒
+                  Try(ex.start) match {
+                    case Failure(e) ⇒ error(e)
+                    case Success(ex) ⇒
+                      val inserted = execution.addDynamicInfo(execId, DynamicExecutionInfo(ex, outputStream))
+                      if (!inserted) ex.cancel
                   }
-                  case (env, bul: BeginUpload) ⇒ Runnings.update(envId) {
-                    re ⇒ re.copy(networkActivity = re.networkActivity.copy(uploadingFiles = re.networkActivity.uploadingFiles + 1))
-                  }
-                  case (env, eul: EndUpload) ⇒ Runnings.update(envId) {
-                    (re: RunningEnvironment) ⇒
-                      val size = re.networkActivity.uploadedSize + (if (eul.success) FileDecorator(eul.file).size else 0)
-                      re.copy(
-                        networkActivity = re.networkActivity.copy(
-                          uploadedSize = size,
-                          readableUploadedSize = readableByteCount(size),
-                          uploadingFiles = re.networkActivity.uploadingFiles - 1)
-                      )
-                  }
-                }
-            }
-            Try(puzzle.toExecution(executionContext = ExecutionContext(out = outputStream))) match {
-              case Success(ex) ⇒
-                Try(ex.start) match {
-                  case Failure(e) ⇒ error(e)
-                  case Success(ex) ⇒
-                    val inserted = execution.addDynamicInfo(execId, DynamicExecutionInfo(ex, outputStream))
-                    if (!inserted) ex.cancel
-                }
-              case Failure(e) ⇒ error(e)
-            }
-        }
+                case Failure(e) ⇒ error(e)
+              }
+          }
+      }
+    }
+    catch {
+      case t: Throwable ⇒ error(t)
     }
   }
 
@@ -249,8 +312,6 @@ object ApiImpl extends Api {
 
     (envData, outputs)
   }
-
-  def buildInfo = buildinfo.info
 
   def marketIndex() = {
     def download[T](action: InputStream ⇒ T): T = {
@@ -333,10 +394,10 @@ object ApiImpl extends Api {
 
   //Extract models from an archive
   def models(archivePath: SafePath): Seq[SafePath] = {
-    extractTGZ(archivePath)
-    deleteFile(archivePath)
+    val toDir = archivePath.toNoExtention
+    // extractTGZToAndDeleteArchive(archivePath, toDir)
     for {
-      tnd ← listFiles(archivePath.parent) if FileType.isSupportedLanguage(tnd.safePath)
+      tnd ← listFiles(toDir) if FileType.isSupportedLanguage(tnd.safePath)
     } yield tnd.safePath
   }
 
@@ -363,6 +424,7 @@ object ApiImpl extends Api {
     def default(key: String, value: String) = s"  $key := $value"
 
     try {
+      imports.foreach { i ⇒ os.write(s"import $i._\n") }
       for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
         os.write("val " + p._1 + " = Val[" + p._2 + "]\n")
       }
@@ -402,8 +464,7 @@ object ApiImpl extends Api {
         case st: ScalaTaskType ⇒
           os.write(
             s"""\nval task = ScalaTask(\n\"\"\"$command\"\"\") set(\n""" +
-              s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n" +
-              s"${imports.map { i ⇒ s"  imports += ${imports.map { i ⇒ s"$i._" }}," }.getOrElse("")}\n" +
+              s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n\n" +
               inString + ouString + imFileString + omFileString + defaults
           )
 
@@ -417,6 +478,20 @@ object ApiImpl extends Api {
     }
     modelTaskFile.createNewFile
     modelTaskFile
+  }
+
+  def expandResources(resources: Resources): Resources = {
+    val paths = treeNodeData(resources.paths).distinct
+    val implicitResource = resources.implicitPath.map {
+      treeNodeData
+    }
+
+    Resources(
+      paths,
+      implicitResource,
+      paths.size + implicitResource.map {
+        listFiles(_).size
+      }.getOrElse(0))
   }
 
   def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {

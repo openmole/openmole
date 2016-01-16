@@ -27,17 +27,16 @@ import scalaz._
 import Scalaz._
 
 object SortByNameDomain {
-  implicit def isFinite[D] = new Finite[File, SortByNameDomain[D]] {
+  implicit def isFinite[D] = new Finite[SortByNameDomain[D], File] with DomainInputs[SortByNameDomain[D]] {
     override def computeValues(domain: SortByNameDomain[D]) = domain.computeValues()
     override def inputs(domain: SortByNameDomain[D]): PrototypeSet = domain.inputs
   }
 
-  def apply[D](d: D)(implicit finite: Finite[File, D]) = new SortByNameDomain(d)
 }
 
-class SortByNameDomain[D](val domain: D)(implicit val finite: Finite[File, D]) {
+case class SortByNameDomain[D](domain: D)(implicit val finite: Finite[D, File], domainInputs: DomainInputs[D]) {
 
-  def inputs = finite.inputs(domain)
+  def inputs = domainInputs.inputs(domain)
 
   def computeValues() = {
     def extractNumber(name: String) = {

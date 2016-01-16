@@ -22,7 +22,7 @@ import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools.FromContext
 
 object VariableDomain {
-  implicit def isFinite[T] = new Finite[T, VariableDomain[T]] {
+  implicit def isFinite[T] = new Finite[VariableDomain[T], T] with DomainInputs[VariableDomain[T]] {
     override def inputs(domain: VariableDomain[T]) = Seq(domain.variable)
     override def computeValues(domain: VariableDomain[T]) =
       FromContext((context, rng) ⇒ context(domain.variable))

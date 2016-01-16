@@ -25,7 +25,7 @@ import org.openmole.core.workflow.tools.ExpandedString
 
 object SelectFileDomain {
 
-  implicit def isFinite = new Finite[File, SelectFileDomain] {
+  implicit def isFinite = new Finite[SelectFileDomain, File] {
     override def computeValues(domain: SelectFileDomain) =
       FromContext((context, rng) ⇒ domain.computeValues(context)(rng))
 

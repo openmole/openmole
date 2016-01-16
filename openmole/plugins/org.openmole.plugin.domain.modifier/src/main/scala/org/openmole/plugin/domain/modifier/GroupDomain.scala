@@ -17,37 +17,30 @@
 
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.tools.obj.ClassUtils
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools.FromContext
-import collection.JavaConversions._
-import ClassUtils._
+
 import scalaz._
 import Scalaz._
 
-import scala.util.Random
-
 object GroupDomain {
 
-  implicit def isDiscrete[T: Manifest, D] = new Discrete[Array[T], GroupDomain[T, D]] {
-    override def iterator(domain: GroupDomain[T, D]) = domain.iterator()
-    override def inputs(domain: GroupDomain[T, D]) = domain.inputs
+  implicit def isDiscrete[D, T: Manifest] = new Discrete[GroupDomain[D, T], Array[T]] with DomainInputs[GroupDomain[D, T]] {
+    override def iterator(domain: GroupDomain[D, T]) = {
+      import domain._
+
+      for {
+        it ← discrete.iterator(d)
+        s ← size
+      } yield it.grouped(s) map (_.toArray)
+    }
+
+    override def inputs(domain: GroupDomain[D, T]) = domain.inputs.inputs(domain.d)
   }
 
-  def apply[T: Manifest, D](d: D, size: FromContext[Int])(implicit discrete: Discrete[T, D]) =
-    new GroupDomain(d, size)
+  def apply[D[_], T: Manifest](d: D[T], size: FromContext[Int])(implicit discrete: Discrete[D[T], T], inputs: DomainInputs[D[T]]) =
+    new GroupDomain[D[T], T](d, size)
 
 }
 
-sealed class GroupDomain[T: Manifest, D](val d: D, val size: FromContext[Int])(implicit val discrete: Discrete[T, D]) {
-
-  def inputs = discrete.inputs(d)
-
-  def iterator() =
-    for {
-      it ← discrete.iterator(d)
-      s ← size
-    } yield it.grouped(s) map (_.toArray)
-
-}
+class GroupDomain[D, T: Manifest](val d: D, val size: FromContext[Int])(implicit val discrete: Discrete[D, T], val inputs: DomainInputs[D])

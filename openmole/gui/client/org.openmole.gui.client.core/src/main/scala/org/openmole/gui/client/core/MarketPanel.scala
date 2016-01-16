@@ -127,7 +127,7 @@ class MarketPanel extends ModalPanel {
       Rx {
         overwriteAlert() match {
           case Some(e: MarketIndexEntry) ⇒
-            AlertPanel.popup(e.name + " already exists. Overwrite ? ",
+            AlertPanel.string(e.name + " already exists. Overwrite ? ",
               () ⇒ {
                 overwriteAlert() = None
                 OMPost[Api].deleteFile(manager.current.safePath() ++ e.name).call().foreach { d ⇒

@@ -27,16 +27,12 @@ import scala.util.Random
 
 class MapDomainSpec extends FlatSpec with Matchers {
 
-  "MapDomain" should "change the values of a domain using groovy code" in {
+  "MapDomain" should "change the values of a domain using the scala code" in {
     implicit val rng = new Random(42)
 
     val r1 = (1 to 3)
 
-    val d1 = new Domain[Int] with Discrete[Int] {
-      override def iterator(context: Context)(implicit rng: Random) = r1.iterator
-    }
-
-    val md = MapDomain(d1, "p1", "p1 * 2").iterator(Context.empty)
+    val md = MapDomain(r1).to[Int]("_ * 2").iterator(Context.empty)(RandomProvider(???))
 
     md.toList == r1.map { _ * 2 } should equal(true)
   }
