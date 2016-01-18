@@ -40,7 +40,7 @@ import bs._
 
 object TreeNodePanel {
 
-  def sons(dirNode: DirNode) = OMPost[Api].listFiles(dirNode).call()
+  def sons(dirNode: DirNode) = OMPost[Api].listFiles(dirNode.safePath()).call()
 
 }
 

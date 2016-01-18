@@ -162,8 +162,6 @@ object ApiImpl extends Api {
     treeNodeData
   }
 
-  def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.safePath)
-
   def listFiles(sp: SafePath): Seq[TreeNodeData] = Utils.listFiles(sp)
 
   def move(from: SafePath, to: SafePath): Unit = {
@@ -413,7 +411,8 @@ object ApiImpl extends Api {
                      outputs: Seq[ProtoTypePair],
                      path: SafePath,
                      imports: Option[String],
-                     libraries: Option[String]): TreeNodeData = {
+                     libraries: Option[String],
+                     resources: Resources): TreeNodeData = {
     val modelTaskFile = new File(path, scriptName + ".oms")
 
     val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))
@@ -438,6 +437,7 @@ object ApiImpl extends Api {
       val imFileString = imapString(ifilemappings, "fileInputs")
       val ouString = ioString(ous, "outputs")
       val omFileString = omapString(ofilemappings, "fileOutputs")
+      val resourcesString = s"""  resources += (${resources.paths.map { r ⇒ s"workDirectory / ${(r.safePath.path.drop(1).mkString("/")).mkString(",")}" }})\n"""
       val defaults =
         "  //Default values. Can be removed if OpenMOLE Vals are set by a value coming from the workflow\n" +
           (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
@@ -450,22 +450,21 @@ object ApiImpl extends Api {
         case ctt: CareTaskType ⇒
           os.write(
             s"""\nval task = CareTask(workDirectory / "$executableName", "$command") set(\n""" +
-              inString + ouString + imFileString + omFileString + defaults
+              inString + ouString + imFileString + omFileString + resourcesString + defaults
           )
         case ntt: NetLogoTaskType ⇒
 
           val imString = imapString(imappings, "netLogoInputs")
           val omString = omapString(omappings, "netLogoOutputs")
           os.write(
-            s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}")) set(\n""" +
-              // embeddWorkspace.map { b ⇒ s"  embeddWorkspace := ${b.toString},\n" }.getOrElse("") +
+            s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}"), embedWorkspace = ${!resources().paths.isEmpty}) set(\n""" +
               inString + ouString + imString + omString + imFileString + omFileString + defaults
           )
         case st: ScalaTaskType ⇒
           os.write(
             s"""\nval task = ScalaTask(\n\"\"\"$command\"\"\") set(\n""" +
               s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n\n" +
-              inString + ouString + imFileString + omFileString + defaults
+              inString + ouString + imFileString + omFileString + resourcesString + defaults
           )
 
         case _ ⇒ ""
@@ -482,16 +481,15 @@ object ApiImpl extends Api {
 
   def expandResources(resources: Resources): Resources = {
     val paths = treeNodeData(resources.paths).distinct
-    val implicitResource = resources.implicitPath.map {
+    val implicitResource = resources.implicits.map {
       treeNodeData
     }
 
     Resources(
       paths,
       implicitResource,
-      paths.size + implicitResource.map {
-        listFiles(_).size
-      }.getOrElse(0))
+      paths.size + implicitResource.size
+    )
   }
 
   def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {

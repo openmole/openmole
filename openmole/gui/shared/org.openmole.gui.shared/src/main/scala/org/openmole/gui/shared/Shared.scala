@@ -42,7 +42,7 @@ trait Api {
   def exists(safePath: SafePath): Boolean
   def existsIn(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
   def treeNodeData(safePaths: Seq[TreeNodeData]): Seq[TreeNodeData]
-  def listFiles(path: TreeNodeData): Seq[TreeNodeData]
+  def listFiles(path: SafePath): Seq[TreeNodeData]
   def mdToHtml(safePath: SafePath): String
   def move(from: SafePath, to: SafePath): Unit
   def moveAllTo(tmpSafePath: SafePath, to: SafePath): Unit
@@ -77,6 +77,6 @@ trait Api {
   def models(archivePath: SafePath): Seq[SafePath]
   def classes(jarPath: SafePath): Seq[ClassTree]
   def methods(jarPath: SafePath, className: String): Seq[JarMethod]
-  def buildModelTask(executableName: String, scriptName: String, command: String, language: Language, inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], path: SafePath, imports: Option[String], libraries: Option[String]): TreeNodeData
+  def buildModelTask(executableName: String, scriptName: String, command: String, language: Language, inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], path: SafePath, imports: Option[String], libraries: Option[String], resources: Resources): TreeNodeData
   def expandResources(resources: Resources): Resources
 }

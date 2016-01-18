@@ -88,7 +88,7 @@ class ModelWizardPanel extends ModalPanel {
   val currentReactives: Var[Seq[Reactive]] = Var(Seq())
   val updatableTable: Var[Boolean] = Var(true)
   val bodyContent: Var[Option[TypedTag[HTMLDivElement]]] = Var(None)
-  val resources: Var[Resources] = Var(Resources(Seq(), None, 0))
+  val resources: Var[Resources] = Var(Resources(Seq(), Seq(), 0))
   val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
   val upButton: Var[HTMLDivElement] = Var(tags.div().render)
@@ -300,9 +300,6 @@ class ModelWizardPanel extends ModalPanel {
                 panels.treeNodePanel.refreshCurrentDirectory
                 onModelChange
               })
-              modelPath() foreach { mp ⇒
-                resources() = resources().copy(implicitPath = Some(treeNodeDataToTreeNode(mp)))
-              }
               getResourceInfo
             }
 
@@ -317,16 +314,24 @@ class ModelWizardPanel extends ModalPanel {
     }
   }
 
-  def getResourceInfo = OMPost[Api].expandResources(resources()).call().foreach { lf ⇒
-    resources() = lf
+  def getResourceInfo = {
+    modelPath().foreach { mp ⇒
+      val modelName = mp.name
+      OMPost[Api].listFiles(mp.parent).call().foreach { b ⇒
+        val l = b.filterNot {
+          _.name == modelName
+        }
+        resources() = resources().copy(implicits = l, number = l.size)
+        OMPost[Api].expandResources(resources()).call().foreach { lf ⇒
+          resources() = lf
+        }
+      }
+    }
   }
 
   def getJarClasses(jarPath: SafePath) = {
-    println("GET JAR CLASSES")
     codeSelector.content() = Some(JavaLikeLanguage())
-    println("code selector  " + codeSelector.content())
     OMPost[Api].classes(jarPath).call().foreach { b ⇒
-      println("Classes " + b)
       val classContents = b.flatMap {
         _.flatten
       }
@@ -419,7 +424,7 @@ class ModelWizardPanel extends ModalPanel {
                   _.name
                 }, modelPath().map {
                   _.name
-                }).call().foreach {
+                }, resources()).call().foreach {
                   b ⇒
                     panels.treeNodePanel.fileDisplayer.tabs -- b
                     panels.treeNodePanel.displayNode(b)
@@ -631,25 +636,12 @@ class ModelWizardPanel extends ModalPanel {
           else {
             val body = tbody.render
             for {
-              i ← resources().implicitPath
+              i ← resources().implicits
             } yield {
-              val modelName = modelPath().map {
-                _.name
-              }.getOrElse("")
-              OMPost[Api].listFiles(i).call().foreach { b ⇒
-                val l = b.filterNot {
-                  _.name == modelName
-                }
-                resources() = resources().copy(number = l.size)
-                l.foreach { sp ⇒
-                  body.appendChild(
-                    tags.tr(
-                      bs.td(bs.col_md_3)(sp.name),
-                      bs.td(bs.col_md_2)(sp.readableSize)
-                    )
-                  )
-                }
-              }
+              body.appendChild(tags.tr(
+                bs.td(bs.col_md_3)(i.name),
+                bs.td(bs.col_md_2)(i.readableSize)
+              ).render)
             }
             bs.table(striped + spacer20)(body)
           }
