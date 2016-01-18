@@ -39,7 +39,7 @@ object OSGi extends Defaults {
     (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1", version := "0.8.0-rc1")
 
   lazy val slickVersion = "3.1.1"
-  lazy val slick = OsgiProject("com.typesafe.slick", exports = Seq("slick.*")) settings
+  lazy val slick = OsgiProject("com.typesafe.slick", exports = Seq("slick.*"), privatePackages = Seq("org.reactivestreams.*")) settings
     (libraryDependencies += "com.typesafe.slick" %% "slick" % slickVersion, version := slickVersion)
 
   lazy val slf4j = OsgiProject("org.slf4j") settings(
