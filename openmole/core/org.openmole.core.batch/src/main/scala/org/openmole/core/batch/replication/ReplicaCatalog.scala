@@ -32,10 +32,13 @@ import java.util.concurrent.TimeUnit
 
 import org.openmole.tool.lock.LockRepository
 import org.openmole.tool.logger.Logger
+import slick.jdbc.SQLActionBuilder
+import slick.profile.SqlAction
 
 import scala.annotation.tailrec
+import scala.concurrent.{ Future, Await }
 import scala.concurrent.duration._
-import scala.slick.driver.H2Driver.simple._
+import slick.driver.H2Driver.api._
 import scala.util.{ Success, Failure, Try }
 
 object ReplicaCatalog extends Logger {
@@ -65,13 +68,12 @@ object ReplicaCatalog extends Logger {
       url = s"jdbc:h2:tcp://localhost:${info.port}/${DBServerInfo.dbDirectory}/${DBServerInfo.urlDBPath}",
       user = info.user,
       password = info.password)
-    db.withSession {
-      s ⇒
-        val statement = s.createStatement()
-        statement.execute(s"SET DEFAULT_LOCK_TIMEOUT ${Workspace.preferenceAsDuration(LockTimeout).toMillis}")
-    }
+
+    Await.result(db.run { sqlu"""SET DEFAULT_LOCK_TIMEOUT ${Workspace.preferenceAsDuration(LockTimeout).toMillis}""" }, Duration.Inf)
     db
   }
+
+  def query[T](f: DBIOAction[T, slick.dbio.NoStream, scala.Nothing]) = Await.result(database.run(f), Duration.Inf)
 
   lazy val localLock = new LockRepository[ReplicaCacheKey]
 
@@ -79,22 +81,18 @@ object ReplicaCatalog extends Logger {
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
     expireAfterWrite(Workspace.preferenceAsDuration(ReplicaCacheTime).toSeconds, TimeUnit.SECONDS).build[ReplicaCacheKey, Replica]
 
-  def withSession[T](f: Session ⇒ T) = database.withSession { s ⇒ f(s) }
+  def inCatalog = inCatalogCache(inCatalogQuery, Workspace.preferenceAsDuration(InCatalogCacheTime).toMillis)
 
-  def inCatalog(implicit session: Session) = inCatalogCache(inCatalogQuery, Workspace.preferenceAsDuration(InCatalogCacheTime).toMillis)
-
-  private def inCatalogQuery(implicit session: Session): Map[String, Set[String]] =
-    replicas.map {
-      replica ⇒ (replica.storage, replica.hash)
-    }.run.groupBy(_._1).mapValues {
-      _.map { case (_, hash) ⇒ hash }.toSet
-    }.withDefaultValue(Set.empty)
+  private def inCatalogQuery: Map[String, Set[String]] = {
+    val all = query(replicas.map { replica ⇒ (replica.storage, replica.hash) }.result)
+    all.groupBy(_._1).mapValues { _.map { case (_, hash) ⇒ hash }.toSet }.withDefaultValue(Set.empty)
+  }
 
   def uploadAndGet(
     upload: ⇒ String,
     srcPath: File,
     hash: String,
-    storage: StorageService)(implicit token: AccessToken, session: Session): Replica = {
+    storage: StorageService)(implicit token: AccessToken): Replica = {
 
     val cacheKey = (srcPath.getCanonicalPath, hash, storage.id)
 
@@ -106,18 +104,18 @@ object ReplicaCatalog extends Logger {
 
           //If replica is already present on the storage with another hash
           def cleanOldReplicas = {
-            def getReplicasForSrcWithOtherHash =
+            val getReplicasForSrcWithOtherHash =
               replicas.filter { r ⇒
                 r.source === srcPath.getCanonicalPath && r.hash =!= hash && r.storage === storage.id
               }
 
-            val samePath = getReplicasForSrcWithOtherHash
+            val samePath = query(getReplicasForSrcWithOtherHash.result)
             samePath.foreach {
               replica ⇒
                 logger.fine(s"Remove obsolete $replica")
                 storage.backgroundRmFile(replica.path)
             }
-            samePath.delete
+            query(getReplicasForSrcWithOtherHash.delete)
           }
 
           @tailrec def uploadAndInsertIfNotInCatalog: Replica = {
@@ -141,16 +139,15 @@ object ReplicaCatalog extends Logger {
               r
             }
 
-            getReplica.firstOption match {
-              case Some(replica) ⇒ assertReplica(replica)
-              case None ⇒
+            import scala.concurrent.ExecutionContext.Implicits.global
+
+            val replica =
+              query(getReplica.result).lastOption.getOrElse {
                 val newFile = upload
-                val replica = session.withTransaction {
-                  getReplica.firstOption match {
-                    case Some(r) ⇒
-                      logger.fine("Already in database deleting")
-                      storage.backgroundRmFile(newFile)
-                      assertReplica(r)
+
+                val action =
+                  getReplica.result.map(_.lastOption).map {
+                    case Some(r) ⇒ (r, Some(newFile))
                     case None ⇒
                       val newReplica = Replica(
                         source = srcPath.getCanonicalPath,
@@ -158,25 +155,20 @@ object ReplicaCatalog extends Logger {
                         path = newFile,
                         hash = hash,
                         lastCheckExists = System.currentTimeMillis)
+                      replicas += newReplica
+                      (newReplica, Option.empty[String])
+                  }.transactionally
 
-                      assert(newReplica.path != null)
+                val (replica, delete) = query { action }
 
-                      logger.fine(s"Insert $newReplica")
-                      try replicas += newReplica
-                      catch {
-                        case t: JdbcSQLException ⇒
-                          storage.backgroundRmFile(newFile)
-                          throw t
-                      }
-                      assertReplica(newReplica)
-                  }
-                }
+                delete.foreach(storage.backgroundRmFile)
+                replica
+              }
 
-                if (stillExists(replica)) replica
-                else {
-                  remove(replica.id)
-                  uploadAndInsertIfNotInCatalog
-                }
+            if (stillExists(replica)) replica
+            else {
+              remove(replica.id)
+              uploadAndInsertIfNotInCatalog
             }
           }
 
@@ -186,18 +178,13 @@ object ReplicaCatalog extends Logger {
           replica
       }
     }
-
   }
 
-  def forPaths(paths: Seq[String])(implicit session: Session) =
-    for {
-      r ← replicas
-      if r.path inSetBind paths
-    } yield r
+  def forPaths(paths: Seq[String]) = query { replicas.filter(_.path inSetBind paths).result }
 
-  def onStorage(storage: StorageService)(implicit session: Session) = replicas.filter { _.storage === storage.id }
+  def deleteReplicas(storage: StorageService) = query { replicas.filter { _.storage === storage.id }.delete }
 
-  def remove(id: Long)(implicit session: Session) = {
+  def remove(id: Long) = query {
     logger.fine(s"Remove replica with id $id")
     replicas.filter { _.id === id }.delete
   }

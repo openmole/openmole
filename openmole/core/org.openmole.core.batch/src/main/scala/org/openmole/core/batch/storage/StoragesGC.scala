@@ -25,7 +25,7 @@ import org.openmole.core.updater.IUpdatable
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.logger.Logger
 import scala.ref.WeakReference
-import scala.slick.driver.H2Driver.simple._
+import slick.driver.H2Driver.api._
 
 object StoragesGC extends Logger
 
@@ -36,20 +36,18 @@ class StoragesGC(storagesRef: WeakReference[Iterable[StorageService]]) extends I
   override def update: Boolean =
     storagesRef.get match {
       case Some(storages) ⇒
-        ReplicaCatalog.withSession { implicit session ⇒
-          for {
-            storage ← storages
-            replica ← replicas.filter { _.storage === storage.id }
-          } {
-            try
-              if (!new File(replica.source).exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preferenceAsDuration(ReplicaCatalog.NoAccessCleanTime).toMillis) {
-                logger.fine(s"Remove gc $replica")
-                ReplicaCatalog.remove(replica.id)
-                storage.backgroundRmFile(replica.path)
-              }
-            catch {
-              case t: Throwable ⇒ logger.log(FINE, "Error while garbage collecting the replicas", t)
+        for {
+          storage ← storages
+          replica ← ReplicaCatalog.query { replicas.filter { _.storage === storage.id }.result }
+        } {
+          try
+            if (!new File(replica.source).exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preferenceAsDuration(ReplicaCatalog.NoAccessCleanTime).toMillis) {
+              logger.fine(s"Remove gc $replica")
+              ReplicaCatalog.remove(replica.id)
+              storage.backgroundRmFile(replica.path)
             }
+          catch {
+            case t: Throwable ⇒ logger.log(FINE, "Error while garbage collecting the replicas", t)
           }
         }
         true

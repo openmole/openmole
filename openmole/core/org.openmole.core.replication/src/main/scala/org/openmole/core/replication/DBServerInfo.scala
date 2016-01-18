@@ -22,7 +22,6 @@ import java.util.UUID
 import com.thoughtworks.xstream.XStream
 import java.io.File
 import scala.io.Source
-import scala.slick.driver.H2Driver.simple._
 import java.net._
 
 import scala.util.Try

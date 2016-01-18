@@ -24,8 +24,6 @@ import fr.iscpif.gridscale.storage._
 import org.openmole.core.tools.cache._
 import org.openmole.tool.logger.Logger
 
-import scala.slick.driver.H2Driver.simple._
-
 object PersistentStorageService extends Logger {
 
   val TmpDirRemoval = new ConfigurationLocation("StorageService", "TmpDirRemoval")
@@ -40,10 +38,10 @@ trait PersistentStorageService extends StorageService {
 
   import PersistentStorageService._
 
-  override def persistentDir(implicit token: AccessToken, session: Session): String =
+  override def persistentDir(implicit token: AccessToken): String =
     unwrap { directoryCache.get("persistentDir", () ⇒ createPersistentDir) }
 
-  private def createPersistentDir(implicit token: AccessToken, session: Session) = {
+  private def createPersistentDir(implicit token: AccessToken) = {
     val persistentPath = child(baseDir, persistent)
     if (!super.exists(persistentPath)) super.makeDir(persistentPath)
 
@@ -53,7 +51,7 @@ trait PersistentStorageService extends StorageService {
       }.getOrElse(true)
 
     val names = listNames(persistentPath)
-    val inReplica = ReplicaCatalog.forPaths(names.map { child(persistentPath, _) }).run.map(_.path).toSet
+    val inReplica = ReplicaCatalog.forPaths(names.map { child(persistentPath, _) }).map(_.path).toSet
 
     for {
       name ← names

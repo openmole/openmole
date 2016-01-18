@@ -33,8 +33,6 @@ import fr.iscpif.gridscale.storage.{ ListEntry, FileType }
 import java.io._
 import org.openmole.tool.logger.Logger
 
-import scala.slick.driver.H2Driver.simple._
-
 object StorageService extends Logger {
 
   val DirRegenerate = new ConfigurationLocation("StorageService", "DirRegenerate")
@@ -50,7 +48,7 @@ trait StorageService extends BatchService with Storage {
   val id: String
   val remoteStorage: RemoteStorage
 
-  def persistentDir(implicit token: AccessToken, session: Session): String
+  def persistentDir(implicit token: AccessToken): String
   def tmpDir(implicit token: AccessToken): String
 
   @transient private lazy val _directoryCache =
@@ -71,8 +69,8 @@ trait StorageService extends BatchService with Storage {
 
   protected implicit def callable[T](f: () ⇒ T): Callable[T] = new Callable[T]() { def call() = f() }
 
-  def clean(implicit token: AccessToken, session: Session) = {
-    ReplicaCatalog.onStorage(this).delete
+  def clean(implicit token: AccessToken) = {
+    ReplicaCatalog.deleteReplicas(this)
     rmDir(baseDir)
     directoryCache.invalidateAll
   }
