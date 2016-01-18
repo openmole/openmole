@@ -88,7 +88,7 @@ class ModelWizardPanel extends ModalPanel {
   val currentReactives: Var[Seq[Reactive]] = Var(Seq())
   val updatableTable: Var[Boolean] = Var(true)
   val bodyContent: Var[Option[TypedTag[HTMLDivElement]]] = Var(None)
-  val resources: Var[Resources] = Var(Resources(Seq(), Seq(), 0))
+  val resources: Var[Resources] = Var(Resources.empty)
   val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
   val upButton: Var[HTMLDivElement] = Var(tags.div().render)
@@ -208,6 +208,7 @@ class ModelWizardPanel extends ModalPanel {
                 if (fInput.files.length > 0) {
                   emptyJARSelectors
                   modelPath() = None
+                  resources() = Resources.empty
                   val fileName = fInput.files.item(0).name
                   labelName() = Some(fileName)
                   filePath() = Some(manager.current.safePath() ++ fileName)

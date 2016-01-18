@@ -547,6 +547,10 @@ case class JarMethod(methodName: String, argumentTypes: Seq[String], returnType:
   val name = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
 }
 
+object Resources{
+  def empty = Resources(Seq(), Seq(), 0)
+}
+
 case class Resources(paths: Seq[TreeNodeData], implicits: Seq[TreeNodeData], number: Int) {
   def withNoImplicit = copy(implicits = Seq())
 
