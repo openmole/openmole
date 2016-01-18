@@ -1,7 +1,7 @@
 package org.openmole.gui.misc.js
 
 import fr.iscpif.scaladget.api.ClassKeyAggregator
-import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLElement, HTMLSpanElement }
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLButtonElement, HTMLElement, HTMLSpanElement }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.TypedTag
@@ -50,5 +50,16 @@ object OMTags {
   val glyph_arrow_right_and_left = "glyphicon-resize-horizontal"
 
   def buttonGroup(keys: ClassKeyAggregator = emptyCK) = bs.div("btn-group " + keys.key)
+
+  def alert(alertType: ClassKeyAggregator, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, todocancel: () ⇒ Unit, buttonGroupClass: ClassKeyAggregator = "left") =
+    tags.div(role := "alert")(
+      content,
+      bs.div("spacer20")(
+        buttonGroup(buttonGroupClass)(
+          bs.button("OK", btn_danger, todook),
+          bs.button("Cancel", btn_default, todocancel)
+        )
+      )
+    )
 
 }

@@ -84,7 +84,17 @@ object ApiImpl extends Api {
 
   def deleteFile(safePath: SafePath): Unit = safePathToFile(safePath).recursiveDelete
 
-  def extractTGZ(safePath: SafePath): Unit =
+  private def getExtractedTGZTo(from: File, to: File): Seq[SafePath] = {
+    extractTGZToFromFiles(from, to)
+    to.listFiles.toSeq
+  }
+
+  private def extractTGZToFromFiles(from: File, to: File): Unit = {
+    from.extractUncompress(to, true)
+    to.applyRecursive((f: File) ⇒ f.setWritable(true))
+  }
+
+  private def extractTGZ(safePath: SafePath): Unit =
     safePath.extension match {
       case FileExtension.TGZ ⇒
         val archiveFile = safePathToFile(safePath)
@@ -93,21 +103,55 @@ object ApiImpl extends Api {
       case _ ⇒
     }
 
-  def extractTGZTo(safePath: SafePath, to: SafePath): Unit = {
+  private def extractTGZTo(safePath: SafePath, to: SafePath): Unit = {
     safePath.extension match {
       case FileExtension.TGZ ⇒
         val archiveFile = safePathToFile(safePath)
         val toFile: File = to
-        //TODO: ask whetehr overwrite or not ?
-        archiveFile.extractUncompress(toFile, true)
-        toFile.applyRecursive((f: File) ⇒ f.setWritable(true))
+        extractTGZTo(archiveFile, to)
       case _ ⇒
     }
   }
 
   def extractTGZ(treeNodeData: TreeNodeData): Unit = extractTGZ(treeNodeData.safePath)
 
+  def temporaryFile: SafePath = Files.createTempDirectory("openmoleGUI").toFile
+
   def exists(safePath: SafePath): Boolean = safePathToFile(safePath).exists
+
+  def moveFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = Utils.moveFromTmp(tmpSafePath, filesToBeMovedTo)
+
+  def moveAllTo(tmpSafePath: SafePath, to: SafePath): Unit = Utils.moveAllTo(tmpSafePath, to)
+
+  // Test whether safePathToTest exists in "in"
+  def existsIn(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {
+
+    def test(sps: Seq[SafePath], inDir: SafePath = in) = {
+
+      sps.filter { sp ⇒
+        exists(inDir ++ sp.name)
+      }.map { sp ⇒ inDir ++ sp.name }
+    }
+
+    val fileType: FileType = safePathToTest
+    fileType match {
+      case a: Archive ⇒ a.language match {
+        case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
+        case _ ⇒
+          val emptyFile = new File("")
+          val from = getFile(emptyFile, safePathToTest.path)
+          val to = getFile(emptyFile, safePathToTest.parent.path)
+          val toTest = in ++ safePathToTest.nameWithNoExtension
+          val extracted = getExtractedTGZTo(from, to)
+          deleteFile(from)
+          if (toTest.exists) {
+            test(extracted, toTest)
+          }
+          else Seq()
+      }
+      case _ ⇒ test(Seq(safePathToTest))
+    }
+  }
 
   private def treeNodeData(treeNodeData: TreeNodeData): TreeNodeData = {
     val tnd: TreeNodeData = safePathToFile(treeNodeData.safePath)
@@ -118,16 +162,12 @@ object ApiImpl extends Api {
     treeNodeData
   }
 
-  def listFiles(tnd: TreeNodeData): Seq[TreeNodeData] = Utils.listFiles(tnd.safePath)
-
   def listFiles(sp: SafePath): Seq[TreeNodeData] = Utils.listFiles(sp)
 
   def move(from: SafePath, to: SafePath): Unit = {
     val fromFile = safePathToFile(from)
     val toFile = safePathToFile(to)
-    if (fromFile.exists && toFile.exists) {
-      fromFile.move(new File(toFile, from.path.last))
-    }
+    Utils.move(fromFile, toFile)
   }
 
   def mdToHtml(safePath: SafePath): String = safePath.extension match {
@@ -271,8 +311,6 @@ object ApiImpl extends Api {
     (envData, outputs)
   }
 
-  def buildInfo = buildinfo.info
-
   def marketIndex() = {
     def download[T](action: InputStream ⇒ T): T = {
       val url = new URL(buildinfo.marketAddress)
@@ -355,8 +393,7 @@ object ApiImpl extends Api {
   //Extract models from an archive
   def models(archivePath: SafePath): Seq[SafePath] = {
     val toDir = archivePath.toNoExtention
-    extractTGZTo(archivePath, toDir)
-    deleteFile(archivePath)
+    // extractTGZToAndDeleteArchive(archivePath, toDir)
     for {
       tnd ← listFiles(toDir) if FileType.isSupportedLanguage(tnd.safePath)
     } yield tnd.safePath
@@ -374,7 +411,8 @@ object ApiImpl extends Api {
                      outputs: Seq[ProtoTypePair],
                      path: SafePath,
                      imports: Option[String],
-                     libraries: Option[String]): TreeNodeData = {
+                     libraries: Option[String],
+                     resources: Resources): TreeNodeData = {
     val modelTaskFile = new File(path, scriptName + ".oms")
 
     val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))
@@ -385,6 +423,7 @@ object ApiImpl extends Api {
     def default(key: String, value: String) = s"  $key := $value"
 
     try {
+      imports.foreach { i ⇒ os.write(s"import $i._\n") }
       for (p ← ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct)) yield {
         os.write("val " + p._1 + " = Val[" + p._2 + "]\n")
       }
@@ -398,6 +437,7 @@ object ApiImpl extends Api {
       val imFileString = imapString(ifilemappings, "fileInputs")
       val ouString = ioString(ous, "outputs")
       val omFileString = omapString(ofilemappings, "fileOutputs")
+      val resourcesString = s"""  resources += (${resources.paths.map { r ⇒ s"workDirectory / ${(r.safePath.path.drop(1).mkString("/")).mkString(",")}" }})\n"""
       val defaults =
         "  //Default values. Can be removed if OpenMOLE Vals are set by a value coming from the workflow\n" +
           (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
@@ -410,23 +450,21 @@ object ApiImpl extends Api {
         case ctt: CareTaskType ⇒
           os.write(
             s"""\nval task = CareTask(workDirectory / "$executableName", "$command") set(\n""" +
-              inString + ouString + imFileString + omFileString + defaults
+              inString + ouString + imFileString + omFileString + resourcesString + defaults
           )
         case ntt: NetLogoTaskType ⇒
 
           val imString = imapString(imappings, "netLogoInputs")
           val omString = omapString(omappings, "netLogoOutputs")
           os.write(
-            s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}")) set(\n""" +
-              // embeddWorkspace.map { b ⇒ s"  embeddWorkspace := ${b.toString},\n" }.getOrElse("") +
+            s"""\nval task = NetLogo5Task(workDirectory / "$executableName", List("${command.split('\n').mkString("\",\"")}"), embedWorkspace = ${!resources().implicits.isEmpty}) set(\n""" +
               inString + ouString + imString + omString + imFileString + omFileString + defaults
           )
         case st: ScalaTaskType ⇒
           os.write(
             s"""\nval task = ScalaTask(\n\"\"\"$command\"\"\") set(\n""" +
-              s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n" +
-              s"${imports.map { i ⇒ s"  imports += ${imports.map { i ⇒ s"$i._" }}," }.getOrElse("")}\n" +
-              inString + ouString + imFileString + omFileString + defaults
+              s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n\n" +
+              inString + ouString + imFileString + omFileString + resourcesString + defaults
           )
 
         case _ ⇒ ""
@@ -443,14 +481,15 @@ object ApiImpl extends Api {
 
   def expandResources(resources: Resources): Resources = {
     val paths = treeNodeData(resources.paths).distinct
-    val implicitResource = resources.implicitPath.map {
+    val implicitResource = resources.implicits.map {
       treeNodeData
     }
 
     Resources(
       paths,
       implicitResource,
-      paths.size + implicitResource.map { listFiles(_).size }.getOrElse(0))
+      paths.size + implicitResource.size
+    )
   }
 
   def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {

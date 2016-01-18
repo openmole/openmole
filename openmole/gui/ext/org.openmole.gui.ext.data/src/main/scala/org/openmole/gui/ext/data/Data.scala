@@ -164,7 +164,9 @@ case class SafePath(path: Seq[String], extension: FileExtension) {
 
   def name = path.last
 
-  def toNoExtention = copy(path = path.dropRight(1) :+ path.last.split('.').head)
+  def toNoExtention = copy(path = path.dropRight(1) :+ nameWithNoExtension)
+
+  def nameWithNoExtension = name.split('.').head
 }
 
 sealed trait AuthenticationData extends Data {
@@ -207,6 +209,10 @@ case class UploadAuthentication() extends UploadType {
 
 case class UploadPlugin() extends UploadType {
   def typeName = "plugin"
+}
+
+case class UploadAbsolute() extends UploadType {
+  def typeName = "absolute"
 }
 
 @JSExport
@@ -541,8 +547,12 @@ case class JarMethod(methodName: String, argumentTypes: Seq[String], returnType:
   val name = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
 }
 
-case class Resources(paths: Seq[TreeNodeData], implicitPath: Option[TreeNodeData], number: Int) {
-  def withNoImplicit = copy(implicitPath = None)
+object Resources{
+  def empty = Resources(Seq(), Seq(), 0)
+}
+
+case class Resources(paths: Seq[TreeNodeData], implicits: Seq[TreeNodeData], number: Int) {
+  def withNoImplicit = copy(implicits = Seq())
 
   def withEmptyPaths = copy(paths = Seq())
 
@@ -550,5 +560,5 @@ case class Resources(paths: Seq[TreeNodeData], implicitPath: Option[TreeNodeData
 
   def withPath(p: TreeNodeData) = copy(paths = paths :+ p)
 
-  def size = paths.size + Seq(implicitPath).flatten.size
+  def size = paths.size + implicits.size
 }

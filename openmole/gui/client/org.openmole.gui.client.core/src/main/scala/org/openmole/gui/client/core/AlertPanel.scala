@@ -19,7 +19,9 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.AbsolutePositioning.{ Zone, FullPage, CenterTransform, Transform }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
+import org.openmole.gui.misc.js.OMTags
 import org.scalajs.dom.html.Div
+import org.scalajs.dom.raw.HTMLDivElement
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 import org.openmole.gui.misc.js.JsRxTags._
@@ -29,16 +31,25 @@ import rx._
 object AlertPanel {
   private val panel = new AlertPanel
 
-  val div = panel.alertDiv
+  val alertDiv = panel.alertDiv
 
-  def popup(message: String,
-            okaction: () ⇒ Unit,
-            cancelaction: () ⇒ Unit = () ⇒ {},
-            transform: Transform = CenterTransform(),
-            zone: Zone = FullPage(),
-            alertType: ClassKeyAggregator = warning) = {
-    panel.popup(message, okaction, cancelaction, transform, zone, alertType)
+  def div(messageDiv: TypedTag[HTMLDivElement],
+          okaction: () ⇒ Unit,
+          cancelaction: () ⇒ Unit = () ⇒ {},
+          transform: Transform = CenterTransform(),
+          zone: Zone = FullPage(),
+          alertType: ClassKeyAggregator = warning,
+          buttonGroupClass: ClassKeyAggregator = "left"): Unit = {
+    panel.popup(messageDiv, okaction, cancelaction, transform, zone, alertType, buttonGroupClass)
   }
+
+  def string(message: String,
+             okaction: () ⇒ Unit,
+             cancelaction: () ⇒ Unit = () ⇒ {},
+             transform: Transform = CenterTransform(),
+             zone: Zone = FullPage(),
+             alertType: ClassKeyAggregator = warning,
+             buttonGroupClass: ClassKeyAggregator = "left"): Unit = div(tags.div(message), okaction, cancelaction, transform, zone, alertType, buttonGroupClass)
 }
 
 class AlertPanel {
@@ -57,13 +68,14 @@ class AlertPanel {
     if (visible()) s"alertOverlay ${overlayZone().zoneClass}" else "displayNone"
   })(elementDiv)
 
-  def popup(message: String,
+  def popup(messageDiv: TypedTag[HTMLDivElement],
             okaction: () ⇒ Unit,
             cancelaction: () ⇒ Unit,
             transform: Transform,
             zone: Zone = FullPage(),
-            alertType: ClassKeyAggregator = warning) = {
-    alertElement() = bs.alert(alertType, message, actionWrapper(okaction), actionWrapper(cancelaction))
+            alertType: ClassKeyAggregator = warning,
+            buttonGroupClass: ClassKeyAggregator = "left") = {
+    alertElement() = OMTags.alert(alertType, messageDiv, actionWrapper(okaction), actionWrapper(cancelaction), buttonGroupClass)
     transform(elementDiv)
     overlayZone() = zone
     visible() = true

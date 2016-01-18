@@ -117,6 +117,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       case "project"        ⇒ moveTo(Utils.webUIProjectFile)
       case "authentication" ⇒ moveTo(Utils.authenticationKeysFile)
       case "plugin"         ⇒ ApiImpl.addPlugins(moveTo(Workspace.pluginDir))
+      case "absolute"       ⇒ moveTo(new File(""))
     }
 
   }
