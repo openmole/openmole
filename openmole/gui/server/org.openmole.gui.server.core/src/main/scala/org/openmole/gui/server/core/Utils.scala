@@ -208,31 +208,36 @@ object Utils {
       from.move(new File(to, from.getName))
     }
 
-  def moveFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = {
+  def copy(from: File, to: File): Unit =
+    if (from.exists && to.exists) {
+      from.copy(new File(to, from.getName))
+    }
+
+  def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = {
     val tmp: File = getFile(new File(""), tmpSafePath.path)
 
     filesToBeMovedTo.foreach { f ⇒
       val from = getFile(tmp, Seq(f.name))
       val toFile: File = f.parent
-      move(from, toFile)
+      copy(from, toFile)
     }
 
   }
 
-  def moveAllTo(tmpSafePath: SafePath, to: SafePath): Unit = {
+  def copyAllTo(tmpSafePath: SafePath, to: SafePath): Unit = {
+
     val f: File = getFile(new File(""), tmpSafePath.path)
-    val childs = {
+
+    val dirToCopy = {
       val level1 = f.listFiles.toSeq
-      if (level1.size == 1) {
-        level1.headOption.filter { _.isDirectory }.map { _.listFiles.toSeq }.getOrElse(level1)
-      }
-      else level1
+      if (level1.size == 1) level1.head
+      else f
     }
 
     to.mkdir
-    childs.foreach { c ⇒
-      move(c, to)
-    }
+    val toFile: File = to
+    dirToCopy.copy(toFile)
+
   }
 
 }

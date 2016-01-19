@@ -119,9 +119,9 @@ object ApiImpl extends Api {
 
   def exists(safePath: SafePath): Boolean = safePathToFile(safePath).exists
 
-  def moveFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = Utils.moveFromTmp(tmpSafePath, filesToBeMovedTo)
+  def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = Utils.copyFromTmp(tmpSafePath, filesToBeMovedTo)
 
-  def moveAllTo(tmpSafePath: SafePath, to: SafePath): Unit = Utils.moveAllTo(tmpSafePath, to)
+  def copyAllTo(tmpSafePath: SafePath, to: SafePath): Unit = Utils.copyAllTo(tmpSafePath, to)
 
   // Test whether safePathToTest exists in "in"
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {
