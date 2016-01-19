@@ -245,7 +245,7 @@ class ModelWizardPanel extends ModalPanel {
         },
         UploadAbsolute(),
         () ⇒ {
-          OMPost[Api].existsIn(tempFile ++ fileName, uploadPath.parent).call().foreach { existing ⇒
+          OMPost[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach { existing ⇒
             val fileType: FileType = uploadPath
 
             val (targetPath, language) = fileType match {

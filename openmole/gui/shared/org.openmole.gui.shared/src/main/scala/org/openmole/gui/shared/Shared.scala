@@ -40,7 +40,7 @@ trait Api {
   def deleteFile(safePath: SafePath): Unit
   def temporaryFile(): SafePath
   def exists(safePath: SafePath): Boolean
-  def existsIn(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
+  def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
   def treeNodeData(safePaths: Seq[TreeNodeData]): Seq[TreeNodeData]
   def listFiles(path: SafePath): Seq[TreeNodeData]
   def mdToHtml(safePath: SafePath): String

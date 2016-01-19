@@ -221,7 +221,14 @@ object Utils {
 
   def moveAllTo(tmpSafePath: SafePath, to: SafePath): Unit = {
     val f: File = getFile(new File(""), tmpSafePath.path)
-    val childs = f.listFiles.toSeq
+    val childs = {
+      val level1 = f.listFiles.toSeq
+      if (level1.size == 1) {
+        level1.headOption.filter { _.isDirectory }.map { _.listFiles.toSeq }.getOrElse(level1)
+      }
+      else level1
+    }
+
     to.mkdir
     childs.foreach { c ⇒
       move(c, to)
