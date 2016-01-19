@@ -257,7 +257,7 @@ object StochasticGAIntegration {
 
   def aggregateVector(aggregation: Option[Seq[FitnessAggregation]], values: Vector[Vector[Double]]): Vector[Double] =
     aggregation match {
-      case Some(aggs) ⇒ (values zip aggs).map { case (p, a) ⇒ a(p) }
+      case Some(aggs) ⇒ (values.transpose zip aggs).map { case (p, a) ⇒ a(p) }
       case None       ⇒ values.transpose.map(_.median)
     }
 
