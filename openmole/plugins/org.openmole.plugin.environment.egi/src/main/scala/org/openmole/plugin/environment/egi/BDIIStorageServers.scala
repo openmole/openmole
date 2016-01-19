@@ -71,7 +71,7 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
     lazy val sizes = usedFileHashes.map { case (f, _) ⇒ f -> f.size }.toMap
     lazy val totalFileSize = sizes.values.sum
 
-    lazy val onStorage = ReplicaCatalog.withSession(ReplicaCatalog.inCatalog(_))
+    lazy val onStorage = ReplicaCatalog.inCatalog
     lazy val maxTime = nonEmpty.map(_.usageControl.time).max
     lazy val minTime = nonEmpty.map(_.usageControl.time).min
 
