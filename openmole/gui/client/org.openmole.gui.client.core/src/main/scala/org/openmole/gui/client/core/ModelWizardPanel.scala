@@ -245,7 +245,7 @@ class ModelWizardPanel extends ModalPanel {
         },
         UploadAbsolute(),
         () ⇒ {
-          OMPost[Api].existsIn(tempFile ++ fileName, uploadPath.parent).call().foreach { existing ⇒
+          OMPost[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach { existing ⇒
             val fileType: FileType = uploadPath
 
             val (targetPath, language) = fileType match {
@@ -260,7 +260,7 @@ class ModelWizardPanel extends ModalPanel {
 
             // Move files from tmp to target path
             if (existing.isEmpty) {
-              OMPost[Api].moveAllTo(tempFile, targetPath).call().foreach { b ⇒
+              OMPost[Api].copyAllTo(tempFile, targetPath).call().foreach { b ⇒
                 buildForm(uploadPath, fileType)
               }
             }
@@ -270,7 +270,7 @@ class ModelWizardPanel extends ModalPanel {
                 "Some files already exist, overwrite ?",
                 optionsDiv.div),
                 () ⇒ {
-                  OMPost[Api].moveFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach { b ⇒
+                  OMPost[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach { b ⇒
                     buildForm(uploadPath, fileType)
                   }
                 }, () ⇒ {}, buttonGroupClass = "right")

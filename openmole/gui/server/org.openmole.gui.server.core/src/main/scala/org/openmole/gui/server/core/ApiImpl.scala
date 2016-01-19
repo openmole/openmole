@@ -119,12 +119,12 @@ object ApiImpl extends Api {
 
   def exists(safePath: SafePath): Boolean = safePathToFile(safePath).exists
 
-  def moveFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = Utils.moveFromTmp(tmpSafePath, filesToBeMovedTo)
+  def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = Utils.copyFromTmp(tmpSafePath, filesToBeMovedTo)
 
-  def moveAllTo(tmpSafePath: SafePath, to: SafePath): Unit = Utils.moveAllTo(tmpSafePath, to)
+  def copyAllTo(tmpSafePath: SafePath, to: SafePath): Unit = Utils.copyAllTo(tmpSafePath, to)
 
   // Test whether safePathToTest exists in "in"
-  def existsIn(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {
+  def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {
 
     def test(sps: Seq[SafePath], inDir: SafePath = in) = {
 
@@ -143,7 +143,8 @@ object ApiImpl extends Api {
           val to = getFile(emptyFile, safePathToTest.parent.path)
           val toTest = in ++ safePathToTest.nameWithNoExtension
           val extracted = getExtractedTGZTo(from, to)
-          deleteFile(from)
+          (to / from.getName).recursiveDelete
+
           if (toTest.exists) {
             test(extracted, toTest)
           }

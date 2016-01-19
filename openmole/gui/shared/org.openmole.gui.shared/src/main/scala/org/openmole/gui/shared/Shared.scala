@@ -40,13 +40,13 @@ trait Api {
   def deleteFile(safePath: SafePath): Unit
   def temporaryFile(): SafePath
   def exists(safePath: SafePath): Boolean
-  def existsIn(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
+  def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
   def treeNodeData(safePaths: Seq[TreeNodeData]): Seq[TreeNodeData]
   def listFiles(path: SafePath): Seq[TreeNodeData]
   def mdToHtml(safePath: SafePath): String
   def move(from: SafePath, to: SafePath): Unit
-  def moveAllTo(tmpSafePath: SafePath, to: SafePath): Unit
-  def moveFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
+  def copyAllTo(tmpSafePath: SafePath, to: SafePath): Unit
+  def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
   def uuid(): String = java.util.UUID.randomUUID.toString
   def renameFileFromPath(filePath: SafePath, name: String): TreeNodeData
   def renameFile(treeNode: TreeNodeData, name: String): TreeNodeData
