@@ -51,7 +51,7 @@ package object abc {
 
     val sampling = LenormandSampling(algorithm, statePrototype)
     val explorationTask = ExplorationTask(sampling) set (_.setName(name + "Exploration"))
-    explorationTask setDefault Default.delayed(statePrototype, algorithm.initialState)
+    explorationTask setDefault Default(statePrototype, _ ⇒ algorithm.initialState)
     explorationTask addOutput statePrototype
 
     val exploration = StrainerCapsule(explorationTask)
