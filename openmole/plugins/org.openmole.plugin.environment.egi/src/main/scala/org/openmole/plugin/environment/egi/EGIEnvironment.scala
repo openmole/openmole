@@ -116,7 +116,7 @@ object EGIEnvironment extends Logger {
 
   Workspace += (ConnectionsBySRMSE, "10")
   Workspace += (ConnectionsByWMS, "10")
-  Workspace += (ConnectionsByWebDAVSE, "50")
+  Workspace += (ConnectionsByWebDAVSE, "20")
 
   Workspace += (ProxyRenewalRatio, "0.2")
   Workspace += (MinProxyRenewal, "PT5M")
