@@ -180,7 +180,7 @@ case class SafePath(path: Seq[String], extension: FileExtension, context: Server
 
   def nameWithNoExtension = name.split('.').head
 
- // def withAbsoluteFileSystem = copy(context = AbsoluteFileSystem)
+  def normalizedPathString = path.tail.mkString("/")
 }
 
 sealed trait AuthenticationData extends Data {

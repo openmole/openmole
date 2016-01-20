@@ -140,7 +140,7 @@ object CodeParsing {
         else if (line.startsWith("INPUTBOX")) parse(tail, args :+ parseInputBox(index), outputs)
         else if (line.startsWith("CHOOSER")) parse(tail, args :+ parseChooser(index), outputs)
         else if (line.startsWith("MONITOR")) parse(tail, args, outputs ++ parseMonitor(index))
-        else if (line.startsWith("PLOT")) parse(tail, args, outputs ++ parsePlot(index))
+        // else if (line.startsWith("PLOT")) parse(tail, args, outputs ++ parsePlot(index))
         else parse(tail, args, outputs)
       }
     }
@@ -165,18 +165,18 @@ object CodeParsing {
     }
 
     def parseMonitor(start: Int): Seq[ProtoTypePair] = {
-      val name = lines(start + 6).clean.split(' ')
+      val name = lines(start + 6).split(' ')
       if (name.size == 1) Seq(ProtoTypePair(name.head.clean, ProtoTYPE.DOUBLE, mapping = Some(name.head)))
       else Seq()
     }
 
-    def parsePlot(start: Int): Seq[ProtoTypePair] = (lines(start + 6).split(',') ++ lines(start + 7).split(',')).map {
+    /*def parsePlot(start: Int): Seq[ProtoTypePair] = (lines(start + 6).split(',') ++ lines(start + 7).split(',')).map {
       _.replaceAll(" ", "")
     }.filterNot { v ⇒
       Seq("ticks", "time").contains(v)
     }.map {
       n ⇒ ProtoTypePair(n.clean, ProtoTYPE.DOUBLE, mapping = Some(n))
-    }
+    }*/
 
     def parseChooser(start: Int): ProtoTypePair = {
       val name = lines(start + 5)
