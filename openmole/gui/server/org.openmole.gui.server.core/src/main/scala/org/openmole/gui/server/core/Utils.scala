@@ -52,27 +52,41 @@ object Utils {
     ak
   }
 
-  def isPlugin(path: SafePath): Boolean = !PluginManager.plugins(safePathToFile(path)).isEmpty
+  def isPlugin(path: SafePath): Boolean = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    !PluginManager.plugins(safePathToFile(path)).isEmpty
+  }
 
-  implicit def fileToSafePath(f: File): SafePath = SafePath(getPathArray(f, workspaceProjectFile), f)
+  implicit def fileToSafePath(f: File)(implicit context: ServerFileSytemContext): SafePath = {
+    context match {
+      case ProjectFileSystem ⇒ SafePath(getPathArray(f, workspaceProjectFile), f)
+      case _                 ⇒ SafePath(getPathArray(f, new File("")), f)
+    }
+  }
 
-  implicit def safePathToFile(s: SafePath): File = getFile(webUIProjectFile, s.path)
+  implicit def safePathToFile(s: SafePath)(implicit context: ServerFileSytemContext): File = {
+    context match {
+      case ProjectFileSystem ⇒ getFile(webUIProjectFile, s.path)
+      case _                 ⇒ getFile(new File(""), s.path)
+    }
 
-  implicit def seqOfSafePathToSeqOfFile(s: Seq[SafePath]): Seq[File] = s.map {
+  }
+
+  implicit def seqOfSafePathToSeqOfFile(s: Seq[SafePath])(implicit context: ServerFileSytemContext): Seq[File] = s.map {
     safePathToFile
   }
 
-  implicit def seqOfFileToSeqOfSafePath(s: Seq[File]): Seq[SafePath] = s.map {
+  implicit def seqOfFileToSeqOfSafePath(s: Seq[File])(implicit context: ServerFileSytemContext): Seq[SafePath] = s.map {
     fileToSafePath
   }
 
-  implicit def fileToTreeNodeData(f: File): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, isPlugin(f), f.length, readableByteCount(FileDecorator(f).size))
+  implicit def fileToTreeNodeData(f: File)(implicit context: ServerFileSytemContext = ProjectFileSystem): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, isPlugin(f), f.length, readableByteCount(FileDecorator(f).size))
 
-  implicit def seqfileToSeqTreeNodeData(fs: Seq[File]): Seq[TreeNodeData] = fs.map {
+  implicit def seqfileToSeqTreeNodeData(fs: Seq[File])(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)
   }
 
-  implicit def fileToOptionSafePath(f: File): Option[SafePath] = Some(fileToSafePath(f))
+  implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSytemContext): Option[SafePath] = Some(fileToSafePath(f))
 
   implicit def javaLevelToErrorLevel(level: Level): ErrorStateLevel = {
     if (level.intValue >= java.util.logging.Level.WARNING.intValue) ErrorLevel()
@@ -106,7 +120,7 @@ object Utils {
     getFile0(paths, root)
   }
 
-  def listFiles(path: SafePath): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
+  def listFiles(path: SafePath)(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
 
   def launchinCommands(model: SafePath): Seq[LaunchingCommand] =
     model.name.split('.').last match {
@@ -116,6 +130,7 @@ object Utils {
     }
 
   private def getCareBinInfos(careArchive: SafePath): Option[LaunchingCommand] = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val fileChannel = new RandomAccessFile(careArchive, "r").getChannel
 
     try {
@@ -155,6 +170,7 @@ object Utils {
   }
 
   def jarClasses(jarPath: SafePath): Seq[ClassTree] = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val zip = new ZipInputStream(new FileInputStream(jarPath))
     val classes = Stream.continually(zip.getNextEntry).
       takeWhile(_ != null).filter { e ⇒
@@ -193,6 +209,7 @@ object Utils {
   }
 
   def jarMethods(jarPath: SafePath, classString: String): Seq[JarMethod] = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val classLoader = new URLClassLoader(Seq(jarPath.toURI.toURL), this.getClass.getClassLoader)
     val clazz = Class.forName(classString, true, classLoader)
 
@@ -214,11 +231,12 @@ object Utils {
     }
 
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = {
-    val tmp: File = getFile(new File(""), tmpSafePath.path)
+    val tmp: File = safePathToFile(tmpSafePath)(ServerFileSytemContext.absolute)
+    //getFile(new File(""), tmpSafePath.path)
 
     filesToBeMovedTo.foreach { f ⇒
       val from = getFile(tmp, Seq(f.name))
-      val toFile: File = f.parent
+      val toFile: File = safePathToFile(f.parent)(ServerFileSytemContext.project)
       copy(from, toFile)
     }
 
@@ -226,7 +244,8 @@ object Utils {
 
   def copyAllTo(tmpSafePath: SafePath, to: SafePath): Unit = {
 
-    val f: File = getFile(new File(""), tmpSafePath.path)
+    val f: File = safePathToFile(tmpSafePath)(ServerFileSytemContext.absolute)
+    val toFile: File = safePathToFile(to)(ServerFileSytemContext.project)
 
     val dirToCopy = {
       val level1 = f.listFiles.toSeq
@@ -234,8 +253,7 @@ object Utils {
       else f
     }
 
-    to.mkdir
-    val toFile: File = to
+    toFile.mkdir
     dirToCopy.copy(toFile)
 
   }

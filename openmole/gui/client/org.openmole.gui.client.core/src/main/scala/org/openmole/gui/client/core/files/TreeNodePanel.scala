@@ -15,6 +15,7 @@ import org.openmole.gui.misc.js.{ _ }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import org.openmole.gui.ext.data.ServerFileSytemContext.project
 import org.openmole.gui.misc.js.Tooltip._
 import TreeNode._
 import autowire._
@@ -258,7 +259,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   }
 
   def trashNode(path: SafePath): Unit = {
-    OMPost[Api].deleteFile(path).call().foreach {
+    OMPost[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach {
       d ⇒
         refreshCurrentDirectory
         fileDisplayer.tabs.checkTabs

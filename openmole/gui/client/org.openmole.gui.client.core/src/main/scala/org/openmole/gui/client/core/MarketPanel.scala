@@ -130,7 +130,7 @@ class MarketPanel extends ModalPanel {
             AlertPanel.string(e.name + " already exists. Overwrite ? ",
               () ⇒ {
                 overwriteAlert() = None
-                OMPost[Api].deleteFile(manager.current.safePath() ++ e.name).call().foreach { d ⇒
+                OMPost[Api].deleteFile(manager.current.safePath() ++ e.name, ServerFileSytemContext.project).call().foreach { d ⇒
                   download(e)
                 }
               }, () ⇒ {

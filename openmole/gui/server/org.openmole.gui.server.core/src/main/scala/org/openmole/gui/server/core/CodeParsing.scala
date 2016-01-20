@@ -127,7 +127,7 @@ object CodeParsing {
   }
 
   def netlogoParsing(safePath: SafePath): LaunchingCommand = {
-
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val lines = Source.fromFile(safePath).getLines.toArray
 
     def parse(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {

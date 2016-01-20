@@ -24,7 +24,6 @@ import Select._
 import autowire._
 import org.scalajs.dom.html.TextArea
 import org.openmole.gui.client.core.files.TreeNode._
-import org.scalajs.dom.raw.HTMLInputElement
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLInputElement }
@@ -237,7 +236,7 @@ class ModelWizardPanel extends ModalPanel {
       }).render
 
   def moveFilesAndBuildForm(fInput: HTMLInputElement, fileName: String, uploadPath: SafePath) =
-    OMPost[Api].temporaryFile.call().foreach { tempFile ⇒
+    CoreUtils.withTmpFile { tempFile ⇒
       FileManager.upload(fInput,
         tempFile,
         (p: ProcessState) ⇒ {
@@ -248,20 +247,21 @@ class ModelWizardPanel extends ModalPanel {
           OMPost[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach { existing ⇒
             val fileType: FileType = uploadPath
 
-            val (targetPath, language) = fileType match {
+            val targetPath = fileType match {
               case a: Archive ⇒
                 a.language match {
-                  case j: JavaLikeLanguage ⇒ (uploadPath, j)
-                  case _                   ⇒ (uploadPath.toNoExtention, UndefinedLanguage)
+                  case j: JavaLikeLanguage ⇒ uploadPath
+                  case _                   ⇒ uploadPath.toNoExtention
                 }
-              case codeFile: CodeFile ⇒ (uploadPath, codeFile.language)
-              case _                  ⇒ (uploadPath, UndefinedLanguage)
+              case codeFile: CodeFile ⇒ uploadPath
+              case _                  ⇒ uploadPath
             }
 
             // Move files from tmp to target path
             if (existing.isEmpty) {
               OMPost[Api].copyAllTo(tempFile, targetPath).call().foreach { b ⇒
                 buildForm(uploadPath, fileType)
+                OMPost[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
               }
             }
             else {
@@ -272,10 +272,10 @@ class ModelWizardPanel extends ModalPanel {
                 () ⇒ {
                   OMPost[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach { b ⇒
                     buildForm(uploadPath, fileType)
+                    OMPost[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
                   }
                 }, () ⇒ {}, buttonGroupClass = "right")
             }
-
           }
         })
     }
