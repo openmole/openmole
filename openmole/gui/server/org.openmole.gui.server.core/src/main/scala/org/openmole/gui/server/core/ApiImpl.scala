@@ -144,8 +144,15 @@ object ApiImpl extends Api {
     // import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
 
     def test(sps: Seq[SafePath], inDir: SafePath = in) = {
+      import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
 
-      sps.filter { sp ⇒
+      val toTest: Seq[SafePath] = if (sps.size == 1) sps.flatMap { f ⇒
+        if (f.isDirectory) f.listFiles.map { _.safePath }
+        else Seq(f)
+      }
+      else sps
+
+      toTest.filter { sp ⇒
         exists(inDir ++ sp.name)
       }.map { sp ⇒ inDir ++ sp.name }
     }
@@ -158,7 +165,9 @@ object ApiImpl extends Api {
           // val emptyFile = new File("")
           val from: File = safePathToFile(safePathToTest)(ServerFileSytemContext.absolute)
           val to: File = safePathToFile(safePathToTest.parent)(ServerFileSytemContext.absolute)
-          val extracted = getExtractedTGZTo(from, to)(ServerFileSytemContext.absolute)
+          val extracted = getExtractedTGZTo(from, to)(ServerFileSytemContext.absolute).filterNot {
+            _ == safePathToTest
+          }
           val toTest = in ++ safePathToTest.nameWithNoExtension
           val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)(ServerFileSytemContext.project)
           new File(to, from.getName).recursiveDelete
