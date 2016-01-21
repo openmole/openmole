@@ -517,7 +517,7 @@ object ApiImpl extends Api {
 
         case _ ⇒ ""
       }
-      os.write("\n  )\n\ntask")
+      os.write("\n  )\n\ntask hook ToStringHook()")
     }
 
     finally {
