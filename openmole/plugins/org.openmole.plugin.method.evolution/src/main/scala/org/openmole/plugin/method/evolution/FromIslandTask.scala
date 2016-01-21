@@ -1,5 +1,5 @@
 /**
- * Created by Romain Reuillon on 20/01/16.
+ * Created by Romain Reuillon on 21/01/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -21,31 +21,27 @@ import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 
-object InitialStateTask {
+object FromIslandTask {
 
   def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
     new TaskBuilder {
       builder ⇒
-      addInput(t.statePrototype)
       addInput(t.populationPrototype)
-      addOutput(t.statePrototype)
       addOutput(t.populationPrototype)
 
-      setDefault(Default(t.statePrototype, ctx ⇒ t.operations.initialState(Task.buildRNG(ctx))))
-      setDefault(Default.value(t.populationPrototype, Vector.empty))
+      abstract class FromIslandTask extends Task {
 
-      abstract class InitialStateTask extends Task {
-        override def process(context: Context)(implicit rng: RandomProvider) =
-          Context(
-            Variable(t.statePrototype, t.operations.startTimeLens.set(System.currentTimeMillis)(context(t.statePrototype)))
-          )
+        override def process(context: Context)(implicit rng: RandomProvider) = {
+          val population = t.operations.migrateFromIsland(context(t.populationPrototype))
+          Variable(t.populationPrototype, population)
+        }
+
       }
 
-      def toTask = new InitialStateTask with Built
+      def toTask = new FromIslandTask with Built
     }
-
   }
 
 }

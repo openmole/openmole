@@ -180,6 +180,8 @@ package object evolution {
 
     val reassingRNGTask = ReassignStateRNGTask(algorithm)
 
+    val fromIsland = FromIslandTask(algorithm)
+
     val populationToOffspring =
       AssignTask(t.populationPrototype -> t.offspringPrototype) set (
         name := "populationToOffspring"
@@ -217,7 +219,7 @@ package object evolution {
       (inputs, outputs) += (t.statePrototype, islandPopulationPrototype)
     )
 
-    val slave = slaveFist -- (islandPopulationToPopulation, reassingRNGTask) -- islandCapsule -- populationToOffspring
+    val slave = slaveFist -- (islandPopulationToPopulation, reassingRNGTask) -- islandCapsule -- fromIsland -- populationToOffspring
 
     val masterSlave = MasterSlave(generateInitialIslands, masterTask, t.populationPrototype, t.statePrototype)(slave)
 
