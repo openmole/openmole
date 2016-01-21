@@ -45,6 +45,7 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
 
   def bdiiServer: BDII
   def voName: String
+  def debug: Boolean
   def proxyCreator: () ⇒ GlobusAuthentication.Proxy
 
   @transient lazy val storages = {
@@ -52,12 +53,12 @@ trait BDIIStorageServers extends BatchEnvironment { env ⇒
     val webdavStorages = bdiiServer.queryWebDAVLocations(voName, timeout)
     if (!webdavStorages.isEmpty) {
       logger.fine("Use webdav storages:" + webdavStorages.mkString(","))
-      webdavStorages.map { s ⇒ EGIWebDAVStorageService(s, env, proxyCreator) }
+      webdavStorages.map { s ⇒ EGIWebDAVStorageService(s, env, voName, debug, proxyCreator) }
     }
     else {
       val srmStorages = bdiiServer.querySRMLocations(voName, timeout)
       logger.fine("Use srm storages:" + srmStorages.mkString(","))
-      srmStorages.map { s ⇒ EGISRMStorageService(s, env, proxyCreator) }
+      srmStorages.map { s ⇒ EGISRMStorageService(s, env, voName, proxyCreator) }
     }
   }
 
