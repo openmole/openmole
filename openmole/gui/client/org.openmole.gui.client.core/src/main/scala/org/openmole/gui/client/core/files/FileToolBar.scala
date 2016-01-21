@@ -1,10 +1,15 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.CoreUtils
+import org.openmole.gui.ext.data.{ ProcessState, UploadProject }
 import org.openmole.gui.misc.js.OMTags
+import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.TypedTag
+import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import bs._
+import org.scalajs.dom.raw.{ HTMLSpanElement, HTMLInputElement }
 import rx._
 
 /*
@@ -73,11 +78,27 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     }
   )
 
-  def refresh = CoreUtils.refreshCurrentDirectory()
+  private def refresh = CoreUtils.refreshCurrentDirectory()
+
+  def fInputMultiple(todo: HTMLInputElement ⇒ Unit) = {
+    lazy val input: HTMLInputElement = tags.input(`class` := "upload", `type` := "file", multiple := "")(onchange := { () ⇒
+      todo(input)
+    }).render
+    input
+  }
+
+  def upbtn(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
+    glyph(glyph_upload + " fileUpload glyphmenu")(
+      fInputMultiple(todo)
+    )
+
+  private val upButton = upbtn((fileInput: HTMLInputElement) ⇒ {
+    FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ treeNodePanel.transferring() = p, UploadProject())
+  })
 
   val div = bs.div("centerFileTool")(
     glyphSpan(glyph_refresh + " glyphmenu", () ⇒ CoreUtils.refreshCurrentDirectory()),
-    glyphSpan(glyph_upload + " glyphmenu", () ⇒ println("upload")),
+    upButton,
     buildSpan(PluginTool, println("plug")),
     buildSpan(TrashTool, println("trash")),
     buildSpan(CopyTool, println("topy")),
