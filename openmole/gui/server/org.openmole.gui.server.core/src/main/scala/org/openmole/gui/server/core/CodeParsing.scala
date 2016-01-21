@@ -1,9 +1,8 @@
 package org.openmole.gui.server.core
 
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.DataUtils._
 import scala.io.Source
-import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
-import scala.reflect.runtime.{ universe ⇒ ru }
 import org.openmole.gui.server.core.Utils._
 
 /*
@@ -145,10 +144,6 @@ object CodeParsing {
       }
     }
 
-    implicit class CleanName(s: String) {
-      def clean = s.split('-').reduce(_ + _.capitalize).filterNot(Seq('?').contains)
-    }
-
     def parseSlider(start: Int): ProtoTypePair = {
       val name = lines(start + 5)
       ProtoTypePair(name.clean, ProtoTYPE.DOUBLE, lines(start + 9), Some(name))
@@ -169,14 +164,6 @@ object CodeParsing {
       if (name.size == 1) Seq(ProtoTypePair(name.head.clean, ProtoTYPE.DOUBLE, mapping = Some(name.head)))
       else Seq()
     }
-
-    /*def parsePlot(start: Int): Seq[ProtoTypePair] = (lines(start + 6).split(',') ++ lines(start + 7).split(',')).map {
-      _.replaceAll(" ", "")
-    }.filterNot { v ⇒
-      Seq("ticks", "time").contains(v)
-    }.map {
-      n ⇒ ProtoTypePair(n.clean, ProtoTYPE.DOUBLE, mapping = Some(n))
-    }*/
 
     def parseChooser(start: Int): ProtoTypePair = {
       val name = lines(start + 5)

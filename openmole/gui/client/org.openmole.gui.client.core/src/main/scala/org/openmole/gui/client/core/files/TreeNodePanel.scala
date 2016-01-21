@@ -3,6 +3,7 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core.AbsolutePositioning.FileZone
 import org.openmole.gui.client.core.ClientProcessState._
 import org.openmole.gui.client.core.{ panels, AlertPanel, PanelTriggerer, OMPost }
+import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
@@ -15,7 +16,6 @@ import org.openmole.gui.misc.js.{ _ }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import org.openmole.gui.ext.data.ServerFileSytemContext.project
 import org.openmole.gui.misc.js.Tooltip._
 import TreeNode._
 import autowire._
@@ -39,14 +39,6 @@ import bs._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object TreeNodePanel {
-
-  def sons(dirNode: DirNode) = OMPost[Api].listFiles(dirNode.safePath()).call()
-
-}
-
-import TreeNodePanel._
-
 class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
@@ -55,7 +47,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val fileDisplayer = new FileDisplayer
   val fileTooBar = new FileToolBar(this)
 
-  computeAllSons(manager.current)
+  CoreUtils.refreshCurrentDirectory()
+  //computeAllSons(manager.current)
 
   val newNodeInput: Input = bs.input("")(
     placeholder := "File name",
@@ -93,10 +86,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 addRootDirButton.content().map {
                   _ match {
                     case dt: DirNodeType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
-                      if (b) refreshCurrentDirectory
+                      if (b) CoreUtils.refreshCurrentDirectory()
                     }
                     case ft: FileNodeType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
-                      if (b) refreshCurrentDirectory
+                      if (b) CoreUtils.refreshCurrentDirectory()
                     }
                   }
                 }
@@ -109,7 +102,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                   FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject())
                 })).tooltip("Upload file")),
             inputGroupAddon(id := "fileinput-addon")(
-              tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ refreshCurrentDirectory })(
+              tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ CoreUtils.refreshCurrentDirectory() })(
                 glyph(glyph_refresh)
               ).tooltip("Refresh file tree", RightDirection()))
           )
@@ -132,7 +125,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         tags.td(height := "40px",
           textAlign := "center",
           transferring.withWaiter { _ ⇒
-            refreshCurrentDirectory
+            CoreUtils.refreshCurrentDirectory()
             tags.div()
           }
         )
@@ -230,40 +223,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       case _ ⇒ ReactiveLine(tn, classType, todo).render
     }
 
-  def computeSons(dn: DirNode): Unit = {
-    sons(dn).foreach {
-      sons ⇒
-        dn.sons() = sons
-    }
-  }
-
-  def computeAllSons(dn: DirNode): Unit = {
-    sons(dn).foreach {
-      sons ⇒
-        dn.sons() = sons
-        dn.sons().foreach {
-          tn ⇒
-            tn match {
-              case (d: DirNode) ⇒ computeAllSons(d)
-              case _            ⇒
-            }
-        }
-    }
-  }
-
-  def refreshCurrentDirectory = {
-    refresh(manager.current)
-  }
-
-  def refresh(dn: DirNode) = {
-    computeAllSons(dn)
-    newNodeInput.value = ""
-  }
-
   def trashNode(path: SafePath): Unit = {
     OMPost[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach {
       d ⇒
-        refreshCurrentDirectory
+        CoreUtils.refreshCurrentDirectory()
         fileDisplayer.tabs.checkTabs
     }
   }
@@ -284,7 +247,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       OMPost[Api].renameFile(treeNode, newName).call().foreach {
         newNode ⇒
           fileDisplayer.tabs.rename(treeNode, newNode)
-          refreshCurrentDirectory
+          CoreUtils.refreshCurrentDirectory()
           toBeEdited() = None
           fileDisplayer.tabs.checkTabs
       }
@@ -301,8 +264,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 fileDisplayer.tabs.saveAllTabs(() ⇒
                   OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach {
                     b ⇒
-                      refreshCurrentDirectory
-                      refresh(d)
+                      CoreUtils.refreshCurrentDirectory()
+                      CoreUtils.refresh(d)
                       fileDisplayer.tabs.checkTabs
                   }
                 )
@@ -376,7 +339,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
           tn.safePath().extension match {
             case FileExtension.TGZ ⇒ glyphSpan(glyph_archive, () ⇒ {
               OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
-                refreshCurrentDirectory
+                CoreUtils.refreshCurrentDirectory()
               }
             })(`class` := "glyphitem file-glyph")
             case _ ⇒

@@ -95,7 +95,7 @@ class MarketPanel extends ModalPanel {
     OMPost[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading().updatedFirst(_._1 == entry, (entry, Var(Processed())))
       downloading().headOption.foreach(_ ⇒ close)
-      panels.treeNodePanel.refreshCurrentDirectory
+      CoreUtils.refreshCurrentDirectory()
     }
   }
 
