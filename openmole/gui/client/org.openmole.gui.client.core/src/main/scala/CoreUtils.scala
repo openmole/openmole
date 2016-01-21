@@ -1,11 +1,11 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.client.core.files.DirNode
 import org.openmole.gui.ext.data._
 import org.openmole.gui.shared.Api
 import autowire._
-import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import scala.util.{ Failure, Success }
+import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org
@@ -42,4 +42,34 @@ object CoreUtils {
       todo(tempFile)
     }
   }
+
+  def refresh(dn: DirNode, onrefreshed: ⇒ Unit = () ⇒ {}) = {
+    computeAllSons(dn)
+    onrefreshed
+  }
+
+  def refreshCurrentDirectory(onrefreshed: ⇒ Unit = () ⇒ {}) = refresh(manager.current, onrefreshed)
+
+  private def computeSons(dn: DirNode): Unit = {
+    sons(dn).foreach {
+      sons ⇒
+        dn.sons() = sons
+    }
+  }
+
+  private def computeAllSons(dn: DirNode): Unit = {
+    sons(dn).foreach {
+      sons ⇒
+        dn.sons() = sons
+        dn.sons().foreach {
+          tn ⇒
+            tn match {
+              case (d: DirNode) ⇒ computeAllSons(d)
+              case _            ⇒
+            }
+        }
+    }
+  }
+
+  def sons(dirNode: DirNode) = OMPost[Api].listFiles(dirNode.safePath()).call()
 }

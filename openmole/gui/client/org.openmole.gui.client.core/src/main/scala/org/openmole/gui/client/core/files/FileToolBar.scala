@@ -1,7 +1,9 @@
 package org.openmole.gui.client.core.files
 
+import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.misc.js.OMTags
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import bs._
 import rx._
 
@@ -71,8 +73,10 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     }
   )
 
+  def refresh = CoreUtils.refreshCurrentDirectory()
+
   val div = bs.div("centerFileTool")(
-    glyphSpan(glyph_refresh + " glyphmenu", () ⇒ println("refresh")),
+    glyphSpan(glyph_refresh + " glyphmenu", () ⇒ CoreUtils.refreshCurrentDirectory()),
     glyphSpan(glyph_upload + " glyphmenu", () ⇒ println("upload")),
     buildSpan(PluginTool, println("plug")),
     buildSpan(TrashTool, println("trash")),

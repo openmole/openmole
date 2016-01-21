@@ -301,7 +301,7 @@ class ModelWizardPanel extends ModalPanel {
             OMPost[Api].models(uploadPath).call().foreach { models ⇒
               fileToUploadPath() = models.headOption
               modelSelector.setContents(models, () ⇒ {
-                panels.treeNodePanel.refreshCurrentDirectory
+                CoreUtils.refreshCurrentDirectory()
                 onModelChange
               })
               getResourceInfo
@@ -349,7 +349,7 @@ class ModelWizardPanel extends ModalPanel {
   def setLaunchingCommand(filePath: SafePath) = {
     emptyJARSelectors
     OMPost[Api].launchingCommands(filePath).call().foreach { b ⇒
-      panels.treeNodePanel.refreshCurrentDirectory
+      CoreUtils.refreshCurrentDirectory()
       launchingCommand() = b.headOption
       fileToUploadPath() = Some(filePath)
       launchingCommand().foreach { lc ⇒
@@ -437,7 +437,7 @@ class ModelWizardPanel extends ModalPanel {
                   b ⇒
                     panels.treeNodePanel.fileDisplayer.tabs -- b
                     panels.treeNodePanel.displayNode(b)
-                    panels.treeNodePanel.refreshCurrentDirectory
+                    CoreUtils.refreshCurrentDirectory()
                 }
           }
       })
