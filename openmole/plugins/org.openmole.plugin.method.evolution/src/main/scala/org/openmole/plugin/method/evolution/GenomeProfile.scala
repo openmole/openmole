@@ -18,6 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo.algorithm.{ profile, noisyprofile }
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.tools.FromContext
 
@@ -27,34 +28,48 @@ import Scalaz._
 object GenomeProfile {
 
   def apply(
-    x: Int,
+    x: Prototype[Double],
     nX: Int,
     genome: Genome,
-    objective: Objective) =
+    objective: Objective) = {
+
+    val xIndex =
+      genome.indexWhere(_ == x) match {
+        case -1 ⇒ throw new UserBadDataError(s"Variable $x not found in the genome")
+        case x  ⇒ x
+      }
+
     DeterministicGenomeProfile(
       profile.OpenMOLE(
         genomeSize = Genome.size(genome),
-        niche = DeterministicGenomeProfile.niche(x, nX),
+        niche = DeterministicGenomeProfile.niche(xIndex, nX),
         operatorExploration = operatorExploration
       ),
       genome,
       objective
     )
+  }
 
   def apply(
-    x: Int,
+    x: Prototype[Double],
     nX: Int,
     genome: Genome,
     objective: Objective,
     replication: Replication[Id],
     paretoSize: Int = 20) = {
 
+    val xIndex =
+      genome.indexWhere(_ == x) match {
+        case -1 ⇒ throw new UserBadDataError(s"Variable $x not found in the genome")
+        case x  ⇒ x
+      }
+
     def aggregation(h: Vector[Double]) = StochasticGAIntegration.aggregate(replication.aggregationClosures, h)
 
     StochasticGenomeProfile(
       noisyprofile.OpenMOLE(
         mu = paretoSize,
-        niche = StochasticGenomeProfile.niche(x, nX),
+        niche = StochasticGenomeProfile.niche(xIndex, nX),
         operatorExploration = operatorExploration,
         genomeSize = Genome.size(genome),
         historySize = replication.max,
