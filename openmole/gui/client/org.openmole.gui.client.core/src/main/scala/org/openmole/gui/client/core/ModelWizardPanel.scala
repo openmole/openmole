@@ -412,7 +412,7 @@ class ModelWizardPanel extends ModalPanel {
           launchingCommand().foreach {
             lc ⇒
               val path = manager.current.safePath()
-              val scriptName = scriptNameInput.value
+              val scriptName = scriptNameInput.value.clean
               val target = targetPath().map { tp ⇒
                 modelSelector.content().map { c ⇒
                   tp.normalizedPathString + "/" + c.name
