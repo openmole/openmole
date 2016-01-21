@@ -36,7 +36,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean) 
 
     def cpCommand =
       serializedJob.storage match {
-        case _: EGIWebDAVStorageService ⇒ Curl(voName)
+        case _: EGIWebDAVStorageService ⇒ Curl(voName, debug)
         case _                          ⇒ LCGCp(voName)
       }
 

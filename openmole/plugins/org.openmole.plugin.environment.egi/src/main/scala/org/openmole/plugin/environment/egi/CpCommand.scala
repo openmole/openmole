@@ -35,9 +35,9 @@ case class LCGCp(voName: String) extends CpCommands {
   def download(from: URI, to: String) = s"$lcgCp ${SRMStorage.fullEndpoint(from.getHost, from.getPort, from.getPath)} file:$to"
 }
 
-case class Curl(voName: String) extends CpCommands {
+case class Curl(voName: String, debug: Boolean) extends CpCommands {
   @transient lazy val curl =
-    s"curl --connect-timeout $getTimeOut --max-time $getTimeOut --cert $$X509_USER_PROXY --key $$X509_USER_PROXY --cacert $$X509_USER_PROXY --capath $$X509_CERT_DIR -f "
+    s"curl ${if (debug) "--verbose" else ""} --connect-timeout $getTimeOut --max-time $getTimeOut --cert $$X509_USER_PROXY --key $$X509_USER_PROXY --cacert $$X509_USER_PROXY --capath $$X509_CERT_DIR -f "
 
   def upload(from: String, to: URI) = s"$curl -T $from -L $to"
   def download(from: URI, to: String) = s"$curl -L $from -o $to"
