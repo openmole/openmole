@@ -65,23 +65,17 @@ object DBServer extends App {
       Logger.getLogger(this.getClass.getName).info("Create BDD")
       fullDataBaseFile.delete
 
-      def setPassword: DBIO[Int] = sqlu"SET PASSWORD '$password'"
+      val h2 = db(user, "")
 
-      val setup = DBIO.seq(
-        replicas.schema.create,
-        setPassword
-      )
+      Await.result(h2.run(replicas.schema.create), Duration.Inf)
 
-      Await.result(db(user, "").run(setup), Duration.Inf)
+      val session = h2.createSession()
 
-      //val s = db(user, "").createSession()
+      try session.withStatement() {
+        _.execute(s"SET PASSWORD '$password';")
+      }
+      finally session.close()
 
-      /*db(user, "").withSession { implicit s ⇒
-        replicas.ddl.create
-        s.withStatement() {
-          _.execute(s"SET PASSWORD '$password';")
-        }
-      }*/
     }
 
     val info =
