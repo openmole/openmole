@@ -51,6 +51,8 @@ object OMTags {
   val glyph_arrow_left = "glyphicon-arrow-left"
   val glyph_arrow_right_and_left = "glyphicon-resize-horizontal"
   val glyph_filter = "glyphicon-filter"
+  val glyph_copy = "glyphicon-copy"
+  val glyph_paste = "glyphicon-paste"
 
   def buttonGroup(keys: ClassKeyAggregator = emptyCK) = bs.div("btn-group " + keys.key)
 

@@ -40,6 +40,14 @@ object FileToolBar {
     val glyph = glyph_plus
   }
 
+  object PluginTool extends SelectedTool {
+    val glyph = OMTags.glyph_plug
+  }
+
+  object CopyTool extends SelectedTool {
+    val glyph = OMTags.glyph_copy
+  }
+
 }
 
 import FileToolBar._
@@ -54,27 +62,22 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   }
 
   def rxClass(sTool: SelectedTool) = Rx {
-      "glyphicon " + sTool.glyph + " glyphmenu " + selectedTool().filter(_ == sTool).map { _ ⇒ "selectedTool" }.getOrElse("")
-    }
+    "glyphicon " + sTool.glyph + " glyphmenu " + selectedTool().filter(_ == sTool).map { _ ⇒ "selectedTool" }.getOrElse("")
+  }
 
+  def buildSpan(selectedTool: SelectedTool, action: ⇒ Unit) = OMTags.glyphSpan(rxClass(selectedTool))(
+    click(selectedTool) {
+      action
+    }
+  )
 
   val div = bs.div("centerFileTool")(
     glyphSpan(glyph_refresh + " glyphmenu", () ⇒ println("refresh")),
     glyphSpan(glyph_upload + " glyphmenu", () ⇒ println("upload")),
-    OMTags.glyphSpan(rxClass(TrashTool))(
-      click(TrashTool) {
-        println("trash")
-      }
-    ),
-    OMTags.glyphSpan(rxClass(FileCreationTool))(
-      click(FileCreationTool) {
-        println("plus")
-      }
-    ),
-    OMTags.glyphSpan(rxClass(FilterTool))(
-      click(FilterTool) {
-        println("filter")
-      }
-    )
+    buildSpan(PluginTool, println("plug")),
+    buildSpan(TrashTool, println("trash")),
+    buildSpan(CopyTool, println("topy")),
+    buildSpan(FileCreationTool, println("plus")),
+    buildSpan(FilterTool, println("filter"))
   )
 }
