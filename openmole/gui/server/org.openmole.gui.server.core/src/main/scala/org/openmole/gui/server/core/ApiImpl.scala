@@ -76,15 +76,24 @@ object ApiImpl extends Api {
   }
 
   // FILES
-  def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean = new File(treeNodeData.safePath, directoryName).mkdirs
+  def addDirectory(treeNodeData: TreeNodeData, directoryName: String): Boolean = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    new File(treeNodeData.safePath, directoryName).mkdirs
+  }
 
-  def addFile(treeNodeData: TreeNodeData, fileName: String): Boolean = new File(treeNodeData.safePath, fileName).createNewFile
+  def addFile(treeNodeData: TreeNodeData, fileName: String): Boolean = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    new File(treeNodeData.safePath, fileName).createNewFile
+  }
 
   def deleteAuthenticationKey(keyName: String): Unit = authenticationFile(keyName).delete
 
-  def deleteFile(safePath: SafePath): Unit = safePathToFile(safePath).recursiveDelete
+  def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit = {
+    implicit val ctx = context
+    safePathToFile(safePath).recursiveDelete
+  }
 
-  private def getExtractedTGZTo(from: File, to: File): Seq[SafePath] = {
+  private def getExtractedTGZTo(from: File, to: File)(implicit context: ServerFileSytemContext): Seq[SafePath] = {
     extractTGZToFromFiles(from, to)
     to.listFiles.toSeq
   }
@@ -97,27 +106,33 @@ object ApiImpl extends Api {
   private def extractTGZ(safePath: SafePath): Unit =
     safePath.extension match {
       case FileExtension.TGZ ⇒
-        val archiveFile = safePathToFile(safePath)
-        val parent: SafePath = archiveFile
-        extractTGZTo(safePath, parent)
+        // val archiveFile = safePathToFile(safePath)
+        //  val parent: SafePath = archiveFile
+        extractTGZTo(safePath, safePath.parent)
       case _ ⇒
     }
 
   private def extractTGZTo(safePath: SafePath, to: SafePath): Unit = {
     safePath.extension match {
       case FileExtension.TGZ ⇒
-        val archiveFile = safePathToFile(safePath)
-        val toFile: File = to
-        extractTGZTo(archiveFile, to)
+        // val archiveFile = safePathToFile(safePath)
+        // val toFile: File = to
+        extractTGZTo(safePath, to)
       case _ ⇒
     }
   }
 
   def extractTGZ(treeNodeData: TreeNodeData): Unit = extractTGZ(treeNodeData.safePath)
 
-  def temporaryFile: SafePath = Files.createTempDirectory("openmoleGUI").toFile
+  def temporaryFile(): SafePath = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
+    Files.createTempDirectory("openmoleGUI").toFile
+  }
 
-  def exists(safePath: SafePath): Boolean = safePathToFile(safePath).exists
+  def exists(safePath: SafePath): Boolean = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    safePathToFile(safePath).exists
+  }
 
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = Utils.copyFromTmp(tmpSafePath, filesToBeMovedTo)
 
@@ -126,9 +141,18 @@ object ApiImpl extends Api {
   // Test whether safePathToTest exists in "in"
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {
 
-    def test(sps: Seq[SafePath], inDir: SafePath = in) = {
+    // import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
 
-      sps.filter { sp ⇒
+    def test(sps: Seq[SafePath], inDir: SafePath = in) = {
+      import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
+
+      val toTest: Seq[SafePath] = if (sps.size == 1) sps.flatMap { f ⇒
+        if (f.isDirectory) f.listFiles.map { _.safePath }
+        else Seq(f)
+      }
+      else sps
+
+      toTest.filter { sp ⇒
         exists(inDir ++ sp.name)
       }.map { sp ⇒ inDir ++ sp.name }
     }
@@ -138,14 +162,17 @@ object ApiImpl extends Api {
       case a: Archive ⇒ a.language match {
         case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
         case _ ⇒
-          val emptyFile = new File("")
-          val from = getFile(emptyFile, safePathToTest.path)
-          val to = getFile(emptyFile, safePathToTest.parent.path)
+          // val emptyFile = new File("")
+          val from: File = safePathToFile(safePathToTest)(ServerFileSytemContext.absolute)
+          val to: File = safePathToFile(safePathToTest.parent)(ServerFileSytemContext.absolute)
+          val extracted = getExtractedTGZTo(from, to)(ServerFileSytemContext.absolute).filterNot {
+            _ == safePathToTest
+          }
           val toTest = in ++ safePathToTest.nameWithNoExtension
-          val extracted = getExtractedTGZTo(from, to)
-          (to / from.getName).recursiveDelete
+          val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)(ServerFileSytemContext.project)
+          new File(to, from.getName).recursiveDelete
 
-          if (toTest.exists) {
+          if (toTestFile.exists) {
             test(extracted, toTest)
           }
           else Seq()
@@ -155,56 +182,72 @@ object ApiImpl extends Api {
   }
 
   private def treeNodeData(treeNodeData: TreeNodeData): TreeNodeData = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val tnd: TreeNodeData = safePathToFile(treeNodeData.safePath)
     tnd.copy(safePath = treeNodeData.safePath)
   }
 
-  def treeNodeData(treeNodeDatas: Seq[TreeNodeData]): Seq[TreeNodeData] = treeNodeDatas.map {
-    treeNodeData
+  def treeNodeData(treeNodeDatas: Seq[TreeNodeData]): Seq[TreeNodeData] = {
+    treeNodeDatas.map {
+      treeNodeData
+    }
   }
 
-  def listFiles(sp: SafePath): Seq[TreeNodeData] = Utils.listFiles(sp)
+  def listFiles(sp: SafePath): Seq[TreeNodeData] = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    Utils.listFiles(sp)
+  }
 
   def move(from: SafePath, to: SafePath): Unit = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val fromFile = safePathToFile(from)
     val toFile = safePathToFile(to)
     Utils.move(fromFile, toFile)
   }
 
-  def mdToHtml(safePath: SafePath): String = safePath.extension match {
-    case FileExtension.MD ⇒ MarkDownProcessor(safePathToFile(safePath).content)
-    case _                ⇒ ""
+  def mdToHtml(safePath: SafePath): String = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+
+    safePath.extension match {
+      case FileExtension.MD ⇒ MarkDownProcessor(safePathToFile(safePath).content)
+      case _                ⇒ ""
+    }
   }
 
-  def renameFile(treeNodeData: TreeNodeData, name: String): TreeNodeData =
-    renameFileFromPath(safePathToFile(treeNodeData.safePath), name)
+  def renameFile(treeNodeData: TreeNodeData, name: String): TreeNodeData = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    val filePath = treeNodeData.safePath
+
+    val targetFile = new File(filePath.parent, name)
+
+    Files.move(safePathToFile(filePath), targetFile, StandardCopyOption.REPLACE_EXISTING)
+    TreeNodeData(name, targetFile, false, false, 0L, "")
+  }
 
   def renameKey(keyName: String, newName: String): Unit =
     Files.move(authenticationFile(keyName), authenticationFile(newName), StandardCopyOption.REPLACE_EXISTING)
 
-  def renameFileFromPath(filePath: SafePath, newName: String): TreeNodeData = {
-    val targetFile = new File(filePath.parent, newName)
-
-    Files.move(safePathToFile(filePath), targetFile, StandardCopyOption.REPLACE_EXISTING)
-    TreeNodeData(newName, targetFile, false, false, 0L, "")
-
+  def saveFile(path: SafePath, fileContent: String): Unit = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    safePathToFile(path).content = fileContent
   }
-
-  def saveFile(path: SafePath, fileContent: String): Unit = safePathToFile(path).content = fileContent
 
   def saveFiles(fileContents: Seq[AlterableFileContent]): Unit = fileContents.foreach { fc ⇒
     saveFile(fc.path, fc.content)
   }
 
-  def workspacePath(): SafePath = Utils.workspaceProjectFile
+  def workspacePath(): SafePath = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    Utils.workspaceProjectFile
+  }
 
   // EXECUTIONS
-
   def cancelExecution(id: ExecutionId): Unit = execution.cancel(id)
 
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
   def runScript(scriptData: ScriptData): Unit = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
 
     val execId = ExecutionId(getUUID)
     val script = safePathToFile(scriptData.scriptPath)
@@ -332,6 +375,7 @@ object ApiImpl extends Api {
   }
 
   def getMarketEntry(entry: buildinfo.MarketIndexEntry, path: SafePath) = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val url = new URL(entry.url)
     val is = new TarInputStream(new GZIPInputStream(url.openStream()))
     try {
@@ -343,11 +387,13 @@ object ApiImpl extends Api {
 
   //PLUGINS
   def addPlugin(path: SafePath): Unit = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val file = safePathToFile(path)
     addPlugins(PluginManager.plugins(file))
   }
 
   def autoAddPlugins(path: SafePath) = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val file = safePathToFile(path)
 
     def recurse(f: File): List[File] = {
@@ -414,6 +460,7 @@ object ApiImpl extends Api {
                      imports: Option[String],
                      libraries: Option[String],
                      resources: Resources): TreeNodeData = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
     val modelTaskFile = new File(path, scriptName + ".oms")
 
     val os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(modelTaskFile)))

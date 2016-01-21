@@ -1,6 +1,11 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.Api
+import autowire._
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.util.{ Failure, Success }
 
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org
@@ -30,5 +35,11 @@ object CoreUtils {
 
     def updatedFirst(cond: T ⇒ Boolean, s: T): Seq[T] =
       sequence.find(cond).map { e ⇒ updatedFirst(e, s) }.getOrElse(sequence)
+  }
+
+  def withTmpFile(todo: SafePath ⇒ Unit): Unit = {
+    OMPost[Api].temporaryFile.call().foreach { tempFile ⇒
+      todo(tempFile)
+    }
   }
 }

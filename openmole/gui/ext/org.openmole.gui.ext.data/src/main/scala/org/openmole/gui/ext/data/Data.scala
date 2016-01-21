@@ -154,8 +154,20 @@ object SafePath {
 
 import org.openmole.gui.ext.data.SafePath._
 
+sealed trait ServerFileSytemContext
+
+object AbsoluteFileSystem extends ServerFileSytemContext
+
+object ProjectFileSystem extends ServerFileSytemContext
+
+object ServerFileSytemContext {
+  implicit val absolute: ServerFileSytemContext = AbsoluteFileSystem
+  implicit val project: ServerFileSytemContext = ProjectFileSystem
+}
+
+
 //The path it relative to the project root directory
-case class SafePath(path: Seq[String], extension: FileExtension) {
+case class SafePath(path: Seq[String], extension: FileExtension, context: ServerFileSytemContext = ProjectFileSystem) {
   def /(safePath: SafePath) = sp(this.path ++ safePath.path, safePath.extension)
 
   def ++(s: String) = sp(this.path :+ s, s)
@@ -167,6 +179,8 @@ case class SafePath(path: Seq[String], extension: FileExtension) {
   def toNoExtention = copy(path = path.dropRight(1) :+ nameWithNoExtension)
 
   def nameWithNoExtension = name.split('.').head
+
+  def normalizedPathString = path.tail.mkString("/")
 }
 
 sealed trait AuthenticationData extends Data {

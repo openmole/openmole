@@ -37,7 +37,7 @@ trait Api {
   def addFile(treeNode: TreeNodeData, fileName: String): Boolean
   def extractTGZ(treeNodeData: TreeNodeData): Unit
   def deleteAuthenticationKey(keyName: String): Unit
-  def deleteFile(safePath: SafePath): Unit
+  def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit
   def temporaryFile(): SafePath
   def exists(safePath: SafePath): Boolean
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
@@ -48,7 +48,6 @@ trait Api {
   def copyAllTo(tmpSafePath: SafePath, to: SafePath): Unit
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
   def uuid(): String = java.util.UUID.randomUUID.toString
-  def renameFileFromPath(filePath: SafePath, name: String): TreeNodeData
   def renameFile(treeNode: TreeNodeData, name: String): TreeNodeData
   def renameKey(keyName: String, newName: String): Unit
   def saveFile(path: SafePath, fileContent: String): Unit
