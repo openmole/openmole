@@ -53,6 +53,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val transferring: Var[ProcessState] = Var(Standby())
   val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
+  val fileTooBar = new FileToolBar(this)
 
   computeAllSons(manager.current)
 
@@ -82,6 +83,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     Rx {
       tags.form(id := "adddir")(
         tags.div(`class` := "tree-header",
+          fileTooBar.div,
           inputGroup(navbar_left)(
             inputGroupButton(addRootDirButton.selector),
             inputGroupButton(tags.form(newNodeInput, onsubmit := { () ⇒

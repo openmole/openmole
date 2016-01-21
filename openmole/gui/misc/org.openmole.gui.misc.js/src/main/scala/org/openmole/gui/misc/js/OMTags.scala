@@ -4,9 +4,11 @@ import fr.iscpif.scaladget.api.ClassKeyAggregator
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLButtonElement, HTMLElement, HTMLSpanElement }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
+import org.openmole.gui.misc.js.JsRxTags._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import bs._
+import rx._
 
 /*
  * Copyright (C) 02/09/15 // mathieu.leclaire@openmole.org
@@ -48,6 +50,7 @@ object OMTags {
   val glyph_arrow_right = "glyphicon-arrow-right"
   val glyph_arrow_left = "glyphicon-arrow-left"
   val glyph_arrow_right_and_left = "glyphicon-resize-horizontal"
+  val glyph_filter = "glyphicon-filter"
 
   def buttonGroup(keys: ClassKeyAggregator = emptyCK) = bs.div("btn-group " + keys.key)
 
@@ -61,5 +64,15 @@ object OMTags {
         )
       )
     )
+
+  def glyphSpan(glyCA: ClassKeyAggregator, linkName: String = "")(todo: ⇒ Unit): TypedTag[HTMLSpanElement] =
+    tags.span(cursor := "pointer", glyph(glyCA)(linkName)(onclick := { () ⇒
+      todo
+    }))
+
+  def glyphSpan(rxString: Rx[String])(todo: ⇒ Unit): TypedTag[HTMLSpanElement] =
+    tags.span(cursor := "pointer", `class` := rxString, onclick := { () ⇒
+      todo
+    })
 
 }

@@ -167,6 +167,31 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     list-style-type: none;
     width: 100%;
 }
+.glyphmenu {
+    top: 5px;
+    margin-bottom: 20px;
+    margin-right: 5px;
+    color: white;
+    display: inline-block;
+    float: right;
+    opacity: 0.2;
+    padding-right: 5px;
+    transition: transform 0.1s ease-out 0s;
+    font-size: 20px;
+}
+
+.glyphmenu:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    color: #3086b5;
+}
+
+.selectedTool{
+    opacity: 1;
+    transform: scale(1.2);
+    color: #3086b5;
+}
+
 .glyphitem {
     top: 0;
     color: white;
@@ -191,6 +216,9 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 }
 #glyphtrash:hover {
     color: #CC3A36;
+}
+#glyphmenu:hover {
+    color: #3086b5;
 }
 #adddir {
     padding-left: 7px;
@@ -926,4 +954,10 @@ border-top-right-radius: 0px;
 .uploadPlugin {
     margin-right: -110px;
     padding-bottom: 30px;
+}
+
+.centerFileTool{
+    position: relative;
+    right: 30%;
+    left: 30%;
 }
