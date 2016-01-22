@@ -88,7 +88,7 @@ object GenomeProfile {
 
     def niche(x: Int, nX: Int) =
       mgo.niche.genomeProfile[profile.Individual](
-        values = (profile.Individual.genome composeLens profile.Genome.values).get,
+        values = (profile.Individual.genome composeLens profile.vectorValues).get,
         x = x,
         nX = nX)
 
