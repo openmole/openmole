@@ -2,11 +2,13 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data.{ Standby, ProcessState, UploadProject }
-import org.openmole.gui.misc.js.OMTags
+import org.openmole.gui.misc.js.{ Select, OMTags }
+import org.scalajs.dom.html.Input
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import bs._
 import org.scalajs.dom.raw.{ HTMLSpanElement, HTMLInputElement }
@@ -89,6 +91,7 @@ class FileToolBar {
     input
   }
 
+  //Upload tool
   def upbtn(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] =
     glyph(glyph_upload + " fileUpload glyphmenu")(
       fInputMultiple(todo)
@@ -98,7 +101,46 @@ class FileToolBar {
     FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject())
   })
 
+  // New file tool
+  val newNodeInput: Input = bs.input("")(
+    placeholder := "File name",
+    width := "130px",
+    autofocus
+  ).render
+
+  val addRootDirButton: Select[TreeNodeType] = {
+    val content = Seq((TreeNodeType.file, key(glyph_file)), (TreeNodeType.folder, key(glyph_folder_close)))
+    Select("fileOrFolder", content, content.map {
+      _._1
+    }.headOption, btn_success + "borderRightFlat", () ⇒ {
+      addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
+    })
+  }
+
+  val createFileTool = inputGroup(navbar_left)(
+    inputGroupButton(addRootDirButton.selector),
+    tags.form(newNodeInput, onsubmit := { () ⇒
+      {
+        val newFile = newNodeInput.value
+        val currentDirNode = manager.current
+        addRootDirButton.content().map {
+          _ match {
+            case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode, newFile)
+            case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode, newFile)
+          }
+        }
+      }
+      false
+    })
+  )
+
   val fileToolDiv = bs.div("fileToolPosition")(
+    Rx {
+      selectedTool() match {
+        case Some(FileCreationTool) ⇒ createFileTool
+        case _                      ⇒ tags.div()
+      }
+    },
     transferring.withWaiter { _ ⇒
       CoreUtils.refreshCurrentDirectory()
       tags.div()

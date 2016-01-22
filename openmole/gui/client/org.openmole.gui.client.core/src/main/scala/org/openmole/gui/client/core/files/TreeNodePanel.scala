@@ -8,7 +8,7 @@ import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
 import org.scalajs.dom.html.Input
-import org.scalajs.dom.raw.{ HTMLInputElement, DragEvent }
+import org.scalajs.dom.raw.DragEvent
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ tags ⇒ tags }
 import org.openmole.gui.misc.js.{ _ }
@@ -47,27 +47,12 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   CoreUtils.refreshCurrentDirectory()
 
-  val newNodeInput: Input = bs.input("")(
-    placeholder := "File name",
-    width := "130px",
-    autofocus
-  ).render
-
   val editNodeInput: Input = bs.input("")(
     placeholder := "Name",
     width := "130px",
     height := "26px",
     autofocus
   ).render
-
-  val addRootDirButton: Select[TreeNodeType] = {
-    val content = Seq((TreeNodeType.file, key(glyph_file)), (TreeNodeType.folder, key(glyph_folder_close)))
-    Select("fileOrFolder", content, content.map {
-      _._1
-    }.headOption, btn_success + "borderRightFlat", () ⇒ {
-      addRootDirButton.content().map { c ⇒ newNodeInput.placeholder = c.name + " name" }
-    })
-  }
 
   val view = tags.div(
     Rx {
@@ -126,8 +111,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     )
   )
 
-  def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {
-  }) =
+  def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
     FileManager.download(
       treeNode,
       (p: ProcessState) ⇒ fileTooBar.transferring() = p,
