@@ -164,7 +164,7 @@ object EGIEnvironment extends Logger {
   def apply(
     voName: String,
     bdii: Option[String] = None,
-    vomsURL: Option[String] = None,
+    vomsURLs: Option[Seq[String]] = None,
     fqan: Option[String] = None,
     openMOLEMemory: Option[Int] = None,
     memory: Option[Int] = None,
@@ -182,7 +182,7 @@ object EGIEnvironment extends Logger {
     new EGIEnvironment(
       voName = voName,
       bdii = bdii.getOrElse(Workspace.preference(EGIEnvironment.DefaultBDII)),
-      vomsURL = vomsURL.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
+      vomsURLs = vomsURLs.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
       fqan = fqan,
       openMOLEMemory = openMOLEMemory,
       memory = memory,
@@ -249,7 +249,7 @@ class EGIBatchExecutionJob(val job: Job, val environment: EGIEnvironment) extend
 class EGIEnvironment(
     val voName: String,
     val bdii: String,
-    val vomsURL: String,
+    val vomsURLs: Seq[String],
     val fqan: Option[String],
     override val openMOLEMemory: Option[Int],
     val memory: Option[Int],
@@ -288,7 +288,7 @@ class EGIEnvironment(
   @transient lazy val authentication = authentications(classOf[EGIAuthentication]).headOption match {
     case Some(a) ⇒
       EGIAuthentication.initialise(a)(
-        vomsURL,
+        vomsURLs,
         voName,
         fqan)(authentications)
     case None ⇒ throw new UserBadDataError("No authentication has been initialized for EGI.")
