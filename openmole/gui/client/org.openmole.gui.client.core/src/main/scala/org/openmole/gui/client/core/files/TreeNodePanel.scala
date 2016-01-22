@@ -158,7 +158,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   )
 
   def goToDirAction(dn: DirNode): () ⇒ Unit = () ⇒ {
-    println("clieked " + dn)
     manager.switch(dn)
     drawTree(manager.current.sons())
   }

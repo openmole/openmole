@@ -42,12 +42,9 @@ class TreeNodeManager {
   def +(dn: DirNode) = dirNodeLine() = dirNodeLine() :+ dn
 
   def switch(dn: DirNode) = {
-    println("switch " + dn)
-    println("switch #2" + dirNodeLine())
     dirNodeLine() = dirNodeLine().zipWithIndex.filter(_._1 == dn).headOption.map {
       case (dn, index) ⇒ take(index + 1)
     }.getOrElse(dirNodeLine())
-    println("switch #3" + dirNodeLine())
   }
 
   def allNodes = dirNodeLine().flatMap {
