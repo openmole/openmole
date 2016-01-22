@@ -48,7 +48,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val fileTooBar = new FileToolBar(this)
 
   CoreUtils.refreshCurrentDirectory()
-  //computeAllSons(manager.current)
 
   val newNodeInput: Input = bs.input("")(
     placeholder := "File name",
