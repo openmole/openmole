@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.AbsolutePositioning.FileZone
-import org.openmole.gui.client.core.ClientProcessState._
 import org.openmole.gui.client.core.{ panels, AlertPanel, PanelTriggerer, OMPost }
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data._
@@ -42,10 +41,9 @@ import bs._
 class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val toBeEdited: Var[Option[TreeNode]] = Var(None)
   val dragState: Var[String] = Var("")
-  val transferring: Var[ProcessState] = Var(Standby())
   val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
-  val fileTooBar = new FileToolBar(this)
+  val fileTooBar = new FileToolBar
 
   CoreUtils.refreshCurrentDirectory()
 
@@ -71,64 +69,61 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     })
   }
 
-  val view = tags.div(
-    Rx {
-      tags.form(id := "adddir")(
-        tags.div(`class` := "tree-header",
-          fileTooBar.div,
-          inputGroup(navbar_left)(
-            inputGroupButton(addRootDirButton.selector),
-            inputGroupButton(tags.form(newNodeInput, onsubmit := { () ⇒
-              {
-                val newFile = newNodeInput.value
-                val currentDirNode = manager.current
-                addRootDirButton.content().map {
-                  _ match {
-                    case dt: DirNodeType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
-                      if (b) CoreUtils.refreshCurrentDirectory()
-                    }
-                    case ft: FileNodeType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
-                      if (b) CoreUtils.refreshCurrentDirectory()
-                    }
-                  }
-                }
-              }
-              false
-            })),
-            inputGroupAddon(id := "fileinput-addon")(
-              tags.label(`class` := "inputFileStyleSmall",
-                uploadButton((fileInput: HTMLInputElement) ⇒ {
-                  FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject())
-                })).tooltip("Upload file")),
-            inputGroupAddon(id := "fileinput-addon")(
-              tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ CoreUtils.refreshCurrentDirectory() })(
-                glyph(glyph_refresh)
-              ).tooltip("Refresh file tree", RightDirection()))
-          )
-        )
+  val view = tags.div(Rx {
+    val toDraw = manager.drop(1)
+    val dirNodeLineSize = toDraw.size
+    tags.div(`class` := "tree-path",
+      buttonGroup()(
+        glyphButton(" Home", btn_primary, glyph_home, goToDirAction(manager.head))(dropPairs(manager.head)),
+        if (dirNodeLineSize > 2) goToDirButton(toDraw(dirNodeLineSize - 3), Some("...")),
+        toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
       )
-    },
+    )
+  },
     Rx {
-      val toDraw = manager.drop(1)
-      val dirNodeLineSize = toDraw.size
-      tags.div(`class` := "tree-path",
-        buttonGroup()(
-          glyphButton(" Home", btn_primary, glyph_home, goToDirAction(manager.head))(dropPairs(manager.head)),
-          if (dirNodeLineSize > 2) goToDirButton(toDraw(dirNodeLineSize - 3), Some("...")),
-          toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
-        )
-      )
+      // tags.form(id := "adddir")(
+      //  tags.div(`class` := "tree-header",
+
+      fileTooBar.div
+      //   inputGroup(navbar_left)(
+      /* inputGroupButton(addRootDirButton.selector),
+       tags.form(newNodeInput, onsubmit := { () ⇒
+         {
+           val newFile = newNodeInput.value
+           val currentDirNode = manager.current
+           addRootDirButton.content().map {
+             _ match {
+               case dt: DirNodeType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
+                 if (b) CoreUtils.refreshCurrentDirectory()
+               }
+               case ft: FileNodeType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
+                 if (b) CoreUtils.refreshCurrentDirectory()
+               }
+             }
+           }
+         }
+         false
+       })*/
+      /*,
+                 inputGroupAddon(id := "fileinput-addon")(
+                   tags.label(`class` := "inputFileStyleSmall",
+                     uploadButton((fileInput: HTMLInputElement) ⇒ {
+                       FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject())
+                     })).tooltip("Upload file")),
+                 inputGroupAddon(id := "fileinput-addon")(
+                   tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ CoreUtils.refreshCurrentDirectory() })(
+                     glyph(glyph_refresh)
+                   ).tooltip("Refresh file tree", RightDirection()))*/
+      //  )
+      // )
+      // )
     },
     tags.table(`class` := "tree" + dragState())(
-      tags.tr(
+      /* tags.tr(
         tags.td(height := "40px",
-          textAlign := "center",
-          transferring.withWaiter { _ ⇒
-            CoreUtils.refreshCurrentDirectory()
-            tags.div()
-          }
+          textAlign := "center"
         )
-      ),
+      ),*/
       tags.tr(
         Rx {
           if (manager.allNodes.size == 0) tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
@@ -142,7 +137,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   }) =
     FileManager.download(
       treeNode,
-      (p: ProcessState) ⇒ transferring() = p,
+      (p: ProcessState) ⇒ fileTooBar.transferring() = p,
       onLoaded
     )
 
