@@ -133,7 +133,7 @@ object GenomeProfile {
 
     def niche(x: Int, nX: Int) =
       mgo.niche.genomeProfile[Individual](
-        values = (Individual.genome composeLens noisyprofile.Genome.values).get,
+        values = (Individual.genome composeLens noisyprofile.vectorValues).get,
         x = x,
         nX = nX)
 
