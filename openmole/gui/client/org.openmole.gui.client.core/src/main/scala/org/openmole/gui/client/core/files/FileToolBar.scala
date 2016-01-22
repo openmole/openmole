@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.CoreUtils
-import org.openmole.gui.ext.data.{ ProcessState, UploadProject }
+import org.openmole.gui.ext.data.{ Standby, ProcessState, UploadProject }
 import org.openmole.gui.misc.js.OMTags
 import scalatags.JsDom.{ tags ⇒ tags }
 import scalatags.JsDom.TypedTag
@@ -11,6 +11,7 @@ import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager
 import bs._
 import org.scalajs.dom.raw.{ HTMLSpanElement, HTMLInputElement }
 import rx._
+import org.openmole.gui.client.core.ClientProcessState._
 
 /*
  * Copyright (C) 20/01/16 // mathieu.leclaire@openmole.org
@@ -59,9 +60,10 @@ object FileToolBar {
 
 import FileToolBar._
 
-class FileToolBar(treeNodePanel: TreeNodePanel) {
+class FileToolBar {
 
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
+  val transferring: Var[ProcessState] = Var(Standby())
 
   def click(tool: SelectedTool)(action: ⇒ Unit) = {
     action
@@ -93,8 +95,15 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     )
 
   private val upButton = upbtn((fileInput: HTMLInputElement) ⇒ {
-    FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ treeNodePanel.transferring() = p, UploadProject())
+    FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject())
   })
+
+  val fileToolDiv = bs.div("fileToolPosition")(
+    transferring.withWaiter { _ ⇒
+      CoreUtils.refreshCurrentDirectory()
+      tags.div()
+    }
+  )
 
   val div = bs.div("centerFileTool")(
     glyphSpan(glyph_refresh + " glyphmenu", () ⇒ CoreUtils.refreshCurrentDirectory()),
@@ -103,6 +112,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     buildSpan(TrashTool, println("trash")),
     buildSpan(CopyTool, println("topy")),
     buildSpan(FileCreationTool, println("plus")),
-    buildSpan(FilterTool, println("filter"))
+    buildSpan(FilterTool, println("filter")),
+    fileToolDiv
   )
 }

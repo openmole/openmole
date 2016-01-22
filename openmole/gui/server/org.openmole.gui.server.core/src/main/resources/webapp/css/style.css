@@ -110,24 +110,18 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .tree-path {
     margin-left: 3px;
     position: relative;
-    top: 17px;
 }
 .tree-path .btn-group .btn.btn-primary{
     background-color: #3086b5;
     border: #3086b5 solid 1px;
 }
-.tree-path .btn-group {
-    margin-top: 10px;
-}
-.tree-header {
-    margin-left: -4px;
-    margin-top: -23px;
-}
 .tree {
     margin-left: 3px;
     margin-right: 15px;
-    margin-top: 20px;
-    width: 94%;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    top: 30px;
 }
 .tree.droppable {
     border: 3px dashed white;
@@ -958,7 +952,8 @@ border-top-right-radius: 0px;
 
 .centerFileTool{
     position: relative;
-    right: 20%;
+    top: 25px;
+    right: 17%;
 }
 
 .fileUpload {
@@ -976,4 +971,14 @@ border-top-right-radius: 0px;
     cursor: pointer;
     opacity: 0;
     filter: alpha(opacity=0);
+}
+
+.fileToolPosition{
+    position: relative;
+    display: inline-block;
+    left: 55px;
+    width: 100%;
+    height: auto;
+    text-align:center;
+   
 }
