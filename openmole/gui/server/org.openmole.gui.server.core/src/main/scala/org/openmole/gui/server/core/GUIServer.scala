@@ -23,8 +23,7 @@ import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
 import org.eclipse.jetty.server.{ ServerConnector, Server }
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp._
-import org.openmole.console.Console
-import org.openmole.console.Console.ExitCodes
+import org.openmole.runtime.console._
 import org.openmole.core.tools.io.Network
 import org.openmole.core.workspace.{ ConfigurationLocation, Workspace }
 import org.scalatra.auth.strategy.{ BasicAuthStrategy, BasicAuthSupport }
@@ -64,7 +63,7 @@ import GUIServer._
 class GUIServer(port: Int, webapp: File, authentication: Boolean) {
 
   val server = new Server()
-  var exitCode = ExitCodes.ok
+  var exitCode = Console.ExitCodes.ok
   val semaphore = new Semaphore(0)
 
   val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
@@ -85,7 +84,7 @@ class GUIServer(port: Int, webapp: File, authentication: Boolean) {
   val authenticationMethod = if (authentication) Some(GUIServer.isPasswordCorrect _) else None
   val applicationControl =
     ApplicationControl(
-      () ⇒ { exitCode = ExitCodes.restart; stop() },
+      () ⇒ { exitCode = Console.ExitCodes.restart; stop() },
       () ⇒ stop()
     )
   context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(authenticationMethod, applicationControl))

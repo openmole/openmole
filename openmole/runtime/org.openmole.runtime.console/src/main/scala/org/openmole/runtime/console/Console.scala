@@ -15,21 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.console
+package org.openmole.runtime.console
 
 import jline.console.ConsoleReader
 import org.openmole.core.console.ScalaREPL
-import org.openmole.core.dsl.{ DSLPackage, Serializer }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.puzzle._
-import org.openmole.tool.file._
-import org.openmole.core.workflow.tools.PluginInfo
-import org.openmole.core.workspace._
-import scala.annotation.tailrec
-import org.openmole.core.workflow.task._
+import org.openmole.core.project._
 import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.workspace._
 import org.openmole.tool.file._
 
+import scala.annotation.tailrec
 import scala.util._
 
 object Console {
@@ -80,22 +76,7 @@ object Console {
 
 }
 
-import Console._
-
-object ConsoleVariables {
-  def empty = ConsoleVariables()
-
-  def bindVariables(loop: ScalaREPL, variables: ConsoleVariables, variablesName: String = "_variables_") =
-    loop.beQuietDuring {
-      loop.bind(variablesName, variables)
-      loop.eval(s"import $variablesName._")
-    }
-
-}
-
-case class ConsoleVariables(
-  args: Seq[String] = Seq.empty,
-  workDirectory: File = currentDirectory)
+import org.openmole.runtime.console.Console._
 
 class Console(password: Option[String] = None, script: Option[String] = None) {
   console ⇒
@@ -106,26 +87,6 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
   def serializer = "serializer"
   def commandsName = "_commands_"
   def pluginsName = "_plugins_"
-
-  def autoImports: Seq[String] = PluginInfo.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"$n._")
-  def keywordNamespace = "om"
-
-  def keywordNamespaceCode =
-    s"""
-       |object $keywordNamespace extends ${classOf[DSLPackage].getCanonicalName} with ${PluginInfo.pluginsInfo.flatMap(_.keywordTraits).mkString(" with ")}
-     """.stripMargin
-
-  def imports =
-    Seq(
-      "org.openmole.core.dsl._",
-      s"$commandsName._"
-    ) ++ autoImports
-
-  def initialisationCommands =
-    Seq(
-      imports.map("import " + _).mkString("; "),
-      keywordNamespaceCode
-    )
 
   def run(args: ConsoleVariables, workDirectory: Option[File]): Int = {
     val correctPassword =
@@ -187,25 +148,15 @@ class Console(password: Option[String] = None, script: Option[String] = None) {
 
   }
 
-  def initialise(loop: ScalaREPL, variables: ConsoleVariables) = {
-    variables.workDirectory.mkdirs()
-    loop.beQuietDuring {
-      loop.bind(commandsName, new Command(loop, variables))
-      initialisationCommands.foreach {
-        loop.interpret
-      }
-      ConsoleVariables.bindVariables(loop, variables)
-    }
-    loop
-  }
-
-  def newREPL(args: ConsoleVariables, quiet: Boolean = false) = {
-    val loop = new ScalaREPL(quiet = quiet)
-    initialise(loop, args)
-  }
-
   def withREPL[T](args: ConsoleVariables)(f: ScalaREPL ⇒ T) = {
-    val loop = newREPL(args)
+    val loop =
+      OpenMOLEREPL.newREPL(
+        args,
+        quiet = false,
+        intialisation = loop ⇒ loop.bind(commandsName, new Command(loop, args)),
+        additionnalImports = Seq(s"$commandsName._")
+      )
+
     try f(loop)
     finally loop.close
   }

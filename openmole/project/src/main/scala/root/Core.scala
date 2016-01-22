@@ -75,6 +75,8 @@ object Core extends Defaults {
   val console = OsgiProject("console", bundleActivator = Some("org.openmole.core.console.Activator"), global = true, imports = Seq("*")) dependsOn
     (pluginManager) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"), libraryDependencies += scalaLang)
 
+  val project = OsgiProject("project", imports = Seq("*")) dependsOn (console, dsl) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"))
+
   val buildinfo = OsgiProject("buildinfo", imports = Seq("*")) enablePlugins (ScalaJSPlugin) settings (
     buildInfoSettings ++
       Seq(
