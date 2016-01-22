@@ -6,7 +6,7 @@ import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
-import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
+import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.{ HTMLInputElement, DragEvent }
 import scalatags.JsDom.all._
@@ -69,17 +69,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     })
   }
 
-  val view = tags.div(Rx {
-    val toDraw = manager.drop(1)
-    val dirNodeLineSize = toDraw.size
-    tags.div(`class` := "tree-path",
-      buttonGroup()(
-        glyphButton(" Home", btn_primary, glyph_home, goToDirAction(manager.head))(dropPairs(manager.head)),
-        if (dirNodeLineSize > 2) goToDirButton(toDraw(dirNodeLineSize - 3), Some("...")),
-        toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn) }
-      )
-    )
-  },
+  val view = tags.div(
     Rx {
       // tags.form(id := "adddir")(
       //  tags.div(`class` := "tree-header",
@@ -117,13 +107,16 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       //  )
       // )
       // )
+    }, Rx {
+      val toDraw = manager.drop(1)
+      val dirNodeLineSize = toDraw.size
+      bs.div("tree-path")(
+        goToDirButton(manager.head, OMTags.glyphString(glyph_home) + " left oo"),
+        toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "oo", s"| ${dn.name()}") }
+      )
+
     },
     tags.table(`class` := "tree" + dragState())(
-      /* tags.tr(
-        tags.td(height := "40px",
-          textAlign := "center"
-        )
-      ),*/
       tags.tr(
         Rx {
           if (manager.allNodes.size == 0) tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
@@ -141,7 +134,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       onLoaded
     )
 
-  def goToDirButton(dn: DirNode, name: Option[String] = None) = bs.button(name.getOrElse(dn.name()), btn_default)(
+  def goToDirButton(dn: DirNode, ck: ClassKeyAggregator, name: String = "") = bs.span(ck)(name)(
     onclick := {
       () ⇒
         goToDirAction(dn)()
@@ -165,6 +158,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   )
 
   def goToDirAction(dn: DirNode): () ⇒ Unit = () ⇒ {
+    println("clieked " + dn)
     manager.switch(dn)
     drawTree(manager.current.sons())
   }
@@ -281,8 +275,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
     def clickablePair(classType: String, todo: () ⇒ Unit) = Seq(
       style := "float:left",
-      cursor := "pointer",
-      fontWeight := "bold",
+      cursor := "pointer", /*
+      fontWeight := "bold",*/
       draggable := true,
       onclick := { () ⇒ todo() },
       `class` := classType

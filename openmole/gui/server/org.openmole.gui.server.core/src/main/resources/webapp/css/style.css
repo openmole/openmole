@@ -110,10 +110,26 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
 .tree-path {
     margin-left: 3px;
     position: relative;
+    min-height: 27px;
+    padding-bottom: auto;
+    height: auto;
+    left: -10px;
+    padding-left: 10px;
+    padding-right: 18px;
+    width: 105%;
+    background-color: #3086b5;
+    padding-bottom: 5px;
+    word-wrap: break-word;
 }
 .tree-path .btn-group .btn.btn-primary{
     background-color: #3086b5;
     border: #3086b5 solid 1px;
+}
+.tree-path .btn-group {
+}
+.tree-header {
+    margin-left: -4px;
+    margin-top: -23px;
 }
 .tree {
     margin-left: 3px;
@@ -121,7 +137,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     position: relative;
     display: inline-block;
     width: 100%;
-    top: 30px;
+    top: 25px;
 }
 .tree.droppable {
     border: 3px dashed white;
@@ -168,7 +184,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     color: white;
     display: inline-block;
     float: right;
-    opacity: 0.2;
+    opacity: 0.9;
     padding-right: 5px;
     transition: transform 0.1s ease-out 0s;
     font-size: 20px;
@@ -952,7 +968,6 @@ border-top-right-radius: 0px;
 
 .centerFileTool{
     position: relative;
-    top: 25px;
     right: 17%;
 }
 
@@ -980,5 +995,20 @@ border-top-right-radius: 0px;
     width: 100%;
     height: auto;
     text-align:center;
-   
+}
+
+.oo{
+    position: relative;
+    top: 2px;
+    font-size: 15px;
+    color: white;
+    cursor: pointer;
+    padding-top: 6px;
+    font-weight: bold;
+    height: 5px;
+    margin-right: 5px;
+}
+
+.oo:hover{
+    color: #333;
 }

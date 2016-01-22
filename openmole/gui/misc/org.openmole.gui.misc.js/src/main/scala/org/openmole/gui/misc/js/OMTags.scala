@@ -67,6 +67,8 @@ object OMTags {
       )
     )
 
+  def glyphString(glyph: String) = "glyphicon " + glyph
+
   def glyphSpan(glyCA: ClassKeyAggregator, linkName: String = "")(todo: ⇒ Unit): TypedTag[HTMLSpanElement] =
     tags.span(cursor := "pointer", glyph(glyCA)(linkName)(onclick := { () ⇒
       todo
