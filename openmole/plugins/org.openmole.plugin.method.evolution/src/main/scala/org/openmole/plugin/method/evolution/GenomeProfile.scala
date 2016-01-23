@@ -34,7 +34,7 @@ object GenomeProfile {
     objective: Objective) = {
 
     val xIndex =
-      genome.indexWhere(_ == x) match {
+      genome.indexWhere(_.prototype == x) match {
         case -1 ⇒ throw new UserBadDataError(s"Variable $x not found in the genome")
         case x  ⇒ x
       }
@@ -59,7 +59,7 @@ object GenomeProfile {
     paretoSize: Int = 20) = {
 
     val xIndex =
-      genome.indexWhere(_ == x) match {
+      genome.indexWhere(_.prototype == x) match {
         case -1 ⇒ throw new UserBadDataError(s"Variable $x not found in the genome")
         case x  ⇒ x
       }

@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 10/06/13 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 22/01/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,16 +9,28 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
+package org.openmole.core.project
 
-package org.openmole.plugin.environment.egi
+import org.openmole.core.console._
+import org.openmole.tool.file._
 
-trait EGIEnvironmentId {
-  def voName: String
-  def vomsURLs: Seq[String]
-  @transient lazy val id = voName + "@" + vomsURLs.head
+object ConsoleVariables {
+  def empty = ConsoleVariables()
+
+  def bindVariables(loop: ScalaREPL, variables: ConsoleVariables, variablesName: String = "_variables_") =
+    loop.beQuietDuring {
+      loop.bind(variablesName, variables)
+      loop.eval(s"import $variablesName._")
+    }
+
 }
+
+case class ConsoleVariables(
+  args: Seq[String] = Seq.empty,
+  workDirectory: File = currentDirectory)

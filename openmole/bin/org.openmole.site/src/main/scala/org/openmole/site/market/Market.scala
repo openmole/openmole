@@ -19,7 +19,7 @@ package org.openmole.site.market
 
 import org.eclipse.jgit.api.{ ResetCommand, CreateBranchCommand, Git }
 import org.eclipse.jgit.merge.MergeStrategy
-import org.openmole.console._
+import org.openmole.core.project._
 import org.openmole.core.buildinfo.MarketIndexEntry
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.site.Config
@@ -111,8 +111,6 @@ case class GeneratedMarketEntry(
 }
 
 class Market(repositories: Seq[MarketRepository], destination: File) {
-
-  lazy val console = new Console()
 
   def branchName = buildinfo.version.takeWhile(_.isDigit) + "-dev"
   def archiveDirectoryName = "market"

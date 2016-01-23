@@ -13,7 +13,7 @@ import org.scalatra.servlet.ScalatraListener
 
 import org.eclipse.jetty.security.{ ConstraintMapping, ConstraintSecurityHandler }
 import org.scalatra._
-import org.openmole.console._
+import org.openmole.runtime.console._
 import org.openmole.tool.hash._
 
 object RESTServer extends Logger {

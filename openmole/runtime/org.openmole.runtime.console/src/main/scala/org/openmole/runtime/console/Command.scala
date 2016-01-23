@@ -15,33 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.console
+package org.openmole.runtime.console
 
+import java.io.{ File, IOException }
 import java.util.logging.Level
 
-import jline.console.ConsoleReader
-import java.io.{ IOException, PrintWriter, StringWriter, File }
-import java.util.concurrent.atomic.{ AtomicLong, AtomicInteger }
-import org.apache.log4j.lf5.viewer.LogTableColumn
-import org.openmole.core.batch.authentication._
+import org.openmole.core.buildinfo
 import org.openmole.core.console.ScalaREPL
+import org.openmole.core.dsl._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.workflow.execution.local._
-import org.openmole.core.workflow.execution.{ Environment, ExecutionState }
-import org.openmole.core.workflow.job.State
-import org.openmole.core.workflow.mole.{ ExecutionContext, Mole, MoleExecution }
+import org.openmole.core.project._
+import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.workflow.execution.Environment
+import org.openmole.core.workflow.mole.{ Mole, MoleExecution }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.validation.Validation
-import org.openmole.core.serializer.SerialiserService
-import org.openmole.core.workspace.Workspace
-import scala.annotation.tailrec
-import scala.collection.mutable.HashMap
-import org.openmole.core.workflow.mole._
-import org.openmole.core.dsl._
-import Console._
-import org.openmole.core.buildinfo
-import org.openmole.core.tools.io.Prettifier._
 
 class Command(val console: ScalaREPL, val variables: ConsoleVariables) { commands ⇒
 
@@ -96,7 +84,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
 
   def verify(mole: Mole): Unit = Validation(mole).foreach(println)
 
-  def encrypted: String = encrypt(askPassword())
+  def encrypted: String = encrypt(Console.askPassword())
 
   def version() =
     println(s"""You are running OpenMOLE ${buildinfo.version} - ${buildinfo.name}

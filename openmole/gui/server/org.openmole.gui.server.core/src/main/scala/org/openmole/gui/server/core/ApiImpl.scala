@@ -18,7 +18,7 @@ import org.openmole.gui.shared._
 import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
-import org.openmole.console._
+import org.openmole.core.project._
 import org.osgi.framework.Bundle
 import scala.util.{ Failure, Success, Try }
 import org.openmole.core.workflow.mole.ExecutionContext

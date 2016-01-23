@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 Romain Reuillon
+/**
+ * Created by Romain Reuillon on 22/01/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,29 +13,25 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-package org.openmole.console
+package org.openmole.core.project
 
 import javax.script.CompiledScript
-import org.openmole.core.console.ScalaREPL
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.console._
+import org.openmole.core.pluginmanager._
 import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workspace.{ Workspace, ConfigurationLocation }
 import org.openmole.tool.file._
-import org.openmole.tool.thread._
 
-import scala.util.{ Success, Failure, Try }
+object Project {
+  def newREPL(variables: ConsoleVariables) = OpenMOLEREPL.newREPL(variables, quiet = true)
+}
 
 sealed trait CompileResult
 case class ScriptFileDoesNotExists() extends CompileResult
 case class CompilationError(exception: Throwable) extends CompileResult
 case class Compiled(result: CompiledScript) extends CompileResult {
   def eval = result.eval().asInstanceOf[Puzzle]
-}
-
-object Project {
-  def newREPL(variables: ConsoleVariables) = new Console().newREPL(variables, quiet = true)
 }
 
 class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = Project.newREPL) {
@@ -50,10 +46,10 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
     else {
       def compileContent =
         s"""${scriptsObjects(script.getParentFileSafe).mkString("\n")}
-            |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {
-            |${script.content}
-            |}
-            |runOMSScript()
+           |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {
+           |${script.content}
+           |}
+           |runOMSScript()
        """.stripMargin
       compile(compileContent, args)
     }

@@ -293,7 +293,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
         resourcesAssemble <+= (Tar.tar in daemon, resourceManaged in Compile) map { case (f, d) ⇒ f → d },
         resourcesAssemble <+= (Tar.tar in api, resourceManaged in Compile) map { case (doc, d) ⇒ doc → d },
         dependencyFilter := { _ ⇒ false }
-      ) dependsOn (Runtime.console, Core.buildinfo, root.Doc.doc)
+      ) dependsOn (Core.project, Core.buildinfo, root.Doc.doc)
 
   lazy val site =
     Project("site", dir / "site", settings = assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (

@@ -19,12 +19,12 @@ object Runtime extends Defaults(runtime.REST) {
     (includeOsgi, bundleType += "daemon",
       libraryDependencies ++= Seq(scalaLang, logging, jodaTime, scopt, equinoxCommon, equinoxApp, gridscaleSSH))
 
-  lazy val console = OsgiProject("org.openmole.console", imports = Seq("*")) settings (
-    organization := "org.openmole.console",
+  lazy val console = OsgiProject("org.openmole.runtime.console", imports = Seq("*")) settings (
     libraryDependencies += upickle
   ) dependsOn (
       Core.workflow,
       Core.console,
+      Core.project,
       Core.dsl,
       Core.batch,
       Core.buildinfo

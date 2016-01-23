@@ -104,7 +104,7 @@ object EGIAuthentication extends Logger {
           }
     }
 
-  def getVOMS(vo: String): Option[String] = getVOMS(vo, xml.XML.loadFile(voCards))
+  def getVOMS(vo: String): Option[Seq[String]] = getVOMS(vo, xml.XML.loadFile(voCards))
   def getVMOSOrError(vo: String) = getVOMS(vo).getOrElse(throw new UserBadDataError(s"ID card for VO $vo not found."))
 
   def getVOMS(vo: String, x: xml.Node) = {
@@ -117,12 +117,17 @@ object EGIAuthentication extends Logger {
 
     card map {
       card ⇒
-        val voms = (card \ "gLiteConf" \ "VOMSServers" \ "VOMS_Server").head
-        val host = (voms \ "hostname").head.text
-        val port = (voms.attribute("VomsesPort").get.text)
-        val dn = (voms \ "X509Cert" \ "DN").headOption.map(_.text)
+        val vomses = (card \ "gLiteConf" \ "VOMSServers" \ "VOMS_Server")
 
-        s"voms://$host:${port}${dn.getOrElse("")}"
+        def vomsUrl(voms: Node) = {
+          val host = (voms \ "hostname").head.text
+          val port = (voms.attribute("VomsesPort").get.text)
+          val dn = (voms \ "X509Cert" \ "DN").headOption.map(_.text)
+
+          s"voms://$host:${port}${dn.getOrElse("")}"
+        }
+
+        vomses.map(vomsUrl)
     }
   }
 
@@ -131,7 +136,7 @@ object EGIAuthentication extends Logger {
   def clear() = Workspace.authentications.clear[EGIAuthentication]
 
   def initialise(a: EGIAuthentication)(
-    serverURL: String,
+    serverURLs: Seq[String],
     voName: String,
     fqan: Option[String])(implicit authenticationProvider: AuthenticationProvider): () ⇒ GlobusAuthentication.Proxy =
     a match {
@@ -141,7 +146,7 @@ object EGIAuthentication extends Logger {
           P12VOMSAuthentication(
             P12Authentication(a.certificate, a.password(authenticationProvider)),
             EGIEnvironment.proxyTime,
-            serverURL,
+            serverURLs,
             voName,
             EGIEnvironment.proxyRenewalRatio,
             fqan)
@@ -152,7 +157,7 @@ object EGIAuthentication extends Logger {
         val pem = PEMVOMSAuthentication(
           PEMAuthentication(a.certificate, a.key, a.password(authenticationProvider)),
           EGIEnvironment.proxyTime,
-          serverURL,
+          serverURLs,
           voName,
           EGIEnvironment.proxyRenewalRatio,
           fqan

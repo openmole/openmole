@@ -44,7 +44,7 @@ object DIRACEnvironment {
     service: String,
     group: Option[String] = None,
     bdii: Option[String] = None,
-    vomsURL: Option[String] = None,
+    vomsURLs: Option[Seq[String]] = None,
     setup: Option[String] = None,
     fqan: Option[String] = None,
     cpuTime: Option[Duration] = None,
@@ -56,7 +56,7 @@ object DIRACEnvironment {
       service = service,
       group = group.getOrElse(voName + "_user"),
       bdii = bdii.getOrElse(Workspace.preference(EGIEnvironment.DefaultBDII)),
-      vomsURL = vomsURL.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
+      vomsURLs = vomsURLs.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
       setup = setup.getOrElse("Dirac-Production"),
       fqan = fqan,
       cpuTime = cpuTime,
@@ -83,7 +83,7 @@ class DIRACEnvironment(
     val service: String,
     val group: String,
     val bdii: String,
-    val vomsURL: String,
+    val vomsURLs: Seq[String],
     val setup: String,
     val fqan: Option[String],
     val cpuTime: Option[Duration],
@@ -113,7 +113,7 @@ class DIRACEnvironment(
 
   @transient lazy val proxyCreator = {
     EGIAuthentication.initialise(getAuthentication)(
-      vomsURL,
+      vomsURLs,
       voName,
       fqan)(authentications)
   }
