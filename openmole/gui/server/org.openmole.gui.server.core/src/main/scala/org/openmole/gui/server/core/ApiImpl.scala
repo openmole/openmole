@@ -88,10 +88,9 @@ object ApiImpl extends Api {
 
   def deleteAuthenticationKey(keyName: String): Unit = authenticationFile(keyName).delete
 
-  def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit = {
-    implicit val ctx = context
-    safePathToFile(safePath).recursiveDelete
-  }
+  def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit = Utils.deleteFile(safePath, context)
+
+  def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSytemContext): Unit = Utils.deleteFiles(safePaths, context)
 
   private def getExtractedTGZTo(from: File, to: File)(implicit context: ServerFileSytemContext): Seq[SafePath] = {
     extractTGZToFromFiles(from, to)
@@ -147,7 +146,9 @@ object ApiImpl extends Api {
       import org.openmole.gui.ext.data.ServerFileSytemContext.absolute
 
       val toTest: Seq[SafePath] = if (sps.size == 1) sps.flatMap { f ⇒
-        if (f.isDirectory) f.listFiles.map { _.safePath }
+        if (f.isDirectory) f.listFiles.map {
+          _.safePath
+        }
         else Seq(f)
       }
       else sps

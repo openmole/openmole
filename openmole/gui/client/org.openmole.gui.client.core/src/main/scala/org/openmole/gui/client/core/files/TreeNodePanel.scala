@@ -20,7 +20,6 @@ import TreeNode._
 import autowire._
 import rx._
 import bs._
-
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
  *
@@ -56,42 +55,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   val view = tags.div(
     Rx {
-      // tags.form(id := "adddir")(
-      //  tags.div(`class` := "tree-header",
-
       fileTooBar.div
-      //   inputGroup(navbar_left)(
-      /* inputGroupButton(addRootDirButton.selector),
-       tags.form(newNodeInput, onsubmit := { () ⇒
-         {
-           val newFile = newNodeInput.value
-           val currentDirNode = manager.current
-           addRootDirButton.content().map {
-             _ match {
-               case dt: DirNodeType ⇒ OMPost[Api].addDirectory(currentDirNode, newFile).call().foreach { b ⇒
-                 if (b) CoreUtils.refreshCurrentDirectory()
-               }
-               case ft: FileNodeType ⇒ OMPost[Api].addFile(currentDirNode, newFile).call().foreach { b ⇒
-                 if (b) CoreUtils.refreshCurrentDirectory()
-               }
-             }
-           }
-         }
-         false
-       })*/
-      /*,
-                 inputGroupAddon(id := "fileinput-addon")(
-                   tags.label(`class` := "inputFileStyleSmall",
-                     uploadButton((fileInput: HTMLInputElement) ⇒ {
-                       FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject())
-                     })).tooltip("Upload file")),
-                 inputGroupAddon(id := "fileinput-addon")(
-                   tags.span(cursor := "pointer", `class` := " btn-file", id := "success-like", onclick := { () ⇒ CoreUtils.refreshCurrentDirectory() })(
-                     glyph(glyph_refresh)
-                   ).tooltip("Refresh file tree", RightDirection()))*/
-      //  )
-      // )
-      // )
     }, Rx {
       val toDraw = manager.drop(1)
       val dirNodeLineSize = toDraw.size
@@ -194,21 +158,16 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       case _ ⇒ ReactiveLine(tn, classType, todo).render
     }
 
-  def trashNode(path: SafePath): Unit = {
-    OMPost[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach {
-      d ⇒
-        CoreUtils.refreshCurrentDirectory()
-        fileDisplayer.tabs.checkTabs
-    }
-  }
-
   def trashNode(treeNode: TreeNode): Unit = {
     fileDisplayer.tabs -- treeNode
     AlertPanel.string(s"Do you really want to delete ${
       treeNode.name()
     }?",
       () ⇒ {
-        trashNode(treeNode.safePath())
+        CoreUtils.trashNode(treeNode.safePath()) {
+          CoreUtils.refreshCurrentDirectory()
+          fileDisplayer.tabs.checkTabs
+        }
       }, zone = FileZone()
     )
   }
@@ -255,6 +214,9 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   class ReactiveLine(tn: TreeNode, classType: String, todo: () ⇒ Unit) {
 
     val lineHovered: Var[Boolean] = Var(false)
+    val checkbox = CheckBox("", manager.isSelected(tn), key("marginRight5")) { cb ⇒
+      manager.setSelected(tn, cb.checked)
+    }
 
     def clickablePair(classType: String, todo: () ⇒ Unit) = Seq(
       style := "float:left",
@@ -296,34 +258,37 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         `class` := "fileNameOverflow " + classType + "Text",
         tn.name()
       ).tooltip(tn.name(), condition = () ⇒ tn.name().length > 24),
-      tags.div(`class` := "file-info",
-        tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
-        tags.span(id := Rx {
-          "treeline" + {
-            if (lineHovered()) "-hover" else ""
-          }
-        })(
-          glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem file-glyph"),
-          glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem file-glyph"),
-          a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"),
-            href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
-          tn.safePath().extension match {
-            case FileExtension.TGZ ⇒ glyphSpan(glyph_archive, () ⇒ {
-              OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
-                CoreUtils.refreshCurrentDirectory()
-              }
-            })(`class` := "glyphitem file-glyph")
-            case _ ⇒
-          },
-          if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-            OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-              panels.pluginTriggerer.open
-            })(`class` := "glyphitem file-glyph")
+
+      manager.selectionMode() match {
+        case true ⇒
+          tags.div(`class` := "file-info")(checkbox.onlyBox)
+        case _ ⇒ tags.div(`class` := "file-info")(
+          tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
+          tags.span(id := Rx {
+            "treeline" + {
+              if (lineHovered()) "-hover" else ""
+            }
+          })(
+            glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem file-glyph"),
+            glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem file-glyph"),
+            a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"),
+              href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
+            tn.safePath().extension match {
+              case FileExtension.TGZ ⇒ glyphSpan(glyph_archive, () ⇒ {
+                OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
+                  CoreUtils.refreshCurrentDirectory()
+                }
+              })(`class` := "glyphitem file-glyph")
+              case _ ⇒
+            },
+            if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
+              OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+                panels.pluginTriggerer.open
+              })(`class` := "glyphitem file-glyph")
+          )
         )
-
-      )
+      }
     )
-
   }
 
 }

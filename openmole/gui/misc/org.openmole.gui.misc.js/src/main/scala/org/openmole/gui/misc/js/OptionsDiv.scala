@@ -17,19 +17,28 @@ package org.openmole.gui.misc.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs}
+import fr.iscpif.scaladget.api.{BootstrapTags ⇒ bs, ClassKeyAggregator}
+import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.HTMLInputElement
 import scalatags.JsDom.{tags ⇒ tags}
 import scalatags.JsDom.all._
 import bs._
 
 object OptionsDiv {
+
+  case class BoxedOption[T <: Displayable](option: T, checkBox: HTMLInputElement)
+
   def apply[T <: Displayable](options: Seq[T]) = new OptionsDiv(options)
 }
 
-class OptionsDiv[T <: Displayable](options: Seq[T]) {
+object CheckBox {
+  def apply(option: String = "", default: Boolean = false, classKey: ClassKeyAggregator = emptyCK)(onchecked: HTMLInputElement => Unit = HTMLInputElement=> {}) =
+    new CheckBox(option, default, classKey)(onchecked)
+}
 
-  case class BoxedOption(option: T, checkBox: HTMLInputElement)
+import OptionsDiv._
+
+class OptionsDiv[T <: Displayable](options: Seq[T]) {
 
   val boxedOptions = options.map { o =>
     BoxedOption(o, bs.checkbox(true).render)
@@ -44,10 +53,32 @@ class OptionsDiv[T <: Displayable](options: Seq[T]) {
     )
   )
 
-  def result: Seq[T] = boxedOptions.filter { bo=>
-    println("RES " + bo.option.name + " :" + bo.checkBox.checked)
+  def result: Seq[T] = boxedOptions.filter { bo =>
     bo.checkBox.checked
   }.map {
     _.option
   }
+
+}
+
+class CheckBox(name: String, default: Boolean, classKey: ClassKeyAggregator)(onchecked: HTMLInputElement => Unit) {
+
+  private lazy val cb: Input = tags.input(`type` := "checkbox", if (default) checked := true else "", onclick := { () ⇒ onchecked(cb) }).render
+  private val cbSpan = tags.span(name, style := "position: relative; margin-right:5px; margin-left:5px; top: -3px;")
+
+  lazy val withNameFirst = bs.div(classKey)(
+    cbSpan,
+    cb
+  )
+
+  lazy val withBoxFirst = bs.div(classKey)(
+    cbSpan,
+    cb
+  )
+
+  lazy val onlyBox = bs.div(classKey)(
+    cb
+  )
+
+  def result: Boolean = cb.checked
 }

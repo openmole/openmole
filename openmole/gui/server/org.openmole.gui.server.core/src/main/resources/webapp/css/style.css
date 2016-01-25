@@ -851,6 +851,10 @@ top: -6px;
     margin-right: 20px;
 }
 
+.marginRight5{
+    margin-right: 5px;
+}
+
 .twocolumns{
     float:left;
     width:50%;

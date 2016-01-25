@@ -38,6 +38,7 @@ trait Api {
   def extractTGZ(treeNodeData: TreeNodeData): Unit
   def deleteAuthenticationKey(keyName: String): Unit
   def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit
+  def deleteFiles(safePath: Seq[SafePath], context: ServerFileSytemContext): Unit
   def temporaryFile(): SafePath
   def exists(safePath: SafePath): Boolean
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]

@@ -9,6 +9,7 @@ import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
+import org.openmole.gui.client.core.files.TreeNode._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import bs._
 import org.scalajs.dom.raw.{ HTMLSpanElement, HTMLInputElement }
@@ -76,7 +77,7 @@ class FileToolBar {
     "glyphicon " + sTool.glyph + " glyphmenu " + selectedTool().filter(_ == sTool).map { _ ⇒ "selectedTool" }.getOrElse("")
   }
 
-  def buildSpan(selectedTool: SelectedTool, action: ⇒ Unit) = OMTags.glyphSpan(rxClass(selectedTool))(
+  def buildSpan(selectedTool: SelectedTool, action: ⇒ Unit = () ⇒ {}) = OMTags.glyphSpan(rxClass(selectedTool))(
     click(selectedTool) {
       action
     }
@@ -134,10 +135,34 @@ class FileToolBar {
     })
   )
 
+  private def refreshAndSwitchOffSelection = {
+
+    manager.switchSelection
+  }
+
+  def unselectTool = selectedTool() = None
+
+  val deleteButton = bs.button("Delete", btn_danger, () ⇒ {
+    CoreUtils.trashNodes(manager.selected()) {
+      unselectTool
+    }
+  })
+
+  val copyButton = bs.button("Copy", btn_primary, () ⇒ {
+    unselectTool
+  })
+
+  val pluginButton = bs.button("Get plugins", btn_primary, () ⇒ {
+    unselectTool
+  })
+
   val fileToolDiv = bs.div("fileToolPosition")(
     Rx {
       selectedTool() match {
         case Some(FileCreationTool) ⇒ createFileTool
+        case Some(TrashTool)        ⇒ deleteButton
+        case Some(CopyTool)         ⇒ copyButton
+        case Some(PluginTool)       ⇒ pluginButton
         case _                      ⇒ tags.div()
       }
     },
@@ -150,10 +175,10 @@ class FileToolBar {
   val div = bs.div("centerFileTool")(
     glyphSpan(glyph_refresh + " glyphmenu", () ⇒ CoreUtils.refreshCurrentDirectory()),
     upButton,
-    buildSpan(PluginTool, println("plug")),
-    buildSpan(TrashTool, println("trash")),
-    buildSpan(CopyTool, println("topy")),
-    buildSpan(FileCreationTool, println("plus")),
+    buildSpan(PluginTool, manager.switchSelection),
+    buildSpan(TrashTool, manager.switchSelection),
+    buildSpan(CopyTool, manager.switchSelection),
+    buildSpan(FileCreationTool),
     buildSpan(FilterTool, println("filter")),
     fileToolDiv
   )

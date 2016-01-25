@@ -76,6 +76,10 @@ object TreeNode {
 
   implicit def safePathToPartialTreeNodeData(sPath: SafePath): TreeNodeData = TreeNodeData(sPath.name, sPath.parent, false, false, 0L, "")
 
+  implicit def treeNodeToSafePath(tn: TreeNode): SafePath = tn.safePath()
+
+  implicit def treeNodesToSafePaths(tns: Seq[TreeNode]): Seq[SafePath] = tns.map { treeNodeToSafePath }
+
   def fromFilePath(path: SafePath) = FileNode()
 
 }
