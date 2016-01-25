@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.DirNode
+import org.openmole.gui.client.core.files.{ FileNodeType, DirNode }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.shared.Api
 import autowire._
@@ -72,4 +72,15 @@ object CoreUtils {
   }
 
   def sons(dirNode: DirNode) = OMPost[Api].listFiles(dirNode.safePath()).call()
+
+  def addDirectory(in: TreeNodeData, dirName: String) =
+    OMPost[Api].addDirectory(in, dirName).call().foreach { b ⇒
+      if (b) refreshCurrentDirectory()
+    }
+
+  def addFile(in: TreeNodeData, fileName: String) =
+    OMPost[Api].addFile(in, fileName).call().foreach { b ⇒
+      if (b) refreshCurrentDirectory()
+    }
+
 }

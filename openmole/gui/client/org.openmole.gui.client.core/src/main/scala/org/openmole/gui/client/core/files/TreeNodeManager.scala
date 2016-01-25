@@ -41,9 +41,11 @@ class TreeNodeManager {
 
   def +(dn: DirNode) = dirNodeLine() = dirNodeLine() :+ dn
 
-  def switch(dn: DirNode) = dirNodeLine() = dirNodeLine().zipWithIndex.filter(_._1 == dn).headOption.map {
-    case (dn, index) ⇒ take(index + 1)
-  }.getOrElse(dirNodeLine())
+  def switch(dn: DirNode) = {
+    dirNodeLine() = dirNodeLine().zipWithIndex.filter(_._1 == dn).headOption.map {
+      case (dn, index) ⇒ take(index + 1)
+    }.getOrElse(dirNodeLine())
+  }
 
   def allNodes = dirNodeLine().flatMap {
     _.sons()
