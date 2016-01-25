@@ -44,8 +44,10 @@ class TreeNodeManager {
     case false ⇒ selected() = selected().filterNot(_ == tn)
   }
 
-  def switchSelection = {
-    selectionMode() = !selectionMode()
+  def setSelection = selectionMode() = true
+
+  def switchOffSelection = {
+    selectionMode() = false
     resetSelection
   }
 

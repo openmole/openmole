@@ -99,6 +99,6 @@ object CoreUtils {
 
   def refreshAndSwitchSelection = {
     refreshCurrentDirectory()
-    manager.switchSelection
+    manager.switchOffSelection
   }
 }

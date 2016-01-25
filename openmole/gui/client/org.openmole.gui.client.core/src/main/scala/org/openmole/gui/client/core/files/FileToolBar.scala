@@ -136,8 +136,7 @@ class FileToolBar {
   )
 
   private def refreshAndSwitchOffSelection = {
-
-    manager.switchSelection
+    manager.switchOffSelection
   }
 
   def unselectTool = selectedTool() = None
@@ -176,9 +175,9 @@ class FileToolBar {
     bs.div("tooPosition")(
       glyphSpan(glyph_refresh + " glyphmenu", () ⇒ CoreUtils.refreshCurrentDirectory()),
       upButton,
-      buildSpan(PluginTool, manager.switchSelection),
-      buildSpan(TrashTool, manager.switchSelection),
-      buildSpan(CopyTool, manager.switchSelection),
+      buildSpan(PluginTool, manager.setSelection),
+      buildSpan(TrashTool, manager.setSelection),
+      buildSpan(CopyTool, manager.setSelection),
       buildSpan(FileCreationTool),
       buildSpan(FilterTool, println("filter"))
     ),
