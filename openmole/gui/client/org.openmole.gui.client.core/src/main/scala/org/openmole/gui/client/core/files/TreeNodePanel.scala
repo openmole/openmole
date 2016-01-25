@@ -60,8 +60,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       val toDraw = manager.drop(1)
       val dirNodeLineSize = toDraw.size
       bs.div("tree-path")(
-        goToDirButton(manager.head, OMTags.glyphString(glyph_home) + " left oo"),
-        toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "oo", s"| ${dn.name()}") }
+        goToDirButton(manager.head, OMTags.glyphString(glyph_home) + " left treePathItems"),
+        toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
       )
 
     },

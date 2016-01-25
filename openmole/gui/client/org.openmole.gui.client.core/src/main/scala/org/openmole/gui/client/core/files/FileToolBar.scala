@@ -148,15 +148,15 @@ class FileToolBar {
     }
   })
 
-  val copyButton = bs.button("Copy", btn_primary, () ⇒ {
+  val copyButton = bs.button("Copy", btn_default, () ⇒ {
     unselectTool
   })
 
-  val pluginButton = bs.button("Get plugins", btn_primary, () ⇒ {
+  val pluginButton = bs.button("Get plugins", btn_default, () ⇒ {
     unselectTool
   })
 
-  val fileToolDiv = bs.div("fileToolPosition")(
+  val fileToolDiv = bs.div("toolPosition")(
     Rx {
       selectedTool() match {
         case Some(FileCreationTool) ⇒ createFileTool
@@ -173,13 +173,15 @@ class FileToolBar {
   )
 
   val div = bs.div("centerFileTool")(
-    glyphSpan(glyph_refresh + " glyphmenu", () ⇒ CoreUtils.refreshCurrentDirectory()),
-    upButton,
-    buildSpan(PluginTool, manager.switchSelection),
-    buildSpan(TrashTool, manager.switchSelection),
-    buildSpan(CopyTool, manager.switchSelection),
-    buildSpan(FileCreationTool),
-    buildSpan(FilterTool, println("filter")),
+    bs.div("tooPosition")(
+      glyphSpan(glyph_refresh + " glyphmenu", () ⇒ CoreUtils.refreshCurrentDirectory()),
+      upButton,
+      buildSpan(PluginTool, manager.switchSelection),
+      buildSpan(TrashTool, manager.switchSelection),
+      buildSpan(CopyTool, manager.switchSelection),
+      buildSpan(FileCreationTool),
+      buildSpan(FilterTool, println("filter"))
+    ),
     fileToolDiv
   )
 }

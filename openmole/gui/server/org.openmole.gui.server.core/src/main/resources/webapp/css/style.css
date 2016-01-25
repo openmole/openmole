@@ -731,7 +731,9 @@ span.label.control-label{
     border: #3086b5 solid 1px;
     font-weight: bold;
 }
-
+.btn.btn-danger{
+    font-weight: bold;
+}
 .btn.btn-success{
     background-color: #3086b5;
     border: #3086b5 solid 1px;
@@ -970,11 +972,7 @@ border-top-right-radius: 0px;
     padding-bottom: 30px;
 }
 
-.centerFileTool{
-    position: relative;
-    right: 17%; 
-    margin-left: 40px;
-}
+
 
 .fileUpload {
     position: relative;
@@ -993,17 +991,20 @@ border-top-right-radius: 0px;
     filter: alpha(opacity=0);
 }
 
-.fileToolPosition{
-    position: relative;
-    display: inline-block;
-    left: 55px;
-    width: 100%;
-    height: auto;
-    text-align:center;
-    margin-bottom: 10px;
+.centerFileTool{
+    padding-right: 50px;
+    padding-bottom: 10px;
+    text-align: center;
+
 }
 
-.oo{
+.toolPosition{
+     display: inline-block;
+     margin: 0 auto;
+     width: 220px; 
+}
+
+.treePathItems{
     position: relative;
     top: 2px;
     font-size: 15px;
@@ -1015,7 +1016,7 @@ border-top-right-radius: 0px;
     margin-right: 5px;
 }
 
-.oo:hover{
+.treePathItems:hover{
     color: #333;
 }
 
