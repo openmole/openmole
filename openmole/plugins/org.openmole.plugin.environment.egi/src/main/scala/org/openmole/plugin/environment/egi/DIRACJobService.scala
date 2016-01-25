@@ -45,10 +45,9 @@ trait DIRACJobService extends GridScaleJobService { js ⇒
   @transient lazy val jobService: GSDIRACJobService =
     GSDIRACJobService(
       environment.service,
-      environment.group,
-      connections = Some(connections))(environment.authentication)
+      environment.group)(environment.authentication)
 
-  @transient lazy val usageControl = new UnlimitedAccess //new LimitedAccess(connections, Int.MaxValue)
+  @transient lazy val usageControl = new LimitedAccess(connections, Int.MaxValue)
 
   def jobScript =
     JobScript(
