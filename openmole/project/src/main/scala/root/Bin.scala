@@ -18,12 +18,14 @@ import sbtbuildinfo.Plugin._
 object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties, root.Doc) {
   val dir = file("bin")
 
-  def filter(m: ModuleID) = {
+  def filter(m: ModuleID) =
     m.organization.startsWith("org.eclipse") ||
       m.organization == "fr.iscpif.gridscale.bundle" ||
       m.organization == "org.bouncycastle" ||
       m.organization.contains("org.openmole")
-  }
+
+  def pluginFilter(m: ModuleID) =
+    m.organization.contains("org.openmole") || m.organization == "fr.iscpif.gridscale.bundle"
 
   lazy val openmoleStartLevels =
     Seq(
@@ -171,7 +173,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "gui") sendTo assemblyPath,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "doc") sendTo assemblyPath,
     libraryDependencies ++= guiCoreDependencies,
-    dependencyFilter := filter
+    dependencyFilter := filter,
+    dependencyName := rename
   )
 
   lazy val consolePlugins = Project("consoleplugins", dir / "target" / "consoleplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
@@ -203,7 +206,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
 
   lazy val guiPlugins = Project("guiplugins", dir / "target" / "guiplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"), true) sendTo assemblyPath,
-    dependencyFilter := filter
+    dependencyFilter := filter,
+    dependencyName := rename
   )
 
   lazy val dbServer = Project("dbserver", dir / "dbserver", settings = assemblySettings) settings (commonsSettings: _*) settings (
@@ -217,7 +221,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       Libraries.slf4j,
       Libraries.scalaLang
     ),
-    dependencyFilter := filter
+    dependencyFilter := filter,
+    dependencyName := rename
   )
 
   lazy val openmoleRuntime = Project("runtime", dir / "runtime", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
