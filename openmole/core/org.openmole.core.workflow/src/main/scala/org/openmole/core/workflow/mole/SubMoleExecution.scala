@@ -50,12 +50,12 @@ class SubMoleExecution(
     val moleExecution: MoleExecution) {
 
   @transient lazy val transitionLock = new locks.ReentrantLock()
-  @transient lazy val masterCapsuleSemaphore = new Semaphore(1)
 
   private val _nbJobs = Ref(0)
   private val _children = TSet.empty[SubMoleExecution]
   private val _jobs = TMap[MoleJob, (Capsule, Ticket)]()
   private val _canceled = Ref(false)
+  private lazy val masterCapsuleExecutor = Executors.newSingleThreadExecutor(daemonThreadFactory)
 
   val masterCapsuleRegistry = new RegistryWithTicket[MasterCapsule, Context]
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[(Long, Variable[_])]]
@@ -204,22 +204,19 @@ class SubMoleExecution(
             a + ctx
         } + Variable(Task.openMOLESeed, moleExecution.newSeed)
 
-      //FIXME: Factorize code
       capsule match {
         case c: MasterCapsule ⇒
           def stateChanged(job: MoleJob, oldState: State, newState: State) =
             EventDispatcher.trigger(moleExecution, new MoleExecution.JobStatusChanged(job, c, newState, oldState))
 
-          background {
-            masterCapsuleSemaphore {
-              val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
-              val moleJob: MoleJob = MoleJob(capsule.task, implicits + sourced + context + savedContext, moleExecution.nextJobId, stateChanged)
-              EventDispatcher.trigger(moleExecution, new MoleExecution.JobCreated(moleJob, capsule))
-              addJob(moleJob, capsule, ticket)
-              moleJob.perform(moleExecution.defaultEnvironment)
-              masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
-              finalState(moleJob, moleJob.state)
-            }
+          masterCapsuleExecutor.submit {
+            val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
+            val moleJob: MoleJob = MoleJob(capsule.task, implicits + sourced + context + savedContext, moleExecution.nextJobId, stateChanged)
+            EventDispatcher.trigger(moleExecution, new MoleExecution.JobCreated(moleJob, capsule))
+            addJob(moleJob, capsule, ticket)
+            moleJob.perform(moleExecution.defaultEnvironment)
+            masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
+            finalState(moleJob, moleJob.state)
           }
         case _ ⇒
           def stateChanged(job: MoleJob, oldState: State, newState: State) = {
