@@ -4,6 +4,7 @@ import org.openmole.gui.client.core.files.DirNode
 import org.openmole.gui.ext.data._
 import org.openmole.gui.shared.Api
 import autowire._
+import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 
@@ -43,19 +44,12 @@ object CoreUtils {
     }
   }
 
-  def refresh(dn: DirNode, onrefreshed: ⇒ Unit = () ⇒ {}) = {
+  def refresh(dn: DirNode, onrefreshed: () ⇒ Unit = () ⇒ {}) = {
     computeAllSons(dn)
-    onrefreshed
+    onrefreshed()
   }
 
-  def refreshCurrentDirectory(onrefreshed: ⇒ Unit = () ⇒ {}) = refresh(manager.current, onrefreshed)
-
-  private def computeSons(dn: DirNode): Unit = {
-    sons(dn).foreach {
-      sons ⇒
-        dn.sons() = sons
-    }
-  }
+  def refreshCurrentDirectory(onrefreshed: () ⇒ Unit = () ⇒ {}) = refresh(manager.current, onrefreshed)
 
   private def computeAllSons(dn: DirNode): Unit = {
     sons(dn).foreach {
@@ -73,32 +67,44 @@ object CoreUtils {
 
   def sons(dirNode: DirNode) = OMPost[Api].listFiles(dirNode.safePath()).call()
 
-  def addDirectory(in: TreeNodeData, dirName: String) =
+  def addDirectory(in: TreeNodeData, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addDirectory(in, dirName).call().foreach { b ⇒
-      if (b) refreshCurrentDirectory()
+      if (b) {
+        onadded()
+        refreshCurrentDirectory()
+      }
     }
 
-  def addFile(in: TreeNodeData, fileName: String) =
+  def addFile(in: TreeNodeData, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addFile(in, fileName).call().foreach { b ⇒
-      if (b) refreshCurrentDirectory()
+      if (b) {
+        onadded()
+        refreshCurrentDirectory()
+      }
     }
 
-  def trashNode(path: SafePath)(ontrashed: ⇒ Unit): Unit = {
+  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
     OMPost[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach { d ⇒
-      ontrashed
+      ontrashed()
       refreshAndSwitchSelection
     }
   }
 
-  def trashNodes(paths: Seq[SafePath])(ontrashed: ⇒ Unit): Unit = {
+  def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
     OMPost[Api].deleteFiles(paths, ServerFileSytemContext.project).call().foreach { d ⇒
-      ontrashed
+      ontrashed()
       refreshAndSwitchSelection
     }
   }
 
   def refreshAndSwitchSelection = {
-    refreshCurrentDirectory()
+    CoreUtils.refreshCurrentDirectory()
     manager.switchOffSelection
   }
+
+  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
+    OMPost[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
+
+  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Unit] =
+    OMPost[Api].copyProjectFilesTo(safePaths, to).call()
 }

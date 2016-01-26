@@ -41,6 +41,8 @@ object TreeNodeType {
   def folder = new DirNodeType {}
 }
 
+case class TreeNodeError(message: String, filesInError: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit)
+
 sealed trait TreeNode {
   val id = getUUID
 

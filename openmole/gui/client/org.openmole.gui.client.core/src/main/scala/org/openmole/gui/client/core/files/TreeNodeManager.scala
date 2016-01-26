@@ -17,6 +17,7 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.AlertPanel
 import org.openmole.gui.ext.data.SafePath
 import rx._
 
@@ -31,11 +32,17 @@ class TreeNodeManager {
 
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(root))
 
+  val error: Var[Option[TreeNodeError]] = Var(None)
+
   val selectionMode: Var[Boolean] = Var(false)
 
   val selected: Var[Seq[TreeNode]] = Var(Seq())
 
   val copied: Var[Seq[TreeNode]] = Var(Seq())
+
+  Obs(error) {
+    error().map(AlertPanel.treeNodeDiv)
+  }
 
   def isSelected(tn: TreeNode) = selected().contains(tn)
 
@@ -46,9 +53,18 @@ class TreeNodeManager {
     case false ⇒ selected() = selected().filterNot(_ == tn)
   }
 
-  def setSelectedAsCopied = copied() = selected()
+  def setSelectedAsCopied = {
+    copied() = selected()
+    selectionMode() = false
+  }
+
+  def emptyCopied = copied() = Seq()
 
   def setSelection = selectionMode() = true
+
+  def setFilesInError(question: String, files: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit) = error() = Some(TreeNodeError(question, files, okaction, cancelaction))
+
+  def noError = error() = None
 
   def switchOffSelection = {
     selectionMode() = false

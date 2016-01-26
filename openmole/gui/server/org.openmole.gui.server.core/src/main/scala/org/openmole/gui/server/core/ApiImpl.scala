@@ -128,14 +128,15 @@ object ApiImpl extends Api {
     Files.createTempDirectory("openmoleGUI").toFile
   }
 
-  def exists(safePath: SafePath): Boolean = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    safePathToFile(safePath).exists
-  }
+  def exists(safePath: SafePath): Boolean = Utils.exists(safePath)
 
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = Utils.copyFromTmp(tmpSafePath, filesToBeMovedTo)
 
-  def copyAllTo(tmpSafePath: SafePath, to: SafePath): Unit = Utils.copyAllTo(tmpSafePath, to)
+  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit = Utils.copyAllTmpTo(tmpSafePath, to)
+
+  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath) = Utils.copyProjectFilesTo(safePaths, to)
+
+  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = Utils.testExistenceAndCopyProjectFilesTo(safePaths, to)
 
   // Test whether safePathToTest exists in "in"
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {

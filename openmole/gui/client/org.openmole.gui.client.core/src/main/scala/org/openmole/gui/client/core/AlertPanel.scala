@@ -17,9 +17,10 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.AbsolutePositioning.{ Zone, FullPage, CenterTransform, Transform }
+import org.openmole.gui.client.core.AbsolutePositioning._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
-import org.openmole.gui.misc.js.OMTags
+import org.openmole.gui.client.core.files.TreeNodeError
+import org.openmole.gui.misc.js.{ OptionsDiv, OMTags }
 import org.scalajs.dom.html.Div
 import org.scalajs.dom.raw.HTMLDivElement
 import scalatags.JsDom.all._
@@ -39,9 +40,15 @@ object AlertPanel {
           transform: Transform = CenterTransform(),
           zone: Zone = FullPage(),
           alertType: ClassKeyAggregator = warning,
-          buttonGroupClass: ClassKeyAggregator = "left"): Unit = {
+          buttonGroupClass: ClassKeyAggregator = "right"): Unit = {
     panel.popup(messageDiv, okaction, cancelaction, transform, zone, alertType, buttonGroupClass)
   }
+
+  def treeNodeDiv(error: TreeNodeError): Unit = div(
+    tags.div(
+      error.message,
+      OptionsDiv(error.filesInError).div
+    ), okaction = error.okaction, cancelaction = error.cancelaction, zone = FileZone())
 
   def string(message: String,
              okaction: () ⇒ Unit,

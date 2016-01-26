@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.CoreUtils
-import org.openmole.gui.ext.data.{ Standby, ProcessState, UploadProject }
+import org.openmole.gui.ext.data.{ SafePath, Standby, ProcessState, UploadProject }
 import org.openmole.gui.misc.js.{ Select, OMTags }
 import org.scalajs.dom.html.Input
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -11,6 +11,7 @@ import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.TreeNode._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import bs._
 import org.scalajs.dom.raw.{ HTMLSpanElement, HTMLInputElement }
 import rx._
@@ -59,6 +60,10 @@ object FileToolBar {
     val glyph = OMTags.glyph_copy
   }
 
+  object PasteTool extends SelectedTool {
+    val glyph = OMTags.glyph_copy
+  }
+
 }
 
 import FileToolBar._
@@ -82,8 +87,6 @@ class FileToolBar {
       action
     }
   )
-
-  private def refresh = CoreUtils.refreshCurrentDirectory()
 
   def fInputMultiple(todo: HTMLInputElement ⇒ Unit) = {
     lazy val input: HTMLInputElement = tags.input(`class` := "upload", `type` := "file", multiple := "")(onchange := { () ⇒
@@ -126,8 +129,8 @@ class FileToolBar {
         val currentDirNode = manager.current
         addRootDirButton.content().map {
           _ match {
-            case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode, newFile)
-            case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode, newFile)
+            case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode, newFile, () ⇒ unselectTool)
+            case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode, newFile, () ⇒ unselectTool)
           }
         }
       }
@@ -135,21 +138,21 @@ class FileToolBar {
     })
   )
 
-  private def refreshAndSwitchOffSelection = {
-    manager.switchOffSelection
-  }
-
   def unselectTool = selectedTool() = None
 
   val deleteButton = bs.button("Delete", btn_danger, () ⇒ {
-    CoreUtils.trashNodes(manager.selected()) {
+    CoreUtils.trashNodes(manager.selected()) { () ⇒
       unselectTool
     }
   })
 
   val copyButton = bs.button("Copy", btn_default, () ⇒ {
     manager.setSelectedAsCopied
-    unselectTool
+    selectedTool() = Some(PasteTool)
+  })
+
+  val pasteButton = bs.button("Paste", btn_success, () ⇒ {
+    paste(manager.copied(), manager.current)
   })
 
   val pluginButton = bs.button("Get plugins", btn_default, () ⇒ {
@@ -162,6 +165,7 @@ class FileToolBar {
         case Some(FileCreationTool) ⇒ createFileTool
         case Some(TrashTool)        ⇒ deleteButton
         case Some(CopyTool)         ⇒ copyButton
+        case Some(PasteTool)        ⇒ pasteButton
         case Some(PluginTool)       ⇒ pluginButton
         case _                      ⇒ tags.div()
       }
@@ -184,4 +188,35 @@ class FileToolBar {
     ),
     fileToolDiv
   )
+
+  private def paste(safePaths: Seq[SafePath], to: SafePath) = {
+    def refreshWithNoError = {
+      manager.noError
+      CoreUtils.refreshAndSwitchSelection
+    }
+
+    def onpasted = {
+      manager.emptyCopied
+      unselectTool
+    }
+
+    CoreUtils.testExistenceAndCopyProjectFilesTo(safePaths, to).foreach { existing ⇒
+      if (existing.isEmpty) {
+        refreshWithNoError
+        onpasted
+      }
+      else manager.setFilesInError(
+        "Some files already exists, overwrite ?",
+        existing,
+        () ⇒ CoreUtils.copyProjectFilesTo(safePaths, to).foreach { b ⇒
+          refreshWithNoError
+          onpasted
+        }, () ⇒ {
+          refreshWithNoError
+          unselectTool
+        }
+      )
+    }
+  }
+
 }
