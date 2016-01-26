@@ -20,6 +20,7 @@ import TreeNode._
 import autowire._
 import rx._
 import bs._
+
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
  *
@@ -110,11 +111,13 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     drawTree(manager.current.sons())
   }
 
-  def drawTree(tns: Seq[TreeNode]) = tags.table(`class` := "file-list")(
-    for (tn ← tns.sorted(TreeNodeOrdering)) yield {
-      drawNode(tn)
-    }
-  )
+  def drawTree(tns: Seq[TreeNode]) = {
+    tags.table(`class` := "file-list")(
+      for (tn ← tns.sorted(TreeNodeOrdering)) yield {
+        drawNode(tn)
+      }
+    )
+  }
 
   def drawNode(node: TreeNode) = node match {
     case fn: FileNode ⇒
@@ -164,7 +167,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       treeNode.name()
     }?",
       () ⇒ {
-        CoreUtils.trashNode(treeNode.safePath()) {
+        CoreUtils.trashNode(treeNode.safePath()) { () ⇒
           CoreUtils.refreshCurrentDirectory()
           fileDisplayer.tabs.checkTabs
         }
@@ -195,7 +198,6 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                   OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach {
                     b ⇒
                       CoreUtils.refreshCurrentDirectory()
-                      CoreUtils.refresh(d)
                       fileDisplayer.tabs.checkTabs
                   }
                 )
@@ -220,8 +222,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
     def clickablePair(classType: String, todo: () ⇒ Unit) = Seq(
       style := "float:left",
-      cursor := "pointer", /*
-      fontWeight := "bold",*/
+      cursor := "pointer",
       draggable := true,
       onclick := { () ⇒ todo() },
       `class` := classType

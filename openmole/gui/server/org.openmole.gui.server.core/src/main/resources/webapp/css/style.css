@@ -459,6 +459,7 @@ a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-
     position: fixed;
     top: 50%;
     left: 50%;
+    min-width: 250px;
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
 }
@@ -735,8 +736,6 @@ span.label.control-label{
     font-weight: bold;
 }
 .btn.btn-success{
-    background-color: #3086b5;
-    border: #3086b5 solid 1px;
     color: white;
     font-weight: bold;
 }

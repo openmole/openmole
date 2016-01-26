@@ -261,7 +261,7 @@ class ModelWizardPanel extends ModalPanel {
             // Move files from tmp to target path
             if (existing.isEmpty) {
               targetPath().map { tp ⇒
-                OMPost[Api].copyAllTo(tempFile, tp).call().foreach { b ⇒
+                OMPost[Api].copyAllTmpTo(tempFile, tp).call().foreach { b ⇒
                   buildForm(uploadPath, fileType)
                   OMPost[Api].deleteFile(tempFile, ServerFileSytemContext.absolute).call()
                 }

@@ -93,6 +93,19 @@ object Utils {
     else DebugLevel()
   }
 
+  implicit class SafePathDecorator(sp: SafePath) {
+
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+
+    def copy(toPath: SafePath) = {
+      val from: File = sp
+      val to: File = toPath
+      if (from.exists && to.exists) {
+        from.copy(new File(to, from.getName))
+      }
+    }
+  }
+
   def authenticationFile(keyFileName: String): File = new File(authenticationKeysFile, keyFileName)
 
   def getPathArray(f: File, until: File): Seq[String] = {
@@ -230,9 +243,19 @@ object Utils {
       from.copy(new File(to, from.getName))
     }
 
+  def exists(safePath: SafePath) = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+    safePathToFile(safePath).exists
+  }
+
+  def existsIn(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = {
+    safePaths.map { sp ⇒
+      to ++ sp.name
+    }.filter(exists)
+  }
+
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = {
     val tmp: File = safePathToFile(tmpSafePath)(ServerFileSytemContext.absolute)
-    //getFile(new File(""), tmpSafePath.path)
 
     filesToBeMovedTo.foreach { f ⇒
       val from = getFile(tmp, Seq(f.name))
@@ -242,7 +265,7 @@ object Utils {
 
   }
 
-  def copyAllTo(tmpSafePath: SafePath, to: SafePath): Unit = {
+  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit = {
 
     val f: File = safePathToFile(tmpSafePath)(ServerFileSytemContext.absolute)
     val toFile: File = safePathToFile(to)(ServerFileSytemContext.project)
@@ -255,6 +278,20 @@ object Utils {
 
     toFile.mkdir
     dirToCopy.copy(toFile)
+
+  }
+
+  // Test if files exist in the 'to' directory, return the lists of already existing files or copy them otherwise
+  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = {
+    val existing = existsIn(safePaths, to)
+
+    if (existing.isEmpty) safePaths.foreach { sp ⇒  sp.copy(to) }
+    existing
+  }
+
+  //copy safePaths files to 'to' folder in overwriting in they exist
+  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath) = {
+    safePaths.foreach { sp ⇒ sp.copy(to) }
 
   }
 
