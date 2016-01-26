@@ -35,6 +35,8 @@ class TreeNodeManager {
 
   val selected: Var[Seq[TreeNode]] = Var(Seq())
 
+  val copied: Var[Seq[TreeNode]] = Var(Seq())
+
   def isSelected(tn: TreeNode) = selected().contains(tn)
 
   def resetSelection = selected() = Seq()
@@ -43,6 +45,8 @@ class TreeNodeManager {
     case true  ⇒ selected() = (selected() :+ tn).distinct
     case false ⇒ selected() = selected().filterNot(_ == tn)
   }
+
+  def setSelectedAsCopied = copied() = selected()
 
   def setSelection = selectionMode() = true
 

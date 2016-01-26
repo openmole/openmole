@@ -148,6 +148,7 @@ class FileToolBar {
   })
 
   val copyButton = bs.button("Copy", btn_default, () ⇒ {
+    manager.setSelectedAsCopied
     unselectTool
   })
 
