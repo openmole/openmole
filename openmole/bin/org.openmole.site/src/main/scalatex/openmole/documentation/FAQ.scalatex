@@ -29,7 +29,7 @@
     @p When your workflow does not start to the remote environment you’re accessing through SSH, you can try these few
     steps to identify the problems.
 
-    @p First, enable the @i{FINE} level of logging in the console using:
+    @p If you are using OpenMOLE in console mode, enable the @i{FINE} level of logging in the console using:
       @hl.openmole("""logger.level("FINE")""")
 
     @p A typical SSH connection error will report as:
@@ -49,16 +49,6 @@
       password you entered since one of them is more than likely incorrect.
 
     @sect{SSH Keypair Authentication}
-      @p Here we consider that you have defined your environment to use a public key authentication as follows:
-      @hl.openmole("""
-              SSHAuthentication +=
-                PrivateKey(
-                  "/home/mylogin/.ssh/id_dsa",
-                  "mylogin",
-                  encrypted,
-                  "the-name-of-the-remote-server"
-                )""")
-
       @p In such a case, we'll have to investigate multiple options, as SSH public key authentications are sensible to
         several configuration parameters.
 
@@ -90,7 +80,7 @@
 
   @sect{My problem is not listed here}
     @p If you could not resolve your problems, feel free to post your problem on the @a("mailing-list",
-    href := "http://fedex.iscpif.fr/mailman/listinfo/openmole-users").
+    href := "http://list.openmole.org").
 
     @p If you think your problem is induced by a bug in OpenMOLE, please report the issue exhaustively on our @a(
     "GitHub page", href := "https://github.com/openmole/openmole/issues").

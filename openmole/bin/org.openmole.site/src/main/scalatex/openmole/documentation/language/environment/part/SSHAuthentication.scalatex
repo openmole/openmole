@@ -1,13 +1,15 @@
 
 @import org.openmole.site._
 
-@p OpenMOLE offers several ways to authenticate to a remote machine through SSH. Login/password and private key. The following instructions explain how to setup SSH authentications in console mode. If you are using the script editor you can configure them directly in the authentication panel.
+@p OpenMOLE offers several ways to authenticate to a remote machine through SSH: login/password and private key. The following instructions explain how to setup SSH authentications. 
 
-@p To authenticate with login / password:
+@p If you are using the script editor you should configure them directly in the authentication panel.
+
+@p In console mode, you can define an authentication using a pair of login / password with the following command:
 @br @hl.openmole("""
   SSHAuthentication += LoginPassword("login", encrypted, "machine-name")""".stripMargin, header = """def encrypted = "" """)
 
-@p To authenticate with a private key:
+@p Or to authenticate with a private key:
 @br @hl.openmole("""
     SSHAuthentication += PrivateKey("/path/to/the/private/key", "login", encrypted, "machine-name")""", header = """def encrypted = "" """)
 
