@@ -1,6 +1,7 @@
 package org.openmole.gui.misc.js
 
 import fr.iscpif.scaladget.api.ClassKeyAggregator
+import org.scalajs.dom.html._
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLButtonElement, HTMLElement, HTMLSpanElement }
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs }
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -79,4 +80,21 @@ object OMTags {
       todo
     })
 
+  private def cbSpan(name: String) = tags.span(name, style := "position: relative; margin-right:5px; margin-left:5px; top: -3px;")
+
+  def checkbox(name: String, default: Boolean)(todo: Input ⇒ Unit) = {
+    lazy val cb: Input = tags.input(`type` := "checkbox", checked := default.toString, onclick := { () ⇒ todo(cb) }).render
+    tags.div(
+      cbSpan(name),
+      cb
+    )
+  }
+
+  def checkbox(default: Boolean, name: String = "")(todo: Input ⇒ Unit) = {
+    lazy val cb: Input = tags.input(`type` := "checkbox", checked := default.toString, onclick := { () ⇒ todo(cb) }).render
+    tags.div(
+      cb,
+      cbSpan(name)
+    )
+  }
 }

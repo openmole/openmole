@@ -258,4 +258,15 @@ object Utils {
 
   }
 
+  def deleteFile(safePath: SafePath, context: ServerFileSytemContext): Unit = {
+    implicit val ctx = context
+    safePathToFile(safePath).recursiveDelete
+  }
+
+  def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSytemContext): Unit = {
+    safePaths.foreach { sp ⇒
+      deleteFile(sp, context)
+    }
+  }
+
 }

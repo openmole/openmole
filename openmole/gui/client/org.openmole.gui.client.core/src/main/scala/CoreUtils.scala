@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{ FileNodeType, DirNode }
+import org.openmole.gui.client.core.files.DirNode
 import org.openmole.gui.ext.data._
 import org.openmole.gui.shared.Api
 import autowire._
@@ -83,4 +83,22 @@ object CoreUtils {
       if (b) refreshCurrentDirectory()
     }
 
+  def trashNode(path: SafePath)(ontrashed: ⇒ Unit): Unit = {
+    OMPost[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach { d ⇒
+      ontrashed
+      refreshAndSwitchSelection
+    }
+  }
+
+  def trashNodes(paths: Seq[SafePath])(ontrashed: ⇒ Unit): Unit = {
+    OMPost[Api].deleteFiles(paths, ServerFileSytemContext.project).call().foreach { d ⇒
+      ontrashed
+      refreshAndSwitchSelection
+    }
+  }
+
+  def refreshAndSwitchSelection = {
+    refreshCurrentDirectory()
+    manager.switchOffSelection
+  }
 }

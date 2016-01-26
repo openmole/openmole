@@ -31,6 +31,30 @@ class TreeNodeManager {
 
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(root))
 
+  val selectionMode: Var[Boolean] = Var(false)
+
+  val selected: Var[Seq[TreeNode]] = Var(Seq())
+
+  val copied: Var[Seq[TreeNode]] = Var(Seq())
+
+  def isSelected(tn: TreeNode) = selected().contains(tn)
+
+  def resetSelection = selected() = Seq()
+
+  def setSelected(tn: TreeNode, b: Boolean) = b match {
+    case true  ⇒ selected() = (selected() :+ tn).distinct
+    case false ⇒ selected() = selected().filterNot(_ == tn)
+  }
+
+  def setSelectedAsCopied = copied() = selected()
+
+  def setSelection = selectionMode() = true
+
+  def switchOffSelection = {
+    selectionMode() = false
+    resetSelection
+  }
+
   def head = dirNodeLine().head
 
   def current = dirNodeLine().last
@@ -49,5 +73,10 @@ class TreeNodeManager {
 
   def allNodes = dirNodeLine().flatMap {
     _.sons()
+  }
+
+  private def selection = selectionMode() match {
+    case true ⇒ Some(false)
+    case _    ⇒ None
   }
 }
