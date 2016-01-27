@@ -24,8 +24,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       m.organization == "org.bouncycastle" ||
       m.organization.contains("org.openmole")
 
-  def pluginFilter(m: ModuleID) =
-    m.organization.contains("org.openmole") || m.organization == "fr.iscpif.gridscale.bundle"
+  def pluginFilter(m: ModuleID) = m.name != "osgi" && m.name != "scala-library"
 
   lazy val openmoleStartLevels =
     Seq(
@@ -201,13 +200,13 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       gridscaleOAR intransitive (),
       gridscaleSSH intransitive ()
     ) ++ apacheHTTP map (_ intransitive ()),
-      dependencyFilter := { m ⇒ m.name != "scala-library" },
+      dependencyFilter := pluginFilter,
       dependencyName := rename
   )
 
   lazy val guiPlugins = Project("guiplugins", dir / "target" / "guiplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"), true) sendTo assemblyPath,
-    dependencyFilter := filter,
+    dependencyFilter := pluginFilter,
     dependencyName := rename
   )
 
