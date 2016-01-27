@@ -17,14 +17,13 @@
 
 package org.openmole.site
 
-import javax.script.ScriptEngineManager
-
 import org.openmole.core.console.ScalaREPL
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.project._
 import org.openmole.core.tools.service.ObjectPool
 
 import scala.collection.mutable.ListBuffer
-import scala.util.Try
+import scala.util.{ Failure, Try, Success }
 
 object DSLTest {
 
@@ -46,9 +45,8 @@ $code
 
   def testCode = toTest.map { _.toCode }.mkString("\n")
 
-  def runTest = Try {
-    engine.compiled(testCode)
-  }
+  def runTest =
+    Try { engine.compile(testCode) }
 
   def clear = toTest.clear
 

@@ -18,12 +18,13 @@ import sbtbuildinfo.Plugin._
 object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties, root.Doc) {
   val dir = file("bin")
 
-  def filter(m: ModuleID) = {
+  def filter(m: ModuleID) =
     m.organization.startsWith("org.eclipse") ||
       m.organization == "fr.iscpif.gridscale.bundle" ||
       m.organization == "org.bouncycastle" ||
       m.organization.contains("org.openmole")
-  }
+
+  def pluginFilter(m: ModuleID) = m.name != "osgi" && m.name != "scala-library"
 
   lazy val openmoleStartLevels =
     Seq(
@@ -93,6 +94,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       downloads := Seq(java368URL → "runtime/jvm-386.tar.gz", javax64URL → "runtime/jvm-x64.tar.gz"),
       libraryDependencies += Libraries.scalajHttp,
       dependencyFilter := filter,
+      dependencyName := rename,
       assemblyDependenciesPath := assemblyPath.value / "plugins",
       Tar.name := "openmole.tar.gz",
       Tar.innerFolder := "openmole",
@@ -171,7 +173,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "gui") sendTo assemblyPath,
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "doc") sendTo assemblyPath,
     libraryDependencies ++= guiCoreDependencies,
-    dependencyFilter := filter
+    dependencyFilter := filter,
+    dependencyName := rename
   )
 
   lazy val consolePlugins = Project("consoleplugins", dir / "target" / "consoleplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
@@ -197,13 +200,14 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       gridscaleOAR intransitive (),
       gridscaleSSH intransitive ()
     ) ++ apacheHTTP map (_ intransitive ()),
-      dependencyFilter := { m ⇒ m.name != "scala-library" },
+      dependencyFilter := pluginFilter,
       dependencyName := rename
   )
 
   lazy val guiPlugins = Project("guiplugins", dir / "target" / "guiplugins", settings = assemblySettings) settings (commonsSettings: _*) settings (
     resourcesAssemble <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"), true) sendTo assemblyPath,
-    dependencyFilter := filter
+    dependencyFilter := pluginFilter,
+    dependencyName := rename
   )
 
   lazy val dbServer = Project("dbserver", dir / "dbserver", settings = assemblySettings) settings (commonsSettings: _*) settings (
@@ -217,7 +221,8 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
       Libraries.slf4j,
       Libraries.scalaLang
     ),
-    dependencyFilter := filter
+    dependencyFilter := filter,
+    dependencyName := rename
   )
 
   lazy val openmoleRuntime = Project("runtime", dir / "runtime", settings = tarProject ++ assemblySettings ++ osgiApplicationSettings) settings (commonsSettings: _*) settings (
@@ -251,6 +256,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
     ) ++ equinox ++ coreDependencies,
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     dependencyFilter := filter,
+    dependencyName := rename,
     setExecutable ++= Seq("openmole-daemon", "openmole-daemon.bat"),
     dependencyName := rename,
     Tar.name := "openmole-daemon.tar.gz",
@@ -285,7 +291,7 @@ object Bin extends Defaults(Core, Plugin, Runtime, Gui, Libraries, ThirdParties,
         libraryDependencies += Libraries.xstream,
         libraryDependencies += Libraries.scalatexSite,
         libraryDependencies += Libraries.scalaLang,
-        libraryDependencies += Libraries.equinoxApp,
+        libraryDependencies ++= equinox,
         libraryDependencies += Libraries.jgit intransitive (),
         libraryDependencies += Libraries.txtmark,
         libraryDependencies += Libraries.toolxitBibtex intransitive (),
