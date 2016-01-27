@@ -285,7 +285,7 @@ object Utils {
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = {
     val existing = existsIn(safePaths, to)
 
-    if (existing.isEmpty) safePaths.foreach { sp ⇒  sp.copy(to) }
+    if (existing.isEmpty) safePaths.foreach { sp ⇒ sp.copy(to) }
     existing
   }
 

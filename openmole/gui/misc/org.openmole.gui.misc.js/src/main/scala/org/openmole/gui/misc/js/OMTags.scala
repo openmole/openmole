@@ -57,7 +57,22 @@ object OMTags {
 
   def buttonGroup(keys: ClassKeyAggregator = emptyCK) = bs.div("btn-group " + keys.key)
 
-  def alert(alertType: ClassKeyAggregator, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, todocancel: () ⇒ Unit, buttonGroupClass: ClassKeyAggregator = "left") =
+  case class AlertAction(action: () ⇒ Unit)
+
+  def alert(alertType: ClassKeyAggregator, content: TypedTag[HTMLDivElement], actions: Seq[AlertAction], buttonGroupClass: ClassKeyAggregator = "left"): TypedTag[HTMLDivElement] =
+    actions.size match {
+      case 1 ⇒ alert(alertType, content, actions.head.action, buttonGroupClass)
+      case 2 ⇒ alert(alertType, content, actions.head.action, actions(1).action, buttonGroupClass)
+      case _ ⇒ tags.div()
+    }
+
+  def alert(alertType: ClassKeyAggregator, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, buttonGroupClass: ClassKeyAggregator): TypedTag[HTMLDivElement] =
+    tags.div(role := "alert")(
+      content,
+      bs.button("OK", btn_danger + "spacer20", todook)
+    )
+
+  def alert(alertType: ClassKeyAggregator, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, todocancel: () ⇒ Unit, buttonGroupClass: ClassKeyAggregator): TypedTag[HTMLDivElement] =
     tags.div(role := "alert")(
       content,
       bs.div("spacer20")(

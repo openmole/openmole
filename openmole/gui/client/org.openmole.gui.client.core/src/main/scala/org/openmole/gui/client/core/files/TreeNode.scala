@@ -43,6 +43,8 @@ object TreeNodeType {
 
 case class TreeNodeError(message: String, filesInError: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit)
 
+case class TreeNodeComment(message: String, filesInError: Seq[SafePath], okaction: () ⇒ Unit)
+
 sealed trait TreeNode {
   val id = getUUID
 

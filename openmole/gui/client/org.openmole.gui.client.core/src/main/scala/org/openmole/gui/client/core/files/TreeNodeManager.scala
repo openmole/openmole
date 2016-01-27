@@ -34,6 +34,8 @@ class TreeNodeManager {
 
   val error: Var[Option[TreeNodeError]] = Var(None)
 
+  val comment: Var[Option[TreeNodeComment]] = Var(None)
+
   val selectionMode: Var[Boolean] = Var(false)
 
   val selected: Var[Seq[TreeNode]] = Var(Seq())
@@ -41,7 +43,11 @@ class TreeNodeManager {
   val copied: Var[Seq[TreeNode]] = Var(Seq())
 
   Obs(error) {
-    error().map(AlertPanel.treeNodeDiv)
+    error().map(AlertPanel.treeNodeErrorDiv)
+  }
+
+  Obs(comment) {
+    comment().map(AlertPanel.treeNodeCommentDiv)
   }
 
   def isSelected(tn: TreeNode) = selected().contains(tn)
@@ -64,7 +70,12 @@ class TreeNodeManager {
 
   def setFilesInError(question: String, files: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit) = error() = Some(TreeNodeError(question, files, okaction, cancelaction))
 
-  def noError = error() = None
+  def setFilesInComment(c: String, files: Seq[SafePath], okaction: () ⇒ Unit) = comment() = Some(TreeNodeComment(c, files, okaction))
+
+  def noError = {
+    error() = None
+    comment() = None
+  }
 
   def switchOffSelection = {
     selectionMode() = false

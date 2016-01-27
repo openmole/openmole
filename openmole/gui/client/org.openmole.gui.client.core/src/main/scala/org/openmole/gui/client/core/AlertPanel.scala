@@ -19,7 +19,8 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.AbsolutePositioning._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
-import org.openmole.gui.client.core.files.TreeNodeError
+import org.openmole.gui.client.core.files.{ TreeNodeComment, TreeNodeError }
+import org.openmole.gui.misc.js.OMTags.AlertAction
 import org.openmole.gui.misc.js.{ OptionsDiv, OMTags }
 import org.scalajs.dom.html.Div
 import org.scalajs.dom.raw.HTMLDivElement
@@ -41,14 +42,20 @@ object AlertPanel {
           zone: Zone = FullPage(),
           alertType: ClassKeyAggregator = warning,
           buttonGroupClass: ClassKeyAggregator = "right"): Unit = {
-    panel.popup(messageDiv, okaction, cancelaction, transform, zone, alertType, buttonGroupClass)
+    panel.popup(messageDiv, Seq(AlertAction(okaction), AlertAction(cancelaction)), transform, zone, alertType, buttonGroupClass)
   }
 
-  def treeNodeDiv(error: TreeNodeError): Unit = div(
+  def treeNodeErrorDiv(error: TreeNodeError): Unit = div(
     tags.div(
       error.message,
       OptionsDiv(error.filesInError).div
     ), okaction = error.okaction, cancelaction = error.cancelaction, zone = FileZone())
+
+  def treeNodeCommentDiv(error: TreeNodeComment): Unit = panel.popup(
+    tags.div(
+      error.message,
+      OptionsDiv(error.filesInError).div
+    ), Seq(AlertAction(error.okaction)), CenterTransform(), FileZone(), warning, "right")
 
   def string(message: String,
              okaction: () ⇒ Unit,
@@ -76,13 +83,14 @@ class AlertPanel {
   })(elementDiv)
 
   def popup(messageDiv: TypedTag[HTMLDivElement],
-            okaction: () ⇒ Unit,
-            cancelaction: () ⇒ Unit,
+            actions: Seq[AlertAction],
+            /* okaction: () ⇒ Unit,
+            cancelaction: () ⇒ Unit,*/
             transform: Transform,
             zone: Zone = FullPage(),
             alertType: ClassKeyAggregator = warning,
             buttonGroupClass: ClassKeyAggregator = "left") = {
-    alertElement() = OMTags.alert(alertType, messageDiv, actionWrapper(okaction), actionWrapper(cancelaction), buttonGroupClass)
+    alertElement() = OMTags.alert(alertType, messageDiv, actions.map { a ⇒ a.copy(action = actionWrapper(a.action)) }, buttonGroupClass)
     transform(elementDiv)
     overlayZone() = zone
     visible() = true

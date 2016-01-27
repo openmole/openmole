@@ -200,23 +200,33 @@ class FileToolBar {
       unselectTool
     }
 
-    CoreUtils.testExistenceAndCopyProjectFilesTo(safePaths, to).foreach { existing ⇒
-      if (existing.isEmpty) {
-        refreshWithNoError
-        onpasted
-      }
-      else manager.setFilesInError(
-        "Some files already exists, overwrite ?",
-        existing,
-        () ⇒ CoreUtils.copyProjectFilesTo(safePaths, to).foreach { b ⇒
+    val same = safePaths.filter { sp ⇒
+      sp == to
+    }
+    if (same.isEmpty) {
+      CoreUtils.testExistenceAndCopyProjectFilesTo(safePaths, to).foreach { existing ⇒
+        if (existing.isEmpty) {
           refreshWithNoError
           onpasted
-        }, () ⇒ {
-          refreshWithNoError
-          unselectTool
         }
-      )
+        else manager.setFilesInError(
+          "Some files already exists, overwrite ?",
+          existing,
+          () ⇒ CoreUtils.copyProjectFilesTo(safePaths, to).foreach { b ⇒
+            refreshWithNoError
+            onpasted
+          }, () ⇒ {
+            refreshWithNoError
+            unselectTool
+          }
+        )
+      }
     }
+    else manager.setFilesInComment(
+      "Paste a folder in itself is not allowed",
+      same,
+      () ⇒ manager.noError
+    )
   }
 
 }
