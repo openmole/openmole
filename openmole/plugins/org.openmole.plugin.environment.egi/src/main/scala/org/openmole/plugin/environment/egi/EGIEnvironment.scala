@@ -181,7 +181,7 @@ object EGIEnvironment extends Logger {
     name: Option[String] = None)(implicit authentications: AuthenticationProvider) =
     new EGIEnvironment(
       voName = voName,
-      bdii = bdii.getOrElse(Workspace.preference(EGIEnvironment.DefaultBDII)),
+      bdii = bdii.map(s => new URI(s)).getOrElse(new URI(Workspace.preference(EGIEnvironment.DefaultBDII))),
       vomsURLs = vomsURLs.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
       fqan = fqan,
       openMOLEMemory = openMOLEMemory,
@@ -248,7 +248,7 @@ class EGIBatchExecutionJob(val job: Job, val environment: EGIEnvironment) extend
 
 class EGIEnvironment(
     val voName: String,
-    val bdii: String,
+    val bdii: URI,
     val vomsURLs: Seq[String],
     val fqan: Option[String],
     override val openMOLEMemory: Option[Int],
@@ -295,7 +295,7 @@ class EGIEnvironment(
   }
 
   @transient lazy val jobServices = {
-    val bdiiWMS = bdiiServer.queryWMSLocations(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut))
+    val bdiiWMS = bdiiServer.queryWMSLocations(voName)
     bdiiWMS.map {
       js ⇒
         new EGIJobService {
@@ -351,6 +351,6 @@ class EGIEnvironment(
     select(jss.toList, rate)
   }
 
-  def bdiiServer: BDII = new BDII(bdii)
+  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preferenceAsDuration(FetchResourcesTimeOut))
   override def runtimeSettings = super.runtimeSettings.copy(archiveResult = true)
 }

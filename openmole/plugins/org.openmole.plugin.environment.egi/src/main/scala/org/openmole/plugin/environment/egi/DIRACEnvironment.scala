@@ -17,6 +17,8 @@
 
 package org.openmole.plugin.environment.egi
 
+import java.net.URI
+
 import fr.iscpif.gridscale.authentication.P12Authentication
 import org.openmole.core.batch.environment.{ BatchExecutionJob, BatchEnvironment }
 import org.openmole.core.exception.UserBadDataError
@@ -55,7 +57,7 @@ object DIRACEnvironment {
       voName = voName,
       service = service,
       group = group.getOrElse(voName + "_user"),
-      bdii = bdii.getOrElse(Workspace.preference(EGIEnvironment.DefaultBDII)),
+      bdii = bdii.map(new URI(_)).getOrElse(new URI(Workspace.preference(EGIEnvironment.DefaultBDII))),
       vomsURLs = vomsURLs.getOrElse(EGIAuthentication.getVMOSOrError(voName)),
       setup = setup.getOrElse("Dirac-Production"),
       fqan = fqan,
@@ -82,7 +84,7 @@ class DIRACEnvironment(
     val voName: String,
     val service: String,
     val group: String,
-    val bdii: String,
+    val bdii: URI,
     val vomsURLs: Seq[String],
     val setup: String,
     val fqan: Option[String],
@@ -103,7 +105,7 @@ class DIRACEnvironment(
     super.submit(job)
   }
 
-  def bdiiServer: BDII = new BDII(bdii)
+  def bdiiServer: BDII = BDII(bdii.getHost, bdii.getPort, Workspace.preferenceAsDuration(EGIEnvironment.FetchResourcesTimeOut))
 
   def executionJob(job: Job) = new DiracBatchExecutionJob(job, this)
 
