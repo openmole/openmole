@@ -21,25 +21,40 @@ import java.io.{ ByteArrayOutputStream, InputStream }
 import java.util.zip.GZIPOutputStream
 
 class GZipedInputStream(is: InputStream) extends InputStream {
-  val byteArrayOutputStream = new ByteArrayOutputStream()
+
   var end = false
   var buffer = Array.empty[Byte]
   var cur = 0
 
+  val byteArrayOutputStream = new ByteArrayOutputStream(1024)
   val gzip = new GZIPOutputStream(byteArrayOutputStream)
+
+  bufferizeByteArrayStream()
 
   override def read(): Int = synchronized {
     while (bufferEmpty && !end) readFromInput
-    if (!bufferEmpty) readBuffer()
+    if (!bufferEmpty) readBuffer() & 0xFF
     else -1
   }
 
   override def close = is.close
 
   private def readFromInput() = {
-    val char = is.read()
-    if (char != -1) byteArrayOutputStream.write(char)
-    else end = true
+    val localBuffer: Array[Byte] = new Array[Byte](1024)
+    val r = is.read(localBuffer)
+    if (r != -1) {
+      gzip.write(localBuffer, 0, r)
+      bufferizeByteArrayStream()
+    }
+    else {
+      gzip.finish()
+      bufferizeByteArrayStream()
+      end = true
+    }
+  }
+
+  private def bufferizeByteArrayStream() = {
+    gzip.flush()
     if (byteArrayOutputStream.size() > 0) {
       setBuffer(byteArrayOutputStream.toByteArray)
       byteArrayOutputStream.reset()
