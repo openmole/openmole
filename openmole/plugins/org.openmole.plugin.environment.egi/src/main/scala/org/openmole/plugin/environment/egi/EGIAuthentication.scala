@@ -152,21 +152,6 @@ object EGIAuthentication extends Logger {
             fqan)
 
         () ⇒ implicitly[GlobusAuthenticationProvider[P12VOMSAuthentication]].apply(p12)
-        case a: PEMCertificate ⇒
-        VOMSAuthentication.setCARepository(EGIAuthentication.CACertificatesDir)
-        val pem = PEMVOMSAuthentication(
-          PEMAuthentication(a.certificate, a.key, a.password(authenticationProvider)),
-          EGIEnvironment.proxyTime,
-          serverURLs,
-          voName,
-          EGIEnvironment.proxyRenewalRatio,
-          fqan
-        )
-
-        () ⇒ implicitly[GlobusAuthenticationProvider[PEMVOMSAuthentication]].apply(pem)
-      /*case a: ProxyFile ⇒
-        val proxy = ProxyFileAuthentication(a.proxy)
-        () ⇒ implicitly[GlobusAuthenticationProvider[ProxyFileAuthentication]].apply(proxy)*/
     }
 
 }
