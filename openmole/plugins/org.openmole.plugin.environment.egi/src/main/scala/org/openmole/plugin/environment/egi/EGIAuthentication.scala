@@ -59,7 +59,7 @@ object EGIAuthentication extends Logger {
     for (tarUrl ← site.listNames("/")) {
       try {
         //val child = site.child(tarUrl)
-        val is = site.openInputStream(tarUrl)
+        val is = site.read(tarUrl)
 
         val tis = new TarInputStream(new GZIPInputStream(new BufferedInputStream(is)))
 

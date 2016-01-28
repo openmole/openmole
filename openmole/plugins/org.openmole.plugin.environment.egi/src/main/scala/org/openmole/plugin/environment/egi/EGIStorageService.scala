@@ -33,7 +33,6 @@ import scala.sys.process.{ Process, ProcessLogger }
 import scala.util.Try
 
 trait EGIStorageService extends PersistentStorageService with GridScaleStorage with CompressedTransfer {
-
   val usageControl: AvailabilityQuality
   import usageControl.quality
 
@@ -43,10 +42,8 @@ trait EGIStorageService extends PersistentStorageService with GridScaleStorage w
   override def makeDir(path: String)(implicit token: AccessToken): Unit = quality { super.makeDir(path)(token) }
   override def rmDir(path: String)(implicit token: AccessToken): Unit = quality { super.rmDir(path)(token) }
   override def rmFile(path: String)(implicit token: AccessToken): Unit = quality { super.rmFile(path)(token) }
-  override def openInputStream(path: String)(implicit token: AccessToken): InputStream = quality { super.openInputStream(path)(token) }
-  override def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = quality { super.openOutputStream(path)(token) }
-  override def upload(src: File, dest: String, options: TransferOptions)(implicit token: AccessToken) = quality { super.upload(src, dest, options)(token) }
-  override def download(src: String, dest: File, options: TransferOptions)(implicit token: AccessToken) = quality { super.download(src, dest, options)(token) }
+  override def downloadStream(path: String, transferOptions: TransferOptions)(implicit token: AccessToken): InputStream = quality { super.downloadStream(path, transferOptions)(token) }
+  override def uploadStream(is: InputStream, path: String, transferOptions: TransferOptions)(implicit token: AccessToken) = quality { super.uploadStream(is, path, transferOptions)(token) }
 }
 
 object EGISRMStorageService {

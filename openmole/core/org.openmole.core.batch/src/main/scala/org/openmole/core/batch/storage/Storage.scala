@@ -17,6 +17,7 @@
 package org.openmole.core.batch.storage
 
 import java.io.{ File, OutputStream, InputStream }
+import java.nio.file.Files
 import java.util.UUID
 
 import fr.iscpif.gridscale.storage._
@@ -44,11 +45,11 @@ object Storage {
 
 trait CompressedTransfer <: Storage {
 
-  override protected def uploadOutputStream(dest: String, options: TransferOptions) =
-    if (!options.raw) _openOutputStream(dest).toGZ else super.uploadOutputStream(dest, options)
+  override abstract def _uploadStream(src: InputStream, dest: String, options: TransferOptions) =
+    if (!options.raw) super._uploadStream(src.toGZiped, dest, options) else super._uploadStream(src, dest, options)
 
-  override protected def downloadInputStream(src: String, options: TransferOptions) =
-    if (!options.raw) _openInputStream(src).toGZ else super.downloadInputStream(src, options)
+  override abstract protected def _downloadStream(src: String, options: TransferOptions) =
+    if (!options.raw) super._downloadStream(src, options).toGZ else super._downloadStream(src, options)
 
 }
 
@@ -61,25 +62,19 @@ trait Storage {
   protected def _makeDir(path: String): Unit
   protected def _rmDir(path: String): Unit
   protected def _rmFile(path: String): Unit
-  protected def _openInputStream(path: String): InputStream
-  protected def _openOutputStream(path: String): OutputStream
   protected def _mv(from: String, to: String)
   protected def _parent(path: String): Option[String]
   protected def _name(path: String): String
+  protected def _uploadStream(src: InputStream, dest: String, options: TransferOptions): Unit
+  protected def _downloadStream(src: String, options: TransferOptions): InputStream
 
-  protected def uploadOutputStream(dest: String, options: TransferOptions) = _openOutputStream(dest)
-  protected def downloadInputStream(src: String, options: TransferOptions) = _openInputStream(src)
+  protected def _upload(src: File, dest: String, options: TransferOptions): Unit =
+    src.withInputStream(is => _uploadStream(is, dest, options))
 
-  protected def _upload(src: File, dest: String, options: TransferOptions) = {
-    val os = uploadOutputStream(dest, options)
-    try src.copy(os, bufferSize, copyTimeout)
-    finally os.close
-  }
-
-  protected def _download(src: String, dest: File, options: TransferOptions) = {
-    val is = downloadInputStream(src, options)
-    try is.copy(dest, bufferSize, copyTimeout)
-    finally is.close
+  protected def _download(src: String, dest: File, options: TransferOptions): Unit = {
+    val is = _downloadStream(src, options)
+    try Files.copy(is, dest.toPath)
+    finally is.close()
   }
 
   protected def bufferSize = Workspace.preferenceAsInt(Storage.BufferSize)
