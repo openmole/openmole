@@ -160,7 +160,7 @@ class CurlRemoteStorage(val host: String, val port: Int, val voName: String, val
     try super.upload(src, dest, options)
     catch {
       case t: Throwable =>
-        run(s"${curl.curl} -X DELETE ${url.resolve(dest)}")
+        Try(run(s"${curl.curl} -X DELETE ${url.resolve(dest)}"))
         throw t
     }
 }
