@@ -24,6 +24,8 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.file._
 
 object Project {
+  def scriptExtension = ".oms"
+  def isScript(file: File) = file.exists() && file.getName.endsWith(scriptExtension)
   def newREPL(variables: ConsoleVariables) = OpenMOLEREPL.newREPL(variables, quiet = true)
 }
 
@@ -64,7 +66,7 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
     finally loop.close()
   }
 
-  def scriptFiles(dir: File) = dir.listFilesSafe(_.getName.endsWith(".oms"))
+  def scriptFiles(dir: File) = dir.listFilesSafe(Project.isScript _)
 
   def scriptsObjects(dir: File) =
     for {
@@ -73,10 +75,10 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
 
   def makeObject(script: File) =
     s"""
-       |class ${script.getName.dropRight(".oms".size)}Class {
+       |class ${script.getName.dropRight(Project.scriptExtension.size)}Class {
        |${script.content}
        |}
-       |lazy val ${script.getName.dropRight(".oms".size)} = new ${script.getName.dropRight(".oms".size)}Class
+       |lazy val ${script.getName.dropRight(Project.scriptExtension.size)} = new ${script.getName.dropRight(".oms".size)}Class
      """.stripMargin
 
 }
