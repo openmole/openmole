@@ -165,11 +165,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
   }
 
   def uploadResult(localResultFile: File, communicationDir: String, job: String, storage: SimpleStorage) = {
-    val runtimeResult = {
-      val is = localResultFile.bufferedInputStream
-      try SerialiserService.deserialise[RuntimeResult](is)
-      finally is.close
-    }
+    val runtimeResult = SerialiserService.deserialiseAndExtractFiles[RuntimeResult](localResultFile)
 
     logger.info(s"Uploading context results to communication dir $communicationDir")
 
@@ -198,31 +194,13 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       case Failure(e) ⇒ Failure(e)
     }
 
-    val uploadedStdOut = runtimeResult.stdOut match {
-      case Some(stdOut) ⇒
-        logger.info("Uploading stdout"); Some(uploadFileMessage(stdOut))
-      case None ⇒ None
-    }
-
-    val uploadedStdErr = runtimeResult.stdErr match {
-      case Some(stdErr) ⇒
-        logger.info("Uploading stderr"); Some(uploadFileMessage(stdErr))
-      case None ⇒ None
-    }
-
     logger.info("Context results uploaded")
-
-    val resultToSend =
-      RuntimeResult(
-        uploadedStdOut,
-        uploadedStdErr,
-        uploadedResult,
-        runtimeResult.info)
+    val resultToSend = runtimeResult.copy(result = uploadedResult)
 
     // Upload the result
     Workspace.withTmpFile { outputLocal ⇒
       logger.info("Uploading job results")
-      SerialiserService.serialise(resultToSend, outputLocal)
+      SerialiserService.serialiseAndArchiveFiles(resultToSend, outputLocal)
       val tmpResultFile = storage.child(tmpResultsDirName, Storage.uniqName(job, ".res"))
       storage.upload(outputLocal, tmpResultFile)
       val resultFile = storage.child(resultsDirName, Storage.uniqName(job, ".res"))

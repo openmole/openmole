@@ -89,30 +89,13 @@ class GetResultActor(jobManager: JobManager) {
 
   private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken): RuntimeResult = Workspace.withTmpFile { resultFile ⇒
     signalDownload(storage.download(outputFilePath, resultFile), outputFilePath, storage, resultFile)
-    SerialiserService.deserialise[RuntimeResult](resultFile)
+    SerialiserService.deserialiseAndExtractFiles[RuntimeResult](resultFile)
   }
 
-  private def display(message: Option[FileMessage], description: String, storage: StorageService, stream: PrintStream)(implicit token: AccessToken) = {
-    message match {
-      case Some(message) ⇒
-        try {
-          Workspace.withTmpFile { tmpFile ⇒
-            signalDownload(storage.download(message.path, tmpFile), message.path, storage, tmpFile)
-
-            /*val stdOutHash = HashService.computeHash(stdOutFile)
-             if (stdOutHash != message.hash)
-             logger.log(WARNING, "The standard output has been corrupted during the transfer.")
-             */
-
-            execution.display(stream, description, tmpFile.content)
-          }
-        }
-        catch {
-          case (e: IOException) ⇒
-            logger.log(WARNING, description + " transfer has failed.")
-            logger.log(FINE, "Stack of the error during transfer", e)
-        }
-      case None ⇒
+  private def display(output: Option[File], description: String, storage: StorageService, stream: PrintStream)(implicit token: AccessToken) = {
+    output.foreach { file ⇒
+      execution.display(stream, description, file.content)
+      file.delete()
     }
   }
 

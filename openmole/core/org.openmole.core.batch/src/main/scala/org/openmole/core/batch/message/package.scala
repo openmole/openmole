@@ -103,6 +103,6 @@ package object message {
   case class IndividualFilesContextResults(contextResults: FileMessage, files: Iterable[ReplicatedFile]) extends SerializedContextResults
   case class ContextResults(results: PartialFunction[MoleJobId, Try[Context]])
 
-  case class RuntimeResult(stdOut: Option[FileMessage], stdErr: Option[FileMessage], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)
+  case class RuntimeResult(stdOut: Option[File], stdErr: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)
 
 }
