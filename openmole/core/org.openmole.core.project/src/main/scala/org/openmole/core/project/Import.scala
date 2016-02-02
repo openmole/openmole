@@ -96,17 +96,17 @@ object Import {
       (1 to imp.stableIdentifier.size).map { i ⇒
         val part = imp.stableIdentifier.take(i)
         val stableIdentifier = part.dropRight(1)
-        val path = relativise(directory, stableIdentifier ++ part.lastOption.map(_ + Project.scriptExtension))
+        val path = toFile(directory, stableIdentifier ++ part.lastOption.map(_ + Project.scriptExtension))
         ImportedFile(stableIdentifier, path)
       }.find { importedFile ⇒ Project.isScript(importedFile.file) }
 
     def matchingFileInSelector(imp: Import): Seq[ImportedFile] =
       imp match {
         case Import(stableIdentifier, Alias(from, _)) ⇒
-          val file = relativise(directory, stableIdentifier) / (from + Project.scriptExtension)
+          val file = toFile(directory, stableIdentifier) / (from + Project.scriptExtension)
           if (file.exists()) Seq(ImportedFile(stableIdentifier, file)) else Seq.empty
         case Import(stableIdentifier, WildCard) ⇒
-          listScripts(relativise(directory, stableIdentifier)) map {
+          listScripts(toFile(directory, stableIdentifier)) map {
             script ⇒ ImportedFile(stableIdentifier, script)
           }
         case _ ⇒ Seq.empty
@@ -118,6 +118,8 @@ object Import {
     }
   }
 
+  def importTree(script: String, directory: File) = Tree.insertAll(importedFiles(parseImports(script), directory))
+
   case class Import(stableIdentifier: Seq[String], importSelector: ImportSelector)
 
   sealed trait ImportSelector
@@ -127,7 +129,42 @@ object Import {
 
   case class ImportedFile(stableIdentifier: Seq[String], file: File)
 
-  def relativise(dir: File, path: Seq[String]) = path.foldLeft(dir) { (d, n) ⇒ d / n }
+  def toFile(dir: File, path: Seq[String]) = path.foldLeft(dir) { (d, n) ⇒ d / n }
   def listScripts(dir: File) = dir.listFilesSafe(Project.isScript _)
+
+  object Tree {
+    def empty = Tree(Seq.empty, Seq.empty)
+    def insertAll(importedFiles: Seq[ImportedFile]) = {
+      def insertAll0(importedFiles: List[ImportedFile], tree: Tree): Tree =
+        importedFiles match {
+          case Nil    ⇒ tree
+          case h :: t ⇒ insertAll0(t, insert(h, tree))
+        }
+      insertAll0(importedFiles.toList, Tree.empty)
+    }
+
+    def insert(importedFile: ImportedFile, tree: Tree): Tree = {
+      def emptyTree(names: Seq[String]): Tree =
+        names match {
+          case Nil    ⇒ Tree(Seq(importedFile.file), Seq.empty)
+          case h :: t ⇒ Tree(Seq.empty, Seq(NamedTree(h, emptyTree(t))))
+        }
+
+      importedFile.stableIdentifier.toList match {
+        case Nil ⇒ tree.copy(tree.files ++ Seq(importedFile.file))
+        case h :: t ⇒
+          tree.children.indexWhere(_.name == h) match {
+            case -1 ⇒ tree.copy(children = tree.children ++ Seq(NamedTree(h, emptyTree(t))))
+            case i ⇒
+              def currentChildTree: NamedTree = tree.children(i)
+              def updated = currentChildTree.copy(tree = insert(importedFile.copy(stableIdentifier = t), currentChildTree.tree))
+              tree.copy(children = tree.children.updated(i, updated))
+          }
+      }
+    }
+  }
+
+  case class Tree(files: Seq[File], children: Seq[NamedTree])
+  case class NamedTree(name: String, tree: Tree)
 
 }
