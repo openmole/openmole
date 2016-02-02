@@ -35,7 +35,7 @@ class PluginPanel extends ModalPanel {
   lazy val modalID = "pluginPanelID"
 
   private val plugins: Var[Option[Seq[Plugin]]] = Var(None)
-  val transferring: Var[ProcessState] = Var(Standby())
+  val transferring: Var[ProcessState] = Var(Processed())
 
   def onOpen() = {
     getPlugins
@@ -92,10 +92,9 @@ class PluginPanel extends ModalPanel {
     Rx {
       tags.div(
         transferring() match {
-          case _: Standby ⇒
           case _: Processed ⇒
             getPlugins
-            transferring() = Standby()
+            transferring() = Processed()
           case _ ⇒
             progressBar(transferring().display, transferring().ratio)(id := "treeprogress")
         },

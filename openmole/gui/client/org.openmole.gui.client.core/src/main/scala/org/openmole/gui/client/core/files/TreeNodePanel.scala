@@ -7,10 +7,11 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.utils.Utils
 import org.openmole.gui.shared._
 import fr.iscpif.scaladget.api.{ BootstrapTags ⇒ bs, ClassKeyAggregator }
-import org.scalajs.dom.html.Input
-import org.scalajs.dom.raw.DragEvent
+import org.scalajs.dom.html.{ Input }
+import org.scalajs.dom.raw.{ HTMLTableElement, HTMLDivElement, DragEvent }
+import scala.concurrent.Future
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ tags ⇒ tags }
+import scalatags.JsDom.{ TypedTag, tags ⇒ tags }
 import org.openmole.gui.misc.js.{ _ }
 import org.openmole.gui.misc.js.JsRxTags._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
@@ -43,9 +44,8 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
   val dragState: Var[String] = Var("")
   val draggedNode: Var[Option[TreeNode]] = Var(None)
   val fileDisplayer = new FileDisplayer
-  val fileTooBar = new FileToolBar
-
-  CoreUtils.refreshCurrentDirectory()
+  val fileTooBar = new FileToolBar(() ⇒ refreshAndDraw)
+  val tree: Var[TypedTag[HTMLDivElement]] = Var(tags.div())
 
   val editNodeInput: Input = bs.input("")(
     placeholder := "Name",
@@ -54,39 +54,37 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     autofocus
   ).render
 
-  val view = tags.div(
-    Rx {
-      fileTooBar.div
-    }, Rx {
-      val toDraw = manager.drop(1)
-      val dirNodeLineSize = toDraw.size
-      bs.div("tree-path")(
-        goToDirButton(manager.head, OMTags.glyphString(glyph_home) + " left treePathItems"),
-        toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
-      )
+  lazy val view = {
+    manager.computeCurrentSons(() ⇒ drawTree)
+    tags.div(
+      fileTooBar.div, Rx {
+        val toDraw = manager.drop(1)
+        val dirNodeLineSize = toDraw.size
+        bs.div("tree-path")(
+          goToDirButton(manager.head, OMTags.glyphString(glyph_home) + " left treePathItems"),
+          toDraw.drop(dirNodeLineSize - 2).takeRight(2).map { dn ⇒ goToDirButton(dn, "treePathItems", s"| ${dn.name()}") }
+        )
 
-    },
-    tags.table(`class` := "tree" + dragState())(
-      tags.tr(
-        Rx {
-          if (manager.allNodes.size == 0) tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
-          else drawTree(manager.current.sons())
-        }
-      )
+      }, Rx {
+        tree()
+      }
     )
-  )
+  }
 
   def downloadFile(treeNode: TreeNode, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) =
     FileManager.download(
       treeNode,
-      (p: ProcessState) ⇒ fileTooBar.transferring() = p,
+      (p: ProcessState) ⇒ {
+        fileTooBar.transferring() = p
+      },
       onLoaded
     )
 
   def goToDirButton(dn: DirNode, ck: ClassKeyAggregator, name: String = "") = bs.span(ck)(name)(
     onclick := {
       () ⇒
-        goToDirAction(dn)()
+        manager.switch(dn)
+        computeAndDraw
     }, dropPairs(dn)
   )
 
@@ -106,17 +104,30 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
     }
   )
 
-  def goToDirAction(dn: DirNode): () ⇒ Unit = () ⇒ {
-    manager.switch(dn)
-    drawTree(manager.current.sons())
-  }
+  def computeAndDraw = manager.computeCurrentSons(() ⇒ drawTree)
 
-  def drawTree(tns: Seq[TreeNode]) = {
-    tags.table(`class` := "file-list")(
-      for (tn ← tns.sorted(TreeNodeOrdering)) yield {
-        drawNode(tn)
-      }
-    )
+  def refreshAndDraw = CoreUtils.refreshCurrentDirectory(() ⇒ drawTree)
+
+  def drawTree: Unit = {
+    manager.computeAndGetCurrentSons.map { sons ⇒
+      tree() = tags.div(
+        if (manager.isRootCurrent && manager.isProjectsEmpty) {
+          tags.div("Create a first OpenMOLE script (.oms)")(`class` := "message")
+        }
+        else
+          tags.table(`class` := "tree" + dragState())(
+            tags.tr(
+              tags.div(
+                tags.table(`class` := "file-list")(
+                  for (tn ← sons.sorted(TreeNodeOrdering)) yield {
+                    drawNode(tn)
+                  }
+                )
+              )
+            )
+          )
+      )
+    }
   }
 
   def drawNode(node: TreeNode) = node match {
@@ -124,13 +135,20 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       clickableElement(fn, "file", () ⇒ {
         displayNode(fn)
       })
-    case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ manager + dn)
+    case dn: DirNode ⇒ clickableElement(dn, "dir", () ⇒ {
+      manager + dn
+      computeAndDraw
+    }
+    )
   }
 
   def displayNode(tn: TreeNode) = tn match {
     case fn: FileNode ⇒
       if (fn.safePath().extension.displayable) {
-        downloadFile(fn, false, (content: String) ⇒ fileDisplayer.display(fn, content))
+        downloadFile(fn, false, (content: String) ⇒ {
+          fileDisplayer.display(fn, content)
+          refreshAndDraw
+        })
       }
     case _ ⇒
   }
@@ -167,9 +185,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       treeNode.name()
     }?",
       () ⇒ {
-        CoreUtils.trashNode(treeNode.safePath()) { () ⇒
-          CoreUtils.refreshCurrentDirectory()
-          fileDisplayer.tabs.checkTabs
+        CoreUtils.trashNode(treeNode.safePath()) {
+          () ⇒
+            fileDisplayer.tabs.checkTabs
+            refreshAndDraw
         }
       }, zone = FileZone()
     )
@@ -180,7 +199,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
       OMPost[Api].renameFile(treeNode, newName).call().foreach {
         newNode ⇒
           fileDisplayer.tabs.rename(treeNode, newNode)
-          CoreUtils.refreshCurrentDirectory()
+          refreshAndDraw
           toBeEdited() = None
           fileDisplayer.tabs.checkTabs
       }
@@ -197,7 +216,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                 fileDisplayer.tabs.saveAllTabs(() ⇒
                   OMPost[Api].move(sp.safePath(), tn.safePath()).call().foreach {
                     b ⇒
-                      CoreUtils.refreshCurrentDirectory()
+                      refreshAndDraw
                       fileDisplayer.tabs.checkTabs
                   }
                 )
@@ -248,46 +267,42 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         dropAction(tn)
       },
       tags.div(clickablePair(classType, todo))(
-        tags.i(id := "plusdir", `class` := {
-          tn.hasSons match {
-            case true  ⇒ "glyphicon glyphicon-plus-sign"
-            case false ⇒ ""
-          }
-        })),
+        tags.i(id := "plusdir")),
       tags.div(
         clickablePair(classType, todo),
         `class` := "fileNameOverflow " + classType + "Text",
         tn.name()
       ).tooltip(tn.name(), condition = () ⇒ tn.name().length > 24),
-
-      manager.selectionMode() match {
-        case true ⇒
-          tags.div(`class` := "file-info")(checkbox.onlyBox)
-        case _ ⇒ tags.div(`class` := "file-info")(
-          tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
-          tags.span(id := Rx {
-            "treeline" + {
-              if (lineHovered()) "-hover" else ""
-            }
-          })(
-            glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem file-glyph"),
-            glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem file-glyph"),
-            a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"),
-              href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
-            tn.safePath().extension match {
-              case FileExtension.TGZ ⇒ glyphSpan(glyph_archive, () ⇒ {
-                OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
-                  CoreUtils.refreshCurrentDirectory()
-                }
-              })(`class` := "glyphitem file-glyph")
-              case _ ⇒
-            },
-            if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-              OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                panels.pluginTriggerer.open
-              })(`class` := "glyphitem file-glyph")
+      Rx {
+        manager.selectionMode() match {
+          case true ⇒
+            tags.div(`class` := "file-info")(checkbox.onlyBox)
+          case _ ⇒ tags.div(`class` := "file-info")(
+            tags.span(`class` := "file-size")(tags.i(tn.readableSize)),
+            tags.span(id := Rx {
+              "treeline" + {
+                if (lineHovered()) "-hover" else ""
+              }
+            })(
+              glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem file-glyph"),
+              glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem file-glyph"),
+              a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"),
+                href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
+              tn.safePath().extension match {
+                case FileExtension.TGZ ⇒ glyphSpan(glyph_archive, () ⇒ {
+                  OMPost[Api].extractTGZ(tn).call().foreach { r ⇒
+                    refreshAndDraw
+                  }
+                })(`class` := "glyphitem file-glyph")
+                case _ ⇒
+              },
+              if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
+                OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+                  panels.pluginTriggerer.open
+                })(`class` := "glyphitem file-glyph")
+            )
           )
-        )
+        }
       }
     )
   }

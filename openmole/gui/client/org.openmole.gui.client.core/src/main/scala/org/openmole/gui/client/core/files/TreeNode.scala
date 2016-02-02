@@ -18,9 +18,11 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.ext.data.{ SafePath, TreeNodeData }
-import TreeNodeTabs.TreeNodeTab
+import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.misc.utils.Utils._
 import rx._
+
+import scala.concurrent.Future
 
 sealed trait TreeNodeType {
   val uuid: String = getUUID
@@ -52,8 +54,6 @@ sealed trait TreeNode {
 
   def safePath: Var[SafePath]
 
-  def hasSons: Boolean
-
   val size: Long
 
   val readableSize: String
@@ -64,17 +64,19 @@ sealed trait TreeNode {
 object TreeNode {
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode =
-    if (tnd.isDirectory) DirNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize, tnd.isPlugin, Var(Seq()))
+    if (tnd.isDirectory) DirNode(tnd.name, tnd.safePath, tnd.size, tnd.readableSize, tnd.isPlugin)
     else FileNode(tnd.name, tnd.safePath, tnd.size, tnd.isPlugin, tnd.readableSize)
 
   implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name(), tn.safePath(), tn match {
-    case DirNode(_, _, _, _, _, _) ⇒ true
-    case _                         ⇒ false
+    case DirNode(_, _, _, _, _) ⇒ true
+    case _                      ⇒ false
   }, tn.isPlugin, tn.size, tn.readableSize)
 
   implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map {
     treeNodeToTreeNodeData
   }
+
+  implicit def futureSeqTreeNodeDataToFutureSeqTreeNode(ftnds: Future[Seq[TreeNodeData]]): Future[Seq[TreeNode]] = ftnds.map(seqTreeNodeDataToSeqTreeNode)
 
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
 
@@ -83,6 +85,8 @@ object TreeNode {
   implicit def treeNodeToSafePath(tn: TreeNode): SafePath = tn.safePath()
 
   implicit def treeNodesToSafePaths(tns: Seq[TreeNode]): Seq[SafePath] = tns.map { treeNodeToSafePath }
+
+  implicit def safePathToDirNode(safePath: SafePath) = DirNode(safePath.name, safePath, 0, "")
 
   def fromFilePath(path: SafePath) = FileNode()
 
@@ -105,16 +109,10 @@ case class DirNode(name: Var[String],
                    safePath: Var[SafePath],
                    size: Long,
                    readableSize: String,
-                   isPlugin: Boolean = false,
-                   sons: Var[Seq[TreeNode]] = Var(Seq())) extends TreeNode {
-  def hasSons = sons().size > 0
-}
+                   isPlugin: Boolean = false) extends TreeNode
 
 case class FileNode(name: Var[String],
                     safePath: Var[SafePath],
                     size: Long,
                     isPlugin: Boolean = false,
-                    readableSize: String) extends TreeNode {
-  def hasSons = false
-}
-
+                    readableSize: String) extends TreeNode

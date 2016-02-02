@@ -195,10 +195,7 @@ object ApiImpl extends Api {
     }
   }
 
-  def listFiles(sp: SafePath): Seq[TreeNodeData] = {
-    import org.openmole.gui.ext.data.ServerFileSytemContext.project
-    Utils.listFiles(sp)
-  }
+  def listFiles(sp: SafePath): Seq[TreeNodeData] = Utils.listFiles(sp)(org.openmole.gui.ext.data.ServerFileSytemContext.project)
 
   def move(from: SafePath, to: SafePath): Unit = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project

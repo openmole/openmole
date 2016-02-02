@@ -49,7 +49,8 @@ class ClientProcessState(processingState: Var[ProcessState]) {
 
         processingState() match {
           case x @ (Processing(_) | Finalizing(_, _)) ⇒ waiterSpan
-          case y @ (Processed(_) | Standby()) ⇒ f(processingState())
+          case y @ (Processed(_)) ⇒ f(processingState())
+          case _=> tags.div()
         }
       }
     )

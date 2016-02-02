@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.CoreUtils
-import org.openmole.gui.ext.data.{ SafePath, Standby, ProcessState, UploadProject }
+import org.openmole.gui.ext.data._
 import org.openmole.gui.misc.js.{ Select, OMTags }
 import org.scalajs.dom.html.Input
 import scalatags.JsDom.{ tags ⇒ tags }
@@ -68,24 +68,19 @@ object FileToolBar {
 
 import FileToolBar._
 
-class FileToolBar {
+class FileToolBar(onrefreshed: () ⇒ Unit) {
 
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
-  val transferring: Var[ProcessState] = Var(Standby())
+  val transferring: Var[ProcessState] = Var(Processed())
 
-  def click(tool: SelectedTool)(action: ⇒ Unit) = {
-    action
-    selectedTool() = Some(tool)
-  }
+  def click(tool: SelectedTool, action: () ⇒ Unit) = doSelection(tool, action)
 
   def rxClass(sTool: SelectedTool) = Rx {
     "glyphicon " + sTool.glyph + " glyphmenu " + selectedTool().filter(_ == sTool).map { _ ⇒ "selectedTool" }.getOrElse("")
   }
 
-  def buildSpan(selectedTool: SelectedTool, action: ⇒ Unit = () ⇒ {}) = OMTags.glyphSpan(rxClass(selectedTool))(
-    click(selectedTool) {
-      action
-    }
+  def buildSpan(selectedTool: SelectedTool, action: () ⇒ Unit = () ⇒ {}) = OMTags.glyphSpan(rxClass(selectedTool))(
+    click(selectedTool, action)
   )
 
   def fInputMultiple(todo: HTMLInputElement ⇒ Unit) = {
@@ -102,7 +97,7 @@ class FileToolBar {
     )
 
   private val upButton = upbtn((fileInput: HTMLInputElement) ⇒ {
-    FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject())
+    FileManager.upload(fileInput, manager.current.safePath(), (p: ProcessState) ⇒ transferring() = p, UploadProject(), onrefreshed)
   })
 
   // New file tool
@@ -129,8 +124,8 @@ class FileToolBar {
         val currentDirNode = manager.current
         addRootDirButton.content().map {
           _ match {
-            case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode, newFile, () ⇒ unselectTool)
-            case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode, newFile, () ⇒ unselectTool)
+            case dt: DirNodeType  ⇒ CoreUtils.addDirectory(currentDirNode, newFile, () ⇒ unselectAndRefreshTree)
+            case ft: FileNodeType ⇒ CoreUtils.addFile(currentDirNode, newFile, () ⇒ unselectAndRefreshTree)
           }
         }
       }
@@ -138,17 +133,29 @@ class FileToolBar {
     })
   )
 
+  def unselectAndRefreshTree: Unit = {
+    unselectTool
+    newNodeInput.value = ""
+    onrefreshed()
+  }
+
   def unselectTool = selectedTool() = None
+
+  def doSelection(tool: SelectedTool, onactivated: () ⇒ Unit) = selectedTool() match {
+    case Some(tool) ⇒ unselectTool
+    case _ ⇒
+      selectedTool() = Some(tool)
+      onactivated()
+  }
 
   val deleteButton = bs.button("Delete", btn_danger, () ⇒ {
     CoreUtils.trashNodes(manager.selected()) { () ⇒
-      unselectTool
+      unselectAndRefreshTree
     }
   })
 
   val copyButton = bs.button("Copy", btn_default, () ⇒ {
     manager.setSelectedAsCopied
-    selectedTool() = Some(PasteTool)
   })
 
   val pasteButton = bs.button("Paste", btn_success, () ⇒ {
@@ -156,7 +163,7 @@ class FileToolBar {
   })
 
   val pluginButton = bs.button("Get plugins", btn_default, () ⇒ {
-    unselectTool
+    unselectAndRefreshTree
   })
 
   val fileToolDiv = bs.div("toolPosition")(
@@ -171,28 +178,34 @@ class FileToolBar {
       }
     },
     transferring.withWaiter { _ ⇒
-      CoreUtils.refreshCurrentDirectory()
       tags.div()
     }
   )
 
   val div = bs.div("centerFileTool")(
-    bs.div("tooPosition")(
-      glyphSpan(glyph_refresh + " glyphmenu", () ⇒ CoreUtils.refreshCurrentDirectory()),
+    tags.div(
+      glyphSpan(glyph_refresh + " glyphmenu", () ⇒ {
+        CoreUtils.refreshCurrentDirectory(onrefreshed)
+      }),
       upButton,
-      buildSpan(PluginTool, manager.setSelection),
-      buildSpan(TrashTool, manager.setSelection),
-      buildSpan(CopyTool, manager.setSelection),
+      buildSpan(PluginTool, () ⇒ setSelection),
+      buildSpan(TrashTool, () ⇒ setSelection),
+      buildSpan(CopyTool, () ⇒ setSelection),
       buildSpan(FileCreationTool),
-      buildSpan(FilterTool, println("filter"))
+      buildSpan(FilterTool, () ⇒ println("filter"))
     ),
     fileToolDiv
   )
 
+  private def setSelection = {
+    manager.setSelection
+    onrefreshed()
+  }
+
   private def paste(safePaths: Seq[SafePath], to: SafePath) = {
     def refreshWithNoError = {
       manager.noError
-      CoreUtils.refreshAndSwitchSelection
+      CoreUtils.refreshAndSwitchSelection(onrefreshed)
     }
 
     def onpasted = {

@@ -81,7 +81,7 @@ class ModelWizardPanel extends ModalPanel {
   implicit def stringToOptionString(s: String): Option[String] = if (s.isEmpty) None else Some(s)
 
   val filePath: Var[Option[SafePath]] = Var(None)
-  val transferring: Var[ProcessState] = Var(Standby())
+  val transferring: Var[ProcessState] = Var(Processed())
   val labelName: Var[Option[String]] = Var(None)
   val launchingCommand: Var[Option[LaunchingCommand]] = Var(None)
   val currentReactives: Var[Seq[Reactive]] = Var(Seq())
@@ -301,8 +301,7 @@ class ModelWizardPanel extends ModalPanel {
             OMPost[Api].models(uploadPath).call().foreach { models ⇒
               fileToUploadPath() = models.headOption
               modelSelector.setContents(models, () ⇒ {
-                CoreUtils.refreshCurrentDirectory()
-                onModelChange
+                CoreUtils.refreshCurrentDirectory(() ⇒ onModelChange)
               })
               getResourceInfo
             }

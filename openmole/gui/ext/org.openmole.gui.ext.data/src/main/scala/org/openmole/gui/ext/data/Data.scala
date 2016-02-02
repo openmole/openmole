@@ -546,8 +546,6 @@ sealed trait ProcessState {
   def display: String = ""
 }
 
-case class Standby() extends ProcessState
-
 case class Processing(override val ratio: Int = 0) extends ProcessState {
   override def display: String = "Transferring... " + ratio + " %"
 }

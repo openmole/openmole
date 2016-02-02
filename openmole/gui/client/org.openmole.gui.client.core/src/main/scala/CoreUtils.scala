@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.DirNode
+import org.openmole.gui.client.core.files.{ TreeNode, DirNode }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.shared.Api
 import autowire._
@@ -44,61 +44,36 @@ object CoreUtils {
     }
   }
 
-  def refresh(dn: DirNode, onrefreshed: () ⇒ Unit = () ⇒ {}) = {
-    computeAllSons(dn)
-    onrefreshed()
-  }
-
-  def refreshCurrentDirectory(onrefreshed: () ⇒ Unit = () ⇒ {}) = refresh(manager.current, onrefreshed)
-
-  private def computeAllSons(dn: DirNode): Unit = {
-    sons(dn).foreach {
-      sons ⇒
-        dn.sons() = sons
-        dn.sons().foreach {
-          tn ⇒
-            tn match {
-              case (d: DirNode) ⇒ computeAllSons(d)
-              case _            ⇒
-            }
-        }
-    }
-  }
-
-  def sons(dirNode: DirNode) = OMPost[Api].listFiles(dirNode.safePath()).call()
+  def refreshCurrentDirectory(todo: () ⇒ Unit = () ⇒ {}) = manager.trashCache(todo)
 
   def addDirectory(in: TreeNodeData, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addDirectory(in, dirName).call().foreach { b ⇒
       if (b) {
-        onadded()
-        refreshCurrentDirectory()
+        refreshCurrentDirectory(onadded)
       }
     }
 
   def addFile(in: TreeNodeData, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     OMPost[Api].addFile(in, fileName).call().foreach { b ⇒
       if (b) {
-        onadded()
-        refreshCurrentDirectory()
+        refreshCurrentDirectory(onadded)
       }
     }
 
   def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
     OMPost[Api].deleteFile(path, ServerFileSytemContext.project).call().foreach { d ⇒
-      ontrashed()
-      refreshAndSwitchSelection
+      refreshAndSwitchSelection(ontrashed)
     }
   }
 
   def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
     OMPost[Api].deleteFiles(paths, ServerFileSytemContext.project).call().foreach { d ⇒
-      ontrashed()
-      refreshAndSwitchSelection
+      refreshAndSwitchSelection(ontrashed)
     }
   }
 
-  def refreshAndSwitchSelection = {
-    CoreUtils.refreshCurrentDirectory()
+  def refreshAndSwitchSelection(onrefreshed: () ⇒ Unit = () ⇒ {}) = {
+    refreshCurrentDirectory(onrefreshed)
     manager.switchOffSelection
   }
 
@@ -107,4 +82,12 @@ object CoreUtils {
 
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Unit] =
     OMPost[Api].copyProjectFilesTo(safePaths, to).call()
+
+  def updateSons(dirNode: DirNode, todo: () ⇒ Unit = () ⇒ {}) = {
+
+    OMPost[Api].listFiles(dirNode.safePath()).call().foreach { s ⇒
+      manager.updateSon(dirNode, s)
+      todo()
+    }
+  }
 }

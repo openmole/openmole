@@ -17,7 +17,7 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.AlertPanel
+import org.openmole.gui.client.core.{ CoreUtils, AlertPanel }
 import org.openmole.gui.ext.data.SafePath
 import rx._
 
@@ -31,6 +31,8 @@ class TreeNodeManager {
   val root = DirNode(Var("projects"), Var(SafePath.sp(Seq("projects"))), 0L, "")
 
   val dirNodeLine: Var[Seq[DirNode]] = Var(Seq(root))
+
+  val sons: Var[Map[DirNode, Seq[TreeNode]]] = Var(Map())
 
   val error: Var[Option[TreeNodeError]] = Var(None)
 
@@ -49,6 +51,15 @@ class TreeNodeManager {
   Obs(comment) {
     comment().map(AlertPanel.treeNodeCommentDiv)
   }
+
+  def computeAndGetCurrentSons = {
+    computeCurrentSons()
+    sons().get(current)
+  }
+
+  def trashCache(ontrashed: () ⇒ Unit) = CoreUtils.updateSons(current, ontrashed)
+
+  def updateSon(dirNode: DirNode, newSons: Seq[TreeNode]) = sons() = sons().updated(dirNode, newSons)
 
   def isSelected(tn: TreeNode) = selected().contains(tn)
 
@@ -92,15 +103,23 @@ class TreeNodeManager {
 
   def +(dn: DirNode) = dirNodeLine() = dirNodeLine() :+ dn
 
-  def switch(dn: DirNode) = {
+  def switch(dn: DirNode) =
     dirNodeLine() = dirNodeLine().zipWithIndex.filter(_._1 == dn).headOption.map {
       case (dn, index) ⇒ take(index + 1)
     }.getOrElse(dirNodeLine())
+
+  def computeCurrentSons(oncomputed: () ⇒ Unit = () ⇒ {}): Unit = {
+    current match {
+      case dirNode: DirNode ⇒
+        if (sons().contains(dirNode)) oncomputed()
+        else CoreUtils.updateSons(dirNode, oncomputed)
+      case _ ⇒
+    }
   }
 
-  def allNodes = dirNodeLine().flatMap {
-    _.sons()
-  }
+  def isRootCurrent = current == root
+
+  def isProjectsEmpty = sons().getOrElse(root, Seq()).isEmpty
 
   private def selection = selectionMode() match {
     case true ⇒ Some(false)
