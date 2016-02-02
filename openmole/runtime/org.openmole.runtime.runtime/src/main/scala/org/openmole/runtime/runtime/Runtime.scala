@@ -71,7 +71,7 @@ class Runtime {
     val executionMessage =
       Workspace.withTmpFile { executionMessageFileCache ⇒
         retry(storage.download(inputMessagePath, executionMessageFileCache))
-        SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
+        SerialiserService.deserialiseAndExtractFiles[ExecutionMessage](executionMessageFileCache)
       }
 
     val oldOut = System.out
@@ -127,11 +127,7 @@ class Runtime {
         }
       }
 
-      val runnableTasks = Workspace.withTmpFile { jobsFileCache ⇒
-        logger.fine("Downloading execution message")
-        retry(storage.download(executionMessage.jobs.path, jobsFileCache))
-        SerialiserService.deserialiseReplaceFiles[Seq[RunnableTask]](jobsFileCache, usedFiles)
-      }
+      val runnableTasks = SerialiserService.deserialiseReplaceFiles[Seq[RunnableTask]](executionMessage.jobs, usedFiles)
 
       val saver = new ContextSaver(runnableTasks.size)
       val allMoleJobs = runnableTasks.map { _.toMoleJob(saver.save) }

@@ -297,7 +297,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
           val executionMessage = Workspace.withTmpFile { executionMessageFileCache ⇒
             storage.download(jobMessage.executionMessagePath, executionMessageFileCache)
-            SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
+            SerialiserService.deserialiseAndExtractFiles[ExecutionMessage](executionMessageFileCache)
           }
 
           def localCachedReplicatedFile(replicatedFile: ReplicatedFile, raw: Boolean) = {
@@ -309,18 +309,12 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           val files = executionMessage.files.map(localCachedReplicatedFile(_, raw = false))
           val plugins = executionMessage.plugins.map(localCachedReplicatedFile(_, raw = true))
 
-          val jobsFile = Workspace.newFile("jobs", ".xml")
-          storage.download(executionMessage.jobs.path, jobsFile)
-
-          val jobs = FileMessage(jobsFile.getAbsolutePath, executionMessage.jobs.hash)
           val localCommunicationDirPath = Workspace.newDir()
           localCommunicationDirPath.mkdirs
 
           val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")
 
-          localExecutionMessage.withOutputStream { os ⇒
-            SerialiserService.serialise(ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath, executionMessage.runtimeSettings), os)
-          }
+          SerialiserService.serialiseAndArchiveFiles(ExecutionMessage(plugins, files, executionMessage.jobs, localCommunicationDirPath.getAbsolutePath, executionMessage.runtimeSettings), localExecutionMessage)
 
           Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, jobMessage.memory, executionMessage, job, cached))
         }
