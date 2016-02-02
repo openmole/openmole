@@ -147,36 +147,29 @@ class Runtime {
 
       val contextResults = ContextResults(saver.results)
 
-      def uploadArchive =
-        Workspace.withTmpFile { contextResultFile ⇒
-          SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
-          val uploadedContextResults = storage.child(communicationDirPath, Storage.uniqName("contextResult", ".bin"))
-          val contextResultFileHash = contextResultFile.hash.toString
-          retry(storage.upload(contextResultFile, uploadedContextResults, TransferOptions(forceCopy = true, canMove = true)))
-          ArchiveContextResults(FileMessage(uploadedContextResults, contextResultFileHash))
-        }
+      def uploadArchive = {
+        val contextResultFile = Workspace.newFile("contextResult", "res")
+        SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
+        ArchiveContextResults(contextResultFile)
+      }
 
-      def uploadIndividualFiles =
-        Workspace.withTmpFile { contextResultFile ⇒
-          SerialiserService.serialise(contextResults, contextResultFile)
-          val PluginClassAndFiles(files, _) = SerialiserService.pluginsAndFiles(contextResults)
+      def uploadIndividualFiles = {
+        val contextResultFile = Workspace.newFile("contextResult", "res")
+        SerialiserService.serialise(contextResults, contextResultFile)
+        val PluginClassAndFiles(files, _) = SerialiserService.pluginsAndFiles(contextResults)
 
-          val replicated =
-            files.map {
-              _.upload {
-                f ⇒
-                  val name = storage.child(communicationDirPath, Storage.uniqName("resultFile", ".bin"))
-                  retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
-                  name
-              }
+        val replicated =
+          files.map {
+            _.upload {
+              f ⇒
+                val name = storage.child(communicationDirPath, Storage.uniqName("resultFile", ".bin"))
+                retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
+                name
             }
+          }
 
-          val uploadedContextResults = storage.child(communicationDirPath, Storage.uniqName("contextResult", ".bin"))
-          val contextResultFileHash = contextResultFile.hash.toString
-
-          retry(storage.upload(contextResultFile, uploadedContextResults, TransferOptions(forceCopy = true, canMove = true)))
-          IndividualFilesContextResults(FileMessage(uploadedContextResults, contextResultFileHash), replicated)
-        }
+        IndividualFilesContextResults(contextResultFile, replicated)
+      }
 
       val result =
         if (executionMessage.runtimeSettings.archiveResult) uploadArchive else uploadIndividualFiles

@@ -186,11 +186,10 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
     val uploadedResult = runtimeResult.result match {
       case Success((ArchiveContextResults(contextResults), log)) ⇒
-        Success((ArchiveContextResults(uploadFileMessage(contextResults)), log))
-      case Success((IndividualFilesContextResults(contextResults: FileMessage, files: Iterable[ReplicatedFile]), log)) ⇒
+        Success((ArchiveContextResults(contextResults), log))
+      case Success((IndividualFilesContextResults(contextResults, files: Iterable[ReplicatedFile]), log)) ⇒
         val uploadedFiles = files.map { uploadReplicatedFile }
-        val uploadedContextResults = uploadFileMessage { contextResults }
-        Success((IndividualFilesContextResults(uploadedContextResults, uploadedFiles), log))
+        Success((IndividualFilesContextResults(contextResults, uploadedFiles), log))
       case Failure(e) ⇒ Failure(e)
     }
 

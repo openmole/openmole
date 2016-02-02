@@ -109,16 +109,14 @@ class GetResultActor(jobManager: JobManager) {
                 replicated.originalPath -> replicated.download((p, f) ⇒ signalDownload(storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage, f))
             }.toMap
 
-          Workspace.withTmpFile { contextResultsFileCache ⇒
-            signalDownload(storage.download(serializedResults.contextResults.path, contextResultsFileCache), serializedResults.contextResults.path, storage, contextResultsFileCache)
-            SerialiserService.deserialiseReplaceFiles[ContextResults](contextResultsFileCache, fileReplacement)
-          }
+          val res = SerialiserService.deserialiseReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)
+          serializedResults.contextResults.delete()
+          res
         }
       case serializedResults: ArchiveContextResults ⇒
-        Workspace.withTmpFile { contextResultsFileCache ⇒
-          signalDownload(storage.download(serializedResults.contextResults.path, contextResultsFileCache), serializedResults.contextResults.path, storage, contextResultsFileCache)
-          SerialiserService.deserialiseAndExtractFiles[ContextResults](contextResultsFileCache)
-        }
+        val res = SerialiserService.deserialiseAndExtractFiles[ContextResults](serializedResults.contextResults)
+        serializedResults.contextResults.delete()
+        res
     }
   }
 
