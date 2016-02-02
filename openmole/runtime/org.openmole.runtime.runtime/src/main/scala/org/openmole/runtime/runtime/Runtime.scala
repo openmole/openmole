@@ -71,7 +71,7 @@ class Runtime {
     val executionMessage =
       Workspace.withTmpFile { executionMessageFileCache ⇒
         retry(storage.download(inputMessagePath, executionMessageFileCache))
-        SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
+        SerialiserService.deserialiseAndExtractFiles[ExecutionMessage](executionMessageFileCache)
       }
 
     val oldOut = System.out
@@ -127,11 +127,7 @@ class Runtime {
         }
       }
 
-      val runnableTasks = Workspace.withTmpFile { jobsFileCache ⇒
-        logger.fine("Downloading execution message")
-        retry(storage.download(executionMessage.jobs.path, jobsFileCache))
-        SerialiserService.deserialiseReplaceFiles[Seq[RunnableTask]](jobsFileCache, usedFiles)
-      }
+      val runnableTasks = SerialiserService.deserialiseReplaceFiles[Seq[RunnableTask]](executionMessage.jobs, usedFiles)
 
       val saver = new ContextSaver(runnableTasks.size)
       val allMoleJobs = runnableTasks.map { _.toMoleJob(saver.save) }
@@ -151,36 +147,29 @@ class Runtime {
 
       val contextResults = ContextResults(saver.results)
 
-      def uploadArchive =
-        Workspace.withTmpFile { contextResultFile ⇒
-          SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
-          val uploadedContextResults = storage.child(communicationDirPath, Storage.uniqName("contextResult", ".bin"))
-          val contextResultFileHash = contextResultFile.hash.toString
-          retry(storage.upload(contextResultFile, uploadedContextResults, TransferOptions(forceCopy = true, canMove = true)))
-          ArchiveContextResults(FileMessage(uploadedContextResults, contextResultFileHash))
-        }
+      def uploadArchive = {
+        val contextResultFile = Workspace.newFile("contextResult", "res")
+        SerialiserService.serialiseAndArchiveFiles(contextResults, contextResultFile)
+        ArchiveContextResults(contextResultFile)
+      }
 
-      def uploadIndividualFiles =
-        Workspace.withTmpFile { contextResultFile ⇒
-          SerialiserService.serialise(contextResults, contextResultFile)
-          val PluginClassAndFiles(files, _) = SerialiserService.pluginsAndFiles(contextResults)
+      def uploadIndividualFiles = {
+        val contextResultFile = Workspace.newFile("contextResult", "res")
+        SerialiserService.serialise(contextResults, contextResultFile)
+        val PluginClassAndFiles(files, _) = SerialiserService.pluginsAndFiles(contextResults)
 
-          val replicated =
-            files.map {
-              _.upload {
-                f ⇒
-                  val name = storage.child(communicationDirPath, Storage.uniqName("resultFile", ".bin"))
-                  retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
-                  name
-              }
+        val replicated =
+          files.map {
+            _.upload {
+              f ⇒
+                val name = storage.child(communicationDirPath, Storage.uniqName("resultFile", ".bin"))
+                retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
+                name
             }
+          }
 
-          val uploadedContextResults = storage.child(communicationDirPath, Storage.uniqName("contextResult", ".bin"))
-          val contextResultFileHash = contextResultFile.hash.toString
-
-          retry(storage.upload(contextResultFile, uploadedContextResults, TransferOptions(forceCopy = true, canMove = true)))
-          IndividualFilesContextResults(FileMessage(uploadedContextResults, contextResultFileHash), replicated)
-        }
+        IndividualFilesContextResults(contextResultFile, replicated)
+      }
 
       val result =
         if (executionMessage.runtimeSettings.archiveResult) uploadArchive else uploadIndividualFiles
@@ -202,34 +191,14 @@ class Runtime {
       System.setErr(oldErr)
     }
 
-    logger.fine("Upload the output")
-    val outputMessage =
-      if (out.length != 0) {
-        val output = storage.child(executionMessage.communicationDirPath, Storage.uniqName("output", ".txt"))
-        val outHash = out.hash.toString
-        retry(storage.upload(out, output, TransferOptions(forceCopy = true, canMove = true)))
-        Some(FileMessage(output, outHash))
-      }
-      else None
-
-    out.delete
-
-    val errorMessage =
-      if (err.length != 0) {
-        val errout = storage.child(executionMessage.communicationDirPath, Storage.uniqName("outputError", ".txt"))
-        val errHash = err.hash.toString
-        retry(storage.upload(err, errout, TransferOptions(forceCopy = true, canMove = true)))
-        Some(FileMessage(errout, errHash))
-      }
-      else None
-
-    err.delete
+    val outputMessage = if (out.length != 0) Some(out) else None
+    val errorMessage = if (err.length != 0) Some(err) else None
 
     val runtimeResult = RuntimeResult(outputMessage, errorMessage, result, localRuntimeInfo)
 
     logger.fine("Upload the result message")
-    Workspace.withTmpFile("output", ".res") { outputLocal ⇒
-      SerialiserService.serialise(runtimeResult, outputLocal)
+    Workspace.withTmpFile("output", ".tgz") { outputLocal ⇒
+      SerialiserService.serialiseAndArchiveFiles(runtimeResult, outputLocal)
       retry(storage.upload(outputLocal, outputMessagePath, TransferOptions(forceCopy = true, canMove = true)))
     }
 

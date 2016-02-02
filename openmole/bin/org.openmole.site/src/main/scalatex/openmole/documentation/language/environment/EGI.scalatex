@@ -13,10 +13,6 @@
    EGIAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")""", header = """def encrypted = "" """)
 
    @p You need to execute this operation only once and for all. OpenMOLE persists this information in your preferences folder.
-   @p PEM certificates and X509 proxy files are the two other certificate types available:
-   @br @hl.openmole("""
-   //For pem
-   EGIAuthentication() = PEMCertificate(encrypted, "/path/to/the/cert", "/path/to/the/key")""", header = """def encrypted = "" """)
 
   @sect{Delegate tasks to EGI}
     To use EGI you must be registered in a Virtual Organisation (VO). The VO is the only compulsory parameter when creating an EGI environment:

@@ -165,11 +165,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
   }
 
   def uploadResult(localResultFile: File, communicationDir: String, job: String, storage: SimpleStorage) = {
-    val runtimeResult = {
-      val is = localResultFile.bufferedInputStream
-      try SerialiserService.deserialise[RuntimeResult](is)
-      finally is.close
-    }
+    val runtimeResult = SerialiserService.deserialiseAndExtractFiles[RuntimeResult](localResultFile)
 
     logger.info(s"Uploading context results to communication dir $communicationDir")
 
@@ -190,39 +186,20 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
     val uploadedResult = runtimeResult.result match {
       case Success((ArchiveContextResults(contextResults), log)) ⇒
-        Success((ArchiveContextResults(uploadFileMessage(contextResults)), log))
-      case Success((IndividualFilesContextResults(contextResults: FileMessage, files: Iterable[ReplicatedFile]), log)) ⇒
+        Success((ArchiveContextResults(contextResults), log))
+      case Success((IndividualFilesContextResults(contextResults, files: Iterable[ReplicatedFile]), log)) ⇒
         val uploadedFiles = files.map { uploadReplicatedFile }
-        val uploadedContextResults = uploadFileMessage { contextResults }
-        Success((IndividualFilesContextResults(uploadedContextResults, uploadedFiles), log))
+        Success((IndividualFilesContextResults(contextResults, uploadedFiles), log))
       case Failure(e) ⇒ Failure(e)
     }
 
-    val uploadedStdOut = runtimeResult.stdOut match {
-      case Some(stdOut) ⇒
-        logger.info("Uploading stdout"); Some(uploadFileMessage(stdOut))
-      case None ⇒ None
-    }
-
-    val uploadedStdErr = runtimeResult.stdErr match {
-      case Some(stdErr) ⇒
-        logger.info("Uploading stderr"); Some(uploadFileMessage(stdErr))
-      case None ⇒ None
-    }
-
     logger.info("Context results uploaded")
-
-    val resultToSend =
-      RuntimeResult(
-        uploadedStdOut,
-        uploadedStdErr,
-        uploadedResult,
-        runtimeResult.info)
+    val resultToSend = runtimeResult.copy(result = uploadedResult)
 
     // Upload the result
     Workspace.withTmpFile { outputLocal ⇒
       logger.info("Uploading job results")
-      SerialiserService.serialise(resultToSend, outputLocal)
+      SerialiserService.serialiseAndArchiveFiles(resultToSend, outputLocal)
       val tmpResultFile = storage.child(tmpResultsDirName, Storage.uniqName(job, ".res"))
       storage.upload(outputLocal, tmpResultFile)
       val resultFile = storage.child(resultsDirName, Storage.uniqName(job, ".res"))
@@ -319,7 +296,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
           val executionMessage = Workspace.withTmpFile { executionMessageFileCache ⇒
             storage.download(jobMessage.executionMessagePath, executionMessageFileCache)
-            SerialiserService.deserialise[ExecutionMessage](executionMessageFileCache)
+            SerialiserService.deserialiseAndExtractFiles[ExecutionMessage](executionMessageFileCache)
           }
 
           def localCachedReplicatedFile(replicatedFile: ReplicatedFile, raw: Boolean) = {
@@ -331,18 +308,12 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           val files = executionMessage.files.map(localCachedReplicatedFile(_, raw = false))
           val plugins = executionMessage.plugins.map(localCachedReplicatedFile(_, raw = true))
 
-          val jobsFile = Workspace.newFile("jobs", ".xml")
-          storage.download(executionMessage.jobs.path, jobsFile)
-
-          val jobs = FileMessage(jobsFile.getAbsolutePath, executionMessage.jobs.hash)
           val localCommunicationDirPath = Workspace.newDir()
           localCommunicationDirPath.mkdirs
 
           val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")
 
-          localExecutionMessage.withOutputStream { os ⇒
-            SerialiserService.serialise(ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath, executionMessage.runtimeSettings), os)
-          }
+          SerialiserService.serialiseAndArchiveFiles(ExecutionMessage(plugins, files, executionMessage.jobs, localCommunicationDirPath.getAbsolutePath, executionMessage.runtimeSettings), localExecutionMessage)
 
           Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, jobMessage.memory, executionMessage, job, cached))
         }

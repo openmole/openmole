@@ -20,11 +20,40 @@ package org.openmole.core.project
 import javax.script.CompiledScript
 import org.openmole.core.console._
 import org.openmole.core.pluginmanager._
+import org.openmole.core.project.Import.Tree
 import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.file._
 
 object Project {
+  def scriptExtension = ".oms"
+  def isScript(file: File) = file.exists() && file.getName.endsWith(scriptExtension)
   def newREPL(variables: ConsoleVariables) = OpenMOLEREPL.newREPL(variables, quiet = true)
+
+  def scriptsObjects(script: String, dir: File) = makeScript(Import.importTree(script, dir))
+
+  def makeScript(tree: Tree): String =
+    s"""
+       |${tree.files.map(makeObject).mkString("\n")}
+       |
+       |${tree.children.map(c ⇒ makePackage(c.name, c.tree)).mkString("\n")}
+     """.stripMargin
+
+  def makePackage(name: String, tree: Tree): String =
+    s"""
+     |object $name {
+     |${tree.children.map(c ⇒ makeScript(tree)).mkString("\n")}
+     |}
+   """.stripMargin
+
+  def makeObject(script: File): String =
+    s"""
+       |class ${script.getName.dropRight(Project.scriptExtension.size)}Class {
+       |${script.content}
+       |}
+       |
+       |lazy val ${script.getName.dropRight(Project.scriptExtension.size)} = new ${script.getName.dropRight(".oms".size)}Class
+     """.stripMargin
+
 }
 
 sealed trait CompileResult
@@ -45,7 +74,8 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
     if (!script.exists) ScriptFileDoesNotExists()
     else {
       def compileContent =
-        s"""${scriptsObjects(script.getParentFileSafe).mkString("\n")}
+        s"""${scriptsObjects(script.content, script.getParentFileSafe)}
+           |
            |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {
            |${script.content}
            |}
@@ -64,19 +94,6 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
     finally loop.close()
   }
 
-  def scriptFiles(dir: File) = dir.listFilesSafe(_.getName.endsWith(".oms"))
-
-  def scriptsObjects(dir: File) =
-    for {
-      script ← scriptFiles(dir)
-    } yield makeObject(script)
-
-  def makeObject(script: File) =
-    s"""
-       |class ${script.getName.dropRight(".oms".size)}Class {
-       |${script.content}
-       |}
-       |lazy val ${script.getName.dropRight(".oms".size)} = new ${script.getName.dropRight(".oms".size)}Class
-     """.stripMargin
+  def scriptsObjects(script: String, dir: File) = Project.scriptsObjects(script, dir)
 
 }

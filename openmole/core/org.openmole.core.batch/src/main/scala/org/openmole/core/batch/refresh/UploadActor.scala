@@ -80,21 +80,17 @@ class UploadActor(jobManager: JobManager) {
 
     val jobForRuntimePath = storage.child(communicationPath, Storage.uniqName("job", ".tgz"))
 
-    val jobHash = jobFile.hash.toString
-    signalUpload(storage.upload(jobFile, jobForRuntimePath, TransferOptions(forceCopy = true, canMove = true)), jobFile, jobForRuntimePath, storage)
-    val jobMessage = FileMessage(jobForRuntimePath, jobHash)
-
     val executionMessage = createExecutionMessage(
       job.job,
-      jobMessage,
+      jobFile,
       files,
       plugins,
       storage,
       communicationPath)
 
     /* ---- upload the execution message ----*/
-    Workspace.withTmpFile("job", ".xml") { executionMessageFile ⇒
-      SerialiserService.serialise(executionMessage, executionMessageFile)
+    Workspace.withTmpFile("job", ".tar") { executionMessageFile ⇒
+      SerialiserService.serialiseAndArchiveFiles(executionMessage, executionMessageFile)
       signalUpload(storage.upload(executionMessageFile, inputPath, TransferOptions(forceCopy = true, canMove = true)), executionMessageFile, inputPath, storage)
     }
 
@@ -148,7 +144,7 @@ class UploadActor(jobManager: JobManager) {
 
   def createExecutionMessage(
     job: Job,
-    jobMessage: FileMessage,
+    jobFile: File,
     serializationFile: Iterable[File],
     serializationPlugin: Iterable[File],
     storage: StorageService,
@@ -160,7 +156,7 @@ class UploadActor(jobManager: JobManager) {
     ExecutionMessage(
       pluginReplicas,
       files,
-      jobMessage,
+      jobFile,
       path,
       storage.environment.runtimeSettings
     )
