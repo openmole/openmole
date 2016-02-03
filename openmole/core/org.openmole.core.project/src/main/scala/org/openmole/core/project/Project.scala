@@ -29,7 +29,7 @@ object Project {
   def isScript(file: File) = file.exists() && file.getName.endsWith(scriptExtension)
   def newREPL(variables: ConsoleVariables) = OpenMOLEREPL.newREPL(variables, quiet = true)
 
-  def scriptsObjects(script: String, dir: File) = makeScript(Import.importTree(script, dir))
+  def scriptsObjects(script: File) = makeScript(Import.importTree(script))
 
   def makeScript(tree: Tree): String =
     s"""
@@ -74,7 +74,7 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
     if (!script.exists) ScriptFileDoesNotExists()
     else {
       def compileContent =
-        s"""${scriptsObjects(script.content, script.getParentFileSafe)}
+        s"""${scriptsObjects(script)}
            |
            |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {
            |${script.content}
@@ -94,6 +94,6 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL = P
     finally loop.close()
   }
 
-  def scriptsObjects(script: String, dir: File) = Project.scriptsObjects(script, dir)
+  def scriptsObjects(script: File) = Project.scriptsObjects(script)
 
 }

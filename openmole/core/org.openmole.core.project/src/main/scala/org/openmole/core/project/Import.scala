@@ -91,7 +91,7 @@ object Import {
     imports.flatMap(parseImport)
   }
 
-  def importedFiles(imports: Seq[Import], directory: File): Seq[ImportedFile] = {
+  def level1ImportedFiles(imports: Seq[Import], directory: File): Seq[ImportedFile] = {
     def matchingFileInStableIdentifier(imp: Import): Option[ImportedFile] =
       (1 to imp.stableIdentifier.size).map { i ⇒
         val part = imp.stableIdentifier.take(i)
@@ -118,7 +118,20 @@ object Import {
     }
   }
 
-  def importTree(script: String, directory: File) = Tree.insertAll(importedFiles(parseImports(script), directory))
+  def importedFiles(script: File): Seq[ImportedFile] = {
+    var alreadyImported = List.empty[File]
+
+    def importedFiles0(script: File): Seq[ImportedFile] = {
+      val imported = level1ImportedFiles(parseImports(script.content), script.getParentFileSafe)
+      val newlyImported = imported.filter(i ⇒ !alreadyImported.exists(_.getCanonicalFile == i.file.getCanonicalPath))
+      alreadyImported = newlyImported.map(_.file).toList ::: alreadyImported
+      newlyImported ++ newlyImported.flatMap { i ⇒ importedFiles0(i.file) }
+    }
+
+    importedFiles0(script)
+  }
+
+  def importTree(script: File) = Tree.insertAll(importedFiles(script))
 
   case class Import(stableIdentifier: Seq[String], importSelector: ImportSelector)
 
