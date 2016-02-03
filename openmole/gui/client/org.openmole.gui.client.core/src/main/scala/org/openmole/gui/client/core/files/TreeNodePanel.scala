@@ -155,7 +155,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def clickableElement(tn: TreeNode,
                        classType: String,
-                       todo: () ⇒ Unit) =
+                       todo: () ⇒ Unit) = {
     toBeEdited() match {
       case Some(etn: TreeNode) ⇒
         if (etn == tn) {
@@ -178,6 +178,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
         else ReactiveLine(tn, classType, todo).render
       case _ ⇒ ReactiveLine(tn, classType, todo).render
     }
+  }
 
   def trashNode(treeNode: TreeNode): Unit = {
     fileDisplayer.tabs -- treeNode
@@ -196,12 +197,11 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def renameNode(treeNode: TreeNode, newName: String) =
     fileDisplayer.tabs.saveAllTabs(() ⇒
-      OMPost[Api].renameFile(treeNode, newName).call().foreach {
-        newNode ⇒
-          fileDisplayer.tabs.rename(treeNode, newNode)
-          refreshAndDraw
-          toBeEdited() = None
-          fileDisplayer.tabs.checkTabs
+      OMPost[Api].renameFile(treeNode, newName).call().foreach { newNode ⇒
+        fileDisplayer.tabs.rename(treeNode, newNode)
+        refreshAndDraw
+        toBeEdited() = None
+        fileDisplayer.tabs.checkTabs
       }
     )
 
@@ -285,7 +285,10 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
               }
             })(
               glyphSpan(glyph_trash, () ⇒ trashNode(tn))(id := "glyphtrash", `class` := "glyphitem file-glyph"),
-              glyphSpan(glyph_edit, () ⇒ toBeEdited() = Some(tn))(`class` := "glyphitem file-glyph"),
+              glyphSpan(glyph_edit, () ⇒ {
+                toBeEdited() = Some(tn)
+                drawTree
+              })(`class` := "glyphitem file-glyph"),
               a(glyphSpan(glyph_download_alt, () ⇒ Unit)(`class` := "glyphitem file-glyph"),
                 href := s"downloadFile?path=${Utils.toURI(tn.safePath().path)}"),
               tn.safePath().extension match {
