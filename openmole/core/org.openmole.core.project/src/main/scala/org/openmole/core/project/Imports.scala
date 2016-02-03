@@ -20,7 +20,7 @@ package org.openmole.core.project
 import java.io.File
 import org.openmole.tool.file._
 
-object Import {
+object Imports {
 
   def separators = Array('\n', ';')
   def space = Set('\t', ' ')

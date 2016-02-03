@@ -20,7 +20,7 @@ package org.openmole.core.project
 import javax.script.CompiledScript
 import org.openmole.core.console._
 import org.openmole.core.pluginmanager._
-import org.openmole.core.project.Import.Tree
+import org.openmole.core.project.Imports.Tree
 import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.file._
 
@@ -29,7 +29,7 @@ object Project {
   def isScript(file: File) = file.exists() && file.getName.endsWith(scriptExtension)
   def newREPL(variables: ConsoleVariables) = OpenMOLEREPL.newREPL(variables, quiet = true)
 
-  def scriptsObjects(script: File) = makeScript(Import.importTree(script))
+  def scriptsObjects(script: File) = makeScript(Imports.importTree(script))
 
   def makeScript(tree: Tree): String =
     s"""
