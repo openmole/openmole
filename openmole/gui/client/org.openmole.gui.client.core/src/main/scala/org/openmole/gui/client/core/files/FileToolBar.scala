@@ -73,14 +73,12 @@ class FileToolBar(onrefreshed: () ⇒ Unit) {
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
   val transferring: Var[ProcessState] = Var(Processed())
 
-  def click(tool: SelectedTool, action: () ⇒ Unit) = doSelection(tool, action)
-
   def rxClass(sTool: SelectedTool) = Rx {
     "glyphicon " + sTool.glyph + " glyphmenu " + selectedTool().filter(_ == sTool).map { _ ⇒ "selectedTool" }.getOrElse("")
   }
 
   def buildSpan(selectedTool: SelectedTool, action: () ⇒ Unit = () ⇒ {}) = OMTags.glyphSpan(rxClass(selectedTool))(
-    click(selectedTool, action)
+    doSelection(selectedTool, action)
   )
 
   def fInputMultiple(todo: HTMLInputElement ⇒ Unit) = {
@@ -156,6 +154,7 @@ class FileToolBar(onrefreshed: () ⇒ Unit) {
 
   val copyButton = bs.button("Copy", btn_default, () ⇒ {
     manager.setSelectedAsCopied
+    selectedTool() = Some(PasteTool)
   })
 
   val pasteButton = bs.button("Paste", btn_success, () ⇒ {

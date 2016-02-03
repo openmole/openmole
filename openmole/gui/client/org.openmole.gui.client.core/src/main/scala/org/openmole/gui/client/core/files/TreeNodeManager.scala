@@ -73,6 +73,7 @@ class TreeNodeManager {
   def setSelectedAsCopied = {
     copied() = selected()
     selectionMode() = false
+
   }
 
   def emptyCopied = copied() = Seq()
