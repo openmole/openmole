@@ -415,7 +415,7 @@ class ModelWizardPanel extends ModalPanel {
               val target = targetPath().map { tp ⇒
                 modelSelector.content().map { c ⇒
                   tp.normalizedPathString + "/" + c.name
-                }.getOrElse(tp + "/" + labelName())
+                }.getOrElse(tp.normalizedPathString)
               }.getOrElse("")
               OMPost[Api].buildModelTask(
                 target,
