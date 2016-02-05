@@ -220,7 +220,7 @@ object ApiImpl extends Api {
     val targetFile = new File(filePath.parent, name)
 
     Files.move(safePathToFile(filePath), targetFile, StandardCopyOption.REPLACE_EXISTING)
-    TreeNodeData(name, targetFile, false, false, 0L, "")
+    TreeNodeData(name, targetFile, false, 0L, "")
   }
 
   def renameKey(keyName: String, newName: String): Unit =

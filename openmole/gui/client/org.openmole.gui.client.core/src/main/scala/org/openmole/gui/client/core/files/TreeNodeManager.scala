@@ -80,9 +80,9 @@ class TreeNodeManager {
   def emptyCopied = copied() = Seq()
 
   def setSelection(selectedTool: SelectedTool) = selectionMode() = selectionMode() match {
-      case Some(s: SelectedTool) ⇒ if (s == selectedTool) None else Some(selectedTool)
-      case _                     ⇒ Some(selectedTool)
-    }
+    case Some(s: SelectedTool) ⇒ if (s == selectedTool) None else Some(selectedTool)
+    case _                     ⇒ Some(selectedTool)
+  }
 
   def setFilesInError(question: String, files: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit) = error() = Some(TreeNodeError(question, files, okaction, cancelaction))
 

@@ -80,7 +80,7 @@ object Utils {
     fileToSafePath
   }
 
-  implicit def fileToTreeNodeData(f: File)(implicit context: ServerFileSytemContext = ProjectFileSystem): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, isPlugin(f), f.length, { if (f.isFile) readableByteCount(FileDecorator(f).size) else "" })
+  implicit def fileToTreeNodeData(f: File)(implicit context: ServerFileSytemContext = ProjectFileSystem): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, f.length, { if (f.isFile) readableByteCount(FileDecorator(f).size) else "" })
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File])(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)
