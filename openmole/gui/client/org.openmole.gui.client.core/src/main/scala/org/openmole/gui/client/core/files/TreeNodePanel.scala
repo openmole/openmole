@@ -106,7 +106,9 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
 
   def computeAndDraw = manager.computeCurrentSons(() ⇒ drawTree)
 
-  def refreshAndDraw = CoreUtils.refreshCurrentDirectory(() ⇒ drawTree)
+  def refreshAndDraw = refreshAnd(() ⇒ drawTree)
+
+  def refreshAnd(todo: () ⇒ Unit) = CoreUtils.refreshCurrentDirectory(todo)
 
   def drawTree: Unit = {
     manager.computeAndGetCurrentSons.map { sons ⇒
@@ -158,7 +160,7 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                        todo: () ⇒ Unit) = {
     toBeEdited() match {
       case Some(etn: TreeNode) ⇒
-        if (etn == tn) {
+        if (etn.path == tn.path) {
           editNodeInput.value = tn.name()
           tags.tr(
             tags.div(`class` := "edit-node",
@@ -298,11 +300,21 @@ class TreeNodePanel(implicit executionTriggerer: PanelTriggerer) {
                   }
                 })(`class` := "glyphitem file-glyph")
                 case _ ⇒
-              } /*,
-              if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
-                OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
-                  panels.pluginTriggerer.open
-                })(`class` := "glyphitem file-glyph")*/
+              },
+              glyphSpan(OMTags.glyph_arrow_right_and_left, () ⇒ CoreUtils.replicate(tn, (replicated: TreeNodeData) ⇒ {
+                refreshAnd(() ⇒ {
+                  toBeEdited() = Some(replicated)
+                  drawTree
+                }
+                )
+              })
+              )(`class` := "glyphitem file-glyph")
+
+            /*,
+                    if (tn.isPlugin) glyphSpan(OMTags.glyph_plug, () ⇒
+                      OMPost[Api].autoAddPlugins(tn.safePath()).call().foreach { p ⇒
+                        panels.pluginTriggerer.open
+                      })(`class` := "glyphitem file-glyph")*/
             )
           )
         }

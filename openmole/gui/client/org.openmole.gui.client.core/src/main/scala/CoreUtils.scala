@@ -72,6 +72,12 @@ object CoreUtils {
     }
   }
 
+  def replicate(treeNode: TreeNode, onreplicated: (TreeNodeData) ⇒ Unit) = {
+    OMPost[Api].replicate(treeNode).call().foreach { r ⇒
+      onreplicated(r)
+    }
+  }
+
   def refreshAndSwitchSelection(onrefreshed: () ⇒ Unit = () ⇒ {}) = {
     refreshCurrentDirectory(onrefreshed)
     manager.switchOffSelection

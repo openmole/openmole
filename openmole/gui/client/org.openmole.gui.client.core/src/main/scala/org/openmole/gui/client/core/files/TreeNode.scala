@@ -78,8 +78,6 @@ object TreeNode {
 
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
 
-  implicit def safePathToPartialTreeNodeData(sPath: SafePath): TreeNodeData = TreeNodeData(sPath.name, sPath.parent, false, 0L, "")
-
   implicit def treeNodeToSafePath(tn: TreeNode): SafePath = tn.safePath()
 
   implicit def treeNodesToSafePaths(tns: Seq[TreeNode]): Seq[SafePath] = tns.map { treeNodeToSafePath }

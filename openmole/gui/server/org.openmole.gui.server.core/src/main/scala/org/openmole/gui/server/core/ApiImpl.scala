@@ -204,6 +204,8 @@ object ApiImpl extends Api {
     Utils.move(fromFile, toFile)
   }
 
+  def replicate(treeNodeData: TreeNodeData): TreeNodeData = Utils.replicate(treeNodeData)
+
   def mdToHtml(safePath: SafePath): String = {
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
 

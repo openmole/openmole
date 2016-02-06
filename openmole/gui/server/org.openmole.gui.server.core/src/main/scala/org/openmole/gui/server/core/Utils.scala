@@ -80,7 +80,9 @@ object Utils {
     fileToSafePath
   }
 
-  implicit def fileToTreeNodeData(f: File)(implicit context: ServerFileSytemContext = ProjectFileSystem): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, f.length, { if (f.isFile) readableByteCount(FileDecorator(f).size) else "" })
+  implicit def fileToTreeNodeData(f: File)(implicit context: ServerFileSytemContext = ProjectFileSystem): TreeNodeData = TreeNodeData(f.getName, f, f.isDirectory, f.length, {
+    if (f.isFile) readableByteCount(FileDecorator(f).size) else ""
+  })
 
   implicit def seqfileToSeqTreeNodeData(fs: Seq[File])(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = fs.map {
     fileToTreeNodeData(_)
@@ -97,11 +99,11 @@ object Utils {
 
     import org.openmole.gui.ext.data.ServerFileSytemContext.project
 
-    def copy(toPath: SafePath) = {
+    def copy(toPath: SafePath, withName: Option[String] = None) = {
       val from: File = sp
       val to: File = toPath
       if (from.exists && to.exists) {
-        from.copy(new File(to, from.getName))
+        from.copy(new File(to, withName.getOrElse(from.getName)))
       }
     }
   }
@@ -134,6 +136,25 @@ object Utils {
   }
 
   def listFiles(path: SafePath)(implicit context: ServerFileSytemContext): Seq[TreeNodeData] = safePathToFile(path).listFilesSafe.toSeq
+
+  def replicate(treeNodeData: TreeNodeData): TreeNodeData = {
+    import org.openmole.gui.ext.data.ServerFileSytemContext.project
+
+    val newName = {
+      val prefix = treeNodeData.safePath.path.last
+      if (treeNodeData.isDirectory) prefix + "_1"
+      else prefix.replaceFirst("[.]", "_1.")
+    }
+
+    val toPath = treeNodeData.safePath.copy(path = treeNodeData.safePath.path.dropRight(1) :+ newName)
+    if (toPath.isDirectory()) toPath.mkdir
+
+    val parent = treeNodeData.safePath.parent
+    treeNodeData.safePath.copy(treeNodeData.safePath.parent, Some(newName))
+
+    val f: File = parent ++ newName
+    f
+  }
 
   def launchinCommands(model: SafePath): Seq[LaunchingCommand] =
     model.name.split('.').last match {
